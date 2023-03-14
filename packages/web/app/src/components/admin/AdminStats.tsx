@@ -7,12 +7,23 @@ import {
   useRef,
   useState,
 } from 'react';
-import { clsx } from 'clsx';
 import { formatISO } from 'date-fns';
 import ReactECharts from 'echarts-for-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
-import { Button, DataWrapper, Stat, Table, TBody, Td, Th, THead, Tr } from '@/components/v2';
+import {
+  Button,
+  DataWrapper,
+  Sortable,
+  Stat,
+  Table,
+  TBody,
+  Td,
+  Th,
+  THead,
+  Tooltip,
+  Tr,
+} from '@/components/v2';
 import { CHART_PRIMARY_COLOR } from '@/constants';
 import { env } from '@/env/frontend';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
@@ -75,7 +86,7 @@ function CollectedOperationsOverTime(props: {
     from: Date;
     to: Date;
   };
-  operations: Array<FragmentType<typeof CollectedOperationsOverTime_OperationFragment>>;
+  operations: FragmentType<typeof CollectedOperationsOverTime_OperationFragment>[];
 }): ReactElement {
   const operations = useFragment(CollectedOperationsOverTime_OperationFragment, props.operations);
   const dataRef = useRef<[string, number][]>();
@@ -210,41 +221,33 @@ function filterStats(
 const columns = [
   table.createDataColumn('name', {
     header: 'Organization',
-    footer: props => props.column.id,
     enableSorting: false,
   }),
   table.createDataColumn('members', {
     header: 'Members',
-    footer: props => props.column.id,
   }),
   table.createDataColumn('users', {
     header: 'Users',
-    footer: props => props.column.id,
     meta: { align: 'right' },
   }),
   table.createDataColumn('projects', {
     header: 'Projects',
-    footer: props => props.column.id,
     meta: { align: 'right' },
   }),
   table.createDataColumn('targets', {
     header: 'Targets',
-    footer: props => props.column.id,
     meta: { align: 'right' },
   }),
   table.createDataColumn('versions', {
     header: 'Schema pushes',
-    footer: props => props.column.id,
     meta: { align: 'right' },
   }),
   table.createDataColumn('persistedOperations', {
     header: 'Persisted Ops',
-    footer: props => props.column.id,
     meta: { align: 'right' },
   }),
   table.createDataColumn('operations', {
     header: 'Collected Ops',
-    footer: props => props.column.id,
     meta: { align: 'right' },
   }),
 ];
@@ -275,37 +278,34 @@ function OrganizationTable({ data }: { data: Organization[] }) {
     tableInstance.setPageIndex(tableInstance.getPageCount() - 1);
   }, [tableInstance]);
 
-  const headerGroup = tableInstance.getHeaderGroups()[0];
+  const { headers } = tableInstance.getHeaderGroups()[0];
 
   return (
     <>
       <Table>
         <THead>
-          {headerGroup.headers.map(header => {
-            const align =
-              (header.column.columnDef.meta as { align: 'right' } | undefined)?.align ?? 'left';
-            const isSorted = header.column.getIsSorted() !== false;
-            return (
-              <Th
-                key={header.id}
-                align={align}
-                onClick={isSorted ? header.column.getToggleSortingHandler() : undefined}
-                className={isSorted ? 'cursor-pointer' : ''}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span>{header.renderHeader()}</span>
-                  {isSorted && (
-                    <ChevronUpIcon
-                      className={clsx(
-                        header.column.getIsSorted() === 'desc' && 'rotate-180',
-                        'w-auto h-5',
-                      )}
-                    />
+          <Tooltip.Provider>
+            {headers.map(header => {
+              const align =
+                (header.column.columnDef.meta as { align: 'right' } | undefined)?.align ?? 'left';
+              const canSort = header.column.getCanSort();
+              const name = header.renderHeader();
+              return (
+                <Th key={header.id} align={align}>
+                  {canSort ? (
+                    <Sortable
+                      sortOrder={header.column.getIsSorted()}
+                      onClick={header.column.getToggleSortingHandler()}
+                    >
+                      {name}
+                    </Sortable>
+                  ) : (
+                    name
                   )}
-                </div>
-              </Th>
-            );
-          })}
+                </Th>
+              );
+            })}
+          </Tooltip.Provider>
         </THead>
         <TBody>
           {tableInstance.getRowModel().rows.map(row => (

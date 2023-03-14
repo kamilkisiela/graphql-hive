@@ -13,13 +13,7 @@ function Wrapper({
 }): ReactElement {
   return (
     <T.Root>
-      <T.Trigger
-        onClick={e => {
-          e.preventDefault();
-        }}
-      >
-        {children}
-      </T.Trigger>
+      <T.Trigger asChild>{children}</T.Trigger>
       <T.Content
         sideOffset={4}
         {...contentProps}

@@ -4,7 +4,19 @@ import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { Scale, Section } from '@/components/common';
 import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
-import { Button, Drawer, Input, Table, TBody, Td, Th, THead, Tooltip, Tr } from '@/components/v2';
+import {
+  Button,
+  Drawer,
+  Input,
+  Sortable,
+  Table,
+  TBody,
+  Td,
+  Th,
+  THead,
+  Tooltip,
+  Tr,
+} from '@/components/v2';
 import { env } from '@/env/frontend';
 import { graphql } from '@/gql';
 import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
@@ -143,33 +155,29 @@ const table = createTable().setRowType<Operation>();
 const columns = [
   table.createDataColumn('name', {
     header: 'Operations',
+    enableSorting: false,
   }),
   table.createDataColumn('kind', {
     header: 'Kind',
+    enableSorting: false,
   }),
   table.createDataColumn('p90', {
     header: 'p90',
-    footer: props => props.column.id,
   }),
   table.createDataColumn('p95', {
     header: 'p95',
-    footer: props => props.column.id,
   }),
   table.createDataColumn('p99', {
     header: 'p99',
-    footer: props => props.column.id,
   }),
   table.createDataColumn('failureRate', {
     header: 'Failure Rate',
-    footer: props => props.column.id,
   }),
   table.createDataColumn('requests', {
     header: 'Requests',
-    footer: props => props.column.id,
   }),
   table.createDataColumn('percentage', {
     header: 'Traffic',
-    footer: props => props.column.id,
   }),
 ];
 
@@ -222,52 +230,33 @@ function OperationsTable({
     setPagination({ pageSize: tableInstance.getState().pagination.pageSize, pageIndex });
   }, 500);
 
-  const headerGroup = tableInstance.getHeaderGroups()[0];
-
-  function findColumn(key: string) {
-    return headerGroup.headers[columns.findIndex(c => c.accessorKey === key)];
-  }
-
-  const p90Column = findColumn('p90');
-  const p95Column = findColumn('p95');
-  const p99Column = findColumn('p99');
-  const failureRateColumn = findColumn('failureRate');
-  const requestsColumn = findColumn('requests');
-  const percentageColumn = findColumn('percentage');
-
+  const { headers } = tableInstance.getHeaderGroups()[0];
   return (
     <div className={clsx('rounded-md p-5 border border-gray-800 bg-gray-900/50', className)}>
       <Section.Title>Operations</Section.Title>
       <Section.Subtitle>List of all operations with their statistics</Section.Subtitle>
       <Table>
         <THead>
-          <Th className="truncate">Operation</Th>
-          <Th align="center">Kind</Th>
-          {[
-            { key: 'p90', header: p90Column },
-            { key: 'p95', header: p95Column },
-            { key: 'p99', header: p99Column },
-            { key: 'Failure Rate', header: failureRateColumn },
-            { key: 'Requests', header: requestsColumn },
-            { key: 'Traffic', header: percentageColumn },
-          ].map(({ key, header }) => {
-            const isSorted = header.column.getIsSorted() !== false;
-            return (
-              <Th onClick={isSorted ? header.column.getToggleSortingHandler() : undefined}>
-                <div className="flex gap-2 justify-center">
-                  <span>{key}</span>
-                  {isSorted && (
-                    <ChevronUpIcon
-                      className={clsx(
-                        'h-5 w-auto',
-                        header.column.getIsSorted() === 'desc' && 'rotate-180',
-                      )}
-                    />
+          <Tooltip.Provider>
+            {headers.map(header => {
+              const canSort = header.column.getCanSort();
+              const name = header.renderHeader();
+              return (
+                <Th key={header.id}>
+                  {canSort ? (
+                    <Sortable
+                      sortOrder={header.column.getIsSorted()}
+                      onClick={header.column.getToggleSortingHandler()}
+                    >
+                      {name}
+                    </Sortable>
+                  ) : (
+                    name
                   )}
-                </div>
-              </Th>
-            );
-          })}
+                </Th>
+              );
+            })}
+          </Tooltip.Provider>
         </THead>
         <TBody>
           {tableInstance
@@ -345,7 +334,7 @@ function OperationsTableContainer({
   className?: string;
 }): ReactElement {
   const data = useMemo(() => {
-    const records: Array<Operation> = [];
+    const records: Operation[] = [];
     for (const op of operations) {
       if (
         operationsFilter.length > 0 &&
@@ -372,7 +361,6 @@ function OperationsTableContainer({
   }, [operations, operationsFilter]);
 
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 20 });
-
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const safeSetPagination = useCallback<SetPaginationFn>(
