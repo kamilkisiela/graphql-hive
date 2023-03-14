@@ -103,7 +103,7 @@ impl HiveRegistry {
 
         match registry.initial_supergraph() {
             Ok(_) => {
-                tracing::info!("Successfully fetched and saved supergraph");
+                tracing::info!("Successfully fetched and saved supergraph from GraphQL Hive");
             }
             Err(e) => {
                 eprintln!("{}", e);
