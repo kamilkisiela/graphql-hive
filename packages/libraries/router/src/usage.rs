@@ -248,7 +248,7 @@ impl Plugin for UsagePlugin {
                                             // we need to clone the `agent` here, bc apollo router's trait enforces us to have an immutable reference to `self`
                                             self_arc_clone
                                                 .clone()
-                                                .lock().expect("failed to acquire the self arc lock from `supergraph_service`")
+                                                .try_lock().expect("failed to acquire the self arc lock from `supergraph_service`")
                                                 .agent
                                                 .add_report(ExecutionReport {
                                                     client_name: client_name.clone(),
