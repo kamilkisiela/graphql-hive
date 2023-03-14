@@ -3,7 +3,7 @@ use apollo_router::layers::ServiceExt;
 use apollo_router::plugin::Plugin;
 use apollo_router::plugin::PluginInit;
 use apollo_router::register_plugin;
-use apollo_router::services::supergraph;
+use apollo_router::services::*;
 use apollo_router::Context;
 use core::ops::Drop;
 use futures::StreamExt;
@@ -13,6 +13,8 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::env;
+use std::sync::Arc;
+use std::sync::Mutex;
 use std::time::Instant;
 use std::time::{SystemTime, UNIX_EPOCH};
 use tower::BoxError;
@@ -30,6 +32,7 @@ struct OperationContext {
     pub(crate) dropped: bool,
 }
 
+#[derive(Clone)]
 struct UsagePlugin {
     config: Config,
     agent: UsageAgent,
@@ -129,7 +132,7 @@ impl UsagePlugin {
             tracing::debug!("Dropped the operation");
         }
 
-        context.insert(
+        let _ = context.insert(
             OPERATION_CONTEXT,
             OperationContext {
                 dropped,
@@ -144,16 +147,6 @@ impl UsagePlugin {
                     * 1000,
             },
         );
-    }
-
-    pub fn add_report(&mut self, report: ExecutionReport) {
-        let size = self
-            .agent
-            .state
-            .lock()
-            .expect("couldn't acquire the state lock")
-            .push(report);
-        self.agent.flush_if_full(size);
     }
 }
 
@@ -186,6 +179,7 @@ impl Plugin for UsagePlugin {
 
     fn supergraph_service(&self, service: supergraph::BoxService) -> supergraph::BoxService {
         let config = self.config.clone();
+        let self_arc = Arc::new(Mutex::new(self.to_owned()));
 
         service
             .map_future_with_request_data(
@@ -194,10 +188,11 @@ impl Plugin for UsagePlugin {
                     req.context.clone()
                 },
                 move |ctx: Context, fut| {
-                    let start = Instant::now();
-
-                    // nested async block, bc async is unstable with closures that receive arguments
+                    let self_arc_clone = self_arc.clone();
                     async move {
+                        let start = Instant::now();
+
+                        // nested async block, bc async is unstable with closures that receive arguments
                         let operation_context = ctx
                             .get::<_, OperationContext>(OPERATION_CONTEXT)
                             .unwrap_or_default()
@@ -223,16 +218,18 @@ impl Plugin for UsagePlugin {
                         match result {
                             Err(e) => {
                                 // we need to clone the `agent` here, bc apollo router's trait enforces us to have an immutable reference to `self`
-                                self.agent.clone().add_report_to_state(ExecutionReport {
-                                    client_name,
-                                    client_version,
-                                    timestamp,
-                                    duration,
-                                    ok: false,
-                                    errors: 1,
-                                    operation_body,
-                                    operation_name,
-                                });
+                                self_arc_clone.clone().lock().expect("failed to acquire the self arc lock from `supergraph_service`").agent.add_report(
+                                    ExecutionReport {
+                                        client_name,
+                                        client_version,
+                                        timestamp,
+                                        duration,
+                                        ok: false,
+                                        errors: 1,
+                                        operation_body,
+                                        operation_name,
+                                    },
+                                );
                                 Err(e)
                             }
                             Ok(router_response) => {
@@ -249,8 +246,11 @@ impl Plugin for UsagePlugin {
                                             // make sure we send a single report, not for each chunk
                                             let response_has_errors = !response.errors.is_empty();
                                             // we need to clone the `agent` here, bc apollo router's trait enforces us to have an immutable reference to `self`
-                                            self.agent.clone().add_report_to_state(
-                                                ExecutionReport {
+                                            self_arc_clone
+                                                .clone()
+                                                .lock().expect("failed to acquire the self arc lock from `supergraph_service`")
+                                                .agent
+                                                .add_report(ExecutionReport {
                                                     client_name: client_name.clone(),
                                                     client_version: client_version.clone(),
                                                     timestamp,
@@ -259,8 +259,8 @@ impl Plugin for UsagePlugin {
                                                     errors: response.errors.len(),
                                                     operation_body: operation_body.clone(),
                                                     operation_name: operation_name.clone(),
-                                                },
-                                            );
+                                                });
+
                                             response
                                         })
                                         .boxed();
@@ -278,6 +278,7 @@ impl Plugin for UsagePlugin {
 
 impl Drop for UsagePlugin {
     fn drop(&mut self) {
+        println!("⚠️ Dropped UsagePlugin!")
         // Shut down the stuff.
         // if let Some(sender) = self.shutdown_signal.take() {
         //     // Currently, this does nothing, as it sends a graceful process termination, but no reciever is setup to handle it

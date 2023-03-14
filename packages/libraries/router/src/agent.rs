@@ -10,7 +10,7 @@ use std::{
 static COMMIT: Option<&'static str> = option_env!("GITHUB_SHA");
 
 #[derive(Serialize, Debug)]
-struct Report {
+pub struct Report {
     size: usize,
     map: HashMap<String, OperationMapRecord>,
     operations: Vec<Operation>,
@@ -206,7 +206,7 @@ impl UsageAgent {
         report
     }
 
-    pub fn add_report_to_state(&mut self, execution_report: ExecutionReport) {
+    pub fn add_report(&mut self, execution_report: ExecutionReport) {
         let size = self
             .state
             .lock()
