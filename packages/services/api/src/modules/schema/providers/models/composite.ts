@@ -103,6 +103,7 @@ export class CompositeModel {
     if (serviceNameCheck.status === 'failed') {
       return {
         conclusion: SchemaCheckConclusion.Failure,
+        warnings: [],
         reasons: [
           {
             code: CheckFailureReasonCode.MissingServiceName,
@@ -122,6 +123,7 @@ export class CompositeModel {
         conclusion: SchemaCheckConclusion.Success,
         state: {
           initial,
+          warnings: null,
           changes: null,
         },
       };
@@ -132,7 +134,7 @@ export class CompositeModel {
         ? this.federationOrchestrator
         : this.stitchingOrchestrator;
 
-    const [compositionCheck, diffCheck] = await Promise.all([
+    const [compositionCheck, diffCheck, policyCheck] = await Promise.all([
       this.checks.composition({
         orchestrator,
         project,
@@ -147,9 +149,20 @@ export class CompositeModel {
         version: compareToLatest ? latest : latestComposable,
         includeUrlChanges: false,
       }),
+      this.checks.policyCheck({
+        orchestrator,
+        project,
+        selector,
+        schemas,
+        modifiedSdl: incoming.sdl,
+      }),
     ]);
 
-    if (compositionCheck.status === 'failed' || diffCheck.status === 'failed') {
+    if (
+      compositionCheck.status === 'failed' ||
+      diffCheck.status === 'failed' ||
+      policyCheck.status === 'failed'
+    ) {
       const reasons: SchemaCheckFailureReason[] = [];
 
       if (compositionCheck.status === 'failed') {
@@ -176,9 +189,17 @@ export class CompositeModel {
         }
       }
 
+      if (policyCheck.status === 'failed') {
+        reasons.push({
+          code: CheckFailureReasonCode.PolicyInfringement,
+          errors: policyCheck.reason.errors ?? [],
+        });
+      }
+
       return {
         conclusion: SchemaCheckConclusion.Failure,
         reasons,
+        warnings: policyCheck.reason?.warnings ?? [],
       };
     }
 
@@ -186,6 +207,7 @@ export class CompositeModel {
       conclusion: SchemaCheckConclusion.Success,
       state: {
         initial,
+        warnings: policyCheck.result?.warnings ?? [],
         changes: diffCheck.result?.changes ?? null,
       },
     };

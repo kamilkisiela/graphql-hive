@@ -21,6 +21,7 @@ enum TabValue {
   Overview = 'overview',
   Members = 'members',
   Settings = 'settings',
+  Policy = 'policy',
   Subscription = 'subscription',
 }
 
@@ -48,8 +49,13 @@ export function OrganizationLayout<
   query,
   className,
 }: {
-  children(props: TSatisfiesType): ReactNode;
-  value?: 'overview' | 'members' | 'settings' | 'subscription';
+  children(
+    props: TSatisfiesType,
+    selector: {
+      organization: string;
+    },
+  ): ReactNode;
+  value?: 'overview' | 'members' | 'settings' | 'subscription' | 'policy';
   className?: string;
   query: TypedDocumentNode<
     TSatisfiesType,
@@ -105,7 +111,13 @@ export function OrganizationLayout<
   }
 
   if (!value) {
-    return <>{children(organizationQuery.data!)}</>;
+    return (
+      <>
+        {children(organizationQuery.data!, {
+          organization: orgId,
+        })}
+      </>
+    );
   }
 
   return (
@@ -137,9 +149,14 @@ export function OrganizationLayout<
             </Tabs.Trigger>
           )}
           {canAccessOrganization(OrganizationAccessScope.Settings, me) && (
-            <Tabs.Trigger value={TabValue.Settings} asChild>
-              <NextLink href={`/${orgId}/view/${TabValue.Settings}`}>Settings</NextLink>
-            </Tabs.Trigger>
+            <>
+              <Tabs.Trigger value={TabValue.Policy} asChild>
+                <NextLink href={`/${orgId}/view/${TabValue.Policy}`}>Policy</NextLink>
+              </Tabs.Trigger>
+              <Tabs.Trigger value={TabValue.Settings} asChild>
+                <NextLink href={`/${orgId}/view/${TabValue.Settings}`}>Settings</NextLink>
+              </Tabs.Trigger>
+            </>
           )}
           {getIsStripeEnabled() && canAccessOrganization(OrganizationAccessScope.Settings, me) && (
             <Tabs.Trigger value={TabValue.Subscription} asChild>
@@ -148,7 +165,9 @@ export function OrganizationLayout<
           )}
         </Tabs.List>
         <Tabs.Content value={value} className={className}>
-          {children(organizationQuery.data!)}
+          {children(organizationQuery.data!, {
+            organization: orgId,
+          })}
         </Tabs.Content>
       </Tabs>
     </>

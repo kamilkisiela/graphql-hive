@@ -19,6 +19,7 @@ import { ProjectMigrationToast } from '../project/migration-toast';
 enum TabValue {
   Targets = 'targets',
   Alerts = 'alerts',
+  Policy = 'policy',
   Settings = 'settings',
 }
 
@@ -60,11 +61,17 @@ export function ProjectLayout<
   className,
   query,
 }: {
-  children(props: {
-    project: Exclude<TSatisfiesType['project'], null | undefined>;
-    organization: Exclude<TSatisfiesType['organization'], null | undefined>;
-  }): ReactNode;
-  value: 'targets' | 'alerts' | 'settings';
+  children(
+    props: {
+      project: Exclude<TSatisfiesType['project'], null | undefined>;
+      organization: Exclude<TSatisfiesType['organization'], null | undefined>;
+    },
+    selector: {
+      organization: string;
+      project: string;
+    },
+  ): ReactNode;
+  value: 'targets' | 'alerts' | 'settings' | 'policy';
   className?: string;
   query: TypedDocumentNode<
     TSatisfiesType,
@@ -192,26 +199,39 @@ export function ProjectLayout<
           </Tabs.Trigger>
           {canAccessProject(ProjectAccessScope.Alerts, organization.me) && (
             <Tabs.Trigger value={TabValue.Alerts} asChild>
-              <NextLink href={`/${orgId}/${projectId}/view/alerts`}>Alerts</NextLink>
+              <NextLink href={`/${orgId}/${projectId}/view/${TabValue.Alerts}`}>Alerts</NextLink>
             </Tabs.Trigger>
           )}
           {canAccessProject(ProjectAccessScope.Settings, organization.me) && (
-            <Tabs.Trigger value={TabValue.Settings} asChild>
-              <NextLink href={`/${orgId}/${projectId}/view/settings`}>Settings</NextLink>
-            </Tabs.Trigger>
+            <>
+              <Tabs.Trigger value={TabValue.Policy} asChild>
+                <NextLink href={`/${orgId}/${projectId}/view/${TabValue.Policy}`}>Policy</NextLink>
+              </Tabs.Trigger>
+              <Tabs.Trigger value={TabValue.Settings} asChild>
+                <NextLink href={`/${orgId}/${projectId}/view/${TabValue.Settings}`}>
+                  Settings
+                </NextLink>
+              </Tabs.Trigger>
+            </>
           )}
         </Tabs.List>
         <Tabs.Content value={value} className={className}>
-          {children({
-            project: projectQuery.data?.project as Exclude<
-              TSatisfiesType['project'],
-              null | undefined
-            >,
-            organization: projectQuery.data?.organization as Exclude<
-              TSatisfiesType['organization'],
-              null | undefined
-            >,
-          })}
+          {children(
+            {
+              project: projectQuery.data?.project as Exclude<
+                TSatisfiesType['project'],
+                null | undefined
+              >,
+              organization: projectQuery.data?.organization as Exclude<
+                TSatisfiesType['organization'],
+                null | undefined
+              >,
+            },
+            {
+              organization: orgId,
+              project: projectId,
+            },
+          )}
         </Tabs.Content>
       </Tabs>
     </>

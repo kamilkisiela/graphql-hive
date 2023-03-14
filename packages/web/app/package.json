@@ -58,6 +58,8 @@
     "hyperid": "3.1.1",
     "immer": "10.0.1",
     "js-cookie": "3.0.5",
+    "json-schema-typed": "8.0.1",
+    "json-schema-yup-transformer": "1.6.12",
     "monaco-editor": "0.37.1",
     "monaco-themes": "0.4.4",
     "next": "13.3.1",

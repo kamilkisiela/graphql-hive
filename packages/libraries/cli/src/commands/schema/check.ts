@@ -2,7 +2,13 @@ import { Errors, Flags } from '@oclif/core';
 import Command from '../../base-command';
 import { graphqlEndpoint } from '../../helpers/config';
 import { gitInfo } from '../../helpers/git';
-import { loadSchema, minifySchema, renderChanges, renderErrors } from '../../helpers/schema';
+import {
+  loadSchema,
+  minifySchema,
+  renderChanges,
+  renderErrors,
+  renderWarnings,
+} from '../../helpers/schema';
 import { invariant } from '../../helpers/validation';
 
 export default class SchemaCheck extends Command {
@@ -118,15 +124,28 @@ export default class SchemaCheck extends Command {
           renderChanges.call(this, changes);
           this.log('');
         }
+
+        const warnings = result.schemaCheck.warnings;
+        if (warnings?.total) {
+          renderWarnings.call(this, warnings);
+          this.log('');
+        }
       } else if (result.schemaCheck.__typename === 'SchemaCheckError') {
         const changes = result.schemaCheck.changes;
         const errors = result.schemaCheck.errors;
+        const warnings = result.schemaCheck.warnings;
         renderErrors.call(this, errors);
+
+        if (warnings?.total) {
+          renderWarnings.call(this, warnings);
+          this.log('');
+        }
 
         if (changes && changes.total) {
           this.log('');
           renderChanges.call(this, changes);
         }
+
         this.log('');
 
         if (forceSafe) {

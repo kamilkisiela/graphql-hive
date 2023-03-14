@@ -1,5 +1,6 @@
 import { ReactElement } from 'react';
 import { CheckboxProps, Indicator, Root } from '@radix-ui/react-checkbox';
+import { CheckIcon } from '@radix-ui/react-icons';
 
 export const Checkbox = (props: CheckboxProps): ReactElement => {
   return (
@@ -16,13 +17,15 @@ export const Checkbox = (props: CheckboxProps): ReactElement => {
       border-orange-500
       bg-gray-800
       text-orange-500
-      focus:ring
       disabled:cursor-not-allowed
       disabled:border-gray-900
+      hover:border-orange-700
     "
       {...props}
     >
-      <Indicator className="h-3.5 w-3.5 rounded-sm bg-current" />
+      <Indicator className="h-full w-full bg-current items-center flex justify-center">
+        <CheckIcon className="text-black" />
+      </Indicator>
     </Root>
   );
 };

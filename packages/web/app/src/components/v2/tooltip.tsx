@@ -22,10 +22,11 @@ function Wrapper({
           'radix-side-right:animate-slide-left-fade',
           'radix-side-bottom:animate-slide-up-fade',
           'radix-side-left:animate-slide-right-fade',
-          'rounded-sm bg-white p-2 text-xs font-normal text-black shadow',
+          'rounded-lg bg-gray-800 p-4 text-xs font-normal text-white shadow',
+          contentProps.className,
         )}
       >
-        <T.Arrow className="fill-current text-white" />
+        <T.Arrow className="fill-current text-black" />
         {content}
       </T.Content>
     </T.Root>

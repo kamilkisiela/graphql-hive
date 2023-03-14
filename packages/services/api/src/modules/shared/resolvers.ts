@@ -11,6 +11,7 @@ SafeIntResolver.description = undefined;
 export const resolvers: SharedModule.Resolvers = {
   DateTime: DateTimeResolver,
   JSON: JSONResolver,
+  JSONSchemaObject: JSONResolver,
   SafeInt: SafeIntResolver,
   Query: {
     noop: () => true,

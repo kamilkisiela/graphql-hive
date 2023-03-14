@@ -50,7 +50,7 @@ const nodeVersion = readFileSync(join(rootDir, '/.node-version')).toString();
 export const targetFromNodeVersion = () => {
   const clean = nodeVersion.trim().split('.');
 
-  return `node${clean[0]}`;
+  return `node${clean[0]}` as any;
 };
 
 export const watchEntryPlugin = () => {

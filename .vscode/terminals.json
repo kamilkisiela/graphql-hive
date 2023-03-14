@@ -38,6 +38,13 @@
       "command": "pnpm dev"
     },
     {
+      "name": "policy:dev",
+      "description": "Run policy service",
+      "open": true,
+      "cwd": "packages/services/policy",
+      "command": "pnpm dev"
+    },
+    {
       "name": "usage-estimator:dev",
       "description": "Run Usage Estimator Service",
       "open": true,

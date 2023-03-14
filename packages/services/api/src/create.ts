@@ -23,6 +23,11 @@ import { operationsModule } from './modules/operations';
 import { CLICKHOUSE_CONFIG, ClickHouseConfig } from './modules/operations/providers/tokens';
 import { organizationModule } from './modules/organization';
 import { persistedOperationModule } from './modules/persisted-operations';
+import { schemaPolicyModule } from './modules/policy';
+import {
+  SCHEMA_POLICY_SERVICE_CONFIG,
+  SchemaPolicyServiceConfig,
+} from './modules/policy/providers/tokens';
 import { projectModule } from './modules/project';
 import { rateLimitModule } from './modules/rate-limit';
 import {
@@ -78,6 +83,7 @@ const modules = [
   rateLimitModule,
   billingModule,
   oidcIntegrationsModule,
+  schemaPolicyModule,
 ];
 
 export function createRegistry({
@@ -87,6 +93,7 @@ export function createRegistry({
   schemaService,
   usageEstimationService,
   rateLimitService,
+  schemaPolicyService,
   logger,
   storage,
   clickHouse,
@@ -110,6 +117,7 @@ export function createRegistry({
   schemaService: SchemaServiceConfig;
   usageEstimationService: UsageEstimationServiceConfig;
   rateLimitService: RateLimitServiceConfig;
+  schemaPolicyService: SchemaPolicyServiceConfig;
   githubApp: GitHubApplicationConfig | null;
   cdn: CDNConfig | null;
   s3: {
@@ -199,6 +207,11 @@ export function createRegistry({
     {
       provide: RATE_LIMIT_SERVICE_CONFIG,
       useValue: rateLimitService,
+      scope: Scope.Singleton,
+    },
+    {
+      provide: SCHEMA_POLICY_SERVICE_CONFIG,
+      useValue: schemaPolicyService,
       scope: Scope.Singleton,
     },
     {

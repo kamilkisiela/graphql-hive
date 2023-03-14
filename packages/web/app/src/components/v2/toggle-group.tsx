@@ -14,6 +14,7 @@ export const ToggleGroup = ({ className, children, ...props }: RootProps) => {
     </Root>
   );
 };
+
 export const ToggleGroupItem = ({ className, children, ...props }: ItemProps) => {
   return (
     <Item
