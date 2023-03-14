@@ -278,13 +278,13 @@ importers:
       axios: ^1.2.1
       graphql-yoga: 3.7.2
       nock: 13.3.0
-      tiny-lru: 8.0.2
+      tiny-lru: 10.2.1
     dependencies:
       '@graphql-hive/core': link:../core
       '@graphql-tools/utils': 9.1.4
       async-retry: 1.3.3
       axios: 1.2.1
-      tiny-lru: 8.0.2
+      tiny-lru: 10.2.1
     optionalDependencies:
       '@apollo/server': 4.5.0
       '@envelop/types': 3.0.2
@@ -836,7 +836,7 @@ importers:
       p-timeout: 6.1.1
       pino-pretty: 10.0.0
       reflect-metadata: 0.1.13
-      tiny-lru: 8.0.2
+      tiny-lru: 10.2.1
       tslib: 2.5.0
       zod: 3.21.4
     dependencies:
@@ -848,7 +848,7 @@ importers:
       ms: 2.1.3
       p-timeout: 6.1.1
       reflect-metadata: 0.1.13
-      tiny-lru: 8.0.2
+      tiny-lru: 10.2.1
       zod: 3.21.4
     devDependencies:
       '@hive/service-common': link:../service-common
@@ -874,7 +874,7 @@ importers:
       graphql: 16.6.0
       kafkajs: 2.2.4
       pino-pretty: 10.0.0
-      tiny-lru: 8.0.2
+      tiny-lru: 10.2.1
       zod: 3.21.4
     dependencies:
       '@sentry/node': 7.43.0
@@ -887,7 +887,7 @@ importers:
       got: 12.6.0
       graphql: 16.6.0
       kafkajs: 2.2.4
-      tiny-lru: 8.0.2
+      tiny-lru: 10.2.1
       zod: 3.21.4
     devDependencies:
       '@hive/service-common': link:../service-common
@@ -944,7 +944,7 @@ importers:
       graphql: 16.6.0
       kafkajs: 2.2.4
       pino-pretty: 10.0.0
-      tiny-lru: 8.0.2
+      tiny-lru: 10.2.1
       tslib: 2.5.0
       zod: 3.21.4
     dependencies:
@@ -956,7 +956,7 @@ importers:
       got: 12.6.0
       graphql: 16.6.0
       kafkajs: 2.2.4
-      tiny-lru: 8.0.2
+      tiny-lru: 10.2.1
       zod: 3.21.4
     devDependencies:
       '@graphql-hive/core': link:../../libraries/core
@@ -27870,6 +27870,11 @@ packages:
       globalyzer: 0.1.0
       globrex: 0.1.2
     dev: true
+
+  /tiny-lru/10.2.1:
+    resolution: {integrity: sha512-cxcNyX4O50FDnB5x9jdEJupYC+9PPutt6wT16TaOtXeHfV9t41aFqg0VniB9YK5KmBeqmZaYriNMajm/5TtA7Q==}
+    engines: {node: '>=12'}
+    dev: false
 
   /tiny-lru/8.0.2:
     resolution: {integrity: sha512-ApGvZ6vVvTNdsmt676grvCkUCGwzG9IqXma5Z07xJgiC5L7akUMof5U8G2JTI9Rz/ovtVhJBlY6mNhEvtjzOIg==}
