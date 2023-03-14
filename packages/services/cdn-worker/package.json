@@ -14,7 +14,7 @@
   "dependencies": {
     "bcryptjs": "2.4.3",
     "graphql": "16.6.0",
-    "toucan-js": "2.7.0",
+    "toucan-js": "3.1.0",
     "zod": "3.21.4"
   },
   "devDependencies": {
