@@ -278,7 +278,6 @@ impl Plugin for UsagePlugin {
 
 impl Drop for UsagePlugin {
     fn drop(&mut self) {
-        println!("⚠️ Dropped UsagePlugin!")
         // Shut down the stuff.
         // if let Some(sender) = self.shutdown_signal.take() {
         //     // Currently, this does nothing, as it sends a graceful process termination, but no reciever is setup to handle it
