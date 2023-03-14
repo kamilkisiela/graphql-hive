@@ -145,6 +145,12 @@ All you need to do is to provide a valid HTTP URL, and Hive will dispatch a `POS
 URL, with a JSON payload as body (with `Content-Type: application/json` header set) when an alert or
 a notification is triggered.
 
+<Callout type="warning">
+  Note that using this form of alert is intended to imlement custom flows. You cannot use an
+  Incoming Webhook feature of products like MSTeams or Slack, because the expected payload is
+  different.
+</Callout>
+
 <NextImage
   alt="HTTP Alert Configuration"
   src={projectHttpAlertImage}
