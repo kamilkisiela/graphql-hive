@@ -4,9 +4,14 @@ import type { RateLimitApi, RateLimitApiInput, RateLimitApiOutput } from '@hive/
 import { FastifyLoggerInstance } from '@hive/service-common';
 
 type CheckRateLimitInput = RateLimitApiInput['/check-rate-limit']['post']['json'];
+//                                           ^ can't jump to type definition, a bit harder than with tRPC to visit definition
+//                         ^ I think it would be nicer to export the router object (result of createRouter)
+//                         This way we could infer the input/output types from the router object without having to export them manually
 type CheckRateLimitResponse = RateLimitApiOutput['/check-rate-limit']['post'][200];
 type GetRetentionInput = RateLimitApiInput['/retention']['post']['json'];
+//                                          ^ it would be a bit cleaner without `/` in the path
 type GetRetentionResponse = RateLimitApiOutput['/retention']['post'][200];
+//                          ^ this could be inferOutput<RateLimitApi, '/retention'> or something like that
 
 export function createUsageRateLimit(config: {
   endpoint: string | null;
@@ -39,6 +44,7 @@ export function createUsageRateLimit(config: {
   async function fetchFreshLimitInfo(input: CheckRateLimitInput) {
     return rateLimit['/check-rate-limit'].post({
       json: input,
+      //    ^ it's a bit weird to have to `json` here and not simply do `post(input)`
     });
   }
 
@@ -65,6 +71,7 @@ export function createUsageRateLimit(config: {
 
       if (!limitInfo) {
         const result = fetchFreshLimitInfo(input).then(r => r.json());
+        //                                       ^ I know it can support different content types but most of the use-cases it's JSON
 
         if (result) {
           cache.set(input.id, result);

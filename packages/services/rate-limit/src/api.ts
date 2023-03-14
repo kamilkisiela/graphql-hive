@@ -101,10 +101,12 @@ export const rateLimitApiRouter = createRouter<Context>({
         200: {
           type: 'number',
         },
+        //^ in tRPC, every response is 200 by default. Only if it throws, it's 500 and connection errors or parsing errors are handled by the library through tRPCError class
       },
     } as const,
     async handler(request, ctx) {
       const jsonBody = await request.json();
+      //                     ^ does it use runtime validation?
       const retention = ctx.limiter.getRetention(jsonBody.targetId);
       return Response.json(retention, {
         status: 200,
@@ -135,6 +137,9 @@ export const rateLimitApiRouter = createRouter<Context>({
           },
           additionalProperties: false,
           required: ['limited', 'quota', 'current'],
+          //        ^ I'm not a fan of creating a list of required fields, it should be next to every property
+          //
+          //        ^ try to change `current` to `current2` and see what happens. We end up with a typescript error impossible to debug
         } as const,
       },
     },
