@@ -1,5 +1,5 @@
 import itty from 'itty-router';
-import Toucan from 'toucan-js';
+import { Toucan } from 'toucan-js';
 import { AnalyticsEngine, createAnalytics } from './analytics';
 import { createArtifactRequestHandler } from './artifact-handler';
 import { ArtifactStorageReader } from './artifact-storage-reader';
@@ -119,15 +119,17 @@ self.addEventListener('fetch', async (event: FetchEvent) => {
     environment: SENTRY_ENVIRONMENT,
     release: SENTRY_RELEASE,
     context: event,
-    allowedHeaders: [
-      'user-agent',
-      'cf-ipcountry',
-      'accept-encoding',
-      'accept',
-      'x-real-ip',
-      'cf-connecting-ip',
-    ],
-    allowedSearchParams: /(.*)/,
+    requestDataOptions: {
+      allowedHeaders: [
+        'user-agent',
+        'cf-ipcountry',
+        'accept-encoding',
+        'accept',
+        'x-real-ip',
+        'cf-connecting-ip',
+      ],
+      allowedSearchParams: /(.*)/,
+    },
   });
 
   try {
