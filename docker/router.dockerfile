@@ -2,7 +2,7 @@
 FROM scratch AS pkg
 FROM scratch AS config
 
-FROM rust:1-slim as build
+FROM rust:1.68-slim as build
 
 WORKDIR /usr/src
 
@@ -21,18 +21,15 @@ RUN rm -rf /var/lib/apt/lists/*
 RUN update-ca-certificates
 RUN rustup component add rustfmt
 
-# Install nightly toolchain so we can use sparse-registry
-RUN rustup toolchain install nightly
-
 # Get the dependencies cached
-RUN cargo +nightly build --release -Z sparse-registry
+RUN CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse cargo build --release
 
 COPY --from=pkg src ./src
 
 RUN touch ./src/main.rs
 
 # Real build this time
-RUN cargo +nightly build --release -Z sparse-registry
+RUN CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse cargo build --release
 
 # Runtime
 FROM debian:bullseye-slim as runtime
