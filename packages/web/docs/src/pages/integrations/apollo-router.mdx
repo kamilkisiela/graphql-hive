@@ -64,6 +64,63 @@ Once you have all services schemas pushed to Hive, and available in the CDN, you
   `https://cdn.graphql-hive.com/artifacts/v1/TARGET_ID`
 </Callout>
 
+## Usage Reporting
+
+You can send usage reporting to Hive registry by passing `HIVE_TOKEN` environment variable and
+enabling `hive.usage` plugin in the config file (`router.yaml`).
+
+<Tabs items={['Binary', 'Docker']}>
+  <Tab>
+    Start the router:
+
+    ```bash
+    HIVE_TOKEN="..." HIVE_CDN_ENDPOINT="..." HIVE_CDN_KEY="..." ./router --config router.yaml
+    ```
+
+  </Tab>
+  <Tab>
+      Running Apollo Router with Hive's Schema Registry and Usage Reporting:
+
+      ```bash
+      docker run -p 4000:4000 \
+        --env HIVE_TOKEN="..." \
+        --env HIVE_CDN_ENDPOINT="..." \
+        --env HIVE_CDN_KEY="..." \
+        --mount "type=bind,source=/home/usr/src/hive/router.yaml,target=/dist/config/router.yaml" \
+        --rm \
+        ghcr.io/kamilkisiela/graphql-hive/apollo-router:latest
+      ```
+
+      To follow the same convention as Apollo Router's official Docker image, the config file is also located at `/dist/config/router.yaml`.
+
+  </Tab>
+</Tabs>
+
+```yaml filename="router.yaml"
+supergraph:
+  listen: 0.0.0.0:4000
+plugins:
+  hive.usage:
+    {}
+    #  Sample rate to determine sampling.
+    #  0.0 = 0% chance of being sent
+    #  1.0 = 100% chance of being sent.
+    #  Default: 1.0
+    # sample_rate: "0.5",
+    #
+    #  A list of operations (by name) to be ignored by Hive.
+    # exclude: ["IntrospectionQuery", "MeQuery"],
+    #
+    #  Uses graphql-client-name by default
+    # client_name_header: "x-client-name",
+    #  Uses graphql-client-version by default
+    # client_version_header: "x-client-version",
+    #
+    #  A maximum number of operations to hold in a buffer before sending to GraphQL Hive
+    #  Default: 1000
+    # buffer_size: 1000
+```
+
 ## Additional Resources
 
 - [Get started with Apollo Federation and Hive guide](/get-started/apollo-federation)
