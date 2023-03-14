@@ -13,11 +13,14 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
       - name: setup environment
         uses: ./.github/actions/setup
         with:
           codegen: false # no need to run because release script will run it anyway
+          actor: release-stable
 
       - name: prepare npm credentials
         run: |

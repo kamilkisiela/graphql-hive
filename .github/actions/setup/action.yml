@@ -14,6 +14,10 @@ inputs:
   workingDirectory:
     description: Working dir
     default: ${{ github.workspace }}
+  actor:
+    description: Name of the workflow that called this action
+    required: true
+    type: string
 
 runs:
   using: 'composite'
@@ -50,7 +54,28 @@ runs:
           ~/.cache/Cypress
         key: ${{ runner.os }}-pnpm-store-n18-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
-          ${{ runner.os }}-pnpm-store-n18-
+          ${{ runner.os }}-pnpm-store-n18
+
+    - name: Cache Turbo
+      uses: actions/cache@v3
+      with:
+        path: node_modules/.cache/turbo
+        key: turbo-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.actor }}-${{ github.sha }}
+        restore-keys: |
+          turbo-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.actor }}-
+          turbo-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-
+
+    - uses: actions/cache@v3
+      name: Cache Next.js
+      with:
+        path: |
+          packages/web/app/.next/cache
+          packages/web/docs/.next/cache
+        key:
+          nextjs-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.actor }}-${{ github.sha }}
+        restore-keys: |
+          nextjs-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.actor }}-
+          nextjs-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-
 
     - name: pnpm install
       if: ${{ inputs.installDependencies == 'true' }}

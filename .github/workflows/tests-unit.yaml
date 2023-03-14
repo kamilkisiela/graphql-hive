@@ -7,9 +7,13 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
       - name: setup environment
         uses: ./.github/actions/setup
+        with:
+          actor: test-unit
 
       - name: unit tests
         run: pnpm test

@@ -22,9 +22,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
       - name: Setup Environment
         uses: ./.github/actions/setup
+        with:
+          actor: nextjs-bundle-analysis
 
       - name: Restore Next.js Build
         uses: actions/cache@v3

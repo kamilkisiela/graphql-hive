@@ -40,6 +40,7 @@ jobs:
         uses: ./.github/actions/setup
         with:
           codegen: false
+          actor: test-e2e
 
       - name: patch compose file volumes
         uses: mikefarah/yq@v4.31.2

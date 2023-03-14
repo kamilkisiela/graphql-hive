@@ -30,6 +30,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
       - name: configure env vars
         if: ${{ inputs.configureEnv != '' }}
@@ -37,6 +39,8 @@ jobs:
 
       - name: setup environment
         uses: ./.github/actions/setup
+        with:
+          actor: test-integration
 
       - name: prepare packages
         run: pnpm --filter integration-tests prepare:env
