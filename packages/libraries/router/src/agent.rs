@@ -153,7 +153,7 @@ impl UsageAgent {
         };
         let schema = &self
             .state
-            .lock()
+            .try_lock()
             .expect("couldn't acquire the state lock")
             .schema;
         // iterate over reports and check if they are valid
@@ -209,7 +209,7 @@ impl UsageAgent {
     pub fn add_report(&mut self, execution_report: ExecutionReport) {
         let size = self
             .state
-            .lock()
+            .try_lock()
             .expect("couldn't acquire the state lock")
             .push(execution_report);
         self.flush_if_full(size);
@@ -270,7 +270,7 @@ impl UsageAgent {
     pub fn flush(&mut self) {
         let execution_reports = self
             .state
-            .lock()
+            .try_lock()
             .expect("couldn't acquire the state lock")
             .drain();
         let size = execution_reports.len();
