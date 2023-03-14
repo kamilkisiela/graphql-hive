@@ -14,12 +14,10 @@ export class HivePolice {
 
   deploy() {
     const kvStorage = new cf.WorkersKvNamespace('hive-police-kv', {
-      accountId: this.accountId,
       title: `hive-police-${this.envName}`,
     });
 
     const script = new cf.WorkerScript('hive-police-worker', {
-      accountId: this.accountId,
       content: readFileSync(
         // eslint-disable-next-line no-process-env
         process.env.POLICE_WORKER_ARTIFACT_PATH ||
