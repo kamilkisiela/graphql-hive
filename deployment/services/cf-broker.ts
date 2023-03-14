@@ -5,6 +5,7 @@ import { isProduction } from '../utils/helpers';
 const commonConfig = new pulumi.Config('common');
 const cfConfig = new pulumi.Config('cloudflareCustom');
 const observabilityConfig = new pulumi.Config('observability');
+const cloudflareProviderConfig = new pulumi.Config('cloudflare');
 
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 
@@ -22,7 +23,7 @@ export function deployCFBroker({
   const cfBrokerSignature = commonConfig.requireSecret('cfBrokerSignature');
   const broker = new CloudflareBroker({
     envName,
-    accountId: cfConfig.require('accountId'),
+    accountId: cloudflareProviderConfig.require('accountId'),
     zoneId: cfConfig.require('zoneId'),
     // We can't cdn for staging env, since CF certificate only covers
     // one level of subdomains. See: https://community.cloudflare.com/t/ssl-handshake-error-cloudflare-proxy/175088
