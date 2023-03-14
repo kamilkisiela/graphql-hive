@@ -25,7 +25,7 @@
     "@graphql-hive/core": "0.2.3",
     "@hive/service-common": "workspace:*",
     "@hive/usage-common": "workspace:*",
-    "pino-pretty": "9.4.0",
+    "pino-pretty": "10.0.0",
     "tslib": "2.5.0"
   },
   "buildOptions": {
