@@ -360,15 +360,7 @@ fragment PersistedOperationFields on PersistedOperation {
   kind
 }
 
-fragment TargetSettingsFields on TargetSettings {
-  id
-  validation {
-    ...TargetValidationSettingsFields
-  }
-}
-
 fragment TargetValidationSettingsFields on TargetValidationSettings {
-  id
   enabled
   period
   percentage

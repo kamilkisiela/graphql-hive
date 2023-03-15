@@ -162,11 +162,18 @@ export class TargetManager {
     });
   });
 
-  async getTargetSettings(selector: TargetSelector): Promise<TargetSettings> {
+  async getTargetSettings(
+    selector: TargetSelector & {
+      unsafe__itIsMeInspector?: boolean;
+    },
+  ): Promise<TargetSettings> {
     this.logger.debug('Fetching target settings (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
       ...selector,
-      scope: TargetAccessScope.READ,
+      scope:
+        selector.unsafe__itIsMeInspector === true
+          ? TargetAccessScope.READ
+          : TargetAccessScope.SETTINGS,
     });
 
     return this.storage.getTargetSettings(selector);
