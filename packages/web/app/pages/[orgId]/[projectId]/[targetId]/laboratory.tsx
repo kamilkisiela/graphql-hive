@@ -1,5 +1,7 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
+import clsx from 'clsx';
 import { GraphiQL } from 'graphiql';
+import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import {
@@ -9,6 +11,7 @@ import {
   DocsNote,
   EmptyList,
   Heading,
+  Link,
   Spinner,
   Title,
 } from '@/components/v2';
@@ -21,10 +24,11 @@ import {
   DeleteOperationModal,
 } from '@/components/v2/modals';
 import { graphql } from '@/gql';
+import { OperationDocument } from '@/graphql';
 import { useClipboard, useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
 import { useCollections } from '@/lib/hooks/use-collections';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { Menu, ToolbarButton } from '@graphiql/react';
+import { Menu, ToolbarButton, useEditorContext } from '@graphiql/react';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import { BookmarkIcon, DotsVerticalIcon, Link1Icon } from '@radix-ui/react-icons';
 import 'graphiql/graphiql.css';
@@ -69,6 +73,27 @@ import 'graphiql/graphiql.css';
 //   );
 // }
 
+function useOperation(operationId: string) {
+  const [{ data }] = useQuery({
+    query: OperationDocument,
+    variables: {
+      id: operationId,
+    },
+    pause: !operationId,
+  });
+  const editorContext = useEditorContext({ nonNull: true });
+  useEffect(() => {
+    const operation = data?.operation;
+    console.log('useEffect', operationId, data);
+    if (operationId && operation) {
+      editorContext.addTab();
+      editorContext.queryEditor?.setValue(operation.query);
+      editorContext.variableEditor?.setValue(operation.variables);
+      editorContext.headerEditor?.setValue(operation.headers);
+    }
+  }, [operationId, data?.operation.id]);
+}
+
 const operationCollectionsPlugin = {
   title: 'Operation Collections',
   icon: BookmarkIcon,
@@ -81,6 +106,13 @@ const operationCollectionsPlugin = {
     const [isDeleteCollectionModalOpen, toggleDeleteCollectionModalOpen] = useToggle();
     const [isDeleteOperationModalOpen, toggleDeleteOperationModalOpen] = useToggle();
     const copyToClipboard = useClipboard();
+    const router = useRouteSelector();
+    const operation = router.query.operation as string;
+    useOperation(operation);
+
+    const initialSelectedCollection =
+      operation &&
+      collections?.find(c => c.items.edges.some(({ node }) => node.id === operation))?.id;
     return (
       <>
         <div className="flex justify-between">
@@ -100,7 +132,7 @@ const operationCollectionsPlugin = {
         {loading ? (
           <Spinner />
         ) : (
-          <Accordion>
+          <Accordion defaultValue={initialSelectedCollection}>
             <CreateCollectionModal
               isOpen={isCollectionModalOpen}
               toggleModalOpen={toggleCollectionModal}
@@ -163,7 +195,22 @@ const operationCollectionsPlugin = {
                     {collection.items.edges.length
                       ? collection.items.edges.map(({ node }) => (
                           <div key={node.id} className="flex justify-between items-center">
-                            <span>{node.name}</span>
+                            <Link
+                              href={{
+                                query: {
+                                  operation: node.id,
+                                  orgId: router.organizationId,
+                                  projectId: router.projectId,
+                                  targetId: router.targetId,
+                                },
+                              }}
+                              className={clsx(
+                                'hover:bg-gray-100/10 w-full rounded p-2 !text-gray-300',
+                                router.query.operation === node.id && 'bg-gray-100/10',
+                              )}
+                            >
+                              {node.name}
+                            </Link>
                             <Menu>
                               <Menu.Button className="graphiql-toolbar-button" aria-label="More">
                                 <DotsVerticalIcon />
@@ -180,8 +227,9 @@ const operationCollectionsPlugin = {
                                 </Menu.Item>
                                 <Menu.Item
                                   onSelect={async () => {
+                                    const url = new URL(window.location.href);
                                     await copyToClipboard(
-                                      `${window.location.href}?operation=${node.id}`,
+                                      `${url.origin}${url.pathname}?operation=${node.id}`,
                                     );
                                   }}
                                 >
