@@ -94,6 +94,7 @@ function useNoIntrospection(params: {
 export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMethod => {
   const server = createYoga<Context>({
     logging: options.logger,
+    maskedErrors: false,
     plugins: [
       useArmor(),
       useSentry({

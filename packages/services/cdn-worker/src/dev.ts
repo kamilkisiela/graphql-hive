@@ -1,7 +1,6 @@
 import { createServer } from 'http';
-import itty from 'itty-router';
-import { json, withParams } from 'itty-router-extras';
-import { createServerAdapter } from '@whatwg-node/server';
+import { Response } from 'fets';
+import zod from 'zod';
 import { createArtifactRequestHandler } from './artifact-handler';
 import { ArtifactStorageReader } from './artifact-storage-reader';
 import { AwsClient } from './aws';
@@ -51,57 +50,52 @@ const handleArtifactRequest = createArtifactRequestHandler({
 });
 
 function main() {
-  const app = createServerAdapter(itty.Router());
-
-  app.put(
-    '/:accountId/storage/kv/namespaces/:namespaceId/values/:key',
-    withParams,
-    async (
-      request: Request & {
-        params: {
-          accountId: string;
-          namespaceId: string;
-          key: string;
-        };
+  const app = handleArtifactRequest
+    .route({
+      method: 'GET',
+      path: '/_readiness',
+      handler: () =>
+        new Response(null, {
+          status: 200,
+        }),
+    })
+    .route({
+      path: '*',
+      handler: handleRequest,
+    })
+    .route({
+      method: 'PUT',
+      path: '/:accountId/storage/kv/namespaces/:namespaceId/values/:key',
+      schemas: {
+        request: {
+          params: zod.object({
+            accountId: zod.string(),
+            namespaceId: zod.string(),
+            key: zod.string(),
+          }),
+        },
       },
-    ) => {
-      if (!request.params.key) {
-        throw new Error(`Missing key`);
-      }
+      handler: async request => {
+        const textBody = await request.text();
 
-      const textBody = await request.text();
+        if (!textBody) {
+          throw new Error(`Missing body value`);
+        }
 
-      if (!textBody) {
-        throw new Error(`Missing body value`);
-      }
+        console.log(`Writing to ephermal storage: ${request.params.key}, value: ${textBody}`);
 
-      console.log(`Writing to ephermal storage: ${request.params.key}, value: ${request.body}`);
+        devStorage.set(request.params.key, textBody);
 
-      devStorage.set(request.params.key, textBody);
-
-      return json({
-        success: true,
-      });
-    },
-  );
-
-  app.get('/dump', () => json(Object.fromEntries(devStorage.entries())));
-
-  app.get(
-    '/_readiness',
-    () =>
-      new Response(null, {
-        status: 200,
-      }),
-  );
-
-  const router = itty
-    .Router()
-    .get('*', handleArtifactRequest)
-    // Legacy CDN Handlers
-    .get('*', handleRequest);
-
-  app.get('*', (request: Request) => router.handle(request));
+        return Response.json({
+          success: true,
+        });
+      },
+    })
+    .route({
+      method: 'GET',
+      path: '/dump',
+      handler: () => Response.json(Object.fromEntries(devStorage.entries())),
+    });
 
   const server = createServer(app);
 

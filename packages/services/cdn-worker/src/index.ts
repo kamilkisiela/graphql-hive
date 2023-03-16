@@ -1,10 +1,10 @@
-import itty from 'itty-router';
+import { Response, RouterRequest } from 'fets';
 import { Toucan } from 'toucan-js';
 import { AnalyticsEngine, createAnalytics } from './analytics';
 import { createArtifactRequestHandler } from './artifact-handler';
 import { ArtifactStorageReader } from './artifact-storage-reader';
 import { AwsClient } from './aws';
-import { UnexpectedError } from './errors';
+import { createUnexpectedErrorResponse } from './errors';
 import { createRequestHandler } from './handler';
 import { createIsKeyValid } from './key-validation';
 
@@ -79,40 +79,30 @@ self.addEventListener('fetch', async (event: FetchEvent) => {
     async getArtifactAction(targetId, artifactType, eTag) {
       return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
     },
-    async fallback(request: Request, params: { targetId: string; artifactType: string }) {
-      const artifactTypeMap: Record<string, string> = {
-        metadata: 'metadata',
-        sdl: 'sdl',
-        services: 'schema',
-        supergraph: 'supergraph',
-      };
-      const artifactType = artifactTypeMap[params.artifactType];
+    async fallback(
+      request: Request | RouterRequest,
+      params: { targetId: string; artifactType: string },
+    ) {
+      const url = request.url.replace(
+        `/artifacts/v1/${params.targetId}/${params.artifactType}`,
+        `/${params.targetId}/${params.artifactType}`,
+      );
 
-      if (artifactType) {
-        const url = request.url.replace(
-          `/artifacts/v1/${params.targetId}/${params.artifactType}`,
-          `/${params.targetId}/${artifactType}`,
-        );
-
-        return handleRequest(new Request(url, request));
-      }
-
-      return;
+      return handleRequest(new Request(url, request));
     },
   });
 
-  const router = itty
-    .Router()
-    .get(
-      '/_health',
-      () =>
-        new Response('OK', {
-          status: 200,
-        }),
-    )
-    .get('*', handleArtifactRequest)
+  const router = handleArtifactRequest
+    .route({
+      method: 'GET',
+      path: '/_health',
+      handler: () => new Response('OK', { status: 200 }),
+    })
     // Legacy CDN Handlers
-    .get('*', handleRequest);
+    .route({
+      path: '*',
+      handler: handleRequest,
+    });
 
   const sentry = new Toucan({
     dsn: SENTRY_DSN,
@@ -132,24 +122,5 @@ self.addEventListener('fetch', async (event: FetchEvent) => {
     },
   });
 
-  try {
-    event.respondWith(
-      router
-        .handle(event.request, sentry.captureException)
-        .then(response => {
-          if (response) {
-            return response;
-          }
-          return new Response('Not found', { status: 404 });
-        })
-        .catch(err => {
-          console.error(err);
-          sentry.captureException(err);
-          return new UnexpectedError(analytics);
-        }),
-    );
-  } catch (error) {
-    sentry.captureException(error);
-    event.respondWith(new UnexpectedError(analytics));
-  }
+  event.respondWith(router.handleRequest(event.request, sentry.captureException));
 });

@@ -1,12 +1,6 @@
 import { createHmac } from 'crypto';
 import * as bcrypt from 'bcryptjs';
 import '../src/dev-polyfill';
-import {
-  InvalidArtifactTypeResponse,
-  InvalidAuthKeyResponse,
-  MissingAuthKeyResponse,
-  MissingTargetIDErrorResponse,
-} from '../src/errors';
 import { createRequestHandler } from '../src/handler';
 import { createIsKeyValid, KeyValidator } from '../src/key-validation';
 
@@ -298,7 +292,8 @@ describe('CDN Worker', () => {
     const etag = firstResponse.headers.get('etag');
 
     expect(firstResponse.status).toBe(200);
-    expect(firstResponse.body).toBeDefined();
+    const result = await firstResponse.json();
+    expect(result.__schema).toBeDefined();
     // Every request receives the etag
     expect(etag).toBeDefined();
 
@@ -322,7 +317,8 @@ describe('CDN Worker', () => {
     });
     const wrongEtagResponse = await handleRequest(wrongEtagRequest);
     expect(wrongEtagResponse.status).toBe(200);
-    expect(wrongEtagResponse.body).toBeDefined();
+    const wrongEtagResult = await wrongEtagResponse.json();
+    expect(wrongEtagResult.__schema).toBeDefined();
   });
 
   test('etag + if-none-match for sdl', async () => {
@@ -403,8 +399,9 @@ describe('CDN Worker', () => {
       const request = new Request('https://fake-worker.com/', {});
 
       const response = await handleRequest(request);
-      expect(response instanceof MissingTargetIDErrorResponse).toBeTruthy();
       expect(response.status).toBe(400);
+      const body = await response.json();
+      expect(body.code).toBe('MISSING_TARGET_ID');
     });
 
     it('Should throw when requested resource is not valid', async () => {
@@ -416,8 +413,9 @@ describe('CDN Worker', () => {
       const request = new Request('https://fake-worker.com/fake-target-id/error', {});
 
       const response = await handleRequest(request);
-      expect(response instanceof InvalidArtifactTypeResponse).toBeTruthy();
       expect(response.status).toBe(400);
+      const body = await response.json();
+      expect(body.code).toBe('INVALID_ARTIFACT_TYPE');
     });
 
     it('Should throw when auth key is missing', async () => {
@@ -429,8 +427,9 @@ describe('CDN Worker', () => {
       const request = new Request('https://fake-worker.com/fake-target-id/sdl', {});
 
       const response = await handleRequest(request);
-      expect(response instanceof MissingAuthKeyResponse).toBeTruthy();
       expect(response.status).toBe(400);
+      const body = await response.json();
+      expect(body.code).toBe('MISSING_AUTH_KEY');
     });
 
     it('Should throw when key validation function fails', async () => {
@@ -446,8 +445,9 @@ describe('CDN Worker', () => {
       });
 
       const response = await handleRequest(request);
-      expect(response instanceof InvalidAuthKeyResponse).toBeTruthy();
       expect(response.status).toBe(403);
+      const body = await response.json();
+      expect(body.code).toBe('INVALID_AUTH_KEY');
     });
   });
 
@@ -521,8 +521,9 @@ describe('CDN Worker', () => {
       });
 
       const response = await handleRequest(request);
-      expect(response instanceof InvalidAuthKeyResponse).toBeTruthy();
       expect(response.status).toBe(403);
+      const body = await response.json();
+      expect(body.code).toBe('INVALID_AUTH_KEY');
     });
 
     it('Should throw on invalid token hash', async () => {
@@ -552,8 +553,9 @@ describe('CDN Worker', () => {
       });
 
       const response = await handleRequest(request);
-      expect(response instanceof InvalidAuthKeyResponse).toBeTruthy();
       expect(response.status).toBe(403);
+      const body = await response.json();
+      expect(body.code).toBe('INVALID_AUTH_KEY');
     });
   });
 });

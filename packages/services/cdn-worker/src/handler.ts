@@ -1,12 +1,14 @@
+import { Response } from 'fets';
 import { buildSchema, introspectionFromSchema } from 'graphql';
+import { crypto, Request, TextEncoder } from '@whatwg-node/fetch';
 import { Analytics, createAnalytics } from './analytics';
 import {
-  CDNArtifactNotFound,
-  InvalidArtifactMatch,
-  InvalidArtifactTypeResponse,
-  InvalidAuthKeyResponse,
-  MissingAuthKeyResponse,
-  MissingTargetIDErrorResponse,
+  createCDNArtifactNotFoundResponse,
+  createInvalidArtifactMatchResponse,
+  createInvalidArtifactTypeResponse,
+  createInvalidAuthKeyResponse,
+  createMissingAuthKeyResponse,
+  createMissingTargetIDErrorResponse,
 } from './errors';
 import type { KeyValidator } from './key-validation';
 
@@ -25,8 +27,8 @@ type SchemaArtifact = {
   date?: string;
 };
 
-type ArtifactType = 'schema' | 'supergraph' | 'sdl' | 'metadata' | 'introspection';
-const artifactTypes = ['schema', 'supergraph', 'sdl', 'metadata', 'introspection'] as const;
+type ArtifactType = (typeof artifactTypes)[number];
+export const artifactTypes = ['schema', 'supergraph', 'sdl', 'metadata', 'introspection'] as const;
 
 const createArtifactTypesHandlers = (
   analytics: Analytics,
@@ -57,7 +59,7 @@ const createArtifactTypesHandlers = (
     }),
   sdl: (targetId: string, artifactType: string, rawValue: string, etag: string) => {
     if (rawValue.startsWith('[')) {
-      return new InvalidArtifactMatch(artifactType, targetId, analytics);
+      return createInvalidArtifactMatchResponse(artifactType, targetId, analytics);
     }
 
     const parsed = JSON.parse(rawValue) as SchemaArtifact;
@@ -82,7 +84,7 @@ const createArtifactTypesHandlers = (
     }),
   introspection: (targetId: string, artifactType: string, rawValue: string, etag: string) => {
     if (rawValue.startsWith('[')) {
-      return new InvalidArtifactMatch(artifactType, targetId, analytics);
+      return createInvalidArtifactMatchResponse(artifactType, targetId, analytics);
     }
 
     const parsed = JSON.parse(rawValue) as SchemaArtifact;
@@ -90,10 +92,9 @@ const createArtifactTypesHandlers = (
     const schema = buildSchema(rawSdl);
     const introspection = introspectionFromSchema(schema);
 
-    return new Response(JSON.stringify(introspection), {
+    return Response.json(introspection, {
       status: 200,
       headers: {
-        'Content-Type': 'application/json',
         etag,
       },
     });
@@ -120,20 +121,20 @@ async function parseIncomingRequest(
 
   if (!targetId) {
     return {
-      error: new MissingTargetIDErrorResponse(analytics),
+      error: createMissingTargetIDErrorResponse(analytics),
     };
   }
 
   const artifactType = (params[1] || 'schema') as ArtifactType;
 
   if (!VALID_ARTIFACT_TYPES.includes(artifactType)) {
-    return { error: new InvalidArtifactTypeResponse(artifactType, analytics) };
+    return { error: createInvalidArtifactTypeResponse(artifactType, analytics) };
   }
 
   const headerKey = request.headers.get(AUTH_HEADER_NAME);
 
   if (!headerKey) {
-    return { error: new MissingAuthKeyResponse(analytics) };
+    return { error: createMissingAuthKeyResponse(analytics) };
   }
 
   try {
@@ -141,7 +142,7 @@ async function parseIncomingRequest(
 
     if (!keyValid) {
       return {
-        error: new InvalidAuthKeyResponse(analytics),
+        error: createInvalidAuthKeyResponse(analytics),
       };
     }
 
@@ -156,7 +157,7 @@ async function parseIncomingRequest(
   } catch (e) {
     console.warn(`Failed to validate key for ${targetId}, error:`, e);
     return {
-      error: new InvalidAuthKeyResponse(analytics),
+      error: createInvalidAuthKeyResponse(analytics),
     };
   }
 }
@@ -181,7 +182,7 @@ export const createRequestHandler = (deps: RequestHandlerDependencies) => {
   const analytics = deps.analytics ?? createAnalytics();
   const artifactTypesHandlers = createArtifactTypesHandlers(analytics);
 
-  return async (request: Request): Promise<Response> => {
+  return async (request: Request) => {
     const parsedRequest = await parseIncomingRequest(request, deps.isKeyValid, analytics);
 
     if ('error' in parsedRequest) {
@@ -228,7 +229,7 @@ export const createRequestHandler = (deps: RequestHandlerDependencies) => {
       console.log(
         `CDN Artifact not found for targetId=${targetId}, artifactType=${artifactType}, storageKeyType=${storageKeyType}`,
       );
-      return new CDNArtifactNotFound(artifactType, targetId, analytics);
+      return createCDNArtifactNotFoundResponse(artifactType, targetId, analytics);
     }
   };
 };

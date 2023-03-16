@@ -55,7 +55,7 @@ export class ArtifactStorageReader {
   async generateArtifactReadUrl(
     targetId: string,
     artifactType: ArtifactsType,
-    etagValue: string | null,
+    etagValue?: string | null,
   ) {
     if (artifactType.startsWith('sdl')) {
       artifactType = 'sdl';

@@ -1,12 +1,13 @@
-import itty from 'itty-router';
+import { createRouter, Response, RouterRequest, useErrorHandling } from 'fets';
 import zod from 'zod';
-import { createFetch, type Request } from '@whatwg-node/fetch';
 import { type Analytics, createAnalytics } from './analytics';
 import { type ArtifactsType } from './artifact-storage-reader';
-import { InvalidAuthKeyResponse, MissingAuthKeyResponse } from './errors';
+import {
+  createInvalidAuthKeyResponse,
+  createMissingAuthKeyResponse,
+  createUnexpectedErrorResponse,
+} from './errors';
 import type { KeyValidator } from './key-validation';
-
-const { Response } = createFetch({ useNodeFetch: true });
 
 type ArtifactRequestHandler = {
   getArtifactAction: (
@@ -19,118 +20,124 @@ type ArtifactRequestHandler = {
   isKeyValid: KeyValidator;
   analytics?: Analytics;
   fallback?: (
-    request: Request,
-    params: { targetId: string; artifactType: string },
-  ) => Promise<Response | undefined>;
+    request: Request | RouterRequest<any, any, any>,
+    params: zod.infer<typeof ParamsModel>,
+  ) => Promise<Response>;
 };
 
 const ParamsModel = zod.object({
-  targetId: zod.string(),
-  artifactType: zod.union([
-    zod.literal('metadata'),
-    zod.literal('sdl'),
-    zod.literal('sdl.graphql'),
-    zod.literal('sdl.graphqls'),
-    zod.literal('services'),
-    zod.literal('schema'),
-    zod.literal('supergraph'),
-  ]),
+  targetId: zod.string({
+    required_error: 'Missing Hive target ID in request params.',
+  }),
+  artifactType: zod.union(
+    [
+      zod.literal('metadata'),
+      zod.literal('sdl'),
+      zod.literal('sdl.graphql'),
+      zod.literal('sdl.graphqls'),
+      zod.literal('services'),
+      zod.literal('schema'),
+      zod.literal('supergraph'),
+    ],
+    {
+      invalid_type_error: 'Invalid artifact type',
+    },
+  ),
 });
 
 const authHeaderName = 'x-hive-cdn-key' as const;
 
+function isCaptureException(
+  captureException: unknown,
+): captureException is (error: unknown) => void {
+  return typeof captureException === 'function';
+}
+
 export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
-  const router = itty.Router<itty.Request & Request>();
   const analytics = deps.analytics ?? createAnalytics();
-
-  const authenticate = async (
-    request: itty.Request & Request,
-    targetId: string,
-  ): Promise<Response | null> => {
-    const headerKey = request.headers.get(authHeaderName);
-    if (headerKey === null) {
-      return new MissingAuthKeyResponse(analytics);
-    }
-
-    const isValid = await deps.isKeyValid(targetId, headerKey);
-
-    if (isValid) {
-      return null;
-    }
-
-    return new InvalidAuthKeyResponse(analytics);
-  };
-
-  router.get(
-    '/artifacts/v1/:targetId/:artifactType',
-    async (request: itty.Request & Request, captureException?: (error: unknown) => void) => {
-      const parseResult = ParamsModel.safeParse(request.params);
-
-      if (parseResult.success === false) {
-        return new Response('Not found.', { status: 404 });
-      }
-
-      const params = parseResult.data;
-
-      /** Legacy handling for old client SDK versions. */
-      if (params.artifactType === 'schema') {
-        return new Response('Found.', {
-          status: 301,
-          headers: {
-            Location: request.url.replace('/schema', '/services'),
-          },
-        });
-      }
-
-      const maybeResponse = await authenticate(request, params.targetId);
-
-      if (maybeResponse !== null) {
-        return maybeResponse;
-      }
-
-      analytics.track(
-        { type: 'artifact', value: params.artifactType, version: 'v1' },
-        params.targetId,
-      );
-
-      const eTag = request.headers.get('if-none-match');
-
-      const result = await deps
-        .getArtifactAction(params.targetId, params.artifactType, eTag)
-        .catch(error => {
-          if (deps.fallback) {
-            if (captureException) {
-              captureException(error);
-            } else {
-              console.error(error);
-            }
-            return null;
-          }
-
-          return Promise.reject(error);
-        });
-
-      if (!result) {
-        return (
-          deps.fallback?.(request, params) ??
-          new Response('Something went wrong, really wrong.', { status: 500 })
-        );
-      }
-
-      if (result.type === 'notModified') {
-        return new Response('', {
-          status: 304,
-        });
-      }
-      if (result.type === 'notFound') {
-        return new Response('Not found.', { status: 404 });
-      }
-      if (result.type === 'redirect') {
-        return new Response('Found.', { status: 302, headers: { Location: result.location } });
-      }
+  return createRouter({
+    title: 'Hive CDN Worker',
+    description: "Hive CDN's Worker Implementation",
+    plugins: [
+      useErrorHandling((error, _request, captureException) => {
+        console.error(error);
+        if (isCaptureException(captureException)) {
+          captureException(error);
+        }
+        return createUnexpectedErrorResponse(analytics);
+      }),
+    ],
+  }).route({
+    method: 'GET',
+    path: '/artifacts/v1/:targetId/:artifactType',
+    schemas: {
+      request: {
+        params: ParamsModel,
+        headers: zod.object({
+          [authHeaderName]: zod.string({
+            required_error: 'Hive CDN authentication key is missing',
+          }),
+          'if-none-match': zod.string().optional(),
+        }),
+      },
     },
-  );
+    handler: [
+      async request => {
+        const headerKey = request.headers.get(authHeaderName);
 
-  return (request: Request, captureException?: (error: unknown) => void) =>
-    router.handle(request, captureException);
+        const isValid = await deps.isKeyValid(request.params.targetId, headerKey);
+
+        if (!isValid) {
+          return createInvalidAuthKeyResponse(analytics);
+        }
+      },
+      async (request, captureException) => {
+        /** Legacy handling for old client SDK versions. */
+        if (request.params.artifactType === 'schema') {
+          return Response.redirect(request.url.replace('/schema', '/services'), 301);
+        }
+
+        analytics.track(
+          { type: 'artifact', value: request.params.artifactType, version: 'v1' },
+          request.params.targetId,
+        );
+
+        const eTag = request.headers.get('if-none-match');
+
+        const result = await deps
+          .getArtifactAction(request.params.targetId, request.params.artifactType, eTag)
+          .catch(error => {
+            if (deps.fallback) {
+              if (isCaptureException(captureException)) {
+                captureException(error);
+              } else {
+                console.error(error);
+              }
+              return null;
+            }
+
+            return Promise.reject(error);
+          });
+
+        if (!result) {
+          return (
+            deps.fallback?.(request, request.params) ??
+            new Response('Something went wrong, really wrong.', { status: 500 })
+          );
+        }
+
+        if (result.type === 'notModified') {
+          return new Response('', {
+            status: 304,
+          });
+        }
+        if (result.type === 'notFound') {
+          return new Response('Not found.', { status: 404 });
+        }
+        if (result.type === 'redirect') {
+          return Response.redirect(result.location, 302);
+        }
+      },
+    ],
+  });
 };
