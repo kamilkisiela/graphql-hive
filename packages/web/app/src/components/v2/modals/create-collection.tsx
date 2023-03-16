@@ -111,6 +111,7 @@ export function CreateCollectionModal({
               Collection Name
             </label>
             <Input
+              data-cy='input.name'
               name="name"
               placeholder="Your Shared Collection"
               value={values.name}
@@ -128,6 +129,7 @@ export function CreateCollectionModal({
             </label>
 
             <Input
+              data-cy='input.description'
               name="description"
               value={values.description}
               onChange={handleChange}
@@ -158,7 +160,7 @@ export function CreateCollectionModal({
             <Button type="button" size="large" block onClick={toggleModalOpen}>
               Cancel
             </Button>
-            <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
+            <Button type="submit" size="large" block variant="primary" disabled={isSubmitting} data-cy="confirm">
               {collectionId ? 'Update' : 'Add'}
             </Button>
           </div>

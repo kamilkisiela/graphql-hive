@@ -2,7 +2,16 @@ import { ReactElement, useState } from 'react';
 import { GraphiQL } from 'graphiql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
-import { Accordion, Button, DocsLink, DocsNote, Heading, Spinner, Title } from '@/components/v2';
+import {
+  Accordion,
+  Button,
+  DocsLink,
+  DocsNote,
+  EmptyList,
+  Heading,
+  Spinner,
+  Title,
+} from '@/components/v2';
 import { HiveLogo, SaveIcon } from '@/components/v2/icon';
 import {
   ConnectLabModal,
@@ -82,6 +91,7 @@ const operationCollectionsPlugin = {
               if (collectionId) setCollectionId('');
               toggleCollectionModal();
             }}
+            data-cy="create-collection"
           >
             + Create
           </Button>
@@ -111,82 +121,89 @@ const operationCollectionsPlugin = {
               toggleModalOpen={toggleDeleteOperationModalOpen}
               operationId={operationId}
             />
-            {collections?.map(collection => (
-              <Accordion.Item key={collection.id} value={collection.id}>
-                <div className="flex">
-                  <Accordion.Header>{collection.name}</Accordion.Header>
+            {collections?.length ? (
+              collections.map(collection => (
+                <Accordion.Item key={collection.id} value={collection.id}>
+                  <div className="flex">
+                    <Accordion.Header>{collection.name}</Accordion.Header>
 
-                  <Menu>
-                    <Menu.Button className="graphiql-toolbar-button !shrink-0" aria-label="More">
-                      <DotsVerticalIcon />
-                    </Menu.Button>
+                    <Menu>
+                      <Menu.Button className="graphiql-toolbar-button !shrink-0" aria-label="More">
+                        <DotsVerticalIcon />
+                      </Menu.Button>
 
-                    <Menu.List>
-                      <Menu.Item
-                        onSelect={() => {
-                          setCollectionId(collection.id);
-                          toggleCollectionModal();
-                        }}
-                      >
-                        Edit collection
-                      </Menu.Item>
-                      <Menu.Item
-                        onSelect={() => {
-                          setCollectionId(collection.id);
-                          toggleDeleteCollectionModalOpen();
-                        }}
-                        className="!text-red-500"
-                      >
-                        Delete
-                      </Menu.Item>
-                    </Menu.List>
-                  </Menu>
-                </div>
-                <Accordion.Content className="pr-0">
-                  {collection.items.edges.length
-                    ? collection.items.edges.map(({ node }) => (
-                        <div key={node.id} className="flex justify-between items-center">
-                          <span>{node.name}</span>
-                          <Menu>
-                            <Menu.Button className="graphiql-toolbar-button" aria-label="More">
-                              <DotsVerticalIcon />
-                            </Menu.Button>
+                      <Menu.List>
+                        <Menu.Item
+                          onSelect={() => {
+                            setCollectionId(collection.id);
+                            toggleCollectionModal();
+                          }}
+                        >
+                          Edit collection
+                        </Menu.Item>
+                        <Menu.Item
+                          onSelect={() => {
+                            setCollectionId(collection.id);
+                            toggleDeleteCollectionModalOpen();
+                          }}
+                          className="!text-red-500"
+                        >
+                          Delete
+                        </Menu.Item>
+                      </Menu.List>
+                    </Menu>
+                  </div>
+                  <Accordion.Content className="pr-0">
+                    {collection.items.edges.length
+                      ? collection.items.edges.map(({ node }) => (
+                          <div key={node.id} className="flex justify-between items-center">
+                            <span>{node.name}</span>
+                            <Menu>
+                              <Menu.Button className="graphiql-toolbar-button" aria-label="More">
+                                <DotsVerticalIcon />
+                              </Menu.Button>
 
-                            <Menu.List>
-                              <Menu.Item
-                                onSelect={() => {
-                                  setOperationId(node.id);
-                                  toggleOperationModal();
-                                }}
-                              >
-                                Edit operation
-                              </Menu.Item>
-                              <Menu.Item
-                                onSelect={async () => {
-                                  await copyToClipboard(
-                                    `${window.location.href}?operation=${node.id}`,
-                                  );
-                                }}
-                              >
-                                Copy link to operation
-                              </Menu.Item>
-                              <Menu.Item
-                                onSelect={() => {
-                                  setOperationId(node.id);
-                                  toggleDeleteOperationModalOpen();
-                                }}
-                                className="!text-red-500"
-                              >
-                                Delete
-                              </Menu.Item>
-                            </Menu.List>
-                          </Menu>
-                        </div>
-                      ))
-                    : 'No operations'}
-                </Accordion.Content>
-              </Accordion.Item>
-            ))}
+                              <Menu.List>
+                                <Menu.Item
+                                  onSelect={() => {
+                                    setOperationId(node.id);
+                                    toggleOperationModal();
+                                  }}
+                                >
+                                  Edit operation
+                                </Menu.Item>
+                                <Menu.Item
+                                  onSelect={async () => {
+                                    await copyToClipboard(
+                                      `${window.location.href}?operation=${node.id}`,
+                                    );
+                                  }}
+                                >
+                                  Copy link to operation
+                                </Menu.Item>
+                                <Menu.Item
+                                  onSelect={() => {
+                                    setOperationId(node.id);
+                                    toggleDeleteOperationModalOpen();
+                                  }}
+                                  className="!text-red-500"
+                                >
+                                  Delete
+                                </Menu.Item>
+                              </Menu.List>
+                            </Menu>
+                          </div>
+                        ))
+                      : 'No operations'}
+                  </Accordion.Content>
+                </Accordion.Item>
+              ))
+            ) : (
+              <EmptyList
+                title="Add your first collection"
+                description="Collections shared across organization"
+              />
+            )}
           </Accordion>
         )}
       </>
@@ -209,6 +226,7 @@ function Save(): ReactElement {
           }
         }}
         label="Save operation"
+        data-cy="save-collection"
       >
         <SaveIcon className="graphiql-toolbar-icon !h-5 w-auto" />
       </ToolbarButton>

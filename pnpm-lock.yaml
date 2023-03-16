@@ -69,6 +69,7 @@ importers:
       husky: 8.0.3
       jest-snapshot-serializer-raw: 1.2.0
       lint-staged: 13.2.0
+      pg: ^8.10.0
       prettier: 2.8.4
       prettier-plugin-sql: 0.13.0
       prettier-plugin-tailwindcss: 0.2.4
@@ -110,6 +111,7 @@ importers:
       husky: 8.0.3
       jest-snapshot-serializer-raw: 1.2.0
       lint-staged: 13.2.0
+      pg: 8.10.0
       prettier: 2.8.4
       prettier-plugin-sql: 0.13.0_prettier@2.8.4
       prettier-plugin-tailwindcss: 0.2.4_prettier@2.8.4
@@ -1000,7 +1002,8 @@ importers:
 
   packages/web/app:
     specifiers:
-      '@graphiql/toolkit': 0.8.2
+      '@graphiql/react': '*'
+      '@graphiql/toolkit': '*'
       '@graphql-codegen/gql-tag-operations-preset': 2.1.0
       '@graphql-tools/mock': 8.7.19
       '@graphql-typed-document-node/core': 3.1.2
@@ -1103,6 +1106,7 @@ importers:
       yup: 1.0.2
       zod: 3.21.4
     dependencies:
+      '@graphiql/react': 0.17.0_4hkbjrep5ureiqkcwz4kv7433y
       '@graphiql/toolkit': 0.8.2_graphql@16.6.0
       '@graphql-tools/mock': 8.7.19_graphql@16.6.0
       '@headlessui/react': 1.7.13_biqbaboplfbrettd7655fr4n2y
