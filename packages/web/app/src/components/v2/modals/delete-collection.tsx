@@ -38,6 +38,7 @@ export function DeleteCollectionModal({
             await mutate({ id: collectionId });
             toggleModalOpen();
           }}
+          data-cy="confirm"
         >
           Delete
         </Button>

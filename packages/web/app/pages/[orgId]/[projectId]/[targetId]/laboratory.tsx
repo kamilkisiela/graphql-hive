@@ -128,7 +128,11 @@ const operationCollectionsPlugin = {
                     <Accordion.Header>{collection.name}</Accordion.Header>
 
                     <Menu>
-                      <Menu.Button className="graphiql-toolbar-button !shrink-0" aria-label="More">
+                      <Menu.Button
+                        className="graphiql-toolbar-button !shrink-0"
+                        aria-label="More"
+                        data-cy="collection-3-dots"
+                      >
                         <DotsVerticalIcon />
                       </Menu.Button>
 
@@ -138,6 +142,7 @@ const operationCollectionsPlugin = {
                             setCollectionId(collection.id);
                             toggleCollectionModal();
                           }}
+                          data-cy="collection-edit"
                         >
                           Edit collection
                         </Menu.Item>
@@ -147,6 +152,7 @@ const operationCollectionsPlugin = {
                             toggleDeleteCollectionModalOpen();
                           }}
                           className="!text-red-500"
+                          data-cy="collection-delete"
                         >
                           Delete
                         </Menu.Item>

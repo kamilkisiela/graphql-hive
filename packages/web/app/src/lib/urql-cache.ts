@@ -9,12 +9,15 @@ import {
   AlertChannelsDocument,
   AlertsDocument,
   CheckIntegrationsDocument,
+  CollectionsDocument,
+  CreateCollectionDocument,
   CreateOrganizationDocument,
   CreateProjectDocument,
   CreateTargetDocument,
   CreateTokenDocument,
   DeleteAlertChannelsDocument,
   DeleteAlertsDocument,
+  DeleteCollectionDocument,
   DeleteGitHubIntegrationDocument,
   DeleteOrganizationDocument,
   DeletePersistedOperationDocument,
@@ -351,6 +354,36 @@ const deleteGitHubIntegration: TypedDocumentNodeUpdateResolver<
   );
 };
 
+const createCollection: TypedDocumentNodeUpdateResolver<typeof CreateCollectionDocument> = (
+  result,
+  args,
+  cache,
+) => {
+  cache.updateQuery(
+    {
+      query: CollectionsDocument,
+      variables: {
+        targetId: args.input.targetId,
+      },
+    },
+    data => {
+      data.collections.nodes.push(result.createCollection);
+      return data;
+    },
+  );
+};
+
+const deleteCollection: TypedDocumentNodeUpdateResolver<typeof DeleteCollectionDocument> = (
+  result,
+  args,
+  cache,
+) => {
+  cache.invalidate({
+    __typename: result.deleteCollection.__typename!,
+    id: result.deleteCollection.id,
+  });
+};
+
 // UpdateResolver
 export const Mutation = {
   createOrganization,
@@ -368,4 +401,6 @@ export const Mutation = {
   deleteAlertChannels,
   addAlert,
   deletePersistedOperation,
+  createCollection,
+  deleteCollection,
 };

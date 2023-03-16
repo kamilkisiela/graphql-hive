@@ -23,6 +23,7 @@ function Wrapper({
       collapsible
       defaultValue={defaultValue}
       className="space-y-4 w-full"
+      data-cy="accordion"
     >
       {children}
     </A.Root>

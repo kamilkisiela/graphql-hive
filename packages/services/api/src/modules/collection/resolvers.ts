@@ -48,8 +48,14 @@ export const resolvers: CollectionModule.Resolvers = {
       const node = await injector.get(CollectionProvider).updateCollection(input);
       return { node };
     },
-    deleteCollection(_, args, { injector }) {
-      return injector.get(CollectionProvider).deleteCollection(args.id);
+    async deleteCollection(_, args, { injector }) {
+      const result = await injector.get(CollectionProvider).deleteCollection(args.id);
+      // should we return collection instead true/false?
+      return {
+        node: {
+          id: args.id
+        }
+      }
     },
     createOperation(_, { input }, { injector }) {
       return injector.get(CollectionProvider).createOperation(input);
