@@ -104,7 +104,6 @@
   },
   "pnpm": {
     "overrides": {
-      "@trivago/prettier-plugin-sort-imports>@babel/parser": "^7.20.7",
       "tsup": "6.5.0"
     },
     "patchedDependencies": {
