@@ -107,7 +107,6 @@
       "tsup": "6.5.0"
     },
     "patchedDependencies": {
-      "@tgriesser/schemats@7.0.1": "patches/@tgriesser__schemats@7.0.1.patch",
       "@theguild/buddy@0.1.0": "patches/@theguild__buddy@0.1.0.patch",
       "mjml-core@4.13.0": "patches/mjml-core@4.13.0.patch",
       "@oclif/core@1.23.0": "patches/@oclif__core@1.23.0.patch",
