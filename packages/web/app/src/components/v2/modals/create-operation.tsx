@@ -97,6 +97,7 @@ export function CreateOperationModal({
               value={values.name}
               onChange={handleChange}
               isInvalid={!!(touched.name && errors.name)}
+              data-cy="input.name"
             />
             {touched.name && errors.name && (
               <div className="text-sm text-red-500">{errors.name}</div>
@@ -117,6 +118,7 @@ export function CreateOperationModal({
               value={values.collectionId}
               onChange={handleChange}
               isInvalid={!!(touched.collectionId && errors.collectionId)}
+              data-cy="select.collectionId"
             />
             {touched.collectionId && errors.collectionId && (
               <div className="text-sm text-red-500">{errors.collectionId}</div>
@@ -129,7 +131,14 @@ export function CreateOperationModal({
             <Button type="button" size="large" block onClick={toggleModalOpen}>
               Cancel
             </Button>
-            <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              size="large"
+              block
+              variant="primary"
+              disabled={isSubmitting}
+              data-cy="confirm"
+            >
               {operationId ? 'Update' : 'Add'}
             </Button>
           </div>

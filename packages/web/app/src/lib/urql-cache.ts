@@ -11,6 +11,7 @@ import {
   CheckIntegrationsDocument,
   CollectionsDocument,
   CreateCollectionDocument,
+  CreateOperationDocument,
   CreateOrganizationDocument,
   CreateProjectDocument,
   CreateTargetDocument,
@@ -359,7 +360,8 @@ const createCollection: TypedDocumentNodeUpdateResolver<typeof CreateCollectionD
   args,
   cache,
 ) => {
-  cache.updateQuery(
+  updateQuery(
+    cache,
     {
       query: CollectionsDocument,
       variables: {
@@ -383,6 +385,38 @@ const deleteCollection: TypedDocumentNodeUpdateResolver<typeof DeleteCollectionD
     id: result.deleteCollection.id,
   });
 };
+const createOperation: TypedDocumentNodeUpdateResolver<typeof CreateOperationDocument> = (
+  result,
+  args,
+  cache,
+) => {
+  const collectionsQueries = cache
+    .inspectFields('Query')
+    .filter(o => o.fieldName === 'collections');
+  // map over `collections` queries because we don't know `targetId`
+  for (const collectionsQuery of collectionsQueries) {
+    updateQuery(
+      cache,
+      {
+        query: CollectionsDocument,
+        variables: {
+          targetId: collectionsQuery.arguments.targetId,
+        },
+      },
+      data => {
+        
+        for (const node of data.collections.nodes) {
+          if (node.id === args.input.collectionId) {
+            node.items.edges.push({
+              node: result.createOperation
+            });
+          }
+        }
+        return data;
+      },
+    );
+  }
+};
 
 // UpdateResolver
 export const Mutation = {
@@ -403,4 +437,5 @@ export const Mutation = {
   deletePersistedOperation,
   createCollection,
   deleteCollection,
+  createOperation,
 };
