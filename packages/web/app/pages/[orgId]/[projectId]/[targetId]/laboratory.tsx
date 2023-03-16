@@ -212,7 +212,11 @@ const operationCollectionsPlugin = {
                               {node.name}
                             </Link>
                             <Menu>
-                              <Menu.Button className="graphiql-toolbar-button" aria-label="More">
+                              <Menu.Button
+                                className="graphiql-toolbar-button"
+                                aria-label="More"
+                                data-cy="operation-3-dots"
+                              >
                                 <DotsVerticalIcon />
                               </Menu.Button>
 
@@ -222,6 +226,7 @@ const operationCollectionsPlugin = {
                                     setOperationId(node.id);
                                     toggleOperationModal();
                                   }}
+                                  data-cy="edit-operation"
                                 >
                                   Edit operation
                                 </Menu.Item>
@@ -241,6 +246,7 @@ const operationCollectionsPlugin = {
                                     toggleDeleteOperationModalOpen();
                                   }}
                                   className="!text-red-500"
+                                  data-cy="remove-operation"
                                 >
                                   Delete
                                 </Menu.Item>

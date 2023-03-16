@@ -64,7 +64,10 @@ export const resolvers: CollectionModule.Resolvers = {
       return injector.get(CollectionProvider).updateOperation(input);
     },
     deleteOperation(_, args, { injector }) {
-      return injector.get(CollectionProvider).deleteOperation(args.id);
+      const result =  injector.get(CollectionProvider).deleteOperation(args.id);
+      return {
+        id: args.id
+      }
     },
   },
 };

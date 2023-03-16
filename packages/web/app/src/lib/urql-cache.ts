@@ -20,6 +20,7 @@ import {
   DeleteAlertsDocument,
   DeleteCollectionDocument,
   DeleteGitHubIntegrationDocument,
+  DeleteOperationDocument,
   DeleteOrganizationDocument,
   DeletePersistedOperationDocument,
   DeleteProjectDocument,
@@ -385,6 +386,17 @@ const deleteCollection: TypedDocumentNodeUpdateResolver<typeof DeleteCollectionD
     id: result.deleteCollection.id,
   });
 };
+
+const deleteOperation: TypedDocumentNodeUpdateResolver<typeof DeleteOperationDocument> = (
+  result,
+  args,
+  cache,
+) => {
+  cache.invalidate({
+    __typename: result.deleteOperation.__typename!,
+    id: result.deleteOperation.id,
+  });
+};
 const createOperation: TypedDocumentNodeUpdateResolver<typeof CreateOperationDocument> = (
   result,
   args,
@@ -404,11 +416,10 @@ const createOperation: TypedDocumentNodeUpdateResolver<typeof CreateOperationDoc
         },
       },
       data => {
-        
         for (const node of data.collections.nodes) {
           if (node.id === args.input.collectionId) {
             node.items.edges.push({
-              node: result.createOperation
+              node: result.createOperation,
             });
           }
         }
@@ -437,5 +448,6 @@ export const Mutation = {
   deletePersistedOperation,
   createCollection,
   deleteCollection,
+  deleteOperation,
   createOperation,
 };

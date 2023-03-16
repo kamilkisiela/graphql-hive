@@ -38,6 +38,7 @@ export function DeleteOperationModal({
             await mutate({ id: operationId });
             toggleModalOpen();
           }}
+          data-cy="confirm"
         >
           Delete
         </Button>
