@@ -1068,7 +1068,7 @@ importers:
       next: 13.2.4
       nextjs-cors: 2.1.2
       postcss: 8.4.21
-      postcss-loader: 7.0.2
+      postcss-loader: 7.1.0
       react: 18.2.0
       react-children-utilities: 2.9.0
       react-date-range: 1.4.0
@@ -1195,7 +1195,7 @@ importers:
       '@welldone-software/why-did-you-render': 7.0.1_react@18.2.0
       autoprefixer: 10.4.14_postcss@8.4.21
       postcss: 8.4.21
-      postcss-loader: 7.0.2_postcss@8.4.21
+      postcss-loader: 7.1.0_postcss@8.4.21
       rimraf: 4.4.0
       storybook: 7.0.0-beta.54
       tailwindcss: 3.2.7_postcss@8.4.21
@@ -11337,7 +11337,7 @@ packages:
       next: 13.2.4_biqbaboplfbrettd7655fr4n2y
       pnp-webpack-plugin: 1.7.0
       postcss: 8.4.21
-      postcss-loader: 7.0.2_postcss@8.4.21
+      postcss-loader: 7.1.0_postcss@8.4.21
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       resolve-url-loader: 5.0.0
@@ -24392,14 +24392,14 @@ packages:
       semver: 7.3.8
     dev: true
 
-  /postcss-loader/7.0.2_postcss@8.4.21:
-    resolution: {integrity: sha512-fUJzV/QH7NXUAqV8dWJ9Lg4aTkDCezpTS5HgJ2DvqznexTbSTxgi/dTECvTZ15BwKTtk8G/bqI/QTu2HPd3ZCg==}
+  /postcss-loader/7.1.0_postcss@8.4.21:
+    resolution: {integrity: sha512-vTD2DJ8vJD0Vr1WzMQkRZWRjcynGh3t7NeoLg+Sb1TeuK7etiZfL/ZwHbaVa3M+Qni7Lj/29voV9IggnIUjlIw==}
     engines: {node: '>= 14.15.0'}
     peerDependencies:
       postcss: ^7.0.0 || ^8.0.1
       webpack: ^5.0.0
     dependencies:
-      cosmiconfig: 7.0.1
+      cosmiconfig: 8.0.0
       klona: 2.0.6
       postcss: 8.4.21
       semver: 7.3.8
