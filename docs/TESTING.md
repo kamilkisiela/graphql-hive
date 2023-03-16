@@ -18,6 +18,9 @@ Integration tests are based pre-built Docker images, so you can run it in 2 mode
 
 #### Running from Source Code
 
+**TL;DR**: Use `pnpm integration:prepare` command to setup the complete environment from locally
+running integration tests.
+
 To run integration tests locally, from the local source code, you need to build a valid Docker
 image.
 

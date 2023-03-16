@@ -28,6 +28,7 @@
     "env:sync": "tsx scripts/sync-env-files.ts",
     "generate": "pnpm --filter @hive/storage db:generate && pnpm graphql:generate",
     "graphql:generate": "graphql-codegen --config codegen.cjs",
+    "integration:prepare": "cd integration-tests && ./local.sh",
     "lint": "eslint --cache --ignore-path .gitignore \"{packages,cypress}/**/*.{ts,tsx}\"",
     "lint:env-template": "tsx scripts/check-env-template.ts",
     "lint:fix": "pnpm lint --fix",
