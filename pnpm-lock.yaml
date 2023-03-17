@@ -751,7 +751,7 @@ importers:
     specifiers:
       '@sentry/node': 7.43.0
       '@sentry/types': 7.43.0
-      '@tgriesser/schemats': 8.0.1
+      '@tgriesser/schemats': 8.0.2
       '@theguild/buddy': 0.1.0
       '@types/node': 18.15.3
       '@types/pg': 8.6.6
@@ -777,7 +777,7 @@ importers:
       zod: 3.21.4
     devDependencies:
       '@sentry/types': 7.43.0
-      '@tgriesser/schemats': 8.0.1
+      '@tgriesser/schemats': 8.0.2
       '@types/node': 18.15.3
       '@types/pg': 8.6.6
       pg-promise: 11.4.1
@@ -11896,8 +11896,8 @@ packages:
       '@testing-library/dom': 8.20.0
     dev: true
 
-  /@tgriesser/schemats/8.0.1:
-    resolution: {integrity: sha512-Fqe32J5GesxXX9XbbvRKM/S/J97KqblssTf8rXvJ3DdgNifl1vs6Ya74jyvtio3pyOxbkkk9VPvkEEBFzGNAww==}
+  /@tgriesser/schemats/8.0.2:
+    resolution: {integrity: sha512-2zommC1FFVDdlNZJTjqfNEm6AdSGnS4Af7Y7wy+mWeLA23Bm3oDVWqRiuV0SbmUnqXTUedIj75clpKV4RF1olQ==}
     hasBin: true
     dependencies:
       bluebird: 3.7.2
