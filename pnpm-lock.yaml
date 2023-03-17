@@ -123,7 +123,7 @@ importers:
       '@lbrlabs/pulumi-grafana': 0.0.9
       '@manypkg/get-packages': 2.1.0
       '@pulumi/cloudflare': 4.16.0
-      '@pulumi/kubernetes': 3.24.1
+      '@pulumi/kubernetes': 3.24.2
       '@pulumi/kubernetesx': 0.1.6
       '@pulumi/pulumi': 3.58.0
       '@pulumi/random': 4.12.0
@@ -137,8 +137,8 @@ importers:
       '@lbrlabs/pulumi-grafana': 0.0.9
       '@manypkg/get-packages': 2.1.0
       '@pulumi/cloudflare': 4.16.0
-      '@pulumi/kubernetes': 3.24.1
-      '@pulumi/kubernetesx': 0.1.6_6pu2dl37qatxodtsclewexqujq
+      '@pulumi/kubernetes': 3.24.2
+      '@pulumi/kubernetesx': 0.1.6_syfwla4dgt3uzpvif24zikh3dm
       '@pulumi/pulumi': 3.58.0
       '@pulumi/random': 4.12.0
       js-yaml: 4.1.0
@@ -8993,8 +8993,8 @@ packages:
       - supports-color
     dev: false
 
-  /@pulumi/kubernetes/3.24.1:
-    resolution: {integrity: sha512-BH/LxfsgZPEqesvuB9VBo8gHkyC/t605+6xYMNNtTSfFTqN+pMX+i17gMYtRQlV7pic/uQ6xAUHGlXOT0JaV9Q==}
+  /@pulumi/kubernetes/3.24.2:
+    resolution: {integrity: sha512-9TJoYt4RltTRX447zn9gCbQj+1lwV2XUBKkBM/GLhoKi75mzOh0RMFomqa70ITeVkPCAGEDqm/a6T5fGpMlDPw==}
     requiresBuild: true
     dependencies:
       '@pulumi/pulumi': 3.58.0
@@ -9010,13 +9010,13 @@ packages:
       - supports-color
     dev: false
 
-  /@pulumi/kubernetesx/0.1.6_6pu2dl37qatxodtsclewexqujq:
+  /@pulumi/kubernetesx/0.1.6_syfwla4dgt3uzpvif24zikh3dm:
     resolution: {integrity: sha512-9VL4Yi4b4aLC/obBarJuNkm86kABByUZICYPSTdV396MGZtOc066o2brsB+kWVQcVfkYVXTPrpjIkAwBXXnzGw==}
     peerDependencies:
       '@pulumi/kubernetes': ^3.0.0
       '@pulumi/pulumi': ^3.0.0
     dependencies:
-      '@pulumi/kubernetes': 3.24.1
+      '@pulumi/kubernetes': 3.24.2
       '@pulumi/pulumi': 3.58.0
     dev: false
 
@@ -10429,7 +10429,7 @@ packages:
       '@storybook/csf-plugin': 7.0.0-beta.54
       '@storybook/csf-tools': 7.0.0-beta.54
       '@storybook/global': 5.0.0
-      '@storybook/mdx2-csf': 1.0.0-next.5
+      '@storybook/mdx2-csf': 1.0.0-next.6
       '@storybook/node-logger': 7.0.0-beta.54
       '@storybook/postinstall': 7.0.0-beta.54
       '@storybook/preview-api': 7.0.0-beta.54
@@ -11296,8 +11296,8 @@ packages:
     resolution: {integrity: sha512-EzqxdBEcKjusrZxX/dABw0PD04anyALhu+aWkJ0o+wPVtdQbL+RIszYscHpjpIuF/LwCg1Vea+UqaDflb9D7mg==}
     dev: true
 
-  /@storybook/mdx2-csf/1.0.0-next.5:
-    resolution: {integrity: sha512-02w0sgGZaK1agT050yCVhJ+o4rLHANWvLKWjQjeAsYbjneLC5ITt+3GDB4jRiWwJboZ8dHW1fGSK1Vg5fA34aQ==}
+  /@storybook/mdx2-csf/1.0.0-next.6:
+    resolution: {integrity: sha512-m6plojocU/rmrqWd26yvm8D+oHZPZ6PtSSFmZIgpNDEPVmc8s4fBD6LXOAB5MiPI5f8KLUr2HVhOMZ97o5pDTw==}
     dev: true
 
   /@storybook/nextjs/7.0.0-beta.54_ld2jel3hspngo3u5lti2kgl2sq:
