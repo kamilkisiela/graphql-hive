@@ -73,6 +73,14 @@ import 'graphiql/graphiql.css';
 //   );
 // }
 
+function hashFromTabContents(args: {
+  query: string | null;
+  variables?: string | null;
+  headers?: string | null;
+}): string {
+  return [args.query ?? '', args.variables ?? '', args.headers ?? ''].join('|');
+}
+
 function useOperation(operationId: string) {
   const [{ data }] = useQuery({
     query: OperationDocument,
@@ -82,16 +90,30 @@ function useOperation(operationId: string) {
     pause: !operationId,
   });
   const editorContext = useEditorContext({ nonNull: true });
+
+  const hasAllEditors = !!(
+    editorContext.queryEditor &&
+    editorContext.variableEditor &&
+    editorContext.headerEditor
+  );
+
   useEffect(() => {
     const operation = data?.operation;
-    console.log('useEffect', operationId, data);
-    if (operationId && operation) {
-      editorContext.addTab();
-      editorContext.queryEditor?.setValue(operation.query);
-      editorContext.variableEditor?.setValue(operation.variables);
-      editorContext.headerEditor?.setValue(operation.headers);
+    console.log('useEffect', operationId, operation);
+    if (hasAllEditors && operationId && operation) {
+      // first found tab hy hash
+      const operationHash = hashFromTabContents(operation);
+      const activeTabIndex = editorContext.tabs.findIndex(tab => operationHash === tab.hash);
+      if (activeTabIndex === -1) {
+        editorContext.addTab();
+        editorContext.queryEditor.setValue(operation.query);
+        editorContext.variableEditor.setValue(operation.variables);
+        editorContext.headerEditor.setValue(operation.headers);
+      } else {
+        editorContext.changeTab(activeTabIndex);
+      }
     }
-  }, [operationId, data?.operation.id]);
+  }, [hasAllEditors, operationId, data?.operation.id]);
 }
 
 const operationCollectionsPlugin = {
