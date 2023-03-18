@@ -329,7 +329,7 @@ importers:
       dotenv: 16.0.3
       got: 12.6.0
       p-limit: 4.0.0
-      pg-promise: 11.4.1
+      pg-promise: 11.4.2
       slonik: 30.4.4
       ts-node: 10.9.1
       tslib: 2.5.0
@@ -351,7 +351,7 @@ importers:
       '@types/node': 18.15.3
       '@types/pg': 8.6.6
       copyfiles: 2.4.1
-      pg-promise: 11.4.1
+      pg-promise: 11.4.2
       tslib: 2.5.0
 
   packages/services/api:
@@ -758,7 +758,7 @@ importers:
       dotenv: 16.0.3
       got: 12.6.0
       param-case: 3.0.4
-      pg-promise: 11.4.1
+      pg-promise: 11.4.2
       slonik: 30.4.4
       slonik-interceptor-query-logging: 1.4.7
       slonik-utilities: 1.9.4
@@ -780,7 +780,7 @@ importers:
       '@tgriesser/schemats': 8.0.2
       '@types/node': 18.15.3
       '@types/pg': 8.6.6
-      pg-promise: 11.4.1
+      pg-promise: 11.4.2
       tslib: 2.5.0
       typescript: 4.9.5
 
@@ -23989,8 +23989,8 @@ packages:
       pg: 8.9.0
     dev: false
 
-  /pg-promise/11.4.1:
-    resolution: {integrity: sha512-gESk5rAnetHpqn1AMHHUxOdd2RcGaQQ5jZbfheas1ArBYwa4OVGdHOARRmcHTnVlrDW5LbZiooRIbq28XeASiA==}
+  /pg-promise/11.4.2:
+    resolution: {integrity: sha512-1f049Q1nremz9ZZ3N2h+P2VuDPMO+4c0CMXj8qVDiKcS6BIOKkrOwkfRYEFf17rl3w89BvKf+dViXVjqUyk+Sg==}
     engines: {node: '>=14.0'}
     dependencies:
       assert-options: 0.8.0
