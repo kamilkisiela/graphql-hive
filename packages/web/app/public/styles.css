@@ -15,7 +15,7 @@
   html,
   body,
   #__next {
-    @apply h-screen w-screen;
+    @apply h-screen;
   }
 
   #__next {
