@@ -157,7 +157,7 @@ importers:
       '@esm2cjs/execa': 6.1.1-cjs.1
       '@graphql-hive/client': workspace:*
       '@graphql-hive/core': 0.2.3
-      '@graphql-typed-document-node/core': 3.1.2
+      '@graphql-typed-document-node/core': 3.2.0
       '@hive/rate-limit': workspace:*
       '@hive/server': workspace:*
       '@trpc/client': 10.16.0
@@ -183,7 +183,7 @@ importers:
       '@esm2cjs/execa': 6.1.1-cjs.1
       '@graphql-hive/client': link:../packages/libraries/client
       '@graphql-hive/core': link:../packages/libraries/core
-      '@graphql-typed-document-node/core': 3.1.2_graphql@16.6.0
+      '@graphql-typed-document-node/core': 3.2.0_graphql@16.6.0
       '@trpc/client': 10.16.0_@trpc+server@10.16.0
       '@trpc/server': 10.16.0
       '@whatwg-node/fetch': 0.8.3
@@ -997,7 +997,7 @@ importers:
       '@graphiql/toolkit': 0.8.2
       '@graphql-codegen/gql-tag-operations-preset': 2.1.0
       '@graphql-tools/mock': 8.7.19
-      '@graphql-typed-document-node/core': 3.1.2
+      '@graphql-typed-document-node/core': 3.2.0
       '@headlessui/react': 1.7.13
       '@hive/emails': workspace:*
       '@hive/server': workspace:*
@@ -1170,7 +1170,7 @@ importers:
       zod: 3.21.4
     devDependencies:
       '@graphql-codegen/gql-tag-operations-preset': 2.1.0_graphql@16.6.0
-      '@graphql-typed-document-node/core': 3.1.2_graphql@16.6.0
+      '@graphql-typed-document-node/core': 3.2.0_graphql@16.6.0
       '@hive/emails': link:../../services/emails
       '@hive/server': link:../../services/server
       '@next/bundle-analyzer': 13.2.4
@@ -7186,7 +7186,7 @@ packages:
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
-      '@graphql-typed-document-node/core': 3.1.2
+      '@graphql-typed-document-node/core': 3.2.0
       tslib: 2.5.0
     dev: false
     optional: true
@@ -7196,7 +7196,7 @@ packages:
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
-      '@graphql-typed-document-node/core': 3.1.2_graphql@16.6.0
+      '@graphql-typed-document-node/core': 3.2.0_graphql@16.6.0
       graphql: 16.6.0
       tslib: 2.5.0
     dev: false
@@ -7206,7 +7206,7 @@ packages:
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
-      '@graphql-typed-document-node/core': 3.1.2
+      '@graphql-typed-document-node/core': 3.2.0
       tslib: 2.5.0
 
   /@graphql-tools/utils/9.2.1_graphql@16.6.0:
@@ -7214,7 +7214,7 @@ packages:
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
-      '@graphql-typed-document-node/core': 3.1.2_graphql@16.6.0
+      '@graphql-typed-document-node/core': 3.2.0_graphql@16.6.0
       graphql: 16.6.0
       tslib: 2.5.0
 
@@ -7287,6 +7287,18 @@ packages:
     dependencies:
       graphql: 16.6.0
 
+  /@graphql-typed-document-node/core/3.2.0:
+    resolution: {integrity: sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==}
+    peerDependencies:
+      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+
+  /@graphql-typed-document-node/core/3.2.0_graphql@16.6.0:
+    resolution: {integrity: sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==}
+    peerDependencies:
+      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+    dependencies:
+      graphql: 16.6.0
+
   /@graphql-yoga/common/2.0.0_graphql@16.6.0:
     resolution: {integrity: sha512-nSENt7yANcnAIHdjTWOeTz4feXnGkgiShUU9MzukFbETWL7pwaK6fjgghUCDVuL2axm155Z3lAhG4sLA4MgvlQ==}
     peerDependencies:
@@ -7298,7 +7310,7 @@ packages:
       '@envelop/validation-cache': 4.7.0_4hr55tbjlvoppd2sokdhrbpreq
       '@graphql-tools/schema': 8.5.1_graphql@16.6.0
       '@graphql-tools/utils': 8.13.1_graphql@16.6.0
-      '@graphql-typed-document-node/core': 3.1.2_graphql@16.6.0
+      '@graphql-typed-document-node/core': 3.2.0_graphql@16.6.0
       '@graphql-yoga/render-graphiql': 2.0.0
       '@graphql-yoga/subscription': 2.0.0
       chalk: 4.1.2
@@ -19023,7 +19035,7 @@ packages:
     dependencies:
       '@graphql-tools/schema': 9.0.17
       '@graphql-tools/wrap': 9.3.8
-      '@graphql-typed-document-node/core': 3.1.2
+      '@graphql-typed-document-node/core': 3.2.0
       ramda: 0.28.0
     dev: false
 
@@ -19044,7 +19056,7 @@ packages:
     peerDependencies:
       graphql: 14 - 16
     dependencies:
-      '@graphql-typed-document-node/core': 3.1.2_graphql@16.6.0
+      '@graphql-typed-document-node/core': 3.2.0_graphql@16.6.0
       cross-fetch: 3.1.5
       extract-files: 9.0.0
       form-data: 3.0.1
