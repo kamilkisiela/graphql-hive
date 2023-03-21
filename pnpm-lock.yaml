@@ -1074,7 +1074,7 @@ importers:
       react-date-range: 1.4.0
       react-dom: 18.2.0
       react-highlight-words: 0.20.0
-      react-select: 5.7.0
+      react-select: 5.7.1
       react-string-replace: 1.1.0
       react-toastify: 9.1.1
       react-virtualized-auto-sizer: 1.0.7
@@ -1150,7 +1150,7 @@ importers:
       react-date-range: 1.4.0_r6j3756ioqf5pjc2u22wj25rla
       react-dom: 18.2.0_react@18.2.0
       react-highlight-words: 0.20.0_react@18.2.0
-      react-select: 5.7.0_zula6vjvt3wdocc4mwcxqa6nzi
+      react-select: 5.7.1_zula6vjvt3wdocc4mwcxqa6nzi
       react-string-replace: 1.1.0
       react-toastify: 9.1.1_biqbaboplfbrettd7655fr4n2y
       react-virtualized-auto-sizer: 1.0.7_biqbaboplfbrettd7655fr4n2y
@@ -25558,13 +25558,13 @@ packages:
       use-sidecar: 1.1.2_pmekkgnqduwlme35zpnqhenc34
     dev: false
 
-  /react-select/5.7.0_zula6vjvt3wdocc4mwcxqa6nzi:
-    resolution: {integrity: sha512-lJGiMxCa3cqnUr2Jjtg9YHsaytiZqeNOKeibv6WF5zbK/fPegZ1hg3y/9P1RZVLhqBTs0PfqQLKuAACednYGhQ==}
+  /react-select/5.7.1_zula6vjvt3wdocc4mwcxqa6nzi:
+    resolution: {integrity: sha512-u/brzm3B6vgI+PtxNyE4/18kXgaf6bn5sOAjKhaQ54EItBfW41SRLH1AJC5fefPnGM4JmMcM51t/HAVCi5GrpQ==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
-      '@babel/runtime': 7.19.4
+      '@babel/runtime': 7.20.7
       '@emotion/cache': 11.10.5
       '@emotion/react': 11.10.5_pmekkgnqduwlme35zpnqhenc34
       '@floating-ui/dom': 1.0.12
