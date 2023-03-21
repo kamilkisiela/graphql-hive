@@ -14,7 +14,7 @@
     "@sentry/node": "7.43.0",
     "@sentry/tracing": "7.43.0",
     "@trpc/server": "10.16.0",
-    "@whatwg-node/fetch": "0.8.2",
+    "@whatwg-node/fetch": "0.8.3",
     "dotenv": "16.0.3",
     "got": "12.6.0",
     "reflect-metadata": "0.1.13",
