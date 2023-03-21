@@ -1076,7 +1076,7 @@ importers:
       react-highlight-words: 0.20.0
       react-select: 5.7.1
       react-string-replace: 1.1.0
-      react-toastify: 9.1.1
+      react-toastify: 9.1.2
       react-virtualized-auto-sizer: 1.0.7
       react-window: 1.8.8
       regenerator-runtime: 0.13.11
@@ -1152,7 +1152,7 @@ importers:
       react-highlight-words: 0.20.0_react@18.2.0
       react-select: 5.7.1_zula6vjvt3wdocc4mwcxqa6nzi
       react-string-replace: 1.1.0
-      react-toastify: 9.1.1_biqbaboplfbrettd7655fr4n2y
+      react-toastify: 9.1.2_biqbaboplfbrettd7655fr4n2y
       react-virtualized-auto-sizer: 1.0.7_biqbaboplfbrettd7655fr4n2y
       react-window: 1.8.8_biqbaboplfbrettd7655fr4n2y
       regenerator-runtime: 0.13.11
@@ -25621,8 +25621,8 @@ packages:
       tslib: 2.5.0
     dev: false
 
-  /react-toastify/9.1.1_biqbaboplfbrettd7655fr4n2y:
-    resolution: {integrity: sha512-pkFCla1z3ve045qvjEmn2xOJOy4ZciwRXm1oMPULVkELi5aJdHCN/FHnuqXq8IwGDLB7PPk2/J6uP9D8ejuiRw==}
+  /react-toastify/9.1.2_biqbaboplfbrettd7655fr4n2y:
+    resolution: {integrity: sha512-PBfzXO5jMGEtdYR5jxrORlNZZe/EuOkwvwKijMatsZZm8IZwLj01YvobeJYNjFcA6uy6CVrx2fzL9GWbhWPTDA==}
     peerDependencies:
       react: '>=16'
       react-dom: '>=16'
