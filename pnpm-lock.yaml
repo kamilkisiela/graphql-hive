@@ -447,7 +447,7 @@ importers:
 
   packages/services/broker-worker:
     specifiers:
-      '@cloudflare/workers-types': 4.20230307.0
+      '@cloudflare/workers-types': 4.20230321.0
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.8.3
       '@whatwg-node/server': 0.7.5
@@ -463,7 +463,7 @@ importers:
       workers-loki-logger: 0.1.14
       zod: 3.21.4
     devDependencies:
-      '@cloudflare/workers-types': 4.20230307.0
+      '@cloudflare/workers-types': 4.20230321.0
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.8.3
       '@whatwg-node/server': 0.7.5
@@ -474,7 +474,7 @@ importers:
 
   packages/services/cdn-worker:
     specifiers:
-      '@cloudflare/workers-types': 4.20230307.0
+      '@cloudflare/workers-types': 4.20230321.0
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.8.3
       '@whatwg-node/server': 0.7.5
@@ -493,7 +493,7 @@ importers:
       toucan-js: 3.1.0
       zod: 3.21.4
     devDependencies:
-      '@cloudflare/workers-types': 4.20230307.0
+      '@cloudflare/workers-types': 4.20230321.0
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.8.3
       '@whatwg-node/server': 0.7.5
@@ -565,11 +565,11 @@ importers:
 
   packages/services/police-worker:
     specifiers:
-      '@cloudflare/workers-types': 4.20230307.0
+      '@cloudflare/workers-types': 4.20230321.0
       '@types/service-worker-mock': 2.0.1
       esbuild: 0.17.12
     devDependencies:
-      '@cloudflare/workers-types': 4.20230307.0
+      '@cloudflare/workers-types': 4.20230321.0
       '@types/service-worker-mock': 2.0.1
       esbuild: 0.17.12
 
@@ -4628,8 +4628,8 @@ packages:
       prettier: 2.8.6
     dev: true
 
-  /@cloudflare/workers-types/4.20230307.0:
-    resolution: {integrity: sha512-Go968aDDcqONHQcUdgIiPRkPdT4QTzD0ecHJsI1u7ZiHPMOoZn+Dy7hYsdUJ5ldX9wTZDrICBM1rDKTRaDUitg==}
+  /@cloudflare/workers-types/4.20230321.0:
+    resolution: {integrity: sha512-zyRFz9AUS0tbg3/kJ+3zxvp9fl/O9yOJlChih/o86hhOqRMcZVbWefYAvFPidRvYUHM5YTG1wjU1bF9FFckRVg==}
     dev: true
 
   /@colors/colors/1.5.0:
