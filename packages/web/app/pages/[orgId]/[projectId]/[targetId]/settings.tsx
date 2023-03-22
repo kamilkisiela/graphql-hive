@@ -295,8 +295,9 @@ const Settings_TargetSettingsQuery = graphql(`
     $targetsSelector: ProjectSelectorInput!
     $organizationSelector: OrganizationSelectorInput!
   ) {
-    targetSettings(selector: $selector) {
-      validation {
+    target(selector: $selector) {
+      id
+      validationSettings {
         enabled
         percentage
         period
@@ -327,8 +328,11 @@ const Settings_UpdateTargetValidationSettingsMutation = graphql(`
   mutation Settings_UpdateTargetValidationSettings($input: UpdateTargetValidationSettingsInput!) {
     updateTargetValidationSettings(input: $input) {
       ok {
-        updatedTargetValidationSettings {
-          ...TargetValidationSettingsFields
+        target {
+          id
+          validationSettings {
+            ...TargetValidationSettingsFields
+          }
         }
       }
       error {
@@ -369,7 +373,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
     },
   });
 
-  const settings = targetSettings.data?.targetSettings.validation;
+  const settings = targetSettings.data?.target?.validationSettings;
   const isEnabled = settings?.enabled || false;
   const possibleTargets = targetSettings.data?.targets.nodes;
 

@@ -1,5 +1,8 @@
 mutation setTargetValidation($input: SetTargetValidationInput!) {
   setTargetValidation(input: $input) {
-    ...TargetValidationSettingsFields
+    id
+    validationSettings {
+      ...TargetValidationSettingsFields
+    }
   }
 }
