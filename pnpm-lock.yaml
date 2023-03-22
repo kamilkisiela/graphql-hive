@@ -37,7 +37,7 @@ importers:
   .:
     specifiers:
       '@changesets/changelog-github': 0.4.8
-      '@changesets/cli': 2.26.0
+      '@changesets/cli': 2.26.1
       '@graphql-codegen/add': 4.0.1
       '@graphql-codegen/cli': 3.2.2
       '@graphql-codegen/client-preset': 2.1.1
@@ -78,7 +78,7 @@ importers:
       vitest: 0.29.7
     devDependencies:
       '@changesets/changelog-github': 0.4.8
-      '@changesets/cli': 2.26.0
+      '@changesets/cli': 2.26.1
       '@graphql-codegen/add': 4.0.1_graphql@16.6.0
       '@graphql-codegen/cli': 3.2.2_cqyb4buyc4habqgvcucexr22xm
       '@graphql-codegen/client-preset': 2.1.1_graphql@16.6.0
@@ -4470,8 +4470,8 @@ packages:
       - encoding
     dev: true
 
-  /@changesets/cli/2.26.0:
-    resolution: {integrity: sha512-0cbTiDms+ICTVtEwAFLNW0jBNex9f5+fFv3I771nBvdnV/mOjd1QJ4+f8KtVSOrwD9SJkk9xbDkWFb0oXd8d1Q==}
+  /@changesets/cli/2.26.1:
+    resolution: {integrity: sha512-XnTa+b51vt057fyAudvDKGB0Sh72xutQZNAdXkCqPBKO2zvs2yYZx5hFZj1u9cbtpwM6Sxtcr02/FQJfZOzemQ==}
     hasBin: true
     dependencies:
       '@babel/runtime': 7.20.7
