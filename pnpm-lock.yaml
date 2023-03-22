@@ -384,7 +384,7 @@ importers:
       dataloader: 2.2.2
       date-fns: 2.29.3
       got: 12.6.0
-      graphql-modules: 2.1.1
+      graphql-modules: 2.1.2
       graphql-parse-resolve-info: 4.13.0
       graphql-scalars: 1.20.4
       graphql-yoga: 3.7.3
@@ -416,7 +416,7 @@ importers:
       dataloader: 2.2.2
       date-fns: 2.29.3
       got: 12.6.0
-      graphql-modules: 2.1.1
+      graphql-modules: 2.1.2
       graphql-parse-resolve-info: 4.13.0
       graphql-scalars: 1.20.4
       graphql-yoga: 3.7.3
@@ -19053,8 +19053,8 @@ packages:
       vscode-languageserver-types: 3.17.2
     dev: false
 
-  /graphql-modules/2.1.1:
-    resolution: {integrity: sha512-jy2qeGtoNk9y4Wb7kHt7L9m3PeAJ5zHCvlomFChiJ34FsUspD+bbfeoYUdRk2AesJ7Hc3/dMQ8eBEeyKcgoyqg==}
+  /graphql-modules/2.1.2:
+    resolution: {integrity: sha512-GWxPom0iv4TXyLkuPqEHdRtJRdWCrUOGRMpXWmly1eY2T2MKAdCNya5iY/Ezb3d0Z2BzQBRUXdOgdkFPe2UDjg==}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
