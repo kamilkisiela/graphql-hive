@@ -2,6 +2,7 @@ lockfileVersion: 5.4
 
 overrides:
   tsup: 6.5.0
+  '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.cd77847.0
 
 patchedDependencies:
   '@apollo/federation@0.38.1':
@@ -11494,7 +11495,7 @@ packages:
       '@storybook/docs-tools': 7.0.0-beta.54
       '@storybook/node-logger': 7.0.0-beta.54
       '@storybook/react': 7.0.0-beta.54_biqbaboplfbrettd7655fr4n2y
-      '@storybook/react-docgen-typescript-plugin': 1.0.2-canary.6.9d540b91e815f8fc2f8829189deb00553559ff63.0
+      '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.cd77847.0
       '@types/node': 16.18.12
       '@types/semver': 7.3.13
       babel-plugin-add-react-displayname: 0.0.5
@@ -11582,10 +11583,10 @@ packages:
     resolution: {integrity: sha512-ytOTkzNFpv0PISk0Lj8QS08VZLSHo9ZD801ym5WFLQN/WjPvUatnJSC2x7PCAxA4KwQAiZvvmuKD+rf58kayGA==}
     dev: true
 
-  /@storybook/react-docgen-typescript-plugin/1.0.2-canary.6.9d540b91e815f8fc2f8829189deb00553559ff63.0:
-    resolution: {integrity: sha512-eVg3BxlOm2P+chijHBTByr90IZVUtgRW56qEOLX7xlww2NBuKrcavBlcmn+HH7GIUktquWkMPtvy6e0W0NgA5w==}
+  /@storybook/react-docgen-typescript-plugin/1.0.6--canary.9.cd77847.0:
+    resolution: {integrity: sha512-I4oBYmnUCX5IsrZhg+ST72dubSIV4wdwY+SfqJiJ3NHvDpdb240ZjdHAmjIy/yJh5rh42Fl4jbG8Tr4SzwV53Q==}
     peerDependencies:
-      typescript: '>= 3.x'
+      typescript: '>= 4.x'
       webpack: '>= 4'
     dependencies:
       debug: 4.3.4
