@@ -32,7 +32,7 @@ import { ProjectManager } from '../project/providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
-import { Inspector } from './providers/inspector';
+import { Inspector, toGraphQLSchemaChange } from './providers/inspector';
 import { SchemaBuildError } from './providers/orchestrators/errors';
 import { ensureSDL, isCompositeSchema, SchemaHelper } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
@@ -720,7 +720,7 @@ export const resolvers: SchemaModule.Resolvers = {
       };
     },
   },
-  SchemaChangeConnection: createConnection(),
+  SchemaChangeConnection: createConnection(toGraphQLSchemaChange),
   SchemaErrorConnection: createConnection(),
   SchemaCheckSuccess: {
     __isTypeOf(obj) {

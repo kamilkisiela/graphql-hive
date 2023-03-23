@@ -1,6 +1,7 @@
 import { URL } from 'node:url';
 import { Injectable, Scope } from 'graphql-modules';
 import hashObject from 'object-hash';
+import { CriticalityLevel } from '@graphql-inspector/core';
 import type { CompositionFailureError } from '@hive/schema';
 import { buildSchema } from '../../../shared/schema';
 import type {
@@ -22,6 +23,10 @@ export type CheckResult<C = unknown, F = unknown> =
     }
   | {
       status: 'failed';
+      reason: F;
+    }
+  | {
+      status: 'compareFailed';
       reason: F;
     }
   | {
@@ -192,12 +197,10 @@ export class RegistryChecks {
       ]);
 
       const changes = await this.inspector.diff(existingSchema, incomingSchema, selector);
-      const breakingChanges = changes
-        .filter(change => change.criticality === 'Breaking')
-        .map(change => ({
-          message: `Breaking Change: ${change.message}`,
-          path: change.path,
-        }));
+
+      const breakingChanges = changes.filter(
+        change => change.criticality.level === CriticalityLevel.Breaking,
+      );
 
       const hasBreakingChanges = breakingChanges.length > 0;
 
@@ -226,13 +229,9 @@ export class RegistryChecks {
       this.logger.debug('Failed to compare schemas (error=%s)', (error as Error).message);
 
       return {
-        status: 'failed',
+        status: 'compareFailed',
         reason: {
-          breakingChanges: [
-            {
-              message: `Failed to compare schemas: ${(error as Error).message}`,
-            },
-          ],
+          compareFailedReason: `Failed to compare schemas: ${(error as Error).message}`,
         },
       } satisfies CheckResult;
     }

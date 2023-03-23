@@ -1,3 +1,4 @@
+import { Change, CriticalityLevel } from '@graphql-inspector/core';
 import type * as Types from '../../../../__generated__/types';
 import {
   Alert,
@@ -14,7 +15,7 @@ export interface SchemaChangeNotificationInput {
     project: Pick<Project, 'id' | 'cleanId' | 'name'>;
     target: Pick<Target, 'id' | 'cleanId' | 'name'>;
     schema: Pick<SchemaVersion, 'id' | 'commit' | 'valid'>;
-    changes: Types.SchemaChange[];
+    changes: Array<Change>;
     messages: string[];
     errors: Types.SchemaError[];
     initial: boolean;
@@ -62,6 +63,6 @@ export function quotesTransformer(msg: string, symbols = '**') {
   return msg.replace(findSingleQuotes, transformm).replace(findDoubleQuotes, transformm);
 }
 
-export function filterChangesByLevel(level: Types.CriticalityLevel) {
-  return (change: Types.SchemaChange) => change.criticality === level;
+export function filterChangesByLevel(level: CriticalityLevel) {
+  return (change: Change) => change.criticality.level === level;
 }

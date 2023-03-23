@@ -1,6 +1,7 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import promClient from 'prom-client';
+import { Change, CriticalityLevel } from '@graphql-inspector/core';
 import * as Sentry from '@sentry/node';
 import type { Span } from '@sentry/types';
 import * as Types from '../../../__generated__/types';
@@ -300,7 +301,7 @@ export class SchemaPublisher {
 
     if (checkResult.conclusion === SchemaCheckConclusion.Success) {
       return {
-        __typename: 'SchemaCheckSuccess' as const,
+        __typename: 'SchemaCheckSuccess',
         valid: true,
         changes: checkResult.state.changes ?? [],
         initial: checkResult.state.initial,
@@ -308,7 +309,7 @@ export class SchemaPublisher {
     }
 
     return {
-      __typename: 'SchemaCheckError' as const,
+      __typename: 'SchemaCheckError',
       valid: false,
       changes: getReasonByCode(checkResult, CheckFailureReasonCode.BreakingChanges)?.changes ?? [],
       errors: (
@@ -651,7 +652,11 @@ export class SchemaPublisher {
 
     const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
 
+    // TODO: get list of changes and write them to the database.
+
+    // let schemaCheckResult: SchemaCheckResult;
     let publishResult: SchemaPublishResult;
+
     switch (project.type) {
       case ProjectType.SINGLE:
         this.logger.debug(
@@ -929,10 +934,8 @@ export class SchemaPublisher {
     serviceName: string | null;
     sha: string;
     conclusion: SchemaCheckConclusion;
-    changes: Types.SchemaChange[] | null;
-    breakingChanges: Array<{
-      message: string;
-    }> | null;
+    changes: Array<Change> | null;
+    breakingChanges: Array<Change> | null;
     compositionErrors: Array<{
       message: string;
     }> | null;
@@ -1175,7 +1178,7 @@ export class SchemaPublisher {
     input: PublishInput;
     project: Project;
     valid: boolean;
-    changes: readonly Types.SchemaChange[];
+    changes: Array<Change>;
     errors: readonly Types.SchemaError[];
     messages?: string[];
   }) {
@@ -1245,14 +1248,14 @@ export class SchemaPublisher {
     }
   }
 
-  private errorsToMarkdown(errors: readonly Types.SchemaError[]): string {
+  private errorsToMarkdown(errors: ReadonlyArray<{ message: string }>): string {
     return ['', ...errors.map(error => `- ${bolderize(error.message)}`)].join('\n');
   }
 
-  private changesToMarkdown(changes: readonly Types.SchemaChange[]): string {
-    const breakingChanges = changes.filter(filterChangesByLevel('Breaking'));
-    const dangerousChanges = changes.filter(filterChangesByLevel('Dangerous'));
-    const safeChanges = changes.filter(filterChangesByLevel('Safe'));
+  private changesToMarkdown(changes: ReadonlyArray<Change>): string {
+    const breakingChanges = changes.filter(filterChangesByLevel(CriticalityLevel.Breaking));
+    const dangerousChanges = changes.filter(filterChangesByLevel(CriticalityLevel.Dangerous));
+    const safeChanges = changes.filter(filterChangesByLevel(CriticalityLevel.NonBreaking));
 
     const lines: string[] = [
       `## Found ${changes.length} change${changes.length > 1 ? 's' : ''}`,
@@ -1279,11 +1282,11 @@ export class SchemaPublisher {
   }
 }
 
-function filterChangesByLevel(level: Types.CriticalityLevel) {
-  return (change: Types.SchemaChange) => change.criticality === level;
+function filterChangesByLevel(level: CriticalityLevel) {
+  return (change: Change) => change.criticality.level === level;
 }
 
-function writeChanges(type: string, changes: readonly Types.SchemaChange[], lines: string[]): void {
+function writeChanges(type: string, changes: ReadonlyArray<Change>, lines: string[]): void {
   if (changes.length > 0) {
     lines.push(
       ...['', `### ${type} changes`].concat(
