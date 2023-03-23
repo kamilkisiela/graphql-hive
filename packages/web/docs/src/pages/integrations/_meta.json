@@ -9,5 +9,6 @@
   "graphql-ruby": "GraphQL-Ruby",
   "lighthouse": "Lighthouse (Laravel)",
   "ci-cd": "CI/CD Guide",
-  "code-first": "Code-First Frameworks"
+  "code-first": "Code-First Frameworks",
+  "graphql-code-generator": "GraphQL Code Generator"
 }
