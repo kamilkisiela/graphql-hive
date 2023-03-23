@@ -1084,7 +1084,7 @@ importers:
       rimraf: 4.4.1
       snarkdown: 2.0.0
       storybook: ^7.0.0-beta.54
-      supertokens-auth-react: 0.31.2
+      supertokens-auth-react: 0.31.3
       supertokens-js-override: 0.0.4
       supertokens-node: 13.1.5
       supertokens-web-js: 0.5.0
@@ -1158,7 +1158,7 @@ importers:
       react-window: 1.8.8_biqbaboplfbrettd7655fr4n2y
       regenerator-runtime: 0.13.11
       snarkdown: 2.0.0
-      supertokens-auth-react: 0.31.2_zh4rdguscatxykxktv3lwuw3je
+      supertokens-auth-react: 0.31.3_zh4rdguscatxykxktv3lwuw3je
       supertokens-js-override: 0.0.4
       supertokens-node: 13.1.5
       supertokens-web-js: 0.5.0
@@ -27382,9 +27382,9 @@ packages:
       ts-interface-checker: 0.1.13
     dev: true
 
-  /supertokens-auth-react/0.31.2_zh4rdguscatxykxktv3lwuw3je:
-    resolution: {integrity: sha512-fnxcBO/Jt8Tvmob2G8X5OHRBjyfpm6O0qx3bk+g+wVvcLOH34fE7ERb/2V37cNZjuaGkQ1sRJYnvCWF3VubY9Q==}
-    engines: {node: '>=16.0.0', npm: ^8}
+  /supertokens-auth-react/0.31.3_zh4rdguscatxykxktv3lwuw3je:
+    resolution: {integrity: sha512-LBMqieKSweYv2+PbzppOwMYT67VW/HfJdb4kS3GTI0emNzwndxxYkRCnFiTroND08C9t3LLdMt5SUxXW+0X8Jw==}
+    engines: {node: '>=16.0.0', npm: '>=8'}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
