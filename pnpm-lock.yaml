@@ -23,9 +23,9 @@ patchedDependencies:
   '@theguild/buddy@0.1.0':
     hash: ryylgra5xglhidfoiaxehn22hq
     path: patches/@theguild__buddy@0.1.0.patch
-  bullmq@3.10.1:
+  bullmq@3.10.2:
     hash: kobtuuqaglbtaadx3jiqtahl3i
-    path: patches/bullmq@3.10.1.patch
+    path: patches/bullmq@3.10.2.patch
   mjml-core@4.13.0:
     hash: zxxsxbqejjmcwuzpigutzzq6wa
     path: patches/mjml-core@4.13.0.patch
@@ -513,7 +513,7 @@ importers:
       '@types/nodemailer': 6.4.7
       '@types/sendmail': 1.4.4
       '@whatwg-node/fetch': 0.8.3
-      bullmq: 3.10.1
+      bullmq: 3.10.2
       copyfiles: 2.4.1
       dotenv: 16.0.3
       ioredis: 5.3.1
@@ -528,7 +528,7 @@ importers:
       '@sentry/node': 7.44.2
       '@trpc/server': 10.17.0
       '@whatwg-node/fetch': 0.8.3
-      bullmq: 3.10.1_kobtuuqaglbtaadx3jiqtahl3i
+      bullmq: 3.10.2_kobtuuqaglbtaadx3jiqtahl3i
       dotenv: 16.0.3
       ioredis: 5.3.1
       mjml: 4.13.0
@@ -968,7 +968,7 @@ importers:
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
       '@trpc/server': 10.17.0
-      bullmq: 3.10.1
+      bullmq: 3.10.2
       copyfiles: 2.4.1
       dotenv: 16.0.3
       got: 12.6.0
@@ -981,7 +981,7 @@ importers:
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
       '@trpc/server': 10.17.0
-      bullmq: 3.10.1_kobtuuqaglbtaadx3jiqtahl3i
+      bullmq: 3.10.2_kobtuuqaglbtaadx3jiqtahl3i
       dotenv: 16.0.3
       got: 12.6.0
       ioredis: 5.3.1
@@ -14447,8 +14447,8 @@ packages:
       semver: 7.3.8
     dev: true
 
-  /bullmq/3.10.1_kobtuuqaglbtaadx3jiqtahl3i:
-    resolution: {integrity: sha512-NHysIgywLRB0C1OXY1YQPXsDRnozBWBREPTyeX72ARolkHMkj0IXY+nG36N1pxc2OToPkMHyhSQxaY4jmaM0VQ==}
+  /bullmq/3.10.2_kobtuuqaglbtaadx3jiqtahl3i:
+    resolution: {integrity: sha512-GyunDkMdGJRUIo3n+jjQH9Uxz0Z+DLLbuz/7uxcQ+tFss1zB/zmn33D3l+rHaO8I52vz8C7hhEa2lCJ0GIhGgA==}
     dependencies:
       cron-parser: 4.6.0
       glob: 8.1.0
