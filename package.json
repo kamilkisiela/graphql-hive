@@ -86,7 +86,7 @@
     "tsup": "6.7.0",
     "tsx": "3.12.6",
     "turbo": "1.8.5",
-    "typescript": "4.9.5",
+    "typescript": "5.0.2",
     "vitest": "0.29.7"
   },
   "husky": {
@@ -104,7 +104,8 @@
   },
   "pnpm": {
     "overrides": {
-      "tsup": "6.5.0"
+      "tsup": "6.5.0",
+      "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.cd77847.0"
     },
     "patchedDependencies": {
       "@theguild/buddy@0.1.0": "patches/@theguild__buddy@0.1.0.patch",
