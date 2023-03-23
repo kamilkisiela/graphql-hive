@@ -49,7 +49,7 @@
   }
 
   .hive-markdown code {
-    @apply rounded bg-white/10 py-1 px-2 text-orange-500;
+    @apply text-orange-500 rounded bg-white/10 py-1 px-2;
   }
 
   .hive-loading-indicator {
