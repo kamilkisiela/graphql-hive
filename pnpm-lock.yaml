@@ -207,7 +207,7 @@ importers:
 
   packages/libraries/cli:
     specifiers:
-      '@graphql-codegen/typescript-graphql-request': 4.5.8
+      '@graphql-codegen/typescript-graphql-request': 4.5.9
       '@graphql-hive/core': 0.2.3
       '@graphql-inspector/core': ~4.0.0
       '@graphql-tools/code-file-loader': ~7.3.6
@@ -257,7 +257,7 @@ importers:
       ts-node: 10.9.1
       tslib: 2.5.0
     devDependencies:
-      '@graphql-codegen/typescript-graphql-request': 4.5.8_f45c35xnr66et7kv43kezet7ie
+      '@graphql-codegen/typescript-graphql-request': 4.5.9_f45c35xnr66et7kv43kezet7ie
       '@types/env-ci': 3.1.1
       '@types/mkdirp': 1.0.2
       oclif: 3.7.1_rxmtqiusuyruv7tkwux5gvotbm
@@ -5785,6 +5785,20 @@ packages:
       tslib: 2.4.1
     dev: true
 
+  /@graphql-codegen/plugin-helpers/3.1.2_graphql@16.6.0:
+    resolution: {integrity: sha512-emOQiHyIliVOIjKVKdsI5MXj312zmRDwmHpyUTZMjfpvxq/UVAHUJIVdVf+lnjjrI+LXBTgMlTWTgHQfmICxjg==}
+    peerDependencies:
+      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+    dependencies:
+      '@graphql-tools/utils': 9.2.1_graphql@16.6.0
+      change-case-all: 1.0.15
+      common-tags: 1.8.2
+      graphql: 16.6.0
+      import-from: 4.0.0
+      lodash: 4.17.21
+      tslib: 2.4.1
+    dev: true
+
   /@graphql-codegen/plugin-helpers/4.1.0_graphql@16.6.0:
     resolution: {integrity: sha512-xvSHJb9OGb5CODIls0AI1rCenLz+FuiaNPCsfHMCNsLDjOZK2u0jAQ9zUBdc/Wb+21YXZujBCc0Vm1QX+Zz0nw==}
     peerDependencies:
@@ -5842,14 +5856,14 @@ packages:
       - supports-color
     dev: true
 
-  /@graphql-codegen/typescript-graphql-request/4.5.8_f45c35xnr66et7kv43kezet7ie:
-    resolution: {integrity: sha512-XsuAA35Ou03LsklNgnIWXZ5HOHsJ5w1dBuDKtvqM9rD0cAI8x0f4TY0n6O1EraSBSvyHLP3npb1lOTPZzG2TjA==}
+  /@graphql-codegen/typescript-graphql-request/4.5.9_f45c35xnr66et7kv43kezet7ie:
+    resolution: {integrity: sha512-Vtv5qymUXcR4UFdHOlJHzK5TN+CZUwMwFDGb3n4Gjcr4yln1BWbUb7DXgD0GHzpXwDIj5G2XmJnFtr0jihBfrg==}
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
-      graphql-request: ^3.4.0 || ^4.0.0 || ^5.0.0
+      graphql-request: ^3.4.0 || ^4.0.0 || ~5.0.0 || ~5.1.0
       graphql-tag: ^2.0.0
     dependencies:
-      '@graphql-codegen/plugin-helpers': 2.7.2_graphql@16.6.0
+      '@graphql-codegen/plugin-helpers': 3.1.2_graphql@16.6.0
       '@graphql-codegen/visitor-plugin-common': 2.13.1_graphql@16.6.0
       auto-bind: 4.0.0
       graphql: 16.6.0
