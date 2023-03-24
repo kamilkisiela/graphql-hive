@@ -165,7 +165,7 @@ importers:
       '@trpc/server': 10.17.0
       '@types/dockerode': 3.3.15
       '@types/ioredis': 4.28.10
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       bcryptjs: 2.4.3
       date-fns: 2.29.3
       dockerode: 3.3.5
@@ -187,7 +187,7 @@ importers:
       '@graphql-typed-document-node/core': 3.2.0_graphql@16.6.0
       '@trpc/client': 10.17.0_@trpc+server@10.17.0
       '@trpc/server': 10.17.0
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       bcryptjs: 2.4.3
       date-fns: 2.29.3
       dockerode: 3.3.5
@@ -324,7 +324,7 @@ importers:
       '@types/bcryptjs': 2.4.2
       '@types/node': 18.15.6
       '@types/pg': 8.6.6
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       bcryptjs: 2.4.3
       copyfiles: 2.4.1
       dotenv: 16.0.3
@@ -338,7 +338,7 @@ importers:
       zod: 3.21.4
     dependencies:
       '@slonik/migrator': 0.11.3_yfpv2xzdmnkrtu2wvaktxf5mmq_slonik@30.4.4
-      '@whatwg-node/fetch': 0.8.3_@types+node@18.15.6
+      '@whatwg-node/fetch': 0.8.4_@types+node@18.15.6
       bcryptjs: 2.4.3
       dotenv: 16.0.3
       got: 12.6.0
@@ -379,7 +379,7 @@ importers:
       '@types/lodash': 4.14.191
       '@types/ms': 0.7.31
       '@types/object-hash': 3.0.2
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       agentkeepalive: 4.3.0
       bcryptjs: 2.4.3
       dataloader: 2.2.2
@@ -411,7 +411,7 @@ importers:
       '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
       '@trpc/client': 10.17.0_@trpc+server@10.17.0
       '@trpc/server': 10.17.0
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       agentkeepalive: 4.3.0
       bcryptjs: 2.4.3
       dataloader: 2.2.2
@@ -450,7 +450,7 @@ importers:
     specifiers:
       '@cloudflare/workers-types': 4.20230321.0
       '@types/service-worker-mock': 2.0.1
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       '@whatwg-node/server': 0.7.5
       esbuild: 0.17.12
       itty-router: 2.6.6
@@ -466,7 +466,7 @@ importers:
     devDependencies:
       '@cloudflare/workers-types': 4.20230321.0
       '@types/service-worker-mock': 2.0.1
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       '@whatwg-node/server': 0.7.5
       esbuild: 0.17.12
       itty-router: 2.6.6
@@ -477,7 +477,7 @@ importers:
     specifiers:
       '@cloudflare/workers-types': 4.20230321.0
       '@types/service-worker-mock': 2.0.1
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       '@whatwg-node/server': 0.7.5
       bcryptjs: 2.4.3
       dotenv: 16.0.3
@@ -496,7 +496,7 @@ importers:
     devDependencies:
       '@cloudflare/workers-types': 4.20230321.0
       '@types/service-worker-mock': 2.0.1
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       '@whatwg-node/server': 0.7.5
       dotenv: 16.0.3
       esbuild: 0.17.12
@@ -512,7 +512,7 @@ importers:
       '@types/mjml': 4.7.0
       '@types/nodemailer': 6.4.7
       '@types/sendmail': 1.4.4
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       bullmq: 3.10.2
       copyfiles: 2.4.1
       dotenv: 16.0.3
@@ -527,7 +527,7 @@ importers:
     dependencies:
       '@sentry/node': 7.44.2
       '@trpc/server': 10.17.0
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       bullmq: 3.10.2_kobtuuqaglbtaadx3jiqtahl3i
       dotenv: 16.0.3
       ioredis: 5.3.1
@@ -583,7 +583,7 @@ importers:
       '@sentry/tracing': 7.44.2
       '@trpc/client': 10.17.0
       '@trpc/server': 10.17.0
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       date-fns: 2.29.3
       dotenv: 16.0.3
       got: 12.6.0
@@ -596,7 +596,7 @@ importers:
       '@sentry/tracing': 7.44.2
       '@trpc/client': 10.17.0_@trpc+server@10.17.0
       '@trpc/server': 10.17.0
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       date-fns: 2.29.3
       dotenv: 16.0.3
       got: 12.6.0
@@ -621,7 +621,7 @@ importers:
       '@trpc/server': 10.17.0
       '@types/async-retry': 1.4.5
       '@types/ioredis-mock': 8.2.1
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       dotenv: 16.0.3
       fastify: 3.29.5
       got: 12.6.0
@@ -638,7 +638,7 @@ importers:
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
       '@trpc/server': 10.17.0
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       dotenv: 16.0.3
       got: 12.6.0
       graphql: 16.6.0
@@ -675,7 +675,7 @@ importers:
       '@sentry/tracing': 7.44.2
       '@swc/core': 1.3.42
       '@trpc/server': 10.17.0
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       '@whatwg-node/server': 0.7.5
       dotenv: 16.0.3
       fastify: 3.29.5
@@ -702,7 +702,7 @@ importers:
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
       '@trpc/server': 10.17.0
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       '@whatwg-node/server': 0.7.5
       dotenv: 16.0.3
       got: 12.6.0
@@ -729,14 +729,14 @@ importers:
       '@sentry/tracing': 7.44.2
       '@sentry/types': 7.44.2
       '@sentry/utils': 7.44.2
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       fastify: 3.29.5
       fastify-cors: 6.0.2
       fastify-plugin: 3.0.1
       prom-client: 14.2.0
       zod: 3.21.4
     dependencies:
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       fastify: 3.29.5
       fastify-cors: 6.0.2
       fastify-plugin: 3.0.1
@@ -793,7 +793,7 @@ importers:
       '@sentry/tracing': 7.44.2
       '@trpc/client': 10.17.0
       '@trpc/server': 10.17.0
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       date-fns: 2.29.3
       dotenv: 16.0.3
       got: 12.6.0
@@ -806,7 +806,7 @@ importers:
       '@sentry/tracing': 7.44.2
       '@trpc/client': 10.17.0_@trpc+server@10.17.0
       '@trpc/server': 10.17.0
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       date-fns: 2.29.3
       dotenv: 16.0.3
       got: 12.6.0
@@ -864,7 +864,7 @@ importers:
       '@sentry/tracing': 7.44.2
       '@trpc/client': 10.17.0
       '@trpc/server': 10.17.0
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       ajv: 8.12.0
       dotenv: 16.0.3
       got: 12.6.0
@@ -878,7 +878,7 @@ importers:
       '@sentry/tracing': 7.44.2
       '@trpc/client': 10.17.0_@trpc+server@10.17.0
       '@trpc/server': 10.17.0
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       ajv: 8.12.0
       dotenv: 16.0.3
       got: 12.6.0
@@ -905,7 +905,7 @@ importers:
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
       '@trpc/server': 10.17.0
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       dotenv: 16.0.3
       got: 12.6.0
       pino-pretty: 10.0.0
@@ -916,7 +916,7 @@ importers:
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
       '@trpc/server': 10.17.0
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       dotenv: 16.0.3
       got: 12.6.0
       reflect-metadata: 0.1.13
@@ -1050,7 +1050,7 @@ importers:
       '@urql/devtools': 2.0.3
       '@urql/exchange-graphcache': 5.0.9
       '@welldone-software/why-did-you-render': 7.0.1
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       autoprefixer: 10.4.14
       clsx: 1.2.1
       cookies: 0.8.0
@@ -1129,7 +1129,7 @@ importers:
       '@urql/core': 3.1.1_graphql@16.6.0
       '@urql/devtools': 2.0.3_ioimjbecbkqzfeizgamzrgwc3y
       '@urql/exchange-graphcache': 5.0.9_graphql@16.6.0
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       clsx: 1.2.1
       cookies: 0.8.0
       date-fns: 2.29.3
@@ -5633,7 +5633,7 @@ packages:
       '@graphql-tools/url-loader': 7.17.1_kf2zbwlxtb67snqdcmdgdvhx3m
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       '@parcel/watcher': 2.1.0
-      '@whatwg-node/fetch': 0.8.3_@types+node@18.15.6
+      '@whatwg-node/fetch': 0.8.4_@types+node@18.15.6
       chalk: 4.1.2
       cosmiconfig: 7.0.1
       debounce: 1.2.1
@@ -13199,8 +13199,8 @@ packages:
       - '@types/node'
     dev: false
 
-  /@whatwg-node/fetch/0.8.3:
-    resolution: {integrity: sha512-qpacTdzO8z36pa3HpEXEE2PoCXS7sn3LNqr7IjDETEPWJWS0RTJMD49fL1ZKdjQrfHZNBQCRwVNOcT1RZv/xVg==}
+  /@whatwg-node/fetch/0.8.4:
+    resolution: {integrity: sha512-xK0NGWt49P+JmsdfN+8zmHzZoscENrV0KL1SyyncvWkc6vbFmSqGSpvItEBuhj1PAfTGFEUpyiRMCsut2hLy/Q==}
     dependencies:
       '@peculiar/webcrypto': 1.4.0
       '@whatwg-node/node-fetch': 0.3.3
@@ -13210,8 +13210,8 @@ packages:
     transitivePeerDependencies:
       - '@types/node'
 
-  /@whatwg-node/fetch/0.8.3_@types+node@18.15.6:
-    resolution: {integrity: sha512-qpacTdzO8z36pa3HpEXEE2PoCXS7sn3LNqr7IjDETEPWJWS0RTJMD49fL1ZKdjQrfHZNBQCRwVNOcT1RZv/xVg==}
+  /@whatwg-node/fetch/0.8.4_@types+node@18.15.6:
+    resolution: {integrity: sha512-xK0NGWt49P+JmsdfN+8zmHzZoscENrV0KL1SyyncvWkc6vbFmSqGSpvItEBuhj1PAfTGFEUpyiRMCsut2hLy/Q==}
     dependencies:
       '@peculiar/webcrypto': 1.4.0
       '@whatwg-node/node-fetch': 0.3.3_@types+node@18.15.6
@@ -13280,7 +13280,7 @@ packages:
   /@whatwg-node/server/0.7.1:
     resolution: {integrity: sha512-kXZeJ+8vLD8Snewq0N1TB2cWPu6z91ymrRRLDx0KHmbsSrsPIdrXxoHBAvFBxTQz3u2O4IYsyhHetAnBBrrWgA==}
     dependencies:
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       tslib: 2.5.0
     transitivePeerDependencies:
       - '@types/node'
@@ -13289,7 +13289,7 @@ packages:
   /@whatwg-node/server/0.7.4:
     resolution: {integrity: sha512-0+c3Y1tmMTIz3+cM8GCOXZuJclHlOZrq2uWb9WVnv1sd98pcFQBW9163nmN7cUTyD84c/yMJmEW3F+Ka6zRZgQ==}
     dependencies:
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       tslib: 2.5.0
     transitivePeerDependencies:
       - '@types/node'
@@ -13297,7 +13297,7 @@ packages:
   /@whatwg-node/server/0.7.5:
     resolution: {integrity: sha512-xTDJdPqr/wULxW3mGXQXD92SRXUm6jwQxqIvyHG17dykRTd21HuCaS2ggBn5lSAM/sYjjrT+OYv3fXbtS4+Mjw==}
     dependencies:
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       tslib: 2.5.0
     transitivePeerDependencies:
       - '@types/node'
@@ -19148,7 +19148,7 @@ packages:
       '@graphql-tools/utils': 9.2.1
       '@graphql-yoga/logger': 0.0.1
       '@graphql-yoga/subscription': 3.1.0
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       '@whatwg-node/server': 0.7.4
       dset: 3.1.2
       lru-cache: 8.0.0
@@ -19168,7 +19168,7 @@ packages:
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       '@graphql-yoga/logger': 0.0.1
       '@graphql-yoga/subscription': 3.1.0
-      '@whatwg-node/fetch': 0.8.3
+      '@whatwg-node/fetch': 0.8.4
       '@whatwg-node/server': 0.7.4
       dset: 3.1.2
       graphql: 16.6.0
