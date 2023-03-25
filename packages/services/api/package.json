@@ -30,7 +30,7 @@
     "got": "12.6.0",
     "graphql-modules": "2.1.2",
     "graphql-parse-resolve-info": "4.13.0",
-    "graphql-scalars": "1.20.4",
+    "graphql-scalars": "1.21.2",
     "graphql-yoga": "3.7.3",
     "ioredis": "5.3.1",
     "lodash": "4.17.21",
