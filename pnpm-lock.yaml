@@ -799,7 +799,7 @@ importers:
       got: 12.6.0
       pino-pretty: 10.0.0
       reflect-metadata: 0.1.13
-      stripe: 11.15.0
+      stripe: 11.16.0
       zod: 3.21.4
     dependencies:
       '@sentry/node': 7.44.2
@@ -811,7 +811,7 @@ importers:
       dotenv: 16.0.3
       got: 12.6.0
       reflect-metadata: 0.1.13
-      stripe: 11.15.0
+      stripe: 11.16.0
       zod: 3.21.4
     devDependencies:
       '@hive/service-common': link:../service-common
@@ -1030,8 +1030,8 @@ importers:
       '@storybook/nextjs': ^7.0.0-beta.54
       '@storybook/react': ^7.0.0-beta.54
       '@storybook/testing-library': ^0.0.14-next.1
-      '@stripe/react-stripe-js': 2.0.0
-      '@stripe/stripe-js': 1.50.0
+      '@stripe/react-stripe-js': 2.1.0
+      '@stripe/stripe-js': 1.52.0
       '@tailwindcss/line-clamp': 0.4.2
       '@tanstack/react-table': 8.0.0-beta.8
       '@theguild/editor': 1.2.5
@@ -1120,8 +1120,8 @@ importers:
       '@radix-ui/react-tooltip': 1.0.5_aen5vu2fkbnw3ssyd5drxdxkh4
       '@sentry/nextjs': 7.44.2_next@13.2.4+react@18.2.0
       '@sentry/types': 7.44.2
-      '@stripe/react-stripe-js': 2.0.0_x24xbjcc7qcg4sivl2m652ynv4
-      '@stripe/stripe-js': 1.50.0
+      '@stripe/react-stripe-js': 2.1.0_wfk2ilwjwqlluiweqjchts7jtq
+      '@stripe/stripe-js': 1.52.0
       '@tanstack/react-table': 8.0.0-beta.8_biqbaboplfbrettd7655fr4n2y
       '@theguild/editor': 1.2.5_4cswkdzjgmv6w3vdsqfc5dospe
       '@trpc/client': 10.18.0_@trpc+server@10.18.0
@@ -11807,21 +11807,21 @@ packages:
       file-system-cache: 2.0.2
     dev: true
 
-  /@stripe/react-stripe-js/2.0.0_x24xbjcc7qcg4sivl2m652ynv4:
-    resolution: {integrity: sha512-JEzZlVdJaU9g3sZIcgCUXfHqvmDGF2pBqDVWxTJLAhSBNARp5kyFEoTFQzeCdPwrq3D4ZMJVgc6i6mbUgiXsgQ==}
+  /@stripe/react-stripe-js/2.1.0_wfk2ilwjwqlluiweqjchts7jtq:
+    resolution: {integrity: sha512-Zb6Ycrj5QuhYkvtlvvLzo+cysUyA6wkx3zWHQ7uVnHRYRM/n1jtQD6VGBrdmptC8e8PJN6L091gBCyB5P0FqmA==}
     peerDependencies:
       '@stripe/stripe-js': ^1.44.1
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
-      '@stripe/stripe-js': 1.50.0
+      '@stripe/stripe-js': 1.52.0
       prop-types: 15.8.1
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
     dev: false
 
-  /@stripe/stripe-js/1.50.0:
-    resolution: {integrity: sha512-7j52eB98l/oJL1ywREs7UJAKEavM1HTtS8LUHt1dso8TJN8kNz561/847Xqbafe0yCReET8WFeIBvMeewug8xQ==}
+  /@stripe/stripe-js/1.52.0:
+    resolution: {integrity: sha512-Ja2VlaTf3kM5tN4Y0sC8T3ibZAnfGUU/QzMAlk/G+Adz2fF1ycTabtSkdSuVP4/adXox8NkPPV4Xndx/EP4fMg==}
     dev: false
 
   /@swc/core-darwin-arm64/1.3.42:
@@ -27308,8 +27308,8 @@ packages:
       acorn: 8.8.2
     dev: true
 
-  /stripe/11.15.0:
-    resolution: {integrity: sha512-HkXz/o4hVvBLSSgTLo3iZQW19PV+DiOdwsj26jnrRcOgpZ+dpGgzpudL/yTWEho7lWcz3cRNov3d4REZ1Qtfbg==}
+  /stripe/11.16.0:
+    resolution: {integrity: sha512-Ej1ZtbrMw+Z7L8Kxj80sDNF0E/lPypY2nwymU/wGcOjn7CppTa2HXxPTsQRQ8U0MSVRcwRWyGMrizQWuaUqVGw==}
     engines: {node: '>=12.*'}
     dependencies:
       '@types/node': 18.15.9
