@@ -1,6 +1,8 @@
+/* eslint-disable no-process-env */
 import { withGuildDocs } from '@theguild/components/next.config';
 
 export default withGuildDocs({
+  basePath: process.env.NEXT_BASE_PATH,
   eslint: {
     ignoreDuringBuilds: true,
   },

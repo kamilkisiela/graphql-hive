@@ -167,17 +167,6 @@ module.exports = {
       },
     },
     {
-      files: ['packages/web/landing-page/**'],
-      settings: {
-        next: {
-          rootDir: 'packages/web/landing-page',
-        },
-        tailwindcss: {
-          config: 'packages/web/landing-page/tailwind.config.cjs',
-        },
-      },
-    },
-    {
       files: 'cypress/**',
       extends: 'plugin:cypress/recommended',
     },
