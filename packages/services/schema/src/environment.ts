@@ -7,7 +7,8 @@ const numberFromNumberOrNumberString = (input: unknown): number | undefined => {
   if (isNumberString(input)) return Number(input);
 };
 
-const NumberFromString = zod.preprocess(numberFromNumberOrNumberString, zod.number().min(1));
+const NumberFromString = (min = 1) =>
+  zod.preprocess(numberFromNumberOrNumberString, zod.number().min(min));
 
 // treat an empty string (`''`) as undefined
 const emptyString = <T extends zod.ZodType>(input: T) => {
@@ -18,7 +19,7 @@ const emptyString = <T extends zod.ZodType>(input: T) => {
 };
 
 const EnvironmentModel = zod.object({
-  PORT: emptyString(NumberFromString.optional()),
+  PORT: emptyString(NumberFromString().optional()),
   ENVIRONMENT: emptyString(zod.string().optional()),
   RELEASE: emptyString(zod.string().optional()),
   ENCRYPTION_SECRET: zod.string(),
@@ -35,6 +36,12 @@ const RequestBrokerModel = zod.union([
   }),
 ]);
 
+const TimingsModel = zod.object({
+  SCHEMA_CACHE_TTL_MS: NumberFromString().default(30000),
+  SCHEMA_COMPOSITION_TIMEOUT_MS: NumberFromString(25000).default(25000),
+  SCHEMA_CACHE_POLL_INTERVAL_MS: NumberFromString(100).default(150),
+});
+
 const SentryModel = zod.union([
   zod.object({
     SENTRY: emptyString(zod.literal('0').optional()),
@@ -47,7 +54,7 @@ const SentryModel = zod.union([
 
 const RedisModel = zod.object({
   REDIS_HOST: zod.string(),
-  REDIS_PORT: NumberFromString,
+  REDIS_PORT: NumberFromString(),
   REDIS_PASSWORD: emptyString(zod.string().optional()),
 });
 
@@ -88,6 +95,8 @@ const configs = {
   log: LogModel.safeParse(process.env),
   // eslint-disable-next-line no-process-env
   requestBroker: RequestBrokerModel.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
+  timings: TimingsModel.safeParse(process.env),
 };
 
 const environmentErrors: Array<string> = [];
@@ -117,6 +126,7 @@ const redis = extractConfig(configs.redis);
 const prometheus = extractConfig(configs.prometheus);
 const log = extractConfig(configs.log);
 const requestBroker = extractConfig(configs.requestBroker);
+const timings = extractConfig(configs.timings);
 
 export const env = {
   environment: base.ENVIRONMENT,
@@ -143,6 +153,11 @@ export const env = {
           },
         }
       : null,
+  timings: {
+    cacheTTL: timings.SCHEMA_CACHE_TTL_MS,
+    cachePollInterval: timings.SCHEMA_CACHE_POLL_INTERVAL_MS,
+    schemaCompositionTimeout: timings.SCHEMA_COMPOSITION_TIMEOUT_MS,
+  },
   requestBroker:
     requestBroker.REQUEST_BROKER === '1'
       ? {
