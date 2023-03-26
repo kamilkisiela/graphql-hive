@@ -24,8 +24,7 @@ This means that Hive Cloud cannot use Apollo Federation v2 libraries directly, o
 services that uses the new properitey libraries internally.
 
 **To use Apollo Federation v2 with your Hive project, you have to run your own composition server
-and connect it to Hive.
-[We have a guide on how to do this here](/management/external-schema-composition).**
+and connect it to Hive.**
 
 </Callout>
 
@@ -266,6 +265,11 @@ Now you should be able to use the **External Composition** feature in your proje
 ## Protocol Specification
 
 You can use the following as reference for the expected shape of the request and response payloads.
+
+<Callout type="info">
+  Your external composition service will have 60s to complete the composition process, otherwise
+  Hive server will result in a timeout.
+</Callout>
 
 <details>
   <summary>Request</summary>
