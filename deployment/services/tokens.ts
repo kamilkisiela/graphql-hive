@@ -2,6 +2,7 @@ import { parse } from 'pg-connection-string';
 import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
 import { DeploymentEnvironment } from '../types';
+import { isProduction } from '../utils/helpers';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
 import { Redis } from './redis';
@@ -41,7 +42,7 @@ export function deployTokens({
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       exposesMetrics: true,
-      replicas: 2,
+      replicas: isProduction(deploymentEnv) ? 2 : 1,
       image,
       env: {
         ...deploymentEnv,
