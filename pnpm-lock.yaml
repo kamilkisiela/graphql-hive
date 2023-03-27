@@ -163,7 +163,7 @@ importers:
       '@hive/server': workspace:*
       '@trpc/client': 10.18.0
       '@trpc/server': 10.18.0
-      '@types/dockerode': 3.3.15
+      '@types/dockerode': 3.3.16
       '@types/ioredis': 4.28.10
       '@whatwg-node/fetch': 0.8.4
       bcryptjs: 2.4.3
@@ -200,7 +200,7 @@ importers:
     devDependencies:
       '@hive/rate-limit': link:../packages/services/rate-limit
       '@hive/server': link:../packages/services/server
-      '@types/dockerode': 3.3.15
+      '@types/dockerode': 3.3.16
       '@types/ioredis': 4.28.10
       tslib: 2.5.0
       vitest: 0.29.7
@@ -12263,8 +12263,8 @@ packages:
       '@types/ssh2': 1.11.6
     dev: true
 
-  /@types/dockerode/3.3.15:
-    resolution: {integrity: sha512-az35KbxZZUCRgCoXqJUEvEbsOL3L7UbItuHSYoZ0uo/MWuNc03y7XMBVSCLLvxpxWK8X8pM5PoM0F/5TFHDF0g==}
+  /@types/dockerode/3.3.16:
+    resolution: {integrity: sha512-ZAX2VrkTjwjk1808T8m6vMr+CFXSLiDD+tkEkLThI+v83AfzlYQZEWfZKwFyk1PWopSXkdDunmIhrF7sxt+zWg==}
     dependencies:
       '@types/docker-modem': 3.0.2
       '@types/node': 18.15.10
