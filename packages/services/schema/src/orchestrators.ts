@@ -303,7 +303,6 @@ const createFederation: (
   requestId: string,
   decrypt: (value: string) => string,
 ) => Orchestrator = (cache, logger, requestId, decrypt) => {
-  const timeoutMs = Math.min(cache.timeoutMs, 25_000);
   const compose = cache.reuse<
     {
       schemas: ComposeAndValidateInput;
@@ -352,10 +351,10 @@ const createFederation: (
                 ...request,
               },
               logger,
-              timeoutMs,
+              cache.timeoutMs,
               requestId,
             )
-          : callExternalService(request, logger, timeoutMs)),
+          : callExternalService(request, logger, cache.timeoutMs)),
       );
 
       if (!parseResult.success) {
