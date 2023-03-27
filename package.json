@@ -13,7 +13,7 @@
   },
   "license": "MIT",
   "private": true,
-  "packageManager": "pnpm@7.30.3",
+  "packageManager": "pnpm@7.30.5",
   "engines": {
     "node": ">=18",
     "pnpm": ">=7"
