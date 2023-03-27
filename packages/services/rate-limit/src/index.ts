@@ -14,15 +14,13 @@ import { env } from './environment';
 import { createRateLimiter } from './limiter';
 
 async function main() {
-  if (env.sentry) {
-    Sentry.init({
-      serverName: 'rate-limit',
-      enabled: !!env.sentry,
-      environment: env.environment,
-      dsn: env.sentry.dsn,
-      release: env.release,
-    });
-  }
+  Sentry.init({
+    serverName: 'rate-limit',
+    enabled: !!env.sentry,
+    environment: env.environment,
+    dsn: env.sentry?.dsn,
+    release: env.release,
+  });
 
   const server = await createServer({
     name: 'rate-limit',

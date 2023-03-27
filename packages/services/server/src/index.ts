@@ -36,28 +36,26 @@ const LegacyCheckAuth0EmailUserExistsPayloadModel = zod.object({
 });
 
 export async function main() {
-  if (env.sentry) {
-    Sentry.init({
-      serverName: 'api',
-      enabled: true,
-      environment: env.environment,
-      dsn: env.sentry.dsn,
-      tracesSampleRate: 1,
-      release: env.release,
-      integrations: [
-        new Sentry.Integrations.Http({ tracing: true }),
-        new Sentry.Integrations.ContextLines(),
-        new Sentry.Integrations.LinkedErrors(),
-        new ExtraErrorData({
-          depth: 2,
-        }),
-        new Dedupe(),
-      ],
-      maxBreadcrumbs: 5,
-      defaultIntegrations: false,
-      autoSessionTracking: false,
-    });
-  }
+  Sentry.init({
+    serverName: 'api',
+    enabled: true,
+    environment: env.environment,
+    dsn: env.sentry?.dsn,
+    tracesSampleRate: 1,
+    release: env.release,
+    integrations: [
+      new Sentry.Integrations.Http({ tracing: true }),
+      new Sentry.Integrations.ContextLines(),
+      new Sentry.Integrations.LinkedErrors(),
+      new ExtraErrorData({
+        depth: 2,
+      }),
+      new Dedupe(),
+    ],
+    maxBreadcrumbs: 5,
+    defaultIntegrations: false,
+    autoSessionTracking: false,
+  });
 
   const server = await createServer({
     name: 'graphql-api',

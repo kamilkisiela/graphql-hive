@@ -11,15 +11,13 @@ import { env } from './environment';
 import { createIngestor } from './ingestor';
 
 async function main() {
-  if (env.sentry) {
-    Sentry.init({
-      serverName: 'usage-ingestor',
-      enabled: !!env.sentry,
-      environment: env.environment,
-      dsn: env.sentry.dsn,
-      release: env.release,
-    });
-  }
+  Sentry.init({
+    serverName: 'usage-ingestor',
+    enabled: !!env.sentry,
+    environment: env.environment,
+    dsn: env.sentry?.dsn,
+    release: env.release,
+  });
 
   const server = await createServer({
     name: 'usage-ingestor',

@@ -33,15 +33,13 @@ function decryptFactory() {
 }
 
 async function main() {
-  if (env.sentry) {
-    Sentry.init({
-      serverName: 'schema',
-      enabled: !!env.sentry,
-      environment: env.environment,
-      dsn: env.sentry.dsn,
-      release: env.release,
-    });
-  }
+  Sentry.init({
+    serverName: 'schema',
+    enabled: !!env.sentry,
+    environment: env.environment,
+    dsn: env.sentry?.dsn,
+    release: env.release,
+  });
 
   const server = await createServer({
     name: 'schema',

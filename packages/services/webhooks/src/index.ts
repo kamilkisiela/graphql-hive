@@ -15,15 +15,13 @@ import { createScheduler } from './scheduler';
 import type { Context } from './types';
 
 async function main() {
-  if (env.sentry) {
-    Sentry.init({
-      serverName: 'webhooks',
-      enabled: !!env.sentry,
-      environment: env.environment,
-      dsn: env.sentry.dsn,
-      release: env.release,
-    });
-  }
+  Sentry.init({
+    serverName: 'webhooks',
+    enabled: !!env.sentry,
+    environment: env.environment,
+    dsn: env.sentry?.dsn,
+    release: env.release,
+  });
 
   const server = await createServer({
     name: 'webhooks',

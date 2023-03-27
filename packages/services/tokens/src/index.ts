@@ -19,15 +19,13 @@ import { env } from './environment';
 import { createStorage } from './storage';
 
 export async function main() {
-  if (env.sentry) {
-    Sentry.init({
-      serverName: 'tokens',
-      enabled: true,
-      environment: env.environment,
-      dsn: env.sentry.dsn,
-      release: env.release,
-    });
-  }
+  Sentry.init({
+    serverName: 'tokens',
+    enabled: true,
+    environment: env.environment,
+    dsn: env.sentry?.dsn,
+    release: env.release,
+  });
 
   const server = await createServer({
     name: 'tokens',

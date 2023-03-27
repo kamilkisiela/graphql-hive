@@ -23,15 +23,13 @@ import type { IncomingLegacyReport, IncomingReport } from './types';
 import { createUsage } from './usage';
 
 async function main() {
-  if (env.sentry) {
-    Sentry.init({
-      serverName: 'usage',
-      enabled: !!env.sentry,
-      environment: env.environment,
-      dsn: env.sentry.dsn,
-      release: env.release,
-    });
-  }
+  Sentry.init({
+    serverName: 'usage',
+    enabled: !!env.sentry,
+    environment: env.environment,
+    dsn: env.sentry?.dsn,
+    release: env.release,
+  });
 
   const server = await createServer({
     name: 'usage',

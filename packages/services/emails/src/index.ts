@@ -16,15 +16,13 @@ import { createEmailProvider } from './providers';
 import { createScheduler } from './scheduler';
 
 async function main() {
-  if (env.sentry) {
-    Sentry.init({
-      serverName: 'emails',
-      enabled: !!env.sentry,
-      environment: env.environment,
-      dsn: env.sentry.dsn,
-      release: env.release,
-    });
-  }
+  Sentry.init({
+    serverName: 'emails',
+    enabled: !!env.sentry,
+    environment: env.environment,
+    dsn: env.sentry?.dsn,
+    release: env.release,
+  });
 
   const server = await createServer({
     name: 'emails',

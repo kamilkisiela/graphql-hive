@@ -1,5 +1,4 @@
 import zod from 'zod';
-import * as Sentry from '@sentry/nextjs';
 
 // treat an empty string `''` as `undefined`
 const emptyString = <T extends zod.ZodType>(input: T) => {
@@ -153,7 +152,7 @@ const authOkta = extractConfig(configs.authOkta);
 const authOktaMultiTenant = extractConfig(configs.authOktaMultiTenant);
 const auth0Legacy = extractConfig(configs.authLegacyAuth0);
 
-const config = {
+export const config = {
   release: base.RELEASE ?? 'local',
   nodeEnv: base.NODE_ENV,
   environment: base.ENVIRONMENT,
@@ -228,19 +227,3 @@ declare global {
 }
 
 globalThis['__backend_env'] = config;
-
-// TODO: I don't like this here, but it seems like it makes most sense here :)
-if (config.sentry) {
-  Sentry.init({
-    serverName: 'app',
-    enabled: true,
-    dsn: config.sentry.dsn,
-    release: config.release,
-    environment: config.environment,
-    integrations: [
-      new Sentry.Integrations.Http({
-        tracing: true,
-      }),
-    ],
-  });
-}

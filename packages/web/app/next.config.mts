@@ -1,4 +1,5 @@
 import bundleAnalyzer from '@next/bundle-analyzer';
+import { withSentryConfig } from '@sentry/nextjs';
 
 // For the dev server we want to make sure that the correct environment variables are set :)
 // during build we don't need environment variables!
@@ -11,22 +12,31 @@ const withBundleAnalyzer = bundleAnalyzer({
   openAnalyzer: true,
 });
 
-export default withBundleAnalyzer({
-  poweredByHeader: false,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    // next doesn't need to check because typecheck command will
-    // also Next.js report false positives (try it...)
-    ignoreBuildErrors: true,
-  },
-  redirects: async () => [
-    // Redirect organization routes
-    {
-      source: '/:orgId/view/subscription/manage',
-      destination: '/:orgId/view/subscription',
-      permanent: true,
+export default withSentryConfig(
+  withBundleAnalyzer({
+    sentry: {
+      disableServerWebpackPlugin: true,
+      disableClientWebpackPlugin: true,
     },
-  ],
-});
+    poweredByHeader: false,
+    eslint: {
+      ignoreDuringBuilds: true,
+    },
+    typescript: {
+      // next doesn't need to check because typecheck command will
+      // also Next.js report false positives (try it...)
+      ignoreBuildErrors: true,
+    },
+    redirects: async () => [
+      // Redirect organization routes
+      {
+        source: '/:orgId/view/subscription/manage',
+        destination: '/:orgId/view/subscription',
+        permanent: true,
+      },
+    ],
+  }),
+  {
+    silent: true,
+  },
+);

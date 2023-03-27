@@ -126,12 +126,11 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
 }
 if (globalThis.window) {
   SuperTokens.init(frontendConfig());
-  if (env.sentry) {
-    Sentry.init({
-      dsn: env.sentry.dsn,
-      enabled: true,
-      release: env.release,
-      environment: env.environment,
-    });
-  }
+
+  Sentry.init({
+    dsn: env.sentry?.dsn,
+    enabled: true,
+    release: env.release,
+    environment: env.environment,
+  });
 }
