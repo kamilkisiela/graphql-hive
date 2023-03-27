@@ -4,7 +4,6 @@ import { CertManager } from '../utils/cert-manager';
 import { isProduction } from '../utils/helpers';
 import { Proxy } from '../utils/reverse-proxy';
 import { App } from './app';
-import { Docs } from './docs';
 import { GraphQL } from './graphql';
 import { Usage } from './usage';
 
@@ -12,20 +11,16 @@ const commonConfig = new pulumi.Config('common');
 
 export function deployProxy({
   appHostname,
-  docsHostname,
   graphql,
   app,
-  docs,
   usage,
   deploymentEnv,
 }: {
   deploymentEnv: DeploymentEnvironment;
   appHostname: string;
-  docsHostname: string;
   graphql: GraphQL;
   app: App;
   usage: Usage;
-  docs: Docs;
 }) {
   const { tlsIssueName } = new CertManager().deployCertManagerAndIssuer();
   return new Proxy(tlsIssueName, {
@@ -33,18 +28,6 @@ export function deployProxy({
     aksReservedIpResourceGroup: commonConfig.get('aksReservedIpResourceGroup'),
   })
     .deployProxy({ replicas: isProduction(deploymentEnv) ? 2 : 1 })
-    .registerService(
-      {
-        record: docsHostname,
-      },
-      [
-        {
-          name: 'docs',
-          path: '/',
-          service: docs.service,
-        },
-      ],
-    )
     .registerService({ record: appHostname }, [
       {
         name: 'app',

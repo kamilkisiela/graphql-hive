@@ -9,7 +9,6 @@ import { deployClickhouse } from './services/clickhouse';
 import { deployCloudFlareSecurityTransform } from './services/cloudflare-security';
 import { deployDatabaseCleanupJob } from './services/database-cleanup';
 import { deployDbMigrations } from './services/db-migrations';
-import { deployDocs } from './services/docs';
 import { deployEmails } from './services/emails';
 import { deployGraphQL } from './services/graphql';
 import { deployKafka } from './services/kafka';
@@ -52,10 +51,8 @@ if (!imagesTag) {
 const envName = pulumi.getStack();
 const commonConfig = new pulumi.Config('common');
 const appDns = 'app';
-const docsDns = 'docs';
 const rootDns = commonConfig.require('dnsZone');
 const appHostname = `${appDns}.${rootDns}`;
-const docsHostname = `${docsDns}.${rootDns}`;
 
 const heartbeatsConfig = new pulumi.Config('heartbeats');
 const emailConfig = new pulumi.Config('email');
@@ -263,16 +260,8 @@ const graphqlApi = deployGraphQL({
   s3Config,
 });
 
-const docs = deployDocs({
-  rootDns,
-  image: dockerImages.getImageId('docs', imagesTag),
-  imagePullSecret,
-  release: imagesTag,
-});
-
 const app = deployApp({
   deploymentEnv,
-  docs,
   graphql: graphqlApi,
   dbMigrations,
   image: dockerImages.getImageId('app', imagesTag),
@@ -292,9 +281,7 @@ const app = deployApp({
 
 const proxy = deployProxy({
   appHostname,
-  docsHostname,
   app,
-  docs,
   graphql: graphqlApi,
   usage: usageApi,
   deploymentEnv,

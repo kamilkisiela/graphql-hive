@@ -1,10 +1,11 @@
 import { ReactElement, ReactNode, useCallback, useState } from 'react';
 import Image, { StaticImageData } from 'next/image';
+import Link from 'next/link';
 import clsx from 'clsx';
 import { FiGithub, FiGlobe, FiRadio, FiServer } from 'react-icons/fi';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { useMounted } from '@theguild/components';
-import { Pricing } from '../pricing';
+import { Pricing } from './pricing';
 import cicdImage from '../../public/any-ci-cd.svg';
 import monitoringImage from '../../public/features/monitoring-preview.png';
 import schemaHistoryImage from '../../public/features/schema-history.png';
@@ -110,9 +111,9 @@ function Hero() {
           >
             Sign up for free
           </a>
-          <a href="https://docs.graphql-hive.com" className={classes.link}>
+          <Link href="/docs" className={classes.link}>
             Documentation
-          </a>
+          </Link>
           <a
             className={clsx(classes.link, 'flex flex-row items-center gap-2')}
             href="https://github.com/kamilkisiela/graphql-hive"
@@ -183,7 +184,7 @@ function Feature(props: {
   );
 }
 
-export default function IndexPage(): ReactElement {
+export function IndexPage(): ReactElement {
   const mounted = useMounted();
   return (
     <Tooltip.Provider>

@@ -1,9 +1,27 @@
 /* eslint sort-keys: error */
 import { useRouter } from 'next/router';
-import { defineConfig, Giscus, useTheme } from '@theguild/components';
+import { defineConfig, FooterExtended, Giscus, useTheme } from '@theguild/components';
 
 export default defineConfig({
   docsRepositoryBase: 'https://github.com/kamilkisiela/graphql-hive/tree/main/packages/web/docs',
+  footer: {
+    component: () => (
+      <FooterExtended
+        resources={[
+          {
+            children: 'Privacy Policy',
+            href: 'https://the-guild.dev/graphql/hive/privacy-policy.pdf',
+            title: 'Privacy Policy',
+          },
+          {
+            children: 'Terms of Use',
+            href: 'https://the-guild.dev/graphql/hive/terms-of-use.pdf',
+            title: 'Terms of Use',
+          },
+        ]}
+      />
+    ),
+  },
   main({ children }) {
     const { resolvedTheme } = useTheme();
     const { route } = useRouter();

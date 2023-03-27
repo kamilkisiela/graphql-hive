@@ -4,7 +4,6 @@ import { DeploymentEnvironment } from '../types';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
-import { Docs } from './docs';
 import { GraphQL } from './graphql';
 
 const appConfig = new pulumi.Config('app');
@@ -18,7 +17,6 @@ export type App = ReturnType<typeof deployApp>;
 
 export function deployApp({
   deploymentEnv,
-  docs,
   graphql,
   dbMigrations,
   release,
@@ -52,7 +50,6 @@ export function deployApp({
     clientSecret: pulumi.Output<string>;
   };
   emailsEndpoint: pulumi.Output<string>;
-  docs: Docs;
 }) {
   return new ServiceDeployment(
     'app',
@@ -120,7 +117,7 @@ export function deployApp({
 
         {
           name: 'DOCS_URL',
-          value: docs.endpoint,
+          value: 'https://the-guild.dev/graphql/hive/docs',
         },
 
         //
