@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentry/node": "7.45.0",
+    "@sentry/node": "7.44.2",
     "@trpc/server": "10.18.0",
     "@whatwg-node/fetch": "0.8.4",
     "bullmq": "3.10.2",
