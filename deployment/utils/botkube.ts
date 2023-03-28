@@ -26,6 +26,11 @@ export class BotKube {
           settings: {
             clusterName: config.clusterName,
           },
+          actions: {
+            'show-logs-on-error': {
+              enabled: true,
+            },
+          },
           executors: {
             'kubectl-all-ns': {
               kubectl: {
