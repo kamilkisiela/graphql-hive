@@ -995,7 +995,7 @@ importers:
 
   packages/web/app:
     specifiers:
-      '@graphiql/toolkit': 0.8.2
+      '@graphiql/toolkit': 0.8.3
       '@graphql-codegen/gql-tag-operations-preset': 2.1.0
       '@graphql-tools/mock': 8.7.19
       '@graphql-typed-document-node/core': 3.2.0
@@ -1098,7 +1098,7 @@ importers:
       yup: 1.0.2
       zod: 3.21.4
     dependencies:
-      '@graphiql/toolkit': 0.8.2_graphql@16.6.0
+      '@graphiql/toolkit': 0.8.3_graphql@16.6.0
       '@graphql-tools/mock': 8.7.19_graphql@16.6.0
       '@headlessui/react': 1.7.13_biqbaboplfbrettd7655fr4n2y
       '@monaco-editor/react': 4.4.6_waewrrayshn643ztij6zbniufy
@@ -5511,7 +5511,7 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
-      '@graphiql/toolkit': 0.8.2_graphql@16.6.0
+      '@graphiql/toolkit': 0.8.3_graphql@16.6.0
       '@reach/combobox': 0.17.0_biqbaboplfbrettd7655fr4n2y
       '@reach/dialog': 0.17.0_aen5vu2fkbnw3ssyd5drxdxkh4
       '@reach/listbox': 0.17.0_biqbaboplfbrettd7655fr4n2y
@@ -5536,8 +5536,8 @@ packages:
       - react-is
     dev: false
 
-  /@graphiql/toolkit/0.8.2_graphql@16.6.0:
-    resolution: {integrity: sha512-FGtXBYTzcPuwfpaC+0BGeriLD6kwTdcF5xugGvjutk5J93Dgy2vw+SkBdbi1QGzz/jooETi1kEtFeDuWTzIG7Q==}
+  /@graphiql/toolkit/0.8.3_graphql@16.6.0:
+    resolution: {integrity: sha512-B5WfZlBes/tMmM7TeTTD/F2E1kbtQD6PYmyX76qWrIt1Sx3+lQoCe8NzHbBvNII77F5sr737RASmkhQ1fcdFWQ==}
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0
       graphql-ws: '>= 4.5.0'
@@ -18862,7 +18862,7 @@ packages:
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       '@graphiql/react': 0.17.0_mimclzdkf6xk56cspmbhfpvkka
-      '@graphiql/toolkit': 0.8.2_graphql@16.6.0
+      '@graphiql/toolkit': 0.8.3_graphql@16.6.0
       entities: 2.2.0
       graphql: 16.6.0
       graphql-language-service: 5.1.2_graphql@16.6.0
