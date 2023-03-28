@@ -59,7 +59,6 @@ export class ServiceDeployment {
 
     if (this.options.livenessProbe) {
       livenessProbe = {
-        terminationGracePeriodSeconds: 60,
         initialDelaySeconds: 5,
         periodSeconds: 20,
         failureThreshold: 10,
@@ -73,7 +72,6 @@ export class ServiceDeployment {
 
     if (this.options.readinessProbe) {
       readinessProbe = {
-        terminationGracePeriodSeconds: 60,
         initialDelaySeconds: 10,
         periodSeconds: 30,
         failureThreshold: 10,
@@ -97,6 +95,7 @@ export class ServiceDeployment {
       imagePullSecrets: this.options.imagePullSecret
         ? [{ name: this.options.imagePullSecret.metadata.name }]
         : undefined,
+      terminationGracePeriodSeconds: 80,
       containers: [
         {
           livenessProbe,
