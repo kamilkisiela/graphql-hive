@@ -1,7 +1,7 @@
 import type { FastifyLoggerInstance } from 'fastify';
 
 const errorTypes = ['unhandledRejection', 'uncaughtException'];
-const signalTraps = ['SIGTERM', 'SIGINT', 'SIGUSR2', 'SIGKILL'];
+const signalTraps = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
 
 export function registerShutdown(config: {
   logger: FastifyLoggerInstance;
