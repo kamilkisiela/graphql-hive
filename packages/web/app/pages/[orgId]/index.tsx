@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/v2/dropdown';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
-import { FragmentType, graphql, useFragment } from '@/gql';
+import { FragmentType, graphql, isFragmentReady, useFragment } from '@/gql';
 import { ProjectActivitiesDocument } from '@/graphql';
 import { canAccessProject, ProjectAccessScope } from '@/lib/access/project';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
@@ -136,7 +136,7 @@ const OrganizationProjectsPageQuery = graphql(`
       total
       nodes {
         id
-        ...ProjectCard_ProjectFragment
+        ...ProjectCard_ProjectFragment @defer
       }
     }
   }
@@ -180,13 +180,20 @@ function ProjectsPage(): ReactElement {
                             <Skeleton visible className="h-7" />
                           </Card>
                         ))
-                      : projects.nodes.map(project => (
-                          <ProjectCard
-                            key={project.id}
-                            project={project}
-                            organization={organization.organization}
-                          />
-                        ))}
+                      : projects.nodes.map(
+                          project =>
+                            isFragmentReady(
+                              OrganizationProjectsPageQuery,
+                              ProjectCard_ProjectFragment,
+                              project,
+                            ) && (
+                              <ProjectCard
+                                key={project.id}
+                                project={project}
+                                organization={organization.organization}
+                              />
+                            ),
+                        )}
                   </div>
                 )}
               </div>
