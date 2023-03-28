@@ -75,7 +75,7 @@ export class ServiceDeployment {
         initialDelaySeconds: 10,
         periodSeconds: 30,
         failureThreshold: 10,
-        timeoutSeconds: 8,
+        timeoutSeconds: 30,
         httpGet: {
           path: this.options.readinessProbe,
           port,
