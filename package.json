@@ -87,7 +87,7 @@
     "tsx": "3.12.6",
     "turbo": "1.8.6",
     "typescript": "5.0.2",
-    "vitest": "0.29.7"
+    "vitest": "0.29.8"
   },
   "husky": {
     "hooks": {
