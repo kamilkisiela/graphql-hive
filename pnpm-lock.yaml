@@ -376,7 +376,7 @@ importers:
       '@trpc/server': 10.18.0
       '@types/bcryptjs': 2.4.2
       '@types/ioredis-mock': 8.2.1
-      '@types/lodash': 4.14.191
+      '@types/lodash': 4.14.192
       '@types/ms': 0.7.31
       '@types/object-hash': 3.0.2
       '@whatwg-node/fetch': 0.8.4
@@ -440,7 +440,7 @@ importers:
       '@hive/webhooks': link:../webhooks
       '@types/bcryptjs': 2.4.2
       '@types/ioredis-mock': 8.2.1
-      '@types/lodash': 4.14.191
+      '@types/lodash': 4.14.192
       '@types/ms': 0.7.31
       '@types/object-hash': 3.0.2
       ioredis-mock: 8.2.7_6jydlboc7eyi5xrsjrlqeddf74
@@ -10820,7 +10820,7 @@ packages:
       '@storybook/preview-api': 7.0.0-beta.54
       '@storybook/theming': 7.0.0-beta.54_biqbaboplfbrettd7655fr4n2y
       '@storybook/types': 7.0.0-beta.54
-      '@types/lodash': 4.14.191
+      '@types/lodash': 4.14.192
       color-convert: 2.0.1
       dequal: 2.0.3
       lodash: 4.17.21
@@ -12476,8 +12476,8 @@ packages:
     resolution: {integrity: sha512-eHcVlLXP0c2FlMPm56ITode2AgLMSa6aJ05JTTbYbI+7EMkCEE5qk2E41d5g2lCVTqRe0GnnRFurmlCsDODrPw==}
     dev: true
 
-  /@types/lodash/4.14.191:
-    resolution: {integrity: sha512-BdZ5BCCvho3EIXw6wUCXHe7rS53AIDPLE+JzwgT+OsJk53oBfbSmZZ7CX4VaRoN78N+TJpFi9QPlfIVNmJYWxQ==}
+  /@types/lodash/4.14.192:
+    resolution: {integrity: sha512-km+Vyn3BYm5ytMO13k9KTp27O75rbQ0NFw+U//g+PX7VZyjCioXaRFisqSIJRECljcTv73G3i6BpglNGHgUQ5A==}
     dev: true
 
   /@types/long/4.0.2:
