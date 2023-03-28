@@ -29,6 +29,13 @@ export class BotKube {
           actions: {
             'show-logs-on-error': {
               enabled: true,
+              displayName: 'Show logs on error',
+              command:
+                'kubectl logs {{ .Event.TypeMeta.Kind | lower }}/{{ .Event.Name }} -n {{ .Event.Namespace }}',
+              bindings: {
+                sources: ['k8s-err-with-logs-events'],
+                executors: ['kubectl-all-ns'],
+              },
             },
           },
           executors: {
@@ -75,7 +82,7 @@ export class BotKube {
                       disabled: false,
                     },
                     bindings: {
-                      executors: ['kubectl-all-ns'],
+                      executors: ['kubectl-all-ns', 'kubectl-read-only'],
                       sources: ['k8s-err-with-logs-events', 'k8s-err-events'],
                       actions: ['show-logs-on-error'],
                     },
