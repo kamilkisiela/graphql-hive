@@ -661,7 +661,7 @@ importers:
       '@envelop/graphql-modules': 4.0.6
       '@envelop/sentry': 5.1.1
       '@envelop/types': 3.0.2
-      '@escape.tech/graphql-armor-max-aliases': 1.7.0
+      '@escape.tech/graphql-armor-max-aliases': 1.7.1
       '@escape.tech/graphql-armor-max-depth': 1.8.2
       '@escape.tech/graphql-armor-max-directives': 1.6.3
       '@escape.tech/graphql-armor-max-tokens': 1.3.1
@@ -694,7 +694,7 @@ importers:
       '@envelop/graphql-modules': 4.0.6_adj6itjezth6avcd67ktx7eo6a
       '@envelop/sentry': 5.1.1_ms2ykyfyuimoegg7bnfjofyhye
       '@envelop/types': 3.0.2
-      '@escape.tech/graphql-armor-max-aliases': 1.7.0
+      '@escape.tech/graphql-armor-max-aliases': 1.7.1
       '@escape.tech/graphql-armor-max-depth': 1.8.2
       '@escape.tech/graphql-armor-max-directives': 1.6.3
       '@escape.tech/graphql-armor-max-tokens': 1.3.1
@@ -5308,8 +5308,8 @@ packages:
     dev: true
     optional: true
 
-  /@escape.tech/graphql-armor-max-aliases/1.7.0:
-    resolution: {integrity: sha512-w3/t1FxR0JTBo0Smz95lLge7fqAiTrReBF8l+3mEBMXMe2Ju/Z86cvlM9v/SUROd4oCxSwJzFwnljoYrtjrrng==}
+  /@escape.tech/graphql-armor-max-aliases/1.7.1:
+    resolution: {integrity: sha512-WUmDBceHXDjG08byxBghc27//9/MN1zOnVDH9AXG070kD23Ko8fYToXq+xwos+3jQvWBqTtzFSoRE6r7piZHuQ==}
     dependencies:
       graphql: 16.6.0
     optionalDependencies:
