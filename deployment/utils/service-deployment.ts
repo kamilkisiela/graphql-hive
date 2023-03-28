@@ -95,6 +95,7 @@ export class ServiceDeployment {
       imagePullSecrets: this.options.imagePullSecret
         ? [{ name: this.options.imagePullSecret.metadata.name }]
         : undefined,
+      terminationGracePeriodSeconds: 60,
       containers: [
         {
           livenessProbe,
