@@ -22,12 +22,12 @@ Mesh artifacts) via the CDN.
 ## CDN Access Tokens
 
 To get started with Hive's CDN access, you'll need to create a CDN token for your target (see
-[Target & Tokens](/management/targets#cdn-access-tokens)).
+[Target & Tokens](/docs/management/targets#cdn-access-tokens)).
 
 <Callout>
   The CDN access token is considered a secret and should not be shared with anyone else. If a CDN
   access token is compromised, you can [revoke it from the target's Settings
-  page](/management/targets#revoking-a-cdn-access-token), and create a new token.
+  page](/docs/management/targets#revoking-a-cdn-access-token), and create a new token.
 </Callout>
 
 To use your CDN access token, go to your target's page on Hive's dashboard and click on the
@@ -65,9 +65,9 @@ curl -v -H 'X-Hive-CDN-Key: CDN_ACCESS_TOKEN' \
 
 Further reading:
 
-- [Integrating Hive CDN with Apollo Gateway](/integrations/apollo-gateway)
-- [Integrating Hive CDN with Apollo Router](/integrations/apollo-router)
-- [Get started with Hive and Apollo Fededation](/get-started/apollo-federation)
+- [Integrating Hive CDN with Apollo Gateway](/docs/integrations/apollo-gateway)
+- [Integrating Hive CDN with Apollo Router](/docs/integrations/apollo-router)
+- [Get started with Hive and Apollo Fededation](/docs/get-started/apollo-federation)
 
 ### Hive Metadata
 
@@ -139,5 +139,5 @@ will return `200 OK` with the new data and new `ETag` header.
 
 Using `ETag` and `If-None-Match` helps to prevent unnecessary data transfer.
 
-The [`@graphql-hive/client`](/api-reference/client#javascript--nodejs-client) package uses this
+The [`@graphql-hive/client`](/docs/api-reference/client#javascript--nodejs-client) package uses this
 feature to save bandwidth and improve performance.

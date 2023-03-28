@@ -400,7 +400,8 @@ The Hive Cloud service leverages the
 schema metadata. This means that your schema will be available from the nearest location to your
 GraphQL gateway, with 100% uptime, regardless of Hive's status. This ensures that everything
 required for your GraphQL API is always available, and reduces the risk of depending on Hive as a
-single point of failure. [You can read more about Hive's CDN here](/features/high-availability-cdn).
+single point of failure.
+[You can read more about Hive's CDN here](/docs/features/high-availability-cdn).
 
 To get started with Hive's CDN access, you'll need to create a CDN token from your target's
 **Settings** page. You'll see a separate section for managing and creating CDN tokens, called **CDN
@@ -442,7 +443,7 @@ to build a simple GraphQL gateway.
 In addition to the SDL endpoint exposed from Hive's CDN, you can also use the `/services` endpoint
 to fetch a list of all services and their metadata (url and name).
 
-As part of [Hive Client](/api-reference/client#javascript--nodejs-client) library, we are also
+As part of [Hive Client](/docs/api-reference/client#javascript--nodejs-client) library, we are also
 exposing utilities for fetching and integrating your schema with your gateway.
 
 Here's a short snippet of how you can fetch the services information from Hive CDN, and start a
@@ -506,11 +507,11 @@ Make sure to add environment variables:
 Now that you use the basic functionality of Hive as a schema registry, we recommend following other
 powerful features of Hive:
 
-- [Schema Stitching Integration with Hive](/integrations/schema-stitching)
+- [Schema Stitching Integration with Hive](/docs/integrations/schema-stitching)
 - [How to implement and run subschemas and gateway with Schema-Stitching](https://the-guild.dev/graphql/stitching/docs/approaches/stitching-directives#schema-setup)
-- [Usage Reporting and Monintoring](/features/usage-reporting)
-- [Conditional Breaking Changes](/features/conditional-breaking-changes)
-- [Alerts and Notifications](/features/alerts-and-notifications)
-- [CI/CD Integration](/features/ci-integration)
+- [Usage Reporting and Monintoring](/docs/features/usage-reporting)
+- [Conditional Breaking Changes](/docs/management/targets#conditional-breaking-changes)
+- [Alerts and Notifications](/docs/management/projects#alerts-and-notifications)
+- [CI/CD Integration](/docs/integrations/ci-cd)
 
 </Steps>
