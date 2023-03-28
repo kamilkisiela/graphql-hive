@@ -91,7 +91,9 @@ export async function main() {
   registerShutdown({
     logger: server.log,
     async onShutdown() {
+      server.log.info('Stopping HTTP server listener...');
       await server.close();
+      server.log.info('Stopping Storage handler...');
       await storage.destroy();
     },
   });
