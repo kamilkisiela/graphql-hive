@@ -61,16 +61,16 @@ If you wish to learn more about how to use Hive with each of these project types
 the following guides:
 
 <Cards>
-  <Card arrow title="Single Schema" href="/get-started/single-project" />
-  <Card arrow title="Schema-Stitching" href="/self-hosting/schema-stitching-project" />
-  <Card arrow title="Apollo Federation" href="/self-hosting/apollo-federation" />
+  <Card arrow title="Single Schema" href="/docs/get-started/single-project" />
+  <Card arrow title="Schema-Stitching" href="/docs/self-hosting/schema-stitching" />
+  <Card arrow title="Apollo Federation" href="/docs/self-hosting/apollo-federation" />
 </Cards>
 
 ## Actions on schemas
 
 This section covers the actions that can be performed on GraphQL schemas in Hive. Action of schemas
-can be performed using the [Hive CLI](/api-reference/cli) or through the
-[Hive Client](/api-reference/client).
+can be performed using the [Hive CLI](/docs/api-reference/cli) or through the
+[Hive Client](/docs/api-reference/client).
 
 ### Publish a schema
 
@@ -96,7 +96,7 @@ Here's an overview of what each of these steps means:
 - **Schema SDL**: the GraphQL schema in SDL format.
 - **Hive Metadata**: Hive metadata is an optional JSON object you can attach to every published
   schema. You can include any information you wish to include in this JSON object (see
-  [Publishing Hive metadata](/api-reference/cli#hive-metadata)).
+  [Publishing Hive metadata](/docs/api-reference/cli#hive-metadata)).
 - **Service Name**: the name of the service. This is used for Schema-Stitching and Apollo Federation
   only.
 - **Service URL**: the URL of the service. This is used for Schema-Stitching and Apollo Federation
@@ -112,14 +112,14 @@ performed to ensure a schema is fully valid:
 4. **Composition Checks** - if the project type is Schema-Stitching or Apollo Federation, the schema
    is validated against the composition rules of the project type.
 5. **Schema Changes** - A schema `diff` is calculated and compared against the previous schema
-   version. If [Conditional Breaking Changes](/management/targets#conditional-breaking-changes) is
-   activated, an additional phase of check against collected operations is performed.
+   version. If [Conditional Breaking Changes](/docs/management/targets#conditional-breaking-changes)
+   is activated, an additional phase of check against collected operations is performed.
 
 For additional reading:
 
-- [Publishing a schema using Hive CLI](/api-reference/cli#publish-a-schema)
-- [`schema:publish` command reference](/api-reference/cli#hive-schemapublish-file)
-- [Publishing a schema using Hive Client](/api-reference/client)
+- [Publishing a schema using Hive CLI](/docs/api-reference/cli#publish-a-schema)
+- [`schema:publish` command reference](/docs/api-reference/cli#hive-schemapublish-file)
+- [Publishing a schema using Hive Client](/docs/api-reference/client)
 
 ### Check a schema
 
@@ -137,14 +137,14 @@ performed to ensure a schema is valid:
 3. **Composition Checks** - if the project type is Schema-Stitching or Apollo Federation, the schema
    is validated against the composition rules of the project type.
 4. **Schema Changes** - A schema `diff` is calculated and compared against the previous schema
-   version. If [Conditional Breaking Changes](/management/targets#conditional-breaking-changes) is
-   activated, an additional phase of check against collected operations is performed. If a non-safe
-   change has been introduced in the schema check, it will be rejected by Hive.
+   version. If [Conditional Breaking Changes](/docs/management/targets#conditional-breaking-changes)
+   is activated, an additional phase of check against collected operations is performed. If a
+   non-safe change has been introduced in the schema check, it will be rejected by Hive.
 
 For additional reading:
 
-- [Checking a schema using Hive CLI](/api-reference/cli#check-a-schema)
-- [`schema:check` command reference](/api-reference/cli#hive-schemacheck-file)
+- [Checking a schema using Hive CLI](/docs/api-reference/cli#check-a-schema)
+- [`schema:check` command reference](/docs/api-reference/cli#hive-schemacheck-file)
 
 ### Delete a service
 
@@ -156,8 +156,8 @@ Deleting a service is the form of removing a service from the multi-schema proje
 
 For additional reading:
 
-- [Deleting a service using Hive CLI](/api-reference/cli#delete-a-schema)
-- [`schema:delete` command reference](/api-reference/cli#hive-schemadelete-service)
+- [Deleting a service using Hive CLI](/docs/api-reference/cli#delete-a-schema)
+- [`schema:delete` command reference](/docs/api-reference/cli#hive-schemadelete-service)
 
 ## Schema History and Changelog
 
@@ -170,8 +170,8 @@ In the list of schema versions of changes, you'll be able to see the following i
 - **Date**: the date of the change.
 - **Status**: the status of the change and the validity of the schema.
 - **Associated Git Commit**: the Git commit associated with the change, when
-  [GitHub Integration](/management/organizations#github) is enabled for your organization, and a
-  [GitHub repository is linked to the Hive project](/management/projects#github-repository).
+  [GitHub Integration](/docs/management/organizations#github) is enabled for your organization, and
+  a [GitHub repository is linked to the Hive project](/docs/management/projects#github-repository).
 
 ### Changelog View
 
@@ -209,8 +209,8 @@ input types.
 
 ### Schema Usage and Coverage
 
-With [Usage Reporting](/features/usage-reporting) feature enabled, you'll be able to see an overview
-of the schema usage and coverage (for types, fields and input types), based on the GraphQL
+With [Usage Reporting](/docs/features/usage-reporting) feature enabled, you'll be able to see an
+overview of the schema usage and coverage (for types, fields and input types), based on the GraphQL
 operations you report to Hive.
 
 This feature is useful if you wish to understand how your GraphQL schema is being used and queried,
@@ -218,6 +218,6 @@ and understand the impact of changes you make to your schema.
 
 <Callout type="info">
   The maximum duration is defined by the retention of your [Hive
-  plan](/management/organizations#subscription-and-billing), and depends on the data you already
-  sent before to Hive.
+  plan](/docs/management/organizations#subscription-and-billing), and depends on the data you
+  already sent before to Hive.
 </Callout>

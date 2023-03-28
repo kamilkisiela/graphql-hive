@@ -36,7 +36,7 @@ also use the **New Target** button to create a new target.
 
 Conditional Breaking Changes is a concept that involves marking breaking changes in your GraphQL
 schemas as safe, based on real-life data and traffic reported to Hive. This is done through the
-[Usage Reporting](/features/usage-reporting) feature.
+[Usage Reporting](/docs/features/usage-reporting) feature.
 
 When a new schema of your GraphQL schema is published to the registry, Hive uses the data collected
 from your API gateway to identify whether the change in your schema actually affects consumers.
@@ -64,14 +64,15 @@ Here are a few examples and their meaning:
 
 <Callout type="info">
   The maximum duration is defined by the retention of your [Hive
-  plan](/management/organizations#subscription-and-billing).
+  plan](/docs/management/organizations#subscription-and-billing).
 </Callout>
 
 #### Client Exclusions
 
 Real-life data and traffic is collected from your API gateway can be annotated with specific
 **Client**. In most cases, the **Client** matches a specific `User-Agent` and reported through the
-Hive agent. You can read more about this in the [Usage Reporting](/features/usage-reporting) page.
+Hive agent. You can read more about this in the [Usage Reporting](/docs/features/usage-reporting)
+page.
 
 You many choose to exclude specific clients from the **Conditional Breaking Changes** if you wish to
 have more control over the process.
@@ -179,7 +180,8 @@ The Hive Cloud service leverages the
 schema metadata. This means that your schema will be available from the nearest location to your
 GraphQL gateway, with 100% uptime, regardless of Hive's status. This ensures that everything
 required for your GraphQL API is always available, and reduces the risk of depending on Hive as a
-single point of failure. [You can read more about Hive's CDN here](/features/high-availability-cdn).
+single point of failure.
+[You can read more about Hive's CDN here](/docs/features/high-availability-cdn).
 
 Managing your **CDN Access Token** is located under your target's **Settings** page.
 

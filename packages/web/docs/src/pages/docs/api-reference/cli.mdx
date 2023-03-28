@@ -2,8 +2,8 @@ import { Callout, PackageCmd } from '@theguild/components'
 
 # Hive CLI (Command Line Interface)
 
-You can perform [schema-registry actions](/features/schema-registry#actions-on-schemas) on your Hive
-targets schemas using the Hive CLI.
+You can perform [schema-registry actions](/docs/features/schema-registry#actions-on-schemas) on your
+Hive targets schemas using the Hive CLI.
 
 ## Installation
 
@@ -36,12 +36,12 @@ curl -sSL https://graphql-hive.com/install.sh | sh
   target.
 </Callout>
 
-Start by setting your Hive token in [`hive.json`](/api-reference/cli#config-file-hivejson) file, or
-set it as `HIVE_TOKEN` environment variable.
+Start by setting your Hive token in [`hive.json`](/docs/api-reference/cli#config-file-hivejson)
+file, or set it as `HIVE_TOKEN` environment variable.
 
 Further reading:
 
-- [Publishing a schema to the Schema Registry](/features/schema-registry#publish-a-schema)
+- [Publishing a schema to the Schema Registry](/docs/features/schema-registry#publish-a-schema)
 
 #### Single Schema Project
 
@@ -59,7 +59,7 @@ hive schema:publish "src/*.graphql"
 
 Further reading:
 
-- [`schema:publish` API Reference](/api-reference/cli#hive-schemapublish-file)
+- [`schema:publish` API Reference](/docs/api-reference/cli#hive-schemapublish-file)
 
 #### Apollo Federation / Schema-Stitching projects
 
@@ -69,9 +69,9 @@ hive schema:publish --service reviews --url http://my-service.com/graphql schema
 
 Further reading:
 
-- [`schema:publish` API Reference](/api-reference/cli#hive-schemapublish-file)
-- [Apollo Router integration](/integrations/apollo-router)
-- [Apollo-Server integration](/integrations/apollo-server)
+- [`schema:publish` API Reference](/docs/api-reference/cli#hive-schemapublish-file)
+- [Apollo Router integration](/docs/integrations/apollo-router)
+- [Apollo-Server integration](/docs/integrations/apollo-server)
 
 #### Hive Metadata
 
@@ -94,7 +94,7 @@ hive schema:publish schema.graphql --metadata '{ "someData": true }'
 
 Further reading:
 
-- [Fetching Hive Metadata from the CDN](/features/high-availability-cdn#hive-metadata)
+- [Fetching Hive Metadata from the CDN](/docs/features/high-availability-cdn#hive-metadata)
 
 ### Check a schema
 
@@ -102,8 +102,8 @@ Further reading:
   This CLI command requires an active registry token with **Read** permissions to the target.
 </Callout>
 
-Start by setting your Hive token in [`hive.json`](/api-reference/cli#config-file-hivejson) file, or
-set it as `HIVE_TOKEN` environment variable.
+Start by setting your Hive token in [`hive.json`](/docs/api-reference/cli#config-file-hivejson)
+file, or set it as `HIVE_TOKEN` environment variable.
 
 Checking a GraphQL schema is the form of checking the compatbility of an upcoming schema, compared
 to the latest published version.
@@ -126,9 +126,9 @@ hive schema:check "src/*.graphql"
 
 Further reading:
 
-- [`schema:check` API Reference](/api-reference/cli#check-a-schema)
-- [Publishing a schema to the Schema Registry](/features/schema-registry#publish-a-schema)
-- [Conditional Breaking Changes](/management/targets#conditional-breaking-changes)
+- [`schema:check` API Reference](/docs/api-reference/cli#check-a-schema)
+- [Publishing a schema to the Schema Registry](/docs/features/schema-registry#publish-a-schema)
+- [Conditional Breaking Changes](/docs/management/targets#conditional-breaking-changes)
 
 ### Delete a schema
 
@@ -141,8 +141,8 @@ Further reading:
   This action is only available for Schema-Stitching and Apollo Federation projects.
 </Callout>
 
-Start by setting your Hive token in [`hive.json`](/api-reference/cli#config-file-hivejson) file, or
-set it as `HIVE_TOKEN` environment variable.
+Start by setting your Hive token in [`hive.json`](/docs/api-reference/cli#config-file-hivejson)
+file, or set it as `HIVE_TOKEN` environment variable.
 
 In case you want to delete a schema (or a subgraph in case of Federation), you can do so by using
 the `hive schema:delete` command.
@@ -185,10 +185,10 @@ git config --global user.email "john@doe.org"
 
 ### CLI and GitHub Integration
 
-If [GitHub Integration](/management/organizations#github) is enabled for your organization, and a
-[GitHub repository is linked to the Hive project](/management/projects#github-repository) is active,
-you may specify an additional `--github` flag to report the results back to GitHub as Check Suite
-(for `schema:check` and `schema:publish` commands):
+If [GitHub Integration](/docs/management/organizations#github) is enabled for your organization, and
+a [GitHub repository is linked to the Hive project](/docs/management/projects#github-repository) is
+active, you may specify an additional `--github` flag to report the results back to GitHub as Check
+Suite (for `schema:check` and `schema:publish` commands):
 
 ```bash
 hive schema:publish schema.graphql --github

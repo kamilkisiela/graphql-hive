@@ -4,16 +4,16 @@ We encourage developers to help us with the developing and evolving Hive, since
 [it's a full open-source project](https://github.com/kamilkisiela/graphql-hive).
 
 This page contains reference and information about the process of integrating Hive to other
-frameworks or tools, usually as a new implementation of the [Hive Client](/api-reference/client)
-libraries.
+frameworks or tools, usually as a new implementation of the
+[Hive Client](/docs/api-reference/client) libraries.
 
 ## Specifications
 
 If you wish to develop a new integration or a plugin for Hive, please refer to the following
 specifications that might help you:
 
-- [Publishing GraphQL schemas to Hive from a running service](/specs/schema-reports)
-- [Usage Reporting to Hive](/specs/usage-reports)
+- [Publishing GraphQL schemas to Hive from a running service](/docs/specs/schema-reports)
+- [Usage Reporting to Hive](/docs/specs/usage-reports)
 
 ## Future Development
 
