@@ -1,16 +1,13 @@
 import type { FastifyLoggerInstance } from 'fastify';
 
 const errorTypes = ['unhandledRejection', 'uncaughtException'];
-const signalTraps = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
+const signalTraps = ['SIGTERM', 'SIGINT', 'SIGUSR2', 'SIGKILL'];
 
 export function registerShutdown(config: {
   logger: FastifyLoggerInstance;
   onShutdown(): void | Promise<void>;
-  noExit?: boolean;
 }) {
   let exited = false;
-
-  const shouldExit = !config.noExit;
 
   async function shutdown() {
     if (exited) {
@@ -27,13 +24,12 @@ export function registerShutdown(config: {
         config.logger.info(`process.on ${type}`);
         config.logger.error(e);
         await shutdown();
-        if (shouldExit) {
-          process.exit(0);
-        }
-      } catch (_) {
-        if (shouldExit) {
-          process.exit(1);
-        }
+        config.logger.info(`shutdown process done, exiting with code 0`);
+        process.exit(0);
+      } catch (e) {
+        config.logger.warn(`shutdown process failed, exiting with code 1`);
+        config.logger.error(e);
+        process.exit(1);
       }
     });
   });
@@ -41,11 +37,14 @@ export function registerShutdown(config: {
   signalTraps.map(type => {
     process.once(type, async () => {
       try {
+        config.logger.info(`process.on ${type}`);
         await shutdown();
-      } finally {
-        if (shouldExit) {
-          process.kill(process.pid, type);
-        }
+        config.logger.info(`shutdown process done, exiting with code 0`);
+        process.exit(0);
+      } catch (e) {
+        config.logger.warn(`shutdown process failed, exiting with code 1`);
+        config.logger.error(e);
+        process.exit(1);
       }
     });
   });
