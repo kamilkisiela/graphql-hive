@@ -71,7 +71,8 @@ export class BotKube {
                     },
                     bindings: {
                       executors: ['kubectl-all-ns'],
-                      sources: ['k8s-err-with-logs-events', 'k8s-create-events'],
+                      sources: ['k8s-err-with-logs-events', 'k8s-err-events'],
+                      actions: ['show-logs-on-error'],
                     },
                   },
                 },
