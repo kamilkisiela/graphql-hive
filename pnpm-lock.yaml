@@ -164,6 +164,7 @@ importers:
       '@graphql-typed-document-node/core': 3.2.0
       '@hive/rate-limit': workspace:*
       '@hive/server': workspace:*
+      '@hive/storage': workspace:*
       '@trpc/client': 10.20.0
       '@trpc/server': 10.20.0
       '@types/dockerode': 3.3.16
@@ -203,6 +204,7 @@ importers:
     devDependencies:
       '@hive/rate-limit': link:../packages/services/rate-limit
       '@hive/server': link:../packages/services/server
+      '@hive/storage': link:../packages/services/storage
       '@types/dockerode': 3.3.16
       '@types/ioredis': 4.28.10
       tslib: 2.5.0

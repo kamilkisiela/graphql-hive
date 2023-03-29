@@ -2,6 +2,7 @@ import { parse } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import { z } from 'zod';
+import { Change } from '@graphql-inspector/core';
 import { RegistryModel } from '../../../__generated__/types';
 import { Orchestrator, ProjectType } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
@@ -296,6 +297,7 @@ export class SchemaManager {
       metadata: string | null;
       projectType: ProjectType;
       actionFn(): Promise<void>;
+      changes: Array<Change>;
     } & TargetSelector,
   ) {
     this.logger.info(

@@ -1,4 +1,5 @@
 import { Injectable } from 'graphql-modules';
+import { Change, SerializableChange } from '@graphql-inspector/core';
 import type {
   AddAlertChannelInput,
   AddAlertInput,
@@ -309,8 +310,16 @@ export interface Storage {
       logIds: string[];
       base_schema: string | null;
       actionFn(): Promise<void>;
+      changes: Array<Change>;
     } & TargetSelector,
   ): Promise<SchemaVersion | never>;
+
+  /**
+   * Returns the changes between the given version and the previous version.
+   * If it return `null` the schema version does not have any changes persisted.
+   * This can happen if the schema version was created before we introduced persisting changes.
+   */
+  getSchemaChangesForVersion(_: { versionId: string }): Promise<null | Array<SerializableChange>>;
 
   updateVersionStatus(
     _: {

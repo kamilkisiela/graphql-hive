@@ -7,6 +7,9 @@
   "engines": {
     "node": ">=12"
   },
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "build": "bob runify --single",
     "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts"

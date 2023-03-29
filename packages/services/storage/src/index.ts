@@ -8,6 +8,7 @@ import {
 } from 'slonik';
 import { update } from 'slonik-utilities';
 import zod from 'zod';
+import type { SerializableChange } from '@graphql-inspector/core';
 import type {
   ActivityObject,
   Alert,
@@ -51,6 +52,7 @@ import {
   tokens,
   users,
 } from './db';
+import { SchemaChangeModel } from './schema-change-model';
 import type { Slonik } from './shared';
 
 export { ConnectionError } from 'slonik';
@@ -2025,6 +2027,29 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           }),
         );
 
+        if (input.changes.length > 0) {
+          await trx.query(sql`
+            INSERT INTO public.schema_version_changes (
+              "schema_version_id",
+              "change_type",
+              "severity_level",
+              "meta"
+            ) VALUES ${sql.join(
+              input.changes.map(
+                change =>
+                  // Note: change.criticality.level is actually a computed value from meta
+                  sql`(
+                    ${version.id},
+                    ${change.type},
+                    ${change.criticality.level},
+                    ${JSON.stringify(change.meta)}::jsonb
+                  )`,
+              ),
+              sql`\n,`,
+            )}
+          `);
+        }
+
         await input.actionFn();
 
         return {
@@ -2041,6 +2066,27 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         commit: output.log.id,
         base_schema: input.base_schema,
       };
+    },
+
+    async getSchemaChangesForVersion(args) {
+      // TODO: should this be paginated?
+      const changes = await pool.query<unknown>(sql`
+        SELECT
+          "change_type" as "type",
+          "severity_level",
+          "meta"
+        FROM
+          "public"."schema_version_changes"
+        WHERE
+          "schema_version_id" = ${args.versionId}
+      `);
+
+      if (changes.rows.length === 0) {
+        return null;
+      }
+
+      // TODO: I don't like the cast...
+      return changes.rows.map(row => SchemaChangeModel.parse(row) as SerializableChange);
     },
 
     async updateVersionStatus({ version, valid }) {

@@ -41,7 +41,7 @@
     "prettier": "prettier --cache --write --list-different --ignore-unknown \"**/*\"",
     "release": "pnpm build:libraries && changeset publish",
     "seed": "tsx scripts/seed-local-env.ts",
-    "test": "vitest .",
+    "test": "vitest",
     "test:e2e": "CYPRESS_BASE_URL=$HIVE_APP_BASE_URL cypress run",
     "typecheck": "pnpm turbo typecheck --color",
     "upload-sourcemaps": "./scripts/upload-sourcemaps.sh",

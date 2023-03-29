@@ -856,6 +856,7 @@ export class SchemaPublisher {
           });
         }
       },
+      changes,
     });
 
     if (changes.length > 0 || errors.length > 0) {
