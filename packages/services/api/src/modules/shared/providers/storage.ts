@@ -256,7 +256,7 @@ export interface Storage {
   hasSchema(_: TargetSelector): Promise<boolean>;
   getLatestSchemas(
     _: {
-      version?: string;
+      onlyComposable?: boolean;
     } & TargetSelector,
   ): Promise<{
     schemas: Schema[];
@@ -277,6 +277,7 @@ export interface Storage {
   getSchemasOfPreviousVersion(
     _: {
       version: string;
+      onlyComposable: boolean;
     } & TargetSelector,
   ): Promise<readonly Schema[] | never>;
   getVersions(_: Paginated<TargetSelector>): Promise<

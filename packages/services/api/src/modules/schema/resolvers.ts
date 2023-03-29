@@ -103,6 +103,9 @@ export const resolvers: SchemaModule.Resolvers = {
         .update(
           JSON.stringify({
             ...input,
+            organization,
+            project,
+            target,
             service: input.service?.toLowerCase(),
           }),
         )
@@ -314,6 +317,7 @@ export const resolvers: SchemaModule.Resolvers = {
       const translator = injector.get(IdTranslator);
       const schemaManager = injector.get(SchemaManager);
       const projectManager = injector.get(ProjectManager);
+      const organizationManager = injector.get(OrganizationManager);
       const helper = injector.get(SchemaHelper);
 
       const [organizationId, projectId, targetId] = await Promise.all([
@@ -322,10 +326,15 @@ export const resolvers: SchemaModule.Resolvers = {
         translator.translateTargetId(selector),
       ]);
 
-      const project = await projectManager.getProject({
-        organization: organizationId,
-        project: projectId,
-      });
+      const [project, organization] = await Promise.all([
+        projectManager.getProject({
+          organization: organizationId,
+          project: projectId,
+        }),
+        organizationManager.getOrganization({
+          organization: organizationId,
+        }),
+      ]);
       const orchestrator = schemaManager.matchOrchestrator(project.type);
 
       // TODO: collect stats from a period between these two versions
@@ -335,6 +344,7 @@ export const resolvers: SchemaModule.Resolvers = {
           project: projectId,
           target: targetId,
           version: selector.version,
+          onlyComposable: organization.featureFlags.compareToPreviousComposableVersion === true,
         }),
         injector.get(SchemaManager).getSchemasOfVersion({
           organization: organizationId,
@@ -358,6 +368,12 @@ export const resolvers: SchemaModule.Resolvers = {
             schemasAfter.map(s => helper.createSchemaObject(s)),
             project.externalComposition,
           ),
+          organization.featureFlags.compareToPreviousComposableVersion === true
+            ? // Do not show schema changes if the new version is not composable
+              // It only applies when the feature flag is enabled.
+              // Otherwise, we show the errors as usual.
+              'reject-on-graphql-errors'
+            : 'ignore-errors',
         ),
       ]).catch(reason => {
         if (reason instanceof SchemaBuildError) {
