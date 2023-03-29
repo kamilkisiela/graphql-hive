@@ -21,7 +21,7 @@
   "scripts": {
     "build": "pnpm turbo build --color",
     "build:libraries": "pnpm graphql:generate && pnpm turbo build --filter=./packages/libraries/* --color",
-    "build:services": "pnpm turbo build  --filter=./packages/services/**/* --color",
+    "build:services": "pnpm turbo build  --filter=./packages/services/**/* --filter=./packages/migrations --color",
     "build:web": "pnpm turbo build --filter=./packages/web/* --color",
     "cargo:fix": "bash ./scripts/fix-symbolic-link.sh",
     "docker:build": "docker buildx bake -f docker/docker.hcl --load build",
