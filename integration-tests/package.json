@@ -32,8 +32,8 @@
     "@graphql-hive/client": "workspace:*",
     "@hive/rate-limit": "workspace:*",
     "@hive/server": "workspace:*",
-    "@types/dockerode": "3.3.16",
     "@hive/storage": "workspace:*",
+    "@types/dockerode": "3.3.16",
     "@types/ioredis": "4.28.10",
     "tslib": "2.5.0",
     "vitest": "0.30.1"
