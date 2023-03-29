@@ -525,6 +525,7 @@ export const InputFieldAddedModel = implement<InputFieldAddedChange>().with({
     inputName: z.string(),
     addedInputFieldName: z.string(),
     isAddedInputFieldTypeNullable: z.boolean(),
+    addedInputFieldType: z.string()
   }),
 });
 
@@ -543,6 +544,7 @@ export const InputFieldDescriptionRemovedModel =
     meta: z.object({
       inputName: z.string(),
       inputFieldName: z.string(),
+      removedDescription: z.string()
     }),
   });
 

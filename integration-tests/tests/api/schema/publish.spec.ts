@@ -1926,6 +1926,7 @@ describe.only('schema publishing changes are persisted', () => {
         inputName: 'A',
         addedInputFieldName: 'b',
         isAddedInputFieldTypeNullable: true,
+        addedInputFieldType: "String"
       },
       type: 'INPUT_FIELD_ADDED',
     },
@@ -1957,6 +1958,7 @@ describe.only('schema publishing changes are persisted', () => {
         inputName: 'A',
         addedInputFieldName: 'b',
         isAddedInputFieldTypeNullable: false,
+        addedInputFieldType: "String!"
       },
       type: 'INPUT_FIELD_ADDED',
     },
@@ -2022,6 +2024,7 @@ describe.only('schema publishing changes are persisted', () => {
       meta: {
         inputName: 'A',
         inputFieldName: 'a',
+        removedDescription: "yo"
       },
       type: 'INPUT_FIELD_DESCRIPTION_REMOVED',
     },
