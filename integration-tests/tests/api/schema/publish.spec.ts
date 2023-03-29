@@ -615,7 +615,7 @@ function connectionString(dbName = POSTGRES_DB) {
 }
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 
-describe.only('schema publishing changes are persisted', () => {
+describe('schema publishing changes are persisted', () => {
   let storage: Awaited<ReturnType<typeof createStorage>>;
   beforeAll(async () => {
     storage = await createStorage(connectionString(), 1);
