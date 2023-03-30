@@ -1,0 +1,14 @@
+{
+  "commitMessageTopic": "Rust crate {{depName}}",
+  "fileMatch": [
+    "(^|/)Cargo\\.toml$"
+  ],
+  "versioning": "cargo",
+  "automerge": true,
+  "packageRules": [
+    {
+      "matchPackageNames": ["apollo-router"],
+      "rangeStrategy": "pin"
+    }
+  ]
+}
