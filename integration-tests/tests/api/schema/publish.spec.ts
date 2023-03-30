@@ -1,4 +1,6 @@
 import 'reflect-metadata';
+import { graphql } from 'testkit/gql';
+import { execute } from 'testkit/graphql';
 
 /* eslint-disable no-process-env */
 import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
@@ -521,7 +523,7 @@ describe.each`
         .publishSchema({
           author: 'Kamil',
           commit: 'abc123',
-          sdl: `type Query { ping: String pong: String }`,
+          sdl: `type Query { ping: String }`,
           ...serviceName,
           ...serviceUrl,
           force: true,
@@ -2614,4 +2616,188 @@ describe('schema publishing changes are persisted', () => {
       type: 'UNION_MEMBER_REMOVED',
     },
   });
+});
+
+const SchemaCompareToPreviousVersionQuery = graphql(`
+  query SchemaCompareToPreviousVersionQuery(
+    $organization: ID!
+    $project: ID!
+    $target: ID!
+    $version: ID!
+  ) {
+    schemaCompareToPrevious(
+      selector: {
+        organization: $organization
+        project: $project
+        target: $target
+        version: $version
+      }
+    ) {
+      ... on SchemaCompareResult {
+        initial
+        changes {
+          total
+          nodes {
+            path
+            message
+            criticality
+          }
+        }
+        diff {
+          before
+          after
+        }
+      }
+    }
+  }
+`);
+
+test.only('Query.schemaCompareToPrevious', async () => {
+  const storage = await createStorage(connectionString(), 1);
+
+  try {
+    const serviceName = {
+      service: 'test',
+    };
+
+    const serviceUrl = { url: 'http://localhost:4000' };
+
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { createToken, target, project } = await createProject(ProjectType.Federation, {});
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
+
+    const publishResult = await readWriteToken
+      .publishSchema({
+        author: 'gilad',
+        commit: '123',
+        sdl: `type Query { ping: String }`,
+        ...serviceName,
+        ...serviceUrl,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+    expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    const publishResult2 = await readWriteToken
+      .publishSchema({
+        force: true,
+        author: 'gilad',
+        commit: '456',
+        sdl: `type Query { ping: Int }`,
+        ...serviceName,
+        ...serviceUrl,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    if (publishResult2.schemaPublish.__typename !== 'SchemaPublishSuccess') {
+      expect(publishResult2.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+      return;
+    }
+
+    const latestVersion = await storage.getLatestVersion({
+      target: target.id,
+      project: project.id,
+      organization: organization.id,
+    });
+
+    const result = await execute({
+      document: SchemaCompareToPreviousVersionQuery,
+      variables: {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        target: target.cleanId,
+        version: latestVersion.id,
+      },
+      authToken: ownerToken,
+    }).then(res => res.expectNoGraphQLErrors());
+
+    expect(result.schemaCompareToPrevious).toMatchInlineSnapshot(`
+      {
+        changes: {
+          nodes: [
+            {
+              criticality: Breaking,
+              message: Field 'Query.ping' changed type from 'String' to 'Int',
+              path: [
+                Query,
+                ping,
+              ],
+            },
+          ],
+          total: 1,
+        },
+        diff: {
+          after: directive @core(as: String, feature: String!, for: core__Purpose) repeatable on SCHEMA
+
+      directive @join__field(graph: join__Graph, provides: join__FieldSet, requires: join__FieldSet) on FIELD_DEFINITION
+
+      directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+      directive @join__owner(graph: join__Graph!) on INTERFACE | OBJECT
+
+      directive @join__type(graph: join__Graph!, key: join__FieldSet) repeatable on INTERFACE | OBJECT
+
+      type Query {
+        ping: Int
+      }
+
+      enum core__Purpose {
+        """
+        \`EXECUTION\` features provide metadata necessary to for operation execution.
+        """
+        EXECUTION
+
+        """
+        \`SECURITY\` features provide metadata necessary to securely resolve fields.
+        """
+        SECURITY
+      }
+
+      scalar join__FieldSet
+
+      enum join__Graph {
+        TEST
+      },
+          before: directive @core(as: String, feature: String!, for: core__Purpose) repeatable on SCHEMA
+
+      directive @join__field(graph: join__Graph, provides: join__FieldSet, requires: join__FieldSet) on FIELD_DEFINITION
+
+      directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+      directive @join__owner(graph: join__Graph!) on INTERFACE | OBJECT
+
+      directive @join__type(graph: join__Graph!, key: join__FieldSet) repeatable on INTERFACE | OBJECT
+
+      type Query {
+        ping: String
+      }
+
+      enum core__Purpose {
+        """
+        \`EXECUTION\` features provide metadata necessary to for operation execution.
+        """
+        EXECUTION
+
+        """
+        \`SECURITY\` features provide metadata necessary to securely resolve fields.
+        """
+        SECURITY
+      }
+
+      scalar join__FieldSet
+
+      enum join__Graph {
+        TEST
+      },
+        },
+        initial: true,
+      }
+    `);
+  } finally {
+    await storage.destroy();
+  }
 });

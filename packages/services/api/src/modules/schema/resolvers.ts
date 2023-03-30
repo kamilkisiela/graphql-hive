@@ -22,6 +22,8 @@ import type {
   GraphQLObjectTypeMapper,
   GraphQLScalarTypeMapper,
   GraphQLUnionTypeMapper,
+  SchemaCompareError,
+  SchemaCompareResult,
 } from '../../shared/mappers';
 import type { WithGraphQLParentInfo, WithSchemaCoordinatesUsage } from '../../shared/mappers';
 import { buildSchema, createConnection } from '../../shared/schema';
@@ -37,6 +39,7 @@ import { SchemaBuildError } from './providers/orchestrators/errors';
 import { ensureSDL, isCompositeSchema, SchemaHelper } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
+import { schemaChangeFromMeta } from './schema-change-from-meta';
 
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 const GraphQLSchemaStringModel = z.string().max(5_000_000).min(0);
@@ -320,33 +323,41 @@ export const resolvers: SchemaModule.Resolvers = {
         ),
       ])
         .then(([before, after]) => {
-          if (!before) {
-            return [null, after] as const;
-          }
+          const result: SchemaCompareResult = {
+            result: {
+              schemas: [before, after],
+              versionSelector: {
+                organization: organizationId,
+                project: projectId,
+                target: targetId,
+                version: selector.version,
+              },
+              serviceUrlChanges: detectUrlChanges(schemasBefore, schemasAfter).map(change => {
+                return {
+                  message: change.serviceUrl.after
+                    ? `[${change.serviceName}] New service url: '${
+                        change.serviceUrl.after
+                      }' (previously: '${change.serviceUrl.before ?? 'none'}')`
+                    : `[${change.serviceName}] Service url removed (previously: '${
+                        change.serviceUrl.before ?? 'none'
+                      }'`,
+                  criticality: 'Dangerous' satisfies CriticalityLevel,
+                } as const;
+              }),
+            },
+          };
 
-          return [
-            before,
-            after,
-            // TODO: becomes obsolete once we persist errors and changes
-            detectUrlChanges(schemasBefore, schemasAfter).map(change => {
-              return {
-                message: change.serviceUrl.after
-                  ? `[${change.serviceName}] New service url: '${
-                      change.serviceUrl.after
-                    }' (previously: '${change.serviceUrl.before ?? 'none'}')`
-                  : `[${change.serviceName}] Service url removed (previously: '${
-                      change.serviceUrl.before ?? 'none'
-                    }'`,
-                criticality: 'Dangerous' satisfies CriticalityLevel,
-              } as const;
-            }),
-          ] as const;
+          return result;
         })
+
         .catch(reason => {
           if (reason instanceof SchemaBuildError) {
-            return Promise.resolve({
-              message: reason.message,
-            });
+            const result: SchemaCompareError = {
+              error: {
+                message: reason.message,
+              },
+            };
+            return Promise.resolve(result);
           }
 
           return Promise.reject(reason);
@@ -592,7 +603,7 @@ export const resolvers: SchemaModule.Resolvers = {
       ).raw;
     },
     async baseSchema(version) {
-      return version.base_schema || null;
+      return version.baseSchema || null;
     },
     async explorer(version, { usage }, { injector }) {
       const project = await injector.get(ProjectManager).getProject({
@@ -633,18 +644,37 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   SchemaCompareError: {
-    __isTypeOf(error) {
-      return 'message' in error;
+    __isTypeOf(source: unknown) {
+      return typeof source === 'object' && source != null && 'error' in source;
     },
   },
   SchemaCompareResult: {
-    __isTypeOf(obj) {
-      return Array.isArray(obj);
+    __isTypeOf(source: unknown) {
+      return typeof source === 'object' && source != null && 'result' in source;
     },
-    initial([before]) {
-      return !before;
+    initial(source) {
+      return !!source.result.schemas[0];
     },
-    async changes([before, after, nonSchemaChanges], _, { injector }) {
+    async changes(source, _, { injector }) {
+      const schemaVersion = await injector
+        .get(SchemaManager)
+        .getSchemaVersion(source.result.versionSelector);
+
+      if (schemaVersion.hasPersistedSchemaChanges === true) {
+        const changes = await injector
+          .get(SchemaManager)
+          .getSchemaChangesForVersion(source.result.versionSelector);
+
+        if (Array.isArray(changes)) {
+          return changes.map(change => toGraphQLSchemaChange(schemaChangeFromMeta(change)));
+        }
+      }
+
+      // LEGACY LAND
+      // If we don't have the stuff in the database we compute it on demand.
+
+      const [before, after] = source.result.schemas;
+
       if (!before) {
         return [];
       }
@@ -670,9 +700,11 @@ export const resolvers: SchemaModule.Resolvers = {
 
       const schemaChanges = await injector.get(Inspector).diff(previousSchema, currentSchema);
 
-      return schemaChanges.concat(nonSchemaChanges);
+      return schemaChanges.map(toGraphQLSchemaChange).concat(source.result.serviceUrlChanges);
     },
-    diff([before, after]) {
+    diff(source) {
+      const [before, after] = source.result.schemas;
+
       return {
         before: before ? before.raw : '',
         after: after.raw,
@@ -701,14 +733,6 @@ export const resolvers: SchemaModule.Resolvers = {
       return schema.service_url;
     },
   },
-  // DeletedCompositeSchema: {
-  //   __isTypeOf(obj) {
-  //     return obj.kind === 'composite' && obj.action === 'DELETE';
-  //   },
-  //   service(schema) {
-  //     return schema.service_name;
-  //   },
-  // },
   SchemaConnection: createConnection(),
   SchemaVersionConnection: {
     pageInfo(info) {
@@ -720,7 +744,7 @@ export const resolvers: SchemaModule.Resolvers = {
       };
     },
   },
-  SchemaChangeConnection: createConnection(toGraphQLSchemaChange),
+  SchemaChangeConnection: createConnection(),
   SchemaErrorConnection: createConnection(),
   SchemaCheckSuccess: {
     __isTypeOf(obj) {

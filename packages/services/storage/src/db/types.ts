@@ -172,6 +172,7 @@ export interface schema_versions {
   action_id: string;
   base_schema: string | null;
   created_at: Date;
+  has_persisted_schema_changes: boolean | null;
   id: string;
   is_composable: boolean;
   target_id: string;

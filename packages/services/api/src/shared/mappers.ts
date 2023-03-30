@@ -11,11 +11,11 @@ import type {
   GraphQLSchema,
   GraphQLUnionType,
 } from 'graphql';
-import { Change } from '@graphql-inspector/core';
 import type {
   ClientStats,
   CriticalityLevel,
   OperationStats,
+  SchemaChange,
   SchemaError,
 } from '../__generated__/types';
 import type {
@@ -98,7 +98,7 @@ export type GraphQLInputObjectTypeMapper = WithSchemaCoordinatesUsage<{
 }>;
 export type GraphQLScalarTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLScalarType }>;
 
-export type SchemaChangeConnection = ReadonlyArray<Change>;
+export type SchemaChangeConnection = ReadonlyArray<SchemaChange>;
 export type SchemaErrorConnection = readonly SchemaError[];
 export type UserConnection = readonly User[];
 export type MemberConnection = readonly Member[];
@@ -118,21 +118,31 @@ export type SchemaVersionConnection = {
   hasMore: boolean;
 };
 type SchemaOnlyObject = Pick<SchemaObject, 'document' | 'raw'>;
-export type SchemaComparePayload =
-  | SchemaCompareResult
-  | {
-      message: string;
+export type SchemaComparePayload = SchemaCompareResult | SchemaCompareError;
+
+export type SchemaCompareError = {
+  error: {
+    message: string;
+  };
+  result?: never;
+};
+
+export type SchemaCompareResult = {
+  error?: never;
+  result: {
+    schemas: readonly [SchemaOnlyObject | null, SchemaOnlyObject];
+    versionSelector: {
+      organization: string;
+      project: string;
+      target: string;
+      version: string;
     };
-export type SchemaCompareResult =
-  | readonly [
-      SchemaOnlyObject,
-      SchemaOnlyObject,
-      Array<{
-        message: string;
-        criticality: CriticalityLevel;
-      }>,
-    ]
-  | readonly [undefined | null, SchemaOnlyObject];
+    serviceUrlChanges: Array<{
+      message: string;
+      criticality: CriticalityLevel;
+    }>;
+  };
+};
 
 export type SingleSchema = SingleSchemaEntity;
 export type PushedCompositeSchema = PushedCompositeSchemaEntity;

@@ -330,7 +330,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       valid: version.is_composable,
       date: version.created_at as any,
       commit: version.action_id,
-      base_schema: version.base_schema,
+      baseSchema: version.base_schema,
+      hasPersistedSchemaChanges: version.has_persisted_schema_changes ?? false,
     };
   }
 
@@ -1614,11 +1615,19 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async getMaybeLatestValidVersion({ target }) {
       const version = await pool.maybeOne<
         Slonik<
-          Pick<schema_versions, 'id' | 'is_composable' | 'created_at' | 'action_id' | 'base_schema'>
+          Pick<
+            schema_versions,
+            | 'id'
+            | 'is_composable'
+            | 'created_at'
+            | 'action_id'
+            | 'base_schema'
+            | 'has_persisted_schema_changes'
+          >
         >
       >(
         sql`
-          SELECT sv.id, sv.is_composable, sv.created_at, sv.action_id, sv.base_schema
+          SELECT sv.id, sv.is_composable, sv.created_at, sv.action_id, sv.base_schema, sv.has_persisted_schema_changes
           FROM public.schema_versions as sv
           WHERE sv.target_id = ${target} AND sv.is_composable IS TRUE
           ORDER BY sv.created_at DESC
@@ -1635,17 +1644,26 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         valid: version.is_composable,
         date: version.created_at as any,
         commit: version.action_id,
-        base_schema: version.base_schema,
+        baseSchema: version.base_schema,
+        hasPersistedSchemaChanges: version.has_persisted_schema_changes ?? false,
       };
     },
     async getLatestValidVersion({ target }) {
       const version = await pool.one<
         Slonik<
-          Pick<schema_versions, 'id' | 'is_composable' | 'created_at' | 'action_id' | 'base_schema'>
+          Pick<
+            schema_versions,
+            | 'id'
+            | 'is_composable'
+            | 'created_at'
+            | 'action_id'
+            | 'base_schema'
+            | 'has_persisted_schema_changes'
+          >
         >
       >(
         sql`
-          SELECT sv.id, sv.is_composable, sv.created_at, sv.action_id, sv.base_schema
+          SELECT sv.id, sv.is_composable, sv.created_at, sv.action_id, sv.base_schema, sv.has_persisted_schema_changes
           FROM public.schema_versions as sv
           WHERE sv.target_id = ${target} AND sv.is_composable IS TRUE
           ORDER BY sv.created_at DESC
@@ -1658,17 +1676,26 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         valid: version.is_composable,
         date: version.created_at as any,
         commit: version.action_id,
-        base_schema: version.base_schema,
+        baseSchema: version.base_schema,
+        hasPersistedSchemaChanges: version.has_persisted_schema_changes ?? false,
       };
     },
     async getLatestVersion({ project, target }) {
       const version = await pool.one<
         Slonik<
-          Pick<schema_versions, 'id' | 'is_composable' | 'created_at' | 'action_id' | 'base_schema'>
+          Pick<
+            schema_versions,
+            | 'id'
+            | 'is_composable'
+            | 'created_at'
+            | 'action_id'
+            | 'base_schema'
+            | 'has_persisted_schema_changes'
+          >
         >
       >(
         sql`
-          SELECT sv.id, sv.is_composable, sv.created_at, sv.action_id, sv.base_schema
+          SELECT sv.id, sv.is_composable, sv.created_at, sv.action_id, sv.base_schema, sv.has_persisted_schema_changes
           FROM public.schema_versions as sv
           LEFT JOIN public.targets as t ON (t.id = sv.target_id)
           WHERE sv.target_id = ${target} AND t.project_id = ${project}
@@ -1682,18 +1709,27 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         valid: version.is_composable,
         date: version.created_at as any,
         commit: version.action_id,
-        base_schema: version.base_schema,
+        baseSchema: version.base_schema,
+        hasPersistedSchemaChanges: version.has_persisted_schema_changes ?? false,
       };
     },
 
     async getMaybeLatestVersion({ project, target }) {
       const version = await pool.maybeOne<
         Slonik<
-          Pick<schema_versions, 'id' | 'is_composable' | 'created_at' | 'action_id' | 'base_schema'>
+          Pick<
+            schema_versions,
+            | 'id'
+            | 'is_composable'
+            | 'created_at'
+            | 'action_id'
+            | 'base_schema'
+            | 'has_persisted_schema_changes'
+          >
         >
       >(
         sql`
-          SELECT sv.id, sv.is_composable, sv.created_at, sv.action_id, sv.base_schema
+          SELECT sv.id, sv.is_composable, sv.created_at, sv.action_id, sv.base_schema, sv.has_persisted_schema_changes,
           FROM public.schema_versions as sv
           LEFT JOIN public.targets as t ON (t.id = sv.target_id)
           WHERE sv.target_id = ${target} AND t.project_id = ${project}
@@ -1711,7 +1747,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         valid: version.is_composable,
         date: version.created_at as any,
         commit: version.action_id,
-        base_schema: version.base_schema,
+        baseSchema: version.base_schema,
+        hasPersistedSchemaChanges: version.has_persisted_schema_changes ?? false,
       };
     },
     async getLatestSchemas({ organization, project, target, onlyComposable }) {
@@ -1817,13 +1854,18 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         Slonik<
           Pick<
             schema_versions,
-            'id' | 'is_composable' | 'created_at' | 'base_schema' | 'action_id'
+            | 'id'
+            | 'is_composable'
+            | 'created_at'
+            | 'base_schema'
+            | 'action_id'
+            | 'has_persisted_schema_changes'
           > &
             Pick<schema_log, 'author' | 'service_name'>
         >
       >(sql`
         SELECT 
-          sv.id, sv.is_composable, sv.created_at, sv.base_schema, sv.action_id,
+          sv.id, sv.is_composable, sv.created_at, sv.base_schema, sv.action_id, sv.has_persisted_schema_changes,
           sl.author, lower(sl.service_name) as service_name
         FROM public.schema_versions as sv
         LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
@@ -1836,16 +1878,17 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         valid: result.is_composable,
         date: result.created_at as any,
         commit: result.action_id,
-        base_schema: result.base_schema,
+        baseSchema: result.base_schema,
         author: result.author,
         service: result.service_name,
+        hasPersistedSchemaChanges: result.has_persisted_schema_changes ?? false,
       };
     },
 
     async getVersions({ project, target, after, limit }) {
       const query = sql`
       SELECT 
-        sv.id, sv.is_composable, sv.created_at, sv.base_schema, sv.action_id,
+        sv.id, sv.is_composable, sv.created_at, sv.base_schema, sv.action_id, sv.has_persisted_schema_changes,
         sl.author, lower(sl.service_name) as service_name
       FROM public.schema_versions as sv
       LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
@@ -1859,7 +1902,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       LIMIT ${limit + 1}
     `;
       const result = await pool.query<
-        Pick<schema_versions, 'id' | 'is_composable' | 'created_at' | 'base_schema' | 'action_id'> &
+        Pick<
+          schema_versions,
+          | 'id'
+          | 'is_composable'
+          | 'created_at'
+          | 'base_schema'
+          | 'action_id'
+          | 'has_persisted_schema_changes'
+        > &
           Pick<schema_log, 'author' | 'service_name'>
       >(query);
 
@@ -1870,7 +1921,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         valid: version.is_composable,
         date: version.created_at as any,
         commit: version.action_id,
-        base_schema: version.base_schema,
+        baseSchema: version.base_schema,
+        hasPersistedSchemaChanges: version.has_persisted_schema_changes ?? false,
       }));
 
       return {
@@ -1996,20 +2048,24 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `);
 
         // creates a new version
-        const version = await trx.one<Slonik<Pick<schema_versions, 'id' | 'created_at'>>>(sql`
+        const version = await trx.one<
+          Slonik<Pick<schema_versions, 'id' | 'created_at' | 'has_persisted_schema_changes'>>
+        >(sql`
           INSERT INTO public.schema_versions
             (
               is_composable,
               target_id,
               action_id,
-              base_schema
+              base_schema,
+              has_persisted_schema_changes
             )
           VALUES
             (
               ${input.valid},
               ${input.target},
               ${log.id},
-              ${input.base_schema}
+              ${input.base_schema},
+              ${true}
             )
           RETURNING
             id,
@@ -2064,7 +2120,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         url,
         valid: input.valid,
         commit: output.log.id,
-        base_schema: input.base_schema,
+        baseSchema: input.base_schema,
+        hasPersistedSchemaChanges: output.version.has_persisted_schema_changes ?? false,
       };
     },
 

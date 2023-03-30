@@ -227,6 +227,16 @@ export class SchemaManager {
     };
   }
 
+  async getSchemaChangesForVersion(selector: TargetSelector & { version: string }) {
+    this.logger.debug('Fetching single schema version changes (selector=%o)', selector);
+    await this.authManager.ensureTargetAccess({
+      ...selector,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    return await this.storage.getSchemaChangesForVersion({ versionId: selector.version });
+  }
+
   async getSchemaVersions(selector: Paginated<TargetSelector>) {
     this.logger.debug('Fetching published schemas (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({

@@ -69,7 +69,8 @@ export interface SchemaVersion {
   valid: boolean;
   date: number;
   commit: string;
-  base_schema: string | null;
+  baseSchema: string | null;
+  hasPersistedSchemaChanges: boolean;
 }
 
 export interface SchemaObject {

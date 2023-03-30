@@ -7,7 +7,7 @@ CREATE TABLE
     "meta" jsonb NOT NULL
   );
 
--- ALTER TABLE
---   "schema_versions"
--- ADD COLUMN
---   "schema_build_error_messages" TEXT DEFAULT NULL;
+ALTER TABLE
+  "schema_versions"
+ADD COLUMN
+  "has_persisted_schema_changes" BOOLEAN;
