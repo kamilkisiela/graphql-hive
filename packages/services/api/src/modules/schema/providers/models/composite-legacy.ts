@@ -4,26 +4,17 @@ import { StitchingOrchestrator } from '../orchestrators/stitching';
 import { RegistryChecks } from '../registry-checks';
 import { swapServices } from '../schema-helper';
 import type { PublishInput } from '../schema-publisher';
-import type {
-  DeletedCompositeSchema,
-  Project,
-  PushedCompositeSchema,
-  Target,
-} from './../../../../shared/entities';
+import type { Project, PushedCompositeSchema, Target } from './../../../../shared/entities';
 import { ProjectType } from './../../../../shared/entities';
 import { Logger } from './../../../shared/providers/logger';
 import {
   CheckFailureReasonCode,
-  DeleteFailureReasonCode,
   PublishFailureReasonCode,
   PublishIgnoreReasonCode,
   /* Check */
   SchemaCheckConclusion,
   SchemaCheckFailureReason,
   SchemaCheckResult,
-  /* Delete */
-  SchemaDeleteConclusion,
-  SchemaDeleteResult,
   /* Publish */
   SchemaPublishConclusion,
   SchemaPublishFailureReason,
@@ -126,7 +117,7 @@ export class CompositeLegacyModel {
         project,
         schemas,
         selector,
-        latestVersion,
+        version: latestVersion,
       }),
     ]);
 
@@ -274,7 +265,7 @@ export class CompositeLegacyModel {
         },
         project,
         schemas,
-        latestVersion,
+        version: latestVersion,
       }),
       isFederation
         ? {
@@ -365,110 +356,6 @@ export class CompositeLegacyModel {
     return {
       conclusion: SchemaPublishConclusion.Reject,
       reasons,
-    };
-  }
-
-  async delete({
-    input,
-    latest,
-    project,
-    selector,
-    baseSchema,
-  }: {
-    input: {
-      serviceName: string;
-    };
-    project: Project;
-    selector: {
-      target: string;
-      project: string;
-      organization: string;
-    };
-    latest: {
-      isComposable: boolean;
-      schemas: PushedCompositeSchema[];
-    };
-    baseSchema: string | null;
-  }): Promise<SchemaDeleteResult> {
-    const incoming: DeletedCompositeSchema = {
-      kind: 'composite',
-      id: temp,
-      target: selector.target,
-      date: Date.now() as any,
-      service_name: input.serviceName,
-      action: 'DELETE',
-    };
-
-    const latestVersion = latest;
-
-    const serviceNameCheck = await this.checks.serviceName({
-      name: incoming.service_name,
-    });
-
-    if (serviceNameCheck.status === 'failed') {
-      return {
-        conclusion: SchemaDeleteConclusion.Reject,
-        reasons: [
-          {
-            code: DeleteFailureReasonCode.MissingServiceName,
-          },
-        ],
-      };
-    }
-
-    const orchestrator = project.type === ProjectType.FEDERATION ? this.federation : this.stitching;
-    const schemas = latestVersion.schemas.filter(s => s.service_name !== input.serviceName);
-
-    const [compositionCheck, diffCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator,
-        project,
-        schemas,
-        baseSchema,
-      }),
-      this.checks.diff({
-        orchestrator,
-        project,
-        schemas,
-        selector,
-        latestVersion,
-      }),
-    ]);
-
-    if (
-      compositionCheck.status === 'failed' &&
-      compositionCheck.reason.errorsBySource.graphql.length > 0
-    ) {
-      return {
-        conclusion: SchemaDeleteConclusion.Reject,
-        reasons: [
-          {
-            code: DeleteFailureReasonCode.CompositionFailure,
-            compositionErrors: compositionCheck.reason.errorsBySource.graphql,
-          },
-        ],
-      };
-    }
-
-    const { changes, breakingChanges } =
-      diffCheck.status === 'failed'
-        ? {
-            changes: diffCheck.reason.changes ?? [],
-            breakingChanges: diffCheck.reason.breakingChanges ?? [],
-          }
-        : {
-            changes: diffCheck.result?.changes ?? [],
-            breakingChanges: [],
-          };
-
-    return {
-      conclusion: SchemaDeleteConclusion.Accept,
-      state: {
-        composable: compositionCheck.status === 'completed',
-        changes,
-        breakingChanges,
-        compositionErrors: compositionCheck.reason?.errors ?? [],
-      },
     };
   }
 }
