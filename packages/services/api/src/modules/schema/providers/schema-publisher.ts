@@ -148,22 +148,32 @@ export class SchemaPublisher {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    const [target, project, latestVersion] = await Promise.all([
-      this.targetManager.getTarget({
-        organization: input.organization,
-        project: input.project,
-        target: input.target,
-      }),
-      this.projectManager.getProject({
-        organization: input.organization,
-        project: input.project,
-      }),
-      this.schemaManager.getLatestSchemas({
-        organization: input.organization,
-        project: input.project,
-        target: input.target,
-      }),
-    ]);
+    const [target, project, organization, latestVersion, latestComposableVersion] =
+      await Promise.all([
+        this.targetManager.getTarget({
+          organization: input.organization,
+          project: input.project,
+          target: input.target,
+        }),
+        this.projectManager.getProject({
+          organization: input.organization,
+          project: input.project,
+        }),
+        this.organizationManager.getOrganization({
+          organization: input.organization,
+        }),
+        this.schemaManager.getLatestSchemas({
+          organization: input.organization,
+          project: input.project,
+          target: input.target,
+        }),
+        this.schemaManager.getLatestSchemas({
+          organization: input.organization,
+          project: input.project,
+          target: input.target,
+          onlyComposable: true,
+        }),
+      ]);
 
     schemaCheckCount.inc({
       model: project.legacyRegistryModel ? 'legacy' : 'modern',
@@ -203,8 +213,15 @@ export class SchemaPublisher {
                 schemas: [ensureSingleSchema(latestVersion.schemas)],
               }
             : null,
+          latestComposable: latestComposableVersion
+            ? {
+                isComposable: latestComposableVersion.valid,
+                schemas: [ensureSingleSchema(latestComposableVersion.schemas)],
+              }
+            : null,
           baseSchema,
           project,
+          organization,
         });
         break;
       case ProjectType.FEDERATION:
@@ -222,8 +239,15 @@ export class SchemaPublisher {
                 schemas: ensureCompositeSchemas(latestVersion.schemas),
               }
             : null,
+          latestComposable: latestComposableVersion
+            ? {
+                isComposable: latestComposableVersion.valid,
+                schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
+              }
+            : null,
           baseSchema,
           project,
+          organization,
         });
         break;
       default:

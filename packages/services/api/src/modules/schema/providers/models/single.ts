@@ -32,7 +32,9 @@ export class SingleModel {
     input,
     selector,
     latest,
+    latestComposable,
     project,
+    organization,
     baseSchema,
   }: {
     input: {
@@ -47,8 +49,13 @@ export class SingleModel {
       isComposable: boolean;
       schemas: [SingleSchema];
     } | null;
+    latestComposable: {
+      isComposable: boolean;
+      schemas: [SingleSchema];
+    } | null;
     baseSchema: string | null;
     project: Project;
+    organization: Organization;
   }): Promise<SchemaCheckResult> {
     const incoming: SingleSchema = {
       kind: 'single',
@@ -64,6 +71,7 @@ export class SingleModel {
     const initial = latest === null;
     const latestVersion = latest;
     const schemas = [incoming] as [SingleSchema];
+    const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
 
     const checksumCheck = await this.checks.checksum({
       schemas,
@@ -94,7 +102,7 @@ export class SingleModel {
         project,
         schemas,
         selector,
-        version: latestVersion,
+        version: compareToLatest ? latest : latestComposable,
       }),
     ]);
 

@@ -289,7 +289,7 @@ describe('check', () => {
         expect: 'latest',
       });
 
-      const message = await check({
+      await check({
         sdl: /* GraphQL */ `
           type Query {
             product(id: ID!): Product
@@ -303,8 +303,6 @@ describe('check', () => {
         serviceName: 'products',
         expect: 'approved',
       });
-
-      expect(message).toMatch('topProduct');
     });
 
     test.concurrent('accepted: no changes', async () => {

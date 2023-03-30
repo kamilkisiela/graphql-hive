@@ -49,7 +49,9 @@ export class CompositeModel {
     input,
     selector,
     latest,
+    latestComposable,
     project,
+    organization,
     baseSchema,
   }: {
     input: {
@@ -65,8 +67,13 @@ export class CompositeModel {
       isComposable: boolean;
       schemas: PushedCompositeSchema[];
     } | null;
+    latestComposable: {
+      isComposable: boolean;
+      schemas: PushedCompositeSchema[];
+    } | null;
     baseSchema: string | null;
     project: Project;
+    organization: Organization;
   }): Promise<SchemaCheckResult> {
     const incoming: PushedCompositeSchema = {
       kind: 'composite',
@@ -87,6 +94,7 @@ export class CompositeModel {
       ? swapServices(latestVersion.schemas, incoming).schemas
       : [incoming];
     const initial = latest === null;
+    const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
 
     const serviceNameCheck = await this.checks.serviceName({
       name: incoming.service_name,
@@ -136,7 +144,7 @@ export class CompositeModel {
         project,
         schemas,
         selector,
-        version: latestVersion,
+        version: compareToLatest ? latest : latestComposable,
       }),
     ]);
 
