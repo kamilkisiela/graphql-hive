@@ -2652,7 +2652,7 @@ const SchemaCompareToPreviousVersionQuery = graphql(`
   }
 `);
 
-test.only('Query.schemaCompareToPrevious', async () => {
+test('Query.schemaCompareToPrevious: result is read from the', async () => {
   const storage = await createStorage(connectionString(), 1);
 
   try {
