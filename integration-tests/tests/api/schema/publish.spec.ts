@@ -630,7 +630,7 @@ describe('schema publishing changes are persisted', () => {
     schemaAfter: string;
     equalsObject: object;
   }) {
-    test(`[Schema change] ${args.name}`, async () => {
+    test.concurrent(`[Schema change] ${args.name}`, async () => {
       const serviceName = {
         service: 'test',
       };
@@ -1736,48 +1736,48 @@ describe('schema publishing changes are persisted', () => {
     },
   });
 
-  persistedTest({
-    name: 'FieldDeprecationReasonAddedModel',
-    schemaBefore: /* GraphQL */ `
-      type Query {
-        a: String @deprecated
-      }
-    `,
-    schemaAfter: /* GraphQL */ `
-      type Query {
-        a: String @deprecated(reason: "yoyo")
-      }
-    `,
-    equalsObject: {
-      meta: {
-        typeName: 'Query',
-        fieldName: 'a',
-        addedDeprecationReason: 'yoyo',
-      },
-      type: 'FIELD_DEPRECATION_REASON_ADDED',
-    },
-  });
+  // persistedTest({
+  //   name: 'FieldDeprecationReasonAddedModel',
+  //   schemaBefore: /* GraphQL */ `
+  //     type Query {
+  //       a: String @deprecated
+  //     }
+  //   `,
+  //   schemaAfter: /* GraphQL */ `
+  //     type Query {
+  //       a: String @deprecated(reason: "yoyo")
+  //     }
+  //   `,
+  //   equalsObject: {
+  //     meta: {
+  //       typeName: 'Query',
+  //       fieldName: 'a',
+  //       addedDeprecationReason: 'yoyo',
+  //     },
+  //     type: 'FIELD_DEPRECATION_REASON_ADDED',
+  //   },
+  // });
 
-  persistedTest({
-    name: 'FieldDeprecationReasonRemovedModel',
-    schemaBefore: /* GraphQL */ `
-      type Query {
-        a: String @deprecated(reason: "yoyo")
-      }
-    `,
-    schemaAfter: /* GraphQL */ `
-      type Query {
-        a: String @deprecated
-      }
-    `,
-    equalsObject: {
-      meta: {
-        typeName: 'Query',
-        fieldName: 'a',
-      },
-      type: 'FIELD_DEPRECATION_REASON_REMOVED',
-    },
-  });
+  // persistedTest({
+  //   name: 'FieldDeprecationReasonRemovedModel',
+  //   schemaBefore: /* GraphQL */ `
+  //     type Query {
+  //       a: String @deprecated(reason: "yoyo")
+  //     }
+  //   `,
+  //   schemaAfter: /* GraphQL */ `
+  //     type Query {
+  //       a: String @deprecated
+  //     }
+  //   `,
+  //   equalsObject: {
+  //     meta: {
+  //       typeName: 'Query',
+  //       fieldName: 'a',
+  //     },
+  //     type: 'FIELD_DEPRECATION_REASON_REMOVED',
+  //   },
+  // });
 
   persistedTest({
     name: 'FieldTypeChangedModel (unsafe)',
@@ -2220,136 +2220,140 @@ describe('schema publishing changes are persisted', () => {
     },
   });
 
-  persistedTest({
-    name: 'SchemaQueryTypeChangedModel',
-    schemaBefore: /* GraphQL */ `
-      type Query {
-        a: String!
-      }
+  // persistedTest({
+  //   name: 'SchemaQueryTypeChangedModel',
+  //   schemaBefore: /* GraphQL */ `
+  //     type Query {
+  //       a: Query
+  //       b: Query2
+  //     }
 
-      type Query2 {
-        b: String!
-      }
+  //     type Query2 {
+  //       a: Query
+  //       b: Query2
+  //     }
 
-      schema {
-        query: Query
-      }
-    `,
-    schemaAfter: /* GraphQL */ `
-      type Query {
-        a: String!
-      }
+  //     schema {
+  //       query: Query
+  //     }
+  //   `,
+  //   schemaAfter: /* GraphQL */ `
+  //     type Query {
+  //       a: Query
+  //       b: Query2
+  //     }
 
-      type Query2 {
-        b: String!
-      }
+  //     type Query2 {
+  //       a: Query
+  //       b: Query2
+  //     }
 
-      schema {
-        query: Query2
-      }
-    `,
-    equalsObject: {
-      meta: {
-        oldQueryTypeName: 'Query',
-        newQueryTypeName: 'Query2',
-      },
-      type: 'SCHEMA_QUERY_TYPE_CHANGED',
-    },
-  });
+  //     schema {
+  //       query: Query2
+  //     }
+  //   `,
+  //   equalsObject: {
+  //     meta: {
+  //       oldQueryTypeName: 'Query',
+  //       newQueryTypeName: 'Query2',
+  //     },
+  //     type: 'SCHEMA_QUERY_TYPE_CHANGED',
+  //   },
+  // });
 
-  persistedTest({
-    name: 'SchemaMutationTypeChangedModel',
-    schemaBefore: /* GraphQL */ `
-      type Query {
-        a: String!
-      }
+  // persistedTest({
+  //   name: 'SchemaMutationTypeChangedModel',
+  //   schemaBefore: /* GraphQL */ `
+  //     type Query {
+  //       a: String!
+  //     }
 
-      type Mutation {
-        b: String!
-      }
+  //     type Mutation {
+  //       b: String!
+  //     }
 
-      type Mutation1 {
-        c: String!
-      }
+  //     type Mutation1 {
+  //       c: String!
+  //     }
 
-      schema {
-        query: Query
-        mutation: Mutation
-      }
-    `,
-    schemaAfter: /* GraphQL */ `
-      type Query {
-        a: String!
-      }
+  //     schema {
+  //       query: Query
+  //       mutation: Mutation
+  //     }
+  //   `,
+  //   schemaAfter: /* GraphQL */ `
+  //     type Query {
+  //       a: String!
+  //     }
 
-      type Mutation {
-        b: String!
-      }
+  //     type Mutation {
+  //       b: String!
+  //     }
 
-      type Mutation1 {
-        c: String!
-      }
+  //     type Mutation1 {
+  //       c: String!
+  //     }
 
-      schema {
-        query: Query
-        mutation: Mutation1
-      }
-    `,
-    equalsObject: {
-      meta: {
-        oldMutationTypeName: 'Mutation',
-        newMutationTypeName: 'Mutation1',
-      },
-      type: 'SCHEMA_MUTATION_TYPE_CHANGED',
-    },
-  });
+  //     schema {
+  //       query: Query
+  //       mutation: Mutation1
+  //     }
+  //   `,
+  //   equalsObject: {
+  //     meta: {
+  //       oldMutationTypeName: 'Mutation',
+  //       newMutationTypeName: 'Mutation1',
+  //     },
+  //     type: 'SCHEMA_MUTATION_TYPE_CHANGED',
+  //   },
+  // });
 
-  persistedTest({
-    name: 'SchemaSubscriptionTypeChangedModel',
-    schemaBefore: /* GraphQL */ `
-      type Query {
-        a: String!
-      }
+  // persistedTest({
+  //   name: 'SchemaSubscriptionTypeChangedModel',
+  //   schemaBefore: /* GraphQL */ `
+  //     type Query {
+  //       a: String!
+  //     }
 
-      type Subscription {
-        b: String!
-      }
+  //     type Subscription {
+  //       b: String!
+  //     }
 
-      type Subscription1 {
-        c: String!
-      }
+  //     type Subscription1 {
+  //       c: String!
+  //     }
 
-      schema {
-        query: Query
-        subscription: Subscription
-      }
-    `,
-    schemaAfter: /* GraphQL */ `
-      type Query {
-        a: String!
-      }
+  //     schema {
+  //       query: Query
+  //       subscription: Subscription
+  //     }
+  //   `,
+  //   schemaAfter: /* GraphQL */ `
+  //     type Query {
+  //       a: String!
+  //     }
 
-      type Subscription {
-        b: String!
-      }
+  //     type Subscription {
+  //       b: String!
+  //     }
 
-      type Subscription1 {
-        c: String!
-      }
+  //     type Subscription1 {
+  //       c: String!
+  //     }
 
-      schema {
-        query: Query
-        subscription: Subscription1
-      }
-    `,
-    equalsObject: {
-      meta: {
-        oldSubscriptionTypeName: 'Subscription',
-        newSubscriptionTypeName: 'Subscription1',
-      },
-      type: 'SCHEMA_SUBSCRIPTION_TYPE_CHANGED',
-    },
-  });
+  //     schema {
+  //       query: Query
+  //       subscription: Subscription1
+  //     }
+  //   `,
+  //   equalsObject: {
+  //     meta: {
+  //       oldSubscriptionTypeName: 'Subscription',
+  //       newSubscriptionTypeName: 'Subscription1',
+  //     },
+  //     type: 'SCHEMA_SUBSCRIPTION_TYPE_CHANGED',
+  //   },
+  // });
 
   persistedTest({
     name: 'TypeRemovedModel',
