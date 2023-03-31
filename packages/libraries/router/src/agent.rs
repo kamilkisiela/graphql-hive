@@ -95,7 +95,7 @@ pub struct UsageAgent {
     buffer_size: usize,
     /// We need the Arc wrapper to be able to clone the agent while preserving multiple mutable reference to processor
     /// We also need the Mutex wrapper bc we cannot borrow data in an `Arc` as mutable
-    pub state: State,
+    pub state: Arc<Mutex<State>>,
     processor: Arc<Mutex<OperationProcessor>>,
 }
 
@@ -114,7 +114,7 @@ impl UsageAgent {
         let schema = parse_schema::<String>(&schema)
             .expect("parsing schema failed!")
             .into_static();
-        let state = State::new(schema);
+        let state = Arc::new(Mutex::new(State::new(schema)));
         let processor = Arc::new(Mutex::new(OperationProcessor::new()));
 
         let agent = Self {
@@ -151,14 +151,20 @@ impl UsageAgent {
             map: HashMap::new(),
             operations: Vec::new(),
         };
-        let schema = &self.state.schema;
         // iterate over reports and check if they are valid
         for op in reports {
             let operation = self
                 .processor
                 .lock()
                 .expect("couldn't acquire the processor lock")
-                .process(&op.operation_body, schema);
+                .process(
+                    &op.operation_body,
+                    &self
+                        .state
+                        .lock()
+                        .expect("failed to acquire State for produce_report")
+                        .schema,
+                );
             match operation {
                 Err(e) => {
                     tracing::warn!("Dropping operation: {}", e);
@@ -203,11 +209,16 @@ impl UsageAgent {
     }
 
     pub fn add_report(&mut self, execution_report: ExecutionReport) {
-        let size = self.state.push(execution_report);
+        let size = self
+            .state
+            .lock()
+            .expect("failed to acquire State for add_report")
+            .push(execution_report);
         self.flush_if_full(size);
     }
 
     pub fn send_report(&self, report: Report) -> Result<(), String> {
+        tracing::debug!("Sending usage report");
         const DELAY_BETWEEN_TRIES: Duration = Duration::from_millis(500);
         const MAX_TRIES: u8 = 3;
 
@@ -260,7 +271,11 @@ impl UsageAgent {
     }
 
     pub fn flush(&mut self) {
-        let execution_reports = self.state.drain();
+        let execution_reports = self
+            .state
+            .lock()
+            .expect("failed to acquire State for flush")
+            .drain();
         let size = execution_reports.len();
 
         if size > 0 {
