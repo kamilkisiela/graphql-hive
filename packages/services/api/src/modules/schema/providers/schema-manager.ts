@@ -4,7 +4,7 @@ import lodash from 'lodash';
 import { z } from 'zod';
 import { Change } from '@graphql-inspector/core';
 import { RegistryModel } from '../../../__generated__/types';
-import { Orchestrator, ProjectType } from '../../../shared/entities';
+import { Orchestrator, ProjectType, SchemaCompositionError } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { atomic, stringifySelector } from '../../../shared/helpers';
 import { SchemaVersion } from '../../../shared/mappers';
@@ -295,7 +295,7 @@ export class SchemaManager {
   }
 
   async createVersion(
-    input: {
+    input: ({
       commit: string;
       schema: string;
       author: string;
@@ -308,7 +308,18 @@ export class SchemaManager {
       projectType: ProjectType;
       actionFn(): Promise<void>;
       changes: Array<Change>;
-    } & TargetSelector,
+      previousSchemaVersion: string | null;
+    } & TargetSelector) &
+      (
+        | {
+            compositeSchemaSDL: null;
+            schemaCompositionErrors: Array<SchemaCompositionError>;
+          }
+        | {
+            compositeSchemaSDL: string;
+            schemaCompositionErrors: null;
+          }
+      ),
   ) {
     this.logger.info(
       'Creating a new version (input=%o)',

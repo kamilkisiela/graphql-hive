@@ -12,8 +12,9 @@ import {
 } from 'graphql';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
+import { SerializableChange } from '@graphql-inspector/core';
 import type { CriticalityLevel } from '../../__generated__/types';
-import { ProjectType, Schema } from '../../shared/entities';
+import { ProjectType } from '../../shared/entities';
 import { createPeriod, parseDateRangeInput } from '../../shared/helpers';
 import type {
   GraphQLEnumTypeMapper,
@@ -282,6 +283,52 @@ export const resolvers: SchemaModule.Resolvers = {
           organization: organizationId,
         }),
       ]);
+
+      const currentVersion = await schemaManager.getSchemaVersion({
+        organization: organizationId,
+        project: projectId,
+        target: targetId,
+        version: selector.version,
+      });
+
+      if (currentVersion.schemaCompositionErrors) {
+        return {
+          error: new SchemaBuildError('Composition error', currentVersion.schemaCompositionErrors),
+        } as SchemaCompareError;
+      }
+
+      const previousVersion = currentVersion.previousSchemaVersionId
+        ? await schemaManager.getSchemaVersion({
+            organization: organizationId,
+            project: projectId,
+            target: targetId,
+            version: currentVersion.previousSchemaVersionId,
+          })
+        : null;
+
+      if (
+        currentVersion.compositeSchemaSDL &&
+        currentVersion.hasPersistedSchemaChanges &&
+        previousVersion?.hasPersistedSchemaChanges
+      ) {
+        const changes = await schemaManager.getSchemaChangesForVersion({
+          ...selector,
+        });
+        return {
+          result: {
+            schemas: {
+              before: previousVersion.compositeSchemaSDL,
+              current: currentVersion.compositeSchemaSDL,
+            },
+            changes,
+          },
+        } as SchemaCompareResult;
+      }
+
+      // LEGACY LAND
+      // If we don't have the stuff in the database we compute it on demand.
+      // so we can skip the expensive stuff happening in here...
+
       const orchestrator = schemaManager.matchOrchestrator(project.type);
 
       const [schemasBefore, schemasAfter] = await Promise.all([
@@ -322,15 +369,36 @@ export const resolvers: SchemaModule.Resolvers = {
             : 'ignore-errors',
         ),
       ])
-        .then(([before, after]) => {
+        .then(async ([before, after]) => {
+          let changes: SerializableChange[] = [];
+
+          if (before) {
+            const previousSchema = buildSchema(
+              before,
+              error =>
+                new GraphQLError(
+                  `Failed to build the previous version: ${
+                    error instanceof GraphQLError ? error.message : error
+                  }`,
+                ),
+            );
+            const currentSchema = buildSchema(
+              after,
+              error =>
+                new GraphQLError(
+                  `Failed to build the selected version: ${
+                    error instanceof GraphQLError ? error.message : error
+                  }`,
+                ),
+            );
+            changes = await injector.get(Inspector).diff(previousSchema, currentSchema);
+          }
+
           const result: SchemaCompareResult = {
             result: {
-              schemas: [before, after],
-              versionSelector: {
-                organization: organizationId,
-                project: projectId,
-                target: targetId,
-                version: selector.version,
+              schemas: {
+                before: before?.raw ?? null,
+                current: after.raw,
               },
               serviceUrlChanges: detectUrlChanges(schemasBefore, schemasAfter).map(change => {
                 return {
@@ -344,6 +412,7 @@ export const resolvers: SchemaModule.Resolvers = {
                   criticality: 'Dangerous' satisfies CriticalityLevel,
                 } as const;
               }),
+              changes,
             },
           };
 
@@ -353,9 +422,7 @@ export const resolvers: SchemaModule.Resolvers = {
         .catch(reason => {
           if (reason instanceof SchemaBuildError) {
             const result: SchemaCompareError = {
-              error: {
-                message: reason.message,
-              },
+              error: reason,
             };
             return Promise.resolve(result);
           }
@@ -647,67 +714,31 @@ export const resolvers: SchemaModule.Resolvers = {
     __isTypeOf(source: unknown) {
       return typeof source === 'object' && source != null && 'error' in source;
     },
+    message: source => source.error.message,
+    details: source =>
+      source.error.errors.map(err => ({
+        message: err.message,
+        type: err.source,
+      })),
   },
   SchemaCompareResult: {
     __isTypeOf(source: unknown) {
       return typeof source === 'object' && source != null && 'result' in source;
     },
     initial(source) {
-      return !!source.result.schemas[0];
+      return source.result.schemas.before === null;
     },
-    async changes(source, _, { injector }) {
-      const schemaVersion = await injector
-        .get(SchemaManager)
-        .getSchemaVersion(source.result.versionSelector);
-
-      if (schemaVersion.hasPersistedSchemaChanges === true) {
-        const changes = await injector
-          .get(SchemaManager)
-          .getSchemaChangesForVersion(source.result.versionSelector);
-
-        if (Array.isArray(changes)) {
-          return changes.map(change => toGraphQLSchemaChange(schemaChangeFromMeta(change)));
-        }
-      }
-
-      // LEGACY LAND
-      // If we don't have the stuff in the database we compute it on demand.
-
-      const [before, after] = source.result.schemas;
-
-      if (!before) {
-        return [];
-      }
-
-      const previousSchema = buildSchema(
-        before,
-        error =>
-          new GraphQLError(
-            `Failed to build the previous version: ${
-              error instanceof GraphQLError ? error.message : error
-            }`,
-          ),
-      );
-      const currentSchema = buildSchema(
-        after,
-        error =>
-          new GraphQLError(
-            `Failed to build the selected version: ${
-              error instanceof GraphQLError ? error.message : error
-            }`,
-          ),
-      );
-
-      const schemaChanges = await injector.get(Inspector).diff(previousSchema, currentSchema);
-
-      return schemaChanges.map(toGraphQLSchemaChange).concat(source.result.serviceUrlChanges);
+    async changes(source) {
+      return source.result.changes
+        .map(change => toGraphQLSchemaChange(schemaChangeFromMeta(change)))
+        .concat(source.result.serviceUrlChanges);
     },
     diff(source) {
-      const [before, after] = source.result.schemas;
+      const { before, current } = source.result.schemas;
 
       return {
-        before: before ? before.raw : '',
-        after: after.raw,
+        before: before ?? '',
+        after: current,
       };
     },
   },

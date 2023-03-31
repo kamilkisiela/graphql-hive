@@ -12,6 +12,7 @@ import type {
 } from './../../../shared/entities';
 import { Logger } from './../../shared/providers/logger';
 import { Inspector } from './inspector';
+import { SchemaBuildError } from './orchestrators/errors';
 import { ensureSDL, extendWithBase, SchemaHelper } from './schema-helper';
 
 // The reason why I'm using `result` and `reason` instead of just `data` for both:
@@ -23,10 +24,6 @@ export type CheckResult<C = unknown, F = unknown> =
     }
   | {
       status: 'failed';
-      reason: F;
-    }
-  | {
-      status: 'compareFailed';
       reason: F;
     }
   | {
@@ -225,15 +222,15 @@ export class RegistryChecks {
           changes,
         },
       } satisfies CheckResult;
-    } catch (error: any) {
+    } catch (error: unknown) {
       this.logger.debug('Failed to compare schemas (error=%s)', (error as Error).message);
 
-      return {
-        status: 'compareFailed',
-        reason: {
-          compareFailedReason: `Failed to compare schemas: ${(error as Error).message}`,
-        },
-      } satisfies CheckResult;
+      if (error instanceof SchemaBuildError) {
+        return {
+          status: 'skipped',
+        } satisfies CheckResult;
+      }
+      throw error;
     }
   }
 

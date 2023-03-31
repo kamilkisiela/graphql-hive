@@ -364,8 +364,19 @@ export default gql`
     initial: Boolean!
   }
 
-  type SchemaCompareError {
+  enum SchemaCompareErrorDetailType {
+    graphql
+    composition
+  }
+
+  type SchemaCompareErrorDetail {
     message: String!
+    type: SchemaCompareErrorDetailType!
+  }
+
+  type SchemaCompareError {
+    message: String! @deprecated(reason: "Use details instead.")
+    details: [SchemaCompareErrorDetail!]
   }
 
   union SchemaComparePayload = SchemaCompareResult | SchemaCompareError

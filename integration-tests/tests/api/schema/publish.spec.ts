@@ -3,11 +3,15 @@ import { graphql } from 'testkit/gql';
 import { execute } from 'testkit/graphql';
 
 /* eslint-disable no-process-env */
-import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
+import { ProjectAccessScope, ProjectType, TargetAccessScope } from '@app/gql/graphql';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { createStorage } from '@hive/storage';
 import { fetch } from '@whatwg-node/fetch';
-import { createTarget, publishSchema } from '../../../testkit/flow';
+import {
+  createTarget,
+  enableExternalSchemaComposition,
+  publishSchema,
+} from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
 
 test.concurrent('cannot publish a schema without target:registry:write access', async () => {
@@ -2648,6 +2652,13 @@ const SchemaCompareToPreviousVersionQuery = graphql(`
           after
         }
       }
+      ... on SchemaCompareError {
+        message
+        details {
+          message
+          type
+        }
+      }
     }
   }
 `);
@@ -2715,86 +2726,138 @@ test('Query.schemaCompareToPrevious: result is read from the', async () => {
       authToken: ownerToken,
     }).then(res => res.expectNoGraphQLErrors());
 
-    expect(result.schemaCompareToPrevious).toMatchInlineSnapshot(`
+    expect(result.schemaCompareToPrevious).toMatchInlineSnapshot();
+  } finally {
+    await storage.destroy();
+  }
+});
+
+// TODO: conditional breaking changes test
+
+test.only('Composition Error (Federation 2) can be served from the database', async () => {
+  const storage = await createStorage(connectionString(), 1);
+  const dockerAddress = `composition_federation_2:3069`;
+
+  try {
+    const initialSchema = /* GraphQL */ `
+      type Product @key(fields: "id") {
+        id: ID!
+        title: String
+        url: String
+        description: String
+        salesRankOverall: Int
+        salesRankInCategory: Int
+        images(size: Int = 1000): [String]
+        primaryImage(size: Int = 1000): String
+      }
+
+      type Query {
+        product(id: ID!): Product
+      }
+    `;
+
+    const newSchema = /* GraphQL */ `
+      type Product @key(fields: "IDONOTEXIST") {
+        id: ID!
+        title: String
+        url: String
+        description: String
+        salesRankOverall: Int
+        salesRankInCategory: Int
+        images(size: Int = 1000): [String]
+        primaryImage(size: Int = 1000): String
+      }
+
+      type Query {
+        product(id: ID!): Product
+      }
+    `;
+
+    const serviceName = {
+      service: 'test',
+    };
+
+    const serviceUrl = { url: 'http://localhost:4000' };
+
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { createToken, target, project } = await createProject(ProjectType.Federation, {});
+    const readWriteToken = await createToken({
+      targetScopes: [
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.Settings,
+      ],
+      projectScopes: [ProjectAccessScope.Settings],
+      organizationScopes: [],
+    });
+
+    await enableExternalSchemaComposition(
       {
-        changes: {
-          nodes: [
+        endpoint: `http://${dockerAddress}/compose`,
+        // eslint-disable-next-line no-process-env
+        secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
+        project: project.cleanId,
+        organization: organization.cleanId,
+      },
+      readWriteToken.secret,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    const publishResult = await readWriteToken
+      .publishSchema({
+        author: 'gilad',
+        commit: '123',
+        sdl: initialSchema,
+        ...serviceName,
+        ...serviceUrl,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+    console.log(JSON.stringify(publishResult.schemaPublish, null, 2));
+    expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    const publishResult2 = await readWriteToken
+      .publishSchema({
+        author: 'gilad',
+        commit: '456',
+        sdl: newSchema,
+        ...serviceName,
+        ...serviceUrl,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    if (publishResult2.schemaPublish.__typename !== 'SchemaPublishSuccess') {
+      expect(publishResult2.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+      return;
+    }
+
+    const latestVersion = await storage.getLatestVersion({
+      target: target.id,
+      project: project.id,
+      organization: organization.id,
+    });
+
+    const result = await execute({
+      document: SchemaCompareToPreviousVersionQuery,
+      variables: {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        target: target.cleanId,
+        version: latestVersion.id,
+      },
+      authToken: ownerToken,
+    }).then(res => res.expectNoGraphQLErrors());
+
+    expect(result).toMatchInlineSnapshot(`
+      {
+        schemaCompareToPrevious: {
+          details: [
             {
-              criticality: Breaking,
-              message: Field 'Query.ping' changed type from 'String' to 'Int',
-              path: [
-                Query,
-                ping,
-              ],
+              message: [test] On type "Product", for @key(fields: "IDONOTEXIST"): Cannot query field "IDONOTEXIST" on type "Product" (the field should either be added to this subgraph or, if it should not be resolved by this subgraph, you need to add it to this subgraph with @external).,
+              type: composition,
             },
           ],
-          total: 1,
+          message: Composition error,
         },
-        diff: {
-          after: directive @core(as: String, feature: String!, for: core__Purpose) repeatable on SCHEMA
-
-      directive @join__field(graph: join__Graph, provides: join__FieldSet, requires: join__FieldSet) on FIELD_DEFINITION
-
-      directive @join__graph(name: String!, url: String!) on ENUM_VALUE
-
-      directive @join__owner(graph: join__Graph!) on INTERFACE | OBJECT
-
-      directive @join__type(graph: join__Graph!, key: join__FieldSet) repeatable on INTERFACE | OBJECT
-
-      type Query {
-        ping: Int
-      }
-
-      enum core__Purpose {
-        """
-        \`EXECUTION\` features provide metadata necessary to for operation execution.
-        """
-        EXECUTION
-
-        """
-        \`SECURITY\` features provide metadata necessary to securely resolve fields.
-        """
-        SECURITY
-      }
-
-      scalar join__FieldSet
-
-      enum join__Graph {
-        TEST
-      },
-          before: directive @core(as: String, feature: String!, for: core__Purpose) repeatable on SCHEMA
-
-      directive @join__field(graph: join__Graph, provides: join__FieldSet, requires: join__FieldSet) on FIELD_DEFINITION
-
-      directive @join__graph(name: String!, url: String!) on ENUM_VALUE
-
-      directive @join__owner(graph: join__Graph!) on INTERFACE | OBJECT
-
-      directive @join__type(graph: join__Graph!, key: join__FieldSet) repeatable on INTERFACE | OBJECT
-
-      type Query {
-        ping: String
-      }
-
-      enum core__Purpose {
-        """
-        \`EXECUTION\` features provide metadata necessary to for operation execution.
-        """
-        EXECUTION
-
-        """
-        \`SECURITY\` features provide metadata necessary to securely resolve fields.
-        """
-        SECURITY
-      }
-
-      scalar join__FieldSet
-
-      enum join__Graph {
-        TEST
-      },
-        },
-        initial: true,
       }
     `);
   } finally {

@@ -71,6 +71,9 @@ export interface SchemaVersion {
   commit: string;
   baseSchema: string | null;
   hasPersistedSchemaChanges: boolean;
+  previousSchemaVersionId: null | string;
+  compositeSchemaSDL: null | string;
+  schemaCompositionErrors: Array<SchemaCompositionError> | null;
 }
 
 export interface SchemaObject {
@@ -311,3 +314,10 @@ export interface AdminOrganizationStats {
     to: Date;
   };
 }
+
+export const SchemaCompositionErrorModel = z.object({
+  message: z.string(),
+  source: z.union([z.literal('graphql'), z.literal('composition')]),
+});
+
+export type SchemaCompositionError = z.TypeOf<typeof SchemaCompositionErrorModel>;

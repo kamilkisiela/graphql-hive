@@ -19,6 +19,7 @@ import type {
   PersistedOperation,
   Project,
   Schema,
+  SchemaCompositionError,
   SchemaLog,
   SchemaVersion,
   Target,
@@ -290,7 +291,6 @@ export interface Storage {
     | never
   >;
   getVersion(_: TargetSelector & { version: string }): Promise<SchemaVersion | never>;
-
   deleteSchema(
     _: {
       serviceName: string;
@@ -299,7 +299,7 @@ export interface Storage {
   ): Promise<DeletedCompositeSchema>;
 
   createVersion(
-    _: {
+    _: ({
       schema: string;
       author: string;
       service?: string | null;
@@ -311,7 +311,18 @@ export interface Storage {
       base_schema: string | null;
       actionFn(): Promise<void>;
       changes: Array<Change>;
-    } & TargetSelector,
+      previousSchemaVersion: null | string;
+    } & TargetSelector) &
+      (
+        | {
+            compositeSchemaSDL: null;
+            schemaCompositionErrors: Array<SchemaCompositionError>;
+          }
+        | {
+            compositeSchemaSDL: string;
+            schemaCompositionErrors: null;
+          }
+      ),
   ): Promise<SchemaVersion | never>;
 
   /**

@@ -10,4 +10,11 @@ CREATE TABLE
 ALTER TABLE
   "schema_versions"
 ADD COLUMN
-  "has_persisted_schema_changes" BOOLEAN;
+  "has_persisted_schema_changes" BOOLEAN,
+ADD COLUMN
+  "schema_composition_errors" jsonb,
+ADD COLUMN
+  "composite_schema_sdl" TEXT,
+ADD COLUMN
+  "previous_schema_version_id" UUID UNIQUE REFERENCES "schema_versions" ("id") ON DELETE SET NULL
+;

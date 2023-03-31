@@ -1,4 +1,8 @@
-import { PushedCompositeSchema, SingleSchema } from 'packages/services/api/src/shared/entities';
+import {
+  PushedCompositeSchema,
+  SchemaCompositionError,
+  SingleSchema,
+} from 'packages/services/api/src/shared/entities';
 import { Change } from '@graphql-inspector/core';
 
 export const SchemaPublishConclusion = {
@@ -143,9 +147,7 @@ type SchemaPublishSuccess = {
     breakingChanges: Array<{
       message: string;
     }> | null;
-    compositionErrors: Array<{
-      message: string;
-    }> | null;
+    compositionErrors: Array<SchemaCompositionError> | null;
     schema: SingleSchema | PushedCompositeSchema;
     schemas: [SingleSchema] | PushedCompositeSchema[];
     supergraph: string | null;

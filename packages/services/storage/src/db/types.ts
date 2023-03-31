@@ -89,7 +89,6 @@ export interface organization_member {
 export interface organizations {
   clean_id: string;
   created_at: Date;
-  feature_flags: any | null;
   get_started_checking_schema: boolean;
   get_started_creating_project: boolean;
   get_started_inviting_members: boolean;
@@ -171,10 +170,13 @@ export interface schema_version_to_log {
 export interface schema_versions {
   action_id: string;
   base_schema: string | null;
+  composite_schema_sdl: string | null;
   created_at: Date;
   has_persisted_schema_changes: boolean | null;
   id: string;
   is_composable: boolean;
+  previous_schema_version_id: string | null;
+  schema_composition_errors: any | null;
   target_id: string;
 }
 

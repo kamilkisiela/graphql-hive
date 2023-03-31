@@ -265,7 +265,7 @@ export class SingleModel {
         changes: diffCheck.result?.changes ?? diffCheck.reason?.changes ?? null,
         messages,
         breakingChanges: null,
-        compositionErrors: null,
+        compositionErrors: compositionCheck.reason?.errors ?? null,
         schema: incoming,
         schemas,
         supergraph: null,

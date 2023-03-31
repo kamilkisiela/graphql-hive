@@ -81,6 +81,13 @@ function registryLockId(targetId: string) {
   return `registry:lock:${targetId}`;
 }
 
+function assertNonNull<T>(value: T | null, message: string): T {
+  if (value === null) {
+    throw new Error(message);
+  }
+  return value;
+}
+
 @Injectable({
   scope: Scope.Operation,
 })
@@ -857,6 +864,19 @@ export class SchemaPublisher {
         }
       },
       changes,
+      previousSchemaVersion: latestVersion?.version ?? null,
+      ...(fullSchemaSdl
+        ? {
+            compositeSchemaSDL: fullSchemaSdl,
+            schemaCompositionErrors: null,
+          }
+        : {
+            compositeSchemaSDL: null,
+            schemaCompositionErrors: assertNonNull(
+              publishResult.state.compositionErrors,
+              "Can't be null",
+            ),
+          }),
     });
 
     if (changes.length > 0 || errors.length > 0) {

@@ -354,7 +354,7 @@ export class CompositeModel {
         changes: diffCheck.result?.changes ?? diffCheck.reason?.changes ?? null,
         messages,
         breakingChanges: null,
-        compositionErrors: null,
+        compositionErrors: compositionCheck.reason?.errors ?? null,
         schema: incoming,
         schemas,
         supergraph: compositionCheck.result?.supergraph ?? null,

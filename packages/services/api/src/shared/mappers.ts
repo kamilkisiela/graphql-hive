@@ -11,6 +11,7 @@ import type {
   GraphQLSchema,
   GraphQLUnionType,
 } from 'graphql';
+import { SerializableChange } from '@graphql-inspector/core';
 import type {
   ClientStats,
   CriticalityLevel,
@@ -18,6 +19,7 @@ import type {
   SchemaChange,
   SchemaError,
 } from '../__generated__/types';
+import { SchemaBuildError } from '../modules/schema/providers/orchestrators/errors';
 import type {
   ActivityObject,
   DateRange,
@@ -27,7 +29,6 @@ import type {
   PersistedOperation,
   Project,
   PushedCompositeSchema as PushedCompositeSchemaEntity,
-  SchemaObject,
   SchemaVersion as SchemaVersionEntity,
   SingleSchema as SingleSchemaEntity,
   Target,
@@ -117,30 +118,25 @@ export type SchemaVersionConnection = {
   nodes: readonly SchemaVersion[];
   hasMore: boolean;
 };
-type SchemaOnlyObject = Pick<SchemaObject, 'document' | 'raw'>;
 export type SchemaComparePayload = SchemaCompareResult | SchemaCompareError;
 
 export type SchemaCompareError = {
-  error: {
-    message: string;
-  };
+  error: SchemaBuildError;
   result?: never;
 };
 
 export type SchemaCompareResult = {
   error?: never;
   result: {
-    schemas: readonly [SchemaOnlyObject | null, SchemaOnlyObject];
-    versionSelector: {
-      organization: string;
-      project: string;
-      target: string;
-      version: string;
+    schemas: {
+      before: string | null;
+      current: string;
     };
     serviceUrlChanges: Array<{
       message: string;
       criticality: CriticalityLevel;
     }>;
+    changes: Array<SerializableChange>;
   };
 };
 
