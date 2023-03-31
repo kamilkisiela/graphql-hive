@@ -533,3 +533,108 @@ impl OperationProcessor {
         }))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use graphql_parser::parse_query;
+    use graphql_parser::parse_schema;
+
+    use super::collect_schema_coordinates;
+
+    #[test]
+    fn basic_test() {
+        let schema = parse_schema::<String>(
+            "
+            type Query {
+                project(selector: ProjectSelectorInput!): Project
+                projectsByType(type: ProjectType!): [Project!]!
+                projects(filter: FilterInput): [Project!]!
+            }
+            type Mutation {
+                deleteProject(selector: ProjectSelectorInput!): DeleteProjectPayload!
+            }
+            input ProjectSelectorInput {
+                organization: ID!
+                project: ID!
+            }
+            input FilterInput {
+                type: ProjectType
+                pagination: PaginationInput
+            }
+            input PaginationInput {
+                limit: Int
+                offset: Int
+            }
+            type ProjectSelector {
+                organization: ID!
+                project: ID!
+            }
+            type DeleteProjectPayload {
+                selector: ProjectSelector!
+                deletedProject: Project!
+            }
+            type Project {
+                id: ID!
+                cleanId: ID!
+                name: String!
+                type: ProjectType!
+                buildUrl: String
+                validationUrl: String
+            }
+            enum ProjectType {
+                FEDERATION
+                STITCHING
+                SINGLE
+                CUSTOM
+            }
+        ",
+        )
+        .unwrap();
+
+        let document = parse_query::<String>(
+            "
+            mutation deleteProjectOperation($selector: ProjectSelectorInput!) {
+                deleteProject(selector: $selector) {
+                    selector {
+                        organization
+                        project
+                    }
+                    deletedProject {
+                        ...ProjectFields
+                    }
+                }
+            }
+            fragment ProjectFields on Project {
+                id
+                cleanId
+                name
+                type
+            }
+        ",
+        )
+        .unwrap();
+
+        let schema_coordinates = collect_schema_coordinates(&document, &schema);
+
+        let expected = vec![
+            "Mutation.deleteProject",
+            "Mutation.deleteProject.selector",
+            "DeleteProjectPayload.selector",
+            "ProjectSelector.organization",
+            "ProjectSelector.project",
+            "DeleteProjectPayload.deletedProject",
+            "Project.id",
+            "Project.cleanId",
+            "Project.name",
+            "Project.type",
+            "ProjectSelectorInput.organization",
+            "ProjectSelectorInput.project",
+        ];
+
+        for exp in expected {
+            assert_eq!(schema_coordinates.get(exp), Some(&exp.to_string()));
+        }
+
+        assert_eq!(schema_coordinates.len(), 12);
+    }
+}
