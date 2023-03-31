@@ -6,6 +6,7 @@ use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::num::NonZeroUsize;
 
 use graphql_parser::minify_query;
 use graphql_parser::parse_query;
@@ -460,7 +461,7 @@ pub struct OperationProcessor {
 impl OperationProcessor {
     pub fn new() -> OperationProcessor {
         OperationProcessor {
-            cache: LruCache::new(1000),
+            cache: LruCache::new(NonZeroUsize::new(1000).unwrap()),
         }
     }
 
