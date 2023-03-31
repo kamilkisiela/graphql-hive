@@ -6,22 +6,22 @@
   "private": true,
   "scripts": {
     "build": "bob runify --single",
-    "dev": "tsup-node src/dev.ts --format esm --shims --target node18 --watch --sourcemap --onSuccess 'node --enable-source-maps dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
+    "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts",
     "postbuild": "copyfiles -f \"node_modules/bullmq/dist/esm/commands/*.lua\" dist && copyfiles -f \"node_modules/bullmq/dist/esm/commands/includes/*.lua\" dist/includes",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentry/node": "7.38.0",
-    "@trpc/server": "10.12.0",
-    "@whatwg-node/fetch": "0.8.1",
-    "bullmq": "3.7.0",
+    "@sentry/node": "7.44.2",
+    "@trpc/server": "10.18.0",
+    "@whatwg-node/fetch": "0.8.4",
+    "bullmq": "3.10.2",
     "dotenv": "16.0.3",
     "ioredis": "5.3.1",
     "mjml": "4.13.0",
     "nodemailer": "6.9.1",
     "p-timeout": "6.1.1",
     "sendmail": "1.6.1",
-    "zod": "3.20.6"
+    "zod": "3.21.4"
   },
   "devDependencies": {
     "@hive/service-common": "workspace:*",
@@ -29,7 +29,7 @@
     "@types/nodemailer": "6.4.7",
     "@types/sendmail": "1.4.4",
     "copyfiles": "2.4.1",
-    "pino-pretty": "9.3.0",
+    "pino-pretty": "10.0.0",
     "tslib": "2.5.0"
   },
   "buildOptions": {

@@ -108,8 +108,9 @@ async function main() {
           prefix: 'schema-service',
           redis,
           logger: req.log,
-          pollIntervalMs: 150,
-          timeoutMs: 25_000,
+          pollIntervalMs: env.timings.cachePollInterval,
+          timeoutMs: env.timings.schemaCompositionTimeout,
+          ttlMs: env.timings.cacheTTL,
         });
         return { cache, req, decrypt, broker: env.requestBroker };
       },

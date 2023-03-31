@@ -281,7 +281,7 @@ function runArtifactsCDNTests(
           commit: 'abc123',
           sdl: `type Query { ping: String }`,
           service: 'ping',
-          url: 'ping.com',
+          url: 'http://ping.com',
         })
         .then(r => r.expectNoGraphQLErrors());
 
@@ -293,7 +293,7 @@ function runArtifactsCDNTests(
         `artifact/${target.id}/services`,
       );
       expect(artifactContents.body).toMatchInlineSnapshot(
-        '[{"name":"ping","sdl":"type Query { ping: String }","url":"ping.com"}]',
+        '[{"name":"ping","sdl":"type Query { ping: String }","url":"http://ping.com"}]',
       );
 
       const cdnAccessResult = await writeToken.createCdnAccess();
@@ -323,7 +323,7 @@ function runArtifactsCDNTests(
       const body = await response.text();
       expect(response.status).toBe(200);
       expect(body).toMatchInlineSnapshot(
-        '[{"name":"ping","sdl":"type Query { ping: String }","url":"ping.com"}]',
+        '[{"name":"ping","sdl":"type Query { ping: String }","url":"http://ping.com"}]',
       );
     });
 
@@ -343,7 +343,7 @@ function runArtifactsCDNTests(
           commit: 'abc123',
           sdl: `type Query { ping: String }`,
           service: 'ping',
-          url: 'ping.com',
+          url: 'http://ping.com',
         })
         .then(r => r.expectNoGraphQLErrors());
 
@@ -355,7 +355,7 @@ function runArtifactsCDNTests(
         `artifact/${target.id}/services`,
       );
       expect(artifactContents.body).toMatchInlineSnapshot(
-        '[{"name":"ping","sdl":"type Query { ping: String }","url":"ping.com"}]',
+        '[{"name":"ping","sdl":"type Query { ping: String }","url":"http://ping.com"}]',
       );
 
       const cdnAccessResult = await writeToken.createCdnAccess();
@@ -389,7 +389,7 @@ function runArtifactsCDNTests(
           commit: 'abc123',
           sdl: 'type Query { ping: String }',
           service: 'ping',
-          url: 'ping.com',
+          url: 'http://ping.com',
         })
         .then(r => r.expectNoGraphQLErrors());
 
@@ -443,10 +443,9 @@ function runArtifactsCDNTests(
 }
 
 runArtifactsCDNTests('API Mirror', { service: 'server', port: 8082, path: '/artifacts/v1/' });
-// runArtifactsCDNTests('Local CDN Mock', 'http://127.0.0.1:3004/artifacts/v1/');
 
 describe('CDN token', () => {
-  const TargetCDNAccessTokensQuery = graphql(/* GraphQL */ `
+  const TargetCDNAccessTokensQuery = graphql(`
     query TargetCDNAccessTokens($selector: TargetSelectorInput!, $after: String, $first: Int = 2) {
       target(selector: $selector) {
         cdnAccessTokens(first: $first, after: $after) {
@@ -468,7 +467,7 @@ describe('CDN token', () => {
     }
   `);
 
-  const DeleteCDNAccessTokenMutation = graphql(/* GraphQL */ `
+  const DeleteCDNAccessTokenMutation = graphql(`
     mutation DeleteCDNAccessToken($input: DeleteCdnAccessTokenInput!) {
       deleteCdnAccessToken(input: $input) {
         error {

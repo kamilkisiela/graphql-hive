@@ -1,7 +1,7 @@
 /**
  * The environment as available on the !!!FRONT END!!!
  */
-export const env = globalThis['__frontend_env'] ?? noop();
+export const env = globalThis.__frontend_env ?? noop();
 
 /**
  * Next.js is so kind and tries to pre-render our page without the environment information being available... :)

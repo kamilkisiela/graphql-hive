@@ -6,28 +6,28 @@
   "private": true,
   "scripts": {
     "build": "bob runify --single",
-    "dev": "tsup-node src/dev.ts --format esm --shims --target node18 --watch --sourcemap --onSuccess 'node --enable-source-maps dist/dev.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname",
+    "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentry/node": "7.38.0",
-    "@sentry/tracing": "7.38.0",
-    "@trpc/client": "10.12.0",
-    "@trpc/server": "10.12.0",
-    "@whatwg-node/fetch": "0.8.1",
+    "@sentry/node": "7.44.2",
+    "@sentry/tracing": "7.44.2",
+    "@trpc/client": "10.18.0",
+    "@trpc/server": "10.18.0",
+    "@whatwg-node/fetch": "0.8.4",
     "ajv": "8.12.0",
     "dotenv": "16.0.3",
-    "got": "12.5.3",
+    "got": "12.6.0",
     "graphql": "16.6.0",
-    "kafkajs": "2.2.3",
+    "kafkajs": "2.2.4",
     "tiny-lru": "8.0.2",
-    "zod": "3.20.6"
+    "zod": "3.21.4"
   },
   "devDependencies": {
     "@hive/service-common": "workspace:*",
     "@hive/tokens": "workspace:*",
     "@hive/usage-common": "workspace:*",
-    "pino-pretty": "9.3.0"
+    "pino-pretty": "10.0.0"
   },
   "buildOptions": {
     "runify": true,

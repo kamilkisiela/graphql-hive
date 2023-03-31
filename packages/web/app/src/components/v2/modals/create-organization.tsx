@@ -1,12 +1,11 @@
-import { ReactElement } from 'react';
 import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 import { useMutation } from 'urql';
 import * as Yup from 'yup';
-import { Button, Heading, Input, Modal } from '@/components/v2';
-import { gql } from '@urql/core';
+import { Button, Heading, Input } from '@/components/v2';
+import { graphql } from '@/gql';
 
-const CreateOrganizationMutation = gql(/* GraphQL */ `
+const CreateOrganizationMutation = graphql(`
   mutation CreateOrganizationMutation($input: CreateOrganizationInput!) {
     createOrganization(input: $input) {
       ok {
@@ -15,6 +14,7 @@ const CreateOrganizationMutation = gql(/* GraphQL */ `
             organization
           }
           organization {
+            cleanId
             ...OrganizationFields
           }
         }
@@ -28,16 +28,9 @@ const CreateOrganizationMutation = gql(/* GraphQL */ `
   }
 `);
 
-export const CreateOrganizationModal = ({
-  isOpen,
-  toggleModalOpen,
-}: {
-  isOpen: boolean;
-  toggleModalOpen: () => void;
-}): ReactElement => {
+export const CreateOrganizationForm = () => {
   const [mutation, mutate] = useMutation(CreateOrganizationMutation);
   const { push } = useRouter();
-
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
     useFormik({
       initialValues: { name: '' },
@@ -52,7 +45,6 @@ export const CreateOrganizationModal = ({
         });
 
         if (mutation.data?.createOrganization.ok) {
-          toggleModalOpen();
           void push(
             `/${mutation.data.createOrganization.ok.createdOrganizationPayload.organization.cleanId}`,
           );
@@ -61,40 +53,35 @@ export const CreateOrganizationModal = ({
     });
 
   return (
-    <Modal open={isOpen} onOpenChange={toggleModalOpen}>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        <Heading className="text-center">Create an organization</Heading>
-        <p className="text-sm text-gray-500">
-          An organization is built on top of <b>Projects</b>. You will become an <b>admin</b> and
-          don't worry, you can add members later.
-        </p>
-        <Input
-          placeholder="Organization name"
-          name="name"
-          value={values.name}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          disabled={isSubmitting}
-          isInvalid={touched.name && !!errors.name}
-          className="grow"
-        />
-        {touched.name && (errors.name || mutation.error) && (
-          <div className="-mt-2 text-sm text-red-500">{errors.name || mutation.error?.message}</div>
-        )}
-        {mutation.data?.createOrganization.error?.inputErrors.name && (
-          <div className="-mt-2 text-sm text-red-500">
-            {mutation.data.createOrganization.error.inputErrors.name}
-          </div>
-        )}
-        <div className="flex gap-2">
-          <Button type="button" size="large" block onClick={toggleModalOpen}>
-            Cancel
-          </Button>
-          <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
-            Create Organization
-          </Button>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <Heading className="text-center">Create an organization</Heading>
+      <p className="text-sm text-gray-500">
+        An organization is built on top of <b>Projects</b>. You will become an <b>admin</b> and
+        don't worry, you can add members later.
+      </p>
+      <Input
+        placeholder="Organization name"
+        name="name"
+        value={values.name}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        disabled={isSubmitting}
+        isInvalid={touched.name && !!errors.name}
+        className="grow"
+      />
+      {touched.name && (errors.name || mutation.error) && (
+        <div className="-mt-2 text-sm text-red-500">{errors.name || mutation.error?.message}</div>
+      )}
+      {mutation.data?.createOrganization.error?.inputErrors.name && (
+        <div className="-mt-2 text-sm text-red-500">
+          {mutation.data.createOrganization.error.inputErrors.name}
         </div>
-      </form>
-    </Modal>
+      )}
+      <div className="flex gap-2">
+        <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
+          Create Organization
+        </Button>
+      </div>
+    </form>
   );
 };

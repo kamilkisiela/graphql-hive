@@ -22,13 +22,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/v2/dropdown';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
-import {
-  ProjectActivitiesDocument,
-  ProjectsWithTargetsDocument,
-  ProjectsWithTargetsQuery,
-} from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { ProjectActivitiesDocument } from '@/graphql';
+import { canAccessProject, ProjectAccessScope } from '@/lib/access/project';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
-import { getDocsUrl } from '@/lib/docs-url';
 import { fixDuplicatedFragments } from '@/lib/graphql';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
@@ -36,11 +33,28 @@ import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const projectActivitiesDocument = fixDuplicatedFragments(ProjectActivitiesDocument);
 
-const ProjectCard = ({
-  project,
-}: {
-  project: ProjectsWithTargetsQuery['projects']['nodes'][number];
-}): ReactElement => {
+const ProjectCard_ProjectFragment = graphql(`
+  fragment ProjectCard_ProjectFragment on Project {
+    cleanId
+    id
+    name
+  }
+`);
+
+const ProjectCard_OrganizationFragment = graphql(`
+  fragment ProjectCard_OrganizationFragment on Organization {
+    me {
+      ...CanAccessProject_MemberFragment
+    }
+  }
+`);
+
+const ProjectCard = (props: {
+  project: FragmentType<typeof ProjectCard_ProjectFragment>;
+  organization: FragmentType<typeof ProjectCard_OrganizationFragment>;
+}): ReactElement | null => {
+  const project = useFragment(ProjectCard_ProjectFragment, props.project);
+  const organization = useFragment(ProjectCard_OrganizationFragment, props.organization);
   const copyToClipboard = useClipboard();
   const router = useRouteSelector();
   const [projectActivitiesQuery] = useQuery({
@@ -67,13 +81,12 @@ const ProjectCard = ({
     >
       <div className="flex items-start gap-x-2">
         <div className="grow">
-          <h3 className="text-xs font-medium text-[#34EAB9]">{project.type}</h3>
           <h4 className="line-clamp-2 text-lg font-bold">{project.name}</h4>
         </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button rotate={90}>
+            <Button>
               <MoreIcon />
             </Button>
           </DropdownMenuTrigger>
@@ -87,12 +100,14 @@ const ProjectCard = ({
               <LinkIcon />
               Share Link
             </DropdownMenuItem>
-            <NextLink href={`/${router.organizationId}/${project.cleanId}/view/settings`}>
-              <DropdownMenuItem>
-                <SettingsIcon />
-                Settings
-              </DropdownMenuItem>
-            </NextLink>
+            {canAccessProject(ProjectAccessScope.Settings, organization.me) && (
+              <NextLink href={`/${router.organizationId}/${project.cleanId}/view/settings`}>
+                <DropdownMenuItem>
+                  <SettingsIcon />
+                  Settings
+                </DropdownMenuItem>
+              </NextLink>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -109,58 +124,77 @@ const ProjectCard = ({
   );
 };
 
+const OrganizationProjectsPageQuery = graphql(`
+  query OrganizationProjectsPageQuery($selector: OrganizationSelectorInput!) {
+    organization(selector: $selector) {
+      organization {
+        ...OrganizationLayout_OrganizationFragment
+        ...ProjectCard_OrganizationFragment
+      }
+    }
+    projects(selector: $selector) {
+      total
+      nodes {
+        id
+        ...ProjectCard_ProjectFragment
+      }
+    }
+  }
+`);
+
 function ProjectsPage(): ReactElement {
-  const router = useRouteSelector();
-
-  const [projectsWithTargetsQuery] = useQuery({
-    query: ProjectsWithTargetsDocument,
-    variables: {
-      selector: {
-        organization: router.organizationId,
-      },
-    },
-  });
-
   return (
     <>
       <Title title="Projects" />
-      <OrganizationLayout value="overview" className="flex justify-between gap-5">
-        {() => (
-          <>
-            <div className="grow">
-              <Heading className="mb-4">Active Projects</Heading>
-              {projectsWithTargetsQuery.data?.projects.total === 0 ? (
-                <EmptyList
-                  title="Hive is waiting for your first project"
-                  description='You can create a project by clicking the "Create Project" button'
-                  docsUrl={getDocsUrl('/get-started/projects')}
-                />
-              ) : (
-                <div className="grid grid-cols-2 gap-5 items-stretch">
-                  {projectsWithTargetsQuery.fetching
-                    ? [1, 2].map(key => (
-                        <Card key={key}>
-                          <div className="flex gap-x-2">
-                            <Skeleton visible className="h-12 w-12" />
-                            <div>
-                              <Skeleton visible className="mb-2 h-3 w-16" />
-                              <Skeleton visible className="h-3 w-8" />
+      <OrganizationLayout
+        value="overview"
+        className="flex justify-between gap-5"
+        query={OrganizationProjectsPageQuery}
+      >
+        {({ projects, organization }) =>
+          projects &&
+          organization?.organization && (
+            <>
+              <div className="grow">
+                <Heading className="mb-4">Active Projects</Heading>
+                {projects.total === 0 ? (
+                  <EmptyList
+                    title="Hive is waiting for your first project"
+                    description='You can create a project by clicking the "Create Project" button'
+                    docsUrl="/management/projects#create-a-new-project"
+                  />
+                ) : (
+                  <div className="grid grid-cols-2 gap-5 items-stretch">
+                    {/** TODO: use defer here :) */}
+                    {projects === null
+                      ? [1, 2].map(key => (
+                          <Card key={key}>
+                            <div className="flex gap-x-2">
+                              <Skeleton visible className="h-12 w-12" />
+                              <div>
+                                <Skeleton visible className="mb-2 h-3 w-16" />
+                                <Skeleton visible className="h-3 w-8" />
+                              </div>
                             </div>
-                          </div>
-                          <Skeleton visible className="mt-5 mb-3 h-7 w-1/2" />
-                          <Skeleton visible className="h-7" />
-                        </Card>
-                      ))
-                    : projectsWithTargetsQuery.data?.projects.nodes.map(project => (
-                        <ProjectCard key={project.id} project={project} />
-                      ))}
-                </div>
-              )}
-            </div>
+                            <Skeleton visible className="mt-5 mb-3 h-7 w-1/2" />
+                            <Skeleton visible className="h-7" />
+                          </Card>
+                        ))
+                      : projects.nodes.map(project => (
+                          <ProjectCard
+                            key={project.id}
+                            project={project}
+                            organization={organization.organization}
+                          />
+                        ))}
+                  </div>
+                )}
+              </div>
 
-            <Activities />
-          </>
-        )}
+              <Activities />
+            </>
+          )
+        }
       </OrganizationLayout>
     </>
   );
@@ -168,9 +202,7 @@ function ProjectsPage(): ReactElement {
 
 export const getServerSideProps = withSessionProtection(async ({ req, res, resolvedUrl }) => {
   writeLastVisitedOrganization(req, res, resolvedUrl.substring(1));
-  return {
-    props: {},
-  };
+  return { props: {} };
 });
 
 export default authenticated(ProjectsPage);

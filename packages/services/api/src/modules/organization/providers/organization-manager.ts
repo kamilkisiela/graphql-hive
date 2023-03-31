@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import { paramCase } from 'param-case';
-import { Organization, OrganizationInvitation, OrganizationType } from '../../../shared/entities';
+import { Organization, OrganizationInvitation } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { cache, diffArrays, pushIfMissing, share, uuid } from '../../../shared/helpers';
 import { ActivityManager } from '../../activity/providers/activity-manager';
@@ -140,14 +140,13 @@ export class OrganizationManager {
 
   async createOrganization(input: {
     name: string;
-    type: OrganizationType;
     user: {
       id: string;
       superTokensUserId: string | null;
       oidcIntegrationId: string | null;
     };
   }): Promise<Organization> {
-    const { name, type, user } = input;
+    const { name, user } = input;
     this.logger.info('Creating an organization (input=%o)', input);
 
     if (user.oidcIntegrationId) {
@@ -161,7 +160,6 @@ export class OrganizationManager {
     const organization = await this.storage.createOrganization({
       name,
       cleanId: paramCase(name),
-      type,
       user: user.id,
       scopes: organizationAdminScopes,
       reservedNames: reservedOrganizationNames,
@@ -188,10 +186,6 @@ export class OrganizationManager {
     const organization = await this.getOrganization({
       organization: selector.organization,
     });
-
-    if (organization.type === OrganizationType.PERSONAL) {
-      throw new HiveError(`Cannot remove a personal organization`);
-    }
 
     const deletedOrganization = await this.storage.deleteOrganization({
       organization: organization.id,
@@ -287,10 +281,6 @@ export class OrganizationManager {
       }),
     ]);
 
-    if (organization.type === OrganizationType.PERSONAL) {
-      throw new HiveError(`Cannot rename a personal organization`);
-    }
-
     let cleanId = paramCase(name);
 
     if (await this.storage.getOrganizationByCleanId({ cleanId })) {
@@ -343,10 +333,6 @@ export class OrganizationManager {
     const organization = await this.getOrganization({
       organization: input.organization,
     });
-
-    if (organization.type === OrganizationType.PERSONAL) {
-      throw new HiveError(`Cannot invite to a personal organization`);
-    }
 
     const members = await this.getOrganizationMembers({ organization: input.organization });
     const existingMember = members.find(member => member.user.email === email);
@@ -425,10 +411,6 @@ export class OrganizationManager {
       return organization;
     }
 
-    if (organization.type === OrganizationType.PERSONAL) {
-      throw new HiveError(`Cannot join a personal organization`);
-    }
-
     await this.storage.addOrganizationMemberViaInvitationCode({
       code,
       user: user.id,
@@ -492,14 +474,6 @@ export class OrganizationManager {
     }
 
     const organization = await this.getOrganization(selector);
-
-    if (organization.type === OrganizationType.PERSONAL) {
-      return {
-        error: {
-          message: `Personal organizations cannot be transferred`,
-        },
-      };
-    }
 
     const { code } = await this.storage.createOrganizationTransferRequest({
       organization: organization.id,

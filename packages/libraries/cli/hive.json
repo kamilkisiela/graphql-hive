@@ -1,4 +1,4 @@
 {
-  "registry": "http://localhost:8082/graphql",
-  "token": "f3b6afd4c6959809421f3099ef9b98aa"
+  "registry": "http://localhost:3001/graphql",
+  "token": "4fb6d8243ba22225e2e9ca33e87cfa8b"
 }

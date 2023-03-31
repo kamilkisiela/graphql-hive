@@ -3,18 +3,29 @@ import { useRouter } from 'next/router';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
 import { TrashIcon } from '@/components/v2/icon';
-import { DeleteOrganizationDocument, OrganizationFieldsFragment } from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { DeleteOrganizationDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
+
+const DeleteOrganizationModal_OrganizationFragment = graphql(`
+  fragment DeleteOrganizationModal_OrganizationFragment on Organization {
+    cleanId
+  }
+`);
 
 export const DeleteOrganizationModal = ({
   isOpen,
   toggleModalOpen,
-  organization,
+  ...props
 }: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-  organization: OrganizationFieldsFragment;
+  organization: FragmentType<typeof DeleteOrganizationModal_OrganizationFragment>;
 }): ReactElement => {
+  const organization = useFragment(
+    DeleteOrganizationModal_OrganizationFragment,
+    props.organization,
+  );
   const [, mutate] = useMutation(DeleteOrganizationDocument);
   const router = useRouteSelector();
   const { replace } = useRouter();

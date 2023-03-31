@@ -1,12 +1,11 @@
 {
   "name": "@hive/cdn-script",
   "version": "0.0.0",
-  "type": "module",
   "license": "MIT",
   "private": true,
   "scripts": {
     "build": "node build.mjs",
-    "dev": "tsup-node src/dev.ts --target node18 --sourcemap --format esm --watch --onSuccess  \"node --enable-source-maps dist/dev.js\"",
+    "dev": "tsup-node --config ../../../configs/tsup/dev.config.worker.ts src/dev.ts",
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
@@ -15,15 +14,16 @@
   "dependencies": {
     "bcryptjs": "2.4.3",
     "graphql": "16.6.0",
-    "toucan-js": "2.7.0",
-    "zod": "3.20.6"
+    "toucan-js": "3.1.0",
+    "zod": "3.21.4"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "4.20230215.0",
+    "@cloudflare/workers-types": "4.20230321.0",
     "@types/service-worker-mock": "2.0.1",
-    "@whatwg-node/fetch": "0.8.1",
-    "@whatwg-node/server": "0.6.7",
-    "esbuild": "0.17.9",
+    "@whatwg-node/fetch": "0.8.4",
+    "@whatwg-node/server": "0.7.5",
+    "dotenv": "16.0.3",
+    "esbuild": "0.17.14",
     "fastify": "3.29.5",
     "itty-router": "2.6.6",
     "itty-router-extras": "0.4.2"

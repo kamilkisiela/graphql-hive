@@ -1,5 +1,5 @@
 import { ReactElement } from 'react';
-import { gql, useQuery } from 'urql';
+import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { SchemaExplorerFilter } from '@/components/target/explorer/filter';
@@ -8,11 +8,12 @@ import {
   SchemaExplorerProvider,
   useSchemaExplorerContext,
 } from '@/components/target/explorer/provider';
-import { DataWrapper, noSchema, Title } from '@/components/v2';
-import { OrganizationFieldsFragment, ProjectFieldsFragment, TargetFieldsFragment } from '@/graphql';
+import { DataWrapper, Title } from '@/components/v2';
+import { noSchemaVersion } from '@/components/v2/empty-list';
+import { graphql } from '@/gql';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const SchemaView_SchemaExplorer = gql(/* GraphQL */ `
+const SchemaView_SchemaExplorer = graphql(`
   query SchemaView_SchemaExplorer(
     $organization: ID!
     $project: ID!
@@ -48,21 +49,21 @@ const SchemaView_SchemaExplorer = gql(/* GraphQL */ `
 `);
 
 function SchemaView({
-  organization,
-  project,
-  target,
+  organizationCleanId,
+  projectCleanId,
+  targetCleanId,
 }: {
-  organization: OrganizationFieldsFragment;
-  project: ProjectFieldsFragment;
-  target: TargetFieldsFragment;
+  organizationCleanId: string;
+  projectCleanId: string;
+  targetCleanId: string;
 }): ReactElement | null {
   const { period } = useSchemaExplorerContext();
   const [query] = useQuery({
     query: SchemaView_SchemaExplorer,
     variables: {
-      organization: organization.cleanId,
-      project: project.cleanId,
-      target: target.cleanId,
+      organization: organizationCleanId,
+      project: projectCleanId,
+      target: targetCleanId,
       period,
     },
     requestPolicy: 'cache-first',
@@ -72,7 +73,7 @@ function SchemaView({
     <DataWrapper query={query}>
       {({ data }) => {
         if (!data.target?.latestSchemaVersion) {
-          return noSchema;
+          return noSchemaVersion;
         }
 
         const { query, mutation, subscription } = data.target.latestSchemaVersion.explorer;
@@ -85,9 +86,9 @@ function SchemaView({
             </div>
             <div className="flex flex-col gap-4">
               <SchemaExplorerFilter
-                organization={organization}
-                project={project}
-                target={target}
+                organization={{ cleanId: organizationCleanId }}
+                project={{ cleanId: projectCleanId }}
+                target={{ cleanId: targetCleanId }}
                 period={period}
               />
               {query ? (
@@ -115,18 +116,49 @@ function SchemaView({
   );
 }
 
+const TargetExplorerPageQuery = graphql(`
+  query TargetExplorerPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...TargetLayout_OrganizationFragment
+        rateLimit {
+          retentionInDays
+        }
+        cleanId
+      }
+    }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_ProjectFragment
+      cleanId
+    }
+    targets(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_TargetConnectionFragment
+    }
+    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+      cleanId
+    }
+    ...TargetLayout_IsCDNEnabledFragment
+  }
+`);
+
 function ExplorerPage(): ReactElement {
   return (
     <>
       <Title title="Schema Explorer" />
-      <TargetLayout value="explorer">
-        {props => (
-          <SchemaExplorerProvider
-            dataRetentionInDays={props.organization.rateLimit.retentionInDays}
-          >
-            <SchemaView {...props} />
-          </SchemaExplorerProvider>
-        )}
+      <TargetLayout value="explorer" query={TargetExplorerPageQuery}>
+        {props =>
+          props.organization && props.project && props.target ? (
+            <SchemaExplorerProvider
+              dataRetentionInDays={props.organization.organization.rateLimit.retentionInDays}
+            >
+              <SchemaView
+                organizationCleanId={props.organization.organization.cleanId}
+                projectCleanId={props.project.cleanId}
+                targetCleanId={props.target.cleanId}
+              />
+            </SchemaExplorerProvider>
+          ) : null
+        }
       </TargetLayout>
     </>
   );

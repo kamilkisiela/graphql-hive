@@ -4,7 +4,7 @@ import promClient from 'prom-client';
 import * as Sentry from '@sentry/node';
 import type { Span } from '@sentry/types';
 import * as Types from '../../../__generated__/types';
-import { Orchestrator, Project, ProjectType, Schema, Target } from '../../../shared/entities';
+import { Project, ProjectType, Schema, Target } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { bolderize } from '../../../shared/markdown';
 import { sentry } from '../../../shared/sentry';
@@ -148,22 +148,32 @@ export class SchemaPublisher {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    const [target, project, latestVersion] = await Promise.all([
-      this.targetManager.getTarget({
-        organization: input.organization,
-        project: input.project,
-        target: input.target,
-      }),
-      this.projectManager.getProject({
-        organization: input.organization,
-        project: input.project,
-      }),
-      this.schemaManager.getLatestSchemas({
-        organization: input.organization,
-        project: input.project,
-        target: input.target,
-      }),
-    ]);
+    const [target, project, organization, latestVersion, latestComposableVersion] =
+      await Promise.all([
+        this.targetManager.getTarget({
+          organization: input.organization,
+          project: input.project,
+          target: input.target,
+        }),
+        this.projectManager.getProject({
+          organization: input.organization,
+          project: input.project,
+        }),
+        this.organizationManager.getOrganization({
+          organization: input.organization,
+        }),
+        this.schemaManager.getLatestSchemas({
+          organization: input.organization,
+          project: input.project,
+          target: input.target,
+        }),
+        this.schemaManager.getLatestSchemas({
+          organization: input.organization,
+          project: input.project,
+          target: input.target,
+          onlyComposable: true,
+        }),
+      ]);
 
     schemaCheckCount.inc({
       model: project.legacyRegistryModel ? 'legacy' : 'modern',
@@ -203,8 +213,15 @@ export class SchemaPublisher {
                 schemas: [ensureSingleSchema(latestVersion.schemas)],
               }
             : null,
+          latestComposable: latestComposableVersion
+            ? {
+                isComposable: latestComposableVersion.valid,
+                schemas: [ensureSingleSchema(latestComposableVersion.schemas)],
+              }
+            : null,
           baseSchema,
           project,
+          organization,
         });
         break;
       case ProjectType.FEDERATION:
@@ -222,8 +239,15 @@ export class SchemaPublisher {
                 schemas: ensureCompositeSchemas(latestVersion.schemas),
               }
             : null,
+          latestComposable: latestComposableVersion
+            ? {
+                isComposable: latestComposableVersion.valid,
+                schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
+              }
+            : null,
           baseSchema,
           project,
+          organization,
         });
         break;
       default:
@@ -365,7 +389,10 @@ export class SchemaPublisher {
 
         const orchestrator = this.schemaManager.matchOrchestrator(project.type);
         const schemaObjects = schemas.map(s => this.helper.createSchemaObject(s));
-        const schema = await orchestrator.build(schemaObjects, project.externalComposition);
+        const compositionResult = await orchestrator.composeAndValidate(
+          schemaObjects,
+          project.externalComposition,
+        );
 
         this.logger.info(
           'Deploying version to CDN (reason="status_change" version=%s)',
@@ -375,15 +402,9 @@ export class SchemaPublisher {
         await this.updateCDN({
           target,
           project,
-          supergraph:
-            project.type === ProjectType.FEDERATION
-              ? await orchestrator.supergraph(
-                  schemas.map(s => this.helper.createSchemaObject(s)),
-                  project.externalComposition,
-                )
-              : null,
+          supergraph: compositionResult.supergraph,
           schemas,
-          fullSchemaSdl: schema.raw,
+          fullSchemaSdl: compositionResult.sdl!,
         });
       }
     }
@@ -408,22 +429,32 @@ export class SchemaPublisher {
             target: input.target,
             scope: TargetAccessScope.REGISTRY_WRITE,
           });
-          const [project, latestVersion, baseSchema] = await Promise.all([
-            this.projectManager.getProject({
-              organization: input.organization,
-              project: input.project,
-            }),
-            this.schemaManager.getLatestSchemas({
-              organization: input.organization,
-              project: input.project,
-              target: input.target,
-            }),
-            this.schemaManager.getBaseSchema({
-              organization: input.organization,
-              project: input.project,
-              target: input.target,
-            }),
-          ]);
+          const [project, organization, latestVersion, latestComposableVersion, baseSchema] =
+            await Promise.all([
+              this.projectManager.getProject({
+                organization: input.organization,
+                project: input.project,
+              }),
+              this.organizationManager.getOrganization({
+                organization: input.organization,
+              }),
+              this.schemaManager.getLatestSchemas({
+                organization: input.organization,
+                project: input.project,
+                target: input.target,
+              }),
+              this.schemaManager.getLatestSchemas({
+                organization: input.organization,
+                project: input.project,
+                target: input.target,
+                onlyComposable: true,
+              }),
+              this.schemaManager.getBaseSchema({
+                organization: input.organization,
+                project: input.project,
+                target: input.target,
+              }),
+            ]);
 
           const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
 
@@ -433,13 +464,24 @@ export class SchemaPublisher {
             throw new HiveError(`${project.type} project (${modelVersion}) not supported`);
           }
 
+          if (modelVersion === 'legacy') {
+            throw new HiveError(
+              'Please upgrade your project to the new registry model to use this feature. See https://the-guild.dev/blog/graphql-hive-improvements-in-schema-registry',
+            );
+          }
+
           if (!latestVersion || latestVersion.schemas.length === 0) {
             throw new HiveError('Registry is empty');
           }
 
           const schemas = ensureCompositeSchemas(latestVersion.schemas);
           this.logger.debug(`Found ${latestVersion?.schemas.length ?? 0} most recent schemas`);
-          this.logger.debug('Using %s registry model (version=%s)', project.type, modelVersion);
+          this.logger.debug(
+            'Using %s registry model (version=%s, featureFlags=%o)',
+            project.type,
+            modelVersion,
+            organization.featureFlags,
+          );
 
           const serviceExists = schemas.some(s => s.service_name === input.serviceName);
 
@@ -463,8 +505,15 @@ export class SchemaPublisher {
               isComposable: latestVersion.valid,
               schemas,
             },
+            latestComposable: latestComposableVersion
+              ? {
+                  isComposable: latestComposableVersion.valid,
+                  schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
+                }
+              : null,
             baseSchema,
             project,
+            organization,
             selector: {
               target: input.target,
               project: input.project,
@@ -548,31 +597,37 @@ export class SchemaPublisher {
       scope: TargetAccessScope.REGISTRY_WRITE,
     });
 
-    const [organization, project, target, latestVersion, baseSchema] = await Promise.all([
-      this.organizationManager.getOrganization({
-        organization: organizationId,
-      }),
-      this.projectManager.getProject({
-        organization: organizationId,
-        project: projectId,
-      }),
-      this.targetManager.getTarget({
-        organization: organizationId,
-        project: projectId,
-        target: targetId,
-      }),
-      this.schemaManager.getLatestSchemas({
-        // here we get an empty list of schemas
-        organization: organizationId,
-        project: projectId,
-        target: targetId,
-      }),
-      this.schemaManager.getBaseSchema({
-        organization: organizationId,
-        project: projectId,
-        target: targetId,
-      }),
-    ]);
+    const [organization, project, target, latestVersion, latestComposable, baseSchema] =
+      await Promise.all([
+        this.organizationManager.getOrganization({
+          organization: organizationId,
+        }),
+        this.projectManager.getProject({
+          organization: organizationId,
+          project: projectId,
+        }),
+        this.targetManager.getTarget({
+          organization: organizationId,
+          project: projectId,
+          target: targetId,
+        }),
+        this.schemaManager.getLatestSchemas({
+          organization: organizationId,
+          project: projectId,
+          target: targetId,
+        }),
+        this.schemaManager.getLatestSchemas({
+          organization: organizationId,
+          project: projectId,
+          target: targetId,
+          onlyComposable: true,
+        }),
+        this.schemaManager.getBaseSchema({
+          organization: organizationId,
+          project: projectId,
+          target: targetId,
+        }),
+      ]);
 
     schemaPublishCount.inc({
       model: project.legacyRegistryModel ? 'legacy' : 'modern',
@@ -591,7 +646,11 @@ export class SchemaPublisher {
     let publishResult: SchemaPublishResult;
     switch (project.type) {
       case ProjectType.SINGLE:
-        this.logger.debug('Using SINGLE registry model (version=%s)', modelVersion);
+        this.logger.debug(
+          'Using SINGLE registry model (version=%s, featureFlags=%o)',
+          modelVersion,
+          organization.featureFlags,
+        );
         publishResult = await this.models[ProjectType.SINGLE][modelVersion].publish({
           input,
           latest: latestVersion
@@ -600,6 +659,13 @@ export class SchemaPublisher {
                 schemas: [ensureSingleSchema(latestVersion.schemas)],
               }
             : null,
+          latestComposable: latestComposable
+            ? {
+                isComposable: latestComposable.valid,
+                schemas: [ensureSingleSchema(latestComposable.schemas)],
+              }
+            : null,
+          organization,
           project,
           target,
           baseSchema,
@@ -607,7 +673,12 @@ export class SchemaPublisher {
         break;
       case ProjectType.FEDERATION:
       case ProjectType.STITCHING:
-        this.logger.debug('Using %s registry model (version=%s)', project.type, modelVersion);
+        this.logger.debug(
+          'Using %s registry model (version=%s, featureFlags=%o)',
+          project.type,
+          modelVersion,
+          organization.featureFlags,
+        );
         publishResult = await this.models[project.type][modelVersion].publish({
           input,
           latest: latestVersion
@@ -616,6 +687,13 @@ export class SchemaPublisher {
                 schemas: ensureCompositeSchemas(latestVersion.schemas),
               }
             : null,
+          latestComposable: latestComposable
+            ? {
+                isComposable: latestComposable.valid,
+                schemas: ensureCompositeSchemas(latestComposable.schemas),
+              }
+            : null,
+          organization,
           project,
           target,
           baseSchema,
@@ -721,26 +799,68 @@ export class SchemaPublisher {
       conclusion: 'accepted',
     });
 
-    const newVersion = await this.publishNewVersion({
-      input,
-      valid: publishResult.state.composable,
-      schemas: publishResult.state.schemas,
-      newSchema: publishResult.state.schema,
-      organizationId,
-      target,
-      project,
-      changes: publishResult.state.changes ?? [],
-      errors,
-      initial: publishResult.state.initial,
+    const composable = publishResult.state.composable;
+    const fullSchemaSdl = publishResult.state.fullSchemaSdl;
+
+    if (composable && !fullSchemaSdl) {
+      throw new Error('Version is composable but the full schema SDL is missing');
+    }
+
+    const changes = publishResult.state.changes ?? [];
+    const messages = publishResult.state.messages ?? [];
+    const initial = publishResult.state.initial;
+    const pushedSchema = publishResult.state.schema;
+    const schemas = [...publishResult.state.schemas];
+    const schemaLogIds = schemas
+      .filter(s => s.id !== pushedSchema.id) // do not include the incoming schema
+      .map(s => s.id);
+
+    const supergraph = publishResult.state.supergraph ?? null;
+
+    this.logger.debug(`Assigning ${schemaLogIds.length} schemas to new version`);
+    const schemaVersion = await this.schemaManager.createVersion({
+      valid: composable,
+      organization: organizationId,
+      project: project.id,
+      target: target.id,
+      commit: input.commit,
+      logIds: schemaLogIds,
+      service: input.service,
+      schema: input.sdl,
+      author: input.author,
+      url: input.url,
+      base_schema: baseSchema,
+      metadata: input.metadata ?? null,
+      projectType: project.type,
+      actionFn: async () => {
+        if (composable && fullSchemaSdl) {
+          await this.publishToCDN({
+            target,
+            project,
+            supergraph,
+            fullSchemaSdl,
+            schemas,
+          });
+        }
+      },
     });
 
-    await this.publishToCDN({
-      valid: newVersion.valid,
-      target,
-      project,
-      orchestrator: publishResult.state.orchestrator,
-      schemas: publishResult.state.schemas,
-    });
+    if (changes.length > 0 || errors.length > 0) {
+      void this.alertsManager
+        .triggerSchemaChangeNotifications({
+          organization,
+          project,
+          target,
+          schema: schemaVersion,
+          changes,
+          messages,
+          errors,
+          initial,
+        })
+        .catch(err => {
+          this.logger.error('Failed to trigger schema change notifications', err);
+        });
+    }
 
     const linkToWebsite =
       typeof this.schemaModuleConfig.schemaPublishLink === 'function'
@@ -754,7 +874,11 @@ export class SchemaPublisher {
             target: {
               cleanId: target.cleanId,
             },
-            version: latestVersion ? newVersion : undefined,
+            version: latestVersion
+              ? {
+                  id: schemaVersion.id,
+                }
+              : undefined,
           })
         : null;
 
@@ -775,7 +899,7 @@ export class SchemaPublisher {
       __typename: 'SchemaPublishSuccess' as const,
       initial: publishResult.state.initial,
       valid: publishResult.state.composable,
-      changes: publishResult.state.changes ?? [],
+      changes: modelVersion === 'legacy' ? publishResult.state.changes ?? [] : null,
       message: (publishResult.state.messages ?? []).join('\n'),
       linkToWebsite,
     } satisfies Types.ResolversTypes['SchemaPublishSuccess'];
@@ -869,114 +993,27 @@ export class SchemaPublisher {
     }
   }
 
-  @sentry('SchemaPublisher.publishNewVersion')
-  private async publishNewVersion({
-    valid,
-    input,
-    target,
-    project,
-    organizationId,
-    newSchema,
-    schemas,
-    changes,
-    errors,
-    initial,
-  }: {
-    valid: boolean;
-    input: PublishInput;
-    target: Target;
-    project: Project;
-    organizationId: string;
-    newSchema: Schema;
-    schemas: readonly Schema[];
-    changes: Types.SchemaChange[];
-    errors: Types.SchemaError[];
-    initial: boolean;
-  }) {
-    const commits = schemas
-      .filter(s => s.id !== newSchema.id) // do not include the incoming schema
-      .map(s => s.id);
-
-    this.logger.debug(`Assigning ${commits.length} schemas to new version`);
-    const baseSchema = await this.schemaManager.getBaseSchema({
-      organization: input.organization,
-      project: input.project,
-      target: input.target,
-    });
-    const [schemaVersion, organization] = await Promise.all([
-      this.schemaManager.createVersion({
-        valid,
-        organization: organizationId,
-        project: project.id,
-        target: target.id,
-        commit: input.commit,
-        commits,
-        service: input.service,
-        schema: input.sdl,
-        author: input.author,
-        url: input.url,
-        base_schema: baseSchema,
-        metadata: input.metadata ?? null,
-        projectType: project.type,
-      }),
-      this.organizationManager.getOrganization({
-        organization: organizationId,
-      }),
-    ]);
-
-    void this.alertsManager
-      .triggerSchemaChangeNotifications({
-        organization,
-        project,
-        target,
-        schema: schemaVersion,
-        changes,
-        errors,
-        initial,
-      })
-      .catch(err => {
-        this.logger.error('Failed to trigger schema change notifications', err);
-      });
-
-    return schemaVersion;
-  }
-
   @sentry('SchemaPublisher.publishToCDN')
   private async publishToCDN({
-    valid,
     target,
     project,
-    orchestrator,
+    supergraph,
+    fullSchemaSdl,
     schemas,
   }: {
-    valid: boolean;
     target: Target;
     project: Project;
-    orchestrator: Orchestrator;
+    supergraph: string | null;
+    fullSchemaSdl: string;
     schemas: readonly Schema[];
   }) {
-    try {
-      if (valid) {
-        const schemaObjects = schemas.map(s => this.helper.createSchemaObject(s));
-        const schema = await orchestrator.build(schemaObjects, project.externalComposition);
-
-        await this.updateCDN({
-          target,
-          project,
-          schemas,
-          supergraph:
-            project.type === ProjectType.FEDERATION
-              ? await orchestrator.supergraph(
-                  schemas.map(s => this.helper.createSchemaObject(s)),
-                  project.externalComposition,
-                )
-              : null,
-          fullSchemaSdl: schema.raw,
-        });
-      }
-    } catch (e) {
-      this.logger.error(`Failed to publish to CDN!`, e);
-    }
+    await this.updateCDN({
+      target,
+      project,
+      schemas,
+      supergraph,
+      fullSchemaSdl,
+    });
   }
 
   private async updateCDN(

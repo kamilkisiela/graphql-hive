@@ -7,23 +7,23 @@ type PropsOf<T> = T extends ForwardRefExoticComponent<infer P> ? P : unknown;
 type RootProps = PropsOf<typeof Root>;
 type ItemProps = PropsOf<typeof Item>;
 
-export const ToggleGroup = (props: RootProps) => {
+export const ToggleGroup = ({ className, children, ...props }: RootProps) => {
   return (
-    <Root {...props} className={clsx('inline-flex rounded-md shadow-sm', props.className)}>
-      {props.children}
+    <Root className={clsx('inline-flex rounded-md shadow-sm', className)} {...props}>
+      {children}
     </Root>
   );
 };
-export const ToggleGroupItem = (props: ItemProps) => {
+export const ToggleGroupItem = ({ className, children, ...props }: ItemProps) => {
   return (
     <Item
-      {...props}
       className={clsx(
         'flex items-center justify-center p-2 first:ml-0 first:rounded-l-md last:rounded-r-md',
-        props.className,
+        className,
       )}
+      {...props}
     >
-      {props.children}
+      {children}
     </Item>
   );
 };

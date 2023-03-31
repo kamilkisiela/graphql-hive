@@ -1,88 +1,40 @@
 import { ReactElement, useCallback, useState } from 'react';
 import NextLink from 'next/link';
-import clsx from 'clsx';
-import { VscBug, VscDiff, VscListFlat } from 'react-icons/vsc';
-import reactStringReplace from 'react-string-replace';
+import { clsx } from 'clsx';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { Label } from '@/components/common';
 import { TargetLayout } from '@/components/layouts';
+import { VersionErrorsAndChanges } from '@/components/target/history/errors-and-changes';
 import {
   Badge,
   Button,
   DiffEditor,
   Heading,
-  noSchema,
   TimeAgo,
   Title,
   ToggleGroup,
   ToggleGroupItem,
 } from '@/components/v2';
-import {
-  CompareDocument,
-  CriticalityLevel,
-  LatestSchemaDocument,
-  SchemaChangeFieldsFragment,
-  VersionsDocument,
-} from '@/graphql';
+import { noSchemaVersion } from '@/components/v2/empty-list';
+import { DiffIcon } from '@/components/v2/icon';
+import { graphql } from '@/gql';
+import { CompareDocument, VersionsDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import {
+  CheckCircledIcon,
+  CrossCircledIcon,
+  ExternalLinkIcon,
+  RowsIcon,
+} from '@radix-ui/react-icons';
 
-function labelize(message: string) {
-  const findSingleQuotes = /'([^']+)'/gim;
-
-  return reactStringReplace(message, findSingleQuotes, (match, i) => (
-    <Label key={i}>{match}</Label>
-  ));
-}
-
-const titleMap: Record<CriticalityLevel, string> = {
-  Safe: 'Safe Changes',
-  Breaking: 'Breaking Changes',
-  Dangerous: 'Dangerous Changes',
-};
-
-const criticalityLevelMapping = {
-  [CriticalityLevel.Safe]: 'text-emerald-400',
-  [CriticalityLevel.Dangerous]: 'text-yellow-400',
-} as Record<CriticalityLevel, string | undefined>;
-
-const ChangesBlock = ({
-  changes,
-  criticality,
-}: {
-  changes: SchemaChangeFieldsFragment[];
-  criticality: CriticalityLevel;
-}): ReactElement | null => {
-  const filteredChanges = changes.filter(c => c.criticality === criticality);
-
-  if (!filteredChanges.length) {
-    return null;
-  }
-
-  return (
-    <div>
-      <h2 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
-        {titleMap[criticality]}
-      </h2>
-      <ul className="list-inside list-disc pl-3 text-base leading-relaxed">
-        {filteredChanges.map((change, key) => (
-          <li key={key} className={clsx(criticalityLevelMapping[criticality] ?? 'text-red-400')}>
-            <span className="text-gray-600 dark:text-white">{labelize(change.message)}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
-const DiffView = ({
+function DiffView({
   view,
   versionId,
 }: {
-  view: 'sdl' | 'list';
+  view: 'SDL' | 'list';
   versionId: string;
-}): ReactElement | null => {
+}): ReactElement | null {
   const router = useRouteSelector();
   const [compareQuery] = useQuery({
     query: CompareDocument,
@@ -94,13 +46,14 @@ const DiffView = ({
     },
   });
   const comparison = compareQuery.data?.schemaCompareToPrevious;
+  const compositionErrors = compareQuery.data?.schemaVersion?.errors;
   const { error } = compareQuery;
 
   if (error) {
     return (
       <div className="m-3 rounded-lg bg-red-500/20 p-8">
         <div className="mb-3 flex items-center gap-3">
-          <VscBug className="h-8 w-8 text-red-500" />
+          <CrossCircledIcon className="h-6 w-auto text-red-500" />
           <h2 className="text-lg font-medium text-white">Failed to compare schemas</h2>
         </div>
         <p className="text-base text-gray-500">
@@ -113,55 +66,66 @@ const DiffView = ({
     );
   }
 
-  if (!comparison) {
+  if (!comparison || !compositionErrors) {
     return null;
   }
 
-  if (comparison.__typename === 'SchemaCompareError') {
+  const isComparisonSuccessful = comparison.__typename !== 'SchemaCompareError';
+
+  if (isComparisonSuccessful && view === 'SDL') {
+    const { before, after } = comparison.diff;
+    return <DiffEditor before={before} after={after} />;
+  }
+
+  const hasChanges = isComparisonSuccessful && comparison.changes.total > 0;
+  const hasErrors = compositionErrors.total > 0;
+
+  if (!hasChanges && !hasErrors) {
     return (
-      <div className="m-3 rounded-lg bg-red-500/20 p-8">
-        <div className="mb-3 flex items-center gap-3">
-          <VscBug className="h-8 w-8 text-red-500" />
-          <h2 className="text-lg font-medium text-white">Failed to build GraphQL Schema</h2>
+      <div>
+        <div className="m-3 rounded-lg bg-emerald-500/20 p-8">
+          <div className="mb-3 flex items-center gap-3">
+            <CheckCircledIcon className="h-6 w-auto text-emerald-500" />
+            <h2 className="text-lg font-medium text-white">First composable version</h2>
+          </div>
+          <p className="text-base text-white">
+            Congratulations! This is the first version of the schema that is composable.
+          </p>
         </div>
-        <p className="text-base text-gray-500">
-          Previous or current schema is most likely incomplete and was force published
-        </p>
-        <pre className="mt-5 whitespace-pre-wrap rounded-lg bg-red-900 p-3 text-xs text-white">
-          {comparison.message}
-        </pre>
       </div>
     );
   }
 
-  const { before, after } = comparison.diff;
-
-  if (view === 'sdl') {
-    return <DiffEditor before={before} after={after} />;
-  }
-
   return (
-    <div className="space-y-3 p-6">
-      <ChangesBlock changes={comparison.changes.nodes} criticality={CriticalityLevel.Breaking} />
-      <ChangesBlock changes={comparison.changes.nodes} criticality={CriticalityLevel.Dangerous} />
-      <ChangesBlock changes={comparison.changes.nodes} criticality={CriticalityLevel.Safe} />
-    </div>
+    <VersionErrorsAndChanges
+      changes={
+        isComparisonSuccessful
+          ? comparison.changes
+          : {
+              nodes: [],
+              total: 0,
+            }
+      }
+      errors={compositionErrors}
+    />
   );
-};
+}
 
 // URQL's Infinite scrolling pattern
 // https://formidable.com/open-source/urql/docs/basics/ui-patterns/#infinite-scrolling
-const ListPage = ({
+function ListPage({
+  gitRepository,
   variables,
   isLastPage,
   onLoadMore,
   versionId,
 }: {
+  gitRepository?: string;
   variables: { after: string; limit: number };
   isLastPage: boolean;
   onLoadMore: (after: string) => void;
   versionId: string;
-}): ReactElement => {
+}): ReactElement {
   const router = useRouteSelector();
 
   const [versionsQuery] = useQuery({
@@ -183,43 +147,58 @@ const ListPage = ({
   return (
     <>
       {versions?.nodes.map(version => (
-        <NextLink
-          key={version.id}
-          href={`/${router.organizationId}/${router.projectId}/${router.targetId}/history/${version.id}`}
-          scroll={false} // disable the scroll to top on page
+        <div
           className={clsx(
             'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
             versionId === version.id && 'bg-gray-800/40',
           )}
         >
-          <h3 className="truncate font-bold">
-            {'commit' in version.log ? version.log.commit : `Deleted ${version.log.deletedService}`}
-          </h3>
-          {'author' in version.log ? (
-            <div className="truncate text-xs font-medium text-gray-500">
-              <span className="overflow-hidden truncate">{version.log.author}</span>
-            </div>
-          ) : null}
-          <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
-            <div className={clsx('w-1/2 ', !version.valid && 'text-red-500')}>
-              <Badge color={version.valid ? 'green' : 'red'} /> Published{' '}
-              <TimeAgo date={version.date} />
-            </div>
-
-            {'service' in version.log && version.log.service ? (
-              <div className="ml-auto mr-0 w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-right font-bold">
-                {version.log.service}
+          <NextLink
+            key={version.id}
+            href={`/${router.organizationId}/${router.projectId}/${router.targetId}/history/${version.id}`}
+            scroll={false} // disable the scroll to top on page
+          >
+            <h3 className="truncate font-bold">
+              {'commit' in version.log
+                ? version.log.commit
+                : `Deleted ${version.log.deletedService}`}
+            </h3>
+            {'author' in version.log ? (
+              <div className="truncate text-xs font-medium text-gray-500">
+                <span className="overflow-hidden truncate">{version.log.author}</span>
               </div>
             ) : null}
-          </div>
-        </NextLink>
+            <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
+              <div className={clsx('w-1/2 ', !version.valid && 'text-red-500')}>
+                <Badge color={version.valid ? 'green' : 'red'} /> Published{' '}
+                <TimeAgo date={version.date} />
+              </div>
+
+              {'service' in version.log && version.log.service ? (
+                <div className="ml-auto mr-0 w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-right font-bold">
+                  {version.log.service}
+                </div>
+              ) : null}
+            </div>
+          </NextLink>
+          {gitRepository && 'commit' in version.log && version.log.commit ? (
+            <a
+              className="text-xs font-medium text-gray-500 hover:text-gray-400"
+              target="_blank"
+              rel="noreferrer"
+              href={`https://github.com/${gitRepository}/commit/${version.log.commit}`}
+            >
+              <ExternalLinkIcon className="inline" /> associated with Git commit
+            </a>
+          ) : null}
+        </div>
       ))}
       {isLastPage && hasMore && (
         <Button
           variant="link"
           onClick={() => {
             const id = versions.nodes.at(-1)?.id;
-            if (typeof id == 'string') {
+            if (id) {
               onLoadMore(id);
             }
           }}
@@ -229,11 +208,11 @@ const ListPage = ({
       )}
     </>
   );
-};
+}
 
-type View = 'sdl' | 'list';
+type View = 'SDL' | 'list';
 
-const Page = ({ versionId }: { versionId: string }) => {
+function Page({ versionId, gitRepository }: { versionId: string; gitRepository?: string }) {
   const [pageVariables, setPageVariables] = useState([{ limit: 10, after: '' }]);
 
   const [view, setView] = useState<View>('list');
@@ -248,7 +227,8 @@ const Page = ({ versionId }: { versionId: string }) => {
         <div className="flex h-0 min-w-[420px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
           {pageVariables.map((variables, i) => (
             <ListPage
-              key={variables.after}
+              gitRepository={gitRepository}
+              key={variables.after || 'initial'}
               variables={variables}
               isLastPage={i === pageVariables.length - 1}
               onLoadMore={after => {
@@ -269,12 +249,13 @@ const Page = ({ versionId }: { versionId: string }) => {
             className="bg-gray-900/50 text-gray-500"
           >
             {[
-              { value: 'sdl', icon: <VscDiff /> },
-              { value: 'list', icon: <VscListFlat /> },
+              { value: 'SDL', icon: <DiffIcon className="h-5 w-auto" /> },
+              { value: 'list', icon: <RowsIcon /> },
             ].map(({ value, icon }) => (
               <ToggleGroupItem
                 key={value}
                 value={value}
+                title={`Show ${value}`}
                 className={clsx('hover:text-white', view === value && 'bg-gray-800 text-white')}
               >
                 {icon}
@@ -282,37 +263,57 @@ const Page = ({ versionId }: { versionId: string }) => {
             ))}
           </ToggleGroup>
         </div>
-        <div className="grow rounded-md border border-gray-800/50">
+        <div className="grow rounded-md border border-gray-800/50 overflow-y-auto">
           <DiffView versionId={versionId} view={view} />
         </div>
       </div>
     </>
   );
-};
+}
+
+const TargetHistoryPageQuery = graphql(`
+  query TargetHistoryPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...TargetLayout_OrganizationFragment
+      }
+    }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_ProjectFragment
+      gitRepository
+    }
+    targets(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_TargetConnectionFragment
+    }
+    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+      id
+      latestSchemaVersion {
+        id
+      }
+    }
+    ...TargetLayout_IsCDNEnabledFragment
+  }
+`);
 
 function HistoryPage(): ReactElement {
   const router = useRouteSelector();
-  const [latestSchemaQuery] = useQuery({
-    query: LatestSchemaDocument,
-    variables: {
-      selector: {
-        organization: router.organizationId,
-        project: router.projectId,
-        target: router.targetId,
-      },
-    },
-    requestPolicy: 'cache-and-network',
-  });
-  const versionId = router.versionId ?? latestSchemaQuery.data?.target?.latestSchemaVersion?.id;
 
   return (
     <>
       <Title title="History" />
       <TargetLayout
         value="history"
-        className={versionId ? 'flex h-full items-stretch gap-x-5' : ''}
+        className="flex h-full items-stretch gap-x-5"
+        query={TargetHistoryPageQuery}
       >
-        {() => (versionId ? <Page versionId={versionId} /> : noSchema)}
+        {({ target, project }) => {
+          const versionId = router.versionId ?? target?.latestSchemaVersion?.id;
+          return versionId ? (
+            <Page gitRepository={project?.gitRepository ?? undefined} versionId={versionId} />
+          ) : (
+            noSchemaVersion
+          );
+        }}
       </TargetLayout>
     </>
   );

@@ -2,7 +2,6 @@ import Document, { DocumentContext, Head, Html, Main, NextScript } from 'next/do
 import 'regenerator-runtime/runtime';
 // don't remove this import ; it will break the built app ; but not the dev app :)
 import '@/config/frontend-env';
-import { extractCritical } from '@emotion/server';
 
 export default class MyDocument extends Document<{
   ids: Array<string>;
@@ -13,27 +12,21 @@ export default class MyDocument extends Document<{
     const { env: frontendEnv } = await import('@/config/frontend-env');
     const initialProps = await Document.getInitialProps(ctx);
     const page = await ctx.renderPage();
-    const styles = extractCritical(page.html);
 
     return {
       ...initialProps,
       ...page,
-      ...styles,
       frontendEnv,
     };
   }
 
   render() {
-    const { ids, css } = this.props;
-
     return (
       <Html className="dark">
         <Head>
           <style
-            data-emotion-css={ids.join(' ')}
             dangerouslySetInnerHTML={{
               __html:
-                css +
                 // we setup background via style tag to prevent white flash on initial page loading
                 'html {background: #0b0d11}',
             }}
@@ -44,10 +37,6 @@ export default class MyDocument extends Document<{
             rel="stylesheet"
           />
           <link rel="icon" href="/just-logo.svg" type="image/svg+xml" />
-          <script
-            id="force-dark-mode"
-            dangerouslySetInnerHTML={{ __html: "localStorage['chakra-ui-color-mode'] = 'dark';" }}
-          />
           <script
             type="module"
             dangerouslySetInnerHTML={{

@@ -1,6 +1,6 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import zod from 'zod';
-import { OIDCIntegration, OrganizationType } from '../../../shared/entities';
+import { OIDCIntegration } from '../../../shared/entities';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { CryptoProvider } from '../../shared/providers/crypto';
@@ -29,17 +29,14 @@ export class OIDCIntegrationsProvider {
     return this.enabled;
   }
 
-  async canViewerManageIntegrationForOrganization(args: {
-    organizationId: string;
-    organizationType: OrganizationType;
-  }) {
-    if (this.isEnabled() === false || args.organizationType === OrganizationType.PERSONAL) {
+  async canViewerManageIntegrationForOrganization(organizationId: string) {
+    if (this.isEnabled() === false) {
       return false;
     }
 
     try {
       await this.authManager.ensureOrganizationAccess({
-        organization: args.organizationId,
+        organization: organizationId,
         scope: OrganizationAccessScope.INTEGRATIONS,
       });
       return true;
@@ -97,11 +94,8 @@ export class OIDCIntegrationsProvider {
 
     const organization = await this.storage.getOrganization({ organization: args.organizationId });
 
-    if (organization.type === OrganizationType.PERSONAL) {
-      return {
-        type: 'error',
-        message: 'Personal organizations cannot have OIDC integrations.',
-      } as const;
+    if (!organization) {
+      throw new Error(`Failed to locate organization ${args.organizationId}`);
     }
 
     const clientIdResult = OIDCIntegrationClientIdModel.safeParse(args.clientId);

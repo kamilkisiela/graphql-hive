@@ -22,7 +22,7 @@ Cypress.Commands.add('signup', user => {
   cy.get('span[data-supertokens="link"]', { includeShadowDom: true }).contains('Sign Up').click();
   cy.fillSupertokensFormAndSubmit(user);
 
-  cy.contains('Create Project');
+  cy.contains('Create Organization');
 });
 
 Cypress.Commands.add('login', user => {
@@ -30,5 +30,5 @@ Cypress.Commands.add('login', user => {
 
   cy.fillSupertokensFormAndSubmit(user);
 
-  cy.contains('Create Project');
+  cy.contains('Create Organization');
 });

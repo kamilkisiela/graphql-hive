@@ -1,10 +1,20 @@
 import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { useFormik } from 'formik';
-import { DocumentType, gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts';
-import { Avatar, Button, Card, Checkbox, Input, Title } from '@/components/v2';
+import {
+  Avatar,
+  Button,
+  Card,
+  Checkbox,
+  DocsLink,
+  DocsNote,
+  Heading,
+  Input,
+  Title,
+} from '@/components/v2';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,14 +23,14 @@ import {
 } from '@/components/v2/dropdown';
 import { CopyIcon, KeyIcon, MoreIcon, SettingsIcon, TrashIcon } from '@/components/v2/icon';
 import { ChangePermissionsModal, DeleteMembersModal } from '@/components/v2/modals';
-import { MeDocument, OrganizationFieldsFragment, OrganizationType } from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { MeDocument, OrganizationFieldsFragment } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { useToggle } from '@/lib/hooks/use-toggle';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { Tooltip } from '@chakra-ui/react';
 
 export const DateFormatter = Intl.DateTimeFormat('en', {
   year: 'numeric',
@@ -28,7 +38,7 @@ export const DateFormatter = Intl.DateTimeFormat('en', {
   day: 'numeric',
 });
 
-const Members_Invitation = gql(/* GraphQL */ `
+const Members_Invitation = graphql(`
   fragment Members_Invitation on OrganizationInvitation {
     id
     createdAt
@@ -38,11 +48,13 @@ const Members_Invitation = gql(/* GraphQL */ `
   }
 `);
 
-export const MemberInvitationForm_InviteByEmail = gql(/* GraphQL */ `
+const MemberInvitationForm_InviteByEmail = graphql(`
   mutation MemberInvitationForm_InviteByEmail($input: InviteToOrganizationByEmailInput!) {
     inviteToOrganizationByEmail(input: $input) {
       ok {
         ...Members_Invitation
+        email
+        id
       }
       error {
         message
@@ -54,7 +66,7 @@ export const MemberInvitationForm_InviteByEmail = gql(/* GraphQL */ `
   }
 `);
 
-export const InvitationDeleteButton_DeleteInvitation = gql(/* GraphQL */ `
+const InvitationDeleteButton_DeleteInvitation = graphql(`
   mutation InvitationDeleteButton_DeleteInvitation($input: DeleteOrganizationInvitationInput!) {
     deleteOrganizationInvitation(input: $input) {
       ok {
@@ -88,7 +100,7 @@ const MemberInvitationForm = ({
   } = useFormik({
     initialValues: { email: '' },
     validationSchema: Yup.object().shape({
-      email: Yup.string().email().required('Email is required'),
+      email: Yup.string().email().required('email is required'),
     }),
     async onSubmit(values) {
       const result = await invite({
@@ -100,7 +112,7 @@ const MemberInvitationForm = ({
 
       if (result.data?.inviteToOrganizationByEmail?.ok?.email) {
         notify(`Invited ${result.data.inviteToOrganizationByEmail.ok.email}`, 'success');
-        resetForm();
+        globalThis.window?.location.reload();
       }
     },
   });
@@ -111,14 +123,8 @@ const MemberInvitationForm = ({
       : invitation.data?.inviteToOrganizationByEmail.error?.inputErrors.email || null;
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-row gap-2">
-      <Tooltip
-        hasArrow
-        placement="top"
-        label={errorMessage}
-        isOpen={typeof errorMessage === 'string'}
-        bg="red.600"
-      >
+    <div>
+      <form onSubmit={handleSubmit} className="flex flex-row gap-2">
         <Input
           style={{
             minWidth: '200px',
@@ -131,28 +137,30 @@ const MemberInvitationForm = ({
           onBlur={handleBlur}
           disabled={isSubmitting}
           isInvalid={touched.email && !!errors.email}
+          onClear={resetForm}
         />
-      </Tooltip>
-      <Button
-        type="submit"
-        size="large"
-        block
-        variant="primary"
-        disabled={isSubmitting || !isValid || !dirty}
-      >
-        Send an invite
-      </Button>
-    </form>
+        <Button
+          type="submit"
+          size="large"
+          block
+          variant="primary"
+          disabled={isSubmitting || !isValid || !dirty}
+        >
+          Send an invite
+        </Button>
+      </form>
+      {errorMessage && <div className="mt-2 text-sm text-red-500">{errorMessage}</div>}
+    </div>
   );
 };
 
-const InvitationDeleteButton = ({
+function InvitationDeleteButton({
   email,
   organizationCleanId,
 }: {
   email: string;
   organizationCleanId: string;
-}) => {
+}) {
   const [mutation, mutate] = useMutation(InvitationDeleteButton_DeleteInvitation);
 
   return (
@@ -165,44 +173,19 @@ const InvitationDeleteButton = ({
             email,
           },
         });
+        globalThis.window?.location.reload();
       }}
     >
       <TrashIcon /> Remove
     </DropdownMenuItem>
   );
-};
+}
 
-export const Members_OrganizationMembers = gql(/* GraphQL */ `
-  query Members_OrganizationMembers($selector: OrganizationSelectorInput!) {
-    organization(selector: $selector) {
-      organization {
-        ...OrganizationFields
-        owner {
-          ...MemberFields
-        }
-        members {
-          nodes {
-            ...MemberFields
-          }
-          total
-        }
-        invitations {
-          nodes {
-            ...Members_Invitation
-          }
-        }
-      }
-    }
-  }
-`);
-
-const Invitation = ({
-  invitation,
-  organizationCleanId,
-}: {
-  invitation: DocumentType<typeof Members_Invitation>;
+const Invitation = (props: {
+  invitation: FragmentType<typeof Members_Invitation>;
   organizationCleanId: string;
-}) => {
+}): ReactElement => {
+  const invitation = useFragment(Members_Invitation, props.invitation);
   const copyToClipboard = useClipboard();
   const copyLink = useCallback(async () => {
     await copyToClipboard(`${window.location.origin}/join/${invitation.code}`);
@@ -218,7 +201,7 @@ const Invitation = ({
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button rotate={90}>
+          <Button>
             <MoreIcon />
           </Button>
         </DropdownMenuTrigger>
@@ -228,7 +211,7 @@ const Invitation = ({
             Copy invite link
           </DropdownMenuItem>
           <InvitationDeleteButton
-            organizationCleanId={organizationCleanId}
+            organizationCleanId={props.organizationCleanId}
             email={invitation.email}
           />
         </DropdownMenuContent>
@@ -237,7 +220,63 @@ const Invitation = ({
   );
 };
 
-const Page = ({ organization }: { organization: OrganizationFieldsFragment }) => {
+const Page_OrganizationFragment = graphql(`
+  fragment Page_OrganizationFragment on Organization {
+    me {
+      ...CanAccessOrganization_MemberFragment
+      ...ChangePermissionsModal_MemberFragment
+    }
+    cleanId
+    owner {
+      id
+    }
+    members {
+      nodes {
+        id
+        ...ChangePermissionsModal_MemberFragment
+        user {
+          provider
+          displayName
+          email
+        }
+      }
+      total
+    }
+    ...OrganizationInvitations_OrganizationFragment
+    ...ChangePermissionsModal_OrganizationFragment
+  }
+`);
+
+const OrganizationInvitations_OrganizationFragment = graphql(`
+  fragment OrganizationInvitations_OrganizationFragment on Organization {
+    cleanId
+    invitations {
+      nodes {
+        id
+        ...Members_Invitation
+      }
+    }
+  }
+`);
+
+const OrganizationInvitations = (props: {
+  organization: FragmentType<typeof OrganizationInvitations_OrganizationFragment>;
+}): ReactElement | null => {
+  const org = useFragment(OrganizationInvitations_OrganizationFragment, props.organization);
+
+  return org.invitations.nodes.length ? (
+    <div className="pt-3">
+      <Heading className="mb-2">Pending Invitations</Heading>
+      {org.invitations.nodes.map(node => (
+        <Invitation key={node.id} invitation={node} organizationCleanId={org.cleanId} />
+      ))}
+    </div>
+  ) : null;
+};
+
+function Page(props: { organization: FragmentType<typeof Page_OrganizationFragment> }) {
+  const organization = useFragment(Page_OrganizationFragment, props.organization);
+
   useOrganizationAccess({
     scope: OrganizationAccessScope.Members,
     redirect: true,
@@ -251,30 +290,18 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
 
   const [meQuery] = useQuery({ query: MeDocument });
   const router = useRouteSelector();
-  const [organizationMembersQuery] = useQuery({
-    query: Members_OrganizationMembers,
-    variables: {
-      selector: {
-        organization: router.organizationId,
-      },
-    },
-  });
-
-  const org = organizationMembersQuery.data?.organization?.organization;
-  const isPersonal = org?.type === OrganizationType.Personal;
-  const members = org?.members.nodes;
-  const invitations = org?.invitations.nodes;
+  const members = organization?.members.nodes;
 
   useEffect(() => {
-    if (isPersonal) {
-      void router.replace(`/${router.organizationId}`);
-    } else if (members) {
+    if (members) {
       // uncheck checkboxes when members were deleted
       setChecked(prev => prev.filter(id => members.some(node => node.id === id)));
     }
-  }, [isPersonal, router, members]);
+  }, [router, members]);
 
-  if (!org || isPersonal) return null;
+  if (!organization) {
+    return null;
+  }
 
   const me = meQuery.data?.me;
   const selectedMember = selectedMemberId
@@ -283,14 +310,17 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
 
   return (
     <>
-      <p className="mb-3 font-light text-gray-300">
-        Invite others to your organization and manage access
-      </p>
+      <DocsNote>
+        You may invite other members to collaborate with you on this organization.{' '}
+        <DocsLink href="/management/organizations#members">
+          Learn more about membership and invitations
+        </DocsLink>
+      </DocsNote>
       {selectedMember && (
         <ChangePermissionsModal
           isOpen={isPermissionsModalOpen}
           toggleModalOpen={togglePermissionsModalOpen}
-          organization={org}
+          organization={organization}
           member={selectedMember}
         />
       )}
@@ -300,7 +330,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
         memberIds={checked}
       />
       <div className="flex items-center justify-between">
-        <MemberInvitationForm organizationCleanId={org.cleanId} />
+        <MemberInvitationForm organizationCleanId={organization.cleanId} />
         <Button
           size="large"
           danger
@@ -315,7 +345,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
       {members?.map(node => {
         const IconToUse = KeyIcon;
 
-        const isOwner = node.id === org.owner.id;
+        const isOwner = node.id === organization.owner.id;
         const isMe = node.id === me?.id;
         const isDisabled = isOwner || isMe;
 
@@ -338,7 +368,7 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button rotate={90} className={isDisabled ? 'invisible' : ''}>
+                <Button className={isDisabled ? 'invisible' : ''}>
                   <MoreIcon />
                 </Button>
               </DropdownMenuTrigger>
@@ -365,24 +395,34 @@ const Page = ({ organization }: { organization: OrganizationFieldsFragment }) =>
           </Card>
         );
       })}
-      {invitations?.length ? (
-        <div className="pt-3">
-          <div className="border-t-4 border-solid pb-6" />
-          {invitations.map(node => (
-            <Invitation key={node.id} invitation={node} organizationCleanId={org.cleanId} />
-          ))}
-        </div>
-      ) : null}
+      <OrganizationInvitations organization={organization} />
     </>
   );
-};
+}
 
-function MembersPage(): ReactElement {
+const OrganizationMembersPageQuery = graphql(`
+  query OrganizationMembersPageQuery($selector: OrganizationSelectorInput!) {
+    organization(selector: $selector) {
+      organization {
+        ...OrganizationLayout_OrganizationFragment
+        ...Page_OrganizationFragment
+      }
+    }
+  }
+`);
+
+function OrganizationMembersPage(): ReactElement {
   return (
     <>
       <Title title="Members" />
-      <OrganizationLayout value="members" className="flex w-4/5 flex-col gap-4">
-        {({ organization }) => <Page organization={organization} />}
+      <OrganizationLayout
+        value="members"
+        className="flex w-4/5 flex-col gap-4"
+        query={OrganizationMembersPageQuery}
+      >
+        {({ organization }) =>
+          organization ? <Page organization={organization.organization} /> : null
+        }
       </OrganizationLayout>
     </>
   );
@@ -390,4 +430,4 @@ function MembersPage(): ReactElement {
 
 export const getServerSideProps = withSessionProtection();
 
-export default authenticated(MembersPage);
+export default authenticated(OrganizationMembersPage);

@@ -14,10 +14,12 @@ test('catch sync exception', async ({ expect }) => {
     redis: new Redis(),
     logger: {
       debug: vi.fn() as any,
+      warn: vi.fn() as any,
     },
     prefix: randomString(),
     pollIntervalMs: 30,
-    timeoutMs: 2000,
+    timeoutMs: 100,
+    ttlMs: 100,
   });
 
   const run = cache.reuse(randomString(), () => {
@@ -32,10 +34,12 @@ test('catch async exception', async ({ expect }) => {
     redis: new Redis(),
     logger: {
       debug: vi.fn() as any,
+      warn: vi.fn() as any,
     },
     prefix: randomString(),
     pollIntervalMs: 30,
-    timeoutMs: 2000,
+    timeoutMs: 100,
+    ttlMs: 100,
   });
 
   const run = cache.reuse(randomString(), async () => {
@@ -50,17 +54,19 @@ test('share execution', async ({ expect }) => {
     redis: new Redis(),
     logger: {
       debug: vi.fn() as any,
+      warn: vi.fn() as any,
     },
     prefix: randomString(),
     pollIntervalMs: 30,
-    timeoutMs: 2000,
+    timeoutMs: 100,
+    ttlMs: 100,
   });
 
   const spy = vi.fn();
 
   const run = cache.reuse(randomString(), async () => {
     spy();
-    await waitFor(150);
+    await waitFor(50);
     return 'foo';
   });
 
@@ -72,23 +78,24 @@ test('share execution', async ({ expect }) => {
   expect(spy).toHaveBeenCalledTimes(1);
 });
 
-test('cache the result of an action for no longer than the timeout', async ({ expect }) => {
-  const timeoutMs = 1000;
+test('cache the result of an action', async ({ expect }) => {
+  const ttlMs = 100;
   const cache = createCache({
     redis: new Redis(),
     logger: {
       debug: vi.fn() as any,
+      warn: vi.fn() as any,
     },
     prefix: randomString(),
-    pollIntervalMs: 30,
-    timeoutMs,
+    pollIntervalMs: 10,
+    timeoutMs: 50,
+    ttlMs,
   });
 
   const spy = vi.fn();
 
   const run = cache.reuse(randomString(), async () => {
     spy();
-    await waitFor(100);
     return 'foo';
   });
 
@@ -96,26 +103,30 @@ test('cache the result of an action for no longer than the timeout', async ({ ex
   await expect(run({})).resolves.toBe('foo');
   expect(spy).toHaveBeenCalledTimes(1);
 
-  await waitFor(100);
+  await waitFor(ttlMs / 2);
 
   await expect(run({})).resolves.toBe('foo');
   expect(spy).toHaveBeenCalledTimes(1);
 
-  await waitFor(timeoutMs);
+  await waitFor(ttlMs);
   await expect(run({})).resolves.toBe('foo');
   expect(spy).toHaveBeenCalledTimes(2);
 });
 
-test('purge the cache when an action fails', async ({ expect }) => {
-  const timeoutMs = 1000;
+test('do not purge the cache when an action fails, persist the failure for some time', async ({
+  expect,
+}) => {
+  const ttlMs = 50;
   const cache = createCache({
     redis: new Redis(),
     logger: {
       debug: vi.fn() as any,
+      warn: vi.fn() as any,
     },
     prefix: randomString(),
-    pollIntervalMs: 30,
-    timeoutMs,
+    pollIntervalMs: 10,
+    timeoutMs: 50,
+    ttlMs,
   });
 
   const spy = vi.fn();
@@ -124,7 +135,7 @@ test('purge the cache when an action fails', async ({ expect }) => {
   const run = cache.reuse(randomString(), async () => {
     spy();
     calls++;
-    await waitFor(100);
+    await waitFor(ttlMs / 2);
 
     if (calls >= 2) {
       // Fail the second time and after
@@ -134,29 +145,42 @@ test('purge the cache when an action fails', async ({ expect }) => {
     return 'foo';
   });
 
-  await expect(run({})).resolves.toBe('foo');
-  await expect(run({})).resolves.toBe('foo');
+  const run1 = run({});
+  const run2 = run({});
+  await expect(run1).resolves.toBe('foo');
+  await expect(run2).resolves.toBe('foo');
   expect(spy).toHaveBeenCalledTimes(1);
 
   // Wait for the cache to expire
-  await waitFor(timeoutMs + 100);
+  await waitFor(ttlMs + 10);
+
+  // Run it again
+  await expect(run({})).rejects.toThrow('test');
+  expect(spy).toHaveBeenCalledTimes(2);
+  // Run it again, but this time it hits the cache (persisted failure)
   await expect(run({})).rejects.toThrow('test');
   expect(spy).toHaveBeenCalledTimes(2);
 
+  // Wait for the cache to expire
+  await waitFor(ttlMs + 10);
+  // Run it again, but this time it calls the factory function
   await expect(run({})).rejects.toThrow('test');
   expect(spy).toHaveBeenCalledTimes(3);
 });
 
 test('timeout', async ({ expect }) => {
-  const timeoutMs = 500;
+  const timeoutMs = 50;
+  const ttlMs = 100;
   const cache = createCache({
     redis: new Redis(),
     logger: {
       debug: vi.fn() as any,
+      warn: vi.fn() as any,
     },
     prefix: randomString(),
-    pollIntervalMs: 30,
+    pollIntervalMs: 10,
     timeoutMs,
+    ttlMs,
   });
 
   const spy = vi.fn();
@@ -171,4 +195,9 @@ test('timeout', async ({ expect }) => {
   await expect(run1).rejects.toThrowError(/timeout/i);
   await expect(run2).rejects.toThrowError(/timeout/i);
   expect(spy).toHaveBeenCalledTimes(1);
+
+  // Wait for the cache to expire
+  await waitFor(ttlMs + 10);
+  await expect(run({})).rejects.toThrowError(/timeout/i);
+  expect(spy).toHaveBeenCalledTimes(2);
 });

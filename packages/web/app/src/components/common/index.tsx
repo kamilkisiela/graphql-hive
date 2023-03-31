@@ -1,8 +1,8 @@
-import React, { ComponentProps, PropsWithChildren, ReactElement } from 'react';
+import { ComponentProps, ReactElement, ReactNode } from 'react';
 import Head from 'next/head';
-import clsx from 'clsx';
+import { clsx } from 'clsx';
 
-export const Title: React.FC<{ title: string }> = ({ title }) => (
+export const Title = ({ title }: { title: string }): ReactElement => (
   <Head>
     <title>{title} - GraphQL Hive</title>
     <meta property="og:title" content={`${title} - GraphQL Hive`} key="title" />
@@ -36,15 +36,18 @@ export const Page = ({
   actions,
   children,
   noPadding,
-}: PropsWithChildren<{
+  className,
+}: {
+  children: ReactNode;
   title: string;
   subtitle?: string;
-  actions?: React.ReactElement;
+  actions?: ReactElement;
   scrollable?: boolean;
   noPadding?: boolean;
-}>) => {
+  className?: string;
+}): ReactElement => {
   return (
-    <div className="flex flex-col relative h-full dark:bg-gray-900">
+    <div className={clsx('flex flex-col relative h-full', className)}>
       <div className="p-4 shrink-0 flex flex-row justify-between items-center">
         <div>
           <h2 className="text-xl text-black dark:text-white font-bold">{title}</h2>
@@ -86,12 +89,17 @@ export const Section = {
   ),
 };
 
-export const Scale: React.FC<{
+export function Scale({
+  value,
+  max,
+  size,
+  className,
+}: {
   value: number;
   max: number;
   size: number;
   className?: string;
-}> = ({ value, max, size, className }) => {
+}): ReactElement {
   return (
     <div className={clsx('flex flex-row space-x-1 grow-0', className)}>
       {new Array(size).fill(null).map((_, i) => (
@@ -101,16 +109,5 @@ export const Scale: React.FC<{
         />
       ))}
     </div>
-  );
-};
-
-export function Description({ className, children, ...props }: ComponentProps<'p'>): ReactElement {
-  return (
-    <p
-      className={clsx('pr-5 text-sm leading-5 text-gray-500 dark:text-gray-300', className)}
-      {...props}
-    >
-      {children}
-    </p>
   );
 }

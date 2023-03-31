@@ -1,6 +1,5 @@
 import { ComponentProps, forwardRef } from 'react';
 import clsx from 'clsx';
-import { css } from '@emotion/react';
 import * as Toolbar from '@radix-ui/react-toolbar';
 
 type ButtonProps = Omit<ComponentProps<'button'>, 'size'> & {
@@ -8,7 +7,6 @@ type ButtonProps = Omit<ComponentProps<'button'>, 'size'> & {
   variant?: 'primary' | 'secondary' | 'default' | 'link';
   size?: 'large' | 'medium' | 'small';
   block?: boolean;
-  rotate?: number;
   as?: 'a';
   href?: string;
 };
@@ -21,7 +19,6 @@ export const Button = forwardRef<any, ButtonProps>(
       variant = 'default',
       size = 'medium',
       block = false,
-      rotate = 0,
       className,
       as,
       ...props
@@ -39,7 +36,7 @@ export const Button = forwardRef<any, ButtonProps>(
           className={clsx(
             `
               transition
-              focus:ring
+              focus-within:ring
               disabled:cursor-not-allowed
               disabled:bg-gray-800
               disabled:text-[#c4c4c4]
@@ -65,19 +62,7 @@ export const Button = forwardRef<any, ButtonProps>(
             variant !== 'link' &&
               'inline-flex items-center border border-transparent text-sm font-bold',
             className,
-            rotate > 0 && 'radix-state-open:border-gray-800 radix-state-open:text-orange-600',
           )}
-          css={css`
-            &[data-state='open'] svg {
-              transform: rotate(${rotate}deg);
-              will-change: transform; /* will-change-transform */
-
-              /* transition-transform */
-              transition-property: transform;
-              transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-              transition-duration: 150ms;
-            }
-          `}
           {...props}
         >
           {children}

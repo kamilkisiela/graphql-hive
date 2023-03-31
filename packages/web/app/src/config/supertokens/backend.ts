@@ -8,35 +8,27 @@ import { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/r
 import { TypeInput } from 'supertokens-node/types';
 import zod from 'zod';
 import { env } from '@/env/backend';
+import { appInfo } from '@/lib/supertokens/app-info';
 import {
   createOIDCSuperTokensNoopProvider,
   getOIDCThirdPartyEmailPasswordNodeOverrides,
 } from '@/lib/supertokens/third-party-email-password-node-oidc-provider';
+import { createThirdPartyEmailPasswordNodeOktaProvider } from '@/lib/supertokens/third-party-email-password-node-okta-provider';
 // eslint-disable-next-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
 import { EmailsApi } from '@hive/emails';
 // eslint-disable-next-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
 import { InternalApi } from '@hive/server';
 import { createTRPCProxyClient, CreateTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
-import { appInfo } from '../../lib/supertokens/app-info';
-import { createThirdPartyEmailPasswordNodeOktaProvider } from '../../lib/supertokens/third-party-email-password-node-okta-provider';
 
 export const backendConfig = (): TypeInput => {
   const emailsService = createTRPCProxyClient<EmailsApi>({
-    links: [
-      httpLink({
-        url: `${env.emailsEndpoint}/trpc`,
-      }),
-    ],
+    links: [httpLink({ url: `${env.emailsEndpoint}/trpc` })],
   });
   const internalApi = createTRPCProxyClient<InternalApi>({
-    links: [
-      httpLink({
-        url: `${env.serverEndpoint}/trpc`,
-      }),
-    ],
+    links: [httpLink({ url: `${env.serverEndpoint}/trpc` })],
   });
-  const providers: Array<TypeProvider> = [];
+  const providers: TypeProvider[] = [];
 
   if (env.auth.github) {
     providers.push(
@@ -107,7 +99,7 @@ export const backendConfig = (): TypeInput => {
         emailDelivery: {
           override: originalImplementation => ({
             ...originalImplementation,
-            sendEmail: async input => {
+            async sendEmail(input) {
               if (input.type === 'EMAIL_VERIFICATION') {
                 await emailsService.sendEmailVerificationEmail.mutate({
                   user: {
@@ -125,40 +117,38 @@ export const backendConfig = (): TypeInput => {
       }),
       SessionNode.init({
         override: {
-          functions: originalImplementation => {
-            return {
-              ...originalImplementation,
-              async createNewSession(input) {
-                const user = await ThirdPartyEmailPasswordNode.getUserById(input.userId);
+          functions: originalImplementation => ({
+            ...originalImplementation,
+            async createNewSession(input) {
+              const user = await ThirdPartyEmailPasswordNode.getUserById(input.userId);
 
-                if (!user) {
-                  throw new Error(
-                    `SuperTokens: Creating a new session failed. Could not find user with id ${input.userId}.`,
-                  );
-                }
+              if (!user) {
+                throw new Error(
+                  `SuperTokens: Creating a new session failed. Could not find user with id ${input.userId}.`,
+                );
+              }
 
-                const externalUserId = user.thirdParty
-                  ? `${user.thirdParty.id}|${user.thirdParty.userId}`
-                  : null;
+              const externalUserId = user.thirdParty
+                ? `${user.thirdParty.id}|${user.thirdParty.userId}`
+                : null;
 
-                input.accessTokenPayload = {
-                  version: '1',
-                  superTokensUserId: input.userId,
-                  externalUserId,
-                  email: user.email,
-                };
+              input.accessTokenPayload = {
+                version: '1',
+                superTokensUserId: input.userId,
+                externalUserId,
+                email: user.email,
+              };
 
-                input.sessionData = {
-                  version: '1',
-                  superTokensUserId: input.userId,
-                  externalUserId,
-                  email: user.email,
-                };
+              input.sessionData = {
+                version: '1',
+                superTokensUserId: input.userId,
+                externalUserId,
+                email: user.email,
+              };
 
-                return originalImplementation.createNewSession(input);
-              },
-            };
-          },
+              return originalImplementation.createNewSession(input);
+            },
+          }),
         },
       }),
     ],
@@ -188,7 +178,7 @@ const getEnsureUserOverrides = (
 
       return response;
     },
-    emailPasswordSignInPOST: async input => {
+    async emailPasswordSignInPOST(input) {
       if (originalImplementation.emailPasswordSignInPOST === undefined) {
         throw Error('Should never come here');
       }
@@ -205,7 +195,7 @@ const getEnsureUserOverrides = (
 
       return response;
     },
-    thirdPartySignInUpPOST: async input => {
+    async thirdPartySignInUpPOST(input) {
       if (originalImplementation.thirdPartySignInUpPOST === undefined) {
         throw Error('Should never come here');
       }
@@ -251,12 +241,12 @@ const bindObjectFunctions = <T extends { [key: string]: CallableFunction | undef
 const composeSuperTokensOverrides = (
   overrides: Array<ThirdPartEmailPasswordTypeInput['override'] | null>,
 ) => ({
-  apis: (
+  apis(
     originalImplementation: ReturnType<
       Exclude<Exclude<ThirdPartEmailPasswordTypeInput['override'], undefined>['apis'], undefined>
     >,
     builder: OverrideableBuilder<ThirdPartyEmailPasswordNode.APIInterface> | undefined,
-  ) => {
+  ) {
     let impl = originalImplementation;
     for (const override of overrides) {
       if (typeof override?.apis === 'function') {
@@ -265,14 +255,14 @@ const composeSuperTokensOverrides = (
     }
     return impl;
   },
-  functions: (
+  functions(
     originalImplementation: ReturnType<
       Exclude<
         Exclude<ThirdPartEmailPasswordTypeInput['override'], undefined>['functions'],
         undefined
       >
     >,
-  ) => {
+  ) {
     let impl = originalImplementation;
     for (const override of overrides) {
       if (typeof override?.functions === 'function') {
@@ -302,7 +292,7 @@ const getAuth0Overrides = (config: Exclude<typeof env.auth.legacyAuth0, null>) =
           const users = await ThirdPartyEmailPasswordNode.getUsersByEmail(email);
 
           // If there is no email/password SuperTokens user yet, we need to check if there is an Auth0 user for this email.
-          if (users.some(user => user.thirdParty == null) === false) {
+          if (!users.some(user => user.thirdParty == null)) {
             // RPC call to check if email/password user exists in Auth0
             const dbUser = await checkWhetherAuth0EmailUserWithoutAssociatedSuperTokensIdExists(
               config,
@@ -327,7 +317,7 @@ const getAuth0Overrides = (config: Exclude<typeof env.auth.legacyAuth0, null>) =
           }
         }
 
-        return await originalImplementation.generatePasswordResetTokenPOST!(input);
+        return originalImplementation.generatePasswordResetTokenPOST!(input);
       },
     };
   };

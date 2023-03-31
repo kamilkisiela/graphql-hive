@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import type { Redis } from 'ioredis';
-import pTimeout from 'p-timeout';
+import pTimeout, { TimeoutError } from 'p-timeout';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 
 function createChecksum<TInput>(input: TInput): string {
@@ -9,7 +9,7 @@ function createChecksum<TInput>(input: TInput): string {
 
 export function createCache(options: {
   redis: Redis;
-  logger: Pick<FastifyLoggerInstance, 'debug'>;
+  logger: Pick<FastifyLoggerInstance, 'debug' | 'warn'>;
   /**
    * Prefix for all keys stored in Redis
    */
@@ -22,9 +22,25 @@ export function createCache(options: {
    * How long to wait for an action to complete
    */
   timeoutMs: number;
+  /**
+   * How long to keep the result of an action in Redis
+   */
+  ttlMs: number;
 }) {
   const { prefix, redis, logger, pollIntervalMs, timeoutMs } = options;
-  const ttlSeconds = Math.ceil(timeoutMs / 1000);
+
+  if (options.ttlMs < timeoutMs) {
+    // Actions will expire before they finish (when timeoutMs is reached)
+    logger.warn(
+      'TTL is less than timeout, this will cause issues. (ttlMs=%s, timeoutMs=%s)',
+      options.ttlMs,
+      timeoutMs,
+    );
+
+    options.ttlMs = timeoutMs;
+  }
+
+  const ttlMs = options.ttlMs;
 
   async function readAction<T>(id: string): Promise<State<T> | null> {
     const action = await redis.get(id);
@@ -43,7 +59,7 @@ export function createCache(options: {
 
     if (inserted) {
       logger.debug('Started action (id=%s)', id);
-      await redis.expire(id, ttlSeconds);
+      await redis.pexpire(id, ttlMs);
       return {
         status: 'started',
       } as const;
@@ -57,9 +73,9 @@ export function createCache(options: {
 
   async function completeAction<T>(id: string, data: T): Promise<void> {
     logger.debug('Completing action (id=%s)', id);
-    await redis.setex(
+    await redis.psetex(
       id,
-      ttlSeconds,
+      ttlMs,
       JSON.stringify({
         status: 'completed',
         result: data,
@@ -67,69 +83,66 @@ export function createCache(options: {
     );
   }
 
-  async function removeAction(id: string, reason: string): Promise<void> {
-    logger.debug('Removing action (id=%s, reason=%s)', id, reason);
-    await redis.del(id);
+  async function failAction(id: string, reason: string): Promise<void> {
+    logger.debug('Failing action (id=%s, reason=%s)', id, reason);
+    await redis.psetex(
+      id,
+      ttlMs,
+      JSON.stringify({
+        status: 'failed',
+        error: reason,
+      }),
+    );
   }
 
   return {
     timeoutMs,
+    isTimeoutError(error: unknown): error is TimeoutError {
+      return error instanceof TimeoutError;
+    },
     reuse<I, O>(groupKey: string, factory: (input: I) => Promise<O>): (input: I) => Promise<O> {
-      async function reuseFactory(input: I, attempt = 0): Promise<O> {
+      return async input => {
         const id = `${prefix}:${groupKey}:${createChecksum(input)}`;
+        const start = await startAction(id);
 
-        if (attempt === 3) {
-          await removeAction(id, 'too many attempts');
-          throw new Error('Tried too many times');
-        }
-
-        let cached = await readAction<O>(id);
-
-        if (!cached) {
-          const started = await startAction(id);
-
-          if (started.status === 'reusing') {
-            return reuseFactory(input, attempt + 1);
+        if (start.status === 'reusing') {
+          let cached = await readAction<O>(id);
+          const startedAt = Date.now();
+          while (cached && cached.status === 'started') {
+            logger.debug(
+              'Waiting for action to complete (id=%s, time=%s)',
+              id,
+              Date.now() - startedAt,
+            );
+            await new Promise(resolve => setTimeout(resolve, pollIntervalMs));
+            cached = await readAction<O>(id);
           }
 
-          try {
-            const result = await pTimeout(factory(input), {
-              milliseconds: timeoutMs,
-              message: `Timeout: took longer than ${timeoutMs}ms to complete`,
-            });
-            await completeAction(id, result);
-            return result;
-          } catch (error) {
-            await removeAction(id, String(error));
-            throw error;
+          if (cached) {
+            if (cached.status === 'failed') {
+              logger.debug('Rejecting action from cache (id=%s)', id);
+              throw new Error(cached.error);
+            }
+
+            logger.debug('Resolving action from cache (id=%s)', id);
+            return cached.result;
           }
+
+          throw new Error('We have a ghost.');
         }
 
-        const startedAt = Date.now();
-        while (cached && cached.status !== 'completed') {
-          logger.debug(
-            'Waiting for action to complete (id=%s, time=%s)',
-            id,
-            Date.now() - startedAt,
-          );
-          await new Promise(resolve => setTimeout(resolve, pollIntervalMs));
-          cached = await readAction<O>(id);
-
-          if (Date.now() - startedAt > timeoutMs) {
-            await removeAction(id, 'waiting-timeout');
-            throw new Error(`Timeout: Waiting for longer than ${timeoutMs}ms. Exiting`);
-          }
+        try {
+          const result = await pTimeout(factory(input), {
+            milliseconds: timeoutMs,
+            message: `Timeout: took longer than ${timeoutMs}ms to complete`,
+          });
+          await completeAction(id, result);
+          return result;
+        } catch (error) {
+          await failAction(id, String(error));
+          throw error;
         }
-
-        if (!cached) {
-          // Action was probably removed, try again
-          return reuseFactory(input, attempt + 1);
-        }
-
-        return cached.result;
-      }
-
-      return reuseFactory;
+      };
     },
   };
 }
@@ -143,4 +156,8 @@ type State<T> =
   | {
       status: 'completed';
       result: T;
+    }
+  | {
+      status: 'failed';
+      error: string;
     };

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { isSignatureValid } from './auth';
 import { InvalidRequestFormat, InvalidSignature, MissingSignature } from './errors';
+import type { Logger } from './types';
 
 const SIGNATURE_HEADER_NAME = 'x-hive-signature';
 
@@ -21,10 +22,13 @@ const RequestModelSchema = z.union([
 export async function parseIncomingRequest(
   request: Request,
   keyValidator: typeof isSignatureValid,
-  captureException: (exception: Error) => void,
+  logger: Logger,
 ): Promise<{ error: Response } | z.infer<typeof RequestModelSchema>> {
   if (request.method !== 'POST') {
-    captureException(new Error(`Only POST requests are allowed, got ${request.method}`));
+    logger.error(
+      'Failed to parse request',
+      new Error(`Only POST requests are allowed, got ${request.method}`),
+    );
     return {
       error: new Response('Only POST requests are allowed', {
         status: 405,
@@ -37,20 +41,20 @@ export async function parseIncomingRequest(
 
   if (!signature) {
     return {
-      error: new MissingSignature(captureException),
+      error: new MissingSignature(logger),
     };
   }
 
   if (!keyValidator(signature)) {
     return {
-      error: new InvalidSignature(captureException),
+      error: new InvalidSignature(logger),
     };
   }
 
   const parseResult = RequestModelSchema.safeParse(await request.json<unknown>());
 
   if (!parseResult.success) {
-    return { error: new InvalidRequestFormat(captureException, parseResult.error.message) };
+    return { error: new InvalidRequestFormat(logger, parseResult.error.message) };
   }
 
   return parseResult.data;

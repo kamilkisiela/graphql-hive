@@ -18,4 +18,10 @@ declare global {
    * Id of the release
    */
   let SENTRY_RELEASE: string;
+  /**
+   * Loki (logging)
+   */
+  let LOKI_PASSWORD: string;
+  let LOKI_USERNAME: string;
+  let LOKI_ENDPOINT: string;
 }

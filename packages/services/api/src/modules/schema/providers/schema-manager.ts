@@ -1,3 +1,4 @@
+import { parse } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import { z } from 'zod';
@@ -9,6 +10,7 @@ import { SchemaVersion } from '../../../shared/mappers';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
+import { ProjectManager } from '../../project/providers/project-manager';
 import { CryptoProvider } from '../../shared/providers/crypto';
 import { Logger } from '../../shared/providers/logger';
 import {
@@ -31,6 +33,13 @@ type Paginated<T> = T & {
   limit: number;
 };
 
+const externalSchemaCompositionTestSdl = /* GraphQL */ `
+  type Query {
+    test: String
+  }
+`;
+const externalSchemaCompositionTestDocument = parse(externalSchemaCompositionTestSdl);
+
 /**
  * Responsible for auth checks.
  * Talks to Storage.
@@ -46,6 +55,7 @@ export class SchemaManager {
     logger: Logger,
     private authManager: AuthManager,
     private storage: Storage,
+    private projectManager: ProjectManager,
     private singleOrchestrator: SingleOrchestrator,
     private stitchingOrchestrator: StitchingOrchestrator,
     private federationOrchestrator: FederationOrchestrator,
@@ -70,6 +80,27 @@ export class SchemaManager {
       includeMetadata?: boolean;
     } & TargetSelector,
   ) {
+    this.logger.debug('Fetching non-empty list of schemas (selector=%o)', selector);
+    await this.authManager.ensureTargetAccess({
+      ...selector,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+    const schemas = await this.storage.getSchemasOfVersion(selector);
+
+    if (schemas.length === 0) {
+      throw new HiveError('No schemas found for this version.');
+    }
+
+    return schemas;
+  }
+
+  @atomic(stringifySelector)
+  async getMaybeSchemasOfVersion(
+    selector: {
+      version: string;
+      includeMetadata?: boolean;
+    } & TargetSelector,
+  ) {
     this.logger.debug('Fetching schemas (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
       ...selector,
@@ -81,9 +112,14 @@ export class SchemaManager {
   async getSchemasOfPreviousVersion(
     selector: {
       version: string;
+      onlyComposable: boolean;
     } & TargetSelector,
   ) {
-    this.logger.debug('Fetching schemas from the previous version (selector=%o)', selector);
+    this.logger.debug(
+      'Fetching schemas from the previous version (onlyComposable=%s, selector=%o)',
+      selector.onlyComposable,
+      selector,
+    );
     await this.authManager.ensureTargetAccess({
       ...selector,
       scope: TargetAccessScope.REGISTRY_READ,
@@ -91,7 +127,11 @@ export class SchemaManager {
     return this.storage.getSchemasOfPreviousVersion(selector);
   }
 
-  async getLatestSchemas(selector: TargetSelector) {
+  async getLatestSchemas(
+    selector: TargetSelector & {
+      onlyComposable?: boolean;
+    },
+  ) {
     this.logger.debug('Fetching latest schemas (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
       ...selector,
@@ -250,60 +290,86 @@ export class SchemaManager {
       author: string;
       valid: boolean;
       service?: string | null;
-      commits: string[];
+      logIds: string[];
       url?: string | null;
       base_schema: string | null;
       metadata: string | null;
       projectType: ProjectType;
+      actionFn(): Promise<void>;
     } & TargetSelector,
   ) {
-    this.logger.info('Creating a new version (input=%o)', lodash.omit(input, ['schema']));
-    const {
-      valid,
-      project,
-      organization,
-      target,
-      commit,
-      schema,
-      author,
-      commits,
-      url,
-      metadata,
-      projectType,
-    } = input;
-    const service = input.service;
+    this.logger.info(
+      'Creating a new version (input=%o)',
+      lodash.omit(input, ['schema', 'actionFn']),
+    );
 
     await this.authManager.ensureTargetAccess({
-      project,
-      organization,
-      target,
+      project: input.project,
+      organization: input.organization,
+      target: input.target,
       scope: TargetAccessScope.REGISTRY_WRITE,
     });
 
-    // insert new schema
-    const insertedSchema = await this.insertSchema({
-      organization,
-      project,
-      target,
-      schema,
-      service,
-      commit,
-      author,
-      url,
-      metadata,
-      projectType,
+    return this.storage.createVersion({
+      ...input,
+      logIds: input.logIds,
+    });
+  }
+
+  async testExternalSchemaComposition(selector: { projectId: string; organizationId: string }) {
+    await this.authManager.ensureProjectAccess({
+      project: selector.projectId,
+      organization: selector.organizationId,
+      scope: ProjectAccessScope.SETTINGS,
     });
 
-    // finally create a version
-    return this.storage.createVersion({
-      valid,
-      organization,
-      project,
-      target,
-      commit: insertedSchema.id,
-      commits: commits.concat(insertedSchema.id),
-      base_schema: input.base_schema,
+    const project = await this.storage.getProject({
+      organization: selector.organizationId,
+      project: selector.projectId,
     });
+
+    if (project.type !== ProjectType.FEDERATION) {
+      throw new HiveError(
+        'Project is not of Federation type. External composition is not available.',
+      );
+    }
+
+    if (!project.externalComposition.enabled) {
+      throw new HiveError('External composition is not enabled.');
+    }
+
+    const orchestrator = this.matchOrchestrator(project.type);
+
+    try {
+      const { errors } = await orchestrator.composeAndValidate(
+        [
+          {
+            document: externalSchemaCompositionTestDocument,
+            raw: externalSchemaCompositionTestSdl,
+            source: 'test',
+            url: null,
+          },
+        ],
+        project.externalComposition,
+      );
+
+      if (errors.length > 0) {
+        return {
+          kind: 'error',
+          error: errors[0].message,
+        } as const;
+      }
+
+      return {
+        kind: 'success',
+        project,
+      } as const;
+    } catch (error) {
+      return {
+        kind: 'error',
+        error: error instanceof HiveError ? error.message : 'Unknown error',
+      } as const;
+    }
   }
 
   matchOrchestrator(projectType: ProjectType): Orchestrator | never {
@@ -321,25 +387,6 @@ export class SchemaManager {
         throw new HiveError(`Couldn't find an orchestrator for project type "${projectType}"`);
       }
     }
-  }
-
-  private async insertSchema(
-    input: {
-      schema: string;
-      commit: string;
-      author: string;
-      service?: string | null;
-      url?: string | null;
-      metadata: string | null;
-      projectType: ProjectType;
-    } & TargetSelector,
-  ) {
-    this.logger.info('Inserting schema (input=%o)', lodash.omit(input, ['schema']));
-    await this.authManager.ensureTargetAccess({
-      ...input,
-      scope: TargetAccessScope.REGISTRY_WRITE,
-    });
-    return this.storage.insertSchema(input);
   }
 
   async getBaseSchema(selector: TargetSelector) {
@@ -377,7 +424,10 @@ export class SchemaManager {
     await this.storage.disableExternalSchemaComposition(input);
 
     return {
-      ok: true,
+      ok: await this.projectManager.getProject({
+        organization: input.organization,
+        project: input.project,
+      }),
     };
   }
 
@@ -420,9 +470,10 @@ export class SchemaManager {
     });
 
     return {
-      ok: {
-        endpoint: input.endpoint,
-      },
+      ok: await this.projectManager.getProject({
+        organization: input.organization,
+        project: input.project,
+      }),
     };
   }
 

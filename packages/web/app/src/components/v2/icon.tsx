@@ -1,5 +1,5 @@
-import { FC, ReactElement } from 'react';
-import clsx from 'clsx';
+import { ReactElement } from 'react';
+import { clsx } from 'clsx';
 
 const DEFAULT_PATH_PROPS = {
   strokeWidth: '2',
@@ -8,26 +8,6 @@ const DEFAULT_PATH_PROPS = {
 } as const;
 
 type IconProps = { className?: string };
-
-export const RefreshIcon = ({ className }: IconProps): ReactElement => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-  >
-    <path d="M23 4V10H17" {...DEFAULT_PATH_PROPS} />
-    <path d="M1 20V14H7" {...DEFAULT_PATH_PROPS} />
-    <path
-      d="M2.56728 8.66641C2.38304 9.18705 2.65576 9.75848 3.1764 9.94272C3.69705 10.127 4.26848 9.85425 4.45272 9.3336L2.56728 8.66641ZM18.36 5.64L17.6527 6.34693C17.6601 6.35432 17.6676 6.3616 17.6752 6.36875L18.36 5.64ZM22.3152 10.7288C22.7177 11.1069 23.3506 11.0873 23.7288 10.6848C24.1069 10.2823 24.0873 9.64944 23.6848 9.27125L22.3152 10.7288ZM1.68478 13.2712C1.2823 12.8931 0.649439 12.9127 0.271247 13.3152C-0.106945 13.7177 -0.0872558 14.3506 0.315223 14.7288L1.68478 13.2712ZM5.64 18.36L6.34728 17.6531C6.3399 17.6457 6.33239 17.6384 6.32478 17.6312L5.64 18.36ZM21.4327 15.3336C21.617 14.813 21.3442 14.2415 20.8236 14.0573C20.3029 13.873 19.7315 14.1458 19.5473 14.6664L21.4327 15.3336ZM4.45272 9.3336C5.36906 6.7441 7.54984 4.80579 10.229 4.19961L9.7876 2.24891C6.43869 3.00665 3.71271 5.42953 2.56728 8.66641L4.45272 9.3336ZM10.229 4.19961C12.9081 3.59342 15.7109 4.40413 17.6527 6.34693L19.0673 4.93307C16.64 2.50457 13.1365 1.49118 9.7876 2.24891L10.229 4.19961ZM17.6752 6.36875L22.3152 10.7288L23.6848 9.27125L19.0448 4.91125L17.6752 6.36875ZM0.315223 14.7288L4.95522 19.0888L6.32478 17.6312L1.68478 13.2712L0.315223 14.7288ZM4.93272 19.0669C7.36 21.4954 10.8635 22.5088 14.2124 21.7511L13.771 19.8004C11.0919 20.4066 8.28911 19.5959 6.34728 17.6531L4.93272 19.0669ZM14.2124 21.7511C17.5613 20.9934 20.2873 18.5705 21.4327 15.3336L19.5473 14.6664C18.6309 17.2559 16.4502 19.1942 13.771 19.8004L14.2124 21.7511Z"
-      fill="currentColor"
-      stroke="none"
-    />
-  </svg>
-);
 
 export const GraphQLIcon = ({ className }: IconProps): ReactElement => (
   <svg
@@ -63,7 +43,7 @@ export const TrendingUpIcon = ({ className }: IconProps): ReactElement => (
   </svg>
 );
 
-export const PlusIcon: FC<IconProps> = ({ className }) => (
+export const PlusIcon = ({ className }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     width="24"
@@ -94,7 +74,10 @@ export const CalendarIcon = ({ className }: IconProps): ReactElement => (
   </svg>
 );
 
-export const UserPlusMinusIcon: FC<IconProps & { isPlus: boolean }> = ({ className, isPlus }) => (
+export const UserPlusMinusIcon = ({
+  className,
+  isPlus,
+}: IconProps & { isPlus: boolean }): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     width="24"
@@ -118,7 +101,7 @@ export const UserPlusMinusIcon: FC<IconProps & { isPlus: boolean }> = ({ classNa
   </svg>
 );
 
-export const MoreIcon: FC<IconProps> = ({ className, ...props }) => (
+export const MoreIcon = ({ className, ...props }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
@@ -140,7 +123,7 @@ export const MoreIcon: FC<IconProps> = ({ className, ...props }) => (
   </svg>
 );
 
-export const EditIcon: FC<IconProps> = ({ className }) => (
+export const EditIcon = ({ className }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 22 22"
     width="22"
@@ -157,7 +140,7 @@ export const EditIcon: FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const TrashIcon: FC<IconProps> = ({ className }) => (
+export const TrashIcon = ({ className }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     width="24"
@@ -177,10 +160,13 @@ export const TrashIcon: FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const CopyIcon: FC<{
+export const CopyIcon = ({
+  className,
+  size = 24,
+}: {
   className?: string;
   size?: number;
-}> = ({ className, size = 24 }) => (
+}): ReactElement => (
   <svg
     width={size}
     height={size}
@@ -198,7 +184,7 @@ export const CopyIcon: FC<{
   </svg>
 );
 
-export const ArrowDownIcon: FC<IconProps> = ({ className }) => (
+export const ArrowDownIcon = ({ className }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     width="24"
@@ -213,7 +199,7 @@ export const ArrowDownIcon: FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const CheckIcon: FC<IconProps> = ({ className }) => (
+export const CheckIcon = ({ className }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     width="24"
@@ -226,7 +212,7 @@ export const CheckIcon: FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const TargetIcon: FC<IconProps> = ({ className }) => (
+export const TargetIcon = ({ className }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     width="24"
@@ -329,7 +315,7 @@ export const LogOutIcon = ({ className }: IconProps): ReactElement => (
   </svg>
 );
 
-export const LinkIcon: FC<IconProps> = ({ className, ...props }) => (
+export const LinkIcon = ({ className, ...props }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
@@ -347,7 +333,7 @@ export const LinkIcon: FC<IconProps> = ({ className, ...props }) => (
   </svg>
 );
 
-export const KeyIcon: FC<IconProps> = ({ className }) => (
+export const KeyIcon = ({ className }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     width="24"
@@ -360,7 +346,7 @@ export const KeyIcon: FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const XIcon: FC<IconProps> = ({ className }) => (
+export const XIcon = ({ className }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     width="24"
@@ -374,7 +360,7 @@ export const XIcon: FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const LinkedInIcon: FC<IconProps> = ({ className, ...props }) => (
+export const LinkedInIcon = ({ className, ...props }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
@@ -387,7 +373,7 @@ export const LinkedInIcon: FC<IconProps> = ({ className, ...props }) => (
   </svg>
 );
 
-export const GoogleIcon: FC<IconProps> = ({ className }) => (
+export const GoogleIcon = ({ className }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     width="24"
@@ -400,7 +386,7 @@ export const GoogleIcon: FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const GitHubIcon: FC<IconProps> = ({ className }) => (
+export const GitHubIcon = ({ className }: IconProps): ReactElement => (
   <svg
     width="24"
     height="24"
@@ -414,7 +400,7 @@ export const GitHubIcon: FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const SlackIcon: FC<IconProps> = ({ className }) => (
+export const SlackIcon = ({ className }: IconProps): ReactElement => (
   <svg
     width="24"
     height="24"
@@ -435,7 +421,7 @@ export const SlackIcon: FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const Link2Icon: FC<IconProps> = ({ className }) => (
+export const Link2Icon = ({ className }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
@@ -489,7 +475,7 @@ export const HiveLogo = ({ className }: IconProps): ReactElement => (
   </svg>
 );
 
-export const AlertTriangleIcon: FC<IconProps> = ({ className }) => (
+export const AlertTriangleIcon = ({ className }: IconProps): ReactElement => (
   <svg
     width="24"
     height="24"
@@ -507,5 +493,39 @@ export const AlertTriangleIcon: FC<IconProps> = ({ className }) => (
     />
     <path d="M12 9V13" {...DEFAULT_PATH_PROPS} />
     <path d="M12 17V18" {...DEFAULT_PATH_PROPS} />
+  </svg>
+);
+
+export const PulseIcon = ({ className }: IconProps): ReactElement => (
+  <svg
+    stroke="currentColor"
+    fill="currentColor"
+    strokeWidth="0"
+    viewBox="0 0 16 16"
+    height="16"
+    width="16"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    <path d="M11.8 9L10 3H9L7.158 9.64 5.99 4.69h-.97L3.85 9H1v.99h3.23l.49-.37.74-2.7L6.59 12h1.03l1.87-7.04 1.46 4.68.48.36H15V9h-3.2z" />
+  </svg>
+);
+
+export const DiffIcon = ({ className }: IconProps): ReactElement => (
+  <svg
+    stroke="currentColor"
+    fill="currentColor"
+    strokeWidth="0"
+    viewBox="0 0 16 16"
+    height="16"
+    width="16"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M2 3.5l.5-.5h5l.5.5v9l-.5.5h-5l-.5-.5v-9zM3 12h4V6H3v6zm0-7h4V4H3v1zm6.5-2h5l.5.5v9l-.5.5h-5l-.5-.5v-9l.5-.5zm.5 9h4v-2h-4v2zm0-4h4V4h-4v4z"
+    />
   </svg>
 );

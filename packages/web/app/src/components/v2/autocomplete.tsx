@@ -1,10 +1,12 @@
-import React from 'react';
-import Select, { StylesConfig } from 'react-select';
+import { ComponentPropsWithRef, ReactElement } from 'react';
+import Highlighter from 'react-highlight-words';
+import Select, { components, createFilter, Props as SelectProps, StylesConfig } from 'react-select';
 import { FixedSizeList } from 'react-window';
+import { SelectOption } from './radix-select';
 
 const height = 40;
 
-function MenuList(props: any) {
+function MenuList(props: any): ReactElement {
   const { options, children, maxHeight, getValue } = props;
   const [value] = getValue();
   const initialOffset = options.indexOf(value) * height;
@@ -22,11 +24,6 @@ function MenuList(props: any) {
   );
 }
 
-interface Option {
-  value: string;
-  label: string;
-}
-
 const styles: StylesConfig = {
   input: styles => ({
     ...styles,
@@ -34,7 +31,7 @@ const styles: StylesConfig = {
   }),
   control: styles => ({
     ...styles,
-    backgroundColor: '#24272E',
+    backgroundColor: '#24272e',
     borderWidth: 1,
     borderColor: '#5f6169',
   }),
@@ -46,41 +43,59 @@ const styles: StylesConfig = {
     ...styles,
     color: '#fff',
     fontSize: '14px',
-    backgroundColor: '#24272E',
+    backgroundColor: '#24272e',
     ':hover': {
       backgroundColor: '#5f6169',
     },
   }),
   menu: styles => ({
     ...styles,
-    backgroundColor: '#24272E',
+    backgroundColor: '#24272e',
   }),
 };
 
-export function Autocomplete(
-  props: React.PropsWithoutRef<{
-    placeholder: string;
-    options: readonly Option[];
-    onChange: (value: Option) => void;
-    defaultValue?: Option | null;
-    disabled?: boolean;
-    loading?: boolean;
-  }>,
-) {
+// Disable mouse events to improve performance when rendering a lot of elements.
+// It's really really slow without this.
+const Option = ({ children, ...props }: ComponentPropsWithRef<typeof components.Option>) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { onMouseMove, onMouseOver, ...rest } = props.innerProps;
+  const newProps = { ...props, innerProps: rest };
+  return <components.Option {...newProps}>{children}</components.Option>;
+};
+
+const formatOptionLabel: SelectProps<any>['formatOptionLabel'] = ({ label }, { inputValue }) => {
+  return <Highlighter searchWords={[inputValue]} textToHighlight={label} />;
+};
+
+export function Autocomplete(props: {
+  placeholder: string;
+  options: readonly SelectOption[];
+  onChange: (value: SelectOption) => void;
+  defaultValue?: SelectOption | null;
+  disabled?: boolean;
+  loading?: boolean;
+  className?: string;
+}): ReactElement {
   return (
     <Select
+      filterOption={createFilter({
+        ignoreAccents: false,
+        ignoreCase: true,
+        trim: true,
+        matchFrom: 'any',
+      })}
+      formatOptionLabel={formatOptionLabel}
       options={props.options}
       defaultValue={props.defaultValue}
       styles={styles}
       isSearchable
       closeMenuOnSelect
-      onChange={option => props.onChange(option as Option)}
+      onChange={option => props.onChange(option as SelectOption)}
       isDisabled={props.disabled}
       isLoading={props.loading}
       placeholder={props.placeholder}
-      components={{
-        MenuList,
-      }}
+      components={{ MenuList, Option }}
+      className={props.className}
     />
   );
 }

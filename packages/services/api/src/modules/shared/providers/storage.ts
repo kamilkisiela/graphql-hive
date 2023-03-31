@@ -2,7 +2,6 @@ import { Injectable } from 'graphql-modules';
 import type {
   AddAlertChannelInput,
   AddAlertInput,
-  ProjectType,
   RegistryModel,
 } from '../../../__generated__/types';
 import type {
@@ -77,12 +76,11 @@ export interface IdMutex {
 
 export interface Storage {
   destroy(): Promise<void>;
+  ping(): Promise<void>;
   ensureUserExists(_: {
     superTokensUserId: string;
     externalAuthUserId?: string | null;
     email: string;
-    reservedOrgNames: string[];
-    scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
     oidcIntegration: null | {
       id: string;
       defaultScopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
@@ -110,7 +108,7 @@ export interface Storage {
   getMyOrganization(_: { user: string }): Promise<Organization | null>;
   getOrganizations(_: { user: string }): Promise<readonly Organization[] | never>;
   createOrganization(
-    _: Pick<Organization, 'cleanId' | 'name' | 'type'> & {
+    _: Pick<Organization, 'cleanId' | 'name'> & {
       user: string;
       scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
       reservedNames: string[];
@@ -258,7 +256,7 @@ export interface Storage {
   hasSchema(_: TargetSelector): Promise<boolean>;
   getLatestSchemas(
     _: {
-      version?: string;
+      onlyComposable?: boolean;
     } & TargetSelector,
   ): Promise<{
     schemas: Schema[];
@@ -275,10 +273,11 @@ export interface Storage {
       version: string;
       includeMetadata?: boolean;
     } & TargetSelector,
-  ): Promise<Schema[] | never>;
+  ): Promise<Schema[]>;
   getSchemasOfPreviousVersion(
     _: {
       version: string;
+      onlyComposable: boolean;
     } & TargetSelector,
   ): Promise<readonly Schema[] | never>;
   getVersions(_: Paginated<TargetSelector>): Promise<
@@ -290,18 +289,6 @@ export interface Storage {
   >;
   getVersion(_: TargetSelector & { version: string }): Promise<SchemaVersion | never>;
 
-  insertSchema(
-    _: {
-      schema: string;
-      commit: string;
-      author: string;
-      service?: string | null;
-      url?: string | null;
-      metadata: string | null;
-      projectType: ProjectType;
-    } & TargetSelector,
-  ): Promise<Schema | never>;
-
   deleteSchema(
     _: {
       serviceName: string;
@@ -311,11 +298,16 @@ export interface Storage {
 
   createVersion(
     _: {
+      schema: string;
+      author: string;
+      service?: string | null;
+      metadata: string | null;
       valid: boolean;
       url?: string | null;
       commit: string;
-      commits: string[];
+      logIds: string[];
       base_schema: string | null;
+      actionFn(): Promise<void>;
     } & TargetSelector,
   ): Promise<SchemaVersion | never>;
 

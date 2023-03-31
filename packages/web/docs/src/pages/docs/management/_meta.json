@@ -1,0 +1,7 @@
+{
+  "organizations": "Organizations",
+  "sso-oidc-provider": "SSO with OIDC",
+  "projects": "Projects & Alerts",
+  "targets": "Targets & Tokens",
+  "external-schema-composition": "External Schema Composition"
+}

@@ -1,16 +1,21 @@
-import { PropsWithChildren } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import clsx from 'clsx';
 import { Button } from '@/components/v2';
 
-export const OperationsFallback = ({
+export function OperationsFallback({
   isError,
   isFetching,
   refetch,
   children,
-}: PropsWithChildren<{ isError: boolean; isFetching?: boolean; refetch: () => void }>) => {
+}: {
+  children: ReactNode;
+  isError: boolean;
+  isFetching?: boolean;
+  refetch: () => void;
+}): ReactElement {
   return (
     <div className="relative">
-      <div className={clsx(isError ? 'blur-sm	' : null, isFetching ? 'opacity-50' : 'opacity-100')}>
+      <div className={clsx(isError && 'blur-sm', isFetching ? 'opacity-50' : 'opacity-100')}>
         {children}
       </div>
       {isError ? (
@@ -22,4 +27,4 @@ export const OperationsFallback = ({
       ) : null}
     </div>
   );
-};
+}

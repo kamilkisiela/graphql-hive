@@ -2,7 +2,7 @@
 FROM scratch AS pkg
 FROM scratch AS config
 
-FROM rust:1-slim as build
+FROM rust:1.68-slim as build
 
 WORKDIR /usr/src
 
@@ -22,14 +22,14 @@ RUN update-ca-certificates
 RUN rustup component add rustfmt
 
 # Get the dependencies cached
-RUN cargo build --release
+RUN CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse cargo build --release
 
 COPY --from=pkg src ./src
 
 RUN touch ./src/main.rs
 
 # Real build this time
-RUN cargo build --release
+RUN CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse cargo build --release
 
 # Runtime
 FROM debian:bullseye-slim as runtime

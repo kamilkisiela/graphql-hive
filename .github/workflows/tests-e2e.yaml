@@ -40,9 +40,10 @@ jobs:
         uses: ./.github/actions/setup
         with:
           codegen: false
+          actor: test-e2e
 
       - name: patch compose file volumes
-        uses: mikefarah/yq@v4.30.8
+        uses: mikefarah/yq@v4.33.1
         with:
           cmd: yq -i 'del(.services.*.volumes)' docker/docker-compose.community.yml
 

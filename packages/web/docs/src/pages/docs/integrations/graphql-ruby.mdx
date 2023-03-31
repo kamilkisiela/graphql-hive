@@ -1,0 +1,68 @@
+# GraphQL-Ruby
+
+## Installation
+
+```bash
+gem install graphql-hive
+```
+
+## Integration Guide
+
+### Publishing Schemas
+
+Add `GraphQL::Hive` at the end of your GraphQL-Ruby schema definition:
+
+```ruby
+class Schema < GraphQL::Schema
+  query QueryType
+
+  use(
+      GraphQL::Hive,
+      {
+        token: '<YOUR_TOKEN>',
+        report_schema: true,
+        reporting: {
+          # feel free to set dummy values here, or real runtime values if you have them
+          author: 'Author of the schema version',
+          commit: 'git sha or any identifier'
+        },
+      }
+  )
+end
+```
+
+### Usage Reporting
+
+Add `collect_usage: true` to your `GraphQL::Hive` configuration.
+
+Optionally, you can pass an optional proc that will help identify the client that performed the
+query:
+
+```ruby
+class Schema < GraphQL::Schema
+  query QueryType
+
+  use(
+      GraphQL::Hive,
+      {
+        token: '<YOUR_TOKEN>',
+        # add this one for usage reporting
+        collect_usage: true,
+        report_schema: false,
+        # for clients reporting
+        client_info: Proc.new { |context| { name: context.client_name, version: context.client_version } },
+        reporting: {
+          # feel free to set dummy values here, or real runtime values if you have them
+          author: 'Author of the schema version',
+          commit: 'git sha or any identifier'
+        },
+      }
+  )
+end
+```
+
+## Additional Resources
+
+- [`graphql-ruby-hive` configuration](https://github.com/charlypoly/graphql-ruby-hive#configuration)
+- [`graphql-ruby-hive` source code](https://github.com/charlypoly/graphql-ruby-hive)
+- [graphql-ruby.org](https://graphql-ruby.org)

@@ -1,23 +1,14 @@
-import { ComponentProps, ReactElement, useCallback, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { formatISO, subDays, subHours, subMinutes } from 'date-fns';
-import { VscChevronDown } from 'react-icons/vsc';
-import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { OperationsFilterTrigger } from '@/components/target/operations/Filters';
 import { OperationsList } from '@/components/target/operations/List';
 import { OperationsStats } from '@/components/target/operations/Stats';
-import { DataWrapper, EmptyList, Title } from '@/components/v2';
-import {
-  HasCollectedOperationsDocument,
-  OrganizationFieldsFragment,
-  ProjectFieldsFragment,
-  TargetFieldsFragment,
-} from '@/graphql';
-import { getDocsUrl } from '@/lib/docs-url';
+import { EmptyList, RadixSelect, Title } from '@/components/v2';
+import { graphql } from '@/gql';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { Select, Stack } from '@chakra-ui/react';
 
 function floorDate(date: Date): Date {
   const time = 1000 * 60;
@@ -34,15 +25,15 @@ const DateRange = {
 
 type PeriodKey = keyof typeof DateRange;
 
-const OperationsView = ({
-  organization,
-  project,
-  target,
+function OperationsView({
+  organizationCleanId,
+  projectCleanId,
+  targetCleanId,
 }: {
-  organization: OrganizationFieldsFragment;
-  project: ProjectFieldsFragment;
-  target: TargetFieldsFragment;
-}): ReactElement => {
+  organizationCleanId: string;
+  projectCleanId: string;
+  targetCleanId: string;
+}): ReactElement {
   const router = useRouter();
   const [href, periodParam] = router.asPath.split('?');
   const selectedPeriod: PeriodKey =
@@ -66,114 +57,95 @@ const OperationsView = ({
     return { from, to };
   }, [selectedPeriod]);
 
-  const updatePeriod = useCallback<Exclude<ComponentProps<'select'>['onChange'], undefined | null>>(
-    ev => {
-      void router.push(`${href}?period=${ev.target.value}`);
+  const updatePeriod = useCallback(
+    (value: string) => {
+      void router.push(`${href}?period=${value}`);
     },
     [href, router],
   );
 
   return (
     <>
-      <div className="absolute top-0 right-0">
-        <Stack direction="row" spacing={4}>
-          <div>
-            <OperationsFilterTrigger
-              period={period}
-              selected={selectedOperations}
-              onFilter={setSelectedOperations}
-            />
-          </div>
-          <div>
-            <Select
-              variant="filled"
-              className="cursor-pointer rounded-md"
-              defaultValue={selectedPeriod}
-              onChange={updatePeriod}
-              iconSize="16"
-              icon={<VscChevronDown />}
-              size="sm"
-            >
-              {Object.entries(DateRange).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </Select>
-          </div>
-        </Stack>
-      </div>
-      <div className="space-y-12">
-        <OperationsStats
-          organization={organization.cleanId}
-          project={project.cleanId}
-          target={target.cleanId}
+      <div className="flex justify-end gap-2 pb-7">
+        <OperationsFilterTrigger
           period={period}
-          operationsFilter={selectedOperations}
+          selected={selectedOperations}
+          onFilter={setSelectedOperations}
         />
-        <OperationsList
-          className="pt-12"
-          period={period}
-          organization={organization.cleanId}
-          project={project.cleanId}
-          target={target.cleanId}
-          operationsFilter={selectedOperations}
+        <RadixSelect
+          onChange={updatePeriod}
+          defaultValue={selectedPeriod}
+          options={Object.entries(DateRange).map(([value, label]) => ({ value, label }))}
         />
       </div>
+      <OperationsStats
+        organization={organizationCleanId}
+        project={projectCleanId}
+        target={targetCleanId}
+        period={period}
+        operationsFilter={selectedOperations}
+      />
+      <OperationsList
+        className="mt-12"
+        period={period}
+        organization={organizationCleanId}
+        project={projectCleanId}
+        target={targetCleanId}
+        operationsFilter={selectedOperations}
+      />
     </>
   );
-};
+}
 
-const OperationsViewGate = ({
-  organization,
-  project,
-  target,
-}: {
-  organization: OrganizationFieldsFragment;
-  project: ProjectFieldsFragment;
-  target: TargetFieldsFragment;
-}): ReactElement => {
-  const [query] = useQuery({
-    query: HasCollectedOperationsDocument,
-    variables: {
-      selector: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
-      },
-    },
-  });
-
-  return (
-    <DataWrapper query={query}>
-      {result =>
-        result.data.hasCollectedOperations ? (
-          <OperationsView organization={organization} project={project} target={target} />
-        ) : (
-          <EmptyList
-            title="Hive is waiting for your first collected operation"
-            description="You can collect usage of your GraphQL API with Hive Client"
-            docsUrl={getDocsUrl('/features/monitoring')}
-          />
-        )
+const TargetOperationsPageQuery = graphql(`
+  query TargetOperationsPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...TargetLayout_OrganizationFragment
+        cleanId
       }
-    </DataWrapper>
-  );
-};
+    }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_ProjectFragment
+      cleanId
+    }
+    targets(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_TargetConnectionFragment
+    }
+    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+      cleanId
+    }
+    hasCollectedOperations(
+      selector: { organization: $organizationId, project: $projectId, target: $targetId }
+    )
+    ...TargetLayout_IsCDNEnabledFragment
+  }
+`);
 
 function OperationsPage(): ReactElement {
   return (
     <>
       <Title title="Operations" />
-      <TargetLayout value="operations">
-        {({ organization, project, target }) => (
-          <div className="relative">
-            <p className="mb-5 font-light text-gray-500">
-              Data collected based on operation executed against your GraphQL schema.
-            </p>
-            <OperationsViewGate organization={organization} project={project} target={target} />
-          </div>
-        )}
+      <TargetLayout value="operations" query={TargetOperationsPageQuery}>
+        {({ organization, project, target, hasCollectedOperations }) =>
+          organization && project && target ? (
+            <div className="relative">
+              {hasCollectedOperations ? (
+                <OperationsView
+                  organizationCleanId={organization.organization.cleanId}
+                  projectCleanId={project.cleanId}
+                  targetCleanId={target.cleanId}
+                />
+              ) : (
+                <EmptyList
+                  title="Hive is waiting for your first collected operation"
+                  description="You can collect usage of your GraphQL API with Hive Client"
+                  docsUrl="/features/usage-reporting"
+                />
+              )}
+            </div>
+          ) : null
+        }
       </TargetLayout>
     </>
   );

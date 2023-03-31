@@ -1,0 +1,30 @@
+diff --git a/dist/esm/commands/script-loader.js b/dist/esm/commands/script-loader.js
+index 60346713df81828c4358b1f82d6c47bcb8781b08..a1c91f295d83a4a087b1367079242fb29bc3149b 100644
+--- a/dist/esm/commands/script-loader.js
++++ b/dist/esm/commands/script-loader.js
+@@ -3,6 +3,7 @@ import { glob, hasMagic } from 'glob';
+ import * as path from 'path';
+ import * as fs from 'fs';
+ import { promisify } from 'util';
++import { fileURLToPath } from 'url';
+ const readFile = promisify(fs.readFile);
+ const readdir = promisify(fs.readdir);
+ const GlobOptions = { dot: true, silent: false };
+@@ -349,16 +350,7 @@ async function getFilenamesByPattern(pattern) {
+ // Determine the project root
+ // https://stackoverflow.com/a/18721515
+ function getPkgJsonDir() {
+-    for (const modPath of module.paths || []) {
+-        try {
+-            const prospectivePkgJsonDir = path.dirname(modPath);
+-            fs.accessSync(modPath, fs.constants.F_OK);
+-            return prospectivePkgJsonDir;
+-            // eslint-disable-next-line no-empty
+-        }
+-        catch (e) { }
+-    }
+-    return '';
++  return path.dirname(fileURLToPath(import.meta.url));
+ }
+ // https://stackoverflow.com/a/66842927
+ // some dark magic here :-)

@@ -61,7 +61,7 @@ We recommend the following flow if you are having issues with running Hive local
 1. Stop all Docker containers: `docker kill $(docker ps -q)`
 2. Clear all local Docker environment: `docker system prune --all --force --volumes`
 3. Delete all generated local `.env` files: `find . -name '.env' | xargs rm`
-4. Delete local `.hive` dir used by Docker volumes.
+4. Delete local `docker/.hive` and `docker/.hive-dev` dir used by Docker volumes.
 5. Reinstall dependencies using `pnpm install`
 6. Force-generate new `.env` files: `pnpm env:sync --force`
 

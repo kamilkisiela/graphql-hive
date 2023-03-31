@@ -21,8 +21,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/v2/dropdown';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
+import { graphql } from '@/gql';
 import { TargetQuery, TargetsDocument, VersionsDocument } from '@/graphql';
-import { getDocsUrl } from '@/lib/docs-url';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
@@ -60,7 +60,7 @@ const TargetCard = ({
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button rotate={90}>
+            <Button>
               <MoreIcon />
             </Button>
           </DropdownMenuTrigger>
@@ -129,7 +129,7 @@ const Page = () => {
           <EmptyList
             title="Hive is waiting for your first target"
             description='You can create a target by clicking the "New Target" button'
-            docsUrl={getDocsUrl('/get-started/targets')}
+            docsUrl="/management/targets#create-a-new-target"
           />
         ) : (
           targets?.nodes.map(target => <TargetCard key={target.id} target={target} />)
@@ -140,11 +140,24 @@ const Page = () => {
   );
 };
 
+const ProjectOverviewPageQuery = graphql(`
+  query ProjectOverviewPageQuery($organizationId: ID!, $projectId: ID!) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...ProjectLayout_OrganizationFragment
+      }
+    }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      ...ProjectLayout_ProjectFragment
+    }
+  }
+`);
+
 function ProjectsPage(): ReactElement {
   return (
     <>
       <Title title="Targets" />
-      <ProjectLayout value="targets" className="flex gap-x-5">
+      <ProjectLayout value="targets" className="flex gap-x-5" query={ProjectOverviewPageQuery}>
         {() => <Page />}
       </ProjectLayout>
     </>

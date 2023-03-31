@@ -39,7 +39,7 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
     try {
       const client = new WebClient(input.integrations.slack.token);
 
-      const totalChanges = input.event.changes.length;
+      const totalChanges = input.event.changes.length + input.event.messages.length;
       const projectLink = this.createLink({
         text: input.event.project.name,
         url: `${this.appBaseUrl}/${input.event.organization.cleanId}/${input.event.project.cleanId}`,
@@ -69,7 +69,7 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
             totalChanges,
           )}* in project ${projectLink}, target ${targetLink} (${viewLink}):`,
           mrkdwn: true,
-          attachments: createAttachments(input.event.changes),
+          attachments: createAttachments(input.event.changes, input.event.messages),
           unfurl_links: false,
           unfurl_media: false,
         });
@@ -122,7 +122,7 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
   }
 }
 
-function createAttachments(changes: readonly Types.SchemaChange[]) {
+function createAttachments(changes: readonly Types.SchemaChange[], messages: readonly string[]) {
   const breakingChanges = changes.filter(filterChangesByLevel('Breaking'));
   const dangerousChanges = changes.filter(filterChangesByLevel('Dangerous'));
   const safeChanges = changes.filter(filterChangesByLevel('Safe'));
@@ -157,6 +157,17 @@ function createAttachments(changes: readonly Types.SchemaChange[]) {
         changes: safeChanges,
       }),
     );
+  }
+
+  if (messages.length) {
+    const text = messages.map(message => slackCoderize(message)).join('\n');
+    attachments.push({
+      mrkdwn_in: ['text'],
+      color: '#1C8DC7',
+      author_name: 'Other changes',
+      text,
+      fallback: text,
+    });
   }
 
   return attachments;

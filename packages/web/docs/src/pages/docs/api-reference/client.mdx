@@ -1,0 +1,156 @@
+import { Callout, Card, Cards, PackageCmd } from '@theguild/components'
+
+# Hive Client
+
+**Hive Client** is a set of libraries and utilities for interacting with Hive, for both
+[Schema Registry](/docs/features/schema-registry) and
+[Usage Reporting](/docs/features/usage-reporting).
+
+## Available Clients
+
+### JavaScript / NodeJS Client
+
+[`@graphql-hive/client`](https://npmjs.com/package/@graphql-hive/client) is the official library for
+interacting with Hive's **Schema Registry** and **Usage Reporting**.
+
+You can refer to the following guides for integration with your project:
+
+<Cards>
+  <Card arrow title="GraphQL Yoga" href="/docs/integrations/graphql-yoga" />
+  <Card arrow title="Envelop" href="/docs/integrations/envelop" />
+  <Card arrow title="Schema-Stitching Gateway" href="/docs/integrations/schema-stitching" />
+  <Card arrow title="Apollo-Server" href="/docs/integrations/apollo-server" />
+  <Card arrow title="Apollo Gateway" href="/docs/integrations/apollo-gateway" />
+</Cards>
+
+#### Configuration
+
+Refer to the
+[`HivePluginOptions` interface](https://github.com/kamilkisiela/graphql-hive/blob/main/packages/libraries/client/src/internal/types.ts#LL40C29-L40C29)
+for complete list of options and configurations you can pass to the Hive JavaScript Client.
+
+#### Client Information
+
+You can pass a custom `clientInfo` callback to the `HivePluginOptions` to have full control on how
+you detect a client's information.
+
+```ts
+const config: HivePluginOptions = {
+  usage: {
+    clientInfo(context) {
+      const name = context.headers['x-graphql-client-name']
+      const version = context.headers['x-graphql-client-version']
+
+      if (name && version) {
+        return { name, version }
+      }
+
+      return null
+    }
+  }
+}
+```
+
+#### Excluding Operations
+
+You can pass a custom `exclude` array to the `HivePluginOptions` to ignore specific operations from
+being reported to Hive.
+
+```ts
+const config: HivePluginOptions = {
+  usage: {
+    exclude: ['unwantedOperationName', 'anotherOperationName']
+  }
+}
+```
+
+#### Sampling
+
+You can pass a custom `sampleRate` array to the `HivePluginOptions` to sample a percentage of the
+total operations reported. By default, Hive agent reports 100% of the operations (`1.0`).
+
+```ts
+const config: HivePluginOptions = {
+  usage: {
+    sampleRate: 0.1
+  }
+}
+```
+
+#### Custom Integration
+
+If your GraphQL server is not listed above, you maybe implement a custom integration. Start by
+importing and creating a Hive instance using the `createHive` function.
+
+```ts
+import { createHive } from '@graphql-hive/client'
+
+const hive = createHive({
+  enabled: true,
+  debug: true, // or, false
+  token: 'YOUR-TOKEN',
+  reporting: {
+    // feel free to set dummy values here, or use actual
+    // environment information that you have
+    author: 'Author of the schema version',
+    commit: 'git sha or any identifier'
+  }
+})
+```
+
+Then, you can use the `reportSchema` to publish your runtime schema to Hive:
+
+```ts
+// Once you server starts and the GraphQL schema becomes
+// available, call "reportSchema" with your schema
+hive.reportSchema({ schema: yourSchema })
+```
+
+You can also implement a custom implementation for the Usage Reporting feature, and send usage
+reports to Hive.
+
+Call `collectUsage` as soon as a GraphQL operation execution starts, and use the return value
+callback when the operation ends. You may also wrap and replace the `execute` function with the
+following:
+
+```ts
+export async function executeWithHive(args: ExecutionArgs): Promise<ExecutionResult> {
+  // args is ExecutionArgs of graphql-js
+  const finish = hive.collectUsage(args)
+  // result is ExecutionResult of graphql-js
+  const result = await execute(args)
+  // Use this callback to finish measuring times, and save the operation report
+  finish(result)
+
+  return result
+}
+```
+
+### Ruby Client
+
+The [`graphql-hive` gem](https://github.com/charlypoly/graphql-ruby-hive) allows
+[GraphQL-Ruby](https://graphql-ruby.org/) users to use Hive to both usage reporting and publish
+schemas to the registry.
+
+Refer to the following guides for integration with your project:
+
+<Cards>
+  <Card arrow title="GraphQL-Ruby" href="/docs/integrations/graphql-ruby" />
+</Cards>
+
+### PHP Client
+
+The [Lighthouse Hive](https://github.com/stayallive/lighthouse-graphql-hive) is third-party
+integration can be used to measure and collect data against all your GraphQL operations.
+
+<Cards>
+  <Card arrow title="Lighthouse (Laravel)" href="/docs/integrations/lighthouse" />
+</Cards>
+
+### Rust Client
+
+Refer to the following guides for integration with your Rust project:
+
+<Cards>
+  <Card arrow title="Apollo Router" href="/docs/integrations/apollo-router" />
+</Cards>

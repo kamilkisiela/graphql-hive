@@ -11,7 +11,7 @@ test.concurrent('renaming a target should result changing its cleanId', async ()
     {
       organization: organization.cleanId,
       project: project.cleanId,
-      target: target!.cleanId,
+      target: target.cleanId,
       name: 'bar',
     },
     ownerToken,

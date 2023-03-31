@@ -98,10 +98,9 @@ export const resolvers: OidcIntegrationsModule.Resolvers = {
   },
   Organization: {
     viewerCanManageOIDCIntegration: (organization, _, { injector }) => {
-      return injector.get(OIDCIntegrationsProvider).canViewerManageIntegrationForOrganization({
-        organizationId: organization.id,
-        organizationType: organization.type,
-      });
+      return injector
+        .get(OIDCIntegrationsProvider)
+        .canViewerManageIntegrationForOrganization(organization.id);
     },
     oidcIntegration: async (organization, _, { injector }) => {
       if (injector.get(OIDCIntegrationsProvider).isEnabled() === false) {

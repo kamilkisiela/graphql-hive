@@ -2,7 +2,6 @@ fragment OrganizationFields on Organization {
   id
   cleanId
   name
-  type
   plan
   me {
     ...MemberFields
@@ -19,7 +18,6 @@ fragment OrganizationEssentials on Organization {
   id
   cleanId
   name
-  type
 }
 
 fragment ProjectFields on Project {
@@ -362,15 +360,7 @@ fragment PersistedOperationFields on PersistedOperation {
   kind
 }
 
-fragment TargetSettingsFields on TargetSettings {
-  id
-  validation {
-    ...TargetValidationSettingsFields
-  }
-}
-
 fragment TargetValidationSettingsFields on TargetValidationSettings {
-  id
   enabled
   period
   percentage

@@ -1,12 +1,13 @@
+import { createPool, sql } from 'slonik';
 import {
   OrganizationAccessScope,
-  OrganizationType,
   ProjectAccessScope,
   ProjectType,
   RegistryModel,
   TargetAccessScope,
 } from '@app/gql/graphql';
 import { authenticate, userEmail } from './auth';
+import { ensureEnv } from './env';
 import {
   checkSchema,
   createCdnAccess,
@@ -35,12 +36,21 @@ import {
   updateRegistryModel,
   updateSchemaVersionStatus,
 } from './flow';
-import { graphql } from './gql';
-import { execute } from './graphql';
 import { collect, CollectedOperation } from './usage';
 import { generateUnique } from './utils';
 
 export function initSeed() {
+  const pg = {
+    user: ensureEnv('POSTGRES_USER'),
+    password: ensureEnv('POSTGRES_PASSWORD'),
+    host: ensureEnv('POSTGRES_HOST'),
+    port: ensureEnv('POSTGRES_PORT'),
+    db: ensureEnv('POSTGRES_DB'),
+  };
+  const poolPromise = createPool(
+    `postgres://${pg.user}:${pg.password}@${pg.host}:${pg.port}/${pg.db}?sslmode=disable`,
+  );
+
   return {
     authenticate: authenticate,
     generateEmail: () => userEmail(generateUnique()),
@@ -51,48 +61,6 @@ export function initSeed() {
       return {
         ownerEmail,
         ownerToken,
-        async createPersonalProject(projectType: ProjectType) {
-          const orgs = await execute({
-            document: graphql(/* GraphQL */ `
-              query myOrganizations {
-                organizations {
-                  total
-                  nodes {
-                    id
-                    cleanId
-                    name
-                    type
-                  }
-                }
-              }
-            `),
-            authToken: ownerToken,
-          }).then(r => r.expectNoGraphQLErrors());
-
-          const personalOrg = orgs.organizations.nodes.find(
-            o => o.type === OrganizationType.Personal,
-          );
-
-          if (!personalOrg) {
-            throw new Error('Personal organization should exist');
-          }
-
-          const projectResult = await createProject(
-            {
-              organization: personalOrg.cleanId,
-              type: projectType,
-              name: generateUnique(),
-            },
-            ownerToken,
-          ).then(r => r.expectNoGraphQLErrors());
-
-          const targets = projectResult.createProject.ok!.createdTargets;
-          const target = targets[0];
-
-          return {
-            target,
-          };
-        },
         async createOrg() {
           const orgName = generateUnique();
           const orgResult = await createOrganization({ name: orgName }, ownerToken).then(r =>
@@ -104,6 +72,16 @@ export function initSeed() {
 
           return {
             organization,
+            async setFeatureFlag(name: string, enabled: boolean) {
+              const pool = await poolPromise;
+
+              await pool.query(sql`
+                UPDATE public.organizations SET feature_flags = ${sql.jsonb({
+                  [name]: enabled,
+                })}
+                WHERE id = ${organization.id}
+              `);
+            },
             async fetchOrganizationInfo() {
               const result = await getOrganization(organization.cleanId, ownerToken).then(r =>
                 r.expectNoGraphQLErrors(),

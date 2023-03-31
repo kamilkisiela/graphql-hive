@@ -1,12 +1,20 @@
-import { MemberFieldsFragment, OrganizationAccessScope } from '../../graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { OrganizationAccessScope } from '../../graphql';
 import { useRedirect } from './common';
 
 export { OrganizationAccessScope } from '../../graphql';
 
+const CanAccessOrganization_MemberFragment = graphql(`
+  fragment CanAccessOrganization_MemberFragment on Member {
+    organizationAccessScopes
+  }
+`);
+
 export function canAccessOrganization(
   scope: OrganizationAccessScope,
-  member: Pick<MemberFieldsFragment, 'organizationAccessScopes'> | null | undefined,
+  mmember: null | FragmentType<typeof CanAccessOrganization_MemberFragment>,
 ) {
+  const member = useFragment(CanAccessOrganization_MemberFragment, mmember);
   if (!member) {
     return false;
   }
@@ -16,14 +24,16 @@ export function canAccessOrganization(
 
 export function useOrganizationAccess({
   scope,
-  member,
+  member: mmember,
   redirect = false,
 }: {
   scope: OrganizationAccessScope;
-  member: Pick<MemberFieldsFragment, 'organizationAccessScopes'> | null | undefined;
+  member: null | FragmentType<typeof CanAccessOrganization_MemberFragment>;
   redirect?: boolean;
 }) {
-  const canAccess = canAccessOrganization(scope, member);
+  const member = useFragment(CanAccessOrganization_MemberFragment, mmember);
+  const canAccess = canAccessOrganization(scope, mmember);
+
   useRedirect({
     canAccess,
     redirectTo: redirect

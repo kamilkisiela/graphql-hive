@@ -2,7 +2,7 @@ import React, { ReactElement, useCallback, useState } from 'react';
 import clsx from 'clsx';
 import { formatISO, subDays } from 'date-fns';
 import { useFormik } from 'formik';
-import { gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
@@ -12,39 +12,38 @@ import {
   Button,
   Card,
   Checkbox,
+  DocsLink,
+  DocsNote,
   Heading,
   Input,
+  Spinner,
   Switch,
   Table,
   Tag,
+  TBody,
+  Td,
   TimeAgo,
   Title,
+  Tr,
 } from '@/components/v2';
 import { Combobox } from '@/components/v2/combobox';
-import { AlertTriangleIcon } from '@/components/v2/icon';
 import { CreateAccessTokenModal, DeleteTargetModal } from '@/components/v2/modals';
-import {
-  DeleteTokensDocument,
-  MemberFieldsFragment,
-  OrganizationFieldsFragment,
-  SetTargetValidationDocument,
-  TargetFieldsFragment,
-  TokensDocument,
-} from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { DeleteTokensDocument, SetTargetValidationDocument, TokensDocument } from '@/graphql';
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { Spinner } from '@chakra-ui/react';
 
-const columns = [
-  { key: 'checkbox' },
-  { key: 'alias' },
-  { key: 'name' },
-  { key: 'lastUsedAt', align: 'right' },
-  { key: 'createdAt', align: 'right' },
-] as const;
+const RegistryAccessTokens_MeFragment = graphql(`
+  fragment RegistryAccessTokens_MeFragment on Member {
+    ...CanAccessTarget_MemberFragment
+  }
+`);
 
-const RegistryAccessTokens = ({ me }: { me: MemberFieldsFragment }): ReactElement => {
+function RegistryAccessTokens(props: {
+  me: FragmentType<typeof RegistryAccessTokens_MeFragment>;
+}): ReactElement {
+  const me = useFragment(RegistryAccessTokens_MeFragment, props.me);
   const router = useRouteSelector();
   const [{ fetching: deleting }, mutate] = useMutation(DeleteTokensDocument);
   const [checked, setChecked] = useState<string[]>([]);
@@ -83,6 +82,14 @@ const RegistryAccessTokens = ({ me }: { me: MemberFieldsFragment }): ReactElemen
       <p className="mb-3 font-light text-gray-300">
         Be careful! These tokens allow to read and write your target data.
       </p>
+      <DocsNote>
+        Registry Access Tokens are used to access to Hive Registry and perform actions on your
+        targets/projects. In most cases, this token is used from the Hive CLI.
+        <br />
+        <DocsLink href="/management/targets#registry-access-tokens">
+          Learn more about Registry Access Token
+        </DocsLink>
+      </DocsNote>
       {canManage && (
         <div className="my-3.5 flex justify-between">
           <Button variant="secondary" onClick={toggleModalOpen} size="large" className="px-5">
@@ -99,43 +106,47 @@ const RegistryAccessTokens = ({ me }: { me: MemberFieldsFragment }): ReactElemen
           </Button>
         </div>
       )}
-      <Table
-        dataSource={tokens?.map(token => ({
-          id: token.id,
-          alias: token.alias,
-          name: token.name,
-          checkbox: (
-            <Checkbox
-              onCheckedChange={isChecked =>
-                setChecked(isChecked ? [...checked, token.id] : checked.filter(k => k !== token.id))
-              }
-              checked={checked.includes(token.id)}
-              disabled={!canManage}
-            />
-          ),
-          lastUsedAt: token.lastUsedAt ? (
-            <>
-              last used <TimeAgo date={token.lastUsedAt} />
-            </>
-          ) : (
-            'not used yet'
-          ),
-          createdAt: (
-            <>
-              created <TimeAgo date={token.date} />
-            </>
-          ),
-        }))}
-        columns={columns}
-      />
+      <Table>
+        <TBody>
+          {tokens?.map(token => (
+            <Tr key={token.id}>
+              <Td width="1">
+                <Checkbox
+                  onCheckedChange={isChecked =>
+                    setChecked(
+                      isChecked ? [...checked, token.id] : checked.filter(k => k !== token.id),
+                    )
+                  }
+                  checked={checked.includes(token.id)}
+                  disabled={!canManage}
+                />
+              </Td>
+              <Td>{token.alias}</Td>
+              <Td>{token.name}</Td>
+              <Td align="right">
+                {token.lastUsedAt ? (
+                  <>
+                    last used <TimeAgo date={token.lastUsedAt} />
+                  </>
+                ) : (
+                  'not used yet'
+                )}
+              </Td>
+              <Td align="right">
+                created <TimeAgo date={token.date} />
+              </Td>
+            </Tr>
+          ))}
+        </TBody>
+      </Table>
       {isModalOpen && (
         <CreateAccessTokenModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
       )}
     </Card>
   );
-};
+}
 
-const Settings_UpdateBaseSchemaMutation = gql(/* GraphQL */ `
+const Settings_UpdateBaseSchemaMutation = graphql(`
   mutation Settings_UpdateBaseSchema($input: UpdateBaseSchemaInput!) {
     updateBaseSchema(input: $input) {
       ok {
@@ -160,11 +171,14 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
   return (
     <Card>
       <Heading className="mb-2">Extend Your Schema</Heading>
-      <p className="mb-3 font-light text-gray-300">
-        Define a piece of SDL that will be added to every published schema.
+      <DocsNote>
+        Schema Extensions is pre-defined GraphQL schema that is automatically merged with your
+        published schemas, before being checked and validated.
         <br />
-        Useful for AWS AppSync users to not send platform-specific part of schema to Hive.
-      </p>
+        <DocsLink href="/management/targets#schema-extensions">
+          You can find more details and examples in the documentation
+        </DocsLink>
+      </DocsNote>
       <SchemaEditor
         theme="vs-dark"
         options={{ readOnly: mutation.fetching }}
@@ -213,7 +227,7 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
   );
 };
 
-const ClientExclusion_AvailableClientNamesQuery = gql(/* GraphQL */ `
+const ClientExclusion_AvailableClientNamesQuery = graphql(`
   query ClientExclusion_AvailableClientNamesQuery($selector: ClientStatsByTargetsInput!) {
     clientStatsByTargets(selector: $selector) {
       nodes {
@@ -275,18 +289,28 @@ function ClientExclusion(
   );
 }
 
-const Settings_TargetSettingsQuery = gql(/* GraphQL */ `
+const Settings_TargetSettingsQuery = graphql(`
   query Settings_TargetSettingsQuery(
     $selector: TargetSelectorInput!
     $targetsSelector: ProjectSelectorInput!
     $organizationSelector: OrganizationSelectorInput!
   ) {
-    targetSettings(selector: $selector) {
-      ...TargetSettingsFields
+    target(selector: $selector) {
+      id
+      validationSettings {
+        enabled
+        percentage
+        period
+        targets {
+          id
+        }
+        excludedClients
+      }
     }
     targets(selector: $targetsSelector) {
       nodes {
-        ...TargetEssentials
+        id
+        name
       }
     }
     organization(selector: $organizationSelector) {
@@ -300,12 +324,15 @@ const Settings_TargetSettingsQuery = gql(/* GraphQL */ `
   }
 `);
 
-const Settings_UpdateTargetValidationSettingsMutation = gql(/* GraphQL */ `
+const Settings_UpdateTargetValidationSettingsMutation = graphql(`
   mutation Settings_UpdateTargetValidationSettings($input: UpdateTargetValidationSettingsInput!) {
     updateTargetValidationSettings(input: $input) {
       ok {
-        updatedTargetValidationSettings {
-          ...TargetValidationSettingsFields
+        target {
+          id
+          validationSettings {
+            ...TargetValidationSettingsFields
+          }
         }
       }
       error {
@@ -346,7 +373,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
     },
   });
 
-  const settings = targetSettings.data?.targetSettings.validation;
+  const settings = targetSettings.data?.target?.validationSettings;
   const isEnabled = settings?.enabled || false;
   const possibleTargets = targetSettings.data?.targets.nodes;
 
@@ -413,9 +440,14 @@ const ConditionalBreakingChanges = (): ReactElement => {
             />
           )}
         </Heading>
+        <DocsNote>
+          Conditional Breaking Changes can change the behavior of schema checks, based on real
+          traffic data sent to Hive.{' '}
+          <DocsLink href="/management/targets#conditional-breaking-changes">Learn more</DocsLink>
+        </DocsNote>
         <div
           className={clsx(
-            'mb-3 flex flex-col items-start gap-3 font-light text-gray-300',
+            'mb-3 mt-4 flex flex-col items-start gap-3 font-light text-gray-300',
             !isEnabled && 'pointer-events-none opacity-25',
           )}
         >
@@ -555,7 +587,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
   );
 };
 
-const Settings_UpdateTargetNameMutation = gql(/* GraphQL */ `
+const Settings_UpdateTargetNameMutation = graphql(`
   mutation Settings_UpdateTargetName($input: UpdateTargetNameInput!) {
     updateTargetName(input: $input) {
       ok {
@@ -566,6 +598,7 @@ const Settings_UpdateTargetNameMutation = gql(/* GraphQL */ `
         }
         updatedTarget {
           ...TargetFields
+          cleanId
         }
       }
       error {
@@ -578,13 +611,29 @@ const Settings_UpdateTargetNameMutation = gql(/* GraphQL */ `
   }
 `);
 
-const Page = ({
-  target,
-  organization,
-}: {
-  target: TargetFieldsFragment;
-  organization: OrganizationFieldsFragment;
+const TargetSettingsPage_TargetFragment = graphql(`
+  fragment TargetSettingsPage_TargetFragment on Target {
+    name
+    baseSchema
+  }
+`);
+
+const TargetSettingsPage_OrganizationFragment = graphql(`
+  fragment TargetSettingsPage_OrganizationFragment on Organization {
+    me {
+      ...CanAccessTarget_MemberFragment
+      ...RegistryAccessTokens_MeFragment
+      ...CDNAccessTokens_MeFragment
+    }
+  }
+`);
+
+const Page = (props: {
+  target: FragmentType<typeof TargetSettingsPage_TargetFragment>;
+  organization: FragmentType<typeof TargetSettingsPage_OrganizationFragment>;
 }) => {
+  const target = useFragment(TargetSettingsPage_TargetFragment, props.target);
+  const organization = useFragment(TargetSettingsPage_OrganizationFragment, props.organization);
   const router = useRouteSelector();
   const [isModalOpen, toggleModalOpen] = useToggle();
 
@@ -624,10 +673,15 @@ const Page = ({
   return (
     <>
       <Card>
-        <Heading className="mb-2">Target Info</Heading>
-        <p className="mb-3 font-light text-gray-300">
-          Name of your target visible within organization.
-        </p>
+        <Heading className="mb-2">Target Name</Heading>
+        <DocsNote warn>
+          Changing the name of your target will also change the slug of your target URL, and will
+          invalidate any existing links to your target.
+          <br />
+          <DocsLink href="/management/targets#rename-a-target">
+            You can read more about it in the documentation
+          </DocsLink>
+        </DocsNote>
         <form onSubmit={handleSubmit} className="flex gap-x-2">
           <Input
             placeholder="Target name"
@@ -671,22 +725,29 @@ const Page = ({
 
       {canDelete && (
         <Card>
-          <Heading className="mb-2">Delete Target</Heading>
-          <p className="mb-3 font-light text-gray-300">Permanently remove your Target</p>
-          <div className="flex items-center gap-x-2">
-            <Button
-              variant="primary"
-              size="large"
-              danger
-              onClick={toggleModalOpen}
-              className="px-5"
-            >
-              Delete Target
-            </Button>
-            <Tag color="yellow" className="py-2.5 px-4">
-              <AlertTriangleIcon className="h-5 w-5" />
-              This action is not reversible!
-            </Tag>
+          <div className="flex items-center justify-between">
+            <div>
+              <Heading className="mb-2">Delete Target</Heading>
+              <DocsNote warn>
+                Deleting an project also delete all schemas and data associated with it.
+                <br />
+                <DocsLink href="/management/targets#delete-a-target">
+                  <strong>This action is not reversible!</strong> You can find more information
+                  about this process in the documentation
+                </DocsLink>
+              </DocsNote>
+            </div>
+            <div className="flex items-center gap-x-2">
+              <Button
+                variant="primary"
+                size="large"
+                danger
+                onClick={toggleModalOpen}
+                className="px-5"
+              >
+                Delete Target
+              </Button>
+            </div>
           </div>
         </Card>
       )}
@@ -695,12 +756,42 @@ const Page = ({
   );
 };
 
+const TargetSettingsPageQuery = graphql(`
+  query TargetSettingsPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...TargetLayout_OrganizationFragment
+        ...TargetSettingsPage_OrganizationFragment
+      }
+    }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_ProjectFragment
+    }
+    targets(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_TargetConnectionFragment
+    }
+    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+      id
+      ...TargetSettingsPage_TargetFragment
+    }
+    ...TargetLayout_IsCDNEnabledFragment
+  }
+`);
+
 function SettingsPage(): ReactElement {
   return (
     <>
       <Title title="Settings" />
-      <TargetLayout value="settings" className="flex flex-col gap-16">
-        {props => <Page target={props.target} organization={props.organization} />}
+      <TargetLayout
+        value="settings"
+        className="flex flex-col gap-16"
+        query={TargetSettingsPageQuery}
+      >
+        {props =>
+          props.organization ? (
+            <Page target={props.target!} organization={props.organization.organization} />
+          ) : null
+        }
       </TargetLayout>
     </>
   );

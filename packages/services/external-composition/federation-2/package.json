@@ -5,14 +5,15 @@
   "private": true,
   "scripts": {
     "build": "bob runify --single",
-    "dev": "tsup-node src/index.ts --format esm --shims --target node18 --watch --sourcemap --onSuccess 'node --enable-source-maps dist/index.js' | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname"
+    "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/index.ts"
   },
   "dependencies": {
     "@apollo/composition": "^2.2.2",
     "@whatwg-node/fetch": "^0.8.0",
-    "@whatwg-node/server": "^0.6.0",
+    "@whatwg-node/server": "^0.7.0",
     "graphql": "^16.6.0",
-    "zod": "3.20.6"
+    "lru-cache": "^7.17.0",
+    "zod": "3.21.4"
   },
   "devDependencies": {
     "@graphql-hive/external-composition": "workspace:*"

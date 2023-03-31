@@ -1,12 +1,13 @@
 import { ReactElement } from 'react';
 import { useFormik } from 'formik';
-import { gql, useMutation } from 'urql';
+import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal, Select, Tag } from '@/components/v2';
+import { graphql } from '@/gql';
 import { AlertChannelType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 
-const CreateChannel_AddAlertChannelMutation = gql(/* GraphQL */ `
+const CreateChannel_AddAlertChannelMutation = graphql(`
   mutation CreateChannel_AddAlertChannel($input: AddAlertChannelInput!) {
     addAlertChannel(input: $input) {
       ok {
@@ -49,16 +50,14 @@ export const CreateChannelModal = ({
         type: Yup.mixed().oneOf(Object.values(AlertChannelType)).required('Must select type'),
         slackChannel: Yup.string()
           .matches(/^[@#]{1}/, 'Must start with a @ or # character')
-          .when('type', {
-            is: AlertChannelType.Slack,
-            then: Yup.string().required('Must enter slack channel'),
-          }),
+          .when('type', ([type], schema) =>
+            type === AlertChannelType.Slack ? schema.required('Must enter slack channel') : schema,
+          ),
         endpoint: Yup.string()
           .url()
-          .when('type', {
-            is: AlertChannelType.Webhook,
-            then: Yup.string().required('Must enter endpoint'),
-          }),
+          .when('type', ([type], schema) =>
+            type === AlertChannelType.Webhook ? schema.required('Must enter endpoint') : schema,
+          ),
       }),
       async onSubmit(values) {
         const { data } = await mutate({

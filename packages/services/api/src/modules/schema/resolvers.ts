@@ -33,7 +33,7 @@ import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import { Inspector } from './providers/inspector';
 import { SchemaBuildError } from './providers/orchestrators/errors';
-import { SchemaHelper } from './providers/schema-helper';
+import { ensureSDL, SchemaHelper } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
 
@@ -103,6 +103,9 @@ export const resolvers: SchemaModule.Resolvers = {
         .update(
           JSON.stringify({
             ...input,
+            organization,
+            project,
+            target,
             service: input.service?.toLowerCase(),
           }),
         )
@@ -288,13 +291,17 @@ export const resolvers: SchemaModule.Resolvers = {
       ]);
 
       return Promise.all([
-        orchestrator.build(
-          schemasBefore.map(s => helper.createSchemaObject(s)),
-          project.externalComposition,
+        ensureSDL(
+          orchestrator.composeAndValidate(
+            schemasBefore.map(s => helper.createSchemaObject(s)),
+            project.externalComposition,
+          ),
         ),
-        orchestrator.build(
-          schemasAfter.map(s => helper.createSchemaObject(s)),
-          project.externalComposition,
+        ensureSDL(
+          orchestrator.composeAndValidate(
+            schemasAfter.map(s => helper.createSchemaObject(s)),
+            project.externalComposition,
+          ),
         ),
       ]).catch(reason => {
         if (reason instanceof SchemaBuildError) {
@@ -310,6 +317,7 @@ export const resolvers: SchemaModule.Resolvers = {
       const translator = injector.get(IdTranslator);
       const schemaManager = injector.get(SchemaManager);
       const projectManager = injector.get(ProjectManager);
+      const organizationManager = injector.get(OrganizationManager);
       const helper = injector.get(SchemaHelper);
 
       const [organizationId, projectId, targetId] = await Promise.all([
@@ -318,10 +326,15 @@ export const resolvers: SchemaModule.Resolvers = {
         translator.translateTargetId(selector),
       ]);
 
-      const project = await projectManager.getProject({
-        organization: organizationId,
-        project: projectId,
-      });
+      const [project, organization] = await Promise.all([
+        projectManager.getProject({
+          organization: organizationId,
+          project: projectId,
+        }),
+        organizationManager.getOrganization({
+          organization: organizationId,
+        }),
+      ]);
       const orchestrator = schemaManager.matchOrchestrator(project.type);
 
       // TODO: collect stats from a period between these two versions
@@ -331,6 +344,7 @@ export const resolvers: SchemaModule.Resolvers = {
           project: projectId,
           target: targetId,
           version: selector.version,
+          onlyComposable: organization.featureFlags.compareToPreviousComposableVersion === true,
         }),
         injector.get(SchemaManager).getSchemasOfVersion({
           organization: organizationId,
@@ -342,14 +356,24 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return Promise.all([
         schemasBefore.length
-          ? orchestrator.build(
-              schemasBefore.map(s => helper.createSchemaObject(s)),
-              project.externalComposition,
+          ? ensureSDL(
+              orchestrator.composeAndValidate(
+                schemasBefore.map(s => helper.createSchemaObject(s)),
+                project.externalComposition,
+              ),
             )
           : null,
-        orchestrator.build(
-          schemasAfter.map(s => helper.createSchemaObject(s)),
-          project.externalComposition,
+        ensureSDL(
+          orchestrator.composeAndValidate(
+            schemasAfter.map(s => helper.createSchemaObject(s)),
+            project.externalComposition,
+          ),
+          organization.featureFlags.compareToPreviousComposableVersion === true
+            ? // Do not show schema changes if the new version is not composable
+              // It only applies when the feature flag is enabled.
+              // Otherwise, we show the errors as usual.
+              'reject-on-graphql-errors'
+            : 'ignore-errors',
         ),
       ]).catch(reason => {
         if (reason instanceof SchemaBuildError) {
@@ -409,6 +433,32 @@ export const resolvers: SchemaModule.Resolvers = {
         project: target.projectId,
         target: target.id,
       });
+    },
+    async testExternalSchemaComposition(_, { selector }, { injector }) {
+      const translator = injector.get(IdTranslator);
+      const [organizationId, projectId] = await Promise.all([
+        translator.translateOrganizationId(selector),
+        translator.translateProjectId(selector),
+      ]);
+
+      const schemaManager = injector.get(SchemaManager);
+
+      const result = await schemaManager.testExternalSchemaComposition({
+        organizationId,
+        projectId,
+      });
+
+      if (result.kind === 'success') {
+        return {
+          ok: result.project,
+        };
+      }
+
+      return {
+        error: {
+          message: result.error,
+        },
+      };
     },
   },
   Target: {
@@ -475,12 +525,40 @@ export const resolvers: SchemaModule.Resolvers = {
       };
     },
     schemas(version, _, { injector }) {
-      return injector.get(SchemaManager).getSchemasOfVersion({
+      return injector.get(SchemaManager).getMaybeSchemasOfVersion({
         version: version.id,
         organization: version.organization,
         project: version.project,
         target: version.target,
       });
+    },
+    async errors(version, _, { injector }) {
+      const schemaManager = injector.get(SchemaManager);
+      const schemaHelper = injector.get(SchemaHelper);
+      const [schemas, project] = await Promise.all([
+        schemaManager.getMaybeSchemasOfVersion({
+          version: version.id,
+          organization: version.organization,
+          project: version.project,
+          target: version.target,
+        }),
+        injector.get(ProjectManager).getProject({
+          organization: version.organization,
+          project: version.project,
+        }),
+      ]);
+
+      if (schemas.length === 0) {
+        return [];
+      }
+
+      const orchestrator = schemaManager.matchOrchestrator(project.type);
+      const validation = await orchestrator.composeAndValidate(
+        schemas.map(s => schemaHelper.createSchemaObject(s)),
+        project.externalComposition,
+      );
+
+      return validation.errors;
     },
     async supergraph(version, _, { injector }) {
       const project = await injector.get(ProjectManager).getProject({
@@ -496,7 +574,7 @@ export const resolvers: SchemaModule.Resolvers = {
       const orchestrator = schemaManager.matchOrchestrator(project.type);
       const helper = injector.get(SchemaHelper);
 
-      const schemas = await schemaManager.getSchemasOfVersion({
+      const schemas = await schemaManager.getMaybeSchemasOfVersion({
         version: version.id,
         organization: version.organization,
         project: version.project,
@@ -504,10 +582,16 @@ export const resolvers: SchemaModule.Resolvers = {
         includeMetadata: false,
       });
 
-      return orchestrator.supergraph(
-        schemas.map(s => helper.createSchemaObject(s)),
-        project.externalComposition,
-      );
+      if (schemas.length === 0) {
+        return null;
+      }
+
+      return orchestrator
+        .composeAndValidate(
+          schemas.map(s => helper.createSchemaObject(s)),
+          project.externalComposition,
+        )
+        .then(r => r.supergraph);
     },
     async sdl(version, _, { injector }) {
       const project = await injector.get(ProjectManager).getProject({
@@ -519,7 +603,7 @@ export const resolvers: SchemaModule.Resolvers = {
       const orchestrator = schemaManager.matchOrchestrator(project.type);
       const helper = injector.get(SchemaHelper);
 
-      const schemas = await schemaManager.getSchemasOfVersion({
+      const schemas = await schemaManager.getMaybeSchemasOfVersion({
         version: version.id,
         organization: version.organization,
         project: version.project,
@@ -527,10 +611,16 @@ export const resolvers: SchemaModule.Resolvers = {
         includeMetadata: false,
       });
 
+      if (schemas.length === 0) {
+        return null;
+      }
+
       return (
-        await orchestrator.build(
-          schemas.map(s => helper.createSchemaObject(s)),
-          project.externalComposition,
+        await ensureSDL(
+          orchestrator.composeAndValidate(
+            schemas.map(s => helper.createSchemaObject(s)),
+            project.externalComposition,
+          ),
         )
       ).raw;
     },
@@ -554,9 +644,11 @@ export const resolvers: SchemaModule.Resolvers = {
         target: version.target,
       });
 
-      const schema = await orchestrator.build(
-        schemas.map(s => helper.createSchemaObject(s)),
-        project.externalComposition,
+      const schema = await ensureSDL(
+        orchestrator.composeAndValidate(
+          schemas.map(s => helper.createSchemaObject(s)),
+          project.externalComposition,
+        ),
       );
 
       return {

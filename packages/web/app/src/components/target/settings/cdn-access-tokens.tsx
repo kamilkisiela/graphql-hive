@@ -1,19 +1,31 @@
-import { useEffect, useMemo, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
-import { gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-import { Button, Card, Heading, Input, Modal, Table, Tag, TimeAgo } from '@/components/v2';
+import {
+  Button,
+  Card,
+  DocsLink,
+  DocsNote,
+  Heading,
+  Input,
+  Modal,
+  Table,
+  Tag,
+  TBody,
+  Td,
+  TimeAgo,
+  Tr,
+} from '@/components/v2';
 import { AlertTriangleIcon, TrashIcon } from '@/components/v2/icon';
 import { InlineCode } from '@/components/v2/inline-code';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
-import { MemberFieldsFragment } from '@/graphql';
 import { canAccessTarget } from '@/lib/access/target';
 import { useRouteSelector } from '@/lib/hooks';
 
-// Note: this will be used in the future :)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const CDNAccessTokeRowFragment = gql(/* GraphQL */ `
+const CDNAccessTokeRowFragment = graphql(`
   fragment CDNAccessTokens_CdnAccessTokenRowFragment on CdnAccessToken {
     id
     firstCharacters
@@ -23,7 +35,7 @@ const CDNAccessTokeRowFragment = gql(/* GraphQL */ `
   }
 `);
 
-const CDNAccessTokenCreateMutation = gql(/* GraphQL */ `
+const CDNAccessTokenCreateMutation = graphql(`
   mutation CDNAccessTokens_CDNAccessTokenCreateMutation($input: CreateCdnAccessTokenInput!) {
     createCdnAccessToken(input: $input) {
       error {
@@ -31,6 +43,7 @@ const CDNAccessTokenCreateMutation = gql(/* GraphQL */ `
       }
       ok {
         createdCdnAccessToken {
+          id
           ...CDNAccessTokens_CdnAccessTokenRowFragment
         }
         secretAccessToken
@@ -39,10 +52,10 @@ const CDNAccessTokenCreateMutation = gql(/* GraphQL */ `
   }
 `);
 
-const CreateCDNAccessTokenModal = (props: {
+function CreateCDNAccessTokenModal(props: {
   onCreateCDNAccessToken: () => void;
   onClose: () => void;
-}) => {
+}): ReactElement {
   const router = useRouteSelector();
   const [createCdnAccessToken, mutate] = useMutation(CDNAccessTokenCreateMutation);
 
@@ -100,7 +113,7 @@ const CreateCDNAccessTokenModal = (props: {
 
       <div className="mt-auto flex w-full gap-2 self-end">
         <Button size="large" className="ml-auto" onClick={props.onClose}>
-          Abort
+          Cancel
         </Button>
 
         <Button
@@ -124,10 +137,12 @@ const CreateCDNAccessTokenModal = (props: {
 
         <p>The CDN Access Token was successfully created.</p>
 
-        <Tag color="yellow" className="py-2.5 px-4">
+        <div className="flex items-center gap-2 rounded-sm p-4 bg-yellow-500/10 text-yellow-500">
           <AlertTriangleIcon className="h-5 w-5" />
-          Please store this access token securely. You will not be able to see it again.
-        </Tag>
+          <span>
+            Please store this access token securely. You will not be able to see it again.
+          </span>
+        </div>
 
         <InlineCode content={createCdnAccessToken.data.createCdnAccessToken.ok.secretAccessToken} />
 
@@ -164,9 +179,9 @@ const CreateCDNAccessTokenModal = (props: {
       {body}
     </Modal>
   );
-};
+}
 
-const CDNAccessTokenDeleteMutation = gql(/* GraphQL */ `
+const CDNAccessTokenDeleteMutation = graphql(`
   mutation CDNAccessTokens_DeleteCDNAccessToken($input: DeleteCdnAccessTokenInput!) {
     deleteCdnAccessToken(input: $input) {
       error {
@@ -179,11 +194,11 @@ const CDNAccessTokenDeleteMutation = gql(/* GraphQL */ `
   }
 `);
 
-const DeleteCDNAccessTokenModal = (props: {
+function DeleteCDNAccessTokenModal(props: {
   cdnAccessTokenId: string;
   onDeletedAccessTokenId: (deletedAccessTokenId: string) => void;
   onClose: () => void;
-}) => {
+}): ReactElement {
   const router = useRouteSelector();
   const [deleteCdnAccessToken, mutate] = useMutation(CDNAccessTokenDeleteMutation);
 
@@ -211,7 +226,7 @@ const DeleteCDNAccessTokenModal = (props: {
 
       <div className="mt-auto flex w-full gap-2 self-end">
         <Button variant="primary" size="large" className="ml-auto" onClick={onClose}>
-          Abort
+          Cancel
         </Button>
         <Button
           disabled={deleteCdnAccessToken.fetching}
@@ -284,9 +299,9 @@ const DeleteCDNAccessTokenModal = (props: {
       {body}
     </Modal>
   );
-};
+}
 
-const CDNAccessTokensQuery = gql(/* GraphQL */ `
+const CDNAccessTokensQuery = graphql(`
   query CDNAccessTokensQuery($selector: TargetSelectorInput!, $first: Int!, $after: String) {
     target(selector: $selector) {
       id
@@ -318,7 +333,16 @@ const isDeleteCDNAccessTokenModalPath = (path: string): null | string => {
   return result[1];
 };
 
-export const CDNAccessTokens = (props: { me: MemberFieldsFragment }): React.ReactElement => {
+const CDNAccessTokens_MeFragment = graphql(`
+  fragment CDNAccessTokens_MeFragment on Member {
+    ...CanAccessTarget_MemberFragment
+  }
+`);
+
+export function CDNAccessTokens(props: {
+  me: FragmentType<typeof CDNAccessTokens_MeFragment>;
+}): React.ReactElement {
+  const me = useFragment(CDNAccessTokens_MeFragment, props.me);
   const routerSelector = useRouteSelector();
   const router = useRouter();
 
@@ -351,16 +375,21 @@ export const CDNAccessTokens = (props: { me: MemberFieldsFragment }): React.Reac
     requestPolicy: 'cache-and-network',
   });
 
-  const canManage = canAccessTarget(TargetAccessScope.Settings, props.me);
+  const canManage = canAccessTarget(TargetAccessScope.Settings, me);
 
   return (
     <Card>
       <Heading id="cdn-access-tokens" className="mb-2">
         CDN Access Token
       </Heading>
-      <p className="mb-3 font-light text-gray-300">
-        Be careful! These tokens allow accessing the schema artifacts of your target.
-      </p>
+      <DocsNote>
+        CDN Access Tokens are used to access to Hive High-Availability CDN and read your schema
+        artifacts.
+        <br />
+        <DocsLink href="/management/targets#cdn-access-tokens">
+          Learn more about CDN Access Token
+        </DocsLink>
+      </DocsNote>
       {canManage && (
         <div className="my-3.5 flex justify-between">
           <Button
@@ -378,35 +407,38 @@ export const CDNAccessTokens = (props: { me: MemberFieldsFragment }): React.Reac
           </Button>
         </div>
       )}
-      <Table
-        dataSource={target?.data?.target?.cdnAccessTokens.edges?.map(edge => ({
-          id: edge.node.id,
-          name:
-            edge.node.firstCharacters + new Array(10).fill('•').join('') + edge.node.lastCharacters,
-          alias: edge.node.alias,
-          createdAt: (
-            <>
-              created <TimeAgo date={edge.node.createdAt} />
-            </>
-          ),
-          delete: (
-            <Button
-              className="hover:text-red-500"
-              onClick={() => {
-                void router.push(`${router.asPath}#delete-cdn-access-token?id=${edge.node.id}`);
-              }}
-            >
-              <TrashIcon />
-            </Button>
-          ),
-        }))}
-        columns={[
-          { key: 'name' },
-          { key: 'alias' },
-          { key: 'createdAt', align: 'right' },
-          { key: 'delete', align: 'right' },
-        ]}
-      />
+      <Table>
+        <TBody>
+          {target?.data?.target?.cdnAccessTokens.edges?.map(edge => {
+            const node = useFragment(CDNAccessTokeRowFragment, edge.node);
+
+            return (
+              <Tr key={node.id}>
+                <Td>
+                  {node.firstCharacters + new Array(10).fill('•').join('') + node.lastCharacters}
+                </Td>
+                <Td>{node.alias}</Td>
+                <Td align="right">
+                  created <TimeAgo date={node.createdAt} />
+                </Td>
+                <Td align="right">
+                  <Button
+                    className="hover:text-red-500"
+                    onClick={() => {
+                      void router.push(
+                        `${router.asPath}#delete-cdn-access-token?id=${edge.node.id}`,
+                      );
+                    }}
+                  >
+                    <TrashIcon />
+                  </Button>
+                </Td>
+              </Tr>
+            );
+          })}
+        </TBody>
+      </Table>
+
       <div className="my-3.5 flex justify-end">
         {target.data?.target?.cdnAccessTokens.pageInfo.hasPreviousPage ? (
           <Button
@@ -461,4 +493,4 @@ export const CDNAccessTokens = (props: { me: MemberFieldsFragment }): React.Reac
       ) : null}
     </Card>
   );
-};
+}

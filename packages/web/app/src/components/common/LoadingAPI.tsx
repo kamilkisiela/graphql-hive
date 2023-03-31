@@ -1,23 +1,11 @@
-import React from 'react';
+import { memo } from 'react';
 import { useInflightRequests } from '@/lib/urql-exchanges/state';
-import { Progress } from '@chakra-ui/react';
 
-export const LoadingAPIIndicator = React.memo(() => {
+export const LoadingAPIIndicator = memo(() => {
   const inflightRequests = useInflightRequests();
   const isFetching = inflightRequests > 0;
 
-  return React.useMemo(() => {
-    return isFetching ? (
-      <Progress
-        zIndex={10_000}
-        position="fixed"
-        top="0px"
-        left="0px"
-        isIndeterminate
-        width="100vw"
-        height="5px"
-        colorScheme="yellow"
-      />
-    ) : null;
-  }, [isFetching]);
+  if (!isFetching) return null;
+
+  return <div className="hive-loading-indicator w-1/2 fixed h-1.5 will-change-transform" />;
 });

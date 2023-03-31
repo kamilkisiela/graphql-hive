@@ -258,6 +258,58 @@ describe('publish', () => {
       expect: 'rejected',
     });
   });
+
+  test.concurrent('CLI output', async ({ expect }) => {
+    const { publish } = await prepare();
+
+    const service = {
+      serviceName: 'products',
+      serviceUrl: 'http://products:3000/graphql',
+    };
+
+    await expect(
+      publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            topProduct: Product
+          }
+
+          type Product {
+            id: ID!
+            name: String!
+          }
+        `,
+        ...service,
+        expect: 'latest-composable',
+      }),
+    ).resolves.toMatchInlineSnapshot(`
+      v Published initial schema.
+      i Available at http://localhost:8080/$organization/$project/production
+    `);
+
+    await expect(
+      publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            topProduct: Product
+          }
+
+          type Product {
+            id: ID!
+            name: String!
+            price: Int!
+          }
+        `,
+        ...service,
+        expect: 'latest-composable',
+      }),
+    ).resolves.toMatchInlineSnapshot(`
+      i Detected 1 change
+      - Field price was added to object type Product
+      v Schema published
+      i Available at http://localhost:8080/$organization/$project/production/history/$version
+    `);
+  });
 });
 
 describe('check', () => {
@@ -478,7 +530,7 @@ describe('check', () => {
 });
 
 describe('delete', () => {
-  test.concurrent('accepted: composable before and after', async () => {
+  test.concurrent('reject and ask to upgrade', async () => {
     const cli = await prepare();
 
     await cli.publish({
@@ -515,37 +567,10 @@ describe('delete', () => {
 
     const message = await cli.delete({
       serviceName: 'reviews',
-      expect: 'latest-composable',
-    });
-
-    expect(message).toMatch('reviews deleted');
-  });
-
-  test.concurrent('rejected: unknown service', async () => {
-    const cli = await prepare();
-
-    await cli.publish({
-      sdl: /* GraphQL */ `
-        type Query {
-          topProduct: Product
-        }
-
-        type Product @key(fields: "id") {
-          id: ID!
-          name: String
-        }
-      `,
-      serviceName: 'products',
-      serviceUrl: 'http://products:3000/graphql',
-      expect: 'latest-composable',
-    });
-
-    const message = await cli.delete({
-      serviceName: 'unknown_service',
       expect: 'rejected',
     });
 
-    expect(message).toMatch('not found');
+    expect(message).toMatch(/upgrade your project/);
   });
 });
 

@@ -1,0 +1,228 @@
+import NextImage from 'next/image'
+import { Callout } from '@theguild/components'
+import projectImage from '../../../../public/docs/pages/first-steps/project.png'
+import githubIntegrationImage from '../../../../public/docs/pages/management/org-github-integration.png'
+import slackIntegrationImage from '../../../../public/docs/pages/management/org-slack-integration.png'
+import projectGitLinkImage from '../../../../public/docs/pages/management/project-git-link.png'
+import projectHttpAlertImage from '../../../../public/docs/pages/management/project-http-alert.png'
+import slackAlertFormImage from '../../../../public/docs/pages/management/project-slack-alert.png'
+
+# Project Management
+
+A Hive **project** represents a GraphQL API project running a GraphQL schema, created under an
+organization.
+
+Within a Hive **project**, you can create **targets** (which are equivalent to runtime environments)
+and manage different schemas across different contextual runtimes.
+
+## Supported project types
+
+Hive supports the following project types:
+
+- **Single Schema**: a GraphQL project that has a single GraphQL schema developed as a standalone.
+- **Schema Stitching**: a form of remote schema merging allowing developers to merge any GraphQL
+  schema(s), under one or many gateways. You can use either direct
+  [Schema Stitching](https://the-guild.dev/graphql/stitching) or
+  [GraphQL-Mesh](https://the-guild.dev/graphql/mesh) for this project type.
+- **Apollo Federation**: a form of remote schema merging developed according to the
+  [Federation specification](https://www.apollographql.com/docs/federation/subgraph-spec/).
+
+## Create a new project
+
+To create a new project, click on **Create Project +** button from your organization's main page:
+
+<NextImage alt="Create Project Form" src={projectImage} className="mt-10 max-w-lg drop-shadow-md" />
+
+Choose a project type based on your project's stack, and then enter the project name.
+
+<Callout>
+  Please note that a **project** type cannot be changed once it is created. However, you can always
+  create an unlimited number of projects under your organization.
+</Callout>
+
+## Manage existing project
+
+### GitHub Repository
+
+Once you have your
+[Hive organization integrated with GitHub](/docs/management/organizations#github), you can connect
+between a project and a GitHub repository.
+
+From the project's **Settings** tab, you can use the **Git Repository** section to select a
+repository to associate with your Hive projects.
+
+Associating a repository with your project will allow you to:
+
+- Publish **Check Suite** back to GitHub (when `--github` flag is enabled for your `schema:publish`
+  and `schema:check` commands - [read more here](/docs/integrations/ci-cd)).
+
+<NextImage
+  alt="GitHub Check Suite"
+  src={githubIntegrationImage}
+  className="mt-6 max-w-lg drop-shadow-md"
+/>
+
+- Have direct connection between a schema version and a Git commit in your repository in Hive
+  dashboard.
+
+<NextImage
+  alt="Associated Git"
+  src={projectGitLinkImage}
+  className="mt-6 max-w-lg drop-shadow-md"
+/>
+
+Once a project is associated with a repository, you can specify `--github` flag when running Hive
+CLI commands, and get the results reported back to GitHub
+([you can learn move about this feature here](/docs/api-reference/cli#cli-and-github-integration)).
+
+### Rename a project
+
+You can easily change the name of your projects in Hive by adjusting the settings of your project.
+
+To do this, go to the **Settings** tab of your project, and use the **Project Name** form to rename
+your project.
+
+<Callout type="warning">
+  Changing the name of your project will also change the slug of your project URL, and will
+  invalidate any existing links to your project.
+</Callout>
+
+### Delete a project
+
+As the owner of an organization, you have the option to delete a project, including all targets,
+settings and all data collected during your use of Hive.
+
+To delete an project, go to the **Settings** tab of your project, and use the **Delete Project**
+section.
+
+<Callout type="warning">This action is not reversible!</Callout>
+
+## Alerts and Notifications
+
+Hive allows you to configure alerts and notifications for your projects. To get started with alerts
+and notifications, go to the **Settings** tab of your project, and click on the **Alerts** tab.
+
+To use alerts and notifications, you need to have at least one **Alert Channel** configured, and
+then you need to create an **Alert** that will be triggered when a specific condition is met.
+
+### Alert Channels
+
+**Alert Channels** are a way to configure **how** you want to receive alerts and notifications from
+Hive.
+
+From the **Alerts** tab of your project, you can create and manage your **Alert Channels**.
+
+At the moment, Hive supports the following transports to ship your alerts and notifications:
+
+#### Slack
+
+Integrating your project with a Slack channel will allow you to receive alerts and notifications
+shipped directly to a Slack channel.
+
+<NextImage
+  alt="Hive Slack Message"
+  src={slackIntegrationImage}
+  className="mt-6 max-w-lg drop-shadow-md"
+/>
+
+To integrate your **project** with a Slack channel, you first need to
+[activate the Slack integration at the organization level](/docs/management/organizations#slack).
+
+Once you have activated the Slack integration, you can configure a Slack channel to connect to your
+Hive project:
+
+<NextImage
+  alt="Hive and Slack Configuration"
+  src={slackAlertFormImage}
+  className="mt-6 max-w-sm drop-shadow-md"
+/>
+
+#### HTTP Webhook
+
+You can implement a custom HTTP webhook to receive alerts and notifications from Hive, when an alert
+or a notification is triggered.
+
+All you need to do is to provide a valid HTTP URL, and Hive will dispatch a `POST` request to that
+URL, with a JSON payload as body (with `Content-Type: application/json` header set) when an alert or
+a notification is triggered.
+
+<Callout type="warning">
+  Note that using this form of alert is intended to imlement custom flows. You cannot use an
+  Incoming Webhook feature of products like MSTeams or Slack, because the expected payload is
+  different.
+</Callout>
+
+<NextImage
+  alt="HTTP Alert Configuration"
+  src={projectHttpAlertImage}
+  className="mt-6 max-w-sm drop-shadow-md"
+/>
+
+<Callout type="info">
+  Every type of event/notification have a different JSON payload, please refer to the information
+  below, for a specific payload structure for every kind of alert.
+</Callout>
+
+### Alerts and Notifications
+
+**Alerts** are a way to configure **when** you want to receive alerts and notifications from Hive.
+
+From the **Alerts** tab of your project, you can create and manage your **Active Alerts and
+Notifications**.
+
+To create a new kind of alert, use the **Create Alert** button and choose the **Alert type**,
+**Alert Channel** and the target's name.
+
+At the moment, Hive supports the following types of alerts and notifications (if you need a
+different kind of alert, you can collaborate with us on
+[this GitHub issue](https://github.com/kamilkisiela/graphql-hive/issues/253)):
+
+#### Schema Changed Notification
+
+An alert triggered when a fully valid and composable schema is published to a target.
+
+This notification has the following payload when shipped over the **HTTP webhook** channel:
+
+```ts copy=false
+type SchemaChangedNotificationPayload = {
+  /** General information about organization triggered the event */
+  organization: {
+    id: string
+    cleanId: string
+    name: string
+  }
+  /** General information about project triggered the event */
+  project: {
+    id: string
+    cleanId: string
+    name: string
+  }
+  /** General information about target triggered the event */
+  target: {
+    id: string
+    cleanId: string
+    name: string
+  }
+  /** Information about the published schema and the commit identification */
+  schema: {
+    id: string
+    commit: string
+    valid: boolean
+  }
+  /** List of changes and their criticality */
+  changes: Array<{
+    criticality: 'Breaking' | 'Dangerous' | 'Safe'
+    message: string
+    path?: string
+  }>
+  /** Useful information about the schema publication flow */
+  messages: string[]
+  /** List of validation and composition error */
+  errors: Array<{
+    message: string
+    path?: string
+  }>
+  /** A boolean indicator set to true, when this is the first schema published to the target */
+  initial: boolean
+}
+```

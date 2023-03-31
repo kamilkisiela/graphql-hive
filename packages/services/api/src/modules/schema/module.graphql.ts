@@ -40,6 +40,9 @@ export default gql`
     Requires API Token
     """
     latestValidVersion: SchemaVersion
+    testExternalSchemaComposition(
+      selector: TestExternalSchemaCompositionInput!
+    ): TestExternalSchemaCompositionResult!
   }
 
   input DisableExternalSchemaCompositionInput {
@@ -51,7 +54,7 @@ export default gql`
   @oneOf
   """
   type DisableExternalSchemaCompositionResult {
-    ok: Boolean
+    ok: Project
     error: String
   }
 
@@ -66,12 +69,29 @@ export default gql`
   @oneOf
   """
   type EnableExternalSchemaCompositionResult {
-    ok: ExternalSchemaComposition
+    ok: Project
     error: EnableExternalSchemaCompositionError
   }
 
   type ExternalSchemaComposition {
     endpoint: String!
+  }
+
+  input TestExternalSchemaCompositionInput {
+    organization: ID!
+    project: ID!
+  }
+
+  """
+  @oneOf
+  """
+  type TestExternalSchemaCompositionResult {
+    ok: Project
+    error: TestExternalSchemaCompositionError
+  }
+
+  type TestExternalSchemaCompositionError implements Error {
+    message: String!
   }
 
   input UpdateProjectRegistryModelInput {
@@ -389,6 +409,7 @@ export default gql`
     Experimental: This field is not stable and may change in the future.
     """
     explorer(usage: SchemaExplorerUsageInput): SchemaExplorer!
+    errors: SchemaErrorConnection!
   }
 
   type SchemaVersionConnection {

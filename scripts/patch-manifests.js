@@ -1,6 +1,5 @@
 /*
   https://github.com/octokit/webhooks-methods.js/issues/45
-
   That's why we patch package.json of @octokit/webhooks-methods and replace the value of `main` with the value from `source`.
 */
 import fs from 'fs';
@@ -41,7 +40,6 @@ function findPackageJson(dirname, until) {
 
 /*
   https://github.com/octokit/webhooks-methods.js/issues/45
-
   That's why we patch package.json of @octokit/webhooks-methods and replace the value of `main` with the value from `source`.
 */
 patchPackage('@octokit/webhooks-methods', pkg => {
@@ -50,7 +48,6 @@ patchPackage('@octokit/webhooks-methods', pkg => {
 
 /*
   https://github.com/octokit/webhooks-methods.js/issues/45
-
   That's why we patch package.json of universal-github-app-jwt and replace the value of `main` with the value from `source`.
 */
 patchPackage('universal-github-app-jwt', pkg => {
@@ -59,8 +56,7 @@ patchPackage('universal-github-app-jwt', pkg => {
 
 /*
   TSUP (but really esbuild) bundles all node_modules, this is expected, we want that.
-  Unfortunately, `apollo-graphql` and `@apollo/*` libraries are CJS only and we end up with CJS and ESM versions of graphql.
-
+  Unfortunately, `apollo-graphql` and `@apollo/*` libraries are CJS only, and we end up with CJS and ESM versions of graphql.
   The very quick fix means we need to patch the graphql module to be CJS-only.
 */
 patchPackage('graphql', pkg => {

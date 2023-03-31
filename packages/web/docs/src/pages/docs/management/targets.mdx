@@ -1,0 +1,211 @@
+import NextImage from 'next/image'
+import { Callout } from '@theguild/components'
+import cdnTokenImage from '../../../../public/docs/pages/guides/cdn_token.png'
+import tokenImage from '../../../../public/docs/pages/guides/token.png'
+import newTargetFormImage from '../../../../public/docs/pages/management/new-target-form.png'
+import tagetConditionalBreakingChangesImage from '../../../../public/docs/pages/management/target-conditional-breaking-changes.png'
+import tokenCreateSuccess from '../../../../public/docs/pages/management/target-created-token.png'
+
+# Target Management
+
+Within a Hive **project**, you can create **targets** (which are equivalent to runtime environments)
+and manage different schemas across different contextual runtimes.
+
+When it comes to the GraphQL schema, every target is considered standalone, and can have different
+states of the same schema, within the same GraphQL API project (just like different runtime
+environments).
+
+When a new Hive **project** is created, default targets are created (`development`, `staging` and
+`production`). You can create more targets if needed, or remove the default ones if they are not in
+use.
+
+## Create a new target
+
+From your Hive **project** page, you can see the list of targets created under the project. You can
+also use the **New Target** button to create a new target.
+
+<NextImage
+  alt="Create Target Form"
+  src={newTargetFormImage}
+  className="mt-10 max-w-xl drop-shadow-md"
+/>
+
+## Manage existing target
+
+### Conditional Breaking Changes
+
+Conditional Breaking Changes is a concept that involves marking breaking changes in your GraphQL
+schemas as safe, based on real-life data and traffic reported to Hive. This is done through the
+[Usage Reporting](/docs/features/usage-reporting) feature.
+
+When a new schema of your GraphQL schema is published to the registry, Hive uses the data collected
+from your API gateway to identify whether the change in your schema actually affects consumers.
+
+<NextImage
+  alt="Conditional Breaking Changes"
+  src={tagetConditionalBreakingChangesImage}
+  className="mt-10 max-w-3xl drop-shadow-md"
+/>
+
+Under your target's **Settings** page, you can enable the **Conditional Breaking Changes** feature
+and configure the following settings:
+
+#### Traffic Threshold and Duration
+
+You maybe choose to mark a breaking change as safe, if it effects some percentage of your traffic,
+in a specific time range.
+
+Here are a few examples and their meaning:
+
+- **Traffic Threshold:** `0%`: A breaking change is considered as breaking and dangerous if the
+  field was was used at least once.
+- **Traffic Threshold:** `10%`: A breaking change is considered as breaking and dangerous if the
+  field was requested by more than 10% of all GraphQL operation.
+
+<Callout type="info">
+  The maximum duration is defined by the retention of your [Hive
+  plan](/docs/management/organizations#subscription-and-billing).
+</Callout>
+
+#### Client Exclusions
+
+Real-life data and traffic is collected from your API gateway can be annotated with specific
+**Client**. In most cases, the **Client** matches a specific `User-Agent` and reported through the
+Hive agent. You can read more about this in the [Usage Reporting](/docs/features/usage-reporting)
+page.
+
+You many choose to exclude specific clients from the **Conditional Breaking Changes** if you wish to
+have more control over the process.
+
+#### Cross-target Checks
+
+When a new schema is published to the registry, Hive checks the usage of the field in the current
+target. However, you may choose to also check the usage of the field in other targets.
+
+This is useful if you wish to use the `production` target as a reference for the usage of the field,
+while checking the schemas of other targets, like `staging` or `development`.
+
+### Schema Extensions
+
+Hive allow you to have a pre-defined GraphQL schema that is automatically merged with your published
+schemas, before being checked and validated.
+
+This feature is useful with some frameworks that defines internal GraphQL schemas, and doesn't
+include it while exporting the schema to a file.
+
+#### Schema Stitching Directives
+
+If you are using
+[Schema Stitching Directives](https://the-guild.dev/graphql/stitching/docs/approaches/stitching-directives),
+you probably want to the core directives as schema extensions, and avoid pushing it through every
+service.
+
+You can find the complete definition of the
+[Stitching Directives SDL in the documentation](https://the-guild.dev/graphql/stitching/docs/approaches/stitching-directives#directives-glossary)
+
+#### AWS AppSync/Amplify
+
+If you are using [AWS AppSync](https://aws.amazon.com/appsync/)
+[AWS Amplify](https://docs.amplify.aws/), you are probably familiar with the
+[GraphQL directives (`@aws_subscribe`, `@aws_auth`, etc.)](https://docs.amplify.aws/cli-legacy/graphql-transformer/directives/)
+that are used to define the GraphQL schema or models.
+
+While building your GraphQL schema within the AWS AppSync console, you don't need to define those
+directives. However, when you try to publish your schema to Hive, you will notice that those
+directives are missing, and schema is marked with errors.
+
+You can use the **Schema Extensions** feature to define a pre-defined schema that is automatically
+merged with your published schemas, before being checked and validated.
+
+[You can find here the directive and scalar SDL needed for AWS AppSync](https://github.com/kamilkisiela/graphql-inspector/blob/d0efec031b64aae94818d749b697e73276f0f239/packages/loaders/loaders/src/index.ts#L57-L82)
+
+### Rename a target
+
+You can easily change the name of your targets in Hive by adjusting the settings of your target.
+
+To do this, go to the **Settings** tab of your target, and use the **Target Name** form to rename
+your target.
+
+<Callout type="warning">
+  Changing the name of your target will also change the slug of your target URL, and will invalidate
+  any existing links to your target.
+</Callout>
+
+### Delete a target
+
+As the owner of an organization, you have the option to delete a target, including all targets,
+settings and all data collected during your use of Hive.
+
+To delete an target, go to the **Settings** tab of your target, and use the **Delete Target**
+section.
+
+<Callout type="warning">This action is not reversible!</Callout>
+
+## Manage Tokens
+
+Under a target's **Settings** page, you can manage two different types of tokens:
+
+### Registry Access Tokens
+
+**Registry Access Tokens** are used to access to Hive Registry and perform actions on your
+targets/projects. In most cases, this token is used from the Hive CLI.
+
+Under the **Registry Access Tokens** section, click the **Generate new token** button. Give your
+access token a either select a predefined preset for your token (under **Simple** view), or create a
+token with custom permissions (under **Advanced** view).
+
+<NextImage
+  alt="Create Registry Token Form"
+  src={tokenImage}
+  className="mt-10 max-w-md drop-shadow-md"
+/>
+
+Click on **Generate Token** button and you should get your CLI token created, with permissions to
+publish GraphQL schemas.
+
+<NextImage alt="Created Token" src={tokenCreateSuccess} className="mt-10 max-w-xl drop-shadow-md" />
+
+Make sure to copy your token and keep it safe. **You won't be able to see it again.**
+
+<Callout type="info">
+  **Note:** You can create multiple tokens with different permissions for different use cases.
+</Callout>
+
+### CDN Access Tokens
+
+#### Creating a CDN Access Token
+
+The Hive Cloud service leverages the
+[CloudFlare Global Network](https://www.cloudflare.com/network/) to deliver your GraphQL schema and
+schema metadata. This means that your schema will be available from the nearest location to your
+GraphQL gateway, with 100% uptime, regardless of Hive's status. This ensures that everything
+required for your GraphQL API is always available, and reduces the risk of depending on Hive as a
+single point of failure.
+[You can read more about Hive's CDN here](/docs/features/high-availability-cdn).
+
+Managing your **CDN Access Token** is located under your target's **Settings** page.
+
+Click on **Create new CDN Token** to create a new CDN token. Describe your token with an alias, and
+click **Create**.
+
+In most cases, CDN Access Tokens are used directly from other tools, like a gateway, so please store
+this access token securely. **You will not be able to see it again.**
+
+<Callout type="info">
+**Why are Registry and CDN tokens different?**
+
+We use a separate, externally managed storage to manage CDN tokens to ensure high availability of
+your schemas. This approach ensures that your GraphQL schemas are fully secured and highly
+available. CDN tokens are read-only and can only fetch schemas from the CDN. They do not have
+permissions to perform any other action on your Hive organization.
+
+</Callout>
+
+#### Revoking a CDN Access Token
+
+In case of a security breach, you can revoke a CDN Access Token by clicking on the **Revoke** button
+in the list of CDN tokens.
+
+<Callout type="info">
+  Revoking CDN access token can take up to 5 minutes to update across the CDN network.
+</Callout>

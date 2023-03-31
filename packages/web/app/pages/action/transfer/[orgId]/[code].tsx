@@ -1,13 +1,13 @@
-import * as React from 'react';
-import clsx from 'clsx';
-import { gql, useMutation, useQuery } from 'urql';
+import { useCallback } from 'react';
+import { clsx } from 'clsx';
+import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Title } from '@/components/common';
-import { DataWrapper } from '@/components/common/DataWrapper';
+import { Button, DataWrapper } from '@/components/v2';
+import { graphql } from '@/gql';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { Button } from '@chakra-ui/react';
 
 const classes = {
   title: clsx('sm:text-4xl text-3xl mb-4 font-medium text-white'),
@@ -15,7 +15,7 @@ const classes = {
   actions: clsx('flex flex-row gap-2 items-center justify-center'),
 };
 
-const OrganizationTransferPage_GetRequest = gql(`
+const OrganizationTransferPage_GetRequest = graphql(`
   query OrganizationTransferPage_GetRequest($selector: OrganizationTransferRequestSelector!) {
     organizationTransferRequest(selector: $selector) {
       organization {
@@ -34,7 +34,7 @@ const OrganizationTransferPage_GetRequest = gql(`
   }
 `);
 
-const OrganizationTransferPage_AnswerRequest = gql(`
+const OrganizationTransferPage_AnswerRequest = graphql(`
   mutation OrganizationTransferPage_AnswerRequest($input: AnswerOrganizationTransferRequestInput!) {
     answerOrganizationTransferRequest(input: $input) {
       ok {
@@ -62,7 +62,7 @@ function OrganizationTransferPage() {
     },
   });
   const [mutation, mutate] = useMutation(OrganizationTransferPage_AnswerRequest);
-  const answer = React.useCallback(
+  const answer = useCallback(
     async (accept: boolean) => {
       const result = await mutate({
         input: {
@@ -91,10 +91,10 @@ function OrganizationTransferPage() {
     [mutate, orgId, code, router, notify],
   );
 
-  const accept = React.useCallback(() => answer(true), [answer]);
-  const reject = React.useCallback(() => answer(false), [answer]);
+  const accept = useCallback(() => answer(true), [answer]);
+  const reject = useCallback(() => answer(false), [answer]);
 
-  const goBack = React.useCallback(() => {
+  const goBack = useCallback(() => {
     router.visitHome();
   }, [router]);
 
@@ -111,7 +111,9 @@ function OrganizationTransferPage() {
                   <p className={classes.description}>Not found</p>
 
                   <div className={classes.actions}>
-                    <Button onClick={goBack}>Back to Hive</Button>
+                    <Button size="large" variant="secondary" onClick={goBack}>
+                      Back to Hive
+                    </Button>
                   </div>
                 </>
               ) : (
@@ -124,10 +126,15 @@ function OrganizationTransferPage() {
                   </p>
 
                   <div className={classes.actions}>
-                    <Button colorScheme="primary" onClick={accept} disabled={mutation.fetching}>
+                    <Button
+                      size="large"
+                      variant="primary"
+                      onClick={accept}
+                      disabled={mutation.fetching}
+                    >
                       Accept
                     </Button>
-                    <Button colorScheme="red" onClick={reject} disabled={mutation.fetching}>
+                    <Button size="large" danger onClick={reject} disabled={mutation.fetching}>
                       Reject
                     </Button>
                   </div>

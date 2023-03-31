@@ -29,7 +29,7 @@ export function hashSchema(schema: SchemaObject): string {
  * Builds GraphQLSchema without validation of SDL
  */
 export function buildSchema(
-  schema: SchemaObject,
+  schema: Pick<SchemaObject, 'document'>,
   transformError = (error: unknown) => error,
 ): GraphQLSchema {
   try {

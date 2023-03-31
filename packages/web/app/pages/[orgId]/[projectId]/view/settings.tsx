@@ -1,25 +1,31 @@
 import { ReactElement } from 'react';
 import { useFormik } from 'formik';
-import { gql, useMutation, useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
 import { ProjectLayout } from '@/components/layouts';
 import { ExternalCompositionSettings } from '@/components/project/settings/external-composition';
 import { ModelMigrationSettings } from '@/components/project/settings/model-migration';
-import { Button, Card, Heading, Input, Link, Select, Spinner, Tag, Title } from '@/components/v2';
-import { AlertTriangleIcon } from '@/components/v2/icon';
-import { DeleteProjectModal } from '@/components/v2/modals';
 import {
-  GetGitHubIntegrationDetailsDocument,
-  OrganizationFieldsFragment,
-  ProjectFieldsFragment,
-  ProjectType,
-} from '@/graphql';
+  Button,
+  Card,
+  DocsLink,
+  DocsNote,
+  Heading,
+  Input,
+  Link,
+  Select,
+  Tag,
+  Title,
+} from '@/components/v2';
+import { DeleteProjectModal } from '@/components/v2/modals';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { GetGitHubIntegrationDetailsDocument, ProjectType } from '@/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const Settings_UpdateProjectGitRepositoryMutation = gql(/* GraphQL */ `
+const Settings_UpdateProjectGitRepositoryMutation = graphql(`
   mutation Settings_UpdateProjectGitRepository($input: UpdateProjectGitRepositoryInput!) {
     updateProjectGitRepository(input: $input) {
       ok {
@@ -38,7 +44,11 @@ const Settings_UpdateProjectGitRepositoryMutation = gql(/* GraphQL */ `
   }
 `);
 
-const GitHubIntegration = ({ gitRepository }: { gitRepository: string | null }): ReactElement => {
+function GitHubIntegration({
+  gitRepository,
+}: {
+  gitRepository: string | null;
+}): ReactElement | null {
   const router = useRouteSelector();
   const [integrationQuery] = useQuery({
     query: GetGitHubIntegrationDetailsDocument,
@@ -70,7 +80,7 @@ const GitHubIntegration = ({ gitRepository }: { gitRepository: string | null }):
     });
 
   if (integrationQuery.fetching) {
-    return <Spinner />;
+    return null;
   }
 
   if (integrationQuery.data?.gitHubIntegration) {
@@ -125,9 +135,9 @@ const GitHubIntegration = ({ gitRepository }: { gitRepository: string | null }):
       to configure it.
     </Tag>
   );
-};
+}
 
-const Settings_UpdateProjectNameMutation = gql(/* GraphQL */ `
+const Settings_UpdateProjectNameMutation = graphql(`
   mutation Settings_UpdateProjectName($input: UpdateProjectNameInput!) {
     updateProjectName(input: $input) {
       ok {
@@ -137,6 +147,7 @@ const Settings_UpdateProjectNameMutation = gql(/* GraphQL */ `
         }
         updatedProject {
           ...ProjectFields
+          cleanId
         }
       }
       error {
@@ -146,13 +157,32 @@ const Settings_UpdateProjectNameMutation = gql(/* GraphQL */ `
   }
 `);
 
-const Page = ({
-  organization,
-  project,
-}: {
-  organization: OrganizationFieldsFragment;
-  project: ProjectFieldsFragment;
+const SettingsPage_OrganizationFragment = graphql(`
+  fragment SettingsPage_OrganizationFragment on Organization {
+    cleanId
+    me {
+      ...CanAccessProject_MemberFragment
+    }
+    ...ExternalCompositionSettings_OrganizationFragment
+  }
+`);
+
+const SettingsPage_ProjectFragment = graphql(`
+  fragment SettingsPage_ProjectFragment on Project {
+    name
+    gitRepository
+    type
+    ...ModelMigrationSettings_ProjectFragment
+    ...ExternalCompositionSettings_ProjectFragment
+  }
+`);
+
+const Page = (props: {
+  organization: FragmentType<typeof SettingsPage_OrganizationFragment>;
+  project: FragmentType<typeof SettingsPage_ProjectFragment>;
 }) => {
+  const organization = useFragment(SettingsPage_OrganizationFragment, props.organization);
+  const project = useFragment(SettingsPage_ProjectFragment, props.project);
   useProjectAccess({
     scope: ProjectAccessScope.Settings,
     member: organization.me,
@@ -189,14 +219,17 @@ const Page = ({
 
   return (
     <>
-      {/* {project.registryModel === 'LEGACY' ? ( */}
       <ModelMigrationSettings project={project} organizationId={organization.cleanId} />
-      {/* ) : null} */}
       <Card>
         <Heading className="mb-2">Project Name</Heading>
-        <p className="mb-3 font-light text-gray-300">
-          Name of your project visible within organization
-        </p>
+        <DocsNote warn>
+          Changing the name of your project will also change the slug of your project URL, and will
+          invalidate any existing links to your project.
+          <br />
+          <DocsLink href="/management/projects#rename-a-project">
+            You can read more about it in the documentation
+          </DocsLink>
+        </DocsNote>
         <form onSubmit={handleSubmit} className="flex gap-x-2">
           <Input
             placeholder="Project name"
@@ -230,9 +263,14 @@ const Page = ({
 
       <Card>
         <Heading className="mb-2">Git Repository</Heading>
-        <p className="mb-3 font-light text-gray-300">
-          Connect the project with your Git repository
-        </p>
+        <DocsNote>
+          Associate your project with a Git repository to enable commit linking and to allow CI
+          integration.
+          <br />
+          <DocsLink href="/management/projects#github-repository">
+            Learn more about GitHub integration
+          </DocsLink>
+        </DocsNote>
         <GitHubIntegration gitRepository={project.gitRepository ?? null} />
       </Card>
 
@@ -242,24 +280,30 @@ const Page = ({
 
       {canAccessProject(ProjectAccessScope.Delete, organization.me) && (
         <Card>
-          <Heading className="mb-2">Delete Project</Heading>
-          <p className="mb-3 font-light text-gray-300">
-            Permanently remove your Project and all targets from the Organization
-          </p>
-          <div className="flex items-center gap-x-2">
-            <Button
-              variant="primary"
-              size="large"
-              danger
-              onClick={toggleModalOpen}
-              className="px-5"
-            >
-              Delete Project
-            </Button>
-            <Tag color="yellow" className="py-2.5 px-4">
-              <AlertTriangleIcon className="h-5 w-5" />
-              This action is not reversible!
-            </Tag>
+          <div className="flex items-center justify-between">
+            <div>
+              <Heading className="mb-2">Delete Project</Heading>
+              <DocsNote warn>
+                Deleting an project will delete all the targets, schemas and data associated with
+                it.
+                <br />
+                <DocsLink href="/management/projects#delete-a-project">
+                  <strong>This action is not reversible!</strong> You can find more information
+                  about this process in the documentation
+                </DocsLink>
+              </DocsNote>
+            </div>
+            <div className="flex items-center gap-x-2">
+              <Button
+                variant="primary"
+                size="large"
+                danger
+                onClick={toggleModalOpen}
+                className="px-5"
+              >
+                Delete Project
+              </Button>
+            </div>
           </div>
         </Card>
       )}
@@ -268,12 +312,31 @@ const Page = ({
   );
 };
 
+const ProjectSettingsPageQuery = graphql(`
+  query ProjectSettingsPageQuery($organizationId: ID!, $projectId: ID!) {
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...SettingsPage_OrganizationFragment
+        ...ProjectLayout_OrganizationFragment
+      }
+    }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      ...ProjectLayout_ProjectFragment
+      ...SettingsPage_ProjectFragment
+    }
+  }
+`);
+
 function SettingsPage(): ReactElement {
   return (
     <>
       <Title title="Project settings" />
-      <ProjectLayout value="settings" className="flex flex-col gap-y-10">
-        {props => <Page {...props} />}
+      <ProjectLayout
+        value="settings"
+        className="flex flex-col gap-y-10"
+        query={ProjectSettingsPageQuery}
+      >
+        {props => <Page organization={props.organization.organization} project={props.project} />}
       </ProjectLayout>
     </>
   );

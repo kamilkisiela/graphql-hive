@@ -15,6 +15,9 @@
 # production
 /build
 
+# storybook
+/storybook-static
+
 # misc
 .DS_Store
 *.pem
@@ -32,8 +35,3 @@ npm-debug.log*
 
 # Graphql
 lib/graphql-operations.ts
-
-next.config.mjs
-environment-*.mjs
-
-./packages

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { createConnection } from '../../shared/schema';
 import { OrganizationManager } from '../organization/providers/organization-manager';
+import { ProjectManager } from '../project/providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import type { TargetModule } from './__generated__/types';
 import { TargetManager } from './providers/target-manager';
@@ -9,6 +10,35 @@ const TargetNameModel = z.string().min(2).max(30);
 const PercentageModel = z.number().min(0).max(100);
 
 export const resolvers: TargetModule.Resolvers = {
+  Target: {
+    project: (target, _args, { injector }) =>
+      injector.get(ProjectManager).getProject({
+        project: target.projectId,
+        organization: target.orgId,
+      }),
+    async validationSettings(target, _args, { injector }) {
+      const targetManager = injector.get(TargetManager);
+
+      const settings = await targetManager.getTargetSettings({
+        organization: target.orgId,
+        project: target.projectId,
+        target: target.id,
+      });
+
+      return {
+        ...settings.validation,
+        targets: await Promise.all(
+          settings.validation.targets.map(tid =>
+            targetManager.getTarget({
+              organization: target.orgId,
+              project: target.projectId,
+              target: tid,
+            }),
+          ),
+        ),
+      };
+    },
+  },
   Query: {
     async target(_, { selector }, { injector }) {
       const translator = injector.get(IdTranslator);
@@ -35,41 +65,6 @@ export const resolvers: TargetModule.Resolvers = {
         organization,
         project,
       });
-    },
-    async targetSettings(_, { selector }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project, target] = await Promise.all([
-        translator.translateOrganizationId(selector),
-        translator.translateProjectId(selector),
-        translator.translateTargetId(selector),
-      ]);
-
-      const targetManager = injector.get(TargetManager);
-
-      const settings = await targetManager.getTargetSettings({
-        organization,
-        project,
-        target,
-      });
-
-      const id = target;
-
-      return {
-        id,
-        validation: {
-          id,
-          ...settings.validation,
-          targets: await Promise.all(
-            settings.validation.targets.map(tid =>
-              targetManager.getTarget({
-                organization,
-                project,
-                target: tid,
-              }),
-            ),
-          ),
-        },
-      };
     },
   },
   Mutation: {
@@ -206,26 +201,18 @@ export const resolvers: TargetModule.Resolvers = {
       ]);
 
       const targetManager = injector.get(TargetManager);
-      const settings = await targetManager.setTargetValidation({
+      await targetManager.setTargetValidation({
         organization,
         project,
         target,
         enabled: input.enabled,
       });
 
-      return {
-        id: target,
-        ...settings,
-        targets: await Promise.all(
-          settings.targets.map(tid =>
-            targetManager.getTarget({
-              organization,
-              project,
-              target: tid,
-            }),
-          ),
-        ),
-      };
+      return targetManager.getTarget({
+        organization,
+        project,
+        target,
+      });
     },
     async updateTargetValidationSettings(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);
@@ -259,7 +246,7 @@ export const resolvers: TargetModule.Resolvers = {
       }
 
       const targetManager = injector.get(TargetManager);
-      const settings = await targetManager.updateTargetValidationSettings({
+      await targetManager.updateTargetValidationSettings({
         period: input.period,
         percentage: input.percentage,
         target,
@@ -271,19 +258,11 @@ export const resolvers: TargetModule.Resolvers = {
 
       return {
         ok: {
-          updatedTargetValidationSettings: {
-            id: target,
-            ...settings,
-            targets: await Promise.all(
-              settings.targets.map(tid =>
-                targetManager.getTarget({
-                  organization,
-                  project,
-                  target: tid,
-                }),
-              ),
-            ),
-          },
+          target: targetManager.getTarget({
+            organization,
+            project,
+            target,
+          }),
         },
       };
     },

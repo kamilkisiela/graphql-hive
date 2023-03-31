@@ -1,33 +1,60 @@
 import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from 'urql';
-import { authenticated } from '@/components/authenticated-container';
 import { Section } from '@/components/common';
-import { DataWrapper, QueryError } from '@/components/common/DataWrapper';
+import { QueryError } from '@/components/common/DataWrapper';
 import { OrganizationLayout } from '@/components/layouts';
 import { BillingPaymentMethod } from '@/components/organization/billing/BillingPaymentMethod';
 import { BillingPlanPicker } from '@/components/organization/billing/BillingPlanPicker';
-import { LimitSlider } from '@/components/organization/billing/LimitSlider';
 import { PlanSummary } from '@/components/organization/billing/PlanSummary';
-import { Button, Card, Heading, Input, Title } from '@/components/v2';
+import { Button, Card, Heading, Input, Slider, Stat, Title } from '@/components/v2';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { BillingPlanType } from '@/gql/graphql';
 import {
   BillingPlansDocument,
   DowngradeToHobbyDocument,
-  OrganizationFieldsFragment,
-  OrgBillingInfoFieldsFragment,
   UpdateOrgRateLimitDocument,
   UpgradeToProDocument,
 } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
-import { withSessionProtection } from '@/lib/supertokens/guard';
-import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
+import { openChatSupport } from '@/utils';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 
-const Inner = ({
-  organization,
-}: {
-  organization: OrganizationFieldsFragment & OrgBillingInfoFieldsFragment;
-}): ReactElement | null => {
+const ManageSubscriptionInner_OrganizationFragment = graphql(`
+  fragment ManageSubscriptionInner_OrganizationFragment on Organization {
+    cleanId
+    me {
+      ...CanAccessOrganization_MemberFragment
+    }
+    billingConfiguration {
+      paymentMethod {
+        __typename
+      }
+    }
+    plan
+    rateLimit {
+      operations
+    }
+    ...BillingPaymentMethod_OrganizationFragment
+  }
+`);
+
+const ManageSubscriptionInner_BillingPlansFragment = graphql(`
+  fragment ManageSubscriptionInner_BillingPlansFragment on BillingPlan {
+    ...BillingPlanPicker_PlanFragment
+    planType
+    retentionInDays
+    ...PlanSummary_PlanFragment
+  }
+`);
+
+function Inner(props: {
+  organization: FragmentType<typeof ManageSubscriptionInner_OrganizationFragment>;
+  billingPlans: Array<FragmentType<typeof ManageSubscriptionInner_BillingPlansFragment>>;
+}): ReactElement | null {
+  const organization = useFragment(
+    ManageSubscriptionInner_OrganizationFragment,
+    props.organization,
+  );
   const stripe = useStripe();
   const elements = useElements();
   const canAccess = useOrganizationAccess({
@@ -36,9 +63,7 @@ const Inner = ({
     redirect: true,
   });
 
-  const [query] = useQuery({
-    query: BillingPlansDocument,
-  });
+  const [query] = useQuery({ query: BillingPlansDocument });
 
   const [paymentDetailsValid, setPaymentDetailsValid] = useState(
     !!organization.billingConfiguration?.paymentMethod,
@@ -48,14 +73,12 @@ const Inner = ({
   const updateOrgRateLimitMutation = useMutation(UpdateOrgRateLimitDocument);
   const planSummaryRef = useRef<HTMLDivElement>(null);
 
-  const [plan, setPlan] = useState<BillingPlanType>(
-    (organization?.plan || 'HOBBY') as BillingPlanType,
-  );
+  const [plan, setPlan] = useState<BillingPlanType>(organization?.plan || 'HOBBY');
   const onPlan = useCallback(
     (plan: BillingPlanType) => {
       setPlan(plan);
-      if (planSummaryRef.current) {
-        const planSummaryElement = planSummaryRef.current;
+      const planSummaryElement = planSummaryRef.current;
+      if (planSummaryElement) {
         setTimeout(() => {
           planSummaryElement.scrollIntoView({
             block: 'start',
@@ -66,14 +89,14 @@ const Inner = ({
     },
     [setPlan, planSummaryRef],
   );
-  const [couponCode, setCouponCode] = useState<string>('');
-  const [operationsRateLimit, setOperationsRateLimit] = useState<number>(
+  const [couponCode, setCouponCode] = useState('');
+  const [operationsRateLimit, setOperationsRateLimit] = useState(
     Math.floor((organization.rateLimit.operations || 1_000_000) / 1_000_000),
   );
 
   const onOperationsRateLimitChange = useCallback(
-    (limit: number) => {
-      setOperationsRateLimit(limit);
+    (limit: number[]) => {
+      setOperationsRateLimit(limit[0]);
     },
     [setOperationsRateLimit],
   );
@@ -95,12 +118,6 @@ const Inner = ({
   if (!canAccess) {
     return null;
   }
-
-  const openChatSupport = () => {
-    if (typeof window !== 'undefined' && (window as any).$crisp) {
-      (window as any).$crisp.push(['do', 'chat:open']);
-    }
-  };
 
   const upgrade = async () => {
     let paymentMethodId: string | null = null;
@@ -178,6 +195,7 @@ const Inner = ({
         </Button>
       );
     }
+
     if (plan === 'PRO') {
       return (
         <Button variant="primary" type="button" onClick={upgrade} disabled={!paymentDetailsValid}>
@@ -185,6 +203,7 @@ const Inner = ({
         </Button>
       );
     }
+
     if (plan === 'HOBBY') {
       return (
         <Button variant="primary" type="button" onClick={downgrade}>
@@ -201,130 +220,133 @@ const Inner = ({
     downgradeToHobbyMutation[0].error ||
     updateOrgRateLimitMutation[0].error;
 
+  const billingPlans = useFragment(
+    ManageSubscriptionInner_BillingPlansFragment,
+    props.billingPlans,
+  );
+
+  // TODO: this is also not safe as billingPlans might be an empty list.
+  const selectedPlan = billingPlans.find(v => v.planType === plan) ?? billingPlans[0];
+
   return (
-    <DataWrapper
-      query={query}
-      loading={
-        upgradeToProMutation[0].fetching ||
-        downgradeToHobbyMutation[0].fetching ||
-        updateOrgRateLimitMutation[0].fetching
-      }
-    >
-      {result => {
-        // TODO: this is also not safe as billingPlans might be an empty list.
-        const selectedPlan =
-          result.data.billingPlans.find(v => v.planType === plan) ?? result.data.billingPlans[0];
+    <div className="flex w-full flex-col gap-5">
+      <Card className="w-full">
+        <Heading className="mb-4">Choose Your Plan</Heading>
+        <BillingPlanPicker
+          disabled={organization.plan === BillingPlanType.Enterprise}
+          activePlan={organization.plan}
+          value={plan}
+          plans={billingPlans}
+          onPlanChange={onPlan}
+        />
+      </Card>
+      <Card className="w-full self-start" ref={planSummaryRef}>
+        <Heading className="mb-2">Plan Summary</Heading>
+        <div>
+          {error && <QueryError showError error={error} />}
 
-        return (
-          <div className="flex w-full flex-col gap-5">
-            <Card className="w-full">
-              <Heading className="mb-4">Choose Your Plan</Heading>
-              <BillingPlanPicker
-                activePlan={organization.plan}
-                value={plan}
-                plans={result.data.billingPlans}
-                onPlanChange={onPlan}
-              />
-            </Card>
-            <Card className="w-full self-start" ref={planSummaryRef}>
-              <Heading className="mb-2">Plan Summary</Heading>
-              <div>
-                {error && <QueryError showError error={error} />}
+          <div className="flex flex-col">
+            <div>
+              <PlanSummary plan={selectedPlan} operationsRateLimit={operationsRateLimit}>
+                {selectedPlan.planType === BillingPlanType.Pro && (
+                  <Stat>
+                    <Stat.Label>Free Trial</Stat.Label>
+                    <Stat.Number>30</Stat.Number>
+                    <Stat.HelpText>days</Stat.HelpText>
+                  </Stat>
+                )}
+              </PlanSummary>
+            </div>
 
-                <div className="flex flex-col">
-                  <div>
-                    <PlanSummary
-                      plan={selectedPlan}
-                      retentionInDays={selectedPlan.retentionInDays}
-                      operationsRateLimit={operationsRateLimit}
-                    >
-                      {selectedPlan.planType === BillingPlanType.Pro && (
-                        <Stat className="mb-4">
-                          <StatLabel>Free Trial</StatLabel>
-                          <StatNumber>30</StatNumber>
-                          <StatHelpText>days</StatHelpText>
-                        </Stat>
-                      )}
-                    </PlanSummary>
+            {plan === BillingPlanType.Pro && (
+              <div className="my-8 w-1/2">
+                <Heading>Define your reserved volume</Heading>
+                <p className="text-sm text-gray-500">
+                  Pro plan requires to defined quota of reported operations.
+                </p>
+                <p className="text-sm text-gray-500">
+                  Pick a volume a little higher than you think you'll need to avoid being rate
+                  limited.
+                </p>
+                <p className="text-sm text-gray-500">
+                  Don't worry, you can always adjust it later.
+                </p>
+                <div className="mt-5 pl-2.5">
+                  <Slider
+                    min={1}
+                    max={300}
+                    value={[operationsRateLimit]}
+                    onValueChange={onOperationsRateLimitChange}
+                  />
+                  <div className="flex justify-between">
+                    <span>1M</span>
+                    <span>100M</span>
+                    <span>200M</span>
+                    <span>300M</span>
                   </div>
-
-                  {plan === BillingPlanType.Pro && (
-                    <div className="my-8 w-1/2">
-                      <Heading>Define your reserved volume</Heading>
-                      <p className="text-sm text-gray-500">
-                        Pro plan requires to defined quota of reported operations.
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Pick a volume a little higher than you think you'll need to avoid being rate
-                        limited.
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Don't worry, you can always adjust it later.
-                      </p>
-                      <div className="mt-5 pl-2.5">
-                        <LimitSlider
-                          title="Monthly operations limit"
-                          min={1}
-                          max={300}
-                          step={1}
-                          marks={[
-                            { value: 1, label: '1M' },
-                            { value: 100, label: '100M' },
-                            { value: 200, label: '200M' },
-                            { value: 300, label: '300M' },
-                          ]}
-                          value={operationsRateLimit}
-                          onChange={onOperationsRateLimitChange}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="my-8 flex flex-row gap-6">
-                    <BillingPaymentMethod
-                      className="w-1/2"
-                      plan={selectedPlan.planType}
-                      organizationBilling={organization}
-                      onValidationChange={setPaymentDetailsValid}
-                    />
-                    <div className="w-1/2">
-                      {plan === BillingPlanType.Pro && plan !== organization.plan ? (
-                        <div>
-                          <Heading className="mb-3">Discount</Heading>
-                          <Input
-                            className="w-full"
-                            size="medium"
-                            value={couponCode ?? ''}
-                            onChange={e => setCouponCode(e.target.value)}
-                            placeholder="Code"
-                          />
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div>{renderActions()}</div>
                 </div>
               </div>
-            </Card>
-          </div>
-        );
-      }}
-    </DataWrapper>
-  );
-};
+            )}
 
-function ManageSubscriptionPage(): ReactElement {
+            <div className="my-8 flex flex-row gap-6">
+              <BillingPaymentMethod
+                className="w-1/2"
+                plan={selectedPlan.planType}
+                organization={organization}
+                onValidationChange={setPaymentDetailsValid}
+              />
+              <div className="w-1/2">
+                {plan === BillingPlanType.Pro && plan !== organization.plan ? (
+                  <div>
+                    <Heading className="mb-3">Discount</Heading>
+                    <Input
+                      className="w-full"
+                      size="medium"
+                      value={couponCode ?? ''}
+                      onChange={e => setCouponCode(e.target.value)}
+                      placeholder="Code"
+                    />
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            <div>{renderActions()}</div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+const ManageSubscriptionPageQuery = graphql(`
+  query ManageSubscriptionPageQuery($selector: OrganizationSelectorInput!) {
+    organization(selector: $selector) {
+      organization {
+        ...OrganizationLayout_OrganizationFragment
+        ...ManageSubscriptionInner_OrganizationFragment
+      }
+    }
+    billingPlans {
+      ...ManageSubscriptionInner_BillingPlansFragment
+    }
+  }
+`);
+
+export default function ManageSubscriptionPage(): ReactElement {
   return (
     <>
       <Title title="Manage Subscription" />
-      <OrganizationLayout includeBilling includeRateLimit>
-        {({ organization }) => <Inner organization={organization} />}
+      <OrganizationLayout query={ManageSubscriptionPageQuery}>
+        {props =>
+          props.organization ? (
+            <Inner
+              organization={props.organization.organization}
+              billingPlans={props.billingPlans}
+            />
+          ) : null
+        }
       </OrganizationLayout>
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
-
-export default authenticated(ManageSubscriptionPage);

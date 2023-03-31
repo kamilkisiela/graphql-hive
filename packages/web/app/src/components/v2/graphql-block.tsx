@@ -1,46 +1,45 @@
-import React from 'react';
-import clsx from 'clsx';
-import { parse, print } from 'graphql';
+import { ReactElement, ReactNode } from 'react';
+import { clsx } from 'clsx';
 import { SchemaEditor, SchemaEditorProps } from '@/components/schema-editor';
 import { Card } from '@/components/v2/card';
 import { Heading } from '@/components/v2/heading';
+import { usePrettify } from '@/lib/hooks';
 
-function prettify(sdl: string) {
-  try {
-    return print(parse(sdl));
-  } catch {
-    return sdl;
-  }
-}
-
-const GraphQLHighlight: React.FC<
-  Omit<SchemaEditorProps, 'schema'> & {
-    code: string;
-  }
-> = ({ code, ...props }) => {
-  const pretty = React.useMemo(() => prettify(code), [code]);
+export function GraphQLHighlight({
+  code,
+  ...props
+}: Omit<SchemaEditorProps, 'schema'> & {
+  code: string;
+}): ReactElement {
+  const pretty = usePrettify(code);
 
   return (
     <SchemaEditor
       theme="vs-dark"
       options={{
         readOnly: true,
-        lineNumbers: 'off',
+        lineNumbers: 'on',
       }}
       height="60vh"
       {...props}
       schema={pretty}
     />
   );
-};
+}
 
-export const GraphQLBlock: React.FC<{
+export function GraphQLBlock({
+  editorProps = {},
+  sdl,
+  title,
+  url,
+  className,
+}: {
   editorProps?: SchemaEditorProps;
   sdl: string;
-  title?: string | React.ReactNode;
+  title?: string | ReactNode;
   url?: string;
   className?: string;
-}> = ({ editorProps = {}, sdl, title, url, className }) => {
+}): ReactElement {
   return (
     <Card className={clsx(className)}>
       <Heading className="mb-4">
@@ -52,4 +51,4 @@ export const GraphQLBlock: React.FC<{
       </div>
     </Card>
   );
-};
+}

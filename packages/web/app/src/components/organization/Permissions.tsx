@@ -1,9 +1,9 @@
-import React, { FormEventHandler } from 'react';
+import { FormEventHandler, memo, ReactElement, useCallback, useState } from 'react';
 import { useMutation } from 'urql';
+import { Accordion, RadixSelect } from '@/components/v2';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import {
-  MemberFieldsFragment,
   OrganizationAccessScope,
-  OrganizationFieldsFragment,
   ProjectAccessScope,
   TargetAccessScope,
   UpdateOrganizationMemberAccessDocument,
@@ -13,7 +13,7 @@ import { canAccessOrganization } from '@/lib/access/organization';
 import { canAccessProject } from '@/lib/access/project';
 import { canAccessTarget } from '@/lib/access/target';
 import { useNotifications } from '@/lib/hooks';
-import { AccordionButton, AccordionItem, AccordionPanel, Select } from '@chakra-ui/react';
+import { truthy } from '@/utils';
 
 interface Props<T> {
   title: string;
@@ -32,13 +32,13 @@ function matchScope<T>(
   let hasHigher = false;
   let hasLower = false;
 
-  list.forEach(item => {
+  for (const item of list) {
     if (item === higherPriority) {
       hasHigher = true;
     } else if (item === lowerPriority) {
       hasLower = true;
     }
-  });
+  }
 
   if (hasHigher) {
     return higherPriority;
@@ -52,130 +52,149 @@ function matchScope<T>(
 }
 
 function isDefined<T>(value: T | null | undefined): value is T {
-  return typeof value !== 'undefined' && value !== null;
+  return value !== undefined && value !== null;
 }
 
-function PermissionsSpaceInner(props: Props<OrganizationAccessScope>): React.ReactElement<any, any>;
-function PermissionsSpaceInner(props: Props<ProjectAccessScope>): React.ReactElement<any, any>;
-function PermissionsSpaceInner(props: Props<TargetAccessScope>): React.ReactElement<any, any>;
+function PermissionsSpaceInner(props: Props<OrganizationAccessScope>): ReactElement<any, any>;
+function PermissionsSpaceInner(props: Props<ProjectAccessScope>): ReactElement<any, any>;
+function PermissionsSpaceInner(props: Props<TargetAccessScope>): ReactElement<any, any>;
 function PermissionsSpaceInner<
   T extends OrganizationAccessScope | ProjectAccessScope | TargetAccessScope,
 >(props: Props<T>) {
   const { title, scopes, initialScopes, onChange, checkAccess } = props;
 
   return (
-    <AccordionItem>
-      <AccordionButton className="font-bold">{title}</AccordionButton>
-      <AccordionPanel pb={4}>
-        <div className="divide-y-2 divide-gray-100">
-          {scopes.map(scope => {
-            const possibleScope = [scope.mapping['read-only'], scope.mapping['read-write']].filter(
-              isDefined,
-            );
-            const canManageScope = possibleScope.some(checkAccess);
+    <Accordion.Item value={title}>
+      <Accordion.Header>{title}</Accordion.Header>
+      <Accordion.Content>
+        {scopes.map(scope => {
+          const possibleScope = [scope.mapping['read-only'], scope.mapping['read-write']].filter(
+            isDefined,
+          );
+          const canManageScope = possibleScope.some(checkAccess);
 
-            if (!canManageScope) {
-              return null;
-            }
+          if (!canManageScope) {
+            return null;
+          }
 
-            const readOnlyScope = scope.mapping['read-only'];
-            const hasReadOnly = typeof readOnlyScope !== 'undefined';
+          const readOnlyScope = scope.mapping['read-only'];
+          const hasReadOnly = typeof readOnlyScope !== 'undefined';
 
-            const selectedScope = matchScope(
-              initialScopes,
-              NoAccess,
-              scope.mapping['read-only'],
-              scope.mapping['read-write'],
-            );
+          const selectedScope = matchScope(
+            initialScopes,
+            NoAccess,
+            scope.mapping['read-only'],
+            scope.mapping['read-write'],
+          );
 
-            return (
-              <div className="py-2 flex flex-row justify-between items-center" key={scope.name}>
-                <div>
-                  <div className="font-semibold text-gray-600">{scope.name}</div>
-                  <div className="text-xs text-gray-600">{scope.description}</div>
-                </div>
-                <div className="shrink-0">
-                  <Select
-                    size="sm"
-                    value={selectedScope}
-                    onChange={event => {
-                      const value = event.target.value as T | string;
-
-                      if (value === NoAccess) {
-                        // Remove all possible scopes
-                        onChange(initialScopes.filter(scope => !possibleScope.includes(scope)));
-                      } else {
-                        const isReadWrite = value === scope.mapping['read-write'];
-
-                        // Remove possible scopes
-                        const newScopes = initialScopes.filter(
-                          scope => !possibleScope.includes(scope),
-                        );
-
-                        if (isReadWrite) {
-                          newScopes.push(scope.mapping['read-write']);
-
-                          if (hasReadOnly) {
-                            // Include read-only as well
-                            newScopes.push(readOnlyScope);
-                          }
-                        } else if (readOnlyScope) {
-                          // just read-only
-                          newScopes.push(readOnlyScope);
-                        }
-
-                        onChange(newScopes);
-                      }
-                    }}
-                  >
-                    <option value={NoAccess}>No access</option>
-                    {scope.mapping['read-only'] && checkAccess(scope.mapping['read-only']) && (
-                      <option value={scope.mapping['read-only']}>Read-only</option>
-                    )}
-                    {scope.mapping['read-write'] && checkAccess(scope.mapping['read-write']) && (
-                      <option value={scope.mapping['read-write']}>Read &amp; write</option>
-                    )}
-                  </Select>
-                </div>
+          return (
+            <div className="py-2 flex flex-row justify-between items-center" key={scope.name}>
+              <div>
+                <div className="font-semibold text-gray-600">{scope.name}</div>
+                <div className="text-xs text-gray-600">{scope.description}</div>
               </div>
-            );
-          })}
-        </div>
-      </AccordionPanel>
-    </AccordionItem>
+              <RadixSelect
+                className="shrink-0"
+                position="popper"
+                value={selectedScope}
+                options={[
+                  { value: NoAccess, label: 'No access' },
+                  scope.mapping['read-only'] &&
+                    checkAccess(scope.mapping['read-only']) && {
+                      value: scope.mapping['read-only'],
+                      label: 'Read-only',
+                    },
+                  scope.mapping['read-write'] &&
+                    checkAccess(scope.mapping['read-write']) && {
+                      value: scope.mapping['read-write'],
+                      label: 'Read & write',
+                    },
+                ].filter(truthy)}
+                onChange={value => {
+                  if (value === NoAccess) {
+                    // Remove all possible scopes
+                    onChange(initialScopes.filter(scope => !possibleScope.includes(scope)));
+                    return;
+                  }
+                  const isReadWrite = value === scope.mapping['read-write'];
+
+                  // Remove possible scopes
+                  const newScopes = initialScopes.filter(scope => !possibleScope.includes(scope));
+
+                  if (isReadWrite) {
+                    newScopes.push(scope.mapping['read-write']);
+
+                    if (hasReadOnly) {
+                      // Include read-only as well
+                      newScopes.push(readOnlyScope);
+                    }
+                  } else if (readOnlyScope) {
+                    // just read-only
+                    newScopes.push(readOnlyScope);
+                  }
+
+                  onChange(newScopes);
+                }}
+              />
+            </div>
+          );
+        })}
+      </Accordion.Content>
+    </Accordion.Item>
   );
 }
 
-export const PermissionsSpace = React.memo(
+export const PermissionsSpace = memo(
   PermissionsSpaceInner,
 ) as unknown as typeof PermissionsSpaceInner;
 
+const UsePermissionManager_OrganizationFragment = graphql(`
+  fragment UsePermissionManager_OrganizationFragment on Organization {
+    cleanId
+    me {
+      ...CanAccessOrganization_MemberFragment
+      ...CanAccessProject_MemberFragment
+      ...CanAccessTarget_MemberFragment
+    }
+  }
+`);
+
+const UsePermissionManager_MemberFragment = graphql(`
+  fragment UsePermissionManager_MemberFragment on Member {
+    id
+    targetAccessScopes
+    projectAccessScopes
+    organizationAccessScopes
+  }
+`);
+
 export function usePermissionsManager({
-  organization,
-  member,
   onSuccess,
   passMemberScopes,
+  ...props
 }: {
-  organization: OrganizationFieldsFragment;
-  member: MemberFieldsFragment;
+  organization: FragmentType<typeof UsePermissionManager_OrganizationFragment>;
+  member: FragmentType<typeof UsePermissionManager_MemberFragment>;
   passMemberScopes: boolean;
   onSuccess(): void;
 }) {
-  const [state, setState] = React.useState<'LOADING' | 'IDLE'>('IDLE');
+  const member = useFragment(UsePermissionManager_MemberFragment, props.member);
+  const organization = useFragment(UsePermissionManager_OrganizationFragment, props.organization);
+  const [state, setState] = useState<'LOADING' | 'IDLE'>('IDLE');
   const notify = useNotifications();
   const [, mutate] = useMutation(UpdateOrganizationMemberAccessDocument);
 
-  const [targetScopes, setTargetScopes] = React.useState<TargetAccessScope[]>(
+  const [targetScopes, setTargetScopes] = useState<TargetAccessScope[]>(
     passMemberScopes ? member.targetAccessScopes : [],
   );
-  const [projectScopes, setProjectScopes] = React.useState<ProjectAccessScope[]>(
+  const [projectScopes, setProjectScopes] = useState<ProjectAccessScope[]>(
     passMemberScopes ? member.projectAccessScopes : [],
   );
-  const [organizationScopes, setOrganizationScopes] = React.useState<OrganizationAccessScope[]>(
+  const [organizationScopes, setOrganizationScopes] = useState<OrganizationAccessScope[]>(
     passMemberScopes ? member.organizationAccessScopes : [],
   );
 
-  const submit = React.useCallback<FormEventHandler<HTMLElement>>(
+  const submit = useCallback<FormEventHandler<HTMLElement>>(
     async evt => {
       evt.preventDefault();
       setState('LOADING');
@@ -221,15 +240,15 @@ export function usePermissionsManager({
     targetScopes,
     state,
     // Methods
-    canAccessOrganization: React.useCallback(
+    canAccessOrganization: useCallback(
       (scope: OrganizationAccessScope) => canAccessOrganization(scope, organization.me),
       [organization],
     ),
-    canAccessProject: React.useCallback(
+    canAccessProject: useCallback(
       (scope: ProjectAccessScope) => canAccessProject(scope, organization.me),
       [organization],
     ),
-    canAccessTarget: React.useCallback(
+    canAccessTarget: useCallback(
       (scope: TargetAccessScope) => canAccessTarget(scope, organization.me),
       [organization],
     ),

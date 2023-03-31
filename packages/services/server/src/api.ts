@@ -1,14 +1,7 @@
 import { CryptoProvider } from 'packages/services/api/src/modules/shared/providers/crypto';
 import { z } from 'zod';
 import type { Storage } from '@hive/api';
-import {
-  OrganizationAccessScope,
-  organizationAdminScopes,
-  OrganizationType,
-  ProjectAccessScope,
-  reservedOrganizationNames,
-  TargetAccessScope,
-} from '@hive/api';
+import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@hive/api';
 import { FastifyRequest, handleTRPCError } from '@hive/service-common';
 import type { inferAsyncReturnType } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
@@ -56,8 +49,6 @@ export const internalApiRouter = t.router({
     .mutation(async ({ input, ctx }) => {
       const result = await ctx.storage.ensureUserExists({
         ...input,
-        reservedOrgNames: reservedOrganizationNames,
-        scopes: organizationAdminScopes,
         oidcIntegration: input.oidcIntegrationId
           ? {
               id: input.oidcIntegrationId,
@@ -111,13 +102,14 @@ export const internalApiRouter = t.router({
       }
 
       if (user?.id) {
-        const organizations = await ctx.storage.getOrganizations({ user: user.id });
-        const org = organizations?.find(org => org.type === OrganizationType.PERSONAL);
+        const allAllOraganizations = await ctx.storage.getOrganizations({ user: user.id });
 
-        if (org) {
+        if (allAllOraganizations.length > 0) {
+          const someOrg = allAllOraganizations[0];
+
           return {
-            id: org.id,
-            cleanId: org.cleanId,
+            id: someOrg.id,
+            cleanId: someOrg.cleanId,
           };
         }
       }

@@ -95,7 +95,7 @@ export class SingleLegacyModel {
         project,
         schemas,
         selector,
-        latestVersion,
+        version: latestVersion,
       }),
     ]);
 
@@ -203,7 +203,7 @@ export class SingleLegacyModel {
         },
         project,
         schemas,
-        latestVersion,
+        version: latestVersion,
       }),
       this.checks.metadata(incoming, latestVersion ? latestVersion.schemas[0] : null),
     ]);
@@ -257,7 +257,8 @@ export class SingleLegacyModel {
           compositionErrors,
           schema: incoming,
           schemas,
-          orchestrator: this.orchestrator,
+          supergraph: null,
+          fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
         },
       };
     }

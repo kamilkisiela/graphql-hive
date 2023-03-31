@@ -5,10 +5,10 @@ import Session from 'supertokens-node/recipe/session';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Title } from '@/components/common';
-import { DataWrapper } from '@/components/common/DataWrapper';
+import { DataWrapper } from '@/components/v2';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { env } from '@/env/backend';
-import { OrganizationsDocument, OrganizationType } from '@/graphql';
+import { OrganizationsDocument } from '@/graphql';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
@@ -26,11 +26,7 @@ async function getSuperTokensUserIdFromRequest(
 
 export const getServerSideProps = withSessionProtection(async ({ req, res }) => {
   const internalApi = createTRPCProxyClient<InternalApi>({
-    links: [
-      httpLink({
-        url: `${env.serverEndpoint}/trpc`,
-      }),
-    ],
+    links: [httpLink({ url: `${env.serverEndpoint}/trpc` })],
   });
 
   const superTokensId = await getSuperTokensUserIdFromRequest(req as any, res as any);
@@ -54,6 +50,13 @@ export const getServerSideProps = withSessionProtection(async ({ req, res }) => 
           },
         };
       }
+
+      return {
+        redirect: {
+          destination: '/org/new',
+          permanent: true,
+        },
+      };
     }
   } catch (error) {
     console.error(error);
@@ -71,9 +74,8 @@ function Home(): ReactElement {
   useEffect(() => {
     // Just in case server-side redirect wasn't working
     if (query.data) {
-      const org = query.data.organizations.nodes.find(
-        node => node.type === OrganizationType.Personal,
-      );
+      const org = query.data.organizations.nodes[0];
+
       if (org) {
         router.visitOrganization({ organizationId: org.cleanId });
       }

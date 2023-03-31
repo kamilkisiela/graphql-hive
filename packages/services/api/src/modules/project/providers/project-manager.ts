@@ -6,7 +6,6 @@ import { ActivityManager } from '../../activity/providers/activity-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
-import { SchemaManager } from '../../schema/providers/schema-manager';
 import { Logger } from '../../shared/providers/logger';
 import { OrganizationSelector, ProjectSelector, Storage } from '../../shared/providers/storage';
 import { TokenStorage } from '../../token/providers/token-storage';
@@ -26,7 +25,6 @@ export class ProjectManager {
     logger: Logger,
     private storage: Storage,
     private authManager: AuthManager,
-    private schemaManager: SchemaManager,
     private tokenStorage: TokenStorage,
     private activityManager: ActivityManager,
   ) {

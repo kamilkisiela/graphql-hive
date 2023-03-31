@@ -13,11 +13,14 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
       - name: setup environment
         uses: ./.github/actions/setup
         with:
           codegen: false # no need to run because release script will run it anyway
+          actor: release-stable
 
       - name: prepare npm credentials
         run: |
@@ -33,7 +36,7 @@ jobs:
           commit: 'chore(release): update monorepo packages versions'
           title: 'Upcoming Release Changes'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GUILD_BOT_TOKEN }}
 
       - name: extract published version
         if:

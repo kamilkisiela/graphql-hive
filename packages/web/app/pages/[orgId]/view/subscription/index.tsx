@@ -8,16 +8,11 @@ import { CurrencyFormatter } from '@/components/organization/billing/helpers';
 import { InvoicesList } from '@/components/organization/billing/InvoicesList';
 import { RateLimitWarn } from '@/components/organization/billing/RateLimitWarn';
 import { OrganizationUsageEstimationView } from '@/components/organization/Usage';
-import { Card, Heading, Tabs, Title } from '@/components/v2';
-import {
-  OrganizationFieldsFragment,
-  OrgBillingInfoFieldsFragment,
-  OrgRateLimitFieldsFragment,
-} from '@/graphql';
+import { Card, Heading, Stat, Tabs, Title } from '@/components/v2';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { Stat, StatHelpText, StatLabel, StatNumber } from '@chakra-ui/react';
 
 const DateFormatter = Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -27,13 +22,39 @@ const DateFormatter = Intl.DateTimeFormat('en-US', {
 
 const ManagePage = dynamic(() => import('./manage'));
 
-const Page = ({
-  organization,
-}: {
-  organization: OrganizationFieldsFragment &
-    OrgBillingInfoFieldsFragment &
-    OrgRateLimitFieldsFragment;
-}): ReactElement | null => {
+const SubscriptionPage_OrganizationFragment = graphql(`
+  fragment SubscriptionPage_OrganizationFragment on Organization {
+    me {
+      ...CanAccessOrganization_MemberFragment
+    }
+    billingConfiguration {
+      invoices {
+        id
+      }
+      upcomingInvoice {
+        amount
+        date
+      }
+    }
+    ...RateLimitWarn_OrganizationFragment
+    ...OrganizationInvoicesList_OrganizationFragment
+    ...BillingView_OrganizationFragment
+    ...OrganizationUsageEstimationView_OrganizationFragment
+  }
+`);
+
+const SubscriptionPage_QueryFragment = graphql(`
+  fragment SubscriptionPage_QueryFragment on Query {
+    ...BillingView_QueryFragment
+  }
+`);
+
+function Page(props: {
+  organization: FragmentType<typeof SubscriptionPage_OrganizationFragment>;
+  query: FragmentType<typeof SubscriptionPage_QueryFragment>;
+}): ReactElement | null {
+  const organization = useFragment(SubscriptionPage_OrganizationFragment, props.organization);
+  const query = useFragment(SubscriptionPage_QueryFragment, props.query);
   const canAccess = useOrganizationAccess({
     scope: OrganizationAccessScope.Settings,
     member: organization?.me,
@@ -59,27 +80,24 @@ const Page = ({
         </Tabs.Trigger>
       </Tabs.List>
       <Tabs.Content value="overview">
-        <p className="mb-3 font-light text-gray-300">
-          Information about your Hive plan, subscription, usage and data ingestion
-        </p>
         <RateLimitWarn organization={organization} />
         <Card className="mt-8">
-          <Heading className="mb-2">Plan and Reserved Volume</Heading>
+          <Heading className="mb-2">Your current plan</Heading>
           <div>
-            <BillingView organization={organization}>
+            <BillingView organization={organization} query={query}>
               {organization.billingConfiguration?.upcomingInvoice && (
-                <Stat className="mb-4">
-                  <StatLabel>Next Invoice</StatLabel>
-                  <StatNumber>
+                <Stat>
+                  <Stat.Label>Next Invoice</Stat.Label>
+                  <Stat.Number>
                     {CurrencyFormatter.format(
                       organization.billingConfiguration.upcomingInvoice.amount,
                     )}
-                  </StatNumber>
-                  <StatHelpText>
+                  </Stat.Number>
+                  <Stat.HelpText>
                     {DateFormatter.format(
                       new Date(organization.billingConfiguration.upcomingInvoice.date),
                     )}
-                  </StatHelpText>
+                  </Stat.HelpText>
                 </Stat>
               )}
             </BillingView>
@@ -108,14 +126,30 @@ const Page = ({
       </Tabs.Content>
     </Tabs>
   );
-};
+}
+
+const SubscriptionPageQuery = graphql(`
+  query SubscriptionPageQuery($selector: OrganizationSelectorInput!) {
+    organization(selector: $selector) {
+      organization {
+        ...OrganizationLayout_OrganizationFragment
+        ...SubscriptionPage_OrganizationFragment
+      }
+    }
+    ...SubscriptionPage_QueryFragment
+  }
+`);
 
 function SubscriptionPage(): ReactElement {
   return (
     <>
       <Title title="Subscription & Usage" />
-      <OrganizationLayout value="subscription" includeBilling includeRateLimit>
-        {({ organization }) => <Page organization={organization} />}
+      <OrganizationLayout value="subscription" query={SubscriptionPageQuery}>
+        {props =>
+          props.organization ? (
+            <Page organization={props.organization.organization} query={props} />
+          ) : null
+        }
       </OrganizationLayout>
     </>
   );
@@ -126,7 +160,7 @@ export const getServerSideProps = withSessionProtection(async context => {
    * If Strive is not enabled we redirect the user to the organization.
    */
   const isStripeEnabled = getIsStripeEnabled();
-  if (isStripeEnabled === false) {
+  if (!isStripeEnabled) {
     const parts = String(context.resolvedUrl).split('/');
     parts.pop();
     return {

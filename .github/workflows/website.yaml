@@ -7,11 +7,14 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
       - name: setup environment
         uses: ./.github/actions/setup
         with:
           codegen: false
+          actor: website
 
       - uses: the-guild-org/shared-config/website-cf@main
         name: build and deploy website
@@ -30,5 +33,5 @@ jobs:
           prId: ${{ github.event.pull_request.number }}
           mainBranch: main
           websiteDirectory: ./
-          buildScript: cd packages/web/landing-page && pnpm build && pnpm next export
-          artifactDir: packages/web/landing-page/out
+          buildScript: cd packages/web/docs && pnpm build && pnpm next export
+          artifactDir: packages/web/docs/out

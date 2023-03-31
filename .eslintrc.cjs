@@ -1,5 +1,7 @@
 /* eslint-env node */
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const guildConfig = require('@theguild/eslint-config/base');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { REACT_RESTRICTED_SYNTAX, RESTRICTED_SYNTAX } = require('@theguild/eslint-config/constants');
 
 const rulesToExtends = Object.fromEntries(
@@ -40,6 +42,9 @@ module.exports = {
     'packages/web/app/src/graphql/index.ts',
     'packages/libraries/cli/src/sdk.ts',
     'packages/services/storage/src/db/types.ts',
+    'packages/web/app/src/gql/**/*',
+    'codegen.cjs',
+    'tsup',
   ],
   parserOptions: {
     ecmaVersion: 2020,
@@ -117,7 +122,6 @@ module.exports = {
         '@typescript-eslint/no-non-null-assertion': 'off',
         'react/jsx-no-useless-fragment': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
-        '@typescript-eslint/no-restricted-imports': 'off',
         '@typescript-eslint/no-empty-function': 'off',
         'react-hooks/rules-of-hooks': 'off',
         'react-hooks/exhaustive-deps': 'off',
@@ -139,11 +143,18 @@ module.exports = {
           rootDir: 'packages/web/app',
         },
         tailwindcss: {
-          config: 'packages/web/app/tailwind.config.js',
+          config: 'packages/web/app/tailwind.config.cjs',
           whitelist: ['drag-none'],
         },
       },
     },
+    // {
+    //   files: ['packages/web/app/**'],
+    //   excludedFiles: ['packages/web/app/pages/**'],
+    //   rules: {
+    //     'import/no-unused-modules': ['error', { unusedExports: true }],
+    //   },
+    // },
     {
       files: ['packages/web/docs/**'],
       settings: {
@@ -152,17 +163,6 @@ module.exports = {
         },
         tailwindcss: {
           config: 'packages/web/docs/tailwind.config.cjs',
-        },
-      },
-    },
-    {
-      files: ['packages/web/landing-page/**'],
-      settings: {
-        next: {
-          rootDir: 'packages/web/landing-page',
-        },
-        tailwindcss: {
-          config: 'packages/web/landing-page/tailwind.config.cjs',
         },
       },
     },

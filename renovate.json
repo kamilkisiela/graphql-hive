@@ -15,7 +15,7 @@
     },
     {
       "groupName": "radix",
-      "matchPackagePrefixes": ["@radix/"],
+      "matchPackagePrefixes": ["@radix/", "@radix-ui"],
       "recreateClosed": false
     },
     {
@@ -47,6 +47,25 @@
       "groupName": "slonik",
       "matchPackagePrefixes": ["@slonik", "slonik"],
       "recreateClosed": false
+    }
+  ],
+  "dockerfile": {
+    "enabled": true,
+    "fileMatch": [".*?\\.[dD]ockerfile"]
+  },
+  "regexManagers": [
+    {
+      "fileMatch": ["deployment/.*?\\.ts$"],
+      "matchStrings": ["image: (?:'|\")(?<depName>.*?):(?<currentValue>.*?)(?:'|\")"],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    },
+    {
+      "fileMatch": ["deployment/.*?\\.ts$"],
+      "matchStrings": [
+        "helmChart\\((?:'|\")(?<registryUrl>.*?)(?:'|\"), (?:'|\")(?<depName>.*?)(?:'|\"), (?:'|\")(?<currentValue>.*?)(?:'|\")\\)"
+      ],
+      "datasourceTemplate": "helm"
     }
   ]
 }

@@ -16,6 +16,10 @@ jobs:
   db-types:
     uses: ./.github/workflows/db-types-diff.yaml
 
+  # Run migrations tests
+  db-migrations:
+    uses: ./.github/workflows/migrations-test.yaml
+
   # GraphQL Breaking Changes Check
   # This workflow validates that the GraphQL schema is not breaking, and fails in case of a breaking change.
   # To allow a GraphQL breaking change in a PR, you may add the "non-breaking" label to the PR.
@@ -100,11 +104,32 @@ jobs:
     if: ${{ !github.event.pull_request.head.repo.fork }}
     secrets: inherit
 
+  # Deploy Storybook preview to CloudFlare Pages
+  storybook-preview:
+    uses: ./.github/workflows/storybook.yaml
+    if: ${{ !github.event.pull_request.head.repo.fork }}
+    secrets: inherit
+
   # Release alpha version on NPM for Hive libraries
-  release:
+  alpha:
     uses: the-guild-org/shared-config/.github/workflows/release-snapshot.yml@main
+    if: ${{ github.event.pull_request.title != 'Upcoming Release Changes' }}
     with:
       npmTag: alpha
+      buildScript: build:libraries
+      nodeVersion: 18
+      packageManager: pnpm
+    secrets:
+      githubToken: ${{ secrets.GITHUB_TOKEN }}
+      npmToken: ${{ secrets.NPM_TOKEN }}
+
+  # Release RC version on NPM for Hive libraries
+  release-candidate:
+    uses: the-guild-org/shared-config/.github/workflows/release-snapshot.yml@main
+    if: ${{ github.event.pull_request.title == 'Upcoming Release Changes' }}
+    with:
+      npmTag: rc
+      restoreDeletedChangesets: true
       buildScript: build:libraries
       nodeVersion: 18
       packageManager: pnpm

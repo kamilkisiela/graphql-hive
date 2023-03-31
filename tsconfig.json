@@ -59,7 +59,7 @@
       "@/*": ["./packages/web/app/src/*"]
     }
   },
-  "include": ["packages"],
+  "include": ["packages", "tsup.config.node.ts"],
   "exclude": [
     "**/node_modules/**",
     "**/dist",

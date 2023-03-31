@@ -1,41 +1,27 @@
-import React, { PropsWithChildren } from 'react';
+import { ReactElement, SetStateAction, useCallback, useMemo, useState } from 'react';
 import clsx from 'clsx';
-import {
-  VscChevronDown,
-  VscChevronLeft,
-  VscChevronRight,
-  VscChevronUp,
-  VscWarning,
-} from 'react-icons/vsc';
-import { gql, useQuery } from 'urql';
+import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { Scale, Section } from '@/components/common';
 import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
-import { env } from '@/env/frontend';
-import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
-import { useDecimal, useFormattedDuration, useFormattedNumber } from '@/lib/hooks';
 import {
   Button,
   Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerOverlay,
-  Flex,
-  IconButton,
   Input,
-  InputGroup,
-  InputLeftAddon,
+  Sortable,
   Table,
-  Tbody,
+  TBody,
   Td,
   Th,
-  Thead,
+  THead,
   Tooltip,
   Tr,
-  useDisclosure,
-} from '@chakra-ui/react';
+} from '@/components/v2';
+import { env } from '@/env/frontend';
+import { graphql } from '@/gql';
+import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
+import { useDecimal, useFormattedDuration, useFormattedNumber, useToggle } from '@/lib/hooks';
+import { ChevronUpIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import {
   createTable,
   getCoreRowModel,
@@ -61,30 +47,7 @@ interface Operation {
   hash: string;
 }
 
-const Sortable = ({
-  children,
-  isSorted,
-  isSortedDesc,
-  align = 'left',
-}: PropsWithChildren<{
-  align?: 'center' | 'right' | 'left';
-  isSortedDesc?: boolean;
-  isSorted?: boolean;
-}>) => {
-  return (
-    <Flex
-      direction="row"
-      align="center"
-      justify={align === 'center' ? 'center' : align === 'left' ? 'start' : 'end'}
-      className="cursor-pointer"
-    >
-      <span>{children}</span>
-      {isSorted ? isSortedDesc ? <VscChevronDown /> : <VscChevronUp /> : null}
-    </Flex>
-  );
-};
-
-const GraphQLOperationBody_GetOperationBodyQuery = gql(/* GraphQL */ `
+const GraphQLOperationBody_GetOperationBodyQuery = graphql(`
   query GraphQLOperationBody_GetOperationBodyQuery($selector: OperationBodyByHashInput!) {
     operationBodyByHash(selector: $selector)
   }
@@ -117,20 +80,24 @@ function GraphQLOperationBody({
   }
 
   if (data?.operationBodyByHash) {
-    return <GraphQLHighlight className="pt-6" light code={data.operationBodyByHash} />;
+    return <GraphQLHighlight className="pt-6" code={data.operationBodyByHash} />;
   }
 
   return null;
 }
 
-const OperationRow: React.FC<{
+function OperationRow({
+  operation,
+  organization,
+  project,
+  target,
+}: {
   operation: Operation;
   organization: string;
   project: string;
   target: string;
-}> = ({ operation, organization, project, target }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const linkRef = React.useRef<HTMLButtonElement | null>(null);
+}): ReactElement {
+  const [isOpen, toggle] = useToggle();
   const count = useFormattedNumber(operation.requests);
   const percentage = useDecimal(operation.percentage);
   const failureRate = useDecimal(operation.failureRate);
@@ -142,120 +109,81 @@ const OperationRow: React.FC<{
     <>
       <Tr>
         <Td className="font-medium truncate">
-          <div className="flex flex-row">
-            <Button
-              as="a"
-              href="#"
-              size="sm"
-              variant="link"
-              // TODO: If you have an idea how to solve this TS issue, send a PR :)
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              ref={linkRef}
-              onClick={e => {
-                e.preventDefault();
-                onOpen();
-              }}
-            >
+          <div className="flex gap-2 items-center">
+            <Button variant="link" onClick={toggle}>
               {operation.name}
             </Button>
             {operation.name === 'anonymous' && (
-              <Tooltip
-                placement="right"
-                label="Anonymous operation detected. Naming your operations is a recommended practice"
-              >
-                <span className="ml-1 text-yellow-500">
-                  <VscWarning />
-                </span>
-              </Tooltip>
+              <Tooltip.Provider delayDuration={200}>
+                <Tooltip content="Anonymous operation detected. Naming your operations is a recommended practice">
+                  <ExclamationTriangleIcon className="text-yellow-500" />
+                </Tooltip>
+              </Tooltip.Provider>
             )}
           </div>
         </Td>
-        <Td textAlign="center">
-          <span className="text-xs">{operation.kind}</span>
+        <Td align="center">{operation.kind}</Td>
+        <Td align="center">{p90}</Td>
+        <Td align="center">{p95}</Td>
+        <Td align="center">{p99}</Td>
+        <Td align="center">{failureRate}%</Td>
+        <Td align="center">{count}</Td>
+        <Td align="right" width="1">
+          {percentage}%
         </Td>
-        <Td textAlign="center">{p90}</Td>
-        <Td textAlign="center">{p95}</Td>
-        <Td textAlign="center">{p99}</Td>
-        <Td textAlign="center">{failureRate}%</Td>
-        <Td textAlign="center">{count}</Td>
-        <Td textAlign="right">
-          <div className="flex flex-row justify-end">
-            <div className="mr-3">{percentage}%</div>
-            <Scale value={operation.percentage} size={10} max={100} className="justify-end" />
-          </div>
+        <Td width="1">
+          <Scale value={operation.percentage} size={10} max={100} className="justify-end" />
         </Td>
       </Tr>
-      <Drawer size="xl" isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={linkRef}>
-        <DrawerOverlay />
-        <DrawerContent bgColor="gray.900">
-          <DrawerCloseButton />
-          <DrawerHeader>
-            {operation.kind} {operation.name}
-          </DrawerHeader>
-
-          <DrawerBody>
-            <GraphQLOperationBody
-              hash={operation.hash}
-              organization={organization}
-              project={project}
-              target={target}
-            />
-          </DrawerBody>
-        </DrawerContent>
+      <Drawer open={isOpen} onOpenChange={toggle} width="60%">
+        <Drawer.Title>
+          {operation.kind} {operation.name}
+        </Drawer.Title>
+        <GraphQLOperationBody
+          hash={operation.hash}
+          organization={organization}
+          project={project}
+          target={target}
+        />
       </Drawer>
     </>
   );
-};
+}
 
 const table = createTable().setRowType<Operation>();
 
 const columns = [
   table.createDataColumn('name', {
     header: 'Operations',
+    enableSorting: false,
   }),
   table.createDataColumn('kind', {
     header: 'Kind',
+    enableSorting: false,
   }),
   table.createDataColumn('p90', {
     header: 'p90',
-    footer: props => props.column.id,
   }),
   table.createDataColumn('p95', {
     header: 'p95',
-    footer: props => props.column.id,
   }),
   table.createDataColumn('p99', {
     header: 'p99',
-    footer: props => props.column.id,
   }),
   table.createDataColumn('failureRate', {
     header: 'Failure Rate',
-    footer: props => props.column.id,
   }),
   table.createDataColumn('requests', {
     header: 'Requests',
-    footer: props => props.column.id,
   }),
   table.createDataColumn('percentage', {
     header: 'Traffic',
-    footer: props => props.column.id,
   }),
 ];
 
-type SetPaginationFn = (updater: React.SetStateAction<PaginationState>) => void;
+type SetPaginationFn = (updater: SetStateAction<PaginationState>) => void;
 
-const OperationsTable: React.FC<{
-  operations: Operation[];
-  pagination: PaginationState;
-  setPagination: SetPaginationFn;
-  sorting: SortingState;
-  setSorting: OnChangeFn<SortingState>;
-  className?: string;
-  organization: string;
-  project: string;
-  target: string;
-}> = ({
+function OperationsTable({
   operations,
   sorting,
   setSorting,
@@ -265,7 +193,17 @@ const OperationsTable: React.FC<{
   organization,
   project,
   target,
-}) => {
+}: {
+  operations: Operation[];
+  pagination: PaginationState;
+  setPagination: SetPaginationFn;
+  sorting: SortingState;
+  setSorting: OnChangeFn<SortingState>;
+  className?: string;
+  organization: string;
+  project: string;
+  target: string;
+}): ReactElement {
   const tableInstance = useTableInstance(table, {
     columns,
     data: operations,
@@ -281,10 +219,10 @@ const OperationsTable: React.FC<{
     debugTable: env.nodeEnv !== 'production',
   });
 
-  const firstPage = React.useCallback(() => {
+  const firstPage = useCallback(() => {
     tableInstance.setPageIndex(0);
   }, [tableInstance]);
-  const lastPage = React.useCallback(() => {
+  const lastPage = useCallback(() => {
     tableInstance.setPageIndex(tableInstance.getPageCount() - 1);
   }, [tableInstance]);
 
@@ -292,179 +230,116 @@ const OperationsTable: React.FC<{
     setPagination({ pageSize: tableInstance.getState().pagination.pageSize, pageIndex });
   }, 500);
 
-  const headerGroup = tableInstance.getHeaderGroups()[0];
-
-  function findColumn(key: string) {
-    return headerGroup.headers[columns.findIndex(c => c.accessorKey === key)];
-  }
-
-  const p90Column = findColumn('p90');
-  const p95Column = findColumn('p95');
-  const p99Column = findColumn('p99');
-  const failureRateColumn = findColumn('failureRate');
-  const requestsColumn = findColumn('requests');
-  const percentageColumn = findColumn('percentage');
-
+  const { headers } = tableInstance.getHeaderGroups()[0];
   return (
-    <div
-      className={clsx(
-        'transition-opacity ease-in-out duration-700 rounded-md p-5 ring-1 ring-gray-800 bg-gray-900/50',
-        className,
-      )}
-    >
+    <div className={clsx('rounded-md p-5 border border-gray-800 bg-gray-900/50', className)}>
       <Section.Title>Operations</Section.Title>
       <Section.Subtitle>List of all operations with their statistics</Section.Subtitle>
-      <Table className="mt-6" variant="striped" colorScheme="gray" size="sm">
-        <Thead>
-          <Tr>
-            <Th className="truncate">Operation</Th>
-            <Th textAlign="center">Kind</Th>
-            <Th onClick={p90Column.column.getToggleSortingHandler()}>
-              <Sortable
-                align="center"
-                isSorted={p90Column.column.getIsSorted() !== false}
-                isSortedDesc={p90Column.column.getIsSorted() === 'desc'}
-              >
-                p90
-              </Sortable>
-            </Th>
-            <Th onClick={p95Column.column.getToggleSortingHandler()}>
-              <Sortable
-                align="center"
-                isSorted={p95Column.column.getIsSorted() !== false}
-                isSortedDesc={p95Column.column.getIsSorted() === 'desc'}
-              >
-                p95
-              </Sortable>
-            </Th>
-            <Th onClick={p99Column.column.getToggleSortingHandler()}>
-              <Sortable
-                align="center"
-                isSorted={p99Column.column.getIsSorted() !== false}
-                isSortedDesc={p99Column.column.getIsSorted() === 'desc'}
-              >
-                p99
-              </Sortable>
-            </Th>
-            <Th onClick={failureRateColumn.column.getToggleSortingHandler()}>
-              <Sortable
-                align="center"
-                isSorted={failureRateColumn.column.getIsSorted() !== false}
-                isSortedDesc={failureRateColumn.column.getIsSorted() === 'desc'}
-              >
-                Failure Rate
-              </Sortable>
-            </Th>
-            <Th onClick={requestsColumn.column.getToggleSortingHandler()}>
-              <Sortable
-                align="center"
-                isSorted={requestsColumn.column.getIsSorted() !== false}
-                isSortedDesc={requestsColumn.column.getIsSorted() === 'desc'}
-              >
-                Requests
-              </Sortable>
-            </Th>
-            <Th onClick={percentageColumn.column.getToggleSortingHandler()}>
-              <Sortable
-                align="center"
-                isSorted={percentageColumn.column.getIsSorted() !== false}
-                isSortedDesc={percentageColumn.column.getIsSorted() === 'desc'}
-              >
-                Traffic
-              </Sortable>
-            </Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {tableInstance.getRowModel().rows.map(row => {
-            if (!row.original) {
-              return null;
-            }
-            return (
-              <OperationRow
-                operation={row.original}
-                key={row.original.id}
-                organization={organization}
-                project={project}
-                target={target}
-              />
-            );
-          })}
-        </Tbody>
+      <Table>
+        <THead>
+          <Tooltip.Provider>
+            {headers.map(header => {
+              const canSort = header.column.getCanSort();
+              const name = header.renderHeader();
+              return (
+                <Th key={header.id}>
+                  {canSort ? (
+                    <Sortable
+                      sortOrder={header.column.getIsSorted()}
+                      onClick={header.column.getToggleSortingHandler()}
+                    >
+                      {name}
+                    </Sortable>
+                  ) : (
+                    name
+                  )}
+                </Th>
+              );
+            })}
+          </Tooltip.Provider>
+        </THead>
+        <TBody>
+          {tableInstance
+            .getRowModel()
+            .rows.map(
+              row =>
+                row.original && (
+                  <OperationRow
+                    operation={row.original}
+                    key={row.original.id}
+                    organization={organization}
+                    project={project}
+                    target={target}
+                  />
+                ),
+            )}
+        </TBody>
       </Table>
-      <div className="py-3 flex flex-row items-center justify-center space-x-2">
-        <Button
-          size="sm"
-          variant="ghost"
-          colorScheme="gray"
-          onClick={firstPage}
-          disabled={!tableInstance.getCanPreviousPage()}
-        >
+      <div className="flex items-center gap-2 mt-6">
+        <Button onClick={firstPage} disabled={!tableInstance.getCanPreviousPage()}>
           First
         </Button>
-        <IconButton
-          size="sm"
-          variant="ghost"
-          colorScheme="gray"
+        <Button
           aria-label="Go to previous page"
           onClick={tableInstance.previousPage}
           disabled={!tableInstance.getCanPreviousPage()}
-          icon={<VscChevronLeft />}
-        />
+        >
+          <ChevronUpIcon className="-rotate-90 h-5 w-auto" />
+        </Button>
         <span className="font-bold whitespace-nowrap text-sm">
           {tableInstance.getState().pagination.pageIndex + 1} / {tableInstance.getPageCount()}
         </span>
-        <IconButton
-          size="sm"
-          variant="ghost"
-          colorScheme="gray"
+        <Button
           aria-label="Go to next page"
           onClick={tableInstance.nextPage}
           disabled={!tableInstance.getCanNextPage()}
-          icon={<VscChevronRight />}
-        />
-        <Button
-          size="sm"
-          variant="ghost"
-          colorScheme="gray"
-          onClick={lastPage}
-          disabled={!tableInstance.getCanNextPage()}
         >
+          <ChevronUpIcon className="rotate-90 h-5 w-auto" />
+        </Button>
+        <Button onClick={lastPage} disabled={!tableInstance.getCanNextPage()}>
           Last
         </Button>
-        <InputGroup variant="filled" className="w-auto" size="sm">
-          <InputLeftAddon>Go to</InputLeftAddon>
-          <Input
-            width="70px"
-            type="number"
-            placeholder="page"
-            colorScheme="gray"
-            defaultValue={tableInstance.getState().pagination.pageIndex + 1}
-            onChange={e => {
-              debouncedSetPage(e.target.valueAsNumber ? e.target.valueAsNumber - 1 : 0);
-            }}
-          />
-        </InputGroup>
+        <Input
+          prefix={
+            <label htmlFor="page" className="shrink-0">
+              Go to:
+            </label>
+          }
+          id="page"
+          size="medium"
+          type="number"
+          defaultValue={tableInstance.getState().pagination.pageIndex + 1}
+          onChange={e => {
+            debouncedSetPage(e.target.valueAsNumber ? e.target.valueAsNumber - 1 : 0);
+          }}
+        />
       </div>
     </div>
   );
-};
+}
 
-const OperationsTableContainer: React.FC<{
+function OperationsTableContainer({
+  operations,
+  operationsFilter,
+  organization,
+  project,
+  target,
+  className,
+}: {
   operations: readonly OperationStatsFieldsFragment[];
   operationsFilter: readonly string[];
   organization: string;
   project: string;
   target: string;
   className?: string;
-}> = ({ operations, operationsFilter, organization, project, target, className }) => {
-  const data = React.useMemo(() => {
-    const records: Array<Operation> = [];
+}): ReactElement {
+  const data = useMemo(() => {
+    const records: Operation[] = [];
     for (const op of operations) {
       if (
         operationsFilter.length > 0 &&
         op.operationHash &&
-        operationsFilter.includes(op.operationHash) === false
+        !operationsFilter.includes(op.operationHash)
       ) {
         continue;
       }
@@ -485,14 +360,10 @@ const OperationsTableContainer: React.FC<{
     return records;
   }, [operations, operationsFilter]);
 
-  const [pagination, setPagination] = React.useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 20,
-  });
+  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 20 });
+  const [sorting, setSorting] = useState<SortingState>([]);
 
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-
-  const safeSetPagination = React.useCallback<SetPaginationFn>(
+  const safeSetPagination = useCallback<SetPaginationFn>(
     state => {
       const handleValue = (state: PaginationState) => {
         const maxPageIndex = Math.ceil(data.length / state.pageSize) - 1;
@@ -524,16 +395,23 @@ const OperationsTableContainer: React.FC<{
       target={target}
     />
   );
-};
+}
 
-export const OperationsList: React.FC<{
+export function OperationsList({
+  className,
+  organization,
+  project,
+  target,
+  period,
+  operationsFilter = [],
+}: {
   className?: string;
   organization: string;
   project: string;
   target: string;
   period: DateRangeInput;
   operationsFilter: readonly string[];
-}> = ({ className, organization, project, target, period, operationsFilter = [] }) => {
+}): ReactElement {
   const [query, refetch] = useQuery({
     query: OperationsStatsDocument,
     variables: {
@@ -552,11 +430,7 @@ export const OperationsList: React.FC<{
     <OperationsFallback
       isError={!!query.error}
       isFetching={query.fetching}
-      refetch={() =>
-        refetch({
-          requestPolicy: 'cache-and-network',
-        })
-      }
+      refetch={() => refetch({ requestPolicy: 'cache-and-network' })}
     >
       <OperationsTableContainer
         operations={operations}
@@ -568,4 +442,4 @@ export const OperationsList: React.FC<{
       />
     </OperationsFallback>
   );
-};
+}

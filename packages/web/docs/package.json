@@ -4,27 +4,25 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "bob runify --single",
-    "dev": "next",
-    "postbuild": "pnpm --filter @hive/docs deploy --prod --no-optional dist/docs && rimraf dist/node_modules && mv dist/docs/node_modules dist && rimraf dist/docs",
-    "start": "next start"
+    "build": "next build && next-sitemap --config next-sitemap.config.cjs",
+    "dev": "next"
   },
   "dependencies": {
-    "@theguild/components": "4.5.4",
-    "next": "13.1.1",
+    "@next/env": "13.2.4",
+    "@radix-ui/react-tooltip": "1.0.5",
+    "@theguild/components": "4.5.6",
+    "clsx": "1.2.1",
+    "next": "13.2.4",
+    "next-themes": "*",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "tailwindcss": "3.2.7",
-    "zod": "3.20.6"
+    "react-icons": "4.8.0"
   },
   "devDependencies": {
     "@theguild/tailwind-config": "0.2.1",
-    "@types/react": "18.0.28"
-  },
-  "buildOptions": {
-    "runify": true,
-    "tags": [
-      "frontend"
-    ]
+    "@types/react": "18.0.31",
+    "next-sitemap": "4.0.6",
+    "postcss": "8.4.21",
+    "tailwindcss": "3.2.7"
   }
 }

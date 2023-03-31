@@ -1,1 +1,2 @@
-DROP TABLE IF EXISTS public.target_validation;
+DROP TABLE IF EXISTS
+  public.target_validation;

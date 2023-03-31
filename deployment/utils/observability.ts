@@ -1,5 +1,6 @@
 import * as k8s from '@pulumi/kubernetes';
 import { interpolate, Output } from '@pulumi/pulumi';
+import { helmChart } from './helm';
 
 export type ObservabilityConfig = {
   loki: {
@@ -26,24 +27,17 @@ export class Observability {
     // We are using otel-collector to scrape metrics from Pods
     // dotansimha: once Vector supports scraping K8s metrics based on Prom, we can drop this.
     new k8s.helm.v3.Chart('metrics', {
-      chart: 'opentelemetry-collector',
+      // prettier-ignore
+      ...helmChart('https://open-telemetry.github.io/opentelemetry-helm-charts', 'opentelemetry-collector', '0.51.1'),
       namespace: ns.metadata.name,
-      version: '0.17.0',
-      fetchOpts: {
-        repo: 'https://open-telemetry.github.io/opentelemetry-helm-charts',
-      },
       // https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-collector/values.yaml
       values: {
-        agentCollector: {
-          enabled: false,
-        },
-        standaloneCollector: {
-          enabled: true,
-          resources: {
-            limits: {
-              cpu: '256m',
-              memory: '512Mi',
-            },
+        mode: 'deployment',
+        replicaCount: 1,
+        resources: {
+          limits: {
+            cpu: '256m',
+            memory: '512Mi',
           },
         },
         clusterRole: {
@@ -120,59 +114,6 @@ export class Observability {
                   scrape_timeout: '10s',
                 },
                 scrape_configs: [
-                  // {
-                  //   job_name: 'ingress-contour-endpoints',
-                  //   kubernetes_sd_configs: [
-                  //     {
-                  //       role: 'pod',
-                  //       namespaces: {
-                  //         names: ['contour'],
-                  //       },
-                  //     },
-                  //   ],
-                  //   relabel_configs: [
-                  //     {
-                  //       source_labels: [
-                  //         '__meta_kubernetes_pod_container_port_name',
-                  //       ],
-                  //       action: 'keep',
-                  //       regex: 'metrics',
-                  //     },
-                  //     {
-                  //       source_labels: [
-                  //         '__meta_kubernetes_pod_annotation_prometheus_io_scrape',
-                  //       ],
-                  //       action: 'keep',
-                  //       regex: true,
-                  //     },
-                  //     {
-                  //       source_labels: [
-                  //         '__meta_kubernetes_pod_annotation_prometheus_io_scheme',
-                  //       ],
-                  //       action: 'replace',
-                  //       target_label: '__scheme__',
-                  //       regex: '(https?)',
-                  //     },
-                  //     {
-                  //       source_labels: [
-                  //         '__meta_kubernetes_pod_annotation_prometheus_io_path',
-                  //       ],
-                  //       action: 'replace',
-                  //       target_label: '__metrics_path__',
-                  //       regex: '(.+)',
-                  //     },
-                  //     {
-                  //       source_labels: [
-                  //         '__address__',
-                  //         '__meta_kubernetes_pod_annotation_prometheus_io_port',
-                  //       ],
-                  //       action: 'replace',
-                  //       regex: '([^:]+)(?::d+)?;(d+)',
-                  //       replacement: '$1:$2',
-                  //       target_label: '__address__',
-                  //     },
-                  //   ],
-                  // },
                   {
                     honor_labels: true,
                     honor_timestamps: true,
@@ -246,29 +187,6 @@ export class Observability {
                     ],
                     scheme: 'http',
                   },
-                  // {
-                  //   bearer_token_file:
-                  //     '/var/run/secrets/kubernetes.io/serviceaccount/token',
-                  //   job_name: 'kubernetes-cadvisor',
-                  //   kubernetes_sd_configs: [
-                  //     {
-                  //       role: 'node',
-                  //     },
-                  //   ],
-                  //   metrics_path: '/metrics/cadvisor',
-                  //   relabel_configs: [
-                  //     {
-                  //       action: 'labelmap',
-                  //       regex: '__meta_kubernetes_node_label_(.+)',
-                  //     },
-                  //   ],
-                  //   scheme: 'https',
-                  //   tls_config: {
-                  //     ca_file:
-                  //       '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt',
-                  //     insecure_skip_verify: true,
-                  //   },
-                  // },
                 ],
               },
             },
@@ -291,12 +209,9 @@ export class Observability {
     new k8s.helm.v3.Chart(
       'vector-logging',
       {
-        chart: 'vector',
-        version: '0.10.3',
+        // prettier-ignore
+        ...helmChart('https://helm.vector.dev', 'vector', '0.20.1'),
         namespace: ns.metadata.name,
-        fetchOpts: {
-          repo: 'https://helm.vector.dev',
-        },
         // https://vector.dev/docs/reference/configuration/
         values: {
           role: 'Agent',

@@ -8,9 +8,13 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
       - name: setup environment
         uses: ./.github/actions/setup
+        with:
+          actor: lint
 
       - name: lint .env.template files
         run: pnpm lint:env-template
@@ -22,6 +26,16 @@ jobs:
           key: ${{ runner.os }}-eslint-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-eslint
+
+      - name: Cache ESLint and Prettier
+        uses: actions/cache@v3
+        with:
+          path: |
+            .eslintcache
+            node_modules/.cache/prettier
+          key: lint-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ github.sha }}
+          restore-keys: |
+            lint-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-
 
       - name: eslint
         id: eslint
@@ -48,7 +62,7 @@ jobs:
       - name: Operation Check
         run: |
           npx graphql-inspector validate \
-            "packages/web/app/**/*.graphql|packages/libraries/cli/**/*.graphql|packages/web/app/**/*.ts(x)" \
+            "packages/web/app/**/*.graphql|packages/libraries/cli/**/*.graphql|packages/web/app/**/*.tsx|packages/web/app/src/lib/**/*.ts" \
             "packages/**/module.graphql.ts" \
             --maxDepth=20 \
             --maxAliasCount=20 \

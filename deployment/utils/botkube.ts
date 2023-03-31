@@ -1,10 +1,12 @@
 import * as k8s from '@pulumi/kubernetes';
 import { Output } from '@pulumi/pulumi';
+import { helmChart } from './helm';
 
 export class BotKube {
   deploy(config: {
     slackChannelName: string;
-    slackToken: Output<string>;
+    slackBotToken: Output<string>;
+    slackAppToken: Output<string>;
     clusterName: string;
     enableKubectl: boolean;
   }) {
@@ -17,64 +19,77 @@ export class BotKube {
     new k8s.helm.v3.Chart(
       'botkube',
       {
-        chart: 'botkube',
-        version: '0.12.4',
+        // prettier-ignore
+        ...helmChart('https://charts.botkube.io', 'botkube', '0.18.0'),
         namespace: ns.metadata.name,
-        fetchOpts: {
-          repo: 'https://infracloudio.github.io/charts',
-        },
         values: {
-          communications: {
-            slack: {
+          settings: {
+            clusterName: config.clusterName,
+          },
+          actions: {
+            'show-logs-on-error': {
               enabled: true,
-              channel: config.slackChannelName,
-              token: config.slackToken,
-              notiftype: 'short',
+              displayName: 'Show logs on error',
+              command:
+                'kubectl logs {{ .Event.TypeMeta.Kind | lower }}/{{ .Event.Name }} -n {{ .Event.Namespace }}',
+              bindings: {
+                sources: ['k8s-err-with-logs-events'],
+                executors: ['kubectl-all-ns'],
+              },
             },
           },
-          config: {
-            resources: [
-              {
-                name: 'apps/v1/deployments',
-                namespaces: {
-                  include: ['default', 'ingress-nginx'],
-                },
-                events: ['all'],
-              },
-              {
-                name: 'v1/pods',
-                namespaces: {
-                  include: ['default', 'ingress-nginx'],
-                },
-                events: ['all'],
-              },
-            ],
-            recommendations: true,
-            settings: {
-              clustername: config.clusterName,
+          executors: {
+            'kubectl-all-ns': {
               kubectl: {
+                enabled: true,
+                namespaces: {
+                  include: ['.*'],
+                },
+                restrictAccess: false,
                 defaultNamespace: 'default',
-                restrictAccess: 'true',
-                enabled: String(config.enableKubectl),
                 commands: {
-                  verbs: ['cluster-info', 'describe', 'get', 'logs', 'top', 'restart'],
+                  verbs: ['cluster-info', 'diff', 'explain', 'get', 'logs', 'top'],
                   resources: [
                     'deployments',
                     'pods',
-                    'namespaces',
                     'services',
+                    'namespaces',
                     'daemonsets',
-                    'httpproxy',
                     'statefulsets',
+                    'storageclasses',
                     'nodes',
+                    'configmaps',
                   ],
                 },
               },
             },
+            helm: {
+              'botkube/helm': {
+                enabled: false,
+              },
+            },
           },
-          image: {
-            repository: 'infracloudio/botkube',
-            tag: 'v0.12.4',
+          communications: {
+            'default-group': {
+              socketSlack: {
+                enabled: true,
+                botToken: config.slackBotToken,
+                appToken: config.slackAppToken,
+                channels: {
+                  default: {
+                    name: config.slackChannelName,
+                    notification: {
+                      disabled: false,
+                    },
+                    bindings: {
+                      executors: ['kubectl-all-ns', 'kubectl-read-only'],
+                      sources: ['k8s-err-with-logs-events', 'k8s-err-events'],
+                      actions: ['show-logs-on-error'],
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },

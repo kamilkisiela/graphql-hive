@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { OrganizationType } from '../../shared/entities';
 import { createConnection } from '../../shared/schema';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
@@ -80,7 +79,6 @@ export const resolvers: OrganizationModule.Resolvers = {
       const user = await injector.get(AuthManager).getCurrentUser();
       const organization = await injector.get(OrganizationManager).createOrganization({
         name: input.name,
-        type: OrganizationType.REGULAR,
         user,
       });
 

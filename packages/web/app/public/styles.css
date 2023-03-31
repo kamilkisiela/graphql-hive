@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: dark;
+}
+
 @layer components {
   *:active,
   *:focus {
@@ -11,7 +15,7 @@
   html,
   body,
   #__next {
-    @apply h-screen w-screen;
+    @apply h-screen;
   }
 
   #__next {
@@ -38,5 +42,69 @@
   .monaco-editor-background,
   [role='presentation'] {
     background: transparent !important;
+  }
+
+  .hive-markdown a {
+    @apply text-orange-500 hover:no-underline;
+  }
+
+  .hive-markdown code {
+    @apply rounded bg-white/10 py-1 px-2 text-orange-500;
+  }
+
+  .hive-loading-indicator {
+    background: linear-gradient(to right, transparent 0%, #f4b740 50%, transparent 100%);
+    animation: 1s ease 0s infinite normal none running loading-indicator;
+  }
+
+  @keyframes loading-indicator {
+    0% {
+      left: -40%;
+    }
+    100% {
+      left: 100%;
+    }
+  }
+
+  .hive-modal {
+    transform: translate(-50%, -50%);
+    box-shadow: hsl(206 22% 7% / 35%) 0 10px 38px -10px, hsl(206 22% 7% / 20%) 0 10px 20px -15px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hive-modal {
+      animation: content-show 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  }
+
+  @keyframes content-show {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -48%) scale(0.96);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hive-modal-overlay {
+      animation: overlay-show 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  }
+
+  @keyframes overlay-show {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  /* hide arrows for <input type="number" /> */
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
   }
 }

@@ -3,6 +3,7 @@ import { AppProps } from 'next/app';
 import Router from 'next/router';
 import Script from 'next/script';
 import cookies from 'js-cookie';
+import { ToastContainer } from 'react-toastify';
 import SuperTokens, { SuperTokensWrapper } from 'supertokens-auth-react';
 import Session from 'supertokens-auth-react/recipe/session';
 import { Provider as UrqlProvider } from 'urql';
@@ -11,30 +12,14 @@ import { frontendConfig } from '@/config/supertokens/frontend';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { env } from '@/env/frontend';
 import * as gtag from '@/lib/gtag';
-import { colors } from '@/lib/theme';
 import { urqlClient } from '@/lib/urql';
-import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 import * as Sentry from '@sentry/nextjs';
 import '../public/styles.css';
-
-const theme = extendTheme({ colors });
-
-declare global {
-  interface Window {
-    $crisp: any;
-  }
-}
+import 'react-toastify/dist/ReactToastify.css';
 
 function identifyOnCrisp(email: string): void {
-  const crisp = globalThis.window.$crisp;
-  if (crisp) {
-    pushIfNotEmpty(crisp, 'user:email', email);
-  }
-}
-
-function pushIfNotEmpty(crisp: any, key: string, value?: string | null): void {
-  if (value) {
-    crisp.push(['set', key, value]);
+  if (email) {
+    window.$crisp?.push(['set', 'user:email', email]);
   }
 }
 
@@ -130,12 +115,12 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
 
       <SuperTokensWrapper>
         <UrqlProvider value={urqlClient}>
-          <ChakraProvider theme={theme}>
-            <LoadingAPIIndicator />
-            <Component {...pageProps} />
-          </ChakraProvider>
+          <LoadingAPIIndicator />
+          <Component {...pageProps} />
         </UrqlProvider>
       </SuperTokensWrapper>
+
+      <ToastContainer hideProgressBar />
     </>
   );
 }

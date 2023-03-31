@@ -48,7 +48,7 @@ type KeyOf<T> = T extends Array<{
   ? K
   : never;
 
-export type PeriodKey = KeyOf<typeof DATE_RANGE_OPTIONS>;
+type PeriodKey = KeyOf<typeof DATE_RANGE_OPTIONS>;
 
 export function calculatePeriod(period: PeriodKey) {
   const now = floorToMinute(new Date());

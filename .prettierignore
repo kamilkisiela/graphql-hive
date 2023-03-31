@@ -9,10 +9,11 @@ __generated__/
 /integration-tests/testkit/gql/
 /packages/services/storage/src/db/types.ts
 /packages/libraries/cli/src/sdk.ts
-/packages/web/app/src/gql/gql.d.ts
-/packages/web/app/src/gql/graphql.ts
+/packages/web/app/src/gql/**
 /packages/web/app/src/graphql/index.ts
 /packages/web/app/next.config.mjs
+/packages/migrations/test/utils/testkit.ts
+/packages/web/app/storybook-static
 
 # test fixtures
 integration-tests/fixtures/init-invalid-schema.graphql

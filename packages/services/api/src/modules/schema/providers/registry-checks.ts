@@ -1,3 +1,4 @@
+import { URL } from 'node:url';
 import { Injectable, Scope } from 'graphql-modules';
 import hashObject from 'object-hash';
 import type { CompositionFailureError } from '@hive/schema';
@@ -10,7 +11,7 @@ import type {
 } from './../../../shared/entities';
 import { Logger } from './../../shared/providers/logger';
 import { Inspector } from './inspector';
-import { extendWithBase, SchemaHelper } from './schema-helper';
+import { ensureSDL, extendWithBase, SchemaHelper } from './schema-helper';
 
 // The reason why I'm using `result` and `reason` instead of just `data` for both:
 // https://bit.ly/hive-check-result-data
@@ -62,7 +63,7 @@ export class RegistryChecks {
     );
     const isInitial = latestVersion === null;
 
-    if (isInitial) {
+    if (isInitial || latestVersion.schemas.length === 0) {
       this.logger.debug('No exiting version');
       return {
         status: 'completed',
@@ -101,10 +102,12 @@ export class RegistryChecks {
     schemas: Schemas;
     baseSchema: string | null;
   }) {
-    const validationErrors = await orchestrator.validate(
+    const result = await orchestrator.composeAndValidate(
       extendWithBase(schemas, baseSchema).map(s => this.helper.createSchemaObject(s)),
       project.externalComposition,
     );
+
+    const validationErrors = result.errors;
 
     if (Array.isArray(validationErrors) && validationErrors.length) {
       this.logger.debug('Detected validation errors');
@@ -123,9 +126,16 @@ export class RegistryChecks {
 
     this.logger.debug('No validation errors');
 
+    if (!result.sdl) {
+      throw new Error('No SDL, but no errors either');
+    }
+
     return {
       status: 'completed',
-      result: null,
+      result: {
+        fullSchemaSdl: result.sdl,
+        supergraph: result.supergraph,
+      },
     } satisfies CheckResult;
   }
 
@@ -133,20 +143,20 @@ export class RegistryChecks {
     orchestrator,
     project,
     schemas,
-    latestVersion,
+    version,
     selector,
   }: {
     orchestrator: Orchestrator;
     project: Project;
     schemas: [SingleSchema] | PushedCompositeSchema[];
-    latestVersion: LatestVersion;
+    version: LatestVersion;
     selector: {
       organization: string;
       project: string;
       target: string;
     };
   }) {
-    if (!latestVersion) {
+    if (!version || version.schemas.length === 0) {
       this.logger.debug('Skipping diff check, no existing version');
       return {
         status: 'skipped',
@@ -155,18 +165,30 @@ export class RegistryChecks {
 
     try {
       const [existingSchema, incomingSchema] = await Promise.all([
-        orchestrator
-          .build(
-            latestVersion.schemas.map(s => this.helper.createSchemaObject(s)),
+        ensureSDL(
+          orchestrator.composeAndValidate(
+            version.schemas.map(s => this.helper.createSchemaObject(s)),
             project.externalComposition,
-          )
-          .then(buildSchema),
-        orchestrator
-          .build(
+          ),
+        ).then(schema => {
+          return buildSchema(
+            this.helper.createSchemaObject({
+              sdl: schema.raw,
+            }),
+          );
+        }),
+        ensureSDL(
+          orchestrator.composeAndValidate(
             schemas.map(s => this.helper.createSchemaObject(s)),
             project.externalComposition,
-          )
-          .then(buildSchema),
+          ),
+        ).then(schema => {
+          return buildSchema(
+            this.helper.createSchemaObject({
+              sdl: schema.raw,
+            }),
+          );
+        }),
       ]);
 
       const changes = await this.inspector.diff(existingSchema, incomingSchema, selector);
@@ -233,6 +255,16 @@ export class RegistryChecks {
     } satisfies CheckResult;
   }
 
+  private isValidURL(url: string): boolean {
+    try {
+      new URL(url);
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async serviceUrl(
     service: { url: string | null },
     existingService: { url: string | null } | null,
@@ -246,6 +278,13 @@ export class RegistryChecks {
     }
 
     this.logger.debug('Service url is defined');
+
+    if (!this.isValidURL(service.url)) {
+      return {
+        status: 'failed',
+        reason: 'Invalid service URL provided',
+      } satisfies CheckResult;
+    }
 
     return {
       status: 'completed',

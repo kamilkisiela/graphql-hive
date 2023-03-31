@@ -1,17 +1,51 @@
-import { ReactElement } from 'react';
-import { gql, useQuery } from 'urql';
-import { Button, CopyValue, Heading, Link, Modal, Tag } from '@/components/v2';
+import { ReactElement, useState } from 'react';
+import { useQuery } from 'urql';
+import {
+  Button,
+  CopyValue,
+  DocsLink,
+  Heading,
+  Link,
+  Modal,
+  RadixSelect,
+  Tag,
+} from '@/components/v2';
+import { graphql } from '@/gql';
+import { ProjectType } from '@/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useRouteSelector } from '@/lib/hooks';
 
-const ConnectSchemaModalQuery = gql(/* GraphQL */ `
+const ConnectSchemaModalQuery = graphql(`
   query ConnectSchemaModal($targetSelector: TargetSelectorInput!) {
     target(selector: $targetSelector) {
       id
+      project {
+        id
+        type
+      }
       cdnUrl
     }
   }
 `);
+
+type CdnArtifactType = 'sdl' | 'services' | 'supergraph' | 'metadata';
+
+const ArtifactToProjectTypeMapping: Record<ProjectType, CdnArtifactType[]> = {
+  [ProjectType.Single]: ['sdl', 'metadata'],
+  [ProjectType.Stitching]: ['sdl', 'services'],
+  [ProjectType.Federation]: ['sdl', 'services', 'supergraph'],
+};
+
+const ArtifactTypeToDisplayName: Record<CdnArtifactType, string> = {
+  sdl: 'GraphQL SDL',
+  services: 'Services Definition and SDL',
+  supergraph: 'Apollo Federation Supergraph',
+  metadata: 'Hive Schema Metadata',
+};
+
+function composeEndpoint(baseUrl: string, artifactType: CdnArtifactType): string {
+  return `${baseUrl}/${artifactType}`;
+}
 
 export const ConnectSchemaModal = ({
   isOpen,
@@ -20,6 +54,7 @@ export const ConnectSchemaModal = ({
   isOpen: boolean;
   toggleModalOpen: () => void;
 }): ReactElement => {
+  const [selectedArtifact, setSelectedArtifact] = useState<CdnArtifactType>('sdl');
   const router = useRouteSelector();
   const [query] = useQuery({
     query: ConnectSchemaModalQuery,
@@ -34,55 +69,82 @@ export const ConnectSchemaModal = ({
   });
 
   return (
-    <Modal open={isOpen} onOpenChange={toggleModalOpen} className="flex w-[650px] flex-col gap-5">
-      <Heading className="text-center">Connect to Hive</Heading>
+    <Modal open={isOpen} onOpenChange={toggleModalOpen} className="flex w-[800px] flex-col gap-5">
+      <Heading className="text-center">Hive CDN Access</Heading>
 
       {query.data?.target && (
         <>
           <p className="text-sm text-gray-500">
-            With high-availability and multi-zone CDN service based on Cloudflare, Hive allows you
-            to access the schema of your API, through a secured external service, that's always up
-            regardless of Hive.
+            Hive leverages the{' '}
+            <Link
+              variant="primary"
+              className="font-bold underline"
+              href="https://www.cloudflare.com/network"
+              target="_blank"
+              rel="noreferrer"
+            >
+              CloudFlare Global Network
+            </Link>{' '}
+            to deliver your GraphQL schema and schema metadata. This means that your schema will be
+            available from the nearest location to your GraphQL gateway, with 100% uptime,
+            regardless of Hive's status.
           </p>
-          <span className="text-sm text-gray-500">You can use the following endpoint:</span>
-          <CopyValue value={query.data.target.cdnUrl} />
+          <p className="text-sm text-gray-500">
+            Based on your project type, you can access different artifacts from Hive's CDN:
+          </p>
+          <div>
+            <RadixSelect
+              placeholder="Select Artifact"
+              name="artifact-select"
+              position="popper"
+              value={selectedArtifact}
+              options={ArtifactToProjectTypeMapping[query.data.target.project.type].map(t => ({
+                value: t,
+                label: ArtifactTypeToDisplayName[t],
+              }))}
+              onChange={setSelectedArtifact}
+            />
+          </div>
           <span className="text-sm text-gray-500">
-            To authenticate, use the access HTTP headers. <br />
+            To access your schema from Hive's CDN, use the following endpoint:
+          </span>
+          <CopyValue value={composeEndpoint(query.data.target.cdnUrl, selectedArtifact)} />
+          <span className="text-sm text-gray-500">
+            To authenticate,{' '}
+            <Link
+              variant="primary"
+              className="font-bold underline"
+              href={`/${router.organizationId}/${router.projectId}/${router.targetId}/settings#cdn-access-tokens`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              create a CDN Access Token from your target's Settings page
+            </Link>{' '}
+            use the CDN access token in your HTTP headers:
+            <br />
           </span>
           <p className="text-sm text-gray-500">
             <Tag>
               X-Hive-CDN-Key: {'<'}Your Access Token{'>'}
             </Tag>
           </p>
-          <p className="text-sm text-gray-500">
-            You can manage and generate CDN access tokens in the{' '}
-            <Link
-              variant="primary"
-              href={
-                '/' +
-                [
-                  router.organizationId,
-                  router.projectId,
-                  router.targetId,
-                  'settings#cdn-access-tokens',
-                ].join('/')
-              }
-            >
-              target settings
-            </Link>
-          </p>
-          <p className="text-sm text-gray-500">
-            Read the{' '}
-            <Link
-              variant="primary"
-              target="_blank"
-              rel="noreferrer"
-              href={getDocsUrl('/features/registry-usage#apollo-federation') ?? ''}
-            >
-              Using the Registry with a Apollo Gateway
-            </Link>{' '}
-            chapter in our documentation.
-          </p>
+          <DocsLink href="/features/high-availability-cdn">
+            Learn more about Hive High-Availability CDN
+          </DocsLink>
+          {query.data.target.project.type === ProjectType.Federation ? (
+            <p className="text-sm text-gray-500">
+              Read the{' '}
+              <Link
+                variant="primary"
+                target="_blank"
+                rel="noreferrer"
+                href={getDocsUrl('/integrations/apollo-gateway#supergraph-sdl-from-the-cdn') ?? ''}
+              >
+                Using the Registry with a Apollo Gateway
+              </Link>{' '}
+              chapter in our documentation.
+            </p>
+          ) : null}
         </>
       )}
       <Button

@@ -1,3 +1,29 @@
-ALTER TABLE public.tokens ADD COLUMN token_alias varchar(64) NOT NULL DEFAULT repeat('*', 64);
-ALTER TABLE public.tokens ALTER COLUMN token TYPE varchar(64);
-UPDATE public.tokens SET token_alias = concat(substring(token from 1 for 3), repeat('*', 26), substring(token from 30 for 3)), token = encode(sha256(token::bytea), 'hex');
+ALTER TABLE
+  public.tokens
+ADD COLUMN
+  token_alias VARCHAR(64) NOT NULL DEFAULT REPEAT('*', 64);
+
+ALTER TABLE
+  public.tokens
+ALTER COLUMN
+  token
+TYPE
+  VARCHAR(64);
+
+UPDATE
+  public.tokens
+SET
+  token_alias = CONCAT(
+    SUBSTRING(
+      token
+      FROM
+        1 FOR 3
+    ),
+    REPEAT('*', 26),
+    SUBSTRING(
+      token
+      FROM
+        30 FOR 3
+    )
+  ),
+  token = ENCODE(SHA256(token::bytea), 'hex');

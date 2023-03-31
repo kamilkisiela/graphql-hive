@@ -1,4 +1,3 @@
-import { paramCase } from 'param-case';
 import {
   DatabasePool,
   DatabasePoolConnection,
@@ -19,7 +18,6 @@ import type {
   OrganizationAccessScope,
   OrganizationBilling,
   OrganizationInvitation,
-  OrganizationType,
   PersistedOperation,
   Project,
   ProjectAccessScope,
@@ -168,7 +166,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         operations: parseInt(organization.limit_operations_monthly),
       },
       billingPlan: organization.plan_name,
-      type: (organization.type === 'PERSONAL' ? 'PERSONAL' : 'REGULAR') as OrganizationType,
       getStarted: {
         id: organization.id,
         creatingProject: organization.get_started_creating_project,
@@ -178,6 +175,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         reportingOperations: organization.get_started_reporting_operations,
         enablingUsageBasedBreakingChanges: organization.get_started_usage_breaking,
       },
+      featureFlags: decodeFeatureFlags(organization.feature_flags),
     };
   }
 
@@ -489,7 +487,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         name,
         user,
         cleanId,
-        type,
         scopes,
         reservedNames,
       }: Parameters<Storage['createOrganization']>[0] & {
@@ -521,9 +518,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const org = await connection.one<Slonik<organizations>>(
         sql`
           INSERT INTO public.organizations
-            ("name", "clean_id", "type", "user_id")
+            ("name", "clean_id", "user_id")
           VALUES
-            (${name}, ${availableCleanId}, ${type}, ${user})
+            (${name}, ${availableCleanId}, ${user})
           RETURNING *
         `,
       );
@@ -602,19 +599,18 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     destroy() {
       return pool.end();
     },
+    async ping() {
+      await pool.exists(sql`SELECT 1`);
+    },
     async ensureUserExists({
       superTokensUserId,
       externalAuthUserId,
       email,
-      scopes,
-      reservedOrgNames,
       oidcIntegration,
     }: {
       superTokensUserId: string;
       externalAuthUserId?: string | null;
       email: string;
-      reservedOrgNames: string[];
-      scopes: Parameters<Storage['createOrganization']>[0]['scopes'];
       oidcIntegration: null | {
         id: string;
         defaultScopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
@@ -637,24 +633,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           action = 'created';
         }
 
-        if (oidcIntegration === null) {
-          const personalOrg = await shared.getOrganization(internalUser.id, t);
-
-          if (!personalOrg) {
-            await shared.createOrganization(
-              {
-                name: internalUser.displayName,
-                user: internalUser.id,
-                cleanId: paramCase(internalUser.displayName),
-                type: 'PERSONAL' as OrganizationType,
-                scopes,
-                reservedNames: reservedOrgNames,
-              },
-              t,
-            );
-            action = 'created';
-          }
-        } else {
+        if (oidcIntegration !== null) {
           // Add user to OIDC linked integration
           await shared.addOrganizationMemberViaOIDCIntegrationId(
             {
@@ -1202,7 +1181,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return org ? transformOrganization(org) : null;
     },
     async getOrganizations({ user }) {
-      const results = await pool.many<Slonik<organizations>>(
+      const results = await pool.query<Slonik<organizations>>(
         sql`
           SELECT o.*
           FROM public.organizations as o
@@ -1211,7 +1190,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           ORDER BY o.created_at DESC
         `,
       );
-      return results.map(transformOrganization);
+
+      return results.rows.map(transformOrganization);
     },
     async getOrganizationByInviteCode({ inviteCode }) {
       const result = await pool.maybeOne<Slonik<organizations>>(
@@ -1726,13 +1706,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         base_schema: version.base_schema,
       };
     },
-    async getLatestSchemas({ organization, project, target }) {
+    async getLatestSchemas({ organization, project, target, onlyComposable }) {
       const latest = await pool.maybeOne<Pick<schema_versions, 'id' | 'is_composable'>>(sql`
         SELECT sv.id, sv.is_composable
         FROM public.schema_versions as sv
         LEFT JOIN public.targets as t ON (t.id = sv.target_id)
         LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
-        WHERE t.id = ${target} AND t.project_id = ${project}
+        WHERE t.id = ${target} AND t.project_id = ${project} AND ${
+        onlyComposable ? sql`sv.is_composable IS TRUE` : true
+      }
         ORDER BY sv.created_at DESC
         LIMIT 1
       `);
@@ -1755,7 +1737,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       };
     },
     async getSchemasOfVersion({ version, includeMetadata = false }) {
-      const results = await pool.many<
+      const result = await pool.query<
         Pick<
           OverrideProp<schema_log, 'action', 'PUSH'>,
           | 'id'
@@ -1798,9 +1780,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `,
       );
 
-      return results.map(transformSchema);
+      return result.rows.map(transformSchema);
     },
-    async getSchemasOfPreviousVersion({ version, target }) {
+    async getSchemasOfPreviousVersion({ version, target, onlyComposable }) {
       const results = await pool.query<
         OverrideProp<schema_log, 'action', 'PUSH'> & Pick<projects, 'type'>
       >(
@@ -1811,7 +1793,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           WHERE svl.version_id = (
             SELECT sv.id FROM public.schema_versions as sv WHERE sv.created_at < (
               SELECT svi.created_at FROM public.schema_versions as svi WHERE svi.id = ${version}
-            ) AND sv.target_id = ${target} ORDER BY sv.created_at DESC LIMIT 1
+            ) AND sv.target_id = ${target} AND ${
+          onlyComposable ? sql`sv.is_composable IS TRUE` : true
+        } ORDER BY sv.created_at DESC LIMIT 1
           ) AND sl.action = 'PUSH'
           ORDER BY sl.created_at DESC
         `,
@@ -1885,47 +1869,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         versions,
         hasMore,
       };
-    },
-    async insertSchema({
-      schema,
-      commit,
-      author,
-      project,
-      projectType,
-      target,
-      service = null,
-      url = null,
-      metadata,
-    }) {
-      const result = await pool.one<OverrideProp<schema_log, 'action', 'PUSH'>>(sql`
-        INSERT INTO public.schema_log
-          (
-            author,
-            service_name,
-            service_url,
-            commit,
-            sdl,
-            project_id,
-            target_id,
-            metadata,
-            action
-          )
-        VALUES
-          (
-            ${author},
-            lower(${service}::text),
-            ${url}::text,
-            ${commit}::text,
-            ${schema}::text,
-            ${project},
-            ${target},
-            ${metadata},
-            'PUSH'
-          )
-        RETURNING *
-      `);
-
-      return transformSchema({ ...result, type: projectType });
     },
     async deleteSchema({ project, target, serviceName, composable }) {
       return pool.transaction(async trx => {
@@ -2012,9 +1955,40 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       });
     },
     async createVersion(input) {
-      const newVersion = await pool.transaction(async trx => {
+      const url = input.url ?? null;
+      const service = input.service ?? null;
+
+      const output = await pool.transaction(async trx => {
+        const log = await pool.one<Pick<schema_log, 'id'>>(sql`
+          INSERT INTO public.schema_log
+            (
+              author,
+              service_name,
+              service_url,
+              commit,
+              sdl,
+              project_id,
+              target_id,
+              metadata,
+              action
+            )
+          VALUES
+            (
+              ${input.author},
+              lower(${service}::text),
+              ${url}::text,
+              ${input.commit}::text,
+              ${input.schema}::text,
+              ${input.project},
+              ${input.target},
+              ${input.metadata},
+              'PUSH'
+            )
+          RETURNING id
+        `);
+
         // creates a new version
-        const newVersion = await trx.one<Slonik<Pick<schema_versions, 'id' | 'created_at'>>>(sql`
+        const version = await trx.one<Slonik<Pick<schema_versions, 'id' | 'created_at'>>>(sql`
           INSERT INTO public.schema_versions
             (
               is_composable,
@@ -2026,7 +2000,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             (
               ${input.valid},
               ${input.target},
-              ${input.commit},
+              ${log.id},
               ${input.base_schema}
             )
           RETURNING
@@ -2035,25 +2009,30 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `);
 
         await Promise.all(
-          input.commits.map(async cid => {
+          input.logIds.concat(log.id).map(async lid => {
             await trx.query(sql`
               INSERT INTO public.schema_version_to_log
                 (version_id, action_id)
               VALUES
-              (${newVersion.id}, ${cid})
+              (${version.id}, ${lid})
             `);
           }),
         );
 
-        return newVersion;
+        await input.actionFn();
+
+        return {
+          version,
+          log,
+        };
       });
 
       return {
-        id: newVersion.id,
-        date: newVersion.created_at as any,
-        url: input.url,
+        id: output.version.id,
+        date: output.version.created_at as any,
+        url,
         valid: input.valid,
-        commit: input.commit,
+        commit: output.log.id,
         base_schema: input.base_schema,
       };
     },
@@ -3117,6 +3096,24 @@ const decodeCDNAccessTokenRecord = (result: unknown): CDNAccessToken => {
     createdAt: rawRecord.created_at,
   };
 };
+
+const FeatureFlagsModel = zod
+  .object({
+    compareToPreviousComposableVersion: zod.boolean().default(false),
+  })
+  .optional()
+  .nullable()
+  .default({})
+  .transform(
+    val =>
+      val ?? {
+        compareToPreviousComposableVersion: false,
+      },
+  );
+
+function decodeFeatureFlags(column: unknown) {
+  return FeatureFlagsModel.parse(column);
+}
 
 /**
  * Calculate a 32 bit FNV-1a hash

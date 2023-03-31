@@ -1,0 +1,72 @@
+diff --git a/dist/composition/compose.js b/dist/composition/compose.js
+index dbf319952c630aa8c0f534e06bd0258e06bcaf8a..101e1afc8803a6899b11e31b2b20faba28c20345 100644
+--- a/dist/composition/compose.js
++++ b/dist/composition/compose.js
+@@ -148,7 +148,17 @@ function buildMapsFromServiceList(serviceList) {
+     };
+ }
+ exports.buildMapsFromServiceList = buildMapsFromServiceList;
++function resolveNamedType(node) {
++    if (node.kind === graphql_1.Kind.LIST_TYPE) {
++        return resolveNamedType(node.type);
++    }
++    if (node.kind === graphql_1.Kind.NON_NULL_TYPE) {
++        return resolveNamedType(node.type);
++    }
++    return node.name.value;
++}
+ function buildSchemaFromDefinitionsAndExtensions({ typeDefinitionsMap, typeExtensionsMap, directiveDefinitionsMap, directiveMetadata, serviceList, }) {
++    var _a, _b;
+     let errors = undefined;
+     const autoIncludedDirectiveDefinitions = directives_1.directivesWithAutoIncludedDefinitions.filter((directive) => directiveMetadata.hasUsages(directive.name));
+     const { FieldSetScalar, JoinFieldDirective, JoinTypeDirective, JoinOwnerDirective, JoinGraphEnum, JoinGraphDirective, } = (0, joinSpec_1.getJoinDefinitions)(serviceList);
+@@ -169,6 +179,34 @@ function buildSchemaFromDefinitionsAndExtensions({ typeDefinitionsMap, typeExten
+     function nodeHasInterfaces(node) {
+         return 'interfaces' in node;
+     }
++    for (const typeName in typeDefinitionsMap) {
++        const typeDefinitions = typeDefinitionsMap[typeName];
++        for (const typeDefinition of typeDefinitions) {
++            if (typeDefinition.kind === graphql_1.Kind.OBJECT_TYPE_DEFINITION) {
++                const fieldNamesToDelete = [];
++                for (const field of (_a = typeDefinition.fields) !== null && _a !== void 0 ? _a : []) {
++                    const fieldTypeName = resolveNamedType(field.type);
++                    if (!typeDefinitionsMap[fieldTypeName] && false === ['ID', 'String', 'Boolean', 'Float', 'Int'].includes(fieldTypeName)) {
++                        if (!typeExtensionsMap[typeName]) {
++                            typeExtensionsMap[typeName] = [];
++                        }
++                        typeExtensionsMap[typeName].push({
++                            kind: graphql_1.Kind.OBJECT_TYPE_EXTENSION,
++                            name: {
++                                kind: graphql_1.Kind.NAME,
++                                value: typeName,
++                            },
++                            fields: [field]
++                        });
++                        fieldNamesToDelete.push(field.name.value);
++                    }
++                }
++                if (fieldNamesToDelete.length > 0) {
++                    typeDefinition.fields = (_b = typeDefinition.fields) === null || _b === void 0 ? void 0 : _b.filter(field => !fieldNamesToDelete.includes(field.name.value));
++                }
++            }
++        }
++    }
+     const definitionsDocument = {
+         kind: graphql_1.Kind.DOCUMENT,
+         definitions: [
+@@ -200,12 +238,13 @@ function buildSchemaFromDefinitionsAndExtensions({ typeDefinitionsMap, typeExten
+             assumeValidSDL: true,
+         });
+     }
+-    catch (e) { }
++    catch { }
+     const extensionsDocument = {
+         kind: graphql_1.Kind.DOCUMENT,
+         definitions: Object.values(typeExtensionsMap).flat(),
+     };
+     errors.push(...(0, validate_1.validateSDL)(extensionsDocument, schema, rules_1.compositionRules));
++    errors = errors.filter((error, index, all) => all.findIndex(e => e.message === error.message) === index);
+     try {
+         schema = (0, graphql_1.extendSchema)(schema, extensionsDocument, {
+             assumeValidSDL: true,
