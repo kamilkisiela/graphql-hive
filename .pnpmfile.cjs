@@ -59,7 +59,7 @@ function readPackage(pkg, context) {
     const workspaceDependencies = Object.entries({
       ...(pkg.dependencies || {}),
       ...(pkg.devDependencies || {}),
-    }).filter(([name, version]) => version === 'workspace:*');
+    }).filter(([name, version]) => version.startsWith('workspace:') || version.startsWith('.'));
 
     if (workspaceDependencies.length === 0) {
       return pkg;

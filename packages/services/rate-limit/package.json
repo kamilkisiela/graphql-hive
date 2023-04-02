@@ -23,7 +23,7 @@
     "zod": "3.21.4"
   },
   "devDependencies": {
-    "@graphql-hive/core": "workspace:*",
+    "@graphql-hive/core": "../../libraries/core",
     "@hive/api": "workspace:*",
     "@hive/emails": "workspace:*",
     "@hive/service-common": "workspace:*",

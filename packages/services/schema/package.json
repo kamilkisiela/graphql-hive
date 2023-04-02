@@ -25,7 +25,7 @@
     "zod": "3.21.4"
   },
   "devDependencies": {
-    "@graphql-hive/external-composition": "workspace:*",
+    "@graphql-hive/external-composition": "../../libraries/external-composition",
     "@hive/service-common": "workspace:*",
     "@types/async-retry": "1.4.5",
     "@types/ioredis-mock": "8.2.1",

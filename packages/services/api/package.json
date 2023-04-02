@@ -43,7 +43,7 @@
     "zod": "3.21.4"
   },
   "devDependencies": {
-    "@graphql-hive/core": "workspace:*",
+    "@graphql-hive/core": "../../libraries/core",
     "@hive/cdn-script": "workspace:*",
     "@types/bcryptjs": "2.4.2",
     "@types/ioredis-mock": "8.2.1",

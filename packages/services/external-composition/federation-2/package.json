@@ -16,7 +16,7 @@
     "zod": "3.21.4"
   },
   "devDependencies": {
-    "@graphql-hive/external-composition": "workspace:*"
+    "@graphql-hive/external-composition": "../../../libraries/external-composition"
   },
   "buildOptions": {
     "runify": true,
