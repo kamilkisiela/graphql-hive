@@ -1206,7 +1206,7 @@ importers:
     specifiers:
       '@next/env': 13.2.4
       '@radix-ui/react-tooltip': 1.0.5
-      '@theguild/components': 4.5.7
+      '@theguild/components': 4.5.8
       '@theguild/tailwind-config': 0.2.1
       '@types/react': 18.0.31
       clsx: 1.2.1
@@ -1221,7 +1221,7 @@ importers:
     dependencies:
       '@next/env': 13.2.4
       '@radix-ui/react-tooltip': 1.0.5_6ayuu6vm2uqggsikytom4xssc4
-      '@theguild/components': 4.5.7_ld2jel3hspngo3u5lti2kgl2sq
+      '@theguild/components': 4.5.8_ld2jel3hspngo3u5lti2kgl2sq
       clsx: 1.2.1
       next: 13.2.4_biqbaboplfbrettd7655fr4n2y
       next-themes: 0.2.1_ld2jel3hspngo3u5lti2kgl2sq
@@ -11901,8 +11901,8 @@ packages:
     dev: false
     patched: true
 
-  /@theguild/components/4.5.7_ld2jel3hspngo3u5lti2kgl2sq:
-    resolution: {integrity: sha512-nh5zOQLaRghXS4psjDt7yGI7QKVt3Ig0VZOlbW3KybZ0IlqrXqDcITdiNwjy+arEbtoEDRqCRal6l4PvWo3Xcg==}
+  /@theguild/components/4.5.8_ld2jel3hspngo3u5lti2kgl2sq:
+    resolution: {integrity: sha512-FogSV0QjfbAnrTJfnn7Yjr7J75zwtSBYXLMneOmh3VBIdherYCums9MxTm7JGHrAzVJz/Gf8B4dQX11ZI0zZ5Q==}
     peerDependencies:
       next: ^12.3.1 || ^13.0.0
       react: ^18.2.0
@@ -11922,12 +11922,12 @@ packages:
       mermaid: 10.0.2
       next: 13.2.4_biqbaboplfbrettd7655fr4n2y
       next-videos: 1.5.0
-      nextra: 2.2.20_ld2jel3hspngo3u5lti2kgl2sq
-      nextra-theme-docs: 2.2.20_mborlevrhep2dwd3wssrtcgtou
+      nextra: 2.3.0_ld2jel3hspngo3u5lti2kgl2sq
+      nextra-theme-docs: 2.3.0_2sg6ajj32xrbwuked4upeu4dxe
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       react-instantsearch-dom: 6.39.1_hat5hgb73khbq5sjh6uehchiaa
-      react-paginate: 8.1.4_react@18.2.0
+      react-paginate: 8.1.5_react@18.2.0
       react-player: 2.12.0_react@18.2.0
       remark-mdx-disable-explicit-jsx: 0.1.0
       search-insights: 2.4.0
@@ -22928,11 +22928,11 @@ packages:
       next: 13.2.4_biqbaboplfbrettd7655fr4n2y
     dev: false
 
-  /nextra-theme-docs/2.2.20_mborlevrhep2dwd3wssrtcgtou:
-    resolution: {integrity: sha512-YbDbpwvLCUnDvq9afP57Zu/fDFbSrsvx5MEZIhKRcrn/eCfo4yIwoMMhdRF0yntB5uTDc4MZ8jqJgb25g2v7QA==}
+  /nextra-theme-docs/2.3.0_2sg6ajj32xrbwuked4upeu4dxe:
+    resolution: {integrity: sha512-KMvHhGOvaKIqR71Gnx+w/1c9LLfpQJ3+fnCAgg9qfjXo2agr1zRKyRDROyY8cGINdslpzmEGgs/MH2gDSAI6nw==}
     peerDependencies:
       next: '>=9.5.3'
-      nextra: 2.2.20
+      nextra: 2.3.0
       react: '>=16.13.1'
       react-dom: '>=16.13.1'
     dependencies:
@@ -22947,15 +22947,16 @@ packages:
       next: 13.2.4_biqbaboplfbrettd7655fr4n2y
       next-seo: 5.14.0_ld2jel3hspngo3u5lti2kgl2sq
       next-themes: 0.2.1_ld2jel3hspngo3u5lti2kgl2sq
-      nextra: 2.2.20_ld2jel3hspngo3u5lti2kgl2sq
+      nextra: 2.3.0_ld2jel3hspngo3u5lti2kgl2sq
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       scroll-into-view-if-needed: 3.0.4
       zod: 3.21.4
     dev: false
 
-  /nextra/2.2.20_ld2jel3hspngo3u5lti2kgl2sq:
-    resolution: {integrity: sha512-V5P5UHvA7GvISziJSEMVV9jCDBm1aMlez3XqKPzvr/aIrugfnIPBhGrFh2YjpXp5FspldgTS8lbZVf36Alonhg==}
+  /nextra/2.3.0_ld2jel3hspngo3u5lti2kgl2sq:
+    resolution: {integrity: sha512-v17vMq2bJa15iKKt9+6AidSeIoKcK1ZlXmwqFqTgc0pQmRrl6pTJaSR36UZKcpMwvvLZ/7/xWuWV/OQB599O3g==}
+    engines: {node: '>=16'}
     peerDependencies:
       next: '>=9.5.3'
       react: '>=16.13.1'
@@ -25409,8 +25410,8 @@ packages:
       react: 18.2.0
     dev: false
 
-  /react-paginate/8.1.4_react@18.2.0:
-    resolution: {integrity: sha512-c3rxjcTEqeDQa6LqXifxLeFguY2qy2CHGRphVjHLFFMGfIHyaJ+v3bOvIlLYEeohwQ1q+cQpknjsqBVrkc/SNA==}
+  /react-paginate/8.1.5_react@18.2.0:
+    resolution: {integrity: sha512-DnwbzimjyCmiregTP8npoHu2HvJ3NDm9+kBM8mx7dOVc66/4lSWzz0uTd1smRSENf1yD7SCZEOMduXbdyxNj1A==}
     peerDependencies:
       react: ^16 || ^17 || ^18
     dependencies:
