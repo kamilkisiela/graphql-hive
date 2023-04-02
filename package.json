@@ -13,10 +13,10 @@
   },
   "license": "MIT",
   "private": true,
-  "packageManager": "pnpm@7.30.5",
+  "packageManager": "pnpm@8.1.0",
   "engines": {
     "node": ">=18",
-    "pnpm": ">=7"
+    "pnpm": ">=8.1.0"
   },
   "scripts": {
     "build": "pnpm turbo build --color",
