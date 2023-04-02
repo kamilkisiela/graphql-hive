@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@graphql-hive/client": "workspace:*",
+    "@graphql-hive/core": "workspace:*",
     "@hive/api": "workspace:*",
     "@hive/cdn-script": "workspace:*",
     "@hive/service-common": "workspace:*",

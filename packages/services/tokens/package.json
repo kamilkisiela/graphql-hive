@@ -22,6 +22,8 @@
     "zod": "3.21.4"
   },
   "devDependencies": {
+    "@graphql-hive/core": "workspace:*",
+    "@hive/api": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
     "@types/ms": "0.7.31",

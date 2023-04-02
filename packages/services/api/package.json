@@ -43,13 +43,7 @@
     "zod": "3.21.4"
   },
   "devDependencies": {
-    "@graphql-hive/core": "0.2.3",
-    "@hive/cdn-script": "workspace:*",
-    "@hive/emails": "workspace:*",
-    "@hive/schema": "workspace:*",
-    "@hive/storage": "workspace:*",
-    "@hive/tokens": "workspace:*",
-    "@hive/webhooks": "workspace:*",
+    "@graphql-hive/core": "workspace:*",
     "@types/bcryptjs": "2.4.2",
     "@types/ioredis-mock": "8.2.1",
     "@types/lodash": "4.14.192",

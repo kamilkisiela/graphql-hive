@@ -73,6 +73,7 @@
     "eslint-plugin-cypress": "2.13.2",
     "eslint-plugin-hive": "file:./rules",
     "eslint-plugin-tailwindcss": "3.10.1",
+    "fast-glob": "3.2.12",
     "graphql": "16.6.0",
     "husky": "8.0.3",
     "jest-snapshot-serializer-raw": "1.2.0",
@@ -113,7 +114,7 @@
       "@oclif/core@1.23.0": "patches/@oclif__core@1.23.0.patch",
       "oclif@3.7.1": "patches/oclif@3.7.1.patch",
       "@slonik/migrator@0.11.3": "patches/@slonik__migrator@0.11.3.patch",
-      "@graphql-inspector/core@4.0.0": "patches/@graphql-inspector__core@4.0.0.patch",
+      "@graphql-inspector/core@4.0.2": "patches/@graphql-inspector__core@4.0.2.patch",
       "@apollo/federation@0.38.1": "patches/@apollo__federation@0.38.1.patch",
       "@octokit/webhooks-methods@3.0.1": "patches/@octokit__webhooks-methods@3.0.1.patch",
       "bullmq@3.10.2": "patches/bullmq@3.10.2.patch"

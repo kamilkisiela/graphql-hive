@@ -8,9 +8,9 @@ patchedDependencies:
   '@apollo/federation@0.38.1':
     hash: rjgakkkphrejw6qrtph4ar24zq
     path: patches/@apollo__federation@0.38.1.patch
-  '@graphql-inspector/core@4.0.0':
+  '@graphql-inspector/core@4.0.2':
     hash: wf35oaq7brzyeva5aoncxac66a
-    path: patches/@graphql-inspector__core@4.0.0.patch
+    path: patches/@graphql-inspector__core@4.0.2.patch
   '@oclif/core@1.23.0':
     hash: zhte2hlj7lfobytjpalcwwo474
     path: patches/@oclif__core@1.23.0.patch
@@ -62,6 +62,7 @@ importers:
       eslint-plugin-cypress: 2.13.2
       eslint-plugin-hive: file:./rules
       eslint-plugin-tailwindcss: 3.10.1
+      fast-glob: 3.2.12
       graphql: 16.6.0
       husky: 8.0.3
       jest-snapshot-serializer-raw: 1.2.0
@@ -103,6 +104,7 @@ importers:
       eslint-plugin-cypress: 2.13.2_eslint@8.37.0
       eslint-plugin-hive: file:rules
       eslint-plugin-tailwindcss: 3.10.1
+      fast-glob: 3.2.12
       graphql: 16.6.0
       husky: 8.0.3
       jest-snapshot-serializer-raw: 1.2.0
@@ -157,7 +159,7 @@ importers:
       '@aws-sdk/client-s3': 3.304.0
       '@esm2cjs/execa': 6.1.1-cjs.1
       '@graphql-hive/client': workspace:*
-      '@graphql-hive/core': 0.2.3
+      '@graphql-hive/core': workspace:*
       '@graphql-typed-document-node/core': 3.2.0
       '@hive/rate-limit': workspace:*
       '@hive/server': workspace:*
@@ -209,7 +211,7 @@ importers:
     specifiers:
       '@graphql-codegen/typescript-graphql-request': 4.5.9
       '@graphql-hive/core': 0.2.3
-      '@graphql-inspector/core': ~4.0.0
+      '@graphql-inspector/core': ~4.0.2
       '@graphql-tools/code-file-loader': ~7.3.6
       '@graphql-tools/graphql-file-loader': ~7.5.5
       '@graphql-tools/json-file-loader': ~7.4.6
@@ -235,7 +237,7 @@ importers:
       tslib: 2.5.0
     dependencies:
       '@graphql-hive/core': link:../core
-      '@graphql-inspector/core': 4.0.0_wf35oaq7brzyeva5aoncxac66a_graphql@16.6.0
+      '@graphql-inspector/core': 4.0.2_wf35oaq7brzyeva5aoncxac66a_graphql@16.6.0
       '@graphql-tools/code-file-loader': 7.3.6_graphql@16.6.0
       '@graphql-tools/graphql-file-loader': 7.5.5_graphql@16.6.0
       '@graphql-tools/json-file-loader': 7.4.6_graphql@16.6.0
@@ -359,14 +361,8 @@ importers:
     specifiers:
       '@aws-sdk/client-s3': 3.304.0
       '@aws-sdk/s3-request-presigner': 3.304.0
-      '@graphql-hive/core': 0.2.3
+      '@graphql-hive/core': workspace:*
       '@graphql-inspector/core': 4.0.2
-      '@hive/cdn-script': workspace:*
-      '@hive/emails': workspace:*
-      '@hive/schema': workspace:*
-      '@hive/storage': workspace:*
-      '@hive/tokens': workspace:*
-      '@hive/webhooks': workspace:*
       '@octokit/app': 13.1.2
       '@sentry/node': 7.44.2
       '@sentry/types': 7.44.2
@@ -377,6 +373,7 @@ importers:
       '@types/bcryptjs': 2.4.2
       '@types/ioredis-mock': 8.2.1
       '@types/lodash': 4.14.192
+      '@types/lodash.sortby': 4.7.7
       '@types/ms': 0.7.31
       '@types/object-hash': 3.0.2
       '@whatwg-node/fetch': 0.8.4
@@ -392,6 +389,7 @@ importers:
       ioredis: 5.3.1
       ioredis-mock: 8.2.7
       lodash: 4.17.21
+      lodash.sortby: 4.7.0
       lru-cache: 7.18.3
       ms: 2.1.3
       object-hash: 3.0.0
@@ -403,7 +401,7 @@ importers:
     dependencies:
       '@aws-sdk/client-s3': 3.304.0
       '@aws-sdk/s3-request-presigner': 3.304.0
-      '@graphql-inspector/core': 4.0.2
+      '@graphql-inspector/core': 4.0.2_wf35oaq7brzyeva5aoncxac66a
       '@octokit/app': 13.1.2
       '@sentry/node': 7.44.2
       '@sentry/types': 7.44.2
@@ -423,6 +421,7 @@ importers:
       graphql-yoga: 3.8.0
       ioredis: 5.3.1
       lodash: 4.17.21
+      lodash.sortby: 4.7.0
       lru-cache: 7.18.3
       ms: 2.1.3
       object-hash: 3.0.0
@@ -432,15 +431,10 @@ importers:
       zod: 3.21.4
     devDependencies:
       '@graphql-hive/core': link:../../libraries/core
-      '@hive/cdn-script': link:../cdn-worker
-      '@hive/emails': link:../emails
-      '@hive/schema': link:../schema
-      '@hive/storage': link:../storage
-      '@hive/tokens': link:../tokens
-      '@hive/webhooks': link:../webhooks
       '@types/bcryptjs': 2.4.2
       '@types/ioredis-mock': 8.2.1
       '@types/lodash': 4.14.192
+      '@types/lodash.sortby': 4.7.7
       '@types/ms': 0.7.31
       '@types/object-hash': 3.0.2
       ioredis-mock: 8.2.7_6jydlboc7eyi5xrsjrlqeddf74
@@ -476,6 +470,7 @@ importers:
   packages/services/cdn-worker:
     specifiers:
       '@cloudflare/workers-types': 4.20230321.0
+      '@types/bcryptjs': 2.4.2
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.8.4
       '@whatwg-node/server': 0.7.5
@@ -486,15 +481,19 @@ importers:
       graphql: 16.6.0
       itty-router: 2.6.6
       itty-router-extras: 0.4.2
+      pino-pretty: 10.0.0
       toucan-js: 3.1.0
+      tslib: 2.5.0
       zod: 3.21.4
     dependencies:
       bcryptjs: 2.4.3
       graphql: 16.6.0
       toucan-js: 3.1.0
+      tslib: 2.5.0
       zod: 3.21.4
     devDependencies:
       '@cloudflare/workers-types': 4.20230321.0
+      '@types/bcryptjs': 2.4.2
       '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.8.4
       '@whatwg-node/server': 0.7.5
@@ -503,11 +502,15 @@ importers:
       fastify: 3.29.5
       itty-router: 2.6.6
       itty-router-extras: 0.4.2
+      pino-pretty: 10.0.0
 
   packages/services/emails:
     specifiers:
       '@hive/service-common': workspace:*
       '@sentry/node': 7.44.2
+      '@sentry/tracing': 7.44.2
+      '@sentry/types': 7.44.2
+      '@sentry/utils': 7.44.2
       '@trpc/server': 10.18.0
       '@types/mjml': 4.7.0
       '@types/nodemailer': 6.4.7
@@ -516,11 +519,15 @@ importers:
       bullmq: 3.10.2
       copyfiles: 2.4.1
       dotenv: 16.0.3
+      fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       ioredis: 5.3.1
       mjml: 4.13.0
       nodemailer: 6.9.1
       p-timeout: 6.1.1
       pino-pretty: 10.0.0
+      prom-client: 14.2.0
       sendmail: 1.6.1
       tslib: 2.5.0
       zod: 3.21.4
@@ -530,14 +537,21 @@ importers:
       '@whatwg-node/fetch': 0.8.4
       bullmq: 3.10.2_kobtuuqaglbtaadx3jiqtahl3i
       dotenv: 16.0.3
+      fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       ioredis: 5.3.1
       mjml: 4.13.0
       nodemailer: 6.9.1
       p-timeout: 6.1.1
+      prom-client: 14.2.0
       sendmail: 1.6.1
       zod: 3.21.4
     devDependencies:
       '@hive/service-common': link:../service-common
+      '@sentry/tracing': 7.44.2
+      '@sentry/types': 7.44.2
+      '@sentry/utils': 7.44.2
       '@types/mjml': 4.7.0
       '@types/nodemailer': 6.4.7
       '@types/sendmail': 1.4.4
@@ -548,9 +562,12 @@ importers:
   packages/services/external-composition/federation-2:
     specifiers:
       '@apollo/composition': ^2.2.2
+      '@apollo/federation': 0.38.1
       '@graphql-hive/external-composition': workspace:*
       '@whatwg-node/fetch': ^0.8.0
       '@whatwg-node/server': ^0.7.0
+      esbuild: 0.17.14
+      fastify: 3.29.5
       graphql: ^16.6.0
       lru-cache: ^7.17.0
       zod: 3.21.4
@@ -562,7 +579,10 @@ importers:
       lru-cache: 7.17.0
       zod: 3.21.4
     devDependencies:
+      '@apollo/federation': 0.38.1_rjgakkkphrejw6qrtph4ar24zq_graphql@16.6.0
       '@graphql-hive/external-composition': link:../../../libraries/external-composition
+      esbuild: 0.17.14
+      fastify: 3.29.5
 
   packages/services/police-worker:
     specifiers:
@@ -576,38 +596,144 @@ importers:
 
   packages/services/rate-limit:
     specifiers:
+      '@aws-sdk/client-s3': 3.304.0
+      '@aws-sdk/s3-request-presigner': 3.304.0
+      '@graphql-hive/core': workspace:*
+      '@graphql-inspector/core': 4.0.2
+      '@hive/api': workspace:*
       '@hive/emails': workspace:*
       '@hive/service-common': workspace:*
       '@hive/storage': workspace:*
+      '@octokit/app': 13.1.2
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
+      '@sentry/types': 7.44.2
+      '@sentry/utils': 7.44.2
+      '@slack/web-api': 6.8.1
+      '@tgriesser/schemats': 8.0.2
+      '@theguild/buddy': 0.1.0
       '@trpc/client': 10.18.0
       '@trpc/server': 10.18.0
+      '@types/bcryptjs': 2.4.2
+      '@types/ioredis-mock': 8.2.1
+      '@types/lodash': 4.14.192
+      '@types/lodash.sortby': 4.7.7
+      '@types/mjml': 4.7.0
+      '@types/ms': 0.7.31
+      '@types/node': 18.15.11
+      '@types/nodemailer': 6.4.7
+      '@types/object-hash': 3.0.2
+      '@types/pg': 8.6.6
+      '@types/sendmail': 1.4.4
       '@whatwg-node/fetch': 0.8.4
+      agentkeepalive: 4.3.0
+      bcryptjs: 2.4.3
+      bullmq: 3.10.2
+      copyfiles: 2.4.1
+      dataloader: 2.2.2
       date-fns: 2.29.3
       dotenv: 16.0.3
+      fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       got: 12.6.0
+      graphql-modules: 2.1.2
+      graphql-parse-resolve-info: 4.13.0
+      graphql-scalars: 1.21.3
+      graphql-yoga: 3.8.0
+      ioredis: 5.3.1
+      ioredis-mock: 8.2.7
+      lodash: 4.17.21
+      lodash.sortby: 4.7.0
+      lru-cache: 7.18.3
+      mjml: 4.13.0
+      ms: 2.1.3
+      nodemailer: 6.9.1
+      object-hash: 3.0.0
+      p-timeout: 6.1.1
+      param-case: 3.0.4
+      pg-promise: 11.4.3
       pino-pretty: 10.0.0
+      prom-client: 14.2.0
       reflect-metadata: 0.1.13
+      sendmail: 1.6.1
+      slonik: 30.4.4
+      slonik-interceptor-query-logging: 1.4.7
+      slonik-utilities: 1.9.4
+      supertokens-node: 13.3.0
       tslib: 2.5.0
+      typescript: 5.0.2
       zod: 3.21.4
     dependencies:
+      '@aws-sdk/client-s3': 3.304.0
+      '@aws-sdk/s3-request-presigner': 3.304.0
+      '@graphql-inspector/core': 4.0.2_wf35oaq7brzyeva5aoncxac66a
+      '@octokit/app': 13.1.2
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
+      '@sentry/types': 7.44.2
+      '@slack/web-api': 6.8.1
+      '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
       '@trpc/client': 10.18.0_@trpc+server@10.18.0
       '@trpc/server': 10.18.0
-      '@whatwg-node/fetch': 0.8.4
+      '@whatwg-node/fetch': 0.8.4_@types+node@18.15.11
+      agentkeepalive: 4.3.0
+      bcryptjs: 2.4.3
+      bullmq: 3.10.2_kobtuuqaglbtaadx3jiqtahl3i
+      dataloader: 2.2.2
       date-fns: 2.29.3
       dotenv: 16.0.3
+      fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       got: 12.6.0
+      graphql-modules: 2.1.2
+      graphql-parse-resolve-info: 4.13.0
+      graphql-scalars: 1.21.3
+      graphql-yoga: 3.8.0_@types+node@18.15.11
+      ioredis: 5.3.1
+      lodash: 4.17.21
+      lodash.sortby: 4.7.0
+      lru-cache: 7.18.3
+      mjml: 4.13.0
+      ms: 2.1.3
+      nodemailer: 6.9.1
+      object-hash: 3.0.0
+      p-timeout: 6.1.1
+      param-case: 3.0.4
+      prom-client: 14.2.0
       reflect-metadata: 0.1.13
+      sendmail: 1.6.1
+      slonik: 30.4.4
+      slonik-interceptor-query-logging: 1.4.7_slonik@30.4.4
+      slonik-utilities: 1.9.4_slonik@30.4.4
+      supertokens-node: 13.3.0
       zod: 3.21.4
     devDependencies:
+      '@graphql-hive/core': link:../../libraries/core
+      '@hive/api': link:../api
       '@hive/emails': link:../emails
       '@hive/service-common': link:../service-common
       '@hive/storage': link:../storage
+      '@sentry/utils': 7.44.2
+      '@tgriesser/schemats': 8.0.2
+      '@types/bcryptjs': 2.4.2
+      '@types/ioredis-mock': 8.2.1
+      '@types/lodash': 4.14.192
+      '@types/lodash.sortby': 4.7.7
+      '@types/mjml': 4.7.0
+      '@types/ms': 0.7.31
+      '@types/node': 18.15.11
+      '@types/nodemailer': 6.4.7
+      '@types/object-hash': 3.0.2
+      '@types/pg': 8.6.6
+      '@types/sendmail': 1.4.4
+      copyfiles: 2.4.1
+      ioredis-mock: 8.2.7_6jydlboc7eyi5xrsjrlqeddf74
+      pg-promise: 11.4.3
       pino-pretty: 10.0.0
       tslib: 2.5.0
+      typescript: 5.0.2
 
   packages/services/schema:
     specifiers:
@@ -618,18 +744,24 @@ importers:
       '@hive/service-common': workspace:*
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
+      '@sentry/types': 7.44.2
+      '@sentry/utils': 7.44.2
       '@trpc/server': 10.18.0
       '@types/async-retry': 1.4.5
       '@types/ioredis-mock': 8.2.1
       '@whatwg-node/fetch': 0.8.4
       dotenv: 16.0.3
+      esbuild: 0.17.14
       fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       got: 12.6.0
       graphql: 16.6.0
       ioredis: 5.3.1
       ioredis-mock: 8.2.7
       p-timeout: 6.1.1
       pino-pretty: 10.0.0
+      prom-client: 14.2.0
       zod: 3.21.4
     dependencies:
       '@apollo/federation': 0.38.1_rjgakkkphrejw6qrtph4ar24zq_graphql@16.6.0
@@ -640,22 +772,34 @@ importers:
       '@trpc/server': 10.18.0
       '@whatwg-node/fetch': 0.8.4
       dotenv: 16.0.3
+      fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       got: 12.6.0
       graphql: 16.6.0
       ioredis: 5.3.1
       p-timeout: 6.1.1
+      prom-client: 14.2.0
       zod: 3.21.4
     devDependencies:
       '@graphql-hive/external-composition': link:../../libraries/external-composition
       '@hive/service-common': link:../service-common
+      '@sentry/types': 7.44.2
+      '@sentry/utils': 7.44.2
       '@types/async-retry': 1.4.5
       '@types/ioredis-mock': 8.2.1
-      fastify: 3.29.5
+      esbuild: 0.17.14
       ioredis-mock: 8.2.7_6jydlboc7eyi5xrsjrlqeddf74
       pino-pretty: 10.0.0
 
   packages/services/server:
     specifiers:
+      '@apollo/federation': 0.38.1
+      '@apollo/server': 4.5.0
+      '@apollo/subgraph': 2.4.0
+      '@aws-sdk/client-s3': 3.304.0
+      '@aws-sdk/s3-request-presigner': 3.304.0
+      '@cloudflare/workers-types': 4.20230321.0
       '@envelop/core': 3.0.6
       '@envelop/generic-auth': 5.0.6
       '@envelop/graphql-modules': 4.0.6
@@ -666,62 +810,170 @@ importers:
       '@escape.tech/graphql-armor-max-directives': 1.6.4
       '@escape.tech/graphql-armor-max-tokens': 1.3.1
       '@graphql-hive/client': workspace:*
+      '@graphql-hive/core': ^0.2.3
+      '@graphql-inspector/core': 4.0.2
+      '@graphql-tools/utils': ^9.0.0
       '@hive/api': workspace:*
       '@hive/cdn-script': workspace:*
       '@hive/service-common': workspace:*
       '@hive/storage': workspace:*
+      '@octokit/app': 13.1.2
       '@sentry/integrations': 7.44.2
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
+      '@sentry/types': 7.44.2
+      '@sentry/utils': 7.44.2
+      '@slack/web-api': 6.8.1
       '@swc/core': 1.3.44
+      '@tgriesser/schemats': 8.0.2
+      '@theguild/buddy': 0.1.0
+      '@trpc/client': 10.18.0
       '@trpc/server': 10.18.0
+      '@types/async-retry': 1.4.5
+      '@types/bcryptjs': 2.4.2
+      '@types/ioredis-mock': 8.2.1
+      '@types/lodash': 4.14.192
+      '@types/lodash.sortby': 4.7.7
+      '@types/ms': 0.7.31
+      '@types/node': 18.15.11
+      '@types/object-hash': 3.0.2
+      '@types/pg': 8.6.6
+      '@types/service-worker-mock': 2.0.1
       '@whatwg-node/fetch': 0.8.4
       '@whatwg-node/server': 0.7.5
+      agentkeepalive: 4.3.0
+      async-retry: 1.3.3
+      axios: ^1.2.1
+      bcryptjs: 2.4.3
+      dataloader: 2.2.2
+      date-fns: 2.29.3
       dotenv: 16.0.3
+      esbuild: 0.17.14
       fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       got: 12.6.0
       graphql: 16.6.0
+      graphql-modules: 2.1.2
+      graphql-parse-resolve-info: 4.13.0
+      graphql-scalars: 1.21.3
       graphql-yoga: 3.8.0
       hyperid: 3.1.1
+      ioredis: 5.3.1
+      ioredis-mock: 8.2.7
+      itty-router: 2.6.6
+      itty-router-extras: 0.4.2
+      lodash: 4.17.21
+      lodash.sortby: 4.7.0
+      lru-cache: 7.18.3
+      ms: 2.1.3
+      nock: 13.3.0
+      object-hash: 3.0.0
+      param-case: 3.0.4
+      pg-promise: 11.4.3
       pino-pretty: 10.0.0
       prom-client: 14.2.0
       reflect-metadata: 0.1.13
+      slonik: 30.4.4
+      slonik-interceptor-query-logging: 1.4.7
+      slonik-utilities: 1.9.4
+      supertokens-node: 13.3.0
+      tiny-lru: 8.0.2
+      toucan-js: 3.1.0
       tslib: 2.5.0
+      typescript: 5.0.2
       zod: 3.21.4
     dependencies:
+      '@aws-sdk/client-s3': 3.304.0
+      '@aws-sdk/s3-request-presigner': 3.304.0
       '@envelop/core': 3.0.6
       '@envelop/generic-auth': 5.0.6_adj6itjezth6avcd67ktx7eo6a
-      '@envelop/graphql-modules': 4.0.6_adj6itjezth6avcd67ktx7eo6a
+      '@envelop/graphql-modules': 4.0.6_ntyon3cywamj3ez5qei6hx6s4y
       '@envelop/sentry': 5.1.1_ms2ykyfyuimoegg7bnfjofyhye
       '@envelop/types': 3.0.2
       '@escape.tech/graphql-armor-max-aliases': 1.7.1
       '@escape.tech/graphql-armor-max-depth': 1.8.3
       '@escape.tech/graphql-armor-max-directives': 1.6.4
       '@escape.tech/graphql-armor-max-tokens': 1.3.1
+      '@graphql-hive/core': link:../../libraries/core
+      '@graphql-inspector/core': 4.0.2_wf35oaq7brzyeva5aoncxac66a_graphql@16.6.0
+      '@graphql-tools/utils': 9.2.1_graphql@16.6.0
+      '@octokit/app': 13.1.2
       '@sentry/integrations': 7.44.2
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
+      '@sentry/types': 7.44.2
+      '@slack/web-api': 6.8.1
+      '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
+      '@trpc/client': 10.18.0_@trpc+server@10.18.0
       '@trpc/server': 10.18.0
-      '@whatwg-node/fetch': 0.8.4
-      '@whatwg-node/server': 0.7.5
+      '@whatwg-node/fetch': 0.8.4_@types+node@18.15.11
+      '@whatwg-node/server': 0.7.5_@types+node@18.15.11
+      agentkeepalive: 4.3.0
+      async-retry: 1.3.3
+      axios: 1.2.1
+      bcryptjs: 2.4.3
+      dataloader: 2.2.2
+      date-fns: 2.29.3
       dotenv: 16.0.3
+      fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       got: 12.6.0
       graphql: 16.6.0
-      graphql-yoga: 3.8.0_graphql@16.6.0
+      graphql-modules: 2.1.2_graphql@16.6.0
+      graphql-parse-resolve-info: 4.13.0_graphql@16.6.0
+      graphql-scalars: 1.21.3_graphql@16.6.0
+      graphql-yoga: 3.8.0_3q6avhgaaacez4ctqk4xik246q
       hyperid: 3.1.1
+      ioredis: 5.3.1
+      lodash: 4.17.21
+      lodash.sortby: 4.7.0
+      lru-cache: 7.18.3
+      ms: 2.1.3
+      object-hash: 3.0.0
+      param-case: 3.0.4
       prom-client: 14.2.0
       reflect-metadata: 0.1.13
+      slonik: 30.4.4
+      slonik-interceptor-query-logging: 1.4.7_slonik@30.4.4
+      slonik-utilities: 1.9.4_slonik@30.4.4
+      supertokens-node: 13.3.0
+      tiny-lru: 8.0.2
+      toucan-js: 3.1.0
+      tslib: 2.5.0
       zod: 3.21.4
     devDependencies:
+      '@apollo/federation': 0.38.1_rjgakkkphrejw6qrtph4ar24zq_graphql@16.6.0
+      '@apollo/server': 4.5.0_graphql@16.6.0
+      '@apollo/subgraph': 2.4.0_graphql@16.6.0
+      '@cloudflare/workers-types': 4.20230321.0
       '@graphql-hive/client': link:../../libraries/client
       '@hive/api': link:../api
       '@hive/cdn-script': link:../cdn-worker
       '@hive/service-common': link:../service-common
       '@hive/storage': link:../storage
+      '@sentry/utils': 7.44.2
       '@swc/core': 1.3.44
-      fastify: 3.29.5
+      '@tgriesser/schemats': 8.0.2
+      '@types/async-retry': 1.4.5
+      '@types/bcryptjs': 2.4.2
+      '@types/ioredis-mock': 8.2.1
+      '@types/lodash': 4.14.192
+      '@types/lodash.sortby': 4.7.7
+      '@types/ms': 0.7.31
+      '@types/node': 18.15.11
+      '@types/object-hash': 3.0.2
+      '@types/pg': 8.6.6
+      '@types/service-worker-mock': 2.0.1
+      esbuild: 0.17.14
+      ioredis-mock: 8.2.7_6jydlboc7eyi5xrsjrlqeddf74
+      itty-router: 2.6.6
+      itty-router-extras: 0.4.2
+      nock: 13.3.0
+      pg-promise: 11.4.3
       pino-pretty: 10.0.0
-      tslib: 2.5.0
+      typescript: 5.0.2
 
   packages/services/service-common:
     specifiers:
@@ -729,10 +981,12 @@ importers:
       '@sentry/tracing': 7.44.2
       '@sentry/types': 7.44.2
       '@sentry/utils': 7.44.2
+      '@trpc/server': 10.18.0
       '@whatwg-node/fetch': 0.8.4
       fastify: 3.29.5
       fastify-cors: 6.0.2
       fastify-plugin: 3.0.1
+      pino-pretty: 10.0.0
       prom-client: 14.2.0
       zod: 3.21.4
     dependencies:
@@ -747,6 +1001,8 @@ importers:
       '@sentry/tracing': 7.44.2
       '@sentry/types': 7.44.2
       '@sentry/utils': 7.44.2
+      '@trpc/server': 10.18.0
+      pino-pretty: 10.0.0
 
   packages/services/storage:
     specifiers:
@@ -791,87 +1047,224 @@ importers:
       '@hive/storage': workspace:*
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
+      '@sentry/types': 7.44.2
+      '@sentry/utils': 7.44.2
+      '@tgriesser/schemats': 8.0.2
+      '@theguild/buddy': 0.1.0
       '@trpc/client': 10.18.0
       '@trpc/server': 10.18.0
+      '@types/node': 18.15.11
+      '@types/pg': 8.6.6
       '@whatwg-node/fetch': 0.8.4
       date-fns: 2.29.3
       dotenv: 16.0.3
+      fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       got: 12.6.0
+      param-case: 3.0.4
+      pg-promise: 11.4.3
       pino-pretty: 10.0.0
+      prom-client: 14.2.0
       reflect-metadata: 0.1.13
+      slonik: 30.4.4
+      slonik-interceptor-query-logging: 1.4.7
+      slonik-utilities: 1.9.4
       stripe: 11.16.0
+      tslib: 2.5.0
+      typescript: 5.0.2
       zod: 3.21.4
     dependencies:
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
+      '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
       '@trpc/client': 10.18.0_@trpc+server@10.18.0
       '@trpc/server': 10.18.0
-      '@whatwg-node/fetch': 0.8.4
+      '@whatwg-node/fetch': 0.8.4_@types+node@18.15.11
       date-fns: 2.29.3
       dotenv: 16.0.3
+      fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       got: 12.6.0
+      param-case: 3.0.4
+      prom-client: 14.2.0
       reflect-metadata: 0.1.13
+      slonik: 30.4.4
+      slonik-interceptor-query-logging: 1.4.7_slonik@30.4.4
+      slonik-utilities: 1.9.4_slonik@30.4.4
       stripe: 11.16.0
       zod: 3.21.4
     devDependencies:
       '@hive/service-common': link:../service-common
       '@hive/storage': link:../storage
+      '@sentry/types': 7.44.2
+      '@sentry/utils': 7.44.2
+      '@tgriesser/schemats': 8.0.2
+      '@types/node': 18.15.11
+      '@types/pg': 8.6.6
+      pg-promise: 11.4.3
       pino-pretty: 10.0.0
+      tslib: 2.5.0
+      typescript: 5.0.2
 
   packages/services/tokens:
     specifiers:
+      '@aws-sdk/client-s3': 3.304.0
+      '@aws-sdk/s3-request-presigner': 3.304.0
+      '@graphql-hive/core': workspace:*
+      '@graphql-inspector/core': 4.0.2
+      '@hive/api': workspace:*
       '@hive/service-common': workspace:*
       '@hive/storage': workspace:*
+      '@octokit/app': 13.1.2
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
+      '@sentry/types': 7.44.2
+      '@sentry/utils': 7.44.2
+      '@slack/web-api': 6.8.1
+      '@tgriesser/schemats': 8.0.2
+      '@theguild/buddy': 0.1.0
+      '@trpc/client': 10.18.0
       '@trpc/server': 10.18.0
+      '@types/bcryptjs': 2.4.2
+      '@types/ioredis-mock': 8.2.1
+      '@types/lodash': 4.14.192
+      '@types/lodash.sortby': 4.7.7
       '@types/ms': 0.7.31
+      '@types/node': 18.15.11
+      '@types/object-hash': 3.0.2
+      '@types/pg': 8.6.6
+      '@whatwg-node/fetch': 0.8.4
+      agentkeepalive: 4.3.0
+      bcryptjs: 2.4.3
+      dataloader: 2.2.2
+      date-fns: 2.29.3
       dotenv: 16.0.3
       fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
+      got: 12.6.0
+      graphql-modules: 2.1.2
+      graphql-parse-resolve-info: 4.13.0
+      graphql-scalars: 1.21.3
+      graphql-yoga: 3.8.0
       ioredis: 5.3.1
+      ioredis-mock: 8.2.7
+      lodash: 4.17.21
+      lodash.sortby: 4.7.0
+      lru-cache: 7.18.3
       ms: 2.1.3
+      object-hash: 3.0.0
       p-timeout: 6.1.1
+      param-case: 3.0.4
+      pg-promise: 11.4.3
       pino-pretty: 10.0.0
+      prom-client: 14.2.0
       reflect-metadata: 0.1.13
+      slonik: 30.4.4
+      slonik-interceptor-query-logging: 1.4.7
+      slonik-utilities: 1.9.4
+      supertokens-node: 13.3.0
       tiny-lru: 8.0.2
       tslib: 2.5.0
+      typescript: 5.0.2
       zod: 3.21.4
     dependencies:
+      '@aws-sdk/client-s3': 3.304.0
+      '@aws-sdk/s3-request-presigner': 3.304.0
+      '@graphql-inspector/core': 4.0.2_wf35oaq7brzyeva5aoncxac66a
+      '@octokit/app': 13.1.2
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
+      '@sentry/types': 7.44.2
+      '@slack/web-api': 6.8.1
+      '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
+      '@trpc/client': 10.18.0_@trpc+server@10.18.0
       '@trpc/server': 10.18.0
+      '@whatwg-node/fetch': 0.8.4_@types+node@18.15.11
+      agentkeepalive: 4.3.0
+      bcryptjs: 2.4.3
+      dataloader: 2.2.2
+      date-fns: 2.29.3
       dotenv: 16.0.3
+      fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
+      got: 12.6.0
+      graphql-modules: 2.1.2
+      graphql-parse-resolve-info: 4.13.0
+      graphql-scalars: 1.21.3
+      graphql-yoga: 3.8.0_@types+node@18.15.11
       ioredis: 5.3.1
+      lodash: 4.17.21
+      lodash.sortby: 4.7.0
+      lru-cache: 7.18.3
       ms: 2.1.3
+      object-hash: 3.0.0
       p-timeout: 6.1.1
+      param-case: 3.0.4
+      prom-client: 14.2.0
       reflect-metadata: 0.1.13
+      slonik: 30.4.4
+      slonik-interceptor-query-logging: 1.4.7_slonik@30.4.4
+      slonik-utilities: 1.9.4_slonik@30.4.4
+      supertokens-node: 13.3.0
       tiny-lru: 8.0.2
       zod: 3.21.4
     devDependencies:
+      '@graphql-hive/core': link:../../libraries/core
+      '@hive/api': link:../api
       '@hive/service-common': link:../service-common
       '@hive/storage': link:../storage
+      '@sentry/utils': 7.44.2
+      '@tgriesser/schemats': 8.0.2
+      '@types/bcryptjs': 2.4.2
+      '@types/ioredis-mock': 8.2.1
+      '@types/lodash': 4.14.192
+      '@types/lodash.sortby': 4.7.7
       '@types/ms': 0.7.31
-      fastify: 3.29.5
+      '@types/node': 18.15.11
+      '@types/object-hash': 3.0.2
+      '@types/pg': 8.6.6
+      ioredis-mock: 8.2.7_6jydlboc7eyi5xrsjrlqeddf74
+      pg-promise: 11.4.3
       pino-pretty: 10.0.0
       tslib: 2.5.0
+      typescript: 5.0.2
 
   packages/services/usage:
     specifiers:
+      '@graphql-hive/core': workspace:*
+      '@hive/api': workspace:*
       '@hive/service-common': workspace:*
+      '@hive/storage': workspace:*
       '@hive/tokens': workspace:*
       '@hive/usage-common': workspace:*
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
+      '@sentry/types': 7.44.2
+      '@sentry/utils': 7.44.2
       '@trpc/client': 10.18.0
       '@trpc/server': 10.18.0
+      '@types/ms': 0.7.31
       '@whatwg-node/fetch': 0.8.4
       ajv: 8.12.0
       dotenv: 16.0.3
+      fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       got: 12.6.0
       graphql: 16.6.0
+      ioredis: 5.3.1
       kafkajs: 2.2.4
+      ms: 2.1.3
+      p-timeout: 6.1.1
       pino-pretty: 10.0.0
+      prom-client: 14.2.0
+      reflect-metadata: 0.1.13
       tiny-lru: 8.0.2
+      tslib: 2.5.0
       zod: 3.21.4
     dependencies:
       '@sentry/node': 7.44.2
@@ -881,16 +1274,31 @@ importers:
       '@whatwg-node/fetch': 0.8.4
       ajv: 8.12.0
       dotenv: 16.0.3
+      fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       got: 12.6.0
       graphql: 16.6.0
+      ioredis: 5.3.1
       kafkajs: 2.2.4
+      ms: 2.1.3
+      p-timeout: 6.1.1
+      prom-client: 14.2.0
+      reflect-metadata: 0.1.13
       tiny-lru: 8.0.2
       zod: 3.21.4
     devDependencies:
+      '@graphql-hive/core': link:../../libraries/core
+      '@hive/api': link:../api
       '@hive/service-common': link:../service-common
+      '@hive/storage': link:../storage
       '@hive/tokens': link:../tokens
       '@hive/usage-common': link:../usage-common
+      '@sentry/types': 7.44.2
+      '@sentry/utils': 7.44.2
+      '@types/ms': 0.7.31
       pino-pretty: 10.0.0
+      tslib: 2.5.0
 
   packages/services/usage-common:
     specifiers:
@@ -900,65 +1308,159 @@ importers:
 
   packages/services/usage-estimator:
     specifiers:
+      '@aws-sdk/client-s3': 3.304.0
+      '@aws-sdk/s3-request-presigner': 3.304.0
+      '@graphql-hive/core': workspace:*
+      '@graphql-inspector/core': 4.0.2
       '@hive/api': workspace:*
       '@hive/service-common': workspace:*
+      '@octokit/app': 13.1.2
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
+      '@sentry/types': 7.44.2
+      '@sentry/utils': 7.44.2
+      '@slack/web-api': 6.8.1
+      '@theguild/buddy': 0.1.0
+      '@trpc/client': 10.18.0
       '@trpc/server': 10.18.0
+      '@types/bcryptjs': 2.4.2
+      '@types/ioredis-mock': 8.2.1
+      '@types/lodash': 4.14.192
+      '@types/lodash.sortby': 4.7.7
+      '@types/ms': 0.7.31
+      '@types/object-hash': 3.0.2
       '@whatwg-node/fetch': 0.8.4
+      agentkeepalive: 4.3.0
+      bcryptjs: 2.4.3
+      dataloader: 2.2.2
+      date-fns: 2.29.3
       dotenv: 16.0.3
+      fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       got: 12.6.0
+      graphql-modules: 2.1.2
+      graphql-parse-resolve-info: 4.13.0
+      graphql-scalars: 1.21.3
+      graphql-yoga: 3.8.0
+      ioredis: 5.3.1
+      ioredis-mock: 8.2.7
+      lodash: 4.17.21
+      lodash.sortby: 4.7.0
+      lru-cache: 7.18.3
+      ms: 2.1.3
+      object-hash: 3.0.0
+      param-case: 3.0.4
       pino-pretty: 10.0.0
+      prom-client: 14.2.0
       reflect-metadata: 0.1.13
+      supertokens-node: 13.3.0
       tslib: 2.5.0
       zod: 3.21.4
     dependencies:
+      '@aws-sdk/client-s3': 3.304.0
+      '@aws-sdk/s3-request-presigner': 3.304.0
+      '@graphql-inspector/core': 4.0.2_wf35oaq7brzyeva5aoncxac66a
+      '@octokit/app': 13.1.2
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
+      '@sentry/types': 7.44.2
+      '@slack/web-api': 6.8.1
+      '@theguild/buddy': 0.1.0_ryylgra5xglhidfoiaxehn22hq
+      '@trpc/client': 10.18.0_@trpc+server@10.18.0
       '@trpc/server': 10.18.0
       '@whatwg-node/fetch': 0.8.4
+      agentkeepalive: 4.3.0
+      bcryptjs: 2.4.3
+      dataloader: 2.2.2
+      date-fns: 2.29.3
       dotenv: 16.0.3
+      fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       got: 12.6.0
+      graphql-modules: 2.1.2
+      graphql-parse-resolve-info: 4.13.0
+      graphql-scalars: 1.21.3
+      graphql-yoga: 3.8.0
+      ioredis: 5.3.1
+      lodash: 4.17.21
+      lodash.sortby: 4.7.0
+      lru-cache: 7.18.3
+      ms: 2.1.3
+      object-hash: 3.0.0
+      param-case: 3.0.4
+      prom-client: 14.2.0
       reflect-metadata: 0.1.13
+      supertokens-node: 13.3.0
       zod: 3.21.4
     devDependencies:
+      '@graphql-hive/core': link:../../libraries/core
       '@hive/api': link:../api
       '@hive/service-common': link:../service-common
+      '@sentry/utils': 7.44.2
+      '@types/bcryptjs': 2.4.2
+      '@types/ioredis-mock': 8.2.1
+      '@types/lodash': 4.14.192
+      '@types/lodash.sortby': 4.7.7
+      '@types/ms': 0.7.31
+      '@types/object-hash': 3.0.2
+      ioredis-mock: 8.2.7_6jydlboc7eyi5xrsjrlqeddf74
       pino-pretty: 10.0.0
       tslib: 2.5.0
 
   packages/services/usage-ingestor:
     specifiers:
-      '@graphql-hive/core': 0.2.3
+      '@graphql-hive/core': workspace:*
       '@hive/service-common': workspace:*
       '@hive/usage-common': workspace:*
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
+      '@sentry/types': 7.44.2
+      '@sentry/utils': 7.44.2
+      '@trpc/server': 10.18.0
+      '@types/lodash.sortby': 4.7.7
+      '@whatwg-node/fetch': 0.8.4
       agentkeepalive: 4.3.0
       date-fns: 2.29.3
       dotenv: 16.0.3
+      fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       got: 12.6.0
       graphql: 16.6.0
       kafkajs: 2.2.4
+      lodash.sortby: 4.7.0
       pino-pretty: 10.0.0
+      prom-client: 14.2.0
       tiny-lru: 8.0.2
       tslib: 2.5.0
       zod: 3.21.4
     dependencies:
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
+      '@whatwg-node/fetch': 0.8.4
       agentkeepalive: 4.3.0
       date-fns: 2.29.3
       dotenv: 16.0.3
+      fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       got: 12.6.0
       graphql: 16.6.0
       kafkajs: 2.2.4
+      lodash.sortby: 4.7.0
+      prom-client: 14.2.0
       tiny-lru: 8.0.2
       zod: 3.21.4
     devDependencies:
       '@graphql-hive/core': link:../../libraries/core
       '@hive/service-common': link:../service-common
       '@hive/usage-common': link:../usage-common
+      '@sentry/types': 7.44.2
+      '@sentry/utils': 7.44.2
+      '@trpc/server': 10.18.0
+      '@types/lodash.sortby': 4.7.7
       pino-pretty: 10.0.0
       tslib: 2.5.0
 
@@ -967,41 +1469,70 @@ importers:
       '@hive/service-common': workspace:*
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
+      '@sentry/types': 7.44.2
+      '@sentry/utils': 7.44.2
       '@trpc/server': 10.18.0
+      '@whatwg-node/fetch': 0.8.4
       bullmq: 3.10.2
       copyfiles: 2.4.1
       dotenv: 16.0.3
+      fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       got: 12.6.0
       ioredis: 5.3.1
       p-timeout: 6.1.1
       pino-pretty: 10.0.0
+      prom-client: 14.2.0
       tslib: 2.5.0
       zod: 3.21.4
     dependencies:
       '@sentry/node': 7.44.2
       '@sentry/tracing': 7.44.2
       '@trpc/server': 10.18.0
+      '@whatwg-node/fetch': 0.8.4
       bullmq: 3.10.2_kobtuuqaglbtaadx3jiqtahl3i
       dotenv: 16.0.3
+      fastify: 3.29.5
+      fastify-cors: 6.0.2
+      fastify-plugin: 3.0.1
       got: 12.6.0
       ioredis: 5.3.1
       p-timeout: 6.1.1
+      prom-client: 14.2.0
       zod: 3.21.4
     devDependencies:
       '@hive/service-common': link:../service-common
+      '@sentry/types': 7.44.2
+      '@sentry/utils': 7.44.2
       copyfiles: 2.4.1
       pino-pretty: 10.0.0
       tslib: 2.5.0
 
   packages/web/app:
     specifiers:
+      '@envelop/core': 3.0.6
+      '@envelop/generic-auth': 5.0.6
+      '@envelop/graphql-modules': 4.0.6
+      '@envelop/sentry': 5.1.1
+      '@envelop/types': 3.0.2
+      '@escape.tech/graphql-armor-max-aliases': 1.7.1
+      '@escape.tech/graphql-armor-max-depth': 1.8.3
+      '@escape.tech/graphql-armor-max-directives': 1.6.4
+      '@escape.tech/graphql-armor-max-tokens': 1.3.1
       '@graphiql/toolkit': 0.8.3
       '@graphql-codegen/gql-tag-operations-preset': 2.1.0
+      '@graphql-hive/client': workspace:*
+      '@graphql-hive/core': workspace:*
       '@graphql-tools/mock': 8.7.19
       '@graphql-typed-document-node/core': 3.2.0
       '@headlessui/react': 1.7.13
+      '@hive/api': workspace:*
+      '@hive/cdn-script': workspace:*
       '@hive/emails': workspace:*
       '@hive/server': workspace:*
+      '@hive/service-common': workspace:*
+      '@hive/storage': workspace:*
       '@monaco-editor/react': 4.4.6
       '@n1ru4l/react-time-ago': 1.1.0
       '@next/bundle-analyzer': 13.2.4
@@ -1020,7 +1551,10 @@ importers:
       '@radix-ui/react-toggle-group': 1.0.3
       '@radix-ui/react-toolbar': 1.0.3
       '@radix-ui/react-tooltip': 1.0.5
+      '@sentry/integrations': 7.44.2
       '@sentry/nextjs': 7.44.2
+      '@sentry/node': 7.44.2
+      '@sentry/tracing': 7.44.2
       '@sentry/types': 7.44.2
       '@storybook/addon-essentials': ^7.0.0-beta.54
       '@storybook/addon-interactions': ^7.0.0-beta.54
@@ -1032,6 +1566,7 @@ importers:
       '@storybook/testing-library': ^0.0.14-next.1
       '@stripe/react-stripe-js': 2.1.0
       '@stripe/stripe-js': 1.52.0
+      '@swc/core': 1.3.44
       '@tailwindcss/line-clamp': 0.4.4
       '@tanstack/react-table': 8.0.0-beta.8
       '@theguild/editor': 1.2.5
@@ -1040,36 +1575,52 @@ importers:
       '@types/cookies': 0.7.7
       '@types/dompurify': 3.0.0
       '@types/js-cookie': 3.0.3
+      '@types/mjml': 4.7.0
+      '@types/nodemailer': 6.4.7
       '@types/react': 18.0.31
       '@types/react-date-range': 1.4.4
       '@types/react-dom': 18.0.11
       '@types/react-highlight-words': 0.16.4
       '@types/react-virtualized-auto-sizer': 1.0.1
       '@types/react-window': 1.8.5
+      '@types/sendmail': 1.4.4
       '@urql/core': 3.1.1
       '@urql/devtools': 2.0.3
       '@urql/exchange-graphcache': 5.0.9
       '@welldone-software/why-did-you-render': 7.0.1
       '@whatwg-node/fetch': 0.8.4
+      '@whatwg-node/server': 0.7.5
       autoprefixer: 10.4.14
+      bullmq: 3.10.2
       clsx: 1.2.1
       cookies: 0.8.0
+      copyfiles: 2.4.1
       date-fns: 2.29.3
       dompurify: 3.0.1
+      dotenv: 16.0.3
       echarts: 5.4.2
       echarts-for-react: 3.0.2
+      fastify: 3.29.5
       formik: 2.2.9
+      got: 12.6.0
       graphiql: 2.4.1
       graphql: 16.6.0
+      graphql-yoga: 3.8.0
       hyperid: 3.1.1
       immer: 9.0.21
+      ioredis: 5.3.1
       js-cookie: 3.0.1
+      mjml: 4.13.0
       monaco-editor: 0.36.1
       monaco-themes: 0.4.4
       next: 13.2.4
       nextjs-cors: 2.1.2
+      nodemailer: 6.9.1
+      p-timeout: 6.1.1
+      pino-pretty: 10.0.0
       postcss: 8.4.21
       postcss-loader: 7.1.0
+      prom-client: 14.2.0
       react: 18.2.0
       react-children-utilities: 2.9.0
       react-date-range: 1.4.0
@@ -1080,8 +1631,10 @@ importers:
       react-toastify: 9.1.2
       react-virtualized-auto-sizer: 1.0.7
       react-window: 1.8.8
+      reflect-metadata: 0.1.13
       regenerator-runtime: 0.13.11
       rimraf: 4.4.1
+      sendmail: 1.6.1
       snarkdown: 2.0.0
       storybook: ^7.0.0-beta.54
       supertokens-auth-react: 0.31.5
@@ -1098,6 +1651,15 @@ importers:
       yup: 1.0.2
       zod: 3.21.4
     dependencies:
+      '@envelop/core': 3.0.6
+      '@envelop/generic-auth': 5.0.6_adj6itjezth6avcd67ktx7eo6a
+      '@envelop/graphql-modules': 4.0.6_adj6itjezth6avcd67ktx7eo6a
+      '@envelop/sentry': 5.1.1_ms2ykyfyuimoegg7bnfjofyhye
+      '@envelop/types': 3.0.2
+      '@escape.tech/graphql-armor-max-aliases': 1.7.1
+      '@escape.tech/graphql-armor-max-depth': 1.8.3
+      '@escape.tech/graphql-armor-max-directives': 1.6.4
+      '@escape.tech/graphql-armor-max-tokens': 1.3.1
       '@graphiql/toolkit': 0.8.3_graphql@16.6.0
       '@graphql-tools/mock': 8.7.19_graphql@16.6.0
       '@headlessui/react': 1.7.13_biqbaboplfbrettd7655fr4n2y
@@ -1118,7 +1680,10 @@ importers:
       '@radix-ui/react-toggle-group': 1.0.3_biqbaboplfbrettd7655fr4n2y
       '@radix-ui/react-toolbar': 1.0.3_biqbaboplfbrettd7655fr4n2y
       '@radix-ui/react-tooltip': 1.0.5_6ayuu6vm2uqggsikytom4xssc4
+      '@sentry/integrations': 7.44.2
       '@sentry/nextjs': 7.44.2_next@13.2.4+react@18.2.0
+      '@sentry/node': 7.44.2
+      '@sentry/tracing': 7.44.2
       '@sentry/types': 7.44.2
       '@stripe/react-stripe-js': 2.1.0_wfk2ilwjwqlluiweqjchts7jtq
       '@stripe/stripe-js': 1.52.0
@@ -1130,22 +1695,32 @@ importers:
       '@urql/devtools': 2.0.3_ioimjbecbkqzfeizgamzrgwc3y
       '@urql/exchange-graphcache': 5.0.9_graphql@16.6.0
       '@whatwg-node/fetch': 0.8.4
+      '@whatwg-node/server': 0.7.5
+      bullmq: 3.10.2_kobtuuqaglbtaadx3jiqtahl3i
       clsx: 1.2.1
       cookies: 0.8.0
       date-fns: 2.29.3
       dompurify: 3.0.1
+      dotenv: 16.0.3
       echarts: 5.4.2
       echarts-for-react: 3.0.2_echarts@5.4.2+react@18.2.0
       formik: 2.2.9_react@18.2.0
+      got: 12.6.0
       graphiql: 2.4.1_a5z75gfpwhkf3sytvxjrz6misa
       graphql: 16.6.0
+      graphql-yoga: 3.8.0_graphql@16.6.0
       hyperid: 3.1.1
       immer: 9.0.21
+      ioredis: 5.3.1
       js-cookie: 3.0.1
+      mjml: 4.13.0
       monaco-editor: 0.36.1
       monaco-themes: 0.4.4
       next: 13.2.4_biqbaboplfbrettd7655fr4n2y
       nextjs-cors: 2.1.2_next@13.2.4
+      nodemailer: 6.9.1
+      p-timeout: 6.1.1
+      prom-client: 14.2.0
       react: 18.2.0
       react-children-utilities: 2.9.0_react@18.2.0
       react-date-range: 1.4.0_r6j3756ioqf5pjc2u22wj25rla
@@ -1156,7 +1731,9 @@ importers:
       react-toastify: 9.1.2_biqbaboplfbrettd7655fr4n2y
       react-virtualized-auto-sizer: 1.0.7_biqbaboplfbrettd7655fr4n2y
       react-window: 1.8.8_biqbaboplfbrettd7655fr4n2y
+      reflect-metadata: 0.1.13
       regenerator-runtime: 0.13.11
+      sendmail: 1.6.1
       snarkdown: 2.0.0
       supertokens-auth-react: 0.31.5_zh4rdguscatxykxktv3lwuw3je
       supertokens-js-override: 0.0.4
@@ -1171,30 +1748,43 @@ importers:
       zod: 3.21.4
     devDependencies:
       '@graphql-codegen/gql-tag-operations-preset': 2.1.0_graphql@16.6.0
+      '@graphql-hive/client': link:../../libraries/client
+      '@graphql-hive/core': link:../../libraries/core
       '@graphql-typed-document-node/core': 3.2.0_graphql@16.6.0
+      '@hive/api': link:../../services/api
+      '@hive/cdn-script': link:../../services/cdn-worker
       '@hive/emails': link:../../services/emails
       '@hive/server': link:../../services/server
+      '@hive/service-common': link:../../services/service-common
+      '@hive/storage': link:../../services/storage
       '@next/bundle-analyzer': 13.2.4
       '@storybook/addon-essentials': 7.0.0-beta.54_biqbaboplfbrettd7655fr4n2y
       '@storybook/addon-interactions': 7.0.0-beta.54_biqbaboplfbrettd7655fr4n2y
       '@storybook/addon-links': 7.0.0-beta.54_biqbaboplfbrettd7655fr4n2y
       '@storybook/addon-postcss': 2.0.0
       '@storybook/blocks': 7.0.0-alpha.8_biqbaboplfbrettd7655fr4n2y
-      '@storybook/nextjs': 7.0.0-beta.54_ld2jel3hspngo3u5lti2kgl2sq
+      '@storybook/nextjs': 7.0.0-beta.54_uy2bzbqr74n6ygzwlv6mru3pve
       '@storybook/react': 7.0.0-beta.54_biqbaboplfbrettd7655fr4n2y
       '@storybook/testing-library': 0.0.14-next.1
+      '@swc/core': 1.3.44
       '@tailwindcss/line-clamp': 0.4.4_tailwindcss@3.2.7
       '@types/cookies': 0.7.7
       '@types/dompurify': 3.0.0
       '@types/js-cookie': 3.0.3
+      '@types/mjml': 4.7.0
+      '@types/nodemailer': 6.4.7
       '@types/react': 18.0.31
       '@types/react-date-range': 1.4.4
       '@types/react-dom': 18.0.11
       '@types/react-highlight-words': 0.16.4
       '@types/react-virtualized-auto-sizer': 1.0.1
       '@types/react-window': 1.8.5
+      '@types/sendmail': 1.4.4
       '@welldone-software/why-did-you-render': 7.0.1_react@18.2.0
       autoprefixer: 10.4.14_postcss@8.4.21
+      copyfiles: 2.4.1
+      fastify: 3.29.5
+      pino-pretty: 10.0.0
       postcss: 8.4.21
       postcss-loader: 7.1.0_postcss@8.4.21
       rimraf: 4.4.1
@@ -1482,7 +2072,6 @@ packages:
       graphql: 16.6.0
       js-levenshtein: 1.1.6
       uuid: 9.0.0
-    dev: false
 
   /@apollo/federation/0.38.1_rjgakkkphrejw6qrtph4ar24zq:
     resolution: {integrity: sha512-miifyAEsFgiYKeM3lUHFH6+vKa2vm9dXKSyWVpX6oeJiPblFLe2/iByN3psZQO2sRdVqO1OKYrGXdgKc74XDKw==}
@@ -1579,7 +2168,6 @@ packages:
       '@protobufjs/utf8': 1.1.0
       '@types/long': 4.0.2
       long: 4.0.0
-    dev: false
 
   /@apollo/query-graphs/2.2.2_graphql@16.6.0:
     resolution: {integrity: sha512-NHxqfDEsMNFqwxSQ8lqj9APP0jGQAvxt0LOEb4WZgVdw303g1qxu2BapUS4YjxKVRqHDap/EAzBHgwg4J2zfjA==}
@@ -1645,7 +2233,6 @@ packages:
       '@apollo/utils.keyvaluecache': 2.1.0
       '@apollo/utils.logger': 2.0.0
       graphql: 16.6.0
-    dev: false
 
   /@apollo/server/4.5.0:
     resolution: {integrity: sha512-+7iRp0omJATUrVQ6b4JKi4XUvvuL+hBxu5/Hy6WiZmVNcVm19zzO+xTOlXO8OJBZgd14jZnGRgWx/eZjXEmkXQ==}
@@ -1721,7 +2308,6 @@ packages:
     transitivePeerDependencies:
       - encoding
       - supports-color
-    dev: false
 
   /@apollo/subgraph/0.6.1:
     resolution: {integrity: sha512-w/6FoubSxuzXSx8uvLE1wEuHZVHRXFyfHPKdM76wX5U/xw82zlUKseVO7wTuVODTcnUzEA30udYeCApUoC3/Xw==}
@@ -1753,11 +2339,21 @@ packages:
       '@apollo/federation-internals': 2.4.0
     dev: true
 
+  /@apollo/subgraph/2.4.0_graphql@16.6.0:
+    resolution: {integrity: sha512-/njjzPkyzkh0FO2WvLV+I9mlsDWk3DhfOtCc+cmMx9p4mixgyyaRvYvx3tPjSPkMvkPw/cNidCVymuWJVOAu5A==}
+    engines: {node: '>=14.15.0'}
+    peerDependencies:
+      graphql: ^16.5.0
+    dependencies:
+      '@apollo/cache-control-types': 1.0.2_graphql@16.6.0
+      '@apollo/federation-internals': 2.4.0_graphql@16.6.0
+      graphql: 16.6.0
+    dev: true
+
   /@apollo/usage-reporting-protobuf/4.1.0:
     resolution: {integrity: sha512-hXouMuw5pQVkzi8dgMybmr6Y11+eRmMQVoB5TF0HyTwAg9SOq/v3OCuiYqcVUKdBcskU9Msp+XvjAk0GKpWCwQ==}
     dependencies:
       '@apollo/protobufjs': 1.2.7
-    dev: false
 
   /@apollo/utils.createhash/2.0.0:
     resolution: {integrity: sha512-9GhGGD3J0HJF/VC+odwYpKi3Cg1NWrsO8GQvyGwDS5v/78I3154Hn8s4tpW+nqoaQ/lAvxdQQr3HM1b5HLM6Ww==}
@@ -1765,7 +2361,6 @@ packages:
     dependencies:
       '@apollo/utils.isnodelike': 2.0.0
       sha.js: 2.4.11
-    dev: false
 
   /@apollo/utils.dropunuseddefinitions/2.0.0:
     resolution: {integrity: sha512-BoPW+Z3kA8kLh0FCWyzOt+R77W5mVZWer5s6UyvVwZ/qROGiEgcHXFcI5TMMndpXoDo0xBSvQV0lIKYHbJQ7+g==}
@@ -1782,17 +2377,14 @@ packages:
       graphql: 14.x || 15.x || 16.x
     dependencies:
       graphql: 16.6.0
-    dev: false
 
   /@apollo/utils.fetcher/2.0.0:
     resolution: {integrity: sha512-RC0twEwwBKbhk/y4B2X4YEciRG1xoKMgiPy5xQqNMd3pG78sR+ybctG/m7c/8+NaaQOS22UPUCBd6yS6WihBIg==}
     engines: {node: '>=14'}
-    dev: false
 
   /@apollo/utils.isnodelike/2.0.0:
     resolution: {integrity: sha512-77CiAM2qDXn0haQYrgX0UgrboQykb+bOHaz5p3KKItMwUZ/EFphzuB2vqHvubneIc9dxJcTx2L7MFDswRw/JAQ==}
     engines: {node: '>=14'}
-    dev: false
 
   /@apollo/utils.keyvaluecache/1.0.1:
     resolution: {integrity: sha512-nLgYLomqjVimEzQ4cdvVQkcryi970NDvcRVPfd0OPeXhBfda38WjBq+WhQFk+czSHrmrSp34YHBxpat0EtiowA==}
@@ -1806,7 +2398,6 @@ packages:
     dependencies:
       '@apollo/utils.logger': 2.0.0
       lru-cache: 7.18.3
-    dev: false
 
   /@apollo/utils.logger/1.0.0:
     resolution: {integrity: sha512-dx9XrjyisD2pOa+KsB5RcDbWIAdgC91gJfeyLCgy0ctJMjQe7yZK5kdWaWlaOoCeX0z6YI9iYlg7vMPyMpQF3Q==}
@@ -1814,7 +2405,6 @@ packages:
   /@apollo/utils.logger/2.0.0:
     resolution: {integrity: sha512-o8qYwgV2sYg+PcGKIfwAZaZsQOTEfV8q3mH7Pw8GB/I/Uh2L9iaHdpiKuR++j7oe1K87lFm0z/JAezMOR9CGhg==}
     engines: {node: '>=14'}
-    dev: false
 
   /@apollo/utils.printwithreducedwhitespace/2.0.0:
     resolution: {integrity: sha512-S+wyxFyuO0LJ8v+mg8c7rRwyKZ+9xlO5wXD/UgaysH3rcCe9NBHRWx/9cmdZ9nTqgKC5X01uHZ6Gsi6pOrUGgw==}
@@ -1831,7 +2421,6 @@ packages:
       graphql: 14.x || 15.x || 16.x
     dependencies:
       graphql: 16.6.0
-    dev: false
 
   /@apollo/utils.removealiases/2.0.0:
     resolution: {integrity: sha512-PT5ICz2SfrMCRsR3DhW2E1anX6hcqVXE/uHpmRHbhqSoQODZKG34AlFm1tC8u3MC3eK5gcvtpGvPHF/cwVfakg==}
@@ -1848,7 +2437,6 @@ packages:
       graphql: 14.x || 15.x || 16.x
     dependencies:
       graphql: 16.6.0
-    dev: false
 
   /@apollo/utils.sortast/2.0.0:
     resolution: {integrity: sha512-VKoVOh8xkvh5HabtyGTekIYbwXdyYFPodFuHpWp333Fo2KBmpczLY+RBMHEr3v2MLoXDn/WUMtR3JZmvFJ45zw==}
@@ -1868,7 +2456,6 @@ packages:
     dependencies:
       graphql: 16.6.0
       lodash.sortby: 4.7.0
-    dev: false
 
   /@apollo/utils.stripsensitiveliterals/2.0.0:
     resolution: {integrity: sha512-pzj1XINetE54uxIjc4bN6gVzDWYP8OZ/yB0xMTgvzttu1VLgXf3BTV76d9hlqLoe8cV0JiD+xLpJktrHOzmBJQ==}
@@ -1885,7 +2472,6 @@ packages:
       graphql: 14.x || 15.x || 16.x
     dependencies:
       graphql: 16.6.0
-    dev: false
 
   /@apollo/utils.usagereporting/2.0.0:
     resolution: {integrity: sha512-9VvVgA/LzKkBEYEGwE9doL1Sl+VRULkbB3D7W+ImJ028jJuTllvlQsh4Xpqz8mJWprfKx4m/i2DwHtElHWU2vg==}
@@ -1915,12 +2501,10 @@ packages:
       '@apollo/utils.sortast': 2.0.0_graphql@16.6.0
       '@apollo/utils.stripsensitiveliterals': 2.0.0_graphql@16.6.0
       graphql: 16.6.0
-    dev: false
 
   /@apollo/utils.withrequired/2.0.0:
     resolution: {integrity: sha512-+djpTu6AEE/A1etryZs9tmXRyDY6XXGe3G29MS/LB09uHq3pcl3n4Q5lvDTL5JWKuJixrulg5djePLDAooG8dQ==}
     engines: {node: '>=14'}
-    dev: false
 
   /@ardatan/relay-compiler/12.0.0_graphql@16.6.0:
     resolution: {integrity: sha512-9anThAaj1dQr6IGmzBMcfzOQKTa5artjuPmw8NYK/fiGEMjADbSguBY2FMDykt+QhilR3wc9VA/3yVju7JHg7Q==}
@@ -4796,6 +5380,19 @@ packages:
       tslib: 2.5.0
     dev: false
 
+  /@envelop/graphql-modules/4.0.6_ntyon3cywamj3ez5qei6hx6s4y:
+    resolution: {integrity: sha512-w7gAdtUptwUmmqWxEaaq4ut0yp+S7RSK0eVaXmXWtvSX+DoADMHv8dewk6svMdENJY4HL4Z7+Jy9KUv5u8k1Wg==}
+    peerDependencies:
+      '@envelop/core': ^3.0.6
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
+      graphql-modules: ^1 || ^2.0.0
+    dependencies:
+      '@envelop/core': 3.0.6
+      graphql: 16.6.0
+      graphql-modules: 2.1.2_graphql@16.6.0
+      tslib: 2.5.0
+    dev: false
+
   /@envelop/parser-cache/4.7.0_4hr55tbjlvoppd2sokdhrbpreq:
     resolution: {integrity: sha512-63NfXDcW/vGn4U6NFxaZ0JbYWAcJb9A6jhTvghsSz1ZS+Dny/ci8bVSgVmM1q+N56hPyGsVPuyI+rIc71mPU5g==}
     peerDependencies:
@@ -5976,7 +6573,7 @@ packages:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@graphql-inspector/commands': 3.4.4_3cy67j6kew5bnd2a7xepdjfv44
-      '@graphql-inspector/core': 4.0.2_graphql@16.6.0
+      '@graphql-inspector/core': 4.0.2_wf35oaq7brzyeva5aoncxac66a_graphql@16.6.0
       '@graphql-inspector/logger': 3.4.3
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       cli-table3: 0.6.3
@@ -6060,29 +6657,18 @@ packages:
       tslib: 2.5.0
     dev: true
 
-  /@graphql-inspector/core/4.0.0_wf35oaq7brzyeva5aoncxac66a_graphql@16.6.0:
-    resolution: {integrity: sha512-lgyc6ozmU5WbdlFx7Uftb96cS9ahYmu6hL41ZswK3KQcS6s7AM7zGu8gNDSdXtAGw8eARm8+Ql4+8J1+/72/+A==}
+  /@graphql-inspector/core/4.0.2_wf35oaq7brzyeva5aoncxac66a:
+    resolution: {integrity: sha512-hySZ6DXCwfZ1/gA506rjV0ZDheKyjxGMroHnms9VSf2hWBk3Uaa4UQ3utCRkSSTvvLCAzsf3IaJB0MsFKCb3oA==}
     peerDependencies:
-      graphql: ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       dependency-graph: 0.11.0
-      graphql: 16.6.0
       object-inspect: 1.12.3
       tslib: 2.5.0
     dev: false
     patched: true
 
-  /@graphql-inspector/core/4.0.2:
-    resolution: {integrity: sha512-hySZ6DXCwfZ1/gA506rjV0ZDheKyjxGMroHnms9VSf2hWBk3Uaa4UQ3utCRkSSTvvLCAzsf3IaJB0MsFKCb3oA==}
-    peerDependencies:
-      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
-    dependencies:
-      dependency-graph: 0.11.0
-      object-inspect: 1.12.3
-      tslib: 2.5.0
-    dev: false
-
-  /@graphql-inspector/core/4.0.2_graphql@16.6.0:
+  /@graphql-inspector/core/4.0.2_wf35oaq7brzyeva5aoncxac66a_graphql@16.6.0:
     resolution: {integrity: sha512-hySZ6DXCwfZ1/gA506rjV0ZDheKyjxGMroHnms9VSf2hWBk3Uaa4UQ3utCRkSSTvvLCAzsf3IaJB0MsFKCb3oA==}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
@@ -6091,7 +6677,7 @@ packages:
       graphql: 16.6.0
       object-inspect: 1.12.3
       tslib: 2.5.0
-    dev: true
+    patched: true
 
   /@graphql-inspector/coverage-command/4.0.3_3cy67j6kew5bnd2a7xepdjfv44:
     resolution: {integrity: sha512-Peuu19eD4Od2yfe37Eymcekz4fu34cWJe21Hvr+8J0HaeYe/rlad85xRYNw+O3cVr44VBzeBgvEOmDOOyv5j2g==}
@@ -6099,7 +6685,7 @@ packages:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@graphql-inspector/commands': 3.4.4_3cy67j6kew5bnd2a7xepdjfv44
-      '@graphql-inspector/core': 4.0.2_graphql@16.6.0
+      '@graphql-inspector/core': 4.0.2_wf35oaq7brzyeva5aoncxac66a_graphql@16.6.0
       '@graphql-inspector/logger': 3.4.3
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       graphql: 16.6.0
@@ -6116,7 +6702,7 @@ packages:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@graphql-inspector/commands': 3.4.4_3cy67j6kew5bnd2a7xepdjfv44
-      '@graphql-inspector/core': 4.0.2_graphql@16.6.0
+      '@graphql-inspector/core': 4.0.2_wf35oaq7brzyeva5aoncxac66a_graphql@16.6.0
       '@graphql-inspector/logger': 3.4.3
       graphql: 16.6.0
       tslib: 2.5.0
@@ -6184,7 +6770,7 @@ packages:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@graphql-inspector/commands': 3.4.4_3cy67j6kew5bnd2a7xepdjfv44
-      '@graphql-inspector/core': 4.0.2_graphql@16.6.0
+      '@graphql-inspector/core': 4.0.2_wf35oaq7brzyeva5aoncxac66a_graphql@16.6.0
       '@graphql-inspector/logger': 3.4.3
       graphql: 16.6.0
       tslib: 2.5.0
@@ -6255,7 +6841,7 @@ packages:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@graphql-inspector/commands': 3.4.4_3cy67j6kew5bnd2a7xepdjfv44
-      '@graphql-inspector/core': 4.0.2_graphql@16.6.0
+      '@graphql-inspector/core': 4.0.2_wf35oaq7brzyeva5aoncxac66a_graphql@16.6.0
       '@graphql-inspector/logger': 3.4.3
       graphql: 16.6.0
       tslib: 2.5.0
@@ -6286,7 +6872,7 @@ packages:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@graphql-inspector/commands': 3.4.4_3cy67j6kew5bnd2a7xepdjfv44
-      '@graphql-inspector/core': 4.0.2_graphql@16.6.0
+      '@graphql-inspector/core': 4.0.2_wf35oaq7brzyeva5aoncxac66a_graphql@16.6.0
       '@graphql-inspector/logger': 3.4.3
       '@graphql-tools/utils': 9.2.1_graphql@16.6.0
       graphql: 16.6.0
@@ -6804,7 +7390,6 @@ packages:
       '@graphql-tools/utils': 9.2.0_graphql@16.6.0
       graphql: 16.6.0
       tslib: 2.5.0
-    dev: false
 
   /@graphql-tools/merge/8.3.1_graphql@16.6.0:
     resolution: {integrity: sha512-BMm99mqdNZbEYeTPK3it9r9S6rsZsQKtlqJsSBknAclXq2pGEfOxjcIZi+kBSkHZKPKCRrYDd5vY0+rUmIHVLg==}
@@ -6967,7 +7552,6 @@ packages:
       graphql: 16.6.0
       tslib: 2.5.0
       value-or-promise: 1.0.12
-    dev: false
 
   /@graphql-tools/schema/9.0.17:
     resolution: {integrity: sha512-HVLq0ecbkuXhJlpZ50IHP5nlISqH2GbNgjBJhhRzHeXhfwlUOT4ISXGquWTmuq61K0xSaO0aCjMpxe4QYbKTng==}
@@ -7183,7 +7767,6 @@ packages:
       '@graphql-typed-document-node/core': 3.2.0_graphql@16.6.0
       graphql: 16.6.0
       tslib: 2.5.0
-    dev: false
 
   /@graphql-tools/utils/9.2.1:
     resolution: {integrity: sha512-WUw506Ql6xzmOORlriNrD6Ugx+HjVgYxt9KCXD9mHAak+eaXSwuGGPyE60hy9xaDEoXKBsG7SkG69ybitaVl6A==}
@@ -7472,7 +8055,6 @@ packages:
 
   /@josephg/resolvable/1.0.1:
     resolution: {integrity: sha512-CtzORUwWTTOTqfVtHaKRJ0I1kNQd1bpn3sUh8I3nJDVY+5/M/Oe1DnEWzPQvqq/xPIIkzzzIP7mfCoAjFRvDhg==}
-    dev: false
 
   /@jridgewell/gen-mapping/0.1.1:
     resolution: {integrity: sha512-sQXCasFk+U8lWYEe66WxRDOE9PjVz4vSM51fTu3Hw+ClTpUSQb718772vH3pyS5pShp6lvQM7SxgIDXXXmOX7w==}
@@ -10796,7 +11378,7 @@ packages:
       - supports-color
     dev: true
 
-  /@storybook/builder-webpack5/7.0.0-beta.54_biqbaboplfbrettd7655fr4n2y:
+  /@storybook/builder-webpack5/7.0.0-beta.54_f633obz2ynyc6yx3n6qqnskzku:
     resolution: {integrity: sha512-2jPRj0/NLSC3d/n5KkJCusovnXl7rt0pHnRAueehWG6IeVrV60dCz7+TzSuFKesJoq6gpZZ0ixDhQ2xWXpCExg==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -10844,11 +11426,11 @@ packages:
       semver: 7.3.8
       slash: 3.0.0
       style-loader: 3.3.1_webpack@5.75.0
-      terser-webpack-plugin: 5.3.6_webpack@5.75.0
+      terser-webpack-plugin: 5.3.6_kim4axymd3gmhme4rmqzzrpnvq
       ts-dedent: 2.2.0
       util: 0.12.4
       util-deprecate: 1.0.2
-      webpack: 5.75.0
+      webpack: 5.75.0_@swc+core@1.3.44
       webpack-dev-middleware: 5.3.3_webpack@5.75.0
       webpack-hot-middleware: 2.25.3
       webpack-virtual-modules: 0.4.6
@@ -11290,7 +11872,7 @@ packages:
     resolution: {integrity: sha512-xcQ8w4IecABAjsakaZTGiUEnEgFZzVKsMjqECjd+qdkwgD3R/kwrBdfyC15CLM5Ye1miPwYBIwJGeBXB9qxsZg==}
     dev: true
 
-  /@storybook/nextjs/7.0.0-beta.54_ld2jel3hspngo3u5lti2kgl2sq:
+  /@storybook/nextjs/7.0.0-beta.54_uy2bzbqr74n6ygzwlv6mru3pve:
     resolution: {integrity: sha512-5bwkQmmHJcE5EVjeUra0lZpqFm0poa57rR7OYeFI57xdn/+BmUVgfAsR1m/GARAjdb6Y84if5oN/5ZRPPqYZGA==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
@@ -11312,7 +11894,7 @@ packages:
     dependencies:
       '@next/font': 13.2.1
       '@storybook/addon-actions': 7.0.0-beta.54_biqbaboplfbrettd7655fr4n2y
-      '@storybook/builder-webpack5': 7.0.0-beta.54_biqbaboplfbrettd7655fr4n2y
+      '@storybook/builder-webpack5': 7.0.0-beta.54_f633obz2ynyc6yx3n6qqnskzku
       '@storybook/core-common': 7.0.0-beta.54
       '@storybook/node-logger': 7.0.0-beta.54
       '@storybook/preset-react-webpack': 7.0.0-beta.54_biqbaboplfbrettd7655fr4n2y
@@ -12058,7 +12640,6 @@ packages:
 
   /@trpc/server/10.18.0:
     resolution: {integrity: sha512-nVMqdDIF9YLOeC3g6RdAvdCPqkHFjpshSqZGThZ+fyjiWSUXj2ZKCduhJFnY77TjtgODojeaaghmzcnjxb+Onw==}
-    dev: false
 
   /@trysound/sax/0.2.0:
     resolution: {integrity: sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==}
@@ -12403,11 +12984,7 @@ packages:
   /@types/lodash.sortby/4.7.7:
     resolution: {integrity: sha512-J/4IS+jQopGBrrRetBXDCX0KnSeXJZ0rOTmGAxR9MWGV24YdHxX8IRi9LCGAU9GKWlBov9KRSfQpuup9PReqrw==}
     dependencies:
-      '@types/lodash': 4.14.186
-    dev: true
-
-  /@types/lodash/4.14.186:
-    resolution: {integrity: sha512-eHcVlLXP0c2FlMPm56ITode2AgLMSa6aJ05JTTbYbI+7EMkCEE5qk2E41d5g2lCVTqRe0GnnRFurmlCsDODrPw==}
+      '@types/lodash': 4.14.192
     dev: true
 
   /@types/lodash/4.14.192:
@@ -12518,7 +13095,7 @@ packages:
     resolution: {integrity: sha512-O2xNmXebtwVekJDD+02udOncjVcMZQuTEQEMpKJ0ZRf5E7/9JJX3izhKUcUifBkyKpljyUM6BTgy2trmviKlpw==}
     dependencies:
       '@types/node': 18.15.11
-      pg-protocol: 1.5.0
+      pg-protocol: 1.6.0
       pg-types: 2.2.0
     dev: true
 
@@ -13179,6 +13756,15 @@ packages:
     transitivePeerDependencies:
       - '@types/node'
 
+  /@whatwg-node/server/0.7.5_@types+node@18.15.11:
+    resolution: {integrity: sha512-xTDJdPqr/wULxW3mGXQXD92SRXUm6jwQxqIvyHG17dykRTd21HuCaS2ggBn5lSAM/sYjjrT+OYv3fXbtS4+Mjw==}
+    dependencies:
+      '@whatwg-node/fetch': 0.8.4_@types+node@18.15.11
+      tslib: 2.5.0
+    transitivePeerDependencies:
+      - '@types/node'
+    dev: false
+
   /@xstate/fsm/1.4.0:
     resolution: {integrity: sha512-uTHDeu2xI5E1IFwf37JFQM31RrH7mY7877RqPBS4ZqSNUwoLDuct8AhBWaXGnVizBAYyimVwgCyGa9z/NiRhXA==}
     dev: false
@@ -13765,7 +14351,6 @@ packages:
     resolution: {integrity: sha512-wfr/jstw9xNi/0teMHrRW7dsz3Lt5ARhYNZ2ewpadnhaIp5mbALhOAP+EAdsC7t4Z6wqsDVv9+W6gm1Dk9mEyw==}
     dependencies:
       retry: 0.13.1
-    dev: false
 
   /async/3.2.4:
     resolution: {integrity: sha512-iAB+JbDEGXhyIUavoDl9WP/Jj106Kz9DEn1DPgYw5ruDn0e3Wgi3sKFm55sASdGBNOQB8F59d9qQ7deqrHA8wQ==}
@@ -13904,7 +14489,7 @@ packages:
       '@babel/core': 7.20.12
       find-cache-dir: 3.3.2
       schema-utils: 4.0.0
-      webpack: 5.75.0
+      webpack: 5.75.0_@swc+core@1.3.44
     dev: true
 
   /babel-plugin-add-react-displayname/0.0.5:
@@ -15334,7 +15919,6 @@ packages:
     dependencies:
       object-assign: 4.1.1
       vary: 1.1.2
-    dev: false
 
   /cose-base/1.0.3:
     resolution: {integrity: sha512-s9whTXInMSgAp/NVXVNuVxVKzGH2qck3aQlVHxDCdAEPgtMKwc4Wq6/QKhgdEdgbLSi9rBTAcPoRa6JpiG4ksg==}
@@ -15502,7 +16086,7 @@ packages:
       postcss-modules-values: 4.0.0_postcss@8.4.21
       postcss-value-parser: 4.2.0
       semver: 7.3.8
-      webpack: 5.75.0
+      webpack: 5.75.0_@swc+core@1.3.44
     dev: true
 
   /css-select/4.3.0:
@@ -18187,7 +18771,7 @@ packages:
       schema-utils: 3.1.1
       semver: 7.3.8
       tapable: 2.2.1
-      webpack: 5.75.0
+      webpack: 5.75.0_@swc+core@1.3.44
     dev: true
 
   /form-data-encoder/1.7.2:
@@ -18972,6 +19556,18 @@ packages:
       ramda: 0.28.0
     dev: false
 
+  /graphql-modules/2.1.2_graphql@16.6.0:
+    resolution: {integrity: sha512-GWxPom0iv4TXyLkuPqEHdRtJRdWCrUOGRMpXWmly1eY2T2MKAdCNya5iY/Ezb3d0Z2BzQBRUXdOgdkFPe2UDjg==}
+    peerDependencies:
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
+    dependencies:
+      '@graphql-tools/schema': 9.0.17_graphql@16.6.0
+      '@graphql-tools/wrap': 9.3.8_graphql@16.6.0
+      '@graphql-typed-document-node/core': 3.2.0_graphql@16.6.0
+      graphql: 16.6.0
+      ramda: 0.28.0
+    dev: false
+
   /graphql-parse-resolve-info/4.13.0:
     resolution: {integrity: sha512-VVJ1DdHYcR7hwOGQKNH+QTzuNgsLA8l/y436HtP9YHoX6nmwXRWq3xWthU3autMysXdm0fQUbhTZCx0W9ICozw==}
     engines: {node: '>=8.6'}
@@ -18979,6 +19575,19 @@ packages:
       graphql: '>=0.9 <0.14 || ^14.0.2 || ^15.4.0 || ^16.3.0'
     dependencies:
       debug: 4.3.4
+      tslib: 2.5.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
+  /graphql-parse-resolve-info/4.13.0_graphql@16.6.0:
+    resolution: {integrity: sha512-VVJ1DdHYcR7hwOGQKNH+QTzuNgsLA8l/y436HtP9YHoX6nmwXRWq3xWthU3autMysXdm0fQUbhTZCx0W9ICozw==}
+    engines: {node: '>=8.6'}
+    peerDependencies:
+      graphql: '>=0.9 <0.14 || ^14.0.2 || ^15.4.0 || ^16.3.0'
+    dependencies:
+      debug: 4.3.4
+      graphql: 16.6.0
       tslib: 2.5.0
     transitivePeerDependencies:
       - supports-color
@@ -19003,6 +19612,16 @@ packages:
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
+      tslib: 2.5.0
+    dev: false
+
+  /graphql-scalars/1.21.3_graphql@16.6.0:
+    resolution: {integrity: sha512-QLWw3BHmqHZMp9JeYmPpjq7JT9aw/H8TpwmWKJEuMSE3+O7Xe7TduQbOLFzbs1q9UxX6CVkc0O1JO/YfkP/pAw==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+    dependencies:
+      graphql: 16.6.0
       tslib: 2.5.0
     dev: false
 
@@ -19042,6 +19661,49 @@ packages:
       tslib: 2.5.0
     transitivePeerDependencies:
       - '@types/node'
+
+  /graphql-yoga/3.8.0_3q6avhgaaacez4ctqk4xik246q:
+    resolution: {integrity: sha512-tCjPeVL+IiTXi9s3oKtLxHTqML/foBhoO4FTuNzosWAsgNybUX7HSnGyPAKoHv0OusYW8KwiU/xFR95wFHvcFw==}
+    peerDependencies:
+      graphql: ^15.2.0 || ^16.0.0
+    dependencies:
+      '@envelop/core': 3.0.6
+      '@envelop/validation-cache': 5.1.2_adj6itjezth6avcd67ktx7eo6a
+      '@graphql-tools/executor': 0.0.15_graphql@16.6.0
+      '@graphql-tools/schema': 9.0.17_graphql@16.6.0
+      '@graphql-tools/utils': 9.2.1_graphql@16.6.0
+      '@graphql-yoga/logger': 0.0.1
+      '@graphql-yoga/subscription': 3.1.0
+      '@whatwg-node/fetch': 0.8.4_@types+node@18.15.11
+      '@whatwg-node/server': 0.7.5_@types+node@18.15.11
+      dset: 3.1.2
+      graphql: 16.6.0
+      lru-cache: 7.18.3
+      tslib: 2.5.0
+    transitivePeerDependencies:
+      - '@types/node'
+    dev: false
+
+  /graphql-yoga/3.8.0_@types+node@18.15.11:
+    resolution: {integrity: sha512-tCjPeVL+IiTXi9s3oKtLxHTqML/foBhoO4FTuNzosWAsgNybUX7HSnGyPAKoHv0OusYW8KwiU/xFR95wFHvcFw==}
+    peerDependencies:
+      graphql: ^15.2.0 || ^16.0.0
+    dependencies:
+      '@envelop/core': 3.0.6
+      '@envelop/validation-cache': 5.1.2_@envelop+core@3.0.6
+      '@graphql-tools/executor': 0.0.15
+      '@graphql-tools/schema': 9.0.17
+      '@graphql-tools/utils': 9.2.1
+      '@graphql-yoga/logger': 0.0.1
+      '@graphql-yoga/subscription': 3.1.0
+      '@whatwg-node/fetch': 0.8.4_@types+node@18.15.11
+      '@whatwg-node/server': 0.7.5_@types+node@18.15.11
+      dset: 3.1.2
+      lru-cache: 7.18.3
+      tslib: 2.5.0
+    transitivePeerDependencies:
+      - '@types/node'
+    dev: false
 
   /graphql-yoga/3.8.0_graphql@16.6.0:
     resolution: {integrity: sha512-tCjPeVL+IiTXi9s3oKtLxHTqML/foBhoO4FTuNzosWAsgNybUX7HSnGyPAKoHv0OusYW8KwiU/xFR95wFHvcFw==}
@@ -19354,7 +20016,7 @@ packages:
       lodash: 4.17.21
       pretty-error: 4.0.0
       tapable: 2.2.1
-      webpack: 5.75.0
+      webpack: 5.75.0_@swc+core@1.3.44
     dev: true
 
   /htmlparser2/4.1.0:
@@ -21129,7 +21791,6 @@ packages:
   /loglevel/1.8.0:
     resolution: {integrity: sha512-G6A/nJLRgWOuuwdNuA6koovfEV1YpqqAG4pRUlFaz3jj2QNZ8M4vBqnVA+HBTmU/AMNUtlOsMmSpF6NyOjztbA==}
     engines: {node: '>= 0.6.0'}
-    dev: false
 
   /long/4.0.0:
     resolution: {integrity: sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==}
@@ -21212,7 +21873,6 @@ packages:
   /lru-cache/7.14.1:
     resolution: {integrity: sha512-ysxwsnTKdAx96aTRdhDOCQfDgbHnt8SK0KY8SEjO0wHinhWOFTESbjVCMPbU1uGXg/ch4lifqx0wfjOawU2+WA==}
     engines: {node: '>=12'}
-    dev: false
 
   /lru-cache/7.17.0:
     resolution: {integrity: sha512-zSxlVVwOabhVyTi6E8gYv2cr6bXK+8ifYz5/uyJb9feXX6NACVDwY4p5Ut3WC3Ivo/QhpARHU3iujx2xGAYHbQ==}
@@ -22172,10 +22832,6 @@ packages:
       arrify: 1.0.1
       is-plain-obj: 1.1.0
       kind-of: 6.0.3
-    dev: true
-
-  /minimist/1.2.7:
-    resolution: {integrity: sha512-bzfL1YUZsP41gmu/qjrEk0Q6i2ix/cVeAhbCbqH9u3zYutS1cLg00qhrD0M2MVdCcx4Sc0UpP2eBWo9rotpq6g==}
     dev: true
 
   /minimist/1.2.8:
@@ -24011,10 +24667,6 @@ packages:
       - pg-native
     dev: true
 
-  /pg-protocol/1.5.0:
-    resolution: {integrity: sha512-muRttij7H8TqRNu/DxrAJQITO4Ac7RmX3Klyr/9mJEOBeIpgnF8f9jAfRz5d3XwQZl5qBjF9gLsUtMPJE0vezQ==}
-    dev: true
-
   /pg-protocol/1.6.0:
     resolution: {integrity: sha512-M+PDm637OY5WM307051+bsDia5Xej6d9IR4GwJse1qA1DIhiKlksvrneZOYQq42OM+spubpcNYEo2FcKQrDk+Q==}
 
@@ -24130,7 +24782,7 @@ packages:
       fast-safe-stringify: 2.1.1
       help-me: 4.2.0
       joycon: 3.1.1
-      minimist: 1.2.7
+      minimist: 1.2.8
       on-exit-leak-free: 2.1.0
       pino-abstract-transport: 1.0.0
       pump: 3.0.0
@@ -26098,7 +26750,6 @@ packages:
   /retry/0.13.1:
     resolution: {integrity: sha512-XQBQ3I8W1Cge0Seh+6gjj03LbmRFWuoszgK9ooCpwYIrhhoO80pfq4cUkU5DkknwfOfFteRwlZ56PYOGYyFWdg==}
     engines: {node: '>= 4'}
-    dev: false
 
   /reusify/1.0.4:
     resolution: {integrity: sha512-U9nH88a3fc/ekCF1l0/UP1IosiuIjyTh7hBvXVMHYgVcfGvt897Xguj2UOLDeI5BG2m7/uwyaLVT6fbtCwTyzw==}
@@ -26467,7 +27118,6 @@ packages:
     dependencies:
       inherits: 2.0.4
       safe-buffer: 5.2.1
-    dev: false
 
   /sha1-es/1.8.2:
     resolution: {integrity: sha512-7gzO0Y7RBt1Qsq8D1fC+So6zsnkwRcZas8sGO9Xp4bOkDhG5s4fzSP0i9yUs6aVzSH7+urqqh6uk0z+dMDeF9A==}
@@ -27189,7 +27839,7 @@ packages:
     peerDependencies:
       webpack: ^5.0.0
     dependencies:
-      webpack: 5.75.0
+      webpack: 5.75.0_@swc+core@1.3.44
     dev: true
 
   /style-to-object/0.3.0:
@@ -27542,7 +28192,7 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /terser-webpack-plugin/5.3.6_webpack@5.75.0:
+  /terser-webpack-plugin/5.3.6_kim4axymd3gmhme4rmqzzrpnvq:
     resolution: {integrity: sha512-kfLFk+PoLUQIbLmB1+PZDMRSZS99Mp+/MHqDNmMA6tOItzRt+Npe3E+fsMs5mfcM0wCtrrdU387UnV+vnSffXQ==}
     engines: {node: '>= 10.13.0'}
     peerDependencies:
@@ -27559,11 +28209,12 @@ packages:
         optional: true
     dependencies:
       '@jridgewell/trace-mapping': 0.3.16
+      '@swc/core': 1.3.44
       jest-worker: 27.5.1
       schema-utils: 3.1.1
       serialize-javascript: 6.0.1
       terser: 5.16.5
-      webpack: 5.75.0
+      webpack: 5.75.0_@swc+core@1.3.44
     dev: true
 
   /terser/5.16.5:
@@ -29068,7 +29719,7 @@ packages:
       mime-types: 2.1.35
       range-parser: 1.2.1
       schema-utils: 4.0.0
-      webpack: 5.75.0
+      webpack: 5.75.0_@swc+core@1.3.44
     dev: true
 
   /webpack-hot-middleware/2.25.3:
@@ -29087,7 +29738,7 @@ packages:
     resolution: {integrity: sha512-5tyDlKLqPfMqjT3Q9TAqf2YqjwmnUleZwzJi1A5qXnlBCdj2AtOJ6wAWdglTIDOPgOiOrXeBeFcsQ8+aGQ6QbA==}
     dev: true
 
-  /webpack/5.75.0:
+  /webpack/5.75.0_@swc+core@1.3.44:
     resolution: {integrity: sha512-piaIaoVJlqMsPtX/+3KTTO6jfvrSYgauFVdt8cr9LTHKmcq/AMd4mhzsiP7ZF/PGRNPGA8336jldh9l2Kt2ogQ==}
     engines: {node: '>=10.13.0'}
     hasBin: true
@@ -29118,7 +29769,7 @@ packages:
       neo-async: 2.6.2
       schema-utils: 3.1.1
       tapable: 2.2.1
-      terser-webpack-plugin: 5.3.6_webpack@5.75.0
+      terser-webpack-plugin: 5.3.6_kim4axymd3gmhme4rmqzzrpnvq
       watchpack: 2.4.0
       webpack-sources: 3.2.3
     transitivePeerDependencies:
@@ -29134,7 +29785,6 @@ packages:
   /whatwg-mimetype/3.0.0:
     resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
     engines: {node: '>=12'}
-    dev: false
 
   /whatwg-url/5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}

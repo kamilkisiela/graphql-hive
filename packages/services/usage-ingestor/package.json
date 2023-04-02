@@ -22,7 +22,7 @@
     "zod": "3.21.4"
   },
   "devDependencies": {
-    "@graphql-hive/core": "0.2.3",
+    "@graphql-hive/core": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@hive/usage-common": "workspace:*",
     "pino-pretty": "10.0.0",

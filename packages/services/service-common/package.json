@@ -22,6 +22,8 @@
     "@sentry/node": "7.44.2",
     "@sentry/tracing": "7.44.2",
     "@sentry/types": "7.44.2",
-    "@sentry/utils": "7.44.2"
+    "@sentry/utils": "7.44.2",
+    "@trpc/server": "10.18.0",
+    "pino-pretty": "10.0.0"
   }
 }
