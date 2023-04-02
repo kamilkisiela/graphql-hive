@@ -68,7 +68,7 @@ importers:
       lint-staged: 13.2.0
       prettier: 2.8.7
       prettier-plugin-sql: 0.13.0
-      prettier-plugin-tailwindcss: 0.2.5
+      prettier-plugin-tailwindcss: 0.2.6
       pretty-quick: 3.1.3
       rimraf: 4.4.1
       ts-node: 10.9.1
@@ -109,7 +109,7 @@ importers:
       lint-staged: 13.2.0
       prettier: 2.8.7
       prettier-plugin-sql: 0.13.0_prettier@2.8.7
-      prettier-plugin-tailwindcss: 0.2.5_prettier@2.8.7
+      prettier-plugin-tailwindcss: 0.2.6_prettier@2.8.7
       pretty-quick: 3.1.3_prettier@2.8.7
       rimraf: 4.4.1
       ts-node: 10.9.1_qhir4tna36pqab4kjb7sybc3oi
@@ -24825,8 +24825,8 @@ packages:
       tslib: 2.5.0
     dev: true
 
-  /prettier-plugin-tailwindcss/0.2.5_prettier@2.8.7:
-    resolution: {integrity: sha512-vZ/iKieyCx0WTxHbkf5E1rBlv/ybFk8WTT4hL5W2jlVxum2Zbe0jMUpuQdDrpa4z2vnPiJ5KIWCqL/kd16fKYg==}
+  /prettier-plugin-tailwindcss/0.2.6_prettier@2.8.7:
+    resolution: {integrity: sha512-F+7XCl9RLF/LPrGdUMHWpsT6TM31JraonAUyE6eBmpqymFvDwyl0ETHsKFHP1NG+sEfv8bmKqnTxEbWQbHPlBA==}
     engines: {node: '>=12.17.0'}
     peerDependencies:
       '@ianvs/prettier-plugin-sort-imports': '*'
