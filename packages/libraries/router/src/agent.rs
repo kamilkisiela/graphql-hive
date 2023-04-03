@@ -169,7 +169,14 @@ impl UsageAgent {
                 );
             match operation {
                 Err(e) => {
-                    tracing::warn!("Dropping operation (reason: PROCESSING): {}", e);
+                    tracing::warn!(
+                        "Dropping operation \"{}\" (reason: PROCESSING): {}",
+                        op.operation_name
+                            .clone()
+                            .or_else(|| Some("anonymous".to_string()))
+                            .unwrap(),
+                        e
+                    );
                     continue;
                 }
                 Ok(operation) => match operation {
