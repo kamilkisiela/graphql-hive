@@ -201,10 +201,10 @@ impl Plugin for UsagePlugin {
                         let result: supergraph::ServiceResult = fut.await;
 
                         if operation_context.dropped {
-                            tracing::info!("Dropping operation (reason: SAMPLING): {}", operation_context.operation_name.or_else(|| Some("anonymous".to_string())).unwrap());
+                            tracing::info!("Dropping operation (reason: SAMPLING): {}", operation_context.operation_name.clone().or_else(|| Some("anonymous".to_string())).unwrap());
                             return result;
                         } else {
-                            tracing::info!("Operation to be collected: {}", operation_context.operation_name.or_else(|| Some("anonymous".to_string())).unwrap());
+                            tracing::info!("Operation to be collected: {}", operation_context.operation_name.clone().or_else(|| Some("anonymous".to_string())).unwrap());
                         }
 
                         let OperationContext {

@@ -1,3 +1,5 @@
+use anyhow::anyhow;
+use anyhow::Error;
 use graphql_tools::ast::ext::SchemaDocumentExtension;
 use graphql_tools::ast::TypeDefinitionExtension;
 use lru::LruCache;
@@ -23,7 +25,7 @@ use graphql_tools::ast::{
 struct SchemaCoordinatesContext {
     pub schema_coordinates: HashSet<String>,
     pub input_types_to_collect: HashSet<String>,
-    error: Option<String>,
+    error: Option<Error>,
 }
 
 impl SchemaCoordinatesContext {
@@ -35,7 +37,7 @@ impl SchemaCoordinatesContext {
 pub fn collect_schema_coordinates(
     document: &Document<'static, String>,
     schema: &SchemaDocument<'static, String>,
-) -> HashSet<String> {
+) -> Result<HashSet<String>, Error> {
     let mut ctx = SchemaCoordinatesContext {
         schema_coordinates: HashSet::new(),
         input_types_to_collect: HashSet::new(),
@@ -46,26 +48,30 @@ pub fn collect_schema_coordinates(
 
     visit_document(&mut visitor, &document, &mut visit_context, &mut ctx);
 
-    for input_type_name in ctx.input_types_to_collect {
-        let named_type = schema.type_by_name(&input_type_name);
+    if let Some(error) = ctx.error {
+        Err(error)
+    } else {
+        for input_type_name in ctx.input_types_to_collect {
+            let named_type = schema.type_by_name(&input_type_name);
 
-        match named_type {
-            Some(named_type) => match named_type {
-                TypeDefinition::InputObject(input_type) => {
-                    for field in &input_type.fields {
-                        ctx.schema_coordinates
-                            .insert(format!("{}.{}", input_type_name, field.name));
+            match named_type {
+                Some(named_type) => match named_type {
+                    TypeDefinition::InputObject(input_type) => {
+                        for field in &input_type.fields {
+                            ctx.schema_coordinates
+                                .insert(format!("{}.{}", input_type_name, field.name));
+                        }
                     }
+                    _ => {}
+                },
+                None => {
+                    ctx.schema_coordinates.insert(input_type_name);
                 }
-                _ => {}
-            },
-            None => {
-                ctx.schema_coordinates.insert(input_type_name);
             }
         }
-    }
 
-    ctx.schema_coordinates
+        Ok(ctx.schema_coordinates)
+    }
 }
 
 struct SchemaCoordinatesVisitor {}
@@ -92,10 +98,18 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
         }
 
         let field_name = field.name.to_string();
-        let parent_name = info.current_parent_type().unwrap().name();
 
-        ctx.schema_coordinates
-            .insert(format!("{}.{}", parent_name, field_name));
+        if let Some(parent_type) = info.current_parent_type() {
+            let parent_name = parent_type.name();
+
+            ctx.schema_coordinates
+                .insert(format!("{}.{}", parent_name, field_name));
+        } else {
+            ctx.error = Some(anyhow!(
+                "Failed to find parent type of {} field",
+                field.name
+            ))
+        }
     }
 
     fn enter_variable_definition(
@@ -120,7 +134,17 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
         if ctx.is_corrupted() {
             return ();
         }
+
+        if info.current_parent_type().is_none() {
+            ctx.error = Some(anyhow!(
+                "Failed to find parent type of {} argument",
+                arg.0.clone()
+            ));
+            return ();
+        }
+
         let type_name = info.current_parent_type().unwrap().name();
+
         let field = info.current_field();
 
         if let Some(field) = field {
@@ -192,7 +216,7 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
         if ctx.is_corrupted() {
             return ();
         }
-        
+
         let input_type = info.current_input_type();
 
         if let Some(input_type) = input_type {
@@ -538,8 +562,10 @@ impl OperationProcessor {
             return Ok(None);
         }
 
-        let schema_coordinates: Vec<String> =
-            Vec::from_iter(collect_schema_coordinates(&parsed, schema));
+        let schema_coordinates_result =
+            collect_schema_coordinates(&parsed, schema).map_err(|e| e.to_string())?;
+
+        let schema_coordinates: Vec<String> = Vec::from_iter(schema_coordinates_result);
 
         let normalized = strip_literals_transformer
             .transform_document(&parsed)
@@ -640,7 +666,7 @@ mod tests {
         )
         .unwrap();
 
-        let schema_coordinates = collect_schema_coordinates(&document, &schema);
+        let schema_coordinates = collect_schema_coordinates(&document, &schema).unwrap();
 
         let expected = vec![
             "Mutation.deleteProject",
