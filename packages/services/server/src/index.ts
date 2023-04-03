@@ -304,32 +304,34 @@ export async function main() {
       url: '/_readiness',
       async handler(req, res) {
         try {
-          const response = await got.post(`http://0.0.0.0:${port}${graphqlPath}`, {
-            method: 'POST',
-            body: introspection,
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-              'x-signature': signature,
-            },
-          });
+          const [response, storageIsReady] = await Promise.all([
+            got.post(`http://0.0.0.0:${port}${graphqlPath}`, {
+              method: 'POST',
+              body: introspection,
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                'x-signature': signature,
+              },
+            }),
+            storage.isReady(),
+          ]);
 
-          await storage.ping();
-
-          if (response.statusCode >= 200 && response.statusCode < 300) {
-            if (response.body.includes('"__schema"')) {
-              reportReadiness(true);
-              res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
-              return;
-            }
+          if (!storageIsReady) {
+            req.log.error('Readiness check failed: failed to connect to Postgres');
+          } else if (response.statusCode !== 200 || !response.body.includes('"__schema"')) {
+            req.log.error(`Readiness check failed: [${response.statusCode}] ${response.body}`);
+          } else {
+            reportReadiness(true);
+            res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+            return;
           }
-          req.log.error(`Readiness check failed [${response.statusCode}] ${response.body}`);
         } catch (error) {
           req.log.error(error);
         }
 
         reportReadiness(false);
-        res.status(500).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
+        res.status(400).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       },
     });
 
