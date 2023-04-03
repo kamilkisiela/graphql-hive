@@ -23,6 +23,13 @@ use graphql_tools::ast::{
 struct SchemaCoordinatesContext {
     pub schema_coordinates: HashSet<String>,
     pub input_types_to_collect: HashSet<String>,
+    error: Option<String>,
+}
+
+impl SchemaCoordinatesContext {
+    fn is_corrupted(&self) -> bool {
+        self.error.is_some()
+    }
 }
 
 pub fn collect_schema_coordinates(
@@ -32,6 +39,7 @@ pub fn collect_schema_coordinates(
     let mut ctx = SchemaCoordinatesContext {
         schema_coordinates: HashSet::new(),
         input_types_to_collect: HashSet::new(),
+        error: None,
     };
     let mut visit_context = OperationVisitorContext::new(document, schema);
     let mut visitor = SchemaCoordinatesVisitor {};
@@ -79,6 +87,10 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
         ctx: &mut SchemaCoordinatesContext,
         field: &Field<'static, String>,
     ) {
+        if ctx.is_corrupted() {
+            return ();
+        }
+
         let field_name = field.name.to_string();
         let parent_name = info.current_parent_type().unwrap().name();
 
@@ -92,6 +104,9 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
         ctx: &mut SchemaCoordinatesContext,
         var: &graphql_tools::static_graphql::query::VariableDefinition,
     ) {
+        if ctx.is_corrupted() {
+            return ();
+        }
         ctx.input_types_to_collect
             .insert(self.resolve_type_name(var.var_type.clone()));
     }
@@ -102,6 +117,9 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
         ctx: &mut SchemaCoordinatesContext,
         arg: &(String, Value<'static, String>),
     ) {
+        if ctx.is_corrupted() {
+            return ();
+        }
         let type_name = info.current_parent_type().unwrap().name();
         let field = info.current_field();
 
@@ -146,6 +164,10 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
         ctx: &mut SchemaCoordinatesContext,
         values: &Vec<Value<'static, String>>,
     ) {
+        if ctx.is_corrupted() {
+            return ();
+        }
+
         if let Some(input_type) = info.current_input_type() {
             for value in values {
                 match value {
@@ -167,6 +189,10 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
         ctx: &mut SchemaCoordinatesContext,
         (name, value): &(String, Value<'static, String>),
     ) {
+        if ctx.is_corrupted() {
+            return ();
+        }
+        
         let input_type = info.current_input_type();
 
         if let Some(input_type) = input_type {
