@@ -112,7 +112,7 @@ fn non_empty_string(value: Option<String>) -> Option<String> {
 impl UsageAgent {
     pub fn new(schema: String, token: String, endpoint: String, buffer_size: usize) -> Self {
         let schema = parse_schema::<String>(&schema)
-            .expect("parsing schema failed!")
+            .expect("Failed to parse schema")
             .into_static();
         let state = Arc::new(Mutex::new(State::new(schema)));
         let processor = Arc::new(Mutex::new(OperationProcessor::new()));
@@ -152,25 +152,24 @@ impl UsageAgent {
             operations: Vec::new(),
         };
 
-        tracing::info!("Hive Usage Processing {} operations", reports.len());
         // iterate over reports and check if they are valid
         for op in reports {
             let operation = self
                 .processor
                 .lock()
-                .expect("couldn't acquire the processor lock")
+                .expect("Unable to acquire the OperationProcessor in produce_report")
                 .process(
                     &op.operation_body,
                     &self
                         .state
                         .lock()
-                        .expect("failed to acquire State for produce_report")
+                        .expect("Unable to acquire State in produce_report")
                         .schema,
                 );
             match operation {
                 Err(e) => {
                     tracing::warn!(
-                        "Dropping operation \"{}\" (reason: PROCESSING): {}",
+                        "Dropping operation \"{}\" (phase: PROCESSING): {}",
                         op.operation_name
                             .clone()
                             .or_else(|| Some("anonymous".to_string()))
@@ -179,40 +178,42 @@ impl UsageAgent {
                     );
                     continue;
                 }
-                Ok(operation) => match operation {
-                    Some(operation) => {
-                        let hash = operation.hash;
-                        report.operations.push(Operation {
-                            operationMapKey: hash.clone(),
-                            timestamp: op.timestamp,
-                            execution: Execution {
-                                ok: op.ok,
-                                duration: op.duration.as_nanos(),
-                                errorsTotal: op.errors,
-                            },
-                            metadata: Some(Metadata {
-                                client: Some(ClientInfo {
-                                    name: non_empty_string(op.client_name),
-                                    version: non_empty_string(op.client_version),
-                                }),
-                            }),
-                        });
-                        if !report.map.contains_key(&hash) {
-                            report.map.insert(
-                                hash,
-                                OperationMapRecord {
-                                    operation: operation.operation,
-                                    operationName: non_empty_string(op.operation_name),
-                                    fields: operation.coordinates,
+                Ok(operation) => {
+                    match operation {
+                        Some(operation) => {
+                            let hash = operation.hash;
+                            report.operations.push(Operation {
+                                operationMapKey: hash.clone(),
+                                timestamp: op.timestamp,
+                                execution: Execution {
+                                    ok: op.ok,
+                                    duration: op.duration.as_nanos(),
+                                    errorsTotal: op.errors,
                                 },
-                            );
+                                metadata: Some(Metadata {
+                                    client: Some(ClientInfo {
+                                        name: non_empty_string(op.client_name),
+                                        version: non_empty_string(op.client_version),
+                                    }),
+                                }),
+                            });
+                            if !report.map.contains_key(&hash) {
+                                report.map.insert(
+                                    hash,
+                                    OperationMapRecord {
+                                        operation: operation.operation,
+                                        operationName: non_empty_string(op.operation_name),
+                                        fields: operation.coordinates,
+                                    },
+                                );
+                            }
+                            report.size += 1;
                         }
-                        report.size += 1;
+                        None => {
+                            tracing::info!("Dropping operation (phase: PROCESSING): probably introspection query");
+                        }
                     }
-                    None => {
-                        tracing::info!("Dropping operation (reason: PROCESSING-INCOMPLETE)");
-                    }
-                },
+                }
             }
         }
 
@@ -223,13 +224,12 @@ impl UsageAgent {
         let size = self
             .state
             .lock()
-            .expect("failed to acquire State for add_report")
+            .expect("Unable to acquire State in add_report")
             .push(execution_report);
         self.flush_if_full(size);
     }
 
     pub fn send_report(&self, report: Report) -> Result<(), String> {
-        tracing::info!("Sending usage report ({} operations)", report.size);
         const DELAY_BETWEEN_TRIES: Duration = Duration::from_millis(500);
         const MAX_TRIES: u8 = 3;
 
@@ -276,7 +276,6 @@ impl UsageAgent {
     }
 
     pub fn flush_if_full(&mut self, size: usize) {
-        tracing::info!("Hive Usage Buffer {}/{}", size, self.buffer_size);
         if size >= self.buffer_size {
             self.flush();
         }
@@ -286,11 +285,9 @@ impl UsageAgent {
         let execution_reports = self
             .state
             .lock()
-            .expect("failed to acquire State for flush")
+            .expect("Unable to acquire State in flush")
             .drain();
         let size = execution_reports.len();
-
-        tracing::info!("Hive Usage Flushing {} operations", size);
 
         if size > 0 {
             let report = self.produce_report(execution_reports);

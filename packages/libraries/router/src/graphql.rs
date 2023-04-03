@@ -106,7 +106,7 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
                 .insert(format!("{}.{}", parent_name, field_name));
         } else {
             ctx.error = Some(anyhow!(
-                "Failed to find parent type of {} field",
+                "Unable to find parent type of '{}' field",
                 field.name
             ))
         }
@@ -137,7 +137,7 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
 
         if info.current_parent_type().is_none() {
             ctx.error = Some(anyhow!(
-                "Failed to find parent type of {} argument",
+                "Unable to find parent type of '{}' argument",
                 arg.0.clone()
             ));
             return ();
@@ -522,7 +522,11 @@ impl OperationProcessor {
     ) -> Result<Option<ProcessedOperation>, String> {
         let key = query.to_string();
         if self.cache.contains(&key) {
-            Ok(self.cache.get(&key).expect("lock cache").clone())
+            Ok(self
+                .cache
+                .get(&key)
+                .expect("Unable to acquire Cache in OperationProcessor.process")
+                .clone())
         } else {
             let result = self.transform(query, schema)?;
             self.cache.put(key, result.clone());
