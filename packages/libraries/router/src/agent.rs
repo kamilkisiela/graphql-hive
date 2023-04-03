@@ -151,6 +151,8 @@ impl UsageAgent {
             map: HashMap::new(),
             operations: Vec::new(),
         };
+
+        tracing::info!("Hive Usage Processing {} operations", reports.len());
         // iterate over reports and check if they are valid
         for op in reports {
             let operation = self
@@ -167,7 +169,7 @@ impl UsageAgent {
                 );
             match operation {
                 Err(e) => {
-                    tracing::warn!("Dropping operation: {}", e);
+                    tracing::warn!("Dropping operation (reason: PROCESSING): {}", e);
                     continue;
                 }
                 Ok(operation) => match operation {
@@ -200,7 +202,9 @@ impl UsageAgent {
                         }
                         report.size += 1;
                     }
-                    None => {}
+                    None => {
+                        tracing::info!("Dropping operation (reason: PROCESSING-INCOMPLETE)");
+                    }
                 },
             }
         }
@@ -218,7 +222,7 @@ impl UsageAgent {
     }
 
     pub fn send_report(&self, report: Report) -> Result<(), String> {
-        tracing::debug!("Sending usage report");
+        tracing::info!("Sending usage report ({} operations)", report.size);
         const DELAY_BETWEEN_TRIES: Duration = Duration::from_millis(500);
         const MAX_TRIES: u8 = 3;
 
@@ -265,6 +269,7 @@ impl UsageAgent {
     }
 
     pub fn flush_if_full(&mut self, size: usize) {
+        tracing::info!("Hive Usage Buffer {}/{}", size, self.buffer_size);
         if size >= self.buffer_size {
             self.flush();
         }
@@ -277,6 +282,8 @@ impl UsageAgent {
             .expect("failed to acquire State for flush")
             .drain();
         let size = execution_reports.len();
+
+        tracing::info!("Hive Usage Flushing {} operations", size);
 
         if size > 0 {
             let report = self.produce_report(execution_reports);
