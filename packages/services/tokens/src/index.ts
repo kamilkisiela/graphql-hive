@@ -129,8 +129,8 @@ export async function main() {
     server.route({
       method: ['GET', 'HEAD'],
       url: '/_readiness',
-      handler(_, res) {
-        const isReady = readiness();
+      async handler(_, res) {
+        const isReady = await readiness();
         reportReadiness(isReady);
         void res.status(isReady ? 200 : 400).send();
       },
