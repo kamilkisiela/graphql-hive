@@ -50,6 +50,8 @@ function DiffView({
   const { error } = compareQuery;
 
   if (error) {
+    const errorMessage = error.graphQLErrors?.[0]?.message ?? error.networkError?.message;
+
     return (
       <div className="m-3 rounded-lg bg-red-500/20 p-8">
         <div className="mb-3 flex items-center gap-3">
@@ -60,7 +62,7 @@ function DiffView({
           Previous or current schema is most likely incomplete and was force published
         </p>
         <pre className="mt-5 whitespace-pre-wrap rounded-lg bg-red-900 p-3 text-xs text-white">
-          {error.graphQLErrors?.[0].message ?? error.networkError?.message}
+          {errorMessage}
         </pre>
       </div>
     );
