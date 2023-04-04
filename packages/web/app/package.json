@@ -102,7 +102,7 @@
     "@storybook/testing-library": "^0.0.14-next.1",
     "@tailwindcss/line-clamp": "0.4.4",
     "@types/cookies": "0.7.7",
-    "@types/dompurify": "3.0.0",
+    "@types/dompurify": "3.0.1",
     "@types/js-cookie": "3.0.3",
     "@types/react": "18.0.32",
     "@types/react-date-range": "1.4.4",
