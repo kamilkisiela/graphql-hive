@@ -89,6 +89,7 @@ export interface organization_member {
 export interface organizations {
   clean_id: string;
   created_at: Date;
+  feature_flags: any | null;
   get_started_checking_schema: boolean;
   get_started_creating_project: boolean;
   get_started_inviting_members: boolean;
