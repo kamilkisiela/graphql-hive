@@ -32,6 +32,9 @@ patchedDependencies:
   oclif@3.7.3:
     hash: rxmtqiusuyruv7tkwux5gvotbm
     path: patches/oclif@3.7.3.patch
+  workers-loki-logger@0.1.14:
+    hash: mbfy52vkijnlipkvmtuix24jnq
+    path: patches/workers-loki-logger@0.1.14.patch
 
 importers:
 
@@ -626,7 +629,7 @@ importers:
         version: 3.1.0
       workers-loki-logger:
         specifier: 0.1.14
-        version: 0.1.14
+        version: 0.1.14(patch_hash=mbfy52vkijnlipkvmtuix24jnq)
       zod:
         specifier: 3.21.4
         version: 3.21.4
@@ -29799,9 +29802,10 @@ packages:
   /wordwrap@1.0.0:
     resolution: {integrity: sha512-gvVzJFlPycKc5dZN4yPkP8w7Dc37BtP1yczEneOb4uq34pXZcvrtRTmWV8W+Ume+XCxKgbjM+nevkyFPMybd4Q==}
 
-  /workers-loki-logger@0.1.14:
+  /workers-loki-logger@0.1.14(patch_hash=mbfy52vkijnlipkvmtuix24jnq):
     resolution: {integrity: sha512-k9iKHsZNUddqPt1qffl0zvzwzdb//8arAqzMiG5DgOP+t3b9LaeT8taYanvcfbgrwGNcgG+CY8AmZ/gDKDgRMw==}
     dev: false
+    patched: true
 
   /wrap-ansi@2.1.0:
     resolution: {integrity: sha512-vAaEaDM946gbNpH5pLVNR+vX2ht6n0Bt3GXwVB1AuAqZosOvHNF3P7wDnh8KLkSqgUh0uh77le7Owgoz+Z9XBw==}
