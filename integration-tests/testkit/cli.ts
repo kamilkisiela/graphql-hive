@@ -57,7 +57,7 @@ export async function schemaDelete(args: string[]) {
   );
 }
 
-export async function createCLI(tokens: { readwrite: string; readonly: string }) {
+export function createCLI(tokens: { readwrite: string; readonly: string }) {
   let publishCount = 0;
 
   async function publish({

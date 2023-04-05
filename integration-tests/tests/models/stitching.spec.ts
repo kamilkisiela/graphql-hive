@@ -529,7 +529,7 @@ describe('other', () => {
           await setFeatureFlag(name, enabled);
         }
 
-        const { publish } = await createCLI(tokens.registry);
+        const { publish } = createCLI(tokens.registry);
 
         // cats service has only one field
         await publish({

@@ -12,7 +12,8 @@ import {
 } from 'graphql';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
-import { ProjectType } from '../../shared/entities';
+import type { CriticalityLevel } from '../../__generated__/types';
+import { ProjectType, Schema } from '../../shared/entities';
 import { createPeriod, parseDateRangeInput } from '../../shared/helpers';
 import type {
   GraphQLEnumTypeMapper,
@@ -33,7 +34,7 @@ import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import { Inspector } from './providers/inspector';
 import { SchemaBuildError } from './providers/orchestrators/errors';
-import { ensureSDL, SchemaHelper } from './providers/schema-helper';
+import { ensureSDL, isCompositeSchema, SchemaHelper } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
 
@@ -256,63 +257,6 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   Query: {
-    async schemaCompare(_, { selector }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const schemaManager = injector.get(SchemaManager);
-      const projectManager = injector.get(ProjectManager);
-      const helper = injector.get(SchemaHelper);
-
-      const [organizationId, projectId, targetId] = await Promise.all([
-        translator.translateOrganizationId(selector),
-        translator.translateProjectId(selector),
-        translator.translateTargetId(selector),
-      ]);
-
-      const project = await projectManager.getProject({
-        organization: organizationId,
-        project: projectId,
-      });
-      const orchestrator = schemaManager.matchOrchestrator(project.type);
-
-      // TODO: collect stats from a period between these two versions
-      const [schemasBefore, schemasAfter] = await Promise.all([
-        injector.get(SchemaManager).getSchemasOfVersion({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-          version: selector.before,
-        }),
-        injector.get(SchemaManager).getSchemasOfVersion({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-          version: selector.after,
-        }),
-      ]);
-
-      return Promise.all([
-        ensureSDL(
-          orchestrator.composeAndValidate(
-            schemasBefore.map(s => helper.createSchemaObject(s)),
-            project.externalComposition,
-          ),
-        ),
-        ensureSDL(
-          orchestrator.composeAndValidate(
-            schemasAfter.map(s => helper.createSchemaObject(s)),
-            project.externalComposition,
-          ),
-        ),
-      ]).catch(reason => {
-        if (reason instanceof SchemaBuildError) {
-          return Promise.resolve({
-            message: reason.message,
-          });
-        }
-
-        return Promise.reject(reason);
-      });
-    },
     async schemaCompareToPrevious(_, { selector }, { injector }) {
       const translator = injector.get(IdTranslator);
       const schemaManager = injector.get(SchemaManager);
@@ -337,7 +281,6 @@ export const resolvers: SchemaModule.Resolvers = {
       ]);
       const orchestrator = schemaManager.matchOrchestrator(project.type);
 
-      // TODO: collect stats from a period between these two versions
       const [schemasBefore, schemasAfter] = await Promise.all([
         injector.get(SchemaManager).getSchemasOfPreviousVersion({
           organization: organizationId,
@@ -375,15 +318,39 @@ export const resolvers: SchemaModule.Resolvers = {
               'reject-on-graphql-errors'
             : 'ignore-errors',
         ),
-      ]).catch(reason => {
-        if (reason instanceof SchemaBuildError) {
-          return Promise.resolve({
-            message: reason.message,
-          });
-        }
+      ])
+        .then(([before, after]) => {
+          if (!before) {
+            return [null, after] as const;
+          }
 
-        return Promise.reject(reason);
-      });
+          return [
+            before,
+            after,
+            // TODO: becomes obsolete once we persist errors and changes
+            detectUrlChanges(schemasBefore, schemasAfter).map(change => {
+              return {
+                message: change.serviceUrl.after
+                  ? `[${change.serviceName}] New service url: '${
+                      change.serviceUrl.after
+                    }' (previously: '${change.serviceUrl.before ?? 'none'}')`
+                  : `[${change.serviceName}] Service url removed (previously: '${
+                      change.serviceUrl.before ?? 'none'
+                    }'`,
+                criticality: 'Dangerous' satisfies CriticalityLevel,
+              } as const;
+            }),
+          ] as const;
+        })
+        .catch(reason => {
+          if (reason instanceof SchemaBuildError) {
+            return Promise.resolve({
+              message: reason.message,
+            });
+          }
+
+          return Promise.reject(reason);
+        });
     },
     async schemaVersions(_, { selector, after, limit }, { injector }) {
       const translator = injector.get(IdTranslator);
@@ -677,7 +644,7 @@ export const resolvers: SchemaModule.Resolvers = {
     initial([before]) {
       return !before;
     },
-    changes([before, after], _, { injector }) {
+    async changes([before, after, nonSchemaChanges], _, { injector }) {
       if (!before) {
         return [];
       }
@@ -701,7 +668,9 @@ export const resolvers: SchemaModule.Resolvers = {
           ),
       );
 
-      return injector.get(Inspector).diff(previousSchema, currentSchema);
+      const schemaChanges = await injector.get(Inspector).diff(previousSchema, currentSchema);
+
+      return schemaChanges.concat(nonSchemaChanges);
     },
     diff([before, after]) {
       return {
@@ -1028,4 +997,52 @@ function stringifyDefaultValue(value: unknown): string | null {
     return JSON.stringify(value);
   }
   return null;
+}
+
+function detectUrlChanges(schemasBefore: readonly Schema[], schemasAfter: readonly Schema[]) {
+  if (schemasBefore.length === 0) {
+    return [];
+  }
+
+  const compositeSchemasBefore = schemasBefore.filter(isCompositeSchema);
+
+  if (compositeSchemasBefore.length === 0) {
+    return [];
+  }
+
+  const compositeSchemasAfter = schemasAfter.filter(isCompositeSchema);
+  const nameToCompositeSchemaMap = new Map(compositeSchemasBefore.map(s => [s.service_name, s]));
+
+  const changes: Array<{
+    serviceName: string;
+    serviceUrl:
+      | {
+          before: string;
+          after: string;
+        }
+      | {
+          before: null;
+          after: string;
+        }
+      | {
+          before: string;
+          after: null;
+        };
+  }> = [];
+
+  for (const schema of compositeSchemasAfter) {
+    const before = nameToCompositeSchemaMap.get(schema.service_name);
+
+    if (before && before.service_url !== schema.service_url) {
+      changes.push({
+        serviceName: schema.service_name,
+        serviceUrl: {
+          before: before.service_url!, // I used `!` because `before !== after` check means there cannot be `null` for both, but TypeScript knows better...
+          after: schema.service_url,
+        },
+      });
+    }
+  }
+
+  return changes;
 }

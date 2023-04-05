@@ -222,7 +222,7 @@ importers:
         specifier: workspace:*
         version: link:../packages/libraries/client
       '@graphql-hive/core':
-        specifier: 0.2.3
+        specifier: workspace:*
         version: link:../packages/libraries/core
       '@graphql-typed-document-node/core':
         specifier: 3.2.0
