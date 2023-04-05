@@ -1075,8 +1075,8 @@ importers:
         specifier: 7.44.2
         version: 7.44.2
       '@tgriesser/schemats':
-        specifier: 8.0.2
-        version: 8.0.2
+        specifier: 9.0.1
+        version: 9.0.1
       '@types/node':
         specifier: 18.15.11
         version: 18.15.11
@@ -12463,8 +12463,8 @@ packages:
       '@testing-library/dom': 8.20.0
     dev: true
 
-  /@tgriesser/schemats@8.0.2:
-    resolution: {integrity: sha512-2zommC1FFVDdlNZJTjqfNEm6AdSGnS4Af7Y7wy+mWeLA23Bm3oDVWqRiuV0SbmUnqXTUedIj75clpKV4RF1olQ==}
+  /@tgriesser/schemats@9.0.1:
+    resolution: {integrity: sha512-kUiFyUQDiVdpeeL/qwOZAdDZrYFTwqppwNZDxOXcPSKeqGCZe8ajbbN64OAS7VlGMnXWxEEHcjhyFzB9gtHn5w==}
     hasBin: true
     dependencies:
       bluebird: 3.7.2
