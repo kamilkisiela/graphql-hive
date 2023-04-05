@@ -13,6 +13,7 @@ import type {
 } from 'graphql';
 import type {
   ClientStats,
+  CriticalityLevel,
   OperationStats,
   SchemaChange,
   SchemaError,
@@ -123,7 +124,14 @@ export type SchemaComparePayload =
       message: string;
     };
 export type SchemaCompareResult =
-  | readonly [SchemaOnlyObject, SchemaOnlyObject]
+  | readonly [
+      SchemaOnlyObject,
+      SchemaOnlyObject,
+      Array<{
+        message: string;
+        criticality: CriticalityLevel;
+      }>,
+    ]
   | readonly [undefined | null, SchemaOnlyObject];
 
 export type SingleSchema = SingleSchemaEntity;

@@ -18,6 +18,7 @@ import type {
   RateLimitInput,
   RequestOrganizationTransferInput,
   SchemaCheckInput,
+  SchemaCompareToPreviousInput,
   SchemaDeleteInput,
   SchemaPublishInput,
   SchemaVersionsInput,
@@ -927,6 +928,34 @@ export function fetchVersions(selector: SchemaVersionsInput, limit: number, toke
     variables: {
       selector,
       limit,
+    },
+  });
+}
+
+export function compareToPreviousVersion(selector: SchemaCompareToPreviousInput, token: string) {
+  return execute({
+    document: graphql(`
+      query compareToPreviousVersion($selector: SchemaCompareToPreviousInput!) {
+        schemaCompareToPrevious(selector: $selector) {
+          ... on SchemaCompareResult {
+            changes {
+              nodes {
+                criticality
+                message
+              }
+              total
+            }
+            initial
+          }
+          ... on SchemaCompareError {
+            message
+          }
+        }
+      }
+    `),
+    token,
+    variables: {
+      selector,
     },
   });
 }
