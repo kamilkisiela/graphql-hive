@@ -2,6 +2,7 @@ import {
   buildUnionMemberAddedMessageFromMeta,
   Change,
   ChangeType,
+  CriticalityLevel,
   directiveAddedFromMeta,
   directiveArgumentAddedFromMeta,
   directiveArgumentDefaultValueChangedFromMeta,
@@ -46,7 +47,7 @@ import {
   schemaMutationTypeChangedFromMeta,
   schemaQueryTypeChangedFromMeta,
   schemaSubscriptionTypeChangedFromMeta,
-  SerializableChange,
+  SerializableChange as SerializableChangeBase,
   typeAddedFromMeta,
   typeDescriptionAddedFromMeta,
   typeDescriptionChangedFromMeta,
@@ -56,7 +57,14 @@ import {
   unionMemberRemovedFromMeta,
 } from '@graphql-inspector/core';
 
-export function schemaChangeFromMeta(change: SerializableChange): Change {
+export type SerializableChange = SerializableChangeBase & {
+  isSafeBasedOnUsage: boolean;
+};
+
+/**
+ * Create the schema change from the persisted meta data.
+ */
+function schemaChangeFromSerializableChange(change: SerializableChange): Change {
   switch (change.type) {
     case ChangeType.FieldArgumentDescriptionChanged:
       return fieldArgumentDescriptionChangedFromMeta(change);
@@ -163,4 +171,23 @@ export function schemaChangeFromMeta(change: SerializableChange): Change {
     case ChangeType.UnionMemberAdded:
       return buildUnionMemberAddedMessageFromMeta(change);
   }
+}
+
+export function schemaChangeFromMeta(serializableChange: SerializableChange): Change {
+  const change = schemaChangeFromSerializableChange(serializableChange);
+
+  // see https://github.com/kamilkisiela/graphql-inspector/blob/3f5d7291d730119c926a05d165aa2f4a309e4fbd/packages/core/src/diff/rules/consider-usage.ts#L71-L78
+  if (serializableChange.isSafeBasedOnUsage) {
+    return {
+      ...change,
+      criticality: {
+        ...change.criticality,
+        level: CriticalityLevel.Dangerous,
+        isSafeBasedOnUsage: true,
+      },
+      message: `${change.message} (non-breaking based on usage)`,
+    };
+  }
+
+  return change;
 }

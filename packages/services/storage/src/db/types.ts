@@ -158,6 +158,7 @@ export interface schema_log {
 export interface schema_version_changes {
   change_type: string;
   id: string;
+  is_safe_based_on_usage: boolean;
   meta: any;
   schema_version_id: string;
   severity_level: string;

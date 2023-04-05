@@ -4,7 +4,8 @@ CREATE TABLE
     "schema_version_id" UUID NOT NULL REFERENCES "schema_versions" ("id") ON DELETE CASCADE,
     "severity_level" TEXT NOT NULL,
     "change_type" TEXT NOT NULL,
-    "meta" jsonb NOT NULL
+    "meta" jsonb NOT NULL,
+    "is_safe_based_on_usage" BOOLEAN NOT NULL
   );
 
 ALTER TABLE

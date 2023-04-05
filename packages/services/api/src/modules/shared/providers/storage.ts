@@ -1,5 +1,5 @@
 import { Injectable } from 'graphql-modules';
-import { Change, SerializableChange } from '@graphql-inspector/core';
+import { Change } from '@graphql-inspector/core';
 import type {
   AddAlertChannelInput,
   AddAlertInput,
@@ -30,6 +30,7 @@ import type { OrganizationAccessScope } from '../../auth/providers/organization-
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
 import { Logger } from './logger';
+import { SerializableChange } from '../../schema/schema-change-from-meta';
 
 type Paginated<T> = T & {
   after?: string | null;

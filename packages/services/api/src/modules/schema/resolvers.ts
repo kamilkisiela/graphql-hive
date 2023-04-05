@@ -12,7 +12,6 @@ import {
 } from 'graphql';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
-import { SerializableChange } from '@graphql-inspector/core';
 import type { CriticalityLevel } from '../../__generated__/types';
 import { ProjectType } from '../../shared/entities';
 import { createPeriod, parseDateRangeInput } from '../../shared/helpers';
@@ -40,7 +39,7 @@ import { SchemaBuildError } from './providers/orchestrators/errors';
 import { ensureSDL, isCompositeSchema, SchemaHelper } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
-import { schemaChangeFromMeta } from './schema-change-from-meta';
+import { schemaChangeFromMeta, SerializableChange } from './schema-change-from-meta';
 
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 const GraphQLSchemaStringModel = z.string().max(5_000_000).min(0);
@@ -312,7 +311,10 @@ export const resolvers: SchemaModule.Resolvers = {
         previousVersion?.hasPersistedSchemaChanges
       ) {
         const changes = await schemaManager.getSchemaChangesForVersion({
-          ...selector,
+          organization: organizationId,
+          project: projectId,
+          target: targetId,
+          version: currentVersion.id,
         });
         return {
           result: {
@@ -391,7 +393,11 @@ export const resolvers: SchemaModule.Resolvers = {
                   }`,
                 ),
             );
-            changes = await injector.get(Inspector).diff(previousSchema, currentSchema);
+            const diffChanges = await injector.get(Inspector).diff(previousSchema, currentSchema);
+            changes = diffChanges.map(change => ({
+              ...change,
+              isSafeBasedOnUsage: change.criticality.isSafeBasedOnUsage ?? false,
+            }));
           }
 
           const result: SchemaCompareResult = {

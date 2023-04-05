@@ -2663,7 +2663,7 @@ const SchemaCompareToPreviousVersionQuery = graphql(`
   }
 `);
 
-test('Query.schemaCompareToPrevious: result is read from the', async () => {
+test('Query.schemaCompareToPrevious: result is read from the database', async () => {
   const storage = await createStorage(connectionString(), 1);
 
   try {
@@ -2712,7 +2712,6 @@ test('Query.schemaCompareToPrevious: result is read from the', async () => {
     const latestVersion = await storage.getLatestVersion({
       target: target.id,
       project: project.id,
-      organization: organization.id,
     });
 
     const result = await execute({
@@ -2726,7 +2725,22 @@ test('Query.schemaCompareToPrevious: result is read from the', async () => {
       authToken: ownerToken,
     }).then(res => res.expectNoGraphQLErrors());
 
-    expect(result.schemaCompareToPrevious).toMatchInlineSnapshot();
+    expect((result.schemaCompareToPrevious as Record<string, unknown>).changes)
+      .toMatchInlineSnapshot(`
+      {
+        nodes: [
+          {
+            criticality: Breaking,
+            message: Field 'Query.ping' changed type from 'String' to 'Int',
+            path: [
+              Query,
+              ping,
+            ],
+          },
+        ],
+        total: 1,
+      }
+    `);
   } finally {
     await storage.destroy();
   }

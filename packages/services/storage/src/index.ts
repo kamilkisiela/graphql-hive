@@ -1,3 +1,4 @@
+import { SerializableChange } from 'packages/services/api/src/modules/schema/schema-change-from-meta';
 import {
   DatabasePool,
   DatabasePoolConnection,
@@ -8,7 +9,6 @@ import {
 } from 'slonik';
 import { update } from 'slonik-utilities';
 import zod from 'zod';
-import type { SerializableChange } from '@graphql-inspector/core';
 import type {
   ActivityObject,
   Alert,
@@ -1915,7 +1915,11 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         FROM public.schema_versions as sv
         LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
         LEFT JOIN public.targets as t ON (t.id = sv.target_id)
-        WHERE sv.target_id = ${target} AND t.project_id = ${project} AND sv.id = ${version} LIMIT 1
+        WHERE
+          sv.target_id = ${target}
+          AND t.project_id = ${project}
+          AND sv.id = ${version}
+        LIMIT 1
       `);
 
       return {
@@ -2166,7 +2170,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
               "schema_version_id",
               "change_type",
               "severity_level",
-              "meta"
+              "meta",
+              "is_safe_based_on_usage"
             ) VALUES ${sql.join(
               input.changes.map(
                 change =>
@@ -2175,7 +2180,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                     ${version.id},
                     ${change.type},
                     ${change.criticality.level},
-                    ${JSON.stringify(change.meta)}::jsonb
+                    ${JSON.stringify(change.meta)}::jsonb,
+                    ${change.criticality.isSafeBasedOnUsage ?? false}
                   )`,
               ),
               sql`\n,`,
@@ -2214,8 +2220,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const changes = await pool.query<unknown>(sql`
         SELECT
           "change_type" as "type",
-          "severity_level",
-          "meta"
+          "meta",
+          "severity_level" as "severityLevel",
+          "is_safe_based_on_usage" as "isSafeBasedOnUsage"
         FROM
           "public"."schema_version_changes"
         WHERE
