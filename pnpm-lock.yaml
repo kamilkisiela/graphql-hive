@@ -50,14 +50,14 @@ importers:
         specifier: 3.2.2
         version: 3.2.2(@types/node@18.15.11)(graphql@16.6.0)
       '@graphql-codegen/client-preset':
-        specifier: 2.1.1
-        version: 2.1.1(graphql@16.6.0)
+        specifier: 3.0.0
+        version: 3.0.0(graphql@16.6.0)
       '@graphql-codegen/graphql-modules-preset':
         specifier: 3.1.1
         version: 3.1.1(graphql@16.6.0)
       '@graphql-codegen/typed-document-node':
-        specifier: 3.0.2
-        version: 3.0.2(graphql@16.6.0)
+        specifier: 4.0.0
+        version: 4.0.0(graphql@16.6.0)
       '@graphql-codegen/typescript':
         specifier: 3.0.2
         version: 3.0.2(graphql@16.6.0)
@@ -6117,23 +6117,23 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@graphql-codegen/client-preset@2.1.1(graphql@16.6.0):
-    resolution: {integrity: sha512-yDFiO2CimwjkH/YE5nwRcLkXoAVz31NC+WWvFQdyrR1UKQqe2tqV/bKLUifnSbBGS238ajHJ6AEzVlzIvI8OYQ==}
+  /@graphql-codegen/client-preset@3.0.0(graphql@16.6.0):
+    resolution: {integrity: sha512-J8MGoucvhjqStZ3JBY9rfmgOZrSwuX8aIX5q1OHpjDjxxwaV7XIcw6ztKcZo394xEwA/hMjdoO++qFi0wMRKQA==}
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@babel/helper-plugin-utils': 7.20.2
       '@babel/template': 7.20.7
       '@graphql-codegen/add': 4.0.1(graphql@16.6.0)
-      '@graphql-codegen/gql-tag-operations': 2.0.2(graphql@16.6.0)
-      '@graphql-codegen/plugin-helpers': 4.1.0(graphql@16.6.0)
-      '@graphql-codegen/typed-document-node': 3.0.2(graphql@16.6.0)
-      '@graphql-codegen/typescript': 3.0.2(graphql@16.6.0)
-      '@graphql-codegen/typescript-operations': 3.0.2(graphql@16.6.0)
-      '@graphql-codegen/visitor-plugin-common': 3.0.2(graphql@16.6.0)
+      '@graphql-codegen/gql-tag-operations': 3.0.0(graphql@16.6.0)
+      '@graphql-codegen/plugin-helpers': 4.2.0(graphql@16.6.0)
+      '@graphql-codegen/typed-document-node': 4.0.0(graphql@16.6.0)
+      '@graphql-codegen/typescript': 3.0.3(graphql@16.6.0)
+      '@graphql-codegen/typescript-operations': 3.0.3(graphql@16.6.0)
+      '@graphql-codegen/visitor-plugin-common': 3.1.0(graphql@16.6.0)
       '@graphql-tools/documents': 0.1.0(graphql@16.6.0)
       '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
-      '@graphql-typed-document-node/core': 3.1.2(graphql@16.6.0)
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.6.0)
       graphql: 16.6.0
       tslib: 2.5.0
     transitivePeerDependencies:
@@ -6146,7 +6146,7 @@ packages:
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
-      '@graphql-codegen/plugin-helpers': 4.1.0(graphql@16.6.0)
+      '@graphql-codegen/plugin-helpers': 4.2.0(graphql@16.6.0)
       '@graphql-tools/schema': 9.0.17(graphql@16.6.0)
       '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
       graphql: 16.6.0
@@ -6191,13 +6191,13 @@ packages:
       - supports-color
     dev: true
 
-  /@graphql-codegen/gql-tag-operations@2.0.2(graphql@16.6.0):
-    resolution: {integrity: sha512-FB4/Q0xP/lIjwnlxdeGAfGFAiL7AhzIJB9keNrosd4Xe9r8V8NuZ0+0/hGc7KdzHhojYF/ycmJD7V2JLWaf23Q==}
+  /@graphql-codegen/gql-tag-operations@3.0.0(graphql@16.6.0):
+    resolution: {integrity: sha512-qU122aRJPwZ+56//cIFl9fA25LNdzlmqArRJFa0nnJ2dY8PPmjXX8oXM5IGRB9sBJfHZPniiN1cM2NysgLS8Lg==}
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
-      '@graphql-codegen/plugin-helpers': 4.1.0(graphql@16.6.0)
-      '@graphql-codegen/visitor-plugin-common': 3.0.2(graphql@16.6.0)
+      '@graphql-codegen/plugin-helpers': 4.2.0(graphql@16.6.0)
+      '@graphql-codegen/visitor-plugin-common': 3.1.0(graphql@16.6.0)
       '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
       auto-bind: 4.0.0
       graphql: 16.6.0
@@ -6266,6 +6266,20 @@ packages:
       tslib: 2.5.0
     dev: true
 
+  /@graphql-codegen/plugin-helpers@4.2.0(graphql@16.6.0):
+    resolution: {integrity: sha512-THFTCfg+46PXlXobYJ/OoCX6pzjI+9woQqCjdyKtgoI0tn3Xq2HUUCiidndxUpEYVrXb5pRiRXb7b/ZbMQqD0A==}
+    peerDependencies:
+      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+    dependencies:
+      '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
+      change-case-all: 1.0.15
+      common-tags: 1.8.2
+      graphql: 16.6.0
+      import-from: 4.0.0
+      lodash: 4.17.21
+      tslib: 2.5.0
+    dev: true
+
   /@graphql-codegen/schema-ast@3.0.1(graphql@16.6.0):
     resolution: {integrity: sha512-rTKTi4XiW4QFZnrEqetpiYEWVsOFNoiR/v3rY9mFSttXFbIwNXPme32EspTiGWmEEdHY8UuTDtZN3vEcs/31zw==}
     peerDependencies:
@@ -6293,13 +6307,13 @@ packages:
       - supports-color
     dev: true
 
-  /@graphql-codegen/typed-document-node@3.0.2(graphql@16.6.0):
-    resolution: {integrity: sha512-RqX46y0GoMAcCfXjkUabOWpeSQ7tazpS5WyzWJNakpzXxNACx8NACaghU8zTEM+gjqtIp6YbFY/S92HQ34HbRQ==}
+  /@graphql-codegen/typed-document-node@4.0.0(graphql@16.6.0):
+    resolution: {integrity: sha512-hzalrmTKIKXSUFv3RzPArBK+2zY9Oi8gBKNdUBKI1lNlEWA9BCXADmu3X/R1fvmLcqrVSnRUc6F1byx47f5+qQ==}
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
-      '@graphql-codegen/plugin-helpers': 4.1.0(graphql@16.6.0)
-      '@graphql-codegen/visitor-plugin-common': 3.0.2(graphql@16.6.0)
+      '@graphql-codegen/plugin-helpers': 4.2.0(graphql@16.6.0)
+      '@graphql-codegen/visitor-plugin-common': 3.1.0(graphql@16.6.0)
       auto-bind: 4.0.0
       change-case-all: 1.0.15
       graphql: 16.6.0
@@ -6360,6 +6374,22 @@ packages:
       - supports-color
     dev: true
 
+  /@graphql-codegen/typescript-operations@3.0.3(graphql@16.6.0):
+    resolution: {integrity: sha512-RtMRFpZ8nyXxwurdxklWVIHX9U6/fGWYWEpvarNIIci17BKajZPzdBPKP2GKhUEWzZVGNESqH3RX38jt0onLqQ==}
+    peerDependencies:
+      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+    dependencies:
+      '@graphql-codegen/plugin-helpers': 4.2.0(graphql@16.6.0)
+      '@graphql-codegen/typescript': 3.0.3(graphql@16.6.0)
+      '@graphql-codegen/visitor-plugin-common': 3.1.0(graphql@16.6.0)
+      auto-bind: 4.0.0
+      graphql: 16.6.0
+      tslib: 2.5.0
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+    dev: true
+
   /@graphql-codegen/typescript-resolvers@3.1.1(graphql@16.6.0):
     resolution: {integrity: sha512-SYabg0/eDitxxVNTUphuJNi0m7ralvxZZ8aS4wXK4cpSpD4U7MkLZox3bhvEZoTYu1tS2r3CZZyN1JZmVR82JA==}
     peerDependencies:
@@ -6401,6 +6431,22 @@ packages:
       '@graphql-codegen/plugin-helpers': 4.1.0(graphql@16.6.0)
       '@graphql-codegen/schema-ast': 3.0.1(graphql@16.6.0)
       '@graphql-codegen/visitor-plugin-common': 3.0.2(graphql@16.6.0)
+      auto-bind: 4.0.0
+      graphql: 16.6.0
+      tslib: 2.5.0
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+    dev: true
+
+  /@graphql-codegen/typescript@3.0.3(graphql@16.6.0):
+    resolution: {integrity: sha512-oVV4/RPs3Lmr2XqywlNDmLhNBCIhefA8rYcuxoWcnd/WRc6GNRm1b2NOIzDhhF4xriVluMyk3QQVRepkdj9enw==}
+    peerDependencies:
+      graphql: ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+    dependencies:
+      '@graphql-codegen/plugin-helpers': 4.2.0(graphql@16.6.0)
+      '@graphql-codegen/schema-ast': 3.0.1(graphql@16.6.0)
+      '@graphql-codegen/visitor-plugin-common': 3.1.0(graphql@16.6.0)
       auto-bind: 4.0.0
       graphql: 16.6.0
       tslib: 2.5.0
@@ -6457,6 +6503,27 @@ packages:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@graphql-codegen/plugin-helpers': 4.1.0(graphql@16.6.0)
+      '@graphql-tools/optimize': 1.3.1(graphql@16.6.0)
+      '@graphql-tools/relay-operation-optimizer': 6.5.6(graphql@16.6.0)
+      '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
+      auto-bind: 4.0.0
+      change-case-all: 1.0.15
+      dependency-graph: 0.11.0
+      graphql: 16.6.0
+      graphql-tag: 2.12.6(graphql@16.6.0)
+      parse-filepath: 1.0.2
+      tslib: 2.5.0
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+    dev: true
+
+  /@graphql-codegen/visitor-plugin-common@3.1.0(graphql@16.6.0):
+    resolution: {integrity: sha512-S4BO/xP38eoEDULwbem5QeV7yWA8DpbcSGkvwrnMfVQW08nL6uHliCSV8hiuAi7Mhx7snVir4Iumk8uIDRVu6Q==}
+    peerDependencies:
+      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+    dependencies:
+      '@graphql-codegen/plugin-helpers': 4.2.0(graphql@16.6.0)
       '@graphql-tools/optimize': 1.3.1(graphql@16.6.0)
       '@graphql-tools/relay-operation-optimizer': 6.5.6(graphql@16.6.0)
       '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
@@ -7772,6 +7839,7 @@ packages:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
       graphql: 16.6.0
+    dev: false
 
   /@graphql-typed-document-node/core@3.2.0:
     resolution: {integrity: sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==}
