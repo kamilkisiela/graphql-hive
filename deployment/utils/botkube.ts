@@ -20,7 +20,7 @@ export class BotKube {
       'botkube',
       {
         // prettier-ignore
-        ...helmChart('https://charts.botkube.io', 'botkube', '0.18.0'),
+        ...helmChart('https://charts.botkube.io', 'botkube', 'v1.0.0'),
         namespace: ns.metadata.name,
         values: {
           settings: {
