@@ -430,7 +430,7 @@ function ClientsStats({
       <Section.Subtitle>Top 5 - GraphQL API consumers</Section.Subtitle>
       <AutoSizer disableHeight className="mt-5 w-full">
         {size => {
-          if (!size.width || !size.height) {
+          if (!size.width) {
             return <></>;
           }
 
