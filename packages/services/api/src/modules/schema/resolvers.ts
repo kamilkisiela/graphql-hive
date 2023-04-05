@@ -331,12 +331,12 @@ export const resolvers: SchemaModule.Resolvers = {
             detectUrlChanges(schemasBefore, schemasAfter).map(change => {
               return {
                 message: change.serviceUrl.after
-                  ? `[${change.serviceName}] New service url: ${
+                  ? `[${change.serviceName}] New service url: '${
                       change.serviceUrl.after
-                    } (previously: ${change.serviceUrl.before ?? 'none'})`
-                  : `[${change.serviceName}] Service url removed (previously: ${
+                    }' (previously: '${change.serviceUrl.before ?? 'none'}')`
+                  : `[${change.serviceName}] Service url removed (previously: '${
                       change.serviceUrl.before ?? 'none'
-                    }`,
+                    }'`,
                 criticality: 'Dangerous' satisfies CriticalityLevel,
               } as const;
             }),

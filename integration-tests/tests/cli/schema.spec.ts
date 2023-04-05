@@ -170,7 +170,7 @@ describe.each`
     },
   );
 
-  test.only
+  test
     .skipIf(projectType === ProjectType.Single)
     .concurrent('can update the service url and show it in comparison query', async () => {
       const { createOrg } = await initSeed().createOwner();
@@ -230,7 +230,7 @@ describe.each`
               nodes: expect.arrayContaining([
                 {
                   criticality: 'Dangerous',
-                  message: `[${serviceName}] New service url: ${newServiceUrl} (previously: ${serviceUrl})`,
+                  message: `[${serviceName}] New service url: '${newServiceUrl}' (previously: '${serviceUrl}')`,
                 },
               ]),
               total: 1,
