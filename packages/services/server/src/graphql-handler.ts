@@ -19,6 +19,7 @@ import { useGenericAuth } from '@envelop/generic-auth';
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useSentry } from '@envelop/sentry';
 import { useHive } from '@graphql-hive/client';
+import { useDeferStream } from '@graphql-yoga/plugin-defer-stream';
 import { Registry, RegistryContext } from '@hive/api';
 import { HiveError } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
@@ -95,6 +96,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
   const server = createYoga<Context>({
     logging: options.logger,
     plugins: [
+      useDeferStream(),
       useArmor(),
       useSentry({
         startTransaction: false,

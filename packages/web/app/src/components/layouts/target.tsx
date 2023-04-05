@@ -62,7 +62,7 @@ export const TargetLayout = <
   TSatisfies extends {
     organization?:
       | {
-          organization?: FragmentType<typeof TargetLayout_OrganizationFragment> | null;
+          organization?: any; //todo
         }
       | null
       | undefined;

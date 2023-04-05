@@ -88,12 +88,15 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
     op: 'graphql',
   });
 
+  const accept = req.headers['accept'] + ', multipart/mixed';
+
+  console.log('>>>>>>>> accept', accept);
   try {
     const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'content-type': req.headers['content-type'],
-        accept: req.headers['accept'],
+        accept,
         'accept-encoding': req.headers['accept-encoding'],
         'x-request-id': requestId,
         'X-API-Token': req.headers['x-api-token'] ?? '',
@@ -109,7 +112,18 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
     if (xRequestId) {
       res.setHeader('x-request-id', xRequestId);
     }
-    const parsedData = await response.json();
+
+    console.log({ response });
+
+    let parsedData;
+    try {
+      parsedData = await response.clone().json();
+    } catch {
+      const rawData = await response.clone().text();
+      parsedData = rawData ? JSON.parse(rawData) : null;
+    }
+
+    console.log('parsedData', JSON.stringify(parsedData, null, 2));
 
     graphqlSpan.setHttpStatus(200);
     graphqlSpan.finish();
@@ -140,9 +154,7 @@ export default graphql;
 
 export const config = {
   api: {
-    bodyParser: {
-      sizeLimit: '6mb',
-    },
+    // bodyParser: false,
     externalResolver: true,
   },
 };

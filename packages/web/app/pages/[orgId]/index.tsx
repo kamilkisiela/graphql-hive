@@ -23,6 +23,7 @@ import {
 } from '@/components/v2/dropdown';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, isFragmentReady, useFragment } from '@/gql';
+import { OrganizationProjectsPageQueryDocument } from '@/gql/graphql';
 import { ProjectActivitiesDocument } from '@/graphql';
 import { canAccessProject, ProjectAccessScope } from '@/lib/access/project';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
@@ -183,7 +184,7 @@ function ProjectsPage(): ReactElement {
                       : projects.nodes.map(
                           project =>
                             isFragmentReady(
-                              OrganizationProjectsPageQuery,
+                              OrganizationProjectsPageQueryDocument,
                               ProjectCard_ProjectFragment,
                               project,
                             ) && (
