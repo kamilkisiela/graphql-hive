@@ -88,7 +88,7 @@ export function VersionErrorsAndChanges(props: {
     .map(err => err.message);
   const groupedServiceErrors = new Map<string, string[]>();
 
-  props.errors.nodes.forEach(err => {
+  for (const err of props.errors.nodes) {
     if (err.message.startsWith('[')) {
       const [service, ...message] = err.message.split('] ');
       const serviceName = service.replace('[', '');
@@ -100,7 +100,7 @@ export function VersionErrorsAndChanges(props: {
 
       groupedServiceErrors.get(serviceName)!.push(errorMessage);
     }
-  });
+  }
 
   const serviceErrorEntries = Array.from(groupedServiceErrors.entries());
 
