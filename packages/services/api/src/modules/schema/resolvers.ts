@@ -13,7 +13,7 @@ import {
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
 import type { CriticalityLevel } from '../../__generated__/types';
-import { ProjectType } from '../../shared/entities';
+import { ProjectType, Schema } from '../../shared/entities';
 import { createPeriod, parseDateRangeInput } from '../../shared/helpers';
 import type {
   GraphQLEnumTypeMapper,
@@ -87,13 +87,22 @@ export const resolvers: SchemaModule.Resolvers = {
         injector.get(TargetManager).getTargetIdByToken(),
       ]);
 
-      return injector.get(SchemaPublisher).check({
+      const result = await injector.get(SchemaPublisher).check({
         ...input,
         service: input.service?.toLowerCase(),
         organization,
         project,
         target,
       });
+
+      if ('changes' in result) {
+        return {
+          ...result,
+          changes: result.changes.map(toGraphQLSchemaChange),
+        };
+      }
+
+      return result;
     },
     async schemaPublish(_, { input }, { injector, abortSignal }, info) {
       const [organization, project, target] = await Promise.all([
@@ -122,7 +131,7 @@ export const resolvers: SchemaModule.Resolvers = {
       const isSchemaPublishMissingUrlErrorSelected =
         !!parsedResolveInfoFragment?.fieldsByTypeName['SchemaPublishMissingUrlError'];
 
-      return injector.get(SchemaPublisher).publish(
+      const result = await injector.get(SchemaPublisher).publish(
         {
           ...input,
           service: input.service?.toLowerCase(),
@@ -134,6 +143,14 @@ export const resolvers: SchemaModule.Resolvers = {
         },
         abortSignal,
       );
+      if ('changes' in result) {
+        return {
+          ...result,
+          changes: result.changes?.map(toGraphQLSchemaChange),
+        };
+      }
+
+      return result;
     },
     async schemaDelete(_, { input }, { injector, abortSignal }) {
       const [organization, project, target] = await Promise.all([
@@ -154,7 +171,7 @@ export const resolvers: SchemaModule.Resolvers = {
         .update(token)
         .digest('base64');
 
-      return injector.get(SchemaPublisher).delete(
+      const result = await injector.get(SchemaPublisher).delete(
         {
           dryRun: input.dryRun,
           serviceName: input.serviceName.toLowerCase(),
@@ -165,6 +182,15 @@ export const resolvers: SchemaModule.Resolvers = {
         },
         abortSignal,
       );
+
+      return {
+        ...result,
+        changes: result.changes?.map(toGraphQLSchemaChange),
+        errors: result.errors?.map(error => ({
+          ...error,
+          path: 'path' in error ? error.path?.split('.') : null,
+        })),
+      };
     },
     async updateSchemaVersionStatus(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);
@@ -316,15 +342,19 @@ export const resolvers: SchemaModule.Resolvers = {
           target: targetId,
           version: currentVersion.id,
         });
+
         return {
           result: {
             schemas: {
               before: previousVersion.compositeSchemaSDL,
               current: currentVersion.compositeSchemaSDL,
             },
-            changes,
+            changes: changes ?? [],
+            // TODO: these must come from the database ok.
+            // We should move this to the Inspector.diff service
+            serviceUrlChanges: [],
           },
-        } as SchemaCompareResult;
+        } satisfies SchemaCompareResult;
       }
 
       // LEGACY LAND

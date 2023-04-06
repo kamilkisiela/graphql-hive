@@ -312,7 +312,7 @@ export class SchemaPublisher {
         valid: true,
         changes: checkResult.state.changes ?? [],
         initial: checkResult.state.initial,
-      } satisfies Types.ResolversTypes['SchemaCheckSuccess'];
+      } as const;
     }
 
     return {
@@ -335,7 +335,7 @@ export class SchemaPublisher {
         getReasonByCode(checkResult, CheckFailureReasonCode.CompositionFailure)
           ?.compositionErrors ?? [],
       ),
-    } satisfies Types.ResolversTypes['SchemaCheckError'];
+    } as const;
   }
 
   @sentry('SchemaPublisher.publish')
@@ -510,7 +510,7 @@ export class SchemaPublisher {
                   message: `Service "${input.serviceName}" not found`,
                 },
               ],
-            } satisfies Types.ResolversTypes['SchemaDeleteResult'];
+            } as const;
           }
 
           const deleteResult = await this.models[project.type][modelVersion].delete({
@@ -557,7 +557,7 @@ export class SchemaPublisher {
                 ...(deleteResult.state.compositionErrors ?? []),
                 ...(deleteResult.state.breakingChanges ?? []),
               ],
-            } satisfies Types.ResolversTypes['SchemaDeleteResult'];
+            } as const;
           }
 
           this.logger.debug('Delete rejected');
@@ -583,7 +583,7 @@ export class SchemaPublisher {
             __typename: 'SchemaDeleteError',
             valid: false,
             errors,
-          } satisfies Types.ResolversTypes['SchemaDeleteResult'];
+          } as const;
         } finally {
           await unlock();
         }
@@ -749,7 +749,7 @@ export class SchemaPublisher {
         initial: false,
         valid: true,
         changes: [],
-      } satisfies Types.ResolversTypes['SchemaPublishSuccess'];
+      } as const;
     }
 
     if (publishResult.conclusion === SchemaPublishConclusion.Reject) {
@@ -768,14 +768,14 @@ export class SchemaPublisher {
         return {
           __typename: 'SchemaPublishMissingServiceError' as const,
           message: 'Missing service name',
-        } satisfies Types.ResolversTypes['SchemaPublishMissingServiceError'];
+        } as const;
       }
 
       if (getReasonByCode(publishResult, PublishFailureReasonCode.MissingServiceUrl)) {
         return {
           __typename: 'SchemaPublishMissingUrlError' as const,
           message: 'Missing service url',
-        } satisfies Types.ResolversTypes['SchemaPublishMissingUrlError'];
+        } as const;
       }
 
       return {
@@ -799,7 +799,7 @@ export class SchemaPublisher {
               ]
             : [],
         ),
-      } satisfies Types.ResolversTypes['SchemaPublishError'];
+      };
     }
 
     const errors = (
@@ -936,7 +936,7 @@ export class SchemaPublisher {
       changes: modelVersion === 'legacy' ? publishResult.state.changes ?? [] : null,
       message: (publishResult.state.messages ?? []).join('\n'),
       linkToWebsite,
-    } satisfies Types.ResolversTypes['SchemaPublishSuccess'];
+    };
   }
 
   private async githubCheck({

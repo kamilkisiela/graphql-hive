@@ -159,11 +159,20 @@ export class CompositeModel {
       }
 
       if (diffCheck.status === 'failed') {
-        reasons.push({
-          code: CheckFailureReasonCode.BreakingChanges,
-          changes: diffCheck.reason.changes ?? [],
-          breakingChanges: diffCheck.reason.breakingChanges,
-        });
+        if (diffCheck.reason.changes) {
+          reasons.push({
+            code: CheckFailureReasonCode.BreakingChanges,
+            changes: diffCheck.reason.changes ?? [],
+            breakingChanges: diffCheck.reason.breakingChanges,
+          });
+        }
+
+        if (diffCheck.reason.compareFailure) {
+          reasons.push({
+            code: CheckFailureReasonCode.CompositionFailure,
+            compositionErrors: [diffCheck.reason.compareFailure],
+          });
+        }
       }
 
       return {

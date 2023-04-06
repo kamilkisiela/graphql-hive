@@ -11,7 +11,6 @@ import type {
   GraphQLSchema,
   GraphQLUnionType,
 } from 'graphql';
-import { SerializableChange } from '@graphql-inspector/core';
 import type {
   ClientStats,
   CriticalityLevel,
@@ -20,6 +19,7 @@ import type {
   SchemaError,
 } from '../__generated__/types';
 import { SchemaBuildError } from '../modules/schema/providers/orchestrators/errors';
+import { SerializableChange } from '../modules/schema/schema-change-from-meta';
 import type {
   ActivityObject,
   DateRange,

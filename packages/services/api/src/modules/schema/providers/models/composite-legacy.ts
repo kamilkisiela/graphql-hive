@@ -329,7 +329,7 @@ export class CompositeLegacyModel {
           initial: latestVersion === null,
           messages,
           changes,
-          breakingChanges,
+          breakingChanges: breakingChanges ?? null,
           compositionErrors,
           schema: incoming,
           schemas,
@@ -352,7 +352,7 @@ export class CompositeLegacyModel {
       reasons.push({
         code: PublishFailureReasonCode.BreakingChanges,
         changes: diffCheck.reason.changes ?? [],
-        breakingChanges: diffCheck.reason.breakingChanges,
+        breakingChanges: diffCheck.reason.breakingChanges ?? [],
       });
     }
 
