@@ -60,8 +60,17 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
       method: 'GET',
     } as any);
 
+    res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
+
     if (response.body) {
-      return Readable.from(response.body as any).pipe(res);
+      const reader = response.body.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          break;
+        }
+        res.write(Buffer.from(value));
+      }
     }
 
     return res.end();
@@ -115,20 +124,33 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
       body: JSON.stringify(req.body || {}),
     } as any);
 
-    const xRequestId = response.headers.get('x-request-id');
-    if (xRequestId) {
-      res.setHeader('x-request-id', xRequestId);
-    }
-
     graphqlSpan.setHttpStatus(200);
     graphqlSpan.finish();
     finishTransaction();
 
-    if (response.body) {
-      Readable.from(response.body as any).pipe(res);
-    } else {
-      res.end();
+    const resHeaders = Object.fromEntries(response.headers.entries());
+
+    const xRequestId = response.headers.get('x-request-id');
+    if (xRequestId) {
+      resHeaders['x-request-id'] = xRequestId;
     }
+
+    res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
+
+    if (response.body) {
+      const reader = response.body.getReader();
+      let streamDone = false;
+      while (!streamDone) {
+        const { done, value } = await reader.read();
+        if (done) {
+          streamDone = true;
+          return;
+        }
+        res.write(Buffer.from(value));
+      }
+    }
+
+    return res.end();
   } catch (error) {
     console.error(error);
     captureException(error);
