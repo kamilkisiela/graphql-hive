@@ -1,9 +1,11 @@
+import { Readable } from 'node:stream';
 import { NextApiRequest, NextApiResponse } from 'next';
 import hyperid from 'hyperid';
 import { env } from '@/env/backend';
 import { extractAccessTokenFromRequest } from '@/lib/api/extract-access-token-from-request';
 import { captureException, startTransaction } from '@sentry/nextjs';
 import type { Transaction } from '@sentry/types';
+import { fetch } from '@whatwg-node/fetch';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 
@@ -57,7 +59,12 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
       },
       method: 'GET',
     } as any);
-    return res.send(await response.text());
+
+    if (response.body) {
+      return Readable.from(response.body as any).pipe(res);
+    }
+
+    return res.end();
   }
 
   const { transaction, finish: finishTransaction } = useTransaction(res);
@@ -113,23 +120,15 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
       res.setHeader('x-request-id', xRequestId);
     }
 
-    console.log({ response });
-
-    let parsedData;
-    try {
-      parsedData = await response.clone().json();
-    } catch {
-      const rawData = await response.clone().text();
-      parsedData = rawData ? JSON.parse(rawData) : null;
-    }
-
-    console.log('parsedData', JSON.stringify(parsedData, null, 2));
-
     graphqlSpan.setHttpStatus(200);
     graphqlSpan.finish();
     finishTransaction();
 
-    res.status(200).json(parsedData);
+    if (response.body) {
+      Readable.from(response.body as any).pipe(res);
+    } else {
+      res.end();
+    }
   } catch (error) {
     console.error(error);
     captureException(error);
