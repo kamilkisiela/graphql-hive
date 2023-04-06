@@ -106,7 +106,7 @@ const TargetOperationsPageQuery = graphql(`
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_ProjectFragment @defer
+      ...TargetLayout_ProjectFragment
       cleanId
     }
     targets(selector: { organization: $organizationId, project: $projectId }) {
@@ -123,7 +123,6 @@ const TargetOperationsPageQuery = graphql(`
 `);
 
 function OperationsPage(): ReactElement {
-  // todo: @defer
   return (
     <>
       <Title title="Operations" />

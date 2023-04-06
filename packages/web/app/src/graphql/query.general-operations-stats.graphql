@@ -1,6 +1,6 @@
 query generalOperationsStats($selector: OperationsStatsSelectorInput!, $resolution: Int!) {
   operationsStats(selector: $selector) {
-    ... on OperationsStats {
+    ... on OperationsStats @defer {
       totalRequests
       totalFailures
       totalOperations
@@ -11,7 +11,7 @@ query generalOperationsStats($selector: OperationsStatsSelectorInput!, $resoluti
         p99
       }
     }
-    ... on OperationsStats {
+    ... on OperationsStats @defer {
       failuresOverTime(resolution: $resolution) {
         date
         value
@@ -30,7 +30,7 @@ query generalOperationsStats($selector: OperationsStatsSelectorInput!, $resoluti
         }
       }
     }
-    ... on OperationsStats {
+    ... on OperationsStats @defer {
       clients {
         nodes {
           name

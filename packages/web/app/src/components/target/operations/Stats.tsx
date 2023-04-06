@@ -340,10 +340,12 @@ function OverTimeStats({
 }
 
 function ClientsStats({
-  clients = [],
+  data,
 }: {
-  clients?: GeneralOperationsStatsQuery['operationsStats']['clients']['nodes'];
+  data: GeneralOperationsStatsQuery['operationsStats']['clients'] | null;
 }): ReactElement {
+  const clients = data?.nodes;
+  console.log({ data });
   const styles = useChartStyles();
   const sortedClients = useMemo(() => {
     return clients?.length ? clients.slice().sort((a, b) => b.count - a.count) : [];
@@ -755,7 +757,7 @@ export function OperationsStats({
     });
   }, [refetchQuery]);
 
-  const isFetching = query.fetching;
+  const isFetching = query.fetching || query.stale;
   const isError = !!query.error;
 
   const operationsStats = query.data?.operationsStats;
@@ -781,7 +783,9 @@ export function OperationsStats({
         </div>
       </OperationsFallback>
       <div>
-        <ClientsStats clients={operationsStats?.clients?.nodes} />
+        <ClientsStats
+          data={operationsStats && 'clients' in operationsStats ? operationsStats.clients : null}
+        />
       </div>
       <div>
         <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>

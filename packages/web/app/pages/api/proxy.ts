@@ -1,4 +1,3 @@
-import { Readable } from 'node:stream';
 import { NextApiRequest, NextApiResponse } from 'next';
 import hyperid from 'hyperid';
 import { env } from '@/env/backend';
@@ -64,12 +63,14 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
 
     if (response.body) {
       const reader = response.body.getReader();
-      while (true) {
+      let streamDone = false;
+      while (!streamDone) {
         const { done, value } = await reader.read();
         if (done) {
-          break;
+          streamDone = true;
+        } else {
+          res.write(Buffer.from(value));
         }
-        res.write(Buffer.from(value));
       }
     }
 
@@ -104,15 +105,12 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
     op: 'graphql',
   });
 
-  const accept = req.headers['accept'] + ', multipart/mixed';
-
-  console.log('>>>>>>>> accept', accept);
   try {
     const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'content-type': req.headers['content-type'],
-        accept,
+        accept: req.headers['accept'] + ', multipart/mixed',
         'accept-encoding': req.headers['accept-encoding'],
         'x-request-id': requestId,
         'X-API-Token': req.headers['x-api-token'] ?? '',
@@ -144,9 +142,9 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
         const { done, value } = await reader.read();
         if (done) {
           streamDone = true;
-          return;
+        } else {
+          res.write(Buffer.from(value));
         }
-        res.write(Buffer.from(value));
       }
     }
 

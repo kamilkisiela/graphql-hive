@@ -22,8 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/v2/dropdown';
 import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
-import { FragmentType, graphql, isFragmentReady, useFragment } from '@/gql';
-import { OrganizationProjectsPageQueryDocument } from '@/gql/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectActivitiesDocument } from '@/graphql';
 import { canAccessProject, ProjectAccessScope } from '@/lib/access/project';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
@@ -137,7 +136,7 @@ const OrganizationProjectsPageQuery = graphql(`
       total
       nodes {
         id
-        ...ProjectCard_ProjectFragment @defer
+        ...ProjectCard_ProjectFragment
       }
     }
   }
@@ -166,7 +165,6 @@ function ProjectsPage(): ReactElement {
                   />
                 ) : (
                   <div className="grid grid-cols-2 gap-5 items-stretch">
-                    {/** TODO: use defer here :) */}
                     {projects === null
                       ? [1, 2].map(key => (
                           <Card key={key}>
@@ -181,20 +179,13 @@ function ProjectsPage(): ReactElement {
                             <Skeleton visible className="h-7" />
                           </Card>
                         ))
-                      : projects.nodes.map(
-                          project =>
-                            isFragmentReady(
-                              OrganizationProjectsPageQueryDocument,
-                              ProjectCard_ProjectFragment,
-                              project,
-                            ) && (
-                              <ProjectCard
-                                key={project.id}
-                                project={project}
-                                organization={organization.organization}
-                              />
-                            ),
-                        )}
+                      : projects.nodes.map(project => (
+                          <ProjectCard
+                            key={project.id}
+                            project={project}
+                            organization={organization.organization}
+                          />
+                        ))}
                   </div>
                 )}
               </div>
