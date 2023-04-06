@@ -57,8 +57,37 @@ import {
   unionMemberRemovedFromMeta,
 } from '@graphql-inspector/core';
 
-export type SerializableChange = SerializableChangeBase & {
+export type RegistryServiceUrlChangeSerializableChange = {
+  type: 'REGISTRY_SERVICE_URL_CHANGED';
+  meta: {
+    serviceName: string;
+    serviceUrls:
+      | {
+          old: null;
+          new: string;
+        }
+      | {
+          old: string;
+          new: string;
+        }
+      | {
+          old: string;
+          new: null;
+        };
+  };
+};
+
+export type SerializableChange = (
+  | RegistryServiceUrlChangeSerializableChange
+  | SerializableChangeBase
+) & {
   isSafeBasedOnUsage: boolean;
+};
+
+export type RegistryServiceUrlChangeChange = RegistryServiceUrlChangeSerializableChange & {
+  message: string;
+  criticality: Change['criticality'];
+  path?: string;
 };
 
 /**
@@ -170,7 +199,29 @@ function schemaChangeFromSerializableChange(change: SerializableChange): Change 
       return unionMemberRemovedFromMeta(change);
     case ChangeType.UnionMemberAdded:
       return buildUnionMemberAddedMessageFromMeta(change);
+    case 'REGISTRY_SERVICE_URL_CHANGED':
+      return buildRegistryServiceURLFromMeta(change);
   }
+}
+
+function buildRegistryServiceURLFromMeta(
+  change: RegistryServiceUrlChangeSerializableChange,
+): RegistryServiceUrlChangeChange {
+  return {
+    type: 'REGISTRY_SERVICE_URL_CHANGED',
+    message: change.meta.serviceUrls.old
+      ? `[${change.meta.serviceName}] New service url: '${
+          change.meta.serviceUrls.new
+        }' (previously: '${change.meta.serviceUrls.old ?? 'none'}')`
+      : `[${change.meta.serviceName}] Service url removed (previously: '${
+          change.meta.serviceUrls.old ?? 'none'
+        }'`,
+    criticality: {
+      level: CriticalityLevel.Dangerous,
+      reason: 'The registry service url has changed',
+    },
+    meta: change.meta,
+  } as const;
 }
 
 export function schemaChangeFromMeta(serializableChange: SerializableChange): Change {

@@ -1,4 +1,5 @@
 /** These mirror DB models from  */
+import { RegistryServiceUrlChangeSerializableChange } from 'packages/services/api/src/modules/schema/schema-change-from-meta';
 import { z } from 'zod';
 import type {
   ChangeType,
@@ -692,6 +693,30 @@ export const UnionMemberAddedModel = implement<UnionMemberAddedChange>().with({
   }),
 });
 
+// Service Registry Url Change
+
+export const RegistryServiceUrlChangeModel =
+  implement<RegistryServiceUrlChangeSerializableChange>().with({
+    type: z.literal('REGISTRY_SERVICE_URL_CHANGED'),
+    meta: z.object({
+      serviceName: z.string(),
+      serviceUrls: z.union([
+        z.object({
+          old: z.null(),
+          new: z.string(),
+        }),
+        z.object({
+          old: z.string(),
+          new: z.null(),
+        }),
+        z.object({
+          old: z.string(),
+          new: z.string(),
+        }),
+      ]),
+    }),
+  });
+
 // TODO: figure out a way to make sure that all the changes are included in the union
 // Similar to implement().with() but for unions
 export const SchemaChangeModel = z.union([
@@ -747,6 +772,8 @@ export const SchemaChangeModel = z.union([
   TypeDescriptionRemovedModel,
   UnionMemberRemovedModel,
   UnionMemberAddedModel,
+  // Hive Federation/Stitching Specific
+  RegistryServiceUrlChangeModel,
 ]);
 
 ({}) as SerializableChange satisfies z.TypeOf<typeof SchemaChangeModel>;

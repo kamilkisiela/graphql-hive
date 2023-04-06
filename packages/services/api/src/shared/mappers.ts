@@ -13,7 +13,6 @@ import type {
 } from 'graphql';
 import type {
   ClientStats,
-  CriticalityLevel,
   OperationStats,
   SchemaChange,
   SchemaError,
@@ -132,10 +131,6 @@ export type SchemaCompareResult = {
       before: string | null;
       current: string;
     };
-    serviceUrlChanges: Array<{
-      message: string;
-      criticality: CriticalityLevel;
-    }>;
     changes: Array<SerializableChange>;
   };
 };

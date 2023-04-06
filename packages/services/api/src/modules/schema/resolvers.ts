@@ -12,8 +12,7 @@ import {
 } from 'graphql';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
-import type { CriticalityLevel } from '../../__generated__/types';
-import { ProjectType, Schema } from '../../shared/entities';
+import { ProjectType } from '../../shared/entities';
 import { createPeriod, parseDateRangeInput } from '../../shared/helpers';
 import type {
   GraphQLEnumTypeMapper,
@@ -36,7 +35,7 @@ import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import { Inspector, toGraphQLSchemaChange } from './providers/inspector';
 import { SchemaBuildError } from './providers/orchestrators/errors';
-import { ensureSDL, isCompositeSchema, SchemaHelper } from './providers/schema-helper';
+import { ensureSDL, SchemaHelper } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
 import { schemaChangeFromMeta, SerializableChange } from './schema-change-from-meta';
@@ -350,9 +349,6 @@ export const resolvers: SchemaModule.Resolvers = {
               current: currentVersion.compositeSchemaSDL,
             },
             changes: changes ?? [],
-            // TODO: these must come from the database ok.
-            // We should move this to the Inspector.diff service
-            serviceUrlChanges: [],
           },
         } satisfies SchemaCompareResult;
       }
@@ -436,18 +432,6 @@ export const resolvers: SchemaModule.Resolvers = {
                 before: before?.raw ?? null,
                 current: after.raw,
               },
-              serviceUrlChanges: detectUrlChanges(schemasBefore, schemasAfter).map(change => {
-                return {
-                  message: change.serviceUrl.after
-                    ? `[${change.serviceName}] New service url: '${
-                        change.serviceUrl.after
-                      }' (previously: '${change.serviceUrl.before ?? 'none'}')`
-                    : `[${change.serviceName}] Service url removed (previously: '${
-                        change.serviceUrl.before ?? 'none'
-                      }'`,
-                  criticality: 'Dangerous' satisfies CriticalityLevel,
-                } as const;
-              }),
               changes,
             },
           };
@@ -765,9 +749,9 @@ export const resolvers: SchemaModule.Resolvers = {
       return source.result.schemas.before === null;
     },
     async changes(source) {
-      return source.result.changes
-        .map(change => toGraphQLSchemaChange(schemaChangeFromMeta(change)))
-        .concat(source.result.serviceUrlChanges);
+      return source.result.changes.map(change =>
+        toGraphQLSchemaChange(schemaChangeFromMeta(change)),
+      );
     },
     diff(source) {
       const { before, current } = source.result.schemas;
@@ -1088,52 +1072,4 @@ function stringifyDefaultValue(value: unknown): string | null {
     return JSON.stringify(value);
   }
   return null;
-}
-
-function detectUrlChanges(schemasBefore: readonly Schema[], schemasAfter: readonly Schema[]) {
-  if (schemasBefore.length === 0) {
-    return [];
-  }
-
-  const compositeSchemasBefore = schemasBefore.filter(isCompositeSchema);
-
-  if (compositeSchemasBefore.length === 0) {
-    return [];
-  }
-
-  const compositeSchemasAfter = schemasAfter.filter(isCompositeSchema);
-  const nameToCompositeSchemaMap = new Map(compositeSchemasBefore.map(s => [s.service_name, s]));
-
-  const changes: Array<{
-    serviceName: string;
-    serviceUrl:
-      | {
-          before: string;
-          after: string;
-        }
-      | {
-          before: null;
-          after: string;
-        }
-      | {
-          before: string;
-          after: null;
-        };
-  }> = [];
-
-  for (const schema of compositeSchemasAfter) {
-    const before = nameToCompositeSchemaMap.get(schema.service_name);
-
-    if (before && before.service_url !== schema.service_url) {
-      changes.push({
-        serviceName: schema.service_name,
-        serviceUrl: {
-          before: before.service_url!, // I used `!` because `before !== after` check means there cannot be `null` for both, but TypeScript knows better...
-          after: schema.service_url,
-        },
-      });
-    }
-  }
-
-  return changes;
 }

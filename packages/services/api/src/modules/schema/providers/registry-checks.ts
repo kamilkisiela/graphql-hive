@@ -3,7 +3,12 @@ import { Injectable, Scope } from 'graphql-modules';
 import hashObject from 'object-hash';
 import { CriticalityLevel } from '@graphql-inspector/core';
 import type { CompositionFailureError } from '@hive/schema';
+import { Schema } from '../../../shared/entities';
 import { buildSchema } from '../../../shared/schema';
+import {
+  RegistryServiceUrlChangeSerializableChange,
+  schemaChangeFromMeta,
+} from '../schema-change-from-meta';
 import type {
   Orchestrator,
   Project,
@@ -12,7 +17,7 @@ import type {
 } from './../../../shared/entities';
 import { Logger } from './../../shared/providers/logger';
 import { Inspector } from './inspector';
-import { ensureSDL, extendWithBase, SchemaHelper } from './schema-helper';
+import { ensureSDL, extendWithBase, isCompositeSchema, SchemaHelper } from './schema-helper';
 
 // The reason why I'm using `result` and `reason` instead of just `data` for both:
 // https://bit.ly/hive-check-result-data
@@ -192,7 +197,15 @@ export class RegistryChecks {
         }),
       ]);
 
-      const changes = await this.inspector.diff(existingSchema, incomingSchema, selector);
+      const changes = [
+        ...(await this.inspector.diff(existingSchema, incomingSchema, selector)),
+        ...detectUrlChanges(version.schemas, schemas).map(change =>
+          schemaChangeFromMeta({
+            ...change,
+            isSafeBasedOnUsage: false,
+          }),
+        ),
+      ];
 
       const breakingChanges = changes.filter(
         change => change.criticality.level === CriticalityLevel.Breaking,
@@ -337,4 +350,43 @@ export class RegistryChecks {
       } satisfies CheckResult;
     }
   }
+}
+
+function detectUrlChanges(
+  schemasBefore: readonly Schema[],
+  schemasAfter: readonly Schema[],
+): Array<RegistryServiceUrlChangeSerializableChange> {
+  if (schemasBefore.length === 0) {
+    return [];
+  }
+
+  const compositeSchemasBefore = schemasBefore.filter(isCompositeSchema);
+
+  if (compositeSchemasBefore.length === 0) {
+    return [];
+  }
+
+  const compositeSchemasAfter = schemasAfter.filter(isCompositeSchema);
+  const nameToCompositeSchemaMap = new Map(compositeSchemasBefore.map(s => [s.service_name, s]));
+
+  const changes: Array<RegistryServiceUrlChangeSerializableChange> = [];
+
+  for (const schema of compositeSchemasAfter) {
+    const before = nameToCompositeSchemaMap.get(schema.service_name);
+
+    if (before && before.service_url !== schema.service_url) {
+      changes.push({
+        type: 'REGISTRY_SERVICE_URL_CHANGED',
+        meta: {
+          serviceName: schema.service_name,
+          serviceUrls: {
+            old: before.service_url!,
+            new: schema.service_url,
+          },
+        },
+      });
+    }
+  }
+
+  return changes;
 }
