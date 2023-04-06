@@ -4,6 +4,7 @@ import { env } from '@/env/backend';
 import { extractAccessTokenFromRequest } from '@/lib/api/extract-access-token-from-request';
 import { captureException, startTransaction } from '@sentry/nextjs';
 import type { Transaction } from '@sentry/types';
+import { fetch } from '@whatwg-node/fetch';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 
@@ -16,7 +17,7 @@ function useTransaction(res: any) {
 
     return {
       transaction: existingTransaction,
-      finish() {},
+      finish() { },
     };
   }
 
@@ -57,7 +58,21 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
       },
       method: 'GET',
     } as any);
-    return res.send(await response.text());
+
+    res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
+
+    if (response.body) {
+      const reader = response.body.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          break;
+        }
+        res.write(Buffer.from(value));
+      }
+    }
+
+    return res.end();
   }
 
   const { transaction, finish: finishTransaction } = useTransaction(res);
@@ -105,17 +120,31 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
       body: JSON.stringify(req.body || {}),
     } as any);
 
-    const xRequestId = response.headers.get('x-request-id');
-    if (xRequestId) {
-      res.setHeader('x-request-id', xRequestId);
-    }
-    const parsedData = await response.json();
-
     graphqlSpan.setHttpStatus(200);
     graphqlSpan.finish();
     finishTransaction();
 
-    res.status(200).json(parsedData);
+    const resHeaders = Object.fromEntries(response.headers.entries());
+
+    const xRequestId = response.headers.get('x-request-id');
+    if (xRequestId) {
+      resHeaders['x-request-id'] = xRequestId;
+    }
+
+    res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
+
+    if (response.body) {
+      const reader = response.body.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          break;
+        }
+        res.write(Buffer.from(value));
+      }
+    }
+
+    return res.end();
   } catch (error) {
     console.error(error);
     captureException(error);
