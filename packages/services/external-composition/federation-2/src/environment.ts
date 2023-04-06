@@ -11,7 +11,10 @@ const BaseSchema = zod.object({
   NODE_ENV: zod.string().default('production'),
   ENVIRONMENT: zod.string().default('production'),
   RELEASE: zod.string().default(''),
-  PORT: zod.coerce.number().default(3069),
+  PORT: zod.coerce
+    .number()
+    .transform(port => port || 3069)
+    .default(3069),
   SECRET: zod.string(),
 });
 
