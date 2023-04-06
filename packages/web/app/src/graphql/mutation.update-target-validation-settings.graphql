@@ -1,9 +1,0 @@
-mutation updateTargetValidationSettings($input: UpdateTargetValidationSettingsInput!) {
-  updateTargetValidationSettings(input: $input) {
-    ok {
-      updatedTargetValidationSettings {
-        ...TargetValidationSettingsFields
-      }
-    }
-  }
-}

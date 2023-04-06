@@ -148,22 +148,32 @@ export class SchemaPublisher {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    const [target, project, latestVersion] = await Promise.all([
-      this.targetManager.getTarget({
-        organization: input.organization,
-        project: input.project,
-        target: input.target,
-      }),
-      this.projectManager.getProject({
-        organization: input.organization,
-        project: input.project,
-      }),
-      this.schemaManager.getLatestSchemas({
-        organization: input.organization,
-        project: input.project,
-        target: input.target,
-      }),
-    ]);
+    const [target, project, organization, latestVersion, latestComposableVersion] =
+      await Promise.all([
+        this.targetManager.getTarget({
+          organization: input.organization,
+          project: input.project,
+          target: input.target,
+        }),
+        this.projectManager.getProject({
+          organization: input.organization,
+          project: input.project,
+        }),
+        this.organizationManager.getOrganization({
+          organization: input.organization,
+        }),
+        this.schemaManager.getLatestSchemas({
+          organization: input.organization,
+          project: input.project,
+          target: input.target,
+        }),
+        this.schemaManager.getLatestSchemas({
+          organization: input.organization,
+          project: input.project,
+          target: input.target,
+          onlyComposable: true,
+        }),
+      ]);
 
     schemaCheckCount.inc({
       model: project.legacyRegistryModel ? 'legacy' : 'modern',
@@ -203,8 +213,15 @@ export class SchemaPublisher {
                 schemas: [ensureSingleSchema(latestVersion.schemas)],
               }
             : null,
+          latestComposable: latestComposableVersion
+            ? {
+                isComposable: latestComposableVersion.valid,
+                schemas: [ensureSingleSchema(latestComposableVersion.schemas)],
+              }
+            : null,
           baseSchema,
           project,
+          organization,
         });
         break;
       case ProjectType.FEDERATION:
@@ -222,8 +239,15 @@ export class SchemaPublisher {
                 schemas: ensureCompositeSchemas(latestVersion.schemas),
               }
             : null,
+          latestComposable: latestComposableVersion
+            ? {
+                isComposable: latestComposableVersion.valid,
+                schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
+              }
+            : null,
           baseSchema,
           project,
+          organization,
         });
         break;
       default:
@@ -405,22 +429,32 @@ export class SchemaPublisher {
             target: input.target,
             scope: TargetAccessScope.REGISTRY_WRITE,
           });
-          const [project, latestVersion, baseSchema] = await Promise.all([
-            this.projectManager.getProject({
-              organization: input.organization,
-              project: input.project,
-            }),
-            this.schemaManager.getLatestSchemas({
-              organization: input.organization,
-              project: input.project,
-              target: input.target,
-            }),
-            this.schemaManager.getBaseSchema({
-              organization: input.organization,
-              project: input.project,
-              target: input.target,
-            }),
-          ]);
+          const [project, organization, latestVersion, latestComposableVersion, baseSchema] =
+            await Promise.all([
+              this.projectManager.getProject({
+                organization: input.organization,
+                project: input.project,
+              }),
+              this.organizationManager.getOrganization({
+                organization: input.organization,
+              }),
+              this.schemaManager.getLatestSchemas({
+                organization: input.organization,
+                project: input.project,
+                target: input.target,
+              }),
+              this.schemaManager.getLatestSchemas({
+                organization: input.organization,
+                project: input.project,
+                target: input.target,
+                onlyComposable: true,
+              }),
+              this.schemaManager.getBaseSchema({
+                organization: input.organization,
+                project: input.project,
+                target: input.target,
+              }),
+            ]);
 
           const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
 
@@ -430,13 +464,24 @@ export class SchemaPublisher {
             throw new HiveError(`${project.type} project (${modelVersion}) not supported`);
           }
 
+          if (modelVersion === 'legacy') {
+            throw new HiveError(
+              'Please upgrade your project to the new registry model to use this feature. See https://the-guild.dev/blog/graphql-hive-improvements-in-schema-registry',
+            );
+          }
+
           if (!latestVersion || latestVersion.schemas.length === 0) {
             throw new HiveError('Registry is empty');
           }
 
           const schemas = ensureCompositeSchemas(latestVersion.schemas);
           this.logger.debug(`Found ${latestVersion?.schemas.length ?? 0} most recent schemas`);
-          this.logger.debug('Using %s registry model (version=%s)', project.type, modelVersion);
+          this.logger.debug(
+            'Using %s registry model (version=%s, featureFlags=%o)',
+            project.type,
+            modelVersion,
+            organization.featureFlags,
+          );
 
           const serviceExists = schemas.some(s => s.service_name === input.serviceName);
 
@@ -460,8 +505,15 @@ export class SchemaPublisher {
               isComposable: latestVersion.valid,
               schemas,
             },
+            latestComposable: latestComposableVersion
+              ? {
+                  isComposable: latestComposableVersion.valid,
+                  schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
+                }
+              : null,
             baseSchema,
             project,
+            organization,
             selector: {
               target: input.target,
               project: input.project,
@@ -545,31 +597,37 @@ export class SchemaPublisher {
       scope: TargetAccessScope.REGISTRY_WRITE,
     });
 
-    const [organization, project, target, latestVersion, baseSchema] = await Promise.all([
-      this.organizationManager.getOrganization({
-        organization: organizationId,
-      }),
-      this.projectManager.getProject({
-        organization: organizationId,
-        project: projectId,
-      }),
-      this.targetManager.getTarget({
-        organization: organizationId,
-        project: projectId,
-        target: targetId,
-      }),
-      this.schemaManager.getLatestSchemas({
-        // here we get an empty list of schemas
-        organization: organizationId,
-        project: projectId,
-        target: targetId,
-      }),
-      this.schemaManager.getBaseSchema({
-        organization: organizationId,
-        project: projectId,
-        target: targetId,
-      }),
-    ]);
+    const [organization, project, target, latestVersion, latestComposable, baseSchema] =
+      await Promise.all([
+        this.organizationManager.getOrganization({
+          organization: organizationId,
+        }),
+        this.projectManager.getProject({
+          organization: organizationId,
+          project: projectId,
+        }),
+        this.targetManager.getTarget({
+          organization: organizationId,
+          project: projectId,
+          target: targetId,
+        }),
+        this.schemaManager.getLatestSchemas({
+          organization: organizationId,
+          project: projectId,
+          target: targetId,
+        }),
+        this.schemaManager.getLatestSchemas({
+          organization: organizationId,
+          project: projectId,
+          target: targetId,
+          onlyComposable: true,
+        }),
+        this.schemaManager.getBaseSchema({
+          organization: organizationId,
+          project: projectId,
+          target: targetId,
+        }),
+      ]);
 
     schemaPublishCount.inc({
       model: project.legacyRegistryModel ? 'legacy' : 'modern',
@@ -588,7 +646,11 @@ export class SchemaPublisher {
     let publishResult: SchemaPublishResult;
     switch (project.type) {
       case ProjectType.SINGLE:
-        this.logger.debug('Using SINGLE registry model (version=%s)', modelVersion);
+        this.logger.debug(
+          'Using SINGLE registry model (version=%s, featureFlags=%o)',
+          modelVersion,
+          organization.featureFlags,
+        );
         publishResult = await this.models[ProjectType.SINGLE][modelVersion].publish({
           input,
           latest: latestVersion
@@ -597,6 +659,13 @@ export class SchemaPublisher {
                 schemas: [ensureSingleSchema(latestVersion.schemas)],
               }
             : null,
+          latestComposable: latestComposable
+            ? {
+                isComposable: latestComposable.valid,
+                schemas: [ensureSingleSchema(latestComposable.schemas)],
+              }
+            : null,
+          organization,
           project,
           target,
           baseSchema,
@@ -604,7 +673,12 @@ export class SchemaPublisher {
         break;
       case ProjectType.FEDERATION:
       case ProjectType.STITCHING:
-        this.logger.debug('Using %s registry model (version=%s)', project.type, modelVersion);
+        this.logger.debug(
+          'Using %s registry model (version=%s, featureFlags=%o)',
+          project.type,
+          modelVersion,
+          organization.featureFlags,
+        );
         publishResult = await this.models[project.type][modelVersion].publish({
           input,
           latest: latestVersion
@@ -613,6 +687,13 @@ export class SchemaPublisher {
                 schemas: ensureCompositeSchemas(latestVersion.schemas),
               }
             : null,
+          latestComposable: latestComposable
+            ? {
+                isComposable: latestComposable.valid,
+                schemas: ensureCompositeSchemas(latestComposable.schemas),
+              }
+            : null,
+          organization,
           project,
           target,
           baseSchema,

@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import type { Redis } from 'ioredis';
-import pTimeout from 'p-timeout';
+import pTimeout, { TimeoutError } from 'p-timeout';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 
 function createChecksum<TInput>(input: TInput): string {
@@ -97,6 +97,9 @@ export function createCache(options: {
 
   return {
     timeoutMs,
+    isTimeoutError(error: unknown): error is TimeoutError {
+      return error instanceof TimeoutError;
+    },
     reuse<I, O>(groupKey: string, factory: (input: I) => Promise<O>): (input: I) => Promise<O> {
       return async input => {
         const id = `${prefix}:${groupKey}:${createChecksum(input)}`;

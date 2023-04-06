@@ -65,9 +65,9 @@ test.concurrent(
     expect((schemaPublishResult.schemaPublish as any).valid).toEqual(true);
 
     const targetValidationResult = await settingsToken.toggleTargetValidation(true);
-    expect(targetValidationResult.setTargetValidation.enabled).toEqual(true);
-    expect(targetValidationResult.setTargetValidation.percentage).toEqual(0);
-    expect(targetValidationResult.setTargetValidation.period).toEqual(30);
+    expect(targetValidationResult.setTargetValidation.validationSettings.enabled).toEqual(true);
+    expect(targetValidationResult.setTargetValidation.validationSettings.percentage).toEqual(0);
+    expect(targetValidationResult.setTargetValidation.validationSettings.period).toEqual(30);
 
     // should not be breaking because the field is unused
     const unusedCheckResult = await readToken
@@ -354,9 +354,9 @@ test.concurrent('check usage from two selected targets', async () => {
   expect((schemaPublishResult.schemaPublish as any).valid).toEqual(true);
 
   const targetValidationResult = await stagingToken.toggleTargetValidation(true);
-  expect(targetValidationResult.setTargetValidation.enabled).toEqual(true);
-  expect(targetValidationResult.setTargetValidation.percentage).toEqual(0);
-  expect(targetValidationResult.setTargetValidation.period).toEqual(30);
+  expect(targetValidationResult.setTargetValidation.validationSettings.enabled).toEqual(true);
+  expect(targetValidationResult.setTargetValidation.validationSettings.percentage).toEqual(0);
+  expect(targetValidationResult.setTargetValidation.validationSettings.period).toEqual(30);
 
   const collectResult = await productionToken.collectOperations([
     {
@@ -422,16 +422,13 @@ test.concurrent('check usage from two selected targets', async () => {
 
   expect(updateValidationResult.updateTargetValidationSettings.error).toBeNull();
   expect(
-    updateValidationResult.updateTargetValidationSettings.ok!.updatedTargetValidationSettings
-      .percentage,
+    updateValidationResult.updateTargetValidationSettings.ok!.target.validationSettings.percentage,
   ).toEqual(50);
   expect(
-    updateValidationResult.updateTargetValidationSettings.ok!.updatedTargetValidationSettings
-      .period,
+    updateValidationResult.updateTargetValidationSettings.ok!.target.validationSettings.period,
   ).toEqual(2);
   expect(
-    updateValidationResult.updateTargetValidationSettings.ok!.updatedTargetValidationSettings
-      .targets,
+    updateValidationResult.updateTargetValidationSettings.ok!.target.validationSettings.targets,
   ).toHaveLength(2);
 
   // should be non-breaking because the field is used in production and we are checking staging and production now
@@ -474,9 +471,9 @@ test.concurrent('check usage not from excluded client names', async () => {
   expect((schemaPublishResult.schemaPublish as any).valid).toEqual(true);
 
   const targetValidationResult = await token.toggleTargetValidation(true);
-  expect(targetValidationResult.setTargetValidation.enabled).toEqual(true);
-  expect(targetValidationResult.setTargetValidation.percentage).toEqual(0);
-  expect(targetValidationResult.setTargetValidation.period).toEqual(30);
+  expect(targetValidationResult.setTargetValidation.validationSettings.enabled).toEqual(true);
+  expect(targetValidationResult.setTargetValidation.validationSettings.percentage).toEqual(0);
+  expect(targetValidationResult.setTargetValidation.validationSettings.period).toEqual(30);
 
   const collectResult = await token.collectOperations([
     {
@@ -559,15 +556,14 @@ test.concurrent('check usage not from excluded client names', async () => {
 
   expect(updateValidationResult.updateTargetValidationSettings.error).toBeNull();
   expect(
-    updateValidationResult.updateTargetValidationSettings.ok!.updatedTargetValidationSettings
-      .enabled,
+    updateValidationResult.updateTargetValidationSettings.ok!.target.validationSettings.enabled,
   ).toBe(true);
   expect(
-    updateValidationResult.updateTargetValidationSettings.ok!.updatedTargetValidationSettings
+    updateValidationResult.updateTargetValidationSettings.ok!.target.validationSettings
       .excludedClients,
   ).toHaveLength(1);
   expect(
-    updateValidationResult.updateTargetValidationSettings.ok!.updatedTargetValidationSettings
+    updateValidationResult.updateTargetValidationSettings.ok!.target.validationSettings
       .excludedClients,
   ).toContainEqual('app');
 

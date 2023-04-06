@@ -26,24 +26,6 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "@hive/docs#build": {
-      "dependsOn": ["^build"],
-      "env": ["NEXT_PUBLIC_APP_LINK", "NEXT_PUBLIC_CRISP_WEBSITE_ID", "NEXT_PUBLIC_GA_TRACKING_ID"],
-      "outputs": ["dist/**"]
-    },
-    "@hive/landing-page#build": {
-      "dependsOn": ["^build"],
-      "env": [
-        "NEXT_PUBLIC_CRISP_WEBSITE_ID",
-        "NEXT_PUBLIC_GA_TRACKING_ID",
-        "NEXT_BASE_PATH",
-        "NEXT_PUBLIC_ALGOLIA_INDEX_NAME",
-        "NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY",
-        "NEXT_PUBLIC_ALGOLIA_APP_ID",
-        "SITE_URL"
-      ],
-      "outputs": [".next/**", "dist/**"]
-    },
     "@hive/migrations#build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]

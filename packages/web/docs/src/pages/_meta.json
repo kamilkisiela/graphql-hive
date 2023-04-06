@@ -1,10 +1,23 @@
 {
-  "index": "Introduction",
-  "get-started": "Get Started",
-  "features": "Features",
-  "api-reference": "CLI/API Reference",
-  "management": "Management",
-  "integrations": "Integrations and Guides",
-  "specs": "Specifications",
-  "self-hosting": "Self-Hosting"
+  "index": {
+    "title": "Home",
+    "type": "page",
+    "display": "hidden",
+    "theme": {
+      "layout": "raw"
+    }
+  },
+  "hive": {
+    "title": "Dashboard",
+    "type": "page",
+    "href": "https://app.graphql-hive.com",
+    "newWindow": true
+  },
+  "docs": {
+    "title": "Documentation",
+    "type": "page",
+    "theme": {
+      "toc": true
+    }
+  }
 }

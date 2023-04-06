@@ -1,0 +1,192 @@
+import NextImage from 'next/image'
+import { Callout } from '@theguild/components'
+import orgImage from '../../../../public/docs/pages/first-steps/org.png'
+import newOrgImage from '../../../../public/docs/pages/management/create-an-organization-button.png'
+import githubIntegrationImage from '../../../../public/docs/pages/management/org-github-integration.png'
+import orgInviteLinkImage from '../../../../public/docs/pages/management/org-invite-link.png'
+import orgInviteMemberImage from '../../../../public/docs/pages/management/org-invite-member.png'
+import slackIntegrationImage from '../../../../public/docs/pages/management/org-slack-integration.png'
+
+# Organization Management
+
+A Hive **organization** is a group of users who share a common set of permissions, or who
+collaborate on GraphQL APIs. Hive organizations are used to manage access, integrations, and
+billing.
+
+## Create a new organization
+
+To create a new organization, [you use this page directly](https://app.graphql-hive.com/org/new).
+
+Alternatively, you can create a new Hive organization by clicking on your user profile and selecting
+**Switch organization**. From there, click on the **Create an organization** button.
+
+<NextImage
+  alt="Creating an organization"
+  src={newOrgImage}
+  className="mt-8 max-w-sm drop-shadow-md"
+/>
+
+Follow the instructions and choose a name for your organization:
+
+<NextImage alt="Create Organization Form" src={orgImage} className="mt-8 max-w-lg drop-shadow-md" />
+
+## Manage existing organization
+
+### Members
+
+Under your organization's **Settings** page, you can manage, add, and remove members from your Hive
+organization.
+
+To invite others to your organization, go to **Members** tab under your oganization. To invite a new
+member to your organization, write their email address and click on **Send an invite** button.
+
+<NextImage
+  alt="Invite Member to Organization"
+  src={orgInviteMemberImage}
+  className="mt-8 max-w-lg drop-shadow-md"
+/>
+
+The new member will receive an email inviting them to join Hive as a user, and this will add them as
+a member to your Hive organization.
+
+Once an invite has been created, you can also copy the personal invite link and share it directly
+using your preferred method:
+
+<NextImage
+  alt="Copy Invite Link"
+  src={orgInviteLinkImage}
+  className="mt-8 max-w-lg drop-shadow-md"
+/>
+
+### Integrations
+
+On your organization's **Settings** page, navigate to the **Integrations** section to manage
+integrations with other services.
+
+#### Slack
+
+The integration of Hive and Slack is an incredibly useful tool that can help you streamline your
+workflow and increase productivity. By using this integration, you can receive alerts and
+notifications directly in your Slack channels, allowing you to stay on top of important changes to
+your GraphQL schemas.
+
+Additionally, this integration can help you to collaborate more effectively with your team members,
+as you can share information and updates in real-time, ensuring that everyone is on the same page.
+
+<NextImage
+  alt="Hive and Slack Integration"
+  src={slackIntegrationImage}
+  className="mt-8 max-w-2xl drop-shadow-md"
+/>
+
+To activate this feature in your organization, go to the **Integrations** section of your
+**Settings** page, and click **Connect Slack** button. You'll get redirected to **Slack** to
+authorize and approve the Slack App installation.
+
+<Callout type="info">
+  Make sure to select the channels you plan to send messages to on the Slack authorization page.
+</Callout>
+
+Now follow the instructions on [Project Management](/docs/management/projects#channels) page to
+connect between a Hive **project** and the actual Slack channel, and choose the alerts and
+notifications you would like to receive.
+
+#### GitHub
+
+Integrating Hive and GitHub will provide your GitHub repositories with additional information about
+GraphQL schema checks and pushes, and will integrate
+[GitHub's Check Suite](https://docs.github.com/en/rest/checks/suites?apiVersion=2022-11-28) feature
+with Hive.
+
+<NextImage
+  alt="Hive and GitHub Integration"
+  src={githubIntegrationImage}
+  className="mt-8 max-w-2xl drop-shadow-md"
+/>
+
+To activate this feature in your organization, go to the **Integrations** section of your
+**Settings** page, and click **Connect GitHub** button. You'll get redirected to **GitHub** to
+authorize and approve the GitHub App installation.
+
+<Callout type="info">
+  Make sure to select the GitHub repositories you plan to run Hive CLI in.
+</Callout>
+
+Now follow the instructions on [Project Management](/docs/management/projects#github-repository)
+page to connect between a Hive CLI and the GitHub repository.
+
+#### SSO with OIDC (OpenID Connect)
+
+Hive supports integrating with OIDC providers, such as Auth0, Okta, Google Workspaces, Azure AD
+(Active Directory), Keycloak and others.
+
+Connecting an OIDC provider to this organization allows users to automatically log in and be part of
+this organization.
+
+Follow the instructions on the [SSO with OIDC guide](/docs/management/sso-oidc-provider) for more
+information about this type of integration.
+
+### Subscription and Billing
+
+Hive offers a free tier for all users, and a paid tier for organizations that needs more data
+storage to store large volume of GraphQL operations sent through
+[Usage Reporting](/docs/features/usage-reporting) feature.
+
+To manage your plan and subscription, use the **Subscription** tab under your organization's page.
+From there, you can upgrade your plan, view invoices, change your payment method, and cancel your
+subscription at any time.
+
+If you wish to upgrade your plan, you can choose between the **Pro** and **Enterprise** plans.
+
+For the **Pro** plan, you can use a credit-card and pay monthly for the resevered quota that works
+for your needs. You can modify your plan and resevered quota any time during the month.
+
+<a
+  className="text-primary-500 mt-6 block cursor-pointer"
+  onClick={() => window.$crisp?.push(['do', 'chat:open'])}
+>
+  For the **Enterprise** plan, please reach our to us, and we'll be happy to help you with your
+  custom needs.
+</a>
+
+### Rename an organization
+
+You can easily change the name of your organization in Hive by adjusting the settings of your
+organization.
+
+To do this, go to the **Settings** tab of your organization, and use the **Organization Name** form
+to rename your organization.
+
+<Callout type="warning">
+  Changing the name of your organization will also change the slug of your organization URL, and
+  will invalidate any existing links to your organization.
+</Callout>
+
+### Transfer Ownership
+
+When you create a new organization, you become its owner by default. While you can invite others to
+be members of your organization, transferring ownership to another user requires utilizing the
+**Transfer Ownership** option found under the **Settings** tab.
+
+Once you fill the form with the email address of the new owner, the new owner will receive a
+confirmation email.
+
+If the new owner doesn't accept the transfer within 24 hours, the invitation will expire.
+
+When you transfer an organization to one of the members, the **new owner** will get access to
+organization's contents, projects, members, and settings.
+
+<Callout type="info">
+  **You** will keep your access to the organization's contents, projects, members, and settings,
+  except you won't be able to remove the organization.
+</Callout>
+
+### Delete an organization
+
+As the owner of an organization, you have the option to delete the entire organization, including
+all projects, targets, membership information, and all data collected during your use of Hive.
+
+To delete an organization, go to the **Settings** tab of your organization, and use the **Delete
+Organization** section.
+
+<Callout type="warning">This action is not reversible!</Callout>

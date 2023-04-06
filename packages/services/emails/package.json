@@ -11,10 +11,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentry/node": "7.44.1",
-    "@trpc/server": "10.17.0",
-    "@whatwg-node/fetch": "0.8.3",
-    "bullmq": "3.10.1",
+    "@sentry/node": "7.44.2",
+    "@trpc/server": "10.18.0",
+    "@whatwg-node/fetch": "0.8.4",
+    "bullmq": "3.10.3",
     "dotenv": "16.0.3",
     "ioredis": "5.3.1",
     "mjml": "4.13.0",
@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@hive/service-common": "workspace:*",
-    "@types/mjml": "4.7.0",
+    "@types/mjml": "4.7.1",
     "@types/nodemailer": "6.4.7",
     "@types/sendmail": "1.4.4",
     "copyfiles": "2.4.1",

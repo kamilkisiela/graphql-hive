@@ -143,20 +143,20 @@ export class RegistryChecks {
     orchestrator,
     project,
     schemas,
-    latestVersion,
+    version,
     selector,
   }: {
     orchestrator: Orchestrator;
     project: Project;
     schemas: [SingleSchema] | PushedCompositeSchema[];
-    latestVersion: LatestVersion;
+    version: LatestVersion;
     selector: {
       organization: string;
       project: string;
       target: string;
     };
   }) {
-    if (!latestVersion || latestVersion.schemas.length === 0) {
+    if (!version || version.schemas.length === 0) {
       this.logger.debug('Skipping diff check, no existing version');
       return {
         status: 'skipped',
@@ -167,7 +167,7 @@ export class RegistryChecks {
       const [existingSchema, incomingSchema] = await Promise.all([
         ensureSDL(
           orchestrator.composeAndValidate(
-            latestVersion.schemas.map(s => this.helper.createSchemaObject(s)),
+            version.schemas.map(s => this.helper.createSchemaObject(s)),
             project.externalComposition,
           ),
         ).then(schema => {

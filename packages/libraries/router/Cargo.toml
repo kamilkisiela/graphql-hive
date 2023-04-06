@@ -11,22 +11,22 @@ name = "router"
 path = "src/main.rs"
 
 [dependencies]
-apollo-router = { version = "^1.11.0" }
+apollo-router = { version = "^1.13.0" }
 reqwest = { version = "0.11.11", default-features = false, features = ["rustls-tls", "blocking", "json"] }
 sha2 = { version = "0.10.2", features = ["std"] }
 anyhow = "1"
 tracing = "0.1"
-async-trait = "0.1"
-futures = "^0.3.24"
+async-trait = "0.1.67"
+futures = { version = "0.3.27", features = ["thread-pool"] }
 schemars = { version = "0.8", features = ["url"] }
 serde = "1"
 serde_json = "1"
-tokio = { version = "1", features = ["full"] }
-tower = { version = "0.4", features = ["full"] }
+tokio = { version = "1.24.2", features = ["full"] }
+tower = { version = "0.4.13", features = ["full"] }
 http = "0.2"
 # Until they release https://github.com/graphql-rust/graphql-parser/commit/0d93ac9310c2894a029d0eb912c3463875a535f9
 graphql-parser = { git = "https://github.com/graphql-rust/graphql-parser.git", rev = "8d76425d83c40670570cc325f57c730262f07456" }
-graphql-tools = { git = "https://github.com/dotansimha/graphql-tools-rs.git", branch = "kamil-minifier-without-fork" }
-lru = "0.7.8"
+graphql-tools = { git = "https://github.com/dotansimha/graphql-tools-rs.git", rev = "59d083108c63fb24a525f987ac4299d108c6e2d1" } # branch = "kamil-minifier-without-fork"
+lru = "0.10.0"
 md5 = "0.7.0"
 rand = "0.8.5"

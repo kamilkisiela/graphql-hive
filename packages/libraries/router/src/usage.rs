@@ -1,8 +1,9 @@
-use apollo_router::layers::ServiceExt;
+use crate::agent::{ExecutionReport, UsageAgent};
+use apollo_router::layers::ServiceBuilderExt;
 use apollo_router::plugin::Plugin;
 use apollo_router::plugin::PluginInit;
 use apollo_router::register_plugin;
-use apollo_router::services::supergraph;
+use apollo_router::services::*;
 use apollo_router::Context;
 use core::ops::Drop;
 use futures::StreamExt;
@@ -12,14 +13,13 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::env;
+use std::sync::Arc;
+use std::sync::Mutex;
 use std::time::Instant;
 use std::time::{SystemTime, UNIX_EPOCH};
-use tokio::sync::mpsc;
-use tokio::sync::oneshot;
 use tower::BoxError;
-use tower::ServiceExt as TowerServiceExt;
-
-use crate::agent::{ExecutionReport, UsageAgent};
+use tower::ServiceBuilder;
+use tower::ServiceExt;
 
 pub(crate) static OPERATION_CONTEXT: &str = "hive::operation_context";
 
@@ -34,10 +34,8 @@ struct OperationContext {
 }
 
 struct UsagePlugin {
-    #[allow(dead_code)]
     config: Config,
-    agent: UsageAgent,
-    shutdown_signal: Option<oneshot::Sender<()>>,
+    agent: Arc<Mutex<UsageAgent>>,
 }
 
 #[derive(Clone, Debug, Deserialize, JsonSchema)]
@@ -73,6 +71,7 @@ impl UsagePlugin {
         let context = &req.context;
         let http_request = &req.supergraph_request;
         let headers = http_request.headers();
+
         let client_name_header = config
             .client_name_header
             .unwrap_or("graphql-client-name".to_string());
@@ -80,21 +79,18 @@ impl UsagePlugin {
             .client_version_header
             .unwrap_or("graphql-client-version".to_string());
 
-        let client_name = headers
-            .get(client_name_header)
-            .cloned()
-            .unwrap_or_else(|| HeaderValue::from_static(""))
-            .to_str()
-            .ok()
-            .map(|v| v.to_string());
+        let get_header_value = |key: &str| {
+            headers
+                .get(key)
+                .cloned()
+                .unwrap_or_else(|| HeaderValue::from_static(""))
+                .to_str()
+                .ok()
+                .map(|v| v.to_string())
+        };
 
-        let client_version = headers
-            .get(client_version_header)
-            .cloned()
-            .unwrap_or_else(|| HeaderValue::from_static(""))
-            .to_str()
-            .ok()
-            .map(|v| v.to_string());
+        let client_name = get_header_value(&client_name_header);
+        let client_version = get_header_value(&client_version_header);
 
         let operation_name = req.supergraph_request.body().operation_name.clone();
         let operation_body = req
@@ -102,7 +98,7 @@ impl UsagePlugin {
             .body()
             .query
             .clone()
-            .expect("operation body");
+            .expect("operation body should not be empty");
 
         let sample_rate = config.sample_rate.clone();
         let excluded_operation_names: HashSet<String> = config
@@ -122,18 +118,14 @@ impl UsagePlugin {
         };
 
         if !dropped {
-            match operation_name.clone() {
+            match &operation_name {
                 Some(name) => {
-                    if excluded_operation_names.contains(&name) {
+                    if excluded_operation_names.contains(name) {
                         dropped = true;
                     }
                 }
                 None => {}
             }
-        }
-
-        if dropped {
-            tracing::debug!("Dropped the operation");
         }
 
         let _ = context.insert(
@@ -152,12 +144,6 @@ impl UsagePlugin {
             },
         );
     }
-
-    pub fn add_report(sender: mpsc::Sender<ExecutionReport>, report: ExecutionReport) {
-        if let Err(e) = sender.to_owned().try_send(report) {
-            tracing::error!("Failed to send report: {}", e);
-        }
-    }
 }
 
 #[async_trait::async_trait]
@@ -165,7 +151,7 @@ impl Plugin for UsagePlugin {
     type Config = Config;
 
     async fn new(init: PluginInit<Config>) -> Result<Self, BoxError> {
-        tracing::debug!("Starting GraphQL Hive Usage plugin");
+        tracing::info!("Starting GraphQL Hive Usage plugin");
         let token =
             env::var("HIVE_TOKEN").map_err(|_| "environment variable HIVE_TOKEN not found")?;
         let endpoint = env::var("HIVE_ENDPOINT");
@@ -176,56 +162,63 @@ impl Plugin for UsagePlugin {
 
         let buffer_size = init.config.buffer_size.unwrap_or(1000);
 
-        let (shutdown_tx, shutdown_rx) = oneshot::channel::<()>();
-
         Ok(UsagePlugin {
             config: init.config,
-            agent: UsageAgent::new(
+            agent: Arc::new(Mutex::new(UsageAgent::new(
                 init.supergraph_sdl.to_string(),
                 token,
                 endpoint,
                 buffer_size,
-                Some(shutdown_rx),
-            ),
-            shutdown_signal: Some(shutdown_tx),
+            ))),
         })
     }
 
     fn supergraph_service(&self, service: supergraph::BoxService) -> supergraph::BoxService {
         let config = self.config.clone();
-        let report_sender = self.agent.sender.clone();
+        let agent = self.agent.clone();
 
-        service
+        ServiceBuilder::new()
             .map_future_with_request_data(
                 move |req: &supergraph::Request| {
                     Self::populate_context(config.clone(), req);
                     req.context.clone()
                 },
                 move |ctx: Context, fut| {
-                    let start = Instant::now();
-                    let sender = report_sender.clone();
+                    let agent_clone = agent.clone();
                     async move {
+                        let start = Instant::now();
+
+                        // nested async block, bc async is unstable with closures that receive arguments
                         let operation_context = ctx
                             .get::<_, OperationContext>(OPERATION_CONTEXT)
                             .unwrap_or_default()
                             .unwrap();
+
+                        let result: supergraph::ServiceResult = fut.await;
+
                         if operation_context.dropped {
-                            let result: supergraph::ServiceResult = fut.await;
+                            tracing::info!("Dropping operation (phase: SAMPLING): {}", operation_context.operation_name.clone().or_else(|| Some("anonymous".to_string())).unwrap());
                             return result;
                         }
 
-                        let result: supergraph::ServiceResult = fut.await;
-                        let client_name = operation_context.client_name;
-                        let client_version = operation_context.client_version;
-                        let operation_name = operation_context.operation_name;
-                        let operation_body = operation_context.operation_body;
-                        let timestamp = operation_context.timestamp;
+                        let OperationContext {
+                            client_name,
+                            client_version,
+                            operation_name,
+                            timestamp,
+                            operation_body,
+                            ..
+                        } = operation_context;
+
                         let duration = start.elapsed();
+
                         match result {
                             Err(e) => {
-                                Self::add_report(
-                                    sender.clone(),
-                                    ExecutionReport {
+                                agent_clone
+                                    .clone()
+                                    .lock()
+                                    .expect("Unable to acquire Agent in supergraph_service (error)")
+                                    .add_report(ExecutionReport {
                                         client_name,
                                         client_version,
                                         timestamp,
@@ -234,54 +227,58 @@ impl Plugin for UsagePlugin {
                                         errors: 1,
                                         operation_body,
                                         operation_name,
-                                    },
-                                );
+                                    });
                                 Err(e)
                             }
                             Ok(router_response) => {
-                                // router_response.
                                 let is_failure = !router_response.response.status().is_success();
                                 Ok(router_response.map(move |response_stream| {
-                                    let sender = sender.clone();
                                     let client_name = client_name.clone();
                                     let client_version = client_version.clone();
                                     let operation_body = operation_body.clone();
                                     let operation_name = operation_name.clone();
-                                    response_stream
+
+                                    let res = response_stream
                                         .map(move |response| {
                                             // make sure we send a single report, not for each chunk
                                             let response_has_errors = !response.errors.is_empty();
-                                            Self::add_report(
-                                                sender.clone(),
-                                                ExecutionReport {
-                                                    client_name: client_name.clone(),
-                                                    client_version: client_version.clone(),
-                                                    timestamp,
-                                                    duration,
-                                                    ok: !is_failure && !response_has_errors,
-                                                    errors: response.errors.len(),
-                                                    operation_body: operation_body.clone(),
-                                                    operation_name: operation_name.clone(),
-                                                },
-                                            );
+                                            agent_clone.clone().lock()
+                                            .expect("Unable to acquire Agent in supergraph_service (ok)").add_report(ExecutionReport {
+                                                client_name: client_name.clone(),
+                                                client_version: client_version.clone(),
+                                                timestamp,
+                                                duration,
+                                                ok: !is_failure && !response_has_errors,
+                                                errors: response.errors.len(),
+                                                operation_body: operation_body.clone(),
+                                                operation_name: operation_name.clone(),
+                                            });
+
                                             response
                                         })
-                                        .boxed()
+                                        .boxed();
+
+                                    res
                                 }))
                             }
                         }
                     }
                 },
             )
+            .service(service)
             .boxed()
     }
 }
 
 impl Drop for UsagePlugin {
     fn drop(&mut self) {
-        if let Some(sender) = self.shutdown_signal.take() {
-            let _ = sender.send(());
-        }
+        tracing::info!("`UsagePlugin` has been dropped!");
+        // Shut down the stuff.
+        // if let Some(sender) = self.shutdown_signal.take() {
+        //     // Currently, this does nothing, as it sends a graceful process termination, but no receiver is setup to handle it
+        //     let _ = sender.send(());
+        //     tracing::warn!("`UsagePlugin` has been dropped!");
+        // }
     }
 }
 

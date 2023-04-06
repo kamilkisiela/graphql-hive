@@ -4,7 +4,6 @@ export default gql`
   extend type Query {
     target(selector: TargetSelectorInput!): Target
     targets(selector: ProjectSelectorInput!): TargetConnection!
-    targetSettings(selector: TargetSelectorInput!): TargetSettings!
   }
 
   extend type Mutation {
@@ -14,7 +13,7 @@ export default gql`
     updateTargetValidationSettings(
       input: UpdateTargetValidationSettingsInput!
     ): UpdateTargetValidationSettingsResult!
-    setTargetValidation(input: SetTargetValidationInput!): TargetValidationSettings!
+    setTargetValidation(input: SetTargetValidationInput!): Target!
   }
 
   type UpdateTargetNameResult {
@@ -87,7 +86,7 @@ export default gql`
   }
 
   type UpdateTargetValidationSettingsOk {
-    updatedTargetValidationSettings: TargetValidationSettings!
+    target: Target!
   }
 
   input SetTargetValidationInput {
@@ -117,15 +116,10 @@ export default gql`
     cleanId: ID!
     name: String!
     project: Project!
-  }
-
-  type TargetSettings {
-    id: ID!
-    validation: TargetValidationSettings!
+    validationSettings: TargetValidationSettings!
   }
 
   type TargetValidationSettings {
-    id: ID!
     enabled: Boolean!
     period: Int!
     percentage: Float!

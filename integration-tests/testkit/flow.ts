@@ -18,6 +18,7 @@ import type {
   RateLimitInput,
   RequestOrganizationTransferInput,
   SchemaCheckInput,
+  SchemaCompareToPreviousInput,
   SchemaDeleteInput,
   SchemaPublishInput,
   SchemaVersionsInput,
@@ -674,10 +675,13 @@ export function setTargetValidation(
     document: graphql(`
       mutation setTargetValidation($input: SetTargetValidationInput!) {
         setTargetValidation(input: $input) {
-          enabled
-          period
-          percentage
-          excludedClients
+          id
+          validationSettings {
+            enabled
+            period
+            percentage
+            excludedClients
+          }
         }
       }
     `),
@@ -703,15 +707,17 @@ export function updateTargetValidationSettings(
       mutation updateTargetValidationSettings($input: UpdateTargetValidationSettingsInput!) {
         updateTargetValidationSettings(input: $input) {
           ok {
-            updatedTargetValidationSettings {
+            target {
               id
-              enabled
-              period
-              percentage
-              targets {
-                id
+              validationSettings {
+                enabled
+                period
+                percentage
+                targets {
+                  id
+                }
+                excludedClients
               }
-              excludedClients
             }
           }
           error {
@@ -922,6 +928,34 @@ export function fetchVersions(selector: SchemaVersionsInput, limit: number, toke
     variables: {
       selector,
       limit,
+    },
+  });
+}
+
+export function compareToPreviousVersion(selector: SchemaCompareToPreviousInput, token: string) {
+  return execute({
+    document: graphql(`
+      query compareToPreviousVersion($selector: SchemaCompareToPreviousInput!) {
+        schemaCompareToPrevious(selector: $selector) {
+          ... on SchemaCompareResult {
+            changes {
+              nodes {
+                criticality
+                message
+              }
+              total
+            }
+            initial
+          }
+          ... on SchemaCompareError {
+            message
+          }
+        }
+      }
+    `),
+    token,
+    variables: {
+      selector,
     },
   });
 }

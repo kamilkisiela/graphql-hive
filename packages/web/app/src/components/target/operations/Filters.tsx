@@ -129,17 +129,21 @@ function OperationsFilter({
         </div>
         <div className="pl-1 grow">
           <AutoSizer>
-            {({ height, width }) => (
-              <FixedSizeList
-                height={height}
-                width={width}
-                itemCount={visibleOperations.length}
-                itemSize={24}
-                overscanCount={5}
-              >
-                {renderRow}
-              </FixedSizeList>
-            )}
+            {({ height, width }) =>
+              !height || !width ? (
+                <></>
+              ) : (
+                <FixedSizeList
+                  height={height}
+                  width={width}
+                  itemCount={visibleOperations.length}
+                  itemSize={24}
+                  overscanCount={5}
+                >
+                  {renderRow}
+                </FixedSizeList>
+              )
+            }
           </AutoSizer>
         </div>
       </div>

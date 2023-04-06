@@ -33,7 +33,9 @@ self.addEventListener('fetch', async event => {
   });
 
   const loki =
-    LOKI_ENDPOINT && LOKI_USERNAME && LOKI_PASSWORD
+    typeof LOKI_ENDPOINT !== 'undefined' &&
+    typeof LOKI_USERNAME !== 'undefined' &&
+    typeof LOKI_PASSWORD !== 'undefined'
       ? new Logger({
           lokiSecret: btoa(`${LOKI_USERNAME}:${LOKI_PASSWORD}`),
           lokiUrl: `https://${LOKI_ENDPOINT}`,

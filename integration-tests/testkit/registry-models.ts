@@ -6,7 +6,7 @@ export async function prepareProject(
   model: RegistryModel = RegistryModel.Modern,
 ) {
   const { createOrg } = await initSeed().createOwner();
-  const { organization, createProject } = await createOrg();
+  const { organization, createProject, setFeatureFlag } = await createOrg();
   const { project, createToken, target, targets } = await createProject(projectType, {
     useLegacyRegistryModels: model === RegistryModel.Legacy,
   });
@@ -37,5 +37,6 @@ export async function prepareProject(
         readonly: readonlyToken,
       },
     },
+    setFeatureFlag,
   };
 }

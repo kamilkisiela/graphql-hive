@@ -1,6 +1,11 @@
 /* eslint-disable no-process-env */
 import { fetch } from '@whatwg-node/fetch';
+import { ensureEnv } from './env';
 import { getServiceHost } from './utils';
+
+const user = ensureEnv('CLICKHOUSE_USER');
+const password = ensureEnv('CLICKHOUSE_PASSWORD');
+const credentials = Buffer.from(`${user}:${password}`).toString('base64');
 
 export async function clickHouseQuery<T>(query: string): Promise<{
   data: T[];
@@ -14,9 +19,7 @@ export async function clickHouseQuery<T>(query: string): Promise<{
     headers: {
       Accept: 'application/json',
       'Accept-Encoding': 'gzip',
-      Authorization: `Basic ${Buffer.from(
-        `${process.env.CLICKHOUSE_USER}:${process.env.CLICKHOUSE_PASSWORD}`,
-      ).toString('base64')}`,
+      Authorization: `Basic ${credentials}`,
     },
   });
 

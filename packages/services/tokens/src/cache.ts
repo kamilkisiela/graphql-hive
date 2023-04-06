@@ -2,6 +2,7 @@ import type { FastifyLoggerInstance } from 'fastify';
 import type { Redis } from 'ioredis';
 import ms from 'ms';
 import LRU from 'tiny-lru';
+import { ConnectionError } from '@hive/storage';
 import { atomic, until, useActionTracker } from './helpers';
 import { cacheHits, cacheInvalidations, cacheMisses } from './metrics';
 import type { Storage, StorageItem } from './storage';
@@ -12,6 +13,7 @@ function generateKey(hashedToken: string) {
 
 interface CacheStorage extends Omit<Storage, 'touchTokens'> {
   invalidateTokens(hashedTokens: string[]): Promise<void>;
+  shouldCacheError(error: unknown): boolean;
 }
 
 const TTLSeconds = {
@@ -90,7 +92,7 @@ export function useCache(
 ): {
   start(): Promise<void>;
   stop(): Promise<void>;
-  readiness(): boolean;
+  readiness(): Promise<boolean>;
   getStorage(): Promise<CacheStorage>;
 } {
   let started = false;
@@ -152,6 +154,12 @@ export function useCache(
     const cachedStorage: CacheStorage = {
       destroy() {
         return storage.destroy();
+      },
+      isReady() {
+        return storage.isReady();
+      },
+      shouldCacheError(error) {
+        return !(error instanceof ConnectionError);
       },
       invalidateTokens(hashedTokens) {
         return invalidateTokens(hashedTokens);
@@ -222,8 +230,12 @@ export function useCache(
     process.exit(0);
   }
 
-  function readiness() {
-    return started && (redisInstance.status === 'ready' || redisInstance.status === 'reconnecting');
+  async function readiness() {
+    return (
+      started &&
+      (redisInstance.status === 'ready' || redisInstance.status === 'reconnecting') &&
+      (await (await getStorage()).isReady())
+    );
   }
 
   return {

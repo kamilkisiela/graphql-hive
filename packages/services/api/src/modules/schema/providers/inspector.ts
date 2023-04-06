@@ -109,7 +109,10 @@ export class Inspector {
 
   private async getSettings({ selector }: { selector: Types.TargetSelector }) {
     try {
-      const settings = await this.targetManager.getTargetSettings(selector);
+      const settings = await this.targetManager.getTargetSettings({
+        ...selector,
+        unsafe__itIsMeInspector: true,
+      });
 
       if (!settings.validation.enabled) {
         this.logger.debug('Usage validation disabled');

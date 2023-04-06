@@ -21,7 +21,12 @@ import { graphql } from '@/gql';
 import { CompareDocument, VersionsDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { CrossCircledIcon, ExternalLinkIcon, RowsIcon } from '@radix-ui/react-icons';
+import {
+  CheckCircledIcon,
+  CrossCircledIcon,
+  ExternalLinkIcon,
+  RowsIcon,
+} from '@radix-ui/react-icons';
 
 function DiffView({
   view,
@@ -45,6 +50,8 @@ function DiffView({
   const { error } = compareQuery;
 
   if (error) {
+    const errorMessage = error.graphQLErrors?.[0]?.message ?? error.networkError?.message;
+
     return (
       <div className="m-3 rounded-lg bg-red-500/20 p-8">
         <div className="mb-3 flex items-center gap-3">
@@ -55,7 +62,7 @@ function DiffView({
           Previous or current schema is most likely incomplete and was force published
         </p>
         <pre className="mt-5 whitespace-pre-wrap rounded-lg bg-red-900 p-3 text-xs text-white">
-          {error.graphQLErrors?.[0].message ?? error.networkError?.message}
+          {errorMessage}
         </pre>
       </div>
     );
@@ -65,30 +72,45 @@ function DiffView({
     return null;
   }
 
-  if (comparison.__typename === 'SchemaCompareError') {
+  const isComparisonSuccessful = comparison.__typename !== 'SchemaCompareError';
+
+  if (isComparisonSuccessful && view === 'SDL') {
+    const { before, after } = comparison.diff;
+    return <DiffEditor before={before} after={after} />;
+  }
+
+  const hasChanges = isComparisonSuccessful && comparison.changes.total > 0;
+  const hasErrors = compositionErrors.total > 0;
+
+  if (!hasChanges && !hasErrors) {
     return (
-      <div className="m-3 rounded-lg bg-red-500/20 p-8">
-        <div className="mb-3 flex items-center gap-3">
-          <CrossCircledIcon className="h-6 w-auto text-red-500" />
-          <h2 className="text-lg font-medium text-white">Failed to build GraphQL Schema</h2>
+      <div>
+        <div className="m-3 rounded-lg bg-emerald-500/20 p-8">
+          <div className="mb-3 flex items-center gap-3">
+            <CheckCircledIcon className="h-6 w-auto text-emerald-500" />
+            <h2 className="text-lg font-medium text-white">First composable version</h2>
+          </div>
+          <p className="text-base text-white">
+            Congratulations! This is the first version of the schema that is composable.
+          </p>
         </div>
-        <p className="text-base text-gray-500">
-          Previous or current schema is most likely incomplete and was force published
-        </p>
-        <pre className="mt-5 whitespace-pre-wrap rounded-lg bg-red-900 p-3 text-xs text-white">
-          {comparison.message}
-        </pre>
       </div>
     );
   }
 
-  const { before, after } = comparison.diff;
-
-  if (view === 'SDL') {
-    return <DiffEditor before={before} after={after} />;
-  }
-
-  return <VersionErrorsAndChanges changes={comparison.changes} errors={compositionErrors} />;
+  return (
+    <VersionErrorsAndChanges
+      changes={
+        isComparisonSuccessful
+          ? comparison.changes
+          : {
+              nodes: [],
+              total: 0,
+            }
+      }
+      errors={compositionErrors}
+    />
+  );
 }
 
 // URQL's Infinite scrolling pattern
@@ -208,7 +230,7 @@ function Page({ versionId, gitRepository }: { versionId: string; gitRepository?:
           {pageVariables.map((variables, i) => (
             <ListPage
               gitRepository={gitRepository}
-              key={variables.after}
+              key={variables.after || 'initial'}
               variables={variables}
               isLastPage={i === pageVariables.length - 1}
               onLoadMore={after => {

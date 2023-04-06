@@ -504,7 +504,7 @@ describe('check', () => {
 
 describe('delete', () => {
   describe('delete', () => {
-    test.concurrent('accepted: composable before and after', async () => {
+    test.concurrent('reject and ask to upgrade', async () => {
       const cli = await prepare();
 
       await cli.publish({
@@ -541,37 +541,10 @@ describe('delete', () => {
 
       const message = await cli.delete({
         serviceName: 'reviews',
-        expect: 'latest-composable',
-      });
-
-      expect(message).toMatch('reviews deleted');
-    });
-
-    test.concurrent('rejected: unknown service', async () => {
-      const cli = await prepare();
-
-      await cli.publish({
-        sdl: /* GraphQL */ `
-          type Query {
-            topProduct: Product
-          }
-
-          type Product @key(selectionSet: "{ id }") {
-            id: ID!
-            name: String
-          }
-        `,
-        serviceName: 'products',
-        serviceUrl: 'http://products:3000/graphql',
-        expect: 'latest-composable',
-      });
-
-      const message = await cli.delete({
-        serviceName: 'unknown_service',
         expect: 'rejected',
       });
 
-      expect(message).toMatch('not found');
+      expect(message).toMatch(/upgrade your project/);
     });
   });
 });

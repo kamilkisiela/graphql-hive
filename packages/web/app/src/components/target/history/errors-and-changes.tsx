@@ -2,7 +2,6 @@ import { ReactElement } from 'react';
 import { clsx } from 'clsx';
 import reactStringReplace from 'react-string-replace';
 import { Label } from '@/components/common';
-import { Accordion } from '@/components/v2';
 import { CriticalityLevel, SchemaChangeFieldsFragment } from '@/graphql';
 
 function labelize(message: string) {
@@ -39,13 +38,32 @@ function ChangesBlock({
 
   return (
     <div>
-      <h2 className="mb-2 text-base font-medium text-gray-900 dark:text-white">
+      <h2 className="mb-2 text-sm font-medium text-gray-900 dark:text-white">
         {titleMap[criticality]}
       </h2>
-      <ul className="list-inside list-disc pl-3 text-base leading-relaxed">
+      <ul className="list-inside list-disc pl-3 text-sm leading-relaxed">
         {filteredChanges.map((change, key) => (
           <li key={key} className={clsx(criticalityLevelMapping[criticality] ?? 'text-red-400')}>
             <span className="text-gray-600 dark:text-white">{labelize(change.message)}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ErrorsBlock({ title, errors }: { errors: string[]; title: React.ReactNode }) {
+  if (!errors.length) {
+    return null;
+  }
+
+  return (
+    <div>
+      <h2 className="mb-2 text-sm font-medium text-gray-900 dark:text-white">{title}</h2>
+      <ul className="list-inside list-disc pl-3 text-sm leading-relaxed">
+        {errors.map((error, key) => (
+          <li key={key} className="text-red-400">
+            <span className="text-gray-600 dark:text-white">{labelize(error)}</span>
           </li>
         ))}
       </ul>
@@ -65,10 +83,12 @@ export function VersionErrorsAndChanges(props: {
     total: number;
   };
 }) {
-  const generalErrors = props.errors.nodes.filter(err => err.message.startsWith('[') === false);
+  const generalErrors = props.errors.nodes
+    .filter(err => err.message.startsWith('[') === false)
+    .map(err => err.message);
   const groupedServiceErrors = new Map<string, string[]>();
 
-  props.errors.nodes.forEach(err => {
+  for (const err of props.errors.nodes) {
     if (err.message.startsWith('[')) {
       const [service, ...message] = err.message.split('] ');
       const serviceName = service.replace('[', '');
@@ -80,17 +100,17 @@ export function VersionErrorsAndChanges(props: {
 
       groupedServiceErrors.get(serviceName)!.push(errorMessage);
     }
-  });
+  }
 
   const serviceErrorEntries = Array.from(groupedServiceErrors.entries());
 
   return (
     <div className="p-5">
-      <Accordion defaultValue={props.changes.total > 0 ? 'changes' : 'errors'}>
+      <div>
         {props.changes.total ? (
-          <Accordion.Item value="changes">
-            <Accordion.Header>Changes</Accordion.Header>
-            <Accordion.Content>
+          <div>
+            <div className="font-semibold">Schema Changes</div>
+            <div>
               <div className="space-y-3 p-6">
                 <ChangesBlock
                   changes={props.changes.nodes}
@@ -102,36 +122,35 @@ export function VersionErrorsAndChanges(props: {
                 />
                 <ChangesBlock changes={props.changes.nodes} criticality={CriticalityLevel.Safe} />
               </div>
-            </Accordion.Content>
-          </Accordion.Item>
+            </div>
+          </div>
         ) : null}
         {props.errors.total ? (
-          <Accordion.Item value="errors">
-            <Accordion.Header>Composition errors</Accordion.Header>
-            <Accordion.Content>
-              <ul className="list-inside list-disc pl-3 text-base leading-relaxed">
-                {generalErrors.map((error, key) => (
-                  <li key={key}>
-                    <span className="text-gray-600 dark:text-white">{labelize(error.message)}</span>
-                  </li>
-                ))}
-                {serviceErrorEntries.map(([service, errors]) => (
-                  <li key={service}>
-                    <span className="text-gray-600 dark:text-white">{service}</span>
-                    <ul className="list-inside list-disc pl-3 text-base leading-relaxed">
-                      {errors.map((error, key) => (
-                        <li key={key}>
-                          <span className="text-gray-600 dark:text-white">{labelize(error)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            </Accordion.Content>
-          </Accordion.Item>
+          <div>
+            <div className="font-semibold">Composition errors</div>
+            <div className="space-y-3 p-6">
+              {generalErrors.length ? (
+                <ErrorsBlock title="Top-level errors" errors={generalErrors} />
+              ) : null}
+              {serviceErrorEntries.length ? (
+                <>
+                  {serviceErrorEntries.map(([service, errors]) => (
+                    <ErrorsBlock
+                      key={service}
+                      title={
+                        <>
+                          Errors from the <strong>"{service}"</strong> service
+                        </>
+                      }
+                      errors={errors}
+                    />
+                  ))}
+                </>
+              ) : null}
+            </div>
+          </div>
         ) : null}
-      </Accordion>
+      </div>
     </div>
   );
 }

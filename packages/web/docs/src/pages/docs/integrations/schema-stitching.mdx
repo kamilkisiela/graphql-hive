@@ -1,0 +1,86 @@
+import { Callout, PackageCmd } from '@theguild/components'
+
+# Schema-Stitching
+
+## Installation
+
+<PackageCmd packages={['@graphql-hive/client']} />
+
+<Callout type="info">
+  We recommend installing Hive Client package as a direct dependency of your project, because it
+  includes a runtime to send usage reports and schemas to Hive registry.
+</Callout>
+
+The `@graphql-hive/client` package exports a utility function called `createServicesFetcher` that
+can be used to fetch services definition from Hive's CDN. You can use it to create a GraphQL schema
+from the all services schemas published to Hive.
+
+<Callout type="info">
+  The `createServicesFetcher` function is a part of the `@graphql-hive/client` package, and it can
+  be used with any GraphQL server runtime. You may use it with Apollo Server, GraphQL Yoga, or any
+  other library to implement a custom GraphQL gateway.
+</Callout>
+
+### Fetching Services Info from CDN
+
+Once you have all services schemas pushed to Hive, and available in the CDN, you can
+[create a CDN Access Token and gain access to the CDN endpoint](/docs/features/high-availability-cdn#cdn-access-tokens).
+
+> In this example, we are using GraphQL-Yoga to create the Gateway server.
+
+```ts
+import { createServer } from 'node:http'
+import { buildSchema } from 'graphql'
+import { createYoga } from 'graphql-yoga'
+import { createServicesFetcher } from '@graphql-hive/client'
+import { buildHTTPExecutor } from '@graphql-tools/executor-http'
+import { stitchSchemas } from '@graphql-tools/stitch'
+
+const fetchServices = createServicesFetcher({
+  // The CDN endpoint you are using here should not end with any artifact name.
+  // So drop the "/sdl" or "/services" from the URL get from Hive dashboard.
+  endpoint: process.env.HIVE_CDN_ENDPOINT,
+  key: process.env.HIVE_CDN_KEY
+})
+
+async function main() {
+  const services = await fetchServices()
+  const subschemas = services.map(service => {
+    return {
+      schema: buildSchema(service.sdl),
+      executor: buildHTTPExecutor({ endpoint: service.url })
+    }
+  })
+
+  const schema = stitchSchemas({ subschemas })
+  const yoga = createYoga({ schema })
+  const server = createServer(yoga)
+
+  server.listen(4000, () => {
+    console.info('Gateway is running on http://localhost:4000/graphql')
+  })
+}
+
+main().catch(err => {
+  console.error(err)
+  process.exit(1)
+})
+```
+
+<Callout>
+  The `HIVE_CDN_ENDPOINT` variable should not include any artifact suffix (for example,
+  `/services`), it should be in the following format:
+  `https://cdn.graphql-hive.com/artifacts/v1/TARGET_ID`
+</Callout>
+
+### Usage Reporting
+
+Based on the server runtime you choosed, you can enable the usage reporting activate the Hive plugin
+for the server you are running.
+
+## Additional Resources
+
+- [Get started with Schema-Stitching and Hive guide](/docs/get-started/schema-stitching)
+- [Schema Stitching documentation](https://the-guild.dev/graphql/stitching/docs)
+- [Schema Stitching Handbook](https://the-guild.dev/graphql/stitching/handbook)
+- [GraphQL Yoga](https://the-guild.dev/graphql/yoga-server)

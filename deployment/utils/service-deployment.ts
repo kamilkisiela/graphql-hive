@@ -59,10 +59,10 @@ export class ServiceDeployment {
 
     if (this.options.livenessProbe) {
       livenessProbe = {
-        initialDelaySeconds: 3,
-        periodSeconds: 20,
-        failureThreshold: 10,
-        timeoutSeconds: 5,
+        initialDelaySeconds: 5,
+        periodSeconds: 10,
+        failureThreshold: 5,
+        timeoutSeconds: 15,
         httpGet: {
           path: this.options.livenessProbe,
           port,
@@ -73,9 +73,9 @@ export class ServiceDeployment {
     if (this.options.readinessProbe) {
       readinessProbe = {
         initialDelaySeconds: 5,
-        periodSeconds: 20,
+        periodSeconds: 30,
         failureThreshold: 5,
-        timeoutSeconds: 5,
+        timeoutSeconds: 15,
         httpGet: {
           path: this.options.readinessProbe,
           port,
@@ -95,6 +95,7 @@ export class ServiceDeployment {
       imagePullSecrets: this.options.imagePullSecret
         ? [{ name: this.options.imagePullSecret.metadata.name }]
         : undefined,
+      terminationGracePeriodSeconds: 60,
       containers: [
         {
           livenessProbe,

@@ -303,7 +303,6 @@ const createFederation: (
   requestId: string,
   decrypt: (value: string) => string,
 ) => Orchestrator = (cache, logger, requestId, decrypt) => {
-  const timeoutMs = Math.min(cache.timeoutMs, 25_000);
   const compose = cache.reuse<
     {
       schemas: ComposeAndValidateInput;
@@ -352,10 +351,10 @@ const createFederation: (
                 ...request,
               },
               logger,
-              timeoutMs,
+              cache.timeoutMs,
               requestId,
             )
-          : callExternalService(request, logger, timeoutMs)),
+          : callExternalService(request, logger, cache.timeoutMs)),
       );
 
       if (!parseResult.success) {
@@ -408,13 +407,30 @@ const createFederation: (
 
   return {
     async composeAndValidate(schemas, external) {
-      const composed = await compose({ schemas, external });
+      try {
+        const composed = await compose({ schemas, external });
 
-      return {
-        errors: composed.type === 'failure' ? composed.result.errors : [],
-        sdl: composed.result.raw ?? null,
-        supergraph: 'supergraphSdl' in composed.result ? composed.result.supergraphSdl : null,
-      };
+        return {
+          errors: composed.type === 'failure' ? composed.result.errors : [],
+          sdl: composed.result.raw ?? null,
+          supergraph: 'supergraphSdl' in composed.result ? composed.result.supergraphSdl : null,
+        };
+      } catch (error) {
+        if (cache.isTimeoutError(error)) {
+          return {
+            errors: [
+              {
+                message: error.message,
+                source: 'graphql',
+              },
+            ],
+            sdl: null,
+            supergraph: null,
+          };
+        }
+
+        throw error;
+      }
     },
   };
 };
