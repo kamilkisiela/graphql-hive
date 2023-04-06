@@ -345,7 +345,6 @@ function ClientsStats({
   data: GeneralOperationsStatsQuery['operationsStats']['clients'] | null;
 }): ReactElement {
   const clients = data?.nodes;
-  console.log({ data });
   const styles = useChartStyles();
   const sortedClients = useMemo(() => {
     return clients?.length ? clients.slice().sort((a, b) => b.count - a.count) : [];
@@ -783,9 +782,7 @@ export function OperationsStats({
         </div>
       </OperationsFallback>
       <div>
-        <ClientsStats
-          data={operationsStats && 'clients' in operationsStats ? operationsStats.clients : null}
-        />
+        <ClientsStats data={operationsStats?.clients ?? null} />
       </div>
       <div>
         <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
