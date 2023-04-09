@@ -40,7 +40,7 @@ export class BotKube {
           },
           executors: {
             'kubectl-all-ns': {
-              kubectl: {
+              'botkube/kubectl': {
                 enabled: true,
                 namespaces: {
                   include: ['.*'],
