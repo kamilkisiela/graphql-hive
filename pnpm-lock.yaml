@@ -1585,8 +1585,8 @@ importers:
         specifier: 3.0.3
         version: 3.0.3(graphql@16.6.0)(react@18.2.0)
       use-debounce:
-        specifier: 9.0.3
-        version: 9.0.3(react@18.2.0)
+        specifier: 9.0.4
+        version: 9.0.4(react@18.2.0)
       valtio:
         specifier: 1.10.4
         version: 1.10.4(react@18.2.0)
@@ -29168,6 +29168,15 @@ packages:
 
   /use-debounce@9.0.3(react@18.2.0):
     resolution: {integrity: sha512-FhtlbDtDXILJV7Lix5OZj5yX/fW1tzq+VrvK1fnT2bUrPOGruU9Rw8NCEn+UI9wopfERBEZAOQ8lfeCJPllgnw==}
+    engines: {node: '>= 10.0.0'}
+    peerDependencies:
+      react: '>=16.8.0'
+    dependencies:
+      react: 18.2.0
+    dev: false
+
+  /use-debounce@9.0.4(react@18.2.0):
+    resolution: {integrity: sha512-6X8H/mikbrt0XE8e+JXRtZ8yYVvKkdYRfmIhWZYsP8rcNs9hk3APV8Ua2mFkKRLcJKVdnX2/Vwrmg2GWKUQEaQ==}
     engines: {node: '>= 10.0.0'}
     peerDependencies:
       react: '>=16.8.0'
