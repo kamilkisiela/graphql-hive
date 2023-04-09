@@ -116,7 +116,7 @@
       "@graphql-inspector/core@4.0.0": "patches/@graphql-inspector__core@4.0.0.patch",
       "@apollo/federation@0.38.1": "patches/@apollo__federation@0.38.1.patch",
       "@octokit/webhooks-methods@3.0.1": "patches/@octokit__webhooks-methods@3.0.1.patch",
-      "bullmq@3.10.3": "patches/bullmq@3.10.3.patch",
+      "bullmq@3.10.4": "patches/bullmq@3.10.4.patch",
       "workers-loki-logger@0.1.14": "patches/workers-loki-logger@0.1.14.patch"
     }
   }
