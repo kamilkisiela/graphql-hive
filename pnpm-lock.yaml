@@ -928,8 +928,8 @@ importers:
         specifier: 3.0.2
         version: 3.0.2
       '@escape.tech/graphql-armor-max-aliases':
-        specifier: 1.7.1
-        version: 1.7.1
+        specifier: 1.7.2
+        version: 1.7.2
       '@escape.tech/graphql-armor-max-depth':
         specifier: 1.8.3
         version: 1.8.3
@@ -5813,13 +5813,13 @@ packages:
     dev: true
     optional: true
 
-  /@escape.tech/graphql-armor-max-aliases@1.7.1:
-    resolution: {integrity: sha512-WUmDBceHXDjG08byxBghc27//9/MN1zOnVDH9AXG070kD23Ko8fYToXq+xwos+3jQvWBqTtzFSoRE6r7piZHuQ==}
+  /@escape.tech/graphql-armor-max-aliases@1.7.2:
+    resolution: {integrity: sha512-eegua9E2Q0UvqIMPT31Lo0Xng2AQj662wjWGbAXOGHUOsKzzhe1y1qWwTRP13uvhdMNI+RTfjNJ5Su+5flWrOA==}
     dependencies:
       graphql: 16.6.0
     optionalDependencies:
       '@envelop/core': 3.0.6
-      '@escape.tech/graphql-armor-types': 0.4.0
+      '@escape.tech/graphql-armor-types': 0.4.1
     dev: false
 
   /@escape.tech/graphql-armor-max-depth@1.8.3:
