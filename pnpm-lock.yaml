@@ -931,8 +931,8 @@ importers:
         specifier: 1.7.2
         version: 1.7.2
       '@escape.tech/graphql-armor-max-depth':
-        specifier: 1.8.3
-        version: 1.8.3
+        specifier: 1.8.4
+        version: 1.8.4
       '@escape.tech/graphql-armor-max-directives':
         specifier: 1.6.4
         version: 1.6.4
@@ -5822,13 +5822,13 @@ packages:
       '@escape.tech/graphql-armor-types': 0.4.1
     dev: false
 
-  /@escape.tech/graphql-armor-max-depth@1.8.3:
-    resolution: {integrity: sha512-u9aj2A29c6iRUNVqI/BtKkKb/U61RexuMEdKEEnW51OWEeQGHQ73GgGlaQFhnZ0Tn++aG2+z7ljtrTuwyxTOyA==}
+  /@escape.tech/graphql-armor-max-depth@1.8.4:
+    resolution: {integrity: sha512-2RYjMVbguxltbWVcTEQGXPzcFc7Lo2wUdbLSQ4as2QeSmr2IqRbW5fNe/Jy8uiEhOOelia59J8xuua+0lxC3Kg==}
     dependencies:
       graphql: 16.6.0
     optionalDependencies:
       '@envelop/core': 3.0.6
-      '@escape.tech/graphql-armor-types': 0.4.0
+      '@escape.tech/graphql-armor-types': 0.4.1
     dev: false
 
   /@escape.tech/graphql-armor-max-directives@1.6.4:
