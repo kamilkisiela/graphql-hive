@@ -616,8 +616,8 @@ importers:
         specifier: 3.0.2
         version: 3.0.2
       ioredis-mock:
-        specifier: 8.4.0
-        version: 8.4.0(@types/ioredis-mock@8.2.1)(ioredis@5.3.1)
+        specifier: 8.5.0
+        version: 8.5.0(@types/ioredis-mock@8.2.1)(ioredis@5.3.1)
       tslib:
         specifier: 2.5.0
         version: 2.5.0
@@ -904,8 +904,8 @@ importers:
         specifier: 3.29.5
         version: 3.29.5
       ioredis-mock:
-        specifier: 8.4.0
-        version: 8.4.0(@types/ioredis-mock@8.2.1)(ioredis@5.3.1)
+        specifier: 8.5.0
+        version: 8.5.0(@types/ioredis-mock@8.2.1)(ioredis@5.3.1)
       pino-pretty:
         specifier: 10.0.0
         version: 10.0.0
@@ -20257,8 +20257,8 @@ packages:
     dependencies:
       loose-envify: 1.4.0
 
-  /ioredis-mock@8.4.0(@types/ioredis-mock@8.2.1)(ioredis@5.3.1):
-    resolution: {integrity: sha512-ZB+Wj9kzYbYcPrU2Xr61Fo+Fcc8Y1/sAnc/8sCKhyi69C4lQf7cdTEqiqRwneICX2OwgGtpCw8Udr7GEyZixOQ==}
+  /ioredis-mock@8.5.0(@types/ioredis-mock@8.2.1)(ioredis@5.3.1):
+    resolution: {integrity: sha512-mtYmuQTta9gjlSUvI7imWpP7axR08DyW1WdVn80NthYIzSJeAWI5dd5rU1rVYc22/dVvJGx87SaoE3Zf6Rr8lA==}
     engines: {node: '>=12.22'}
     peerDependencies:
       '@types/ioredis-mock': ^8
