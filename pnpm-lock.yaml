@@ -558,8 +558,8 @@ importers:
         specifier: 4.17.21
         version: 4.17.21
       lru-cache:
-        specifier: 7.18.3
-        version: 7.18.3
+        specifier: 9.0.0
+        version: 9.0.0
       ms:
         specifier: 2.1.3
         version: 2.1.3
@@ -775,8 +775,8 @@ importers:
         specifier: ^16.6.0
         version: 16.6.0
       lru-cache:
-        specifier: ^7.17.0
-        version: 7.17.0
+        specifier: ^9.0.0
+        version: 9.0.0
       zod:
         specifier: 3.21.4
         version: 3.21.4
@@ -21857,14 +21857,14 @@ packages:
     engines: {node: '>=12'}
     dev: false
 
-  /lru-cache@7.17.0:
-    resolution: {integrity: sha512-zSxlVVwOabhVyTi6E8gYv2cr6bXK+8ifYz5/uyJb9feXX6NACVDwY4p5Ut3WC3Ivo/QhpARHU3iujx2xGAYHbQ==}
-    engines: {node: '>=12'}
-    dev: false
-
   /lru-cache@7.18.3:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
+
+  /lru-cache@9.0.0:
+    resolution: {integrity: sha512-9AEKXzvOZc4BMacFnYiTOlDH/197LNnQIK9wZ6iMB5NXPzuv4bWR/Msv7iUMplkiMQ1qQL+KSv/JF1mZAB5Lrg==}
+    engines: {node: '>=16.14'}
+    dev: false
 
   /lru-memoizer@2.1.4:
     resolution: {integrity: sha512-IXAq50s4qwrOBrXJklY+KhgZF+5y98PDaNo0gi/v2KQBFLyWr+JyFvijZXkGKjQj/h9c0OwoE+JZbwUXce76hQ==}
