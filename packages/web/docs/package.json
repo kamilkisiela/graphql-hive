@@ -10,7 +10,7 @@
   "dependencies": {
     "@next/env": "13.2.4",
     "@radix-ui/react-tooltip": "1.0.5",
-    "@theguild/components": "4.5.8",
+    "@theguild/components": "4.5.9",
     "clsx": "1.2.1",
     "next": "13.2.4",
     "next-themes": "*",
@@ -20,8 +20,8 @@
   },
   "devDependencies": {
     "@theguild/tailwind-config": "0.2.1",
-    "@types/react": "18.0.33",
-    "next-sitemap": "4.0.6",
+    "@types/react": "18.0.34",
+    "next-sitemap": "4.0.7",
     "postcss": "8.4.21",
     "tailwindcss": "3.3.1"
   }

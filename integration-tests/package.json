@@ -10,13 +10,13 @@
   "dependencies": {
     "@apollo/gateway": "2.4.1",
     "@apollo/server": "4.6.0",
-    "@aws-sdk/client-s3": "3.306.0",
+    "@aws-sdk/client-s3": "3.309.0",
     "@esm2cjs/execa": "6.1.1-cjs.1",
     "@graphql-hive/client": "workspace:*",
     "@graphql-hive/core": "workspace:*",
     "@graphql-typed-document-node/core": "3.2.0",
-    "@trpc/client": "10.18.0",
-    "@trpc/server": "10.18.0",
+    "@trpc/client": "10.19.1",
+    "@trpc/server": "10.19.1",
     "@whatwg-node/fetch": "0.8.4",
     "bcryptjs": "2.4.3",
     "date-fns": "2.29.3",
@@ -35,6 +35,6 @@
     "@types/dockerode": "3.3.16",
     "@types/ioredis": "4.28.10",
     "tslib": "2.5.0",
-    "vitest": "0.29.8"
+    "vitest": "0.30.0"
   }
 }

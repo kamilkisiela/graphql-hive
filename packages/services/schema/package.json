@@ -11,11 +11,11 @@
   },
   "dependencies": {
     "@apollo/federation": "0.38.1",
-    "@graphql-tools/stitch": "8.7.46",
-    "@graphql-tools/stitching-directives": "2.3.32",
+    "@graphql-tools/stitch": "8.7.47",
+    "@graphql-tools/stitching-directives": "2.3.33",
     "@sentry/node": "7.44.2",
     "@sentry/tracing": "7.44.2",
-    "@trpc/server": "10.18.0",
+    "@trpc/server": "10.19.1",
     "@whatwg-node/fetch": "0.8.4",
     "dotenv": "16.0.3",
     "got": "12.6.0",
@@ -30,7 +30,7 @@
     "@types/async-retry": "1.4.5",
     "@types/ioredis-mock": "8.2.1",
     "fastify": "3.29.5",
-    "ioredis-mock": "8.4.0",
+    "ioredis-mock": "8.5.0",
     "pino-pretty": "10.0.0"
   },
   "buildOptions": {
