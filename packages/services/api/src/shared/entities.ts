@@ -67,7 +67,7 @@ export interface DateRange {
 export interface SchemaVersion {
   id: string;
   valid: boolean;
-  date: number;
+  date: string;
   commit: string;
   baseSchema: string | null;
   hasPersistedSchemaChanges: boolean;

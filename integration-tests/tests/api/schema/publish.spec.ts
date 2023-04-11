@@ -2745,8 +2745,6 @@ test('Query.schemaCompareToPrevious: result is read from the database', async ()
   }
 });
 
-// TODO: conditional breaking changes test
-
 test('Composition Error (Federation 2) can be served from the database', async () => {
   const storage = await createStorage(connectionString(), 1);
   const dockerAddress = `composition_federation_2:3069`;
