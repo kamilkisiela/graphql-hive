@@ -536,7 +536,6 @@ describe.each`
         .then(r => r.expectNoGraphQLErrors());
 
       expect(result.schemaPublish.__typename).toBe('SchemaPublishSuccess');
-
       const linkToWebsite =
         result.schemaPublish.__typename === 'SchemaPublishSuccess'
           ? result.schemaPublish.linkToWebsite
@@ -2826,7 +2825,7 @@ test('Composition Error (Federation 2) can be served from the database', async (
         ...serviceUrl,
       })
       .then(r => r.expectNoGraphQLErrors());
-    console.log(JSON.stringify(publishResult.schemaPublish, null, 2));
+
     expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
     const publishResult2 = await readWriteToken

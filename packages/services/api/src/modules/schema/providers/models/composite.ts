@@ -145,6 +145,7 @@ export class CompositeModel {
         schemas,
         selector,
         version: compareToLatest ? latest : latestComposable,
+        includeUrlChanges: false,
       }),
     ]);
 
@@ -309,6 +310,7 @@ export class CompositeModel {
           organization: project.orgId,
         },
         version: compareToLatest ? latest : latestComposable,
+        includeUrlChanges: true,
       }),
     ]);
 
@@ -447,6 +449,7 @@ export class CompositeModel {
         schemas,
         selector,
         version: compareToLatest ? latestVersion : latestComposable,
+        includeUrlChanges: true,
       }),
     ]);
 

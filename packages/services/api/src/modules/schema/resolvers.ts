@@ -142,6 +142,7 @@ export const resolvers: SchemaModule.Resolvers = {
         },
         abortSignal,
       );
+
       if ('changes' in result) {
         return {
           ...result,

@@ -151,6 +151,7 @@ export class RegistryChecks {
     schemas,
     version,
     selector,
+    includeUrlChanges,
   }: {
     orchestrator: Orchestrator;
     project: Project;
@@ -161,6 +162,7 @@ export class RegistryChecks {
       project: string;
       target: string;
     };
+    includeUrlChanges: boolean;
   }) {
     if (!version || version.schemas.length === 0) {
       this.logger.debug('Skipping diff check, no existing version');
@@ -197,15 +199,18 @@ export class RegistryChecks {
         }),
       ]);
 
-      const changes = [
-        ...(await this.inspector.diff(existingSchema, incomingSchema, selector)),
-        ...detectUrlChanges(version.schemas, schemas).map(change =>
-          schemaChangeFromMeta({
-            ...change,
-            isSafeBasedOnUsage: false,
-          }),
-        ),
-      ];
+      const changes = [...(await this.inspector.diff(existingSchema, incomingSchema, selector))];
+
+      if (includeUrlChanges) {
+        changes.push(
+          ...detectUrlChanges(version.schemas, schemas).map(change =>
+            schemaChangeFromMeta({
+              ...change,
+              isSafeBasedOnUsage: false,
+            }),
+          ),
+        );
+      }
 
       const breakingChanges = changes.filter(
         change => change.criticality.level === CriticalityLevel.Breaking,

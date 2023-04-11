@@ -103,6 +103,7 @@ export class SingleModel {
         schemas,
         selector,
         version: compareToLatest ? latest : latestComposable,
+        includeUrlChanges: false,
       }),
     ]);
 
@@ -226,6 +227,7 @@ export class SingleModel {
           organization: project.orgId,
         },
         version: compareToLatest ? latestVersion : latestComposable,
+        includeUrlChanges: false,
       }),
     ]);
 

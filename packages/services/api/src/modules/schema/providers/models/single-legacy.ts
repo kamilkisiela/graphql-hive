@@ -96,6 +96,7 @@ export class SingleLegacyModel {
         schemas,
         selector,
         version: latestVersion,
+        includeUrlChanges: false,
       }),
     ]);
 
@@ -213,6 +214,7 @@ export class SingleLegacyModel {
         project,
         schemas,
         version: latestVersion,
+        includeUrlChanges: false,
       }),
       this.checks.metadata(incoming, latestVersion ? latestVersion.schemas[0] : null),
     ]);

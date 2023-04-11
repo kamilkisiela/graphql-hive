@@ -659,9 +659,6 @@ export class SchemaPublisher {
 
     const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
 
-    // TODO: get list of changes and write them to the database.
-
-    // let schemaCheckResult: SchemaCheckResult;
     let publishResult: SchemaPublishResult;
 
     switch (project.type) {
@@ -744,11 +741,28 @@ export class SchemaPublisher {
         });
       }
 
+      const linkToWebsite =
+        typeof this.schemaModuleConfig.schemaPublishLink === 'function'
+          ? this.schemaModuleConfig.schemaPublishLink({
+              organization: {
+                cleanId: organization.cleanId,
+              },
+              project: {
+                cleanId: project.cleanId,
+              },
+              target: {
+                cleanId: target.cleanId,
+              },
+              version: latestVersion ? { id: latestVersion.version } : undefined,
+            })
+          : null;
+
       return {
         __typename: 'SchemaPublishSuccess' as const,
         initial: false,
         valid: true,
         changes: [],
+        linkToWebsite,
       } as const;
     }
 

@@ -118,6 +118,7 @@ export class CompositeLegacyModel {
         schemas,
         selector,
         version: latestVersion,
+        includeUrlChanges: false,
       }),
     ]);
 
@@ -275,6 +276,7 @@ export class CompositeLegacyModel {
         project,
         schemas,
         version: latestVersion,
+        includeUrlChanges: true,
       }),
       isFederation
         ? {
