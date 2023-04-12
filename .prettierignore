@@ -13,6 +13,7 @@ __generated__/
 /packages/web/app/src/graphql/index.ts
 /packages/web/app/next.config.mjs
 /packages/migrations/test/utils/testkit.ts
+/packages/migrations/src/actions
 /packages/web/app/storybook-static
 
 # test fixtures
