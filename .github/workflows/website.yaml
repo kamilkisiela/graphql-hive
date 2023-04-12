@@ -14,7 +14,9 @@ jobs:
         id: website-files
         uses: tj-actions/changed-files@v35
         with:
-          files: packages/web/{docs,landing-page}/**
+          files: |
+            packages/web/docs/**
+            packages/web/landing-page/**
 
       - name: setup environment
         if: steps.website-files.outputs.any_changed == 'true'
