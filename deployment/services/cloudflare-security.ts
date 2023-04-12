@@ -25,7 +25,7 @@ export function deployCloudFlareSecurityTransform(options: {
     options.ignoredPaths,
   )} } and not http.host in { ${toExpressionList(options.ignoredHosts)} }`;
 
-  const monacoCdnBasePath: `https://${string}/` = `https://cdn.jsdelivr.net/npm/monaco-editor@0.33.0/`;
+  const monacoCdnBasePath: `https://${string}/` = `https://cdn.jsdelivr.net/npm/monaco-editor@0.37.1/`;
   const crispHost = 'client.crisp.chat';
   const stripeHost = 'js.stripe.com';
   const gtmHost = 'www.googletagmanager.com';
