@@ -18,6 +18,7 @@ jobs:
     env:
       DOCKER_REGISTRY: ${{ inputs.registry }}/${{ inputs.imageName }}/
       DOCKER_TAG: :${{ inputs.imageTag }}
+      HIVE_APP_BASE_URL: 'http://localhost:8080'
 
     steps:
       - name: checkout
@@ -53,9 +54,7 @@ jobs:
         timeout-minutes: 6
         uses: cypress-io/github-action@v5
         with:
-          command: |
-            source docker/.end2end.env
-            pnpm test:e2e
+          command: pnpm test:e2e
           install: false
 
       - uses: actions/upload-artifact@v3.1.2
