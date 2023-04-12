@@ -16,21 +16,9 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      HIVE_ENCRYPTION_SECRET: wowverysecuremuchsecret
-      HIVE_EMAIL_FROM: no-reply@graphql-hive.com
-      HIVE_APP_BASE_URL: http://localhost:8080
-      SUPERTOKENS_API_KEY: wowverysecuremuchsecret
-      CLICKHOUSE_USER: clickhouse
-      CLICKHOUSE_PASSWORD: wowverysecuremuchsecret
-      REDIS_PASSWORD: wowverysecuremuchsecret
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_DB: registry
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-      CDN_AUTH_PRIVATE_KEY: 6b4721a99bd2ef6c00ce4328f34d95d7
       DOCKER_REGISTRY: ${{ inputs.registry }}/${{ inputs.imageName }}/
       DOCKER_TAG: :${{ inputs.imageTag }}
+      HIVE_APP_BASE_URL: 'http://localhost:8080'
 
     steps:
       - name: checkout
@@ -49,7 +37,12 @@ jobs:
 
       - name: run containers
         timeout-minutes: 10
-        run: docker compose -f docker/docker-compose.community.yml up -d --wait
+        run: |
+          source docker/.end2end.env
+          docker compose \
+            -f docker/docker-compose.community.yml \
+            -f docker/docker-compose.end2end.yml \
+            up -d --wait
 
       - name: troubleshoot containers
         if: ${{ failure() }}
