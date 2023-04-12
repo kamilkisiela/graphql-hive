@@ -31,7 +31,8 @@ export function deployCloudFlareSecurityTransform(options: {
     options.ignoredPaths,
   )} } and not http.host in { ${toExpressionList(options.ignoredHosts)} }`;
 
-  const monacoCdnBasePath: `https://${string}/` = `https://cdn.jsdelivr.net/npm/monaco-editor@${monacoEditorVersion}/`;
+  const monacoCdnDynamicBasePath: `https://${string}/` = `https://cdn.jsdelivr.net/npm/monaco-editor@${monacoEditorVersion}/`;
+  const monacoCdnStaticBasePath: `https://${string}/` = `https://cdn.jsdelivr.net/npm/monaco-editor@0.33.0/`;
   const crispHost = 'client.crisp.chat';
   const stripeHost = 'js.stripe.com';
   const gtmHost = 'www.googletagmanager.com';
@@ -52,12 +53,12 @@ export function deployCloudFlareSecurityTransform(options: {
   default-src 'self';
   frame-src ${stripeHost} https://game.crisp.chat https://giscus.app https://www.youtube.com;
   worker-src 'self' blob:;
-  style-src 'self' 'unsafe-inline' ${crispHost} fonts.googleapis.com ${monacoCdnBasePath};
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' {DYNAMIC_HOST_PLACEHOLDER} ${monacoCdnBasePath} ${cspHosts};
+  style-src 'self' 'unsafe-inline' ${crispHost} fonts.googleapis.com ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath};
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' {DYNAMIC_HOST_PLACEHOLDER} ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} ${cspHosts};
   connect-src 'self' {DYNAMIC_HOST_PLACEHOLDER} ${cspHosts}; 
   media-src ${crispHost};
-  style-src-elem 'self' 'unsafe-inline' ${monacoCdnBasePath} fonts.googleapis.com ${crispHost};
-  font-src 'self' fonts.gstatic.com ${monacoCdnBasePath} ${crispHost};
+  style-src-elem 'self' 'unsafe-inline' ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} fonts.googleapis.com ${crispHost};
+  font-src 'self' fonts.gstatic.com ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} ${crispHost};
   img-src * 'self' data: https: https://image.crisp.chat https://storage.crisp.chat ${gtmHost} ${crispHost};
 `;
 
