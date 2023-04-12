@@ -173,11 +173,11 @@ importers:
         specifier: 4.16.0
         version: 4.16.0
       '@pulumi/kubernetes':
-        specifier: 3.24.3
-        version: 3.24.3
+        specifier: 3.25.0
+        version: 3.25.0
       '@pulumi/kubernetesx':
         specifier: 0.1.6
-        version: 0.1.6(@pulumi/kubernetes@3.24.3)(@pulumi/pulumi@3.62.0)
+        version: 0.1.6(@pulumi/kubernetes@3.25.0)(@pulumi/pulumi@3.62.0)
       '@pulumi/pulumi':
         specifier: 3.62.0
         version: 3.62.0
@@ -9523,8 +9523,8 @@ packages:
       - supports-color
     dev: false
 
-  /@pulumi/kubernetes@3.24.3:
-    resolution: {integrity: sha512-GkO+pnVojyQbCfYW+4q7cDT8jXgKRwG5ZyS8blg2aro5cYD1UxbwIVAqDUUGpS4Gr8/vOfgfjhhq1xW2waF+GQ==}
+  /@pulumi/kubernetes@3.25.0:
+    resolution: {integrity: sha512-D0BNhz1Zi6HZy7FaTtkrTpmjv/baKSS3WWPMUdj/B57CKKxAlJDUA/sovAZMzgpsYNOsMYn0Ok/29+AB/E1MwA==}
     requiresBuild: true
     dependencies:
       '@pulumi/pulumi': 3.62.0
@@ -9540,13 +9540,13 @@ packages:
       - supports-color
     dev: false
 
-  /@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@3.24.3)(@pulumi/pulumi@3.62.0):
+  /@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@3.25.0)(@pulumi/pulumi@3.62.0):
     resolution: {integrity: sha512-9VL4Yi4b4aLC/obBarJuNkm86kABByUZICYPSTdV396MGZtOc066o2brsB+kWVQcVfkYVXTPrpjIkAwBXXnzGw==}
     peerDependencies:
       '@pulumi/kubernetes': ^3.0.0
       '@pulumi/pulumi': ^3.0.0
     dependencies:
-      '@pulumi/kubernetes': 3.24.3
+      '@pulumi/kubernetes': 3.25.0
       '@pulumi/pulumi': 3.62.0
     dev: false
 
