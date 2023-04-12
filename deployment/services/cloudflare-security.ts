@@ -1,7 +1,9 @@
 import * as cf from '@pulumi/cloudflare';
 import * as pulumi from '@pulumi/pulumi';
+import { dependencies } from '../../packages/web/app/package.json' assert { type: 'json' };
 
 const cfConfig = new pulumi.Config('cloudflareCustom');
+const monacoEditorVersion = dependencies['monaco-editor'];
 
 function toExpressionList(items: string[]): string {
   return items.map(v => `"${v}"`).join(' ');
@@ -25,7 +27,7 @@ export function deployCloudFlareSecurityTransform(options: {
     options.ignoredPaths,
   )} } and not http.host in { ${toExpressionList(options.ignoredHosts)} }`;
 
-  const monacoCdnBasePath: `https://${string}/` = `https://cdn.jsdelivr.net/npm/monaco-editor@0.37.1/`;
+  const monacoCdnBasePath: `https://${string}/` = `https://cdn.jsdelivr.net/npm/monaco-editor@${monacoEditorVersion}/`;
   const crispHost = 'client.crisp.chat';
   const stripeHost = 'js.stripe.com';
   const gtmHost = 'www.googletagmanager.com';
