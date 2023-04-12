@@ -15,6 +15,12 @@ jobs:
         uses: tj-actions/changed-files@v35
         with:
           files: packages/web/app/**
+          
+      - name: Run step if any file(s) in the docs folder change
+        if: steps.storybook-files.outputs.any_changed == 'true'
+        run: |
+          echo "One or more files has changed."
+          echo "List all the files that have changed: ${{ steps.storybook-files.outputs.all_changed_files }}"
 
       - name: setup environment
         if: steps.storybook-files.outputs.any_changed == 'true'
