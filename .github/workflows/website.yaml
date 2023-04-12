@@ -10,7 +10,7 @@ jobs:
         with:
           fetch-depth: 2
           
-      - name: Get changed files in the docs folder
+      - name: Get changed files
         id: website-files
         uses: tj-actions/changed-files@v35
         with:
