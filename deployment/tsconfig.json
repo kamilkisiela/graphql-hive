@@ -2,8 +2,8 @@
   "compilerOptions": {
     "strict": true,
     "outDir": "bin",
-    "target": "esnext",
-    "module": "esnext",
+    "target": "es2016",
+    "module": "commonjs",
     "moduleResolution": "node",
     "typeRoots": ["./node_modules/@types"],
     "sourceMap": true,
@@ -12,14 +12,7 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true
+    "skipLibCheck": true
   },
-  "include": [
-    "services/**/*.ts",
-    "utils/*c*/*.ts",
-    "index.ts",
-    "types.ts",
-    "../packages/web/app/package.json"
-  ]
+  "include": ["services/**/*.ts", "utils/*c*/*.ts", "index.ts", "types.ts"]
 }

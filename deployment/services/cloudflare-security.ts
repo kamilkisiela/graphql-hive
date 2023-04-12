@@ -1,6 +1,10 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import * as cf from '@pulumi/cloudflare';
 import * as pulumi from '@pulumi/pulumi';
-import * as webAppPkg from '../../packages/web/app/package.json' assert { type: 'json' };
+
+const webAppPkgJsonFilepath = join(__dirname, '../../packages/web/app/package.json');
+const webAppPkg = JSON.parse(readFileSync(webAppPkgJsonFilepath, 'utf8'));
 
 const cfConfig = new pulumi.Config('cloudflareCustom');
 const monacoEditorVersion = webAppPkg.dependencies['monaco-editor'];
