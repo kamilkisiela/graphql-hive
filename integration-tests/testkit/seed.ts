@@ -10,6 +10,7 @@ import { authenticate, userEmail } from './auth';
 import { ensureEnv } from './env';
 import {
   checkSchema,
+  compareToPreviousVersion,
   createCdnAccess,
   createOrganization,
   createProject,
@@ -347,6 +348,19 @@ export function initSeed() {
                     },
                     async fetchLatestValidSchema() {
                       return (await fetchLatestValidSchema(secret)).expectNoGraphQLErrors();
+                    },
+                    async compareToPreviousVersion(version: string) {
+                      return (
+                        await compareToPreviousVersion(
+                          {
+                            organization: organization.cleanId,
+                            project: project.cleanId,
+                            target: target.cleanId,
+                            version,
+                          },
+                          secret,
+                        )
+                      ).expectNoGraphQLErrors();
                     },
                     async updateBaseSchema(newBase: string) {
                       const result = await updateBaseSchema(

@@ -9,6 +9,6 @@ export default defineConfig({
       '@graphql-hive/core': 'packages/libraries/core/src/index.ts',
     },
     exclude: [...defaultExclude, 'integration-tests', 'packages/migrations/test'],
-    setupFiles: ['./serializer.ts'],
+    setupFiles: ['./scripts/serializer.ts'],
   },
 });

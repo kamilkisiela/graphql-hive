@@ -24,11 +24,11 @@
   },
   "devDependencies": {
     "@sentry/types": "7.44.2",
-    "@tgriesser/schemats": "8.0.2",
+    "@tgriesser/schemats": "9.0.1",
     "@types/node": "18.15.11",
     "@types/pg": "8.6.6",
     "pg-promise": "11.4.3",
     "tslib": "2.5.0",
-    "typescript": "5.0.2"
+    "typescript": "5.0.4"
   }
 }

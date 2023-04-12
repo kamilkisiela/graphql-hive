@@ -98,7 +98,7 @@ impl UsagePlugin {
             .body()
             .query
             .clone()
-            .expect("operation body");
+            .expect("operation body should not be empty");
 
         let sample_rate = config.sample_rate.clone();
         let excluded_operation_names: HashSet<String> = config
@@ -126,10 +126,6 @@ impl UsagePlugin {
                 }
                 None => {}
             }
-        }
-
-        if dropped {
-            tracing::debug!("Dropped the operation");
         }
 
         let _ = context.insert(
@@ -201,6 +197,7 @@ impl Plugin for UsagePlugin {
                         let result: supergraph::ServiceResult = fut.await;
 
                         if operation_context.dropped {
+                            tracing::info!("Dropping operation (phase: SAMPLING): {}", operation_context.operation_name.clone().or_else(|| Some("anonymous".to_string())).unwrap());
                             return result;
                         }
 
@@ -220,7 +217,7 @@ impl Plugin for UsagePlugin {
                                 agent_clone
                                     .clone()
                                     .lock()
-                                    .expect("failed to acquire Agent from `supergraph_service` (error)")
+                                    .expect("Unable to acquire Agent in supergraph_service (error)")
                                     .add_report(ExecutionReport {
                                         client_name,
                                         client_version,
@@ -234,7 +231,6 @@ impl Plugin for UsagePlugin {
                                 Err(e)
                             }
                             Ok(router_response) => {
-                                // router_response.
                                 let is_failure = !router_response.response.status().is_success();
                                 Ok(router_response.map(move |response_stream| {
                                     let client_name = client_name.clone();
@@ -247,7 +243,7 @@ impl Plugin for UsagePlugin {
                                             // make sure we send a single report, not for each chunk
                                             let response_has_errors = !response.errors.is_empty();
                                             agent_clone.clone().lock()
-                                            .expect("failed to acquire Agent from `supergraph_service` (ok)").add_report(ExecutionReport {
+                                            .expect("Unable to acquire Agent in supergraph_service (ok)").add_report(ExecutionReport {
                                                 client_name: client_name.clone(),
                                                 client_version: client_version.clone(),
                                                 timestamp,

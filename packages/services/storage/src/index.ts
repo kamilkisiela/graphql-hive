@@ -53,6 +53,7 @@ import {
 } from './db';
 import type { Slonik } from './shared';
 
+export { ConnectionError } from 'slonik';
 export { createConnectionString } from './db/utils';
 export { createTokenStorage } from './tokens';
 export type { tokens } from './db/types';
@@ -599,8 +600,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     destroy() {
       return pool.end();
     },
-    async ping() {
-      await pool.exists(sql`SELECT 1`);
+    async isReady() {
+      try {
+        await pool.exists(sql`SELECT 1`);
+        return true;
+      } catch {
+        return false;
+      }
     },
     async ensureUserExists({
       superTokensUserId,

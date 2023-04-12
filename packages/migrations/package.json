@@ -27,7 +27,7 @@
     "p-limit": "4.0.0",
     "slonik": "30.4.4",
     "ts-node": "10.9.1",
-    "typescript": "5.0.2",
+    "typescript": "5.0.4",
     "zod": "3.21.4"
   },
   "devDependencies": {

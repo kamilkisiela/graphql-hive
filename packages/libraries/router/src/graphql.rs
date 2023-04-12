@@ -1,3 +1,5 @@
+use anyhow::anyhow;
+use anyhow::Error;
 use graphql_tools::ast::ext::SchemaDocumentExtension;
 use graphql_tools::ast::TypeDefinitionExtension;
 use lru::LruCache;
@@ -23,41 +25,53 @@ use graphql_tools::ast::{
 struct SchemaCoordinatesContext {
     pub schema_coordinates: HashSet<String>,
     pub input_types_to_collect: HashSet<String>,
+    error: Option<Error>,
+}
+
+impl SchemaCoordinatesContext {
+    fn is_corrupted(&self) -> bool {
+        self.error.is_some()
+    }
 }
 
 pub fn collect_schema_coordinates(
     document: &Document<'static, String>,
     schema: &SchemaDocument<'static, String>,
-) -> HashSet<String> {
+) -> Result<HashSet<String>, Error> {
     let mut ctx = SchemaCoordinatesContext {
         schema_coordinates: HashSet::new(),
         input_types_to_collect: HashSet::new(),
+        error: None,
     };
     let mut visit_context = OperationVisitorContext::new(document, schema);
     let mut visitor = SchemaCoordinatesVisitor {};
 
     visit_document(&mut visitor, &document, &mut visit_context, &mut ctx);
 
-    for input_type_name in ctx.input_types_to_collect {
-        let named_type = schema.type_by_name(&input_type_name);
+    if let Some(error) = ctx.error {
+        Err(error)
+    } else {
+        for input_type_name in ctx.input_types_to_collect {
+            let named_type = schema.type_by_name(&input_type_name);
 
-        match named_type {
-            Some(named_type) => match named_type {
-                TypeDefinition::InputObject(input_type) => {
-                    for field in &input_type.fields {
-                        ctx.schema_coordinates
-                            .insert(format!("{}.{}", input_type_name, field.name));
+            match named_type {
+                Some(named_type) => match named_type {
+                    TypeDefinition::InputObject(input_type) => {
+                        for field in &input_type.fields {
+                            ctx.schema_coordinates
+                                .insert(format!("{}.{}", input_type_name, field.name));
+                        }
                     }
+                    _ => {}
+                },
+                None => {
+                    ctx.schema_coordinates.insert(input_type_name);
                 }
-                _ => {}
-            },
-            None => {
-                ctx.schema_coordinates.insert(input_type_name);
             }
         }
-    }
 
-    ctx.schema_coordinates
+        Ok(ctx.schema_coordinates)
+    }
 }
 
 struct SchemaCoordinatesVisitor {}
@@ -79,11 +93,23 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
         ctx: &mut SchemaCoordinatesContext,
         field: &Field<'static, String>,
     ) {
-        let field_name = field.name.to_string();
-        let parent_name = info.current_parent_type().unwrap().name();
+        if ctx.is_corrupted() {
+            return ();
+        }
 
-        ctx.schema_coordinates
-            .insert(format!("{}.{}", parent_name, field_name));
+        let field_name = field.name.to_string();
+
+        if let Some(parent_type) = info.current_parent_type() {
+            let parent_name = parent_type.name();
+
+            ctx.schema_coordinates
+                .insert(format!("{}.{}", parent_name, field_name));
+        } else {
+            ctx.error = Some(anyhow!(
+                "Unable to find parent type of '{}' field",
+                field.name
+            ))
+        }
     }
 
     fn enter_variable_definition(
@@ -92,6 +118,9 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
         ctx: &mut SchemaCoordinatesContext,
         var: &graphql_tools::static_graphql::query::VariableDefinition,
     ) {
+        if ctx.is_corrupted() {
+            return ();
+        }
         ctx.input_types_to_collect
             .insert(self.resolve_type_name(var.var_type.clone()));
     }
@@ -102,7 +131,20 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
         ctx: &mut SchemaCoordinatesContext,
         arg: &(String, Value<'static, String>),
     ) {
+        if ctx.is_corrupted() {
+            return ();
+        }
+
+        if info.current_parent_type().is_none() {
+            ctx.error = Some(anyhow!(
+                "Unable to find parent type of '{}' argument",
+                arg.0.clone()
+            ));
+            return ();
+        }
+
         let type_name = info.current_parent_type().unwrap().name();
+
         let field = info.current_field();
 
         if let Some(field) = field {
@@ -146,6 +188,10 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
         ctx: &mut SchemaCoordinatesContext,
         values: &Vec<Value<'static, String>>,
     ) {
+        if ctx.is_corrupted() {
+            return ();
+        }
+
         if let Some(input_type) = info.current_input_type() {
             for value in values {
                 match value {
@@ -167,6 +213,10 @@ impl<'a> OperationVisitor<'a, SchemaCoordinatesContext> for SchemaCoordinatesVis
         ctx: &mut SchemaCoordinatesContext,
         (name, value): &(String, Value<'static, String>),
     ) {
+        if ctx.is_corrupted() {
+            return ();
+        }
+
         let input_type = info.current_input_type();
 
         if let Some(input_type) = input_type {
@@ -472,7 +522,11 @@ impl OperationProcessor {
     ) -> Result<Option<ProcessedOperation>, String> {
         let key = query.to_string();
         if self.cache.contains(&key) {
-            Ok(self.cache.get(&key).expect("lock cache").clone())
+            Ok(self
+                .cache
+                .get(&key)
+                .expect("Unable to acquire Cache in OperationProcessor.process")
+                .clone())
         } else {
             let result = self.transform(query, schema)?;
             self.cache.put(key, result.clone());
@@ -512,8 +566,10 @@ impl OperationProcessor {
             return Ok(None);
         }
 
-        let schema_coordinates: Vec<String> =
-            Vec::from_iter(collect_schema_coordinates(&parsed, schema));
+        let schema_coordinates_result =
+            collect_schema_coordinates(&parsed, schema).map_err(|e| e.to_string())?;
+
+        let schema_coordinates: Vec<String> = Vec::from_iter(schema_coordinates_result);
 
         let normalized = strip_literals_transformer
             .transform_document(&parsed)
@@ -531,5 +587,110 @@ impl OperationProcessor {
             hash,
             coordinates: schema_coordinates,
         }))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use graphql_parser::parse_query;
+    use graphql_parser::parse_schema;
+
+    use super::collect_schema_coordinates;
+
+    #[test]
+    fn basic_test() {
+        let schema = parse_schema::<String>(
+            "
+            type Query {
+                project(selector: ProjectSelectorInput!): Project
+                projectsByType(type: ProjectType!): [Project!]!
+                projects(filter: FilterInput): [Project!]!
+            }
+            type Mutation {
+                deleteProject(selector: ProjectSelectorInput!): DeleteProjectPayload!
+            }
+            input ProjectSelectorInput {
+                organization: ID!
+                project: ID!
+            }
+            input FilterInput {
+                type: ProjectType
+                pagination: PaginationInput
+            }
+            input PaginationInput {
+                limit: Int
+                offset: Int
+            }
+            type ProjectSelector {
+                organization: ID!
+                project: ID!
+            }
+            type DeleteProjectPayload {
+                selector: ProjectSelector!
+                deletedProject: Project!
+            }
+            type Project {
+                id: ID!
+                cleanId: ID!
+                name: String!
+                type: ProjectType!
+                buildUrl: String
+                validationUrl: String
+            }
+            enum ProjectType {
+                FEDERATION
+                STITCHING
+                SINGLE
+                CUSTOM
+            }
+        ",
+        )
+        .unwrap();
+
+        let document = parse_query::<String>(
+            "
+            mutation deleteProjectOperation($selector: ProjectSelectorInput!) {
+                deleteProject(selector: $selector) {
+                    selector {
+                        organization
+                        project
+                    }
+                    deletedProject {
+                        ...ProjectFields
+                    }
+                }
+            }
+            fragment ProjectFields on Project {
+                id
+                cleanId
+                name
+                type
+            }
+        ",
+        )
+        .unwrap();
+
+        let schema_coordinates = collect_schema_coordinates(&document, &schema).unwrap();
+
+        let expected = vec![
+            "Mutation.deleteProject",
+            "Mutation.deleteProject.selector",
+            "DeleteProjectPayload.selector",
+            "ProjectSelector.organization",
+            "ProjectSelector.project",
+            "DeleteProjectPayload.deletedProject",
+            "Project.id",
+            "Project.cleanId",
+            "Project.name",
+            "Project.type",
+            "ProjectSelectorInput.organization",
+            "ProjectSelectorInput.project",
+        ];
+
+        for exp in expected {
+            assert_eq!(schema_coordinates.get(exp), Some(&exp.to_string()));
+        }
+
+        assert_eq!(schema_coordinates.len(), 12);
     }
 }
