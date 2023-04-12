@@ -1,0 +1,26 @@
+diff --git a/dist/urql-core-chunk.js b/dist/urql-core-chunk.js
+index 871125b78cac4308c615bc8859c045089e117d21..a5f5171446d086d7fa5120d87578f4df53d23a5b 100644
+--- a/dist/urql-core-chunk.js
++++ b/dist/urql-core-chunk.js
+@@ -578,7 +578,7 @@ var serializeBody = (operation, body) => {
+  */
+ var makeFetchOptions = (operation, body) => {
+   var headers = {
+-    accept: operation.kind === 'subscription' ? 'text/event-stream, multipart/mixed' : 'application/graphql-response+json, application/graphql+json, application/json, text/event-stream, multipart/mixed'
++    accept: operation.kind === 'subscription' ? 'text/event-stream, multipart/mixed' : 'application/graphql-response+json, application/graphql+json, application/json, multipart/mixed'
+   };
+   var extraOptions = (typeof operation.context.fetchOptions === 'function' ? operation.context.fetchOptions() : operation.context.fetchOptions) || {};
+   if (extraOptions.headers) for (var key in extraOptions.headers) headers[key.toLowerCase()] = extraOptions.headers[key];
+diff --git a/dist/urql-core-chunk.mjs b/dist/urql-core-chunk.mjs
+index 7d06ea66caf0636b097f55d9b5c800f78777dc4b..5f757ae343e48749439aed042618182db1132f8b 100644
+--- a/dist/urql-core-chunk.mjs
++++ b/dist/urql-core-chunk.mjs
+@@ -383,7 +383,7 @@ var serializeBody = (r, e) => {
+ 
+ var makeFetchOptions = (r, e) => {
+   var t = {
+-    accept: "subscription" === r.kind ? "text/event-stream, multipart/mixed" : "application/graphql-response+json, application/graphql+json, application/json, text/event-stream, multipart/mixed"
++    accept: "subscription" === r.kind ? "text/event-stream, multipart/mixed" : "application/graphql-response+json, application/graphql+json, application/json, multipart/mixed"
+   };
+   var a = ("function" == typeof r.context.fetchOptions ? r.context.fetchOptions() : r.context.fetchOptions) || {};
+   if (a.headers) {

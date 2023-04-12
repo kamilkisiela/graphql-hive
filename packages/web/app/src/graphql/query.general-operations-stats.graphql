@@ -1,6 +1,6 @@
 query generalOperationsStats($selector: OperationsStatsSelectorInput!, $resolution: Int!) {
   operationsStats(selector: $selector) {
-    ... on OperationsStats @defer {
+    ... on OperationsStats {
       totalRequests
       totalFailures
       totalOperations
