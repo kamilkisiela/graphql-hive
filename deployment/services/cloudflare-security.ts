@@ -1,9 +1,9 @@
 import * as cf from '@pulumi/cloudflare';
 import * as pulumi from '@pulumi/pulumi';
-import { dependencies } from '../../packages/web/app/package.json' assert { type: 'json' };
+import * as webAppPkg from '../../packages/web/app/package.json' assert { type: 'json' };
 
 const cfConfig = new pulumi.Config('cloudflareCustom');
-const monacoEditorVersion = dependencies['monaco-editor'];
+const monacoEditorVersion = webAppPkg.dependencies['monaco-editor'];
 
 function toExpressionList(items: string[]): string {
   return items.map(v => `"${v}"`).join(' ');
