@@ -17,7 +17,7 @@ function useTransaction(res: any) {
 
     return {
       transaction: existingTransaction,
-      finish() { },
+      finish() {},
     };
   }
 
@@ -55,14 +55,15 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
         'graphql-client-name': 'Hive App',
         'x-use-proxy': '/api/proxy',
         'graphql-client-version': env.release,
-      },
+      } as Record<string, string>,
       method: 'GET',
-    } as any);
+    });
 
     res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
 
     if (response.body) {
       const reader = response.body.getReader();
+      // eslint-disable-next-line no-constant-condition
       while (true) {
         const { done, value } = await reader.read();
         if (done) {
@@ -111,14 +112,14 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
         accept: req.headers['accept'],
         'accept-encoding': req.headers['accept-encoding'],
         'x-request-id': requestId,
-        'X-API-Token': req.headers['x-api-token'] ?? '',
+        'X-API-Token': req.headers['x-api-token'],
         'sentry-trace': transaction.toTraceparent(),
         'graphql-client-name': 'Hive App',
         'graphql-client-version': env.release,
-      },
+      } as Record<string, string>,
       method: 'POST',
       body: JSON.stringify(req.body || {}),
-    } as any);
+    });
 
     graphqlSpan.setHttpStatus(200);
     graphqlSpan.finish();
