@@ -20,6 +20,7 @@ export function toGraphQLSchemaChange(change: Change): Types.SchemaChange {
     message: change.message,
     path: change.path?.split('.') ?? null,
     criticality: criticalityMap[change.criticality.level],
+    criticalityReason: change.criticality.reason ?? null,
   };
 }
 

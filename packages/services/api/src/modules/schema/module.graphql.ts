@@ -250,6 +250,7 @@ export default gql`
 
   type SchemaChange {
     criticality: CriticalityLevel!
+    criticalityReason: String
     message: String!
     path: [String!]
   }
