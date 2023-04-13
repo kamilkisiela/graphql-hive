@@ -267,13 +267,14 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
 
         const accept = req.headers.accept;
 
-        if (!accept || accept === '*/*' || !reply.hasHeader('content-type')) {
+        if (!accept || accept === '*/*') {
           void reply.header('content-type', 'application/json');
         }
 
         void reply.status(response.status);
 
-        return reply.send(response.body || '');
+        const textResponse = await response.text();
+        return reply.send(textResponse);
       },
     );
   };
