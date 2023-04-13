@@ -12,8 +12,8 @@
     "reflect-metadata": "^0.1.0"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.309.0",
-    "@aws-sdk/s3-request-presigner": "3.309.0",
+    "@aws-sdk/client-s3": "3.312.0",
+    "@aws-sdk/s3-request-presigner": "3.312.0",
     "@graphql-inspector/core": "4.0.2",
     "@octokit/app": "13.1.2",
     "@sentry/node": "7.44.2",
@@ -55,7 +55,7 @@
     "@types/lodash": "4.14.192",
     "@types/ms": "0.7.31",
     "@types/object-hash": "3.0.2",
-    "ioredis-mock": "8.5.0",
+    "ioredis-mock": "8.6.0",
     "tslib": "2.5.0"
   }
 }
