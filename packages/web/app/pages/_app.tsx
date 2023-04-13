@@ -13,7 +13,7 @@ import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { env } from '@/env/frontend';
 import * as gtag from '@/lib/gtag';
 import { urqlClient } from '@/lib/urql';
-import * as Sentry from '@sentry/nextjs';
+import { configureScope, init } from '@sentry/nextjs';
 import '../public/styles.css';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -24,7 +24,7 @@ function identifyOnCrisp(email: string): void {
 }
 
 function identifyOnSentry(userId: string, email: string): void {
-  Sentry.configureScope(scope => {
+  configureScope(scope => {
     scope.setUser({ id: userId, email });
   });
 }
@@ -127,7 +127,7 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
 if (globalThis.window) {
   SuperTokens.init(frontendConfig());
   if (env.sentry) {
-    Sentry.init({
+    init({
       dsn: env.sentry.dsn,
       enabled: true,
       release: env.release,
