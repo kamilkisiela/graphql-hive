@@ -1,3 +1,4 @@
+import { createPool, sql } from 'slonik';
 import {
   OrganizationAccessScope,
   ProjectAccessScope,
@@ -6,8 +7,10 @@ import {
   TargetAccessScope,
 } from '@app/gql/graphql';
 import { authenticate, userEmail } from './auth';
+import { ensureEnv } from './env';
 import {
   checkSchema,
+  compareToPreviousVersion,
   createCdnAccess,
   createOrganization,
   createProject,
@@ -38,6 +41,17 @@ import { collect, CollectedOperation } from './usage';
 import { generateUnique } from './utils';
 
 export function initSeed() {
+  const pg = {
+    user: ensureEnv('POSTGRES_USER'),
+    password: ensureEnv('POSTGRES_PASSWORD'),
+    host: ensureEnv('POSTGRES_HOST'),
+    port: ensureEnv('POSTGRES_PORT'),
+    db: ensureEnv('POSTGRES_DB'),
+  };
+  const poolPromise = createPool(
+    `postgres://${pg.user}:${pg.password}@${pg.host}:${pg.port}/${pg.db}?sslmode=disable`,
+  );
+
   return {
     authenticate: authenticate,
     generateEmail: () => userEmail(generateUnique()),
@@ -59,6 +73,16 @@ export function initSeed() {
 
           return {
             organization,
+            async setFeatureFlag(name: string, enabled: boolean) {
+              const pool = await poolPromise;
+
+              await pool.query(sql`
+                UPDATE public.organizations SET feature_flags = ${sql.jsonb({
+                  [name]: enabled,
+                })}
+                WHERE id = ${organization.id}
+              `);
+            },
             async fetchOrganizationInfo() {
               const result = await getOrganization(organization.cleanId, ownerToken).then(r =>
                 r.expectNoGraphQLErrors(),
@@ -324,6 +348,19 @@ export function initSeed() {
                     },
                     async fetchLatestValidSchema() {
                       return (await fetchLatestValidSchema(secret)).expectNoGraphQLErrors();
+                    },
+                    async compareToPreviousVersion(version: string) {
+                      return (
+                        await compareToPreviousVersion(
+                          {
+                            organization: organization.cleanId,
+                            project: project.cleanId,
+                            target: target.cleanId,
+                            version,
+                          },
+                          secret,
+                        )
+                      ).expectNoGraphQLErrors();
                     },
                     async updateBaseSchema(newBase: string) {
                       const result = await updateBaseSchema(

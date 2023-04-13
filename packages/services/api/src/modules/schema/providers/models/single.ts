@@ -2,7 +2,7 @@ import { Injectable, Scope } from 'graphql-modules';
 import { SingleOrchestrator } from '../orchestrators/single';
 import { RegistryChecks } from '../registry-checks';
 import type { PublishInput } from '../schema-publisher';
-import type { Project, SingleSchema, Target } from './../../../../shared/entities';
+import type { Organization, Project, SingleSchema, Target } from './../../../../shared/entities';
 import { Logger } from './../../../shared/providers/logger';
 import {
   CheckFailureReasonCode,
@@ -32,7 +32,9 @@ export class SingleModel {
     input,
     selector,
     latest,
+    latestComposable,
     project,
+    organization,
     baseSchema,
   }: {
     input: {
@@ -47,8 +49,13 @@ export class SingleModel {
       isComposable: boolean;
       schemas: [SingleSchema];
     } | null;
+    latestComposable: {
+      isComposable: boolean;
+      schemas: [SingleSchema];
+    } | null;
     baseSchema: string | null;
     project: Project;
+    organization: Organization;
   }): Promise<SchemaCheckResult> {
     const incoming: SingleSchema = {
       kind: 'single',
@@ -64,6 +71,7 @@ export class SingleModel {
     const initial = latest === null;
     const latestVersion = latest;
     const schemas = [incoming] as [SingleSchema];
+    const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
 
     const checksumCheck = await this.checks.checksum({
       schemas,
@@ -94,7 +102,7 @@ export class SingleModel {
         project,
         schemas,
         selector,
-        latestVersion,
+        version: compareToLatest ? latest : latestComposable,
       }),
     ]);
 
@@ -136,14 +144,21 @@ export class SingleModel {
   async publish({
     input,
     target,
-    latest,
     project,
+    organization,
+    latest,
+    latestComposable,
     baseSchema,
   }: {
     input: PublishInput;
+    organization: Organization;
     project: Project;
     target: Target;
     latest: {
+      isComposable: boolean;
+      schemas: [SingleSchema];
+    } | null;
+    latestComposable: {
       isComposable: boolean;
       schemas: [SingleSchema];
     } | null;
@@ -162,6 +177,7 @@ export class SingleModel {
 
     const latestVersion = latest;
     const schemas = [incoming] as [SingleSchema];
+    const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
 
     const checksumCheck = await this.checks.checksum({
       schemas,
@@ -200,7 +216,7 @@ export class SingleModel {
           project: project.id,
           organization: project.orgId,
         },
-        latestVersion,
+        version: compareToLatest ? latestVersion : latestComposable,
       }),
     ]);
 
@@ -228,15 +244,17 @@ export class SingleModel {
       compositionCheck.status === 'failed' &&
       compositionCheck.reason.errorsBySource.graphql.length > 0
     ) {
-      return {
-        conclusion: SchemaPublishConclusion.Reject,
-        reasons: [
-          {
-            code: PublishFailureReasonCode.CompositionFailure,
-            compositionErrors: compositionCheck.reason.errorsBySource.graphql,
-          },
-        ],
-      };
+      if (compareToLatest) {
+        return {
+          conclusion: SchemaPublishConclusion.Reject,
+          reasons: [
+            {
+              code: PublishFailureReasonCode.CompositionFailure,
+              compositionErrors: compositionCheck.reason.errorsBySource.graphql,
+            },
+          ],
+        };
+      }
     }
 
     return {

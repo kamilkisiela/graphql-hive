@@ -89,7 +89,28 @@ describe.each`
     }).then(r => r.expectNoGraphQLErrors());
 
     // We should have 2 versions (push, push)
-    await expect(fetchVersions(3)).resolves.toHaveLength(2);
+    const versionsBeforeDelete = await fetchVersions(3);
+    expect(versionsBeforeDelete).toHaveLength(2);
+
+    expect(versionsBeforeDelete).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          log: expect.objectContaining({
+            service: 'myservice',
+          }),
+        }),
+        expect.objectContaining({
+          log: expect.objectContaining({
+            service: 'myotherservice',
+          }),
+        }),
+      ]),
+    );
+
+    if (model === 'legacy') {
+      // Ignore the rest of the test for legacy models
+      return;
+    }
 
     await expect(
       deleteSchema(

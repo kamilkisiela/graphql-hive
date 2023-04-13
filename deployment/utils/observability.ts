@@ -28,7 +28,7 @@ export class Observability {
     // dotansimha: once Vector supports scraping K8s metrics based on Prom, we can drop this.
     new k8s.helm.v3.Chart('metrics', {
       // prettier-ignore
-      ...helmChart('https://open-telemetry.github.io/opentelemetry-helm-charts', 'opentelemetry-collector', '0.51.1'),
+      ...helmChart('https://open-telemetry.github.io/opentelemetry-helm-charts', 'opentelemetry-collector', '0.53.0'),
       namespace: ns.metadata.name,
       // https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-collector/values.yaml
       values: {
@@ -210,7 +210,7 @@ export class Observability {
       'vector-logging',
       {
         // prettier-ignore
-        ...helmChart('https://helm.vector.dev', 'vector', '0.20.1'),
+        ...helmChart('https://helm.vector.dev', 'vector', '0.21.0'),
         namespace: ns.metadata.name,
         // https://vector.dev/docs/reference/configuration/
         values: {

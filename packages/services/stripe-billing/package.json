@@ -13,14 +13,14 @@
   "dependencies": {
     "@sentry/node": "7.44.2",
     "@sentry/tracing": "7.44.2",
-    "@trpc/client": "10.18.0",
-    "@trpc/server": "10.18.0",
+    "@trpc/client": "10.19.1",
+    "@trpc/server": "10.19.1",
     "@whatwg-node/fetch": "0.8.4",
     "date-fns": "2.29.3",
     "dotenv": "16.0.3",
     "got": "12.6.0",
     "reflect-metadata": "0.1.13",
-    "stripe": "11.16.0",
+    "stripe": "11.18.0",
     "zod": "3.21.4"
   },
   "devDependencies": {

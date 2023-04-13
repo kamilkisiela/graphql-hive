@@ -148,6 +148,9 @@ export interface Organization {
     operations: number;
   };
   getStarted: OrganizationGetStarted;
+  featureFlags: {
+    compareToPreviousComposableVersion: boolean;
+  };
 }
 
 export interface OrganizationInvitation {

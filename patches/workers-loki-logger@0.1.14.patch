@@ -1,0 +1,253 @@
+diff --git a/build/logger.js b/build/logger.js
+index 2d1d9ea14ccfc4efbe25b58c06f49817b623c736..20a7b49633e529d2362ac11b9775ae3714c2ce18 100644
+--- a/build/logger.js
++++ b/build/logger.js
+@@ -1,124 +1,136 @@
+-import { formatErrorToString } from './error-formatter.js';
+-import { isNotNullOrUndefined } from './lib.js';
++import { formatErrorToString } from "./error-formatter.js";
++import { isNotNullOrUndefined } from "./lib.js";
+ export class Logger {
+-    messages = [];
+-    mdcString = null;
+-    timeNanoSeconds;
+-    mdc;
+-    stream;
+-    lokiSecret;
+-    lokiUrl;
+-    fetch;
+-    cloudflareContext;
+-    loggerReceiver;
+-    constructor(loggerConfig) {
+-        this.stream = loggerConfig.stream;
+-        this.lokiSecret = loggerConfig.lokiSecret;
+-        this.mdc = new Map(Object.entries(loggerConfig.mdc ?? {}));
+-        this.lokiUrl = loggerConfig.lokiUrl ?? 'https://logs-prod-eu-west-0.grafana.net';
+-        this.fetch = loggerConfig.fetch ?? ((input, init) => fetch(input, init));
+-        this.cloudflareContext = loggerConfig.cloudflareContext ?? {};
+-        this.loggerReceiver = loggerConfig.logReceiver ?? console;
+-        this.timeNanoSeconds = loggerConfig.timeNanoSeconds ?? Date.now() * 1000000;
++  messages = [];
++  mdcString = null;
++  timeNanoSeconds;
++  mdc;
++  stream;
++  lokiSecret;
++  lokiUrl;
++  fetch;
++  cloudflareContext;
++  loggerReceiver;
++  getTimeNanoSecondsCalls;
++  constructor(loggerConfig) {
++    this.stream = loggerConfig.stream;
++    this.lokiSecret = loggerConfig.lokiSecret;
++    this.mdc = new Map(Object.entries(loggerConfig.mdc ?? {}));
++    this.lokiUrl =
++      loggerConfig.lokiUrl ?? "https://logs-prod-eu-west-0.grafana.net";
++    this.fetch = loggerConfig.fetch ?? ((input, init) => fetch(input, init));
++    this.cloudflareContext = loggerConfig.cloudflareContext ?? {};
++    this.loggerReceiver = loggerConfig.logReceiver ?? console;
++    this.getTimeNanoSecondsCalls = 0;
++  }
++  getTimeNanoSeconds() {
++    return Date.now() * 1000000 + this.getTimeNanoSecondsCalls++;
++  }
++
++  mdcSet(key, value) {
++    this.mdcString = null;
++    this.mdc.set(key, value);
++  }
++  mdcDelete(key) {
++    this.mdcString = null;
++    this.mdc.delete(key);
++  }
++  mdcGet(key) {
++    return this.mdc.get(key);
++  }
++  async flush() {
++    if (this.messages.length === 0) {
++      this.loggerReceiver.debug("logger has no messages to flush");
++      return;
+     }
+-    mdcSet(key, value) {
+-        this.mdcString = null;
+-        this.mdc.set(key, value);
++    const mdcString = this.mdcFormatString();
++    const request = {
++      streams: [
++        {
++          stream: this.stream,
++          values: this.messages.map((messageEntry) => [
++            messageEntry.time.toString(),
++            mdcString +
++              "level=" +
++              messageEntry.level +
++              " " +
++              messageEntry.message,
++          ]),
++        },
++      ],
++    };
++    const saveLogsPromise = this.fetch(`${this.lokiUrl}/loki/api/v1/push`, {
++      method: "POST",
++      headers: {
++        "Content-Type": "application/json",
++        Authorization: `Basic ${this.lokiSecret}`,
++      },
++      body: JSON.stringify(request),
++    });
++    this.messages = [];
++    if (isCloudflareContext(this.cloudflareContext)) {
++      await this.cloudflareContext.waitUntil(saveLogsPromise);
++    } else {
++      await saveLogsPromise;
+     }
+-    mdcDelete(key) {
+-        this.mdcString = null;
+-        this.mdc.delete(key);
++  }
++  info(message) {
++    this.messages.push({
++      time: this.getTimeNanoSeconds(),
++      message,
++      level: "info",
++    });
++    this.loggerReceiver.info(this.mdcFormatString() + message);
++  }
++  error(message, error) {
++    if (isNotNullOrUndefined(error)) {
++      message += " " + formatErrorToString(error);
+     }
+-    mdcGet(key) {
+-        return this.mdc.get(key);
++    this.messages.push({
++      time: this.getTimeNanoSeconds(),
++      message,
++      level: "error",
++    });
++    this.loggerReceiver.error(this.mdcFormatString() + message, error);
++  }
++  fatal(message, error) {
++    if (isNotNullOrUndefined(error)) {
++      message += " " + formatErrorToString(error);
+     }
+-    async flush() {
+-        if (this.messages.length === 0) {
+-            this.loggerReceiver.debug('logger has no messages to flush');
+-            return;
+-        }
+-        const mdcString = this.mdcFormatString();
+-        const request = {
+-            streams: [
+-                {
+-                    stream: this.stream,
+-                    values: this.messages.map((messageEntry) => [
+-                        messageEntry.time.toString(),
+-                        mdcString + 'level=' + messageEntry.level + ' ' + messageEntry.message,
+-                    ]),
+-                },
+-            ],
+-        };
+-        const saveLogsPromise = this.fetch(`${this.lokiUrl}/loki/api/v1/push`, {
+-            method: 'POST',
+-            headers: {
+-                'Content-Type': 'application/json',
+-                Authorization: `Basic ${this.lokiSecret}`,
+-            },
+-            body: JSON.stringify(request),
+-        });
+-        this.messages = [];
+-        if (isCloudflareContext(this.cloudflareContext)) {
+-            await this.cloudflareContext.waitUntil(saveLogsPromise);
+-        }
+-        else {
+-            await saveLogsPromise;
+-        }
++    this.messages.push({
++      time: this.getTimeNanoSeconds(),
++      message,
++      level: "fatal",
++    });
++    this.loggerReceiver.error(this.mdcFormatString() + message, error);
++  }
++  warn(message, error) {
++    if (isNotNullOrUndefined(error)) {
++      message += " " + formatErrorToString(error);
+     }
+-    info(message) {
+-        this.messages.push({
+-            time: ++this.timeNanoSeconds,
+-            message,
+-            level: 'info',
+-        });
+-        this.loggerReceiver.info(this.mdcFormatString() + message);
++    this.messages.push({
++      time: this.getTimeNanoSeconds(),
++      message,
++      level: "warn",
++    });
++    this.loggerReceiver.warn(this.mdcFormatString() + message, error);
++  }
++  mdcFormatString() {
++    if (isNotNullOrUndefined(this.mdcString)) {
++      return this.mdcString;
+     }
+-    error(message, error) {
+-        if (isNotNullOrUndefined(error)) {
+-            message += ' ' + formatErrorToString(error);
+-        }
+-        this.messages.push({
+-            time: ++this.timeNanoSeconds,
+-            message,
+-            level: 'error',
+-        });
+-        this.loggerReceiver.error(this.mdcFormatString() + message, error);
+-    }
+-    fatal(message, error) {
+-        if (isNotNullOrUndefined(error)) {
+-            message += ' ' + formatErrorToString(error);
+-        }
+-        this.messages.push({
+-            time: ++this.timeNanoSeconds,
+-            message,
+-            level: 'fatal',
+-        });
+-        this.loggerReceiver.error(this.mdcFormatString() + message, error);
+-    }
+-    warn(message, error) {
+-        if (isNotNullOrUndefined(error)) {
+-            message += ' ' + formatErrorToString(error);
+-        }
+-        this.messages.push({
+-            time: ++this.timeNanoSeconds,
+-            message,
+-            level: 'warn',
+-        });
+-        this.loggerReceiver.warn(this.mdcFormatString() + message, error);
+-    }
+-    mdcFormatString() {
+-        if (isNotNullOrUndefined(this.mdcString)) {
+-            return this.mdcString;
+-        }
+-        let newMdcString = '';
+-        for (const entry of this.mdc.entries()) {
+-            newMdcString += entry[0] + '=' + entry[1] + ' ';
+-        }
+-        this.mdcString = newMdcString;
+-        return this.mdcString;
++    let newMdcString = "";
++    for (const entry of this.mdc.entries()) {
++      newMdcString += entry[0] + "=" + entry[1] + " ";
+     }
++    this.mdcString = newMdcString;
++    return this.mdcString;
++  }
+ }
+ function isCloudflareContext(context) {
+-    return isNotNullOrUndefined(context) && Object.getPrototypeOf(context).hasOwnProperty('waitUntil');
++  return (
++    isNotNullOrUndefined(context) &&
++    Object.getPrototypeOf(context).hasOwnProperty("waitUntil")
++  );
+ }
+ //# sourceMappingURL=logger.js.map

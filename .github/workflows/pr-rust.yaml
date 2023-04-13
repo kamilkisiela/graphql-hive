@@ -1,0 +1,33 @@
+name: pr
+on:
+  pull_request: {}
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+  TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
+  TURBO_REMOTE_ONLY: 'true'
+  HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
+
+jobs:
+  # Builds Rust crates, and creates Docker images
+  build-rust:
+    name: build_rust
+    uses: ./.github/workflows/build-and-dockerize.yaml
+    with:
+      dockerize: ${{ !github.event.pull_request.head.repo.fork }}
+      imageTag: ${{ github.event.pull_request.head.sha }}
+      publishLatest: false
+      targets: 'rust'
+      build: false
+      publishPrComment: false
+      uploadJavaScriptArtifacts: false
+    secrets: inherit
+
+  # Builds binaries from Rust crates
+  build-rust-binaries:
+    name: build-rust-binaries
+    uses: ./.github/workflows/publish-rust.yaml
+    with:
+      publish: false
+    secrets: inherit

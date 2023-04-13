@@ -9,6 +9,14 @@ export async function createTokenStorage(connection: string, maximumPoolSize: nu
     destroy() {
       return pool.end();
     },
+    async isReady() {
+      try {
+        await pool.exists(sql`SELECT 1`);
+        return true;
+      } catch {
+        return false;
+      }
+    },
     async getTokens({ target }: { target: string }) {
       const result = await pool.query<Slonik<tokens>>(
         sql`

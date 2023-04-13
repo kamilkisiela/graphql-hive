@@ -10,13 +10,27 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Get changed files
+        id: storybook-files
+        uses: tj-actions/changed-files@v35
+        with:
+          files: packages/web/app/**
+
+      - name: Run step if any file(s) in the docs folder change
+        if: steps.storybook-files.outputs.any_changed == 'true'
+        run: |
+          echo "One or more files has changed."
+          echo "List all the files that have changed: ${{ steps.storybook-files.outputs.all_changed_files }}"
+
       - name: setup environment
+        if: steps.storybook-files.outputs.any_changed == 'true'
         uses: ./.github/actions/setup
         with:
           codegen: true
           actor: storybook
 
       - uses: the-guild-org/shared-config/website-cf@main
+        if: steps.storybook-files.outputs.any_changed == 'true'
         name: build and deploy storybook
         with:
           cloudflareApiToken: ${{ secrets.WEBSITE_CLOUDFLARE_API_TOKEN }}

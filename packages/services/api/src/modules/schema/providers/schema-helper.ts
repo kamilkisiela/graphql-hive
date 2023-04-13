@@ -98,11 +98,21 @@ type CreateSchemaObjectInput = Parameters<typeof createSchemaObject>[0];
 
 export async function ensureSDL(
   composeAndValidationResultPromise: Promise<ComposeAndValidateResult>,
+  strategy: 'reject-on-graphql-errors' | 'ignore-errors' = 'ignore-errors',
 ) {
   const composeAndValidationResult = await composeAndValidationResultPromise;
 
+  if (strategy === 'reject-on-graphql-errors') {
+    if (composeAndValidationResult.errors.length) {
+      throw new SchemaBuildError(
+        `Composition errors: \n` +
+          composeAndValidationResult.errors.map(err => ` - ${err.message}`).join('\n'),
+      );
+    }
+  }
+
   if (!composeAndValidationResult.sdl) {
-    if (composeAndValidationResult.errors) {
+    if (composeAndValidationResult.errors.length) {
       throw new SchemaBuildError(
         `Composition errors: \n` +
           composeAndValidationResult.errors.map(err => ` - ${err.message}`).join('\n'),

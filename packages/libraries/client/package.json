@@ -55,11 +55,11 @@
   },
   "devDependencies": {
     "@apollo/federation": "0.38.1",
-    "@apollo/server": "4.5.0",
-    "@apollo/subgraph": "2.4.0",
+    "@apollo/server": "4.6.0",
+    "@apollo/subgraph": "2.4.1",
     "@envelop/types": "3.0.2",
     "@types/async-retry": "1.4.5",
-    "graphql-yoga": "3.7.3",
+    "graphql-yoga": "3.8.0",
     "nock": "13.3.0"
   },
   "publishConfig": {

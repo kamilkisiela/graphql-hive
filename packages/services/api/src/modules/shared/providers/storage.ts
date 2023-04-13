@@ -76,7 +76,7 @@ export interface IdMutex {
 
 export interface Storage {
   destroy(): Promise<void>;
-  ping(): Promise<void>;
+  isReady(): Promise<boolean>;
   ensureUserExists(_: {
     superTokensUserId: string;
     externalAuthUserId?: string | null;
@@ -256,7 +256,7 @@ export interface Storage {
   hasSchema(_: TargetSelector): Promise<boolean>;
   getLatestSchemas(
     _: {
-      version?: string;
+      onlyComposable?: boolean;
     } & TargetSelector,
   ): Promise<{
     schemas: Schema[];
@@ -277,6 +277,7 @@ export interface Storage {
   getSchemasOfPreviousVersion(
     _: {
       version: string;
+      onlyComposable: boolean;
     } & TargetSelector,
   ): Promise<readonly Schema[] | never>;
   getVersions(_: Paginated<TargetSelector>): Promise<

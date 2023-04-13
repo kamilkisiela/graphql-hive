@@ -11,7 +11,7 @@ interface HeartbeatsConfigEnabled {
   /**
    * Sends a heartbeat to the endpoint only if the condition is true, skips a heartbeat if the condition is false.
    */
-  isReady(): boolean;
+  isReady(): boolean | Promise<boolean>;
 }
 
 interface HeartbeatsConfigDisabled {
@@ -42,7 +42,7 @@ export function startHeartbeats(config: { enabled: boolean }): Heartbeats {
 
   async function beat() {
     try {
-      if (isReady()) {
+      if (await isReady()) {
         await fetch(endpoint, { method: 'GET' });
       }
     } catch (error) {

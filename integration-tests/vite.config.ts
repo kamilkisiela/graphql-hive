@@ -7,7 +7,7 @@ export default defineConfig({
       '@app/gql/graphql': 'testkit/gql/graphql.ts',
       '@app/gql': 'testkit/gql/index.ts',
     },
-    setupFiles: ['dotenv/config', '../serializer.ts'],
+    setupFiles: ['dotenv/config', '../scripts/serializer.ts'],
     testTimeout: 90_000,
   },
 });

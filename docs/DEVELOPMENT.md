@@ -95,6 +95,38 @@ We recommend the following flow if you are having issues with running Hive local
    [GraphQL Hive Development](https://github.com/organizations/the-guild-org/settings/apps/graphql-hive-development)
    app and set it to `https://hive-<your-name>.loophole.site/api/github/setup-callback`
 
+### Local OIDC Testing
+
+The `docker-compose.dev.yml` files includes a mock OIDC server that can be used for testing the OIDC
+login/logout flow locally. The server tuns on port `7043`.
+
+Please make sure to set the `AUTH_ORGANIZATION_OIDC` environment variables for the `server` and
+`app` to `"1"`.
+
+You can use the following values for connecting an integration to an OIDC provider.
+
+```
+# Token Endpoint
+http://localhost:7043/connect/token
+# User Info Endpoint
+http://localhost:7043/connect/userinfo
+# Authorization Endpoint
+http://localhost:7043/connect/authorize
+# Client ID
+implicit-mock-client
+# Client Secret
+client-credentials-mock-client-secret
+```
+
+For login use the following credentials.
+
+```
+# Username
+test-user
+# Password
+password
+```
+
 ### Run Hive
 
 1. Click on Start Hive in the bottom bar of VSCode

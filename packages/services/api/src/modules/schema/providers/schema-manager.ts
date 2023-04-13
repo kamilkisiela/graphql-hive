@@ -112,9 +112,14 @@ export class SchemaManager {
   async getSchemasOfPreviousVersion(
     selector: {
       version: string;
+      onlyComposable: boolean;
     } & TargetSelector,
   ) {
-    this.logger.debug('Fetching schemas from the previous version (selector=%o)', selector);
+    this.logger.debug(
+      'Fetching schemas from the previous version (onlyComposable=%s, selector=%o)',
+      selector.onlyComposable,
+      selector,
+    );
     await this.authManager.ensureTargetAccess({
       ...selector,
       scope: TargetAccessScope.REGISTRY_READ,
@@ -122,7 +127,11 @@ export class SchemaManager {
     return this.storage.getSchemasOfPreviousVersion(selector);
   }
 
-  async getLatestSchemas(selector: TargetSelector) {
+  async getLatestSchemas(
+    selector: TargetSelector & {
+      onlyComposable?: boolean;
+    },
+  ) {
     this.logger.debug('Fetching latest schemas (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
       ...selector,
