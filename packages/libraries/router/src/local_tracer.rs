@@ -29,7 +29,7 @@ impl LocalTracer {
     pub fn trace(message: &str) {
         tracing::subscriber::with_default(Self::get_subscriber(), || tracing::trace!(message));
     }
-    fn error(message: &str) {
+    pub fn error(message: &str) {
         tracing::subscriber::with_default(Self::get_subscriber(), || tracing::error!(message));
     }
 }

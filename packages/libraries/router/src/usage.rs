@@ -1,4 +1,5 @@
 use crate::agent::{ExecutionReport, UsageAgent};
+use crate::local_tracer::LocalTracer;
 use apollo_router::layers::ServiceBuilderExt;
 use apollo_router::plugin::Plugin;
 use apollo_router::plugin::PluginInit;
@@ -151,7 +152,7 @@ impl Plugin for UsagePlugin {
     type Config = Config;
 
     async fn new(init: PluginInit<Config>) -> Result<Self, BoxError> {
-        tracing::info!("Starting GraphQL Hive Usage plugin");
+        LocalTracer::info("Starting GraphQL Hive Usage plugin");
         let token =
             env::var("HIVE_TOKEN").map_err(|_| "environment variable HIVE_TOKEN not found")?;
         let endpoint = env::var("HIVE_ENDPOINT");
@@ -197,7 +198,7 @@ impl Plugin for UsagePlugin {
                         let result: supergraph::ServiceResult = fut.await;
 
                         if operation_context.dropped {
-                            tracing::info!("Dropping operation (phase: SAMPLING): {}", operation_context.operation_name.clone().or_else(|| Some("anonymous".to_string())).unwrap());
+                            LocalTracer::info(&format!("Dropping operation (phase: SAMPLING): {}", operation_context.operation_name.clone().or_else(|| Some("anonymous".to_string())).unwrap()));
                             return result;
                         }
 
@@ -272,7 +273,7 @@ impl Plugin for UsagePlugin {
 
 impl Drop for UsagePlugin {
     fn drop(&mut self) {
-        tracing::info!("`UsagePlugin` has been dropped!");
+        LocalTracer::info("`UsagePlugin` has been dropped!");
         // Shut down the stuff.
         // if let Some(sender) = self.shutdown_signal.take() {
         //     // Currently, this does nothing, as it sends a graceful process termination, but no receiver is setup to handle it
