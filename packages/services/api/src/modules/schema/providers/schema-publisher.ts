@@ -336,7 +336,13 @@ export class SchemaPublisher {
     signal: AbortSignal,
     span?: Span | undefined,
   ): Promise<PublishResult> {
-    this.logger.debug('Schema publication (checksum=%s)', input.checksum);
+    this.logger.debug(
+      'Schema publication (checksum=%s, organization=%s, project=%s, target=%s)',
+      input.checksum,
+      input.organization,
+      input.project,
+      input.target,
+    );
     return this.idempotentRunner.run({
       identifier: `schema:publish:${input.checksum}`,
       executor: async () => {
