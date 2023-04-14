@@ -22,7 +22,7 @@
     "@sentry/integrations": "7.44.2",
     "@sentry/node": "7.44.2",
     "@sentry/tracing": "7.44.2",
-    "@trpc/server": "10.19.1",
+    "@trpc/server": "10.20.0",
     "@whatwg-node/fetch": "0.8.4",
     "@whatwg-node/server": "0.7.5",
     "dotenv": "16.0.3",
