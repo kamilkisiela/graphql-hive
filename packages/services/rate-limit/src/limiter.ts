@@ -180,8 +180,8 @@ export function createRateLimiter(config: {
 
   return {
     logger,
-    readiness() {
-      return initialized;
+    async readiness() {
+      return initialized && (await (await postgres$).isReady());
     },
     getRetention(targetId: string) {
       const orgId = targetIdToOrgLookup.get(targetId);

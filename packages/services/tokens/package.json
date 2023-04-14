@@ -12,7 +12,7 @@
   "dependencies": {
     "@sentry/node": "7.44.2",
     "@sentry/tracing": "7.44.2",
-    "@trpc/server": "10.18.0",
+    "@trpc/server": "10.20.0",
     "dotenv": "16.0.3",
     "ioredis": "5.3.1",
     "ms": "2.1.3",

@@ -14,6 +14,7 @@ export interface StorageItem {
 
 export interface Storage {
   destroy(): Promise<void>;
+  isReady(): Promise<boolean>;
   readTarget(targetId: string): Promise<StorageItem[]>;
   readToken(hashedToken: string): Promise<StorageItem | null>;
   writeToken(item: Omit<StorageItem, 'date' | 'lastUsedAt'>): Promise<StorageItem>;
@@ -44,6 +45,9 @@ export async function createStorage(
   return {
     destroy() {
       return db.destroy();
+    },
+    isReady() {
+      return db.isReady();
     },
     async readTarget(target) {
       const tokens = await db.getTokens({ target });

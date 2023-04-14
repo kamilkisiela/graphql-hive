@@ -274,7 +274,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         void reply.status(response.status);
 
         const textResponse = await response.text();
-        void reply.send(textResponse);
+        return reply.send(textResponse);
       },
     );
   };

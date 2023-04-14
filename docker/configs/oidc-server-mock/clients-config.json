@@ -1,0 +1,17 @@
+[
+  {
+    "ClientId": "implicit-mock-client",
+    "Description": "Client for implicit flow",
+    "AllowedGrantTypes": ["authorization_code"],
+    "AllowAccessTokensViaBrowser": true,
+    "RedirectUris": [
+      "http://localhost:3000/auth/callback/oidc",
+      "http://localhost:8080/auth/callback/oidc"
+    ],
+    "ClientSecrets": ["client-credentials-mock-client-secret"],
+    "AllowedScopes": ["openid", "profile", "email"],
+    "IdentityTokenLifetime": 3600,
+    "AccessTokenLifetime": 3600,
+    "RequirePkce": false
+  }
+]

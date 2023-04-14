@@ -53,6 +53,7 @@ import {
 } from './db';
 import type { Slonik } from './shared';
 
+export { ConnectionError } from 'slonik';
 export { createConnectionString } from './db/utils';
 export { createTokenStorage } from './tokens';
 export type { tokens } from './db/types';
@@ -175,6 +176,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         reportingOperations: organization.get_started_reporting_operations,
         enablingUsageBasedBreakingChanges: organization.get_started_usage_breaking,
       },
+      featureFlags: decodeFeatureFlags(organization.feature_flags),
     };
   }
 
@@ -598,8 +600,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     destroy() {
       return pool.end();
     },
-    async ping() {
-      await pool.exists(sql`SELECT 1`);
+    async isReady() {
+      try {
+        await pool.exists(sql`SELECT 1`);
+        return true;
+      } catch {
+        return false;
+      }
     },
     async ensureUserExists({
       superTokensUserId,
@@ -1705,13 +1712,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         base_schema: version.base_schema,
       };
     },
-    async getLatestSchemas({ organization, project, target }) {
+    async getLatestSchemas({ organization, project, target, onlyComposable }) {
       const latest = await pool.maybeOne<Pick<schema_versions, 'id' | 'is_composable'>>(sql`
         SELECT sv.id, sv.is_composable
         FROM public.schema_versions as sv
         LEFT JOIN public.targets as t ON (t.id = sv.target_id)
         LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
-        WHERE t.id = ${target} AND t.project_id = ${project}
+        WHERE t.id = ${target} AND t.project_id = ${project} AND ${
+        onlyComposable ? sql`sv.is_composable IS TRUE` : true
+      }
         ORDER BY sv.created_at DESC
         LIMIT 1
       `);
@@ -1779,7 +1788,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return result.rows.map(transformSchema);
     },
-    async getSchemasOfPreviousVersion({ version, target }) {
+    async getSchemasOfPreviousVersion({ version, target, onlyComposable }) {
       const results = await pool.query<
         OverrideProp<schema_log, 'action', 'PUSH'> & Pick<projects, 'type'>
       >(
@@ -1790,7 +1799,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           WHERE svl.version_id = (
             SELECT sv.id FROM public.schema_versions as sv WHERE sv.created_at < (
               SELECT svi.created_at FROM public.schema_versions as svi WHERE svi.id = ${version}
-            ) AND sv.target_id = ${target} ORDER BY sv.created_at DESC LIMIT 1
+            ) AND sv.target_id = ${target} AND ${
+          onlyComposable ? sql`sv.is_composable IS TRUE` : true
+        } ORDER BY sv.created_at DESC LIMIT 1
           ) AND sl.action = 'PUSH'
           ORDER BY sl.created_at DESC
         `,
@@ -3091,6 +3102,24 @@ const decodeCDNAccessTokenRecord = (result: unknown): CDNAccessToken => {
     createdAt: rawRecord.created_at,
   };
 };
+
+const FeatureFlagsModel = zod
+  .object({
+    compareToPreviousComposableVersion: zod.boolean().default(false),
+  })
+  .optional()
+  .nullable()
+  .default({})
+  .transform(
+    val =>
+      val ?? {
+        compareToPreviousComposableVersion: false,
+      },
+  );
+
+function decodeFeatureFlags(column: unknown) {
+  return FeatureFlagsModel.parse(column);
+}
 
 /**
  * Calculate a 32 bit FNV-1a hash

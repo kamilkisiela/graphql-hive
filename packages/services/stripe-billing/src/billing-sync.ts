@@ -167,8 +167,8 @@ export function createStripeBilling(config: {
     postgres$,
     loadStripeData$,
     stripeApi,
-    readiness() {
-      return true;
+    async readiness() {
+      return await (await postgres$).isReady();
     },
     async start() {
       logger.info(

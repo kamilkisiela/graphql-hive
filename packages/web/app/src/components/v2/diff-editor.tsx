@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
+import { MonacoDiffEditor } from '@/components/schema-editor';
 import { Spinner } from '@/components/v2';
 import { usePrettify } from '@/lib/hooks';
-import { DiffEditor as MonacoDiffEditor } from '@monaco-editor/react';
 
 export const DiffEditor = ({ before, after }: { before: string; after: string }): ReactElement => {
   const sdlBefore = usePrettify(before);

@@ -1,7 +1,10 @@
 const { plugins, ...prettierConfig } = require('@theguild/prettier-config');
-
+/**
+ * @type {import('prettier').Config}
+ */
 module.exports = {
   ...prettierConfig,
+  importOrderParserPlugins: ['importAssertions', ...prettierConfig.importOrderParserPlugins],
   plugins: [
     require('prettier-plugin-sql'),
     // For sort CSS classes
