@@ -100,7 +100,7 @@ export DOCKER_TAG=":local"
 
 6. Compile a local Docker image by running: `docker buildx bake -f docker/docker.hcl build --load`
 7. Run the e2e environment, by running:
-   `docker compose -f ./docker/docker-compose.community.yml --env-file ./integration-tests/.env up -d --wait`
+   `docker compose -f ./docker/docker-compose.community.yml -f ./docker/docker-compose.end2end.yml --env-file ./integration-tests/.env up -d --wait`
 8. Run Cypress: `pnpm test:e2e`
 
 #### Running from Pre-Built Docker Image

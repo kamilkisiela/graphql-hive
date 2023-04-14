@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  oidc-server-mock:
+    container_name: oidc-server-mock
+    image: ghcr.io/soluto/oidc-server-mock:latest
+    ports:
+      - '7043:80'
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      SERVER_OPTIONS_INLINE: |
+        {
+          "AccessTokenJwtType": "JWT",
+          "Discovery": {
+            "ShowKeySet": true
+          },
+          "Authentication": {
+            "CookieSameSiteMode": "Lax",
+            "CheckSessionCookieSameSiteMode": "Lax"
+          }
+        }
+      LOGIN_OPTIONS_INLINE: |
+        {
+          "AllowRememberLogin": false
+        }
+      LOGOUT_OPTIONS_INLINE: |
+        {
+          "AutomaticRedirectAfterSignOut": true
+        }
+      USERS_CONFIGURATION_PATH: /tmp/config/users-config.json
+      CLIENTS_CONFIGURATION_PATH: /tmp/config/clients-config.json
+    volumes:
+      - ./configs/oidc-server-mock/clients-config.json:/tmp/config/clients-config.json:ro
+      - ./configs/oidc-server-mock/users-config.json:/tmp/config/users-config.json:ro
+    networks:
+      - 'stack'
+
+networks:
+  stack: {}

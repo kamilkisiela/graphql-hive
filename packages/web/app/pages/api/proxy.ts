@@ -4,7 +4,6 @@ import { env } from '@/env/backend';
 import { extractAccessTokenFromRequest } from '@/lib/api/extract-access-token-from-request';
 import { captureException, startTransaction } from '@sentry/nextjs';
 import type { Transaction } from '@sentry/types';
-import { fetch } from '@whatwg-node/fetch';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 
@@ -55,25 +54,10 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
         'graphql-client-name': 'Hive App',
         'x-use-proxy': '/api/proxy',
         'graphql-client-version': env.release,
-      } as Record<string, string>,
+      },
       method: 'GET',
-    });
-
-    res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
-
-    if (response.body) {
-      const reader = response.body.getReader();
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-          break;
-        }
-        res.write(Buffer.from(value));
-      }
-    }
-
-    return res.end();
+    } as any);
+    return res.send(await response.text());
   }
 
   const { transaction, finish: finishTransaction } = useTransaction(res);
@@ -112,41 +96,26 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
         accept: req.headers['accept'],
         'accept-encoding': req.headers['accept-encoding'],
         'x-request-id': requestId,
-        'X-API-Token': req.headers['x-api-token'],
+        'X-API-Token': req.headers['x-api-token'] ?? '',
         'sentry-trace': transaction.toTraceparent(),
         'graphql-client-name': 'Hive App',
         'graphql-client-version': env.release,
-      } as Record<string, string>,
+      },
       method: 'POST',
       body: JSON.stringify(req.body || {}),
-    });
+    } as any);
+
+    const xRequestId = response.headers.get('x-request-id');
+    if (xRequestId) {
+      res.setHeader('x-request-id', xRequestId);
+    }
+    const parsedData = await response.json();
 
     graphqlSpan.setHttpStatus(200);
     graphqlSpan.finish();
     finishTransaction();
 
-    const resHeaders = Object.fromEntries(response.headers.entries());
-
-    const xRequestId = response.headers.get('x-request-id');
-    if (xRequestId) {
-      resHeaders['x-request-id'] = xRequestId;
-    }
-
-    res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
-
-    if (response.body) {
-      const reader = response.body.getReader();
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) {
-          break;
-        }
-        res.write(Buffer.from(value));
-      }
-    }
-
-    return res.end();
+    res.status(200).json(parsedData);
   } catch (error) {
     console.error(error);
     captureException(error);
