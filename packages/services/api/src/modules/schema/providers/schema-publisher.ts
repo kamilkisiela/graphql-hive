@@ -342,6 +342,7 @@ export class SchemaPublisher {
       executor: async () => {
         const unlock = await this.storage.idMutex.lock(registryLockId(input.target), {
           signal,
+          logger: this.logger,
         });
         try {
           return await this.internalPublish(input);
@@ -421,6 +422,7 @@ export class SchemaPublisher {
       executor: async () => {
         const unlock = await this.storage.idMutex.lock(registryLockId(input.target), {
           signal,
+          logger: this.logger,
         });
         try {
           await this.authManager.ensureTargetAccess({

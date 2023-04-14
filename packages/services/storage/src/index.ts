@@ -2750,7 +2750,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     idMutex: {
-      async lock(id, { signal }) {
+      async lock(id, { signal, logger }) {
         return Promise.race([
           new Promise<never>((_, reject) => {
             const listener = () => {
@@ -2768,6 +2768,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             // postgres advisory locks uses bigints as lock keys,
             // we therefore hash the provided lock id and use the hash
             const idInt = hashFnv32a(id);
+
+            logger?.debug('Acquiring lock (id=%s, idInt=%d)', id, idInt);
 
             // wait if there's a lock in the process
             let lock;
@@ -2791,6 +2793,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             try {
               let i = 0;
               while (!advisoryLock) {
+                logger?.debug('Try advisory lock (id=%s, idInt=%d, attempt=%d)', id, idInt, i);
                 i++;
                 if (i > 30) {
                   // 30 seconds is already too much
@@ -2808,13 +2811,16 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 }
               }
             } catch (err) {
+              logger?.error('Error while trying advisory lock (id=%s, idInt=%d)', id, idInt, err);
               locks.delete(id);
               release();
               if (advisoryLock) {
                 lockConn.query(sql`select pg_advisory_unlock(${idInt})`).catch(err => {
                   // warn for now, we'll rethink if it happens to much
-                  console.warn(
-                    `Error while unlocking advisory lock ${idInt} with id ${id} after error`,
+                  logger?.warn(
+                    'Error while unlocking advisory lock (id=%s, idInt=%d)',
+                    id,
+                    idInt,
                     err,
                   );
                 });
@@ -2830,8 +2836,10 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 release();
                 lockConn.query(sql`select pg_advisory_unlock(${idInt})`).catch(err => {
                   // warn for now, we'll rethink if it happens to much
-                  console.warn(
-                    `Error while unlocking advisory lock ${idInt} with id ${id} after abort`,
+                  logger?.warn(
+                    'Error while unlocking advisory lock (id=%s, idInt=%d)',
+                    id,
+                    idInt,
                     err,
                   );
                 });
@@ -2839,7 +2847,10 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             };
             signal.addEventListener('abort', listener);
 
+            logger?.debug('Lock acquired (id=%s, idInt=%d)', id, idInt);
+
             return async function unlock() {
+              logger?.debug('Releasing lock (id=%s, idInt=%d)', id, idInt);
               signal.removeEventListener('abort', listener);
               if (locks.get(id)) {
                 locks.delete(id); // delete the lock first so that the while loop in lock can break

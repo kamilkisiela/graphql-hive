@@ -27,6 +27,7 @@ import type {
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
+import { Logger } from './logger';
 
 type Paginated<T> = T & {
   after?: string | null;
@@ -67,7 +68,7 @@ export interface IdMutex {
    */
   lock(
     id: string,
-    opts: { signal: AbortSignal },
+    opts: { signal: AbortSignal; logger?: Logger },
   ): Promise<
     // unlock
     () => Promise<void>
