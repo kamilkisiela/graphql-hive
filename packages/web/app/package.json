@@ -16,7 +16,7 @@
   "dependencies": {
     "@graphiql/toolkit": "0.8.3",
     "@graphql-tools/mock": "8.7.20",
-    "@headlessui/react": "1.7.13",
+    "@headlessui/react": "1.7.14",
     "@monaco-editor/react": "4.5.0",
     "@n1ru4l/react-time-ago": "1.1.0",
     "@radix-ui/react-accordion": "1.1.1",
