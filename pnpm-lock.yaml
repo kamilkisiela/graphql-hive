@@ -607,8 +607,8 @@ importers:
         specifier: 8.2.1
         version: 8.2.1
       '@types/lodash':
-        specifier: 4.14.192
-        version: 4.14.192
+        specifier: 4.14.194
+        version: 4.14.194
       '@types/ms':
         specifier: 0.7.31
         version: 0.7.31
@@ -7158,6 +7158,19 @@ packages:
       tslib: 2.5.0
       value-or-promise: 1.0.12
 
+  /@graphql-tools/executor@0.0.16(graphql@16.6.0):
+    resolution: {integrity: sha512-TGhvJPNaZbvhurLQtYBfedvNRuokvoPRC3vCjeHCe9AOUfb8Vn7Jvrpnys5R/wdCnXKsOpCm9QZt9OqNMfkByQ==}
+    peerDependencies:
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+    dependencies:
+      '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.6.0)
+      '@repeaterjs/repeater': 3.0.4
+      graphql: 16.6.0
+      tslib: 2.5.0
+      value-or-promise: 1.0.12
+    dev: false
+
   /@graphql-tools/executor@0.0.17(graphql@16.6.0):
     resolution: {integrity: sha512-DVKyMclsNY8ei14FUrR4jn24VHB3EuFldD8yGWrcJ8cudSh47sknznvXN6q0ffqDeAf0IlZSaBCHrOTBqA7OfQ==}
     peerDependencies:
@@ -11261,7 +11274,7 @@ packages:
       '@storybook/preview-api': 7.0.0-beta.54
       '@storybook/theming': 7.0.0-beta.54(react-dom@18.2.0)(react@18.2.0)
       '@storybook/types': 7.0.0-beta.54
-      '@types/lodash': 4.14.192
+      '@types/lodash': 4.14.194
       color-convert: 2.0.1
       dequal: 2.0.3
       lodash: 4.17.21
@@ -12937,8 +12950,8 @@ packages:
     resolution: {integrity: sha512-eHcVlLXP0c2FlMPm56ITode2AgLMSa6aJ05JTTbYbI+7EMkCEE5qk2E41d5g2lCVTqRe0GnnRFurmlCsDODrPw==}
     dev: true
 
-  /@types/lodash@4.14.192:
-    resolution: {integrity: sha512-km+Vyn3BYm5ytMO13k9KTp27O75rbQ0NFw+U//g+PX7VZyjCioXaRFisqSIJRECljcTv73G3i6BpglNGHgUQ5A==}
+  /@types/lodash@4.14.194:
+    resolution: {integrity: sha512-r22s9tAS7imvBt2lyHC9B8AGwWnXaYb1tY09oyLkXDs4vArpYJzw09nj8MLx5VfciBPGIb+ZwG0ssYnEPJxn/g==}
     dev: true
 
   /@types/long@4.0.2:
