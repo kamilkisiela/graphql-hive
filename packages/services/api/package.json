@@ -39,7 +39,7 @@
     "object-hash": "3.0.0",
     "param-case": "3.0.4",
     "prom-client": "14.2.0",
-    "supertokens-node": "13.4.0",
+    "supertokens-node": "13.4.1",
     "zod": "3.21.4"
   },
   "devDependencies": {
