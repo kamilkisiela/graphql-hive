@@ -70,7 +70,7 @@
     "react-select": "5.7.2",
     "react-string-replace": "1.1.0",
     "react-toastify": "9.1.2",
-    "react-virtualized-auto-sizer": "1.0.11",
+    "react-virtualized-auto-sizer": "1.0.14",
     "react-window": "1.8.8",
     "regenerator-runtime": "0.13.11",
     "snarkdown": "2.0.0",
