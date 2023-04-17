@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@slonik/migrator": "0.11.3",
-    "@whatwg-node/fetch": "0.8.4",
+    "@whatwg-node/fetch": "0.8.5",
     "bcryptjs": "2.4.3",
     "dotenv": "16.0.3",
     "got": "12.6.0",
