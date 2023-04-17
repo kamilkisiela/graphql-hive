@@ -4,14 +4,7 @@ import type {
   FastifyRequest,
   RouteHandlerMethod,
 } from 'fastify';
-import {
-  GraphQLError,
-  Kind,
-  OperationDefinitionNode,
-  print,
-  ValidationContext,
-  ValidationRule,
-} from 'graphql';
+import { GraphQLError, print, ValidationContext, ValidationRule } from 'graphql';
 import { createYoga, Plugin, useErrorHandler } from 'graphql-yoga';
 import hyperid from 'hyperid';
 import zod from 'zod';
@@ -22,7 +15,7 @@ import { useHive } from '@graphql-hive/client';
 import { Registry, RegistryContext } from '@hive/api';
 import { HiveError } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
-import { getCurrentHub, runWithAsyncContext } from '@sentry/node';
+import { runWithAsyncContext } from '@sentry/node';
 import { fetch } from '@whatwg-node/fetch';
 import { asyncStorage } from './async-storage';
 import type { HiveConfig } from './environment';
