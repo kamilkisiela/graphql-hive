@@ -200,8 +200,6 @@ module.exports = {
     },
   },
   plugins: [
-    // Utilities for visually truncating text after a fixed number of lines
-    require('@tailwindcss/line-clamp'),
     // Utilities and variants for styling Radix state
     require('tailwindcss-radix')(),
   ],
