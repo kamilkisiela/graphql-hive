@@ -8,33 +8,33 @@ patchedDependencies:
   '@theguild/buddy@0.1.0':
     hash: ryylgra5xglhidfoiaxehn22hq
     path: patches/@theguild__buddy@0.1.0.patch
-  '@slonik/migrator@0.11.3':
-    hash: yfpv2xzdmnkrtu2wvaktxf5mmq
-    path: patches/@slonik__migrator@0.11.3.patch
-  '@graphql-inspector/core@4.1.0-alpha-20230403113909-e09091f3':
-    hash: wf35oaq7brzyeva5aoncxac66a
-    path: patches/@graphql-inspector__core@4.1.0-alpha-20230403113909-e09091f3.patch
-  workers-loki-logger@0.1.14:
-    hash: mbfy52vkijnlipkvmtuix24jnq
-    path: patches/workers-loki-logger@0.1.14.patch
-  mjml-core@4.14.0:
-    hash: zxxsxbqejjmcwuzpigutzzq6wa
-    path: patches/mjml-core@4.14.0.patch
   '@oclif/core@1.23.0':
     hash: zhte2hlj7lfobytjpalcwwo474
     path: patches/@oclif__core@1.23.0.patch
+  '@graphql-inspector/core@4.1.0-alpha-20230403113909-e09091f3':
+    hash: wf35oaq7brzyeva5aoncxac66a
+    path: patches/@graphql-inspector__core@4.1.0-alpha-20230403113909-e09091f3.patch
+  mjml-core@4.14.0:
+    hash: zxxsxbqejjmcwuzpigutzzq6wa
+    path: patches/mjml-core@4.14.0.patch
   oclif@3.7.3:
     hash: rxmtqiusuyruv7tkwux5gvotbm
     path: patches/oclif@3.7.3.patch
-  '@apollo/federation@0.38.1':
-    hash: rjgakkkphrejw6qrtph4ar24zq
-    path: patches/@apollo__federation@0.38.1.patch
   bullmq@3.10.4:
     hash: kobtuuqaglbtaadx3jiqtahl3i
     path: patches/bullmq@3.10.4.patch
+  '@slonik/migrator@0.11.3':
+    hash: yfpv2xzdmnkrtu2wvaktxf5mmq
+    path: patches/@slonik__migrator@0.11.3.patch
   '@octokit/webhooks-methods@3.0.1':
     hash: ckboo4crezw7uvstxm24ozngtq
     path: patches/@octokit__webhooks-methods@3.0.1.patch
+  workers-loki-logger@0.1.14:
+    hash: mbfy52vkijnlipkvmtuix24jnq
+    path: patches/workers-loki-logger@0.1.14.patch
+  '@apollo/federation@0.38.1':
+    hash: rjgakkkphrejw6qrtph4ar24zq
+    path: patches/@apollo__federation@0.38.1.patch
 
 importers:
 
