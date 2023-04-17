@@ -42,6 +42,7 @@ export async function main() {
       enabled: true,
       environment: env.environment,
       dsn: env.sentry.dsn,
+      enableTracing: true,
       tracesSampleRate: 1,
       release: env.release,
       integrations: [

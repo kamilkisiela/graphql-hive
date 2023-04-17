@@ -234,6 +234,8 @@ if (config.sentry) {
   Sentry.init({
     serverName: 'app',
     enabled: true,
+    enableTracing: true,
+    tracesSampleRate: 1,
     dsn: config.sentry.dsn,
     release: config.release,
     environment: config.environment,
