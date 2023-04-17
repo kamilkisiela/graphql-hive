@@ -1,5 +1,7 @@
 import zod from 'zod';
-import { init, Integrations } from '@sentry/nextjs';
+import Sentry from '@sentry/nextjs';
+
+const { init, Integrations } = Sentry;
 
 // treat an empty string `''` as `undefined`
 const emptyString = <T extends zod.ZodType>(input: T) => {
