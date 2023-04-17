@@ -29,8 +29,8 @@ import type {
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
-import { Logger } from './logger';
 import { SerializableChange } from '../../schema/schema-change-from-meta';
+import { Logger } from './logger';
 
 type Paginated<T> = T & {
   after?: string | null;
