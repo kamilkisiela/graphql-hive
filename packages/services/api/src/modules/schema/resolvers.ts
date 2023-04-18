@@ -331,6 +331,18 @@ export const resolvers: SchemaModule.Resolvers = {
           })
         : null;
 
+      if (currentVersion.compositeSchemaSDL && previousVersion === null) {
+        return {
+          result: {
+            schemas: {
+              before: null,
+              current: currentVersion.compositeSchemaSDL,
+            },
+            changes: [],
+          },
+        } satisfies SchemaCompareResult;
+      }
+
       if (
         currentVersion.compositeSchemaSDL &&
         currentVersion.hasPersistedSchemaChanges &&

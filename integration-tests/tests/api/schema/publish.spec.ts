@@ -2875,3 +2875,243 @@ test('Composition Error (Federation 2) can be served from the database', async (
     await storage.destroy();
   }
 });
+
+test('Composition Network Failure (Federation 2)', async () => {
+  const storage = await createStorage(connectionString(), 1);
+  const dockerAddress = `composition_federation_2:3069`;
+
+  try {
+    const initialSchema = /* GraphQL */ `
+      type Product @key(fields: "id") {
+        id: ID!
+      }
+
+      type Query {
+        product(id: ID!): Product
+      }
+    `;
+
+    const newSchema = /* GraphQL */ `
+      type Product @key(fields: "id") {
+        id: ID!
+        title: String
+      }
+
+      type Query {
+        product(id: ID!): Product
+      }
+    `;
+
+    const newNewSchema = /* GraphQL */ `
+      type Product @key(fields: "id") {
+        id: ID!
+        title: String
+        url: String
+      }
+
+      type Query {
+        product(id: ID!): Product
+      }
+    `;
+
+    const serviceName = {
+      service: 'test',
+    };
+
+    const serviceUrl = { url: 'http://localhost:4000' };
+
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { createToken, target, project } = await createProject(ProjectType.Federation, {});
+    const readWriteToken = await createToken({
+      targetScopes: [
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.Settings,
+      ],
+      projectScopes: [ProjectAccessScope.Settings],
+      organizationScopes: [],
+    });
+
+    await enableExternalSchemaComposition(
+      {
+        endpoint: `http://${dockerAddress}/compose`,
+        // eslint-disable-next-line no-process-env
+        secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
+        project: project.cleanId,
+        organization: organization.cleanId,
+      },
+      readWriteToken.secret,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    const publishResult = await readWriteToken
+      .publishSchema({
+        author: 'gilad',
+        commit: '123',
+        sdl: initialSchema,
+        ...serviceName,
+        ...serviceUrl,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    const publishResult2 = await readWriteToken
+      .publishSchema({
+        author: 'gilad',
+        commit: '456',
+        sdl: newSchema,
+        ...serviceName,
+        ...serviceUrl,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    if (publishResult2.schemaPublish.__typename !== 'SchemaPublishSuccess') {
+      expect(publishResult2.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+      return;
+    }
+
+    await enableExternalSchemaComposition(
+      {
+        endpoint: `http://${dockerAddress}/no_compose`,
+        // eslint-disable-next-line no-process-env
+        secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
+        project: project.cleanId,
+        organization: organization.cleanId,
+      },
+      readWriteToken.secret,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    const publishResult3 = await readWriteToken
+      .publishSchema({
+        author: 'gilad',
+        commit: '456',
+        sdl: newNewSchema,
+        ...serviceName,
+        ...serviceUrl,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    if (publishResult3.schemaPublish.__typename !== 'SchemaPublishError') {
+      expect(publishResult3.schemaPublish.__typename).toBe('SchemaPublishError');
+      return;
+    }
+
+    const latestVersion = await storage.getLatestVersion({
+      target: target.id,
+      project: project.id,
+      organization: organization.id,
+    });
+
+    const result = await execute({
+      document: SchemaCompareToPreviousVersionQuery,
+      variables: {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        target: target.cleanId,
+        version: latestVersion.id,
+      },
+      authToken: ownerToken,
+    }).then(res => res.expectNoGraphQLErrors());
+
+    expect(result).toMatchInlineSnapshot(`
+      {
+        schemaCompareToPrevious: {
+          changes: {
+            nodes: [
+              {
+                criticality: Safe,
+                message: Field 'title' was added to object type 'Product',
+                path: [
+                  Product,
+                  title,
+                ],
+              },
+            ],
+            total: 1,
+          },
+          diff: {
+            after: directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
+
+      directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+      directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boolean! = false, resolvable: Boolean! = true) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+
+      directive @join__field(graph: join__Graph!, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+      directive @join__implements(graph: join__Graph!, interface: String!) repeatable on OBJECT | INTERFACE
+
+      enum link__Purpose {
+        """
+        \`SECURITY\` features provide metadata necessary to securely resolve fields.
+        """
+        SECURITY
+
+        """
+        \`EXECUTION\` features provide metadata necessary for operation execution.
+        """
+        EXECUTION
+      }
+
+      scalar link__Import
+
+      enum join__Graph {
+        TEST
+      }
+
+      scalar join__FieldSet
+
+      type Product {
+        id: ID!
+        title: String
+      }
+
+      type Query {
+        product(id: ID!): Product
+      },
+            before: directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
+
+      directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+      directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boolean! = false, resolvable: Boolean! = true) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+
+      directive @join__field(graph: join__Graph!, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+      directive @join__implements(graph: join__Graph!, interface: String!) repeatable on OBJECT | INTERFACE
+
+      enum link__Purpose {
+        """
+        \`SECURITY\` features provide metadata necessary to securely resolve fields.
+        """
+        SECURITY
+
+        """
+        \`EXECUTION\` features provide metadata necessary for operation execution.
+        """
+        EXECUTION
+      }
+
+      scalar link__Import
+
+      enum join__Graph {
+        TEST
+      }
+
+      scalar join__FieldSet
+
+      type Product {
+        id: ID!
+      }
+
+      type Query {
+        product(id: ID!): Product
+      },
+          },
+          initial: false,
+        },
+      }
+    `);
+  } finally {
+    await storage.destroy();
+  }
+});
