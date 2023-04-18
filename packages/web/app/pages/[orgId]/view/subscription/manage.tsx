@@ -247,15 +247,7 @@ function Inner(props: {
 
           <div className="flex flex-col">
             <div>
-              <PlanSummary plan={selectedPlan} operationsRateLimit={operationsRateLimit}>
-                {selectedPlan.planType === BillingPlanType.Pro && (
-                  <Stat>
-                    <Stat.Label>Free Trial</Stat.Label>
-                    <Stat.Number>30</Stat.Number>
-                    <Stat.HelpText>days</Stat.HelpText>
-                  </Stat>
-                )}
-              </PlanSummary>
+              <PlanSummary plan={selectedPlan} operationsRateLimit={operationsRateLimit} />
             </div>
 
             {plan === BillingPlanType.Pro && (

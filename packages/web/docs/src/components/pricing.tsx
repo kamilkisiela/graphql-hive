@@ -100,7 +100,6 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
                 90 days of usage data retention
               </Tooltip>,
             ]}
-            footer={<div className="mb-2 text-sm font-bold">Free 30 days trial period</div>}
           />
           <Plan
             name="Enterprise"

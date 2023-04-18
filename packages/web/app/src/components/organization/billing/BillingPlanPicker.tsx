@@ -29,11 +29,6 @@ const planCollection: {
       '$10 per 1M operations',
       '90 days of usage data retention',
     ],
-    footer: (
-      <>
-        <div className="mb-2 text-sm font-bold">Free 30 days trial period</div>
-      </>
-    ),
   },
   [BillingPlanType.Enterprise]: {
     description: 'Custom plan for large companies',

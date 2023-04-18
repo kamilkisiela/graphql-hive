@@ -305,7 +305,6 @@ export const stripeBillingApiRouter = t.router({
         coupon: input.couponCode || undefined,
         customer: customerId,
         default_payment_method: paymentMethodId,
-        trial_end: Math.floor(addDays(new Date(), 30).getTime() / 1000),
         backdate_start_date: Math.floor(startOfMonth(new Date()).getTime() / 1000),
         items: [
           {

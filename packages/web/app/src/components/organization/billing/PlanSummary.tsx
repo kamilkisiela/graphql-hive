@@ -63,7 +63,7 @@ function PriceEstimationTable(props: {
         )}
       </TBody>
       <TFoot>
-        <Th>Total monthly (after trial ends)</Th>
+        <Th>Total monthly</Th>
         <Th align="right">{total === 0 ? 'FREE' : CurrencyFormatter.format(total)}</Th>
       </TFoot>
     </Table>
@@ -85,7 +85,7 @@ export function PlanSummary({
 }: {
   plan: FragmentType<typeof PlanSummary_PlanFragment>;
   operationsRateLimit: number;
-  children: ReactNode;
+  children?: ReactNode;
 }): ReactElement {
   const plan = useFragment(PlanSummary_PlanFragment, props.plan);
   if (plan.planType === BillingPlanType.Enterprise) {
