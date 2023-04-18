@@ -11,7 +11,7 @@
     "@trpc/server": "10.20.0"
   },
   "dependencies": {
-    "@whatwg-node/fetch": "0.8.4",
+    "@whatwg-node/fetch": "0.8.5",
     "fastify": "3.29.5",
     "fastify-cors": "6.0.2",
     "fastify-plugin": "3.0.1",
