@@ -117,8 +117,7 @@
       "@apollo/federation@0.38.1": "patches/@apollo__federation@0.38.1.patch",
       "@octokit/webhooks-methods@3.0.1": "patches/@octokit__webhooks-methods@3.0.1.patch",
       "bullmq@3.10.4": "patches/bullmq@3.10.4.patch",
-      "workers-loki-logger@0.1.14": "patches/workers-loki-logger@0.1.14.patch",
-      "@urql/core@4.0.3": "patches/@urql__core@4.0.3.patch"
+      "workers-loki-logger@0.1.14": "patches/workers-loki-logger@0.1.14.patch"
     }
   }
 }

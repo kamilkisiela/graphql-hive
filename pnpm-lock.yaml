@@ -23,9 +23,6 @@ patchedDependencies:
   '@theguild/buddy@0.1.0':
     hash: ryylgra5xglhidfoiaxehn22hq
     path: patches/@theguild__buddy@0.1.0.patch
-  '@urql/core@4.0.3':
-    hash: 26log362e2ucehte43fsiqzcnq
-    path: patches/@urql__core@4.0.3.patch
   bullmq@3.10.4:
     hash: kobtuuqaglbtaadx3jiqtahl3i
     path: patches/bullmq@3.10.4.patch
@@ -1477,14 +1474,14 @@ importers:
         specifier: 10.19.1
         version: 10.19.1
       '@urql/core':
-        specifier: 4.0.3
-        version: 4.0.3(patch_hash=26log362e2ucehte43fsiqzcnq)(graphql@16.6.0)
+        specifier: 4.0.4
+        version: 4.0.4(graphql@16.6.0)
       '@urql/devtools':
         specifier: 2.0.3
-        version: 2.0.3(@urql/core@4.0.3)(graphql@16.6.0)
+        version: 2.0.3(@urql/core@4.0.4)(graphql@16.6.0)
       '@urql/exchange-graphcache':
-        specifier: 5.0.9
-        version: 5.0.9(graphql@16.6.0)
+        specifier: 6.0.1
+        version: 6.0.1(graphql@16.6.0)
       '@whatwg-node/fetch':
         specifier: 0.8.4
         version: 0.8.4
@@ -13393,35 +13390,34 @@ packages:
       eslint-visitor-keys: 3.4.0
     dev: true
 
-  /@urql/core@4.0.3(patch_hash=26log362e2ucehte43fsiqzcnq)(graphql@16.6.0):
-    resolution: {integrity: sha512-13figZkXYD8QHTCY/MTWnzbK958I6Owx6sOm1+tZo5aR9HEnOKFVI0hJZZkzW/JIdiGnXW//YyTrp4ce+LWtbg==}
+  /@urql/core@4.0.4(graphql@16.6.0):
+    resolution: {integrity: sha512-r1rB/VMVpCnfnMTTzCAs+HY+UqOHUgpZ+GimLtU4DCTP3C78DK+m4qr36M7KKleggrKgcpcC1TE8eFEVcKzfSQ==}
     dependencies:
       '@0no-co/graphql.web': 1.0.0(graphql@16.6.0)
       wonka: 6.3.1
     transitivePeerDependencies:
       - graphql
     dev: false
-    patched: true
 
-  /@urql/devtools@2.0.3(@urql/core@4.0.3)(graphql@16.6.0):
+  /@urql/devtools@2.0.3(@urql/core@4.0.4)(graphql@16.6.0):
     resolution: {integrity: sha512-TktPLiBS9LcBPHD6qcnb8wqOVcg3Bx0iCtvQ80uPpfofwwBGJmqnQTjUdEFU6kwaLOFZULQ9+Uo4831G823mQw==}
     peerDependencies:
       '@urql/core': '>= 1.14.0'
       graphql: '>= 0.11.0'
     dependencies:
-      '@urql/core': 4.0.3(patch_hash=26log362e2ucehte43fsiqzcnq)(graphql@16.6.0)
+      '@urql/core': 4.0.4(graphql@16.6.0)
       graphql: 16.6.0
       wonka: 6.3.1
     dev: false
 
-  /@urql/exchange-graphcache@5.0.9(graphql@16.6.0):
-    resolution: {integrity: sha512-GYhN4YDL+/alF6ci1OFOaL0Ze0GinmuYWrjQjpjl8kP/9ZbXY2LLN/3ZlRG9cCks1nxyea/9h4IS0mk5LS57lA==}
-    peerDependencies:
-      graphql: ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+  /@urql/exchange-graphcache@6.0.1(graphql@16.6.0):
+    resolution: {integrity: sha512-nJCQwem45p1nspbRrZz2oFjyHW6tufT6LQ1SvqE3CN1pLq3v72leZ6nfRMv4RCoh9IxFnv9hr0fn8DQSmQaB4w==}
     dependencies:
-      '@urql/core': 4.0.3(patch_hash=26log362e2ucehte43fsiqzcnq)(graphql@16.6.0)
-      graphql: 16.6.0
+      '@0no-co/graphql.web': 1.0.0(graphql@16.6.0)
+      '@urql/core': 4.0.4(graphql@16.6.0)
       wonka: 6.3.1
+    transitivePeerDependencies:
+      - graphql
     dev: false
 
   /@vercel/ncc@0.36.1:
@@ -29350,7 +29346,7 @@ packages:
     peerDependencies:
       react: '>= 16.8.0'
     dependencies:
-      '@urql/core': 4.0.3(patch_hash=26log362e2ucehte43fsiqzcnq)(graphql@16.6.0)
+      '@urql/core': 4.0.4(graphql@16.6.0)
       react: 18.2.0
       wonka: 6.3.1
     transitivePeerDependencies:
