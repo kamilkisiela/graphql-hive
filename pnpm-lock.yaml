@@ -573,8 +573,8 @@ importers:
         specifier: 14.2.0
         version: 14.2.0
       supertokens-node:
-        specifier: 13.4.1
-        version: 13.4.1
+        specifier: 13.4.2
+        version: 13.4.2
       zod:
         specifier: 3.21.4
         version: 3.21.4
@@ -1543,8 +1543,8 @@ importers:
         specifier: 0.0.4
         version: 0.0.4
       supertokens-node:
-        specifier: 13.4.1
-        version: 13.4.1
+        specifier: 13.4.2
+        version: 13.4.2
       supertokens-web-js:
         specifier: 0.5.0
         version: 0.5.0
@@ -29181,8 +29181,8 @@ packages:
     resolution: {integrity: sha512-r0JFBjkMIdep3Lbk3JA+MpnpuOtw4RSyrlRAbrzMcxwiYco3GFWl/daimQZ5b1forOiUODpOlXbSOljP/oyurg==}
     dev: false
 
-  /supertokens-node@13.4.1:
-    resolution: {integrity: sha512-2s/+/syJLs6FYjs8kBnIKtoyU0ndQ/T4qd0JfvCsNNYLAGWhJn+OCTO/bMSaeyCySZt57qsWf9/sK/3gNKp3pg==}
+  /supertokens-node@13.4.2:
+    resolution: {integrity: sha512-JMxQxto24g78OvHxbcTGWMF43MIX6MoWYI9cMgYTZcQMycUQH4pvGZvO+kyDSY6zeCISzQT6wHcjKzYYJHVRYA==}
     dependencies:
       axios: 0.21.4(debug@4.3.4)
       body-parser: 1.20.1
