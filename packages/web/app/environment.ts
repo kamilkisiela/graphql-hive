@@ -1,5 +1,5 @@
 import zod from 'zod';
-import * as Sentry from '@sentry/nextjs';
+import Sentry from '@sentry/nextjs';
 
 console.log('🌲 Loading environment variables...');
 
