@@ -391,17 +391,19 @@ test.concurrent('service url change is persisted and can be fetched via api', as
     writeToken.secret,
   ).then(r => r.expectNoGraphQLErrors());
 
+  const sdl = /* GraphQL */ `
+    type Query {
+      products: [Product]
+    }
+    type Product @key(fields: "id") {
+      id: ID!
+    }
+  `;
+
   let publishProductsResult = await writeToken
     .publishSchema({
       url: 'https://api.com/products',
-      sdl: /* GraphQL */ `
-        type Query {
-          products: [Product]
-        }
-        type Product @key(fields: "id") {
-          id: ID!
-        }
-      `,
+      sdl,
       service: 'foo',
     })
     .then(r => r.expectNoGraphQLErrors());
@@ -411,22 +413,12 @@ test.concurrent('service url change is persisted and can be fetched via api', as
   publishProductsResult = await writeToken
     .publishSchema({
       url: 'https://api.com/products-new',
-      sdl: /* GraphQL */ `
-        type Query {
-          products: [Product]
-        }
-        type Product @key(fields: "id") {
-          id: ID!
-        }
-      `,
+      sdl,
       service: 'foo',
     })
     .then(r => r.expectNoGraphQLErrors());
 
-  if (publishProductsResult.schemaPublish.__typename !== 'SchemaPublishSuccess') {
-    expect(publishProductsResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
-    return;
-  }
+  expect(publishProductsResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   const result = await writeToken.fetchLatestValidSchema();
   const versionId = result.latestValidVersion?.id;
