@@ -1,7 +1,18 @@
 import zod from 'zod';
 import * as Sentry from '@sentry/nextjs';
 
-const { init, Integrations } = Sentry;
+// Weird hacky way of getting the Sentry.Integrations object
+// When the nextjs config is loaded by Next CLI Sentry has `Integrations` property.
+// When nextjs starts and the `environment.js` is loaded, the Sentry object doesn't have the `Integrations` property, it' under `Sentry.default` property.
+// Dealing with esm/cjs/default exports is a pain, we all feel that pain...
+function getSentryIntegrations() {
+  if ('default' in Sentry) {
+    const sentry: typeof Sentry = (Sentry as any).default;
+    return sentry.Integrations;
+  }
+
+  return Sentry.Integrations;
+}
 
 // treat an empty string `''` as `undefined`
 const emptyString = <T extends zod.ZodType>(input: T) => {
@@ -232,7 +243,7 @@ declare global {
 globalThis['__backend_env'] = config;
 
 // TODO: I don't like this here, but it seems like it makes most sense here :)
-init({
+Sentry.init({
   serverName: 'app',
   enabled: !!config.sentry,
   enableTracing: true,
@@ -241,7 +252,8 @@ init({
   release: config.release,
   environment: config.environment,
   integrations: [
-    new Integrations.Http({
+    // HTTP integration is only available on the server
+    new (getSentryIntegrations().Http)({
       tracing: true,
     }),
   ],

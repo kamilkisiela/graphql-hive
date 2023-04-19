@@ -5,7 +5,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "bob runify --single",
+    "build": "tsx ../../../scripts/runify.ts",
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts",
     "postbuild": "copyfiles -f \"node_modules/bullmq/dist/esm/commands/*.lua\" dist && copyfiles -f \"node_modules/bullmq/dist/esm/commands/includes/*.lua\" dist/includes",
     "typecheck": "tsc --noEmit"
@@ -25,13 +25,5 @@
     "copyfiles": "2.4.1",
     "pino-pretty": "10.0.0",
     "tslib": "2.5.0"
-  },
-  "buildOptions": {
-    "runify": true,
-    "tsup": true,
-    "tags": [
-      "backend"
-    ],
-    "banner": "../../../scripts/banner.js"
   }
 }

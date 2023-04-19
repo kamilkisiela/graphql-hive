@@ -11,7 +11,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "build": "bob runify --single",
+    "build": "tsx ../../../scripts/runify.ts",
     "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts"
   },
   "dependencies": {
