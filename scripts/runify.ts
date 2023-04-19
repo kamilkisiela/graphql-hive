@@ -9,8 +9,6 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 const requireShim = fs.readFileSync(normalize(join(__dirname, './banner.js')), 'utf-8');
 
-export const distDir = 'dist';
-
 interface BuildOptions {
   external?: string[];
   next?: {
@@ -120,6 +118,8 @@ async function buildWithNext(cwd: string, additionalRequire: string | null) {
             hostname: '0.0.0.0',
             port: parseInt(process.env.PORT),
             conf: {},
+            isDev: false,
+            useWorkers: false,
           }).catch((err)=>{
             console.error(err);
             process.exit(1);
