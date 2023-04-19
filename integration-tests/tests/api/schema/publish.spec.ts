@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import { createPool, sql } from 'slonik';
 import { graphql } from 'testkit/gql';
 import { execute } from 'testkit/graphql';
 
@@ -600,24 +601,24 @@ describe.each`
   });
 });
 
-const {
-  POSTGRES_USER = 'postgres',
-  POSTGRES_PASSWORD = 'postgres',
-  POSTGRES_HOST = 'localhost',
-  POSTGRES_PORT = 5432,
-  POSTGRES_DB = 'registry',
-  POSTGRES_SSL = null,
-  POSTGRES_CONNECTION_STRING = null,
-} = process.env;
-
-function connectionString(dbName = POSTGRES_DB) {
+function connectionString() {
+  const {
+    POSTGRES_USER = 'postgres',
+    POSTGRES_PASSWORD = 'postgres',
+    POSTGRES_HOST = 'localhost',
+    POSTGRES_PORT = 5432,
+    POSTGRES_DB = 'registry',
+    POSTGRES_SSL = null,
+    POSTGRES_CONNECTION_STRING = null,
+  } = process.env;
   return (
     POSTGRES_CONNECTION_STRING ||
-    `postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${dbName}${
+    `postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}${
       POSTGRES_SSL ? '?sslmode=require' : '?sslmode=disable'
     }`
   );
 }
+
 type Awaited<T> = T extends PromiseLike<infer U> ? U : T;
 
 describe('schema publishing changes are persisted', () => {
@@ -3115,3 +3116,352 @@ test('Composition Network Failure (Federation 2)', async () => {
     await storage.destroy();
   }
 });
+
+test.concurrent(
+  'service url change is persisted and can be fetched via api',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createToken } = await createProject(ProjectType.Federation);
+
+    // Create a token with write rights
+    const writeToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [ProjectAccessScope.Settings, ProjectAccessScope.Read],
+      organizationScopes: [],
+    });
+
+    const sdl = /* GraphQL */ `
+      type Query {
+        products: [Product]
+      }
+      type Product @key(fields: "id") {
+        id: ID!
+      }
+    `;
+
+    let publishProductsResult = await writeToken
+      .publishSchema({
+        url: 'https://api.com/products',
+        sdl,
+        service: 'foo',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(publishProductsResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    publishProductsResult = await writeToken
+      .publishSchema({
+        url: 'https://api.com/products-new',
+        sdl,
+        service: 'foo',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(publishProductsResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    const result = await writeToken.fetchLatestValidSchema();
+    const versionId = result.latestValidVersion?.id;
+
+    if (!versionId) {
+      expect(versionId).toBeInstanceOf(String);
+      return;
+    }
+
+    const compareResult = await writeToken.compareToPreviousVersion(versionId);
+
+    expect(compareResult.schemaCompareToPrevious).toMatchInlineSnapshot(`
+    {
+      changes: {
+        nodes: [
+          {
+            criticality: Dangerous,
+            message: [foo] New service url: 'https://api.com/products-new' (previously: 'https://api.com/products'),
+          },
+        ],
+        total: 1,
+      },
+      initial: false,
+    }
+  `);
+  },
+);
+
+test.concurrent(
+  'service url change is persisted and can be fetched via api (in combination with other change)',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createToken } = await createProject(ProjectType.Federation);
+
+    // Create a token with write rights
+    const writeToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [ProjectAccessScope.Settings, ProjectAccessScope.Read],
+      organizationScopes: [],
+    });
+
+    let publishProductsResult = await writeToken
+      .publishSchema({
+        url: 'https://api.com/products',
+        sdl: /* GraphQL */ `
+          type Query {
+            products: [Product]
+          }
+          type Product @key(fields: "id") {
+            id: ID!
+          }
+        `,
+        service: 'foo',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(publishProductsResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    publishProductsResult = await writeToken
+      .publishSchema({
+        url: 'https://api.com/products-new',
+        sdl: /* GraphQL */ `
+          type Query {
+            products: [Product]
+          }
+          type Product @key(fields: "id") {
+            id: ID!
+            name: String!
+          }
+        `,
+        service: 'foo',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(publishProductsResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    const result = await writeToken.fetchLatestValidSchema();
+    const versionId = result.latestValidVersion?.id;
+
+    if (!versionId) {
+      expect(versionId).toBeInstanceOf(String);
+      return;
+    }
+
+    const compareResult = await writeToken.compareToPreviousVersion(versionId);
+
+    expect(compareResult.schemaCompareToPrevious).toMatchInlineSnapshot(`
+      {
+        changes: {
+          nodes: [
+            {
+              criticality: Safe,
+              message: Field 'name' was added to object type 'Product',
+            },
+            {
+              criticality: Dangerous,
+              message: [foo] New service url: 'https://api.com/products-new' (previously: 'https://api.com/products'),
+            },
+          ],
+          total: 2,
+        },
+        initial: false,
+      }
+    `);
+  },
+);
+
+const insertLegacyVersion = async (
+  pool: Awaited<ReturnType<typeof createPool>>,
+  args: {
+    sdl: string;
+    projectId: string;
+    targetId: string;
+    serviceUrl: string;
+  },
+) => {
+  const logId = await pool.oneFirst<string>(sql`
+        INSERT INTO public.schema_log
+          (
+            author,
+            service_name,
+            service_url,
+            commit,
+            sdl,
+            project_id,
+            target_id,
+            metadata,
+            action
+          )
+        VALUES
+          (
+            ${'Laurin did it again'},
+            lower(${'foo'}),
+            ${args.serviceUrl}::text,
+            ${'42069'}::text,
+            ${args.sdl}::text,
+            ${args.projectId},
+            ${args.targetId},
+            ${null},
+            'PUSH'
+          )
+        RETURNING id
+      `);
+
+  const versionId = await pool.oneFirst<string>(sql`
+        INSERT INTO public.schema_versions
+          (
+            is_composable,
+            target_id,
+            action_id
+          )
+        VALUES
+          (
+            ${true},
+            ${args.targetId},
+            ${logId}
+          )
+        RETURNING "id"
+      `);
+
+  await pool.query(sql`
+        INSERT INTO
+          public.schema_version_to_log
+          (version_id, action_id)
+        VALUES
+          (${versionId}, ${logId})
+      `);
+
+  return versionId;
+};
+
+test.concurrent(
+  'service url change from legacy to new version is displayed correctly',
+  async ({ expect }) => {
+    let pool: Awaited<ReturnType<typeof createPool>> | undefined;
+    try {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { project, target, createToken } = await createProject(ProjectType.Federation);
+
+      // Create a token with write rights
+      const writeToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+        projectScopes: [ProjectAccessScope.Settings, ProjectAccessScope.Read],
+        organizationScopes: [],
+      });
+
+      // We need to seed a legacy entry in the database
+
+      const conn = connectionString();
+      pool = await createPool(conn);
+
+      const sdl = 'type Query { ping: String! }';
+
+      await insertLegacyVersion(pool, {
+        projectId: project.id,
+        targetId: target.id,
+        sdl,
+        serviceUrl: 'https://api.com/products',
+      });
+
+      const publishProductsResult = await writeToken
+        .publishSchema({
+          url: 'https://api.com/nah',
+          sdl,
+          service: 'foo',
+        })
+        .then(r => r.expectNoGraphQLErrors());
+
+      expect(publishProductsResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+      const newVersionId = (await writeToken.fetchLatestValidSchema())?.latestValidVersion?.id;
+
+      if (!newVersionId) {
+        expect(newVersionId).toBeInstanceOf(String);
+        return;
+      }
+
+      const compareResult = await writeToken.compareToPreviousVersion(newVersionId);
+
+      expect(compareResult.schemaCompareToPrevious).toMatchInlineSnapshot(`
+        {
+          changes: {
+            nodes: [
+              {
+                criticality: Dangerous,
+                message: [foo] New service url: 'https://api.com/nah' (previously: 'https://api.com/products'),
+              },
+            ],
+            total: 1,
+          },
+          initial: false,
+        }
+      `);
+    } finally {
+      await pool?.end();
+    }
+  },
+);
+
+test.concurrent(
+  'service url change from legacy to legacy version is displayed correctly',
+  async ({ expect }) => {
+    let pool: Awaited<ReturnType<typeof createPool>> | undefined;
+    try {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { project, target, createToken } = await createProject(ProjectType.Federation);
+
+      // Create a token with write rights
+      const writeToken = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+        projectScopes: [ProjectAccessScope.Settings, ProjectAccessScope.Read],
+        organizationScopes: [],
+      });
+
+      // We need to seed a legacy entry in the database
+
+      const conn = connectionString();
+      pool = await createPool(conn);
+
+      const sdl = 'type Query { ping: String! }';
+
+      await insertLegacyVersion(pool, {
+        projectId: project.id,
+        targetId: target.id,
+        sdl,
+        serviceUrl: 'https://api.com/products',
+      });
+
+      await insertLegacyVersion(pool, {
+        projectId: project.id,
+        targetId: target.id,
+        sdl,
+        serviceUrl: 'https://api.com/nah',
+      });
+
+      const newVersionId = (await writeToken.fetchLatestValidSchema())?.latestValidVersion?.id;
+
+      if (!newVersionId) {
+        expect(newVersionId).toBeInstanceOf(String);
+        return;
+      }
+
+      const compareResult = await writeToken.compareToPreviousVersion(newVersionId);
+
+      expect(compareResult.schemaCompareToPrevious).toMatchInlineSnapshot(`
+        {
+          changes: {
+            nodes: [
+              {
+                criticality: Dangerous,
+                message: [foo] New service url: 'https://api.com/nah' (previously: 'https://api.com/products'),
+              },
+            ],
+            total: 1,
+          },
+          initial: false,
+        }
+      `);
+    } finally {
+      await pool?.end();
+    }
+  },
+);

@@ -35,6 +35,7 @@ import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import { Inspector, toGraphQLSchemaChange } from './providers/inspector';
 import { SchemaBuildError } from './providers/orchestrators/errors';
+import { detectUrlChanges } from './providers/registry-checks';
 import { ensureSDL, SchemaHelper } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
@@ -343,11 +344,32 @@ export const resolvers: SchemaModule.Resolvers = {
         } satisfies SchemaCompareResult;
       }
 
-      if (
-        currentVersion.compositeSchemaSDL &&
-        currentVersion.hasPersistedSchemaChanges &&
-        previousVersion?.hasPersistedSchemaChanges
-      ) {
+      const getBeforeSchemaSDL = async () => {
+        const orchestrator = schemaManager.matchOrchestrator(project.type);
+
+        const schemasBefore = await injector.get(SchemaManager).getSchemasOfPreviousVersion({
+          organization: organizationId,
+          project: projectId,
+          target: targetId,
+          version: selector.version,
+          onlyComposable: organization.featureFlags.compareToPreviousComposableVersion === true,
+        });
+
+        if (schemasBefore.length === 0) {
+          return null;
+        }
+        const { raw } = await ensureSDL(
+          orchestrator.composeAndValidate(
+            schemasBefore.map(s => helper.createSchemaObject(s)),
+            project.externalComposition,
+          ),
+        );
+
+        console.log('THIS IS RAW', raw);
+        return raw;
+      };
+
+      if (currentVersion.compositeSchemaSDL && currentVersion.hasPersistedSchemaChanges) {
         const changes = await schemaManager.getSchemaChangesForVersion({
           organization: organizationId,
           project: projectId,
@@ -358,7 +380,10 @@ export const resolvers: SchemaModule.Resolvers = {
         return {
           result: {
             schemas: {
-              before: previousVersion.compositeSchemaSDL,
+              before:
+                previousVersion === null
+                  ? null
+                  : previousVersion.compositeSchemaSDL ?? (await getBeforeSchemaSDL()),
               current: currentVersion.compositeSchemaSDL,
             },
             changes: changes ?? [],
@@ -369,6 +394,8 @@ export const resolvers: SchemaModule.Resolvers = {
       // LEGACY LAND
       // If we don't have the stuff in the database we compute it on demand.
       // so we can skip the expensive stuff happening in here...
+
+      // console.log('\n\nCERTIFIED LEG LEG LEGACY CODE\n\n');
 
       const orchestrator = schemaManager.matchOrchestrator(project.type);
 
@@ -438,6 +465,13 @@ export const resolvers: SchemaModule.Resolvers = {
               isSafeBasedOnUsage: change.criticality.isSafeBasedOnUsage ?? false,
             }));
           }
+
+          changes.push(
+            ...detectUrlChanges(schemasBefore, schemasAfter).map(change => ({
+              ...change,
+              isSafeBasedOnUsage: false,
+            })),
+          );
 
           const result: SchemaCompareResult = {
             result: {

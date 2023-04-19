@@ -357,7 +357,7 @@ export class RegistryChecks {
   }
 }
 
-function detectUrlChanges(
+export function detectUrlChanges(
   schemasBefore: readonly Schema[],
   schemasAfter: readonly Schema[],
 ): Array<RegistryServiceUrlChangeSerializableChange> {
