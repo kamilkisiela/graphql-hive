@@ -16,8 +16,8 @@
     "@aws-sdk/s3-request-presigner": "3.312.0",
     "@graphql-inspector/core": "4.0.3",
     "@octokit/app": "13.1.2",
-    "@sentry/node": "7.44.2",
-    "@sentry/types": "7.44.2",
+    "@sentry/node": "7.48.0",
+    "@sentry/types": "7.48.0",
     "@slack/web-api": "6.8.1",
     "@theguild/buddy": "0.1.0",
     "@trpc/client": "10.20.0",
@@ -31,7 +31,7 @@
     "graphql-modules": "2.1.2",
     "graphql-parse-resolve-info": "4.13.0",
     "graphql-scalars": "1.21.3",
-    "graphql-yoga": "3.9.0",
+    "graphql-yoga": "3.9.1",
     "ioredis": "5.3.1",
     "lodash": "4.17.21",
     "lru-cache": "7.18.3",
@@ -39,7 +39,7 @@
     "object-hash": "3.0.0",
     "param-case": "3.0.4",
     "prom-client": "14.2.0",
-    "supertokens-node": "13.4.1",
+    "supertokens-node": "13.4.2",
     "zod": "3.21.4"
   },
   "devDependencies": {
@@ -55,7 +55,7 @@
     "@types/lodash": "4.14.194",
     "@types/ms": "0.7.31",
     "@types/object-hash": "3.0.2",
-    "ioredis-mock": "8.6.0",
+    "ioredis-mock": "8.7.0",
     "tslib": "2.5.0"
   }
 }

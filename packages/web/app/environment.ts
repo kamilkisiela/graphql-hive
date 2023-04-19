@@ -1,6 +1,8 @@
 import zod from 'zod';
 import * as Sentry from '@sentry/nextjs';
 
+const { init, Integrations } = Sentry;
+
 // treat an empty string `''` as `undefined`
 const emptyString = <T extends zod.ZodType>(input: T) => {
   return zod.preprocess((value: unknown) => {
@@ -230,17 +232,17 @@ declare global {
 globalThis['__backend_env'] = config;
 
 // TODO: I don't like this here, but it seems like it makes most sense here :)
-if (config.sentry) {
-  Sentry.init({
-    serverName: 'app',
-    enabled: true,
-    dsn: config.sentry.dsn,
-    release: config.release,
-    environment: config.environment,
-    integrations: [
-      new Sentry.Integrations.Http({
-        tracing: true,
-      }),
-    ],
-  });
-}
+init({
+  serverName: 'app',
+  enabled: !!config.sentry,
+  enableTracing: true,
+  tracesSampleRate: 1,
+  dsn: config.sentry?.dsn,
+  release: config.release,
+  environment: config.environment,
+  integrations: [
+    new Integrations.Http({
+      tracing: true,
+    }),
+  ],
+});
