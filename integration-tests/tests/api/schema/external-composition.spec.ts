@@ -445,3 +445,95 @@ test.concurrent('service url change is persisted and can be fetched via api', as
     }
   `);
 });
+
+test.concurrent(
+  'service url change is persisted and can be fetched via api (in combination with other change)',
+  async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { createToken, project } = await createProject(ProjectType.Federation);
+
+    // Create a token with write rights
+    const writeToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [ProjectAccessScope.Settings, ProjectAccessScope.Read],
+      organizationScopes: [],
+    });
+    const dockerAddress = `${serviceName}:${servicePort}`;
+
+    await enableExternalSchemaComposition(
+      {
+        endpoint: `http://${dockerAddress}/compose`,
+        // eslint-disable-next-line no-process-env
+        secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
+        project: project.cleanId,
+        organization: organization.cleanId,
+      },
+      writeToken.secret,
+    ).then(r => r.expectNoGraphQLErrors());
+
+    let publishProductsResult = await writeToken
+      .publishSchema({
+        url: 'https://api.com/products',
+        sdl: /* GraphQL */ `
+          type Query {
+            products: [Product]
+          }
+          type Product @key(fields: "id") {
+            id: ID!
+          }
+        `,
+        service: 'foo',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(publishProductsResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    publishProductsResult = await writeToken
+      .publishSchema({
+        url: 'https://api.com/products-new',
+        sdl: /* GraphQL */ `
+          type Query {
+            products: [Product]
+          }
+          type Product @key(fields: "id") {
+            id: ID!
+            name: String!
+          }
+        `,
+        service: 'foo',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(publishProductsResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    const result = await writeToken.fetchLatestValidSchema();
+    const versionId = result.latestValidVersion?.id;
+
+    if (!versionId) {
+      expect(versionId).toBeInstanceOf(String);
+      return;
+    }
+
+    const compareResult = await writeToken.compareToPreviousVersion(versionId);
+
+    expect(compareResult.schemaCompareToPrevious).toMatchInlineSnapshot(`
+      {
+        changes: {
+          nodes: [
+            {
+              criticality: Safe,
+              message: Field 'name' was added to object type 'Product',
+            },
+            {
+              criticality: Dangerous,
+              message: [foo] New service url: 'https://api.com/products-new' (previously: 'https://api.com/products'),
+            },
+          ],
+          total: 2,
+        },
+        initial: false,
+      }
+    `);
+  },
+);
