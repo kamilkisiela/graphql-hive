@@ -1,6 +1,8 @@
 import zod from 'zod';
 import * as Sentry from '@sentry/nextjs';
 
+console.log('🌲 Loading environment variables...');
+
 // Weird hacky way of getting the Sentry.Integrations object
 // When the nextjs config is loaded by Next CLI Sentry has `Integrations` property.
 // When nextjs starts and the `environment.js` is loaded, the Sentry object doesn't have the `Integrations` property, it' under `Sentry.default` property.

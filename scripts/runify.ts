@@ -22,6 +22,7 @@ async function runify(packagePath: string) {
   const cwd = packagePath.replace(`${sep}package.json`, '');
   const pkg = await readPackageJson(cwd);
   const buildOptions: BuildOptions = pkg.buildOptions || {};
+  console.log(`Building...`);
 
   if (isNext(pkg)) {
     const additionalRequire = pkg?.buildOptions?.next?.header ?? null;
@@ -42,7 +43,7 @@ async function runify(packagePath: string) {
     await rewritePackageJson(pkg, cwd);
   }
 
-  console.log(`Built ${pkg.name}`);
+  console.log(`Built!`);
 }
 
 export async function readPackageJson(baseDir: string) {
@@ -85,6 +86,7 @@ function isNext(pkg: any): boolean {
 }
 
 async function buildWithNext(cwd: string, additionalRequire: string | null) {
+  console.log('📦 Building local Docker images...');
   await fs.mkdirp(normalize(join(cwd, 'dist')));
   if (additionalRequire) {
     await tsup({
