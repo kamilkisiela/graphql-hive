@@ -1,5 +1,5 @@
 import zod from 'zod';
-import Sentry from '@sentry/nextjs';
+import * as Sentry from '@sentry/nextjs';
 
 const { init, Integrations } = Sentry;
 
