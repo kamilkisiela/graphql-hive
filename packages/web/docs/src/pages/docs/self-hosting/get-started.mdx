@@ -103,15 +103,15 @@ After setting the environment variables, pull the required images for GraphQL Hi
 going to take some time if you're doing it for the first time.
 
 ```bash
-docker compose -f docker-compose.community.yml pull
+docker-compose -f docker-compose.community.yml pull
 ```
 
-After it's done, you can start the GraphQL Hive services using `docker compose`.
+After it's done, you can start the GraphQL Hive services using `docker-compose`.
 
 ```bash
-docker compose -f docker-compose.community.yml up
-# or of you embedded the environment variables into your docker compose file and called it `docker-compose.with-env.yml`
-docker compose -f docker-compose.with-env.yml up
+docker-compose -f docker-compose.community.yml up
+# or of you embedded the environment variables into your docker-compose file and called it `docker-compose.with-env.yml`
+docker-compose -f docker-compose.with-env.yml up
 ```
 
 Wait until all the services are up and running.

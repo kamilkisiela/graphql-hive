@@ -1,14 +1,12 @@
 import type { FastifyInstance, FastifyPluginAsync, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 import * as Sentry from '@sentry/node';
-import '@sentry/tracing';
-import { Transaction } from '@sentry/tracing';
-import type { ExtractedNodeRequestData, TraceparentData } from '@sentry/types';
+import type { ExtractedNodeRequestData, TraceparentData, Transaction } from '@sentry/types';
 import { extractTraceparentData, normalize } from '@sentry/utils';
 import { cleanRequestId } from './helpers';
 
 const plugin: FastifyPluginAsync = async server => {
-  server.decorateRequest('sentryTransaction', null);
+  server.decorateReply('sentryTransaction', null);
 
   function shouldIgnore(request: FastifyRequest) {
     if (
@@ -22,7 +20,7 @@ const plugin: FastifyPluginAsync = async server => {
     return false;
   }
 
-  server.addHook('onRequest', async request => {
+  server.addHook('onRequest', async (request, reply) => {
     if (shouldIgnore(request)) {
       return;
     }
@@ -53,11 +51,10 @@ const plugin: FastifyPluginAsync = async server => {
       },
       { request: extractedRequestData },
     );
-    (request as any).sentryTransaction = transaction;
+    (reply as any).sentryTransaction = transaction;
+    transaction.sampled = true;
 
-    Sentry.getCurrentHub().configureScope(scope => {
-      scope.setSpan(transaction);
-    });
+    Sentry.configureScope(scope => scope.setSpan(transaction));
 
     return;
   });
@@ -68,7 +65,7 @@ const plugin: FastifyPluginAsync = async server => {
     }
 
     setImmediate(() => {
-      const transaction: Transaction = (request as any).sentryTransaction;
+      const transaction: Transaction = (reply as any).sentryTransaction;
 
       transaction.setData('url', request.url);
       transaction.setData('query', request.query);
