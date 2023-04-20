@@ -4,7 +4,7 @@ import { Logger } from '../providers/logger';
 import { Mutex } from '../providers/mutex';
 
 describe('Single process', () => {
-  it('should allow only one lock at a time', async () => {
+  it('should allow only one lock at a time', async ({ expect }) => {
     const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
 
     const [signal] = createSignal();
@@ -22,7 +22,7 @@ describe('Single process', () => {
     await expect(lock2).resolves.toBeTruthy();
   });
 
-  it('should allow different locks at any time', async () => {
+  it('should allow different locks at any time', async ({ expect }) => {
     const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
 
     const [signal] = createSignal();
@@ -32,7 +32,7 @@ describe('Single process', () => {
     await expect(mutex.lock('3', { signal })).resolves.toBeTruthy();
   });
 
-  it('should time out after the specified duration', async () => {
+  it('should time out after the specified duration', async ({ expect }) => {
     const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
 
     const [signal] = createSignal();
@@ -46,7 +46,7 @@ describe('Single process', () => {
     );
   });
 
-  it('should cancel locking on abort signal', async () => {
+  it('should cancel locking on abort signal', async ({ expect }) => {
     const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
 
     const [signal, abort] = createSignal();
