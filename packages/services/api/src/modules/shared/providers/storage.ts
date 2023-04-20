@@ -1,4 +1,5 @@
 import { Injectable } from 'graphql-modules';
+import { Change } from '@graphql-inspector/core';
 import type {
   AddAlertChannelInput,
   AddAlertInput,
@@ -18,6 +19,7 @@ import type {
   PersistedOperation,
   Project,
   Schema,
+  SchemaCompositionError,
   SchemaLog,
   SchemaVersion,
   Target,
@@ -27,6 +29,8 @@ import type {
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
+import { SerializableChange } from '../../schema/schema-change-from-meta';
+import { Logger } from './logger';
 
 type Paginated<T> = T & {
   after?: string | null;
@@ -67,7 +71,7 @@ export interface IdMutex {
    */
   lock(
     id: string,
-    opts: { signal: AbortSignal },
+    opts: { signal: AbortSignal; logger?: Logger },
   ): Promise<
     // unlock
     () => Promise<void>
@@ -288,7 +292,6 @@ export interface Storage {
     | never
   >;
   getVersion(_: TargetSelector & { version: string }): Promise<SchemaVersion | never>;
-
   deleteSchema(
     _: {
       serviceName: string;
@@ -297,7 +300,7 @@ export interface Storage {
   ): Promise<DeletedCompositeSchema>;
 
   createVersion(
-    _: {
+    _: ({
       schema: string;
       author: string;
       service?: string | null;
@@ -308,8 +311,27 @@ export interface Storage {
       logIds: string[];
       base_schema: string | null;
       actionFn(): Promise<void>;
-    } & TargetSelector,
+      changes: Array<Change>;
+      previousSchemaVersion: null | string;
+    } & TargetSelector) &
+      (
+        | {
+            compositeSchemaSDL: null;
+            schemaCompositionErrors: Array<SchemaCompositionError>;
+          }
+        | {
+            compositeSchemaSDL: string;
+            schemaCompositionErrors: null;
+          }
+      ),
   ): Promise<SchemaVersion | never>;
+
+  /**
+   * Returns the changes between the given version and the previous version.
+   * If it return `null` the schema version does not have any changes persisted.
+   * This can happen if the schema version was created before we introduced persisting changes.
+   */
+  getSchemaChangesForVersion(_: { versionId: string }): Promise<null | Array<SerializableChange>>;
 
   updateVersionStatus(
     _: {

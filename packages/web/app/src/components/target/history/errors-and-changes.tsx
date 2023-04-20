@@ -2,6 +2,7 @@ import { ReactElement } from 'react';
 import { clsx } from 'clsx';
 import reactStringReplace from 'react-string-replace';
 import { Label } from '@/components/common';
+import { Tooltip } from '@/components/v2';
 import { CriticalityLevel, SchemaChangeFieldsFragment } from '@/graphql';
 
 function labelize(message: string) {
@@ -44,11 +45,23 @@ function ChangesBlock({
       <ul className="list-inside list-disc pl-3 text-sm leading-relaxed">
         {filteredChanges.map((change, key) => (
           <li key={key} className={clsx(criticalityLevelMapping[criticality] ?? 'text-red-400')}>
-            <span className="text-gray-600 dark:text-white">{labelize(change.message)}</span>
+            <MaybeWrapTooltip tooltip={change.criticalityReason ?? null}>
+              <span className="text-gray-600 dark:text-white">{labelize(change.message)}</span>
+            </MaybeWrapTooltip>
           </li>
         ))}
       </ul>
     </div>
+  );
+}
+
+function MaybeWrapTooltip(props: { children: React.ReactNode; tooltip: string | null }) {
+  return props.tooltip ? (
+    <Tooltip.Provider delayDuration={200}>
+      <Tooltip content={props.tooltip}>{props.children}</Tooltip>
+    </Tooltip.Provider>
+  ) : (
+    <>{props.children}</>
   );
 }
 

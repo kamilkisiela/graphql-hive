@@ -81,7 +81,7 @@ export function Header(): ReactElement {
             <DropdownMenuTrigger asChild>
               <Button>
                 <ArrowDownIcon className="h-5 w-5 text-gray-500" />
-                <Avatar shape="circle" className="ml-2.5 border-2 border-gray-900" />
+                <Avatar shape="circle" className="border-2 border-gray-900" />
               </Button>
             </DropdownMenuTrigger>
 
@@ -105,7 +105,15 @@ export function Header(): ReactElement {
                   ) : null}
                   {organizations.map(org => (
                     <NextLink href={`/${org.cleanId}`} key={org.cleanId}>
-                      <DropdownMenuItem className="truncate !block">{org.name}</DropdownMenuItem>
+                      <DropdownMenuItem
+                        className={`truncate !block ${
+                          currentOrg?.name === org.name
+                            ? 'bg-gray-700 text-gray-100 pointer-events-none'
+                            : ''
+                        }`}
+                      >
+                        {org.name}
+                      </DropdownMenuItem>
                     </NextLink>
                   ))}
                   <DropdownMenuSeparator />

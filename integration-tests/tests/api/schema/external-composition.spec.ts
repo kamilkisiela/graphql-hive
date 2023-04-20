@@ -273,7 +273,7 @@ test.concurrent(
   },
 );
 
-test.concurrent('a timeout error should be visible to the user', async () => {
+test.concurrent('a timeout error should be visible to the user', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject, organization } = await createOrg();
   const { createToken, project } = await createProject(ProjectType.Federation);

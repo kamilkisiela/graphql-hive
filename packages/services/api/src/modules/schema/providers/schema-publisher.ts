@@ -1,6 +1,7 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import promClient from 'prom-client';
+import { Change, CriticalityLevel } from '@graphql-inspector/core';
 import * as Sentry from '@sentry/node';
 import type { Span } from '@sentry/types';
 import * as Types from '../../../__generated__/types';
@@ -78,6 +79,13 @@ type PublishResult = BreakPromise<ReturnType<SchemaPublisher['internalPublish']>
 
 function registryLockId(targetId: string) {
   return `registry:lock:${targetId}`;
+}
+
+function assertNonNull<T>(value: T | null, message: string): T {
+  if (value === null) {
+    throw new Error(message);
+  }
+  return value;
 }
 
 @Injectable({
@@ -300,15 +308,15 @@ export class SchemaPublisher {
 
     if (checkResult.conclusion === SchemaCheckConclusion.Success) {
       return {
-        __typename: 'SchemaCheckSuccess' as const,
+        __typename: 'SchemaCheckSuccess',
         valid: true,
         changes: checkResult.state.changes ?? [],
         initial: checkResult.state.initial,
-      } satisfies Types.ResolversTypes['SchemaCheckSuccess'];
+      } as const;
     }
 
     return {
-      __typename: 'SchemaCheckError' as const,
+      __typename: 'SchemaCheckError',
       valid: false,
       changes: getReasonByCode(checkResult, CheckFailureReasonCode.BreakingChanges)?.changes ?? [],
       errors: (
@@ -327,7 +335,7 @@ export class SchemaPublisher {
         getReasonByCode(checkResult, CheckFailureReasonCode.CompositionFailure)
           ?.compositionErrors ?? [],
       ),
-    } satisfies Types.ResolversTypes['SchemaCheckError'];
+    } as const;
   }
 
   @sentry('SchemaPublisher.publish')
@@ -336,12 +344,19 @@ export class SchemaPublisher {
     signal: AbortSignal,
     span?: Span | undefined,
   ): Promise<PublishResult> {
-    this.logger.debug('Schema publication (checksum=%s)', input.checksum);
+    this.logger.debug(
+      'Schema publication (checksum=%s, organization=%s, project=%s, target=%s)',
+      input.checksum,
+      input.organization,
+      input.project,
+      input.target,
+    );
     return this.idempotentRunner.run({
       identifier: `schema:publish:${input.checksum}`,
       executor: async () => {
         const unlock = await this.storage.idMutex.lock(registryLockId(input.target), {
           signal,
+          logger: this.logger,
         });
         try {
           return await this.internalPublish(input);
@@ -421,6 +436,7 @@ export class SchemaPublisher {
       executor: async () => {
         const unlock = await this.storage.idMutex.lock(registryLockId(input.target), {
           signal,
+          logger: this.logger,
         });
         try {
           await this.authManager.ensureTargetAccess({
@@ -494,7 +510,7 @@ export class SchemaPublisher {
                   message: `Service "${input.serviceName}" not found`,
                 },
               ],
-            } satisfies Types.ResolversTypes['SchemaDeleteResult'];
+            } as const;
           }
 
           const deleteResult = await this.models[project.type][modelVersion].delete({
@@ -541,7 +557,7 @@ export class SchemaPublisher {
                 ...(deleteResult.state.compositionErrors ?? []),
                 ...(deleteResult.state.breakingChanges ?? []),
               ],
-            } satisfies Types.ResolversTypes['SchemaDeleteResult'];
+            } as const;
           }
 
           this.logger.debug('Delete rejected');
@@ -567,7 +583,7 @@ export class SchemaPublisher {
             __typename: 'SchemaDeleteError',
             valid: false,
             errors,
-          } satisfies Types.ResolversTypes['SchemaDeleteResult'];
+          } as const;
         } finally {
           await unlock();
         }
@@ -644,6 +660,7 @@ export class SchemaPublisher {
     const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
 
     let publishResult: SchemaPublishResult;
+
     switch (project.type) {
       case ProjectType.SINGLE:
         this.logger.debug(
@@ -724,12 +741,29 @@ export class SchemaPublisher {
         });
       }
 
+      const linkToWebsite =
+        typeof this.schemaModuleConfig.schemaPublishLink === 'function'
+          ? this.schemaModuleConfig.schemaPublishLink({
+              organization: {
+                cleanId: organization.cleanId,
+              },
+              project: {
+                cleanId: project.cleanId,
+              },
+              target: {
+                cleanId: target.cleanId,
+              },
+              version: latestVersion ? { id: latestVersion.version } : undefined,
+            })
+          : null;
+
       return {
         __typename: 'SchemaPublishSuccess' as const,
         initial: false,
         valid: true,
         changes: [],
-      } satisfies Types.ResolversTypes['SchemaPublishSuccess'];
+        linkToWebsite,
+      } as const;
     }
 
     if (publishResult.conclusion === SchemaPublishConclusion.Reject) {
@@ -748,14 +782,14 @@ export class SchemaPublisher {
         return {
           __typename: 'SchemaPublishMissingServiceError' as const,
           message: 'Missing service name',
-        } satisfies Types.ResolversTypes['SchemaPublishMissingServiceError'];
+        } as const;
       }
 
       if (getReasonByCode(publishResult, PublishFailureReasonCode.MissingServiceUrl)) {
         return {
           __typename: 'SchemaPublishMissingUrlError' as const,
           message: 'Missing service url',
-        } satisfies Types.ResolversTypes['SchemaPublishMissingUrlError'];
+        } as const;
       }
 
       return {
@@ -779,7 +813,7 @@ export class SchemaPublisher {
               ]
             : [],
         ),
-      } satisfies Types.ResolversTypes['SchemaPublishError'];
+      };
     }
 
     const errors = (
@@ -843,6 +877,20 @@ export class SchemaPublisher {
           });
         }
       },
+      changes,
+      previousSchemaVersion: latestVersion?.version ?? null,
+      ...(fullSchemaSdl
+        ? {
+            compositeSchemaSDL: fullSchemaSdl,
+            schemaCompositionErrors: null,
+          }
+        : {
+            compositeSchemaSDL: null,
+            schemaCompositionErrors: assertNonNull(
+              publishResult.state.compositionErrors,
+              "Can't be null",
+            ),
+          }),
     });
 
     if (changes.length > 0 || errors.length > 0) {
@@ -902,7 +950,7 @@ export class SchemaPublisher {
       changes: modelVersion === 'legacy' ? publishResult.state.changes ?? [] : null,
       message: (publishResult.state.messages ?? []).join('\n'),
       linkToWebsite,
-    } satisfies Types.ResolversTypes['SchemaPublishSuccess'];
+    };
   }
 
   private async githubCheck({
@@ -921,10 +969,8 @@ export class SchemaPublisher {
     serviceName: string | null;
     sha: string;
     conclusion: SchemaCheckConclusion;
-    changes: Types.SchemaChange[] | null;
-    breakingChanges: Array<{
-      message: string;
-    }> | null;
+    changes: Array<Change> | null;
+    breakingChanges: Array<Change> | null;
     compositionErrors: Array<{
       message: string;
     }> | null;
@@ -1167,7 +1213,7 @@ export class SchemaPublisher {
     input: PublishInput;
     project: Project;
     valid: boolean;
-    changes: readonly Types.SchemaChange[];
+    changes: Array<Change>;
     errors: readonly Types.SchemaError[];
     messages?: string[];
   }) {
@@ -1237,14 +1283,14 @@ export class SchemaPublisher {
     }
   }
 
-  private errorsToMarkdown(errors: readonly Types.SchemaError[]): string {
+  private errorsToMarkdown(errors: ReadonlyArray<{ message: string }>): string {
     return ['', ...errors.map(error => `- ${bolderize(error.message)}`)].join('\n');
   }
 
-  private changesToMarkdown(changes: readonly Types.SchemaChange[]): string {
-    const breakingChanges = changes.filter(filterChangesByLevel('Breaking'));
-    const dangerousChanges = changes.filter(filterChangesByLevel('Dangerous'));
-    const safeChanges = changes.filter(filterChangesByLevel('Safe'));
+  private changesToMarkdown(changes: ReadonlyArray<Change>): string {
+    const breakingChanges = changes.filter(filterChangesByLevel(CriticalityLevel.Breaking));
+    const dangerousChanges = changes.filter(filterChangesByLevel(CriticalityLevel.Dangerous));
+    const safeChanges = changes.filter(filterChangesByLevel(CriticalityLevel.NonBreaking));
 
     const lines: string[] = [
       `## Found ${changes.length} change${changes.length > 1 ? 's' : ''}`,
@@ -1271,11 +1317,11 @@ export class SchemaPublisher {
   }
 }
 
-function filterChangesByLevel(level: Types.CriticalityLevel) {
-  return (change: Types.SchemaChange) => change.criticality === level;
+function filterChangesByLevel(level: CriticalityLevel) {
+  return (change: Change) => change.criticality.level === level;
 }
 
-function writeChanges(type: string, changes: readonly Types.SchemaChange[], lines: string[]): void {
+function writeChanges(type: string, changes: ReadonlyArray<Change>, lines: string[]): void {
   if (changes.length > 0) {
     lines.push(
       ...['', `### ${type} changes`].concat(

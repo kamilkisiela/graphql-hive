@@ -2,8 +2,10 @@ import colors from 'colors';
 import { ClientError, GraphQLClient } from 'graphql-request';
 import symbols from 'log-symbols';
 import { Command, Errors, Config as OclifConfig } from '@oclif/core';
-import { Config } from './helpers/config';
+import { Config, GetConfigurationValueType, ValidConfigurationKeys } from './helpers/config';
 import { getSdk } from './sdk';
+
+type OmitNever<T> = { [K in keyof T as T[K] extends never ? never : K]: T[K] };
 
 export default abstract class extends Command {
   protected _userConfig: Config;
@@ -51,35 +53,52 @@ export default abstract class extends Command {
    * @param env an env var name
    */
   ensure<
+    TKey extends ValidConfigurationKeys,
     TArgs extends {
-      [key: string]: any;
+      [key in TKey]: GetConfigurationValueType<TKey>;
     },
-    TKey extends keyof TArgs,
   >({
     key,
     args,
+    legacyFlagName,
     defaultValue,
     message,
     env,
   }: {
-    key: TKey;
     args: TArgs;
-    defaultValue?: TArgs[TKey] | null;
+    key: TKey;
+    /** By default we try to match config names with flag names, but for legacy compatibility we need to provide the old flag name. */
+    legacyFlagName?: keyof OmitNever<{
+      // Symbol.asyncIterator to discriminate against any lol
+      [TArgKey in keyof TArgs]: typeof Symbol.asyncIterator extends TArgs[TArgKey]
+        ? never
+        : string extends TArgs[TArgKey]
+        ? TArgKey
+        : never;
+    }>;
+
+    defaultValue?: TArgs[keyof TArgs] | null;
     message?: string;
     env?: string;
-  }): NonNullable<TArgs[TKey]> | never {
-    if (args[key]) {
-      return args[key];
+  }): NonNullable<GetConfigurationValueType<TKey>> | never {
+    if (args[key] != null) {
+      return args[key] as NonNullable<GetConfigurationValueType<TKey>>;
+    }
+
+    if (legacyFlagName && (args as any)[legacyFlagName] != null) {
+      return args[legacyFlagName] as any as NonNullable<GetConfigurationValueType<TKey>>;
     }
 
     // eslint-disable-next-line no-process-env
     if (env && process.env[env]) {
       // eslint-disable-next-line no-process-env
-      return process.env[env] as TArgs[TKey];
+      return process.env[env] as TArgs[keyof TArgs] as NonNullable<GetConfigurationValueType<TKey>>;
     }
 
-    if (this._userConfig.has(key as string)) {
-      return this._userConfig.get(key as string);
+    const userConfigValue = this._userConfig.get(key);
+
+    if (userConfigValue != null) {
+      return userConfigValue;
     }
 
     if (defaultValue) {
@@ -91,28 +110,6 @@ export default abstract class extends Command {
     }
 
     throw new Errors.CLIError(`Missing "${String(key)}"`);
-  }
-
-  /**
-   * Get a value from arguments or flags first, then fallback to config.
-   * Do NOT throw when there's no value.
-   *
-   * @param key
-   * @param args all arguments or flags
-   */
-  maybe<
-    TArgs extends {
-      [key: string]: any;
-    },
-    TKey extends keyof TArgs,
-  >(key: TKey, args: TArgs): TArgs[TKey] | undefined {
-    if (args[key]) {
-      return args[key];
-    }
-
-    if (this._userConfig.has(key as string)) {
-      return this._userConfig.get(key as string);
-    }
   }
 
   cleanRequestId(requestId?: string | null) {
