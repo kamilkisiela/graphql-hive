@@ -13,8 +13,8 @@
     "cypress",
     "cypress.config.ts",
     ".eslintrc.cjs",
-    "vite.config.ts",
-    "serializer.ts",
+    "vitest.config.ts",
+    "scripts/serializer.ts",
     "packages/web/app/.babelrc.cjs"
   ],
   "exclude": ["**/node_modules/**", "**/dist", "**/temp", "**/tmp"]

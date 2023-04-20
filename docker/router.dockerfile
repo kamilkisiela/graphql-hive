@@ -4,16 +4,6 @@ FROM scratch AS config
 
 FROM rust:1.68-slim as build
 
-WORKDIR /usr/src
-
-# Create blank project
-RUN USER=root cargo new router
-
-COPY --from=pkg Cargo.toml /usr/src/router/
-COPY --from=config Cargo.lock /usr/src/router/
-
-WORKDIR /usr/src/router
-
 # Required by Apollo Router
 RUN apt-get update
 RUN apt-get -y install npm protobuf-compiler curl pkg-config
@@ -21,15 +11,24 @@ RUN rm -rf /var/lib/apt/lists/*
 RUN update-ca-certificates
 RUN rustup component add rustfmt
 
+WORKDIR /usr/src
+# Create blank project
+RUN USER=root cargo new router
+
+# Copy Cargo files
+COPY --from=pkg Cargo.toml /usr/src/router/
+COPY --from=config Cargo.lock /usr/src/router/
+
+WORKDIR /usr/src/router
 # Get the dependencies cached
-RUN CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse cargo build --release
+RUN --mount=type=cache,target=/usr/local/cargo/registry CARGO_HOME=/usr/local/cargo/registry CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse cargo build --release
 
+# Copy in the source code
 COPY --from=pkg src ./src
-
 RUN touch ./src/main.rs
 
 # Real build this time
-RUN CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse cargo build --release
+RUN --mount=type=cache,target=/usr/local/cargo/registry CARGO_HOME=/usr/local/cargo/registry CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse cargo build --release
 
 # Runtime
 FROM debian:bullseye-slim as runtime

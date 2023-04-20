@@ -183,6 +183,22 @@ git config --global user.email "john@doe.org"
 
 </Callout>
 
+### Fetch a schema from CDN
+
+You can fetch the GraphQL schema from the CDN using the `artifact:fetch` command.
+
+<Callout type="info">
+  You can learn how to create a CDN access token in the [High-Availability CDN
+  documentation](/features/high-availability-cdn).
+</Callout>
+
+```bash
+hive artifact:fetch --artifact sdl --cdn.endpoint VALUE --cdn.accessToken VALUE
+```
+
+For more information please refer to the
+[CLI readme](https://github.com/kamilkisiela/graphql-hive/blob/main/packages/libraries/cli/README.md#commands).
+
 ### CLI and GitHub Integration
 
 If [GitHub Integration](/docs/management/organizations#github) is enabled for your organization, and

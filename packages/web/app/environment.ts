@@ -1,6 +1,17 @@
 import zod from 'zod';
 import * as Sentry from '@sentry/nextjs';
 
+console.log('🌲 Loading environment variables...');
+
+// Weird hacky way of getting the Sentry.Integrations object
+// When the nextjs config is loaded by Next CLI Sentry has `Integrations` property.
+// When nextjs starts and the `environment.js` is loaded, the Sentry object doesn't have the `Integrations` property, it' under `Sentry.default` property.
+// Dealing with esm/cjs/default exports is a pain, we all feel that pain...
+const Integrations =
+  'default' in Sentry
+    ? ((Sentry as any).default as typeof Sentry).Integrations
+    : Sentry.Integrations;
+
 // treat an empty string `''` as `undefined`
 const emptyString = <T extends zod.ZodType>(input: T) => {
   return zod.preprocess((value: unknown) => {
@@ -230,17 +241,18 @@ declare global {
 globalThis['__backend_env'] = config;
 
 // TODO: I don't like this here, but it seems like it makes most sense here :)
-if (config.sentry) {
-  Sentry.init({
-    serverName: 'app',
-    enabled: true,
-    dsn: config.sentry.dsn,
-    release: config.release,
-    environment: config.environment,
-    integrations: [
-      new Sentry.Integrations.Http({
-        tracing: true,
-      }),
-    ],
-  });
-}
+Sentry.init({
+  serverName: 'app',
+  enabled: !!config.sentry,
+  enableTracing: true,
+  tracesSampleRate: 1,
+  dsn: config.sentry?.dsn,
+  release: config.release,
+  environment: config.environment,
+  integrations: [
+    // HTTP integration is only available on the server
+    new Integrations.Http({
+      tracing: true,
+    }),
+  ],
+});

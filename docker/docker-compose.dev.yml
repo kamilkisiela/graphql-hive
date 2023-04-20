@@ -20,7 +20,7 @@ services:
       - '5432:5432'
 
   redis:
-    image: docker.io/bitnami/redis:7.0.10
+    image: docker.io/bitnami/redis:7.0.11
     networks:
       - 'stack'
     healthcheck:
@@ -88,7 +88,7 @@ services:
       - 'stack'
 
   broker:
-    image: vectorized/redpanda:v23.1.6
+    image: vectorized/redpanda:v23.1.7
     container_name: broker
     hostname: broker
     networks:
@@ -137,6 +137,39 @@ services:
       POSTGRESQL_PORT: 5432
       API_KEYS: bubatzbieber6942096420
       ACCESS_TOKEN_BLACKLISTING: 'true'
+
+  oidc-server-mock:
+    container_name: oidc-server-mock
+    image: ghcr.io/soluto/oidc-server-mock:latest
+    ports:
+      - '7043:80'
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      SERVER_OPTIONS_INLINE: |
+        {
+          "AccessTokenJwtType": "JWT",
+          "Discovery": {
+            "ShowKeySet": true
+          },
+          "Authentication": {
+            "CookieSameSiteMode": "Lax",
+            "CheckSessionCookieSameSiteMode": "Lax"
+          }
+        }
+      LOGIN_OPTIONS_INLINE: |
+        {
+          "AllowRememberLogin": false
+        }
+      LOGOUT_OPTIONS_INLINE: |
+        {
+          "AutomaticRedirectAfterSignOut": true
+        }
+      USERS_CONFIGURATION_PATH: /tmp/config/users-config.json
+      CLIENTS_CONFIGURATION_PATH: /tmp/config/clients-config.json
+    volumes:
+      - ./configs/oidc-server-mock/clients-config.json:/tmp/config/clients-config.json:ro
+    networks:
+      - 'stack'
 
 networks:
   stack: {}

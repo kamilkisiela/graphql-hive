@@ -5,15 +5,15 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "bob runify --single",
+    "build": "tsx ../../../scripts/runify.ts",
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts",
     "postbuild": "copyfiles -f \"node_modules/bullmq/dist/esm/commands/*.lua\" dist && copyfiles -f \"node_modules/bullmq/dist/esm/commands/includes/*.lua\" dist/includes",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentry/node": "7.44.2",
-    "@trpc/server": "10.19.1",
-    "@whatwg-node/fetch": "0.8.4",
+    "@sentry/node": "7.48.0",
+    "@trpc/server": "10.20.0",
+    "@whatwg-node/fetch": "0.8.5",
     "bullmq": "3.10.4",
     "dotenv": "16.0.3",
     "ioredis": "5.3.1",
@@ -31,13 +31,5 @@
     "copyfiles": "2.4.1",
     "pino-pretty": "10.0.0",
     "tslib": "2.5.0"
-  },
-  "buildOptions": {
-    "runify": true,
-    "tsup": true,
-    "tags": [
-      "backend"
-    ],
-    "banner": "../../../scripts/banner.js"
   }
 }

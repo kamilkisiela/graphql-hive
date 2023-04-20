@@ -4,14 +4,7 @@ import type {
   FastifyRequest,
   RouteHandlerMethod,
 } from 'fastify';
-import {
-  GraphQLError,
-  Kind,
-  OperationDefinitionNode,
-  print,
-  ValidationContext,
-  ValidationRule,
-} from 'graphql';
+import { GraphQLError, print, ValidationContext, ValidationRule } from 'graphql';
 import { createYoga, Plugin, useErrorHandler } from 'graphql-yoga';
 import hyperid from 'hyperid';
 import zod from 'zod';
@@ -23,6 +16,7 @@ import { useDeferStream } from '@graphql-yoga/plugin-defer-stream';
 import { Registry, RegistryContext } from '@hive/api';
 import { HiveError } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
+import { runWithAsyncContext } from '@sentry/node';
 import { fetch } from '@whatwg-node/fetch';
 import { asyncStorage } from './async-storage';
 import type { HiveConfig } from './environment';
@@ -66,7 +60,11 @@ interface Context extends RegistryContext {
 const NoIntrospection: ValidationRule = (context: ValidationContext) => ({
   Field(node) {
     if (node.name.value === '__schema' || node.name.value === '__type') {
-      context.reportError(new GraphQLError('GraphQL introspection is not allowed', [node]));
+      context.reportError(
+        new GraphQLError('GraphQL introspection is not allowed', {
+          nodes: [node],
+        }),
+      );
     }
   },
 });
@@ -100,22 +98,13 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
       useArmor(),
       useSentry({
         startTransaction: false,
-        renameTransaction: true,
+        renameTransaction: false,
         /**
          * When it's not `null`, the plugin modifies the error object.
          * We end up with an unintended error masking, because the GraphQLYogaError is replaced with GraphQLError (without error.originalError).
          */
         eventIdKey: null,
         operationName: () => 'graphql',
-        transactionName(args) {
-          const rootOperation = args.document.definitions.find(
-            o => o.kind === Kind.OPERATION_DEFINITION,
-          ) as OperationDefinitionNode;
-          const operationType = rootOperation.operation;
-          const opName = args.operationName || rootOperation.name?.value || 'anonymous';
-
-          return `${operationType}.${opName}`;
-        },
         includeRawResult: false,
         includeResolverArgs: false,
         includeExecuteVariables: true,
@@ -130,6 +119,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
             : clientNameHeaderValue;
 
           if (transaction) {
+            transaction.setName(`graphql.${args.operationName || 'unknown'}`);
             transaction.setTag('graphql_client_name', clientName ?? 'unknown');
             transaction.sampled = !!clientName && clientName !== 'Hive Client';
           }
@@ -143,7 +133,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         },
         appendTags: ({ contextValue }) => {
           const supertokens_user_id = extractUserId(contextValue as any);
-          const request_id = cleanRequestId((contextValue as Context).req.headers['x-request-id']);
+          const request_id = (contextValue as Context).requestId;
 
           return {
             supertokens_user_id,
@@ -250,13 +240,15 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         requestId,
       },
       async () => {
-        const response = await server.handleNodeRequest(req, {
-          req,
-          reply,
-          headers: req.headers,
-          requestId,
-          session: null,
-          abortSignal: controller.signal,
+        const response = await runWithAsyncContext(() => {
+          return server.handleNodeRequest(req, {
+            req,
+            reply,
+            headers: req.headers,
+            requestId,
+            session: null,
+            abortSignal: controller.signal,
+          });
         });
 
         response.headers.forEach((value, key) => {

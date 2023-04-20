@@ -7,14 +7,7 @@ const config = {
     '@storybook/addon-links',
     '@storybook/addon-essentials',
     '@storybook/addon-interactions',
-    {
-      name: '@storybook/addon-postcss',
-      options: {
-        postcssLoaderOptions: {
-          implementation: postcss,
-        },
-      },
-    },
+    '@storybook/addon-styling',
   ],
   framework: {
     name: '@storybook/nextjs',

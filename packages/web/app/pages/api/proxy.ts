@@ -2,38 +2,10 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import hyperid from 'hyperid';
 import { env } from '@/env/backend';
 import { extractAccessTokenFromRequest } from '@/lib/api/extract-access-token-from-request';
-import { captureException, startTransaction } from '@sentry/nextjs';
-import type { Transaction } from '@sentry/types';
+import { captureException, getCurrentHub, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 import { fetch } from '@whatwg-node/fetch';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
-
-function useTransaction(res: any) {
-  const existingTransaction: Transaction = res.__sentryTransaction;
-
-  if (existingTransaction) {
-    existingTransaction.setName('app.graphql');
-    existingTransaction.op = 'app.graphql';
-
-    return {
-      transaction: existingTransaction,
-      finish() {},
-    };
-  }
-
-  const transaction = startTransaction({
-    name: 'app.graphql',
-    op: 'app.graphql',
-  });
-
-  return {
-    transaction,
-    finish() {
-      transaction.finish();
-    },
-  };
-}
-
 async function graphql(req: NextApiRequest, res: NextApiResponse) {
   const url = env.graphqlEndpoint;
 
@@ -77,9 +49,22 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
     return res.end();
   }
 
-  const { transaction, finish: finishTransaction } = useTransaction(res);
+  const scope = getCurrentHub().getScope();
+  const rootSpan = scope?.getSpan();
 
-  const accessSpan = transaction.startChild({
+  const body: {
+    operationName?: string;
+    query: string;
+    variables?: Record<string, any>;
+  } = {
+    operationName: req.body.operationName,
+    query: req.body.query,
+    variables: req.body.variables,
+  };
+
+  scope.setTransactionName(`proxy.${body?.operationName || 'unknown'}`);
+
+  const accessSpan = rootSpan?.startChild({
     op: 'app.accessToken',
   });
 
@@ -92,16 +77,15 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
   }
 
   if (!accessToken) {
-    accessSpan.setHttpStatus(401);
-    accessSpan.finish();
-    finishTransaction();
+    accessSpan?.setHttpStatus(401);
+    accessSpan?.finish();
     res.status(401).json({});
     return;
   }
 
-  accessSpan.setHttpStatus(200);
+  rootSpan?.setHttpStatus(200);
 
-  const graphqlSpan = accessSpan.startChild({
+  const graphqlSpan = rootSpan?.startChild({
     op: 'graphql',
   });
 
@@ -114,7 +98,6 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
         'accept-encoding': req.headers['accept-encoding'],
         'x-request-id': requestId,
         'X-API-Token': req.headers['x-api-token'] ?? '',
-        'sentry-trace': transaction.toTraceparent(),
         'graphql-client-name': 'Hive App',
         'graphql-client-version': env.release,
       },
@@ -122,9 +105,8 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
       body: JSON.stringify(req.body || {}),
     } as any);
 
-    graphqlSpan.setHttpStatus(200);
-    graphqlSpan.finish();
-    finishTransaction();
+    graphqlSpan?.setHttpStatus(200);
+    graphqlSpan?.finish();
 
     const resHeaders = Object.fromEntries(response.headers.entries());
 
@@ -153,9 +135,8 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
     console.error(error);
     captureException(error);
 
-    graphqlSpan.setHttpStatus(500);
-    graphqlSpan.finish();
-    finishTransaction();
+    graphqlSpan?.setHttpStatus(500);
+    graphqlSpan?.finish();
 
     // TODO: better type narrowing of the error
     const status = (error as Record<string, number | undefined>)?.['status'] ?? 500;
@@ -169,11 +150,10 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default graphql;
+export default wrapApiHandlerWithSentry(graphql, 'api/proxy');
 
 export const config = {
   api: {
-    // bodyParser: false,
     externalResolver: true,
   },
 };

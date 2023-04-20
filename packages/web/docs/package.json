@@ -8,11 +8,11 @@
     "dev": "next"
   },
   "dependencies": {
-    "@next/env": "13.2.4",
+    "@next/env": "13.3.0",
     "@radix-ui/react-tooltip": "1.0.5",
     "@theguild/components": "4.5.9",
     "clsx": "1.2.1",
-    "next": "13.2.4",
+    "next": "13.3.0",
     "next-themes": "*",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -20,9 +20,9 @@
   },
   "devDependencies": {
     "@theguild/tailwind-config": "0.2.1",
-    "@types/react": "18.0.34",
+    "@types/react": "18.0.37",
     "next-sitemap": "4.0.7",
-    "postcss": "8.4.21",
+    "postcss": "8.4.22",
     "tailwindcss": "3.3.1"
   }
 }

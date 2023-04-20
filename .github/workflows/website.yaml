@@ -10,21 +10,28 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Get changed files
+        id: website-files
+        uses: tj-actions/changed-files@v35
+        with:
+          files: |
+            packages/web/docs/**
+            packages/web/landing-page/**
+
       - name: setup environment
+        if: steps.website-files.outputs.any_changed == 'true'
         uses: ./.github/actions/setup
         with:
           codegen: false
           actor: website
 
       - uses: the-guild-org/shared-config/website-cf@main
+        if: steps.website-files.outputs.any_changed == 'true'
         name: build and deploy website
         env:
           NEXT_BASE_PATH: ${{ github.ref == 'refs/heads/main' && '/graphql/hive' || '' }}
           SITE_URL:
             ${{ github.ref == 'refs/heads/main' && 'https://the-guild.dev/graphql/hive' || '' }}
-          NEXT_PUBLIC_ALGOLIA_INDEX_NAME: ${{ secrets.NEXT_PUBLIC_ALGOLIA_INDEX_NAME }}
-          NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY: ${{ secrets.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY }}
-          NEXT_PUBLIC_ALGOLIA_APP_ID: ${{ secrets.NEXT_PUBLIC_ALGOLIA_APP_ID }}
         with:
           cloudflareApiToken: ${{ secrets.WEBSITE_CLOUDFLARE_API_TOKEN }}
           cloudflareAccountId: ${{ secrets.WEBSITE_CLOUDFLARE_ACCOUNT_ID }}

@@ -107,6 +107,7 @@ export async function ensureSDL(
       throw new SchemaBuildError(
         `Composition errors: \n` +
           composeAndValidationResult.errors.map(err => ` - ${err.message}`).join('\n'),
+        composeAndValidationResult.errors,
       );
     }
   }
@@ -116,6 +117,7 @@ export async function ensureSDL(
       throw new SchemaBuildError(
         `Composition errors: \n` +
           composeAndValidationResult.errors.map(err => ` - ${err.message}`).join('\n'),
+        composeAndValidationResult.errors,
       );
     }
 
@@ -128,7 +130,12 @@ export async function ensureSDL(
       raw: composeAndValidationResult.sdl,
     };
   } catch (error) {
-    throw new SchemaBuildError(`Failed to parse schema: ${String(error)}`);
+    throw new SchemaBuildError(`Failed to parse schema: ${String(error)}`, [
+      {
+        message: String(error),
+        source: 'graphql',
+      },
+    ]);
   }
 }
 

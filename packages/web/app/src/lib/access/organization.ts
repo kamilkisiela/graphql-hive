@@ -2,7 +2,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope } from '../../graphql';
 import { useRedirect } from './common';
 
-export { OrganizationAccessScope } from '../../graphql';
+export { OrganizationAccessScope };
 
 const CanAccessOrganization_MemberFragment = graphql(`
   fragment CanAccessOrganization_MemberFragment on Member {
