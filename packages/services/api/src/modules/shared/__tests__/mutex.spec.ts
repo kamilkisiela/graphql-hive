@@ -14,7 +14,7 @@ describe('Single process', () => {
     const lock2 = mutex.lock('1', { signal });
 
     // second lock shouldnt resolve
-    await expect(Promise.race([throwAfter(50), lock2])).rejects.toBeTruthy();
+    await expect(Promise.race([throwAfter(), lock2])).rejects.toBeTruthy();
 
     await unlock1();
 
@@ -64,6 +64,23 @@ describe('Single process', () => {
     // make sure that the aborted lock does not lock
     await expect(mutex.lock('1', { signal: createSignal()[0] })).resolves.toBeTruthy();
   });
+
+  describe.concurrent('should serialise concurrent threads', () => {
+    const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
+    const [signal] = createSignal();
+
+    let running = false;
+    for (let i = 1; i <= 20; i++) {
+      it.concurrent(`#${i}`, async ({ expect }) => {
+        await mutex.perform('1', { signal }, async () => {
+          expect(running).toBeFalsy();
+          running = true;
+          await sleep();
+          running = false;
+        });
+      });
+    }
+  });
 });
 
 // since vitest uses workers (which are kindof separate processes), this can be tested
@@ -79,8 +96,13 @@ class Tlogger implements Logger {
   public child = () => this;
 }
 
-function throwAfter(ms: number) {
-  return new Promise((_, reject) => setTimeout(() => reject(`Throwing after ${ms}ms`), ms));
+function sleep(ms = 50) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function throwAfter(ms?: number) {
+  await sleep(ms);
+  throw `Throwing after ${ms}ms`;
 }
 
 function randomPort() {
