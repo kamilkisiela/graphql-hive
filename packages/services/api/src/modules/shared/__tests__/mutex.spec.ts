@@ -4,7 +4,7 @@ import { Logger } from '../providers/logger';
 import { Mutex } from '../providers/mutex';
 
 it('should allow only one lock at a time', async ({ expect }) => {
-  const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
+  const mutex = new Mutex(new Tlogger(), new Redis(differentPort()));
 
   const [signal] = createSignal();
 
@@ -22,7 +22,7 @@ it('should allow only one lock at a time', async ({ expect }) => {
 });
 
 it('should allow different locks at any time', async ({ expect }) => {
-  const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
+  const mutex = new Mutex(new Tlogger(), new Redis(differentPort()));
 
   const [signal] = createSignal();
 
@@ -32,7 +32,7 @@ it('should allow different locks at any time', async ({ expect }) => {
 });
 
 it('should time out after the specified duration', async ({ expect }) => {
-  const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
+  const mutex = new Mutex(new Tlogger(), new Redis(differentPort()));
 
   const [signal] = createSignal();
 
@@ -46,7 +46,7 @@ it('should time out after the specified duration', async ({ expect }) => {
 });
 
 it('should cancel locking on abort signal', async ({ expect }) => {
-  const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
+  const mutex = new Mutex(new Tlogger(), new Redis(differentPort()));
 
   const [signal, abort] = createSignal();
 
@@ -65,7 +65,7 @@ it('should cancel locking on abort signal', async ({ expect }) => {
 });
 
 it('should release lock in perform after return', async ({ expect }) => {
-  const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
+  const mutex = new Mutex(new Tlogger(), new Redis(differentPort()));
 
   const [signal] = createSignal();
 
@@ -80,7 +80,7 @@ it('should release lock in perform after return', async ({ expect }) => {
 });
 
 it('should release lock in perform on throw', async ({ expect }) => {
-  const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
+  const mutex = new Mutex(new Tlogger(), new Redis(differentPort()));
 
   const [signal] = createSignal();
 
@@ -96,7 +96,7 @@ it('should release lock in perform on throw', async ({ expect }) => {
 
 // since vitest uses workers (which run in separate threads), this can be tested
 describe.concurrent('should serialise concurrent threads', () => {
-  const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
+  const mutex = new Mutex(new Tlogger(), new Redis(differentPort()));
   const [signal] = createSignal();
 
   let running = false;
@@ -131,8 +131,14 @@ async function throwAfter(ms?: number) {
   throw `Throwing after ${ms}ms`;
 }
 
-function randomPort() {
-  return Math.floor(Math.random() * 100);
+// make sure the ports are really different
+const usedPorts: number[] = [];
+function differentPort(): number {
+  const port = Math.floor(Math.random() * 100);
+  if (!usedPorts.includes(port)) {
+    return port;
+  }
+  return differentPort();
 }
 
 function createSignal(): [signal: AbortSignal, abort: () => void] {
