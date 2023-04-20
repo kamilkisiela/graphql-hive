@@ -3,54 +3,58 @@ import 'reflect-metadata';
 import { Logger } from '../providers/logger';
 import { Mutex } from '../providers/mutex';
 
-it('should allow only one lock at a time', async () => {
-  const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
+describe('Single process', () => {
+  it('should allow only one lock at a time', async () => {
+    const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
 
-  const ctrl = new AbortController();
-  const signal = ctrl.signal;
+    const ctrl = new AbortController();
+    const signal = ctrl.signal;
 
-  const unlock1 = await mutex.lock('1', { signal });
+    const unlock1 = await mutex.lock('1', { signal });
 
-  const lock2 = mutex.lock('1', { signal });
+    const lock2 = mutex.lock('1', { signal });
 
-  // second lock shouldnt resolve
-  await expect(Promise.race([throwAfter(50), lock2])).rejects.toBeTruthy();
+    // second lock shouldnt resolve
+    await expect(Promise.race([throwAfter(50), lock2])).rejects.toBeTruthy();
 
-  await unlock1();
+    await unlock1();
 
-  // after the first lock releases, second one resolves
-  await expect(lock2).resolves.toBeTruthy();
+    // after the first lock releases, second one resolves
+    await expect(lock2).resolves.toBeTruthy();
+  });
+
+  it('should time out after the specified duration', async () => {
+    const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
+
+    const ctrl = new AbortController();
+    const signal = ctrl.signal;
+
+    await mutex.lock('1', { signal });
+
+    const lock2 = mutex.lock('1', { signal, timeout: 50, retries: 0 });
+
+    await expect(lock2).rejects.toMatchInlineSnapshot(
+      '[ExecutionError: The operation was unable to achieve a quorum during its retry window.]',
+    );
+  });
+
+  it('should cancel locking on abort signal', async () => {
+    const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
+
+    const ctrl = new AbortController();
+    const signal = ctrl.signal;
+
+    await mutex.lock('1', { signal });
+
+    const lock2 = mutex.lock('1', { signal });
+
+    ctrl.abort();
+
+    await expect(lock2).rejects.toMatchInlineSnapshot('[Error: Locking aborted]');
+  });
 });
 
-it('should time out after the specified duration', async () => {
-  const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
-
-  const ctrl = new AbortController();
-  const signal = ctrl.signal;
-
-  await mutex.lock('1', { signal });
-
-  const lock2 = mutex.lock('1', { signal, timeout: 50, retries: 0 });
-
-  await expect(lock2).rejects.toMatchInlineSnapshot(
-    '[ExecutionError: The operation was unable to achieve a quorum during its retry window.]',
-  );
-});
-
-it('should cancel locking on abort signal', async () => {
-  const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
-
-  const ctrl = new AbortController();
-  const signal = ctrl.signal;
-
-  await mutex.lock('1', { signal });
-
-  const lock2 = mutex.lock('1', { signal });
-
-  ctrl.abort();
-
-  await expect(lock2).rejects.toMatchInlineSnapshot('[Error: Locking aborted]');
-});
+describe.todo('Multiple processes');
 
 class Tlogger implements Logger {
   public info = vi.fn();
