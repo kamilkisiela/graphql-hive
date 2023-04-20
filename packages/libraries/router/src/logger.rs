@@ -22,7 +22,7 @@ impl Logger {
             .iter()
             .find(|(l, _)| *l == log_level)
             .map(|(_, score)| *score)
-            .unwrap_or(4) // default log level is info
+            .unwrap()
     }
 
     fn should_log(level: &str) -> bool {
