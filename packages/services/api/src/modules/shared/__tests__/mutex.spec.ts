@@ -52,8 +52,7 @@ describe('Single process', () => {
     await unlock1();
 
     // make sure that the aborted lock does not lock
-    const [signal2] = createSignal();
-    await expect(mutex.lock('1', { signal: signal2 })).resolves.toBeTruthy();
+    await expect(mutex.lock('1', { signal: createSignal()[0] })).resolves.toBeTruthy();
   });
 });
 
