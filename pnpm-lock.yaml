@@ -392,8 +392,8 @@ importers:
         specifier: ^1.2.1
         version: 1.2.1
       tiny-lru:
-        specifier: 8.0.2
-        version: 8.0.2
+        specifier: 11.0.1
+        version: 11.0.1
     optionalDependencies:
       '@apollo/server':
         specifier: ^4.0.0
@@ -1163,8 +1163,8 @@ importers:
         specifier: 0.1.13
         version: 0.1.13
       tiny-lru:
-        specifier: 8.0.2
-        version: 8.0.2
+        specifier: 11.0.1
+        version: 11.0.1
       zod:
         specifier: 3.21.4
         version: 3.21.4
@@ -1218,8 +1218,8 @@ importers:
         specifier: 2.2.4
         version: 2.2.4
       tiny-lru:
-        specifier: 8.0.2
-        version: 8.0.2
+        specifier: 11.0.1
+        version: 11.0.1
       zod:
         specifier: 3.21.4
         version: 3.21.4
@@ -1304,8 +1304,8 @@ importers:
         specifier: 2.2.4
         version: 2.2.4
       tiny-lru:
-        specifier: 8.0.2
-        version: 8.0.2
+        specifier: 11.0.1
+        version: 11.0.1
       zod:
         specifier: 3.21.4
         version: 3.21.4
@@ -28616,6 +28616,11 @@ packages:
       globalyzer: 0.1.0
       globrex: 0.1.2
     dev: true
+
+  /tiny-lru@11.0.1:
+    resolution: {integrity: sha512-iNgFugVuQgBKrqeO/mpiTTgmBsTP0WL6yeuLfLs/Ctf0pI/ixGqIRm8sDCwMcXGe9WWvt2sGXI5mNqZbValmJg==}
+    engines: {node: '>=12'}
+    dev: false
 
   /tiny-lru@8.0.2:
     resolution: {integrity: sha512-ApGvZ6vVvTNdsmt676grvCkUCGwzG9IqXma5Z07xJgiC5L7akUMof5U8G2JTI9Rz/ovtVhJBlY6mNhEvtjzOIg==}
