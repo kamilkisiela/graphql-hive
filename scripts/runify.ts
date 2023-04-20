@@ -86,7 +86,6 @@ function isNext(pkg: any): boolean {
 }
 
 async function buildWithNext(cwd: string, additionalRequire: string | null) {
-  console.log('📦 Building local Docker images...');
   await fs.mkdirp(normalize(join(cwd, 'dist')));
   if (additionalRequire) {
     await tsup({
