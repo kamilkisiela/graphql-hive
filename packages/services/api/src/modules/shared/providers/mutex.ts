@@ -36,22 +36,11 @@ export class Mutex {
   }
 
   public lock(id: string, { signal, timeout = 60_000, retries = 10 }: MutexLockOptions) {
-    let lock: Lock | null = null;
     return Promise.race([
       new Promise<never>((_, reject) => {
         const listener = () => {
           signal.removeEventListener('abort', listener);
-          if (!lock) {
-            return reject(new Error('Locking aborted'));
-          }
-          lock
-            .release()
-            .catch(err => {
-              this.logger.error('Unable to release lock after aborted (id=%s, err=%s)', id, err);
-            })
-            .finally(() => {
-              reject(new Error('Locking aborted'));
-            });
+          reject(new Error('Locking aborted'));
         };
         signal.addEventListener('abort', listener);
       }),
@@ -60,22 +49,17 @@ export class Mutex {
           throw new Error('Locking aborted');
         }
         this.logger.debug('Acquiring lock (id=%s)', id);
-        const thisLock = await this.redlock.acquire([id], timeout, { retryCount: retries });
+        const lock = await this.redlock.acquire([id], timeout, { retryCount: retries });
         if (signal.aborted) {
-          thisLock.release().catch(err => {
+          lock.release().catch(err => {
             this.logger.error('Unable to release lock after aborted (id=%s, err=%s)', id, err);
           });
           throw new Error('Locking aborted');
         }
-        lock = thisLock;
         this.logger.debug('Lock acquired (id=%s)', id);
         return async () => {
           this.logger.debug('Releasing lock (id=%s)', id);
-          lock = null;
-
-          // It is safe to re-attempt a release in case the lock was aborted.
-          // See more: https://github.com/mike-marcacci/node-redlock/blob/5dd9e281daae8f086ccb9284a9fc8709faf74a2a/src/index.ts#L343-L364
-          await thisLock.release();
+          await lock.release();
         };
       })(),
     ]);

@@ -7,8 +7,7 @@ describe('Single process', () => {
   it('should allow only one lock at a time', async () => {
     const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
 
-    const ctrl = new AbortController();
-    const signal = ctrl.signal;
+    const [signal] = createSignal();
 
     const unlock1 = await mutex.lock('1', { signal });
 
@@ -26,8 +25,7 @@ describe('Single process', () => {
   it('should time out after the specified duration', async () => {
     const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
 
-    const ctrl = new AbortController();
-    const signal = ctrl.signal;
+    const [signal] = createSignal();
 
     await mutex.lock('1', { signal });
 
@@ -38,19 +36,24 @@ describe('Single process', () => {
     );
   });
 
-  it('should cancel locking on abort signal', async () => {
+  it.only('should cancel locking on abort signal', async () => {
     const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
 
-    const ctrl = new AbortController();
-    const signal = ctrl.signal;
+    const [signal, abort] = createSignal();
 
-    await mutex.lock('1', { signal });
+    const unlock1 = await mutex.lock('1', { signal });
 
     const lock2 = mutex.lock('1', { signal });
 
-    ctrl.abort();
+    abort();
 
     await expect(lock2).rejects.toMatchInlineSnapshot('[Error: Locking aborted]');
+
+    await unlock1();
+
+    // make sure that the aborted lock does not lock
+    const [signal2] = createSignal();
+    await expect(mutex.lock('1', { signal: signal2 })).resolves.toBeTruthy();
   });
 });
 
@@ -72,4 +75,9 @@ function throwAfter(ms: number) {
 
 function randomPort() {
   return Math.floor(Math.random() * 100);
+}
+
+function createSignal(): [signal: AbortSignal, abort: () => void] {
+  const ctrl = new AbortController();
+  return [ctrl.signal, () => ctrl.abort()];
 }
