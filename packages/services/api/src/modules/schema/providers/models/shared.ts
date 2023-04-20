@@ -1,5 +1,9 @@
-import { PushedCompositeSchema, SingleSchema } from 'packages/services/api/src/shared/entities';
-import type { SchemaModule } from './../../__generated__/types';
+import {
+  PushedCompositeSchema,
+  SchemaCompositionError,
+  SingleSchema,
+} from 'packages/services/api/src/shared/entities';
+import { Change } from '@graphql-inspector/core';
 
 export const SchemaPublishConclusion = {
   /**
@@ -75,16 +79,14 @@ export type SchemaCheckFailureReason =
     }
   | {
       code: (typeof CheckFailureReasonCode)['BreakingChanges'];
-      breakingChanges: Array<{
-        message: string;
-      }>;
-      changes: SchemaModule.SchemaChange[];
+      breakingChanges: Array<Change>;
+      changes: Array<Change>;
     };
 
 export type SchemaCheckSuccess = {
   conclusion: (typeof SchemaCheckConclusion)['Success'];
   state: {
-    changes: SchemaModule.SchemaChange[] | null;
+    changes: Array<Change> | null;
     initial: boolean;
   };
 };
@@ -131,10 +133,8 @@ export type SchemaPublishFailureReason =
     }
   | {
       code: (typeof PublishFailureReasonCode)['BreakingChanges'];
-      breakingChanges: Array<{
-        message: string;
-      }>;
-      changes: SchemaModule.SchemaChange[];
+      breakingChanges: Array<Change>;
+      changes: Array<Change>;
     };
 
 type SchemaPublishSuccess = {
@@ -142,14 +142,12 @@ type SchemaPublishSuccess = {
   state: {
     composable: boolean;
     initial: boolean;
-    changes: SchemaModule.SchemaChange[] | null;
+    changes: Array<Change> | null;
     messages: string[] | null;
     breakingChanges: Array<{
       message: string;
     }> | null;
-    compositionErrors: Array<{
-      message: string;
-    }> | null;
+    compositionErrors: Array<SchemaCompositionError> | null;
     schema: SingleSchema | PushedCompositeSchema;
     schemas: [SingleSchema] | PushedCompositeSchema[];
     supergraph: string | null;
@@ -195,10 +193,8 @@ export type SchemaDeleteSuccess = {
   conclusion: (typeof SchemaDeleteConclusion)['Accept'];
   state: {
     composable: boolean;
-    changes: SchemaModule.SchemaChange[] | null;
-    breakingChanges: Array<{
-      message: string;
-    }> | null;
+    changes: Array<Change> | null;
+    breakingChanges: Array<Change> | null;
     compositionErrors: Array<{
       message: string;
     }> | null;

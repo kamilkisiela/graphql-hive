@@ -145,6 +145,7 @@ export class CompositeModel {
         schemas,
         selector,
         version: compareToLatest ? latest : latestComposable,
+        includeUrlChanges: false,
       }),
     ]);
 
@@ -159,11 +160,20 @@ export class CompositeModel {
       }
 
       if (diffCheck.status === 'failed') {
-        reasons.push({
-          code: CheckFailureReasonCode.BreakingChanges,
-          changes: diffCheck.reason.changes ?? [],
-          breakingChanges: diffCheck.reason.breakingChanges,
-        });
+        if (diffCheck.reason.changes) {
+          reasons.push({
+            code: CheckFailureReasonCode.BreakingChanges,
+            changes: diffCheck.reason.changes ?? [],
+            breakingChanges: diffCheck.reason.breakingChanges,
+          });
+        }
+
+        if (diffCheck.reason.compareFailure) {
+          reasons.push({
+            code: CheckFailureReasonCode.CompositionFailure,
+            compositionErrors: [diffCheck.reason.compareFailure],
+          });
+        }
       }
 
       return {
@@ -300,6 +310,7 @@ export class CompositeModel {
           organization: project.orgId,
         },
         version: compareToLatest ? latest : latestComposable,
+        includeUrlChanges: true,
       }),
     ]);
 
@@ -354,7 +365,7 @@ export class CompositeModel {
         changes: diffCheck.result?.changes ?? diffCheck.reason?.changes ?? null,
         messages,
         breakingChanges: null,
-        compositionErrors: null,
+        compositionErrors: compositionCheck.reason?.errors ?? null,
         schema: incoming,
         schemas,
         supergraph: compositionCheck.result?.supergraph ?? null,
@@ -438,6 +449,7 @@ export class CompositeModel {
         schemas,
         selector,
         version: compareToLatest ? latestVersion : latestComposable,
+        includeUrlChanges: true,
       }),
     ]);
 

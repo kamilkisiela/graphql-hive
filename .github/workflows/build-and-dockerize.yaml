@@ -112,7 +112,7 @@ jobs:
         timeout-minutes: 360
         id: docker-bake
         if: ${{ inputs.dockerize }}
-        uses: docker/bake-action@v2
+        uses: docker/bake-action@v3
         env:
           DOCKER_REGISTRY: ${{ inputs.registry }}/${{ inputs.imageName }}/
           COMMIT_SHA: ${{ inputs.imageTag }}
@@ -122,6 +122,8 @@ jobs:
           PWD: ${{ github.workspace }}
           BUILD_STABLE: ${{ inputs.publishLatest && '1' || '' }}
         with:
+          # See https://github.com/docker/buildx/issues/1533
+          provenance: false
           push: true
           files: docker/docker.hcl
           targets: ${{ inputs.targets }}

@@ -48,12 +48,28 @@ export function minifySchema(schema: string): string {
   return schema.replace(/\s+/g, ' ').trim();
 }
 
-export function createConnection<T>() {
+export function createConnection<TInput>(): {
+  nodes(nodes: readonly TInput[]): readonly TInput[];
+  total(nodes: readonly TInput[]): number;
+};
+export function createConnection<TInput, TOutput = TInput>(
+  map: (node: TInput) => TOutput,
+): {
+  nodes(nodes: readonly TInput[]): readonly TOutput[];
+  total(nodes: readonly TInput[]): number;
+};
+export function createConnection(map?: (node: unknown) => unknown): {
+  nodes(nodes: readonly unknown[]): readonly unknown[];
+  total(nodes: readonly unknown[]): number;
+} {
   return {
-    nodes(nodes: readonly T[]) {
+    nodes(nodes: readonly unknown[]): readonly unknown[] {
+      if (map) {
+        return nodes.map(map);
+      }
       return nodes ?? [];
     },
-    total(nodes: readonly T[]) {
+    total(nodes: readonly unknown[]) {
       return nodes?.length ?? 0;
     },
   };

@@ -13,7 +13,7 @@
     "cypress",
     "cypress.config.ts",
     ".eslintrc.cjs",
-    "vite.config.ts",
+    "vitest.config.ts",
     "scripts/serializer.ts",
     "packages/web/app/.babelrc.cjs"
   ],
