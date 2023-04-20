@@ -122,6 +122,8 @@ jobs:
           PWD: ${{ github.workspace }}
           BUILD_STABLE: ${{ inputs.publishLatest && '1' || '' }}
         with:
+          # See https://github.com/docker/buildx/issues/1533
+          provenance: false
           push: true
           files: docker/docker.hcl
           targets: ${{ inputs.targets }}
