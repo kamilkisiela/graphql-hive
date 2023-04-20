@@ -33,7 +33,7 @@ export class Mutex {
     this.logger = logger.child({ service: 'Mutex' });
     this.redlock = new Redlock([redis]);
     this.redlock.on('error', err => {
-      logger.error(err);
+      this.logger.error(err);
     });
   }
 
