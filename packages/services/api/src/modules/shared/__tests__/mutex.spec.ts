@@ -64,6 +64,36 @@ it('should cancel locking on abort signal', async ({ expect }) => {
   await expect(mutex.lock('1', { signal: createSignal()[0] })).resolves.toBeTruthy();
 });
 
+it('should release lock in perform after return', async ({ expect }) => {
+  const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
+
+  const [signal] = createSignal();
+
+  const result = {};
+  await expect(
+    mutex.perform('1', { signal }, () => {
+      return result;
+    }),
+  ).resolves.toBe(result);
+
+  await expect(mutex.lock('1', { signal })).resolves.toBeTruthy();
+});
+
+it('should release lock in perform on throw', async ({ expect }) => {
+  const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
+
+  const [signal] = createSignal();
+
+  const whoops = new Error('Whoops!');
+  await expect(
+    mutex.perform('1', { signal }, async () => {
+      throw whoops;
+    }),
+  ).rejects.toBe(whoops);
+
+  await expect(mutex.lock('1', { signal })).resolves.toBeTruthy();
+});
+
 // since vitest uses workers (which are kindof separate processes), this can be tested
 describe.concurrent('should serialise concurrent threads', () => {
   const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
