@@ -18,6 +18,7 @@ import { OrganizationManager } from '../../organization/providers/organization-m
 import { ProjectManager } from '../../project/providers/project-manager';
 import { IdempotentRunner } from '../../shared/providers/idempotent-runner';
 import { Logger } from '../../shared/providers/logger';
+import { Mutex } from '../../shared/providers/mutex';
 import { Storage, type TargetSelector } from '../../shared/providers/storage';
 import { TargetManager } from '../../target/providers/target-manager';
 import { ArtifactStorageWriter } from './artifact-storage-writer';
@@ -122,6 +123,7 @@ export class SchemaPublisher {
     private idempotentRunner: IdempotentRunner,
     private helper: SchemaHelper,
     private artifactStorageWriter: ArtifactStorageWriter,
+    private mutex: Mutex,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
     singleModel: SingleModel,
     compositeModel: CompositeModel,
@@ -353,17 +355,14 @@ export class SchemaPublisher {
     );
     return this.idempotentRunner.run({
       identifier: `schema:publish:${input.checksum}`,
-      executor: async () => {
-        const unlock = await this.storage.idMutex.lock(registryLockId(input.target), {
-          signal,
-          logger: this.logger,
-        });
-        try {
-          return await this.internalPublish(input);
-        } finally {
-          await unlock();
-        }
-      },
+      executor: () =>
+        this.mutex.perform(
+          registryLockId(input.target),
+          {
+            signal,
+          },
+          () => this.internalPublish(input),
+        ),
       ttl: 15,
       span,
     });
@@ -433,161 +432,160 @@ export class SchemaPublisher {
 
     return this.idempotentRunner.run({
       identifier: `schema:delete:${input.checksum}`,
-      executor: async () => {
-        const unlock = await this.storage.idMutex.lock(registryLockId(input.target), {
-          signal,
-          logger: this.logger,
-        });
-        try {
-          await this.authManager.ensureTargetAccess({
-            organization: input.organization,
-            project: input.project,
-            target: input.target,
-            scope: TargetAccessScope.REGISTRY_WRITE,
-          });
-          const [project, organization, latestVersion, latestComposableVersion, baseSchema] =
-            await Promise.all([
-              this.projectManager.getProject({
-                organization: input.organization,
-                project: input.project,
-              }),
-              this.organizationManager.getOrganization({
-                organization: input.organization,
-              }),
-              this.schemaManager.getLatestSchemas({
-                organization: input.organization,
-                project: input.project,
-                target: input.target,
-              }),
-              this.schemaManager.getLatestSchemas({
-                organization: input.organization,
-                project: input.project,
-                target: input.target,
-                onlyComposable: true,
-              }),
-              this.schemaManager.getBaseSchema({
-                organization: input.organization,
-                project: input.project,
-                target: input.target,
-              }),
-            ]);
-
-          const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
-
-          schemaDeleteCount.inc({ model: modelVersion, projectType: project.type });
-
-          if (project.type !== ProjectType.FEDERATION && project.type !== ProjectType.STITCHING) {
-            throw new HiveError(`${project.type} project (${modelVersion}) not supported`);
-          }
-
-          if (modelVersion === 'legacy') {
-            throw new HiveError(
-              'Please upgrade your project to the new registry model to use this feature. See https://the-guild.dev/blog/graphql-hive-improvements-in-schema-registry',
-            );
-          }
-
-          if (!latestVersion || latestVersion.schemas.length === 0) {
-            throw new HiveError('Registry is empty');
-          }
-
-          const schemas = ensureCompositeSchemas(latestVersion.schemas);
-          this.logger.debug(`Found ${latestVersion?.schemas.length ?? 0} most recent schemas`);
-          this.logger.debug(
-            'Using %s registry model (version=%s, featureFlags=%o)',
-            project.type,
-            modelVersion,
-            organization.featureFlags,
-          );
-
-          const serviceExists = schemas.some(s => s.service_name === input.serviceName);
-
-          if (!serviceExists) {
-            return {
-              __typename: 'SchemaDeleteError',
-              valid: latestVersion.valid,
-              errors: [
-                {
-                  message: `Service "${input.serviceName}" not found`,
-                },
-              ],
-            } as const;
-          }
-
-          const deleteResult = await this.models[project.type][modelVersion].delete({
-            input: {
-              serviceName: input.serviceName,
-            },
-            latest: {
-              isComposable: latestVersion.valid,
-              schemas,
-            },
-            latestComposable: latestComposableVersion
-              ? {
-                  isComposable: latestComposableVersion.valid,
-                  schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
-                }
-              : null,
-            baseSchema,
-            project,
-            organization,
-            selector: {
-              target: input.target,
-              project: input.project,
+      executor: () =>
+        this.mutex.perform(
+          registryLockId(input.target),
+          {
+            signal,
+          },
+          async () => {
+            await this.authManager.ensureTargetAccess({
               organization: input.organization,
-            },
-          });
+              project: input.project,
+              target: input.target,
+              scope: TargetAccessScope.REGISTRY_WRITE,
+            });
+            const [project, organization, latestVersion, latestComposableVersion, baseSchema] =
+              await Promise.all([
+                this.projectManager.getProject({
+                  organization: input.organization,
+                  project: input.project,
+                }),
+                this.organizationManager.getOrganization({
+                  organization: input.organization,
+                }),
+                this.schemaManager.getLatestSchemas({
+                  organization: input.organization,
+                  project: input.project,
+                  target: input.target,
+                }),
+                this.schemaManager.getLatestSchemas({
+                  organization: input.organization,
+                  project: input.project,
+                  target: input.target,
+                  onlyComposable: true,
+                }),
+                this.schemaManager.getBaseSchema({
+                  organization: input.organization,
+                  project: input.project,
+                  target: input.target,
+                }),
+              ]);
 
-          if (deleteResult.conclusion === SchemaDeleteConclusion.Accept) {
-            this.logger.debug('Delete accepted');
-            if (input.dryRun !== true) {
-              await this.storage.deleteSchema({
-                organization: input.organization,
-                project: input.project,
-                target: input.target,
+            const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
+
+            schemaDeleteCount.inc({ model: modelVersion, projectType: project.type });
+
+            if (project.type !== ProjectType.FEDERATION && project.type !== ProjectType.STITCHING) {
+              throw new HiveError(`${project.type} project (${modelVersion}) not supported`);
+            }
+
+            if (modelVersion === 'legacy') {
+              throw new HiveError(
+                'Please upgrade your project to the new registry model to use this feature. See https://the-guild.dev/blog/graphql-hive-improvements-in-schema-registry',
+              );
+            }
+
+            if (!latestVersion || latestVersion.schemas.length === 0) {
+              throw new HiveError('Registry is empty');
+            }
+
+            const schemas = ensureCompositeSchemas(latestVersion.schemas);
+            this.logger.debug(`Found ${latestVersion?.schemas.length ?? 0} most recent schemas`);
+            this.logger.debug(
+              'Using %s registry model (version=%s, featureFlags=%o)',
+              project.type,
+              modelVersion,
+              organization.featureFlags,
+            );
+
+            const serviceExists = schemas.some(s => s.service_name === input.serviceName);
+
+            if (!serviceExists) {
+              return {
+                __typename: 'SchemaDeleteError',
+                valid: latestVersion.valid,
+                errors: [
+                  {
+                    message: `Service "${input.serviceName}" not found`,
+                  },
+                ],
+              } as const;
+            }
+
+            const deleteResult = await this.models[project.type][modelVersion].delete({
+              input: {
                 serviceName: input.serviceName,
-                composable: deleteResult.state.composable,
+              },
+              latest: {
+                isComposable: latestVersion.valid,
+                schemas,
+              },
+              latestComposable: latestComposableVersion
+                ? {
+                    isComposable: latestComposableVersion.valid,
+                    schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
+                  }
+                : null,
+              baseSchema,
+              project,
+              organization,
+              selector: {
+                target: input.target,
+                project: input.project,
+                organization: input.organization,
+              },
+            });
+
+            if (deleteResult.conclusion === SchemaDeleteConclusion.Accept) {
+              this.logger.debug('Delete accepted');
+              if (input.dryRun !== true) {
+                await this.storage.deleteSchema({
+                  organization: input.organization,
+                  project: input.project,
+                  target: input.target,
+                  serviceName: input.serviceName,
+                  composable: deleteResult.state.composable,
+                });
+              }
+
+              return {
+                __typename: 'SchemaDeleteSuccess',
+                valid: deleteResult.state.composable,
+                changes: deleteResult.state.changes,
+                errors: [
+                  ...(deleteResult.state.compositionErrors ?? []),
+                  ...(deleteResult.state.breakingChanges ?? []),
+                ],
+              } as const;
+            }
+
+            this.logger.debug('Delete rejected');
+
+            const errors = [];
+
+            const compositionErrors = getReasonByCode(
+              deleteResult,
+              DeleteFailureReasonCode.CompositionFailure,
+            )?.compositionErrors;
+
+            if (getReasonByCode(deleteResult, DeleteFailureReasonCode.MissingServiceName)) {
+              errors.push({
+                message: 'Service name is required',
               });
             }
 
+            if (compositionErrors?.length) {
+              errors.push(...compositionErrors);
+            }
+
             return {
-              __typename: 'SchemaDeleteSuccess',
-              valid: deleteResult.state.composable,
-              changes: deleteResult.state.changes,
-              errors: [
-                ...(deleteResult.state.compositionErrors ?? []),
-                ...(deleteResult.state.breakingChanges ?? []),
-              ],
+              __typename: 'SchemaDeleteError',
+              valid: false,
+              errors,
             } as const;
-          }
-
-          this.logger.debug('Delete rejected');
-
-          const errors = [];
-
-          const compositionErrors = getReasonByCode(
-            deleteResult,
-            DeleteFailureReasonCode.CompositionFailure,
-          )?.compositionErrors;
-
-          if (getReasonByCode(deleteResult, DeleteFailureReasonCode.MissingServiceName)) {
-            errors.push({
-              message: 'Service name is required',
-            });
-          }
-
-          if (compositionErrors?.length) {
-            errors.push(...compositionErrors);
-          }
-
-          return {
-            __typename: 'SchemaDeleteError',
-            valid: false,
-            errors,
-          } as const;
-        } finally {
-          await unlock();
-        }
-      },
+          },
+        ),
       ttl: 60,
       span,
     });

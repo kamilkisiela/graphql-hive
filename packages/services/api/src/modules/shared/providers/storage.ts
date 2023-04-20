@@ -30,7 +30,6 @@ import type { OrganizationAccessScope } from '../../auth/providers/organization-
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
 import { SerializableChange } from '../../schema/schema-change-from-meta';
-import { Logger } from './logger';
 
 type Paginated<T> = T & {
   after?: string | null;
@@ -51,31 +50,6 @@ export interface TargetSelector extends ProjectSelector {
 
 export interface PersistedOperationSelector extends ProjectSelector {
   operation: string;
-}
-
-export interface IdMutex {
-  /**
-   * Acquires a mutual exclusion lock using the provided argument
-   * as the key.
-   *
-   * If there is already a lock with the supplied key, the promise
-   * will wait until that lock is released.
-   *
-   * The lock exists until the function that is resolved (unlock) is called.
-   *
-   * Locks are acquired on the database and within the running process,
-   * meaning the lock mechanism works across multiple services running
-   * in parallel.
-   *
-   * @param id - Mutual exclusion lock key
-   */
-  lock(
-    id: string,
-    opts: { signal: AbortSignal; logger?: Logger },
-  ): Promise<
-    // unlock
-    () => Promise<void>
-  >;
 }
 
 export interface Storage {
@@ -474,7 +448,6 @@ export interface Storage {
     authorizationEndpoint: string | null;
   }): Promise<OIDCIntegration>;
   deleteOIDCIntegration(_: { oidcIntegrationId: string }): Promise<void>;
-  idMutex: IdMutex;
 
   createCDNAccessToken(_: {
     id: string;
