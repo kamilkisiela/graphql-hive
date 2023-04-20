@@ -66,6 +66,7 @@ describe('Single process', () => {
   });
 });
 
+// since vitest uses workers (which are kindof separate processes), this can be tested
 describe.todo('Multiple processes');
 
 class Tlogger implements Logger {
