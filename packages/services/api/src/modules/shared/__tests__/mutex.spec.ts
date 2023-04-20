@@ -36,7 +36,7 @@ describe('Single process', () => {
     );
   });
 
-  it.only('should cancel locking on abort signal', async () => {
+  it('should cancel locking on abort signal', async () => {
     const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
 
     const [signal, abort] = createSignal();
