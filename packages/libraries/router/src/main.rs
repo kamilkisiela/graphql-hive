@@ -2,6 +2,7 @@
 mod agent;
 mod graphql;
 mod registry;
+mod registry_logger;
 mod usage;
 
 use registry::HiveRegistry;
