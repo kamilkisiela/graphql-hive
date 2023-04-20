@@ -29,5 +29,4 @@ export default withBundleAnalyzer({
       permanent: true,
     },
   ],
-  swcMinify: true,
 });
