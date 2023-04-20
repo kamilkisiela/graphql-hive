@@ -33,19 +33,41 @@ curl -sSL https://graphql-hive.com/install.sh | sh
 ## Commands
 
 <!-- commands -->
+* [`hive artifact:fetch`](#hive-artifactfetch)
+* [`hive config:delete KEY`](#hive-configdelete-key)
+* [`hive config:get KEY`](#hive-configget-key)
+* [`hive config:reset`](#hive-configreset)
+* [`hive config:set KEY VALUE`](#hive-configset-key-value)
+* [`hive help [COMMANDS]`](#hive-help-commands)
+* [`hive operations:check FILE`](#hive-operationscheck-file)
+* [`hive operations:publish FILE`](#hive-operationspublish-file)
+* [`hive schema:check FILE`](#hive-schemacheck-file)
+* [`hive schema:delete SERVICE`](#hive-schemadelete-service)
+* [`hive schema:publish FILE`](#hive-schemapublish-file)
+* [`hive update [CHANNEL]`](#hive-update-channel)
+* [`hive whoami`](#hive-whoami)
 
-- [`hive config:delete KEY`](#hive-configdelete-key)
-- [`hive config:get KEY`](#hive-configget-key)
-- [`hive config:reset`](#hive-configreset)
-- [`hive config:set KEY VALUE`](#hive-configset-key-value)
-- [`hive help [COMMANDS]`](#hive-help-commands)
-- [`hive operations:check FILE`](#hive-operationscheck-file)
-- [`hive operations:publish FILE`](#hive-operationspublish-file)
-- [`hive schema:check FILE`](#hive-schemacheck-file)
-- [`hive schema:delete SERVICE`](#hive-schemadelete-service)
-- [`hive schema:publish FILE`](#hive-schemapublish-file)
-- [`hive update [CHANNEL]`](#hive-update-channel)
-- [`hive whoami`](#hive-whoami)
+## `hive artifact:fetch`
+
+fetch artifacts from the CDN
+
+```
+USAGE
+  $ hive artifact:fetch --artifact sdl|supergraph|metadata|services|sdl.graphql|sdl.graphqls [--cdn.endpoint
+    <value>] [--cdn.accessToken <value>] [--outputFile <value>]
+
+FLAGS
+  --artifact=(sdl|supergraph|metadata|services|sdl.graphql|sdl.graphqls)  (required) artifact to fetch (Note: supergraph
+                                                                          is only available for federation projects)
+  --cdn.accessToken=<value>                                               CDN access token
+  --cdn.endpoint=<value>                                                  CDN endpoint
+  --outputFile=<value>                                                    whether to write to a file instead of stdout
+
+DESCRIPTION
+  fetch artifacts from the CDN
+```
+
+_See code: [dist/commands/artifact/fetch.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/artifact/fetch.js)_
 
 ## `hive config:delete KEY`
 
@@ -62,8 +84,7 @@ DESCRIPTION
   deletes specific cli configuration
 ```
 
-_See code:
-[dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/config/delete.js)_
+_See code: [dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/config/delete.js)_
 
 ## `hive config:get KEY`
 
@@ -80,8 +101,7 @@ DESCRIPTION
   prints specific cli configuration
 ```
 
-_See code:
-[dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/config/get.js)_
+_See code: [dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/config/get.js)_
 
 ## `hive config:reset`
 
@@ -95,8 +115,7 @@ DESCRIPTION
   resets local cli configuration
 ```
 
-_See code:
-[dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/config/reset.js)_
+_See code: [dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/config/reset.js)_
 
 ## `hive config:set KEY VALUE`
 
@@ -114,8 +133,7 @@ DESCRIPTION
   updates specific cli configuration
 ```
 
-_See code:
-[dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/config/set.js)_
+_See code: [dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/config/set.js)_
 
 ## `hive help [COMMANDS]`
 
@@ -135,8 +153,7 @@ DESCRIPTION
   Display help for hive.
 ```
 
-_See code:
-[@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.6/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.9/src/commands/help.ts)_
 
 ## `hive operations:check FILE`
 
@@ -144,22 +161,24 @@ checks operations against a published schema
 
 ```
 USAGE
-  $ hive operations:check FILE [--registry.endpoint <value>] [--registry.accessToken <value>] [--require <value>]
+  $ hive operations:check FILE [--registry.endpoint <value>] [--registry <value>] [--registry.accessToken <value>]
+    [--token <value>] [--require <value>]
 
 ARGUMENTS
   FILE  Glob pattern to find the operations
 
 FLAGS
-  --registry.endpoint=<value>             registry endpoint
-  --registry.accessToken=<value> api token
-  --require=<value>...           [default: ] Loads specific require.extensions before running the command
+  --registry=<value>              registry address
+  --registry.accessToken=<value>  registry access token
+  --registry.endpoint=<value>     registry endpoint
+  --require=<value>...            [default: ] Loads specific require.extensions before running the command
+  --token=<value>                 api token
 
 DESCRIPTION
   checks operations against a published schema
 ```
 
-_See code:
-[dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/operations/check.js)_
+_See code: [dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/operations/check.js)_
 
 ## `hive operations:publish FILE`
 
@@ -167,23 +186,25 @@ saves operations to the store
 
 ```
 USAGE
-  $ hive operations:publish FILE [--registry.endpoint <value>] [--registry.accessToken <value>] [--require <value>]
+  $ hive operations:publish FILE [--registry.endpoint <value>] [--registry <value>] [--registry.accessToken <value>]
+    [--token <value>] [--require <value>]
 
 ARGUMENTS
   FILE  Glob pattern to find the operations
 
 FLAGS
-  --registry.endpoint=<value>    registry address
-  --require=<value>...  [default: ] Loads specific require.extensions before running the codegen and reading the
-                        configuration
-  --registry.accessToken=<value>       api token
+  --registry=<value>              registry address
+  --registry.accessToken=<value>  registry access token
+  --registry.endpoint=<value>     registry endpoint
+  --require=<value>...            [default: ] Loads specific require.extensions before running the codegen and reading
+                                  the configuration
+  --token=<value>                 api token
 
 DESCRIPTION
   saves operations to the store
 ```
 
-_See code:
-[dist/commands/operations/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/operations/publish.js)_
+_See code: [dist/commands/operations/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/operations/publish.js)_
 
 ## `hive schema:check FILE`
 
@@ -191,27 +212,28 @@ checks schema
 
 ```
 USAGE
-  $ hive schema:check FILE [--service <value>] [--registry.endpoint <value>] [--registry.accessToken <value>] [--forceSafe] [--github]
-    [--require <value>]
+  $ hive schema:check FILE [--service <value>] [--registry.endpoint <value>] [--registry <value>]
+    [--registry.accessToken <value>] [--token <value>] [--forceSafe] [--github] [--require <value>]
 
 ARGUMENTS
   FILE  Path to the schema file(s)
 
 FLAGS
-  --forceSafe                          mark the check as safe, breaking changes are expected
-  --github                             Connect with GitHub Application
-  --registry.endpoint=<value>          registry address
-  --require=<value>...                 [default: ] Loads specific require.extensions before running the codegen and reading the
-                                       configuration
-  --service=<value>                    service name (only for distributed schemas)
-  --registry.accessToken=<value>       api token
+  --forceSafe                     mark the check as safe, breaking changes are expected
+  --github                        Connect with GitHub Application
+  --registry=<value>              registry address
+  --registry.accessToken=<value>  registry access token
+  --registry.endpoint=<value>     registry endpoint
+  --require=<value>...            [default: ] Loads specific require.extensions before running the codegen and reading
+                                  the configuration
+  --service=<value>               service name (only for distributed schemas)
+  --token=<value>                 api token
 
 DESCRIPTION
   checks schema
 ```
 
-_See code:
-[dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/schema/check.js)_
+_See code: [dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/schema/check.js)_
 
 ## `hive schema:delete SERVICE`
 
@@ -219,7 +241,8 @@ deletes a schema
 
 ```
 USAGE
-  $ hive schema:delete SERVICE [--registry.endpoint <value>] [--registry.accessToken <value>] [--dryRun] [--confirm]
+  $ hive schema:delete SERVICE [--registry.endpoint <value>] [--registry <value>] [--registry.accessToken <value>]
+    [--token <value>] [--dryRun] [--confirm]
 
 ARGUMENTS
   SERVICE  name of the service
@@ -227,15 +250,16 @@ ARGUMENTS
 FLAGS
   --confirm                       Confirm deletion of the service
   --dryRun                        Does not delete the service, only reports what it would have done.
-  --registry.endpoint=<value>     Address of the registry
-  --registry.accessToken=<value>  API token
+  --registry=<value>              registry address
+  --registry.accessToken=<value>  registry access token
+  --registry.endpoint=<value>     registry endpoint
+  --token=<value>                 api token
 
 DESCRIPTION
   deletes a schema
 ```
 
-_See code:
-[dist/commands/schema/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/schema/delete.js)_
+_See code: [dist/commands/schema/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/schema/delete.js)_
 
 ## `hive schema:publish FILE`
 
@@ -244,8 +268,8 @@ publishes schema
 ```
 USAGE
   $ hive schema:publish FILE [--service <value>] [--url <value>] [--metadata <value>] [--registry.endpoint <value>]
-    [--registry.accessToken <value>] [--author <value>] [--commit <value>] [--github] [--force] [--experimental_acceptBreakingChanges]
-    [--require <value>]
+    [--registry <value>] [--registry.accessToken <value>] [--token <value>] [--author <value>] [--commit <value>]
+    [--github] [--force] [--experimental_acceptBreakingChanges] [--require <value>]
 
 ARGUMENTS
   FILE  Path to the schema file(s)
@@ -259,19 +283,20 @@ FLAGS
   --github                              Connect with GitHub Application
   --metadata=<value>                    additional metadata to attach to the GraphQL schema. This can be a string with a
                                         valid JSON, or a path to a file containing a valid JSON
-  --registry.endpoint=<value>           registry address
+  --registry=<value>                    registry address
+  --registry.accessToken=<value>        registry access token
+  --registry.endpoint=<value>           registry endpoint
   --require=<value>...                  [default: ] Loads specific require.extensions before running the codegen and
                                         reading the configuration
   --service=<value>                     service name (only for distributed schemas)
-  --registry.accessToken=<value>        api token
+  --token=<value>                       api token
   --url=<value>                         service url (only for distributed schemas)
 
 DESCRIPTION
   publishes schema
 ```
 
-_See code:
-[dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/schema/publish.js)_
+_See code: [dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/schema/publish.js)_
 
 ## `hive update [CHANNEL]`
 
@@ -308,8 +333,7 @@ EXAMPLES
     $ hive update --available
 ```
 
-_See code:
-[@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.1.6/src/commands/update.ts)_
+_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.1.9/src/commands/update.ts)_
 
 ## `hive whoami`
 
@@ -317,19 +341,20 @@ shows information about the current token
 
 ```
 USAGE
-  $ hive whoami [--registry <value>] [--token <value>]
+  $ hive whoami [--registry.endpoint <value>] [--registry <value>] [--registry.accessToken <value>] [--token
+    <value>]
 
 FLAGS
-  --registry=<value>  registry address
-  --token=<value>     api token
+  --registry=<value>              registry address
+  --registry.accessToken=<value>  registry access token
+  --registry.endpoint=<value>     registry endpoint
+  --token=<value>                 api token
 
 DESCRIPTION
   shows information about the current token
 ```
 
-_See code:
-[dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/whoami.js)_
-
+_See code: [dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/whoami.js)_
 <!-- commandsstop -->
 
 ## Configuration
