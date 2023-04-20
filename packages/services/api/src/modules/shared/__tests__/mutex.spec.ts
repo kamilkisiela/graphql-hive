@@ -22,6 +22,16 @@ describe('Single process', () => {
     await expect(lock2).resolves.toBeTruthy();
   });
 
+  it('should allow different locks at any time', async () => {
+    const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
+
+    const [signal] = createSignal();
+
+    await expect(mutex.lock('1', { signal })).resolves.toBeTruthy();
+    await expect(mutex.lock('2', { signal })).resolves.toBeTruthy();
+    await expect(mutex.lock('3', { signal })).resolves.toBeTruthy();
+  });
+
   it('should time out after the specified duration', async () => {
     const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
 
