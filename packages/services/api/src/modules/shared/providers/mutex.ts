@@ -59,9 +59,9 @@ export class Mutex {
           throw new Error('Locking aborted');
         }
         this.logger.debug('Lock acquired (id=%s)', id);
-        return async () => {
+        return () => {
           this.logger.debug('Releasing lock (id=%s)', id);
-          await lock.release();
+          return lock.release();
         };
       })(),
     ]);
