@@ -136,6 +136,7 @@ const usedPorts: number[] = [];
 function differentPort(): number {
   const port = Math.floor(Math.random() * 100);
   if (!usedPorts.includes(port)) {
+    usedPorts.push(port);
     return port;
   }
   return differentPort();
