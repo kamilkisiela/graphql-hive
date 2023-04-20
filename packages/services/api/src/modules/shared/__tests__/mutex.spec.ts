@@ -94,14 +94,14 @@ it('should release lock in perform on throw', async ({ expect }) => {
   await expect(mutex.lock('1', { signal })).resolves.toBeTruthy();
 });
 
-// since vitest uses workers (which are kindof separate processes), this can be tested
+// since vitest uses workers (which run in separate threads), this can be tested
 describe.concurrent('should serialise concurrent threads', () => {
   const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
   const [signal] = createSignal();
 
   let running = false;
   for (let i = 1; i <= 20; i++) {
-    it.concurrent(`#${i}`, async ({ expect }) => {
+    it(`#${i}`, async ({ expect }) => {
       await mutex.perform('1', { signal }, async () => {
         expect(running).toBeFalsy();
         running = true;
