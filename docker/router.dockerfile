@@ -2,7 +2,7 @@
 FROM scratch AS pkg
 FROM scratch AS config
 
-FROM rust:1.68-slim as build
+FROM rust:1.69-slim as build
 
 # Required by Apollo Router
 RUN apt-get update
