@@ -1576,8 +1576,8 @@ importers:
         specifier: 6.3.1
         version: 6.3.1
       yup:
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: 1.1.1
+        version: 1.1.1
       zod:
         specifier: 3.21.4
         version: 3.21.4
@@ -30552,8 +30552,8 @@ packages:
       wrap-ansi: 2.1.0
     dev: true
 
-  /yup@1.1.0:
-    resolution: {integrity: sha512-CtpEHWiIMwWJBJ+zX8xWImXXdvJ10X/sKkYYTXfVocHj087e9zhP0GNkU7HlXBBI4T9BtHQxs8n2jLzmo/X8Yg==}
+  /yup@1.1.1:
+    resolution: {integrity: sha512-KfCGHdAErqFZWA5tZf7upSUnGKuTOnsI3hUsLr7fgVtx+DK04NPV01A68/FslI4t3s/ZWpvXJmgXhd7q6ICnag==}
     dependencies:
       property-expr: 2.0.5
       tiny-case: 1.0.3
