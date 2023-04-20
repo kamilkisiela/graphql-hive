@@ -1,6 +1,6 @@
 import { Inject, Injectable } from 'graphql-modules';
+import { Change, CriticalityLevel } from '@graphql-inspector/core';
 import { MessageAttachment, WebClient } from '@slack/web-api';
-import type * as Types from '../../../../__generated__/types';
 import { Logger } from '../../../shared/providers/logger';
 import { WEB_APP_URL } from '../../../shared/providers/tokens';
 import {
@@ -122,10 +122,10 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
   }
 }
 
-function createAttachments(changes: readonly Types.SchemaChange[], messages: readonly string[]) {
-  const breakingChanges = changes.filter(filterChangesByLevel('Breaking'));
-  const dangerousChanges = changes.filter(filterChangesByLevel('Dangerous'));
-  const safeChanges = changes.filter(filterChangesByLevel('Safe'));
+function createAttachments(changes: readonly Change[], messages: readonly string[]) {
+  const breakingChanges = changes.filter(filterChangesByLevel(CriticalityLevel.Breaking));
+  const dangerousChanges = changes.filter(filterChangesByLevel(CriticalityLevel.Dangerous));
+  const safeChanges = changes.filter(filterChangesByLevel(CriticalityLevel.NonBreaking));
 
   const attachments: MessageAttachment[] = [];
 
@@ -180,7 +180,7 @@ function renderAttachments({
 }: {
   color: string;
   title: string;
-  changes: readonly Types.SchemaChange[];
+  changes: readonly Change[];
 }): MessageAttachment {
   const text = changes.map(change => slackCoderize(change.message)).join('\n');
 

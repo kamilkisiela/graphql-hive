@@ -67,9 +67,13 @@ export interface DateRange {
 export interface SchemaVersion {
   id: string;
   valid: boolean;
-  date: number;
+  date: string;
   commit: string;
-  base_schema: string | null;
+  baseSchema: string | null;
+  hasPersistedSchemaChanges: boolean;
+  previousSchemaVersionId: null | string;
+  compositeSchemaSDL: null | string;
+  schemaCompositionErrors: Array<SchemaCompositionError> | null;
 }
 
 export interface SchemaObject {
@@ -310,3 +314,10 @@ export interface AdminOrganizationStats {
     to: Date;
   };
 }
+
+export const SchemaCompositionErrorModel = z.object({
+  message: z.string(),
+  source: z.union([z.literal('graphql'), z.literal('composition')]),
+});
+
+export type SchemaCompositionError = z.TypeOf<typeof SchemaCompositionErrorModel>;

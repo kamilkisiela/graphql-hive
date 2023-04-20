@@ -223,7 +223,7 @@ describe.each`
 
       const versionWithNewServiceUrl = versions[0];
 
-      expect(compareToPreviousVersion(versionWithNewServiceUrl.id)).resolves.toEqual(
+      expect(await compareToPreviousVersion(versionWithNewServiceUrl.id)).toEqual(
         expect.objectContaining({
           schemaCompareToPrevious: expect.objectContaining({
             changes: expect.objectContaining({

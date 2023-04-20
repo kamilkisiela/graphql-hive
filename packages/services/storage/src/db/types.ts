@@ -155,6 +155,15 @@ export interface schema_log {
   target_id: string;
 }
 
+export interface schema_version_changes {
+  change_type: string;
+  id: string;
+  is_safe_based_on_usage: boolean;
+  meta: any;
+  schema_version_id: string;
+  severity_level: string;
+}
+
 export interface schema_version_to_log {
   action_id: string;
   version_id: string;
@@ -163,9 +172,13 @@ export interface schema_version_to_log {
 export interface schema_versions {
   action_id: string;
   base_schema: string | null;
+  composite_schema_sdl: string | null;
   created_at: Date;
+  has_persisted_schema_changes: boolean | null;
   id: string;
   is_composable: boolean;
+  previous_schema_version_id: string | null;
+  schema_composition_errors: any | null;
   target_id: string;
 }
 
@@ -242,6 +255,7 @@ export interface DBTables {
   persisted_operations: persisted_operations;
   projects: projects;
   schema_log: schema_log;
+  schema_version_changes: schema_version_changes;
   schema_version_to_log: schema_version_to_log;
   schema_versions: schema_versions;
   target_validation: target_validation;
