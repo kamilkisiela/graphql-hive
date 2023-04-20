@@ -1,5 +1,5 @@
 import { Inject, Injectable } from 'graphql-modules';
-import Redlock from 'redlock';
+import Redlock, { ResourceLockedError } from 'redlock';
 import { Logger } from './logger';
 import type { Redis } from './redis';
 import { REDIS_INSTANCE } from './redis';
@@ -7,21 +7,27 @@ import { REDIS_INSTANCE } from './redis';
 export interface MutexLockOptions {
   signal: AbortSignal;
   /**
-   * The lock timeout/duration in milliseconds.
+   * The lock duration in milliseconds. Beware that the duration
+   * is how long the lock can be held, not the acquire timeout.
    *
-   * Note that the timeout is _between_ retries, not the total
-   * timeout. For example, if you retry 10 times with a 6 second
-   * duration - the lock will time out after 1 minute (60 seconds).
-   *
-   * @default 6_000
+   * @default 60_000
    */
-  timeout?: number;
+  duration?: number;
   /**
-   * How many times is the lock retried before failing.
+   * How many times is the lock acquire retried before failing.
    *
-   * @default 10
+   * @default 60
    */
   retries?: number;
+  /**
+   * How long to wait between lock acquire retries in milliseconds.
+   *
+   * The total lock timeout is then retries multiplied by the retryDelay.
+   * For example: 60 (retries) * 1000ms (retryDelay) = 1min.
+   *
+   * @default 1000
+   */
+  retryDelay?: number;
 }
 
 @Injectable()
@@ -33,11 +39,18 @@ export class Mutex {
     this.logger = logger.child({ service: 'Mutex' });
     this.redlock = new Redlock([redis]);
     this.redlock.on('error', err => {
+      // these errors will be reported directly by the locking mechanism
+      if (err instanceof ResourceLockedError) {
+        return;
+      }
       this.logger.error(err);
     });
   }
 
-  public lock(id: string, { signal, timeout = 6_000, retries = 10 }: MutexLockOptions) {
+  public lock(
+    id: string,
+    { signal, duration = 60_000, retries = 60, retryDelay = 1000 }: MutexLockOptions,
+  ) {
     return Promise.race([
       new Promise<never>((_, reject) => {
         const listener = () => {
@@ -51,17 +64,30 @@ export class Mutex {
           throw new Error('Locking aborted');
         }
         this.logger.debug('Acquiring lock (id=%s)', id);
-        const lock = await this.redlock.acquire([id], timeout, { retryCount: retries });
+        const lock = await this.redlock.acquire([id], duration, {
+          retryCount: retries,
+          retryDelay,
+        });
         if (signal.aborted) {
           lock.release().catch(err => {
-            this.logger.error('Unable to release lock after aborted (id=%s, err=%s)', id, err);
+            // it is safe to not throw the error, as the lock will
+            // automatically expire after its duration is exceeded
+            // TODO: should this be logged as an error? a release may fail if there
+            //       is no lock to release, like when the duration gets exceeded
+            this.logger.warn('Lock release problem after aborted (id=%s, err=%s)', id, err);
           });
           throw new Error('Locking aborted');
         }
         this.logger.debug('Lock acquired (id=%s)', id);
-        return () => {
+        return async () => {
           this.logger.debug('Releasing lock (id=%s)', id);
-          return lock.release();
+          await lock.release().catch(err => {
+            // it is safe to not throw the error, as the lock will
+            // automatically expire after its duration is exceeded
+            // TODO: should this be logged as an error? a release may fail if there
+            //       is no lock to release, like when the duration gets exceeded
+            this.logger.warn('Lock release problem (id=%s, err=%s)', id, err);
+          });
         };
       })(),
     ]);

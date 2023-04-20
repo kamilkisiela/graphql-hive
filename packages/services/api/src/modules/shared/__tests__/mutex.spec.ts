@@ -38,7 +38,7 @@ it('should time out after the specified duration', async ({ expect }) => {
 
   await mutex.lock('1', { signal });
 
-  const lock2 = mutex.lock('1', { signal, timeout: 50, retries: 0 });
+  const lock2 = mutex.lock('1', { signal, retries: 0 });
 
   await expect(lock2).rejects.toMatchInlineSnapshot(
     '[ExecutionError: The operation was unable to achieve a quorum during its retry window.]',
@@ -102,7 +102,7 @@ describe.concurrent('should serialise concurrent threads', () => {
   let running = false;
   for (let i = 1; i <= 20; i++) {
     it(`#${i}`, async ({ expect }) => {
-      await mutex.perform('1', { signal }, async () => {
+      await mutex.perform('1', { signal, retryDelay: 50 }, async () => {
         expect(running).toBeFalsy();
         running = true;
         await sleep();
