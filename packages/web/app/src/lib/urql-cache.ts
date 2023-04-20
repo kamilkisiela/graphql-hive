@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
+import { DocumentNode, Kind } from 'graphql';
 import produce from 'immer';
-import { getOperationName, TypedDocumentNode } from 'urql';
+import type { TypedDocumentNode } from 'urql';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
 import {
@@ -27,6 +28,14 @@ import {
   TargetsDocument,
   TokensDocument,
 } from '../graphql';
+
+export const getOperationName = (query: DocumentNode): string | undefined => {
+  for (const node of query.definitions) {
+    if (node.kind === Kind.OPERATION_DEFINITION) {
+      return node.name ? node.name.value : undefined;
+    }
+  }
+};
 
 function updateQuery<T, V>(cache: Cache, input: QueryInput<T, V>, recipe: (obj: T) => void) {
   return cache.updateQuery(input, (data: T | null) => {
