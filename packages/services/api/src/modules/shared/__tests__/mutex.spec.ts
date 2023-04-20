@@ -37,6 +37,21 @@ it('should time out after the specified duration', async () => {
   );
 });
 
+it('should cancel locking on abort signal', async () => {
+  const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
+
+  const ctrl = new AbortController();
+  const signal = ctrl.signal;
+
+  await mutex.lock('1', { signal });
+
+  const lock2 = mutex.lock('1', { signal });
+
+  ctrl.abort();
+
+  await expect(lock2).rejects.toMatchInlineSnapshot('[Error: Locking aborted]');
+});
+
 class Tlogger implements Logger {
   public info = vi.fn();
   public warn = vi.fn();
