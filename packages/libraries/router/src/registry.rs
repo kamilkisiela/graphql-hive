@@ -1,11 +1,10 @@
+use super::logger::Logger;
 use anyhow::{anyhow, Result};
 use sha2::Digest;
 use sha2::Sha256;
 use std::env;
 use std::io::Write;
 use std::thread;
-
-use crate::local_tracer::LocalTracer;
 
 #[derive(Debug, Clone)]
 pub struct HiveRegistry {
@@ -72,8 +71,8 @@ impl HiveRegistry {
 
         // In case of an endpoint and an key being empty, we don't start the polling and skip the registry
         if endpoint.is_empty() && key.is_empty() {
-            LocalTracer::info("You're not using GraphQL Hive as the source of schema.");
-            LocalTracer::info(
+            Logger::info("You're not using GraphQL Hive as the source of schema.");
+            Logger::info(
                 "Reason: could not find HIVE_CDN_KEY and HIVE_CDN_ENDPOINT environment variables.",
             );
             return Ok(());
@@ -105,7 +104,7 @@ impl HiveRegistry {
 
         match registry.initial_supergraph() {
             Ok(_) => {
-                LocalTracer::info("Successfully fetched and saved supergraph from GraphQL Hive");
+                Logger::info("Successfully fetched and saved supergraph from GraphQL Hive");
             }
             Err(e) => {
                 eprintln!("{}", e);
@@ -193,13 +192,13 @@ impl HiveRegistry {
                     let new_supergraph_hash = hash(new_supergraph.as_bytes());
 
                     if current_supergraph_hash != new_supergraph_hash {
-                        LocalTracer::info("New supergraph detected!");
+                        Logger::info("New supergraph detected!");
                         std::fs::write(self.file_name.clone(), new_supergraph)
                             .expect("Could not write file");
                     }
                 }
             }
-            Err(e) => LocalTracer::error(&format!("{}", e)),
+            Err(e) => Logger::error(&format!("Error: {}", e)),
         }
     }
 }

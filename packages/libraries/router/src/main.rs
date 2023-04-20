@@ -1,10 +1,9 @@
 mod agent;
 mod graphql;
-mod local_tracer;
+mod logger;
 mod registry;
 mod usage;
 
-use local_tracer::LocalTracer;
 use registry::HiveRegistry;
 use usage::register;
 

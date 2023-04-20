@@ -1,5 +1,5 @@
 mod agent;
 mod graphql;
-pub mod local_tracer;
+pub mod logger;
 pub mod registry;
 pub mod usage;

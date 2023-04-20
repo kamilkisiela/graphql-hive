@@ -1,6 +1,5 @@
-use super::local_tracer::LocalTracer;
-
 use super::graphql::OperationProcessor;
+use super::logger::Logger;
 use graphql_parser::schema::{parse_schema, Document};
 use serde::Serialize;
 use std::{
@@ -170,14 +169,14 @@ impl UsageAgent {
                 );
             match operation {
                 Err(e) => {
-                    LocalTracer::warn(&format!(
+                    Logger::warn(&format!(
                         "Dropping operation \"{}\" (phase: PROCESSING): {}",
                         op.operation_name
                             .clone()
-                            .or_else(|| Some("anonymous".to_string()))
-                            .unwrap(),
+                            .unwrap_or_else(|| "anonymous".to_string()),
                         e,
                     ));
+
                     continue;
                 }
                 Ok(operation) => {
@@ -212,7 +211,7 @@ impl UsageAgent {
                             report.size += 1;
                         }
                         None => {
-                            LocalTracer::info("Dropping operation (phase: PROCESSING): probably introspection query");
+                            Logger::info("Dropping operation (phase: PROCESSING): probably introspection query");
                         }
                     }
                 }
@@ -294,8 +293,8 @@ impl UsageAgent {
         if size > 0 {
             let report = self.produce_report(execution_reports);
             match self.send_report(report) {
-                Ok(_) => LocalTracer::debug(&format!("Reported {} operations", size)),
-                Err(e) => LocalTracer::error(&format!("{}", e)),
+                Ok(_) => Logger::debug(&format!("Reported {} operations", size)),
+                Err(e) => Logger::error(&format!("{}", e)),
             }
         }
     }
