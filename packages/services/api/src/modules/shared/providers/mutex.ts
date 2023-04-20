@@ -1,5 +1,5 @@
 import { Inject, Injectable } from 'graphql-modules';
-import Redlock, { Lock } from 'redlock';
+import Redlock from 'redlock';
 import { Logger } from './logger';
 import type { Redis } from './redis';
 import { REDIS_INSTANCE } from './redis';
@@ -9,9 +9,11 @@ export interface MutexLockOptions {
   /**
    * The lock timeout/duration in milliseconds.
    *
-   * Note that the timeout is _between_ retries, not the total timeout.
+   * Note that the timeout is _between_ retries, not the total
+   * timeout. For example, if you retry 10 times with a 6 second
+   * duration - the lock will time out after 1 minute (60 seconds).
    *
-   * @default 60_000
+   * @default 6_000
    */
   timeout?: number;
   /**
@@ -35,7 +37,7 @@ export class Mutex {
     });
   }
 
-  public lock(id: string, { signal, timeout = 60_000, retries = 10 }: MutexLockOptions) {
+  public lock(id: string, { signal, timeout = 6_000, retries = 10 }: MutexLockOptions) {
     return Promise.race([
       new Promise<never>((_, reject) => {
         const listener = () => {
