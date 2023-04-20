@@ -6,11 +6,27 @@ import { graphqlEndpoint } from '../helpers/config';
 export default class WhoAmI extends Command {
   static description = 'shows information about the current token';
   static flags = {
+    'registry.endpoint': Flags.string({
+      description: 'registry endpoint',
+    }),
+    /** @deprecated */
     registry: Flags.string({
       description: 'registry address',
+      deprecated: {
+        message: 'use --registry.endpoint instead',
+        version: '0.21.0',
+      },
     }),
+    'registry.accessToken': Flags.string({
+      description: 'registry access token',
+    }),
+    /** @deprecated */
     token: Flags.string({
       description: 'api token',
+      deprecated: {
+        message: 'use --registry.accessToken instead',
+        version: '0.21.0',
+      },
     }),
   };
 
@@ -18,13 +34,15 @@ export default class WhoAmI extends Command {
     const { flags } = await this.parse(WhoAmI);
 
     const registry = this.ensure({
-      key: 'registry',
+      key: 'registry.endpoint',
+      legacyFlagName: 'registry',
       args: flags,
       defaultValue: graphqlEndpoint,
       env: 'HIVE_REGISTRY',
     });
     const token = this.ensure({
-      key: 'token',
+      key: 'registry.accessToken',
+      legacyFlagName: 'token',
       args: flags,
       env: 'HIVE_TOKEN',
     });

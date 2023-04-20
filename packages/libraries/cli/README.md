@@ -144,15 +144,15 @@ checks operations against a published schema
 
 ```
 USAGE
-  $ hive operations:check FILE [--registry <value>] [--token <value>] [--require <value>]
+  $ hive operations:check FILE [--registry.endpoint <value>] [--registry.accessToken <value>] [--require <value>]
 
 ARGUMENTS
   FILE  Glob pattern to find the operations
 
 FLAGS
-  --registry=<value>    registry address
-  --require=<value>...  [default: ] Loads specific require.extensions before running the command
-  --token=<value>       api token
+  --registry.endpoint=<value>             registry endpoint
+  --registry.accessToken=<value> api token
+  --require=<value>...           [default: ] Loads specific require.extensions before running the command
 
 DESCRIPTION
   checks operations against a published schema
@@ -167,16 +167,16 @@ saves operations to the store
 
 ```
 USAGE
-  $ hive operations:publish FILE [--registry <value>] [--token <value>] [--require <value>]
+  $ hive operations:publish FILE [--registry.endpoint <value>] [--registry.accessToken <value>] [--require <value>]
 
 ARGUMENTS
   FILE  Glob pattern to find the operations
 
 FLAGS
-  --registry=<value>    registry address
+  --registry.endpoint=<value>    registry address
   --require=<value>...  [default: ] Loads specific require.extensions before running the codegen and reading the
                         configuration
-  --token=<value>       api token
+  --registry.accessToken=<value>       api token
 
 DESCRIPTION
   saves operations to the store
@@ -191,20 +191,20 @@ checks schema
 
 ```
 USAGE
-  $ hive schema:check FILE [--service <value>] [--registry <value>] [--token <value>] [--forceSafe] [--github]
+  $ hive schema:check FILE [--service <value>] [--registry.endpoint <value>] [--registry.accessToken <value>] [--forceSafe] [--github]
     [--require <value>]
 
 ARGUMENTS
   FILE  Path to the schema file(s)
 
 FLAGS
-  --forceSafe           mark the check as safe, breaking changes are expected
-  --github              Connect with GitHub Application
-  --registry=<value>    registry address
-  --require=<value>...  [default: ] Loads specific require.extensions before running the codegen and reading the
-                        configuration
-  --service=<value>     service name (only for distributed schemas)
-  --token=<value>       api token
+  --forceSafe                          mark the check as safe, breaking changes are expected
+  --github                             Connect with GitHub Application
+  --registry.endpoint=<value>          registry address
+  --require=<value>...                 [default: ] Loads specific require.extensions before running the codegen and reading the
+                                       configuration
+  --service=<value>                    service name (only for distributed schemas)
+  --registry.accessToken=<value>       api token
 
 DESCRIPTION
   checks schema
@@ -219,16 +219,16 @@ deletes a schema
 
 ```
 USAGE
-  $ hive schema:delete SERVICE [--registry <value>] [--token <value>] [--dryRun] [--confirm]
+  $ hive schema:delete SERVICE [--registry.endpoint <value>] [--registry.accessToken <value>] [--dryRun] [--confirm]
 
 ARGUMENTS
   SERVICE  name of the service
 
 FLAGS
-  --confirm           Confirm deletion of the service
-  --dryRun            Does not delete the service, only reports what it would have done.
-  --registry=<value>  Address of the registry
-  --token=<value>     API token
+  --confirm                       Confirm deletion of the service
+  --dryRun                        Does not delete the service, only reports what it would have done.
+  --registry.endpoint=<value>     Address of the registry
+  --registry.accessToken=<value>  API token
 
 DESCRIPTION
   deletes a schema
@@ -243,8 +243,8 @@ publishes schema
 
 ```
 USAGE
-  $ hive schema:publish FILE [--service <value>] [--url <value>] [--metadata <value>] [--registry <value>] [--token
-    <value>] [--author <value>] [--commit <value>] [--github] [--force] [--experimental_acceptBreakingChanges]
+  $ hive schema:publish FILE [--service <value>] [--url <value>] [--metadata <value>] [--registry.endpoint <value>]
+    [--registry.accessToken <value>] [--author <value>] [--commit <value>] [--github] [--force] [--experimental_acceptBreakingChanges]
     [--require <value>]
 
 ARGUMENTS
@@ -259,11 +259,11 @@ FLAGS
   --github                              Connect with GitHub Application
   --metadata=<value>                    additional metadata to attach to the GraphQL schema. This can be a string with a
                                         valid JSON, or a path to a file containing a valid JSON
-  --registry=<value>                    registry address
+  --registry.endpoint=<value>           registry address
   --require=<value>...                  [default: ] Loads specific require.extensions before running the codegen and
                                         reading the configuration
   --service=<value>                     service name (only for distributed schemas)
-  --token=<value>                       api token
+  --registry.accessToken=<value>        api token
   --url=<value>                         service url (only for distributed schemas)
 
 DESCRIPTION
@@ -341,12 +341,23 @@ globally.
 
 ### Config file (`hive.json`)
 
-You can create a `hive.json` file to manage your Hive configuration, you may use the following JSON
-keys:
+You can create a `hive.json` file to manage your Hive configuration.
+
+Note that the CLI args will override the values in config if both are specified.
+
+The configuration input priority is: CLI args > environment variables > hive.json configuration.
+
+This is how the structure of the config file should look like:
 
 ```json
 {
-  "registry": "<HIVE_REGISTRY_URL_GRAPHQL_ENDPOINT>",
-  "token": "<HIVE_REGISTRY_TOKEN>"
+  "registry": {
+    "endpoint": "<yourRegistryURL>",
+    "accessToken": "<yourtoken>"
+  },
+  "cdn": {
+    "endpoint": "<yourCdnURL>",
+    "accessToken": "<yourtoken>"
+  }
 }
 ```
