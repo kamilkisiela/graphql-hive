@@ -4,6 +4,7 @@ import {
   DatabasePoolConnection,
   DatabaseTransactionConnection,
   sql,
+  StatementTimeoutError,
   TaggedTemplateLiteralInvocation,
   UniqueIntegrityConstraintViolationError,
 } from 'slonik';
@@ -114,27 +115,32 @@ export async function createStorage(connection: string, maximumPoolSize: number)
   const getLockConn = (() => {
     let lockConn: DatabasePoolConnection | null;
     return () =>
-      new Promise<DatabasePoolConnection>((resolve, reject) => {
-        if (lockConn) {
-          return resolve(lockConn);
-        }
-        pool
-          .connect(conn => {
-            lockConn = conn;
-            resolve(lockConn);
-            return new Promise(() => {
-              // keep the connection alive indefinitely
+      lockConn
+        ? Promise.resolve(lockConn)
+        : new Promise<DatabasePoolConnection>((resolve, reject) => {
+            pool
+              .connect(conn => {
+                lockConn = conn;
+                resolve(lockConn);
+                return new Promise(() => {
+                  // keep the connection alive indefinitely
+                });
+              })
+              .then(() => {
+                lockConn = null;
+                reject(new Error('Lock connection ended'));
+              })
+              .catch(err => {
+                lockConn = null;
+                reject(err);
+              });
+          })
+            .then(() => lockConn!.query(sql`set session statement_timeout to '1min'`))
+            .then(() => lockConn!)
+            .catch(err => {
+              lockConn = null; // TODO: do we need to end the connection too?
+              throw new Error(`Problem while configuring the lock timeout: ${err}`);
             });
-          })
-          .then(() => {
-            lockConn = null;
-            reject(new Error('Lock connection ended'));
-          })
-          .catch(err => {
-            lockConn = null;
-            reject(err);
-          });
-      });
   })();
 
   function transformUser(user: users): User {
@@ -2921,41 +2927,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             });
 
             // wait and acquire lock on the database (intra-process sync)
-            let advisoryLock = false;
             try {
-              let i = 0;
-              while (!advisoryLock) {
-                logger?.debug('Try advisory lock (id=%s, idInt=%d, attempt=%d)', id, idInt, i);
-                i++;
-                if (i > 30) {
-                  // 30 seconds is already too much
-                  throw new Error('Lock was never acquired');
-                }
-                advisoryLock = await lockConn.oneFirst<boolean>(
-                  sql`select pg_try_advisory_lock(${idInt}) as advisoryLock`,
-                );
-                if (!advisoryLock) {
-                  // only sleep if not locked so that the loop can resolve fast if locked
-                  await new Promise(resolve => setTimeout(resolve, 1_000));
-                }
-                if (signal.aborted) {
-                  throw new Error('Locking aborted');
-                }
-              }
+              await lockConn.query(sql`select pg_advisory_lock(${idInt})`);
             } catch (err) {
-              logger?.error('Error while trying advisory lock (id=%s, idInt=%d)', id, idInt, err);
               locks.delete(id);
               release();
-              if (advisoryLock) {
-                lockConn.query(sql`select pg_advisory_unlock(${idInt})`).catch(err => {
-                  // warn for now, we'll rethink if it happens to much
-                  logger?.warn(
-                    'Error while unlocking advisory lock (id=%s, idInt=%d)',
-                    id,
-                    idInt,
-                    err,
-                  );
-                });
+              if (err instanceof StatementTimeoutError) {
+                throw new Error('Lock was never acquired');
               }
               throw err;
             }
