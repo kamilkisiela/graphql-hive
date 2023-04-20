@@ -4,7 +4,7 @@ import { Logger } from '../providers/logger';
 import { Mutex } from '../providers/mutex';
 
 it('should allow only one lock at a time', async () => {
-  const mutex = new Mutex(new Tlogger(), new Redis());
+  const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
 
   const ctrl = new AbortController();
   const signal = ctrl.signal;
@@ -23,7 +23,7 @@ it('should allow only one lock at a time', async () => {
 });
 
 it('should time out after the specified duration', async () => {
-  const mutex = new Mutex(new Tlogger(), new Redis());
+  const mutex = new Mutex(new Tlogger(), new Redis(randomPort()));
 
   const ctrl = new AbortController();
   const signal = ctrl.signal;
@@ -49,4 +49,8 @@ class Tlogger implements Logger {
 
 function throwAfter(ms: number) {
   return new Promise((_, reject) => setTimeout(() => reject(`Throwing after ${ms}ms`), ms));
+}
+
+function randomPort() {
+  return Math.floor(Math.random() * 100);
 }
