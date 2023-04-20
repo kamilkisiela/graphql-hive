@@ -22,6 +22,21 @@ it('should allow only one lock at a time', async () => {
   await expect(lock2).resolves.toBeTruthy();
 });
 
+it('should time out after the specified duration', async () => {
+  const mutex = new Mutex(new Tlogger(), new Redis());
+
+  const ctrl = new AbortController();
+  const signal = ctrl.signal;
+
+  await mutex.lock('1', { signal });
+
+  const lock2 = mutex.lock('1', { signal, timeout: 50, retries: 0 });
+
+  await expect(lock2).rejects.toMatchInlineSnapshot(
+    '[ExecutionError: The operation was unable to achieve a quorum during its retry window.]',
+  );
+});
+
 class Tlogger implements Logger {
   public info = vi.fn();
   public warn = vi.fn();

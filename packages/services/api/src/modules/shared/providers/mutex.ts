@@ -4,10 +4,22 @@ import { Logger } from './logger';
 import type { Redis } from './redis';
 import { REDIS_INSTANCE } from './redis';
 
-const MUTEX_TIMEOUT = 60_000; // 1 minute
-
 export interface MutexLockOptions {
   signal: AbortSignal;
+  /**
+   * The lock timeout/duration in milliseconds.
+   *
+   * Note that the timeout is _between_ retries, not the total timeout.
+   *
+   * @default 60_000
+   */
+  timeout?: number;
+  /**
+   * How many times is the lock retried before failing.
+   *
+   * @default 10
+   */
+  retries?: number;
 }
 
 @Injectable()
@@ -23,7 +35,7 @@ export class Mutex {
     });
   }
 
-  public lock(id: string, { signal }: MutexLockOptions) {
+  public lock(id: string, { signal, timeout = 60_000, retries = 10 }: MutexLockOptions) {
     let lock: Lock | null = null;
     return Promise.race([
       new Promise<never>((_, reject) => {
@@ -48,7 +60,7 @@ export class Mutex {
           throw new Error('Locking aborted');
         }
         this.logger.debug('Acquiring lock (id=%s)', id);
-        const thisLock = await this.redlock.acquire([id], MUTEX_TIMEOUT);
+        const thisLock = await this.redlock.acquire([id], timeout, { retryCount: retries });
         if (signal.aborted) {
           thisLock.release().catch(err => {
             this.logger.error('Unable to release lock after aborted (id=%s, err=%s)', id, err);
