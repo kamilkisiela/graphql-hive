@@ -22,7 +22,7 @@ impl Logger {
             .iter()
             .find(|(l, _)| *l == log_level)
             .map(|(_, score)| *score)
-            .unwrap()
+            .expect("Invalid log level")
     }
 
     fn should_log(level: &str) -> bool {
