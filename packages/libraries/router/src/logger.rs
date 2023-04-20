@@ -11,7 +11,7 @@ static CURRENT_LOG_LEVEL: Lazy<String> =
 ///
 /// ### Example
 /// When log level is equal to `info`, it will include `info` and all of the previous indices like `warn`, `error`, and `trace`.
-const LOG_LEVELS_POWER_ORDER: [LogLevel; 5] = ["trace", "error", "warn", "info", "debug"];
+const LOG_LEVELS_POWER_ORDER: [LogLevel; 6] = ["silent", "trace", "error", "warn", "info", "debug"];
 
 type LogLevel = &'static str;
 
