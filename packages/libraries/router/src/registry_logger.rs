@@ -45,7 +45,7 @@ impl fmt::Display for Level {
 
 #[derive(Clone, Debug)]
 pub struct Logger {
-    max_level: Level,
+    max_level: LogLevel,
 }
 
 impl Logger {
