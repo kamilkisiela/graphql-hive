@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@sentry/node": "7.48.0",
-    "@trpc/server": "10.20.0",
+    "@trpc/server": "10.21.1",
     "bullmq": "3.10.4",
     "dotenv": "16.0.3",
     "got": "12.6.0",
