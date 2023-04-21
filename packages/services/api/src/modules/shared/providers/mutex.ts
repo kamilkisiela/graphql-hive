@@ -96,9 +96,15 @@ export class Mutex {
             retryDelay,
             automaticExtensionThreshold: autoExtendThreshold,
           },
-          // TODO: how to handle the extension fail signal? it basically gets
-          //       invoked if the lock extension failed for whatever reason
-          _extensionFailSignal => {
+          autoExtensionFailSignal => {
+            autoExtensionFailSignal.addEventListener(
+              'abort',
+              event => {
+                // TODO: how to bubble this to the caller? the lock is basically released at this point
+                this.logger.error('Lock auto-extension failed (id=%s, event=%s)', id, event);
+              },
+              { once: true },
+            );
             this.logger.debug('Lock acquired (id=%s)', id);
             acquired(() => {
               this.logger.debug('Releasing lock (id=%s)', id);
