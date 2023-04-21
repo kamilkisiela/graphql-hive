@@ -38,10 +38,10 @@ import {
 } from './modules/schema/providers/orchestrators/tokens';
 import { sharedModule } from './modules/shared';
 import { CryptoProvider, encryptionSecretProvider } from './modules/shared/providers/crypto';
+import { DistributedCache } from './modules/shared/providers/distributed-cache';
 import { Emails, EMAILS_ENDPOINT } from './modules/shared/providers/emails';
 import { HttpClient } from './modules/shared/providers/http-client';
 import { IdTranslator } from './modules/shared/providers/id-translator';
-import { IdempotentRunner } from './modules/shared/providers/idempotent-runner';
 import { Logger } from './modules/shared/providers/logger';
 import { Mutex } from './modules/shared/providers/mutex';
 import { REDIS_CONFIG, RedisConfig, RedisProvider } from './modules/shared/providers/redis';
@@ -149,7 +149,7 @@ export function createRegistry({
     IdTranslator,
     RedisProvider,
     Mutex,
-    IdempotentRunner,
+    DistributedCache,
     CryptoProvider,
     Emails,
     {
