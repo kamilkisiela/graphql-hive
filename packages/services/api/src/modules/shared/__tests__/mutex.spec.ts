@@ -64,6 +64,24 @@ it('should cancel locking on abort signal', async ({ expect }) => {
   await expect(mutex.lock('1', { signal: createSignal()[0] })).resolves.toBeTruthy();
 });
 
+it('should unlock on abort signal', async ({ expect }) => {
+  const mutex = new Mutex(new Tlogger(), new Redis(differentPort()));
+
+  const [signal, abort] = createSignal();
+
+  await mutex.lock('1', { signal });
+
+  const lock2 = mutex.lock('1', { signal: createSignal()[0] });
+
+  // second lock shouldnt resolve
+  await expect(Promise.race([throwAfter(), lock2])).rejects.toBeTruthy();
+
+  abort();
+
+  // first lock is aborted, second one should resolve now
+  await expect(lock2).resolves.toBeTruthy();
+});
+
 it('should release lock in perform after return', async ({ expect }) => {
   const mutex = new Mutex(new Tlogger(), new Redis(differentPort()));
 

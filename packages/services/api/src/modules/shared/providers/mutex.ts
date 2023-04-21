@@ -79,7 +79,23 @@ export class Mutex {
           throw new Error('Locking aborted');
         }
         this.logger.debug('Lock acquired (id=%s)', id);
+        const listener = () => {
+          this.logger.debug('Releasing lock after aborted (id=%s)', id);
+          signal.removeEventListener('abort', listener);
+          lock.release().catch(err => {
+            // it is safe to not throw the error, as the lock will
+            // automatically expire after its duration is exceeded
+            // TODO: should this be logged as an error? a release may fail if there
+            //       is no lock to release, like when the duration gets exceeded
+            this.logger.warn('Lock release problem after aborted (id=%s, err=%s)', id, err);
+          });
+        };
+        signal.addEventListener('abort', listener);
         return async () => {
+          if (signal.aborted) {
+            this.logger.debug('Lock already released because aborted (id=%s)', id);
+            return;
+          }
           this.logger.debug('Releasing lock (id=%s)', id);
           await lock.release().catch(err => {
             // it is safe to not throw the error, as the lock will
