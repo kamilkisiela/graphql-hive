@@ -116,6 +116,30 @@ describe.concurrent('should serialise concurrent threads', () => {
   }
 });
 
+it('should keep auto-extending lock until unlock', async ({ expect }) => {
+  const mutex = new Mutex(new Tlogger(), new Redis(differentPort()));
+  const [signal] = createSignal();
+
+  const unlock = await mutex.lock('1', {
+    signal,
+    autoExtendThreshold: 100,
+    // duration needs to be 100ms more than the autoExtendThreshold
+    duration: 200,
+  });
+
+  await sleep(600); // extended at least 2 times
+
+  const lock2 = mutex.lock('1', { signal: createSignal()[0] });
+
+  // second lock still cannot be acquired resolve
+  await expect(Promise.race([throwAfter(50), lock2])).rejects.toBeTruthy();
+
+  unlock();
+
+  // only after unlock can the second lock be acquired
+  await expect(lock2).resolves.toBeTruthy();
+});
+
 class Tlogger implements Logger {
   public info = vi.fn();
   public warn = vi.fn();

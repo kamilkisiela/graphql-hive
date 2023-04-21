@@ -31,6 +31,12 @@ export interface MutexLockOptions {
    * @default 1000
    */
   retryDelay?: number;
+  /**
+   * The minimum remaining time in milliseconds on the lock before auto-extension.
+   *
+   * @default 500
+   */
+  autoExtendThreshold?: number;
 }
 
 @Injectable()
@@ -52,7 +58,13 @@ export class Mutex {
 
   public lock(
     id: string,
-    { signal, duration = 60_000, retries = 60, retryDelay = 1000 }: MutexLockOptions,
+    {
+      signal,
+      duration = 60_000,
+      retries = 60,
+      retryDelay = 1000,
+      autoExtendThreshold = 500,
+    }: MutexLockOptions,
   ): Promise<() => void> {
     return new Promise((acquired, rejected) => {
       this.logger.debug('Acquiring lock (id=%s)', id);
@@ -80,6 +92,7 @@ export class Mutex {
           {
             retryCount: retries,
             retryDelay,
+            automaticExtensionThreshold: autoExtendThreshold,
           },
           // TODO: how to handle the extension fail signal? it basically gets
           //       invoked if the lock extension failed for whatever reason
