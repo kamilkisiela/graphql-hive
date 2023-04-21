@@ -13,7 +13,7 @@ export interface MutexLockOptions {
    * Note that the lock will be extended by the duration all
    * the way until release (unlock).
    *
-   * @default 60_000
+   * @default 30_000
    */
   duration?: number;
   /**
@@ -60,7 +60,7 @@ export class Mutex {
     id: string,
     {
       signal,
-      duration = 60_000,
+      duration = 30_000,
       retries = 60,
       retryDelay = 1000,
       autoExtendThreshold = 500,
