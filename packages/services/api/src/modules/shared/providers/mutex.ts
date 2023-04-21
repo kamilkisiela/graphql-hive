@@ -8,12 +8,12 @@ export interface MutexLockOptions {
   signal: AbortSignal;
   /**
    * The lock duration in milliseconds. Beware that the duration
-   * is how long the lock can be held, not the acquire timeout.
+   * is how long is the lock held, not the acquire timeout.
    *
-   * Note that the lock will be extended by the duration all
-   * the way until release (unlock).
+   * Note that the lock will be auto-extended by the duration all
+   * the way until released (unlocked).
    *
-   * @default 30_000
+   * @default 10_000
    */
   duration?: number;
   /**
@@ -60,7 +60,7 @@ export class Mutex {
     id: string,
     {
       signal,
-      duration = 30_000,
+      duration = 10_000,
       retries = 60,
       retryDelay = 1000,
       autoExtendThreshold = 500,
