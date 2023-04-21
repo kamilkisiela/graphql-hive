@@ -16,7 +16,7 @@ import { CdnProvider } from '../../cdn/providers/cdn.provider';
 import { GitHubIntegrationManager } from '../../integrations/providers/github-integration-manager';
 import { OrganizationManager } from '../../organization/providers/organization-manager';
 import { ProjectManager } from '../../project/providers/project-manager';
-import { IdempotentRunner } from '../../shared/providers/idempotent-runner';
+import { DistributedCache } from '../../shared/providers/distributed-cache';
 import { Logger } from '../../shared/providers/logger';
 import { Mutex } from '../../shared/providers/mutex';
 import { Storage, type TargetSelector } from '../../shared/providers/storage';
@@ -120,7 +120,7 @@ export class SchemaPublisher {
     private alertsManager: AlertsManager,
     private cdn: CdnProvider,
     private gitHubIntegrationManager: GitHubIntegrationManager,
-    private idempotentRunner: IdempotentRunner,
+    private distributedCache: DistributedCache,
     private helper: SchemaHelper,
     private artifactStorageWriter: ArtifactStorageWriter,
     private mutex: Mutex,
@@ -341,11 +341,7 @@ export class SchemaPublisher {
   }
 
   @sentry('SchemaPublisher.publish')
-  async publish(
-    input: PublishInput,
-    signal: AbortSignal,
-    span?: Span | undefined,
-  ): Promise<PublishResult> {
+  async publish(input: PublishInput, signal: AbortSignal): Promise<PublishResult> {
     this.logger.debug(
       'Schema publication (checksum=%s, organization=%s, project=%s, target=%s)',
       input.checksum,
@@ -353,19 +349,25 @@ export class SchemaPublisher {
       input.project,
       input.target,
     );
-    return this.idempotentRunner.run({
-      identifier: `schema:publish:${input.checksum}`,
-      executor: () =>
-        this.mutex.perform(
-          registryLockId(input.target),
-          {
-            signal,
-          },
-          () => this.internalPublish(input),
-        ),
-      ttl: 15,
-      span,
-    });
+    return this.mutex.perform(
+      registryLockId(input.target),
+      {
+        signal,
+      },
+      async () => {
+        await this.authManager.ensureTargetAccess({
+          target: input.target,
+          project: input.project,
+          organization: input.organization,
+          scope: TargetAccessScope.REGISTRY_WRITE,
+        });
+        return this.distributedCache.wrap({
+          key: `schema:publish:${input.checksum}`,
+          ttlSeconds: 15,
+          executor: () => this.internalPublish(input),
+        });
+      },
+    );
   }
 
   public async updateVersionStatus(input: TargetSelector & { version: string; valid: boolean }) {
@@ -427,168 +429,162 @@ export class SchemaPublisher {
   }
 
   @sentry('SchemaPublisher.delete')
-  async delete(input: DeleteInput, signal: AbortSignal, span?: Span | undefined) {
+  async delete(input: DeleteInput, signal: AbortSignal) {
     this.logger.info('Deleting schema (input=%o)', input);
 
-    return this.idempotentRunner.run({
-      identifier: `schema:delete:${input.checksum}`,
-      executor: () =>
-        this.mutex.perform(
-          registryLockId(input.target),
-          {
-            signal,
-          },
-          async () => {
-            await this.authManager.ensureTargetAccess({
+    return this.mutex.perform(
+      registryLockId(input.target),
+      {
+        signal,
+      },
+      async () => {
+        await this.authManager.ensureTargetAccess({
+          organization: input.organization,
+          project: input.project,
+          target: input.target,
+          scope: TargetAccessScope.REGISTRY_WRITE,
+        });
+        const [project, organization, latestVersion, latestComposableVersion, baseSchema] =
+          await Promise.all([
+            this.projectManager.getProject({
+              organization: input.organization,
+              project: input.project,
+            }),
+            this.organizationManager.getOrganization({
+              organization: input.organization,
+            }),
+            this.schemaManager.getLatestSchemas({
               organization: input.organization,
               project: input.project,
               target: input.target,
-              scope: TargetAccessScope.REGISTRY_WRITE,
-            });
-            const [project, organization, latestVersion, latestComposableVersion, baseSchema] =
-              await Promise.all([
-                this.projectManager.getProject({
-                  organization: input.organization,
-                  project: input.project,
-                }),
-                this.organizationManager.getOrganization({
-                  organization: input.organization,
-                }),
-                this.schemaManager.getLatestSchemas({
-                  organization: input.organization,
-                  project: input.project,
-                  target: input.target,
-                }),
-                this.schemaManager.getLatestSchemas({
-                  organization: input.organization,
-                  project: input.project,
-                  target: input.target,
-                  onlyComposable: true,
-                }),
-                this.schemaManager.getBaseSchema({
-                  organization: input.organization,
-                  project: input.project,
-                  target: input.target,
-                }),
-              ]);
+            }),
+            this.schemaManager.getLatestSchemas({
+              organization: input.organization,
+              project: input.project,
+              target: input.target,
+              onlyComposable: true,
+            }),
+            this.schemaManager.getBaseSchema({
+              organization: input.organization,
+              project: input.project,
+              target: input.target,
+            }),
+          ]);
 
-            const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
+        const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
 
-            schemaDeleteCount.inc({ model: modelVersion, projectType: project.type });
+        schemaDeleteCount.inc({ model: modelVersion, projectType: project.type });
 
-            if (project.type !== ProjectType.FEDERATION && project.type !== ProjectType.STITCHING) {
-              throw new HiveError(`${project.type} project (${modelVersion}) not supported`);
-            }
+        if (project.type !== ProjectType.FEDERATION && project.type !== ProjectType.STITCHING) {
+          throw new HiveError(`${project.type} project (${modelVersion}) not supported`);
+        }
 
-            if (modelVersion === 'legacy') {
-              throw new HiveError(
-                'Please upgrade your project to the new registry model to use this feature. See https://the-guild.dev/blog/graphql-hive-improvements-in-schema-registry',
-              );
-            }
+        if (modelVersion === 'legacy') {
+          throw new HiveError(
+            'Please upgrade your project to the new registry model to use this feature. See https://the-guild.dev/blog/graphql-hive-improvements-in-schema-registry',
+          );
+        }
 
-            if (!latestVersion || latestVersion.schemas.length === 0) {
-              throw new HiveError('Registry is empty');
-            }
+        if (!latestVersion || latestVersion.schemas.length === 0) {
+          throw new HiveError('Registry is empty');
+        }
 
-            const schemas = ensureCompositeSchemas(latestVersion.schemas);
-            this.logger.debug(`Found ${latestVersion?.schemas.length ?? 0} most recent schemas`);
-            this.logger.debug(
-              'Using %s registry model (version=%s, featureFlags=%o)',
-              project.type,
-              modelVersion,
-              organization.featureFlags,
-            );
+        const schemas = ensureCompositeSchemas(latestVersion.schemas);
+        this.logger.debug(`Found ${latestVersion?.schemas.length ?? 0} most recent schemas`);
+        this.logger.debug(
+          'Using %s registry model (version=%s, featureFlags=%o)',
+          project.type,
+          modelVersion,
+          organization.featureFlags,
+        );
 
-            const serviceExists = schemas.some(s => s.service_name === input.serviceName);
+        const serviceExists = schemas.some(s => s.service_name === input.serviceName);
 
-            if (!serviceExists) {
-              return {
-                __typename: 'SchemaDeleteError',
-                valid: latestVersion.valid,
-                errors: [
-                  {
-                    message: `Service "${input.serviceName}" not found`,
-                  },
-                ],
-              } as const;
-            }
-
-            const deleteResult = await this.models[project.type][modelVersion].delete({
-              input: {
-                serviceName: input.serviceName,
+        if (!serviceExists) {
+          return {
+            __typename: 'SchemaDeleteError',
+            valid: latestVersion.valid,
+            errors: [
+              {
+                message: `Service "${input.serviceName}" not found`,
               },
-              latest: {
-                isComposable: latestVersion.valid,
-                schemas,
-              },
-              latestComposable: latestComposableVersion
-                ? {
-                    isComposable: latestComposableVersion.valid,
-                    schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
-                  }
-                : null,
-              baseSchema,
-              project,
-              organization,
-              selector: {
-                target: input.target,
-                project: input.project,
-                organization: input.organization,
-              },
-            });
+            ],
+          } as const;
+        }
 
-            if (deleteResult.conclusion === SchemaDeleteConclusion.Accept) {
-              this.logger.debug('Delete accepted');
-              if (input.dryRun !== true) {
-                await this.storage.deleteSchema({
-                  organization: input.organization,
-                  project: input.project,
-                  target: input.target,
-                  serviceName: input.serviceName,
-                  composable: deleteResult.state.composable,
-                });
-              }
-
-              return {
-                __typename: 'SchemaDeleteSuccess',
-                valid: deleteResult.state.composable,
-                changes: deleteResult.state.changes,
-                errors: [
-                  ...(deleteResult.state.compositionErrors ?? []),
-                  ...(deleteResult.state.breakingChanges ?? []),
-                ],
-              } as const;
-            }
-
-            this.logger.debug('Delete rejected');
-
-            const errors = [];
-
-            const compositionErrors = getReasonByCode(
-              deleteResult,
-              DeleteFailureReasonCode.CompositionFailure,
-            )?.compositionErrors;
-
-            if (getReasonByCode(deleteResult, DeleteFailureReasonCode.MissingServiceName)) {
-              errors.push({
-                message: 'Service name is required',
-              });
-            }
-
-            if (compositionErrors?.length) {
-              errors.push(...compositionErrors);
-            }
-
-            return {
-              __typename: 'SchemaDeleteError',
-              valid: false,
-              errors,
-            } as const;
+        const deleteResult = await this.models[project.type][modelVersion].delete({
+          input: {
+            serviceName: input.serviceName,
           },
-        ),
-      ttl: 60,
-      span,
-    });
+          latest: {
+            isComposable: latestVersion.valid,
+            schemas,
+          },
+          latestComposable: latestComposableVersion
+            ? {
+                isComposable: latestComposableVersion.valid,
+                schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
+              }
+            : null,
+          baseSchema,
+          project,
+          organization,
+          selector: {
+            target: input.target,
+            project: input.project,
+            organization: input.organization,
+          },
+        });
+
+        if (deleteResult.conclusion === SchemaDeleteConclusion.Accept) {
+          this.logger.debug('Delete accepted');
+          if (input.dryRun !== true) {
+            await this.storage.deleteSchema({
+              organization: input.organization,
+              project: input.project,
+              target: input.target,
+              serviceName: input.serviceName,
+              composable: deleteResult.state.composable,
+            });
+          }
+
+          return {
+            __typename: 'SchemaDeleteSuccess',
+            valid: deleteResult.state.composable,
+            changes: deleteResult.state.changes,
+            errors: [
+              ...(deleteResult.state.compositionErrors ?? []),
+              ...(deleteResult.state.breakingChanges ?? []),
+            ],
+          } as const;
+        }
+
+        this.logger.debug('Delete rejected');
+
+        const errors = [];
+
+        const compositionErrors = getReasonByCode(
+          deleteResult,
+          DeleteFailureReasonCode.CompositionFailure,
+        )?.compositionErrors;
+
+        if (getReasonByCode(deleteResult, DeleteFailureReasonCode.MissingServiceName)) {
+          errors.push({
+            message: 'Service name is required',
+          });
+        }
+
+        if (compositionErrors?.length) {
+          errors.push(...compositionErrors);
+        }
+
+        return {
+          __typename: 'SchemaDeleteError',
+          valid: false,
+          errors,
+        } as const;
+      },
+    );
   }
 
   private async internalPublish(input: PublishInput) {
@@ -602,13 +598,6 @@ export class SchemaPublisher {
       checksum: input.checksum,
       experimental_accept_breaking_changes: input.experimental_acceptBreakingChanges === true,
       metadata: !!input.metadata,
-    });
-
-    await this.authManager.ensureTargetAccess({
-      target: targetId,
-      project: projectId,
-      organization: organizationId,
-      scope: TargetAccessScope.REGISTRY_WRITE,
     });
 
     const [organization, project, target, latestVersion, latestComposable, baseSchema] =
