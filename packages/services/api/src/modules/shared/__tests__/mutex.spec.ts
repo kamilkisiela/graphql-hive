@@ -13,7 +13,7 @@ it('should allow only one lock at a time', async ({ expect }) => {
   const lock2 = mutex.lock('1', { signal });
 
   // second lock shouldnt resolve
-  await expect(Promise.race([throwAfter(), lock2])).rejects.toBeTruthy();
+  await expect(Promise.race([throwAfter(50), lock2])).rejects.toBeTruthy();
 
   unlock1();
 
@@ -60,7 +60,7 @@ it('should unlock on abort signal', async ({ expect }) => {
   const lock2 = mutex.lock('1', { signal: createSignal()[0] });
 
   // second lock shouldnt resolve
-  await expect(Promise.race([throwAfter(), lock2])).rejects.toBeTruthy();
+  await expect(Promise.race([throwAfter(50), lock2])).rejects.toBeTruthy();
 
   abort();
 
@@ -130,7 +130,7 @@ function sleep(ms = 50) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function throwAfter(ms?: number) {
+async function throwAfter(ms: number) {
   await sleep(ms);
   throw `Throwing after ${ms}ms`;
 }
