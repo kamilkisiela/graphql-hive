@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "toucan-js": "3.1.0",
-    "workers-loki-logger": "0.1.14",
+    "workers-loki-logger": "0.1.15",
     "zod": "3.21.4"
   },
   "devDependencies": {
