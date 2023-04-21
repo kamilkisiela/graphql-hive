@@ -9,14 +9,18 @@ const LegacyConfigModel = zod.object({
 });
 
 const ConfigModel = zod.object({
-  registry: zod.object({
-    endpoint: zod.string().url().optional(),
-    accessToken: zod.string().optional(),
-  }),
-  cdn: zod.object({
-    endpoint: zod.string().url().optional(),
-    accessToken: zod.string().optional(),
-  }),
+  registry: zod
+    .object({
+      endpoint: zod.string().url().optional(),
+      accessToken: zod.string().optional(),
+    })
+    .optional(),
+  cdn: zod
+    .object({
+      endpoint: zod.string().url().optional(),
+      accessToken: zod.string().optional(),
+    })
+    .optional(),
 });
 
 const getAllowedConfigKeys = <TConfig extends zod.ZodObject<any>>(config: TConfig): Set<string> => {
