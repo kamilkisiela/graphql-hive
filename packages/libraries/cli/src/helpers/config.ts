@@ -46,6 +46,8 @@ const getAllowedConfigKeys = <TConfig extends zod.ZodObject<any>>(config: TConfi
 
 export type ConfigModelType = zod.TypeOf<typeof ConfigModel>;
 
+type BuildPropertyPath<TObject extends zod.ZodObject<any>> = `.${GetConfigurationKeys<TObject>}`;
+
 type GetConfigurationKeys<
   T extends zod.ZodObject<{
     [key: string]: zod.ZodType<any, any>;
@@ -54,7 +56,11 @@ type GetConfigurationKeys<
   ? TObjectShape extends Record<infer TKey, infer TObjectPropertyType>
     ? TKey extends string
       ? `${TKey}${TObjectPropertyType extends zod.ZodObject<any>
-          ? `.${GetConfigurationKeys<TObjectPropertyType>}`
+          ? BuildPropertyPath<TObjectPropertyType>
+          : TObjectPropertyType extends zod.ZodOptional<infer TOptionalInnerObjectPropertyType>
+          ? TOptionalInnerObjectPropertyType extends zod.ZodObject<any>
+            ? BuildPropertyPath<TOptionalInnerObjectPropertyType>
+            : ''
           : ''}`
       : never
     : never
@@ -67,6 +73,10 @@ type GetZodValueType<
   ? ConfigurationModelType extends zod.ZodObject<infer InnerType>
     ? InnerType[TKey] extends zod.ZodObject<any>
       ? GetZodValueType<TNextKey, InnerType[TKey]>
+      : InnerType[TKey] extends zod.ZodOptional<infer OptionalInner>
+      ? OptionalInner extends zod.ZodObject<any>
+        ? GetZodValueType<TNextKey, OptionalInner>
+        : never
       : never
     : never
   : ConfigurationModelType extends zod.ZodObject<infer InnerType>
