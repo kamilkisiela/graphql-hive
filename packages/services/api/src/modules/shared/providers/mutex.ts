@@ -66,7 +66,7 @@ export class Mutex {
       autoExtendThreshold = 500,
     }: MutexLockOptions,
   ): Promise<() => void> {
-    return new Promise((acquired, rejected) => {
+    return new Promise((acquired, notAcquired) => {
       this.logger.debug('Acquiring lock (id=%s)', id);
 
       let unlock!: () => void;
@@ -76,7 +76,9 @@ export class Mutex {
             'abort',
             () => {
               this.logger.warn('Lock aborted (id=%s)', id);
-              rejected(new Error('Locking aborted'));
+              // reject lock acquire
+              notAcquired(new Error('Locking aborted'));
+              // but resolve lock (so that redlock releases)
               resolve();
             },
             { once: true },
@@ -106,7 +108,7 @@ export class Mutex {
           },
         )
         // nothing in the lock usage throws, so the error can only be a failed acquire
-        .catch(rejected);
+        .catch(notAcquired);
     });
   }
 
