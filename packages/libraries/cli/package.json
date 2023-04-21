@@ -64,7 +64,7 @@
     "graphql-tag": "2.12.6",
     "log-symbols": "4.1.0",
     "mkdirp": "2.1.6",
-    "rimraf": "4.4.1",
+    "rimraf": "5.0.0",
     "ts-node": "10.9.1",
     "tslib": "2.5.0",
     "zod": "3.21.4"
