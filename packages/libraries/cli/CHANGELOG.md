@@ -1,5 +1,39 @@
 # @graphql-hive/cli
 
+## 0.21.0
+
+### Minor Changes
+
+- [#2080](https://github.com/kamilkisiela/graphql-hive/pull/2080)
+  [`331a1116`](https://github.com/kamilkisiela/graphql-hive/commit/331a11165e88416e9f0e138704f2dab1fb384e05)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Introduce new config file format. Please move the
+  `accessToken` property to a `registry` object.
+
+  The old top-level property approach is now considered deprecated and will no longer be supported
+  in the next major version of the CLI.
+
+  ```diff
+   {
+  -  "accessToken": "xxxxxd4cxxx980xxxxf3099efxxxxx"
+  +  "registry": {
+  +      "accessToken": "xxxxxd4cxxx980xxxxf3099efxxxxx"
+  +  }
+   }
+  ```
+
+- [#2080](https://github.com/kamilkisiela/graphql-hive/pull/2080)
+  [`331a1116`](https://github.com/kamilkisiela/graphql-hive/commit/331a11165e88416e9f0e138704f2dab1fb384e05)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Support fetching artifacts from the CDN with
+  `hive artifact:fetch`.
+
+  See the readme for more information.
+
+### Patch Changes
+
+- [#1461](https://github.com/kamilkisiela/graphql-hive/pull/1461)
+  [`f66f6714`](https://github.com/kamilkisiela/graphql-hive/commit/f66f6714d5841620d8fa224b67907c534e21470b)
+  Thanks [@renovate](https://github.com/apps/renovate)! - Update oclif@3.7.0
+
 ## 0.20.2
 
 ### Patch Changes
