@@ -92,10 +92,8 @@ export class Mutex {
             return l;
           },
         )
-        .catch(err => {
-          // should never happen because nothing throws, but never assume anything 🤷
-          this.logger.error('Lock usage error (id=%s, err=%s)', id, err);
-        });
+        // nothing in the lock usage throws, so the error can only be a failed acquire
+        .catch(rejected);
     });
   }
 
