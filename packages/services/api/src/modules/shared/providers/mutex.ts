@@ -8,9 +8,12 @@ export interface MutexLockOptions {
   signal: AbortSignal;
   /**
    * The lock duration in milliseconds. Beware that the duration
-   * is how long the lock can be held, not the acquire timeout.
+   * is how long is the lock held, not the acquire timeout.
    *
-   * @default 60_000
+   * Note that the lock will be auto-extended by the duration all
+   * the way until released (unlocked).
+   *
+   * @default 10_000
    */
   duration?: number;
   /**
@@ -28,6 +31,12 @@ export interface MutexLockOptions {
    * @default 1000
    */
   retryDelay?: number;
+  /**
+   * The minimum remaining time in milliseconds on the lock before auto-extension.
+   *
+   * @default 500
+   */
+  autoExtendThreshold?: number;
 }
 
 @Injectable()
@@ -49,64 +58,64 @@ export class Mutex {
 
   public lock(
     id: string,
-    { signal, duration = 60_000, retries = 60, retryDelay = 1000 }: MutexLockOptions,
-  ) {
-    return Promise.race([
-      new Promise<never>((_, reject) => {
-        const listener = () => {
-          signal.removeEventListener('abort', listener);
-          reject(new Error('Locking aborted'));
-        };
-        signal.addEventListener('abort', listener);
-      }),
-      (async () => {
-        if (signal.aborted) {
-          throw new Error('Locking aborted');
-        }
-        this.logger.debug('Acquiring lock (id=%s)', id);
-        const lock = await this.redlock.acquire([id], duration, {
-          retryCount: retries,
-          retryDelay,
-        });
-        if (signal.aborted) {
-          lock.release().catch(err => {
-            // it is safe to not throw the error, as the lock will
-            // automatically expire after its duration is exceeded
-            // TODO: should this be logged as an error? a release may fail if there
-            //       is no lock to release, like when the duration gets exceeded
-            this.logger.warn('Lock release problem after aborted (id=%s, err=%s)', id, err);
-          });
-          throw new Error('Locking aborted');
-        }
-        this.logger.debug('Lock acquired (id=%s)', id);
-        const listener = () => {
-          this.logger.debug('Releasing lock after aborted (id=%s)', id);
-          signal.removeEventListener('abort', listener);
-          lock.release().catch(err => {
-            // it is safe to not throw the error, as the lock will
-            // automatically expire after its duration is exceeded
-            // TODO: should this be logged as an error? a release may fail if there
-            //       is no lock to release, like when the duration gets exceeded
-            this.logger.warn('Lock release problem after aborted (id=%s, err=%s)', id, err);
-          });
-        };
-        signal.addEventListener('abort', listener);
-        return async () => {
-          if (signal.aborted) {
-            this.logger.debug('Lock already released because aborted (id=%s)', id);
-            return;
-          }
-          this.logger.debug('Releasing lock (id=%s)', id);
-          await lock.release().catch(err => {
-            // it is safe to not throw the error, as the lock will
-            // automatically expire after its duration is exceeded
-            // TODO: should this be logged as an error? a release may fail if there
-            //       is no lock to release, like when the duration gets exceeded
-            this.logger.warn('Lock release problem (id=%s, err=%s)', id, err);
-          });
-        };
-      })(),
-    ]);
+    {
+      signal,
+      duration = 10_000,
+      retries = 60,
+      retryDelay = 1000,
+      autoExtendThreshold = 500,
+    }: MutexLockOptions,
+  ): Promise<() => void> {
+    return new Promise((acquired, notAcquired) => {
+      this.logger.debug('Acquiring lock (id=%s)', id);
+
+      let unlock!: () => void;
+      const l = Promise.race([
+        new Promise<void>(resolve => {
+          signal.addEventListener(
+            'abort',
+            () => {
+              this.logger.warn('Lock aborted (id=%s)', id);
+              // reject lock acquire
+              notAcquired(new Error('Locking aborted'));
+              // but resolve lock (so that redlock releases)
+              resolve();
+            },
+            { once: true },
+          );
+        }),
+        new Promise<void>(resolve => (unlock = resolve)),
+      ]);
+
+      this.redlock
+        .using(
+          [id],
+          duration,
+          {
+            retryCount: retries,
+            retryDelay,
+            automaticExtensionThreshold: autoExtendThreshold,
+          },
+          autoExtensionFailSignal => {
+            autoExtensionFailSignal.addEventListener(
+              'abort',
+              event => {
+                // TODO: how to bubble this to the caller? the lock is basically released at this point
+                this.logger.error('Lock auto-extension failed (id=%s, event=%s)', id, event);
+              },
+              { once: true },
+            );
+            this.logger.debug('Lock acquired (id=%s)', id);
+            acquired(() => {
+              this.logger.debug('Releasing lock (id=%s)', id);
+              unlock();
+            });
+            return l;
+          },
+        )
+        // nothing in the lock usage throws, so the error can only be a failed acquire
+        .catch(notAcquired);
+    });
   }
 
   public async perform<T>(
@@ -118,7 +127,7 @@ export class Mutex {
     try {
       return await action();
     } finally {
-      await unlock();
+      unlock();
     }
   }
 }

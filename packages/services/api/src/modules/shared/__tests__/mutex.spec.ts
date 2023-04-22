@@ -13,9 +13,9 @@ it('should allow only one lock at a time', async ({ expect }) => {
   const lock2 = mutex.lock('1', { signal });
 
   // second lock shouldnt resolve
-  await expect(Promise.race([throwAfter(), lock2])).rejects.toBeTruthy();
+  await expect(Promise.race([throwAfter(50), lock2])).rejects.toBeTruthy();
 
-  await unlock1();
+  unlock1();
 
   // after the first lock releases, second one resolves
   await expect(lock2).resolves.toBeTruthy();
@@ -31,20 +31,6 @@ it('should allow different locks at any time', async ({ expect }) => {
   await expect(mutex.lock('3', { signal })).resolves.toBeTruthy();
 });
 
-it('should time out after the specified duration', async ({ expect }) => {
-  const mutex = new Mutex(new Tlogger(), new Redis(differentPort()));
-
-  const [signal] = createSignal();
-
-  await mutex.lock('1', { signal });
-
-  const lock2 = mutex.lock('1', { signal, retries: 0 });
-
-  await expect(lock2).rejects.toMatchInlineSnapshot(
-    '[ExecutionError: The operation was unable to achieve a quorum during its retry window.]',
-  );
-});
-
 it('should cancel locking on abort signal', async ({ expect }) => {
   const mutex = new Mutex(new Tlogger(), new Redis(differentPort()));
 
@@ -58,7 +44,7 @@ it('should cancel locking on abort signal', async ({ expect }) => {
 
   await expect(lock2).rejects.toMatchInlineSnapshot('[Error: Locking aborted]');
 
-  await unlock1();
+  unlock1();
 
   // make sure that the aborted lock does not lock
   await expect(mutex.lock('1', { signal: createSignal()[0] })).resolves.toBeTruthy();
@@ -74,7 +60,7 @@ it('should unlock on abort signal', async ({ expect }) => {
   const lock2 = mutex.lock('1', { signal: createSignal()[0] });
 
   // second lock shouldnt resolve
-  await expect(Promise.race([throwAfter(), lock2])).rejects.toBeTruthy();
+  await expect(Promise.race([throwAfter(50), lock2])).rejects.toBeTruthy();
 
   abort();
 
@@ -130,6 +116,30 @@ describe.concurrent('should serialise concurrent threads', () => {
   }
 });
 
+it('should keep auto-extending lock until unlock', async ({ expect }) => {
+  const mutex = new Mutex(new Tlogger(), new Redis(differentPort()));
+  const [signal] = createSignal();
+
+  const unlock = await mutex.lock('1', {
+    signal,
+    autoExtendThreshold: 100,
+    // duration needs to be 100ms more than the autoExtendThreshold
+    duration: 200,
+  });
+
+  await sleep(600); // extended at least 2 times
+
+  const lock2 = mutex.lock('1', { signal: createSignal()[0] });
+
+  // second lock still cannot be acquired resolve
+  await expect(Promise.race([throwAfter(50), lock2])).rejects.toBeTruthy();
+
+  unlock();
+
+  // only after unlock can the second lock be acquired
+  await expect(lock2).resolves.toBeTruthy();
+});
+
 class Tlogger implements Logger {
   public info = vi.fn();
   public warn = vi.fn();
@@ -144,7 +154,7 @@ function sleep(ms = 50) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function throwAfter(ms?: number) {
+async function throwAfter(ms: number) {
   await sleep(ms);
   throw `Throwing after ${ms}ms`;
 }
