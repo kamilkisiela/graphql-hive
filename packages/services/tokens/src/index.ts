@@ -88,7 +88,7 @@ export async function main() {
       server.log.info('Redis connection closed');
     });
 
-    redis.on('reconnecting', timeToReconnect => {
+    redis.on('reconnecting', (timeToReconnect?: number) => {
       server.log.info('Redis reconnecting in %s', timeToReconnect);
     });
 
