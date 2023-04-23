@@ -128,7 +128,7 @@ export function createScheduler(config: Config) {
       logger.info('Redis connection closed');
     });
 
-    redisConnection.on('reconnecting', timeToReconnect => {
+    redisConnection.on('reconnecting', (timeToReconnect?: number) => {
       logger.info('Redis reconnecting in %s', timeToReconnect);
     });
 
