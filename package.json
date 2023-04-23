@@ -58,7 +58,7 @@
     "@graphql-codegen/typescript": "3.0.3",
     "@graphql-codegen/typescript-operations": "3.0.3",
     "@graphql-codegen/typescript-resolvers": "3.2.0",
-    "@graphql-inspector/cli": "3.4.13",
+    "@graphql-inspector/cli": "3.4.16",
     "@manypkg/get-packages": "2.1.0",
     "@next/eslint-plugin-next": "13.3.0",
     "@sentry/cli": "2.15.2",
