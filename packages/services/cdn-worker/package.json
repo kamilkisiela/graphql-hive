@@ -28,7 +28,7 @@
     "@whatwg-node/fetch": "0.8.6",
     "@whatwg-node/server": "0.7.5",
     "dotenv": "16.0.3",
-    "esbuild": "0.17.17",
+    "esbuild": "0.17.18",
     "fastify": "3.29.5",
     "itty-router": "2.6.6",
     "itty-router-extras": "0.4.2"
