@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import produce from 'immer';
+import { produce } from 'immer';
 import { getOperationName, TypedDocumentNode } from 'urql';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
