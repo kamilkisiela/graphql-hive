@@ -213,8 +213,8 @@ importers:
         specifier: 4.7.0
         version: 4.7.0(graphql@16.6.0)
       '@aws-sdk/client-s3':
-        specifier: 3.316.0
-        version: 3.316.0
+        specifier: 3.317.0
+        version: 3.317.0
       '@esm2cjs/execa':
         specifier: 6.1.1-cjs.1
         version: 6.1.1-cjs.1
@@ -501,11 +501,11 @@ importers:
   packages/services/api:
     dependencies:
       '@aws-sdk/client-s3':
-        specifier: 3.316.0
-        version: 3.316.0
+        specifier: 3.317.0
+        version: 3.317.0
       '@aws-sdk/s3-request-presigner':
-        specifier: 3.316.0
-        version: 3.316.0
+        specifier: 3.317.0
+        version: 3.317.0
       '@graphql-inspector/core':
         specifier: 4.2.1
         version: 4.2.1
@@ -2519,8 +2519,8 @@ packages:
       tslib: 2.5.0
     dev: false
 
-  /@aws-sdk/client-s3@3.316.0:
-    resolution: {integrity: sha512-nmlvXf7c1Nz9VR/VlplgsZqPqe7eg5RYuuIb70rX/4Joe5x98sJqz72hyLblwQTB47lwPLK+qvHps9aVOY2QhA==}
+  /@aws-sdk/client-s3@3.317.0:
+    resolution: {integrity: sha512-Y7AZMO/ikKFARsGYv7LKNELTDqJHjEpDTGEBBWnFkVoTmlquBsa9r0tU2nofP3uxSIkySPkkQpR50Zm/Q6zWyw==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@aws-crypto/sha1-browser': 3.0.0
@@ -3125,8 +3125,8 @@ packages:
       tslib: 2.5.0
     dev: false
 
-  /@aws-sdk/s3-request-presigner@3.316.0:
-    resolution: {integrity: sha512-FTsXtmkpVKRANtjZ84dUiEoynTLy3M+Q6DGP0/Jwx1xefK4uKbQvQSRt9IpcuVYTzO/2+7fRk0hGuv/V6+Keiw==}
+  /@aws-sdk/s3-request-presigner@3.317.0:
+    resolution: {integrity: sha512-Q9UTJI1oz5aCgmeXwN8/EAz+gxFWFRnKskNb4zE1MV/Fbcpuc4S7jEQLLeRrofqF9Du4Xbsd7/lYBK5YkfVEPA==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@aws-sdk/middleware-endpoint': 3.310.0
