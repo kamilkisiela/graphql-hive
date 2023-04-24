@@ -1,4 +1,4 @@
-use std::{env, fmt};
+use std::env;
 
 static LOG_LEVEL_NAMES: [&str; 5] = ["ERROR", "WARN", "INFO", "DEBUG", "TRACE"];
 
@@ -30,16 +30,6 @@ impl LogLevel {
             .position(|&name| name.eq_ignore_ascii_case(s))
             .map(|p| LogLevel::from_usize(p).expect("Hive failed to read the log level"))
             .expect("Hive failed to parse the log level filter")
-    }
-
-    pub fn as_str(&self) -> &'static str {
-        LOG_LEVEL_NAMES[*self as usize]
-    }
-}
-
-impl fmt::Display for Level {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        fmt.pad(self.as_str())
     }
 }
 
