@@ -1,8 +1,6 @@
 import { gql } from 'graphql-modules';
 
 export default gql`
-  directive @defer on FRAGMENT_SPREAD | INLINE_FRAGMENT
-
   extend type Query {
     fieldStats(selector: FieldStatsInput!): FieldStats!
     fieldListStats(selector: FieldListStatsInput!): [FieldStats!]!
