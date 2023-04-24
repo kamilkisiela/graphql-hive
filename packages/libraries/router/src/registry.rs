@@ -1,3 +1,4 @@
+use crate::registry_logger::Logger;
 use anyhow::{anyhow, Result};
 use sha2::Digest;
 use sha2::Sha256;
@@ -11,6 +12,7 @@ pub struct HiveRegistry {
     key: String,
     file_name: String,
     etag: Option<String>,
+    pub logger: Logger,
 }
 
 pub struct HiveRegistryConfig {
@@ -68,11 +70,13 @@ impl HiveRegistry {
             None => 10,
         };
 
+        let logger = Logger::new();
+
         // In case of an endpoint and an key being empty, we don't start the polling and skip the registry
         if endpoint.is_empty() && key.is_empty() {
-            tracing::info!("You're not using GraphQL Hive as the source of schema.");
-            tracing::info!(
-                "Reason: could not find HIVE_CDN_KEY and HIVE_CDN_ENDPOINT environment variables."
+            logger.info("You're not using GraphQL Hive as the source of schema.");
+            logger.info(
+                "Reason: could not find HIVE_CDN_KEY and HIVE_CDN_ENDPOINT environment variables.",
             );
             return Ok(());
         }
@@ -99,14 +103,17 @@ impl HiveRegistry {
             key,
             file_name,
             etag: None,
+            logger,
         };
 
         match registry.initial_supergraph() {
             Ok(_) => {
-                tracing::info!("Successfully fetched and saved supergraph from GraphQL Hive");
+                registry
+                    .logger
+                    .info("Successfully fetched and saved supergraph from GraphQL Hive");
             }
             Err(e) => {
-                eprintln!("{}", e);
+                registry.logger.error(&e);
                 std::process::exit(1);
             }
         }
@@ -191,13 +198,13 @@ impl HiveRegistry {
                     let new_supergraph_hash = hash(new_supergraph.as_bytes());
 
                     if current_supergraph_hash != new_supergraph_hash {
-                        tracing::info!("New supergraph detected!");
+                        self.logger.info("New supergraph detected!");
                         std::fs::write(self.file_name.clone(), new_supergraph)
                             .expect("Could not write file");
                     }
                 }
             }
-            Err(e) => tracing::error!("{}", e),
+            Err(e) => self.logger.error(&format!("{}", e)),
         }
     }
 }
