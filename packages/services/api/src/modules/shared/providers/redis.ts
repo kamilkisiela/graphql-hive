@@ -35,7 +35,7 @@ export const RedisProvider: FactoryProvider<RedisInstance> = {
     });
 
     redis.on('error', err => {
-      logger.error(err);
+      logger.error('Redis connection error', err);
     });
 
     redis.on('connect', () => {
@@ -50,7 +50,7 @@ export const RedisProvider: FactoryProvider<RedisInstance> = {
       logger.info('Redis connection closed');
     });
 
-    redis.on('reconnecting', timeToReconnect => {
+    redis.on('reconnecting', (timeToReconnect?: number) => {
       logger.info('Redis reconnecting in %s', timeToReconnect);
     });
 

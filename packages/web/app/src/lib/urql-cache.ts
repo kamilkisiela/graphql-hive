@@ -1,7 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { DocumentNode, Kind } from 'graphql';
 import produce from 'immer';
-import type { TypedDocumentNode } from 'urql';
+import { TypedDocumentNode } from 'urql';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
 import {
