@@ -1,6 +1,6 @@
+import { SerializableChange } from 'packages/services/api/src/modules/schema/schema-change-from-meta';
 import {
   DatabasePool,
-  DatabasePoolConnection,
   DatabaseTransactionConnection,
   sql,
   TaggedTemplateLiteralInvocation,
@@ -22,7 +22,6 @@ import type {
   Project,
   ProjectAccessScope,
   Schema,
-  SchemaVersion,
   Storage,
   Target,
   TargetAccessScope,
@@ -31,7 +30,12 @@ import type {
 } from '@hive/api';
 import { batch } from '@theguild/buddy';
 import { ProjectType } from '../../api/src';
-import type { CDNAccessToken, OIDCIntegration, SchemaLog } from '../../api/src/shared/entities';
+import {
+  CDNAccessToken,
+  OIDCIntegration,
+  SchemaCompositionErrorModel,
+  SchemaLog,
+} from '../../api/src/shared/entities';
 import {
   activities,
   alert_channels,
@@ -51,6 +55,7 @@ import {
   tokens,
   users,
 } from './db';
+import { SchemaChangeModel } from './schema-change-model';
 import type { Slonik } from './shared';
 
 export { ConnectionError } from 'slonik';
@@ -100,36 +105,6 @@ function getProviderBasedOnExternalId(externalId: string): AuthProvider {
 
 export async function createStorage(connection: string, maximumPoolSize: number): Promise<Storage> {
   const pool = await getPool(connection, maximumPoolSize);
-
-  // use a single connection for locks because postgres advisory locks are bound
-  // to sessions and if the session is disposed, so will be the lock. by using
-  // a single connection for locks always, we guarantee the locks database
-  // persistance throughout its whole lifecycle
-  const getLockConn = (() => {
-    let lockConn: DatabasePoolConnection | null;
-    return () =>
-      new Promise<DatabasePoolConnection>((resolve, reject) => {
-        if (lockConn) {
-          return resolve(lockConn);
-        }
-        pool
-          .connect(conn => {
-            lockConn = conn;
-            resolve(lockConn);
-            return new Promise(() => {
-              // keep the connection alive indefinitely
-            });
-          })
-          .then(() => {
-            lockConn = null;
-            reject(new Error('Lock connection ended'));
-          })
-          .catch(err => {
-            lockConn = null;
-            reject(err);
-          });
-      });
-  })();
 
   function transformUser(user: users): User {
     return {
@@ -320,16 +295,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         };
 
     return record;
-  }
-
-  function transformSchemaVersion(version: schema_versions): SchemaVersion {
-    return {
-      id: version.id,
-      valid: version.is_composable,
-      date: version.created_at as any,
-      commit: version.action_id,
-      base_schema: version.base_schema,
-    };
   }
 
   function transformActivity(row: {
@@ -589,12 +554,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       oidcIntegrationId: input.oidcIntegrationId,
     };
   }
-
-  type Lock = {
-    p: Promise<void>;
-    release: () => void;
-  };
-  const locks = new Map<string, Lock>();
 
   const storage: Storage = {
     destroy() {
@@ -1610,13 +1569,18 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       );
     },
     async getMaybeLatestValidVersion({ target }) {
-      const version = await pool.maybeOne<
-        Slonik<
-          Pick<schema_versions, 'id' | 'is_composable' | 'created_at' | 'action_id' | 'base_schema'>
-        >
-      >(
+      const version = await pool.maybeOne<unknown>(
         sql`
-          SELECT sv.id, sv.is_composable, sv.created_at, sv.action_id, sv.base_schema
+          SELECT
+            sv.id,
+            sv.is_composable,
+            to_json(sv.created_at) as "created_at",
+            sv.action_id,
+            sv.base_schema,
+            sv.has_persisted_schema_changes,
+            sv.previous_schema_version_id,
+            sv.composite_schema_sdl,
+            sv.schema_composition_errors
           FROM public.schema_versions as sv
           WHERE sv.target_id = ${target} AND sv.is_composable IS TRUE
           ORDER BY sv.created_at DESC
@@ -1628,22 +1592,21 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         return null;
       }
 
-      return {
-        id: version.id,
-        valid: version.is_composable,
-        date: version.created_at as any,
-        commit: version.action_id,
-        base_schema: version.base_schema,
-      };
+      return SchemaVersionModel.parse(version);
     },
     async getLatestValidVersion({ target }) {
-      const version = await pool.one<
-        Slonik<
-          Pick<schema_versions, 'id' | 'is_composable' | 'created_at' | 'action_id' | 'base_schema'>
-        >
-      >(
+      const version = await pool.maybeOne<unknown>(
         sql`
-          SELECT sv.id, sv.is_composable, sv.created_at, sv.action_id, sv.base_schema
+          SELECT
+            sv.id,
+            sv.is_composable,
+            to_json(sv.created_at) as "created_at",
+            sv.action_id,
+            sv.base_schema,
+            sv.has_persisted_schema_changes,
+            sv.previous_schema_version_id,
+            sv.composite_schema_sdl,
+            sv.schema_composition_errors
           FROM public.schema_versions as sv
           WHERE sv.target_id = ${target} AND sv.is_composable IS TRUE
           ORDER BY sv.created_at DESC
@@ -1651,22 +1614,21 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `,
       );
 
-      return {
-        id: version.id,
-        valid: version.is_composable,
-        date: version.created_at as any,
-        commit: version.action_id,
-        base_schema: version.base_schema,
-      };
+      return SchemaVersionModel.parse(version);
     },
     async getLatestVersion({ project, target }) {
-      const version = await pool.one<
-        Slonik<
-          Pick<schema_versions, 'id' | 'is_composable' | 'created_at' | 'action_id' | 'base_schema'>
-        >
-      >(
+      const version = await pool.maybeOne<unknown>(
         sql`
-          SELECT sv.id, sv.is_composable, sv.created_at, sv.action_id, sv.base_schema
+          SELECT
+            sv.id,
+            sv.is_composable,
+            to_json(sv.created_at) as "created_at",
+            sv.action_id,
+            sv.base_schema,
+            sv.has_persisted_schema_changes,
+            sv.previous_schema_version_id,
+            sv.composite_schema_sdl,
+            sv.schema_composition_errors
           FROM public.schema_versions as sv
           LEFT JOIN public.targets as t ON (t.id = sv.target_id)
           WHERE sv.target_id = ${target} AND t.project_id = ${project}
@@ -1675,23 +1637,22 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `,
       );
 
-      return {
-        id: version.id,
-        valid: version.is_composable,
-        date: version.created_at as any,
-        commit: version.action_id,
-        base_schema: version.base_schema,
-      };
+      return SchemaVersionModel.parse(version);
     },
 
     async getMaybeLatestVersion({ project, target }) {
-      const version = await pool.maybeOne<
-        Slonik<
-          Pick<schema_versions, 'id' | 'is_composable' | 'created_at' | 'action_id' | 'base_schema'>
-        >
-      >(
+      const version = await pool.maybeOne<unknown>(
         sql`
-          SELECT sv.id, sv.is_composable, sv.created_at, sv.action_id, sv.base_schema
+          SELECT
+            sv.id,
+            sv.is_composable,
+            to_json(sv.created_at) as "created_at",
+            sv.action_id,
+            sv.base_schema,
+            sv.has_persisted_schema_changes,
+            sv.previous_schema_version_id,
+            sv.composite_schema_sdl,
+            sv.schema_composition_errors
           FROM public.schema_versions as sv
           LEFT JOIN public.targets as t ON (t.id = sv.target_id)
           WHERE sv.target_id = ${target} AND t.project_id = ${project}
@@ -1704,13 +1665,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         return null;
       }
 
-      return {
-        id: version.id,
-        valid: version.is_composable,
-        date: version.created_at as any,
-        commit: version.action_id,
-        base_schema: version.base_schema,
-      };
+      return SchemaVersionModel.parse(version);
     },
     async getLatestSchemas({ organization, project, target, onlyComposable }) {
       const latest = await pool.maybeOne<Pick<schema_versions, 'id' | 'is_composable'>>(sql`
@@ -1815,36 +1770,72 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         Slonik<
           Pick<
             schema_versions,
-            'id' | 'is_composable' | 'created_at' | 'base_schema' | 'action_id'
+            | 'id'
+            | 'is_composable'
+            | 'created_at'
+            | 'base_schema'
+            | 'action_id'
+            | 'has_persisted_schema_changes'
+            | 'previous_schema_version_id'
+            | 'composite_schema_sdl'
+            | 'schema_composition_errors'
           > &
             Pick<schema_log, 'author' | 'service_name'>
         >
       >(sql`
         SELECT 
-          sv.id, sv.is_composable, sv.created_at, sv.base_schema, sv.action_id,
-          sl.author, lower(sl.service_name) as service_name
+          sv.id,
+          sv.is_composable,
+          to_json(sv.created_at) as "created_at",
+          sv.base_schema,
+          sv.action_id,
+          sv.has_persisted_schema_changes,
+          sv.previous_schema_version_id,
+          sv.composite_schema_sdl,
+          sv.schema_composition_errors,
+          sl.author,
+          lower(sl.service_name) as "service_name"
         FROM public.schema_versions as sv
         LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
         LEFT JOIN public.targets as t ON (t.id = sv.target_id)
-        WHERE sv.target_id = ${target} AND t.project_id = ${project} AND sv.id = ${version} LIMIT 1
+        WHERE
+          sv.target_id = ${target}
+          AND t.project_id = ${project}
+          AND sv.id = ${version}
+        LIMIT 1
       `);
 
       return {
         id: result.id,
         valid: result.is_composable,
-        date: result.created_at as any,
+        date: result.created_at.toString(),
         commit: result.action_id,
-        base_schema: result.base_schema,
+        baseSchema: result.base_schema,
         author: result.author,
         service: result.service_name,
+        hasPersistedSchemaChanges: result.has_persisted_schema_changes ?? false,
+        previousSchemaVersionId: result.previous_schema_version_id,
+        compositeSchemaSDL: result.composite_schema_sdl ?? null,
+        schemaCompositionErrors: Array.isArray(result.schema_composition_errors)
+          ? result.schema_composition_errors.map(item => SchemaCompositionErrorModel.parse(item))
+          : null,
       };
     },
 
     async getVersions({ project, target, after, limit }) {
       const query = sql`
       SELECT 
-        sv.id, sv.is_composable, sv.created_at, sv.base_schema, sv.action_id,
-        sl.author, lower(sl.service_name) as service_name
+        sv.id,
+        sv.is_composable,
+        to_json(sv.created_at) as "created_at",
+        sv.base_schema,
+        sv.action_id,
+        sv.has_persisted_schema_changes,
+        sv.previous_schema_version_id,
+        sv.composite_schema_sdl,
+        sv.schema_composition_errors,
+        sl.author,
+        lower(sl.service_name) as "service_name"
       FROM public.schema_versions as sv
       LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
       LEFT JOIN public.targets as t ON (t.id = sv.target_id)
@@ -1857,7 +1848,18 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       LIMIT ${limit + 1}
     `;
       const result = await pool.query<
-        Pick<schema_versions, 'id' | 'is_composable' | 'created_at' | 'base_schema' | 'action_id'> &
+        Pick<
+          schema_versions,
+          | 'id'
+          | 'is_composable'
+          | 'created_at'
+          | 'base_schema'
+          | 'action_id'
+          | 'has_persisted_schema_changes'
+          | 'previous_schema_version_id'
+          | 'composite_schema_sdl'
+          | 'schema_composition_errors'
+        > &
           Pick<schema_log, 'author' | 'service_name'>
       >(query);
 
@@ -1866,9 +1868,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const versions = result.rows.slice(0, limit).map(version => ({
         id: version.id,
         valid: version.is_composable,
-        date: version.created_at as any,
+        date: version.created_at.toString(),
         commit: version.action_id,
-        base_schema: version.base_schema,
+        baseSchema: version.base_schema,
+        hasPersistedSchemaChanges: version.has_persisted_schema_changes ?? false,
+        previousSchemaVersionId: version.previous_schema_version_id,
+        compositeSchemaSDL: version.composite_schema_sdl ?? null,
+        schemaCompositionErrors: Array.isArray(version.schema_composition_errors)
+          ? version.schema_composition_errors.map(item => SchemaCompositionErrorModel.parse(item))
+          : null,
       }));
 
       return {
@@ -1994,24 +2002,47 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `);
 
         // creates a new version
-        const version = await trx.one<Slonik<Pick<schema_versions, 'id' | 'created_at'>>>(sql`
+        const version = await trx.one<
+          Slonik<
+            Pick<
+              schema_versions,
+              | 'id'
+              | 'created_at'
+              | 'has_persisted_schema_changes'
+              | 'previous_schema_version_id'
+              | 'composite_schema_sdl'
+              | 'schema_composition_errors'
+            >
+          >
+        >(sql`
           INSERT INTO public.schema_versions
             (
               is_composable,
               target_id,
               action_id,
-              base_schema
+              base_schema,
+              has_persisted_schema_changes,
+              previous_schema_version_id,
+              composite_schema_sdl,
+              schema_composition_errors
             )
           VALUES
             (
               ${input.valid},
               ${input.target},
               ${log.id},
-              ${input.base_schema}
+              ${input.base_schema},
+              ${true},
+              ${input.previousSchemaVersion},
+              ${input.compositeSchemaSDL},
+              ${
+                input.schemaCompositionErrors
+                  ? sql`${JSON.stringify(input.schemaCompositionErrors)}::jsonb`
+                  : sql`${null}`
+              }
             )
           RETURNING
-            id,
-            created_at
+            *
         `);
 
         await Promise.all(
@@ -2024,6 +2055,31 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             `);
           }),
         );
+
+        if (input.changes.length > 0) {
+          await trx.query(sql`
+            INSERT INTO public.schema_version_changes (
+              "schema_version_id",
+              "change_type",
+              "severity_level",
+              "meta",
+              "is_safe_based_on_usage"
+            ) VALUES ${sql.join(
+              input.changes.map(
+                change =>
+                  // Note: change.criticality.level is actually a computed value from meta
+                  sql`(
+                    ${version.id},
+                    ${change.type},
+                    ${change.criticality.level},
+                    ${JSON.stringify(change.meta)}::jsonb,
+                    ${change.criticality.isSafeBasedOnUsage ?? false}
+                  )`,
+              ),
+              sql`\n,`,
+            )}
+          `);
+        }
 
         await input.actionFn();
 
@@ -2039,17 +2095,56 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         url,
         valid: input.valid,
         commit: output.log.id,
-        base_schema: input.base_schema,
+        baseSchema: input.base_schema,
+        hasPersistedSchemaChanges: output.version.has_persisted_schema_changes ?? false,
+        previousSchemaVersionId: output.version.previous_schema_version_id ?? null,
+        compositeSchemaSDL: output.version.composite_schema_sdl ?? null,
+        schemaCompositionErrors: Array.isArray(output.version.schema_composition_errors)
+          ? output.version.schema_composition_errors.map(item =>
+              SchemaCompositionErrorModel.parse(item),
+            )
+          : null,
       };
     },
 
+    async getSchemaChangesForVersion(args) {
+      // TODO: should this be paginated?
+      const changes = await pool.query<unknown>(sql`
+        SELECT
+          "change_type" as "type",
+          "meta",
+          "severity_level" as "severityLevel",
+          "is_safe_based_on_usage" as "isSafeBasedOnUsage"
+        FROM
+          "public"."schema_version_changes"
+        WHERE
+          "schema_version_id" = ${args.versionId}
+      `);
+
+      if (changes.rows.length === 0) {
+        return null;
+      }
+
+      // TODO: I don't like the cast...
+      return changes.rows.map(row => SchemaChangeModel.parse(row) as SerializableChange);
+    },
+
     async updateVersionStatus({ version, valid }) {
-      return transformSchemaVersion(
-        await pool.one<Slonik<schema_versions>>(sql`
+      return SchemaVersionModel.parse(
+        await pool.maybeOne<unknown>(sql`
           UPDATE public.schema_versions
           SET is_composable = ${valid}
           WHERE id = ${version}
-          RETURNING *
+          RETURNING
+            id,
+            is_composable,
+            to_json(created_at) as "created_at",
+            action_id,
+            base_schema,
+            has_persisted_schema_changes,
+            previous_schema_version_id,
+            composite_schema_sdl,
+            schema_composition_errors
         `),
       );
     },
@@ -2749,109 +2844,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       `);
     },
 
-    idMutex: {
-      async lock(id, { signal }) {
-        return Promise.race([
-          new Promise<never>((_, reject) => {
-            const listener = () => {
-              signal.removeEventListener('abort', listener);
-              reject(new Error('Locking aborted'));
-            };
-            signal.addEventListener('abort', listener);
-          }),
-          (async () => {
-            const lockConn = await getLockConn();
-            if (signal.aborted) {
-              throw new Error('Locking aborted');
-            }
-
-            // postgres advisory locks uses bigints as lock keys,
-            // we therefore hash the provided lock id and use the hash
-            const idInt = hashFnv32a(id);
-
-            // wait if there's a lock in the process
-            let lock;
-            while ((lock = locks.get(id))) {
-              await lock.p;
-              if (signal.aborted) {
-                throw new Error('Locking aborted');
-              }
-            }
-
-            // only one lock can be acquired per process
-            let release!: () => void;
-            const p = new Promise<void>(resolve => (release = resolve));
-            locks.set(id, {
-              p,
-              release,
-            });
-
-            // wait and acquire lock on the database (intra-process sync)
-            let advisoryLock = false;
-            try {
-              let i = 0;
-              while (!advisoryLock) {
-                i++;
-                if (i > 30) {
-                  // 30 seconds is already too much
-                  throw new Error('Lock was never acquired');
-                }
-                advisoryLock = await lockConn.oneFirst<boolean>(
-                  sql`select pg_try_advisory_lock(${idInt}) as advisoryLock`,
-                );
-                if (!advisoryLock) {
-                  // only sleep if not locked so that the loop can resolve fast if locked
-                  await new Promise(resolve => setTimeout(resolve, 1_000));
-                }
-                if (signal.aborted) {
-                  throw new Error('Locking aborted');
-                }
-              }
-            } catch (err) {
-              locks.delete(id);
-              release();
-              if (advisoryLock) {
-                lockConn.query(sql`select pg_advisory_unlock(${idInt})`).catch(err => {
-                  // warn for now, we'll rethink if it happens to much
-                  console.warn(
-                    `Error while unlocking advisory lock ${idInt} with id ${id} after error`,
-                    err,
-                  );
-                });
-              }
-              throw err;
-            }
-
-            const listener = () => {
-              signal.removeEventListener('abort', listener);
-              if (locks.get(id)) {
-                // unlock if aborted because the lock _was_ acquired at this time
-                locks.delete(id);
-                release();
-                lockConn.query(sql`select pg_advisory_unlock(${idInt})`).catch(err => {
-                  // warn for now, we'll rethink if it happens to much
-                  console.warn(
-                    `Error while unlocking advisory lock ${idInt} with id ${id} after abort`,
-                    err,
-                  );
-                });
-              }
-            };
-            signal.addEventListener('abort', listener);
-
-            return async function unlock() {
-              signal.removeEventListener('abort', listener);
-              if (locks.get(id)) {
-                locks.delete(id); // delete the lock first so that the while loop in lock can break
-                release(); // release the process first (guarantees unlock if query below fails)
-                await lockConn.query(sql`select pg_advisory_unlock(${idInt})`); // finally release the advisory lock
-              }
-            };
-          })(),
-        ]);
-      },
-    },
-
     async createCDNAccessToken(args) {
       const result = await pool.maybeOne(sql`
         INSERT INTO "public"."cdn_access_tokens" (
@@ -3121,20 +3113,29 @@ function decodeFeatureFlags(column: unknown) {
   return FeatureFlagsModel.parse(column);
 }
 
-/**
- * Calculate a 32 bit FNV-1a hash
- * Found here: https://gist.github.com/vaiorabbit/5657561
- * Ref.: http://isthe.com/chongo/tech/comp/fnv/
- *
- * @param str - The input string value to be hashed
- */
-function hashFnv32a(str: string): number {
-  let i,
-    l,
-    hval = 0x811c9dc5;
-  for (i = 0, l = str.length; i < l; i++) {
-    hval ^= str.charCodeAt(i);
-    hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
-  }
-  return hval >>> 0;
-}
+const SchemaVersionModel = zod
+  .object({
+    id: zod.string(),
+    is_composable: zod.boolean(),
+    created_at: zod.string(),
+    base_schema: zod.nullable(zod.string()),
+    action_id: zod.string(),
+    has_persisted_schema_changes: zod.nullable(zod.boolean()),
+    previous_schema_version_id: zod.nullable(zod.string()),
+    composite_schema_sdl: zod.nullable(zod.string()),
+    schema_composition_errors: zod.nullable(zod.array(SchemaCompositionErrorModel)),
+  })
+  .transform(value => ({
+    id: value.id,
+    /** @deprecated Use isComposable instead. */
+    valid: value.is_composable,
+    isComposable: value.is_composable,
+    createdAt: value.created_at,
+    baseSchema: value.base_schema,
+    commit: value.action_id,
+    hasPersistedSchemaChanges: value.has_persisted_schema_changes ?? false,
+    previousSchemaVersionId: value.previous_schema_version_id ?? null,
+    compositeSchemaSDL: value.composite_schema_sdl ?? null,
+    schemaCompositionErrors: value.schema_composition_errors ?? null,
+    date: value.created_at,
+  }));

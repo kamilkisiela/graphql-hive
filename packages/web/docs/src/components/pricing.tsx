@@ -118,7 +118,7 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
             features={[
               'Unlimited seats',
               'Unlimited schema pushes',
-              <Tooltip content={OPERATIONS_EXPLAINER}>Unlimited operations</Tooltip>,
+              <Tooltip content={OPERATIONS_EXPLAINER}>Custom limit of operations</Tooltip>,
               <Tooltip content={USAGE_DATA_RETENTION_EXPLAINER}>
                 12 months of usage data retention
               </Tooltip>,

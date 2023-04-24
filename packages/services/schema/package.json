@@ -5,7 +5,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "bob runify --single",
+    "build": "tsx ../../../scripts/runify.ts",
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts",
     "typecheck": "tsc --noEmit"
   },
@@ -13,14 +13,13 @@
     "@apollo/federation": "0.38.1",
     "@graphql-tools/stitch": "8.7.48",
     "@graphql-tools/stitching-directives": "2.3.34",
-    "@sentry/node": "7.44.2",
-    "@sentry/tracing": "7.44.2",
-    "@trpc/server": "10.20.0",
-    "@whatwg-node/fetch": "0.8.4",
+    "@sentry/node": "7.48.0",
+    "@trpc/server": "10.21.1",
+    "@whatwg-node/fetch": "0.8.6",
     "dotenv": "16.0.3",
     "got": "12.6.0",
     "graphql": "16.6.0",
-    "ioredis": "5.3.1",
+    "ioredis": "5.3.2",
     "p-timeout": "6.1.1",
     "zod": "3.21.4"
   },
@@ -30,15 +29,7 @@
     "@types/async-retry": "1.4.5",
     "@types/ioredis-mock": "8.2.1",
     "fastify": "3.29.5",
-    "ioredis-mock": "8.6.0",
+    "ioredis-mock": "8.7.0",
     "pino-pretty": "10.0.0"
-  },
-  "buildOptions": {
-    "runify": true,
-    "tsup": true,
-    "tags": [
-      "backend"
-    ],
-    "banner": "../../../scripts/banner.js"
   }
 }

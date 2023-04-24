@@ -7,12 +7,15 @@
   "engines": {
     "node": ">=12"
   },
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
-    "build": "bob runify --single",
+    "build": "tsx ../../../scripts/runify.ts",
     "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts"
   },
   "dependencies": {
-    "@sentry/node": "7.44.2",
+    "@sentry/node": "7.48.0",
     "@theguild/buddy": "0.1.0",
     "dotenv": "16.0.3",
     "got": "12.6.0",
@@ -23,12 +26,17 @@
     "zod": "3.21.4"
   },
   "devDependencies": {
-    "@sentry/types": "7.44.2",
+    "@sentry/types": "7.48.0",
     "@tgriesser/schemats": "9.0.1",
-    "@types/node": "18.15.11",
+    "@types/node": "18.16.0",
     "@types/pg": "8.6.6",
     "pg-promise": "11.4.3",
     "tslib": "2.5.0",
     "typescript": "5.0.4"
+  },
+  "buildOptions": {
+    "external": [
+      "pg-native"
+    ]
   }
 }

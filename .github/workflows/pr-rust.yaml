@@ -1,6 +1,12 @@
 name: pr
 on:
-  pull_request: {}
+  pull_request:
+    paths:
+      - 'packages/libraries/router/**'
+      - 'scripts/compress/**'
+      - 'configs/cargo/Cargo.lock'
+      - 'Cargo.lock'
+      - 'Cargo.toml'
 
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}

@@ -6,16 +6,15 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "bob runify --single",
+    "build": "tsx ../../../scripts/runify.ts",
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentry/node": "7.44.2",
-    "@sentry/tracing": "7.44.2",
-    "@trpc/client": "10.20.0",
-    "@trpc/server": "10.20.0",
-    "@whatwg-node/fetch": "0.8.4",
+    "@sentry/node": "7.48.0",
+    "@trpc/client": "10.21.1",
+    "@trpc/server": "10.21.1",
+    "@whatwg-node/fetch": "0.8.6",
     "date-fns": "2.29.3",
     "dotenv": "16.0.3",
     "got": "12.6.0",
@@ -30,14 +29,8 @@
     "tslib": "2.5.0"
   },
   "buildOptions": {
-    "runify": true,
-    "tsup": true,
     "external": [
       "pg-native"
-    ],
-    "tags": [
-      "backend"
-    ],
-    "banner": "../../../scripts/banner.js"
+    ]
   }
 }

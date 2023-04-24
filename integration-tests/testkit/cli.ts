@@ -37,7 +37,9 @@ async function exec(cmd: string) {
 export async function schemaPublish(args: string[]) {
   const registryAddress = await getServiceHost('server', 8082);
   return await exec(
-    ['schema:publish', `--registry`, `http://${registryAddress}/graphql`, ...args].join(' '),
+    ['schema:publish', `--registry.endpoint`, `http://${registryAddress}/graphql`, ...args].join(
+      ' ',
+    ),
   );
 }
 
@@ -45,7 +47,7 @@ export async function schemaCheck(args: string[]) {
   const registryAddress = await getServiceHost('server', 8082);
 
   return await exec(
-    ['schema:check', `--registry`, `http://${registryAddress}/graphql`, ...args].join(' '),
+    ['schema:check', `--registry.endpoint`, `http://${registryAddress}/graphql`, ...args].join(' '),
   );
 }
 
@@ -53,7 +55,9 @@ export async function schemaDelete(args: string[]) {
   const registryAddress = await getServiceHost('server', 8082);
 
   return await exec(
-    ['schema:delete', `--registry`, `http://${registryAddress}/graphql`, ...args].join(' '),
+    ['schema:delete', `--registry.endpoint`, `http://${registryAddress}/graphql`, ...args].join(
+      ' ',
+    ),
   );
 }
 
@@ -82,7 +86,7 @@ export function createCLI(tokens: { readwrite: string; readonly: string }) {
     const commit = randomUUID();
 
     const cmd = schemaPublish([
-      '--token',
+      '--registry.accessToken',
       tokens.readwrite,
       '--author',
       'Kamil',
@@ -170,7 +174,7 @@ export function createCLI(tokens: { readwrite: string; readonly: string }) {
     expect: 'approved' | 'rejected';
   }) {
     const cmd = schemaCheck([
-      '--token',
+      '--registry.accessToken',
       tokens.readonly,
       ...(serviceName ? ['--service', serviceName] : []),
       await generateTmpFile(sdl, 'graphql'),

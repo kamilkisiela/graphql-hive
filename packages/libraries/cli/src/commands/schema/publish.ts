@@ -21,11 +21,27 @@ export default class SchemaPublish extends Command {
       description:
         'additional metadata to attach to the GraphQL schema. This can be a string with a valid JSON, or a path to a file containing a valid JSON',
     }),
+    'registry.endpoint': Flags.string({
+      description: 'registry endpoint',
+    }),
+    /** @deprecated */
     registry: Flags.string({
       description: 'registry address',
+      deprecated: {
+        message: 'use --registry.endpoint instead',
+        version: '0.21.0',
+      },
     }),
+    'registry.accessToken': Flags.string({
+      description: 'registry access token',
+    }),
+    /** @deprecated */
     token: Flags.string({
       description: 'api token',
+      deprecated: {
+        message: 'use --registry.accessToken instead',
+        version: '0.21.0',
+      },
     }),
     author: Flags.string({
       description: 'author of the change',
@@ -108,27 +124,26 @@ export default class SchemaPublish extends Command {
 
       await this.require(flags);
 
-      const registry = this.ensure({
-        key: 'registry',
+      const endpoint = this.ensure({
+        key: 'registry.endpoint',
         args: flags,
+        legacyFlagName: 'registry',
         defaultValue: graphqlEndpoint,
         env: 'HIVE_REGISTRY',
       });
-      const service = this.maybe('service', flags);
-      const url = this.maybe('url', flags);
-      const file = args.file;
-      const token = this.ensure({
-        key: 'token',
+      const accessToken = this.ensure({
+        key: 'registry.accessToken',
         args: flags,
+        legacyFlagName: 'token',
         env: 'HIVE_TOKEN',
       });
-      const force = this.maybe('force', flags);
-      const experimental_acceptBreakingChanges = this.maybe(
-        'experimental_acceptBreakingChanges',
-        flags,
-      );
-      const metadata = this.resolveMetadata(this.maybe('metadata', flags));
-      const usesGitHubApp = this.maybe('github', flags) === true;
+      const service = flags.service;
+      const url = flags.url;
+      const file = args.file;
+      const force = flags.force;
+      const experimental_acceptBreakingChanges = flags.experimental_acceptBreakingChanges;
+      const metadata = this.resolveMetadata(flags.metadata);
+      const usesGitHubApp = flags.github;
 
       let commit: string | undefined | null = flags.commit;
       let author: string | undefined | null = flags.author;
@@ -172,7 +187,7 @@ export default class SchemaPublish extends Command {
         throw err;
       }
 
-      const result = await this.registryApi(registry, token).schemaPublish({
+      const result = await this.registryApi(endpoint, accessToken).schemaPublish({
         input: {
           service,
           url,

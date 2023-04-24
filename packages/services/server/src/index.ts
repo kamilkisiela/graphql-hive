@@ -18,7 +18,7 @@ import {
 } from '@hive/service-common';
 import { createConnectionString, createStorage as createPostgreSQLStorage } from '@hive/storage';
 import { Dedupe, ExtraErrorData } from '@sentry/integrations';
-import * as Sentry from '@sentry/node';
+import { captureException, init, Integrations, SeverityLevel } from '@sentry/node';
 import { createServerAdapter } from '@whatwg-node/server';
 import { createContext, internalApiRouter } from './api';
 import { asyncStorage } from './async-storage';
@@ -36,28 +36,27 @@ const LegacyCheckAuth0EmailUserExistsPayloadModel = zod.object({
 });
 
 export async function main() {
-  if (env.sentry) {
-    Sentry.init({
-      serverName: 'api',
-      enabled: true,
-      environment: env.environment,
-      dsn: env.sentry.dsn,
-      tracesSampleRate: 1,
-      release: env.release,
-      integrations: [
-        new Sentry.Integrations.Http({ tracing: true }),
-        new Sentry.Integrations.ContextLines(),
-        new Sentry.Integrations.LinkedErrors(),
-        new ExtraErrorData({
-          depth: 2,
-        }),
-        new Dedupe(),
-      ],
-      maxBreadcrumbs: 5,
-      defaultIntegrations: false,
-      autoSessionTracking: false,
-    });
-  }
+  init({
+    serverName: 'api',
+    enabled: !!env.sentry,
+    environment: env.environment,
+    dsn: env.sentry?.dsn,
+    enableTracing: true,
+    tracesSampleRate: 1,
+    release: env.release,
+    integrations: [
+      new Integrations.Http({ tracing: true }),
+      new Integrations.ContextLines(),
+      new Integrations.LinkedErrors(),
+      new ExtraErrorData({
+        depth: 2,
+      }),
+      new Dedupe(),
+    ],
+    maxBreadcrumbs: 5,
+    defaultIntegrations: false,
+    autoSessionTracking: false,
+  });
 
   const server = await createServer({
     name: 'graphql-api',
@@ -98,7 +97,7 @@ export async function main() {
     },
   });
 
-  function createErrorHandler(level: Sentry.SeverityLevel): LogFn {
+  function createErrorHandler(level: SeverityLevel): LogFn {
     return (error: any, errorLike?: any, ...args: any[]) => {
       server.log.error(error, errorLike, ...args);
 
@@ -110,7 +109,7 @@ export async function main() {
       }
 
       if (errorObj instanceof Error) {
-        Sentry.captureException(errorObj, {
+        captureException(errorObj, {
           level,
           extra: {
             error,
@@ -445,7 +444,7 @@ export async function main() {
     await server.listen(port, '::');
   } catch (error) {
     server.log.fatal(error);
-    Sentry.captureException(error, {
+    captureException(error, {
       level: 'fatal',
     });
     process.exit(1);

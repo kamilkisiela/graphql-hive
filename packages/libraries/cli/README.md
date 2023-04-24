@@ -34,6 +34,7 @@ curl -sSL https://graphql-hive.com/install.sh | sh
 
 <!-- commands -->
 
+- [`hive artifact:fetch`](#hive-artifactfetch)
 - [`hive config:delete KEY`](#hive-configdelete-key)
 - [`hive config:get KEY`](#hive-configget-key)
 - [`hive config:reset`](#hive-configreset)
@@ -46,6 +47,29 @@ curl -sSL https://graphql-hive.com/install.sh | sh
 - [`hive schema:publish FILE`](#hive-schemapublish-file)
 - [`hive update [CHANNEL]`](#hive-update-channel)
 - [`hive whoami`](#hive-whoami)
+
+## `hive artifact:fetch`
+
+fetch artifacts from the CDN
+
+```
+USAGE
+  $ hive artifact:fetch --artifact sdl|supergraph|metadata|services|sdl.graphql|sdl.graphqls [--cdn.endpoint
+    <value>] [--cdn.accessToken <value>] [--outputFile <value>]
+
+FLAGS
+  --artifact=(sdl|supergraph|metadata|services|sdl.graphql|sdl.graphqls)  (required) artifact to fetch (Note: supergraph
+                                                                          is only available for federation projects)
+  --cdn.accessToken=<value>                                               CDN access token
+  --cdn.endpoint=<value>                                                  CDN endpoint
+  --outputFile=<value>                                                    whether to write to a file instead of stdout
+
+DESCRIPTION
+  fetch artifacts from the CDN
+```
+
+_See code:
+[dist/commands/artifact/fetch.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.20.2/dist/commands/artifact/fetch.js)_
 
 ## `hive config:delete KEY`
 
@@ -136,7 +160,7 @@ DESCRIPTION
 ```
 
 _See code:
-[@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.6/src/commands/help.ts)_
+[@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.9/src/commands/help.ts)_
 
 ## `hive operations:check FILE`
 
@@ -144,15 +168,18 @@ checks operations against a published schema
 
 ```
 USAGE
-  $ hive operations:check FILE [--registry <value>] [--token <value>] [--require <value>]
+  $ hive operations:check FILE [--registry.endpoint <value>] [--registry <value>] [--registry.accessToken <value>]
+    [--token <value>] [--require <value>]
 
 ARGUMENTS
   FILE  Glob pattern to find the operations
 
 FLAGS
-  --registry=<value>    registry address
-  --require=<value>...  [default: ] Loads specific require.extensions before running the command
-  --token=<value>       api token
+  --registry=<value>              registry address
+  --registry.accessToken=<value>  registry access token
+  --registry.endpoint=<value>     registry endpoint
+  --require=<value>...            [default: ] Loads specific require.extensions before running the command
+  --token=<value>                 api token
 
 DESCRIPTION
   checks operations against a published schema
@@ -167,16 +194,19 @@ saves operations to the store
 
 ```
 USAGE
-  $ hive operations:publish FILE [--registry <value>] [--token <value>] [--require <value>]
+  $ hive operations:publish FILE [--registry.endpoint <value>] [--registry <value>] [--registry.accessToken <value>]
+    [--token <value>] [--require <value>]
 
 ARGUMENTS
   FILE  Glob pattern to find the operations
 
 FLAGS
-  --registry=<value>    registry address
-  --require=<value>...  [default: ] Loads specific require.extensions before running the codegen and reading the
-                        configuration
-  --token=<value>       api token
+  --registry=<value>              registry address
+  --registry.accessToken=<value>  registry access token
+  --registry.endpoint=<value>     registry endpoint
+  --require=<value>...            [default: ] Loads specific require.extensions before running the codegen and reading
+                                  the configuration
+  --token=<value>                 api token
 
 DESCRIPTION
   saves operations to the store
@@ -191,20 +221,22 @@ checks schema
 
 ```
 USAGE
-  $ hive schema:check FILE [--service <value>] [--registry <value>] [--token <value>] [--forceSafe] [--github]
-    [--require <value>]
+  $ hive schema:check FILE [--service <value>] [--registry.endpoint <value>] [--registry <value>]
+    [--registry.accessToken <value>] [--token <value>] [--forceSafe] [--github] [--require <value>]
 
 ARGUMENTS
   FILE  Path to the schema file(s)
 
 FLAGS
-  --forceSafe           mark the check as safe, breaking changes are expected
-  --github              Connect with GitHub Application
-  --registry=<value>    registry address
-  --require=<value>...  [default: ] Loads specific require.extensions before running the codegen and reading the
-                        configuration
-  --service=<value>     service name (only for distributed schemas)
-  --token=<value>       api token
+  --forceSafe                     mark the check as safe, breaking changes are expected
+  --github                        Connect with GitHub Application
+  --registry=<value>              registry address
+  --registry.accessToken=<value>  registry access token
+  --registry.endpoint=<value>     registry endpoint
+  --require=<value>...            [default: ] Loads specific require.extensions before running the codegen and reading
+                                  the configuration
+  --service=<value>               service name (only for distributed schemas)
+  --token=<value>                 api token
 
 DESCRIPTION
   checks schema
@@ -219,16 +251,19 @@ deletes a schema
 
 ```
 USAGE
-  $ hive schema:delete SERVICE [--registry <value>] [--token <value>] [--dryRun] [--confirm]
+  $ hive schema:delete SERVICE [--registry.endpoint <value>] [--registry <value>] [--registry.accessToken <value>]
+    [--token <value>] [--dryRun] [--confirm]
 
 ARGUMENTS
   SERVICE  name of the service
 
 FLAGS
-  --confirm           Confirm deletion of the service
-  --dryRun            Does not delete the service, only reports what it would have done.
-  --registry=<value>  Address of the registry
-  --token=<value>     API token
+  --confirm                       Confirm deletion of the service
+  --dryRun                        Does not delete the service, only reports what it would have done.
+  --registry=<value>              registry address
+  --registry.accessToken=<value>  registry access token
+  --registry.endpoint=<value>     registry endpoint
+  --token=<value>                 api token
 
 DESCRIPTION
   deletes a schema
@@ -243,9 +278,9 @@ publishes schema
 
 ```
 USAGE
-  $ hive schema:publish FILE [--service <value>] [--url <value>] [--metadata <value>] [--registry <value>] [--token
-    <value>] [--author <value>] [--commit <value>] [--github] [--force] [--experimental_acceptBreakingChanges]
-    [--require <value>]
+  $ hive schema:publish FILE [--service <value>] [--url <value>] [--metadata <value>] [--registry.endpoint <value>]
+    [--registry <value>] [--registry.accessToken <value>] [--token <value>] [--author <value>] [--commit <value>]
+    [--github] [--force] [--experimental_acceptBreakingChanges] [--require <value>]
 
 ARGUMENTS
   FILE  Path to the schema file(s)
@@ -260,6 +295,8 @@ FLAGS
   --metadata=<value>                    additional metadata to attach to the GraphQL schema. This can be a string with a
                                         valid JSON, or a path to a file containing a valid JSON
   --registry=<value>                    registry address
+  --registry.accessToken=<value>        registry access token
+  --registry.endpoint=<value>           registry endpoint
   --require=<value>...                  [default: ] Loads specific require.extensions before running the codegen and
                                         reading the configuration
   --service=<value>                     service name (only for distributed schemas)
@@ -309,7 +346,7 @@ EXAMPLES
 ```
 
 _See code:
-[@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.1.6/src/commands/update.ts)_
+[@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.1.9/src/commands/update.ts)_
 
 ## `hive whoami`
 
@@ -317,11 +354,14 @@ shows information about the current token
 
 ```
 USAGE
-  $ hive whoami [--registry <value>] [--token <value>]
+  $ hive whoami [--registry.endpoint <value>] [--registry <value>] [--registry.accessToken <value>] [--token
+    <value>]
 
 FLAGS
-  --registry=<value>  registry address
-  --token=<value>     api token
+  --registry=<value>              registry address
+  --registry.accessToken=<value>  registry access token
+  --registry.endpoint=<value>     registry endpoint
+  --token=<value>                 api token
 
 DESCRIPTION
   shows information about the current token
@@ -341,12 +381,23 @@ globally.
 
 ### Config file (`hive.json`)
 
-You can create a `hive.json` file to manage your Hive configuration, you may use the following JSON
-keys:
+You can create a `hive.json` file to manage your Hive configuration.
+
+Note that the CLI args will override the values in config if both are specified.
+
+The configuration input priority is: CLI args > environment variables > hive.json configuration.
+
+This is how the structure of the config file should look like:
 
 ```json
 {
-  "registry": "<HIVE_REGISTRY_URL_GRAPHQL_ENDPOINT>",
-  "token": "<HIVE_REGISTRY_TOKEN>"
+  "registry": {
+    "endpoint": "<yourRegistryURL>",
+    "accessToken": "<yourtoken>"
+  },
+  "cdn": {
+    "endpoint": "<yourCdnURL>",
+    "accessToken": "<yourtoken>"
+  }
 }
 ```

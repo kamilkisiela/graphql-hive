@@ -13,11 +13,12 @@ import type {
 } from 'graphql';
 import type {
   ClientStats,
-  CriticalityLevel,
   OperationStats,
   SchemaChange,
   SchemaError,
 } from '../__generated__/types';
+import { SchemaBuildError } from '../modules/schema/providers/orchestrators/errors';
+import { SerializableChange } from '../modules/schema/schema-change-from-meta';
 import type {
   ActivityObject,
   DateRange,
@@ -27,7 +28,6 @@ import type {
   PersistedOperation,
   Project,
   PushedCompositeSchema as PushedCompositeSchemaEntity,
-  SchemaObject,
   SchemaVersion as SchemaVersionEntity,
   SingleSchema as SingleSchemaEntity,
   Target,
@@ -98,7 +98,7 @@ export type GraphQLInputObjectTypeMapper = WithSchemaCoordinatesUsage<{
 }>;
 export type GraphQLScalarTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLScalarType }>;
 
-export type SchemaChangeConnection = readonly SchemaChange[];
+export type SchemaChangeConnection = ReadonlyArray<SchemaChange>;
 export type SchemaErrorConnection = readonly SchemaError[];
 export type UserConnection = readonly User[];
 export type MemberConnection = readonly Member[];
@@ -117,22 +117,23 @@ export type SchemaVersionConnection = {
   nodes: readonly SchemaVersion[];
   hasMore: boolean;
 };
-type SchemaOnlyObject = Pick<SchemaObject, 'document' | 'raw'>;
-export type SchemaComparePayload =
-  | SchemaCompareResult
-  | {
-      message: string;
+export type SchemaComparePayload = SchemaCompareResult | SchemaCompareError;
+
+export type SchemaCompareError = {
+  error: SchemaBuildError;
+  result?: never;
+};
+
+export type SchemaCompareResult = {
+  error?: never;
+  result: {
+    schemas: {
+      before: string | null;
+      current: string;
     };
-export type SchemaCompareResult =
-  | readonly [
-      SchemaOnlyObject,
-      SchemaOnlyObject,
-      Array<{
-        message: string;
-        criticality: CriticalityLevel;
-      }>,
-    ]
-  | readonly [undefined | null, SchemaOnlyObject];
+    changes: Array<SerializableChange>;
+  };
+};
 
 export type SingleSchema = SingleSchemaEntity;
 export type PushedCompositeSchema = PushedCompositeSchemaEntity;

@@ -103,6 +103,7 @@ export class SingleModel {
         schemas,
         selector,
         version: compareToLatest ? latest : latestComposable,
+        includeUrlChanges: false,
       }),
     ]);
 
@@ -119,11 +120,20 @@ export class SingleModel {
 
       if (diffCheck.status === 'failed') {
         this.logger.debug('Failing schema check due to breaking changes');
-        reasons.push({
-          code: CheckFailureReasonCode.BreakingChanges,
-          changes: diffCheck.reason.changes ?? [],
-          breakingChanges: diffCheck.reason.breakingChanges,
-        });
+        if (diffCheck.reason.changes) {
+          reasons.push({
+            code: CheckFailureReasonCode.BreakingChanges,
+            changes: diffCheck.reason.changes ?? [],
+            breakingChanges: diffCheck.reason.breakingChanges,
+          });
+        }
+
+        if (diffCheck.reason.compareFailure) {
+          reasons.push({
+            code: CheckFailureReasonCode.CompositionFailure,
+            compositionErrors: [diffCheck.reason.compareFailure],
+          });
+        }
       }
 
       return {
@@ -217,6 +227,7 @@ export class SingleModel {
           organization: project.orgId,
         },
         version: compareToLatest ? latestVersion : latestComposable,
+        includeUrlChanges: false,
       }),
     ]);
 
@@ -265,7 +276,7 @@ export class SingleModel {
         changes: diffCheck.result?.changes ?? diffCheck.reason?.changes ?? null,
         messages,
         breakingChanges: null,
-        compositionErrors: null,
+        compositionErrors: compositionCheck.reason?.errors ?? null,
         schema: incoming,
         schemas,
         supergraph: null,

@@ -7,7 +7,7 @@ if (globalThis.process.env.BUILD !== '1') {
 }
 
 const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === '1',
+  enabled: globalThis.process.env.ANALYZE === '1',
   openAnalyzer: true,
 });
 

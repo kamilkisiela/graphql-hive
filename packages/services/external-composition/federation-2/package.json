@@ -4,7 +4,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "bob runify --single",
+    "build": "BUILD=1 tsx ../../../../scripts/runify.ts",
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/index.ts"
   },
   "dependencies": {
@@ -17,11 +17,5 @@
   },
   "devDependencies": {
     "@graphql-hive/external-composition": "workspace:*"
-  },
-  "buildOptions": {
-    "runify": true,
-    "tsup": true,
-    "tags": [],
-    "banner": "../../../../scripts/banner.js"
   }
 }
