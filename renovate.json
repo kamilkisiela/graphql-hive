@@ -51,6 +51,12 @@
       "groupName": "slonik",
       "matchPackagePrefixes": ["@slonik", "slonik"],
       "recreateClosed": false
+    },
+    {
+      "groupName": "apollo-router",
+      "matchSourceUrls": ["(^|/)Cargo\\.toml$"],
+      "packageFile": "Cargo.toml",
+      "rangeStrategy": "pin"
     }
   ],
   "dockerfile": {
