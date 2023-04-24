@@ -11,7 +11,7 @@ networks:
 
 services:
   local_cdn:
-    image: node:18.15.0-alpine3.16
+    image: node:20.0.0-alpine3.16
     working_dir: /app
     command: ['node', 'index.js']
     networks:
@@ -38,7 +38,7 @@ services:
       S3_PUBLIC_URL: 'http://localhost:8083'
 
   local_broker:
-    image: node:18.15.0-alpine3.16
+    image: node:20.0.0-alpine3.16
     working_dir: /app
     command: ['node', 'broker.js']
     networks:
@@ -78,7 +78,7 @@ services:
       SECRET: '${EXTERNAL_COMPOSITION_SECRET}'
 
   external_composition:
-    image: node:18.15.0-alpine3.16
+    image: node:20.0.0-alpine3.16
     working_dir: /app
     command: ['node', 'example.mjs']
     networks:
@@ -256,10 +256,10 @@ services:
 
   # It's not part of integration tests
   app:
-    image: node:18.15.0-alpine3.16
+    image: node:20.0.0-alpine3.16
     command: ['npx', 'http-server']
 
   # Redpand is used for integration tests, instead of Kafka. Zookeeper is no longer needed
   zookeeper:
-    image: node:18.15.0-alpine3.16
+    image: node:20.0.0-alpine3.16
     command: ['npx', 'http-server']

@@ -73,4 +73,5 @@ export default withGuildDocs({
       permanent: true,
     },
   ],
+  swcMinify: true,
 });

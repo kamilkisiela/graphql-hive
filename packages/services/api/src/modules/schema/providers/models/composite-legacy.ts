@@ -118,6 +118,7 @@ export class CompositeLegacyModel {
         schemas,
         selector,
         version: latestVersion,
+        includeUrlChanges: false,
       }),
     ]);
 
@@ -132,11 +133,20 @@ export class CompositeLegacyModel {
       }
 
       if (diffCheck.status === 'failed') {
-        reasons.push({
-          code: CheckFailureReasonCode.BreakingChanges,
-          changes: diffCheck.reason.changes ?? [],
-          breakingChanges: diffCheck.reason.breakingChanges,
-        });
+        if (diffCheck.reason.changes) {
+          reasons.push({
+            code: CheckFailureReasonCode.BreakingChanges,
+            changes: diffCheck.reason.changes ?? [],
+            breakingChanges: diffCheck.reason.breakingChanges,
+          });
+        }
+
+        if (diffCheck.reason.compareFailure) {
+          reasons.push({
+            code: CheckFailureReasonCode.CompositionFailure,
+            compositionErrors: [diffCheck.reason.compareFailure],
+          });
+        }
       }
 
       return {
@@ -266,6 +276,7 @@ export class CompositeLegacyModel {
         project,
         schemas,
         version: latestVersion,
+        includeUrlChanges: true,
       }),
       isFederation
         ? {
@@ -320,7 +331,7 @@ export class CompositeLegacyModel {
           initial: latestVersion === null,
           messages,
           changes,
-          breakingChanges,
+          breakingChanges: breakingChanges ?? null,
           compositionErrors,
           schema: incoming,
           schemas,
@@ -343,7 +354,7 @@ export class CompositeLegacyModel {
       reasons.push({
         code: PublishFailureReasonCode.BreakingChanges,
         changes: diffCheck.reason.changes ?? [],
-        breakingChanges: diffCheck.reason.breakingChanges,
+        breakingChanges: diffCheck.reason.breakingChanges ?? [],
       });
     }
 

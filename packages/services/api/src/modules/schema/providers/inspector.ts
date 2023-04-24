@@ -15,6 +15,15 @@ const criticalityMap: Record<CriticalityLevel, Types.CriticalityLevel> = {
   [CriticalityLevel.Dangerous]: 'Dangerous',
 };
 
+export function toGraphQLSchemaChange(change: Change): Types.SchemaChange {
+  return {
+    message: change.message,
+    path: change.path?.split('.') ?? null,
+    criticality: criticalityMap[change.criticality.level],
+    criticalityReason: change.criticality.reason ?? null,
+  };
+}
+
 @Injectable({
   scope: Scope.Operation,
 })
@@ -34,7 +43,7 @@ export class Inspector {
     existing: GraphQLSchema,
     incoming: GraphQLSchema,
     selector?: Types.TargetSelector,
-  ): Promise<Types.SchemaChange[]> {
+  ): Promise<Array<Change>> {
     this.logger.debug('Comparing Schemas');
 
     const changes = await diff(existing, incoming, [DiffRule.considerUsage], {
@@ -94,17 +103,7 @@ export class Inspector {
       },
     });
 
-    return changes
-      .map(change => this.translateChange(change))
-      .sort((a, b) => a.criticality.localeCompare(b.criticality));
-  }
-
-  private translateChange(change: Change): Types.SchemaChange {
-    return {
-      message: change.message,
-      criticality: criticalityMap[change.criticality.level],
-      path: change.path?.split('.'),
-    };
+    return changes.sort((a, b) => a.criticality.level.localeCompare(b.criticality.level));
   }
 
   private async getSettings({ selector }: { selector: Types.TargetSelector }) {

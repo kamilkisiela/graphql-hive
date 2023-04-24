@@ -28,6 +28,7 @@ import { stringifyOperation, stringifyRegistryRecord } from './serializer';
 
 interface NormalizationResult {
   type: OperationTypeNode;
+  name: string | null;
   body: string;
   hash: string;
   coordinates: string[];
@@ -83,8 +84,6 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
             continue;
           }
 
-          serializedOperations.push(stringifyOperation(processedOperation));
-
           const sample = operationSample.get(rawOperation.operationMapKey);
 
           // count operations per operationMapKey
@@ -96,6 +95,8 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
           } else {
             sample.size += 1;
           }
+
+          serializedOperations.push(stringifyOperation(processedOperation));
         }
 
         for (const group of operationSample.values()) {
@@ -124,7 +125,7 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
               size: group.size,
               target: rawReport.target,
               hash: operationHash,
-              name: operationMapRecord.operationName,
+              name: operationMapRecord.operationName ?? normalized.name,
               body: normalized.body,
               operation_kind: normalized.type,
               coordinates: normalized.coordinates,
@@ -148,16 +149,7 @@ function processSingleOperation(
   operationMap: RawOperationMap,
   target: string,
   normalize: NormalizeFunction,
-):
-  | (ProcessedOperation & {
-      legacy: {
-        coordinates: string[];
-        name?: string | null;
-        body: string;
-        kind: string;
-      };
-    })
-  | null {
+): ProcessedOperation | null {
   const operationMapRecord = operationMap[operation.operationMapKey];
   const { execution, metadata } = operation;
 
@@ -184,21 +176,11 @@ function processSingleOperation(
     execution,
     metadata,
     operationHash,
-    legacy: {
-      coordinates: normalized.coordinates,
-      name: operationMapRecord.operationName,
-      body: normalized.body,
-      kind: normalized.type,
-    },
   };
 }
 
 function isOperationDef(def: DefinitionNode): def is OperationDefinitionNode {
   return def.kind === Kind.OPERATION_DEFINITION;
-}
-
-function getOperationType(operation: DocumentNode): OperationTypeNode {
-  return operation.definitions.find(isOperationDef)!.operation;
 }
 
 function normalizeOperation(operation: RawOperationMapRecord) {
@@ -237,16 +219,24 @@ function normalizeOperation(operation: RawOperationMapRecord) {
 
   const sortedCoordinates = Array.from(uniqueCoordinatesSet).sort();
 
+  const operationDefinition = findOperationDefinition(parsed);
+  const operationName = operation.operationName ?? operationDefinition.name?.value;
+
   const hash = createHash('md5')
     .update(body)
-    .update(operation.operationName ?? '')
+    .update(operationName ?? '')
     .update(sortedCoordinates.join(';')) // we do not need to sort from A to Z, default lexicographic sorting is enough
     .digest('hex');
 
   return {
-    type: getOperationType(parsed),
+    type: operationDefinition.operation,
     hash,
     body,
     coordinates: sortedCoordinates,
+    name: operationName || null,
   };
+}
+
+function findOperationDefinition(doc: DocumentNode) {
+  return doc.definitions.find(isOperationDef)!;
 }

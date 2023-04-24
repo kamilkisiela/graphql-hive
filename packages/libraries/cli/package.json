@@ -1,6 +1,6 @@
 {
   "name": "@graphql-hive/cli",
-  "version": "0.20.2",
+  "version": "0.21.0",
   "description": "A CLI util to manage and control your GraphQL Hive",
   "repository": {
     "type": "git",
@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@graphql-hive/core": "0.2.3",
-    "@graphql-inspector/core": "~4.0.0",
+    "@graphql-inspector/core": "4.2.1",
     "@graphql-tools/code-file-loader": "~7.3.6",
     "@graphql-tools/graphql-file-loader": "~7.5.5",
     "@graphql-tools/json-file-loader": "~7.4.6",
@@ -54,7 +54,8 @@
     "@graphql-tools/utils": "9.2.1",
     "@oclif/core": "^1.23.0",
     "@oclif/plugin-help": "5.2.9",
-    "@oclif/plugin-update": "3.1.9",
+    "@oclif/plugin-update": "3.1.13",
+    "@whatwg-node/fetch": "0.8.6",
     "colors": "1.4.0",
     "env-ci": "7.3.0",
     "git-parse": "3.0.1",
@@ -65,13 +66,14 @@
     "mkdirp": "2.1.6",
     "rimraf": "4.4.1",
     "ts-node": "10.9.1",
-    "tslib": "2.5.0"
+    "tslib": "2.5.0",
+    "zod": "3.21.4"
   },
   "devDependencies": {
     "@graphql-codegen/typescript-graphql-request": "4.5.9",
     "@types/env-ci": "3.1.1",
     "@types/mkdirp": "1.0.2",
-    "oclif": "3.7.3"
+    "oclif": "3.8.1"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",

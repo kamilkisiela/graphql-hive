@@ -16,25 +16,6 @@ jobs:
       uploadJavaScriptArtifacts: true
     secrets: inherit
 
-  # Builds Rust crates, and creates Docker images
-  build-rust:
-    uses: ./.github/workflows/build-and-dockerize.yaml
-    with:
-      imageTag: ${{ github.sha }}
-      publishLatest: true
-      targets: rust
-      build: false
-      publishPrComment: false
-      uploadJavaScriptArtifacts: false
-    secrets: inherit
-
-  # Build and publish Rust crates and binaries
-  rust:
-    uses: ./.github/workflows/publish-rust.yaml
-    secrets: inherit
-    with:
-      publish: true
-
   # Trigger deployment
   deploy:
     name: trigger staging deployment

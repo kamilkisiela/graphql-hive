@@ -122,6 +122,7 @@ npm-shrinkwrap.json
 .volumes
 
 cypress
+!cypress/local.sh
 
 packages/web/app/next.config.mjs
 packages/web/app/environment-*.mjs

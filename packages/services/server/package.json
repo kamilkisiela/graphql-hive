@@ -5,7 +5,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "bob runify --single",
+    "build": "tsx ../../../scripts/runify.ts",
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts",
     "typecheck": "tsc --noEmit"
   },
@@ -19,16 +19,15 @@
     "@escape.tech/graphql-armor-max-depth": "1.8.4",
     "@escape.tech/graphql-armor-max-directives": "1.6.5",
     "@escape.tech/graphql-armor-max-tokens": "1.3.2",
-    "@sentry/integrations": "7.44.2",
-    "@sentry/node": "7.44.2",
-    "@sentry/tracing": "7.44.2",
-    "@trpc/server": "10.19.1",
-    "@whatwg-node/fetch": "0.8.4",
+    "@sentry/integrations": "7.49.0",
+    "@sentry/node": "7.49.0",
+    "@trpc/server": "10.21.1",
+    "@whatwg-node/fetch": "0.8.6",
     "@whatwg-node/server": "0.7.5",
     "dotenv": "16.0.3",
     "got": "12.6.0",
     "graphql": "16.6.0",
-    "graphql-yoga": "3.8.0",
+    "graphql-yoga": "3.9.1",
     "hyperid": "3.1.1",
     "prom-client": "14.2.0",
     "reflect-metadata": "0.1.13",
@@ -40,20 +39,14 @@
     "@hive/cdn-script": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
-    "@swc/core": "1.3.49",
+    "@swc/core": "1.3.53",
     "fastify": "3.29.5",
     "pino-pretty": "10.0.0",
     "tslib": "2.5.0"
   },
   "buildOptions": {
-    "runify": true,
-    "tsup": true,
     "external": [
       "pg-native"
-    ],
-    "tags": [
-      "backend"
-    ],
-    "banner": "../../../scripts/banner.js"
+    ]
   }
 }

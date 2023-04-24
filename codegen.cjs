@@ -59,6 +59,7 @@ const config = {
           SchemaComparePayload:
             '../shared/mappers#SchemaComparePayload as SchemaComparePayloadMapper',
           SchemaCompareResult: '../shared/mappers#SchemaCompareResult as SchemaCompareResultMapper',
+          SchemaCompareError: '../shared/mappers#SchemaCompareError as SchemaCompareErrorMapper',
           SchemaVersionConnection:
             '../shared/mappers#SchemaVersionConnection as SchemaVersionConnectionMapper',
           SchemaVersion: '../shared/mappers#SchemaVersion as SchemaVersionMapper',

@@ -2,8 +2,9 @@ import { parse } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import { z } from 'zod';
+import { Change } from '@graphql-inspector/core';
 import { RegistryModel } from '../../../__generated__/types';
-import { Orchestrator, ProjectType } from '../../../shared/entities';
+import { Orchestrator, ProjectType, SchemaCompositionError } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { atomic, stringifySelector } from '../../../shared/helpers';
 import { SchemaVersion } from '../../../shared/mappers';
@@ -226,6 +227,16 @@ export class SchemaManager {
     };
   }
 
+  async getSchemaChangesForVersion(selector: TargetSelector & { version: string }) {
+    this.logger.debug('Fetching single schema version changes (selector=%o)', selector);
+    await this.authManager.ensureTargetAccess({
+      ...selector,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    return await this.storage.getSchemaChangesForVersion({ versionId: selector.version });
+  }
+
   async getSchemaVersions(selector: Paginated<TargetSelector>) {
     this.logger.debug('Fetching published schemas (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
@@ -284,7 +295,7 @@ export class SchemaManager {
   }
 
   async createVersion(
-    input: {
+    input: ({
       commit: string;
       schema: string;
       author: string;
@@ -296,7 +307,19 @@ export class SchemaManager {
       metadata: string | null;
       projectType: ProjectType;
       actionFn(): Promise<void>;
-    } & TargetSelector,
+      changes: Array<Change>;
+      previousSchemaVersion: string | null;
+    } & TargetSelector) &
+      (
+        | {
+            compositeSchemaSDL: null;
+            schemaCompositionErrors: Array<SchemaCompositionError>;
+          }
+        | {
+            compositeSchemaSDL: string;
+            schemaCompositionErrors: null;
+          }
+      ),
   ) {
     this.logger.info(
       'Creating a new version (input=%o)',

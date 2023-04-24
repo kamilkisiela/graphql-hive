@@ -29,7 +29,7 @@ describe.each`
     const { secret } = await createToken({});
 
     await schemaPublish([
-      '--token',
+      '--registry.accessToken',
       secret,
       '--author',
       'Kamil',
@@ -43,13 +43,18 @@ describe.each`
     await schemaCheck([
       '--service',
       'test',
-      '--token',
+      '--registry.accessToken',
       secret,
       'fixtures/nonbreaking-schema.graphql',
     ]);
 
     await expect(
-      schemaCheck([...serviceNameArgs, '--token', secret, 'fixtures/breaking-schema.graphql']),
+      schemaCheck([
+        ...serviceNameArgs,
+        '--registry.accessToken',
+        secret,
+        'fixtures/breaking-schema.graphql',
+      ]),
     ).rejects.toThrowError(/breaking/i);
   });
 
@@ -67,7 +72,7 @@ describe.each`
       const allocatedError = new Error('Should have thrown.');
       try {
         await schemaPublish([
-          '--token',
+          '--registry.accessToken',
           secret,
           '--author',
           'Kamil',
@@ -101,7 +106,7 @@ describe.each`
       schemaPublish([
         ...serviceNameArgs,
         ...serviceUrlArgs,
-        '--token',
+        '--registry.accessToken',
         secret,
         'fixtures/init-schema.graphql',
       ]),
@@ -113,7 +118,7 @@ describe.each`
       schemaPublish([
         ...serviceNameArgs,
         ...serviceUrlArgs,
-        '--token',
+        '--registry.accessToken',
         secret,
         'fixtures/nonbreaking-schema.graphql',
       ]),
@@ -132,7 +137,12 @@ describe.each`
     const { secret } = await createToken({});
 
     await expect(
-      schemaCheck(['--token', secret, ...serviceNameArgs, 'fixtures/init-schema.graphql']),
+      schemaCheck([
+        '--registry.accessToken',
+        secret,
+        ...serviceNameArgs,
+        'fixtures/init-schema.graphql',
+      ]),
     ).resolves.toMatch('empty');
   });
 
@@ -147,7 +157,7 @@ describe.each`
 
     const output = schemaCheck([
       ...serviceNameArgs,
-      '--token',
+      '--registry.accessToken',
       secret,
       'fixtures/missing-type.graphql',
     ]);
@@ -161,7 +171,7 @@ describe.each`
       const output = schemaPublish([
         ...serviceNameArgs,
         ...serviceUrlArgs,
-        '--token',
+        '--registry.accessToken',
         invalidToken,
         'fixtures/init-schema.graphql',
       ]);
@@ -223,7 +233,7 @@ describe.each`
 
       const versionWithNewServiceUrl = versions[0];
 
-      expect(compareToPreviousVersion(versionWithNewServiceUrl.id)).resolves.toEqual(
+      expect(await compareToPreviousVersion(versionWithNewServiceUrl.id)).toEqual(
         expect.objectContaining({
           schemaCompareToPrevious: expect.objectContaining({
             changes: expect.objectContaining({

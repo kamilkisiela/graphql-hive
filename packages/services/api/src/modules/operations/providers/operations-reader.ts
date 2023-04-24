@@ -566,7 +566,7 @@ export class OperationsReader {
               })}
               GROUP BY client_name, client_version
             `,
-            queryId: 'count_clients',
+            queryId: 'count_clients_daily',
             timeout: 10_000,
             span,
           },
@@ -584,7 +584,7 @@ export class OperationsReader {
               })}
               GROUP BY client_name, client_version
             `,
-            queryId: 'count_clients',
+            queryId: 'count_clients_hourly',
             timeout: 10_000,
             span,
           },
@@ -602,7 +602,7 @@ export class OperationsReader {
               })}
               GROUP BY client_name, client_version
             `,
-            queryId: 'count_clients',
+            queryId: 'count_clients_regular',
             timeout: 10_000,
             span,
           },

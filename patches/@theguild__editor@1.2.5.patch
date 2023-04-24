@@ -1,0 +1,34 @@
+diff --git a/package.json b/package.json
+index 546590cae059dba903df796ff15647db23a5f0ac..97191d3e5426bdd25a827c305bc4245b1ca8cb0f 100644
+--- a/package.json
++++ b/package.json
+@@ -2,18 +2,23 @@
+   "name": "@theguild/editor",
+   "version": "1.2.5",
+   "license": "MIT",
+-  "main": "./dist/index.js",
++  "type": "module",
++  "main": "dist/index.js",
++  "module": "dist/index.js",
+   "exports": {
+     ".": {
+-      "import": "./dist/index.js",
+-      "types": "./dist/index.d.ts"
++      "import": {
++        "types": "./dist/index.d.ts",
++        "default": "./dist/index.js"
++      },
++      "default": {
++        "types": "./dist/index.d.ts",
++        "default": "./dist/index.js"
++      }
+     },
+     "./package.json": "./package.json"
+   },
+   "types": "./dist/index.d.ts",
+-  "files": [
+-    "dist"
+-  ],
+   "peerDependencies": {
+     "@monaco-editor/react": "^4",
+     "monaco-editor": "^0.24.0 || ^0.25.0 || ^0.26.0 || ^0.27.0 || ^0.28.0 || ^0.29.0 || ^0.30.0 || ^0.32.0 || ^0.34.0 || ^0.35.0 || ^0.36.0",
