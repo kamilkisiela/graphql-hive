@@ -57,7 +57,7 @@
     "graphql": "16.6.0",
     "hyperid": "3.1.1",
     "immer": "10.0.1",
-    "js-cookie": "3.0.1",
+    "js-cookie": "3.0.4",
     "monaco-editor": "0.37.1",
     "monaco-themes": "0.4.4",
     "next": "13.3.0",

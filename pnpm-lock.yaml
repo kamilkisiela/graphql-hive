@@ -1498,8 +1498,8 @@ importers:
         specifier: 10.0.1
         version: 10.0.1
       js-cookie:
-        specifier: 3.0.1
-        version: 3.0.1
+        specifier: 3.0.4
+        version: 3.0.4
       monaco-editor:
         specifier: 0.37.1
         version: 0.37.1
@@ -20942,9 +20942,9 @@ packages:
       nopt: 6.0.0
     dev: false
 
-  /js-cookie@3.0.1:
-    resolution: {integrity: sha512-+0rgsUXZu4ncpPxRL+lNEptWMOWl9etvPHc/koSRp6MPwpRYAhmk0dUG00J4bxVV3r9uUzfo24wW0knS07SKSw==}
-    engines: {node: '>=12'}
+  /js-cookie@3.0.4:
+    resolution: {integrity: sha512-tlu5VGqPFMP5eBefnmszCFZkPXG2n527NRN9XdNtN6FZ5n/0e98TdDm8BOz290OIIsxtXb9XTJjfqE6gVhOHQw==}
+    engines: {node: '>=14', npm: '>=9.5.0'}
     dev: false
 
   /js-levenshtein@1.1.6:
