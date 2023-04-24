@@ -1,10 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "github>the-guild-org/shared-config:renovate",
-    ":preserveSemverRanges",
-    "./.github/rust-renovate.json"
-  ],
+  "extends": ["github>the-guild-org/shared-config:renovate", ":preserveSemverRanges"],
   "packageRules": [
     {
       "groupName": "@theguild/prettier-config",
