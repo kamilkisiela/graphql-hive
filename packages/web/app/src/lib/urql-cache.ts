@@ -32,7 +32,7 @@ import {
 export const getOperationName = (query: DocumentNode): string | undefined => {
   for (const node of query.definitions) {
     if (node.kind === Kind.OPERATION_DEFINITION) {
-      return node.name ? node.name.value : undefined;
+      return node.name?.value;
     }
   }
 };
