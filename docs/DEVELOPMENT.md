@@ -16,7 +16,6 @@ Developing Hive locally requires you to have the following software installed lo
 - Create `.env` file in the root, and use the following:
 
 ```dotenv
-SERVER_ENDPOINT=http://localhost:3001
 ENVIRONMENT=local
 ```
 

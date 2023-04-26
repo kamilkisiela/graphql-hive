@@ -19,6 +19,7 @@
     "test": "node --experimental-specifier-resolution=node --loader ts-node/esm ./test/*.test.ts"
   },
   "dependencies": {
+    "@graphql-hive/core": "workspace:*",
     "@slonik/migrator": "0.11.3",
     "@whatwg-node/fetch": "0.9.0",
     "bcryptjs": "2.4.3",
