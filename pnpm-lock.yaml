@@ -1607,8 +1607,8 @@ importers:
         specifier: 7.0.6
         version: 7.0.6(react-dom@18.2.0)(react@18.2.0)
       '@storybook/addon-styling':
-        specifier: 1.0.1
-        version: 1.0.1(postcss@8.4.23)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 1.0.3
+        version: 1.0.3(postcss@8.4.23)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/blocks':
         specifier: 7.0.6
         version: 7.0.6(react-dom@18.2.0)(react@18.2.0)
@@ -11689,8 +11689,8 @@ packages:
       ts-dedent: 2.2.0
     dev: true
 
-  /@storybook/addon-styling@1.0.1(postcss@8.4.23)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-ERi52/Rebk3HPQAA0Xnhd5Opl3Q4csX1yYkYKRa5vAKTKIX7n3YT6I5V5zasCdNHT5+LkJ5ZUJb4AQ5T/QPYRw==}
+  /@storybook/addon-styling@1.0.3(postcss@8.4.23)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-FGgAWJema61VjIrH08+MYjDJEDlbVnVkufVq3TTCwr7RUJho4XHabRwDWghZE/IfkdWd4T06YNPUOML8q/BNsw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -11704,10 +11704,12 @@ packages:
       '@storybook/components': 7.0.6(react-dom@18.2.0)(react@18.2.0)
       '@storybook/core-events': 7.0.6
       '@storybook/manager-api': 7.0.6(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/node-logger': 7.0.7
       '@storybook/preview-api': 7.0.6
       '@storybook/theming': 7.0.6(react-dom@18.2.0)(react@18.2.0)
       '@storybook/types': 7.0.6
       css-loader: 6.7.3
+      less-loader: 11.1.0
       postcss-loader: 7.2.4(postcss@8.4.23)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -11717,6 +11719,7 @@ packages:
     transitivePeerDependencies:
       - '@types/node'
       - fibers
+      - less
       - node-sass
       - postcss
       - sass
@@ -12327,6 +12330,15 @@ packages:
 
   /@storybook/node-logger@7.0.6:
     resolution: {integrity: sha512-719jP38S72w+dPqIxM9X8+voTmLAkseMktbTlPDJtMKd1br3NveHCpaJkZPCvqlYbZrqzkF1pAFwWVkQyCxbAA==}
+    dependencies:
+      '@types/npmlog': 4.1.4
+      chalk: 4.1.2
+      npmlog: 5.0.1
+      pretty-hrtime: 1.0.3
+    dev: true
+
+  /@storybook/node-logger@7.0.7:
+    resolution: {integrity: sha512-5Y4LLgKeCStq1ktCKZ5eNPzQQSQ+CYZAlkEdzQ3Pp//0KXaZvVxEvGtaYhAymP2HatLpI8Oneo4lHrJioRfgww==}
     dependencies:
       '@types/npmlog': 4.1.4
       chalk: 4.1.2
@@ -21297,6 +21309,16 @@ packages:
       app-root-dir: 1.0.2
       dotenv: 16.0.3
       dotenv-expand: 10.0.0
+    dev: true
+
+  /less-loader@11.1.0:
+    resolution: {integrity: sha512-C+uDBV7kS7W5fJlUjq5mPBeBVhYpTIm5gB09APT9o3n/ILeaXVsiSFTbZpTJCJwQ/Crczfn3DmfQFwxYusWFug==}
+    engines: {node: '>= 14.15.0'}
+    peerDependencies:
+      less: ^3.5.0 || ^4.0.0
+      webpack: ^5.0.0
+    dependencies:
+      klona: 2.0.6
     dev: true
 
   /leven@3.1.0:
