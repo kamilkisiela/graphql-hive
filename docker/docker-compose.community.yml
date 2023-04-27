@@ -23,7 +23,7 @@ services:
       - ./.hive/postgres:/var/lib/postgresql/data
 
   clickhouse:
-    image: clickhouse/clickhouse-server:23.3-alpine
+    image: clickhouse/clickhouse-server:23.4-alpine
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:8123/ping']
       interval: 5s
