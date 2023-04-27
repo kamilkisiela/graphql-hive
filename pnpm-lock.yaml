@@ -182,8 +182,8 @@ importers:
         specifier: 3.65.1
         version: 3.65.1
       '@pulumi/random':
-        specifier: 4.12.1
-        version: 4.12.1
+        specifier: 4.13.0
+        version: 4.13.0
       js-yaml:
         specifier: 4.1.0
         version: 4.1.0
@@ -10239,8 +10239,8 @@ packages:
     resolution: {integrity: sha512-xfo+yLRM2zVjVEA4p23IjQWzyWl1ZhWOGobsBqRpIarzLvwNH/RAGaoehdxlhx4X92302DrpdIFgTICMN4P38w==}
     dev: false
 
-  /@pulumi/random@4.12.1:
-    resolution: {integrity: sha512-vE3gxYsYviu5aQOpOoaeTV2WfH8NiDKWHhw8fnMl3XeAhqkcg8+lRbCuwIWZIxGiyUxzEB55Z/zFPyMeIDSU8g==}
+  /@pulumi/random@4.13.0:
+    resolution: {integrity: sha512-AKnbzftGaFq5sLo2VmDCAjmwTE0Oo1lmr2azqDUk7rx65r4TArLyqOZVJRLlb0WgEpcL2ZhS4D+vozeiT1Iqtw==}
     requiresBuild: true
     dependencies:
       '@pulumi/pulumi': 3.65.1
