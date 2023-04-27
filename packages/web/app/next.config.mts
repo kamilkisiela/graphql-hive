@@ -21,6 +21,14 @@ export default withBundleAnalyzer({
     // also Next.js report false positives (try it...)
     ignoreBuildErrors: true,
   },
+  experimental: {
+    swcPlugins: [
+      [
+        '@graphql-codegen/client-preset-swc-plugin',
+        { artifactDirectory: './src/gql', gqlTagName: 'graphql' },
+      ],
+    ],
+  },
   redirects: async () => [
     // Redirect organization routes
     {
