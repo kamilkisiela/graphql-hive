@@ -6,12 +6,6 @@ import * as Sentry from '@sentry/node';
 import { writeDuration } from './metrics';
 import { joinIntoSingleMessage, operationsOrder, registryOrder } from './serializer';
 
-function hasResponse(error: unknown): error is {
-  response: GotResponse;
-} {
-  return error instanceof Error && 'response' in error;
-}
-
 export interface ClickHouseConfig {
   protocol: string;
   host: string;
@@ -153,8 +147,7 @@ async function writeCsv(
     })
     .catch(error => {
       stopTimer({
-        status:
-          hasResponse(error) && error.response.statusCode ? error.response.statusCode : 'unknown',
+        status: getStatusCodeFromError(error) ?? 'unknown',
       });
       Sentry.captureException(error, {
         level: 'error',
@@ -172,4 +165,16 @@ async function writeCsv(
       });
       return Promise.reject(error);
     });
+}
+
+function hasResponse(error: unknown): error is {
+  response: GotResponse;
+} {
+  return error instanceof Error && 'response' in error && typeof error.response === 'object';
+}
+
+function getStatusCodeFromError(error: unknown) {
+  if (hasResponse(error)) {
+    return error.response?.statusCode;
+  }
 }
