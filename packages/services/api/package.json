@@ -22,7 +22,7 @@
     "@theguild/buddy": "0.1.0",
     "@trpc/client": "10.21.1",
     "@trpc/server": "10.21.1",
-    "@whatwg-node/fetch": "0.8.6",
+    "@whatwg-node/fetch": "0.8.8",
     "agentkeepalive": "4.3.0",
     "bcryptjs": "2.4.3",
     "dataloader": "2.2.2",
