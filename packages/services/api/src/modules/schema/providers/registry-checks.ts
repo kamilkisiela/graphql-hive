@@ -380,16 +380,42 @@ export function detectUrlChanges(
     const before = nameToCompositeSchemaMap.get(schema.service_name);
 
     if (before && before.service_url !== schema.service_url) {
-      changes.push({
-        type: 'REGISTRY_SERVICE_URL_CHANGED',
-        meta: {
-          serviceName: schema.service_name,
-          serviceUrls: {
-            old: before.service_url!,
-            new: schema.service_url,
+      if (before.service_url && schema.service_url) {
+        changes.push({
+          type: 'REGISTRY_SERVICE_URL_CHANGED',
+          meta: {
+            serviceName: schema.service_name,
+            serviceUrls: {
+              old: before.service_url,
+              new: schema.service_url,
+            },
           },
-        },
-      });
+        });
+      } else if (before.service_url && schema.service_url == null) {
+        changes.push({
+          type: 'REGISTRY_SERVICE_URL_CHANGED',
+          meta: {
+            serviceName: schema.service_name,
+            serviceUrls: {
+              old: before.service_url,
+              new: null,
+            },
+          },
+        });
+      } else if (before.service_url == null && schema.service_url) {
+        changes.push({
+          type: 'REGISTRY_SERVICE_URL_CHANGED',
+          meta: {
+            serviceName: schema.service_name,
+            serviceUrls: {
+              old: null,
+              new: schema.service_url,
+            },
+          },
+        });
+      } else {
+        throw new Error("This shouldn't happen.");
+      }
     }
   }
 

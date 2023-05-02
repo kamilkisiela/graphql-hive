@@ -635,6 +635,8 @@ describe('schema publishing changes are persisted', () => {
     schemaBefore: string;
     schemaAfter: string;
     equalsObject: object;
+    /** Only provide if you want to test a service url change */
+    serviceUrlAfter?: string;
   }) {
     test.concurrent(`[Schema change] ${args.name}`, async () => {
       const serviceName = {
@@ -670,7 +672,7 @@ describe('schema publishing changes are persisted', () => {
           commit: '456',
           sdl: args.schemaAfter,
           ...serviceName,
-          ...serviceUrl,
+          url: args.serviceUrlAfter ?? serviceUrl.url,
         })
         .then(r => r.expectNoGraphQLErrors());
 
@@ -2618,6 +2620,31 @@ describe('schema publishing changes are persisted', () => {
         removedUnionMemberTypeName: 'B',
       },
       type: 'UNION_MEMBER_REMOVED',
+    },
+  });
+
+  persistedTest({
+    name: 'RegistryServiceUrlChangeModel',
+    schemaBefore: /* GraphQL */ `
+      type Query {
+        a: String!
+      }
+    `,
+    schemaAfter: /* GraphQL */ `
+      type Query {
+        a: String!
+      }
+    `,
+    serviceUrlAfter: 'http://iliketurtles.com/graphql',
+    equalsObject: {
+      meta: {
+        serviceName: 'test',
+        serviceUrls: {
+          old: 'http://localhost:4000',
+          new: 'http://iliketurtles.com/graphql',
+        },
+      },
+      type: 'REGISTRY_SERVICE_URL_CHANGED',
     },
   });
 });
