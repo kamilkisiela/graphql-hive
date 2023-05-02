@@ -1,4 +1,5 @@
 #/bin/sh
+set -e 
 
 echo "💀 Killing all running Docker containers..."
 docker kill $(docker ps -q)
