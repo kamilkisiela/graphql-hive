@@ -310,90 +310,84 @@ export const resolvers: SchemaModule.Resolvers = {
         }),
       ]);
 
-      // Lord forgive me for my sins
-      if (project.type !== ProjectType.STITCHING) {
-        const currentVersion = await schemaManager.getSchemaVersion({
+      const currentVersion = await schemaManager.getSchemaVersion({
+        organization: organizationId,
+        project: projectId,
+        target: targetId,
+        version: selector.version,
+      });
+
+      if (currentVersion.schemaCompositionErrors) {
+        return {
+          error: new SchemaBuildError('Composition error', currentVersion.schemaCompositionErrors),
+        } as SchemaCompareError;
+      }
+
+      const previousVersion = currentVersion.previousSchemaVersionId
+        ? await schemaManager.getSchemaVersion({
+            organization: organizationId,
+            project: projectId,
+            target: targetId,
+            version: currentVersion.previousSchemaVersionId,
+          })
+        : null;
+
+      if (currentVersion.compositeSchemaSDL && previousVersion === null) {
+        return {
+          result: {
+            schemas: {
+              before: null,
+              current: currentVersion.compositeSchemaSDL,
+            },
+            changes: [],
+          },
+        } satisfies SchemaCompareResult;
+      }
+
+      const getBeforeSchemaSDL = async () => {
+        const orchestrator = schemaManager.matchOrchestrator(project.type);
+
+        const schemasBefore = await injector.get(SchemaManager).getSchemasOfPreviousVersion({
           organization: organizationId,
           project: projectId,
           target: targetId,
           version: selector.version,
+          onlyComposable: organization.featureFlags.compareToPreviousComposableVersion === true,
         });
 
-        if (currentVersion.schemaCompositionErrors) {
-          return {
-            error: new SchemaBuildError(
-              'Composition error',
-              currentVersion.schemaCompositionErrors,
-            ),
-          } as SchemaCompareError;
+        if (schemasBefore.length === 0) {
+          return null;
         }
+        const { raw } = await ensureSDL(
+          orchestrator.composeAndValidate(
+            schemasBefore.map(s => helper.createSchemaObject(s)),
+            project.externalComposition,
+          ),
+        );
 
-        const previousVersion = currentVersion.previousSchemaVersionId
-          ? await schemaManager.getSchemaVersion({
-              organization: organizationId,
-              project: projectId,
-              target: targetId,
-              version: currentVersion.previousSchemaVersionId,
-            })
-          : null;
+        return raw;
+      };
 
-        if (currentVersion.compositeSchemaSDL && previousVersion === null) {
-          return {
-            result: {
-              schemas: {
-                before: null,
-                current: currentVersion.compositeSchemaSDL,
-              },
-              changes: [],
+      if (currentVersion.compositeSchemaSDL && currentVersion.hasPersistedSchemaChanges) {
+        const changes = await schemaManager.getSchemaChangesForVersion({
+          organization: organizationId,
+          project: projectId,
+          target: targetId,
+          version: currentVersion.id,
+        });
+
+        return {
+          result: {
+            schemas: {
+              before:
+                previousVersion === null
+                  ? null
+                  : previousVersion.compositeSchemaSDL ?? (await getBeforeSchemaSDL()),
+              current: currentVersion.compositeSchemaSDL,
             },
-          } satisfies SchemaCompareResult;
-        }
-
-        const getBeforeSchemaSDL = async () => {
-          const orchestrator = schemaManager.matchOrchestrator(project.type);
-
-          const schemasBefore = await injector.get(SchemaManager).getSchemasOfPreviousVersion({
-            organization: organizationId,
-            project: projectId,
-            target: targetId,
-            version: selector.version,
-            onlyComposable: organization.featureFlags.compareToPreviousComposableVersion === true,
-          });
-
-          if (schemasBefore.length === 0) {
-            return null;
-          }
-          const { raw } = await ensureSDL(
-            orchestrator.composeAndValidate(
-              schemasBefore.map(s => helper.createSchemaObject(s)),
-              project.externalComposition,
-            ),
-          );
-
-          return raw;
-        };
-
-        if (currentVersion.compositeSchemaSDL && currentVersion.hasPersistedSchemaChanges) {
-          const changes = await schemaManager.getSchemaChangesForVersion({
-            organization: organizationId,
-            project: projectId,
-            target: targetId,
-            version: currentVersion.id,
-          });
-
-          return {
-            result: {
-              schemas: {
-                before:
-                  previousVersion === null
-                    ? null
-                    : previousVersion.compositeSchemaSDL ?? (await getBeforeSchemaSDL()),
-                current: currentVersion.compositeSchemaSDL,
-              },
-              changes: changes ?? [],
-            },
-          } satisfies SchemaCompareResult;
-        }
+            changes: changes ?? [],
+          },
+        } satisfies SchemaCompareResult;
       }
 
       // LEGACY LAND

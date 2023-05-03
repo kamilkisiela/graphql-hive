@@ -2109,8 +2109,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
     async getSchemaChangesForVersion(args) {
       // TODO: should this be paginated?
-      const changes = await pool.query<unknown>(sql`
+      const records = await pool.query<Record<string, unknown>>(sql`
         SELECT
+          "id",
           "change_type" as "type",
           "meta",
           "severity_level" as "severityLevel",
@@ -2121,12 +2122,25 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           "schema_version_id" = ${args.versionId}
       `);
 
-      if (changes.rows.length === 0) {
+      if (records.rows.length === 0) {
         return null;
       }
 
-      // TODO: I don't like the cast...
-      return changes.rows.map(row => SchemaChangeModel.parse(row) as SerializableChange);
+      const changes: Array<SerializableChange> = [];
+
+      for (const row of records.rows) {
+        const result = SchemaChangeModel.safeParse(row);
+        if (result.success === true) {
+          changes.push(result.data as SerializableChange);
+          continue;
+        }
+
+        console.warn(
+          `Encountered row that couldn't be parsed as a schema change (schemaChangeId=${row['id']})`,
+        );
+      }
+
+      return changes;
     },
 
     async updateVersionStatus({ version, valid }) {
