@@ -287,7 +287,7 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   Query: {
-    async schemaCompareToPrevious(_, { selector }, { injector }) {
+    async schemaCompareToPrevious(_, { selector, unstable_forceLegacyComparison }, { injector }) {
       const translator = injector.get(IdTranslator);
       const schemaManager = injector.get(SchemaManager);
       const projectManager = injector.get(ProjectManager);
@@ -310,8 +310,10 @@ export const resolvers: SchemaModule.Resolvers = {
         }),
       ]);
 
+      const useLegacy = unstable_forceLegacyComparison ?? false;
+
       // Lord forgive me for my sins
-      if (project.type !== ProjectType.STITCHING) {
+      if (useLegacy === false && project.type !== ProjectType.STITCHING) {
         const currentVersion = await schemaManager.getSchemaVersion({
           organization: organizationId,
           project: projectId,
