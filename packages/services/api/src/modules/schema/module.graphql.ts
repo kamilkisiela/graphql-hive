@@ -28,7 +28,10 @@ export default gql`
   }
 
   extend type Query {
-    schemaCompareToPrevious(selector: SchemaCompareToPreviousInput!): SchemaComparePayload!
+    schemaCompareToPrevious(
+      selector: SchemaCompareToPreviousInput!
+      unstable_forceLegacyComparison: Boolean = False
+    ): SchemaComparePayload!
     schemaVersions(selector: SchemaVersionsInput!, after: ID, limit: Int!): SchemaVersionConnection!
     schemaVersion(selector: SchemaVersionInput!): SchemaVersion!
     """
