@@ -76,7 +76,7 @@
     "snarkdown": "2.0.0",
     "supertokens-auth-react": "0.31.5",
     "supertokens-js-override": "0.0.4",
-    "supertokens-node": "13.5.0",
+    "supertokens-node": "13.4.2",
     "supertokens-web-js": "0.5.0",
     "tslib": "2.5.0",
     "urql": "3.0.3",
