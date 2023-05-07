@@ -1,4 +1,5 @@
 import { createHash } from 'crypto';
+import stringify from 'fast-json-stable-stringify';
 import {
   buildASTSchema,
   GraphQLError,
@@ -114,7 +115,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       const checksum = createHash('md5')
         .update(
-          JSON.stringify({
+          stringify({
             ...input,
             organization,
             project,
@@ -164,7 +165,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       const checksum = createHash('md5')
         .update(
-          JSON.stringify({
+          stringify({
             ...input,
             serviceName: input.serviceName.toLowerCase(),
           }),
@@ -1121,7 +1122,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
 function stringifyDefaultValue(value: unknown): string | null {
   if (typeof value !== 'undefined') {
-    return JSON.stringify(value);
+    return stringify(value);
   }
   return null;
 }

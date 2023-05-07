@@ -27,6 +27,7 @@
     "bcryptjs": "2.4.3",
     "dataloader": "2.2.2",
     "date-fns": "2.29.3",
+    "fast-json-stable-stringify": "2.1.0",
     "got": "12.6.0",
     "graphql-modules": "2.1.2",
     "graphql-parse-resolve-info": "4.13.0",

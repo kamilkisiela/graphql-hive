@@ -545,6 +545,9 @@ importers:
       date-fns:
         specifier: 2.29.3
         version: 2.29.3
+      fast-json-stable-stringify:
+        specifier: 2.1.0
+        version: 2.1.0
       got:
         specifier: 12.6.0
         version: 12.6.0
@@ -8189,7 +8192,7 @@ packages:
       https-proxy-agent: 5.0.1
       isomorphic-fetch: 3.0.0
       js-yaml: 4.1.0
-      json-stable-stringify: 1.0.1
+      json-stable-stringify: 1.0.2
       jsonwebtoken: 9.0.0
       lodash: 4.17.21
       scuid: 1.1.0
@@ -21217,8 +21220,8 @@ packages:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
     dev: true
 
-  /json-stable-stringify@1.0.1:
-    resolution: {integrity: sha512-i/J297TW6xyj7sDFa7AmBPkQvLIxWr2kKPWI26tXydnZrzVAocNqn5DMNT1Mzk0vit1V5UkRM7C1KdVNp7Lmcg==}
+  /json-stable-stringify@1.0.2:
+    resolution: {integrity: sha512-eunSSaEnxV12z+Z73y/j5N37/In40GK4GmsSy+tEHJMxknvqnA7/djeYtAgW0GsWHUfg+847WJjKaEylk2y09g==}
     dependencies:
       jsonify: 0.0.1
     dev: true
