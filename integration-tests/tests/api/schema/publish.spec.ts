@@ -3428,6 +3428,70 @@ test.concurrent(
 );
 
 test.concurrent(
+  'legacy stitching project service without url results in correct change when an url is added',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { /* project, target,*/ createToken } = await createProject(ProjectType.Stitching, {
+      useLegacyRegistryModels: true,
+    });
+
+    const writeToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [ProjectAccessScope.Settings, ProjectAccessScope.Read],
+      organizationScopes: [],
+    });
+
+    let result = await writeToken
+      .publishSchema({
+        sdl: 'type Query { ping: String! }',
+        author: 'Laurin',
+        commit: '123',
+        service: 'foo1',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(result.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
+
+    result = await writeToken
+      .publishSchema({
+        sdl: 'type Query { ping: String! }',
+        author: 'Laurin',
+        commit: '123',
+        service: 'foo1',
+        url: 'https://api.com/foo1',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(result.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
+
+    const newVersionId = (await writeToken.fetchLatestValidSchema())?.latestValidVersion?.id;
+
+    if (typeof newVersionId !== 'string') {
+      throw new Error('newVersionId is not a string');
+    }
+
+    const compareResult = await writeToken.compareToPreviousVersion(newVersionId);
+    expect(compareResult).toMatchInlineSnapshot(`
+    {
+      schemaCompareToPrevious: {
+        changes: {
+          nodes: [
+            {
+              criticality: Dangerous,
+              message: [foo1] New service url: 'https://api.com/foo1' (previously: 'none'),
+            },
+          ],
+          total: 1,
+        },
+        initial: false,
+      },
+    }
+    `);
+  },
+);
+
+test.concurrent(
   'service url change from legacy to legacy version is displayed correctly',
   async ({ expect }) => {
     let pool: Awaited<ReturnType<typeof createPool>> | undefined;

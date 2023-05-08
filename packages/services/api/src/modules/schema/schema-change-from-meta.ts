@@ -209,13 +209,13 @@ function buildRegistryServiceURLFromMeta(
 ): RegistryServiceUrlChangeChange {
   return {
     type: 'REGISTRY_SERVICE_URL_CHANGED',
-    message: change.meta.serviceUrls.old
+    message: change.meta.serviceUrls.new
       ? `[${change.meta.serviceName}] New service url: '${
           change.meta.serviceUrls.new
         }' (previously: '${change.meta.serviceUrls.old ?? 'none'}')`
       : `[${change.meta.serviceName}] Service url removed (previously: '${
           change.meta.serviceUrls.old ?? 'none'
-        }'`,
+        }')`,
     criticality: {
       level: CriticalityLevel.Dangerous,
       reason: 'The registry service url has changed',
