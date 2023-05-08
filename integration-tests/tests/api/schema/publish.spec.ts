@@ -3427,50 +3427,52 @@ test.concurrent(
   },
 );
 
-test.concurrent('legacy service stitching with missing service', async ({ expect }) => {
-  const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
-  const { /* project, target,*/ createToken } = await createProject(ProjectType.Stitching, {
-    useLegacyRegistryModels: true,
-  });
+test.concurrent(
+  'legacy stitching project service without url results in correct change when an url is added',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { /* project, target,*/ createToken } = await createProject(ProjectType.Stitching, {
+      useLegacyRegistryModels: true,
+    });
 
-  const writeToken = await createToken({
-    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-    projectScopes: [ProjectAccessScope.Settings, ProjectAccessScope.Read],
-    organizationScopes: [],
-  });
+    const writeToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [ProjectAccessScope.Settings, ProjectAccessScope.Read],
+      organizationScopes: [],
+    });
 
-  let result = await writeToken
-    .publishSchema({
-      sdl: 'type Query { ping: String! }',
-      author: 'Laurin',
-      commit: '123',
-      service: 'foo1',
-    })
-    .then(r => r.expectNoGraphQLErrors());
+    let result = await writeToken
+      .publishSchema({
+        sdl: 'type Query { ping: String! }',
+        author: 'Laurin',
+        commit: '123',
+        service: 'foo1',
+      })
+      .then(r => r.expectNoGraphQLErrors());
 
-  expect(result.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
+    expect(result.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
 
-  result = await writeToken
-    .publishSchema({
-      sdl: 'type Query { ping: String! }',
-      author: 'Laurin',
-      commit: '123',
-      service: 'foo1',
-      url: 'https://api.com/foo1',
-    })
-    .then(r => r.expectNoGraphQLErrors());
+    result = await writeToken
+      .publishSchema({
+        sdl: 'type Query { ping: String! }',
+        author: 'Laurin',
+        commit: '123',
+        service: 'foo1',
+        url: 'https://api.com/foo1',
+      })
+      .then(r => r.expectNoGraphQLErrors());
 
-  expect(result.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
+    expect(result.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
 
-  const newVersionId = (await writeToken.fetchLatestValidSchema())?.latestValidVersion?.id;
+    const newVersionId = (await writeToken.fetchLatestValidSchema())?.latestValidVersion?.id;
 
-  if (typeof newVersionId !== 'string') {
-    throw new Error('newVersionId is not a string');
-  }
+    if (typeof newVersionId !== 'string') {
+      throw new Error('newVersionId is not a string');
+    }
 
-  const compareResult = await writeToken.compareToPreviousVersion(newVersionId);
-  expect(compareResult).toMatchInlineSnapshot(`
+    const compareResult = await writeToken.compareToPreviousVersion(newVersionId);
+    expect(compareResult).toMatchInlineSnapshot(`
     {
       schemaCompareToPrevious: {
         changes: {
@@ -3486,7 +3488,8 @@ test.concurrent('legacy service stitching with missing service', async ({ expect
       },
     }
     `);
-});
+  },
+);
 
 test.concurrent(
   'service url change from legacy to legacy version is displayed correctly',
