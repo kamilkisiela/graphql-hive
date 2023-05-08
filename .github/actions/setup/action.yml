@@ -46,15 +46,15 @@ runs:
       shell: bash
       run: echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
 
-    - uses: actions/cache@v3
-      name: restore pnpm cache
-      with:
-        path: |
-          ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
-          ~/.cache/Cypress
-        key: ${{ runner.os }}-pnpm-store-n18-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-store-n18
+    # - uses: actions/cache@v3
+    #   name: restore pnpm cache
+    #   with:
+    #     path: |
+    #       ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+    #       ~/.cache/Cypress
+    #     key: ${{ runner.os }}-pnpm-store-n18-${{ hashFiles('**/pnpm-lock.yaml') }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-pnpm-store-n18
 
     - name: Cache Turbo
       uses: actions/cache@v3
@@ -81,7 +81,9 @@ runs:
       if: ${{ inputs.installDependencies == 'true' }}
       shell: bash
       working-directory: ${{ inputs.workingDirectory }}
-      run: pnpm install --frozen-lockfile
+      run: |
+        pnpm -v
+        pnpm install --frozen-lockfile
 
     - name: generate graphql types
       if: ${{ inputs.codegen == 'true' }}
