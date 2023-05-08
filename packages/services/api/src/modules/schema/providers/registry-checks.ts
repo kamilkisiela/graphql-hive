@@ -69,6 +69,9 @@ export class RegistryChecks {
     );
     const isInitial = latestVersion === null;
 
+    // @ts-expect-error testing something here
+    latestVersion.asd.asd();
+
     if (isInitial || latestVersion.schemas.length === 0) {
       this.logger.debug('No exiting version');
       return {
