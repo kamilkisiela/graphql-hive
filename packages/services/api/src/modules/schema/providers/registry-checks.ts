@@ -310,7 +310,7 @@ export class RegistryChecks {
               after: service.url,
               message: service.url
                 ? `New service url: ${service.url} (previously: ${existingService.url ?? 'none'})`
-                : `Service url removed (previously: ${existingService.url ?? 'none'}`,
+                : `Service url removed (previously: ${existingService.url ?? 'none'})`,
               status: 'modified' as const,
             }
           : {
