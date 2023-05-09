@@ -1,6 +1,6 @@
+import '../src/dev-polyfill';
 import nock from 'nock';
 import { isSignatureValid } from '../src/auth';
-import '../src/dev-polyfill';
 import { InvalidRequestFormat, InvalidSignature, MissingSignature } from '../src/errors';
 import { handleRequest } from '../src/handler';
 

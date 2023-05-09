@@ -2,7 +2,6 @@ import 'reflect-metadata';
 import { createPool, sql } from 'slonik';
 import { graphql } from 'testkit/gql';
 import { execute } from 'testkit/graphql';
-
 /* eslint-disable no-process-env */
 import { ProjectAccessScope, ProjectType, TargetAccessScope } from '@app/gql/graphql';
 // eslint-disable-next-line import/no-extraneous-dependencies

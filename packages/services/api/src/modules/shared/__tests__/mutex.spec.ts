@@ -1,5 +1,5 @@
-import Redis from 'ioredis-mock';
 import 'reflect-metadata';
+import Redis from 'ioredis-mock';
 import { Logger } from '../providers/logger';
 import { Mutex } from '../providers/mutex';
 

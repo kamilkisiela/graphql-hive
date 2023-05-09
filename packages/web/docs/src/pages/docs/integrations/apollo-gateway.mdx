@@ -57,8 +57,7 @@ To enable Usage Reporting with your Apollo Gateway, you can use the Hive plugin 
 import { ApolloGateway } from '@apollo/gateway'
 import { ApolloServer } from '@apollo/server'
 import { startStandaloneServer } from '@apollo/server/standalone'
-import { createSupergraphManager } from '@graphql-hive/client'
-import { hiveApollo } from '@graphql-hive/client'
+import { createSupergraphManager, hiveApollo } from '@graphql-hive/client'
 
 const gateway = new ApolloGateway({
   // Apollo Gateway will fetch Supergraph from Hive CDN

@@ -31,9 +31,9 @@ import type {
 import { batch } from '@theguild/buddy';
 import { ProjectType } from '../../api/src';
 import {
+  SchemaCompositionErrorModel,
   type CDNAccessToken,
   type OIDCIntegration,
-  SchemaCompositionErrorModel,
   type SchemaLog,
   type SchemaPolicy,
 } from '../../api/src/shared/entities';

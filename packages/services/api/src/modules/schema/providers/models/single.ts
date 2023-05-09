@@ -7,12 +7,10 @@ import { Logger } from './../../../shared/providers/logger';
 import {
   CheckFailureReasonCode,
   PublishFailureReasonCode,
-  PublishIgnoreReasonCode,
-  /* Check */
+  PublishIgnoreReasonCode /* Check */,
   SchemaCheckConclusion,
   SchemaCheckFailureReason,
-  SchemaCheckResult,
-  /* Publish */
+  SchemaCheckResult /* Publish */,
   SchemaPublishConclusion,
   SchemaPublishResult,
   temp,

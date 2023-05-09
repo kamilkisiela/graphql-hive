@@ -1,5 +1,5 @@
-import { Logger } from './../shared/providers/logger';
 import { RateLimitModule } from './__generated__/types';
+import { Logger } from './../shared/providers/logger';
 import { RateLimitProvider } from './providers/rate-limit.provider';
 
 export const resolvers: RateLimitModule.Resolvers = {

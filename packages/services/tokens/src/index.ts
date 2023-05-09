@@ -1,7 +1,7 @@
 #!/usr/bin/env node
+import 'reflect-metadata';
 import Redis from 'ioredis';
 import ms from 'ms';
-import 'reflect-metadata';
 import LRU from 'tiny-lru';
 import {
   createErrorHandler,

@@ -1,8 +1,8 @@
+import './dev-polyfill';
 import { createServer } from 'http';
 import { Router } from 'itty-router';
 import { createServerAdapter } from '@whatwg-node/server';
 import { isSignatureValid } from './auth';
-import './dev-polyfill';
 import { handleRequest } from './handler';
 
 // eslint-disable-next-line no-process-env

@@ -1,6 +1,6 @@
+import '../src/dev-polyfill';
 import { createHmac } from 'crypto';
 import * as bcrypt from 'bcryptjs';
-import '../src/dev-polyfill';
 import {
   InvalidArtifactTypeResponse,
   InvalidAuthKeyResponse,
