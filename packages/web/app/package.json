@@ -113,7 +113,7 @@
     "@welldone-software/why-did-you-render": "7.0.1",
     "autoprefixer": "10.4.14",
     "postcss": "8.4.23",
-    "postcss-loader": "7.2.4",
+    "postcss-loader": "7.3.0",
     "rimraf": "4.4.1",
     "storybook": "7.0.7",
     "tailwindcss": "3.3.2",
