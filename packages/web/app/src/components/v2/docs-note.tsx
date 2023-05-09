@@ -1,3 +1,5 @@
+import { ReactElement } from 'react';
+import clsx from 'clsx';
 import { getDocsUrl } from '@/lib/docs-url';
 import { ExclamationTriangleIcon, ExternalLinkIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { Link } from './link';
@@ -17,13 +19,30 @@ export const DocsNote = ({ children, warn }: { warn?: boolean; children: React.R
   );
 };
 
-export const DocsLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
-  const fullUrl = getDocsUrl(href) || 'https://docs.graphql-hive.com/';
+export const DocsLink = ({
+  href,
+  children,
+  icon,
+  className,
+}: {
+  href: string;
+  icon?: ReactElement;
+  children?: React.ReactNode;
+  className?: string;
+}) => {
+  const fullUrl = href.startsWith('http')
+    ? href
+    : getDocsUrl(href) || 'https://docs.graphql-hive.com/';
 
   return (
-    <Link className="text-orange-500" href={fullUrl} target="_blank" rel="noreferrer">
+    <Link
+      className={clsx('text-orange-500', className)}
+      href={fullUrl}
+      target="_blank"
+      rel="noreferrer"
+    >
       {children}
-      <ExternalLinkIcon className="inline pl-1" />
+      {icon ?? <ExternalLinkIcon className="inline pl-1" />}
     </Link>
   );
 };

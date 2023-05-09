@@ -10,6 +10,7 @@
 export type alert_channel_type = "SLACK" | "WEBHOOK";
 export type alert_type = "SCHEMA_CHANGE_NOTIFICATIONS";
 export type operation_kind = "mutation" | "query" | "subscription";
+export type schema_policy_resource = "ORGANIZATION" | "PROJECT";
 export type user_role = "ADMIN" | "MEMBER";
 
 export interface activities {
@@ -155,6 +156,15 @@ export interface schema_log {
   target_id: string;
 }
 
+export interface schema_policy_config {
+  allow_overriding: boolean;
+  config: any;
+  created_at: Date;
+  resource_id: string;
+  resource_type: schema_policy_resource;
+  updated_at: Date;
+}
+
 export interface schema_version_changes {
   change_type: string;
   id: string;
@@ -255,6 +265,7 @@ export interface DBTables {
   persisted_operations: persisted_operations;
   projects: projects;
   schema_log: schema_log;
+  schema_policy_config: schema_policy_config;
   schema_version_changes: schema_version_changes;
   schema_version_to_log: schema_version_to_log;
   schema_versions: schema_versions;

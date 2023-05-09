@@ -32,6 +32,10 @@ export default abstract class extends Command {
     this.log(colors.yellow(symbols.info), ...args);
   }
 
+  infoWarning(...args: any[]) {
+    this.log(colors.yellow(symbols.warning), ...args);
+  }
+
   bolderize(msg: string) {
     const findSingleQuotes = /'([^']+)'/gim;
     const findDoubleQuotes = /"([^"]+)"/gim;

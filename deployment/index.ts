@@ -14,6 +14,7 @@ import { deployGraphQL } from './services/graphql';
 import { deployKafka } from './services/kafka';
 import { deployMetrics } from './services/observability';
 import { deployCloudflarePolice } from './services/police';
+import { deploySchemaPolicy } from './services/policy';
 import { deployProxy } from './services/proxy';
 import { deployRateLimit } from './services/rate-limit';
 import { deployRedis } from './services/redis';
@@ -206,6 +207,13 @@ const schemaApi = deploySchema({
   broker: cfBroker,
 });
 
+const schemaPolicyApi = deploySchemaPolicy({
+  image: dockerImages.getImageId('policy', imagesTag),
+  imagePullSecret,
+  release: imagesTag,
+  deploymentEnv,
+});
+
 const supertokensApiKey = new random.RandomPassword('supertokens-api-key', {
   length: 31,
   special: false,
@@ -241,6 +249,7 @@ const graphqlApi = deployGraphQL({
   tokens: tokensApi,
   webhooks: webhooksApi,
   schema: schemaApi,
+  schemaPolicy: schemaPolicyApi,
   dbMigrations,
   redis: redisApi,
   usage: usageApi,

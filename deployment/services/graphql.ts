@@ -11,6 +11,7 @@ import { CDN } from './cf-cdn';
 import { Clickhouse } from './clickhouse';
 import { DbMigrations } from './db-migrations';
 import { Emails } from './emails';
+import { SchemaPolicy } from './policy';
 import { RateLimitService } from './rate-limit';
 import { Redis } from './redis';
 import { Schema } from './schema';
@@ -37,6 +38,7 @@ export function deployGraphQL({
   tokens,
   webhooks,
   schema,
+  schemaPolicy,
   cdn,
   redis,
   usage,
@@ -58,6 +60,7 @@ export function deployGraphQL({
   tokens: Tokens;
   webhooks: Webhooks;
   schema: Schema;
+  schemaPolicy: SchemaPolicy;
   redis: Redis;
   cdn: CDN;
   cdnAuthPrivateKey: Output<string>;
@@ -131,6 +134,7 @@ export function deployGraphQL({
         TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
         WEBHOOKS_ENDPOINT: serviceLocalEndpoint(webhooks.service),
         SCHEMA_ENDPOINT: serviceLocalEndpoint(schema.service),
+        SCHEMA_POLICY_ENDPOINT: serviceLocalEndpoint(schemaPolicy.service),
         WEB_APP_URL: `https://${deploymentEnv.DEPLOYED_DNS}/`,
         // CDN
         CDN_CF: '1',

@@ -21,6 +21,7 @@ export function RadixSelect<T extends string>({
   name,
   placeholder,
 }: {
+  multiple?: boolean;
   className?: string;
   options: SelectOption[];
   onChange: (value: T) => void;

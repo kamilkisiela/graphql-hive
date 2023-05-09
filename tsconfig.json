@@ -47,6 +47,7 @@
       "@hive/usage": ["./packages/services/usage/src/index.ts"],
       "@hive/usage-ingestor": ["./packages/services/usage-ingestor/src/index.ts"],
       "@hive/rate-limit": ["./packages/services/rate-limit/src/api.ts"],
+      "@hive/policy": ["./packages/services/policy/src/api.ts"],
       "@hive/tokens": ["./packages/services/tokens/src/api.ts"],
       "@hive/webhooks": ["./packages/services/webhooks/src/api.ts"],
       "@hive/emails": ["./packages/services/emails/src/api.ts"],

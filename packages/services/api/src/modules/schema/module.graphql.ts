@@ -273,16 +273,30 @@ export default gql`
     total: Int!
   }
 
+  type SchemaWarningConnection {
+    nodes: [SchemaCheckWarning!]!
+    total: Int!
+  }
+
   type SchemaCheckSuccess {
     valid: Boolean!
     initial: Boolean!
     changes: SchemaChangeConnection
+    warnings: SchemaWarningConnection
+  }
+
+  type SchemaCheckWarning {
+    message: String!
+    source: String
+    line: Int
+    column: Int
   }
 
   type SchemaCheckError {
     valid: Boolean!
     changes: SchemaChangeConnection
     errors: SchemaErrorConnection!
+    warnings: SchemaWarningConnection
   }
 
   type GitHubSchemaCheckSuccess {
@@ -371,6 +385,7 @@ export default gql`
   enum SchemaCompareErrorDetailType {
     graphql
     composition
+    policy
   }
 
   type SchemaCompareErrorDetail {

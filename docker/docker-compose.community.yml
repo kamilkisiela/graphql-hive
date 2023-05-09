@@ -215,6 +215,8 @@ services:
         condition: service_healthy
       schema:
         condition: service_healthy
+      policy:
+        condition: service_healthy
     ports:
       - '8082:3001'
     environment:
@@ -235,6 +237,7 @@ services:
       TOKENS_ENDPOINT: http://tokens:3003
       WEBHOOKS_ENDPOINT: http://webhooks:3005
       SCHEMA_ENDPOINT: http://schema:3002
+      SCHEMA_POLICY_ENDPOINT: http://policy:3012
       EMAILS_ENDPOINT: http://emails:3011
       ENCRYPTION_SECRET: '${HIVE_ENCRYPTION_SECRET}'
       WEB_APP_URL: '${HIVE_APP_BASE_URL}'
@@ -250,6 +253,17 @@ services:
       CDN_API: '1'
       CDN_API_BASE_URL: 'http://localhost:8082'
       AUTH_ORGANIZATION_OIDC: '1'
+
+  policy:
+    image: '${DOCKER_REGISTRY}policy${DOCKER_TAG}'
+    networks:
+      - 'stack'
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3012
 
   schema:
     image: '${DOCKER_REGISTRY}schema${DOCKER_TAG}'

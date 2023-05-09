@@ -24,6 +24,7 @@ const EnvironmentModel = zod.object({
   ENCRYPTION_SECRET: emptyString(zod.string()),
   WEB_APP_URL: emptyString(zod.string().url().optional()),
   RATE_LIMIT_ENDPOINT: emptyString(zod.string().url().optional()),
+  SCHEMA_POLICY_ENDPOINT: emptyString(zod.string().url().optional()),
   TOKENS_ENDPOINT: zod.string().url(),
   USAGE_ESTIMATOR_ENDPOINT: emptyString(zod.string().url().optional()),
   BILLING_ENDPOINT: emptyString(zod.string().url().optional()),
@@ -255,6 +256,11 @@ export const env = {
     rateLimit: base.RATE_LIMIT_ENDPOINT
       ? {
           endpoint: base.RATE_LIMIT_ENDPOINT,
+        }
+      : null,
+    schemaPolicy: base.SCHEMA_POLICY_ENDPOINT
+      ? {
+          endpoint: base.SCHEMA_POLICY_ENDPOINT,
         }
       : null,
     usageEstimator: base.USAGE_ESTIMATOR_ENDPOINT

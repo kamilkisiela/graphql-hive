@@ -17,6 +17,7 @@ import type {
   SchemaChange,
   SchemaError,
 } from '../__generated__/types';
+import { SchemaCheckWarning } from '../modules/schema/providers/models/shared';
 import { SchemaBuildError } from '../modules/schema/providers/orchestrators/errors';
 import { SerializableChange } from '../modules/schema/schema-change-from-meta';
 import type {
@@ -100,6 +101,7 @@ export type GraphQLScalarTypeMapper = WithSchemaCoordinatesUsage<{ entity: Graph
 
 export type SchemaChangeConnection = ReadonlyArray<SchemaChange>;
 export type SchemaErrorConnection = readonly SchemaError[];
+export type SchemaWarningConnection = readonly SchemaCheckWarning[];
 export type UserConnection = readonly User[];
 export type MemberConnection = readonly Member[];
 export type ActivityConnection = readonly ActivityObject[];

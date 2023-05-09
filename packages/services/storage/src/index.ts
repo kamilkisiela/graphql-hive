@@ -31,10 +31,11 @@ import type {
 import { batch } from '@theguild/buddy';
 import { ProjectType } from '../../api/src';
 import {
-  CDNAccessToken,
-  OIDCIntegration,
+  type CDNAccessToken,
+  type OIDCIntegration,
   SchemaCompositionErrorModel,
-  SchemaLog,
+  type SchemaLog,
+  type SchemaPolicy,
 } from '../../api/src/shared/entities';
 import {
   activities,
@@ -49,6 +50,7 @@ import {
   persisted_operations,
   projects,
   schema_log as schema_log_in_db,
+  schema_policy_config,
   schema_versions,
   target_validation,
   targets,
@@ -61,7 +63,7 @@ import type { Slonik } from './shared';
 export { ConnectionError } from 'slonik';
 export { createConnectionString } from './db/utils';
 export { createTokenStorage } from './tokens';
-export type { tokens } from './db/types';
+export type { tokens, schema_policy_resource } from './db/types';
 
 type Connection = DatabasePool | DatabaseTransactionConnection;
 
@@ -117,6 +119,18 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       isAdmin: user.is_admin ?? false,
       externalAuthUserId: user.external_auth_user_id ?? null,
       oidcIntegrationId: user.oidc_integration_id ?? null,
+    };
+  }
+
+  function transformSchemaPolicy(schema_policy: schema_policy_config): SchemaPolicy {
+    return {
+      id: `${schema_policy.resource_type}_${schema_policy.resource_id}`,
+      config: schema_policy.config,
+      createdAt: schema_policy.created_at,
+      updatedAt: schema_policy.updated_at,
+      resource: schema_policy.resource_type,
+      resourceId: schema_policy.resource_id,
+      allowOverrides: schema_policy.allow_overriding,
     };
   }
 
@@ -2989,6 +3003,78 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           },
         },
       };
+    },
+
+    async setSchemaPolicyForOrganization(input): Promise<SchemaPolicy> {
+      const result = await pool.one<schema_policy_config>(sql`
+        INSERT INTO "public"."schema_policy_config"
+        ("resource_type", "resource_id", "config", "allow_overriding")
+          VALUES ('ORGANIZATION', ${input.organizationId}, ${sql.jsonb(input.policy)}, ${
+        input.allowOverrides
+      })
+        ON CONFLICT
+          (resource_type, resource_id)
+        DO UPDATE
+          SET "config" = ${sql.jsonb(input.policy)},
+              "allow_overriding" = ${input.allowOverrides},
+              "updated_at" = now() 
+        RETURNING *;
+      `);
+
+      return transformSchemaPolicy(result);
+    },
+    async setSchemaPolicyForProject(input): Promise<SchemaPolicy> {
+      const result = await pool.one<schema_policy_config>(sql`
+      INSERT INTO "public"."schema_policy_config"
+      ("resource_type", "resource_id", "config")
+        VALUES ('PROJECT', ${input.projectId}, ${sql.jsonb(input.policy)})
+      ON CONFLICT
+        (resource_type, resource_id)
+      DO UPDATE
+        SET "config" = ${sql.jsonb(input.policy)},
+            "updated_at" = now() 
+      RETURNING *;
+    `);
+
+      return transformSchemaPolicy(result);
+    },
+    async findInheritedPolicies(selector): Promise<SchemaPolicy[]> {
+      const { organization, project } = selector;
+
+      const result = await pool.any<schema_policy_config>(sql`
+        SELECT *
+        FROM
+          "public"."schema_policy_config"
+        WHERE
+          ("resource_type" = 'ORGANIZATION' AND "resource_id" = ${organization})
+          OR ("resource_type" = 'PROJECT' AND "resource_id" = ${project});
+      `);
+
+      return result.map(transformSchemaPolicy);
+    },
+    async getSchemaPolicyForOrganization(organizationId: string): Promise<SchemaPolicy | null> {
+      const result = await pool.maybeOne<schema_policy_config>(sql`
+        SELECT *
+        FROM
+          "public"."schema_policy_config"
+        WHERE
+          "resource_type" = 'ORGANIZATION'
+          AND "resource_id" = ${organizationId};
+      `);
+
+      return result ? transformSchemaPolicy(result) : null;
+    },
+    async getSchemaPolicyForProject(projectId: string): Promise<SchemaPolicy | null> {
+      const result = await pool.maybeOne<schema_policy_config>(sql`
+      SELECT *
+      FROM
+        "public"."schema_policy_config"
+      WHERE
+        "resource_type" = 'PROJECT'
+        AND "resource_id" = ${projectId};
+    `);
+
+      return result ? transformSchemaPolicy(result) : null;
     },
   };
 

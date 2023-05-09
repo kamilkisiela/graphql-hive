@@ -1,0 +1,136 @@
+diff --git a/esm/estree-converter/utils.js b/esm/estree-converter/utils.js
+index 9c857b132b610e42795ed64962112125ae31341c..632d50f221031777ce80840eeebd911f18d0283f 100644
+--- a/esm/estree-converter/utils.js
++++ b/esm/estree-converter/utils.js
+@@ -1,7 +1,9 @@
+-import { createRequire } from 'module';
+-const require = createRequire(import.meta.url);
++// import { createRequire } from 'module';
++// const require = createRequire(import.meta.url);
+ import { isListType, isNonNullType, Source, TokenKind, } from 'graphql';
+ import { valueFromASTUntyped } from 'graphql/utilities/valueFromASTUntyped.js';
++import { Lexer } from 'graphql'
++
+ export const valueFromNode = (...args) => {
+     return valueFromASTUntyped(...args);
+ };
+@@ -34,18 +36,20 @@ export function convertToken(token, type) {
+         range: [start, end],
+     };
+ }
++
+ function getLexer(source) {
+-    // GraphQL v14
+-    const gqlLanguage = require('graphql/language');
+-    if (gqlLanguage === null || gqlLanguage === void 0 ? void 0 : gqlLanguage.createLexer) {
+-        return gqlLanguage.createLexer(source, {});
+-    }
+-    // GraphQL v15
+-    const { Lexer: LexerCls } = require('graphql');
+-    if (LexerCls && typeof LexerCls === 'function') {
+-        return new LexerCls(source);
+-    }
+-    throw new Error('Unsupported GraphQL version! Please make sure to use GraphQL v14 or newer!');
++  return new Lexer(source)
++    // // GraphQL v14
++    // const gqlLanguage = require('graphql/language');
++    // if (gqlLanguage === null || gqlLanguage === void 0 ? void 0 : gqlLanguage.createLexer) {
++    //     return gqlLanguage.createLexer(source, {});
++    // }
++    // // GraphQL v15
++    // const { Lexer: LexerCls } = require('graphql');
++    // if (LexerCls && typeof LexerCls === 'function') {
++    //     return new LexerCls(source);
++    // }
++    // throw new Error('Unsupported GraphQL version! Please make sure to use GraphQL v14 or newer!');
+ }
+ export function extractTokens(filePath, code) {
+     const source = new Source(code, filePath);
+diff --git a/esm/index.js b/esm/index.js
+index b1770333ee454583dea85dd7188e255b170bf416..6723715af58da9a03ec16287e7c86456eb889d05 100644
+--- a/esm/index.js
++++ b/esm/index.js
+@@ -1,7 +1,7 @@
+ import { processor } from './processor.js';
+ export { parseForESLint } from './parser.js';
+ export { rules } from './rules/index.js';
+-export * from './testkit.js';
++// export * from './testkit.js';
+ export * from './types.js';
+ export { requireGraphQLSchemaFromContext, requireSiblingsOperations } from './utils.js';
+ export const processors = { graphql: processor };
+diff --git a/esm/parser.js b/esm/parser.js
+index c6f9ee8543f9263a75ca0896d17ecad70ec46791..9b0f81cc9230c8690334d78d0451bc37970e5cba 100644
+--- a/esm/parser.js
++++ b/esm/parser.js
+@@ -2,10 +2,10 @@ import { parseGraphQLSDL } from '@graphql-tools/utils';
+ import debugFactory from 'debug';
+ import { buildSchema, GraphQLError } from 'graphql';
+ import { convertToESTree, extractComments, extractTokens } from './estree-converter/index.js';
+-import { loadGraphQLConfig } from './graphql-config.js';
++// import { loadGraphQLConfig } from './graphql-config.js';
+ import { getSchema } from './schema.js';
+ import { getSiblings } from './siblings.js';
+-import { CWD, VIRTUAL_DOCUMENT_REGEX } from './utils.js';
++import { CWD, /*VIRTUAL_DOCUMENT_REGEX*/ } from './utils.js';
+ const debug = debugFactory('graphql-eslint:parser');
+ debug('cwd %o', CWD);
+ export function parseForESLint(code, options) {
+@@ -19,9 +19,9 @@ export function parseForESLint(code, options) {
+             ...options.graphQLParserOptions,
+             noLocation: false,
+         });
+-        const gqlConfig = loadGraphQLConfig(options);
+-        const realFilepath = filePath.replace(VIRTUAL_DOCUMENT_REGEX, '');
+-        const project = gqlConfig.getProjectForFile(realFilepath);
++        // const gqlConfig = loadGraphQLConfig(options);
++        // const realFilepath = filePath.replace(VIRTUAL_DOCUMENT_REGEX, '');
++        let project;
+         let schema = null;
+         try {
+             schema = project
+diff --git a/esm/rules/graphql-js-validation.js b/esm/rules/graphql-js-validation.js
+index 8149d49d50c3d5196272d26a2fb583b78169294d..7d4a9d9e075baf2eb40aef6db1e68a68b95d99ba 100644
+--- a/esm/rules/graphql-js-validation.js
++++ b/esm/rules/graphql-js-validation.js
+@@ -1,5 +1,6 @@
+-import { createRequire } from 'module';
+-const require = createRequire(import.meta.url);
++import * as allGraphQLJSRules from 'graphql/validation/index.js'
++// import { createRequire } from 'module';
++// const require = createRequire(import.meta.url);
+ import { Kind, validate, visit, } from 'graphql';
+ import { validateSDL } from 'graphql/validation/validate.js';
+ import { ARRAY_DEFAULT_OPTIONS, logger, REPORT_ON_FIRST_CHARACTER, requireGraphQLSchemaFromContext, requireSiblingsOperations, } from '../utils.js';
+@@ -96,18 +97,19 @@ const handleMissingFragments = ({ ruleId, context, node }) => {
+     return node;
+ };
+ const validationToRule = ({ ruleId, ruleName, getDocumentNode, schema = [], hasDidYouMeanSuggestions, }, docs) => {
+-    let ruleFn = null;
+-    try {
+-        ruleFn = require(`graphql/validation/rules/${ruleName}Rule`)[`${ruleName}Rule`];
+-    }
+-    catch (_a) {
+-        try {
+-            ruleFn = require(`graphql/validation/rules/${ruleName}`)[`${ruleName}Rule`];
+-        }
+-        catch (_b) {
+-            ruleFn = require('graphql/validation')[`${ruleName}Rule`];
+-        }
+-    }
++    // let ruleFn = null;
++    let ruleFn = allGraphQLJSRules[`${ruleName}Rule`]
++    // try {
++    //     ruleFn = require(`graphql/validation/rules/${ruleName}Rule`)[`${ruleName}Rule`];
++    // }
++    // catch (_a) {
++    //     try {
++    //         ruleFn = require(`graphql/validation/rules/${ruleName}`)[`${ruleName}Rule`];
++    //     }
++    //     catch (_b) {
++    //         ruleFn = require('graphql/validation')[`${ruleName}Rule`];
++    //     }
++    // }
+     return {
+         [ruleId]: {
+             meta: {

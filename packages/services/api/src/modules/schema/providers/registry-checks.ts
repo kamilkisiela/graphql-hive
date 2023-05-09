@@ -5,6 +5,7 @@ import { CriticalityLevel } from '@graphql-inspector/core';
 import type { CompositionFailureError } from '@hive/schema';
 import { Schema } from '../../../shared/entities';
 import { buildSchema } from '../../../shared/schema';
+import { SchemaPolicyProvider } from '../../policy/providers/schema-policy.provider';
 import {
   RegistryServiceUrlChangeSerializableChange,
   schemaChangeFromMeta,
@@ -17,6 +18,7 @@ import type {
 } from './../../../shared/entities';
 import { Logger } from './../../shared/providers/logger';
 import { Inspector } from './inspector';
+import { SchemaCheckWarning } from './models/shared';
 import { ensureSDL, extendWithBase, isCompositeSchema, SchemaHelper } from './schema-helper';
 
 // The reason why I'm using `result` and `reason` instead of just `data` for both:
@@ -48,6 +50,13 @@ function isCompositionValidationError(error: CompositionFailureError): error is 
   return error.source === 'composition';
 }
 
+function isPolicyValidationError(error: CompositionFailureError): error is {
+  message: string;
+  source: 'policy';
+} {
+  return error.source === 'policy';
+}
+
 function isGraphQLValidationError(error: CompositionFailureError): error is {
   message: string;
   source: 'graphql';
@@ -59,7 +68,12 @@ function isGraphQLValidationError(error: CompositionFailureError): error is {
   scope: Scope.Operation,
 })
 export class RegistryChecks {
-  constructor(private helper: SchemaHelper, private inspector: Inspector, private logger: Logger) {}
+  constructor(
+    private helper: SchemaHelper,
+    private policy: SchemaPolicyProvider,
+    private inspector: Inspector,
+    private logger: Logger,
+  ) {}
 
   async checksum({ schemas, latestVersion }: { schemas: Schemas; latestVersion: LatestVersion }) {
     this.logger.debug(
@@ -125,6 +139,7 @@ export class RegistryChecks {
           errorsBySource: {
             graphql: validationErrors.filter(isGraphQLValidationError),
             composition: validationErrors.filter(isCompositionValidationError),
+            policy: validationErrors.filter(isPolicyValidationError),
           },
         },
       } satisfies CheckResult;
@@ -143,6 +158,72 @@ export class RegistryChecks {
         supergraph: result.supergraph,
       },
     } satisfies CheckResult;
+  }
+
+  async policyCheck({
+    orchestrator,
+    project,
+    schemas,
+    selector,
+    modifiedSdl,
+  }: {
+    orchestrator: Orchestrator;
+    schemas: [SingleSchema] | PushedCompositeSchema[];
+    project: Project;
+    modifiedSdl: string;
+    selector: {
+      organization: string;
+      project: string;
+      target: string;
+    };
+  }) {
+    const sdl = await ensureSDL(
+      orchestrator.composeAndValidate(
+        schemas.map(s => this.helper.createSchemaObject(s)),
+        project.externalComposition,
+      ),
+    );
+
+    try {
+      const policyResult = await this.policy.checkPolicy(sdl.raw, modifiedSdl, selector);
+      const warnings =
+        policyResult?.warnings?.map<SchemaCheckWarning>(record => ({
+          message: record.message,
+          source: record.ruleId ? `policy-${record.ruleId}` : 'policy',
+          column: record.column,
+          line: record.line,
+        })) ?? [];
+
+      if (policyResult === null) {
+        return {
+          status: 'skipped',
+        } satisfies CheckResult;
+      }
+
+      if (policyResult.success) {
+        return {
+          status: 'completed',
+          result: {
+            warnings,
+          },
+        } satisfies CheckResult;
+      }
+
+      return {
+        status: 'failed',
+        reason: {
+          errors: policyResult.errors,
+          warnings,
+        },
+      } satisfies CheckResult;
+    } catch (e) {
+      return {
+        status: 'failed',
+        reason: {
+          errors: [{ message: (e as Error).message }],
+        },
+      } satisfies CheckResult;
+    }
   }
 
   async diff({
