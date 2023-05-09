@@ -274,8 +274,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/services/storage
       '@types/dockerode':
-        specifier: 3.3.16
-        version: 3.3.16
+        specifier: 3.3.17
+        version: 3.3.17
       '@types/ioredis':
         specifier: 4.28.10
         version: 4.28.10
@@ -13169,8 +13169,8 @@ packages:
       '@types/ssh2': 1.11.6
     dev: true
 
-  /@types/dockerode@3.3.16:
-    resolution: {integrity: sha512-ZAX2VrkTjwjk1808T8m6vMr+CFXSLiDD+tkEkLThI+v83AfzlYQZEWfZKwFyk1PWopSXkdDunmIhrF7sxt+zWg==}
+  /@types/dockerode@3.3.17:
+    resolution: {integrity: sha512-rhH719FBhfwFcL45AixUE5YWnXsdYEEnGhp/HWubOTowZMcsE4wDANvZi+EOrDLzYy2jI3EougA8par/ILi5Ww==}
     dependencies:
       '@types/docker-modem': 3.0.2
       '@types/node': 18.16.0
