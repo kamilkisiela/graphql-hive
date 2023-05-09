@@ -5,6 +5,7 @@ import { OrganizationLayout } from '@/components/layouts';
 import { PolicySettings } from '@/components/policy/policy-settings';
 import { Card, Checkbox, DocsLink, DocsNote, Heading, Title } from '@/components/v2';
 import { graphql } from '@/gql';
+import { RegistryModel } from '@/graphql';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const OrganizationPolicyPageQuery = graphql(`
@@ -13,6 +14,13 @@ const OrganizationPolicyPageQuery = graphql(`
       organization {
         id
         ...OrganizationLayout_OrganizationFragment
+        projects {
+          nodes {
+            id
+            cleanId
+            registryModel
+          }
+        }
         schemaPolicy {
           id
           updatedAt
@@ -64,8 +72,16 @@ function OrganizationPolicyPage(): ReactElement {
         className="flex flex-col gap-y-10"
         query={OrganizationPolicyPageQuery}
       >
-        {(props, selector) =>
-          props.organization ? (
+        {(props, selector) => {
+          if (!props.organization) {
+            return null;
+          }
+
+          const legacyProjects = props.organization.organization.projects.nodes.filter(
+            p => p.registryModel === RegistryModel.Legacy,
+          );
+
+          return (
             <Card>
               <Heading className="mb-2">Organization Schema Policy</Heading>
               <DocsNote>
@@ -74,6 +90,25 @@ function OrganizationPolicyPage(): ReactElement {
                 to affect all projects and targets. At the project level, policies can be overridden
                 or extended. <DocsLink href="/features/schema-policy">Learn more</DocsLink>
               </DocsNote>
+              {legacyProjects.length > 0 ? (
+                <div className="mt-4">
+                  <DocsNote warn>
+                    Note: some of your projects (
+                    {legacyProjects.map(p => (
+                      <code key={p.cleanId}>{p.cleanId}</code>
+                    ))}
+                    ) are using the legacy model of the schema registry.{' '}
+                    <strong className="underline">
+                      Policy feature is only available for projects that are using the new registry
+                      model.
+                    </strong>
+                    <br />
+                    <DocsLink href="https://the-guild.dev/blog/graphql-hive-improvements-in-schema-registry">
+                      Learn more
+                    </DocsLink>
+                  </DocsNote>
+                </div>
+              ) : null}
               <PolicySettings
                 saving={mutation.fetching}
                 error={
@@ -107,8 +142,8 @@ function OrganizationPolicyPage(): ReactElement {
                 )}
               </PolicySettings>
             </Card>
-          ) : null
-        }
+          );
+        }}
       </OrganizationLayout>
     </>
   );
