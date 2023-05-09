@@ -1586,8 +1586,8 @@ importers:
         version: 3.21.4
     devDependencies:
       '@graphql-codegen/client-preset-swc-plugin':
-        specifier: 0.1.3
-        version: 0.1.3
+        specifier: 0.2.0
+        version: 0.2.0
       '@graphql-typed-document-node/core':
         specifier: 3.2.0
         version: 3.2.0(graphql@16.6.0)
@@ -6862,8 +6862,8 @@ packages:
       - utf-8-validate
     dev: true
 
-  /@graphql-codegen/client-preset-swc-plugin@0.1.3:
-    resolution: {integrity: sha512-mTdwaADV2IsgY1kuMWlixgxk8DW+1HE9WGzwK2JtfV+vjLvCtB2WJXE/o4FcXJWJGP6DTp/Gf+03Gm7EuryU6Q==}
+  /@graphql-codegen/client-preset-swc-plugin@0.2.0:
+    resolution: {integrity: sha512-wibvCKuB+pP1ggNzZnkMLQgfyr0l+71kZsfK9M9GxxV8kaFGypbT3eN2XP4U8wH35GTaceLDg9jTg2JSUpcWdg==}
     dev: true
 
   /@graphql-codegen/client-preset@3.0.1(graphql@16.6.0):
