@@ -658,8 +658,8 @@ importers:
         version: 3.21.4
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: 4.20230404.0
-        version: 4.20230404.0
+        specifier: 4.20230419.0
+        version: 4.20230419.0
       '@types/service-worker-mock':
         specifier: 2.0.1
         version: 2.0.1
@@ -698,8 +698,8 @@ importers:
         version: 3.21.4
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: 4.20230404.0
-        version: 4.20230404.0
+        specifier: 4.20230419.0
+        version: 4.20230419.0
       '@types/service-worker-mock':
         specifier: 2.0.1
         version: 2.0.1
@@ -811,8 +811,8 @@ importers:
   packages/services/police-worker:
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: 4.20230404.0
-        version: 4.20230404.0
+        specifier: 4.20230419.0
+        version: 4.20230419.0
       '@types/service-worker-mock':
         specifier: 2.0.1
         version: 2.0.1
@@ -5959,8 +5959,8 @@ packages:
       prettier: 2.8.8
     dev: true
 
-  /@cloudflare/workers-types@4.20230404.0:
-    resolution: {integrity: sha512-fG3oaJX1icfsGV74nhx1+AC6opvZsGqnpx6FvrcVqQaBmCNkjKNqDRFrpasXWFiOIvysBXHKQAzsAJkBZgnM+A==}
+  /@cloudflare/workers-types@4.20230419.0:
+    resolution: {integrity: sha512-MfNBlHrI/ekRkbLtdAo23D4hkXF+3QD92OCwuXxCUK73HtMHuBqkMp9T/8KFbKNRCnz7PzUderc7Jr5m3eeW3g==}
     dev: true
 
   /@colors/colors@1.5.0:
