@@ -12,8 +12,8 @@
     "reflect-metadata": "^0.1.0"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.317.0",
-    "@aws-sdk/s3-request-presigner": "3.317.0",
+    "@aws-sdk/client-s3": "3.321.1",
+    "@aws-sdk/s3-request-presigner": "3.321.1",
     "@graphql-inspector/core": "4.2.1",
     "@octokit/app": "13.1.2",
     "@sentry/node": "7.49.0",
@@ -22,11 +22,12 @@
     "@theguild/buddy": "0.1.0",
     "@trpc/client": "10.21.1",
     "@trpc/server": "10.21.1",
-    "@whatwg-node/fetch": "0.8.6",
+    "@whatwg-node/fetch": "0.8.8",
     "agentkeepalive": "4.3.0",
     "bcryptjs": "2.4.3",
     "dataloader": "2.2.2",
     "date-fns": "2.29.3",
+    "fast-json-stable-stringify": "2.1.0",
     "got": "12.6.0",
     "graphql-modules": "2.1.2",
     "graphql-parse-resolve-info": "4.13.0",
@@ -40,7 +41,7 @@
     "param-case": "3.0.4",
     "prom-client": "14.2.0",
     "redlock": "5.0.0-beta.2",
-    "supertokens-node": "13.5.0",
+    "supertokens-node": "13.4.2",
     "zod": "3.21.4"
   },
   "devDependencies": {

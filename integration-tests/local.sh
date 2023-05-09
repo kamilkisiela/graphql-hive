@@ -1,10 +1,14 @@
 #/bin/sh
+set -e
 
 echo "💀 Killing all running Docker containers..."
-docker kill $(docker ps -q)
+docker kill $(docker ps -q) || true
 
 echo "🧹 Clearing existing Docker volumes..."
 rm -rf ../docker/.hive || true
+
+echo "🧹 Clearing old artifacts..."
+rm -rf ../packages/migrations/dist || true
 
 echo "✨ Clearing unused Docker images and volumes..."
 docker system prune -f

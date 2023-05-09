@@ -6,10 +6,14 @@ export async function prepareProject(
   model: RegistryModel = RegistryModel.Modern,
 ) {
   const { createOrg } = await initSeed().createOwner();
-  const { organization, createProject, setFeatureFlag } = await createOrg();
-  const { project, createToken, target, targets } = await createProject(projectType, {
-    useLegacyRegistryModels: model === RegistryModel.Legacy,
-  });
+  const { organization, createProject, setFeatureFlag, setOrganizationSchemaPolicy } =
+    await createOrg();
+  const { project, createToken, target, targets, setProjectSchemaPolicy } = await createProject(
+    projectType,
+    {
+      useLegacyRegistryModels: model === RegistryModel.Legacy,
+    },
+  );
 
   // Create a token with write rights
   const { secret: readwriteToken } = await createToken({
@@ -31,6 +35,10 @@ export async function prepareProject(
     targets,
     target,
     fetchVersions,
+    policy: {
+      setOrganizationSchemaPolicy,
+      setProjectSchemaPolicy,
+    },
     tokens: {
       registry: {
         readwrite: readwriteToken,

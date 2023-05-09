@@ -1,6 +1,13 @@
-query compare($organization: ID!, $project: ID!, $target: ID!, $version: ID!) {
+query compare(
+  $organization: ID!
+  $project: ID!
+  $target: ID!
+  $version: ID!
+  $unstable_forceLegacyComparison: Boolean!
+) {
   schemaCompareToPrevious(
     selector: { organization: $organization, project: $project, target: $target, version: $version }
+    unstable_forceLegacyComparison: $unstable_forceLegacyComparison
   ) {
     __typename
     ...SchemaCompareResultFields

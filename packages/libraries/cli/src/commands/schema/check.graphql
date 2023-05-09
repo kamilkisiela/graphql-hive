@@ -4,6 +4,15 @@ mutation schemaCheck($input: SchemaCheckInput!, $usesGitHubApp: Boolean!) {
     ... on SchemaCheckSuccess @skip(if: $usesGitHubApp) {
       valid
       initial
+      warnings {
+        nodes {
+          message
+          source
+          line
+          column
+        }
+        total
+      }
       changes {
         nodes {
           message
@@ -18,6 +27,15 @@ mutation schemaCheck($input: SchemaCheckInput!, $usesGitHubApp: Boolean!) {
         nodes {
           message
           criticality
+        }
+        total
+      }
+      warnings {
+        nodes {
+          message
+          source
+          line
+          column
         }
         total
       }

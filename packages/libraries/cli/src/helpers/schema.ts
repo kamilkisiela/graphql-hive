@@ -6,7 +6,12 @@ import { JsonFileLoader } from '@graphql-tools/json-file-loader';
 import { loadTypedefs } from '@graphql-tools/load';
 import { UrlLoader } from '@graphql-tools/url-loader';
 import baseCommand from '../base-command';
-import { CriticalityLevel, SchemaChangeConnection, SchemaErrorConnection } from '../sdk';
+import {
+  CriticalityLevel,
+  SchemaChangeConnection,
+  SchemaErrorConnection,
+  SchemaWarningConnection,
+} from '../sdk';
 
 const indent = '  ';
 
@@ -31,6 +36,20 @@ export function renderChanges(this: baseCommand, changes: SchemaChangeConnection
 
   changes.nodes.forEach(change => {
     this.log(indent, criticalityMap[change.criticality], this.bolderize(change.message));
+  });
+}
+
+export function renderWarnings(this: baseCommand, warnings: SchemaWarningConnection) {
+  this.log('');
+  this.infoWarning(`Detected ${warnings.total} warning${warnings.total > 1 ? 's' : ''}`);
+  this.log('');
+
+  warnings.nodes.forEach(warning => {
+    const details = [warning.source ? `source: ${this.bolderize(warning.source)}` : undefined]
+      .filter(Boolean)
+      .join(', ');
+
+    this.log(indent, `- ${this.bolderize(warning.message)}${details ? ` (${details})` : ''}`);
   });
 }
 

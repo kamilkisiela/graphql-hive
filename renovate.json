@@ -1,6 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>the-guild-org/shared-config:renovate", ":preserveSemverRanges"],
+  "constraints": {
+    "pnpm": "7.32.2"
+  },
   "packageRules": [
     {
       "groupName": "@theguild/prettier-config",

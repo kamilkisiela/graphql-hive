@@ -1,4 +1,5 @@
 import { createHash } from 'crypto';
+import stringify from 'fast-json-stable-stringify';
 import {
   buildASTSchema,
   GraphQLError,
@@ -114,7 +115,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       const checksum = createHash('md5')
         .update(
-          JSON.stringify({
+          stringify({
             ...input,
             organization,
             project,
@@ -164,7 +165,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       const checksum = createHash('md5')
         .update(
-          JSON.stringify({
+          stringify({
             ...input,
             serviceName: input.serviceName.toLowerCase(),
           }),
@@ -287,7 +288,7 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   Query: {
-    async schemaCompareToPrevious(_, { selector }, { injector }) {
+    async schemaCompareToPrevious(_, { selector, unstable_forceLegacyComparison }, { injector }) {
       const translator = injector.get(IdTranslator);
       const schemaManager = injector.get(SchemaManager);
       const projectManager = injector.get(ProjectManager);
@@ -310,92 +311,97 @@ export const resolvers: SchemaModule.Resolvers = {
         }),
       ]);
 
-      const currentVersion = await schemaManager.getSchemaVersion({
-        organization: organizationId,
-        project: projectId,
-        target: targetId,
-        version: selector.version,
-      });
+      const useLegacy = unstable_forceLegacyComparison ?? false;
 
-      if (currentVersion.schemaCompositionErrors) {
-        return {
-          error: new SchemaBuildError('Composition error', currentVersion.schemaCompositionErrors),
-        } as SchemaCompareError;
-      }
-
-      const previousVersion = currentVersion.previousSchemaVersionId
-        ? await schemaManager.getSchemaVersion({
-            organization: organizationId,
-            project: projectId,
-            target: targetId,
-            version: currentVersion.previousSchemaVersionId,
-          })
-        : null;
-
-      if (currentVersion.compositeSchemaSDL && previousVersion === null) {
-        return {
-          result: {
-            schemas: {
-              before: null,
-              current: currentVersion.compositeSchemaSDL,
-            },
-            changes: [],
-          },
-        } satisfies SchemaCompareResult;
-      }
-
-      const getBeforeSchemaSDL = async () => {
-        const orchestrator = schemaManager.matchOrchestrator(project.type);
-
-        const schemasBefore = await injector.get(SchemaManager).getSchemasOfPreviousVersion({
+      // Lord forgive me for my sins
+      if (useLegacy === false) {
+        const currentVersion = await schemaManager.getSchemaVersion({
           organization: organizationId,
           project: projectId,
           target: targetId,
           version: selector.version,
-          onlyComposable: organization.featureFlags.compareToPreviousComposableVersion === true,
         });
 
-        if (schemasBefore.length === 0) {
-          return null;
+        if (currentVersion.schemaCompositionErrors) {
+          return {
+            error: new SchemaBuildError(
+              'Composition error',
+              currentVersion.schemaCompositionErrors,
+            ),
+          } as SchemaCompareError;
         }
-        const { raw } = await ensureSDL(
-          orchestrator.composeAndValidate(
-            schemasBefore.map(s => helper.createSchemaObject(s)),
-            project.externalComposition,
-          ),
-        );
 
-        console.log('THIS IS RAW', raw);
-        return raw;
-      };
+        const previousVersion = currentVersion.previousSchemaVersionId
+          ? await schemaManager.getSchemaVersion({
+              organization: organizationId,
+              project: projectId,
+              target: targetId,
+              version: currentVersion.previousSchemaVersionId,
+            })
+          : null;
 
-      if (currentVersion.compositeSchemaSDL && currentVersion.hasPersistedSchemaChanges) {
-        const changes = await schemaManager.getSchemaChangesForVersion({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-          version: currentVersion.id,
-        });
-
-        return {
-          result: {
-            schemas: {
-              before:
-                previousVersion === null
-                  ? null
-                  : previousVersion.compositeSchemaSDL ?? (await getBeforeSchemaSDL()),
-              current: currentVersion.compositeSchemaSDL,
+        if (currentVersion.compositeSchemaSDL && previousVersion === null) {
+          return {
+            result: {
+              schemas: {
+                before: null,
+                current: currentVersion.compositeSchemaSDL,
+              },
+              changes: [],
             },
-            changes: changes ?? [],
-          },
-        } satisfies SchemaCompareResult;
+          } satisfies SchemaCompareResult;
+        }
+
+        const getBeforeSchemaSDL = async () => {
+          const orchestrator = schemaManager.matchOrchestrator(project.type);
+
+          const schemasBefore = await injector.get(SchemaManager).getSchemasOfPreviousVersion({
+            organization: organizationId,
+            project: projectId,
+            target: targetId,
+            version: selector.version,
+            onlyComposable: organization.featureFlags.compareToPreviousComposableVersion === true,
+          });
+
+          if (schemasBefore.length === 0) {
+            return null;
+          }
+          const { raw } = await ensureSDL(
+            orchestrator.composeAndValidate(
+              schemasBefore.map(s => helper.createSchemaObject(s)),
+              project.externalComposition,
+            ),
+          );
+
+          return raw;
+        };
+
+        if (currentVersion.compositeSchemaSDL && currentVersion.hasPersistedSchemaChanges) {
+          const changes = await schemaManager.getSchemaChangesForVersion({
+            organization: organizationId,
+            project: projectId,
+            target: targetId,
+            version: currentVersion.id,
+          });
+
+          return {
+            result: {
+              schemas: {
+                before:
+                  previousVersion === null
+                    ? null
+                    : previousVersion.compositeSchemaSDL ?? (await getBeforeSchemaSDL()),
+                current: currentVersion.compositeSchemaSDL,
+              },
+              changes: changes ?? [],
+            },
+          } satisfies SchemaCompareResult;
+        }
       }
 
       // LEGACY LAND
       // If we don't have the stuff in the database we compute it on demand.
       // so we can skip the expensive stuff happening in here...
-
-      // console.log('\n\nCERTIFIED LEG LEG LEGACY CODE\n\n');
 
       const orchestrator = schemaManager.matchOrchestrator(project.type);
 
@@ -844,6 +850,7 @@ export const resolvers: SchemaModule.Resolvers = {
   },
   SchemaChangeConnection: createConnection(),
   SchemaErrorConnection: createConnection(),
+  SchemaWarningConnection: createConnection(),
   SchemaCheckSuccess: {
     __isTypeOf(obj) {
       return obj.valid;
@@ -1116,7 +1123,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
 function stringifyDefaultValue(value: unknown): string | null {
   if (typeof value !== 'undefined') {
-    return JSON.stringify(value);
+    return stringify(value);
   }
   return null;
 }

@@ -1,7 +1,9 @@
 import { DocumentNode, GraphQLError, SourceLocation } from 'graphql';
 import { parse } from 'graphql';
 import { z } from 'zod';
+import type { AvailableRulesResponse, PolicyConfigurationObject } from '@hive/policy';
 import type { CompositionFailureError } from '@hive/schema';
+import { schema_policy_resource } from '@hive/storage';
 import type {
   AlertChannelType,
   AlertType,
@@ -317,7 +319,19 @@ export interface AdminOrganizationStats {
 
 export const SchemaCompositionErrorModel = z.object({
   message: z.string(),
-  source: z.union([z.literal('graphql'), z.literal('composition')]),
+  source: z.union([z.literal('graphql'), z.literal('composition'), z.literal('policy')]),
 });
 
 export type SchemaCompositionError = z.TypeOf<typeof SchemaCompositionErrorModel>;
+
+export type SchemaPolicy = {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  config: PolicyConfigurationObject;
+  resource: schema_policy_resource;
+  resourceId: string;
+  allowOverrides: boolean;
+};
+
+export type SchemaPolicyAvailableRuleObject = AvailableRulesResponse[0];

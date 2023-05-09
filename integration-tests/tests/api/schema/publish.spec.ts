@@ -635,6 +635,8 @@ describe('schema publishing changes are persisted', () => {
     schemaBefore: string;
     schemaAfter: string;
     equalsObject: object;
+    /** Only provide if you want to test a service url change */
+    serviceUrlAfter?: string;
   }) {
     test.concurrent(`[Schema change] ${args.name}`, async () => {
       const serviceName = {
@@ -670,7 +672,7 @@ describe('schema publishing changes are persisted', () => {
           commit: '456',
           sdl: args.schemaAfter,
           ...serviceName,
-          ...serviceUrl,
+          url: args.serviceUrlAfter ?? serviceUrl.url,
         })
         .then(r => r.expectNoGraphQLErrors());
 
@@ -2620,6 +2622,31 @@ describe('schema publishing changes are persisted', () => {
       type: 'UNION_MEMBER_REMOVED',
     },
   });
+
+  persistedTest({
+    name: 'RegistryServiceUrlChangeModel',
+    schemaBefore: /* GraphQL */ `
+      type Query {
+        a: String!
+      }
+    `,
+    schemaAfter: /* GraphQL */ `
+      type Query {
+        a: String!
+      }
+    `,
+    serviceUrlAfter: 'http://iliketurtles.com/graphql',
+    equalsObject: {
+      meta: {
+        serviceName: 'test',
+        serviceUrls: {
+          old: 'http://localhost:4000',
+          new: 'http://iliketurtles.com/graphql',
+        },
+      },
+      type: 'REGISTRY_SERVICE_URL_CHANGED',
+    },
+  });
 });
 
 const SchemaCompareToPreviousVersionQuery = graphql(`
@@ -3397,6 +3424,70 @@ test.concurrent(
     } finally {
       await pool?.end();
     }
+  },
+);
+
+test.concurrent(
+  'legacy stitching project service without url results in correct change when an url is added',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { /* project, target,*/ createToken } = await createProject(ProjectType.Stitching, {
+      useLegacyRegistryModels: true,
+    });
+
+    const writeToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [ProjectAccessScope.Settings, ProjectAccessScope.Read],
+      organizationScopes: [],
+    });
+
+    let result = await writeToken
+      .publishSchema({
+        sdl: 'type Query { ping: String! }',
+        author: 'Laurin',
+        commit: '123',
+        service: 'foo1',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(result.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
+
+    result = await writeToken
+      .publishSchema({
+        sdl: 'type Query { ping: String! }',
+        author: 'Laurin',
+        commit: '123',
+        service: 'foo1',
+        url: 'https://api.com/foo1',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(result.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
+
+    const newVersionId = (await writeToken.fetchLatestValidSchema())?.latestValidVersion?.id;
+
+    if (typeof newVersionId !== 'string') {
+      throw new Error('newVersionId is not a string');
+    }
+
+    const compareResult = await writeToken.compareToPreviousVersion(newVersionId);
+    expect(compareResult).toMatchInlineSnapshot(`
+    {
+      schemaCompareToPrevious: {
+        changes: {
+          nodes: [
+            {
+              criticality: Dangerous,
+              message: [foo1] New service url: 'https://api.com/foo1' (previously: 'none'),
+            },
+          ],
+          total: 1,
+        },
+        initial: false,
+      },
+    }
+    `);
   },
 );
 

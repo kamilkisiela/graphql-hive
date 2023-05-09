@@ -5,6 +5,7 @@ export default gql`
 
   scalar DateTime
   scalar JSON
+  scalar JSONSchemaObject
   scalar SafeInt
 
   type Query {

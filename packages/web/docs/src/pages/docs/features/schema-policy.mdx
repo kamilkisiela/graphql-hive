@@ -1,0 +1,126 @@
+import NextImage from 'next/image'
+import { Callout } from '@theguild/components'
+import cliPolicyErrorImage from '../../../../public/docs/pages/features/policy/policy-cli-error.png'
+import cliPolicyWarningImage from '../../../../public/docs/pages/features/policy/policy-cli-warning.png'
+import policyOverrideConfigImage from '../../../../public/docs/pages/features/policy/policy-override-config.png'
+import policyOverrideSeverityImage from '../../../../public/docs/pages/features/policy/policy-override-severity.png'
+import policyOverviewImage from '../../../../public/docs/pages/features/policy/policy-overview.png'
+import policyRulesConfigImage from '../../../../public/docs/pages/features/policy/policy-rules-config.png'
+import policySeverityImage from '../../../../public/docs/pages/features/policy/policy-severity.png'
+
+# Schema Policies
+
+In addition to providing basic schema registry functionality, Hive allows you to define policies for
+schema checks performed on your schemas. These policies can enforce semantic constraints or best
+practices on the GraphQL schema, such as requiring a description on all fields or a specific naming
+convention for all types.
+
+Schema Policies are integrated into the schema `check` process of Hive. Every rule from the ruleset
+have its own configuration and adjustments, and can have its severity:
+
+- `warning` will display a emit a warning
+- `error` will reject and fail the schema check
+
+You can define policies on either the organization or project level. Organization-level policies can
+be overridden on the project level, if allowed by the organization settings.
+
+## Managing Policy Rules
+
+Hive is using [GraphQL-ESLint powerful set of rules](https://the-guild.dev/graphql/eslint/rules) to
+run checks on your schemas.
+
+To find the list of all available rules, go to your **organization** or **project** page, and choose
+**Policy** tab. You will see the list of all available rules, with the ability to enable/disable
+rule by using the corresponding checkbox.
+
+<NextImage
+  alt="Schema Policy Overview"
+  src={policyOverviewImage}
+  className="mt-6 max-w-2xl drop-shadow-md"
+/>
+
+Once a rule is activated, you may configure the following options:
+
+### Rule Severity
+
+You can set the severity of the rule to `warning` or `error`. The default severity is `warning`.
+
+<NextImage
+  alt="Schema Policy Severity"
+  src={policySeverityImage}
+  className="w-sm mt-6 drop-shadow-md"
+/>
+
+A rule defined with `warning` severity will emit a **warning**, but will not fail the schema check.
+
+A rule defined with `error` severity will emit an **error**, and will fail the schema check.
+
+### Per-rule configuration
+
+Every rule activated in the policy can be configured with the corresponding options. Some rules
+might only have the severity option, but some rule can be configured with additional options to
+ensure flexibility.
+
+<NextImage
+  alt="Policy Per-rule Configuration"
+  src={policyRulesConfigImage}
+  className="mt-6 max-w-2xl drop-shadow-md"
+/>
+
+## Policies Hierarchy and Overrides
+
+When a schema is checked, the **target** policy and rules are calculated based on the following:
+
+1. Organization-level policies (if any)
+2. Project-level policies (if any)
+
+Every rule that is defined on the project level overrides the corresponding rule defined on the
+organization level (including all configurations and severity). **Per-rule configuration is not
+being merged**.
+
+When a policy is defined for the organization, you'll see an indicator on the project page, near
+every rule that you override:
+
+<NextImage
+  alt="Override Policy Configuration"
+  src={policyOverrideConfigImage}
+  className="mt-6 max-w-2xl drop-shadow-md"
+/>
+
+In addition to the ability to override rules configuration or severity, you maybe disable rules that
+were defined at the organization level by setting the rule severity to `off`.
+
+<NextImage
+  alt="Override Policy Severity"
+  src={policyOverrideSeverityImage}
+  className="mt-6 max-w-2xl drop-shadow-md"
+/>
+
+### Prevening overrides
+
+If you wish to prevent overrides of your organization-level policies, you can do so by unchecking
+the `Allow projects to override or disable rules` checkbox under your organization's **Policy**
+page.
+
+<Callout type="info">
+  Disallowing projects to override the organization-level policies will prevent the projects from
+  editing the project-level policy. If a previous policy has been set for the project, it will be
+  ignored during schema checks.
+</Callout>
+
+## Integration with Hive CLI
+
+Schema Policies is fully integrated into the Hive CLI, and you'll see both warnings and error coming
+from the schema policies:
+
+<NextImage
+  alt="Hive CLI and Policy Warnings"
+  src={cliPolicyWarningImage}
+  className="mt-6 max-w-2xl drop-shadow-md"
+/>
+
+<NextImage
+  alt="Hive CLI and Policy Errors"
+  src={cliPolicyErrorImage}
+  className="mt-6 max-w-2xl drop-shadow-md"
+/>

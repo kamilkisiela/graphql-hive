@@ -23,7 +23,7 @@
     "@sentry/integrations": "7.49.0",
     "@sentry/node": "7.49.0",
     "@trpc/server": "10.21.1",
-    "@whatwg-node/fetch": "0.8.6",
+    "@whatwg-node/fetch": "0.8.8",
     "@whatwg-node/server": "0.7.5",
     "dotenv": "16.0.3",
     "got": "12.6.0",
@@ -40,7 +40,7 @@
     "@hive/cdn-script": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
-    "@swc/core": "1.3.53",
+    "@swc/core": "1.3.55",
     "fastify": "3.29.5",
     "pino-pretty": "10.0.0",
     "tslib": "2.5.0"

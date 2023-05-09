@@ -85,12 +85,13 @@ export class SingleModel {
         conclusion: SchemaCheckConclusion.Success,
         state: {
           changes: null,
+          warnings: [],
           initial,
         },
       };
     }
 
-    const [compositionCheck, diffCheck] = await Promise.all([
+    const [compositionCheck, diffCheck, policyCheck] = await Promise.all([
       this.checks.composition({
         orchestrator: this.orchestrator,
         project,
@@ -105,9 +106,20 @@ export class SingleModel {
         version: compareToLatest ? latest : latestComposable,
         includeUrlChanges: false,
       }),
+      this.checks.policyCheck({
+        orchestrator: this.orchestrator,
+        project,
+        selector,
+        schemas,
+        modifiedSdl: input.sdl,
+      }),
     ]);
 
-    if (compositionCheck.status === 'failed' || diffCheck.status === 'failed') {
+    if (
+      compositionCheck.status === 'failed' ||
+      diffCheck.status === 'failed' ||
+      policyCheck.status === 'failed'
+    ) {
       const reasons: SchemaCheckFailureReason[] = [];
 
       if (compositionCheck.status === 'failed') {
@@ -136,8 +148,16 @@ export class SingleModel {
         }
       }
 
+      if (policyCheck.status === 'failed') {
+        reasons.push({
+          code: CheckFailureReasonCode.PolicyInfringement,
+          errors: policyCheck.reason.errors ?? [],
+        });
+      }
+
       return {
         conclusion: SchemaCheckConclusion.Failure,
+        warnings: policyCheck.reason?.warnings ?? [],
         reasons,
       };
     }
@@ -146,6 +166,7 @@ export class SingleModel {
       conclusion: SchemaCheckConclusion.Success,
       state: {
         changes: diffCheck.result?.changes ?? null,
+        warnings: policyCheck.result?.warnings ?? [],
         initial,
       },
     };

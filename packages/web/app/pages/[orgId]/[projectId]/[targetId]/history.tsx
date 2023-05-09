@@ -43,8 +43,10 @@ function DiffView({
       project: router.projectId,
       target: router.targetId,
       version: versionId,
+      unstable_forceLegacyComparison: router.query['force-legacy-comparison'] === '1',
     },
   });
+
   const comparison = compareQuery.data?.schemaCompareToPrevious;
   const compositionErrors = compareQuery.data?.schemaVersion?.errors;
   const { error } = compareQuery;

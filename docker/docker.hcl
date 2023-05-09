@@ -127,7 +127,7 @@ target "schema" {
   inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/schema/dist"
   args = {
-    IMAGE_TITLE = "graphql-hive/rate-limit"
+    IMAGE_TITLE = "graphql-hive/schema"
     IMAGE_DESCRIPTION = "The schema service of the GraphQL Hive project."
     PORT = "3002"
     HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
@@ -137,6 +137,23 @@ target "schema" {
     stable_image_tag("schema"),
     image_tag("schema", COMMIT_SHA),
     image_tag("schema", BRANCH_NAME)
+  ]
+}
+
+target "policy" {
+  inherits = ["service-base", get_target()]
+  context = "${PWD}/packages/services/policy/dist"
+  args = {
+    IMAGE_TITLE = "graphql-hive/policy"
+    IMAGE_DESCRIPTION = "The policy service of the GraphQL Hive project."
+    PORT = "3012"
+    HEALTHCHECK_CMD = "wget --spider -q http://127.0.0.1:$${PORT}/_readiness"
+  }
+  tags = [
+    local_image_tag("policy"),
+    stable_image_tag("policy"),
+    image_tag("policy", COMMIT_SHA),
+    image_tag("policy", BRANCH_NAME)
   ]
 }
 
@@ -331,6 +348,7 @@ group "build" {
     "emails",
     "rate-limit",
     "schema",
+    "policy",
     "storage",
     "tokens",
     "usage-estimator",
@@ -349,6 +367,7 @@ group "integration-tests" {
     "emails",
     "rate-limit",
     "schema",
+    "policy",
     "storage",
     "tokens",
     "usage-estimator",

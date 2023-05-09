@@ -1,4 +1,6 @@
 type Query {
   foo: Int!
   bar: String
+  test: String
 }
+# test 3

@@ -13,7 +13,7 @@
   },
   "license": "MIT",
   "private": true,
-  "packageManager": "pnpm@7.32.2",
+  "packageManager": "pnpm@7.32.3",
   "engines": {
     "node": ">=18",
     "pnpm": ">=7"
@@ -43,6 +43,7 @@
     "seed": "tsx scripts/seed-local-env.ts",
     "test": "vitest",
     "test:e2e": "CYPRESS_BASE_URL=$HIVE_APP_BASE_URL cypress run",
+    "test:integration": "cd integration-tests && pnpm test:integration",
     "typecheck": "pnpm turbo typecheck --color",
     "upload-sourcemaps": "./scripts/upload-sourcemaps.sh",
     "workspace": "pnpm run --filter $1 $2"
@@ -60,27 +61,27 @@
     "@graphql-codegen/typescript-resolvers": "3.2.1-alpha-20230420202418-82620d460",
     "@graphql-inspector/cli": "3.4.16",
     "@manypkg/get-packages": "2.1.0",
-    "@next/eslint-plugin-next": "13.3.0",
+    "@next/eslint-plugin-next": "13.3.1",
     "@sentry/cli": "2.17.4",
-    "@swc/core": "1.3.53",
+    "@swc/core": "1.3.55",
     "@theguild/eslint-config": "0.9.0",
     "@theguild/prettier-config": "1.1.3",
-    "@types/node": "18.16.0",
+    "@types/node": "18.16.6",
     "bob-the-bundler": "6.0.0",
-    "cypress": "12.10.0",
+    "cypress": "12.11.0",
     "dotenv": "16.0.3",
-    "eslint": "8.39.0",
-    "eslint-plugin-cypress": "2.13.2",
+    "eslint": "8.40.0",
+    "eslint-plugin-cypress": "2.13.3",
     "eslint-plugin-hive": "file:./rules",
     "eslint-plugin-tailwindcss": "3.11.0",
     "fs-extra": "11.1.1",
     "graphql": "16.6.0",
     "husky": "8.0.3",
     "jest-snapshot-serializer-raw": "1.2.0",
-    "lint-staged": "13.2.1",
+    "lint-staged": "13.2.2",
     "prettier": "2.8.8",
     "prettier-plugin-sql": "0.14.0",
-    "prettier-plugin-tailwindcss": "0.2.7",
+    "prettier-plugin-tailwindcss": "0.2.8",
     "pretty-quick": "3.1.3",
     "rimraf": "4.4.1",
     "ts-node": "10.9.1",
@@ -105,7 +106,6 @@
   },
   "pnpm": {
     "overrides": {
-      "tsup": "6.7.0",
       "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.cd77847.0"
     },
     "patchedDependencies": {
@@ -117,7 +117,9 @@
       "@apollo/federation@0.38.1": "patches/@apollo__federation@0.38.1.patch",
       "@octokit/webhooks-methods@3.0.1": "patches/@octokit__webhooks-methods@3.0.1.patch",
       "bullmq@3.12.0": "patches/bullmq@3.12.0.patch",
-      "@theguild/editor@1.2.5": "patches/@theguild__editor@1.2.5.patch"
+      "@theguild/editor@1.2.5": "patches/@theguild__editor@1.2.5.patch",
+      "eslint@8.40.0": "patches/eslint@8.40.0.patch",
+      "@graphql-eslint/eslint-plugin@3.18.0": "patches/@graphql-eslint__eslint-plugin@3.18.0.patch"
     }
   }
 }
