@@ -233,11 +233,11 @@ importers:
         specifier: 3.2.0
         version: 3.2.0(graphql@16.6.0)
       '@trpc/client':
-        specifier: 10.21.1
-        version: 10.21.1(@trpc/server@10.21.1)
+        specifier: 10.25.1
+        version: 10.25.1(@trpc/server@10.25.1)
       '@trpc/server':
-        specifier: 10.21.1
-        version: 10.21.1
+        specifier: 10.25.1
+        version: 10.25.1
       '@whatwg-node/fetch':
         specifier: 0.8.8
         version: 0.8.8
@@ -533,11 +533,11 @@ importers:
         specifier: 0.1.0
         version: 0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)
       '@trpc/client':
-        specifier: 10.21.1
-        version: 10.21.1(@trpc/server@10.21.1)
+        specifier: 10.25.1
+        version: 10.25.1(@trpc/server@10.25.1)
       '@trpc/server':
-        specifier: 10.21.1
-        version: 10.21.1
+        specifier: 10.25.1
+        version: 10.25.1
       '@whatwg-node/fetch':
         specifier: 0.8.8
         version: 0.8.8
@@ -731,8 +731,8 @@ importers:
         specifier: 7.51.2
         version: 7.51.2
       '@trpc/server':
-        specifier: 10.21.1
-        version: 10.21.1
+        specifier: 10.25.1
+        version: 10.25.1
       '@whatwg-node/fetch':
         specifier: 0.8.8
         version: 0.8.8
@@ -832,8 +832,8 @@ importers:
         specifier: 7.51.2
         version: 7.51.2
       '@trpc/server':
-        specifier: 10.21.1
-        version: 10.21.1
+        specifier: 10.25.1
+        version: 10.25.1
       '@whatwg-node/fetch':
         specifier: 0.8.8
         version: 0.8.8
@@ -872,11 +872,11 @@ importers:
         specifier: 7.51.2
         version: 7.51.2
       '@trpc/client':
-        specifier: 10.21.1
-        version: 10.21.1(@trpc/server@10.21.1)
+        specifier: 10.25.1
+        version: 10.25.1(@trpc/server@10.25.1)
       '@trpc/server':
-        specifier: 10.21.1
-        version: 10.21.1
+        specifier: 10.25.1
+        version: 10.25.1
       '@whatwg-node/fetch':
         specifier: 0.8.8
         version: 0.8.8
@@ -927,8 +927,8 @@ importers:
         specifier: 7.51.2
         version: 7.51.2
       '@trpc/server':
-        specifier: 10.21.1
-        version: 10.21.1
+        specifier: 10.25.1
+        version: 10.25.1
       '@whatwg-node/fetch':
         specifier: 0.8.8
         version: 0.8.8
@@ -1009,8 +1009,8 @@ importers:
         specifier: 7.51.2
         version: 7.51.2
       '@trpc/server':
-        specifier: 10.21.1
-        version: 10.21.1
+        specifier: 10.25.1
+        version: 10.25.1
       '@whatwg-node/fetch':
         specifier: 0.8.8
         version: 0.8.8
@@ -1159,11 +1159,11 @@ importers:
         specifier: 7.51.2
         version: 7.51.2
       '@trpc/client':
-        specifier: 10.21.1
-        version: 10.21.1(@trpc/server@10.21.1)
+        specifier: 10.25.1
+        version: 10.25.1(@trpc/server@10.25.1)
       '@trpc/server':
-        specifier: 10.21.1
-        version: 10.21.1
+        specifier: 10.25.1
+        version: 10.25.1
       '@whatwg-node/fetch':
         specifier: 0.8.8
         version: 0.8.8
@@ -1202,8 +1202,8 @@ importers:
         specifier: 7.51.2
         version: 7.51.2
       '@trpc/server':
-        specifier: 10.21.1
-        version: 10.21.1
+        specifier: 10.25.1
+        version: 10.25.1
       dotenv:
         specifier: 16.0.3
         version: 16.0.3
@@ -1251,11 +1251,11 @@ importers:
         specifier: 7.51.2
         version: 7.51.2
       '@trpc/client':
-        specifier: 10.21.1
-        version: 10.21.1(@trpc/server@10.21.1)
+        specifier: 10.25.1
+        version: 10.25.1(@trpc/server@10.25.1)
       '@trpc/server':
-        specifier: 10.21.1
-        version: 10.21.1
+        specifier: 10.25.1
+        version: 10.25.1
       '@whatwg-node/fetch':
         specifier: 0.8.8
         version: 0.8.8
@@ -1306,8 +1306,8 @@ importers:
         specifier: 7.51.2
         version: 7.51.2
       '@trpc/server':
-        specifier: 10.21.1
-        version: 10.21.1
+        specifier: 10.25.1
+        version: 10.25.1
       '@whatwg-node/fetch':
         specifier: 0.8.8
         version: 0.8.8
@@ -1389,8 +1389,8 @@ importers:
         specifier: 7.51.2
         version: 7.51.2
       '@trpc/server':
-        specifier: 10.21.1
-        version: 10.21.1
+        specifier: 10.25.1
+        version: 10.25.1
       bullmq:
         specifier: 3.12.0
         version: 3.12.0(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
@@ -1504,11 +1504,11 @@ importers:
         specifier: 1.2.5
         version: 1.2.5(patch_hash=pz2nlsfawfhpo6sw62ecmp2yum)(@monaco-editor/react@4.5.1)(graphql@16.6.0)(monaco-editor@0.38.0)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/client':
-        specifier: 10.21.1
-        version: 10.21.1(@trpc/server@10.21.1)
+        specifier: 10.25.1
+        version: 10.25.1(@trpc/server@10.25.1)
       '@trpc/server':
-        specifier: 10.21.1
-        version: 10.21.1
+        specifier: 10.25.1
+        version: 10.25.1
       '@urql/core':
         specifier: 3.1.1
         version: 3.1.1(graphql@16.6.0)
@@ -14209,16 +14209,16 @@ packages:
       - supports-color
     dev: true
 
-  /@trpc/client@10.21.1(@trpc/server@10.21.1):
-    resolution: {integrity: sha512-oZgPbghs9y2frTCA9mZPSAlVknV9stCTKYO5nsvRr0aX+oaA0URoXJTKZTSpLZxLfuwWgxBj4iTiCWWWmaVelw==}
+  /@trpc/client@10.25.1(@trpc/server@10.25.1):
+    resolution: {integrity: sha512-6ymAOKrbUgi6H/MxDZiDXXiADCF0B2fsGewBe7yWSQGNl/MK1GTuIzltJ6WAUqjmMmzrCxE621uzUihdFZ4tow==}
     peerDependencies:
-      '@trpc/server': 10.21.1
+      '@trpc/server': 10.25.1
     dependencies:
-      '@trpc/server': 10.21.1
+      '@trpc/server': 10.25.1
     dev: false
 
-  /@trpc/server@10.21.1:
-    resolution: {integrity: sha512-4E4upTD2/Aq0Dm9HW4nbKSoIlqbV/ajRqNl1MCFBd9FjTv47qq2ncmAWMbb0AIVh2UV87PJlTjpPNNecRm6g9Q==}
+  /@trpc/server@10.25.1:
+    resolution: {integrity: sha512-zi08QKVvWPK0EEGpEy7i5PlOK9CBlQb3LqiIdmaIpe27DzFNz6+yZ4qXwsLXTwDcDphELl/BNw+RzzQ2+Ou2vw==}
     dev: false
 
   /@trysound/sax@0.2.0:

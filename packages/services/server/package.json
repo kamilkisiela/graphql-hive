@@ -21,7 +21,7 @@
     "@escape.tech/graphql-armor-max-tokens": "1.3.2",
     "@sentry/integrations": "7.51.2",
     "@sentry/node": "7.51.2",
-    "@trpc/server": "10.21.1",
+    "@trpc/server": "10.25.1",
     "@whatwg-node/fetch": "0.8.8",
     "@whatwg-node/server": "0.7.5",
     "dotenv": "16.0.3",
