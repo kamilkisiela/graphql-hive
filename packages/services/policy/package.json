@@ -11,16 +11,16 @@
   },
   "dependencies": {
     "@graphql-eslint/eslint-plugin": "3.18.0",
-    "@sentry/node": "7.49.0",
-    "@sentry/tracing": "7.49.0",
-    "@trpc/server": "10.21.1",
+    "@sentry/node": "7.51.2",
+    "@sentry/tracing": "7.51.2",
+    "@trpc/server": "10.25.1",
     "@whatwg-node/fetch": "0.8.8",
     "ajv": "8.12.0",
     "dotenv": "16.0.3",
     "eslint": "8.40.0",
     "graphql": "16.6.0",
     "zod": "3.21.4",
-    "zod-validation-error": "1.0.1"
+    "zod-validation-error": "1.3.0"
   },
   "devDependencies": {
     "@hive/service-common": "workspace:*",
