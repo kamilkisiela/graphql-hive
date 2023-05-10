@@ -1498,8 +1498,8 @@ importers:
         specifier: 1.52.1
         version: 1.52.1
       '@tanstack/react-table':
-        specifier: 8.0.0-beta.8
-        version: 8.0.0-beta.8(react-dom@18.2.0)(react@18.2.0)
+        specifier: 8.9.1
+        version: 8.9.1(react-dom@18.2.0)(react@18.2.0)
       '@theguild/editor':
         specifier: 1.2.5
         version: 1.2.5(patch_hash=pz2nlsfawfhpo6sw62ecmp2yum)(@monaco-editor/react@4.5.1)(graphql@16.6.0)(monaco-editor@0.38.0)(react-dom@18.2.0)(react@18.2.0)
@@ -14027,20 +14027,20 @@ packages:
       defer-to-connect: 2.0.1
     dev: false
 
-  /@tanstack/react-table@8.0.0-beta.8(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-hffDi9NnSI2tl/l3cW0CH8ErI1aJOWzIo6of0t1KMGdfES6mDcnfYMMRjm89ffaWogqVrdkKFJfbNAwV0g/0iA==}
+  /@tanstack/react-table@8.9.1(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-yHs2m6lk5J5RNcu2dNtsDGux66wNXZjEgzxos6MRCX8gL+nqxeW3ZglqP6eANN0bGElPnjvqiUHGQvdACOr3Cw==}
     engines: {node: '>=12'}
     peerDependencies:
       react: '>=16'
       react-dom: '>=16'
     dependencies:
-      '@tanstack/table-core': 8.0.0-beta.8
+      '@tanstack/table-core': 8.9.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@tanstack/table-core@8.0.0-beta.8:
-    resolution: {integrity: sha512-uIl9kHsuyP09Mc5DBhCzBavRg/e2KNUnZmb7/SW6ec+l2cyC4n64c1B64rDVzIn0CaV/0ajuXB4gI3xfcGsPfg==}
+  /@tanstack/table-core@8.9.1:
+    resolution: {integrity: sha512-2+R83n8vMZND0q3W1lSiF7co9nFbeWbjAErFf27xwbeA9E0wtUu5ZDfgj+TZ6JzdAEQAgfxkk/QNFAKiS8E4MA==}
     engines: {node: '>=12'}
     dev: false
 

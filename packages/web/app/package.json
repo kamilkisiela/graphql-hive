@@ -38,7 +38,7 @@
     "@sentry/types": "7.51.2",
     "@stripe/react-stripe-js": "2.1.0",
     "@stripe/stripe-js": "1.52.1",
-    "@tanstack/react-table": "8.0.0-beta.8",
+    "@tanstack/react-table": "8.9.1",
     "@theguild/editor": "1.2.5",
     "@trpc/client": "10.21.1",
     "@trpc/server": "10.21.1",
