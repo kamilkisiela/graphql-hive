@@ -1591,8 +1591,8 @@ importers:
         specifier: 0.20.0
         version: 0.20.0(react@18.2.0)
       react-select:
-        specifier: 5.7.2
-        version: 5.7.2(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 5.7.3
+        version: 5.7.3(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0)
       react-string-replace:
         specifier: 1.1.0
         version: 1.1.0
@@ -26492,13 +26492,13 @@ packages:
       use-sidecar: 1.1.2(@types/react@18.2.6)(react@18.2.0)
     dev: false
 
-  /react-select@5.7.2(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-cTlJkQ8YjV6T/js8wW0owTzht0hHGABh29vjLscY4HfZGkv7hc3FFTmRp9NzY/Ib1uQ36GieAKEjxpHdpCFpcA==}
+  /react-select@5.7.3(@types/react@18.2.6)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-z8i3NCuFFWL3w27xq92rBkVI2onT0jzIIPe480HlBjXJ3b5o6Q+Clp4ydyeKrj9DZZ3lrjawwLC5NGl0FSvUDg==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
-      '@babel/runtime': 7.20.7
+      '@babel/runtime': 7.21.0
       '@emotion/cache': 11.10.5
       '@emotion/react': 11.10.5(@types/react@18.2.6)(react@18.2.0)
       '@floating-ui/dom': 1.0.12
