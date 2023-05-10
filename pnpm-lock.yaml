@@ -518,8 +518,8 @@ importers:
         specifier: 4.2.1
         version: 4.2.1
       '@octokit/app':
-        specifier: 13.1.2
-        version: 13.1.2
+        specifier: 13.1.3
+        version: 13.1.3
       '@sentry/node':
         specifier: 7.49.0
         version: 7.49.0
@@ -9726,8 +9726,8 @@ packages:
     deprecated: Deprecated in favor of @oclif/core
     dev: true
 
-  /@octokit/app@13.1.2:
-    resolution: {integrity: sha512-Kf+h5sa1SOI33hFsuHvTsWj1jUrjp1x4MuiJBq7U/NicfEGa6nArPUoDnyfP/YTmcQ5cQ5yvOgoIBkbwPg6kzQ==}
+  /@octokit/app@13.1.3:
+    resolution: {integrity: sha512-qG3a3AddK/XLmtpQuB2eICbOUTwwdvqfdnyOzU6PlHhhhVapLfuutkbTOllHB/5OS/slUamIBD3zhOYpKsLFDQ==}
     engines: {node: '>= 14'}
     dependencies:
       '@octokit/auth-app': 4.0.8
