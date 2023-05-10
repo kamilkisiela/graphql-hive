@@ -511,6 +511,26 @@ export class OperationsManager {
     });
   }
 
+  async getClientListForSchemaCoordinate(
+    args: {
+      period: DateRange;
+      schemaCoordinate: string;
+    } & TargetSelector,
+  ) {
+    await this.authManager.ensureTargetAccess({
+      organization: args.organization,
+      project: args.project,
+      target: args.target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    return this.reader.getClientListForSchemaCoordinate({
+      targetId: args.target,
+      period: args.period,
+      schemaCoordinate: args.schemaCoordinate,
+    });
+  }
+
   async hasOperationsForOrganization(selector: OrganizationSelector): Promise<boolean> {
     const targets = await this.storage.getTargetIdsOfOrganization(selector);
 

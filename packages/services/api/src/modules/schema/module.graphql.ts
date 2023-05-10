@@ -468,6 +468,11 @@ export default gql`
   type SchemaCoordinateUsage {
     total: Float!
     isUsed: Boolean!
+    """
+    A list of clients that use this schema coordinate within GraphQL operation documents.
+    Is null if used by none clients.
+    """
+    usedByClients: [String!]
   }
 
   type SupergraphMetadata {

@@ -15,8 +15,8 @@ import {
 } from 'graphql';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
-import { ProjectType } from '../../shared/entities';
-import { createPeriod, parseDateRangeInput } from '../../shared/helpers';
+import { type DateRange, ProjectType } from '../../shared/entities';
+import { createPeriod, parseDateRangeInput, PromiseOrValue } from '../../shared/helpers';
 import type {
   GraphQLEnumTypeMapper,
   GraphQLInputObjectTypeMapper,
@@ -34,6 +34,7 @@ import { OperationsManager } from '../operations/providers/operations-manager';
 import { OrganizationManager } from '../organization/providers/organization-manager';
 import { ProjectManager } from '../project/providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
+import { TargetSelector } from '../shared/providers/storage';
 import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import {
@@ -65,6 +66,7 @@ async function usage(
           };
         }>
       >,
+  _: unknown,
 ) {
   const coordinate =
     'parent' in source ? `${source.parent.coordinate}.${source.entity.name}` : source.entity.name;
@@ -74,10 +76,14 @@ async function usage(
     ? {
         total: usage.total,
         isUsed: usage.total > 0,
+        get usedByClients() {
+          return usage.usedByClients;
+        },
       }
     : {
         total: 0,
         isUsed: false,
+        usedByClients: [],
       };
 }
 
@@ -972,19 +978,29 @@ export const resolvers: SchemaModule.Resolvers = {
   SchemaExplorer: {
     async type(source, { name }, { injector }) {
       const entity = source.schema.getType(name);
+      const operationsManager = injector.get(OperationsManager);
 
       if (!entity) {
         return null;
       }
 
       const { supergraph } = source;
-      const usage = injector.get(OperationsManager).countCoordinatesOfType({
-        typename: entity.name,
-        organization: source.usage.organization,
-        project: source.usage.project,
-        target: source.usage.target,
-        period: source.usage.period,
-      });
+      const usage = injector
+        .get(OperationsManager)
+        .countCoordinatesOfType({
+          typename: entity.name,
+          organization: source.usage.organization,
+          project: source.usage.project,
+          target: source.usage.target,
+          period: source.usage.period,
+        })
+        .then(usage =>
+          withUsedByClients(usage, {
+            selector: source.usage,
+            period: source.usage.period,
+            operationsManager,
+          }),
+        );
 
       if (isObjectType(entity)) {
         return {
@@ -1088,12 +1104,18 @@ export const resolvers: SchemaModule.Resolvers = {
       const typeMap = schema.getTypeMap();
       const operationsManager = injector.get(OperationsManager);
 
-      function getStats() {
-        return operationsManager.countCoordinatesOfTarget({
+      async function getStats() {
+        const stats = await operationsManager.countCoordinatesOfTarget({
           target: usage.target,
           organization: usage.organization,
           project: usage.project,
           period: usage.period,
+        });
+
+        return withUsedByClients(stats, {
+          selector: usage,
+          period: usage.period,
+          operationsManager,
         });
       }
 
@@ -1205,6 +1227,7 @@ export const resolvers: SchemaModule.Resolvers = {
       return types;
     },
     async query({ schema, usage, supergraph }, _, { injector }) {
+      const operationsManager = injector.get(OperationsManager);
       const entity = schema.getQueryType();
 
       if (!entity) {
@@ -1214,13 +1237,21 @@ export const resolvers: SchemaModule.Resolvers = {
       return {
         entity,
         get usage() {
-          return injector.get(OperationsManager).countCoordinatesOfType({
-            typename: entity.name,
-            organization: usage.organization,
-            project: usage.project,
-            target: usage.target,
-            period: usage.period,
-          });
+          return operationsManager
+            .countCoordinatesOfType({
+              typename: entity.name,
+              organization: usage.organization,
+              project: usage.project,
+              target: usage.target,
+              period: usage.period,
+            })
+            .then(stats =>
+              withUsedByClients(stats, {
+                selector: usage,
+                period: usage.period,
+                operationsManager,
+              }),
+            );
         },
         supergraph: supergraph
           ? {
@@ -1234,6 +1265,7 @@ export const resolvers: SchemaModule.Resolvers = {
       };
     },
     async mutation({ schema, usage, supergraph }, _, { injector }) {
+      const operationsManager = injector.get(OperationsManager);
       const entity = schema.getMutationType();
 
       if (!entity) {
@@ -1243,13 +1275,21 @@ export const resolvers: SchemaModule.Resolvers = {
       return {
         entity,
         get usage() {
-          return injector.get(OperationsManager).countCoordinatesOfType({
-            typename: entity.name,
-            organization: usage.organization,
-            project: usage.project,
-            target: usage.target,
-            period: usage.period,
-          });
+          return operationsManager
+            .countCoordinatesOfType({
+              typename: entity.name,
+              organization: usage.organization,
+              project: usage.project,
+              target: usage.target,
+              period: usage.period,
+            })
+            .then(stats =>
+              withUsedByClients(stats, {
+                selector: usage,
+                period: usage.period,
+                operationsManager,
+              }),
+            );
         },
         supergraph: supergraph
           ? {
@@ -1262,7 +1302,9 @@ export const resolvers: SchemaModule.Resolvers = {
           : null,
       };
     },
+
     async subscription({ schema, usage, supergraph }, _, { injector }) {
+      const operationsManager = injector.get(OperationsManager);
       const entity = schema.getSubscriptionType();
 
       if (!entity) {
@@ -1272,13 +1314,21 @@ export const resolvers: SchemaModule.Resolvers = {
       return {
         entity,
         get usage() {
-          return injector.get(OperationsManager).countCoordinatesOfType({
-            typename: entity.name,
-            organization: usage.organization,
-            project: usage.project,
-            target: usage.target,
-            period: usage.period,
-          });
+          return operationsManager
+            .countCoordinatesOfType({
+              typename: entity.name,
+              organization: usage.organization,
+              project: usage.project,
+              target: usage.target,
+              period: usage.period,
+            })
+            .then(stats =>
+              withUsedByClients(stats, {
+                selector: usage,
+                period: usage.period,
+                operationsManager,
+              }),
+            );
         },
         supergraph: supergraph
           ? {
@@ -1491,4 +1541,37 @@ function stringifyDefaultValue(value: unknown): string | null {
     return stringify(value);
   }
   return null;
+}
+
+function withUsedByClients<
+  T extends {
+    isUsed: boolean;
+  },
+>(
+  input: Record<string, T>,
+  deps: {
+    selector: TargetSelector;
+    operationsManager: OperationsManager;
+    period: DateRange;
+  },
+): Record<string, T & { usedByClients: PromiseOrValue<Array<string> | null> }> {
+  return Object.fromEntries(
+    Object.entries(input).map(([schemaCoordinate, record]) => [
+      schemaCoordinate,
+      {
+        ...record,
+        get usedByClients() {
+          if (record.isUsed === false) {
+            return null;
+          }
+
+          return deps.operationsManager.getClientListForSchemaCoordinate({
+            ...deps.selector,
+            period: deps.period,
+            schemaCoordinate,
+          });
+        },
+      },
+    ]),
+  );
 }

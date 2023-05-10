@@ -1,5 +1,6 @@
 import { addMinutes, differenceInDays, format } from 'date-fns';
 import { Injectable } from 'graphql-modules';
+import * as z from 'zod';
 import type { Span } from '@sentry/types';
 import { batch } from '@theguild/buddy';
 import type { DateRange } from '../../../shared/entities';
@@ -7,6 +8,21 @@ import { sentry } from '../../../shared/sentry';
 import { ClickHouse, RowOf, sql } from './clickhouse-client';
 import { calculateTimeWindow } from './helpers';
 import { SqlValue } from './sql';
+
+const GetClientListForSchemaCoordinateModel = z
+  .array(
+    z
+      .object({
+        client_name: z.string(),
+      })
+      .transform(data => {
+        if (data.client_name === '') {
+          return 'unknown';
+        }
+        return data.client_name;
+      }),
+  )
+  .transform(data => (data.length === 0 ? null : data));
 
 function formatDate(date: Date): string {
   return format(addMinutes(date, date.getTimezoneOffset()), 'yyyy-MM-dd HH:mm:ss');
@@ -661,6 +677,53 @@ export class OperationsReader {
         percentage: (client.total / total) * 100,
       };
     });
+  }
+
+  /**
+   * Receive a list of clients that queried a specific schema coordinate.
+   */
+  @sentry('OperationsReader.getClientListForSchemaCoordinate')
+  async getClientListForSchemaCoordinate(args: {
+    targetId: string;
+    period: DateRange;
+    schemaCoordinate: string;
+  }): Promise<Array<string> | null> {
+    const query = sql`
+      SELECT
+        "client_name"
+      FROM
+        "clients_daily"
+      ${this.createFilter({
+        target: args.targetId,
+        period: args.period,
+        extra: [
+          sql`
+            "hash" IN (
+              SELECT
+                "hash"
+              FROM
+                "coordinates_daily"
+              ${this.createFilter({
+                target: args.targetId,
+                period: args.period,
+                extra: [sql`coordinate = '${args.schemaCoordinate}'`],
+              })}
+              GROUP BY
+                "hash"
+            )
+          `,
+        ],
+      })}
+      GROUP BY
+        "client_name"
+    `;
+    const result = await this.clickHouse.query({
+      queryId: 'get_client_list_for_schema_coordinate',
+      timeout: 10_000,
+      query,
+    });
+
+    return GetClientListForSchemaCoordinateModel.parse(result.data);
   }
 
   @sentry('OperationsReader.readUniqueClientNames')
