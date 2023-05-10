@@ -19,7 +19,7 @@
     "dotenv": "16.0.3",
     "got": "12.6.0",
     "reflect-metadata": "0.1.13",
-    "stripe": "12.2.0",
+    "stripe": "12.4.0",
     "zod": "3.21.4"
   },
   "devDependencies": {
