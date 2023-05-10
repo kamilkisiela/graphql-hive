@@ -19,7 +19,7 @@
     "@trpc/server": "10.21.1",
     "@whatwg-node/fetch": "0.8.8",
     "bcryptjs": "2.4.3",
-    "date-fns": "2.29.3",
+    "date-fns": "2.30.0",
     "dockerode": "3.3.5",
     "dotenv": "16.0.3",
     "graphql": "16.6.0",

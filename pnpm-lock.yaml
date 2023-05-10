@@ -245,8 +245,8 @@ importers:
         specifier: 2.4.3
         version: 2.4.3
       date-fns:
-        specifier: 2.29.3
-        version: 2.29.3
+        specifier: 2.30.0
+        version: 2.30.0
       dockerode:
         specifier: 3.3.5
         version: 3.3.5
@@ -551,8 +551,8 @@ importers:
         specifier: 2.2.2
         version: 2.2.2
       date-fns:
-        specifier: 2.29.3
-        version: 2.29.3
+        specifier: 2.30.0
+        version: 2.30.0
       fast-json-stable-stringify:
         specifier: 2.1.0
         version: 2.1.0
@@ -881,8 +881,8 @@ importers:
         specifier: 0.8.8
         version: 0.8.8
       date-fns:
-        specifier: 2.29.3
-        version: 2.29.3
+        specifier: 2.30.0
+        version: 2.30.0
       dotenv:
         specifier: 16.0.3
         version: 16.0.3
@@ -1168,8 +1168,8 @@ importers:
         specifier: 0.8.8
         version: 0.8.8
       date-fns:
-        specifier: 2.29.3
-        version: 2.29.3
+        specifier: 2.30.0
+        version: 2.30.0
       dotenv:
         specifier: 16.0.3
         version: 16.0.3
@@ -1346,8 +1346,8 @@ importers:
         specifier: 4.3.0
         version: 4.3.0
       date-fns:
-        specifier: 2.29.3
-        version: 2.29.3
+        specifier: 2.30.0
+        version: 2.30.0
       dotenv:
         specifier: 16.0.3
         version: 16.0.3
@@ -1528,8 +1528,8 @@ importers:
         specifier: 0.8.0
         version: 0.8.0
       date-fns:
-        specifier: 2.29.3
-        version: 2.29.3
+        specifier: 2.30.0
+        version: 2.30.0
       dompurify:
         specifier: 3.0.3
         version: 3.0.3
@@ -1583,7 +1583,7 @@ importers:
         version: 2.9.0(react@18.2.0)
       react-date-range:
         specifier: 1.4.0
-        version: 1.4.0(date-fns@2.29.3)(react@18.2.0)
+        version: 1.4.0(date-fns@2.30.0)(react@18.2.0)
       react-dom:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
@@ -14708,7 +14708,7 @@ packages:
     resolution: {integrity: sha512-9Y9NyNgaCsEVN/+O4HKuxzPbVjRVBGdOKRxMDcsTRWVG62lpYgnxefNckTXDWup8FvczoqPW0+ESZR6R1yymDg==}
     dependencies:
       '@types/react': 18.2.6
-      date-fns: 2.29.3
+      date-fns: 2.30.0
     dev: true
 
   /@types/react-dom@18.2.4:
@@ -17404,7 +17404,7 @@ packages:
     hasBin: true
     dependencies:
       chalk: 4.1.2
-      date-fns: 2.29.3
+      date-fns: 2.30.0
       lodash: 4.17.21
       rxjs: 7.8.0
       shell-quote: 1.7.3
@@ -18157,9 +18157,11 @@ packages:
   /dataloader@2.2.2:
     resolution: {integrity: sha512-8YnDaaf7N3k/q5HnTJVuzSyLETjoZjVmHc4AeKAzOvKHEFQKcn64OKBfzHYtE9zGjctNM7V9I0MfnUVLpi7M5g==}
 
-  /date-fns@2.29.3:
-    resolution: {integrity: sha512-dDCnyH2WnnKusqvZZ6+jA1O51Ibt8ZMRNkDZdyAyK4YfbDwa/cEmuztzG5pk6hqlp9aSBPYcjOlktquahGwGeA==}
+  /date-fns@2.30.0:
+    resolution: {integrity: sha512-fnULvOpxnC5/Vg3NCiWelDsLiUc9bRwAPs/+LfTLNvetFCtCTN+yQz15C/fs4AwX1R9K5GLtLfn8QW+dWisaAw==}
     engines: {node: '>=0.11'}
+    dependencies:
+      '@babel/runtime': 7.21.0
 
   /date-time@3.1.0:
     resolution: {integrity: sha512-uqCUKXE5q1PNBXjPqvwhwJf9SwMoAHBgWJ6DcrnS5o+W2JOiIILl0JEdVD8SGujrNS02GGxgwAg2PN2zONgtjg==}
@@ -27026,14 +27028,14 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: true
 
-  /react-date-range@1.4.0(date-fns@2.29.3)(react@18.2.0):
+  /react-date-range@1.4.0(date-fns@2.30.0)(react@18.2.0):
     resolution: {integrity: sha512-+9t0HyClbCqw1IhYbpWecjsiaftCeRN5cdhsi9v06YdimwyMR2yYHWcgVn3URwtN/txhqKpEZB6UX1fHpvK76w==}
     peerDependencies:
       date-fns: 2.0.0-alpha.7 || >=2.0.0
       react: ^0.14 || ^15.0.0-rc || >=15.0
     dependencies:
       classnames: 2.3.2
-      date-fns: 2.29.3
+      date-fns: 2.30.0
       prop-types: 15.8.1
       react: 18.2.0
       react-list: 0.8.17(react@18.2.0)
