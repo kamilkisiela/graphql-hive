@@ -9,9 +9,6 @@ fragment OrganizationFields on Organization {
   rateLimit {
     retentionInDays
   }
-  getStarted {
-    ...GetStartedWizard_GetStartedProgress
-  }
 }
 
 fragment OrganizationEssentials on Organization {

@@ -2,6 +2,11 @@ query organizations {
   organizations {
     nodes {
       ...OrganizationFields
+      ... on Organization @defer {
+        getStarted {
+          ...GetStartedWizard_GetStartedProgress
+        }
+      }
     }
     total
   }

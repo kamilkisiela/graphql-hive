@@ -76,7 +76,7 @@ export function Header(): ReactElement {
       <div className="container flex h-[84px] items-center justify-between">
         <HiveLink />
         <div className="flex flex-row gap-8">
-          {currentOrg ? <GetStartedProgress tasks={currentOrg.getStarted} /> : null}
+          {currentOrg?.getStarted ? <GetStartedProgress tasks={currentOrg.getStarted} /> : null}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button>
