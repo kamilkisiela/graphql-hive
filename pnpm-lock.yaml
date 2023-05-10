@@ -1426,8 +1426,8 @@ importers:
   packages/web/app:
     dependencies:
       '@graphiql/toolkit':
-        specifier: 0.8.3
-        version: 0.8.3(graphql@16.6.0)
+        specifier: 0.8.4
+        version: 0.8.4(graphql@16.6.0)
       '@graphql-tools/mock':
         specifier: 8.7.20
         version: 8.7.20(graphql@16.6.0)
@@ -7832,22 +7832,6 @@ packages:
       - '@types/react'
       - graphql-ws
       - react-is
-    dev: false
-
-  /@graphiql/toolkit@0.8.3(graphql@16.6.0):
-    resolution: {integrity: sha512-B5WfZlBes/tMmM7TeTTD/F2E1kbtQD6PYmyX76qWrIt1Sx3+lQoCe8NzHbBvNII77F5sr737RASmkhQ1fcdFWQ==}
-    peerDependencies:
-      graphql: ^15.5.0 || ^16.0.0
-      graphql-ws: '>= 4.5.0'
-    peerDependenciesMeta:
-      graphql-ws:
-        optional: true
-    dependencies:
-      '@n1ru4l/push-pull-async-iterable-iterator': 3.2.0
-      graphql: 16.6.0
-      meros: 1.2.1
-    transitivePeerDependencies:
-      - '@types/node'
     dev: false
 
   /@graphiql/toolkit@0.8.4(graphql@16.6.0):
