@@ -203,9 +203,7 @@ export type SchemaDeleteFailureReason =
     }
   | {
       code: (typeof DeleteFailureReasonCode)['CompositionFailure'];
-      compositionErrors: Array<{
-        message: string;
-      }>;
+      compositionErrors: Array<SchemaCompositionError>;
     };
 
 export type SchemaDeleteSuccess = {
@@ -213,9 +211,7 @@ export type SchemaDeleteSuccess = {
   state: {
     changes: Array<Change> | null;
     breakingChanges: Array<Change> | null;
-    compositionErrors: Array<{
-      message: string;
-    }> | null;
+    compositionErrors: Array<SchemaCompositionError> | null;
     supergraph: string | null;
   } & (
     | {

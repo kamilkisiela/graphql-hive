@@ -559,8 +559,16 @@ export class SchemaPublisher {
               target: input.target.id,
               serviceName: input.serviceName,
               composable: deleteResult.state.composable,
-              // changes: deleteResult.state.changes,
-              // compositeSchemaSDL: deleteResult.state.
+              changes: deleteResult.state.changes,
+              ...(deleteResult.state.fullSchemaSdl
+                ? {
+                    compositeSchemaSDL: deleteResult.state.fullSchemaSdl,
+                    schemaCompositionErrors: null,
+                  }
+                : {
+                    compositeSchemaSDL: null,
+                    schemaCompositionErrors: deleteResult.state.compositionErrors ?? [],
+                  }),
               actionFn: async () => {
                 if (deleteResult.state.composable) {
                   await this.publishToCDN({
