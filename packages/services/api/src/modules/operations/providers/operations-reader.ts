@@ -20,15 +20,10 @@ const GetHashesForSchemaCoordinateModel = z
 
 const GetClientNamesForHashesModel = z
   .array(
-    z
-      .object({
-        client_name: z.string(),
-        hash: z.string(),
-      })
-      .transform(data => ({
-        hash: data.hash,
-        client_name: data.client_name === '' ? 'unknown' : data.client_name,
-      })),
+    z.object({
+      clientName: z.string(),
+      hash: z.string(),
+    }),
   )
   .transform(data => {
     const map = new Map<string, Array<string>>();
@@ -38,7 +33,7 @@ const GetClientNamesForHashesModel = z
         clientNames = [];
         map.set(record.hash, clientNames);
       }
-      clientNames.push(record.client_name);
+      clientNames.push(record.clientName === '' ? 'unknown' : record.clientName);
     }
 
     return map;
@@ -734,7 +729,7 @@ export class OperationsReader {
     // 1. Fetch all client names for hashes
     const clientNamesForHashesQuery = sql`
       SELECT
-        "client_name",
+        "client_name" as "clientName",
         "hash"
       FROM
         "clients_daily"
