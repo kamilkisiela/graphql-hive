@@ -1,3 +1,4 @@
+import DataLoader from 'dataloader';
 import { Injectable, Scope } from 'graphql-modules';
 import LRU from 'lru-cache';
 import type { DateRange } from '../../../shared/entities';
@@ -511,6 +512,36 @@ export class OperationsManager {
     });
   }
 
+  private clientListForSchemaCoordinateDataLoaderCache = new Map<
+    string,
+    DataLoader<string, Array<string> | null>
+  >();
+
+  private getClientListForSchemaCoordinateDataLoader(args: { target: string; period: DateRange }) {
+    const cacheKey = [args.target, args.period.from, args.period.to].join('__');
+    let loader = this.clientListForSchemaCoordinateDataLoaderCache.get(cacheKey);
+
+    if (loader == null) {
+      loader = new DataLoader<string, Array<string> | null>(async schemaCoordinates => {
+        const clientsBySchemaCoordinate = await this.reader.getClientListForSchemaCoordinates({
+          targetId: args.target,
+          period: args.period,
+          schemaCoordinates,
+        });
+
+        return schemaCoordinates.map(
+          schemaCoordinate => clientsBySchemaCoordinate.get(schemaCoordinate) ?? null,
+        );
+      });
+    }
+
+    return loader;
+  }
+
+  /**
+   * Receive a list of clients that queried a specific schema coordinate.
+   * Uses DataLoader underneath for batching.
+   */
   async getClientListForSchemaCoordinate(
     args: {
       period: DateRange;
@@ -524,11 +555,12 @@ export class OperationsManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    return this.reader.getClientListForSchemaCoordinate({
-      targetId: args.target,
+    const loader = this.getClientListForSchemaCoordinateDataLoader({
+      target: args.target,
       period: args.period,
-      schemaCoordinate: args.schemaCoordinate,
     });
+
+    return loader.load(args.schemaCoordinate);
   }
 
   async hasOperationsForOrganization(selector: OrganizationSelector): Promise<boolean> {

@@ -9,20 +9,40 @@ import { ClickHouse, RowOf, sql } from './clickhouse-client';
 import { calculateTimeWindow } from './helpers';
 import { SqlValue } from './sql';
 
-const GetClientListForSchemaCoordinateModel = z
+const GetHashesForSchemaCoordinateModel = z
+  .array(
+    z.object({
+      hash: z.string(),
+      coordinate: z.string(),
+    }),
+  )
+  .transform(data => (data.length === 0 ? null : data));
+
+const GetClientNamesForHashesModel = z
   .array(
     z
       .object({
         client_name: z.string(),
+        hash: z.string(),
       })
-      .transform(data => {
-        if (data.client_name === '') {
-          return 'unknown';
-        }
-        return data.client_name;
-      }),
+      .transform(data => ({
+        hash: data.hash,
+        client_name: data.client_name === '' ? 'unknown' : data.client_name,
+      })),
   )
-  .transform(data => (data.length === 0 ? null : data));
+  .transform(data => {
+    const map = new Map<string, Array<string>>();
+    for (const record of data) {
+      let clientNames = map.get(record.hash);
+      if (clientNames == null) {
+        clientNames = [];
+        map.set(record.hash, clientNames);
+      }
+      clientNames.push(record.client_name);
+    }
+
+    return map;
+  });
 
 function formatDate(date: Date): string {
   return format(addMinutes(date, date.getTimezoneOffset()), 'yyyy-MM-dd HH:mm:ss');
@@ -679,18 +699,43 @@ export class OperationsReader {
     });
   }
 
-  /**
-   * Receive a list of clients that queried a specific schema coordinate.
-   */
-  @sentry('OperationsReader.getClientListForSchemaCoordinate')
-  async getClientListForSchemaCoordinate(args: {
+  @sentry('OperationsReader.getClientListForSchemaCoordinates')
+  async getClientListForSchemaCoordinates(args: {
     targetId: string;
     period: DateRange;
-    schemaCoordinate: string;
-  }): Promise<Array<string> | null> {
-    const query = sql`
+    schemaCoordinates: ReadonlyArray<string>;
+  }): Promise<Map<string, Array<string> | null>> {
+    // 1. Fetch all hashes for schema coordinates
+    const hashQuery = sql`
       SELECT
-        "client_name"
+        "hash",
+        "coordinate"
+      FROM
+        "coordinates_daily"
+      ${this.createFilter({
+        target: args.targetId,
+        period: args.period,
+        extra: [sql`coordinate IN ('${args.schemaCoordinates.join(`', '`)}')`],
+      })}
+    `;
+
+    const hashesForSchemaCoordinates = await this.clickHouse
+      .query({
+        queryId: 'get_hashes_for_schema_coordinates',
+        query: hashQuery,
+        timeout: 10_000,
+      })
+      .then(result => GetHashesForSchemaCoordinateModel.parse(result.data));
+
+    if (hashesForSchemaCoordinates === null) {
+      return new Map();
+    }
+
+    // 1. Fetch all client names for hashes
+    const clientNamesForHashesQuery = sql`
+      SELECT
+        "client_name",
+        "hash"
       FROM
         "clients_daily"
       ${this.createFilter({
@@ -699,31 +744,34 @@ export class OperationsReader {
         extra: [
           sql`
             "hash" IN (
-              SELECT
-                "hash"
-              FROM
-                "coordinates_daily"
-              ${this.createFilter({
-                target: args.targetId,
-                period: args.period,
-                extra: [sql`coordinate = '${args.schemaCoordinate}'`],
-              })}
-              GROUP BY
-                "hash"
+              '${hashesForSchemaCoordinates.map(record => record.hash).join(`', '`)}'
             )
           `,
         ],
       })}
       GROUP BY
-        "client_name"
+        "client_name",
+        "hash"
     `;
-    const result = await this.clickHouse.query({
-      queryId: 'get_client_list_for_schema_coordinate',
-      timeout: 10_000,
-      query,
-    });
 
-    return GetClientListForSchemaCoordinateModel.parse(result.data);
+    const clientNamesForHashes = await this.clickHouse
+      .query({
+        queryId: 'get_client_names_for_hashes',
+        query: clientNamesForHashesQuery,
+        timeout: 10_000,
+      })
+      .then(result => GetClientNamesForHashesModel.parse(result.data));
+
+    // 3. Match hashes to schema coordinates
+    const clientsBySchemaCoordinate = new Map<string, Array<string> | null>();
+    for (const record of hashesForSchemaCoordinates) {
+      clientsBySchemaCoordinate.set(
+        record.coordinate,
+        clientNamesForHashes.get(record.hash) ?? null,
+      );
+    }
+
+    return clientsBySchemaCoordinate;
   }
 
   @sentry('OperationsReader.readUniqueClientNames')
