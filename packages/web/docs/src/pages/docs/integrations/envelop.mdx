@@ -23,6 +23,7 @@ You can report schemas to Hive registry by using the `reporting` section of the 
 import { createServer } from 'node:http'
 import { createYoga } from 'graphql-yoga'
 import { schema } from './schema'
+import { useHive } from '@graphql-hive/client'
 
 const plugin = useHive({
   enabled: true, // Enable/Disable Hive Client
