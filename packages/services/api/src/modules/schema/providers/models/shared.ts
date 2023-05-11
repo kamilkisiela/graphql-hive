@@ -211,13 +211,19 @@ export type SchemaDeleteFailureReason =
 export type SchemaDeleteSuccess = {
   conclusion: (typeof SchemaDeleteConclusion)['Accept'];
   state: {
-    composable: boolean;
     changes: Array<Change> | null;
     breakingChanges: Array<Change> | null;
     compositionErrors: Array<{
       message: string;
     }> | null;
-  };
+    supergraph: string | null;
+  } & (
+    | {
+        composable: true;
+        fullSchemaSdl: string;
+      }
+    | { composable: false; fullSchemaSdl: null }
+  );
 };
 
 export type SchemaDeleteFailure = {

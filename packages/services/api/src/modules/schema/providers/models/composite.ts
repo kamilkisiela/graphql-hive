@@ -503,13 +503,41 @@ export class CompositeModel {
             breakingChanges: [],
           };
 
+    let composablePartial:
+      | {
+          composable: true;
+          fullSchemaSdl: string;
+        }
+      | {
+          composable: false;
+          fullSchemaSdl: null;
+        } = {
+      composable: false,
+      fullSchemaSdl: null,
+    };
+
+    const isComposable = compositionCheck.status === 'completed';
+    const fullSchemaSdl = compositionCheck.result?.fullSchemaSdl ?? null;
+
+    if (compositionCheck.status === 'completed' && isComposable && fullSchemaSdl == null) {
+      throw new Error(
+        'Full schema SDL is null when composition check is completed and is composable.',
+      );
+    } else if (isComposable && fullSchemaSdl) {
+      composablePartial = {
+        composable: isComposable,
+        fullSchemaSdl,
+      };
+    }
+
     return {
       conclusion: SchemaDeleteConclusion.Accept,
       state: {
-        composable: compositionCheck.status === 'completed',
+        ...composablePartial,
         changes,
         breakingChanges,
         compositionErrors: compositionCheck.reason?.errors ?? [],
+        supergraph: compositionCheck.result?.supergraph ?? null,
       },
     };
   }

@@ -1898,7 +1898,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         hasMore,
       };
     },
-    async deleteSchema({ project, target, serviceName, composable }) {
+    async deleteSchema({ project, target, serviceName, composable, actionFn }) {
       return pool.transaction(async trx => {
         // fetch the latest version
         const latestVersion = await trx.one<Pick<schema_versions, 'id' | 'base_schema'>>(
@@ -1933,6 +1933,14 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             )
           RETURNING *
         `);
+        //  --, has_persisted_schema_changes,
+        //  -- previous_schema_version_id,
+        //  -- composite_schema_sdl,
+        //  -- schema_composition_errors
+        // --, ${true},
+        // -- ${latestVersion.id},
+        // -- ${null},
+        // -- ${null}
 
         // creates a new version
         const newVersion = await trx.one<Pick<schema_versions, 'id' | 'created_at'>>(sql`
@@ -1971,6 +1979,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           VALUES
             (${newVersion.id}, ${deleteActionResult.id})
         `);
+
+        await actionFn();
 
         return {
           kind: 'composite',

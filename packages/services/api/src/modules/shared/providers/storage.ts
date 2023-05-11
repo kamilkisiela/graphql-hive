@@ -272,6 +272,7 @@ export interface Storage {
     _: {
       serviceName: string;
       composable: boolean;
+      actionFn(): Promise<void>;
     } & TargetSelector,
   ): Promise<DeletedCompositeSchema>;
 
