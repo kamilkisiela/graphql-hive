@@ -5,7 +5,7 @@ import type { Span } from '@sentry/types';
 import { atomic } from '../../../shared/helpers';
 import { HttpClient } from '../../shared/providers/http-client';
 import { Logger } from '../../shared/providers/logger';
-import { SqlStatement, toQueryParams } from './sql';
+import { sql, SqlStatement, toQueryParams } from './sql';
 import type { ClickHouseConfig } from './tokens';
 import { CLICKHOUSE_CONFIG } from './tokens';
 
@@ -149,13 +149,13 @@ export class ClickHouse {
     return response;
   }
 
-  translateWindow({ value, unit }: { value: number; unit: 'd' | 'h' | 'm' }): string {
+  translateWindow({ value, unit }: { value: number; unit: 'd' | 'h' | 'm' }) {
     const unitMap = {
       d: 'DAY',
       h: 'HOUR',
       m: 'MINUTE',
     };
 
-    return `${value} ${unitMap[unit]}`;
+    return sql.raw(`${value} ${unitMap[unit]}`);
   }
 }
