@@ -28,7 +28,7 @@ export type { AuthProvider } from './__generated__/types';
 export { HttpClient } from './modules/shared/providers/http-client';
 export { OperationsManager } from './modules/operations/providers/operations-manager';
 export { OperationsReader } from './modules/operations/providers/operations-reader';
-export { ClickHouse } from './modules/operations/providers/clickhouse-client';
+export { ClickHouse, sql } from './modules/operations/providers/clickhouse-client';
 export {
   organizationAdminScopes,
   reservedOrganizationNames,
