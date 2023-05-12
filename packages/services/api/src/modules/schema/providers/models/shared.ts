@@ -203,21 +203,23 @@ export type SchemaDeleteFailureReason =
     }
   | {
       code: (typeof DeleteFailureReasonCode)['CompositionFailure'];
-      compositionErrors: Array<{
-        message: string;
-      }>;
+      compositionErrors: Array<SchemaCompositionError>;
     };
 
 export type SchemaDeleteSuccess = {
   conclusion: (typeof SchemaDeleteConclusion)['Accept'];
   state: {
-    composable: boolean;
     changes: Array<Change> | null;
     breakingChanges: Array<Change> | null;
-    compositionErrors: Array<{
-      message: string;
-    }> | null;
-  };
+    compositionErrors: Array<SchemaCompositionError> | null;
+    supergraph: string | null;
+  } & (
+    | {
+        composable: true;
+        fullSchemaSdl: string;
+      }
+    | { composable: false; fullSchemaSdl: null }
+  );
 };
 
 export type SchemaDeleteFailure = {

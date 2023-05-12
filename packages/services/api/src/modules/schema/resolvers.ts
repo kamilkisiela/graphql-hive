@@ -158,7 +158,7 @@ export const resolvers: SchemaModule.Resolvers = {
       const [organization, project, target] = await Promise.all([
         injector.get(OrganizationManager).getOrganizationIdByToken(),
         injector.get(ProjectManager).getProjectIdByToken(),
-        injector.get(TargetManager).getTargetIdByToken(),
+        injector.get(TargetManager).getTargetFromToken(),
       ]);
 
       const token = injector.get(AuthManager).ensureApiToken();

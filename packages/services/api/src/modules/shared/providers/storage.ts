@@ -272,7 +272,19 @@ export interface Storage {
     _: {
       serviceName: string;
       composable: boolean;
-    } & TargetSelector,
+      actionFn(): Promise<void>;
+      changes: Array<Change> | null;
+    } & TargetSelector &
+      (
+        | {
+            compositeSchemaSDL: null;
+            schemaCompositionErrors: Array<SchemaCompositionError>;
+          }
+        | {
+            compositeSchemaSDL: string;
+            schemaCompositionErrors: null;
+          }
+      ),
   ): Promise<DeletedCompositeSchema>;
 
   createVersion(
