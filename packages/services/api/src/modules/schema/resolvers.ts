@@ -838,6 +838,11 @@ export const resolvers: SchemaModule.Resolvers = {
     },
     async service(source, _, { injector }) {
       const versionIds = source.result.versionIds;
+  
+      if (!versionIds) {
+        return null;
+      }
+  
       const serviceSchema = await injector.get(SchemaManager).getMatchingServiceSchemaOfVersions({
         before: versionIds.before,
         after: versionIds.current,
