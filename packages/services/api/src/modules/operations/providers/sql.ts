@@ -109,7 +109,7 @@ export const createJoinSqlFragment = (
   let placeholderIndex = greatestParameterPosition;
 
   if (token.values.length === 0) {
-    throw new Error('Value list must have at least 1 member.');
+    throw new Error('sql.join: must have at least 1 member.');
   }
 
   for (const value of token.values) {
@@ -124,7 +124,7 @@ export const createJoinSqlFragment = (
       values.push(value);
     } else {
       throw new Error(
-        'Invalid list member type. Must be a SQL token or a primitive value expression.',
+        'sql.join: Invalid list member type. Must be a SQL token or a primitive value expression.',
       );
     }
   }
@@ -171,7 +171,7 @@ const createSqlQuery = (parts: readonly string[], values: readonly ValueExpressi
       rawSql += createParamPlaceholder(parameterValues.length + 1, 'String');
       parameterValues.push(token);
     } else {
-      throw new TypeError('Unexpected value expression.');
+      throw new TypeError('sql: Unexpected value expression.');
     }
   }
 
@@ -240,5 +240,5 @@ function stringifyValue(value: Value): string {
     return `[${value.map(v => `'${v}'`).join(', ')}]`;
   }
 
-  throw new Error('Unexpected value. Expected a string or an array of strings.');
+  throw new Error('sql: Unexpected value. Expected a string or an array of strings.');
 }
