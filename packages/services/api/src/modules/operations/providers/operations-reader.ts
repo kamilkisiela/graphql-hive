@@ -45,22 +45,22 @@ function ensureNumber(value: number | string): number {
   return parseFloat(value);
 }
 
-function pickQueryByPeriod<Q extends string | SqlValue>(
+function pickQueryByPeriod(
   queryMap: {
     hourly: {
-      query: Q;
+      query: SqlValue;
       queryId: string;
       timeout: number;
       span?: Span | undefined;
     };
     daily: {
-      query: Q;
+      query: SqlValue;
       queryId: string;
       timeout: number;
       span?: Span | undefined;
     };
     regular: {
-      query: Q;
+      query: SqlValue;
       queryId: string;
       timeout: number;
       span?: Span | undefined;
