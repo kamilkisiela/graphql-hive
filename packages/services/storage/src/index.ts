@@ -53,6 +53,7 @@ import {
   projects,
   schema_log as schema_log_in_db,
   schema_policy_config,
+  schema_version_to_log,
   schema_versions,
   target_validation,
   targets,
@@ -1761,10 +1762,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
     async getSchemasOfPreviousVersion({ version, target, onlyComposable }) {
       const results = await pool.query<
-        OverrideProp<schema_log, 'action', 'PUSH'> & Pick<projects, 'type'>
+        OverrideProp<schema_log, 'action', 'PUSH'> &
+          Pick<projects, 'type'> &
+          Pick<schema_version_to_log, 'version_id'>
       >(
         sql`
-          SELECT sl.*, lower(sl.service_name) as service_name, p.type FROM public.schema_version_to_log as svl
+          SELECT sl.*, lower(sl.service_name) as service_name, p.type, svl.version_id as version_id
+          FROM public.schema_version_to_log as svl
           LEFT JOIN public.schema_log as sl ON (sl.id = svl.action_id)
           LEFT JOIN public.projects as p ON (p.id = sl.project_id)
           WHERE svl.version_id = (
@@ -1778,7 +1782,44 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `,
       );
 
-      return results.rows.map(transformSchema);
+      if (results.rowCount === 0) {
+        return {
+          schemas: [],
+        };
+      }
+
+      return {
+        schemas: results.rows.map(transformSchema),
+        id: results.rows[0].version_id,
+      };
+    },
+
+    async getMatchingServiceSchemaOfVersions(versions) {
+      const after = await pool.one<{
+        sdl: string;
+        service_name: string;
+      }>(sql`
+        SELECT sl.service_name, sl.sdl
+        FROM schema_versions as sv
+        LEFT JOIN schema_log as sl ON sv.action_id = sl.id
+        WHERE sv.id = ${versions.after} AND service_name IS NOT NULL
+      `);
+
+      // It's an initial version, so we just need to fetch a single version
+      if (!versions.before) {
+        return { serviceName: after.service_name, after: after.sdl, before: null };
+      }
+
+      const before = await pool.maybeOne<{
+        sdl: string | null;
+      }>(sql`
+        SELECT sl.sdl
+        FROM schema_version_to_log as svtl
+        LEFT JOIN schema_log as sl ON svtl.action_id = sl.id
+        WHERE svtl.version_id = ${versions.before} AND sl.service_name = ${after.service_name}
+      `);
+
+      return { serviceName: after.service_name, after: after.sdl, before: before?.sdl ?? null };
     },
 
     async getVersion({ project, target, version }) {

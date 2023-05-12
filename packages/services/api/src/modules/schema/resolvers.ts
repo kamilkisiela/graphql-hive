@@ -348,6 +348,10 @@ export const resolvers: SchemaModule.Resolvers = {
                 current: currentVersion.compositeSchemaSDL,
               },
               changes: [],
+              versionIds: {
+                before: null,
+                current: currentVersion.id,
+              },
             },
           } satisfies SchemaCompareResult;
         }
@@ -355,13 +359,15 @@ export const resolvers: SchemaModule.Resolvers = {
         const getBeforeSchemaSDL = async () => {
           const orchestrator = schemaManager.matchOrchestrator(project.type);
 
-          const schemasBefore = await injector.get(SchemaManager).getSchemasOfPreviousVersion({
-            organization: organizationId,
-            project: projectId,
-            target: targetId,
-            version: selector.version,
-            onlyComposable: organization.featureFlags.compareToPreviousComposableVersion === true,
-          });
+          const { schemas: schemasBefore } = await injector
+            .get(SchemaManager)
+            .getSchemasOfPreviousVersion({
+              organization: organizationId,
+              project: projectId,
+              target: targetId,
+              version: selector.version,
+              onlyComposable: organization.featureFlags.compareToPreviousComposableVersion === true,
+            });
 
           if (schemasBefore.length === 0) {
             return null;
@@ -394,6 +400,10 @@ export const resolvers: SchemaModule.Resolvers = {
                 current: currentVersion.compositeSchemaSDL,
               },
               changes: changes ?? [],
+              versionIds: {
+                before: previousVersion?.id ?? null,
+                current: currentVersion.id,
+              },
             },
           } satisfies SchemaCompareResult;
         }
@@ -405,7 +415,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       const orchestrator = schemaManager.matchOrchestrator(project.type);
 
-      const [schemasBefore, schemasAfter] = await Promise.all([
+      const [{ schemas: schemasBefore, id: previousVersionId }, schemasAfter] = await Promise.all([
         injector.get(SchemaManager).getSchemasOfPreviousVersion({
           organization: organizationId,
           project: projectId,
@@ -486,12 +496,15 @@ export const resolvers: SchemaModule.Resolvers = {
                 current: after.raw,
               },
               changes,
+              versionIds: {
+                before: previousVersionId ?? null,
+                current: selector.version,
+              },
             },
           };
 
           return result;
         })
-
         .catch(reason => {
           if (reason instanceof SchemaBuildError) {
             const result: SchemaCompareError = {
@@ -812,6 +825,23 @@ export const resolvers: SchemaModule.Resolvers = {
       return {
         before: before ?? '',
         after: current,
+      };
+    },
+    async service(source, _, { injector }) {
+      const versionIds = source.result.versionIds;
+      const serviceSchema = await injector.get(SchemaManager).getMatchingServiceSchemaOfVersions({
+        before: versionIds.before,
+        after: versionIds.current,
+      });
+
+      if (!serviceSchema) {
+        return null;
+      }
+
+      return {
+        name: serviceSchema.serviceName,
+        before: serviceSchema.before,
+        after: serviceSchema.after,
       };
     },
   },

@@ -248,6 +248,14 @@ export interface Storage {
   getLatestVersion(_: TargetSelector): Promise<SchemaVersion | never>;
   getMaybeLatestVersion(_: TargetSelector): Promise<SchemaVersion | null>;
 
+  getMatchingServiceSchemaOfVersions(versions: {
+    before: string | null;
+    after: string;
+  }): Promise<null | {
+    serviceName: string;
+    before: string | null;
+    after: string | null;
+  }>;
   getSchemasOfVersion(
     _: {
       version: string;
@@ -259,7 +267,13 @@ export interface Storage {
       version: string;
       onlyComposable: boolean;
     } & TargetSelector,
-  ): Promise<readonly Schema[] | never>;
+  ): Promise<
+    | {
+        schemas: readonly Schema[];
+        id?: string;
+      }
+    | never
+  >;
   getVersions(_: Paginated<TargetSelector>): Promise<
     | {
         versions: readonly SchemaVersion[];
