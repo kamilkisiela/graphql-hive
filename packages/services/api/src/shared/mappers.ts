@@ -137,7 +137,7 @@ export type SchemaCompareResult = {
     versionIds: {
       before: string | null;
       current: string;
-    };
+    } | null;
   };
 };
 

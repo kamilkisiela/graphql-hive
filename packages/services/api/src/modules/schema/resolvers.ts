@@ -312,6 +312,9 @@ export const resolvers: SchemaModule.Resolvers = {
       ]);
 
       const useLegacy = unstable_forceLegacyComparison ?? false;
+      const isCompositeModernProject =
+        project.legacyRegistryModel === false &&
+        (project.type === ProjectType.FEDERATION || project.type === ProjectType.STITCHING);
 
       // Lord forgive me for my sins
       if (useLegacy === false) {
@@ -348,10 +351,12 @@ export const resolvers: SchemaModule.Resolvers = {
                 current: currentVersion.compositeSchemaSDL,
               },
               changes: [],
-              versionIds: {
-                before: null,
-                current: currentVersion.id,
-              },
+              versionIds: isCompositeModernProject
+                ? {
+                    before: null,
+                    current: currentVersion.id,
+                  }
+                : null,
             },
           } satisfies SchemaCompareResult;
         }
@@ -400,10 +405,12 @@ export const resolvers: SchemaModule.Resolvers = {
                 current: currentVersion.compositeSchemaSDL,
               },
               changes: changes ?? [],
-              versionIds: {
-                before: previousVersion?.id ?? null,
-                current: currentVersion.id,
-              },
+              versionIds: isCompositeModernProject
+                ? {
+                    before: previousVersion?.id ?? null,
+                    current: currentVersion.id,
+                  }
+                : null,
             },
           } satisfies SchemaCompareResult;
         }
@@ -496,10 +503,12 @@ export const resolvers: SchemaModule.Resolvers = {
                 current: after.raw,
               },
               changes,
-              versionIds: {
-                before: previousVersionId ?? null,
-                current: selector.version,
-              },
+              versionIds: isCompositeModernProject
+                ? {
+                    before: previousVersionId ?? null,
+                    current: selector.version,
+                  }
+                : null,
             },
           };
 
