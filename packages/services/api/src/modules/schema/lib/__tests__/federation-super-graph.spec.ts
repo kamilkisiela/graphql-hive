@@ -186,6 +186,10 @@ const ast = parse(/* GraphQL */ `
     @join__unionMember(graph: B, member: "Panda") =
       Movie
     | Book
+
+  input UserInput @join__type(graph: PRODUCTS) @join__type(graph: PANDAS) {
+    name: String!
+  }
 `);
 
 describe('extractSuperGraphInformation', () => {
@@ -393,6 +397,14 @@ describe('extractSuperGraphInformation', () => {
             users,
           ],
           PandaOrUser => [
+            products,
+            pandas,
+          ],
+          UserInput => [
+            products,
+            pandas,
+          ],
+          UserInput.name => [
             products,
             pandas,
           ],

@@ -1043,9 +1043,26 @@ export const resolvers: SchemaModule.Resolvers = {
                 }
               : null,
           });
+        } else if (isInputObjectType(entity)) {
+          types.push({
+            entity,
+            get usage() {
+              return getStats();
+            },
+            supergraph: supergraph
+              ? {
+                  ownedByServiceNames:
+                    supergraph.schemaCoordinateServicesMappings.get(typename) ?? null,
+                  getInputFieldUsedByServices: (inputFieldName: string) =>
+                    supergraph.schemaCoordinateServicesMappings.get(
+                      `${typename}.${inputFieldName}`,
+                    ) ?? null,
+                }
+              : null,
+          });
         } else {
           types.push({
-            entity: typeMap[typename] as any,
+            entity,
             get usage() {
               return getStats();
             },
@@ -1254,8 +1271,19 @@ export const resolvers: SchemaModule.Resolvers = {
           coordinate: t.entity.name,
         },
         usage: t.usage,
+        supergraph: t.supergraph
+          ? {
+              ownedByServiceNames: t.supergraph.getInputFieldUsedByServices(f.name),
+            }
+          : null,
       })),
     usage,
+    supergraphMetadata: t =>
+      t.supergraph
+        ? {
+            ownedByServiceNames: t.supergraph.ownedByServiceNames,
+          }
+        : null,
   },
   GraphQLScalarType: {
     __isTypeOf: __isTypeOf(isScalarType),
@@ -1308,6 +1336,12 @@ export const resolvers: SchemaModule.Resolvers = {
     isDeprecated: f => typeof f.entity.deprecationReason === 'string',
     deprecationReason: f => f.entity.deprecationReason ?? null,
     usage,
+    supergraphMetadata: f =>
+      f.supergraph
+        ? {
+            ownedByServiceNames: f.supergraph.ownedByServiceNames,
+          }
+        : null,
   },
   GraphQLArgument: {
     name: a => a.entity.name,

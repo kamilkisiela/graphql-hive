@@ -551,6 +551,11 @@ export default gql`
     description: String
     fields: [GraphQLInputField!]!
     usage: SchemaCoordinateUsage!
+    """
+    Metadata specific to Apollo Federation Projects.
+    Is null if no meta information is available (e.g. this is not an apollo federation project).
+    """
+    supergraphMetadata: SupergraphMetadata
   }
 
   type GraphQLScalarType {
@@ -582,6 +587,11 @@ export default gql`
     isDeprecated: Boolean!
     deprecationReason: String
     usage: SchemaCoordinateUsage!
+    """
+    Metadata specific to Apollo Federation Projects.
+    Is null if no meta information is available (e.g. this is not an apollo federation project).
+    """
+    supergraphMetadata: SupergraphMetadata
   }
 
   type GraphQLArgument {

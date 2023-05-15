@@ -114,14 +114,54 @@ export function extractSuperGraphInformation(documentAst: DocumentNode): SuperGr
       return interfaceAndObjectHandler(node);
     },
     UnionTypeDefinition(node) {
-      const objectTypeServiceReferences = new Set(
+      const serviceReferences = new Set(
         getJoinTypeEnumServiceName({
           directives: node.directives ?? [],
           valueName: 'type',
         }),
       );
 
-      schemaCoordinateToServiceEnumValueMappings.set(node.name.value, objectTypeServiceReferences);
+      schemaCoordinateToServiceEnumValueMappings.set(node.name.value, serviceReferences);
+    },
+    InputObjectTypeDefinition(node) {
+      const serviceReferences = new Set(
+        getJoinTypeEnumServiceName({
+          directives: node.directives ?? [],
+          valueName: 'type',
+        }),
+      );
+
+      schemaCoordinateToServiceEnumValueMappings.set(node.name.value, serviceReferences);
+
+      if (!node.fields?.length) {
+        return false;
+      }
+
+      for (const fieldNode of node.fields) {
+        const schemaCoordinate = `${node.name.value}.${fieldNode.name.value}`;
+
+        const graphArg = fieldNode.directives
+          ?.find(directive => directive.name.value === 'join__field')
+          ?.arguments?.find(arg => arg.name.value === 'graph');
+
+        if (graphArg === undefined) {
+          schemaCoordinateToServiceEnumValueMappings.set(schemaCoordinate, serviceReferences);
+          continue;
+        }
+
+        const serviceEnumValue = getEnumValueArgumentValue(graphArg);
+
+        if (!serviceEnumValue) {
+          continue;
+        }
+
+        schemaCoordinateToServiceEnumValueMappings.set(
+          schemaCoordinate,
+          new Set([serviceEnumValue]),
+        );
+      }
+
+      return false;
     },
   });
 

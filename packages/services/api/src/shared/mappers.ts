@@ -79,6 +79,9 @@ export type GraphQLFieldMapper = WithSchemaCoordinatesUsage<
 export type GraphQLInputFieldMapper = WithSchemaCoordinatesUsage<
   WithGraphQLParentInfo<{
     entity: GraphQLInputField;
+    supergraph: null | {
+      ownedByServiceNames: Array<string> | null;
+    };
   }>
 >;
 export type GraphQLEnumValueMapper = WithSchemaCoordinatesUsage<
@@ -131,6 +134,10 @@ export type GraphQLEnumTypeMapper = WithSchemaCoordinatesUsage<{
 }>;
 export type GraphQLInputObjectTypeMapper = WithSchemaCoordinatesUsage<{
   entity: GraphQLInputObjectType;
+  supergraph: null | {
+    ownedByServiceNames: Array<string> | null;
+    getInputFieldUsedByServices: (inputFieldName: string) => Array<string> | null;
+  };
 }>;
 export type GraphQLScalarTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLScalarType }>;
 
