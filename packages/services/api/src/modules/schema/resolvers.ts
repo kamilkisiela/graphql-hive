@@ -815,6 +815,7 @@ export const resolvers: SchemaModule.Resolvers = {
         supergraph,
       };
     },
+    date: version => version.createdAt,
   },
   SchemaCompareError: {
     __isTypeOf(source: unknown) {
