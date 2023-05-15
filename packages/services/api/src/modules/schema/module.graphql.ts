@@ -470,6 +470,14 @@ export default gql`
     isUsed: Boolean!
   }
 
+  type SupergraphMetadata {
+    """
+    List of service names that own the field/type.
+    Resolves to null if the entity (field, type, scalar) does not belong to any service.
+    """
+    ownedByServiceNames: [String!]
+  }
+
   union GraphQLNamedType =
       GraphQLObjectType
     | GraphQLInterfaceType
@@ -484,6 +492,11 @@ export default gql`
     fields: [GraphQLField!]!
     interfaces: [String!]!
     usage: SchemaCoordinateUsage!
+    """
+    Metadata specific to Apollo Federation Projects.
+    Is null if no meta information is available (e.g. this is not an apollo federation project).
+    """
+    supergraphMetadata: SupergraphMetadata
   }
 
   type GraphQLInterfaceType {
@@ -492,6 +505,11 @@ export default gql`
     fields: [GraphQLField!]!
     interfaces: [String!]!
     usage: SchemaCoordinateUsage!
+    """
+    Metadata specific to Apollo Federation Projects.
+    Is null if no meta information is available.
+    """
+    supergraphMetadata: SupergraphMetadata
   }
 
   type GraphQLUnionType {
@@ -511,6 +529,11 @@ export default gql`
     description: String
     values: [GraphQLEnumValue!]!
     usage: SchemaCoordinateUsage!
+    """
+    Metadata specific to Apollo Federation Projects.
+    Is null if no meta information is available.
+    """
+    supergraphMetadata: SupergraphMetadata
   }
 
   type GraphQLInputObjectType {
@@ -534,6 +557,11 @@ export default gql`
     isDeprecated: Boolean!
     deprecationReason: String
     usage: SchemaCoordinateUsage!
+    """
+    Metadata specific to Apollo Federation Projects.
+    Is null if no meta information is available.
+    """
+    supergraphMetadata: SupergraphMetadata
   }
 
   type GraphQLInputField {
@@ -562,5 +590,10 @@ export default gql`
     isDeprecated: Boolean!
     deprecationReason: String
     usage: SchemaCoordinateUsage!
+    """
+    Metadata specific to Apollo Federation Projects.
+    Is null if no meta information is available.
+    """
+    supergraphMetadata: SupergraphMetadata
   }
 `;

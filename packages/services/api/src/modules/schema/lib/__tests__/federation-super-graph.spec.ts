@@ -185,205 +185,205 @@ describe('extractSuperGraphInformation', () => {
     const result = extractSuperGraphInformation(ast);
     expect(result).toMatchInlineSnapshot(`
       {
-        schemaCoordinateOwner: Map {
-          DeliveryEstimates => Set {
+        schemaCoordinateServicesMappings: Map {
+          DeliveryEstimates => [
             inventory,
-          },
-          DeliveryEstimates.estimatedDelivery => Set {
+          ],
+          DeliveryEstimates.estimatedDelivery => [
             inventory,
-          },
-          DeliveryEstimates.fastestDelivery => Set {
+          ],
+          DeliveryEstimates.fastestDelivery => [
             inventory,
-          },
-          Panda => Set {
+          ],
+          Panda => [
             pandas,
-          },
-          Panda.name => Set {
+          ],
+          Panda.name => [
             pandas,
-          },
-          Panda.favoriteFood => Set {
+          ],
+          Panda.favoriteFood => [
             pandas,
-          },
-          Product => Set {
+          ],
+          Product => [
             inventory,
             products,
             reviews,
-          },
-          Product.id => Set {
+          ],
+          Product.id => [
             inventory,
             products,
             reviews,
-          },
-          Product.dimensions => Set {
+          ],
+          Product.dimensions => [
             inventory,
-          },
-          Product.delivery => Set {
+          ],
+          Product.delivery => [
             inventory,
-          },
-          Product.sku => Set {
+          ],
+          Product.sku => [
             products,
-          },
-          Product.name => Set {
+          ],
+          Product.name => [
             products,
-          },
-          Product.package => Set {
+          ],
+          Product.package => [
             products,
-          },
-          Product.variation => Set {
+          ],
+          Product.variation => [
             products,
-          },
-          Product.createdBy => Set {
+          ],
+          Product.createdBy => [
             products,
-          },
-          Product.hidden => Set {
+          ],
+          Product.hidden => [
             products,
-          },
-          Product.reviewsScore => Set {
+          ],
+          Product.reviewsScore => [
             reviews,
-          },
-          Product.oldField => Set {
+          ],
+          Product.oldField => [
             products,
-          },
-          Product.reviewsCount => Set {
+          ],
+          Product.reviewsCount => [
             reviews,
-          },
-          Product.reviews => Set {
+          ],
+          Product.reviews => [
             reviews,
-          },
-          ProductDimension => Set {
+          ],
+          ProductDimension => [
             inventory,
             products,
-          },
-          ProductDimension.size => Set {
+          ],
+          ProductDimension.size => [
             inventory,
             products,
-          },
-          ProductDimension.weight => Set {
+          ],
+          ProductDimension.weight => [
             inventory,
             products,
-          },
-          ProductItf => Set {
-            inventory,
-            products,
-            reviews,
-          },
-          ProductItf.id => Set {
+          ],
+          ProductItf => [
             inventory,
             products,
             reviews,
-          },
-          ProductItf.dimensions => Set {
+          ],
+          ProductItf.id => [
             inventory,
-          },
-          ProductItf.delivery => Set {
+            products,
+            reviews,
+          ],
+          ProductItf.dimensions => [
             inventory,
-          },
-          ProductItf.sku => Set {
+          ],
+          ProductItf.delivery => [
+            inventory,
+          ],
+          ProductItf.sku => [
             products,
-          },
-          ProductItf.name => Set {
+          ],
+          ProductItf.name => [
             products,
-          },
-          ProductItf.package => Set {
+          ],
+          ProductItf.package => [
             products,
-          },
-          ProductItf.variation => Set {
+          ],
+          ProductItf.variation => [
             products,
-          },
-          ProductItf.createdBy => Set {
+          ],
+          ProductItf.createdBy => [
             products,
-          },
-          ProductItf.hidden => Set {
+          ],
+          ProductItf.hidden => [
             products,
-          },
-          ProductItf.oldField => Set {
+          ],
+          ProductItf.oldField => [
             products,
-          },
-          ProductItf.reviewsCount => Set {
+          ],
+          ProductItf.reviewsCount => [
             reviews,
-          },
-          ProductItf.reviewsScore => Set {
+          ],
+          ProductItf.reviewsScore => [
             reviews,
-          },
-          ProductItf.reviews => Set {
+          ],
+          ProductItf.reviews => [
             reviews,
-          },
-          ProductVariation => Set {
+          ],
+          ProductVariation => [
             products,
-          },
-          ProductVariation.id => Set {
+          ],
+          ProductVariation.id => [
             products,
-          },
-          ProductVariation.name => Set {
+          ],
+          ProductVariation.name => [
             products,
-          },
-          Query => Set {
+          ],
+          Query => [
             inventory,
             pandas,
             products,
             reviews,
             users,
-          },
-          Query.allPandas => Set {
+          ],
+          Query.allPandas => [
             pandas,
-          },
-          Query.panda => Set {
+          ],
+          Query.panda => [
             pandas,
-          },
-          Query.allProducts => Set {
+          ],
+          Query.allProducts => [
             products,
-          },
-          Query.product => Set {
+          ],
+          Query.product => [
             products,
-          },
-          Query.review => Set {
+          ],
+          Query.review => [
             reviews,
-          },
-          Review => Set {
+          ],
+          Review => [
             reviews,
-          },
-          Review.id => Set {
+          ],
+          Review.id => [
             reviews,
-          },
-          Review.body => Set {
+          ],
+          Review.body => [
             reviews,
-          },
-          ShippingClass => Set {
+          ],
+          ShippingClass => [
             inventory,
             products,
-          },
-          ShippingClass.STANDARD => Set {
+          ],
+          ShippingClass.STANDARD => [
             inventory,
             products,
-          },
-          ShippingClass.EXPRESS => Set {
+          ],
+          ShippingClass.EXPRESS => [
             inventory,
             products,
-          },
-          ShippingClass.OVERNIGHT => Set {
+          ],
+          ShippingClass.OVERNIGHT => [
             inventory,
-          },
-          SkuItf => Set {
+          ],
+          SkuItf => [
             products,
-          },
-          SkuItf.sku => Set {
+          ],
+          SkuItf.sku => [
             products,
-          },
-          User => Set {
-            products,
-            users,
-          },
-          User.email => Set {
+          ],
+          User => [
             products,
             users,
-          },
-          User.totalProductsCreated => Set {
+          ],
+          User.email => [
             products,
             users,
-          },
-          User.name => Set {
+          ],
+          User.totalProductsCreated => [
+            products,
             users,
-          },
+          ],
+          User.name => [
+            users,
+          ],
         },
       }
     `);

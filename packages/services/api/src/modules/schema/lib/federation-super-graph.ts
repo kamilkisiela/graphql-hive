@@ -9,16 +9,16 @@ import {
   visit,
 } from 'graphql';
 
-type SuperGraphInformation = {
+export type SuperGraphInformation = {
   /** Mapping of schema coordinate to the services that own it. */
-  schemaCoordinateServicesMappings: Map<string, Set<string>>;
+  schemaCoordinateServicesMappings: Map<string, Array<string>>;
 };
 
 /**
  * Extracts the super graph information from the GraphQL schema AST.
  */
 export function extractSuperGraphInformation(documentAst: DocumentNode): SuperGraphInformation {
-  const schemaCoordinateServiceMappings = new Map<string, Set<string>>();
+  const schemaCoordinateServicesMappings = new Map<string, Array<string>>();
 
   const serviceEnumValueToServiceNameMappings = new Map<string, string>();
   const schemaCoordinateToServiceEnumValueMappings = new Map<string, Set<string>>();
@@ -128,10 +128,10 @@ export function extractSuperGraphInformation(documentAst: DocumentNode): SuperGr
       continue;
     }
 
-    schemaCoordinateServiceMappings.set(schemaCoordinate, new Set(serviceNames));
+    schemaCoordinateServicesMappings.set(schemaCoordinate, Array.from(serviceNames));
   }
 
-  return { schemaCoordinateServicesMappings: schemaCoordinateServiceMappings };
+  return { schemaCoordinateServicesMappings };
 }
 
 function getJoinGraphEnumServiceName(enumValueDefinitionNode: EnumValueDefinitionNode) {

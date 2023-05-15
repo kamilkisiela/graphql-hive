@@ -17,6 +17,7 @@ import type {
   SchemaChange,
   SchemaError,
 } from '../__generated__/types';
+import { type SuperGraphInformation } from '../modules/schema/lib/federation-super-graph';
 import { SchemaCheckWarning } from '../modules/schema/providers/models/shared';
 import { SchemaBuildError } from '../modules/schema/providers/orchestrators/errors';
 import { SerializableChange } from '../modules/schema/schema-change-from-meta';
@@ -64,12 +65,15 @@ export type SchemaExplorerMapper = {
     project: string;
     target: string;
   };
-  supergraph: null | GraphQLSchema;
+  supergraph: null | SuperGraphInformation;
 };
 
 export type GraphQLFieldMapper = WithSchemaCoordinatesUsage<
   WithGraphQLParentInfo<{
     entity: GraphQLField<any, any, any>;
+    supergraph: null | {
+      ownedByServiceNames: Array<string> | null;
+    };
   }>
 >;
 export type GraphQLInputFieldMapper = WithSchemaCoordinatesUsage<
@@ -78,7 +82,12 @@ export type GraphQLInputFieldMapper = WithSchemaCoordinatesUsage<
   }>
 >;
 export type GraphQLEnumValueMapper = WithSchemaCoordinatesUsage<
-  WithGraphQLParentInfo<{ entity: GraphQLEnumValue }>
+  WithGraphQLParentInfo<{
+    entity: GraphQLEnumValue;
+    supergraph: null | {
+      ownedByServiceNames: Array<string> | null;
+    };
+  }>
 >;
 export type GraphQLArgumentMapper = WithSchemaCoordinatesUsage<
   WithGraphQLParentInfo<{ entity: GraphQLArgument }>
@@ -89,12 +98,28 @@ export type GraphQLUnionTypeMemberMapper = WithSchemaCoordinatesUsage<
   }>
 >;
 
-export type GraphQLObjectTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLObjectType }>;
+export type GraphQLObjectTypeMapper = WithSchemaCoordinatesUsage<{
+  entity: GraphQLObjectType;
+  supergraph: null | {
+    ownedByServiceNames: Array<string> | null;
+    getFieldUsedByServices: (fieldName: string) => Array<string> | null;
+  };
+}>;
 export type GraphQLInterfaceTypeMapper = WithSchemaCoordinatesUsage<{
   entity: GraphQLInterfaceType;
+  supergraph: null | {
+    ownedByServiceNames: Array<string> | null;
+    getFieldUsedByServices: (fieldName: string) => Array<string> | null;
+  };
 }>;
 export type GraphQLUnionTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLUnionType }>;
-export type GraphQLEnumTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLEnumType }>;
+export type GraphQLEnumTypeMapper = WithSchemaCoordinatesUsage<{
+  entity: GraphQLEnumType;
+  supergraph: null | {
+    ownedByServiceNames: Array<string> | null;
+    getEnumValueUsedByServices: (fieldName: string) => Array<string> | null;
+  };
+}>;
 export type GraphQLInputObjectTypeMapper = WithSchemaCoordinatesUsage<{
   entity: GraphQLInputObjectType;
 }>;

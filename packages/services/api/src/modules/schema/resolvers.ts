@@ -35,6 +35,7 @@ import { ProjectManager } from '../project/providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
+import { extractSuperGraphInformation } from './lib/federation-super-graph';
 import { Inspector, toGraphQLSchemaChange } from './providers/inspector';
 import { SchemaBuildError } from './providers/orchestrators/errors';
 import { detectUrlChanges } from './providers/registry-checks';
@@ -711,6 +712,10 @@ export const resolvers: SchemaModule.Resolvers = {
         return null;
       }
 
+      if (version.supergraphSDL) {
+        return version.supergraphSDL;
+      }
+
       const schemaManager = injector.get(SchemaManager);
       const orchestrator = schemaManager.matchOrchestrator(project.type);
       const helper = injector.get(SchemaHelper);
@@ -793,7 +798,7 @@ export const resolvers: SchemaModule.Resolvers = {
       );
 
       const supergraph = version.supergraphSDL
-        ? buildASTSchema(parse(version.supergraphSDL))
+        ? extractSuperGraphInformation(parse(version.supergraphSDL))
         : null;
 
       return {
@@ -807,7 +812,7 @@ export const resolvers: SchemaModule.Resolvers = {
           project: version.project,
           target: version.target,
         },
-        supergraph: null,
+        supergraph,
       };
     },
   },
@@ -926,8 +931,8 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   SchemaExplorer: {
-    async type({ schema, usage }, { name }, { injector }) {
-      const namedType = schema.getType(name);
+    async type(source, { name }, { injector }) {
+      const namedType = source.schema.getType(name);
 
       if (!namedType) {
         return null;
@@ -938,14 +943,15 @@ export const resolvers: SchemaModule.Resolvers = {
         entity: namedType as any,
         usage: injector.get(OperationsManager).countCoordinatesOfType({
           typename: namedType.name,
-          organization: usage.organization,
-          project: usage.project,
-          target: usage.target,
-          period: usage.period,
+          organization: source.usage.organization,
+          project: source.usage.project,
+          target: source.usage.target,
+          period: source.usage.period,
         }),
+        supergraph: source.supergraph,
       };
     },
-    async types({ schema, usage }, _, { injector }) {
+    async types({ schema, usage, supergraph }, _, { injector }) {
       const types: Array<
         | GraphQLObjectTypeMapper
         | GraphQLInterfaceTypeMapper
@@ -971,76 +977,155 @@ export const resolvers: SchemaModule.Resolvers = {
           continue;
         }
 
-        types.push({
-          entity: typeMap[typename] as any,
-          get usage() {
-            return getStats();
-          },
-        });
+        const entity = typeMap[typename];
+
+        if (isObjectType(entity)) {
+          types.push({
+            entity,
+            get usage() {
+              return getStats();
+            },
+            supergraph: supergraph
+              ? {
+                  ownedByServiceNames:
+                    supergraph.schemaCoordinateServicesMappings.get(typename) ?? null,
+                  getFieldUsedByServices: (fieldName: string) =>
+                    supergraph.schemaCoordinateServicesMappings.get(`${typename}.${fieldName}`) ??
+                    null,
+                }
+              : null,
+          });
+        } else if (isInterfaceType(entity)) {
+          types.push({
+            entity,
+            get usage() {
+              return getStats();
+            },
+            supergraph: supergraph
+              ? {
+                  ownedByServiceNames:
+                    supergraph.schemaCoordinateServicesMappings.get(typename) ?? null,
+                  getFieldUsedByServices: (fieldName: string) =>
+                    supergraph.schemaCoordinateServicesMappings.get(`${typename}.${fieldName}`) ??
+                    null,
+                }
+              : null,
+          });
+        } else if (isEnumType(entity)) {
+          types.push({
+            entity,
+            get usage() {
+              return getStats();
+            },
+            supergraph: supergraph
+              ? {
+                  ownedByServiceNames:
+                    supergraph.schemaCoordinateServicesMappings.get(typename) ?? null,
+                  getEnumValueUsedByServices: (fieldName: string) =>
+                    supergraph.schemaCoordinateServicesMappings.get(`${typename}.${fieldName}`) ??
+                    null,
+                }
+              : null,
+          });
+        } else {
+          types.push({
+            entity: typeMap[typename] as any,
+            get usage() {
+              return getStats();
+            },
+          });
+        }
       }
 
       types.sort((a, b) => a.entity.name.localeCompare(b.entity.name));
 
       return types;
     },
-    async query({ schema, usage }, _, { injector }) {
-      const queryType = schema.getQueryType();
+    async query({ schema, usage, supergraph }, _, { injector }) {
+      const entity = schema.getQueryType();
 
-      if (!queryType) {
+      if (!entity) {
         return null;
       }
 
       return {
-        entity: queryType,
+        entity,
         get usage() {
           return injector.get(OperationsManager).countCoordinatesOfType({
-            typename: queryType.name,
+            typename: entity.name,
             organization: usage.organization,
             project: usage.project,
             target: usage.target,
             period: usage.period,
           });
         },
+        supergraph: supergraph
+          ? {
+              ownedByServiceNames:
+                supergraph.schemaCoordinateServicesMappings.get(entity.name) ?? null,
+              getFieldUsedByServices: (fieldName: string) =>
+                supergraph.schemaCoordinateServicesMappings.get(`${entity.name}.${fieldName}`) ??
+                null,
+            }
+          : null,
       };
     },
-    async mutation({ schema, usage }, _, { injector }) {
-      const mutationType = schema.getMutationType();
+    async mutation({ schema, usage, supergraph }, _, { injector }) {
+      const entity = schema.getMutationType();
 
-      if (!mutationType) {
+      if (!entity) {
         return null;
       }
 
       return {
-        entity: mutationType,
+        entity,
         get usage() {
           return injector.get(OperationsManager).countCoordinatesOfType({
-            typename: mutationType.name,
+            typename: entity.name,
             organization: usage.organization,
             project: usage.project,
             target: usage.target,
             period: usage.period,
           });
         },
+        supergraph: supergraph
+          ? {
+              ownedByServiceNames:
+                supergraph.schemaCoordinateServicesMappings.get(entity.name) ?? null,
+              getFieldUsedByServices: (fieldName: string) =>
+                supergraph.schemaCoordinateServicesMappings.get(`${entity.name}.${fieldName}`) ??
+                null,
+            }
+          : null,
       };
     },
-    async subscription({ schema, usage }, _, { injector }) {
-      const subscriptionType = schema.getSubscriptionType();
+    async subscription({ schema, usage, supergraph }, _, { injector }) {
+      const entity = schema.getSubscriptionType();
 
-      if (!subscriptionType) {
+      if (!entity) {
         return null;
       }
 
       return {
-        entity: subscriptionType,
+        entity,
         get usage() {
           return injector.get(OperationsManager).countCoordinatesOfType({
-            typename: subscriptionType.name,
+            typename: entity.name,
             organization: usage.organization,
             project: usage.project,
             target: usage.target,
             period: usage.period,
           });
         },
+        supergraph: supergraph
+          ? {
+              ownedByServiceNames:
+                supergraph.schemaCoordinateServicesMappings.get(entity.name) ?? null,
+              getFieldUsedByServices: (fieldName: string) =>
+                supergraph.schemaCoordinateServicesMappings.get(`${entity.name}.${fieldName}`) ??
+                null,
+            }
+          : null,
       };
     },
   },
@@ -1055,9 +1140,18 @@ export const resolvers: SchemaModule.Resolvers = {
           coordinate: t.entity.name,
         },
         usage: t.usage,
+        supergraph: t.supergraph
+          ? { ownedByServiceNames: t.supergraph.getFieldUsedByServices(f.name) }
+          : null,
       })),
     interfaces: t => t.entity.getInterfaces().map(i => i.name),
     usage,
+    supergraphMetadata: t =>
+      t.supergraph
+        ? {
+            ownedByServiceNames: t.supergraph.ownedByServiceNames,
+          }
+        : null,
   },
   GraphQLInterfaceType: {
     __isTypeOf: __isTypeOf(isInterfaceType),
@@ -1070,9 +1164,18 @@ export const resolvers: SchemaModule.Resolvers = {
           coordinate: t.entity.name,
         },
         usage: t.usage,
+        supergraph: t.supergraph
+          ? { ownedByServiceNames: t.supergraph.getFieldUsedByServices(f.name) }
+          : null,
       })),
     interfaces: t => t.entity.getInterfaces().map(i => i.name),
     usage,
+    supergraphMetadata: t =>
+      t.supergraph
+        ? {
+            ownedByServiceNames: t.supergraph.ownedByServiceNames,
+          }
+        : null,
   },
   GraphQLUnionType: {
     __isTypeOf: __isTypeOf(isUnionType),
@@ -1101,8 +1204,17 @@ export const resolvers: SchemaModule.Resolvers = {
           coordinate: t.entity.name,
         },
         usage: t.usage,
+        supergraph: t.supergraph
+          ? { ownedByServiceNames: t.supergraph.getEnumValueUsedByServices(v.name) }
+          : null,
       })),
     usage,
+    supergraphMetadata: t =>
+      t.supergraph
+        ? {
+            ownedByServiceNames: t.supergraph.ownedByServiceNames,
+          }
+        : null,
   },
   GraphQLInputObjectType: {
     __isTypeOf: __isTypeOf(isInputObjectType),
@@ -1130,6 +1242,8 @@ export const resolvers: SchemaModule.Resolvers = {
     isDeprecated: v => typeof v.entity.deprecationReason === 'string',
     deprecationReason: v => v.entity.deprecationReason ?? null,
     usage,
+    supergraphMetadata: v =>
+      v.supergraph ? { ownedByServiceNames: v.supergraph.ownedByServiceNames } : null,
   },
   GraphQLUnionTypeMember: {
     name: m => m.entity.name,
@@ -1150,6 +1264,12 @@ export const resolvers: SchemaModule.Resolvers = {
         usage: f.usage,
       })),
     usage,
+    supergraphMetadata: f =>
+      f.supergraph
+        ? {
+            ownedByServiceNames: f.supergraph.ownedByServiceNames,
+          }
+        : null,
   },
   GraphQLInputField: {
     name: f => f.entity.name,
