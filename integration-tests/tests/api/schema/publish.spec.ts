@@ -3002,7 +3002,6 @@ test('Composition Network Failure (Federation 2)', async () => {
     await enableExternalSchemaComposition(
       {
         endpoint: `http://${dockerAddress}/no_compose`,
-        // eslint-disable-next-line no-process-env
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
         project: project.cleanId,
         organization: organization.cleanId,

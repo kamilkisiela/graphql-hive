@@ -1597,6 +1597,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             sv.has_persisted_schema_changes,
             sv.previous_schema_version_id,
             sv.composite_schema_sdl,
+            sv.supergraph_sdl,
             sv.schema_composition_errors
           FROM public.schema_versions as sv
           WHERE sv.target_id = ${target} AND sv.is_composable IS TRUE
@@ -1623,6 +1624,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             sv.has_persisted_schema_changes,
             sv.previous_schema_version_id,
             sv.composite_schema_sdl,
+            sv.supergraph_sdl,
             sv.schema_composition_errors
           FROM public.schema_versions as sv
           WHERE sv.target_id = ${target} AND sv.is_composable IS TRUE
@@ -1645,6 +1647,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             sv.has_persisted_schema_changes,
             sv.previous_schema_version_id,
             sv.composite_schema_sdl,
+            sv.supergraph_sdl,
             sv.schema_composition_errors
           FROM public.schema_versions as sv
           LEFT JOIN public.targets as t ON (t.id = sv.target_id)
@@ -1669,6 +1672,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             sv.has_persisted_schema_changes,
             sv.previous_schema_version_id,
             sv.composite_schema_sdl,
+            sv.supergraph_sdl,
             sv.schema_composition_errors
           FROM public.schema_versions as sv
           LEFT JOIN public.targets as t ON (t.id = sv.target_id)
@@ -1823,23 +1827,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     async getVersion({ project, target, version }) {
-      const result = await pool.one<
-        Slonik<
-          Pick<
-            schema_versions,
-            | 'id'
-            | 'is_composable'
-            | 'created_at'
-            | 'base_schema'
-            | 'action_id'
-            | 'has_persisted_schema_changes'
-            | 'previous_schema_version_id'
-            | 'composite_schema_sdl'
-            | 'schema_composition_errors'
-          > &
-            Pick<schema_log, 'author' | 'service_name'>
-        >
-      >(sql`
+      const result = await pool.one(sql`
         SELECT 
           sv.id,
           sv.is_composable,
@@ -1849,9 +1837,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           sv.has_persisted_schema_changes,
           sv.previous_schema_version_id,
           sv.composite_schema_sdl,
-          sv.schema_composition_errors,
-          sl.author,
-          lower(sl.service_name) as "service_name"
+          sv.supergraph_sdl,
+          sv.schema_composition_errors
         FROM public.schema_versions as sv
         LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
         LEFT JOIN public.targets as t ON (t.id = sv.target_id)
@@ -1862,21 +1849,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         LIMIT 1
       `);
 
-      return {
-        id: result.id,
-        valid: result.is_composable,
-        date: result.created_at.toString(),
-        commit: result.action_id,
-        baseSchema: result.base_schema,
-        author: result.author,
-        service: result.service_name,
-        hasPersistedSchemaChanges: result.has_persisted_schema_changes ?? false,
-        previousSchemaVersionId: result.previous_schema_version_id,
-        compositeSchemaSDL: result.composite_schema_sdl ?? null,
-        schemaCompositionErrors: Array.isArray(result.schema_composition_errors)
-          ? result.schema_composition_errors.map(item => SchemaCompositionErrorModel.parse(item))
-          : null,
-      };
+      return SchemaVersionModel.parse(result);
     },
 
     async getVersions({ project, target, after, limit }) {
@@ -1890,6 +1863,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         sv.has_persisted_schema_changes,
         sv.previous_schema_version_id,
         sv.composite_schema_sdl,
+        sv.supergraph_sdl,
         sv.schema_composition_errors,
         sl.author,
         lower(sl.service_name) as "service_name"
@@ -1904,37 +1878,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       ORDER BY sv.created_at DESC
       LIMIT ${limit + 1}
     `;
-      const result = await pool.query<
-        Pick<
-          schema_versions,
-          | 'id'
-          | 'is_composable'
-          | 'created_at'
-          | 'base_schema'
-          | 'action_id'
-          | 'has_persisted_schema_changes'
-          | 'previous_schema_version_id'
-          | 'composite_schema_sdl'
-          | 'schema_composition_errors'
-        > &
-          Pick<schema_log, 'author' | 'service_name'>
-      >(query);
+      const result = await pool.query(query);
 
       const hasMore = result.rows.length > limit;
 
-      const versions = result.rows.slice(0, limit).map(version => ({
-        id: version.id,
-        valid: version.is_composable,
-        date: version.created_at.toString(),
-        commit: version.action_id,
-        baseSchema: version.base_schema,
-        hasPersistedSchemaChanges: version.has_persisted_schema_changes ?? false,
-        previousSchemaVersionId: version.previous_schema_version_id,
-        compositeSchemaSDL: version.composite_schema_sdl ?? null,
-        schemaCompositionErrors: Array.isArray(version.schema_composition_errors)
-          ? version.schema_composition_errors.map(item => SchemaCompositionErrorModel.parse(item))
-          : null,
-      }));
+      const versions = result.rows
+        .slice(0, limit)
+        .map(version => SchemaVersionModel.parse(version));
 
       return {
         versions,
@@ -1985,6 +1935,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           baseSchema: latestVersion.base_schema,
           previousSchemaVersion: latestVersion.id,
           compositeSchemaSDL: args.compositeSchemaSDL,
+          supergraphSDL: args.supergraphSDL,
           schemaCompositionErrors: args.schemaCompositionErrors,
         });
 
@@ -2065,6 +2016,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           baseSchema: input.base_schema,
           previousSchemaVersion: input.previousSchemaVersion,
           compositeSchemaSDL: input.compositeSchemaSDL,
+          supergraphSDL: input.supergraphSDL,
           schemaCompositionErrors: input.schemaCompositionErrors,
         });
 
@@ -2092,22 +2044,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         };
       });
 
-      return {
-        id: output.version.id,
-        date: output.version.created_at as any,
-        url,
-        valid: input.valid,
-        commit: output.log.id,
-        baseSchema: input.base_schema,
-        hasPersistedSchemaChanges: output.version.has_persisted_schema_changes ?? false,
-        previousSchemaVersionId: output.version.previous_schema_version_id ?? null,
-        compositeSchemaSDL: output.version.composite_schema_sdl ?? null,
-        schemaCompositionErrors: Array.isArray(output.version.schema_composition_errors)
-          ? output.version.schema_composition_errors.map(item =>
-              SchemaCompositionErrorModel.parse(item),
-            )
-          : null,
-      };
+      return output.version;
     },
 
     async getSchemaChangesForVersion(args) {
@@ -2135,9 +2072,12 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async updateVersionStatus({ version, valid }) {
       return SchemaVersionModel.parse(
         await pool.maybeOne<unknown>(sql`
-          UPDATE public.schema_versions
-          SET is_composable = ${valid}
-          WHERE id = ${version}
+          UPDATE
+            public.schema_versions
+          SET
+            is_composable = ${valid}
+          WHERE
+            id = ${version}
           RETURNING
             id,
             is_composable,
@@ -2147,6 +2087,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             has_persisted_schema_changes,
             previous_schema_version_id,
             composite_schema_sdl,
+            supergraph_sdl,
             schema_composition_errors
         `),
       );
@@ -3198,6 +3139,7 @@ const SchemaVersionModel = zod
     has_persisted_schema_changes: zod.nullable(zod.boolean()),
     previous_schema_version_id: zod.nullable(zod.string()),
     composite_schema_sdl: zod.nullable(zod.string()),
+    supergraph_sdl: zod.nullable(zod.string()),
     schema_composition_errors: zod.nullable(zod.array(SchemaCompositionErrorModel)),
   })
   .transform(value => ({
@@ -3209,10 +3151,10 @@ const SchemaVersionModel = zod
     baseSchema: value.base_schema,
     commit: value.action_id,
     hasPersistedSchemaChanges: value.has_persisted_schema_changes ?? false,
-    previousSchemaVersionId: value.previous_schema_version_id ?? null,
-    compositeSchemaSDL: value.composite_schema_sdl ?? null,
-    schemaCompositionErrors: value.schema_composition_errors ?? null,
-    date: value.created_at,
+    previousSchemaVersionId: value.previous_schema_version_id,
+    compositeSchemaSDL: value.composite_schema_sdl,
+    supergraphSDL: value.supergraph_sdl,
+    schemaCompositionErrors: value.schema_composition_errors,
   }));
 
 /**
@@ -3265,22 +3207,11 @@ async function insertSchemaVersion(
     baseSchema: string | null;
     previousSchemaVersion: string | null;
     compositeSchemaSDL: string | null;
+    supergraphSDL: string | null;
     schemaCompositionErrors: Array<SchemaCompositionError> | null;
   },
 ) {
-  return await trx.one<
-    Slonik<
-      Pick<
-        schema_versions,
-        | 'id'
-        | 'created_at'
-        | 'has_persisted_schema_changes'
-        | 'previous_schema_version_id'
-        | 'composite_schema_sdl'
-        | 'schema_composition_errors'
-      >
-    >
-  >(sql`
+  const query = sql`
     INSERT INTO public.schema_versions
       (
         is_composable,
@@ -3290,6 +3221,7 @@ async function insertSchemaVersion(
         has_persisted_schema_changes,
         previous_schema_version_id,
         composite_schema_sdl,
+        supergraph_sdl,
         schema_composition_errors
       )
     VALUES
@@ -3301,6 +3233,7 @@ async function insertSchemaVersion(
         ${true},
         ${args.previousSchemaVersion},
         ${args.compositeSchemaSDL},
+        ${args.supergraphSDL},
         ${
           args.schemaCompositionErrors
             ? sql`${JSON.stringify(args.schemaCompositionErrors)}::jsonb`
@@ -3308,6 +3241,17 @@ async function insertSchemaVersion(
         }
       )
     RETURNING
-      *
-  `);
+      id,
+      is_composable,
+      to_json(created_at) as "created_at",
+      action_id,
+      base_schema,
+      has_persisted_schema_changes,
+      previous_schema_version_id,
+      composite_schema_sdl,
+      supergraph_sdl,
+      schema_composition_errors
+  `;
+
+  return await trx.one(query).then(SchemaVersionModel.parse);
 }

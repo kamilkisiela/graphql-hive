@@ -563,10 +563,12 @@ export class SchemaPublisher {
               ...(deleteResult.state.fullSchemaSdl
                 ? {
                     compositeSchemaSDL: deleteResult.state.fullSchemaSdl,
+                    supergraphSDL: deleteResult.state.supergraph,
                     schemaCompositionErrors: null,
                   }
                 : {
                     compositeSchemaSDL: null,
+                    supergraphSDL: null,
                     schemaCompositionErrors: deleteResult.state.compositionErrors ?? [],
                   }),
               actionFn: async () => {
@@ -904,10 +906,12 @@ export class SchemaPublisher {
       ...(fullSchemaSdl
         ? {
             compositeSchemaSDL: fullSchemaSdl,
+            supergraphSDL: supergraph,
             schemaCompositionErrors: null,
           }
         : {
             compositeSchemaSDL: null,
+            supergraphSDL: null,
             schemaCompositionErrors: assertNonNull(
               publishResult.state.compositionErrors,
               "Can't be null",

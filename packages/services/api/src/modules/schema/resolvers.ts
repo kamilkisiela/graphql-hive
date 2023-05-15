@@ -10,6 +10,7 @@ import {
   isObjectType,
   isScalarType,
   isUnionType,
+  parse,
 } from 'graphql';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
@@ -791,6 +792,10 @@ export const resolvers: SchemaModule.Resolvers = {
         ),
       );
 
+      const supergraph = version.supergraphSDL
+        ? buildASTSchema(parse(version.supergraphSDL))
+        : null;
+
       return {
         schema: buildASTSchema(schema.document, {
           assumeValidSDL: true,
@@ -802,6 +807,7 @@ export const resolvers: SchemaModule.Resolvers = {
           project: version.project,
           target: version.target,
         },
+        supergraph: null,
       };
     },
   },

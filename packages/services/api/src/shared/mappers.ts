@@ -64,6 +64,7 @@ export type SchemaExplorerMapper = {
     project: string;
     target: string;
   };
+  supergraph: null | GraphQLSchema;
 };
 
 export type GraphQLFieldMapper = WithSchemaCoordinatesUsage<

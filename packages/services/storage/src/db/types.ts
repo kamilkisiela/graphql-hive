@@ -189,6 +189,7 @@ export interface schema_versions {
   is_composable: boolean;
   previous_schema_version_id: string | null;
   schema_composition_errors: any | null;
+  supergraph_sdl: string | null;
   target_id: string;
 }
 
