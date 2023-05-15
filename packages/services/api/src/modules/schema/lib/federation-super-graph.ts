@@ -113,6 +113,16 @@ export function extractSuperGraphInformation(documentAst: DocumentNode): SuperGr
     InterfaceTypeDefinition(node) {
       return interfaceAndObjectHandler(node);
     },
+    UnionTypeDefinition(node) {
+      const objectTypeServiceReferences = new Set(
+        getJoinTypeEnumServiceName({
+          directives: node.directives ?? [],
+          valueName: 'type',
+        }),
+      );
+
+      schemaCoordinateToServiceEnumValueMappings.set(node.name.value, objectTypeServiceReferences);
+    },
   });
 
   for (const [schemaCoordinate, serviceEnumValues] of schemaCoordinateToServiceEnumValueMappings) {

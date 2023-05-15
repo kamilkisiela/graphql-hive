@@ -95,6 +95,9 @@ export type GraphQLArgumentMapper = WithSchemaCoordinatesUsage<
 export type GraphQLUnionTypeMemberMapper = WithSchemaCoordinatesUsage<
   WithGraphQLParentInfo<{
     entity: GraphQLObjectType;
+    supergraph: null | {
+      ownedByServiceNames: Array<string> | null;
+    };
   }>
 >;
 
@@ -112,7 +115,13 @@ export type GraphQLInterfaceTypeMapper = WithSchemaCoordinatesUsage<{
     getFieldUsedByServices: (fieldName: string) => Array<string> | null;
   };
 }>;
-export type GraphQLUnionTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLUnionType }>;
+export type GraphQLUnionTypeMapper = WithSchemaCoordinatesUsage<{
+  entity: GraphQLUnionType;
+  supergraph: null | {
+    ownedByServiceNames: Array<string> | null;
+    getUnionMemberUserByServices: (unionMemberName: string) => Array<string> | null;
+  };
+}>;
 export type GraphQLEnumTypeMapper = WithSchemaCoordinatesUsage<{
   entity: GraphQLEnumType;
   supergraph: null | {

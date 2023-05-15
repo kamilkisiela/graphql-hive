@@ -517,11 +517,21 @@ export default gql`
     description: String
     members: [GraphQLUnionTypeMember!]!
     usage: SchemaCoordinateUsage!
+    """
+    Metadata specific to Apollo Federation Projects.
+    Is null if no meta information is available (e.g. this is not an apollo federation project).
+    """
+    supergraphMetadata: SupergraphMetadata
   }
 
   type GraphQLUnionTypeMember {
     name: String!
     usage: SchemaCoordinateUsage!
+    """
+    Metadata specific to Apollo Federation Projects.
+    Is null if no meta information is available (e.g. this is not an apollo federation project).
+    """
+    supergraphMetadata: SupergraphMetadata
   }
 
   type GraphQLEnumType {

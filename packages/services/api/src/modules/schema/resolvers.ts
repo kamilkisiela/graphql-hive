@@ -1028,6 +1028,21 @@ export const resolvers: SchemaModule.Resolvers = {
                 }
               : null,
           });
+        } else if (isUnionType(entity)) {
+          types.push({
+            entity,
+            get usage() {
+              return getStats();
+            },
+            supergraph: supergraph
+              ? {
+                  ownedByServiceNames:
+                    supergraph.schemaCoordinateServicesMappings.get(typename) ?? null,
+                  getUnionMemberUserByServices: (memberName: string) =>
+                    supergraph.schemaCoordinateServicesMappings.get(memberName) ?? null,
+                }
+              : null,
+          });
         } else {
           types.push({
             entity: typeMap[typename] as any,
@@ -1190,9 +1205,20 @@ export const resolvers: SchemaModule.Resolvers = {
           parent: {
             coordinate: t.entity.name,
           },
+          supergraph: t.supergraph
+            ? {
+                ownedByServiceNames: t.supergraph.getUnionMemberUserByServices(i.name),
+              }
+            : null,
         };
       }),
     usage,
+    supergraphMetadata: t =>
+      t.supergraph
+        ? {
+            ownedByServiceNames: t.supergraph.ownedByServiceNames,
+          }
+        : null,
   },
   GraphQLEnumType: {
     __isTypeOf: __isTypeOf(isEnumType),
@@ -1249,6 +1275,8 @@ export const resolvers: SchemaModule.Resolvers = {
   GraphQLUnionTypeMember: {
     name: m => m.entity.name,
     usage,
+    supergraphMetadata: m =>
+      m.supergraph ? { ownedByServiceNames: m.supergraph.ownedByServiceNames } : null,
   },
   GraphQLField: {
     name: f => f.entity.name,
