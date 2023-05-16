@@ -749,8 +749,8 @@ importers:
         specifier: 4.14.0
         version: 4.14.0
       nodemailer:
-        specifier: 6.9.1
-        version: 6.9.1
+        specifier: 6.9.2
+        version: 6.9.2
       p-timeout:
         specifier: 6.1.1
         version: 6.1.1
@@ -24412,6 +24412,11 @@ packages:
 
   /nodemailer@6.9.1:
     resolution: {integrity: sha512-qHw7dOiU5UKNnQpXktdgQ1d3OFgRAekuvbJLcdG5dnEo/GtcTHRYM7+UfJARdOFU9WUQO8OiIamgWPmiSFHYAA==}
+    engines: {node: '>=6.0.0'}
+    dev: false
+
+  /nodemailer@6.9.2:
+    resolution: {integrity: sha512-4+TYaa/e1nIxQfyw/WzNPYTEZ5OvHIDEnmjs4LPmIfccPQN+2CYKmGHjWixn/chzD3bmUTu5FMfpltizMxqzdg==}
     engines: {node: '>=6.0.0'}
     dev: false
 
