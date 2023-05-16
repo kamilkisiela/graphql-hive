@@ -933,23 +933,99 @@ export const resolvers: SchemaModule.Resolvers = {
   },
   SchemaExplorer: {
     async type(source, { name }, { injector }) {
-      const namedType = source.schema.getType(name);
+      const entity = source.schema.getType(name);
 
-      if (!namedType) {
+      if (!entity) {
         return null;
       }
 
+      const { supergraph } = source;
+      const usage = injector.get(OperationsManager).countCoordinatesOfType({
+        typename: entity.name,
+        organization: source.usage.organization,
+        project: source.usage.project,
+        target: source.usage.target,
+        period: source.usage.period,
+      });
+
+      if (isObjectType(entity)) {
+        return {
+          entity,
+          usage,
+          supergraph: supergraph
+            ? {
+                ownedByServiceNames:
+                  supergraph.schemaCoordinateServicesMappings.get(entity.name) ?? null,
+                getFieldOwnedByServices: (fieldName: string) =>
+                  supergraph.schemaCoordinateServicesMappings.get(`${entity.name}.${fieldName}`) ??
+                  null,
+              }
+            : null,
+        };
+      }
+      if (isInterfaceType(entity)) {
+        return {
+          entity,
+          usage,
+          supergraph: supergraph
+            ? {
+                ownedByServiceNames:
+                  supergraph.schemaCoordinateServicesMappings.get(entity.name) ?? null,
+                getFieldOwnedByServices: (fieldName: string) =>
+                  supergraph.schemaCoordinateServicesMappings.get(`${entity.name}.${fieldName}`) ??
+                  null,
+              }
+            : null,
+        };
+      }
+      if (isEnumType(entity)) {
+        return {
+          entity,
+          usage,
+          supergraph: supergraph
+            ? {
+                ownedByServiceNames:
+                  supergraph.schemaCoordinateServicesMappings.get(entity.name) ?? null,
+                getEnumValueOwnedByServices: (fieldName: string) =>
+                  supergraph.schemaCoordinateServicesMappings.get(`${entity.name}.${fieldName}`) ??
+                  null,
+              }
+            : null,
+        };
+      }
+      if (isUnionType(entity)) {
+        return {
+          entity,
+          usage,
+          supergraph: supergraph
+            ? {
+                ownedByServiceNames:
+                  supergraph.schemaCoordinateServicesMappings.get(entity.name) ?? null,
+                getUnionMemberOwnedByServices: (memberName: string) =>
+                  supergraph.schemaCoordinateServicesMappings.get(memberName) ?? null,
+              }
+            : null,
+        };
+      }
+      if (isInputObjectType(entity)) {
+        return {
+          entity,
+          usage,
+          supergraph: supergraph
+            ? {
+                ownedByServiceNames:
+                  supergraph.schemaCoordinateServicesMappings.get(entity.name) ?? null,
+                getInputFieldOwnedByServices: (inputFieldName: string) =>
+                  supergraph.schemaCoordinateServicesMappings.get(
+                    `${entity.name}.${inputFieldName}`,
+                  ) ?? null,
+              }
+            : null,
+        };
+      }
       return {
-        // TODO: fix any
-        entity: namedType as any,
-        usage: injector.get(OperationsManager).countCoordinatesOfType({
-          typename: namedType.name,
-          organization: source.usage.organization,
-          project: source.usage.project,
-          target: source.usage.target,
-          period: source.usage.period,
-        }),
-        supergraph: source.supergraph,
+        entity,
+        usage,
       };
     },
     async types({ schema, usage, supergraph }, _, { injector }) {
@@ -990,7 +1066,7 @@ export const resolvers: SchemaModule.Resolvers = {
               ? {
                   ownedByServiceNames:
                     supergraph.schemaCoordinateServicesMappings.get(typename) ?? null,
-                  getFieldUsedByServices: (fieldName: string) =>
+                  getFieldOwnedByServices: (fieldName: string) =>
                     supergraph.schemaCoordinateServicesMappings.get(`${typename}.${fieldName}`) ??
                     null,
                 }
@@ -1006,7 +1082,7 @@ export const resolvers: SchemaModule.Resolvers = {
               ? {
                   ownedByServiceNames:
                     supergraph.schemaCoordinateServicesMappings.get(typename) ?? null,
-                  getFieldUsedByServices: (fieldName: string) =>
+                  getFieldOwnedByServices: (fieldName: string) =>
                     supergraph.schemaCoordinateServicesMappings.get(`${typename}.${fieldName}`) ??
                     null,
                 }
@@ -1022,7 +1098,7 @@ export const resolvers: SchemaModule.Resolvers = {
               ? {
                   ownedByServiceNames:
                     supergraph.schemaCoordinateServicesMappings.get(typename) ?? null,
-                  getEnumValueUsedByServices: (fieldName: string) =>
+                  getEnumValueOwnedByServices: (fieldName: string) =>
                     supergraph.schemaCoordinateServicesMappings.get(`${typename}.${fieldName}`) ??
                     null,
                 }
@@ -1038,7 +1114,7 @@ export const resolvers: SchemaModule.Resolvers = {
               ? {
                   ownedByServiceNames:
                     supergraph.schemaCoordinateServicesMappings.get(typename) ?? null,
-                  getUnionMemberUserByServices: (memberName: string) =>
+                  getUnionMemberOwnedByServices: (memberName: string) =>
                     supergraph.schemaCoordinateServicesMappings.get(memberName) ?? null,
                 }
               : null,
@@ -1053,7 +1129,7 @@ export const resolvers: SchemaModule.Resolvers = {
               ? {
                   ownedByServiceNames:
                     supergraph.schemaCoordinateServicesMappings.get(typename) ?? null,
-                  getInputFieldUsedByServices: (inputFieldName: string) =>
+                  getInputFieldOwnedByServices: (inputFieldName: string) =>
                     supergraph.schemaCoordinateServicesMappings.get(
                       `${typename}.${inputFieldName}`,
                     ) ?? null,
@@ -1096,7 +1172,7 @@ export const resolvers: SchemaModule.Resolvers = {
           ? {
               ownedByServiceNames:
                 supergraph.schemaCoordinateServicesMappings.get(entity.name) ?? null,
-              getFieldUsedByServices: (fieldName: string) =>
+              getFieldOwnedByServices: (fieldName: string) =>
                 supergraph.schemaCoordinateServicesMappings.get(`${entity.name}.${fieldName}`) ??
                 null,
             }
@@ -1125,7 +1201,7 @@ export const resolvers: SchemaModule.Resolvers = {
           ? {
               ownedByServiceNames:
                 supergraph.schemaCoordinateServicesMappings.get(entity.name) ?? null,
-              getFieldUsedByServices: (fieldName: string) =>
+              getFieldOwnedByServices: (fieldName: string) =>
                 supergraph.schemaCoordinateServicesMappings.get(`${entity.name}.${fieldName}`) ??
                 null,
             }
@@ -1154,7 +1230,7 @@ export const resolvers: SchemaModule.Resolvers = {
           ? {
               ownedByServiceNames:
                 supergraph.schemaCoordinateServicesMappings.get(entity.name) ?? null,
-              getFieldUsedByServices: (fieldName: string) =>
+              getFieldOwnedByServices: (fieldName: string) =>
                 supergraph.schemaCoordinateServicesMappings.get(`${entity.name}.${fieldName}`) ??
                 null,
             }
@@ -1174,7 +1250,7 @@ export const resolvers: SchemaModule.Resolvers = {
         },
         usage: t.usage,
         supergraph: t.supergraph
-          ? { ownedByServiceNames: t.supergraph.getFieldUsedByServices(f.name) }
+          ? { ownedByServiceNames: t.supergraph.getFieldOwnedByServices(f.name) }
           : null,
       })),
     interfaces: t => t.entity.getInterfaces().map(i => i.name),
@@ -1198,7 +1274,7 @@ export const resolvers: SchemaModule.Resolvers = {
         },
         usage: t.usage,
         supergraph: t.supergraph
-          ? { ownedByServiceNames: t.supergraph.getFieldUsedByServices(f.name) }
+          ? { ownedByServiceNames: t.supergraph.getFieldOwnedByServices(f.name) }
           : null,
       })),
     interfaces: t => t.entity.getInterfaces().map(i => i.name),
@@ -1224,7 +1300,7 @@ export const resolvers: SchemaModule.Resolvers = {
           },
           supergraph: t.supergraph
             ? {
-                ownedByServiceNames: t.supergraph.getUnionMemberUserByServices(i.name),
+                ownedByServiceNames: t.supergraph.getUnionMemberOwnedByServices(i.name),
               }
             : null,
         };
@@ -1249,7 +1325,7 @@ export const resolvers: SchemaModule.Resolvers = {
         },
         usage: t.usage,
         supergraph: t.supergraph
-          ? { ownedByServiceNames: t.supergraph.getEnumValueUsedByServices(v.name) }
+          ? { ownedByServiceNames: t.supergraph.getEnumValueOwnedByServices(v.name) }
           : null,
       })),
     usage,
@@ -1273,7 +1349,7 @@ export const resolvers: SchemaModule.Resolvers = {
         usage: t.usage,
         supergraph: t.supergraph
           ? {
-              ownedByServiceNames: t.supergraph.getInputFieldUsedByServices(f.name),
+              ownedByServiceNames: t.supergraph.getInputFieldOwnedByServices(f.name),
             }
           : null,
       })),

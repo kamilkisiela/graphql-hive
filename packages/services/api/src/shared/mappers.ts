@@ -108,35 +108,35 @@ export type GraphQLObjectTypeMapper = WithSchemaCoordinatesUsage<{
   entity: GraphQLObjectType;
   supergraph: null | {
     ownedByServiceNames: Array<string> | null;
-    getFieldUsedByServices: (fieldName: string) => Array<string> | null;
+    getFieldOwnedByServices: (fieldName: string) => Array<string> | null;
   };
 }>;
 export type GraphQLInterfaceTypeMapper = WithSchemaCoordinatesUsage<{
   entity: GraphQLInterfaceType;
   supergraph: null | {
     ownedByServiceNames: Array<string> | null;
-    getFieldUsedByServices: (fieldName: string) => Array<string> | null;
+    getFieldOwnedByServices: (fieldName: string) => Array<string> | null;
   };
 }>;
 export type GraphQLUnionTypeMapper = WithSchemaCoordinatesUsage<{
   entity: GraphQLUnionType;
   supergraph: null | {
     ownedByServiceNames: Array<string> | null;
-    getUnionMemberUserByServices: (unionMemberName: string) => Array<string> | null;
+    getUnionMemberOwnedByServices: (unionMemberName: string) => Array<string> | null;
   };
 }>;
 export type GraphQLEnumTypeMapper = WithSchemaCoordinatesUsage<{
   entity: GraphQLEnumType;
   supergraph: null | {
     ownedByServiceNames: Array<string> | null;
-    getEnumValueUsedByServices: (fieldName: string) => Array<string> | null;
+    getEnumValueOwnedByServices: (fieldName: string) => Array<string> | null;
   };
 }>;
 export type GraphQLInputObjectTypeMapper = WithSchemaCoordinatesUsage<{
   entity: GraphQLInputObjectType;
   supergraph: null | {
     ownedByServiceNames: Array<string> | null;
-    getInputFieldUsedByServices: (inputFieldName: string) => Array<string> | null;
+    getInputFieldOwnedByServices: (inputFieldName: string) => Array<string> | null;
   };
 }>;
 export type GraphQLScalarTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLScalarType }>;
