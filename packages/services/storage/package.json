@@ -28,7 +28,7 @@
   "devDependencies": {
     "@sentry/types": "7.51.2",
     "@tgriesser/schemats": "9.0.1",
-    "@types/node": "18.16.10",
+    "@types/node": "18.16.12",
     "@types/pg": "8.6.6",
     "pg-promise": "11.4.3",
     "tslib": "2.5.0",
