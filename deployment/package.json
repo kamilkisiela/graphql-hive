@@ -13,7 +13,7 @@
     "@pulumi/pulumi": "3.67.1",
     "@pulumi/random": "4.13.0",
     "js-yaml": "4.1.0",
-    "pg-connection-string": "2.5.0"
+    "pg-connection-string": "2.6.0"
   },
   "devDependencies": {
     "@types/js-yaml": "4.0.5",
