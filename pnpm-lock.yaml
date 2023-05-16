@@ -115,8 +115,8 @@ importers:
         specifier: file:./rules
         version: file:rules
       eslint-plugin-tailwindcss:
-        specifier: 3.11.0
-        version: 3.11.0
+        specifier: 3.12.0
+        version: 3.12.0
       fs-extra:
         specifier: 11.1.1
         version: 11.1.1
@@ -19086,11 +19086,11 @@ packages:
       eslint: 8.40.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
     dev: true
 
-  /eslint-plugin-tailwindcss@3.11.0:
-    resolution: {integrity: sha512-RaraOG4D6VXutKnoNvFQ4+frTWGJDKtezy1yCrGFS7Um1to/npDNdh2GL19IRoGB/eanbtwhxFXy+xyEw0grAg==}
+  /eslint-plugin-tailwindcss@3.12.0:
+    resolution: {integrity: sha512-DMfg8NcSV04V1v3iBgJGEhmRuapW36XZXyRV8WHdNFGEXGUkBwM9R8MujguKXeQKBG6VhjiX4t98rhzXdIlUFw==}
     engines: {node: '>=12.13.0'}
     peerDependencies:
-      tailwindcss: ^3.2.2
+      tailwindcss: ^3.3.2
     dependencies:
       fast-glob: 3.2.12
       postcss: 8.4.23
