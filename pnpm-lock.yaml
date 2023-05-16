@@ -627,8 +627,8 @@ importers:
         specifier: 2.4.2
         version: 2.4.2
       '@types/ioredis-mock':
-        specifier: 8.2.1
-        version: 8.2.1
+        specifier: 8.2.2
+        version: 8.2.2
       '@types/lodash':
         specifier: 4.14.194
         version: 4.14.194
@@ -640,7 +640,7 @@ importers:
         version: 3.0.2
       ioredis-mock:
         specifier: 8.7.0
-        version: 8.7.0(@types/ioredis-mock@8.2.1)(ioredis@5.3.2)
+        version: 8.7.0(@types/ioredis-mock@8.2.2)(ioredis@5.3.2)
       tslib:
         specifier: 2.5.0
         version: 2.5.0
@@ -961,14 +961,14 @@ importers:
         specifier: 1.4.5
         version: 1.4.5
       '@types/ioredis-mock':
-        specifier: 8.2.1
-        version: 8.2.1
+        specifier: 8.2.2
+        version: 8.2.2
       fastify:
         specifier: 3.29.5
         version: 3.29.5
       ioredis-mock:
         specifier: 8.7.0
-        version: 8.7.0(@types/ioredis-mock@8.2.1)(ioredis@5.3.2)
+        version: 8.7.0(@types/ioredis-mock@8.2.2)(ioredis@5.3.2)
       pino-pretty:
         specifier: 10.0.0
         version: 10.0.0
@@ -14314,8 +14314,8 @@ packages:
   /@types/http-cache-semantics@4.0.1:
     resolution: {integrity: sha512-SZs7ekbP8CN0txVG2xVRH6EgKmEm31BOxA07vkFaETzZz1xh+cbt8BcI0slpymvwhx5dlFnQG2rTlPVQn+iRPQ==}
 
-  /@types/ioredis-mock@8.2.1:
-    resolution: {integrity: sha512-VZsxDuzie7RGiPn/eMQ6ODZd6Q2gb0fTkD2gyPKVkojRw4D1hPisQ87aD+cCHqGylKeU4x01VwQ4QA82Fx4fRg==}
+  /@types/ioredis-mock@8.2.2:
+    resolution: {integrity: sha512-bnbPHOjxy4TUDjRh61MMoK2QvDNZqrMDXJYrEDZP/HPFvBubR24CQ0DBi5lgWhLxG4lvVsXPRDXtZ03+JgonoQ==}
     dependencies:
       ioredis: 5.3.2
     transitivePeerDependencies:
@@ -21462,7 +21462,7 @@ packages:
     dependencies:
       loose-envify: 1.4.0
 
-  /ioredis-mock@8.7.0(@types/ioredis-mock@8.2.1)(ioredis@5.3.2):
+  /ioredis-mock@8.7.0(@types/ioredis-mock@8.2.2)(ioredis@5.3.2):
     resolution: {integrity: sha512-BJcSjkR3sIMKbH93fpFzwlWi/jl1kd5I3vLvGQxnJ/W/6bD2ksrxnyQN186ljAp3Foz4p1ivViDE3rZeKEAluA==}
     engines: {node: '>=12.22'}
     peerDependencies:
@@ -21471,7 +21471,7 @@ packages:
     dependencies:
       '@ioredis/as-callback': 3.0.0
       '@ioredis/commands': 1.2.0
-      '@types/ioredis-mock': 8.2.1
+      '@types/ioredis-mock': 8.2.2
       fengari: 0.1.4
       fengari-interop: 0.1.3(fengari@0.1.4)
       ioredis: 5.3.2
