@@ -7,7 +7,7 @@
   "peerDependencies": {
     "@sentry/node": "^7.0.0",
     "@sentry/utils": "^7.0.0",
-    "@trpc/server": "10.25.1"
+    "@trpc/server": "10.26.0"
   },
   "dependencies": {
     "@whatwg-node/fetch": "0.8.8",
