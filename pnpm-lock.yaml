@@ -193,8 +193,8 @@ importers:
         specifier: 4.1.0
         version: 4.1.0
       pg-connection-string:
-        specifier: 2.5.0
-        version: 2.5.0
+        specifier: 2.6.0
+        version: 2.6.0
     devDependencies:
       '@types/js-yaml':
         specifier: 4.0.5
@@ -25227,8 +25227,8 @@ packages:
       is-reference: 3.0.0
     dev: false
 
-  /pg-connection-string@2.5.0:
-    resolution: {integrity: sha512-r5o/V/ORTA6TmUnyWZR9nCj1klXCO2CEKNRlVuJptZe85QuhFayC7WeMic7ndayT5IRIR0S0xFxFi2ousartlQ==}
+  /pg-connection-string@2.6.0:
+    resolution: {integrity: sha512-x14ibktcwlHKoHxx9X3uTVW9zIGR41ZB6QNhHb21OPNdCCO3NaRnpJuwKIQSR4u+Yqjx4HCvy7Hh7VSy1U4dGg==}
 
   /pg-copy-streams-binary@2.2.0:
     resolution: {integrity: sha512-jPCWgTR8004wz5XOI2sc09+IMwE7YMeINYCabwPMCPtlgj2ay81VLCClMkj/u+xOeisRcN8vCrIZ4FrqlaTyBQ==}
@@ -25338,7 +25338,7 @@ packages:
     dependencies:
       buffer-writer: 2.0.0
       packet-reader: 1.0.0
-      pg-connection-string: 2.5.0
+      pg-connection-string: 2.6.0
       pg-pool: 3.6.0(pg@8.10.0)
       pg-protocol: 1.6.0
       pg-types: 2.2.0
@@ -25356,7 +25356,7 @@ packages:
     dependencies:
       buffer-writer: 2.0.0
       packet-reader: 1.0.0
-      pg-connection-string: 2.5.0
+      pg-connection-string: 2.6.0
       pg-pool: 3.5.2(pg@8.9.0)
       pg-protocol: 1.6.0
       pg-types: 2.2.0
