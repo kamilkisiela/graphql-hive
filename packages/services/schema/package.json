@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@apollo/federation": "0.38.1",
-    "@graphql-tools/stitch": "8.7.48",
+    "@graphql-tools/stitch": "8.7.50",
     "@graphql-tools/stitching-directives": "2.3.34",
     "@sentry/node": "7.51.2",
     "@trpc/server": "10.25.1",
