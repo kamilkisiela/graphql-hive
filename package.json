@@ -73,7 +73,7 @@
     "eslint": "8.40.0",
     "eslint-plugin-cypress": "2.13.3",
     "eslint-plugin-hive": "file:./rules",
-    "eslint-plugin-tailwindcss": "3.11.0",
+    "eslint-plugin-tailwindcss": "3.12.0",
     "fs-extra": "11.1.1",
     "graphql": "16.6.0",
     "husky": "8.0.3",
