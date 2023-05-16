@@ -1,5 +1,10 @@
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { GraphQLTypeCard, GraphQLTypeCardListItem, SchemaExplorerUsageStats } from './common';
+import {
+  GraphQLTypeCard,
+  GraphQLTypeCardListItem,
+  SchemaExplorerUsageStats,
+  SupergraphMetadataTooltip,
+} from './common';
 
 export const GraphQLEnumTypeComponent_TypeFragment = graphql(`
   fragment GraphQLEnumTypeComponent_TypeFragment on GraphQLEnumType {
@@ -16,6 +21,12 @@ export const GraphQLEnumTypeComponent_TypeFragment = graphql(`
       usage {
         ...SchemaExplorerUsageStats_UsageFragment
       }
+      supergraphMetadata {
+        ...GraphQLTypeCard_SupergraphMetadataFragment
+      }
+    }
+    supergraphMetadata {
+      ...GraphQLTypeCard_SupergraphMetadataFragment
     }
   }
 `);
@@ -26,12 +37,20 @@ export function GraphQLEnumTypeComponent(props: {
 }) {
   const ttype = useFragment(GraphQLEnumTypeComponent_TypeFragment, props.type);
   return (
-    <GraphQLTypeCard name={ttype.name} kind="enum" description={ttype.description}>
+    <GraphQLTypeCard
+      name={ttype.name}
+      kind="enum"
+      description={ttype.description}
+      supergraphMetadata={ttype.supergraphMetadata}
+    >
       <div className="flex flex-col">
         {ttype.values.map((value, i) => (
           <GraphQLTypeCardListItem index={i}>
             <div>{value.name}</div>
             <SchemaExplorerUsageStats totalRequests={props.totalRequests} usage={value.usage} />
+            {value.supergraphMetadata ? (
+              <SupergraphMetadataTooltip supergraphMetadata={value.supergraphMetadata} />
+            ) : null}
           </GraphQLTypeCardListItem>
         ))}
       </div>
