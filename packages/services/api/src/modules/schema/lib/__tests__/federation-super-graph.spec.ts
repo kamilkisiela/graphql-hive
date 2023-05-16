@@ -1,7 +1,7 @@
 import { parse } from 'graphql';
 import { extractSuperGraphInformation } from '../federation-super-graph.js';
 
-const ast = parse(/* GraphQL */ `
+const federation2SDL = parse(/* GraphQL */ `
   schema
     @link(url: "https://specs.apollo.dev/link/v1.0")
     @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION)
@@ -192,23 +192,62 @@ const ast = parse(/* GraphQL */ `
   }
 `);
 
+const federation1SDL = parse(/* GraphQL */ `
+  schema
+    @core(feature: "https://specs.apollo.dev/core/v0.2")
+    @core(feature: "https://specs.apollo.dev/join/v0.1", for: EXECUTION) {
+    query: Query
+  }
+
+  directive @core(as: String, feature: String!, for: core__Purpose) repeatable on SCHEMA
+
+  directive @join__field(
+    graph: join__Graph
+    provides: join__FieldSet
+    requires: join__FieldSet
+  ) on FIELD_DEFINITION
+
+  directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+  directive @join__owner(graph: join__Graph!) on INTERFACE | OBJECT
+
+  directive @join__type(graph: join__Graph!, key: join__FieldSet) repeatable on INTERFACE | OBJECT
+
+  type NestedQuery {
+    test: String
+  }
+
+  type Query {
+    field(arg: String): String @join__field(graph: FOO)
+    nested: NestedQuery! @join__field(graph: FOO)
+  }
+
+  enum core__Purpose {
+    EXECUTION
+    SECURITY
+  }
+
+  scalar join__FieldSet
+
+  enum join__Graph {
+    FOO @join__graph(name: "foo", url: "https://foo.com")
+  }
+`);
+
 describe('extractSuperGraphInformation', () => {
-  test('extracts definitions', () => {
-    const result = extractSuperGraphInformation(ast);
+  test('extracts definitions (Federation 2)', () => {
+    const result = extractSuperGraphInformation(federation2SDL);
     expect(result).toMatchInlineSnapshot(`
       {
         schemaCoordinateServicesMappings: Map {
-          DeliveryEstimates => [
-            inventory,
-          ],
           DeliveryEstimates.estimatedDelivery => [
             inventory,
           ],
           DeliveryEstimates.fastestDelivery => [
             inventory,
           ],
-          Panda => [
-            pandas,
+          DeliveryEstimates => [
+            inventory,
           ],
           Panda.name => [
             pandas,
@@ -216,10 +255,8 @@ describe('extractSuperGraphInformation', () => {
           Panda.favoriteFood => [
             pandas,
           ],
-          Product => [
-            inventory,
-            products,
-            reviews,
+          Panda => [
+            pandas,
           ],
           Product.id => [
             inventory,
@@ -262,9 +299,10 @@ describe('extractSuperGraphInformation', () => {
           Product.reviews => [
             reviews,
           ],
-          ProductDimension => [
+          Product => [
             inventory,
             products,
+            reviews,
           ],
           ProductDimension.size => [
             inventory,
@@ -274,10 +312,9 @@ describe('extractSuperGraphInformation', () => {
             inventory,
             products,
           ],
-          ProductItf => [
+          ProductDimension => [
             inventory,
             products,
-            reviews,
           ],
           ProductItf.id => [
             inventory,
@@ -320,8 +357,10 @@ describe('extractSuperGraphInformation', () => {
           ProductItf.reviews => [
             reviews,
           ],
-          ProductVariation => [
+          ProductItf => [
+            inventory,
             products,
+            reviews,
           ],
           ProductVariation.id => [
             products,
@@ -329,12 +368,8 @@ describe('extractSuperGraphInformation', () => {
           ProductVariation.name => [
             products,
           ],
-          Query => [
-            inventory,
-            pandas,
+          ProductVariation => [
             products,
-            reviews,
-            users,
           ],
           Query.allPandas => [
             pandas,
@@ -351,13 +386,20 @@ describe('extractSuperGraphInformation', () => {
           Query.review => [
             reviews,
           ],
-          Review => [
+          Query => [
+            inventory,
+            pandas,
+            products,
             reviews,
+            users,
           ],
           Review.id => [
             reviews,
           ],
           Review.body => [
+            reviews,
+          ],
+          Review => [
             reviews,
           ],
           ShippingClass => [
@@ -375,15 +417,11 @@ describe('extractSuperGraphInformation', () => {
           ShippingClass.OVERNIGHT => [
             inventory,
           ],
-          SkuItf => [
-            products,
-          ],
           SkuItf.sku => [
             products,
           ],
-          User => [
+          SkuItf => [
             products,
-            users,
           ],
           User.email => [
             products,
@@ -394,6 +432,10 @@ describe('extractSuperGraphInformation', () => {
             users,
           ],
           User.name => [
+            users,
+          ],
+          User => [
+            products,
             users,
           ],
           PandaOrUser => [
@@ -407,6 +449,31 @@ describe('extractSuperGraphInformation', () => {
           UserInput.name => [
             products,
             pandas,
+          ],
+        },
+      }
+    `);
+  });
+
+  test('extracts definitions (Federation 1)', () => {
+    const result = extractSuperGraphInformation(federation1SDL);
+    expect(result).toMatchInlineSnapshot(`
+      {
+        schemaCoordinateServicesMappings: Map {
+          Query.field => [
+            foo,
+          ],
+          Query.nested => [
+            foo,
+          ],
+          Query => [
+            foo,
+          ],
+          NestedQuery => [
+            foo,
+          ],
+          NestedQuery.test => [
+            foo,
           ],
         },
       }

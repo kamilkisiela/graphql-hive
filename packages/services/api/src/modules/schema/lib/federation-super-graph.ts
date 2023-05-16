@@ -5,7 +5,9 @@ import {
   type EnumValueDefinitionNode,
   type FieldDefinitionNode,
   Kind,
+  NamedTypeNode,
   type NameNode,
+  TypeNode,
   visit,
 } from 'graphql';
 
@@ -23,6 +25,11 @@ export function extractSuperGraphInformation(documentAst: DocumentNode): SuperGr
   const serviceEnumValueToServiceNameMappings = new Map<string, string>();
   const schemaCoordinateToServiceEnumValueMappings = new Map<string, Set<string>>();
 
+  // START -- Federation 1.0 support - this can be removed once we ship Federation 2.0 by default.
+  const potentialTypeServiceOwners = new Map<string, string>();
+  const typeFieldMappings = new Map<string, Set<string>>();
+  // END -- Federation 1.0 support
+
   function interfaceAndObjectHandler(node: {
     readonly fields?: ReadonlyArray<FieldDefinitionNode> | undefined;
     readonly directives?: ReadonlyArray<ConstDirectiveNode> | undefined;
@@ -35,11 +42,13 @@ export function extractSuperGraphInformation(documentAst: DocumentNode): SuperGr
       }),
     );
 
-    schemaCoordinateToServiceEnumValueMappings.set(node.name.value, objectTypeServiceReferences);
-
     if (node.fields === undefined) {
-      return;
+      return false;
     }
+
+    // START -- Federation 1.0 support - this can be removed once we ship Federation 2.0 by default.
+    const typeFields = new Set<string>();
+    // END -- Federation 1.0 support
 
     for (const fieldNode of node.fields) {
       const schemaCoordinate = `${node.name.value}.${fieldNode.name.value}`;
@@ -53,6 +62,11 @@ export function extractSuperGraphInformation(documentAst: DocumentNode): SuperGr
           schemaCoordinate,
           objectTypeServiceReferences,
         );
+
+        // START -- Federation 1.0 support - this can be removed once we ship Federation 2.0 by default.
+        typeFields.add(fieldNode.name.value);
+        // END -- Federation 1.0 support
+
         continue;
       }
 
@@ -63,7 +77,22 @@ export function extractSuperGraphInformation(documentAst: DocumentNode): SuperGr
       }
 
       schemaCoordinateToServiceEnumValueMappings.set(schemaCoordinate, new Set([serviceEnumValue]));
+
+      // START -- Federation 1.0 support - this can be removed once we ship Federation 2.0 by default.
+      objectTypeServiceReferences.add(serviceEnumValue);
+
+      const fieldTypeName = unwrapTypeNode(fieldNode.type).name.value;
+      potentialTypeServiceOwners.set(fieldTypeName, serviceEnumValue);
+      // END -- Federation 1.0 support
     }
+
+    schemaCoordinateToServiceEnumValueMappings.set(node.name.value, objectTypeServiceReferences);
+
+    // START -- Federation 1.0 support - this can be removed once we ship Federation 2.0 by default.
+    if (typeFields.size) {
+      typeFieldMappings.set(node.name.value, typeFields);
+    }
+    // END -- Federation 1.0 support
 
     return false;
   }
@@ -181,6 +210,31 @@ export function extractSuperGraphInformation(documentAst: DocumentNode): SuperGr
     schemaCoordinateServicesMappings.set(schemaCoordinate, Array.from(serviceNames));
   }
 
+  // START -- Federation 1.0 support - this can be removed once we ship Federation 2.0 by default.
+  for (const [typeName, serviceEnumValue] of potentialTypeServiceOwners) {
+    if (schemaCoordinateServicesMappings.has(typeName)) {
+      continue;
+    }
+
+    const fields = typeFieldMappings.get(typeName);
+
+    if (fields === undefined) {
+      continue;
+    }
+
+    const serviceName = serviceEnumValueToServiceNameMappings.get(serviceEnumValue);
+    if (serviceName === undefined) {
+      continue;
+    }
+
+    schemaCoordinateServicesMappings.set(typeName, [serviceName]);
+
+    for (const fieldName of fields) {
+      schemaCoordinateServicesMappings.set(`${typeName}.${fieldName}`, [serviceName]);
+    }
+  }
+  // END -- Federation 1.0 support
+
   return { schemaCoordinateServicesMappings };
 }
 
@@ -239,4 +293,16 @@ function getStringValueArgumentValue(arg: ConstArgumentNode): string | null {
   }
 
   return arg.value.value;
+}
+
+function unwrapTypeNode(node: TypeNode): NamedTypeNode {
+  let innerNode = node;
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    if (innerNode.kind === Kind.NAMED_TYPE) {
+      return innerNode;
+    }
+    innerNode = innerNode.type;
+  }
 }
