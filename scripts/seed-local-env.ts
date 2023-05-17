@@ -1,91 +1,433 @@
 import { buildSchema, parse } from 'graphql';
-import { createHive } from '../packages/libraries/client/dist/cjs/index.js';
+import { createHive } from '@graphql-hive/client';
+import { fetch } from '@whatwg-node/fetch';
 
-const hiveInstance = createHive({
-  token: process.env.TOKEN,
-  agent: 'Hive Seed Script',
-  debug: true,
-  enabled: true,
-  reporting: {
-    enabled: true,
-    endpoint: process.env.STAGING
-      ? 'https://app.staging.graphql-hive.com/registry'
-      : process.env.DEV
-      ? 'https://app.dev.graphql-hive.com/registry'
-      : 'http://localhost:3001/graphql',
-    author: 'Hive Seed Script',
-    commit: '1',
+const isFederation = process.env.FEDERATION === '1';
+
+const reportingEndpoint = process.env.STAGING
+  ? 'https://app.staging.graphql-hive.com/registry'
+  : process.env.DEV
+  ? 'https://app.dev.graphql-hive.com/registry'
+  : 'http://localhost:3001/graphql';
+
+const createInstance = (
+  service: null | {
+    name: string;
+    url: string;
   },
-  usage: {
+) => {
+  return createHive({
+    token: process.env.TOKEN!,
+    agent: {
+      name: 'Hive Seed Script',
+    },
+    debug: true,
     enabled: true,
-    clientInfo: 'Fake Hive Client',
-    endpoint: process.env.STAGING
-      ? 'https://app.staging.graphql-hive.com/usage'
-      : process.env.DEV
-      ? 'https://app.dev.graphql-hive.com/usage'
-      : 'http://localhost:4001',
-    max: 10,
-    sampleRate: 1,
-  },
-});
+    reporting: {
+      endpoint: reportingEndpoint,
+      author: 'Hive Seed Script',
+      commit: '1',
+      serviceName: service?.name,
+      serviceUrl: service?.url,
+    },
+    usage: {
+      clientInfo: () => ({
+        name: 'Fake Hive Client',
+        version: '1.1.1',
+      }),
+      endpoint: process.env.STAGING
+        ? 'https://app.staging.graphql-hive.com/usage'
+        : process.env.DEV
+        ? 'https://app.dev.graphql-hive.com/usage'
+        : 'http://localhost:4001',
+      max: 10,
+      sampleRate: 1,
+    },
+  });
+};
 
-await hiveInstance.info();
+async function single() {
+  const hiveInstance = createInstance(null);
 
-const schema = buildSchema(/* GraphQL */ `
-  type Query {
-    field(arg: String): String
-    nested: NestedQuery!
-  }
+  await hiveInstance.info();
 
-  type NestedQuery {
-    test: String
-  }
-`);
-
-const query1 = parse(/* GraphQL */ `
-  query test {
-    field
-    withArg: field(arg: "test")
-    nested {
-      test
+  const schema = buildSchema(/* GraphQL */ `
+    type Query {
+      field(arg: String): String
+      nested: NestedQuery!
     }
-  }
-`);
 
-const query2 = parse(/* GraphQL */ `
-  query testAnother {
-    field
-  }
-`);
+    type NestedQuery {
+      test: String
+    }
+  `);
 
-hiveInstance.reportSchema({ schema });
+  const query1 = parse(/* GraphQL */ `
+    query test {
+      field
+      withArg: field(arg: "test")
+      nested {
+        test
+      }
+    }
+  `);
 
-const operationsPerBatch = process.env.OPERATIONS ? parseInt(process.env.OPERATIONS) : 1;
+  const query2 = parse(/* GraphQL */ `
+    query testAnother {
+      field
+    }
+  `);
 
-setInterval(
-  () => {
-    for (let i = 0; i < operationsPerBatch; i++) {
-      const randNumber = Math.random() * 100;
-      console.log('Reporting usage query...');
+  hiveInstance.reportSchema({ schema });
 
-      const done = hiveInstance.collectUsage({
-        document: randNumber > 50 ? query1 : query2,
-        schema,
-        variableValues: {},
-      });
+  const operationsPerBatch = process.env.OPERATIONS ? parseInt(process.env.OPERATIONS) : 1;
 
-      done(
-        randNumber > 90
-          ? {
-              data: {},
-              errors: undefined,
+  setInterval(
+    () => {
+      for (let i = 0; i < operationsPerBatch; i++) {
+        const randNumber = Math.random() * 100;
+        console.log('Reporting usage query...');
+
+        const done = hiveInstance.collectUsage({
+          document: randNumber > 50 ? query1 : query2,
+          schema,
+          variableValues: {},
+        });
+
+        done(
+          randNumber > 90
+            ? {
+                errors: undefined,
+              }
+            : {
+                errors: [{ message: 'oops' }],
+              },
+        );
+      }
+    },
+    process.env.INTERVAL ? parseInt(process.env.INTERVAL) : 1000,
+  );
+}
+
+const publishMutationDocument =
+  /* GraphQL */
+  `
+    mutation schemaPublish($input: SchemaPublishInput!) {
+      schemaPublish(input: $input) {
+        __typename
+        ... on SchemaPublishSuccess {
+          initial
+          valid
+          message
+          linkToWebsite
+          changes {
+            nodes {
+              message
+              criticality
             }
-          : {
-              data: undefined,
-              errors: [{ message: 'oops' }],
-            },
-      );
+            total
+          }
+        }
+        ... on SchemaPublishError {
+          valid
+          linkToWebsite
+          changes {
+            nodes {
+              message
+              criticality
+            }
+            total
+          }
+          errors {
+            nodes {
+              message
+            }
+            total
+          }
+        }
+      }
     }
-  },
-  process.env.INTERVAL ? parseInt(process.env.INTERVAL) : 1000,
-);
+  `;
+
+async function federation() {
+  const instance = createInstance(null);
+  const schemaInventory = /* GraphQL */ `
+    extend schema
+      @link(
+        url: "https://specs.apollo.dev/federation/v2.1"
+        import: ["@key", "@shareable", "@external", "@requires"]
+      )
+
+    type Product implements ProductItf @key(fields: "id") {
+      id: ID!
+      dimensions: ProductDimension @external
+      delivery(zip: String): DeliveryEstimates @requires(fields: "dimensions { size weight }")
+    }
+
+    type ProductDimension @shareable {
+      size: String
+      weight: Float
+    }
+
+    type DeliveryEstimates {
+      estimatedDelivery: String
+      fastestDelivery: String
+    }
+
+    interface ProductItf {
+      id: ID!
+      dimensions: ProductDimension
+      delivery(zip: String): DeliveryEstimates
+    }
+
+    enum ShippingClass {
+      STANDARD
+      EXPRESS
+      OVERNIGHT
+    }
+  `;
+
+  const schemaPandas = /* GraphQL */ `
+    directive @tag(name: String!) repeatable on FIELD_DEFINITION
+
+    type Query {
+      allPandas: [Panda]
+      panda(name: ID!): Panda
+    }
+
+    type Panda {
+      name: ID!
+      favoriteFood: String @tag(name: "nom-nom-nom")
+    }
+  `;
+
+  const schemaProducts = /* GraphQL */ `
+    extend schema
+      @link(
+        url: "https://specs.apollo.dev/federation/v2.1"
+        import: ["@key", "@shareable", "@tag", "@inaccessible", "@composeDirective"]
+      )
+      @link(
+        url: "https://myspecs.dev/myDirective/v1.0"
+        import: ["@myDirective", { name: "@anotherDirective", as: "@hello" }]
+      )
+      @composeDirective(name: "@myDirective")
+      @composeDirective(name: "@hello")
+
+    directive @myDirective(a: String!) on FIELD_DEFINITION
+    directive @hello on FIELD_DEFINITION
+
+    type Query {
+      allProducts: [ProductItf]
+      product(id: ID!): ProductItf
+    }
+
+    interface ProductItf implements SkuItf {
+      id: ID!
+      sku: String
+      name: String
+      package: String
+      variation: ProductVariation
+      dimensions: ProductDimension
+      createdBy: User
+      hidden: String @inaccessible
+      oldField: String @deprecated(reason: "refactored out")
+    }
+
+    interface SkuItf {
+      sku: String
+    }
+
+    type Product implements ProductItf & SkuItf
+      @key(fields: "id")
+      @key(fields: "sku package")
+      @key(fields: "sku variation { id }") {
+      id: ID! @tag(name: "hi-from-products")
+      sku: String
+      name: String @hello
+      package: String
+      variation: ProductVariation
+      dimensions: ProductDimension
+      createdBy: User
+      hidden: String
+      reviewsScore: Float!
+      oldField: String
+    }
+    enum ShippingClass {
+      STANDARD
+      EXPRESS
+    }
+    type ProductVariation {
+      id: ID!
+      name: String
+    }
+    type ProductDimension @shareable {
+      size: String
+      weight: Float
+    }
+    type User @key(fields: "email") {
+      email: ID!
+      totalProductsCreated: Int @shareable
+    }
+  `;
+
+  const schemaReviews = /* GraphQL */ `
+    schema
+      @link(
+        url: "https://specs.apollo.dev/federation/v2.0"
+        import: ["@key", "@override", "@shareable"]
+      ) {
+      query: Query
+    }
+
+    type Product implements ProductItf @key(fields: "id") {
+      id: ID!
+      reviewsCount: Int!
+      reviewsScore: Float! @shareable @override(from: "products")
+      reviews: [Review!]!
+    }
+
+    interface ProductItf {
+      id: ID!
+      reviewsCount: Int!
+      reviewsScore: Float!
+      reviews: [Review!]!
+    }
+
+    type Query {
+      review(id: Int!): Review
+    }
+
+    type Review {
+      id: Int!
+      body: String!
+    }
+  `;
+
+  const schemaUsers = /* GraphQL */ `
+    directive @tag(name: String!) repeatable on FIELD_DEFINITION | OBJECT
+
+    type User @key(fields: "email") {
+      email: ID! @tag(name: "test-from-users")
+      name: String
+      totalProductsCreated: Int
+    }
+  `;
+
+  let res = await fetch(reportingEndpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.TOKEN}`,
+    },
+    body: JSON.stringify({
+      query: publishMutationDocument,
+      variables: {
+        input: {
+          author: 'MoneyBoy',
+          commit: '1977',
+          sdl: schemaInventory,
+          service: 'Inventory',
+          url: 'https://inventory.localhost/graphql',
+        },
+      },
+    }),
+  }).then(res => res.json());
+  console.log(JSON.stringify(res, null, 2));
+
+  res = await fetch(reportingEndpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.TOKEN}`,
+    },
+    body: JSON.stringify({
+      query: publishMutationDocument,
+      variables: {
+        input: {
+          author: 'MoneyBoy',
+          commit: '1977',
+          sdl: schemaPandas,
+          service: 'Panda',
+          url: 'https://panda.localhost/graphql',
+        },
+      },
+    }),
+  }).then(res => res.json());
+
+  console.log(JSON.stringify(res, null, 2));
+
+  res = await fetch(reportingEndpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.TOKEN}`,
+    },
+    body: JSON.stringify({
+      query: publishMutationDocument,
+      variables: {
+        input: {
+          author: 'MoneyBoy',
+          commit: '1977',
+          sdl: schemaProducts,
+          service: 'Products',
+          url: 'https://products.localhost/graphql',
+        },
+      },
+    }),
+  }).then(res => res.json());
+
+  console.log(JSON.stringify(res, null, 2));
+
+  res = await fetch(reportingEndpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.TOKEN}`,
+    },
+    body: JSON.stringify({
+      query: publishMutationDocument,
+      variables: {
+        input: {
+          author: 'MoneyBoy',
+          commit: '1977',
+          sdl: schemaReviews,
+          service: 'Reviews',
+          url: 'https://reviews.localhost/graphql',
+        },
+      },
+    }),
+  }).then(res => res.json());
+
+  console.log(JSON.stringify(res, null, 2));
+
+  res = await fetch(reportingEndpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.TOKEN}`,
+    },
+    body: JSON.stringify({
+      query: publishMutationDocument,
+      variables: {
+        input: {
+          author: 'MoneyBoy',
+          commit: '1977',
+          sdl: schemaUsers,
+          service: 'Users',
+          url: 'https://users.localhost/graphql',
+        },
+      },
+    }),
+  }).then(res => res.json());
+
+  console.log(JSON.stringify(res, null, 2));
+
+  await instance.info();
+}
+
+if (isFederation === false) {
+  await single();
+} else {
+  await federation();
+}

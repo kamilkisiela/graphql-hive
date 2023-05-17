@@ -1,0 +1,7 @@
+{
+  "name": "@hive/scripts",
+  "type": "module",
+  "devDependencies": {
+    "@graphql-hive/client": "*"
+  }
+}

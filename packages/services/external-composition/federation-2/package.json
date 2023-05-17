@@ -8,7 +8,7 @@
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/index.ts"
   },
   "dependencies": {
-    "@apollo/composition": "^2.2.2",
+    "@apollo/composition": "^2.4.5",
     "@whatwg-node/fetch": "^0.9.0",
     "@whatwg-node/server": "^0.7.0",
     "graphql": "^16.6.0",
