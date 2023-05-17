@@ -43,14 +43,14 @@ export const TrendingUpIcon = ({ className }: IconProps): ReactElement => (
   </svg>
 );
 
-export const PlusIcon = ({ className }: IconProps): ReactElement => (
+export const PlusIcon = (props: IconProps & { size: number }): ReactElement => (
   <svg
     viewBox="0 0 24 24"
-    width="24"
-    height="24"
+    width={props.size ?? 24}
+    height={props.size ?? 24}
     stroke="currentColor"
     xmlns="http://www.w3.org/2000/svg"
-    className={className}
+    className={props.className}
   >
     <path d="M12 5V19" {...DEFAULT_PATH_PROPS} />
     <path d="M5 12H19" {...DEFAULT_PATH_PROPS} />
