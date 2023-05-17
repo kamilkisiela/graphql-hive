@@ -24,7 +24,9 @@ function SchemaBlock({ schema }: { schema: CompositeSchemaFieldsFragment }) {
     <Accordion.Item value={schema.id} key={schema.id} className="border-2 border-gray-900/50">
       <Accordion.Header>
         <div>
-          <div className="text-base">{schema.service ?? 'SDL'}</div>
+          <div className="text-base" id={schema.service ?? undefined}>
+            {schema.service ?? 'SDL'}
+          </div>
           {schema.url ? <div className="text-xs text-gray-500">{schema.url}</div> : null}
         </div>
       </Accordion.Header>

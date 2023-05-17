@@ -1,10 +1,6 @@
 import { FragmentType, graphql, useFragment } from '@/gql';
-import {
-  GraphQLTypeCard,
-  GraphQLTypeCardListItem,
-  SchemaExplorerUsageStats,
-  SupergraphMetadataTooltip,
-} from './common';
+import { GraphQLTypeCard, GraphQLTypeCardListItem, SchemaExplorerUsageStats } from './common';
+import { SupergraphMetadataList } from './super-graph-metadata';
 
 export const GraphQLUnionTypeComponent_TypeFragment = graphql(`
   fragment GraphQLUnionTypeComponent_TypeFragment on GraphQLUnionType {
@@ -19,11 +15,12 @@ export const GraphQLUnionTypeComponent_TypeFragment = graphql(`
         ...SchemaExplorerUsageStats_UsageFragment
       }
       supergraphMetadata {
-        ...GraphQLTypeCard_SupergraphMetadataFragment
+        ...SupergraphMetadataList_SupergraphMetadataFragment
       }
     }
     supergraphMetadata {
       ...GraphQLTypeCard_SupergraphMetadataFragment
+      ...SupergraphMetadataList_SupergraphMetadataFragment
     }
   }
 `);
@@ -46,7 +43,7 @@ export function GraphQLUnionTypeComponent(props: {
             <div>{member.name}</div>
             <SchemaExplorerUsageStats totalRequests={props.totalRequests} usage={member.usage} />
             {member.supergraphMetadata ? (
-              <SupergraphMetadataTooltip supergraphMetadata={member.supergraphMetadata} />
+              <SupergraphMetadataList supergraphMetadata={member.supergraphMetadata} />
             ) : null}
           </GraphQLTypeCardListItem>
         ))}

@@ -1,7 +1,6 @@
 import React, { ReactElement, ReactNode } from 'react';
 import { clsx } from 'clsx';
-import { Tooltip } from '@/components/v2';
-import { PulseIcon, ServerIcon } from '@/components/v2/icon';
+import { PulseIcon } from '@/components/v2/icon';
 import { Link } from '@/components/v2/link';
 import { Markdown } from '@/components/v2/markdown';
 import { FragmentType, graphql, useFragment } from '@/gql';
@@ -9,6 +8,7 @@ import { formatNumber, useRouteSelector } from '@/lib/hooks';
 import { ChatBubbleIcon } from '@radix-ui/react-icons';
 import * as P from '@radix-ui/react-popover';
 import { useArgumentListToggle } from './provider';
+import { SupergraphMetadataList } from './super-graph-metadata';
 
 const noop = () => {};
 
@@ -60,7 +60,7 @@ export function SchemaExplorerUsageStats(props: {
   const percentage = props.totalRequests ? (usage.total / props.totalRequests) * 100 : 0;
 
   return (
-    <div className="flex flex-row items-center gap-2 text-xs">
+    <div className="flex flex-row items-center gap-2 text-xs ml-3">
       <div className="grow">
         <div className="text-center" title={`${usage.total} requests`}>
           {formatNumber(usage.total)}
@@ -94,7 +94,7 @@ const GraphQLFields_FieldFragment = graphql(`
       ...GraphQLArguments_ArgumentFragment
     }
     supergraphMetadata {
-      ...GraphQLTypeCard_SupergraphMetadataFragment
+      ...SupergraphMetadataList_SupergraphMetadataFragment
     }
   }
 `);
@@ -127,7 +127,7 @@ const GraphQLInputFields_InputFieldFragment = graphql(`
 
 const GraphQLTypeCard_SupergraphMetadataFragment = graphql(`
   fragment GraphQLTypeCard_SupergraphMetadataFragment on SupergraphMetadata {
-    ownedByServiceNames
+    ...SupergraphMetadataList_SupergraphMetadataFragment
   }
 `);
 
@@ -142,6 +142,10 @@ export function GraphQLTypeCard(
     supergraphMetadata?: FragmentType<typeof GraphQLTypeCard_SupergraphMetadataFragment> | null;
   }>,
 ): ReactElement {
+  const supergraphMetadata = useFragment(
+    GraphQLTypeCard_SupergraphMetadataFragment,
+    props.supergraphMetadata,
+  );
   return (
     <div className="rounded-md border-2 border-gray-900">
       <div className="flex flex-row justify-between p-4">
@@ -165,48 +169,12 @@ export function GraphQLTypeCard(
         {props.usage && typeof props.totalRequests !== 'undefined' ? (
           <SchemaExplorerUsageStats totalRequests={props.totalRequests} usage={props.usage} />
         ) : null}
-        {props.supergraphMetadata ? (
-          <SupergraphMetadataTooltip supergraphMetadata={props.supergraphMetadata} />
+        {supergraphMetadata ? (
+          <SupergraphMetadataList supergraphMetadata={supergraphMetadata} />
         ) : null}
       </div>
       <div>{props.children}</div>
     </div>
-  );
-}
-
-export function SupergraphMetadataTooltip(props: {
-  supergraphMetadata: FragmentType<typeof GraphQLTypeCard_SupergraphMetadataFragment>;
-}) {
-  const supergraphMetadata = useFragment(
-    GraphQLTypeCard_SupergraphMetadataFragment,
-    props.supergraphMetadata,
-  );
-  return (
-    <Tooltip
-      content={
-        <>
-          <div className="font-bold mb-1 text-lg">Supergraph Information</div>
-          {supergraphMetadata.ownedByServiceNames == null ? (
-            <div>This is not owned by a specific subgraph.</div>
-          ) : (
-            <>
-              <div className="mb-2">The following subgraphs own this entity.</div>
-              <ul>
-                {supergraphMetadata.ownedByServiceNames.map(item => (
-                  <li key={item} className="font-bold">
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </>
-      }
-    >
-      <div className="text-xl p-1 cursor-help">
-        <ServerIcon size={16} className="h-6 w-auto" />
-      </div>
-    </Tooltip>
   );
 }
 
@@ -315,12 +283,12 @@ export function GraphQLFields(props: {
               <GraphQLTypeAsLink type={field.type} />
             </div>
             <div className="flex flex-row items-center">
-              <SchemaExplorerUsageStats totalRequests={totalRequests} usage={field.usage} />
               {field.supergraphMetadata ? (
                 <div className="ml-1">
-                  <SupergraphMetadataTooltip supergraphMetadata={field.supergraphMetadata} />
+                  <SupergraphMetadataList supergraphMetadata={field.supergraphMetadata} />
                 </div>
               ) : null}
+              <SchemaExplorerUsageStats totalRequests={totalRequests} usage={field.usage} />
             </div>
           </GraphQLTypeCardListItem>
         );

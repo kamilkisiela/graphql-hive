@@ -530,7 +530,7 @@ export const DiffIcon = ({ className }: IconProps): ReactElement => (
   </svg>
 );
 
-export const ServerIcon = (
+export const PackageIcon = (
   props: IconProps & {
     size?: number;
   },
@@ -545,9 +545,9 @@ export const ServerIcon = (
     strokeLinecap="round"
     strokeLinejoin="round"
     strokeWidth={2}
+    className={props.className}
   >
-    <rect width={20} height={8} x={2} y={2} rx={2} ry={2} />
-    <rect width={20} height={8} x={2} y={14} rx={2} ry={2} />
-    <path d="M6 6h.01M6 18h.01" />
+    <path d="m16.5 9.4-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+    <path d="M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12" />
   </svg>
 );
