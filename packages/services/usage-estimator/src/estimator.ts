@@ -1,4 +1,4 @@
-import { ClickHouse, HttpClient, OperationsReader } from '@hive/api';
+import { ClickHouse, HttpClient, OperationsReader, sql } from '@hive/api';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 
 export type Estimator = ReturnType<typeof createEstimator>;
@@ -47,14 +47,14 @@ export function createEstimator(config: {
         total: string;
         target: string;
       }>({
-        query: `
-      SELECT
-        target,
-        sum(total) as total
-      FROM operations_hourly
-       ${filter}
-      GROUP BY target
-    `,
+        query: sql`
+          SELECT
+            target,
+            sum(total) as total
+          FROM operations_hourly
+          ${filter}
+          GROUP BY target
+        `,
         queryId: 'usage_estimator_count_operations_all',
         timeout: 60_000,
       });
@@ -75,12 +75,12 @@ export function createEstimator(config: {
       return await clickhouse.query<{
         total: string;
       }>({
-        query: `
-      SELECT 
-        sum(total) as total
-      FROM operations_hourly
-      ${filter}
-    `,
+        query: sql`
+          SELECT 
+            sum(total) as total
+          FROM operations_hourly
+          ${filter}
+        `,
         queryId: 'usage_estimator_count_operations',
         timeout: 15_000,
       });

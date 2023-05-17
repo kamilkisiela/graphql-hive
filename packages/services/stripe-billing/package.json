@@ -11,15 +11,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentry/node": "7.51.2",
-    "@trpc/client": "10.25.1",
-    "@trpc/server": "10.25.1",
+    "@sentry/node": "7.52.1",
+    "@trpc/client": "10.26.0",
+    "@trpc/server": "10.26.0",
     "@whatwg-node/fetch": "0.8.8",
     "date-fns": "2.30.0",
     "dotenv": "16.0.3",
     "got": "12.6.0",
     "reflect-metadata": "0.1.13",
-    "stripe": "12.4.0",
+    "stripe": "12.5.0",
     "zod": "3.21.4"
   },
   "devDependencies": {

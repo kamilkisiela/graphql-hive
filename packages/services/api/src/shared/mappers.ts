@@ -134,6 +134,10 @@ export type SchemaCompareResult = {
       current: string;
     };
     changes: Array<SerializableChange>;
+    versionIds: {
+      before: string | null;
+      current: string;
+    } | null;
   };
 };
 

@@ -66,6 +66,8 @@ export const ConnectSchemaModal = ({
       },
     },
     requestPolicy: 'cache-and-network',
+    // we only need to fetch the data when the modal is open
+    pause: !isOpen,
   });
 
   return (

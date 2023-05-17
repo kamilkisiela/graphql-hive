@@ -66,8 +66,9 @@ export type CheckInput = Omit<Types.SchemaCheckInput, 'project' | 'organization'
   TargetSelector;
 
 export type DeleteInput = Omit<Types.SchemaDeleteInput, 'project' | 'organization' | 'target'> &
-  TargetSelector & {
+  Omit<TargetSelector, 'target'> & {
     checksum: string;
+    target: Target;
   };
 
 export type PublishInput = Types.SchemaPublishInput &
@@ -446,7 +447,7 @@ export class SchemaPublisher {
     this.logger.info('Deleting schema (input=%o)', input);
 
     return this.mutex.perform(
-      registryLockId(input.target),
+      registryLockId(input.target.id),
       {
         signal,
       },
@@ -454,7 +455,7 @@ export class SchemaPublisher {
         await this.authManager.ensureTargetAccess({
           organization: input.organization,
           project: input.project,
-          target: input.target,
+          target: input.target.id,
           scope: TargetAccessScope.REGISTRY_WRITE,
         });
         const [project, organization, latestVersion, latestComposableVersion, baseSchema] =
@@ -469,18 +470,18 @@ export class SchemaPublisher {
             this.schemaManager.getLatestSchemas({
               organization: input.organization,
               project: input.project,
-              target: input.target,
+              target: input.target.id,
             }),
             this.schemaManager.getLatestSchemas({
               organization: input.organization,
               project: input.project,
-              target: input.target,
+              target: input.target.id,
               onlyComposable: true,
             }),
             this.schemaManager.getBaseSchema({
               organization: input.organization,
               project: input.project,
-              target: input.target,
+              target: input.target.id,
             }),
           ]);
 
@@ -543,7 +544,7 @@ export class SchemaPublisher {
           project,
           organization,
           selector: {
-            target: input.target,
+            target: input.target.id,
             project: input.project,
             organization: input.organization,
           },
@@ -555,9 +556,30 @@ export class SchemaPublisher {
             await this.storage.deleteSchema({
               organization: input.organization,
               project: input.project,
-              target: input.target,
+              target: input.target.id,
               serviceName: input.serviceName,
               composable: deleteResult.state.composable,
+              changes: deleteResult.state.changes,
+              ...(deleteResult.state.fullSchemaSdl
+                ? {
+                    compositeSchemaSDL: deleteResult.state.fullSchemaSdl,
+                    schemaCompositionErrors: null,
+                  }
+                : {
+                    compositeSchemaSDL: null,
+                    schemaCompositionErrors: deleteResult.state.compositionErrors ?? [],
+                  }),
+              actionFn: async () => {
+                if (deleteResult.state.composable) {
+                  await this.publishToCDN({
+                    target: input.target,
+                    project,
+                    supergraph: deleteResult.state.supergraph,
+                    fullSchemaSdl: deleteResult.state.fullSchemaSdl,
+                    schemas,
+                  });
+                }
+              },
             });
           }
 

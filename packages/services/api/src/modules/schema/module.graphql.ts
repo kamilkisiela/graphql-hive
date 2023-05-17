@@ -379,6 +379,7 @@ export default gql`
   type SchemaCompareResult {
     changes: SchemaChangeConnection!
     diff: SchemaDiff!
+    service: ServiceSchemaDiff
     initial: Boolean!
   }
 
@@ -402,7 +403,13 @@ export default gql`
 
   type SchemaDiff {
     after: String!
-    before: String!
+    before: String
+  }
+
+  type ServiceSchemaDiff {
+    name: String!
+    after: String
+    before: String
   }
 
   input SchemaVersionsInput {

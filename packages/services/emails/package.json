@@ -11,14 +11,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentry/node": "7.51.2",
-    "@trpc/server": "10.25.1",
+    "@sentry/node": "7.52.1",
+    "@trpc/server": "10.26.0",
     "@whatwg-node/fetch": "0.8.8",
     "bullmq": "3.12.0",
     "dotenv": "16.0.3",
     "ioredis": "5.3.2",
     "mjml": "4.14.0",
-    "nodemailer": "6.9.1",
+    "nodemailer": "6.9.2",
     "p-timeout": "6.1.1",
     "sendmail": "1.6.1",
     "zod": "3.21.4"
