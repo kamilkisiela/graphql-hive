@@ -139,7 +139,12 @@ export type GraphQLInputObjectTypeMapper = WithSchemaCoordinatesUsage<{
     getInputFieldOwnedByServices: (inputFieldName: string) => Array<string> | null;
   };
 }>;
-export type GraphQLScalarTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLScalarType }>;
+export type GraphQLScalarTypeMapper = WithSchemaCoordinatesUsage<{
+  entity: GraphQLScalarType;
+  supergraph: null | {
+    ownedByServiceNames: Array<string> | null;
+  };
+}>;
 
 export type SchemaChangeConnection = ReadonlyArray<SchemaChange>;
 export type SchemaErrorConnection = readonly SchemaError[];

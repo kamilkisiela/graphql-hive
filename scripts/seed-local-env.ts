@@ -311,7 +311,10 @@ async function federation() {
       email: ID! @tag(name: "test-from-users")
       name: String
       totalProductsCreated: Int
+      createdAt: DateTime
     }
+
+    scalar DateTime
   `;
 
   let res = await fetch(reportingEndpoint, {

@@ -961,7 +961,7 @@ export const resolvers: SchemaModule.Resolvers = {
                   null,
               }
             : null,
-        };
+        } satisfies GraphQLObjectTypeMapper;
       }
       if (isInterfaceType(entity)) {
         return {
@@ -976,7 +976,7 @@ export const resolvers: SchemaModule.Resolvers = {
                   null,
               }
             : null,
-        };
+        } satisfies GraphQLInterfaceTypeMapper;
       }
       if (isEnumType(entity)) {
         return {
@@ -991,7 +991,7 @@ export const resolvers: SchemaModule.Resolvers = {
                   null,
               }
             : null,
-        };
+        } satisfies GraphQLEnumTypeMapper;
       }
       if (isUnionType(entity)) {
         return {
@@ -1005,7 +1005,7 @@ export const resolvers: SchemaModule.Resolvers = {
                   supergraph.schemaCoordinateServicesMappings.get(memberName) ?? null,
               }
             : null,
-        };
+        } satisfies GraphQLUnionTypeMapper;
       }
       if (isInputObjectType(entity)) {
         return {
@@ -1021,12 +1021,22 @@ export const resolvers: SchemaModule.Resolvers = {
                   ) ?? null,
               }
             : null,
-        };
+        } satisfies GraphQLInputObjectTypeMapper;
       }
-      return {
-        entity,
-        usage,
-      };
+      if (isScalarType(entity)) {
+        return {
+          entity,
+          usage,
+          supergraph: supergraph
+            ? {
+                ownedByServiceNames:
+                  supergraph.schemaCoordinateServicesMappings.get(entity.name) ?? null,
+              }
+            : null,
+        } satisfies GraphQLScalarTypeMapper;
+      }
+
+      throw new Error('Illegal state: unknown type kind');
     },
     async types({ schema, usage, supergraph }, _, { injector }) {
       const types: Array<
@@ -1136,12 +1146,18 @@ export const resolvers: SchemaModule.Resolvers = {
                 }
               : null,
           });
-        } else {
+        } else if (isScalarType(entity)) {
           types.push({
             entity,
             get usage() {
               return getStats();
             },
+            supergraph: supergraph
+              ? {
+                  ownedByServiceNames:
+                    supergraph.schemaCoordinateServicesMappings.get(entity.name) ?? null,
+                }
+              : null,
           });
         }
       }
@@ -1366,6 +1382,8 @@ export const resolvers: SchemaModule.Resolvers = {
     name: t => t.entity.name,
     description: t => t.entity.description ?? null,
     usage,
+    supergraphMetadata: t =>
+      t.supergraph ? { ownedByServiceNames: t.supergraph.ownedByServiceNames } : null,
   },
   GraphQLEnumValue: {
     name: v => v.entity.name,

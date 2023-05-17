@@ -562,6 +562,11 @@ export default gql`
     name: String!
     description: String
     usage: SchemaCoordinateUsage!
+    """
+    Metadata specific to Apollo Federation Projects.
+    Is null if no meta information is available (e.g. this is not an apollo federation project).
+    """
+    supergraphMetadata: SupergraphMetadata
   }
 
   type GraphQLField {

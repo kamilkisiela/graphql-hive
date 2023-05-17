@@ -192,6 +192,21 @@ export function extractSuperGraphInformation(documentAst: DocumentNode): SuperGr
 
       return false;
     },
+    ScalarTypeDefinition(node) {
+      const objectTypeServiceReferences = new Set(
+        getJoinTypeEnumServiceName({
+          directives: node.directives ?? [],
+          valueName: 'type',
+        }),
+      );
+
+      if (objectTypeServiceReferences.size) {
+        schemaCoordinateToServiceEnumValueMappings.set(
+          node.name.value,
+          objectTypeServiceReferences,
+        );
+      }
+    },
   });
 
   for (const [schemaCoordinate, serviceEnumValues] of schemaCoordinateToServiceEnumValueMappings) {
