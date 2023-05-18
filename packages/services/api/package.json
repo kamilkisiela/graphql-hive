@@ -58,6 +58,6 @@
     "@types/ms": "0.7.31",
     "@types/object-hash": "3.0.2",
     "ioredis-mock": "8.7.0",
-    "tslib": "2.5.0"
+    "tslib": "2.5.1"
   }
 }

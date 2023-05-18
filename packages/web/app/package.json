@@ -80,7 +80,7 @@
     "supertokens-js-override": "0.0.4",
     "supertokens-node": "13.4.2",
     "supertokens-web-js": "0.5.0",
-    "tslib": "2.5.0",
+    "tslib": "2.5.1",
     "urql": "3.0.3",
     "use-debounce": "9.0.4",
     "valtio": "1.10.5",
