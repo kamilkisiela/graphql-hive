@@ -13,7 +13,7 @@
     "@sentry/node": "7.52.1",
     "@trpc/client": "10.26.0",
     "@trpc/server": "10.26.0",
-    "@whatwg-node/fetch": "0.8.8",
+    "@whatwg-node/fetch": "0.9.0",
     "ajv": "8.12.0",
     "dotenv": "16.0.3",
     "got": "12.6.0",
