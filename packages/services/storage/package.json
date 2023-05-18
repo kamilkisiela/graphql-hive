@@ -31,7 +31,7 @@
     "@types/node": "18.16.12",
     "@types/pg": "8.6.6",
     "pg-promise": "11.4.3",
-    "tslib": "2.5.0",
+    "tslib": "2.5.1",
     "typescript": "5.0.4"
   },
   "buildOptions": {

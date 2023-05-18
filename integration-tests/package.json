@@ -36,7 +36,7 @@
     "@hive/storage": "workspace:*",
     "@types/dockerode": "3.3.17",
     "@types/ioredis": "4.28.10",
-    "tslib": "2.5.0",
+    "tslib": "2.5.1",
     "vitest": "0.31.0"
   }
 }
