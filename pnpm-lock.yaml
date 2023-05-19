@@ -1180,8 +1180,8 @@ importers:
         specifier: 0.1.13
         version: 0.1.13
       stripe:
-        specifier: 12.5.0
-        version: 12.5.0
+        specifier: 12.6.0
+        version: 12.6.0
       zod:
         specifier: 3.21.4
         version: 3.21.4
@@ -1493,10 +1493,10 @@ importers:
         version: 7.52.1
       '@stripe/react-stripe-js':
         specifier: 2.1.0
-        version: 2.1.0(@stripe/stripe-js@1.52.1)(react-dom@18.2.0)(react@18.2.0)
+        version: 2.1.0(@stripe/stripe-js@1.53.0)(react-dom@18.2.0)(react@18.2.0)
       '@stripe/stripe-js':
-        specifier: 1.52.1
-        version: 1.52.1
+        specifier: 1.53.0
+        version: 1.53.0
       '@tanstack/react-table':
         specifier: 8.0.0-beta.8
         version: 8.0.0-beta.8(react-dom@18.2.0)(react@18.2.0)
@@ -13330,21 +13330,21 @@ packages:
       file-system-cache: 2.0.2
     dev: true
 
-  /@stripe/react-stripe-js@2.1.0(@stripe/stripe-js@1.52.1)(react-dom@18.2.0)(react@18.2.0):
+  /@stripe/react-stripe-js@2.1.0(@stripe/stripe-js@1.53.0)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-Zb6Ycrj5QuhYkvtlvvLzo+cysUyA6wkx3zWHQ7uVnHRYRM/n1jtQD6VGBrdmptC8e8PJN6L091gBCyB5P0FqmA==}
     peerDependencies:
       '@stripe/stripe-js': ^1.44.1
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
-      '@stripe/stripe-js': 1.52.1
+      '@stripe/stripe-js': 1.53.0
       prop-types: 15.8.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@stripe/stripe-js@1.52.1:
-    resolution: {integrity: sha512-fza40OPSpGQlFxc5TZWiYC/6Lk89Sep1fLuv9ss33YS6lCAF8UZbfA1E6W+lwO4c7WRKZIZumHIEbPJfP/O9uw==}
+  /@stripe/stripe-js@1.53.0:
+    resolution: {integrity: sha512-qhhAa5WxlgVqh1J41ppyqqQVu6S1T1Q9lDAk2Ho9eI/GjrkMvAHcJpKqhekJRsZ1vjsK4P68PYOcXBXPyNCpnQ==}
     dev: false
 
   /@swc/core-darwin-arm64@1.3.58:
@@ -28377,8 +28377,8 @@ packages:
       acorn: 8.8.2
     dev: true
 
-  /stripe@12.5.0:
-    resolution: {integrity: sha512-eDBh4bv+Uo+GdhjnQ246lM5KaOReoBzxFltgW0HJqco/QEAgSYxZPOpFbd5+gJnZlRqHSB5B+Zqw273SlbdPag==}
+  /stripe@12.6.0:
+    resolution: {integrity: sha512-aJat4pGA6fr5DvuojRVXMaOCAw8ceS3UQM4ux1BMUViG686NmOAf1psEh6Wu+NFUifoy6kV7+4APq66OlTWtTw==}
     engines: {node: '>=12.*'}
     dependencies:
       '@types/node': 18.16.12
