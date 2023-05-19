@@ -49,6 +49,8 @@ We have a script to feed your local instance of Hive.
 > Note: You can set `STAGING=1` in order to target staging env and seed a target there. Same for
 > development env, you can use `DEV=1`
 
+> Note: You can set `FEDERATION=1` in order to publish multiple subgraphs.
+
 > To send more operations and test heavy load on Hive instance, you can also set `OPERATIONS`
 > (amount of operations in each interval round, default is `1`) and `INTERVAL` (frequency of sending
 > operations, default: `1000`ms). For example, using `INTERVAL=1000 OPERATIONS=1000` will send 1000
