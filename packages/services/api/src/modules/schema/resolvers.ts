@@ -2,6 +2,7 @@ import { createHash } from 'crypto';
 import stringify from 'fast-json-stable-stringify';
 import {
   buildASTSchema,
+  type DocumentNode,
   GraphQLError,
   GraphQLNamedType,
   isEnumType,
@@ -35,7 +36,10 @@ import { ProjectManager } from '../project/providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
-import { extractSuperGraphInformation } from './lib/federation-super-graph';
+import {
+  extractSuperGraphInformation,
+  type SuperGraphInformation,
+} from './lib/federation-super-graph';
 import { Inspector, toGraphQLSchemaChange } from './providers/inspector';
 import { SchemaBuildError } from './providers/orchestrators/errors';
 import { detectUrlChanges } from './providers/registry-checks';
@@ -797,9 +801,33 @@ export const resolvers: SchemaModule.Resolvers = {
         ),
       );
 
-      const supergraph = version.supergraphSDL
-        ? extractSuperGraphInformation(parse(version.supergraphSDL))
-        : null;
+      let supergraph: SuperGraphInformation | null = null;
+
+      if (project.type === ProjectType.FEDERATION) {
+        let supergraphDocument: DocumentNode;
+        if (version.supergraphSDL) {
+          supergraphDocument = parse(version.supergraphSDL);
+        } else {
+          // Legacy Fallback
+          const schemas = await injector.get(SchemaManager).getSchemasOfVersion({
+            organization: version.organization,
+            project: version.project,
+            target: version.target,
+            version: version.id,
+          });
+
+          const schema = await ensureSDL(
+            orchestrator.composeAndValidate(
+              schemas.map(s => helper.createSchemaObject(s)),
+              project.externalComposition,
+            ),
+          );
+
+          supergraphDocument = schema.document;
+        }
+
+        supergraph = extractSuperGraphInformation(supergraphDocument);
+      }
 
       return {
         schema: buildASTSchema(schema.document, {
