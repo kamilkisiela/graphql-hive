@@ -43,7 +43,7 @@ export const TrendingUpIcon = ({ className }: IconProps): ReactElement => (
   </svg>
 );
 
-export const PlusIcon = (props: IconProps & { size: number }): ReactElement => (
+export const PlusIcon = (props: IconProps & { size?: number }): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     width={props.size ?? 24}
