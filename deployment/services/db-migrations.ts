@@ -60,6 +60,7 @@ export function deployDbMigrations({
         CLICKHOUSE_USERNAME: clickhouse.config.username,
         CLICKHOUSE_PASSWORD: clickhouse.config.password,
         CLICKHOUSE_PROTOCOL: clickhouse.config.protocol,
+        CLICKHOUSE_MIGRATOR_GRAPHQL_HIVE_CLOUD: '1',
         KAFKA_BROKER: kafka.config.endpoint,
         TS_NODE_TRANSPILE_ONLY: 'true',
         RUN_S3_LEGACY_CDN_KEY_IMPORT: '1',
