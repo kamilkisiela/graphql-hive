@@ -70,7 +70,7 @@
     "bob-the-bundler": "6.0.0",
     "cypress": "12.12.0",
     "dotenv": "16.0.3",
-    "eslint": "8.40.0",
+    "eslint": "8.41.0",
     "eslint-plugin-cypress": "2.13.3",
     "eslint-plugin-hive": "file:./rules",
     "eslint-plugin-tailwindcss": "3.12.0",
