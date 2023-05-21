@@ -566,8 +566,8 @@ importers:
         specifier: 4.13.0
         version: 4.13.0
       graphql-scalars:
-        specifier: 1.21.3
-        version: 1.21.3
+        specifier: 1.22.0
+        version: 1.22.0
       graphql-yoga:
         specifier: 3.9.1
         version: 3.9.1
@@ -20343,8 +20343,8 @@ packages:
     transitivePeerDependencies:
       - encoding
 
-  /graphql-scalars@1.21.3:
-    resolution: {integrity: sha512-QLWw3BHmqHZMp9JeYmPpjq7JT9aw/H8TpwmWKJEuMSE3+O7Xe7TduQbOLFzbs1q9UxX6CVkc0O1JO/YfkP/pAw==}
+  /graphql-scalars@1.22.0:
+    resolution: {integrity: sha512-t3r6c/cMF6OP64oN+YYVwempyMA4tbI/JdWWDdPN1U45IgpIfPZmJdO+wvPPoptxL9Lr/7jmgRFRsAUg66DFmA==}
     engines: {node: '>=10'}
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
