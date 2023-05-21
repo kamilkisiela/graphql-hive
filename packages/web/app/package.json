@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@graphiql/toolkit": "0.8.4",
-    "@graphql-tools/mock": "8.7.20",
+    "@graphql-tools/mock": "9.0.0",
     "@headlessui/react": "1.7.14",
     "@monaco-editor/react": "4.5.1",
     "@n1ru4l/react-time-ago": "1.1.0",
