@@ -30,6 +30,6 @@
     "@types/sendmail": "1.4.4",
     "copyfiles": "2.4.1",
     "pino-pretty": "10.0.0",
-    "tslib": "2.5.1"
+    "tslib": "2.5.2"
   }
 }
