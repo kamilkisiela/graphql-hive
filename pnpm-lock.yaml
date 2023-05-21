@@ -82,8 +82,8 @@ importers:
         specifier: 13.3.1
         version: 13.3.1
       '@sentry/cli':
-        specifier: 2.17.5
-        version: 2.17.5
+        specifier: 2.18.0
+        version: 2.18.0
       '@swc/core':
         specifier: 1.3.59
         version: 1.3.59
@@ -11881,8 +11881,8 @@ packages:
       - supports-color
     dev: false
 
-  /@sentry/cli@2.17.5:
-    resolution: {integrity: sha512-0tXjLDpaKB46851EMJ6NbP0o9/gdEaDSLAyjEtXxlVO6+RyhUj6x6jDwn0vis8n/7q0AvbIjAcJrot+TbZP+WQ==}
+  /@sentry/cli@2.18.0:
+    resolution: {integrity: sha512-PLteLsq78kAzYymLb8WzMuyWRc6GKHLX9g2JOsCJZzaTUueUdZQPzWOHyTkLmKDTeLHgPw1xYVGi3pix4BRAHw==}
     engines: {node: '>= 10'}
     hasBin: true
     requiresBuild: true
