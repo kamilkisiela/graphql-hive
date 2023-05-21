@@ -18,7 +18,7 @@
   "devDependencies": {
     "@types/js-yaml": "4.0.5",
     "@types/mime-types": "2.1.1",
-    "@types/node": "18.16.13",
+    "@types/node": "18.16.14",
     "typescript": "5.0.4"
   }
 }
