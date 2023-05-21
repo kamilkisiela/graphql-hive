@@ -25,6 +25,6 @@
     "@hive/service-common": "workspace:*",
     "@hive/usage-common": "workspace:*",
     "pino-pretty": "10.0.0",
-    "tslib": "2.5.1"
+    "tslib": "2.5.2"
   }
 }

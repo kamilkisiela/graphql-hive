@@ -36,6 +36,6 @@
     "@types/pg": "8.6.6",
     "copyfiles": "2.4.1",
     "pg-promise": "11.4.3",
-    "tslib": "2.5.1"
+    "tslib": "2.5.2"
   }
 }
