@@ -73,6 +73,7 @@ const action: Action = async (exec, isGraphQLHiveCloud) => {
 
   // Run the rest of the migration only for self-hosted instances, not for Cloud.
   if (isGraphQLHiveCloud) {
+    console.log('Detected GraphQL Hive Cloud. Skipping the rest of the migration.');
     // In case of Cloud, we need to perform it in a different, more complicated way.
     // We need to insert partition by partition, because otherwise it will take too much time and resources.
     // The query below will generate a list of insert statements we need to run.
@@ -116,6 +117,8 @@ const action: Action = async (exec, isGraphQLHiveCloud) => {
     */
     return;
   }
+
+  console.log('Detected self-hosted version of GraphQL Hive. Running the rest of the migration.');
 
   // Copy data
   await exec(`
