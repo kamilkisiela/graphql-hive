@@ -466,7 +466,7 @@ export default gql`
   }
 
   type SchemaCoordinateUsage {
-    total: Int!
+    total: Float!
     isUsed: Boolean!
   }
 
