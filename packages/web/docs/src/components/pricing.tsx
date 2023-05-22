@@ -3,7 +3,7 @@ import { Arrow, Content, Root, Trigger } from '@radix-ui/react-tooltip';
 
 function Tooltip({ content, children }: { content: string; children: ReactNode }) {
   return (
-    <Root>
+    <Root delayDuration={0}>
       <Trigger>{children}</Trigger>
       <Content
         sideOffset={5}
@@ -53,9 +53,8 @@ function Plan(plan: {
   );
 }
 
-const USAGE_DATA_RETENTION_EXPLAINER =
-  'How long to store GraphQL requests reported to GraphQL Hive';
-const OPERATIONS_EXPLAINER = 'GraphQL requests reported to GraphQL Hive';
+const USAGE_DATA_RETENTION_EXPLAINER = 'How long your GraphQL operations is stored on Hive';
+const OPERATIONS_EXPLAINER = 'GraphQL operations reported to GraphQL Hive';
 
 export function Pricing({ gradient }: { gradient: [string, string] }): ReactElement {
   return (
@@ -69,16 +68,20 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
         >
           Pricing
         </h2>
-        <p className="text-gray-400">All features are available in every plan</p>
+        <p className="text-gray-400">
+          All features are available on all plans - including the free plan. Our pricing is honest
+          and based only on your real usage.
+        </p>
         <div className="mt-6 flex flex-col content-start items-stretch justify-start justify-items-start gap-4 md:flex-row">
           <Plan
             name="Hobby"
             description="For personal or small projects"
             price="Free"
             features={[
-              'Unlimited seats',
-              'Unlimited schema pushes',
-              <Tooltip content={OPERATIONS_EXPLAINER}>Limit of 1M operations monthly</Tooltip>,
+              'Unlimited seats, projects and organizations',
+              'Unlimited schema pushes & checks',
+              'Full access to all features (including SSO)',
+              <Tooltip content={OPERATIONS_EXPLAINER}>Limit of 1M operations per month</Tooltip>,
               <Tooltip content={USAGE_DATA_RETENTION_EXPLAINER}>
                 7 days of usage data retention
               </Tooltip>,
@@ -86,21 +89,21 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
           />
           <Plan
             name="Pro"
-            description="For scaling API"
+            description="For scaling API and teams"
             price={
               <Tooltip content="Base price charged monthly">
                 $10<span className="text-sm text-gray-500">/mo</span>
               </Tooltip>
             }
             features={[
-              'Unlimited seats',
-              'Unlimited schema pushes',
-              <Tooltip content={OPERATIONS_EXPLAINER}>$10 per 1M operations monthly</Tooltip>,
+              <Tooltip content={OPERATIONS_EXPLAINER}>+ $10 per 1M operations</Tooltip>,
+              'Change your plan at any time',
+              <strong>Everything in Hobby plan, and:</strong>,
               <Tooltip content={USAGE_DATA_RETENTION_EXPLAINER}>
                 90 days of usage data retention
               </Tooltip>,
             ]}
-            footer={<div className="mb-2 text-sm font-bold">Free 30 days trial period</div>}
+            footer={<div className="mb-2 text-sm font-bold">🎉 Free 30 days trial period</div>}
           />
           <Plan
             name="Enterprise"
@@ -116,14 +119,16 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
               </span>
             }
             features={[
-              'Unlimited seats',
-              'Unlimited schema pushes',
               <Tooltip content={OPERATIONS_EXPLAINER}>Custom limit of operations</Tooltip>,
+              'Change your plan at any time',
+              'Improved pricing as you scale',
               <Tooltip content={USAGE_DATA_RETENTION_EXPLAINER}>
                 12 months of usage data retention
               </Tooltip>,
-              <span className="flex gap-1">
-                Support from
+              <span className="gap-1">
+                GraphQL/APIs support and guidance
+                <br />
+                from{' '}
                 <a
                   href="https://the-guild.dev"
                   target="_blank"
