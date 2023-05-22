@@ -212,8 +212,8 @@ importers:
   integration-tests:
     dependencies:
       '@apollo/gateway':
-        specifier: 2.4.3
-        version: 2.4.3(graphql@16.6.0)
+        specifier: 2.4.5
+        version: 2.4.5(graphql@16.6.0)
       '@apollo/server':
         specifier: 4.7.1
         version: 4.7.1(graphql@16.6.0)
@@ -411,8 +411,8 @@ importers:
         specifier: 0.38.1
         version: 0.38.1(patch_hash=rjgakkkphrejw6qrtph4ar24zq)
       '@apollo/subgraph':
-        specifier: 2.4.3
-        version: 2.4.3
+        specifier: 2.4.5
+        version: 2.4.5
       '@types/async-retry':
         specifier: 1.4.5
         version: 1.4.5
@@ -1983,17 +1983,6 @@ packages:
     dependencies:
       graphql: 16.6.0
 
-  /@apollo/composition@2.4.3(graphql@16.6.0):
-    resolution: {integrity: sha512-C0829vugQ+jB+xg1ttrq0fpuHyL78Ap5USiV66k8XjqB0/NxNJiBHARiLGyHa+/Mgl1mFs5hZpIwva4sUuSGpQ==}
-    engines: {node: '>=14.15.0'}
-    peerDependencies:
-      graphql: ^16.5.0
-    dependencies:
-      '@apollo/federation-internals': 2.4.3(graphql@16.6.0)
-      '@apollo/query-graphs': 2.4.3(graphql@16.6.0)
-      graphql: 16.6.0
-    dev: false
-
   /@apollo/composition@2.4.5(graphql@16.6.0):
     resolution: {integrity: sha512-n7w8gk678CEXjMVa/tXUuuD25Nt+v19AHQ1BCUqVBeaLfH3PzTQPNkRBjXpiX0IZJA7zttwyWw8JeYak11giIQ==}
     engines: {node: '>=14.15.0'}
@@ -2005,8 +1994,8 @@ packages:
       graphql: 16.6.0
     dev: false
 
-  /@apollo/federation-internals@2.4.3:
-    resolution: {integrity: sha512-GPkYC4PRcJNkxGr6cuj4k27l/Tzb7TYJVTfrtMKZ+emiXH9/YY1ph10H7fwqzQTuimri9fRGAEU5XX0IPk99QA==}
+  /@apollo/federation-internals@2.4.5:
+    resolution: {integrity: sha512-yXZJ5gOArKFQ6Eyon5o8sbxw+sM/Wznl5ECptf/gkCKS51+AhrVjJu41frWhcKdoeufy835v5XVjeXRx9WO6Ug==}
     engines: {node: '>=14.15.0'}
     peerDependencies:
       graphql: ^16.5.0
@@ -2016,19 +2005,6 @@ packages:
       js-levenshtein: 1.1.6
       uuid: 9.0.0
     dev: true
-
-  /@apollo/federation-internals@2.4.3(graphql@16.6.0):
-    resolution: {integrity: sha512-GPkYC4PRcJNkxGr6cuj4k27l/Tzb7TYJVTfrtMKZ+emiXH9/YY1ph10H7fwqzQTuimri9fRGAEU5XX0IPk99QA==}
-    engines: {node: '>=14.15.0'}
-    peerDependencies:
-      graphql: ^16.5.0
-    dependencies:
-      '@types/uuid': 9.0.1
-      chalk: 4.1.2
-      graphql: 16.6.0
-      js-levenshtein: 1.1.6
-      uuid: 9.0.0
-    dev: false
 
   /@apollo/federation-internals@2.4.5(graphql@16.6.0):
     resolution: {integrity: sha512-yXZJ5gOArKFQ6Eyon5o8sbxw+sM/Wznl5ECptf/gkCKS51+AhrVjJu41frWhcKdoeufy835v5XVjeXRx9WO6Ug==}
@@ -2071,15 +2047,15 @@ packages:
       - encoding
     patched: true
 
-  /@apollo/gateway@2.4.3(graphql@16.6.0):
-    resolution: {integrity: sha512-gdTzNQhJeVrMx4qrSCurzXz47n2w1+zeN147u/Nakmxg9pviM4B+I1TPdDJSwjrhQmOkXvA+SH7H9Nwbh2m9Iw==}
+  /@apollo/gateway@2.4.5(graphql@16.6.0):
+    resolution: {integrity: sha512-KTC/ep86cDyFvNHMRj4cvHb5yAnQmLKqKeTRoSthjh+e7HDktxa5sROqXnSmj550gbaCzVGMhMzo4yL2mHHPnQ==}
     engines: {node: '>=14.15.0'}
     peerDependencies:
       graphql: ^16.5.0
     dependencies:
-      '@apollo/composition': 2.4.3(graphql@16.6.0)
-      '@apollo/federation-internals': 2.4.3(graphql@16.6.0)
-      '@apollo/query-planner': 2.4.3(graphql@16.6.0)
+      '@apollo/composition': 2.4.5(graphql@16.6.0)
+      '@apollo/federation-internals': 2.4.5(graphql@16.6.0)
+      '@apollo/query-planner': 2.4.5(graphql@16.6.0)
       '@apollo/server-gateway-interface': 1.1.0(graphql@16.6.0)
       '@apollo/usage-reporting-protobuf': 4.1.0
       '@apollo/utils.createhash': 2.0.0
@@ -2140,19 +2116,6 @@ packages:
       long: 4.0.0
     dev: false
 
-  /@apollo/query-graphs@2.4.3(graphql@16.6.0):
-    resolution: {integrity: sha512-rewBB3KSiZRGK92M21nbpxBFq2Ty+t6KqH9CFrWstpocNAw4P2SMqs9rA3mEQhLYrEyIaWTMwD199/vi/M7QMw==}
-    engines: {node: '>=14.15.0'}
-    peerDependencies:
-      graphql: ^16.5.0
-    dependencies:
-      '@apollo/federation-internals': 2.4.3(graphql@16.6.0)
-      deep-equal: 2.1.0
-      graphql: 16.6.0
-      ts-graphviz: 1.5.5
-      uuid: 9.0.0
-    dev: false
-
   /@apollo/query-graphs@2.4.5(graphql@16.6.0):
     resolution: {integrity: sha512-6u8MwTSoANsKfw+Fut0P2u9Ngkaw4HQirfiHAuE0cQEUU38ibetWXFUkQ2SEpCfcf5bw71/Mx7g0TDV8figEgQ==}
     engines: {node: '>=14.15.0'}
@@ -2166,14 +2129,14 @@ packages:
       uuid: 9.0.0
     dev: false
 
-  /@apollo/query-planner@2.4.3(graphql@16.6.0):
-    resolution: {integrity: sha512-PvBGTm1xRNTbzbQ25SEwj/AJ1mQkZdVQiWifoRzw2dRIRcqSbimsV3ma35N1t7Eu5YiTHOSUBdEYxBz0Pm1dgg==}
+  /@apollo/query-planner@2.4.5(graphql@16.6.0):
+    resolution: {integrity: sha512-ztt8Sme4AqTwGLAcx7G5CB2F1CQI/mc/Rm0K+HTyYLVs3MVQ74XxnQLpcEgKVsFIAqIDe8oLUITvIQ/mFR2wrQ==}
     engines: {node: '>=14.15.0'}
     peerDependencies:
       graphql: ^16.5.0
     dependencies:
-      '@apollo/federation-internals': 2.4.3(graphql@16.6.0)
-      '@apollo/query-graphs': 2.4.3(graphql@16.6.0)
+      '@apollo/federation-internals': 2.4.5(graphql@16.6.0)
+      '@apollo/query-graphs': 2.4.5(graphql@16.6.0)
       '@apollo/utils.keyvaluecache': 2.1.0
       chalk: 4.1.2
       deep-equal: 2.1.0
@@ -2301,14 +2264,14 @@ packages:
       '@apollo/cache-control-types': 1.0.2(graphql@16.6.0)
       graphql: 16.6.0
 
-  /@apollo/subgraph@2.4.3:
-    resolution: {integrity: sha512-O/VqXLA+ut1yFVmCsgwusgqDczScc5zYrHSW64xBX5hJ5/ZsgrcrWlgaf3bo7JSHsVlabnYHfXBOS9hKYjUlOg==}
+  /@apollo/subgraph@2.4.5:
+    resolution: {integrity: sha512-+HBkCK1goDrjfu3UofVflWsa71KBH5vVBGGjn6R5M76JExGSrz7/3QMGCgFcnGdNm/QLI9kLcy/juKb7H/PRWw==}
     engines: {node: '>=14.15.0'}
     peerDependencies:
       graphql: ^16.5.0
     dependencies:
       '@apollo/cache-control-types': 1.0.2
-      '@apollo/federation-internals': 2.4.3
+      '@apollo/federation-internals': 2.4.5
     dev: true
 
   /@apollo/usage-reporting-protobuf@4.1.0:
