@@ -8,6 +8,7 @@ import { formatNumber, useRouteSelector } from '@/lib/hooks';
 import { ChatBubbleIcon } from '@radix-ui/react-icons';
 import * as P from '@radix-ui/react-popover';
 import { useArgumentListToggle } from './provider';
+import { SupergraphMetadataList } from './super-graph-metadata';
 
 const noop = () => {};
 
@@ -59,10 +60,7 @@ export function SchemaExplorerUsageStats(props: {
   const percentage = props.totalRequests ? (usage.total / props.totalRequests) * 100 : 0;
 
   return (
-    <div className="flex flex-row items-center gap-2 text-xs">
-      <div className="text-xl">
-        <PulseIcon className="h-6 w-auto" />
-      </div>
+    <div className="flex flex-row items-center gap-2 text-xs ml-3">
       <div className="grow">
         <div className="text-center" title={`${usage.total} requests`}>
           {formatNumber(usage.total)}
@@ -74,6 +72,9 @@ export function SchemaExplorerUsageStats(props: {
         >
           <div className="h-full bg-orange-500" style={{ width: `${percentage}%` }} />
         </div>
+      </div>
+      <div className="text-xl">
+        <PulseIcon className="h-6 w-auto" />
       </div>
     </div>
   );
@@ -91,6 +92,9 @@ const GraphQLFields_FieldFragment = graphql(`
     }
     args {
       ...GraphQLArguments_ArgumentFragment
+    }
+    supergraphMetadata {
+      ...SupergraphMetadataList_SupergraphMetadataFragment
     }
   }
 `);
@@ -121,6 +125,12 @@ const GraphQLInputFields_InputFieldFragment = graphql(`
   }
 `);
 
+const GraphQLTypeCard_SupergraphMetadataFragment = graphql(`
+  fragment GraphQLTypeCard_SupergraphMetadataFragment on SupergraphMetadata {
+    ...SupergraphMetadataList_SupergraphMetadataFragment
+  }
+`);
+
 export function GraphQLTypeCard(
   props: React.PropsWithChildren<{
     kind: string;
@@ -129,8 +139,13 @@ export function GraphQLTypeCard(
     implements?: string[];
     totalRequests?: number;
     usage?: FragmentType<typeof SchemaExplorerUsageStats_UsageFragment>;
+    supergraphMetadata?: FragmentType<typeof GraphQLTypeCard_SupergraphMetadataFragment> | null;
   }>,
 ): ReactElement {
+  const supergraphMetadata = useFragment(
+    GraphQLTypeCard_SupergraphMetadataFragment,
+    props.supergraphMetadata,
+  );
   return (
     <div className="rounded-md border-2 border-gray-900">
       <div className="flex flex-row justify-between p-4">
@@ -153,6 +168,9 @@ export function GraphQLTypeCard(
         ) : null}
         {props.usage && typeof props.totalRequests !== 'undefined' ? (
           <SchemaExplorerUsageStats totalRequests={props.totalRequests} usage={props.usage} />
+        ) : null}
+        {supergraphMetadata ? (
+          <SupergraphMetadataList supergraphMetadata={supergraphMetadata} />
         ) : null}
       </div>
       <div>{props.children}</div>
@@ -264,7 +282,14 @@ export function GraphQLFields(props: {
               <span className="mr-1">:</span>
               <GraphQLTypeAsLink type={field.type} />
             </div>
-            <SchemaExplorerUsageStats totalRequests={totalRequests} usage={field.usage} />
+            <div className="flex flex-row items-center">
+              {field.supergraphMetadata ? (
+                <div className="ml-1">
+                  <SupergraphMetadataList supergraphMetadata={field.supergraphMetadata} />
+                </div>
+              ) : null}
+              <SchemaExplorerUsageStats totalRequests={totalRequests} usage={field.usage} />
+            </div>
           </GraphQLTypeCardListItem>
         );
       })}

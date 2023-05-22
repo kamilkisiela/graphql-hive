@@ -292,10 +292,12 @@ export interface Storage {
       (
         | {
             compositeSchemaSDL: null;
+            supergraphSDL: null;
             schemaCompositionErrors: Array<SchemaCompositionError>;
           }
         | {
             compositeSchemaSDL: string;
+            supergraphSDL: string | null;
             schemaCompositionErrors: null;
           }
       ),
@@ -319,10 +321,12 @@ export interface Storage {
       (
         | {
             compositeSchemaSDL: null;
+            supergraphSDL: null;
             schemaCompositionErrors: Array<SchemaCompositionError>;
           }
         | {
             compositeSchemaSDL: string;
+            supergraphSDL: string | null;
             schemaCompositionErrors: null;
           }
       ),

@@ -9,6 +9,9 @@ export const GraphQLScalarTypeComponent_TypeFragment = graphql(`
     usage {
       ...SchemaExplorerUsageStats_UsageFragment
     }
+    supergraphMetadata {
+      ...GraphQLTypeCard_SupergraphMetadataFragment
+    }
   }
 `);
 
@@ -18,7 +21,7 @@ export function GraphQLScalarTypeComponent(props: {
 }) {
   const ttype = useFragment(GraphQLScalarTypeComponent_TypeFragment, props.type);
   return (
-    <GraphQLTypeCard name={ttype.name} kind="scalar">
+    <GraphQLTypeCard name={ttype.name} kind="scalar" supergraphMetadata={ttype.supergraphMetadata}>
       <div className="flex flex-row gap-4 p-4">
         <div className="grow text-sm">
           {typeof ttype.description === 'string' ? <Markdown content={ttype.description} /> : null}

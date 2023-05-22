@@ -318,10 +318,12 @@ export class SchemaManager {
       (
         | {
             compositeSchemaSDL: null;
+            supergraphSDL: null;
             schemaCompositionErrors: Array<SchemaCompositionError>;
           }
         | {
             compositeSchemaSDL: string;
+            supergraphSDL: string | null;
             schemaCompositionErrors: null;
           }
       ),

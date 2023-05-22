@@ -11,6 +11,9 @@ export const GraphQLInputObjectTypeComponent_TypeFragment = graphql(`
     fields {
       ...GraphQLInputFields_InputFieldFragment
     }
+    supergraphMetadata {
+      ...GraphQLTypeCard_SupergraphMetadataFragment
+    }
   }
 `);
 
@@ -26,6 +29,7 @@ export function GraphQLInputObjectTypeComponent(props: {
       description={ttype.description}
       totalRequests={props.totalRequests}
       usage={ttype.usage}
+      supergraphMetadata={ttype.supergraphMetadata}
     >
       <GraphQLInputFields fields={ttype.fields} totalRequests={props.totalRequests} />
     </GraphQLTypeCard>

@@ -12,6 +12,9 @@ export const GraphQLObjectTypeComponent_TypeFragment = graphql(`
     fields {
       ...GraphQLFields_FieldFragment
     }
+    supergraphMetadata {
+      ...GraphQLTypeCard_SupergraphMetadataFragment
+    }
   }
 `);
 
@@ -27,6 +30,7 @@ export function GraphQLObjectTypeComponent(props: {
       name={ttype.name}
       description={ttype.description}
       implements={ttype.interfaces}
+      supergraphMetadata={ttype.supergraphMetadata}
     >
       <GraphQLFields
         fields={ttype.fields}
