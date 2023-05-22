@@ -48,7 +48,7 @@ export function deployDbMigrations({
       image,
       env: {
         POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
-        POSTGRES_PORT: connectionString.apply(connection => connection.port ?? '5432'),
+        POSTGRES_PORT: connectionString.apply(connection => connection.port || '5432'),
         POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),
         POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
         POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),

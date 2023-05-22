@@ -53,7 +53,7 @@ export function deployRateLimit({
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
         EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
         POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
-        POSTGRES_PORT: connectionString.apply(connection => connection.port ?? '5432'),
+        POSTGRES_PORT: connectionString.apply(connection => connection.port || '5432'),
         POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),
         POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
         POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
