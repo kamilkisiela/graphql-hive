@@ -94,19 +94,20 @@ const action: Action = async (exec, isGraphQLHiveCloud) => {
             toStartOfDay(expires_at) AS expires_at,
             count() AS total
           FROM default.operations
-          WHERE timestamp >= toDateTime(\'{0}-{1}-{2} 00:00:00\', \'UTC\') AND timestamp <= toDateTime(\'{0}-{1}-{2} 23:59:59\', \'UTC\')
+          WHERE timestamp >= toDateTime({0}-{1}-{2} 00:00:00, UTC) AND timestamp <= toDateTime({0}-{1}-{2} 23:59:59, UTC)
           GROUP BY
             target,
             client_name,
             client_version,
             hash,
             timestamp,
-            expires_at
+            expires_at'
+      , year, month, day) as insert_statement
     FROM
       system.parts
     WHERE
       database = 'default'
-      AND table = 'sales'
+      AND table = 'operations'
       AND toInt32(partition) < toInt32((SELECT toYYYYMMDD(fromUnixTimestamp(minMerge(timestamp))) FROM default.clients_daily_migration))
     GROUP BY
       database,
