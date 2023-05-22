@@ -53,7 +53,7 @@ function Plan(plan: {
   );
 }
 
-const USAGE_DATA_RETENTION_EXPLAINER = 'How long your GraphQL operations is stored on Hive';
+const USAGE_DATA_RETENTION_EXPLAINER = 'How long your GraphQL operations are stored on Hive';
 const OPERATIONS_EXPLAINER = 'GraphQL operations reported to GraphQL Hive';
 
 export function Pricing({ gradient }: { gradient: [string, string] }): ReactElement {
