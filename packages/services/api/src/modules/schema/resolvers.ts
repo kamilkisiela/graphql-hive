@@ -787,24 +787,10 @@ export const resolvers: SchemaModule.Resolvers = {
       const orchestrator = schemaManager.matchOrchestrator(project.type);
       const helper = injector.get(SchemaHelper);
 
-      const schemas = await schemaManager.getSchemasOfVersion({
-        version: version.id,
-        organization: version.organization,
-        project: version.project,
-        target: version.target,
-      });
-
-      const schema = await ensureSDL(
-        orchestrator.composeAndValidate(
-          schemas.map(s => helper.createSchemaObject(s)),
-          project.externalComposition,
-        ),
-      );
-
       let supergraph: SuperGraphInformation | null = null;
 
       if (project.type === ProjectType.FEDERATION) {
-        let supergraphDocument: DocumentNode;
+        let supergraphDocument: DocumentNode | null = null;
         if (version.supergraphSDL) {
           supergraphDocument = parse(version.supergraphSDL);
         } else {
@@ -816,21 +802,45 @@ export const resolvers: SchemaModule.Resolvers = {
             version: version.id,
           });
 
-          const schema = await ensureSDL(
-            orchestrator.composeAndValidate(
-              schemas.map(s => helper.createSchemaObject(s)),
-              project.externalComposition,
-            ),
+          const result = await orchestrator.composeAndValidate(
+            schemas.map(s => helper.createSchemaObject(s)),
+            project.externalComposition,
           );
 
-          supergraphDocument = schema.document;
+          if (result.supergraph) {
+            supergraphDocument = parse(result.supergraph);
+          }
         }
 
-        supergraph = extractSuperGraphInformation(supergraphDocument);
+        if (supergraphDocument) {
+          supergraph = extractSuperGraphInformation(supergraphDocument);
+        }
+      }
+
+      let schemaAST: DocumentNode;
+      if (version.compositeSchemaSDL) {
+        schemaAST = parse(version.compositeSchemaSDL);
+      } else {
+        // Legacy Fallback
+        const schemas = await injector.get(SchemaManager).getSchemasOfVersion({
+          organization: version.organization,
+          project: version.project,
+          target: version.target,
+          version: version.id,
+        });
+
+        const schema = await ensureSDL(
+          orchestrator.composeAndValidate(
+            schemas.map(s => helper.createSchemaObject(s)),
+            project.externalComposition,
+          ),
+        );
+
+        schemaAST = schema.document;
       }
 
       return {
-        schema: buildASTSchema(schema.document, {
+        schema: buildASTSchema(schemaAST, {
           assumeValidSDL: true,
           assumeValid: true,
         }),
