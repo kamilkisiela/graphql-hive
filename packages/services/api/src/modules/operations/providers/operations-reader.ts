@@ -710,7 +710,7 @@ export class OperationsReader {
       ${this.createFilter({
         target: args.targetId,
         period: args.period,
-        extra: [sql`coordinate IN ('${args.schemaCoordinates.join(`', '`)}')`],
+        extra: [sql`coordinate IN (${sql.array(args.schemaCoordinates, 'String')})`],
       })}
     `;
 
@@ -739,7 +739,10 @@ export class OperationsReader {
         extra: [
           sql`
             "hash" IN (
-              '${hashesForSchemaCoordinates.map(record => record.hash).join(`', '`)}'
+              ${sql.array(
+                hashesForSchemaCoordinates.map(record => record.hash),
+                'String',
+              )}
             )
           `,
         ],
