@@ -3,7 +3,7 @@ import { isGraphQLError } from '@envelop/core';
 import { MapperKind, mapSchema } from '@graphql-tools/utils';
 
 /**
- * Scalar serialization errors are swallowed by graphql-yoga, because they are GraphQLErrors and not Errors.
+ * Scalar serialization errors are swallowed by sentry in graphql-yoga, because they are GraphQLErrors and not Errors.
  * We can map them to normal errors in order to report them.
  *
  * See https://github.com/n1ru4l/envelop/issues/1808
