@@ -83,7 +83,7 @@ async function usage(
     : {
         total: 0,
         isUsed: false,
-        usedByClients: [],
+        usedByClients: null,
       };
 }
 

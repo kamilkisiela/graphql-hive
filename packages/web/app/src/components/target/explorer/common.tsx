@@ -64,7 +64,7 @@ export function SchemaExplorerUsageStats(props: {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="flex flex-row items-center gap-2 text-xs">
+      <div className="flex flex-row items-center gap-2 text-xs ml-3">
         <div className="grow">
           <div className="text-center" title={`${usage.total} requests`}>
             {formatNumber(usage.total)}
