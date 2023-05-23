@@ -36,7 +36,7 @@ export function useUnexpectedSerializationError(): Plugin<any> {
       });
       // @ts-expect-error GraphQLSchemaExtensions does not yet include symbol in its index signature
       newSchema.extensions[didApplyTransformSymbol] = true;
-      replaceSchema(schema);
+      replaceSchema(newSchema);
     },
   };
 }
