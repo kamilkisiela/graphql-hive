@@ -21,6 +21,7 @@ import { asyncStorage } from './async-storage';
 import type { HiveConfig } from './environment';
 import { useArmor } from './use-armor';
 import { extractUserId, useSentryUser } from './use-sentry-user';
+import { useUnexpectedSerializationError } from './use-unexpected-serialization-error';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 
@@ -93,6 +94,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
   const server = createYoga<Context>({
     logging: options.logger,
     plugins: [
+      useUnexpectedSerializationError(),
       useArmor(),
       useSentry({
         startTransaction: false,

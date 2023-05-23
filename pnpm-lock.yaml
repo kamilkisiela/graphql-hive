@@ -1002,6 +1002,9 @@ importers:
       '@escape.tech/graphql-armor-max-tokens':
         specifier: 1.3.2
         version: 1.3.2
+      '@graphql-tools/utils':
+        specifier: ^10.0.0
+        version: 10.0.0(graphql@16.6.0)
       '@sentry/integrations':
         specifier: 7.52.1
         version: 7.52.1
