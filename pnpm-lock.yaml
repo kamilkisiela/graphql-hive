@@ -667,8 +667,8 @@ importers:
         specifier: 0.9.0
         version: 0.9.0
       '@whatwg-node/server':
-        specifier: 0.7.6
-        version: 0.7.6
+        specifier: 0.8.0
+        version: 0.8.0
       esbuild:
         specifier: 0.17.19
         version: 0.17.19
@@ -707,8 +707,8 @@ importers:
         specifier: 0.9.0
         version: 0.9.0
       '@whatwg-node/server':
-        specifier: 0.7.6
-        version: 0.7.6
+        specifier: 0.8.0
+        version: 0.8.0
       dotenv:
         specifier: 16.0.3
         version: 16.0.3
@@ -792,8 +792,8 @@ importers:
         specifier: ^0.9.0
         version: 0.9.0
       '@whatwg-node/server':
-        specifier: ^0.7.0
-        version: 0.7.1
+        specifier: ^0.8.0
+        version: 0.8.0
       graphql:
         specifier: ^16.6.0
         version: 16.6.0
@@ -1015,8 +1015,8 @@ importers:
         specifier: 0.9.0
         version: 0.9.0
       '@whatwg-node/server':
-        specifier: 0.7.6
-        version: 0.7.6
+        specifier: 0.8.0
+        version: 0.8.0
       dotenv:
         specifier: 16.0.3
         version: 16.0.3
@@ -14223,21 +14223,14 @@ packages:
       fast-url-parser: 1.1.3
       tslib: 2.5.2
 
-  /@whatwg-node/server@0.7.1:
-    resolution: {integrity: sha512-kXZeJ+8vLD8Snewq0N1TB2cWPu6z91ymrRRLDx0KHmbsSrsPIdrXxoHBAvFBxTQz3u2O4IYsyhHetAnBBrrWgA==}
-    dependencies:
-      '@whatwg-node/fetch': 0.8.8
-      tslib: 2.5.2
-    dev: false
-
   /@whatwg-node/server@0.7.5:
     resolution: {integrity: sha512-xTDJdPqr/wULxW3mGXQXD92SRXUm6jwQxqIvyHG17dykRTd21HuCaS2ggBn5lSAM/sYjjrT+OYv3fXbtS4+Mjw==}
     dependencies:
       '@whatwg-node/fetch': 0.8.8
       tslib: 2.5.2
 
-  /@whatwg-node/server@0.7.6:
-    resolution: {integrity: sha512-u7zfNDdMc7bYk7MCii71rG4PbfGcfostbV2l74Hi3GN7EGti4koyQoj/rcS22fCpfDY1ZQBr4EiCYwflQE9F5w==}
+  /@whatwg-node/server@0.8.0:
+    resolution: {integrity: sha512-ZEAZuzBQP40PYJ5iBbmMy46CqzF97QctLPQtFVlXnpVZwo7mMeWNf2u+1sZPM7rEgxCK2MgIUeeuKR2C2XaoMg==}
     engines: {node: '>=16.0.0'}
     dependencies:
       '@whatwg-node/fetch': 0.9.0
