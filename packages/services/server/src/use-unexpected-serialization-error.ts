@@ -1,6 +1,6 @@
 import { GraphQLScalarType } from 'graphql';
 import { type Plugin } from 'graphql-yoga';
-import { isGraphQLError } from 'graphql-yoga/typings/error';
+import { isGraphQLError } from '@envelop/core';
 import { MapperKind, mapSchema } from '@graphql-tools/utils';
 
 /**
