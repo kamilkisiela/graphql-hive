@@ -1,4 +1,3 @@
-import { GraphQLScalarType } from 'graphql';
 import { type Plugin } from 'graphql-yoga';
 import { isGraphQLError } from '@envelop/core';
 import { MapperKind, mapSchema } from '@graphql-tools/utils';
@@ -17,21 +16,20 @@ export function useUnexpectedSerializationError(): Plugin<any> {
       }
 
       const newSchema = mapSchema(schema, {
-        [MapperKind.SCALAR_TYPE](type) {
-          const config = type.toConfig();
-          return new GraphQLScalarType({
-            ...config,
-            serialize(value) {
-              try {
-                return config.serialize(value);
-              } catch (err) {
-                if (isGraphQLError(err)) {
-                  throw new Error(err.message);
-                }
-                throw err;
+        [MapperKind.SCALAR_TYPE](scalarType) {
+          const serialize = scalarType.serialize.bind(scalarType);
+          scalarType.serialize = value => {
+            try {
+              return serialize(value);
+            } catch (err) {
+              if (isGraphQLError(err)) {
+                throw new Error(err.message);
               }
-            },
-          });
+              throw err;
+            }
+          };
+
+          return scalarType;
         },
       });
       // @ts-expect-error GraphQLSchemaExtensions does not yet include symbol in its index signature
