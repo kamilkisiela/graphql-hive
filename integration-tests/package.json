@@ -34,7 +34,7 @@
     "@hive/rate-limit": "workspace:*",
     "@hive/server": "workspace:*",
     "@hive/storage": "workspace:*",
-    "@types/dockerode": "3.3.17",
+    "@types/dockerode": "3.3.18",
     "@types/ioredis": "4.28.10",
     "tslib": "2.5.2",
     "vitest": "0.31.1"
