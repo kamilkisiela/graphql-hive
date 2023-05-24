@@ -26,14 +26,14 @@ const GetClientNamesForHashesModel = z
     }),
   )
   .transform(data => {
-    const map = new Map<string, Array<string>>();
+    const map = new Map<string, Set<string>>();
     for (const record of data) {
       let clientNames = map.get(record.hash);
       if (clientNames == null) {
-        clientNames = [];
+        clientNames = new Set();
         map.set(record.hash, clientNames);
       }
-      clientNames.push(record.clientName === '' ? 'unknown' : record.clientName);
+      clientNames.add(record.clientName === '' ? 'unknown' : record.clientName);
     }
 
     return map;
@@ -699,7 +699,7 @@ export class OperationsReader {
     targetId: string;
     period: DateRange;
     schemaCoordinates: ReadonlyArray<string>;
-  }): Promise<Map<string, Array<string> | null>> {
+  }): Promise<Map<string, Set<string>>> {
     // 1. Fetch all hashes for schema coordinates
     const hashQuery = sql`
       SELECT
@@ -712,6 +712,9 @@ export class OperationsReader {
         period: args.period,
         extra: [sql`coordinate IN (${sql.array(args.schemaCoordinates, 'String')})`],
       })}
+      GROUP BY
+        "hash",
+        "coordinate"
     `;
 
     const hashesForSchemaCoordinates = await this.clickHouse
@@ -761,12 +764,23 @@ export class OperationsReader {
       .then(result => GetClientNamesForHashesModel.parse(result.data));
 
     // 3. Match hashes to schema coordinates
-    const clientsBySchemaCoordinate = new Map<string, Array<string> | null>();
+    const clientsBySchemaCoordinate = new Map<string, Set<string>>();
+
     for (const record of hashesForSchemaCoordinates) {
-      clientsBySchemaCoordinate.set(
-        record.coordinate,
-        clientNamesForHashes.get(record.hash) ?? null,
-      );
+      const newItems = clientNamesForHashes.get(record.hash);
+      if (newItems === undefined) {
+        continue;
+      }
+
+      let mapping = clientsBySchemaCoordinate.get(record.coordinate);
+      if (mapping == null) {
+        mapping = new Set();
+        clientsBySchemaCoordinate.set(record.coordinate, mapping);
+      }
+
+      for (const item of newItems) {
+        mapping.add(item);
+      }
     }
 
     return clientsBySchemaCoordinate;

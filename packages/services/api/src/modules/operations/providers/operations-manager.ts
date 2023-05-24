@@ -529,9 +529,13 @@ export class OperationsManager {
           schemaCoordinates,
         });
 
-        return schemaCoordinates.map(
-          schemaCoordinate => clientsBySchemaCoordinate.get(schemaCoordinate) ?? null,
-        );
+        return schemaCoordinates.map(schemaCoordinate => {
+          const clients = clientsBySchemaCoordinate.get(schemaCoordinate);
+          if (clients == null) {
+            return null;
+          }
+          return Array.from(clients);
+        });
       });
       this.clientListForSchemaCoordinateDataLoaderCache.set(cacheKey, loader);
     }
