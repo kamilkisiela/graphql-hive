@@ -533,6 +533,7 @@ export class OperationsManager {
           schemaCoordinate => clientsBySchemaCoordinate.get(schemaCoordinate) ?? null,
         );
       });
+      this.clientListForSchemaCoordinateDataLoaderCache.set(cacheKey, loader);
     }
 
     return loader;
