@@ -1,12 +1,14 @@
 import React, { ReactElement, ReactNode } from 'react';
 import { clsx } from 'clsx';
-import { PulseIcon } from '@/components/v2/icon';
+import { Tooltip } from '@/components/v2';
+import { PulseIcon, UsersIcon } from '@/components/v2/icon';
 import { Link } from '@/components/v2/link';
 import { Markdown } from '@/components/v2/markdown';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { formatNumber, useRouteSelector } from '@/lib/hooks';
 import { ChatBubbleIcon } from '@radix-ui/react-icons';
 import * as P from '@radix-ui/react-popover';
+import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { useArgumentListToggle } from './provider';
 import { SupergraphMetadataList } from './super-graph-metadata';
 
@@ -49,6 +51,7 @@ const SchemaExplorerUsageStats_UsageFragment = graphql(`
   fragment SchemaExplorerUsageStats_UsageFragment on SchemaCoordinateUsage {
     total
     isUsed
+    usedByClients
   }
 `);
 
@@ -60,23 +63,68 @@ export function SchemaExplorerUsageStats(props: {
   const percentage = props.totalRequests ? (usage.total / props.totalRequests) * 100 : 0;
 
   return (
-    <div className="flex flex-row items-center gap-2 text-xs ml-3">
-      <div className="grow">
-        <div className="text-center" title={`${usage.total} requests`}>
-          {formatNumber(usage.total)}
+    <TooltipProvider delayDuration={0}>
+      <div className="flex flex-row items-center gap-2 text-xs ml-3">
+        <div className="grow">
+          <div className="text-center" title={`${usage.total} requests`}>
+            {formatNumber(usage.total)}
+          </div>
+          <div
+            title={`${percentage.toFixed(2)}% of all requests`}
+            className="relative mt-1 w-full overflow-hidden rounded bg-orange-500/20"
+            style={{ width: 50, height: 5 }}
+          >
+            <div className="h-full bg-orange-500" style={{ width: `${percentage}%` }} />
+          </div>
         </div>
-        <div
-          title={`${percentage.toFixed(2)}% of all requests`}
-          className="relative mt-1 w-full overflow-hidden rounded bg-orange-500/20"
-          style={{ width: 50, height: 5 }}
+        <Tooltip
+          content={
+            <>
+              <div className="font-bold mb-1 text-lg">Field Usage</div>
+              {usage.isUsed === false ? (
+                <div>This field is currently not in use.</div>
+              ) : (
+                <ul>
+                  <li>This field has been queried in {usage.total} requests.</li>
+                  <li>{percentage.toFixed(2)}% of all requests use this field.</li>
+                </ul>
+              )}
+            </>
+          }
         >
-          <div className="h-full bg-orange-500" style={{ width: `${percentage}%` }} />
-        </div>
+          <div className="text-xl cursor-help">
+            <PulseIcon className="h-6 w-auto" />
+          </div>
+        </Tooltip>
+
+        <Tooltip
+          content={
+            <>
+              <div className="font-bold mb-1 text-lg">Client Usage</div>
+
+              {Array.isArray(usage.usedByClients) ? (
+                <>
+                  <div className="mb-2">This field is used by the following clients:</div>
+                  <ul>
+                    {usage.usedByClients.map(item => (
+                      <li key={item} className="font-bold">
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <div>This field is not used by any client.</div>
+              )}
+            </>
+          }
+        >
+          <div className="text-xl p-1 cursor-help">
+            <UsersIcon size={16} className="h-6 w-auto" />
+          </div>
+        </Tooltip>
       </div>
-      <div className="text-xl">
-        <PulseIcon className="h-6 w-auto" />
-      </div>
-    </div>
+    </TooltipProvider>
   );
 }
 

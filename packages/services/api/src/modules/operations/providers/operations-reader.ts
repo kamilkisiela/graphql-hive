@@ -1,5 +1,6 @@
 import { addMinutes, differenceInDays, format } from 'date-fns';
 import { Injectable } from 'graphql-modules';
+import * as z from 'zod';
 import type { Span } from '@sentry/types';
 import { batch } from '@theguild/buddy';
 import type { DateRange } from '../../../shared/entities';
@@ -7,6 +8,36 @@ import { sentry } from '../../../shared/sentry';
 import { ClickHouse, RowOf, sql } from './clickhouse-client';
 import { calculateTimeWindow } from './helpers';
 import { SqlValue } from './sql';
+
+const GetHashesForSchemaCoordinateModel = z
+  .array(
+    z.object({
+      hash: z.string(),
+      coordinate: z.string(),
+    }),
+  )
+  .transform(data => (data.length === 0 ? null : data));
+
+const GetClientNamesForHashesModel = z
+  .array(
+    z.object({
+      clientName: z.string(),
+      hash: z.string(),
+    }),
+  )
+  .transform(data => {
+    const map = new Map<string, Array<string>>();
+    for (const record of data) {
+      let clientNames = map.get(record.hash);
+      if (clientNames == null) {
+        clientNames = [];
+        map.set(record.hash, clientNames);
+      }
+      clientNames.push(record.clientName === '' ? 'unknown' : record.clientName);
+    }
+
+    return map;
+  });
 
 function formatDate(date: Date): string {
   return format(addMinutes(date, date.getTimezoneOffset()), 'yyyy-MM-dd HH:mm:ss');
@@ -661,6 +692,84 @@ export class OperationsReader {
         percentage: (client.total / total) * 100,
       };
     });
+  }
+
+  @sentry('OperationsReader.getClientListForSchemaCoordinates')
+  async getClientListForSchemaCoordinates(args: {
+    targetId: string;
+    period: DateRange;
+    schemaCoordinates: ReadonlyArray<string>;
+  }): Promise<Map<string, Array<string> | null>> {
+    // 1. Fetch all hashes for schema coordinates
+    const hashQuery = sql`
+      SELECT
+        "hash",
+        "coordinate"
+      FROM
+        "coordinates_daily"
+      ${this.createFilter({
+        target: args.targetId,
+        period: args.period,
+        extra: [sql`coordinate IN (${sql.array(args.schemaCoordinates, 'String')})`],
+      })}
+    `;
+
+    const hashesForSchemaCoordinates = await this.clickHouse
+      .query({
+        queryId: 'get_hashes_for_schema_coordinates',
+        query: hashQuery,
+        timeout: 10_000,
+      })
+      .then(result => GetHashesForSchemaCoordinateModel.parse(result.data));
+
+    if (hashesForSchemaCoordinates === null) {
+      return new Map();
+    }
+
+    // 1. Fetch all client names for hashes
+    const clientNamesForHashesQuery = sql`
+      SELECT
+        "client_name" as "clientName",
+        "hash"
+      FROM
+        "clients_daily"
+      ${this.createFilter({
+        target: args.targetId,
+        period: args.period,
+        extra: [
+          sql`
+            "hash" IN (
+              ${sql.array(
+                hashesForSchemaCoordinates.map(record => record.hash),
+                'String',
+              )}
+            )
+          `,
+        ],
+      })}
+      GROUP BY
+        "client_name",
+        "hash"
+    `;
+
+    const clientNamesForHashes = await this.clickHouse
+      .query({
+        queryId: 'get_client_names_for_hashes',
+        query: clientNamesForHashesQuery,
+        timeout: 10_000,
+      })
+      .then(result => GetClientNamesForHashesModel.parse(result.data));
+
+    // 3. Match hashes to schema coordinates
+    const clientsBySchemaCoordinate = new Map<string, Array<string> | null>();
+    for (const record of hashesForSchemaCoordinates) {
+      clientsBySchemaCoordinate.set(
+        record.coordinate,
+        clientNamesForHashes.get(record.hash) ?? null,
+      );
+    }
+
+    return clientsBySchemaCoordinate;
   }
 
   @sentry('OperationsReader.readUniqueClientNames')

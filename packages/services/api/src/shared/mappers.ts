@@ -36,6 +36,7 @@ import type {
   Token,
   User,
 } from './entities';
+import { type PromiseOrValue } from './helpers';
 
 export interface SchemaVersion extends SchemaVersionEntity {
   project: string;
@@ -53,6 +54,7 @@ export type WithSchemaCoordinatesUsage<T> = T & {
   usage: Promise<{
     [coordinate: string]: {
       total: number;
+      usedByClients: PromiseOrValue<Array<string> | null>;
     };
   }>;
 };
@@ -222,4 +224,10 @@ export type AdminStats = {
     from: string;
     to: string;
   };
+};
+
+export type SchemaCoordinateUsageTypeMapper = {
+  isUsed: boolean;
+  total: number;
+  usedByClients: PromiseOrValue<Array<string> | null>;
 };

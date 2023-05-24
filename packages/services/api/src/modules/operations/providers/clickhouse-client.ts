@@ -57,7 +57,7 @@ export class ClickHouse {
   }
 
   @atomic(({ query }: { query: SqlStatement }) => hashQuery(query))
-  async query<T>({
+  async query<T = unknown>({
     query,
     queryId,
     timeout,
