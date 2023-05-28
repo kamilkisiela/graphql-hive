@@ -69,12 +69,13 @@ export interface DateRange {
 export interface SchemaVersion {
   id: string;
   valid: boolean;
-  date: string;
+  createdAt: string;
   commit: string;
   baseSchema: string | null;
   hasPersistedSchemaChanges: boolean;
   previousSchemaVersionId: null | string;
   compositeSchemaSDL: null | string;
+  supergraphSDL: null | string;
   schemaCompositionErrors: Array<SchemaCompositionError> | null;
 }
 

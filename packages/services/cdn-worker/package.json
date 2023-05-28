@@ -23,12 +23,12 @@
     "zod": "3.21.4"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "4.20230419.0",
+    "@cloudflare/workers-types": "4.20230518.0",
     "@types/service-worker-mock": "2.0.1",
-    "@whatwg-node/fetch": "0.8.8",
-    "@whatwg-node/server": "0.7.5",
+    "@whatwg-node/fetch": "0.9.0",
+    "@whatwg-node/server": "0.8.0",
     "dotenv": "16.0.3",
-    "esbuild": "0.17.18",
+    "esbuild": "0.17.19",
     "fastify": "3.29.5",
     "itty-router": "2.6.6",
     "itty-router-extras": "0.4.2"

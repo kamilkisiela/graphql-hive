@@ -13,7 +13,7 @@
   },
   "license": "MIT",
   "private": true,
-  "packageManager": "pnpm@7.32.4",
+  "packageManager": "pnpm@7.32.5",
   "engines": {
     "node": ">=18",
     "pnpm": ">=7"
@@ -62,18 +62,18 @@
     "@graphql-inspector/cli": "3.4.19",
     "@manypkg/get-packages": "2.1.0",
     "@next/eslint-plugin-next": "13.3.1",
-    "@sentry/cli": "2.17.5",
-    "@swc/core": "1.3.57",
+    "@sentry/cli": "2.18.1",
+    "@swc/core": "1.3.60",
     "@theguild/eslint-config": "0.9.0",
     "@theguild/prettier-config": "1.1.3",
-    "@types/node": "18.16.7",
+    "@types/node": "18.16.14",
     "bob-the-bundler": "6.0.0",
     "cypress": "12.12.0",
     "dotenv": "16.0.3",
-    "eslint": "8.40.0",
+    "eslint": "8.41.0",
     "eslint-plugin-cypress": "2.13.3",
     "eslint-plugin-hive": "file:./rules",
-    "eslint-plugin-tailwindcss": "3.11.0",
+    "eslint-plugin-tailwindcss": "3.12.0",
     "fs-extra": "11.1.1",
     "graphql": "16.6.0",
     "husky": "8.0.3",
@@ -82,15 +82,15 @@
     "pg": "^8.10.0",
     "prettier": "2.8.8",
     "prettier-plugin-sql": "0.14.0",
-    "prettier-plugin-tailwindcss": "0.2.8",
+    "prettier-plugin-tailwindcss": "0.3.0",
     "pretty-quick": "3.1.3",
     "rimraf": "4.4.1",
     "ts-node": "10.9.1",
     "tsup": "6.7.0",
     "tsx": "3.12.7",
-    "turbo": "1.9.3",
+    "turbo": "1.9.7",
     "typescript": "5.0.4",
-    "vitest": "0.31.0"
+    "vitest": "0.31.1"
   },
   "husky": {
     "hooks": {
@@ -117,9 +117,9 @@
       "@slonik/migrator@0.11.3": "patches/@slonik__migrator@0.11.3.patch",
       "@apollo/federation@0.38.1": "patches/@apollo__federation@0.38.1.patch",
       "@octokit/webhooks-methods@3.0.1": "patches/@octokit__webhooks-methods@3.0.1.patch",
-      "bullmq@3.12.0": "patches/bullmq@3.12.0.patch",
+      "bullmq@3.13.4": "patches/bullmq@3.13.4.patch",
       "@theguild/editor@1.2.5": "patches/@theguild__editor@1.2.5.patch",
-      "eslint@8.40.0": "patches/eslint@8.40.0.patch",
+      "eslint@8.41.0": "patches/eslint@8.41.0.patch",
       "@graphql-eslint/eslint-plugin@3.18.0": "patches/@graphql-eslint__eslint-plugin@3.18.0.patch"
     }
   }

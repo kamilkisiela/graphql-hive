@@ -1,3 +1,4 @@
+import DataLoader from 'dataloader';
 import { Injectable, Scope } from 'graphql-modules';
 import LRU from 'lru-cache';
 import type { DateRange } from '../../../shared/entities';
@@ -510,6 +511,62 @@ export class OperationsManager {
       period,
       operations,
     });
+  }
+
+  private clientListForSchemaCoordinateDataLoaderCache = new Map<
+    string,
+    DataLoader<string, Array<string> | null>
+  >();
+
+  private getClientListForSchemaCoordinateDataLoader(args: { target: string; period: DateRange }) {
+    const cacheKey = [args.target, args.period.from, args.period.to].join('__');
+    let loader = this.clientListForSchemaCoordinateDataLoaderCache.get(cacheKey);
+
+    if (loader == null) {
+      loader = new DataLoader<string, Array<string> | null>(async schemaCoordinates => {
+        const clientsBySchemaCoordinate = await this.reader.getClientListForSchemaCoordinates({
+          targetId: args.target,
+          period: args.period,
+          schemaCoordinates,
+        });
+
+        return schemaCoordinates.map(schemaCoordinate => {
+          const clients = clientsBySchemaCoordinate.get(schemaCoordinate);
+          if (clients == null) {
+            return null;
+          }
+          return Array.from(clients);
+        });
+      });
+      this.clientListForSchemaCoordinateDataLoaderCache.set(cacheKey, loader);
+    }
+
+    return loader;
+  }
+
+  /**
+   * Receive a list of clients that queried a specific schema coordinate.
+   * Uses DataLoader underneath for batching.
+   */
+  async getClientListForSchemaCoordinate(
+    args: {
+      period: DateRange;
+      schemaCoordinate: string;
+    } & TargetSelector,
+  ) {
+    await this.authManager.ensureTargetAccess({
+      organization: args.organization,
+      project: args.project,
+      target: args.target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    const loader = this.getClientListForSchemaCoordinateDataLoader({
+      target: args.target,
+      period: args.period,
+    });
+
+    return loader.load(args.schemaCoordinate);
   }
 
   async hasOperationsForOrganization(selector: OrganizationSelector): Promise<boolean> {

@@ -12,6 +12,9 @@ export const GraphQLInterfaceTypeComponent_TypeFragment = graphql(`
     fields {
       ...GraphQLFields_FieldFragment
     }
+    supergraphMetadata {
+      ...GraphQLTypeCard_SupergraphMetadataFragment
+    }
   }
 `);
 
@@ -26,6 +29,7 @@ export function GraphQLInterfaceTypeComponent(props: {
       name={ttype.name}
       description={ttype.description}
       implements={ttype.interfaces}
+      supergraphMetadata={ttype.supergraphMetadata}
     >
       <GraphQLFields fields={ttype.fields} totalRequests={props.totalRequests} />
     </GraphQLTypeCard>

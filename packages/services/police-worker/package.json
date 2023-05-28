@@ -8,8 +8,8 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "4.20230419.0",
+    "@cloudflare/workers-types": "4.20230518.0",
     "@types/service-worker-mock": "2.0.1",
-    "esbuild": "0.17.18"
+    "esbuild": "0.17.19"
   }
 }

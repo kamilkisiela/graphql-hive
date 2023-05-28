@@ -1,6 +1,6 @@
 import { ReactElement, ReactNode } from 'react';
 import { Label, Section } from '@/components/common';
-import { Link, Radio, RadioGroup } from '@/components/v2';
+import { Radio, RadioGroup } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { BillingPlanType } from '@/graphql';
 import { CheckIcon } from '@radix-ui/react-icons';
@@ -15,18 +15,19 @@ const planCollection: {
   [BillingPlanType.Hobby]: {
     description: 'For personal or small projects',
     features: [
-      'Unlimited seats',
-      'Unlimited schema pushes',
-      'Limit of 1M operations',
+      'Unlimited seats, projects and organizations',
+      'Unlimited schema pushes & checks',
+      'Full access to all features (including SSO)',
+      'Limit of 1M operations per month',
       '7 days of usage data retention',
     ],
   },
   [BillingPlanType.Pro]: {
-    description: 'For scaling API',
+    description: 'For scaling APIs and teams',
     features: [
-      'Unlimited seats',
-      'Unlimited schema pushes',
-      '$10 per 1M operations',
+      '+ $10 per 1M operations',
+      'Change your plan at any time',
+      'Everything in Hobby plan, and:',
       '90 days of usage data retention',
     ],
     footer: (
@@ -41,12 +42,21 @@ const planCollection: {
       'Unlimited seats',
       'Unlimited operations',
       'Unlimited schema pushes',
+      'Change your plan at any time',
+      'Improved pricing as you scale',
       '12 months of usage data retention',
-      <span className="flex gap-1">
-        Support from
-        <Link variant="primary" href="https://the-guild.dev" target="_blank" rel="noreferrer">
+      <span className="gap-1">
+        GraphQL/APIs support and guidance
+        <br />
+        from{' '}
+        <a
+          href="https://the-guild.dev"
+          target="_blank"
+          rel="noreferrer"
+          className="font-medium text-orange-500 transition-colors hover:underline"
+        >
           The Guild
-        </Link>
+        </a>
       </span>,
     ],
     footer: 'Shape a custom plan for your business',

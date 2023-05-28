@@ -8,16 +8,16 @@
     "test:integration": "vitest"
   },
   "dependencies": {
-    "@apollo/gateway": "2.4.3",
+    "@apollo/gateway": "2.4.5",
     "@apollo/server": "4.7.1",
-    "@aws-sdk/client-s3": "3.329.0",
+    "@aws-sdk/client-s3": "3.337.0",
     "@esm2cjs/execa": "6.1.1-cjs.1",
     "@graphql-hive/client": "workspace:*",
     "@graphql-hive/core": "workspace:*",
     "@graphql-typed-document-node/core": "3.2.0",
-    "@trpc/client": "10.25.1",
-    "@trpc/server": "10.25.1",
-    "@whatwg-node/fetch": "0.8.8",
+    "@trpc/client": "10.27.1",
+    "@trpc/server": "10.27.1",
+    "@whatwg-node/fetch": "0.9.0",
     "bcryptjs": "2.4.3",
     "date-fns": "2.30.0",
     "dockerode": "3.3.5",
@@ -34,9 +34,9 @@
     "@hive/rate-limit": "workspace:*",
     "@hive/server": "workspace:*",
     "@hive/storage": "workspace:*",
-    "@types/dockerode": "3.3.17",
+    "@types/dockerode": "3.3.18",
     "@types/ioredis": "4.28.10",
-    "tslib": "2.5.0",
-    "vitest": "0.31.0"
+    "tslib": "2.5.2",
+    "vitest": "0.31.1"
   }
 }

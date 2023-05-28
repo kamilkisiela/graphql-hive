@@ -6,3 +6,4 @@ packages:
   - packages/libraries/*
   - integration-tests
   - deployment
+  - scripts

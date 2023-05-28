@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@types/lodash.sortby": "4.7.7",
-    "tslib": "2.5.0"
+    "tslib": "2.5.2"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",

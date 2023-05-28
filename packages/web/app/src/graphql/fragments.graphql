@@ -142,6 +142,11 @@ fragment SchemaCompareResultFields on SchemaCompareResult {
     before
     after
   }
+  service {
+    name
+    after
+    before
+  }
 }
 
 fragment SchemaCompareErrorFields on SchemaCompareError {

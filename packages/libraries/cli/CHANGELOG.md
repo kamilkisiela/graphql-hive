@@ -1,5 +1,14 @@
 # @graphql-hive/cli
 
+## 0.22.0
+
+### Minor Changes
+
+- [#1730](https://github.com/kamilkisiela/graphql-hive/pull/1730)
+  [`9238a1f9`](https://github.com/kamilkisiela/graphql-hive/commit/9238a1f91594923abd171c3ec2029c3eb1265055)
+  Thanks [@dotansimha](https://github.com/dotansimha)! - Added support for new warnings feature
+  during `schema:check` commands
+
 ## 0.21.0
 
 ### Minor Changes

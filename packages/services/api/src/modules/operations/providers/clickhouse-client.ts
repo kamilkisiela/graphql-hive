@@ -1,11 +1,19 @@
+import { createHash } from 'node:crypto';
 import Agent from 'agentkeepalive';
 import { Inject, Injectable } from 'graphql-modules';
 import type { Span } from '@sentry/types';
 import { atomic } from '../../../shared/helpers';
 import { HttpClient } from '../../shared/providers/http-client';
 import { Logger } from '../../shared/providers/logger';
+import { sql, SqlStatement, toQueryParams } from './sql';
 import type { ClickHouseConfig } from './tokens';
 import { CLICKHOUSE_CONFIG } from './tokens';
+
+export { sql } from './sql';
+
+function hashQuery(query: SqlStatement): string {
+  return createHash('sha256').update(query.sql).update(JSON.stringify(query.values)).digest('hex');
+}
 
 export interface QueryResponse<T> {
   data: readonly T[];
@@ -48,14 +56,14 @@ export class ClickHouse {
     });
   }
 
-  @atomic(({ query }: { query: string }) => query)
-  async query<T>({
+  @atomic(({ query }: { query: SqlStatement }) => hashQuery(query))
+  async query<T = unknown>({
     query,
     queryId,
     timeout,
     span: parentSpan,
   }: {
-    query: string;
+    query: SqlStatement;
     queryId: string;
     timeout: number;
     span?: Span;
@@ -75,13 +83,14 @@ export class ClickHouse {
           context: {
             description: `ClickHouse - ${queryId}`,
           },
-          body: query,
+          body: query.sql,
           headers: {
             'Accept-Encoding': 'gzip',
             Accept: 'application/json',
           },
           searchParams: {
             default_format: 'JSON',
+            ...toQueryParams(query),
           },
           username: this.config.username,
           password: this.config.password,
@@ -140,13 +149,13 @@ export class ClickHouse {
     return response;
   }
 
-  translateWindow({ value, unit }: { value: number; unit: 'd' | 'h' | 'm' }): string {
+  translateWindow({ value, unit }: { value: number; unit: 'd' | 'h' | 'm' }) {
     const unitMap = {
       d: 'DAY',
       h: 'HOUR',
       m: 'MINUTE',
     };
 
-    return `${value} ${unitMap[unit]}`;
+    return sql.raw(`${value} ${unitMap[unit]}`);
   }
 }

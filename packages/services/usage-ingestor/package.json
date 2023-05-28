@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentry/node": "7.51.2",
+    "@sentry/node": "7.52.1",
     "agentkeepalive": "4.3.0",
     "date-fns": "2.30.0",
     "dotenv": "16.0.3",
@@ -25,6 +25,6 @@
     "@hive/service-common": "workspace:*",
     "@hive/usage-common": "workspace:*",
     "pino-pretty": "10.0.0",
-    "tslib": "2.5.0"
+    "tslib": "2.5.2"
   }
 }

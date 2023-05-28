@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@slonik/migrator": "0.11.3",
-    "@whatwg-node/fetch": "0.8.8",
+    "@whatwg-node/fetch": "0.9.0",
     "bcryptjs": "2.4.3",
     "dotenv": "16.0.3",
     "got": "12.6.0",
@@ -32,10 +32,10 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "2.4.2",
-    "@types/node": "18.16.7",
-    "@types/pg": "8.6.6",
+    "@types/node": "18.16.14",
+    "@types/pg": "8.10.1",
     "copyfiles": "2.4.1",
     "pg-promise": "11.4.3",
-    "tslib": "2.5.0"
+    "tslib": "2.5.2"
   }
 }

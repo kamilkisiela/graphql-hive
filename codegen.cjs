@@ -111,6 +111,7 @@ const config = {
           User: '../shared/entities#User as UserMapper',
           SchemaPolicy: '../shared/entities#SchemaPolicy as SchemaPolicyMapper',
           SchemaPolicyRule: '../shared/entities#SchemaPolicyAvailableRuleObject',
+          SchemaCoordinateUsage: '../shared/mappers#SchemaCoordinateUsageTypeMapper',
         },
       },
     },

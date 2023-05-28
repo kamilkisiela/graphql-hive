@@ -141,6 +141,11 @@ export class SchemaManager {
     return this.storage.getLatestSchemas(selector);
   }
 
+  async getMatchingServiceSchemaOfVersions(versions: { before: string | null; after: string }) {
+    this.logger.debug('Fetching service schema of versions (selector=%o)', versions);
+    return this.storage.getMatchingServiceSchemaOfVersions(versions);
+  }
+
   async getMaybeLatestValidVersion(selector: TargetSelector) {
     this.logger.debug('Fetching latest valid version (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
@@ -313,10 +318,12 @@ export class SchemaManager {
       (
         | {
             compositeSchemaSDL: null;
+            supergraphSDL: null;
             schemaCompositionErrors: Array<SchemaCompositionError>;
           }
         | {
             compositeSchemaSDL: string;
+            supergraphSDL: string | null;
             schemaCompositionErrors: null;
           }
       ),

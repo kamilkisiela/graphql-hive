@@ -52,14 +52,14 @@ export const TrendingUpIcon = ({ className }: IconProps): ReactElement => (
   </svg>
 );
 
-export const PlusIcon = ({ className }: IconProps): ReactElement => (
+export const PlusIcon = (props: IconProps & { size?: number }): ReactElement => (
   <svg
     viewBox="0 0 24 24"
-    width="24"
-    height="24"
+    width={props.size ?? 24}
+    height={props.size ?? 24}
     stroke="currentColor"
     xmlns="http://www.w3.org/2000/svg"
-    className={className}
+    className={props.className}
   >
     <path d="M12 5V19" {...DEFAULT_PATH_PROPS} />
     <path d="M5 12H19" {...DEFAULT_PATH_PROPS} />
@@ -107,6 +107,24 @@ export const UserPlusMinusIcon = ({
     />
     {isPlus && <path d="M20 8V14" {...DEFAULT_PATH_PROPS} />}
     <path d="M23 11H17" {...DEFAULT_PATH_PROPS} />
+  </svg>
+);
+
+export const UsersIcon = (props: IconProps & { size: number }): ReactElement => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    width={props.size}
+    height={props.size}
+    fill="none"
+    stroke="currentColor"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth={2}
+  >
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx={9} cy={7} r={4} />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
   </svg>
 );
 
@@ -525,5 +543,27 @@ export const DiffIcon = ({ className }: IconProps): ReactElement => (
       clipRule="evenodd"
       d="M2 3.5l.5-.5h5l.5.5v9l-.5.5h-5l-.5-.5v-9zM3 12h4V6H3v6zm0-7h4V4H3v1zm6.5-2h5l.5.5v9l-.5.5h-5l-.5-.5v-9l.5-.5zm.5 9h4v-2h-4v2zm0-4h4V4h-4v4z"
     />
+  </svg>
+);
+
+export const PackageIcon = (
+  props: IconProps & {
+    size?: number;
+  },
+): ReactElement => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={props.size ?? 16}
+    height={props.size ?? 16}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth={2}
+    className={props.className}
+  >
+    <path d="m16.5 9.4-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+    <path d="M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12" />
   </svg>
 );

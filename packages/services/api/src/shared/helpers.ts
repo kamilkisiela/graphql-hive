@@ -224,3 +224,5 @@ export function pushIfMissing<T>(list: T[], item: T): void {
     list.push(item);
   }
 }
+
+export type PromiseOrValue<T> = Promise<T> | T;

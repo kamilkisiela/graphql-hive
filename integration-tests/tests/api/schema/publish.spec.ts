@@ -3002,7 +3002,6 @@ test('Composition Network Failure (Federation 2)', async () => {
     await enableExternalSchemaComposition(
       {
         endpoint: `http://${dockerAddress}/no_compose`,
-        // eslint-disable-next-line no-process-env
         secret: process.env.EXTERNAL_COMPOSITION_SECRET!,
         project: project.cleanId,
         organization: organization.cleanId,
@@ -3063,11 +3062,15 @@ test('Composition Network Failure (Federation 2)', async () => {
 
       directive @join__graph(name: String!, url: String!) on ENUM_VALUE
 
-      directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boolean! = false, resolvable: Boolean! = true) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+      directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boolean! = false, resolvable: Boolean! = true, isInterfaceObject: Boolean! = false) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
 
-      directive @join__field(graph: join__Graph!, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+      directive @join__field(graph: join__Graph, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 
       directive @join__implements(graph: join__Graph!, interface: String!) repeatable on OBJECT | INTERFACE
+
+      directive @join__unionMember(graph: join__Graph!, member: String!) repeatable on UNION
+
+      directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
 
       enum link__Purpose {
         """
@@ -3101,11 +3104,15 @@ test('Composition Network Failure (Federation 2)', async () => {
 
       directive @join__graph(name: String!, url: String!) on ENUM_VALUE
 
-      directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boolean! = false, resolvable: Boolean! = true) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+      directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boolean! = false, resolvable: Boolean! = true, isInterfaceObject: Boolean! = false) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
 
-      directive @join__field(graph: join__Graph!, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+      directive @join__field(graph: join__Graph, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 
       directive @join__implements(graph: join__Graph!, interface: String!) repeatable on OBJECT | INTERFACE
+
+      directive @join__unionMember(graph: join__Graph!, member: String!) repeatable on UNION
+
+      directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
 
       enum link__Purpose {
         """

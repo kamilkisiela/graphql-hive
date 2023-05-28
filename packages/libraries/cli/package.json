@@ -1,6 +1,6 @@
 {
   "name": "@graphql-hive/cli",
-  "version": "0.21.0",
+  "version": "0.22.0",
   "description": "A CLI util to manage and control your GraphQL Hive",
   "repository": {
     "type": "git",
@@ -46,16 +46,16 @@
   "dependencies": {
     "@graphql-hive/core": "0.2.3",
     "@graphql-inspector/core": "4.2.1",
-    "@graphql-tools/code-file-loader": "~7.3.6",
-    "@graphql-tools/graphql-file-loader": "~7.5.5",
-    "@graphql-tools/json-file-loader": "~7.4.6",
-    "@graphql-tools/load": "~7.8.0",
-    "@graphql-tools/url-loader": "~7.17.0",
-    "@graphql-tools/utils": "9.2.1",
+    "@graphql-tools/code-file-loader": "~8.0.0",
+    "@graphql-tools/graphql-file-loader": "~8.0.0",
+    "@graphql-tools/json-file-loader": "~8.0.0",
+    "@graphql-tools/load": "~8.0.0",
+    "@graphql-tools/url-loader": "~8.0.0",
+    "@graphql-tools/utils": "10.0.0",
     "@oclif/core": "^1.23.0",
     "@oclif/plugin-help": "5.2.9",
     "@oclif/plugin-update": "3.1.13",
-    "@whatwg-node/fetch": "0.8.8",
+    "@whatwg-node/fetch": "0.9.0",
     "colors": "1.4.0",
     "env-ci": "7.3.0",
     "git-parse": "3.0.1",
@@ -66,7 +66,7 @@
     "mkdirp": "2.1.6",
     "rimraf": "4.4.1",
     "ts-node": "10.9.1",
-    "tslib": "2.5.0",
+    "tslib": "2.5.2",
     "zod": "3.21.4"
   },
   "devDependencies": {

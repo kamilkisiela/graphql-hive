@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   db:
-    image: postgres:14.6-alpine
+    image: postgres:14.8-alpine
     networks:
       - 'stack'
     healthcheck:
@@ -88,7 +88,7 @@ services:
       - 'stack'
 
   broker:
-    image: vectorized/redpanda:v23.1.8
+    image: vectorized/redpanda:v23.1.10
     container_name: broker
     hostname: broker
     networks:

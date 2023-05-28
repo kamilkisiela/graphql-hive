@@ -48,7 +48,7 @@ export function deployDbMigrations({
       image,
       env: {
         POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
-        POSTGRES_PORT: connectionString.apply(connection => connection.port ?? '5432'),
+        POSTGRES_PORT: connectionString.apply(connection => connection.port || '5432'),
         POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),
         POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
         POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
@@ -60,6 +60,7 @@ export function deployDbMigrations({
         CLICKHOUSE_USERNAME: clickhouse.config.username,
         CLICKHOUSE_PASSWORD: clickhouse.config.password,
         CLICKHOUSE_PROTOCOL: clickhouse.config.protocol,
+        CLICKHOUSE_MIGRATOR_GRAPHQL_HIVE_CLOUD: '1',
         KAFKA_BROKER: kafka.config.endpoint,
         TS_NODE_TRANSPILE_ONLY: 'true',
         RUN_S3_LEGACY_CDN_KEY_IMPORT: '1',

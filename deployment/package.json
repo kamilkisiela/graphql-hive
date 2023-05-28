@@ -5,20 +5,20 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@lbrlabs/pulumi-grafana": "0.0.9",
+    "@lbrlabs/pulumi-grafana": "0.0.10",
     "@manypkg/get-packages": "2.1.0",
     "@pulumi/cloudflare": "4.16.0",
-    "@pulumi/kubernetes": "3.26.0",
+    "@pulumi/kubernetes": "3.28.0",
     "@pulumi/kubernetesx": "0.1.6",
-    "@pulumi/pulumi": "3.66.0",
-    "@pulumi/random": "4.13.0",
+    "@pulumi/pulumi": "3.68.0",
+    "@pulumi/random": "4.13.2",
     "js-yaml": "4.1.0",
-    "pg-connection-string": "2.5.0"
+    "pg-connection-string": "2.6.0"
   },
   "devDependencies": {
     "@types/js-yaml": "4.0.5",
     "@types/mime-types": "2.1.1",
-    "@types/node": "18.16.7",
+    "@types/node": "18.16.14",
     "typescript": "5.0.4"
   }
 }

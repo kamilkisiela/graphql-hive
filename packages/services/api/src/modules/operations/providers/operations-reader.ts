@@ -1,11 +1,43 @@
 import { addMinutes, differenceInDays, format } from 'date-fns';
 import { Injectable } from 'graphql-modules';
+import * as z from 'zod';
 import type { Span } from '@sentry/types';
 import { batch } from '@theguild/buddy';
 import type { DateRange } from '../../../shared/entities';
 import { sentry } from '../../../shared/sentry';
-import { ClickHouse, RowOf } from './clickhouse-client';
+import { ClickHouse, RowOf, sql } from './clickhouse-client';
 import { calculateTimeWindow } from './helpers';
+import { SqlValue } from './sql';
+
+const GetHashesForSchemaCoordinateModel = z
+  .array(
+    z.object({
+      hash: z.string(),
+      coordinate: z.string(),
+    }),
+  )
+  .transform(data => (data.length === 0 ? null : data));
+
+const GetClientNamesForHashesModel = z
+  .array(
+    z.object({
+      clientName: z.string(),
+      hash: z.string(),
+    }),
+  )
+  .transform(data => {
+    const map = new Map<string, Set<string>>();
+    for (const record of data) {
+      let clientNames = map.get(record.hash);
+      if (clientNames == null) {
+        clientNames = new Set();
+        map.set(record.hash, clientNames);
+      }
+      clientNames.add(record.clientName === '' ? 'unknown' : record.clientName);
+    }
+
+    return map;
+  });
 
 function formatDate(date: Date): string {
   return format(addMinutes(date, date.getTimezoneOffset()), 'yyyy-MM-dd HH:mm:ss');
@@ -47,19 +79,19 @@ function ensureNumber(value: number | string): number {
 function pickQueryByPeriod(
   queryMap: {
     hourly: {
-      query: string;
+      query: SqlValue;
       queryId: string;
       timeout: number;
       span?: Span | undefined;
     };
     daily: {
-      query: string;
+      query: SqlValue;
       queryId: string;
       timeout: number;
       span?: Span | undefined;
     };
     regular: {
-      query: string;
+      query: SqlValue;
       queryId: string;
       timeout: number;
       span?: Span | undefined;
@@ -148,18 +180,18 @@ export class OperationsReader {
     span?: Span,
   ): Promise<Record<string, number>> {
     const coordinates = fields.map(selector => this.makeId(selector));
-    const conditions = [`( coordinate IN ('${coordinates.join(`', '`)}') )`];
+    const conditions = [sql`(coordinate IN (${sql.array(coordinates, 'String')}))`];
 
     if (Array.isArray(excludedClients) && excludedClients.length > 0) {
       // Eliminate coordinates fetched by excluded clients.
       // We can connect a coordinate to a client by using the hash column.
       // The hash column is basically a unique identifier of a GraphQL operation.
-      conditions.push(`
+      conditions.push(sql`
         hash NOT IN (
           SELECT hash FROM clients_daily ${this.createFilter({
             target,
             period,
-            extra: [`client_name IN ('${excludedClients.join(`', '`)}')`],
+            extra: [sql`client_name IN (${sql.array(excludedClients, 'String')})`],
           })} GROUP BY hash
         )
       `);
@@ -169,7 +201,7 @@ export class OperationsReader {
       total: string;
       coordinate: string;
     }>({
-      query: `
+      query: sql`
             SELECT
               coordinate,
               sum(total) as total
@@ -223,7 +255,7 @@ export class OperationsReader {
     const query = pickQueryByPeriod(
       {
         daily: {
-          query: `SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_daily ${this.createFilter(
+          query: sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_daily ${this.createFilter(
             {
               target,
               period,
@@ -235,7 +267,7 @@ export class OperationsReader {
           span,
         },
         hourly: {
-          query: `SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_hourly ${this.createFilter(
+          query: sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_hourly ${this.createFilter(
             {
               target,
               period,
@@ -247,11 +279,13 @@ export class OperationsReader {
           span,
         },
         regular: {
-          query: `SELECT count() as total, sum(ok) as totalOk FROM operations ${this.createFilter({
-            target,
-            period,
-            operations,
-          })}`,
+          query: sql`SELECT count() as total, sum(ok) as totalOk FROM operations ${this.createFilter(
+            {
+              target,
+              period,
+              operations,
+            },
+          )}`,
           queryId: 'count_operations_regular',
           timeout: 30_000,
           span,
@@ -304,7 +338,7 @@ export class OperationsReader {
     const query = pickQueryByPeriod(
       {
         daily: {
-          query: `
+          query: sql`
             SELECT count(distinct hash) as total
             FROM operations_daily
             ${this.createFilter({
@@ -318,7 +352,7 @@ export class OperationsReader {
           span,
         },
         hourly: {
-          query: `
+          query: sql`
             SELECT count(distinct hash) as total
             FROM operations_hourly
             ${this.createFilter({
@@ -332,7 +366,7 @@ export class OperationsReader {
           span,
         },
         regular: {
-          query: `
+          query: sql`
             SELECT count(distinct hash) as total
             FROM operations
             ${this.createFilter({
@@ -381,7 +415,7 @@ export class OperationsReader {
     const query = pickQueryByPeriod(
       {
         daily: {
-          query: `
+          query: sql`
             SELECT sum(total) as total, sum(total_ok) as totalOk, hash 
             FROM operations_daily
             ${this.createFilter({
@@ -396,7 +430,7 @@ export class OperationsReader {
           span,
         },
         hourly: {
-          query: `
+          query: sql`
             SELECT 
               sum(total) as total,
               sum(total_ok) as totalOk,
@@ -414,7 +448,7 @@ export class OperationsReader {
           span,
         },
         regular: {
-          query: `
+          query: sql`
             SELECT count() as total, sum(ok) as totalOk, hash
             FROM operations
             ${this.createFilter({
@@ -443,7 +477,7 @@ export class OperationsReader {
         hash: string;
         operation_kind: string;
       }>({
-        query: `
+        query: sql`
           SELECT 
             name,
             hash,
@@ -503,13 +537,13 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       body: string;
     }>({
-      query: `
+      query: sql`
         SELECT 
           body
         FROM operation_collection
           ${this.createFilter({
             target,
-            extra: [`hash = '${hash}'`],
+            extra: [sql`hash = ${hash}`],
           })}
         LIMIT 1
       `,
@@ -553,7 +587,7 @@ export class OperationsReader {
       pickQueryByPeriod(
         {
           daily: {
-            query: `
+            query: sql`
               SELECT 
                 sum(total) as total,
                 client_name,
@@ -571,7 +605,7 @@ export class OperationsReader {
             span,
           },
           hourly: {
-            query: `
+            query: sql`
               SELECT 
                 count(*) as total,
                 client_name,
@@ -589,7 +623,7 @@ export class OperationsReader {
             span,
           },
           regular: {
-            query: `
+            query: sql`
               SELECT 
                 count(*) as total,
                 client_name,
@@ -660,6 +694,98 @@ export class OperationsReader {
     });
   }
 
+  @sentry('OperationsReader.getClientListForSchemaCoordinates')
+  async getClientListForSchemaCoordinates(args: {
+    targetId: string;
+    period: DateRange;
+    schemaCoordinates: ReadonlyArray<string>;
+  }): Promise<Map<string, Set<string>>> {
+    // 1. Fetch all hashes for schema coordinates
+    const hashQuery = sql`
+      SELECT
+        "hash",
+        "coordinate"
+      FROM
+        "coordinates_daily"
+      ${this.createFilter({
+        target: args.targetId,
+        period: args.period,
+        extra: [sql`coordinate IN (${sql.array(args.schemaCoordinates, 'String')})`],
+      })}
+      GROUP BY
+        "hash",
+        "coordinate"
+    `;
+
+    const hashesForSchemaCoordinates = await this.clickHouse
+      .query({
+        queryId: 'get_hashes_for_schema_coordinates',
+        query: hashQuery,
+        timeout: 10_000,
+      })
+      .then(result => GetHashesForSchemaCoordinateModel.parse(result.data));
+
+    if (hashesForSchemaCoordinates === null) {
+      return new Map();
+    }
+
+    // 1. Fetch all client names for hashes
+    const clientNamesForHashesQuery = sql`
+      SELECT
+        "client_name" as "clientName",
+        "hash"
+      FROM
+        "clients_daily"
+      ${this.createFilter({
+        target: args.targetId,
+        period: args.period,
+        extra: [
+          sql`
+            "hash" IN (
+              ${sql.array(
+                hashesForSchemaCoordinates.map(record => record.hash),
+                'String',
+              )}
+            )
+          `,
+        ],
+      })}
+      GROUP BY
+        "client_name",
+        "hash"
+    `;
+
+    const clientNamesForHashes = await this.clickHouse
+      .query({
+        queryId: 'get_client_names_for_hashes',
+        query: clientNamesForHashesQuery,
+        timeout: 10_000,
+      })
+      .then(result => GetClientNamesForHashesModel.parse(result.data));
+
+    // 3. Match hashes to schema coordinates
+    const clientsBySchemaCoordinate = new Map<string, Set<string>>();
+
+    for (const record of hashesForSchemaCoordinates) {
+      const newItems = clientNamesForHashes.get(record.hash);
+      if (newItems === undefined) {
+        continue;
+      }
+
+      let mapping = clientsBySchemaCoordinate.get(record.coordinate);
+      if (mapping == null) {
+        mapping = new Set();
+        clientsBySchemaCoordinate.set(record.coordinate, mapping);
+      }
+
+      for (const item of newItems) {
+        mapping.add(item);
+      }
+    }
+
+    return clientsBySchemaCoordinate;
+  }
+
   @sentry('OperationsReader.readUniqueClientNames')
   async readUniqueClientNames(
     {
@@ -682,7 +808,7 @@ export class OperationsReader {
       count: string;
       client_name: string;
     }>({
-      query: `
+      query: sql`
         SELECT 
           sum(total) as count,
           client_name
@@ -691,7 +817,7 @@ export class OperationsReader {
           target,
           period,
           operations,
-          extra: ['notEmpty(client_name)'],
+          extra: [sql`notEmpty(client_name)`],
         })}
         GROUP BY client_name
       `,
@@ -805,7 +931,7 @@ export class OperationsReader {
       latency: number;
       total: number;
     }>({
-      query: `
+      query: sql`
         WITH histogram(90)(logDuration) AS hist
         SELECT
             arrayJoin(hist).1 as latency,
@@ -850,7 +976,7 @@ export class OperationsReader {
       pickQueryByPeriod(
         {
           daily: {
-            query: `
+            query: sql`
               SELECT 
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
               FROM operations_daily
@@ -861,7 +987,7 @@ export class OperationsReader {
             span,
           },
           hourly: {
-            query: `
+            query: sql`
               SELECT 
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
               FROM operations_hourly
@@ -872,7 +998,7 @@ export class OperationsReader {
             span,
           },
           regular: {
-            query: `
+            query: sql`
               SELECT 
                 quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles
               FROM operations
@@ -910,7 +1036,7 @@ export class OperationsReader {
       pickQueryByPeriod(
         {
           daily: {
-            query: `
+            query: sql`
               SELECT 
                 hash,
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
@@ -923,7 +1049,7 @@ export class OperationsReader {
             span,
           },
           hourly: {
-            query: `
+            query: sql`
               SELECT 
                 hash,
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
@@ -936,7 +1062,7 @@ export class OperationsReader {
             span,
           },
           regular: {
-            query: `
+            query: sql`
               SELECT 
                 hash,
                 quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles
@@ -973,7 +1099,7 @@ export class OperationsReader {
       client_name: string;
     }>({
       queryId: 'client_names_per_target_v2',
-      query: `SELECT client_name FROM clients_daily ${this.createFilter({
+      query: sql`SELECT client_name FROM clients_daily ${this.createFilter({
         target,
         period,
       })} GROUP BY client_name`,
@@ -1008,7 +1134,7 @@ export class OperationsReader {
       pickQueryByPeriod(
         {
           daily: {
-            query: `
+            query: sql`
               SELECT 
                 multiply(
                   toUnixTimestamp(
@@ -1030,7 +1156,7 @@ export class OperationsReader {
             span,
           },
           hourly: {
-            query: `
+            query: sql`
               SELECT 
                 multiply(
                   toUnixTimestamp(
@@ -1052,7 +1178,7 @@ export class OperationsReader {
             span,
           },
           regular: {
-            query: `
+            query: sql`
               SELECT 
                 multiply(
                   toUnixTimestamp(
@@ -1094,9 +1220,10 @@ export class OperationsReader {
       total: string;
     }>({
       // TODO: use the operations_daily table once the FF_CLICKHOUSE_V2_TABLES is available for everyone
-      query: `SELECT sum(total) as total from operations_hourly WHERE target IN ('${targets.join(
-        `', '`,
-      )}')`,
+      query: sql`SELECT sum(total) as total from operations_hourly WHERE target IN (${sql.array(
+        targets,
+        'String',
+      )})`,
       queryId: 'count_operations_for_targets',
       timeout: 15_000,
     });
@@ -1202,19 +1329,19 @@ export class OperationsReader {
     period: DateRange;
     typenames: string[];
   }) {
-    const typesFilter = typenames
-      .map(t => `coordinate = '${t}' OR coordinate LIKE '${t}.%'`)
-      .join(' OR ');
+    const typesConditions = typenames.map(
+      t => sql`coordinate = ${t} OR coordinate LIKE ${t + '.%'}`,
+    );
     const result = await this.clickHouse.query<{
       coordinate: string;
       total: number;
     }>({
-      query: `
+      query: sql`
         SELECT coordinate, sum(total) as total FROM coordinates_daily
         ${this.createFilter({
           target,
           period,
-          extra: [`(${typesFilter})`],
+          extra: [sql`(${sql.join(typesConditions, ' OR ')})`],
         })}
         GROUP BY coordinate`,
       queryId: 'coordinates_per_types',
@@ -1232,7 +1359,7 @@ export class OperationsReader {
       coordinate: string;
       total: number;
     }>({
-      query: `
+      query: sql`
         SELECT coordinate, sum(total) as total FROM coordinates_daily
         ${this.createFilter({
           target,
@@ -1258,17 +1385,17 @@ export class OperationsReader {
       to: Date;
     };
   }) {
-    const dateRangeFilter = `
+    const dateRangeFilter = sql.raw(`
       timestamp >= FROM_UNIXTIME(${Math.floor(period.from.getTime() / 1000)})
       AND
       timestamp < FROM_UNIXTIME(${Math.floor(period.to.getTime() / 1000)})
-    `;
+    `);
 
     const result = await this.clickHouse.query<{
       total: string;
       target: string;
     }>({
-      query: `SELECT sum(total) as total, target from operations_daily WHERE ${dateRangeFilter} GROUP BY target`,
+      query: sql`SELECT sum(total) as total, target from operations_daily WHERE ${dateRangeFilter} GROUP BY target`,
       queryId: 'admin_operations_per_target',
       timeout: 15_000,
     });
@@ -1289,16 +1416,16 @@ export class OperationsReader {
   }) {
     const days = differenceInDays(period.to, period.from);
     const resolution = 90;
-    const dateRangeFilter = `
+    const dateRangeFilter = sql.raw(`
       timestamp >= FROM_UNIXTIME(${Math.floor(period.from.getTime() / 1000)})
       AND
       timestamp < FROM_UNIXTIME(${Math.floor(period.to.getTime() / 1000)})
-    `;
+    `);
     const result = await this.clickHouse.query<{
       date: number;
       total: string;
     }>({
-      query: `
+      query: sql`
         SELECT 
           multiply(
             toUnixTimestamp(
@@ -1311,7 +1438,7 @@ export class OperationsReader {
             'UTC'),
           1000) as date,
           sum(total) as total
-        FROM ${days > 1 && days >= resolution ? 'operations_daily' : 'operations_hourly'}
+        FROM ${sql.raw(days > 1 && days >= resolution ? 'operations_daily' : 'operations_hourly')}
         WHERE ${dateRangeFilter}
         GROUP BY date
         ORDER BY date
@@ -1335,34 +1462,34 @@ export class OperationsReader {
     target?: string | readonly string[];
     period?: DateRange;
     operations?: readonly string[];
-    extra?: string[];
-  }) {
-    const where: string[] = [];
+    extra?: SqlValue[];
+  }): SqlValue {
+    const where: SqlValue[] = [];
 
     if (target) {
       if (Array.isArray(target)) {
-        where.push(`target IN (${target.map(t => `'${t}'`).join(', ')})`);
+        where.push(sql`target IN (${sql.array(target, 'String')})`);
       } else {
-        where.push(`target = '${target}'`);
+        where.push(sql`target = ${target as string}`);
       }
     }
 
     if (period) {
       where.push(
-        `timestamp >= toDateTime('${formatDate(period.from)}', 'UTC')`,
-        `timestamp <= toDateTime('${formatDate(period.to)}', 'UTC')`,
+        sql`timestamp >= toDateTime(${formatDate(period.from)}, 'UTC')`,
+        sql`timestamp <= toDateTime(${formatDate(period.to)}, 'UTC')`,
       );
     }
 
     if (operations?.length) {
-      where.push(`(hash) IN (${operations.map(op => `'${op}'`).join(',')})`);
+      where.push(sql`(hash) IN (${sql.array(operations, 'String')})`);
     }
 
     if (extra.length) {
       where.push(...extra);
     }
 
-    const statement = where.length ? ` PREWHERE ${where.join(' AND ')} ` : ' ';
+    const statement = where.length ? sql` PREWHERE ${sql.join(where, ' AND ')} ` : sql``;
 
     return statement;
   }

@@ -1,187 +1,22 @@
 import { got } from 'got';
+import { z } from 'zod';
 
-const createTableStatements = [
-  `
-    CREATE TABLE IF NOT EXISTS default.operation_collection
-    (
-      target LowCardinality(String),
-      hash String,
-      name String,
-      body String,
-      operation_kind String,
-      coordinates Array(String) CODEC(ZSTD(1)),
-      total UInt32 CODEC(ZSTD(1)),
-      timestamp DateTime('UTC'),
-      expires_at DateTime('UTC'),
-      INDEX idx_operation_kind (operation_kind) TYPE set(0) GRANULARITY 1
-    )
-    ENGINE = SummingMergeTree
-    PARTITION BY toYYYYMMDD(timestamp)
-    PRIMARY KEY (target, hash)
-    ORDER BY (target, hash, timestamp, expires_at)
-    TTL expires_at
-    SETTINGS index_granularity = 8192;
-  `,
-  `
-    CREATE TABLE IF NOT EXISTS default.operations
-    (
-      target LowCardinality(String) CODEC(ZSTD(1)),
-      timestamp DateTime('UTC'),
-      expires_at DateTime('UTC'),
-      hash String CODEC(ZSTD(1)),
-      ok UInt8 CODEC(ZSTD(1)),
-      errors UInt16 CODEC(ZSTD(1)),
-      duration UInt64 CODEC(ZSTD(1)),
-      client_name LowCardinality(String) CODEC(ZSTD(1)),
-      client_version String CODEC(ZSTD(1)),
-      INDEX idx_client_name (client_name) TYPE set(0) GRANULARITY 1,
-      INDEX idx_hash (hash) TYPE set(0) GRANULARITY 1
-    )
-    ENGINE = MergeTree
-    PARTITION BY toYYYYMMDD(timestamp)
-    PRIMARY KEY (target, hash)
-    ORDER BY (target, hash, timestamp)
-    TTL expires_at
-    SETTINGS index_granularity = 8192
-  `,
-  // operations hourly
-  `
-    CREATE MATERIALIZED VIEW IF NOT EXISTS default.operations_hourly
-    (
-        target LowCardinality(String) CODEC(ZSTD(1)),
-        timestamp DateTime('UTC'),
-        expires_at DateTime('UTC'),
-        hash String CODEC(ZSTD(1)),
-        total UInt32 CODEC(ZSTD(1)),
-        total_ok UInt32 CODEC(ZSTD(1)),
-        duration_avg AggregateFunction(avg, UInt64) CODEC(ZSTD(1)),
-        duration_quantiles AggregateFunction(quantiles(0.75, 0.9, 0.95, 0.99), UInt64) CODEC(ZSTD(1))
-    )
-    ENGINE = SummingMergeTree
-    PARTITION BY toYYYYMMDD(timestamp)
-    PRIMARY KEY (target, hash)
-    ORDER BY (target, hash, timestamp, expires_at)
-    SETTINGS index_granularity = 8192 AS
-    SELECT
-      target,
-      toStartOfHour(timestamp) AS timestamp,
-      toStartOfHour(expires_at) AS expires_at,
-      hash,
-      count() AS total,
-      sum(ok) AS total_ok,
-      avgState(duration) AS duration_avg,
-      quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
-    FROM default.operations
-    GROUP BY
-      target,
-      hash,
-      timestamp,
-      expires_at
-  `,
-  // operations daily
-  `
-    CREATE MATERIALIZED VIEW IF NOT EXISTS default.operations_daily
-    (
-        target LowCardinality(String) CODEC(ZSTD(1)),
-        timestamp DateTime('UTC'),
-        expires_at DateTime('UTC'),
-        hash String CODEC(ZSTD(1)),
-        total UInt32 CODEC(ZSTD(1)),
-        total_ok UInt32 CODEC(ZSTD(1)),
-        duration_avg AggregateFunction(avg, UInt64) CODEC(ZSTD(1)),
-        duration_quantiles AggregateFunction(quantiles(0.75, 0.9, 0.95, 0.99), UInt64) CODEC(ZSTD(1))
-    )
-    ENGINE = SummingMergeTree
-    PARTITION BY toYYYYMMDD(timestamp)
-    PRIMARY KEY (target, hash)
-    ORDER BY (target, hash, timestamp, expires_at)
-    TTL expires_at
-    SETTINGS index_granularity = 8192 AS
-    SELECT
-      target,
-      toStartOfDay(timestamp) AS timestamp,
-      toStartOfDay(expires_at) AS expires_at,
-      hash,
-      count() AS total,
-      sum(ok) AS total_ok,
-      avgState(duration) AS duration_avg,
-      quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
-    FROM default.operations
-    GROUP BY
-      target,
-      hash,
-      timestamp,
-      expires_at
-  `,
-  `
-    CREATE MATERIALIZED VIEW IF NOT EXISTS default.coordinates_daily
-    (
-      target LowCardinality(String) CODEC(ZSTD(1)),
-      hash String CODEC(ZSTD(1)), 
-      timestamp DateTime('UTC'),
-      expires_at DateTime('UTC'),
-      total UInt32 CODEC(ZSTD(1)),
-      coordinate String CODEC(ZSTD(1))
-    )
-    ENGINE = SummingMergeTree
-    PARTITION BY toYYYYMMDD(timestamp)
-    PRIMARY KEY (target, coordinate, hash)
-    ORDER BY (target, coordinate, hash, timestamp, expires_at)
-    SETTINGS index_granularity = 8192
-    AS
-    SELECT
-      target,
-      hash,
-      toStartOfDay(timestamp) AS timestamp,
-      toStartOfDay(expires_at) AS expires_at,
-      sum(total) AS total,
-      coordinate
-    FROM default.operation_collection
-    ARRAY JOIN coordinates as coordinate
-    GROUP BY
-      target,
-      coordinate,
-      hash,
-      timestamp,
-      expires_at
-  `,
-  `
-    CREATE MATERIALIZED VIEW IF NOT EXISTS default.clients_daily
-    (
-      target LowCardinality(String) CODEC(ZSTD(1)),
-      client_name String CODEC(ZSTD(1)),
-      client_version String CODEC(ZSTD(1)),
-      hash String CODEC(ZSTD(1)), 
-      timestamp DateTime('UTC'),
-      expires_at DateTime('UTC'),
-      total UInt32 CODEC(ZSTD(1)),
-      INDEX idx_hash (hash) TYPE set(0) GRANULARITY 1
-    )
-    ENGINE = SummingMergeTree
-    PARTITION BY toYYYYMMDD(timestamp)
-    PRIMARY KEY (target, client_name, client_version)
-    ORDER BY (target, client_name, client_version, timestamp, expires_at)
-    TTL expires_at
-    SETTINGS index_granularity = 8192
-    AS
-    SELECT
-      target,
-      client_name,
-      client_version,
-      hash,
-      toStartOfDay(timestamp) AS timestamp,
-      toStartOfDay(expires_at) AS expires_at,
-      count() AS total
-    FROM default.operations
-    GROUP BY
-      target,
-      client_name,
-      client_version,
-      hash,
-      timestamp,
-      expires_at
-  `,
-];
+const MigrationsTableModel = z.object({
+  rows: z.number(),
+  data: z.array(
+    z.object({
+      id: z.number(),
+    }),
+  ),
+});
+
+// eslint-disable-next-line no-process-env
+const isGraphQLHiveCloud = process.env.CLICKHOUSE_MIGRATOR_GRAPHQL_HIVE_CLOUD === '1';
+
+export type Action = (
+  exec: (query: string) => Promise<void>,
+  isGraphQLHiveCloud: boolean,
+) => Promise<void>;
 
 export async function migrateClickHouse(
   isClickHouseMigrator: boolean,
@@ -235,16 +70,13 @@ export async function migrateClickHouse(
     },
   });
 
-  for await (const query of createTableStatements) {
-    await got
+  function exec(query: string) {
+    return got
       .post(endpoint, {
         body: query,
         searchParams: {
           default_format: 'JSON',
           wait_end_of_query: '1',
-        },
-        timeout: {
-          request: 10_000,
         },
         headers: {
           Accept: 'text/plain',
@@ -261,4 +93,63 @@ export async function migrateClickHouse(
         return Promise.reject(error);
       });
   }
+
+  // Create migrations table
+  await exec(`
+    CREATE TABLE IF NOT EXISTS default.migrations (
+      id UInt8,
+      timestamp DateTime('UTC'),
+    ) ENGINE = MergeTree()
+    ORDER BY (id, timestamp)
+  `);
+
+  // Read migrations table
+  const migrationsResponse = await exec(`
+    SELECT id FROM default.migrations ORDER BY id DESC
+  `);
+
+  const completedActions = new Set(
+    MigrationsTableModel.parse(JSON.parse(migrationsResponse.body)).data.map(({ id }) => id),
+  );
+
+  const actions = await Promise.all<{ action: Action }>([
+    import('./clickhouse-actions/001-initial'),
+    import('./clickhouse-actions/002-add-hash-to-clients_daily'),
+  ]);
+
+  async function actionRunner(action: Action, index: number) {
+    const startedAt = Date.now();
+    console.log(` - Running action`, index);
+
+    if (completedActions.has(index)) {
+      console.log('   Skipping because it was already run');
+      return;
+    }
+
+    try {
+      await action(async query => {
+        await exec(query);
+      }, isGraphQLHiveCloud);
+    } catch (error) {
+      console.error(error);
+      process.exit(1);
+    }
+
+    await exec(`
+      INSERT INTO default.migrations (id, timestamp) VALUES (${index}, now())
+    `);
+
+    const finishedAt = Date.now();
+    console.log(`   Finished in ${finishedAt - startedAt}ms`);
+  }
+
+  console.log('');
+  console.log('Running ClickHouse migrations');
+  console.log('');
+  for (const [index, { action }] of actions.entries()) {
+    await actionRunner(action, index);
+  }
+
+  console.log('');
+  console.log('ClickHouse Migration completed');
 }

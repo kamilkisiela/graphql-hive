@@ -19,11 +19,11 @@
     "@escape.tech/graphql-armor-max-depth": "1.8.4",
     "@escape.tech/graphql-armor-max-directives": "1.6.5",
     "@escape.tech/graphql-armor-max-tokens": "1.3.2",
-    "@sentry/integrations": "7.51.2",
-    "@sentry/node": "7.51.2",
-    "@trpc/server": "10.25.1",
-    "@whatwg-node/fetch": "0.8.8",
-    "@whatwg-node/server": "0.7.5",
+    "@sentry/integrations": "7.52.1",
+    "@sentry/node": "7.52.1",
+    "@trpc/server": "10.27.1",
+    "@whatwg-node/fetch": "0.9.0",
+    "@whatwg-node/server": "0.8.0",
     "dotenv": "16.0.3",
     "got": "12.6.0",
     "graphql": "16.6.0",
@@ -39,10 +39,10 @@
     "@hive/cdn-script": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
-    "@swc/core": "1.3.57",
+    "@swc/core": "1.3.60",
     "fastify": "3.29.5",
     "pino-pretty": "10.0.0",
-    "tslib": "2.5.0"
+    "tslib": "2.5.2"
   },
   "buildOptions": {
     "external": [

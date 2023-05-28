@@ -17,6 +17,7 @@ import type {
   SchemaChange,
   SchemaError,
 } from '../__generated__/types';
+import { type SuperGraphInformation } from '../modules/schema/lib/federation-super-graph';
 import { SchemaCheckWarning } from '../modules/schema/providers/models/shared';
 import { SchemaBuildError } from '../modules/schema/providers/orchestrators/errors';
 import { SerializableChange } from '../modules/schema/schema-change-from-meta';
@@ -35,6 +36,7 @@ import type {
   Token,
   User,
 } from './entities';
+import { type PromiseOrValue } from './helpers';
 
 export interface SchemaVersion extends SchemaVersionEntity {
   project: string;
@@ -52,6 +54,7 @@ export type WithSchemaCoordinatesUsage<T> = T & {
   usage: Promise<{
     [coordinate: string]: {
       total: number;
+      usedByClients: PromiseOrValue<Array<string> | null>;
     };
   }>;
 };
@@ -64,20 +67,32 @@ export type SchemaExplorerMapper = {
     project: string;
     target: string;
   };
+  supergraph: null | SuperGraphInformation;
 };
 
 export type GraphQLFieldMapper = WithSchemaCoordinatesUsage<
   WithGraphQLParentInfo<{
     entity: GraphQLField<any, any, any>;
+    supergraph: null | {
+      ownedByServiceNames: Array<string> | null;
+    };
   }>
 >;
 export type GraphQLInputFieldMapper = WithSchemaCoordinatesUsage<
   WithGraphQLParentInfo<{
     entity: GraphQLInputField;
+    supergraph: null | {
+      ownedByServiceNames: Array<string> | null;
+    };
   }>
 >;
 export type GraphQLEnumValueMapper = WithSchemaCoordinatesUsage<
-  WithGraphQLParentInfo<{ entity: GraphQLEnumValue }>
+  WithGraphQLParentInfo<{
+    entity: GraphQLEnumValue;
+    supergraph: null | {
+      ownedByServiceNames: Array<string> | null;
+    };
+  }>
 >;
 export type GraphQLArgumentMapper = WithSchemaCoordinatesUsage<
   WithGraphQLParentInfo<{ entity: GraphQLArgument }>
@@ -85,19 +100,53 @@ export type GraphQLArgumentMapper = WithSchemaCoordinatesUsage<
 export type GraphQLUnionTypeMemberMapper = WithSchemaCoordinatesUsage<
   WithGraphQLParentInfo<{
     entity: GraphQLObjectType;
+    supergraph: null | {
+      ownedByServiceNames: Array<string> | null;
+    };
   }>
 >;
 
-export type GraphQLObjectTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLObjectType }>;
+export type GraphQLObjectTypeMapper = WithSchemaCoordinatesUsage<{
+  entity: GraphQLObjectType;
+  supergraph: null | {
+    ownedByServiceNames: Array<string> | null;
+    getFieldOwnedByServices: (fieldName: string) => Array<string> | null;
+  };
+}>;
 export type GraphQLInterfaceTypeMapper = WithSchemaCoordinatesUsage<{
   entity: GraphQLInterfaceType;
+  supergraph: null | {
+    ownedByServiceNames: Array<string> | null;
+    getFieldOwnedByServices: (fieldName: string) => Array<string> | null;
+  };
 }>;
-export type GraphQLUnionTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLUnionType }>;
-export type GraphQLEnumTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLEnumType }>;
+export type GraphQLUnionTypeMapper = WithSchemaCoordinatesUsage<{
+  entity: GraphQLUnionType;
+  supergraph: null | {
+    ownedByServiceNames: Array<string> | null;
+    getUnionMemberOwnedByServices: (unionMemberName: string) => Array<string> | null;
+  };
+}>;
+export type GraphQLEnumTypeMapper = WithSchemaCoordinatesUsage<{
+  entity: GraphQLEnumType;
+  supergraph: null | {
+    ownedByServiceNames: Array<string> | null;
+    getEnumValueOwnedByServices: (fieldName: string) => Array<string> | null;
+  };
+}>;
 export type GraphQLInputObjectTypeMapper = WithSchemaCoordinatesUsage<{
   entity: GraphQLInputObjectType;
+  supergraph: null | {
+    ownedByServiceNames: Array<string> | null;
+    getInputFieldOwnedByServices: (inputFieldName: string) => Array<string> | null;
+  };
 }>;
-export type GraphQLScalarTypeMapper = WithSchemaCoordinatesUsage<{ entity: GraphQLScalarType }>;
+export type GraphQLScalarTypeMapper = WithSchemaCoordinatesUsage<{
+  entity: GraphQLScalarType;
+  supergraph: null | {
+    ownedByServiceNames: Array<string> | null;
+  };
+}>;
 
 export type SchemaChangeConnection = ReadonlyArray<SchemaChange>;
 export type SchemaErrorConnection = readonly SchemaError[];
@@ -134,6 +183,10 @@ export type SchemaCompareResult = {
       current: string;
     };
     changes: Array<SerializableChange>;
+    versionIds: {
+      before: string | null;
+      current: string;
+    } | null;
   };
 };
 
@@ -171,4 +224,10 @@ export type AdminStats = {
     from: string;
     to: string;
   };
+};
+
+export type SchemaCoordinateUsageTypeMapper = {
+  isUsed: boolean;
+  total: number;
+  usedByClients: PromiseOrValue<Array<string> | null>;
 };

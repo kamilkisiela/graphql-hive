@@ -62,7 +62,6 @@ export class FederationOrchestrator implements Orchestrator {
   @sentry('FederationOrchestrator.composeAndValidate')
   async composeAndValidate(schemas: SchemaObject[], external: Project['externalComposition']) {
     this.logger.debug('Composing and Validating Federated Schemas');
-
     const result = await this.schemaService.composeAndValidate.mutate({
       type: 'federation',
       schemas: schemas.map(s => ({
