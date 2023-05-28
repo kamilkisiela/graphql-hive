@@ -14,8 +14,8 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@graphiql/react": "*",
-    "@graphiql/toolkit": "*",
+    "@graphiql/react": "0.17.6",
+    "@graphiql/toolkit": "0.8.4",
     "@graphql-tools/mock": "8.7.20",
     "@headlessui/react": "1.7.14",
     "@monaco-editor/react": "4.5.1",
@@ -54,7 +54,7 @@
     "echarts": "5.4.2",
     "echarts-for-react": "3.0.2",
     "formik": "2.2.9",
-    "graphiql": "2.4.3",
+    "graphiql": "2.4.6",
     "graphql": "16.6.0",
     "hyperid": "3.1.1",
     "immer": "10.0.2",

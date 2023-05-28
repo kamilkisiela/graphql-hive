@@ -1,4 +1,5 @@
 import { ReactElement, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/router';
 import clsx from 'clsx';
 import { GraphiQL } from 'graphiql';
 import { useQuery } from 'urql';
@@ -31,50 +32,31 @@ import { canAccessTarget, CanAccessTarget_MemberFragment } from '@/lib/access/ta
 import { useClipboard, useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
 import { useCollections } from '@/lib/hooks/use-collections';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { GraphiQLPlugin, Menu, ToolbarButton, useEditorContext } from '@graphiql/react';
+import { GraphiQLPlugin, Menu, ToolbarButton, Tooltip, useEditorContext } from '@graphiql/react';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
-import { BookmarkIcon, DotsVerticalIcon, Link1Icon } from '@radix-ui/react-icons';
+import { BookmarkIcon, DotsVerticalIcon, Link1Icon, Share2Icon } from '@radix-ui/react-icons';
 import 'graphiql/graphiql.css';
 
-// function Share(): ReactElement {
-//   const { queryEditor, variableEditor, headerEditor } = useEditorContext({
-//     nonNull: true,
-//   });
-//   const copyToClipboard = useClipboard();
-//
-//   const headers = headerEditor?.getValue();
-//   const variables = variableEditor?.getValue();
-//   const query = queryEditor?.getValue();
-//
-//   const label = 'Share query';
-//
-//   return (
-//     <Menu>
-//       <Tooltip label={label}>
-//         <Menu.Button className="graphiql-toolbar-button" aria-label={label}>
-//           <Share2Icon className="graphiql-toolbar-icon" />
-//         </Menu.Button>
-//       </Tooltip>
-//
-//       <Menu.List>
-//         {['With headers', 'With variables', 'With both'].map((name, i) => (
-//           <Menu.Item
-//             key={name}
-//             onSelect={async () => {
-//               const data: { query: string; headers?: string; variables?: string } = { query };
-//               if (i === 0 || i === 3) data.headers = headers;
-//               if (i === 1 || i === 3) data.variables = variables;
-//
-//               await copyToClipboard(JSON.stringify(data));
-//             }}
-//           >
-//             {name}
-//           </Menu.Item>
-//         ))}
-//       </Menu.List>
-//     </Menu>
-//   );
-// }
+function Share(): ReactElement {
+  const label = 'Share query';
+  const copyToClipboard = useClipboard();
+  const { href } = window.location;
+  const router = useRouter();
+  return (
+    <Tooltip label={label}>
+      <Button
+        className="graphiql-toolbar-button"
+        aria-label={label}
+        disabled={!router.query.operation}
+        onClick={async () => {
+          await copyToClipboard(href);
+        }}
+      >
+        <Share2Icon className="graphiql-toolbar-icon" />
+      </Button>
+    </Tooltip>
+  );
+}
 
 function hashFromTabContents(args: {
   query: string | null;
@@ -102,7 +84,6 @@ function useOperation(operationId: string) {
 
   useEffect(() => {
     const operation = data?.operation;
-    console.log('useEffect', operationId, operation);
     if (hasAllEditors && operationId && operation) {
       // first found tab hy hash
       const operationHash = hashFromTabContents(operation);
@@ -252,7 +233,7 @@ function useOperationCollectionsPlugin(props: {
                               </Link>
                               <Menu>
                                 <Menu.Button
-                                  className="graphiql-toolbar-button"
+                                  className="graphiql-toolbar-button opacity-0 [div:hover>&]:opacity-100 transition"
                                   aria-label="More"
                                   data-cy="operation-3-dots"
                                 >
@@ -321,6 +302,7 @@ function Save(): ReactElement {
   const [isOpen, toggle] = useToggle();
   const { collections } = useCollections();
   const notify = useNotifications();
+  const { query } = useRouter();
   return (
     <>
       <ToolbarButton
@@ -336,7 +318,11 @@ function Save(): ReactElement {
       >
         <SaveIcon className="graphiql-toolbar-icon !h-5 w-auto" />
       </ToolbarButton>
-      <CreateOperationModal isOpen={isOpen} toggleModalOpen={toggle} />
+      <CreateOperationModal
+        isOpen={isOpen}
+        toggleModalOpen={toggle}
+        operationId={query.operation as string}
+      />
     </>
   );
 }
@@ -350,7 +336,6 @@ function Page({
 }): ReactElement {
   const { me } = useFragment(TargetLayout_OrganizationFragment, organizationRef);
   const operationCollectionsPlugin = useOperationCollectionsPlugin({ meRef: me });
-
   return (
     <>
       <DocsNote>
@@ -368,8 +353,8 @@ function Page({
         toolbar={{
           additionalContent: (
             <>
-              {/*<Share />*/}
               <Save />
+              <Share />
             </>
           ),
         }}

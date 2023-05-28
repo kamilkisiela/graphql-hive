@@ -1,4 +1,5 @@
 import { ReactElement, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
@@ -45,7 +46,7 @@ export function CreateOperationModal({
       });
     }
   }, [data]);
-
+  const router = useRouter();
   const {
     handleSubmit,
     values,
@@ -66,7 +67,7 @@ export function CreateOperationModal({
       collectionId: Yup.string().required('Collection is a required field'),
     }),
     async onSubmit(values) {
-      const { error } =
+      const { error, data: result } =
         operationId && data?.operation
           ? await mutateUpdate({
               input: {
@@ -86,6 +87,16 @@ export function CreateOperationModal({
               },
             });
       if (!error) {
+        if (result) {
+          const data =
+            'createOperation' in result ? result.createOperation : result.updateOperation;
+          await router.push({
+            query: {
+              ...router.query,
+              operation: data.id,
+            },
+          });
+        }
         resetForm();
         toggleModalOpen();
       }
@@ -96,7 +107,7 @@ export function CreateOperationModal({
     <Modal open={isOpen} onOpenChange={toggleModalOpen}>
       {!fetching && (
         <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
-          <Heading className="text-center">Save Operation</Heading>
+          <Heading className="text-center">{operationId ? 'Edit' : 'Create'} Operation</Heading>
 
           <div className="flex flex-col gap-4">
             <label className="text-sm font-semibold" htmlFor="name">
