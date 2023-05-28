@@ -630,8 +630,8 @@ importers:
         specifier: 8.2.2
         version: 8.2.2
       '@types/lodash':
-        specifier: 4.14.194
-        version: 4.14.194
+        specifier: 4.14.195
+        version: 4.14.195
       '@types/ms':
         specifier: 0.7.31
         version: 0.7.31
@@ -12035,7 +12035,7 @@ packages:
       '@storybook/preview-api': 7.0.18
       '@storybook/theming': 7.0.18(react-dom@18.2.0)(react@18.2.0)
       '@storybook/types': 7.0.18
-      '@types/lodash': 4.14.194
+      '@types/lodash': 4.14.195
       color-convert: 2.0.1
       dequal: 2.0.3
       lodash: 4.17.21
@@ -13574,8 +13574,8 @@ packages:
     resolution: {integrity: sha512-eHcVlLXP0c2FlMPm56ITode2AgLMSa6aJ05JTTbYbI+7EMkCEE5qk2E41d5g2lCVTqRe0GnnRFurmlCsDODrPw==}
     dev: true
 
-  /@types/lodash@4.14.194:
-    resolution: {integrity: sha512-r22s9tAS7imvBt2lyHC9B8AGwWnXaYb1tY09oyLkXDs4vArpYJzw09nj8MLx5VfciBPGIb+ZwG0ssYnEPJxn/g==}
+  /@types/lodash@4.14.195:
+    resolution: {integrity: sha512-Hwx9EUgdwf2GLarOjQp5ZH8ZmblzcbTBC2wtQWNKARBSxM9ezRIAUpeDTgoQRAFB0+8CNWXVA9+MaSOzOF3nPg==}
     dev: true
 
   /@types/long@4.0.2:
