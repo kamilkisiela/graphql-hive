@@ -1718,8 +1718,8 @@ importers:
         specifier: 8.4.24
         version: 8.4.24
       postcss-loader:
-        specifier: 7.3.0
-        version: 7.3.0(postcss@8.4.24)
+        specifier: 7.3.2
+        version: 7.3.2(postcss@8.4.24)
       rimraf:
         specifier: 4.4.1
         version: 4.4.1
@@ -11911,7 +11911,7 @@ packages:
       '@storybook/types': 7.0.10
       css-loader: 6.7.3
       less-loader: 11.1.0
-      postcss-loader: 7.3.0(postcss@8.4.24)
+      postcss-loader: 7.3.2(postcss@8.4.24)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       resolve-url-loader: 5.0.0
@@ -12581,7 +12581,7 @@ packages:
       node-polyfill-webpack-plugin: 2.0.1
       pnp-webpack-plugin: 1.7.0
       postcss: 8.4.24
-      postcss-loader: 7.3.0(postcss@8.4.24)
+      postcss-loader: 7.3.2(postcss@8.4.24)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       resolve-url-loader: 5.0.0
@@ -25473,8 +25473,8 @@ packages:
       yaml: 2.2.2
     dev: true
 
-  /postcss-loader@7.3.0(postcss@8.4.24):
-    resolution: {integrity: sha512-qLAFjvR2BFNz1H930P7mj1iuWJFjGey/nVhimfOAAQ1ZyPpcClAxP8+A55Sl8mBvM+K2a9Pjgdj10KpANWrNfw==}
+  /postcss-loader@7.3.2(postcss@8.4.24):
+    resolution: {integrity: sha512-c7qDlXErX6n0VT+LUsW+nwefVtTu3ORtVvK8EXuUIDcxo+b/euYqpuHlJAvePb0Af5e8uMjR/13e0lTuYifaig==}
     engines: {node: '>= 14.15.0'}
     peerDependencies:
       postcss: ^7.0.0 || ^8.0.1
