@@ -54,7 +54,7 @@
     "echarts": "5.4.2",
     "echarts-for-react": "3.0.2",
     "formik": "2.2.9",
-    "graphiql": "2.4.6",
+    "graphiql": "2.4.7",
     "graphql": "16.6.0",
     "hyperid": "3.1.1",
     "immer": "10.0.2",
