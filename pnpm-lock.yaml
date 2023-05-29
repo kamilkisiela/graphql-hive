@@ -518,8 +518,8 @@ importers:
         specifier: 4.2.1
         version: 4.2.1
       '@octokit/app':
-        specifier: 13.1.4
-        version: 13.1.4
+        specifier: 13.1.5
+        version: 13.1.5
       '@sentry/node':
         specifier: 7.53.1
         version: 7.53.1
@@ -9724,11 +9724,11 @@ packages:
     deprecated: Deprecated in favor of @oclif/core
     dev: true
 
-  /@octokit/app@13.1.4:
-    resolution: {integrity: sha512-DOssIBopEpXemC1VgQ8hFAU5FP+Mo0CCRjg5Rc7mahwSvqUp0c/AFPpOuSVP9eX2bO03EOVkdmAVqLp77m8CzA==}
+  /@octokit/app@13.1.5:
+    resolution: {integrity: sha512-6qTa24S+gdQUU66SCVfqTkyt2jAr9/ZeyPqJhnNI9PZ8Wum4lQy3bPS+voGlxABNOlzRKnxbSdYKoraMr3MqBA==}
     engines: {node: '>= 14'}
     dependencies:
-      '@octokit/auth-app': 4.0.8
+      '@octokit/auth-app': 4.0.13
       '@octokit/auth-unauthenticated': 3.0.3
       '@octokit/core': 4.1.0
       '@octokit/oauth-app': 4.2.0
@@ -9739,18 +9739,17 @@ packages:
       - encoding
     dev: false
 
-  /@octokit/auth-app@4.0.8:
-    resolution: {integrity: sha512-miI7y9FfS/fL1bSPsDaAfCGSxQ04iGLyisI2GA8N7P6eB6AkCOt+F1XXapJKRnAubQubvYF0dqxoTZYyKk93NQ==}
+  /@octokit/auth-app@4.0.13:
+    resolution: {integrity: sha512-NBQkmR/Zsc+8fWcVIFrwDgNXS7f4XDrkd9LHdi9DPQw1NdGHLviLzRO2ZBwTtepnwHXW5VTrVU9eFGijMUqllg==}
     engines: {node: '>= 14'}
     dependencies:
       '@octokit/auth-oauth-app': 5.0.4
       '@octokit/auth-oauth-user': 2.0.4
       '@octokit/request': 6.2.2
       '@octokit/request-error': 3.0.2
-      '@octokit/types': 8.0.0
-      '@types/lru-cache': 5.1.1
+      '@octokit/types': 9.0.0
       deprecation: 2.3.1
-      lru-cache: 6.0.0
+      lru-cache: 9.1.1
       universal-github-app-jwt: 1.1.1
       universal-user-agent: 6.0.0
     transitivePeerDependencies:
@@ -13580,10 +13579,6 @@ packages:
 
   /@types/long@4.0.2:
     resolution: {integrity: sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==}
-
-  /@types/lru-cache@5.1.1:
-    resolution: {integrity: sha512-ssE3Vlrys7sdIzs5LOxCzTVMsU7i9oa/IaW92wF32JFb3CVczqOkru2xspuKczHEbG3nvmPY7IFqVmGGHdNbYw==}
-    dev: false
 
   /@types/mdast@3.0.10:
     resolution: {integrity: sha512-W864tg/Osz1+9f4lrGTZpCSO5/z4608eUp19tbozkq2HJK6i3z1kT0H9tlADXuYIb1YYOBByU4Jsqkk75q48qA==}
@@ -22275,6 +22270,11 @@ packages:
   /lru-cache@7.18.3:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
+
+  /lru-cache@9.1.1:
+    resolution: {integrity: sha512-65/Jky17UwSb0BuB9V+MyDpsOtXKmYwzhyl+cOa9XUiI4uV2Ouy/2voFP3+al0BjZbJgMBD8FojMpAf+Z+qn4A==}
+    engines: {node: 14 || >=16.14}
+    dev: false
 
   /lru-memoizer@2.1.4:
     resolution: {integrity: sha512-IXAq50s4qwrOBrXJklY+KhgZF+5y98PDaNo0gi/v2KQBFLyWr+JyFvijZXkGKjQj/h9c0OwoE+JZbwUXce76hQ==}
