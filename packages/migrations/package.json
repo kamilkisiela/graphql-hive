@@ -35,7 +35,7 @@
     "@types/node": "18.16.16",
     "@types/pg": "8.10.1",
     "copyfiles": "2.4.1",
-    "pg-promise": "11.4.3",
+    "pg-promise": "11.5.0",
     "tslib": "2.5.2"
   }
 }
