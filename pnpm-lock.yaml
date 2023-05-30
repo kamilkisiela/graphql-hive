@@ -7,9 +7,9 @@ patchedDependencies:
   '@apollo/federation@0.38.1':
     hash: rjgakkkphrejw6qrtph4ar24zq
     path: patches/@apollo__federation@0.38.1.patch
-  '@graphql-eslint/eslint-plugin@3.18.0':
+  '@graphql-eslint/eslint-plugin@3.19.1':
     hash: c6q4g4elst6ppqfojixwejouee
-    path: patches/@graphql-eslint__eslint-plugin@3.18.0.patch
+    path: patches/@graphql-eslint__eslint-plugin@3.19.1.patch
   '@oclif/core@1.23.0':
     hash: zhte2hlj7lfobytjpalcwwo474
     path: patches/@oclif__core@1.23.0.patch
@@ -823,8 +823,8 @@ importers:
   packages/services/policy:
     dependencies:
       '@graphql-eslint/eslint-plugin':
-        specifier: 3.18.0
-        version: 3.18.0(patch_hash=c6q4g4elst6ppqfojixwejouee)(graphql@16.6.0)
+        specifier: 3.19.1
+        version: 3.19.1(patch_hash=c6q4g4elst6ppqfojixwejouee)(graphql@16.6.0)
       '@sentry/node':
         specifier: 7.53.1
         version: 7.53.1
@@ -7213,14 +7213,14 @@ packages:
       - supports-color
     dev: true
 
-  /@graphql-eslint/eslint-plugin@3.18.0(patch_hash=c6q4g4elst6ppqfojixwejouee)(graphql@16.6.0):
-    resolution: {integrity: sha512-riEEfRycc0+pWxcEWqHi8woRxzg1xZqAfh9DRACJUR7bTN8dmc1N04i7+pvW4sevClUFYC2wuL1Vtr+DwzXLUg==}
+  /@graphql-eslint/eslint-plugin@3.19.1(patch_hash=c6q4g4elst6ppqfojixwejouee)(graphql@16.6.0):
+    resolution: {integrity: sha512-8hllEu0dFXDk9poJRN0gIqrGoBblMe1TpRJFx0We+ZKWNQgaxvQ0QGmJPDak+BZV5BcOAM7m/GH2XWDgVB2nQA==}
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@babel/code-frame': 7.21.4
       '@graphql-tools/code-file-loader': 7.3.23(graphql@16.6.0)
-      '@graphql-tools/graphql-tag-pluck': 7.5.1(graphql@16.6.0)
+      '@graphql-tools/graphql-tag-pluck': 7.5.2(graphql@16.6.0)
       '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
       chalk: 4.1.2
       debug: 4.3.4
@@ -8122,23 +8122,6 @@ packages:
       - '@babel/core'
       - supports-color
     dev: true
-
-  /@graphql-tools/graphql-tag-pluck@7.5.1(graphql@16.6.0):
-    resolution: {integrity: sha512-TgKcSvs2sdFHMbUzyhR9bnYfwFHxqdpotX5Q0OcMmJkuieQe1q60+eEANWlCrjuEqr2giw528Ydq57MIWLKlNA==}
-    peerDependencies:
-      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-    dependencies:
-      '@babel/parser': 7.21.8
-      '@babel/plugin-syntax-import-assertions': 7.20.0
-      '@babel/traverse': 7.21.5
-      '@babel/types': 7.21.5
-      '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
-      graphql: 16.6.0
-      tslib: 2.5.2
-    transitivePeerDependencies:
-      - '@babel/core'
-      - supports-color
-    dev: false
 
   /@graphql-tools/graphql-tag-pluck@7.5.2(@babel/core@7.21.5)(graphql@16.6.0):
     resolution: {integrity: sha512-RW+H8FqOOLQw0BPXaahYepVSRjuOHw+7IL8Opaa5G5uYGOBxoXR7DceyQ7BcpMgktAOOmpDNQ2WtcboChOJSRA==}
