@@ -44,9 +44,11 @@ export function RadixSelect<T extends string>({
       <S.Trigger asChild aria-label="">
         <RadixButton className={className}>
           <S.Value placeholder={placeholder} />
-          <S.Icon className="ml-2">
-            <ChevronDownIcon />
-          </S.Icon>
+          {isDisabled ? null : (
+            <S.Icon className="ml-2">
+              <ChevronDownIcon />
+            </S.Icon>
+          )}
         </RadixButton>
       </S.Trigger>
       <S.Content

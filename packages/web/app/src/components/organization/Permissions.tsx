@@ -22,6 +22,7 @@ interface Props<T> {
   initialScopes: readonly T[];
   onChange: (scopes: T[]) => void;
   checkAccess: (scope: T) => boolean;
+  isReadOnly?: boolean;
 }
 
 function matchScope<T>(
@@ -93,23 +94,41 @@ function PermissionsSpaceInner<
               )}
             >
               <div>
-                <div className="font-semibold text-gray-600">{scope.name}</div>
-                <div className="text-xs text-gray-600">{scope.description}</div>
+                <div
+                  className={clsx(
+                    'font-semibold text-gray-600',
+                    props.isReadOnly && selectedScope !== 'no-access' && canManageScope === false
+                      ? 'text-red-600'
+                      : null,
+                  )}
+                >
+                  {scope.name}
+                </div>
+                <div
+                  className={clsx(
+                    'text-xs text-gray-600',
+                    props.isReadOnly && selectedScope !== 'no-access' && canManageScope === false
+                      ? 'text-red-600'
+                      : null,
+                  )}
+                >
+                  {scope.description}
+                </div>
               </div>
               <RadixSelect
-                isDisabled={canManageScope === false}
+                isDisabled={!canManageScope || props.isReadOnly}
                 className="shrink-0"
                 position="popper"
                 value={selectedScope}
                 options={[
                   { value: NoAccess, label: 'No access' },
                   scope.mapping['read-only'] &&
-                    checkAccess(scope.mapping['read-only']) && {
+                    (props.isReadOnly || checkAccess(scope.mapping['read-only'])) && {
                       value: scope.mapping['read-only'],
                       label: 'Read-only',
                     },
                   scope.mapping['read-write'] &&
-                    checkAccess(scope.mapping['read-write']) && {
+                    (props.isReadOnly || checkAccess(scope.mapping['read-write'])) && {
                       value: scope.mapping['read-write'],
                       label: 'Read & write',
                     },
