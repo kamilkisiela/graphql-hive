@@ -8,6 +8,7 @@ import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 const CollectionsQuery = graphql(`
   query Collections($selector: TargetSelectorInput!) {
     target(selector: $selector) {
+      id
       documentCollections {
         nodes {
           id

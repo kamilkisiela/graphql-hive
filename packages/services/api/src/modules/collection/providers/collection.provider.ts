@@ -44,14 +44,17 @@ export class CollectionProvider {
     return this.storage.getDocumentCollectionDocument({ id });
   }
 
-  async createCollection({ name, description, ...input }: CreateDocumentCollectionInput) {
+  async createCollection(
+    targetId: string,
+    { name, description }: Pick<CreateDocumentCollectionInput, 'description' | 'name'>,
+  ) {
     const currentUser = await this.authManager.getCurrentUser();
 
     return this.storage.createDocumentCollection({
       createdByUserId: currentUser.id,
       title: name,
       description: description || '',
-      targetId: input.targetSelector.target,
+      targetId,
     });
   }
 

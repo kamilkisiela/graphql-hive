@@ -126,11 +126,11 @@ export class TargetManager {
     return this.storage.getTargets(selector);
   }
 
-  async getTarget(selector: TargetSelector): Promise<Target> {
+  async getTarget(selector: TargetSelector, scope = TargetAccessScope.READ): Promise<Target> {
     this.logger.debug('Fetching target (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
       ...selector,
-      scope: TargetAccessScope.READ,
+      scope,
     });
     return this.storage.getTarget(selector);
   }

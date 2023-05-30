@@ -1,6 +1,34 @@
+import { Injector } from 'graphql-modules';
+import { TargetSelectorInput } from '../../__generated__/types';
 import { createConnection } from '../../shared/schema';
+import { AuthManager } from '../auth/providers/auth-manager';
+import { TargetAccessScope } from '../auth/providers/scopes';
+import { IdTranslator } from '../shared/providers/id-translator';
+import { Storage } from '../shared/providers/storage';
 import { CollectionModule } from './__generated__/types';
 import { CollectionProvider } from './providers/collection.provider';
+
+async function validateTargetAccess(
+  injector: Injector,
+  selector: TargetSelectorInput,
+  scope: TargetAccessScope = TargetAccessScope.REGISTRY_READ,
+) {
+  const translator = injector.get(IdTranslator);
+  const [organization, project, target] = await Promise.all([
+    translator.translateOrganizationId(selector),
+    translator.translateProjectId(selector),
+    translator.translateTargetId(selector),
+  ]);
+
+  await injector.get(AuthManager).ensureTargetAccess({
+    organization,
+    project,
+    target,
+    scope,
+  });
+
+  return await injector.get(Storage).getTarget({ target, organization, project });
+}
 
 export const resolvers: CollectionModule.Resolvers = {
   DocumentCollection: {
@@ -19,9 +47,7 @@ export const resolvers: CollectionModule.Resolvers = {
     name: root => root.title,
     query: root => root.contents,
     async collection(root, args, { injector }) {
-      const node = await injector.get(CollectionProvider).getCollection(root.documentCollectionId);
-
-      return node;
+      return await injector.get(CollectionProvider).getCollection(root.documentCollectionId);
     },
   },
   Target: {
@@ -34,34 +60,148 @@ export const resolvers: CollectionModule.Resolvers = {
       return injector.get(CollectionProvider).getOperation(args.id);
     },
     async documentCollection(_, args, { injector }) {
-      const node = await injector.get(CollectionProvider).getCollection(args.id);
-      return node;
+      return await injector.get(CollectionProvider).getCollection(args.id);
     },
   },
   Mutation: {
-    async createDocumentCollection(_, { input }, { injector }) {
-      const node = await injector.get(CollectionProvider).createCollection(input);
-      return node;
-    },
-    async updateDocumentCollection(_, { input }, { injector }) {
-      const node = await injector.get(CollectionProvider).updateCollection(input);
-      return node;
-    },
-    async deleteDocumentCollection(_, args, { injector }) {
-      await injector.get(CollectionProvider).deleteCollection(args.id);
+    async createDocumentCollection(_, { selector, input }, { injector }) {
+      try {
+        const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
+        const result = await injector.get(CollectionProvider).createCollection(target.id, input);
 
-      return true;
+        return {
+          ok: {
+            __typename: 'ModifyDocumentCollectionOkPayload',
+            collection: result,
+            updatedTarget: target,
+          },
+        };
+      } catch (e) {
+        return {
+          error: {
+            __typename: 'ModifyDocumentCollectionError',
+            message: 'Failed to create a document collection',
+          },
+        };
+      }
     },
-    createOperationInDocumentCollection(_, { input }, { injector }) {
-      return injector.get(CollectionProvider).createOperation(input);
-    },
-    updateOperationInDocumentCollection(_, { input }, { injector }) {
-      return injector.get(CollectionProvider).updateOperation(input);
-    },
-    async deleteOperationInDocumentCollection(_, args, { injector }) {
-      await injector.get(CollectionProvider).deleteOperation(args.id);
+    async updateDocumentCollection(_, { selector, input }, { injector }) {
+      try {
+        const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
+        const result = await injector.get(CollectionProvider).updateCollection(input);
 
-      return true;
+        return {
+          ok: {
+            __typename: 'ModifyDocumentCollectionOkPayload',
+            collection: result,
+            updatedTarget: target,
+          },
+        };
+      } catch (e) {
+        return {
+          error: {
+            __typename: 'ModifyDocumentCollectionError',
+            message: 'Failed to update a document collection',
+          },
+        };
+      }
+    },
+    async deleteDocumentCollection(_, { selector, id }, { injector }) {
+      try {
+        const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
+        await injector.get(CollectionProvider).deleteCollection(id);
+
+        return {
+          ok: {
+            __typename: 'DeleteDocumentCollectionOkPayload',
+            deletedId: id,
+            updatedTarget: target,
+          },
+        };
+      } catch (e) {
+        return {
+          error: {
+            __typename: 'ModifyDocumentCollectionError',
+            message: 'Failed to update a document collection',
+          },
+        };
+      }
+    },
+    async createOperationInDocumentCollection(_, { selector, input }, { injector }) {
+      try {
+        const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
+        const result = await injector.get(CollectionProvider).createOperation(input);
+        const collection = await injector
+          .get(CollectionProvider)
+          .getCollection(result.documentCollectionId);
+
+        return {
+          ok: {
+            __typename: 'ModifyDocumentCollectionOperationOkPayload',
+            operation: result,
+            updatedTarget: target,
+            collection,
+          },
+        };
+      } catch (e) {
+        return {
+          error: {
+            __typename: 'ModifyDocumentCollectionError',
+            message: 'Failed to create operation in document collection',
+          },
+        };
+      }
+    },
+    async updateOperationInDocumentCollection(_, { selector, input }, { injector }) {
+      try {
+        const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
+        const result = await injector.get(CollectionProvider).updateOperation(input);
+        const collection = await injector
+          .get(CollectionProvider)
+          .getCollection(result.documentCollectionId);
+
+        return {
+          ok: {
+            __typename: 'ModifyDocumentCollectionOperationOkPayload',
+            operation: result,
+            updatedTarget: target,
+            collection,
+          },
+        };
+      } catch (e) {
+        return {
+          error: {
+            __typename: 'ModifyDocumentCollectionError',
+            message: 'Failed to update operation in document collection',
+          },
+        };
+      }
+    },
+    async deleteOperationInDocumentCollection(_, { selector, id }, { injector }) {
+      try {
+        const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
+        const operation = await injector.get(CollectionProvider).getOperation(id);
+        const collection = await injector
+          .get(CollectionProvider)
+          .getCollection(operation.documentCollectionId);
+        await injector.get(CollectionProvider).deleteOperation(id);
+
+        return {
+          ok: {
+            __typename: 'DeleteDocumentCollectionOperationOkPayload',
+            deletedId: id,
+            updatedTarget: target,
+            updatedCollection: collection,
+          },
+        };
+      } catch (e) {
+        return {
+          error: {
+            __typename: 'ModifyDocumentCollectionError',
+            message: 'Failed to update a document collection',
+          },
+        };
+      }
     },
   },
 };

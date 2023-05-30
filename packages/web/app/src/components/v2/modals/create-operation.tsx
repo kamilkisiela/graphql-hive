@@ -10,21 +10,54 @@ import { useCollections } from '@/lib/hooks/use-collections';
 import { useEditorContext } from '@graphiql/react';
 
 const CreateOperationMutation = graphql(`
-  mutation CreateOperation($input: CreateDocumentCollectionOperationInput!) {
-    createOperationInDocumentCollection(input: $input) {
-      id
-      name
+  mutation CreateOperation(
+    $selector: TargetSelectorInput!
+    $input: CreateDocumentCollectionOperationInput!
+  ) {
+    createOperationInDocumentCollection(selector: $selector, input: $input) {
+      error {
+        message
+      }
+      ok {
+        operation {
+          id
+          name
+        }
+        collection {
+          id
+          operations {
+            nodes {
+              id
+            }
+          }
+        }
+      }
     }
   }
 `);
 
 const UpdateOperationMutation = graphql(`
-  mutation UpdateOperation($input: UpdateDocumentCollectionOperationInput!) {
-    updateOperationInDocumentCollection(input: $input) {
-      id
-      name
-      collection {
-        id
+  mutation UpdateOperation(
+    $selector: TargetSelectorInput!
+    $input: UpdateDocumentCollectionOperationInput!
+  ) {
+    updateOperationInDocumentCollection(selector: $selector, input: $input) {
+      error {
+        message
+      }
+      ok {
+        operation {
+          id
+          name
+        }
+        collection {
+          id
+          operations {
+            nodes {
+              id
+            }
+          }
+        }
       }
     }
   }
@@ -67,6 +100,10 @@ export function CreateOperationModal({
     nonNull: true,
   });
 
+  useEffect(() => {
+    console.log('queryEditor', queryEditor?.getValue());
+  }, []);
+
   const [{ data, error: operationError, fetching: loadingOperation }] = useQuery({
     query: OperationQuery,
     variables: {
@@ -92,10 +129,12 @@ export function CreateOperationModal({
       });
     }
   }, [data]);
+
   const {
     handleSubmit,
     values,
     handleChange,
+    handleBlur,
     errors,
     isValid,
     touched,
@@ -115,6 +154,11 @@ export function CreateOperationModal({
       const { error, data: result } =
         operationId && data?.target?.documentCollectionOperation
           ? await mutateUpdate({
+              selector: {
+                target: routeSelector.targetId,
+                organization: routeSelector.organizationId,
+                project: routeSelector.projectId,
+              },
               input: {
                 collectionId: values.collectionId,
                 name: values.name,
@@ -122,20 +166,15 @@ export function CreateOperationModal({
                 variables: data.target.documentCollectionOperation.variables,
                 headers: data.target.documentCollectionOperation.headers,
                 operationId,
-                targetSelector: {
-                  target: routeSelector.targetId,
-                  organization: routeSelector.organizationId,
-                  project: routeSelector.projectId,
-                },
               },
             })
           : await mutateCreate({
+              selector: {
+                target: routeSelector.targetId,
+                organization: routeSelector.organizationId,
+                project: routeSelector.projectId,
+              },
               input: {
-                targetSelector: {
-                  target: routeSelector.targetId,
-                  organization: routeSelector.organizationId,
-                  project: routeSelector.projectId,
-                },
                 name: values.name,
                 collectionId: values.collectionId,
                 query: queryEditor?.getValue(),
@@ -152,7 +191,7 @@ export function CreateOperationModal({
           await router.push({
             query: {
               ...router.query,
-              operation: data.id,
+              operation: data.ok?.operation.id,
             },
           });
         }
@@ -177,6 +216,7 @@ export function CreateOperationModal({
               placeholder="Your Operation Name"
               value={values.name}
               onChange={handleChange}
+              onBlur={handleBlur}
               isInvalid={!!(touched.name && errors.name)}
               data-cy="input.name"
             />
@@ -198,6 +238,7 @@ export function CreateOperationModal({
               }))}
               value={values.collectionId}
               onChange={handleChange}
+              onBlur={handleBlur}
               isInvalid={!!(touched.collectionId && errors.collectionId)}
               data-cy="select.collectionId"
             />
@@ -209,7 +250,15 @@ export function CreateOperationModal({
           {error && <div className="text-sm text-red-500">{error.message}</div>}
 
           <div className="flex w-full gap-2">
-            <Button type="button" size="large" block onClick={toggleModalOpen}>
+            <Button
+              type="button"
+              size="large"
+              block
+              onClick={() => {
+                resetForm();
+                toggleModalOpen();
+              }}
+            >
               Cancel
             </Button>
             <Button

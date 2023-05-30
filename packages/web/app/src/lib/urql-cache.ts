@@ -9,18 +9,13 @@ import {
   AlertChannelsDocument,
   AlertsDocument,
   CheckIntegrationsDocument,
-  CollectionsDocument,
-  CreateCollectionDocument,
-  CreateOperationDocument,
   CreateOrganizationDocument,
   CreateProjectDocument,
   CreateTargetDocument,
   CreateTokenDocument,
   DeleteAlertChannelsDocument,
   DeleteAlertsDocument,
-  DeleteCollectionDocument,
   DeleteGitHubIntegrationDocument,
-  DeleteOperationDocument,
   DeleteOrganizationDocument,
   DeletePersistedOperationDocument,
   DeleteProjectDocument,
@@ -356,72 +351,6 @@ const deleteGitHubIntegration: TypedDocumentNodeUpdateResolver<
   );
 };
 
-const createCollection: TypedDocumentNodeUpdateResolver<typeof CreateCollectionDocument> = (
-  result,
-  args,
-  cache,
-) => {
-  updateQuery(
-    cache,
-    {
-      query: CollectionsDocument,
-      variables: {
-        selector: args.input.targetSelector,
-      },
-    },
-    data => {
-      data.target?.documentCollections.nodes.push(result.createDocumentCollection);
-      return data;
-    },
-  );
-};
-
-const deleteCollection: TypedDocumentNodeUpdateResolver<typeof DeleteCollectionDocument> = (
-  result,
-  args,
-  cache,
-) => {
-  cache.invalidate({
-    __typename: 'DocumentCollection',
-    id: args.id,
-  });
-};
-
-const deleteOperation: TypedDocumentNodeUpdateResolver<typeof DeleteOperationDocument> = (
-  result,
-  args,
-  cache,
-) => {
-  cache.invalidate({
-    __typename: 'deleteOperationInDocumentCollection',
-    id: args.id,
-  });
-};
-
-const createOperation: TypedDocumentNodeUpdateResolver<typeof CreateOperationDocument> = (
-  result,
-  args,
-  cache,
-) => {
-  updateQuery(
-    cache,
-    {
-      query: CollectionsDocument,
-      variables: {
-        selector: args.input.targetSelector,
-      },
-    },
-    data => {
-      for (const node of data.target?.documentCollections?.nodes || []) {
-        if (node.id === args.input.collectionId) {
-          node.operations.nodes.push(result.createOperationInDocumentCollection);
-        }
-      }
-      return data;
-    },
-  );
-};
-
 // UpdateResolver
 export const Mutation = {
   createOrganization,
@@ -439,8 +368,4 @@ export const Mutation = {
   deleteAlertChannels,
   addAlert,
   deletePersistedOperation,
-  createCollection,
-  deleteCollection,
-  deleteOperation,
-  createOperation,
 };

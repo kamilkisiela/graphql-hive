@@ -21,14 +21,33 @@ const CollectionQuery = graphql(`
 `);
 
 const CreateCollectionMutation = graphql(`
-  mutation CreateCollection($input: CreateDocumentCollectionInput!) {
-    createDocumentCollection(input: $input) {
-      id
-      name
-      operations(first: 100) {
-        nodes {
+  mutation CreateCollection(
+    $selector: TargetSelectorInput!
+    $input: CreateDocumentCollectionInput!
+  ) {
+    createDocumentCollection(selector: $selector, input: $input) {
+      error {
+        message
+      }
+      ok {
+        updatedTarget {
+          id
+          documentCollections {
+            nodes {
+              id
+              name
+            }
+          }
+        }
+        collection {
           id
           name
+          operations(first: 100) {
+            nodes {
+              id
+              name
+            }
+          }
         }
       }
     }
@@ -36,11 +55,35 @@ const CreateCollectionMutation = graphql(`
 `);
 
 const UpdateCollectionMutation = graphql(`
-  mutation UpdateCollection($input: UpdateDocumentCollectionInput!) {
-    updateDocumentCollection(input: $input) {
-      id
-      name
-      description
+  mutation UpdateCollection(
+    $selector: TargetSelectorInput!
+    $input: UpdateDocumentCollectionInput!
+  ) {
+    updateDocumentCollection(selector: $selector, input: $input) {
+      error {
+        message
+      }
+      ok {
+        updatedTarget {
+          id
+          documentCollections {
+            nodes {
+              id
+              name
+            }
+          }
+        }
+        collection {
+          id
+          name
+          operations(first: 100) {
+            nodes {
+              id
+              name
+            }
+          }
+        }
+      }
     }
   }
 `);
@@ -114,29 +157,27 @@ export function CreateCollectionModal({
       description: Yup.string(),
     }),
     async onSubmit(values) {
-      const targetId = result.data?.target?.id;
-      if (!targetId) throw new Error('No targetId found');
       const { error } = collectionId
         ? await mutateUpdate({
+            selector: {
+              target: router.targetId,
+              organization: router.organizationId,
+              project: router.projectId,
+            },
             input: {
               collectionId,
-              targetSelector: {
-                target: router.targetId,
-                organization: router.organizationId,
-                project: router.projectId,
-              },
-              ...values,
+
+              name: values.name,
+              description: values.description,
             },
           })
         : await mutateCreate({
-            input: {
-              targetSelector: {
-                target: router.targetId,
-                organization: router.organizationId,
-                project: router.projectId,
-              },
-              ...values,
+            selector: {
+              target: router.targetId,
+              organization: router.organizationId,
+              project: router.projectId,
             },
+            input: values,
           });
       if (!error) {
         resetForm();

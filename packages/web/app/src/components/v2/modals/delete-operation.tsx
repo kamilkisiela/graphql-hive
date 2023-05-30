@@ -2,11 +2,27 @@ import { ReactElement } from 'react';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
+import { useRouteSelector } from '@/lib/hooks';
 import { TrashIcon } from '@radix-ui/react-icons';
 
 const DeleteOperationMutation = graphql(`
-  mutation DeleteOperation($id: ID!) {
-    deleteOperationInDocumentCollection(id: $id)
+  mutation DeleteOperation($selector: TargetSelectorInput!, $id: ID!) {
+    deleteOperationInDocumentCollection(selector: $selector, id: $id) {
+      error {
+        message
+      }
+      ok {
+        deletedId
+        updatedCollection {
+          id
+          operations {
+            nodes {
+              id
+            }
+          }
+        }
+      }
+    }
   }
 `);
 
@@ -19,6 +35,7 @@ export function DeleteOperationModal({
   toggleModalOpen: () => void;
   operationId: string;
 }): ReactElement {
+  const route = useRouteSelector();
   const [, mutate] = useMutation(DeleteOperationMutation);
 
   return (
@@ -41,7 +58,14 @@ export function DeleteOperationModal({
           block
           danger
           onClick={async () => {
-            await mutate({ id: operationId });
+            await mutate({
+              id: operationId,
+              selector: {
+                target: route.targetId,
+                organization: route.organizationId,
+                project: route.projectId,
+              },
+            });
             toggleModalOpen();
           }}
           data-cy="confirm"
