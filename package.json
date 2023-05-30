@@ -119,7 +119,7 @@
       "bullmq@3.13.4": "patches/bullmq@3.13.4.patch",
       "@theguild/editor@1.2.5": "patches/@theguild__editor@1.2.5.patch",
       "eslint@8.41.0": "patches/eslint@8.41.0.patch",
-      "@graphql-eslint/eslint-plugin@3.18.0": "patches/@graphql-eslint__eslint-plugin@3.18.0.patch"
+      "@graphql-eslint/eslint-plugin@3.19.1": "patches/@graphql-eslint__eslint-plugin@3.19.1.patch"
     }
   }
 }
