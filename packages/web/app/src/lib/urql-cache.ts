@@ -366,11 +366,11 @@ const createCollection: TypedDocumentNodeUpdateResolver<typeof CreateCollectionD
     {
       query: CollectionsDocument,
       variables: {
-        targetId: args.input.targetId,
+        selector: args.input.targetSelector,
       },
     },
     data => {
-      data.collections.nodes.push(result.createCollection);
+      data.target?.documentCollections.nodes.push(result.createDocumentCollection);
       return data;
     },
   );
@@ -382,8 +382,8 @@ const deleteCollection: TypedDocumentNodeUpdateResolver<typeof DeleteCollectionD
   cache,
 ) => {
   cache.invalidate({
-    __typename: result.deleteCollection.__typename!,
-    id: result.deleteCollection.id,
+    __typename: 'DocumentCollection',
+    id: args.id,
   });
 };
 
@@ -393,40 +393,33 @@ const deleteOperation: TypedDocumentNodeUpdateResolver<typeof DeleteOperationDoc
   cache,
 ) => {
   cache.invalidate({
-    __typename: result.deleteOperation.__typename!,
-    id: result.deleteOperation.id,
+    __typename: 'deleteOperationInDocumentCollection',
+    id: args.id,
   });
 };
+
 const createOperation: TypedDocumentNodeUpdateResolver<typeof CreateOperationDocument> = (
   result,
   args,
   cache,
 ) => {
-  const collectionsQueries = cache
-    .inspectFields('Query')
-    .filter(o => o.fieldName === 'collections');
-  // map over `collections` queries because we don't know `targetId`
-  for (const collectionsQuery of collectionsQueries) {
-    updateQuery(
-      cache,
-      {
-        query: CollectionsDocument,
-        variables: {
-          targetId: collectionsQuery.arguments!.targetId as string,
-        },
+  updateQuery(
+    cache,
+    {
+      query: CollectionsDocument,
+      variables: {
+        selector: args.input.targetSelector,
       },
-      data => {
-        for (const node of data.collections.nodes) {
-          if (node.id === args.input.collectionId) {
-            node.items.edges.push({
-              node: result.createOperation,
-            });
-          }
+    },
+    data => {
+      for (const node of data.target?.documentCollections?.nodes || []) {
+        if (node.id === args.input.collectionId) {
+          node.operations.nodes.push(result.createOperationInDocumentCollection);
         }
-        return data;
-      },
-    );
-  }
+      }
+      return data;
+    },
+  );
 };
 
 // UpdateResolver

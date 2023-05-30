@@ -1,8 +1,28 @@
 import { useEffect } from 'react';
 import { useQuery } from 'urql';
-import { CollectionsDocument, TargetDocument } from '@/graphql';
+import { graphql } from '@/gql';
+import { TargetDocument } from '@/graphql';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+
+const CollectionsQuery = graphql(`
+  query Collections($selector: TargetSelectorInput!) {
+    target(selector: $selector) {
+      documentCollections {
+        nodes {
+          id
+          name
+          operations(first: 100) {
+            nodes {
+              id
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+`);
 
 export function useCollections() {
   const router = useRouteSelector();
@@ -17,8 +37,14 @@ export function useCollections() {
   const targetId = result.data?.target?.id as string;
 
   const [{ data, error, fetching }] = useQuery({
-    query: CollectionsDocument,
-    variables: { targetId },
+    query: CollectionsQuery,
+    variables: {
+      selector: {
+        target: router.targetId,
+        organization: router.organizationId,
+        project: router.projectId,
+      },
+    },
     pause: !targetId,
   });
 
@@ -31,7 +57,7 @@ export function useCollections() {
   }, [error]);
 
   return {
-    collections: data?.collections.nodes,
+    collections: data?.target?.documentCollections.nodes,
     loading: result.fetching || fetching,
   };
 }

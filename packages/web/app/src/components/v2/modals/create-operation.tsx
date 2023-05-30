@@ -4,9 +4,48 @@ import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal, Select } from '@/components/v2';
-import { CreateOperationDocument, OperationDocument, UpdateOperationDocument } from '@/graphql';
+import { graphql } from '@/gql';
+import { useRouteSelector } from '@/lib/hooks';
 import { useCollections } from '@/lib/hooks/use-collections';
 import { useEditorContext } from '@graphiql/react';
+
+const CreateOperationMutation = graphql(`
+  mutation CreateOperation($input: CreateDocumentCollectionOperationInput!) {
+    createOperationInDocumentCollection(input: $input) {
+      id
+      name
+    }
+  }
+`);
+
+const UpdateOperationMutation = graphql(`
+  mutation UpdateOperation($input: UpdateDocumentCollectionOperationInput!) {
+    updateOperationInDocumentCollection(input: $input) {
+      id
+      name
+      collection {
+        id
+      }
+    }
+  }
+`);
+
+const OperationQuery = graphql(`
+  query Operation($selector: TargetSelectorInput!, $id: ID!) {
+    target(selector: $selector) {
+      documentCollectionOperation(id: $id) {
+        id
+        name
+        query
+        headers
+        variables
+        collection {
+          id
+        }
+      }
+    }
+  }
+`);
 
 export function CreateOperationModal({
   isOpen,
@@ -17,8 +56,10 @@ export function CreateOperationModal({
   toggleModalOpen: () => void;
   operationId?: string;
 }): ReactElement {
-  const [mutationCreate, mutateCreate] = useMutation(CreateOperationDocument);
-  const [mutationUpdate, mutateUpdate] = useMutation(UpdateOperationDocument);
+  const routeSelector = useRouteSelector();
+  const router = useRouter();
+  const [mutationCreate, mutateCreate] = useMutation(CreateOperationMutation);
+  const [mutationUpdate, mutateUpdate] = useMutation(UpdateOperationMutation);
 
   const { collections, loading } = useCollections();
 
@@ -27,9 +68,14 @@ export function CreateOperationModal({
   });
 
   const [{ data, error: operationError, fetching: loadingOperation }] = useQuery({
-    query: OperationDocument,
+    query: OperationQuery,
     variables: {
       id: operationId!,
+      selector: {
+        target: routeSelector.targetId,
+        organization: routeSelector.organizationId,
+        project: routeSelector.projectId,
+      },
     },
     pause: !operationId,
   });
@@ -39,14 +85,13 @@ export function CreateOperationModal({
 
   useEffect(() => {
     if (data) {
-      const { operation } = data;
+      const { documentCollectionOperation } = data.target!;
       void setValues({
-        name: operation.name,
-        collectionId: operation.collection.id,
+        name: documentCollectionOperation.name,
+        collectionId: documentCollectionOperation.collection.id,
       });
     }
   }, [data]);
-  const router = useRouter();
   const {
     handleSubmit,
     values,
@@ -68,19 +113,31 @@ export function CreateOperationModal({
     }),
     async onSubmit(values) {
       const { error, data: result } =
-        operationId && data?.operation
+        operationId && data?.target?.documentCollectionOperation
           ? await mutateUpdate({
               input: {
-                ...values,
-                query: data.operation.query,
-                variables: data.operation.variables,
-                headers: data.operation.headers,
-                id: operationId,
+                collectionId: values.collectionId,
+                name: values.name,
+                query: data.target.documentCollectionOperation.query,
+                variables: data.target.documentCollectionOperation.variables,
+                headers: data.target.documentCollectionOperation.headers,
+                operationId,
+                targetSelector: {
+                  target: routeSelector.targetId,
+                  organization: routeSelector.organizationId,
+                  project: routeSelector.projectId,
+                },
               },
             })
           : await mutateCreate({
               input: {
-                ...values,
+                targetSelector: {
+                  target: routeSelector.targetId,
+                  organization: routeSelector.organizationId,
+                  project: routeSelector.projectId,
+                },
+                name: values.name,
+                collectionId: values.collectionId,
                 query: queryEditor?.getValue(),
                 variables: variableEditor?.getValue(),
                 headers: headerEditor?.getValue(),
@@ -89,7 +146,9 @@ export function CreateOperationModal({
       if (!error) {
         if (result) {
           const data =
-            'createOperation' in result ? result.createOperation : result.updateOperation;
+            'createOperationInDocumentCollection' in result
+              ? result.createOperationInDocumentCollection
+              : result.updateOperationInDocumentCollection;
           await router.push({
             query: {
               ...router.query,

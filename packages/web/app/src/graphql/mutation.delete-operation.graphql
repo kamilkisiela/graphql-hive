@@ -1,5 +1,0 @@
-mutation DeleteOperation($id: ID!) {
-  deleteOperation(id: $id) {
-    id
-  }
-}

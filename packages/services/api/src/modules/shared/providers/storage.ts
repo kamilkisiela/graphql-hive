@@ -13,7 +13,7 @@ import type {
   CDNAccessToken,
   DeletedCompositeSchema,
   DocumentCollection,
-  DocumentCollectionDocument,
+  DocumentCollectionOperation,
   Member,
   OIDCIntegration,
   Organization,
@@ -620,7 +620,7 @@ export interface Storage {
    * Returns null if the document collection does not exist (did not get deleted).
    * Returns the id of the deleted document collection if it got deleted
    */
-  deleteDocumentCollection(_: { documentCollectionId: string }): Promise<string | null>;
+  deleteDocumentCollection(_: { documentCollectionId: string }): Promise<string>;
 
   /**
    * Returns null if the document collection does not exist (did not get updated).
@@ -629,9 +629,9 @@ export interface Storage {
     documentCollectionId: string;
     title: string | null;
     description: string | null;
-  }): Promise<DocumentCollection | null>;
+  }): Promise<DocumentCollection>;
 
-  getDocumentCollection(_: { id: string }): Promise<DocumentCollection | null>;
+  getDocumentCollection(_: { id: string }): Promise<DocumentCollection>;
 
   getPaginatedDocumentsForDocumentCollection(_: {
     documentCollectionId: string;
@@ -640,7 +640,7 @@ export interface Storage {
   }): Promise<
     Readonly<{
       items: ReadonlyArray<{
-        node: DocumentCollectionDocument;
+        node: DocumentCollectionOperation;
         cursor: string;
       }>;
       pageInfo: Readonly<{
@@ -659,15 +659,13 @@ export interface Storage {
     variables: string | null;
     headers: string | null;
     createdByUserId: string | null;
-  }): Promise<DocumentCollectionDocument>;
+  }): Promise<DocumentCollectionOperation>;
 
   /**
    * Returns null if the document collection document does not exist (did not get deleted).
    * Returns the id of the deleted document collection document if it got deleted
    */
-  deleteDocumentCollectionDocument(_: {
-    documentCollectionDocumentId: string;
-  }): Promise<string | null>;
+  deleteDocumentCollectionDocument(_: { documentCollectionDocumentId: string }): Promise<string>;
 
   /**
    * Returns null if the document collection document does not exist (did not get updated).
@@ -678,9 +676,9 @@ export interface Storage {
     contents: string | null;
     variables: string | null;
     headers: string | null;
-  }): Promise<DocumentCollectionDocument | null>;
+  }): Promise<DocumentCollectionOperation>;
 
-  getDocumentCollectionDocument(_: { id: string }): Promise<DocumentCollectionDocument | null>;
+  getDocumentCollectionDocument(_: { id: string }): Promise<DocumentCollectionOperation>;
 }
 
 @Injectable()

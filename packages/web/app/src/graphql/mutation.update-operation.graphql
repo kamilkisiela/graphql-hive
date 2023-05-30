@@ -1,9 +1,0 @@
-mutation UpdateOperation($input: UpdateOperationInput!) {
-  updateOperation(input: $input) {
-    id
-    name
-    collection {
-      id
-    }
-  }
-}

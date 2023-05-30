@@ -1,8 +1,14 @@
 import { ReactElement } from 'react';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
-import { DeleteOperationDocument } from '@/graphql';
+import { graphql } from '@/gql';
 import { TrashIcon } from '@radix-ui/react-icons';
+
+const DeleteOperationMutation = graphql(`
+  mutation DeleteOperation($id: ID!) {
+    deleteOperationInDocumentCollection(id: $id)
+  }
+`);
 
 export function DeleteOperationModal({
   isOpen,
@@ -13,7 +19,7 @@ export function DeleteOperationModal({
   toggleModalOpen: () => void;
   operationId: string;
 }): ReactElement {
-  const [, mutate] = useMutation(DeleteOperationDocument);
+  const [, mutate] = useMutation(DeleteOperationMutation);
 
   return (
     <Modal

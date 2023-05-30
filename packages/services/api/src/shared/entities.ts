@@ -204,7 +204,7 @@ export interface DocumentCollection {
   updatedAt: string;
 }
 
-export interface DocumentCollectionDocument {
+export interface DocumentCollectionOperation {
   id: string;
   title: string;
   contents: string;

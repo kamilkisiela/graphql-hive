@@ -1,74 +1,67 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck TODO: fix Property 'node' does not exist on type ...
+import { createConnection } from '../../shared/schema';
 import { CollectionModule } from './__generated__/types';
 import { CollectionProvider } from './providers/collection.provider';
 
 export const resolvers: CollectionModule.Resolvers = {
-  Collection: {
-    id: root => root.node.id,
-    name: root => root.node.title,
-    description: root => root.node.description,
-    items(root, args, { injector }) {
-      return injector.get(CollectionProvider).getOperations(root.node.id);
+  DocumentCollection: {
+    id: root => root.id,
+    name: root => root.title,
+    description: root => root.description,
+    async operations(root, args, { injector }) {
+      const result = await injector.get(CollectionProvider).getOperations(root.id);
+
+      return result.items.map(v => v.node);
     },
   },
-  CollectionItemsConnection: {
-    edges: root => root.items,
-  },
-  Operation: {
+  DocumentCollectionConnection: createConnection(),
+  DocumentCollectionOperationsConnection: createConnection(),
+  DocumentCollectionOperation: {
     name: root => root.title,
     query: root => root.contents,
     async collection(root, args, { injector }) {
       const node = await injector.get(CollectionProvider).getCollection(root.documentCollectionId);
-      return { node };
+
+      return node;
     },
   },
-  Query: {
-    async collections(_, args, { injector }) {
-      const collections = await injector.get(CollectionProvider).getCollections(args.targetId);
-      return {
-        nodes: collections.items,
-        total: collections.items.length,
-      };
+  Target: {
+    async documentCollections(target, args, { injector }) {
+      const collections = await injector.get(CollectionProvider).getCollections(target.id);
+
+      return collections.items.map(v => v.node);
     },
-    operation(_, args, { injector }) {
+    documentCollectionOperation(_, args, { injector }) {
       return injector.get(CollectionProvider).getOperation(args.id);
     },
-    async collection(_, args, { injector }) {
+    async documentCollection(_, args, { injector }) {
       const node = await injector.get(CollectionProvider).getCollection(args.id);
-      return { node };
+      return node;
     },
   },
   Mutation: {
-    async createCollection(_, { input }, { injector }) {
+    async createDocumentCollection(_, { input }, { injector }) {
       const node = await injector.get(CollectionProvider).createCollection(input);
-      return { node };
+      return node;
     },
-    async updateCollection(_, { input }, { injector }) {
+    async updateDocumentCollection(_, { input }, { injector }) {
       const node = await injector.get(CollectionProvider).updateCollection(input);
-      return { node };
+      return node;
     },
-    async deleteCollection(_, args, { injector }) {
+    async deleteDocumentCollection(_, args, { injector }) {
       await injector.get(CollectionProvider).deleteCollection(args.id);
 
-      return {
-        node: {
-          id: args.id,
-        },
-      };
+      return true;
     },
-    createOperation(_, { input }, { injector }) {
+    createOperationInDocumentCollection(_, { input }, { injector }) {
       return injector.get(CollectionProvider).createOperation(input);
     },
-    updateOperation(_, { input }, { injector }) {
+    updateOperationInDocumentCollection(_, { input }, { injector }) {
       return injector.get(CollectionProvider).updateOperation(input);
     },
-    async deleteOperation(_, args, { injector }) {
+    async deleteOperationInDocumentCollection(_, args, { injector }) {
       await injector.get(CollectionProvider).deleteOperation(args.id);
 
-      return {
-        id: args.id,
-      };
+      return true;
     },
   },
 };

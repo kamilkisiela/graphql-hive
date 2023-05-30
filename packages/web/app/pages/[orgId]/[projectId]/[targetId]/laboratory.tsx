@@ -67,9 +67,15 @@ function hashFromTabContents(args: {
 }
 
 function useOperation(operationId: string) {
+  const router = useRouteSelector();
   const [{ data }] = useQuery({
     query: OperationDocument,
     variables: {
+      selector: {
+        target: router.targetId,
+        project: router.projectId,
+        organization: router.organizationId,
+      },
       id: operationId,
     },
     pause: !operationId,
@@ -83,7 +89,7 @@ function useOperation(operationId: string) {
   );
 
   useEffect(() => {
-    const operation = data?.operation;
+    const operation = data?.target?.documentCollectionOperation;
     if (hasAllEditors && operationId && operation) {
       // first found tab hy hash
       const operationHash = hashFromTabContents(operation);
@@ -97,7 +103,7 @@ function useOperation(operationId: string) {
         editorContext.changeTab(activeTabIndex);
       }
     }
-  }, [hasAllEditors, operationId, data?.operation.id]);
+  }, [hasAllEditors, operationId, data?.target?.documentCollectionOperation.id]);
 }
 
 function useOperationCollectionsPlugin(props: {
@@ -128,7 +134,7 @@ function useOperationCollectionsPlugin(props: {
 
       const initialSelectedCollection =
         operation &&
-        collections?.find(c => c.items.edges.some(({ node }) => node.id === operation))?.id;
+        collections?.find(c => c.operations.nodes.some(node => node.id === operation))?.id;
       return (
         <>
           <div className="flex justify-between">
@@ -212,8 +218,8 @@ function useOperationCollectionsPlugin(props: {
                       ) : null}
                     </div>
                     <Accordion.Content className="pr-0">
-                      {collection.items.edges.length
-                        ? collection.items.edges.map(({ node }) => (
+                      {collection.operations.nodes.length
+                        ? collection.operations.nodes.map(node => (
                             <div key={node.id} className="flex justify-between items-center">
                               <Link
                                 href={{

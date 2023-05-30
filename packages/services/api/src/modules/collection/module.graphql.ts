@@ -1,32 +1,27 @@
 import { gql } from 'graphql-modules';
 
 export const typeDefs = gql`
-  type Collection {
+  type DocumentCollection {
     id: ID!
     name: String!
     description: String
     createdAt: DateTime!
     updatedAt: DateTime!
     createdBy: User!
-    items(first: Int, after: String): CollectionItemsConnection!
+    operations(first: Int, after: String): DocumentCollectionOperationsConnection!
   }
 
-  type CollectionConnection {
-    nodes: [Collection!]!
-    total: Int!
-  }
-
-  type CollectionItemsConnection {
-    edges: [OperationEdge!]!
+  type DocumentCollectionConnection {
+    nodes: [DocumentCollection!]!
     pageInfo: PageInfo!
   }
 
-  type OperationEdge {
-    node: Operation!
-    cursor: String!
+  type DocumentCollectionOperationsConnection {
+    nodes: [DocumentCollectionOperation!]!
+    pageInfo: PageInfo!
   }
 
-  type Operation {
+  type DocumentCollectionOperation {
     id: ID!
     name: String!
     query: String!
@@ -34,49 +29,57 @@ export const typeDefs = gql`
     headers: JSON
     createdAt: DateTime!
     updatedAt: DateTime!
-    collection: Collection!
+    collection: DocumentCollection!
   }
 
-  input CreateCollectionInput {
-    targetId: ID!
+  input CreateDocumentCollectionInput {
+    targetSelector: TargetSelectorInput!
     name: String!
     description: String
   }
 
-  input UpdateCollectionInput {
-    id: ID!
+  input UpdateDocumentCollectionInput {
+    targetSelector: TargetSelectorInput!
+    collectionId: ID!
     name: String!
     description: String
   }
 
-  input CreateOperationInput {
+  input CreateDocumentCollectionOperationInput {
+    targetSelector: TargetSelectorInput!
     collectionId: ID!
     name: String!
     query: String!
     variables: JSON
     headers: JSON
   }
-  input UpdateOperationInput {
-    id: ID!
+
+  input UpdateDocumentCollectionOperationInput {
+    targetSelector: TargetSelectorInput!
+    operationId: ID!
+    collectionId: ID!
     name: String!
     query: String!
-    collectionId: ID!
     variables: JSON
     headers: JSON
   }
 
   extend type Mutation {
-    createOperation(input: CreateOperationInput!): Operation!
-    updateOperation(input: UpdateOperationInput!): Operation!
-    deleteOperation(id: ID!): Operation!
-    createCollection(input: CreateCollectionInput!): Collection!
-    updateCollection(input: UpdateCollectionInput!): Collection!
-    deleteCollection(id: ID!): Collection!
+    createOperationInDocumentCollection(
+      input: CreateDocumentCollectionOperationInput!
+    ): DocumentCollectionOperation!
+    updateOperationInDocumentCollection(
+      input: UpdateDocumentCollectionOperationInput!
+    ): DocumentCollectionOperation!
+    deleteOperationInDocumentCollection(id: ID!): Boolean!
+    createDocumentCollection(input: CreateDocumentCollectionInput!): DocumentCollection!
+    updateDocumentCollection(input: UpdateDocumentCollectionInput!): DocumentCollection!
+    deleteDocumentCollection(id: ID!): Boolean!
   }
 
-  extend type Query {
-    collections(targetId: ID!): CollectionConnection!
-    operation(id: ID!): Operation!
-    collection(id: ID!): Collection!
+  extend type Target {
+    documentCollection(id: ID!): DocumentCollection!
+    documentCollections: DocumentCollectionConnection!
+    documentCollectionOperation(id: ID!): DocumentCollectionOperation!
   }
 `;

@@ -1,9 +1,9 @@
 import { Injectable, Scope } from 'graphql-modules';
 import {
-  CreateCollectionInput,
-  CreateOperationInput,
-  UpdateCollectionInput,
-  UpdateOperationInput,
+  CreateDocumentCollectionInput,
+  CreateDocumentCollectionOperationInput,
+  UpdateDocumentCollectionInput,
+  UpdateDocumentCollectionOperationInput,
 } from '@/graphql';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
@@ -44,13 +44,14 @@ export class CollectionProvider {
     return this.storage.getDocumentCollectionDocument({ id });
   }
 
-  async createCollection({ name, description, ...input }: CreateCollectionInput) {
+  async createCollection({ name, description, ...input }: CreateDocumentCollectionInput) {
     const currentUser = await this.authManager.getCurrentUser();
+
     return this.storage.createDocumentCollection({
       createdByUserId: currentUser.id,
       title: name,
       description: description || '',
-      ...input,
+      targetId: input.targetSelector.target,
     });
   }
 
@@ -58,7 +59,7 @@ export class CollectionProvider {
     return this.storage.deleteDocumentCollection({ documentCollectionId: id });
   }
 
-  async createOperation(input: CreateOperationInput) {
+  async createOperation(input: CreateDocumentCollectionOperationInput) {
     const currentUser = await this.authManager.getCurrentUser();
     return this.storage.createDocumentCollectionDocument({
       documentCollectionId: input.collectionId,
@@ -70,11 +71,9 @@ export class CollectionProvider {
     });
   }
 
-  updateOperation(input: UpdateOperationInput) {
+  updateOperation(input: UpdateDocumentCollectionOperationInput) {
     return this.storage.updateDocumentCollectionDocument({
-      // TODO: laurin we need add possibility change collectionId
-      // documentCollectionId: input.collectionId,
-      documentCollectionDocumentId: input.id,
+      documentCollectionDocumentId: input.operationId,
       title: input.name,
       contents: input.query,
       variables: input.variables,
@@ -82,9 +81,9 @@ export class CollectionProvider {
     });
   }
 
-  updateCollection(input: UpdateCollectionInput) {
+  updateCollection(input: UpdateDocumentCollectionInput) {
     return this.storage.updateDocumentCollection({
-      documentCollectionId: input.id,
+      documentCollectionId: input.collectionId,
       description: input.description || null,
       title: input.name,
     });

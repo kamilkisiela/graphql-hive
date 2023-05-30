@@ -3,13 +3,47 @@ import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal } from '@/components/v2';
-import {
-  CollectionDocument,
-  CreateCollectionDocument,
-  TargetDocument,
-  UpdateCollectionDocument,
-} from '@/graphql';
+import { graphql } from '@/gql';
+import { TargetDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
+
+const CollectionQuery = graphql(`
+  query Collection($selector: TargetSelectorInput!, $id: ID!) {
+    target(selector: $selector) {
+      id
+      documentCollection(id: $id) {
+        id
+        name
+        description
+      }
+    }
+  }
+`);
+
+const CreateCollectionMutation = graphql(`
+  mutation CreateCollection($input: CreateDocumentCollectionInput!) {
+    createDocumentCollection(input: $input) {
+      id
+      name
+      operations(first: 100) {
+        nodes {
+          id
+          name
+        }
+      }
+    }
+  }
+`);
+
+const UpdateCollectionMutation = graphql(`
+  mutation UpdateCollection($input: UpdateDocumentCollectionInput!) {
+    updateDocumentCollection(input: $input) {
+      id
+      name
+      description
+    }
+  }
+`);
 
 export function CreateCollectionModal({
   isOpen,
@@ -21,8 +55,8 @@ export function CreateCollectionModal({
   collectionId?: string;
 }): ReactElement {
   const router = useRouteSelector();
-  const [mutationCreate, mutateCreate] = useMutation(CreateCollectionDocument);
-  const [mutationUpdate, mutateUpdate] = useMutation(UpdateCollectionDocument);
+  const [mutationCreate, mutateCreate] = useMutation(CreateCollectionMutation);
+  const [mutationUpdate, mutateUpdate] = useMutation(UpdateCollectionMutation);
 
   const [result] = useQuery({
     query: TargetDocument,
@@ -34,9 +68,14 @@ export function CreateCollectionModal({
   });
 
   const [{ data, error: collectionError, fetching: loadingCollection }] = useQuery({
-    query: CollectionDocument,
+    query: CollectionQuery,
     variables: {
       id: collectionId!,
+      selector: {
+        target: router.targetId,
+        organization: router.organizationId,
+        project: router.projectId,
+      },
     },
     pause: !collectionId,
   });
@@ -48,10 +87,10 @@ export function CreateCollectionModal({
     if (!collectionId) {
       resetForm();
     } else if (data) {
-      const { collection } = data;
+      const { documentCollection } = data.target!;
       void setValues({
-        name: collection.name,
-        description: collection.description || '',
+        name: documentCollection.name,
+        description: documentCollection.description || '',
       });
     }
   }, [data, collectionId]);
@@ -80,13 +119,22 @@ export function CreateCollectionModal({
       const { error } = collectionId
         ? await mutateUpdate({
             input: {
-              id: collectionId,
+              collectionId,
+              targetSelector: {
+                target: router.targetId,
+                organization: router.organizationId,
+                project: router.projectId,
+              },
               ...values,
             },
           })
         : await mutateCreate({
             input: {
-              targetId,
+              targetSelector: {
+                target: router.targetId,
+                organization: router.organizationId,
+                project: router.projectId,
+              },
               ...values,
             },
           });

@@ -25,6 +25,8 @@ import type {
   ActivityObject,
   DateRange,
   DeletedCompositeSchema as DeletedCompositeSchemaEntity,
+  DocumentCollection,
+  DocumentCollectionOperation,
   Member,
   Organization,
   PersistedOperation,
@@ -231,3 +233,6 @@ export type SchemaCoordinateUsageTypeMapper = {
   total: number;
   usedByClients: PromiseOrValue<Array<string> | null>;
 };
+
+export type DocumentCollectionConnection = ReadonlyArray<DocumentCollection>;
+export type DocumentCollectionOperationsConnection = ReadonlyArray<DocumentCollectionOperation>;
