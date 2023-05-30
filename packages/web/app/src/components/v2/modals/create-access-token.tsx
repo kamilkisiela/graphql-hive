@@ -226,7 +226,7 @@ const PresetTabContent = (props: { manager: ReturnType<typeof usePermissionsMana
   return (
     <>
       <div className="px-4 pb-2 text-sm">
-        <p className=" text-gray-500">
+        <p className="text-gray-500">
           With simple mode, you can choose the flow you want to implement and the wizard will help
           you with the permissions required.
         </p>
@@ -301,6 +301,20 @@ function ModalContent(props: {
     props.organization,
   );
   const [mutation, mutate] = useMutation(CreateAccessToken_CreateTokenMutation);
+  const manager = usePermissionsManager({
+    onSuccess() {},
+    organization,
+    member: organization.me,
+    passMemberScopes: false,
+  });
+
+  const filteredDownPermissions = useMemo(() => {
+    return {
+      organizationScopes: manager.organizationScopes.filter(manager.canAccessOrganization),
+      projectScopes: manager.projectScopes.filter(manager.canAccessProject),
+      targetScopes: manager.targetScopes.filter(manager.canAccessTarget),
+    };
+  }, [manager]);
 
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
     useFormik({
@@ -315,27 +329,18 @@ function ModalContent(props: {
             project: props.projectId,
             target: props.targetId,
             name: values.name,
-            organizationScopes: manager.organizationScopes.filter(manager.canAccessOrganization),
-            projectScopes: manager.projectScopes.filter(manager.canAccessProject),
-            targetScopes: manager.targetScopes.filter(manager.canAccessTarget),
+            organizationScopes: filteredDownPermissions.organizationScopes,
+            projectScopes: filteredDownPermissions.projectScopes,
+            targetScopes: filteredDownPermissions.targetScopes,
           },
         });
       },
     });
 
-  const manager = usePermissionsManager({
-    onSuccess() {},
-    organization,
-    member: organization.me,
-    passMemberScopes: false,
-  });
-
-  console.log(manager);
-
   const noPermissionsSelected =
-    manager.organizationScopes.length === 0 &&
-    manager.projectScopes.length === 0 &&
-    manager.targetScopes.length === 0;
+    filteredDownPermissions.organizationScopes.length === 0 &&
+    filteredDownPermissions.projectScopes.length === 0 &&
+    filteredDownPermissions.targetScopes.length === 0;
 
   return (
     <>
