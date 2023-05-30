@@ -20,6 +20,7 @@ export function RadixSelect<T extends string>({
   position,
   name,
   placeholder,
+  isDisabled,
 }: {
   multiple?: boolean;
   className?: string;
@@ -30,9 +31,16 @@ export function RadixSelect<T extends string>({
   placeholder?: string;
   position?: SelectContentProps['position'];
   name?: string;
+  isDisabled?: boolean;
 }): ReactElement {
   return (
-    <S.Root defaultValue={defaultValue} onValueChange={onChange} value={value} name={name}>
+    <S.Root
+      defaultValue={defaultValue}
+      onValueChange={onChange}
+      value={value}
+      name={name}
+      disabled={isDisabled}
+    >
       <S.Trigger asChild aria-label="">
         <RadixButton className={className}>
           <S.Value placeholder={placeholder} />

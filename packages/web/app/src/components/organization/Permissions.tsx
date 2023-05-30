@@ -1,6 +1,7 @@
 import { FormEventHandler, memo, ReactElement, useCallback, useState } from 'react';
+import clsx from 'clsx';
 import { useMutation } from 'urql';
-import { Accordion, RadixSelect } from '@/components/v2';
+import { Accordion, RadixSelect, Tooltip } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import {
   OrganizationAccessScope,
@@ -73,10 +74,6 @@ function PermissionsSpaceInner<
           );
           const canManageScope = possibleScope.some(checkAccess);
 
-          if (!canManageScope) {
-            return null;
-          }
-
           const readOnlyScope = scope.mapping['read-only'];
           const hasReadOnly = typeof readOnlyScope !== 'undefined';
 
@@ -87,13 +84,20 @@ function PermissionsSpaceInner<
             scope.mapping['read-write'],
           );
 
-          return (
-            <div className="py-2 flex flex-row justify-between items-center" key={scope.name}>
+          const inner = (
+            <div
+              key={scope.name}
+              className={clsx(
+                'py-2 flex flex-row justify-between items-center',
+                canManageScope === false ? 'opacity-50' : null,
+              )}
+            >
               <div>
                 <div className="font-semibold text-gray-600">{scope.name}</div>
                 <div className="text-xs text-gray-600">{scope.description}</div>
               </div>
               <RadixSelect
+                isDisabled={canManageScope === false}
                 className="shrink-0"
                 position="popper"
                 value={selectedScope}
@@ -137,6 +141,21 @@ function PermissionsSpaceInner<
                 }}
               />
             </div>
+          );
+
+          return canManageScope ? (
+            inner
+          ) : (
+            <Tooltip
+              content={
+                <>
+                  Your user account does not have these permissions, thus it can not issue those to
+                  the access token.
+                </>
+              }
+            >
+              {inner}
+            </Tooltip>
           );
         })}
       </Accordion.Content>
