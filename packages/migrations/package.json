@@ -23,7 +23,7 @@
     "@whatwg-node/fetch": "0.9.0",
     "bcryptjs": "2.4.3",
     "dotenv": "16.0.3",
-    "got": "12.6.0",
+    "got": "12.6.1",
     "p-limit": "4.0.0",
     "slonik": "30.4.4",
     "ts-node": "10.9.1",
