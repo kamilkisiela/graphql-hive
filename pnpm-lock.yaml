@@ -469,8 +469,8 @@ importers:
         specifier: 16.0.3
         version: 16.0.3
       got:
-        specifier: 12.6.0
-        version: 12.6.0
+        specifier: 12.6.1
+        version: 12.6.1
       p-limit:
         specifier: 4.0.0
         version: 4.0.0
@@ -557,8 +557,8 @@ importers:
         specifier: 2.1.0
         version: 2.1.0
       got:
-        specifier: 12.6.0
-        version: 12.6.0
+        specifier: 12.6.1
+        version: 12.6.1
       graphql-modules:
         specifier: 2.1.2
         version: 2.1.2
@@ -887,8 +887,8 @@ importers:
         specifier: 16.0.3
         version: 16.0.3
       got:
-        specifier: 12.6.0
-        version: 12.6.0
+        specifier: 12.6.1
+        version: 12.6.1
       reflect-metadata:
         specifier: 0.1.13
         version: 0.1.13
@@ -936,8 +936,8 @@ importers:
         specifier: 16.0.3
         version: 16.0.3
       got:
-        specifier: 12.6.0
-        version: 12.6.0
+        specifier: 12.6.1
+        version: 12.6.1
       graphql:
         specifier: 16.6.0
         version: 16.6.0
@@ -1021,8 +1021,8 @@ importers:
         specifier: 16.0.3
         version: 16.0.3
       got:
-        specifier: 12.6.0
-        version: 12.6.0
+        specifier: 12.6.1
+        version: 12.6.1
       graphql:
         specifier: 16.6.0
         version: 16.6.0
@@ -1113,8 +1113,8 @@ importers:
         specifier: 16.0.3
         version: 16.0.3
       got:
-        specifier: 12.6.0
-        version: 12.6.0
+        specifier: 12.6.1
+        version: 12.6.1
       param-case:
         specifier: 3.0.4
         version: 3.0.4
@@ -1174,8 +1174,8 @@ importers:
         specifier: 16.0.3
         version: 16.0.3
       got:
-        specifier: 12.6.0
-        version: 12.6.0
+        specifier: 12.6.1
+        version: 12.6.1
       reflect-metadata:
         specifier: 0.1.13
         version: 0.1.13
@@ -1266,8 +1266,8 @@ importers:
         specifier: 16.0.3
         version: 16.0.3
       got:
-        specifier: 12.6.0
-        version: 12.6.0
+        specifier: 12.6.1
+        version: 12.6.1
       graphql:
         specifier: 16.6.0
         version: 16.6.0
@@ -1315,8 +1315,8 @@ importers:
         specifier: 16.0.3
         version: 16.0.3
       got:
-        specifier: 12.6.0
-        version: 12.6.0
+        specifier: 12.6.1
+        version: 12.6.1
       reflect-metadata:
         specifier: 0.1.13
         version: 0.1.13
@@ -1352,8 +1352,8 @@ importers:
         specifier: 16.0.3
         version: 16.0.3
       got:
-        specifier: 12.6.0
-        version: 12.6.0
+        specifier: 12.6.1
+        version: 12.6.1
       graphql:
         specifier: 16.6.0
         version: 16.6.0
@@ -1398,8 +1398,8 @@ importers:
         specifier: 16.0.3
         version: 16.0.3
       got:
-        specifier: 12.6.0
-        version: 12.6.0
+        specifier: 12.6.1
+        version: 12.6.1
       ioredis:
         specifier: 5.3.2
         version: 5.3.2
@@ -20017,8 +20017,8 @@ packages:
       responselike: 2.0.1
     dev: true
 
-  /got@12.6.0:
-    resolution: {integrity: sha512-WTcaQ963xV97MN3x0/CbAriXFZcXCfgxVp91I+Ze6pawQOa7SgzwSx2zIJJsX+kTajMnVs0xcFD1TxZKFqhdnQ==}
+  /got@12.6.1:
+    resolution: {integrity: sha512-mThBblvlAF1d4O5oqyvN+ZxLAYwIJK7bpMxgYqPD9okW0C3qm5FFn7k811QrcuEBwaogR3ngOFoCfs6mRv7teQ==}
     engines: {node: '>=14.16'}
     dependencies:
       '@sindresorhus/is': 5.3.0

@@ -28,7 +28,7 @@
     "dataloader": "2.2.2",
     "date-fns": "2.30.0",
     "fast-json-stable-stringify": "2.1.0",
-    "got": "12.6.0",
+    "got": "12.6.1",
     "graphql-modules": "2.1.2",
     "graphql-parse-resolve-info": "4.13.0",
     "graphql-scalars": "1.22.1",

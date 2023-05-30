@@ -18,7 +18,7 @@
     "@sentry/node": "7.53.1",
     "@theguild/buddy": "0.1.0",
     "dotenv": "16.0.3",
-    "got": "12.6.0",
+    "got": "12.6.1",
     "param-case": "3.0.4",
     "slonik": "30.4.4",
     "slonik-interceptor-query-logging": "1.4.7",
