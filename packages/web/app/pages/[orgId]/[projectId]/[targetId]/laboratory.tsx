@@ -91,17 +91,14 @@ function useOperation(operationId: string) {
   useEffect(() => {
     const operation = data?.target?.documentCollectionOperation;
     if (hasAllEditors && operationId && operation) {
-      // first found tab hy hash
-      const operationHash = hashFromTabContents(operation);
-      const activeTabIndex = editorContext.tabs.findIndex(tab => operationHash === tab.hash);
-      if (activeTabIndex === -1) {
-        editorContext.addTab();
-        editorContext.queryEditor.setValue(operation.query);
-        editorContext.variableEditor.setValue(operation.variables);
-        editorContext.headerEditor.setValue(operation.headers);
-      } else {
-        editorContext.changeTab(activeTabIndex);
+      if (editorContext.tabs.length !== 1) {
+        for (const [index] of editorContext.tabs.entries()) {
+          editorContext.closeTab(index);
+        }
       }
+      editorContext.queryEditor.setValue(operation.query);
+      editorContext.variableEditor.setValue(operation.variables);
+      editorContext.headerEditor.setValue(operation.headers);
     }
   }, [hasAllEditors, operationId, data?.target?.documentCollectionOperation.id]);
 }
@@ -354,6 +351,9 @@ function Page({
         .graphiql-container {
           --color-base: transparent !important;
           --color-primary: 40, 89%, 60% !important;
+        }
+        .graphiql-tab-add {
+          display: none !important;
         }
       `}</style>
       <GraphiQL

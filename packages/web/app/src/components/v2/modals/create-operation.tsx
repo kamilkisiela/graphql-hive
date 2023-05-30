@@ -100,10 +100,6 @@ export function CreateOperationModal({
     nonNull: true,
   });
 
-  useEffect(() => {
-    console.log('queryEditor', queryEditor?.getValue());
-  }, []);
-
   const [{ data, error: operationError, fetching: loadingOperation }] = useQuery({
     query: OperationQuery,
     variables: {
