@@ -324,11 +324,13 @@ function Save(): ReactElement {
       >
         <SaveIcon className="graphiql-toolbar-icon !h-5 w-auto" />
       </ToolbarButton>
-      <CreateOperationModal
-        isOpen={isOpen}
-        toggleModalOpen={toggle}
-        operationId={query.operation as string}
-      />
+      {isOpen ? (
+        <CreateOperationModal
+          isOpen={isOpen}
+          toggleModalOpen={toggle}
+          operationId={query.operation as string}
+        />
+      ) : null}
     </>
   );
 }
