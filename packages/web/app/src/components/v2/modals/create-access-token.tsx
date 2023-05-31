@@ -419,13 +419,19 @@ function ModalContent(props: {
                 </Tabs.Trigger>
               </Tabs.List>
               <Tabs.Content value="simple" className="flex py-2 overflow-hidden relative" noPadding>
-                <div className="overflow-y-scroll py-7">
+                <div
+                  className="overflow-y-scroll py-7 w-full"
+                  style={{ height: 'calc(100% - 1px)' }}
+                >
                   <PresetTabContent manager={manager} />
                 </div>
                 <ScrollableTabShadow />
               </Tabs.Content>
-              <Tabs.Content value="advanced" noPadding className="flex relative">
-                <div className="overflow-y-scroll py-7">
+              <Tabs.Content value="advanced" noPadding className="flex overflow-hidden relative">
+                <div
+                  className="overflow-y-scroll py-7 w-full"
+                  style={{ height: 'calc(100% - 1px)' }}
+                >
                   <Accordion type="multiple" defaultValue={['Organization', 'Project', 'Target']}>
                     <PermissionsSpace
                       title="Organization"
@@ -478,6 +484,8 @@ function ModalContent(props: {
   );
 }
 
+const shadowColor = 'rgb(14, 11, 15)';
+
 const ScrollableTabShadow = () => (
   <div
     style={{
@@ -487,7 +495,7 @@ const ScrollableTabShadow = () => (
       right: 0,
       bottom: 0,
       pointerEvents: 'none',
-      boxShadow: 'inset 0px 20px 20px -10px black, inset 0px -20px 20px -10px black',
+      boxShadow: `inset 0px 20px 20px -10px ${shadowColor}, inset 0px -20px 20px -10px ${shadowColor}`,
     }}
   />
 );
