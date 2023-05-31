@@ -615,10 +615,10 @@ function LatencyOverTimeStats({
   }
 
   const series = [
-    createSeries('p75', '#fef08a', p75),
-    createSeries('p90', '#facc15', p90),
-    createSeries('p95', '#ca8a04', p95),
-    createSeries('p99', '#854d0e', p99),
+    createSeries('p75', '#10b981', p75),
+    createSeries('p90', '#0ea5e9', p90),
+    createSeries('p95', '#8b5cf6', p95),
+    createSeries('p99', '#ec4899', p99),
   ];
 
   return (
