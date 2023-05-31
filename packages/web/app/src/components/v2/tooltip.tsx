@@ -31,11 +31,13 @@ function Wrapper({
     </T.Content>
   );
 
+  console.log(container);
+
   return (
     <T.Provider>
       <T.Root>
         <T.Trigger asChild>{children}</T.Trigger>
-        {container ? <T.Portal container={container}>{innerContent}</T.Portal> : content}
+        {container ? <T.Portal container={container}>{innerContent}</T.Portal> : innerContent}
       </T.Root>
     </T.Provider>
   );
