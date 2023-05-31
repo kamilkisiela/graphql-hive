@@ -1661,8 +1661,8 @@ importers:
         specifier: 6.3.2
         version: 6.3.2
       yup:
-        specifier: 1.1.1
-        version: 1.1.1
+        specifier: 1.2.0
+        version: 1.2.0
       zod:
         specifier: 3.21.4
         version: 3.21.4
@@ -30780,8 +30780,8 @@ packages:
       toposort: 2.0.2
     dev: false
 
-  /yup@1.1.1:
-    resolution: {integrity: sha512-KfCGHdAErqFZWA5tZf7upSUnGKuTOnsI3hUsLr7fgVtx+DK04NPV01A68/FslI4t3s/ZWpvXJmgXhd7q6ICnag==}
+  /yup@1.2.0:
+    resolution: {integrity: sha512-PPqYKSAXjpRCgLgLKVGPA33v5c/WgEx3wi6NFjIiegz90zSwyMpvTFp/uGcVnnbx6to28pgnzp/q8ih3QRjLMQ==}
     dependencies:
       property-expr: 2.0.5
       tiny-case: 1.0.3

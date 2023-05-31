@@ -85,7 +85,7 @@
     "use-debounce": "9.0.4",
     "valtio": "1.10.5",
     "wonka": "6.3.2",
-    "yup": "1.1.1",
+    "yup": "1.2.0",
     "zod": "3.21.4"
   },
   "devDependencies": {
