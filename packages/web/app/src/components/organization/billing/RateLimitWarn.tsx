@@ -23,11 +23,10 @@ export function RateLimitWarn(props: {
 
   if (organization.plan === BillingPlanType.Enterprise) {
     return (
-      <Callout type="warning" className="w-full">
+      <Callout type="warning" className="w-full mb-2">
         <b>Your organization has reached it's contract limit.</b>
         <br />
-        The data in your organization <b>{organization.name}</b> is still being processed and no
-        data will be lost.
+        The data under your organization is still being processed and no data will be lost.
         <br />
         Please contact our support team to increase your contract limit.
       </Callout>
@@ -35,11 +34,11 @@ export function RateLimitWarn(props: {
   }
 
   return (
-    <Callout type="warning" className="w-full">
+    <Callout type="warning" className="w-full mb-2">
       <b>Your organization is being rate-limited for operations.</b>
       <br />
       Since you have reached your organization rate-limit and data ingestion limitation, your
-      organization <b>{organization.name}</b> is currently unable to ingest data.
+      organization is currently unable to ingest data.
     </Callout>
   );
 }
