@@ -36,33 +36,6 @@ const CreateOperationMutation = graphql(`
   }
 `);
 
-const UpdateOperationMutation = graphql(`
-  mutation UpdateOperation(
-    $selector: TargetSelectorInput!
-    $input: UpdateDocumentCollectionOperationInput!
-  ) {
-    updateOperationInDocumentCollection(selector: $selector, input: $input) {
-      error {
-        message
-      }
-      ok {
-        operation {
-          id
-          name
-        }
-        collection {
-          id
-          operations {
-            nodes {
-              id
-            }
-          }
-        }
-      }
-    }
-  }
-`);
-
 const OperationQuery = graphql(`
   query Operation($selector: TargetSelectorInput!, $id: ID!) {
     target(selector: $selector) {
@@ -92,7 +65,6 @@ export function CreateOperationModal({
   const routeSelector = useRouteSelector();
   const router = useRouter();
   const [mutationCreate, mutateCreate] = useMutation(CreateOperationMutation);
-  const [mutationUpdate, mutateUpdate] = useMutation(UpdateOperationMutation);
 
   const { collections, loading } = useCollections();
 
@@ -112,7 +84,7 @@ export function CreateOperationModal({
     },
     pause: !operationId,
   });
-  const error = mutationCreate.error || mutationUpdate.error || operationError;
+  const error = mutationCreate.error || operationError;
 
   const fetching = loading || loadingOperation;
 
@@ -147,43 +119,23 @@ export function CreateOperationModal({
       collectionId: Yup.string().required('Collection is a required field'),
     }),
     async onSubmit(values) {
-      const { error, data: result } =
-        operationId && data?.target?.documentCollectionOperation
-          ? await mutateUpdate({
-              selector: {
-                target: routeSelector.targetId,
-                organization: routeSelector.organizationId,
-                project: routeSelector.projectId,
-              },
-              input: {
-                collectionId: values.collectionId,
-                name: values.name,
-                query: data.target.documentCollectionOperation.query,
-                variables: data.target.documentCollectionOperation.variables,
-                headers: data.target.documentCollectionOperation.headers,
-                operationId,
-              },
-            })
-          : await mutateCreate({
-              selector: {
-                target: routeSelector.targetId,
-                organization: routeSelector.organizationId,
-                project: routeSelector.projectId,
-              },
-              input: {
-                name: values.name,
-                collectionId: values.collectionId,
-                query: queryEditor?.getValue(),
-                variables: variableEditor?.getValue(),
-                headers: headerEditor?.getValue(),
-              },
-            });
+      const { error, data: result } = await mutateCreate({
+        selector: {
+          target: routeSelector.targetId,
+          organization: routeSelector.organizationId,
+          project: routeSelector.projectId,
+        },
+        input: {
+          name: values.name,
+          collectionId: values.collectionId,
+          query: queryEditor?.getValue(),
+          variables: variableEditor?.getValue(),
+          headers: headerEditor?.getValue(),
+        },
+      });
       if (!error) {
         if (result) {
-          const data =
-            'createOperationInDocumentCollection' in result
-              ? result.createOperationInDocumentCollection
-              : result.updateOperationInDocumentCollection;
+          const data = result.createOperationInDocumentCollection;
           await router.push({
             query: {
               ...router.query,

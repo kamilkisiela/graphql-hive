@@ -2,7 +2,7 @@ import { ReactElement, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import clsx from 'clsx';
 import { GraphiQL } from 'graphiql';
-import { useQuery } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { TargetLayout_OrganizationFragment } from '@/components/layouts/target';
@@ -32,7 +32,7 @@ import { canAccessTarget, CanAccessTarget_MemberFragment } from '@/lib/access/ta
 import { useClipboard, useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
 import { useCollections } from '@/lib/hooks/use-collections';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { GraphiQLPlugin, Menu, ToolbarButton, Tooltip, useEditorContext } from '@graphiql/react';
+import { GraphiQLPlugin, Menu, Tooltip, useEditorContext } from '@graphiql/react';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import { BookmarkIcon, DotsVerticalIcon, Link1Icon, Share2Icon } from '@radix-ui/react-icons';
 import 'graphiql/graphiql.css';
@@ -58,16 +58,9 @@ function Share(): ReactElement {
   );
 }
 
-function hashFromTabContents(args: {
-  query: string | null;
-  variables?: string | null;
-  headers?: string | null;
-}): string {
-  return [args.query ?? '', args.variables ?? '', args.headers ?? ''].join('|');
-}
-
-function useOperation(operationId: string) {
+function useCurrentOperation() {
   const router = useRouteSelector();
+  const operationId = router.query.operation as string;
   const [{ data }] = useQuery({
     query: OperationDocument,
     variables: {
@@ -80,27 +73,8 @@ function useOperation(operationId: string) {
     },
     pause: !operationId,
   });
-  const editorContext = useEditorContext({ nonNull: true });
 
-  const hasAllEditors = !!(
-    editorContext.queryEditor &&
-    editorContext.variableEditor &&
-    editorContext.headerEditor
-  );
-
-  useEffect(() => {
-    const operation = data?.target?.documentCollectionOperation;
-    if (hasAllEditors && operationId && operation) {
-      if (editorContext.tabs.length !== 1) {
-        for (const [index] of editorContext.tabs.entries()) {
-          editorContext.closeTab(index);
-        }
-      }
-      editorContext.queryEditor.setValue(operation.query);
-      editorContext.variableEditor.setValue(operation.variables);
-      editorContext.headerEditor.setValue(operation.headers);
-    }
-  }, [hasAllEditors, operationId, data?.target?.documentCollectionOperation.id]);
+  return data?.target?.documentCollectionOperation;
 }
 
 function useOperationCollectionsPlugin(props: {
@@ -116,22 +90,61 @@ function useOperationCollectionsPlugin(props: {
       const [isCollectionModalOpen, toggleCollectionModal] = useToggle();
       const [isOperationModalOpen, toggleOperationModal] = useToggle();
       const { collections, loading } = useCollections();
-      const [operationId, setOperationId] = useState('');
       const [collectionId, setCollectionId] = useState('');
       const [isDeleteCollectionModalOpen, toggleDeleteCollectionModalOpen] = useToggle();
       const [isDeleteOperationModalOpen, toggleDeleteOperationModalOpen] = useToggle();
       const copyToClipboard = useClipboard();
       const router = useRouteSelector();
-      const operation = router.query.operation as string;
-      useOperation(operation);
+
+      const currentOperation = useCurrentOperation();
+      const editorContext = useEditorContext({ nonNull: true });
+
+      const hasAllEditors = !!(
+        editorContext.queryEditor &&
+        editorContext.variableEditor &&
+        editorContext.headerEditor
+      );
+
+      const operationId = router.query.operation as string;
+
+      const tabsCount = editorContext.tabs.length;
+
+      useEffect(() => {
+        if (tabsCount !== 1) {
+          for (let index = 1; index < tabsCount; index++) {
+            // Workaround to close opened tabs from end, to avoid bug when tabs are still opened
+            editorContext.closeTab(tabsCount - index);
+          }
+          const { operation: _paramToRemove, ...query } = router.query;
+          void router.push({ query });
+        }
+      }, [tabsCount]);
+
+      useEffect(() => {
+        if (!hasAllEditors) return;
+
+        if (operationId && currentOperation) {
+          // Set selected operation in editors
+          editorContext.queryEditor.setValue(currentOperation.query);
+          editorContext.variableEditor.setValue(currentOperation.variables);
+          editorContext.headerEditor.setValue(currentOperation.headers);
+        } else {
+          // Clear editors if operation not selected
+          editorContext.queryEditor.setValue('');
+          editorContext.variableEditor.setValue('');
+          editorContext.headerEditor.setValue('');
+        }
+      }, [hasAllEditors, operationId, currentOperation]);
 
       const canEdit = canAccessTarget(TargetAccessScope.Settings, props.meRef);
       const canDelete = canAccessTarget(TargetAccessScope.Delete, props.meRef);
       const shouldShowMenu = canEdit || canDelete;
 
       const initialSelectedCollection =
-        operation &&
-        collections?.find(c => c.operations.nodes.some(node => node.id === operation))?.id;
+        currentOperation?.id &&
+        collections?.find(c => c.operations.nodes.some(node => node.id === currentOperation.id))
+          ?.id;
+
       return (
         <>
           <div className="flex justify-between">
@@ -244,17 +257,14 @@ function useOperationCollectionsPlugin(props: {
                                 </Menu.Button>
 
                                 <Menu.List>
-                                  {canEdit ? (
-                                    <Menu.Item
-                                      onSelect={() => {
-                                        setOperationId(node.id);
-                                        toggleOperationModal();
-                                      }}
-                                      data-cy="edit-operation"
-                                    >
-                                      Edit operation
-                                    </Menu.Item>
-                                  ) : null}
+                                  {/*{canEdit ? (*/}
+                                  {/*  <Menu.Item*/}
+                                  {/*    onSelect={toggleOperationModal}*/}
+                                  {/*    data-cy="edit-operation"*/}
+                                  {/*  >*/}
+                                  {/*    Edit operation*/}
+                                  {/*  </Menu.Item>*/}
+                                  {/*) : null}*/}
                                   <Menu.Item
                                     onSelect={async () => {
                                       const url = new URL(window.location.href);
@@ -267,10 +277,7 @@ function useOperationCollectionsPlugin(props: {
                                   </Menu.Item>
                                   {canDelete ? (
                                     <Menu.Item
-                                      onSelect={() => {
-                                        setOperationId(node.id);
-                                        toggleDeleteOperationModalOpen();
-                                      }}
+                                      onSelect={toggleDeleteOperationModalOpen}
                                       className="!text-red-500"
                                       data-cy="remove-operation"
                                     >
@@ -301,32 +308,92 @@ function useOperationCollectionsPlugin(props: {
   return pluginRef.current;
 }
 
+const UpdateOperationMutation = graphql(`
+  mutation UpdateOperation(
+    $selector: TargetSelectorInput!
+    $input: UpdateDocumentCollectionOperationInput!
+  ) {
+    updateOperationInDocumentCollection(selector: $selector, input: $input) {
+      error {
+        message
+      }
+      ok {
+        operation {
+          id
+          name
+        }
+        collection {
+          id
+          operations {
+            nodes {
+              id
+            }
+          }
+        }
+      }
+    }
+  }
+`);
+
 function Save(): ReactElement {
   const [isOpen, toggle] = useToggle();
   const { collections } = useCollections();
   const notify = useNotifications();
-  const { query } = useRouter();
+  const routeSelector = useRouteSelector();
+  const currentOperation = useCurrentOperation();
+  const [, mutateUpdate] = useMutation(UpdateOperationMutation);
+  const { queryEditor, variableEditor, headerEditor } = useEditorContext();
+  const isSame = !!currentOperation && currentOperation.query === queryEditor?.getValue();
+  const operationId = currentOperation?.id;
+  const label = isSame ? undefined : operationId ? 'Update saved operation' : 'Save operation';
+  console.log({ currentOperation });
+  const button = (
+    <Button
+      className="graphiql-toolbar-button"
+      data-cy="save-collection"
+      aria-label={label}
+      disabled={isSame}
+      onClick={async () => {
+        if (!collections?.length) {
+          notify('You must create collection first!', 'warning');
+          return;
+        }
+        if (!operationId) {
+          toggle();
+          return;
+        }
+        const { error, data } = await mutateUpdate({
+          selector: {
+            target: routeSelector.targetId,
+            organization: routeSelector.organizationId,
+            project: routeSelector.projectId,
+          },
+          input: {
+            name: currentOperation.name,
+            collectionId: currentOperation.collection.id,
+            query: queryEditor?.getValue(),
+            variables: variableEditor?.getValue(),
+            headers: headerEditor?.getValue(),
+            operationId,
+          },
+        });
+        if (data) {
+          notify('Updated!', 'success');
+        }
+        if (error) {
+          notify(error.message, 'error');
+        }
+      }}
+    >
+      <SaveIcon className="graphiql-toolbar-icon !h-5 w-auto" />
+    </Button>
+  );
+
   return (
     <>
-      <ToolbarButton
-        onClick={() => {
-          if (collections?.length) {
-            toggle();
-          } else {
-            notify('You must create collection first!', 'warning');
-          }
-        }}
-        label="Save operation"
-        data-cy="save-collection"
-      >
-        <SaveIcon className="graphiql-toolbar-icon !h-5 w-auto" />
-      </ToolbarButton>
+      {label ? <Tooltip label={label}>{button}</Tooltip> : button}
       {isOpen ? (
-        <CreateOperationModal
-          isOpen={isOpen}
-          toggleModalOpen={toggle}
-          operationId={query.operation as string}
-        />
+        <CreateOperationModal isOpen={isOpen} toggleModalOpen={toggle} operationId={operationId} />
       ) : null}
     </>
   );
@@ -351,9 +418,6 @@ function Page({
         .graphiql-container {
           --color-base: transparent !important;
           --color-primary: 40, 89%, 60% !important;
-        }
-        .graphiql-tab-add {
-          display: none !important;
         }
       `}</style>
       <GraphiQL
