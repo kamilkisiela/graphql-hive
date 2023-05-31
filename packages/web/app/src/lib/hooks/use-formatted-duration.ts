@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { toDecimal } from './use-decimal';
 
-function formatDuration(duration: number, showZero = false) {
+export function formatDuration(duration: number, showZero = false) {
   if (duration === 0 && !showZero) {
     return '-';
   }
