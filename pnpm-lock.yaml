@@ -1742,8 +1742,8 @@ importers:
         specifier: 1.0.6
         version: 1.0.6(@types/react@18.2.7)(react-dom@18.2.0)(react@18.2.0)
       '@theguild/components':
-        specifier: 4.6.2
-        version: 4.6.2(@types/react@18.2.7)(next@13.3.1)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 4.6.3
+        version: 4.6.3(@types/react@18.2.7)(next@13.3.1)(react-dom@18.2.0)(react@18.2.0)
       clsx:
         specifier: 1.2.1
         version: 1.2.1
@@ -13604,8 +13604,8 @@ packages:
     dev: false
     patched: true
 
-  /@theguild/components@4.6.2(@types/react@18.2.7)(next@13.3.1)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-3JkPG/fQOoGZjyeBzeXl3Ym7DZTdLrNbnRCi10xZTGV78seOj3dWrJs1Iw0etrVhCPZjQIvjBcW1bpNngKjbXw==}
+  /@theguild/components@4.6.3(@types/react@18.2.7)(next@13.3.1)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-zY5MS2xdpihlwwIQ6qhH1FCxXW76EWEVgf9Lb3R0vXecwuhxe18AH+JWQ+w1a3UlUB+KFvvkv6CbsjLNi23Zog==}
     peerDependencies:
       next: ^12.3.1 || ^13.0.0
       react: ^18.2.0
