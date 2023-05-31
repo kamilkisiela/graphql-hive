@@ -10,8 +10,9 @@ import {
   GeneralOperationsStatsDocument,
   GeneralOperationsStatsQuery,
 } from '@/graphql';
-import { theme } from '@/lib/charts';
 import {
+  formatDuration,
+  formatNumber,
   formatThroughput,
   toDecimal,
   useFormattedDuration,
@@ -272,7 +273,6 @@ function OverTimeStats({
         {size => (
           <ReactECharts
             style={{ width: size.width, height: 200 }}
-            theme={theme.theme}
             option={{
               ...styles,
               grid: {
@@ -292,23 +292,41 @@ function OverTimeStats({
                   min: period.from,
                   max: period.to,
                 },
-                {
-                  type: 'time',
-                  boundaryGap: false,
-                  min: period.from,
-                  max: period.to,
-                },
               ],
               yAxis: [
-                { type: 'value', min: 0 },
-                { type: 'value', min: 0 },
+                {
+                  type: 'value',
+                  min: 0,
+                  splitLine: {
+                    lineStyle: {
+                      color: '#595959',
+                      type: 'dashed',
+                    },
+                  },
+                  axisLabel: {
+                    formatter: (value: number) => formatNumber(value),
+                  },
+                },
+                {
+                  type: 'value',
+                  min: 0,
+                  splitLine: {
+                    lineStyle: {
+                      color: '#595959',
+                      type: 'dashed',
+                    },
+                  },
+                  axisLabel: {
+                    formatter: (value: number) => formatNumber(value),
+                  },
+                },
               ],
               series: [
                 {
                   type: 'line',
                   name: 'Requests',
                   showSymbol: false,
-                  smooth: true,
+                  smooth: false,
                   color: CHART_PRIMARY_COLOR,
                   areaStyle: {},
                   emphasis: {
@@ -321,7 +339,7 @@ function OverTimeStats({
                   type: 'line',
                   name: 'Failures',
                   showSymbol: false,
-                  smooth: true,
+                  smooth: false,
                   color: '#ef4444',
                   areaStyle: {},
                   emphasis: {
@@ -438,7 +456,6 @@ function ClientsStats({
             <div className="flex w-full flex-row gap-4">
               <ReactECharts
                 style={{ width: size.width / 2, height: 200 }}
-                theme={theme.theme}
                 option={{
                   ...styles,
                   grid: {
@@ -454,6 +471,15 @@ function ClientsStats({
                   },
                   xAxis: {
                     type: 'value',
+                    splitLine: {
+                      lineStyle: {
+                        color: '#595959',
+                        type: 'dashed',
+                      },
+                    },
+                    axisLabel: {
+                      formatter: '{value}%',
+                    },
                   },
                   yAxis: {
                     type: 'category',
@@ -470,7 +496,6 @@ function ClientsStats({
               />
               <ReactECharts
                 style={{ width: size.width / 2, height: 200 }}
-                theme={theme.theme}
                 option={{
                   ...styles,
                   grid: {
@@ -486,6 +511,15 @@ function ClientsStats({
                   },
                   xAxis: {
                     type: 'value',
+                    splitLine: {
+                      lineStyle: {
+                        color: '#595959',
+                        type: 'dashed',
+                      },
+                    },
+                    axisLabel: {
+                      formatter: '{value}%',
+                    },
                   },
                   yAxis: {
                     type: 'category',
@@ -571,7 +605,7 @@ function LatencyOverTimeStats({
     return {
       name,
       type: 'line',
-      smooth: true,
+      smooth: false,
       showSymbol: false,
       color,
       emphasis: { focus: 'series' },
@@ -581,10 +615,10 @@ function LatencyOverTimeStats({
   }
 
   const series = [
-    createSeries('p75', '#10b981', p75),
-    createSeries('p90', '#06b6d4', p90),
-    createSeries('p95', '#6366f1', p95),
-    createSeries('p99', '#ec4899', p99),
+    createSeries('p75', '#fef08a', p75),
+    createSeries('p90', '#facc15', p90),
+    createSeries('p95', '#ca8a04', p95),
+    createSeries('p99', '#854d0e', p99),
   ];
 
   return (
@@ -595,7 +629,6 @@ function LatencyOverTimeStats({
         {size => (
           <ReactECharts
             style={{ width: size.width, height: 200 }}
-            theme={theme.theme}
             option={{
               ...styles,
               grid: {
@@ -611,8 +644,33 @@ function LatencyOverTimeStats({
                 ...styles.legend,
                 data: series.map(s => s.name),
               },
-              xAxis: [{ type: 'time', boundaryGap: false }],
-              yAxis: [{ type: 'value', min: 0 }],
+              xAxis: [
+                {
+                  type: 'time',
+                  boundaryGap: false,
+                  splitLine: {
+                    lineStyle: {
+                      color: '#595959',
+                      type: 'dashed',
+                    },
+                  },
+                },
+              ],
+              yAxis: [
+                {
+                  type: 'value',
+                  min: 0,
+                  splitLine: {
+                    lineStyle: {
+                      color: '#595959',
+                      type: 'dashed',
+                    },
+                  },
+                  axisLabel: {
+                    formatter: (value: number) => formatDuration(value, true),
+                  },
+                },
+              ],
               series,
             }}
           />
@@ -662,7 +720,6 @@ function RpmOverTimeStats({
         {size => (
           <ReactECharts
             style={{ width: size.width, height: 200 }}
-            theme={theme.theme}
             option={{
               ...styles,
               grid: {
@@ -681,6 +738,12 @@ function RpmOverTimeStats({
                   boundaryGap: false,
                   min: period.from,
                   max: period.to,
+                  splitLine: {
+                    lineStyle: {
+                      color: '#595959',
+                      type: 'dashed',
+                    },
+                  },
                 },
               ],
               yAxis: [
@@ -691,6 +754,12 @@ function RpmOverTimeStats({
                   axisLabel: {
                     formatter: (value: number) => formatThroughput(value * 10, interval),
                   },
+                  splitLine: {
+                    lineStyle: {
+                      color: '#595959',
+                      type: 'dashed',
+                    },
+                  },
                 },
               ],
               series: [
@@ -698,7 +767,7 @@ function RpmOverTimeStats({
                   type: 'bar',
                   name: 'RPM',
                   symbol: 'none',
-                  smooth: true,
+                  smooth: false,
                   areaStyle: {
                     color: CHART_PRIMARY_COLOR,
                   },
