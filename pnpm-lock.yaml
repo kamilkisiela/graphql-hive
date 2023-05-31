@@ -243,8 +243,8 @@ importers:
         specifier: 10.27.1
         version: 10.27.1
       '@whatwg-node/fetch':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.1
+        version: 0.9.1
       bcryptjs:
         specifier: 2.4.3
         version: 2.4.3
@@ -334,8 +334,8 @@ importers:
         specifier: 3.1.13
         version: 3.1.13(@swc/core@1.3.61)(@types/node@18.16.16)(typescript@5.0.4)
       '@whatwg-node/fetch':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.1
+        version: 0.9.1
       colors:
         specifier: 1.4.0
         version: 1.4.0
@@ -473,8 +473,8 @@ importers:
         specifier: 0.11.3
         version: 0.11.3(patch_hash=yfpv2xzdmnkrtu2wvaktxf5mmq)(slonik@30.4.4)
       '@whatwg-node/fetch':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.1
+        version: 0.9.1
       bcryptjs:
         specifier: 2.4.3
         version: 2.4.3
@@ -552,8 +552,8 @@ importers:
         specifier: 10.27.1
         version: 10.27.1
       '@whatwg-node/fetch':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.1
+        version: 0.9.1
       agentkeepalive:
         specifier: 4.3.0
         version: 4.3.0
@@ -683,11 +683,11 @@ importers:
         specifier: 2.0.1
         version: 2.0.1
       '@whatwg-node/fetch':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.1
+        version: 0.9.1
       '@whatwg-node/server':
-        specifier: 0.8.0
-        version: 0.8.0
+        specifier: 0.8.1
+        version: 0.8.1
       esbuild:
         specifier: 0.17.19
         version: 0.17.19
@@ -723,11 +723,11 @@ importers:
         specifier: 2.0.1
         version: 2.0.1
       '@whatwg-node/fetch':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.1
+        version: 0.9.1
       '@whatwg-node/server':
-        specifier: 0.8.0
-        version: 0.8.0
+        specifier: 0.8.1
+        version: 0.8.1
       dotenv:
         specifier: 16.0.3
         version: 16.0.3
@@ -753,8 +753,8 @@ importers:
         specifier: 10.27.1
         version: 10.27.1
       '@whatwg-node/fetch':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.1
+        version: 0.9.1
       bullmq:
         specifier: 3.14.1
         version: 3.14.1(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
@@ -854,8 +854,8 @@ importers:
         specifier: 10.27.1
         version: 10.27.1
       '@whatwg-node/fetch':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.1
+        version: 0.9.1
       ajv:
         specifier: 8.12.0
         version: 8.12.0
@@ -897,8 +897,8 @@ importers:
         specifier: 10.27.1
         version: 10.27.1
       '@whatwg-node/fetch':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.1
+        version: 0.9.1
       date-fns:
         specifier: 2.30.0
         version: 2.30.0
@@ -949,8 +949,8 @@ importers:
         specifier: 10.27.1
         version: 10.27.1
       '@whatwg-node/fetch':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.1
+        version: 0.9.1
       dotenv:
         specifier: 16.0.3
         version: 16.0.3
@@ -1031,11 +1031,11 @@ importers:
         specifier: 10.27.1
         version: 10.27.1
       '@whatwg-node/fetch':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.1
+        version: 0.9.1
       '@whatwg-node/server':
-        specifier: 0.8.0
-        version: 0.8.0
+        specifier: 0.8.1
+        version: 0.8.1
       dotenv:
         specifier: 16.0.3
         version: 16.0.3
@@ -1095,8 +1095,8 @@ importers:
         specifier: 10.27.1
         version: 10.27.1
       '@whatwg-node/fetch':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.1
+        version: 0.9.1
       fastify:
         specifier: 3.29.5
         version: 3.29.5
@@ -1187,8 +1187,8 @@ importers:
         specifier: 10.27.1
         version: 10.27.1
       '@whatwg-node/fetch':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.1
+        version: 0.9.1
       date-fns:
         specifier: 2.30.0
         version: 2.30.0
@@ -1279,8 +1279,8 @@ importers:
         specifier: 10.27.1
         version: 10.27.1
       '@whatwg-node/fetch':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.1
+        version: 0.9.1
       ajv:
         specifier: 8.12.0
         version: 8.12.0
@@ -1331,8 +1331,8 @@ importers:
         specifier: 10.27.1
         version: 10.27.1
       '@whatwg-node/fetch':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.1
+        version: 0.9.1
       dotenv:
         specifier: 16.0.3
         version: 16.0.3
@@ -1541,8 +1541,8 @@ importers:
         specifier: 5.0.9
         version: 5.0.9(graphql@16.6.0)
       '@whatwg-node/fetch':
-        specifier: 0.9.0
-        version: 0.9.0
+        specifier: 0.9.1
+        version: 0.9.1
       clsx:
         specifier: 1.2.1
         version: 1.2.1
@@ -6805,7 +6805,7 @@ packages:
     dependencies:
       '@graphql-tools/utils': 10.0.0(graphql@16.6.0)
       '@repeaterjs/repeater': 3.0.4
-      '@whatwg-node/fetch': 0.9.0
+      '@whatwg-node/fetch': 0.9.1
       dset: 3.1.2
       extract-files: 11.0.0
       graphql: 16.6.0
@@ -7398,7 +7398,7 @@ packages:
       '@graphql-tools/utils': 10.0.0(graphql@16.6.0)
       '@graphql-tools/wrap': 10.0.0(graphql@16.6.0)
       '@types/ws': 8.5.3
-      '@whatwg-node/fetch': 0.9.0
+      '@whatwg-node/fetch': 0.9.1
       graphql: 16.6.0
       isomorphic-ws: 5.0.0(ws@8.13.0)
       tslib: 2.5.2
@@ -13485,6 +13485,14 @@ packages:
     dependencies:
       '@whatwg-node/node-fetch': 0.4.0
       urlpattern-polyfill: 8.0.2
+    dev: false
+
+  /@whatwg-node/fetch@0.9.1:
+    resolution: {integrity: sha512-5aTZX0FqO3Ug2mVlnxyOm++F5C2GfutoB4iIO0ykm5WTsUe0NLqJYDijID4qshZSciFeyodvNU/lRMKUhar8eQ==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@whatwg-node/node-fetch': 0.4.1
+      urlpattern-polyfill: 8.0.2
 
   /@whatwg-node/node-fetch@0.3.6:
     resolution: {integrity: sha512-w9wKgDO4C95qnXZRwZTfCmLWqyRnooGjcIwG0wADWjw9/HN0p7dtvtgSvItZtUyNteEvgTrd8QojNEqV6DAGTA==}
@@ -13504,6 +13512,17 @@ packages:
       fast-querystring: 1.1.1
       fast-url-parser: 1.1.3
       tslib: 2.5.2
+    dev: false
+
+  /@whatwg-node/node-fetch@0.4.1:
+    resolution: {integrity: sha512-pO27RvU5fIWdCcOXOm17dtS2Kd7pWAxO4RYiX1wBumP6WXqI+OPr/resrwn5dk7oQl8JuHf+hPoy2/Qqx9dCHw==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@whatwg-node/events': 0.1.1
+      busboy: 1.6.0
+      fast-querystring: 1.1.1
+      fast-url-parser: 1.1.3
+      tslib: 2.5.2
 
   /@whatwg-node/server@0.7.5:
     resolution: {integrity: sha512-xTDJdPqr/wULxW3mGXQXD92SRXUm6jwQxqIvyHG17dykRTd21HuCaS2ggBn5lSAM/sYjjrT+OYv3fXbtS4+Mjw==}
@@ -13515,7 +13534,15 @@ packages:
     resolution: {integrity: sha512-ZEAZuzBQP40PYJ5iBbmMy46CqzF97QctLPQtFVlXnpVZwo7mMeWNf2u+1sZPM7rEgxCK2MgIUeeuKR2C2XaoMg==}
     engines: {node: '>=16.0.0'}
     dependencies:
-      '@whatwg-node/fetch': 0.9.0
+      '@whatwg-node/fetch': 0.9.1
+      tslib: 2.5.2
+    dev: false
+
+  /@whatwg-node/server@0.8.1:
+    resolution: {integrity: sha512-5nzOE61W5VA43rE4MeUVHLDPpZGDfGiQ5LnEwJNbVehUI6Ua8QD566C8dhBmXxFuT8pXTlxWZHe3sjjGZCc4ng==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@whatwg-node/fetch': 0.9.1
       tslib: 2.5.2
 
   /@xstate/fsm@1.4.0:
