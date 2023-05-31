@@ -2431,6 +2431,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           organization: string;
           org_name: string;
           org_clean_id: string;
+          org_plan_name: string;
           owner_email: string;
           target: string;
           limit_operations_monthly: number;
@@ -2444,6 +2445,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             o.name as org_name,
             o.limit_operations_monthly,
             o.limit_retention_days,
+            o.plan_name as org_plan_name,
             t.id as target,
             u.email as owner_email
           FROM public.targets AS t

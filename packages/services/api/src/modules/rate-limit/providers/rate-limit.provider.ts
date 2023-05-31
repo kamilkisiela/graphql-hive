@@ -34,16 +34,6 @@ export class RateLimitProvider {
       : null;
   }
 
-  async assertRateLimit(input: RateLimitApiInput['checkRateLimit']) {
-    const limit = await this.checkRateLimit(input);
-
-    if (limit.limited) {
-      throw new HiveError(`Monthly limit for ${input.type} has reached!`);
-    }
-
-    return limit;
-  }
-
   @sentry('RateLimitProvider.checkRateLimit')
   async checkRateLimit(input: RateLimitApiInput['checkRateLimit']) {
     if (this.rateLimit === null) {
@@ -53,6 +43,7 @@ export class RateLimitProvider {
       );
 
       return {
+        usagePercenrage: 0,
         limited: false,
       };
     }

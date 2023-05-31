@@ -439,6 +439,7 @@ export interface Storage {
       organization: string;
       org_name: string;
       org_clean_id: string;
+      org_plan_name: string;
       owner_email: string;
       target: string;
       limit_operations_monthly: number;
