@@ -4,24 +4,29 @@ import * as A from '@radix-ui/react-accordion';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 
 type AccordionProps = Partial<
-  Pick<ComponentProps<typeof A.Root>, 'type' | 'disabled' | 'value' | 'onValueChange'>
+  Pick<ComponentProps<typeof A.Root>, 'disabled' | 'value' | 'onValueChange'>
 >;
 
 function Wrapper({
-  defaultValue,
   children,
   type = 'single',
+  defaultValue,
   ...props
 }: {
-  defaultValue?: string;
+  defaultValue?: string | Array<string>;
   children: ReactNode;
-} & AccordionProps): ReactElement {
+} & AccordionProps &
+  (
+    | { type?: 'single'; defaultValue?: string }
+    | { type: 'multiple'; defaultValue?: Array<string> }
+  )): ReactElement {
   return (
+    // @ts-expect-error docs say array is okay
     <A.Root
       {...(props as any[])}
-      type={type as any}
-      collapsible
+      type={type}
       defaultValue={defaultValue}
+      collapsible
       className="space-y-4 w-full"
     >
       {children}

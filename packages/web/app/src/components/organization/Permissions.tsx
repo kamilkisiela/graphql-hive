@@ -1,6 +1,7 @@
 import { FormEventHandler, memo, ReactElement, useCallback, useState } from 'react';
+import clsx from 'clsx';
 import { useMutation } from 'urql';
-import { Accordion, RadixSelect } from '@/components/v2';
+import { Accordion, RadixSelect, Tooltip } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import {
   OrganizationAccessScope,
@@ -21,6 +22,7 @@ interface Props<T> {
   initialScopes: readonly T[];
   onChange: (scopes: T[]) => void;
   checkAccess: (scope: T) => boolean;
+  isReadOnly?: boolean;
 }
 
 function matchScope<T>(
@@ -73,10 +75,6 @@ function PermissionsSpaceInner<
           );
           const canManageScope = possibleScope.some(checkAccess);
 
-          if (!canManageScope) {
-            return null;
-          }
-
           const readOnlyScope = scope.mapping['read-only'];
           const hasReadOnly = typeof readOnlyScope !== 'undefined';
 
@@ -87,25 +85,50 @@ function PermissionsSpaceInner<
             scope.mapping['read-write'],
           );
 
-          return (
-            <div className="py-2 flex flex-row justify-between items-center" key={scope.name}>
+          const inner = (
+            <div
+              key={scope.name}
+              className={clsx(
+                'py-2 flex flex-row justify-between items-center',
+                canManageScope === false ? 'opacity-50' : null,
+              )}
+            >
               <div>
-                <div className="font-semibold text-gray-600">{scope.name}</div>
-                <div className="text-xs text-gray-600">{scope.description}</div>
+                <div
+                  className={clsx(
+                    'font-semibold text-gray-600',
+                    props.isReadOnly && selectedScope !== 'no-access' && canManageScope === false
+                      ? 'text-red-600'
+                      : null,
+                  )}
+                >
+                  {scope.name}
+                </div>
+                <div
+                  className={clsx(
+                    'text-xs text-gray-600',
+                    props.isReadOnly && selectedScope !== 'no-access' && canManageScope === false
+                      ? 'text-red-600'
+                      : null,
+                  )}
+                >
+                  {scope.description}
+                </div>
               </div>
               <RadixSelect
+                isDisabled={!canManageScope || props.isReadOnly}
                 className="shrink-0"
                 position="popper"
                 value={selectedScope}
                 options={[
                   { value: NoAccess, label: 'No access' },
                   scope.mapping['read-only'] &&
-                    checkAccess(scope.mapping['read-only']) && {
+                    (props.isReadOnly || checkAccess(scope.mapping['read-only'])) && {
                       value: scope.mapping['read-only'],
                       label: 'Read-only',
                     },
                   scope.mapping['read-write'] &&
-                    checkAccess(scope.mapping['read-write']) && {
+                    (props.isReadOnly || checkAccess(scope.mapping['read-write'])) && {
                       value: scope.mapping['read-write'],
                       label: 'Read & write',
                     },
@@ -137,6 +160,21 @@ function PermissionsSpaceInner<
                 }}
               />
             </div>
+          );
+
+          return canManageScope ? (
+            inner
+          ) : (
+            <Tooltip
+              content={
+                <>
+                  Your user account does not have these permissions, thus it can not issue those to
+                  the access token.
+                </>
+              }
+            >
+              {inner}
+            </Tooltip>
           );
         })}
       </Accordion.Content>
