@@ -26,9 +26,9 @@ patchedDependencies:
   '@theguild/buddy@0.1.0':
     hash: ryylgra5xglhidfoiaxehn22hq
     path: patches/@theguild__buddy@0.1.0.patch
-  '@theguild/editor@1.2.5':
-    hash: pz2nlsfawfhpo6sw62ecmp2yum
-    path: patches/@theguild__editor@1.2.5.patch
+  '@theguild/editor@1.3.0':
+    hash: hvz267fqxphdmk3ukt6cn54xrm
+    path: patches/@theguild__editor@1.3.0.patch
   bullmq@3.14.1:
     hash: kobtuuqaglbtaadx3jiqtahl3i
     path: patches/bullmq@3.14.1.patch
@@ -1523,8 +1523,8 @@ importers:
         specifier: 8.0.0-beta.8
         version: 8.0.0-beta.8(react-dom@18.2.0)(react@18.2.0)
       '@theguild/editor':
-        specifier: 1.2.5
-        version: 1.2.5(patch_hash=pz2nlsfawfhpo6sw62ecmp2yum)(@monaco-editor/react@4.5.1)(@types/node@18.16.16)(graphql@16.6.0)(monaco-editor@0.38.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 1.3.0
+        version: 1.3.0(patch_hash=hvz267fqxphdmk3ukt6cn54xrm)(@monaco-editor/react@4.5.1)(@types/node@18.16.16)(graphql@16.6.0)(monaco-editor@0.38.0)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/client':
         specifier: 10.28.2
         version: 10.28.2(@trpc/server@10.28.2)
@@ -6569,18 +6569,6 @@ packages:
       value-or-promise: 1.0.11
     dev: true
 
-  /@graphql-tools/batch-execute@8.5.18(graphql@16.6.0):
-    resolution: {integrity: sha512-mNv5bpZMLLwhkmPA6+RP81A6u3KF4CSKLf3VX9hbomOkQR4db8pNs8BOvpZU54wKsUzMzdlws/2g/Dabyb2Vsg==}
-    peerDependencies:
-      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-    dependencies:
-      '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
-      dataloader: 2.2.2
-      graphql: 16.6.0
-      tslib: 2.5.2
-      value-or-promise: 1.0.12
-    dev: false
-
   /@graphql-tools/batch-execute@8.5.19(graphql@16.6.0):
     resolution: {integrity: sha512-eqofTMYPygg9wVPdA+p8lk4NBpaPTcDut6SlnDk9IiYdY23Yfo6pY7mzZ3b27GugI7HDtB2OZUxzZJSGsk6Qew==}
     peerDependencies:
@@ -6673,7 +6661,7 @@ packages:
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
-      '@graphql-tools/batch-execute': 8.5.18(graphql@16.6.0)
+      '@graphql-tools/batch-execute': 8.5.19(graphql@16.6.0)
       '@graphql-tools/executor': 0.0.15(graphql@16.6.0)
       '@graphql-tools/schema': 9.0.18(graphql@16.6.0)
       '@graphql-tools/utils': 9.2.1(graphql@16.6.0)
@@ -12272,11 +12260,11 @@ packages:
       - webpack
     dev: false
 
-  /@theguild/editor@1.2.5(patch_hash=pz2nlsfawfhpo6sw62ecmp2yum)(@monaco-editor/react@4.5.1)(@types/node@18.16.16)(graphql@16.6.0)(monaco-editor@0.38.0)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-hbXf17F1TLD9zWcbIvkKe/tK3WC48pLd1A/CH3/NOtqDQGdx8lvBB6Cd3Fsv/Gg2qVv7gzZjIVn/1o547++/AA==}
+  /@theguild/editor@1.3.0(patch_hash=hvz267fqxphdmk3ukt6cn54xrm)(@monaco-editor/react@4.5.1)(@types/node@18.16.16)(graphql@16.6.0)(monaco-editor@0.38.0)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-8DBd/nKDzbCrJKKptghkrs+rFOW3dVBJ+4PnLxF6SLrFALSnU/PmTyymaVcOpASNjVtWLIKMW2LJdx/2OcbvkA==}
     peerDependencies:
       '@monaco-editor/react': ^4
-      monaco-editor: ^0.24.0 || ^0.25.0 || ^0.26.0 || ^0.27.0 || ^0.28.0 || ^0.29.0 || ^0.30.0 || ^0.32.0 || ^0.34.0 || ^0.35.0 || ^0.36.0
+      monaco-editor: ^0.24.0 || ^0.25.0 || ^0.26.0 || ^0.27.0 || ^0.28.0 || ^0.29.0 || ^0.30.0 || ^0.32.0 || ^0.34.0 || ^0.35.0 || ^0.36.0 || ^0.37.0 || ^0.38.0
       react: ^18.2.0
       react-dom: ^18.2.0
     dependencies:
