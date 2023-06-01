@@ -14,7 +14,7 @@
     "@sentry/node": "7.53.1",
     "@trpc/server": "10.28.2",
     "@whatwg-node/fetch": "0.9.1",
-    "bullmq": "3.14.1",
+    "bullmq": "3.15.0",
     "dotenv": "16.0.3",
     "ioredis": "5.3.2",
     "mjml": "4.14.0",
