@@ -31,6 +31,6 @@
     "esbuild": "0.17.19",
     "fastify": "3.29.5",
     "itty-router": "2.6.6",
-    "itty-router-extras": "0.4.2"
+    "itty-router-extras": "0.4.5"
   }
 }
