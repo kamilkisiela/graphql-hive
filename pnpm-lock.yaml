@@ -1013,8 +1013,8 @@ importers:
         specifier: 1.7.2
         version: 1.7.2
       '@escape.tech/graphql-armor-max-depth':
-        specifier: 1.8.4
-        version: 1.8.4
+        specifier: 2.0.0
+        version: 2.0.0
       '@escape.tech/graphql-armor-max-directives':
         specifier: 1.6.5
         version: 1.6.5
@@ -5156,6 +5156,16 @@ packages:
       '@envelop/types': 3.0.2
       tslib: 2.5.2
 
+  /@envelop/core@4.0.0:
+    resolution: {integrity: sha512-6usEZO86hWT0ZajAbhOX0QXlV++lrlEmu8br6KQVvyXOxttiHADIibgfzb3GtSI7RnnJDnrcRb7Jynv6Lca3iQ==}
+    engines: {node: '>=16.0.0'}
+    requiresBuild: true
+    dependencies:
+      '@envelop/types': 4.0.0
+      tslib: 2.5.2
+    dev: false
+    optional: true
+
   /@envelop/extended-validation@2.0.6(@envelop/core@3.0.6)(graphql@16.6.0):
     resolution: {integrity: sha512-aXAf1bg5Z71YfEKLCZ8OMUZAOYPGHV/a+7avd5TIMFNDxl5wJTmIonep3T+kdMpwRInDphfNPGFD0GcGdGxpHg==}
     peerDependencies:
@@ -5210,6 +5220,14 @@ packages:
     resolution: {integrity: sha512-pOFea9ha0EkURWxJ/35axoH9fDGP5S2cUu/5Mmo9pb8zUf+TaEot8vB670XXihFEn/92759BMjLJNWBKmNhyng==}
     dependencies:
       tslib: 2.5.0
+
+  /@envelop/types@4.0.0:
+    resolution: {integrity: sha512-dmBK16VVfKCkqYYemvE+gt1cPBP0d9CbYO4yjNhSSYy9K+w6+Lw48wOLK238mSR339PNAvwj/JW/qzNy2llggA==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      tslib: 2.5.2
+    dev: false
+    optional: true
 
   /@envelop/validation-cache@5.1.2(@envelop/core@3.0.6)(graphql@16.6.0):
     resolution: {integrity: sha512-APofOvjaHrF+IW71VCXdyG+EbA6EQJXdunUe1EECU9vZzGKYUuQXfVeCOD6IYNF44KKSQArTfU8RhnUlW6VyOQ==}
@@ -5628,12 +5646,13 @@ packages:
       '@escape.tech/graphql-armor-types': 0.4.1
     dev: false
 
-  /@escape.tech/graphql-armor-max-depth@1.8.4:
-    resolution: {integrity: sha512-2RYjMVbguxltbWVcTEQGXPzcFc7Lo2wUdbLSQ4as2QeSmr2IqRbW5fNe/Jy8uiEhOOelia59J8xuua+0lxC3Kg==}
+  /@escape.tech/graphql-armor-max-depth@2.0.0:
+    resolution: {integrity: sha512-ucORvM/DEyxNXz4EaB0Ea+JDV4jf/XASfm3wA8lPiPeBdbMiPquXBuH7F2gIICN73WAuqess5jEw4vbCfUrQUw==}
+    engines: {node: '>=16.0.0'}
     dependencies:
       graphql: 16.6.0
     optionalDependencies:
-      '@envelop/core': 3.0.6
+      '@envelop/core': 4.0.0
       '@escape.tech/graphql-armor-types': 0.4.1
     dev: false
 
