@@ -116,7 +116,7 @@
       "@slonik/migrator@0.11.3": "patches/@slonik__migrator@0.11.3.patch",
       "@apollo/federation@0.38.1": "patches/@apollo__federation@0.38.1.patch",
       "@octokit/webhooks-methods@3.0.1": "patches/@octokit__webhooks-methods@3.0.1.patch",
-      "bullmq@3.14.1": "patches/bullmq@3.14.1.patch",
+      "bullmq@3.15.0": "patches/bullmq@3.15.0.patch",
       "@theguild/editor@1.2.5": "patches/@theguild__editor@1.2.5.patch",
       "eslint@8.41.0": "patches/eslint@8.41.0.patch",
       "@graphql-eslint/eslint-plugin@3.19.1": "patches/@graphql-eslint__eslint-plugin@3.19.1.patch"
