@@ -6,15 +6,12 @@
   },
   "packageRules": [
     {
-      "groupName": "@theguild/prettier-config",
-      "matchPackageNames": ["@theguild/prettier-config"],
-      "prPriority": 10000,
-      "ignoreUnstable": false,
-      "allowedVersions": "/^(d+).(d+)(?:.(d+))?(-rc-.+)?$/"
+      "matchPackageNames": ["slonik", "slonik-utilities"],
+      "enabled": false
     },
     {
       "groupName": "graphql-armor",
-      "matchPackagePrefixes": ["@escape.tech/graphql-armor/"]
+      "matchPackagePrefixes": ["@escape.tech/graphql-armor-"]
     },
     {
       "groupName": "radix",
@@ -31,10 +28,6 @@
       "recreateClosed": false
     },
     {
-      "groupName": "oclif",
-      "matchPackagePrefixes": ["@oclif/", "oclif"]
-    },
-    {
       "groupName": "sentry",
       "matchPackagePrefixes": ["@sentry/", "sentry"]
     },
@@ -45,11 +38,6 @@
     {
       "groupName": "supertokens",
       "matchPackagePrefixes": ["supertokens"]
-    },
-    {
-      "groupName": "slonik",
-      "matchPackagePrefixes": ["@slonik", "slonik"],
-      "recreateClosed": false
     },
     {
       "groupName": "apollo-router",
