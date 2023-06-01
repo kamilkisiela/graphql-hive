@@ -534,11 +534,11 @@ importers:
         specifier: 13.1.5
         version: 13.1.5
       '@sentry/node':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@sentry/types':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@slack/web-api':
         specifier: 6.8.1
         version: 6.8.1
@@ -747,8 +747,8 @@ importers:
   packages/services/emails:
     dependencies:
       '@sentry/node':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@trpc/server':
         specifier: 10.28.2
         version: 10.28.2
@@ -845,11 +845,11 @@ importers:
         specifier: 3.19.1
         version: 3.19.1(patch_hash=c6q4g4elst6ppqfojixwejouee)(@babel/core@7.21.5)(@types/node@18.16.16)(graphql@16.6.0)
       '@sentry/node':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@sentry/tracing':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@trpc/server':
         specifier: 10.28.2
         version: 10.28.2
@@ -888,8 +888,8 @@ importers:
   packages/services/rate-limit:
     dependencies:
       '@sentry/node':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@trpc/client':
         specifier: 10.28.2
         version: 10.28.2(@trpc/server@10.28.2)
@@ -943,8 +943,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0(graphql@16.6.0)
       '@sentry/node':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@trpc/server':
         specifier: 10.28.2
         version: 10.28.2
@@ -1005,7 +1005,7 @@ importers:
         version: 4.0.6(@envelop/core@3.0.6)(graphql-modules@2.1.2)(graphql@16.6.0)
       '@envelop/sentry':
         specifier: 5.1.1
-        version: 5.1.1(@envelop/core@3.0.6)(@sentry/node@7.53.1)(graphql@16.6.0)
+        version: 5.1.1(@envelop/core@3.0.6)(@sentry/node@7.54.0)(graphql@16.6.0)
       '@envelop/types':
         specifier: 3.0.2
         version: 3.0.2
@@ -1022,11 +1022,11 @@ importers:
         specifier: 1.3.2
         version: 1.3.2
       '@sentry/integrations':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@sentry/node':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@trpc/server':
         specifier: 10.28.2
         version: 10.28.2
@@ -1114,20 +1114,20 @@ importers:
         version: 3.21.4
     devDependencies:
       '@sentry/node':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@sentry/types':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@sentry/utils':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
 
   packages/services/storage:
     dependencies:
       '@sentry/node':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@theguild/buddy':
         specifier: 0.1.0
         version: 0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)
@@ -1154,8 +1154,8 @@ importers:
         version: 3.21.4
     devDependencies:
       '@sentry/types':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@tgriesser/schemats':
         specifier: 9.0.1
         version: 9.0.1
@@ -1178,8 +1178,8 @@ importers:
   packages/services/stripe-billing:
     dependencies:
       '@sentry/node':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@trpc/client':
         specifier: 10.28.2
         version: 10.28.2(@trpc/server@10.28.2)
@@ -1221,8 +1221,8 @@ importers:
   packages/services/tokens:
     dependencies:
       '@sentry/node':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@trpc/server':
         specifier: 10.28.2
         version: 10.28.2
@@ -1270,8 +1270,8 @@ importers:
   packages/services/usage:
     dependencies:
       '@sentry/node':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@trpc/client':
         specifier: 10.28.2
         version: 10.28.2(@trpc/server@10.28.2)
@@ -1325,8 +1325,8 @@ importers:
   packages/services/usage-estimator:
     dependencies:
       '@sentry/node':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@trpc/server':
         specifier: 10.28.2
         version: 10.28.2
@@ -1362,8 +1362,8 @@ importers:
   packages/services/usage-ingestor:
     dependencies:
       '@sentry/node':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       agentkeepalive:
         specifier: 4.3.0
         version: 4.3.0
@@ -1408,8 +1408,8 @@ importers:
   packages/services/webhooks:
     dependencies:
       '@sentry/node':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@trpc/server':
         specifier: 10.28.2
         version: 10.28.2
@@ -1508,11 +1508,11 @@ importers:
         specifier: 1.0.6
         version: 1.0.6(@types/react-dom@18.2.4)(@types/react@18.2.7)(react-dom@18.2.0)(react@18.2.0)
       '@sentry/nextjs':
-        specifier: 7.53.1
-        version: 7.53.1(next@13.3.1)(react@18.2.0)(webpack@5.75.0)
+        specifier: 7.54.0
+        version: 7.54.0(next@13.3.1)(react@18.2.0)(webpack@5.75.0)
       '@sentry/types':
-        specifier: 7.53.1
-        version: 7.53.1
+        specifier: 7.54.0
+        version: 7.54.0
       '@stripe/react-stripe-js':
         specifier: 2.1.0
         version: 2.1.0(@stripe/stripe-js@1.54.0)(react-dom@18.2.0)(react@18.2.0)
@@ -5193,7 +5193,7 @@ packages:
       tslib: 2.5.2
     dev: false
 
-  /@envelop/sentry@5.1.1(@envelop/core@3.0.6)(@sentry/node@7.53.1)(graphql@16.6.0):
+  /@envelop/sentry@5.1.1(@envelop/core@3.0.6)(@sentry/node@7.54.0)(graphql@16.6.0):
     resolution: {integrity: sha512-Ca2QMWUH8Ipc9l7AHki10bL6gO3NRy23Gb2XHRlc2sT7bpO200VNMwcqXJaeac8hkeqSWmivmWd3v+94cBEZhQ==}
     peerDependencies:
       '@envelop/core': ^3.0.6
@@ -5201,7 +5201,7 @@ packages:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@envelop/core': 3.0.6
-      '@sentry/node': 7.53.1
+      '@sentry/node': 7.54.0
       graphql: 16.6.0
       tslib: 2.5.2
     dev: false
@@ -10607,24 +10607,24 @@ packages:
       string-argv: 0.3.1
     dev: false
 
-  /@sentry-internal/tracing@7.53.1:
-    resolution: {integrity: sha512-a4H4rvVdz0XDGgNfRqc7zg6rMt2P1P05xBmgfIfztYy94Vciw1QMdboNiT7einr8ra8wogdEaK4Pe2AzYAPBJQ==}
+  /@sentry-internal/tracing@7.54.0:
+    resolution: {integrity: sha512-JsyhZ0wWZ+VqbHJg+azqRGdYJDkcI5R9+pnkO6SzbzxrRewqMAIwzkpPee3oI7vG99uhMEkOkMjHu0nQGwkOQw==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry/core': 7.53.1
-      '@sentry/types': 7.53.1
-      '@sentry/utils': 7.53.1
+      '@sentry/core': 7.54.0
+      '@sentry/types': 7.54.0
+      '@sentry/utils': 7.54.0
       tslib: 1.14.1
 
-  /@sentry/browser@7.53.1:
-    resolution: {integrity: sha512-1zas2R6riJaj0k7FoeieCW0SuC7UyKaBGA6jEG2LsgIqyD7IDOlF3BPZ4Yt08GFav0ImpyhGn5Vbrq5JLbeQdw==}
+  /@sentry/browser@7.54.0:
+    resolution: {integrity: sha512-EvLAw03N9WE2m1CMl2/1YMeIs1icw9IEOVJhWmf3uJEysNJOFWXu6ZzdtHEz1E6DiJYhc1HzDya0ExZeJxNARA==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry-internal/tracing': 7.53.1
-      '@sentry/core': 7.53.1
-      '@sentry/replay': 7.53.1
-      '@sentry/types': 7.53.1
-      '@sentry/utils': 7.53.1
+      '@sentry-internal/tracing': 7.54.0
+      '@sentry/core': 7.54.0
+      '@sentry/replay': 7.54.0
+      '@sentry/types': 7.54.0
+      '@sentry/utils': 7.54.0
       tslib: 1.14.1
     dev: false
 
@@ -10671,26 +10671,26 @@ packages:
       tslib: 1.14.1
     dev: false
 
-  /@sentry/core@7.53.1:
-    resolution: {integrity: sha512-DAH8IJNORJJ7kQLqsZuhMkN6cwJjXzFuuUoZor7IIDHIHjtl51W+2F3Stg3+I3ZoKDfJfUNKqhipk2WZjG0FBg==}
+  /@sentry/core@7.54.0:
+    resolution: {integrity: sha512-MAn0E2EwgNn1pFQn4qxhU+1kz6edullWg6VE5wCmtpXWOVw6sILBUsQpeIG5djBKMcneJCdOlz5jeqcKPrLvZQ==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry/types': 7.53.1
-      '@sentry/utils': 7.53.1
+      '@sentry/types': 7.54.0
+      '@sentry/utils': 7.54.0
       tslib: 1.14.1
 
-  /@sentry/integrations@7.53.1:
-    resolution: {integrity: sha512-Y2Sq+nkYG2FFYWZ3NLDUdFdJQEAfSNL95MeoIAjpAioHmPBOHXoRwUzAMlaOR/2VibaKwGEIGwsHofj7RwtjrA==}
+  /@sentry/integrations@7.54.0:
+    resolution: {integrity: sha512-RolGsQzJChJzjHTJcCKSZ1HanmY33floc5o13WgU9NoDqJbLGLNcOIrAu+WynqPe8P5VTVrVb8NiwhLqWrKp4g==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry/types': 7.53.1
-      '@sentry/utils': 7.53.1
+      '@sentry/types': 7.54.0
+      '@sentry/utils': 7.54.0
       localforage: 1.10.0
       tslib: 1.14.1
     dev: false
 
-  /@sentry/nextjs@7.53.1(next@13.3.1)(react@18.2.0)(webpack@5.75.0):
-    resolution: {integrity: sha512-b8wQwk0NPNsRKHc9wCik0suXrfN/HYWIKYWOCQkdSm01DnPD/J5ROBHzo4XfuaI+pwAIgboSrKIr3e2DjUnMRw==}
+  /@sentry/nextjs@7.54.0(next@13.3.1)(react@18.2.0)(webpack@5.75.0):
+    resolution: {integrity: sha512-F+2OinUNq1F4QOUb5mqZZVmW8EkobKsECSpttWbLOKh4/Br37G9H1P3q1/qDUTke9ZMgp57O8acUByLfROp0ag==}
     engines: {node: '>=8'}
     peerDependencies:
       next: ^10.0.8 || ^11.0 || ^12.0 || ^13.0
@@ -10701,12 +10701,12 @@ packages:
         optional: true
     dependencies:
       '@rollup/plugin-commonjs': 24.0.0(rollup@2.78.0)
-      '@sentry/core': 7.53.1
-      '@sentry/integrations': 7.53.1
-      '@sentry/node': 7.53.1
-      '@sentry/react': 7.53.1(react@18.2.0)
-      '@sentry/types': 7.53.1
-      '@sentry/utils': 7.53.1
+      '@sentry/core': 7.54.0
+      '@sentry/integrations': 7.54.0
+      '@sentry/node': 7.54.0
+      '@sentry/react': 7.54.0(react@18.2.0)
+      '@sentry/types': 7.54.0
+      '@sentry/utils': 7.54.0
       '@sentry/webpack-plugin': 1.20.0
       chalk: 3.0.0
       next: 13.3.1(@babel/core@7.21.5)(react-dom@18.2.0)(react@18.2.0)
@@ -10720,14 +10720,14 @@ packages:
       - supports-color
     dev: false
 
-  /@sentry/node@7.53.1:
-    resolution: {integrity: sha512-B4ax8sRd54xj4ad+4eY2EOKNt0Mh1NjuLW1zUKS8HW3h0bmuaDFzGuhEVvEY5H4SaV6tZKj1c0dvnMnyUbYkhA==}
+  /@sentry/node@7.54.0:
+    resolution: {integrity: sha512-k8P7WD6lra3JF3H/y9GO+twBV8qQilj3X3d8PpaVPBHHwOA9AfdBVF18qgrdlZKghKtgALapZzrQQVnTOm34rw==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry-internal/tracing': 7.53.1
-      '@sentry/core': 7.53.1
-      '@sentry/types': 7.53.1
-      '@sentry/utils': 7.53.1
+      '@sentry-internal/tracing': 7.54.0
+      '@sentry/core': 7.54.0
+      '@sentry/types': 7.54.0
+      '@sentry/utils': 7.54.0
       cookie: 0.4.2
       https-proxy-agent: 5.0.1
       lru_map: 0.3.3
@@ -10735,34 +10735,34 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /@sentry/react@7.53.1(react@18.2.0):
-    resolution: {integrity: sha512-eEOY/peBepSD/nhPn4SU77aYdjQfAI1svOqpG4sbpjaGZU1P6L7+IIGmip8l2T68oPEeKDaiH9Qy/3uxu55B/Q==}
+  /@sentry/react@7.54.0(react@18.2.0):
+    resolution: {integrity: sha512-qUbwmRRpTh05m2rbC8A2zAFQYsoHhwIpxT5UXxh0P64ZlA3cSg1/DmTTgwnd1l+7gzKrc31UikXQ4y0YDbMNKg==}
     engines: {node: '>=8'}
     peerDependencies:
       react: 15.x || 16.x || 17.x || 18.x
     dependencies:
-      '@sentry/browser': 7.53.1
-      '@sentry/types': 7.53.1
-      '@sentry/utils': 7.53.1
+      '@sentry/browser': 7.54.0
+      '@sentry/types': 7.54.0
+      '@sentry/utils': 7.54.0
       hoist-non-react-statics: 3.3.2
       react: 18.2.0
       tslib: 1.14.1
     dev: false
 
-  /@sentry/replay@7.53.1:
-    resolution: {integrity: sha512-5He5JLJiYLeWtXHC53z2ZzfbgAedafbHNZVS4+MBCOtydCk7cnuyJ0gGV6Rfxej/lZSNXZxOdW7HeMhzBtZCxw==}
+  /@sentry/replay@7.54.0:
+    resolution: {integrity: sha512-C0F0568ybphzGmKGe23duB6n5wJcgM7WLYhoeqW3o2bHeqpj1dGPSka/K3s9KzGaAgzn1zeOUYXJsOs+T/XdsA==}
     engines: {node: '>=12'}
     dependencies:
-      '@sentry/core': 7.53.1
-      '@sentry/types': 7.53.1
-      '@sentry/utils': 7.53.1
+      '@sentry/core': 7.54.0
+      '@sentry/types': 7.54.0
+      '@sentry/utils': 7.54.0
     dev: false
 
-  /@sentry/tracing@7.53.1:
-    resolution: {integrity: sha512-1lpys/e19ee2gDTkcgIXyFNJySEqxdIxlu3Q1Oj+V0ORXVBfA9kFap2fHPWASaDJvmy1zpgGKlbzCpr+IEyfYQ==}
+  /@sentry/tracing@7.54.0:
+    resolution: {integrity: sha512-IyflAAqOiKuNvhWXrJsXN8yfl8DbHRpfgtCEPo5TBvdkpcyxUyfE8W2a2MQ8MXDzgfJT1IixXEwleO+qPIi3Gg==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry-internal/tracing': 7.53.1
+      '@sentry-internal/tracing': 7.54.0
     dev: false
 
   /@sentry/types@7.28.1:
@@ -10770,8 +10770,8 @@ packages:
     engines: {node: '>=8'}
     dev: false
 
-  /@sentry/types@7.53.1:
-    resolution: {integrity: sha512-/ijchRIu+jz3+j/zY+7KRPfLSCY14fTx5xujjbOdmEKjmIHQmwPBdszcQm40uwofrR8taV4hbt5MFN+WnjCkCw==}
+  /@sentry/types@7.54.0:
+    resolution: {integrity: sha512-D+i9xogBeawvQi2r0NOrM7zYcUaPuijeME4O9eOTrDF20tj71hWtJLilK+KTGLYFtpGg1h+9bPaz7OHEIyVopg==}
     engines: {node: '>=8'}
 
   /@sentry/utils@7.28.1:
@@ -10782,11 +10782,11 @@ packages:
       tslib: 1.14.1
     dev: false
 
-  /@sentry/utils@7.53.1:
-    resolution: {integrity: sha512-DKJA1LSUOEv4KOR828MzVuLh+drjeAgzyKgN063OEKmnirgjgRgNNS8wUgwpG0Tn2k6ANZGCwrdfzPeSBxshKg==}
+  /@sentry/utils@7.54.0:
+    resolution: {integrity: sha512-3Yf5KlKjIcYLddOexSt2ovu2TWlR4Fi7M+aCK8yUTzwNzf/xwFSWOstHlD/WiDy9HvfhWAOB/ukNTuAeJmtasw==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry/types': 7.53.1
+      '@sentry/types': 7.54.0
       tslib: 1.14.1
 
   /@sentry/webpack-plugin@1.20.0:
@@ -24185,7 +24185,7 @@ packages:
       process: 0.11.10
       punycode: 2.1.1
       querystring-es3: 0.2.1
-      readable-stream: 4.2.0
+      readable-stream: 4.4.0
       stream-browserify: 3.0.0
       stream-http: 3.2.0
       string_decoder: 1.3.0
@@ -25397,7 +25397,7 @@ packages:
   /pino-abstract-transport@1.0.0:
     resolution: {integrity: sha512-c7vo5OpW4wIS42hUVcT5REsL8ZljsUfBjqV/e2sFxmFEFZiq1XLUp5EYLtuDH6PEHq9W1egWqRbnLUP5FuZmOA==}
     dependencies:
-      readable-stream: 4.2.0
+      readable-stream: 4.4.0
       split2: 4.1.0
     dev: true
 

@@ -18,8 +18,8 @@
     "zod": "3.21.4"
   },
   "devDependencies": {
-    "@sentry/node": "7.53.1",
-    "@sentry/types": "7.53.1",
-    "@sentry/utils": "7.53.1"
+    "@sentry/node": "7.54.0",
+    "@sentry/types": "7.54.0",
+    "@sentry/utils": "7.54.0"
   }
 }
