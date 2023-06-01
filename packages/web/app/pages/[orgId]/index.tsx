@@ -190,7 +190,6 @@ function ProjectsPage(): ReactElement {
                   </div>
                 )}
               </div>
-
               <Activities />
             </>
           )

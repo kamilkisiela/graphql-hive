@@ -10,7 +10,16 @@ import { createEmailScheduler } from './emails';
 import { rateLimitOperationsEventOrg } from './metrics';
 
 export type RateLimitCheckResponse = {
+  /**
+   * An indictaor that refers to the hard-limit state of the org.
+   * If this is set to "true" -> usage is limited and no data is processed.
+   */
   limited: boolean;
+  /**
+   * An indictaor that tells about the usage of the org. We are using that for UI indicators.
+   * This is a number between 0-1 (or higher in case of non-limited orgs)
+   */
+  usagePercenrage: number;
   quota: number;
   current: number;
 };
@@ -18,12 +27,14 @@ export type RateLimitCheckResponse = {
 const UNKNOWN_RATE_LIMIT_OBJ: RateLimitCheckResponse = {
   current: -1,
   quota: -1,
+  usagePercenrage: 0,
   limited: false,
 };
 
 export type CachedRateLimitInfo = {
   orgName: string;
   orgEmail: string;
+  orgPlan: string;
   orgCleanId: string;
   operations: RateLimitCheckResponse;
   retentionInDays: number;
@@ -104,11 +115,13 @@ export function createRateLimiter(config: {
         newCachedResult.set(pairRecord.organization, {
           orgName: pairRecord.org_name,
           orgEmail: pairRecord.owner_email,
+          orgPlan: pairRecord.org_plan_name,
           orgCleanId: pairRecord.org_clean_id,
           operations: {
             current: 0,
             quota: pairRecord.limit_operations_monthly,
             limited: false,
+            usagePercenrage: 0,
           },
           retentionInDays: pairRecord.limit_retention_days,
         });
@@ -121,12 +134,15 @@ export function createRateLimiter(config: {
 
     newCachedResult.forEach((orgRecord, orgId) => {
       const orgName = orgRecord.orgName;
-      const noLimits = orgRecord.operations.quota === 0;
+      // We do not really limit Enterprise customers, but we still want to track their usage.
+      const noLimits = orgRecord.orgPlan === 'ENTERPRISE' || orgRecord.operations.quota === 0;
       orgRecord.operations.limited = noLimits
         ? false
         : orgRecord.operations.current > orgRecord.operations.quota;
+      orgRecord.operations.usagePercenrage =
+        orgRecord.operations.current / orgRecord.operations.quota;
 
-      if (orgRecord.operations.limited) {
+      if (orgRecord.operations.usagePercenrage >= 1) {
         rateLimitOperationsEventOrg.labels({ orgId, orgName }).inc();
         logger.info(
           `Organization "${orgName}"/"${orgId}" is now being rate-limited for operations (${orgRecord.operations.current}/${orgRecord.operations.quota})`,
@@ -148,7 +164,7 @@ export function createRateLimiter(config: {
             current: orgRecord.operations.current,
           },
         });
-      } else if (orgRecord.operations.current / orgRecord.operations.quota >= 0.9) {
+      } else if (orgRecord.operations.usagePercenrage >= 0.9) {
         emails.limitWarning({
           organization: {
             id: orgId,

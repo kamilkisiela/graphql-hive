@@ -2,7 +2,6 @@ import { Inject, Injectable, Scope } from 'graphql-modules';
 import type { RateLimitApi, RateLimitApiInput } from '@hive/rate-limit';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
-import { HiveError } from '../../../shared/errors';
 import { sentry } from '../../../shared/sentry';
 import { Logger } from '../../shared/providers/logger';
 import type { RateLimitServiceConfig } from './tokens';
@@ -34,16 +33,6 @@ export class RateLimitProvider {
       : null;
   }
 
-  async assertRateLimit(input: RateLimitApiInput['checkRateLimit']) {
-    const limit = await this.checkRateLimit(input);
-
-    if (limit.limited) {
-      throw new HiveError(`Monthly limit for ${input.type} has reached!`);
-    }
-
-    return limit;
-  }
-
   @sentry('RateLimitProvider.checkRateLimit')
   async checkRateLimit(input: RateLimitApiInput['checkRateLimit']) {
     if (this.rateLimit === null) {
@@ -53,6 +42,7 @@ export class RateLimitProvider {
       );
 
       return {
+        usagePercenrage: 0,
         limited: false,
       };
     }
