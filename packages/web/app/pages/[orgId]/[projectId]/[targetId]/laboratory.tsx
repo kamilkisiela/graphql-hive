@@ -346,7 +346,6 @@ function Save(): ReactElement {
   const isSame = !!currentOperation && currentOperation.query === queryEditor?.getValue();
   const operationId = currentOperation?.id;
   const label = isSame ? undefined : operationId ? 'Update saved operation' : 'Save operation';
-  console.log({ currentOperation });
   const button = (
     <Button
       className="graphiql-toolbar-button"

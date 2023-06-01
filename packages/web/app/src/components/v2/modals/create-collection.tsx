@@ -190,7 +190,9 @@ export function CreateCollectionModal({
     <Modal open={isOpen} onOpenChange={toggleModalOpen}>
       {!fetching && (
         <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
-          <Heading className="text-center">Create Shared Collection</Heading>
+          <Heading className="text-center">
+            {collectionId ? 'Update' : 'Create'} Shared Collection
+          </Heading>
 
           <div className="flex flex-col gap-4">
             <label className="text-sm font-semibold" htmlFor="name">
