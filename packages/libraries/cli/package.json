@@ -73,7 +73,7 @@
     "@graphql-codegen/typescript-graphql-request": "4.5.9",
     "@types/env-ci": "3.1.1",
     "@types/mkdirp": "1.0.2",
-    "oclif": "3.8.1"
+    "oclif": "3.9.0"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
