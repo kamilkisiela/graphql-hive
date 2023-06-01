@@ -52,7 +52,7 @@
     "@graphql-tools/load": "~8.0.0",
     "@graphql-tools/url-loader": "~8.0.0",
     "@graphql-tools/utils": "10.0.0",
-    "@oclif/core": "^1.23.0",
+    "@oclif/core": "^2.0.0",
     "@oclif/plugin-help": "5.2.9",
     "@oclif/plugin-update": "3.1.13",
     "@whatwg-node/fetch": "0.9.1",
