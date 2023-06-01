@@ -1,5 +1,5 @@
-import { ReactElement, ReactNode } from 'react';
-import { clsx } from 'clsx';
+import { createContext, ReactElement, ReactNode, useState } from 'react';
+import clsx from 'clsx';
 import { Button } from '@/components/v2';
 import { XIcon } from '@/components/v2/icon';
 import {
@@ -14,12 +14,15 @@ import {
   Title,
   Trigger,
 } from '@radix-ui/react-dialog';
+import { Provider as TooltipProvider } from '@radix-ui/react-tooltip';
 
 const widthBySize = {
   sm: clsx('w-[450px]'),
   md: clsx('w-[600px]'),
   lg: clsx('w-[800px]'),
 };
+
+export const ModalTooltipContext = createContext<HTMLDivElement | null>(null);
 
 const Modal = ({
   trigger,
@@ -35,14 +38,19 @@ const Modal = ({
   size?: 'sm' | 'md' | 'lg';
   onOpenChange?: (isOpen: boolean) => void;
   className?: string;
-}): ReactElement => (
-  <Root open={open} onOpenChange={onOpenChange}>
-    <Trigger asChild>{trigger}</Trigger>
-    <Portal>
-      <Overlay className="hive-modal-overlay fixed inset-0 z-50 bg-gray-800/80">
-        <Content
-          className={clsx(
-            `
+}): ReactElement => {
+  const [state, setState] = useState<HTMLDivElement | null>(null);
+  return (
+    <ModalTooltipContext.Provider value={state}>
+      <Root open={open} onOpenChange={onOpenChange}>
+        <Trigger asChild>{trigger}</Trigger>
+        <Portal>
+          <Overlay className="hive-modal-overlay fixed inset-0 z-50 bg-gray-800/80">
+            <TooltipProvider>
+              <Content
+                ref={ref => setState(ref)}
+                className={clsx(
+                  `
             hive-modal
             relative
             top-1/2
@@ -53,22 +61,25 @@ const Modal = ({
             rounded-md
             bg-black
             p-7`,
-            className,
-            widthBySize[size],
-          )}
-        >
-          {children}
+                  className,
+                  widthBySize[size],
+                )}
+              >
+                {children}
 
-          <Close asChild>
-            <Button className="absolute top-5 right-5 text-gray-500 hover:border-gray-500 hover:text-orange-500">
-              <XIcon />
-            </Button>
-          </Close>
-        </Content>
-      </Overlay>
-    </Portal>
-  </Root>
-);
+                <Close asChild>
+                  <Button className="absolute top-5 right-5 text-gray-500 hover:border-gray-500 hover:text-orange-500">
+                    <XIcon />
+                  </Button>
+                </Close>
+              </Content>
+            </TooltipProvider>
+          </Overlay>
+        </Portal>
+      </Root>
+    </ModalTooltipContext.Provider>
+  );
+};
 
 Modal.Title = ({
   className,

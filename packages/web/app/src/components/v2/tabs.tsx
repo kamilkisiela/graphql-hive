@@ -45,7 +45,9 @@ const Trigger = forwardRef<any, Omit<TabsTriggerProps, 'className'> & { hasBorde
   radix-state-active:border-b-orange-500
   border-b-[5px]
   border-b-transparent
-  pb-3`,
+  pb-3
+  cursor-pointer
+  `,
       )}
       {...props}
     >
@@ -54,8 +56,13 @@ const Trigger = forwardRef<any, Omit<TabsTriggerProps, 'className'> & { hasBorde
   ),
 );
 
-const Content = ({ children, className, ...props }: TabsContentProps): ReactElement => (
-  <TabsContent className={clsx('py-7', className)} {...props}>
+const Content = ({
+  children,
+  className,
+  noPadding,
+  ...props
+}: TabsContentProps & { noPadding?: boolean }): ReactElement => (
+  <TabsContent className={clsx(noPadding ? undefined : 'py-7', className)} {...props}>
     {children}
   </TabsContent>
 );

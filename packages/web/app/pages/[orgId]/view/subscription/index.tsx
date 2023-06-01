@@ -6,7 +6,6 @@ import { OrganizationLayout } from '@/components/layouts';
 import { BillingView } from '@/components/organization/billing/Billing';
 import { CurrencyFormatter } from '@/components/organization/billing/helpers';
 import { InvoicesList } from '@/components/organization/billing/InvoicesList';
-import { RateLimitWarn } from '@/components/organization/billing/RateLimitWarn';
 import { OrganizationUsageEstimationView } from '@/components/organization/Usage';
 import { Card, Heading, Stat, Tabs, Title } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
@@ -80,8 +79,7 @@ function Page(props: {
         </Tabs.Trigger>
       </Tabs.List>
       <Tabs.Content value="overview">
-        <RateLimitWarn organization={organization} />
-        <Card className="mt-8">
+        <Card>
           <Heading className="mb-2">Your current plan</Heading>
           <div>
             <BillingView organization={organization} query={query}>

@@ -16,6 +16,7 @@ import {
 } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { RateLimitWarn } from '../organization/billing/RateLimitWarn';
 
 enum TabValue {
   Overview = 'overview',
@@ -31,6 +32,7 @@ const OrganizationLayout_OrganizationFragment = graphql(`
     me {
       ...CanAccessOrganization_MemberFragment
     }
+    ...RateLimitWarn_OrganizationFragment
   }
 `);
 
@@ -137,7 +139,6 @@ export function OrganizationLayout<
           <CreateProjectModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
         </div>
       </SubHeader>
-
       <Tabs className="container" value={value}>
         <Tabs.List>
           <Tabs.Trigger value={TabValue.Overview} asChild>
@@ -164,10 +165,13 @@ export function OrganizationLayout<
             </Tabs.Trigger>
           )}
         </Tabs.List>
-        <Tabs.Content value={value} className={className}>
-          {children(organizationQuery.data!, {
-            organization: orgId,
-          })}
+        <Tabs.Content value={value}>
+          <RateLimitWarn organization={organization} />
+          <div className={className}>
+            {children(organizationQuery.data!, {
+              organization: orgId,
+            })}
+          </div>
         </Tabs.Content>
       </Tabs>
     </>

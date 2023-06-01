@@ -102,10 +102,12 @@ const plugin: FastifyPluginAsync = async server => {
 
       scope.setTag('path', req.raw.url);
       scope.setTag('method', req.raw.method);
-      console.log('fastify.setErrorHandler error', err);
+      req.log.error(err);
       Sentry.captureException(err);
 
-      void reply.send(
+      req.log.warn('Replying with 500 Internal Server Error');
+
+      void reply.status(500).send(
         JSON.stringify({
           error: 500,
           message: 'Internal Server Error',
