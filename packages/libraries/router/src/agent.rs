@@ -93,6 +93,7 @@ pub struct UsageAgent {
     token: String,
     endpoint: String,
     buffer_size: usize,
+    accept_invalid_certs: bool,
     /// We need the Arc wrapper to be able to clone the agent while preserving multiple mutable reference to processor
     /// We also need the Mutex wrapper bc we cannot borrow data in an `Arc` as mutable
     pub state: Arc<Mutex<State>>,
@@ -110,7 +111,13 @@ fn non_empty_string(value: Option<String>) -> Option<String> {
 }
 
 impl UsageAgent {
-    pub fn new(schema: String, token: String, endpoint: String, buffer_size: usize) -> Self {
+    pub fn new(
+        schema: String,
+        token: String,
+        endpoint: String,
+        buffer_size: usize,
+        accept_invalid_certs: bool,
+    ) -> Self {
         let schema = parse_schema::<String>(&schema)
             .expect("Failed to parse schema")
             .into_static();
@@ -123,6 +130,7 @@ impl UsageAgent {
             endpoint,
             token,
             buffer_size,
+            accept_invalid_certs,
         };
 
         let mut agent_for_interval = agent.clone();
@@ -233,7 +241,10 @@ impl UsageAgent {
         const DELAY_BETWEEN_TRIES: Duration = Duration::from_millis(500);
         const MAX_TRIES: u8 = 3;
 
-        let client = reqwest::blocking::Client::new();
+        let client = reqwest::blocking::Client::builder()
+            .danger_accept_invalid_certs(self.accept_invalid_certs)
+            .build()
+            .map_err(|err| err.to_string())?;
         let mut error_message = "Unexpected error".to_string();
 
         for _ in 0..MAX_TRIES {
