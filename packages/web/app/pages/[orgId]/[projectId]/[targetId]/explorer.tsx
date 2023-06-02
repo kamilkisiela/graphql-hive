@@ -1,126 +1,72 @@
 import { ReactElement } from 'react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { TargetLayout } from '@/components/layouts';
+import { TargetLayout } from '@/components/layouts/target';
 import { SchemaExplorerFilter } from '@/components/target/explorer/filter';
 import { GraphQLObjectTypeComponent } from '@/components/target/explorer/object-type';
 import {
   SchemaExplorerProvider,
   useSchemaExplorerContext,
 } from '@/components/target/explorer/provider';
-import { DataWrapper, Title } from '@/components/v2';
+import { Title } from '@/components/v2';
 import { noSchemaVersion } from '@/components/v2/empty-list';
-import { graphql } from '@/gql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { useRouteSelector } from '@/lib/hooks';
+import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const SchemaView_SchemaExplorer = graphql(`
-  query SchemaView_SchemaExplorer(
-    $organization: ID!
-    $project: ID!
-    $target: ID!
-    $period: DateRangeInput!
-  ) {
-    target(selector: { organization: $organization, project: $project, target: $target }) {
-      __typename
-      id
-      latestSchemaVersion {
-        __typename
-        id
-        valid
-        explorer(usage: { period: $period }) {
-          query {
-            ...GraphQLObjectTypeComponent_TypeFragment
-          }
-          mutation {
-            ...GraphQLObjectTypeComponent_TypeFragment
-          }
-          subscription {
-            ...GraphQLObjectTypeComponent_TypeFragment
-          }
-        }
-      }
+const ExplorerPage_SchemaExplorerFragment = graphql(`
+  fragment ExplorerPage_SchemaExplorerFragment on SchemaExplorer {
+    query {
+      ...GraphQLObjectTypeComponent_TypeFragment
     }
-    operationsStats(
-      selector: { organization: $organization, project: $project, target: $target, period: $period }
-    ) {
-      totalRequests
+    mutation {
+      ...GraphQLObjectTypeComponent_TypeFragment
+    }
+    subscription {
+      ...GraphQLObjectTypeComponent_TypeFragment
     }
   }
 `);
 
-function SchemaView({
-  organizationCleanId,
-  projectCleanId,
-  targetCleanId,
-}: {
-  organizationCleanId: string;
-  projectCleanId: string;
-  targetCleanId: string;
-}): ReactElement | null {
-  const { period } = useSchemaExplorerContext();
-  const [query] = useQuery({
-    query: SchemaView_SchemaExplorer,
-    variables: {
-      organization: organizationCleanId,
-      project: projectCleanId,
-      target: targetCleanId,
-      period,
-    },
-    requestPolicy: 'cache-first',
-  });
+function SchemaView(props: {
+  explorer: FragmentType<typeof ExplorerPage_SchemaExplorerFragment>;
+  totalRequests: number;
+}) {
+  const { query, mutation, subscription } = useFragment(
+    ExplorerPage_SchemaExplorerFragment,
+    props.explorer,
+  );
+  const { totalRequests } = props;
 
   return (
-    <DataWrapper query={query}>
-      {({ data }) => {
-        if (!data.target?.latestSchemaVersion) {
-          return noSchemaVersion;
-        }
-
-        const { query, mutation, subscription } = data.target.latestSchemaVersion.explorer;
-        const { totalRequests } = data.operationsStats;
-
-        return (
-          <>
-            <div className="mb-5 flex flex-row items-center justify-between">
-              <div className="font-light text-gray-500">The latest published schema.</div>
-            </div>
-            <div className="flex flex-col gap-4">
-              <SchemaExplorerFilter
-                organization={{ cleanId: organizationCleanId }}
-                project={{ cleanId: projectCleanId }}
-                target={{ cleanId: targetCleanId }}
-                period={period}
-              />
-              {query ? (
-                <GraphQLObjectTypeComponent type={query} totalRequests={totalRequests} collapsed />
-              ) : null}
-              {mutation ? (
-                <GraphQLObjectTypeComponent
-                  type={mutation}
-                  totalRequests={totalRequests}
-                  collapsed
-                />
-              ) : null}
-              {subscription ? (
-                <GraphQLObjectTypeComponent
-                  type={subscription}
-                  totalRequests={totalRequests}
-                  collapsed
-                />
-              ) : null}
-            </div>
-          </>
-        );
-      }}
-    </DataWrapper>
+    <div className="flex flex-col gap-4">
+      {query ? (
+        <GraphQLObjectTypeComponent type={query} totalRequests={totalRequests} collapsed />
+      ) : null}
+      {mutation ? (
+        <GraphQLObjectTypeComponent type={mutation} totalRequests={totalRequests} collapsed />
+      ) : null}
+      {subscription ? (
+        <GraphQLObjectTypeComponent type={subscription} totalRequests={totalRequests} collapsed />
+      ) : null}
+    </div>
   );
 }
 
 const TargetExplorerPageQuery = graphql(`
-  query TargetExplorerPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+  query TargetExplorerPageQuery(
+    $organizationId: ID!
+    $projectId: ID!
+    $targetId: ID!
+    $period: DateRangeInput!
+  ) {
+    organizations {
+      ...TargetLayout_OrganizationConnectionFragment
+    }
     organization(selector: { organization: $organizationId }) {
       organization {
-        ...TargetLayout_OrganizationFragment
+        ...TargetLayout_CurrentOrganizationFragment
         rateLimit {
           retentionInDays
         }
@@ -128,38 +74,114 @@ const TargetExplorerPageQuery = graphql(`
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_ProjectFragment
+      ...TargetLayout_CurrentProjectFragment
       cleanId
-    }
-    targets(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_TargetConnectionFragment
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       cleanId
+      latestSchemaVersion {
+        __typename
+        id
+        valid
+        explorer(usage: { period: $period }) {
+          ...ExplorerPage_SchemaExplorerFragment
+        }
+      }
+    }
+    operationsStats(
+      selector: {
+        organization: $organizationId
+        project: $projectId
+        target: $targetId
+        period: $period
+      }
+    ) {
+      totalRequests
+    }
+    me {
+      ...TargetLayout_MeFragment
     }
     ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 
+function ExplorerPageContent() {
+  const router = useRouteSelector();
+  const { period, dataRetentionInDays, setDataRetentionInDays } = useSchemaExplorerContext();
+  const [query] = useQuery({
+    query: TargetExplorerPageQuery,
+    variables: {
+      organizationId: router.organizationId,
+      projectId: router.projectId,
+      targetId: router.targetId,
+      period,
+    },
+  });
+  useNotFoundRedirectOnError(!!query.error);
+
+  if (query.error) {
+    return null;
+  }
+
+  const me = query.data?.me;
+  const currentOrganization = query.data?.organization?.organization;
+  const currentProject = query.data?.project;
+  const currentTarget = query.data?.target;
+  const organizationConnection = query.data?.organizations;
+  const isCDNEnabled = query.data;
+  const explorer = currentTarget?.latestSchemaVersion?.explorer;
+  const latestSchemaVersion = currentTarget?.latestSchemaVersion;
+
+  const retentionInDays = currentOrganization?.rateLimit.retentionInDays;
+  if (typeof retentionInDays === 'number' && dataRetentionInDays !== retentionInDays) {
+    setDataRetentionInDays(retentionInDays);
+  }
+
+  return (
+    <TargetLayout
+      value="explorer"
+      className="flex justify-between gap-8"
+      currentOrganization={currentOrganization ?? null}
+      currentProject={currentProject ?? null}
+      me={me ?? null}
+      organizations={organizationConnection ?? null}
+      isCDNEnabled={isCDNEnabled ?? null}
+    >
+      <div className="grow">
+        <div className="py-6 flex flex-row items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold tracking-tight">Explore</h3>
+            <p className="text-sm text-gray-400">Insights from the latest version.</p>
+          </div>
+          {latestSchemaVersion ? (
+            <SchemaExplorerFilter
+              organization={{ cleanId: router.organizationId }}
+              project={{ cleanId: router.projectId }}
+              target={{ cleanId: router.targetId }}
+              period={period}
+            />
+          ) : null}
+        </div>
+        {latestSchemaVersion && explorer ? (
+          <SchemaView
+            totalRequests={query.data?.operationsStats.totalRequests ?? 0}
+            explorer={explorer}
+          />
+        ) : (
+          noSchemaVersion
+        )}
+      </div>
+    </TargetLayout>
+  );
+}
+
 function ExplorerPage(): ReactElement {
   return (
     <>
       <Title title="Schema Explorer" />
-      <TargetLayout value="explorer" query={TargetExplorerPageQuery}>
-        {props =>
-          props.organization && props.project && props.target ? (
-            <SchemaExplorerProvider
-              dataRetentionInDays={props.organization.organization.rateLimit.retentionInDays}
-            >
-              <SchemaView
-                organizationCleanId={props.organization.organization.cleanId}
-                projectCleanId={props.project.cleanId}
-                targetCleanId={props.target.cleanId}
-              />
-            </SchemaExplorerProvider>
-          ) : null
-        }
-      </TargetLayout>
+      <SchemaExplorerProvider>
+        <ExplorerPageContent />
+      </SchemaExplorerProvider>
     </>
   );
 }

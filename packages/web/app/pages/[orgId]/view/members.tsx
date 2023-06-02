@@ -3,18 +3,10 @@ import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
-import { OrganizationLayout } from '@/components/layouts';
-import {
-  Avatar,
-  Button,
-  Card,
-  Checkbox,
-  DocsLink,
-  DocsNote,
-  Heading,
-  Input,
-  Title,
-} from '@/components/v2';
+import { OrganizationLayout } from '@/components/layouts/organization';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Avatar, Card, DocsLink, Heading, Input, Title } from '@/components/v2';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +19,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { MeDocument, OrganizationFieldsFragment } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
+import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { useToggle } from '@/lib/hooks/use-toggle';
@@ -124,7 +117,7 @@ const MemberInvitationForm = ({
 
   return (
     <div>
-      <form onSubmit={handleSubmit} className="flex flex-row gap-2">
+      <form onSubmit={handleSubmit} className="flex flex-row gap-2 items-center">
         <Input
           style={{
             minWidth: '200px',
@@ -139,13 +132,7 @@ const MemberInvitationForm = ({
           isInvalid={touched.email && !!errors.email}
           onClear={resetForm}
         />
-        <Button
-          type="submit"
-          size="large"
-          block
-          variant="primary"
-          disabled={isSubmitting || !isValid || !dirty}
-        >
+        <Button type="submit" disabled={isSubmitting || !isValid || !dirty}>
           Send an invite
         </Button>
       </form>
@@ -201,7 +188,7 @@ const Invitation = (props: {
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button>
+          <Button variant="ghost">
             <MoreIcon />
           </Button>
         </DropdownMenuTrigger>
@@ -309,13 +296,18 @@ function Page(props: { organization: FragmentType<typeof Page_OrganizationFragme
     : null;
 
   return (
-    <>
-      <DocsNote>
-        You may invite other members to collaborate with you on this organization.{' '}
-        <DocsLink href="/management/organizations#members">
-          Learn more about membership and invitations
-        </DocsLink>
-      </DocsNote>
+    <div className="flex flex-col gap-y-4">
+      <div className="py-6">
+        <h3 className="text-lg font-semibold tracking-tight">Members</h3>
+        <p className="text-sm text-gray-400">
+          You may invite other members to collaborate with you on this organization.
+        </p>
+        <p>
+          <DocsLink href="/management/organizations#members" className="text-muted-foreground">
+            Learn more about membership and invitations
+          </DocsLink>
+        </p>
+      </div>
       {selectedMember && (
         <ChangePermissionsModal
           isOpen={isPermissionsModalOpen}
@@ -332,14 +324,13 @@ function Page(props: { organization: FragmentType<typeof Page_OrganizationFragme
       <div className="flex items-center justify-between">
         <MemberInvitationForm organizationCleanId={organization.cleanId} />
         <Button
-          size="large"
-          danger
-          className="min-w-[150px] justify-between"
+          variant="destructive"
+          className="flex flex-row items-center justify-between"
           onClick={toggleDeleteMembersModalOpen}
           disabled={checked.length === 0}
         >
           Delete {checked.length || ''}
-          <TrashIcon />
+          <TrashIcon className="ml-2 w-4 h-4" />
         </Button>
       </div>
       {members?.map(node => {
@@ -368,7 +359,7 @@ function Page(props: { organization: FragmentType<typeof Page_OrganizationFragme
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button className={isDisabled ? 'invisible' : ''}>
+                <Button variant="ghost" className={isDisabled ? 'invisible' : ''}>
                   <MoreIcon />
                 </Button>
               </DropdownMenuTrigger>
@@ -396,7 +387,7 @@ function Page(props: { organization: FragmentType<typeof Page_OrganizationFragme
         );
       })}
       <OrganizationInvitations organization={organization} />
-    </>
+    </div>
   );
 }
 
@@ -404,26 +395,58 @@ const OrganizationMembersPageQuery = graphql(`
   query OrganizationMembersPageQuery($selector: OrganizationSelectorInput!) {
     organization(selector: $selector) {
       organization {
-        ...OrganizationLayout_OrganizationFragment
+        ...OrganizationLayout_CurrentOrganizationFragment
         ...Page_OrganizationFragment
       }
     }
+    organizations {
+      ...OrganizationLayout_OrganizationConnectionFragment
+    }
+    me {
+      ...OrganizationLayout_MeFragment
+    }
   }
 `);
+
+function SettingsPageContent() {
+  const router = useRouteSelector();
+  const [query] = useQuery({
+    query: OrganizationMembersPageQuery,
+    variables: {
+      selector: {
+        organization: router.organizationId,
+      },
+    },
+  });
+
+  useNotFoundRedirectOnError(!!query.error);
+
+  if (query.error) {
+    return null;
+  }
+
+  const me = query.data?.me;
+  const currentOrganization = query.data?.organization?.organization;
+  const organizationConnection = query.data?.organizations;
+
+  return (
+    <OrganizationLayout
+      value="members"
+      className="flex flex-col gap-y-10"
+      currentOrganization={currentOrganization ?? null}
+      organizations={organizationConnection ?? null}
+      me={me ?? null}
+    >
+      {currentOrganization ? <Page organization={currentOrganization} /> : null}
+    </OrganizationLayout>
+  );
+}
 
 function OrganizationMembersPage(): ReactElement {
   return (
     <>
       <Title title="Members" />
-      <OrganizationLayout
-        value="members"
-        className="flex w-4/5 flex-col gap-4"
-        query={OrganizationMembersPageQuery}
-      >
-        {({ organization }) =>
-          organization ? <Page organization={organization.organization} /> : null
-        }
-      </OrganizationLayout>
+      <SettingsPageContent />
     </>
   );
 }

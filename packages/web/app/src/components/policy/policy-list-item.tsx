@@ -1,9 +1,10 @@
 import { ReactElement } from 'react';
 import type { JSONSchema } from 'json-schema-typed';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Markdown } from '@/components/v2/markdown';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { RuleInstanceSeverityLevel } from '@/graphql';
-import { Checkbox, DocsLink, Tooltip } from '../v2';
+import { DocsLink, Tooltip } from '../v2';
 import { useConfigurationHelper } from './form-helper';
 import { PolicyRuleConfig } from './rules-configuration';
 import { SeverityLevelToggle } from './rules-configuration/severity-toggle';
@@ -73,7 +74,7 @@ export function PolicyListItem(props: {
                   </>
                 }
               >
-                <label htmlFor={ruleInfo.id} className="font-mono font-bold">
+                <label htmlFor={ruleInfo.id} className="font-mono text-sm font-medium">
                   {ruleInfo.id}
                 </label>
               </Tooltip>

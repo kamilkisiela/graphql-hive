@@ -7,7 +7,11 @@ import { cache } from '../../../shared/helpers';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 import { Logger } from '../../shared/providers/logger';
-import type { OrganizationSelector, TargetSelector } from '../../shared/providers/storage';
+import type {
+  OrganizationSelector,
+  ProjectSelector,
+  TargetSelector,
+} from '../../shared/providers/storage';
 import { Storage } from '../../shared/providers/storage';
 import { OperationsReader } from './operations-reader';
 
@@ -296,6 +300,109 @@ export class OperationsManager {
       target,
       period,
       operations,
+    });
+  }
+
+  async readRequestsOverTimeOfProject({
+    period,
+    resolution,
+    organization,
+    project,
+  }: {
+    period: DateRange;
+    resolution: number;
+  } & ProjectSelector): Promise<
+    Array<{
+      date: any;
+      value: number;
+    }>
+  > {
+    this.logger.info(
+      'Reading requests over time (period=%o, resolution=%s, project=%s)',
+      period,
+      resolution,
+      project,
+    );
+    const targets = await this.storage.getTargetIdsOfProject({
+      organization,
+      project,
+    });
+    await Promise.all(
+      targets.map(target =>
+        this.authManager.ensureTargetAccess({
+          organization,
+          project,
+          target,
+          scope: TargetAccessScope.REGISTRY_READ,
+        }),
+      ),
+    );
+
+    const groups = await this.reader.requestsOverTimeOfTargets({
+      targets,
+      period,
+      resolution,
+    });
+
+    // Because we get data for each target separately, we need to sum(targets) per date
+    // All dates are the same for all targets as we use `toStartOfInterval` function of clickhouse under the hood,
+    // with the same interval value.
+    // The `toStartOfInterval` function gives back the same output for data time points within the same interval window.
+    // Let's say that interval is 10 minutes.
+    // `2023-21-10 21:37` and `2023-21-10 21:38` are within 21:30 and 21:40 window, so the output will be `2023-21-10 21:30`.
+    const dataPointsAggregator = new Map<number, number>();
+
+    for (const target in groups) {
+      const targetDataPoints = groups[target];
+
+      for (const dataPoint of targetDataPoints) {
+        const existing = dataPointsAggregator.get(dataPoint.date);
+
+        if (existing == null) {
+          dataPointsAggregator.set(dataPoint.date, dataPoint.value);
+        } else {
+          dataPointsAggregator.set(dataPoint.date, existing + dataPoint.value);
+        }
+      }
+    }
+
+    return Array.from(dataPointsAggregator.entries())
+      .map(([date, value]) => ({ date, value }))
+      .sort((a, b) => a.date - b.date);
+  }
+
+  async readRequestsOverTimeOfTargets({
+    period,
+    resolution,
+    organization,
+    project,
+    targets,
+  }: {
+    period: DateRange;
+    resolution: number;
+    targets: string[];
+  } & ProjectSelector) {
+    this.logger.info(
+      'Reading requests over time (period=%o, resolution=%s, target=%s)',
+      period,
+      resolution,
+      targets.join(';'),
+    );
+    await Promise.all(
+      targets.map(target =>
+        this.authManager.ensureTargetAccess({
+          organization,
+          project,
+          target,
+          scope: TargetAccessScope.REGISTRY_READ,
+        }),
+      ),
+    );
+
+    return this.reader.requestsOverTimeOfTargets({
+      targets,
+      period,
+      resolution,
     });
   }
 

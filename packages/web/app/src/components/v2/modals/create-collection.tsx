@@ -4,7 +4,6 @@ import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
-import { TargetDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 
 const CollectionQuery = graphql(`
@@ -116,15 +115,6 @@ export function CreateCollectionModal({
   const [mutationCreate, mutateCreate] = useMutation(CreateCollectionMutation);
   const [mutationUpdate, mutateUpdate] = useMutation(UpdateCollectionMutation);
 
-  const [result] = useQuery({
-    query: TargetDocument,
-    variables: {
-      targetId: router.targetId,
-      organizationId: router.organizationId,
-      projectId: router.projectId,
-    },
-  });
-
   const [{ data, error: collectionError, fetching: loadingCollection }] = useQuery({
     query: CollectionQuery,
     variables: {
@@ -138,8 +128,8 @@ export function CreateCollectionModal({
     pause: !collectionId,
   });
 
-  const error = mutationCreate.error || result.error || collectionError || mutationUpdate.error;
-  const fetching = loadingCollection || result.fetching;
+  const error = mutationCreate.error || collectionError || mutationUpdate.error;
+  const fetching = loadingCollection;
 
   useEffect(() => {
     if (!collectionId) {

@@ -329,6 +329,29 @@ export const resolvers: OperationsModule.Resolvers = {
       });
     },
   },
+  Project: {
+    async requestsOverTime(project, { resolution, period }, { injector }) {
+      return injector.get(OperationsManager).readRequestsOverTimeOfProject({
+        project: project.id,
+        organization: project.orgId,
+        period: parseDateRangeInput(period),
+        resolution,
+      });
+    },
+  },
+  Target: {
+    async requestsOverTime(target, { resolution, period }, { injector }) {
+      const result = await injector.get(OperationsManager).readRequestsOverTimeOfTargets({
+        project: target.projectId,
+        organization: target.orgId,
+        targets: [target.id],
+        period: parseDateRangeInput(period),
+        resolution,
+      });
+
+      return result[target.id] ?? [];
+    },
+  },
 };
 
 function transformPercentile(value: number | null): number {

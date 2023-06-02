@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { HiveError } from '../../shared/errors';
+import { ProjectManager } from '../project/providers/project-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { TargetManager } from '../target/providers/target-manager';
 import type { AlertsModule } from './__generated__/types';
@@ -33,16 +35,20 @@ export const resolvers: AlertsModule.Resolvers = {
       }
 
       const translator = injector.get(IdTranslator);
-      const [organization, project] = await Promise.all([
+      const [organizationId, projectId] = await Promise.all([
         translator.translateOrganizationId(input),
         translator.translateProjectId(input),
       ]);
 
       return {
         ok: {
+          updatedProject: injector.get(ProjectManager).getProject({
+            organization: organizationId,
+            project: projectId,
+          }),
           addedAlertChannel: injector.get(AlertsManager).addChannel({
-            organization,
-            project,
+            organization: organizationId,
+            project: projectId,
             name: input.name,
             type: input.type,
             slack: input.slack,
@@ -53,70 +59,128 @@ export const resolvers: AlertsModule.Resolvers = {
     },
     async deleteAlertChannels(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);
-      const [organization, project] = await Promise.all([
+      const [organizationId, projectId] = await Promise.all([
         translator.translateOrganizationId(input),
         translator.translateProjectId(input),
       ]);
 
-      return injector.get(AlertsManager).deleteChannels({
-        organization,
-        project,
-        channels: input.channels,
+      const project = await injector.get(ProjectManager).getProject({
+        organization: organizationId,
+        project: projectId,
       });
+
+      try {
+        await injector.get(AlertsManager).deleteChannels({
+          organization: organizationId,
+          project: projectId,
+          channels: input.channels,
+        });
+
+        return {
+          ok: {
+            updatedProject: project,
+          },
+        };
+      } catch (error) {
+        if (error instanceof HiveError) {
+          return {
+            error: {
+              message: error.message,
+            },
+          };
+        }
+
+        throw error;
+      }
     },
     async addAlert(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);
-      const [organization, project, target] = await Promise.all([
+      const [organizationId, projectId, targetId] = await Promise.all([
         translator.translateOrganizationId(input),
         translator.translateProjectId(input),
         translator.translateTargetId(input),
       ]);
 
-      return injector.get(AlertsManager).addAlert({
-        organization,
-        project,
-        target,
-        channel: input.channel,
-        type: input.type,
+      const project = await injector.get(ProjectManager).getProject({
+        organization: organizationId,
+        project: projectId,
       });
+
+      try {
+        const alert = await injector.get(AlertsManager).addAlert({
+          organization: organizationId,
+          project: projectId,
+          target: targetId,
+          channel: input.channel,
+          type: input.type,
+        });
+
+        return {
+          ok: {
+            addedAlert: alert,
+            updatedProject: project,
+          },
+        };
+      } catch (error) {
+        if (error instanceof HiveError) {
+          return {
+            error: {
+              message: error.message,
+            },
+          };
+        }
+
+        throw error;
+      }
     },
     async deleteAlerts(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);
-      const [organization, project] = await Promise.all([
+      const [organizationId, projectId] = await Promise.all([
         translator.translateOrganizationId(input),
         translator.translateProjectId(input),
       ]);
 
-      return injector.get(AlertsManager).deleteAlerts({
-        organization,
-        project,
-        alerts: input.alerts,
+      const project = await injector.get(ProjectManager).getProject({
+        organization: organizationId,
+        project: projectId,
       });
+
+      try {
+        await injector.get(AlertsManager).deleteAlerts({
+          organization: organizationId,
+          project: projectId,
+          alerts: input.alerts,
+        });
+
+        return {
+          ok: {
+            updatedProject: project,
+          },
+        };
+      } catch (error) {
+        if (error instanceof HiveError) {
+          return {
+            error: {
+              message: error.message,
+            },
+          };
+        }
+
+        throw error;
+      }
     },
   },
-  Query: {
-    async alerts(_, { selector }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project] = await Promise.all([
-        translator.translateOrganizationId(selector),
-        translator.translateProjectId(selector),
-      ]);
-
+  Project: {
+    async alerts(project, _, { injector }) {
       return injector.get(AlertsManager).getAlerts({
-        organization,
-        project,
+        organization: project.orgId,
+        project: project.id,
       });
     },
-    async alertChannels(_, { selector }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project] = await Promise.all([
-        translator.translateOrganizationId(selector),
-        translator.translateProjectId(selector),
-      ]);
-
+    async alertChannels(project, _, { injector }) {
       return injector.get(AlertsManager).getChannels({
-        organization,
-        project,
+        organization: project.orgId,
+        project: project.id,
       });
     },
   },

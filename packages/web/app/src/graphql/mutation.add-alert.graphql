@@ -1,5 +1,0 @@
-mutation addAlert($input: AddAlertInput!) {
-  addAlert(input: $input) {
-    ...AlertFields
-  }
-}

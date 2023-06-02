@@ -122,6 +122,11 @@ export default gql`
   extend type Project {
     externalSchemaComposition: ExternalSchemaComposition
     registryModel: RegistryModel!
+    schemaVersionsCount(period: DateRangeInput): Int!
+  }
+
+  extend type Target {
+    schemaVersionsCount(period: DateRangeInput): Int!
   }
 
   type EnableExternalSchemaCompositionError implements Error {

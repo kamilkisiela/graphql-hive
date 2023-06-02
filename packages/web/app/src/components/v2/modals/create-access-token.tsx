@@ -391,7 +391,7 @@ function ModalContent(props: {
               </div>
             )}
           </div>
-          <div className="container flex flex-col flex-1 overflow-hidden">
+          <div className="flex flex-col flex-1 overflow-hidden">
             <Tabs
               defaultValue="simple"
               className="flex flex-col overflow-hidden"

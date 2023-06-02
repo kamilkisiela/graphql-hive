@@ -1,6 +1,7 @@
 import { ReactElement, useMemo, useRef } from 'react';
 import { Formik, FormikHelpers, FormikProps } from 'formik';
 import { useQuery } from 'urql';
+import { Button } from '@/components/ui/button';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import {
   PolicySettings_SchemaPolicyFragmentFragment,
@@ -8,7 +9,7 @@ import {
   SchemaPolicyInput,
 } from '@/graphql';
 import type { ResultOf } from '@graphql-typed-document-node/core';
-import { Button, Callout, DataWrapper } from '../v2';
+import { Callout, DataWrapper } from '../v2';
 import { PolicyListItem } from './policy-list-item';
 import { buildValidationSchema, PolicyFormValues } from './rules-configuration';
 
@@ -108,7 +109,7 @@ function PolicySettingsListForm({
             <Button
               disabled={!props.dirty || saving}
               type="submit"
-              variant="primary"
+              variant="default"
               onClick={() => props.submitForm()}
             >
               Update Policy

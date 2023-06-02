@@ -671,6 +671,14 @@ export const resolvers: SchemaModule.Resolvers = {
         pageInfo: result.pageInfo,
       };
     },
+    schemaVersionsCount(target, { period }, { injector }) {
+      return injector.get(SchemaManager).countSchemaVersionsOfTarget({
+        organization: target.orgId,
+        project: target.projectId,
+        target: target.id,
+        period: period ? parseDateRangeInput(period) : null,
+      });
+    },
   },
   SchemaVersion: {
     async log(version, _, { injector }) {
@@ -1009,6 +1017,13 @@ export const resolvers: SchemaModule.Resolvers = {
     },
     registryModel(project) {
       return project.legacyRegistryModel ? 'LEGACY' : 'MODERN';
+    },
+    schemaVersionsCount(project, { period }, { injector }) {
+      return injector.get(SchemaManager).countSchemaVersionsOfProject({
+        organization: project.orgId,
+        project: project.id,
+        period: period ? parseDateRangeInput(period) : null,
+      });
     },
   },
   SchemaExplorer: {

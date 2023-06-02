@@ -1,5 +1,0 @@
-query alerts($selector: ProjectSelectorInput!) {
-  alerts(selector: $selector) {
-    ...AlertFields
-  }
-}

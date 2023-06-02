@@ -1,6 +1,0 @@
-mutation deleteAlertChannels($input: DeleteAlertChannelsInput!) {
-  deleteAlertChannels(input: $input) {
-    __typename
-    id
-  }
-}

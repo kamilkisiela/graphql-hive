@@ -834,6 +834,185 @@ export class OperationsReader {
     });
   }
 
+  // @sentry('OperationsReader.requestsOverTimeOfTargets')
+  requestsOverTimeOfTargets = batch(
+    async (
+      selectors: ReadonlyArray<{
+        targets: readonly string[];
+        period: DateRange;
+        resolution: number;
+      }>,
+    ) => {
+      const aggregationMap = new Map<
+        string,
+        {
+          targets: string[];
+          period: DateRange;
+          resolution: number;
+        }
+      >();
+
+      const makeKey = (selector: { period: DateRange; resolution: number }) =>
+        `${selector.period.from};${selector.period.to};${selector.resolution}`;
+
+      const subSelectors = selectors
+        .map(selector =>
+          selector.targets.map(target => ({
+            target,
+            period: selector.period,
+            resolution: selector.resolution,
+          })),
+        )
+        .flat(1);
+
+      // The idea here is to make the least possible number of queries to ClickHouse
+      // by fetching all data points of the same target, period and resolution.
+      for (const selector of subSelectors) {
+        const key = makeKey(selector);
+        const value = aggregationMap.get(key);
+
+        if (!value) {
+          aggregationMap.set(key, {
+            targets: [selector.target],
+            period: selector.period,
+            resolution: selector.resolution,
+          });
+        } else {
+          value.targets.push(selector.target);
+        }
+      }
+
+      const aggregationResultMap = new Map<
+        string,
+        Promise<
+          readonly {
+            date: number;
+            total: number;
+            target: string;
+          }[]
+        >
+      >();
+
+      for (const [key, { targets, period, resolution }] of aggregationMap) {
+        aggregationResultMap.set(
+          key,
+          this.clickHouse
+            .query<{
+              date: number;
+              target: string;
+              total: number;
+            }>(
+              pickQueryByPeriod(
+                {
+                  daily: {
+                    query: sql`
+                    SELECT 
+                      multiply(
+                        toUnixTimestamp(
+                          toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
+                            calculateTimeWindow({ period, resolution }),
+                          )}, 'UTC'),
+                        'UTC'),
+                      1000) as date,
+                      sum(total) as total,
+                      target
+                    FROM operations_daily
+                    ${this.createFilter({ target: targets, period })}
+                    GROUP BY date, target
+                    ORDER BY date
+                  `,
+                    queryId: 'targets_count_over_time_daily',
+                    timeout: 15_000,
+                  },
+                  hourly: {
+                    query: sql`
+                    SELECT 
+                      multiply(
+                        toUnixTimestamp(
+                          toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
+                            calculateTimeWindow({ period, resolution }),
+                          )}, 'UTC'),
+                        'UTC'),
+                      1000) as date,
+                      sum(total) as total,
+                      target
+                    FROM operations_hourly
+                    ${this.createFilter({ target: targets, period })}
+                    GROUP BY date, target
+                    ORDER BY date
+                  `,
+                    queryId: 'targets_count_over_time_hourly',
+                    timeout: 15_000,
+                  },
+                  regular: {
+                    query: sql`
+                    SELECT 
+                      multiply(
+                        toUnixTimestamp(
+                          toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
+                            calculateTimeWindow({ period, resolution }),
+                          )}, 'UTC'),
+                        'UTC'),
+                      1000) as date,
+                      count(*) as total,
+                      target
+                    FROM operations
+                    ${this.createFilter({ target: targets, period })}
+                    GROUP BY date, target
+                    ORDER BY date
+                  `,
+                    queryId: 'targets_count_over_time_regular',
+                    timeout: 15_000,
+                  },
+                },
+                period,
+                resolution,
+              ),
+            )
+            .then(result => result.data),
+        );
+      }
+
+      // Because the `batch` function is used (it's a similar concept to DataLoader),
+      // it has tu return a map of promises matching provided selectors in exact same order.
+      return selectors.map(async selector => {
+        const key = makeKey(selector);
+        const queryPromise = aggregationResultMap.get(key);
+
+        if (!queryPromise) {
+          throw new Error(`Could not find data for ${key} selector`);
+        }
+
+        const rows = await queryPromise;
+
+        const resultsPerTarget: {
+          [target: string]: Array<{
+            date: any;
+            value: number;
+          }>;
+        } = {};
+
+        for (const row of rows) {
+          if (!selector.targets.includes(row.target)) {
+            // it's not relevant to the current selector
+            continue;
+          }
+
+          if (!resultsPerTarget[row.target]) {
+            resultsPerTarget[row.target] = [];
+          }
+
+          resultsPerTarget[row.target].push({
+            date: ensureNumber(row.date) as any,
+            value: ensureNumber(row.total),
+          });
+        }
+
+        return resultsPerTarget;
+      });
+    },
+  );
+
   @sentry('OperationsReader.requestsOverTime')
   async requestsOverTime({
     target,

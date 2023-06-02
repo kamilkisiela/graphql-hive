@@ -27,8 +27,8 @@ describe('basic user flow', () => {
 
   it('should log in and log out', () => {
     cy.login(user);
-    cy.get('header').find('button[aria-haspopup="menu"]').click();
-    cy.get('a[href="/logout"]').click();
+    cy.get('[data-cy="user-menu-trigger"]').click();
+    cy.get('[data-cy="user-menu-logout"]').click();
   });
 });
 
@@ -38,7 +38,7 @@ it('create organization', () => {
   cy.signup(user);
   cy.get('input[name="name"]').type('Bubatzbieber');
   cy.get('button[type="submit"]').click();
-  cy.get('h1').contains('Bubatzbieber');
+  cy.get('[data-cy="organization-picker-current"]').contains('Bubatzbieber');
 });
 
 it('oidc login for organization', () => {
@@ -47,7 +47,7 @@ it('oidc login for organization', () => {
   cy.signup(organizationAdminUser);
   cy.get('input[name="name"]').type('Bubatzbieber');
   cy.get('button[type="submit"]').click();
-  cy.get('h1').contains('Bubatzbieber');
+  cy.get('[data-cy="organization-picker-current"]').contains('Bubatzbieber');
   cy.get('a[href$="/view/settings"]').click();
   cy.get('a[href$="/view/settings#create-oidc-integration"]').click();
   cy.get('input[id="tokenEndpoint"]').type('http://oidc-server-mock:80/connect/token');
@@ -73,6 +73,6 @@ it('oidc login for organization', () => {
       cy.get('input[id="Input_Password"]').type('password');
       cy.get('button[value="login"]').click();
 
-      cy.get('h1').contains('Bubatzbieber');
+      cy.get('[data-cy="organization-picker-current"]').contains('Bubatzbieber');
     });
 });

@@ -1,6 +1,8 @@
 import { ReactElement } from 'react';
-import clsx from 'clsx';
+import { Book } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { getDocsUrl } from '@/lib/docs-url';
+import { cn } from '@/lib/utils';
 import { ExclamationTriangleIcon, ExternalLinkIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { Link } from './link';
 
@@ -35,14 +37,12 @@ export const DocsLink = ({
     : getDocsUrl(href) || 'https://docs.graphql-hive.com/';
 
   return (
-    <Link
-      className={clsx('text-orange-500', className)}
-      href={fullUrl}
-      target="_blank"
-      rel="noreferrer"
-    >
-      {children}
-      {icon ?? <ExternalLinkIcon className="inline pl-1" />}
-    </Link>
+    <Button variant="link" className={cn('p-0 text-orange-500', className)} asChild>
+      <Link href={fullUrl} target="_blank" rel="noreferrer">
+        {icon ?? <Book className="mr-2 w-4 h-4" />}
+        {children}
+        <ExternalLinkIcon className="inline pl-1" />
+      </Link>
+    </Button>
   );
 };

@@ -1,38 +1,29 @@
 import { useMemo, useState } from 'react';
 import NextLink from 'next/link';
-import clsx from 'clsx';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { TargetLayout } from '@/components/layouts';
+import { TargetLayout } from '@/components/layouts/target';
 import { SchemaEditor } from '@/components/schema-editor';
 import { ChangesBlock, labelize } from '@/components/target/history/errors-and-changes';
-import { Badge, Button, DiffEditor, Heading, TimeAgo, Title } from '@/components/v2';
+import {
+  Badge,
+  Button,
+  DiffEditor,
+  DocsLink,
+  EmptyList,
+  Heading,
+  TimeAgo,
+  Title,
+} from '@/components/v2';
 import { AlertTriangleIcon, DiffIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel } from '@/gql/graphql';
 import { useRouteSelector } from '@/lib/hooks';
+import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import { cn } from '@/lib/utils';
 import { ListBulletIcon } from '@radix-ui/react-icons';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
-
-const ChecksPageQuery = graphql(`
-  query ChecksPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
-    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
-      id
-    }
-    organization(selector: { organization: $organizationId }) {
-      organization {
-        ...TargetLayout_OrganizationFragment
-      }
-    }
-    project(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_ProjectFragment
-    }
-    targets(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_TargetConnectionFragment
-    }
-  }
-`);
 
 const SchemaChecks_NavigationQuery = graphql(`
   query SchemaChecks_NavigationQuery(
@@ -88,7 +79,7 @@ const Navigation = (props: {
         <>
           {query.data.target.schemaChecks.edges.map(edge => (
             <div
-              className={clsx(
+              className={cn(
                 'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
                 edge.node.id === router.schemaCheckId ? 'bg-gray-800/40' : null,
               )}
@@ -106,7 +97,7 @@ const Navigation = (props: {
                 ) : null}
                 <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
                   <div
-                    className={clsx(
+                    className={cn(
                       'w-1/2 ',
                       edge.node.__typename === 'FailedSchemaCheck' ? 'text-red-500' : null,
                     )}
@@ -243,7 +234,7 @@ const PolicyBlock = (props: {
         {policies.edges.map((edge, key) => (
           <li
             key={key}
-            className={clsx(props.type === 'warning' ? 'text-yellow-400' : 'text-red-400')}
+            className={cn(props.type === 'warning' ? 'text-yellow-400' : 'text-red-400')}
           >
             <span className="text-gray-600 dark:text-white">{labelize(edge.node.message)}</span>
           </li>
@@ -253,7 +244,11 @@ const PolicyBlock = (props: {
   );
 };
 
-const ActiveSchemaCheck = (): React.ReactElement | null => {
+const ActiveSchemaCheck = ({
+  schemaCheckId,
+}: {
+  schemaCheckId: string | null;
+}): React.ReactElement | null => {
   const router = useRouteSelector();
   const [query] = useQuery({
     query: ActiveSchemaCheckQuery,
@@ -261,9 +256,9 @@ const ActiveSchemaCheck = (): React.ReactElement | null => {
       organizationId: router.organizationId,
       projectId: router.projectId,
       targetId: router.targetId,
-      schemaCheckId: router.schemaCheckId ?? '',
+      schemaCheckId: schemaCheckId ?? '',
     },
-    pause: !router.schemaCheckId,
+    pause: !schemaCheckId,
   });
   const [view, setView] = useState<string>('details');
 
@@ -333,18 +328,26 @@ const ActiveSchemaCheck = (): React.ReactElement | null => {
   }, [query.data?.target?.schemaCheck]);
 
   if (!query.data?.target?.schemaCheck) {
-    return null;
+    return (
+      <EmptyList
+        className="border-0"
+        title="Check not found"
+        description="Learn how to check your schema with Hive CLI"
+        docsUrl="/features/schema-registry#check-a-schema"
+      />
+    );
   }
 
   const { schemaCheck } = query.data.target;
 
   return (
-    <div className="flex grow flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <Heading>Check {schemaCheck.id}</Heading>
+    <div className="flex grow flex-col h-full">
+      <div className="py-6">
+        <h3 className="text-lg font-semibold tracking-tight">Check {schemaCheck.id}</h3>
+        <p className="text-sm text-gray-400">Detailed view of the schema check</p>
       </div>
-      <div className="flex flex-col gap-2 mb-1">
-        <div className="mb-1.5 flex align-middle font-medium p-2 text-[#c4c4c4] rounded-md border-gray-800 border space-x-4">
+      <div>
+        <div className="flex align-middle font-medium p-2 text-[#c4c4c4] rounded-md border-gray-800 border space-x-4">
           <div>
             <div className="text-xs">
               Triggered <TimeAgo date={schemaCheck.createdAt} />
@@ -378,28 +381,30 @@ const ActiveSchemaCheck = (): React.ReactElement | null => {
         </div>
       </div>
 
-      <ToggleGroup.Root
-        className="flex space-x-1 rounded-md bg-gray-900/50 text-gray-500 p-0.5 mb-2"
-        type="single"
-        defaultValue={view}
-        onValueChange={value => value && setView(value)}
-        orientation="vertical"
-      >
-        {toggleItems.map(item => (
-          <ToggleGroup.Item
-            key={item.value}
-            value={item.value}
-            className={clsx(
-              'flex items-center rounded-md py-[0.4375rem] px-2 text-xs font-semibold hover:text-white',
-              view === item.value && 'bg-gray-800 text-white',
-            )}
-            title={item.tooltip}
-          >
-            {item.icon}
-            <span className="ml-2">{item.label}</span>
-          </ToggleGroup.Item>
-        ))}
-      </ToggleGroup.Root>
+      <div className="pt-6 pb-1">
+        <ToggleGroup.Root
+          className="flex space-x-1 rounded-md bg-gray-900/50 text-gray-500"
+          type="single"
+          defaultValue={view}
+          onValueChange={value => value && setView(value)}
+          orientation="vertical"
+        >
+          {toggleItems.map(item => (
+            <ToggleGroup.Item
+              key={item.value}
+              value={item.value}
+              className={cn(
+                'flex items-center rounded-md py-[0.4375rem] px-2 text-xs font-semibold hover:text-white',
+                view === item.value && 'bg-gray-800 text-white',
+              )}
+              title={item.tooltip}
+            >
+              {item.icon}
+              <span className="ml-2">{item.label}</span>
+            </ToggleGroup.Item>
+          ))}
+        </ToggleGroup.Root>
+      </div>
       {view === 'details' ? (
         <>
           <>
@@ -564,40 +569,139 @@ const SchemaPolicyEditor = (props: {
   );
 };
 
-function ChecksPage() {
-  const router = useRouteSelector();
+const ChecksPageQuery = graphql(`
+  query ChecksPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+    organizations {
+      ...TargetLayout_OrganizationConnectionFragment
+    }
+    organization(selector: { organization: $organizationId }) {
+      organization {
+        ...TargetLayout_CurrentOrganizationFragment
+      }
+    }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      ...TargetLayout_CurrentProjectFragment
+    }
+    target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+      id
+      schemaChecks(first: 1) {
+        edges {
+          node {
+            id
+          }
+        }
+      }
+    }
+    me {
+      ...TargetLayout_MeFragment
+    }
+    ...TargetLayout_IsCDNEnabledFragment
+  }
+`);
+
+function ChecksPageContent() {
   const [paginationVariables, setPaginationVariables] = useState<Array<string | null>>(() => [
     null,
   ]);
+
+  const router = useRouteSelector();
+  const [query] = useQuery({
+    query: ChecksPageQuery,
+    variables: {
+      organizationId: router.organizationId,
+      projectId: router.projectId,
+      targetId: router.targetId,
+    },
+  });
+  useNotFoundRedirectOnError(!!query.error);
+
+  if (query.error) {
+    return null;
+  }
+
+  const me = query.data?.me;
+  const currentOrganization = query.data?.organization?.organization;
+  const currentProject = query.data?.project;
+  const organizationConnection = query.data?.organizations;
+  const isCDNEnabled = query.data;
+  const { schemaCheckId } = router;
+  const hasSchemaChecks = !!query.data?.target?.schemaChecks?.edges?.length;
+  const hasActiveSchemaCheck = !!schemaCheckId;
+
+  return (
+    <>
+      <TargetLayout
+        value="checks"
+        className="flex justify-between gap-8 h-full"
+        currentOrganization={currentOrganization ?? null}
+        currentProject={currentProject ?? null}
+        me={me ?? null}
+        organizations={organizationConnection ?? null}
+        isCDNEnabled={isCDNEnabled ?? null}
+      >
+        <div className="grow">
+          <div
+            className={cn(
+              'flex w-full h-full',
+              hasSchemaChecks || hasActiveSchemaCheck ? 'flex-row gap-x-6' : '',
+            )}
+          >
+            <div>
+              <div className="py-6">
+                <h3 className="text-lg font-semibold tracking-tight">Schema Checks</h3>
+                <p className="text-sm text-gray-400">Recently checked schemas.</p>
+              </div>
+              {hasSchemaChecks ? (
+                <div className="flex flex-col gap-5">
+                  <div className="flex w-[300px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
+                    {paginationVariables.map((cursor, index) => (
+                      <Navigation
+                        after={cursor}
+                        isLastPage={index + 1 === paginationVariables.length}
+                        onLoadMore={cursor =>
+                          setPaginationVariables(cursors => [...cursors, cursor])
+                        }
+                        key={cursor ?? 'first'}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="text-sm">
+                    {hasActiveSchemaCheck ? 'List is empty' : 'Your schema check list is empty'}
+                  </div>
+                  <DocsLink href="/features/schema-registry#check-a-schema">
+                    {hasActiveSchemaCheck
+                      ? 'Check you first schema'
+                      : 'Learn how to check your first schema with Hive CLI'}
+                  </DocsLink>
+                </div>
+              )}
+            </div>
+            {hasActiveSchemaCheck ? (
+              <div className="grow">
+                {schemaCheckId ? <ActiveSchemaCheck schemaCheckId={schemaCheckId} /> : null}
+              </div>
+            ) : hasSchemaChecks ? (
+              <EmptyList
+                className="border-0 pt-6"
+                title="Select a schema check"
+                description="A list of your schema checks is available on the left."
+              />
+            ) : null}
+          </div>
+        </div>
+      </TargetLayout>
+    </>
+  );
+}
+
+function ChecksPage() {
   return (
     <>
       <Title title="Schema Checks" />
-      <TargetLayout
-        value="checks"
-        className="flex h-full items-stretch gap-x-5"
-        query={ChecksPageQuery}
-      >
-        {() => {
-          return (
-            <>
-              <div className="flex flex-col gap-4">
-                <Heading>Schema Checks</Heading>
-                <div className="flex h-0  grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5 w-[300px]">
-                  {paginationVariables.map((cursor, index) => (
-                    <Navigation
-                      after={cursor}
-                      isLastPage={index + 1 === paginationVariables.length}
-                      onLoadMore={cursor => setPaginationVariables(cursors => [...cursors, cursor])}
-                      key={cursor ?? 'first'}
-                    />
-                  ))}
-                </div>
-              </div>
-              <ActiveSchemaCheck key={router.schemaCheckId} />
-            </>
-          );
-        }}
-      </TargetLayout>
+      <ChecksPageContent />
     </>
   );
 }

@@ -48,9 +48,9 @@ export default gql`
     error: CreateProjectError
   }
   type CreateProjectOk {
-    selector: ProjectSelector!
     createdProject: Project!
     createdTargets: [Target!]!
+    updatedOrganization: Organization!
   }
 
   type CreateProjectInputErrors {

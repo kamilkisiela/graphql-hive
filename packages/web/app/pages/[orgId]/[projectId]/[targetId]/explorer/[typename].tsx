@@ -1,7 +1,6 @@
-import { ReactElement } from 'react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { TargetLayout } from '@/components/layouts';
+import { TargetLayout } from '@/components/layouts/target';
 import { GraphQLEnumTypeComponent } from '@/components/target/explorer/enum-type';
 import { SchemaExplorerFilter } from '@/components/target/explorer/filter';
 import { GraphQLInputObjectTypeComponent } from '@/components/target/explorer/input-object-type';
@@ -13,41 +12,12 @@ import {
 } from '@/components/target/explorer/provider';
 import { GraphQLScalarTypeComponent } from '@/components/target/explorer/scalar-type';
 import { GraphQLUnionTypeComponent } from '@/components/target/explorer/union-type';
-import { DataWrapper, Title } from '@/components/v2';
+import { Title } from '@/components/v2';
 import { noSchemaVersion } from '@/components/v2/empty-list';
 import { FragmentType, graphql, useFragment } from '@/gql';
+import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-
-const SchemaTypeExplorer_Type = graphql(`
-  query SchemaTypeExplorer_Type(
-    $organization: ID!
-    $project: ID!
-    $target: ID!
-    $period: DateRangeInput!
-    $typename: String!
-  ) {
-    target(selector: { organization: $organization, project: $project, target: $target }) {
-      __typename
-      id
-      latestSchemaVersion {
-        __typename
-        id
-        valid
-        explorer(usage: { period: $period }) {
-          type(name: $typename) {
-            ...TypeRenderFragment
-          }
-        }
-      }
-    }
-    operationsStats(
-      selector: { organization: $organization, project: $project, target: $target, period: $period }
-    ) {
-      totalRequests
-    }
-  }
-`);
 
 const TypeRenderFragment = graphql(`
   fragment TypeRenderFragment on GraphQLNamedType {
@@ -84,66 +54,20 @@ function TypeRenderer(props: {
   }
 }
 
-function SchemaTypeExplorer({
-  organizationCleanId,
-  projectCleanId,
-  targetCleanId,
-  typename,
-}: {
-  organizationCleanId: string;
-  projectCleanId: string;
-  targetCleanId: string;
-  typename: string;
-}): ReactElement | null {
-  const { period } = useSchemaExplorerContext();
-  const [query] = useQuery({
-    query: SchemaTypeExplorer_Type,
-    variables: {
-      organization: organizationCleanId,
-      project: projectCleanId,
-      target: targetCleanId,
-      period,
-      typename,
-    },
-    requestPolicy: 'cache-first',
-  });
-
-  return (
-    <DataWrapper query={query}>
-      {({ data }) => {
-        if (!data.target?.latestSchemaVersion) {
-          return noSchemaVersion;
-        }
-
-        const { type } = data.target.latestSchemaVersion.explorer;
-        const { totalRequests } = data.operationsStats;
-
-        if (!type) {
-          return <div>No type found</div>;
-        }
-
-        return (
-          <div className="space-y-4">
-            <SchemaExplorerFilter
-              organization={{ cleanId: organizationCleanId }}
-              project={{ cleanId: projectCleanId }}
-              target={{ cleanId: targetCleanId }}
-              period={period}
-              typename={typename}
-            />
-            <TypeRenderer totalRequests={totalRequests} type={type} />
-          </div>
-        );
-      }}
-    </DataWrapper>
-  );
-}
-
 const TargetExplorerTypenamePageQuery = graphql(`
-  query TargetExplorerTypenamePageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+  query TargetExplorerTypenamePageQuery(
+    $organizationId: ID!
+    $projectId: ID!
+    $targetId: ID!
+    $period: DateRangeInput!
+    $typename: String!
+  ) {
+    organizations {
+      ...TargetLayout_OrganizationConnectionFragment
+    }
     organization(selector: { organization: $organizationId }) {
       organization {
-        ...TargetLayout_OrganizationFragment
+        ...TargetLayout_CurrentOrganizationFragment
         cleanId
         rateLimit {
           retentionInDays
@@ -151,19 +75,113 @@ const TargetExplorerTypenamePageQuery = graphql(`
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_ProjectFragment
+      ...TargetLayout_CurrentProjectFragment
       cleanId
-    }
-    targets(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_TargetConnectionFragment
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       cleanId
+      latestSchemaVersion {
+        __typename
+        id
+        valid
+        explorer(usage: { period: $period }) {
+          type(name: $typename) {
+            ...TypeRenderFragment
+          }
+        }
+      }
     }
+    operationsStats(
+      selector: {
+        organization: $organizationId
+        project: $projectId
+        target: $targetId
+        period: $period
+      }
+    ) {
+      totalRequests
+    }
+    me {
+      ...TargetLayout_MeFragment
+    }
+    ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 
-function ExplorerPage(): ReactElement | null {
+function TypeExplorerPageContent({ typename }: { typename: string }) {
+  const router = useRouteSelector();
+  const { period, dataRetentionInDays, setDataRetentionInDays } = useSchemaExplorerContext();
+  const [query] = useQuery({
+    query: TargetExplorerTypenamePageQuery,
+    variables: {
+      organizationId: router.organizationId,
+      projectId: router.projectId,
+      targetId: router.targetId,
+      period,
+      typename,
+    },
+  });
+  useNotFoundRedirectOnError(!!query.error);
+
+  if (query.error) {
+    return null;
+  }
+
+  const me = query.data?.me;
+  const currentOrganization = query.data?.organization?.organization;
+  const currentProject = query.data?.project;
+  const currentTarget = query.data?.target;
+  const organizationConnection = query.data?.organizations;
+  const isCDNEnabled = query.data;
+  const type = currentTarget?.latestSchemaVersion?.explorer.type;
+  const latestSchemaVersion = currentTarget?.latestSchemaVersion;
+
+  const retentionInDays = currentOrganization?.rateLimit.retentionInDays;
+  if (typeof retentionInDays === 'number' && dataRetentionInDays !== retentionInDays) {
+    setDataRetentionInDays(retentionInDays);
+  }
+
+  return (
+    <TargetLayout
+      value="explorer"
+      className="flex justify-between gap-8"
+      currentOrganization={currentOrganization ?? null}
+      currentProject={currentProject ?? null}
+      me={me ?? null}
+      organizations={organizationConnection ?? null}
+      isCDNEnabled={isCDNEnabled ?? null}
+    >
+      <div className="grow">
+        <div className="py-6 flex flex-row items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold tracking-tight">Explore</h3>
+            <p className="text-sm text-gray-400">Insights from the latest version.</p>
+          </div>
+          {latestSchemaVersion && type ? (
+            <SchemaExplorerFilter
+              organization={{ cleanId: router.organizationId }}
+              project={{ cleanId: router.projectId }}
+              target={{ cleanId: router.targetId }}
+              period={period}
+            />
+          ) : null}
+        </div>
+        {latestSchemaVersion && type ? (
+          <TypeRenderer
+            totalRequests={query.data?.operationsStats.totalRequests ?? 0}
+            type={type}
+          />
+        ) : type ? (
+          noSchemaVersion
+        ) : (
+          <div>Not found</div>
+        )}
+      </div>
+    </TargetLayout>
+  );
+}
+
+function TypeExplorerPage() {
   const router = useRouteSelector();
   const { typename } = router.query;
 
@@ -174,24 +192,13 @@ function ExplorerPage(): ReactElement | null {
   return (
     <>
       <Title title={`Type ${typename}`} />
-      <TargetLayout value="explorer" query={TargetExplorerTypenamePageQuery}>
-        {props => (
-          <SchemaExplorerProvider
-            dataRetentionInDays={props.organization?.organization.rateLimit.retentionInDays ?? 0}
-          >
-            <SchemaTypeExplorer
-              organizationCleanId={props.organization?.organization.cleanId ?? ''}
-              projectCleanId={props.project?.cleanId ?? ''}
-              targetCleanId={props.target?.cleanId ?? ''}
-              typename={typename}
-            />
-          </SchemaExplorerProvider>
-        )}
-      </TargetLayout>
+      <SchemaExplorerProvider>
+        <TypeExplorerPageContent typename={typename} />
+      </SchemaExplorerProvider>
     </>
   );
 }
 
 export const getServerSideProps = withSessionProtection();
 
-export default authenticated(ExplorerPage);
+export default authenticated(TypeExplorerPage);

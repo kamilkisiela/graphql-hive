@@ -2,6 +2,91 @@
 @tailwind components;
 @tailwind utilities;
 
+/* <shadcdn */
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --popover: 222.86 70% 3.92%;
+    --popover-foreground: 0 0% 100%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
+
+    --border: 240 3.7% 15.88%;
+    --input: 214.3 31.8% 91.4%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --accent: 0 0% 9.02%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 210 40% 98%;
+
+    --ring: 215 20.2% 65.1%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 220, 21.43%, 5.49%;
+    --foreground: 213 31% 91%;
+
+    --muted: 24 9.8% 10%;
+    --muted-foreground: 25 5.26% 44.71%;
+
+    --popover: 222.86 70% 3.92%;
+    --popover-foreground: 0 0% 98%;
+
+    --card: 224 71% 4%;
+    --card-foreground: 213 31% 91%;
+
+    --border: 12 5% 15%;
+    --input: 12 5% 15%;
+
+    --primary: 210 40% 98%; /* 40 89% 60%; */
+    --primary-foreground: 222.2 47.4% 1.2%;
+
+    /* 221.54 28.89% 8.82% */
+    /* 12 5 15 */
+
+    --secondary: 230 14% 8%;
+    --secondary-foreground: 210 40% 98%; /* 220, 21.43%, 5.49% */
+
+    --accent: 230 14% 8%;
+    --accent-foreground: 210 40% 98%; /* 220, 21.43%, 5.49% */
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%; /* 220, 21.43%, 5.49% */
+
+    --ring: 216 34% 17%;
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+}
+
+/* shadcdn> */
+
 :root {
   color-scheme: dark;
 }
@@ -19,7 +104,7 @@
   }
 
   #__next {
-    font-family: inherit !important;
+    /* font-family: inherit !important; */
     color: inherit !important;
     @apply flex h-full flex-col text-sm text-gray-700 antialiased lg:text-base;
   }

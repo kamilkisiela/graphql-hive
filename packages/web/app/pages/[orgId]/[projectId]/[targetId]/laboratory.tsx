@@ -1,39 +1,42 @@
-import { ReactElement, useEffect, useRef, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import clsx from 'clsx';
 import { GraphiQL } from 'graphiql';
+import { LinkIcon } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { TargetLayout } from '@/components/layouts';
-import { TargetLayout_OrganizationFragment } from '@/components/layouts/target';
-import {
-  Accordion,
-  Button,
-  DocsLink,
-  DocsNote,
-  EmptyList,
-  Heading,
-  Link,
-  Spinner,
-  Title,
-} from '@/components/v2';
+import { TargetLayout } from '@/components/layouts/target';
+import { Button } from '@/components/ui/button';
+import { Accordion, DocsLink, EmptyList, Link, Spinner, Title } from '@/components/v2';
 import { HiveLogo, SaveIcon } from '@/components/v2/icon';
 import {
-  ConnectLabModal,
   CreateCollectionModal,
   CreateOperationModal,
   DeleteCollectionModal,
   DeleteOperationModal,
 } from '@/components/v2/modals';
-import { FragmentType, graphql, useFragment } from '@/gql';
+import { ConnectLabModal } from '@/components/v2/modals/connect-lab';
+import { graphql } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
-import { canAccessTarget, CanAccessTarget_MemberFragment } from '@/lib/access/target';
-import { useClipboard, useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
-import { useCollections } from '@/lib/hooks/use-collections';
+import { canAccessTarget } from '@/lib/access/target';
+import {
+  useClipboard,
+  useCollections,
+  useNotifications,
+  useRouteSelector,
+  useToggle,
+} from '@/lib/hooks';
+import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { DropdownMenu, GraphiQLPlugin, Tooltip, useEditorContext } from '@graphiql/react';
+import { cn } from '@/lib/utils';
+import {
+  Button as GraphiQLButton,
+  DropdownMenu as GraphiQLDropdownMenu,
+  GraphiQLPlugin,
+  Tooltip as GraphiQLTooltip,
+  useEditorContext,
+} from '@graphiql/react';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
-import { BookmarkIcon, DotsVerticalIcon, Link1Icon, Share2Icon } from '@radix-ui/react-icons';
+import { BookmarkIcon, DotsVerticalIcon, Share2Icon } from '@radix-ui/react-icons';
 import 'graphiql/graphiql.css';
 
 function Share(): ReactElement {
@@ -42,8 +45,8 @@ function Share(): ReactElement {
   const router = useRouter();
 
   return (
-    <Tooltip label={label}>
-      <Button
+    <GraphiQLTooltip label={label}>
+      <GraphiQLButton
         className="graphiql-toolbar-button"
         aria-label={label}
         disabled={!router.query.operation}
@@ -52,8 +55,8 @@ function Share(): ReactElement {
         }}
       >
         <Share2Icon className="graphiql-toolbar-icon" />
-      </Button>
-    </Tooltip>
+      </GraphiQLButton>
+    </GraphiQLTooltip>
   );
 }
 
@@ -94,13 +97,14 @@ function useCurrentOperation() {
   return operationId ? data?.target?.documentCollectionOperation : null;
 }
 
-function useOperationCollectionsPlugin(props: {
-  meRef: FragmentType<typeof CanAccessTarget_MemberFragment>;
-}) {
-  const propsRef = useRef(props);
-  propsRef.current = props;
-  const pluginRef = useRef<GraphiQLPlugin>();
-  pluginRef.current ||= {
+function useOperationCollectionsPlugin({
+  canDelete,
+  canEdit,
+}: {
+  canEdit: boolean;
+  canDelete: boolean;
+}): GraphiQLPlugin {
+  return {
     title: 'Operation Collections',
     icon: BookmarkIcon,
     content: function Content() {
@@ -153,8 +157,6 @@ function useOperationCollectionsPlugin(props: {
         }
       }, [hasAllEditors, queryParamsOperationId, currentOperation]);
 
-      const canEdit = canAccessTarget(TargetAccessScope.Settings, props.meRef);
-      const canDelete = canAccessTarget(TargetAccessScope.Delete, props.meRef);
       const shouldShowMenu = canEdit || canDelete;
 
       const initialSelectedCollection =
@@ -166,7 +168,7 @@ function useOperationCollectionsPlugin(props: {
       return (
         <>
           <div className="flex justify-between">
-            <Heading>Collections</Heading>
+            <h3 className="text-lg font-semibold tracking-tight">Collections</h3>
             {canEdit ? (
               <Button
                 variant="link"
@@ -180,7 +182,7 @@ function useOperationCollectionsPlugin(props: {
               </Button>
             ) : null}
           </div>
-          <p className="mb-3 font-light text-gray-300 text-sm">Shared across your organization</p>
+          <p className="mb-3 font-light text-gray-300 text-xs">Shared across your organization</p>
           {loading ? (
             <Spinner />
           ) : (
@@ -207,20 +209,20 @@ function useOperationCollectionsPlugin(props: {
                       <Accordion.Header>{collection.name}</Accordion.Header>
 
                       {shouldShowMenu ? (
-                        <DropdownMenu
+                        <GraphiQLDropdownMenu
                           // https://github.com/radix-ui/primitives/issues/1241#issuecomment-1580887090
                           modal={false}
                         >
-                          <DropdownMenu.Button
+                          <GraphiQLDropdownMenu.Button
                             className="graphiql-toolbar-button !shrink-0"
                             aria-label="More"
                             data-cy="collection-3-dots"
                           >
                             <DotsVerticalIcon />
-                          </DropdownMenu.Button>
+                          </GraphiQLDropdownMenu.Button>
 
-                          <DropdownMenu.Content>
-                            <DropdownMenu.Item
+                          <GraphiQLDropdownMenu.Content>
+                            <GraphiQLDropdownMenu.Item
                               onSelect={() => {
                                 setCollectionId(collection.id);
                                 toggleCollectionModal();
@@ -228,8 +230,8 @@ function useOperationCollectionsPlugin(props: {
                               data-cy="collection-edit"
                             >
                               Edit
-                            </DropdownMenu.Item>
-                            <DropdownMenu.Item
+                            </GraphiQLDropdownMenu.Item>
+                            <GraphiQLDropdownMenu.Item
                               onSelect={() => {
                                 setCollectionId(collection.id);
                                 toggleDeleteCollectionModalOpen();
@@ -238,9 +240,9 @@ function useOperationCollectionsPlugin(props: {
                               data-cy="collection-delete"
                             >
                               Delete
-                            </DropdownMenu.Item>
-                          </DropdownMenu.Content>
-                        </DropdownMenu>
+                            </GraphiQLDropdownMenu.Item>
+                          </GraphiQLDropdownMenu.Content>
+                        </GraphiQLDropdownMenu>
                       ) : null}
                     </div>
                     <Accordion.Content className="pr-0">
@@ -256,7 +258,7 @@ function useOperationCollectionsPlugin(props: {
                                     targetId: router.targetId,
                                   },
                                 }}
-                                className={clsx(
+                                className={cn(
                                   'hover:bg-gray-100/10 w-full rounded p-2 !text-gray-300',
                                   router.query.operation === node.id && 'bg-gray-100/10',
                                 )}
@@ -280,20 +282,20 @@ function useOperationCollectionsPlugin(props: {
                               >
                                 {node.name}
                               </Link>
-                              <DropdownMenu
+                              <GraphiQLDropdownMenu
                                 // https://github.com/radix-ui/primitives/issues/1241#issuecomment-1580887090
                                 modal={false}
                               >
-                                <DropdownMenu.Button
+                                <GraphiQLDropdownMenu.Button
                                   className="graphiql-toolbar-button opacity-0 [div:hover>&]:opacity-100 transition"
                                   aria-label="More"
                                   data-cy="operation-3-dots"
                                 >
                                   <DotsVerticalIcon />
-                                </DropdownMenu.Button>
+                                </GraphiQLDropdownMenu.Button>
 
-                                <DropdownMenu.Content>
-                                  <DropdownMenu.Item
+                                <GraphiQLDropdownMenu.Content>
+                                  <GraphiQLDropdownMenu.Item
                                     onSelect={async () => {
                                       const url = new URL(window.location.href);
                                       await copyToClipboard(
@@ -302,9 +304,9 @@ function useOperationCollectionsPlugin(props: {
                                     }}
                                   >
                                     Copy link to operation
-                                  </DropdownMenu.Item>
+                                  </GraphiQLDropdownMenu.Item>
                                   {canDelete ? (
-                                    <DropdownMenu.Item
+                                    <GraphiQLDropdownMenu.Item
                                       onSelect={() => {
                                         setOperationId(node.id);
                                         toggleDeleteOperationModalOpen();
@@ -313,10 +315,10 @@ function useOperationCollectionsPlugin(props: {
                                       data-cy="remove-operation"
                                     >
                                       Delete
-                                    </DropdownMenu.Item>
+                                    </GraphiQLDropdownMenu.Item>
                                   ) : null}
-                                </DropdownMenu.Content>
-                              </DropdownMenu>
+                                </GraphiQLDropdownMenu.Content>
+                              </GraphiQLDropdownMenu>
                             </div>
                           ))
                         : 'No operations yet. Use the editor to create an operation, and click Save to store and share it.'}
@@ -335,8 +337,6 @@ function useOperationCollectionsPlugin(props: {
       );
     },
   };
-
-  return pluginRef.current;
 }
 
 const UpdateOperationMutation = graphql(`
@@ -377,7 +377,7 @@ function Save(): ReactElement {
   const operationId = currentOperation?.id;
   const label = isSame ? undefined : operationId ? 'Update saved operation' : 'Save operation';
   const button = (
-    <Button
+    <GraphiQLButton
       className="graphiql-toolbar-button"
       data-cy="save-collection"
       aria-label={label}
@@ -415,114 +415,146 @@ function Save(): ReactElement {
       }}
     >
       <SaveIcon className="graphiql-toolbar-icon !h-5 w-auto" />
-    </Button>
+    </GraphiQLButton>
   );
 
   return (
     <>
-      {label ? <Tooltip label={label}>{button}</Tooltip> : button}
+      {label ? <GraphiQLTooltip label={label}>{button}</GraphiQLTooltip> : button}
       {isOpen ? <CreateOperationModal isOpen={isOpen} toggleModalOpen={toggle} /> : null}
-    </>
-  );
-}
-
-// Save.whyDidYouRender = true;
-
-function Page({
-  endpoint,
-  organizationRef,
-}: {
-  endpoint: string;
-  organizationRef: FragmentType<typeof TargetLayout_OrganizationFragment>;
-}): ReactElement {
-  const { me } = useFragment(TargetLayout_OrganizationFragment, organizationRef);
-  const operationCollectionsPlugin = useOperationCollectionsPlugin({ meRef: me });
-  return (
-    <>
-      <DocsNote>
-        Explore your GraphQL schema and run queries against a mocked version of your GraphQL
-        service. <DocsLink href="/features/laboratory">Learn more about the Laboratory</DocsLink>
-      </DocsNote>
-      <style global jsx>{`
-        .graphiql-container {
-          --color-base: transparent !important;
-          --color-primary: 40, 89%, 60% !important;
-          min-height: 600px;
-        }
-      `}</style>
-      <GraphiQL
-        fetcher={createGraphiQLFetcher({ url: endpoint })}
-        toolbar={{
-          additionalContent: (
-            <>
-              <Save />
-              <Share />
-            </>
-          ),
-        }}
-        showPersistHeadersSettings={false}
-        shouldPersistHeaders={false}
-        plugins={[operationCollectionsPlugin]}
-        visiblePlugin={operationCollectionsPlugin}
-      >
-        <GraphiQL.Logo>
-          <HiveLogo className="h-6 w-auto" />
-        </GraphiQL.Logo>
-      </GraphiQL>
     </>
   );
 }
 
 const TargetLaboratoryPageQuery = graphql(`
   query TargetLaboratoryPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+    organizations {
+      ...TargetLayout_OrganizationConnectionFragment
+    }
     organization(selector: { organization: $organizationId }) {
       organization {
-        ...TargetLayout_OrganizationFragment
+        ...TargetLayout_CurrentOrganizationFragment
+        me {
+          ...CanAccessTarget_MemberFragment
+        }
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_ProjectFragment
-    }
-    targets(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_TargetConnectionFragment
+      ...TargetLayout_CurrentProjectFragment
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
+    }
+    me {
+      ...TargetLayout_MeFragment
     }
     ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 
-function LaboratoryPage(): ReactElement {
+function LaboratoryPageContent() {
   const [isModalOpen, toggleModalOpen] = useToggle();
   const router = useRouteSelector();
-  const endpoint = `${window.location.origin}/api/lab/${router.organizationId}/${router.projectId}/${router.targetId}`;
+  const [query] = useQuery({
+    query: TargetLaboratoryPageQuery,
+    variables: {
+      organizationId: router.organizationId,
+      projectId: router.projectId,
+      targetId: router.targetId,
+    },
+  });
+  useNotFoundRedirectOnError(!!query.error);
 
+  const endpoint = `${location.origin}/api/lab/${router.organizationId}/${router.projectId}/${router.targetId}`;
+  const me = query.data?.me;
+  const currentOrganization = query.data?.organization?.organization;
+  const currentProject = query.data?.project;
+  const organizationConnection = query.data?.organizations;
+  const isCDNEnabled = query.data;
+
+  const operationCollectionsPlugin = useOperationCollectionsPlugin({
+    canEdit: canAccessTarget(TargetAccessScope.Settings, currentOrganization?.me ?? null),
+    canDelete: canAccessTarget(TargetAccessScope.Delete, currentOrganization?.me ?? null),
+  });
+
+  if (query.error) {
+    return null;
+  }
+
+  return (
+    <TargetLayout
+      value="laboratory"
+      className="flex justify-between gap-8"
+      currentOrganization={currentOrganization ?? null}
+      currentProject={currentProject ?? null}
+      me={me ?? null}
+      organizations={organizationConnection ?? null}
+      isCDNEnabled={isCDNEnabled ?? null}
+      connect={
+        <div>
+          <Button onClick={toggleModalOpen} variant="link" className="text-orange-500">
+            <LinkIcon size={16} className="mr-2" />
+            Use Schema Externally
+          </Button>
+          <ConnectLabModal
+            isOpen={isModalOpen}
+            toggleModalOpen={toggleModalOpen}
+            endpoint={endpoint}
+          />
+        </div>
+      }
+    >
+      <div className="grow">
+        <div className="py-6">
+          <h3 className="text-lg font-semibold tracking-tight">Laboratory</h3>
+          <p className="text-sm text-gray-400">
+            Explore your GraphQL schema and run queries against a mocked version of your GraphQL
+            service.
+          </p>
+          <p>
+            <DocsLink className="text-muted-foreground text-sm" href="/features/laboratory">
+              Learn more about the Laboratory
+            </DocsLink>
+          </p>
+        </div>
+        <style global jsx>{`
+          .graphiql-container {
+            --color-base: transparent !important;
+            --color-primary: 40, 89%, 60% !important;
+            min-height: 600px;
+          }
+        `}</style>
+        {query.fetching ? null : (
+          <GraphiQL
+            fetcher={createGraphiQLFetcher({ url: endpoint })}
+            toolbar={{
+              additionalContent: (
+                <>
+                  <Save />
+                  <Share />
+                </>
+              ),
+            }}
+            showPersistHeadersSettings={false}
+            shouldPersistHeaders={false}
+            plugins={[operationCollectionsPlugin]}
+            visiblePlugin={operationCollectionsPlugin}
+          >
+            <GraphiQL.Logo>
+              <HiveLogo className="h-6 w-auto" />
+            </GraphiQL.Logo>
+          </GraphiQL>
+        )}
+      </div>
+    </TargetLayout>
+  );
+}
+
+function LaboratoryPage(): ReactElement {
   return (
     <>
       <Title title="Schema laboratory" />
-      <TargetLayout
-        query={TargetLaboratoryPageQuery}
-        value="laboratory"
-        className="flex h-full flex-col"
-        connect={
-          <>
-            <Button size="large" variant="primary" onClick={toggleModalOpen} className="ml-auto">
-              Use Schema Externally
-              <Link1Icon className="ml-8 h-6 w-auto" />
-            </Button>
-            <ConnectLabModal
-              isOpen={isModalOpen}
-              toggleModalOpen={toggleModalOpen}
-              endpoint={endpoint}
-            />
-          </>
-        }
-      >
-        {({ organization }) => (
-          <Page organizationRef={organization!.organization} endpoint={endpoint} />
-        )}
-      </TargetLayout>
+      <LaboratoryPageContent />
     </>
   );
 }

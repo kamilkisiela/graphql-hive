@@ -1,12 +1,11 @@
 import Image from 'next/image';
 import Router from 'next/router';
-import { Button, Header } from '@/components/v2';
+import { Button } from '@/components/v2';
 import ghost from '../public/images/figures/ghost.svg';
 
 const NotFoundPage = () => {
   return (
     <>
-      <Header />
       <div className="flex h-screen flex-col items-center justify-center gap-2.5">
         <Image
           src={ghost}

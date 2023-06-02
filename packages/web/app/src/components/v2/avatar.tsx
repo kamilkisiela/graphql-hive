@@ -26,7 +26,7 @@ export const Avatar = ({
     <Root
       className={clsx(
         // By default Root has `span` element with `display: inline` property
-        'flex shrink-0 items-center justify-center overflow-hidden bg-gray-800',
+        'flex shrink-0 items-center justify-center overflow-hidden bg-gray-900',
         shape === 'square' ? (size === 'lg' ? 'rounded-md' : 'rounded-sm') : 'rounded-full',
         {
           xs: 'h-5 w-5',

@@ -1,14 +1,12 @@
-import { ReactElement, ReactNode, useEffect } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import NextLink from 'next/link';
-import { useRouter } from 'next/router';
-import cookies from 'js-cookie';
-import { TypedDocumentNode, useQuery } from 'urql';
-import { Button, Heading, SubHeader, Tabs } from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
+import { UserMenu } from '@/components/ui/user-menu';
+import { HiveLink, SubHeader, Tabs } from '@/components/v2';
 import { PlusIcon } from '@/components/v2/icon';
 import { CreateProjectModal } from '@/components/v2/modals';
-import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { Exact } from '@/graphql';
 import {
   canAccessOrganization,
   OrganizationAccessScope,
@@ -27,156 +25,182 @@ enum TabValue {
   Subscription = 'subscription',
 }
 
-const OrganizationLayout_OrganizationFragment = graphql(`
-  fragment OrganizationLayout_OrganizationFragment on Organization {
+const OrganizationLayout_CurrentOrganizationFragment = graphql(`
+  fragment OrganizationLayout_CurrentOrganizationFragment on Organization {
+    id
     name
+    cleanId
     me {
       ...CanAccessOrganization_MemberFragment
     }
     ...ProPlanBilling_OrganizationFragment
     ...RateLimitWarn_OrganizationFragment
+    ...UserMenu_CurrentOrganizationFragment
   }
 `);
 
-export function OrganizationLayout<
-  TSatisfiesType extends {
-    organization?:
-      | {
-          organization?: FragmentType<typeof OrganizationLayout_OrganizationFragment> | null;
-        }
-      | null
-      | undefined;
-  },
->({
+const OrganizationLayout_MeFragment = graphql(`
+  fragment OrganizationLayout_MeFragment on User {
+    id
+    ...UserMenu_MeFragment
+  }
+`);
+
+const OrganizationLayout_OrganizationConnectionFragment = graphql(`
+  fragment OrganizationLayout_OrganizationConnectionFragment on OrganizationConnection {
+    nodes {
+      id
+      cleanId
+      name
+    }
+    ...UserMenu_OrganizationConnectionFragment
+  }
+`);
+
+export function OrganizationLayout({
   children,
   value,
-  query,
   className,
+  ...props
 }: {
-  children(
-    props: TSatisfiesType,
-    selector: {
-      organization: string;
-    },
-  ): ReactNode;
   value?: 'overview' | 'members' | 'settings' | 'subscription' | 'policy';
   className?: string;
-  query: TypedDocumentNode<
-    TSatisfiesType,
-    Exact<{
-      selector: {
-        organization: string;
-      };
-    }>
-  >;
+  me: FragmentType<typeof OrganizationLayout_MeFragment> | null;
+  currentOrganization: FragmentType<typeof OrganizationLayout_CurrentOrganizationFragment> | null;
+  organizations: FragmentType<typeof OrganizationLayout_OrganizationConnectionFragment> | null;
+  children: ReactNode;
 }): ReactElement | null {
   const router = useRouteSelector();
-  const { push } = useRouter();
   const [isModalOpen, toggleModalOpen] = useToggle();
 
-  const orgId = router.organizationId;
-
-  const [organizationQuery] = useQuery({
-    query,
-    variables: {
-      selector: {
-        organization: orgId,
-      },
-    },
-  });
-
-  const organization = useFragment(
-    OrganizationLayout_OrganizationFragment,
-    organizationQuery.data?.organization?.organization,
+  const currentOrganization = useFragment(
+    OrganizationLayout_CurrentOrganizationFragment,
+    props.currentOrganization,
   );
 
-  useEffect(() => {
-    if (organizationQuery.error) {
-      cookies.remove(LAST_VISITED_ORG_KEY);
-      // url with # provoke error Maximum update depth exceeded
-      void push('/404', router.asPath.replace(/#.*/, ''));
-    }
-  }, [organizationQuery.error, router]);
-
   useOrganizationAccess({
-    member: organization?.me ?? null,
+    member: currentOrganization?.me ?? null,
     scope: OrganizationAccessScope.Read,
     redirect: true,
   });
 
-  if (organizationQuery.fetching || organizationQuery.error) {
-    return null;
-  }
-
-  const me = organization?.me;
-
-  if (!organization || !me) {
-    return null;
-  }
-
-  if (!value) {
-    return (
-      <>
-        {children(organizationQuery.data!, {
-          organization: orgId,
-        })}
-      </>
-    );
-  }
+  const meInCurrentOrg = currentOrganization?.me;
+  const me = useFragment(OrganizationLayout_MeFragment, props.me);
+  const organizationConnection = useFragment(
+    OrganizationLayout_OrganizationConnectionFragment,
+    props.organizations,
+  );
+  const organizations = organizationConnection?.nodes;
 
   return (
     <>
       <SubHeader>
         <div className="container flex h-[84px] items-center justify-between">
-          <div className="truncate">
-            <Heading size="2xl" className="inline">
-              {organization?.name}
-            </Heading>
-            <div className="text-xs font-medium text-gray-500">Organization</div>
+          <div className="flex flex-row items-center gap-4">
+            <HiveLink className="w-8 h-8" />
+            {currentOrganization && organizations ? (
+              <Select
+                defaultValue={currentOrganization.cleanId}
+                onValueChange={id => {
+                  router.visitOrganization({
+                    organizationId: id,
+                  });
+                }}
+              >
+                <SelectTrigger variant="default">
+                  <div className="font-medium" data-cy="organization-picker-current">
+                    {currentOrganization.name}
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  {organizations.map(org => (
+                    <SelectItem key={org.cleanId} value={org.cleanId}>
+                      {org.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <div className="w-48 h-5 bg-gray-800 rounded-full animate-pulse" />
+            )}
           </div>
-          <Button size="large" variant="primary" className="shrink-0" onClick={toggleModalOpen}>
-            Create Project
-            <PlusIcon className="ml-2" />
-          </Button>
-          <CreateProjectModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
+          <div>
+            <UserMenu
+              me={me ?? null}
+              currentOrganization={currentOrganization ?? null}
+              organizations={organizationConnection ?? null}
+            />
+          </div>
         </div>
       </SubHeader>
-      <Tabs className="container" value={value}>
-        <Tabs.List>
-          <Tabs.Trigger value={TabValue.Overview} asChild>
-            <NextLink href={`/${orgId}`}>Overview</NextLink>
-          </Tabs.Trigger>
-          {canAccessOrganization(OrganizationAccessScope.Members, me) && (
-            <Tabs.Trigger value={TabValue.Members} asChild>
-              <NextLink href={`/${orgId}/view/${TabValue.Members}`}>Members</NextLink>
-            </Tabs.Trigger>
+      <div className="relative border-b border-gray-800">
+        <div className="container flex justify-between items-center">
+          {currentOrganization && meInCurrentOrg ? (
+            <Tabs value={value}>
+              <Tabs.List>
+                <Tabs.Trigger value={TabValue.Overview} asChild>
+                  <NextLink href={`/${currentOrganization.cleanId}`}>Overview</NextLink>
+                </Tabs.Trigger>
+                {canAccessOrganization(OrganizationAccessScope.Members, meInCurrentOrg) && (
+                  <Tabs.Trigger value={TabValue.Members} asChild>
+                    <NextLink href={`/${currentOrganization.cleanId}/view/${TabValue.Members}`}>
+                      Members
+                    </NextLink>
+                  </Tabs.Trigger>
+                )}
+                {canAccessOrganization(OrganizationAccessScope.Settings, meInCurrentOrg) && (
+                  <>
+                    <Tabs.Trigger value={TabValue.Policy} asChild>
+                      <NextLink href={`/${currentOrganization.cleanId}/view/${TabValue.Policy}`}>
+                        Policy
+                      </NextLink>
+                    </Tabs.Trigger>
+                    <Tabs.Trigger value={TabValue.Settings} asChild>
+                      <NextLink href={`/${currentOrganization.cleanId}/view/${TabValue.Settings}`}>
+                        Settings
+                      </NextLink>
+                    </Tabs.Trigger>
+                  </>
+                )}
+                {getIsStripeEnabled() &&
+                  canAccessOrganization(OrganizationAccessScope.Settings, meInCurrentOrg) && (
+                    <Tabs.Trigger value={TabValue.Subscription} asChild>
+                      <NextLink
+                        href={`/${currentOrganization.cleanId}/view/${TabValue.Subscription}`}
+                      >
+                        Subscription
+                      </NextLink>
+                    </Tabs.Trigger>
+                  )}
+              </Tabs.List>
+            </Tabs>
+          ) : (
+            <div className="flex flex-row gap-x-8 px-4 py-3 border-b-[2px] border-b-transparent">
+              <div className="w-12 h-5 bg-gray-800 rounded-full animate-pulse" />
+              <div className="w-12 h-5 bg-gray-800 rounded-full animate-pulse" />
+              <div className="w-12 h-5 bg-gray-800 rounded-full animate-pulse" />
+            </div>
           )}
-          {canAccessOrganization(OrganizationAccessScope.Settings, me) && (
+          {currentOrganization ? (
             <>
-              <Tabs.Trigger value={TabValue.Policy} asChild>
-                <NextLink href={`/${orgId}/view/${TabValue.Policy}`}>Policy</NextLink>
-              </Tabs.Trigger>
-              <Tabs.Trigger value={TabValue.Settings} asChild>
-                <NextLink href={`/${orgId}/view/${TabValue.Settings}`}>Settings</NextLink>
-              </Tabs.Trigger>
+              <Button onClick={toggleModalOpen} variant="link" className="text-orange-500">
+                <PlusIcon size={16} className="mr-2" />
+                New project
+              </Button>
+              <CreateProjectModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
             </>
-          )}
-          {getIsStripeEnabled() && canAccessOrganization(OrganizationAccessScope.Settings, me) && (
-            <Tabs.Trigger value={TabValue.Subscription} asChild>
-              <NextLink href={`/${orgId}/view/${TabValue.Subscription}`}>Subscription</NextLink>
-            </Tabs.Trigger>
-          )}
-        </Tabs.List>
-        <Tabs.Content value={value}>
-          <RateLimitWarn organization={organization} />
-          <ProPlanBilling organization={organization} />
-          <div className={className}>
-            {children(organizationQuery.data!, {
-              organization: orgId,
-            })}
-          </div>
-        </Tabs.Content>
-      </Tabs>
+          ) : null}
+        </div>
+      </div>
+      <div className="container pb-7">
+        {currentOrganization ? (
+          <>
+            <ProPlanBilling organization={currentOrganization} />
+            <RateLimitWarn organization={currentOrganization} />
+          </>
+        ) : null}
+        <div className={className}>{children}</div>
+      </div>
     </>
   );
 }

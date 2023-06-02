@@ -1,6 +1,6 @@
 import { forwardRef, ReactNode } from 'react';
 import NextLink, { LinkProps } from 'next/link';
-import { clsx } from 'clsx';
+import { cn } from '@/lib/utils';
 
 type CardProps = (
   | {
@@ -23,7 +23,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       <TagToUse
         // @ts-expect-error TODO: figure out what's wrong with ref here
         ref={forwardedRef}
-        className={clsx('rounded-md p-5 border border-gray-800', className)}
+        className={cn('rounded-md p-5 border border-gray-800', className)}
         {...props}
       >
         {children}

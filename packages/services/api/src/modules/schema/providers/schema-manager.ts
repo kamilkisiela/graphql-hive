@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { Change } from '@graphql-inspector/core';
 import type { SchemaCheck, SchemaCompositionError } from '@hive/storage';
 import { RegistryModel } from '../../../__generated__/types';
-import { Orchestrator, ProjectType } from '../../../shared/entities';
+import { DateRange, Orchestrator, ProjectType } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { atomic, stringifySelector } from '../../../shared/helpers';
 import { SchemaVersion } from '../../../shared/mappers';
@@ -436,6 +436,24 @@ export class SchemaManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
     await this.storage.updateBaseSchema(selector, newBaseSchema);
+  }
+
+  countSchemaVersionsOfProject(
+    selector: ProjectSelector & {
+      period: DateRange | null;
+    },
+  ): Promise<number> {
+    this.logger.debug('Fetching schema versions count of project (selector=%o)', selector);
+    return this.storage.countSchemaVersionsOfProject(selector);
+  }
+
+  countSchemaVersionsOfTarget(
+    selector: TargetSelector & {
+      period: DateRange | null;
+    },
+  ): Promise<number> {
+    this.logger.debug('Fetching schema versions count of target (selector=%o)', selector);
+    return this.storage.countSchemaVersionsOfTarget(selector);
   }
 
   completeGetStartedCheck(

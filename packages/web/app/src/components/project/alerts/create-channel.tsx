@@ -7,13 +7,15 @@ import { graphql } from '@/gql';
 import { AlertChannelType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 
-const CreateChannel_AddAlertChannelMutation = graphql(`
+export const CreateChannel_AddAlertChannelMutation = graphql(`
   mutation CreateChannel_AddAlertChannel($input: AddAlertChannelInput!) {
     addAlertChannel(input: $input) {
       ok {
+        updatedProject {
+          id
+        }
         addedAlertChannel {
-          ...AlertSlackChannelFields
-          ...AlertWebhookChannelFields
+          ...ChannelsTable_AlertChannelFragment
         }
       }
       error {
@@ -60,7 +62,7 @@ export const CreateChannelModal = ({
           ),
       }),
       async onSubmit(values) {
-        const { data } = await mutate({
+        const { data, error } = await mutate({
           input: {
             organization: router.organizationId,
             project: router.projectId,
@@ -71,6 +73,13 @@ export const CreateChannelModal = ({
               values.type === AlertChannelType.Webhook ? { endpoint: values.endpoint } : null,
           },
         });
+        if (error) {
+          console.error(error);
+        }
+        if (data?.addAlertChannel.error) {
+          console.log('local error');
+          console.error(data.addAlertChannel.error);
+        }
         if (data?.addAlertChannel.ok) {
           toggleModalOpen();
         }

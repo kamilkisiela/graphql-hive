@@ -1,17 +1,18 @@
 import { ReactElement, useCallback, useState } from 'react';
 import NextLink from 'next/link';
-import { clsx } from 'clsx';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { TargetLayout } from '@/components/layouts';
+import { TargetLayout } from '@/components/layouts/target';
 import { VersionErrorsAndChanges } from '@/components/target/history/errors-and-changes';
-import { Badge, Button, DiffEditor, Heading, Spinner, TimeAgo, Title } from '@/components/v2';
+import { Badge, Button, DiffEditor, Spinner, TimeAgo, Title } from '@/components/v2';
 import { noSchemaVersion } from '@/components/v2/empty-list';
 import { DiffIcon } from '@/components/v2/icon';
 import { graphql } from '@/gql';
-import { CompareDocument, VersionsDocument } from '@/graphql';
+import { CompareDocument } from '@/graphql';
+import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import { cn } from '@/lib/utils';
 import {
   CheckCircledIcon,
   CrossCircledIcon,
@@ -20,6 +21,34 @@ import {
   ListBulletIcon,
 } from '@radix-ui/react-icons';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
+
+const HistoryPage_VersionsPageQuery = graphql(`
+  query HistoryPage_VersionsPageQuery($selector: SchemaVersionsInput!, $limit: Int!, $after: ID) {
+    schemaVersions(selector: $selector, after: $after, limit: $limit) {
+      nodes {
+        id
+        date
+        valid
+        log {
+          ... on PushedSchemaLog {
+            id
+            author
+            service
+            commit
+          }
+          ... on DeletedSchemaLog {
+            id
+            deletedService
+          }
+        }
+        baseSchema
+      }
+      pageInfo {
+        hasNextPage
+      }
+    }
+  }
+`);
 
 // URQL's Infinite scrolling pattern
 // https://formidable.com/open-source/urql/docs/basics/ui-patterns/#infinite-scrolling
@@ -39,7 +68,7 @@ function ListPage({
   const router = useRouteSelector();
 
   const [versionsQuery] = useQuery({
-    query: VersionsDocument,
+    query: HistoryPage_VersionsPageQuery,
     variables: {
       selector: {
         organization: router.organizationId,
@@ -58,7 +87,7 @@ function ListPage({
     <>
       {versions?.nodes.map(version => (
         <div
-          className={clsx(
+          className={cn(
             'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
             versionId === version.id && 'bg-gray-800/40',
           )}
@@ -79,7 +108,7 @@ function ListPage({
               </div>
             ) : null}
             <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
-              <div className={clsx('w-1/2 ', !version.valid && 'text-red-500')}>
+              <div className={cn('w-1/2 ', !version.valid && 'text-red-500')}>
                 <Badge color={version.valid ? 'green' : 'red'} /> Published{' '}
                 <TimeAgo date={version.date} />
               </div>
@@ -192,145 +221,127 @@ function ComparisonView({ versionId }: { versionId: string }) {
   ).filter(isDefined);
 
   return (
-    <div className="flex grow flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <Heading>Schema</Heading>
-        <ToggleGroup.Root
-          className="flex space-x-1 rounded-md bg-gray-900/50 text-gray-500 p-0.5"
-          type="single"
-          defaultValue={availableViews[0]?.value}
-          onValueChange={onViewChange}
-          orientation="vertical"
-        >
-          {availableViews.map(({ value, icon, label, tooltip }) => (
-            <ToggleGroup.Item
-              key={value}
-              value={value}
-              className={clsx(
-                'flex items-center rounded-md py-[0.4375rem] px-2 text-xs font-semibold hover:text-white',
-                view === value && 'bg-gray-800 text-white',
-              )}
-              title={tooltip}
-            >
-              {icon}
-              <span className="ml-2">{label}</span>
-            </ToggleGroup.Item>
-          ))}
-        </ToggleGroup.Root>
-      </div>
-      <div className="grow rounded-md border border-gray-800/50 overflow-y-auto">
-        {isLoading ? (
-          <div className="flex w-full h-full flex justify-center items-center">
-            <Spinner />
-          </div>
-        ) : error ? (
-          <div className="m-3 rounded-lg bg-red-500/20 p-8">
-            <div className="mb-3 flex items-center gap-3">
-              <CrossCircledIcon className="h-6 w-auto text-red-500" />
-              <h2 className="text-lg font-medium text-white">Failed to compare schemas</h2>
-            </div>
-            <p className="text-base text-gray-500">
-              Previous or current schema is most likely incomplete and was force published
-            </p>
-            <pre className="mt-5 whitespace-pre-wrap rounded-lg bg-red-900 p-3 text-xs text-white">
-              {error.graphQLErrors?.[0]?.message ?? error.networkError?.message}
-            </pre>
-          </div>
-        ) : showFullSchemaDiff ? (
-          <DiffEditor
-            title="Full schema"
-            before={comparison.diff.before ?? ''}
-            after={comparison.diff.after}
-          />
-        ) : showServiceSchemaDiff ? (
-          <DiffEditor
-            title={comparison.service?.name ?? ''}
-            before={comparison.service?.before ?? ''}
-            after={comparison.service?.after ?? ''}
-          />
-        ) : showListView ? (
-          <VersionErrorsAndChanges
-            changes={
-              hasSchemaChanges
-                ? comparison.changes
-                : {
-                    nodes: [],
-                    total: 0,
-                  }
-            }
-            errors={
-              hasCompositionErrors
-                ? compositionErrors
-                : {
-                    nodes: [],
-                    total: 0,
-                  }
-            }
-          />
-        ) : isServiceSchemaAvailable ? (
-          <DiffEditor
-            title={comparison.service?.name ?? ''}
-            before={comparison.service?.before ?? ''}
-            after={comparison.service?.after ?? ''}
-          />
-        ) : (
-          <div>
-            <div className="m-3 rounded-lg bg-emerald-500/20 p-8">
-              <div className="mb-3 flex items-center gap-3">
-                <CheckCircledIcon className="h-6 w-auto text-emerald-500" />
-                <h2 className="text-lg font-medium text-white">First composable version</h2>
-              </div>
-              <p className="text-base text-white">
-                Congratulations! This is the first version of the schema that is composable.
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Page({ versionId, gitRepository }: { versionId: string; gitRepository?: string }) {
-  const [pageVariables, setPageVariables] = useState([{ limit: 10, after: '' }]);
-
-  return (
     <>
-      <div className="flex flex-col gap-5">
-        <Heading>Versions</Heading>
-        <div className="flex h-0 min-w-[420px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
-          {pageVariables.map((variables, i) => (
-            <ListPage
-              gitRepository={gitRepository}
-              key={variables.after || 'initial'}
-              variables={variables}
-              isLastPage={i === pageVariables.length - 1}
-              onLoadMore={after => {
-                setPageVariables([...pageVariables, { after, limit: 10 }]);
-              }}
-              versionId={versionId}
+      <div className="flex flex-row justify-between items-center">
+        <div className="py-6">
+          <h3 className="text-lg font-semibold tracking-tight">Details</h3>
+          <p className="text-sm text-gray-400">Explore details of the selected version</p>
+        </div>
+        {availableViews.length ? (
+          <div className="flex items-center justify-between">
+            <ToggleGroup.Root
+              className="flex space-x-1 rounded-md bg-gray-900/50 text-gray-500 p-0.5"
+              type="single"
+              defaultValue={availableViews[0]?.value}
+              onValueChange={onViewChange}
+              orientation="vertical"
+            >
+              {availableViews.map(({ value, icon, label, tooltip }) => (
+                <ToggleGroup.Item
+                  key={value}
+                  value={value}
+                  className={cn(
+                    'flex items-center rounded-md py-[0.4375rem] px-2 text-xs font-semibold hover:text-white',
+                    view === value && 'bg-gray-800 text-white',
+                  )}
+                  title={tooltip}
+                >
+                  {icon}
+                  <span className="ml-2">{label}</span>
+                </ToggleGroup.Item>
+              ))}
+            </ToggleGroup.Root>
+          </div>
+        ) : null}
+      </div>
+      <div>
+        <div className="grow rounded-md border border-gray-800/50 overflow-y-auto">
+          {isLoading ? (
+            <div className="flex w-full h-full justify-center items-center">
+              <Spinner />
+            </div>
+          ) : error ? (
+            <div className="m-3 rounded-lg bg-red-500/20 p-8">
+              <div className="mb-3 flex items-center gap-3">
+                <CrossCircledIcon className="h-6 w-auto text-red-500" />
+                <h2 className="text-lg font-medium text-white">Failed to compare schemas</h2>
+              </div>
+              <p className="text-base text-gray-500">
+                Previous or current schema is most likely incomplete and was force published
+              </p>
+              <pre className="mt-5 whitespace-pre-wrap rounded-lg bg-red-900 p-3 text-xs text-white">
+                {error.graphQLErrors?.[0]?.message ?? error.networkError?.message}
+              </pre>
+            </div>
+          ) : showFullSchemaDiff ? (
+            <DiffEditor
+              title="Full schema"
+              before={comparison.diff.before ?? ''}
+              after={comparison.diff.after}
             />
-          ))}
+          ) : showServiceSchemaDiff ? (
+            <DiffEditor
+              title={comparison.service?.name ?? ''}
+              before={comparison.service?.before ?? ''}
+              after={comparison.service?.after ?? ''}
+            />
+          ) : showListView ? (
+            <VersionErrorsAndChanges
+              changes={
+                hasSchemaChanges
+                  ? comparison.changes
+                  : {
+                      nodes: [],
+                      total: 0,
+                    }
+              }
+              errors={
+                hasCompositionErrors
+                  ? compositionErrors
+                  : {
+                      nodes: [],
+                      total: 0,
+                    }
+              }
+            />
+          ) : isServiceSchemaAvailable ? (
+            <DiffEditor
+              title={comparison.service?.name ?? ''}
+              before={comparison.service?.before ?? ''}
+              after={comparison.service?.after ?? ''}
+            />
+          ) : (
+            <div>
+              <div className="m-3 p-4">
+                <div className="mb-3 flex items-center gap-3">
+                  <CheckCircledIcon className="h-4 w-auto text-emerald-500" />
+                  <h2 className="text-base font-medium text-white">First composable version</h2>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Congratulations! This is the first version of the schema that is composable.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-      <ComparisonView versionId={versionId} />
     </>
   );
 }
 
 const TargetHistoryPageQuery = graphql(`
   query TargetHistoryPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+    organizations {
+      ...TargetLayout_OrganizationConnectionFragment
+    }
     organization(selector: { organization: $organizationId }) {
       organization {
-        ...TargetLayout_OrganizationFragment
+        ...TargetLayout_CurrentOrganizationFragment
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_ProjectFragment
+      ...TargetLayout_CurrentProjectFragment
       gitRepository
-    }
-    targets(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_TargetConnectionFragment
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
@@ -338,30 +349,97 @@ const TargetHistoryPageQuery = graphql(`
         id
       }
     }
+    me {
+      ...TargetLayout_MeFragment
+    }
     ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 
-function HistoryPage(): ReactElement {
+function HistoryPageContent() {
   const router = useRouteSelector();
+  const [query] = useQuery({
+    query: TargetHistoryPageQuery,
+    variables: {
+      organizationId: router.organizationId,
+      projectId: router.projectId,
+      targetId: router.targetId,
+    },
+  });
+  useNotFoundRedirectOnError(!!query.error);
+  const [pageVariables, setPageVariables] = useState([{ limit: 10, after: '' }]);
 
+  if (query.error) {
+    return null;
+  }
+
+  const me = query.data?.me;
+  const currentOrganization = query.data?.organization?.organization;
+  const currentProject = query.data?.project;
+  const currentTarget = query.data?.target;
+  const organizationConnection = query.data?.organizations;
+  const isCDNEnabled = query.data;
+
+  const versionId = router.versionId ?? currentTarget?.latestSchemaVersion?.id;
+
+  return (
+    <TargetLayout
+      value="history"
+      className="flex justify-between gap-8 h-full"
+      currentOrganization={currentOrganization ?? null}
+      currentProject={currentProject ?? null}
+      me={me ?? null}
+      organizations={organizationConnection ?? null}
+      isCDNEnabled={isCDNEnabled ?? null}
+    >
+      <div className="grow">
+        {versionId ? (
+          <div className="flex w-full h-full flex-row gap-x-6">
+            <div>
+              <div className="py-6">
+                <h3 className="text-lg font-semibold tracking-tight">Versions</h3>
+                <p className="text-sm text-gray-400">Recently published schemas.</p>
+              </div>
+              <div className="flex flex-col gap-5">
+                <div className="flex min-w-[420px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
+                  {pageVariables.map((variables, i) => (
+                    <ListPage
+                      gitRepository={currentProject?.gitRepository ?? undefined}
+                      key={variables.after || 'initial'}
+                      variables={variables}
+                      isLastPage={i === pageVariables.length - 1}
+                      onLoadMore={after => {
+                        setPageVariables([...pageVariables, { after, limit: 10 }]);
+                      }}
+                      versionId={versionId}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="grow">
+              <ComparisonView versionId={versionId} />
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="py-6">
+              <h3 className="text-lg font-semibold tracking-tight">Versions</h3>
+              <p className="text-sm text-gray-400">Recently published schemas.</p>
+            </div>
+            {noSchemaVersion}
+          </>
+        )}
+      </div>
+    </TargetLayout>
+  );
+}
+
+function HistoryPage(): ReactElement {
   return (
     <>
       <Title title="History" />
-      <TargetLayout
-        value="history"
-        className="flex h-full items-stretch gap-x-5"
-        query={TargetHistoryPageQuery}
-      >
-        {({ target, project }) => {
-          const versionId = router.versionId ?? target?.latestSchemaVersion?.id;
-          return versionId ? (
-            <Page gitRepository={project?.gitRepository ?? undefined} versionId={versionId} />
-          ) : (
-            noSchemaVersion
-          );
-        }}
-      </TargetLayout>
+      <HistoryPageContent />
     </>
   );
 }

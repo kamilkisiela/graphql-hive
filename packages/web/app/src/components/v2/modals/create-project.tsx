@@ -8,20 +8,19 @@ import { graphql } from '@/gql';
 import { ProjectType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 
-const CreateProjectMutation = graphql(`
+export const CreateProjectMutation = graphql(`
   mutation CreateProject_CreateProject($input: CreateProjectInput!) {
     createProject(input: $input) {
       ok {
-        selector {
-          organization
-          project
-        }
         createdProject {
           cleanId
           ...ProjectFields
         }
         createdTargets {
           ...TargetFields
+        }
+        updatedOrganization {
+          id
         }
       }
       error {
@@ -78,6 +77,8 @@ export const CreateProjectModal = ({
       }
     },
   });
+
+  console.log(mutation);
 
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen} className="w-[650px]">

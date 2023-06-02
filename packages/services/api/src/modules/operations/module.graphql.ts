@@ -164,4 +164,12 @@ export default gql`
   extend type OrganizationGetStarted {
     reportingOperations: Boolean!
   }
+
+  extend type Target {
+    requestsOverTime(resolution: Int!, period: DateRangeInput!): [RequestsOverTime!]!
+  }
+
+  extend type Project {
+    requestsOverTime(resolution: Int!, period: DateRangeInput!): [RequestsOverTime!]!
+  }
 `;

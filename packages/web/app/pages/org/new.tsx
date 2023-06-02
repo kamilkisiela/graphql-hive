@@ -8,13 +8,12 @@ function CreateOrgPage(): ReactElement {
   return (
     <>
       <Title title="Create Organization" />
-      <SubHeader>
-        <div className="flex items-center">
-          <div className="container w-1/3">
-            <CreateOrganizationForm />
-          </div>
+      <SubHeader />
+      <div className="h-full grow flex items-center">
+        <div className="container w-1/3">
+          <CreateOrganizationForm />
         </div>
-      </SubHeader>
+      </div>
     </>
   );
 }
