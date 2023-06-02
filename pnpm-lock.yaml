@@ -695,8 +695,8 @@ importers:
         specifier: 2.6.6
         version: 2.6.6
       itty-router-extras:
-        specifier: 0.4.2
-        version: 0.4.2
+        specifier: 0.4.5
+        version: 0.4.5
       nock:
         specifier: 13.3.1
         version: 13.3.1
@@ -741,8 +741,8 @@ importers:
         specifier: 2.6.6
         version: 2.6.6
       itty-router-extras:
-        specifier: 0.4.2
-        version: 0.4.2
+        specifier: 0.4.5
+        version: 0.4.5
 
   packages/services/emails:
     dependencies:
@@ -21113,8 +21113,8 @@ packages:
       istanbul-lib-report: 3.0.0
     dev: true
 
-  /itty-router-extras@0.4.2:
-    resolution: {integrity: sha512-ppHaBzcTXs7idFSDISehG+8kif2/4aqLCfyY/Y/uIZv79sfEfNmTq9G+rDeqblun/VZRBiXZD8ztYmMS8EOsKw==}
+  /itty-router-extras@0.4.5:
+    resolution: {integrity: sha512-flxFhFZgPqiscrHTV3mBbRBk8plgOGdg5tZMyv7hE629PO+XEfXh2uHs78ndH6axRG50fIHfjrrqAlb3Pguemw==}
     dev: true
 
   /itty-router@2.6.6:

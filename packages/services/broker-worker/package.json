@@ -20,7 +20,7 @@
     "@whatwg-node/server": "0.8.1",
     "esbuild": "0.17.19",
     "itty-router": "2.6.6",
-    "itty-router-extras": "0.4.2",
+    "itty-router-extras": "0.4.5",
     "nock": "13.3.1"
   }
 }
