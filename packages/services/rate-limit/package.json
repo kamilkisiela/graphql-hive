@@ -26,7 +26,7 @@
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
     "pino-pretty": "10.0.0",
-    "tslib": "2.5.2"
+    "tslib": "2.5.3"
   },
   "buildOptions": {
     "external": [
