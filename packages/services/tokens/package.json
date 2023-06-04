@@ -26,7 +26,7 @@
     "@types/ms": "0.7.31",
     "fastify": "3.29.5",
     "pino-pretty": "10.0.0",
-    "tslib": "2.5.2"
+    "tslib": "2.5.3"
   },
   "buildOptions": {
     "external": [
