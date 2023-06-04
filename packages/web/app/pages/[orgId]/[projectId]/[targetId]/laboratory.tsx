@@ -417,6 +417,7 @@ function Page({
         .graphiql-container {
           --color-base: transparent !important;
           --color-primary: 40, 89%, 60% !important;
+          min-height: 600px;
         }
       `}</style>
       <GraphiQL
