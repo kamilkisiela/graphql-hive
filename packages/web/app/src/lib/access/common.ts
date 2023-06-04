@@ -139,7 +139,7 @@ export function useRedirect({
       redirectRef.current = true;
       const route = redirectTo(router);
       if (route) {
-        router.push(route.route, route.as);
+        void router.push(route.route, route.as);
       }
     }
   }, [router, canAccess, redirectRef, redirectTo]);

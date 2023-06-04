@@ -77,7 +77,7 @@ function Home(): ReactElement {
       const org = query.data.organizations.nodes[0];
 
       if (org) {
-        router.visitOrganization({ organizationId: org.cleanId });
+        void router.visitOrganization({ organizationId: org.cleanId });
       }
     }
   }, [router, query.data]);

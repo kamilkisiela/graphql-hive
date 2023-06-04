@@ -115,14 +115,14 @@ export const TargetLayout = <
   useEffect(() => {
     if (!data.fetching && !target) {
       // url with # provoke error Maximum update depth exceeded
-      router.push('/404', router.asPath.replace(/#.*/, ''));
+      void router.push('/404', router.asPath.replace(/#.*/, ''));
     }
   }, [router, target, data.fetching]);
 
   useEffect(() => {
     if (!data.fetching && !project) {
       // url with # provoke error Maximum update depth exceeded
-      router.push('/404', router.asPath.replace(/#.*/, ''));
+      void router.push('/404', router.asPath.replace(/#.*/, ''));
     }
   }, [router, project, data.fetching]);
 

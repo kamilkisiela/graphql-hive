@@ -32,13 +32,13 @@ function OrganizationPage() {
       } else {
         const org = result.data.joinOrganization.organization;
         notify(`You joined "${org.name}" organization`, 'success');
-        router.visitOrganization({ organizationId: org.cleanId });
+        void router.visitOrganization({ organizationId: org.cleanId });
       }
     }
   }, [mutate, code, router, notify]);
 
   const goBack = useCallback(() => {
-    router.visitHome();
+    void router.visitHome();
   }, [router]);
 
   return (

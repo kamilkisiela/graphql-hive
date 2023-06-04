@@ -97,7 +97,7 @@ export function ProjectLayout<
   useEffect(() => {
     if (projectQuery.error) {
       // url with # provoke error Maximum update depth exceeded
-      router.push('/404', router.asPath.replace(/#.*/, ''));
+      void router.push('/404', router.asPath.replace(/#.*/, ''));
     }
   }, [projectQuery.error, router]);
 
