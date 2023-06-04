@@ -27,6 +27,7 @@ const SubscriptionPage_OrganizationFragment = graphql(`
       ...CanAccessOrganization_MemberFragment
     }
     billingConfiguration {
+      hasPaymentIssues
       invoices {
         id
       }

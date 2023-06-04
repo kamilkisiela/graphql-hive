@@ -8,6 +8,7 @@ export default gql`
 
   type BillingConfiguration {
     hasActiveSubscription: Boolean!
+    hasPaymentIssues: Boolean!
     paymentMethod: BillingPaymentMethod
     billingAddress: BillingDetails
     invoices: [BillingInvoice!]
@@ -21,6 +22,15 @@ export default gql`
     periodStart: DateTime!
     periodEnd: DateTime!
     pdfLink: String
+    status: BillingInvoiceStatus!
+  }
+
+  enum BillingInvoiceStatus {
+    DRAFT
+    OPEN
+    PAID
+    VOID
+    UNCOLLECTIBLE
   }
 
   type BillingPaymentMethod {
@@ -68,6 +78,7 @@ export default gql`
   }
 
   extend type Mutation {
+    generateStripePortalLink(selector: OrganizationSelectorInput!): String!
     upgradeToPro(input: UpgradeToProInput!): ChangePlanResult!
     downgradeToHobby(input: DowngradeToHobbyInput!): ChangePlanResult!
     updateOrgRateLimit(
