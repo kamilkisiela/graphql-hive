@@ -10,10 +10,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sentry/node": "7.53.1",
+    "@sentry/node": "7.54.0",
     "agentkeepalive": "4.3.0",
     "date-fns": "2.30.0",
-    "dotenv": "16.0.3",
+    "dotenv": "16.1.3",
     "got": "12.6.1",
     "graphql": "16.6.0",
     "kafkajs": "2.2.4",
