@@ -5,6 +5,7 @@ import {
 } from 'packages/services/api/src/shared/entities';
 import { Change } from '@graphql-inspector/core';
 import type { CheckPolicyResponse } from '@hive/policy';
+import { type RegistryChecks } from '../registry-checks';
 
 export const SchemaPublishConclusion = {
   /**
@@ -70,43 +71,37 @@ export type CheckFailureReasonCode =
 export type CheckPolicyResultRecord = CheckPolicyResponse[number] | { message: string };
 export type SchemaCheckWarning = {
   message: string;
-  source: string;
+  source?: string | undefined | null;
 
   line?: number;
   column?: number;
 };
 
-export type SchemaCheckFailureReason =
-  | {
-      code: (typeof CheckFailureReasonCode)['CompositionFailure'];
-      compositionErrors: Array<{
-        message: string;
-      }>;
-    }
-  | {
-      code: (typeof CheckFailureReasonCode)['BreakingChanges'];
-      breakingChanges: Array<Change>;
-      changes: Array<Change>;
-    }
-  | {
-      code: (typeof CheckFailureReasonCode)['PolicyInfringement'];
-      errors: Array<{
-        message: string;
-      }>;
-    };
-
 export type SchemaCheckSuccess = {
   conclusion: (typeof SchemaCheckConclusion)['Success'];
   state: {
-    changes: Array<Change> | null;
-    warnings: SchemaCheckWarning[] | null;
+    schemaChanges: Array<Change> | null;
+    schemaPolicyWarnings: SchemaCheckWarning[] | null;
   };
 };
 
 export type SchemaCheckFailure = {
   conclusion: (typeof SchemaCheckConclusion)['Failure'];
-  reasons: SchemaCheckFailureReason[];
-  warnings: SchemaCheckWarning[] | null;
+  state: {
+    // TODO: in theory if composition errors are present schema policy and schema changes would always be null
+    // we could express this with the type-system in a stricter way.
+    compositionErrors: Array<{ message: string }> | null;
+    /** Absence means schema changes were skipped. */
+    schemaChanges: null | {
+      breaking: Array<Change>;
+      safe: Array<Change>;
+    };
+    /** Absence means the schema policy is disabled or wasn't done because composition failed. */
+    schemaPolicy: null | {
+      errors: SchemaCheckWarning[] | null;
+      warnings: SchemaCheckWarning[] | null;
+    };
+  };
 };
 
 export type SchemaCheckResult = SchemaCheckFailure | SchemaCheckSuccess;
@@ -229,21 +224,69 @@ type ReasonOf<T extends { code: string }[], R extends T[number]['code']> = T ext
     : never
   : never;
 
-export function getReasonByCode<
-  T extends {
-    reasons: { code: string }[];
-  },
-  R extends T['reasons'][number]['code'],
->(failure: T, code: R): ReasonOf<T['reasons'], R> | undefined {
-  return failure.reasons.find(r => r.code === code) as any;
+export function getReasonByCode<T extends { code: string }[], R extends T[number]['code']>(
+  reasons: T,
+  code: R,
+): ReasonOf<T, R> | undefined {
+  return reasons.find(r => r.code === code) as any;
 }
 
 export const temp = 'temp';
 
-export function formatPolicyMessage(record: CheckPolicyResultRecord): string {
+export function formatPolicyError(record: CheckPolicyResultRecord): { message: string } {
   if ('ruleId' in record) {
-    return `${record.message} (source: policy-${record.ruleId})`;
+    return { message: `${record.message} (source: policy-${record.ruleId})` };
   }
 
-  return record.message;
+  return { message: record.message };
+}
+
+export function buildSchemaCheckFailureState(args: {
+  compositionCheck: Awaited<ReturnType<RegistryChecks['composition']>>;
+  diffCheck: Awaited<ReturnType<RegistryChecks['diff']>>;
+  policyCheck: Awaited<ReturnType<RegistryChecks['policyCheck']>> | null;
+}): SchemaCheckFailure['state'] {
+  const compositionErrors: Array<{ message: string }> = [];
+  let schemaChanges: null | {
+    breaking: Array<Change>;
+    safe: Array<Change>;
+  } = null;
+  let schemaPolicy: null | {
+    errors: SchemaCheckWarning[] | null;
+    warnings: SchemaCheckWarning[] | null;
+  } = null;
+
+  if (args.compositionCheck.status === 'failed') {
+    compositionErrors.push(...args.compositionCheck.reason.errors);
+  }
+
+  if (args.compositionCheck.status === 'failed') {
+    compositionErrors.push(...args.compositionCheck.reason.errors);
+  }
+
+  if (args.diffCheck.status === 'failed') {
+    if (args.diffCheck.reason.changes) {
+      schemaChanges = {
+        breaking: args.diffCheck.reason.breakingChanges,
+        safe: args.diffCheck.reason.safeChanges,
+      };
+    }
+
+    if (args.diffCheck.reason.compareFailure) {
+      compositionErrors.push(args.diffCheck.reason.compareFailure);
+    }
+  }
+
+  if (args.policyCheck) {
+    schemaPolicy = {
+      errors: args.policyCheck?.reason?.errors ?? null,
+      warnings: args.policyCheck?.reason?.warnings || args.policyCheck?.result?.warnings || null,
+    };
+  }
+
+  return {
+    schemaChanges,
+    compositionErrors: compositionErrors.length ? compositionErrors : null,
+    schemaPolicy,
+  };
 }

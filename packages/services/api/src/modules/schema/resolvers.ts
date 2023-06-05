@@ -112,6 +112,11 @@ export const resolvers: SchemaModule.Resolvers = {
         return {
           ...result,
           changes: result.changes.map(toGraphQLSchemaChange),
+          errors:
+            result.errors?.map(error => ({
+              ...error,
+              path: 'path' in error ? error.path?.split('.') : null,
+            })) ?? [],
         };
       }
 

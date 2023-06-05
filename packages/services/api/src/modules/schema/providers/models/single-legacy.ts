@@ -5,12 +5,11 @@ import type { PublishInput } from '../schema-publisher';
 import type { Project, SingleSchema, Target } from './../../../../shared/entities';
 import { Logger } from './../../../shared/providers/logger';
 import {
-  CheckFailureReasonCode,
+  buildSchemaCheckFailureState,
   PublishFailureReasonCode,
   PublishIgnoreReasonCode,
   /* Check */
   SchemaCheckConclusion,
-  SchemaCheckFailureReason,
   SchemaCheckResult,
   /* Publish */
   SchemaPublishConclusion,
@@ -76,8 +75,8 @@ export class SingleLegacyModel {
       return {
         conclusion: SchemaCheckConclusion.Success,
         state: {
-          changes: null,
-          warnings: null,
+          schemaChanges: null,
+          schemaPolicyWarnings: null,
         },
       };
     }
@@ -100,46 +99,21 @@ export class SingleLegacyModel {
     ]);
 
     if (compositionCheck.status === 'failed' || diffCheck.status === 'failed') {
-      const reasons: SchemaCheckFailureReason[] = [];
-
-      if (compositionCheck.status === 'failed') {
-        this.logger.debug('Failing schema check due to composition errors');
-        reasons.push({
-          code: CheckFailureReasonCode.CompositionFailure,
-          compositionErrors: compositionCheck.reason.errors,
-        });
-      }
-
-      if (diffCheck.status === 'failed') {
-        this.logger.debug('Failing schema check due to breaking changes');
-        if (diffCheck.reason.changes) {
-          reasons.push({
-            code: CheckFailureReasonCode.BreakingChanges,
-            changes: diffCheck.reason.changes ?? [],
-            breakingChanges: diffCheck.reason.breakingChanges,
-          });
-        }
-
-        if (diffCheck.reason.compareFailure) {
-          reasons.push({
-            code: CheckFailureReasonCode.CompositionFailure,
-            compositionErrors: [diffCheck.reason.compareFailure],
-          });
-        }
-      }
-
       return {
         conclusion: SchemaCheckConclusion.Failure,
-        warnings: [],
-        reasons,
+        state: buildSchemaCheckFailureState({
+          compositionCheck,
+          diffCheck,
+          policyCheck: null,
+        }),
       };
     }
 
     return {
       conclusion: SchemaCheckConclusion.Success,
       state: {
-        changes: diffCheck.result?.changes ?? null,
-        warnings: null,
+        schemaChanges: diffCheck.result?.changes ?? null,
+        schemaPolicyWarnings: null,
       },
     };
   }

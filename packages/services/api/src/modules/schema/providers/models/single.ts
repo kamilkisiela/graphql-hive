@@ -5,12 +5,11 @@ import type { PublishInput } from '../schema-publisher';
 import type { Organization, Project, SingleSchema, Target } from './../../../../shared/entities';
 import { Logger } from './../../../shared/providers/logger';
 import {
-  CheckFailureReasonCode,
+  buildSchemaCheckFailureState,
   PublishFailureReasonCode,
   PublishIgnoreReasonCode,
   /* Check */
   SchemaCheckConclusion,
-  SchemaCheckFailureReason,
   SchemaCheckResult,
   /* Publish */
   SchemaPublishConclusion,
@@ -83,8 +82,8 @@ export class SingleModel {
       return {
         conclusion: SchemaCheckConclusion.Success,
         state: {
-          changes: null,
-          warnings: [],
+          schemaChanges: null,
+          schemaPolicyWarnings: [],
         },
       };
     }
@@ -118,53 +117,21 @@ export class SingleModel {
       diffCheck.status === 'failed' ||
       policyCheck.status === 'failed'
     ) {
-      const reasons: SchemaCheckFailureReason[] = [];
-
-      if (compositionCheck.status === 'failed') {
-        this.logger.debug('Failing schema check due to composition errors');
-        reasons.push({
-          code: CheckFailureReasonCode.CompositionFailure,
-          compositionErrors: compositionCheck.reason.errors,
-        });
-      }
-
-      if (diffCheck.status === 'failed') {
-        this.logger.debug('Failing schema check due to breaking changes');
-        if (diffCheck.reason.changes) {
-          reasons.push({
-            code: CheckFailureReasonCode.BreakingChanges,
-            changes: diffCheck.reason.changes ?? [],
-            breakingChanges: diffCheck.reason.breakingChanges,
-          });
-        }
-
-        if (diffCheck.reason.compareFailure) {
-          reasons.push({
-            code: CheckFailureReasonCode.CompositionFailure,
-            compositionErrors: [diffCheck.reason.compareFailure],
-          });
-        }
-      }
-
-      if (policyCheck.status === 'failed') {
-        reasons.push({
-          code: CheckFailureReasonCode.PolicyInfringement,
-          errors: policyCheck.reason.errors ?? [],
-        });
-      }
-
       return {
         conclusion: SchemaCheckConclusion.Failure,
-        warnings: policyCheck.reason?.warnings ?? [],
-        reasons,
+        state: buildSchemaCheckFailureState({
+          compositionCheck,
+          diffCheck,
+          policyCheck,
+        }),
       };
     }
 
     return {
       conclusion: SchemaCheckConclusion.Success,
       state: {
-        changes: diffCheck.result?.changes ?? null,
-        warnings: policyCheck.result?.warnings ?? [],
+        schemaChanges: diffCheck.result?.changes ?? null,
+        schemaPolicyWarnings: policyCheck.result?.warnings ?? [],
       },
     };
   }

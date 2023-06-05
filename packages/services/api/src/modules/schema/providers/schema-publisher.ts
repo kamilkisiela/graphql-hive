@@ -27,9 +27,8 @@ import { SCHEMA_MODULE_CONFIG } from './config';
 import { CompositeModel } from './models/composite';
 import { CompositeLegacyModel } from './models/composite-legacy';
 import {
-  CheckFailureReasonCode,
   DeleteFailureReasonCode,
-  formatPolicyMessage,
+  formatPolicyError,
   getReasonByCode,
   PublishFailureReasonCode,
   SchemaCheckConclusion,
@@ -292,8 +291,8 @@ export class SchemaPublisher {
           serviceName: input.service ?? null,
           sha: input.github.commit,
           conclusion: checkResult.conclusion,
-          changes: checkResult.state.changes ?? null,
-          warnings: checkResult.state.warnings,
+          changes: checkResult.state.schemaChanges ?? null,
+          warnings: checkResult.state.schemaPolicyWarnings,
           breakingChanges: null,
           compositionErrors: null,
           errors: null,
@@ -306,24 +305,14 @@ export class SchemaPublisher {
         serviceName: input.service ?? null,
         sha: input.github.commit,
         conclusion: checkResult.conclusion,
-        changes:
-          getReasonByCode(checkResult, CheckFailureReasonCode.BreakingChanges)?.changes ?? null,
-        breakingChanges:
-          getReasonByCode(checkResult, CheckFailureReasonCode.BreakingChanges)?.breakingChanges ??
-          null,
-        compositionErrors:
-          getReasonByCode(checkResult, CheckFailureReasonCode.CompositionFailure)
-            ?.compositionErrors ?? null,
-        warnings: checkResult.warnings ?? [],
-        errors: (
-          [] as Array<{
-            message: string;
-          }>
-        ).concat(
-          getReasonByCode(checkResult, CheckFailureReasonCode.PolicyInfringement)?.errors.map(
-            e => ({ message: formatPolicyMessage(e) }),
-          ) ?? [],
-        ),
+        changes: [
+          ...(checkResult.state.schemaChanges?.breaking ?? []),
+          ...(checkResult.state.schemaChanges?.safe ?? []),
+        ],
+        breakingChanges: checkResult.state.schemaChanges?.breaking ?? [],
+        compositionErrors: checkResult.state.compositionErrors ?? [],
+        warnings: checkResult.state.schemaPolicy?.warnings ?? [],
+        errors: checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? [],
       });
     }
 
@@ -331,8 +320,8 @@ export class SchemaPublisher {
       return {
         __typename: 'SchemaCheckSuccess',
         valid: true,
-        changes: checkResult.state.changes ?? [],
-        warnings: checkResult.state.warnings ?? [],
+        changes: checkResult.state.schemaChanges ?? [],
+        warnings: checkResult.state.schemaPolicyWarnings ?? [],
         initial: latestVersion == null,
       } as const;
     }
@@ -340,20 +329,16 @@ export class SchemaPublisher {
     return {
       __typename: 'SchemaCheckError',
       valid: false,
-      changes: getReasonByCode(checkResult, CheckFailureReasonCode.BreakingChanges)?.changes ?? [],
-      warnings: checkResult.warnings ?? [],
-      errors: (
-        [] as Array<{
-          message: string;
-        }>
-      ).concat(
-        getReasonByCode(checkResult, CheckFailureReasonCode.BreakingChanges)?.breakingChanges ?? [],
-        getReasonByCode(checkResult, CheckFailureReasonCode.PolicyInfringement)?.errors.map(e => ({
-          message: formatPolicyMessage(e),
-        })) ?? [],
-        getReasonByCode(checkResult, CheckFailureReasonCode.CompositionFailure)
-          ?.compositionErrors ?? [],
-      ),
+      changes: [
+        ...(checkResult.state.schemaChanges?.breaking ?? []),
+        ...(checkResult.state.schemaChanges?.safe ?? []),
+      ],
+      warnings: checkResult.state.schemaPolicy?.warnings ?? [],
+      errors: [
+        ...(checkResult.state.schemaChanges?.breaking ?? []),
+        ...(checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? []),
+        ...(checkResult.state.compositionErrors ?? []),
+      ],
     } as const;
   }
 
@@ -604,11 +589,11 @@ export class SchemaPublisher {
         const errors = [];
 
         const compositionErrors = getReasonByCode(
-          deleteResult,
+          deleteResult.reasons,
           DeleteFailureReasonCode.CompositionFailure,
         )?.compositionErrors;
 
-        if (getReasonByCode(deleteResult, DeleteFailureReasonCode.MissingServiceName)) {
+        if (getReasonByCode(deleteResult.reasons, DeleteFailureReasonCode.MissingServiceName)) {
           errors.push({
             message: 'Service name is required',
           });
@@ -805,14 +790,14 @@ export class SchemaPublisher {
         conclusion: 'rejected',
       });
 
-      if (getReasonByCode(publishResult, PublishFailureReasonCode.MissingServiceName)) {
+      if (getReasonByCode(publishResult.reasons, PublishFailureReasonCode.MissingServiceName)) {
         return {
           __typename: 'SchemaPublishMissingServiceError' as const,
           message: 'Missing service name',
         } as const;
       }
 
-      if (getReasonByCode(publishResult, PublishFailureReasonCode.MissingServiceUrl)) {
+      if (getReasonByCode(publishResult.reasons, PublishFailureReasonCode.MissingServiceUrl)) {
         return {
           __typename: 'SchemaPublishMissingUrlError' as const,
           message: 'Missing service url',
@@ -823,16 +808,18 @@ export class SchemaPublisher {
         __typename: 'SchemaPublishError' as const,
         valid: false,
         changes:
-          getReasonByCode(publishResult, PublishFailureReasonCode.BreakingChanges)?.changes ?? [],
+          getReasonByCode(publishResult.reasons, PublishFailureReasonCode.BreakingChanges)
+            ?.changes ?? [],
         errors: (
           [] as Array<{
             message: string;
           }>
         ).concat(
-          getReasonByCode(publishResult, PublishFailureReasonCode.BreakingChanges)?.changes ?? [],
-          getReasonByCode(publishResult, PublishFailureReasonCode.CompositionFailure)
+          getReasonByCode(publishResult.reasons, PublishFailureReasonCode.BreakingChanges)
+            ?.changes ?? [],
+          getReasonByCode(publishResult.reasons, PublishFailureReasonCode.CompositionFailure)
             ?.compositionErrors ?? [],
-          getReasonByCode(publishResult, PublishFailureReasonCode.MetadataParsingFailure)
+          getReasonByCode(publishResult.reasons, PublishFailureReasonCode.MetadataParsingFailure)
             ? [
                 {
                   message: 'Failed to parse metadata',
