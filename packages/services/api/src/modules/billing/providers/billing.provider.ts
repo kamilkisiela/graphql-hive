@@ -107,4 +107,16 @@ export class BillingProvider {
 
     return await this.billingService.cancelSubscriptionForOrganization.mutate(input);
   }
+
+  async generateStripePortalLink(orgId: string) {
+    this.logger.debug('Generating Stripe portal link for id:' + orgId);
+
+    if (!this.billingService) {
+      throw new Error(`Billing service is not configured!`);
+    }
+
+    return await this.billingService.generateStripePortalLink.mutate({
+      organizationId: orgId,
+    });
+  }
 }

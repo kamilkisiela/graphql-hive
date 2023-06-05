@@ -6,6 +6,7 @@ import { CurrencyFormatter, DateFormatter } from './helpers';
 const OrganizationInvoicesList_OrganizationFragment = graphql(`
   fragment OrganizationInvoicesList_OrganizationFragment on Organization {
     billingConfiguration {
+      hasPaymentIssues
       invoices {
         id
         date
@@ -13,6 +14,7 @@ const OrganizationInvoicesList_OrganizationFragment = graphql(`
         periodStart
         periodEnd
         pdfLink
+        status
       }
     }
   }
@@ -34,6 +36,7 @@ export function InvoicesList(props: {
       <THead>
         <Th>Invoice Date</Th>
         <Th>Amount</Th>
+        <Th>Status</Th>
         <Th>Period Start</Th>
         <Th>Period End</Th>
         <Th>PDF</Th>
@@ -43,6 +46,7 @@ export function InvoicesList(props: {
           <Tr key={invoice.id}>
             <Td>{DateFormatter.format(new Date(invoice.date))}</Td>
             <Td>{CurrencyFormatter.format(invoice.amount)}</Td>
+            <Td>{invoice.status}</Td>
             <Td>{DateFormatter.format(new Date(invoice.periodStart))}</Td>
             <Td>{DateFormatter.format(new Date(invoice.periodEnd))}</Td>
             <Td>
