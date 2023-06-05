@@ -1,4 +1,4 @@
-import { Errors, Flags } from '@oclif/core';
+import { Args, Errors, Flags } from '@oclif/core';
 import Command from '../../base-command';
 import { graphqlEndpoint } from '../../helpers/config';
 import { loadOperations } from '../../helpers/operations';
@@ -36,14 +36,14 @@ export default class OperationsPublish extends Command {
     }),
   };
 
-  static args = [
-    {
+  static args = {
+    file: Args.string({
       name: 'file',
       required: true,
       description: 'Glob pattern to find the operations',
       hidden: false,
-    },
-  ];
+    }),
+  };
 
   async run() {
     try {

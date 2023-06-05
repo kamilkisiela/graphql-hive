@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'fs';
 import { GraphQLError, print } from 'graphql';
 import { transformCommentsToDescriptions } from '@graphql-tools/utils';
-import { Errors, Flags } from '@oclif/core';
+import { Args, Errors, Flags } from '@oclif/core';
 import Command from '../../base-command';
 import { graphqlEndpoint } from '../../helpers/config';
 import { gitInfo } from '../../helpers/git';
@@ -76,14 +76,14 @@ export default class SchemaPublish extends Command {
     }),
   };
 
-  static args = [
-    {
+  static args = {
+    file: Args.string({
       name: 'file',
       required: true,
       description: 'Path to the schema file(s)',
       hidden: false,
-    },
-  ];
+    }),
+  };
 
   resolveMetadata(metadata: string | undefined): string | undefined {
     if (!metadata) {
@@ -145,8 +145,16 @@ export default class SchemaPublish extends Command {
       const metadata = this.resolveMetadata(flags.metadata);
       const usesGitHubApp = flags.github;
 
-      let commit: string | undefined | null = flags.commit;
-      let author: string | undefined | null = flags.author;
+      let commit: string | undefined | null = this.maybe({
+        key: 'commit',
+        args: flags,
+        env: 'HIVE_COMMIT',
+      });
+      let author: string | undefined | null = this.maybe({
+        key: 'author',
+        args: flags,
+        env: 'HIVE_AUTHOR',
+      });
 
       if (!commit || !author) {
         const git = await gitInfo(() => {

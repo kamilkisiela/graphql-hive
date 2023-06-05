@@ -90,16 +90,9 @@ jobs:
 
   # Release alpha version on NPM for Hive libraries
   alpha:
-    uses: the-guild-org/shared-config/.github/workflows/release-snapshot.yml@main
+    uses: ./.github/workflows/release-alpha.yaml
     if: ${{ github.event.pull_request.title != 'Upcoming Release Changes' }}
-    with:
-      npmTag: alpha
-      buildScript: build:libraries
-      nodeVersion: 18
-      packageManager: pnpm
-    secrets:
-      githubToken: ${{ secrets.GITHUB_TOKEN }}
-      npmToken: ${{ secrets.NPM_TOKEN }}
+    secrets: inherit
 
   # Release RC version on NPM for Hive libraries
   release-candidate:

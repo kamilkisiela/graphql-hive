@@ -49,6 +49,11 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "publish=true" >> $GITHUB_OUTPUT
 
+      # Needed for `oclif pack win`
+      - name: Install NSIS
+        run: |
+          sudo apt-get -y install nsis
+
       - name: pack tarballs
         if: steps.cli.outputs.publish == 'true'
         working-directory: packages/libraries/cli
@@ -65,5 +70,5 @@ jobs:
         env:
           VERSION: ${{ steps.cli.outputs.version }}
         run:
-          pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION || pnpm oclif
-          promote --no-xz --sha ${GITHUB_SHA:0:8} --version $VERSION
+          pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION --win || pnpm oclif
+          promote --no-xz --sha ${GITHUB_SHA:0:8} --version $VERSION --win

@@ -11,7 +11,7 @@ export default class ArtifactsFetch extends Command {
     'cdn.accessToken': Flags.string({
       description: 'CDN access token',
     }),
-    artifact: Flags.enum({
+    artifact: Flags.string({
       description: 'artifact to fetch (Note: supergraph is only available for federation projects)',
       options: ['sdl', 'supergraph', 'metadata', 'services', 'sdl.graphql', 'sdl.graphqls'],
       required: true,

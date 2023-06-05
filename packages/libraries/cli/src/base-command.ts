@@ -45,6 +45,28 @@ export default abstract class extends Command {
       .replace(findDoubleQuotes, (_: string, value: string) => colors.bold(value));
   }
 
+  maybe<TArgs extends Record<string, any>, TKey extends keyof TArgs>({
+    key,
+    env,
+    args,
+  }: {
+    key: TKey;
+    env: string;
+    args: TArgs;
+  }) {
+    if (args[key] != null) {
+      return args[key];
+    }
+
+    // eslint-disable-next-line no-process-env
+    if (env && process.env[env]) {
+      // eslint-disable-next-line no-process-env
+      return process.env[env];
+    }
+
+    return undefined;
+  }
+
   /**
    * Get a value from arguments or flags first, then from env variables,
    * then fallback to config.

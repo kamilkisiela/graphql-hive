@@ -1,0 +1,119 @@
+on:
+  workflow_call:
+
+jobs:
+  # Release alpha version on NPM for Hive libraries
+  npm:
+    uses: the-guild-org/shared-config/.github/workflows/release-snapshot.yml@main
+    with:
+      npmTag: alpha
+      buildScript: build:libraries
+      nodeVersion: 18
+      packageManager: pnpm
+    secrets:
+      githubToken: ${{ secrets.GITHUB_TOKEN }}
+      npmToken: ${{ secrets.NPM_TOKEN }}
+
+  # Upload zipped tarballs to GitHub
+  cli-artifacts:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: setup environment
+        uses: ./.github/actions/setup
+        with:
+          codegen: false # no need to run because release script will run it anyway
+          actor: release-alpha
+
+      - name: build libraries
+        run: pnpm build:libraries
+
+      # Needed for `oclif pack win`
+      - name: Install NSIS
+        run: |
+          sudo apt-get -y install nsis
+
+      - name: pack tarballs
+        working-directory: packages/libraries/cli
+        run: pnpm oclif:pack
+
+      - name: upload darwin arm64
+        uses: actions/upload-artifact@v3
+        with:
+          name: hive-cli-darwin-arm64
+          path: ./packages/libraries/cli/dist/*-darwin-arm64.tar.gz
+
+      - name: upload darwin x64
+        uses: actions/upload-artifact@v3
+        with:
+          name: hive-cli-darwin-x64
+          path: ./packages/libraries/cli/dist/*-darwin-x64.tar.gz
+
+      - name: upload windows x64
+        uses: actions/upload-artifact@v3
+        with:
+          name: hive-cli-windows-x64
+          path: ./packages/libraries/cli/dist/win32/*-x64.exe
+
+      - name: upload windows x86
+        uses: actions/upload-artifact@v3
+        with:
+          name: hive-cli-windows-x86
+          path: ./packages/libraries/cli/dist/win32/*-x86.exe
+
+      - name: upload linux arm
+        uses: actions/upload-artifact@v3
+        with:
+          name: hive-cli-linux-arm
+          path: ./packages/libraries/cli/dist/*-linux-arm.tar.gz
+
+      - name: upload linux x64
+        uses: actions/upload-artifact@v3
+        with:
+          name: hive-cli-linux-x64
+          path: ./packages/libraries/cli/dist/*-linux-x64.tar.gz
+
+  cli-test:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    needs: [cli-artifacts]
+    steps:
+      - name: Pull artifact for macos
+        if: matrix.os == 'macos-latest'
+        uses: actions/download-artifact@v3
+        with:
+          name: hive-cli-darwin-x64
+
+      - name: Pull artifact for ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/download-artifact@v3
+        with:
+          name: hive-cli-linux-x64
+
+      - name: Pull artifact for windows
+        if: matrix.os == 'windows-latest'
+        uses: actions/download-artifact@v3
+        with:
+          name: hive-cli-windows-x64
+
+      - name: Unzip and run
+        run: |
+          rm -rf /usr/local/bin/node
+          rm -rf /usr/local/lib/node
+
+          if command -v node &> /dev/null
+          then
+              echo "Expected node to not be installed"
+              command -v node
+              exit 1
+          fi
+          tar -xzf *.tar.gz
+          # Expect the command to succeed
+          ./hive/bin/hive --version || exit 1
