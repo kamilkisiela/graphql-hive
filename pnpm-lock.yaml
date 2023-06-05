@@ -1451,8 +1451,8 @@ importers:
   packages/web/app:
     dependencies:
       '@graphiql/react':
-        specifier: 0.17.6
-        version: 0.17.6(@codemirror/language@6.0.0)(@types/node@18.16.16)(@types/react@18.2.8)(graphql@16.6.0)(react-dom@18.2.0)(react-is@17.0.2)(react@18.2.0)
+        specifier: 0.18.0-alpha.0
+        version: 0.18.0-alpha.0(@codemirror/language@6.0.0)(@types/node@18.16.16)(@types/react-dom@18.2.4)(@types/react@18.2.8)(graphql@16.6.0)(react-dom@18.2.0)(react@18.2.0)
       '@graphiql/toolkit':
         specifier: 0.8.4
         version: 0.8.4(@types/node@18.16.16)(graphql@16.6.0)
@@ -1538,14 +1538,14 @@ importers:
         specifier: 10.29.0
         version: 10.29.0
       '@urql/core':
-        specifier: 3.1.1
-        version: 3.1.1(graphql@16.6.0)
+        specifier: 4.0.10
+        version: 4.0.10(graphql@16.6.0)
       '@urql/devtools':
         specifier: 2.0.3
-        version: 2.0.3(@urql/core@3.1.1)(graphql@16.6.0)
+        version: 2.0.3(@urql/core@4.0.10)(graphql@16.6.0)
       '@urql/exchange-graphcache':
-        specifier: 5.0.9
-        version: 5.0.9(graphql@16.6.0)
+        specifier: 6.0.4
+        version: 6.0.4(graphql@16.6.0)
       '@whatwg-node/fetch':
         specifier: 0.9.2
         version: 0.9.2
@@ -1571,8 +1571,8 @@ importers:
         specifier: 2.2.9
         version: 2.2.9(react@18.2.0)
       graphiql:
-        specifier: 2.4.7
-        version: 2.4.7(@codemirror/language@6.0.0)(@types/node@18.16.16)(@types/react@18.2.8)(graphql@16.6.0)(react-dom@18.2.0)(react-is@17.0.2)(react@18.2.0)
+        specifier: 3.0.0-alpha.0
+        version: 3.0.0-alpha.0(@codemirror/language@6.0.0)(@types/node@18.16.16)(@types/react-dom@18.2.4)(@types/react@18.2.8)(graphql@16.6.0)(react-dom@18.2.0)(react@18.2.0)
       graphql:
         specifier: 16.6.0
         version: 16.6.0
@@ -1655,8 +1655,8 @@ importers:
         specifier: 2.5.3
         version: 2.5.3
       urql:
-        specifier: 3.0.3
-        version: 3.0.3(graphql@16.6.0)(react@18.2.0)
+        specifier: 4.0.3
+        version: 4.0.3(graphql@16.6.0)(react@18.2.0)
       use-debounce:
         specifier: 9.0.4
         version: 9.0.4(react@18.2.0)
@@ -1814,6 +1814,17 @@ importers:
         version: link:../packages/libraries/client/dist
 
 packages:
+
+  /@0no-co/graphql.web@1.0.1(graphql@16.6.0):
+    resolution: {integrity: sha512-6Yaxyv6rOwRkLIvFaL0NrLDgfNqC/Ng9QOPmTmlqW4mORXMEKmh5NYGkIvvt5Yw8fZesnMAqkj8cIqTj8f40cQ==}
+    peerDependencies:
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
+    peerDependenciesMeta:
+      graphql:
+        optional: true
+    dependencies:
+      graphql: 16.6.0
+    dev: false
 
   /@algolia/autocomplete-core@1.9.2(@algolia/client-search@4.17.1)(algoliasearch@4.17.1)(search-insights@2.6.0):
     resolution: {integrity: sha512-hkG80c9kx9ClVAEcUJbTd2ziVC713x9Bji9Ty4XJfKXlxlsx3iXsoNhAwfeR4ulzIUg7OE5gez0UU1zVDdG7kg==}
@@ -5094,6 +5105,19 @@ packages:
     resolution: {integrity: sha512-14FtKiHhy2QoPIzdTcvh//8OyBlknNs2nXRwIhG904opCby3l+9Xaf/wuPvICBF0rc1ZCNBd3nKe9cd2mecVkQ==}
     dev: false
 
+  /@emotion/is-prop-valid@0.8.8:
+    resolution: {integrity: sha512-u5WtneEAr5IDG2Wv65yhunPSMLIpuKsbuOktRojfrEiEvRyC85LgPMZI63cr7NUqT8ZIGdSVg8ZKGxIug4lXcA==}
+    requiresBuild: true
+    dependencies:
+      '@emotion/memoize': 0.7.4
+    dev: false
+    optional: true
+
+  /@emotion/memoize@0.7.4:
+    resolution: {integrity: sha512-Ja/Vfqe3HpuzRsG1oBtWTHk2PGZ7GR+2Vz5iYGelAw8dx32K0y7PjVuxK6z1nMpZOqAFsRUPCkK1YjJ56qJlgw==}
+    dev: false
+    optional: true
+
   /@emotion/memoize@0.8.0:
     resolution: {integrity: sha512-G/YwXTkv7Den9mXDO7AhLWkE3q+I92B+VqAE+dYG4NGPaHZGvt3G8Q0p9vmE+sq7rTGphUbAvmQ9YpbfMQGGlA==}
     dev: false
@@ -5836,24 +5860,24 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@graphiql/react@0.17.6(@codemirror/language@6.0.0)(@types/node@18.16.16)(@types/react@18.2.8)(graphql@16.6.0)(react-dom@18.2.0)(react-is@17.0.2)(react@18.2.0):
-    resolution: {integrity: sha512-3k1paSRbRwVNxr2U80xnRhkws8tSErWlETJvEQBmqRcWbt0+WmwFJorkLnG1n3Wj0Ho6k4a2BAiTfJ6F4SPrLg==}
+  /@graphiql/react@0.18.0-alpha.0(@codemirror/language@6.0.0)(@types/node@18.16.16)(@types/react-dom@18.2.4)(@types/react@18.2.8)(graphql@16.6.0)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-d+Ra22v9bkyJFhgqZseemBqg+7WFASskerX3Wg5QJ3t3XUSu05teH6MP7R6NtlQhue0VUKjxccp7rkTC48nkMg==}
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
-      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react: ^16.8.0 || ^17 || ^18
+      react-dom: ^16.8.0 || ^17 || ^18
     dependencies:
       '@graphiql/toolkit': 0.8.4(@types/node@18.16.16)(graphql@16.6.0)
-      '@reach/combobox': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/dialog': 0.17.0(@types/react@18.2.8)(react-dom@18.2.0)(react@18.2.0)
-      '@reach/listbox': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/menu-button': 0.17.0(react-dom@18.2.0)(react-is@17.0.2)(react@18.2.0)
-      '@reach/tooltip': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/visually-hidden': 0.17.0(react-dom@18.2.0)(react@18.2.0)
+      '@headlessui/react': 1.7.15(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-dialog': 1.0.4(@types/react-dom@18.2.4)(@types/react@18.2.8)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-dropdown-menu': 2.0.5(@types/react-dom@18.2.4)(@types/react@18.2.8)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-tooltip': 1.0.6(@types/react-dom@18.2.4)(@types/react@18.2.8)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-visually-hidden': 1.0.3(@types/react-dom@18.2.4)(@types/react@18.2.8)(react-dom@18.2.0)(react@18.2.0)
       clsx: 1.2.1
       codemirror: 5.65.9
-      codemirror-graphql: 2.0.8(@codemirror/language@6.0.0)(codemirror@5.65.9)(graphql@16.6.0)
+      codemirror-graphql: 2.0.9-alpha.0(@codemirror/language@6.0.0)(codemirror@5.65.9)(graphql@16.6.0)
       copy-to-clipboard: 3.3.3
+      framer-motion: 6.5.1(react-dom@18.2.0)(react@18.2.0)
       graphql: 16.6.0
       graphql-language-service: 5.1.6(graphql@16.6.0)
       markdown-it: 12.3.2
@@ -5864,8 +5888,8 @@ packages:
       - '@codemirror/language'
       - '@types/node'
       - '@types/react'
+      - '@types/react-dom'
       - graphql-ws
-      - react-is
     dev: false
 
   /@graphiql/toolkit@0.8.4(@types/node@18.16.16)(graphql@16.6.0):
@@ -7905,6 +7929,53 @@ packages:
       monaco-editor: 0.38.0
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+  /@motionone/animation@10.15.1:
+    resolution: {integrity: sha512-mZcJxLjHor+bhcPuIFErMDNyrdb2vJur8lSfMCsuCB4UyV8ILZLvK+t+pg56erv8ud9xQGK/1OGPt10agPrCyQ==}
+    dependencies:
+      '@motionone/easing': 10.15.1
+      '@motionone/types': 10.15.1
+      '@motionone/utils': 10.15.1
+      tslib: 2.5.3
+    dev: false
+
+  /@motionone/dom@10.12.0:
+    resolution: {integrity: sha512-UdPTtLMAktHiqV0atOczNYyDd/d8Cf5fFsd1tua03PqTwwCe/6lwhLSQ8a7TbnQ5SN0gm44N1slBfj+ORIhrqw==}
+    dependencies:
+      '@motionone/animation': 10.15.1
+      '@motionone/generators': 10.15.1
+      '@motionone/types': 10.15.1
+      '@motionone/utils': 10.15.1
+      hey-listen: 1.0.8
+      tslib: 2.5.3
+    dev: false
+
+  /@motionone/easing@10.15.1:
+    resolution: {integrity: sha512-6hIHBSV+ZVehf9dcKZLT7p5PEKHGhDwky2k8RKkmOvUoYP3S+dXsKupyZpqx5apjd9f+php4vXk4LuS+ADsrWw==}
+    dependencies:
+      '@motionone/utils': 10.15.1
+      tslib: 2.5.3
+    dev: false
+
+  /@motionone/generators@10.15.1:
+    resolution: {integrity: sha512-67HLsvHJbw6cIbLA/o+gsm7h+6D4Sn7AUrB/GPxvujse1cGZ38F5H7DzoH7PhX+sjvtDnt2IhFYF2Zp1QTMKWQ==}
+    dependencies:
+      '@motionone/types': 10.15.1
+      '@motionone/utils': 10.15.1
+      tslib: 2.5.3
+    dev: false
+
+  /@motionone/types@10.15.1:
+    resolution: {integrity: sha512-iIUd/EgUsRZGrvW0jqdst8st7zKTzS9EsKkP+6c6n4MPZoQHwiHuVtTQLD6Kp0bsBLhNzKIBlHXponn/SDT4hA==}
+    dev: false
+
+  /@motionone/utils@10.15.1:
+    resolution: {integrity: sha512-p0YncgU+iklvYr/Dq4NobTRdAPv9PveRDUXabPEeOjBLSO/1FNB2phNTZxOxpi1/GZwYpAoECEa0Wam+nsmhSw==}
+    dependencies:
+      '@motionone/types': 10.15.1
+      hey-listen: 1.0.8
+      tslib: 2.5.3
     dev: false
 
   /@msgpackr-extract/msgpackr-extract-darwin-arm64@2.1.2:
@@ -10362,217 +10433,6 @@ packages:
     resolution: {integrity: sha512-fyrgCaedtvMg9NK3en0pnOYJdtfwxUcNolezkNPUsoX57X8oQk+NkqcvzHXD2uKNij6GXmWU9NDru2IWjrO4BQ==}
     dependencies:
       '@babel/runtime': 7.21.0
-    dev: false
-
-  /@reach/auto-id@0.17.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-ud8iPwF52RVzEmkHq1twuqGuPA+moreumUHdtgvU3sr3/15BNhwp3KyDLrKKSz0LP1r3V4pSdyF9MbYM8BoSjA==}
-    peerDependencies:
-      react: ^16.8.0 || 17.x
-      react-dom: ^16.8.0 || 17.x
-    dependencies:
-      '@reach/utils': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tslib: 2.5.3
-    dev: false
-
-  /@reach/combobox@0.17.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-2mYvU5agOBCQBMdlM4cri+P1BbNwp05P1OuDyc33xJSNiBG7BMy4+ZSHJ0X4fyle6rHwSgCAOCLOeWV1XUYjoQ==}
-    peerDependencies:
-      react: ^16.8.0 || 17.x
-      react-dom: ^16.8.0 || 17.x
-    dependencies:
-      '@reach/auto-id': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/descendants': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/popover': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/portal': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/utils': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tiny-warning: 1.0.3
-      tslib: 2.5.3
-    dev: false
-
-  /@reach/descendants@0.17.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-c7lUaBfjgcmKFZiAWqhG+VnXDMEhPkI4kAav/82XKZD6NVvFjsQOTH+v3tUkskrAPV44Yuch0mFW/u5Ntifr7Q==}
-    peerDependencies:
-      react: ^16.8.0 || 17.x
-      react-dom: ^16.8.0 || 17.x
-    dependencies:
-      '@reach/utils': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tslib: 2.5.3
-    dev: false
-
-  /@reach/dialog@0.17.0(@types/react@18.2.8)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-AnfKXugqDTGbeG3c8xDcrQDE4h9b/vnc27Sa118oQSquz52fneUeX9MeFb5ZEiBJK8T5NJpv7QUTBIKnFCAH5A==}
-    peerDependencies:
-      react: ^16.8.0 || 17.x
-      react-dom: ^16.8.0 || 17.x
-    dependencies:
-      '@reach/portal': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/utils': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-focus-lock: 2.9.2(@types/react@18.2.8)(react@18.2.0)
-      react-remove-scroll: 2.5.5(@types/react@18.2.8)(react@18.2.0)
-      tslib: 2.5.3
-    transitivePeerDependencies:
-      - '@types/react'
-    dev: false
-
-  /@reach/dropdown@0.17.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-qBTIGInhxtPHtdj4Pl2XZgZMz3e37liydh0xR3qc48syu7g71sL4nqyKjOzThykyfhA3Pb3/wFgsFJKGTSdaig==}
-    peerDependencies:
-      react: ^16.8.0 || 17.x
-      react-dom: ^16.8.0 || 17.x
-    dependencies:
-      '@reach/auto-id': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/descendants': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/popover': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/utils': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tslib: 2.5.3
-    dev: false
-
-  /@reach/listbox@0.17.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-AMnH1P6/3VKy2V/nPb4Es441arYR+t4YRdh9jdcFVrCOD6y7CQrlmxsYjeg9Ocdz08XpdoEBHM3PKLJqNAUr7A==}
-    peerDependencies:
-      react: ^16.8.0 || 17.x
-      react-dom: ^16.8.0 || 17.x
-    dependencies:
-      '@reach/auto-id': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/descendants': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/machine': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/popover': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/utils': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    dev: false
-
-  /@reach/machine@0.17.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-9EHnuPgXzkbRENvRUzJvVvYt+C2jp7PGN0xon7ffmKoK8rTO6eA/bb7P0xgloyDDQtu88TBUXKzW0uASqhTXGA==}
-    peerDependencies:
-      react: ^16.8.0 || 17.x
-      react-dom: ^16.8.0 || 17.x
-    dependencies:
-      '@reach/utils': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@xstate/fsm': 1.4.0
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tslib: 2.5.3
-    dev: false
-
-  /@reach/menu-button@0.17.0(react-dom@18.2.0)(react-is@17.0.2)(react@18.2.0):
-    resolution: {integrity: sha512-YyuYVyMZKamPtivoEI6D0UEILYH3qZtg4kJzEAuzPmoR/aHN66NZO75Fx0gtjG1S6fZfbiARaCOZJC0VEiDOtQ==}
-    peerDependencies:
-      react: ^16.8.0 || 17.x
-      react-dom: ^16.8.0 || 17.x
-      react-is: ^16.8.0 || 17.x
-    dependencies:
-      '@reach/dropdown': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/popover': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/utils': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-is: 17.0.2
-      tiny-warning: 1.0.3
-      tslib: 2.5.3
-    dev: false
-
-  /@reach/observe-rect@1.2.0:
-    resolution: {integrity: sha512-Ba7HmkFgfQxZqqaeIWWkNK0rEhpxVQHIoVyW1YDSkGsGIXzcaW4deC8B0pZrNSSyLTdIk7y+5olKt5+g0GmFIQ==}
-    dev: false
-
-  /@reach/popover@0.17.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-yYbBF4fMz4Ml4LB3agobZjcZ/oPtPsNv70ZAd7lEC2h7cvhF453pA+zOBGYTPGupKaeBvgAnrMjj7RnxDU5hoQ==}
-    peerDependencies:
-      react: ^16.8.0 || 17.x
-      react-dom: ^16.8.0 || 17.x
-    dependencies:
-      '@reach/portal': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/rect': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/utils': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tabbable: 4.0.0
-      tslib: 2.5.3
-    dev: false
-
-  /@reach/portal@0.17.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-+IxsgVycOj+WOeNPL2NdgooUdHPSY285wCtj/iWID6akyr4FgGUK7sMhRM9aGFyrGpx2vzr+eggbUmAVZwOz+A==}
-    peerDependencies:
-      react: ^16.8.0 || 17.x
-      react-dom: ^16.8.0 || 17.x
-    dependencies:
-      '@reach/utils': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tiny-warning: 1.0.3
-      tslib: 2.5.3
-    dev: false
-
-  /@reach/rect@0.17.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-3YB7KA5cLjbLc20bmPkJ06DIfXSK06Cb5BbD2dHgKXjUkT9WjZaLYIbYCO8dVjwcyO3GCNfOmPxy62VsPmZwYA==}
-    peerDependencies:
-      react: ^16.8.0 || 17.x
-      react-dom: ^16.8.0 || 17.x
-    dependencies:
-      '@reach/observe-rect': 1.2.0
-      '@reach/utils': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tiny-warning: 1.0.3
-      tslib: 2.5.3
-    dev: false
-
-  /@reach/tooltip@0.17.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-HP8Blordzqb/Cxg+jnhGmWQfKgypamcYLBPlcx6jconyV5iLJ5m93qipr1giK7MqKT2wlsKWy44ZcOrJ+Wrf8w==}
-    peerDependencies:
-      react: ^16.8.0 || 17.x
-      react-dom: ^16.8.0 || 17.x
-    dependencies:
-      '@reach/auto-id': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/portal': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/rect': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/utils': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      '@reach/visually-hidden': 0.17.0(react-dom@18.2.0)(react@18.2.0)
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tiny-warning: 1.0.3
-      tslib: 2.5.3
-    dev: false
-
-  /@reach/utils@0.17.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-M5y8fCBbrWeIsxedgcSw6oDlAMQDkl5uv3VnMVJ7guwpf4E48Xlh1v66z/1BgN/WYe2y8mB/ilFD2nysEfdGeA==}
-    peerDependencies:
-      react: ^16.8.0 || 17.x
-      react-dom: ^16.8.0 || 17.x
-    dependencies:
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tiny-warning: 1.0.3
-      tslib: 2.5.3
-    dev: false
-
-  /@reach/visually-hidden@0.17.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-T6xF3Nv8vVnjVkGU6cm0+kWtvliLqPAo8PcZ+WxkKacZsaHTjaZb4v1PaCcyQHmuTNT/vtTVNOJLG0SjQOIb7g==}
-    peerDependencies:
-      react: ^16.8.0 || 17.x
-      react-dom: ^16.8.0 || 17.x
-    dependencies:
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      tslib: 2.5.3
     dev: false
 
   /@repeaterjs/repeater@3.0.4:
@@ -13243,34 +13103,34 @@ packages:
       eslint-visitor-keys: 3.4.1
     dev: true
 
-  /@urql/core@3.1.1(graphql@16.6.0):
-    resolution: {integrity: sha512-Mnxtq4I4QeFJsgs7Iytw+HyhiGxISR6qtyk66c9tipozLZ6QVxrCiUPF2HY4BxNIabaxcp+rivadvm8NAnXj4Q==}
-    peerDependencies:
-      graphql: ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+  /@urql/core@4.0.10(graphql@16.6.0):
+    resolution: {integrity: sha512-Vs3nOSAnYftqOCg034Ostp/uSqWlQg5ryLIzcOrm8+O43s4M+Ew4GQAuemIH7ZDB8dek6h61zzWI3ujd8FH3NA==}
     dependencies:
-      graphql: 16.6.0
+      '@0no-co/graphql.web': 1.0.1(graphql@16.6.0)
       wonka: 6.3.2
+    transitivePeerDependencies:
+      - graphql
     dev: false
 
-  /@urql/devtools@2.0.3(@urql/core@3.1.1)(graphql@16.6.0):
+  /@urql/devtools@2.0.3(@urql/core@4.0.10)(graphql@16.6.0):
     resolution: {integrity: sha512-TktPLiBS9LcBPHD6qcnb8wqOVcg3Bx0iCtvQ80uPpfofwwBGJmqnQTjUdEFU6kwaLOFZULQ9+Uo4831G823mQw==}
     peerDependencies:
       '@urql/core': '>= 1.14.0'
       graphql: '>= 0.11.0'
     dependencies:
-      '@urql/core': 3.1.1(graphql@16.6.0)
+      '@urql/core': 4.0.10(graphql@16.6.0)
       graphql: 16.6.0
       wonka: 6.3.2
     dev: false
 
-  /@urql/exchange-graphcache@5.0.9(graphql@16.6.0):
-    resolution: {integrity: sha512-GYhN4YDL+/alF6ci1OFOaL0Ze0GinmuYWrjQjpjl8kP/9ZbXY2LLN/3ZlRG9cCks1nxyea/9h4IS0mk5LS57lA==}
-    peerDependencies:
-      graphql: ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
+  /@urql/exchange-graphcache@6.0.4(graphql@16.6.0):
+    resolution: {integrity: sha512-fzfCUrHzhLycPRa6kYrQYryk0pwmUfeHY9Xqh11A6wtp4/diV7FASlffB5k2j3AWRBxBnqThXDssRXI/G8cACQ==}
     dependencies:
-      '@urql/core': 3.1.1(graphql@16.6.0)
-      graphql: 16.6.0
+      '@0no-co/graphql.web': 1.0.1(graphql@16.6.0)
+      '@urql/core': 4.0.10(graphql@16.6.0)
       wonka: 6.3.2
+    transitivePeerDependencies:
+      - graphql
     dev: false
 
   /@vercel/ncc@0.36.1:
@@ -13658,10 +13518,6 @@ packages:
     dependencies:
       '@whatwg-node/fetch': 0.9.2
       tslib: 2.5.3
-
-  /@xstate/fsm@1.4.0:
-    resolution: {integrity: sha512-uTHDeu2xI5E1IFwf37JFQM31RrH7mY7877RqPBS4ZqSNUwoLDuct8AhBWaXGnVizBAYyimVwgCyGa9z/NiRhXA==}
-    dev: false
 
   /@xtuc/ieee754@1.2.0:
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -15727,8 +15583,8 @@ packages:
     resolution: {integrity: sha512-RpAVKQA5T63xEj6/giIbUEtZwJ4UFIc3ZtvEkiaUERylqe8xb5IvqcgOurZLahv93CLKfxcw5YI+DZcUBRyLXA==}
     engines: {node: '>=0.10.0'}
 
-  /codemirror-graphql@2.0.8(@codemirror/language@6.0.0)(codemirror@5.65.9)(graphql@16.6.0):
-    resolution: {integrity: sha512-EU+pXsSKZJAFVdF8j5hbB5gqXsDDjsBiJoohQq09yhsr69pzaI8ZrXjmpuR4CMyf9jgqcz5KK7rsTmxDHmeJPQ==}
+  /codemirror-graphql@2.0.9-alpha.0(@codemirror/language@6.0.0)(codemirror@5.65.9)(graphql@16.6.0):
+    resolution: {integrity: sha512-52UDU1rHCLkju/4tQQXkG/3fmYH+leeKPV9DaRERRQK+/HIbfSxeunslKSCL5qjaQa18heZCI4J0lKl5IAXx5Q==}
     peerDependencies:
       '@codemirror/language': 6.0.0
       codemirror: ^5.65.3
@@ -18747,13 +18603,6 @@ packages:
     engines: {node: '>=8'}
     dev: false
 
-  /focus-lock@0.11.4:
-    resolution: {integrity: sha512-LzZWJcOBIcHslQ46N3SUu/760iLPSrUtp8omM4gh9du438V2CQdks8TcOu1yvmu2C68nVOBnl1WFiKGPbQ8L6g==}
-    engines: {node: '>=10'}
-    dependencies:
-      tslib: 2.5.3
-    dev: false
-
   /focus-trap-react@10.1.4(prop-types@15.8.1)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-vLUQRXI6SUJD8YLYTBa1DlCYRmTKFDxRvc4TEe2nq8S1aj+YKsucuNxqZUOf0+RZ01Yoiwtk/6rD9xqSvawIvQ==}
     peerDependencies:
@@ -18927,6 +18776,30 @@ packages:
     engines: {node: '>=0.10.0'}
     dependencies:
       map-cache: 0.2.2
+    dev: false
+
+  /framer-motion@6.5.1(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-o1BGqqposwi7cgDrtg0dNONhkmPsUFDaLcKXigzuTFC5x58mE8iyTazxSudFzmT6MEyJKfjjU8ItoMe3W+3fiw==}
+    peerDependencies:
+      react: '>=16.8 || ^17.0.0 || ^18.0.0'
+      react-dom: '>=16.8 || ^17.0.0 || ^18.0.0'
+    dependencies:
+      '@motionone/dom': 10.12.0
+      framesync: 6.0.1
+      hey-listen: 1.0.8
+      popmotion: 11.0.3
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      style-value-types: 5.0.0
+      tslib: 2.5.3
+    optionalDependencies:
+      '@emotion/is-prop-valid': 0.8.8
+    dev: false
+
+  /framesync@6.0.1:
+    resolution: {integrity: sha512-fUY88kXvGiIItgNC7wcTOl0SNRCVXMKSWW2Yzfmn7EKNc+MpCzcz9DhdHcdjbrtN3c6R4H5dTY2jiCpPdysEjA==}
+    dependencies:
+      tslib: 2.5.3
     dev: false
 
   /fresh@0.5.2:
@@ -19467,14 +19340,14 @@ packages:
   /graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
-  /graphiql@2.4.7(@codemirror/language@6.0.0)(@types/node@18.16.16)(@types/react@18.2.8)(graphql@16.6.0)(react-dom@18.2.0)(react-is@17.0.2)(react@18.2.0):
-    resolution: {integrity: sha512-Fm3fVI65EPyXy+PdbeQUyODTwl2NhpZ47msGnGwpDvdEzYdgF7pPrxL96xCfF31KIauS4+ceEJ+ZwEe5iLWiQw==}
+  /graphiql@3.0.0-alpha.0(@codemirror/language@6.0.0)(@types/node@18.16.16)(@types/react-dom@18.2.4)(@types/react@18.2.8)(graphql@16.6.0)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-7674fsWb7kFgHbTzNqi1VDB4UJb2ZY3MBmS+agUCZWWCPNmxh2e/4+PftdRDwkH8FaOme8jHTWsqNZYXK+L9uw==}
     peerDependencies:
       graphql: ^15.5.0 || ^16.0.0
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
-      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react: ^16.8.0 || ^17 || ^18
+      react-dom: ^16.8.0 || ^17 || ^18
     dependencies:
-      '@graphiql/react': 0.17.6(@codemirror/language@6.0.0)(@types/node@18.16.16)(@types/react@18.2.8)(graphql@16.6.0)(react-dom@18.2.0)(react-is@17.0.2)(react@18.2.0)
+      '@graphiql/react': 0.18.0-alpha.0(@codemirror/language@6.0.0)(@types/node@18.16.16)(@types/react-dom@18.2.4)(@types/react@18.2.8)(graphql@16.6.0)(react-dom@18.2.0)(react@18.2.0)
       '@graphiql/toolkit': 0.8.4(@types/node@18.16.16)(graphql@16.6.0)
       graphql: 16.6.0
       graphql-language-service: 5.1.6(graphql@16.6.0)
@@ -19485,8 +19358,8 @@ packages:
       - '@codemirror/language'
       - '@types/node'
       - '@types/react'
+      - '@types/react-dom'
       - graphql-ws
-      - react-is
     dev: false
 
   /graphql-config@4.5.0(@types/node@18.16.16)(graphql@16.6.0):
@@ -20003,6 +19876,10 @@ packages:
       glob: 8.1.0
       readable-stream: 3.6.0
     dev: true
+
+  /hey-listen@1.0.8:
+    resolution: {integrity: sha512-COpmrF2NOg4TBWUJ5UVyaCU2A88wEMkUPK4hNqyCkqHbxT92BbvfjoSozkAIIm6XhicGlJHhFdullInrdhwU8Q==}
+    dev: false
 
   /highlight-words-core@1.2.2:
     resolution: {integrity: sha512-BXUKIkUuh6cmmxzi5OIbUJxrG8OAk2MqoL1DtO3Wo9D2faJg2ph5ntyuQeLqaHJmzER6H5tllCDA9ZnNe9BVGg==}
@@ -25519,6 +25396,15 @@ packages:
     engines: {node: '>=12.0.0'}
     dev: false
 
+  /popmotion@11.0.3:
+    resolution: {integrity: sha512-Y55FLdj3UxkR7Vl3s7Qr4e9m0onSnP8W7d/xQLsoJM40vs6UKHFdygs6SWryasTZYqugMjm3BepCF4CWXDiHgA==}
+    dependencies:
+      framesync: 6.0.1
+      hey-listen: 1.0.8
+      style-value-types: 5.0.0
+      tslib: 2.5.3
+    dev: false
+
   /posix-character-classes@0.1.1:
     resolution: {integrity: sha512-xTgYBc3fuo7Yt7JbiuFxSYGToMoz8fLoE6TC9Wx1P/u+LfeThMOAqmuyECnlBaaJb+u1m9hHiXUEtwW4OzfUJg==}
     engines: {node: '>=0.10.0'}
@@ -26470,15 +26356,6 @@ packages:
       react: 18.2.0
     dev: false
 
-  /react-clientside-effect@1.2.6(react@18.2.0):
-    resolution: {integrity: sha512-XGGGRQAKY+q25Lz9a/4EPqom7WRjz3z9R2k4jhVKA/puQFH/5Nt27vFZYql4m4NVNdUvX8PS3O7r/Zzm7cjUlg==}
-    peerDependencies:
-      react: ^15.3.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
-    dependencies:
-      '@babel/runtime': 7.21.0
-      react: 18.2.0
-    dev: false
-
   /react-colorful@5.6.1(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-1exovf0uGTGyq5mXQT0zgQ80uvj2PCwvF8zY1RN9/vbJVSjSo3fsB/4L3ObbF7u70NduSiK4xu4Y6q1MHoUGEw==}
     peerDependencies:
@@ -26560,25 +26437,6 @@ packages:
     resolution: {integrity: sha512-rtGImPZ0YyLrscKI9xTpV8psd6I8VAtjKCzQDlzyDvqJA8XOW78TXYQwNRNd8g8JZnDu8q9Fu/1v4HPAVwVdHA==}
     dev: false
 
-  /react-focus-lock@2.9.2(@types/react@18.2.8)(react@18.2.0):
-    resolution: {integrity: sha512-5JfrsOKyA5Zn3h958mk7bAcfphr24jPoMoznJ8vaJF6fUrPQ8zrtEd3ILLOK8P5jvGxdMd96OxWNjDzATfR2qw==}
-    peerDependencies:
-      '@types/react': ^16.8.0 || ^17.0.0 || ^18.0.0
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-    dependencies:
-      '@babel/runtime': 7.21.0
-      '@types/react': 18.2.8
-      focus-lock: 0.11.4
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-clientside-effect: 1.2.6(react@18.2.0)
-      use-callback-ref: 1.3.0(@types/react@18.2.8)(react@18.2.0)
-      use-sidecar: 1.1.2(@types/react@18.2.8)(react@18.2.0)
-    dev: false
-
   /react-highlight-words@0.20.0(react@18.2.0):
     resolution: {integrity: sha512-asCxy+jCehDVhusNmCBoxDf2mm1AJ//D+EzDx1m5K7EqsMBIHdZ5G4LdwbSEXqZq1Ros0G0UySWmAtntSph7XA==}
     peerDependencies:
@@ -26643,6 +26501,7 @@ packages:
 
   /react-is@17.0.2:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
+    dev: true
 
   /react-is@18.1.0:
     resolution: {integrity: sha512-Fl7FuabXsJnV5Q1qIOQwx/sagGF18kogb4gpfcG4gjLBWO0WDiiz1ko/ExayuxE7InyQkBLkxRFG5oxY6Uu3Kg==}
@@ -28687,6 +28546,13 @@ packages:
       inline-style-parser: 0.1.1
     dev: false
 
+  /style-value-types@5.0.0:
+    resolution: {integrity: sha512-08yq36Ikn4kx4YU6RD7jWEv27v4V+PUsOGa4n/as8Et3CuODMJQ00ENeAVXAeydX4Z2j1XHZF1K2sX4mGl18fA==}
+    dependencies:
+      hey-listen: 1.0.8
+      tslib: 2.5.3
+    dev: false
+
   /styled-jsx@5.1.1(@babel/core@7.21.5)(react@18.2.0):
     resolution: {integrity: sha512-pW7uC1l4mBZ8ugbiZrcIsiIvVx1UmTfw7UkC3Um2tmfUq9Bhk8IiyEIPl6F8agHgjzku6j0xQEZbfA5uSgSaCw==}
     engines: {node: '>= 12.0.0'}
@@ -28871,10 +28737,6 @@ packages:
       '@pkgr/utils': 2.3.1
       tslib: 2.5.3
     dev: true
-
-  /tabbable@4.0.0:
-    resolution: {integrity: sha512-H1XoH1URcBOa/rZZWxLxHCtOdVUEev+9vo5YdYhC9tCY4wnybX+VQrCYuy9ubkg69fCBxCONJOSLGfw0DWMffQ==}
-    dev: false
 
   /tabbable@6.1.2:
     resolution: {integrity: sha512-qCN98uP7i9z0fIS4amQ5zbGBOq+OSigYeGvPy7NDk8Y9yncqDZ9pRPgfsc2PJIVM9RrJj7GIfuRgmjoUU9zTHQ==}
@@ -30060,16 +29922,16 @@ packages:
   /urlpattern-polyfill@9.0.0:
     resolution: {integrity: sha512-WHN8KDQblxd32odxeIgo83rdVDE2bvdkb86it7bMhYZwWKJz0+O0RK/eZiHYnM+zgt/U7hAHOlCQGfjjvSkw2g==}
 
-  /urql@3.0.3(graphql@16.6.0)(react@18.2.0):
-    resolution: {integrity: sha512-aVUAMRLdc5AOk239DxgXt6ZxTl/fEmjr7oyU5OGo8uvpqu42FkeJErzd2qBzhAQ3DyusoZIbqbBLPlnKo/yy2A==}
+  /urql@4.0.3(graphql@16.6.0)(react@18.2.0):
+    resolution: {integrity: sha512-ynwez59f5uo31RO9/OD1RveasLGsaRC2mEm5nNGuPiQbpIeuZLQJTya61hr6I9c24YWIHf3Ld29xZy6JW3scvQ==}
     peerDependencies:
-      graphql: ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
       react: '>= 16.8.0'
     dependencies:
-      '@urql/core': 3.1.1(graphql@16.6.0)
-      graphql: 16.6.0
+      '@urql/core': 4.0.10(graphql@16.6.0)
       react: 18.2.0
       wonka: 6.3.2
+    transitivePeerDependencies:
+      - graphql
     dev: false
 
   /use-callback-ref@1.3.0(@types/react@18.2.8)(react@18.2.0):

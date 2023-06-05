@@ -27,12 +27,11 @@ import {
 } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
-import { OperationDocument } from '@/graphql';
 import { canAccessTarget, CanAccessTarget_MemberFragment } from '@/lib/access/target';
 import { useClipboard, useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
 import { useCollections } from '@/lib/hooks/use-collections';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { GraphiQLPlugin, Menu, Tooltip, useEditorContext } from '@graphiql/react';
+import { DropdownMenu, GraphiQLPlugin, Tooltip, useEditorContext } from '@graphiql/react';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import { BookmarkIcon, DotsVerticalIcon, Link1Icon, Share2Icon } from '@radix-ui/react-icons';
 import 'graphiql/graphiql.css';
@@ -58,11 +57,28 @@ function Share(): ReactElement {
   );
 }
 
+const OperationQuery = graphql(`
+  query Operation($selector: TargetSelectorInput!, $id: ID!) {
+    target(selector: $selector) {
+      documentCollectionOperation(id: $id) {
+        id
+        name
+        query
+        headers
+        variables
+        collection {
+          id
+        }
+      }
+    }
+  }
+`);
+
 function useCurrentOperation() {
   const router = useRouteSelector();
   const operationId = router.query.operation as string;
   const [{ data }] = useQuery({
-    query: OperationDocument,
+    query: OperationQuery,
     variables: {
       selector: {
         target: router.targetId,
@@ -73,8 +89,8 @@ function useCurrentOperation() {
     },
     pause: !operationId,
   });
-
-  return data?.target?.documentCollectionOperation;
+  // if operationId is undefined `data` could contain previous state
+  return operationId ? data?.target?.documentCollectionOperation : null;
 }
 
 function useOperationCollectionsPlugin(props: {
@@ -88,9 +104,9 @@ function useOperationCollectionsPlugin(props: {
     icon: BookmarkIcon,
     content: function Content() {
       const [isCollectionModalOpen, toggleCollectionModal] = useToggle();
-      const [isOperationModalOpen, toggleOperationModal] = useToggle();
       const { collections, loading } = useCollections();
       const [collectionId, setCollectionId] = useState('');
+      const [operationId, setOperationId] = useState('');
       const [isDeleteCollectionModalOpen, toggleDeleteCollectionModalOpen] = useToggle();
       const [isDeleteOperationModalOpen, toggleDeleteOperationModalOpen] = useToggle();
       const copyToClipboard = useClipboard();
@@ -105,7 +121,7 @@ function useOperationCollectionsPlugin(props: {
         editorContext.headerEditor
       );
 
-      const operationId = router.query.operation as string;
+      const queryParamsOperationId = router.query.operation as string;
 
       const tabsCount = editorContext.tabs.length;
 
@@ -123,7 +139,7 @@ function useOperationCollectionsPlugin(props: {
       useEffect(() => {
         if (!hasAllEditors) return;
 
-        if (operationId && currentOperation) {
+        if (queryParamsOperationId && currentOperation) {
           // Set selected operation in editors
           editorContext.queryEditor.setValue(currentOperation.query);
           editorContext.variableEditor.setValue(currentOperation.variables);
@@ -134,7 +150,7 @@ function useOperationCollectionsPlugin(props: {
           editorContext.variableEditor.setValue('');
           editorContext.headerEditor.setValue('');
         }
-      }, [hasAllEditors, operationId, currentOperation]);
+      }, [hasAllEditors, queryParamsOperationId, currentOperation]);
 
       const canEdit = canAccessTarget(TargetAccessScope.Settings, props.meRef);
       const canDelete = canAccessTarget(TargetAccessScope.Delete, props.meRef);
@@ -177,11 +193,6 @@ function useOperationCollectionsPlugin(props: {
                 toggleModalOpen={toggleDeleteCollectionModalOpen}
                 collectionId={collectionId}
               />
-              <CreateOperationModal
-                isOpen={isOperationModalOpen}
-                toggleModalOpen={toggleOperationModal}
-                operationId={operationId}
-              />
               <DeleteOperationModal
                 isOpen={isDeleteOperationModalOpen}
                 toggleModalOpen={toggleDeleteOperationModalOpen}
@@ -194,17 +205,17 @@ function useOperationCollectionsPlugin(props: {
                       <Accordion.Header>{collection.name}</Accordion.Header>
 
                       {shouldShowMenu ? (
-                        <Menu>
-                          <Menu.Button
+                        <DropdownMenu>
+                          <DropdownMenu.Button
                             className="graphiql-toolbar-button !shrink-0"
                             aria-label="More"
                             data-cy="collection-3-dots"
                           >
                             <DotsVerticalIcon />
-                          </Menu.Button>
+                          </DropdownMenu.Button>
 
-                          <Menu.List>
-                            <Menu.Item
+                          <DropdownMenu.Content>
+                            <DropdownMenu.Item
                               onSelect={() => {
                                 setCollectionId(collection.id);
                                 toggleCollectionModal();
@@ -212,8 +223,8 @@ function useOperationCollectionsPlugin(props: {
                               data-cy="collection-edit"
                             >
                               Edit
-                            </Menu.Item>
-                            <Menu.Item
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item
                               onSelect={() => {
                                 setCollectionId(collection.id);
                                 toggleDeleteCollectionModalOpen();
@@ -222,9 +233,9 @@ function useOperationCollectionsPlugin(props: {
                               data-cy="collection-delete"
                             >
                               Delete
-                            </Menu.Item>
-                          </Menu.List>
-                        </Menu>
+                            </DropdownMenu.Item>
+                          </DropdownMenu.Content>
+                        </DropdownMenu>
                       ) : null}
                     </div>
                     <Accordion.Content className="pr-0">
@@ -247,25 +258,17 @@ function useOperationCollectionsPlugin(props: {
                               >
                                 {node.name}
                               </Link>
-                              <Menu>
-                                <Menu.Button
+                              <DropdownMenu>
+                                <DropdownMenu.Button
                                   className="graphiql-toolbar-button opacity-0 [div:hover>&]:opacity-100 transition"
                                   aria-label="More"
                                   data-cy="operation-3-dots"
                                 >
                                   <DotsVerticalIcon />
-                                </Menu.Button>
+                                </DropdownMenu.Button>
 
-                                <Menu.List>
-                                  {/*{canEdit ? (*/}
-                                  {/*  <Menu.Item*/}
-                                  {/*    onSelect={toggleOperationModal}*/}
-                                  {/*    data-cy="edit-operation"*/}
-                                  {/*  >*/}
-                                  {/*    Edit operation*/}
-                                  {/*  </Menu.Item>*/}
-                                  {/*) : null}*/}
-                                  <Menu.Item
+                                <DropdownMenu.Content>
+                                  <DropdownMenu.Item
                                     onSelect={async () => {
                                       const url = new URL(window.location.href);
                                       await copyToClipboard(
@@ -274,18 +277,21 @@ function useOperationCollectionsPlugin(props: {
                                     }}
                                   >
                                     Copy link to operation
-                                  </Menu.Item>
+                                  </DropdownMenu.Item>
                                   {canDelete ? (
-                                    <Menu.Item
-                                      onSelect={toggleDeleteOperationModalOpen}
+                                    <DropdownMenu.Item
+                                      onSelect={() => {
+                                        setOperationId(node.id);
+                                        toggleDeleteOperationModalOpen();
+                                      }}
                                       className="!text-red-500"
                                       data-cy="remove-operation"
                                     >
                                       Delete
-                                    </Menu.Item>
+                                    </DropdownMenu.Item>
                                   ) : null}
-                                </Menu.List>
-                              </Menu>
+                                </DropdownMenu.Content>
+                              </DropdownMenu>
                             </div>
                           ))
                         : 'No operations yet. Use the editor to create an operation, and click Save to store and share it.'}
@@ -391,12 +397,12 @@ function Save(): ReactElement {
   return (
     <>
       {label ? <Tooltip label={label}>{button}</Tooltip> : button}
-      {isOpen ? (
-        <CreateOperationModal isOpen={isOpen} toggleModalOpen={toggle} operationId={operationId} />
-      ) : null}
+      {isOpen ? <CreateOperationModal isOpen={isOpen} toggleModalOpen={toggle} /> : null}
     </>
   );
 }
+
+// Save.whyDidYouRender = true;
 
 function Page({
   endpoint,

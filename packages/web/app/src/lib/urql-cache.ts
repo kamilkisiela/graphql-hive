@@ -1,32 +1,19 @@
 /* eslint-disable import/no-extraneous-dependencies */
+import { DocumentNode, Kind } from 'graphql';
 import { produce } from 'immer';
-import { getOperationName, TypedDocumentNode } from 'urql';
+import { TypedDocumentNode } from 'urql';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
-import {
-  AddAlertChannelDocument,
-  AddAlertDocument,
-  AlertChannelsDocument,
-  AlertsDocument,
-  CheckIntegrationsDocument,
-  CreateOrganizationDocument,
-  CreateProjectDocument,
-  CreateTargetDocument,
-  CreateTokenDocument,
-  DeleteAlertChannelsDocument,
-  DeleteAlertsDocument,
-  DeleteGitHubIntegrationDocument,
-  DeleteOrganizationDocument,
-  DeletePersistedOperationDocument,
-  DeleteProjectDocument,
-  DeleteSlackIntegrationDocument,
-  DeleteTargetDocument,
-  DeleteTokensDocument,
-  OrganizationsDocument,
-  ProjectsDocument,
-  TargetsDocument,
-  TokensDocument,
-} from '../graphql';
+import { AddAlertChannelDocument, AddAlertDocument, AlertChannelsDocument, AlertsDocument, CheckIntegrationsDocument, CreateOrganizationDocument, CreateProjectDocument, CreateTargetDocument, CreateTokenDocument, DeleteAlertChannelsDocument, DeleteAlertsDocument, DeleteGitHubIntegrationDocument, DeleteOrganizationDocument, DeletePersistedOperationDocument, DeleteProjectDocument, DeleteSlackIntegrationDocument, DeleteTargetDocument, DeleteTokensDocument, OrganizationsDocument, ProjectsDocument, TargetsDocument, TokensDocument } from '../graphql';
+
+
+export const getOperationName = (query: DocumentNode): string | void => {
+  for (const node of query.definitions) {
+    if (node.kind === Kind.OPERATION_DEFINITION) {
+      return node.name?.value;
+    }
+  }
+};
 
 function updateQuery<T, V>(cache: Cache, input: QueryInput<T, V>, recipe: (obj: T) => void) {
   return cache.updateQuery(input, (data: T | null) => {

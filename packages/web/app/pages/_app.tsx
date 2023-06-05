@@ -14,6 +14,7 @@ import { env } from '@/env/frontend';
 import * as gtag from '@/lib/gtag';
 import { urqlClient } from '@/lib/urql';
 import { configureScope, init } from '@sentry/nextjs';
+import '../src/wdyr';
 import '../public/styles.css';
 import 'react-toastify/dist/ReactToastify.css';
 

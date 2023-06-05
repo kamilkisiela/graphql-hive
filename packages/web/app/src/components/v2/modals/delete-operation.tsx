@@ -2,7 +2,7 @@ import { ReactElement } from 'react';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
-import { useRouteSelector } from '@/lib/hooks';
+import { useNotifications, useRouteSelector } from '@/lib/hooks';
 import { TrashIcon } from '@radix-ui/react-icons';
 
 const DeleteOperationMutation = graphql(`
@@ -37,7 +37,7 @@ export function DeleteOperationModal({
 }): ReactElement {
   const route = useRouteSelector();
   const [, mutate] = useMutation(DeleteOperationMutation);
-
+  const notify = useNotifications();
   return (
     <Modal
       open={isOpen}
@@ -58,7 +58,7 @@ export function DeleteOperationModal({
           block
           danger
           onClick={async () => {
-            await mutate({
+            const { error } = await mutate({
               id: operationId,
               selector: {
                 target: route.targetId,
@@ -66,6 +66,9 @@ export function DeleteOperationModal({
                 project: route.projectId,
               },
             });
+            if (error) {
+              notify(error.message, 'error');
+            }
             toggleModalOpen();
           }}
           data-cy="confirm"

@@ -1,7 +1,6 @@
-import { ReactElement, useEffect } from 'react';
-import { useRouter } from 'next/router';
+import { ReactElement } from 'react';
 import { useFormik } from 'formik';
-import { useMutation, useQuery } from 'urql';
+import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal, Select } from '@/components/v2';
 import { graphql } from '@/gql';
@@ -36,34 +35,14 @@ const CreateOperationMutation = graphql(`
   }
 `);
 
-const OperationQuery = graphql(`
-  query Operation($selector: TargetSelectorInput!, $id: ID!) {
-    target(selector: $selector) {
-      documentCollectionOperation(id: $id) {
-        id
-        name
-        query
-        headers
-        variables
-        collection {
-          id
-        }
-      }
-    }
-  }
-`);
-
 export function CreateOperationModal({
   isOpen,
   toggleModalOpen,
-  operationId,
 }: {
   isOpen: boolean;
   toggleModalOpen: () => void;
-  operationId?: string;
 }): ReactElement {
-  const routeSelector = useRouteSelector();
-  const router = useRouter();
+  const router = useRouteSelector();
   const [mutationCreate, mutateCreate] = useMutation(CreateOperationMutation);
 
   const { collections, loading } = useCollections();
@@ -72,31 +51,9 @@ export function CreateOperationModal({
     nonNull: true,
   });
 
-  const [{ data, error: operationError, fetching: loadingOperation }] = useQuery({
-    query: OperationQuery,
-    variables: {
-      id: operationId!,
-      selector: {
-        target: routeSelector.targetId,
-        organization: routeSelector.organizationId,
-        project: routeSelector.projectId,
-      },
-    },
-    pause: !operationId,
-  });
-  const error = mutationCreate.error || operationError;
+  const { error } = mutationCreate;
 
-  const fetching = loading || loadingOperation;
-
-  useEffect(() => {
-    if (data) {
-      const { documentCollectionOperation } = data.target!;
-      void setValues({
-        name: documentCollectionOperation.name,
-        collectionId: documentCollectionOperation.collection.id,
-      });
-    }
-  }, [data]);
+  const fetching = loading;
 
   const {
     handleSubmit,
@@ -107,7 +64,6 @@ export function CreateOperationModal({
     isValid,
     touched,
     isSubmitting,
-    setValues,
     resetForm,
   } = useFormik({
     initialValues: {
@@ -121,9 +77,9 @@ export function CreateOperationModal({
     async onSubmit(values) {
       const { error, data: result } = await mutateCreate({
         selector: {
-          target: routeSelector.targetId,
-          organization: routeSelector.organizationId,
-          project: routeSelector.projectId,
+          target: router.targetId,
+          organization: router.organizationId,
+          project: router.projectId,
         },
         input: {
           name: values.name,
@@ -136,12 +92,15 @@ export function CreateOperationModal({
       if (!error) {
         if (result) {
           const data = result.createOperationInDocumentCollection;
-          await router.push({
-            query: {
-              ...router.query,
-              operation: data.ok?.operation.id,
-            },
-          });
+          // quick fix because router.push provoke infinity network requests due
+          // `pause: !router.query.operation` in `useQuery` urql hook
+          window.location.search = `operation=${data.ok?.operation.id}`;
+          // void router.push({
+          //   query: {
+          //     ...router.query,
+          //     operation: data.ok?.operation.id,
+          //   },
+          // });
         }
         resetForm();
         toggleModalOpen();
@@ -153,7 +112,7 @@ export function CreateOperationModal({
     <Modal open={isOpen} onOpenChange={toggleModalOpen}>
       {!fetching && (
         <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
-          <Heading className="text-center">{operationId ? 'Edit' : 'Create'} Operation</Heading>
+          <Heading className="text-center">Create Operation</Heading>
 
           <div className="flex flex-col gap-4">
             <label className="text-sm font-semibold" htmlFor="name">
@@ -217,7 +176,7 @@ export function CreateOperationModal({
               disabled={isSubmitting || !isValid || values.collectionId === ''}
               data-cy="confirm"
             >
-              {operationId ? 'Update' : 'Add'}
+              Add Operation
             </Button>
           </div>
         </form>
