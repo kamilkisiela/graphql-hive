@@ -239,7 +239,24 @@ export class SchemaPublisher {
         break;
       case ProjectType.FEDERATION:
       case ProjectType.STITCHING:
+        if (input.service == null) {
+          this.logger.debug('No service name provided (type=%s)', project.type, modelVersion);
+
+          return {
+            __typename: 'SchemaCheckError',
+            valid: false,
+            changes: [],
+            warnings: [],
+            errors: [
+              {
+                message: 'Missing service name',
+              },
+            ],
+          } as const;
+        }
+
         this.logger.debug('Using %s registry model (version=%s)', project.type, modelVersion);
+
         checkResult = await this.models[project.type][modelVersion].check({
           input: {
             sdl: input.sdl,
@@ -303,13 +320,6 @@ export class SchemaPublisher {
             message: string;
           }>
         ).concat(
-          getReasonByCode(checkResult, CheckFailureReasonCode.MissingServiceName)
-            ? [
-                {
-                  message: 'Missing service name',
-                },
-              ]
-            : [],
           getReasonByCode(checkResult, CheckFailureReasonCode.PolicyInfringement)?.errors.map(
             e => ({ message: formatPolicyMessage(e) }),
           ) ?? [],
@@ -337,13 +347,6 @@ export class SchemaPublisher {
           message: string;
         }>
       ).concat(
-        getReasonByCode(checkResult, CheckFailureReasonCode.MissingServiceName)
-          ? [
-              {
-                message: 'Missing service name',
-              },
-            ]
-          : [],
         getReasonByCode(checkResult, CheckFailureReasonCode.BreakingChanges)?.breakingChanges ?? [],
         getReasonByCode(checkResult, CheckFailureReasonCode.PolicyInfringement)?.errors.map(e => ({
           message: formatPolicyMessage(e),
