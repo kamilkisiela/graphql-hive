@@ -68,7 +68,6 @@ export class SingleModel {
       metadata: null,
     };
 
-    const initial = latest === null;
     const latestVersion = latest;
     const schemas = [incoming] as [SingleSchema];
     const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
@@ -86,7 +85,6 @@ export class SingleModel {
         state: {
           changes: null,
           warnings: [],
-          initial,
         },
       };
     }
@@ -167,7 +165,6 @@ export class SingleModel {
       state: {
         changes: diffCheck.result?.changes ?? null,
         warnings: policyCheck.result?.warnings ?? [],
-        initial,
       },
     };
   }

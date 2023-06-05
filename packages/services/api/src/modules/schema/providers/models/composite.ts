@@ -93,7 +93,6 @@ export class CompositeModel {
     const schemas = latestVersion
       ? swapServices(latestVersion.schemas, incoming).schemas
       : [incoming];
-    const initial = latest === null;
     const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
 
     const serviceNameCheck = await this.checks.serviceName({
@@ -122,7 +121,6 @@ export class CompositeModel {
       return {
         conclusion: SchemaCheckConclusion.Success,
         state: {
-          initial,
           warnings: null,
           changes: null,
         },
@@ -206,7 +204,6 @@ export class CompositeModel {
     return {
       conclusion: SchemaCheckConclusion.Success,
       state: {
-        initial,
         warnings: policyCheck.result?.warnings ?? [],
         changes: diffCheck.result?.changes ?? null,
       },

@@ -105,7 +105,6 @@ export type SchemaCheckSuccess = {
   state: {
     changes: Array<Change> | null;
     warnings: SchemaCheckWarning[] | null;
-    initial: boolean;
   };
 };
 
