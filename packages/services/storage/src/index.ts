@@ -1585,7 +1585,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `,
       );
     },
-    async getMaybeLatestValidVersion({ target }) {
+    async getMaybeLatestValidSchemaVersion({ target }) {
       const version = await pool.maybeOne<unknown>(
         sql`
           SELECT
@@ -1612,7 +1612,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return SchemaVersionModel.parse(version);
     },
-    async getLatestValidVersion({ target }) {
+    async getLatestValidSchemaVersion({ target }) {
       const version = await pool.maybeOne<unknown>(
         sql`
           SELECT
@@ -1635,7 +1635,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return SchemaVersionModel.parse(version);
     },
-    async getLatestVersion({ project, target }) {
+    async getLatestSchemaVersion({ project, target }) {
       const version = await pool.maybeOne<unknown>(
         sql`
           SELECT
@@ -1660,7 +1660,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return SchemaVersionModel.parse(version);
     },
 
-    async getMaybeLatestVersion({ project, target }) {
+    async getMaybeLatestSchemaVersion({ project, target }) {
       const version = await pool.maybeOne<unknown>(
         sql`
           SELECT
@@ -1688,7 +1688,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return SchemaVersionModel.parse(version);
     },
-    async getLatestSchemas({ organization, project, target, onlyComposable }) {
+    async getSchemasOfLatestSchemaVersion({ organization, project, target, onlyComposable }) {
       const latest = await pool.maybeOne<Pick<schema_versions, 'id' | 'is_composable'>>(sql`
         SELECT sv.id, sv.is_composable
         FROM public.schema_versions as sv
@@ -1975,7 +1975,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         };
       });
     },
-    async createVersion(input) {
+    async createSchemaVersion(input) {
       const url = input.url ?? null;
       const service = input.service ?? null;
 
@@ -2047,7 +2047,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return output.version;
     },
 
-    async getSchemaChangesForVersion(args) {
+    async getSchemaChangesForSchemaVersion(args) {
       // TODO: should this be paginated?
       const changes = await pool.query<unknown>(sql`
         SELECT
@@ -3008,6 +3008,47 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return result ? transformSchemaPolicy(result) : null;
     },
+    // @ts-expect-error This needs a change in graphql-inspector -> Switch from enum to const strings (Type '"FIELD_ARGUMENT_DESCRIPTION_CHANGED"' is not assignable to type 'ChangeType.UnionMemberAdded'.)
+    async createSchemaCheck(schemaCheck) {
+      const result = await pool.maybeOne<unknown>(sql`
+        INSERT INTO "public"."schema_checks" (
+          "schema_sdl"
+          , "schema_version_id"
+          , "schema_composition_errors"
+          , "schema_changes"
+          , "composite_schema_sdl"
+          , "supergraph_sdl"
+        )
+        VALUES (
+          ${schemaCheck.schemaSDL}
+          , ${schemaCheck.schemaVersionId}
+          , ${
+            schemaCheck.schemaCompositionErrors == null
+              ? null
+              : sql`${JSON.stringify(schemaCheck.schemaCompositionErrors)}::jsonb`
+          }
+          , ${
+            schemaCheck.schemaChanges == null
+              ? null
+              : sql`${JSON.stringify(schemaCheck.schemaChanges)}::jsonb`
+          }
+          , ${schemaCheck.compositeSchemaSDL}
+          , ${schemaCheck.supergraphSDL}
+        )
+        RETURNING
+          "id"
+          , "schema_sdl" as "schemaSDL"
+          , "schema_version_id" as "schemaVersionId"
+          , "schema_composition_errors" as "schemaCompositionErrors"
+          , "schema_changes" as "schemaChanges"
+          , "composite_schema_sdl" as "compositeSchemaSDL"
+          , "supergraph_sdl" as "supergraphSDL"
+          , to_json("created_at") as "createdAt"
+          , to_json("updated_at") as "updatedAt"
+      `);
+
+      return SchemaCheckModel.parse(result);
+    },
   };
 
   return storage;
@@ -3257,3 +3298,27 @@ async function insertSchemaVersion(
 
   return await trx.one(query).then(SchemaVersionModel.parse);
 }
+
+const SchemaCheckModel = zod.intersection(
+  zod.object({
+    id: zod.string(),
+    createdAt: zod.string(),
+    updatedAt: zod.string(),
+    schemaSDL: zod.string(),
+    schemaVersionId: zod.string(),
+  }),
+  zod.union([
+    zod.object({
+      schemaCompositionErrors: zod.array(SchemaCompositionErrorModel),
+      schemaChanges: zod.null(),
+      compositeSchemaSDL: zod.null(),
+      supergraphSDL: zod.null(),
+    }),
+    zod.object({
+      schemaCompositionErrors: zod.null(),
+      schemaChanges: zod.array(SchemaChangeModel),
+      compositeSchemaSDL: zod.string(),
+      supergraphSDL: zod.string().nullable(),
+    }),
+  ]),
+);

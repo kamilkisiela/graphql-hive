@@ -36,7 +36,7 @@ export class CompositeLegacyModel {
   async check({
     input,
     selector,
-    latest,
+    latestSchemaVersion,
     project,
     baseSchema,
   }: {
@@ -49,7 +49,7 @@ export class CompositeLegacyModel {
       project: string;
       target: string;
     };
-    latest: {
+    latestSchemaVersion: {
       isComposable: boolean;
       schemas: PushedCompositeSchema[];
     } | null;
@@ -70,11 +70,11 @@ export class CompositeLegacyModel {
       metadata: null,
     };
 
-    const latestVersion = latest;
+    const latestVersion = latestSchemaVersion;
     const schemas = latestVersion
       ? swapServices(latestVersion.schemas, incoming).schemas
       : [incoming];
-    const initial = latest === null;
+    const initial = latestSchemaVersion === null;
     const orchestrator = project.type === ProjectType.FEDERATION ? this.federation : this.stitching;
 
     const serviceNameCheck = await this.checks.serviceName({

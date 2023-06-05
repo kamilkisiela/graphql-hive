@@ -161,32 +161,37 @@ export class SchemaPublisher {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    const [target, project, organization, latestVersion, latestComposableVersion] =
-      await Promise.all([
-        this.targetManager.getTarget({
-          organization: input.organization,
-          project: input.project,
-          target: input.target,
-        }),
-        this.projectManager.getProject({
-          organization: input.organization,
-          project: input.project,
-        }),
-        this.organizationManager.getOrganization({
-          organization: input.organization,
-        }),
-        this.schemaManager.getLatestSchemas({
-          organization: input.organization,
-          project: input.project,
-          target: input.target,
-        }),
-        this.schemaManager.getLatestSchemas({
-          organization: input.organization,
-          project: input.project,
-          target: input.target,
-          onlyComposable: true,
-        }),
-      ]);
+    const [
+      target,
+      project,
+      organization,
+      schemasOfLatestSchemaVersion,
+      schemasOfLatestComposableSchemaVersion,
+    ] = await Promise.all([
+      this.targetManager.getTarget({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+      }),
+      this.projectManager.getProject({
+        organization: input.organization,
+        project: input.project,
+      }),
+      this.organizationManager.getOrganization({
+        organization: input.organization,
+      }),
+      this.schemaManager.getSchemasOfLatestSchemaVersion({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+      }),
+      this.schemaManager.getSchemasOfLatestSchemaVersion({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+        onlyComposable: true,
+      }),
+    ]);
 
     schemaCheckCount.inc({
       model: project.legacyRegistryModel ? 'legacy' : 'modern',
@@ -220,16 +225,16 @@ export class SchemaPublisher {
         checkResult = await this.models[ProjectType.SINGLE][modelVersion].check({
           input,
           selector,
-          latest: latestVersion
+          latestSchemaVersion: schemasOfLatestSchemaVersion
             ? {
-                isComposable: latestVersion.valid,
-                schemas: [ensureSingleSchema(latestVersion.schemas)],
+                isComposable: schemasOfLatestSchemaVersion.valid,
+                schemas: [ensureSingleSchema(schemasOfLatestSchemaVersion.schemas)],
               }
             : null,
-          latestComposable: latestComposableVersion
+          latestComposableSchemaVersion: schemasOfLatestComposableSchemaVersion
             ? {
-                isComposable: latestComposableVersion.valid,
-                schemas: [ensureSingleSchema(latestComposableVersion.schemas)],
+                isComposable: schemasOfLatestComposableSchemaVersion.valid,
+                schemas: [ensureSingleSchema(schemasOfLatestComposableSchemaVersion.schemas)],
               }
             : null,
           baseSchema,
@@ -246,16 +251,16 @@ export class SchemaPublisher {
             serviceName: input.service,
           },
           selector,
-          latest: latestVersion
+          latestSchemaVersion: schemasOfLatestSchemaVersion
             ? {
-                isComposable: latestVersion.valid,
-                schemas: ensureCompositeSchemas(latestVersion.schemas),
+                isComposable: schemasOfLatestSchemaVersion.valid,
+                schemas: ensureCompositeSchemas(schemasOfLatestSchemaVersion.schemas),
               }
             : null,
-          latestComposable: latestComposableVersion
+          latestComposableSchemaVersion: schemasOfLatestComposableSchemaVersion
             ? {
-                isComposable: latestComposableVersion.valid,
-                schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
+                isComposable: schemasOfLatestComposableSchemaVersion.valid,
+                schemas: ensureCompositeSchemas(schemasOfLatestComposableSchemaVersion.schemas),
               }
             : null,
           baseSchema,
@@ -393,7 +398,7 @@ export class SchemaPublisher {
       // Why?
       // Because we change its status to valid
       // and `getLatestValidVersion` calls for fresh data from DB
-      const latestVersion = await this.schemaManager.getLatestValidVersion(input);
+      const latestVersion = await this.schemaManager.getLatestValidSchemaVersion(input);
 
       // if it is the latest version, we should update the CDN
       if (latestVersion.id === updateResult.id) {
@@ -467,12 +472,12 @@ export class SchemaPublisher {
             this.organizationManager.getOrganization({
               organization: input.organization,
             }),
-            this.schemaManager.getLatestSchemas({
+            this.schemaManager.getSchemasOfLatestSchemaVersion({
               organization: input.organization,
               project: input.project,
               target: input.target.id,
             }),
-            this.schemaManager.getLatestSchemas({
+            this.schemaManager.getSchemasOfLatestSchemaVersion({
               organization: input.organization,
               project: input.project,
               target: input.target.id,
@@ -651,12 +656,12 @@ export class SchemaPublisher {
           project: projectId,
           target: targetId,
         }),
-        this.schemaManager.getLatestSchemas({
+        this.schemaManager.getSchemasOfLatestSchemaVersion({
           organization: organizationId,
           project: projectId,
           target: targetId,
         }),
-        this.schemaManager.getLatestSchemas({
+        this.schemaManager.getSchemasOfLatestSchemaVersion({
           organization: organizationId,
           project: projectId,
           target: targetId,

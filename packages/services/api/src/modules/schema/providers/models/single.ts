@@ -31,8 +31,8 @@ export class SingleModel {
   async check({
     input,
     selector,
-    latest,
-    latestComposable,
+    latestSchemaVersion,
+    latestComposableSchemaVersion,
     project,
     organization,
     baseSchema,
@@ -45,11 +45,11 @@ export class SingleModel {
       project: string;
       target: string;
     };
-    latest: {
+    latestSchemaVersion: {
       isComposable: boolean;
       schemas: [SingleSchema];
     } | null;
-    latestComposable: {
+    latestComposableSchemaVersion: {
       isComposable: boolean;
       schemas: [SingleSchema];
     } | null;
@@ -68,8 +68,8 @@ export class SingleModel {
       metadata: null,
     };
 
-    const initial = latest === null;
-    const latestVersion = latest;
+    const initial = latestSchemaVersion === null;
+    const latestVersion = latestSchemaVersion;
     const schemas = [incoming] as [SingleSchema];
     const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
 
@@ -81,8 +81,11 @@ export class SingleModel {
     // Short-circuit if there are no changes
     if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
       this.logger.debug('No changes detected, skipping schema check');
+
       return {
         conclusion: SchemaCheckConclusion.Success,
+        compositeSchemaSDL: input.sdl,
+        supergraphSDL: null,
         state: {
           changes: null,
           warnings: [],
@@ -103,7 +106,7 @@ export class SingleModel {
         project,
         schemas,
         selector,
-        version: compareToLatest ? latest : latestComposable,
+        version: compareToLatest ? latestSchemaVersion : latestComposableSchemaVersion,
         includeUrlChanges: false,
       }),
       this.checks.policyCheck({
@@ -164,6 +167,8 @@ export class SingleModel {
 
     return {
       conclusion: SchemaCheckConclusion.Success,
+      compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
+      supergraphSDL: null,
       state: {
         changes: diffCheck.result?.changes ?? null,
         warnings: policyCheck.result?.warnings ?? [],

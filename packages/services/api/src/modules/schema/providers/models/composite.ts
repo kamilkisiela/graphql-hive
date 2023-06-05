@@ -48,8 +48,8 @@ export class CompositeModel {
   async check({
     input,
     selector,
-    latest,
-    latestComposable,
+    latestSchemaVersion,
+    latestComposableSchemaVersion,
     project,
     organization,
     baseSchema,
@@ -63,11 +63,11 @@ export class CompositeModel {
       project: string;
       target: string;
     };
-    latest: {
+    latestSchemaVersion: {
       isComposable: boolean;
       schemas: PushedCompositeSchema[];
     } | null;
-    latestComposable: {
+    latestComposableSchemaVersion: {
       isComposable: boolean;
       schemas: PushedCompositeSchema[];
     } | null;
@@ -89,11 +89,11 @@ export class CompositeModel {
       metadata: null,
     };
 
-    const latestVersion = latest;
+    const latestVersion = latestSchemaVersion;
     const schemas = latestVersion
       ? swapServices(latestVersion.schemas, incoming).schemas
       : [incoming];
-    const initial = latest === null;
+    const initial = latestSchemaVersion === null;
     const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
 
     const serviceNameCheck = await this.checks.serviceName({
@@ -146,7 +146,7 @@ export class CompositeModel {
         project,
         schemas,
         selector,
-        version: compareToLatest ? latest : latestComposable,
+        version: compareToLatest ? latestSchemaVersion : latestComposableSchemaVersion,
         includeUrlChanges: false,
       }),
       this.checks.policyCheck({

@@ -32,7 +32,7 @@ export class SingleLegacyModel {
   async check({
     input,
     selector,
-    latest,
+    latestSchemaVersion,
     project,
     baseSchema,
   }: {
@@ -44,7 +44,7 @@ export class SingleLegacyModel {
       project: string;
       target: string;
     };
-    latest: {
+    latestSchemaVersion: {
       isComposable: boolean;
       schemas: [SingleSchema];
     } | null;
@@ -62,8 +62,8 @@ export class SingleLegacyModel {
       metadata: null,
     };
 
-    const initial = latest === null;
-    const latestVersion = latest;
+    const initial = latestSchemaVersion === null;
+    const latestVersion = latestSchemaVersion;
     const schemas = [incoming] as [SingleSchema];
 
     const checksumCheck = await this.checks.checksum({

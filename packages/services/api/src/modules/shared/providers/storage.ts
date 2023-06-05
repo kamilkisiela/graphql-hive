@@ -234,7 +234,7 @@ export interface Storage {
   ): Promise<TargetSettings['validation'] | never>;
 
   hasSchema(_: TargetSelector): Promise<boolean>;
-  getLatestSchemas(
+  getSchemasOfLatestSchemaVersion(
     _: {
       onlyComposable?: boolean;
     } & TargetSelector,
@@ -243,10 +243,10 @@ export interface Storage {
     version: string;
     valid: boolean;
   } | null>;
-  getLatestValidVersion(_: TargetSelector): Promise<SchemaVersion | never>;
-  getMaybeLatestValidVersion(_: TargetSelector): Promise<SchemaVersion | null | never>;
-  getLatestVersion(_: TargetSelector): Promise<SchemaVersion | never>;
-  getMaybeLatestVersion(_: TargetSelector): Promise<SchemaVersion | null>;
+  getLatestValidSchemaVersion(_: TargetSelector): Promise<SchemaVersion | never>;
+  getMaybeLatestValidSchemaVersion(_: TargetSelector): Promise<SchemaVersion | null | never>;
+  getLatestSchemaVersion(_: TargetSelector): Promise<SchemaVersion | never>;
+  getMaybeLatestSchemaVersion(_: TargetSelector): Promise<SchemaVersion | null>;
 
   getMatchingServiceSchemaOfVersions(versions: {
     before: string | null;
@@ -303,7 +303,7 @@ export interface Storage {
       ),
   ): Promise<DeletedCompositeSchema>;
 
-  createVersion(
+  createSchemaVersion(
     _: ({
       schema: string;
       author: string;
@@ -337,7 +337,9 @@ export interface Storage {
    * If it return `null` the schema version does not have any changes persisted.
    * This can happen if the schema version was created before we introduced persisting changes.
    */
-  getSchemaChangesForVersion(_: { versionId: string }): Promise<null | Array<SerializableChange>>;
+  getSchemaChangesForSchemaVersion(_: {
+    versionId: string;
+  }): Promise<null | Array<SerializableChange>>;
 
   updateVersionStatus(
     _: {
@@ -512,6 +514,47 @@ export interface Storage {
         endCursor: string;
       }>;
     }>
+  >;
+
+  createSchemaCheck(
+    _: {
+      schemaSDL: string;
+      schemaVersionId: string;
+      isBreaking: boolean;
+    } & (
+      | {
+          schemaCompositionErrors: Array<SchemaCompositionError>;
+          schemaChanges: null;
+          compositeSchemaSDL: null;
+          supergraphSDL: null;
+        }
+      | {
+          schemaCompositionErrors: null;
+          schemaChanges: Array<Change>;
+          compositeSchemaSDL: string;
+          supergraphSDL: string | null;
+        }
+    ),
+  ): Promise<
+    {
+      id: string;
+    } & {
+      schemaSDL: string;
+      schemaVersionId: string;
+    } & (
+        | {
+            schemaCompositionErrors: Array<SchemaCompositionError>;
+            schemaChanges: null;
+            compositeSchemaSDL: null;
+            supergraphSDL: null;
+          }
+        | {
+            schemaCompositionErrors: null;
+            schemaChanges: Array<SerializableChange>;
+            compositeSchemaSDL: string;
+            supergraphSDL: string | null;
+          }
+      )
   >;
 
   /** Schema Policies */

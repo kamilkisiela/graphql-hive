@@ -102,6 +102,8 @@ export type SchemaCheckFailureReason =
 
 export type SchemaCheckSuccess = {
   conclusion: (typeof SchemaCheckConclusion)['Success'];
+  compositeSchemaSDL: string;
+  supergraphSDL: string | null;
   state: {
     changes: Array<Change> | null;
     warnings: SchemaCheckWarning[] | null;

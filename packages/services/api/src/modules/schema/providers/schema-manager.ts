@@ -128,7 +128,7 @@ export class SchemaManager {
     return this.storage.getSchemasOfPreviousVersion(selector);
   }
 
-  async getLatestSchemas(
+  async getSchemasOfLatestSchemaVersion(
     selector: TargetSelector & {
       onlyComposable?: boolean;
     },
@@ -138,7 +138,7 @@ export class SchemaManager {
       ...selector,
       scope: TargetAccessScope.REGISTRY_READ,
     });
-    return this.storage.getLatestSchemas(selector);
+    return this.storage.getSchemasOfLatestSchemaVersion(selector);
   }
 
   async getMatchingServiceSchemaOfVersions(versions: { before: string | null; after: string }) {
@@ -153,7 +153,7 @@ export class SchemaManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    const version = await this.storage.getMaybeLatestValidVersion(selector);
+    const version = await this.storage.getMaybeLatestValidSchemaVersion(selector);
 
     if (!version) {
       return null;
@@ -167,14 +167,14 @@ export class SchemaManager {
     };
   }
 
-  async getLatestValidVersion(selector: TargetSelector) {
+  async getLatestValidSchemaVersion(selector: TargetSelector) {
     this.logger.debug('Fetching latest valid version (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
       ...selector,
       scope: TargetAccessScope.REGISTRY_READ,
     });
     return {
-      ...(await this.storage.getLatestValidVersion(selector)),
+      ...(await this.storage.getLatestValidSchemaVersion(selector)),
       project: selector.project,
       target: selector.target,
       organization: selector.organization,
@@ -188,7 +188,7 @@ export class SchemaManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
     return {
-      ...(await this.storage.getLatestVersion(selector)),
+      ...(await this.storage.getLatestSchemaVersion(selector)),
       project: selector.project,
       target: selector.target,
       organization: selector.organization,
@@ -202,7 +202,7 @@ export class SchemaManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    const latest = await this.storage.getMaybeLatestVersion(selector);
+    const latest = await this.storage.getMaybeLatestSchemaVersion(selector);
 
     if (!latest) {
       return null;
@@ -239,7 +239,7 @@ export class SchemaManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    return await this.storage.getSchemaChangesForVersion({ versionId: selector.version });
+    return await this.storage.getSchemaChangesForSchemaVersion({ versionId: selector.version });
   }
 
   async getSchemaVersions(selector: Paginated<TargetSelector>) {
@@ -340,7 +340,7 @@ export class SchemaManager {
       scope: TargetAccessScope.REGISTRY_WRITE,
     });
 
-    return this.storage.createVersion({
+    return this.storage.createSchemaVersion({
       ...input,
       logIds: input.logIds,
     });
