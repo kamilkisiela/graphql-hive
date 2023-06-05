@@ -56,7 +56,7 @@ export class CompositeModel {
   }: {
     input: {
       sdl: string;
-      serviceName?: string | null;
+      serviceName: string;
     };
     selector: {
       organization: string;
@@ -83,7 +83,7 @@ export class CompositeModel {
       target: selector.target,
       date: Date.now() as any,
       sdl: input.sdl,
-      service_name: input.serviceName!,
+      service_name: input.serviceName,
       service_url: temp,
       action: 'PUSH',
       metadata: null,
@@ -94,22 +94,6 @@ export class CompositeModel {
       ? swapServices(latestVersion.schemas, incoming).schemas
       : [incoming];
     const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
-
-    const serviceNameCheck = await this.checks.serviceName({
-      name: incoming.service_name,
-    });
-
-    if (serviceNameCheck.status === 'failed') {
-      return {
-        conclusion: SchemaCheckConclusion.Failure,
-        warnings: [],
-        reasons: [
-          {
-            code: CheckFailureReasonCode.MissingServiceName,
-          },
-        ],
-      };
-    }
 
     const checksumCheck = await this.checks.checksum({
       schemas,

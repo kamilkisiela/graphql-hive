@@ -59,8 +59,6 @@ export type SchemaDeleteConclusion =
   (typeof SchemaDeleteConclusion)[keyof typeof SchemaDeleteConclusion];
 
 export const CheckFailureReasonCode = {
-  MissingServiceUrl: 'MISSING_SERVICE_URL',
-  MissingServiceName: 'MISSING_SERVICE_NAME',
   CompositionFailure: 'COMPOSITION_FAILURE',
   BreakingChanges: 'BREAKING_CHANGES',
   PolicyInfringement: 'POLICY_INFRINGEMENT',
@@ -79,9 +77,6 @@ export type SchemaCheckWarning = {
 };
 
 export type SchemaCheckFailureReason =
-  | {
-      code: (typeof CheckFailureReasonCode)['MissingServiceName'];
-    }
   | {
       code: (typeof CheckFailureReasonCode)['CompositionFailure'];
       compositionErrors: Array<{

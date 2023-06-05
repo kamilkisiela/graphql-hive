@@ -42,7 +42,7 @@ export class CompositeLegacyModel {
   }: {
     input: {
       sdl: string;
-      serviceName?: string | null;
+      serviceName: string;
     };
     selector: {
       organization: string;
@@ -64,7 +64,7 @@ export class CompositeLegacyModel {
       target: selector.target,
       date: Date.now() as any,
       sdl: input.sdl,
-      service_name: input.serviceName!,
+      service_name: input.serviceName,
       service_url: temp,
       action: 'PUSH',
       metadata: null,
@@ -75,23 +75,6 @@ export class CompositeLegacyModel {
       ? swapServices(latestVersion.schemas, incoming).schemas
       : [incoming];
     const orchestrator = project.type === ProjectType.FEDERATION ? this.federation : this.stitching;
-
-    const serviceNameCheck = await this.checks.serviceName({
-      name: incoming.service_name,
-    });
-
-    if (serviceNameCheck.status === 'failed') {
-      return {
-        conclusion: SchemaCheckConclusion.Failure,
-        // Do we want to use this new "warning" field to let users know they should upgrade to new model?
-        warnings: [],
-        reasons: [
-          {
-            code: CheckFailureReasonCode.MissingServiceName,
-          },
-        ],
-      };
-    }
 
     const checksumCheck = await this.checks.checksum({
       schemas,
