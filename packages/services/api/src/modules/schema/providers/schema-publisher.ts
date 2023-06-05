@@ -323,7 +323,7 @@ export class SchemaPublisher {
         valid: true,
         changes: checkResult.state.changes ?? [],
         warnings: checkResult.state.warnings ?? [],
-        initial: checkResult.state.initial,
+        initial: latestVersion == null,
       } as const;
     }
 

@@ -74,7 +74,6 @@ export class CompositeLegacyModel {
     const schemas = latestVersion
       ? swapServices(latestVersion.schemas, incoming).schemas
       : [incoming];
-    const initial = latest === null;
     const orchestrator = project.type === ProjectType.FEDERATION ? this.federation : this.stitching;
 
     const serviceNameCheck = await this.checks.serviceName({
@@ -103,7 +102,7 @@ export class CompositeLegacyModel {
     if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
       return {
         conclusion: SchemaCheckConclusion.Success,
-        state: { initial, changes: null, warnings: null },
+        state: { changes: null, warnings: null },
       };
     }
 
@@ -161,7 +160,6 @@ export class CompositeLegacyModel {
     return {
       conclusion: SchemaCheckConclusion.Success,
       state: {
-        initial,
         changes: diffCheck.result?.changes ?? null,
         warnings: null,
       },

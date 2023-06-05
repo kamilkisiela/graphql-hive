@@ -62,7 +62,6 @@ export class SingleLegacyModel {
       metadata: null,
     };
 
-    const initial = latest === null;
     const latestVersion = latest;
     const schemas = [incoming] as [SingleSchema];
 
@@ -79,7 +78,6 @@ export class SingleLegacyModel {
         state: {
           changes: null,
           warnings: null,
-          initial,
         },
       };
     }
@@ -142,7 +140,6 @@ export class SingleLegacyModel {
       state: {
         changes: diffCheck.result?.changes ?? null,
         warnings: null,
-        initial,
       },
     };
   }
