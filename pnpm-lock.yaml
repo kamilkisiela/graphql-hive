@@ -92,8 +92,8 @@ importers:
         specifier: 1.3.62
         version: 1.3.62
       '@theguild/eslint-config':
-        specifier: 0.9.0
-        version: 0.9.0(eslint@8.41.0)(typescript@5.1.3)
+        specifier: 0.10.0
+        version: 0.10.0(eslint@8.41.0)(typescript@5.1.3)
       '@theguild/prettier-config':
         specifier: 1.1.3
         version: 1.1.3(prettier@2.8.8)
@@ -12378,8 +12378,8 @@ packages:
     dev: false
     patched: true
 
-  /@theguild/eslint-config@0.9.0(eslint@8.41.0)(typescript@5.1.3):
-    resolution: {integrity: sha512-rPYiVcAxT2j75wUm7nVrFw6oCpSdgFsS3PtVXfWKBhBb3JHSv2249t5SVPkvJKD3WRiVl4952KI5lh9tHT6JBg==}
+  /@theguild/eslint-config@0.10.0(eslint@8.41.0)(typescript@5.1.3):
+    resolution: {integrity: sha512-raRyudPsUrZE3MRuLX2ZfeS4RmYhcu4yLuLyvO8+WpzvQR+c53fJLhL2xoz3+zJQmYNEQ56dNGeDbBFFNRdLkQ==}
     peerDependencies:
       eslint: ^8.24.0
     dependencies:
