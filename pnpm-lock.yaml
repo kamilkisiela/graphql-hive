@@ -686,8 +686,8 @@ importers:
         specifier: 0.9.2
         version: 0.9.2
       '@whatwg-node/server':
-        specifier: 0.8.1
-        version: 0.8.1
+        specifier: 0.8.2
+        version: 0.8.2
       esbuild:
         specifier: 0.17.19
         version: 0.17.19
@@ -726,8 +726,8 @@ importers:
         specifier: 0.9.2
         version: 0.9.2
       '@whatwg-node/server':
-        specifier: 0.8.1
-        version: 0.8.1
+        specifier: 0.8.2
+        version: 0.8.2
       dotenv:
         specifier: 16.1.4
         version: 16.1.4
@@ -1034,8 +1034,8 @@ importers:
         specifier: 0.9.2
         version: 0.9.2
       '@whatwg-node/server':
-        specifier: 0.8.1
-        version: 0.8.1
+        specifier: 0.8.2
+        version: 0.8.2
       dotenv:
         specifier: 16.1.4
         version: 16.1.4
@@ -13646,10 +13646,11 @@ packages:
       tslib: 2.5.3
     dev: false
 
-  /@whatwg-node/server@0.8.1:
-    resolution: {integrity: sha512-5nzOE61W5VA43rE4MeUVHLDPpZGDfGiQ5LnEwJNbVehUI6Ua8QD566C8dhBmXxFuT8pXTlxWZHe3sjjGZCc4ng==}
+  /@whatwg-node/server@0.8.2:
+    resolution: {integrity: sha512-vljFfLh8iM/N5XO0amiYebKveKiuoLjnhmFmPejeaTylsbQJp/l6ojSKfNJwZ7bD0pdPIFsENMrtCUN09CefmQ==}
     engines: {node: '>=16.0.0'}
     dependencies:
+      '@repeaterjs/repeater': 3.0.4
       '@whatwg-node/fetch': 0.9.2
       tslib: 2.5.3
 
