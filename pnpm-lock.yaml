@@ -1544,8 +1544,8 @@ importers:
         specifier: 2.0.3
         version: 2.0.3(@urql/core@4.0.10)(graphql@16.6.0)
       '@urql/exchange-graphcache':
-        specifier: 6.0.4
-        version: 6.0.4(graphql@16.6.0)
+        specifier: 6.1.1
+        version: 6.1.1(graphql@16.6.0)
       '@whatwg-node/fetch':
         specifier: 0.9.2
         version: 0.9.2
@@ -13123,8 +13123,8 @@ packages:
       wonka: 6.3.2
     dev: false
 
-  /@urql/exchange-graphcache@6.0.4(graphql@16.6.0):
-    resolution: {integrity: sha512-fzfCUrHzhLycPRa6kYrQYryk0pwmUfeHY9Xqh11A6wtp4/diV7FASlffB5k2j3AWRBxBnqThXDssRXI/G8cACQ==}
+  /@urql/exchange-graphcache@6.1.1(graphql@16.6.0):
+    resolution: {integrity: sha512-R4BOZLPSfSWVMhfJMRIGY6ktbnIa0EkmMGeXa78SyfLq/g8RgA+8zk9znVVFI0q8LadKCMoPpxIbsx7wJxx7RA==}
     dependencies:
       '@0no-co/graphql.web': 1.0.1(graphql@16.6.0)
       '@urql/core': 4.0.10(graphql@16.6.0)
