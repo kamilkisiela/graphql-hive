@@ -26,6 +26,7 @@ const ManageSubscriptionInner_OrganizationFragment = graphql(`
       ...CanAccessOrganization_MemberFragment
     }
     billingConfiguration {
+      hasPaymentIssues
       paymentMethod {
         __typename
       }
@@ -243,8 +244,6 @@ function Inner(props: {
       <Card className="w-full self-start" ref={planSummaryRef}>
         <Heading className="mb-2">Plan Summary</Heading>
         <div>
-          {error && <QueryError showError error={error} />}
-
           <div className="flex flex-col">
             <div>
               <PlanSummary plan={selectedPlan} operationsRateLimit={operationsRateLimit}>
@@ -310,7 +309,7 @@ function Inner(props: {
                 ) : null}
               </div>
             </div>
-
+            {error && <QueryError showError error={error} />}
             <div>{renderActions()}</div>
           </div>
         </div>

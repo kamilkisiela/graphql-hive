@@ -1,14 +1,26 @@
 import { ReactElement } from 'react';
+import { useRouter } from 'next/router';
 import clsx from 'clsx';
+import { useMutation } from 'urql';
 import { Section } from '@/components/common';
-import { Heading, Link } from '@/components/v2';
+import { Button, Heading, Link } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { BillingPlanType } from '@/graphql';
+import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import { CardElement } from '@stripe/react-stripe-js';
+
+const GenerateStripeLinkMutation = graphql(`
+  mutation GenerateStripeLinkMutation($selector: OrganizationSelectorInput!) {
+    generateStripePortalLink(selector: $selector)
+  }
+`);
 
 const BillingPaymentMethod_OrganizationFragment = graphql(`
   fragment BillingPaymentMethod_OrganizationFragment on Organization {
+    id
+    cleanId
     billingConfiguration {
+      hasPaymentIssues
       paymentMethod {
         brand
         last4
@@ -30,6 +42,9 @@ export const BillingPaymentMethod = ({
   organization: FragmentType<typeof BillingPaymentMethod_OrganizationFragment>;
   onValidationChange?: (isValid: boolean) => void;
 }): ReactElement | null => {
+  const [mutation, mutate] = useMutation(GenerateStripeLinkMutation);
+  const router = useRouter();
+
   if (plan !== 'PRO') {
     return null;
   }
@@ -70,10 +85,42 @@ export const BillingPaymentMethod = ({
 
   return (
     <>
-      <Section.BigTitle>Payment Method</Section.BigTitle>
-      <Section.Subtitle className="mb-6">
-        {info.brand.toUpperCase()} ending with {info.last4} (expires {info.expMonth}/{info.expYear})
-      </Section.Subtitle>
+      <div>
+        <div>
+          <Section.BigTitle>Payment Method and Billing Settings</Section.BigTitle>
+          <Section.Subtitle className="mb-6">
+            Your current payment method is <strong>{info.brand.toUpperCase()}</strong> ending with{' '}
+            {info.last4} (expires {info.expMonth}/{info.expYear}).
+          </Section.Subtitle>
+        </div>
+        <div>
+          To manage or change your payment method, billing settings, billing email, Tax ID, you can
+          use the Stripe customer dashboard:
+          <br />
+          <Button
+            variant="primary"
+            onClick={() => {
+              void mutate({
+                selector: {
+                  organization: organization.cleanId,
+                },
+              }).then(result => {
+                if (result.data?.generateStripePortalLink) {
+                  void router.push(result.data.generateStripePortalLink);
+                }
+              });
+            }}
+          >
+            {mutation.fetching ? (
+              'Loading...'
+            ) : (
+              <>
+                <ExternalLinkIcon /> Stripe Billing Dashboard
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
     </>
   );
 };

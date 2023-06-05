@@ -411,6 +411,7 @@ fragment BillingInvoiceFields on BillingInvoice {
   date
   periodStart
   periodEnd
+  status
 }
 
 fragment OrgRateLimitFields on Organization {

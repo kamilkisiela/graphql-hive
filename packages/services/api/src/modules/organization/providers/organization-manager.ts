@@ -65,11 +65,14 @@ export class OrganizationManager {
     return organization;
   });
 
-  async getOrganization(selector: OrganizationSelector): Promise<Organization> {
+  async getOrganization(
+    selector: OrganizationSelector,
+    scope = OrganizationAccessScope.READ,
+  ): Promise<Organization> {
     this.logger.debug('Fetching organization (selector=%o)', selector);
     await this.authManager.ensureOrganizationAccess({
       ...selector,
-      scope: OrganizationAccessScope.READ,
+      scope,
     });
     return this.storage.getOrganization(selector);
   }

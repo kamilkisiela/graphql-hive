@@ -1,4 +1,5 @@
 import { GraphQLError } from 'graphql';
+import { TRPCClientError } from '@trpc/client';
 import { BillingPlanType } from '../../__generated__/types';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../auth/providers/organization-access';
@@ -33,6 +34,8 @@ export const resolvers: BillingModule.Resolvers = {
     date: i => new Date(i.created * 1000).toISOString(),
     periodStart: i => new Date(i.period_start * 1000).toISOString(),
     periodEnd: i => new Date(i.period_end * 1000).toISOString(),
+    status: i =>
+      i.status ? (i.status.toUpperCase() as BillingModule.BillingInvoiceStatus) : 'DRAFT',
   },
   Organization: {
     plan: org => (org.billingPlan || 'HOBBY') as BillingPlanType,
@@ -44,6 +47,7 @@ export const resolvers: BillingModule.Resolvers = {
       if (!billingRecord) {
         return {
           hasActiveSubscription: false,
+          hasPaymentIssues: false,
           paymentMethod: null,
           billingAddress: null,
           invoices: null,
@@ -58,6 +62,7 @@ export const resolvers: BillingModule.Resolvers = {
       if (!subscriptionInfo) {
         return {
           hasActiveSubscription: false,
+          hasPaymentIssues: false,
           paymentMethod: null,
           billingAddress: null,
           invoices: null,
@@ -74,8 +79,13 @@ export const resolvers: BillingModule.Resolvers = {
         }),
       ]);
 
+      const hasPaymentIssues = invoices?.some(
+        i => i.charge !== null && typeof i.charge === 'object' && i.charge?.failure_code !== null,
+      );
+
       return {
         hasActiveSubscription: subscriptionInfo.subscription !== null,
+        hasPaymentIssues,
         paymentMethod: subscriptionInfo.paymentMethod?.card || null,
         billingAddress: subscriptionInfo.paymentMethod?.billing_details || null,
         invoices,
@@ -143,6 +153,19 @@ export const resolvers: BillingModule.Resolvers = {
     },
   },
   Mutation: {
+    generateStripePortalLink: async (_, args, { injector }) => {
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId({
+        organization: args.selector.organization,
+      });
+      const organization = await injector.get(OrganizationManager).getOrganization(
+        {
+          organization: organizationId,
+        },
+        OrganizationAccessScope.SETTINGS,
+      );
+
+      return injector.get(BillingProvider).generateStripePortalLink(organization.id);
+    },
     updateOrgRateLimit: async (_, args, { injector }) => {
       const organizationId = await injector.get(IdTranslator).translateOrganizationId({
         organization: args.selector.organization,
@@ -212,14 +235,22 @@ export const resolvers: BillingModule.Resolvers = {
 
       if (organization.billingPlan === 'HOBBY') {
         // Configure user to use Stripe payments, create billing participant record for the org
-        await injector.get(BillingProvider).upgradeToPro({
-          organizationId,
-          couponCode: args.input.couponCode,
-          paymentMethodId: args.input.paymentMethodId,
-          reserved: {
-            operations: Math.floor(args.input.monthlyLimits.operations / 1_000_000),
-          },
-        });
+        try {
+          await injector.get(BillingProvider).upgradeToPro({
+            organizationId,
+            couponCode: args.input.couponCode,
+            paymentMethodId: args.input.paymentMethodId,
+            reserved: {
+              operations: Math.floor(args.input.monthlyLimits.operations / 1_000_000),
+            },
+          });
+        } catch (e) {
+          if (e instanceof TRPCClientError) {
+            throw new GraphQLError(`Falied to upgrade: ${e.message}`);
+          }
+
+          throw e;
+        }
 
         // Upgrade the actual org plan to PRO
         organization = await injector
@@ -242,6 +273,7 @@ export const resolvers: BillingModule.Resolvers = {
           organization,
         };
       }
+
       throw new GraphQLError(`Unable to upgrade to Pro from your current plan`);
     },
   },

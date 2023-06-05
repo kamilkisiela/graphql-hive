@@ -16,6 +16,7 @@ import {
 } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { ProPlanBilling } from '../organization/billing/ProPlanBillingWarm';
 import { RateLimitWarn } from '../organization/billing/RateLimitWarn';
 
 enum TabValue {
@@ -32,6 +33,7 @@ const OrganizationLayout_OrganizationFragment = graphql(`
     me {
       ...CanAccessOrganization_MemberFragment
     }
+    ...ProPlanBilling_OrganizationFragment
     ...RateLimitWarn_OrganizationFragment
   }
 `);
@@ -167,6 +169,7 @@ export function OrganizationLayout<
         </Tabs.List>
         <Tabs.Content value={value}>
           <RateLimitWarn organization={organization} />
+          <ProPlanBilling organization={organization} />
           <div className={className}>
             {children(organizationQuery.data!, {
               organization: orgId,

@@ -44,6 +44,7 @@ export const stripeBillingApiRouter = t.router({
 
       const invoices = await ctx.stripe.invoices.list({
         customer: organizationBillingRecord.externalBillingReference,
+        expand: ['data.charge'],
       });
 
       return invoices.data;
@@ -178,6 +179,31 @@ export const stripeBillingApiRouter = t.router({
           `Failed to sync subscription for organization: failed to find find active record`,
         );
       }
+    }),
+  generateStripePortalLink: procedure
+    .input(
+      z.object({
+        organizationId: z.string().nonempty(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const storage = await ctx.storage$;
+      const organizationBillingRecord = await storage.getOrganizationBilling({
+        organization: input.organizationId,
+      });
+
+      if (organizationBillingRecord === null) {
+        throw new Error(
+          `Failed to generate Stripe link for organization: no existing participant record`,
+        );
+      }
+
+      const session = await ctx.stripe.billingPortal.sessions.create({
+        customer: organizationBillingRecord.externalBillingReference,
+        return_url: 'https://app.graphql-hive.com/',
+      });
+
+      return session.url;
     }),
   cancelSubscriptionForOrganization: procedure
     .input(
