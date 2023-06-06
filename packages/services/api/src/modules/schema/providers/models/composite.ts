@@ -13,13 +13,12 @@ import type {
 } from './../../../../shared/entities';
 import { ProjectType } from './../../../../shared/entities';
 import {
-  CheckFailureReasonCode,
+  buildSchemaCheckFailureState,
   DeleteFailureReasonCode,
   PublishFailureReasonCode,
   PublishIgnoreReasonCode,
   /* Check */
   SchemaCheckConclusion,
-  SchemaCheckFailureReason,
   SchemaCheckResult,
   /* Delete */
   SchemaDeleteConclusion,
@@ -105,8 +104,8 @@ export class CompositeModel {
       return {
         conclusion: SchemaCheckConclusion.Success,
         state: {
-          warnings: null,
-          changes: null,
+          schemaPolicyWarnings: null,
+          schemaChanges: null,
         },
       };
     }
@@ -145,51 +144,21 @@ export class CompositeModel {
       diffCheck.status === 'failed' ||
       policyCheck.status === 'failed'
     ) {
-      const reasons: SchemaCheckFailureReason[] = [];
-
-      if (compositionCheck.status === 'failed') {
-        reasons.push({
-          code: CheckFailureReasonCode.CompositionFailure,
-          compositionErrors: compositionCheck.reason.errors,
-        });
-      }
-
-      if (diffCheck.status === 'failed') {
-        if (diffCheck.reason.changes) {
-          reasons.push({
-            code: CheckFailureReasonCode.BreakingChanges,
-            changes: diffCheck.reason.changes ?? [],
-            breakingChanges: diffCheck.reason.breakingChanges,
-          });
-        }
-
-        if (diffCheck.reason.compareFailure) {
-          reasons.push({
-            code: CheckFailureReasonCode.CompositionFailure,
-            compositionErrors: [diffCheck.reason.compareFailure],
-          });
-        }
-      }
-
-      if (policyCheck.status === 'failed') {
-        reasons.push({
-          code: CheckFailureReasonCode.PolicyInfringement,
-          errors: policyCheck.reason.errors ?? [],
-        });
-      }
-
       return {
         conclusion: SchemaCheckConclusion.Failure,
-        reasons,
-        warnings: policyCheck.reason?.warnings ?? [],
+        state: buildSchemaCheckFailureState({
+          compositionCheck,
+          diffCheck,
+          policyCheck,
+        }),
       };
     }
 
     return {
       conclusion: SchemaCheckConclusion.Success,
       state: {
-        warnings: policyCheck.result?.warnings ?? [],
-        changes: diffCheck.result?.changes ?? null,
+        schemaPolicyWarnings: policyCheck.result?.warnings ?? [],
+        schemaChanges: diffCheck.result?.changes ?? null,
       },
     };
   }

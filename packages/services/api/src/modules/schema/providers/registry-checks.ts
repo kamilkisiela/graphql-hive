@@ -1,7 +1,7 @@
 import { URL } from 'node:url';
 import { Injectable, Scope } from 'graphql-modules';
 import hashObject from 'object-hash';
-import { CriticalityLevel } from '@graphql-inspector/core';
+import { type Change, CriticalityLevel } from '@graphql-inspector/core';
 import type { CompositionFailureError } from '@hive/schema';
 import { Schema } from '../../../shared/entities';
 import { buildSchema } from '../../../shared/schema';
@@ -293,9 +293,15 @@ export class RegistryChecks {
         );
       }
 
-      const breakingChanges = changes.filter(
-        change => change.criticality.level === CriticalityLevel.Breaking,
-      );
+      const safeChanges: Array<Change> = [];
+      const breakingChanges: Array<Change> = [];
+      for (const change of changes) {
+        if (change.criticality.level === CriticalityLevel.Breaking) {
+          breakingChanges.push(change);
+          continue;
+        }
+        safeChanges.push(change);
+      }
 
       const hasBreakingChanges = breakingChanges.length > 0;
 
@@ -305,6 +311,7 @@ export class RegistryChecks {
           status: 'failed',
           reason: {
             breakingChanges,
+            safeChanges,
             changes,
           },
         } satisfies CheckResult;
