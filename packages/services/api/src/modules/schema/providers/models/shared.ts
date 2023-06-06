@@ -5,6 +5,7 @@ import {
 } from 'packages/services/api/src/shared/entities';
 import { Change } from '@graphql-inspector/core';
 import type { CheckPolicyResponse } from '@hive/policy';
+import { CompositionFailureError } from '@hive/schema';
 import { type RegistryChecks } from '../registry-checks';
 
 export const SchemaPublishConclusion = {
@@ -90,7 +91,17 @@ export type SchemaCheckFailure = {
   state: {
     // TODO: in theory if composition errors are present schema policy and schema changes would always be null
     // we could express this with the type-system in a stricter way.
-    compositionErrors: Array<{ message: string }> | null;
+    composition:
+      | {
+          errors: Array<SchemaCompositionError>;
+          compositeSchemaSDL: null | string;
+          supergraphSDL: null;
+        }
+      | {
+          errors: null;
+          compositeSchemaSDL: string;
+          supergraphSDL: null | string;
+        };
     /** Absence means schema changes were skipped. */
     schemaChanges: null | {
       breaking: Array<Change>;
@@ -246,7 +257,7 @@ export function buildSchemaCheckFailureState(args: {
   diffCheck: Awaited<ReturnType<RegistryChecks['diff']>>;
   policyCheck: Awaited<ReturnType<RegistryChecks['policyCheck']>> | null;
 }): SchemaCheckFailure['state'] {
-  const compositionErrors: Array<{ message: string }> = [];
+  const compositionErrors: Array<CompositionFailureError> = [];
   let schemaChanges: null | {
     breaking: Array<Change>;
     safe: Array<Change>;
@@ -282,7 +293,18 @@ export function buildSchemaCheckFailureState(args: {
 
   return {
     schemaChanges,
-    compositionErrors: compositionErrors.length ? compositionErrors : null,
+    composition:
+      compositionErrors.length || args.compositionCheck.status === 'failed'
+        ? {
+            errors: compositionErrors,
+            compositeSchemaSDL: null,
+            supergraphSDL: null,
+          }
+        : {
+            errors: null,
+            compositeSchemaSDL: args.compositionCheck.result.fullSchemaSdl,
+            supergraphSDL: args.compositionCheck.result.supergraph ?? null,
+          },
     schemaPolicy,
   };
 }

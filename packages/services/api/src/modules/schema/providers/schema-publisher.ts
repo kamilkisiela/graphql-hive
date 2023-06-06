@@ -310,7 +310,7 @@ export class SchemaPublisher {
           ...(checkResult.state.schemaChanges?.safe ?? []),
         ],
         breakingChanges: checkResult.state.schemaChanges?.breaking ?? [],
-        compositionErrors: checkResult.state.compositionErrors ?? [],
+        compositionErrors: checkResult.state.composition.errors ?? [],
         warnings: checkResult.state.schemaPolicy?.warnings ?? [],
         errors: checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? [],
       });
@@ -337,7 +337,7 @@ export class SchemaPublisher {
       errors: [
         ...(checkResult.state.schemaChanges?.breaking ?? []),
         ...(checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? []),
-        ...(checkResult.state.compositionErrors ?? []),
+        ...(checkResult.state.composition.errors ?? []),
       ],
     } as const;
   }
