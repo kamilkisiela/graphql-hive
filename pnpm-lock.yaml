@@ -507,8 +507,8 @@ importers:
         specifier: 18.16.16
         version: 18.16.16
       '@types/pg':
-        specifier: 8.10.1
-        version: 8.10.1
+        specifier: 8.10.2
+        version: 8.10.2
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -1163,8 +1163,8 @@ importers:
         specifier: 18.16.16
         version: 18.16.16
       '@types/pg':
-        specifier: 8.10.1
-        version: 8.10.1
+        specifier: 8.10.2
+        version: 8.10.2
       pg-promise:
         specifier: 11.5.0
         version: 11.5.0
@@ -12941,8 +12941,8 @@ packages:
   /@types/parse-json@4.0.0:
     resolution: {integrity: sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==}
 
-  /@types/pg@8.10.1:
-    resolution: {integrity: sha512-AmEHA/XxMxemQom5iDwP62FYNkv+gDDnetRG7v2N2dPtju7UKI7FknUimcZo7SodKTHtckYPzaTqUEvUKbVJEA==}
+  /@types/pg@8.10.2:
+    resolution: {integrity: sha512-MKFs9P6nJ+LAeHLU3V0cODEOgyThJ3OAnmOlsZsxux6sfQs3HRXR5bBn7xG5DjckEFhTAxsXi7k7cd0pCMxpJw==}
     dependencies:
       '@types/node': 18.16.16
       pg-protocol: 1.6.0
