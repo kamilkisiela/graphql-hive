@@ -260,10 +260,6 @@ export function buildSchemaCheckFailureState(args: {
     compositionErrors.push(...args.compositionCheck.reason.errors);
   }
 
-  if (args.compositionCheck.status === 'failed') {
-    compositionErrors.push(...args.compositionCheck.reason.errors);
-  }
-
   if (args.diffCheck.status === 'failed') {
     if (args.diffCheck.reason.changes) {
       schemaChanges = {
