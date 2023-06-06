@@ -57,6 +57,7 @@ Once you have all services schemas pushed to Hive, and available in the CDN, you
 - `HIVE_CDN_ENDPOINT` - the endpoint Hive generated for you in the previous step
 - `HIVE_CDN_KEY` - the access key
 - `HIVE_CDN_POLL_INTERVAL` - polling interval (default is 10 seconds)
+- `HIVE_CDN_ACCEPT_INVALID_CERTS` - accepts invalid SSL certificates (default is `false`)
 - `HIVE_REGISTRY_LOG` - defines the log level for the registry (default is `INFO`)
 
 <Callout>
@@ -120,6 +121,10 @@ plugins:
     #  A maximum number of operations to hold in a buffer before sending to GraphQL Hive
     #  Default: 1000
     # buffer_size: 1000
+    #
+    #  Accepts invalid SSL certificates
+    #  Default: false
+    # accept_invalid_certs: true
 ```
 
 ## Additional Resources

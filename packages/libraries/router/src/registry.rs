@@ -12,6 +12,7 @@ pub struct HiveRegistry {
     key: String,
     file_name: String,
     etag: Option<String>,
+    accept_invalid_certs: bool,
     pub logger: Logger,
 }
 
@@ -19,6 +20,7 @@ pub struct HiveRegistryConfig {
     endpoint: Option<String>,
     key: Option<String>,
     poll_interval: Option<u64>,
+    accept_invalid_certs: Option<bool>,
 }
 
 static COMMIT: Option<&'static str> = option_env!("GITHUB_SHA");
@@ -29,6 +31,7 @@ impl HiveRegistry {
             endpoint: None,
             key: None,
             poll_interval: None,
+            accept_invalid_certs: Some(true),
         };
 
         // Pass values from user's config
@@ -36,6 +39,7 @@ impl HiveRegistry {
             config.endpoint = user_config.endpoint;
             config.key = user_config.key;
             config.poll_interval = user_config.poll_interval;
+            config.accept_invalid_certs = user_config.accept_invalid_certs;
         }
 
         // Pass values from environment variables if they are not set in the user's config
@@ -62,6 +66,16 @@ impl HiveRegistry {
             }
         }
 
+        if config.accept_invalid_certs.is_none() {
+            if let Ok(accept_invalid_certs) = env::var("HIVE_CDN_ACCEPT_INVALID_CERTS") {
+                config.accept_invalid_certs = Some(
+                    accept_invalid_certs.eq("1")
+                        || accept_invalid_certs.to_lowercase().eq("true")
+                        || accept_invalid_certs.to_lowercase().eq("on"),
+                );
+            }
+        }
+
         // Resolve values
         let endpoint = config.endpoint.unwrap_or_else(|| "".to_string());
         let key = config.key.unwrap_or_else(|| "".to_string());
@@ -69,6 +83,7 @@ impl HiveRegistry {
             Some(value) => value,
             None => 10,
         };
+        let accept_invalid_certs = config.accept_invalid_certs.unwrap_or_else(|| false);
 
         let logger = Logger::new();
 
@@ -103,6 +118,7 @@ impl HiveRegistry {
             key,
             file_name,
             etag: None,
+            accept_invalid_certs,
             logger,
         };
 
@@ -127,7 +143,10 @@ impl HiveRegistry {
     }
 
     fn fetch_supergraph(&mut self, etag: Option<String>) -> Result<Option<String>, String> {
-        let client = reqwest::blocking::Client::new();
+        let client = reqwest::blocking::Client::builder()
+            .danger_accept_invalid_certs(self.accept_invalid_certs)
+            .build()
+            .map_err(|err| err.to_string())?;
         let mut headers = reqwest::header::HeaderMap::new();
 
         headers.insert(
