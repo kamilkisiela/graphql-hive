@@ -3110,7 +3110,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return DocumentCollectionModel.parse(result);
     },
     async deleteDocumentCollection(args) {
-      const result = await pool.oneFirst(sql`
+      const result = await pool.maybeOneFirst(sql`
         DELETE
         FROM
           "public"."document_collections"
@@ -3120,11 +3120,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           "id"
       `);
 
+      if (result == null) {
+        return null;
+      }
+
       return zod.string().parse(result);
     },
 
     async updateDocumentCollection(args) {
-      const result = await pool.one(sql`
+      const result = await pool.maybeOne(sql`
         UPDATE
           "public"."document_collections"
         SET
@@ -3142,6 +3146,10 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , to_json("created_at") as "createdAt"
           , to_json("updated_at") as "updatedAt"
       `);
+
+      if (result == null) {
+        return null;
+      }
 
       return DocumentCollectionModel.parse(result);
     },
@@ -3224,7 +3232,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     async createDocumentCollectionDocument(args) {
-      const result = await pool.maybeOne(sql`
+      const result = await pool.one(sql`
         INSERT INTO "public"."document_collection_documents" (
           "title"
           , "contents"
@@ -3257,7 +3265,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     async deleteDocumentCollectionDocument(args) {
-      const result = await pool.oneFirst(sql`
+      const result = await pool.maybeOneFirst(sql`
         DELETE
         FROM
           "public"."document_collection_documents"
@@ -3267,11 +3275,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           "id"
       `);
 
+      if (result == null) {
+        return null;
+      }
+
       return zod.string().parse(result);
     },
 
     async getDocumentCollectionDocument(args) {
-      const result = await pool.one(sql`
+      const result = await pool.maybeOne(sql`
         SELECT
           "id"
           , "title"
@@ -3288,11 +3300,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           "id" = ${args.id}
       `);
 
+      if (result === null) {
+        return null;
+      }
+
       return DocumentCollectionDocumentModel.parse(result);
     },
 
     async getDocumentCollection(args) {
-      const result = await pool.one(sql`
+      const result = await pool.maybeOne(sql`
         SELECT
           "id"
           , "title"
@@ -3307,11 +3323,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           "id" = ${args.id}
       `);
 
+      if (result === null) {
+        return null;
+      }
+
       return DocumentCollectionModel.parse(result);
     },
 
     async updateDocumentCollectionDocument(args) {
-      const result = await pool.one(sql`
+      const result = await pool.maybeOne(sql`
         UPDATE
           "public"."document_collection_documents"
         SET
@@ -3333,6 +3353,10 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , to_json("created_at") as "createdAt"
           , to_json("updated_at") as "updatedAt"
       `);
+
+      if (result === null) {
+        return null;
+      }
 
       return DocumentCollectionDocumentModel.parse(result);
     },

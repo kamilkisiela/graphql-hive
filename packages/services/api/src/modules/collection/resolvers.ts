@@ -40,14 +40,26 @@ export const resolvers: CollectionModule.Resolvers = {
   DocumentCollectionOperation: {
     name: root => root.title,
     query: root => root.contents,
-    collection: (root, args, { injector }) =>
-      injector.get(CollectionProvider).getCollection(root.documentCollectionId),
+    async collection(root, args, { injector }) {
+      const collection = await injector
+        .get(CollectionProvider)
+        .getCollection(root.documentCollectionId);
+
+      // This should not happen, but we do want to flag this as an unexpected error.
+      if (!collection) {
+        throw new Error('Collection not found');
+      }
+
+      return collection;
+    },
   },
   Target: {
     documentCollections: (target, args, { injector }) =>
       injector.get(CollectionProvider).getCollections(target.id, args.first, args.after),
-    documentCollectionOperation: (_, args, { injector }) => injector.get(CollectionProvider).getOperation(args.id),
-    documentCollection: (_, args, { injector }) => injector.get(CollectionProvider).getCollection(args.id),
+    documentCollectionOperation: (_, args, { injector }) =>
+      injector.get(CollectionProvider).getOperation(args.id),
+    documentCollection: (_, args, { injector }) =>
+      injector.get(CollectionProvider).getCollection(args.id),
   },
   Mutation: {
     async createDocumentCollection(_, { selector, input }, { injector }) {
@@ -75,6 +87,15 @@ export const resolvers: CollectionModule.Resolvers = {
       try {
         const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
         const result = await injector.get(CollectionProvider).updateCollection(input);
+
+        if (!result) {
+          return {
+            error: {
+              __typename: 'ModifyDocumentCollectionError',
+              message: 'Failed to locate a document collection',
+            },
+          };
+        }
 
         return {
           ok: {
@@ -121,6 +142,15 @@ export const resolvers: CollectionModule.Resolvers = {
           .get(CollectionProvider)
           .getCollection(result.documentCollectionId);
 
+        if (!result || !collection) {
+          return {
+            error: {
+              __typename: 'ModifyDocumentCollectionError',
+              message: 'Failed to locate a document collection',
+            },
+          };
+        }
+
         return {
           ok: {
             __typename: 'ModifyDocumentCollectionOperationOkPayload',
@@ -142,6 +172,16 @@ export const resolvers: CollectionModule.Resolvers = {
       try {
         const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
         const result = await injector.get(CollectionProvider).updateOperation(input);
+
+        if (!result) {
+          return {
+            error: {
+              __typename: 'ModifyDocumentCollectionError',
+              message: 'Failed to locate a document collection',
+            },
+          };
+        }
+
         const collection = await injector
           .get(CollectionProvider)
           .getCollection(result.documentCollectionId);
@@ -151,7 +191,7 @@ export const resolvers: CollectionModule.Resolvers = {
             __typename: 'ModifyDocumentCollectionOperationOkPayload',
             operation: result,
             updatedTarget: target,
-            collection,
+            collection: collection!,
           },
         };
       } catch (e) {
@@ -167,6 +207,16 @@ export const resolvers: CollectionModule.Resolvers = {
       try {
         const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
         const operation = await injector.get(CollectionProvider).getOperation(id);
+
+        if (!operation) {
+          return {
+            error: {
+              __typename: 'ModifyDocumentCollectionError',
+              message: 'Failed to locate a operation',
+            },
+          };
+        }
+
         const collection = await injector
           .get(CollectionProvider)
           .getCollection(operation.documentCollectionId);
@@ -177,7 +227,7 @@ export const resolvers: CollectionModule.Resolvers = {
             __typename: 'DeleteDocumentCollectionOperationOkPayload',
             deletedId: id,
             updatedTarget: target,
-            updatedCollection: collection,
+            updatedCollection: collection!,
           },
         };
       } catch (e) {

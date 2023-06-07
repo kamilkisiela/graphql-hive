@@ -610,7 +610,7 @@ export interface Storage {
    * Returns null if the document collection does not exist (did not get deleted).
    * Returns the id of the deleted document collection if it got deleted
    */
-  deleteDocumentCollection(_: { documentCollectionId: string }): Promise<string>;
+  deleteDocumentCollection(_: { documentCollectionId: string }): Promise<string | null>;
 
   /**
    * Returns null if the document collection does not exist (did not get updated).
@@ -619,9 +619,9 @@ export interface Storage {
     documentCollectionId: string;
     title: string | null;
     description: string | null;
-  }): Promise<DocumentCollection>;
+  }): Promise<DocumentCollection | null>;
 
-  getDocumentCollection(_: { id: string }): Promise<DocumentCollection>;
+  getDocumentCollection(_: { id: string }): Promise<DocumentCollection | null>;
 
   getPaginatedDocumentsForDocumentCollection(_: {
     documentCollectionId: string;
@@ -642,7 +642,9 @@ export interface Storage {
    * Returns null if the document collection document does not exist (did not get deleted).
    * Returns the id of the deleted document collection document if it got deleted
    */
-  deleteDocumentCollectionDocument(_: { documentCollectionDocumentId: string }): Promise<string>;
+  deleteDocumentCollectionDocument(_: {
+    documentCollectionDocumentId: string;
+  }): Promise<string | null>;
 
   /**
    * Returns null if the document collection document does not exist (did not get updated).
@@ -653,9 +655,9 @@ export interface Storage {
     contents: string | null;
     variables: string | null;
     headers: string | null;
-  }): Promise<DocumentCollectionOperation>;
+  }): Promise<DocumentCollectionOperation | null>;
 
-  getDocumentCollectionDocument(_: { id: string }): Promise<DocumentCollectionOperation>;
+  getDocumentCollectionDocument(_: { id: string }): Promise<DocumentCollectionOperation | null>;
 }
 
 @Injectable()

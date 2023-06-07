@@ -159,8 +159,9 @@ function useOperationCollectionsPlugin(props: {
 
       const initialSelectedCollection =
         currentOperation?.id &&
-        collections?.find(c => c.operations.nodes.some(node => node.id === currentOperation.id))
-          ?.id;
+        collections?.find(c =>
+          c.operations.edges.some(({ node }) => node.id === currentOperation.id),
+        )?.id;
 
       return (
         <>
@@ -243,8 +244,8 @@ function useOperationCollectionsPlugin(props: {
                       ) : null}
                     </div>
                     <Accordion.Content className="pr-0">
-                      {collection.operations.nodes.length
-                        ? collection.operations.nodes.map(node => (
+                      {collection.operations.edges.length
+                        ? collection.operations.edges.map(({ node }) => (
                             <div key={node.id} className="flex justify-between items-center">
                               <Link
                                 href={{

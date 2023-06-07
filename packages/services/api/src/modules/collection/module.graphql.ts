@@ -157,8 +157,8 @@ export const typeDefs = gql`
   }
 
   extend type Target {
-    documentCollection(id: ID!): DocumentCollection!
+    documentCollection(id: ID!): DocumentCollection
     documentCollections(first: Int = 100, after: String = null): DocumentCollectionConnection!
-    documentCollectionOperation(id: ID!): DocumentCollectionOperation!
+    documentCollectionOperation(id: ID!): DocumentCollectionOperation
   }
 `;

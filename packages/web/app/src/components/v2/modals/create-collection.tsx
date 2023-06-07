@@ -144,10 +144,13 @@ export function CreateCollectionModal({
       resetForm();
     } else if (data) {
       const { documentCollection } = data.target!;
-      void setValues({
-        name: documentCollection.name,
-        description: documentCollection.description || '',
-      });
+
+      if (documentCollection) {
+        void setValues({
+          name: documentCollection.name,
+          description: documentCollection.description || '',
+        });
+      }
     }
   }, [data, collectionId]);
 
