@@ -26,6 +26,8 @@ const DeleteCollectionMutation = graphql(`
   }
 `);
 
+export type DeleteCollectionMutationType = typeof DeleteCollectionMutation;
+
 export function DeleteCollectionModal({
   isOpen,
   toggleModalOpen,

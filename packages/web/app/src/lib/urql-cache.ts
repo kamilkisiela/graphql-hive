@@ -2,10 +2,35 @@
 import { DocumentNode, Kind } from 'graphql';
 import { produce } from 'immer';
 import { TypedDocumentNode } from 'urql';
+import type { DeleteCollectionMutationType } from '@/components/v2/modals/delete-collection';
+import type { DeleteOperationMutationType } from '@/components/v2/modals/delete-operation';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
-import { AddAlertChannelDocument, AddAlertDocument, AlertChannelsDocument, AlertsDocument, CheckIntegrationsDocument, CreateOrganizationDocument, CreateProjectDocument, CreateTargetDocument, CreateTokenDocument, DeleteAlertChannelsDocument, DeleteAlertsDocument, DeleteGitHubIntegrationDocument, DeleteOrganizationDocument, DeletePersistedOperationDocument, DeleteProjectDocument, DeleteSlackIntegrationDocument, DeleteTargetDocument, DeleteTokensDocument, OrganizationsDocument, ProjectsDocument, TargetsDocument, TokensDocument } from '../graphql';
-
+import {
+  AddAlertChannelDocument,
+  AddAlertDocument,
+  AlertChannelsDocument,
+  AlertsDocument,
+  CheckIntegrationsDocument,
+  CreateOrganizationDocument,
+  CreateProjectDocument,
+  CreateTargetDocument,
+  CreateTokenDocument,
+  DeleteAlertChannelsDocument,
+  DeleteAlertsDocument,
+  DeleteGitHubIntegrationDocument,
+  DeleteOrganizationDocument,
+  DeletePersistedOperationDocument,
+  DeleteProjectDocument,
+  DeleteSlackIntegrationDocument,
+  DeleteTargetDocument,
+  DeleteTokensDocument,
+  OrganizationsDocument,
+  ProjectsDocument,
+  TargetsDocument,
+  TokensDocument,
+} from '../graphql';
+import { CollectionsQuery } from './hooks/use-collections';
 
 export const getOperationName = (query: DocumentNode): string | void => {
   for (const node of query.definitions) {
@@ -338,6 +363,62 @@ const deleteGitHubIntegration: TypedDocumentNodeUpdateResolver<
   );
 };
 
+const deleteDocumentCollection: TypedDocumentNodeUpdateResolver<DeleteCollectionMutationType> = (
+  mutation,
+  args,
+  cache,
+) => {
+  cache.updateQuery(
+    {
+      query: CollectionsQuery,
+      variables: {
+        selector: args.selector,
+      },
+    },
+    data => {
+      if (data === null) {
+        return null;
+      }
+
+      return {
+        ...data,
+        target: Object.assign(
+          {},
+          data.target,
+          mutation.deleteDocumentCollection.ok?.updatedTarget || {},
+        ),
+      };
+    },
+  );
+};
+
+const deleteOperationInDocumentCollection: TypedDocumentNodeUpdateResolver<
+  DeleteOperationMutationType
+> = (mutation, args, cache) => {
+  cache.updateQuery(
+    {
+      query: CollectionsQuery,
+      variables: {
+        selector: args.selector,
+      },
+    },
+    data => {
+      if (data === null) {
+        return null;
+      }
+
+      return {
+        ...data,
+        target: Object.assign(
+          {},
+          data.target,
+          mutation.deleteOperationInDocumentCollection.ok?.updatedTarget || {},
+        ),
+      };
+    },
+  );
+};
+
 // UpdateResolver
 export const Mutation = {
   createOrganization,
@@ -355,4 +436,6 @@ export const Mutation = {
   deleteAlertChannels,
   addAlert,
   deletePersistedOperation,
+  deleteDocumentCollection,
+  deleteOperationInDocumentCollection,
 };

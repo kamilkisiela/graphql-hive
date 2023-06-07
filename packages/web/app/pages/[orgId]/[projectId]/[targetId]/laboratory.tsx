@@ -60,6 +60,7 @@ function Share(): ReactElement {
 const OperationQuery = graphql(`
   query Operation($selector: TargetSelectorInput!, $id: ID!) {
     target(selector: $selector) {
+      id
       documentCollectionOperation(id: $id) {
         id
         name

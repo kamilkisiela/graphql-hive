@@ -13,11 +13,16 @@ const DeleteOperationMutation = graphql(`
       }
       ok {
         deletedId
-        updatedCollection {
+        updatedTarget {
           id
-          operations {
+          documentCollections {
             nodes {
               id
+              operations {
+                nodes {
+                  id
+                }
+              }
             }
           }
         }
@@ -25,6 +30,9 @@ const DeleteOperationMutation = graphql(`
     }
   }
 `);
+
+export type DeleteOperationMutationType = typeof DeleteOperationMutation;
+
 
 export function DeleteOperationModal({
   isOpen,
@@ -66,6 +74,7 @@ export function DeleteOperationModal({
                 project: route.projectId,
               },
             });
+
             if (error) {
               notify(error.message, 'error');
             }

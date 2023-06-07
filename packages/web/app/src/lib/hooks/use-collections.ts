@@ -5,7 +5,7 @@ import { TargetDocument } from '@/graphql';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
-const CollectionsQuery = graphql(`
+export const CollectionsQuery = graphql(`
   query Collections($selector: TargetSelectorInput!) {
     target(selector: $selector) {
       id
