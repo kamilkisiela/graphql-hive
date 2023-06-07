@@ -2,6 +2,7 @@ import { URL } from 'node:url';
 import { Injectable, Scope } from 'graphql-modules';
 import hashObject from 'object-hash';
 import { type Change, CriticalityLevel } from '@graphql-inspector/core';
+import type { CheckPolicyResponse } from '@hive/policy';
 import type { CompositionFailureError } from '@hive/schema';
 import { Schema } from '../../../shared/entities';
 import { buildSchema } from '../../../shared/schema';
@@ -48,13 +49,6 @@ function isCompositionValidationError(error: CompositionFailureError): error is 
   source: 'composition';
 } {
   return error.source === 'composition';
-}
-
-function isPolicyValidationError(error: CompositionFailureError): error is {
-  message: string;
-  source: 'policy';
-} {
-  return error.source === 'policy';
 }
 
 function isGraphQLValidationError(error: CompositionFailureError): error is {
@@ -139,7 +133,6 @@ export class RegistryChecks {
           errorsBySource: {
             graphql: validationErrors.filter(isGraphQLValidationError),
             composition: validationErrors.filter(isCompositionValidationError),
-            policy: validationErrors.filter(isPolicyValidationError),
           },
         },
       } satisfies CheckResult;
@@ -184,46 +177,31 @@ export class RegistryChecks {
       ),
     );
 
-    try {
-      const policyResult = await this.policy.checkPolicy(sdl.raw, modifiedSdl, selector);
-      const warnings =
-        policyResult?.warnings?.map<SchemaCheckWarning>(record => ({
-          message: record.message,
-          source: record.ruleId ? `policy-${record.ruleId}` : 'policy',
-          column: record.column,
-          line: record.line,
-        })) ?? [];
+    const policyResult = await this.policy.checkPolicy(sdl.raw, modifiedSdl, selector);
+    const warnings = policyResult?.warnings?.map<SchemaCheckWarning>(toSchemaCheckWarning) ?? [];
 
-      if (policyResult === null) {
-        return {
-          status: 'skipped',
-        } satisfies CheckResult;
-      }
-
-      if (policyResult.success) {
-        return {
-          status: 'completed',
-          result: {
-            warnings,
-          },
-        } satisfies CheckResult;
-      }
-
+    if (policyResult === null) {
       return {
-        status: 'failed',
-        reason: {
-          errors: policyResult.errors,
+        status: 'skipped',
+      } satisfies CheckResult;
+    }
+
+    if (policyResult.success) {
+      return {
+        status: 'completed',
+        result: {
           warnings,
         },
       } satisfies CheckResult;
-    } catch (e) {
-      return {
-        status: 'failed',
-        reason: {
-          errors: [{ message: (e as Error).message }],
-        },
-      } satisfies CheckResult;
     }
+
+    return {
+      status: 'failed',
+      reason: {
+        errors: policyResult.errors.map(toSchemaCheckWarning),
+        warnings,
+      },
+    } satisfies CheckResult;
   }
 
   async diff({
@@ -252,94 +230,80 @@ export class RegistryChecks {
       } satisfies CheckResult;
     }
 
-    try {
-      const [existingSchema, incomingSchema] = await Promise.all([
-        ensureSDL(
-          orchestrator.composeAndValidate(
-            version.schemas.map(s => this.helper.createSchemaObject(s)),
-            project.externalComposition,
-          ),
-        ).then(schema => {
-          return buildSchema(
-            this.helper.createSchemaObject({
-              sdl: schema.raw,
-            }),
-          );
-        }),
-        ensureSDL(
-          orchestrator.composeAndValidate(
-            schemas.map(s => this.helper.createSchemaObject(s)),
-            project.externalComposition,
-          ),
-        ).then(schema => {
-          return buildSchema(
-            this.helper.createSchemaObject({
-              sdl: schema.raw,
-            }),
-          );
-        }),
-      ]);
-
-      const changes = [...(await this.inspector.diff(existingSchema, incomingSchema, selector))];
-
-      if (includeUrlChanges) {
-        changes.push(
-          ...detectUrlChanges(version.schemas, schemas).map(change =>
-            schemaChangeFromMeta({
-              ...change,
-              isSafeBasedOnUsage: false,
-            }),
-          ),
+    const [existingSchema, incomingSchema] = await Promise.all([
+      ensureSDL(
+        orchestrator.composeAndValidate(
+          version.schemas.map(s => this.helper.createSchemaObject(s)),
+          project.externalComposition,
+        ),
+      ).then(schema => {
+        return buildSchema(
+          this.helper.createSchemaObject({
+            sdl: schema.raw,
+          }),
         );
+      }),
+      ensureSDL(
+        orchestrator.composeAndValidate(
+          schemas.map(s => this.helper.createSchemaObject(s)),
+          project.externalComposition,
+        ),
+      ).then(schema => {
+        return buildSchema(
+          this.helper.createSchemaObject({
+            sdl: schema.raw,
+          }),
+        );
+      }),
+    ]);
+
+    const changes = [...(await this.inspector.diff(existingSchema, incomingSchema, selector))];
+
+    if (includeUrlChanges) {
+      changes.push(
+        ...detectUrlChanges(version.schemas, schemas).map(change =>
+          schemaChangeFromMeta({
+            ...change,
+            isSafeBasedOnUsage: false,
+          }),
+        ),
+      );
+    }
+
+    const safeChanges: Array<Change> = [];
+    const breakingChanges: Array<Change> = [];
+    for (const change of changes) {
+      if (change.criticality.level === CriticalityLevel.Breaking) {
+        breakingChanges.push(change);
+        continue;
       }
+      safeChanges.push(change);
+    }
 
-      const safeChanges: Array<Change> = [];
-      const breakingChanges: Array<Change> = [];
-      for (const change of changes) {
-        if (change.criticality.level === CriticalityLevel.Breaking) {
-          breakingChanges.push(change);
-          continue;
-        }
-        safeChanges.push(change);
-      }
+    const hasBreakingChanges = breakingChanges.length > 0;
 
-      const hasBreakingChanges = breakingChanges.length > 0;
-
-      if (hasBreakingChanges) {
-        this.logger.debug('Detected breaking changes');
-        return {
-          status: 'failed',
-          reason: {
-            breakingChanges,
-            safeChanges,
-            changes,
-          },
-        } satisfies CheckResult;
-      }
-
-      if (changes.length) {
-        this.logger.debug('Detected non-breaking changes');
-      }
-
-      return {
-        status: 'completed',
-        result: {
-          changes,
-        },
-      } satisfies CheckResult;
-    } catch (error: unknown) {
-      this.logger.debug('Failed to compare schemas (error=%s)', (error as Error).message);
-
+    if (hasBreakingChanges) {
+      this.logger.debug('Detected breaking changes');
       return {
         status: 'failed',
         reason: {
-          compareFailure: {
-            message: `Failed to compare schemas: ${(error as Error).message}`,
-            source: 'composition' as const,
-          },
+          breakingChanges,
+          safeChanges,
+          changes,
         },
       } satisfies CheckResult;
     }
+
+    if (changes.length) {
+      this.logger.debug('Detected non-breaking changes');
+    }
+
+    return {
+      status: 'completed',
+      result: {
+        changes,
+      },
+    } satisfies CheckResult;
   }
 
   async serviceName(service: { name: string | null }) {
@@ -510,3 +474,10 @@ export function detectUrlChanges(
 
   return changes;
 }
+
+const toSchemaCheckWarning = (record: CheckPolicyResponse[number]): SchemaCheckWarning => ({
+  message: record.message,
+  source: record.ruleId ? `policy-${record.ruleId}` : 'policy',
+  column: record.column,
+  line: record.line,
+});

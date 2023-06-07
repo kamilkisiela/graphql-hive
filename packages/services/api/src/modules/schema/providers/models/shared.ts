@@ -278,10 +278,6 @@ export function buildSchemaCheckFailureState(args: {
         safe: args.diffCheck.reason.safeChanges,
       };
     }
-
-    if (args.diffCheck.reason.compareFailure) {
-      compositionErrors.push(args.diffCheck.reason.compareFailure);
-    }
   }
 
   if (args.policyCheck) {
