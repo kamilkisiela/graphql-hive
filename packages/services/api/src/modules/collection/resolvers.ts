@@ -1,6 +1,5 @@
 import { Injector } from 'graphql-modules';
 import { TargetSelectorInput } from '../../__generated__/types';
-import { createConnection } from '../../shared/schema';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { TargetAccessScope } from '../auth/providers/scopes';
 import { IdTranslator } from '../shared/providers/id-translator';
@@ -35,33 +34,20 @@ export const resolvers: CollectionModule.Resolvers = {
     id: root => root.id,
     name: root => root.title,
     description: root => root.description,
-    async operations(root, args, { injector }) {
-      const result = await injector.get(CollectionProvider).getOperations(root.id);
-
-      return result.items.map(v => v.node);
-    },
+    operations: (root, args, { injector }) =>
+      injector.get(CollectionProvider).getOperations(root.id, args.first, args.after),
   },
-  DocumentCollectionConnection: createConnection(),
-  DocumentCollectionOperationsConnection: createConnection(),
   DocumentCollectionOperation: {
     name: root => root.title,
     query: root => root.contents,
-    async collection(root, args, { injector }) {
-      return await injector.get(CollectionProvider).getCollection(root.documentCollectionId);
-    },
+    collection: (root, args, { injector }) =>
+      injector.get(CollectionProvider).getCollection(root.documentCollectionId),
   },
   Target: {
-    async documentCollections(target, args, { injector }) {
-      const collections = await injector.get(CollectionProvider).getCollections(target.id);
-
-      return collections.items.map(v => v.node);
-    },
-    documentCollectionOperation(_, args, { injector }) {
-      return injector.get(CollectionProvider).getOperation(args.id);
-    },
-    async documentCollection(_, args, { injector }) {
-      return await injector.get(CollectionProvider).getCollection(args.id);
-    },
+    documentCollections: (target, args, { injector }) =>
+      injector.get(CollectionProvider).getCollections(target.id, args.first, args.after),
+    documentCollectionOperation: (_, args, { injector }) => injector.get(CollectionProvider).getOperation(args.id),
+    documentCollection: (_, args, { injector }) => injector.get(CollectionProvider).getCollection(args.id),
   },
   Mutation: {
     async createDocumentCollection(_, { selector, input }, { injector }) {

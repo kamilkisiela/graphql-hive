@@ -204,6 +204,19 @@ export interface DocumentCollection {
   updatedAt: string;
 }
 
+export type PaginatedDocumentCollections = Readonly<{
+  items: ReadonlyArray<{
+    node: DocumentCollection;
+    cursor: string;
+  }>;
+  pageInfo: Readonly<{
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    startCursor: string;
+    endCursor: string;
+  }>;
+}>;
+
 export interface DocumentCollectionOperation {
   id: string;
   title: string;
@@ -215,6 +228,19 @@ export interface DocumentCollectionOperation {
   createdAt: string;
   updatedAt: string;
 }
+
+export type PaginatedDocumentCollectionOperations = Readonly<{
+  items: ReadonlyArray<{
+    node: DocumentCollectionOperation;
+    cursor: string;
+  }>;
+  pageInfo: Readonly<{
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    startCursor: string;
+    endCursor: string;
+  }>;
+}>;
 
 export interface Project {
   id: string;

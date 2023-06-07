@@ -33,9 +33,12 @@ const CreateCollectionMutation = graphql(`
         updatedTarget {
           id
           documentCollections {
-            nodes {
-              id
-              name
+            edges {
+              cursor
+              node {
+                id
+                name
+              }
             }
           }
         }
@@ -43,9 +46,13 @@ const CreateCollectionMutation = graphql(`
           id
           name
           operations(first: 100) {
-            nodes {
-              id
-              name
+            edges {
+              cursor
+              node {
+                id
+                name
+              }
+              cursor
             }
           }
         }
@@ -67,9 +74,12 @@ const UpdateCollectionMutation = graphql(`
         updatedTarget {
           id
           documentCollections {
-            nodes {
-              id
-              name
+            edges {
+              node {
+                id
+                name
+              }
+              cursor
             }
           }
         }
@@ -77,9 +87,12 @@ const UpdateCollectionMutation = graphql(`
           id
           name
           operations(first: 100) {
-            nodes {
-              id
-              name
+            edges {
+              cursor
+              node {
+                id
+                name
+              }
             }
           }
         }

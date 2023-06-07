@@ -20,11 +20,11 @@ export class CollectionProvider {
     this.logger = logger.child({ source: 'CollectionProvider' });
   }
 
-  getCollections(targetId: string) {
+  getCollections(targetId: string, first: number, cursor: string | null) {
     return this.storage.getPaginatedDocumentCollectionsForTarget({
       targetId,
-      first: 100,
-      cursor: null,
+      first,
+      cursor,
     });
   }
 
@@ -32,11 +32,11 @@ export class CollectionProvider {
     return this.storage.getDocumentCollection({ id });
   }
 
-  getOperations(documentCollectionId: string) {
+  getOperations(documentCollectionId: string, first: number, cursor: string | null) {
     return this.storage.getPaginatedDocumentsForDocumentCollection({
       documentCollectionId,
-      first: 100,
-      cursor: null,
+      first,
+      cursor,
     });
   }
 

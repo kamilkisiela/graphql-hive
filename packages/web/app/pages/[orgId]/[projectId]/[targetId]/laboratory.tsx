@@ -338,8 +338,11 @@ const UpdateOperationMutation = graphql(`
         collection {
           id
           operations {
-            nodes {
-              id
+            edges {
+              cursor
+              node {
+                id
+              }
             }
           }
         }

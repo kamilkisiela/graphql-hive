@@ -19,6 +19,8 @@ import type {
   Organization,
   OrganizationBilling,
   OrganizationInvitation,
+  PaginatedDocumentCollectionOperations,
+  PaginatedDocumentCollections,
   PersistedOperation,
   Project,
   Schema,
@@ -595,20 +597,7 @@ export interface Storage {
     targetId: string;
     first: number | null;
     cursor: null | string;
-  }): Promise<
-    Readonly<{
-      items: ReadonlyArray<{
-        node: DocumentCollection;
-        cursor: string;
-      }>;
-      pageInfo: Readonly<{
-        hasNextPage: boolean;
-        hasPreviousPage: boolean;
-        startCursor: string;
-        endCursor: string;
-      }>;
-    }>
-  >;
+  }): Promise<PaginatedDocumentCollections>;
 
   createDocumentCollection(_: {
     targetId: string;
@@ -638,20 +627,7 @@ export interface Storage {
     documentCollectionId: string;
     first: number | null;
     cursor: null | string;
-  }): Promise<
-    Readonly<{
-      items: ReadonlyArray<{
-        node: DocumentCollectionOperation;
-        cursor: string;
-      }>;
-      pageInfo: Readonly<{
-        hasNextPage: boolean;
-        hasPreviousPage: boolean;
-        startCursor: string;
-        endCursor: string;
-      }>;
-    }>
-  >;
+  }): Promise<PaginatedDocumentCollectionOperations>;
 
   createDocumentCollectionDocument(_: {
     documentCollectionId: string;

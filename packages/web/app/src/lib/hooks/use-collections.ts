@@ -10,13 +10,19 @@ export const CollectionsQuery = graphql(`
     target(selector: $selector) {
       id
       documentCollections {
-        nodes {
-          id
-          name
-          operations(first: 100) {
-            nodes {
-              id
-              name
+        edges {
+          cursor
+          node {
+            id
+            name
+            operations(first: 100) {
+              edges {
+                node {
+                  id
+                  name
+                }
+                cursor
+              }
             }
           }
         }
@@ -58,7 +64,7 @@ export function useCollections() {
   }, [error]);
 
   return {
-    collections: data?.target?.documentCollections.nodes,
+    collections: data?.target?.documentCollections.edges.map(v => v.node) || [],
     loading: result.fetching || fetching,
   };
 }

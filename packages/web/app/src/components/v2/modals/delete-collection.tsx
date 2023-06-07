@@ -16,8 +16,11 @@ const DeleteCollectionMutation = graphql(`
         updatedTarget {
           id
           documentCollections {
-            nodes {
-              id
+            edges {
+              cursor
+              node {
+                id
+              }
             }
           }
         }

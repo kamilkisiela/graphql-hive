@@ -8,17 +8,22 @@ export const typeDefs = gql`
     createdAt: DateTime!
     updatedAt: DateTime!
     createdBy: User!
-    operations(first: Int, after: String): DocumentCollectionOperationsConnection!
+    operations(first: Int = 100, after: String = null): DocumentCollectionOperationsConnection!
+  }
+
+  type DocumentCollectionEdge {
+    node: DocumentCollection!
+    cursor: String!
   }
 
   type DocumentCollectionConnection {
-    nodes: [DocumentCollection!]!
-    total: Int!
+    edges: [DocumentCollectionEdge!]!
+    pageInfo: PageInfo!
   }
 
   type DocumentCollectionOperationsConnection {
-    nodes: [DocumentCollectionOperation!]!
-    total: Int!
+    edges: [DocumentCollectionOperationEdge!]!
+    pageInfo: PageInfo!
   }
 
   type DocumentCollectionOperation {
@@ -30,6 +35,11 @@ export const typeDefs = gql`
     createdAt: DateTime!
     updatedAt: DateTime!
     collection: DocumentCollection!
+  }
+
+  type DocumentCollectionOperationEdge {
+    node: DocumentCollectionOperation!
+    cursor: String!
   }
 
   input CreateDocumentCollectionInput {
@@ -148,7 +158,7 @@ export const typeDefs = gql`
 
   extend type Target {
     documentCollection(id: ID!): DocumentCollection!
-    documentCollections: DocumentCollectionConnection!
+    documentCollections(first: Int = 100, after: String = null): DocumentCollectionConnection!
     documentCollectionOperation(id: ID!): DocumentCollectionOperation!
   }
 `;

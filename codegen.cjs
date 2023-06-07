@@ -115,10 +115,9 @@ const config = {
           DocumentCollection: '../shared/entities#DocumentCollection as DocumentCollectionEntity',
           DocumentCollectionOperation:
             '../shared/entities#DocumentCollectionOperation as DocumentCollectionOperationEntity',
-          DocumentCollectionConnection:
-            '../shared/mappers#DocumentCollectionConnection as DocumentCollectionConnectionMapper',
+          DocumentCollectionConnection: '../shared/entities#PaginatedDocumentCollections',
           DocumentCollectionOperationsConnection:
-            '../shared/mappers#DocumentCollectionOperationsConnection as DocumentCollectionOperationsConnectionMapper',
+            '../shared/entities#PaginatedDocumentCollectionOperations',
         },
       },
     },

@@ -16,11 +16,17 @@ const DeleteOperationMutation = graphql(`
         updatedTarget {
           id
           documentCollections {
-            nodes {
-              id
-              operations {
-                nodes {
-                  id
+            edges {
+              cursor
+              node {
+                id
+                operations {
+                  edges {
+                    node {
+                      id
+                    }
+                    cursor
+                  }
                 }
               }
             }
@@ -32,7 +38,6 @@ const DeleteOperationMutation = graphql(`
 `);
 
 export type DeleteOperationMutationType = typeof DeleteOperationMutation;
-
 
 export function DeleteOperationModal({
   isOpen,
