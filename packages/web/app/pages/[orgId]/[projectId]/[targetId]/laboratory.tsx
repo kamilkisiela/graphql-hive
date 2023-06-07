@@ -206,7 +206,10 @@ function useOperationCollectionsPlugin(props: {
                       <Accordion.Header>{collection.name}</Accordion.Header>
 
                       {shouldShowMenu ? (
-                        <DropdownMenu>
+                        <DropdownMenu
+                          // https://github.com/radix-ui/primitives/issues/1241#issuecomment-1580887090
+                          modal={false}
+                        >
                           <DropdownMenu.Button
                             className="graphiql-toolbar-button !shrink-0"
                             aria-label="More"
@@ -259,7 +262,10 @@ function useOperationCollectionsPlugin(props: {
                               >
                                 {node.name}
                               </Link>
-                              <DropdownMenu>
+                              <DropdownMenu
+                                // https://github.com/radix-ui/primitives/issues/1241#issuecomment-1580887090
+                                modal={false}
+                              >
                                 <DropdownMenu.Button
                                   className="graphiql-toolbar-button opacity-0 [div:hover>&]:opacity-100 transition"
                                   aria-label="More"
