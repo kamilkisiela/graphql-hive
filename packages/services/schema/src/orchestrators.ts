@@ -251,6 +251,20 @@ async function callExternalService(
     return JSON.parse(response.body) as unknown;
   } catch (error) {
     if (error instanceof RequestError) {
+      if (!error.response) {
+        logger.info('Network error without response. (%s)', error.message);
+        return {
+          type: 'failure',
+          result: {
+            errors: [
+              {
+                message: `External composition network failure. Is the service reachable?`,
+                source: 'graphql',
+              },
+            ],
+          },
+        } satisfies CompositionFailure;
+      }
       if (error.response) {
         const message = error.response.body ? error.response.body : error.response.statusMessage;
 
@@ -292,6 +306,8 @@ async function callExternalService(
         } satisfies CompositionFailure;
       }
     }
+
+    console.log(error);
 
     throw error;
   }
