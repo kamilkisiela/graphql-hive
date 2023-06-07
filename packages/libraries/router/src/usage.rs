@@ -52,6 +52,9 @@ struct Config {
     /// A maximum number of operations to hold in a buffer before sending to GraphQL Hive
     /// Default: 1000
     buffer_size: Option<usize>,
+    /// Accept invalid SSL certificates
+    /// Default: false
+    accept_invalid_certs: Option<bool>,
 }
 
 impl Default for Config {
@@ -61,6 +64,7 @@ impl Default for Config {
             exclude: None,
             client_name_header: None,
             client_version_header: None,
+            accept_invalid_certs: Some(false),
             buffer_size: Some(1000),
         }
     }
@@ -161,6 +165,7 @@ impl Plugin for UsagePlugin {
         };
 
         let buffer_size = init.config.buffer_size.unwrap_or(1000);
+        let accept_invalid_certs = init.config.accept_invalid_certs.unwrap_or(false);
 
         Ok(UsagePlugin {
             config: init.config,
@@ -169,6 +174,7 @@ impl Plugin for UsagePlugin {
                 token,
                 endpoint,
                 buffer_size,
+                accept_invalid_certs,
             ))),
         })
     }

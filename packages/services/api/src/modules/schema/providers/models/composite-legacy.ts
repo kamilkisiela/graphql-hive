@@ -8,12 +8,11 @@ import type { Project, PushedCompositeSchema, Target } from './../../../../share
 import { ProjectType } from './../../../../shared/entities';
 import { Logger } from './../../../shared/providers/logger';
 import {
-  CheckFailureReasonCode,
+  buildSchemaCheckFailureState,
   PublishFailureReasonCode,
   PublishIgnoreReasonCode,
   /* Check */
   SchemaCheckConclusion,
-  SchemaCheckFailureReason,
   SchemaCheckResult,
   /* Publish */
   SchemaPublishConclusion,
@@ -42,7 +41,7 @@ export class CompositeLegacyModel {
   }: {
     input: {
       sdl: string;
-      serviceName?: string | null;
+      serviceName: string;
     };
     selector: {
       organization: string;
@@ -64,7 +63,7 @@ export class CompositeLegacyModel {
       target: selector.target,
       date: Date.now() as any,
       sdl: input.sdl,
-      service_name: input.serviceName!,
+      service_name: input.serviceName,
       service_url: temp,
       action: 'PUSH',
       metadata: null,
@@ -74,25 +73,7 @@ export class CompositeLegacyModel {
     const schemas = latestVersion
       ? swapServices(latestVersion.schemas, incoming).schemas
       : [incoming];
-    const initial = latest === null;
     const orchestrator = project.type === ProjectType.FEDERATION ? this.federation : this.stitching;
-
-    const serviceNameCheck = await this.checks.serviceName({
-      name: incoming.service_name,
-    });
-
-    if (serviceNameCheck.status === 'failed') {
-      return {
-        conclusion: SchemaCheckConclusion.Failure,
-        // Do we want to use this new "warning" field to let users know they should upgrade to new model?
-        warnings: [],
-        reasons: [
-          {
-            code: CheckFailureReasonCode.MissingServiceName,
-          },
-        ],
-      };
-    }
 
     const checksumCheck = await this.checks.checksum({
       schemas,
@@ -103,7 +84,7 @@ export class CompositeLegacyModel {
     if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
       return {
         conclusion: SchemaCheckConclusion.Success,
-        state: { initial, changes: null, warnings: null },
+        state: { schemaChanges: null, schemaPolicyWarnings: null },
       };
     }
 
@@ -125,45 +106,21 @@ export class CompositeLegacyModel {
     ]);
 
     if (compositionCheck.status === 'failed' || diffCheck.status === 'failed') {
-      const reasons: SchemaCheckFailureReason[] = [];
-
-      if (compositionCheck.status === 'failed') {
-        reasons.push({
-          code: CheckFailureReasonCode.CompositionFailure,
-          compositionErrors: compositionCheck.reason.errors,
-        });
-      }
-
-      if (diffCheck.status === 'failed') {
-        if (diffCheck.reason.changes) {
-          reasons.push({
-            code: CheckFailureReasonCode.BreakingChanges,
-            changes: diffCheck.reason.changes ?? [],
-            breakingChanges: diffCheck.reason.breakingChanges,
-          });
-        }
-
-        if (diffCheck.reason.compareFailure) {
-          reasons.push({
-            code: CheckFailureReasonCode.CompositionFailure,
-            compositionErrors: [diffCheck.reason.compareFailure],
-          });
-        }
-      }
-
       return {
         conclusion: SchemaCheckConclusion.Failure,
-        warnings: [],
-        reasons,
+        state: buildSchemaCheckFailureState({
+          compositionCheck,
+          diffCheck,
+          policyCheck: null,
+        }),
       };
     }
 
     return {
       conclusion: SchemaCheckConclusion.Success,
       state: {
-        initial,
-        changes: diffCheck.result?.changes ?? null,
-        warnings: null,
+        schemaChanges: diffCheck.result?.changes ?? null,
+        schemaPolicyWarnings: null,
       },
     };
   }

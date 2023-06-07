@@ -30,7 +30,7 @@
     "@sentry/types": "7.54.0",
     "@tgriesser/schemats": "9.0.1",
     "@types/node": "18.16.16",
-    "@types/pg": "8.10.1",
+    "@types/pg": "8.10.2",
     "pg-promise": "11.5.0",
     "tslib": "2.5.3",
     "typescript": "5.1.3"
