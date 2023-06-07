@@ -136,6 +136,7 @@ export class CompositeModel {
         selector,
         schemas,
         modifiedSdl: incoming.sdl,
+        baseSchema,
       }),
     ]);
 
@@ -445,8 +446,8 @@ export class CompositeModel {
     const { changes, breakingChanges } =
       diffCheck.status === 'failed'
         ? {
-            changes: diffCheck.reason.changes ?? [],
-            breakingChanges: diffCheck.reason.breakingChanges ?? [],
+            changes: diffCheck.reason?.changes ?? [],
+            breakingChanges: diffCheck.reason?.breakingChanges ?? [],
           }
         : {
             changes: diffCheck.result?.changes ?? [],
