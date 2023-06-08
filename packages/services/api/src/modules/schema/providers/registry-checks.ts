@@ -335,6 +335,7 @@ export class RegistryChecks {
         reason: {
           compareFailure: {
             message: `Failed to compare schemas: ${(error as Error).message}`,
+            source: 'composition' as const,
           },
         },
       } satisfies CheckResult;
