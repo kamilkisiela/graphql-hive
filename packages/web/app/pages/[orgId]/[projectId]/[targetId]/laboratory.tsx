@@ -352,7 +352,11 @@ function Save(): ReactElement {
   const currentOperation = useCurrentOperation();
   const [, mutateUpdate] = useMutation(UpdateOperationMutation);
   const { queryEditor, variableEditor, headerEditor } = useEditorContext()!;
-  const isSame = !!currentOperation && currentOperation.query === queryEditor?.getValue();
+  const isSame =
+    !!currentOperation &&
+    currentOperation.query === queryEditor?.getValue() &&
+    currentOperation.variables === variableEditor?.getValue() &&
+    currentOperation.headers === headerEditor?.getValue();
   const operationId = currentOperation?.id;
   const label = isSame ? undefined : operationId ? 'Update saved operation' : 'Save operation';
   const button = (
