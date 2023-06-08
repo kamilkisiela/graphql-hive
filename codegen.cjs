@@ -35,7 +35,6 @@ const config = {
         scalars: {
           DateTime: 'string',
           SafeInt: 'number',
-          JSON: 'Record<string, any>',
         },
         mappers: {
           SchemaChangeConnection:

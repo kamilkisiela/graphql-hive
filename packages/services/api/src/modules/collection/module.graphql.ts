@@ -30,8 +30,8 @@ export const typeDefs = gql`
     id: ID!
     name: String!
     query: String!
-    variables: JSON
-    headers: JSON
+    variables: String
+    headers: String
     createdAt: DateTime!
     updatedAt: DateTime!
     collection: DocumentCollection!
@@ -57,8 +57,8 @@ export const typeDefs = gql`
     collectionId: ID!
     name: String!
     query: String!
-    variables: JSON
-    headers: JSON
+    variables: String
+    headers: String
   }
 
   input UpdateDocumentCollectionOperationInput {
@@ -66,8 +66,8 @@ export const typeDefs = gql`
     collectionId: ID!
     name: String!
     query: String!
-    variables: JSON
-    headers: JSON
+    variables: String
+    headers: String
   }
 
   extend type Mutation {

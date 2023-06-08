@@ -2,6 +2,7 @@
 import { DocumentNode, Kind } from 'graphql';
 import { produce } from 'immer';
 import { TypedDocumentNode } from 'urql';
+import type { CreateOperationMutationType } from '@/components/v2/modals/create-operation';
 import type { DeleteCollectionMutationType } from '@/components/v2/modals/delete-collection';
 import type { DeleteOperationMutationType } from '@/components/v2/modals/delete-operation';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
@@ -419,6 +420,33 @@ const deleteOperationInDocumentCollection: TypedDocumentNodeUpdateResolver<
   );
 };
 
+const createOperationInDocumentCollection: TypedDocumentNodeUpdateResolver<
+  CreateOperationMutationType
+> = (mutation, args, cache) => {
+  cache.updateQuery(
+    {
+      query: CollectionsQuery,
+      variables: {
+        selector: args.selector,
+      },
+    },
+    data => {
+      if (data === null) {
+        return null;
+      }
+
+      return {
+        ...data,
+        target: Object.assign(
+          {},
+          data.target,
+          mutation.createOperationInDocumentCollection.ok?.updatedTarget || {},
+        ),
+      };
+    },
+  );
+};
+
 // UpdateResolver
 export const Mutation = {
   createOrganization,
@@ -438,4 +466,5 @@ export const Mutation = {
   deletePersistedOperation,
   deleteDocumentCollection,
   deleteOperationInDocumentCollection,
+  createOperationInDocumentCollection,
 };

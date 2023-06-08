@@ -62,36 +62,26 @@ export class CollectionProvider {
     return this.storage.deleteDocumentCollection({ documentCollectionId: id });
   }
 
-  async createOperation(
-    input: Omit<CreateDocumentCollectionOperationInput, 'headers' | 'variables'> & {
-      headers: string | null;
-      variables: string | null;
-    },
-  ) {
+  async createOperation(input: CreateDocumentCollectionOperationInput) {
     const currentUser = await this.authManager.getCurrentUser();
 
     return this.storage.createDocumentCollectionDocument({
       documentCollectionId: input.collectionId,
       title: input.name,
       contents: input.query,
-      variables: input.variables,
-      headers: input.headers,
+      variables: input.variables ?? null,
+      headers: input.headers ?? null,
       createdByUserId: currentUser.id,
     });
   }
 
-  updateOperation(
-    input: Omit<UpdateDocumentCollectionOperationInput, 'headers' | 'variables'> & {
-      headers: string | null;
-      variables: string | null;
-    },
-  ) {
+  updateOperation(input: UpdateDocumentCollectionOperationInput) {
     return this.storage.updateDocumentCollectionDocument({
       documentCollectionDocumentId: input.operationId,
       title: input.name,
       contents: input.query,
-      variables: input.variables,
-      headers: input.headers,
+      variables: input.variables ?? null,
+      headers: input.headers ?? null,
     });
   }
 

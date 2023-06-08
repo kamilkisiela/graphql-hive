@@ -290,8 +290,8 @@ export function initSeed() {
                   collectionId: string;
                   name: string;
                   query: string;
-                  variables?: Record<string, string>;
-                  headers?: Record<string, string>;
+                  variables?: string;
+                  headers?: string;
                   token?: string;
                 }) {
                   const result = await execute({
@@ -336,8 +336,8 @@ export function initSeed() {
                   collectionId: string;
                   name: string;
                   query: string;
-                  variables?: Record<string, string>;
-                  headers?: Record<string, string>;
+                  variables?: string;
+                  headers?: string;
                   token?: string;
                 }) {
                   const result = await execute({

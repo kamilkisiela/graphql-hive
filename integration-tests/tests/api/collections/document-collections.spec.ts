@@ -86,12 +86,12 @@ describe('Document Collections', () => {
         operationId,
         name: 'My Updated Operation',
         query: 'query { hello world }',
-        variables: {
+        variables: JSON.stringify({
           id: '1',
-        },
-        headers: {
+        }),
+        headers: JSON.stringify({
           Key: '3',
-        },
+        }),
       });
 
       expect(updateResult.error).toBeNull();

@@ -11,11 +11,24 @@ import { CollectionProvider } from './providers/collection.provider';
 
 const MAX_INPUT_LENGTH = 5000;
 
+// The following validates the length and the validity of the JSON object incoming as string.
 const inputObjectSchema = zod
-  .object({})
-  .refine(v => !v || (v && JSON.stringify(v).length <= MAX_INPUT_LENGTH), 'Input too long')
+  .string()
+  .max(MAX_INPUT_LENGTH)
   .optional()
-  .nullable();
+  .nullable()
+  .refine(v => {
+    if (!v) {
+      return true;
+    }
+
+    try {
+      JSON.parse(v);
+      return true;
+    } catch {
+      return false;
+    }
+  });
 
 const OperationValidationInputModel = zod
   .object({
@@ -73,8 +86,6 @@ export const resolvers: CollectionModule.Resolvers = {
 
       return collection;
     },
-    variables: op => (op.variables ? JSON.parse(op.variables) : null),
-    headers: op => (op.headers ? JSON.parse(op.headers) : null),
   },
   Target: {
     documentCollections: (target, args, { injector }) =>
@@ -134,11 +145,7 @@ export const resolvers: CollectionModule.Resolvers = {
       try {
         OperationValidationInputModel.parse(input);
         const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
-        const result = await injector.get(CollectionProvider).createOperation({
-          ...input,
-          headers: input.headers ? JSON.stringify(input.headers) : null,
-          variables: input.variables ? JSON.stringify(input.variables) : null,
-        });
+        const result = await injector.get(CollectionProvider).createOperation(input);
         const collection = await injector
           .get(CollectionProvider)
           .getCollection(result.documentCollectionId);
@@ -177,11 +184,7 @@ export const resolvers: CollectionModule.Resolvers = {
       try {
         OperationValidationInputModel.parse(input);
         const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
-        const result = await injector.get(CollectionProvider).updateOperation({
-          ...input,
-          headers: input.headers ? JSON.stringify(input.headers) : null,
-          variables: input.variables ? JSON.stringify(input.variables) : null,
-        });
+        const result = await injector.get(CollectionProvider).updateOperation(input);
 
         if (!result) {
           return {

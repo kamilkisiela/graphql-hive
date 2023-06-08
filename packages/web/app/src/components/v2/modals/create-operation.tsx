@@ -22,13 +22,21 @@ const CreateOperationMutation = graphql(`
           id
           name
         }
-        collection {
+        updatedTarget {
           id
-          operations {
+          documentCollections {
             edges {
               cursor
               node {
                 id
+                operations {
+                  edges {
+                    node {
+                      id
+                    }
+                    cursor
+                  }
+                }
               }
             }
           }
@@ -37,6 +45,8 @@ const CreateOperationMutation = graphql(`
     }
   }
 `);
+
+export type CreateOperationMutationType = typeof CreateOperationMutation;
 
 export function CreateOperationModal({
   isOpen,
@@ -78,7 +88,7 @@ export function CreateOperationModal({
       collectionId: Yup.string().required('Collection is a required field'),
     }),
     async onSubmit(values) {
-      const { error, data: result } = await mutateCreate({
+      const response = await mutateCreate({
         selector: {
           target: router.targetId,
           organization: router.organizationId,
@@ -92,19 +102,21 @@ export function CreateOperationModal({
           headers: headerEditor?.getValue(),
         },
       });
+      const result = response.data;
+      const error = response.error || response.data?.createOperationInDocumentCollection.error;
+
       if (!error) {
         if (result) {
           const data = result.createOperationInDocumentCollection;
-          // quick fix because router.push provoke infinity network requests due
-          // `pause: !router.query.operation` in `useQuery` urql hook
-          window.location.search = `operation=${data.ok?.operation.id}`;
-          // void router.push({
-          //   query: {
-          //     ...router.query,
-          //     operation: data.ok?.operation.id,
-          //   },
-          // });
+
+          void router.push({
+            query: {
+              ...router.query,
+              operation: data.ok?.operation.id,
+            },
+          });
         }
+
         resetForm();
         toggleModalOpen();
       }
