@@ -1,4 +1,6 @@
 import { Injector } from 'graphql-modules';
+import * as zod from 'zod';
+import { fromZodError } from 'zod-validation-error';
 import { TargetSelectorInput } from '../../__generated__/types';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { TargetAccessScope } from '../auth/providers/scopes';
@@ -6,6 +8,25 @@ import { IdTranslator } from '../shared/providers/id-translator';
 import { Storage } from '../shared/providers/storage';
 import { CollectionModule } from './__generated__/types';
 import { CollectionProvider } from './providers/collection.provider';
+
+const MAX_INPUT_LENGTH = 5000;
+
+const inputObjectSchema = zod
+  .object({})
+  .refine(v => !v || (v && JSON.stringify(v).length <= MAX_INPUT_LENGTH), 'Input too long')
+  .optional()
+  .nullable();
+
+const OperationValidationInputModel = zod
+  .object({
+    collectionId: zod.string(),
+    name: zod.string().min(1).max(100),
+    query: zod.string().min(1).max(MAX_INPUT_LENGTH),
+    variables: inputObjectSchema,
+    headers: inputObjectSchema,
+  })
+  .partial()
+  .passthrough();
 
 async function validateTargetAccess(
   injector: Injector,
@@ -38,12 +59,12 @@ export const resolvers: CollectionModule.Resolvers = {
       injector.get(CollectionProvider).getOperations(root.id, args.first, args.after),
   },
   DocumentCollectionOperation: {
-    name: root => root.title,
-    query: root => root.contents,
-    async collection(root, args, { injector }) {
+    name: op => op.title,
+    query: op => op.contents,
+    async collection(op, args, { injector }) {
       const collection = await injector
         .get(CollectionProvider)
-        .getCollection(root.documentCollectionId);
+        .getCollection(op.documentCollectionId);
 
       // This should not happen, but we do want to flag this as an unexpected error.
       if (!collection) {
@@ -52,6 +73,8 @@ export const resolvers: CollectionModule.Resolvers = {
 
       return collection;
     },
+    variables: op => (op.variables ? JSON.parse(op.variables) : null),
+    headers: op => (op.headers ? JSON.parse(op.headers) : null),
   },
   Target: {
     documentCollections: (target, args, { injector }) =>
@@ -63,81 +86,59 @@ export const resolvers: CollectionModule.Resolvers = {
   },
   Mutation: {
     async createDocumentCollection(_, { selector, input }, { injector }) {
-      try {
-        const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
-        const result = await injector.get(CollectionProvider).createCollection(target.id, input);
+      const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
+      const result = await injector.get(CollectionProvider).createCollection(target.id, input);
 
-        return {
-          ok: {
-            __typename: 'ModifyDocumentCollectionOkPayload',
-            collection: result,
-            updatedTarget: target,
-          },
-        };
-      } catch (e) {
-        return {
-          error: {
-            __typename: 'ModifyDocumentCollectionError',
-            message: 'Failed to create a document collection',
-          },
-        };
-      }
+      return {
+        ok: {
+          __typename: 'ModifyDocumentCollectionOkPayload',
+          collection: result,
+          updatedTarget: target,
+        },
+      };
     },
     async updateDocumentCollection(_, { selector, input }, { injector }) {
-      try {
-        const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
-        const result = await injector.get(CollectionProvider).updateCollection(input);
+      const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
+      const result = await injector.get(CollectionProvider).updateCollection(input);
 
-        if (!result) {
-          return {
-            error: {
-              __typename: 'ModifyDocumentCollectionError',
-              message: 'Failed to locate a document collection',
-            },
-          };
-        }
-
-        return {
-          ok: {
-            __typename: 'ModifyDocumentCollectionOkPayload',
-            collection: result,
-            updatedTarget: target,
-          },
-        };
-      } catch (e) {
+      if (!result) {
         return {
           error: {
             __typename: 'ModifyDocumentCollectionError',
-            message: 'Failed to update a document collection',
+            message: 'Failed to locate a document collection',
           },
         };
       }
+
+      return {
+        ok: {
+          __typename: 'ModifyDocumentCollectionOkPayload',
+          collection: result,
+          updatedTarget: target,
+        },
+      };
     },
     async deleteDocumentCollection(_, { selector, id }, { injector }) {
-      try {
-        const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
-        await injector.get(CollectionProvider).deleteCollection(id);
+      const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
+      await injector.get(CollectionProvider).deleteCollection(id);
 
-        return {
-          ok: {
-            __typename: 'DeleteDocumentCollectionOkPayload',
-            deletedId: id,
-            updatedTarget: target,
-          },
-        };
-      } catch (e) {
-        return {
-          error: {
-            __typename: 'ModifyDocumentCollectionError',
-            message: 'Failed to update a document collection',
-          },
-        };
-      }
+      return {
+        ok: {
+          __typename: 'DeleteDocumentCollectionOkPayload',
+          deletedId: id,
+          updatedTarget: target,
+        },
+      };
     },
     async createOperationInDocumentCollection(_, { selector, input }, { injector }) {
       try {
+        OperationValidationInputModel.parse(input);
         const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
-        const result = await injector.get(CollectionProvider).createOperation(input);
+        const result = await injector.get(CollectionProvider).createOperation({
+          ...input,
+          headers: input.headers ? JSON.stringify(input.headers) : null,
+          variables: input.variables ? JSON.stringify(input.variables) : null,
+        });
         const collection = await injector
           .get(CollectionProvider)
           .getCollection(result.documentCollectionId);
@@ -160,18 +161,27 @@ export const resolvers: CollectionModule.Resolvers = {
           },
         };
       } catch (e) {
-        return {
-          error: {
-            __typename: 'ModifyDocumentCollectionError',
-            message: 'Failed to create operation in document collection',
-          },
-        };
+        if (e instanceof zod.ZodError) {
+          return {
+            error: {
+              __typename: 'ModifyDocumentCollectionError',
+              message: fromZodError(e).message,
+            },
+          };
+        }
+
+        throw e;
       }
     },
     async updateOperationInDocumentCollection(_, { selector, input }, { injector }) {
       try {
+        OperationValidationInputModel.parse(input);
         const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
-        const result = await injector.get(CollectionProvider).updateOperation(input);
+        const result = await injector.get(CollectionProvider).updateOperation({
+          ...input,
+          headers: input.headers ? JSON.stringify(input.headers) : null,
+          variables: input.variables ? JSON.stringify(input.variables) : null,
+        });
 
         if (!result) {
           return {
@@ -195,49 +205,44 @@ export const resolvers: CollectionModule.Resolvers = {
           },
         };
       } catch (e) {
-        return {
-          error: {
-            __typename: 'ModifyDocumentCollectionError',
-            message: 'Failed to update operation in document collection',
-          },
-        };
-      }
-    },
-    async deleteOperationInDocumentCollection(_, { selector, id }, { injector }) {
-      try {
-        const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
-        const operation = await injector.get(CollectionProvider).getOperation(id);
-
-        if (!operation) {
+        if (e instanceof zod.ZodError) {
           return {
             error: {
               __typename: 'ModifyDocumentCollectionError',
-              message: 'Failed to locate a operation',
+              message: fromZodError(e).message,
             },
           };
         }
 
-        const collection = await injector
-          .get(CollectionProvider)
-          .getCollection(operation.documentCollectionId);
-        await injector.get(CollectionProvider).deleteOperation(id);
+        throw e;
+      }
+    },
+    async deleteOperationInDocumentCollection(_, { selector, id }, { injector }) {
+      const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
+      const operation = await injector.get(CollectionProvider).getOperation(id);
 
-        return {
-          ok: {
-            __typename: 'DeleteDocumentCollectionOperationOkPayload',
-            deletedId: id,
-            updatedTarget: target,
-            updatedCollection: collection!,
-          },
-        };
-      } catch (e) {
+      if (!operation) {
         return {
           error: {
             __typename: 'ModifyDocumentCollectionError',
-            message: 'Failed to update a document collection',
+            message: 'Failed to locate a operation',
           },
         };
       }
+
+      const collection = await injector
+        .get(CollectionProvider)
+        .getCollection(operation.documentCollectionId);
+      await injector.get(CollectionProvider).deleteOperation(id);
+
+      return {
+        ok: {
+          __typename: 'DeleteDocumentCollectionOperationOkPayload',
+          deletedId: id,
+          updatedTarget: target,
+          updatedCollection: collection!,
+        },
+      };
     },
   },
 };

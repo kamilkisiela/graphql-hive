@@ -205,7 +205,7 @@ export interface DocumentCollection {
 }
 
 export type PaginatedDocumentCollections = Readonly<{
-  items: ReadonlyArray<{
+  edges: ReadonlyArray<{
     node: DocumentCollection;
     cursor: string;
   }>;
@@ -221,8 +221,8 @@ export interface DocumentCollectionOperation {
   id: string;
   title: string;
   contents: string;
-  variables: string;
-  headers: string;
+  variables: string | null;
+  headers: string | null;
   createdByUserId: string | null;
   documentCollectionId: string;
   createdAt: string;
@@ -230,7 +230,7 @@ export interface DocumentCollectionOperation {
 }
 
 export type PaginatedDocumentCollectionOperations = Readonly<{
-  items: ReadonlyArray<{
+  edges: ReadonlyArray<{
     node: DocumentCollectionOperation;
     cursor: string;
   }>;

@@ -3069,7 +3069,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       items = items.slice(0, limit);
 
       return {
-        items,
+        edges: items,
         pageInfo: {
           hasNextPage,
           hasPreviousPage: cursor !== null,
@@ -3217,7 +3217,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       items = items.slice(0, limit);
 
       return {
-        items,
+        edges: items,
         pageInfo: {
           hasNextPage,
           hasPreviousPage: cursor !== null,
@@ -3525,8 +3525,8 @@ const DocumentCollectionDocumentModel = zod.object({
   id: zod.string(),
   title: zod.string(),
   contents: zod.string(),
-  variables: zod.string(),
-  headers: zod.string(),
+  variables: zod.string().nullable(),
+  headers: zod.string().nullable(),
   createdByUserId: zod.union([zod.string(), zod.null()]),
   documentCollectionId: zod.string(),
   createdAt: zod.string(),

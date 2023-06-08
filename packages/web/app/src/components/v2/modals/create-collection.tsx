@@ -20,7 +20,7 @@ const CollectionQuery = graphql(`
   }
 `);
 
-const CreateCollectionMutation = graphql(`
+export const CreateCollectionMutation = graphql(`
   mutation CreateCollection(
     $selector: TargetSelectorInput!
     $input: CreateDocumentCollectionInput!
@@ -45,6 +45,7 @@ const CreateCollectionMutation = graphql(`
         collection {
           id
           name
+          description
           operations(first: 100) {
             edges {
               cursor
@@ -86,6 +87,7 @@ const UpdateCollectionMutation = graphql(`
         collection {
           id
           name
+          description
           operations(first: 100) {
             edges {
               cursor

@@ -35,6 +35,7 @@ const config = {
         scalars: {
           DateTime: 'string',
           SafeInt: 'number',
+          JSON: 'Record<string, any>',
         },
         mappers: {
           SchemaChangeConnection:
@@ -174,7 +175,7 @@ const config = {
     },
     // Integration tests
     './integration-tests/testkit/gql/': {
-      documents: './integration-tests/(testkit|tests)/**/*.ts',
+      documents: ['./integration-tests/(testkit|tests)/**/*.ts'],
       preset: 'client',
       plugins: [],
     },
