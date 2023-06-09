@@ -72,18 +72,24 @@ export type CheckFailureReasonCode =
 export type CheckPolicyResultRecord = CheckPolicyResponse[number] | { message: string };
 export type SchemaCheckWarning = {
   message: string;
-  source: string | null;
-
-  line?: number;
-  column?: number;
-  ruleId: string | null;
+  source: string;
+  line: number;
+  column: number;
+  ruleId: string;
+  endLine: number | null;
+  endColumn: number | null;
 };
 
 export type SchemaCheckSuccess = {
   conclusion: (typeof SchemaCheckConclusion)['Success'];
-  state: {
+  // state is null in case the check got skipped.
+  state: null | {
     schemaChanges: Array<Change> | null;
     schemaPolicyWarnings: SchemaCheckWarning[] | null;
+    composition: {
+      compositeSchemaSDL: string;
+      supergraphSDL: string | null;
+    };
   };
 };
 

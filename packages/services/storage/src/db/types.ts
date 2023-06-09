@@ -164,6 +164,24 @@ export interface projects {
   validation_url: string | null;
 }
 
+export interface schema_checks {
+  breaking_schema_changes: any | null;
+  composite_schema_sdl: string | null;
+  created_at: Date;
+  id: string;
+  is_success: boolean;
+  safe_schema_changes: any | null;
+  schema_composition_errors: any | null;
+  schema_policy_errors: any | null;
+  schema_policy_warnings: any | null;
+  schema_sdl: string;
+  schema_version_id: string | null;
+  service_name: string | null;
+  supergraph_sdl: string | null;
+  target_id: string;
+  updated_at: Date;
+}
+
 export interface schema_log {
   action: string;
   author: string;
@@ -289,6 +307,7 @@ export interface DBTables {
   organizations_billing: organizations_billing;
   persisted_operations: persisted_operations;
   projects: projects;
+  schema_checks: schema_checks;
   schema_log: schema_log;
   schema_policy_config: schema_policy_config;
   schema_version_changes: schema_version_changes;

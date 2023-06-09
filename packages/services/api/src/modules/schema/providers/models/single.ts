@@ -81,10 +81,7 @@ export class SingleModel {
       this.logger.debug('No changes detected, skipping schema check');
       return {
         conclusion: SchemaCheckConclusion.Success,
-        state: {
-          schemaChanges: null,
-          schemaPolicyWarnings: [],
-        },
+        state: null,
       };
     }
 
@@ -133,6 +130,10 @@ export class SingleModel {
       state: {
         schemaChanges: diffCheck.result?.changes ?? null,
         schemaPolicyWarnings: policyCheck.result?.warnings ?? [],
+        composition: {
+          compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
+          supergraphSDL: compositionCheck.result.supergraph,
+        },
       },
     };
   }

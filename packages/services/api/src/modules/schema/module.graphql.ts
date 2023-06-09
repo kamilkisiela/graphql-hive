@@ -154,6 +154,14 @@ export default gql`
     latestSchemaVersion: SchemaVersion
     baseSchema: String
     hasSchema: Boolean!
+    """
+    Get a schema check for the target by ID.
+    """
+    schemaCheck(id: ID!): SchemaCheck
+    """
+    Get a list of paginated schema checks for a target.
+    """
+    schemaChecks(first: Int, after: String): SchemaCheckConnection!
   }
 
   type SchemaConnection {
@@ -283,6 +291,7 @@ export default gql`
     initial: Boolean!
     changes: SchemaChangeConnection
     warnings: SchemaWarningConnection
+    schemaCheck: SchemaCheck
   }
 
   type SchemaCheckWarning {
@@ -297,6 +306,7 @@ export default gql`
     changes: SchemaChangeConnection
     errors: SchemaErrorConnection!
     warnings: SchemaWarningConnection
+    schemaCheck: SchemaCheck
   }
 
   type GitHubSchemaCheckSuccess {
@@ -625,5 +635,110 @@ export default gql`
     Is null if no meta information is available.
     """
     supergraphMetadata: SupergraphMetadata
+  }
+
+  type SchemaPolicyWarning {
+    message: String!
+    ruleId: String!
+    line: Int!
+    column: Int!
+    endLine: Int
+    endColumn: Int
+  }
+
+  type SchemaPolicyWarningEdge {
+    node: SchemaPolicyWarning!
+    cursor: String!
+  }
+
+  type SchemaPolicyWarningConnection {
+    edges: [SchemaPolicyWarningEdge!]!
+    pageInfo: PageInfo!
+  }
+
+  interface SchemaCheck {
+    id: ID!
+    createdAt: String!
+    """
+    The SDL of the schema that was checked.
+    """
+    schemaSDL: String!
+    """
+    The name of the service that owns the schema. Is null for non composite project types.
+    """
+    serviceName: String
+    """
+    The schema version against this check was performed.
+    Is null if there is no schema version published yet.
+    """
+    schemaVersion: SchemaVersion
+  }
+
+  """
+  A successful schema check.
+  """
+  type SuccessfulSchemaCheck implements SchemaCheck {
+    id: ID!
+    createdAt: String!
+    """
+    The SDL of the schema that was checked.
+    """
+    schemaSDL: String!
+    """
+    The name of the service that owns the schema. Is null for non composite project types.
+    """
+    serviceName: String
+    """
+    The schema version against this check was performed.
+    Is null if there is no schema version published yet.
+    """
+    schemaVersion: SchemaVersion
+
+    safeSchemaChanges: SchemaChangeConnection
+    schemaPolicyWarnings: SchemaPolicyWarningConnection
+
+    compositeSchemaSDL: String!
+    supergraphSDL: String
+  }
+
+  """
+  A failed schema check.
+  """
+  type FailedSchemaCheck implements SchemaCheck {
+    id: ID!
+    createdAt: String!
+    """
+    The SDL of the schema that was checked.
+    """
+    schemaSDL: String!
+    """
+    The name of the service that owns the schema. Is null for non composite project types.
+    """
+    serviceName: String
+    """
+    The schema version against this check was performed.
+    Is null if there is no schema version published yet.
+    """
+    schemaVersion: SchemaVersion
+
+    compositionErrors: SchemaErrorConnection
+
+    breakingSchemaChanges: SchemaChangeConnection
+    safeSchemaChanges: SchemaChangeConnection
+    schemaPolicyWarnings: SchemaPolicyWarningConnection
+    schemaPolicyErrors: SchemaPolicyWarningConnection
+
+    compositeSchemaSDL: String
+    supergraphSDL: String
+  }
+
+  type SchemaCheckEdge {
+    node: SchemaCheck!
+    cursor: String!
+  }
+
+  type SchemaCheckConnection {
+    edges: [SchemaCheckEdge!]!
+    pageInfo: PageInfo!
   }
 `;

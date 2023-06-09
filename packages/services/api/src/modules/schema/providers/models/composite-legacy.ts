@@ -84,7 +84,7 @@ export class CompositeLegacyModel {
     if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
       return {
         conclusion: SchemaCheckConclusion.Success,
-        state: { schemaChanges: null, schemaPolicyWarnings: null },
+        state: null,
       };
     }
 
@@ -121,6 +121,10 @@ export class CompositeLegacyModel {
       state: {
         schemaChanges: diffCheck.result?.changes ?? null,
         schemaPolicyWarnings: null,
+        composition: {
+          compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
+          supergraphSDL: compositionCheck.result.supergraph,
+        },
       },
     };
   }

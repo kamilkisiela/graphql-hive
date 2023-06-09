@@ -15,9 +15,10 @@ import {
 } from 'graphql';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
-import { type DateRange, ProjectType } from '../../shared/entities';
+import { type DateRange, ProjectType, Target } from '../../shared/entities';
 import { createPeriod, parseDateRangeInput, PromiseOrValue } from '../../shared/helpers';
 import type {
+  FailedSchemaCheckMapper,
   GraphQLEnumTypeMapper,
   GraphQLInputObjectTypeMapper,
   GraphQLInterfaceTypeMapper,
@@ -26,9 +27,10 @@ import type {
   GraphQLUnionTypeMapper,
   SchemaCompareError,
   SchemaCompareResult,
+  SuccessfulSchemaCheckMapper,
 } from '../../shared/mappers';
 import type { WithGraphQLParentInfo, WithSchemaCoordinatesUsage } from '../../shared/mappers';
-import { buildSchema, createConnection } from '../../shared/schema';
+import { buildSchema, createConnection, createDummyConnection } from '../../shared/schema';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { OperationsManager } from '../operations/providers/operations-manager';
 import { OrganizationManager } from '../organization/providers/organization-manager';
@@ -45,7 +47,7 @@ import { Inspector, toGraphQLSchemaChange } from './providers/inspector';
 import { SchemaBuildError } from './providers/orchestrators/errors';
 import { detectUrlChanges } from './providers/registry-checks';
 import { ensureSDL, SchemaHelper } from './providers/schema-helper';
-import { SchemaManager } from './providers/schema-manager';
+import { InflatedSchemaCheck, SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
 import { schemaChangeFromMeta, SerializableChange } from './schema-change-from-meta';
 
@@ -639,6 +641,35 @@ export const resolvers: SchemaModule.Resolvers = {
         project: target.projectId,
         organization: target.orgId,
       });
+    },
+    async schemaCheck(target, args, { injector }) {
+      const schemaCheck = await injector.get(SchemaManager).findSchemaCheck({
+        targetId: target.id,
+        projectId: target.projectId,
+        organizationId: target.orgId,
+        schemaCheckId: args.id,
+      });
+
+      if (schemaCheck == null) {
+        return null;
+      }
+
+      return toGraphQLSchemaCheck(target)(schemaCheck);
+    },
+    async schemaChecks(target, args, { injector }) {
+      const result = await injector.get(SchemaManager).getPaginatedSchemaChecksForTarget({
+        targetId: target.id,
+        projectId: target.projectId,
+        organizationId: target.orgId,
+        first: args.first ?? null,
+        cursor: args.after ?? null,
+        transformNode: toGraphQLSchemaCheck(target),
+      });
+
+      return {
+        edges: result.items,
+        pageInfo: result.pageInfo,
+      };
     },
   },
   SchemaVersion: {
@@ -1539,6 +1570,54 @@ export const resolvers: SchemaModule.Resolvers = {
     isDeprecated: a => typeof a.entity.deprecationReason === 'string',
     usage,
   },
+  SuccessfulSchemaCheck: {
+    schemaVersion(schemaCheck, _, { injector }) {
+      if (schemaCheck.schemaVersionId === null) {
+        return null;
+      }
+      return injector.get(SchemaManager).getSchemaVersion({
+        organization: schemaCheck.selector.organizationId,
+        project: schemaCheck.selector.projectId,
+        target: schemaCheck.targetId,
+        version: schemaCheck.schemaVersionId,
+      });
+    },
+    safeSchemaChanges(schemaCheck) {
+      if (!schemaCheck.safeSchemaChanges) {
+        return null;
+      }
+
+      return schemaCheck.safeSchemaChanges.map(toGraphQLSchemaChange);
+    },
+  },
+  FailedSchemaCheck: {
+    schemaVersion(schemaCheck, _, { injector }) {
+      if (schemaCheck.schemaVersionId === null) {
+        return null;
+      }
+      return injector.get(SchemaManager).getSchemaVersion({
+        organization: schemaCheck.selector.organizationId,
+        project: schemaCheck.selector.projectId,
+        target: schemaCheck.targetId,
+        version: schemaCheck.schemaVersionId,
+      });
+    },
+    safeSchemaChanges(schemaCheck) {
+      if (!schemaCheck.safeSchemaChanges) {
+        return null;
+      }
+
+      return schemaCheck.safeSchemaChanges.map(toGraphQLSchemaChange);
+    },
+    breakingSchemaChanges(schemaCheck) {
+      if (!schemaCheck.breakingSchemaChanges) {
+        return null;
+      }
+
+      return schemaCheck.breakingSchemaChanges.map(toGraphQLSchemaChange);
+    },
+  },
+  SchemaPolicyWarningConnection: createDummyConnection(),
 };
 
 function stringifyDefaultValue(value: unknown): string | null {
@@ -1580,3 +1659,30 @@ function withUsedByClients<
     ]),
   );
 }
+
+/**
+ * Helper function for transforming a "raw" schema check from the database into a mapper object for the GraphQL resolver phase.
+ */
+export const toGraphQLSchemaCheck = (target: Target) => {
+  const selector = {
+    organizationId: target.orgId,
+    projectId: target.projectId,
+  };
+  return function toGraphQLSchemaCheck(
+    schemaCheck: InflatedSchemaCheck,
+  ): SuccessfulSchemaCheckMapper | FailedSchemaCheckMapper {
+    if (schemaCheck.isSuccess) {
+      return {
+        __typename: 'SuccessfulSchemaCheck' as const,
+        selector,
+        ...schemaCheck,
+      };
+    }
+
+    return {
+      __typename: 'FailedSchemaCheck' as const,
+      selector,
+      ...schemaCheck,
+    };
+  };
+};

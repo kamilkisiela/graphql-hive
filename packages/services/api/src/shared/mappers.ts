@@ -20,6 +20,7 @@ import type {
 import { type SuperGraphInformation } from '../modules/schema/lib/federation-super-graph';
 import { SchemaCheckWarning } from '../modules/schema/providers/models/shared';
 import { SchemaBuildError } from '../modules/schema/providers/orchestrators/errors';
+import { InflatedSchemaCheck } from '../modules/schema/providers/schema-manager';
 import { SerializableChange } from '../modules/schema/schema-change-from-meta';
 import type {
   ActivityObject,
@@ -236,3 +237,20 @@ export type SchemaCoordinateUsageTypeMapper = {
 
 export type DocumentCollectionConnection = ReadonlyArray<DocumentCollection>;
 export type DocumentCollectionOperationsConnection = ReadonlyArray<DocumentCollectionOperation>;
+
+export type FailedSchemaCheckMapper = {
+  __typename: 'FailedSchemaCheck';
+  selector: {
+    organizationId: string;
+    projectId: string;
+  };
+} & Extract<InflatedSchemaCheck, { isSuccess: false }>;
+export type SuccessfulSchemaCheckMapper = {
+  __typename: 'SuccessfulSchemaCheck';
+  selector: {
+    organizationId: string;
+    projectId: string;
+  };
+} & Extract<InflatedSchemaCheck, { isSuccess: true }>;
+
+export type SchemaPolicyWarningConnectionMapper = ReadonlyArray<SchemaCheckWarning>;

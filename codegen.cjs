@@ -118,6 +118,9 @@ const config = {
           DocumentCollectionConnection: '../shared/entities#PaginatedDocumentCollections',
           DocumentCollectionOperationsConnection:
             '../shared/entities#PaginatedDocumentCollectionOperations',
+          FailedSchemaCheck: '../shared/mappers#FailedSchemaCheckMapper',
+          SuccessfulSchemaCheck: '../shared/mappers#SuccessfulSchemaCheckMapper',
+          SchemaPolicyWarningConnection: '../shared/mappers#SchemaPolicyWarningConnectionMapper',
         },
       },
     },

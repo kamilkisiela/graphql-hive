@@ -75,6 +75,70 @@ export function createConnection(map?: (node: unknown) => unknown): {
   };
 }
 
+export function createDummyConnection<TInput>(): {
+  edges(nodes: readonly TInput[]): readonly {
+    node: TInput;
+    cursor: string;
+  }[];
+  pageInfo(nodes: readonly TInput[]): {
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    startCursor: string;
+    endCursor: string;
+  };
+};
+export function createDummyConnection<TInput, TOutput = TInput>(
+  map: (node: TInput) => TOutput,
+): {
+  edges(nodes: readonly TInput[]): readonly {
+    node: TOutput;
+    cursor: string;
+  }[];
+  pageInfo(nodes: readonly TInput[]): {
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    startCursor: string;
+    endCursor: string;
+  };
+};
+/**
+ * Creates a dummy connection for an array value.
+ */
+export function createDummyConnection(map?: (node: unknown) => unknown): {
+  edges(nodes: readonly unknown[]): readonly {
+    node: unknown;
+    cursor: string;
+  }[];
+  pageInfo(nodes: readonly unknown[]): {
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    startCursor: string;
+    endCursor: string;
+  };
+} {
+  return {
+    edges(nodes: readonly unknown[]): readonly {
+      node: unknown;
+      cursor: string;
+    }[] {
+      return nodes.map((node, index) => {
+        return {
+          node: map ? map(node) : node,
+          cursor: String(index),
+        };
+      });
+    },
+    pageInfo() {
+      return {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        startCursor: '',
+        endCursor: '',
+      };
+    },
+  };
+}
+
 export function sortDocumentNode(doc: DocumentNode): DocumentNode {
   return visit(doc, {
     Document(node) {
