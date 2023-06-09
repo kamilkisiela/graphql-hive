@@ -28,6 +28,7 @@ services:
       - '${PWD}/packages/services/cdn-worker/dist/index.nodejs.js:/app/index.js'
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: ${NODE_OPTIONS:-}
       PORT: 3004
       LOG_LEVEL: debug
       CDN_AUTH_PRIVATE_KEY: 1e1064ef9cda8bf38936b77317e90dc3
@@ -55,6 +56,7 @@ services:
       - '${PWD}/packages/services/broker-worker/dist/index.nodejs.js:/app/broker.js'
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: ${NODE_OPTIONS:-}
       PORT: 3013
       LOG_LEVEL: debug
       CF_BROKER_SIGNATURE: secretSignature
@@ -73,6 +75,7 @@ services:
       - 3069:3069
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: ${NODE_OPTIONS:-}
       PORT: 3069
       LOG_LEVEL: debug
       SECRET: '${EXTERNAL_COMPOSITION_SECRET}'
@@ -95,6 +98,7 @@ services:
       - '${PWD}/packages/libraries/external-composition/dist/example.js:/app/example.mjs'
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: ${NODE_OPTIONS:-}
       PORT: 3012
       LOG_LEVEL: debug
       SECRET: '${EXTERNAL_COMPOSITION_SECRET}'
@@ -112,6 +116,7 @@ services:
         condition: service_completed_successfully
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: ${NODE_OPTIONS:-}
       LOG_LEVEL: debug
       CLICKHOUSE_PROTOCOL: 'http'
       CLICKHOUSE_HOST: 'clickhouse'
@@ -138,6 +143,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: ${NODE_OPTIONS:-}
       LOG_LEVEL: debug
       LIMIT_CACHE_UPDATE_INTERVAL_MS: '${LIMIT_CACHE_UPDATE_INTERVAL_MS}'
       POSTGRES_HOST: db

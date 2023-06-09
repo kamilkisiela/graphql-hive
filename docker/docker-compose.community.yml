@@ -221,6 +221,7 @@ services:
       - '8082:3001'
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: ${NODE_OPTIONS:-}
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       POSTGRES_DB: '${POSTGRES_DB}'
@@ -263,6 +264,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: ${NODE_OPTIONS:-}
       PORT: 3012
 
   schema:
@@ -274,6 +276,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: ${NODE_OPTIONS:-}
       PORT: 3002
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -289,6 +292,7 @@ services:
         condition: service_completed_successfully
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: ${NODE_OPTIONS:-}
       POSTGRES_HOST: db
       POSTGRES_USER: '${POSTGRES_USER}'
       POSTGRES_PASSWORD: '${POSTGRES_PASSWORD}'
@@ -308,6 +312,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: ${NODE_OPTIONS:-}
       PORT: 3005
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -322,6 +327,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: ${NODE_OPTIONS:-}
       PORT: 3011
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -342,6 +348,7 @@ services:
       - 8081:3006
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: ${NODE_OPTIONS:-}
       TOKENS_ENDPOINT: http://tokens:3003
       KAFKA_CONNECTION_MODE: 'docker'
       KAFKA_TOPIC: 'usage_reports_v2'
@@ -362,6 +369,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: ${NODE_OPTIONS:-}
       KAFKA_CONNECTION_MODE: 'docker'
       KAFKA_BROKER: broker:29092
       KAFKA_CONCURRENCY: '1'
@@ -383,6 +391,7 @@ services:
     environment:
       PORT: 3000
       NODE_ENV: production
+      NODE_OPTIONS: ${NODE_OPTIONS:-}
       APP_BASE_URL: '${HIVE_APP_BASE_URL}'
       SUPERTOKENS_CONNECTION_URI: http://supertokens:3567
       SUPERTOKENS_API_KEY: '${SUPERTOKENS_API_KEY}'
