@@ -221,9 +221,11 @@ describe('Schema policy checks', () => {
       expect(message).toContain(`Detected 2 errors`);
       expect(message.split('\n').slice(1).join('\n')).toMatchInlineSnapshot(`
         ✖ Detected 2 errors
-
-           - Description is required for type Query (source: policy-require-description)
-           - Description is required for type User (source: policy-require-description)
+        - Description is required for type Query (source: policy-require-description)
+        - Description is required for type User (source: policy-require-description)
+        i Detected 2 changes
+        - Type User was added
+        - Field user was added to object type Query
       `);
     });
 
@@ -277,13 +279,14 @@ describe('Schema policy checks', () => {
       expect(message).toContain(`Detected 1 warning`);
       expect(message.split('\n').slice(1).join('\n')).toMatchInlineSnapshot(`
         ✖ Detected 2 errors
-
-           - Description is required for type Query (source: policy-require-description)
-           - Description is required for type User (source: policy-require-description)
-
+        - Description is required for type Query (source: policy-require-description)
+        - Description is required for type User (source: policy-require-description)
         ⚠ Detected 1 warning
-
-           - Deprecation reason is required for field foo in type Query. (source: policy-require-deprecation-reason)
+        - Deprecation reason is required for field foo in type Query. (source: policy-require-deprecation-reason)
+        i Detected 3 changes
+        - Type User was added
+        - Field user was added to object type Query
+        - Field Query.foo is deprecated
       `);
     });
   });

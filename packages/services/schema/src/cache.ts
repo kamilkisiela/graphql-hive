@@ -121,6 +121,9 @@ export function createCache(options: {
           if (cached) {
             if (cached.status === 'failed') {
               logger.debug('Rejecting action from cache (id=%s)', id);
+              if (cached.error.startsWith('TimeoutError:')) {
+                throw new TimeoutError(cached.error.replace('TimeoutError:', ''));
+              }
               throw new Error(cached.error);
             }
 

@@ -136,6 +136,7 @@ export class CompositeModel {
         selector,
         schemas,
         modifiedSdl: incoming.sdl,
+        baseSchema,
       }),
     ]);
 

@@ -109,6 +109,7 @@ export class SingleModel {
         selector,
         schemas,
         modifiedSdl: input.sdl,
+        baseSchema,
       }),
     ]);
 
