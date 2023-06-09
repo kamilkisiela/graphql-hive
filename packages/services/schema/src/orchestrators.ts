@@ -307,8 +307,6 @@ async function callExternalService(
       }
     }
 
-    console.log(error);
-
     throw error;
   }
 }
