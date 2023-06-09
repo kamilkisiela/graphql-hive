@@ -98,10 +98,7 @@ export function createCache(options: {
   return {
     timeoutMs,
     isTimeoutError(error: unknown): error is TimeoutError {
-      return (
-        error instanceof TimeoutError ||
-        ((error as null | { message?: string })?.message?.startsWith('TimeoutError') ?? false)
-      );
+      return error instanceof TimeoutError;
     },
     reuse<I, O>(groupKey: string, factory: (input: I) => Promise<O>): (input: I) => Promise<O> {
       return async input => {
@@ -124,6 +121,9 @@ export function createCache(options: {
           if (cached) {
             if (cached.status === 'failed') {
               logger.debug('Rejecting action from cache (id=%s)', id);
+              if (cached.error.startsWith('TimeoutError:')) {
+                throw new TimeoutError(cached.error.replace('TimeoutError:', ''));
+              }
               throw new Error(cached.error);
             }
 
