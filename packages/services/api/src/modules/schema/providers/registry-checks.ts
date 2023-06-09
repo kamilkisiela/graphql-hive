@@ -503,4 +503,5 @@ const toSchemaCheckWarning = (record: CheckPolicyResponse[number]): SchemaCheckW
   source: record.ruleId ? `policy-${record.ruleId}` : 'policy',
   column: record.column,
   line: record.line,
+  ruleId: record.ruleId ?? null,
 });

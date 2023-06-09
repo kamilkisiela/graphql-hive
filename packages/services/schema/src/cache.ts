@@ -98,7 +98,10 @@ export function createCache(options: {
   return {
     timeoutMs,
     isTimeoutError(error: unknown): error is TimeoutError {
-      return error instanceof TimeoutError;
+      return (
+        error instanceof TimeoutError ||
+        ((error as null | { message?: string })?.message?.startsWith('TimeoutError') ?? false)
+      );
     },
     reuse<I, O>(groupKey: string, factory: (input: I) => Promise<O>): (input: I) => Promise<O> {
       return async input => {
