@@ -1,4 +1,5 @@
 import { URL } from 'node:url';
+import type { GraphQLSchema } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import hashObject from 'object-hash';
 import { type Change, CriticalityLevel } from '@graphql-inspector/core';
@@ -242,7 +243,6 @@ export class RegistryChecks {
         version.schemas.map(s => this.helper.createSchemaObject(s)),
         project.externalComposition,
       ),
-
       orchestrator.composeAndValidate(
         schemas.map(s => this.helper.createSchemaObject(s)),
         project.externalComposition,
@@ -256,17 +256,27 @@ export class RegistryChecks {
       } satisfies CheckResult;
     }
 
-    const existingSchema = buildSchema(
-      this.helper.createSchemaObject({
-        sdl: existingSchemaResult.sdl,
-      }),
-    );
+    let existingSchema: GraphQLSchema;
+    let incomingSchema: GraphQLSchema;
 
-    const incomingSchema = buildSchema(
-      this.helper.createSchemaObject({
-        sdl: incomingSchemaResult.sdl,
-      }),
-    );
+    try {
+      existingSchema = buildSchema(
+        this.helper.createSchemaObject({
+          sdl: existingSchemaResult.sdl,
+        }),
+      );
+
+      incomingSchema = buildSchema(
+        this.helper.createSchemaObject({
+          sdl: incomingSchemaResult.sdl,
+        }),
+      );
+    } catch (error) {
+      this.logger.error('Failed to build schema for diff. Skip diff check.');
+      return {
+        status: 'skipped',
+      } satisfies CheckResult;
+    }
 
     const changes = [...(await this.inspector.diff(existingSchema, incomingSchema, selector))];
 
