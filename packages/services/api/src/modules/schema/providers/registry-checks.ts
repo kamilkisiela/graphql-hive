@@ -183,12 +183,6 @@ export class RegistryChecks {
         status: 'skipped',
       };
     }
-    if (result.errors.length > 0) {
-      this.logger.debug('Skip policy check due schemas not being valid.');
-      return {
-        status: 'skipped',
-      } satisfies CheckResult;
-    }
 
     const policyResult = await this.policy.checkPolicy(result.sdl, modifiedSdl, selector);
     const warnings = policyResult?.warnings?.map<SchemaCheckWarning>(toSchemaCheckWarning) ?? [];
@@ -257,12 +251,6 @@ export class RegistryChecks {
 
     if (existingSchemaResult.sdl == null || incomingSchemaResult.sdl == null) {
       this.logger.debug('Skip policy check due to no SDL being composed.');
-      return {
-        status: 'skipped',
-      } satisfies CheckResult;
-    }
-    if (existingSchemaResult.errors.length > 0 || incomingSchemaResult.errors.length > 0) {
-      this.logger.debug('Skip policy check due schemas not being valid.');
       return {
         status: 'skipped',
       } satisfies CheckResult;

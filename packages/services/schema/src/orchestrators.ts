@@ -47,7 +47,7 @@ interface CompositionSuccess {
   };
 }
 
-export type CompositionErrorSource = 'graphql' | 'composition' | 'policy';
+export type CompositionErrorSource = 'graphql' | 'composition';
 
 export interface CompositionFailureError {
   message: string;
