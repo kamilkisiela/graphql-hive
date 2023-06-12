@@ -1,11 +1,8 @@
-import {
-  PushedCompositeSchema,
-  SchemaCompositionError,
-  SingleSchema,
-} from 'packages/services/api/src/shared/entities';
+import { PushedCompositeSchema, SingleSchema } from 'packages/services/api/src/shared/entities';
 import { Change } from '@graphql-inspector/core';
 import type { CheckPolicyResponse } from '@hive/policy';
 import { CompositionFailureError } from '@hive/schema';
+import type { SchemaCompositionError } from '@hive/storage';
 import { type RegistryChecks } from '../registry-checks';
 
 export const SchemaPublishConclusion = {

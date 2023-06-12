@@ -34,12 +34,8 @@ import { ProjectType } from '../../api/src';
 import {
   type CDNAccessToken,
   type OIDCIntegration,
-  SchemaCheckModel,
-  SchemaCompositionError,
-  SchemaCompositionErrorModel,
   type SchemaLog,
   type SchemaPolicy,
-  SchemaPolicyWarningModel,
 } from '../../api/src/shared/entities';
 import {
   activities,
@@ -62,7 +58,13 @@ import {
   tokens,
   users,
 } from './db';
-import { SchemaChangeModel } from './schema-change-model';
+import {
+  SchemaChangeModel,
+  SchemaCheckModel,
+  SchemaCompositionError,
+  SchemaCompositionErrorModel,
+  SchemaPolicyWarningModel,
+} from './schema-change-model';
 import type { Slonik } from './shared';
 
 export { ConnectionError } from 'slonik';
@@ -3807,4 +3809,4 @@ const schemaCheckSQLFields = sql`
   , "supergraph_sdl" as "supergraphSDL"
 `;
 
-export { SchemaChangeModel };
+export * from './schema-change-model';

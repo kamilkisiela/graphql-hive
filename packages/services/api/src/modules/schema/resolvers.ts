@@ -15,10 +15,9 @@ import {
 } from 'graphql';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
-import { type DateRange, ProjectType, Target } from '../../shared/entities';
+import { type DateRange, ProjectType } from '../../shared/entities';
 import { createPeriod, parseDateRangeInput, PromiseOrValue } from '../../shared/helpers';
 import type {
-  FailedSchemaCheckMapper,
   GraphQLEnumTypeMapper,
   GraphQLInputObjectTypeMapper,
   GraphQLInterfaceTypeMapper,
@@ -27,7 +26,6 @@ import type {
   GraphQLUnionTypeMapper,
   SchemaCompareError,
   SchemaCompareResult,
-  SuccessfulSchemaCheckMapper,
 } from '../../shared/mappers';
 import type { WithGraphQLParentInfo, WithSchemaCoordinatesUsage } from '../../shared/mappers';
 import { buildSchema, createConnection, createDummyConnection } from '../../shared/schema';
@@ -47,9 +45,10 @@ import { Inspector, toGraphQLSchemaChange } from './providers/inspector';
 import { SchemaBuildError } from './providers/orchestrators/errors';
 import { detectUrlChanges } from './providers/registry-checks';
 import { ensureSDL, SchemaHelper } from './providers/schema-helper';
-import { InflatedSchemaCheck, SchemaManager } from './providers/schema-manager';
+import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
 import { schemaChangeFromMeta, SerializableChange } from './schema-change-from-meta';
+import { toGraphQLSchemaCheck } from './to-graphql-schema-check';
 
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 const GraphQLSchemaStringModel = z.string().max(5_000_000).min(0);
@@ -1659,30 +1658,3 @@ function withUsedByClients<
     ]),
   );
 }
-
-/**
- * Helper function for transforming a "raw" schema check from the database into a mapper object for the GraphQL resolver phase.
- */
-export const toGraphQLSchemaCheck = (target: Target) => {
-  const selector = {
-    organizationId: target.orgId,
-    projectId: target.projectId,
-  };
-  return function toGraphQLSchemaCheck(
-    schemaCheck: InflatedSchemaCheck,
-  ): SuccessfulSchemaCheckMapper | FailedSchemaCheckMapper {
-    if (schemaCheck.isSuccess) {
-      return {
-        __typename: 'SuccessfulSchemaCheck' as const,
-        selector,
-        ...schemaCheck,
-      };
-    }
-
-    return {
-      __typename: 'FailedSchemaCheck' as const,
-      selector,
-      ...schemaCheck,
-    };
-  };
-};

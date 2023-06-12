@@ -3,13 +3,9 @@ import { Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import { z } from 'zod';
 import { Change } from '@graphql-inspector/core';
+import type { SchemaCheck, SchemaCompositionError } from '@hive/storage';
 import { RegistryModel } from '../../../__generated__/types';
-import {
-  Orchestrator,
-  ProjectType,
-  SchemaCheck,
-  SchemaCompositionError,
-} from '../../../shared/entities';
+import { Orchestrator, ProjectType } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { atomic, stringifySelector } from '../../../shared/helpers';
 import { SchemaVersion } from '../../../shared/mappers';
