@@ -4,6 +4,7 @@
     "fabiospampinato.vscode-commands",
     "esbenp.prettier-vscode",
     "thebearingedge.vscode-sql-lit",
-    "hashicorp.hcl"
+    "hashicorp.hcl",
+    "GraphQL.vscode-graphql"
   ]
 }

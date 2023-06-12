@@ -76,7 +76,7 @@ function OrganizationTransferPage() {
           if (accept) {
             notify('The organization is now yours!', 'success');
           }
-          router.visitOrganization({
+          void router.visitOrganization({
             organizationId: orgId,
           });
         } else {
@@ -95,7 +95,7 @@ function OrganizationTransferPage() {
   const reject = useCallback(() => answer(false), [answer]);
 
   const goBack = useCallback(() => {
-    router.visitHome();
+    void router.visitHome();
   }, [router]);
 
   return (

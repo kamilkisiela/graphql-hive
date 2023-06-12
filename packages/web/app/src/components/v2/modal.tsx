@@ -17,9 +17,9 @@ import {
 import { Provider as TooltipProvider } from '@radix-ui/react-tooltip';
 
 const widthBySize = {
-  sm: 'w-[450px]',
-  md: 'w-[600px]',
-  lg: 'w-[800px]',
+  sm: clsx('w-[450px]'),
+  md: clsx('w-[600px]'),
+  lg: clsx('w-[800px]'),
 };
 
 export const ModalTooltipContext = createContext<HTMLDivElement | null>(null);

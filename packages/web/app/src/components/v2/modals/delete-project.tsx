@@ -2,9 +2,9 @@ import { ReactElement } from 'react';
 import { useRouter } from 'next/router';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
-import { TrashIcon } from '@/components/v2/icon';
 import { DeleteProjectDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
+import { TrashIcon } from '@radix-ui/react-icons';
 
 export const DeleteProjectModal = ({
   isOpen,
@@ -23,7 +23,7 @@ export const DeleteProjectModal = ({
       onOpenChange={toggleModalOpen}
       className="flex flex-col items-center gap-5"
     >
-      <TrashIcon className="h-24 w-24 text-red-500 opacity-70" />
+      <TrashIcon className="h-16 w-auto text-red-500 opacity-70" />
       <Heading>Delete project</Heading>
       <p className="text-sm text-gray-500">
         Are you sure you wish to delete this project? This action is irreversible!

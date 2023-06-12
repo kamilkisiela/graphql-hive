@@ -4,7 +4,7 @@ import { useRedirect } from './common';
 
 export { TargetAccessScope };
 
-const CanAccessTarget_MemberFragment = graphql(`
+export const CanAccessTarget_MemberFragment = graphql(`
   fragment CanAccessTarget_MemberFragment on Member {
     targetAccessScopes
   }

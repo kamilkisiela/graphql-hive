@@ -9,7 +9,7 @@ export function Select({
   isInvalid,
   ...props
 }: ComponentProps<'select'> & {
-  options: { name: string; value: string }[];
+  options?: { name: string; value: string }[];
   isInvalid?: boolean;
 }): ReactElement {
   return (

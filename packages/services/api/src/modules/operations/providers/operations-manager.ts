@@ -207,6 +207,7 @@ export class OperationsManager {
       percentage: total === 0 ? 0 : (totalField / total) * 100,
     };
   }
+
   async readFieldListStats({
     fields,
     period,
@@ -575,9 +576,7 @@ export class OperationsManager {
       return false;
     }
 
-    const total = await this.reader.countOperationsForTargets({
-      targets,
-    });
+    const total = await this.reader.countOperationsForTargets({ targets });
 
     if (total > 0) {
       await this.storage.completeGetStartedStep({

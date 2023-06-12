@@ -112,6 +112,12 @@ const config = {
           SchemaPolicy: '../shared/entities#SchemaPolicy as SchemaPolicyMapper',
           SchemaPolicyRule: '../shared/entities#SchemaPolicyAvailableRuleObject',
           SchemaCoordinateUsage: '../shared/mappers#SchemaCoordinateUsageTypeMapper',
+          DocumentCollection: '../shared/entities#DocumentCollection as DocumentCollectionEntity',
+          DocumentCollectionOperation:
+            '../shared/entities#DocumentCollectionOperation as DocumentCollectionOperationEntity',
+          DocumentCollectionConnection: '../shared/entities#PaginatedDocumentCollections',
+          DocumentCollectionOperationsConnection:
+            '../shared/entities#PaginatedDocumentCollectionOperations',
         },
       },
     },
@@ -168,7 +174,7 @@ const config = {
     },
     // Integration tests
     './integration-tests/testkit/gql/': {
-      documents: './integration-tests/(testkit|tests)/**/*.ts',
+      documents: ['./integration-tests/(testkit|tests)/**/*.ts'],
       preset: 'client',
       plugins: [],
     },

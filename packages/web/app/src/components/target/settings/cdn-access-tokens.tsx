@@ -387,7 +387,7 @@ export function CDNAccessTokens(props: {
         artifacts.
         <br />
         <DocsLink href="/management/targets#cdn-access-tokens">
-          Learn more about CDN Access Token
+          Learn more about CDN Access Tokens
         </DocsLink>
       </DocsNote>
       {canManage && (
@@ -395,7 +395,7 @@ export function CDNAccessTokens(props: {
           <Button
             as="a"
             href={openCreateCDNAccessTokensModalLink}
-            variant="secondary"
+            variant="primary"
             onClick={ev => {
               ev.preventDefault();
               void router.push(openCreateCDNAccessTokensModalLink);
@@ -403,7 +403,7 @@ export function CDNAccessTokens(props: {
             size="large"
             className="px-5"
           >
-            Create new CDN Token
+            Create new CDN token
           </Button>
         </div>
       )}
@@ -457,22 +457,23 @@ export function CDNAccessTokens(props: {
             Previous Page
           </Button>
         ) : null}
-        <Button
-          variant="secondary"
-          size="large"
-          className="px-5"
-          disabled={!target.data?.target?.cdnAccessTokens.pageInfo.hasNextPage}
-          onClick={() => {
-            setEndCursors(cursors => {
-              if (!target.data?.target?.cdnAccessTokens.pageInfo.endCursor) {
-                return cursors;
-              }
-              return [...cursors, target.data?.target?.cdnAccessTokens.pageInfo.endCursor];
-            });
-          }}
-        >
-          Next Page
-        </Button>
+        {target.data?.target?.cdnAccessTokens.pageInfo.hasNextPage ? (
+          <Button
+            variant="secondary"
+            size="large"
+            className="px-5"
+            onClick={() => {
+              setEndCursors(cursors => {
+                if (!target.data?.target?.cdnAccessTokens.pageInfo.endCursor) {
+                  return cursors;
+                }
+                return [...cursors, target.data?.target?.cdnAccessTokens.pageInfo.endCursor];
+              });
+            }}
+          >
+            Next Page
+          </Button>
+        ) : null}
       </div>
       {isCreateCDNAccessTokensModalOpen ? (
         <CreateCDNAccessTokenModal

@@ -8,11 +8,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/v2/dropdown';
-import { ArrowDownIcon, Link2Icon } from '@/components/v2/icon';
+import { ArrowDownIcon } from '@/components/v2/icon';
 import { ConnectSchemaModal } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { canAccessTarget, TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { Link1Icon } from '@radix-ui/react-icons';
 import { QueryError } from '../common/DataWrapper';
 import { ProjectMigrationToast } from '../project/migration-toast';
 
@@ -25,7 +26,7 @@ enum TabValue {
   Settings = 'settings',
 }
 
-const TargetLayout_OrganizationFragment = graphql(`
+export const TargetLayout_OrganizationFragment = graphql(`
   fragment TargetLayout_OrganizationFragment on Organization {
     me {
       ...CanAccessTarget_MemberFragment
@@ -114,14 +115,14 @@ export const TargetLayout = <
   useEffect(() => {
     if (!data.fetching && !target) {
       // url with # provoke error Maximum update depth exceeded
-      router.push('/404', router.asPath.replace(/#.*/, ''));
+      void router.push('/404', router.asPath.replace(/#.*/, ''));
     }
   }, [router, target, data.fetching]);
 
   useEffect(() => {
     if (!data.fetching && !project) {
       // url with # provoke error Maximum update depth exceeded
-      router.push('/404', router.asPath.replace(/#.*/, ''));
+      void router.push('/404', router.asPath.replace(/#.*/, ''));
     }
   }, [router, project, data.fetching]);
 
@@ -200,7 +201,7 @@ export const TargetLayout = <
                   className="ml-auto"
                 >
                   Connect to CDN
-                  <Link2Icon className="ml-8 h-4 w-4" />
+                  <Link1Icon className="ml-8 h-6 w-auto" />
                 </Button>
                 <ConnectSchemaModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
               </>

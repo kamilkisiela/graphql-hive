@@ -8,6 +8,14 @@ import {
   TargetAccessScope,
 } from '@app/gql/graphql';
 import { authenticate, userEmail } from './auth';
+import {
+  CreateCollectionMutation,
+  CreateOperationMutation,
+  DeleteCollectionMutation,
+  DeleteOperationMutation,
+  UpdateCollectionMutation,
+  UpdateOperationMutation,
+} from './collections';
 import { ensureEnv } from './env';
 import {
   checkSchema,
@@ -198,6 +206,161 @@ export function initSeed() {
                   )
                     .then(r => r.expectNoGraphQLErrors())
                     .then(r => r.deleteTokens.deletedTokens);
+                },
+                async createDocumentCollection({
+                  name,
+                  description,
+                  token = ownerToken,
+                }: {
+                  name: string;
+                  description: string;
+                  token?: string;
+                }) {
+                  const result = await execute({
+                    document: CreateCollectionMutation,
+                    variables: {
+                      input: {
+                        name,
+                        description,
+                      },
+                      selector: {
+                        organization: organization.cleanId,
+                        project: project.cleanId,
+                        target: target.cleanId,
+                      },
+                    },
+                    authToken: token,
+                  }).then(r => r.expectNoGraphQLErrors());
+
+                  return result.createDocumentCollection;
+                },
+                async updateDocumentCollection({
+                  collectionId,
+                  name,
+                  description,
+                  token = ownerToken,
+                }: {
+                  collectionId: string;
+                  name: string;
+                  description: string;
+                  token?: string;
+                }) {
+                  const result = await execute({
+                    document: UpdateCollectionMutation,
+                    variables: {
+                      input: {
+                        collectionId,
+                        name,
+                        description,
+                      },
+                      selector: {
+                        organization: organization.cleanId,
+                        project: project.cleanId,
+                        target: target.cleanId,
+                      },
+                    },
+                    authToken: token,
+                  }).then(r => r.expectNoGraphQLErrors());
+
+                  return result.updateDocumentCollection;
+                },
+                async deleteDocumentCollection({
+                  collectionId,
+                  token = ownerToken,
+                }: {
+                  collectionId: string;
+                  token?: string;
+                }) {
+                  const result = await execute({
+                    document: DeleteCollectionMutation,
+                    variables: {
+                      id: collectionId,
+                      selector: {
+                        organization: organization.cleanId,
+                        project: project.cleanId,
+                        target: target.cleanId,
+                      },
+                    },
+                    authToken: token,
+                  }).then(r => r.expectNoGraphQLErrors());
+
+                  return result.deleteDocumentCollection;
+                },
+                async createOperationInCollection(input: {
+                  collectionId: string;
+                  name: string;
+                  query: string;
+                  variables?: string;
+                  headers?: string;
+                  token?: string;
+                }) {
+                  const result = await execute({
+                    document: CreateOperationMutation,
+                    variables: {
+                      input: {
+                        collectionId: input.collectionId,
+                        name: input.name,
+                        query: input.query,
+                        headers: input.headers,
+                        variables: input.variables,
+                      },
+                      selector: {
+                        organization: organization.cleanId,
+                        project: project.cleanId,
+                        target: target.cleanId,
+                      },
+                    },
+                    authToken: input.token || ownerToken,
+                  }).then(r => r.expectNoGraphQLErrors());
+
+                  return result.createOperationInDocumentCollection;
+                },
+                async deleteOperationInCollection(input: { operationId: string; token?: string }) {
+                  const result = await execute({
+                    document: DeleteOperationMutation,
+                    variables: {
+                      id: input.operationId,
+                      selector: {
+                        organization: organization.cleanId,
+                        project: project.cleanId,
+                        target: target.cleanId,
+                      },
+                    },
+                    authToken: input.token || ownerToken,
+                  }).then(r => r.expectNoGraphQLErrors());
+
+                  return result.deleteOperationInDocumentCollection;
+                },
+                async updateOperationInCollection(input: {
+                  operationId: string;
+                  collectionId: string;
+                  name: string;
+                  query: string;
+                  variables?: string;
+                  headers?: string;
+                  token?: string;
+                }) {
+                  const result = await execute({
+                    document: UpdateOperationMutation,
+                    variables: {
+                      input: {
+                        operationId: input.operationId,
+                        collectionId: input.collectionId,
+                        name: input.name,
+                        query: input.query,
+                        headers: input.headers,
+                        variables: input.variables,
+                      },
+                      selector: {
+                        organization: organization.cleanId,
+                        project: project.cleanId,
+                        target: target.cleanId,
+                      },
+                    },
+                    authToken: input.token || ownerToken,
+                  }).then(r => r.expectNoGraphQLErrors());
+
+                  return result.updateOperationInDocumentCollection;
                 },
                 async createToken({
                   targetScopes = [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],

@@ -9,6 +9,7 @@ import { billingModule } from './modules/billing';
 import { BILLING_CONFIG, BillingConfig } from './modules/billing/providers/tokens';
 import { cdnModule } from './modules/cdn';
 import { CDN_CONFIG, CDNConfig } from './modules/cdn/providers/tokens';
+import { collectionModule } from './modules/collection';
 import { feedbackModule } from './modules/feedback';
 import { FEEDBACK_SLACK_CHANNEL, FEEDBACK_SLACK_TOKEN } from './modules/feedback/providers/tokens';
 import { integrationsModule } from './modules/integrations';
@@ -84,6 +85,7 @@ const modules = [
   billingModule,
   oidcIntegrationsModule,
   schemaPolicyModule,
+  collectionModule,
 ];
 
 export function createRegistry({

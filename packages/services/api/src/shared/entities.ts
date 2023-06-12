@@ -194,6 +194,54 @@ export interface CDNAccessToken {
   readonly createdAt: string;
 }
 
+export interface DocumentCollection {
+  id: string;
+  title: string;
+  description: string | null;
+  targetId: string;
+  createdByUserId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type PaginatedDocumentCollections = Readonly<{
+  edges: ReadonlyArray<{
+    node: DocumentCollection;
+    cursor: string;
+  }>;
+  pageInfo: Readonly<{
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    startCursor: string;
+    endCursor: string;
+  }>;
+}>;
+
+export interface DocumentCollectionOperation {
+  id: string;
+  title: string;
+  contents: string;
+  variables: string | null;
+  headers: string | null;
+  createdByUserId: string | null;
+  documentCollectionId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type PaginatedDocumentCollectionOperations = Readonly<{
+  edges: ReadonlyArray<{
+    node: DocumentCollectionOperation;
+    cursor: string;
+  }>;
+  pageInfo: Readonly<{
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    startCursor: string;
+    endCursor: string;
+  }>;
+}>;
+
 export interface Project {
   id: string;
   cleanId: string;

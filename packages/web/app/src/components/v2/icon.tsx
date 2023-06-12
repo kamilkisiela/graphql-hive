@@ -28,6 +28,15 @@ export const GraphQLIcon = ({ className }: IconProps): ReactElement => (
   </svg>
 );
 
+export const SaveIcon = ({ className }: IconProps): ReactElement => (
+  <svg viewBox="0 0 24 24" className={className}>
+    <g fill="none" stroke="currentColor" strokeWidth="1">
+      <path d="M21.75 23.25H2.25a1.5 1.5 0 0 1-1.5-1.5V7.243a3 3 0 0 1 .879-2.121l3.492-3.493A3 3 0 0 1 7.243.75H21.75a1.5 1.5 0 0 1 1.5 1.5v19.5a1.5 1.5 0 0 1-1.5 1.5z" />
+      <path d="M8.25.75v6a1.5 1.5 0 0 0 1.5 1.5h7.5a1.5 1.5 0 0 0 1.5-1.5v-6M15.75 3.75v1.5M17.25 12.75H6.75a1.5 1.5 0 0 0-1.5 1.5v9h13.5v-9a1.5 1.5 0 0 0-1.5-1.5zM8.25 15.75h4.5M8.25 18.75h7.5" />
+    </g>
+  </svg>
+);
+
 export const TrendingUpIcon = ({ className }: IconProps): ReactElement => (
   <svg
     width="24"
@@ -436,17 +445,6 @@ export const SlackIcon = ({ className }: IconProps): ReactElement => (
     <path d="M15.5 19H14V20.5C14 21.33 14.67 22 15.5 22C16.33 22 17 21.33 17 20.5C17 19.67 16.33 19 15.5 19Z" />
     <path d="M10 9.5C10 8.67 9.33 8 8.5 8H3.5C2.67 8 2 8.67 2 9.5C2 10.33 2.67 11 3.5 11H8.5C9.33 11 10 10.33 10 9.5Z" />
     <path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2C7.67 2 7 2.67 7 3.5C7 4.33 7.67 5 8.5 5Z" />
-  </svg>
-);
-
-export const Link2Icon = ({ className }: IconProps): ReactElement => (
-  <svg
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-    className={clsx('h-6 w-6 fill-current stroke-current', className)}
-  >
-    <path d="M15 6C14.4477 6 14 6.44772 14 7C14 7.55228 14.4477 8 15 8V6ZM18 7V6V7ZM15 16C14.4477 16 14 16.4477 14 17C14 17.5523 14.4477 18 15 18V16ZM9 18C9.55229 18 10 17.5523 10 17C10 16.4477 9.55229 16 9 16V18ZM9 8C9.55229 8 10 7.55228 10 7C10 6.44772 9.55229 6 9 6V8ZM15 8H18V6H15V8ZM18 8C19.0609 8 20.0783 8.42143 20.8284 9.17157L22.2426 7.75736C21.1174 6.63214 19.5913 6 18 6V8ZM20.8284 9.17157C21.5786 9.92172 22 10.9391 22 12H24C24 10.4087 23.3679 8.88258 22.2426 7.75736L20.8284 9.17157ZM22 12C22 14.2091 20.2091 16 18 16V18C21.3137 18 24 15.3137 24 12H22ZM18 16H15V18H18V16ZM9 16H6V18H9V16ZM6 16C4.93913 16 3.92172 15.5786 3.17157 14.8284L1.75736 16.2426C2.88258 17.3679 4.4087 18 6 18V16ZM3.17157 14.8284C2.42143 14.0783 2 13.0609 2 12H0C0 13.5913 0.632141 15.1174 1.75736 16.2426L3.17157 14.8284ZM2 12C2 9.79086 3.79086 8 6 8V6C2.68629 6 0 8.68629 0 12H2ZM6 8H9V6H6V8Z" />
-    <path d="M8 12H16" {...DEFAULT_PATH_PROPS} />
   </svg>
 );
 
