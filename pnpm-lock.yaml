@@ -331,8 +331,8 @@ importers:
         specifier: 5.2.9
         version: 5.2.9(@swc/core@1.3.62)(@types/node@18.16.16)(typescript@5.1.3)
       '@oclif/plugin-update':
-        specifier: 3.1.16
-        version: 3.1.16(@swc/core@1.3.62)(@types/node@18.16.16)(typescript@5.1.3)
+        specifier: 3.1.18
+        version: 3.1.18(@swc/core@1.3.62)(@types/node@18.16.16)(typescript@5.1.3)
       '@whatwg-node/fetch':
         specifier: 0.9.3
         version: 0.9.3
@@ -8416,8 +8416,8 @@ packages:
       - supports-color
     dev: true
 
-  /@oclif/color@1.0.5:
-    resolution: {integrity: sha512-CeUDnzGOt3G7k6KJolTueTMYfJnU/zc6MouwF3sgL+7lnrwTiLaLwQ384EVFtUaIlRHNA0WifGh6FHKc8jqw2g==}
+  /@oclif/color@1.0.6:
+    resolution: {integrity: sha512-U6hABUkwoUoEZ1K5mJ2E7AeJ7udjYP3ZYWq18LLoMyjV+Us9hh3UwAghOY75F9PAzF8q5kvhoGu70LnPASbZ8g==}
     engines: {node: '>=12.0.0'}
     dependencies:
       ansi-styles: 4.3.0
@@ -8518,7 +8518,7 @@ packages:
       natural-orderby: 2.0.3
       object-treeify: 1.1.33
       password-prompt: 1.1.2
-      semver: 7.5.0
+      semver: 7.5.1
       string-width: 4.2.3
       strip-ansi: 6.0.1
       supports-color: 8.1.1
@@ -8591,17 +8591,17 @@ packages:
     resolution: {integrity: sha512-PfUVr67dHORFSeQthUwrPMJB/mRRNT4ENNdbafCOlL0HqC+WTuFy5nih+qnHBEli15RaOuMNoW3kR5MyBH82hA==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      '@oclif/color': 1.0.5
+      '@oclif/color': 1.0.6
       '@oclif/core': 1.24.0
       fast-levenshtein: 3.0.0
       lodash: 4.17.21
     dev: true
 
-  /@oclif/plugin-update@3.1.16(@swc/core@1.3.62)(@types/node@18.16.16)(typescript@5.1.3):
-    resolution: {integrity: sha512-wmfgjqUKaIOtanXpt2pgpHpvoCuYjBlW1sMQ0+AS/bpdyWgxkTQWfKLAmIaDOUuFtUz1hDlXT71YfDy3TNpELQ==}
+  /@oclif/plugin-update@3.1.18(@swc/core@1.3.62)(@types/node@18.16.16)(typescript@5.1.3):
+    resolution: {integrity: sha512-wY7wD5PkkLW0EpBR3vFcpBBr9wPhVYQwB8KjOnQSzUbQGjPIvHBnb7ud9bRjk0t9fbGo5IFvNFTIFh8u3KESKg==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      '@oclif/color': 1.0.5
+      '@oclif/color': 1.0.6
       '@oclif/core': 2.8.5(@swc/core@1.3.62)(@types/node@18.16.16)(typescript@5.1.3)
       cross-spawn: 7.0.3
       debug: 4.3.4(supports-color@8.1.1)
