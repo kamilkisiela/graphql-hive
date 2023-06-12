@@ -98,12 +98,16 @@ describe('Document Collections', () => {
       expect(updateResult.ok?.operation?.id).toBeDefined();
       expect(updateResult.ok?.operation?.name).toBe('My Updated Operation');
       expect(updateResult.ok?.operation?.query).toBe('query { hello world }');
-      expect(updateResult.ok?.operation?.headers).toStrictEqual({
-        Key: '3',
-      });
-      expect(updateResult.ok?.operation?.variables).toStrictEqual({
-        id: '1',
-      });
+      expect(updateResult.ok?.operation?.headers).toBe(
+        JSON.stringify({
+          Key: '3',
+        }),
+      );
+      expect(updateResult.ok?.operation?.variables).toBe(
+        JSON.stringify({
+          id: '1',
+        }),
+      );
       const deleteResult = await deleteOperationInCollection({
         operationId,
       });
