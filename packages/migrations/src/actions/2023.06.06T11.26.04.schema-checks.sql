@@ -3,7 +3,6 @@ CREATE TABLE "public"."schema_checks" (
   , "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
   , "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 
-  , "user_id" uuid REFERENCES "users" ("id") ON DELETE SET NULL
   , "schema_sdl" text NOT NULL
   , "service_name" text
 

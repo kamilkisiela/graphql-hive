@@ -297,11 +297,9 @@ export class SchemaPublisher {
     }
 
     let schemaCheck: null | SchemaCheck = null;
-    const user = await this.authManager.getCurrentUser();
 
     if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
       schemaCheck = await this.storage.createSchemaCheck({
-        userId: user.id,
         schemaSDL: input.sdl,
         serviceName: input.service ?? null,
         targetId: target.id,
@@ -363,7 +361,6 @@ export class SchemaPublisher {
       }
 
       schemaCheck = await this.storage.createSchemaCheck({
-        userId: user.id,
         schemaSDL: input.sdl,
         serviceName: input.service ?? null,
         targetId: target.id,
