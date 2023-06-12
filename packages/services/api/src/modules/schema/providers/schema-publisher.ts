@@ -193,7 +193,7 @@ export class SchemaPublisher {
         target: input.target,
         onlyComposable: true,
       }),
-      this.schemaManager.getLatestVersion({
+      this.schemaManager.getMaybeLatestVersion({
         organization: input.organization,
         project: input.project,
         target: input.target,
@@ -322,12 +322,13 @@ export class SchemaPublisher {
             }),
       });
     }
+
     if (checkResult.conclusion === SchemaCheckConclusion.Success) {
       let composition = checkResult.state?.composition ?? null;
 
       // in case of a skip this is null
       if (composition === null) {
-        if (latestVersion == null) {
+        if (latestVersion == null || latestSchemaVersion == null) {
           throw new Error(
             'Composition yielded no composite schema SDL but there is no latest version to fall back to.',
           );
