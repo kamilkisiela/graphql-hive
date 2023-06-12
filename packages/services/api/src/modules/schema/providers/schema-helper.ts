@@ -96,6 +96,9 @@ export function extendWithBase(
 
 type CreateSchemaObjectInput = Parameters<typeof createSchemaObject>[0];
 
+/**
+ * @deprecated Please don't throw random errors. Handle them gracefully instead. 😇
+ */
 export async function ensureSDL(
   composeAndValidationResultPromise: Promise<ComposeAndValidateResult>,
   strategy: 'reject-on-graphql-errors' | 'ignore-errors' = 'ignore-errors',

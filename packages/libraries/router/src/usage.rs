@@ -35,11 +35,13 @@ struct OperationContext {
 
 struct UsagePlugin {
     config: Config,
-    agent: Arc<Mutex<UsageAgent>>,
+    agent: Option<Arc<Mutex<UsageAgent>>>,
 }
 
 #[derive(Clone, Debug, Deserialize, JsonSchema)]
 struct Config {
+    /// Default: true
+    enabled: Option<bool>,
     /// Sample rate to determine sampling.
     /// 0.0 = 0% chance of being sent
     /// 1.0 = 100% chance of being sent.
@@ -60,6 +62,7 @@ struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
+            enabled: Some(true),
             sample_rate: Some(1.0),
             exclude: None,
             client_name_header: None,
@@ -164,115 +167,122 @@ impl Plugin for UsagePlugin {
             Err(_) => "https://app.graphql-hive.com/usage".to_string(),
         };
 
+        let enabled = init.config.enabled.unwrap_or(true);
         let buffer_size = init.config.buffer_size.unwrap_or(1000);
         let accept_invalid_certs = init.config.accept_invalid_certs.unwrap_or(false);
 
         Ok(UsagePlugin {
             config: init.config,
-            agent: Arc::new(Mutex::new(UsageAgent::new(
-                init.supergraph_sdl.to_string(),
-                token,
-                endpoint,
-                buffer_size,
-                accept_invalid_certs,
-            ))),
+            agent: match enabled {
+                true => Some(Arc::new(Mutex::new(UsageAgent::new(
+                    init.supergraph_sdl.to_string(),
+                    token,
+                    endpoint,
+                    buffer_size,
+                    accept_invalid_certs,
+                )))),
+                false => None,
+            },
         })
     }
 
     fn supergraph_service(&self, service: supergraph::BoxService) -> supergraph::BoxService {
         let config = self.config.clone();
-        let agent = self.agent.clone();
-
-        ServiceBuilder::new()
-            .map_future_with_request_data(
-                move |req: &supergraph::Request| {
-                    Self::populate_context(config.clone(), req);
-                    req.context.clone()
-                },
-                move |ctx: Context, fut| {
-                    let agent_clone = agent.clone();
-                    async move {
-                        let start = Instant::now();
-
-                        // nested async block, bc async is unstable with closures that receive arguments
-                        let operation_context = ctx
-                            .get::<_, OperationContext>(OPERATION_CONTEXT)
-                            .unwrap_or_default()
-                            .unwrap();
-
-                        let result: supergraph::ServiceResult = fut.await;
-
-                        if operation_context.dropped {
-                            tracing::info!("Dropping operation (phase: SAMPLING): {}", operation_context.operation_name.clone().or_else(|| Some("anonymous".to_string())).unwrap());
-                            return result;
-                        }
-
-                        let OperationContext {
-                            client_name,
-                            client_version,
-                            operation_name,
-                            timestamp,
-                            operation_body,
-                            ..
-                        } = operation_context;
-
-                        let duration = start.elapsed();
-
-                        match result {
-                            Err(e) => {
-                                agent_clone
-                                    .clone()
-                                    .lock()
-                                    .expect("Unable to acquire Agent in supergraph_service (error)")
-                                    .add_report(ExecutionReport {
-                                        client_name,
-                                        client_version,
-                                        timestamp,
-                                        duration,
-                                        ok: false,
-                                        errors: 1,
-                                        operation_body,
-                                        operation_name,
-                                    });
-                                Err(e)
+        match self.agent.clone() {
+            None => ServiceBuilder::new().service(service).boxed(),
+            Some(agent) => {
+                ServiceBuilder::new()
+                .map_future_with_request_data(
+                    move |req: &supergraph::Request| {
+                        Self::populate_context(config.clone(), req);
+                        req.context.clone()
+                    },
+                    move |ctx: Context, fut| {
+                        let agent_clone = agent.clone();
+                        async move {
+                            let start = Instant::now();
+    
+                            // nested async block, bc async is unstable with closures that receive arguments
+                            let operation_context = ctx
+                                .get::<_, OperationContext>(OPERATION_CONTEXT)
+                                .unwrap_or_default()
+                                .unwrap();
+    
+                            let result: supergraph::ServiceResult = fut.await;
+    
+                            if operation_context.dropped {
+                                tracing::info!("Dropping operation (phase: SAMPLING): {}", operation_context.operation_name.clone().or_else(|| Some("anonymous".to_string())).unwrap());
+                                return result;
                             }
-                            Ok(router_response) => {
-                                let is_failure = !router_response.response.status().is_success();
-                                Ok(router_response.map(move |response_stream| {
-                                    let client_name = client_name.clone();
-                                    let client_version = client_version.clone();
-                                    let operation_body = operation_body.clone();
-                                    let operation_name = operation_name.clone();
-
-                                    let res = response_stream
-                                        .map(move |response| {
-                                            // make sure we send a single report, not for each chunk
-                                            let response_has_errors = !response.errors.is_empty();
-                                            agent_clone.clone().lock()
-                                            .expect("Unable to acquire Agent in supergraph_service (ok)").add_report(ExecutionReport {
-                                                client_name: client_name.clone(),
-                                                client_version: client_version.clone(),
-                                                timestamp,
-                                                duration,
-                                                ok: !is_failure && !response_has_errors,
-                                                errors: response.errors.len(),
-                                                operation_body: operation_body.clone(),
-                                                operation_name: operation_name.clone(),
-                                            });
-
-                                            response
-                                        })
-                                        .boxed();
-
-                                    res
-                                }))
+    
+                            let OperationContext {
+                                client_name,
+                                client_version,
+                                operation_name,
+                                timestamp,
+                                operation_body,
+                                ..
+                            } = operation_context;
+    
+                            let duration = start.elapsed();
+    
+                            match result {
+                                Err(e) => {
+                                    agent_clone
+                                        .clone()
+                                        .lock()
+                                        .expect("Unable to acquire Agent in supergraph_service (error)")
+                                        .add_report(ExecutionReport {
+                                            client_name,
+                                            client_version,
+                                            timestamp,
+                                            duration,
+                                            ok: false,
+                                            errors: 1,
+                                            operation_body,
+                                            operation_name,
+                                        });
+                                    Err(e)
+                                }
+                                Ok(router_response) => {
+                                    let is_failure = !router_response.response.status().is_success();
+                                    Ok(router_response.map(move |response_stream| {
+                                        let client_name = client_name.clone();
+                                        let client_version = client_version.clone();
+                                        let operation_body = operation_body.clone();
+                                        let operation_name = operation_name.clone();
+    
+                                        let res = response_stream
+                                            .map(move |response| {
+                                                // make sure we send a single report, not for each chunk
+                                                let response_has_errors = !response.errors.is_empty();
+                                                agent_clone.clone().lock()
+                                                .expect("Unable to acquire Agent in supergraph_service (ok)").add_report(ExecutionReport {
+                                                    client_name: client_name.clone(),
+                                                    client_version: client_version.clone(),
+                                                    timestamp,
+                                                    duration,
+                                                    ok: !is_failure && !response_has_errors,
+                                                    errors: response.errors.len(),
+                                                    operation_body: operation_body.clone(),
+                                                    operation_name: operation_name.clone(),
+                                                });
+    
+                                                response
+                                            })
+                                            .boxed();
+    
+                                        res
+                                    }))
+                                }
                             }
                         }
-                    }
-                },
-            )
-            .service(service)
-            .boxed()
+                    },
+                )
+                .service(service)
+                .boxed()
+            }
+        }
     }
 }
 

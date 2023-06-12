@@ -72,10 +72,11 @@ export type CheckFailureReasonCode =
 export type CheckPolicyResultRecord = CheckPolicyResponse[number] | { message: string };
 export type SchemaCheckWarning = {
   message: string;
-  source?: string | undefined | null;
+  source: string | null;
 
   line?: number;
   column?: number;
+  ruleId: string | null;
 };
 
 export type SchemaCheckSuccess = {
@@ -104,7 +105,7 @@ export type SchemaCheckFailure = {
         };
     /** Absence means schema changes were skipped. */
     schemaChanges: null | {
-      breaking: Array<Change>;
+      breaking: Array<Change> | null;
       safe: Array<Change>;
     };
     /** Absence means the schema policy is disabled or wasn't done because composition failed. */
@@ -259,7 +260,7 @@ export function buildSchemaCheckFailureState(args: {
 }): SchemaCheckFailure['state'] {
   const compositionErrors: Array<CompositionFailureError> = [];
   let schemaChanges: null | {
-    breaking: Array<Change>;
+    breaking: Array<Change> | null;
     safe: Array<Change>;
   } = null;
   let schemaPolicy: null | {
@@ -271,17 +272,18 @@ export function buildSchemaCheckFailureState(args: {
     compositionErrors.push(...args.compositionCheck.reason.errors);
   }
 
-  if (args.diffCheck.status === 'failed') {
-    if (args.diffCheck.reason.changes) {
-      schemaChanges = {
-        breaking: args.diffCheck.reason.breakingChanges,
-        safe: args.diffCheck.reason.safeChanges,
-      };
-    }
+  if (args.diffCheck.reason) {
+    schemaChanges = {
+      breaking: args.diffCheck.reason.breakingChanges,
+      safe: args.diffCheck.reason.safeChanges,
+    };
+  }
 
-    if (args.diffCheck.reason.compareFailure) {
-      compositionErrors.push(args.diffCheck.reason.compareFailure);
-    }
+  if (args.diffCheck.result) {
+    schemaChanges = {
+      breaking: null,
+      safe: args.diffCheck.result.changes,
+    };
   }
 
   if (args.policyCheck) {

@@ -3,7 +3,6 @@ import type { SchemaBuilderApi } from '@hive/schema';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
 import { Orchestrator, ProjectType, SchemaObject } from '../../../../shared/entities';
-import { HiveError } from '../../../../shared/errors';
 import { sentry } from '../../../../shared/sentry';
 import { Logger } from '../../../shared/providers/logger';
 import type { SchemaServiceConfig } from './tokens';
@@ -44,7 +43,7 @@ export class SingleOrchestrator implements Orchestrator {
       this.logger.debug('More than one schema (sources=%o)', {
         sources: schemas.map(s => s.source),
       });
-      throw new HiveError('too many schemas');
+      throw new Error('too many schemas');
     }
 
     const result = await this.schemaService.composeAndValidate.mutate({
