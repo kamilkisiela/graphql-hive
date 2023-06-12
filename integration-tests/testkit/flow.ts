@@ -587,6 +587,9 @@ export function checkSchema(input: SchemaCheckInput, token: string) {
               }
               total
             }
+            schemaCheck {
+              id
+            }
           }
           ... on SchemaCheckError {
             __typename
@@ -603,6 +606,9 @@ export function checkSchema(input: SchemaCheckInput, token: string) {
                 message
               }
               total
+            }
+            schemaCheck {
+              id
             }
           }
         }

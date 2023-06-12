@@ -1615,8 +1615,24 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return schemaCheck.breakingSchemaChanges.map(toGraphQLSchemaChange);
     },
+    compositionErrors(schemaCheck) {
+      return schemaCheck.schemaCompositionErrors;
+    },
   },
-  SchemaPolicyWarningConnection: createDummyConnection(),
+  SchemaPolicyWarningConnection: createDummyConnection(warning => ({
+    ...warning,
+    start: {
+      column: warning.column,
+      line: warning.line,
+    },
+    end:
+      warning.endColumn && warning.endLine
+        ? {
+            column: warning.endColumn,
+            line: warning.endLine,
+          }
+        : null,
+  })),
 };
 
 function stringifyDefaultValue(value: unknown): string | null {

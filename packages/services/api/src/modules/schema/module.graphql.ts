@@ -637,13 +637,16 @@ export default gql`
     supergraphMetadata: SupergraphMetadata
   }
 
+  type CodePosition {
+    line: Int!
+    column: Int!
+  }
+
   type SchemaPolicyWarning {
     message: String!
     ruleId: String!
-    line: Int!
-    column: Int!
-    endLine: Int
-    endColumn: Int
+    start: CodePosition!
+    end: CodePosition
   }
 
   type SchemaPolicyWarningEdge {
@@ -697,7 +700,7 @@ export default gql`
     safeSchemaChanges: SchemaChangeConnection
     schemaPolicyWarnings: SchemaPolicyWarningConnection
 
-    compositeSchemaSDL: String!
+    compositeSchemaSDL: String
     supergraphSDL: String
   }
 
