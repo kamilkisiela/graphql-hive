@@ -180,6 +180,7 @@ export interface schema_checks {
   supergraph_sdl: string | null;
   target_id: string;
   updated_at: Date;
+  user_id: string | null;
 }
 
 export interface schema_log {

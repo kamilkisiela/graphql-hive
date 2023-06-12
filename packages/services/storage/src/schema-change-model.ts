@@ -836,6 +836,7 @@ const SuccessfulSchemaCheckPartialModel = z.object({
 });
 
 const SchemaCheckSharedFieldsModel = z.object({
+  userId: z.string().nullable(),
   schemaSDL: z.string(),
   serviceName: z.string().nullable(),
   targetId: z.string(),

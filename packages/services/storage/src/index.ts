@@ -3367,7 +3367,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async createSchemaCheck(args) {
       const result = await pool.maybeOne<unknown>(sql`
         INSERT INTO "public"."schema_checks" (
-          "schema_sdl"
+          "user_id"
+          , "schema_sdl"
           , "service_name"
           , "target_id"
           , "schema_version_id"
@@ -3381,7 +3382,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "supergraph_sdl"
         )
         VALUES (
-          ${args.schemaSDL}
+          ${args.userId}
+          , ${args.schemaSDL}
           , ${args.serviceName}
           , ${args.targetId}
           , ${args.schemaVersionId}
@@ -3795,6 +3797,7 @@ const schemaCheckSQLFields = sql`
   "id"
   , to_json("created_at") as "createdAt"
   , to_json("updated_at") as "updatedAt"
+  , "user_id" as "userId"
   , "schema_sdl" as "schemaSDL"
   , "service_name" as "serviceName"
   , "target_id" as "targetId"
