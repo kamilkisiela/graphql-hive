@@ -16,7 +16,11 @@ jobs:
         with:
           actor: typescript-typecheck
 
+      - name: get cpu count
+        id: cpu-cores
+        uses: SimenB/github-actions-cpu-cores@v1
+
       - name: typecheck
-        run: pnpm typecheck
+        run: pnpm typecheck --concurrency ${{ steps.cpu-cores.outputs.count }}
         env:
           NODE_OPTIONS: '--max-old-space-size=4096'
