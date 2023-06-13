@@ -235,36 +235,6 @@ const ActiveSchemaCheck = (): React.ReactElement | null => {
       tooltip: 'Details',
     });
 
-    if (query.data.target.schemaCheck.compositeSchemaSDL) {
-      items.push({
-        value: 'schema',
-        icon: <DiffIcon className="h-5 w-auto flex-none" />,
-        label: 'Schema',
-        tooltip: 'Schema',
-      });
-    }
-
-    if (query.data.target.schemaCheck.supergraphSDL) {
-      items.push({
-        value: 'supergraph',
-        icon: <DiffIcon className="h-5 w-auto flex-none" />,
-        label: 'Supergraph',
-        tooltip: 'Supergraph',
-      });
-    }
-
-    if (
-      query.data.target.schemaCheck.compositeSchemaSDL &&
-      query.data.target.schemaCheck.supergraphSDL
-    ) {
-      items.push({
-        value: 'schemaDiff',
-        icon: <DiffIcon className="h-5 w-auto flex-none" />,
-        label: 'Diff',
-        tooltip: 'Schema Diff',
-      });
-    }
-
     if (
       query.data.target.schemaCheck.schemaPolicyWarnings ||
       ('schemaPolicyErrors' in query.data.target.schemaCheck &&
@@ -275,6 +245,36 @@ const ActiveSchemaCheck = (): React.ReactElement | null => {
         icon: <AlertTriangleIcon className="h-5 w-auto flex-none" />,
         label: 'Policy',
         tooltip: 'Schema Policy',
+      });
+    }
+
+    if (query.data.target.schemaCheck.compositeSchemaSDL) {
+      items.push({
+        value: 'schema',
+        icon: <DiffIcon className="h-5 w-auto flex-none" />,
+        label: 'Schema',
+        tooltip: 'Schema',
+      });
+    }
+
+    if (
+      query.data.target.schemaCheck.compositeSchemaSDL &&
+      query.data.target.schemaCheck.compositeSchemaSDL
+    ) {
+      items.push({
+        value: 'schemaDiff',
+        icon: <DiffIcon className="h-5 w-auto flex-none" />,
+        label: 'Diff',
+        tooltip: 'Schema Diff',
+      });
+    }
+
+    if (query.data.target.schemaCheck.supergraphSDL) {
+      items.push({
+        value: 'supergraph',
+        icon: <DiffIcon className="h-5 w-auto flex-none" />,
+        label: 'Supergraph',
+        tooltip: 'Supergraph',
       });
     }
 
