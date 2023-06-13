@@ -21,7 +21,7 @@ export const EmptyList = ({
         height="200"
         className="drag-none"
       />
-      <Heading>{title}</Heading>
+      <Heading className="text-center">{title}</Heading>
       <span className="text-center text-sm font-medium text-gray-500">{description}</span>
       {docsUrl && <DocsLink href={docsUrl}>Read about it in the documentation</DocsLink>}
     </Card>
