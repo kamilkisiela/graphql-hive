@@ -50,9 +50,12 @@ async function main() {
         buffer: env.kafka.buffer,
         connection: env.kafka.connection,
       },
+      onStop(reason) {
+        return shutdown(reason);
+      },
     });
 
-    registerShutdown({
+    const shutdown = registerShutdown({
       logger: server.log,
       async onShutdown() {
         await Promise.all([stop(), server.close()]);

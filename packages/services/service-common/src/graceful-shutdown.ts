@@ -6,7 +6,7 @@ const signalTraps = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
 export function registerShutdown(config: {
   logger: FastifyLoggerInstance;
   onShutdown(): void | Promise<void>;
-}) {
+}): (reason?: string) => Promise<void> {
   let exited = false;
 
   async function shutdown() {
@@ -48,4 +48,17 @@ export function registerShutdown(config: {
       }
     });
   });
+
+  return async (reason?: string) => {
+    try {
+      config.logger.info(`Manual shutdown ${reason ? `(${reason})` : ''}`);
+      await shutdown();
+      config.logger.info(`shutdown process done, exiting with code 0`);
+      process.exit(0);
+    } catch (e) {
+      config.logger.warn(`shutdown process failed, exiting with code 1`);
+      config.logger.error(e);
+      process.exit(1);
+    }
+  };
 }
