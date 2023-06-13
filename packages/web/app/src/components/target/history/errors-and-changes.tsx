@@ -5,7 +5,7 @@ import { Label } from '@/components/common';
 import { Tooltip } from '@/components/v2';
 import { CriticalityLevel, SchemaChangeFieldsFragment } from '@/graphql';
 
-function labelize(message: string) {
+export function labelize(message: string) {
   // Turn " into '
   // Replace '...' with <Label>...</Label>
   return reactStringReplace(message.replace(/"/g, "'"), /'([^']+)'/gim, (match, i) => {
@@ -24,7 +24,7 @@ const criticalityLevelMapping = {
   [CriticalityLevel.Dangerous]: clsx('text-yellow-400'),
 } as Record<CriticalityLevel, string>;
 
-function ChangesBlock({
+export function ChangesBlock({
   changes,
   criticality,
 }: {

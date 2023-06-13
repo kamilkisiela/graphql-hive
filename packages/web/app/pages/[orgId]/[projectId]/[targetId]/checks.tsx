@@ -5,9 +5,11 @@ import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { SchemaEditor } from '@/components/schema-editor';
+import { ChangesBlock, labelize } from '@/components/target/history/errors-and-changes';
 import { Badge, DiffEditor, Heading, TimeAgo, Title } from '@/components/v2';
 import { AlertTriangleIcon, DiffIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
+import { CriticalityLevel } from '@/gql/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { ListBulletIcon } from '@radix-ui/react-icons';
@@ -156,11 +158,17 @@ const ActiveSchemaCheckQuery = graphql(`
           breakingSchemaChanges {
             nodes {
               message
+              criticality
+              criticalityReason
+              path
             }
           }
           safeSchemaChanges {
             nodes {
               message
+              criticality
+              criticalityReason
+              path
             }
           }
           schemaPolicyWarnings {
@@ -186,6 +194,9 @@ const ActiveSchemaCheckQuery = graphql(`
           safeSchemaChanges {
             nodes {
               message
+              criticality
+              criticalityReason
+              path
             }
           }
           schemaPolicyWarnings {
@@ -201,6 +212,29 @@ const ActiveSchemaCheckQuery = graphql(`
     }
   }
 `);
+
+const PolicyBlock = (props: {
+  title: string;
+  policies: FragmentType<typeof SchemaPolicyEditor_PolicyWarningsFragment>;
+  type: 'warning' | 'error';
+}) => {
+  const policies = useFragment(SchemaPolicyEditor_PolicyWarningsFragment, props.policies);
+  return (
+    <div>
+      <h2 className="mb-2 text-sm font-medium text-gray-900 dark:text-white">{props.title}</h2>
+      <ul className="list-inside list-disc pl-3 text-sm leading-relaxed">
+        {policies.edges.map((edge, key) => (
+          <li
+            key={key}
+            className={clsx(props.type === 'warning' ? 'text-yellow-400' : 'text-red-400')}
+          >
+            <span className="text-gray-600 dark:text-white">{labelize(edge.node.message)}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
 
 const ActiveSchemaCheck = (): React.ReactElement | null => {
   const router = useRouteSelector();
@@ -366,50 +400,36 @@ const ActiveSchemaCheck = (): React.ReactElement | null => {
             ) : null}
             {'breakingSchemaChanges' in schemaCheck && schemaCheck.breakingSchemaChanges ? (
               <div className="mb-2">
-                <Heading>
-                  <Badge color="red" /> Breaking Schema Changes
-                </Heading>
-                <ul>
-                  {schemaCheck.breakingSchemaChanges.nodes.map((change, index) => (
-                    <li key={index}>{change.message}</li>
-                  ))}
-                </ul>
+                <ChangesBlock
+                  criticality={CriticalityLevel.Breaking}
+                  changes={schemaCheck.breakingSchemaChanges.nodes}
+                />
               </div>
             ) : null}
             {schemaCheck.safeSchemaChanges ? (
               <div className="mb-2">
-                <Heading>
-                  <Badge color="green" /> Safe Schema Changes
-                </Heading>
-                <ul>
-                  {schemaCheck.safeSchemaChanges.nodes.map((change, index) => (
-                    <li key={index}>{change.message}</li>
-                  ))}
-                </ul>
+                <ChangesBlock
+                  criticality={CriticalityLevel.Safe}
+                  changes={schemaCheck.safeSchemaChanges.nodes}
+                />
               </div>
             ) : null}
             {'schemaPolicyErrors' in schemaCheck && schemaCheck.schemaPolicyErrors ? (
               <div className="mb-2">
-                <Heading>
-                  <Badge color="red" /> Schema Policy Errors
-                </Heading>
-                <ul>
-                  {schemaCheck.schemaPolicyErrors.edges.map((edge, index) => (
-                    <li key={index}>{edge.node.message}</li>
-                  ))}
-                </ul>
+                <PolicyBlock
+                  title="Schema Policy Errors"
+                  policies={schemaCheck.schemaPolicyErrors}
+                  type="error"
+                />
               </div>
             ) : null}
             {schemaCheck.schemaPolicyWarnings ? (
               <div className="mb-2">
-                <Heading>
-                  <Badge color="yellow" /> Schema Policy Warnings
-                </Heading>
-                <ul>
-                  {schemaCheck.schemaPolicyWarnings.edges.map((edge, index) => (
-                    <li key={index}>{edge.node.message}</li>
-                  ))}
-                </ul>
+                <PolicyBlock
+                  title="Schema Policy Warnings"
+                  policies={schemaCheck.schemaPolicyWarnings}
+                  type="warning"
+                />
               </div>
             ) : null}
           </>
@@ -517,6 +537,7 @@ const SchemaPolicyEditor = (props: {
 };
 
 function ChecksPage() {
+  const router = useRouteSelector();
   return (
     <>
       <Title title="Schema Checks" />
@@ -532,7 +553,7 @@ function ChecksPage() {
                 <Heading>Schema Checks</Heading>
                 <Navigation />
               </div>
-              <ActiveSchemaCheck />
+              <ActiveSchemaCheck key={router.schemaCheckId} />
             </>
           );
         }}
