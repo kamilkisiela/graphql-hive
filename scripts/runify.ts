@@ -155,5 +155,26 @@ async function compile(
     banner: {
       js: requireShim,
     },
+    esbuildOptions(options) {
+      options.sourcesContent = false;
+    },
+    esbuildPlugins: [
+      {
+        // https://github.com/evanw/esbuild/issues/1685#issuecomment-944928069
+        name: 'excludeVendorFromSourceMap',
+        setup(build) {
+          build.onLoad({ filter: /node_modules/ }, args => {
+            if (args.path.endsWith('.js')) {
+              return {
+                contents:
+                  fs.readFileSync(args.path, 'utf8') +
+                  '\n//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIiJdLCJtYXBwaW5ncyI6IkEifQ==',
+                loader: 'default',
+              };
+            }
+          });
+        },
+      },
+    ],
   });
 }
