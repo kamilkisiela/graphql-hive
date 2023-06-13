@@ -15,6 +15,18 @@ export interface SchemaModuleConfig {
       id: string;
     };
   }): string;
+  schemaCheckLink?(input: {
+    organization: {
+      cleanId: string;
+    };
+    project: {
+      cleanId: string;
+    };
+    target: {
+      cleanId: string;
+    };
+    schemaCheckId: string;
+  }): string;
 }
 
 export const SCHEMA_MODULE_CONFIG = new InjectionToken<SchemaModuleConfig>('SchemaModuleConfig');

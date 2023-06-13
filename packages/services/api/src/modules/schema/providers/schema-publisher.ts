@@ -7,7 +7,7 @@ import { SchemaCheck } from '@hive/storage';
 import * as Sentry from '@sentry/node';
 import type { Span } from '@sentry/types';
 import * as Types from '../../../__generated__/types';
-import { Project, ProjectType, Schema, Target } from '../../../shared/entities';
+import { Organization, Project, ProjectType, Schema, Target } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { bolderize } from '../../../shared/markdown';
 import { sentry } from '../../../shared/sentry';
@@ -392,6 +392,7 @@ export class SchemaPublisher {
         return this.githubCheck({
           project,
           target,
+          organization,
           serviceName: input.service ?? null,
           sha: input.github.commit,
           conclusion: checkResult.conclusion,
@@ -400,12 +401,14 @@ export class SchemaPublisher {
           breakingChanges: null,
           compositionErrors: null,
           errors: null,
+          schemaCheckId: schemaCheck?.id ?? null,
         });
       }
 
       return this.githubCheck({
         project,
         target,
+        organization,
         serviceName: input.service ?? null,
         sha: input.github.commit,
         conclusion: checkResult.conclusion,
@@ -417,6 +420,7 @@ export class SchemaPublisher {
         compositionErrors: checkResult.state.composition.errors ?? [],
         warnings: checkResult.state.schemaPolicy?.warnings ?? [],
         errors: checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? [],
+        schemaCheckId: schemaCheck?.id ?? null,
       });
     }
 
@@ -1082,6 +1086,7 @@ export class SchemaPublisher {
   private async githubCheck({
     project,
     target,
+    organization,
     serviceName,
     sha,
     conclusion,
@@ -1090,9 +1095,11 @@ export class SchemaPublisher {
     compositionErrors,
     errors,
     warnings,
+    schemaCheckId,
   }: {
     project: Project;
     target: Target;
+    organization: Organization;
     serviceName: string | null;
     sha: string;
     conclusion: SchemaCheckConclusion;
@@ -1105,6 +1112,7 @@ export class SchemaPublisher {
     errors: Array<{
       message: string;
     }> | null;
+    schemaCheckId: string | null;
   }) {
     if (!project.gitRepository) {
       return {
@@ -1153,6 +1161,15 @@ export class SchemaPublisher {
           title,
           summary,
         },
+        detailsUrl:
+          (schemaCheckId &&
+            this.schemaModuleConfig.schemaCheckLink?.({
+              project,
+              target,
+              organization,
+              schemaCheckId,
+            })) ||
+          null,
       });
 
       return {
@@ -1398,6 +1415,7 @@ export class SchemaPublisher {
           title,
           summary,
         },
+        detailsUrl: null,
       });
       return {
         __typename: 'GitHubSchemaPublishSuccess' as const,
