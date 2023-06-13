@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'crypto';
-import { CompressionTypes, Kafka, logLevel, Partitioners } from 'kafkajs';
+import { CompressionTypes, Kafka, logLevel, Partitioners, RetryOptions } from 'kafkajs';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import type { RawOperationMap, RawReport } from '@hive/usage-common';
 import { compress } from '@hive/usage-common';
@@ -27,6 +27,7 @@ const DAY_IN_MS = 86_400_000;
 enum Status {
   Waiting,
   Ready,
+  Unhealthy,
   Stopped,
 }
 
@@ -37,6 +38,14 @@ const levelMap = {
   [logLevel.INFO]: 'info',
   [logLevel.DEBUG]: 'debug',
 } as const;
+
+const retryOptions: RetryOptions = {
+  maxRetryTime: 15 * 1000,
+  initialRetryTime: 300,
+  factor: 0.2,
+  multiplier: 2,
+  retries: 3,
+};
 
 export function splitReport(report: RawReport, numOfChunks: number) {
   const reports: RawReport[] = [];
@@ -141,12 +150,13 @@ export function createUsage(config: {
     requestTimeout: 60_000, //
     connectionTimeout: 5000,
     authenticationTimeout: 5000,
+    retry: retryOptions,
   });
   const producer = kafka.producer({
-    idempotent: true,
     // settings recommended by Azure EventHub https://docs.microsoft.com/en-us/azure/event-hubs/apache-kafka-configurations
     metadataMaxAge: 180_000,
     createPartitioner: Partitioners.LegacyPartitioner,
+    retry: retryOptions,
   });
   const buffer = createKVBuffer<RawReport>({
     logger,
@@ -200,12 +210,15 @@ export function createUsage(config: {
           rawOperationWrites.inc(numOfOperations);
           logger.info(`Flushed (id=%s, operations=%s)`, batchId, numOfOperations);
         }
+
+        status = Status.Ready;
       } catch (error: any) {
         rawOperationFailures.inc(numOfOperations);
 
         if (isBufferTooBigError(error)) {
           logger.debug('Buffer too big, retrying (id=%s, error=%s)', batchId, error.message);
         } else {
+          status = Status.Unhealthy;
           logger.error(`Failed to flush (id=%s, error=%s)`, batchId, error.message);
         }
 
@@ -215,6 +228,18 @@ export function createUsage(config: {
   });
 
   let status: Status = Status.Waiting;
+
+  producer.on(producer.events.CONNECT, () => {
+    logger.info('Kafka producer: connected');
+  });
+
+  producer.on(producer.events.DISCONNECT, () => {
+    logger.info('Kafka producer: disconnected');
+  });
+
+  producer.on(producer.events.REQUEST_TIMEOUT, () => {
+    logger.info('Kafka producer: request timeout');
+  });
 
   return {
     async collect(
