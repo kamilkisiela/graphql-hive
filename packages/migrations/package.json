@@ -21,7 +21,7 @@
   "dependencies": {
     "@graphql-hive/core": "workspace:*",
     "@slonik/migrator": "0.11.3",
-    "@whatwg-node/fetch": "0.9.3",
+    "@whatwg-node/fetch": "0.9.4",
     "bcryptjs": "2.4.3",
     "dotenv": "16.1.4",
     "got": "12.6.1",
