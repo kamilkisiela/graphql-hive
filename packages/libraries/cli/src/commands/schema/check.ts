@@ -52,6 +52,12 @@ export default class SchemaCheck extends Command {
       default: [],
       multiple: true,
     }),
+    author: Flags.string({
+      description: 'Author of the change',
+    }),
+    commit: Flags.string({
+      description: 'Associated commit sha',
+    }),
   };
 
   static args = [
@@ -90,7 +96,9 @@ export default class SchemaCheck extends Command {
       const git = await gitInfo(() => {
         // noop
       });
-      const commit = git.commit;
+
+      const commit = flags.commit || git?.commit;
+      const author = flags.author || git?.author;
 
       invariant(typeof sdl === 'string' && sdl.length > 0, 'Schema seems empty');
 
@@ -110,6 +118,13 @@ export default class SchemaCheck extends Command {
                 commit: commit!,
               }
             : null,
+          meta:
+            !!commit && !!author
+              ? {
+                  commit,
+                  author,
+                }
+              : null,
         },
         usesGitHubApp,
       });

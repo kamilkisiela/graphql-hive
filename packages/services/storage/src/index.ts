@@ -34,8 +34,6 @@ import { ProjectType } from '../../api/src';
 import {
   type CDNAccessToken,
   type OIDCIntegration,
-  SchemaCompositionError,
-  SchemaCompositionErrorModel,
   type SchemaLog,
   type SchemaPolicy,
 } from '../../api/src/shared/entities';
@@ -60,7 +58,13 @@ import {
   tokens,
   users,
 } from './db';
-import { SchemaChangeModel } from './schema-change-model';
+import {
+  SchemaChangeModel,
+  SchemaCheckModel,
+  SchemaCompositionError,
+  SchemaCompositionErrorModel,
+  SchemaPolicyWarningModel,
+} from './schema-change-model';
 import type { Slonik } from './shared';
 
 export { ConnectionError } from 'slonik';
@@ -3360,6 +3364,134 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return DocumentCollectionDocumentModel.parse(result);
     },
+    async createSchemaCheck(args) {
+      const result = await pool.maybeOne<unknown>(sql`
+        INSERT INTO "public"."schema_checks" (
+          "schema_sdl"
+          , "service_name"
+          , "meta"
+          , "target_id"
+          , "schema_version_id"
+          , "is_success"
+          , "schema_composition_errors"
+          , "breaking_schema_changes"
+          , "safe_schema_changes"
+          , "schema_policy_warnings"
+          , "schema_policy_errors"
+          , "composite_schema_sdl"
+          , "supergraph_sdl"
+        )
+        VALUES (
+          ${args.schemaSDL}
+          , ${args.serviceName}
+          , ${jsonify(args.meta)}
+          , ${args.targetId}
+          , ${args.schemaVersionId}
+          , ${args.isSuccess}
+          , ${jsonify(args.schemaCompositionErrors)}
+          , ${jsonify(args.breakingSchemaChanges?.map(toSerializableSchemaChange))}
+          , ${jsonify(args.safeSchemaChanges?.map(toSerializableSchemaChange))}
+          , ${jsonify(args.schemaPolicyWarnings?.map(w => SchemaPolicyWarningModel.parse(w)))}
+          , ${jsonify(args.schemaPolicyErrors?.map(w => SchemaPolicyWarningModel.parse(w)))}
+          , ${args.compositeSchemaSDL}
+          , ${args.supergraphSDL}
+        )
+        RETURNING
+          ${schemaCheckSQLFields}
+      `);
+
+      return SchemaCheckModel.parse(result);
+    },
+    async findSchemaCheck(args) {
+      console.log(args.targetId);
+      const result = await pool.maybeOne<unknown>(sql`
+        SELECT
+          ${schemaCheckSQLFields}
+        FROM
+          "public"."schema_checks"
+        WHERE
+          "id" = ${args.schemaCheckId}
+          AND "target_id" = ${args.targetId}
+      `);
+
+      if (result == null) {
+        return null;
+      }
+
+      return SchemaCheckModel.parse(result);
+    },
+    async getPaginatedSchemaChecksForTarget(args) {
+      let cursor: null | {
+        createdAt: string;
+        id: string;
+      } = null;
+
+      const limit = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
+
+      if (args.cursor) {
+        cursor = decodeCreatedAtAndUUIDIdBasedCursor(args.cursor);
+      }
+
+      const result = await pool.any<unknown>(sql`
+        SELECT
+          ${schemaCheckSQLFields}
+        FROM
+          "public"."schema_checks"
+        WHERE
+          "target_id" = ${args.targetId}
+          ${
+            cursor
+              ? sql`
+                AND (
+                  (
+                    "created_at" = ${cursor.createdAt}
+                    AND "id" < ${cursor.id}
+                  )
+                  OR "created_at" < ${cursor.createdAt}
+                )
+              `
+              : sql``
+          }
+        ORDER BY
+          "target_id" ASC
+          , "created_at" DESC
+          , "id" DESC
+        LIMIT ${limit + 1}
+      `);
+
+      let items = result.map(row => {
+        const node = SchemaCheckModel.parse(row);
+
+        return {
+          get node() {
+            // TODO: remove this any cast and fix the type issues...
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+            return (args.transformNode?.(node) ?? node) as any;
+          },
+          get cursor() {
+            return encodeCreatedAtAndUUIDIdBasedCursor(node);
+          },
+        };
+      });
+
+      const hasNextPage = items.length > limit;
+
+      items = items.slice(0, limit);
+
+      return {
+        items,
+        pageInfo: {
+          hasNextPage,
+          hasPreviousPage: cursor !== null,
+          get endCursor() {
+            return items[items.length - 1]?.cursor ?? '';
+          },
+          get startCursor() {
+            return items[0]?.cursor ?? '';
+          },
+        },
+      };
+    },
   };
 
   return storage;
@@ -3631,3 +3763,53 @@ async function insertSchemaVersion(
 
   return await trx.one(query).then(SchemaVersionModel.parse);
 }
+
+/**
+ * Small helper utility for jsonifying a nullable object.
+ */
+function jsonify<T>(obj: T | null | undefined) {
+  if (obj == null) return null;
+  return sql`${JSON.stringify(obj)}::jsonb`;
+}
+
+/**
+ * Utility function for stripping a schema change of its computable properties for efficient storage in the database.
+ */
+function toSerializableSchemaChange(change: {
+  type: string;
+  criticality?: {
+    isSafeBasedOnUsage?: boolean;
+  };
+  meta: unknown;
+}): {
+  type: string;
+  meta: unknown;
+  isSafeBasedOnUsage: boolean;
+} {
+  return {
+    type: change.type,
+    meta: change.meta,
+    isSafeBasedOnUsage: change.criticality?.isSafeBasedOnUsage ?? false,
+  };
+}
+
+const schemaCheckSQLFields = sql`
+  "id"
+  , to_json("created_at") as "createdAt"
+  , to_json("updated_at") as "updatedAt"
+  , "schema_sdl" as "schemaSDL"
+  , "service_name" as "serviceName"
+  , "meta"
+  , "target_id" as "targetId"
+  , "schema_version_id" as "schemaVersionId"
+  , "is_success" as "isSuccess"
+  , "schema_composition_errors" as "schemaCompositionErrors"
+  , "breaking_schema_changes" as "breakingSchemaChanges"
+  , "safe_schema_changes" as "safeSchemaChanges"
+  , "schema_policy_warnings" as "schemaPolicyWarnings"
+  , "schema_policy_errors" as "schemaPolicyErrors"
+  , "composite_schema_sdl" as "compositeSchemaSDL"
+  , "supergraph_sdl" as "supergraphSDL"
+`;
+
+export * from './schema-change-model';

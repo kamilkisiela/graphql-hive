@@ -779,3 +779,99 @@ export const SchemaChangeModel = z.union([
 ({}) as SerializableChange satisfies z.TypeOf<typeof SchemaChangeModel>;
 
 export type Change = z.infer<typeof SchemaChangeModel>;
+
+export const SchemaCompositionErrorModel = z.object({
+  message: z.string(),
+  source: z.union([z.literal('graphql'), z.literal('composition')]),
+});
+
+export type SchemaCompositionError = z.TypeOf<typeof SchemaCompositionErrorModel>;
+
+export const SchemaPolicyWarningModel = z.object({
+  message: z.string(),
+  line: z.number(),
+  column: z.number(),
+  ruleId: z.string(),
+  endLine: z.number().nullable(),
+  endColumn: z.number().nullable(),
+});
+
+const FailedSchemaCheckPartialModel = z.intersection(
+  z.object({
+    isSuccess: z.literal(false),
+
+    breakingSchemaChanges: z.array(SchemaChangeModel).nullable(),
+    safeSchemaChanges: z.array(SchemaChangeModel).nullable(),
+
+    schemaPolicyWarnings: z.array(SchemaPolicyWarningModel).nullable(),
+    schemaPolicyErrors: z.array(SchemaPolicyWarningModel).nullable(),
+  }),
+  z.union([
+    z.object({
+      schemaCompositionErrors: z.array(SchemaCompositionErrorModel),
+
+      compositeSchemaSDL: z.null(),
+      supergraphSDL: z.null(),
+    }),
+    z.object({
+      schemaCompositionErrors: z.null(),
+
+      compositeSchemaSDL: z.string(),
+      supergraphSDL: z.string().nullable(),
+    }),
+  ]),
+);
+
+const SuccessfulSchemaCheckPartialModel = z.object({
+  isSuccess: z.literal(true),
+  schemaCompositionErrors: z.null(),
+
+  breakingSchemaChanges: z.null(),
+  safeSchemaChanges: z.array(SchemaChangeModel).nullable(),
+  schemaPolicyWarnings: z.array(SchemaPolicyWarningModel).nullable(),
+  schemaPolicyErrors: z.null(),
+
+  compositeSchemaSDL: z.string(),
+  supergraphSDL: z.string().nullable(),
+});
+
+const SchemaCheckSharedFieldsModel = z.object({
+  schemaSDL: z.string(),
+  serviceName: z.string().nullable(),
+  targetId: z.string(),
+  schemaVersionId: z.string().nullable(),
+  meta: z
+    .object({
+      author: z.string(),
+      commit: z.string(),
+    })
+    .nullable(),
+});
+
+const SchemaCheckInputModel = z.intersection(
+  SchemaCheckSharedFieldsModel,
+  z.union([FailedSchemaCheckPartialModel, SuccessfulSchemaCheckPartialModel]),
+);
+
+const PersistedSchemaCheckPartialModel = z.object({
+  id: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const FailedSchemaCheckModel = z.intersection(
+  SchemaCheckSharedFieldsModel,
+  z.intersection(PersistedSchemaCheckPartialModel, FailedSchemaCheckPartialModel),
+);
+
+export const SuccessfulSchemaCheckModel = z.intersection(
+  SchemaCheckSharedFieldsModel,
+  z.intersection(PersistedSchemaCheckPartialModel, SuccessfulSchemaCheckPartialModel),
+);
+
+export const SchemaCheckModel = z.union([FailedSchemaCheckModel, SuccessfulSchemaCheckModel]);
+
+export type SchemaCheckInput = z.TypeOf<typeof SchemaCheckInputModel>;
+export type SchemaCheck = z.TypeOf<typeof SchemaCheckModel>;
+export type FailedSchemaCheck = z.TypeOf<typeof FailedSchemaCheckModel>;
+export type SuccessfulSchemaCheck = z.TypeOf<typeof SuccessfulSchemaCheckModel>;

@@ -152,12 +152,6 @@ const publishMutationDocument =
 async function federation() {
   const instance = createInstance(null);
   const schemaInventory = /* GraphQL */ `
-    extend schema
-      @link(
-        url: "https://specs.apollo.dev/federation/v2.1"
-        import: ["@key", "@shareable", "@external", "@requires"]
-      )
-
     type Product implements ProductItf @key(fields: "id") {
       id: ID!
       dimensions: ProductDimension @external
@@ -202,18 +196,6 @@ async function federation() {
   `;
 
   const schemaProducts = /* GraphQL */ `
-    extend schema
-      @link(
-        url: "https://specs.apollo.dev/federation/v2.1"
-        import: ["@key", "@shareable", "@tag", "@inaccessible", "@composeDirective"]
-      )
-      @link(
-        url: "https://myspecs.dev/myDirective/v1.0"
-        import: ["@myDirective", { name: "@anotherDirective", as: "@hello" }]
-      )
-      @composeDirective(name: "@myDirective")
-      @composeDirective(name: "@hello")
-
     directive @myDirective(a: String!) on FIELD_DEFINITION
     directive @hello on FIELD_DEFINITION
 
@@ -272,14 +254,6 @@ async function federation() {
   `;
 
   const schemaReviews = /* GraphQL */ `
-    schema
-      @link(
-        url: "https://specs.apollo.dev/federation/v2.0"
-        import: ["@key", "@override", "@shareable"]
-      ) {
-      query: Query
-    }
-
     type Product implements ProductItf @key(fields: "id") {
       id: ID!
       reviewsCount: Int!

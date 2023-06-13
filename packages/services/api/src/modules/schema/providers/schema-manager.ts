@@ -3,8 +3,9 @@ import { Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import { z } from 'zod';
 import { Change } from '@graphql-inspector/core';
+import type { SchemaCheck, SchemaCompositionError } from '@hive/storage';
 import { RegistryModel } from '../../../__generated__/types';
-import { Orchestrator, ProjectType, SchemaCompositionError } from '../../../shared/entities';
+import { Orchestrator, ProjectType } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { atomic, stringifySelector } from '../../../shared/helpers';
 import { SchemaVersion } from '../../../shared/mappers';
@@ -20,6 +21,7 @@ import {
   Storage,
   TargetSelector,
 } from '../../shared/providers/storage';
+import { schemaChangeFromMeta } from '../schema-change-from-meta';
 import { FederationOrchestrator } from './orchestrators/federation';
 import { SingleOrchestrator } from './orchestrators/single';
 import { StitchingOrchestrator } from './orchestrators/stitching';
@@ -522,4 +524,87 @@ export class SchemaManager {
       ok: this.storage.updateProjectRegistryModel(input),
     };
   }
+
+  async getPaginatedSchemaChecksForTarget<
+    TransformedSchemaCheck extends InflatedSchemaCheck,
+  >(args: {
+    organizationId: string;
+    projectId: string;
+    targetId: string;
+    first: number | null;
+    cursor: string | null;
+    transformNode: (check: InflatedSchemaCheck) => TransformedSchemaCheck;
+  }) {
+    await this.authManager.ensureTargetAccess({
+      organization: args.organizationId,
+      project: args.projectId,
+      target: args.targetId,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    const paginatedResult = await this.storage.getPaginatedSchemaChecksForTarget({
+      targetId: args.targetId,
+      first: args.first,
+      cursor: args.cursor,
+      transformNode: node => args.transformNode(inflateSchemaCheck(node)),
+    });
+
+    return paginatedResult;
+  }
+
+  async findSchemaCheck(args: {
+    targetId: string;
+    projectId: string;
+    organizationId: string;
+    schemaCheckId: string;
+  }) {
+    this.logger.debug('Find schema check (args=%o)', args);
+    await this.authManager.ensureTargetAccess({
+      target: args.targetId,
+      project: args.projectId,
+      organization: args.organizationId,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    const schemaCheck = await this.storage.findSchemaCheck({
+      targetId: args.targetId,
+      schemaCheckId: args.schemaCheckId,
+    });
+
+    if (schemaCheck == null) {
+      this.logger.debug('Schema check not found (args=%o)', args);
+      return null;
+    }
+
+    return inflateSchemaCheck(schemaCheck);
+  }
 }
+
+/**
+ * Takes a schema check as read from the database and inflates it to the proper business logic type.
+ */
+export function inflateSchemaCheck(schemaCheck: SchemaCheck) {
+  if (schemaCheck.isSuccess) {
+    return {
+      ...schemaCheck,
+      safeSchemaChanges:
+        // TODO: fix any type
+        schemaCheck.safeSchemaChanges?.map((check: any) => schemaChangeFromMeta(check)) ?? null,
+    };
+  }
+
+  return {
+    ...schemaCheck,
+    safeSchemaChanges:
+      // TODO: fix any type
+      schemaCheck.safeSchemaChanges?.map((check: any) => schemaChangeFromMeta(check)) ?? null,
+    // TODO: fix any type
+    breakingSchemaChanges:
+      schemaCheck.breakingSchemaChanges?.map((check: any) => schemaChangeFromMeta(check)) ?? null,
+  };
+}
+
+/**
+ * Schema check with all the fields inflated to their proper types.
+ */
+export type InflatedSchemaCheck = ReturnType<typeof inflateSchemaCheck>;

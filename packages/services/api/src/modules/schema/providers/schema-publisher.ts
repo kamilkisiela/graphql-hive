@@ -2,6 +2,7 @@ import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import promClient from 'prom-client';
 import { Change, CriticalityLevel } from '@graphql-inspector/core';
+import { SchemaCheck } from '@hive/storage';
 import * as Sentry from '@sentry/node';
 import type { Span } from '@sentry/types';
 import * as Types from '../../../__generated__/types';
@@ -21,6 +22,7 @@ import { Logger } from '../../shared/providers/logger';
 import { Mutex } from '../../shared/providers/mutex';
 import { Storage, type TargetSelector } from '../../shared/providers/storage';
 import { TargetManager } from '../../target/providers/target-manager';
+import { toGraphQLSchemaCheck } from '../to-graphql-schema-check';
 import { ArtifactStorageWriter } from './artifact-storage-writer';
 import type { SchemaModuleConfig } from './config';
 import { SCHEMA_MODULE_CONFIG } from './config';
@@ -41,7 +43,7 @@ import {
 import { SingleModel } from './models/single';
 import { SingleLegacyModel } from './models/single-legacy';
 import { ensureCompositeSchemas, ensureSingleSchema, SchemaHelper } from './schema-helper';
-import { SchemaManager } from './schema-manager';
+import { inflateSchemaCheck, SchemaManager } from './schema-manager';
 
 const schemaCheckCount = new promClient.Counter({
   name: 'registry_check_count',
@@ -160,32 +162,43 @@ export class SchemaPublisher {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    const [target, project, organization, latestVersion, latestComposableVersion] =
-      await Promise.all([
-        this.targetManager.getTarget({
-          organization: input.organization,
-          project: input.project,
-          target: input.target,
-        }),
-        this.projectManager.getProject({
-          organization: input.organization,
-          project: input.project,
-        }),
-        this.organizationManager.getOrganization({
-          organization: input.organization,
-        }),
-        this.schemaManager.getLatestSchemas({
-          organization: input.organization,
-          project: input.project,
-          target: input.target,
-        }),
-        this.schemaManager.getLatestSchemas({
-          organization: input.organization,
-          project: input.project,
-          target: input.target,
-          onlyComposable: true,
-        }),
-      ]);
+    const [
+      target,
+      project,
+      organization,
+      latestVersion,
+      latestComposableVersion,
+      latestSchemaVersion,
+    ] = await Promise.all([
+      this.targetManager.getTarget({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+      }),
+      this.projectManager.getProject({
+        organization: input.organization,
+        project: input.project,
+      }),
+      this.organizationManager.getOrganization({
+        organization: input.organization,
+      }),
+      this.schemaManager.getLatestSchemas({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+      }),
+      this.schemaManager.getLatestSchemas({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+        onlyComposable: true,
+      }),
+      this.schemaManager.getMaybeLatestVersion({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+      }),
+    ]);
 
     schemaCheckCount.inc({
       model: project.legacyRegistryModel ? 'legacy' : 'modern',
@@ -283,6 +296,88 @@ export class SchemaPublisher {
         throw new HiveError(`${project.type} project (${modelVersion}) not supported`);
     }
 
+    let schemaCheck: null | SchemaCheck = null;
+
+    if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
+      schemaCheck = await this.storage.createSchemaCheck({
+        schemaSDL: input.sdl,
+        serviceName: input.service ?? null,
+        meta: input.meta ?? null,
+        targetId: target.id,
+        schemaVersionId: latestVersion?.version ?? null,
+        isSuccess: false,
+        breakingSchemaChanges: checkResult.state.schemaChanges?.breaking ?? null,
+        safeSchemaChanges: checkResult.state.schemaChanges?.safe ?? null,
+        schemaPolicyWarnings: checkResult.state.schemaPolicy?.warnings ?? null,
+        schemaPolicyErrors: checkResult.state.schemaPolicy?.errors ?? null,
+        ...(checkResult.state.composition.errors
+          ? {
+              schemaCompositionErrors: checkResult.state.composition.errors,
+              compositeSchemaSDL: null,
+              supergraphSDL: null,
+            }
+          : {
+              schemaCompositionErrors: null,
+              compositeSchemaSDL: checkResult.state.composition.compositeSchemaSDL,
+              supergraphSDL: checkResult.state.composition.supergraphSDL,
+            }),
+      });
+    }
+
+    if (checkResult.conclusion === SchemaCheckConclusion.Success) {
+      let composition = checkResult.state?.composition ?? null;
+
+      // in case of a skip this is null
+      if (composition === null) {
+        if (latestVersion == null || latestSchemaVersion == null) {
+          throw new Error(
+            'Composition yielded no composite schema SDL but there is no latest version to fall back to.',
+          );
+        }
+
+        if (latestSchemaVersion.compositeSchemaSDL) {
+          composition = {
+            compositeSchemaSDL: latestSchemaVersion.compositeSchemaSDL,
+            supergraphSDL: latestSchemaVersion.supergraphSDL,
+          };
+        } else {
+          // LEGACY CASE if the schema version record has no sdl
+          // -> we need to do manual composition
+          const orchestrator = this.schemaManager.matchOrchestrator(project.type);
+
+          const result = await orchestrator.composeAndValidate(
+            latestVersion.schemas.map(s => this.helper.createSchemaObject(s)),
+            project.externalComposition,
+          );
+
+          if (result.sdl == null) {
+            throw new Error('Manual composition yielded no composite schema SDL.');
+          }
+
+          composition = {
+            compositeSchemaSDL: result.sdl,
+            supergraphSDL: result.supergraph,
+          };
+        }
+      }
+
+      schemaCheck = await this.storage.createSchemaCheck({
+        schemaSDL: input.sdl,
+        serviceName: input.service ?? null,
+        meta: input.meta ?? null,
+        targetId: target.id,
+        schemaVersionId: latestVersion?.version ?? null,
+        isSuccess: true,
+        breakingSchemaChanges: null,
+        safeSchemaChanges: checkResult.state?.schemaChanges ?? null,
+        schemaPolicyWarnings: checkResult.state?.schemaPolicyWarnings ?? null,
+        schemaPolicyErrors: null,
+        schemaCompositionErrors: null,
+        compositeSchemaSDL: composition.compositeSchemaSDL,
+        supergraphSDL: composition.supergraphSDL,
+      });
+    }
+
     if (input.github) {
       if (checkResult.conclusion === SchemaCheckConclusion.Success) {
         return this.githubCheck({
@@ -291,8 +386,8 @@ export class SchemaPublisher {
           serviceName: input.service ?? null,
           sha: input.github.commit,
           conclusion: checkResult.conclusion,
-          changes: checkResult.state.schemaChanges ?? null,
-          warnings: checkResult.state.schemaPolicyWarnings,
+          changes: checkResult.state?.schemaChanges ?? null,
+          warnings: checkResult.state?.schemaPolicyWarnings ?? null,
           breakingChanges: null,
           compositionErrors: null,
           errors: null,
@@ -316,13 +411,18 @@ export class SchemaPublisher {
       });
     }
 
+    if (schemaCheck == null) {
+      throw new Error('Invalid state. Schema check can not be null at this point.');
+    }
+
     if (checkResult.conclusion === SchemaCheckConclusion.Success) {
       return {
         __typename: 'SchemaCheckSuccess',
         valid: true,
-        changes: checkResult.state.schemaChanges ?? [],
-        warnings: checkResult.state.schemaPolicyWarnings ?? [],
+        changes: checkResult.state?.schemaChanges ?? [],
+        warnings: checkResult.state?.schemaPolicyWarnings ?? [],
         initial: latestVersion == null,
+        schemaCheck: toGraphQLSchemaCheck(target)(inflateSchemaCheck(schemaCheck)),
       } as const;
     }
 
@@ -339,6 +439,7 @@ export class SchemaPublisher {
         ...(checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? []),
         ...(checkResult.state.composition.errors ?? []),
       ],
+      schemaCheck: toGraphQLSchemaCheck(target)(inflateSchemaCheck(schemaCheck)),
     } as const;
   }
 

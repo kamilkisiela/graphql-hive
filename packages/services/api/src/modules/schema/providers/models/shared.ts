@@ -1,11 +1,8 @@
-import {
-  PushedCompositeSchema,
-  SchemaCompositionError,
-  SingleSchema,
-} from 'packages/services/api/src/shared/entities';
+import { PushedCompositeSchema, SingleSchema } from 'packages/services/api/src/shared/entities';
 import { Change } from '@graphql-inspector/core';
 import type { CheckPolicyResponse } from '@hive/policy';
 import { CompositionFailureError } from '@hive/schema';
+import type { SchemaCompositionError } from '@hive/storage';
 import { type RegistryChecks } from '../registry-checks';
 
 export const SchemaPublishConclusion = {
@@ -72,18 +69,24 @@ export type CheckFailureReasonCode =
 export type CheckPolicyResultRecord = CheckPolicyResponse[number] | { message: string };
 export type SchemaCheckWarning = {
   message: string;
-  source: string | null;
-
-  line?: number;
-  column?: number;
-  ruleId: string | null;
+  source: string;
+  line: number;
+  column: number;
+  ruleId: string;
+  endLine: number | null;
+  endColumn: number | null;
 };
 
 export type SchemaCheckSuccess = {
   conclusion: (typeof SchemaCheckConclusion)['Success'];
-  state: {
+  // state is null in case the check got skipped.
+  state: null | {
     schemaChanges: Array<Change> | null;
     schemaPolicyWarnings: SchemaCheckWarning[] | null;
+    composition: {
+      compositeSchemaSDL: string;
+      supergraphSDL: string | null;
+    };
   };
 };
 

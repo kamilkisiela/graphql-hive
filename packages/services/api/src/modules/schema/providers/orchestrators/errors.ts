@@ -1,4 +1,4 @@
-import { SchemaCompositionError } from 'packages/services/api/src/shared/entities';
+import type { SchemaCompositionError } from '@hive/storage';
 import { HiveError } from '../../../../shared/errors';
 
 export class SchemaBuildError extends HiveError {

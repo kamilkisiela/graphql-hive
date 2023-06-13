@@ -1,6 +1,7 @@
 import { Injectable } from 'graphql-modules';
 import { Change } from '@graphql-inspector/core';
 import type { PolicyConfigurationObject } from '@hive/policy';
+import type { SchemaCheck, SchemaCheckInput, SchemaCompositionError } from '@hive/storage';
 import type {
   AddAlertChannelInput,
   AddAlertInput,
@@ -24,7 +25,6 @@ import type {
   PersistedOperation,
   Project,
   Schema,
-  SchemaCompositionError,
   SchemaLog,
   SchemaPolicy,
   SchemaVersion,
@@ -658,6 +658,39 @@ export interface Storage {
   }): Promise<DocumentCollectionOperation | null>;
 
   getDocumentCollectionDocument(_: { id: string }): Promise<DocumentCollectionOperation | null>;
+  /**
+   * Persist a schema check record in the database.
+   */
+  createSchemaCheck(input: SchemaCheckInput): Promise<SchemaCheck>;
+  /**
+   * Find schema check for a given ID and target.
+   */
+  findSchemaCheck(input: { schemaCheckId: string; targetId: string }): Promise<SchemaCheck | null>;
+  /**
+   * Retrieve paginated schema checks for a given target.
+   */
+  getPaginatedSchemaChecksForTarget<TransformedSchemaCheck extends SchemaCheck = SchemaCheck>(_: {
+    first: number | null;
+    cursor: null | string;
+    targetId: string;
+    /**
+     * Optional mapper for transforming the raw schema check loaded from the database.
+     */
+    transformNode?: (check: SchemaCheck) => TransformedSchemaCheck;
+  }): Promise<
+    Readonly<{
+      items: ReadonlyArray<{
+        node: TransformedSchemaCheck;
+        cursor: string;
+      }>;
+      pageInfo: Readonly<{
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+        startCursor: string;
+        endCursor: string;
+      }>;
+    }>
+  >;
 }
 
 @Injectable()

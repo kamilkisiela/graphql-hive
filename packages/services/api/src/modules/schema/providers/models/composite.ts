@@ -103,10 +103,7 @@ export class CompositeModel {
     if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
       return {
         conclusion: SchemaCheckConclusion.Success,
-        state: {
-          schemaPolicyWarnings: null,
-          schemaChanges: null,
-        },
+        state: null,
       };
     }
 
@@ -160,6 +157,10 @@ export class CompositeModel {
       state: {
         schemaPolicyWarnings: policyCheck.result?.warnings ?? [],
         schemaChanges: diffCheck.result?.changes ?? null,
+        composition: {
+          compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
+          supergraphSDL: compositionCheck.result.supergraph,
+        },
       },
     };
   }

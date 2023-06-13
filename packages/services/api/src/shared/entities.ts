@@ -3,7 +3,7 @@ import { parse } from 'graphql';
 import { z } from 'zod';
 import type { AvailableRulesResponse, PolicyConfigurationObject } from '@hive/policy';
 import type { CompositionFailureError } from '@hive/schema';
-import { schema_policy_resource } from '@hive/storage';
+import type { schema_policy_resource, SchemaCompositionError } from '@hive/storage';
 import type {
   AlertChannelType,
   AlertType,
@@ -365,13 +365,6 @@ export interface AdminOrganizationStats {
     to: Date;
   };
 }
-
-export const SchemaCompositionErrorModel = z.object({
-  message: z.string(),
-  source: z.union([z.literal('graphql'), z.literal('composition'), z.literal('policy')]),
-});
-
-export type SchemaCompositionError = z.TypeOf<typeof SchemaCompositionErrorModel>;
 
 export type SchemaPolicy = {
   id: string;

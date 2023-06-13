@@ -28,7 +28,7 @@ import type {
   SchemaCompareResult,
 } from '../../shared/mappers';
 import type { WithGraphQLParentInfo, WithSchemaCoordinatesUsage } from '../../shared/mappers';
-import { buildSchema, createConnection } from '../../shared/schema';
+import { buildSchema, createConnection, createDummyConnection } from '../../shared/schema';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { OperationsManager } from '../operations/providers/operations-manager';
 import { OrganizationManager } from '../organization/providers/organization-manager';
@@ -48,6 +48,7 @@ import { ensureSDL, SchemaHelper } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
 import { schemaChangeFromMeta, SerializableChange } from './schema-change-from-meta';
+import { toGraphQLSchemaCheck } from './to-graphql-schema-check';
 
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 const GraphQLSchemaStringModel = z.string().max(5_000_000).min(0);
@@ -639,6 +640,35 @@ export const resolvers: SchemaModule.Resolvers = {
         project: target.projectId,
         organization: target.orgId,
       });
+    },
+    async schemaCheck(target, args, { injector }) {
+      const schemaCheck = await injector.get(SchemaManager).findSchemaCheck({
+        targetId: target.id,
+        projectId: target.projectId,
+        organizationId: target.orgId,
+        schemaCheckId: args.id,
+      });
+
+      if (schemaCheck == null) {
+        return null;
+      }
+
+      return toGraphQLSchemaCheck(target)(schemaCheck);
+    },
+    async schemaChecks(target, args, { injector }) {
+      const result = await injector.get(SchemaManager).getPaginatedSchemaChecksForTarget({
+        targetId: target.id,
+        projectId: target.projectId,
+        organizationId: target.orgId,
+        first: args.first ?? null,
+        cursor: args.after ?? null,
+        transformNode: toGraphQLSchemaCheck(target),
+      });
+
+      return {
+        edges: result.items,
+        pageInfo: result.pageInfo,
+      };
     },
   },
   SchemaVersion: {
@@ -1539,6 +1569,70 @@ export const resolvers: SchemaModule.Resolvers = {
     isDeprecated: a => typeof a.entity.deprecationReason === 'string',
     usage,
   },
+  SuccessfulSchemaCheck: {
+    schemaVersion(schemaCheck, _, { injector }) {
+      if (schemaCheck.schemaVersionId === null) {
+        return null;
+      }
+      return injector.get(SchemaManager).getSchemaVersion({
+        organization: schemaCheck.selector.organizationId,
+        project: schemaCheck.selector.projectId,
+        target: schemaCheck.targetId,
+        version: schemaCheck.schemaVersionId,
+      });
+    },
+    safeSchemaChanges(schemaCheck) {
+      if (!schemaCheck.safeSchemaChanges) {
+        return null;
+      }
+
+      return schemaCheck.safeSchemaChanges.map(toGraphQLSchemaChange);
+    },
+  },
+  FailedSchemaCheck: {
+    schemaVersion(schemaCheck, _, { injector }) {
+      if (schemaCheck.schemaVersionId === null) {
+        return null;
+      }
+      return injector.get(SchemaManager).getSchemaVersion({
+        organization: schemaCheck.selector.organizationId,
+        project: schemaCheck.selector.projectId,
+        target: schemaCheck.targetId,
+        version: schemaCheck.schemaVersionId,
+      });
+    },
+    safeSchemaChanges(schemaCheck) {
+      if (!schemaCheck.safeSchemaChanges) {
+        return null;
+      }
+
+      return schemaCheck.safeSchemaChanges.map(toGraphQLSchemaChange);
+    },
+    breakingSchemaChanges(schemaCheck) {
+      if (!schemaCheck.breakingSchemaChanges) {
+        return null;
+      }
+
+      return schemaCheck.breakingSchemaChanges.map(toGraphQLSchemaChange);
+    },
+    compositionErrors(schemaCheck) {
+      return schemaCheck.schemaCompositionErrors;
+    },
+  },
+  SchemaPolicyWarningConnection: createDummyConnection(warning => ({
+    ...warning,
+    start: {
+      column: warning.column,
+      line: warning.line,
+    },
+    end:
+      warning.endColumn && warning.endLine
+        ? {
+            column: warning.endColumn,
+            line: warning.endLine,
+          }
+        : null,
+  })),
 };
 
 function stringifyDefaultValue(value: unknown): string | null {

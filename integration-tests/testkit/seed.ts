@@ -433,11 +433,19 @@ export function initSeed() {
                         authorizationHeader: headerName,
                       });
                     },
-                    async checkSchema(sdl: string, service?: string) {
+                    async checkSchema(
+                      sdl: string,
+                      service?: string,
+                      meta?: {
+                        author: string;
+                        commit: string;
+                      },
+                    ) {
                       return await checkSchema(
                         {
                           sdl,
                           service,
+                          meta,
                         },
                         secret,
                       );

@@ -56,18 +56,16 @@ describe.each`
         firstSdl,
         'myService', // camelCase
       ).then(r => r.expectNoGraphQLErrors()),
-    ).resolves.toEqual(
-      expect.objectContaining({
-        schemaCheck: {
-          __typename: 'SchemaCheckSuccess',
-          valid: true,
-          changes: {
-            nodes: [],
-            total: 0,
-          },
+    ).resolves.toMatchObject({
+      schemaCheck: {
+        __typename: 'SchemaCheckSuccess',
+        valid: true,
+        changes: {
+          nodes: [],
+          total: 0,
         },
-      }),
-    );
+      },
+    });
 
     const secondSdl = /* GraphQL */ `
       type Query {
