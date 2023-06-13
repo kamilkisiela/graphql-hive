@@ -1,3 +1,4 @@
+import { parse, print } from 'graphql';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import promClient from 'prom-client';
@@ -224,6 +225,14 @@ export class SchemaPublisher {
 
     const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
 
+    let sdl: string;
+
+    try {
+      sdl = print(parse(input.sdl));
+    } catch {
+      sdl = input.sdl;
+    }
+
     let checkResult: SchemaCheckResult;
 
     switch (project.type) {
@@ -271,7 +280,7 @@ export class SchemaPublisher {
 
         checkResult = await this.models[project.type][modelVersion].check({
           input: {
-            sdl: input.sdl,
+            sdl,
             serviceName: input.service,
           },
           selector,
@@ -300,7 +309,7 @@ export class SchemaPublisher {
 
     if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
       schemaCheck = await this.storage.createSchemaCheck({
-        schemaSDL: input.sdl,
+        schemaSDL: sdl,
         serviceName: input.service ?? null,
         meta: input.meta ?? null,
         targetId: target.id,
@@ -362,7 +371,7 @@ export class SchemaPublisher {
       }
 
       schemaCheck = await this.storage.createSchemaCheck({
-        schemaSDL: input.sdl,
+        schemaSDL: sdl,
         serviceName: input.service ?? null,
         meta: input.meta ?? null,
         targetId: target.id,
