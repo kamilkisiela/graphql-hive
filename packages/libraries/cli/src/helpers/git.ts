@@ -23,8 +23,6 @@ function getLatestCommitFromGit() {
     exec(latestCommitCommand, { cwd: process.cwd() }, (_, stdout) => {
       if (stdout.includes(splitBy)) {
         const [hash, authorName, authorEmail] = stdout.split(splitBy);
-        console.log({ hash, authorName, authorEmail });
-
         if (hash && authorName) {
           let author = authorName;
 
