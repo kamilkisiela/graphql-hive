@@ -58,14 +58,11 @@
     "@whatwg-node/fetch": "0.9.4",
     "colors": "1.4.0",
     "env-ci": "7.3.0",
-    "git-parse": "3.0.1",
     "graphql": "^16.0.0",
     "graphql-request": "5.1.0",
     "graphql-tag": "2.12.6",
     "log-symbols": "4.1.0",
     "mkdirp": "2.1.6",
-    "rimraf": "4.4.1",
-    "ts-node": "10.9.1",
     "tslib": "2.5.3",
     "zod": "3.21.4"
   },
@@ -73,7 +70,9 @@
     "@graphql-codegen/typescript-graphql-request": "4.5.9",
     "@types/env-ci": "3.1.1",
     "@types/mkdirp": "1.0.2",
-    "oclif": "3.9.0"
+    "oclif": "3.9.0",
+    "rimraf": "4.4.1",
+    "ts-node": "10.9.1"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",

@@ -1,36 +1,48 @@
-import { existsSync, readFileSync } from 'fs';
-import { join } from 'path';
+import { exec } from 'child_process';
+import { readFileSync } from 'fs';
 import ci from 'env-ci';
-import { gitToJs } from 'git-parse';
-
-function splitPath(path: string) {
-  const parts = path.split(/(\/|\\)/);
-  if (!parts.length) {
-    return parts;
-  }
-
-  // when path starts with a slash, the first part is empty string
-  return !parts[0].length ? parts.slice(1) : parts;
-}
-
-function findParentDir(currentFullPath: string, clue: string) {
-  function testDir(parts: string[]): null | string {
-    if (parts.length === 0) {
-      return null;
-    }
-
-    const p = parts.join('');
-
-    const itdoes = existsSync(join(p, clue));
-    return itdoes ? p : testDir(parts.slice(0, -1));
-  }
-
-  return testDir(splitPath(currentFullPath));
-}
 
 interface CIRunner {
   detect(): boolean;
   env(): { commit: string | undefined | null };
+}
+
+const splitBy = '<##>';
+const gitLogFormat = [
+  /* full hash */ '%H',
+  /* Author's name */ '%an',
+  /* Author's email */ '%ae',
+].join(splitBy);
+const latestCommitCommand = `git log -1 --pretty=format:"${gitLogFormat}"`;
+
+function getLatestCommitFromGit() {
+  return new Promise<{
+    hash: string;
+    author: string;
+  } | null>(resolve => {
+    exec(latestCommitCommand, { cwd: process.cwd() }, (_, stdout) => {
+      if (stdout.includes(splitBy)) {
+        const [hash, authorName, authorEmail] = stdout.split(splitBy);
+        console.log({ hash, authorName, authorEmail });
+
+        if (hash && authorName) {
+          let author = authorName;
+
+          if (authorEmail) {
+            author += ` <${authorEmail}>`;
+          }
+
+          resolve({
+            hash,
+            author,
+          });
+          return;
+        }
+      }
+
+      resolve(null);
+    });
+  });
 }
 
 function useGitHubAction(): CIRunner {
@@ -86,25 +98,14 @@ export async function gitInfo(noGit: () => void) {
   }
 
   if (!commit || !author) {
-    const rootFromEnv = 'root' in env ? env.root : null;
-    const git =
-      rootFromEnv ?? findParentDir(__dirname, '.git') ?? findParentDir(process.cwd(), '.git');
-
+    const git = await getLatestCommitFromGit();
     if (git) {
-      const commits = await gitToJs(git);
+      if (!commit) {
+        commit = git.hash;
+      }
 
-      if (commits && commits.length) {
-        const lastCommit = commits[0];
-
-        if (!commit) {
-          commit = lastCommit.hash;
-        }
-
-        if (!author) {
-          author = `${lastCommit.authorName || ''} ${
-            lastCommit.authorEmail ? `<${lastCommit.authorEmail}>` : ''
-          }`.trim();
-        }
+      if (!author) {
+        author = git.author;
       }
     } else {
       noGit();
