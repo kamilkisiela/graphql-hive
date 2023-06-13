@@ -840,6 +840,12 @@ const SchemaCheckSharedFieldsModel = z.object({
   serviceName: z.string().nullable(),
   targetId: z.string(),
   schemaVersionId: z.string().nullable(),
+  meta: z
+    .object({
+      author: z.string(),
+      commit: z.string(),
+    })
+    .nullable(),
 });
 
 const SchemaCheckInputModel = z.intersection(

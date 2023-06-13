@@ -142,6 +142,10 @@ const SchemaCheckQuery = graphql(/* GraphQL */ `
         schemaVersion {
           id
         }
+        meta {
+          commit
+          author
+        }
         ... on SuccessfulSchemaCheck {
           safeSchemaChanges {
             nodes {
@@ -803,3 +807,73 @@ test.concurrent(
     expect(check.schemaCheck).toEqual(null);
   },
 );
+
+test('metadata is persisted', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, organization } = await createOrg();
+  const { createToken, project, target } = await createProject(ProjectType.Single);
+
+  // Create a token with read rights
+  const readToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead],
+    projectScopes: [],
+    organizationScopes: [],
+  });
+
+  // Check schema with read rights
+  const checkResult = await readToken
+    .checkSchema(
+      /* GraphQL */ `
+        type Query {
+          ping: String
+          pong: String
+        }
+      `,
+      undefined,
+      {
+        author: 'Freddy Gibbs',
+        commit: '$oul $old $eparately',
+      },
+    )
+    .then(r => r.expectNoGraphQLErrors());
+  const check = checkResult.schemaCheck;
+
+  if (check.__typename !== 'SchemaCheckSuccess') {
+    throw new Error(`Expected SchemaCheckSuccess, got ${check.__typename}`);
+  }
+
+  const schemaCheckId = check.schemaCheck?.id;
+
+  if (schemaCheckId == null) {
+    throw new Error('Missing schema check id.');
+  }
+
+  const schemaCheck = await execute({
+    document: SchemaCheckQuery,
+    variables: {
+      selector: {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        target: target.cleanId,
+      },
+      id: schemaCheckId,
+    },
+    authToken: readToken.secret,
+  }).then(r => r.expectNoGraphQLErrors());
+
+  expect(schemaCheck).toMatchObject({
+    target: {
+      schemaCheck: {
+        __typename: 'SuccessfulSchemaCheck',
+        id: schemaCheckId,
+        createdAt: expect.any(String),
+        serviceName: null,
+        schemaVersion: null,
+        meta: {
+          author: 'Freddy Gibbs',
+          commit: '$oul $old $eparately',
+        },
+      },
+    },
+  });
+});

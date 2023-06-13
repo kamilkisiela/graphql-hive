@@ -348,10 +348,16 @@ export default gql`
     message: String!
   }
 
+  input SchemaCheckMetaInput {
+    author: String!
+    commit: String!
+  }
+
   input SchemaCheckInput {
     service: ID
     sdl: String!
     github: GitHubSchemaCheckInput
+    meta: SchemaCheckMetaInput
   }
 
   input SchemaDeleteInput {
@@ -659,6 +665,11 @@ export default gql`
     pageInfo: PageInfo!
   }
 
+  type SchemaCheckMeta {
+    author: String!
+    commit: String!
+  }
+
   interface SchemaCheck {
     id: ID!
     createdAt: String!
@@ -670,6 +681,10 @@ export default gql`
     The name of the service that owns the schema. Is null for non composite project types.
     """
     serviceName: String
+    """
+    Meta information about the schema check.
+    """
+    meta: SchemaCheckMeta
     """
     The schema version against this check was performed.
     Is null if there is no schema version published yet.
@@ -691,6 +706,10 @@ export default gql`
     The name of the service that owns the schema. Is null for non composite project types.
     """
     serviceName: String
+    """
+    Meta information about the schema check.
+    """
+    meta: SchemaCheckMeta
     """
     The schema version against this check was performed.
     Is null if there is no schema version published yet.
@@ -718,6 +737,10 @@ export default gql`
     The name of the service that owns the schema. Is null for non composite project types.
     """
     serviceName: String
+    """
+    Meta information about the schema check.
+    """
+    meta: SchemaCheckMeta
     """
     The schema version against this check was performed.
     Is null if there is no schema version published yet.

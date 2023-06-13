@@ -170,6 +170,7 @@ export interface schema_checks {
   created_at: Date;
   id: string;
   is_success: boolean;
+  meta: any | null;
   safe_schema_changes: any | null;
   schema_composition_errors: any | null;
   schema_policy_errors: any | null;

@@ -3369,6 +3369,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         INSERT INTO "public"."schema_checks" (
           "schema_sdl"
           , "service_name"
+          , "meta"
           , "target_id"
           , "schema_version_id"
           , "is_success"
@@ -3383,6 +3384,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         VALUES (
           ${args.schemaSDL}
           , ${args.serviceName}
+          , ${jsonify(args.meta)}
           , ${args.targetId}
           , ${args.schemaVersionId}
           , ${args.isSuccess}
@@ -3797,6 +3799,7 @@ const schemaCheckSQLFields = sql`
   , to_json("updated_at") as "updatedAt"
   , "schema_sdl" as "schemaSDL"
   , "service_name" as "serviceName"
+  , "meta"
   , "target_id" as "targetId"
   , "schema_version_id" as "schemaVersionId"
   , "is_success" as "isSuccess"

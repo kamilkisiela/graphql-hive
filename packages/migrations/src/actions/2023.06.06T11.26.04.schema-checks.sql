@@ -5,6 +5,7 @@ CREATE TABLE "public"."schema_checks" (
 
   , "schema_sdl" text NOT NULL
   , "service_name" text
+  , "meta" jsonb
 
   , "target_id" uuid NOT NULL REFERENCES "targets" ("id") ON DELETE CASCADE
   , "schema_version_id" uuid REFERENCES "schema_versions" ("id") ON DELETE CASCADE
