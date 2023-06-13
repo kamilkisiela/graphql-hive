@@ -166,7 +166,7 @@ function useOperationCollectionsPlugin(props: {
       return (
         <>
           <div className="flex justify-between">
-            <Heading>Operation Collections</Heading>
+            <Heading>Collections</Heading>
             {canEdit ? (
               <Button
                 variant="link"
@@ -180,7 +180,7 @@ function useOperationCollectionsPlugin(props: {
               </Button>
             ) : null}
           </div>
-          <p className="mb-3 font-light text-gray-300">Shared across your organization</p>
+          <p className="mb-3 font-light text-gray-300 text-sm">Shared across your organization</p>
           {loading ? (
             <Spinner />
           ) : (
