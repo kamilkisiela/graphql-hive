@@ -107,6 +107,7 @@ export function createUsage(config: {
     };
     connection: KafkaEnvironment['connection'];
   };
+  onStop(reason: string): Promise<void>;
 }) {
   const { logger } = config;
 
@@ -242,8 +243,10 @@ export function createUsage(config: {
     reconnectCounter++;
 
     if (reconnectCounter > retryOptions.retries) {
-      logger.error('Failed to reconnect Kafka producer. Too many retries.');
+      const message = 'Failed to reconnect Kafka producer. Too many retries.';
+      logger.error(message);
       status = Status.Unhealthy;
+      void config.onStop(message);
       return;
     }
 
@@ -284,6 +287,18 @@ export function createUsage(config: {
   producer.on(producer.events.REQUEST_TIMEOUT, () => {
     logger.info('Kafka producer: request timeout');
   });
+
+  async function stop() {
+    logger.info('Started Usage shutdown...');
+
+    status = Status.Stopped;
+    await buffer.stop();
+    logger.info(`Buffering stopped`);
+    await producer.disconnect();
+    logger.info(`Producer disconnected`);
+
+    logger.info('Usage stopped');
+  }
 
   return {
     async collect(
@@ -402,17 +417,7 @@ export function createUsage(config: {
       status = Status.Ready;
       logger.info('Kafka producer is ready');
     },
-    async stop() {
-      logger.info('Started Usage shutdown...');
-
-      status = Status.Stopped;
-      await buffer.stop();
-      logger.info(`Buffering stopped`);
-      await producer.disconnect();
-      logger.info(`Producer disconnected`);
-
-      logger.info('Usage stopped');
-    },
+    stop,
   };
 }
 
