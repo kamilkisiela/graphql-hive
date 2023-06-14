@@ -39,8 +39,8 @@ import 'graphiql/graphiql.css';
 function Share(): ReactElement {
   const label = 'Share query';
   const copyToClipboard = useClipboard();
-  const { href } = window.location;
   const router = useRouter();
+
   return (
     <Tooltip label={label}>
       <Button
@@ -48,7 +48,7 @@ function Share(): ReactElement {
         aria-label={label}
         disabled={!router.query.operation}
         onClick={async () => {
-          await copyToClipboard(href);
+          await copyToClipboard(window.location.href);
         }}
       >
         <Share2Icon className="graphiql-toolbar-icon" />
@@ -260,6 +260,23 @@ function useOperationCollectionsPlugin(props: {
                                   'hover:bg-gray-100/10 w-full rounded p-2 !text-gray-300',
                                   router.query.operation === node.id && 'bg-gray-100/10',
                                 )}
+                                onClick={ev => {
+                                  ev.preventDefault();
+                                  void router.push(
+                                    {
+                                      query: {
+                                        operation: node.id,
+                                        orgId: router.organizationId,
+                                        projectId: router.projectId,
+                                        targetId: router.targetId,
+                                      },
+                                    },
+                                    undefined,
+                                    {
+                                      scroll: false,
+                                    },
+                                  );
+                                }}
                               >
                                 {node.name}
                               </Link>
@@ -443,6 +460,8 @@ function Page({
             </>
           ),
         }}
+        showPersistHeadersSettings={false}
+        shouldPersistHeaders={false}
         plugins={[operationCollectionsPlugin]}
         visiblePlugin={operationCollectionsPlugin}
       >
