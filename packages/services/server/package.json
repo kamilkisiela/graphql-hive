@@ -10,11 +10,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@envelop/core": "3.0.6",
-    "@envelop/generic-auth": "5.0.6",
-    "@envelop/graphql-modules": "4.0.6",
-    "@envelop/sentry": "5.1.1",
-    "@envelop/types": "3.0.2",
+    "@envelop/core": "4.0.0",
+    "@envelop/generic-auth": "6.0.0",
+    "@envelop/graphql-modules": "5.0.0",
+    "@envelop/sentry": "6.0.0",
+    "@envelop/types": "4.0.0",
     "@escape.tech/graphql-armor-max-aliases": "2.0.0",
     "@escape.tech/graphql-armor-max-depth": "2.0.0",
     "@escape.tech/graphql-armor-max-directives": "2.0.0",
