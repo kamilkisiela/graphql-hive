@@ -382,7 +382,7 @@ const ActiveSchemaCheck = (): React.ReactElement | null => {
         className="flex space-x-1 rounded-md bg-gray-900/50 text-gray-500 p-0.5 mb-2"
         type="single"
         defaultValue={view}
-        onValueChange={value => setView(value as any)}
+        onValueChange={value => value && setView(value)}
         orientation="vertical"
       >
         {toggleItems.map(item => (
