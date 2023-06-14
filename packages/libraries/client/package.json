@@ -51,13 +51,13 @@
   },
   "optionalDependencies": {
     "@apollo/server": "^4.0.0",
-    "@envelop/types": "^3.0.0"
+    "@envelop/types": "^4.0.0"
   },
   "devDependencies": {
     "@apollo/federation": "0.38.1",
     "@apollo/server": "4.7.2",
     "@apollo/subgraph": "2.4.7",
-    "@envelop/types": "3.0.2",
+    "@envelop/types": "4.0.0",
     "@types/async-retry": "1.4.5",
     "graphql-yoga": "4.0.0",
     "nock": "13.3.1"
