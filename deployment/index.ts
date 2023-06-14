@@ -16,6 +16,7 @@ import { deployMetrics } from './services/observability';
 import { deployCloudflarePolice } from './services/police';
 import { deploySchemaPolicy } from './services/policy';
 import { deployProxy } from './services/proxy';
+import { provisionCloudflareR2AccessToken } from './services/r2-token';
 import { deployRateLimit } from './services/rate-limit';
 import { deployRedis } from './services/redis';
 import { deploySchema } from './services/schema';
@@ -59,11 +60,24 @@ const heartbeatsConfig = new pulumi.Config('heartbeats');
 const emailConfig = new pulumi.Config('email');
 const r2Config = new pulumi.Config('r2');
 
+const cloudflareConfig = new pulumi.Config('cloudflare');
+const r2Token = provisionCloudflareR2AccessToken(
+  {
+    envName,
+    cloudflareAccountId: cloudflareConfig.require('accountId'),
+  },
+  {
+    read: true,
+    write: true,
+    tokenName: 'Hive CDN',
+  },
+);
+
 const s3Config = {
   endpoint: r2Config.require('endpoint'),
   bucketName: r2Config.require('bucketName'),
-  accessKeyId: r2Config.requireSecret('accessKeyId'),
-  secretAccessKey: r2Config.requireSecret('secretAccessKey'),
+  accessKeyId: r2Token.accessKeyId,
+  secretAccessKey: r2Token.secretAccessKey,
 };
 
 const deploymentEnv: DeploymentEnvironment = {
