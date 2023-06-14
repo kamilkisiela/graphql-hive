@@ -12,6 +12,7 @@ import { useGenericAuth } from '@envelop/generic-auth';
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useSentry } from '@envelop/sentry';
 import { useHive } from '@graphql-hive/client';
+import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { Registry, RegistryContext } from '@hive/api';
 import { HiveError } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
@@ -207,6 +208,15 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           author: 'Hive API',
           commit: options.release,
         },
+      }),
+      useResponseCache({
+        session: request =>
+          request.headers.get('authentication') ?? request.headers.get('x-api-token'),
+        ttl: 0,
+        ttlPerSchemaCoordinate: {
+          'Query.tokenInfo': 5000 /* 5 seconds */,
+        },
+        invalidateViaMutation: false,
       }),
       useGraphQLModules(options.registry),
       useNoIntrospection({

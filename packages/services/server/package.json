@@ -19,6 +19,7 @@
     "@escape.tech/graphql-armor-max-depth": "2.0.0",
     "@escape.tech/graphql-armor-max-directives": "2.0.0",
     "@escape.tech/graphql-armor-max-tokens": "2.0.0",
+    "@graphql-yoga/plugin-response-cache": "2.0.0",
     "@sentry/integrations": "7.54.0",
     "@sentry/node": "7.54.0",
     "@trpc/server": "10.29.1",
