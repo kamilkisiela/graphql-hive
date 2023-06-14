@@ -6,7 +6,6 @@ settings:
 
 overrides:
   '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.cd77847.0
-  '@envelop/response-cache': 5.0.1-alpha-20230614122817-14924772
 
 patchedDependencies:
   '@apollo/federation@0.38.1':
@@ -5240,8 +5239,8 @@ packages:
       tslib: 2.5.3
     dev: false
 
-  /@envelop/response-cache@5.0.1-alpha-20230614122817-14924772(@envelop/core@4.0.0)(graphql@16.6.0):
-    resolution: {integrity: sha512-8HJIScHZ3b8gWod8d8ZB+AdiJLs5hWiaFw8DB+P/WDu/27dRcOncokHUSksM0sEk33sqaUEebpokS/V5uUC6UQ==}
+  /@envelop/response-cache@5.0.1(@envelop/core@4.0.0)(graphql@16.6.0):
+    resolution: {integrity: sha512-mObEI0PZsMHZ6dTzGpuQOJ+QhSrTIH4y9tChv1DeM0eKakRutY9l96EZ6mQGSfVcrJklkOOvCyUZdBs1qQrOmw==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       '@envelop/core': ^4.0.0
@@ -7644,7 +7643,7 @@ packages:
       graphql: ^15.2.0 || ^16.0.0
       graphql-yoga: ^4.0.0
     dependencies:
-      '@envelop/response-cache': 5.0.1-alpha-20230614122817-14924772(@envelop/core@4.0.0)(graphql@16.6.0)
+      '@envelop/response-cache': 5.0.1(@envelop/core@4.0.0)(graphql@16.6.0)
       graphql: 16.6.0
       graphql-yoga: 4.0.0(graphql@16.6.0)
     transitivePeerDependencies:
