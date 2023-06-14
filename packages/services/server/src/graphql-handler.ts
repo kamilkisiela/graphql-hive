@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import type {
   FastifyLoggerInstance,
   FastifyReply,
@@ -12,6 +13,7 @@ import { useGenericAuth } from '@envelop/generic-auth';
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useSentry } from '@envelop/sentry';
 import { useHive } from '@graphql-hive/client';
+import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { Registry, RegistryContext } from '@hive/api';
 import { HiveError } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
@@ -23,6 +25,10 @@ import { useArmor } from './use-armor';
 import { extractUserId, useSentryUser } from './use-sentry-user';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
+
+function hashSessionId(sessionId: string): string {
+  return createHash('sha256').update(sessionId).digest('hex');
+}
 
 const SuperTokenAccessTokenModel = zod.object({
   version: zod.literal('1'),
@@ -207,6 +213,23 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           author: 'Hive API',
           commit: options.release,
         },
+      }),
+      useResponseCache({
+        session: request => {
+          const sessionValue =
+            request.headers.get('authorization') ?? request.headers.get('x-api-token');
+
+          if (sessionValue != null) {
+            return hashSessionId(sessionValue);
+          }
+
+          return null;
+        },
+        ttl: 0,
+        ttlPerSchemaCoordinate: {
+          'Query.tokenInfo': 5_000 /* 5 seconds */,
+        },
+        invalidateViaMutation: false,
       }),
       useGraphQLModules(options.registry),
       useNoIntrospection({

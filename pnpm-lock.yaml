@@ -1024,6 +1024,9 @@ importers:
       '@escape.tech/graphql-armor-max-tokens':
         specifier: 2.0.0
         version: 2.0.0
+      '@graphql-yoga/plugin-response-cache':
+        specifier: 2.0.0
+        version: 2.0.0(@envelop/core@4.0.0)(graphql-yoga@4.0.0)(graphql@16.6.0)
       '@sentry/integrations':
         specifier: 7.54.0
         version: 7.54.0
@@ -5236,6 +5239,22 @@ packages:
       tslib: 2.5.3
     dev: false
 
+  /@envelop/response-cache@5.0.1(@envelop/core@4.0.0)(graphql@16.6.0):
+    resolution: {integrity: sha512-mObEI0PZsMHZ6dTzGpuQOJ+QhSrTIH4y9tChv1DeM0eKakRutY9l96EZ6mQGSfVcrJklkOOvCyUZdBs1qQrOmw==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      '@envelop/core': ^4.0.0
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
+    dependencies:
+      '@envelop/core': 4.0.0
+      '@graphql-tools/utils': 10.0.1(graphql@16.6.0)
+      '@whatwg-node/fetch': 0.9.4
+      fast-json-stable-stringify: 2.1.0
+      graphql: 16.6.0
+      lru-cache: 9.1.1
+      tslib: 2.5.3
+    dev: false
+
   /@envelop/sentry@6.0.0(@envelop/core@4.0.0)(@sentry/node@7.54.0)(graphql@16.6.0):
     resolution: {integrity: sha512-qvGzmHXTvVIptyk55ROTWLZZl/S0FRv/grUNfXKWRDBPnOTgGFlXTm8dFklRIJC5s+ws9cMDlLjkXep/M2JBVg==}
     engines: {node: '>=16.0.0'}
@@ -7616,6 +7635,20 @@ packages:
     engines: {node: '>=16.0.0'}
     dependencies:
       tslib: 2.5.3
+
+  /@graphql-yoga/plugin-response-cache@2.0.0(@envelop/core@4.0.0)(graphql-yoga@4.0.0)(graphql@16.6.0):
+    resolution: {integrity: sha512-lwAw8MTejnuZLxs69kde4GAGzfiK6yxDvzqzxjH6JA8BgCNNLPH9AkodVbV6AzVC5/M1D7S2VnL1RfWUAj2UqQ==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      graphql: ^15.2.0 || ^16.0.0
+      graphql-yoga: ^4.0.0
+    dependencies:
+      '@envelop/response-cache': 5.0.1(@envelop/core@4.0.0)(graphql@16.6.0)
+      graphql: 16.6.0
+      graphql-yoga: 4.0.0(graphql@16.6.0)
+    transitivePeerDependencies:
+      - '@envelop/core'
+    dev: false
 
   /@graphql-yoga/subscription@3.1.0:
     resolution: {integrity: sha512-Vc9lh8KzIHyS3n4jBlCbz7zCjcbtQnOBpsymcRvHhFr2cuH+knmRn0EmzimMQ58jQ8kxoRXXC3KJS3RIxSdPIg==}
