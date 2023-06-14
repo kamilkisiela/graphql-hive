@@ -6,7 +6,7 @@ import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts';
 import { SchemaEditor } from '@/components/schema-editor';
 import { ChangesBlock, labelize } from '@/components/target/history/errors-and-changes';
-import { Badge, DiffEditor, Heading, TimeAgo, Title } from '@/components/v2';
+import { Badge, Button, DiffEditor, Heading, TimeAgo, Title } from '@/components/v2';
 import { AlertTriangleIcon, DiffIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel } from '@/gql/graphql';
@@ -66,7 +66,11 @@ const SchemaChecks_NavigationQuery = graphql(`
   }
 `);
 
-const Navigation = (): React.ReactElement => {
+const Navigation = (props: {
+  after: string | null;
+  isLastPage: boolean;
+  onLoadMore: (cursor: string) => void;
+}): React.ReactElement => {
   const router = useRouteSelector();
   const [query] = useQuery({
     query: SchemaChecks_NavigationQuery,
@@ -74,14 +78,15 @@ const Navigation = (): React.ReactElement => {
       organizationId: router.organizationId,
       projectId: router.projectId,
       targetId: router.targetId,
+      after: props.after,
     },
   });
 
   return (
-    <div className="flex h-0 min-w-[420px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
-      {query.fetching
-        ? null
-        : query.data?.target?.schemaChecks.edges.map(edge => (
+    <>
+      {query.fetching || !query.data?.target?.schemaChecks ? null : (
+        <>
+          {query.data.target.schemaChecks.edges.map(edge => (
             <div
               className={clsx(
                 'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
@@ -119,7 +124,19 @@ const Navigation = (): React.ReactElement => {
               </NextLink>
             </div>
           ))}
-    </div>
+          {props.isLastPage && query.data.target.schemaChecks.pageInfo.hasNextPage && (
+            <Button
+              variant="link"
+              onClick={() => {
+                props.onLoadMore(query.data?.target?.schemaChecks.pageInfo.endCursor ?? '');
+              }}
+            >
+              Load more
+            </Button>
+          )}
+        </>
+      )}
+    </>
   );
 };
 
@@ -538,6 +555,9 @@ const SchemaPolicyEditor = (props: {
 
 function ChecksPage() {
   const router = useRouteSelector();
+  const [paginationVariables, setPaginationVariables] = useState<Array<string | null>>(() => [
+    null,
+  ]);
   return (
     <>
       <Title title="Schema Checks" />
@@ -551,7 +571,16 @@ function ChecksPage() {
             <>
               <div className="flex flex-col gap-4">
                 <Heading>Schema Checks</Heading>
-                <Navigation />
+                <div className="flex h-0 min-w-[420px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
+                  {paginationVariables.map((cursor, index) => (
+                    <Navigation
+                      after={cursor}
+                      isLastPage={index + 1 === paginationVariables.length}
+                      onLoadMore={cursor => setPaginationVariables(cursors => [...cursors, cursor])}
+                      key={cursor ?? 'first'}
+                    />
+                  ))}
+                </div>
               </div>
               <ActiveSchemaCheck key={router.schemaCheckId} />
             </>
