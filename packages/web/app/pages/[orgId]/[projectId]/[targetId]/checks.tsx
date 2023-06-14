@@ -571,7 +571,7 @@ function ChecksPage() {
             <>
               <div className="flex flex-col gap-4">
                 <Heading>Schema Checks</Heading>
-                <div className="flex h-0 min-w-[420px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
+                <div className="flex h-0  grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5 w-[300px]">
                   {paginationVariables.map((cursor, index) => (
                     <Navigation
                       after={cursor}

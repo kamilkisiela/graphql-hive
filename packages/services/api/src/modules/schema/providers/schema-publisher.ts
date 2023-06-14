@@ -224,14 +224,7 @@ export class SchemaPublisher {
     };
 
     const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
-
-    let sdl: string;
-
-    try {
-      sdl = print(parse(input.sdl));
-    } catch {
-      sdl = input.sdl;
-    }
+    const sdl = tryPrettifySDL(input.sdl);
 
     let checkResult: SchemaCheckResult;
 
@@ -1493,4 +1486,12 @@ function writeChanges(type: string, changes: ReadonlyArray<Change>, lines: strin
 
 function buildGitHubActionCheckName(target: string, service: string | null) {
   return `GraphQL Hive > schema:check > ${target}` + (service ? ` > ${service}` : '');
+}
+
+function tryPrettifySDL(sdl: string): string {
+  try {
+    return print(parse(sdl));
+  } catch {
+    return sdl;
+  }
 }
