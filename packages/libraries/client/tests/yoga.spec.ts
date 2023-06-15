@@ -1,6 +1,9 @@
 import axios from 'axios';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { createSchema, createYoga } from 'graphql-yoga';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import nock from 'nock';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { useHive } from '../src/yoga.js';
 
@@ -92,7 +95,8 @@ it('reports usage', async () => {
     ],
   });
 
-  await new Promise(async resolve => {
+  // eslint-disable-next-line no-async-promise-executor
+  await new Promise<void>(async resolve => {
     const res = await yoga.fetch('http://localhost/graphql', {
       method: 'POST',
       headers: {
@@ -202,8 +206,8 @@ it('reports usage with response cache', async () => {
       }),
     ],
   });
-
-  await new Promise(async resolve => {
+  // eslint-disable-next-line no-async-promise-executor
+  await new Promise<void>(async resolve => {
     for (const _ of [1, 2, 3]) {
       const res = await yoga.fetch('http://localhost/graphql', {
         method: 'POST',
