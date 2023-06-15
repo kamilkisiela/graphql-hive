@@ -6,7 +6,7 @@ import type { SchemaReporter } from './reporting.js';
 export interface HiveClient {
   info(): Promise<void>;
   reportSchema: SchemaReporter['report'];
-  collectUsage(args: ExecutionArgs): CollectUsageCallback;
+  collectUsage(): CollectUsageCallback;
   /**
    * @deprecated https://github.com/kamilkisiela/graphql-hive/issues/659
    */
@@ -22,6 +22,7 @@ export type AbortAction = {
 };
 
 export type CollectUsageCallback = (
+  args: ExecutionArgs,
   result:
     | AsyncIterableIteratorOrValue<GraphQLErrorsResult>
     | AsyncIterableOrValue<GraphQLErrorsResult>

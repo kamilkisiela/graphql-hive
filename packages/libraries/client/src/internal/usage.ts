@@ -1,7 +1,6 @@
 import {
   ArgumentNode,
   DocumentNode,
-  ExecutionArgs,
   GraphQLInputObjectType,
   GraphQLInputType,
   GraphQLInterfaceType,
@@ -46,11 +45,11 @@ import {
 } from './utils.js';
 
 interface UsageCollector {
-  collect(args: ExecutionArgs): CollectUsageCallback;
+  collect(): CollectUsageCallback;
   dispose(): Promise<void>;
 }
 
-function isAbortAction(result: Parameters<CollectUsageCallback>[0]): result is AbortAction {
+function isAbortAction(result: Parameters<CollectUsageCallback>[1]): result is AbortAction {
   return 'action' in result && result.action === 'abort';
 }
 
@@ -151,10 +150,10 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
 
   return {
     dispose: agent.dispose,
-    collect(args) {
+    collect() {
       const finish = measureDuration();
 
-      return function complete(result) {
+      return function complete(args, result) {
         try {
           if (isAbortAction(result)) {
             logger.info(result.reason);

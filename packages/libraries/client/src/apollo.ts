@@ -153,7 +153,8 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
       const isLegacyV3 = 'context' in context;
 
       let doc: DocumentNode;
-      const complete = hive.collectUsage({
+      const complete = hive.collectUsage();
+      const args = {
         schema: context.schema,
         get document() {
           return doc;
@@ -161,13 +162,13 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
         operationName: context.operationName,
         contextValue: isLegacyV3 ? context.context : context.contextValue,
         variableValues: context.request.variables,
-      });
+      };
 
       if (isLegacyV0) {
         return {
           willSendResponse(ctx: any) {
             doc = ctx.document;
-            complete(ctx.response);
+            complete(args, ctx.response);
           },
         } as any;
       }
@@ -176,7 +177,7 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
         return Promise.resolve({
           async willSendResponse(ctx) {
             doc = ctx.document!;
-            complete(ctx.response as any);
+            complete(args, ctx.response as any);
           },
         });
       }
@@ -186,12 +187,12 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
         async willSendResponse(ctx) {
           doc = ctx.document!;
           if (ctx.response.body.kind === 'incremental') {
-            complete({
+            complete(args, {
               action: 'abort',
               reason: '@defer and @stream is not supported by Hive',
             });
           } else {
-            complete(ctx.response.body.singleResult);
+            complete(args, ctx.response.body.singleResult);
           }
         },
       });

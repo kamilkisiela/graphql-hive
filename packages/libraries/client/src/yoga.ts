@@ -1,9 +1,16 @@
-import { DocumentNode, GraphQLSchema, parse } from 'graphql';
-import type { Plugin } from 'graphql-yoga';
+import { DocumentNode, ExecutionArgs, GraphQLSchema, Kind, parse } from 'graphql';
+import type { GraphQLParams, Plugin } from 'graphql-yoga';
 import LRU from 'tiny-lru';
 import { createHive } from './client.js';
 import type { CollectUsageCallback, HiveClient, HivePluginOptions } from './internal/types.js';
 import { isHiveClient } from './internal/utils.js';
+
+type CacheRecord = {
+  callback: CollectUsageCallback;
+  paramsArgs: GraphQLParams;
+  executionArgs?: ExecutionArgs;
+  parsedDocument?: DocumentNode;
+};
 
 export function useHive(clientOrOptions: HiveClient): Plugin;
 export function useHive(clientOrOptions: HivePluginOptions): Plugin;
@@ -20,9 +27,9 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
 
   void hive.info();
 
-  const lru = LRU<DocumentNode>(10_000);
+  const parsedDocumentCache = LRU<DocumentNode>(10_000);
   let latestSchema: GraphQLSchema | null = null;
-  const cache = new WeakMap<Request, [CollectUsageCallback, ...Array<CollectUsageCallback>]>();
+  const cache = new WeakMap<Request, CacheRecord>();
 
   return {
     onSchemaChange({ schema }) {
@@ -31,41 +38,72 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
     },
     onParams(context) {
       if (context.params.query && latestSchema) {
-        try {
-          let document = lru.get(context.params.query);
-          if (document === undefined) {
-            document = parse(context.params.query);
-            lru.set(context.params.query, document);
-          }
-          const callback = hive.collectUsage({
-            document,
-            operationName: context.params.operationName,
-            schema: latestSchema,
-          });
-
-          let callbacks = cache.get(context.request);
-          if (callbacks === undefined) {
-            callbacks = [callback];
-            cache.set(context.request, callbacks);
-            return;
-          }
-
-          callbacks.push(callback);
-        } catch {
-          // ignore
-        }
+        cache.set(context.request, {
+          callback: hive.collectUsage(),
+          paramsArgs: context.params,
+        });
       }
     },
-    onResultProcess(context) {
-      const callbacks = cache.get(context.request);
-      if (callbacks) {
-        if (Array.isArray(context.result)) {
-          for (const result of context.result) {
-            callbacks.shift()!(result as any);
+    // since response-cache modifies the executed GraphQL document, we need to extract it after parsing.
+    onParse(parseCtx) {
+      return ctx => {
+        if (ctx.result.kind === Kind.DOCUMENT) {
+          const record = cache.get(ctx.context.request);
+          if (record) {
+            record.parsedDocument = ctx.result;
+            parsedDocumentCache.set(parseCtx.params.source, ctx.result);
           }
-        } else {
-          callbacks[0](context.result as any);
         }
+      };
+    },
+    onExecute() {
+      return {
+        onExecuteDone({ args }) {
+          const record = cache.get(args.contextValue.request);
+          if (record) {
+            record.executionArgs = args;
+          }
+        },
+      };
+    },
+    onResultProcess(context) {
+      const record = cache.get(context.request);
+      if (!record || Array.isArray(context.result)) {
+        return;
+      }
+
+      if (record.executionArgs) {
+        record.callback(
+          {
+            ...record.executionArgs,
+            document: record.parsedDocument ?? record.executionArgs.document,
+          },
+          context.result,
+        );
+        return;
+      }
+
+      if (!record.paramsArgs.query || !latestSchema) {
+        return;
+      }
+
+      try {
+        let document = parsedDocumentCache.get(record.paramsArgs.query);
+        if (document === undefined) {
+          document = parse(record.paramsArgs.query);
+          parsedDocumentCache.set(record.paramsArgs.query, document);
+        }
+        record.callback(
+          {
+            document,
+            schema: latestSchema,
+            variableValues: record.paramsArgs.variables,
+            operationName: record.paramsArgs.operationName,
+          },
+          context.result,
+        );
+      } catch {
+        // ignore
       }
     },
   };
