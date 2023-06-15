@@ -22,7 +22,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
 
   const lru = LRU<DocumentNode>(10_000);
   let latestSchema: GraphQLSchema | null = null;
-  const cache = new WeakMap<Request, CollectUsageCallback>();
+  const cache = new WeakMap<Request, [CollectUsageCallback, ...Array<CollectUsageCallback>]>();
 
   return {
     onSchemaChange({ schema }) {
@@ -42,18 +42,29 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
             operationName: context.params.operationName,
             schema: latestSchema,
           });
-          cache.set(context.request, callback);
+
+          let callbacks = cache.get(context.request);
+          if (callbacks === undefined) {
+            callbacks = [callback];
+            cache.set(context.request, callbacks);
+            return;
+          }
+
+          callbacks.push(callback);
         } catch {
           // ignore
         }
       }
     },
     onResultProcess(context) {
-      const callback = cache.get(context.request);
-      if (callback) {
-        // we don't support batching :)
-        if (Array.isArray(context.result) === false) {
-          callback(context.result as any);
+      const callbacks = cache.get(context.request);
+      if (callbacks) {
+        if (Array.isArray(context.result)) {
+          for (const result of context.result) {
+            callbacks.shift()!(result as any);
+          }
+        } else {
+          callbacks[0](context.result as any);
         }
       }
     },
