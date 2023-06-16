@@ -222,8 +222,8 @@ importers:
         specifier: 2.4.7
         version: 2.4.7(graphql@16.6.0)
       '@apollo/server':
-        specifier: 4.7.2
-        version: 4.7.2(graphql@16.6.0)
+        specifier: 4.7.4
+        version: 4.7.4(graphql@16.6.0)
       '@aws-sdk/client-s3':
         specifier: 3.345.0
         version: 3.345.0
@@ -409,7 +409,7 @@ importers:
     optionalDependencies:
       '@apollo/server':
         specifier: ^4.0.0
-        version: 4.7.2(graphql@16.6.0)
+        version: 4.7.4(graphql@16.6.0)
       '@envelop/types':
         specifier: ^4.0.0
         version: 4.0.0
@@ -2206,8 +2206,8 @@ packages:
       graphql: 16.6.0
     dev: false
 
-  /@apollo/server@4.7.2(graphql@16.6.0):
-    resolution: {integrity: sha512-GCGgdrz+1+9fNRuj64J4H+iyYNm6C+Uph5kNbYgSEUz8ujjs3P4FKKMbWov2N6z2kany3y+QjOsHXksrhqrkgQ==}
+  /@apollo/server@4.7.4(graphql@16.6.0):
+    resolution: {integrity: sha512-7MwEsBR+4JRfjAzrFIOP0m/NdzNCyVOlRWCO/86zs73CC+trr08FklTD7JD0yx5BJDfyzjdhF2BZ1sEYvp/Waw==}
     engines: {node: '>=14.16.0'}
     requiresBuild: true
     peerDependencies:
