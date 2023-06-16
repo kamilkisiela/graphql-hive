@@ -287,9 +287,21 @@ const ActiveSchemaCheck = (): React.ReactElement | null => {
     });
 
     if (
+      query.data.target.schemaCheck.compositeSchemaSDL &&
+      query.data.target.schemaCheck.compositeSchemaSDL
+    ) {
+      items.push({
+        value: 'schemaDiff',
+        icon: <DiffIcon className="h-5 w-auto flex-none" />,
+        label: 'Diff',
+        tooltip: 'Schema Diff',
+      });
+    }
+
+    if (
       query.data.target.schemaCheck.schemaPolicyWarnings ||
-      ('schemaPolicyErrors' in query.data.target.schemaCheck &&
-        query.data.target.schemaCheck.schemaPolicyErrors)
+      (query.data.target.schemaCheck.__typename === 'FailedSchemaCheck' &&
+        query.data.target.schemaCheck.schemaPolicyErrors?.edges?.length)
     ) {
       items.push({
         value: 'policy',
@@ -303,20 +315,8 @@ const ActiveSchemaCheck = (): React.ReactElement | null => {
       items.push({
         value: 'schema',
         icon: <DiffIcon className="h-5 w-auto flex-none" />,
-        label: 'Schema',
+        label: query.data.target.schemaCheck.serviceName ? 'Composite Schema' : 'Schema',
         tooltip: 'Schema',
-      });
-    }
-
-    if (
-      query.data.target.schemaCheck.compositeSchemaSDL &&
-      query.data.target.schemaCheck.compositeSchemaSDL
-    ) {
-      items.push({
-        value: 'schemaDiff',
-        icon: <DiffIcon className="h-5 w-auto flex-none" />,
-        label: 'Diff',
-        tooltip: 'Schema Diff',
       });
     }
 
@@ -403,7 +403,16 @@ const ActiveSchemaCheck = (): React.ReactElement | null => {
       {view === 'details' ? (
         <>
           <>
-            {'compositionErrors' in schemaCheck && schemaCheck.compositionErrors ? (
+            {schemaCheck.__typename === 'SuccessfulSchemaCheck' &&
+            !schemaCheck.schemaPolicyWarnings?.edges?.length &&
+            !schemaCheck.safeSchemaChanges?.nodes?.length ? (
+              <div className="my-2">
+                <Heading>Details</Heading>
+                <div className="mt-1">No changes or policy warnings detected.</div>
+              </div>
+            ) : null}
+            {schemaCheck.__typename === 'FailedSchemaCheck' &&
+            schemaCheck.compositionErrors?.nodes.length ? (
               <div className="mb-2">
                 <Heading>
                   <Badge color="red" /> Composition Errors
@@ -415,7 +424,8 @@ const ActiveSchemaCheck = (): React.ReactElement | null => {
                 </ul>
               </div>
             ) : null}
-            {'breakingSchemaChanges' in schemaCheck && schemaCheck.breakingSchemaChanges ? (
+            {schemaCheck.__typename === 'FailedSchemaCheck' &&
+            schemaCheck.breakingSchemaChanges?.nodes.length ? (
               <div className="mb-2">
                 <ChangesBlock
                   criticality={CriticalityLevel.Breaking}
@@ -431,7 +441,8 @@ const ActiveSchemaCheck = (): React.ReactElement | null => {
                 />
               </div>
             ) : null}
-            {'schemaPolicyErrors' in schemaCheck && schemaCheck.schemaPolicyErrors ? (
+            {schemaCheck.__typename === 'FailedSchemaCheck' &&
+            schemaCheck.schemaPolicyErrors?.edges.length ? (
               <div className="mb-2">
                 <PolicyBlock
                   title="Schema Policy Errors"
