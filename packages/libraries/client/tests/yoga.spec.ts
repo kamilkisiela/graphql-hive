@@ -12,10 +12,6 @@ beforeAll(() => {
 });
 
 it('reports usage', async () => {
-  axios.interceptors.request.use(config => {
-    console.log(config.url);
-    return config;
-  });
   const graphqlScope = nock('http://localhost')
     .post('/graphql')
     .reply(200, {

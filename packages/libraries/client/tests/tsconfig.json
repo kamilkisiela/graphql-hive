@@ -1,0 +1,13 @@
+{
+  "extends": "../../../../tsconfig.json",
+  "include": ["."],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": ".",
+    "target": "es2017",
+    "module": "esnext",
+    "skipLibCheck": true,
+    "types": ["vitest/globals"],
+    "noEmit": true
+  }
+}

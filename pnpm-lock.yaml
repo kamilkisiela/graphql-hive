@@ -429,6 +429,9 @@ importers:
       nock:
         specifier: 13.3.1
         version: 13.3.1
+      vitest:
+        specifier: 0.31.1
+        version: 0.31.1
     publishDirectory: dist
 
   packages/libraries/core:
