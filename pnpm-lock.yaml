@@ -1,4 +1,4 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
 
 settings:
   autoInstallPeers: true
@@ -185,11 +185,11 @@ importers:
         specifier: 4.16.0
         version: 4.16.0
       '@pulumi/kubernetes':
-        specifier: 3.29.0
-        version: 3.29.0
+        specifier: 3.29.1
+        version: 3.29.1
       '@pulumi/kubernetesx':
         specifier: 0.1.6
-        version: 0.1.6(@pulumi/kubernetes@3.29.0)(@pulumi/pulumi@3.69.0)
+        version: 0.1.6(@pulumi/kubernetes@3.29.1)(@pulumi/pulumi@3.69.0)
       '@pulumi/pulumi':
         specifier: 3.69.0
         version: 3.69.0
@@ -9396,13 +9396,13 @@ packages:
       - supports-color
     dev: false
 
-  /@pulumi/kubernetes@3.29.0:
-    resolution: {integrity: sha512-NzWfGDNp6BfJJxYLf5Zv+0uM9HVOEhiQyWTQWSNjlToxLiAmtX25J/yMSpLoo17Nqm1oHnNDvGPaM5q0KoDR6Q==}
+  /@pulumi/kubernetes@3.29.1:
+    resolution: {integrity: sha512-0IDCtOHP2eeVM6Ls2a3x2kv9C7RYWHW+ZLf8dBxIEfsl8kz1jI44uaND3/rTdTuy8t1WEfdlezwVCxAqJL2r1Q==}
     requiresBuild: true
     dependencies:
       '@pulumi/pulumi': 3.69.0
       '@types/glob': 5.0.37
-      '@types/node-fetch': 2.6.2
+      '@types/node-fetch': 2.6.4
       '@types/tmp': 0.0.33
       glob: 7.2.3
       node-fetch: 2.6.7
@@ -9413,13 +9413,13 @@ packages:
       - supports-color
     dev: false
 
-  /@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@3.29.0)(@pulumi/pulumi@3.69.0):
+  /@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@3.29.1)(@pulumi/pulumi@3.69.0):
     resolution: {integrity: sha512-9VL4Yi4b4aLC/obBarJuNkm86kABByUZICYPSTdV396MGZtOc066o2brsB+kWVQcVfkYVXTPrpjIkAwBXXnzGw==}
     peerDependencies:
       '@pulumi/kubernetes': ^3.0.0
       '@pulumi/pulumi': ^3.0.0
     dependencies:
-      '@pulumi/kubernetes': 3.29.0
+      '@pulumi/kubernetes': 3.29.1
       '@pulumi/pulumi': 3.69.0
     dev: false
 
@@ -12679,7 +12679,6 @@ packages:
     dependencies:
       '@types/node': 18.16.18
       form-data: 3.0.1
-    dev: true
 
   /@types/node@10.17.60:
     resolution: {integrity: sha512-F0KIgDJfy2nA3zMLmWGKxcH2ZVEtCZXHHdOQs2gSaQ27+lNeEfGxzkIw90aXswATX7AZ33tahPbzy6KAfUreVw==}
