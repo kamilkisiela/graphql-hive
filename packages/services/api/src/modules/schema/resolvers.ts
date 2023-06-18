@@ -2,7 +2,6 @@ import { createHash } from 'crypto';
 import stringify from 'fast-json-stable-stringify';
 import {
   buildASTSchema,
-  type DocumentNode,
   GraphQLError,
   GraphQLNamedType,
   isEnumType,
@@ -12,10 +11,11 @@ import {
   isScalarType,
   isUnionType,
   parse,
+  type DocumentNode,
 } from 'graphql';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
-import { type DateRange, ProjectType } from '../../shared/entities';
+import { ProjectType, type DateRange } from '../../shared/entities';
 import { createPeriod, parseDateRangeInput, PromiseOrValue } from '../../shared/helpers';
 import type {
   GraphQLEnumTypeMapper,
@@ -26,8 +26,9 @@ import type {
   GraphQLUnionTypeMapper,
   SchemaCompareError,
   SchemaCompareResult,
+  WithGraphQLParentInfo,
+  WithSchemaCoordinatesUsage,
 } from '../../shared/mappers';
-import type { WithGraphQLParentInfo, WithSchemaCoordinatesUsage } from '../../shared/mappers';
 import { buildSchema, createConnection, createDummyConnection } from '../../shared/schema';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { OperationsManager } from '../operations/providers/operations-manager';

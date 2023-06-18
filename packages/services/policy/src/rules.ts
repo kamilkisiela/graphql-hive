@@ -1,4 +1,4 @@
-import { type CategoryType, GraphQLESLintRule, rules } from '@graphql-eslint/eslint-plugin';
+import { GraphQLESLintRule, rules, type CategoryType } from '@graphql-eslint/eslint-plugin';
 
 type AllRulesType = typeof rules;
 type RuleName = keyof AllRulesType;

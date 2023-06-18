@@ -10,11 +10,9 @@ import { Logger } from './../../../shared/providers/logger';
 import {
   buildSchemaCheckFailureState,
   PublishFailureReasonCode,
-  PublishIgnoreReasonCode,
-  /* Check */
+  PublishIgnoreReasonCode /* Check */,
   SchemaCheckConclusion,
-  SchemaCheckResult,
-  /* Publish */
+  SchemaCheckResult /* Publish */,
   SchemaPublishConclusion,
   SchemaPublishFailureReason,
   SchemaPublishResult,
