@@ -13,7 +13,7 @@
     "@apollo/federation": "0.38.1",
     "@graphql-tools/stitch": "9.0.0",
     "@graphql-tools/stitching-directives": "3.0.0",
-    "@sentry/node": "7.54.0",
+    "@sentry/node": "7.55.2",
     "@trpc/server": "10.29.1",
     "@whatwg-node/fetch": "0.9.6",
     "dotenv": "16.1.4",
