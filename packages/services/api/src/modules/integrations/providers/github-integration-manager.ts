@@ -1,10 +1,10 @@
 import { Inject, Injectable, InjectionToken, Scope } from 'graphql-modules';
 import { App } from '@octokit/app';
+import type { IntegrationsModule } from '../__generated__/types';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { Logger } from '../../shared/providers/logger';
 import { OrganizationSelector, Storage } from '../../shared/providers/storage';
-import type { IntegrationsModule } from '../__generated__/types';
 
 export interface GitHubApplicationConfig {
   appId: number;

@@ -1,14 +1,14 @@
 import {
+  Kind,
+  NamedTypeNode,
+  TypeNode,
+  visit,
   type ConstArgumentNode,
   type ConstDirectiveNode,
   type DocumentNode,
   type EnumValueDefinitionNode,
   type FieldDefinitionNode,
-  Kind,
-  NamedTypeNode,
   type NameNode,
-  TypeNode,
-  visit,
 } from 'graphql';
 
 export type SuperGraphInformation = {

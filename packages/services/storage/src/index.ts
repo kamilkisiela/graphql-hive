@@ -3465,7 +3465,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         return {
           get node() {
             // TODO: remove this any cast and fix the type issues...
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
             return (args.transformNode?.(node) ?? node) as any;
           },
           get cursor() {

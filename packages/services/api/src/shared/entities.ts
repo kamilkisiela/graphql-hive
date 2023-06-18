@@ -1,5 +1,4 @@
-import { DocumentNode, GraphQLError, SourceLocation } from 'graphql';
-import { parse } from 'graphql';
+import { DocumentNode, GraphQLError, parse, SourceLocation } from 'graphql';
 import { z } from 'zod';
 import type { AvailableRulesResponse, PolicyConfigurationObject } from '@hive/policy';
 import type { CompositionFailureError } from '@hive/schema';
