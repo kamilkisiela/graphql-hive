@@ -16,7 +16,7 @@
     "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts"
   },
   "dependencies": {
-    "@sentry/node": "7.54.0",
+    "@sentry/node": "7.55.2",
     "@theguild/buddy": "0.1.0",
     "dotenv": "16.1.4",
     "got": "12.6.1",
@@ -27,7 +27,7 @@
     "zod": "3.21.4"
   },
   "devDependencies": {
-    "@sentry/types": "7.54.0",
+    "@sentry/types": "7.55.2",
     "@tgriesser/schemats": "9.0.1",
     "@types/node": "18.16.18",
     "@types/pg": "8.10.2",

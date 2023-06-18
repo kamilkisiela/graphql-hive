@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@graphql-eslint/eslint-plugin": "3.19.1",
-    "@sentry/node": "7.54.0",
-    "@sentry/tracing": "7.54.0",
+    "@sentry/node": "7.55.2",
+    "@sentry/tracing": "7.55.2",
     "@trpc/server": "10.29.1",
     "@whatwg-node/fetch": "0.9.6",
     "ajv": "8.12.0",
