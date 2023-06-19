@@ -6,7 +6,8 @@ import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout } from '@/components/layouts/organization';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Avatar, Card, DocsLink, Heading, Input, Title } from '@/components/v2';
+import { Subtitle, Title } from '@/components/ui/page';
+import { Avatar, Card, DocsLink, Heading, Input, MetaTitle } from '@/components/v2';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -298,10 +299,10 @@ function Page(props: { organization: FragmentType<typeof Page_OrganizationFragme
   return (
     <div className="flex flex-col gap-y-4">
       <div className="py-6">
-        <h3 className="text-lg font-semibold tracking-tight">Members</h3>
-        <p className="text-sm text-gray-400">
+        <Title>Members</Title>
+        <Subtitle>
           You may invite other members to collaborate with you on this organization.
-        </p>
+        </Subtitle>
         <p>
           <DocsLink href="/management/organizations#members" className="text-muted-foreground">
             Learn more about membership and invitations
@@ -445,7 +446,7 @@ function SettingsPageContent() {
 function OrganizationMembersPage(): ReactElement {
   return (
     <>
-      <Title title="Members" />
+      <MetaTitle title="Members" />
       <SettingsPageContent />
     </>
   );

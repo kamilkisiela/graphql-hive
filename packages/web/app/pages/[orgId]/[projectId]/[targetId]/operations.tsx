@@ -7,7 +7,8 @@ import { TargetLayout } from '@/components/layouts/target';
 import { OperationsFilterTrigger } from '@/components/target/operations/Filters';
 import { OperationsList } from '@/components/target/operations/List';
 import { OperationsStats } from '@/components/target/operations/Stats';
-import { EmptyList, RadixSelect, Title } from '@/components/v2';
+import { Subtitle, Title } from '@/components/ui/page';
+import { EmptyList, MetaTitle, RadixSelect } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
 import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
@@ -71,8 +72,8 @@ function OperationsView({
     <>
       <div className="py-6 flex flex-row items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold tracking-tight">Versions</h3>
-          <p className="text-sm text-gray-400">Recently published schemas.</p>
+          <Title>Versions</Title>
+          <Subtitle>Recently published schemas.</Subtitle>
         </div>
         <div className="flex justify-end gap-x-2">
           <OperationsFilterTrigger
@@ -161,32 +162,29 @@ function TargetOperationsPageContent() {
   return (
     <TargetLayout
       value="operations"
-      className="flex justify-between gap-8"
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}
       me={me ?? null}
       organizations={organizationConnection ?? null}
       isCDNEnabled={isCDNEnabled ?? null}
     >
-      <div className="grow">
-        {currentOrganization && currentProject && currentTarget ? (
-          hasCollectedOperations ? (
-            <OperationsView
-              organizationCleanId={currentOrganization.cleanId}
-              projectCleanId={currentProject.cleanId}
-              targetCleanId={currentTarget.cleanId}
+      {currentOrganization && currentProject && currentTarget ? (
+        hasCollectedOperations ? (
+          <OperationsView
+            organizationCleanId={currentOrganization.cleanId}
+            projectCleanId={currentProject.cleanId}
+            targetCleanId={currentTarget.cleanId}
+          />
+        ) : (
+          <div className="py-8">
+            <EmptyList
+              title="Hive is waiting for your first collected operation"
+              description="You can collect usage of your GraphQL API with Hive Client"
+              docsUrl="/features/usage-reporting"
             />
-          ) : (
-            <div className="py-8">
-              <EmptyList
-                title="Hive is waiting for your first collected operation"
-                description="You can collect usage of your GraphQL API with Hive Client"
-                docsUrl="/features/usage-reporting"
-              />
-            </div>
-          )
-        ) : null}
-      </div>
+          </div>
+        )
+      ) : null}
     </TargetLayout>
   );
 }
@@ -194,7 +192,7 @@ function TargetOperationsPageContent() {
 function OperationsPage(): ReactElement {
   return (
     <>
-      <Title title="Operations" />
+      <MetaTitle title="Operations" />
       <TargetOperationsPageContent />
     </>
   );

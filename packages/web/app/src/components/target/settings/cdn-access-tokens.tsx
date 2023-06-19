@@ -7,7 +7,6 @@ import {
   Button,
   Card,
   DocsLink,
-  DocsNote,
   Heading,
   Input,
   Modal,
@@ -382,14 +381,14 @@ export function CDNAccessTokens(props: {
       <Heading id="cdn-access-tokens" className="mb-2">
         CDN Access Token
       </Heading>
-      <DocsNote>
+      <div className="text-sm text-gray-400">
         CDN Access Tokens are used to access to Hive High-Availability CDN and read your schema
         artifacts.
         <br />
         <DocsLink href="/management/targets#cdn-access-tokens">
           Learn more about CDN Access Tokens
         </DocsLink>
-      </DocsNote>
+      </div>
       {canManage && (
         <div className="my-3.5 flex justify-between">
           <Button

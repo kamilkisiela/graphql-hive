@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { useQuery } from 'urql';
 import { ActivityNode } from '@/components/common/activities/common';
 import { Link, TimeAgo } from '@/components/v2';
@@ -14,6 +14,7 @@ import {
 } from '@/graphql';
 import { fixDuplicatedFragments } from '@/lib/graphql';
 import { useRouteSelector } from '@/lib/hooks';
+import { Subtitle, Title } from '../ui/page';
 
 const organizationActivitiesDocument = fixDuplicatedFragments(OrganizationActivitiesDocument);
 
@@ -198,7 +199,7 @@ export const getActivity = (
   }
 };
 
-export const Activities = (props: React.ComponentProps<'div'>): ReactElement => {
+export const Activities = (): ReactElement => {
   const router = useRouteSelector();
   const [organizationActivitiesQuery] = useQuery({
     query: organizationActivitiesDocument,
@@ -215,10 +216,10 @@ export const Activities = (props: React.ComponentProps<'div'>): ReactElement => 
   const isLoading = organizationActivitiesQuery.fetching;
 
   return (
-    <div className="w-[450px] shrink-0" {...props}>
+    <div className="w-[450px] shrink-0">
       <div className="py-6">
-        <h3 className="text-lg font-semibold tracking-tight">Activity</h3>
-        <p className="text-sm text-gray-400">Recent changes in your organization</p>
+        <Title>Activity</Title>
+        <Subtitle>Recent changes in your organization</Subtitle>
       </div>
       <ul className="w-full break-all">
         {isLoading || !activities?.nodes

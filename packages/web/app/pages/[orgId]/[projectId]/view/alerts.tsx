@@ -24,7 +24,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { DocsLink, Title } from '@/components/v2';
+import { Subtitle, Title } from '@/components/ui/page';
+import { DocsLink, MetaTitle } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
@@ -242,10 +243,8 @@ function AlertsPageContent() {
     >
       <div>
         <div className="py-6">
-          <h3 className="text-lg font-semibold tracking-tight">Alerts and Notifications</h3>
-          <p className="text-sm text-gray-400">
-            Configure alerts and notifications for your project.
-          </p>
+          <Title>Alerts and Notifications</Title>
+          <Subtitle>Configure alerts and notifications for your project.</Subtitle>
         </div>
         {currentProject && currentOrganization ? (
           <div className="flex flex-col gap-y-4">
@@ -261,7 +260,7 @@ function AlertsPageContent() {
 function AlertsPage(): ReactElement {
   return (
     <>
-      <Title title="Alerts" />
+      <MetaTitle title="Alerts" />
       <AlertsPageContent />
     </>
   );

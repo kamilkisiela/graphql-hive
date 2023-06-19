@@ -13,14 +13,15 @@ import {
   fullSeries,
   resolutionToMilliseconds,
 } from '@/components/target/operations/utils';
+import { Subtitle, Title } from '@/components/ui/page';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Activities, Card, EmptyList, Title } from '@/components/v2';
+import { Activities, Card, EmptyList, MetaTitle } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useFormattedNumber } from '@/lib/hooks';
 import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { pluralize } from '@/lib/utils';
+import { cn, pluralize } from '@/lib/utils';
 
 function floorDate(date: Date): Date {
   const time = 1000 * 60;
@@ -261,7 +262,7 @@ const Page = () => {
   return (
     <ProjectLayout
       value="targets"
-      className="flex justify-between gap-8"
+      className="flex justify-between gap-12"
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}
       me={me ?? null}
@@ -269,10 +270,15 @@ const Page = () => {
     >
       <div className="grow">
         <div className="py-6">
-          <h3 className="text-lg font-semibold tracking-tight">Targets</h3>
-          <p className="text-sm text-gray-400">A list of available targets in your project.</p>
+          <Title>Targets</Title>
+          <Subtitle>A list of available targets in your project.</Subtitle>
         </div>
-        <div className="grid grid-cols-2 gap-5 items-stretch">
+        <div
+          className={cn(
+            'grow',
+            targets?.length === 0 ? '' : 'grid grid-cols-2 gap-5 items-stretch',
+          )}
+        >
           {targets ? (
             targets.length === 0 ? (
               <EmptyList
@@ -281,17 +287,27 @@ const Page = () => {
                 docsUrl="/management/targets#create-a-new-target"
               />
             ) : (
-              targets.map((target, i) => (
-                <TargetCard
-                  key={i}
-                  target={target}
-                  days={days}
-                  highestNumberOfRequests={highestNumberOfRequests}
-                  period={period.current!}
-                  requestsOverTime={target.requestsOverTime}
-                  schemaVersionsCount={target.schemaVersionsCount}
-                />
-              ))
+              targets
+                .sort((a, b) => {
+                  const diff = b.schemaVersionsCount - a.schemaVersionsCount;
+
+                  if (diff !== 0) {
+                    return diff;
+                  }
+
+                  return a.name.localeCompare(b.name);
+                })
+                .map(target => (
+                  <TargetCard
+                    key={target.id}
+                    target={target}
+                    days={days}
+                    highestNumberOfRequests={highestNumberOfRequests}
+                    period={period.current!}
+                    requestsOverTime={target.requestsOverTime}
+                    schemaVersionsCount={target.schemaVersionsCount}
+                  />
+                ))
             )
           ) : (
             <>
@@ -337,6 +353,7 @@ const ProjectOverviewPageQuery = graphql(`
       total
       nodes {
         id
+        name
         ...TargetCard_TargetFragment
         requestsOverTime(resolution: $chartResolution, period: $period) {
           date
@@ -354,7 +371,7 @@ const ProjectOverviewPageQuery = graphql(`
 function ProjectsPage(): ReactElement {
   return (
     <>
-      <Title title="Targets" />
+      <MetaTitle title="Targets" />
       <Page />
     </>
   );

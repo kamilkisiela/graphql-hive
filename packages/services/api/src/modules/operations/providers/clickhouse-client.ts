@@ -74,7 +74,10 @@ export class ClickHouse {
     const startedAt = Date.now();
     const endpoint = `${this.config.protocol ?? 'https'}://${this.config.host}:${this.config.port}`;
 
-    this.logger.debug(`Executing ClickHouse Query: %s`, query);
+    this.logger.debug(
+      `Executing ClickHouse Query: %s`,
+      query.sql.replace(/\n/g, ' ').replace(/\s+/g, ' '),
+    );
 
     const response = await this.httpClient
       .post<QueryResponse<T>>(

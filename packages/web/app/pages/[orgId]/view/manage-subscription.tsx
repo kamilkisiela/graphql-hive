@@ -9,7 +9,8 @@ import { BillingPaymentMethod } from '@/components/organization/billing/BillingP
 import { BillingPlanPicker } from '@/components/organization/billing/BillingPlanPicker';
 import { PlanSummary } from '@/components/organization/billing/PlanSummary';
 import { Button } from '@/components/ui/button';
-import { Card, Heading, Input, Slider, Stat, Title } from '@/components/v2';
+import { Subtitle, Title } from '@/components/ui/page';
+import { Card, Heading, Input, MetaTitle, Slider, Stat } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { BillingPlanType } from '@/gql/graphql';
 import {
@@ -397,8 +398,8 @@ function ManageSubscriptionPageContent() {
       <div className="grow">
         <div className="py-6 flex flex-row justify-between items-center">
           <div>
-            <h3 className="text-lg font-semibold tracking-tight">Manage subscription</h3>
-            <p className="text-sm text-gray-400">Manage your current plan and invoices.</p>
+            <Title>Manage subscription</Title>
+            <Subtitle>Manage your current plan and invoices.</Subtitle>
           </div>
           <div>
             <Button asChild>
@@ -419,7 +420,7 @@ function ManageSubscriptionPageContent() {
 function ManageSubscriptionPage(): ReactElement {
   return (
     <>
-      <Title title="Manage Subscription" />
+      <MetaTitle title="Manage Subscription" />
       <ManageSubscriptionPageContent />
     </>
   );

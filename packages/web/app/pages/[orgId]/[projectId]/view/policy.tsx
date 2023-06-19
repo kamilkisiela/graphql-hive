@@ -4,7 +4,8 @@ import { authenticated } from '@/components/authenticated-container';
 import { ProjectLayout } from '@/components/layouts/project';
 import { PolicySettings } from '@/components/policy/policy-settings';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DocsLink, Title } from '@/components/v2';
+import { Subtitle, Title } from '@/components/ui/page';
+import { DocsLink, MetaTitle } from '@/components/v2';
 import { graphql } from '@/gql';
 import { ProjectAccessScope } from '@/gql/graphql';
 import { RegistryModel } from '@/graphql';
@@ -119,11 +120,11 @@ function ProjectPolicyContent() {
     >
       <div>
         <div className="py-6">
-          <h3 className="text-lg font-semibold tracking-tight">Organization Schema Policy</h3>
-          <p className="text-sm text-gray-400">
+          <Title>Organization Schema Policy</Title>
+          <Subtitle>
             Schema Policies enable developers to define additional semantic checks on the GraphQL
             schema.
-          </p>
+          </Subtitle>
         </div>
         {currentProject && currentOrganization ? (
           <Card>
@@ -199,7 +200,7 @@ function ProjectPolicyContent() {
 function ProjectPolicyPage(): ReactElement {
   return (
     <>
-      <Title title="Project Schema Policy" />
+      <MetaTitle title="Project Schema Policy" />
       <ProjectPolicyContent />
     </>
   );

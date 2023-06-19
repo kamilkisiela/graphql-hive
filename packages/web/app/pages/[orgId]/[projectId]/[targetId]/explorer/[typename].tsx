@@ -12,7 +12,8 @@ import {
 } from '@/components/target/explorer/provider';
 import { GraphQLScalarTypeComponent } from '@/components/target/explorer/scalar-type';
 import { GraphQLUnionTypeComponent } from '@/components/target/explorer/union-type';
-import { Title } from '@/components/v2';
+import { Subtitle, Title } from '@/components/ui/page';
+import { MetaTitle } from '@/components/v2';
 import { noSchemaVersion } from '@/components/v2/empty-list';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
@@ -144,39 +145,33 @@ function TypeExplorerPageContent({ typename }: { typename: string }) {
   return (
     <TargetLayout
       value="explorer"
-      className="flex justify-between gap-8"
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}
       me={me ?? null}
       organizations={organizationConnection ?? null}
       isCDNEnabled={isCDNEnabled ?? null}
     >
-      <div className="grow">
-        <div className="py-6 flex flex-row items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold tracking-tight">Explore</h3>
-            <p className="text-sm text-gray-400">Insights from the latest version.</p>
-          </div>
-          {latestSchemaVersion && type ? (
-            <SchemaExplorerFilter
-              organization={{ cleanId: router.organizationId }}
-              project={{ cleanId: router.projectId }}
-              target={{ cleanId: router.targetId }}
-              period={period}
-            />
-          ) : null}
+      <div className="py-6 flex flex-row items-center justify-between">
+        <div>
+          <Title>Explore</Title>
+          <Subtitle>Insights from the latest version.</Subtitle>
         </div>
         {latestSchemaVersion && type ? (
-          <TypeRenderer
-            totalRequests={query.data?.operationsStats.totalRequests ?? 0}
-            type={type}
+          <SchemaExplorerFilter
+            organization={{ cleanId: router.organizationId }}
+            project={{ cleanId: router.projectId }}
+            target={{ cleanId: router.targetId }}
+            period={period}
           />
-        ) : type ? (
-          noSchemaVersion
-        ) : (
-          <div>Not found</div>
-        )}
+        ) : null}
       </div>
+      {latestSchemaVersion && type ? (
+        <TypeRenderer totalRequests={query.data?.operationsStats.totalRequests ?? 0} type={type} />
+      ) : type ? (
+        noSchemaVersion
+      ) : (
+        <div>Not found</div>
+      )}
     </TargetLayout>
   );
 }
@@ -191,7 +186,7 @@ function TypeExplorerPage() {
 
   return (
     <>
-      <Title title={`Type ${typename}`} />
+      <MetaTitle title={`Type ${typename}`} />
       <SchemaExplorerProvider>
         <TypeExplorerPageContent typename={typename} />
       </SchemaExplorerProvider>

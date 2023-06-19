@@ -4,11 +4,12 @@ import { Link } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { UserMenu } from '@/components/ui/user-menu';
-import { HiveLink, SubHeader, Tabs } from '@/components/v2';
+import { HiveLink, Tabs } from '@/components/v2';
 import { ConnectSchemaModal } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { canAccessTarget, TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { cn } from '@/lib/utils';
 import { ProjectMigrationToast } from '../project/migration-toast';
 
 enum TabValue {
@@ -140,7 +141,7 @@ export const TargetLayout = ({
 
   return (
     <>
-      <SubHeader>
+      <header>
         <div className="container flex h-[84px] items-center justify-between">
           <div className="flex flex-row items-center gap-4">
             <HiveLink className="w-8 h-8" />
@@ -199,7 +200,7 @@ export const TargetLayout = ({
             />
           </div>
         </div>
-      </SubHeader>
+      </header>
 
       {currentProject?.registryModel === 'LEGACY' ? (
         <ProjectMigrationToast orgId={orgId} projectId={projectId} />
@@ -277,7 +278,9 @@ export const TargetLayout = ({
         </div>
       </div>
       <div className="container pb-7 h-full">
-        <div className={className}>{children}</div>
+        <div className={cn('flex justify-between gap-12', className)}>
+          <div className="grow">{children}</div>
+        </div>
       </div>
     </>
   );

@@ -5,6 +5,7 @@ import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts/target';
 import { SchemaEditor } from '@/components/schema-editor';
 import { ChangesBlock, labelize } from '@/components/target/history/errors-and-changes';
+import { Subtitle, Title } from '@/components/ui/page';
 import {
   Badge,
   Button,
@@ -12,8 +13,8 @@ import {
   DocsLink,
   EmptyList,
   Heading,
+  MetaTitle,
   TimeAgo,
-  Title,
 } from '@/components/v2';
 import { AlertTriangleIcon, DiffIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
@@ -343,8 +344,8 @@ const ActiveSchemaCheck = ({
   return (
     <div className="flex grow flex-col h-full">
       <div className="py-6">
-        <h3 className="text-lg font-semibold tracking-tight">Check {schemaCheck.id}</h3>
-        <p className="text-sm text-gray-400">Detailed view of the schema check</p>
+        <Title>Check {schemaCheck.id}</Title>
+        <Subtitle>Detailed view of the schema check</Subtitle>
       </div>
       <div>
         <div className="flex align-middle font-medium p-2 text-[#c4c4c4] rounded-md border-gray-800 border space-x-4">
@@ -632,65 +633,61 @@ function ChecksPageContent() {
     <>
       <TargetLayout
         value="checks"
-        className="flex justify-between gap-8 h-full"
+        className="h-full"
         currentOrganization={currentOrganization ?? null}
         currentProject={currentProject ?? null}
         me={me ?? null}
         organizations={organizationConnection ?? null}
         isCDNEnabled={isCDNEnabled ?? null}
       >
-        <div className="grow">
-          <div
-            className={cn(
-              'flex w-full h-full',
-              hasSchemaChecks || hasActiveSchemaCheck ? 'flex-row gap-x-6' : '',
-            )}
-          >
-            <div>
-              <div className="py-6">
-                <h3 className="text-lg font-semibold tracking-tight">Schema Checks</h3>
-                <p className="text-sm text-gray-400">Recently checked schemas.</p>
-              </div>
-              {hasSchemaChecks ? (
-                <div className="flex flex-col gap-5">
-                  <div className="flex w-[300px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
-                    {paginationVariables.map((cursor, index) => (
-                      <Navigation
-                        after={cursor}
-                        isLastPage={index + 1 === paginationVariables.length}
-                        onLoadMore={cursor =>
-                          setPaginationVariables(cursors => [...cursors, cursor])
-                        }
-                        key={cursor ?? 'first'}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <div className="text-sm">
-                    {hasActiveSchemaCheck ? 'List is empty' : 'Your schema check list is empty'}
-                  </div>
-                  <DocsLink href="/features/schema-registry#check-a-schema">
-                    {hasActiveSchemaCheck
-                      ? 'Check you first schema'
-                      : 'Learn how to check your first schema with Hive CLI'}
-                  </DocsLink>
-                </div>
-              )}
+        <div
+          className={cn(
+            'flex w-full h-full',
+            hasSchemaChecks || hasActiveSchemaCheck ? 'flex-row gap-x-6' : '',
+          )}
+        >
+          <div>
+            <div className="py-6">
+              <Title>Schema Checks</Title>
+              <Subtitle>Recently checked schemas.</Subtitle>
             </div>
-            {hasActiveSchemaCheck ? (
-              <div className="grow">
-                {schemaCheckId ? <ActiveSchemaCheck schemaCheckId={schemaCheckId} /> : null}
+            {hasSchemaChecks ? (
+              <div className="flex flex-col gap-5">
+                <div className="flex w-[300px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
+                  {paginationVariables.map((cursor, index) => (
+                    <Navigation
+                      after={cursor}
+                      isLastPage={index + 1 === paginationVariables.length}
+                      onLoadMore={cursor => setPaginationVariables(cursors => [...cursors, cursor])}
+                      key={cursor ?? 'first'}
+                    />
+                  ))}
+                </div>
               </div>
-            ) : hasSchemaChecks ? (
-              <EmptyList
-                className="border-0 pt-6"
-                title="Select a schema check"
-                description="A list of your schema checks is available on the left."
-              />
-            ) : null}
+            ) : (
+              <div>
+                <div className="text-sm">
+                  {hasActiveSchemaCheck ? 'List is empty' : 'Your schema check list is empty'}
+                </div>
+                <DocsLink href="/features/schema-registry#check-a-schema">
+                  {hasActiveSchemaCheck
+                    ? 'Check you first schema'
+                    : 'Learn how to check your first schema with Hive CLI'}
+                </DocsLink>
+              </div>
+            )}
           </div>
+          {hasActiveSchemaCheck ? (
+            <div className="grow">
+              {schemaCheckId ? <ActiveSchemaCheck schemaCheckId={schemaCheckId} /> : null}
+            </div>
+          ) : hasSchemaChecks ? (
+            <EmptyList
+              className="border-0 pt-6"
+              title="Select a schema check"
+              description="A list of your schema checks is available on the left."
+            />
+          ) : null}
         </div>
       </TargetLayout>
     </>
@@ -700,7 +697,7 @@ function ChecksPageContent() {
 function ChecksPage() {
   return (
     <>
-      <Title title="Schema Checks" />
+      <MetaTitle title="Schema Checks" />
       <ChecksPageContent />
     </>
   );

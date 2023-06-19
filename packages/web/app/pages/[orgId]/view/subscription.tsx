@@ -9,7 +9,8 @@ import { CurrencyFormatter } from '@/components/organization/billing/helpers';
 import { InvoicesList } from '@/components/organization/billing/InvoicesList';
 import { OrganizationUsageEstimationView } from '@/components/organization/Usage';
 import { Button } from '@/components/ui/button';
-import { Card, Heading, Stat, Title } from '@/components/v2';
+import { Subtitle, Title } from '@/components/ui/page';
+import { Card, Heading, MetaTitle, Stat } from '@/components/v2';
 import { graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
@@ -122,8 +123,8 @@ function SubscriptionPageContent() {
       <div className="grow">
         <div className="py-6 flex flex-row justify-between items-center">
           <div>
-            <h3 className="text-lg font-semibold tracking-tight">Your subscription</h3>
-            <p className="text-sm text-gray-400">Explore your current plan and usage.</p>
+            <Title>Your subscription</Title>
+            <Subtitle>Explore your current plan and usage.</Subtitle>
           </div>
           <div>
             <Button asChild>
@@ -182,7 +183,7 @@ function SubscriptionPageContent() {
 function SubscriptionPage(): ReactElement {
   return (
     <>
-      <Title title="Subscription & Usage" />
+      <MetaTitle title="Subscription & Usage" />
       <SubscriptionPageContent />
     </>
   );

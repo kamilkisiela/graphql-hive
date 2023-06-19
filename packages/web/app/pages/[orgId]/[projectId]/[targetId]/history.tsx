@@ -4,7 +4,8 @@ import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts/target';
 import { VersionErrorsAndChanges } from '@/components/target/history/errors-and-changes';
-import { Badge, Button, DiffEditor, Spinner, TimeAgo, Title } from '@/components/v2';
+import { Subtitle, Title } from '@/components/ui/page';
+import { Badge, Button, DiffEditor, MetaTitle, Spinner, TimeAgo } from '@/components/v2';
 import { noSchemaVersion } from '@/components/v2/empty-list';
 import { DiffIcon } from '@/components/v2/icon';
 import { graphql } from '@/gql';
@@ -224,8 +225,8 @@ function ComparisonView({ versionId }: { versionId: string }) {
     <>
       <div className="flex flex-row justify-between items-center">
         <div className="py-6">
-          <h3 className="text-lg font-semibold tracking-tight">Details</h3>
-          <p className="text-sm text-gray-400">Explore details of the selected version</p>
+          <Title>Details</Title>
+          <Subtitle>Explore details of the selected version</Subtitle>
         </div>
         {availableViews.length ? (
           <div className="flex items-center justify-between">
@@ -254,8 +255,8 @@ function ComparisonView({ versionId }: { versionId: string }) {
           </div>
         ) : null}
       </div>
-      <div>
-        <div className="grow rounded-md border border-gray-800/50 overflow-y-auto">
+      <div className="flex h-full">
+        <div className="grow rounded-md overflow-y-auto">
           {isLoading ? (
             <div className="flex w-full h-full justify-center items-center">
               <Spinner />
@@ -385,52 +386,50 @@ function HistoryPageContent() {
   return (
     <TargetLayout
       value="history"
-      className="flex justify-between gap-8 h-full"
+      className="h-full"
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}
       me={me ?? null}
       organizations={organizationConnection ?? null}
       isCDNEnabled={isCDNEnabled ?? null}
     >
-      <div className="grow">
-        {versionId ? (
-          <div className="flex w-full h-full flex-row gap-x-6">
-            <div>
-              <div className="py-6">
-                <h3 className="text-lg font-semibold tracking-tight">Versions</h3>
-                <p className="text-sm text-gray-400">Recently published schemas.</p>
-              </div>
-              <div className="flex flex-col gap-5">
-                <div className="flex min-w-[420px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
-                  {pageVariables.map((variables, i) => (
-                    <ListPage
-                      gitRepository={currentProject?.gitRepository ?? undefined}
-                      key={variables.after || 'initial'}
-                      variables={variables}
-                      isLastPage={i === pageVariables.length - 1}
-                      onLoadMore={after => {
-                        setPageVariables([...pageVariables, { after, limit: 10 }]);
-                      }}
-                      versionId={versionId}
-                    />
-                  ))}
-                </div>
-              </div>
+      {versionId ? (
+        <div className="flex w-full h-full flex-row gap-x-6">
+          <div>
+            <div className="py-6">
+              <Title>Versions</Title>
+              <Subtitle>Recently published schemas.</Subtitle>
             </div>
-            <div className="grow">
-              <ComparisonView versionId={versionId} />
+            <div className="flex flex-col gap-5">
+              <div className="flex min-w-[420px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
+                {pageVariables.map((variables, i) => (
+                  <ListPage
+                    gitRepository={currentProject?.gitRepository ?? undefined}
+                    key={variables.after || 'initial'}
+                    variables={variables}
+                    isLastPage={i === pageVariables.length - 1}
+                    onLoadMore={after => {
+                      setPageVariables([...pageVariables, { after, limit: 10 }]);
+                    }}
+                    versionId={versionId}
+                  />
+                ))}
+              </div>
             </div>
           </div>
-        ) : (
-          <>
-            <div className="py-6">
-              <h3 className="text-lg font-semibold tracking-tight">Versions</h3>
-              <p className="text-sm text-gray-400">Recently published schemas.</p>
-            </div>
-            {noSchemaVersion}
-          </>
-        )}
-      </div>
+          <div className="grow">
+            <ComparisonView versionId={versionId} />
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="py-6">
+            <Title>Versions</Title>
+            <Subtitle>Recently published schemas.</Subtitle>
+          </div>
+          {noSchemaVersion}
+        </>
+      )}
     </TargetLayout>
   );
 }
@@ -438,7 +437,7 @@ function HistoryPageContent() {
 function HistoryPage(): ReactElement {
   return (
     <>
-      <Title title="History" />
+      <MetaTitle title="History" />
       <HistoryPageContent />
     </>
   );

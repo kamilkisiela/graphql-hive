@@ -8,7 +8,8 @@ import {
   SchemaExplorerProvider,
   useSchemaExplorerContext,
 } from '@/components/target/explorer/provider';
-import { Title } from '@/components/v2';
+import { Subtitle, Title } from '@/components/ui/page';
+import { MetaTitle } from '@/components/v2';
 import { noSchemaVersion } from '@/components/v2/empty-list';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
@@ -140,37 +141,34 @@ function ExplorerPageContent() {
   return (
     <TargetLayout
       value="explorer"
-      className="flex justify-between gap-8"
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}
       me={me ?? null}
       organizations={organizationConnection ?? null}
       isCDNEnabled={isCDNEnabled ?? null}
     >
-      <div className="grow">
-        <div className="py-6 flex flex-row items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold tracking-tight">Explore</h3>
-            <p className="text-sm text-gray-400">Insights from the latest version.</p>
-          </div>
-          {latestSchemaVersion ? (
-            <SchemaExplorerFilter
-              organization={{ cleanId: router.organizationId }}
-              project={{ cleanId: router.projectId }}
-              target={{ cleanId: router.targetId }}
-              period={period}
-            />
-          ) : null}
+      <div className="py-6 flex flex-row items-center justify-between">
+        <div>
+          <Title>Explore</Title>
+          <Subtitle>Insights from the latest version.</Subtitle>
         </div>
-        {latestSchemaVersion && explorer ? (
-          <SchemaView
-            totalRequests={query.data?.operationsStats.totalRequests ?? 0}
-            explorer={explorer}
+        {latestSchemaVersion ? (
+          <SchemaExplorerFilter
+            organization={{ cleanId: router.organizationId }}
+            project={{ cleanId: router.projectId }}
+            target={{ cleanId: router.targetId }}
+            period={period}
           />
-        ) : (
-          noSchemaVersion
-        )}
+        ) : null}
       </div>
+      {latestSchemaVersion && explorer ? (
+        <SchemaView
+          totalRequests={query.data?.operationsStats.totalRequests ?? 0}
+          explorer={explorer}
+        />
+      ) : (
+        noSchemaVersion
+      )}
     </TargetLayout>
   );
 }
@@ -178,7 +176,7 @@ function ExplorerPageContent() {
 function ExplorerPage(): ReactElement {
   return (
     <>
-      <Title title="Schema Explorer" />
+      <MetaTitle title="Schema Explorer" />
       <SchemaExplorerProvider>
         <ExplorerPageContent />
       </SchemaExplorerProvider>

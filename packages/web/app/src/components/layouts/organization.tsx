@@ -3,7 +3,7 @@ import NextLink from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { UserMenu } from '@/components/ui/user-menu';
-import { HiveLink, SubHeader, Tabs } from '@/components/v2';
+import { HiveLink, Tabs } from '@/components/v2';
 import { PlusIcon } from '@/components/v2/icon';
 import { CreateProjectModal } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
@@ -94,7 +94,7 @@ export function OrganizationLayout({
 
   return (
     <>
-      <SubHeader>
+      <header>
         <div className="container flex h-[84px] items-center justify-between">
           <div className="flex flex-row items-center gap-4">
             <HiveLink className="w-8 h-8" />
@@ -132,7 +132,7 @@ export function OrganizationLayout({
             />
           </div>
         </div>
-      </SubHeader>
+      </header>
       <div className="relative border-b border-gray-800">
         <div className="container flex justify-between items-center">
           {currentOrganization && meInCurrentOrg ? (

@@ -8,14 +8,15 @@ import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts/target';
 import { SchemaEditor } from '@/components/schema-editor';
 import { CDNAccessTokens } from '@/components/target/settings/cdn-access-tokens';
+import { Subtitle, Title } from '@/components/ui/page';
 import {
   Button,
   Card,
   Checkbox,
   DocsLink,
-  DocsNote,
   Heading,
   Input,
+  MetaTitle,
   Spinner,
   Switch,
   Table,
@@ -23,7 +24,6 @@ import {
   TBody,
   Td,
   TimeAgo,
-  Title,
   Tr,
 } from '@/components/v2';
 import { Combobox } from '@/components/v2/combobox';
@@ -80,17 +80,15 @@ function RegistryAccessTokens(props: {
   return (
     <Card>
       <Heading className="mb-2">Registry Access Tokens</Heading>
-      <p className="mb-3 font-light text-gray-300">
-        Be careful! These tokens allow to read and write your target data.
-      </p>
-      <DocsNote>
+      <div className="text-sm text-gray-400">
         Registry Access Tokens are used to access to Hive Registry and perform actions on your
         targets/projects. In most cases, this token is used from the Hive CLI.
-        <br />
+      </div>
+      <p>
         <DocsLink href="/management/targets#registry-access-tokens">
           Learn more about Registry Access Tokens
         </DocsLink>
-      </DocsNote>
+      </p>
       {canManage && (
         <div className="my-3.5 flex justify-between">
           <Button variant="primary" onClick={toggleModalOpen} size="large" className="px-5">
@@ -168,14 +166,14 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
   return (
     <Card>
       <Heading className="mb-2">Extend Your Schema</Heading>
-      <DocsNote>
+      <div className="text-sm text-gray-400">
         Schema Extensions is pre-defined GraphQL schema that is automatically merged with your
         published schemas, before being checked and validated.
         <br />
         <DocsLink href="/management/targets#schema-extensions">
           You can find more details and examples in the documentation
         </DocsLink>
-      </DocsNote>
+      </div>
       <SchemaEditor
         theme="vs-dark"
         options={{ readOnly: mutation.fetching }}
@@ -441,11 +439,11 @@ const ConditionalBreakingChanges = (): ReactElement => {
             />
           )}
         </Heading>
-        <DocsNote>
+        <div className="text-sm text-gray-400">
           Conditional Breaking Changes can change the behavior of schema checks, based on real
           traffic data sent to Hive.{' '}
           <DocsLink href="/management/targets#conditional-breaking-changes">Learn more</DocsLink>
-        </DocsNote>
+        </div>
         <div
           className={clsx(
             'mb-3 mt-4 flex flex-col items-start gap-3 font-light text-gray-300',
@@ -627,14 +625,14 @@ function TargetName(props: {
   return (
     <Card>
       <Heading className="mb-2">Target Name</Heading>
-      <DocsNote warn>
+      <div className="text-sm text-gray-400">
         Changing the name of your target will also change the slug of your target URL, and will
         invalidate any existing links to your target.
         <br />
         <DocsLink href="/management/targets#rename-a-target">
           You can read more about it in the documentation
         </DocsLink>
-      </DocsNote>
+      </div>
       <form onSubmit={handleSubmit} className="flex gap-x-2">
         <Input
           placeholder="Target name"
@@ -720,14 +718,14 @@ function TargetDelete(props: { organizationId: string; projectId: string; target
         <div className="flex items-center justify-between">
           <div>
             <Heading className="mb-2">Delete Target</Heading>
-            <DocsNote warn>
+            <div className="text-sm text-gray-400">
               Deleting an project also delete all schemas and data associated with it.
               <br />
               <DocsLink href="/management/targets#delete-a-target">
                 <strong>This action is not reversible!</strong> You can find more information about
                 this process in the documentation
               </DocsLink>
-            </DocsNote>
+            </div>
           </div>
           <div className="flex items-center gap-x-2">
             <Button
@@ -821,40 +819,37 @@ function TargetSettingsContent() {
   return (
     <TargetLayout
       value="settings"
-      className="flex justify-between gap-8"
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}
       me={me ?? null}
       organizations={organizationConnection ?? null}
       isCDNEnabled={isCDNEnabled ?? null}
     >
-      <div className="grow">
-        <div className="py-6">
-          <h3 className="text-lg font-semibold tracking-tight">Settings</h3>
-          <p className="text-sm text-gray-400">Manage your target settings.</p>
-        </div>
-        {currentOrganization && currentProject && currentTarget && organizationForSettings ? (
-          <div className="flex flex-col gap-y-4">
-            <TargetName
-              targetName={currentTarget.name}
+      <div className="py-6">
+        <Title>Settings</Title>
+        <Subtitle>Manage your target settings.</Subtitle>
+      </div>
+      {currentOrganization && currentProject && currentTarget && organizationForSettings ? (
+        <div className="flex flex-col gap-y-4">
+          <TargetName
+            targetName={currentTarget.name}
+            targetId={currentTarget.cleanId}
+            projectId={currentProject.cleanId}
+            organizationId={currentOrganization.cleanId}
+          />
+          {canAccessTokens && <RegistryAccessTokens me={organizationForSettings.me} />}
+          {canAccessTokens && <CDNAccessTokens me={organizationForSettings.me} />}
+          <ConditionalBreakingChanges />
+          <ExtendBaseSchema baseSchema={targetForSettings?.baseSchema ?? ''} />
+          {canDelete && (
+            <TargetDelete
               targetId={currentTarget.cleanId}
               projectId={currentProject.cleanId}
               organizationId={currentOrganization.cleanId}
             />
-            {canAccessTokens && <RegistryAccessTokens me={organizationForSettings.me} />}
-            {canAccessTokens && <CDNAccessTokens me={organizationForSettings.me} />}
-            <ConditionalBreakingChanges />
-            <ExtendBaseSchema baseSchema={targetForSettings?.baseSchema ?? ''} />
-            {canDelete && (
-              <TargetDelete
-                targetId={currentTarget.cleanId}
-                projectId={currentProject.cleanId}
-                organizationId={currentOrganization.cleanId}
-              />
-            )}
-          </div>
-        ) : null}
-      </div>
+          )}
+        </div>
+      ) : null}
     </TargetLayout>
   );
 }
@@ -862,7 +857,7 @@ function TargetSettingsContent() {
 function SettingsPage(): ReactElement {
   return (
     <>
-      <Title title="Settings" />
+      <MetaTitle title="Settings" />
       <TargetSettingsContent />
     </>
   );

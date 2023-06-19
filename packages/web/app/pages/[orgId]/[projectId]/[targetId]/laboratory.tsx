@@ -6,7 +6,8 @@ import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts/target';
 import { Button } from '@/components/ui/button';
-import { Accordion, DocsLink, EmptyList, Link, Spinner, Title } from '@/components/v2';
+import { Subtitle, Title } from '@/components/ui/page';
+import { Accordion, DocsLink, EmptyList, Link, MetaTitle, Spinner } from '@/components/v2';
 import { HiveLogo, SaveIcon } from '@/components/v2/icon';
 import {
   CreateCollectionModal,
@@ -168,7 +169,7 @@ function useOperationCollectionsPlugin({
       return (
         <>
           <div className="flex justify-between">
-            <h3 className="text-lg font-semibold tracking-tight">Collections</h3>
+            <Title>Collections</Title>
             {canEdit ? (
               <Button
                 variant="link"
@@ -484,7 +485,6 @@ function LaboratoryPageContent() {
   return (
     <TargetLayout
       value="laboratory"
-      className="flex justify-between gap-8"
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}
       me={me ?? null}
@@ -504,48 +504,46 @@ function LaboratoryPageContent() {
         </div>
       }
     >
-      <div className="grow">
-        <div className="py-6">
-          <h3 className="text-lg font-semibold tracking-tight">Laboratory</h3>
-          <p className="text-sm text-gray-400">
-            Explore your GraphQL schema and run queries against a mocked version of your GraphQL
-            service.
-          </p>
-          <p>
-            <DocsLink className="text-muted-foreground text-sm" href="/features/laboratory">
-              Learn more about the Laboratory
-            </DocsLink>
-          </p>
-        </div>
-        <style global jsx>{`
-          .graphiql-container {
-            --color-base: transparent !important;
-            --color-primary: 40, 89%, 60% !important;
-            min-height: 600px;
-          }
-        `}</style>
-        {query.fetching ? null : (
-          <GraphiQL
-            fetcher={createGraphiQLFetcher({ url: endpoint })}
-            toolbar={{
-              additionalContent: (
-                <>
-                  <Save />
-                  <Share />
-                </>
-              ),
-            }}
-            showPersistHeadersSettings={false}
-            shouldPersistHeaders={false}
-            plugins={[operationCollectionsPlugin]}
-            visiblePlugin={operationCollectionsPlugin}
-          >
-            <GraphiQL.Logo>
-              <HiveLogo className="h-6 w-auto" />
-            </GraphiQL.Logo>
-          </GraphiQL>
-        )}
+      <div className="py-6">
+        <Title>Laboratory</Title>
+        <Subtitle>
+          Explore your GraphQL schema and run queries against a mocked version of your GraphQL
+          service.
+        </Subtitle>
+        <p>
+          <DocsLink className="text-muted-foreground text-sm" href="/features/laboratory">
+            Learn more about the Laboratory
+          </DocsLink>
+        </p>
       </div>
+      <style global jsx>{`
+        .graphiql-container {
+          --color-base: transparent !important;
+          --color-primary: 40, 89%, 60% !important;
+          min-height: 600px;
+        }
+      `}</style>
+      {query.fetching ? null : (
+        <GraphiQL
+          fetcher={createGraphiQLFetcher({ url: endpoint })}
+          toolbar={{
+            additionalContent: (
+              <>
+                <Save />
+                <Share />
+              </>
+            ),
+          }}
+          showPersistHeadersSettings={false}
+          shouldPersistHeaders={false}
+          plugins={[operationCollectionsPlugin]}
+          visiblePlugin={operationCollectionsPlugin}
+        >
+          <GraphiQL.Logo>
+            <HiveLogo className="h-6 w-auto" />
+          </GraphiQL.Logo>
+        </GraphiQL>
+      )}
     </TargetLayout>
   );
 }
@@ -553,7 +551,7 @@ function LaboratoryPageContent() {
 function LaboratoryPage(): ReactElement {
   return (
     <>
-      <Title title="Schema laboratory" />
+      <MetaTitle title="Schema laboratory" />
       <LaboratoryPageContent />
     </>
   );

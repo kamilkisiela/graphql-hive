@@ -15,7 +15,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { DocsLink, Input, Tag, Title } from '@/components/v2';
+import { Subtitle, Title } from '@/components/ui/page';
+import { DocsLink, Input, MetaTitle, Tag } from '@/components/v2';
 import { GitHubIcon, SlackIcon } from '@/components/v2/icon';
 import {
   DeleteOrganizationModal,
@@ -209,8 +210,8 @@ const SettingsPageRenderer = (props: {
   return (
     <div>
       <div className="py-6">
-        <h3 className="text-lg font-semibold tracking-tight">Organization Settings</h3>
-        <p className="text-sm text-gray-400">Manage your organization settings and integrations.</p>
+        <Title>Organization Settings</Title>
+        <Subtitle>Manage your organization settings and integrations.</Subtitle>
       </div>
       <div className="flex flex-col gap-y-4">
         <Card>
@@ -406,7 +407,7 @@ function SettingsPageContent() {
 function OrganizationSettingsPage(): ReactElement {
   return (
     <>
-      <Title title="Organization settings" />
+      <MetaTitle title="Organization settings" />
       <SettingsPageContent />
     </>
   );

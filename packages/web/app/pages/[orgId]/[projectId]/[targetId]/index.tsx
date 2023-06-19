@@ -4,7 +4,8 @@ import { useDebouncedCallback } from 'use-debounce';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts/target';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
-import { Accordion, GraphQLBlock, Input, noSchema, Title } from '@/components/v2';
+import { Subtitle, Title } from '@/components/ui/page';
+import { Accordion, GraphQLBlock, Input, MetaTitle, noSchema } from '@/components/v2';
 import { noSchemaVersion } from '@/components/v2/empty-list';
 import { GraphQLHighlight } from '@/components/v2/graphql-block';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
@@ -287,27 +288,20 @@ function Page() {
   return (
     <TargetLayout
       value="schema"
-      className="flex justify-between gap-8"
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}
       me={me ?? null}
       organizations={organizationConnection ?? null}
       isCDNEnabled={isCDNEnabled ?? null}
     >
-      <div className="grow">
-        <div className="py-6">
-          <h3 className="text-lg font-semibold tracking-tight">Schema</h3>
-          <p className="text-sm text-gray-400">The latest published schema.</p>
-        </div>
-        <div>
-          {currentOrganization && currentProject && target ? (
-            <SchemaView
-              organization={currentOrganization}
-              project={currentProject}
-              target={target}
-            />
-          ) : null}
-        </div>
+      <div className="py-6">
+        <Title>Schema</Title>
+        <Subtitle>The latest published schema.</Subtitle>
+      </div>
+      <div>
+        {currentOrganization && currentProject && target ? (
+          <SchemaView organization={currentOrganization} project={currentProject} target={target} />
+        ) : null}
       </div>
     </TargetLayout>
   );
@@ -316,7 +310,7 @@ function Page() {
 function SchemaPage(): ReactElement {
   return (
     <>
-      <Title title="Schema" />
+      <MetaTitle title="Schema" />
       <Page />
     </>
   );

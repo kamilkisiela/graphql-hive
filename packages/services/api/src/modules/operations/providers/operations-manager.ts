@@ -62,6 +62,20 @@ interface ReadFieldStatsOutput {
 })
 export class OperationsManager {
   private logger: Logger;
+  private requestsOverTimeOfTargetsLoader: DataLoader<
+    {
+      targets: readonly string[];
+      period: DateRange;
+      resolution: number;
+    },
+    {
+      [target: string]: {
+        date: any;
+        value: number;
+      }[];
+    },
+    string
+  >;
 
   constructor(
     logger: Logger,
@@ -70,6 +84,22 @@ export class OperationsManager {
     private storage: Storage,
   ) {
     this.logger = logger.child({ source: 'OperationsManager' });
+
+    this.requestsOverTimeOfTargetsLoader = new DataLoader(
+      async selectors => {
+        const results = await this.reader.requestsOverTimeOfTargets(selectors);
+
+        return results;
+      },
+      {
+        cacheKeyFn(selector) {
+          return `${selector.period.from.toISOString()};${selector.period.to.toISOString()};${
+            selector.resolution
+          };${selector.targets.join(',')}}`;
+        },
+        batchScheduleFn: callback => setTimeout(callback, 100),
+      },
+    );
   }
 
   async getOperationBody({
@@ -317,8 +347,8 @@ export class OperationsManager {
       value: number;
     }>
   > {
-    this.logger.info(
-      'Reading requests over time (period=%o, resolution=%s, project=%s)',
+    this.logger.debug(
+      'Reading requests over time of project (period=%o, resolution=%s, project=%s)',
       period,
       resolution,
       project,
@@ -338,7 +368,7 @@ export class OperationsManager {
       ),
     );
 
-    const groups = await this.reader.requestsOverTimeOfTargets({
+    const groups = await this.requestsOverTimeOfTargetsLoader.load({
       targets,
       period,
       resolution,
@@ -382,8 +412,8 @@ export class OperationsManager {
     resolution: number;
     targets: string[];
   } & ProjectSelector) {
-    this.logger.info(
-      'Reading requests over time (period=%o, resolution=%s, target=%s)',
+    this.logger.debug(
+      'Reading requests over time of targets (period=%o, resolution=%s, targets=%s)',
       period,
       resolution,
       targets.join(';'),
@@ -399,7 +429,7 @@ export class OperationsManager {
       ),
     );
 
-    return this.reader.requestsOverTimeOfTargets({
+    return this.requestsOverTimeOfTargetsLoader.load({
       targets,
       period,
       resolution,

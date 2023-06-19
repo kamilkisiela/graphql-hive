@@ -2,14 +2,14 @@
 import { DocumentNode, Kind } from 'graphql';
 import { produce } from 'immer';
 import { TypedDocumentNode } from 'urql';
-import type { CreateOperationMutationType } from '@/components/v2/modals/create-operation';
-import type { DeleteCollectionMutationType } from '@/components/v2/modals/delete-collection';
-import type { DeleteOperationMutationType } from '@/components/v2/modals/delete-operation';
 import type { CreateAlertModal_AddAlertMutation } from '@/components/project/alerts/create-alert';
 import type { CreateChannel_AddAlertChannelMutation } from '@/components/project/alerts/create-channel';
 import type { DeleteAlertsButton_DeleteAlertsMutation } from '@/components/project/alerts/delete-alerts-button';
 import type { DeleteChannelsButton_DeleteChannelsMutation } from '@/components/project/alerts/delete-channels-button';
+import type { CreateOperationMutationType } from '@/components/v2/modals/create-operation';
 import type { CreateProjectMutation } from '@/components/v2/modals/create-project';
+import type { DeleteCollectionMutationType } from '@/components/v2/modals/delete-collection';
+import type { DeleteOperationMutationType } from '@/components/v2/modals/delete-operation';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
 import {

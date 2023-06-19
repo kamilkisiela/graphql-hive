@@ -13,8 +13,9 @@ import {
   fullSeries,
   resolutionToMilliseconds,
 } from '@/components/target/operations/utils';
+import { Subtitle, Title } from '@/components/ui/page';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Activities, Card, EmptyList, Title } from '@/components/v2';
+import { Activities, Card, EmptyList, MetaTitle } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
@@ -238,6 +239,7 @@ const OrganizationProjectsPageQuery = graphql(`
       total
       nodes {
         id
+        name
         ...ProjectCard_ProjectFragment
         requestsOverTime(resolution: $chartResolution, period: $period) {
           date
@@ -310,7 +312,7 @@ function OrganizationPageContent() {
   return (
     <OrganizationLayout
       value="overview"
-      className="flex justify-between gap-8"
+      className="flex justify-between gap-12"
       currentOrganization={currentOrganization ?? null}
       organizations={organizationConnection ?? null}
       me={me ?? null}
@@ -318,10 +320,8 @@ function OrganizationPageContent() {
       <>
         <div className="grow">
           <div className="py-6">
-            <h3 className="text-lg font-semibold tracking-tight">Projects</h3>
-            <p className="text-sm text-gray-400">
-              A list of available project in your organization.
-            </p>
+            <Title>Projects</Title>
+            <Subtitle>A list of available project in your organization.</Subtitle>
           </div>
           {currentOrganization && projects ? (
             projects.total === 0 ? (
@@ -332,33 +332,43 @@ function OrganizationPageContent() {
               />
             ) : (
               <div className="grid grid-cols-2 gap-5 items-stretch">
-                {projects.nodes.map((project, i) => (
-                  <ProjectCard
-                    key={i}
-                    days={days}
-                    project={project}
-                    highestNumberOfRequests={highestNumberOfRequests}
-                    period={period.current!}
-                    requestsOverTime={project.requestsOverTime}
-                    schemaVersionsCount={project.schemaVersionsCount}
-                  />
-                ))}
+                {projects.nodes
+                  .sort((a, b) => {
+                    const diff = b.schemaVersionsCount - a.schemaVersionsCount;
+
+                    if (diff !== 0) {
+                      return diff;
+                    }
+
+                    return a.name.localeCompare(b.name);
+                  })
+                  .map(project => (
+                    <ProjectCard
+                      key={project.id}
+                      days={days}
+                      highestNumberOfRequests={highestNumberOfRequests}
+                      period={period.current!}
+                      project={project}
+                      requestsOverTime={project.requestsOverTime}
+                      schemaVersionsCount={project.schemaVersionsCount}
+                    />
+                  ))}
               </div>
             )
           ) : (
-            <>
+            <div className="grid grid-cols-2 gap-5 items-stretch">
               {Array.from({ length: 4 }).map((_, index) => (
                 <ProjectCard
                   key={index}
                   days={days}
-                  project={null}
                   highestNumberOfRequests={highestNumberOfRequests}
                   period={period.current!}
+                  project={null}
                   requestsOverTime={null}
                   schemaVersionsCount={null}
                 />
               ))}
-            </>
+            </div>
           )}
         </div>
         <Activities />
@@ -370,7 +380,7 @@ function OrganizationPageContent() {
 function OrganizationPage(): ReactElement {
   return (
     <>
-      <Title title="Organization" />
+      <MetaTitle title="Organization" />
       <OrganizationPageContent />
     </>
   );

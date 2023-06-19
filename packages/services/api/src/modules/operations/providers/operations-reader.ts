@@ -834,78 +834,79 @@ export class OperationsReader {
     });
   }
 
-  // @sentry('OperationsReader.requestsOverTimeOfTargets')
-  requestsOverTimeOfTargets = batch(
-    async (
-      selectors: ReadonlyArray<{
-        targets: readonly string[];
+  @sentry('OperationsReader.requestsOverTimeOfTargets')
+  async requestsOverTimeOfTargets(
+    selectors: ReadonlyArray<{
+      targets: readonly string[];
+      period: DateRange;
+      resolution: number;
+    }>,
+  ) {
+    const aggregationMap = new Map<
+      string,
+      {
+        targets: string[];
         period: DateRange;
         resolution: number;
-      }>,
-    ) => {
-      const aggregationMap = new Map<
-        string,
-        {
-          targets: string[];
-          period: DateRange;
-          resolution: number;
-        }
-      >();
-
-      const makeKey = (selector: { period: DateRange; resolution: number }) =>
-        `${selector.period.from};${selector.period.to};${selector.resolution}`;
-
-      const subSelectors = selectors
-        .map(selector =>
-          selector.targets.map(target => ({
-            target,
-            period: selector.period,
-            resolution: selector.resolution,
-          })),
-        )
-        .flat(1);
-
-      // The idea here is to make the least possible number of queries to ClickHouse
-      // by fetching all data points of the same target, period and resolution.
-      for (const selector of subSelectors) {
-        const key = makeKey(selector);
-        const value = aggregationMap.get(key);
-
-        if (!value) {
-          aggregationMap.set(key, {
-            targets: [selector.target],
-            period: selector.period,
-            resolution: selector.resolution,
-          });
-        } else {
-          value.targets.push(selector.target);
-        }
       }
+    >();
 
-      const aggregationResultMap = new Map<
-        string,
-        Promise<
-          readonly {
+    const makeKey = (selector: { period: DateRange; resolution: number }) =>
+      `${selector.period.from.toISOString()};${selector.period.to.toISOString()};${
+        selector.resolution
+      }`;
+
+    const subSelectors = selectors
+      .map(selector =>
+        selector.targets.map(target => ({
+          target,
+          period: selector.period,
+          resolution: selector.resolution,
+        })),
+      )
+      .flat(1);
+
+    // The idea here is to make the least possible number of queries to ClickHouse
+    // by fetching all data points of the same target, period and resolution.
+    for (const selector of subSelectors) {
+      const key = makeKey(selector);
+      const value = aggregationMap.get(key);
+
+      if (!value) {
+        aggregationMap.set(key, {
+          targets: [selector.target],
+          period: selector.period,
+          resolution: selector.resolution,
+        });
+      } else {
+        value.targets.push(selector.target);
+      }
+    }
+
+    const aggregationResultMap = new Map<
+      string,
+      Promise<
+        readonly {
+          date: number;
+          total: number;
+          target: string;
+        }[]
+      >
+    >();
+
+    for (const [key, { targets, period, resolution }] of aggregationMap) {
+      aggregationResultMap.set(
+        key,
+        this.clickHouse
+          .query<{
             date: number;
-            total: number;
             target: string;
-          }[]
-        >
-      >();
-
-      for (const [key, { targets, period, resolution }] of aggregationMap) {
-        aggregationResultMap.set(
-          key,
-          this.clickHouse
-            .query<{
-              date: number;
-              target: string;
-              total: number;
-            }>(
-              pickQueryByPeriod(
-                {
-                  daily: {
-                    query: sql`
+            total: number;
+          }>(
+            pickQueryByPeriod(
+              {
+                daily: {
+                  query: sql`
                     SELECT 
                       multiply(
                         toUnixTimestamp(
@@ -921,11 +922,11 @@ export class OperationsReader {
                     GROUP BY date, target
                     ORDER BY date
                   `,
-                    queryId: 'targets_count_over_time_daily',
-                    timeout: 15_000,
-                  },
-                  hourly: {
-                    query: sql`
+                  queryId: 'targets_count_over_time_daily',
+                  timeout: 15_000,
+                },
+                hourly: {
+                  query: sql`
                     SELECT 
                       multiply(
                         toUnixTimestamp(
@@ -941,11 +942,11 @@ export class OperationsReader {
                     GROUP BY date, target
                     ORDER BY date
                   `,
-                    queryId: 'targets_count_over_time_hourly',
-                    timeout: 15_000,
-                  },
-                  regular: {
-                    query: sql`
+                  queryId: 'targets_count_over_time_hourly',
+                  timeout: 15_000,
+                },
+                regular: {
+                  query: sql`
                     SELECT 
                       multiply(
                         toUnixTimestamp(
@@ -961,22 +962,24 @@ export class OperationsReader {
                     GROUP BY date, target
                     ORDER BY date
                   `,
-                    queryId: 'targets_count_over_time_regular',
-                    timeout: 15_000,
-                  },
+                  queryId: 'targets_count_over_time_regular',
+                  timeout: 15_000,
                 },
-                period,
-                resolution,
-              ),
-            )
-            .then(result => result.data),
-        );
-      }
+              },
+              period,
+              resolution,
+            ),
+          )
+          .then(result => result.data),
+      );
+    }
 
-      // Because the `batch` function is used (it's a similar concept to DataLoader),
-      // it has tu return a map of promises matching provided selectors in exact same order.
-      return selectors.map(async selector => {
+    // Because the function is used in a DataLoader,
+    // it has to return a list of promises matching the order of selectors.
+    return Promise.all(
+      selectors.map(async selector => {
         const key = makeKey(selector);
+
         const queryPromise = aggregationResultMap.get(key);
 
         if (!queryPromise) {
@@ -1009,9 +1012,9 @@ export class OperationsReader {
         }
 
         return resultsPerTarget;
-      });
-    },
-  );
+      }),
+    );
+  }
 
   @sentry('OperationsReader.requestsOverTime')
   async requestsOverTime({
@@ -1440,7 +1443,9 @@ export class OperationsReader {
       >();
 
       const makeKey = (selector: { target: string; period: DateRange }) =>
-        `${selector.target}-${selector.period.from}-${selector.period.to}`;
+        `${
+          selector.target
+        }-${selector.period.from.toISOString()}-${selector.period.to.toISOString()}`;
 
       // Groups the type names by their target and period
       // The idea here is to make the least possible number of queries to ClickHouse

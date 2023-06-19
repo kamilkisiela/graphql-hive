@@ -15,7 +15,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { DocsLink, Input, Link, Select, Tag, Title } from '@/components/v2';
+import { Subtitle, Title } from '@/components/ui/page';
+import { DocsLink, Input, Link, MetaTitle, Select, Tag } from '@/components/v2';
 import { DeleteProjectModal } from '@/components/v2/modals';
 import { graphql, useFragment } from '@/gql';
 import { GetGitHubIntegrationDetailsDocument, ProjectType } from '@/graphql';
@@ -283,8 +284,8 @@ function ProjectSettingsContent() {
     >
       <div>
         <div className="py-6">
-          <h3 className="text-lg font-semibold tracking-tight">Settings</h3>
-          <p className="text-sm text-gray-400">Manage your project settings</p>
+          <Title>Settings</Title>
+          <Subtitle>Manage your project settings</Subtitle>
         </div>
         <div className="flex flex-col gap-y-4">
           {project && organization ? (
@@ -380,7 +381,7 @@ function ProjectSettingsContent() {
 function SettingsPage() {
   return (
     <>
-      <Title title="Project settings" />
+      <MetaTitle title="Project settings" />
       <ProjectSettingsContent />
     </>
   );
