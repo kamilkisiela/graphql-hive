@@ -1208,8 +1208,8 @@ importers:
         specifier: 0.1.13
         version: 0.1.13
       stripe:
-        specifier: 12.8.0
-        version: 12.8.0
+        specifier: 12.9.0
+        version: 12.9.0
       zod:
         specifier: 3.21.4
         version: 3.21.4
@@ -1523,8 +1523,8 @@ importers:
         specifier: 7.55.2
         version: 7.55.2
       '@stripe/react-stripe-js':
-        specifier: 2.1.0
-        version: 2.1.0(@stripe/stripe-js@1.54.0)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 2.1.1
+        version: 2.1.1(@stripe/stripe-js@1.54.0)(react-dom@18.2.0)(react@18.2.0)
       '@stripe/stripe-js':
         specifier: 1.54.0
         version: 1.54.0
@@ -11923,8 +11923,8 @@ packages:
       file-system-cache: 2.0.2
     dev: true
 
-  /@stripe/react-stripe-js@2.1.0(@stripe/stripe-js@1.54.0)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-Zb6Ycrj5QuhYkvtlvvLzo+cysUyA6wkx3zWHQ7uVnHRYRM/n1jtQD6VGBrdmptC8e8PJN6L091gBCyB5P0FqmA==}
+  /@stripe/react-stripe-js@2.1.1(@stripe/stripe-js@1.54.0)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-aHm6cWOqmOyq3eKKlR42hgvrcZhzc9ijL+BeXJ5H3uaWUKKcooSsBys0tiKl0gLxYQHUjUCvrRSX8fYaPBmAKg==}
     peerDependencies:
       '@stripe/stripe-js': ^1.44.1
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -28423,8 +28423,8 @@ packages:
       acorn: 8.8.2
     dev: true
 
-  /stripe@12.8.0:
-    resolution: {integrity: sha512-LVn981F20uR/0osbGq5n6j49LBh2W3gLoO96d8GPcUX0UYWzIOYXCG3aImIxNuiUPlgtziTHs+e33On2JgCScg==}
+  /stripe@12.9.0:
+    resolution: {integrity: sha512-stYtrWetRYUsEbsUVyJaPG9Sppt0ds2szBqXsuDG6KZPPuUmCccbpceLrhoOBwNl1RziEfNB7oG9wg1n2eW+EQ==}
     engines: {node: '>=12.*'}
     dependencies:
       '@types/node': 18.16.18
