@@ -404,7 +404,7 @@ export class OperationsReader {
     span?: Span,
   ): Promise<
     Array<{
-      operationHash?: string;
+      operationHash: string;
       operationName: string;
       kind: string;
       count: number;
