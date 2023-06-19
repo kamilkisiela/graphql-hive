@@ -107,8 +107,8 @@ importers:
         specifier: 12.14.0
         version: 12.14.0
       dotenv:
-        specifier: 16.1.4
-        version: 16.1.4
+        specifier: 16.3.1
+        version: 16.3.1
       eslint:
         specifier: 8.43.0
         version: 8.43.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
@@ -258,8 +258,8 @@ importers:
         specifier: 3.3.5
         version: 3.3.5
       dotenv:
-        specifier: 16.1.4
-        version: 16.1.4
+        specifier: 16.3.1
+        version: 16.3.1
       graphql:
         specifier: 16.6.0
         version: 16.6.0
@@ -479,8 +479,8 @@ importers:
         specifier: 2.4.3
         version: 2.4.3
       dotenv:
-        specifier: 16.1.4
-        version: 16.1.4
+        specifier: 16.3.1
+        version: 16.3.1
       got:
         specifier: 12.6.1
         version: 12.6.1
@@ -732,8 +732,8 @@ importers:
         specifier: 0.8.12
         version: 0.8.12
       dotenv:
-        specifier: 16.1.4
-        version: 16.1.4
+        specifier: 16.3.1
+        version: 16.3.1
       esbuild:
         specifier: 0.17.19
         version: 0.17.19
@@ -762,8 +762,8 @@ importers:
         specifier: 3.15.8
         version: 3.15.8(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
       dotenv:
-        specifier: 16.1.4
-        version: 16.1.4
+        specifier: 16.3.1
+        version: 16.3.1
       ioredis:
         specifier: 5.3.2
         version: 5.3.2
@@ -863,8 +863,8 @@ importers:
         specifier: 8.12.0
         version: 8.12.0
       dotenv:
-        specifier: 16.1.4
-        version: 16.1.4
+        specifier: 16.3.1
+        version: 16.3.1
       eslint:
         specifier: 8.43.0
         version: 8.43.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
@@ -906,8 +906,8 @@ importers:
         specifier: 2.30.0
         version: 2.30.0
       dotenv:
-        specifier: 16.1.4
-        version: 16.1.4
+        specifier: 16.3.1
+        version: 16.3.1
       got:
         specifier: 12.6.1
         version: 12.6.1
@@ -955,8 +955,8 @@ importers:
         specifier: 0.9.6
         version: 0.9.6
       dotenv:
-        specifier: 16.1.4
-        version: 16.1.4
+        specifier: 16.3.1
+        version: 16.3.1
       got:
         specifier: 12.6.1
         version: 12.6.1
@@ -1043,8 +1043,8 @@ importers:
         specifier: 0.8.12
         version: 0.8.12
       dotenv:
-        specifier: 16.1.4
-        version: 16.1.4
+        specifier: 16.3.1
+        version: 16.3.1
       got:
         specifier: 12.6.1
         version: 12.6.1
@@ -1138,8 +1138,8 @@ importers:
         specifier: 0.1.0
         version: 0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)
       dotenv:
-        specifier: 16.1.4
-        version: 16.1.4
+        specifier: 16.3.1
+        version: 16.3.1
       got:
         specifier: 12.6.1
         version: 12.6.1
@@ -1199,8 +1199,8 @@ importers:
         specifier: 2.30.0
         version: 2.30.0
       dotenv:
-        specifier: 16.1.4
-        version: 16.1.4
+        specifier: 16.3.1
+        version: 16.3.1
       got:
         specifier: 12.6.1
         version: 12.6.1
@@ -1233,8 +1233,8 @@ importers:
         specifier: 10.29.1
         version: 10.29.1
       dotenv:
-        specifier: 16.1.4
-        version: 16.1.4
+        specifier: 16.3.1
+        version: 16.3.1
       ioredis:
         specifier: 5.3.2
         version: 5.3.2
@@ -1291,8 +1291,8 @@ importers:
         specifier: 8.12.0
         version: 8.12.0
       dotenv:
-        specifier: 16.1.4
-        version: 16.1.4
+        specifier: 16.3.1
+        version: 16.3.1
       got:
         specifier: 12.6.1
         version: 12.6.1
@@ -1340,8 +1340,8 @@ importers:
         specifier: 0.9.6
         version: 0.9.6
       dotenv:
-        specifier: 16.1.4
-        version: 16.1.4
+        specifier: 16.3.1
+        version: 16.3.1
       got:
         specifier: 12.6.1
         version: 12.6.1
@@ -1377,8 +1377,8 @@ importers:
         specifier: 2.30.0
         version: 2.30.0
       dotenv:
-        specifier: 16.1.4
-        version: 16.1.4
+        specifier: 16.3.1
+        version: 16.3.1
       got:
         specifier: 12.6.1
         version: 12.6.1
@@ -1423,8 +1423,8 @@ importers:
         specifier: 3.15.8
         version: 3.15.8(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
       dotenv:
-        specifier: 16.1.4
-        version: 16.1.4
+        specifier: 16.3.1
+        version: 16.3.1
       got:
         specifier: 12.6.1
         version: 12.6.1
@@ -7247,7 +7247,7 @@ packages:
       '@types/jsonwebtoken': 8.5.9
       chalk: 4.1.2
       debug: 4.3.4(supports-color@8.1.1)
-      dotenv: 16.1.4
+      dotenv: 16.3.1
       graphql: 16.6.0
       graphql-request: 5.1.0(graphql@16.6.0)
       http-proxy-agent: 5.0.0
@@ -16988,8 +16988,8 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
-  /dotenv@16.1.4:
-    resolution: {integrity: sha512-m55RtE8AsPeJBpOIFKihEmqUcoVncQIwo7x9U8ZwLEZw9ZpXboz2c+rvog+jUaJvVrZ5kBOeYQBX5+8Aa/OZQw==}
+  /dotenv@16.3.1:
+    resolution: {integrity: sha512-IPzF4w4/Rd94bA9imS68tZBaYyBWSCE47V1RGuMrB94iyTOIEwRmVL2x/4An+6mETpLrKJ5hQkB8W4kFAadeIQ==}
     engines: {node: '>=12'}
 
   /dotenv@8.6.0:
@@ -21485,7 +21485,7 @@ packages:
     engines: {node: '>=14.0.0'}
     dependencies:
       app-root-dir: 1.0.2
-      dotenv: 16.1.4
+      dotenv: 16.3.1
       dotenv-expand: 10.0.0
     dev: true
 
