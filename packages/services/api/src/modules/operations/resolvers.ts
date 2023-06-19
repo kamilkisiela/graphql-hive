@@ -149,13 +149,13 @@ export const resolvers: OperationsModule.Resolvers = {
       return operations
         .map(op => {
           return {
-            id: hash(`${op.operationName}__${op.operationHash!}`),
+            id: hash(`${op.operationName}__${op.operationHash}`),
             kind: op.kind,
             name: op.operationName,
             count: op.count,
             countOk: op.countOk,
             percentage: op.percentage,
-            duration: durations.get(op.operationHash!)!,
+            duration: durations.get(op.operationHash)!,
             operationHash: op.operationHash,
           };
         })
