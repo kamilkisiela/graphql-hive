@@ -334,8 +334,8 @@ importers:
         specifier: 5.2.9
         version: 5.2.9(@swc/core@1.3.65)(@types/node@18.16.18)(typescript@5.1.3)
       '@oclif/plugin-update':
-        specifier: 3.1.18
-        version: 3.1.18(@swc/core@1.3.65)(@types/node@18.16.18)(typescript@5.1.3)
+        specifier: 3.1.19
+        version: 3.1.19(@swc/core@1.3.65)(@types/node@18.16.18)(typescript@5.1.3)
       '@whatwg-node/fetch':
         specifier: 0.9.6
         version: 0.9.6
@@ -8695,6 +8695,47 @@ packages:
       - '@swc/wasm'
       - '@types/node'
       - typescript
+    dev: true
+
+  /@oclif/core@2.8.7(@swc/core@1.3.65)(@types/node@18.16.18)(typescript@5.1.3):
+    resolution: {integrity: sha512-WTZUFgANYGyHQOmGc2YsczEdqdlG2/ZEfqksHnuYbz3egozpka/R9LrFwNfWPZETi9ydzcjDWwJKUGQmJG3ixA==}
+    engines: {node: '>=14.0.0'}
+    dependencies:
+      '@types/cli-progress': 3.11.0
+      ansi-escapes: 4.3.2
+      ansi-styles: 4.3.0
+      cardinal: 2.1.1
+      chalk: 4.1.2
+      clean-stack: 3.0.1
+      cli-progress: 3.12.0
+      debug: 4.3.4(supports-color@8.1.1)
+      ejs: 3.1.8
+      fs-extra: 9.1.0
+      get-package-type: 0.1.0
+      globby: 11.1.0
+      hyperlinker: 1.0.0
+      indent-string: 4.0.0
+      is-wsl: 2.2.0
+      js-yaml: 3.14.1
+      natural-orderby: 2.0.3
+      object-treeify: 1.1.33
+      password-prompt: 1.1.2
+      semver: 7.5.1
+      string-width: 4.2.3
+      strip-ansi: 6.0.1
+      supports-color: 8.1.1
+      supports-hyperlinks: 2.3.0
+      ts-node: 10.9.1(@swc/core@1.3.65)(@types/node@18.16.18)(typescript@5.1.3)
+      tslib: 2.5.3
+      widest-line: 3.1.0
+      wordwrap: 1.0.0
+      wrap-ansi: 7.0.0
+    transitivePeerDependencies:
+      - '@swc/core'
+      - '@swc/wasm'
+      - '@types/node'
+      - typescript
+    dev: false
 
   /@oclif/linewrap@1.0.0:
     resolution: {integrity: sha512-Ups2dShK52xXa8w6iBWLgcjPJWjais6KPJQq3gQ/88AY6BXoTX+MIGFPrWQO1KLMiQfoTpcLnUwloN4brrVUHw==}
@@ -8720,12 +8761,12 @@ packages:
       lodash: 4.17.21
     dev: true
 
-  /@oclif/plugin-update@3.1.18(@swc/core@1.3.65)(@types/node@18.16.18)(typescript@5.1.3):
-    resolution: {integrity: sha512-wY7wD5PkkLW0EpBR3vFcpBBr9wPhVYQwB8KjOnQSzUbQGjPIvHBnb7ud9bRjk0t9fbGo5IFvNFTIFh8u3KESKg==}
+  /@oclif/plugin-update@3.1.19(@swc/core@1.3.65)(@types/node@18.16.18)(typescript@5.1.3):
+    resolution: {integrity: sha512-XaPHXmx6LA1Ikzq92nZEy8S9kjIZpnxnsIXopzVWYXinWc0nMLGLaMYDYu79fLav9M0W9gh8i6aSNyz1BGJFQw==}
     engines: {node: '>=12.0.0'}
     dependencies:
       '@oclif/color': 1.0.6
-      '@oclif/core': 2.8.5(@swc/core@1.3.65)(@types/node@18.16.18)(typescript@5.1.3)
+      '@oclif/core': 2.8.7(@swc/core@1.3.65)(@types/node@18.16.18)(typescript@5.1.3)
       cross-spawn: 7.0.3
       debug: 4.3.4(supports-color@8.1.1)
       filesize: 6.4.0
