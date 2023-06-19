@@ -27,8 +27,14 @@ describe('basic user flow', () => {
 
   it('should log in and log out', () => {
     cy.login(user);
+
+    cy.get('input[name="name"]').type('Bubatzbieber');
+    cy.get('button[type="submit"]').click();
+
+    // Logout
     cy.get('[data-cy="user-menu-trigger"]').click();
     cy.get('[data-cy="user-menu-logout"]').click();
+    cy.url().should('include', '/auth?redirectToPath=%2F');
   });
 });
 
