@@ -146,6 +146,7 @@ export class GitHubIntegrationManager {
       name: string;
       sha: string;
       conclusion: 'success' | 'neutral' | 'failure';
+      detailsUrl: string | null;
       output?: {
         /** The title of the check run. */
         title: string;
@@ -183,6 +184,7 @@ export class GitHubIntegrationManager {
       head_sha: input.sha,
       conclusion: input.conclusion,
       output: input.output,
+      details_url: input.detailsUrl ?? undefined,
     });
 
     this.logger.debug('Check-run created (link=%s)', result.data.url);

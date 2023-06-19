@@ -234,6 +234,11 @@ export async function main() {
 
               return url;
             },
+            schemaCheckLink(input) {
+              return `${env.hiveServices.webApp!.url}/${input.organization.cleanId}/${
+                input.project.cleanId
+              }/${input.target.cleanId}/checks/${input.schemaCheckId}`;
+            },
           }
         : {},
       organizationOIDC: env.organizationOIDC,

@@ -1,3 +1,4 @@
+import { parse, print } from 'graphql';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import promClient from 'prom-client';
@@ -6,7 +7,7 @@ import { SchemaCheck } from '@hive/storage';
 import * as Sentry from '@sentry/node';
 import type { Span } from '@sentry/types';
 import * as Types from '../../../__generated__/types';
-import { Project, ProjectType, Schema, Target } from '../../../shared/entities';
+import { Organization, Project, ProjectType, Schema, Target } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { bolderize } from '../../../shared/markdown';
 import { sentry } from '../../../shared/sentry';
@@ -223,6 +224,7 @@ export class SchemaPublisher {
     };
 
     const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
+    const sdl = tryPrettifySDL(input.sdl);
 
     let checkResult: SchemaCheckResult;
 
@@ -271,7 +273,7 @@ export class SchemaPublisher {
 
         checkResult = await this.models[project.type][modelVersion].check({
           input: {
-            sdl: input.sdl,
+            sdl,
             serviceName: input.service,
           },
           selector,
@@ -300,7 +302,7 @@ export class SchemaPublisher {
 
     if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
       schemaCheck = await this.storage.createSchemaCheck({
-        schemaSDL: input.sdl,
+        schemaSDL: sdl,
         serviceName: input.service ?? null,
         meta: input.meta ?? null,
         targetId: target.id,
@@ -362,7 +364,7 @@ export class SchemaPublisher {
       }
 
       schemaCheck = await this.storage.createSchemaCheck({
-        schemaSDL: input.sdl,
+        schemaSDL: sdl,
         serviceName: input.service ?? null,
         meta: input.meta ?? null,
         targetId: target.id,
@@ -383,6 +385,7 @@ export class SchemaPublisher {
         return this.githubCheck({
           project,
           target,
+          organization,
           serviceName: input.service ?? null,
           sha: input.github.commit,
           conclusion: checkResult.conclusion,
@@ -391,12 +394,14 @@ export class SchemaPublisher {
           breakingChanges: null,
           compositionErrors: null,
           errors: null,
+          schemaCheckId: schemaCheck?.id ?? null,
         });
       }
 
       return this.githubCheck({
         project,
         target,
+        organization,
         serviceName: input.service ?? null,
         sha: input.github.commit,
         conclusion: checkResult.conclusion,
@@ -408,6 +413,7 @@ export class SchemaPublisher {
         compositionErrors: checkResult.state.composition.errors ?? [],
         warnings: checkResult.state.schemaPolicy?.warnings ?? [],
         errors: checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? [],
+        schemaCheckId: schemaCheck?.id ?? null,
       });
     }
 
@@ -1073,6 +1079,7 @@ export class SchemaPublisher {
   private async githubCheck({
     project,
     target,
+    organization,
     serviceName,
     sha,
     conclusion,
@@ -1081,9 +1088,11 @@ export class SchemaPublisher {
     compositionErrors,
     errors,
     warnings,
+    schemaCheckId,
   }: {
     project: Project;
     target: Target;
+    organization: Organization;
     serviceName: string | null;
     sha: string;
     conclusion: SchemaCheckConclusion;
@@ -1096,6 +1105,7 @@ export class SchemaPublisher {
     errors: Array<{
       message: string;
     }> | null;
+    schemaCheckId: string | null;
   }) {
     if (!project.gitRepository) {
       return {
@@ -1144,6 +1154,15 @@ export class SchemaPublisher {
           title,
           summary,
         },
+        detailsUrl:
+          (schemaCheckId &&
+            this.schemaModuleConfig.schemaCheckLink?.({
+              project,
+              target,
+              organization,
+              schemaCheckId,
+            })) ||
+          null,
       });
 
       return {
@@ -1389,6 +1408,7 @@ export class SchemaPublisher {
           title,
           summary,
         },
+        detailsUrl: null,
       });
       return {
         __typename: 'GitHubSchemaPublishSuccess' as const,
@@ -1466,4 +1486,12 @@ function writeChanges(type: string, changes: ReadonlyArray<Change>, lines: strin
 
 function buildGitHubActionCheckName(target: string, service: string | null) {
   return `GraphQL Hive > schema:check > ${target}` + (service ? ` > ${service}` : '');
+}
+
+function tryPrettifySDL(sdl: string): string {
+  try {
+    return print(parse(sdl));
+  } catch {
+    return sdl;
+  }
 }

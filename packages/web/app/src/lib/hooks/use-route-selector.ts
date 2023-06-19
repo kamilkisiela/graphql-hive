@@ -79,6 +79,7 @@ export function useRouteSelector() {
       projectId: router.query.projectId as string,
       visitProject,
       targetId: router.query.targetId as string,
+      schemaCheckId: (router.query.schemaCheckId ?? null) as string | null,
       visitTarget,
       operationHash: router.query.hash as string,
       versionId: router.query.versionId as string,

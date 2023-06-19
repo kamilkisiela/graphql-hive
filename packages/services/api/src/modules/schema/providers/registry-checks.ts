@@ -186,7 +186,7 @@ export class RegistryChecks {
     }
 
     const policyResult = await this.policy.checkPolicy(result.sdl, modifiedSdl, selector);
-    const warnings = policyResult?.warnings?.map<SchemaCheckWarning>(toSchemaCheckWarning) ?? [];
+    const warnings = policyResult?.warnings?.map<SchemaCheckWarning>(toSchemaCheckWarning) ?? null;
 
     if (policyResult === null) {
       return {

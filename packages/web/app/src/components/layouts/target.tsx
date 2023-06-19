@@ -20,6 +20,7 @@ import { ProjectMigrationToast } from '../project/migration-toast';
 enum TabValue {
   Schema = 'schema',
   Explorer = 'explorer',
+  Checks = 'checks',
   History = 'history',
   Operations = 'operations',
   Laboratory = 'laboratory',
@@ -78,7 +79,7 @@ export const TargetLayout = <
   query,
 }: {
   children(props: TSatisfies): ReactNode;
-  value: 'schema' | 'explorer' | 'history' | 'operations' | 'laboratory' | 'settings';
+  value: 'schema' | 'explorer' | 'checks' | 'history' | 'operations' | 'laboratory' | 'settings';
   className?: string;
   connect?: ReactNode;
   query: TypedDocumentNode<
@@ -219,6 +220,9 @@ export const TargetLayout = <
             <>
               <Tabs.Trigger value={TabValue.Schema} asChild>
                 <NextLink href={`/${orgId}/${projectId}/${targetId}`}>Schema</NextLink>
+              </Tabs.Trigger>
+              <Tabs.Trigger value={TabValue.Checks} asChild>
+                <NextLink href={`/${orgId}/${projectId}/${targetId}/checks`}>Checks</NextLink>
               </Tabs.Trigger>
               <Tabs.Trigger value={TabValue.Explorer} asChild>
                 <NextLink href={`/${orgId}/${projectId}/${targetId}/explorer`}>Explorer</NextLink>

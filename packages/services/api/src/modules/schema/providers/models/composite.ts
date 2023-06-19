@@ -152,7 +152,7 @@ export class CompositeModel {
     return {
       conclusion: SchemaCheckConclusion.Success,
       state: {
-        schemaPolicyWarnings: policyCheck.result?.warnings ?? [],
+        schemaPolicyWarnings: policyCheck.result?.warnings ?? null,
         schemaChanges: diffCheck.result?.changes ?? null,
         composition: {
           compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
