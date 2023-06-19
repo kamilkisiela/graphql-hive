@@ -37,7 +37,7 @@
     "@radix-ui/react-tooltip": "1.0.6",
     "@sentry/nextjs": "7.55.2",
     "@sentry/types": "7.55.2",
-    "@stripe/react-stripe-js": "2.1.0",
+    "@stripe/react-stripe-js": "2.1.1",
     "@stripe/stripe-js": "1.54.0",
     "@tanstack/react-table": "8.0.0-beta.8",
     "@theguild/editor": "1.2.5",
