@@ -265,7 +265,7 @@ export interface Storage {
   getTargets(_: ProjectSelector): Promise<readonly Target[]>;
 
   getTargetIdsOfOrganization(_: OrganizationSelector): Promise<readonly string[]>;
-
+  getTargetIdsOfProject(_: ProjectSelector): Promise<readonly string[]>;
   getTargetSettings(_: TargetSelector): Promise<TargetSettings | never>;
 
   setTargetValidation(
@@ -275,6 +275,23 @@ export interface Storage {
   updateTargetValidationSettings(
     _: TargetSelector & Omit<TargetSettings['validation'], 'enabled'>,
   ): Promise<TargetSettings['validation'] | never>;
+
+  countSchemaVersionsOfProject(
+    _: ProjectSelector & {
+      period: {
+        from: Date;
+        to: Date;
+      } | null;
+    },
+  ): Promise<number>;
+  countSchemaVersionsOfTarget(
+    _: TargetSelector & {
+      period: {
+        from: Date;
+        to: Date;
+      } | null;
+    },
+  ): Promise<number>;
 
   hasSchema(_: TargetSelector): Promise<boolean>;
 

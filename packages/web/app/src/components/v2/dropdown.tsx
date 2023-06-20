@@ -45,11 +45,14 @@ export const DropdownMenuContent = React.forwardRef<
           flex-col
           gap-1
           rounded-md
-          bg-gray-800
           p-[13px]
           text-sm
-          font-semibold
+          font-normal
+          bg-[#0b0d11]
           text-gray-300
+          shadow-lg
+          shadow-black
+          ring-1 ring-gray-900
         `,
           className,
         )}
@@ -70,8 +73,7 @@ export const DropdownMenuSubTrigger = React.forwardRef<
       {...props}
       className={clsx(
         `
-        radix-state-open:bg-orange-500/40
-        radix-state-open:sepia
+        radix-state-open:bg-gray-800/50
         flex
         cursor-pointer
         items-center
@@ -80,9 +82,9 @@ export const DropdownMenuSubTrigger = React.forwardRef<
         py-2.5
         px-2
         transition
-        hover:bg-gray-500/50
+        hover:bg-gray-800/50
         hover:text-white
-        focus:bg-gray-500/50
+        focus:bg-gray-800/50
         focus:text-white
     `,
         className,
@@ -108,11 +110,14 @@ export const DropdownMenuSubContent = React.forwardRef<
           flex-col
           gap-1
           rounded-md
-          bg-gray-800
           p-[13px]
           text-sm
-          font-semibold
+          font-normal
+          bg-[#0b0d11]
           text-gray-300
+          shadow-lg
+          shadow-black
+          ring-1 ring-gray-900
         `,
           className,
         )}
@@ -144,9 +149,9 @@ export const DropdownMenuItem = React.forwardRef<
         py-2.5
         px-2
         transition
-        hover:bg-gray-500/50
+        hover:bg-gray-800/50
         hover:text-white
-        focus:bg-gray-500/50
+        focus:bg-gray-800/50
         focus:text-white`,
         className,
       )}
@@ -168,7 +173,7 @@ export const DropdownMenuSeparator = React.forwardRef<
         `
         my-2
         h-px
-        bg-gray-700/50
+        bg-gray-800/50
       `,
         className,
       )}

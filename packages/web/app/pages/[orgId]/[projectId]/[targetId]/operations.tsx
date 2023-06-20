@@ -1,13 +1,17 @@
 import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { formatISO, subDays, subHours, subMinutes } from 'date-fns';
+import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { TargetLayout } from '@/components/layouts';
+import { TargetLayout } from '@/components/layouts/target';
 import { OperationsFilterTrigger } from '@/components/target/operations/Filters';
 import { OperationsList } from '@/components/target/operations/List';
 import { OperationsStats } from '@/components/target/operations/Stats';
-import { EmptyList, RadixSelect, Title } from '@/components/v2';
+import { Subtitle, Title } from '@/components/ui/page';
+import { EmptyList, MetaTitle, RadixSelect } from '@/components/v2';
 import { graphql } from '@/gql';
+import { useRouteSelector } from '@/lib/hooks';
+import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 function floorDate(date: Date): Date {
@@ -66,17 +70,23 @@ function OperationsView({
 
   return (
     <>
-      <div className="flex justify-end gap-2 pb-7">
-        <OperationsFilterTrigger
-          period={period}
-          selected={selectedOperations}
-          onFilter={setSelectedOperations}
-        />
-        <RadixSelect
-          onChange={updatePeriod}
-          defaultValue={selectedPeriod}
-          options={Object.entries(DateRange).map(([value, label]) => ({ value, label }))}
-        />
+      <div className="py-6 flex flex-row items-center justify-between">
+        <div>
+          <Title>Versions</Title>
+          <Subtitle>Recently published schemas.</Subtitle>
+        </div>
+        <div className="flex justify-end gap-x-2">
+          <OperationsFilterTrigger
+            period={period}
+            selected={selectedOperations}
+            onFilter={setSelectedOperations}
+          />
+          <RadixSelect
+            onChange={updatePeriod}
+            defaultValue={selectedPeriod}
+            options={Object.entries(DateRange).map(([value, label]) => ({ value, label }))}
+          />
+        </div>
       </div>
       <OperationsStats
         organization={organizationCleanId}
@@ -99,18 +109,18 @@ function OperationsView({
 
 const TargetOperationsPageQuery = graphql(`
   query TargetOperationsPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+    organizations {
+      ...TargetLayout_OrganizationConnectionFragment
+    }
     organization(selector: { organization: $organizationId }) {
       organization {
-        ...TargetLayout_OrganizationFragment
+        ...TargetLayout_CurrentOrganizationFragment
         cleanId
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_ProjectFragment
+      ...TargetLayout_CurrentProjectFragment
       cleanId
-    }
-    targets(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_TargetConnectionFragment
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       cleanId
@@ -118,35 +128,72 @@ const TargetOperationsPageQuery = graphql(`
     hasCollectedOperations(
       selector: { organization: $organizationId, project: $projectId, target: $targetId }
     )
+    me {
+      ...TargetLayout_MeFragment
+    }
     ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 
+function TargetOperationsPageContent() {
+  const router = useRouteSelector();
+  const [query] = useQuery({
+    query: TargetOperationsPageQuery,
+    variables: {
+      organizationId: router.organizationId,
+      projectId: router.projectId,
+      targetId: router.targetId,
+    },
+  });
+  useNotFoundRedirectOnError(!!query.error);
+
+  if (query.error) {
+    return null;
+  }
+
+  const me = query.data?.me;
+  const currentOrganization = query.data?.organization?.organization;
+  const currentProject = query.data?.project;
+  const currentTarget = query.data?.target;
+  const organizationConnection = query.data?.organizations;
+  const isCDNEnabled = query.data;
+  const hasCollectedOperations = query.data?.hasCollectedOperations === true;
+
+  return (
+    <TargetLayout
+      value="operations"
+      currentOrganization={currentOrganization ?? null}
+      currentProject={currentProject ?? null}
+      me={me ?? null}
+      organizations={organizationConnection ?? null}
+      isCDNEnabled={isCDNEnabled ?? null}
+    >
+      {currentOrganization && currentProject && currentTarget ? (
+        hasCollectedOperations ? (
+          <OperationsView
+            organizationCleanId={currentOrganization.cleanId}
+            projectCleanId={currentProject.cleanId}
+            targetCleanId={currentTarget.cleanId}
+          />
+        ) : (
+          <div className="py-8">
+            <EmptyList
+              title="Hive is waiting for your first collected operation"
+              description="You can collect usage of your GraphQL API with Hive Client"
+              docsUrl="/features/usage-reporting"
+            />
+          </div>
+        )
+      ) : null}
+    </TargetLayout>
+  );
+}
+
 function OperationsPage(): ReactElement {
   return (
     <>
-      <Title title="Operations" />
-      <TargetLayout value="operations" query={TargetOperationsPageQuery}>
-        {({ organization, project, target, hasCollectedOperations }) =>
-          organization && project && target ? (
-            <div className="relative">
-              {hasCollectedOperations ? (
-                <OperationsView
-                  organizationCleanId={organization.organization.cleanId}
-                  projectCleanId={project.cleanId}
-                  targetCleanId={target.cleanId}
-                />
-              ) : (
-                <EmptyList
-                  title="Hive is waiting for your first collected operation"
-                  description="You can collect usage of your GraphQL API with Hive Client"
-                  docsUrl="/features/usage-reporting"
-                />
-              )}
-            </div>
-          ) : null
-        }
-      </TargetLayout>
+      <MetaTitle title="Operations" />
+      <TargetOperationsPageContent />
     </>
   );
 }

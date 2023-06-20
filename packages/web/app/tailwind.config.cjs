@@ -1,12 +1,27 @@
 const colors = require('tailwindcss/colors');
+const { fontFamily } = require('tailwindcss/defaultTheme');
 
 module.exports = {
   darkMode: 'class',
-  content: ['./{pages,src}/**/*.ts{,x}'],
+  content: ['./{pages,src,components}/**/*.ts{,x}'],
   important: true,
   theme: {
     container: {
       center: true,
+      padding: '2rem',
+      screens: {
+        '2xl': '1400px',
+      },
+    },
+    fontFamily: {
+      sans: [
+        'Inter var,' + fontFamily.sans.join(','),
+        {
+          fontFeatureSettings: 'normal',
+          fontVariationSettings: '"opsz" 32',
+        },
+      ],
+      mono: fontFamily.mono,
     },
     colors: {
       transparent: 'transparent',
@@ -53,17 +68,7 @@ module.exports = {
       cyan: '#0acccc',
       purple: '#5f2eea',
       blue: colors.indigo,
-      gray: {
-        100: '#f2f2f4',
-        200: '#dfe0e2',
-        300: '#cccdd1',
-        400: '#a5a7af',
-        500: '#7f818c',
-        600: '#72747e',
-        700: '#5f6169',
-        800: '#24272e', // '#4c4d54',
-        900: '#202329',
-      },
+      gray: colors.stone,
       magenta: '#f11197',
       orange: {
         50: '#fefbf5',
@@ -79,8 +84,45 @@ module.exports = {
       },
     },
     extend: {
-      fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+      colors: {
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
       ringColor: theme => ({
         DEFAULT: theme('colors.orange.500/75'),
@@ -171,6 +213,14 @@ module.exports = {
           '0%': { transform: 'translateY(var(--radix-toast-swipe-end-y))' },
           '100%': { transform: 'translateY(calc(100% + 1rem))' },
         },
+        'accordion-down': {
+          from: { height: 0 },
+          to: { height: 'var(--radix-accordion-content-height)' },
+        },
+        'accordion-up': {
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: 0 },
+        },
       },
       animation: {
         // Dropdown menu
@@ -197,11 +247,14 @@ module.exports = {
         'toast-slide-in-bottom': 'toast-slide-in-bottom 150ms cubic-bezier(0.16, 1, 0.3, 1)',
         'toast-swipe-out-x': 'toast-swipe-out-x 100ms ease-out forwards',
         'toast-swipe-out-y': 'toast-swipe-out-y 100ms ease-out forwards',
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
       },
     },
   },
   plugins: [
     // Utilities and variants for styling Radix state
     require('tailwindcss-radix')(),
+    require('tailwindcss-animate'),
   ],
 };

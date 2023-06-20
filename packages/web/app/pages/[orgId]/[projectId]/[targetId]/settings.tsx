@@ -5,17 +5,18 @@ import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
-import { TargetLayout } from '@/components/layouts';
+import { TargetLayout } from '@/components/layouts/target';
 import { SchemaEditor } from '@/components/schema-editor';
 import { CDNAccessTokens } from '@/components/target/settings/cdn-access-tokens';
+import { Subtitle, Title } from '@/components/ui/page';
 import {
   Button,
   Card,
   Checkbox,
   DocsLink,
-  DocsNote,
   Heading,
   Input,
+  MetaTitle,
   Spinner,
   Switch,
   Table,
@@ -23,7 +24,6 @@ import {
   TBody,
   Td,
   TimeAgo,
-  Title,
   Tr,
 } from '@/components/v2';
 import { Combobox } from '@/components/v2/combobox';
@@ -32,6 +32,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { DeleteTokensDocument, SetTargetValidationDocument, TokensDocument } from '@/graphql';
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const RegistryAccessTokens_MeFragment = graphql(`
@@ -79,17 +80,15 @@ function RegistryAccessTokens(props: {
   return (
     <Card>
       <Heading className="mb-2">Registry Access Tokens</Heading>
-      <p className="mb-3 font-light text-gray-300">
-        Be careful! These tokens allow to read and write your target data.
-      </p>
-      <DocsNote>
+      <div className="text-sm text-gray-400">
         Registry Access Tokens are used to access to Hive Registry and perform actions on your
         targets/projects. In most cases, this token is used from the Hive CLI.
-        <br />
+      </div>
+      <p>
         <DocsLink href="/management/targets#registry-access-tokens">
           Learn more about Registry Access Tokens
         </DocsLink>
-      </DocsNote>
+      </p>
       {canManage && (
         <div className="my-3.5 flex justify-between">
           <Button variant="primary" onClick={toggleModalOpen} size="large" className="px-5">
@@ -167,14 +166,14 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
   return (
     <Card>
       <Heading className="mb-2">Extend Your Schema</Heading>
-      <DocsNote>
+      <div className="text-sm text-gray-400">
         Schema Extensions is pre-defined GraphQL schema that is automatically merged with your
         published schemas, before being checked and validated.
         <br />
         <DocsLink href="/management/targets#schema-extensions">
           You can find more details and examples in the documentation
         </DocsLink>
-      </DocsNote>
+      </div>
       <SchemaEditor
         theme="vs-dark"
         options={{ readOnly: mutation.fetching }}
@@ -285,8 +284,8 @@ function ClientExclusion(
   );
 }
 
-const Settings_TargetSettingsQuery = graphql(`
-  query Settings_TargetSettingsQuery(
+const TargetSettingsPage_TargetSettingsQuery = graphql(`
+  query TargetSettingsPage_TargetSettingsQuery(
     $selector: TargetSelectorInput!
     $targetsSelector: ProjectSelectorInput!
     $organizationSelector: OrganizationSelectorInput!
@@ -320,8 +319,10 @@ const Settings_TargetSettingsQuery = graphql(`
   }
 `);
 
-const Settings_UpdateTargetValidationSettingsMutation = graphql(`
-  mutation Settings_UpdateTargetValidationSettings($input: UpdateTargetValidationSettingsInput!) {
+const TargetSettingsPage_UpdateTargetValidationSettingsMutation = graphql(`
+  mutation TargetSettingsPage_UpdateTargetValidationSettings(
+    $input: UpdateTargetValidationSettingsInput!
+  ) {
     updateTargetValidationSettings(input: $input) {
       ok {
         target {
@@ -350,9 +351,11 @@ function floorDate(date: Date): Date {
 const ConditionalBreakingChanges = (): ReactElement => {
   const router = useRouteSelector();
   const [targetValidation, setValidation] = useMutation(SetTargetValidationDocument);
-  const [mutation, updateValidation] = useMutation(Settings_UpdateTargetValidationSettingsMutation);
+  const [mutation, updateValidation] = useMutation(
+    TargetSettingsPage_UpdateTargetValidationSettingsMutation,
+  );
   const [targetSettings] = useQuery({
-    query: Settings_TargetSettingsQuery,
+    query: TargetSettingsPage_TargetSettingsQuery,
     variables: {
       selector: {
         organization: router.organizationId,
@@ -436,11 +439,11 @@ const ConditionalBreakingChanges = (): ReactElement => {
             />
           )}
         </Heading>
-        <DocsNote>
+        <div className="text-sm text-gray-400">
           Conditional Breaking Changes can change the behavior of schema checks, based on real
           traffic data sent to Hive.{' '}
           <DocsLink href="/management/targets#conditional-breaking-changes">Learn more</DocsLink>
-        </DocsNote>
+        </div>
         <div
           className={clsx(
             'mb-3 mt-4 flex flex-col items-start gap-3 font-light text-gray-300',
@@ -583,8 +586,90 @@ const ConditionalBreakingChanges = (): ReactElement => {
   );
 };
 
-const Settings_UpdateTargetNameMutation = graphql(`
-  mutation Settings_UpdateTargetName($input: UpdateTargetNameInput!) {
+function TargetName(props: {
+  targetName: string | null;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+}) {
+  const router = useRouteSelector();
+
+  const [mutation, mutate] = useMutation(TargetSettingsPage_UpdateTargetNameMutation);
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
+    useFormik({
+      enableReinitialize: true,
+      initialValues: {
+        name: props.targetName || '',
+      },
+      validationSchema: Yup.object().shape({
+        name: Yup.string().required('Target name is required'),
+      }),
+      onSubmit: values =>
+        mutate({
+          input: {
+            organization: props.organizationId,
+            project: props.projectId,
+            target: props.targetId,
+            name: values.name,
+          },
+        }).then(result => {
+          if (result?.data?.updateTargetName?.ok) {
+            const newTargetId = result.data.updateTargetName.ok.updatedTarget.cleanId;
+            void router.replace(
+              `/${router.organizationId}/${router.projectId}/${newTargetId}/settings`,
+            );
+          }
+        }),
+    });
+
+  return (
+    <Card>
+      <Heading className="mb-2">Target Name</Heading>
+      <div className="text-sm text-gray-400">
+        Changing the name of your target will also change the slug of your target URL, and will
+        invalidate any existing links to your target.
+        <br />
+        <DocsLink href="/management/targets#rename-a-target">
+          You can read more about it in the documentation
+        </DocsLink>
+      </div>
+      <form onSubmit={handleSubmit} className="flex gap-x-2">
+        <Input
+          placeholder="Target name"
+          name="name"
+          value={values.name}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          disabled={isSubmitting}
+          isInvalid={touched.name && !!errors.name}
+          className="w-96"
+        />
+        <Button
+          type="submit"
+          variant="primary"
+          size="large"
+          disabled={isSubmitting}
+          className="px-10"
+        >
+          Save
+        </Button>
+      </form>
+      {touched.name && (errors.name || mutation.error) && (
+        <div className="mt-2 text-red-500">
+          {errors.name ?? mutation.error?.graphQLErrors[0]?.message ?? mutation.error?.message}
+        </div>
+      )}
+      {mutation.data?.updateTargetName.error?.inputErrors?.name && (
+        <div className="mt-2 text-red-500">
+          {mutation.data.updateTargetName.error.inputErrors.name}
+        </div>
+      )}
+    </Card>
+  );
+}
+
+const TargetSettingsPage_UpdateTargetNameMutation = graphql(`
+  mutation TargetSettingsPage_UpdateTargetName($input: UpdateTargetNameInput!) {
     updateTargetName(input: $input) {
       ok {
         selector {
@@ -624,171 +709,156 @@ const TargetSettingsPage_OrganizationFragment = graphql(`
   }
 `);
 
-const Page = (props: {
-  target: FragmentType<typeof TargetSettingsPage_TargetFragment>;
-  organization: FragmentType<typeof TargetSettingsPage_OrganizationFragment>;
-}) => {
-  const target = useFragment(TargetSettingsPage_TargetFragment, props.target);
-  const organization = useFragment(TargetSettingsPage_OrganizationFragment, props.organization);
-  const router = useRouteSelector();
+function TargetDelete(props: { organizationId: string; projectId: string; targetId: string }) {
   const [isModalOpen, toggleModalOpen] = useToggle();
-
-  const [mutation, mutate] = useMutation(Settings_UpdateTargetNameMutation);
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
-    useFormik({
-      enableReinitialize: true,
-      initialValues: {
-        name: target?.name || '',
-      },
-      validationSchema: Yup.object().shape({
-        name: Yup.string().required('Target name is required'),
-      }),
-      onSubmit: values =>
-        mutate({
-          input: {
-            organization: router.organizationId,
-            project: router.projectId,
-            target: router.targetId,
-            name: values.name,
-          },
-        }).then(result => {
-          if (result?.data?.updateTargetName?.ok) {
-            const newTargetId = result.data.updateTargetName.ok.updatedTarget.cleanId;
-            void router.replace(
-              `/${router.organizationId}/${router.projectId}/${newTargetId}/settings`,
-            );
-          }
-        }),
-    });
-
-  const me = organization?.me;
-
-  const canAccessTokens = canAccessTarget(TargetAccessScope.TokensRead, me);
-  const canDelete = canAccessTarget(TargetAccessScope.Delete, me);
 
   return (
     <>
       <Card>
-        <Heading className="mb-2">Target Name</Heading>
-        <DocsNote warn>
-          Changing the name of your target will also change the slug of your target URL, and will
-          invalidate any existing links to your target.
-          <br />
-          <DocsLink href="/management/targets#rename-a-target">
-            You can read more about it in the documentation
-          </DocsLink>
-        </DocsNote>
-        <form onSubmit={handleSubmit} className="flex gap-x-2">
-          <Input
-            placeholder="Target name"
-            name="name"
-            value={values.name}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            disabled={isSubmitting}
-            isInvalid={touched.name && !!errors.name}
-            className="w-96"
-          />
-          <Button
-            type="submit"
-            variant="primary"
-            size="large"
-            disabled={isSubmitting}
-            className="px-10"
-          >
-            Save
-          </Button>
-        </form>
-        {touched.name && (errors.name || mutation.error) && (
-          <div className="mt-2 text-red-500">
-            {errors.name ?? mutation.error?.graphQLErrors[0]?.message ?? mutation.error?.message}
+        <div className="flex items-center justify-between">
+          <div>
+            <Heading className="mb-2">Delete Target</Heading>
+            <div className="text-sm text-gray-400">
+              Deleting an project also delete all schemas and data associated with it.
+              <br />
+              <DocsLink href="/management/targets#delete-a-target">
+                <strong>This action is not reversible!</strong> You can find more information about
+                this process in the documentation
+              </DocsLink>
+            </div>
           </div>
-        )}
-        {mutation.data?.updateTargetName.error?.inputErrors?.name && (
-          <div className="mt-2 text-red-500">
-            {mutation.data.updateTargetName.error.inputErrors.name}
+          <div className="flex items-center gap-x-2">
+            <Button
+              variant="primary"
+              size="large"
+              danger
+              onClick={toggleModalOpen}
+              className="px-5"
+            >
+              Delete Target
+            </Button>
           </div>
-        )}
+        </div>
       </Card>
-
-      {canAccessTokens && <RegistryAccessTokens me={me} />}
-
-      {canAccessTokens && <CDNAccessTokens me={me} />}
-
-      <ConditionalBreakingChanges />
-
-      <ExtendBaseSchema baseSchema={target?.baseSchema ?? ''} />
-
-      {canDelete && (
-        <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <Heading className="mb-2">Delete Target</Heading>
-              <DocsNote warn>
-                Deleting an project also delete all schemas and data associated with it.
-                <br />
-                <DocsLink href="/management/targets#delete-a-target">
-                  <strong>This action is not reversible!</strong> You can find more information
-                  about this process in the documentation
-                </DocsLink>
-              </DocsNote>
-            </div>
-            <div className="flex items-center gap-x-2">
-              <Button
-                variant="primary"
-                size="large"
-                danger
-                onClick={toggleModalOpen}
-                className="px-5"
-              >
-                Delete Target
-              </Button>
-            </div>
-          </div>
-        </Card>
-      )}
-      <DeleteTargetModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
+      <DeleteTargetModal
+        organizationId={props.organizationId}
+        projectId={props.projectId}
+        targetId={props.targetId}
+        isOpen={isModalOpen}
+        toggleModalOpen={toggleModalOpen}
+      />
     </>
   );
-};
+}
 
 const TargetSettingsPageQuery = graphql(`
   query TargetSettingsPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+    organizations {
+      ...TargetLayout_OrganizationConnectionFragment
+    }
     organization(selector: { organization: $organizationId }) {
       organization {
-        ...TargetLayout_OrganizationFragment
+        cleanId
+        ...TargetLayout_CurrentOrganizationFragment
         ...TargetSettingsPage_OrganizationFragment
+        me {
+          ...CDNAccessTokens_MeFragment
+        }
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_ProjectFragment
-    }
-    targets(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_TargetConnectionFragment
+      cleanId
+      ...TargetLayout_CurrentProjectFragment
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
-      id
+      cleanId
+      name
       ...TargetSettingsPage_TargetFragment
+    }
+    me {
+      ...TargetLayout_MeFragment
     }
     ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 
+function TargetSettingsContent() {
+  const router = useRouteSelector();
+  const [query] = useQuery({
+    query: TargetSettingsPageQuery,
+    variables: {
+      organizationId: router.organizationId,
+      projectId: router.projectId,
+      targetId: router.targetId,
+    },
+  });
+  useNotFoundRedirectOnError(!!query.error);
+
+  const me = query.data?.me;
+  const currentOrganization = query.data?.organization?.organization;
+  const currentProject = query.data?.project;
+  const currentTarget = query.data?.target;
+  const organizationConnection = query.data?.organizations;
+  const isCDNEnabled = query.data;
+  const organizationForSettings = useFragment(
+    TargetSettingsPage_OrganizationFragment,
+    currentOrganization,
+  );
+  const targetForSettings = useFragment(TargetSettingsPage_TargetFragment, currentTarget);
+
+  const canAccessTokens = canAccessTarget(
+    TargetAccessScope.TokensRead,
+    organizationForSettings?.me ?? null,
+  );
+  const canDelete = canAccessTarget(TargetAccessScope.Delete, organizationForSettings?.me ?? null);
+
+  if (query.error) {
+    return null;
+  }
+
+  return (
+    <TargetLayout
+      value="settings"
+      currentOrganization={currentOrganization ?? null}
+      currentProject={currentProject ?? null}
+      me={me ?? null}
+      organizations={organizationConnection ?? null}
+      isCDNEnabled={isCDNEnabled ?? null}
+    >
+      <div className="py-6">
+        <Title>Settings</Title>
+        <Subtitle>Manage your target settings.</Subtitle>
+      </div>
+      {currentOrganization && currentProject && currentTarget && organizationForSettings ? (
+        <div className="flex flex-col gap-y-4">
+          <TargetName
+            targetName={currentTarget.name}
+            targetId={currentTarget.cleanId}
+            projectId={currentProject.cleanId}
+            organizationId={currentOrganization.cleanId}
+          />
+          {canAccessTokens && <RegistryAccessTokens me={organizationForSettings.me} />}
+          {canAccessTokens && <CDNAccessTokens me={organizationForSettings.me} />}
+          <ConditionalBreakingChanges />
+          <ExtendBaseSchema baseSchema={targetForSettings?.baseSchema ?? ''} />
+          {canDelete && (
+            <TargetDelete
+              targetId={currentTarget.cleanId}
+              projectId={currentProject.cleanId}
+              organizationId={currentOrganization.cleanId}
+            />
+          )}
+        </div>
+      ) : null}
+    </TargetLayout>
+  );
+}
+
 function SettingsPage(): ReactElement {
   return (
     <>
-      <Title title="Settings" />
-      <TargetLayout
-        value="settings"
-        className="flex flex-col gap-16"
-        query={TargetSettingsPageQuery}
-      >
-        {props =>
-          props.organization ? (
-            <Page target={props.target!} organization={props.organization.organization} />
-          ) : null
-        }
-      </TargetLayout>
+      <MetaTitle title="Settings" />
+      <TargetSettingsContent />
     </>
   );
 }

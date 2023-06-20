@@ -1,13 +1,8 @@
 import { Injectable, Scope } from 'graphql-modules';
-import {
-  CreateDocumentCollectionInput,
-  CreateDocumentCollectionOperationInput,
-  UpdateDocumentCollectionInput,
-  UpdateDocumentCollectionOperationInput,
-} from '@/graphql';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
+import type { CollectionModule } from './../__generated__/types';
 
 @Injectable({
   global: true,
@@ -46,7 +41,10 @@ export class CollectionProvider {
 
   async createCollection(
     targetId: string,
-    { name, description }: Pick<CreateDocumentCollectionInput, 'description' | 'name'>,
+    {
+      name,
+      description,
+    }: Pick<CollectionModule.CreateDocumentCollectionInput, 'description' | 'name'>,
   ) {
     const currentUser = await this.authManager.getCurrentUser();
 
@@ -62,7 +60,7 @@ export class CollectionProvider {
     return this.storage.deleteDocumentCollection({ documentCollectionId: id });
   }
 
-  async createOperation(input: CreateDocumentCollectionOperationInput) {
+  async createOperation(input: CollectionModule.CreateDocumentCollectionOperationInput) {
     const currentUser = await this.authManager.getCurrentUser();
 
     return this.storage.createDocumentCollectionDocument({
@@ -75,7 +73,7 @@ export class CollectionProvider {
     });
   }
 
-  updateOperation(input: UpdateDocumentCollectionOperationInput) {
+  updateOperation(input: CollectionModule.UpdateDocumentCollectionOperationInput) {
     return this.storage.updateDocumentCollectionDocument({
       documentCollectionDocumentId: input.operationId,
       title: input.name,
@@ -85,7 +83,7 @@ export class CollectionProvider {
     });
   }
 
-  updateCollection(input: UpdateDocumentCollectionInput) {
+  updateCollection(input: CollectionModule.UpdateDocumentCollectionInput) {
     return this.storage.updateDocumentCollection({
       documentCollectionId: input.collectionId,
       description: input.description || null,

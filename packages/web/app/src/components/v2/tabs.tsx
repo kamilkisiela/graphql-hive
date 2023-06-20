@@ -17,8 +17,6 @@ const List = ({ children, className, ...props }: TabsListProps): ReactElement =>
       relative
       flex
       items-center
-      gap-7
-      text-xl
       text-gray-700
     `,
       className,
@@ -35,19 +33,18 @@ const Trigger = forwardRef<any, Omit<TabsTriggerProps, 'className'> & { hasBorde
       ref={forwardedRef}
       className={clsx(
         '!appearance-none', // unset button styles in Safari
-        `
-  radix-state-active:text-white
-  font-bold
-  transition
-  hover:text-white`,
-        hasBorder &&
+        'font-medium text-sm transition text-white',
+        hasBorder
+          ? `
+            radix-state-active:border-b-orange-500
+            hover:border-b-orange-900
+            border-b-[2px]
+            border-b-transparent
+            px-4
+            py-3
+            cursor-pointer
           `
-  radix-state-active:border-b-orange-500
-  border-b-[5px]
-  border-b-transparent
-  pb-3
-  cursor-pointer
-  `,
+          : null,
       )}
       {...props}
     >

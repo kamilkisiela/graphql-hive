@@ -1,11 +1,17 @@
 import { ReactElement } from 'react';
-import { useMutation } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { ProjectLayout } from '@/components/layouts';
+import { ProjectLayout } from '@/components/layouts/project';
 import { PolicySettings } from '@/components/policy/policy-settings';
-import { Card, DocsLink, DocsNote, Heading, Title } from '@/components/v2';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Subtitle, Title } from '@/components/ui/page';
+import { DocsLink, MetaTitle } from '@/components/v2';
 import { graphql } from '@/gql';
+import { ProjectAccessScope } from '@/gql/graphql';
 import { RegistryModel } from '@/graphql';
+import { useProjectAccess } from '@/lib/access/project';
+import { useRouteSelector } from '@/lib/hooks';
+import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const ProjectPolicyPageQuery = graphql(`
@@ -23,18 +29,27 @@ const ProjectPolicyPageQuery = graphql(`
             }
           }
         }
-        ...ProjectLayout_OrganizationFragment
+        me {
+          ...CanAccessProject_MemberFragment
+        }
+        ...ProjectLayout_CurrentOrganizationFragment
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
       id
-      ...ProjectLayout_ProjectFragment
+      ...ProjectLayout_CurrentProjectFragment
       registryModel
       schemaPolicy {
         id
         updatedAt
         ...PolicySettings_SchemaPolicyFragment
       }
+    }
+    organizations {
+      ...ProjectLayout_OrganizationConnectionFragment
+    }
+    me {
+      ...ProjectLayout_MeFragment
     }
   }
 `);
@@ -51,7 +66,7 @@ const UpdateSchemaPolicyForProject = graphql(`
       ok {
         project {
           id
-          ...ProjectLayout_ProjectFragment
+          ...ProjectLayout_CurrentProjectFragment
           schemaPolicy {
             id
             updatedAt
@@ -63,23 +78,60 @@ const UpdateSchemaPolicyForProject = graphql(`
   }
 `);
 
-function ProjectPolicyPage(): ReactElement {
+function ProjectPolicyContent() {
   const [mutation, mutate] = useMutation(UpdateSchemaPolicyForProject);
+  const router = useRouteSelector();
+  const [query] = useQuery({
+    query: ProjectPolicyPageQuery,
+    variables: {
+      organizationId: router.organizationId,
+      projectId: router.projectId,
+    },
+    requestPolicy: 'cache-and-network',
+  });
+
+  useNotFoundRedirectOnError(!!query.error);
+
+  const me = query.data?.me;
+  const currentOrganization = query.data?.organization?.organization;
+  const currentProject = query.data?.project;
+  const organizationConnection = query.data?.organizations;
+
+  useProjectAccess({
+    scope: ProjectAccessScope.Settings,
+    member: currentOrganization?.me ?? null,
+    redirect: true,
+  });
+
+  if (query.error) {
+    return null;
+  }
+
+  const isLegacyProject = currentProject?.registryModel === RegistryModel.Legacy;
 
   return (
-    <>
-      <Title title="Project Schema Policy" />
-      <ProjectLayout
-        value="policy"
-        className="flex flex-col gap-y-10"
-        query={ProjectPolicyPageQuery}
-      >
-        {(props, selector) => {
-          return props.project && props.organization ? (
-            <Card>
-              <Heading className="mb-2">Project Schema Policy</Heading>
-              {props.project.registryModel === RegistryModel.Legacy ? (
-                <DocsNote warn>
+    <ProjectLayout
+      currentOrganization={currentOrganization ?? null}
+      currentProject={currentProject ?? null}
+      organizations={organizationConnection ?? null}
+      me={me ?? null}
+      value="policy"
+      className="flex flex-col gap-y-10"
+    >
+      <div>
+        <div className="py-6">
+          <Title>Organization Schema Policy</Title>
+          <Subtitle>
+            Schema Policies enable developers to define additional semantic checks on the GraphQL
+            schema.
+          </Subtitle>
+        </div>
+        {currentProject && currentOrganization ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Rules</CardTitle>
+              {currentProject && isLegacyProject ? (
+                <CardDescription>
                   <strong>
                     Policy feature is only available for projects that are using the new registry
                     model.
@@ -88,51 +140,68 @@ function ProjectPolicyPage(): ReactElement {
                     policy feature.
                   </strong>
                   <br />
-                  <DocsLink href="https://the-guild.dev/blog/graphql-hive-improvements-in-schema-registry">
+                  <DocsLink
+                    className="text-muted-foreground text-sm"
+                    href="https://the-guild.dev/blog/graphql-hive-improvements-in-schema-registry"
+                  >
                     Learn more
                   </DocsLink>
-                </DocsNote>
+                </CardDescription>
               ) : (
-                <>
-                  <DocsNote>
-                    <strong>Schema Policies</strong> enable developers to define additional semantic
-                    checks on the GraphQL schema. At the project level, policies can be defined to
-                    affect all targets, and override policy configuration defined at the
-                    organization level.{' '}
-                    <DocsLink href="/features/schema-policy">Learn more</DocsLink>
-                  </DocsNote>
-                  {props.organization.organization.schemaPolicy === null ||
-                  props.organization.organization.schemaPolicy?.allowOverrides ? (
-                    <PolicySettings
-                      saving={mutation.fetching}
-                      rulesInParent={props.organization.organization.schemaPolicy?.rules.map(
-                        r => r.rule.id,
-                      )}
-                      error={
-                        mutation.error?.message ||
-                        mutation.data?.updateSchemaPolicyForProject.error?.message
-                      }
-                      onSave={async newPolicy => {
-                        await mutate({
-                          selector,
-                          policy: newPolicy,
-                        });
-                      }}
-                      currentState={props.project.schemaPolicy}
-                    />
-                  ) : (
-                    <div className="mt-4 text-gray-400 pl-1 text-sm font-bold">
-                      <p className="text-orange-500 inline-block mr-4">!</p>
-                      Organization settings does not allow projects to override policy. Please
-                      consult your organization administrator.
-                    </div>
-                  )}
-                </>
+                <CardDescription>
+                  At the project level, policies can be defined to affect all targets, and override
+                  policy configuration defined at the organization level.
+                  <br />
+                  <DocsLink
+                    href="/features/schema-policy"
+                    className="text-muted-foreground text-sm"
+                  >
+                    Learn more
+                  </DocsLink>
+                </CardDescription>
               )}
-            </Card>
-          ) : null;
-        }}
-      </ProjectLayout>
+            </CardHeader>
+            <CardContent>
+              {currentOrganization.schemaPolicy === null ||
+              currentOrganization.schemaPolicy?.allowOverrides ? (
+                <PolicySettings
+                  saving={mutation.fetching}
+                  rulesInParent={currentOrganization.schemaPolicy?.rules.map(r => r.rule.id)}
+                  error={
+                    mutation.error?.message ||
+                    mutation.data?.updateSchemaPolicyForProject.error?.message
+                  }
+                  onSave={async newPolicy => {
+                    await mutate({
+                      selector: {
+                        organization: router.organizationId,
+                        project: router.projectId,
+                      },
+                      policy: newPolicy,
+                    });
+                  }}
+                  currentState={currentProject.schemaPolicy}
+                />
+              ) : (
+                <div className="text-gray-400 pl-1 text-sm font-bold">
+                  <p className="text-orange-500 inline-block mr-4">!</p>
+                  Organization settings does not allow projects to override policy. Please consult
+                  your organization administrator.
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ) : null}
+      </div>
+    </ProjectLayout>
+  );
+}
+
+function ProjectPolicyPage(): ReactElement {
+  return (
+    <>
+      <MetaTitle title="Project Schema Policy" />
+      <ProjectPolicyContent />
     </>
   );
 }

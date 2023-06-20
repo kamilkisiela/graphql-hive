@@ -1,43 +1,56 @@
 import { ReactElement } from 'react';
 import { useFormik } from 'formik';
-import { useMutation, useQuery } from 'urql';
+import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Modal, Select } from '@/components/v2';
-import { AddAlertDocument, AlertChannelsDocument, AlertType, TargetsDocument } from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { AlertType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 
-export const CreateAlertModal = ({
-  isOpen,
-  toggleModalOpen,
-}: {
+export const CreateAlertModal_AddAlertMutation = graphql(`
+  mutation CreateAlertModal_AddAlertMutation($input: AddAlertInput!) {
+    addAlert(input: $input) {
+      ok {
+        updatedProject {
+          id
+        }
+        addedAlert {
+          ...AlertsTable_AlertFragment
+        }
+      }
+      error {
+        message
+      }
+    }
+  }
+`);
+
+export const CreateAlertModal_TargetFragment = graphql(`
+  fragment CreateAlertModal_TargetFragment on Target {
+    id
+    cleanId
+    name
+  }
+`);
+
+export const CreateAlertModal_AlertChannelFragment = graphql(`
+  fragment CreateAlertModal_AlertChannelFragment on AlertChannel {
+    id
+    name
+  }
+`);
+
+export const CreateAlertModal = (props: {
   isOpen: boolean;
   toggleModalOpen: () => void;
+  targets: FragmentType<typeof CreateAlertModal_TargetFragment>[];
+  channels: FragmentType<typeof CreateAlertModal_AlertChannelFragment>[];
 }): ReactElement => {
-  const [mutation, mutate] = useMutation(AddAlertDocument);
+  const { isOpen, toggleModalOpen } = props;
+  const targets = useFragment(CreateAlertModal_TargetFragment, props.targets);
+  const channels = useFragment(CreateAlertModal_AlertChannelFragment, props.channels);
+  const [mutation, mutate] = useMutation(CreateAlertModal_AddAlertMutation);
   const router = useRouteSelector();
-  const [targetsQuery] = useQuery({
-    query: TargetsDocument,
-    variables: {
-      selector: {
-        organization: router.organizationId,
-        project: router.projectId,
-      },
-    },
-    requestPolicy: 'cache-and-network',
-  });
-  const [channelsQuery] = useQuery({
-    query: AlertChannelsDocument,
-    variables: {
-      selector: {
-        organization: router.organizationId,
-        project: router.projectId,
-      },
-    },
-    requestPolicy: 'cache-and-network',
-  });
-
-  const channels = channelsQuery.data?.alertChannels || [];
-  const targets = targetsQuery.data?.targets.nodes || [];
 
   const { handleSubmit, values, handleChange, errors, touched, isSubmitting } = useFormik({
     initialValues: {
@@ -61,7 +74,7 @@ export const CreateAlertModal = ({
       ),
     }),
     async onSubmit(values) {
-      const { error } = await mutate({
+      const { error, data } = await mutate({
         input: {
           organization: router.organizationId,
           project: router.projectId,
@@ -70,7 +83,8 @@ export const CreateAlertModal = ({
           type: values.type,
         },
       });
-      if (!error) {
+      console.log({ data, error });
+      if (!error && data?.addAlert) {
         toggleModalOpen();
       }
     },

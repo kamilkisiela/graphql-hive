@@ -1,19 +1,22 @@
 import { ReactElement } from 'react';
 import Image from 'next/image';
 import { Card, DocsLink, Heading } from '@/components/v2/index';
+import { cn } from '@/lib/utils';
 import magnifier from '../../../public/images/figures/magnifier.svg';
 
 export const EmptyList = ({
   title,
   description,
   docsUrl,
+  className,
 }: {
   title: string;
   description: string;
-  docsUrl?: string;
+  docsUrl?: string | null;
+  className?: string;
 }): ReactElement => {
   return (
-    <Card className="flex grow flex-col items-center gap-y-2" data-cy="empty-list">
+    <Card className={cn('flex grow flex-col items-center gap-y-2', className)} data-cy="empty-list">
       <Image
         src={magnifier}
         alt="Magnifier illustration"

@@ -37,9 +37,11 @@ type SchemaExplorerContextType = {
   isArgumentListCollapsed: boolean;
   setArgumentListCollapsed(isCollapsed: boolean): void;
   setPeriodOption(option: PeriodOption): void;
+  setDataRetentionInDays(days: number): void;
   periodOption: PeriodOption;
   availablePeriodOptions: PeriodOption[];
   period: Period;
+  dataRetentionInDays: number;
 };
 
 const SchemaExplorerContext = createContext<SchemaExplorerContextType>({
@@ -49,15 +51,14 @@ const SchemaExplorerContext = createContext<SchemaExplorerContextType>({
   period: createPeriod('7d'),
   availablePeriodOptions: ['7d'],
   setPeriodOption: () => {},
+  dataRetentionInDays: 7,
+  setDataRetentionInDays: () => {},
 });
 
-export function SchemaExplorerProvider({
-  dataRetentionInDays,
-  children,
-}: {
-  dataRetentionInDays: number;
-  children: ReactNode;
-}): ReactElement {
+export function SchemaExplorerProvider({ children }: { children: ReactNode }): ReactElement {
+  const [dataRetentionInDays, setDataRetentionInDays] = useState(
+    7 /* Minimum possible data retention period - Free plan */,
+  );
   const [isArgumentListCollapsed, setArgumentListCollapsed] = useLocalStorage(
     'hive:schema-explorer:collapsed',
     true,
@@ -98,6 +99,8 @@ export function SchemaExplorerProvider({
         setPeriodOption: updatePeriod,
         periodOption,
         availablePeriodOptions,
+        dataRetentionInDays,
+        setDataRetentionInDays,
       }}
     >
       {children}

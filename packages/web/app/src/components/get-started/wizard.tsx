@@ -1,12 +1,12 @@
 import { ReactElement, ReactNode } from 'react';
 import clsx from 'clsx';
 import { Drawer } from '@/components/v2';
-import { DocumentType, graphql } from '@/gql';
+import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useToggle } from '@/lib/hooks';
 import { CheckCircledIcon } from '@radix-ui/react-icons';
 
-const GetStartedWizard_GetStartedProgress = graphql(`
+export const GetStartedWizard_GetStartedProgress = graphql(`
   fragment GetStartedWizard_GetStartedProgress on OrganizationGetStarted {
     creatingProject
     publishingSchema
@@ -17,12 +17,11 @@ const GetStartedWizard_GetStartedProgress = graphql(`
   }
 `);
 
-export function GetStartedProgress({
-  tasks,
-}: {
-  tasks: DocumentType<typeof GetStartedWizard_GetStartedProgress>;
+export function GetStartedProgress(props: {
+  tasks: FragmentType<typeof GetStartedWizard_GetStartedProgress>;
 }): ReactElement | null {
   const [isOpen, toggle] = useToggle();
+  const tasks = useFragment(GetStartedWizard_GetStartedProgress, props.tasks);
 
   if (!tasks) {
     return null;

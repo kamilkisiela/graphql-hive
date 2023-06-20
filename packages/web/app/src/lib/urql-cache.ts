@@ -2,23 +2,21 @@
 import { DocumentNode, Kind } from 'graphql';
 import { produce } from 'immer';
 import { TypedDocumentNode } from 'urql';
+import type { CreateAlertModal_AddAlertMutation } from '@/components/project/alerts/create-alert';
+import type { CreateChannel_AddAlertChannelMutation } from '@/components/project/alerts/create-channel';
+import type { DeleteAlertsButton_DeleteAlertsMutation } from '@/components/project/alerts/delete-alerts-button';
+import type { DeleteChannelsButton_DeleteChannelsMutation } from '@/components/project/alerts/delete-channels-button';
 import type { CreateOperationMutationType } from '@/components/v2/modals/create-operation';
+import type { CreateProjectMutation } from '@/components/v2/modals/create-project';
 import type { DeleteCollectionMutationType } from '@/components/v2/modals/delete-collection';
 import type { DeleteOperationMutationType } from '@/components/v2/modals/delete-operation';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
 import {
-  AddAlertChannelDocument,
-  AddAlertDocument,
-  AlertChannelsDocument,
-  AlertsDocument,
   CheckIntegrationsDocument,
   CreateOrganizationDocument,
-  CreateProjectDocument,
   CreateTargetDocument,
   CreateTokenDocument,
-  DeleteAlertChannelsDocument,
-  DeleteAlertsDocument,
   DeleteGitHubIntegrationDocument,
   DeleteOrganizationDocument,
   DeletePersistedOperationDocument,
@@ -27,7 +25,6 @@ import {
   DeleteTargetDocument,
   DeleteTokensDocument,
   OrganizationsDocument,
-  ProjectsDocument,
   TargetsDocument,
   TokensDocument,
 } from '../graphql';
@@ -59,15 +56,13 @@ type TypedDocumentNodeUpdateResolver<TNode extends TypedDocumentNode<any, any>> 
   VariablesOf<TNode>
 >;
 
-const deleteAlerts: TypedDocumentNodeUpdateResolver<typeof DeleteAlertsDocument> = (
-  { deleteAlerts },
-  _args,
-  cache,
-) => {
-  for (const alert of deleteAlerts) {
+const deleteAlerts: TypedDocumentNodeUpdateResolver<
+  typeof DeleteAlertsButton_DeleteAlertsMutation
+> = ({ deleteAlerts }, _args, cache) => {
+  if (deleteAlerts.ok) {
     cache.invalidate({
-      __typename: alert.__typename,
-      id: alert.id,
+      __typename: 'Project',
+      id: deleteAlerts.ok.updatedProject.id,
     });
   }
 };
@@ -106,7 +101,7 @@ const deleteOrganization: TypedDocumentNodeUpdateResolver<typeof DeleteOrganizat
   });
 };
 
-const createProject: TypedDocumentNodeUpdateResolver<typeof CreateProjectDocument> = (
+const createProject: TypedDocumentNodeUpdateResolver<typeof CreateProjectMutation> = (
   { createProject },
   _args,
   cache,
@@ -114,24 +109,11 @@ const createProject: TypedDocumentNodeUpdateResolver<typeof CreateProjectDocumen
   if (!createProject.ok) {
     return;
   }
-  const { selector } = createProject.ok;
-  const project = createProject.ok.createdProject;
 
-  updateQuery(
-    cache,
-    {
-      query: ProjectsDocument,
-      variables: {
-        selector: {
-          organization: selector.organization,
-        },
-      },
-    },
-    data => {
-      data.projects.nodes.unshift(project);
-      data.projects.total += 1;
-    },
-  );
+  cache.invalidate({
+    __typename: 'Organization',
+    id: createProject.ok.updatedOrganization.id,
+  });
 };
 
 const deleteProject: TypedDocumentNodeUpdateResolver<typeof DeleteProjectDocument> = (
@@ -247,65 +229,43 @@ const deleteTokens: TypedDocumentNodeUpdateResolver<typeof DeleteTokensDocument>
   );
 };
 
-const addAlertChannel: TypedDocumentNodeUpdateResolver<typeof AddAlertChannelDocument> = (
-  { addAlertChannel },
-  args,
-  cache,
-) => {
+const addAlertChannel: TypedDocumentNodeUpdateResolver<
+  typeof CreateChannel_AddAlertChannelMutation
+> = ({ addAlertChannel }, args, cache) => {
   if (!addAlertChannel.ok) {
     return;
   }
 
-  const { addedAlertChannel } = addAlertChannel.ok;
-
-  updateQuery(
-    cache,
-    {
-      query: AlertChannelsDocument,
-      variables: {
-        selector: {
-          organization: args.input.organization,
-          project: args.input.project,
-        },
-      },
-    },
-    data => {
-      data.alertChannels.unshift(addedAlertChannel);
-    },
-  );
+  const { updatedProject } = addAlertChannel.ok;
+  cache.invalidate({
+    __typename: 'Project',
+    id: updatedProject.id,
+  });
 };
-const deleteAlertChannels: TypedDocumentNodeUpdateResolver<typeof DeleteAlertChannelsDocument> = (
-  { deleteAlertChannels },
-  _args,
-  cache,
-) => {
-  for (const channel of deleteAlertChannels) {
+const deleteAlertChannels: TypedDocumentNodeUpdateResolver<
+  typeof DeleteChannelsButton_DeleteChannelsMutation
+> = ({ deleteAlertChannels }, _args, cache) => {
+  if (deleteAlertChannels.ok) {
     cache.invalidate({
-      __typename: channel.__typename,
-      id: channel.id,
+      __typename: 'Project',
+      id: deleteAlertChannels.ok.updatedProject.id,
     });
   }
 };
-const addAlert: TypedDocumentNodeUpdateResolver<typeof AddAlertDocument> = (
+const addAlert: TypedDocumentNodeUpdateResolver<typeof CreateAlertModal_AddAlertMutation> = (
   { addAlert },
-  args,
+  _args,
   cache,
 ) => {
-  updateQuery(
-    cache,
-    {
-      query: AlertsDocument,
-      variables: {
-        selector: {
-          organization: args.input.organization,
-          project: args.input.project,
-        },
-      },
-    },
-    data => {
-      data.alerts.unshift(addAlert);
-    },
-  );
+  if (!addAlert.ok) {
+    return;
+  }
+
+  const { updatedProject } = addAlert.ok;
+  cache.invalidate({
+    __typename: 'Project',
+    id: updatedProject.id,
+  });
 };
 const deletePersistedOperation: TypedDocumentNodeUpdateResolver<
   typeof DeletePersistedOperationDocument

@@ -3,7 +3,7 @@ import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
-import { Avatar, Button, Heading, Input, SubHeader, Tabs, Title } from '@/components/v2';
+import { Avatar, Button, Heading, Input, MetaTitle, Tabs } from '@/components/v2';
 import { graphql } from '@/gql';
 import { MeDocument } from '@/graphql';
 import { withSessionProtection } from '@/lib/supertokens/guard';
@@ -51,26 +51,24 @@ function SettingsPage(): ReactElement {
 
   return (
     <>
-      <Title title="Profile settings" />
-      <SubHeader>
-        <header className="container flex items-center pb-5">
-          <div className="mr-4 rounded-full">
-            <Avatar
-              src={null}
-              alt="Your profile photo"
-              shape="circle"
-              fallback={me?.displayName[0] ?? '?'}
-              className="!h-[94px] !w-[94px] text-4xl"
-            />
-          </div>
-          <div className="overflow-hidden">
-            <Heading size="2xl" className="line-clamp-1">
-              {me?.displayName}
-            </Heading>
-            <span className="text-xs font-medium text-gray-500">{me?.email}</span>
-          </div>
-        </header>
-      </SubHeader>
+      <MetaTitle title="Profile settings" />
+      <header className="container flex items-center pb-5">
+        <div className="mr-4 rounded-full">
+          <Avatar
+            src={null}
+            alt="Your profile photo"
+            shape="circle"
+            fallback={me?.displayName[0] ?? '?'}
+            className="!h-[94px] !w-[94px] text-4xl"
+          />
+        </div>
+        <div className="overflow-hidden">
+          <Heading size="2xl" className="line-clamp-1">
+            {me?.displayName}
+          </Heading>
+          <span className="text-xs font-medium text-gray-500">{me?.email}</span>
+        </div>
+      </header>
       <Tabs defaultValue="personal-info" className="container">
         <Tabs.List>
           <Tabs.Trigger value="personal-info">Personal Info</Tabs.Trigger>

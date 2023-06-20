@@ -1,6 +1,10 @@
 query me {
   me {
-    ...UserFields
-    canSwitchOrganization
+    ...MeFields
   }
+}
+
+fragment MeFields on User {
+  ...UserFields
+  canSwitchOrganization
 }

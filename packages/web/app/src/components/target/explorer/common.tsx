@@ -179,17 +179,16 @@ const GraphQLTypeCard_SupergraphMetadataFragment = graphql(`
   }
 `);
 
-export function GraphQLTypeCard(
-  props: React.PropsWithChildren<{
-    kind: string;
-    name: string;
-    description?: string | null;
-    implements?: string[];
-    totalRequests?: number;
-    usage?: FragmentType<typeof SchemaExplorerUsageStats_UsageFragment>;
-    supergraphMetadata?: FragmentType<typeof GraphQLTypeCard_SupergraphMetadataFragment> | null;
-  }>,
-): ReactElement {
+export function GraphQLTypeCard(props: {
+  kind: string;
+  name: string;
+  description?: string | null;
+  implements?: string[];
+  totalRequests?: number;
+  usage?: FragmentType<typeof SchemaExplorerUsageStats_UsageFragment>;
+  supergraphMetadata?: FragmentType<typeof GraphQLTypeCard_SupergraphMetadataFragment> | null;
+  children: ReactNode;
+}): ReactElement {
   const supergraphMetadata = useFragment(
     GraphQLTypeCard_SupergraphMetadataFragment,
     props.supergraphMetadata,

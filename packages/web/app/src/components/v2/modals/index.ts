@@ -2,8 +2,6 @@ export { ChangePermissionsModal } from './change-permissions';
 export { ConnectLabModal } from './connect-lab';
 export { ConnectSchemaModal } from './connect-schema';
 export { CreateAccessTokenModal } from './create-access-token';
-export { CreateAlertModal } from './create-alert';
-export { CreateChannelModal } from './create-channel';
 export { CreateCollectionModal } from './create-collection';
 export { CreateOperationModal } from './create-operation';
 export { CreateProjectModal } from './create-project';

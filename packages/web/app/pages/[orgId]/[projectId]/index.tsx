@@ -1,154 +1,369 @@
-import { ReactElement } from 'react';
+import { ReactElement, useMemo, useRef } from 'react';
 import NextLink from 'next/link';
-import clsx from 'clsx';
+import { formatISO, subDays } from 'date-fns';
+import * as echarts from 'echarts';
+import ReactECharts from 'echarts-for-react';
+import { Globe, History } from 'lucide-react';
+import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { ProjectLayout } from '@/components/layouts';
+import { ProjectLayout } from '@/components/layouts/project';
 import {
-  Activities,
-  Badge,
-  Button,
-  Card,
-  EmptyList,
-  Heading,
-  TimeAgo,
-  Title,
-} from '@/components/v2';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/v2/dropdown';
-import { LinkIcon, MoreIcon, SettingsIcon } from '@/components/v2/icon';
-import { graphql } from '@/gql';
-import { TargetQuery, TargetsDocument, VersionsDocument } from '@/graphql';
-import { useClipboard } from '@/lib/hooks/use-clipboard';
+  createEmptySeries,
+  fullSeries,
+  resolutionToMilliseconds,
+} from '@/components/target/operations/utils';
+import { Subtitle, Title } from '@/components/ui/page';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Activities, Card, EmptyList, MetaTitle } from '@/components/v2';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { useFormattedNumber } from '@/lib/hooks';
+import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import { cn, pluralize } from '@/lib/utils';
 
-const TargetCard = ({
-  target,
-}: {
-  target: Exclude<TargetQuery['target'], null | undefined>;
+function floorDate(date: Date): Date {
+  const time = 1000 * 60;
+  return new Date(Math.floor(date.getTime() / time) * time);
+}
+
+const TargetCard_TargetFragment = graphql(`
+  fragment TargetCard_TargetFragment on Target {
+    id
+    name
+    cleanId
+  }
+`);
+
+const TargetCard = (props: {
+  target: FragmentType<typeof TargetCard_TargetFragment> | null;
+  highestNumberOfRequests: number;
+  period: {
+    from: string;
+    to: string;
+  };
+  requestsOverTime: { date: string; value: number }[] | null;
+  schemaVersionsCount: number | null;
+  days: number;
 }): ReactElement => {
   const router = useRouteSelector();
-  const copyToClipboard = useClipboard();
-  const [versionsQuery] = useQuery({
-    query: VersionsDocument,
-    variables: {
-      selector: {
-        organization: router.organizationId,
-        project: router.projectId,
-        target: target.cleanId,
-      },
-      limit: 1,
-    },
-    requestPolicy: 'cache-and-network',
-  });
-  const versions = versionsQuery.data?.schemaVersions;
-  const lastVersion = versions?.nodes[0];
-  const author = lastVersion?.log && 'author' in lastVersion.log ? lastVersion.log.author : null;
-  const isValid = lastVersion?.valid;
-  const href = `/${router.organizationId}/${router.projectId}/${target.cleanId}`;
+  const target = useFragment(TargetCard_TargetFragment, props.target);
+  const href = target ? `/${router.organizationId}/${router.projectId}/${target.cleanId}` : '';
+  const { period, highestNumberOfRequests } = props;
+  const interval = resolutionToMilliseconds(props.days, period);
+  const requests = useMemo(() => {
+    if (props.requestsOverTime?.length) {
+      return fullSeries(
+        props.requestsOverTime.map<[string, number]>(node => [node.date, node.value]),
+        interval,
+        props.period,
+      );
+    }
+
+    return createEmptySeries({ interval, period });
+  }, [interval]);
+
+  const totalNumberOfRequests = useMemo(
+    () => requests.reduce((acc, [_, value]) => acc + value, 0),
+    [requests],
+  );
+  const totalNumberOfVersions = props.schemaVersionsCount ?? 0;
+  const requestsInDateRange = useFormattedNumber(totalNumberOfRequests);
+  const schemaVersionsInDateRange = useFormattedNumber(totalNumberOfVersions);
 
   return (
-    <Card as={NextLink} key={target.id} className="hover:bg-gray-800/40" href={href}>
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <h2 className="line-clamp-2 text-lg font-bold">{target.name}</h2>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button>
-              <MoreIcon />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent sideOffset={5} align="start">
-            <DropdownMenuItem
-              onClick={async e => {
-                e.stopPropagation();
-                await copyToClipboard(`${location.origin}${href}`);
-              }}
-            >
-              <LinkIcon />
-              Share Link
-            </DropdownMenuItem>
-            <NextLink
-              href={`/${router.organizationId}/${router.projectId}/${target.cleanId}#settings`}
-            >
-              <DropdownMenuItem>
-                <SettingsIcon />
-                Settings
-              </DropdownMenuItem>
-            </NextLink>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      {author && (
-        <>
-          <div className={clsx('mt-2.5 mb-1.5 flex items-center gap-x-2 text-sm text-gray-500')}>
-            {lastVersion ? (
-              <>
-                <Badge color={isValid ? 'green' : 'red'} />
-                <span>
-                  {'commit' in lastVersion.log ? lastVersion.log.commit.substring(0, 7) : ''}
-                </span>
-                <span>
-                  - Published <TimeAgo date={lastVersion.date} />
-                </span>
-              </>
-            ) : (
-              <Badge color="yellow" />
-            )}
+    <Card
+      as={NextLink}
+      href={href}
+      className="h-full pt-4 px-0 self-start hover:bg-gray-800/40 hover:shadow-md hover:shadow-gray-800/50"
+    >
+      <TooltipProvider>
+        <div className="flex items-start gap-x-2">
+          <div className="grow">
+            <div>
+              <AutoSizer disableHeight>
+                {size => (
+                  <ReactECharts
+                    style={{ width: size.width, height: 90 }}
+                    option={{
+                      animation: !!target,
+                      color: ['#f4b740'],
+                      grid: {
+                        left: 0,
+                        top: 10,
+                        right: 0,
+                        bottom: 10,
+                      },
+                      tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                          label: {
+                            formatter({ value }: { value: number }) {
+                              return new Date(value).toDateString();
+                            },
+                          },
+                        },
+                      },
+                      xAxis: [
+                        {
+                          show: false,
+                          type: 'time',
+                          boundaryGap: false,
+                        },
+                      ],
+                      yAxis: [
+                        {
+                          show: false,
+                          type: 'value',
+                          min: 0,
+                          max: highestNumberOfRequests,
+                        },
+                      ],
+                      series: [
+                        {
+                          name: 'Requests',
+                          type: 'line',
+                          smooth: false,
+                          lineStyle: {
+                            width: 2,
+                          },
+                          showSymbol: false,
+                          areaStyle: {
+                            opacity: 0.8,
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                              {
+                                offset: 0,
+                                color: 'rgba(244, 184, 64, 0.20)',
+                              },
+                              {
+                                offset: 1,
+                                color: 'rgba(244, 184, 64, 0)',
+                              },
+                            ]),
+                          },
+                          emphasis: {
+                            focus: 'series',
+                          },
+                          data: requests,
+                        },
+                      ],
+                    }}
+                  />
+                )}
+              </AutoSizer>
+            </div>
+            <div className="flex flex-row gap-y-3 px-4 pt-4 justify-between items-center">
+              <div>
+                {target ? (
+                  <h4 className="line-clamp-2 text-lg font-bold">{target.name}</h4>
+                ) : (
+                  <div className="w-48 h-4 py-2 bg-gray-800 rounded-full animate-pulse" />
+                )}
+              </div>
+              <div className="flex flex-col gap-y-2 py-1">
+                {target ? (
+                  <>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <div className="flex flex-row gap-x-2 items-center">
+                          <Globe className="w-4 h-4 text-gray-500" />
+                          <div className="text-xs">
+                            {requestsInDateRange}{' '}
+                            {pluralize(totalNumberOfRequests, 'request', 'requests')}
+                          </div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Number of GraphQL requests in the last {props.days} days.
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <div className="flex flex-row gap-x-2 items-center">
+                          <History className="w-4 h-4 text-gray-500" />
+                          <div className="text-xs">
+                            {schemaVersionsInDateRange}{' '}
+                            {pluralize(totalNumberOfVersions, 'commit', 'commits')}
+                          </div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Number of schemas pushed to this project in the last {props.days} days.
+                      </TooltipContent>
+                    </Tooltip>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-16 h-2 my-1 bg-gray-800 rounded-full animate-pulse" />
+                    <div className="w-16 h-2 my-1 bg-gray-800 rounded-full animate-pulse" />
+                  </>
+                )}
+              </div>
+            </div>
           </div>
-        </>
-      )}
+        </div>
+      </TooltipProvider>
     </Card>
   );
 };
 
 const Page = () => {
   const router = useRouteSelector();
-  const [targetsQuery] = useQuery({
-    query: TargetsDocument,
+  const period = useRef<{
+    from: string;
+    to: string;
+  }>();
+  const days = 14;
+
+  if (!period.current) {
+    const now = floorDate(new Date());
+    const from = formatISO(subDays(now, days));
+    const to = formatISO(now);
+
+    period.current = { from, to };
+  }
+
+  const [query] = useQuery({
+    query: ProjectOverviewPageQuery,
     variables: {
-      selector: {
-        organization: router.organizationId,
-        project: router.projectId,
-      },
+      organizationId: router.organizationId,
+      projectId: router.projectId,
+      chartResolution: days, // 14 days = 14 data points
+      period: period.current,
     },
   });
-  const targets = targetsQuery.data?.targets;
+  useNotFoundRedirectOnError(!!query.error);
+
+  const me = query.data?.me;
+  const currentOrganization = query.data?.organization?.organization;
+  const currentProject = query.data?.project;
+  const organizationConnection = query.data?.organizations;
+  const targetConnection = query.data?.targets;
+  const targets = targetConnection?.nodes;
+
+  const highestNumberOfRequests = useMemo(() => {
+    if (targets?.length) {
+      return targets.reduce((max, target) => {
+        return Math.max(
+          max,
+          target.requestsOverTime.reduce((max, { value }) => Math.max(max, value), 0),
+        );
+      }, 100);
+    }
+
+    return 100;
+  }, [targets]);
+
+  if (query.error) {
+    return null;
+  }
 
   return (
-    <>
-      <div className="flex grow flex-col gap-4">
-        <Heading>List of targets</Heading>
-        {targets && targets.total === 0 ? (
-          <EmptyList
-            title="Hive is waiting for your first target"
-            description='You can create a target by clicking the "New Target" button'
-            docsUrl="/management/targets#create-a-new-target"
-          />
-        ) : (
-          targets?.nodes.map(target => <TargetCard key={target.id} target={target} />)
-        )}
+    <ProjectLayout
+      value="targets"
+      className="flex justify-between gap-12"
+      currentOrganization={currentOrganization ?? null}
+      currentProject={currentProject ?? null}
+      me={me ?? null}
+      organizations={organizationConnection ?? null}
+    >
+      <div className="grow">
+        <div className="py-6">
+          <Title>Targets</Title>
+          <Subtitle>A list of available targets in your project.</Subtitle>
+        </div>
+        <div
+          className={cn(
+            'grow',
+            targets?.length === 0 ? '' : 'grid grid-cols-2 gap-5 items-stretch',
+          )}
+        >
+          {targets ? (
+            targets.length === 0 ? (
+              <EmptyList
+                title="Hive is waiting for your first target"
+                description='You can create a target by clicking the "New Target" button'
+                docsUrl="/management/targets#create-a-new-target"
+              />
+            ) : (
+              targets
+                .sort((a, b) => {
+                  const diff = b.schemaVersionsCount - a.schemaVersionsCount;
+
+                  if (diff !== 0) {
+                    return diff;
+                  }
+
+                  return a.name.localeCompare(b.name);
+                })
+                .map(target => (
+                  <TargetCard
+                    key={target.id}
+                    target={target}
+                    days={days}
+                    highestNumberOfRequests={highestNumberOfRequests}
+                    period={period.current!}
+                    requestsOverTime={target.requestsOverTime}
+                    schemaVersionsCount={target.schemaVersionsCount}
+                  />
+                ))
+            )
+          ) : (
+            <>
+              {Array.from({ length: 4 }).map((_, index) => (
+                <TargetCard
+                  key={index}
+                  target={null}
+                  days={days}
+                  highestNumberOfRequests={highestNumberOfRequests}
+                  period={period.current!}
+                  requestsOverTime={null}
+                  schemaVersionsCount={null}
+                />
+              ))}
+            </>
+          )}
+        </div>
       </div>
       <Activities />
-    </>
+    </ProjectLayout>
   );
 };
 
 const ProjectOverviewPageQuery = graphql(`
-  query ProjectOverviewPageQuery($organizationId: ID!, $projectId: ID!) {
+  query ProjectOverviewPageQuery(
+    $organizationId: ID!
+    $projectId: ID!
+    $chartResolution: Int!
+    $period: DateRangeInput!
+  ) {
     organization(selector: { organization: $organizationId }) {
       organization {
-        ...ProjectLayout_OrganizationFragment
+        ...ProjectLayout_CurrentOrganizationFragment
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
-      ...ProjectLayout_ProjectFragment
+      ...ProjectLayout_CurrentProjectFragment
+    }
+    organizations {
+      ...ProjectLayout_OrganizationConnectionFragment
+    }
+    targets(selector: { organization: $organizationId, project: $projectId }) {
+      total
+      nodes {
+        id
+        name
+        ...TargetCard_TargetFragment
+        requestsOverTime(resolution: $chartResolution, period: $period) {
+          date
+          value
+        }
+        schemaVersionsCount(period: $period)
+      }
+    }
+    me {
+      ...ProjectLayout_MeFragment
     }
   }
 `);
@@ -156,10 +371,8 @@ const ProjectOverviewPageQuery = graphql(`
 function ProjectsPage(): ReactElement {
   return (
     <>
-      <Title title="Targets" />
-      <ProjectLayout value="targets" className="flex gap-x-5" query={ProjectOverviewPageQuery}>
-        {() => <Page />}
-      </ProjectLayout>
+      <MetaTitle title="Targets" />
+      <Page />
     </>
   );
 }

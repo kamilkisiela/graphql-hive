@@ -3,18 +3,22 @@ import { useRouter } from 'next/router';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
 import { DeleteTargetDocument } from '@/graphql';
-import { useRouteSelector } from '@/lib/hooks';
 import { TrashIcon } from '@radix-ui/react-icons';
 
 export const DeleteTargetModal = ({
   isOpen,
   toggleModalOpen,
+  organizationId,
+  projectId,
+  targetId,
 }: {
   isOpen: boolean;
   toggleModalOpen: () => void;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
 }): ReactElement => {
   const [, mutate] = useMutation(DeleteTargetDocument);
-  const router = useRouteSelector();
   const { replace } = useRouter();
 
   return (
@@ -39,13 +43,13 @@ export const DeleteTargetModal = ({
           onClick={async () => {
             await mutate({
               selector: {
-                organization: router.organizationId,
-                project: router.projectId,
-                target: router.targetId,
+                organization: organizationId,
+                project: projectId,
+                target: targetId,
               },
             });
             toggleModalOpen();
-            void replace(`/${router.organizationId}/${router.projectId}`);
+            void replace(`/${organizationId}/${projectId}`);
           }}
         >
           Delete

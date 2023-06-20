@@ -1,6 +1,0 @@
-mutation deleteAlerts($input: DeleteAlertsInput!) {
-  deleteAlerts(input: $input) {
-    __typename
-    id
-  }
-}

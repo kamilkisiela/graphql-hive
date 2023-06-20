@@ -1,11 +1,22 @@
 import { ReactElement } from 'react';
+import NextLink from 'next/link';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
-import { OrganizationLayout } from '@/components/layouts';
+import { OrganizationLayout } from '@/components/layouts/organization';
 import { OIDCIntegrationSection } from '@/components/organization/settings/oidc-integration-section';
-import { Button, Card, DocsLink, DocsNote, Heading, Input, Tag, Title } from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Subtitle, Title } from '@/components/ui/page';
+import { DocsLink, Input, MetaTitle, Tag } from '@/components/v2';
 import { GitHubIcon, SlackIcon } from '@/components/v2/icon';
 import {
   DeleteOrganizationModal,
@@ -24,6 +35,7 @@ import {
   useOrganizationAccess,
 } from '@/lib/access/organization';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 function Integrations(): ReactElement | null {
@@ -57,8 +69,7 @@ function Integrations(): ReactElement | null {
         <div className="flex items-center gap-x-4">
           {hasSlackIntegration ? (
             <Button
-              size="large"
-              danger
+              variant="destructive"
               disabled={deleteSlackMutation.fetching}
               onClick={async () => {
                 await deleteSlack({
@@ -72,9 +83,11 @@ function Integrations(): ReactElement | null {
               Disconnect Slack
             </Button>
           ) : (
-            <Button variant="secondary" size="large" as="a" href={`/api/slack/connect/${orgId}`}>
-              <SlackIcon className="mr-2" />
-              Connect Slack
+            <Button variant="secondary" asChild>
+              <NextLink href={`/api/slack/connect/${orgId}`}>
+                <SlackIcon className="mr-2" />
+                Connect Slack
+              </NextLink>
             </Button>
           )}
           <Tag>Alerts and notifications</Tag>
@@ -86,8 +99,7 @@ function Integrations(): ReactElement | null {
             {hasGitHubIntegration ? (
               <>
                 <Button
-                  size="large"
-                  danger
+                  variant="destructive"
                   disabled={deleteGitHubMutation.fetching}
                   onClick={async () => {
                     await deleteGitHub({
@@ -100,14 +112,16 @@ function Integrations(): ReactElement | null {
                   <GitHubIcon className="mr-2" />
                   Disconnect GitHub
                 </Button>
-                <Button size="large" variant="link" as="a" href={`/api/github/connect/${orgId}`}>
-                  Adjust permissions
+                <Button variant="link" asChild>
+                  <NextLink href={`/api/github/connect/${orgId}`}>Adjust permissions</NextLink>
                 </Button>
               </>
             ) : (
-              <Button variant="secondary" size="large" as="a" href={`/api/github/connect/${orgId}`}>
-                <GitHubIcon className="mr-2" />
-                Connect GitHub
+              <Button variant="secondary" asChild>
+                <NextLink href={`/api/github/connect/${orgId}`}>
+                  <GitHubIcon className="mr-2" />
+                  Connect GitHub
+                </NextLink>
               </Button>
             )}
             <Tag>Allow Hive to communicate with GitHub</Tag>
@@ -194,125 +208,136 @@ const SettingsPageRenderer = (props: {
     });
 
   return (
-    <>
-      <Card>
-        <Heading className="mb-2">Organization Name</Heading>
-        <form onSubmit={handleSubmit} className="flex gap-x-2">
-          <Input
-            placeholder="Organization name"
-            name="name"
-            value={values.name}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            disabled={isSubmitting}
-            isInvalid={touched.name && !!errors.name}
-            className="w-96"
-          />
-          <Button
-            type="submit"
-            variant="primary"
-            size="large"
-            disabled={isSubmitting}
-            className="px-10"
-          >
-            Save
-          </Button>
-        </form>
-        {touched.name && (errors.name || mutation.error) && (
-          <div className="mt-2 text-red-500">{errors.name || mutation.error?.message}</div>
-        )}
-        {mutation.data?.updateOrganizationName?.error && (
-          <div className="mt-2 text-red-500">
-            {mutation.data?.updateOrganizationName.error.message}
-          </div>
-        )}
-        {mutation.error && (
-          <div>{mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}</div>
-        )}
-        <DocsNote warn>
-          Changing the name of your organization will also change the slug of your organization URL,
-          and will invalidate any existing links to your organization.
-          <br />
-          <DocsLink href="/management/organizations#rename-an-organization">
-            You can read more about it in the documentation
-          </DocsLink>
-        </DocsNote>
-      </Card>
-
-      {canAccessOrganization(OrganizationAccessScope.Integrations, organization.me) && (
+    <div>
+      <div className="py-6">
+        <Title>Organization Settings</Title>
+        <Subtitle>Manage your organization settings and integrations.</Subtitle>
+      </div>
+      <div className="flex flex-col gap-y-4">
         <Card>
-          <Heading className="mb-2">Integrations</Heading>
-          <DocsNote>
-            Authorize external services to make them available for your the projects under this
-            organization.
-            <br />
-            <DocsLink href="/management/organizations#integrations">
-              You can find here instructions and full documentation for the available integration
-            </DocsLink>
-          </DocsNote>
-          <div className="flex flex-col gap-y-4 text-gray-500">
-            <Integrations />
-          </div>
+          <CardHeader>
+            <CardTitle>Organization Name</CardTitle>
+            <CardDescription>
+              Changing the name of your organization will also change the slug of your organization
+              URL, and will invalidate any existing links to your organization.
+              <br />
+              <DocsLink
+                className="text-muted-foreground text-sm"
+                href="/management/organizations#rename-an-organization"
+              >
+                You can read more about it in the documentation
+              </DocsLink>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <form onSubmit={handleSubmit} className="flex gap-x-2">
+              <Input
+                placeholder="Organization name"
+                name="name"
+                value={values.name}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                disabled={isSubmitting}
+                isInvalid={touched.name && !!errors.name}
+                className="w-96"
+              />
+            </form>
+            {touched.name && (errors.name || mutation.error) && (
+              <div className="mt-2 text-red-500">{errors.name || mutation.error?.message}</div>
+            )}
+            {mutation.data?.updateOrganizationName?.error && (
+              <div className="mt-2 text-red-500">
+                {mutation.data?.updateOrganizationName.error.message}
+              </div>
+            )}
+            {mutation.error && (
+              <div>{mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}</div>
+            )}
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <Button disabled={isSubmitting} className="px-10">
+              Save
+            </Button>
+          </CardFooter>
         </Card>
-      )}
 
-      {organization.me.isOwner && (
-        <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <Heading className="mb-2">Transfer Ownership</Heading>
-              <DocsNote>
+        {canAccessOrganization(OrganizationAccessScope.Integrations, organization.me) && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Integrations</CardTitle>
+              <CardDescription>
+                Authorize external services to make them available for your the projects under this
+                organization.
+                <br />
+                <DocsLink
+                  className="text-muted-foreground text-sm"
+                  href="/management/organizations#integrations"
+                >
+                  You can find here instructions and full documentation for the available
+                  integration
+                </DocsLink>
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-y-4 text-gray-500">
+                <Integrations />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {organization.me.isOwner && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Transfer Ownership</CardTitle>
+              <CardDescription>
                 <strong>You are currently the owner of the organization.</strong> You can transfer
                 the organization to another member of the organization, or to an external user.
                 <br />
-                <DocsLink href="/management/organizations#transfer-ownership">
+                <DocsLink
+                  className="text-muted-foreground text-sm"
+                  href="/management/organizations#transfer-ownership"
+                >
                   Learn more about the process
                 </DocsLink>
-              </DocsNote>
-            </div>
-            <div>
-              <Button
-                variant="primary"
-                size="large"
-                danger
-                onClick={toggleTransferModalOpen}
-                className="px-5"
-              >
-                Transfer Ownership
-              </Button>
-              <TransferOrganizationOwnershipModal
-                isOpen={isTransferModalOpen}
-                toggleModalOpen={toggleTransferModalOpen}
-                organization={organization}
-              />
-            </div>
-          </div>
-        </Card>
-      )}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Button variant="destructive" onClick={toggleTransferModalOpen} className="px-5">
+                    Transfer Ownership
+                  </Button>
+                  <TransferOrganizationOwnershipModal
+                    isOpen={isTransferModalOpen}
+                    toggleModalOpen={toggleTransferModalOpen}
+                    organization={organization}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-      {canAccessOrganization(OrganizationAccessScope.Delete, organization.me) && (
-        <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <Heading className="mb-2">Delete Organization</Heading>
-              <DocsNote warn>
+        {canAccessOrganization(OrganizationAccessScope.Delete, organization.me) && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Delete Organization</CardTitle>
+              <CardDescription>
                 Deleting an organization will delete all the projects, targets, schemas and data
                 associated with it.
                 <br />
-                <DocsLink href="/management/organizations#delete-an-organization">
+                <DocsLink
+                  className="text-muted-foreground text-sm"
+                  href="/management/organizations#delete-an-organization"
+                >
                   <strong>This action is not reversible!</strong> You can find more information
                   about this process in the documentation
                 </DocsLink>
-              </DocsNote>
-            </div>
-            <div className="flex items-center gap-x-2">
-              <Button
-                variant="primary"
-                size="large"
-                danger
-                onClick={toggleDeleteModalOpen}
-                className="px-5"
-              >
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="destructive" onClick={toggleDeleteModalOpen} className="px-5">
                 Delete Organization
               </Button>
               <DeleteOrganizationModal
@@ -320,11 +345,11 @@ const SettingsPageRenderer = (props: {
                 toggleModalOpen={toggleDeleteModalOpen}
                 organization={organization}
               />
-            </div>
-          </div>
-        </Card>
-      )}
-    </>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
   );
 };
 
@@ -332,28 +357,58 @@ const OrganizationSettingsPageQuery = graphql(`
   query OrganizationSettingsPageQuery($selector: OrganizationSelectorInput!) {
     organization(selector: $selector) {
       organization {
-        ...OrganizationLayout_OrganizationFragment
+        ...OrganizationLayout_CurrentOrganizationFragment
         ...SettingsPageRenderer_OrganizationFragment
       }
+    }
+    organizations {
+      ...OrganizationLayout_OrganizationConnectionFragment
+    }
+    me {
+      ...OrganizationLayout_MeFragment
     }
   }
 `);
 
+function SettingsPageContent() {
+  const router = useRouteSelector();
+  const [query] = useQuery({
+    query: OrganizationSettingsPageQuery,
+    variables: {
+      selector: {
+        organization: router.organizationId,
+      },
+    },
+  });
+
+  useNotFoundRedirectOnError(!!query.error);
+
+  if (query.error) {
+    return null;
+  }
+
+  const me = query.data?.me;
+  const currentOrganization = query.data?.organization?.organization;
+  const organizationConnection = query.data?.organizations;
+
+  return (
+    <OrganizationLayout
+      value="settings"
+      className="flex flex-col gap-y-10"
+      currentOrganization={currentOrganization ?? null}
+      organizations={organizationConnection ?? null}
+      me={me ?? null}
+    >
+      {currentOrganization ? <SettingsPageRenderer organization={currentOrganization} /> : null}
+    </OrganizationLayout>
+  );
+}
+
 function OrganizationSettingsPage(): ReactElement {
   return (
     <>
-      <Title title="Organization settings" />
-      <OrganizationLayout
-        value="settings"
-        className="flex flex-col gap-y-10"
-        query={OrganizationSettingsPageQuery}
-      >
-        {props =>
-          props.organization ? (
-            <SettingsPageRenderer organization={props.organization.organization} />
-          ) : null
-        }
-      </OrganizationLayout>
+      <MetaTitle title="Organization settings" />
+      <SettingsPageContent />
     </>
   );
 }

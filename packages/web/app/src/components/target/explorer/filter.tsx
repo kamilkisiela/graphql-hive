@@ -88,9 +88,9 @@ export function SchemaExplorerFilter({
   );
 
   return (
-    <div className="flex flex-row items-center lg:gap-12 gap-4">
+    <div className="flex flex-row items-center gap-x-4">
       <Autocomplete
-        className="grow"
+        className="grow min-w-[250px]"
         placeholder="Search for a type"
         defaultValue={typename ? { value: typename, label: typename } : null}
         options={types}

@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import Head from 'next/head';
 
-export const Title = ({ title }: { title: string }): ReactElement => {
+export const MetaTitle = ({ title }: { title: string }): ReactElement => {
   const pageTitle = `${title} - GraphQL Hive`;
 
   return (

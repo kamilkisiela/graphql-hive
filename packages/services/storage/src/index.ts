@@ -1460,6 +1460,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return results.rows.map(r => r.id);
     },
+    async getTargetIdsOfProject({ project }) {
+      const results = await pool.query<Slonik<Pick<targets, 'id'>>>(
+        sql`
+          SELECT id FROM public.targets WHERE project_id = ${project}
+        `,
+      );
+
+      return results.rows.map(r => r.id);
+    },
     async getTargetSettings({ target, project }) {
       const row = await pool.one<
         Pick<
@@ -1582,6 +1591,47 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         }),
       ).validation;
     },
+
+    async countSchemaVersionsOfProject({ project, period }) {
+      if (period) {
+        const result = await pool.maybeOne<{ total: number }>(sql`
+          SELECT COUNT(*) as total FROM public.schema_versions as sv
+          LEFT JOIN public.targets as t ON (t.id = sv.target_id)
+          WHERE 
+            t.project_id = ${project}
+            AND sv.created_at >= ${period.from.toISOString()}
+            AND sv.created_at < ${period.to.toISOString()}
+        `);
+        return result?.total ?? 0;
+      }
+
+      const result = await pool.maybeOne<{ total: number }>(sql`
+        SELECT COUNT(*) as total FROM public.schema_versions as sv
+        LEFT JOIN public.targets as t ON (t.id = sv.target_id)
+        WHERE t.project_id = ${project}
+      `);
+
+      return result?.total ?? 0;
+    },
+    async countSchemaVersionsOfTarget({ target, period }) {
+      if (period) {
+        const result = await pool.maybeOne<{ total: number }>(sql`
+          SELECT COUNT(*) as total FROM public.schema_versions
+          WHERE 
+            target_id = ${target}
+            AND created_at >= ${period.from.toISOString()}
+            AND created_at < ${period.to.toISOString()}
+        `);
+        return result?.total ?? 0;
+      }
+
+      const result = await pool.maybeOne<{ total: number }>(sql`
+        SELECT COUNT(*) as total FROM public.schema_versions WHERE target_id = ${target}
+      `);
+
+      return result?.total ?? 0;
+    },
+
     async hasSchema({ target }) {
       return pool.exists(
         sql`

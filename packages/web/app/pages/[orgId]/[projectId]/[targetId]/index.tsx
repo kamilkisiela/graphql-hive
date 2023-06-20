@@ -2,24 +2,33 @@ import { ChangeEventHandler, ReactElement, useCallback, useState } from 'react';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { authenticated } from '@/components/authenticated-container';
-import { TargetLayout } from '@/components/layouts';
+import { TargetLayout } from '@/components/layouts/target';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
-import { Accordion, DataWrapper, GraphQLBlock, Input, noSchema, Title } from '@/components/v2';
+import { Subtitle, Title } from '@/components/ui/page';
+import { Accordion, GraphQLBlock, Input, MetaTitle, noSchema } from '@/components/v2';
 import { noSchemaVersion } from '@/components/v2/empty-list';
 import { GraphQLHighlight } from '@/components/v2/graphql-block';
-import { FragmentType, graphql, useFragment } from '@/gql';
-import { CompositeSchemaFieldsFragment, SingleSchemaFieldsFragment } from '@/gql/graphql';
-import { LatestSchemaDocument, ProjectType, RegistryModel } from '@/graphql';
+import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
+import { ProjectType, RegistryModel } from '@/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
+import { useRouteSelector } from '@/lib/hooks';
+import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
+type CompositeSchema = Extract<
+  DocumentType<typeof SchemaView_SchemaFragment>,
+  {
+    __typename?: 'CompositeSchema';
+  }
+>;
+
 function isCompositeSchema(
-  schema: SingleSchemaFieldsFragment | CompositeSchemaFieldsFragment,
-): schema is CompositeSchemaFieldsFragment {
+  schema: DocumentType<typeof SchemaView_SchemaFragment>,
+): schema is CompositeSchema {
   return schema.__typename === 'CompositeSchema';
 }
 
-function SchemaBlock({ schema }: { schema: CompositeSchemaFieldsFragment }) {
+function SchemaBlock({ schema }: { schema: CompositeSchema }) {
   return (
     <Accordion.Item value={schema.id} key={schema.id} className="border-2 border-gray-900/50">
       <Accordion.Header>
@@ -47,14 +56,14 @@ const Schemas_ProjectFragment = graphql(`
 
 function Schemas({
   filterService,
-  schemas = [],
   ...props
 }: {
   project: FragmentType<typeof Schemas_ProjectFragment>;
-  schemas: Array<SingleSchemaFieldsFragment | CompositeSchemaFieldsFragment>;
+  schemas: FragmentType<typeof SchemaView_SchemaFragment>[];
   filterService?: string;
 }): ReactElement {
   const project = useFragment(Schemas_ProjectFragment, props.project);
+  const schemas = useFragment(SchemaView_SchemaFragment, props.schemas);
 
   if (project.type === ProjectType.Single) {
     const [schema] = schemas;
@@ -116,13 +125,35 @@ const SchemaView_ProjectFragment = graphql(`
   }
 `);
 
+const SchemaView_SchemaFragment = graphql(`
+  fragment SchemaView_SchemaFragment on Schema {
+    ... on SingleSchema {
+      id
+      author
+      source
+      commit
+    }
+    ... on CompositeSchema {
+      id
+      author
+      source
+      service
+      url
+      commit
+    }
+  }
+`);
+
 const SchemaView_TargetFragment = graphql(`
   fragment SchemaView_TargetFragment on Target {
     cleanId
     latestSchemaVersion {
+      id
+      valid
       schemas {
         nodes {
           __typename
+          ...SchemaView_SchemaFragment
         }
       }
     }
@@ -157,104 +188,130 @@ function SchemaView(props: {
   const isDistributed =
     project.type === ProjectType.Federation || project.type === ProjectType.Stitching;
 
-  const [query] = useQuery({
-    query: LatestSchemaDocument,
-    variables: {
-      selector: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        target: target.cleanId,
-      },
-    },
-    requestPolicy: 'cache-first',
-  });
-
   const canManage = useTargetAccess({
     scope: TargetAccessScope.RegistryWrite,
     member: organization.me,
     redirect: false,
   });
 
+  const { latestSchemaVersion } = target;
+  if (!latestSchemaVersion) {
+    return noSchemaVersion;
+  }
+
+  if (!latestSchemaVersion.schemas.nodes.length) {
+    return noSchema;
+  }
+
+  const canMarkAsValid = project.registryModel === RegistryModel.Legacy;
+  const showExtra = canManage && project.registryModel === RegistryModel.Legacy;
+
   return (
-    <DataWrapper query={query}>
-      {query => {
-        const latestSchemaVersion = query.data?.target?.latestSchemaVersion;
-        if (!latestSchemaVersion) {
-          return noSchemaVersion;
-        }
-
-        if (!latestSchemaVersion.schemas.nodes.length) {
-          return noSchema;
-        }
-
-        return (
-          <>
-            <div className="mb-5 flex flex-row items-center justify-between">
-              <div className="font-light text-gray-500">The latest published schema.</div>
-              <div className="flex flex-row items-center gap-4">
-                {isDistributed && (
-                  <Input
-                    placeholder="Find service"
-                    value={term}
-                    onChange={handleChange}
-                    onClear={reset}
-                    size="small"
-                  />
-                )}
-                {canManage && project.registryModel === RegistryModel.Legacy ? (
-                  <>
-                    <MarkAsValid version={latestSchemaVersion} />{' '}
-                  </>
-                ) : null}
-              </div>
-            </div>
-            <Schemas
-              project={project}
-              filterService={filterService}
-              schemas={latestSchemaVersion.schemas.nodes ?? []}
-            />
-          </>
-        );
-      }}
-    </DataWrapper>
+    <>
+      {showExtra ? (
+        <div className="mb-5 flex flex-row items-center justify-between">
+          <div className="flex flex-row items-center gap-4">
+            {isDistributed && (
+              <Input
+                placeholder="Find service"
+                value={term}
+                onChange={handleChange}
+                onClear={reset}
+                size="small"
+              />
+            )}
+            {canMarkAsValid ? (
+              <>
+                <MarkAsValid version={latestSchemaVersion} />{' '}
+              </>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+      <Schemas
+        project={project}
+        filterService={filterService}
+        schemas={target.latestSchemaVersion?.schemas.nodes ?? []}
+      />
+    </>
   );
 }
 
 const TargetSchemaPageQuery = graphql(`
   query TargetSchemaPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+    organizations {
+      ...TargetLayout_OrganizationConnectionFragment
+    }
     organization(selector: { organization: $organizationId }) {
       organization {
-        ...TargetLayout_OrganizationFragment
+        ...TargetLayout_CurrentOrganizationFragment
         ...SchemaView_OrganizationFragment
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_ProjectFragment
+      ...TargetLayout_CurrentProjectFragment
       ...SchemaView_ProjectFragment
-    }
-    targets(selector: { organization: $organizationId, project: $projectId }) {
-      ...TargetLayout_TargetConnectionFragment
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       ...SchemaView_TargetFragment
+    }
+    me {
+      ...TargetLayout_MeFragment
     }
     ...TargetLayout_IsCDNEnabledFragment
   }
 `);
 
+function Page() {
+  const router = useRouteSelector();
+  const [query] = useQuery({
+    query: TargetSchemaPageQuery,
+    variables: {
+      organizationId: router.organizationId,
+      projectId: router.projectId,
+      targetId: router.targetId,
+    },
+  });
+  useNotFoundRedirectOnError(!!query.error);
+
+  if (query.error) {
+    return null;
+  }
+
+  const me = query.data?.me;
+  const currentOrganization = query.data?.organization?.organization;
+  const currentProject = query.data?.project;
+  const organizationConnection = query.data?.organizations;
+  const target = query.data?.target;
+  const isCDNEnabled = query.data;
+
+  return (
+    <TargetLayout
+      value="schema"
+      currentOrganization={currentOrganization ?? null}
+      currentProject={currentProject ?? null}
+      me={me ?? null}
+      organizations={organizationConnection ?? null}
+      isCDNEnabled={isCDNEnabled ?? null}
+    >
+      <div className="py-6">
+        <Title>Schema</Title>
+        <Subtitle>The latest published schema.</Subtitle>
+      </div>
+      <div>
+        {currentOrganization && currentProject && target ? (
+          <SchemaView organization={currentOrganization} project={currentProject} target={target} />
+        ) : null}
+      </div>
+    </TargetLayout>
+  );
+}
+
 function SchemaPage(): ReactElement {
   return (
     <>
-      <Title title="Schema" />
-      <TargetLayout value="schema" query={TargetSchemaPageQuery}>
-        {props => (
-          <SchemaView
-            target={props.target!}
-            organization={props.organization!.organization}
-            project={props.project!}
-          />
-        )}
-      </TargetLayout>
+      <MetaTitle title="Schema" />
+      <Page />
     </>
   );
 }

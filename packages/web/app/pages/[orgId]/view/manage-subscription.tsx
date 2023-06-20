@@ -1,12 +1,16 @@
 import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import NextLink from 'next/link';
 import { useMutation, useQuery } from 'urql';
+import { authenticated } from '@/components/authenticated-container';
 import { Section } from '@/components/common';
 import { QueryError } from '@/components/common/DataWrapper';
-import { OrganizationLayout } from '@/components/layouts';
+import { OrganizationLayout } from '@/components/layouts/organization';
 import { BillingPaymentMethod } from '@/components/organization/billing/BillingPaymentMethod';
 import { BillingPlanPicker } from '@/components/organization/billing/BillingPlanPicker';
 import { PlanSummary } from '@/components/organization/billing/PlanSummary';
-import { Button, Card, Heading, Input, Slider, Stat, Title } from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import { Subtitle, Title } from '@/components/ui/page';
+import { Card, Heading, Input, MetaTitle, Slider, Stat } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { BillingPlanType } from '@/gql/graphql';
 import {
@@ -16,6 +20,10 @@ import {
   UpgradeToProDocument,
 } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
+import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
+import { useRouteSelector } from '@/lib/hooks';
+import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
+import { withSessionProtection } from '@/lib/supertokens/guard';
 import { openChatSupport } from '@/utils';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 
@@ -176,7 +184,7 @@ function Inner(props: {
       if (organization.rateLimit.operations !== operationsRateLimit * 1_000_000) {
         return (
           <>
-            <Button variant="primary" type="button" onClick={updateLimits}>
+            <Button type="button" onClick={updateLimits}>
               Update Limits
             </Button>
             <Section.Subtitle className="mt-4">
@@ -191,7 +199,7 @@ function Inner(props: {
 
     if (plan === 'ENTERPRISE') {
       return (
-        <Button variant="primary" type="button" onClick={openChatSupport}>
+        <Button type="button" onClick={openChatSupport}>
           Contact Us
         </Button>
       );
@@ -199,7 +207,7 @@ function Inner(props: {
 
     if (plan === 'PRO') {
       return (
-        <Button variant="primary" type="button" onClick={upgrade} disabled={!paymentDetailsValid}>
+        <Button type="button" onClick={upgrade} disabled={!paymentDetailsValid}>
           Upgrade to Pro
         </Button>
       );
@@ -207,7 +215,7 @@ function Inner(props: {
 
     if (plan === 'HOBBY') {
       return (
-        <Button variant="primary" type="button" onClick={downgrade}>
+        <Button type="button" onClick={downgrade}>
           Downgrade to Hobby
         </Button>
       );
@@ -322,30 +330,118 @@ const ManageSubscriptionPageQuery = graphql(`
   query ManageSubscriptionPageQuery($selector: OrganizationSelectorInput!) {
     organization(selector: $selector) {
       organization {
-        ...OrganizationLayout_OrganizationFragment
+        cleanId
+        ...OrganizationLayout_CurrentOrganizationFragment
         ...ManageSubscriptionInner_OrganizationFragment
       }
     }
     billingPlans {
       ...ManageSubscriptionInner_BillingPlansFragment
     }
+    organizations {
+      ...OrganizationLayout_OrganizationConnectionFragment
+    }
+    me {
+      ...OrganizationLayout_MeFragment
+    }
   }
 `);
 
-export default function ManageSubscriptionPage(): ReactElement {
+function ManageSubscriptionPageContent() {
+  const router = useRouteSelector();
+  const [query] = useQuery({
+    query: ManageSubscriptionPageQuery,
+    variables: {
+      selector: {
+        organization: router.organizationId,
+      },
+    },
+  });
+
+  useNotFoundRedirectOnError(!!query.error);
+
+  const me = query.data?.me;
+  const currentOrganization = query.data?.organization?.organization;
+  const organizationConnection = query.data?.organizations;
+  const billingPlans = query.data?.billingPlans;
+
+  const organization = useFragment(
+    ManageSubscriptionInner_OrganizationFragment,
+    currentOrganization,
+  );
+  const canAccess = useOrganizationAccess({
+    scope: OrganizationAccessScope.Settings,
+    member: organization?.me ?? null,
+    redirect: true,
+  });
+
+  if (query.error) {
+    return null;
+  }
+
+  if (!currentOrganization || !me || !organizationConnection || !organization || !billingPlans) {
+    return null;
+  }
+
+  if (!canAccess) {
+    return null;
+  }
+
+  return (
+    <OrganizationLayout
+      value="subscription"
+      className="flex flex-col gap-y-10"
+      currentOrganization={currentOrganization}
+      organizations={organizationConnection}
+      me={me}
+    >
+      <div className="grow">
+        <div className="py-6 flex flex-row justify-between items-center">
+          <div>
+            <Title>Manage subscription</Title>
+            <Subtitle>Manage your current plan and invoices.</Subtitle>
+          </div>
+          <div>
+            <Button asChild>
+              <NextLink href={`/${currentOrganization.cleanId}/view/subscription`}>
+                Subscription usage
+              </NextLink>
+            </Button>
+          </div>
+        </div>
+        <div>
+          <Inner organization={currentOrganization} billingPlans={billingPlans} />
+        </div>
+      </div>
+    </OrganizationLayout>
+  );
+}
+
+function ManageSubscriptionPage(): ReactElement {
   return (
     <>
-      <Title title="Manage Subscription" />
-      <OrganizationLayout query={ManageSubscriptionPageQuery}>
-        {props =>
-          props.organization ? (
-            <Inner
-              organization={props.organization.organization}
-              billingPlans={props.billingPlans}
-            />
-          ) : null
-        }
-      </OrganizationLayout>
+      <MetaTitle title="Manage Subscription" />
+      <ManageSubscriptionPageContent />
     </>
   );
 }
+
+export const getServerSideProps = withSessionProtection(async context => {
+  /**
+   * If Stripe is not enabled we redirect the user to the organization.
+   */
+  const isStripeEnabled = getIsStripeEnabled();
+  if (!isStripeEnabled) {
+    const parts = String(context.resolvedUrl).split('/');
+    parts.pop();
+    return {
+      redirect: {
+        destination: parts.join('/'),
+        permanent: false,
+      },
+    };
+  }
+  return { props: {} };
+});
+
+export default authenticated(ManageSubscriptionPage);

@@ -58,7 +58,7 @@ export function deployCloudFlareSecurityTransform(options: {
   connect-src 'self' {DYNAMIC_HOST_PLACEHOLDER} ${cspHosts}; 
   media-src ${crispHost};
   style-src-elem 'self' 'unsafe-inline' ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} fonts.googleapis.com ${crispHost};
-  font-src 'self' fonts.gstatic.com ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} ${crispHost};
+  font-src 'self' fonts.gstatic.com rsms.me ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} ${crispHost};
   img-src * 'self' data: https: https://image.crisp.chat https://storage.crisp.chat ${gtmHost} ${crispHost};
 `;
 

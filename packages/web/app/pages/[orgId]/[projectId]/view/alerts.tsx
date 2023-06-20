@@ -1,124 +1,162 @@
 import { ReactElement, useState } from 'react';
-import { useMutation, useQuery } from 'urql';
+import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { ProjectLayout } from '@/components/layouts';
+import { ProjectLayout } from '@/components/layouts/project';
+import { AlertsTable, AlertsTable_AlertFragment } from '@/components/project/alerts/alerts-table';
 import {
-  Button,
+  ChannelsTable,
+  ChannelsTable_AlertChannelFragment,
+} from '@/components/project/alerts/channels-table';
+import {
+  CreateAlertModal,
+  CreateAlertModal_AlertChannelFragment,
+  CreateAlertModal_TargetFragment,
+} from '@/components/project/alerts/create-alert';
+import { CreateChannelModal } from '@/components/project/alerts/create-channel';
+import { DeleteAlertsButton } from '@/components/project/alerts/delete-alerts-button';
+import { DeleteChannelsButton } from '@/components/project/alerts/delete-channels-button';
+import { Button } from '@/components/ui/button';
+import {
   Card,
-  Checkbox,
-  DocsLink,
-  DocsNote,
-  Heading,
-  Table,
-  Tag,
-  TBody,
-  Td,
-  Title,
-  Tr,
-} from '@/components/v2';
-import { CreateAlertModal, CreateChannelModal } from '@/components/v2/modals';
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Subtitle, Title } from '@/components/ui/page';
+import { DocsLink, MetaTitle } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import {
-  AlertChannelsDocument,
-  AlertChannelType,
-  AlertsDocument,
-  DeleteAlertChannelsDocument,
-  DeleteAlertsDocument,
-} from '@/graphql';
 import { ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-function Channels(): ReactElement {
+function Channels(props: {
+  channels: FragmentType<typeof ChannelsTable_AlertChannelFragment>[];
+}): ReactElement {
   const router = useRouteSelector();
-  const [checked, setChecked] = useState<string[]>([]);
-  const [channelAlertsQuery] = useQuery({
-    query: AlertChannelsDocument,
-    variables: {
-      selector: {
-        organization: router.organizationId,
-        project: router.projectId,
-      },
-    },
-    requestPolicy: 'cache-and-network',
-  });
+  const [selected, setSelected] = useState<string[]>([]);
   const [isModalOpen, toggleModalOpen] = useToggle();
-  const [mutation, mutate] = useMutation(DeleteAlertChannelsDocument);
-
-  const channelAlerts = channelAlertsQuery.data?.alertChannels || [];
+  const channels = props.channels ?? [];
 
   return (
     <Card>
-      <Heading className="mb-2">Available Channels</Heading>
-      <DocsNote>
-        Alert Channels are a way to configure <strong>how</strong> you want to receive alerts and
-        notifications from Hive.{' '}
-        <DocsLink href="/management/projects#alert-channels">Learn more</DocsLink>
-      </DocsNote>
-      <Table>
-        <TBody>
-          {channelAlerts.map(channelAlert => (
-            <Tr key={channelAlert.id}>
-              <Td width="1">
-                <Checkbox
-                  onCheckedChange={isChecked =>
-                    setChecked(
-                      isChecked
-                        ? [...checked, channelAlert.id]
-                        : checked.filter(k => k !== channelAlert.id),
-                    )
-                  }
-                  checked={checked.includes(channelAlert.id)}
-                />
-              </Td>
-              <Td>{channelAlert.name}</Td>
-              <Td className="text-xs truncate text-gray-400">
-                {channelAlert.__typename === 'AlertSlackChannel'
-                  ? channelAlert.channel
-                  : channelAlert.__typename === 'AlertWebhookChannel'
-                  ? channelAlert.endpoint
-                  : ''}
-              </Td>
-              <Td>
-                <Tag color={channelAlert.type === AlertChannelType.Webhook ? 'green' : 'yellow'}>
-                  {channelAlert.type}
-                </Tag>
-              </Td>
-            </Tr>
-          ))}
-        </TBody>
-      </Table>
-      <div className="mt-4 flex gap-x-2">
-        <Button size="large" variant="primary" onClick={toggleModalOpen}>
-          Add channel
-        </Button>
-        {channelAlerts.length > 0 && (
-          <Button
-            size="large"
-            danger
-            disabled={checked.length === 0 || mutation.fetching}
-            onClick={async () => {
-              await mutate({
-                input: {
-                  organization: router.organizationId,
-                  project: router.projectId,
-                  channels: checked,
-                },
-              });
-              setChecked([]);
-            }}
+      <CardHeader>
+        <CardTitle>Channels</CardTitle>
+        <CardDescription>
+          Alert Channels are a way to configure <strong>how</strong> you want to receive alerts and
+          notifications from Hive.
+          <br />
+          <DocsLink
+            className="text-muted-foreground text-sm"
+            href="/management/projects#alert-channels"
           >
-            Delete {checked.length || null}
+            Learn more
+          </DocsLink>
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChannelsTable
+          channels={channels}
+          isChecked={channelId => selected.includes(channelId)}
+          onCheckedChange={(channelId, isChecked) => {
+            setSelected(
+              isChecked ? [...selected, channelId] : selected.filter(k => k !== channelId),
+            );
+          }}
+        />
+      </CardContent>
+      <CardFooter>
+        <div className="mt-4 flex gap-x-2">
+          <Button variant="default" onClick={toggleModalOpen}>
+            Add channel
           </Button>
-        )}
-      </div>
+          {channels.length > 0 && (
+            <DeleteChannelsButton
+              organizationId={router.organizationId}
+              projectId={router.projectId}
+              selected={selected}
+              onSuccess={() => {
+                setSelected([]);
+              }}
+            />
+          )}
+        </div>
+      </CardFooter>
       {isModalOpen && <CreateChannelModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />}
     </Card>
   );
 }
 
-const AlertsPage_OrganizationFragment = graphql(`
-  fragment AlertsPage_OrganizationFragment on Organization {
+export function Alerts(props: {
+  alerts: FragmentType<typeof AlertsTable_AlertFragment>[];
+  channels: FragmentType<typeof CreateAlertModal_AlertChannelFragment>[];
+  targets: FragmentType<typeof CreateAlertModal_TargetFragment>[];
+}) {
+  const [selected, setSelected] = useState<string[]>([]);
+  const router = useRouteSelector();
+  const [isModalOpen, toggleModalOpen] = useToggle();
+  const alerts = props.alerts ?? [];
+
+  console.log('isModalOpen', isModalOpen);
+
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Alerts and Notifications</CardTitle>
+          <CardDescription>
+            Alerts are a way to configure <strong>when</strong> you want to receive alerts and
+            notifications from Hive.
+            <br />
+            <DocsLink
+              className="text-muted-foreground text-sm"
+              href="/management/projects#alerts-and-notifications-1"
+            >
+              Learn more
+            </DocsLink>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AlertsTable
+            alerts={alerts}
+            isChecked={alertId => selected.includes(alertId)}
+            onCheckedChange={(alertId, isChecked) => {
+              setSelected(isChecked ? [...selected, alertId] : selected.filter(k => k !== alertId));
+            }}
+          />
+        </CardContent>
+        <CardFooter>
+          <div className="flex gap-x-2">
+            <Button variant="default" onClick={toggleModalOpen}>
+              Create alert
+            </Button>
+            <DeleteAlertsButton
+              organizationId={router.organizationId}
+              projectId={router.projectId}
+              selected={selected}
+              onSuccess={() => {
+                setSelected([]);
+              }}
+            />
+          </div>
+        </CardFooter>
+      </Card>
+      {isModalOpen && (
+        <CreateAlertModal
+          targets={props.targets}
+          channels={props.channels}
+          isOpen={isModalOpen}
+          toggleModalOpen={toggleModalOpen}
+        />
+      )}
+    </>
+  );
+}
+
+const ProjectAlertsPage_OrganizationFragment = graphql(`
+  fragment ProjectAlertsPage_OrganizationFragment on Organization {
     cleanId
     me {
       ...CanAccessProject_MemberFragment
@@ -126,130 +164,104 @@ const AlertsPage_OrganizationFragment = graphql(`
   }
 `);
 
-const AlertsPage_ProjectFragment = graphql(`
-  fragment AlertsPage_ProjectFragment on Project {
-    cleanId
-  }
-`);
-
-const Page = (props: {
-  organization: FragmentType<typeof AlertsPage_OrganizationFragment>;
-  project: FragmentType<typeof AlertsPage_ProjectFragment>;
-}) => {
-  const organization = useFragment(AlertsPage_OrganizationFragment, props.organization);
-  const project = useFragment(AlertsPage_ProjectFragment, props.project);
-  useProjectAccess({
-    scope: ProjectAccessScope.Alerts,
-    member: organization.me,
-    redirect: true,
-  });
-  const [checked, setChecked] = useState<string[]>([]);
-  const router = useRouteSelector();
-  const [isModalOpen, toggleModalOpen] = useToggle();
-  const [mutation, mutate] = useMutation(DeleteAlertsDocument);
-  const [alertsQuery] = useQuery({
-    query: AlertsDocument,
-    variables: {
-      selector: {
-        organization: organization.cleanId,
-        project: project.cleanId,
-      },
-    },
-    requestPolicy: 'cache-and-network',
-  });
-
-  const alerts = alertsQuery.data?.alerts || [];
-  return (
-    <>
-      <Channels />
-      <Card>
-        <Heading className="mb-2">Active Alerts and Notifications</Heading>
-        <DocsNote>
-          Alerts are a way to configure <strong>when</strong> you want to receive alerts and
-          notifications from Hive.{' '}
-          <DocsLink href="/management/projects#alerts-and-notifications-1">Learn more</DocsLink>
-        </DocsNote>
-        <Table>
-          <TBody>
-            {alerts.map(alert => (
-              <Tr key={alert.id}>
-                <Td width="1">
-                  <Checkbox
-                    onCheckedChange={isChecked =>
-                      setChecked(
-                        isChecked ? [...checked, alert.id] : checked.filter(k => k !== alert.id),
-                      )
-                    }
-                    checked={checked.includes(alert.id)}
-                  />
-                </Td>
-                <Td>
-                  <span className="capitalize">
-                    {alert.type.replaceAll('_', ' ').toLowerCase()}
-                  </span>
-                </Td>
-                <Td>Channel: {alert.channel.name}</Td>
-                <Td>Target: {alert.target.name}</Td>
-              </Tr>
-            ))}
-          </TBody>
-        </Table>
-        <div className="mt-4 flex gap-x-2">
-          <Button size="large" variant="primary" onClick={toggleModalOpen}>
-            Create alert
-          </Button>
-          {alerts.length > 0 && (
-            <Button
-              size="large"
-              danger
-              disabled={checked.length === 0 || mutation.fetching}
-              onClick={async () => {
-                await mutate({
-                  input: {
-                    organization: router.organizationId,
-                    project: router.projectId,
-                    alerts: checked,
-                  },
-                });
-                setChecked([]);
-              }}
-            >
-              Delete {checked.length || null}
-            </Button>
-          )}
-        </div>
-      </Card>
-      {isModalOpen && <CreateAlertModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />}
-    </>
-  );
-};
-
 const ProjectAlertsPageQuery = graphql(`
   query ProjectAlertsPageQuery($organizationId: ID!, $projectId: ID!) {
     organization(selector: { organization: $organizationId }) {
       organization {
-        ...ProjectLayout_OrganizationFragment
-        ...AlertsPage_OrganizationFragment
+        ...ProjectLayout_CurrentOrganizationFragment
+        ...ProjectAlertsPage_OrganizationFragment
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
-      ...ProjectLayout_ProjectFragment
-      ...AlertsPage_ProjectFragment
+      ...ProjectLayout_CurrentProjectFragment
+      targets {
+        nodes {
+          ...CreateAlertModal_TargetFragment
+        }
+      }
+      alerts {
+        ...AlertsTable_AlertFragment
+      }
+      alertChannels {
+        ...ChannelsTable_AlertChannelFragment
+        ...CreateAlertModal_AlertChannelFragment
+      }
+    }
+    organizations {
+      ...ProjectLayout_OrganizationConnectionFragment
+    }
+    me {
+      ...ProjectLayout_MeFragment
     }
   }
 `);
 
+function AlertsPageContent() {
+  const router = useRouteSelector();
+  const [query] = useQuery({
+    query: ProjectAlertsPageQuery,
+    variables: {
+      organizationId: router.organizationId,
+      projectId: router.projectId,
+    },
+    requestPolicy: 'cache-and-network',
+  });
+
+  useNotFoundRedirectOnError(!!query.error);
+
+  const me = query.data?.me;
+  const currentOrganization = query.data?.organization?.organization;
+  const currentProject = query.data?.project;
+  const organizationConnection = query.data?.organizations;
+  const organizationForAlerts = useFragment(
+    ProjectAlertsPage_OrganizationFragment,
+    currentOrganization,
+  );
+
+  useProjectAccess({
+    scope: ProjectAccessScope.Alerts,
+    member: organizationForAlerts?.me ?? null,
+    redirect: true,
+  });
+
+  if (query.error) {
+    return null;
+  }
+
+  const alerts = currentProject?.alerts || [];
+  const channels = currentProject?.alertChannels || [];
+  const targets = currentProject?.targets?.nodes || [];
+
+  return (
+    <ProjectLayout
+      currentOrganization={currentOrganization ?? null}
+      currentProject={currentProject ?? null}
+      organizations={organizationConnection ?? null}
+      me={me ?? null}
+      value="alerts"
+      className="flex flex-col gap-y-10"
+    >
+      <div>
+        <div className="py-6">
+          <Title>Alerts and Notifications</Title>
+          <Subtitle>Configure alerts and notifications for your project.</Subtitle>
+        </div>
+        {currentProject && currentOrganization ? (
+          <div className="flex flex-col gap-y-4">
+            <Channels channels={channels} />
+            <Alerts alerts={alerts} channels={channels} targets={targets} />
+          </div>
+        ) : null}
+      </div>
+    </ProjectLayout>
+  );
+}
+
 function AlertsPage(): ReactElement {
   return (
     <>
-      <Title title="Alerts" />
-      <ProjectLayout
-        value="alerts"
-        className="flex flex-col gap-y-10"
-        query={ProjectAlertsPageQuery}
-      >
-        {props => <Page organization={props.organization.organization} project={props.project} />}
-      </ProjectLayout>
+      <MetaTitle title="Alerts" />
+      <AlertsPageContent />
     </>
   );
 }

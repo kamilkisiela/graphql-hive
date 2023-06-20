@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { ProjectType } from '../../shared/entities';
 import { createConnection } from '../../shared/schema';
+import { OrganizationManager } from '../organization/providers/organization-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { TargetManager } from '../target/providers/target-manager';
 import type { ProjectModule } from './__generated__/types';
@@ -55,12 +56,15 @@ export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
       }
 
       const translator = injector.get(IdTranslator);
-      const organization = await translator.translateOrganizationId({
+      const organizationId = await translator.translateOrganizationId({
         organization: input.organization,
       });
       const project = await injector.get(ProjectManager).createProject({
         ...input,
-        organization,
+        organization: organizationId,
+      });
+      const organization = await injector.get(OrganizationManager).getOrganization({
+        organization: organizationId,
       });
 
       const targetManager = injector.get(TargetManager);
@@ -69,28 +73,25 @@ export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
         targetManager.createTarget({
           name: 'production',
           project: project.id,
-          organization,
+          organization: organizationId,
         }),
         targetManager.createTarget({
           name: 'staging',
           project: project.id,
-          organization,
+          organization: organizationId,
         }),
         targetManager.createTarget({
           name: 'development',
           project: project.id,
-          organization,
+          organization: organizationId,
         }),
       ]);
 
       return {
         ok: {
-          selector: {
-            organization: input.organization,
-            project: project.cleanId,
-          },
           createdProject: project,
           createdTargets: targets,
+          updatedOrganization: organization,
         },
       };
     },

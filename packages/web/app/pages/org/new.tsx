@@ -1,20 +1,18 @@
 import { ReactElement } from 'react';
 import { authenticated } from '@/components/authenticated-container';
-import { SubHeader, Title } from '@/components/v2';
+import { MetaTitle } from '@/components/v2';
 import { CreateOrganizationForm } from '@/components/v2/modals/create-organization';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 function CreateOrgPage(): ReactElement {
   return (
     <>
-      <Title title="Create Organization" />
-      <SubHeader>
-        <div className="flex items-center">
-          <div className="container w-1/3">
-            <CreateOrganizationForm />
-          </div>
+      <MetaTitle title="Create Organization" />
+      <div className="h-full grow flex items-center">
+        <div className="container w-1/3">
+          <CreateOrganizationForm />
         </div>
-      </SubHeader>
+      </div>
     </>
   );
 }
