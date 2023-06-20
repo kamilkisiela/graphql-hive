@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import cookies from 'js-cookie';
 import { CombinedError } from 'urql';
-import { Button, Callout, Tag } from '@/components/v2';
+import { Button } from '@/components/ui/button';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { openChatSupport } from '@/utils';
 
@@ -9,7 +9,7 @@ export function QueryError({
   error,
   showError,
 }: {
-  error?: Error | CombinedError;
+  error: CombinedError;
   showError?: boolean;
 }): ReactElement {
   const requestId =
@@ -19,28 +19,51 @@ export function QueryError({
 
   cookies.remove(LAST_VISITED_ORG_KEY);
 
+  const containsUnexpectedError = error.message?.includes('Unexpected error');
+  const isNetworkError = !!error.networkError;
+  const isExpectedError = !isNetworkError && !containsUnexpectedError;
+  const shouldShowError = typeof showError === 'boolean' ? showError : isExpectedError;
+
   return (
-    <Callout type="warning" className="w-1/2 mx-auto">
-      <b>Oops, something went wrong.</b>
-      <br />
-      {showError ? (
-        <Tag color="yellow">{error?.message?.replace('[GraphQL] ', '')}</Tag>
-      ) : (
-        <>
-          Don't worry, our technical support got this error reported automatically. If you wish to
-          track it later or share more details with us,{' '}
-          <Button variant="link" onClick={openChatSupport}>
-            you can use the support chat
-          </Button>
-          .
-          <br />
-          {requestId && (
-            <span>
-              Request ID: <Tag color="yellow">{requestId}</Tag>
-            </span>
-          )}
-        </>
-      )}
-    </Callout>
+    <div className="h-full w-full flex items-center justify-center">
+      <div className="flex flex-row items-center gap-x-6 w-2/3 max-w-[960px]">
+        <img
+          src="/images/figures/connection.svg"
+          alt="Ghost"
+          className="block w-[200px] h-[200px]"
+        />
+        <div className="grow">
+          <h1 className="text-xl font-semibold">Oops, something went wrong.</h1>
+          <div className="mt-2">
+            {shouldShowError ? (
+              <div className="text-sm">{error?.message?.replace('[GraphQL] ', '')}</div>
+            ) : (
+              <div className="text-sm">
+                <p>Don't worry, our technical support got this error reported automatically.</p>
+                <p>
+                  If you wish to track it later or share more details with us,{' '}
+                  <Button
+                    variant="link"
+                    className="h-auto p-0 text-orange-500"
+                    onClick={openChatSupport}
+                  >
+                    you can use the support chat
+                  </Button>
+                  .
+                </p>
+              </div>
+            )}
+            {requestId ? (
+              <div className="mt-6 text-xs">
+                <div className="inline-flex items-center text-gray-300">
+                  <div className="p-2 bg-yellow-500/10 rounded-l-sm">Error ID</div>
+                  <div className="p-2 bg-yellow-500/5 rounded-r-sm">{requestId}</div>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
