@@ -9,6 +9,7 @@ import { TargetLayout } from '@/components/layouts/target';
 import { SchemaEditor } from '@/components/schema-editor';
 import { CDNAccessTokens } from '@/components/target/settings/cdn-access-tokens';
 import { Subtitle, Title } from '@/components/ui/page';
+import { QueryError } from '@/components/ui/query-error';
 import {
   Button,
   Card,
@@ -32,7 +33,6 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { DeleteTokensDocument, SetTargetValidationDocument, TokensDocument } from '@/graphql';
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
-import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const RegistryAccessTokens_MeFragment = graphql(`
@@ -792,7 +792,6 @@ function TargetSettingsContent() {
       targetId: router.targetId,
     },
   });
-  useNotFoundRedirectOnError(!!query.error);
 
   const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
@@ -813,7 +812,7 @@ function TargetSettingsContent() {
   const canDelete = canAccessTarget(TargetAccessScope.Delete, organizationForSettings?.me ?? null);
 
   if (query.error) {
-    return null;
+    return <QueryError error={query.error} />;
   }
 
   return (

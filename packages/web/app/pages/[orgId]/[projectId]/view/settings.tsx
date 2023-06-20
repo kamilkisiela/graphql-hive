@@ -16,13 +16,13 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Subtitle, Title } from '@/components/ui/page';
+import { QueryError } from '@/components/ui/query-error';
 import { DocsLink, Input, Link, MetaTitle, Select, Tag } from '@/components/v2';
 import { DeleteProjectModal } from '@/components/v2/modals';
 import { graphql, useFragment } from '@/gql';
 import { GetGitHubIntegrationDetailsDocument, ProjectType } from '@/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
-import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const ProjectSettingsPage_UpdateProjectGitRepositoryMutation = graphql(`
@@ -228,8 +228,6 @@ function ProjectSettingsContent() {
     requestPolicy: 'cache-and-network',
   });
 
-  useNotFoundRedirectOnError(!!query.error);
-
   const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
   const currentProject = query.data?.project;
@@ -270,7 +268,7 @@ function ProjectSettingsContent() {
     });
 
   if (query.error) {
-    return null;
+    return <QueryError error={query.error} />;
   }
 
   return (

@@ -8,10 +8,10 @@ import { OperationsFilterTrigger } from '@/components/target/operations/Filters'
 import { OperationsList } from '@/components/target/operations/List';
 import { OperationsStats } from '@/components/target/operations/Stats';
 import { Subtitle, Title } from '@/components/ui/page';
+import { QueryError } from '@/components/ui/query-error';
 import { EmptyList, MetaTitle, RadixSelect } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
-import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 function floorDate(date: Date): Date {
@@ -145,10 +145,9 @@ function TargetOperationsPageContent() {
       targetId: router.targetId,
     },
   });
-  useNotFoundRedirectOnError(!!query.error);
 
   if (query.error) {
-    return null;
+    return <QueryError error={query.error} />;
   }
 
   const me = query.data?.me;

@@ -7,6 +7,7 @@ import { OrganizationLayout } from '@/components/layouts/organization';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Subtitle, Title } from '@/components/ui/page';
+import { QueryError } from '@/components/ui/query-error';
 import { Avatar, Card, DocsLink, Heading, Input, MetaTitle } from '@/components/v2';
 import {
   DropdownMenu,
@@ -20,7 +21,6 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { MeDocument, OrganizationFieldsFragment } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
-import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { useToggle } from '@/lib/hooks/use-toggle';
@@ -420,10 +420,8 @@ function SettingsPageContent() {
     },
   });
 
-  useNotFoundRedirectOnError(!!query.error);
-
   if (query.error) {
-    return null;
+    return <QueryError error={query.error} />;
   }
 
   const me = query.data?.me;

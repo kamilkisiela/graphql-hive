@@ -5,6 +5,7 @@ import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts/target';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
 import { Subtitle, Title } from '@/components/ui/page';
+import { QueryError } from '@/components/ui/query-error';
 import { Accordion, GraphQLBlock, Input, MetaTitle, noSchema } from '@/components/v2';
 import { noSchemaVersion } from '@/components/v2/empty-list';
 import { GraphQLHighlight } from '@/components/v2/graphql-block';
@@ -12,7 +13,6 @@ import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectType, RegistryModel } from '@/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { useRouteSelector } from '@/lib/hooks';
-import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 type CompositeSchema = Extract<
@@ -272,10 +272,9 @@ function Page() {
       targetId: router.targetId,
     },
   });
-  useNotFoundRedirectOnError(!!query.error);
 
   if (query.error) {
-    return null;
+    return <QueryError error={query.error} />;
   }
 
   const me = query.data?.me;

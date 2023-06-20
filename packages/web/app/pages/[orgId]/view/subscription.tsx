@@ -10,12 +10,12 @@ import { InvoicesList } from '@/components/organization/billing/InvoicesList';
 import { OrganizationUsageEstimationView } from '@/components/organization/Usage';
 import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
+import { QueryError } from '@/components/ui/query-error';
 import { Card, Heading, MetaTitle, Stat } from '@/components/v2';
 import { graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { useRouteSelector } from '@/lib/hooks';
-import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const DateFormatter = Intl.DateTimeFormat('en-US', {
@@ -82,8 +82,6 @@ function SubscriptionPageContent() {
     },
   });
 
-  useNotFoundRedirectOnError(!!query.error);
-
   const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
   const organizationConnection = query.data?.organizations;
@@ -96,7 +94,11 @@ function SubscriptionPageContent() {
     redirect: true,
   });
 
-  if (query.error || query.fetching) {
+  if (query.error) {
+    return <QueryError error={query.error} />;
+  }
+
+  if (query.fetching) {
     return null;
   }
 

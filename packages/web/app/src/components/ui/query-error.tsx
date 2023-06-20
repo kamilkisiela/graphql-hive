@@ -1,6 +1,8 @@
 import { ReactElement } from 'react';
+import cookies from 'js-cookie';
 import { CombinedError } from 'urql';
 import { Button, Callout, Tag } from '@/components/v2';
+import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { openChatSupport } from '@/utils';
 
 export function QueryError({
@@ -14,6 +16,8 @@ export function QueryError({
     error &&
     'response' in error &&
     error.response.headers.get('x-request-id')?.split(',')[0].trim();
+
+  cookies.remove(LAST_VISITED_ORG_KEY);
 
   return (
     <Callout type="warning" className="w-1/2 mx-auto">

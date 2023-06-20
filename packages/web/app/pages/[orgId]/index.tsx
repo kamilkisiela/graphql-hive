@@ -14,13 +14,13 @@ import {
   resolutionToMilliseconds,
 } from '@/components/target/operations/utils';
 import { Subtitle, Title } from '@/components/ui/page';
+import { QueryError } from '@/components/ui/query-error';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Activities, Card, EmptyList, MetaTitle } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
 import { useFormattedNumber } from '@/lib/hooks';
-import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { pluralize } from '@/lib/utils';
@@ -282,8 +282,6 @@ function OrganizationPageContent() {
     },
   });
 
-  useNotFoundRedirectOnError(!!query.error);
-
   const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
   const organizationConnection = query.data?.organizations;
@@ -306,7 +304,7 @@ function OrganizationPageContent() {
   }, [projects]);
 
   if (query.error) {
-    return null;
+    return <QueryError error={query.error} />;
   }
 
   return (

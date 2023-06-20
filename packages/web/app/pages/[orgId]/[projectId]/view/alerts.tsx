@@ -25,11 +25,11 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Subtitle, Title } from '@/components/ui/page';
+import { QueryError } from '@/components/ui/query-error';
 import { DocsLink, MetaTitle } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
-import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 function Channels(props: {
@@ -207,8 +207,6 @@ function AlertsPageContent() {
     requestPolicy: 'cache-and-network',
   });
 
-  useNotFoundRedirectOnError(!!query.error);
-
   const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
   const currentProject = query.data?.project;
@@ -225,7 +223,7 @@ function AlertsPageContent() {
   });
 
   if (query.error) {
-    return null;
+    return <QueryError error={query.error} />;
   }
 
   const alerts = currentProject?.alerts || [];

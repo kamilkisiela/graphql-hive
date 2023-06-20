@@ -5,13 +5,13 @@ import { ProjectLayout } from '@/components/layouts/project';
 import { PolicySettings } from '@/components/policy/policy-settings';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Subtitle, Title } from '@/components/ui/page';
+import { QueryError } from '@/components/ui/query-error';
 import { DocsLink, MetaTitle } from '@/components/v2';
 import { graphql } from '@/gql';
 import { ProjectAccessScope } from '@/gql/graphql';
 import { RegistryModel } from '@/graphql';
 import { useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector } from '@/lib/hooks';
-import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const ProjectPolicyPageQuery = graphql(`
@@ -90,8 +90,6 @@ function ProjectPolicyContent() {
     requestPolicy: 'cache-and-network',
   });
 
-  useNotFoundRedirectOnError(!!query.error);
-
   const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
   const currentProject = query.data?.project;
@@ -104,7 +102,7 @@ function ProjectPolicyContent() {
   });
 
   if (query.error) {
-    return null;
+    return <QueryError error={query.error} />;
   }
 
   const isLegacyProject = currentProject?.registryModel === RegistryModel.Legacy;

@@ -1,6 +1,6 @@
 import { Component, ReactNode } from 'react';
 import { AnyVariables, UseQueryState } from 'urql';
-import { QueryError } from '@/components/common/DataWrapper';
+import { QueryError } from '@/components/ui/query-error';
 
 export class DataWrapper<TData, TVariables extends AnyVariables> extends Component<{
   query: UseQueryState<TData, TVariables>;
