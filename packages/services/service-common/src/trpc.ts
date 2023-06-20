@@ -1,4 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
+import { ZodError } from 'zod';
 import * as Sentry from '@sentry/node';
 import type { AnyRouter } from '@trpc/server';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
@@ -29,6 +30,7 @@ export async function handleTRPCError<
         ok: false;
         error: {
           message: string;
+          cause?: Error | undefined;
         };
       }
     | {
@@ -45,12 +47,15 @@ export async function handleTRPCError<
   const result = await next();
 
   if (!result.ok) {
-    Sentry.captureException(result.error, {
-      tags: {
-        path,
-        request_id: ctx.req.id,
-      },
-    });
+    // Ignore validation errors
+    if (!(result.error.cause instanceof ZodError)) {
+      Sentry.captureException(result.error, {
+        tags: {
+          path,
+          request_id: ctx.req.id,
+        },
+      });
+    }
     ctx.req.log.error(result.error.message);
   }
 
