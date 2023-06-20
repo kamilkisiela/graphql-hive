@@ -1,5 +1,14 @@
 # @graphql-hive/cli
 
+## 0.23.0
+
+### Minor Changes
+
+- [#2430](https://github.com/kamilkisiela/graphql-hive/pull/2430)
+  [`951f6865`](https://github.com/kamilkisiela/graphql-hive/commit/951f686506d003382658ddeb25a780fb194b65d4)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Use lighter solution to get commit sha
+  and author from git
+
 ## 0.22.0
 
 ### Minor Changes
