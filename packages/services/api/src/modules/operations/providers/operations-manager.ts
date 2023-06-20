@@ -311,9 +311,11 @@ export class OperationsManager {
     project,
     target,
     operations,
+    clientFilter,
   }: {
     period: DateRange;
     operations?: readonly string[];
+    clientFilter: string | null;
   } & TargetSelector) {
     this.logger.info('Reading operations stats (period=%o, target=%s)', period, target);
     await this.authManager.ensureTargetAccess({
@@ -328,6 +330,7 @@ export class OperationsManager {
       target,
       period,
       operations,
+      clientFilter,
     });
   }
 
@@ -562,11 +565,17 @@ export class OperationsManager {
     project,
     target,
     operations,
-  }: { period: DateRange; operations?: readonly string[] } & TargetSelector) {
+    clientFilter,
+  }: {
+    period: DateRange;
+    operations?: readonly string[];
+    clientFilter: string | null;
+  } & TargetSelector) {
     this.logger.info(
-      'Reading detailed duration percentiles (period=%o, target=%s)',
+      'Reading detailed duration percentiles (period=%o, target=%s, clientFilter=%s)',
       period,
       target,
+      clientFilter,
     );
     await this.authManager.ensureTargetAccess({
       organization,
@@ -579,6 +588,7 @@ export class OperationsManager {
       target,
       period,
       operations,
+      clientFilter,
     });
   }
 

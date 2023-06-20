@@ -1,10 +1,18 @@
-query operationsStats($selector: OperationsStatsSelectorInput!) {
+query operationsStats(
+  $selector: OperationsStatsSelectorInput!
+  $operationsFilter: OperationStatsOperationFilter
+) {
   operationsStats(selector: $selector) {
-    operations {
+    operations(filter: $operationsFilter) {
       nodes {
         ...OperationStatsFields
       }
       total
+    }
+    clients {
+      nodes {
+        name
+      }
     }
   }
 }

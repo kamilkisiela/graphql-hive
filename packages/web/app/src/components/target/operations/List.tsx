@@ -8,6 +8,7 @@ import {
   Button,
   Drawer,
   Input,
+  Select,
   Sortable,
   Table,
   TBody,
@@ -193,6 +194,9 @@ function OperationsTable({
   organization,
   project,
   target,
+  clients,
+  clientFilter,
+  setClientFilter,
 }: {
   operations: Operation[];
   pagination: PaginationState;
@@ -203,6 +207,9 @@ function OperationsTable({
   organization: string;
   project: string;
   target: string;
+  clients: readonly { name: string }[];
+  clientFilter: string | null;
+  setClientFilter: (filter: string) => void;
 }): ReactElement {
   const tableInstance = useTableInstance(table, {
     columns,
@@ -233,8 +240,22 @@ function OperationsTable({
   const { headers } = tableInstance.getHeaderGroups()[0];
   return (
     <div className={clsx('rounded-md p-5 border border-gray-800 bg-gray-900/50', className)}>
-      <Section.Title>Operations</Section.Title>
-      <Section.Subtitle>List of all operations with their statistics</Section.Subtitle>
+      <div className="flex justify-between">
+        <div>
+          <Section.Title>Operations</Section.Title>
+          <Section.Subtitle>List of all operations with their statistics</Section.Subtitle>
+        </div>
+        <div>
+          Client
+          <Select
+            placeholder="Select"
+            options={clients.map(client => ({ name: client.name, value: client.name }))}
+            value={clientFilter ?? undefined}
+            onChange={ev => setClientFilter(ev.target.value)}
+          />
+        </div>
+      </div>
+
       <Table>
         <THead>
           <Tooltip.Provider>
@@ -324,6 +345,9 @@ function OperationsTableContainer({
   organization,
   project,
   target,
+  clients,
+  clientFilter,
+  setClientFilter,
   className,
 }: {
   operations: readonly OperationStatsFieldsFragment[];
@@ -331,6 +355,9 @@ function OperationsTableContainer({
   organization: string;
   project: string;
   target: string;
+  clients: readonly { name: string }[];
+  clientFilter: string | null;
+  setClientFilter: (client: string) => void;
   className?: string;
 }): ReactElement {
   const data = useMemo(() => {
@@ -393,6 +420,9 @@ function OperationsTableContainer({
       organization={organization}
       project={project}
       target={target}
+      clients={clients}
+      clientFilter={clientFilter}
+      setClientFilter={setClientFilter}
     />
   );
 }
@@ -412,6 +442,7 @@ export function OperationsList({
   period: DateRangeInput;
   operationsFilter: readonly string[];
 }): ReactElement {
+  const [clientFilter, setClientFilter] = useState<string | null>(null);
   const [query, refetch] = useQuery({
     query: OperationsStatsDocument,
     variables: {
@@ -422,9 +453,15 @@ export function OperationsList({
         period,
         operations: [],
       },
+      operationsFilter: clientFilter
+        ? {
+            clientName: clientFilter,
+          }
+        : null,
     },
   });
   const operations = query.data?.operationsStats?.operations?.nodes ?? [];
+  const clients = query.data?.operationsStats?.clients?.nodes ?? [];
 
   return (
     <OperationsFallback
@@ -436,6 +473,9 @@ export function OperationsList({
         operations={operations}
         operationsFilter={operationsFilter}
         className={className}
+        clients={clients}
+        setClientFilter={setClientFilter}
+        clientFilter={clientFilter}
         organization={organization}
         project={project}
         target={target}

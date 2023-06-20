@@ -85,8 +85,15 @@ export default gql`
     totalOperations: Int!
     durationHistogram(resolution: Int!): [DurationHistogram!]!
     duration: DurationStats!
-    operations: OperationStatsConnection!
+    operations(filter: OperationStatsOperationFilter): OperationStatsConnection!
     clients: ClientStatsConnection!
+  }
+
+  input OperationStatsOperationFilter {
+    """
+    Name of the client to filter by
+    """
+    clientName: String
   }
 
   type OperationStatsConnection {

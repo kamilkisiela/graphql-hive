@@ -417,10 +417,12 @@ export class OperationsReader {
       target,
       period,
       operations,
+      clientFilter,
     }: {
       target: string;
       period: DateRange;
       operations?: readonly string[];
+      clientFilter: string | null;
     },
     span?: Span,
   ): Promise<
@@ -433,6 +435,12 @@ export class OperationsReader {
       percentage: number;
     }>
   > {
+    const extra: Array<SqlValue> = [];
+
+    if (clientFilter) {
+      extra.push(sql`"client_name" = ${clientFilter}`);
+    }
+
     const query = pickQueryByPeriod(
       {
         daily: {
@@ -443,6 +451,7 @@ export class OperationsReader {
               target,
               period,
               operations,
+              extra,
             })}
             GROUP BY hash
           `,
@@ -461,6 +470,7 @@ export class OperationsReader {
               target,
               period,
               operations,
+              extra,
             })}
             GROUP BY hash
           `,
@@ -476,6 +486,7 @@ export class OperationsReader {
               target,
               period,
               operations,
+              extra,
             })}
             GROUP BY hash
           `,
@@ -1225,13 +1236,21 @@ export class OperationsReader {
       target,
       period,
       operations,
+      clientFilter,
     }: {
       target: string;
       period: DateRange;
       operations?: readonly string[];
+      clientFilter: string | null;
     },
     span?: Span,
   ) {
+    const extra: Array<SqlValue> = [];
+
+    if (clientFilter) {
+      extra.push(sql`"client_name" = ${clientFilter}`);
+    }
+
     const result = await this.clickHouse.query<{
       hash: string;
       percentiles: [number, number, number, number];
@@ -1244,7 +1263,7 @@ export class OperationsReader {
                 hash,
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
               FROM operations_daily
-              ${this.createFilter({ target, period, operations })}
+              ${this.createFilter({ target, period, operations, extra })}
               GROUP BY hash
             `,
             queryId: 'duration_percentiles_daily',
@@ -1257,7 +1276,7 @@ export class OperationsReader {
                 hash,
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
               FROM operations_hourly
-              ${this.createFilter({ target, period, operations })}
+              ${this.createFilter({ target, period, operations, extra })}
               GROUP BY hash
             `,
             queryId: 'duration_percentiles_hourly',
@@ -1270,7 +1289,7 @@ export class OperationsReader {
                 hash,
                 quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles
               FROM operations
-              ${this.createFilter({ target, period, operations })}
+              ${this.createFilter({ target, period, operations, extra })}
               GROUP BY hash
             `,
             queryId: 'duration_percentiles_regular',

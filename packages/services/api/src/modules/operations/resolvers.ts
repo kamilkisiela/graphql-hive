@@ -125,9 +125,10 @@ export const resolvers: OperationsModule.Resolvers = {
   OperationsStats: {
     async operations(
       { organization, project, target, period, operations: operationsFilter },
-      _,
+      args,
       { injector },
     ) {
+      const clientFilter = args.filter?.clientName ?? null;
       const operationsManager = injector.get(OperationsManager);
       const [operations, durations] = await Promise.all([
         operationsManager.readOperationsStats({
@@ -136,6 +137,7 @@ export const resolvers: OperationsModule.Resolvers = {
           target,
           period,
           operations: operationsFilter,
+          clientFilter,
         }),
         operationsManager.readDetailedDurationPercentiles({
           organization,
@@ -143,6 +145,7 @@ export const resolvers: OperationsModule.Resolvers = {
           target,
           period,
           operations: operationsFilter,
+          clientFilter,
         }),
       ]);
 
