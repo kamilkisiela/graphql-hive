@@ -22,7 +22,7 @@
     "@graphql-yoga/plugin-response-cache": "2.0.1",
     "@sentry/integrations": "7.55.2",
     "@sentry/node": "7.55.2",
-    "@trpc/server": "10.29.1",
+    "@trpc/server": "10.31.0",
     "@whatwg-node/fetch": "0.9.6",
     "@whatwg-node/server": "0.8.12",
     "dotenv": "16.3.1",
