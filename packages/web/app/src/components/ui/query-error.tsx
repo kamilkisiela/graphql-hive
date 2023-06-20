@@ -26,13 +26,13 @@ export function QueryError({
 
   return (
     <div className="h-full w-full flex items-center justify-center">
-      <div className="flex flex-row items-center gap-x-6 w-2/3 max-w-[960px]">
+      <div className="flex sm:flex-row flex-col items-center gap-x-6 max-w-[960px]">
         <img
           src="/images/figures/connection.svg"
           alt="Ghost"
           className="block w-[200px] h-[200px]"
         />
-        <div className="grow">
+        <div className="grow text-center sm:text-left">
           <h1 className="text-xl font-semibold">Oops, something went wrong.</h1>
           <div className="mt-2">
             {shouldShowError ? (
