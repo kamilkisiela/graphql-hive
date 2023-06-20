@@ -26,7 +26,6 @@ import {
   useRouteSelector,
   useToggle,
 } from '@/lib/hooks';
-import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { cn } from '@/lib/utils';
 import {
@@ -39,6 +38,7 @@ import {
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import { BookmarkIcon, DotsVerticalIcon, Share2Icon } from '@radix-ui/react-icons';
 import 'graphiql/graphiql.css';
+import { QueryError } from '@/components/ui/query-error';
 
 function Share(): ReactElement {
   const label = 'Share query';
@@ -464,7 +464,6 @@ function LaboratoryPageContent() {
       targetId: router.targetId,
     },
   });
-  useNotFoundRedirectOnError(!!query.error);
 
   const endpoint = `${location.origin}/api/lab/${router.organizationId}/${router.projectId}/${router.targetId}`;
   const me = query.data?.me;
@@ -479,7 +478,7 @@ function LaboratoryPageContent() {
   });
 
   if (query.error) {
-    return null;
+    return <QueryError error={query.error} />;
   }
 
   return (

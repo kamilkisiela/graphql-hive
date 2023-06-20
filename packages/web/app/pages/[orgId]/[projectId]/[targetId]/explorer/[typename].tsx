@@ -13,10 +13,10 @@ import {
 import { GraphQLScalarTypeComponent } from '@/components/target/explorer/scalar-type';
 import { GraphQLUnionTypeComponent } from '@/components/target/explorer/union-type';
 import { Subtitle, Title } from '@/components/ui/page';
+import { QueryError } from '@/components/ui/query-error';
 import { MetaTitle } from '@/components/v2';
 import { noSchemaVersion } from '@/components/v2/empty-list';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
@@ -122,10 +122,9 @@ function TypeExplorerPageContent({ typename }: { typename: string }) {
       typename,
     },
   });
-  useNotFoundRedirectOnError(!!query.error);
 
   if (query.error) {
-    return null;
+    return <QueryError error={query.error} />;
   }
 
   const me = query.data?.me;

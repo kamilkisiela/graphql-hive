@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Subtitle, Title } from '@/components/ui/page';
+import { QueryError } from '@/components/ui/query-error';
 import { DocsLink, Input, MetaTitle, Tag } from '@/components/v2';
 import { GitHubIcon, SlackIcon } from '@/components/v2/icon';
 import {
@@ -35,7 +36,6 @@ import {
   useOrganizationAccess,
 } from '@/lib/access/organization';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
-import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 function Integrations(): ReactElement | null {
@@ -381,10 +381,8 @@ function SettingsPageContent() {
     },
   });
 
-  useNotFoundRedirectOnError(!!query.error);
-
   if (query.error) {
-    return null;
+    return <QueryError error={query.error} />;
   }
 
   const me = query.data?.me;

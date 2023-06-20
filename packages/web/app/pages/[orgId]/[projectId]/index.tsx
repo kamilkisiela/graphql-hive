@@ -14,11 +14,11 @@ import {
   resolutionToMilliseconds,
 } from '@/components/target/operations/utils';
 import { Subtitle, Title } from '@/components/ui/page';
+import { QueryError } from '@/components/ui/query-error';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Activities, Card, EmptyList, MetaTitle } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useFormattedNumber } from '@/lib/hooks';
-import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { cn, pluralize } from '@/lib/utils';
@@ -233,7 +233,6 @@ const Page = () => {
       period: period.current,
     },
   });
-  useNotFoundRedirectOnError(!!query.error);
 
   const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
@@ -256,7 +255,7 @@ const Page = () => {
   }, [targets]);
 
   if (query.error) {
-    return null;
+    return <QueryError error={query.error} />;
   }
 
   return (

@@ -3,13 +3,13 @@ import NextLink from 'next/link';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Section } from '@/components/common';
-import { QueryError } from '@/components/common/DataWrapper';
 import { OrganizationLayout } from '@/components/layouts/organization';
 import { BillingPaymentMethod } from '@/components/organization/billing/BillingPaymentMethod';
 import { BillingPlanPicker } from '@/components/organization/billing/BillingPlanPicker';
 import { PlanSummary } from '@/components/organization/billing/PlanSummary';
 import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
+import { QueryError } from '@/components/ui/query-error';
 import { Card, Heading, Input, MetaTitle, Slider, Stat } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { BillingPlanType } from '@/gql/graphql';
@@ -22,7 +22,6 @@ import {
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { useRouteSelector } from '@/lib/hooks';
-import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { openChatSupport } from '@/utils';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
@@ -358,8 +357,6 @@ function ManageSubscriptionPageContent() {
     },
   });
 
-  useNotFoundRedirectOnError(!!query.error);
-
   const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
   const organizationConnection = query.data?.organizations;
@@ -376,7 +373,7 @@ function ManageSubscriptionPageContent() {
   });
 
   if (query.error) {
-    return null;
+    return <QueryError error={query.error} />;
   }
 
   if (!currentOrganization || !me || !organizationConnection || !organization || !billingPlans) {

@@ -6,11 +6,11 @@ import { PolicySettings } from '@/components/policy/policy-settings';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Subtitle, Title } from '@/components/ui/page';
+import { QueryError } from '@/components/ui/query-error';
 import { DocsLink, DocsNote, MetaTitle } from '@/components/v2';
 import { graphql } from '@/gql';
 import { RegistryModel } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
-import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const OrganizationPolicyPageQuery = graphql(`
@@ -84,10 +84,8 @@ function PolicyPageContent() {
   });
   const [mutation, mutate] = useMutation(UpdateSchemaPolicyForOrganization);
 
-  useNotFoundRedirectOnError(!!query.error);
-
   if (query.error) {
-    return null;
+    return <QueryError error={query.error} />;
   }
 
   const me = query.data?.me;

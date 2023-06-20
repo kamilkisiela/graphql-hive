@@ -5,12 +5,12 @@ import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts/target';
 import { VersionErrorsAndChanges } from '@/components/target/history/errors-and-changes';
 import { Subtitle, Title } from '@/components/ui/page';
+import { QueryError } from '@/components/ui/query-error';
 import { Badge, Button, DiffEditor, MetaTitle, Spinner, TimeAgo } from '@/components/v2';
 import { noSchemaVersion } from '@/components/v2/empty-list';
 import { DiffIcon } from '@/components/v2/icon';
 import { graphql } from '@/gql';
 import { CompareDocument } from '@/graphql';
-import { useNotFoundRedirectOnError } from '@/lib/hooks/use-not-found-redirect-on-error';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { cn } from '@/lib/utils';
@@ -367,11 +367,10 @@ function HistoryPageContent() {
       targetId: router.targetId,
     },
   });
-  useNotFoundRedirectOnError(!!query.error);
   const [pageVariables, setPageVariables] = useState([{ limit: 10, after: '' }]);
 
   if (query.error) {
-    return null;
+    return <QueryError error={query.error} />;
   }
 
   const me = query.data?.me;
