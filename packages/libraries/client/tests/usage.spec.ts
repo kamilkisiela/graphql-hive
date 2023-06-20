@@ -136,14 +136,17 @@ test('should send data to Hive', async () => {
     usage: true,
   });
 
-  const collect = hive.collectUsage({
-    schema,
-    document: op,
-    operationName: 'deleteProject',
-  });
+  const collect = hive.collectUsage();
 
   await waitFor(2000);
-  collect({});
+  collect(
+    {
+      schema,
+      document: op,
+      operationName: 'deleteProject',
+    },
+    {},
+  );
   await hive.dispose();
   await waitFor(1000);
   http.done();
@@ -232,14 +235,17 @@ test('should send data to Hive (deprecated endpoint)', async () => {
     },
   });
 
-  const collect = hive.collectUsage({
-    schema,
-    document: op,
-    operationName: 'deleteProject',
-  });
+  const collect = hive.collectUsage();
 
   await waitFor(2000);
-  collect({});
+  collect(
+    {
+      schema,
+      document: op,
+      operationName: 'deleteProject',
+    },
+    {},
+  );
   await hive.dispose();
   await waitFor(1000);
   http.done();
@@ -309,11 +315,14 @@ test('should not leak the exception', async () => {
     },
   });
 
-  hive.collectUsage({
-    schema,
-    document: op,
-    operationName: 'deleteProject',
-  })({});
+  hive.collectUsage()(
+    {
+      schema,
+      document: op,
+      operationName: 'deleteProject',
+    },
+    {},
+  );
 
   await waitFor(1000);
   await hive.dispose();
@@ -364,15 +373,24 @@ test('sendImmediately should not stop the schedule', async () => {
     },
   });
 
-  const collect = hive.collectUsage({
+  const args = {
     schema,
     document: op,
     operationName: 'deleteProject',
-  });
+  };
+
+  const collect = hive.collectUsage();
 
   expect(logger.info).toHaveBeenCalledTimes(0);
 
-  collect({});
+  collect(
+    {
+      schema,
+      document: op,
+      operationName: 'deleteProject',
+    },
+    {},
+  );
   await waitFor(200);
   // Because maxSize is 2 and sendInterval is 100ms
   // the scheduled send task should be done by now
@@ -384,8 +402,8 @@ test('sendImmediately should not stop the schedule', async () => {
 
   // Now we will check the maxSize
   // We run collect three times
-  collect({});
-  collect({});
+  collect(args, {});
+  collect(args, {});
   expect(logger.error).not.toHaveBeenCalled();
   expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);
   expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending immediately`);
@@ -398,7 +416,7 @@ test('sendImmediately should not stop the schedule', async () => {
   expect(logger.info).toHaveBeenCalledTimes(5);
 
   // Let's check if the scheduled send task is still running
-  collect({});
+  collect(args, {});
   await waitFor(200);
   expect(logger.error).not.toHaveBeenCalled();
   expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 1) (attempt 1)`);

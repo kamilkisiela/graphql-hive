@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ExecutionArgs, ExecutionResult, GraphQLSchema } from 'graphql';
+import { ExecutionResult, GraphQLSchema } from 'graphql';
 import { createOperationsStore } from './internal/operations-store.js';
 import { createReporting } from './internal/reporting.js';
 import type { HiveClient, HivePluginOptions } from './internal/types.js';
@@ -30,8 +30,8 @@ export function createHive(options: HivePluginOptions): HiveClient {
     schemaReporter.report({ schema });
   }
 
-  function collectUsage(args: ExecutionArgs) {
-    return usage.collect(args);
+  function collectUsage() {
+    return usage.collect();
   }
 
   async function dispose() {

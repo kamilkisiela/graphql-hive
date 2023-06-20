@@ -13,7 +13,7 @@ import { isGraphQLError } from '@envelop/core';
 import { useGenericAuth } from '@envelop/generic-auth';
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useSentry } from '@envelop/sentry';
-import { useHive } from '@graphql-hive/client';
+import { useYogaHive } from '@graphql-hive/client';
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { HiveError, Registry, RegistryContext } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
@@ -191,7 +191,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           return null;
         },
       }),
-      useHive({
+      useYogaHive({
         debug: true,
         enabled: !!options.hiveConfig,
         token: options.hiveConfig?.token ?? '',

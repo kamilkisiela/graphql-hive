@@ -23,11 +23,11 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
       hive.reportSchema({ schema });
     },
     onExecute({ args }) {
-      const complete = hive.collectUsage(args);
+      const complete = hive.collectUsage();
 
       return {
         onExecuteDone({ result }) {
-          complete(result);
+          complete(args, result);
         },
       };
     },
