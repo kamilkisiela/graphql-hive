@@ -21,3 +21,11 @@ export function cache<R, A, K>(
     return { key, value };
   };
 }
+
+export function errorOkTuple<TResult>(fn: () => TResult) {
+  try {
+    return [null, fn()] as const;
+  } catch (e) {
+    return [e, null] as const;
+  }
+}
