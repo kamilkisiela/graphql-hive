@@ -16,7 +16,7 @@ import type {
   RawOperationMapRecord,
   RawReport,
 } from '@hive/usage-common';
-import { cache } from './helpers';
+import { cache, errorOkTuple } from './helpers';
 import {
   normalizeCacheMisses,
   reportMessageSize,
@@ -77,6 +77,7 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
             rawReport.map,
             rawReport.target,
             normalize,
+            logger,
           );
 
           if (processedOperation === null) {
@@ -149,11 +150,27 @@ function processSingleOperation(
   operationMap: RawOperationMap,
   target: string,
   normalize: NormalizeFunction,
+  logger: FastifyLoggerInstance,
 ): ProcessedOperation | null {
   const operationMapRecord = operationMap[operation.operationMapKey];
   const { execution, metadata } = operation;
 
-  const { value: normalized } = normalize(operationMapRecord);
+  const [normalizationError, normalizationResult] = errorOkTuple(() =>
+    normalize(operationMapRecord),
+  );
+
+  if (!normalizationResult) {
+    // Failed to normalize the operation because of an exception
+    logger.debug(
+      'Failed to normalize operation (operationName=%s, operation=%s)',
+      operationMapRecord.operationName ?? '-',
+      operationMapRecord.operation,
+    );
+    logger.error(normalizationError);
+    return null;
+  }
+
+  const { value: normalized } = normalizationResult;
 
   if (normalized === null) {
     // The operation should be ignored
@@ -220,6 +237,11 @@ function normalizeOperation(operation: RawOperationMapRecord) {
   const sortedCoordinates = Array.from(uniqueCoordinatesSet).sort();
 
   const operationDefinition = findOperationDefinition(parsed);
+
+  if (!operationDefinition) {
+    return null;
+  }
+
   const operationName = operation.operationName ?? operationDefinition.name?.value;
 
   const hash = createHash('md5')
@@ -238,5 +260,5 @@ function normalizeOperation(operation: RawOperationMapRecord) {
 }
 
 function findOperationDefinition(doc: DocumentNode) {
-  return doc.definitions.find(isOperationDef)!;
+  return doc.definitions.find(isOperationDef);
 }
