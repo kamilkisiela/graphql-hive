@@ -235,6 +235,27 @@ export class OperationsReader {
     return stats;
   }
 
+  @sentry('OperationsReader.hasCollectedOperations')
+  async hasCollectedOperations(
+    {
+      target,
+    }: {
+      target: string | readonly string[];
+    },
+    span?: Span,
+  ): Promise<boolean> {
+    const result = await this.clickHouse.query<{
+      exists: number;
+    }>({
+      query: sql`SELECT 1 as exists FROM operations_daily ${this.createFilter({ target })} LIMIT 1`,
+      queryId: 'has_collected_operations',
+      timeout: 10_000,
+      span,
+    });
+
+    return result.rows > 0;
+  }
+
   @sentry('OperationsReader.countOperations')
   async countOperations(
     {
@@ -243,7 +264,7 @@ export class OperationsReader {
       operations,
     }: {
       target: string | readonly string[];
-      period?: DateRange;
+      period: DateRange;
       operations?: readonly string[];
     },
     span?: Span,

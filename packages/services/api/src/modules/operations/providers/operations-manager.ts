@@ -153,11 +153,9 @@ export class OperationsManager {
     });
 
     return hasCollectedOperationsCached(target, () =>
-      this.reader
-        .countOperations({
-          target,
-        })
-        .then(r => r.total > 0),
+      this.reader.hasCollectedOperations({
+        target,
+      }),
     );
   }
 
@@ -707,6 +705,10 @@ export class OperationsManager {
   }
 
   async hasOperationsForOrganization(selector: OrganizationSelector): Promise<boolean> {
+    this.logger.info(
+      'Checking existence of collected operations (organization=%s)',
+      selector.organization,
+    );
     const targets = await this.storage.getTargetIdsOfOrganization(selector);
 
     if (targets.length === 0) {
