@@ -81,7 +81,7 @@ export function createInputValidationSchema() {
     )
     .required()
     .partial()
-    .strict('Unkonwn rule name passed');
+    .strict('Unknown rule name passed');
 }
 
 export type PolicyConfigurationObject = z.infer<ReturnType<typeof createInputValidationSchema>>;
