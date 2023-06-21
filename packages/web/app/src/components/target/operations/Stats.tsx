@@ -18,10 +18,10 @@ import {
   useFormattedNumber,
   useFormattedThroughput,
 } from '@/lib/hooks';
+import { cn } from '@/lib/utils';
 import { useChartStyles } from '@/utils';
 import { OperationsFallback } from './Fallback';
 import { createEmptySeries, fullSeries, resolutionToMilliseconds } from './utils';
-import { cn } from '@/lib/utils';
 
 const classes = {
   root: cn('text-center'),
