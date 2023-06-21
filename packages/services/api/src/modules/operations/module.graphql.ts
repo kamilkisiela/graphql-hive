@@ -126,19 +126,19 @@ export default gql`
   type ClientStats {
     name: String!
     versions: [ClientVersionStats!]!
-    count: SafeInt!
+    count: Float!
     percentage: Float!
   }
 
   type ClientVersionStats {
     version: String!
-    count: SafeInt!
+    count: Float!
     percentage: Float!
   }
 
   type ClientNameStats {
     name: String!
-    count: SafeInt!
+    count: Float!
   }
 
   type RequestsOverTime {
