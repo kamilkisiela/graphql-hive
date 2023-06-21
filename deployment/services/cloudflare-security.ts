@@ -53,11 +53,11 @@ export function deployCloudFlareSecurityTransform(options: {
   default-src 'self';
   frame-src ${stripeHost} https://game.crisp.chat https://giscus.app https://www.youtube.com;
   worker-src 'self' blob:;
-  style-src 'self' 'unsafe-inline' ${crispHost} fonts.googleapis.com ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath};
+  style-src 'self' 'unsafe-inline' ${crispHost} fonts.googleapis.com rsms.me ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath};
   script-src 'self' 'unsafe-eval' 'unsafe-inline' {DYNAMIC_HOST_PLACEHOLDER} ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} ${cspHosts};
   connect-src 'self' {DYNAMIC_HOST_PLACEHOLDER} ${cspHosts}; 
   media-src ${crispHost};
-  style-src-elem 'self' 'unsafe-inline' ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} fonts.googleapis.com ${crispHost};
+  style-src-elem 'self' 'unsafe-inline' ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} fonts.googleapis.com rsms.me ${crispHost};
   font-src 'self' fonts.gstatic.com rsms.me ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} ${crispHost};
   img-src * 'self' data: https: https://image.crisp.chat https://storage.crisp.chat ${gtmHost} ${crispHost};
 `;
