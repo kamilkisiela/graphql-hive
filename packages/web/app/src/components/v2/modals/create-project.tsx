@@ -78,8 +78,6 @@ export const CreateProjectModal = ({
     },
   });
 
-  console.log(mutation);
-
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen} className="w-[650px]">
       <form onSubmit={handleSubmit} className="flex flex-col gap-8">
