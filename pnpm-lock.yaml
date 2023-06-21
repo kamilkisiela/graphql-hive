@@ -1019,14 +1019,14 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       '@escape.tech/graphql-armor-max-depth':
-        specifier: 2.0.0
-        version: 2.0.0
+        specifier: 2.1.0
+        version: 2.1.0
       '@escape.tech/graphql-armor-max-directives':
         specifier: 2.0.0
         version: 2.0.0
       '@escape.tech/graphql-armor-max-tokens':
-        specifier: 2.0.0
-        version: 2.0.0
+        specifier: 2.1.0
+        version: 2.1.0
       '@graphql-yoga/plugin-response-cache':
         specifier: 2.0.1
         version: 2.0.1(@envelop/core@4.0.0)(graphql-yoga@4.0.1)(graphql@16.6.0)
@@ -5853,8 +5853,8 @@ packages:
       '@escape.tech/graphql-armor-types': 0.4.1
     dev: false
 
-  /@escape.tech/graphql-armor-max-depth@2.0.0:
-    resolution: {integrity: sha512-ucORvM/DEyxNXz4EaB0Ea+JDV4jf/XASfm3wA8lPiPeBdbMiPquXBuH7F2gIICN73WAuqess5jEw4vbCfUrQUw==}
+  /@escape.tech/graphql-armor-max-depth@2.1.0:
+    resolution: {integrity: sha512-CKzMzpGq5UycVKzBT5AyFmKAks0qXx+VnWHoechoaoeRRSh+7USvhsWrC/TYpAnn1SnJn/oQH5iVRPAj4szH7w==}
     engines: {node: '>=16.0.0'}
     dependencies:
       graphql: 16.6.0
@@ -5873,8 +5873,8 @@ packages:
       '@escape.tech/graphql-armor-types': 0.4.1
     dev: false
 
-  /@escape.tech/graphql-armor-max-tokens@2.0.0:
-    resolution: {integrity: sha512-3auhqpOLkf81TwGdLhEoKxLcnpTq9KyMX9jQYr5LKKURCUCmMuHo3ERxKOI/ft8xW1QX5bMgEyyS5TX0HbXJIw==}
+  /@escape.tech/graphql-armor-max-tokens@2.1.0:
+    resolution: {integrity: sha512-/RJM6GyvCo9rtf8OLywUG1KywAH5bFevXWM0jC4GhdHz2OQXEAhL2O0p3tFAgzNpCE6tvQioYCZCimZA8+y7eA==}
     engines: {node: '>=16.0.0'}
     dependencies:
       graphql: 16.6.0
