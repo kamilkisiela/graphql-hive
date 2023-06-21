@@ -238,7 +238,7 @@ export class OperationsReader {
   @sentry('OperationsReader.hasCollectedOperations')
   async hasCollectedOperations(
     {
-      target
+      target,
     }: {
       target: string | readonly string[];
     },
@@ -253,7 +253,7 @@ export class OperationsReader {
       span,
     });
 
-    return result.rows > 0;;
+    return result.rows > 0;
   }
 
   @sentry('OperationsReader.countOperations')
