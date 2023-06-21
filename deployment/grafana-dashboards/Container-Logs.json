@@ -97,10 +97,7 @@
       "id": 3,
       "options": {
         "legend": {
-          "calcs": [
-            "mean",
-            "count"
-          ],
+          "calcs": ["mean", "count"],
           "displayMode": "table",
           "placement": "right",
           "showLegend": true
@@ -223,10 +220,7 @@
   "revision": 1,
   "schemaVersion": 38,
   "style": "dark",
-  "tags": [
-    "kubernetes",
-    "logs"
-  ],
+  "tags": ["kubernetes", "logs"],
   "templating": {
     "list": [
       {
