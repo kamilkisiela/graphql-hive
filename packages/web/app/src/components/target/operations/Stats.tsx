@@ -1,5 +1,4 @@
 import { ReactElement, useCallback, useMemo } from 'react';
-import clsx from 'clsx';
 import ReactECharts from 'echarts-for-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
@@ -19,14 +18,15 @@ import {
   useFormattedNumber,
   useFormattedThroughput,
 } from '@/lib/hooks';
+import { cn } from '@/lib/utils';
 import { useChartStyles } from '@/utils';
 import { OperationsFallback } from './Fallback';
 import { createEmptySeries, fullSeries, resolutionToMilliseconds } from './utils';
 
 const classes = {
-  root: clsx('text-center'),
-  value: clsx('font-normal text-3xl text-gray-900 dark:text-white'),
-  title: clsx('text-sm leading-relaxed'),
+  root: cn('text-center'),
+  value: cn('font-normal text-3xl text-gray-900 dark:text-white'),
+  title: cn('text-sm leading-relaxed'),
 };
 
 function RequestsStats({ requests = 0 }: { requests?: number }): ReactElement {
@@ -98,7 +98,7 @@ function SuccessRateStats({
 
   return (
     <div className={classes.root}>
-      <h2 className={clsx(classes.value, 'text-emerald-500 dark:text-emerald-500')}>{rate}</h2>
+      <h2 className={cn(classes.value, 'text-emerald-500 dark:text-emerald-500')}>{rate}</h2>
       <p className={classes.title}>Success rate</p>
     </div>
   );
@@ -114,8 +114,8 @@ function FailureRateStats({
   const rate = requests || totalFailures ? `${toDecimal((totalFailures * 100) / requests)}%` : '-';
 
   return (
-    <div className={clsx(classes.root, 'pt-4')}>
-      <h2 className={clsx(classes.value, 'text-red-500 dark:text-red-500')}>{rate}</h2>
+    <div className={cn(classes.root)}>
+      <h2 className={cn(classes.value, 'text-red-500 dark:text-red-500')}>{rate}</h2>
       <p className={classes.title}>Failure rate</p>
     </div>
   );
