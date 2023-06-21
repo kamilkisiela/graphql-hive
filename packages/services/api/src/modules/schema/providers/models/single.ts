@@ -127,7 +127,7 @@ export class SingleModel {
       conclusion: SchemaCheckConclusion.Success,
       state: {
         schemaChanges: diffCheck.result?.changes ?? null,
-        schemaPolicyWarnings: policyCheck.result?.warnings ?? [],
+        schemaPolicyWarnings: policyCheck.result?.warnings ?? null,
         composition: {
           compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
           supergraphSDL: compositionCheck.result.supergraph,
