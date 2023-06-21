@@ -1,0 +1,144 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 65,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Ascending",
+        "wrapLogMessage": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "builder",
+          "expr": "{env=\"prod\"} |= `$requestId` | json | __error__ != `JSONParserErr` | level > 30 | line_format `[{{.hostname}}] {{trim .msg}})`",
+          "hide": false,
+          "key": "Q-4f74f5b0-5837-415a-b726-56138193c25e-0",
+          "legendFormat": "",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Errors/Warnings",
+      "type": "logs"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "id": 2,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Ascending",
+        "wrapLogMessage": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "builder",
+          "expr": "{env=\"prod\"} |= `$requestId` | json | __error__ != `JSONParserErr` | line_format `[{{.hostname}}] {{trim .msg}})`",
+          "hide": false,
+          "key": "Q-4f74f5b0-5837-415a-b726-56138193c25e-0",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "All logs",
+      "type": "logs"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "16310560-80d1-48ac-a045-e75bbf3d47de",
+          "value": "16310560-80d1-48ac-a045-e75bbf3d47de"
+        },
+        "description": "Show logs associated with x-request-id header",
+        "hide": 0,
+        "label": "Request ID",
+        "name": "requestId",
+        "options": [
+          {
+            "selected": true,
+            "text": "16310560-80d1-48ac-a045-e75bbf3d47de",
+            "value": "16310560-80d1-48ac-a045-e75bbf3d47de"
+          }
+        ],
+        "query": "16310560-80d1-48ac-a045-e75bbf3d47de",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Explore Request",
+  "uid": "b977162a-89b3-4394-969c-5f654b926161",
+  "version": 2,
+  "weekStart": ""
+}

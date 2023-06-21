@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 20,
+  "id": 54,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -33,22 +33,79 @@
         "type": "loki",
         "uid": "grafanacloud-logs"
       },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
       "gridPos": {
-        "h": 11,
+        "h": 8,
         "w": 24,
         "x": 0,
         "y": 0
       },
-      "id": 1,
+      "id": 3,
       "options": {
-        "dedupStrategy": "none",
-        "enableLogDetails": true,
-        "prettifyLogMessage": false,
-        "showCommonLabels": false,
-        "showLabels": false,
-        "showTime": true,
-        "sortOrder": "Descending",
-        "wrapLogMessage": false
+        "legend": {
+          "calcs": ["mean", "count"],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
       },
       "targets": [
         {
@@ -56,14 +113,31 @@
             "type": "loki",
             "uid": "grafanacloud-logs"
           },
-          "editorMode": "code",
-          "expr": "{container_name=\"$service\"} | json | __error__!=\"JSONParserErr\" ",
+          "editorMode": "builder",
+          "expr": "avg by(container_name) (rate({env=\"prod\"} |= `\"level\":50` [$__interval]))",
+          "key": "Q-0eeded78-b26f-4d43-af08-3cadcd2261f2-0",
+          "legendFormat": "{{container_name}}",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Service Logs",
-      "type": "logs"
+      "title": "Errors over time (all services)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 4,
+      "panels": [],
+      "repeat": "service",
+      "repeatDirection": "h",
+      "title": "$service",
+      "type": "row"
     },
     {
       "datasource": {
@@ -74,9 +148,9 @@
         "h": 13,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 9
       },
-      "id": 2,
+      "id": 5,
       "options": {
         "dedupStrategy": "none",
         "enableLogDetails": true,
@@ -101,11 +175,48 @@
           "refId": "A"
         }
       ],
-      "title": "Recent Log Errors/Warnings",
+      "title": "Recent Log Errors/Warnings of $service",
+      "type": "logs"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "grafanacloud-logs"
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "id": 1,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "grafanacloud-logs"
+          },
+          "editorMode": "code",
+          "expr": "{container_name=\"$service\"} | json | __error__!=\"JSONParserErr\" ",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Service Logs of $service",
       "type": "logs"
     }
   ],
-  "refresh": "",
+  "refresh": "30s",
   "revision": 1,
   "schemaVersion": 38,
   "style": "dark",
@@ -113,6 +224,11 @@
   "templating": {
     "list": [
       {
+        "current": {
+          "selected": false,
+          "text": "rate-limiter",
+          "value": "rate-limiter"
+        },
         "datasource": {
           "type": "loki",
           "uid": "grafanacloud-logs"
@@ -145,7 +261,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "Container Logs",
-  "uid": "2FZ-3Plnk",
-  "version": 6,
+  "uid": "ih6KH0aVz",
+  "version": 8,
   "weekStart": ""
 }
