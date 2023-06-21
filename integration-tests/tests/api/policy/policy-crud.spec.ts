@@ -355,7 +355,7 @@ describe('Policy CRUD', () => {
       const upsertResult = await setOrganizationSchemaPolicy(INVALID_RULE_POLICY, true);
       expect(upsertResult.ok).toBeNull();
       expect(upsertResult.error).toBeDefined();
-      expect(upsertResult.error?.message).toContain('Unkonwn rule name passed');
+      expect(upsertResult.error?.message).toContain('Unknown rule name passed');
     });
 
     test.concurrent('invalid rule config is rejected with an error', async () => {
