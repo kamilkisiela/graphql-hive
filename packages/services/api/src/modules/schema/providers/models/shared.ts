@@ -109,7 +109,7 @@ export type SchemaCheckFailure = {
     /** Absence means schema changes were skipped. */
     schemaChanges: null | {
       breaking: Array<Change> | null;
-      safe: Array<Change>;
+      safe: Array<Change> | null;
     };
     /** Absence means the schema policy is disabled or wasn't done because composition failed. */
     schemaPolicy: null | {
@@ -264,7 +264,7 @@ export function buildSchemaCheckFailureState(args: {
   const compositionErrors: Array<CompositionFailureError> = [];
   let schemaChanges: null | {
     breaking: Array<Change> | null;
-    safe: Array<Change>;
+    safe: Array<Change> | null;
   } = null;
   let schemaPolicy: null | {
     errors: SchemaCheckWarning[] | null;

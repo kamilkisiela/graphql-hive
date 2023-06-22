@@ -2,7 +2,7 @@ import { URL } from 'node:url';
 import type { GraphQLSchema } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import hashObject from 'object-hash';
-import { CriticalityLevel, type Change } from '@graphql-inspector/core';
+import { type Change, CriticalityLevel } from '@graphql-inspector/core';
 import type { CheckPolicyResponse } from '@hive/policy';
 import type { CompositionFailureError } from '@hive/schema';
 import { Schema } from '../../../shared/entities';
@@ -301,15 +301,13 @@ export class RegistryChecks {
       safeChanges.push(change);
     }
 
-    const hasBreakingChanges = breakingChanges.length > 0;
-
-    if (hasBreakingChanges) {
+    if (breakingChanges.length > 0) {
       this.logger.debug('Detected breaking changes');
       return {
         status: 'failed',
         reason: {
           breakingChanges,
-          safeChanges,
+          safeChanges: safeChanges.length ? safeChanges : null,
           changes,
         },
       } satisfies CheckResult;
@@ -322,7 +320,7 @@ export class RegistryChecks {
     return {
       status: 'completed',
       result: {
-        changes,
+        changes: changes.length ? changes : null,
       },
     } satisfies CheckResult;
   }
