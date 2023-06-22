@@ -55,7 +55,7 @@ async function main() {
       format('INSERT INTO default.operations_daily_new
           SELECT
             target,
-            toStartOfDay(timestamp) AS timestamp_day,
+            toStartOfDay(timestamp) AS timestamp,
             toStartOfDay(expires_at) AS expires_at,
             hash,
             client_name,
@@ -68,8 +68,9 @@ async function main() {
           WHERE timestamp >= toDateTime(\\'{0}-{1}-{2} 00:00:00\\', \\'UTC\\') AND timestamp <= toDateTime(\\'{0}-{1}-{2} 23:59:59\\', \\'UTC\\')
           GROUP BY
             target,
-            hash,
             client_name,
+            client_version,
+            hash,
             timestamp_day,
             expires_at
       ', year, month, day) as "insertStatement"
@@ -154,8 +155,8 @@ async function main() {
       format('INSERT INTO default.operations_hourly_new
           SELECT
             target,
-            toStartOfHour(timestamp) AS timestamp_day,
-            toStartOfHour(expires_at) AS expires_at,
+            toStartOfDay(timestamp) AS timestamp,
+            toStartOfDay(expires_at) AS expires_at,
             hash,
             client_name,
             count() AS total,
@@ -163,17 +164,16 @@ async function main() {
             avgState(duration) AS duration_avg,
             quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
           FROM
-            default.operations
-          WHERE
-            timestamp >= toDateTime(\\'{0}-{1}-{2} 00:00:00\\', \\'UTC\\')
-            AND timestamp <= toDateTime(\\'{0}-{1}-{2} 23:59:59\\', \\'UTC\\')
+          default.operations
+          WHERE timestamp >= toDateTime(\\'{0}-{1}-{2} 00:00:00\\', \\'UTC\\') AND timestamp <= toDateTime(\\'{0}-{1}-{2} 23:59:59\\', \\'UTC\\')
           GROUP BY
             target,
-            hash,
             client_name,
+            client_version,
+            hash,
             timestamp_day,
             expires_at
-      ', year, month, day) as "insertStatement"
+      ', year, month, day) as insert_statement
     FROM
       system.parts
     WHERE
@@ -247,13 +247,21 @@ async function main() {
 
   await execute(`
     RENAME TABLE
-      default.operations_daily TO default.operations_daily_old,
+      default.operations_daily TO default.operations_daily_old
+  `);
+
+  await execute(`
+    RENAME TABLE
       default.operations_daily_new TO default.operations_daily
   `);
 
   await execute(`
     RENAME TABLE
-      default.operations_hourly TO default.operations_hourly_old,
+      default.operations_hourly TO default.operations_hourly_old
+  `);
+
+  await execute(`
+    RENAME TABLE
       default.operations_hourly_new TO default.operations_hourly
   `);
 
