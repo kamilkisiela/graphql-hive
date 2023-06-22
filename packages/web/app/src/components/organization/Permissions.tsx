@@ -3,18 +3,30 @@ import clsx from 'clsx';
 import { useMutation } from 'urql';
 import { Accordion, RadixSelect, Tooltip } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import {
-  OrganizationAccessScope,
-  ProjectAccessScope,
-  TargetAccessScope,
-  UpdateOrganizationMemberAccessDocument,
-} from '@/graphql';
+import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@/graphql';
 import { NoAccess, Scope } from '@/lib/access/common';
 import { canAccessOrganization } from '@/lib/access/organization';
 import { canAccessProject } from '@/lib/access/project';
 import { canAccessTarget } from '@/lib/access/target';
 import { useNotifications } from '@/lib/hooks';
 import { truthy } from '@/utils';
+
+const OrganizationPermissions_UpdateMemberAccessMutation = graphql(`
+  mutation OrganizationPermissions_UpdateMemberAccessMutation(
+    $input: OrganizationMemberAccessInput!
+  ) {
+    updateOrganizationMemberAccess(input: $input) {
+      selector {
+        organization
+      }
+      organization {
+        id
+        cleanId
+        name
+      }
+    }
+  }
+`);
 
 interface Props<T> {
   title: string;
@@ -220,7 +232,7 @@ export function usePermissionsManager({
   const organization = useFragment(UsePermissionManager_OrganizationFragment, props.organization);
   const [state, setState] = useState<'LOADING' | 'IDLE'>('IDLE');
   const notify = useNotifications();
-  const [, mutate] = useMutation(UpdateOrganizationMemberAccessDocument);
+  const [, mutate] = useMutation(OrganizationPermissions_UpdateMemberAccessMutation);
 
   const [targetScopes, setTargetScopes] = useState<TargetAccessScope[]>(
     passMemberScopes ? member.targetAccessScopes : [],

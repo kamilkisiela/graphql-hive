@@ -4,7 +4,17 @@ import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
-import { MeDocument } from '@/graphql';
+
+const UserSettings_MeQuery = graphql(`
+  query UserSettings_MeQuery {
+    me {
+      id
+      fullName
+      displayName
+      canSwitchOrganization
+    }
+  }
+`);
 
 const UpdateMeMutation = graphql(`
   mutation updateMe($input: UpdateMeInput!) {
@@ -34,7 +44,7 @@ export function UserSettingsModal({
   isOpen: boolean;
   toggleModalOpen: () => void;
 }): ReactElement {
-  const [meQuery] = useQuery({ query: MeDocument });
+  const [meQuery] = useQuery({ query: UserSettings_MeQuery });
   const [mutation, mutate] = useMutation(UpdateMeMutation);
 
   const me = meQuery.data?.me;

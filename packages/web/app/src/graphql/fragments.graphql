@@ -340,14 +340,6 @@ fragment TargetIdUpdated on TargetIdUpdatedActivity {
   }
 }
 
-fragment PersistedOperationFields on PersistedOperation {
-  id
-  operationHash
-  content
-  name
-  kind
-}
-
 fragment TargetValidationSettingsFields on TargetValidationSettings {
   enabled
   period

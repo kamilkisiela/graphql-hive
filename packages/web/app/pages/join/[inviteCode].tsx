@@ -1,29 +1,63 @@
 import { useCallback } from 'react';
-import { clsx } from 'clsx';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Title } from '@/components/common';
 import { Button, DataWrapper } from '@/components/v2';
-import { JoinOrganizationDocument, OrganizationInvitationDocument } from '@/graphql';
+import { graphql } from '@/gql';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+import { cn } from '@/lib/utils';
 
 const classes = {
-  title: clsx('sm:text-4xl text-3xl mb-4 font-medium text-white'),
-  description: clsx('mb-8 leading-relaxed'),
-  actions: clsx('flex flex-row gap-2 items-center justify-center'),
+  title: cn('sm:text-4xl text-3xl mb-4 font-medium text-white'),
+  description: cn('mb-8 leading-relaxed'),
+  actions: cn('flex flex-row gap-2 items-center justify-center'),
 };
 
-function OrganizationPage() {
+const JoinOrganizationPage_JoinOrganizationMutation = graphql(`
+  mutation JoinOrganizationPage_JoinOrganizationMutation($code: String!) {
+    joinOrganization(code: $code) {
+      __typename
+      ... on OrganizationPayload {
+        selector {
+          organization
+        }
+        organization {
+          name
+          cleanId
+        }
+      }
+      ... on OrganizationInvitationError {
+        message
+      }
+    }
+  }
+`);
+
+const JoinOrganizationPage_OrganizationInvitationQuery = graphql(`
+  query JoinOrganizationPage_OrganizationInvitationQuery($code: String!) {
+    organizationByInviteCode(code: $code) {
+      __typename
+      ... on OrganizationInvitationPayload {
+        name
+      }
+      ... on OrganizationInvitationError {
+        message
+      }
+    }
+  }
+`);
+
+function JoinOrganizationPage() {
   const router = useRouteSelector();
   const notify = useNotifications();
   const code = router.query.inviteCode as string;
   const [query] = useQuery({
-    query: OrganizationInvitationDocument,
+    query: JoinOrganizationPage_OrganizationInvitationQuery,
     variables: { code },
   });
-  const [mutation, mutate] = useMutation(JoinOrganizationDocument);
+  const [mutation, mutate] = useMutation(JoinOrganizationPage_JoinOrganizationMutation);
   const accept = useCallback(async () => {
     const result = await mutate({ code });
     if (result.data) {
@@ -98,4 +132,4 @@ function OrganizationPage() {
 
 export const getServerSideProps = withSessionProtection();
 
-export default authenticated(OrganizationPage);
+export default authenticated(JoinOrganizationPage);

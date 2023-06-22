@@ -18,7 +18,7 @@ import {
 import { CopyIcon, KeyIcon, MoreIcon, SettingsIcon, TrashIcon } from '@/components/v2/icon';
 import { ChangePermissionsModal, DeleteMembersModal } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { MeDocument, OrganizationFieldsFragment } from '@/graphql';
+import { OrganizationFieldsFragment } from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { useClipboard } from '@/lib/hooks/use-clipboard';
 import { useNotifications } from '@/lib/hooks/use-notifications';
@@ -247,6 +247,14 @@ const OrganizationInvitations_OrganizationFragment = graphql(`
   }
 `);
 
+const OrganizationMembersPage_MeFragment = graphql(`
+  fragment OrganizationMembersPage_MeFragment on User {
+    id
+    fullName
+    displayName
+  }
+`);
+
 const OrganizationInvitations = (props: {
   organization: FragmentType<typeof OrganizationInvitations_OrganizationFragment>;
 }): ReactElement | null => {
@@ -262,7 +270,10 @@ const OrganizationInvitations = (props: {
   ) : null;
 };
 
-function Page(props: { organization: FragmentType<typeof Page_OrganizationFragment> }) {
+function Page(props: {
+  organization: FragmentType<typeof Page_OrganizationFragment>;
+  me?: FragmentType<typeof OrganizationMembersPage_MeFragment>;
+}) {
   const organization = useFragment(Page_OrganizationFragment, props.organization);
 
   useOrganizationAccess({
@@ -276,7 +287,6 @@ function Page(props: { organization: FragmentType<typeof Page_OrganizationFragme
   const [isPermissionsModalOpen, togglePermissionsModalOpen] = useToggle();
   const [isDeleteMembersModalOpen, toggleDeleteMembersModalOpen] = useToggle();
 
-  const [meQuery] = useQuery({ query: MeDocument });
   const router = useRouteSelector();
   const members = organization?.members.nodes;
 
@@ -291,7 +301,7 @@ function Page(props: { organization: FragmentType<typeof Page_OrganizationFragme
     return null;
   }
 
-  const me = meQuery.data?.me;
+  const me = useFragment(OrganizationMembersPage_MeFragment, props.me);
   const selectedMember = selectedMemberId
     ? members?.find(node => node.id === selectedMemberId)
     : null;
@@ -405,6 +415,7 @@ const OrganizationMembersPageQuery = graphql(`
     }
     me {
       ...OrganizationLayout_MeFragment
+      ...OrganizationMembersPage_MeFragment
     }
   }
 `);
@@ -436,7 +447,7 @@ function SettingsPageContent() {
       organizations={organizationConnection ?? null}
       me={me ?? null}
     >
-      {currentOrganization ? <Page organization={currentOrganization} /> : null}
+      {currentOrganization ? <Page organization={currentOrganization} me={me} /> : null}
     </OrganizationLayout>
   );
 }
