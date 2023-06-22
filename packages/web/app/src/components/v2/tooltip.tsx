@@ -31,8 +31,6 @@ function Wrapper({
     </T.Content>
   );
 
-  console.log(container);
-
   return (
     <T.Provider>
       <T.Root>
