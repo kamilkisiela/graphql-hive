@@ -715,9 +715,9 @@ export class OperationsManager {
       return false;
     }
 
-    const total = await this.reader.countOperationsForTargets({ targets });
+    const hasCollectedOperations = await this.reader.hasCollectedOperations({ target: targets });
 
-    if (total > 0) {
+    if (hasCollectedOperations) {
       await this.storage.completeGetStartedStep({
         organization: selector.organization,
         step: 'reportingOperations',
