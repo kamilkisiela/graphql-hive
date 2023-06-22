@@ -301,15 +301,13 @@ export class RegistryChecks {
       safeChanges.push(change);
     }
 
-    const hasBreakingChanges = breakingChanges.length > 0;
-
-    if (hasBreakingChanges) {
+    if (breakingChanges.length > 0) {
       this.logger.debug('Detected breaking changes');
       return {
         status: 'failed',
         reason: {
           breakingChanges,
-          safeChanges,
+          safeChanges: safeChanges.length ? safeChanges : null,
           changes,
         },
       } satisfies CheckResult;
@@ -322,7 +320,7 @@ export class RegistryChecks {
     return {
       status: 'completed',
       result: {
-        changes,
+        changes: changes.length ? changes : null,
       },
     } satisfies CheckResult;
   }
