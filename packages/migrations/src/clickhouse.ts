@@ -115,6 +115,7 @@ export async function migrateClickHouse(
   const actions = await Promise.all<{ action: Action }>([
     import('./clickhouse-actions/001-initial'),
     import('./clickhouse-actions/002-add-hash-to-clients_daily'),
+    import('./clickhouse-actions/003-add-client-name-to-operations-tables'),
   ]);
 
   async function actionRunner(action: Action, index: number) {
