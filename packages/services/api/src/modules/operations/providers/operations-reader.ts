@@ -1418,30 +1418,6 @@ export class OperationsReader {
     });
   }
 
-  async countOperationsForTargets({ targets }: { targets: readonly string[] }): Promise<number> {
-    const result = await this.clickHouse.query<{
-      total: string;
-    }>({
-      // TODO: use the operations_daily table once the FF_CLICKHOUSE_V2_TABLES is available for everyone
-      query: sql`SELECT sum(total) as total from operations_hourly WHERE target IN (${sql.array(
-        targets,
-        'String',
-      )})`,
-      queryId: 'count_operations_for_targets',
-      timeout: 15_000,
-    });
-
-    if (result.data.length === 0) {
-      return 0;
-    }
-
-    if (result.data.length > 1) {
-      throw new Error('Too many rows returned, expected 1');
-    }
-
-    return ensureNumber(result.data[0].total);
-  }
-
   // Every call to this method is part of the batching logic.
   // The `batch` function works similar to the DataLoader concept.
   // It gathers all function calls within the same event loop,
