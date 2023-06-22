@@ -1,8 +1,0 @@
-query persistedOperations($selector: ProjectSelectorInput!) {
-  persistedOperations(selector: $selector) {
-    total
-    nodes {
-      ...PersistedOperationFields
-    }
-  }
-}

@@ -144,7 +144,8 @@ const UpdateOrganizationNameMutation = graphql(`
             organization
           }
           organization {
-            ...OrganizationFields
+            id
+            name
           }
         }
       }
