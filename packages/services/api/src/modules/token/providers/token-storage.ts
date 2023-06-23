@@ -122,7 +122,10 @@ export class TokenStorage {
 
       return tokenInfo;
     } catch (error: any) {
-      this.logger.error(error);
+      if (!(error instanceof HiveError)) {
+        this.logger.error(error);
+      }
+
       throw new HiveError('Invalid token provided', {
         originalError: error,
       });
