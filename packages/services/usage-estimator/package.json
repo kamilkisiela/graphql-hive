@@ -13,7 +13,7 @@
   "dependencies": {
     "@sentry/node": "7.56.0",
     "@trpc/server": "10.31.0",
-    "@whatwg-node/fetch": "0.9.6",
+    "@whatwg-node/fetch": "0.9.7",
     "dotenv": "16.3.1",
     "got": "12.6.1",
     "reflect-metadata": "0.1.13",

@@ -55,7 +55,7 @@
     "@oclif/core": "^1.23.0",
     "@oclif/plugin-help": "5.2.10",
     "@oclif/plugin-update": "3.1.19",
-    "@whatwg-node/fetch": "0.9.6",
+    "@whatwg-node/fetch": "0.9.7",
     "colors": "1.4.0",
     "env-ci": "7.3.0",
     "graphql": "^16.0.0",
