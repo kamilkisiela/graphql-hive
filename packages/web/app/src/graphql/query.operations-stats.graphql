@@ -1,9 +1,8 @@
 query operationsStats(
   $selector: OperationsStatsSelectorInput!
-  $operationsFilter: OperationStatsOperationFilter
 ) {
   operationsStats(selector: $selector) {
-    operations(filter: $operationsFilter) {
+    operations {
       nodes {
         ...OperationStatsFields
       }
@@ -12,6 +11,7 @@ query operationsStats(
     clients {
       nodes {
         name
+        count
       }
     }
   }

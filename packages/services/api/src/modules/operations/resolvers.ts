@@ -70,6 +70,7 @@ export const resolvers: OperationsModule.Resolvers = {
         project,
         target,
         operations,
+        clients: selector.clientNames ?? [],
       };
     },
     async clientStatsByTargets(_, { selector }, { injector }) {
@@ -124,11 +125,10 @@ export const resolvers: OperationsModule.Resolvers = {
   },
   OperationsStats: {
     async operations(
-      { organization, project, target, period, operations: operationsFilter },
+      { organization, project, target, period, operations: operationsFilter, clients },
       args,
       { injector },
     ) {
-      const clientFilter = args.filter?.clientName ?? null;
       const operationsManager = injector.get(OperationsManager);
       const [operations, durations] = await Promise.all([
         operationsManager.readOperationsStats({
@@ -137,7 +137,7 @@ export const resolvers: OperationsModule.Resolvers = {
           target,
           period,
           operations: operationsFilter,
-          clientFilter,
+          clients,
         }),
         operationsManager.readDetailedDurationPercentiles({
           organization,
@@ -145,7 +145,7 @@ export const resolvers: OperationsModule.Resolvers = {
           target,
           period,
           operations: operationsFilter,
-          clientFilter,
+          clients,
         }),
       ]);
 
@@ -164,17 +164,18 @@ export const resolvers: OperationsModule.Resolvers = {
         })
         .sort((a, b) => b.count - a.count);
     },
-    totalRequests({ organization, project, target, period, operations }, _, { injector }) {
+    totalRequests({ organization, project, target, period, operations, clients }, _, { injector }) {
       return injector.get(OperationsManager).countRequests({
         organization,
         project,
         target,
         period,
         operations,
+        clients
       });
     },
     totalFailures(
-      { organization, project, target, period, operations: operationsFilter },
+      { organization, project, target, period, operations: operationsFilter, clients },
       _,
       { injector },
     ) {
@@ -184,10 +185,11 @@ export const resolvers: OperationsModule.Resolvers = {
         target,
         period,
         operations: operationsFilter,
+        clients,
       });
     },
     totalOperations(
-      { organization, project, target, period, operations: operationsFilter },
+      { organization, project, target, period, operations: operationsFilter, clients },
       _,
       { injector },
     ) {
@@ -197,10 +199,11 @@ export const resolvers: OperationsModule.Resolvers = {
         target,
         period,
         operations: operationsFilter,
+        clients,
       });
     },
     requestsOverTime(
-      { organization, project, target, period, operations: operationsFilter },
+      { organization, project, target, period, operations: operationsFilter, clients },
       { resolution },
       { injector },
     ) {
@@ -211,10 +214,11 @@ export const resolvers: OperationsModule.Resolvers = {
         period,
         resolution,
         operations: operationsFilter,
+        clients,
       });
     },
     failuresOverTime(
-      { organization, project, target, period, operations: operationsFilter },
+      { organization, project, target, period, operations: operationsFilter, clients },
       { resolution },
       { injector },
     ) {
@@ -225,10 +229,11 @@ export const resolvers: OperationsModule.Resolvers = {
         period,
         resolution,
         operations: operationsFilter,
+        clients
       });
     },
     durationOverTime(
-      { organization, project, target, period, operations: operationsFilter },
+      { organization, project, target, period, operations: operationsFilter, clients },
       { resolution },
       { injector },
     ) {
@@ -239,6 +244,7 @@ export const resolvers: OperationsModule.Resolvers = {
         period,
         resolution,
         operations: operationsFilter,
+        clients,
       });
     },
     clients(
@@ -255,7 +261,7 @@ export const resolvers: OperationsModule.Resolvers = {
       });
     },
     duration(
-      { organization, project, target, period, operations: operationsFilter },
+      { organization, project, target, period, operations: operationsFilter, clients, },
       _,
       { injector },
     ) {
@@ -265,10 +271,11 @@ export const resolvers: OperationsModule.Resolvers = {
         target,
         period,
         operations: operationsFilter,
+        clients,
       });
     },
     async durationHistogram(
-      { organization, project, target, period, operations: operationsFilter },
+      { organization, project, target, period, operations: operationsFilter, clients },
       _,
       { injector },
     ) {
@@ -278,6 +285,7 @@ export const resolvers: OperationsModule.Resolvers = {
         target,
         period,
         operations: operationsFilter,
+        clients,
       });
 
       const uniqueDurations = new Map<

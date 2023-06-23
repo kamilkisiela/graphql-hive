@@ -8,7 +8,6 @@ import {
   Button,
   Drawer,
   Input,
-  Select,
   Sortable,
   Table,
   TBody,
@@ -194,9 +193,6 @@ function OperationsTable({
   organization,
   project,
   target,
-  clients,
-  clientFilter,
-  setClientFilter,
 }: {
   operations: Operation[];
   pagination: PaginationState;
@@ -240,21 +236,8 @@ function OperationsTable({
   const { headers } = tableInstance.getHeaderGroups()[0];
   return (
     <div className={clsx('rounded-md p-5 border border-gray-800 bg-gray-900/50', className)}>
-      <div className="flex justify-between">
-        <div>
-          <Section.Title>Operations</Section.Title>
-          <Section.Subtitle>List of all operations with their statistics</Section.Subtitle>
-        </div>
-        <div>
-          Client
-          <Select
-            placeholder="Select"
-            options={clients.map(client => ({ name: client.name, value: client.name }))}
-            value={clientFilter ?? undefined}
-            onChange={ev => setClientFilter(ev.target.value)}
-          />
-        </div>
-      </div>
+      <Section.Title>Operations</Section.Title>
+      <Section.Subtitle>List of all operations with their statistics</Section.Subtitle>
 
       <Table>
         <THead>
@@ -434,6 +417,7 @@ export function OperationsList({
   target,
   period,
   operationsFilter = [],
+  clientNamesFilter = []
 }: {
   className?: string;
   organization: string;
@@ -441,6 +425,7 @@ export function OperationsList({
   target: string;
   period: DateRangeInput;
   operationsFilter: readonly string[];
+  clientNamesFilter: string[];
 }): ReactElement {
   const [clientFilter, setClientFilter] = useState<string | null>(null);
   const [query, refetch] = useQuery({
@@ -452,12 +437,8 @@ export function OperationsList({
         target,
         period,
         operations: [],
+        clientNames: clientNamesFilter,
       },
-      operationsFilter: clientFilter
-        ? {
-            clientName: clientFilter,
-          }
-        : null,
     },
   });
   const operations = query.data?.operationsStats?.operations?.nodes ?? [];

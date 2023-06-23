@@ -16,6 +16,7 @@ export default gql`
     target: ID!
     period: DateRangeInput!
     operations: [ID!]
+    clientNames: [String!]
   }
 
   input OperationBodyByHashInput {
@@ -85,15 +86,8 @@ export default gql`
     totalOperations: Int!
     durationHistogram(resolution: Int!): [DurationHistogram!]!
     duration: DurationStats!
-    operations(filter: OperationStatsOperationFilter): OperationStatsConnection!
+    operations: OperationStatsConnection!
     clients: ClientStatsConnection!
-  }
-
-  input OperationStatsOperationFilter {
-    """
-    Name of the client to filter by
-    """
-    clientName: String
   }
 
   type OperationStatsConnection {
