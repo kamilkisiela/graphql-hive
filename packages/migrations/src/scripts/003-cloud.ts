@@ -143,7 +143,7 @@ async function main() {
       client_name,
       timestamp_day,
       expires_at
-  `)
+  `);
 
   const operationsHourlyStatements = await execute(`
     SELECT
@@ -243,7 +243,7 @@ async function main() {
       client_name,
       timestamp_day,
       expires_at
-  `)
+  `);
 
   await execute(`
     RENAME TABLE
