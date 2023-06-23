@@ -1,6 +1,4 @@
-query operationsStats(
-  $selector: OperationsStatsSelectorInput!
-) {
+query operationsStats($selector: OperationsStatsSelectorInput!) {
   operationsStats(selector: $selector) {
     operations {
       nodes {

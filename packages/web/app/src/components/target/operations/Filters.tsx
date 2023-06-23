@@ -261,9 +261,8 @@ export function OperationsFilterTrigger({
   );
 }
 
-
 function ClientRow({
-client,
+  client,
   selected,
   onSelect,
   style,
@@ -309,7 +308,7 @@ function ClientsFilter({
   selected?: string[];
 }): ReactElement {
   function getClientNames() {
-    return clients.map(client => client.name)
+    return clients.map(client => client.name);
   }
 
   const [selectedItems, setSelectedItems] = useState<string[]>(() =>
@@ -431,8 +430,6 @@ function ClientsFilter({
     </Drawer>
   );
 }
-
-
 
 function ClientsFilterContainer({
   period,

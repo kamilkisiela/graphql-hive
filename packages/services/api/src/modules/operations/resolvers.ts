@@ -171,7 +171,7 @@ export const resolvers: OperationsModule.Resolvers = {
         target,
         period,
         operations,
-        clients
+        clients,
       });
     },
     totalFailures(
@@ -229,7 +229,7 @@ export const resolvers: OperationsModule.Resolvers = {
         period,
         resolution,
         operations: operationsFilter,
-        clients
+        clients,
       });
     },
     durationOverTime(
@@ -261,7 +261,7 @@ export const resolvers: OperationsModule.Resolvers = {
       });
     },
     duration(
-      { organization, project, target, period, operations: operationsFilter, clients, },
+      { organization, project, target, period, operations: operationsFilter, clients },
       _,
       { injector },
     ) {

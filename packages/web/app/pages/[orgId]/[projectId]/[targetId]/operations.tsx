@@ -4,7 +4,10 @@ import { formatISO, subDays, subHours, subMinutes } from 'date-fns';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts/target';
-import { ClientsFilterTrigger, OperationsFilterTrigger } from '@/components/target/operations/Filters';
+import {
+  ClientsFilterTrigger,
+  OperationsFilterTrigger,
+} from '@/components/target/operations/Filters';
 import { OperationsList } from '@/components/target/operations/List';
 import { OperationsStats } from '@/components/target/operations/Stats';
 import { Subtitle, Title } from '@/components/ui/page';
@@ -81,7 +84,7 @@ function OperationsView({
             selected={selectedOperations}
             onFilter={setSelectedOperations}
           />
-          <ClientsFilterTrigger 
+          <ClientsFilterTrigger
             period={period}
             selected={selectedClients}
             onFilter={setSelectedClients}

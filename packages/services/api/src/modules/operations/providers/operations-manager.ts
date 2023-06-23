@@ -128,7 +128,11 @@ export class OperationsManager {
     period,
     operations,
     clients,
-  }: { period: DateRange; operations?: readonly string[]; clients?: readonly string[] } & TargetSelector) {
+  }: {
+    period: DateRange;
+    operations?: readonly string[];
+    clients?: readonly string[];
+  } & TargetSelector) {
     this.logger.info('Counting unique operations (period=%o, target=%s)', period, target);
     await this.authManager.ensureTargetAccess({
       organization,
@@ -167,8 +171,11 @@ export class OperationsManager {
     target,
     period,
     operations,
-    clients
-  }: { period: DateRange; operations?: readonly string[]; clients?: readonly string[] } & Listify<TargetSelector, 'target'>) {
+    clients,
+  }: { period: DateRange; operations?: readonly string[]; clients?: readonly string[] } & Listify<
+    TargetSelector,
+    'target'
+  >) {
     this.logger.info('Counting requests (period=%s, target=%s)', period, target);
     await this.authManager.ensureTargetAccess({
       organization,
@@ -194,7 +201,11 @@ export class OperationsManager {
     period,
     operations,
     clients,
-  }: { period: DateRange; operations?: readonly string[]; clients?: readonly string[];  } & TargetSelector) {
+  }: {
+    period: DateRange;
+    operations?: readonly string[];
+    clients?: readonly string[];
+  } & TargetSelector) {
     this.logger.info('Counting failures (period=%o, target=%s)', period, target);
     await this.authManager.ensureTargetAccess({
       organization,
@@ -450,7 +461,7 @@ export class OperationsManager {
     project,
     target,
     operations,
-    clients
+    clients,
   }: {
     period: DateRange;
     resolution: number;
@@ -558,7 +569,11 @@ export class OperationsManager {
     target,
     operations,
     clients,
-  }: { period: DateRange; operations?: readonly string[]; clients?: readonly string[];  } & TargetSelector) {
+  }: {
+    period: DateRange;
+    operations?: readonly string[];
+    clients?: readonly string[];
+  } & TargetSelector) {
     this.logger.info('Reading overall duration percentiles (period=%o, target=%s)', period, target);
     await this.authManager.ensureTargetAccess({
       organization,
@@ -616,7 +631,11 @@ export class OperationsManager {
     target,
     operations,
     clients,
-  }: { period: DateRange; operations?: readonly string[]; clients?: readonly string[] } & TargetSelector) {
+  }: {
+    period: DateRange;
+    operations?: readonly string[];
+    clients?: readonly string[];
+  } & TargetSelector) {
     this.logger.info('Reading duration histogram (period=%o, target=%s)', period, target);
     await this.authManager.ensureTargetAccess({
       organization,

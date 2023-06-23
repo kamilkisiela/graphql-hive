@@ -417,7 +417,7 @@ export function OperationsList({
   target,
   period,
   operationsFilter = [],
-  clientNamesFilter = []
+  clientNamesFilter = [],
 }: {
   className?: string;
   organization: string;

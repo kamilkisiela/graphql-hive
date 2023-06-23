@@ -262,7 +262,7 @@ export class OperationsReader {
       target,
       period,
       operations,
-      clients
+      clients,
     }: {
       target: string | readonly string[];
       period: DateRange;
@@ -1704,7 +1704,7 @@ export class OperationsReader {
     }
 
     if (clients?.length) {
-      where.push(sql`"client_name" IN (${sql.array(clients, 'String')})`)
+      where.push(sql`"client_name" IN (${sql.array(clients, 'String')})`);
     }
 
     if (extra.length) {
