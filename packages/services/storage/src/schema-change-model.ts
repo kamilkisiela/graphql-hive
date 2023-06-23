@@ -796,12 +796,17 @@ export const SchemaPolicyWarningModel = z.object({
   endColumn: z.number().nullable(),
 });
 
+const SchemaChangeModelWithIsSafeBreakingChange = z.intersection(
+  SchemaChangeModel,
+  z.object({ isSafeBasedOnUsage: z.boolean().optional() }),
+);
+
 const FailedSchemaCheckPartialModel = z.intersection(
   z.object({
     isSuccess: z.literal(false),
 
-    breakingSchemaChanges: z.array(SchemaChangeModel).nullable(),
-    safeSchemaChanges: z.array(SchemaChangeModel).nullable(),
+    breakingSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
+    safeSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
 
     schemaPolicyWarnings: z.array(SchemaPolicyWarningModel).nullable(),
     schemaPolicyErrors: z.array(SchemaPolicyWarningModel).nullable(),
@@ -827,7 +832,7 @@ const SuccessfulSchemaCheckPartialModel = z.object({
   schemaCompositionErrors: z.null(),
 
   breakingSchemaChanges: z.null(),
-  safeSchemaChanges: z.array(SchemaChangeModel).nullable(),
+  safeSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
   schemaPolicyWarnings: z.array(SchemaPolicyWarningModel).nullable(),
   schemaPolicyErrors: z.null(),
 

@@ -24,27 +24,21 @@ const criticalityLevelMapping = {
   [CriticalityLevel.Dangerous]: clsx('text-yellow-400'),
 } as Record<CriticalityLevel, string>;
 
-export function ChangesBlock({
-  changes,
-  criticality,
-}: {
+export function ChangesBlock(props: {
   changes: SchemaChangeFieldsFragment[];
   criticality: CriticalityLevel;
 }): ReactElement | null {
-  const filteredChanges = changes.filter(c => c.criticality === criticality);
-
-  if (!filteredChanges.length) {
-    return null;
-  }
-
   return (
     <div>
       <h2 className="mb-2 text-sm font-medium text-gray-900 dark:text-white">
-        {titleMap[criticality]}
+        {titleMap[props.criticality]}
       </h2>
       <ul className="list-inside list-disc pl-3 text-sm leading-relaxed">
-        {filteredChanges.map((change, key) => (
-          <li key={key} className={clsx(criticalityLevelMapping[criticality] ?? 'text-red-400')}>
+        {props.changes.map((change, key) => (
+          <li
+            key={key}
+            className={clsx(criticalityLevelMapping[props.criticality] ?? 'text-red-400')}
+          >
             <MaybeWrapTooltip tooltip={change.criticalityReason ?? null}>
               <span className="text-gray-600 dark:text-white">{labelize(change.message)}</span>
             </MaybeWrapTooltip>
@@ -126,14 +120,21 @@ export function VersionErrorsAndChanges(props: {
             <div>
               <div className="space-y-3 p-6">
                 <ChangesBlock
-                  changes={props.changes.nodes}
+                  changes={props.changes.nodes.filter(
+                    c => c.criticality === CriticalityLevel.Breaking,
+                  )}
                   criticality={CriticalityLevel.Breaking}
                 />
                 <ChangesBlock
-                  changes={props.changes.nodes}
+                  changes={props.changes.nodes.filter(
+                    c => c.criticality === CriticalityLevel.Dangerous,
+                  )}
                   criticality={CriticalityLevel.Dangerous}
                 />
-                <ChangesBlock changes={props.changes.nodes} criticality={CriticalityLevel.Safe} />
+                <ChangesBlock
+                  changes={props.changes.nodes.filter(c => c.criticality === CriticalityLevel.Safe)}
+                  criticality={CriticalityLevel.Safe}
+                />
               </div>
             </div>
           </div>
