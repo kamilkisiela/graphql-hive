@@ -424,8 +424,8 @@ importers:
         specifier: 1.4.5
         version: 1.4.5
       graphql-yoga:
-        specifier: 4.0.1
-        version: 4.0.1(graphql@16.6.0)
+        specifier: 4.0.2
+        version: 4.0.2(graphql@16.6.0)
       nock:
         specifier: 13.3.1
         version: 13.3.1
@@ -588,8 +588,8 @@ importers:
         specifier: 1.22.2
         version: 1.22.2(graphql@16.6.0)
       graphql-yoga:
-        specifier: 4.0.1
-        version: 4.0.1(graphql@16.6.0)
+        specifier: 4.0.2
+        version: 4.0.2(graphql@16.6.0)
       ioredis:
         specifier: 5.3.2
         version: 5.3.2
@@ -1028,8 +1028,8 @@ importers:
         specifier: 2.1.0
         version: 2.1.0
       '@graphql-yoga/plugin-response-cache':
-        specifier: 2.0.1
-        version: 2.0.1(@envelop/core@4.0.0)(graphql-yoga@4.0.1)(graphql@16.6.0)
+        specifier: 2.0.2
+        version: 2.0.2(@envelop/core@4.0.0)(graphql-yoga@4.0.2)(graphql@16.6.0)
       '@sentry/integrations':
         specifier: 7.56.0
         version: 7.56.0
@@ -1055,8 +1055,8 @@ importers:
         specifier: 16.6.0
         version: 16.6.0
       graphql-yoga:
-        specifier: 4.0.1
-        version: 4.0.1(graphql@16.6.0)
+        specifier: 4.0.2
+        version: 4.0.2(graphql@16.6.0)
       hyperid:
         specifier: 3.1.1
         version: 3.1.1
@@ -7604,16 +7604,16 @@ packages:
     dependencies:
       tslib: 2.5.3
 
-  /@graphql-yoga/plugin-response-cache@2.0.1(@envelop/core@4.0.0)(graphql-yoga@4.0.1)(graphql@16.6.0):
-    resolution: {integrity: sha512-Xm3klNDoz83uOH3CfLsZccPF0OjA0/keCqFsBFApwRxiOeBenn9/jfWMdLBAO62TyiyYAN4Ifp6PiJCXElB0ig==}
+  /@graphql-yoga/plugin-response-cache@2.0.2(@envelop/core@4.0.0)(graphql-yoga@4.0.2)(graphql@16.6.0):
+    resolution: {integrity: sha512-bRODDqY9oC8p/UWDuqINBGVaJiEBFlsRTshXk+EhVVBu5s/5IZY6JIwLW0GgMyR2uskf0lQKsuTnpJquzBi0xg==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
-      graphql-yoga: ^4.0.1
+      graphql-yoga: ^4.0.2
     dependencies:
       '@envelop/response-cache': 5.0.1(@envelop/core@4.0.0)(graphql@16.6.0)
       graphql: 16.6.0
-      graphql-yoga: 4.0.1(graphql@16.6.0)
+      graphql-yoga: 4.0.2(graphql@16.6.0)
     transitivePeerDependencies:
       - '@envelop/core'
     dev: false
@@ -19551,8 +19551,8 @@ packages:
       tslib: 2.5.3
     dev: true
 
-  /graphql-yoga@4.0.1(graphql@16.6.0):
-    resolution: {integrity: sha512-J/EXfaitY6sm9CXMBSHxQxFGH7Iv2Fg/kiLzpGPYrVtN6dIYeAOl59EHiXS7yv33pWKZ+cE4VyzCDtj8ncuzNw==}
+  /graphql-yoga@4.0.2(graphql@16.6.0):
+    resolution: {integrity: sha512-frDoqKD+b9JvUY2vgqfeWW5LT1iqibyW4//i7hNBKh7mhA1cSR4eK8C/DT//v0Sado8KQphrVThjDxVH+07wFA==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
