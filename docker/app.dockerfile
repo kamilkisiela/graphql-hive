@@ -1,4 +1,4 @@
-FROM node:18.16.0-slim
+FROM node:18.16.1-slim
 
 ENV NODE_ENV production
 
