@@ -67,7 +67,6 @@ jobs:
           files:
             packages/services/broker-worker/dist/index.worker.js
             packages/services/cdn-worker/dist/index.worker.js
-            packages/services/police-worker/dist/index.worker.js
           dest: ${{ inputs.imageTag }}.zip
 
       - name: upload artifact
