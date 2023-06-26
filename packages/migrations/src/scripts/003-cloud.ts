@@ -1,6 +1,6 @@
 import got from 'got';
 import zod from 'zod';
-import { env } from '../environment';
+import { env } from '../environment.js';
 
 const Model = zod.object({
   data: zod.array(
@@ -109,6 +109,42 @@ async function main() {
     }
   }
 
+  await execute(`
+    INSERT INTO default.operations_daily_new
+    SELECT
+      target,
+      toStartOfDay(timestamp) AS timestamp_day,
+      toStartOfDay(expires_at) AS expires_at,
+      hash,
+      client_name,
+      count() AS total,
+      sum(ok) AS total_ok,
+      avgState(duration) AS duration_avg,
+      quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
+    FROM
+      default.operations
+    WHERE
+      timestamp >= toDateTime('2023-06-22 00:00:00', 'UTC')
+      AND timestamp < (
+        SELECT
+            fromUnixTimestamp(
+              if(
+                minMerge(timestamp) > 0, 
+                minMerge(timestamp),
+                toUnixTimestamp(now())
+              )
+            )
+          FROM
+            default.operations_migration
+      )
+    GROUP BY
+      target,
+      hash,
+      client_name,
+      timestamp_day,
+      expires_at
+  `);
+
   const operationsHourlyStatements = await execute(`
     SELECT
       partition,
@@ -173,23 +209,67 @@ async function main() {
     }
   }
 
-  // await execute(`
-  //   RENAME TABLE
-  //     default.operations_daily TO default.operations_daily_old,
-  //     default.operations_daily_new TO default.operations_daily
-  // `);
+  await execute(`
+    INSERT INTO default.operations_hourly_new
+    SELECT
+      target,
+      toStartOfHour(timestamp) AS timestamp_day,
+      toStartOfHour(expires_at) AS expires_at,
+      hash,
+      client_name,
+      count() AS total,
+      sum(ok) AS total_ok,
+      avgState(duration) AS duration_avg,
+      quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
+    FROM
+      default.operations
+    WHERE
+      timestamp >= toDateTime('2023-06-22 00:00:00', 'UTC')
+      AND timestamp < (
+        SELECT
+            fromUnixTimestamp(
+              if(
+                minMerge(timestamp) > 0, 
+                minMerge(timestamp),
+                toUnixTimestamp(now())
+              )
+            )
+          FROM
+            default.operations_migration
+      )
+    GROUP BY
+      target,
+      hash,
+      client_name,
+      timestamp_day,
+      expires_at
+  `);
 
-  // await execute(`
-  //   RENAME TABLE
-  //     default.operations_hourly TO default.operations_hourly_old,
-  //     default.operations_hourly_new TO default.operations_hourly
-  // `);
+  await execute(`
+    RENAME TABLE
+      default.operations_daily TO default.operations_daily_old
+  `);
 
-  // await Promise.all([
-  //   execute(`DROP VIEW default.operations_daily_old`),
-  //   execute(`DROP VIEW default.operations_hourly_old`),
-  //   execute(`DROP VIEW default.operations_migration`),
-  // ]);
+  await execute(`
+    RENAME TABLE
+      default.operations_daily_new TO default.operations_daily
+  `);
+
+  await execute(`
+    RENAME TABLE
+      default.operations_hourly TO default.operations_hourly_old
+  `);
+
+  await execute(`
+    RENAME TABLE
+      default.operations_hourly_new TO default.operations_hourly
+  `);
+
+  await Promise.all([
+    execute(`DROP VIEW default.operations_daily_old`),
+    execute(`DROP VIEW default.operations_hourly_old`),
+    execute(`DROP VIEW default.operations_migration`),
+  ]);
 }
 
 main();
