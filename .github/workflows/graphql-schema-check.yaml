@@ -41,7 +41,6 @@ jobs:
       - name: schema check
         env:
           HIVE_TOKEN: ${{ secrets.hiveToken }}
-        run:
-          ./packages/libraries/cli/bin/dev schema:check
-          "packages/services/api/src/modules/*/module.graphql.ts" ${{
-          steps.pr-label-check.outputs.safeFlag }} --github
+        run: |
+          curl -sSL https://graphql-hive.com/install.sh | sh
+          hive schema:check "packages/services/api/src/modules/*/module.graphql.ts" ${{steps.pr-label-check.outputs.safeFlag }} --github
