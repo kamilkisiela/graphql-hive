@@ -307,8 +307,8 @@ importers:
         specifier: 0.2.3
         version: link:../core/dist
       '@graphql-inspector/core':
-        specifier: 4.2.1
-        version: 4.2.1(graphql@16.6.0)
+        specifier: 4.2.2
+        version: 4.2.2(graphql@16.6.0)
       '@graphql-tools/code-file-loader':
         specifier: ~8.0.0
         version: 8.0.0(@babel/core@7.21.5)(graphql@16.6.0)
@@ -531,8 +531,8 @@ importers:
         specifier: 3.359.0
         version: 3.359.0
       '@graphql-inspector/core':
-        specifier: 4.2.1
-        version: 4.2.1(graphql@16.6.0)
+        specifier: 4.2.2
+        version: 4.2.2(graphql@16.6.0)
       '@octokit/app':
         specifier: 13.1.8
         version: 13.1.8
@@ -6499,17 +6499,6 @@ packages:
       tslib: 2.5.0
     dev: true
 
-  /@graphql-inspector/core@4.2.1(graphql@16.6.0):
-    resolution: {integrity: sha512-2aXRvILVy0qsGK9dJKeR/lqg5VW9oAr0ANDMcyzA1fuKZRXKR58bXMoLR6+NCV8dMg/Xjfi2imBbmx1ZhYrs/g==}
-    peerDependencies:
-      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
-    dependencies:
-      dependency-graph: 0.11.0
-      graphql: 16.6.0
-      object-inspect: 1.12.3
-      tslib: 2.5.0
-    dev: false
-
   /@graphql-inspector/core@4.2.2(graphql@16.6.0):
     resolution: {integrity: sha512-MnRtzV5TuzhkgwlGJV0qSewHo9UUVSd9D+79WCNHzjRBQ+Lej1x0i9/KoXebK71dDlOeeueKlGhBCXqPEb7wag==}
     peerDependencies:
@@ -6519,7 +6508,6 @@ packages:
       graphql: 16.6.0
       object-inspect: 1.12.3
       tslib: 2.5.0
-    dev: true
 
   /@graphql-inspector/coverage-command@4.0.11(@graphql-inspector/config@3.4.5)(@graphql-inspector/loaders@3.4.7)(graphql@16.6.0)(yargs@17.7.2):
     resolution: {integrity: sha512-hsuAS2yog4CnyGAIjgM0FmoeMj5IuxmSXrq39j0+cfjgXli3+J7k4OeVjILC6jLjtjrWSm/U0c26V1n2Cqj5sQ==}

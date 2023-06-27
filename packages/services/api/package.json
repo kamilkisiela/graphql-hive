@@ -14,7 +14,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "3.359.0",
     "@aws-sdk/s3-request-presigner": "3.359.0",
-    "@graphql-inspector/core": "4.2.1",
+    "@graphql-inspector/core": "4.2.2",
     "@octokit/app": "13.1.8",
     "@sentry/node": "7.56.0",
     "@sentry/types": "7.56.0",
