@@ -221,7 +221,7 @@ function OperationRow({
   }, [onSelect, hash, selected]);
 
   return (
-    <div style={style} className="flex items-center gap-4">
+    <div style={style} className="flex items-center gap-4 truncate">
       <Checkbox checked={selected} onCheckedChange={change} id={hash} />
       <label
         htmlFor={hash}
@@ -281,7 +281,7 @@ function ClientRow({
   }, [onSelect, hash, selected]);
 
   return (
-    <div style={style} className="flex items-center gap-4">
+    <div style={style} className="flex items-center gap-4 truncate">
       <Checkbox checked={selected} onCheckedChange={change} id={hash} />
       <label
         htmlFor={hash}
