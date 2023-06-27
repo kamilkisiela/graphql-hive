@@ -25,18 +25,10 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: setup environment
-        uses: ./.github/actions/setup
-        with:
-          actor: graphql-schema-check
-
       - name: check pull request label
         if: contains(github.event.pull_request.labels.*.name, 'non-breaking')
         run: echo "safeFlag=--forceSafe" >> $GITHUB_OUTPUT
         id: pr-label-check
-
-      - name: build core package
-        run: pnpm build --filter @graphql-hive/core
 
       - name: schema check
         env:
