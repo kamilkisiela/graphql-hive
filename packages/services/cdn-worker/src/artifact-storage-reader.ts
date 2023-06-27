@@ -67,6 +67,9 @@ export class ArtifactStorageReader {
       [this.s3.endpoint, this.s3.bucketName, key].join('/'),
       {
         method: 'HEAD',
+        aws: {
+          signQuery: true,
+        },
       },
     );
 
