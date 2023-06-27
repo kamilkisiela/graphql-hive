@@ -203,6 +203,9 @@ function OperationsTable({
   organization: string;
   project: string;
   target: string;
+  clients: readonly { name: string }[];
+  clientFilter: string | null;
+  setClientFilter: (filter: string) => void;
 }): ReactElement {
   const tableInstance = useTableInstance(table, {
     columns,
@@ -235,6 +238,7 @@ function OperationsTable({
     <div className={clsx('rounded-md p-5 border border-gray-800 bg-gray-900/50', className)}>
       <Section.Title>Operations</Section.Title>
       <Section.Subtitle>List of all operations with their statistics</Section.Subtitle>
+
       <Table>
         <THead>
           <Tooltip.Provider>
@@ -324,6 +328,9 @@ function OperationsTableContainer({
   organization,
   project,
   target,
+  clients,
+  clientFilter,
+  setClientFilter,
   className,
 }: {
   operations: readonly OperationStatsFieldsFragment[];
@@ -331,6 +338,9 @@ function OperationsTableContainer({
   organization: string;
   project: string;
   target: string;
+  clients: readonly { name: string }[];
+  clientFilter: string | null;
+  setClientFilter: (client: string) => void;
   className?: string;
 }): ReactElement {
   const data = useMemo(() => {
@@ -393,6 +403,9 @@ function OperationsTableContainer({
       organization={organization}
       project={project}
       target={target}
+      clients={clients}
+      clientFilter={clientFilter}
+      setClientFilter={setClientFilter}
     />
   );
 }
@@ -404,6 +417,7 @@ export function OperationsList({
   target,
   period,
   operationsFilter = [],
+  clientNamesFilter = [],
 }: {
   className?: string;
   organization: string;
@@ -411,7 +425,9 @@ export function OperationsList({
   target: string;
   period: DateRangeInput;
   operationsFilter: readonly string[];
+  clientNamesFilter: string[];
 }): ReactElement {
+  const [clientFilter, setClientFilter] = useState<string | null>(null);
   const [query, refetch] = useQuery({
     query: OperationsStatsDocument,
     variables: {
@@ -421,10 +437,12 @@ export function OperationsList({
         target,
         period,
         operations: [],
+        clientNames: clientNamesFilter,
       },
     },
   });
   const operations = query.data?.operationsStats?.operations?.nodes ?? [];
+  const clients = query.data?.operationsStats?.clients?.nodes ?? [];
 
   return (
     <OperationsFallback
@@ -436,6 +454,9 @@ export function OperationsList({
         operations={operations}
         operationsFilter={operationsFilter}
         className={className}
+        clients={clients}
+        setClientFilter={setClientFilter}
+        clientFilter={clientFilter}
         organization={organization}
         project={project}
         target={target}

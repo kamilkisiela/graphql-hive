@@ -262,10 +262,12 @@ export class OperationsReader {
       target,
       period,
       operations,
+      clients,
     }: {
       target: string | readonly string[];
       period: DateRange;
       operations?: readonly string[];
+      clients?: readonly string[];
     },
     span?: Span,
   ): Promise<{
@@ -281,6 +283,7 @@ export class OperationsReader {
               target,
               period,
               operations,
+              clients,
             },
           )}`,
           queryId: 'count_operations_daily',
@@ -293,6 +296,7 @@ export class OperationsReader {
               target,
               period,
               operations,
+              clients,
             },
           )}`,
           queryId: 'count_operations_hourly',
@@ -305,6 +309,7 @@ export class OperationsReader {
               target,
               period,
               operations,
+              clients,
             },
           )}`,
           queryId: 'count_operations_regular',
@@ -335,12 +340,14 @@ export class OperationsReader {
     target,
     period,
     operations,
+    clients,
   }: {
     target: string;
     period: DateRange;
     operations?: readonly string[];
+    clients?: readonly string[];
   }): Promise<number> {
-    return this.countOperations({ target, period, operations }).then(r => r.notOk);
+    return this.countOperations({ target, period, operations, clients }).then(r => r.notOk);
   }
 
   @sentry('OperationsReader.countUniqueDocuments')
@@ -349,10 +356,12 @@ export class OperationsReader {
       target,
       period,
       operations,
+      clients,
     }: {
       target: string;
       period: DateRange;
       operations?: readonly string[];
+      clients?: readonly string[];
     },
     span?: Span,
   ): Promise<number> {
@@ -366,6 +375,7 @@ export class OperationsReader {
               target,
               period,
               operations,
+              clients,
             })}
           `,
           queryId: 'count_unique_documents_daily',
@@ -380,6 +390,7 @@ export class OperationsReader {
               target,
               period,
               operations,
+              clients,
             })}
           `,
           queryId: 'count_unique_documents_hourly',
@@ -394,6 +405,7 @@ export class OperationsReader {
               target,
               period,
               operations,
+              clients,
             })}
           `,
           queryId: 'count_unique_documents',
@@ -417,10 +429,12 @@ export class OperationsReader {
       target,
       period,
       operations,
+      clients,
     }: {
       target: string;
       period: DateRange;
       operations?: readonly string[];
+      clients?: readonly string[];
     },
     span?: Span,
   ): Promise<
@@ -443,6 +457,7 @@ export class OperationsReader {
               target,
               period,
               operations,
+              clients,
             })}
             GROUP BY hash
           `,
@@ -461,6 +476,7 @@ export class OperationsReader {
               target,
               period,
               operations,
+              clients,
             })}
             GROUP BY hash
           `,
@@ -476,6 +492,7 @@ export class OperationsReader {
               target,
               period,
               operations,
+              clients,
             })}
             GROUP BY hash
           `,
@@ -1043,17 +1060,20 @@ export class OperationsReader {
     period,
     resolution,
     operations,
+    clients,
   }: {
     target: string;
     period: DateRange;
     resolution: number;
     operations?: readonly string[];
+    clients?: readonly string[];
   }) {
     const results = await this.getDurationAndCountOverTime({
       target,
       period,
       resolution,
       operations,
+      clients,
     });
 
     return results.map(row => ({
@@ -1068,17 +1088,20 @@ export class OperationsReader {
     period,
     resolution,
     operations,
+    clients,
   }: {
     target: string;
     period: DateRange;
     resolution: number;
     operations?: readonly string[];
+    clients?: readonly string[];
   }) {
     const result = await this.getDurationAndCountOverTime({
       target,
       period,
       resolution,
       operations,
+      clients,
     });
 
     return result.map(row => ({
@@ -1093,11 +1116,13 @@ export class OperationsReader {
     period,
     resolution,
     operations,
+    clients,
   }: {
     target: string;
     period: DateRange;
     resolution: number;
     operations?: readonly string[];
+    clients?: readonly string[];
   }): Promise<
     Array<{
       date: any;
@@ -1109,6 +1134,7 @@ export class OperationsReader {
       period,
       resolution,
       operations,
+      clients,
     });
   }
 
@@ -1118,10 +1144,12 @@ export class OperationsReader {
       target,
       period,
       operations,
+      clients,
     }: {
       target: string;
       period: DateRange;
       operations?: readonly string[];
+      clients?: readonly string[];
     },
     span?: Span,
   ): Promise<
@@ -1143,7 +1171,7 @@ export class OperationsReader {
         (
             SELECT log10(duration) as logDuration
             FROM operations_new
-            ${this.createFilter({ target, period, operations })}
+            ${this.createFilter({ target, period, operations, clients })}
         )
         ORDER BY latency
       `,
@@ -1166,10 +1194,12 @@ export class OperationsReader {
       target,
       period,
       operations,
+      clients,
     }: {
       target: string;
       period: DateRange;
       operations?: readonly string[];
+      clients?: readonly string[];
     },
     span?: Span,
   ): Promise<Percentiles> {
@@ -1183,7 +1213,7 @@ export class OperationsReader {
               SELECT 
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
               FROM operations_daily
-              ${this.createFilter({ target, period, operations })}
+              ${this.createFilter({ target, period, operations, clients })}
             `,
             queryId: 'general_duration_percentiles_daily',
             timeout: 15_000,
@@ -1194,7 +1224,7 @@ export class OperationsReader {
               SELECT 
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
               FROM operations_hourly
-              ${this.createFilter({ target, period, operations })}
+              ${this.createFilter({ target, period, operations, clients })}
             `,
             queryId: 'general_duration_percentiles_hourly',
             timeout: 15_000,
@@ -1205,7 +1235,7 @@ export class OperationsReader {
               SELECT 
                 quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles
               FROM operations
-              ${this.createFilter({ target, period, operations })}
+              ${this.createFilter({ target, period, operations, clients })}
             `,
             queryId: 'general_duration_percentiles_regular',
             timeout: 15_000,
@@ -1225,10 +1255,12 @@ export class OperationsReader {
       target,
       period,
       operations,
+      clients,
     }: {
       target: string;
       period: DateRange;
       operations?: readonly string[];
+      clients?: readonly string[];
     },
     span?: Span,
   ) {
@@ -1244,7 +1276,7 @@ export class OperationsReader {
                 hash,
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
               FROM operations_daily
-              ${this.createFilter({ target, period, operations })}
+              ${this.createFilter({ target, period, operations, clients })}
               GROUP BY hash
             `,
             queryId: 'duration_percentiles_daily',
@@ -1257,7 +1289,7 @@ export class OperationsReader {
                 hash,
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
               FROM operations_hourly
-              ${this.createFilter({ target, period, operations })}
+              ${this.createFilter({ target, period, operations, clients })}
               GROUP BY hash
             `,
             queryId: 'duration_percentiles_hourly',
@@ -1270,7 +1302,7 @@ export class OperationsReader {
                 hash,
                 quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles
               FROM operations
-              ${this.createFilter({ target, period, operations })}
+              ${this.createFilter({ target, period, operations, clients })}
               GROUP BY hash
             `,
             queryId: 'duration_percentiles_regular',
@@ -1319,11 +1351,13 @@ export class OperationsReader {
       period,
       resolution,
       operations,
+      clients,
     }: {
       target: string;
       period: DateRange;
       resolution: number;
       operations?: readonly string[];
+      clients?: readonly string[];
     },
     span?: Span,
   ) {
@@ -1350,7 +1384,8 @@ export class OperationsReader {
                 sum(total) as total,
                 sum(total_ok) as totalOk
               FROM operations_daily
-              ${this.createFilter({ target, period, operations })}
+    }: {
+              ${this.createFilter({ target, period, operations, clients })}
               GROUP BY date
               ORDER BY date
             `,
@@ -1372,7 +1407,7 @@ export class OperationsReader {
                 sum(total) as total,
                 sum(total_ok) as totalOk
               FROM operations_hourly
-              ${this.createFilter({ target, period, operations })}
+              ${this.createFilter({ target, period, operations, clients })}
               GROUP BY date
               ORDER BY date
             `,
@@ -1394,7 +1429,7 @@ export class OperationsReader {
                 count(*) as total,
                 sum(ok) as totalOk
               FROM operations
-              ${this.createFilter({ target, period, operations })}
+              ${this.createFilter({ target, period, operations, clients })}
               GROUP BY date
               ORDER BY date
             `,
@@ -1638,11 +1673,13 @@ export class OperationsReader {
     target,
     period,
     operations,
+    clients,
     extra = [],
   }: {
     target?: string | readonly string[];
     period?: DateRange;
     operations?: readonly string[];
+    clients?: readonly string[];
     extra?: SqlValue[];
   }): SqlValue {
     const where: SqlValue[] = [];
@@ -1664,6 +1701,10 @@ export class OperationsReader {
 
     if (operations?.length) {
       where.push(sql`(hash) IN (${sql.array(operations, 'String')})`);
+    }
+
+    if (clients?.length) {
+      where.push(sql`"client_name" IN (${sql.array(clients, 'String')})`);
     }
 
     if (extra.length) {

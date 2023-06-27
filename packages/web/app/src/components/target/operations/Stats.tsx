@@ -689,6 +689,7 @@ export function OperationsStats({
   target,
   period,
   operationsFilter,
+  clientNamesFilter,
 }: {
   organization: string;
   project: string;
@@ -698,6 +699,7 @@ export function OperationsStats({
     to: string;
   };
   operationsFilter: string[];
+  clientNamesFilter: Array<string>;
 }): ReactElement {
   const resolution = 90;
   const [query, refetchQuery] = useQuery({
@@ -709,6 +711,7 @@ export function OperationsStats({
         target,
         period,
         operations: operationsFilter,
+        clientNames: clientNamesFilter,
       },
       resolution,
     },

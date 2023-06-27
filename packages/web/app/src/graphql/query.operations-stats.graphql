@@ -6,5 +6,11 @@ query operationsStats($selector: OperationsStatsSelectorInput!) {
       }
       total
     }
+    clients {
+      nodes {
+        name
+        count
+      }
+    }
   }
 }

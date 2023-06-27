@@ -204,6 +204,7 @@ export interface OperationsStats {
   target: string;
   period: DateRange;
   operations: readonly string[];
+  clients: readonly string[];
 }
 
 export interface DurationStats {

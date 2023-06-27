@@ -16,6 +16,7 @@ export default gql`
     target: ID!
     period: DateRangeInput!
     operations: [ID!]
+    clientNames: [String!]
   }
 
   input OperationBodyByHashInput {

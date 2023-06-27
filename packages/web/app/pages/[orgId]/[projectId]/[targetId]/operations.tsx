@@ -4,7 +4,10 @@ import { formatISO, subDays, subHours, subMinutes } from 'date-fns';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts/target';
-import { OperationsFilterTrigger } from '@/components/target/operations/Filters';
+import {
+  ClientsFilterTrigger,
+  OperationsFilterTrigger,
+} from '@/components/target/operations/Filters';
 import { OperationsList } from '@/components/target/operations/List';
 import { OperationsStats } from '@/components/target/operations/Stats';
 import { Subtitle, Title } from '@/components/ui/page';
@@ -43,7 +46,7 @@ function OperationsView({
   const selectedPeriod: PeriodKey =
     (new URLSearchParams(periodParam).get('period') as PeriodKey) ?? '1d';
   const [selectedOperations, setSelectedOperations] = useState<string[]>([]);
-
+  const [selectedClients, setSelectedClients] = useState<string[]>([]);
   const period = useMemo(() => {
     const now = floorDate(new Date());
     const sub = selectedPeriod.endsWith('h') ? 'h' : selectedPeriod.endsWith('m') ? 'm' : 'd';
@@ -81,6 +84,11 @@ function OperationsView({
             selected={selectedOperations}
             onFilter={setSelectedOperations}
           />
+          <ClientsFilterTrigger
+            period={period}
+            selected={selectedClients}
+            onFilter={setSelectedClients}
+          />
           <RadixSelect
             onChange={updatePeriod}
             defaultValue={selectedPeriod}
@@ -94,6 +102,7 @@ function OperationsView({
         target={targetCleanId}
         period={period}
         operationsFilter={selectedOperations}
+        clientNamesFilter={selectedClients}
       />
       <OperationsList
         className="mt-12"
@@ -102,6 +111,7 @@ function OperationsView({
         project={projectCleanId}
         target={targetCleanId}
         operationsFilter={selectedOperations}
+        clientNamesFilter={selectedClients}
       />
     </>
   );
