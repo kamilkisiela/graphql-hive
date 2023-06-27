@@ -76,6 +76,13 @@ target "router-base" {
   }
 }
 
+target "cli-base" {
+  dockerfile = "${PWD}/docker/cli.dockerfile"
+  args = {
+    RELEASE = "${RELEASE}"
+  }
+}
+
 target "target-dev" {}
 
 target "target-ci" {
@@ -343,6 +350,21 @@ target "apollo-router" {
   ]
 }
 
+target "cli" {
+  inherits = ["cli-base", get_target()]
+  context = "${PWD}/packages/libraries/cli"
+  args = {
+    IMAGE_TITLE = "graphql-hive/cli"
+    IMAGE_DESCRIPTION = "GraphQL Hive CLI"
+  }
+  tags = [
+    local_image_tag("cli"),
+    stable_image_tag("cli"),
+    image_tag("cli", COMMIT_SHA),
+    image_tag("cli", BRANCH_NAME)
+  ]
+}
+
 group "build" {
   targets = [
     "emails",
@@ -358,7 +380,8 @@ group "build" {
     "server",
     "stripe-billing",
     "composition-federation-2",
-    "app"
+    "app",
+    "cli"
   ]
 }
 
@@ -382,5 +405,11 @@ group "integration-tests" {
 group "rust" {
   targets = [
     "apollo-router"
+  ]
+}
+
+group "cli" {
+  targets = [
+    "cli"
   ]
 }

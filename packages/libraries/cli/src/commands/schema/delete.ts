@@ -1,4 +1,4 @@
-import { CliUx, Errors, Flags } from '@oclif/core';
+import { Args, Errors, Flags, ux } from '@oclif/core';
 import Command from '../../base-command';
 import { graphqlEndpoint } from '../../helpers/config';
 import { renderErrors } from '../../helpers/schema';
@@ -38,14 +38,14 @@ export default class SchemaDelete extends Command {
     }),
   };
 
-  static args = [
-    {
+  static args = {
+    service: Args.string({
       name: 'service' as const,
       required: true,
       description: 'name of the service',
       hidden: false,
-    },
-  ];
+    }),
+  };
 
   async run() {
     try {
@@ -54,7 +54,7 @@ export default class SchemaDelete extends Command {
       const service: string = args.service;
 
       if (!flags.confirm) {
-        const confirmed = await CliUx.ux.confirm(
+        const confirmed = await ux.confirm(
           `Are you sure you want to delete "${service}" from the registry? (y/n)`,
         );
 

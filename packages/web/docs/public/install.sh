@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 {
   set -e
   SUDO=''
@@ -11,19 +11,16 @@
   fi
 
   # run inside sudo
-  $SUDO bash << SCRIPT
+  $SUDO sh << SCRIPT
       set -e
       
       OS=""
       ARCH=""
-      OS_ARCH=""
 
       echoerr() { echo "\$@" 1>&2; }
 
       unsupported_arch() {
-        local os=$1
-        local arch=$2
-        echoerr "GraphQL Hive CLI does not support $os / $arch at this time."
+        echoerr "GraphQL Hive CLI does not support \$@ at this time."
         echo "If you think that's a bug - please file an issue to https://github.com/kamilkisiela/graphql-hive/issues"
         exit 1
       }
@@ -35,29 +32,29 @@
       }
 
       set_os_arch() {
-        if [ "\$(uname)" == "Darwin" ]; then
+        if [ "\$(uname)" = "Darwin" ]; then
           OS=darwin
-        elif [ "\$(expr substr \$(uname -s) 1 5)" == "Linux" ]; then
+        elif [ "\$(expr substr \$(uname -s) 1 5)" = "Linux" ]; then
           OS=linux
         else
           unsupported_win
         fi
 
         ARCH="\$(uname -m)"
-        if [ "\$ARCH" == "x86_64" ]; then
+        if [ "\$ARCH" = "x86_64" ]; then
           ARCH=x64
-        elif [ "\$ARCH" == "amd64" ]; then
+        elif [ "\$ARCH" = "amd64" ]; then
           ARCH=x64
-        elif [ "\$ARCH" == "arm64" ]; then
-          if [ "\$OS" == "darwin" ]; then
+        elif [ "\$ARCH" = "arm64" ]; then
+          if [ "\$OS" = "darwin" ]; then
             ARCH=arm64
           else
             ARCH=arm
           fi
-        elif [[ "\$ARCH" == aarch* ]]; then
+        elif [[ "\$ARCH" = aarch* ]]; then
           ARCH=arm
         else
-          unsupported_arch $OS $ARCH
+         unsupported_arch "\$OS / \$ARCH"
         fi
       }
 
@@ -89,7 +86,7 @@
       download
 
 SCRIPT
-  LOCATION=$(command -v hive)
-  echo "GraphQL Hive CLI installed to $LOCATION"
-  hive --version
+LOCATION=$(command -v hive)
+echo "GraphQL Hive CLI installed to $LOCATION"
+hive --version
 }

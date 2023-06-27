@@ -112,7 +112,6 @@
     "patchedDependencies": {
       "@theguild/buddy@0.1.0": "patches/@theguild__buddy@0.1.0.patch",
       "mjml-core@4.14.0": "patches/mjml-core@4.14.0.patch",
-      "@oclif/core@1.23.0": "patches/@oclif__core@1.23.0.patch",
       "oclif@3.9.1": "patches/oclif@3.9.1.patch",
       "@slonik/migrator@0.11.3": "patches/@slonik__migrator@0.11.3.patch",
       "@apollo/federation@0.38.1": "patches/@apollo__federation@0.38.1.patch",
@@ -120,7 +119,8 @@
       "bullmq@3.15.8": "patches/bullmq@3.15.8.patch",
       "@theguild/editor@1.2.5": "patches/@theguild__editor@1.2.5.patch",
       "eslint@8.43.0": "patches/eslint@8.43.0.patch",
-      "@graphql-eslint/eslint-plugin@3.19.1": "patches/@graphql-eslint__eslint-plugin@3.19.1.patch"
+      "@graphql-eslint/eslint-plugin@3.19.1": "patches/@graphql-eslint__eslint-plugin@3.19.1.patch",
+      "@oclif/core@2.8.5": "patches/@oclif__core@2.8.5.patch"
     }
   }
 }

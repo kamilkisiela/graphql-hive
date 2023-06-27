@@ -23,7 +23,9 @@ const ConfigModel = zod.object({
     .optional(),
 });
 
-const getAllowedConfigKeys = <TConfig extends zod.ZodObject<any>>(config: TConfig): Set<string> => {
+const getAllowedConfigKeys = <TConfig extends zod.ZodObject<any>>(
+  config: TConfig,
+): Set<GetConfigurationKeys<TConfig>> => {
   const keys = new Set<GetConfigurationKeys<TConfig>>();
 
   const traverse = (obj: zod.ZodObject<Record<string, any>>, path: Array<string> = []): string => {
@@ -92,6 +94,8 @@ export type ValidConfigurationKeys = GetConfigurationKeys<typeof ConfigModel>;
 
 export const graphqlEndpoint = 'https://app.graphql-hive.com/graphql';
 
+export const allowedKeys = Array.from(getAllowedConfigKeys(ConfigModel));
+
 export class Config {
   private cache?: ConfigModelType;
   private filepath: string;
@@ -116,7 +120,7 @@ export class Config {
     return current as GetZodValueType<TKey, typeof ConfigModel>;
   }
 
-  set(key: string, value: string) {
+  set(key: ValidConfigurationKeys, value: string) {
     if (getAllowedConfigKeys(ConfigModel).has(key) === false) {
       throw new Error(`Invalid configuration key: ${key}`);
     }
