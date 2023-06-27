@@ -41,6 +41,10 @@ export class ArtifactStorageWriter {
         'content-type': meta.contentType,
       },
       body: meta.preprocessor(args.artifact),
+      aws: {
+        // This boolean makes Google Cloud Storage happy.
+        signQuery: true,
+      },
     });
 
     if (result.status !== 200) {
