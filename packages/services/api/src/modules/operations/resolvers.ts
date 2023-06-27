@@ -70,7 +70,10 @@ export const resolvers: OperationsModule.Resolvers = {
         project,
         target,
         operations,
-        clients: selector.clientNames ?? [],
+        clients:
+          // TODO: figure out if the mapping should actually happen here :thinking:
+          selector.clientNames?.map(clientName => (clientName === 'unknown' ? '' : clientName)) ??
+          [],
       };
     },
     async clientStatsByTargets(_, { selector }, { injector }) {

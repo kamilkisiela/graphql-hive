@@ -88,13 +88,15 @@ async function single() {
         const randNumber = Math.random() * 100;
         console.log('Reporting usage query...');
 
-        const done = hiveInstance.collectUsage({
-          document: randNumber > 50 ? query1 : query2,
-          schema,
-          variableValues: {},
-        });
+        const done = hiveInstance.collectUsage();
 
         done(
+          {
+            document: randNumber > 50 ? query1 : query2,
+            schema,
+            variableValues: {},
+            contextValue: {},
+          },
           randNumber > 90
             ? {
                 errors: undefined,
