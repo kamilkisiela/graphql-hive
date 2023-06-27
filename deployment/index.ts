@@ -13,7 +13,6 @@ import { deployEmails } from './services/emails';
 import { deployGraphQL } from './services/graphql';
 import { deployKafka } from './services/kafka';
 import { deployMetrics } from './services/observability';
-import { deployCloudflarePolice } from './services/police';
 import { deploySchemaPolicy } from './services/policy';
 import { deployProxy } from './services/proxy';
 import { deployRateLimit } from './services/rate-limit';
@@ -89,8 +88,6 @@ const cfBroker = deployCFBroker({
   rootDns,
   release: imagesTag,
 });
-
-deployCloudflarePolice({ envName, rootDns });
 
 const redisApi = deployRedis({ deploymentEnv });
 const kafkaApi = deployKafka();

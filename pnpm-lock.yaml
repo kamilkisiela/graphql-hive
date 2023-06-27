@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -832,18 +832,6 @@ importers:
       '@graphql-hive/external-composition':
         specifier: workspace:*
         version: link:../../../libraries/external-composition/dist
-
-  packages/services/police-worker:
-    devDependencies:
-      '@cloudflare/workers-types':
-        specifier: 4.20230518.0
-        version: 4.20230518.0
-      '@types/service-worker-mock':
-        specifier: 2.0.1
-        version: 2.0.1
-      esbuild:
-        specifier: 0.17.19
-        version: 0.17.19
 
   packages/services/policy:
     dependencies:
