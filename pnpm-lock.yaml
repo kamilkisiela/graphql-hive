@@ -1,4 +1,4 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
 
 settings:
   autoInstallPeers: true
@@ -222,8 +222,8 @@ importers:
         specifier: 2.4.8
         version: 2.4.8(graphql@16.6.0)
       '@apollo/server':
-        specifier: 4.7.4
-        version: 4.7.4(graphql@16.6.0)
+        specifier: 4.7.5
+        version: 4.7.5(graphql@16.6.0)
       '@aws-sdk/client-s3':
         specifier: 3.359.0
         version: 3.359.0
@@ -409,7 +409,7 @@ importers:
     optionalDependencies:
       '@apollo/server':
         specifier: ^4.0.0
-        version: 4.7.4(graphql@16.6.0)
+        version: 4.7.5(graphql@16.6.0)
       '@envelop/types':
         specifier: ^4.0.0
         version: 4.0.0
@@ -2032,6 +2032,14 @@ packages:
     dependencies:
       graphql: 16.6.0
 
+  /@apollo/cache-control-types@1.0.3(graphql@16.6.0):
+    resolution: {integrity: sha512-F17/vCp7QVwom9eG7ToauIKdAxpSoadsJnqIfyryLFSkLSOEqu+eC5Z3N8OXcUVStuOMcNHlyraRsA6rRICu4g==}
+    peerDependencies:
+      graphql: 14.x || 15.x || 16.x
+    dependencies:
+      graphql: 16.6.0
+    dev: false
+
   /@apollo/composition@2.4.5(graphql@16.6.0):
     resolution: {integrity: sha512-n7w8gk678CEXjMVa/tXUuuD25Nt+v19AHQ1BCUqVBeaLfH3PzTQPNkRBjXpiX0IZJA7zttwyWw8JeYak11giIQ==}
     engines: {node: '>=14.15.0'}
@@ -2208,23 +2216,35 @@ packages:
     peerDependencies:
       graphql: 14.x || 15.x || 16.x
     dependencies:
-      '@apollo/usage-reporting-protobuf': 4.1.0
+      '@apollo/usage-reporting-protobuf': 4.1.1
       '@apollo/utils.fetcher': 2.0.0
       '@apollo/utils.keyvaluecache': 2.1.0
       '@apollo/utils.logger': 2.0.0
       graphql: 16.6.0
     dev: false
 
-  /@apollo/server@4.7.4(graphql@16.6.0):
-    resolution: {integrity: sha512-7MwEsBR+4JRfjAzrFIOP0m/NdzNCyVOlRWCO/86zs73CC+trr08FklTD7JD0yx5BJDfyzjdhF2BZ1sEYvp/Waw==}
+  /@apollo/server-gateway-interface@1.1.1(graphql@16.6.0):
+    resolution: {integrity: sha512-pGwCl/po6+rxRmDMFgozKQo2pbsSwE91TpsDBAOgf74CRDPXHHtM88wbwjab0wMMZh95QfR45GGyDIdhY24bkQ==}
+    peerDependencies:
+      graphql: 14.x || 15.x || 16.x
+    dependencies:
+      '@apollo/usage-reporting-protobuf': 4.1.1
+      '@apollo/utils.fetcher': 2.0.0
+      '@apollo/utils.keyvaluecache': 2.1.0
+      '@apollo/utils.logger': 2.0.0
+      graphql: 16.6.0
+    dev: false
+
+  /@apollo/server@4.7.5(graphql@16.6.0):
+    resolution: {integrity: sha512-XobKpTnW/jbmr0DuJ+8zBzoeL6uEat4CkBN7kOCjhXEUuCNxiLrQGrWFVDqgV7bSdOJr6o2POmZYBPNQXLdyvA==}
     engines: {node: '>=14.16.0'}
     requiresBuild: true
     peerDependencies:
       graphql: ^16.6.0
     dependencies:
-      '@apollo/cache-control-types': 1.0.2(graphql@16.6.0)
-      '@apollo/server-gateway-interface': 1.1.0(graphql@16.6.0)
-      '@apollo/usage-reporting-protobuf': 4.1.0
+      '@apollo/cache-control-types': 1.0.3(graphql@16.6.0)
+      '@apollo/server-gateway-interface': 1.1.1(graphql@16.6.0)
+      '@apollo/usage-reporting-protobuf': 4.1.1
       '@apollo/utils.createhash': 2.0.0
       '@apollo/utils.fetcher': 2.0.0
       '@apollo/utils.isnodelike': 2.0.0
@@ -2277,6 +2297,12 @@ packages:
 
   /@apollo/usage-reporting-protobuf@4.1.0:
     resolution: {integrity: sha512-hXouMuw5pQVkzi8dgMybmr6Y11+eRmMQVoB5TF0HyTwAg9SOq/v3OCuiYqcVUKdBcskU9Msp+XvjAk0GKpWCwQ==}
+    dependencies:
+      '@apollo/protobufjs': 1.2.7
+    dev: false
+
+  /@apollo/usage-reporting-protobuf@4.1.1:
+    resolution: {integrity: sha512-u40dIUePHaSKVshcedO7Wp+mPiZsaU6xjv9J+VyxpoU/zL6Jle+9zWeG98tr/+SZ0nZ4OXhrbb8SNr0rAPpIDA==}
     dependencies:
       '@apollo/protobufjs': 1.2.7
     dev: false
@@ -2373,7 +2399,7 @@ packages:
     peerDependencies:
       graphql: 14.x || 15.x || 16.x
     dependencies:
-      '@apollo/usage-reporting-protobuf': 4.1.0
+      '@apollo/usage-reporting-protobuf': 4.1.1
       '@apollo/utils.dropunuseddefinitions': 2.0.1(graphql@16.6.0)
       '@apollo/utils.printwithreducedwhitespace': 2.0.1(graphql@16.6.0)
       '@apollo/utils.removealiases': 2.0.1(graphql@16.6.0)
