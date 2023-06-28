@@ -3554,7 +3554,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           INNER JOIN "projects" p ON t."project_id" = p."id"
           INNER JOIN "organizations" o ON p."org_id" = o."id"
         WHERE
-          sc."id" = ${args.targetId}
+          t."id" = ${args.targetId}
       `);
 
       if (result === null) {

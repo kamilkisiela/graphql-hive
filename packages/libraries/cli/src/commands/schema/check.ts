@@ -145,6 +145,10 @@ export default class SchemaCheck extends Command {
           renderWarnings.call(this, warnings);
           this.log('');
         }
+
+        if (result.schemaCheck.schemaCheck?.webUrl) {
+          this.log(`View full report:\n${result.schemaCheck.schemaCheck.webUrl}`);
+        }
       } else if (result.schemaCheck.__typename === 'SchemaCheckError') {
         const changes = result.schemaCheck.changes;
         const errors = result.schemaCheck.errors;
@@ -159,6 +163,11 @@ export default class SchemaCheck extends Command {
         if (changes && changes.total) {
           this.log('');
           renderChanges.call(this, changes);
+        }
+
+        if (result.schemaCheck.schemaCheck?.webUrl) {
+          this.log('');
+          this.log(`View full report:\n${result.schemaCheck.schemaCheck.webUrl}`);
         }
 
         this.log('');

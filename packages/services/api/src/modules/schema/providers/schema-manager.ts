@@ -22,7 +22,7 @@ import {
   TargetSelector,
 } from '../../shared/providers/storage';
 import { schemaChangeFromMeta } from '../schema-change-from-meta';
-import { SCHEMA_MODULE_CONFIG, SchemaModuleConfig } from './config';
+import { SCHEMA_MODULE_CONFIG, type SchemaModuleConfig } from './config';
 import { FederationOrchestrator } from './orchestrators/federation';
 import { SingleOrchestrator } from './orchestrators/single';
 import { StitchingOrchestrator } from './orchestrators/stitching';
