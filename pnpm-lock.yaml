@@ -1,4 +1,4 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
 
 settings:
   autoInstallPeers: true
@@ -368,8 +368,8 @@ importers:
         version: 3.21.4
     devDependencies:
       '@graphql-codegen/typescript-graphql-request':
-        specifier: 4.5.9
-        version: 4.5.9(graphql-request@5.1.0)(graphql-tag@2.12.6)(graphql@16.6.0)
+        specifier: 5.0.0
+        version: 5.0.0(graphql-request@5.1.0)(graphql-tag@2.12.6)(graphql@16.6.0)
       '@types/env-ci':
         specifier: 3.1.1
         version: 3.1.1
@@ -6271,11 +6271,11 @@ packages:
       - supports-color
     dev: true
 
-  /@graphql-codegen/typescript-graphql-request@4.5.9(graphql-request@5.1.0)(graphql-tag@2.12.6)(graphql@16.6.0):
-    resolution: {integrity: sha512-Vtv5qymUXcR4UFdHOlJHzK5TN+CZUwMwFDGb3n4Gjcr4yln1BWbUb7DXgD0GHzpXwDIj5G2XmJnFtr0jihBfrg==}
+  /@graphql-codegen/typescript-graphql-request@5.0.0(graphql-request@5.1.0)(graphql-tag@2.12.6)(graphql@16.6.0):
+    resolution: {integrity: sha512-BM9UzZD/5q3b3Q4c+VOy/QoPWgsnfs1GAnGJjh9xtuty6YsCprwhh12BaV16F+xndNUd6qkghigGyjR8m8RdkA==}
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
-      graphql-request: ^3.4.0 || ^4.0.0 || ~5.0.0 || ~5.1.0
+      graphql-request: ^6.0.0
       graphql-tag: ^2.0.0
     dependencies:
       '@graphql-codegen/plugin-helpers': 3.1.2(graphql@16.6.0)
