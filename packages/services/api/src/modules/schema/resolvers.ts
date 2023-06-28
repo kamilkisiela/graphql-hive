@@ -1604,6 +1604,12 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return schemaCheck.safeSchemaChanges.map(toGraphQLSchemaChange);
     },
+    webUrl(schemaCheck, _, { injector }) {
+      return injector.get(SchemaManager).getSchemaCheckWebUrl({
+        schemaCheckId: schemaCheck.id,
+        targetId: schemaCheck.targetId,
+      });
+    },
   },
   FailedSchemaCheck: {
     schemaVersion(schemaCheck, _, { injector }) {
@@ -1633,6 +1639,12 @@ export const resolvers: SchemaModule.Resolvers = {
     },
     compositionErrors(schemaCheck) {
       return schemaCheck.schemaCompositionErrors;
+    },
+    webUrl(schemaCheck, _, { injector }) {
+      return injector.get(SchemaManager).getSchemaCheckWebUrl({
+        schemaCheckId: schemaCheck.id,
+        targetId: schemaCheck.targetId,
+      });
     },
   },
   SchemaPolicyWarningConnection: createDummyConnection(warning => ({

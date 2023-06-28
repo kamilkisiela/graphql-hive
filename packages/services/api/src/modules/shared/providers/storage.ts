@@ -1,7 +1,12 @@
 import { Injectable } from 'graphql-modules';
 import { Change } from '@graphql-inspector/core';
 import type { PolicyConfigurationObject } from '@hive/policy';
-import type { SchemaCheck, SchemaCheckInput, SchemaCompositionError } from '@hive/storage';
+import type {
+  SchemaCheck,
+  SchemaCheckInput,
+  SchemaCompositionError,
+  TargetBreadcrumb,
+} from '@hive/storage';
 import type {
   AddAlertChannelInput,
   AddAlertInput,
@@ -708,6 +713,8 @@ export interface Storage {
       }>;
     }>
   >;
+
+  getTargetBreadcrumbForTargetId(_: { targetId: string }): Promise<TargetBreadcrumb | null>;
 }
 
 @Injectable()

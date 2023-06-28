@@ -880,3 +880,11 @@ export type SchemaCheckInput = z.TypeOf<typeof SchemaCheckInputModel>;
 export type SchemaCheck = z.TypeOf<typeof SchemaCheckModel>;
 export type FailedSchemaCheck = z.TypeOf<typeof FailedSchemaCheckModel>;
 export type SuccessfulSchemaCheck = z.TypeOf<typeof SuccessfulSchemaCheckModel>;
+
+export const TargetBreadcrumbModel = z.object({
+  organization: z.string(),
+  project: z.string(),
+  target: z.string(),
+});
+
+export type TargetBreadcrumb = z.TypeOf<typeof TargetBreadcrumbModel>;
