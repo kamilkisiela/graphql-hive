@@ -74,12 +74,16 @@ describe('Schema policy checks', () => {
       });
       const message = stripAnsi(rawMessage);
 
-      expect(message).toContain(`Detected 1 warning`);
-      expect(message).toMatchInlineSnapshot(`
-        v No changes
-        ⚠ Detected 1 warning
-        - Description is required for type User (source: policy-require-description)
-      `);
+      expect(message.split('\n')).toEqual([
+        '✔ No changes',
+        '',
+        '⚠ Detected 1 warning',
+        '',
+        '   - Description is required for type User (source: policy-require-description)',
+        '',
+        'View full report:',
+        expect.any(String),
+      ]);
     });
 
     it('Fedearation project with policy with , should check only the part that was changed', async () => {
@@ -137,11 +141,15 @@ describe('Schema policy checks', () => {
       const message = stripAnsi(rawMessage);
 
       expect(message).toContain(`Detected 1 error`);
-      expect(message.split('\n').slice(1).join('\n')).toMatchInlineSnapshot(`
-        ✖ Detected 1 error
-
-           - Description is required for type User (source: policy-require-description)
-      `);
+      expect(message.split('\n').slice(1)).toEqual([
+        '✖ Detected 1 error',
+        '',
+        '   - Description is required for type User (source: policy-require-description)',
+        '',
+        'View full report:',
+        expect.any(String),
+        '',
+      ]);
     });
   });
 
@@ -179,14 +187,21 @@ describe('Schema policy checks', () => {
       const message = stripAnsi(rawMessage);
 
       expect(message).toContain(`Detected 2 warnings`);
-      expect(message).toMatchInlineSnapshot(`
-        i Detected 2 changes
-        - Type User was added
-        - Field user was added to object type Query
-        ⚠ Detected 2 warnings
-        - Description is required for type Query (source: policy-require-description)
-        - Description is required for type User (source: policy-require-description)
-      `);
+      expect(message.split('\n')).toEqual([
+        'ℹ Detected 2 changes',
+        '',
+        '   - Type User was added',
+        '   - Field user was added to object type Query',
+        '',
+        '',
+        '⚠ Detected 2 warnings',
+        '',
+        '   - Description is required for type Query (source: policy-require-description)',
+        '   - Description is required for type User (source: policy-require-description)',
+        '',
+        'View full report:',
+        expect.any(String),
+      ]);
     });
 
     test('Single with policy with only errors', async () => {
@@ -219,14 +234,21 @@ describe('Schema policy checks', () => {
       const message = stripAnsi(rawMessage);
 
       expect(message).toContain(`Detected 2 errors`);
-      expect(message.split('\n').slice(1).join('\n')).toMatchInlineSnapshot(`
-        ✖ Detected 2 errors
-        - Description is required for type Query (source: policy-require-description)
-        - Description is required for type User (source: policy-require-description)
-        i Detected 2 changes
-        - Type User was added
-        - Field user was added to object type Query
-      `);
+      expect(message.split('\n').slice(1)).toEqual([
+        '✖ Detected 2 errors',
+        '',
+        '   - Description is required for type Query (source: policy-require-description)',
+        '   - Description is required for type User (source: policy-require-description)',
+        '',
+        'ℹ Detected 2 changes',
+        '',
+        '   - Type User was added',
+        '   - Field user was added to object type Query',
+        '',
+        'View full report:',
+        expect.any(String),
+        '',
+      ]);
     });
 
     test('Single with policy with both errors and warning', async () => {
@@ -277,17 +299,27 @@ describe('Schema policy checks', () => {
 
       expect(message).toContain(`Detected 2 errors`);
       expect(message).toContain(`Detected 1 warning`);
-      expect(message.split('\n').slice(1).join('\n')).toMatchInlineSnapshot(`
-        ✖ Detected 2 errors
-        - Description is required for type Query (source: policy-require-description)
-        - Description is required for type User (source: policy-require-description)
-        ⚠ Detected 1 warning
-        - Deprecation reason is required for field foo in type Query. (source: policy-require-deprecation-reason)
-        i Detected 3 changes
-        - Type User was added
-        - Field user was added to object type Query
-        - Field Query.foo is deprecated
-      `);
+      expect(message.split('\n').slice(1)).toEqual([
+        '✖ Detected 2 errors',
+        '',
+        '   - Description is required for type Query (source: policy-require-description)',
+        '   - Description is required for type User (source: policy-require-description)',
+        '',
+        '⚠ Detected 1 warning',
+        '',
+        '   - Deprecation reason is required for field foo in type Query. (source: policy-require-deprecation-reason)',
+        '',
+        '',
+        'ℹ Detected 3 changes',
+        '',
+        '   - Type User was added',
+        '   - Field user was added to object type Query',
+        '   - Field Query.foo is deprecated',
+        '',
+        'View full report:',
+        expect.any(String),
+        '',
+      ]);
     });
   });
 });

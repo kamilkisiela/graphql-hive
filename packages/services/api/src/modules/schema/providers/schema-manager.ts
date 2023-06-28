@@ -1,5 +1,5 @@
 import { parse } from 'graphql';
-import { Injectable, Scope } from 'graphql-modules';
+import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import { z } from 'zod';
 import { Change } from '@graphql-inspector/core';
@@ -22,6 +22,7 @@ import {
   TargetSelector,
 } from '../../shared/providers/storage';
 import { schemaChangeFromMeta } from '../schema-change-from-meta';
+import { SCHEMA_MODULE_CONFIG, type SchemaModuleConfig } from './config';
 import { FederationOrchestrator } from './orchestrators/federation';
 import { SingleOrchestrator } from './orchestrators/single';
 import { StitchingOrchestrator } from './orchestrators/stitching';
@@ -63,6 +64,7 @@ export class SchemaManager {
     private stitchingOrchestrator: StitchingOrchestrator,
     private federationOrchestrator: FederationOrchestrator,
     private crypto: CryptoProvider,
+    @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
   ) {
     this.logger = logger.child({ source: 'SchemaManager' });
   }
@@ -595,6 +597,35 @@ export class SchemaManager {
     }
 
     return inflateSchemaCheck(schemaCheck);
+  }
+
+  async getSchemaCheckWebUrl(args: {
+    schemaCheckId: string;
+    targetId: string;
+  }): Promise<null | string> {
+    if (this.schemaModuleConfig.schemaCheckLink == null) {
+      return null;
+    }
+
+    const breadcrumb = await this.storage.getTargetBreadcrumbForTargetId({
+      targetId: args.targetId,
+    });
+    if (!breadcrumb) {
+      return null;
+    }
+
+    return this.schemaModuleConfig.schemaCheckLink({
+      organization: {
+        cleanId: breadcrumb.organization,
+      },
+      project: {
+        cleanId: breadcrumb.project,
+      },
+      target: {
+        cleanId: breadcrumb.target,
+      },
+      schemaCheckId: args.schemaCheckId,
+    });
   }
 }
 

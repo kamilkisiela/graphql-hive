@@ -64,6 +64,7 @@ import {
   SchemaCompositionError,
   SchemaCompositionErrorModel,
   SchemaPolicyWarningModel,
+  TargetBreadcrumbModel,
 } from './schema-change-model';
 import type { Slonik } from './shared';
 
@@ -3540,6 +3541,27 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           },
         },
       };
+    },
+
+    async getTargetBreadcrumbForTargetId(args) {
+      const result = await pool.maybeOne<unknown>(sql`
+        SELECT
+          o."clean_id" AS "organization",
+          p."clean_id" AS "project",
+          t."clean_id" AS "target"
+        FROM
+          "targets" t
+          INNER JOIN "projects" p ON t."project_id" = p."id"
+          INNER JOIN "organizations" o ON p."org_id" = o."id"
+        WHERE
+          t."id" = ${args.targetId}
+      `);
+
+      if (result === null) {
+        return null;
+      }
+
+      return TargetBreadcrumbModel.parse(result);
     },
   };
 

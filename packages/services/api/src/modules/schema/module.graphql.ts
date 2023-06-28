@@ -695,6 +695,10 @@ export default gql`
     Is null if there is no schema version published yet.
     """
     schemaVersion: SchemaVersion
+    """
+    The URL of the schema check on the Hive Web App.
+    """
+    webUrl: String
   }
 
   """
@@ -720,6 +724,10 @@ export default gql`
     Is null if there is no schema version published yet.
     """
     schemaVersion: SchemaVersion
+    """
+    The URL of the schema check on the Hive Web App.
+    """
+    webUrl: String
 
     safeSchemaChanges: SchemaChangeConnection
     schemaPolicyWarnings: SchemaPolicyWarningConnection
@@ -751,6 +759,10 @@ export default gql`
     Is null if there is no schema version published yet.
     """
     schemaVersion: SchemaVersion
+    """
+    The URL of the schema check on the Hive Web App.
+    """
+    webUrl: String
 
     compositionErrors: SchemaErrorConnection
 

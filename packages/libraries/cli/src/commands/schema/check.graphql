@@ -20,6 +20,9 @@ mutation schemaCheck($input: SchemaCheckInput!, $usesGitHubApp: Boolean!) {
         }
         total
       }
+      schemaCheck {
+        webUrl
+      }
     }
     ... on SchemaCheckError @skip(if: $usesGitHubApp) {
       valid
@@ -44,6 +47,9 @@ mutation schemaCheck($input: SchemaCheckInput!, $usesGitHubApp: Boolean!) {
           message
         }
         total
+      }
+      schemaCheck {
+        webUrl
       }
     }
     ... on GitHubSchemaCheckSuccess @include(if: $usesGitHubApp) {
