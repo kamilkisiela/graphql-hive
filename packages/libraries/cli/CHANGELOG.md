@@ -1,5 +1,20 @@
 # @graphql-hive/cli
 
+## 0.24.0
+
+### Minor Changes
+
+- [#2378](https://github.com/kamilkisiela/graphql-hive/pull/2378)
+  [`05b37a88`](https://github.com/kamilkisiela/graphql-hive/commit/05b37a885e347c3a9eb33235d48150770fb168eb)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Support HIVE_AUTHOR and HIVE_COMMIT env
+  vars
+
+### Patch Changes
+
+- [#2378](https://github.com/kamilkisiela/graphql-hive/pull/2378)
+  [`05b37a88`](https://github.com/kamilkisiela/graphql-hive/commit/05b37a885e347c3a9eb33235d48150770fb168eb)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Adds windows installer
+
 ## 0.23.0
 
 ### Minor Changes

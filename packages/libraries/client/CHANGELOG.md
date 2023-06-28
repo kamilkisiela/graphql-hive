@@ -1,5 +1,14 @@
 # @graphql-hive/client
 
+## 0.24.0
+
+### Minor Changes
+
+- [#2439](https://github.com/kamilkisiela/graphql-hive/pull/2439)
+  [`c7cdeb73`](https://github.com/kamilkisiela/graphql-hive/commit/c7cdeb73f63dca4e3d795f92b0cf2641f592c733)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Add `useYogaHive` plugin for better integration
+  with GraphQL Yoga.
+
 ## 0.23.1
 
 ### Patch Changes
