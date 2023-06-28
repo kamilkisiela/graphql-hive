@@ -1,19 +1,16 @@
 import {
   ArgumentNode,
   DocumentNode,
-  GraphQLInputObjectType,
+  getNamedType,
   GraphQLInputType,
   GraphQLInterfaceType,
   GraphQLNamedType,
   GraphQLObjectType,
-  GraphQLOutputType,
   GraphQLSchema,
   GraphQLType,
   GraphQLUnionType,
   isEnumType,
   isInputObjectType,
-  isListType,
-  isNonNullType,
   isScalarType,
   Kind,
   ObjectFieldNode,
@@ -299,7 +296,7 @@ export function createCollector({
     }
 
     function markEntireTypeAsUsed(type: GraphQLInputType): void {
-      const namedType = unwrapType(type);
+      const namedType = getNamedType(type);
 
       if (collected_entire_named_types.has(namedType.name)) {
         // No need to mark this type as used again
@@ -341,7 +338,7 @@ export function createCollector({
               const field = namedType.getFields()[fieldName];
               if (field) {
                 collectInputType(namedType.name, fieldName);
-                collectVariable(unwrapType(field.type), variable[fieldName]);
+                collectVariable(getNamedType(field.type), variable[fieldName]);
               }
             }
           } else {
@@ -370,7 +367,7 @@ export function createCollector({
             // Granular collection of variable values is enabled
             const variableName = node.variable.name.value;
             const variableValue = variables[variableName];
-            const namedType = unwrapType(inputType);
+            const namedType = getNamedType(inputType);
 
             collectVariable(namedType, variableValue);
           } else {
@@ -445,25 +442,13 @@ export function createCollector({
 }
 
 function resolveTypeName(inputType: GraphQLType): string {
-  return unwrapType(inputType).name;
-}
-
-function unwrapType(type: GraphQLInputType): GraphQLNamedInputType;
-function unwrapType(type: GraphQLOutputType): GraphQLNamedOutputType;
-function unwrapType(type: GraphQLType): GraphQLNamedType;
-function unwrapType(type: GraphQLType): GraphQLNamedType {
-  if (isNonNullType(type) || isListType(type)) {
-    return unwrapType(type.ofType);
-  }
-
-  return type;
+  return getNamedType(inputType).name;
 }
 
 type GraphQLNamedInputType = Exclude<
   GraphQLNamedType,
   GraphQLObjectType | GraphQLInterfaceType | GraphQLUnionType
 >;
-type GraphQLNamedOutputType = Exclude<GraphQLNamedType, GraphQLInputObjectType>;
 
 export interface Report {
   size: number;
