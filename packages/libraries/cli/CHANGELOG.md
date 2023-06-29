@@ -1,5 +1,14 @@
 # @graphql-hive/cli
 
+## 0.25.0
+
+### Minor Changes
+
+- [#2544](https://github.com/kamilkisiela/graphql-hive/pull/2544)
+  [`f6510317`](https://github.com/kamilkisiela/graphql-hive/commit/f6510317be6a79456a982116ca3ff13866f5c68e)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - print web schema check url when running
+  `hive schema:check`.
+
 ## 0.24.0
 
 ### Minor Changes
