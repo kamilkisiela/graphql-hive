@@ -13,7 +13,7 @@ Hive ships a custom build of Apollo Gateway,
 Once you have all services schemas pushed to Hive, and available in the CDN, you can
 [create a CDN Access Token and gain access to the CDN endpoint](/docs/features/high-availability-cdn#cdn-access-tokens).
 
-<Tabs items={['Binary', 'Docker']}>
+<Tabs items={['Binary', 'Docker', 'Custom']}>
   <Tab>
     Download Apollo Router for Linux (`x86_64`), MacOS (`x86_64`) or Windows (`x86_64`):
 
@@ -50,6 +50,42 @@ Once you have all services schemas pushed to Hive, and available in the CDN, you
       ```
 
   </Tab>
+
+  <Tab>
+    Creating a custom Apollo Router binary requires compiling it from source.
+    To setup a project, please follow ["Create a new project"](https://www.apollographql.com/docs/router/customizations/custom-binary/#1-create-a-new-project) section of "Creating a custom Apollo Router binary" guide.
+
+    Once your project is ready, update `Cargo.toml` file with the following dependencies:
+
+    ```toml filename="Cargo.toml"
+    graphql-hive-router = { git = "https://github.com/kamilkisiela/graphql-hive", branch = "main" }
+    ```
+
+    Next, update `src/main.rs` file with the following content to add GraphQL Hive:
+
+    ```diff filename="src/main.rs"
+      mod plugins;
+
+      use anyhow::Result;
+    + use graphql_hive_router::registry;
+
+      fn main() -> Result<()> {
+    -   apollo_router::main()
+    +   match registry::HiveRegistry::new(None).and(apollo_router::main()) {
+    +     Ok(_) => {}
+    +     Err(e) => {
+    +         eprintln!("{}", e);
+    +         std::process::exit(1);
+    +     }
+    +   }
+      }
+    ```
+
+    Finally, [build the binary](https://www.apollographql.com/docs/router/customizations/custom-binary/#2-compile-the-router) and [run it](https://www.apollographql.com/docs/router/customizations/custom-binary/#3-run-the-compiled-binary) using `HIVE_CDN_ENDPOINT` and `HIVE_CDN_KEY` environment variables.
+
+    In case of any issues, please refer to the [official guide](https://www.apollographql.com/docs/router/customizations/custom-binary/) or [open an issue](https://github.com/kamilkisiela/graphql-hive/issues/new) in GraphQL Hive repository.
+
+  </Tab>
 </Tabs>
 
 ## Configuration
@@ -71,7 +107,7 @@ Once you have all services schemas pushed to Hive, and available in the CDN, you
 You can send usage reporting to Hive registry by passing `HIVE_TOKEN` environment variable and
 enabling `hive.usage` plugin in the config file (`router.yaml`).
 
-<Tabs items={['Binary', 'Docker']}>
+<Tabs items={['Binary', 'Docker', 'Custom']}>
   <Tab>
     Start the router:
 
@@ -94,6 +130,45 @@ enabling `hive.usage` plugin in the config file (`router.yaml`).
       ```
 
       To follow the same convention as Apollo Router's official Docker image, the config file is also located at `/dist/config/router.yaml`.
+
+  </Tab>
+
+  <Tab>
+    Creating a custom Apollo Router binary requires compiling it from source.
+    To setup a project, please follow ["Create a new project"](https://www.apollographql.com/docs/router/customizations/custom-binary/#1-create-a-new-project) section of "Creating a custom Apollo Router binary" guide.
+
+    Once your project is ready, update `Cargo.toml` file with the following dependencies:
+
+    ```toml filename="Cargo.toml"
+    graphql-hive-router = { git = "https://github.com/kamilkisiela/graphql-hive", branch = "main" }
+    ```
+
+    Next, update `src/main.rs` file with the following content to add GraphQL Hive:
+
+    ```diff filename="src/main.rs"
+      mod plugins;
+
+      use anyhow::Result;
+    + use graphql_hive_router::registry;
+    + use graphql_hive_router::usage;
+
+      fn main() -> Result<()> {
+    -   apollo_router::main()
+    +   usage::register();
+    +   match registry::HiveRegistry::new(None).and(apollo_router::main()) {
+    +     Ok(_) => {}
+    +     Err(e) => {
+    +         eprintln!("{}", e);
+    +         std::process::exit(1);
+    +     }
+    +   }
+      }
+    ```
+
+    Finally, [build the binary](https://www.apollographql.com/docs/router/customizations/custom-binary/#2-compile-the-router) and [run it](https://www.apollographql.com/docs/router/customizations/custom-binary/#3-run-the-compiled-binary) using `HIVE_TOKEN`, `HIVE_CDN_ENDPOINT` and `HIVE_CDN_KEY` environment variables.
+    Don't forget to create `router.yaml` file with configuration for `hive.usage` plugin.
+
+    In case of any issues, please refer to the [official guide](https://www.apollographql.com/docs/router/customizations/custom-binary/) or [open an issue](https://github.com/kamilkisiela/graphql-hive/issues/new) in GraphQL Hive repository.
 
   </Tab>
 </Tabs>
