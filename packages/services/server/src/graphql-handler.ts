@@ -255,7 +255,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
     // when the request gets processed (not canceled)
     // see more: https://github.com/nodejs/node/issues/38924
     // TODO: socket.once might break for http/2 because
-    if(!controller) {
+    if (!controller) {
       controller = new AbortController();
       abortControllerCache.set(req.socket, controller);
 
@@ -264,7 +264,6 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         abortControllerCache.delete(req.socket);
       });
     }
-    
 
     await asyncStorage.run(
       {
