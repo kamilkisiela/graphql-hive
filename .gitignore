@@ -70,6 +70,7 @@ typings/
 # Nuxt.js build / generate output
 .nuxt
 dist/
+deploy-tmp/
 
 # Gatsby files
 .cache/

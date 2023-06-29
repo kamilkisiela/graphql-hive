@@ -14,9 +14,10 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "@hive/libraries/client#build": {
+    "@hive/libraries/cli#build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**", "!dist/**/node_modules/**"],
+      "cache": false
     },
     "@hive/cdn-script#build": {
       "dependsOn": ["^build"],
@@ -28,11 +29,18 @@
     },
     "@hive/app#build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**"],
+      "cache": false
+    },
+    "@hive/docs#build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"],
+      "cache": false
     },
     "@hive/migrations#build": {
       "dependsOn": ["^build", "@graphql-hive/client#build"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**"],
+      "cache": false
     },
     "typecheck": {
       "outputs": [""]

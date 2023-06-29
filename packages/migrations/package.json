@@ -9,7 +9,7 @@
     "tsconfig.json"
   ],
   "scripts": {
-    "build": "pnpm --filter=@hive/migrations deploy --prod ./dist/migrations/",
+    "build": "pnpm --filter=@hive/migrations deploy --prod deploy-tmp/migrations && rimraf dist/node_modules && mv deploy-tmp/migrations/node_modules dist && rimraf deploy-tmp/migrations",
     "db:create": "node tools/create-db.mjs",
     "db:init": "pnpm db:create && pnpm migration:run",
     "db:migrator": "node --experimental-specifier-resolution=node --loader ts-node/esm src/index.ts",
@@ -37,6 +37,7 @@
     "@types/pg": "8.10.2",
     "copyfiles": "2.4.1",
     "pg-promise": "11.5.0",
+    "rimraf": "4.4.1",
     "tslib": "2.5.3"
   }
 }
