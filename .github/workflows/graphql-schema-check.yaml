@@ -35,4 +35,4 @@ jobs:
           HIVE_TOKEN: ${{ secrets.hiveToken }}
         run: |
           curl -sSL https://graphql-hive.com/install.sh | sh
-          hive schema:check "packages/services/api/src/modules/*/module.graphql.ts" ${{steps.pr-label-check.outputs.safeFlag }} --github
+          hive schema:check "packages/services/api/src/modules/*/module.graphql.ts" ${{steps.pr-label-check.outputs.safeFlag }} --commit 3c5e85f593e4db2e6fb396eac5b36fabca3c4636 --github
