@@ -1,5 +1,14 @@
 # @graphql-hive/cli
 
+## 0.25.1
+
+### Patch Changes
+
+- [#2557](https://github.com/kamilkisiela/graphql-hive/pull/2557)
+  [`1a1aae6`](https://github.com/kamilkisiela/graphql-hive/commit/1a1aae63b6b22c9484eaa559375e1de35b8152b7)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Hide deprecation warning when --force
+  is not provided by user
+
 ## 0.25.0
 
 ### Minor Changes
