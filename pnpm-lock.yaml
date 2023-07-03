@@ -424,8 +424,8 @@ importers:
         specifier: 1.4.5
         version: 1.4.5
       graphql-yoga:
-        specifier: 4.0.2
-        version: 4.0.2(graphql@16.6.0)
+        specifier: 4.0.3
+        version: 4.0.3(graphql@16.6.0)
       nock:
         specifier: 13.3.1
         version: 13.3.1
@@ -588,8 +588,8 @@ importers:
         specifier: 1.22.2
         version: 1.22.2(graphql@16.6.0)
       graphql-yoga:
-        specifier: 4.0.2
-        version: 4.0.2(graphql@16.6.0)
+        specifier: 4.0.3
+        version: 4.0.3(graphql@16.6.0)
       ioredis:
         specifier: 5.3.2
         version: 5.3.2
@@ -1016,8 +1016,8 @@ importers:
         specifier: 2.1.0
         version: 2.1.0
       '@graphql-yoga/plugin-response-cache':
-        specifier: 2.0.2
-        version: 2.0.2(@envelop/core@4.0.0)(graphql-yoga@4.0.2)(graphql@16.6.0)
+        specifier: 2.1.0
+        version: 2.1.0(@envelop/core@4.0.0)(graphql-yoga@4.0.3)(graphql@16.6.0)
       '@sentry/integrations':
         specifier: 7.56.0
         version: 7.56.0
@@ -1043,8 +1043,8 @@ importers:
         specifier: 16.6.0
         version: 16.6.0
       graphql-yoga:
-        specifier: 4.0.2
-        version: 4.0.2(graphql@16.6.0)
+        specifier: 4.0.3
+        version: 4.0.3(graphql@16.6.0)
       hyperid:
         specifier: 3.1.1
         version: 3.1.1
@@ -5203,8 +5203,8 @@ packages:
       tslib: 2.5.3
     dev: false
 
-  /@envelop/response-cache@5.0.1(@envelop/core@4.0.0)(graphql@16.6.0):
-    resolution: {integrity: sha512-mObEI0PZsMHZ6dTzGpuQOJ+QhSrTIH4y9tChv1DeM0eKakRutY9l96EZ6mQGSfVcrJklkOOvCyUZdBs1qQrOmw==}
+  /@envelop/response-cache@5.1.0(@envelop/core@4.0.0)(graphql@16.6.0):
+    resolution: {integrity: sha512-G81MF9XCQdmyZWgTkZa09rBusXNXhvjPMDjP4cfOpr8g1DEvEsxskEGT08f22hvl9Fg+G2wlVXBsHPLEr798Lg==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       '@envelop/core': ^4.0.0
@@ -5215,7 +5215,7 @@ packages:
       '@whatwg-node/fetch': 0.9.7
       fast-json-stable-stringify: 2.1.0
       graphql: 16.6.0
-      lru-cache: 9.1.1
+      lru-cache: 10.0.0
       tslib: 2.5.3
     dev: false
 
@@ -7601,16 +7601,16 @@ packages:
     dependencies:
       tslib: 2.5.3
 
-  /@graphql-yoga/plugin-response-cache@2.0.2(@envelop/core@4.0.0)(graphql-yoga@4.0.2)(graphql@16.6.0):
-    resolution: {integrity: sha512-bRODDqY9oC8p/UWDuqINBGVaJiEBFlsRTshXk+EhVVBu5s/5IZY6JIwLW0GgMyR2uskf0lQKsuTnpJquzBi0xg==}
+  /@graphql-yoga/plugin-response-cache@2.1.0(@envelop/core@4.0.0)(graphql-yoga@4.0.3)(graphql@16.6.0):
+    resolution: {integrity: sha512-QMmVL5Sx2mEQ6pejj0pQ6F2QcfIiMYibE1xSdhWAJkDfQlImAcd3uv1smMBbUMp3GNRF3vs1K5SpIzX/UHva4g==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
-      graphql-yoga: ^4.0.2
+      graphql-yoga: ^4.0.3
     dependencies:
-      '@envelop/response-cache': 5.0.1(@envelop/core@4.0.0)(graphql@16.6.0)
+      '@envelop/response-cache': 5.1.0(@envelop/core@4.0.0)(graphql@16.6.0)
       graphql: 16.6.0
-      graphql-yoga: 4.0.2(graphql@16.6.0)
+      graphql-yoga: 4.0.3(graphql@16.6.0)
     transitivePeerDependencies:
       - '@envelop/core'
     dev: false
@@ -13524,15 +13524,15 @@ packages:
       tslib: 2.5.3
     dev: true
 
-  /@whatwg-node/server@0.8.8:
-    resolution: {integrity: sha512-AfLqqwcbQGzD5X1At1fhNpo2AbhY+vvFyx5kFsOeZinB4dWzrZ5yhTTh0RTmG05eDI1Hw90/os65JhH+QocNxQ==}
+  /@whatwg-node/server@0.9.0:
+    resolution: {integrity: sha512-dEpgIgLlUA9IRIUbAhsPuFvJjuAQIjWqRhNc6VpMMLnumw2bvOHd9b/Nm2UN9cLvUSSA6//Fy+v0jhxiA2LFAw==}
     engines: {node: '>=16.0.0'}
     dependencies:
       '@whatwg-node/fetch': 0.9.7
       tslib: 2.5.3
 
-  /@whatwg-node/server@0.9.0:
-    resolution: {integrity: sha512-dEpgIgLlUA9IRIUbAhsPuFvJjuAQIjWqRhNc6VpMMLnumw2bvOHd9b/Nm2UN9cLvUSSA6//Fy+v0jhxiA2LFAw==}
+  /@whatwg-node/server@0.9.1:
+    resolution: {integrity: sha512-Zq0FWafIlJzYyyAL7UwzsEhqSMzvKci/XqIFKpC4V031PxKKPBmZSP1mXCew5eZFW8Z5Sj6bZNi2CIsHd062ug==}
     engines: {node: '>=16.0.0'}
     dependencies:
       '@whatwg-node/fetch': 0.9.7
@@ -19661,8 +19661,8 @@ packages:
       tslib: 2.5.3
     dev: true
 
-  /graphql-yoga@4.0.2(graphql@16.6.0):
-    resolution: {integrity: sha512-frDoqKD+b9JvUY2vgqfeWW5LT1iqibyW4//i7hNBKh7mhA1cSR4eK8C/DT//v0Sado8KQphrVThjDxVH+07wFA==}
+  /graphql-yoga@4.0.3(graphql@16.6.0):
+    resolution: {integrity: sha512-MP+v+yxCqM3lXg95vaA+kXjyRvyRxHUlgZryTecN7ugzEEnyQKKu8JBXA4ziEuLi3liRriyjCAyV4pqFzhHujA==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
@@ -19674,7 +19674,7 @@ packages:
       '@graphql-yoga/logger': 1.0.0
       '@graphql-yoga/subscription': 4.0.0
       '@whatwg-node/fetch': 0.9.7
-      '@whatwg-node/server': 0.8.8
+      '@whatwg-node/server': 0.9.1
       dset: 3.1.2
       graphql: 16.6.0
       lru-cache: 10.0.0
