@@ -55,7 +55,6 @@ export default class SchemaPublish extends Command {
     }),
     force: Flags.boolean({
       description: 'force publish even on breaking changes',
-      default: false,
       deprecated: {
         message: '--force is enabled by default for newly created projects',
       },
