@@ -1,6 +1,8 @@
 import { Inject, Injectable, InjectionToken, Scope } from 'graphql-modules';
 import { App } from '@octokit/app';
+import { RequestError } from '@octokit/request-error';
 import type { IntegrationsModule } from '../__generated__/types';
+import { HiveError } from '../../../shared/errors';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { Logger } from '../../shared/providers/logger';
@@ -166,7 +168,7 @@ export class GitHubIntegrationManager {
     });
 
     if (!installationId) {
-      throw new Error(
+      throw new HiveError(
         'GitHub Integration not found. Please install our GraphQL Hive GitHub Application.',
       );
     }
@@ -177,18 +179,42 @@ export class GitHubIntegrationManager {
 
     const octokit = await this.app.getInstallationOctokit(parseInt(installationId, 10));
 
-    const result = await octokit.request('POST /repos/{owner}/{repo}/check-runs', {
-      owner: input.repositoryOwner,
-      repo: input.repositoryName,
-      name: input.name,
-      head_sha: input.sha,
-      conclusion: input.conclusion,
-      output: input.output,
-      details_url: input.detailsUrl ?? undefined,
-    });
+    try {
+      const result = await octokit.request('POST /repos/{owner}/{repo}/check-runs', {
+        owner: input.repositoryOwner,
+        repo: input.repositoryName,
+        name: input.name,
+        head_sha: input.sha,
+        conclusion: input.conclusion,
+        output: input.output,
+        details_url: input.detailsUrl ?? undefined,
+      });
 
-    this.logger.debug('Check-run created (link=%s)', result.data.url);
+      this.logger.debug('Check-run created (link=%s)', result.data.url);
 
-    return result.data.url;
+      return result.data.url;
+    } catch (error) {
+      this.logger.error('Failed to create check-run', error);
+
+      if (isOctokitRequestError(error)) {
+        this.logger.debug(
+          'GitHub error details (message=%s, status=%s)',
+          error.message,
+          error.status,
+        );
+
+        if (error.message.includes('No commit found for SHA:')) {
+          throw new HiveError(
+            `Commit ${input.sha} not found in repository ${input.repositoryOwner}/${input.repositoryName}`,
+          );
+        }
+      }
+
+      throw error;
+    }
   }
+}
+
+function isOctokitRequestError(error: unknown): error is RequestError {
+  return error instanceof RequestError;
 }
