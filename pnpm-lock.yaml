@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -536,6 +536,9 @@ importers:
       '@octokit/app':
         specifier: 13.1.8
         version: 13.1.8
+      '@octokit/request-error':
+        specifier: 3.0.2
+        version: 3.0.2
       '@sentry/node':
         specifier: 7.56.0
         version: 7.56.0
