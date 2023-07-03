@@ -131,6 +131,7 @@ export function createCache(options: {
             return cached.result;
           }
 
+          logger.warn('Hey Ghostbusters, we have a ghost (id=%s)', id);
           throw new Error('We have a ghost.');
         }
 
