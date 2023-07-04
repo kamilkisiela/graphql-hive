@@ -41,6 +41,7 @@ module.exports = {
     'public',
     'packages/web/app/src/graphql/index.ts',
     'packages/libraries/cli/src/sdk.ts',
+    'packages/libraries/cli/src/gql/**/*',
     'packages/services/storage/src/db/types.ts',
     'packages/web/app/src/gql/**/*',
     'codegen.cjs',
