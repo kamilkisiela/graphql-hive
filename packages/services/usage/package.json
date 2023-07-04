@@ -26,6 +26,6 @@
     "@hive/service-common": "workspace:*",
     "@hive/tokens": "workspace:*",
     "@hive/usage-common": "workspace:*",
-    "pino-pretty": "10.0.0"
+    "pino-pretty": "10.0.1"
   }
 }
