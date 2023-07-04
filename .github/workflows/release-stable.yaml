@@ -30,7 +30,7 @@ jobs:
 
       - name: publish stable
         id: changesets
-        uses: changesets/action@v1.4.4
+        uses: changesets/action@v1.4.5
         with:
           publish: pnpm release
           commit: 'chore(release): update monorepo packages versions'
