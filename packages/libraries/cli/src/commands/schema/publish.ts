@@ -3,10 +3,61 @@ import { GraphQLError, print } from 'graphql';
 import { transformCommentsToDescriptions } from '@graphql-tools/utils';
 import { Args, Errors, Flags } from '@oclif/core';
 import Command from '../../base-command';
+import { graphql } from '../../gql';
 import { graphqlEndpoint } from '../../helpers/config';
 import { gitInfo } from '../../helpers/git';
 import { loadSchema, minifySchema, renderChanges, renderErrors } from '../../helpers/schema';
 import { invariant } from '../../helpers/validation';
+
+const schemaPublishMutation = graphql(/* GraphQL */ `
+  mutation schemaPublish($input: SchemaPublishInput!, $usesGitHubApp: Boolean!) {
+    schemaPublish(input: $input) {
+      __typename
+      ... on SchemaPublishSuccess @skip(if: $usesGitHubApp) {
+        initial
+        valid
+        successMessage: message
+        linkToWebsite
+        changes {
+          nodes {
+            message
+            criticality
+          }
+          total
+        }
+      }
+      ... on SchemaPublishError @skip(if: $usesGitHubApp) {
+        valid
+        linkToWebsite
+        changes {
+          nodes {
+            message
+            criticality
+          }
+          total
+        }
+        errors {
+          nodes {
+            message
+          }
+          total
+        }
+      }
+      ... on SchemaPublishMissingServiceError @skip(if: $usesGitHubApp) {
+        missingServiceError: message
+      }
+      ... on SchemaPublishMissingUrlError @skip(if: $usesGitHubApp) {
+        missingUrlError: message
+      }
+      ... on GitHubSchemaPublishSuccess @include(if: $usesGitHubApp) {
+        message
+      }
+      ... on GitHubSchemaPublishError @include(if: $usesGitHubApp) {
+        message
+      }
+    }
+  }
+`);
 
 export default class SchemaPublish extends Command {
   static description = 'publishes schema';
@@ -194,7 +245,7 @@ export default class SchemaPublish extends Command {
         throw err;
       }
 
-      const result = await this.registryApi(endpoint, accessToken).schemaPublish({
+      const result = await this.registryApi(endpoint, accessToken).request(schemaPublishMutation, {
         input: {
           service,
           url,

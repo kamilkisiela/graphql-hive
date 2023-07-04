@@ -1,7 +1,41 @@
 import { Args, Errors, Flags, ux } from '@oclif/core';
 import Command from '../../base-command';
+import { graphql } from '../../gql';
 import { graphqlEndpoint } from '../../helpers/config';
 import { renderErrors } from '../../helpers/schema';
+
+const schemaDeleteMutation = graphql(/* GraphQL */ `
+  mutation schemaDelete($input: SchemaDeleteInput!) {
+    schemaDelete(input: $input) {
+      __typename
+      ... on SchemaDeleteSuccess {
+        valid
+        changes {
+          nodes {
+            criticality
+            message
+          }
+          total
+        }
+        errors {
+          nodes {
+            message
+          }
+          total
+        }
+      }
+      ... on SchemaDeleteError {
+        valid
+        errors {
+          nodes {
+            message
+          }
+          total
+        }
+      }
+    }
+  }
+`);
 
 export default class SchemaDelete extends Command {
   static description = 'deletes a schema';
@@ -78,7 +112,7 @@ export default class SchemaDelete extends Command {
         env: 'HIVE_TOKEN',
       });
 
-      const result = await this.registryApi(endpoint, accessToken).schemaDelete({
+      const result = await this.registryApi(endpoint, accessToken).request(schemaDeleteMutation, {
         input: {
           serviceName: service,
           dryRun: flags.dryRun,

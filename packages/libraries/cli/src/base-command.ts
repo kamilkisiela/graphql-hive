@@ -3,7 +3,6 @@ import { ClientError, GraphQLClient } from 'graphql-request';
 import symbols from 'log-symbols';
 import { Command, Errors, Config as OclifConfig } from '@oclif/core';
 import { Config, GetConfigurationValueType, ValidConfigurationKeys } from './helpers/config';
-import { getSdk } from './sdk';
 
 type OmitNever<T> = { [K in keyof T as T[K] extends never ? never : K]: T[K] };
 
@@ -143,17 +142,17 @@ export default abstract class extends Command {
   }
 
   registryApi(registry: string, token: string) {
-    return getSdk(
-      new GraphQLClient(registry, {
-        headers: {
-          Accept: 'application/json',
-          'User-Agent': `hive-cli/${this.config.version}`,
-          Authorization: `Bearer ${token}`,
-          'graphql-client-name': 'Hive CLI',
-          'graphql-client-version': this.config.version,
-        },
-      }),
-    );
+    const client = new GraphQLClient(registry, {
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': `hive-cli/${this.config.version}`,
+        Authorization: `Bearer ${token}`,
+        'graphql-client-name': 'Hive CLI',
+        'graphql-client-version': this.config.version,
+      },
+    });
+
+    return client;
   }
 
   handleFetchError(error: unknown): never {

@@ -2,8 +2,17 @@ import { buildSchema, GraphQLError, Source } from 'graphql';
 import { InvalidDocument, validate } from '@graphql-inspector/core';
 import { Args, Errors, Flags } from '@oclif/core';
 import Command from '../../base-command';
+import { graphql } from '../../gql';
 import { graphqlEndpoint } from '../../helpers/config';
 import { loadOperations } from '../../helpers/operations';
+
+const fetchLatestVersionQuery = graphql(/* GraphQL */ `
+  query fetchLatestVersion {
+    latestValidVersion {
+      sdl
+    }
+  }
+`);
 
 export default class OperationsCheck extends Command {
   static description = 'checks operations against a published schema';
@@ -77,12 +86,12 @@ export default class OperationsCheck extends Command {
         return;
       }
 
-      const result = await this.registryApi(endpoint, accessToken).fetchLatestVersion();
+      const result = await this.registryApi(endpoint, accessToken).request(fetchLatestVersionQuery);
 
-      const sdl = result.latestVersion?.sdl;
+      const sdl = result.latestValidVersion?.sdl;
 
       if (!sdl) {
-        this.error('No schema found');
+        this.error('Could not find a published schema. Please publish a valid schema first.');
       }
 
       const schema = buildSchema(sdl, {

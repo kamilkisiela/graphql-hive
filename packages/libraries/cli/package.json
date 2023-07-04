@@ -52,6 +52,7 @@
     "@graphql-tools/load": "~8.0.0",
     "@graphql-tools/url-loader": "~8.0.0",
     "@graphql-tools/utils": "10.0.1",
+    "@graphql-typed-document-node/core": "3.2.0",
     "@oclif/core": "^2.8.5",
     "@oclif/plugin-help": "5.2.10",
     "@oclif/plugin-update": "3.1.19",
@@ -67,7 +68,6 @@
     "zod": "3.21.4"
   },
   "devDependencies": {
-    "@graphql-codegen/typescript-graphql-request": "4.5.9",
     "@types/env-ci": "3.1.1",
     "@types/mkdirp": "1.0.2",
     "oclif": "3.9.1",

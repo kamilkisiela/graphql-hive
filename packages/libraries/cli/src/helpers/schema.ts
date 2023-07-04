@@ -11,7 +11,7 @@ import {
   SchemaChangeConnection,
   SchemaErrorConnection,
   SchemaWarningConnection,
-} from '../sdk';
+} from '../gql/graphql';
 
 const indent = '  ';
 

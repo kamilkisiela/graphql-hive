@@ -1,3 +1,0 @@
-query comparePersistedOperations($hashes: [String!]!) {
-  comparePersistedOperations(hashes: $hashes)
-}

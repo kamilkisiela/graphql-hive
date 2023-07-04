@@ -160,12 +160,13 @@ const config = {
       plugins: [],
     },
     // CLI
-    'packages/libraries/cli/src/sdk.ts': {
-      documents: './packages/libraries/cli/src/**/*.graphql',
+    './packages/libraries/cli/src/gql/': {
+      documents: ['./packages/libraries/cli/src/commands/**/*.ts'],
+      preset: 'client',
+      plugins: [],
       config: {
-        flattenGeneratedTypes: true,
+        useTypeImports: true,
       },
-      plugins: ['typescript', 'typescript-operations', 'typescript-graphql-request'],
     },
     // Client
     'packages/libraries/client/src/__generated__/types.ts': {
