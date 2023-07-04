@@ -22,6 +22,8 @@ test.concurrent('call an external service to compose and validate services', asy
   const publishUsersResult = await writeToken
     .publishSchema({
       sdl: /* GraphQL */ `
+        extend schema @link(url: "https://specs.apollo.dev/federation/v2.3", import: ["@key"])
+
         type Query {
           me: User
         }
@@ -58,6 +60,8 @@ test.concurrent('call an external service to compose and validate services', asy
   const publishProductsResult = await writeToken
     .publishSchema({
       sdl: /* GraphQL */ `
+        extend schema @link(url: "https://specs.apollo.dev/federation/v2.3", import: ["@key"])
+
         type Query {
           products: [Product]
         }
