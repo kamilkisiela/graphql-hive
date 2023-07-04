@@ -4,7 +4,7 @@ import { enableExternalSchemaComposition } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
 import { generateUnique } from '../../../testkit/utils';
 
-test.concurrent('call an external service to compose and validate services', async () => {
+test.only.concurrent('call an external service to compose and validate services', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject, organization } = await createOrg();
   const { createToken, project } = await createProject(ProjectType.Federation);
@@ -33,6 +33,8 @@ test.concurrent('call an external service to compose and validate services', asy
         }
       `,
       service: usersServiceName,
+      author: generateUnique(),
+      commit: generateUnique(),
     })
     .then(r => r.expectNoGraphQLErrors());
 
@@ -77,14 +79,22 @@ test.concurrent('call an external service to compose and validate services', asy
         }
       `,
       service: productsServiceName,
+      author: generateUnique(),
+      commit: generateUnique(),
     })
-    .then(r => r.expectNoGraphQLErrors());
-
-  // Schema publish should be successful
-  expect(publishProductsResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+    .then(r => {
+      console.log(r.rawBody.extensions);
+      return r.expectNoGraphQLErrors();
+    });
 
   // expect `products` service to be composed externally
   await expect(history()).resolves.toContainEqual(productsServiceName);
+
+  // Schema publish should be successful
+  console.dir(publishProductsResult, {
+    depth: null,
+  });
+  expect(publishProductsResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 });
 
 test.concurrent(

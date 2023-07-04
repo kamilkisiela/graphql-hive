@@ -2,7 +2,7 @@
 /// @ts-check
 import fastify from 'fastify';
 import { parse, printSchema } from 'graphql';
-import { composeAndValidate, compositionHasErrors } from '@apollo/federation';
+import { composeServices } from '@apollo/composition';
 import { compose, signatureHeaderName, verifyRequest } from './src/index';
 
 if (typeof process.env.PORT === 'undefined') {
@@ -22,33 +22,66 @@ const PORT = process.env.PORT;
 const history = [];
 
 const composeFederation = compose(services => {
-  const result = composeAndValidate(
-    services.map(service => {
-      history.push(service.name);
-      return {
-        typeDefs: parse(service.sdl),
-        name: service.name,
-        url: service.url,
-      };
-    }),
-  );
+  try {
+    const result = composeServices(
+      services.map(service => {
+        history.push(service.name);
+        return {
+          typeDefs: parse(service.sdl),
+          name: service.name,
+          url: service.url,
+        };
+      }),
+    );
 
-  if (compositionHasErrors(result)) {
-    return {
-      type: 'failure',
-      result: {
-        errors: result.errors.map(err => ({
-          message: err.message,
-          source: typeof err.extensions?.code === 'string' ? 'composition' : 'graphql',
-        })),
-      },
-    };
-  } else {
+    if (result.errors?.length) {
+      return {
+        type: 'failure',
+        result: {
+          errors: result.errors.map(error => ({
+            message: error.message,
+            source:
+              typeof error.extensions?.code === 'string' &&
+              // `INVALID_GRAPHQL` is a special error code that is used to indicate that the error comes from GraphQL-JS
+              error.extensions.code !== 'INVALID_GRAPHQL'
+                ? 'composition'
+                : 'graphql',
+          })),
+        },
+      };
+    }
+
+    if (!result.supergraphSdl) {
+      return {
+        type: 'failure',
+        result: {
+          errors: [
+            {
+              message: 'supergraphSdl not defined',
+              source: 'graphql',
+            },
+          ],
+        },
+      };
+    }
+
     return {
       type: 'success',
       result: {
         supergraph: result.supergraphSdl,
-        sdl: printSchema(result.schema),
+        sdl: printSchema(result.schema.toGraphQLJSSchema()),
+      },
+    };
+  } catch (e) {
+    return {
+      type: 'failure',
+      result: {
+        errors: [
+          {
+            message: String(e),
+            source: 'graphql',
+          },
+        ],
       },
     };
   }

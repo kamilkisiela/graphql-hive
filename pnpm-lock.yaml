@@ -453,9 +453,9 @@ importers:
 
   packages/libraries/external-composition:
     devDependencies:
-      '@apollo/federation':
-        specifier: 0.38.1
-        version: 0.38.1(patch_hash=rjgakkkphrejw6qrtph4ar24zq)(graphql@16.6.0)
+      '@apollo/composition':
+        specifier: 2.4.8
+        version: 2.4.8(graphql@16.6.0)
       esbuild:
         specifier: 0.17.19
         version: 0.17.19
@@ -2063,7 +2063,6 @@ packages:
       '@apollo/federation-internals': 2.4.8(graphql@16.6.0)
       '@apollo/query-graphs': 2.4.8(graphql@16.6.0)
       graphql: 16.6.0
-    dev: false
 
   /@apollo/federation-internals@2.4.5(graphql@16.6.0):
     resolution: {integrity: sha512-yXZJ5gOArKFQ6Eyon5o8sbxw+sM/Wznl5ECptf/gkCKS51+AhrVjJu41frWhcKdoeufy835v5XVjeXRx9WO6Ug==}
@@ -2197,7 +2196,6 @@ packages:
       graphql: 16.6.0
       ts-graphviz: 1.5.5
       uuid: 9.0.0
-    dev: false
 
   /@apollo/query-planner@2.4.8(graphql@16.6.0):
     resolution: {integrity: sha512-fL869BNhjC4f9oap3JDmlMK4hJ0YCQDmVvheCHScXuJQHQz3rXkzU3DNsojf64p/tNtrVEOlLngXSheSvATqWw==}
@@ -29271,7 +29269,6 @@ packages:
   /ts-graphviz@1.5.5:
     resolution: {integrity: sha512-abon0Tlcgvxcqr8x+p8QH1fTbR2R4cEXKGZfT4OJONZWah2YfqkmERb6hrr82omAc1IHwk5PlF8g4BS/ECYvwQ==}
     engines: {node: '>=14.16'}
-    dev: false
 
   /ts-interface-checker@0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}

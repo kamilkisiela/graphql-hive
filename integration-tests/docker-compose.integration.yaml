@@ -246,6 +246,7 @@ services:
 
   schema:
     environment:
+      LOG_LEVEL: debug
       REQUEST_BROKER: '1'
       REQUEST_BROKER_SIGNATURE: 'secretSignature'
       REQUEST_BROKER_ENDPOINT: 'http://local_broker:3013'
