@@ -1,5 +1,6 @@
 import { Args, Errors, Flags } from '@oclif/core';
 import Command from '../../base-command';
+import { graphql } from '../../gql';
 import { graphqlEndpoint } from '../../helpers/config';
 import { gitInfo } from '../../helpers/git';
 import {
@@ -10,6 +11,71 @@ import {
   renderWarnings,
 } from '../../helpers/schema';
 import { invariant } from '../../helpers/validation';
+
+const schemaCheckMutation = graphql(/* GraphQL */ `
+  mutation schemaCheck($input: SchemaCheckInput!, $usesGitHubApp: Boolean!) {
+    schemaCheck(input: $input) {
+      __typename
+      ... on SchemaCheckSuccess @skip(if: $usesGitHubApp) {
+        valid
+        initial
+        warnings {
+          nodes {
+            message
+            source
+            line
+            column
+          }
+          total
+        }
+        changes {
+          nodes {
+            message
+            criticality
+          }
+          total
+        }
+        schemaCheck {
+          webUrl
+        }
+      }
+      ... on SchemaCheckError @skip(if: $usesGitHubApp) {
+        valid
+        changes {
+          nodes {
+            message
+            criticality
+          }
+          total
+        }
+        warnings {
+          nodes {
+            message
+            source
+            line
+            column
+          }
+          total
+        }
+        errors {
+          nodes {
+            message
+          }
+          total
+        }
+        schemaCheck {
+          webUrl
+        }
+      }
+      ... on GitHubSchemaCheckSuccess @include(if: $usesGitHubApp) {
+        message
+      }
+      ... on GitHubSchemaCheckError @include(if: $usesGitHubApp) {
+        message
+      }
+    }
+  }
+`);
 
 export default class SchemaCheck extends Command {
   static description = 'checks schema';
@@ -109,7 +175,7 @@ export default class SchemaCheck extends Command {
         );
       }
 
-      const result = await this.registryApi(endpoint, accessToken).schemaCheck({
+      const result = await this.registryApi(endpoint, accessToken).request(schemaCheckMutation, {
         input: {
           service,
           sdl: minifySchema(sdl),

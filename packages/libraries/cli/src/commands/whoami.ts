@@ -1,7 +1,40 @@
 import colors from 'colors';
 import { Flags } from '@oclif/core';
 import Command from '../base-command';
+import { graphql } from '../gql';
 import { graphqlEndpoint } from '../helpers/config';
+
+const myTokenInfoQuery = graphql(/* GraphQL */ `
+  query myTokenInfo {
+    tokenInfo {
+      __typename
+      ... on TokenInfo {
+        token {
+          name
+        }
+        organization {
+          name
+          cleanId
+        }
+        project {
+          name
+          type
+          cleanId
+        }
+        target {
+          name
+          cleanId
+        }
+        canPublishSchema: hasTargetScope(scope: REGISTRY_WRITE)
+        canCheckSchema: hasTargetScope(scope: REGISTRY_READ)
+        canPublishOperations: hasProjectScope(scope: OPERATIONS_STORE_WRITE)
+      }
+      ... on TokenNotFoundError {
+        message
+      }
+    }
+  }
+`);
 
 export default class WhoAmI extends Command {
   static description = 'shows information about the current token';
@@ -48,7 +81,7 @@ export default class WhoAmI extends Command {
     });
 
     const result = await this.registryApi(registry, token)
-      .myTokenInfo()
+      .request(myTokenInfoQuery)
       .catch(error => {
         this.handleFetchError(error);
       });

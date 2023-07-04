@@ -1,5 +1,0 @@
-query fetchLatestVersion {
-  latestVersion {
-    sdl
-  }
-}
