@@ -21,6 +21,8 @@ test.concurrent('call an external service to compose and validate services', asy
     .publishSchema({
       url: 'https://api.com/users',
       sdl: /* GraphQL */ `
+        extend schema @link(url: "https://specs.apollo.dev/federation/v2.3", import: ["@key"])
+
         type Query {
           me: User
         }
@@ -34,8 +36,8 @@ test.concurrent('call an external service to compose and validate services', asy
     })
     .then(r => r.expectNoGraphQLErrors());
 
-  // Schema publish should be successful
-  expect(publishUsersResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  // Schema publish should be unsuccessful (Fed v2 features are not enabled yet)
+  expect(publishUsersResult.schemaPublish.__typename).toBe('SchemaPublishError');
 
   // expect `users` service to be composed internally
   await expect(history()).resolves.not.toContainEqual(usersServiceName);
@@ -64,6 +66,8 @@ test.concurrent('call an external service to compose and validate services', asy
     .publishSchema({
       url: 'https://api.com/products',
       sdl: /* GraphQL */ `
+        extend schema @link(url: "https://specs.apollo.dev/federation/v2.3", import: ["@key"])
+
         type Query {
           products: [Product]
         }
@@ -76,11 +80,11 @@ test.concurrent('call an external service to compose and validate services', asy
     })
     .then(r => r.expectNoGraphQLErrors());
 
-  // Schema publish should be successful
-  expect(publishProductsResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
-
   // expect `products` service to be composed externally
   await expect(history()).resolves.toContainEqual(productsServiceName);
+
+  // Schema publish should be successful
+  expect(publishProductsResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 });
 
 test.concurrent(
