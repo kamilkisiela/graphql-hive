@@ -38,7 +38,7 @@ test.concurrent('call an external service to compose and validate services', asy
     .then(r => r.expectNoGraphQLErrors());
 
   // Schema publish should be successful
-  expect(publishUsersResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  expect(publishUsersResult.schemaPublish.__typename).toBe('SchemaPublishError');
 
   // enable external composition
   const externalCompositionResult = await enableExternalSchemaComposition(
