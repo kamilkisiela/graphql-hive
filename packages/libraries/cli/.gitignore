@@ -8,3 +8,4 @@
 node_modules
 src/sdk.ts
 schema.graphql
+src/gql
