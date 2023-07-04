@@ -37,7 +37,7 @@ test.concurrent('call an external service to compose and validate services', asy
     })
     .then(r => r.expectNoGraphQLErrors());
 
-  // Schema publish should be successful
+  // Schema publish should be unsuccessful (Fed v2 features are not enabled yet)
   expect(publishUsersResult.schemaPublish.__typename).toBe('SchemaPublishError');
 
   // enable external composition
