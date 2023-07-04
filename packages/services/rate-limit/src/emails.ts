@@ -76,7 +76,7 @@ export function createEmailScheduler(config?: { endpoint: string }) {
                   </mj-text>
                   <mj-button href="${env.hiveServices.webAppUrl}/${
             input.organization.cleanId
-          }/subscription">
+          }/view/subscription">
                     Manage your subscription
                   </mj-button>
                 </mj-column>
@@ -140,7 +140,7 @@ export function createEmailScheduler(config?: { endpoint: string }) {
                   </mj-text>
                   <mj-button href="${env.hiveServices.webAppUrl}/${
             input.organization.cleanId
-          }/subscription">
+          }/view/subscription">
                     Manage your subscription
                   </mj-button>
                 </mj-column>
