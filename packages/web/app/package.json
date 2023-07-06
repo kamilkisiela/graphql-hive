@@ -83,7 +83,7 @@
     "snarkdown": "2.0.0",
     "supertokens-auth-react": "0.31.5",
     "supertokens-js-override": "0.0.4",
-    "supertokens-node": "13.4.2",
+    "supertokens-node": "14.1.3",
     "supertokens-web-js": "0.5.0",
     "tailwind-merge": "1.13.2",
     "tslib": "2.5.3",
