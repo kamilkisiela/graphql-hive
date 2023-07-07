@@ -26,8 +26,9 @@ const rulesToExtends = Object.fromEntries(
 const HIVE_RESTRICTED_SYNTAX = [
   {
     // ❌ '0.0.0.0' or `0.0.0.0`
-    selector: ':matches(Literal[value="0.0.0.0"], TemplateElement[value.raw="0.0.0.0"])',
-    message: 'Use "::" to make it compatible with both IPv4 and IPv6',
+    selector:
+      ':matches(Literal[value="::"], Literal[value="0.0.0.0"], TemplateElement[value.raw="0.0.0.0"], TemplateElement[value.raw="::"])',
+    message: 'Use empty hostname to make it compatible with both IPv4 and IPv6',
   },
 ];
 
