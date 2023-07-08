@@ -118,6 +118,7 @@ export function SupergraphMetadataList(props: {
                 </div>
               </>
             }
+            contentProps={{ className: 'z-10' }}
           >
             <span className="pl-1 font-bold text-xs flex items-center cursor-pointer text-white ">
               + {allItems.length - previewItems.length} more
