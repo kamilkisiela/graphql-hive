@@ -25,7 +25,7 @@
   "devDependencies": {
     "@hive/service-common": "workspace:*",
     "fastify": "3.29.5",
-    "pino-pretty": "10.0.0"
+    "pino-pretty": "10.0.1"
   },
   "buildOptions": {
     "runify": true,
