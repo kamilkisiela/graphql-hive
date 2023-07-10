@@ -7,7 +7,7 @@ import { createRequestListener } from './server';
 const env = resolveEnv(process.env);
 const server = createServer(createRequestListener(env));
 
-server.listen(env.http.port, '::', () => {
+server.listen(env.http.port, () => {
   console.log(`Listening on http://localhost:${env.http.port}`);
 });
 
