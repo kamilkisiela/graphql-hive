@@ -1,3 +1,7 @@
+# 11.07.2023
+
+- Use debug level when logging dropped operations
+
 # 07.06.2023
 
 - Introduce `enabled` flag (Usage Plugin)
