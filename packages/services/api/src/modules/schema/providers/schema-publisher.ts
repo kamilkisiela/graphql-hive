@@ -387,8 +387,10 @@ export class SchemaPublisher {
     }
 
     if (input.github) {
+      let result: Awaited<ReturnType<SchemaPublisher['githubCheck']>>;
+
       if (checkResult.conclusion === SchemaCheckConclusion.Success) {
-        const result = await this.githubCheck({
+        result = await this.githubCheck({
           project,
           target,
           organization,
@@ -402,34 +404,25 @@ export class SchemaPublisher {
           errors: null,
           schemaCheckId: schemaCheck?.id ?? null,
         });
-
-        if (result?.checkRun && schemaCheck?.id) {
-          await this.storage.setSchemaCheckGithubCheckRunId({
-            schemaCheckId: schemaCheck.id,
-            githubCheckRunId: result.checkRun.id,
-          });
-        }
-
-        return result;
+      } else {
+        result = await this.githubCheck({
+          project,
+          target,
+          organization,
+          serviceName: input.service ?? null,
+          sha: input.github.commit,
+          conclusion: checkResult.conclusion,
+          changes: [
+            ...(checkResult.state.schemaChanges?.breaking ?? []),
+            ...(checkResult.state.schemaChanges?.safe ?? []),
+          ],
+          breakingChanges: checkResult.state.schemaChanges?.breaking ?? [],
+          compositionErrors: checkResult.state.composition.errors ?? [],
+          warnings: checkResult.state.schemaPolicy?.warnings ?? [],
+          errors: checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? [],
+          schemaCheckId: schemaCheck?.id ?? null,
+        });
       }
-
-      const result = await this.githubCheck({
-        project,
-        target,
-        organization,
-        serviceName: input.service ?? null,
-        sha: input.github.commit,
-        conclusion: checkResult.conclusion,
-        changes: [
-          ...(checkResult.state.schemaChanges?.breaking ?? []),
-          ...(checkResult.state.schemaChanges?.safe ?? []),
-        ],
-        breakingChanges: checkResult.state.schemaChanges?.breaking ?? [],
-        compositionErrors: checkResult.state.composition.errors ?? [],
-        warnings: checkResult.state.schemaPolicy?.warnings ?? [],
-        errors: checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? [],
-        schemaCheckId: schemaCheck?.id ?? null,
-      });
 
       if (result?.checkRun && schemaCheck?.id) {
         await this.storage.setSchemaCheckGithubCheckRunId({
