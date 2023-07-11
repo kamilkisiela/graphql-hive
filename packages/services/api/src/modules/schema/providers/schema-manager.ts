@@ -627,6 +627,82 @@ export class SchemaManager {
       schemaCheckId: args.schemaCheckId,
     });
   }
+
+  /**
+   * Approve a schema check that failed due to breaking changes.
+   * You cannot approve a schema check that failed because composition failed.
+   */
+  async approveFailedSchemaCheck(args: {
+    targetId: string;
+    projectId: string;
+    organizationId: string;
+    schemaCheckId: string;
+  }) {
+    this.logger.debug('Manually approve failed schema check (args=%o)', args);
+
+    await this.authManager.ensureTargetAccess({
+      target: args.targetId,
+      project: args.projectId,
+      organization: args.organizationId,
+      scope: TargetAccessScope.REGISTRY_WRITE,
+    });
+
+    let [schemaCheck, viewer] = await Promise.all([
+      this.storage.findSchemaCheck({
+        targetId: args.targetId,
+        schemaCheckId: args.schemaCheckId,
+      }),
+      this.authManager.getCurrentUser(),
+    ]);
+
+    if (schemaCheck == null) {
+      this.logger.debug('Schema check not found (args=%o)', args);
+      return {
+        type: 'error',
+        reason: "Schema check doesn't exist.",
+      } as const;
+    }
+
+    if (schemaCheck.isSuccess) {
+      this.logger.debug('Schema check is not failed (args=%o)', args);
+      return {
+        type: 'error',
+        reason: 'Schema check is not failed.',
+      } as const;
+    }
+
+    if (schemaCheck.schemaCompositionErrors != null) {
+      this.logger.debug(
+        'Schema check has composition errors or schema policy errors (args=%o).',
+        args,
+      );
+      return {
+        type: 'error',
+        reason: 'Schema check has composition errors.',
+      } as const;
+    }
+
+    schemaCheck = await this.storage.approveFailedSchemaCheck({
+      schemaCheckId: args.schemaCheckId,
+      userId: viewer.id,
+    });
+
+    if (!schemaCheck) {
+      return {
+        type: 'error',
+        reason: "Schema check doesn't exist.",
+      } as const;
+    }
+
+    if (schemaCheck.githubCheckRunId) {
+      // TODO: update github check run.
+    }
+
+    return {
+      type: 'ok',
+      schemaCheck: inflateSchemaCheck(schemaCheck),
+    } as const;
+  }
 }
 
 /**

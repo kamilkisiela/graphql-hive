@@ -49,7 +49,7 @@ import { ensureSDL, SchemaHelper } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
 import { schemaChangeFromMeta, SerializableChange } from './schema-change-from-meta';
-import { toGraphQLSchemaCheck } from './to-graphql-schema-check';
+import { toGraphQLSchemaCheck, toGraphQLSchemaCheckCurry } from './to-graphql-schema-check';
 
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 const GraphQLSchemaStringModel = z.string().max(5_000_000).min(0);
@@ -123,6 +123,40 @@ export const resolvers: SchemaModule.Resolvers = {
       }
 
       return result;
+    },
+    async approveFailedSchemaCheck(_, { input }, { injector }) {
+      const [organizationId, projectId, targetId] = await Promise.all([
+        injector.get(IdTranslator).translateOrganizationId(input),
+        injector.get(IdTranslator).translateProjectId(input),
+        injector.get(IdTranslator).translateTargetId(input),
+      ]);
+
+      const result = await injector.get(SchemaManager).approveFailedSchemaCheck({
+        organizationId,
+        projectId,
+        targetId,
+        schemaCheckId: input.schemaCheckId,
+      });
+
+      if (result.type === 'error') {
+        return {
+          error: {
+            message: result.reason,
+          },
+        };
+      }
+
+      return {
+        ok: {
+          schemaCheck: toGraphQLSchemaCheck(
+            {
+              organizationId,
+              projectId,
+            },
+            result.schemaCheck,
+          ),
+        },
+      };
     },
     async schemaPublish(_, { input }, { injector, abortSignal }, info) {
       const [organization, project, target] = await Promise.all([
@@ -654,7 +688,13 @@ export const resolvers: SchemaModule.Resolvers = {
         return null;
       }
 
-      return toGraphQLSchemaCheck(target)(schemaCheck);
+      return toGraphQLSchemaCheck(
+        {
+          organizationId: target.orgId,
+          projectId: target.projectId,
+        },
+        schemaCheck,
+      );
     },
     async schemaChecks(target, args, { injector }) {
       const result = await injector.get(SchemaManager).getPaginatedSchemaChecksForTarget({
@@ -663,7 +703,10 @@ export const resolvers: SchemaModule.Resolvers = {
         organizationId: target.orgId,
         first: args.first ?? null,
         cursor: args.after ?? null,
-        transformNode: toGraphQLSchemaCheck(target),
+        transformNode: toGraphQLSchemaCheckCurry({
+          organizationId: target.orgId,
+          projectId: target.projectId,
+        }),
       });
 
       return {

@@ -720,6 +720,13 @@ export interface Storage {
     schemaCheckId: string;
     githubCheckRunId: number;
   }): Promise<SchemaCheck | null>;
+  /**
+   * Overwrite and approve a schema check.
+   */
+  approveFailedSchemaCheck(input: {
+    schemaCheckId: string;
+    userId: string;
+  }): Promise<SchemaCheck | null>;
 
   getTargetBreadcrumbForTargetId(_: { targetId: string }): Promise<TargetBreadcrumb | null>;
 }

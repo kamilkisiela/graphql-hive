@@ -438,6 +438,11 @@ export class SchemaPublisher {
       throw new Error('Invalid state. Schema check can not be null at this point.');
     }
 
+    const schemaCheckSelector = {
+      organizationId: target.orgId,
+      projectId: target.projectId,
+    };
+
     if (checkResult.conclusion === SchemaCheckConclusion.Success) {
       return {
         __typename: 'SchemaCheckSuccess',
@@ -445,7 +450,7 @@ export class SchemaPublisher {
         changes: checkResult.state?.schemaChanges ?? [],
         warnings: checkResult.state?.schemaPolicyWarnings ?? [],
         initial: latestVersion == null,
-        schemaCheck: toGraphQLSchemaCheck(target)(inflateSchemaCheck(schemaCheck)),
+        schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, inflateSchemaCheck(schemaCheck)),
       } as const;
     }
 
@@ -462,7 +467,7 @@ export class SchemaPublisher {
         ...(checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? []),
         ...(checkResult.state.composition.errors ?? []),
       ],
-      schemaCheck: toGraphQLSchemaCheck(target)(inflateSchemaCheck(schemaCheck)),
+      schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, inflateSchemaCheck(schemaCheck)),
     } as const;
   }
 

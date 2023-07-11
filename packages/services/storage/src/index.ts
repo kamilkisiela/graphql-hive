@@ -3494,6 +3494,28 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return SchemaCheckModel.parse(result);
     },
+    async approveFailedSchemaCheck(args) {
+      const result = await pool.maybeOne<unknown>(sql`
+        UPDATE
+          "public"."schema_checks"
+        SET
+          "is_success" = true
+          , "is_manually_approved" = true
+          , "manual_approval_user_id" = ${args.userId}
+        WHERE
+          "id" = ${args.schemaCheckId}
+          AND "is_success" = false
+          AND "schema_composition_errors" IS NULL
+        RETURNING
+          ${schemaCheckSQLFields}
+      `);
+
+      if (result == null) {
+        return null;
+      }
+
+      return SchemaCheckModel.parse(result);
+    },
     async getPaginatedSchemaChecksForTarget(args) {
       let cursor: null | {
         createdAt: string;
@@ -3905,7 +3927,7 @@ const schemaCheckSQLFields = sql`
   , "composite_schema_sdl" as "compositeSchemaSDL"
   , "supergraph_sdl" as "supergraphSDL"
   , "github_check_run_id" as "githubCheckRunId"
-  , coalesce("is_manually_approved", FALSE) as "isManuallyApproved"
+  , coalesce("is_manually_approved", false) as "isManuallyApproved"
   , "manual_approval_user_id" as "manualApprovalUserId"
 `;
 

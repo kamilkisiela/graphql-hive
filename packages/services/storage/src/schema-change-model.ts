@@ -846,7 +846,7 @@ const SuccessfulSchemaCheckPartialModel = z.intersection(
   z.union([
     z.object({
       isManuallyApproved: z.literal(true),
-      manualApprovalUserId: z.number().nullable(),
+      manualApprovalUserId: z.string().nullable(),
     }),
     z.object({
       isManuallyApproved: z.literal(false),

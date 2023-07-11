@@ -237,6 +237,21 @@ const SchemaCheckQuery = graphql(/* GraphQL */ `
   }
 `);
 
+const ApproveFailedSchemaCheckMutation = graphql(/* GraphQL */ `
+  mutation ApproveFailedSchemaCheck($input: ApproveFailedSchemaCheckInput!) {
+    approveFailedSchemaCheck(input: $input) {
+      ok {
+        schemaCheck {
+          __typename
+        }
+      }
+      error {
+        message
+      }
+    }
+  }
+`);
+
 test.concurrent('successful check without previously published schema is persisted', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject, organization } = await createOrg();
@@ -873,6 +888,110 @@ test('metadata is persisted', async () => {
           author: 'Freddy Gibbs',
           commit: '$oul $old $eparately',
         },
+      },
+    },
+  });
+});
+
+test('approve failed schema check that has breaking changes succeeds', async () => {
+  const { createOrg, ownerToken } = await initSeed().createOwner();
+  const { createProject, organization } = await createOrg();
+  const { createToken, project, target } = await createProject(ProjectType.Single);
+
+  // Create a token with write rights
+  const writeToken = await createToken({
+    targetScopes: [
+      TargetAccessScope.Read,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+    ],
+  });
+
+  // Publish schema with write rights
+  const publishResult = await writeToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        type Query {
+          ping: String
+        }
+      `,
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  // Schema publish should be successful
+  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  // Create a token with read rights
+  const readToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead],
+    projectScopes: [],
+    organizationScopes: [],
+  });
+
+  // Check schema with read rights
+  const checkResult = await readToken
+    .checkSchema(
+      /* GraphQL */ `
+        type Query {
+          ping: Float
+        }
+      `,
+    )
+    .then(r => r.expectNoGraphQLErrors());
+  const check = checkResult.schemaCheck;
+
+  if (check.__typename !== 'SchemaCheckError') {
+    throw new Error(`Expected SchemaCheckError, got ${check.__typename}`);
+  }
+
+  const schemaCheckId = check.schemaCheck?.id;
+
+  if (schemaCheckId == null) {
+    throw new Error('Missing schema check id.');
+  }
+
+  const mutationResult = await execute({
+    document: ApproveFailedSchemaCheckMutation,
+    variables: {
+      input: {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        target: target.cleanId,
+        schemaCheckId,
+      },
+    },
+    authToken: ownerToken,
+  }).then(r => r.expectNoGraphQLErrors());
+
+  expect(mutationResult).toEqual({
+    approveFailedSchemaCheck: {
+      ok: {
+        schemaCheck: {
+          __typename: 'SuccessfulSchemaCheck',
+        },
+      },
+      error: null,
+    },
+  });
+
+  const schemaCheck = await execute({
+    document: SchemaCheckQuery,
+    variables: {
+      selector: {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        target: target.cleanId,
+      },
+      id: schemaCheckId,
+    },
+    authToken: readToken.secret,
+  }).then(r => r.expectNoGraphQLErrors());
+
+  expect(schemaCheck).toMatchObject({
+    target: {
+      schemaCheck: {
+        __typename: 'SuccessfulSchemaCheck',
       },
     },
   });

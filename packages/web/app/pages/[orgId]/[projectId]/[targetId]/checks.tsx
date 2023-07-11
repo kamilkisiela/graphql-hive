@@ -157,6 +157,38 @@ const ActiveSchemaCheckQuery = graphql(`
           commit
           author
         }
+        breakingSchemaChanges {
+          nodes {
+            message
+            criticality
+            criticalityReason
+            path
+          }
+        }
+        safeSchemaChanges {
+          nodes {
+            message
+            criticality
+            criticalityReason
+            path
+          }
+        }
+        schemaPolicyWarnings {
+          ...SchemaPolicyEditor_PolicyWarningsFragment
+          edges {
+            node {
+              message
+            }
+          }
+        }
+        schemaPolicyErrors {
+          ...SchemaPolicyEditor_PolicyWarningsFragment
+          edges {
+            node {
+              message
+            }
+          }
+        }
         ... on FailedSchemaCheck {
           compositeSchemaSDL
           supergraphSDL
@@ -165,58 +197,10 @@ const ActiveSchemaCheckQuery = graphql(`
               message
             }
           }
-          breakingSchemaChanges {
-            nodes {
-              message
-              criticality
-              criticalityReason
-              path
-            }
-          }
-          safeSchemaChanges {
-            nodes {
-              message
-              criticality
-              criticalityReason
-              path
-            }
-          }
-          schemaPolicyWarnings {
-            ...SchemaPolicyEditor_PolicyWarningsFragment
-            edges {
-              node {
-                message
-              }
-            }
-          }
-          schemaPolicyErrors {
-            ...SchemaPolicyEditor_PolicyWarningsFragment
-            edges {
-              node {
-                message
-              }
-            }
-          }
         }
         ... on SuccessfulSchemaCheck {
           compositeSchemaSDL
           supergraphSDL
-          safeSchemaChanges {
-            nodes {
-              message
-              criticality
-              criticalityReason
-              path
-            }
-          }
-          schemaPolicyWarnings {
-            ...SchemaPolicyEditor_PolicyWarningsFragment
-            edges {
-              node {
-                message
-              }
-            }
-          }
         }
       }
     }
@@ -412,8 +396,10 @@ const ActiveSchemaCheck = ({
           <div className="my-2">
             {schemaCheck.__typename === 'SuccessfulSchemaCheck' &&
             !schemaCheck.schemaPolicyWarnings?.edges?.length &&
-            !schemaCheck.safeSchemaChanges?.nodes?.length ? (
-              <div>
+            !schemaCheck.safeSchemaChanges?.nodes?.length &&
+            !schemaCheck.breakingSchemaChanges?.nodes?.length &&
+            !schemaCheck.schemaPolicyErrors?.edges?.length ? (
+              <div className="my-2">
                 <Heading>Details</Heading>
                 <div className="mt-1">No changes or policy warnings detected.</div>
               </div>
@@ -431,8 +417,7 @@ const ActiveSchemaCheck = ({
                 </ul>
               </div>
             ) : null}
-            {schemaCheck.__typename === 'FailedSchemaCheck' &&
-            schemaCheck.breakingSchemaChanges?.nodes.length ? (
+            {schemaCheck.breakingSchemaChanges?.nodes.length ? (
               <div className="mb-2">
                 <ChangesBlock
                   criticality={CriticalityLevel.Breaking}
@@ -448,8 +433,7 @@ const ActiveSchemaCheck = ({
                 />
               </div>
             ) : null}
-            {schemaCheck.__typename === 'FailedSchemaCheck' &&
-            schemaCheck.schemaPolicyErrors?.edges.length ? (
+            {schemaCheck.schemaPolicyErrors?.edges.length ? (
               <div className="mb-2">
                 <PolicyBlock
                   title="Schema Policy Errors"
