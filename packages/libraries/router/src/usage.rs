@@ -211,7 +211,7 @@ impl Plugin for UsagePlugin {
                             let result: supergraph::ServiceResult = fut.await;
     
                             if operation_context.dropped {
-                                tracing::info!("Dropping operation (phase: SAMPLING): {}", operation_context.operation_name.clone().or_else(|| Some("anonymous".to_string())).unwrap());
+                                tracing::debug!("Dropping operation (phase: SAMPLING): {}", operation_context.operation_name.clone().or_else(|| Some("anonymous".to_string())).unwrap());
                                 return result;
                             }
     
@@ -288,7 +288,7 @@ impl Plugin for UsagePlugin {
 
 impl Drop for UsagePlugin {
     fn drop(&mut self) {
-        tracing::info!("`UsagePlugin` has been dropped!");
+        tracing::debug!("`UsagePlugin` has been dropped!");
         // Shut down the stuff.
         // if let Some(sender) = self.shutdown_signal.take() {
         //     // Currently, this does nothing, as it sends a graceful process termination, but no receiver is setup to handle it

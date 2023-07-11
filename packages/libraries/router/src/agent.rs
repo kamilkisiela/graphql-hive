@@ -218,7 +218,7 @@ impl UsageAgent {
                             report.size += 1;
                         }
                         None => {
-                            tracing::info!("Dropping operation (phase: PROCESSING): probably introspection query");
+                            tracing::debug!("Dropping operation (phase: PROCESSING): probably introspection query");
                         }
                     }
                 }
