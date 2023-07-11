@@ -426,7 +426,7 @@ function HistoryPageContent() {
             <Title>Versions</Title>
             <Subtitle>Recently published schemas.</Subtitle>
           </div>
-          {noSchemaVersion}
+          {query.fetching ? null : noSchemaVersion}
         </>
       )}
     </TargetLayout>

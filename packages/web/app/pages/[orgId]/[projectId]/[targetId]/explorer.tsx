@@ -160,7 +160,7 @@ function ExplorerPageContent() {
           />
         ) : null}
       </div>
-      {latestSchemaVersion && explorer ? (
+      {query.fetching ? null : latestSchemaVersion && explorer ? (
         <SchemaView
           totalRequests={query.data?.operationsStats.totalRequests ?? 0}
           explorer={explorer}

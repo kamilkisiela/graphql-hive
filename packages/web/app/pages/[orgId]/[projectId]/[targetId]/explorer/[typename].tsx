@@ -164,7 +164,7 @@ function TypeExplorerPageContent({ typename }: { typename: string }) {
           />
         ) : null}
       </div>
-      {latestSchemaVersion && type ? (
+      {query.fetching ? null : latestSchemaVersion && type ? (
         <TypeRenderer totalRequests={query.data?.operationsStats.totalRequests ?? 0} type={type} />
       ) : type ? (
         noSchemaVersion

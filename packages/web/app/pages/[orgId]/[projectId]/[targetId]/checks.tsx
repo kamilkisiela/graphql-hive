@@ -650,7 +650,7 @@ function ChecksPageContent() {
               <Title>Schema Checks</Title>
               <Subtitle>Recently checked schemas.</Subtitle>
             </div>
-            {hasSchemaChecks ? (
+            {query.fetching ? null : hasSchemaChecks ? (
               <div className="flex flex-col gap-5">
                 <div className="flex w-[300px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
                   {paginationVariables.map((cursor, index) => (

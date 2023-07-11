@@ -86,7 +86,7 @@
       download
 
 SCRIPT
-LOCATION=$(command -v hive)
-echo "GraphQL Hive CLI installed to $LOCATION"
-hive --version
+  LOCATION=$(command -v hive)
+  echo "GraphQL Hive CLI installed to $LOCATION"
+  hive --version
 }
