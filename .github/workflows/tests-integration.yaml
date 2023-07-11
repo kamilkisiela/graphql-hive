@@ -20,7 +20,7 @@ on:
         type: string
 
 jobs:
-  test:
+  integration:
     runs-on: ubuntu-22.04
 
     env:

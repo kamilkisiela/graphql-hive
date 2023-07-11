@@ -47,7 +47,7 @@ jobs:
 
   # Integration tests that are based on Docker images created during build step.
   integration-tests:
-    name: integration
+    name: test
     needs: build
     uses: ./.github/workflows/tests-integration.yaml
     secrets:
