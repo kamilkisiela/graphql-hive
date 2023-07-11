@@ -3468,8 +3468,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         WHERE
           "id" = ${args.schemaCheckId}
           AND "target_id" = ${args.targetId}
-        RETURN
-          ${schemaCheckSQLFields}
       `);
 
       if (result == null) {
@@ -3486,7 +3484,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           "github_check_run_id" = ${args.githubCheckRunId}
         WHERE
           "id" = ${args.schemaCheckId}
-        RETURN
+        RETURNING
           ${schemaCheckSQLFields}
       `);
 
