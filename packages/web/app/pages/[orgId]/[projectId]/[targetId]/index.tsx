@@ -298,7 +298,7 @@ function Page() {
         <Subtitle>The latest published schema.</Subtitle>
       </div>
       <div>
-        {currentOrganization && currentProject && target ? (
+        {query.fetching ? null : currentOrganization && currentProject && target ? (
           <SchemaView organization={currentOrganization} project={currentProject} target={target} />
         ) : null}
       </div>
