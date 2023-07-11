@@ -192,7 +192,10 @@ export class GitHubIntegrationManager {
 
       this.logger.debug('Check-run created (link=%s)', result.data.url);
 
-      return result.data.url;
+      return {
+        id: result.data.id,
+        url: result.data.url,
+      };
     } catch (error) {
       this.logger.error('Failed to create check-run', error);
 

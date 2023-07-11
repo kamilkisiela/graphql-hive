@@ -810,6 +810,9 @@ const FailedSchemaCheckPartialModel = z.intersection(
 
     schemaPolicyWarnings: z.array(SchemaPolicyWarningModel).nullable(),
     schemaPolicyErrors: z.array(SchemaPolicyWarningModel).nullable(),
+
+    isManuallyApproved: z.literal(false),
+    manualApprovalUserId: z.null(),
   }),
   z.union([
     z.object({
@@ -827,18 +830,30 @@ const FailedSchemaCheckPartialModel = z.intersection(
   ]),
 );
 
-const SuccessfulSchemaCheckPartialModel = z.object({
-  isSuccess: z.literal(true),
-  schemaCompositionErrors: z.null(),
+const SuccessfulSchemaCheckPartialModel = z.intersection(
+  z.object({
+    isSuccess: z.literal(true),
+    schemaCompositionErrors: z.null(),
 
-  breakingSchemaChanges: z.null(),
-  safeSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
-  schemaPolicyWarnings: z.array(SchemaPolicyWarningModel).nullable(),
-  schemaPolicyErrors: z.null(),
+    safeSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
+    breakingSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
+    schemaPolicyWarnings: z.array(SchemaPolicyWarningModel).nullable(),
+    schemaPolicyErrors: z.array(SchemaPolicyWarningModel).nullable(),
 
-  compositeSchemaSDL: z.string(),
-  supergraphSDL: z.string().nullable(),
-});
+    compositeSchemaSDL: z.string(),
+    supergraphSDL: z.string().nullable(),
+  }),
+  z.union([
+    z.object({
+      isManuallyApproved: z.literal(true),
+      manualApprovalUserId: z.number().nullable(),
+    }),
+    z.object({
+      isManuallyApproved: z.literal(false),
+      manualApprovalUserId: z.null(),
+    }),
+  ]),
+);
 
 const SchemaCheckSharedFieldsModel = z.object({
   schemaSDL: z.string(),
@@ -851,6 +866,7 @@ const SchemaCheckSharedFieldsModel = z.object({
       commit: z.string(),
     })
     .nullable(),
+  githubCheckRunId: z.number().nullable(),
 });
 
 const SchemaCheckInputModel = z.intersection(

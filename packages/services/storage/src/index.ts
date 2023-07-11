@@ -3431,6 +3431,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "schema_policy_errors"
           , "composite_schema_sdl"
           , "supergraph_sdl"
+          , "is_manually_approved"
+          , "manual_approval_user_id"
+          , "github_check_run_id"
         )
         VALUES (
           ${args.schemaSDL}
@@ -3446,6 +3449,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , ${jsonify(args.schemaPolicyErrors?.map(w => SchemaPolicyWarningModel.parse(w)))}
           , ${args.compositeSchemaSDL}
           , ${args.supergraphSDL}
+          , ${args.isManuallyApproved}
+          , ${args.manualApprovalUserId}
+          , ${args.githubCheckRunId}
         )
         RETURNING
           ${schemaCheckSQLFields}
@@ -3454,7 +3460,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return SchemaCheckModel.parse(result);
     },
     async findSchemaCheck(args) {
-      console.log(args.targetId);
       const result = await pool.maybeOne<unknown>(sql`
         SELECT
           ${schemaCheckSQLFields}
@@ -3463,6 +3468,26 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         WHERE
           "id" = ${args.schemaCheckId}
           AND "target_id" = ${args.targetId}
+        RETURN
+          ${schemaCheckSQLFields}
+      `);
+
+      if (result == null) {
+        return null;
+      }
+
+      return SchemaCheckModel.parse(result);
+    },
+    async setSchemaCheckGithubCheckRunId(args) {
+      const result = await pool.maybeOne<unknown>(sql`
+        UPDATE
+          "public"."schema_checks"
+        SET
+          "github_check_run_id" = ${args.githubCheckRunId}
+        WHERE
+          "id" = ${args.schemaCheckId}
+        RETURN
+          ${schemaCheckSQLFields}
       `);
 
       if (result == null) {
@@ -3881,6 +3906,9 @@ const schemaCheckSQLFields = sql`
   , "schema_policy_errors" as "schemaPolicyErrors"
   , "composite_schema_sdl" as "compositeSchemaSDL"
   , "supergraph_sdl" as "supergraphSDL"
+  , "github_check_run_id" as "githubCheckRunId"
+  , coalesce("is_manually_approved", FALSE) as "isManuallyApproved"
+  , "manual_approval_user_id" as "manualApprovalUserId"
 `;
 
 export * from './schema-change-model';

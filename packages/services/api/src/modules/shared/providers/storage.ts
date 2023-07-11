@@ -713,6 +713,13 @@ export interface Storage {
       }>;
     }>
   >;
+  /**
+   * Set the github check run id for a schema check.
+   */
+  setSchemaCheckGithubCheckRunId(input: {
+    schemaCheckId: string;
+    githubCheckRunId: number;
+  }): Promise<SchemaCheck | null>;
 
   getTargetBreadcrumbForTargetId(_: { targetId: string }): Promise<TargetBreadcrumb | null>;
 }
