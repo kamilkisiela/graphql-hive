@@ -1,0 +1,26 @@
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index 22f61f3e6504abd380899db7184fade2d6c03d95..ad67e788217f46869256490cd2b52161844dc880 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -1291,4 +1291,7 @@ declare function ThemeSwitch({ lite, className }: ThemeSwitchProps): ReactElemen
+ 
+ declare function Layout({ children, ...context }: NextraThemeLayoutProps): ReactElement;
+ 
+-export { Bleed, Card, Cards, Collapse, PartialDocsThemeConfig as DocsThemeConfig, FileTree, Link, Navbar, NotFoundPage, ServerSideErrorPage, SkipNavContent, SkipNavLink, Steps, Tab, Tabs, ThemeSwitch, Layout as default, useConfig };
++// KAMIL: needed to enable search in Hive
++declare function Flexsearch({className}: { className?: string }): ReactElement;
++
++export { Bleed, Card, Cards, Flexsearch, Collapse, PartialDocsThemeConfig as DocsThemeConfig, FileTree, Link, Navbar, NotFoundPage, ServerSideErrorPage, SkipNavContent, SkipNavLink, Steps, Tab, Tabs, ThemeSwitch, Layout as default, useConfig };
+diff --git a/dist/index.js b/dist/index.js
+index 72788625f8c8e1140a30ba703413b18d0e861802..29a86022b948fe7255b9075181094fb1198331cf 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -3239,5 +3239,7 @@ export {
+   Layout as default,
+   useConfig,
+   useMDXComponents,
+-  useTheme3 as useTheme
++  useTheme3 as useTheme,
++  // KAMIL: needed to enable search in Hive
++  Flexsearch
+ };

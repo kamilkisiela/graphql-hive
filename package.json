@@ -120,7 +120,9 @@
       "@theguild/editor@1.2.5": "patches/@theguild__editor@1.2.5.patch",
       "eslint@8.43.0": "patches/eslint@8.43.0.patch",
       "@graphql-eslint/eslint-plugin@3.19.1": "patches/@graphql-eslint__eslint-plugin@3.19.1.patch",
-      "@oclif/core@2.8.5": "patches/@oclif__core@2.8.5.patch"
+      "@oclif/core@2.8.5": "patches/@oclif__core@2.8.5.patch",
+      "@theguild/components@4.6.5": "patches/@theguild__components@4.6.5.patch",
+      "nextra-theme-docs@2.7.0": "patches/nextra-theme-docs@2.7.0.patch"
     }
   }
 }
