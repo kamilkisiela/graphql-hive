@@ -84,7 +84,7 @@ We recommend the following flow if you are having issues with running Hive local
    use `hive-kamil`). It creates `https://hive-<your-name>.loophole.site` endpoint.
 4. Message @kamilkisiela and send him the url (He will update the list of accepted redirect urls in
    both Auth0 and Slack App).
-5. Update `APP_BASE_URL` and `AUTH0_BASE_URL` in [`packages/web/app/.env`](./packages/web/app/.env)
+5. Update `APP_BASE_URL` and `AUTH0_BASE_URL` in [`packages/web/app/.env`](./packages/web/app/.env) to the proxy URL (e.g. `https://hive-<your-name>.loophole.site`)
 6. Run `packages/web/app` and open `https://hive-<your-name>.loophole.site`.
 
 > We have a special Slack channel called `#hive-tests` to not spam people :)
