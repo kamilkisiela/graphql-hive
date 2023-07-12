@@ -631,6 +631,35 @@ export class SchemaManager {
   }
 
   /**
+   * Whether a failed schema check can be approved manually.
+   */
+  getFailedSchemaCheckCanBeApproved(args: { schemaCompositionErrors: Array<unknown> | null }) {
+    return !args.schemaCompositionErrors;
+  }
+
+  async getFailedSchemaCheckCanBeApprovedByViewer(args: {
+    organizationId: string;
+    schemaCompositionErrors: Array<unknown> | null;
+  }) {
+    if (!this.getFailedSchemaCheckCanBeApproved(args)) {
+      return false;
+    }
+
+    if (!this.authManager.isUser()) {
+      // TODO: support approving a schema check via non web app user?
+      return false;
+    }
+
+    const user = await this.authManager.getCurrentUser();
+    const scopes = await this.authManager.getMemberTargetScopes({
+      user: user.id,
+      organization: args.organizationId,
+    });
+
+    return scopes.includes(TargetAccessScope.REGISTRY_WRITE);
+  }
+
+  /**
    * Approve a schema check that failed due to breaking changes.
    * You cannot approve a schema check that failed because composition failed.
    */
@@ -673,7 +702,7 @@ export class SchemaManager {
       } as const;
     }
 
-    if (schemaCheck.schemaCompositionErrors != null) {
+    if (!this.getFailedSchemaCheckCanBeApproved(schemaCheck)) {
       this.logger.debug(
         'Schema check has composition errors or schema policy errors (args=%o).',
         args,
@@ -735,6 +764,17 @@ export class SchemaManager {
       schemaCheck: inflateSchemaCheck(schemaCheck),
     } as const;
   }
+
+  async getApprovedByUser(args: { organizationId: string; userId: string | null }) {
+    if (args.userId == null) {
+      return null;
+    }
+
+    return this.storage.getOrganizationUser({
+      organizationId: args.organizationId,
+      userId: args.userId,
+    });
+  }
 }
 
 /**
@@ -747,6 +787,9 @@ export function inflateSchemaCheck(schemaCheck: SchemaCheck) {
       safeSchemaChanges:
         // TODO: fix any type
         schemaCheck.safeSchemaChanges?.map((check: any) => schemaChangeFromMeta(check)) ?? null,
+      // TODO: fix any type
+      breakingSchemaChanges:
+        schemaCheck.breakingSchemaChanges?.map((check: any) => schemaChangeFromMeta(check)) ?? null,
     };
   }
 

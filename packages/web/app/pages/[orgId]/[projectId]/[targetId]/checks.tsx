@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import NextLink from 'next/link';
-import { useQuery } from 'urql';
+import clsx from 'clsx';
+import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts/target';
 import { SchemaEditor } from '@/components/schema-editor';
@@ -15,7 +16,9 @@ import {
   EmptyList,
   Heading,
   MetaTitle,
+  Modal,
   TimeAgo,
+  Tooltip,
 } from '@/components/v2';
 import { AlertTriangleIcon, DiffIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
@@ -133,8 +136,79 @@ const Navigation = (props: {
   );
 };
 
+const ActiveSchemaCheck_SchemaCheckFragment = graphql(`
+  fragment ActiveSchemaCheck_SchemaCheckFragment on SchemaCheck {
+    __typename
+    id
+    schemaSDL
+    schemaVersion {
+      id
+      supergraph
+      sdl
+    }
+    serviceName
+    createdAt
+    meta {
+      commit
+      author
+    }
+    breakingSchemaChanges {
+      nodes {
+        message
+        criticality
+        criticalityReason
+        path
+      }
+    }
+    safeSchemaChanges {
+      nodes {
+        message
+        criticality
+        criticalityReason
+        path
+      }
+    }
+    schemaPolicyWarnings {
+      ...SchemaPolicyEditor_PolicyWarningsFragment
+      edges {
+        node {
+          message
+        }
+      }
+    }
+    schemaPolicyErrors {
+      ...SchemaPolicyEditor_PolicyWarningsFragment
+      edges {
+        node {
+          message
+        }
+      }
+    }
+    ... on FailedSchemaCheck {
+      compositeSchemaSDL
+      supergraphSDL
+      compositionErrors {
+        nodes {
+          message
+        }
+      }
+      canBeApproved
+      canBeApprovedByViewer
+    }
+    ... on SuccessfulSchemaCheck {
+      compositeSchemaSDL
+      supergraphSDL
+      isApproved
+      approvedBy {
+        id
+        displayName
+      }
+    }
+  }
+`);
+
 const ActiveSchemaCheckQuery = graphql(`
-  query ActiveSchemaCheckQuery(
+  query ActiveSchemaCheck_ActiveSchemaCheckQuery(
     $organizationId: ID!
     $projectId: ID!
     $targetId: ID!
@@ -143,65 +217,7 @@ const ActiveSchemaCheckQuery = graphql(`
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
       schemaCheck(id: $schemaCheckId) {
-        __typename
-        id
-        schemaSDL
-        schemaVersion {
-          id
-          supergraph
-          sdl
-        }
-        serviceName
-        createdAt
-        meta {
-          commit
-          author
-        }
-        breakingSchemaChanges {
-          nodes {
-            message
-            criticality
-            criticalityReason
-            path
-          }
-        }
-        safeSchemaChanges {
-          nodes {
-            message
-            criticality
-            criticalityReason
-            path
-          }
-        }
-        schemaPolicyWarnings {
-          ...SchemaPolicyEditor_PolicyWarningsFragment
-          edges {
-            node {
-              message
-            }
-          }
-        }
-        schemaPolicyErrors {
-          ...SchemaPolicyEditor_PolicyWarningsFragment
-          edges {
-            node {
-              message
-            }
-          }
-        }
-        ... on FailedSchemaCheck {
-          compositeSchemaSDL
-          supergraphSDL
-          compositionErrors {
-            nodes {
-              message
-            }
-          }
-        }
-        ... on SuccessfulSchemaCheck {
-          compositeSchemaSDL
-          supergraphSDL
-        }
+        ...ActiveSchemaCheck_SchemaCheckFragment
       }
     }
   }
@@ -230,6 +246,99 @@ const PolicyBlock = (props: {
   );
 };
 
+const ApproveFailedSchemaCheckMutation = graphql(`
+  mutation ApproveFailedSchemaCheckModal_ApproveFailedSchemaCheckMutation(
+    $input: ApproveFailedSchemaCheckInput!
+  ) {
+    approveFailedSchemaCheck(input: $input) {
+      ok {
+        schemaCheck {
+          ...ActiveSchemaCheck_SchemaCheckFragment
+        }
+      }
+      error {
+        message
+      }
+    }
+  }
+`);
+
+const ApproveFailedSchemaCheckModal = (props: {
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+  schemaCheckId: string;
+  isOpen: boolean;
+  close: () => void;
+}) => {
+  const [state, mutate] = useMutation(ApproveFailedSchemaCheckMutation);
+
+  return (
+    <Modal open={props.isOpen} onOpenChange={props.close} className={clsx('w-[550px]')}>
+      <div className={clsx('flex flex-col items-stretch gap-5')}>
+        <Heading>Approve Failed Schema Check</Heading>
+        {!state.data && !state.error ? (
+          <>
+            <p>Are you sure you want to approve this failed schema check?</p>
+            <div className="flex w-full gap-2">
+              <Button type="button" size="large" block onClick={props.close}>
+                Close
+              </Button>
+              <Button
+                type="submit"
+                size="large"
+                block
+                variant="primary"
+                disabled={state.fetching}
+                onClick={() =>
+                  mutate({
+                    input: {
+                      organization: props.organizationId,
+                      project: props.projectId,
+                      target: props.targetId,
+                      schemaCheckId: props.schemaCheckId,
+                    },
+                  })
+                }
+              >
+                Approve failed schema check
+              </Button>
+            </div>
+          </>
+        ) : state.error ? (
+          <>
+            <p>Oops. Something unexpected went wrong. Please try again later</p>
+            <code>{state.error.message}</code>
+            <div className="flex w-full gap-2">
+              <Button type="button" size="large" block onClick={props.close}>
+                Close
+              </Button>
+            </div>
+          </>
+        ) : state.data?.approveFailedSchemaCheck.error ? (
+          <>
+            <p>{state.data.approveFailedSchemaCheck.error.message}</p>
+            <div className="flex w-full gap-2">
+              <Button type="button" size="large" block onClick={props.close}>
+                Close
+              </Button>
+            </div>
+          </>
+        ) : state.data?.approveFailedSchemaCheck.error ? (
+          <>
+            <p>The schema check has been approved successfully!</p>
+            <div className="flex w-full gap-2">
+              <Button type="button" size="large" block onClick={props.close}>
+                Close
+              </Button>
+            </div>
+          </>
+        ) : null}
+      </div>
+    </Modal>
+  );
+};
+
 const ActiveSchemaCheck = ({
   schemaCheckId,
 }: {
@@ -247,6 +356,13 @@ const ActiveSchemaCheck = ({
     pause: !schemaCheckId,
   });
   const [view, setView] = useState<string>('details');
+  const [isApproveFailedSchemaCheckModalOpen, setIsApproveFailedSchemaCheckModalOpen] =
+    useState(false);
+
+  const schemaCheck = useFragment(
+    ActiveSchemaCheck_SchemaCheckFragment,
+    query.data?.target?.schemaCheck,
+  );
 
   const [toggleItems] = useMemo(() => {
     const items: Array<{
@@ -256,7 +372,7 @@ const ActiveSchemaCheck = ({
       tooltip: string;
     }> = [];
 
-    if (!query?.data?.target?.schemaCheck) {
+    if (!schemaCheck) {
       return [[]] as const;
     }
 
@@ -267,10 +383,7 @@ const ActiveSchemaCheck = ({
       tooltip: 'Details',
     });
 
-    if (
-      query.data.target.schemaCheck.compositeSchemaSDL &&
-      query.data.target.schemaCheck.compositeSchemaSDL
-    ) {
+    if (schemaCheck.compositeSchemaSDL && schemaCheck.compositeSchemaSDL) {
       items.push({
         value: 'schemaDiff',
         icon: <DiffIcon className="h-5 w-auto flex-none" />,
@@ -280,9 +393,9 @@ const ActiveSchemaCheck = ({
     }
 
     if (
-      query.data.target.schemaCheck.schemaPolicyWarnings ||
-      (query.data.target.schemaCheck.__typename === 'FailedSchemaCheck' &&
-        query.data.target.schemaCheck.schemaPolicyErrors?.edges?.length)
+      schemaCheck.schemaPolicyWarnings ||
+      (schemaCheck.__typename === 'FailedSchemaCheck' &&
+        schemaCheck.schemaPolicyErrors?.edges?.length)
     ) {
       items.push({
         value: 'policy',
@@ -292,16 +405,16 @@ const ActiveSchemaCheck = ({
       });
     }
 
-    if (query.data.target.schemaCheck.compositeSchemaSDL) {
+    if (schemaCheck.compositeSchemaSDL) {
       items.push({
         value: 'schema',
         icon: <DiffIcon className="h-5 w-auto flex-none" />,
-        label: query.data.target.schemaCheck.serviceName ? 'Composite Schema' : 'Schema',
+        label: schemaCheck.serviceName ? 'Composite Schema' : 'Schema',
         tooltip: 'Schema',
       });
     }
 
-    if (query.data.target.schemaCheck.supergraphSDL) {
+    if (schemaCheck.supergraphSDL) {
       items.push({
         value: 'supergraph',
         icon: <DiffIcon className="h-5 w-auto flex-none" />,
@@ -311,9 +424,9 @@ const ActiveSchemaCheck = ({
     }
 
     return [items] as const;
-  }, [query.data?.target?.schemaCheck]);
+  }, [schemaCheck]);
 
-  if (!query.data?.target?.schemaCheck) {
+  if (!schemaCheck) {
     return (
       <EmptyList
         className="border-0"
@@ -323,8 +436,6 @@ const ActiveSchemaCheck = ({
       />
     );
   }
-
-  const { schemaCheck } = query.data.target;
 
   return (
     <div className="flex grow flex-col h-full">
@@ -341,7 +452,7 @@ const ActiveSchemaCheck = ({
             </div>
           </div>
           {schemaCheck.serviceName ? (
-            <div>
+            <div className="ml-4">
               <div className="text-xs">Service</div>
               <div>
                 <div className="text-white text-sm font-semibold">{schemaCheck.serviceName}</div>
@@ -364,6 +475,29 @@ const ActiveSchemaCheck = ({
               </div>
             </div>
           </div>
+          {schemaCheck.__typename === 'FailedSchemaCheck' && schemaCheck.canBeApproved ? (
+            <div className="mr-0 ml-auto pl-4">
+              {schemaCheck.canBeApprovedByViewer ? (
+                <Button danger onClick={() => setIsApproveFailedSchemaCheckModalOpen(true)}>
+                  Approve
+                </Button>
+              ) : (
+                <Tooltip content={<>Missing permissions. Please contact the organization owner.</>}>
+                  <Button disabled>Approve</Button>
+                </Tooltip>
+              )}
+            </div>
+          ) : null}
+          {schemaCheck.__typename === 'SuccessfulSchemaCheck' && schemaCheck.isApproved ? (
+            <div className="ml-4">
+              <div className="text-xs">Approved by</div>
+              <div>
+                <div className="text-white text-sm font-bold">
+                  {schemaCheck.approvedBy?.displayName ?? 'unknown'}
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -492,6 +626,14 @@ const ActiveSchemaCheck = ({
           errors={('schemaPolicyErrors' in schemaCheck && schemaCheck.schemaPolicyErrors) || null}
         />
       ) : null}
+      <ApproveFailedSchemaCheckModal
+        organizationId={router.organizationId}
+        projectId={router.projectId}
+        targetId={router.targetId}
+        schemaCheckId={schemaCheck.id}
+        isOpen={isApproveFailedSchemaCheckModalOpen}
+        close={() => setIsApproveFailedSchemaCheckModalOpen(false)}
+      />
     </div>
   );
 };
@@ -663,7 +805,9 @@ function ChecksPageContent() {
           </div>
           {hasActiveSchemaCheck ? (
             <div className="grow">
-              {schemaCheckId ? <ActiveSchemaCheck schemaCheckId={schemaCheckId} /> : null}
+              {schemaCheckId ? (
+                <ActiveSchemaCheck schemaCheckId={schemaCheckId} key={schemaCheckId} />
+              ) : null}
             </div>
           ) : hasSchemaChecks ? (
             <EmptyList

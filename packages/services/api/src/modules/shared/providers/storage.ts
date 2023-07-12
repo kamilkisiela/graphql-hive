@@ -729,6 +729,11 @@ export interface Storage {
   }): Promise<SchemaCheck | null>;
 
   getTargetBreadcrumbForTargetId(_: { targetId: string }): Promise<TargetBreadcrumb | null>;
+
+  /**
+   * Get an user that belongs to a specific organization by id.
+   */
+  getOrganizationUser(_: { organizationId: string; userId: string }): Promise<User | null>;
 }
 
 @Injectable()

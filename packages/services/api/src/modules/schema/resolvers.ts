@@ -1647,10 +1647,26 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return schemaCheck.safeSchemaChanges.map(toGraphQLSchemaChange);
     },
+    breakingSchemaChanges(schemaCheck) {
+      if (!schemaCheck.breakingSchemaChanges) {
+        return null;
+      }
+
+      return schemaCheck.breakingSchemaChanges.map(toGraphQLSchemaChange);
+    },
     webUrl(schemaCheck, _, { injector }) {
       return injector.get(SchemaManager).getSchemaCheckWebUrl({
         schemaCheckId: schemaCheck.id,
         targetId: schemaCheck.targetId,
+      });
+    },
+    isApproved(schemaCheck) {
+      return schemaCheck.isManuallyApproved;
+    },
+    approvedBy(schemaCheck, _, { injector }) {
+      return injector.get(SchemaManager).getApprovedByUser({
+        organizationId: schemaCheck.selector.organizationId,
+        userId: schemaCheck.manualApprovalUserId,
       });
     },
   },
@@ -1687,6 +1703,17 @@ export const resolvers: SchemaModule.Resolvers = {
       return injector.get(SchemaManager).getSchemaCheckWebUrl({
         schemaCheckId: schemaCheck.id,
         targetId: schemaCheck.targetId,
+      });
+    },
+    async canBeApproved(schemaCheck, _, { injector }) {
+      return injector.get(SchemaManager).getFailedSchemaCheckCanBeApproved({
+        schemaCompositionErrors: schemaCheck.schemaCompositionErrors,
+      });
+    },
+    async canBeApprovedByViewer(schemaCheck, _, { injector }) {
+      return injector.get(SchemaManager).getFailedSchemaCheckCanBeApprovedByViewer({
+        organizationId: schemaCheck.selector.organizationId,
+        schemaCompositionErrors: schemaCheck.schemaCompositionErrors,
       });
     },
   },

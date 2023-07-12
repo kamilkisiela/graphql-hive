@@ -751,6 +751,14 @@ export default gql`
 
     compositeSchemaSDL: String
     supergraphSDL: String
+    """
+    Whether the schema check was manually approved.
+    """
+    isApproved: Boolean!
+    """
+    The user that approved the schema check.
+    """
+    approvedBy: User
   }
 
   """
@@ -790,6 +798,15 @@ export default gql`
 
     compositeSchemaSDL: String
     supergraphSDL: String
+
+    """
+    Whether this schema check can be approved manually.
+    """
+    canBeApproved: Boolean!
+    """
+    Whether this schema check can be approved by the viewer.
+    """
+    canBeApprovedByViewer: Boolean!
   }
 
   type SchemaCheckEdge {

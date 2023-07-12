@@ -3608,6 +3608,27 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return TargetBreadcrumbModel.parse(result);
     },
+
+    async getOrganizationUser(args) {
+      const result = await pool.maybeOne<users>(sql`
+        SELECT
+          "users".*
+        FROM "organization_member" as "om"
+          LEFT JOIN "organizations" as "o" ON ("o"."id" = "om"."organization_id")
+          LEFT JOIN "users" as "u" ON ("u"."id" = "om"."user_id")
+        FROM
+          "users"
+        WHERE
+          "u"."id" = ${args.userId}
+          AND "o"."id" = ${args.organizationId}
+      `);
+
+      if (result === null) {
+        return null;
+      }
+
+      return transformUser(result);
+    },
   };
 
   return storage;
