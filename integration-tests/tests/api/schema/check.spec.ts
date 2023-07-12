@@ -243,6 +243,12 @@ const ApproveFailedSchemaCheckMutation = graphql(/* GraphQL */ `
       ok {
         schemaCheck {
           __typename
+          ... on SuccessfulSchemaCheck {
+            isApproved
+            approvedBy {
+              __typename
+            }
+          }
         }
       }
       error {
@@ -969,6 +975,10 @@ test('approve failed schema check that has breaking changes succeeds', async () 
       ok: {
         schemaCheck: {
           __typename: 'SuccessfulSchemaCheck',
+          isApproved: true,
+          approvedBy: {
+            __typename: 'User',
+          },
         },
       },
       error: null,
