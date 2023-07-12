@@ -10,6 +10,7 @@ query organizationActivities($selector: OrganizationActivitiesSelector!) {
       ...OrganizationIdUpdated
       ...MemberAdded
       ...MemberDeleted
+      ...MemberLeft
       ...ProjectCreated
       ...ProjectDeleted
       ...ProjectNameUpdated

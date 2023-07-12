@@ -108,6 +108,28 @@ export const resolvers: OrganizationModule.Resolvers = {
         organization,
       };
     },
+    async leaveOrganization(_, { input }, { injector }) {
+      const translator = injector.get(IdTranslator);
+      const organizationId = await translator.translateOrganizationId({
+        organization: input.organization,
+      });
+
+      const result = await injector.get(OrganizationManager).leaveOrganization(organizationId);
+
+      if (!result.ok) {
+        return {
+          error: {
+            message: result.message,
+          },
+        };
+      }
+
+      return {
+        ok: {
+          id: organizationId,
+        },
+      };
+    },
     async updateOrganizationName(_, { input }, { injector }) {
       const UpdateOrganizationNameModel = z.object({
         name: OrganizationNameModel,
@@ -319,6 +341,16 @@ export const resolvers: OrganizationModule.Resolvers = {
     },
     name(organization) {
       return organization.name;
+    },
+  },
+  Member: {
+    async canLeaveOrganization(member, _, { injector }) {
+      const { result } = await injector.get(OrganizationManager).canLeaveOrganization({
+        organizationId: member.organization,
+        userId: member.id,
+      });
+
+      return result;
     },
   },
   OrganizationConnection: createConnection(),

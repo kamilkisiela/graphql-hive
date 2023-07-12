@@ -86,6 +86,14 @@ export const resolvers: ActivityModule.Resolvers = {
       return (activity as ActivityObject).meta.email;
     },
   },
+  MemberLeftActivity: {
+    __isTypeOf(activity) {
+      return activity.type === 'MEMBER_LEFT';
+    },
+    email(activity: any) {
+      return (activity as ActivityObject).meta.email;
+    },
+  },
   ProjectCreatedActivity: {
     __isTypeOf(activity) {
       return activity.type === 'PROJECT_CREATED';

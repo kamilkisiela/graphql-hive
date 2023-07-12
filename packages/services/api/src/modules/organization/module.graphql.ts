@@ -15,6 +15,7 @@ export default gql`
     deleteOrganization(selector: OrganizationSelectorInput!): OrganizationPayload!
     deleteOrganizationMembers(selector: OrganizationMembersSelectorInput!): OrganizationPayload!
     joinOrganization(code: String!): JoinOrganizationPayload!
+    leaveOrganization(input: OrganizationSelectorInput!): LeaveOrganizationResult!
     inviteToOrganizationByEmail(
       input: InviteToOrganizationByEmailInput!
     ): InviteToOrganizationByEmailResult!
@@ -55,6 +56,19 @@ export default gql`
   type CreateOrganizationError implements Error {
     message: String!
     inputErrors: CreateOrganizationInputErrors!
+  }
+
+  type LeaveOrganizationResult {
+    ok: LeaveOrganizationOk
+    error: LeaveOrganizationError
+  }
+
+  type LeaveOrganizationOk {
+    id: ID!
+  }
+
+  type LeaveOrganizationError implements Error {
+    message: String!
   }
 
   input OrganizationTransferRequestSelector {
@@ -238,5 +252,9 @@ export default gql`
 
   type DeleteOrganizationInvitationError implements Error {
     message: String!
+  }
+
+  extend type Member {
+    canLeaveOrganization: Boolean!
   }
 `;

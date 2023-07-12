@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 import { useMutation } from 'urql';
 import * as Yup from 'yup';
-import { Button, Heading, Input } from '@/components/v2';
+import { Button, Heading, Input, Spinner } from '@/components/v2';
 import { graphql } from '@/gql';
 
 const CreateOrganizationMutation = graphql(`
@@ -79,7 +79,14 @@ export const CreateOrganizationForm = () => {
       )}
       <div className="flex gap-2">
         <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
-          Create Organization
+          {isSubmitting ? (
+            <>
+              <Spinner className="w-6 h-6 text-white" />
+              <span className="ml-4">Creating...</span>
+            </>
+          ) : (
+            'Create Organization'
+          )}
         </Button>
       </div>
     </form>

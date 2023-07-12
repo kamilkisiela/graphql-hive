@@ -160,6 +160,7 @@ export interface Storage {
   ): Promise<void>;
 
   getOrganizationMembers(_: OrganizationSelector): Promise<readonly Member[] | never>;
+  countOrganizationMembers(_: OrganizationSelector): Promise<number>;
 
   getOrganizationInvitations(_: OrganizationSelector): Promise<readonly OrganizationInvitation[]>;
 

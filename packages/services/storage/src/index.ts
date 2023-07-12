@@ -782,6 +782,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         return Promise.reject(new Error(`Owner not found (organization=${organization})`));
       });
     }),
+    async countOrganizationMembers({ organization }) {
+      const { total } = await pool.one<{ total: number }>(
+        sql`SELECT COUNT(*) as total FROM public.organization_member WHERE organization_id = ${organization}`,
+      );
+
+      return total;
+    },
     getOrganizationMembers: batch(async selectors => {
       const organizations = selectors.map(s => s.organization);
       const allMembers = await pool.query<

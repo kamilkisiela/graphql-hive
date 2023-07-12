@@ -66,6 +66,14 @@ export interface MemberDeletedActivity extends BaseActivity {
   };
 }
 
+export interface MemberLeftActivity extends BaseActivity {
+  type: 'MEMBER_LEFT';
+  selector: OrganizationSelector;
+  meta: {
+    email: string;
+  };
+}
+
 export interface ProjectCreatedActivity extends BaseActivity {
   type: 'PROJECT_CREATED';
   selector: ProjectSelector;
@@ -155,6 +163,7 @@ export type Activity =
   | OrganizationPlanUpdated
   | MemberAddedActivity
   | MemberDeletedActivity
+  | MemberLeftActivity
   | ProjectCreatedActivity
   | ProjectDeletedActivity
   | ProjectNameUpdatedActivity

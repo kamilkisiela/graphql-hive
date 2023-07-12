@@ -83,6 +83,97 @@ export class OrganizationManager {
     return this.storage.getOrganizations({ user: user.id });
   }
 
+  async canLeaveOrganization({
+    organizationId,
+    userId,
+  }: {
+    organizationId: string;
+    userId: string;
+  }) {
+    const member = await this.storage.getOrganizationMember({
+      organization: organizationId,
+      user: userId,
+    });
+
+    if (!member) {
+      return {
+        result: false,
+        reason: 'Member not found',
+      };
+    }
+
+    if (member.isOwner) {
+      return {
+        result: false,
+        reason: 'Cannot leave organization as an owner',
+      };
+    }
+
+    const membersCount = await this.countOrganizationMembers({
+      organization: organizationId,
+    });
+
+    if (membersCount > 1) {
+      return {
+        result: true,
+        reason: 'Organization has more than one member',
+      };
+    }
+
+    return {
+      result: false,
+      reason: 'Cannot leave organization as the last member',
+    };
+  }
+
+  async leaveOrganization(organizationId: string): Promise<
+    | {
+        ok: true;
+      }
+    | {
+        ok: false;
+        message: string;
+      }
+  > {
+    this.logger.debug('Leaving organization (organization=%s)', organizationId);
+    const user = await this.authManager.getCurrentUser();
+
+    const canLeave = await this.canLeaveOrganization({
+      organizationId,
+      userId: user.id,
+    });
+
+    if (!canLeave.result) {
+      return {
+        ok: false,
+        message: canLeave.reason,
+      };
+    }
+
+    await this.storage.deleteOrganizationMembers({
+      users: [user.id],
+      organization: organizationId,
+    });
+
+    await this.activityManager.create({
+      type: 'MEMBER_LEFT',
+      selector: {
+        organization: organizationId,
+      },
+      user: user,
+      meta: {
+        email: user.email,
+      },
+    });
+
+    // Because we checked the access before, it's stale by now
+    this.authManager.resetAccessCache();
+
+    return {
+      ok: true,
+    };
+  }
+
   async getOrganizationByInviteCode({
     code,
   }: {
@@ -116,6 +207,10 @@ export class OrganizationManager {
   @cache((selector: OrganizationSelector) => selector.organization)
   async getOrganizationMembers(selector: OrganizationSelector) {
     return this.storage.getOrganizationMembers(selector);
+  }
+
+  countOrganizationMembers(selector: OrganizationSelector) {
+    return this.storage.countOrganizationMembers(selector);
   }
 
   async getOrganizationMember(selector: OrganizationSelector & { user: string }) {
