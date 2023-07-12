@@ -59,6 +59,10 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
     captureException(error);
   }
 
+  if (!accessToken && req.headers['authorization']) {
+    accessToken = req.headers['authorization'].replace('Bearer ', '');
+  }
+
   if (!accessToken) {
     accessSpan?.setHttpStatus(401);
     accessSpan?.finish();
