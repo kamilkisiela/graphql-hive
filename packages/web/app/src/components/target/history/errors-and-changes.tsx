@@ -111,6 +111,14 @@ export function VersionErrorsAndChanges(props: {
 
   const serviceErrorEntries = Array.from(groupedServiceErrors.entries());
 
+  const breakingChanges = props.changes.nodes.filter(
+    c => c.criticality === CriticalityLevel.Breaking,
+  );
+  const dangerousChanges = props.changes.nodes.filter(
+    c => c.criticality === CriticalityLevel.Dangerous,
+  );
+  const safeChanges = props.changes.nodes.filter(c => c.criticality === CriticalityLevel.Safe);
+
   return (
     <div className="p-5">
       <div>
@@ -119,22 +127,18 @@ export function VersionErrorsAndChanges(props: {
             <div className="font-semibold">Schema Changes</div>
             <div>
               <div className="space-y-3 p-6">
-                <ChangesBlock
-                  changes={props.changes.nodes.filter(
-                    c => c.criticality === CriticalityLevel.Breaking,
-                  )}
-                  criticality={CriticalityLevel.Breaking}
-                />
-                <ChangesBlock
-                  changes={props.changes.nodes.filter(
-                    c => c.criticality === CriticalityLevel.Dangerous,
-                  )}
-                  criticality={CriticalityLevel.Dangerous}
-                />
-                <ChangesBlock
-                  changes={props.changes.nodes.filter(c => c.criticality === CriticalityLevel.Safe)}
-                  criticality={CriticalityLevel.Safe}
-                />
+                {breakingChanges.length ? (
+                  <ChangesBlock changes={breakingChanges} criticality={CriticalityLevel.Breaking} />
+                ) : null}
+                {dangerousChanges.length ? (
+                  <ChangesBlock
+                    changes={dangerousChanges}
+                    criticality={CriticalityLevel.Dangerous}
+                  />
+                ) : null}
+                {safeChanges.length ? (
+                  <ChangesBlock changes={safeChanges} criticality={CriticalityLevel.Safe} />
+                ) : null}
               </div>
             </div>
           </div>

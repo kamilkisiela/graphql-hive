@@ -98,7 +98,7 @@ function ListPage({
             href={`/${router.organizationId}/${router.projectId}/${router.targetId}/history/${version.id}`}
             scroll={false} // disable the scroll to top on page
           >
-            <h3 className="truncate font-bold">
+            <h3 className="truncate font-semibold text-sm">
               {'commit' in version.log
                 ? version.log.commit
                 : `Deleted ${version.log.deletedService}`}
@@ -109,7 +109,7 @@ function ListPage({
               </div>
             ) : null}
             <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
-              <div className={cn('w-1/2 ', !version.valid && 'text-red-500')}>
+              <div className={cn(!version.valid && 'text-red-500')}>
                 <Badge color={version.valid ? 'green' : 'red'} /> Published{' '}
                 <TimeAgo date={version.date} />
               </div>
