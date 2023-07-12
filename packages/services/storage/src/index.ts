@@ -3612,12 +3612,10 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async getOrganizationUser(args) {
       const result = await pool.maybeOne<users>(sql`
         SELECT
-          "users".*
+          "u".*
         FROM "organization_member" as "om"
           LEFT JOIN "organizations" as "o" ON ("o"."id" = "om"."organization_id")
           LEFT JOIN "users" as "u" ON ("u"."id" = "om"."user_id")
-        FROM
-          "users"
         WHERE
           "u"."id" = ${args.userId}
           AND "o"."id" = ${args.organizationId}
