@@ -90,7 +90,9 @@ const Navigation = (props: {
                 href={`/${router.organizationId}/${router.projectId}/${router.targetId}/checks/${edge.node.id}`}
                 scroll={false} // disable the scroll to top on page
               >
-                <h3 className="truncate font-bold">{edge.node.meta?.commit ?? edge.node.id}</h3>
+                <h3 className="truncate font-semibold text-sm">
+                  {edge.node.meta?.commit ?? edge.node.id}
+                </h3>
                 {edge.node.meta?.author ? (
                   <div className="truncate text-xs font-medium text-gray-500">
                     <span className="overflow-hidden truncate">{edge.node.meta.author}</span>
@@ -99,7 +101,6 @@ const Navigation = (props: {
                 <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
                   <div
                     className={cn(
-                      'w-1/2 ',
                       edge.node.__typename === 'FailedSchemaCheck' ? 'text-red-500' : null,
                     )}
                   >
@@ -348,35 +349,35 @@ const ActiveSchemaCheck = ({
         <Subtitle>Detailed view of the schema check</Subtitle>
       </div>
       <div>
-        <div className="flex align-middle font-medium p-2 text-[#c4c4c4] rounded-md border-gray-800 border space-x-4">
+        <div className="flex flex-row justify-between items-center font-medium gap-x-4 p-4 text-gray-400 rounded-md border-gray-800 border">
           <div>
-            <div className="text-xs">
-              Triggered <TimeAgo date={schemaCheck.createdAt} />
-            </div>
-            <div className="text-white text-sm">
-              by {schemaCheck.meta ? <>{schemaCheck.meta.author}</> : 'unknown'}
-            </div>
-          </div>
-          <div>
-            <div className="text-xs">Commit</div>
-            <div>
-              <div className="text-white text-sm font-bold">
-                {schemaCheck.meta?.commit ?? 'unknown'}
-              </div>
+            <div className="text-xs">Status</div>
+            <div className="text-white text-sm font-semibold">
+              {schemaCheck.__typename === 'FailedSchemaCheck' ? <>Failed</> : <>Success</>}
             </div>
           </div>
           {schemaCheck.serviceName ? (
             <div>
               <div className="text-xs">Service</div>
               <div>
-                <div className="text-white text-sm font-bold">{schemaCheck.serviceName}</div>
+                <div className="text-white text-sm font-semibold">{schemaCheck.serviceName}</div>
               </div>
             </div>
           ) : null}
           <div>
-            <div className="text-xs">Status</div>
-            <div className="text-white text-sm font-bold">
-              {schemaCheck.__typename === 'FailedSchemaCheck' ? <>Failed</> : <>Success</>}
+            <div className="text-xs">
+              Triggered <TimeAgo date={schemaCheck.createdAt} />
+            </div>
+            <div className="text-white text-sm truncate">
+              by {schemaCheck.meta ? <>{schemaCheck.meta.author}</> : 'unknown'}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs">Commit</div>
+            <div>
+              <div className="text-white text-sm font-semibold truncate">
+                {schemaCheck.meta?.commit ?? 'unknown'}
+              </div>
             </div>
           </div>
         </div>
@@ -408,11 +409,11 @@ const ActiveSchemaCheck = ({
       </div>
       {view === 'details' ? (
         <>
-          <>
+          <div className="my-2">
             {schemaCheck.__typename === 'SuccessfulSchemaCheck' &&
             !schemaCheck.schemaPolicyWarnings?.edges?.length &&
             !schemaCheck.safeSchemaChanges?.nodes?.length ? (
-              <div className="my-2">
+              <div>
                 <Heading>Details</Heading>
                 <div className="mt-1">No changes or policy warnings detected.</div>
               </div>
@@ -466,7 +467,7 @@ const ActiveSchemaCheck = ({
                 />
               </div>
             ) : null}
-          </>
+          </div>
         </>
       ) : null}
       {view === 'schema' ? (
