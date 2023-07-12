@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -26,6 +26,9 @@ patchedDependencies:
   '@theguild/buddy@0.1.0':
     hash: ryylgra5xglhidfoiaxehn22hq
     path: patches/@theguild__buddy@0.1.0.patch
+  '@theguild/components@4.6.5':
+    hash: aunm4murvphlxzckxqmxmdgale
+    path: patches/@theguild__components@4.6.5.patch
   '@theguild/editor@1.2.5':
     hash: pz2nlsfawfhpo6sw62ecmp2yum
     path: patches/@theguild__editor@1.2.5.patch
@@ -38,6 +41,9 @@ patchedDependencies:
   mjml-core@4.14.0:
     hash: zxxsxbqejjmcwuzpigutzzq6wa
     path: patches/mjml-core@4.14.0.patch
+  nextra-theme-docs@2.7.0:
+    hash: orcw6l5emhrkl372dmya37cwpa
+    path: patches/nextra-theme-docs@2.7.0.patch
   oclif@3.9.1:
     hash: zfq635w2wnfryxdh76ieiqh2e4
     path: patches/oclif@3.9.1.patch
@@ -1786,7 +1792,7 @@ importers:
         version: 1.0.6(@types/react-dom@18.2.6)(@types/react@18.2.14)(react-dom@18.2.0)(react@18.2.0)
       '@theguild/components':
         specifier: 4.6.5
-        version: 4.6.5(@algolia/client-search@4.17.1)(@types/react@18.2.14)(next@13.4.7)(prop-types@15.8.1)(react-dom@18.2.0)(react@18.2.0)(webpack@4.46.0)
+        version: 4.6.5(patch_hash=aunm4murvphlxzckxqmxmdgale)(@algolia/client-search@4.17.1)(@types/react@18.2.14)(next@13.4.7)(prop-types@15.8.1)(react-dom@18.2.0)(react@18.2.0)(webpack@4.46.0)
       clsx:
         specifier: 1.2.1
         version: 1.2.1
@@ -11897,7 +11903,7 @@ packages:
     dev: false
     patched: true
 
-  /@theguild/components@4.6.5(@algolia/client-search@4.17.1)(@types/react@18.2.14)(next@13.4.7)(prop-types@15.8.1)(react-dom@18.2.0)(react@18.2.0)(webpack@4.46.0):
+  /@theguild/components@4.6.5(patch_hash=aunm4murvphlxzckxqmxmdgale)(@algolia/client-search@4.17.1)(@types/react@18.2.14)(next@13.4.7)(prop-types@15.8.1)(react-dom@18.2.0)(react@18.2.0)(webpack@4.46.0):
     resolution: {integrity: sha512-Mt8JHgTN422ZxEITvrA+8Cu/M11XMfqKXjN2Q9u8UFnRF1F+eg2MNhQn1nhykFw8rwwR1ld/jcv/dxbYXrZrBg==}
     peerDependencies:
       next: ^12.3.1 || ^13.0.0
@@ -11919,7 +11925,7 @@ packages:
       next: 13.4.7(@babel/core@7.21.5)(react-dom@18.2.0)(react@18.2.0)
       next-videos: 1.5.0(webpack@4.46.0)
       nextra: 2.7.0(next@13.4.7)(react-dom@18.2.0)(react@18.2.0)
-      nextra-theme-docs: 2.7.0(next@13.4.7)(nextra@2.7.0)(react-dom@18.2.0)(react@18.2.0)
+      nextra-theme-docs: 2.7.0(patch_hash=orcw6l5emhrkl372dmya37cwpa)(next@13.4.7)(nextra@2.7.0)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       react-instantsearch-dom: 6.40.0(algoliasearch@4.17.1)(react-dom@18.2.0)(react@18.2.0)
@@ -11939,6 +11945,7 @@ packages:
       - utf-8-validate
       - webpack
     dev: false
+    patched: true
 
   /@theguild/editor@1.2.5(patch_hash=pz2nlsfawfhpo6sw62ecmp2yum)(@monaco-editor/react@4.5.1)(@types/node@18.16.18)(graphql@16.6.0)(monaco-editor@0.39.0)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-hbXf17F1TLD9zWcbIvkKe/tK3WC48pLd1A/CH3/NOtqDQGdx8lvBB6Cd3Fsv/Gg2qVv7gzZjIVn/1o547++/AA==}
@@ -23624,7 +23631,7 @@ packages:
       next: 13.4.7(@babel/core@7.21.5)(react-dom@18.2.0)(react@18.2.0)
     dev: false
 
-  /nextra-theme-docs@2.7.0(next@13.4.7)(nextra@2.7.0)(react-dom@18.2.0)(react@18.2.0):
+  /nextra-theme-docs@2.7.0(patch_hash=orcw6l5emhrkl372dmya37cwpa)(next@13.4.7)(nextra@2.7.0)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-984jZR13QO/YTIsLEYpFK2Pf4hQjD2Z2fHrBYJl/ZZQjylwxnnGcx1QAciy65mnPWr7/Kv9/dAKpjm9tYtyLrw==}
     peerDependencies:
       next: '>=9.5.3'
@@ -23649,6 +23656,7 @@ packages:
       scroll-into-view-if-needed: 3.0.4
       zod: 3.21.4
     dev: false
+    patched: true
 
   /nextra@2.7.0(next@13.4.7)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-SXUsczIzb6+apg3ipRQQllBJk6W2FJfUrmJrQySu9DJpUfS36ylQYLX5ofkCI+Sq3ZHfefZbnut49KGozt/rGQ==}

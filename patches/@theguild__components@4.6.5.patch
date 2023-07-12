@@ -1,0 +1,47 @@
+diff --git a/dist/index.js b/dist/index.js
+index 18c400b5e36259c165ec923d8dc3d2cb7cfd6768..277a7ae0a17e7db455194419417cab270571448c 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -2540,7 +2540,7 @@ var PackageCmd = ({ packages }) => {
+ 
+ // src/define-config.tsx
+ import { useRouter as useRouter3 } from "next/router";
+-import { Navbar, useConfig } from "nextra-theme-docs";
++import { Navbar, useConfig, Flexsearch } from "nextra-theme-docs";
+ import { Fragment as Fragment8, jsx as jsx43, jsxs as jsxs30 } from "react/jsx-runtime";
+ function defineConfig({
+   siteName: originalSiteName,
+@@ -2570,12 +2570,16 @@ function defineConfig({
+     },
+     navbar: {
+       component: (props) => /* @__PURE__ */ jsxs30(Fragment8, { children: [
+-        /* @__PURE__ */ jsx43(Header, { accentColor: "#1cc8ee", searchBarProps: { version: "v2" } }),
++        /* @__PURE__ */ jsx43(Header, { accentColor: "#1cc8ee", searchBarProps: { version: "v2" }, search: false }),
+         /* @__PURE__ */ jsx43(Navbar, { ...props })
+       ] })
+     },
+     search: {
+-      component: null
++      component: props => jsx43(Flexsearch, { ...props }),
++      emptyResult: () => jsx43("span", { className: "nx-block nx-select-none nx-p-8 nx-text-center nx-text-sm nx-text-gray-400", children: "No results found." }),
++      error: "Failed to load search index.",
++      loading: () => jsxs30(Fragment8, { children: ["Loading…"] }),
++      placeholder:() => "Search documentation…",
+     },
+     sidebar: {
+       defaultMenuCollapseLevel: 1,
+diff --git a/dist/next.config.mjs b/dist/next.config.mjs
+index 09fa92225f014a763c2691987a3815150666edbe..0d44255329ad31353b781a822f1b7fbd3af0aa09 100644
+--- a/dist/next.config.mjs
++++ b/dist/next.config.mjs
+@@ -70,7 +70,9 @@ var withGuildDocs = ({
+     mdxOptions: {
+       remarkPlugins: defaultRemarkPlugins
+     },
+-    flexsearch: false
++    flexsearch: {
++      codeblocks: false
++    },
+   });
+   const siteUrl = process.env.SITE_URL || "";
+   return withBundleAnalyzer(
