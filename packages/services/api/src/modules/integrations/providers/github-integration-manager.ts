@@ -216,6 +216,77 @@ export class GitHubIntegrationManager {
       throw error;
     }
   }
+
+  async updateCheckRunToSuccess(args: {
+    organizationId: string;
+    checkRun: {
+      owner: string;
+      repository: string;
+      checkRunId: number;
+    };
+  }) {
+    this.logger.debug(
+      'Update check-run (organizationId=%s, checkRun.owner=%s, checkRun.repository=%s, checkRun.id=%s)',
+      args.organizationId,
+      args.checkRun.owner,
+      args.checkRun.repository,
+      args.checkRun.checkRunId,
+    );
+    const installationId = await this.getInstallationId({
+      organization: args.organizationId,
+    });
+
+    if (!this.app || !installationId) {
+      this.logger.warn(
+        'Attempting to update GitHub check-run without GitHub App. Please provide GITHUB_APP_CONFIG. Skipping this step. (organizationId=%s, checkRun.owner=%s, checkRun.repository=%s, checkRun.id=%s)',
+        args.organizationId,
+        args.checkRun.owner,
+        args.checkRun.repository,
+        args.checkRun.checkRunId,
+      );
+      return;
+    }
+
+    const octokit = await this.app.getInstallationOctokit(parseInt(installationId, 10));
+
+    try {
+      const result = await octokit.request(
+        'PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}',
+        {
+          owner: args.checkRun.owner,
+          repo: args.checkRun.repository,
+          check_run_id: args.checkRun.checkRunId,
+          conclusion: 'success',
+          headers: {
+            'X-GitHub-Api-Version': '2022-11-28',
+          },
+        },
+      );
+
+      this.logger.debug('Check-run updated (id=%s, link=%s)', result.data.id, result.data.url);
+
+      return {
+        type: 'success',
+        id: result.data.id,
+        url: result.data.url,
+      } as const;
+    } catch (error) {
+      this.logger.error('Failed to update check-run', error);
+
+      if (isOctokitRequestError(error)) {
+        this.logger.debug(
+          'GitHub error details (message=%s, status=%s)',
+          error.message,
+          error.status,
+        );
+      }
+
+      return {
+        type: 'error',
+        reason: 'Failed to update check-run on GitHub. Please try again later.',
+      };
+    }
+  }
 }
 
 function isOctokitRequestError(error: unknown): error is RequestError {

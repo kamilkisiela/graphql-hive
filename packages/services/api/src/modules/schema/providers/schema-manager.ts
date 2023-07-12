@@ -12,6 +12,7 @@ import { SchemaVersion } from '../../../shared/mappers';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
+import { GitHubIntegrationManager } from '../../integrations/providers/github-integration-manager';
 import { ProjectManager } from '../../project/providers/project-manager';
 import { CryptoProvider } from '../../shared/providers/crypto';
 import { Logger } from '../../shared/providers/logger';
@@ -64,6 +65,7 @@ export class SchemaManager {
     private stitchingOrchestrator: StitchingOrchestrator,
     private federationOrchestrator: FederationOrchestrator,
     private crypto: CryptoProvider,
+    private githubIntegrationManager: GitHubIntegrationManager,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
   ) {
     this.logger = logger.child({ source: 'SchemaManager' });
@@ -682,6 +684,40 @@ export class SchemaManager {
       } as const;
     }
 
+    if (schemaCheck.githubCheckRunId) {
+      this.logger.debug('Attempt updating GitHub schema check. (args=%o).', args);
+      const project = await this.projectManager.getProject({
+        organization: args.organizationId,
+        project: args.projectId,
+      });
+      if (!project.gitRepository) {
+        this.logger.debug(
+          'Skip updating GitHub schema check. Project has no git repository connected. (args=%o).',
+          args,
+        );
+      } else {
+        const [owner, repository] = project.gitRepository.split('/');
+        const result = await this.githubIntegrationManager.updateCheckRunToSuccess({
+          organizationId: args.organizationId,
+          checkRun: {
+            owner,
+            repository,
+            checkRunId: schemaCheck.githubCheckRunId,
+          },
+        });
+
+        // In case updating the check run fails, we don't want to update our database state.
+        // Instead, we want to return the error to the user and inform him that there is an issue with GitHub
+        // and he needs to try again later.
+        if (result?.type === 'error') {
+          return {
+            type: 'error',
+            reason: result.reason,
+          } as const;
+        }
+      }
+    }
+
     schemaCheck = await this.storage.approveFailedSchemaCheck({
       schemaCheckId: args.schemaCheckId,
       userId: viewer.id,
@@ -692,10 +728,6 @@ export class SchemaManager {
         type: 'error',
         reason: "Schema check doesn't exist.",
       } as const;
-    }
-
-    if (schemaCheck.githubCheckRunId) {
-      // TODO: update github check run.
     }
 
     return {
