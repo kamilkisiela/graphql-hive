@@ -44,6 +44,36 @@ mutations, subscriptions) will now fail to execute.
 This is one example of many supported kinds of possible breaking changes. Hive is using
 [GraphQL-Inspector](https://the-guild.dev/graphql/inspector) under the hood.
 
+## Breaking changes in practice
+
+In practice, breaking changes are not always breaking. This is because consumers of your GraphQL API
+might not be using the field that was removed.
+
+For example, let's assume we have the following GraphQL operation:
+
+```graphql
+query Feed_AllPosts {
+  posts {
+    id
+    title
+    content
+    # Note: Field "description" is not requested in this query
+  }
+}
+```
+
+In this case, the removal of the `description` field is not a breaking change, because the consumer
+of the API is not using this field.
+
+Hive is smart enough to understand this, and will not consider this change as a breaking change.
+Please, follow the
+[Conditional Breaking Changes](/docs/management/targets#conditional-breaking-changes) guide to
+enable this feature in your target.
+
+From now on, when a new schema of your GraphQL schema is published to the registry, Hive uses the
+data collected from your API gateway to identify whether the change in your schema actually affects
+consumers.
+
 ## Supported Schema Models
 
 Hive supports the following project types:
