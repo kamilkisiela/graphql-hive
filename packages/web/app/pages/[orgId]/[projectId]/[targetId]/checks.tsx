@@ -324,7 +324,7 @@ const ApproveFailedSchemaCheckModal = (props: {
               </Button>
             </div>
           </>
-        ) : state.data?.approveFailedSchemaCheck.error ? (
+        ) : state.data?.approveFailedSchemaCheck.ok ? (
           <>
             <p>The schema check has been approved successfully!</p>
             <div className="flex w-full gap-2">
