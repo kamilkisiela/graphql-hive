@@ -1,5 +1,7 @@
 FROM node:18.16.0-slim
 
+RUN apt-get update && apt-get install -y ca-certificates
+
 WORKDIR /usr/src/app
 COPY . /usr/src/app/
 
