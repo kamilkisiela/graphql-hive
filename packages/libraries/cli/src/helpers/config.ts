@@ -108,12 +108,18 @@ export class Config {
     }
   }
 
-  get<TKey extends ValidConfigurationKeys>(key: TKey): GetZodValueType<TKey, typeof ConfigModel> {
+  get<TKey extends ValidConfigurationKeys>(
+    key: TKey,
+  ): GetZodValueType<TKey, typeof ConfigModel> | null {
     const map = this.read();
 
     const parts = key.split('.');
     let current: any = map;
     for (const part of parts) {
+      if (current == null) {
+        return null;
+      }
+
       current = current[part];
     }
 
