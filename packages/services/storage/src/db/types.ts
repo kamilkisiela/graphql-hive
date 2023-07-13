@@ -168,7 +168,7 @@ export interface schema_checks {
   breaking_schema_changes: any | null;
   composite_schema_sdl: string | null;
   created_at: Date;
-  github_check_run_id: number | null;
+  github_check_run_id: string | null;
   id: string;
   is_manually_approved: boolean | null;
   is_success: boolean;
