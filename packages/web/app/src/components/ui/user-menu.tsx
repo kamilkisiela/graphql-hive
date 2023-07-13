@@ -165,8 +165,8 @@ export function UserMenu(props: {
                   <DropdownMenuSeparator />
                   <NextLink href="/org/new">
                     <DropdownMenuItem>
-                      <PlusIcon className="mr-2 h-4 w-4" />
-                      Create an organization
+                      Create organization
+                      <PlusIcon className="ml-2 h-4 w-4" />
                     </DropdownMenuItem>
                   </NextLink>
                 </DropdownMenuSubContent>
