@@ -10,10 +10,6 @@ export default gql`
     Requires API Token
     """
     schemaCheck(input: SchemaCheckInput!): SchemaCheckPayload!
-    """
-    Requires API Token
-    """
-    schemaDelete(input: SchemaDeleteInput!): SchemaDeleteResult!
     updateSchemaVersionStatus(input: SchemaVersionUpdateInput!): SchemaVersion!
     updateBaseSchema(input: UpdateBaseSchemaInput!): UpdateBaseSchemaResult!
     enableExternalSchemaComposition(
