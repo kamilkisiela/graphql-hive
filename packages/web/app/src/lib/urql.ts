@@ -43,6 +43,7 @@ export const urqlClient = createClient({
         SuccessfulSchemaCheck: ({ id }) => `SchemaCheck:${id}`,
         FailedSchemaCheck: ({ id }) => `SchemaCheck:${id}`,
       },
+      globalIDs: ['SuccessfulSchemaCheck', 'FailedSchemaCheck'],
     }),
     errorExchange({
       onError(error) {
