@@ -136,7 +136,7 @@ function GitHubIntegration({
           ) : (
             <Tag className="!p-4">
               The organization is not connected to our GitHub Application.
-              <Link variant="primary" href={`/${router.organizationId}#settings`}>
+              <Link variant="primary" href={`/${router.organizationId}/view/settings`}>
                 Visit settings
               </Link>
               to configure it.
