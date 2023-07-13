@@ -1,5 +1,26 @@
 # @graphql-hive/cli
 
+## 0.26.0
+
+### Minor Changes
+
+- [#2568](https://github.com/kamilkisiela/graphql-hive/pull/2568)
+  [`9a205952`](https://github.com/kamilkisiela/graphql-hive/commit/9a2059524c4f09f576b2c5dd33687113c94aadd8)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Remove experimental operations:publish
+  command
+
+- [#2568](https://github.com/kamilkisiela/graphql-hive/pull/2568)
+  [`9a205952`](https://github.com/kamilkisiela/graphql-hive/commit/9a2059524c4f09f576b2c5dd33687113c94aadd8)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Use latest composable schema in
+  operations:check command
+
+### Patch Changes
+
+- [#2594](https://github.com/kamilkisiela/graphql-hive/pull/2594)
+  [`c10e1250`](https://github.com/kamilkisiela/graphql-hive/commit/c10e1250096d4ffae04696e6d2a9a9299da10974)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - prevent reading a key of undefined
+  value from config file
+
 ## 0.25.1
 
 ### Patch Changes
