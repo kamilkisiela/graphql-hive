@@ -22,7 +22,7 @@ import { DeleteProjectModal } from '@/components/v2/modals';
 import { graphql, useFragment } from '@/gql';
 import { GetGitHubIntegrationDetailsDocument, ProjectType } from '@/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
-import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const ProjectSettingsPage_UpdateProjectGitRepositoryMutation = graphql(`
@@ -46,11 +46,7 @@ const ProjectSettingsPage_UpdateProjectGitRepositoryMutation = graphql(`
   }
 `);
 
-function GitHubIntegration({
-  gitRepository,
-}: {
-  gitRepository: string | null;
-}): ReactElement | null {
+function GitHubIntegration(props: { gitRepository: string | null }): ReactElement | null {
   const router = useRouteSelector();
   const [integrationQuery] = useQuery({
     query: GetGitHubIntegrationDetailsDocument,
@@ -60,6 +56,9 @@ function GitHubIntegration({
       },
     },
   });
+  const gitRepository = props.gitRepository ?? '';
+
+  const notify = useNotifications();
 
   const [mutation, mutate] = useMutation(ProjectSettingsPage_UpdateProjectGitRepositoryMutation);
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
@@ -76,8 +75,14 @@ function GitHubIntegration({
           input: {
             organization: router.organizationId,
             project: router.projectId,
-            gitRepository: values.gitRepository,
+            gitRepository: values.gitRepository === '' ? null : values.gitRepository,
           },
+        }).then(result => {
+          if (result.data?.updateProjectGitRepository.ok) {
+            notify('Updated Git repository', 'success');
+          } else {
+            notify('Failed to update Git repository', 'error');
+          }
         }),
     });
 
@@ -85,6 +90,7 @@ function GitHubIntegration({
     return null;
   }
 
+  console.log(gitRepository, values.gitRepository);
   const githubIntegration = integrationQuery.data?.gitHubIntegration;
 
   return (
@@ -145,7 +151,11 @@ function GitHubIntegration({
         </CardContent>
         {githubIntegration ? (
           <CardFooter>
-            <Button type="submit" className="px-10" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="px-10"
+              disabled={isSubmitting || gitRepository === values.gitRepository}
+            >
               Save
             </Button>
           </CardFooter>
