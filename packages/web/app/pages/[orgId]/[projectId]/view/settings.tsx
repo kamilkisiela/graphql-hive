@@ -213,6 +213,7 @@ const ProjectSettingsPageQuery = graphql(`
     me {
       ...ProjectLayout_MeFragment
     }
+    isGitHubIntegrationFeatureEnabled
   }
 `);
 
@@ -337,7 +338,9 @@ function ProjectSettingsContent() {
                 </Card>
               </form>
 
-              <GitHubIntegration gitRepository={project.gitRepository ?? null} />
+              {query.data?.isGitHubIntegrationFeatureEnabled ? (
+                <GitHubIntegration gitRepository={project.gitRepository ?? null} />
+              ) : null}
 
               {project.type === ProjectType.Federation ? (
                 <ExternalCompositionSettings project={project} organization={organization} />
