@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import NextLink from 'next/link';
 import clsx from 'clsx';
 import { useMutation, useQuery } from 'urql';
@@ -270,8 +270,13 @@ const ApproveFailedSchemaCheckModal = (props: {
   schemaCheckId: string;
   isOpen: boolean;
   close: () => void;
+  refetch: () => void;
 }) => {
   const [state, mutate] = useMutation(ApproveFailedSchemaCheckMutation);
+
+  useEffect(() => {
+    props.refetch();
+  }, [state.data?.approveFailedSchemaCheck.ok]);
 
   return (
     <Modal open={props.isOpen} onOpenChange={props.close} className={clsx('w-[550px]')}>
@@ -345,7 +350,7 @@ const ActiveSchemaCheck = ({
   schemaCheckId: string | null;
 }): React.ReactElement | null => {
   const router = useRouteSelector();
-  const [query] = useQuery({
+  const [query, refetch] = useQuery({
     query: ActiveSchemaCheckQuery,
     variables: {
       organizationId: router.organizationId,
@@ -633,6 +638,7 @@ const ActiveSchemaCheck = ({
         schemaCheckId={schemaCheck.id}
         isOpen={isApproveFailedSchemaCheckModalOpen}
         close={() => setIsApproveFailedSchemaCheckModalOpen(false)}
+        refetch={() => refetch({ requestPolicy: 'network-only' })}
       />
     </div>
   );
