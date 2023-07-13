@@ -5,6 +5,7 @@ import { Link, TimeAgo } from '@/components/v2';
 import { EditIcon, PlusIcon, TrashIcon, UserPlusMinusIcon } from '@/components/v2/icon';
 import {
   MemberDeletedActivity,
+  MemberLeftActivity,
   OrganizationActivitiesDocument,
   OrganizationIdUpdatedActivity,
   OrganizationNameUpdatedActivity,
@@ -106,6 +107,16 @@ export const getActivity = (
           <>
             {user.displayName} removed{' '}
             <b className="text-gray-300">{(activity as MemberDeletedActivity).email}</b> from
+            organization
+          </>
+        ),
+        icon: <UserPlusMinusIcon isPlus={false} className="h-5 w-5" />,
+      };
+    case 'MemberLeftActivity':
+      return {
+        content: (
+          <>
+            <b className="text-gray-300">{(activity as MemberLeftActivity).email}</b> left{' '}
             organization
           </>
         ),

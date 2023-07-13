@@ -214,6 +214,15 @@ fragment MemberDeleted on MemberDeletedActivity {
   }
 }
 
+fragment MemberLeft on MemberLeftActivity {
+  id
+  createdAt
+  email
+  organization {
+    ...OrganizationEssentials
+  }
+}
+
 fragment ProjectCreated on ProjectCreatedActivity {
   id
   createdAt

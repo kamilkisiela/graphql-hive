@@ -89,6 +89,14 @@ export default gql`
     email: String!
   }
 
+  type MemberLeftActivity implements Activity {
+    id: ID!
+    type: String!
+    createdAt: DateTime!
+    organization: Organization!
+    email: String!
+  }
+
   type ProjectCreatedActivity implements Activity {
     id: ID!
     type: String!

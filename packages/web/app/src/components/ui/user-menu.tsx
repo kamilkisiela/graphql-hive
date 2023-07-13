@@ -1,5 +1,5 @@
 import NextLink from 'next/link';
-import { FaGithub, FaGoogle, FaKey } from 'react-icons/fa';
+import { FaGithub, FaGoogle, FaKey, FaUsersSlash } from 'react-icons/fa';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +23,7 @@ import {
   SettingsIcon,
   TrendingUpIcon,
 } from '@/components/v2/icon';
+import { LeaveOrganizationModal } from '@/components/v2/modals/leave-organization';
 import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { AuthProvider } from '@/graphql';
@@ -39,6 +40,9 @@ export const UserMenu_CurrentOrganizationFragment = graphql(`
     name
     getStarted {
       ...GetStartedWizard_GetStartedProgress
+    }
+    me {
+      ...UserMenu_MemberFragment
     }
   }
 `);
@@ -65,6 +69,12 @@ export const UserMenu_MeFragment = graphql(`
   }
 `);
 
+const UserMenu_MemberFragment = graphql(`
+  fragment UserMenu_MemberFragment on Member {
+    canLeaveOrganization
+  }
+`);
+
 export function UserMenu(props: {
   me: FragmentType<typeof UserMenu_MeFragment> | null;
   currentOrganization: FragmentType<typeof UserMenu_CurrentOrganizationFragment> | null;
@@ -76,8 +86,12 @@ export function UserMenu(props: {
     UserMenu_CurrentOrganizationFragment,
     props.currentOrganization,
   );
+  const meInOrg = useFragment(UserMenu_MemberFragment, currentOrganization?.me);
   const organizations = useFragment(UserMenu_OrganizationConnectionFragment, props.organizations);
   const [isUserSettingsModalOpen, toggleUserSettingsModalOpen] = useToggle();
+  const [isLeaveOrganizationModalOpen, toggleLeaveOrganizationModalOpen] = useToggle();
+
+  const canLeaveOrganization = !!currentOrganization && meInOrg?.canLeaveOrganization === true;
 
   return (
     <>
@@ -85,6 +99,14 @@ export function UserMenu(props: {
         toggleModalOpen={toggleUserSettingsModalOpen}
         isOpen={isUserSettingsModalOpen}
       />
+      {canLeaveOrganization ? (
+        <LeaveOrganizationModal
+          toggleModalOpen={toggleLeaveOrganizationModalOpen}
+          isOpen={isLeaveOrganizationModalOpen}
+          organizationId={currentOrganization.cleanId}
+          organizationName={currentOrganization.name}
+        />
+      ) : null}
       <div className="flex flex-row gap-8 items-center">
         {currentOrganization ? <GetStartedProgress tasks={currentOrganization.getStarted} /> : null}
         <DropdownMenu>
@@ -200,6 +222,16 @@ export function UserMenu(props: {
                 </NextLink>
               )}
               <DropdownMenuSeparator />
+              {canLeaveOrganization ? (
+                <DropdownMenuItem
+                  onClick={() => {
+                    toggleLeaveOrganizationModalOpen();
+                  }}
+                >
+                  <FaUsersSlash className="mr-2 h-4 w-4" />
+                  Leave organization
+                </DropdownMenuItem>
+              ) : null}
               <DropdownMenuItem asChild>
                 <a href="/logout" data-cy="user-menu-logout">
                   <LogOutIcon className="mr-2 h-4 w-4" />

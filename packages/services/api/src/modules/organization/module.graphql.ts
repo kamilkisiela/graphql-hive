@@ -15,6 +15,7 @@ export default gql`
     deleteOrganization(selector: OrganizationSelectorInput!): OrganizationPayload!
     deleteOrganizationMembers(selector: OrganizationMembersSelectorInput!): OrganizationPayload!
     joinOrganization(code: String!): JoinOrganizationPayload!
+    leaveOrganization(input: OrganizationSelectorInput!): LeaveOrganizationResult!
     inviteToOrganizationByEmail(
       input: InviteToOrganizationByEmailInput!
     ): InviteToOrganizationByEmailResult!
@@ -55,6 +56,22 @@ export default gql`
   type CreateOrganizationError implements Error {
     message: String!
     inputErrors: CreateOrganizationInputErrors!
+  }
+
+  """
+  @oneOf
+  """
+  type LeaveOrganizationResult {
+    ok: LeaveOrganizationOk
+    error: LeaveOrganizationError
+  }
+
+  type LeaveOrganizationOk {
+    organizationId: ID!
+  }
+
+  type LeaveOrganizationError implements Error {
+    message: String!
   }
 
   input OrganizationTransferRequestSelector {
@@ -101,6 +118,9 @@ export default gql`
     message: String!
   }
 
+  """
+  @oneOf
+  """
   type CreateOrganizationResult {
     ok: CreateOrganizationOk
     error: CreateOrganizationError
@@ -231,6 +251,9 @@ export default gql`
     enablingUsageBasedBreakingChanges: Boolean!
   }
 
+  """
+  @oneOf
+  """
   type DeleteOrganizationInvitationResult {
     ok: OrganizationInvitation
     error: DeleteOrganizationInvitationError
@@ -238,5 +261,9 @@ export default gql`
 
   type DeleteOrganizationInvitationError implements Error {
     message: String!
+  }
+
+  extend type Member {
+    canLeaveOrganization: Boolean!
   }
 `;
