@@ -81,7 +81,8 @@ async function main() {
     if (env.prometheus) {
       await startMetrics(env.prometheus.labels.instance);
     }
-    await server.listen(env.http.port);
+    // eslint-disable-next-line no-restricted-syntax
+    await server.listen(env.http.port, '0.0.0.0');
     await start();
   } catch (error) {
     server.log.fatal(error);

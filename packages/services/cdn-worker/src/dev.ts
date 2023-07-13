@@ -106,7 +106,8 @@ function main() {
   const server = createServer(app);
 
   return new Promise<void>(resolve => {
-    server.listen(PORT, resolve);
+    // eslint-disable-next-line no-restricted-syntax
+    server.listen(PORT, '0.0.0.0', resolve);
   });
 }
 

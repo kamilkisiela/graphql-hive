@@ -448,13 +448,32 @@ export async function main() {
       await startMetrics(env.prometheus.labels.instance);
     }
 
-    await server.listen(port);
+    // Start server
+    try {
+      server.log.info('Starting server on ::');
+      await server.listen(port, '::');
+    } catch (error) {
+      if (typeof (error as any).code === 'string' && (error as any).code === 'EAFNOSUPPORT') {
+        // if we get here, this means ipv6 is disabled, and we should explicitly listen to ipv4 loopback
+        server.log.warn(
+          `Ipv6 seems to be disabled, and we ran into an error when trying to listen on ::`,
+        );
+        server.log.warn(error);
+        server.log.info('Starting server on 0.0.0.0');
+        // eslint-disable-next-line no-restricted-syntax
+        await server.listen(env.http.port, '0.0.0.0');
+      } else {
+        throw error;
+      }
+    }
   } catch (error) {
-    server.log.fatal(error);
-    captureException(error, {
-      level: 'fatal',
-    });
-    process.exit(1);
+    if (typeof (error as any).code === 'string' && (error as any).code === 'EAFNOSUPPORT') {
+      server.log.fatal(error);
+      captureException(error, {
+        level: 'fatal',
+      });
+      process.exit(1);
+    }
   }
 }
 
