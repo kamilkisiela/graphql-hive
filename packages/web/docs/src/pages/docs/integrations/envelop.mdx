@@ -15,30 +15,12 @@ The `@graphql-hive/client` package exports an
 [Envelop plugin](https://the-guild.dev/graphql/envelop), that can be used directly with any server
 that supports Envelop.
 
+## Integration Guide
+
 ### Publishing Schemas
 
-You can report schemas to Hive registry by using the `reporting` section of the configuration:
-
-```ts
-import { createServer } from 'node:http'
-import { createYoga } from 'graphql-yoga'
-import { useHive } from '@graphql-hive/client'
-import { schema } from './schema'
-
-const plugin = useHive({
-  enabled: true, // Enable/Disable Hive Client
-  debug: true, // Debugging mode
-  token: 'YOUR-TOKEN',
-  // Schema reporting
-  reporting: {
-    // feel free to set dummy values here
-    author: 'Author of the schema version',
-    commit: 'git sha or any identifier'
-  }
-})
-
-// Now use `plugin` with your server, pass it as Envelop plugin.
-```
+Please use the [Hive CLI to publish your GraphQL schema](../api-reference/cli.mdx#publish-a-schema).
+Follow the [CI/CD instructions](./ci-cd.mdx) for automating the process.
 
 ### Usage Reporting
 

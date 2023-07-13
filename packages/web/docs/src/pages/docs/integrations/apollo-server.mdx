@@ -15,35 +15,12 @@ The `@graphql-hive/client` package exports a
 [Apollo-Server plugin](https://www.apollographql.com/docs/apollo-server/), that can be used
 directly.
 
+## Integration Guide
+
 ### Publishing Schemas
 
-Import the `hiveApollo` plugin and add it to `ApolloServer` instance:
-
-```ts
-import { ApolloServer } from 'apollo-server'
-import { hiveApollo } from '@graphql-hive/client'
-
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-  plugins: [
-    hiveApollo({
-      enabled: true,
-      debug: true, // or false
-      token: 'YOUR-TOKEN',
-      reporting: {
-        // feel free to set dummy values here
-        author: 'Author of the latest change',
-        commit: 'git sha or any identifier',
-
-        // Federation and Stitching
-        serviceUrl: '...',
-        serviceName: '...'
-      }
-    })
-  ]
-})
-```
+Please use the [Hive CLI to publish your GraphQL schema](../api-reference/cli.mdx#publish-a-schema).
+Follow the [CI/CD instructions](./ci-cd.mdx) for automating the process.
 
 ### Usage Reporting
 
