@@ -40,7 +40,10 @@ export const urqlClient = createClient({
         GraphQLInputField: noKey,
         GraphQLArgument: noKey,
         SchemaCoordinateUsage: noKey,
+        SuccessfulSchemaCheck: ({ id }) => `SchemaCheck:${id}`,
+        FailedSchemaCheck: ({ id }) => `SchemaCheck:${id}`,
       },
+      globalIDs: ['SuccessfulSchemaCheck', 'FailedSchemaCheck'],
     }),
     errorExchange({
       onError(error) {

@@ -323,6 +323,9 @@ export class SchemaPublisher {
               compositeSchemaSDL: checkResult.state.composition.compositeSchemaSDL,
               supergraphSDL: checkResult.state.composition.supergraphSDL,
             }),
+        isManuallyApproved: false,
+        manualApprovalUserId: null,
+        githubCheckRunId: null,
       });
     }
 
@@ -377,12 +380,17 @@ export class SchemaPublisher {
         schemaCompositionErrors: null,
         compositeSchemaSDL: composition.compositeSchemaSDL,
         supergraphSDL: composition.supergraphSDL,
+        isManuallyApproved: false,
+        manualApprovalUserId: null,
+        githubCheckRunId: null,
       });
     }
 
     if (input.github) {
+      let result: Awaited<ReturnType<SchemaPublisher['githubCheck']>>;
+
       if (checkResult.conclusion === SchemaCheckConclusion.Success) {
-        return this.githubCheck({
+        result = await this.githubCheck({
           project,
           target,
           organization,
@@ -396,30 +404,44 @@ export class SchemaPublisher {
           errors: null,
           schemaCheckId: schemaCheck?.id ?? null,
         });
+      } else {
+        result = await this.githubCheck({
+          project,
+          target,
+          organization,
+          serviceName: input.service ?? null,
+          sha: input.github.commit,
+          conclusion: checkResult.conclusion,
+          changes: [
+            ...(checkResult.state.schemaChanges?.breaking ?? []),
+            ...(checkResult.state.schemaChanges?.safe ?? []),
+          ],
+          breakingChanges: checkResult.state.schemaChanges?.breaking ?? [],
+          compositionErrors: checkResult.state.composition.errors ?? [],
+          warnings: checkResult.state.schemaPolicy?.warnings ?? [],
+          errors: checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? [],
+          schemaCheckId: schemaCheck?.id ?? null,
+        });
       }
 
-      return this.githubCheck({
-        project,
-        target,
-        organization,
-        serviceName: input.service ?? null,
-        sha: input.github.commit,
-        conclusion: checkResult.conclusion,
-        changes: [
-          ...(checkResult.state.schemaChanges?.breaking ?? []),
-          ...(checkResult.state.schemaChanges?.safe ?? []),
-        ],
-        breakingChanges: checkResult.state.schemaChanges?.breaking ?? [],
-        compositionErrors: checkResult.state.composition.errors ?? [],
-        warnings: checkResult.state.schemaPolicy?.warnings ?? [],
-        errors: checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? [],
-        schemaCheckId: schemaCheck?.id ?? null,
-      });
+      if (result?.checkRun && schemaCheck?.id) {
+        await this.storage.setSchemaCheckGithubCheckRunId({
+          schemaCheckId: schemaCheck.id,
+          githubCheckRunId: result.checkRun.id,
+        });
+      }
+
+      return result;
     }
 
     if (schemaCheck == null) {
       throw new Error('Invalid state. Schema check can not be null at this point.');
     }
+
+    const schemaCheckSelector = {
+      organizationId: target.orgId,
+      projectId: target.projectId,
+    };
 
     if (checkResult.conclusion === SchemaCheckConclusion.Success) {
       return {
@@ -428,7 +450,7 @@ export class SchemaPublisher {
         changes: checkResult.state?.schemaChanges ?? [],
         warnings: checkResult.state?.schemaPolicyWarnings ?? [],
         initial: latestVersion == null,
-        schemaCheck: toGraphQLSchemaCheck(target)(inflateSchemaCheck(schemaCheck)),
+        schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, inflateSchemaCheck(schemaCheck)),
       } as const;
     }
 
@@ -445,7 +467,7 @@ export class SchemaPublisher {
         ...(checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? []),
         ...(checkResult.state.composition.errors ?? []),
       ],
-      schemaCheck: toGraphQLSchemaCheck(target)(inflateSchemaCheck(schemaCheck)),
+      schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, inflateSchemaCheck(schemaCheck)),
     } as const;
   }
 
@@ -1143,7 +1165,7 @@ export class SchemaPublisher {
           .join('\n\n');
       }
 
-      await this.gitHubIntegrationManager.createCheckRun({
+      const checkRun = await this.gitHubIntegrationManager.createCheckRun({
         name: buildGitHubActionCheckName(target.name, serviceName ?? null),
         conclusion: conclusion === SchemaCheckConclusion.Success ? 'success' : 'failure',
         sha,
@@ -1168,6 +1190,7 @@ export class SchemaPublisher {
       return {
         __typename: 'GitHubSchemaCheckSuccess' as const,
         message: 'Check-run created',
+        checkRun,
       };
     } catch (error: any) {
       Sentry.captureException(error);

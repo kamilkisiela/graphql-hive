@@ -12,6 +12,7 @@ import { SchemaVersion } from '../../../shared/mappers';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
+import { GitHubIntegrationManager } from '../../integrations/providers/github-integration-manager';
 import { ProjectManager } from '../../project/providers/project-manager';
 import { CryptoProvider } from '../../shared/providers/crypto';
 import { Logger } from '../../shared/providers/logger';
@@ -64,6 +65,7 @@ export class SchemaManager {
     private stitchingOrchestrator: StitchingOrchestrator,
     private federationOrchestrator: FederationOrchestrator,
     private crypto: CryptoProvider,
+    private githubIntegrationManager: GitHubIntegrationManager,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
   ) {
     this.logger = logger.child({ source: 'SchemaManager' });
@@ -627,6 +629,152 @@ export class SchemaManager {
       schemaCheckId: args.schemaCheckId,
     });
   }
+
+  /**
+   * Whether a failed schema check can be approved manually.
+   */
+  getFailedSchemaCheckCanBeApproved(args: { schemaCompositionErrors: Array<unknown> | null }) {
+    return !args.schemaCompositionErrors;
+  }
+
+  async getFailedSchemaCheckCanBeApprovedByViewer(args: {
+    organizationId: string;
+    schemaCompositionErrors: Array<unknown> | null;
+  }) {
+    if (!this.getFailedSchemaCheckCanBeApproved(args)) {
+      return false;
+    }
+
+    if (!this.authManager.isUser()) {
+      // TODO: support approving a schema check via non web app user?
+      return false;
+    }
+
+    const user = await this.authManager.getCurrentUser();
+    const scopes = await this.authManager.getMemberTargetScopes({
+      user: user.id,
+      organization: args.organizationId,
+    });
+
+    return scopes.includes(TargetAccessScope.REGISTRY_WRITE);
+  }
+
+  /**
+   * Approve a schema check that failed due to breaking changes.
+   * You cannot approve a schema check that failed because composition failed.
+   */
+  async approveFailedSchemaCheck(args: {
+    targetId: string;
+    projectId: string;
+    organizationId: string;
+    schemaCheckId: string;
+  }) {
+    this.logger.debug('Manually approve failed schema check (args=%o)', args);
+
+    await this.authManager.ensureTargetAccess({
+      target: args.targetId,
+      project: args.projectId,
+      organization: args.organizationId,
+      scope: TargetAccessScope.REGISTRY_WRITE,
+    });
+
+    let [schemaCheck, viewer] = await Promise.all([
+      this.storage.findSchemaCheck({
+        targetId: args.targetId,
+        schemaCheckId: args.schemaCheckId,
+      }),
+      this.authManager.getCurrentUser(),
+    ]);
+
+    if (schemaCheck == null) {
+      this.logger.debug('Schema check not found (args=%o)', args);
+      return {
+        type: 'error',
+        reason: "Schema check doesn't exist.",
+      } as const;
+    }
+
+    if (schemaCheck.isSuccess) {
+      this.logger.debug('Schema check is not failed (args=%o)', args);
+      return {
+        type: 'error',
+        reason: 'Schema check is not failed.',
+      } as const;
+    }
+
+    if (!this.getFailedSchemaCheckCanBeApproved(schemaCheck)) {
+      this.logger.debug(
+        'Schema check has composition errors or schema policy errors (args=%o).',
+        args,
+      );
+      return {
+        type: 'error',
+        reason: 'Schema check has composition errors.',
+      } as const;
+    }
+
+    if (schemaCheck.githubCheckRunId) {
+      this.logger.debug('Attempt updating GitHub schema check. (args=%o).', args);
+      const project = await this.projectManager.getProject({
+        organization: args.organizationId,
+        project: args.projectId,
+      });
+      if (!project.gitRepository) {
+        this.logger.debug(
+          'Skip updating GitHub schema check. Project has no git repository connected. (args=%o).',
+          args,
+        );
+      } else {
+        const [owner, repository] = project.gitRepository.split('/');
+        const result = await this.githubIntegrationManager.updateCheckRunToSuccess({
+          organizationId: args.organizationId,
+          checkRun: {
+            owner,
+            repository,
+            checkRunId: schemaCheck.githubCheckRunId,
+          },
+        });
+
+        // In case updating the check run fails, we don't want to update our database state.
+        // Instead, we want to return the error to the user and inform him that there is an issue with GitHub
+        // and he needs to try again later.
+        if (result?.type === 'error') {
+          return {
+            type: 'error',
+            reason: result.reason,
+          } as const;
+        }
+      }
+    }
+
+    schemaCheck = await this.storage.approveFailedSchemaCheck({
+      schemaCheckId: args.schemaCheckId,
+      userId: viewer.id,
+    });
+
+    if (!schemaCheck) {
+      return {
+        type: 'error',
+        reason: "Schema check doesn't exist.",
+      } as const;
+    }
+
+    return {
+      type: 'ok',
+      schemaCheck: inflateSchemaCheck(schemaCheck),
+    } as const;
+  }
+
+  async getApprovedByUser(args: { organizationId: string; userId: string | null }) {
+    if (args.userId == null) {
+      return null;
+    }
+
+    return this.storage.getOrganizationUser({
+      organizationId: args.organizationId,
+      userId: args.userId,
+    });
+  }
 }
 
 /**
@@ -639,6 +787,9 @@ export function inflateSchemaCheck(schemaCheck: SchemaCheck) {
       safeSchemaChanges:
         // TODO: fix any type
         schemaCheck.safeSchemaChanges?.map((check: any) => schemaChangeFromMeta(check)) ?? null,
+      // TODO: fix any type
+      breakingSchemaChanges:
+        schemaCheck.breakingSchemaChanges?.map((check: any) => schemaChangeFromMeta(check)) ?? null,
     };
   }
 

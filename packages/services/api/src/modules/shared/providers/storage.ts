@@ -714,8 +714,27 @@ export interface Storage {
       }>;
     }>
   >;
+  /**
+   * Set the github check run id for a schema check.
+   */
+  setSchemaCheckGithubCheckRunId(input: {
+    schemaCheckId: string;
+    githubCheckRunId: number;
+  }): Promise<SchemaCheck | null>;
+  /**
+   * Overwrite and approve a schema check.
+   */
+  approveFailedSchemaCheck(input: {
+    schemaCheckId: string;
+    userId: string;
+  }): Promise<SchemaCheck | null>;
 
   getTargetBreadcrumbForTargetId(_: { targetId: string }): Promise<TargetBreadcrumb | null>;
+
+  /**
+   * Get an user that belongs to a specific organization by id.
+   */
+  getOrganizationUser(_: { organizationId: string; userId: string }): Promise<User | null>;
 }
 
 @Injectable()

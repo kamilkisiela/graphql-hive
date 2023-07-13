@@ -25,6 +25,10 @@ export default gql`
     updateProjectRegistryModel(
       input: UpdateProjectRegistryModelInput!
     ): UpdateProjectRegistryModelResult!
+    """
+    Approve a failed schema check with breaking changes.
+    """
+    approveFailedSchemaCheck(input: ApproveFailedSchemaCheckInput!): ApproveFailedSchemaCheckResult!
   }
 
   extend type Query {
@@ -699,6 +703,11 @@ export default gql`
     The URL of the schema check on the Hive Web App.
     """
     webUrl: String
+
+    breakingSchemaChanges: SchemaChangeConnection
+    safeSchemaChanges: SchemaChangeConnection
+    schemaPolicyWarnings: SchemaPolicyWarningConnection
+    schemaPolicyErrors: SchemaPolicyWarningConnection
   }
 
   """
@@ -729,11 +738,27 @@ export default gql`
     """
     webUrl: String
 
+    """
+    Breaking changes can exist in an successful schema check if the check was manually approved.
+    """
+    breakingSchemaChanges: SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
     schemaPolicyWarnings: SchemaPolicyWarningConnection
+    """
+    Schema policy errors can exist in an successful schema check if the check was manually approved.
+    """
+    schemaPolicyErrors: SchemaPolicyWarningConnection
 
     compositeSchemaSDL: String
     supergraphSDL: String
+    """
+    Whether the schema check was manually approved.
+    """
+    isApproved: Boolean!
+    """
+    The user that approved the schema check.
+    """
+    approvedBy: User
   }
 
   """
@@ -773,6 +798,15 @@ export default gql`
 
     compositeSchemaSDL: String
     supergraphSDL: String
+
+    """
+    Whether this schema check can be approved manually.
+    """
+    canBeApproved: Boolean!
+    """
+    Whether this schema check can be approved by the viewer.
+    """
+    canBeApprovedByViewer: Boolean!
   }
 
   type SchemaCheckEdge {
@@ -783,5 +817,25 @@ export default gql`
   type SchemaCheckConnection {
     edges: [SchemaCheckEdge!]!
     pageInfo: PageInfo!
+  }
+
+  input ApproveFailedSchemaCheckInput {
+    organization: ID!
+    project: ID!
+    target: ID!
+    schemaCheckId: ID!
+  }
+
+  type ApproveFailedSchemaCheckResult {
+    ok: ApproveFailedSchemaCheckOk
+    error: ApproveFailedSchemaCheckError
+  }
+
+  type ApproveFailedSchemaCheckOk {
+    schemaCheck: SchemaCheck!
+  }
+
+  type ApproveFailedSchemaCheckError {
+    message: String!
   }
 `;

@@ -59,6 +59,12 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
     captureException(error);
   }
 
+  // For convenience, we allow to pass the access token in the Authorization header
+  // in development mode to avoid spinning up multiple proxy servers when testing integrations
+  if (env.nodeEnv === 'development' && !accessToken && req.headers['authorization']) {
+    accessToken = req.headers['authorization'].replace('Bearer ', '');
+  }
+
   if (!accessToken) {
     accessSpan?.setHttpStatus(401);
     accessSpan?.finish();

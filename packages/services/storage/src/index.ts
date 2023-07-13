@@ -3438,6 +3438,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "schema_policy_errors"
           , "composite_schema_sdl"
           , "supergraph_sdl"
+          , "is_manually_approved"
+          , "manual_approval_user_id"
+          , "github_check_run_id"
         )
         VALUES (
           ${args.schemaSDL}
@@ -3453,6 +3456,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , ${jsonify(args.schemaPolicyErrors?.map(w => SchemaPolicyWarningModel.parse(w)))}
           , ${args.compositeSchemaSDL}
           , ${args.supergraphSDL}
+          , ${args.isManuallyApproved}
+          , ${args.manualApprovalUserId}
+          , ${args.githubCheckRunId}
         )
         RETURNING
           ${schemaCheckSQLFields}
@@ -3461,7 +3467,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return SchemaCheckModel.parse(result);
     },
     async findSchemaCheck(args) {
-      console.log(args.targetId);
       const result = await pool.maybeOne<unknown>(sql`
         SELECT
           ${schemaCheckSQLFields}
@@ -3470,6 +3475,46 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         WHERE
           "id" = ${args.schemaCheckId}
           AND "target_id" = ${args.targetId}
+      `);
+
+      if (result == null) {
+        return null;
+      }
+
+      return SchemaCheckModel.parse(result);
+    },
+    async setSchemaCheckGithubCheckRunId(args) {
+      const result = await pool.maybeOne<unknown>(sql`
+        UPDATE
+          "public"."schema_checks"
+        SET
+          "github_check_run_id" = ${args.githubCheckRunId}
+        WHERE
+          "id" = ${args.schemaCheckId}
+        RETURNING
+          ${schemaCheckSQLFields}
+      `);
+
+      if (result == null) {
+        return null;
+      }
+
+      return SchemaCheckModel.parse(result);
+    },
+    async approveFailedSchemaCheck(args) {
+      const result = await pool.maybeOne<unknown>(sql`
+        UPDATE
+          "public"."schema_checks"
+        SET
+          "is_success" = true
+          , "is_manually_approved" = true
+          , "manual_approval_user_id" = ${args.userId}
+        WHERE
+          "id" = ${args.schemaCheckId}
+          AND "is_success" = false
+          AND "schema_composition_errors" IS NULL
+        RETURNING
+          ${schemaCheckSQLFields}
       `);
 
       if (result == null) {
@@ -3569,6 +3614,25 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       }
 
       return TargetBreadcrumbModel.parse(result);
+    },
+
+    async getOrganizationUser(args) {
+      const result = await pool.maybeOne<users>(sql`
+        SELECT
+          "u".*
+        FROM "organization_member" as "om"
+          LEFT JOIN "organizations" as "o" ON ("o"."id" = "om"."organization_id")
+          LEFT JOIN "users" as "u" ON ("u"."id" = "om"."user_id")
+        WHERE
+          "u"."id" = ${args.userId}
+          AND "o"."id" = ${args.organizationId}
+      `);
+
+      if (result === null) {
+        return null;
+      }
+
+      return transformUser(result);
     },
   };
 
@@ -3888,6 +3952,9 @@ const schemaCheckSQLFields = sql`
   , "schema_policy_errors" as "schemaPolicyErrors"
   , "composite_schema_sdl" as "compositeSchemaSDL"
   , "supergraph_sdl" as "supergraphSDL"
+  , "github_check_run_id" as "githubCheckRunId"
+  , coalesce("is_manually_approved", false) as "isManuallyApproved"
+  , "manual_approval_user_id" as "manualApprovalUserId"
 `;
 
 export * from './schema-change-model';
