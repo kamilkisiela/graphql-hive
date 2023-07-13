@@ -83,7 +83,10 @@ target "cli-base" {
   }
 }
 
-target "target-dev" {}
+target "target-dev" {
+  // TODO: this should not be fixed for dev
+  platforms = ["linux/amd64"]
+}
 
 target "target-ci" {
   cache-from = ["type=gha"]
@@ -133,6 +136,8 @@ target "rate-limit" {
 target "schema" {
   inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/schema/dist"
+  // TODO: both platforms?
+  platforms = ["linux/amd64"]
   args = {
     IMAGE_TITLE = "graphql-hive/schema"
     IMAGE_DESCRIPTION = "The schema service of the GraphQL Hive project."
@@ -301,6 +306,8 @@ target "webhooks" {
 target "composition-federation-2" {
   inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/external-composition/federation-2/dist"
+  // TODO: both platforms?
+  platforms = ["linux/amd64"]
   args = {
     IMAGE_TITLE = "graphql-hive/composition-federation-2"
     IMAGE_DESCRIPTION = "Federation 2 Composition Service for GraphQL Hive."
@@ -362,6 +369,25 @@ target "cli" {
     stable_image_tag("cli"),
     image_tag("cli", COMMIT_SHA),
     image_tag("cli", BRANCH_NAME)
+  ]
+}
+
+group "publish" {
+  targets = [
+    // "emails",
+    // "rate-limit",
+    "schema",
+    // "policy",
+    // "storage",
+    "tokens",
+    // "usage-estimator",
+    "usage-ingestor",
+    "usage",
+    "webhooks",
+    "server",
+    "composition-federation-2",
+    // "app",
+    // "cli"
   ]
 }
 
