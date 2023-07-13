@@ -90,7 +90,6 @@ function GitHubIntegration(props: { gitRepository: string | null }): ReactElemen
     return null;
   }
 
-  console.log(gitRepository, values.gitRepository);
   const githubIntegration = integrationQuery.data?.gitHubIntegration;
 
   return (
