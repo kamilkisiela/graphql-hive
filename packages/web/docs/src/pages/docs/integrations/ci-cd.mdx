@@ -32,6 +32,57 @@ hive schema:publish schema.graphql --github
 hive schema:check schema.graphql --github
 ```
 
+#### GitHub Workflow for CI
+
+The following workflow will run the check workflow for every Pull Request, and will associated the
+check results with the Pull Request.
+
+```yaml filename=".github/workflows/ci.yml"
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  check:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: schema check
+        env:
+          HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
+        run: |
+          curl -sSL https://graphql-hive.com/install.sh | sh
+          hive schema:check "schema.graphql" \
+            --registry.accessToken ${{ env.HIVE_TOKEN }} \
+            --github
+```
+
+#### GitHub Workflow for CD
+
+The following workflow will run the publish the latest schema to the schema registry for every push
+to `main` branch.
+
+```yaml filename=".github/workflows/cd.yml"
+on:
+  push:
+    branches: [main]
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: schema publish
+        env:
+          HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
+          HIVE_ENDPOINT: ${{ secrets.HIVE_ENDPOINT }}
+        run: |
+          curl -sSL https://graphql-hive.com/install.sh | sh
+          hive schema:publish "schema.graphql" \
+            --registry.accessToken ${{ env.HIVE_TOKEN }} \
+            --github
+```
+
 ## Best Practices
 
 We recommend using 2 different models schema publication to Hive:
