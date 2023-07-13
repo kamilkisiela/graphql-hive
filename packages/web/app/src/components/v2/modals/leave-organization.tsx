@@ -12,7 +12,7 @@ const LeaveOrganizationModal_LeaveOrganizationMutation = graphql(`
   mutation LeaveOrganizationModal_LeaveOrganizationMutation($input: OrganizationSelectorInput!) {
     leaveOrganization(input: $input) {
       ok {
-        id
+        organizationId
       }
       error {
         message

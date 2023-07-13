@@ -58,13 +58,16 @@ export default gql`
     inputErrors: CreateOrganizationInputErrors!
   }
 
+  """
+  @oneOf
+  """
   type LeaveOrganizationResult {
     ok: LeaveOrganizationOk
     error: LeaveOrganizationError
   }
 
   type LeaveOrganizationOk {
-    id: ID!
+    organizationId: ID!
   }
 
   type LeaveOrganizationError implements Error {
@@ -115,6 +118,9 @@ export default gql`
     message: String!
   }
 
+  """
+  @oneOf
+  """
   type CreateOrganizationResult {
     ok: CreateOrganizationOk
     error: CreateOrganizationError
@@ -245,6 +251,9 @@ export default gql`
     enablingUsageBasedBreakingChanges: Boolean!
   }
 
+  """
+  @oneOf
+  """
   type DeleteOrganizationInvitationResult {
     ok: OrganizationInvitation
     error: DeleteOrganizationInvitationError

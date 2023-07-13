@@ -126,7 +126,7 @@ export const resolvers: OrganizationModule.Resolvers = {
 
       return {
         ok: {
-          id: organizationId,
+          organizationId,
         },
       };
     },
