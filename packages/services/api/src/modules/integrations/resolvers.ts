@@ -91,10 +91,16 @@ export const resolvers: IntegrationsModule.Resolvers = {
     async gitHubIntegration(_, { selector }, { injector }) {
       const organization = await injector.get(IdTranslator).translateOrganizationId(selector);
 
+      const repositories = await injector.get(GitHubIntegrationManager).getRepositories({
+        organization,
+      });
+
+      if (repositories == null) {
+        return null;
+      }
+
       return {
-        repositories: await injector.get(GitHubIntegrationManager).getRepositories({
-          organization,
-        }),
+        repositories,
       };
     },
     organizationByGitHubInstallationId(_, { installation }, { injector }) {

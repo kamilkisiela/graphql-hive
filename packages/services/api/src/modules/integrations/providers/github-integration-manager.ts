@@ -92,36 +92,42 @@ export class GitHubIntegrationManager {
     });
   }
 
+  /**
+   * Fetches repositories for the given organization.
+   * Returns null in case no integration is found.
+   * @param selector
+   * @returns
+   */
   async getRepositories(
     selector: OrganizationSelector,
-  ): Promise<IntegrationsModule.GitHubIntegration['repositories']> {
+  ): Promise<IntegrationsModule.GitHubIntegration['repositories'] | null> {
     const installationId = await this.getInstallationId(selector);
     this.logger.debug('Fetching repositories');
 
-    if (installationId) {
-      if (!this.app) {
-        throw new Error('GitHub Integration not found. Please provide GITHUB_APP_CONFIG.');
-      }
-
-      const octokit = await this.app.getInstallationOctokit(parseInt(installationId, 10));
-
-      return octokit
-        .request('GET /installation/repositories')
-        .then(result =>
-          result.data.repositories.map(repo => {
-            return {
-              nameWithOwner: repo.full_name,
-            };
-          }),
-        )
-        .catch(e => {
-          this.logger.warn('Failed to fetch repositories', e);
-          this.logger.error(e);
-          return Promise.resolve([]);
-        });
+    if (!installationId) {
+      return null;
     }
 
-    return [];
+    if (!this.app) {
+      throw new Error('GitHub Integration not found. Please provide GITHUB_APP_CONFIG.');
+    }
+
+    const octokit = await this.app.getInstallationOctokit(parseInt(installationId, 10));
+
+    return octokit
+      .request('GET /installation/repositories')
+      .then(result =>
+        result.data.repositories.map(repo => {
+          return {
+            nameWithOwner: repo.full_name,
+          };
+        }),
+      )
+      .catch(e => {
+        this.logger.warn('Failed to fetch repositories', e);
+        this.logger.error(e);
+        return Promise.resolve([]);
+      });
   }
 
   async getOrganization(selector: { installation: string }) {

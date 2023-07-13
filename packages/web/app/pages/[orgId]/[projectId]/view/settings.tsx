@@ -22,7 +22,7 @@ import { DeleteProjectModal } from '@/components/v2/modals';
 import { graphql, useFragment } from '@/gql';
 import { GetGitHubIntegrationDetailsDocument, ProjectType } from '@/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
-import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const ProjectSettingsPage_UpdateProjectGitRepositoryMutation = graphql(`
@@ -46,11 +46,7 @@ const ProjectSettingsPage_UpdateProjectGitRepositoryMutation = graphql(`
   }
 `);
 
-function GitHubIntegration({
-  gitRepository,
-}: {
-  gitRepository: string | null;
-}): ReactElement | null {
+function GitHubIntegration(props: { gitRepository: string | null }): ReactElement | null {
   const router = useRouteSelector();
   const [integrationQuery] = useQuery({
     query: GetGitHubIntegrationDetailsDocument,
@@ -60,6 +56,9 @@ function GitHubIntegration({
       },
     },
   });
+  const gitRepository = props.gitRepository ?? '';
+
+  const notify = useNotifications();
 
   const [mutation, mutate] = useMutation(ProjectSettingsPage_UpdateProjectGitRepositoryMutation);
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
@@ -76,8 +75,14 @@ function GitHubIntegration({
           input: {
             organization: router.organizationId,
             project: router.projectId,
-            gitRepository: values.gitRepository,
+            gitRepository: values.gitRepository === '' ? null : values.gitRepository,
           },
+        }).then(result => {
+          if (result.data?.updateProjectGitRepository.ok) {
+            notify('Updated Git repository', 'success');
+          } else {
+            notify('Failed to update Git repository', 'error');
+          }
         }),
     });
 
@@ -136,7 +141,7 @@ function GitHubIntegration({
           ) : (
             <Tag className="!p-4">
               The organization is not connected to our GitHub Application.
-              <Link variant="primary" href={`/${router.organizationId}#settings`}>
+              <Link variant="primary" href={`/${router.organizationId}/view/settings`}>
                 Visit settings
               </Link>
               to configure it.
@@ -145,7 +150,11 @@ function GitHubIntegration({
         </CardContent>
         {githubIntegration ? (
           <CardFooter>
-            <Button type="submit" className="px-10" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="px-10"
+              disabled={isSubmitting || gitRepository === values.gitRepository}
+            >
               Save
             </Button>
           </CardFooter>
@@ -213,6 +222,7 @@ const ProjectSettingsPageQuery = graphql(`
     me {
       ...ProjectLayout_MeFragment
     }
+    isGitHubIntegrationFeatureEnabled
   }
 `);
 
@@ -337,7 +347,9 @@ function ProjectSettingsContent() {
                 </Card>
               </form>
 
-              <GitHubIntegration gitRepository={project.gitRepository ?? null} />
+              {query.data?.isGitHubIntegrationFeatureEnabled ? (
+                <GitHubIntegration gitRepository={project.gitRepository ?? null} />
+              ) : null}
 
               {project.type === ProjectType.Federation ? (
                 <ExternalCompositionSettings project={project} organization={organization} />

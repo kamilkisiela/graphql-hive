@@ -11,7 +11,7 @@ export default gql`
   extend type Query {
     hasSlackIntegration(selector: OrganizationSelectorInput!): Boolean!
     hasGitHubIntegration(selector: OrganizationSelectorInput!): Boolean!
-    gitHubIntegration(selector: OrganizationSelectorInput!): GitHubIntegration!
+    gitHubIntegration(selector: OrganizationSelectorInput!): GitHubIntegration
     organizationByGitHubInstallationId(installation: ID!): Organization
     isGitHubIntegrationFeatureEnabled: Boolean!
   }
