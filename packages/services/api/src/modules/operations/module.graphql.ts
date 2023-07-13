@@ -87,7 +87,6 @@ export default gql`
     durationHistogram(resolution: Int!): [DurationHistogram!]!
     duration: DurationStats!
     operations: OperationStatsConnection!
-    clients: ClientStatsConnection!
   }
 
   type OperationStatsConnection {
