@@ -1,6 +1,6 @@
 {
   "name": "@graphql-hive/cli",
-  "version": "0.25.1",
+  "version": "0.26.0",
   "description": "A CLI util to manage and control your GraphQL Hive",
   "repository": {
     "type": "git",

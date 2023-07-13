@@ -1,5 +1,13 @@
 # @graphql-hive/client
 
+## 0.24.1
+
+### Patch Changes
+
+- [#2543](https://github.com/kamilkisiela/graphql-hive/pull/2543)
+  [`0a41288d`](https://github.com/kamilkisiela/graphql-hive/commit/0a41288d4ebcfa8d38726c619882a4f1ab0774da)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Internal refactor for re-using existing code.
+
 ## 0.24.0
 
 ### Minor Changes
