@@ -118,7 +118,7 @@
     "@types/react-window": "1.8.5",
     "@welldone-software/why-did-you-render": "7.0.1",
     "autoprefixer": "10.4.14",
-    "postcss": "8.4.24",
+    "postcss": "8.4.26",
     "postcss-loader": "7.3.3",
     "rimraf": "4.4.1",
     "storybook": "7.0.23",
