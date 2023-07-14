@@ -306,7 +306,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
 
 /**
  * Verify whether a SuperTokens access token session is valid.
- * https://app.swaggerhub.com/apis/supertokens/CDI/2.15.1#/Session%20Recipe/verifySession
+ * https://app.swaggerhub.com/apis/supertokens/CDI/2.20#/Session%20Recipe/verifySession
  */
 async function verifySuperTokensSession(
   connectionUri: string,
@@ -319,6 +319,7 @@ async function verifySuperTokensSession(
       'content-type': 'application/json',
       'api-key': apiKey,
       rid: 'session',
+      'cdi-version': '2.20.0',
     },
     body: JSON.stringify({
       accessToken,
