@@ -47,7 +47,6 @@ export function deploySuperTokens(
             .requireSecret('postgresConnectionString')
             .apply(str => str.replace('postgres://', 'postgresql://')),
           API_KEYS: apiKey,
-          ACCESS_TOKEN_BLACKLISTING: 'true',
         },
       },
     ],

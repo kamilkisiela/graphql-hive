@@ -126,7 +126,6 @@ services:
       POSTGRESQL_HOST: db
       POSTGRESQL_PORT: 5432
       API_KEYS: '${SUPERTOKENS_API_KEY}'
-      ACCESS_TOKEN_BLACKLISTING: 'true'
 
   s3:
     image: quay.io/minio/minio:RELEASE.2022-11-29T23-40-49Z

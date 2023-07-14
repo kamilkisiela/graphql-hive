@@ -139,7 +139,7 @@ export const backendConfig = (): TypeInput => {
                 email: user.email,
               };
 
-              input.sessionData = {
+              input.sessionDataInDatabase = {
                 version: '1',
                 superTokensUserId: input.userId,
                 externalUserId,

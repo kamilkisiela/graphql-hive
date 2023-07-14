@@ -15,6 +15,7 @@ export async function extractAccessTokenFromRequest(
     async next =>
       await verifySession({
         sessionRequired: false,
+        checkDatabase: true,
       })(req as any, res as any, next),
     req,
     res,
