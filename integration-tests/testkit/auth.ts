@@ -24,7 +24,7 @@ const signUpUserViaEmail = async (
       headers: {
         'content-type': 'application/json; charset=UTF-8',
         'api-key': ensureEnv('SUPERTOKENS_API_KEY'),
-        'cdi-version': '2.20.0',
+        'cdi-version': '2.20',
       },
       body: JSON.stringify({
         email,
@@ -101,7 +101,7 @@ const createSession = async (
         'content-type': 'application/json; charset=UTF-8',
         'api-key': ensureEnv('SUPERTOKENS_API_KEY'),
         rid: 'session',
-        'cdi-version': '2.20.0',
+        'cdi-version': '2.20',
       },
       body: JSON.stringify(payload),
     });
