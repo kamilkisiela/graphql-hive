@@ -113,7 +113,6 @@
       "@theguild/buddy@0.1.0": "patches/@theguild__buddy@0.1.0.patch",
       "mjml-core@4.14.0": "patches/mjml-core@4.14.0.patch",
       "oclif@3.9.1": "patches/oclif@3.9.1.patch",
-      "@slonik/migrator@0.11.3": "patches/@slonik__migrator@0.11.3.patch",
       "@apollo/federation@0.38.1": "patches/@apollo__federation@0.38.1.patch",
       "@octokit/webhooks-methods@3.0.1": "patches/@octokit__webhooks-methods@3.0.1.patch",
       "bullmq@3.15.8": "patches/bullmq@3.15.8.patch",
