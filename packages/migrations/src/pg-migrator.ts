@@ -36,6 +36,12 @@ export async function runMigrations(args: {
     await seedMigrationsIfNotExists({ connection });
     for (const migration of args.migrations) {
       const { name } = migration;
+
+      if (args.runTo && args.runTo === name) {
+        console.log(`reached migration '${name}'. Stopping.`);
+        break;
+      }
+
       const exists = await connection.maybeOneFirst(sql`
         SELECT true
         FROM
@@ -60,11 +66,6 @@ export async function runMigrations(args: {
         INSERT INTO "public"."migration" ("name", "hash")
         VALUES (${name}, ${name});
       `);
-
-      if (args.runTo && args.runTo === name) {
-        console.log(`reached migration '${name}'. Stopping.`);
-        break;
-      }
     }
   });
 
