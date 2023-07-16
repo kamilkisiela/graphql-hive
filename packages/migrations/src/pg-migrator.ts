@@ -42,7 +42,7 @@ export async function runMigrations(args: {
         WHERE
           "name" = ${name}
       `);
-      if (exists !== true) {
+      if (exists === true) {
         continue;
       }
 
