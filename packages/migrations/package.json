@@ -9,7 +9,7 @@
     "tsconfig.json"
   ],
   "scripts": {
-    "build": "tsx ../../../scripts/runify.ts",
+    "build": "tsx ../../scripts/runify.ts",
     "db:create": "node tools/create-db.mjs",
     "db:init": "pnpm db:create && pnpm migration:run",
     "db:migrator": "node --experimental-specifier-resolution=node --loader ts-node/esm src/index.ts",
