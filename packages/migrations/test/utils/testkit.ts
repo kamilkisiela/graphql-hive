@@ -5,9 +5,9 @@ import { fileURLToPath } from 'node:url';
 import { config } from 'dotenv';
 import pgpFactory from 'pg-promise';
 import { createPool, sql } from 'slonik';
-import { SlonikMigrator } from '@slonik/migrator';
 import type * as DbTypes from '../../../services/storage/src/db/types';
 import { createConnectionString } from '../../src/connection-string';
+import { runPGMigrations } from '../../src/run-pg-migrations'
 
 export { DbTypes };
 
@@ -41,17 +41,12 @@ export async function initMigrationTestingEnvironment() {
   const actionsDirectory = resolve(__dirname + '/../../src/actions/');
   console.log('actionsDirectory', actionsDirectory);
 
-  const migrator = new SlonikMigrator({
-    migrationsPath: actionsDirectory,
-    slonik,
-    migrationTableName: 'migration',
-    logger: console,
-  });
+
 
   return {
     db: slonik,
     async runTo(name: string) {
-      await migrator.up({ to: name });
+      await runPGMigrations({ slonik, runTo: name });
     },
     seed: {
       async user() {
@@ -61,7 +56,7 @@ export async function initMigrationTestingEnvironment() {
       },
     },
     async complete() {
-      await migrator.up();
+      await runPGMigrations({ slonik });
     },
     async done(deleteDb = true) {
       deleteDb ?? (await db.query(`DROP DATABASE ${dbName};`));

@@ -28,6 +28,7 @@ const seedMigrationsIfNotExists = async (args: { connection: DatabaseTransaction
 export async function runMigrations(args: {
   slonik: DatabasePool;
   migrations: Array<MigrationExecutor>;
+  runTo?: string;
 }) {
   console.log('Running PG migrations.');
 
@@ -42,6 +43,7 @@ export async function runMigrations(args: {
         WHERE
           "name" = ${name}
       `);
+
       if (exists === true) {
         continue;
       }
@@ -58,6 +60,11 @@ export async function runMigrations(args: {
         INSERT INTO "public"."migration" ("name", "hash")
         VALUES (${name}, ${name});
       `);
+
+      if (args.runTo && args.runTo === name) {
+        console.log(`reached migration '${name}'. Stopping.`);
+        break;
+      }
     }
   });
 
