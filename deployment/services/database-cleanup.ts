@@ -15,13 +15,18 @@ export function deployDatabaseCleanupJob(options: { deploymentEnv: DeploymentEnv
   const { job } = new ServiceDeployment(
     'db-cleanup',
     {
-      image: 'jbergknoff/postgresql-client:latest',
+      image: 'postgres:14.8-slim',
       env: {
         PG_CONNECTION_STRING: rawConnectionString,
         // to make sure we can run this over and over
         IGNORE_RERUN_NONCE: Date.now().toString(),
       },
-      args: ['$(PG_CONNECTION_STRING)', '-c', 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'],
+      command: [
+        'psql',
+        '$(PG_CONNECTION_STRING)',
+        '-c',
+        'DROP SCHEMA public CASCADE; CREATE SCHEMA public;',
+      ],
     },
     [],
   ).deployAsJob();

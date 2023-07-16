@@ -31,6 +31,7 @@ export class ServiceDeployment {
           cpuAverageToScale: number;
         };
       };
+      command?: string[];
     },
     protected dependencies?: Array<pulumi.Resource | undefined | null>,
     protected parent?: pulumi.Resource | null,
@@ -130,6 +131,7 @@ export class ServiceDeployment {
                 }
               : {}),
           },
+          command: this.options.command,
         },
       ],
     });
