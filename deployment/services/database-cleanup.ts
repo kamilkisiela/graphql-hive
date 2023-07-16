@@ -15,7 +15,7 @@ export function deployDatabaseCleanupJob(options: { deploymentEnv: DeploymentEnv
   const { job } = new ServiceDeployment(
     'db-cleanup',
     {
-      image: 'postgres:14.8-slim',
+      image: 'postgres:14.8',
       env: {
         PG_CONNECTION_STRING: rawConnectionString,
         // to make sure we can run this over and over
