@@ -433,8 +433,8 @@ importers:
         specifier: 4.0.3
         version: 4.0.3(graphql@16.6.0)
       nock:
-        specifier: 13.3.1
-        version: 13.3.1
+        specifier: 13.3.2
+        version: 13.3.2
       vitest:
         specifier: 0.31.1
         version: 0.31.1
@@ -713,8 +713,8 @@ importers:
         specifier: 0.4.5
         version: 0.4.5
       nock:
-        specifier: 13.3.1
-        version: 13.3.1
+        specifier: 13.3.2
+        version: 13.3.2
 
   packages/services/cdn-worker:
     dependencies:
@@ -23711,8 +23711,8 @@ packages:
       lower-case: 2.0.2
       tslib: 2.5.3
 
-  /nock@13.3.1:
-    resolution: {integrity: sha512-vHnopocZuI93p2ccivFyGuUfzjq2fxNyNurp7816mlT5V5HF4SzXu8lvLrVzBbNqzs+ODooZ6OksuSUNM7Njkw==}
+  /nock@13.3.2:
+    resolution: {integrity: sha512-CwbljitiWJhF1gL83NbanhoKs1l23TDlRioNraPTZrzZIEooPemrHRj5m0FZCPkB1ecdYCSWWGcHysJgX/ngnQ==}
     engines: {node: '>= 10.13'}
     dependencies:
       debug: 4.3.4(supports-color@8.1.1)
