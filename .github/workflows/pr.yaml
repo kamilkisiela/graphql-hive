@@ -3,10 +3,6 @@ on:
   pull_request: {}
 
 env:
-  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
-  TURBO_API_URL: ${{ secrets.TURBO_API_URL }}
-  TURBO_REMOTE_ONLY: 'true'
   HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
 
 jobs:
