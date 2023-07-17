@@ -29,7 +29,6 @@ jobs:
         with:
           codegen: false # no need to run because release script will run it anyway
           actor: release-alpha
-          cacheCypress: false
           cacheNext: false
           cacheTurbo: true
 

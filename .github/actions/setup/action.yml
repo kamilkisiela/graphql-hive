@@ -15,9 +15,6 @@ inputs:
     description: Name of the workflow that called this action
     required: true
     type: string
-  cacheCypress:
-    description: Should cache Cypress?
-    default: 'false'
   cacheNext:
     description: Should cache Next?
     default: 'true'
@@ -70,17 +67,6 @@ runs:
         restore-keys: |
           nextjs-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.actor }}-
           nextjs-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-
-
-    - name: Cache Cypress
-      uses: actions/cache@v3
-      if: ${{ inputs.cacheCypress == 'true' }}
-      with:
-        path: ~/.cache/Cypress
-        key:
-          cypress-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.actor }}-${{ github.sha }}
-        restore-keys: |
-          cypress-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.actor }}-
-          cypress-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-
 
     - name: pnpm install
       shell: bash

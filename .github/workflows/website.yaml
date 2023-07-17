@@ -24,7 +24,6 @@ jobs:
         with:
           codegen: false
           actor: website
-          cacheCypress: false
           cacheNext: true
           cacheTurbo: true
 

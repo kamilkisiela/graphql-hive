@@ -14,7 +14,6 @@ jobs:
         uses: ./.github/actions/setup
         with:
           actor: test-unit
-          cacheCypress: false
           cacheNext: false
           cacheTurbo: false
 

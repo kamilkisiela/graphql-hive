@@ -28,7 +28,6 @@ jobs:
         with:
           codegen: true
           actor: storybook
-          cacheCypress: false
           cacheNext: true
           cacheTurbo: true
 

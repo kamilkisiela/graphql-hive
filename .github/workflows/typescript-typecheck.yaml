@@ -15,7 +15,6 @@ jobs:
         uses: ./.github/actions/setup
         with:
           actor: typescript-typecheck
-          cacheCypress: false
           cacheNext: false
           cacheTurbo: false
 

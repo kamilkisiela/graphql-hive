@@ -35,7 +35,6 @@ jobs:
         with:
           codegen: false # no need to run codegen in this case, we can skip
           actor: migrations-test
-          cacheCypress: false
           cacheNext: false
           cacheTurbo: false
 
