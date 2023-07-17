@@ -129,10 +129,12 @@ jobs:
               input_set="$input_set\n$target.cache-to=type=gha,mode=max,scope=$GITHUB_REF-$target"
           done
 
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           echo "targets<<$EOF" >> "$GITHUB_ENV"
           echo $input_targets >> "$GITHUB_ENV"
           echo "$EOF" >> "$GITHUB_ENV"
 
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           echo "set<<$EOF" >> "$GITHUB_ENV"
           echo $input_set >> "$GITHUB_ENV"
           echo "$EOF" >> "$GITHUB_ENV"
