@@ -20,9 +20,6 @@ patchedDependencies:
   '@octokit/webhooks-methods@3.0.1':
     hash: ckboo4crezw7uvstxm24ozngtq
     path: patches/@octokit__webhooks-methods@3.0.1.patch
-  '@slonik/migrator@0.11.3':
-    hash: yfpv2xzdmnkrtu2wvaktxf5mmq
-    path: patches/@slonik__migrator@0.11.3.patch
   '@theguild/buddy@0.1.0':
     hash: ryylgra5xglhidfoiaxehn22hq
     path: patches/@theguild__buddy@0.1.0.patch
@@ -478,9 +475,6 @@ importers:
       '@graphql-hive/core':
         specifier: workspace:*
         version: link:../libraries/core/dist
-      '@slonik/migrator':
-        specifier: 0.11.3
-        version: 0.11.3(patch_hash=yfpv2xzdmnkrtu2wvaktxf5mmq)(slonik@30.4.4)
       '@whatwg-node/fetch':
         specifier: 0.9.7
         version: 0.9.7
@@ -499,12 +493,6 @@ importers:
       slonik:
         specifier: 30.4.4
         version: 30.4.4
-      ts-node:
-        specifier: 10.9.1
-        version: 10.9.1(@swc/core@1.3.68)(@types/node@18.16.18)(typescript@5.1.3)
-      typescript:
-        specifier: 5.1.3
-        version: 5.1.3
       zod:
         specifier: 3.21.4
         version: 3.21.4
@@ -524,9 +512,15 @@ importers:
       pg-promise:
         specifier: 11.5.0
         version: 11.5.0
+      ts-node:
+        specifier: 10.9.1
+        version: 10.9.1(@swc/core@1.3.68)(@types/node@18.16.18)(typescript@5.1.3)
       tslib:
         specifier: 2.5.3
         version: 2.5.3
+      typescript:
+        specifier: 5.1.3
+        version: 5.1.3
 
   packages/services/api:
     dependencies:
@@ -10331,15 +10325,6 @@ packages:
     resolution: {integrity: sha512-sXo/qW2/pAcmT43VoRKOJbDOfV3cYpq3szSVfIThQXNt+E4DfKj361vaAt3c88U5tPUxzEswam7GW48PJqtKAg==}
     dev: true
 
-  /@rushstack/ts-command-line@4.12.5:
-    resolution: {integrity: sha512-PCKrOu4RXKXPHcswHEQ9MYDW7Z7iQ+vbkvPtqHC46zFxD67ZCBXkm9P8QNOtED0cQzXh5nCtFnSOMuaOQf0GaQ==}
-    dependencies:
-      '@types/argparse': 1.0.38
-      argparse: 1.0.10
-      colors: 1.2.5
-      string-argv: 0.3.1
-    dev: false
-
   /@sentry-internal/tracing@7.56.0:
     resolution: {integrity: sha512-OKI4Pz/O13gng8hT9rNc+gRV3+P7nnk1HnHlV8fgaQydS6DsRxoDL1sHa42tZGbh7K9jqNAP3TC6VjBOsr2tXA==}
     engines: {node: '>=8'}
@@ -10581,17 +10566,6 @@ packages:
     transitivePeerDependencies:
       - debug
     dev: false
-
-  /@slonik/migrator@0.11.3(patch_hash=yfpv2xzdmnkrtu2wvaktxf5mmq)(slonik@30.4.4):
-    resolution: {integrity: sha512-lzu1WmoPRWWQPfFmU4alvEuV7ZS50W5QBvsr70+x6+sv5gXXNzzKGwGSfNkyDmlVRhNUqqv2CnGaZaetI5isZg==}
-    peerDependencies:
-      slonik: 27 - 29
-    dependencies:
-      '@rushstack/ts-command-line': 4.12.5
-      slonik: 30.4.4
-      umzug: 3.2.1
-    dev: false
-    patched: true
 
   /@smithy/protocol-http@1.0.1:
     resolution: {integrity: sha512-9OrEn0WfOVtBNYJUjUAn9AOiJ4lzERCJJ/JeZs8E6yajTGxBaFRxUnNBHiNqoDJVg076hY36UmEnPx7xXrvUSg==}
@@ -12103,10 +12077,6 @@ packages:
     resolution: {integrity: sha512-veQTnWP+1D/xbxVrPC3zHnCZRjSrKfhbMUlEA43iMZLu7EsnTtkJklIuwrCPbOi8YkvDQAiW05VQQFvvz9oieQ==}
     dependencies:
       '@types/estree': 1.0.0
-
-  /@types/argparse@1.0.38:
-    resolution: {integrity: sha512-ebDJ9b0e702Yr7pWgB0jzm+CX4Srzz8RcXtLJDJB+BSccqMa36uyH/zUsSYao5+BD1ytv3k3rPYCq4mAE1hsXA==}
-    dev: false
 
   /@types/async-retry@1.4.5:
     resolution: {integrity: sha512-YrdjSD+yQv7h6d5Ip+PMxh3H6ZxKyQk0Ts+PvaNRInxneG9PFVZjFg77ILAN+N6qYf7g4giSJ1l+ZjQ1zeegvA==}
@@ -15328,11 +15298,6 @@ packages:
     engines: {node: '>=0.1.90'}
     dev: true
 
-  /colors@1.2.5:
-    resolution: {integrity: sha512-erNRLao/Y3Fv54qUa0LBB+//Uf3YwMUmdJinN20yMXm9zdKKqH9wt7R9IIVZ+K7ShzfpLV/Zg8+VyrBJYB4lpg==}
-    engines: {node: '>=0.1.90'}
-    dev: false
-
   /colors@1.4.0:
     resolution: {integrity: sha512-a+UqTh4kgZg/SlGvfbzDHpgRu7AAQOmmqRHJnxhRZICKFUT91brVhNNt58CMWU9PsBbv3PDCZUHbVxuDiH2mtA==}
     engines: {node: '>=0.1.90'}
@@ -16832,11 +16797,6 @@ packages:
       inherits: 2.0.4
       minimalistic-assert: 1.0.1
       minimalistic-crypto-utils: 1.0.1
-
-  /emittery@0.12.1:
-    resolution: {integrity: sha512-pYyW59MIZo0HxPFf+Vb3+gacUu0gxVS3TZwB2ClwkEZywgF9f9OJDoVmNLojTn0vKX3tO9LC+pdQEcLP4Oz/bQ==}
-    engines: {node: '>=12'}
-    dev: false
 
   /emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -18567,13 +18527,6 @@ packages:
       graceful-fs: 4.2.11
       jsonfile: 6.1.0
       universalify: 2.0.0
-
-  /fs-jetpack@4.3.1:
-    resolution: {integrity: sha512-dbeOK84F6BiQzk2yqqCVwCPWTxAvVGJ3fMQc6E2wuEohS28mR6yHngbrKuVCK1KHRx/ccByDylqu4H5PCP2urQ==}
-    dependencies:
-      minimatch: 3.1.2
-      rimraf: 2.7.1
-    dev: false
 
   /fs-minipass@2.1.0:
     resolution: {integrity: sha512-V/JgOLFCS+R6Vcq0slCuaeWEdNC3ouDlJMNIsacH2VtALiu9mV4LPrHc5cDl8k5aw6J8jwgWWpiTo5RYhmIzvg==}
@@ -25161,11 +25114,6 @@ packages:
       '@babel/runtime': 7.21.0
     dev: true
 
-  /pony-cause@2.1.8:
-    resolution: {integrity: sha512-c4E5sVlX+npoRiKb72SkMOYMZ/c+jehaKAytybykhh49tEQYkjHxKSZ3YHUyH1v3oEL+wl3aXtkyYhJp+cNXDg==}
-    engines: {node: '>=12.0.0'}
-    dev: false
-
   /popmotion@11.0.3:
     resolution: {integrity: sha512-Y55FLdj3UxkR7Vl3s7Qr4e9m0onSnP8W7d/xQLsoJM40vs6UKHFdygs6SWryasTZYqugMjm3BepCF4CWXDiHgA==}
     dependencies:
@@ -28084,6 +28032,7 @@ packages:
   /string-argv@0.3.1:
     resolution: {integrity: sha512-a1uQGz7IyVy9YwhqjZIZu1c8JO8dNIe20xBmSS6qu9kv++k3JGzCVmprbNN5Kn+BgzD5E7YYwg1CcjuJMRNsvg==}
     engines: {node: '>=0.6.19'}
+    dev: true
 
   /string-env-interpolation@1.0.1:
     resolution: {integrity: sha512-78lwMoCcn0nNu8LszbP1UA7g55OeE4v7rCeWnM5B453rnNr4aq+5it3FEYtZrSEiMvHZOZ9Jlqb0OD0M2VInqg==}
@@ -29361,18 +29310,6 @@ packages:
     engines: {node: '>=0.8.0'}
     hasBin: true
     requiresBuild: true
-
-  /umzug@3.2.1:
-    resolution: {integrity: sha512-XyWQowvP9CKZycKc/Zg9SYWrAWX/gJCE799AUTFqk8yC3tp44K1xWr3LoFF0MNEjClKOo1suCr5ASnoy+KltdA==}
-    engines: {node: '>=12'}
-    dependencies:
-      '@rushstack/ts-command-line': 4.12.5
-      emittery: 0.12.1
-      fs-jetpack: 4.3.1
-      glob: 8.1.0
-      pony-cause: 2.1.8
-      type-fest: 2.19.0
-    dev: false
 
   /unbox-primitive@1.0.2:
     resolution: {integrity: sha512-61pPlCD9h51VoreyJ0BReideM3MDKMKnh6+V9L08331ipq6Q8OFXZYiqP6n/tbHx4s5I9uRhcye6BrbkizkBDw==}

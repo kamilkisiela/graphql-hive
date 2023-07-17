@@ -183,7 +183,7 @@ target "server" {
 
 target "storage" {
   inherits = ["migrations-base", get_target()]
-  context = "${PWD}/packages/migrations/dist/migrations"
+  context = "${PWD}/packages/migrations/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/storage"
     IMAGE_DESCRIPTION = "The migrations service of the GraphQL Hive project."
