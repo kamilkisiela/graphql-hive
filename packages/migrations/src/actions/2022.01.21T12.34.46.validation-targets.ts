@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2022.01.21T12.34.46.validation-targets.sql',
@@ -20,5 +20,5 @@ INSERT INTO
     WHERE
       validation_enabled IS TRUE
   );
-`
-} satisfies MigrationExecutor
+`,
+} satisfies MigrationExecutor;

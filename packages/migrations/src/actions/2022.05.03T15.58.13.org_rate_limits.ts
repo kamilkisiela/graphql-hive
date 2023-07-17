@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2022.05.03T15.58.13.org_rate_limits.sql',
@@ -21,5 +21,5 @@ ADD COLUMN
   limit_retention_days BIGINT NOT NULL DEFAULT 3;
 
 -- HOBBY plan is default
-`
-} satisfies MigrationExecutor
+`,
+} satisfies MigrationExecutor;

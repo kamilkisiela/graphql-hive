@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2021-04-30T11-47-26.validation.sql',
@@ -18,5 +18,5 @@ ALTER TABLE
   public.targets
 ADD COLUMN
   validation_percentage FLOAT NOT NULL DEFAULT 0.00;
-`
-} satisfies MigrationExecutor
+`,
+} satisfies MigrationExecutor;

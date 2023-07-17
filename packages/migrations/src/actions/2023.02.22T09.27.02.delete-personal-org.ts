@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2023.02.22T09.27.02.delete-personal-org.sql',
@@ -29,4 +29,4 @@ TYPE;
 DROP TYPE
   organization_type;
 `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

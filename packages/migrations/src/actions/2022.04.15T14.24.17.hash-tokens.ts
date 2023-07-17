@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2022.04.15T14.24.17.hash-tokens.sql',
@@ -32,5 +32,5 @@ SET
     )
   ),
   token = ENCODE(SHA256(token::bytea), 'hex');
-`
-} satisfies MigrationExecutor
+`,
+} satisfies MigrationExecutor;

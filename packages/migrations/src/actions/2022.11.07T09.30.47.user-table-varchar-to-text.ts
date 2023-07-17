@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2022.11.07T09.30.47.user-table-varchar-to-text.sql',
@@ -14,4 +14,4 @@ ALTER COLUMN
 TYPE
   VARCHAR(300);
   `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

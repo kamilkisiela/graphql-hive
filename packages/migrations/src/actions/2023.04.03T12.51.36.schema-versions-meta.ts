@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2023.04.03T12.51.36.schema-versions-meta.sql',
@@ -25,4 +25,4 @@ ADD COLUMN
   "previous_schema_version_id" UUID UNIQUE REFERENCES "schema_versions" ("id") ON DELETE SET NULL
 ;
   `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2021-06-11T10-46-24.slack-integration.sql',
@@ -8,5 +8,5 @@ ALTER TABLE
   public.organizations
 ADD COLUMN
   slack_token TEXT;
-`
-} satisfies MigrationExecutor
+`,
+} satisfies MigrationExecutor;

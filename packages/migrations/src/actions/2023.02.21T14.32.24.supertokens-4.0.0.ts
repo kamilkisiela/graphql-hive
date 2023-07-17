@@ -1,7 +1,7 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
-  name: '2023.02.21T14.32.24.supertokens-4.0.0.ts',
+  name: '2023.02.21T14.32.24.supertokens-4.0.0.sql',
   run: ({ sql }) => sql`
 ALTER TABLE IF EXISTS
   public.supertokens_thirdparty_users
@@ -17,4 +17,4 @@ ALTER COLUMN
 TYPE
   VARCHAR(256);
   `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

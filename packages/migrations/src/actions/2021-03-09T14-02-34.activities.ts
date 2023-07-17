@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2021-03-09T14-02-34.activities.sql',
@@ -15,5 +15,5 @@ CREATE TABLE
     activity_metadata JSONB NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
   );
-`
-} satisfies MigrationExecutor
+`,
+} satisfies MigrationExecutor;

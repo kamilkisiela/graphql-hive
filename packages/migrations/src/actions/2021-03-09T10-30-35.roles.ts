@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2021-03-09T10-30-35.roles.sql',
@@ -26,5 +26,5 @@ WHERE
       o.id = om.organization_id
       AND o.user_id = om.user_id
   ) IS NOT NULL;
-`
-} satisfies MigrationExecutor
+`,
+} satisfies MigrationExecutor;

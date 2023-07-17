@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2022.07.11T20.09.37.migrate-pro-hobby-retention.sql',
@@ -21,4 +21,4 @@ WHERE
   plan_name = 'PRO'
   AND limit_retention_days = 180;
 `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

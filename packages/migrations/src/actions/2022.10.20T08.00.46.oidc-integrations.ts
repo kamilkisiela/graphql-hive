@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '22022.10.20T08.00.46.oidc-integrations.sql',
@@ -19,4 +19,4 @@ ALTER TABLE
 ADD COLUMN
   "oidc_integration_id" UUID REFERENCES "public"."oidc_integrations" ("id") ON DELETE CASCADE;
   `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

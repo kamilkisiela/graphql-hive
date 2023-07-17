@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2021-06-11T15-38-28.alerts.sql',
@@ -32,5 +32,5 @@ CREATE TABLE
       project_id UUID NOT NULL REFERENCES public.projects (id) ON DELETE CASCADE,
       target_id UUID NOT NULL REFERENCES public.targets (id) ON DELETE CASCADE
   );
-`
-} satisfies MigrationExecutor
+`,
+} satisfies MigrationExecutor;

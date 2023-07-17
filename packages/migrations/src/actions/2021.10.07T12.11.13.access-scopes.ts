@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2021.10.07T12.11.13.access-scopes.sql',
@@ -69,5 +69,5 @@ SET
     'target:registry:read',
     'target:registry:write'
   ]
-`
-} satisfies MigrationExecutor
+`,
+} satisfies MigrationExecutor;

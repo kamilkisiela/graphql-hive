@@ -39,7 +39,7 @@ type Cursor = {
   lastCreatedAt: string;
 };
 
- const run: MigrationExecutor['run'] = async ({  connection, sql  }) => {
+const run: MigrationExecutor['run'] = async ({ connection, sql }) => {
   // eslint-disable-next-line no-process-env
   const eenv = shouldRunModel.parse(process.env);
   const shouldRun = eenv.RUN_S3_LEGACY_CDN_KEY_IMPORT === '1';
@@ -612,4 +612,4 @@ function guessServiceRegion(url: URL, headers: Headers) {
 export default {
   name: '2023.01.17T10.46.28.import-legacy-s3-keys-to-database.mts',
   run,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

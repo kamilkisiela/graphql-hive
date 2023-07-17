@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2023.06.01T09.07.53.create_collections.sql',
@@ -39,4 +39,4 @@ CREATE INDEX "document_collection_documents_connection_pagination" ON "document_
   "id" DESC
 );
 `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2023.01.12T17.00.23.cdn-tokens.sql',
@@ -17,4 +17,4 @@ CREATE TABLE
 CREATE INDEX
   cdn_access_tokens_pagination ON "public"."cdn_access_tokens" ("target_id" ASC, "created_at" DESC, "id" DESC);
   `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

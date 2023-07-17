@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2022.05.04T11.01.22.billing_plans.sql',
@@ -15,5 +15,5 @@ ALTER TABLE
   public.organizations
 ADD COLUMN
   plan_name VARCHAR(50) NOT NULL DEFAULT 'HOBBY';
-`
-} satisfies MigrationExecutor
+`,
+} satisfies MigrationExecutor;

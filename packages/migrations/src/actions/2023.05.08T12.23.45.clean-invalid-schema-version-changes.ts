@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2023.05.08T12.23.45.clean-invalid-schema-version-changes.sql',
@@ -14,4 +14,4 @@ WHERE
   )
 ;
   `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

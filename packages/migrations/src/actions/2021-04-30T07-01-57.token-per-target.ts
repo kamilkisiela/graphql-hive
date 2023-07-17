@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2021-04-30T07-01-57.token-per-target.sql',
@@ -13,5 +13,5 @@ ALTER TABLE
   public.tokens
 ADD COLUMN
   organization_id UUID NOT NULL REFERENCES public.organizations (id) ON DELETE CASCADE;
-`
-} satisfies MigrationExecutor
+`,
+} satisfies MigrationExecutor;

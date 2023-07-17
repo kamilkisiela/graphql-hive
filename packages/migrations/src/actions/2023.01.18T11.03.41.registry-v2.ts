@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2023.01.18T11.03.41.registry-v2.sql',
@@ -129,4 +129,4 @@ SELECT
 FROM
   public.version_commit;
   `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

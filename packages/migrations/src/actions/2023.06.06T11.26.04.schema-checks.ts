@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2023.06.06T11.26.04.schema-checks.sql',
@@ -34,4 +34,4 @@ CREATE INDEX "schema_checks_connection_pagination" ON "schema_checks" (
   , "id" DESC
 );
   `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

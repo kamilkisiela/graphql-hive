@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2021.11.22T11.23.44.base-schema.sql',
@@ -13,5 +13,5 @@ ALTER TABLE
   public.versions
 ADD
   base_schema TEXT;
-`
-} satisfies MigrationExecutor
+`,
+} satisfies MigrationExecutor;

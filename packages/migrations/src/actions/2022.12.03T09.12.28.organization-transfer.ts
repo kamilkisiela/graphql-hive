@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2022.12.03T09.12.28.organization-transfer.sql',
@@ -12,4 +12,4 @@ ADD COLUMN
 ADD COLUMN
   ownership_transfer_expires_at TIMESTAMP WITH TIME ZONE;
   `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

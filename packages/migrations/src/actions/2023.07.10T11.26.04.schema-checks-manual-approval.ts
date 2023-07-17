@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2023.07.10T11.26.04.schema-checks-manual-approval.sql',
@@ -9,4 +9,4 @@ ALTER TABLE "public"."schema_checks"
   , ADD COLUMN "manual_approval_user_id" uuid REFERENCES "users" ("id") ON DELETE SET NULL
 ;
   `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

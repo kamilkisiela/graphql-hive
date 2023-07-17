@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2022.07.07T12.15.10.no-schema-pushes-limit.sql',
@@ -8,4 +8,4 @@ ALTER TABLE
 DROP COLUMN
   limit_schema_push_monthly;
 `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

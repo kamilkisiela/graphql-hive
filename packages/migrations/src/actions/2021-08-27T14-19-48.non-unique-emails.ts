@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2021-08-27T14-19-48.non-unique-emails.sql',
@@ -44,5 +44,5 @@ ALTER TABLE
 ALTER COLUMN
   full_name
 SET NOT NULL;
-`
-} satisfies MigrationExecutor
+`,
+} satisfies MigrationExecutor;

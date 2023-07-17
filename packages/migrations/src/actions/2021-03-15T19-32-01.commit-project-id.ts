@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2021-03-15T19-32-01.commit-project-id.sql',
@@ -25,5 +25,5 @@ ALTER TABLE
 ALTER COLUMN
   project_id
 SET NOT NULL;
-`
-} satisfies MigrationExecutor
+`,
+} satisfies MigrationExecutor;

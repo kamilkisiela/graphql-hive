@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2022.08.25T09.59.16.multiple-invitation-codes.sql',
@@ -18,4 +18,4 @@ CREATE TABLE
     PRIMARY KEY (organization_id, email)
   );
 `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

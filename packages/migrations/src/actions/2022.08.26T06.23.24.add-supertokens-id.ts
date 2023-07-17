@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2022.08.26T06.23.24.add-supertokens-id.sql',
@@ -16,4 +16,4 @@ DROP NOT NULL
 ADD COLUMN
   "is_admin" BOOLEAN;
   `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

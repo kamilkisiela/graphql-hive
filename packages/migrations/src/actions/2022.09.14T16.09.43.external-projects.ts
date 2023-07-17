@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2022.09.14T16.09.43.external-projects.sql',
@@ -12,4 +12,4 @@ ADD COLUMN
 ADD COLUMN
   external_composition_secret TEXT;
   `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

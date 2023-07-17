@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2022.07.11T10.09.41.get-started-wizard.sql',
@@ -79,4 +79,4 @@ WHERE
       t.validation_enabled IS TRUE
   );
 `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

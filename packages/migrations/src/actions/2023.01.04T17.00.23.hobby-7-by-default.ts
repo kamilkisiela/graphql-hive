@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2023.01.04T17.00.23.hobby-7-by-default.sql',
@@ -20,4 +20,4 @@ ALTER COLUMN
 SET DEFAULT
   7;
   `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

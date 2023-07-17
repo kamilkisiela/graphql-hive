@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2022.12.20T09.20.36.oidc-columns.sql',
@@ -31,4 +31,4 @@ ADD
     )
   );
   `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;

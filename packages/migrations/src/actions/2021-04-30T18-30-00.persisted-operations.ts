@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2021-04-30T18-30-00.persisted-operations.sql',
@@ -18,5 +18,5 @@ CREATE TABLE
     project_id UUID NOT NULL REFERENCES public.projects (id) ON DELETE CASCADE,
     UNIQUE (operation_hash, project_id)
   );
-`
-} satisfies MigrationExecutor
+`,
+} satisfies MigrationExecutor;

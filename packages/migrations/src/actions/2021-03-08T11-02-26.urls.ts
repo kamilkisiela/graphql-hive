@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2021-03-08T11-02-26.urls.sql',
@@ -14,5 +14,5 @@ ALTER COLUMN
   validation_url
 TYPE
   TEXT;
-`
-} satisfies MigrationExecutor
+`,
+} satisfies MigrationExecutor;

@@ -1,4 +1,4 @@
-import { type MigrationExecutor } from "../pg-migrator"
+import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2023.03.14T12.14.23.schema-policy.sql',
@@ -17,4 +17,4 @@ CREATE TABLE
     PRIMARY KEY (resource_type, resource_id)
   );
   `,
-} satisfies MigrationExecutor
+} satisfies MigrationExecutor;
