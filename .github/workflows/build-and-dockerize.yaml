@@ -107,6 +107,43 @@ jobs:
           string: ${{ github.head_ref || github.ref_name }}
           replace-with: '_'
 
+      - name: Prepare Bake inputs
+        id: docker-bake-inputs
+        run: |
+          targets=$(docker buildx bake -f docker/docker.hcl --print build | jq -r '.group.build.targets[]')
+          input_set=""
+          input_targets=""
+          first=0
+
+          for target in $targets
+          do
+              if [ $first -eq 0 ]
+              then
+                  input_targets="$target"
+                  first=1
+              else
+                  input_targets="$input_targets, $target"
+              fi
+
+              input_set="$input_set\n$target.cache-from=type=gha,scope=$GITHUB_REF-$target"
+              input_set="$input_set\n$target.cache-to=type=gha,mode=max,scope=$GITHUB_REF-$target"
+          done
+
+          echo "targets<<$EOF" >> "$GITHUB_ENV"
+          echo $input_targets >> "$GITHUB_ENV"
+          echo "$EOF" >> "$GITHUB_ENV"
+
+          echo "set<<$EOF" >> "$GITHUB_ENV"
+          echo $input_set >> "$GITHUB_ENV"
+          echo "$EOF" >> "$GITHUB_ENV"
+
+
+          echo "Printing targets:"
+          echo $input_targets
+          echo "\n"
+          echo "Printing set:"
+          echo $input_set
+
       - name: build docker images
         timeout-minutes: 360
         id: docker-bake
@@ -125,10 +162,8 @@ jobs:
           provenance: false
           push: true
           files: docker/docker.hcl
-          targets: ${{ inputs.targets }}
-          set: |
-            *.cache-from=type=gha
-            *.cache-to=type=gha,mode=max
+          targets: ${{ steps.docker-bake-inputs.outputs.targets }}
+          set: ${{ steps.docker-bake-inputs.outputs.set }}
 
       - name: docker details pr comment
         uses: marocchino/sticky-pull-request-comment@v2
