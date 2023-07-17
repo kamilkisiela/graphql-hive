@@ -119,7 +119,21 @@ function CollectedOperationsOverTime(props: {
                 max: props.dateRange.to,
               },
             ],
-            yAxis: [{ type: 'value', min: 0 }],
+            yAxis: [
+              {
+                type: 'value',
+                min: 0,
+                splitLine: {
+                  lineStyle: {
+                    color: '#595959',
+                    type: 'dashed',
+                  },
+                },
+                axisLabel: {
+                  formatter: (value: number) => formatNumber(value),
+                },
+              },
+            ],
             series: [
               {
                 type: 'line',
