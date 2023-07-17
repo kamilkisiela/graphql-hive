@@ -165,7 +165,8 @@ jobs:
           push: true
           files: docker/docker.hcl
           targets: ${{ steps.docker-bake-inputs.outputs.targets }}
-          set: ${{ steps.docker-bake-inputs.outputs.set }}
+          set: |
+            ${{ steps.docker-bake-inputs.outputs.set }}
 
       - name: docker details pr comment
         uses: marocchino/sticky-pull-request-comment@v2
