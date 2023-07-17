@@ -3,9 +3,12 @@ FROM node:18.16.1-slim
 RUN apt-get update && apt-get install -y ca-certificates
 
 WORKDIR /usr/src/app
-COPY . /usr/src/app/
+
+COPY package.json /usr/src/app
 
 RUN npm install --omit=dev
+
+COPY . /usr/src/app/
 
 LABEL org.opencontainers.image.title=$IMAGE_TITLE
 LABEL org.opencontainers.image.version=$RELEASE
