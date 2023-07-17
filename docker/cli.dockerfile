@@ -6,7 +6,6 @@ WORKDIR /usr/src/app
 COPY . /usr/src/app/
 
 RUN npm install --omit=dev
-RUN npm install -g file:./
 
 LABEL org.opencontainers.image.title=$IMAGE_TITLE
 LABEL org.opencontainers.image.version=$RELEASE
@@ -17,6 +16,6 @@ LABEL org.opencontainers.image.url="https://github.com/kamilkisiela/graphql-hive
 
 ENV ENVIRONMENT production
 ENV RELEASE $RELEASE
-RUN npx hive --version
+RUN npx . --version
 
-ENTRYPOINT ["npx", "hive"]
+ENTRYPOINT ["npx", "."]
