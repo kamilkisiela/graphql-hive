@@ -17,6 +17,8 @@ export class ServiceDeployment {
       readinessProbe?: string;
       memoryLimit?: string;
       cpuLimit?: string;
+      volumes?: k8s.types.input.core.v1.Volume[];
+      volumeMounts?: k8s.types.input.core.v1.VolumeMount[];
       /**
        * Enables /metrics endpoint on port 10254
        */
@@ -97,10 +99,12 @@ export class ServiceDeployment {
         ? [{ name: this.options.imagePullSecret.metadata.name }]
         : undefined,
       terminationGracePeriodSeconds: 60,
+      volumes: this.options.volumes,
       containers: [
         {
           livenessProbe,
           readinessProbe,
+          volumeMounts: this.options.volumeMounts,
           imagePullPolicy: 'Always',
           env: [
             { name: 'PORT', value: String(port) },
