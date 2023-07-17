@@ -41,9 +41,10 @@ jobs:
           fetch-depth: 2
 
       - name: Use Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v3.6.0
         with:
           node-version-file: .node-version
+          cache: 'pnpm'
 
       - name: Prepare MacOS
         if: ${{ matrix.os == 'macos-latest' }}
