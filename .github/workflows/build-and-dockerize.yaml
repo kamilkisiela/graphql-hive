@@ -50,6 +50,7 @@ jobs:
         uses: ./.github/actions/setup
         with:
           actor: build-and-dockerize
+          cacheCypress: true
 
       - name: build packages and applications
         if: ${{ inputs.build }}
