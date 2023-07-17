@@ -122,7 +122,7 @@ jobs:
                   input_targets="$target"
                   first=1
               else
-                  input_targets="$input_targets, $target"
+                  input_targets="$input_targets,$target"
               fi
 
               input_set="$input_set\n$target.cache-from=type=gha,scope=$GITHUB_REF-$target"
