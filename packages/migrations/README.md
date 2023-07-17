@@ -26,13 +26,11 @@ Please follow these guidelines:
 
 ## Adding new Postgres migrations
 
-For postgres migrations, just run the following command with your configuration:
+For postgres migrations, just create a new file (copy a previous migration).
 
-```
-pnpm migration:create --name "do_something.sql"
-```
-
-Then, make sure to write both `up` and `down` migrations, based on your need.
+Then, adjust the content and migration name as desired. Make sure you import in
+[`src/run-pg-migrations.ts`](./src/run-pg-migrations.ts) and add it to the list of migrations to
+run.
 
 ## ClickHouse Migrations
 

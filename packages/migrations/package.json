@@ -13,8 +13,6 @@
     "db:create": "node tools/create-db.mjs",
     "db:init": "pnpm db:create && pnpm migration:run",
     "db:migrator": "node --experimental-specifier-resolution=node --loader ts-node/esm src/index.ts",
-    "migration:create": "pnpm db:migrator create",
-    "migration:rollback": "pnpm db:migrator down",
     "migration:run": "pnpm db:migrator up",
     "test": "node --experimental-specifier-resolution=node --loader ts-node/esm ./test/*.test.ts"
   },
