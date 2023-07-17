@@ -2530,7 +2530,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         SELECT
           COUNT(*) as total,
           o.id
-        FROM versions AS v
+        FROM schema_versions AS v
         LEFT JOIN targets AS t ON (t.id = v.target_id)
         LEFT JOIN projects AS p ON (p.id = t.project_id)
         LEFT JOIN organizations AS o ON (o.id = p.org_id)
