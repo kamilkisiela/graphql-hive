@@ -29,6 +29,9 @@ jobs:
         with:
           codegen: false
           actor: test-e2e
+          cacheCypress: true
+          cacheNext: false
+          cacheTurbo: false
 
       - name: patch compose file volumes
         uses: mikefarah/yq@v4.34.1

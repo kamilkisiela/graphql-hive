@@ -41,6 +41,9 @@ jobs:
         uses: ./.github/actions/setup
         with:
           actor: test-integration
+          cacheCypress: false
+          cacheNext: true
+          cacheTurbo: true
 
       - name: prepare packages
         run: pnpm --filter integration-tests prepare:env

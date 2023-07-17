@@ -24,6 +24,9 @@ jobs:
         with:
           codegen: false
           actor: website
+          cacheCypress: false
+          cacheNext: true
+          cacheTurbo: true
 
       - uses: the-guild-org/shared-config/website-cf@main
         if: steps.website-files.outputs.any_changed == 'true'

@@ -15,6 +15,9 @@ jobs:
         uses: ./.github/actions/setup
         with:
           actor: lint
+          cacheCypress: false
+          cacheNext: false
+          cacheTurbo: false
 
       - name: lint .env.template files
         run: pnpm lint:env-template
