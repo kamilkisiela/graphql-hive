@@ -114,15 +114,14 @@ jobs:
           input_set=""
           first=0
 
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+
+          echo "set<<$EOF" >> "$GITHUB_ENV"
           for target in $targets
           do
-              input_set="$input_set\n$target.cache-from=type=gha,scope=$GITHUB_REF-$target"
-              input_set="$input_set\n$target.cache-to=type=gha,mode=max,scope=$GITHUB_REF-$target"
+              echo "$target.cache-from=type=gha,scope=$GITHUB_REF-$target" >> "$GITHUB_ENV"
+              echo "$target.cache-to=type=gha,mode=max,scope=$GITHUB_REF-$target" >> "$GITHUB_ENV"
           done
-
-          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-          echo "set<<$EOF" >> "$GITHUB_ENV"
-          echo $input_set >> "$GITHUB_ENV"
           echo "$EOF" >> "$GITHUB_ENV"
 
       - name: build docker images
