@@ -22,12 +22,6 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: install nodejs
-      uses: actions/setup-node@v3.6.0
-      with:
-        node-version-file: .node-version
-        cache: 'pnpm'
-
     - name: check pnpm version
       shell: bash
       id: pnpm
@@ -41,6 +35,12 @@ runs:
       uses: pnpm/action-setup@v2.2.4
       with:
         version: ${{ steps.pnpm.outputs.version }}
+
+    - name: install nodejs
+      uses: actions/setup-node@v3.6.0
+      with:
+        node-version-file: .node-version
+        cache: 'pnpm'
 
     - name: Cache Turbo
       uses: actions/cache@v3
