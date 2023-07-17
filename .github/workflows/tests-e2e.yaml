@@ -29,6 +29,11 @@ jobs:
         with:
           codegen: false
           actor: test-e2e
+          cacheNext: false
+          cacheTurbo: false
+
+      - name: Install Cypress binary
+        run: pnpm cypress install
 
       - name: patch compose file volumes
         uses: mikefarah/yq@v4.34.1

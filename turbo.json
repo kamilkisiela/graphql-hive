@@ -28,7 +28,12 @@
     },
     "@hive/app#build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**"],
+      "cache": false
+    },
+    "@hive/docs#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"]
     },
     "@hive/migrations#build": {
       "dependsOn": ["^build", "@graphql-hive/client#build"],

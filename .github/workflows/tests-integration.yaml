@@ -22,6 +22,10 @@ on:
 jobs:
   integration:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        # Divide integration tests into 3 shards, to run them in parallel.
+        shardIndex: [1, 2, 3]
 
     env:
       DOCKER_REGISTRY: ${{ inputs.registry }}/${{ inputs.imageName }}/
@@ -41,6 +45,8 @@ jobs:
         uses: ./.github/actions/setup
         with:
           actor: test-integration
+          cacheNext: true
+          cacheTurbo: true
 
       - name: prepare packages
         run: pnpm --filter integration-tests prepare:env
@@ -66,11 +72,11 @@ jobs:
           docker compose -f docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env logs
 
       - name: run integration tests
-        timeout-minutes: 15
+        timeout-minutes: 5
         env:
           HIVE_DEBUG: 1
         run: |
-          VITEST_MAX_THREADS=${{ steps.cpu-cores.outputs.count }} pnpm --filter integration-tests test:integration
+          VITEST_MAX_THREADS=${{ steps.cpu-cores.outputs.count }} pnpm --filter integration-tests test:integration --shard=${{ matrix.shardIndex }}/3
 
       - name: log dump
         if: ${{ failure() }}

@@ -28,6 +28,8 @@ jobs:
         with:
           codegen: true
           actor: storybook
+          cacheNext: true
+          cacheTurbo: true
 
       - uses: the-guild-org/shared-config/website-cf@main
         if: steps.storybook-files.outputs.any_changed == 'true'

@@ -8,9 +8,6 @@ inputs:
   codegen:
     description: Should run GraphQL Codegen?
     default: 'true'
-  installDependencies:
-    description: Should run pnpm install?
-    default: 'true'
   workingDirectory:
     description: Working dir
     default: ${{ github.workspace }}
@@ -18,15 +15,16 @@ inputs:
     description: Name of the workflow that called this action
     required: true
     type: string
+  cacheNext:
+    description: Should cache Next?
+    default: 'true'
+  cacheTurbo:
+    description: Should cache Turbo?
+    default: 'true'
 
 runs:
   using: 'composite'
   steps:
-    - name: install nodejs
-      uses: actions/setup-node@v3.6.0
-      with:
-        node-version-file: .node-version
-
     - name: check pnpm version
       shell: bash
       id: pnpm
@@ -41,23 +39,15 @@ runs:
       with:
         version: ${{ steps.pnpm.outputs.version }}
 
-    - name: pnpm store path
-      id: pnpm-cache
-      shell: bash
-      run: echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-    - uses: actions/cache@v3
-      name: restore pnpm cache
+    - name: install nodejs
+      uses: actions/setup-node@v3.6.0
       with:
-        path: |
-          ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
-          ~/.cache/Cypress
-        key: ${{ runner.os }}-pnpm-store-n18-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-store-n18
+        node-version-file: .node-version
+        cache: 'pnpm'
 
     - name: Cache Turbo
       uses: actions/cache@v3
+      if: ${{ inputs.cacheNext == 'true' }}
       with:
         path: node_modules/.cache/turbo
         key: turbo-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.actor }}-${{ github.sha }}
@@ -67,6 +57,7 @@ runs:
 
     - uses: actions/cache@v3
       name: Cache Next.js
+      if: ${{ inputs.cacheNext == 'true' }}
       with:
         path: |
           packages/web/app/.next/cache
@@ -78,7 +69,6 @@ runs:
           nextjs-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-
 
     - name: pnpm install
-      if: ${{ inputs.installDependencies == 'true' }}
       shell: bash
       working-directory: ${{ inputs.workingDirectory }}
       run: pnpm install --frozen-lockfile

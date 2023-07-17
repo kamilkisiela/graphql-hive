@@ -33,6 +33,8 @@ jobs:
         with:
           codegen: false # no need to run codegen in this case, we can skip
           actor: db-types-diff
+          cacheNext: false
+          cacheTurbo: false
 
       - name: create database
         working-directory: packages/migrations
