@@ -41,21 +41,6 @@ runs:
       with:
         version: ${{ steps.pnpm.outputs.version }}
 
-    - name: pnpm store path
-      id: pnpm-cache
-      shell: bash
-      run: echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-    - uses: actions/cache@v3
-      name: restore pnpm cache
-      with:
-        path: |
-          ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
-          ~/.cache/Cypress
-        key: ${{ runner.os }}-pnpm-store-n18-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-store-n18
-
     - name: Cache Turbo
       uses: actions/cache@v3
       with:
