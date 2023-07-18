@@ -1,10 +1,11 @@
 import { z } from 'zod';
 
 const LoaderIdModel = z.enum(['graphql-file', 'code-file', 'json-file', 'url']);
+const LoaderIdArrayModel = z.array(LoaderIdModel);
 type LoaderId = z.infer<typeof LoaderIdModel>;
 
 export async function getLoaders(defaultLoaders: LoaderId[]) {
-  const requestedLoaders = LoaderIdModel.parse(
+  const requestedLoaders = LoaderIdArrayModel.parse(
     // Allows to override the list of loaders.
     // Integration tests use this to reduce the parsing time of JS code (less loaders, less code to parse).
     // It improves the performance of the tests by ~20% (locally).
