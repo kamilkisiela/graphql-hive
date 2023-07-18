@@ -107,6 +107,23 @@ jobs:
           string: ${{ github.head_ref || github.ref_name }}
           replace-with: '_'
 
+      - name: Prepare Bake inputs
+        id: docker-bake-inputs
+        run: |
+          targets=$(docker buildx bake -f docker/docker.hcl --print build | jq -r '.group.build.targets[]')
+          input_set=""
+          first=0
+
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+
+          echo "set<<$EOF" >> "$GITHUB_ENV"
+          for target in $targets
+          do
+              echo "$target.cache-from=type=gha,scope=$GITHUB_REF-$target" >> "$GITHUB_ENV"
+              echo "$target.cache-to=type=gha,mode=max,scope=$GITHUB_REF-$target" >> "$GITHUB_ENV"
+          done
+          echo "$EOF" >> "$GITHUB_ENV"
+
       - name: build docker images
         timeout-minutes: 360
         id: docker-bake
@@ -127,8 +144,7 @@ jobs:
           files: docker/docker.hcl
           targets: ${{ inputs.targets }}
           set: |
-            *.cache-from=type=gha
-            *.cache-to=type=gha,mode=max
+            ${{ steps.docker-bake-inputs.outputs.set }}
 
       - name: docker details pr comment
         uses: marocchino/sticky-pull-request-comment@v2
