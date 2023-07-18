@@ -1,10 +1,6 @@
 import colors from 'colors';
 import { concatAST, print } from 'graphql';
-import { CodeFileLoader } from '@graphql-tools/code-file-loader';
-import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
-import { JsonFileLoader } from '@graphql-tools/json-file-loader';
 import { loadTypedefs } from '@graphql-tools/load';
-import { UrlLoader } from '@graphql-tools/url-loader';
 import baseCommand from '../base-command';
 import {
   CriticalityLevel,
@@ -12,6 +8,7 @@ import {
   SchemaErrorConnection,
   SchemaWarningConnection,
 } from '../gql/graphql';
+import { getLoaders } from './loaders';
 
 const indent = '  ';
 
@@ -56,7 +53,7 @@ export function renderWarnings(this: baseCommand, warnings: SchemaWarningConnect
 export async function loadSchema(file: string) {
   const sources = await loadTypedefs(file, {
     cwd: process.cwd(),
-    loaders: [new CodeFileLoader(), new GraphQLFileLoader(), new JsonFileLoader(), new UrlLoader()],
+    loaders: await getLoaders(['code-file', 'graphql-file', 'json-file', 'url']),
   });
 
   return print(concatAST(sources.map(s => s.document!)));
