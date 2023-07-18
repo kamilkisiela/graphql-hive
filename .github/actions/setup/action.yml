@@ -36,13 +36,13 @@ runs:
         PNPM_VERSION=${PNPM_VERSION:-8}
         echo "Using PNPM version $PNPM_VERSION"
         echo "version=$PNPM_VERSION" >> $GITHUB_OUTPUT
-        
+
         if [ ${{ inputs.installDependencies }} = true ]; then
           echo "cache=pnpm" >> $GITHUB_OUTPUT
         else
           echo "cache=" >> "$GITHUB_ENV"
         fi
-          
+
     - name: install pnpm
       uses: pnpm/action-setup@v2.2.4
       with:
