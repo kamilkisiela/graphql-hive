@@ -10,7 +10,7 @@ inputs:
     default: 'true'
   installDependencies:
     description: Should run pnpm install?
-    default: 'false'
+    default: 'true'
   workingDirectory:
     description: Working dir
     default: ${{ github.workspace }}
