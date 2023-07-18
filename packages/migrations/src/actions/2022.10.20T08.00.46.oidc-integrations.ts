@@ -1,7 +1,7 @@
 import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
-  name: '22022.10.20T08.00.46.oidc-integrations.sql',
+  name: '2022.10.20T08.00.46.oidc-integrations.sql',
   run: ({ sql }) => sql`
 CREATE TABLE IF NOT EXISTS
   "public"."oidc_integrations" (
