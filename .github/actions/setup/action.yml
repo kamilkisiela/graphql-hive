@@ -8,6 +8,9 @@ inputs:
   codegen:
     description: Should run GraphQL Codegen?
     default: 'true'
+  installDependencies:
+    description: Should run pnpm install?
+    default: 'true'
   workingDirectory:
     description: Working dir
     default: ${{ github.workspace }}
@@ -70,6 +73,7 @@ runs:
 
     - name: pnpm install
       shell: bash
+      if: ${{ inputs.installDependencies == 'true' }}
       working-directory: ${{ inputs.workingDirectory }}
       run: pnpm install --frozen-lockfile
 
