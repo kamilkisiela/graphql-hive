@@ -45,7 +45,7 @@ jobs:
         uses: ./.github/actions/setup
         with:
           actor: test-integration
-          cacheNext: true
+          cacheNext: false
           cacheTurbo: true
 
       - name: prepare packages
