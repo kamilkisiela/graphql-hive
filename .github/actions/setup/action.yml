@@ -37,6 +37,12 @@ runs:
         echo "Using PNPM version $PNPM_VERSION"
         echo "version=$PNPM_VERSION" >> $GITHUB_OUTPUT
 
+        if [ ${{ inputs.installDependencies }} = true ]; then
+          echo "cache=pnpm" >> $GITHUB_OUTPUT
+        else
+          echo "cache=" >> "$GITHUB_ENV"
+        fi
+
     - name: install pnpm
       uses: pnpm/action-setup@v2.2.4
       with:
@@ -46,7 +52,7 @@ runs:
       uses: actions/setup-node@v3.6.0
       with:
         node-version-file: .node-version
-        cache: 'pnpm'
+        cache: ${{ steps.pnpm.outputs.cache }}
 
     - name: Cache Turbo
       uses: actions/cache@v3
