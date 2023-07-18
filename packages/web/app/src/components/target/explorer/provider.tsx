@@ -69,13 +69,6 @@ export function SchemaExplorerProvider({ children }: { children: ReactNode }): R
   );
   const [period, setPeriod] = useState(createPeriod(periodOption));
 
-  useEffect(() => {
-    const inDays = parseInt(periodOption.replace('d', ''), 10);
-    if (dataRetentionInDays < inDays) {
-      updatePeriod(dataRetentionInDays > 7 ? '30d' : '7d');
-    }
-  }, [periodOption, setPeriodOption]);
-
   const updatePeriod = useCallback<SchemaExplorerContextType['setPeriodOption']>(
     option => {
       setPeriodOption(option);
@@ -84,11 +77,18 @@ export function SchemaExplorerProvider({ children }: { children: ReactNode }): R
     [setPeriodOption, setPeriod],
   );
 
+  useEffect(() => {
+    const inDays = parseInt(periodOption.replace('d', ''), 10);
+    if (dataRetentionInDays < inDays) {
+      updatePeriod(dataRetentionInDays > 7 ? '30d' : '7d');
+    }
+  }, [periodOption, setPeriodOption, updatePeriod, dataRetentionInDays]);
+
   const availablePeriodOptions = useMemo(() => {
     const options = Object.keys(periodLabelMap) as PeriodOption[];
 
     return options.filter(option => parseInt(option.replace('d', ''), 10) <= dataRetentionInDays);
-  }, [periodOption]);
+  }, [periodOption, dataRetentionInDays]);
 
   return (
     <SchemaExplorerContext.Provider
