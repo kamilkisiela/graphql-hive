@@ -59,9 +59,6 @@ const CreateSessionModel = z.object({
   refreshToken: z.object({
     token: z.string(),
   }),
-  idRefreshToken: z.object({
-    token: z.string(),
-  }),
 });
 
 const createSession = async (
