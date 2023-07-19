@@ -136,7 +136,6 @@ services:
       POSTGRESQL_HOST: db
       POSTGRESQL_PORT: 5432
       API_KEYS: bubatzbieber6942096420
-      ACCESS_TOKEN_BLACKLISTING: 'true'
 
   oidc-server-mock:
     container_name: oidc-server-mock

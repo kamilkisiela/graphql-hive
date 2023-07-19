@@ -319,12 +319,13 @@ async function verifySuperTokensSession(
       'content-type': 'application/json',
       'api-key': apiKey,
       rid: 'session',
-      'cdi-version': '2.20',
+      'cdi-version': '2.21',
     },
     body: JSON.stringify({
       accessToken,
       enableAntiCsrf: false,
       doAntiCsrfCheck: false,
+      checkDatabase: true,
     }),
   });
   const body = await response.text();

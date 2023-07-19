@@ -24,7 +24,7 @@ const signUpUserViaEmail = async (
       headers: {
         'content-type': 'application/json; charset=UTF-8',
         'api-key': ensureEnv('SUPERTOKENS_API_KEY'),
-        'cdi-version': '2.20',
+        'cdi-version': '2.21',
       },
       body: JSON.stringify({
         email,
@@ -57,9 +57,6 @@ const CreateSessionModel = z.object({
     token: z.string(),
   }),
   refreshToken: z.object({
-    token: z.string(),
-  }),
-  idRefreshToken: z.object({
     token: z.string(),
   }),
 });
@@ -101,7 +98,7 @@ const createSession = async (
         'content-type': 'application/json; charset=UTF-8',
         'api-key': ensureEnv('SUPERTOKENS_API_KEY'),
         rid: 'session',
-        'cdi-version': '2.20',
+        'cdi-version': '2.21',
       },
       body: JSON.stringify(payload),
     });
