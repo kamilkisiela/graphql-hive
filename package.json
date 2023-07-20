@@ -68,7 +68,7 @@
     "@theguild/eslint-config": "0.10.0",
     "@theguild/prettier-config": "1.2.0",
     "@types/node": "18.16.19",
-    "bob-the-bundler": "6.0.0",
+    "bob-the-bundler": "7.0.1",
     "cypress": "12.15.0",
     "dotenv": "16.3.1",
     "eslint": "8.43.0",
