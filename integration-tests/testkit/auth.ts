@@ -19,18 +19,21 @@ const signUpUserViaEmail = async (
   password: string,
 ): Promise<z.TypeOf<typeof SignUpSignInUserResponseModel>> => {
   try {
-    const response = await fetch(`${ensureEnv('SUPERTOKENS_CONNECTION_URI')}/recipe/signup`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json; charset=UTF-8',
-        'api-key': ensureEnv('SUPERTOKENS_API_KEY'),
-        'cdi-version': '2.21',
+    const response = await fetch(
+      `${ensureEnv('SUPERTOKENS_CONNECTION_URI')}/appid-public/public/recipe/signup`,
+      {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json; charset=UTF-8',
+          'api-key': ensureEnv('SUPERTOKENS_API_KEY'),
+          'cdi-version': '3.0',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       },
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-    });
+    );
     const body = await response.text();
 
     if (response.status !== 200) {
@@ -92,16 +95,19 @@ const createSession = async (
       userDataInJWT: sessionData,
     };
 
-    const response = await fetch(`${ensureEnv('SUPERTOKENS_CONNECTION_URI')}/recipe/session`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json; charset=UTF-8',
-        'api-key': ensureEnv('SUPERTOKENS_API_KEY'),
-        rid: 'session',
-        'cdi-version': '2.21',
+    const response = await fetch(
+      `${ensureEnv('SUPERTOKENS_CONNECTION_URI')}/appid-public/public/recipe/session`,
+      {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json; charset=UTF-8',
+          'api-key': ensureEnv('SUPERTOKENS_API_KEY'),
+          rid: 'session',
+          'cdi-version': '3.0',
+        },
+        body: JSON.stringify(payload),
       },
-      body: JSON.stringify(payload),
-    });
+    );
     const body = await response.text();
 
     if (response.status !== 200) {

@@ -313,13 +313,13 @@ async function verifySuperTokensSession(
   apiKey: string,
   accessToken: string,
 ): Promise<SuperTokenSessionPayload> {
-  const response = await fetch(connectionUri + '/recipe/session/verify', {
+  const response = await fetch(connectionUri + '/appid-public/public/recipe/session/verify', {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
       'api-key': apiKey,
       rid: 'session',
-      'cdi-version': '2.21',
+      'cdi-version': '3.0',
     },
     body: JSON.stringify({
       accessToken,
