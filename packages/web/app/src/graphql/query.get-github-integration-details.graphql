@@ -1,7 +1,0 @@
-query getGitHubIntegrationDetails($selector: OrganizationSelectorInput!) {
-  gitHubIntegration(selector: $selector) {
-    repositories {
-      nameWithOwner
-    }
-  }
-}

@@ -3,17 +3,28 @@ import { gql } from 'graphql-modules';
 export default gql`
   extend type Mutation {
     addSlackIntegration(input: AddSlackIntegrationInput!): Boolean!
-    deleteSlackIntegration(input: OrganizationSelectorInput!): Boolean!
+    deleteSlackIntegration(input: OrganizationSelectorInput!): DeleteSlackIntegrationResult!
     addGitHubIntegration(input: AddGitHubIntegrationInput!): Boolean!
-    deleteGitHubIntegration(input: OrganizationSelectorInput!): Boolean!
+    deleteGitHubIntegration(input: OrganizationSelectorInput!): DeleteGitHubIntegrationResult!
+  }
+
+  type DeleteSlackIntegrationResult {
+    organization: Organization!
+  }
+
+  type DeleteGitHubIntegrationResult {
+    organization: Organization!
   }
 
   extend type Query {
-    hasSlackIntegration(selector: OrganizationSelectorInput!): Boolean!
-    hasGitHubIntegration(selector: OrganizationSelectorInput!): Boolean!
-    gitHubIntegration(selector: OrganizationSelectorInput!): GitHubIntegration
     organizationByGitHubInstallationId(installation: ID!): Organization
     isGitHubIntegrationFeatureEnabled: Boolean!
+  }
+
+  extend type Organization {
+    hasSlackIntegration: Boolean!
+    hasGitHubIntegration: Boolean!
+    gitHubIntegration: GitHubIntegration
   }
 
   input AddSlackIntegrationInput {

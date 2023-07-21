@@ -20,7 +20,7 @@ import { QueryError } from '@/components/ui/query-error';
 import { DocsLink, Input, Link, MetaTitle, Select, Tag } from '@/components/v2';
 import { DeleteProjectModal } from '@/components/v2/modals';
 import { graphql, useFragment } from '@/gql';
-import { GetGitHubIntegrationDetailsDocument, ProjectType } from '@/graphql';
+import { ProjectType } from '@/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
@@ -46,10 +46,24 @@ const ProjectSettingsPage_UpdateProjectGitRepositoryMutation = graphql(`
   }
 `);
 
+const GithubIntegration_GithubIntegrationDetailsQuery = graphql(`
+  query getGitHubIntegrationDetails($selector: OrganizationSelectorInput!) {
+    organization(selector: $selector) {
+      organization {
+        gitHubIntegration {
+          repositories {
+            nameWithOwner
+          }
+        }
+      }
+    }
+  }
+`);
+
 function GitHubIntegration(props: { gitRepository: string | null }): ReactElement | null {
   const router = useRouteSelector();
   const [integrationQuery] = useQuery({
-    query: GetGitHubIntegrationDetailsDocument,
+    query: GithubIntegration_GithubIntegrationDetailsQuery,
     variables: {
       selector: {
         organization: router.organizationId,
@@ -90,7 +104,7 @@ function GitHubIntegration(props: { gitRepository: string | null }): ReactElemen
     return null;
   }
 
-  const githubIntegration = integrationQuery.data?.gitHubIntegration;
+  const githubIntegration = integrationQuery.data?.organization?.organization.gitHubIntegration;
 
   return (
     <form onSubmit={handleSubmit}>

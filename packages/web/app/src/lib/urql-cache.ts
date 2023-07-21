@@ -13,15 +13,12 @@ import type { DeleteOperationMutationType } from '@/components/v2/modals/delete-
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
 import {
-  CheckIntegrationsDocument,
   CreateOrganizationDocument,
   CreateTargetDocument,
   CreateTokenDocument,
-  DeleteGitHubIntegrationDocument,
   DeleteOrganizationDocument,
   DeletePersistedOperationDocument,
   DeleteProjectDocument,
-  DeleteSlackIntegrationDocument,
   DeleteTargetDocument,
   DeleteTokensDocument,
   OrganizationsDocument,
@@ -277,52 +274,6 @@ const deletePersistedOperation: TypedDocumentNodeUpdateResolver<
     id: operation.id,
   });
 };
-const deleteSlackIntegration: TypedDocumentNodeUpdateResolver<
-  typeof DeleteSlackIntegrationDocument
-> = (_, args, cache) => {
-  cache.updateQuery(
-    {
-      query: CheckIntegrationsDocument,
-      variables: {
-        selector: {
-          organization: args.input.organization,
-        },
-      },
-    },
-    data => {
-      if (data === null) {
-        return null;
-      }
-      return {
-        ...data,
-        hasSlackIntegration: false,
-      };
-    },
-  );
-};
-const deleteGitHubIntegration: TypedDocumentNodeUpdateResolver<
-  typeof DeleteGitHubIntegrationDocument
-> = (_, args, cache) => {
-  cache.updateQuery(
-    {
-      query: CheckIntegrationsDocument,
-      variables: {
-        selector: {
-          organization: args.input.organization,
-        },
-      },
-    },
-    data => {
-      if (data === null) {
-        return null;
-      }
-      return {
-        ...data,
-        hasGitHubIntegration: false,
-      };
-    },
-  );
-};
 
 const deleteDocumentCollection: TypedDocumentNodeUpdateResolver<DeleteCollectionMutationType> = (
   mutation,
@@ -418,8 +369,6 @@ export const Mutation = {
   createToken,
   deleteTokens,
   deleteAlerts,
-  deleteGitHubIntegration,
-  deleteSlackIntegration,
   addAlertChannel,
   deleteAlertChannels,
   addAlert,
