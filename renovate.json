@@ -4,6 +4,7 @@
   "constraints": {
     "pnpm": "8.6.0"
   },
+  "prConcurrentLimit": 10,
   "packageRules": [
     {
       "matchPackageNames": ["slonik", "slonik-utilities"],
