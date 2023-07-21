@@ -1,9 +1,0 @@
-mutation updateBaseSchema($input: UpdateBaseSchemaInput!) {
-  updateBaseSchema(input: $input) {
-    ok {
-      updatedTarget {
-        ...TargetFields
-      }
-    }
-  }
-}

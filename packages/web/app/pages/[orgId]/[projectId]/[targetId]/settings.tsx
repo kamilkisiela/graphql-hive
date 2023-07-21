@@ -30,7 +30,7 @@ import {
 import { Combobox } from '@/components/v2/combobox';
 import { CreateAccessTokenModal, DeleteTargetModal } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { DeleteTokensDocument, SetTargetValidationDocument, TokensDocument } from '@/graphql';
+import { SetTargetValidationDocument } from '@/graphql';
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
@@ -38,6 +38,35 @@ import { withSessionProtection } from '@/lib/supertokens/guard';
 const RegistryAccessTokens_MeFragment = graphql(`
   fragment RegistryAccessTokens_MeFragment on Member {
     ...CanAccessTarget_MemberFragment
+  }
+`);
+
+export const DeleteTokensDocument = graphql(`
+  mutation deleteTokens($input: DeleteTokensInput!) {
+    deleteTokens(input: $input) {
+      selector {
+        organization
+        project
+        target
+      }
+      deletedTokens
+    }
+  }
+`);
+
+export const TokensDocument = graphql(`
+  query tokens($selector: TargetSelectorInput!) {
+    tokens(selector: $selector) {
+      total
+      nodes {
+        ...TokenFields
+        id
+        alias
+        name
+        lastUsedAt
+        date
+      }
+    }
   }
 `);
 
