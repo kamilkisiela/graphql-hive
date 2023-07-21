@@ -63,7 +63,11 @@ module.exports = {
     'import/no-extraneous-dependencies': [
       'error',
       {
-        devDependencies: ['packages/services/storage/tools/*.js', 'packages/services/**'],
+        devDependencies: [
+          'packages/services/storage/tools/*.js',
+          'packages/services/**',
+          'packages/migrations/**',
+        ],
         optionalDependencies: false,
       },
     ],

@@ -9,7 +9,10 @@
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
+  "devDependencies": {
+    "@graphql-hive/core": "0.2.3",
+    "@hive/service-common": "workspace:*",
+    "@hive/usage-common": "workspace:*",
     "@sentry/node": "7.59.3",
     "agentkeepalive": "4.3.0",
     "date-fns": "2.30.0",
@@ -17,14 +20,9 @@
     "got": "12.6.1",
     "graphql": "16.6.0",
     "kafkajs": "2.2.4",
-    "tiny-lru": "8.0.2",
-    "zod": "3.21.4"
-  },
-  "devDependencies": {
-    "@graphql-hive/core": "0.2.3",
-    "@hive/service-common": "workspace:*",
-    "@hive/usage-common": "workspace:*",
     "pino-pretty": "10.1.0",
-    "tslib": "2.5.3"
+    "tiny-lru": "8.0.2",
+    "tslib": "2.5.3",
+    "zod": "3.21.4"
   }
 }

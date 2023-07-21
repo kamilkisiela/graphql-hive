@@ -37,7 +37,7 @@ async function runify(packagePath: string) {
       cwd,
       'src/index.ts',
       buildOptions,
-      Object.keys(pkg.dependencies ?? {}),
+      Object.keys(pkg.dependencies ?? {}).concat(Object.keys(pkg.devDependencies ?? {})),
       pkg.type === 'module',
     );
     await rewritePackageJson(pkg, cwd);

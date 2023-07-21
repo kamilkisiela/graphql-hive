@@ -15,25 +15,23 @@
     "build": "tsx ../../../scripts/runify.ts",
     "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts"
   },
-  "dependencies": {
+  "devDependencies": {
     "@sentry/node": "7.59.3",
+    "@sentry/types": "7.59.3",
+    "@tgriesser/schemats": "9.0.1",
     "@theguild/buddy": "0.1.0",
+    "@types/node": "18.16.19",
+    "@types/pg": "8.10.2",
     "dotenv": "16.3.1",
     "got": "12.6.1",
     "param-case": "3.0.4",
+    "pg-promise": "11.5.0",
     "slonik": "30.4.4",
     "slonik-interceptor-query-logging": "1.4.7",
     "slonik-utilities": "1.9.4",
-    "zod": "3.21.4"
-  },
-  "devDependencies": {
-    "@sentry/types": "7.59.3",
-    "@tgriesser/schemats": "9.0.1",
-    "@types/node": "18.16.19",
-    "@types/pg": "8.10.2",
-    "pg-promise": "11.5.0",
     "tslib": "2.5.3",
-    "typescript": "5.1.6"
+    "typescript": "5.1.6",
+    "zod": "3.21.4"
   },
   "buildOptions": {
     "external": [

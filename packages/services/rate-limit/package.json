@@ -10,7 +10,10 @@
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
+  "devDependencies": {
+    "@hive/emails": "workspace:*",
+    "@hive/service-common": "workspace:*",
+    "@hive/storage": "workspace:*",
     "@sentry/node": "7.59.3",
     "@trpc/client": "10.31.0",
     "@trpc/server": "10.31.0",
@@ -18,15 +21,10 @@
     "date-fns": "2.30.0",
     "dotenv": "16.3.1",
     "got": "12.6.1",
-    "reflect-metadata": "0.1.13",
-    "zod": "3.21.4"
-  },
-  "devDependencies": {
-    "@hive/emails": "workspace:*",
-    "@hive/service-common": "workspace:*",
-    "@hive/storage": "workspace:*",
     "pino-pretty": "10.1.0",
-    "tslib": "2.5.3"
+    "reflect-metadata": "0.1.13",
+    "tslib": "2.5.3",
+    "zod": "3.21.4"
   },
   "buildOptions": {
     "external": [
