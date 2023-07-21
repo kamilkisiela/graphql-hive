@@ -1,11 +1,15 @@
 import { createClient, errorExchange, fetchExchange } from 'urql';
+import { env } from '@/env/frontend';
 import { cacheExchange } from '@urql/exchange-graphcache';
+import { persistedExchange } from '@urql/exchange-persisted';
 import { Mutation } from './urql-cache';
 import { networkStatusExchange } from './urql-exchanges/state';
 
 const noKey = (): null => null;
 
 const SERVER_BASE_PATH = '/api/proxy';
+
+const isSome = <T>(value: T | null | undefined): value is T => value != null;
 
 export const urqlClient = createClient({
   url: SERVER_BASE_PATH,
@@ -45,6 +49,7 @@ export const urqlClient = createClient({
       },
       globalIDs: ['SuccessfulSchemaCheck', 'FailedSchemaCheck'],
     }),
+    networkStatusExchange,
     errorExchange({
       onError(error) {
         if (error.response?.status === 401) {
@@ -52,7 +57,16 @@ export const urqlClient = createClient({
         }
       },
     }),
-    networkStatusExchange,
+    env.graphql.persistedOperations
+      ? persistedExchange({
+          enforcePersistedQueries: true,
+          enableForMutation: true,
+          generateHash: (_, document) => {
+            // TODO: improve types here
+            return Promise.resolve((document as any)?.['__meta__']?.['hash']);
+          },
+        })
+      : null,
     fetchExchange,
-  ].filter(Boolean),
+  ].filter(isSome),
 });

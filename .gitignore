@@ -129,6 +129,7 @@ cypress
 packages/web/app/next.config.mjs
 packages/web/app/environment-*.mjs
 packages/web/app/src/gql/*.ts
+packages/web/app/src/gql/*.json
 packages/web/app/src/graphql/*.ts
 
 _redirects

@@ -5,7 +5,7 @@ import type {
   FastifyRequest,
   RouteHandlerMethod,
 } from 'fastify';
-import { GraphQLError, print, ValidationContext, ValidationRule } from 'graphql';
+import { DocumentNode, GraphQLError, print, ValidationContext, ValidationRule } from 'graphql';
 import { createYoga, Plugin, useErrorHandler } from 'graphql-yoga';
 import hyperid from 'hyperid';
 import zod from 'zod';
@@ -14,6 +14,7 @@ import { useGenericAuth } from '@envelop/generic-auth';
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useSentry } from '@envelop/sentry';
 import { useYogaHive } from '@graphql-hive/client';
+import { usePersistedOperations } from '@graphql-yoga/plugin-persisted-operations';
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { HiveError, Registry, RegistryContext } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
@@ -54,6 +55,7 @@ export interface GraphQLHandlerOptions {
   hiveConfig: HiveConfig;
   release: string;
   logger: FastifyLoggerInstance;
+  persistedOperations: Record<string, DocumentNode | string> | null;
 }
 
 export type SuperTokenSessionPayload = zod.TypeOf<typeof SuperTokenAccessTokenModel>;
@@ -98,9 +100,19 @@ function useNoIntrospection(params: {
 }
 
 export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMethod => {
+  const { persistedOperations } = options;
   const server = createYoga<Context>({
     logging: options.logger,
     plugins: [
+      persistedOperations
+        ? usePersistedOperations({
+            allowArbitraryOperations: true,
+            skipDocumentValidation: true,
+            getPersistedOperation(key) {
+              return persistedOperations[key] ?? null;
+            },
+          })
+        : {},
       useArmor(),
       useSentry({
         startTransaction: false,

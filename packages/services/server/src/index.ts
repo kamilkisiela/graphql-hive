@@ -1,6 +1,7 @@
 #!/usr/bin/env node
+import * as fs from 'fs';
 import got from 'got';
-import { GraphQLError, stripIgnoredCharacters } from 'graphql';
+import { DocumentNode, GraphQLError, stripIgnoredCharacters } from 'graphql';
 import 'reflect-metadata';
 import zod from 'zod';
 import { createRegistry, CryptoProvider, LogFn, Logger } from '@hive/api';
@@ -244,6 +245,13 @@ export async function main() {
       organizationOIDC: env.organizationOIDC,
     });
 
+    let persistedOperations: Record<string, DocumentNode | string> | null = null;
+    if (env.graphql.persistedOperationsPath) {
+      persistedOperations = JSON.parse(
+        fs.readFileSync(env.graphql.persistedOperationsPath, 'utf-8'),
+      );
+    }
+
     const graphqlPath = '/graphql';
     const port = env.http.port;
     const signature = Math.random().toString(16).substr(2);
@@ -259,6 +267,7 @@ export async function main() {
       release: env.release,
       hiveConfig: env.hive,
       logger: graphqlLogger as any,
+      persistedOperations,
     });
 
     server.route({

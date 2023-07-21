@@ -48,6 +48,7 @@
     "@urql/devtools": "2.0.3",
     "@urql/exchange-graphcache": "6.1.4",
     "@whatwg-node/fetch": "0.9.9",
+    "@urql/exchange-persisted": "4.0.1",
     "class-variance-authority": "0.6.0",
     "clsx": "1.2.1",
     "cookies": "0.8.0",

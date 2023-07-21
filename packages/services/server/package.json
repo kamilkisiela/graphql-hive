@@ -5,7 +5,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "tsx ../../../scripts/runify.ts",
+    "build": "tsx ../../../scripts/runify.ts && tsx ./scripts/copy-persisted-operations.mts",
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts",
     "typecheck": "tsc --noEmit"
   },
@@ -19,6 +19,7 @@
     "@escape.tech/graphql-armor-max-depth": "2.1.0",
     "@escape.tech/graphql-armor-max-directives": "2.0.0",
     "@escape.tech/graphql-armor-max-tokens": "2.1.0",
+    "@graphql-yoga/plugin-persisted-operations": "2.0.3",
     "@graphql-yoga/plugin-response-cache": "2.1.0",
     "@sentry/integrations": "7.59.3",
     "@sentry/node": "7.59.3",

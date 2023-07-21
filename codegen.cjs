@@ -157,6 +157,9 @@ const config = {
           JSONSchemaObject: 'json-schema-typed#JSONSchema',
         },
       },
+      presetConfig: {
+        persistedDocuments: true,
+      },
       plugins: [],
     },
     // CLI

@@ -48,6 +48,7 @@ The GraphQL API for GraphQL Hive.
 | `PROMETHEUS_METRICS`                        | No                                             | Whether Prometheus metrics should be enabled                                                  | `1` (enabled) or `0` (disabled)                      |
 | `PROMETHEUS_METRICS_LABEL_INSTANCE`         | No                                             | The instance label added for the prometheus metrics.                                          | `server`                                             |
 | `REQUEST_LOGGING`                           | No                                             | Log http requests                                                                             | `1` (enabled) or `0` (disabled)                      |
+| `GRAPHQL_PERSISTED_OPERATIONS_PATH`         | No                                             | The path to a file of persisted operations to                                                 | `./persisted-operations.json`                        |
 
 ## Hive Hosted Configuration
 
