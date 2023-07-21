@@ -8,11 +8,11 @@
     "dev": "next"
   },
   "dependencies": {
-    "@next/env": "13.4.7",
+    "@next/env": "13.4.11",
     "@radix-ui/react-tooltip": "1.0.6",
     "@theguild/components": "4.6.5",
     "clsx": "1.2.1",
-    "next": "13.4.7",
+    "next": "13.4.11",
     "next-themes": "*",
     "react": "18.2.0",
     "react-dom": "18.2.0",
