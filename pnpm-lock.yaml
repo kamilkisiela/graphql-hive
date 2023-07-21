@@ -225,8 +225,8 @@ importers:
         specifier: 2.5.1
         version: 2.5.1(graphql@16.6.0)
       '@apollo/server':
-        specifier: 4.7.5
-        version: 4.7.5(graphql@16.6.0)
+        specifier: 4.8.0
+        version: 4.8.0(graphql@16.6.0)
       '@aws-sdk/client-s3':
         specifier: 3.359.0
         version: 3.359.0
@@ -412,7 +412,7 @@ importers:
     optionalDependencies:
       '@apollo/server':
         specifier: ^4.0.0
-        version: 4.7.5(graphql@16.6.0)
+        version: 4.8.0(graphql@16.6.0)
       '@envelop/types':
         specifier: ^4.0.0
         version: 4.0.0
@@ -2216,8 +2216,8 @@ packages:
       graphql: 16.6.0
     dev: false
 
-  /@apollo/server@4.7.5(graphql@16.6.0):
-    resolution: {integrity: sha512-XobKpTnW/jbmr0DuJ+8zBzoeL6uEat4CkBN7kOCjhXEUuCNxiLrQGrWFVDqgV7bSdOJr6o2POmZYBPNQXLdyvA==}
+  /@apollo/server@4.8.0(graphql@16.6.0):
+    resolution: {integrity: sha512-aJtRxeG5bojUtCAPc6EbC9WuqM/2ZGA3HQEVcs3alXhKjtblnMssMFsgXhp8dHBN2v4aK1MPxj6ZPpKIwizmwA==}
     engines: {node: '>=14.16.0'}
     requiresBuild: true
     peerDependencies:
@@ -14267,7 +14267,7 @@ packages:
     engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
     dependencies:
       bytes: 3.1.2
-      content-type: 1.0.4
+      content-type: 1.0.5
       debug: 2.6.9
       depd: 2.0.0
       destroy: 1.2.0
@@ -15487,10 +15487,6 @@ packages:
     engines: {node: '>= 0.6'}
     dependencies:
       safe-buffer: 5.2.1
-
-  /content-type@1.0.4:
-    resolution: {integrity: sha512-hIP3EEPs8tB9AT1L+NUqtwOAps4mk2Zob89MWXMHjHWg9milF/j4osnnQLXBCBFBk/tvIG/tUc9mOUJiPBhPXA==}
-    engines: {node: '>= 0.6'}
 
   /content-type@1.0.5:
     resolution: {integrity: sha512-nTjqfcBFEipKdXCv4YDQWCfmcLZKm81ldF0pAopTvyrFGVbcR6P/VAAd5G7N+0tTr8QqiU0tFadD6FK4NtJwOA==}
