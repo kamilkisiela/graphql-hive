@@ -53,6 +53,7 @@ const DeleteSlackIntegrationMutation = graphql(`
   mutation Integrations_DeleteSlackIntegration($input: OrganizationSelectorInput!) {
     deleteSlackIntegration(input: $input) {
       organization {
+        id
         hasSlackIntegration
       }
     }
@@ -63,6 +64,7 @@ const DeleteGitHubIntegrationMutation = graphql(`
   mutation Integrations_DeleteGitHubIntegration($input: OrganizationSelectorInput!) {
     deleteGitHubIntegration(input: $input) {
       organization {
+        id
         hasGitHubIntegration
       }
     }
