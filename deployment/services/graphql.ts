@@ -164,6 +164,8 @@ export function deployGraphQL({
         AUTH_LEGACY_AUTH0: '1',
         AUTH_LEGACY_AUTH0_INTERNAL_API_KEY: auth0Config.internalApiKey,
         AUTH_ORGANIZATION_OIDC: '1',
+        // Various
+        GRAPHQL_PERSISTED_OPERATIONS_PATH: './persisted-operations.json',
       },
       exposesMetrics: true,
       port: 4000,

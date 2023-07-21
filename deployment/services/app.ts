@@ -120,6 +120,11 @@ export function deployApp({
           value: 'https://the-guild.dev/graphql/hive/docs',
         },
 
+        {
+          name: 'GRAPHQL_PERSISTED_OPERATIONS',
+          value: '1',
+        },
+
         //
         // AUTH
         //
