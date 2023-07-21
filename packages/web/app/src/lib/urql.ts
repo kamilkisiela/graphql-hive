@@ -63,7 +63,7 @@ export const urqlClient = createClient({
           enableForMutation: true,
           generateHash: (_, document) => {
             // TODO: improve types here
-            return Promise.resolve((document as any)?.['__meta__']?.['hash']);
+            return Promise.resolve((document as any)?.['__meta__']?.['hash'] ?? '');
           },
         })
       : null,
