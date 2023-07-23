@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@graphql-eslint/eslint-plugin": "3.19.1",
+    "@graphql-eslint/eslint-plugin": "3.20.1",
     "@sentry/node": "7.59.3",
     "@sentry/tracing": "7.59.3",
     "@trpc/server": "10.31.0",
