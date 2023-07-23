@@ -29,7 +29,7 @@
     "@types/async-retry": "1.4.5",
     "@types/ioredis-mock": "8.2.2",
     "fastify": "3.29.5",
-    "ioredis-mock": "8.7.0",
+    "ioredis-mock": "8.8.1",
     "pino-pretty": "10.1.0"
   }
 }
