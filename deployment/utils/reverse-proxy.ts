@@ -123,7 +123,7 @@ export class Proxy {
 
     const proxyController = new k8s.helm.v3.Chart('contour-proxy', {
       // prettier-ignore
-      ...helmChart('https://charts.bitnami.com/bitnami', 'contour', '12.1.0'),
+      ...helmChart('https://charts.bitnami.com/bitnami', 'contour', '12.2.0'),
       namespace: ns.metadata.name,
       // https://github.com/bitnami/charts/tree/master/bitnami/contour
       values: {
