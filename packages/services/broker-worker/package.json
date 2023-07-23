@@ -14,7 +14,7 @@
     "zod": "3.21.4"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "4.20230717.0",
+    "@cloudflare/workers-types": "4.20230717.1",
     "@types/service-worker-mock": "2.0.1",
     "@whatwg-node/fetch": "0.9.9",
     "@whatwg-node/server": "0.9.5",
