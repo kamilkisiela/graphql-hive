@@ -139,6 +139,7 @@ const S3Model = zod.object({
   S3_ENDPOINT: zod.string().url(),
   S3_ACCESS_KEY_ID: zod.string(),
   S3_SECRET_ACCESS_KEY: zod.string(),
+  S3_SESSION_TOKEN: emptyString(zod.string().optional()),
   S3_BUCKET_NAME: zod.string(),
   S3_PUBLIC_URL: emptyString(zod.string().url().optional()),
 });
@@ -328,6 +329,7 @@ export const env = {
     credentials: {
       accessKeyId: s3.S3_ACCESS_KEY_ID,
       secretAccessKey: s3.S3_SECRET_ACCESS_KEY,
+      sessionToken: s3.S3_SESSION_TOKEN
     },
   },
   organizationOIDC: base.AUTH_ORGANIZATION_OIDC === '1',
