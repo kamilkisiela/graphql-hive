@@ -1,4 +1,4 @@
-import { FormEventHandler, memo, ReactElement, useCallback, useState } from 'react';
+import { FormEventHandler, memo, ReactElement, useCallback, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useMutation } from 'urql';
 import { Accordion, RadixSelect, Tooltip } from '@/components/v2';
@@ -243,6 +243,14 @@ export function usePermissionsManager({
   const [organizationScopes, setOrganizationScopes] = useState<OrganizationAccessScope[]>(
     passMemberScopes ? member.organizationAccessScopes : [],
   );
+
+  useEffect(() => {
+    if (passMemberScopes) {
+      setTargetScopes(member.targetAccessScopes);
+      setProjectScopes(member.projectAccessScopes);
+      setOrganizationScopes(member.organizationAccessScopes);
+    }
+  }, [member, passMemberScopes, setTargetScopes, setProjectScopes, setOrganizationScopes]);
 
   const submit = useCallback<FormEventHandler<HTMLElement>>(
     async evt => {
