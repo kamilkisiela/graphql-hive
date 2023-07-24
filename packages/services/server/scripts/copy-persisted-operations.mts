@@ -16,7 +16,7 @@ const persistedOperationsAppPath = path.join(
   'gql',
   'persisted-documents.json',
 );
-const persistedOperationsDistPath = path.join(dirname, '..', 'dist', 'persisted-documents.json');
+const persistedOperationsDistPath = path.join(dirname, '..', 'dist', 'persisted-operations.json');
 
 const persistedOperations: Record<string, string> = JSON.parse(
   await fs.readFile(persistedOperationsAppPath, 'utf-8'),
