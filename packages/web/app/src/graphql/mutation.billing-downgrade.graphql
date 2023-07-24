@@ -1,9 +1,0 @@
-mutation downgradeToHobby($organization: ID!) {
-  downgradeToHobby(input: { organization: { organization: $organization } }) {
-    previousPlan
-    newPlan
-    organization {
-      ...OrgBillingInfoFields
-    }
-  }
-}

@@ -13,12 +13,6 @@ import { QueryError } from '@/components/ui/query-error';
 import { Card, Heading, Input, MetaTitle, Slider, Stat } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { BillingPlanType } from '@/gql/graphql';
-import {
-  BillingPlansDocument,
-  DowngradeToHobbyDocument,
-  UpdateOrgRateLimitDocument,
-  UpgradeToProDocument,
-} from '@/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { useRouteSelector } from '@/lib/hooks';
@@ -55,6 +49,66 @@ const ManageSubscriptionInner_BillingPlansFragment = graphql(`
   }
 `);
 
+const BillingsPlanQuery = graphql(`
+  query ManageSubscription_BillingPlans {
+    billingPlans {
+      id
+      planType
+      name
+      basePrice
+      description
+      includedOperationsLimit
+      pricePerOperationsUnit
+      rateLimit
+      retentionInDays
+    }
+  }
+`);
+
+const BillingDowngradeMutation = graphql(`
+  mutation ManageSubscription_DowngradeToHobby($organization: ID!) {
+    downgradeToHobby(input: { organization: { organization: $organization } }) {
+      previousPlan
+      newPlan
+      organization {
+        ...OrgBillingInfoFields
+      }
+    }
+  }
+`);
+
+const BillingUpgradeToProMutation = graphql(`
+  mutation ManageSubscription_UpgradeToPro(
+    $organization: ID!
+    $paymentMethodId: String
+    $couponCode: String
+    $monthlyLimits: RateLimitInput!
+  ) {
+    upgradeToPro(
+      input: {
+        paymentMethodId: $paymentMethodId
+        couponCode: $couponCode
+        organization: { organization: $organization }
+        monthlyLimits: $monthlyLimits
+      }
+    ) {
+      previousPlan
+      newPlan
+      organization {
+        ...OrgBillingInfoFields
+      }
+    }
+  }
+`);
+
+const UpdateOrgRateLimitMutation = graphql(`
+  mutation updateOrgRateLimit($organization: ID!, $monthlyLimits: RateLimitInput!) {
+    updateOrgRateLimit(monthlyLimits: $monthlyLimits, selector: { organization: $organization }) {
+      ...OrgBillingInfoFields
+    }
+  }
+`);
+
 function Inner(props: {
   organization: FragmentType<typeof ManageSubscriptionInner_OrganizationFragment>;
   billingPlans: Array<FragmentType<typeof ManageSubscriptionInner_BillingPlansFragment>>;
@@ -71,14 +125,14 @@ function Inner(props: {
     redirect: true,
   });
 
-  const [query] = useQuery({ query: BillingPlansDocument });
+  const [query] = useQuery({ query: BillingsPlanQuery });
 
   const [paymentDetailsValid, setPaymentDetailsValid] = useState(
     !!organization.billingConfiguration?.paymentMethod,
   );
-  const upgradeToProMutation = useMutation(UpgradeToProDocument);
-  const downgradeToHobbyMutation = useMutation(DowngradeToHobbyDocument);
-  const updateOrgRateLimitMutation = useMutation(UpdateOrgRateLimitDocument);
+  const upgradeToProMutation = useMutation(BillingUpgradeToProMutation);
+  const downgradeToHobbyMutation = useMutation(BillingDowngradeMutation);
+  const updateOrgRateLimitMutation = useMutation(UpdateOrgRateLimitMutation);
   const planSummaryRef = useRef<HTMLDivElement>(null);
 
   const [plan, setPlan] = useState<BillingPlanType>(organization?.plan || 'HOBBY');

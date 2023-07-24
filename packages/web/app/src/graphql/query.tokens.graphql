@@ -1,8 +1,0 @@
-query tokens($selector: TargetSelectorInput!) {
-  tokens(selector: $selector) {
-    total
-    nodes {
-      ...TokenFields
-    }
-  }
-}

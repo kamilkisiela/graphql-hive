@@ -7,7 +7,7 @@ import { Button, Heading, Input, Modal } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
 
-const CreateTarget_CreateTargetMutation = graphql(`
+export const CreateTarget_CreateTargetMutation = graphql(`
   mutation CreateTarget_CreateTarget($input: CreateTargetInput!) {
     createTarget(input: $input) {
       ok {

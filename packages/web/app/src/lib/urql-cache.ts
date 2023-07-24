@@ -6,29 +6,39 @@ import type { CreateAlertModal_AddAlertMutation } from '@/components/project/ale
 import type { CreateChannel_AddAlertChannelMutation } from '@/components/project/alerts/create-channel';
 import type { DeleteAlertsButton_DeleteAlertsMutation } from '@/components/project/alerts/delete-alerts-button';
 import type { DeleteChannelsButton_DeleteChannelsMutation } from '@/components/project/alerts/delete-channels-button';
+import type { CreateAccessToken_CreateTokenMutation } from '@/components/v2/modals/create-access-token';
 import type { CreateOperationMutationType } from '@/components/v2/modals/create-operation';
+import type { CreateOrganizationMutation } from '@/components/v2/modals/create-organization';
 import type { CreateProjectMutation } from '@/components/v2/modals/create-project';
+import type { CreateTarget_CreateTargetMutation } from '@/components/v2/modals/create-target';
 import type { DeleteCollectionMutationType } from '@/components/v2/modals/delete-collection';
 import type { DeleteOperationMutationType } from '@/components/v2/modals/delete-operation';
+import type { DeleteOrganizationDocument } from '@/components/v2/modals/delete-organization';
+import { graphql } from '@/gql';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
 import {
-  CheckIntegrationsDocument,
-  CreateOrganizationDocument,
-  CreateTargetDocument,
-  CreateTokenDocument,
-  DeleteGitHubIntegrationDocument,
-  DeleteOrganizationDocument,
+  TokensDocument,
+  type DeleteTokensDocument,
+} from '../../pages/[orgId]/[projectId]/[targetId]/settings';
+import {
   DeletePersistedOperationDocument,
   DeleteProjectDocument,
-  DeleteSlackIntegrationDocument,
   DeleteTargetDocument,
-  DeleteTokensDocument,
   OrganizationsDocument,
-  TargetsDocument,
-  TokensDocument,
 } from '../graphql';
 import { CollectionsQuery } from './hooks/use-collections';
+
+const TargetsDocument = graphql(`
+  query targets($selector: ProjectSelectorInput!) {
+    targets(selector: $selector) {
+      total
+      nodes {
+        ...TargetFields
+      }
+    }
+  }
+`);
 
 export const getOperationName = (query: DocumentNode): string | void => {
   for (const node of query.definitions) {
@@ -67,7 +77,7 @@ const deleteAlerts: TypedDocumentNodeUpdateResolver<
   }
 };
 
-const createOrganization: TypedDocumentNodeUpdateResolver<typeof CreateOrganizationDocument> = (
+const createOrganization: TypedDocumentNodeUpdateResolver<typeof CreateOrganizationMutation> = (
   { createOrganization },
   _args,
   cache,
@@ -80,7 +90,8 @@ const createOrganization: TypedDocumentNodeUpdateResolver<typeof CreateOrganizat
     data => {
       if (createOrganization.ok) {
         data.organizations.nodes.unshift(
-          createOrganization.ok.createdOrganizationPayload.organization,
+          // TODO: figure out masking
+          createOrganization.ok.createdOrganizationPayload.organization as any,
         );
         data.organizations.total += 1;
       }
@@ -129,7 +140,7 @@ const deleteProject: TypedDocumentNodeUpdateResolver<typeof DeleteProjectDocumen
   });
 };
 
-const createTarget: TypedDocumentNodeUpdateResolver<typeof CreateTargetDocument> = (
+const createTarget: TypedDocumentNodeUpdateResolver<typeof CreateTarget_CreateTargetMutation> = (
   { createTarget },
   _args,
   cache,
@@ -153,7 +164,8 @@ const createTarget: TypedDocumentNodeUpdateResolver<typeof CreateTargetDocument>
       },
     },
     data => {
-      data.targets.nodes.unshift(target);
+      // TODO: figure out masking
+      data.targets.nodes.unshift(target as any);
       data.targets.total += 1;
     },
   );
@@ -172,7 +184,7 @@ const deleteTarget: TypedDocumentNodeUpdateResolver<typeof DeleteTargetDocument>
   });
 };
 
-const createToken: TypedDocumentNodeUpdateResolver<typeof CreateTokenDocument> = (
+const createToken: TypedDocumentNodeUpdateResolver<typeof CreateAccessToken_CreateTokenMutation> = (
   { createToken },
   _args,
   cache,
@@ -195,7 +207,7 @@ const createToken: TypedDocumentNodeUpdateResolver<typeof CreateTokenDocument> =
       },
     },
     data => {
-      data.tokens.nodes.unshift(createdToken);
+      data.tokens.nodes.unshift(createdToken as any);
       data.tokens.total += 1;
     },
   );
@@ -222,7 +234,9 @@ const deleteTokens: TypedDocumentNodeUpdateResolver<typeof DeleteTokensDocument>
     },
     data => {
       data.tokens.nodes = data.tokens.nodes.filter(
-        node => !deleteTokens.deletedTokens.includes(node.id),
+        // TODO: fix types
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        node => !deleteTokens.deletedTokens.includes((node as any).id),
       );
       data.tokens.total = data.tokens.nodes.length;
     },
@@ -276,52 +290,6 @@ const deletePersistedOperation: TypedDocumentNodeUpdateResolver<
     __typename: operation.__typename,
     id: operation.id,
   });
-};
-const deleteSlackIntegration: TypedDocumentNodeUpdateResolver<
-  typeof DeleteSlackIntegrationDocument
-> = (_, args, cache) => {
-  cache.updateQuery(
-    {
-      query: CheckIntegrationsDocument,
-      variables: {
-        selector: {
-          organization: args.input.organization,
-        },
-      },
-    },
-    data => {
-      if (data === null) {
-        return null;
-      }
-      return {
-        ...data,
-        hasSlackIntegration: false,
-      };
-    },
-  );
-};
-const deleteGitHubIntegration: TypedDocumentNodeUpdateResolver<
-  typeof DeleteGitHubIntegrationDocument
-> = (_, args, cache) => {
-  cache.updateQuery(
-    {
-      query: CheckIntegrationsDocument,
-      variables: {
-        selector: {
-          organization: args.input.organization,
-        },
-      },
-    },
-    data => {
-      if (data === null) {
-        return null;
-      }
-      return {
-        ...data,
-        hasGitHubIntegration: false,
-      };
-    },
-  );
 };
 
 const deleteDocumentCollection: TypedDocumentNodeUpdateResolver<DeleteCollectionMutationType> = (
@@ -418,8 +386,6 @@ export const Mutation = {
   createToken,
   deleteTokens,
   deleteAlerts,
-  deleteGitHubIntegration,
-  deleteSlackIntegration,
   addAlertChannel,
   deleteAlertChannels,
   addAlert,

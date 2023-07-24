@@ -1,9 +1,28 @@
 import { ReactElement } from 'react';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
-import { DeleteOrganizationMembersDocument } from '@/graphql';
+import { graphql } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
 import { TrashIcon } from '@radix-ui/react-icons';
+
+const DeleteOrganizationMembersDocument = graphql(`
+  mutation deleteOrganizationMembers($selector: OrganizationMembersSelectorInput!) {
+    deleteOrganizationMembers(selector: $selector) {
+      selector {
+        organization
+      }
+      organization {
+        id
+        members {
+          total
+          nodes {
+            ...MemberFields
+          }
+        }
+      }
+    }
+  }
+`);
 
 export const DeleteMembersModal = ({
   isOpen,

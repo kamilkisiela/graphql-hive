@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { HiveError } from '../../shared/errors';
+import { OrganizationManager } from '../organization/providers/organization-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
 import type { IntegrationsModule } from './__generated__/types';
 import { GitHubIntegrationManager } from './providers/github-integration-manager';
@@ -38,13 +39,14 @@ export const resolvers: IntegrationsModule.Resolvers = {
       return true;
     },
     async deleteSlackIntegration(_, { input }, { injector }) {
-      const organization = await injector.get(IdTranslator).translateOrganizationId(input);
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
 
       await injector.get(SlackIntegrationManager).unregister({
-        organization,
+        organization: organizationId,
       });
 
-      return true;
+      const organization = await injector.get(OrganizationManager).getOrganization(input);
+      return { organization };
     },
     async addGitHubIntegration(_, { input }, { injector }) {
       const organization = await injector.get(IdTranslator).translateOrganizationId(input);
@@ -57,42 +59,40 @@ export const resolvers: IntegrationsModule.Resolvers = {
       return true;
     },
     async deleteGitHubIntegration(_, { input }, { injector }) {
-      const organization = await injector.get(IdTranslator).translateOrganizationId(input);
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
 
       await injector.get(GitHubIntegrationManager).unregister({
-        organization,
+        organization: organizationId,
       });
 
-      return true;
+      const organization = await injector.get(OrganizationManager).getOrganization(input);
+      return { organization };
     },
   },
   Query: {
     isGitHubIntegrationFeatureEnabled(_, __, { injector }) {
       return injector.get(GitHubIntegrationManager).isEnabled();
     },
-    async hasSlackIntegration(_, { selector }, { injector }) {
-      const organization = await injector.get(IdTranslator).translateOrganizationId(selector);
-
+    organizationByGitHubInstallationId(_, { installation }, { injector }) {
+      return injector.get(GitHubIntegrationManager).getOrganization({
+        installation,
+      });
+    },
+  },
+  Organization: {
+    hasSlackIntegration(organization, _, { injector }) {
       return injector.get(SlackIntegrationManager).isAvailable({
-        organization,
+        organization: organization.id,
       });
     },
-    async hasGitHubIntegration(_, { selector }, { injector }) {
-      const organization = await injector.get(IdTranslator).translateOrganizationId(selector);
-
-      if (!injector.get(GitHubIntegrationManager).isEnabled()) {
-        return false;
-      }
-
+    hasGitHubIntegration(organization, _, { injector }) {
       return injector.get(GitHubIntegrationManager).isAvailable({
-        organization,
+        organization: organization.id,
       });
     },
-    async gitHubIntegration(_, { selector }, { injector }) {
-      const organization = await injector.get(IdTranslator).translateOrganizationId(selector);
-
+    async gitHubIntegration(organization, _, { injector }) {
       const repositories = await injector.get(GitHubIntegrationManager).getRepositories({
-        organization,
+        organization: organization.id,
       });
 
       if (repositories == null) {
@@ -102,11 +102,6 @@ export const resolvers: IntegrationsModule.Resolvers = {
       return {
         repositories,
       };
-    },
-    organizationByGitHubInstallationId(_, { installation }, { injector }) {
-      return injector.get(GitHubIntegrationManager).getOrganization({
-        installation,
-      });
     },
   },
 };

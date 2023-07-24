@@ -26,11 +26,6 @@ import {
 import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import {
-  CheckIntegrationsDocument,
-  DeleteGitHubIntegrationDocument,
-  DeleteSlackIntegrationDocument,
-} from '@/graphql';
-import {
   canAccessOrganization,
   OrganizationAccessScope,
   useOrganizationAccess,
@@ -38,12 +33,50 @@ import {
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
+const Integrations_CheckIntegrationsQuery = graphql(`
+  query Integrations_CheckIntegrationsQuery($selector: OrganizationSelectorInput!) {
+    organization(selector: $selector) {
+      organization {
+        id
+        viewerCanManageOIDCIntegration
+        ...OIDCIntegrationSection_OrganizationFragment
+        id
+        hasSlackIntegration
+        hasGitHubIntegration
+      }
+    }
+    isGitHubIntegrationFeatureEnabled
+  }
+`);
+
+const DeleteSlackIntegrationMutation = graphql(`
+  mutation Integrations_DeleteSlackIntegration($input: OrganizationSelectorInput!) {
+    deleteSlackIntegration(input: $input) {
+      organization {
+        id
+        hasSlackIntegration
+      }
+    }
+  }
+`);
+
+const DeleteGitHubIntegrationMutation = graphql(`
+  mutation Integrations_DeleteGitHubIntegration($input: OrganizationSelectorInput!) {
+    deleteGitHubIntegration(input: $input) {
+      organization {
+        id
+        hasGitHubIntegration
+      }
+    }
+  }
+`);
+
 function Integrations(): ReactElement | null {
   const router = useRouteSelector();
   const orgId = router.organizationId;
 
   const [checkIntegrations] = useQuery({
-    query: CheckIntegrationsDocument,
+    query: Integrations_CheckIntegrationsQuery,
     variables: {
       selector: {
         organization: orgId,
@@ -51,8 +84,8 @@ function Integrations(): ReactElement | null {
     },
   });
 
-  const [deleteSlackMutation, deleteSlack] = useMutation(DeleteSlackIntegrationDocument);
-  const [deleteGitHubMutation, deleteGitHub] = useMutation(DeleteGitHubIntegrationDocument);
+  const [deleteSlackMutation, deleteSlack] = useMutation(DeleteSlackIntegrationMutation);
+  const [deleteGitHubMutation, deleteGitHub] = useMutation(DeleteGitHubIntegrationMutation);
 
   if (checkIntegrations.fetching) {
     return null;
@@ -60,8 +93,10 @@ function Integrations(): ReactElement | null {
 
   const isGitHubIntegrationFeatureEnabled =
     checkIntegrations.data?.isGitHubIntegrationFeatureEnabled;
-  const hasGitHubIntegration = checkIntegrations.data?.hasGitHubIntegration === true;
-  const hasSlackIntegration = checkIntegrations.data?.hasSlackIntegration === true;
+  const hasGitHubIntegration =
+    checkIntegrations.data?.organization?.organization.hasGitHubIntegration === true;
+  const hasSlackIntegration =
+    checkIntegrations.data?.organization?.organization.hasSlackIntegration === true;
 
   return (
     <>

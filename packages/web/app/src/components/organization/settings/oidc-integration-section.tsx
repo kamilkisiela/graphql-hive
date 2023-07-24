@@ -31,9 +31,10 @@ function extractDomain(rawUrl: string) {
 }
 
 export function OIDCIntegrationSection(props: {
-  organization: DocumentType<typeof OIDCIntegrationSection_OrganizationFragment>;
+  organization: FragmentType<typeof OIDCIntegrationSection_OrganizationFragment>;
 }): ReactElement {
   const router = useRouter();
+  const organization = useFragment(OIDCIntegrationSection_OrganizationFragment, props.organization);
 
   const isCreateOIDCIntegrationModalOpen = router.asPath.endsWith('#create-oidc-integration');
   const isUpdateOIDCIntegrationModalOpen = router.asPath.endsWith('#manage-oidc-integration');
@@ -50,7 +51,7 @@ export function OIDCIntegrationSection(props: {
   return (
     <>
       <div className="flex items-center gap-x-2">
-        {props.organization.oidcIntegration ? (
+        {organization.oidcIntegration ? (
           <>
             <Button
               as="a"
@@ -64,7 +65,7 @@ export function OIDCIntegrationSection(props: {
             >
               <KeyIcon className="mr-2" />
               Manage OIDC Provider (
-              {extractDomain(props.organization.oidcIntegration.authorizationEndpoint)})
+              {extractDomain(organization.oidcIntegration.authorizationEndpoint)})
             </Button>
             <Button
               variant="primary"
@@ -99,16 +100,16 @@ export function OIDCIntegrationSection(props: {
       <CreateOIDCIntegrationModal
         isOpen={isCreateOIDCIntegrationModalOpen}
         close={closeModal}
-        hasOIDCIntegration={!!props.organization.oidcIntegration}
-        organizationId={props.organization.id}
+        hasOIDCIntegration={!!organization.oidcIntegration}
+        organizationId={organization.id}
         openEditModalLink={openEditModalLink}
         transitionToManageScreen={() => {
           void router.replace(openEditModalLink);
         }}
       />
       <ManageOIDCIntegrationModal
-        key={props.organization.oidcIntegration?.id ?? 'noop'}
-        oidcIntegration={props.organization.oidcIntegration ?? null}
+        key={organization.oidcIntegration?.id ?? 'noop'}
+        oidcIntegration={organization.oidcIntegration ?? null}
         isOpen={isUpdateOIDCIntegrationModalOpen}
         close={closeModal}
         openCreateModalLink={openCreateModalLink}
@@ -116,7 +117,7 @@ export function OIDCIntegrationSection(props: {
       <RemoveOIDCIntegrationModal
         isOpen={isDeleteOIDCIntegrationModalOpen}
         close={closeModal}
-        oidcIntegrationId={props.organization.oidcIntegration?.id ?? null}
+        oidcIntegrationId={organization.oidcIntegration?.id ?? null}
       />
     </>
   );

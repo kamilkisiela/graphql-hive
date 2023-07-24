@@ -77,6 +77,11 @@ export class GitHubIntegrationManager {
 
   async isAvailable(selector: OrganizationSelector): Promise<boolean> {
     this.logger.debug('Checking GitHub integration (organization=%s)', selector.organization);
+
+    if (this.isEnabled()) {
+      return false;
+    }
+
     const installationId = await this.getInstallationId({
       organization: selector.organization,
     });
