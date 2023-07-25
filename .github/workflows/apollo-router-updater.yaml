@@ -7,7 +7,7 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  deployment:
+  update:
     runs-on: ubuntu-22.04
     steps:
       - name: checkout
