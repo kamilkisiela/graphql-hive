@@ -253,7 +253,7 @@
             "dimensionFilters": [],
             "metricName": "cpu_percent",
             "metricNamespace": "microsoft.dbforpostgresql/flexibleservers",
-            "resourceGroup": "AZURE_KUBERNETES_RESOURCE_GROUP",
+            "resourceGroup": "AZURE_POSTGRES_RESOURCE_GROUP",
             "resourceName": "AZURE_POSTGRES_SERVER_NAME",
             "timeGrain": "auto"
           },
@@ -275,7 +275,7 @@
             "dimensionFilters": [],
             "metricName": "memory_percent",
             "metricNamespace": "microsoft.dbforpostgresql/flexibleservers",
-            "resourceGroup": "AZURE_KUBERNETES_RESOURCE_GROUP",
+            "resourceGroup": "AZURE_POSTGRES_RESOURCE_GROUP",
             "resourceName": "AZURE_POSTGRES_SERVER_NAME",
             "timeGrain": "auto"
           },
