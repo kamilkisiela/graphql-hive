@@ -17,6 +17,7 @@ import type { DeleteOrganizationDocument } from '@/components/v2/modals/delete-o
 import { graphql } from '@/gql';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
+import { OrganizationsQuery } from '../../pages';
 import { CollectionsQuery } from '../../pages/[orgId]/[projectId]/[targetId]/laboratory';
 import {
   TokensDocument,
@@ -26,7 +27,6 @@ import {
   DeletePersistedOperationDocument,
   DeleteProjectDocument,
   DeleteTargetDocument,
-  OrganizationsDocument,
 } from '../graphql';
 
 const TargetsDocument = graphql(`
@@ -85,7 +85,7 @@ const createOrganization: TypedDocumentNodeUpdateResolver<typeof CreateOrganizat
   updateQuery(
     cache,
     {
-      query: OrganizationsDocument,
+      query: OrganizationsQuery,
     },
     data => {
       if (createOrganization.ok) {

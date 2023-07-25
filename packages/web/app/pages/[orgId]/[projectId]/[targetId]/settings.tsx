@@ -30,10 +30,20 @@ import {
 import { Combobox } from '@/components/v2/combobox';
 import { CreateAccessTokenModal, DeleteTargetModal } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { SetTargetValidationDocument } from '@/graphql';
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+
+const SetTargetValidationMutation = graphql(`
+  mutation Settings_SetTargetValidation($input: SetTargetValidationInput!) {
+    setTargetValidation(input: $input) {
+      id
+      validationSettings {
+        ...TargetValidationSettingsFields
+      }
+    }
+  }
+`);
 
 const RegistryAccessTokens_MeFragment = graphql(`
   fragment RegistryAccessTokens_MeFragment on Member {
@@ -379,7 +389,7 @@ function floorDate(date: Date): Date {
 
 const ConditionalBreakingChanges = (): ReactElement => {
   const router = useRouteSelector();
-  const [targetValidation, setValidation] = useMutation(SetTargetValidationDocument);
+  const [targetValidation, setValidation] = useMutation(SetTargetValidationMutation);
   const [mutation, updateValidation] = useMutation(
     TargetSettingsPage_UpdateTargetValidationSettingsMutation,
   );
