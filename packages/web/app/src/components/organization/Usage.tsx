@@ -2,7 +2,6 @@ import { ReactElement } from 'react';
 import { useQuery } from 'urql';
 import { DataWrapper, Table, TBody, Td, Th, THead, Tr } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { UsageEstimationDocument } from '@/graphql';
 import { Scale } from '../common';
 import { calculatePeriod } from '../common/TimeFilter';
 
@@ -17,6 +16,16 @@ const OrganizationUsageEstimationView_OrganizationFragment = graphql(`
   }
 `);
 
+const Usage_UsageEstimationQuery = graphql(`
+  query Usage_UsageEstimationQuery($range: DateRangeInput!, $organization: ID!) {
+    usageEstimation(range: $range) {
+      org(selector: { organization: $organization }) {
+        operations
+      }
+    }
+  }
+`);
+
 export function OrganizationUsageEstimationView(props: {
   organization: FragmentType<typeof OrganizationUsageEstimationView_OrganizationFragment>;
 }): ReactElement {
@@ -27,7 +36,7 @@ export function OrganizationUsageEstimationView(props: {
   const period = calculatePeriod('month');
 
   const [query] = useQuery({
-    query: UsageEstimationDocument,
+    query: Usage_UsageEstimationQuery,
     variables: {
       organization: organization.cleanId,
       range: period,
