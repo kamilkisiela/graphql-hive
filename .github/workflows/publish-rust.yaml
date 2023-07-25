@@ -19,7 +19,7 @@ jobs:
       - name: Look for changes
         id: rust_changed
         run: |
-          lines=$( git diff HEAD~ HEAD --name-only -- 'packages/libraries/router' | wc -l )
+          lines=$( git diff HEAD~ HEAD --name-only -- 'packages/libraries/router' 'Cargo.toml' 'configs/cargo/Cargo.lock' | wc -l )
           if [ $lines -gt 0 ]; then
               echo 'rust_changed=true' >> $GITHUB_OUTPUT
           fi
