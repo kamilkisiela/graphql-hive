@@ -36,11 +36,8 @@ jobs:
         if: steps.check.outputs.update == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GUILD_BOT_TOKEN }}
           commit-message: Update apollo-router to version ${{ steps.check.outputs.version }}
-          committer: GitHub <noreply@github.com>
-          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          signoff: false
           branch: apollo-router-update-${{ steps.check.outputs.version }}
           delete-branch: true
           title: ${{ steps.check.outputs.title }}
@@ -48,4 +45,3 @@ jobs:
             Automatic update of apollo-router to version ${{ steps.check.outputs.version }}.
           assignees: kamilkisiela
           reviewers: kamilkisiela
-          draft: false
