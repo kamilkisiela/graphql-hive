@@ -28,7 +28,7 @@ const HIVE_RESTRICTED_SYNTAX = [
     // ❌ '::' or `localhost`
     selector:
       ':matches(Literal[value="localhost"], TemplateElement[value.raw="localhost"], Literal[value="::"], TemplateElement[value.raw="::"])',
-    message: 'Use "0.0.0.0" to make it compatible with IPv4 only',
+    message: 'Use "0.0.0.0" to make it IPv4 only',
   },
 ];
 

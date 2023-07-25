@@ -31,7 +31,7 @@
     "integration:prepare": "cd integration-tests && ./local.sh",
     "lint": "eslint --cache --ignore-path .gitignore \"{packages,cypress}/**/*.{ts,tsx}\"",
     "lint:env-template": "tsx scripts/check-env-template.ts",
-    "lint:fix": "pnpm lint --fix",
+    "lint:fix": "pnpm lint --fix && pnpm lint:env-template --fix",
     "lint:prettier": "prettier --cache --check .",
     "local:setup": "docker-compose -f ./docker/docker-compose.dev.yml up -d --remove-orphans && pnpm --filter @hive/migrations db:init",
     "postinstall": "node ./scripts/patch-manifests.js && pnpm env:sync && node ./scripts/turborepo-cleanup.js && pnpm cargo:fix",
