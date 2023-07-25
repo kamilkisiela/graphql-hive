@@ -1018,6 +1018,9 @@ importers:
       '@escape.tech/graphql-armor-max-tokens':
         specifier: 2.1.0
         version: 2.1.0
+      '@graphql-yoga/plugin-persisted-operations':
+        specifier: 2.0.3
+        version: 2.0.3(@graphql-tools/utils@10.0.3)(graphql-yoga@4.0.3)(graphql@16.6.0)
       '@graphql-yoga/plugin-response-cache':
         specifier: 2.1.0
         version: 2.1.0(@envelop/core@4.0.0)(graphql-yoga@4.0.3)(graphql@16.6.0)
@@ -1546,6 +1549,9 @@ importers:
       '@urql/exchange-graphcache':
         specifier: 6.1.4
         version: 6.1.4(graphql@16.6.0)
+      '@urql/exchange-persisted':
+        specifier: 4.0.1
+        version: 4.0.1(graphql@16.6.0)
       '@whatwg-node/fetch':
         specifier: 0.9.9
         version: 0.9.9
@@ -7615,6 +7621,19 @@ packages:
     dependencies:
       tslib: 2.5.3
 
+  /@graphql-yoga/plugin-persisted-operations@2.0.3(@graphql-tools/utils@10.0.3)(graphql-yoga@4.0.3)(graphql@16.6.0):
+    resolution: {integrity: sha512-2MWcNiwetxlfpUuwGpf9YvYfWalOHckRA81DRdWQtys4qRpozPJ5Zt+ucEEmrCtpqhloudbmXjW2aXnrLVUcQQ==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      '@graphql-tools/utils': ^10.0.0
+      graphql: ^15.2.0 || ^16.0.0
+      graphql-yoga: ^4.0.3
+    dependencies:
+      '@graphql-tools/utils': 10.0.3(graphql@16.6.0)
+      graphql: 16.6.0
+      graphql-yoga: 4.0.3(graphql@16.6.0)
+    dev: false
+
   /@graphql-yoga/plugin-response-cache@2.1.0(@envelop/core@4.0.0)(graphql-yoga@4.0.3)(graphql@16.6.0):
     resolution: {integrity: sha512-QMmVL5Sx2mEQ6pejj0pQ6F2QcfIiMYibE1xSdhWAJkDfQlImAcd3uv1smMBbUMp3GNRF3vs1K5SpIzX/UHva4g==}
     engines: {node: '>=16.0.0'}
@@ -13003,6 +13022,15 @@ packages:
     resolution: {integrity: sha512-GQ1scnYjMVoUHrPoYOlw3ZfU2nXuLTEhWhKzPquhZz87GliVpZPuFMf+o64cI1dKy9xDlbU7aQnKiSaGeT248w==}
     dependencies:
       '@0no-co/graphql.web': 1.0.1(graphql@16.6.0)
+      '@urql/core': 4.0.10(graphql@16.6.0)
+      wonka: 6.3.2
+    transitivePeerDependencies:
+      - graphql
+    dev: false
+
+  /@urql/exchange-persisted@4.0.1(graphql@16.6.0):
+    resolution: {integrity: sha512-EG0835VoNC4a1Tjv58z0V01/jX1L3+TEEEglI8rTMfE0KUdGKpqel6vqz2W6L52RdGiZgh0cY+wgfy/xAZT2ug==}
+    dependencies:
       '@urql/core': 4.0.10(graphql@16.6.0)
       wonka: 6.3.2
     transitivePeerDependencies:

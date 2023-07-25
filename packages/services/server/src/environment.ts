@@ -32,6 +32,7 @@ const EnvironmentModel = zod.object({
   WEBHOOKS_ENDPOINT: zod.string().url(),
   SCHEMA_ENDPOINT: zod.string().url(),
   AUTH_ORGANIZATION_OIDC: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
+  GRAPHQL_PERSISTED_OPERATIONS_PATH: emptyString(zod.string().optional()),
 });
 
 const SentryModel = zod.union([
@@ -350,4 +351,7 @@ export const env = {
         }
       : null,
   hive: hiveConfig,
+  graphql: {
+    persistedOperationsPath: base.GRAPHQL_PERSISTED_OPERATIONS_PATH ?? null,
+  },
 } as const;

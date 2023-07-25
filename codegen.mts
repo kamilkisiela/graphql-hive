@@ -1,7 +1,7 @@
-// @ts-check
+import { type CodegenConfig } from '@graphql-codegen/cli';
+import { addTypenameDocumentTransform } from './configs/graphql-code-generator/add-typename-document-transform.mjs';
 
-/** @type {import('@graphql-codegen/cli').CodegenConfig} */
-const config = {
+const config: CodegenConfig = {
   schema: './packages/services/api/src/modules/*/module.graphql.ts',
   emitLegacyCommonJSImports: true,
   generates: {
@@ -157,7 +157,11 @@ const config = {
           JSONSchemaObject: 'json-schema-typed#JSONSchema',
         },
       },
+      presetConfig: {
+        persistedDocuments: true,
+      },
       plugins: [],
+      documentTransforms: [addTypenameDocumentTransform],
     },
     // CLI
     './packages/libraries/cli/src/gql/': {

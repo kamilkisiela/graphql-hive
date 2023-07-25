@@ -33,6 +33,9 @@ export const env = {
   release: backendEnv.release,
   environment: backendEnv.environment,
   nodeEnv: backendEnv.nodeEnv,
+  graphql: {
+    persistedOperations: backendEnv.graphql.persistedOperations,
+  },
 } as const;
 
 declare global {

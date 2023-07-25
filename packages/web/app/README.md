@@ -38,6 +38,7 @@ The following environment variables configure the application.
 | `NODE_ENV`                              | No                                         | The `NODE_ENV` value.                                                                         | `production`                                         |
 | `GA_TRACKING_ID`                        | No                                         | The token for Google Analytics in order to track user actions.                                | `g6aff8102efda5e1d12e`                               |
 | `CRISP_WEBSITE_ID`                      | No                                         | The Crisp Website ID                                                                          | `g6aff8102efda5e1d12e`                               |
+| `GRAPHQL_PERSISTED_OPERATIONS`          | No                                         | Send persisted oepration hashes instead of documents to the server.                           | `1` (enabled) or `0` (disabled)                      |
 
 ## Hive Hosted Configuration
 
