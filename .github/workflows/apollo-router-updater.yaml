@@ -1,0 +1,51 @@
+name: Apollo Router Updater
+on:
+  schedule:
+    # Every 2 hours
+    - cron: '0 */2 * * *'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch: {}
+
+jobs:
+  deployment:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: setup environment
+        uses: ./.github/actions/setup
+        with:
+          codegen: false
+          actor: apollo-router-updater
+          cacheNext: false
+          cacheTurbo: false
+
+      - name: Check for updates
+        id: check
+        run: |
+          pnpm tsx ./scripts/apollo-router-action.ts
+
+      - name: Run updates
+        if: steps.check.outputs.update == 'true'
+        run: cargo update -p apollo-router --precise ${{ steps.check.outputs.version }}
+
+      - name: Create Pull Request
+        if: steps.check.outputs.update == 'true'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Update apollo-router to version ${{ steps.check.outputs.version }}
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          signoff: false
+          branch: apollo-router-update-${{ steps.check.outputs.version }}
+          delete-branch: true
+          title: ${{ steps.check.outputs.title }}
+          body: |
+            Automatic update of apollo-router to version ${{ steps.check.outputs.version }}.
+          assignees: kamilkisiela
+          reviewers: kamilkisiela
+          draft: false
