@@ -24,7 +24,7 @@ function main() {
   const server = createServer(app);
 
   return new Promise<void>(resolve => {
-    server.listen(PORT, '::', resolve);
+    server.listen(PORT, '0.0.0.0', resolve);
   });
 }
 

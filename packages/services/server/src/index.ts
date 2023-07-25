@@ -457,7 +457,7 @@ export async function main() {
       await startMetrics(env.prometheus.labels.instance);
     }
 
-    await server.listen(port, '::');
+    await server.listen(port, '0.0.0.0');
   } catch (error) {
     server.log.fatal(error);
     captureException(error, {

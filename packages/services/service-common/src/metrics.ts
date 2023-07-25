@@ -40,5 +40,5 @@ export async function startMetrics(instanceLabel: string | undefined) {
 
   await server.register(cors);
 
-  return server.listen(10_254, '::');
+  return server.listen(10_254, '0.0.0.0');
 }
