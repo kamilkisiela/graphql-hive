@@ -1,3 +1,0 @@
-mutation sendFeedback($feedback: String!) {
-  sendFeedback(feedback: $feedback)
-}
