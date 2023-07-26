@@ -36,7 +36,7 @@ export function QueryError({
           <h1 className="text-xl font-semibold">Oops, something went wrong.</h1>
           <div className="mt-2">
             {shouldShowError ? (
-              <div className="text-sm">{error?.message?.replace('[GraphQL] ', '')}</div>
+              <div className="text-sm">{error.graphQLErrors[0].message}</div>
             ) : (
               <div className="text-sm">
                 <p>Don't worry, our technical support got this error reported automatically.</p>
