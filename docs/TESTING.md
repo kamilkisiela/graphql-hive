@@ -42,12 +42,14 @@ To do so, follow these instructions:
    `docker buildx bake -f docker/docker.hcl integration-tests --load`
 6. Use Docker Compose to run the built containers (based on `community` compose file), along with
    the extra containers:
+
    ```bash
    export DOCKER_TAG=":local"
    export DOCKER_REGISTRY=""
    
    docker compose -f ./docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
    ```
+
 7. Run the tests: `pnpm --filter integration-tests test:integration`
 
 #### Running from Pre-Built Docker Image
@@ -61,12 +63,14 @@ To run integration tests locally, from the pre-build Docker image, follow:
 4. Decide on the commit ID / Docker image tag you would like to use (make sure `build-and-dockerize`
    is done successfully)
 5. Set the needed env vars, and use Docker Compose to run all local services:
+
    ```bash
    export DOCKER_REGISTRY="ghcr.io/kamilkisiela/graphql-hive/"
    export DOCKER_TAG=":IMAGE_TAG_HERE"
    
    docker compose -f ./docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
    ```
+
 6. Run the tests: `pnpm --filter integration-tests test:integration`
 
 ## E2E Tests

@@ -329,7 +329,7 @@ export const env = {
     credentials: {
       accessKeyId: s3.S3_ACCESS_KEY_ID,
       secretAccessKey: s3.S3_SECRET_ACCESS_KEY,
-      sessionToken: s3.S3_SESSION_TOKEN
+      sessionToken: s3.S3_SESSION_TOKEN,
     },
   },
   organizationOIDC: base.AUTH_ORGANIZATION_OIDC === '1',

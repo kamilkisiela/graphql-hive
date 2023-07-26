@@ -21,14 +21,6 @@ jobs:
       - name: lint .env.template files
         run: pnpm lint:env-template
 
-      - name: eslint cache
-        uses: actions/cache@v3
-        with:
-          path: '.eslintcache'
-          key: ${{ runner.os }}-eslint-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-eslint
-
       - name: Cache ESLint and Prettier
         uses: actions/cache@v3
         with:
@@ -52,7 +44,6 @@ jobs:
           )
         env:
           TIMING: 'true'
-          DEBUG: 'eslint:cli-engine'
 
       - name: prettier
         id: prettier
