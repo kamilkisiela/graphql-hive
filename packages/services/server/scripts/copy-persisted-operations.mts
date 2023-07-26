@@ -26,7 +26,12 @@ await fs.writeFile(
   persistedOperationsDistPath,
   JSON.stringify(
     Object.fromEntries(
-      Object.entries(persistedOperations).map(([hash, document]) => [hash, parse(document)]),
+      Object.entries(persistedOperations).map(([hash, document]) => [
+        hash,
+        parse(document, {
+          noLocation: true,
+        }),
+      ]),
     ),
     null,
     2,
