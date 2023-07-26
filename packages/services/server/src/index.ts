@@ -214,6 +214,7 @@ export async function main() {
       s3: {
         accessKeyId: env.s3.credentials.accessKeyId,
         secretAccessKeyId: env.s3.credentials.secretAccessKey,
+        sessionToken: env.s3.credentials.sessionToken,
         bucketName: env.s3.bucketName,
         endpoint: env.s3.endpoint,
       },

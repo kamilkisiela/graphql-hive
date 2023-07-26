@@ -11,12 +11,14 @@ import { createIsKeyValid } from './key-validation';
 declare let S3_ENDPOINT: string;
 declare let S3_ACCESS_KEY_ID: string;
 declare let S3_SECRET_ACCESS_KEY: string;
+declare let S3_SESSION_TOKEN: string;
 declare let S3_BUCKET_NAME: string;
 
 const s3 = {
   client: new AwsClient({
     accessKeyId: S3_ACCESS_KEY_ID,
     secretAccessKey: S3_SECRET_ACCESS_KEY,
+    sessionToken: S3_SESSION_TOKEN,
     service: 's3',
   }),
   bucketName: S3_BUCKET_NAME,

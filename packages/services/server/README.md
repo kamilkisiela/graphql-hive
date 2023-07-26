@@ -5,7 +5,7 @@ The GraphQL API for GraphQL Hive.
 ## Configuration
 
 | Name                                        | Required                                       | Description                                                                                   | Example Value                                        |
-| ------------------------------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+|---------------------------------------------|------------------------------------------------| --------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
 | `PORT`                                      | **Yes**                                        | The port this service is running on.                                                          | `4013`                                               |
 | `ENCRYPTION_SECRET`                         | **Yes**                                        | Secret for encrypting stuff.                                                                  | `8ebe95cg21c1fee355e9fa32c8c33141`                   |
 | `WEB_APP_URL`                               | **Yes**                                        | The url of the web app.                                                                       | `http://127.0.0.1:3000`                              |
@@ -33,6 +33,7 @@ The GraphQL API for GraphQL Hive.
 | `S3_ACCESS_KEY_ID`                          | **Yes**                                        | The S3 access key id.                                                                         | `minioadmin`                                         |
 | `S3_SECRET_ACCESS_KEY`                      | **Yes**                                        | The S3 secret access key.                                                                     | `minioadmin`                                         |
 | `S3_BUCKET_NAME`                            | **Yes**                                        | The S3 bucket name.                                                                           | `artifacts`                                          |
+| `S3_SESSION_TOKEN`                          | No                                             | The S3 session token.                                                                         | `dummytoken`                                         |
 | `S3_PUBLIC_URL`                             | No                                             | The public URL of the S3, in case it differs from the `S#_ENDPOINT`.                          | `http://localhost:8083`                              |
 | `CDN_API`                                   | No                                             | Whether the CDN exposed via API is enabled.                                                   | `1` (enabled) or `0` (disabled)                      |
 | `CDN_API_BASE_URL`                          | No (Yes if `CDN_API` is set to `1`)            | The public base url of the API service.                                                       | `http://localhost:8082`                              |
