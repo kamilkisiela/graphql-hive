@@ -40,30 +40,25 @@ const DeleteOperationMutation = graphql(`
 export type DeleteOperationMutationType = typeof DeleteOperationMutation;
 
 export function DeleteOperationModal({
-  isOpen,
-  toggleModalOpen,
+  close,
   operationId,
 }: {
-  isOpen: boolean;
-  toggleModalOpen: () => void;
+  close: () => void;
   operationId: string;
 }): ReactElement {
   const route = useRouteSelector();
   const [, mutate] = useMutation(DeleteOperationMutation);
   const notify = useNotifications();
+
   return (
-    <Modal
-      open={isOpen}
-      onOpenChange={toggleModalOpen}
-      className="flex flex-col items-center gap-5"
-    >
+    <Modal open onOpenChange={close} className="flex flex-col items-center gap-5">
       <TrashIcon className="h-16 w-auto text-red-500 opacity-70" />
       <Heading>Delete Operation</Heading>
       <p className="text-sm text-gray-500">
         Are you sure you wish to delete this operation? This action is irreversible!
       </p>
       <div className="flex w-full gap-2">
-        <Button type="button" size="large" block onClick={toggleModalOpen}>
+        <Button type="button" size="large" block onClick={close}>
           Cancel
         </Button>
         <Button
@@ -83,7 +78,7 @@ export function DeleteOperationModal({
             if (error) {
               notify(error.message, 'error');
             }
-            toggleModalOpen();
+            close();
           }}
           data-cy="confirm"
         >

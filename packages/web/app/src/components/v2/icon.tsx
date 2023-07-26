@@ -29,11 +29,18 @@ export const GraphQLIcon = ({ className }: IconProps): ReactElement => (
 );
 
 export const SaveIcon = ({ className }: IconProps): ReactElement => (
-  <svg viewBox="0 0 24 24" className={className}>
-    <g fill="none" stroke="currentColor" strokeWidth="1">
-      <path d="M21.75 23.25H2.25a1.5 1.5 0 0 1-1.5-1.5V7.243a3 3 0 0 1 .879-2.121l3.492-3.493A3 3 0 0 1 7.243.75H21.75a1.5 1.5 0 0 1 1.5 1.5v19.5a1.5 1.5 0 0 1-1.5 1.5z" />
-      <path d="M8.25.75v6a1.5 1.5 0 0 0 1.5 1.5h7.5a1.5 1.5 0 0 0 1.5-1.5v-6M15.75 3.75v1.5M17.25 12.75H6.75a1.5 1.5 0 0 0-1.5 1.5v9h13.5v-9a1.5 1.5 0 0 0-1.5-1.5zM8.25 15.75h4.5M8.25 18.75h7.5" />
-    </g>
+  <svg
+    viewBox="0 0 24 24"
+    className={className}
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    fill="none"
+  >
+    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+    <polyline points="17 21 17 13 7 13 7 21" />
+    <polyline points="7 3 7 8 15 8" />
   </svg>
 );
 
@@ -184,6 +191,25 @@ export const TrashIcon = ({ className }: IconProps): ReactElement => (
     />
     <path d="M10 11V17" {...DEFAULT_PATH_PROPS} />
     <path d="M14 11V17" {...DEFAULT_PATH_PROPS} />
+  </svg>
+);
+
+export const ShareIcon = ({ className }: IconProps): ReactElement => (
+  <svg
+    viewBox="0 0 24 24"
+    width="24"
+    height="24"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+    <polyline points="16 6 12 2 8 6" />
+    <line x1={12} y1={2} x2={12} y2={15} />
   </svg>
 );
 

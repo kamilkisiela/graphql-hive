@@ -50,10 +50,10 @@ export type CreateOperationMutationType = typeof CreateOperationMutation;
 
 export function CreateOperationModal({
   isOpen,
-  toggleModalOpen,
+  close,
 }: {
   isOpen: boolean;
-  toggleModalOpen: () => void;
+  close: () => void;
 }): ReactElement {
   const router = useRouteSelector();
   const [mutationCreate, mutateCreate] = useMutation(CreateOperationMutation);
@@ -118,13 +118,13 @@ export function CreateOperationModal({
         }
 
         resetForm();
-        toggleModalOpen();
+        close();
       }
     },
   });
 
   return (
-    <Modal open={isOpen} onOpenChange={toggleModalOpen}>
+    <Modal open={isOpen} onOpenChange={close}>
       {!fetching && (
         <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
           <Heading className="text-center">Create Operation</Heading>
@@ -178,7 +178,7 @@ export function CreateOperationModal({
               block
               onClick={() => {
                 resetForm();
-                toggleModalOpen();
+                close();
               }}
             >
               Cancel

@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { GraphiQL } from 'graphiql';
 import { LinkIcon } from 'lucide-react';
@@ -7,8 +7,8 @@ import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts/target';
 import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
-import { Accordion, DocsLink, EmptyList, Link, MetaTitle, Spinner } from '@/components/v2';
-import { HiveLogo, SaveIcon } from '@/components/v2/icon';
+import { Accordion, DocsLink, Link, MetaTitle, Spinner } from '@/components/v2';
+import { HiveLogo, PlusIcon, SaveIcon, ShareIcon } from '@/components/v2/icon';
 import {
   CreateCollectionModal,
   CreateOperationModal,
@@ -36,8 +36,9 @@ import {
   useEditorContext,
 } from '@graphiql/react';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
-import { BookmarkIcon, DotsVerticalIcon, Share2Icon } from '@radix-ui/react-icons';
+import { BookmarkIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
 import 'graphiql/graphiql.css';
+import { cx } from 'class-variance-authority';
 import { QueryError } from '@/components/ui/query-error';
 
 function Share(): ReactElement {
@@ -55,7 +56,7 @@ function Share(): ReactElement {
           await copyToClipboard(window.location.href);
         }}
       >
-        <Share2Icon className="graphiql-toolbar-icon" />
+        <ShareIcon className="graphiql-toolbar-icon" />
       </GraphiQLButton>
     </GraphiQLTooltip>
   );
@@ -98,6 +99,181 @@ function useCurrentOperation() {
   return operationId ? data?.target?.documentCollectionOperation : null;
 }
 
+const CreateOperationMutation = graphql(`
+  mutation CreateOperation(
+    $selector: TargetSelectorInput!
+    $input: CreateDocumentCollectionOperationInput!
+  ) {
+    createOperationInDocumentCollection(selector: $selector, input: $input) {
+      error {
+        message
+      }
+      ok {
+        operation {
+          id
+          name
+        }
+        updatedTarget {
+          id
+          documentCollections {
+            edges {
+              cursor
+              node {
+                id
+                operations {
+                  edges {
+                    node {
+                      id
+                    }
+                    cursor
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`);
+
+const CollectionItem = (props: {
+  node: { id: string; name: string };
+  canDelete: boolean;
+  onDelete: (operationId: string) => void;
+}): ReactElement => {
+  const router = useRouteSelector();
+  const copyToClipboard = useClipboard();
+
+  return (
+    <div key={props.node.id} className="flex justify-between items-center">
+      <Link
+        href={{
+          query: {
+            operation: props.node.id,
+            orgId: router.organizationId,
+            projectId: router.projectId,
+            targetId: router.targetId,
+          },
+        }}
+        className={cn(
+          'hover:bg-gray-100/10 w-full rounded p-2 !text-gray-300',
+          router.query.operation === props.node.id && 'bg-gray-100/10',
+        )}
+        onClick={ev => {
+          ev.preventDefault();
+          void router.push(
+            {
+              query: {
+                operation: props.node.id,
+                orgId: router.organizationId,
+                projectId: router.projectId,
+                targetId: router.targetId,
+              },
+            },
+            undefined,
+            {
+              scroll: false,
+              shallow: true,
+            },
+          );
+        }}
+      >
+        {props.node.name}
+      </Link>
+      <GraphiQLDropdownMenu
+        // https://github.com/radix-ui/primitives/issues/1241#issuecomment-1580887090
+        modal={false}
+      >
+        <GraphiQLDropdownMenu.Button
+          className="graphiql-toolbar-button opacity-0 [div:hover>&]:opacity-100 transition [div:hover>&]:bg-transparent"
+          aria-label="More"
+          data-cy="operation-3-dots"
+        >
+          <DotsVerticalIcon />
+        </GraphiQLDropdownMenu.Button>
+
+        <GraphiQLDropdownMenu.Content>
+          <GraphiQLDropdownMenu.Item
+            onSelect={async () => {
+              const url = new URL(window.location.href);
+              await copyToClipboard(`${url.origin}${url.pathname}?operation=${props.node.id}`);
+            }}
+          >
+            Copy link to operation
+          </GraphiQLDropdownMenu.Item>
+          {props.canDelete ? (
+            <GraphiQLDropdownMenu.Item
+              onSelect={() => {
+                props.onDelete(props.node.id);
+              }}
+              className="!text-red-500"
+              data-cy="remove-operation"
+            >
+              Delete
+            </GraphiQLDropdownMenu.Item>
+          ) : null}
+        </GraphiQLDropdownMenu.Content>
+      </GraphiQLDropdownMenu>
+    </div>
+  );
+};
+
+const AddCollectionItemButton = (props: { collectionId: string }): ReactElement => {
+  const [createOperationState, createOperation] = useMutation(CreateOperationMutation);
+  const router = useRouteSelector();
+  const notify = useNotifications();
+
+  return (
+    <Button
+      variant="link"
+      className="p-0 text-gray-500"
+      onClick={async () => {
+        const result = await createOperation({
+          input: {
+            collectionId: props.collectionId,
+            name: 'New Operation',
+            query: '{}',
+            headers: '',
+            variables: '',
+          },
+          selector: {
+            target: router.targetId,
+            organization: router.organizationId,
+            project: router.projectId,
+          },
+        });
+        if (result.error) {
+          notify("Couldn't create operation. Please try again later.", 'error');
+        }
+        if (result.data?.createOperationInDocumentCollection.error) {
+          notify(result.data.createOperationInDocumentCollection.error.message, 'error');
+        }
+        if (result.data?.createOperationInDocumentCollection.ok) {
+          void router.push(
+            {
+              query: {
+                operation: result.data.createOperationInDocumentCollection.ok.operation.id,
+                orgId: router.organizationId,
+                projectId: router.projectId,
+                targetId: router.targetId,
+              },
+            },
+            undefined,
+            {
+              scroll: false,
+              shallow: true,
+            },
+          );
+        }
+      }}
+      disabled={createOperationState.fetching}
+    >
+      <PlusIcon size={10} className="mr-1" /> Add Operation
+    </Button>
+  );
+};
+
 function useOperationCollectionsPlugin({
   canDelete,
   canEdit,
@@ -108,107 +284,74 @@ function useOperationCollectionsPlugin({
   return {
     title: 'Operation Collections',
     icon: BookmarkIcon,
-    content: function Content() {
-      const [isCollectionModalOpen, toggleCollectionModal] = useToggle();
-      const { collections, loading } = useCollections();
-      const [collectionId, setCollectionId] = useState('');
-      const [operationId, setOperationId] = useState('');
-      const [isDeleteCollectionModalOpen, toggleDeleteCollectionModalOpen] = useToggle();
-      const [isDeleteOperationModalOpen, toggleDeleteOperationModalOpen] = useToggle();
-      const copyToClipboard = useClipboard();
-      const router = useRouteSelector();
+    content: useCallback(
+      function Content() {
+        const [isCollectionModalOpen, toggleCollectionModal] = useToggle();
+        const { collections, loading } = useCollections();
+        const [collectionId, setCollectionId] = useState('');
+        const [isDeleteCollectionModalOpen, toggleDeleteCollectionModalOpen] = useToggle();
+        const [operationToDeleteId, setOperationToDeleteId] = useState<null | string>(null);
+        const router = useRouteSelector();
 
-      const currentOperation = useCurrentOperation();
-      const editorContext = useEditorContext({ nonNull: true });
+        const currentOperation = useCurrentOperation();
+        const editorContext = useEditorContext({ nonNull: true });
 
-      const hasAllEditors = !!(
-        editorContext.queryEditor &&
-        editorContext.variableEditor &&
-        editorContext.headerEditor
-      );
+        const hasAllEditors = !!(
+          editorContext.queryEditor &&
+          editorContext.variableEditor &&
+          editorContext.headerEditor
+        );
 
-      const queryParamsOperationId = router.query.operation as string;
+        const queryParamsOperationId = router.query.operation as string;
 
-      const tabsCount = editorContext.tabs.length;
-
-      useEffect(() => {
-        if (tabsCount !== 1) {
-          for (let index = 1; index < tabsCount; index++) {
-            // Workaround to close opened tabs from end, to avoid bug when tabs are still opened
-            editorContext.closeTab(tabsCount - index);
+        useEffect(() => {
+          if (!hasAllEditors) {
+            return;
           }
-          const { operation: _paramToRemove, ...query } = router.query;
-          void router.push({ query });
-        }
-      }, [tabsCount]);
 
-      useEffect(() => {
-        if (!hasAllEditors) return;
+          if (queryParamsOperationId && currentOperation) {
+            // Set selected operation in editors
+            editorContext.queryEditor.setValue(currentOperation.query);
+            editorContext.variableEditor.setValue(currentOperation.variables);
+            editorContext.headerEditor.setValue(currentOperation.headers);
+          } else {
+            // Clear editors if operation not selected
+            editorContext.queryEditor.setValue('');
+            editorContext.variableEditor.setValue('');
+            editorContext.headerEditor.setValue('');
+          }
+        }, [hasAllEditors, queryParamsOperationId, currentOperation]);
 
-        if (queryParamsOperationId && currentOperation) {
-          // Set selected operation in editors
-          editorContext.queryEditor.setValue(currentOperation.query);
-          editorContext.variableEditor.setValue(currentOperation.variables);
-          editorContext.headerEditor.setValue(currentOperation.headers);
-        } else {
-          // Clear editors if operation not selected
-          editorContext.queryEditor.setValue('');
-          editorContext.variableEditor.setValue('');
-          editorContext.headerEditor.setValue('');
-        }
-      }, [hasAllEditors, queryParamsOperationId, currentOperation]);
+        const shouldShowMenu = canEdit || canDelete;
 
-      const shouldShowMenu = canEdit || canDelete;
+        const initialSelectedCollection =
+          currentOperation?.id &&
+          collections?.find(c =>
+            c.operations.edges.some(({ node }) => node.id === currentOperation.id),
+          )?.id;
 
-      const initialSelectedCollection =
-        currentOperation?.id &&
-        collections?.find(c =>
-          c.operations.edges.some(({ node }) => node.id === currentOperation.id),
-        )?.id;
-
-      return (
-        <>
-          <div className="flex justify-between">
-            <Title>Collections</Title>
-            {canEdit ? (
-              <Button
-                variant="link"
-                onClick={() => {
-                  if (collectionId) setCollectionId('');
-                  toggleCollectionModal();
-                }}
-                data-cy="create-collection"
+        return (
+          <div className="h-full flex flex-col">
+            <div className="flex justify-between">
+              <Title>Collections</Title>
+            </div>
+            {loading ? (
+              <div className="flex justify-center h-fit flex-1 items-center">
+                <div className="flex items-center flex-col">
+                  <Spinner />
+                  <div className="text-xs mt-2">Loading collections</div>
+                </div>
+              </div>
+            ) : collections?.length ? (
+              <Accordion
+                defaultValue={initialSelectedCollection ? [initialSelectedCollection] : undefined}
+                className="mt-5 space-y-0"
+                type="multiple"
               >
-                + Create
-              </Button>
-            ) : null}
-          </div>
-          <p className="mb-3 font-light text-gray-300 text-xs">Shared across your organization</p>
-          {loading ? (
-            <Spinner />
-          ) : (
-            <Accordion defaultValue={initialSelectedCollection}>
-              <CreateCollectionModal
-                isOpen={isCollectionModalOpen}
-                toggleModalOpen={toggleCollectionModal}
-                collectionId={collectionId}
-              />
-              <DeleteCollectionModal
-                isOpen={isDeleteCollectionModalOpen}
-                toggleModalOpen={toggleDeleteCollectionModalOpen}
-                collectionId={collectionId}
-              />
-              <DeleteOperationModal
-                isOpen={isDeleteOperationModalOpen}
-                toggleModalOpen={toggleDeleteOperationModalOpen}
-                operationId={operationId}
-              />
-              {collections?.length ? (
-                collections.map(collection => (
+                {collections.map(collection => (
                   <Accordion.Item key={collection.id} value={collection.id}>
                     <div className="flex">
-                      <Accordion.Header>{collection.name}</Accordion.Header>
-
+                      <Accordion.Header triggerClassName="pl-1">{collection.name}</Accordion.Header>
                       {shouldShowMenu ? (
                         <GraphiQLDropdownMenu
                           // https://github.com/radix-ui/primitives/issues/1241#issuecomment-1580887090
@@ -249,94 +392,62 @@ function useOperationCollectionsPlugin({
                     <Accordion.Content className="pr-0">
                       {collection.operations.edges.length
                         ? collection.operations.edges.map(({ node }) => (
-                            <div key={node.id} className="flex justify-between items-center">
-                              <Link
-                                href={{
-                                  query: {
-                                    operation: node.id,
-                                    orgId: router.organizationId,
-                                    projectId: router.projectId,
-                                    targetId: router.targetId,
-                                  },
-                                }}
-                                className={cn(
-                                  'hover:bg-gray-100/10 w-full rounded p-2 !text-gray-300',
-                                  router.query.operation === node.id && 'bg-gray-100/10',
-                                )}
-                                onClick={ev => {
-                                  ev.preventDefault();
-                                  void router.push(
-                                    {
-                                      query: {
-                                        operation: node.id,
-                                        orgId: router.organizationId,
-                                        projectId: router.projectId,
-                                        targetId: router.targetId,
-                                      },
-                                    },
-                                    undefined,
-                                    {
-                                      scroll: false,
-                                    },
-                                  );
-                                }}
-                              >
-                                {node.name}
-                              </Link>
-                              <GraphiQLDropdownMenu
-                                // https://github.com/radix-ui/primitives/issues/1241#issuecomment-1580887090
-                                modal={false}
-                              >
-                                <GraphiQLDropdownMenu.Button
-                                  className="graphiql-toolbar-button opacity-0 [div:hover>&]:opacity-100 transition"
-                                  aria-label="More"
-                                  data-cy="operation-3-dots"
-                                >
-                                  <DotsVerticalIcon />
-                                </GraphiQLDropdownMenu.Button>
-
-                                <GraphiQLDropdownMenu.Content>
-                                  <GraphiQLDropdownMenu.Item
-                                    onSelect={async () => {
-                                      const url = new URL(window.location.href);
-                                      await copyToClipboard(
-                                        `${url.origin}${url.pathname}?operation=${node.id}`,
-                                      );
-                                    }}
-                                  >
-                                    Copy link to operation
-                                  </GraphiQLDropdownMenu.Item>
-                                  {canDelete ? (
-                                    <GraphiQLDropdownMenu.Item
-                                      onSelect={() => {
-                                        setOperationId(node.id);
-                                        toggleDeleteOperationModalOpen();
-                                      }}
-                                      className="!text-red-500"
-                                      data-cy="remove-operation"
-                                    >
-                                      Delete
-                                    </GraphiQLDropdownMenu.Item>
-                                  ) : null}
-                                </GraphiQLDropdownMenu.Content>
-                              </GraphiQLDropdownMenu>
-                            </div>
+                            <CollectionItem
+                              key={node.id}
+                              node={node}
+                              canDelete={canDelete}
+                              onDelete={setOperationToDeleteId}
+                            />
                           ))
-                        : 'No operations yet. Use the editor to create an operation, and click Save to store and share it.'}
+                        : null}
+                      <AddCollectionItemButton collectionId={collection.id} />
                     </Accordion.Content>
                   </Accordion.Item>
-                ))
-              ) : (
-                <EmptyList
-                  title="Add your first collection"
-                  description="Collections shared across organization"
-                />
-              )}
-            </Accordion>
-          )}
-        </>
-      );
-    },
+                ))}
+              </Accordion>
+            ) : (
+              <div className="flex justify-center h-fit flex-1 items-center">
+                <div className="flex items-center flex-col">
+                  <BookmarkIcon width={30} height={30} />
+                  <div className="text-xs mt-2">There are no collections available.</div>
+                  {canEdit ? (
+                    <Button
+                      onClick={() => {
+                        if (collectionId) {
+                          setCollectionId('');
+                        }
+                        toggleCollectionModal();
+                      }}
+                      data-cy="create-collection"
+                      className="mt-3"
+                    >
+                      Create your first Collection.
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+            )}
+            <CreateCollectionModal
+              isOpen={isCollectionModalOpen}
+              toggleModalOpen={toggleCollectionModal}
+              collectionId={collectionId}
+            />
+            <DeleteCollectionModal
+              isOpen={isDeleteCollectionModalOpen}
+              toggleModalOpen={toggleDeleteCollectionModalOpen}
+              collectionId={collectionId}
+            />
+            {operationToDeleteId === null ? null : (
+              <DeleteOperationModal
+                close={() => setOperationToDeleteId(null)}
+                operationId={operationToDeleteId}
+              />
+            )}
+          </div>
+        );
+      },
+      [canEdit, canDelete],
+    ),
   };
 }
 
@@ -375,54 +486,67 @@ function Save(): ReactElement {
     currentOperation.query === queryEditor?.getValue() &&
     currentOperation.variables === variableEditor?.getValue() &&
     currentOperation.headers === headerEditor?.getValue();
-  const operationId = currentOperation?.id;
-  const label = isSame ? undefined : operationId ? 'Update saved operation' : 'Save operation';
-  const button = (
-    <GraphiQLButton
-      className="graphiql-toolbar-button"
-      data-cy="save-collection"
-      aria-label={label}
-      disabled={isSame}
-      onClick={async () => {
-        if (!collections?.length) {
-          notify('You must create collection first!', 'warning');
-          return;
-        }
-        if (!operationId) {
-          toggle();
-          return;
-        }
-        const { error, data } = await mutateUpdate({
-          selector: {
-            target: routeSelector.targetId,
-            organization: routeSelector.organizationId,
-            project: routeSelector.projectId,
-          },
-          input: {
-            name: currentOperation.name,
-            collectionId: currentOperation.collection.id,
-            query: queryEditor?.getValue(),
-            variables: variableEditor?.getValue(),
-            headers: headerEditor?.getValue(),
-            operationId,
-          },
-        });
-        if (data) {
-          notify('Updated!', 'success');
-        }
-        if (error) {
-          notify(error.message, 'error');
-        }
-      }}
-    >
-      <SaveIcon className="graphiql-toolbar-icon !h-5 w-auto" />
-    </GraphiQLButton>
-  );
 
   return (
     <>
-      {label ? <GraphiQLTooltip label={label}>{button}</GraphiQLTooltip> : button}
-      {isOpen ? <CreateOperationModal isOpen={isOpen} toggleModalOpen={toggle} /> : null}
+      <GraphiQLDropdownMenu
+        // https://github.com/radix-ui/primitives/issues/1241#issuecomment-1580887090
+        modal={false}
+      >
+        <GraphiQLDropdownMenu.Button
+          className="graphiql-toolbar-button"
+          aria-label="More"
+          data-cy="save-operation"
+        >
+          <SaveIcon className="graphiql-toolbar-icon !h-5 w-auto" />
+        </GraphiQLDropdownMenu.Button>
+        <GraphiQLDropdownMenu.Content>
+          <GraphiQLDropdownMenu.Item
+            disabled={isSame}
+            className={cx(isSame && 'cursor-default hover:bg-transparent text-gray-400')}
+            onClick={async () => {
+              if (!currentOperation || isSame) {
+                return;
+              }
+              const { error, data } = await mutateUpdate({
+                selector: {
+                  target: routeSelector.targetId,
+                  organization: routeSelector.organizationId,
+                  project: routeSelector.projectId,
+                },
+                input: {
+                  name: currentOperation.name,
+                  collectionId: currentOperation.collection.id,
+                  query: queryEditor?.getValue(),
+                  variables: variableEditor?.getValue(),
+                  headers: headerEditor?.getValue(),
+                  operationId: currentOperation.id,
+                },
+              });
+              if (data) {
+                notify('Updated!', 'success');
+              }
+              if (error) {
+                notify(error.message, 'error');
+              }
+            }}
+          >
+            Save
+          </GraphiQLDropdownMenu.Item>
+          <GraphiQLDropdownMenu.Item
+            onClick={async () => {
+              if (!collections.length) {
+                notify('Please create a collection first.', 'error');
+                return;
+              }
+              toggle();
+            }}
+          >
+            Save as
+          </GraphiQLDropdownMenu.Item>
+        </GraphiQLDropdownMenu.Content>
+      </GraphiQLDropdownMenu>
+      <CreateOperationModal isOpen={isOpen} close={toggle} />
     </>
   );
 }
@@ -520,6 +644,14 @@ function LaboratoryPageContent() {
           --color-base: transparent !important;
           --color-primary: 40, 89%, 60% !important;
           min-height: 600px;
+        }
+
+        .graphiql-container .graphiql-tab-add {
+          display: none;
+        }
+
+        .graphiql-container .graphiql-toolbar-icon {
+          color: #4c5462;
         }
       `}</style>
       {query.fetching ? null : (
