@@ -41,22 +41,14 @@ jobs:
 
       - name: eslint
         id: eslint
-        run: pnpm lint
+        run: pnpm lint || (echo "\nTo fix it, run \n$ pnpm run lint:fix\n" && exit 1)
         env:
           TIMING: 'true'
           DEBUG: 'eslint:cli-engine'
 
-      - name: eslint tip
-        if: ${{ steps.eslint.outcome }} == 'failure'
-        run: echo "Run pnpm lint --fix"
-
       - name: prettier
         id: prettier
-        run: pnpm lint:prettier
-
-      - name: eslint tip
-        if: ${{ steps.prettier.outcome }} == 'failure'
-        run: echo "Run pnpm format"
+        run: pnpm lint:prettier || (echo "\nTo fix it, run \n$ pnpm run prettier\n" && exit 1)
 
       - name: Generate Types
         run: yarn graphql:generate
