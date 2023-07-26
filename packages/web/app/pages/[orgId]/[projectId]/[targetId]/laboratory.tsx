@@ -227,7 +227,7 @@ const AddCollectionItemButton = (props: { collectionId: string }): ReactElement 
   return (
     <Button
       variant="link"
-      className="p-0 text-gray-500"
+      className="py-0 px-2 text-gray-500 hover:text-white hover:no-underline"
       onClick={async () => {
         const result = await createOperation({
           input: {
