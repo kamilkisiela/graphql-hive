@@ -40,25 +40,13 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: check pnpm version
-        shell: bash
-        id: pnpm
-        run: |
-          PNPM_VERSION=$(cat package.json | jq -r '.packageManager' | awk -F@ '{print $2}')
-          PNPM_VERSION=${PNPM_VERSION:-8}
-          echo "Using PNPM version $PNPM_VERSION"
-          echo "version=$PNPM_VERSION" >> $GITHUB_OUTPUT
-
-      - name: install pnpm
-        uses: pnpm/action-setup@v2.2.4
+      - name: setup environment
+        uses: ./.github/actions/setup
         with:
-          version: ${{ steps.pnpm.outputs.version }}
-
-      - name: Use Node
-        uses: actions/setup-node@v3.6.0
-        with:
-          node-version-file: .node-version
-          cache: 'pnpm'
+          actor: publish-rust
+          codegen: false
+          cacheNext: false
+          cacheTurbo: false
 
       - name: Prepare MacOS
         if: ${{ matrix.os == 'macos-latest' }}
