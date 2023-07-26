@@ -41,14 +41,31 @@ jobs:
 
       - name: eslint
         id: eslint
-        run: pnpm lint || (echo "\nTo fix it, run \n$ pnpm run lint:fix\n" && exit 1)
+        run: |
+          pnpm lint || \
+          ( \
+            echo "" && \
+            echo "To fix it, run" && \
+            echo "$ pnpm run lint:fix" && \
+            echo "" && \
+            exit 1 \
+          )
         env:
           TIMING: 'true'
           DEBUG: 'eslint:cli-engine'
 
       - name: prettier
         id: prettier
-        run: pnpm lint:prettier || (echo "\nTo fix it, run \n$ pnpm run prettier\n" && exit 1)
+        shell: sh
+        run: |
+          pnpm lint:prettier || \
+          ( \
+            echo "" && \
+            echo "To fix it, run" && \
+            echo "$ pnpm run prettier" && \
+            echo "" && \
+            exit 1 \
+          )
 
       - name: Generate Types
         run: yarn graphql:generate
