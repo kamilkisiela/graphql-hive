@@ -5,7 +5,16 @@ import type {
   FastifyRequest,
   RouteHandlerMethod,
 } from 'fastify';
-import { DocumentNode, GraphQLError, print, ValidationContext, ValidationRule } from 'graphql';
+import {
+  DocumentNode,
+  GraphQLError,
+  Kind,
+  print,
+  ValidationContext,
+  ValidationRule,
+  type DefinitionNode,
+  type OperationDefinitionNode,
+} from 'graphql';
 import { createYoga, Plugin, useErrorHandler } from 'graphql-yoga';
 import hyperid from 'hyperid';
 import zod from 'zod';
@@ -129,7 +138,11 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         configureScope(args, scope) {
           const transaction = scope.getTransaction();
 
-          // Reduce the number of transactions to avoid overloading Sentry
+          // Get the operation name from the request, or use the operation name from the document.
+          const operationName =
+            args.operationName ??
+            args.document.definitions.find(isOperationDefinitionNode)?.name?.value ??
+            'unknown';
           const ctx = args.contextValue as Context;
           const clientNameHeaderValue = ctx.req.headers['graphql-client-name'];
           const clientName = Array.isArray(clientNameHeaderValue)
@@ -137,14 +150,15 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
             : clientNameHeaderValue;
 
           if (transaction) {
-            transaction.setName(`graphql.${args.operationName || 'unknown'}`);
+            transaction.setName(`graphql.${operationName}`);
             transaction.setTag('graphql_client_name', clientName ?? 'unknown');
+            // Reduce the number of transactions to avoid overloading Sentry
             transaction.sampled = !!clientName && clientName !== 'Hive Client';
           }
 
           scope.setContext('Extra Info', {
+            operationName,
             variables: JSON.stringify(args.variableValues),
-            operationName: args.operationName,
             operation: print(args.document),
             userId: extractUserId(args.contextValue as any),
           });
@@ -165,15 +179,21 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
       }),
       useSentryUser(),
       useErrorHandler(({ errors, context }): void => {
+        // Not sure what changed, but the `context` is now an object with a contextValue property.
+        // We previously relied on the `context` being the `contextValue` itself.
+        const ctx = ('contextValue' in context ? context.contextValue : context) as Context;
+
         for (const error of errors) {
           if (isGraphQLError(error) && error.originalError) {
-            console.log(error);
-            console.log(error.originalError);
+            console.error(error);
+            console.error(error.originalError);
             continue;
+          } else {
+            console.error(error);
           }
 
-          if (hasFastifyRequest(context)) {
-            context.req.log.error(error);
+          if (hasFastifyRequest(ctx)) {
+            ctx.req.log.error(error);
           } else {
             server.logger.error(error);
           }
@@ -355,4 +375,8 @@ async function verifySuperTokensSession(
     ...sessionInfo,
     externalUserId: sessionInfo.externalUserId ?? null,
   };
+}
+
+function isOperationDefinitionNode(def: DefinitionNode): def is OperationDefinitionNode {
+  return def.kind === Kind.OPERATION_DEFINITION;
 }
