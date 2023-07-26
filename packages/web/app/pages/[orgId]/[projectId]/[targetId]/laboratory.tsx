@@ -158,7 +158,7 @@ const CollectionItem = (props: {
         }}
         className={cn(
           'hover:bg-gray-100/10 w-full rounded p-2 !text-gray-300',
-          router.query.operation === props.node.id && 'bg-gray-100/10',
+          router.query.operation === props.node.id && 'bg-gray-100/10 text-white',
         )}
         onClick={ev => {
           ev.preventDefault();
