@@ -1,14 +1,9 @@
 export { ChangePermissionsModal } from './change-permissions';
-export { ConnectLabModal } from './connect-lab';
 export { ConnectSchemaModal } from './connect-schema';
 export { CreateAccessTokenModal } from './create-access-token';
-export { CreateCollectionModal } from './create-collection';
-export { CreateOperationModal } from './create-operation';
 export { CreateProjectModal } from './create-project';
 export { CreateTargetModal } from './create-target';
-export { DeleteCollectionModal } from './delete-collection';
 export { DeleteMembersModal } from './delete-members';
-export { DeleteOperationModal } from './delete-operation';
 export { DeleteOrganizationModal } from './delete-organization';
 export { DeleteProjectModal } from './delete-project';
 export { DeleteTargetModal } from './delete-target';

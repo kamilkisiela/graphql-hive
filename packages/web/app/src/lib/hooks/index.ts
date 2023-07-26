@@ -1,5 +1,4 @@
 export { useClipboard } from './use-clipboard';
-export { useCollections } from './use-collections';
 export { toDecimal, useDecimal } from './use-decimal';
 export { formatDuration, useFormattedDuration } from './use-formatted-duration';
 export { formatNumber, useFormattedNumber } from './use-formatted-number';

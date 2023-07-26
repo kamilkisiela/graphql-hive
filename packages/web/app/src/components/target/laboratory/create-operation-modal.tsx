@@ -5,8 +5,8 @@ import * as Yup from 'yup';
 import { Button, Heading, Input, Modal, Select } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
-import { useCollections } from '@/lib/hooks/use-collections';
 import { useEditorContext } from '@graphiql/react';
+import { useCollections } from '../../../../pages/[orgId]/[projectId]/[targetId]/laboratory';
 
 const CreateOperationMutation = graphql(`
   mutation CreateOperation(
@@ -58,15 +58,11 @@ export function CreateOperationModal({
   const router = useRouteSelector();
   const [mutationCreate, mutateCreate] = useMutation(CreateOperationMutation);
 
-  const { collections, loading } = useCollections();
+  const { collections, fetching } = useCollections();
 
   const { queryEditor, variableEditor, headerEditor } = useEditorContext({
     nonNull: true,
   });
-
-  const { error } = mutationCreate;
-
-  const fetching = loading;
 
   const {
     handleSubmit,
@@ -169,7 +165,9 @@ export function CreateOperationModal({
             )}
           </div>
 
-          {error && <div className="text-sm text-red-500">{error.message}</div>}
+          {mutationCreate.error && (
+            <div className="text-sm text-red-500">{mutationCreate.error.message}</div>
+          )}
 
           <div className="flex w-full gap-2">
             <Button

@@ -5,27 +5,19 @@ import { LinkIcon } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts/target';
+import { ConnectLabModal } from '@/components/target/laboratory/connect-lab-modal';
+import { CreateCollectionModal } from '@/components/target/laboratory/create-collection-modal';
+import { CreateOperationModal } from '@/components/target/laboratory/create-operation-modal';
+import { DeleteCollectionModal } from '@/components/target/laboratory/delete-collection-modal';
+import { DeleteOperationModal } from '@/components/target/laboratory/delete-operation-modal';
 import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
 import { Accordion, DocsLink, Link, MetaTitle, Spinner } from '@/components/v2';
 import { HiveLogo, PlusIcon, SaveIcon, ShareIcon } from '@/components/v2/icon';
-import {
-  CreateCollectionModal,
-  CreateOperationModal,
-  DeleteCollectionModal,
-  DeleteOperationModal,
-} from '@/components/v2/modals';
-import { ConnectLabModal } from '@/components/v2/modals/connect-lab';
 import { graphql } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
 import { canAccessTarget } from '@/lib/access/target';
-import {
-  useClipboard,
-  useCollections,
-  useNotifications,
-  useRouteSelector,
-  useToggle,
-} from '@/lib/hooks';
+import { useClipboard, useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { cn } from '@/lib/utils';
 import {
@@ -140,7 +132,9 @@ const CreateOperationMutation = graphql(`
 const CollectionItem = (props: {
   node: { id: string; name: string };
   canDelete: boolean;
+  canEdit: boolean;
   onDelete: (operationId: string) => void;
+  onEdit: (operationId: string) => void;
 }): ReactElement => {
   const router = useRouteSelector();
   const copyToClipboard = useClipboard();
@@ -202,6 +196,15 @@ const CollectionItem = (props: {
           >
             Copy link to operation
           </GraphiQLDropdownMenu.Item>
+          {props.canEdit ? (
+            <GraphiQLDropdownMenu.Item
+              onSelect={async () => {
+                props.onEdit(props.node.id);
+              }}
+            >
+              Edit
+            </GraphiQLDropdownMenu.Item>
+          ) : null}
           {props.canDelete ? (
             <GraphiQLDropdownMenu.Item
               onSelect={() => {
@@ -274,6 +277,59 @@ const AddCollectionItemButton = (props: { collectionId: string }): ReactElement 
   );
 };
 
+export const CollectionsQuery = graphql(`
+  query Collections($selector: TargetSelectorInput!) {
+    target(selector: $selector) {
+      id
+      documentCollections {
+        edges {
+          cursor
+          node {
+            id
+            name
+            operations(first: 100) {
+              edges {
+                node {
+                  id
+                  name
+                }
+                cursor
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`);
+
+export function useCollections() {
+  const router = useRouteSelector();
+  const [{ data, error, fetching }] = useQuery({
+    query: CollectionsQuery,
+    variables: {
+      selector: {
+        target: router.targetId,
+        organization: router.organizationId,
+        project: router.projectId,
+      },
+    },
+  });
+
+  const notify = useNotifications();
+
+  useEffect(() => {
+    if (error) {
+      notify(error.message, 'error');
+    }
+  }, [error]);
+
+  return {
+    collections: data?.target?.documentCollections.edges.map(v => v.node) || [],
+    fetching,
+  };
+}
+
 function useOperationCollectionsPlugin({
   canDelete,
   canEdit,
@@ -287,10 +343,11 @@ function useOperationCollectionsPlugin({
     content: useCallback(
       function Content() {
         const [isCollectionModalOpen, toggleCollectionModal] = useToggle();
-        const { collections, loading } = useCollections();
+        const { collections, fetching: loading } = useCollections();
         const [collectionId, setCollectionId] = useState('');
         const [isDeleteCollectionModalOpen, toggleDeleteCollectionModalOpen] = useToggle();
         const [operationToDeleteId, setOperationToDeleteId] = useState<null | string>(null);
+        const [operationToEditId, setOperationToEditId] = useState<null | string>(null);
         const router = useRouteSelector();
 
         const currentOperation = useCurrentOperation();
@@ -396,7 +453,9 @@ function useOperationCollectionsPlugin({
                               key={node.id}
                               node={node}
                               canDelete={canDelete}
+                              canEdit={canEdit}
                               onDelete={setOperationToDeleteId}
+                              onEdit={setOperationToEditId}
                             />
                           ))
                         : null}
@@ -443,6 +502,7 @@ function useOperationCollectionsPlugin({
                 operationId={operationToDeleteId}
               />
             )}
+            {operationToEditId === null ? null : <>hi</>}
           </div>
         );
       },
