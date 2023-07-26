@@ -76,8 +76,8 @@ export class CollectionProvider {
   updateOperation(input: CollectionModule.UpdateDocumentCollectionOperationInput) {
     return this.storage.updateDocumentCollectionDocument({
       documentCollectionDocumentId: input.operationId,
-      title: input.name,
-      contents: input.query,
+      title: input.name ?? null,
+      contents: input.query ?? null,
       variables: input.variables ?? null,
       headers: input.headers ?? null,
     });

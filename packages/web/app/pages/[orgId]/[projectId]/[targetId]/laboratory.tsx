@@ -31,6 +31,7 @@ import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import { BookmarkIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
 import 'graphiql/graphiql.css';
 import { cx } from 'class-variance-authority';
+import { EditOperationModal } from '@/components/target/laboratory/edit-operation-modal';
 import { QueryError } from '@/components/ui/query-error';
 
 function Share(): ReactElement {
@@ -502,7 +503,13 @@ function useOperationCollectionsPlugin({
                 operationId={operationToDeleteId}
               />
             )}
-            {operationToEditId === null ? null : <>hi</>}
+            {operationToEditId === null ? null : (
+              <EditOperationModal
+                key={operationToEditId}
+                operationId={operationToEditId}
+                close={() => setOperationToEditId(null)}
+              />
+            )}
           </div>
         );
       },
