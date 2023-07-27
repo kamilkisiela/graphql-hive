@@ -161,9 +161,10 @@ export class CloudflareBroker {
       content: readFileSync(
         // eslint-disable-next-line no-process-env
         process.env.BROKER_WORKER_ARTIFACT_PATH ||
-          resolve(__dirname, '../../packages/services/broker-worker/dist/index.worker.js'),
+          resolve(__dirname, '../../packages/services/broker-worker/dist/index.worker.mjs'),
         'utf-8',
       ),
+      module: true,
       name: `hive-broker-${this.config.envName}`,
       secretTextBindings,
     });

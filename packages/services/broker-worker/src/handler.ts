@@ -1,4 +1,4 @@
-import { isSignatureValid } from './auth';
+import type { SignatureValidator } from './auth';
 import { parseIncomingRequest } from './models';
 import { Logger } from './types';
 
@@ -22,7 +22,7 @@ async function gatherResponse(response: Response) {
 
 export async function handleRequest(
   request: Request,
-  keyValidator: typeof isSignatureValid,
+  keyValidator: SignatureValidator,
   logger: Logger,
 ) {
   const parsedRequest = await parseIncomingRequest(request, keyValidator, logger);

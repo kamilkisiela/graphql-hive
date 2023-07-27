@@ -1,3 +1,7 @@
-export function isSignatureValid(signature: string) {
-  return SIGNATURE === signature;
+export type SignatureValidator = (receivedSignature: string) => boolean;
+
+export function createSignatureValidator(expectedSignature: string): SignatureValidator {
+  return (receivedSignature: string) => {
+    return expectedSignature === receivedSignature;
+  };
 }

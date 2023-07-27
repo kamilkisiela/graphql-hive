@@ -7,7 +7,7 @@ import { build } from 'esbuild';
   console.log('🚀 Building HTTP Broker Worker...');
   const __dirname = dirname(fileURLToPath(import.meta.url));
   const nodeOutputPath = `${__dirname}/dist/index.nodejs.js`;
-  const workerOutputPath = `${__dirname}/dist/index.worker.js`;
+  const workerOutputPath = `${__dirname}/dist/index.worker.mjs`;
 
   await Promise.all([
     // Build for integration tests, and expect it to run on NodeJS
