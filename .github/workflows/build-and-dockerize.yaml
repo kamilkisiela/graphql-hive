@@ -66,7 +66,7 @@ jobs:
           recursive: false
           files:
             packages/services/broker-worker/dist/index.worker.js
-            packages/services/cdn-worker/dist/index.worker.js
+            packages/services/cdn-worker/dist/index.worker.mjs
           dest: ${{ inputs.imageTag }}.zip
 
       - name: upload artifact
