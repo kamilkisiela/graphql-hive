@@ -33,6 +33,7 @@ export class CloudflareCDN {
         'utf-8',
       ),
       name: `hive-storage-cdn-${this.config.envName}`,
+      module: true,
       kvNamespaceBindings: [
         {
           // HIVE_DATA is in use in cdn-script.js as well, its the name of the global variable
