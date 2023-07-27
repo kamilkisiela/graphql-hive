@@ -23,6 +23,6 @@ jobs:
         uses: SimenB/github-actions-cpu-cores@v1
 
       - name: typecheck
-        run: pnpm typecheck --concurrency ${{ steps.cpu-cores.outputs.count }}
+        run: pnpm run --workspace-concurrency ${{ steps.cpu-cores.outputs.count }} -r typecheck
         env:
           NODE_OPTIONS: '--max-old-space-size=4096'

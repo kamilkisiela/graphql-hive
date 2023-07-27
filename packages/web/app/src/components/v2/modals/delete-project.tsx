@@ -2,9 +2,24 @@ import { ReactElement } from 'react';
 import { useRouter } from 'next/router';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
-import { DeleteProjectDocument } from '@/graphql';
+import { graphql } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
 import { TrashIcon } from '@radix-ui/react-icons';
+
+export const DeleteProjectMutation = graphql(`
+  mutation deleteProject($selector: ProjectSelectorInput!) {
+    deleteProject(selector: $selector) {
+      selector {
+        organization
+        project
+      }
+      deletedProject {
+        __typename
+        id
+      }
+    }
+  }
+`);
 
 export const DeleteProjectModal = ({
   isOpen,
@@ -13,7 +28,7 @@ export const DeleteProjectModal = ({
   isOpen: boolean;
   toggleModalOpen: () => void;
 }): ReactElement => {
-  const [, mutate] = useMutation(DeleteProjectDocument);
+  const [, mutate] = useMutation(DeleteProjectMutation);
   const router = useRouteSelector();
   const { replace } = useRouter();
 

@@ -39,8 +39,9 @@
       "dependsOn": ["^build", "@graphql-hive/client#build"],
       "outputs": ["dist/**"]
     },
-    "typecheck": {
-      "outputs": [""]
+    "@hive/server#build": {
+      "dependsOn": ["^build", "@hive/app#build"],
+      "outputs": ["dist/**"]
     },
     "check:build": {
       "outputs": [""]

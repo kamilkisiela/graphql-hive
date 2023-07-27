@@ -14,20 +14,17 @@ import type { CreateOrganizationMutation } from '@/components/v2/modals/create-o
 import type { CreateProjectMutation } from '@/components/v2/modals/create-project';
 import type { CreateTarget_CreateTargetMutation } from '@/components/v2/modals/create-target';
 import type { DeleteOrganizationDocument } from '@/components/v2/modals/delete-organization';
+import { type DeleteProjectMutation } from '@/components/v2/modals/delete-project';
+import { type DeleteTargetMutation } from '@/components/v2/modals/delete-target';
 import { graphql } from '@/gql';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
+import { OrganizationsQuery } from '../../pages';
 import { CollectionsQuery } from '../../pages/[orgId]/[projectId]/[targetId]/laboratory';
 import {
   TokensDocument,
   type DeleteTokensDocument,
 } from '../../pages/[orgId]/[projectId]/[targetId]/settings';
-import {
-  DeletePersistedOperationDocument,
-  DeleteProjectDocument,
-  DeleteTargetDocument,
-  OrganizationsDocument,
-} from '../graphql';
 
 const TargetsDocument = graphql(`
   query targets($selector: ProjectSelectorInput!) {
@@ -85,7 +82,7 @@ const createOrganization: TypedDocumentNodeUpdateResolver<typeof CreateOrganizat
   updateQuery(
     cache,
     {
-      query: OrganizationsDocument,
+      query: OrganizationsQuery,
     },
     data => {
       if (createOrganization.ok) {
@@ -127,7 +124,7 @@ const createProject: TypedDocumentNodeUpdateResolver<typeof CreateProjectMutatio
   });
 };
 
-const deleteProject: TypedDocumentNodeUpdateResolver<typeof DeleteProjectDocument> = (
+const deleteProject: TypedDocumentNodeUpdateResolver<typeof DeleteProjectMutation> = (
   { deleteProject },
   _args,
   cache,
@@ -171,7 +168,7 @@ const createTarget: TypedDocumentNodeUpdateResolver<typeof CreateTarget_CreateTa
   );
 };
 
-const deleteTarget: TypedDocumentNodeUpdateResolver<typeof DeleteTargetDocument> = (
+const deleteTarget: TypedDocumentNodeUpdateResolver<typeof DeleteTargetMutation> = (
   { deleteTarget },
   _args,
   cache,
@@ -279,16 +276,6 @@ const addAlert: TypedDocumentNodeUpdateResolver<typeof CreateAlertModal_AddAlert
     id: updatedProject.id,
   });
 };
-const deletePersistedOperation: TypedDocumentNodeUpdateResolver<
-  typeof DeletePersistedOperationDocument
-> = ({ deletePersistedOperation }, _args, cache) => {
-  const operation = deletePersistedOperation.deletedPersistedOperation;
-
-  cache.invalidate({
-    __typename: operation.__typename,
-    id: operation.id,
-  });
-};
 
 const deleteDocumentCollection: TypedDocumentNodeUpdateResolver<DeleteCollectionMutationType> = (
   mutation,
@@ -387,7 +374,6 @@ export const Mutation = {
   addAlertChannel,
   deleteAlertChannels,
   addAlert,
-  deletePersistedOperation,
   deleteDocumentCollection,
   deleteOperationInDocumentCollection,
   createOperationInDocumentCollection,

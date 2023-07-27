@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -1703,9 +1703,6 @@ importers:
       '@hive/emails':
         specifier: workspace:*
         version: link:../../services/emails
-      '@hive/server':
-        specifier: workspace:*
-        version: link:../../services/server
       '@next/bundle-analyzer':
         specifier: 13.4.11
         version: 13.4.11

@@ -1,3 +1,0 @@
-query hasCollectedOperations($selector: TargetSelectorInput!) {
-  hasCollectedOperations(selector: $selector)
-}

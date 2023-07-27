@@ -2,8 +2,24 @@ import { ReactElement } from 'react';
 import { useRouter } from 'next/router';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
-import { DeleteTargetDocument } from '@/graphql';
+import { graphql } from '@/gql';
 import { TrashIcon } from '@radix-ui/react-icons';
+
+export const DeleteTargetMutation = graphql(`
+  mutation deleteTarget($selector: TargetSelectorInput!) {
+    deleteTarget(selector: $selector) {
+      selector {
+        organization
+        project
+        target
+      }
+      deletedTarget {
+        __typename
+        id
+      }
+    }
+  }
+`);
 
 export const DeleteTargetModal = ({
   isOpen,
@@ -18,7 +34,7 @@ export const DeleteTargetModal = ({
   projectId: string;
   targetId: string;
 }): ReactElement => {
-  const [, mutate] = useMutation(DeleteTargetDocument);
+  const [, mutate] = useMutation(DeleteTargetMutation);
   const { replace } = useRouter();
 
   return (

@@ -8,12 +8,12 @@ import { Title } from '@/components/common';
 import { DataWrapper } from '@/components/v2';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { env } from '@/env/backend';
-import { OrganizationsDocument } from '@/graphql';
+import { graphql } from '@/gql';
 import { writeLastVisitedOrganization } from '@/lib/cookies';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 // eslint-disable-next-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
-import { InternalApi } from '@hive/server';
+import { type InternalApi } from '@hive/server';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 
 async function getSuperTokensUserIdFromRequest(
@@ -67,8 +67,20 @@ export const getServerSideProps = withSessionProtection(async ({ req, res }) => 
   };
 });
 
+export const OrganizationsQuery = graphql(`
+  query organizations {
+    organizations {
+      nodes {
+        ...OrganizationFields
+        cleanId
+      }
+      total
+    }
+  }
+`);
+
 function Home(): ReactElement {
-  const [query] = useQuery({ query: OrganizationsDocument });
+  const [query] = useQuery({ query: OrganizationsQuery });
   const router = useRouteSelector();
 
   useEffect(() => {
