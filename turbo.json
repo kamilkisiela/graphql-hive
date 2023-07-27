@@ -44,7 +44,8 @@
       "outputs": ["dist/**"]
     },
     "typecheck": {
-      "outputs": [""]
+      "outputs": [""],
+      "cache": false
     },
     "check:build": {
       "outputs": [""]
