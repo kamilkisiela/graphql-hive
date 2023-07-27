@@ -4,7 +4,7 @@ import { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/r
 import zod from 'zod';
 import { env } from '@/env/backend';
 // eslint-disable-next-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
-import { InternalApi } from '@hive/server';
+import { type InternalApi } from '@hive/server';
 import { CreateTRPCProxyClient } from '@trpc/client';
 
 const OIDCProfileInfoSchema = zod.object({

@@ -17,7 +17,7 @@ import { createThirdPartyEmailPasswordNodeOktaProvider } from '@/lib/supertokens
 // eslint-disable-next-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
 import { EmailsApi } from '@hive/emails';
 // eslint-disable-next-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
-import { InternalApi } from '@hive/server';
+import { type InternalApi } from '@hive/server';
 import { createTRPCProxyClient, CreateTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
 
