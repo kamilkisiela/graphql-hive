@@ -1,4 +1,5 @@
 import { createFetch, Headers, ReadableStream, Request, Response } from '@whatwg-node/fetch';
+import type { Env } from './env';
 
 const nodeFetch = createFetch({
   useNodeFetch: true,
@@ -19,5 +20,13 @@ if (!globalThis.ReadableStream) {
 
 globalThis.fetch = nodeFetch.fetch;
 
-// eslint-disable-next-line no-process-env
-(globalThis as any).SIGNATURE = process.env.CF_BROKER_SIGNATURE || '';
+export const env: Env = {
+  // eslint-disable-next-line no-process-env
+  SIGNATURE: process.env.CF_BROKER_SIGNATURE || '',
+  SENTRY_DSN: '',
+  SENTRY_ENVIRONMENT: '',
+  SENTRY_RELEASE: '',
+  LOKI_PASSWORD: '',
+  LOKI_USERNAME: '',
+  LOKI_ENDPOINT: '',
+};
