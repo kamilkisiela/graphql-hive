@@ -6,17 +6,18 @@ import type { CreateAlertModal_AddAlertMutation } from '@/components/project/ale
 import type { CreateChannel_AddAlertChannelMutation } from '@/components/project/alerts/create-channel';
 import type { DeleteAlertsButton_DeleteAlertsMutation } from '@/components/project/alerts/delete-alerts-button';
 import type { DeleteChannelsButton_DeleteChannelsMutation } from '@/components/project/alerts/delete-channels-button';
+import type { CreateOperationMutationType } from '@/components/target/laboratory/create-operation-modal';
+import type { DeleteCollectionMutationType } from '@/components/target/laboratory/delete-collection-modal';
+import type { DeleteOperationMutationType } from '@/components/target/laboratory/delete-operation-modal';
 import type { CreateAccessToken_CreateTokenMutation } from '@/components/v2/modals/create-access-token';
-import type { CreateOperationMutationType } from '@/components/v2/modals/create-operation';
 import type { CreateOrganizationMutation } from '@/components/v2/modals/create-organization';
 import type { CreateProjectMutation } from '@/components/v2/modals/create-project';
 import type { CreateTarget_CreateTargetMutation } from '@/components/v2/modals/create-target';
-import type { DeleteCollectionMutationType } from '@/components/v2/modals/delete-collection';
-import type { DeleteOperationMutationType } from '@/components/v2/modals/delete-operation';
 import type { DeleteOrganizationDocument } from '@/components/v2/modals/delete-organization';
 import { graphql } from '@/gql';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
+import { CollectionsQuery } from '../../pages/[orgId]/[projectId]/[targetId]/laboratory';
 import {
   TokensDocument,
   type DeleteTokensDocument,
@@ -27,7 +28,6 @@ import {
   DeleteTargetDocument,
   OrganizationsDocument,
 } from '../graphql';
-import { CollectionsQuery } from './hooks/use-collections';
 
 const TargetsDocument = graphql(`
   query targets($selector: ProjectSelectorInput!) {
@@ -234,9 +234,7 @@ const deleteTokens: TypedDocumentNodeUpdateResolver<typeof DeleteTokensDocument>
     },
     data => {
       data.tokens.nodes = data.tokens.nodes.filter(
-        // TODO: fix types
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        node => !deleteTokens.deletedTokens.includes((node as any).id),
+        node => !deleteTokens.deletedTokens.includes(node.id),
       );
       data.tokens.total = data.tokens.nodes.length;
     },
