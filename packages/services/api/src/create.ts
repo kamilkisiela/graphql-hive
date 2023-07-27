@@ -127,6 +127,7 @@ export function createRegistry({
     endpoint: string;
     accessKeyId: string;
     secretAccessKeyId: string;
+    sessionToken?: string;
   };
   encryptionSecret: string;
   feedback: {
@@ -145,8 +146,8 @@ export function createRegistry({
     client: new AwsClient({
       accessKeyId: s3.accessKeyId,
       secretAccessKey: s3.secretAccessKeyId,
+      sessionToken: s3.sessionToken,
       service: 's3',
-      region: 'auto',
     }),
     bucket: s3.bucketName,
     endpoint: s3.endpoint,

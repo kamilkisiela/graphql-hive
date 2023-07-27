@@ -6,42 +6,29 @@ import { createArtifactRequestHandler } from './artifact-handler';
 import { ArtifactStorageReader } from './artifact-storage-reader';
 import { AwsClient } from './aws';
 import './dev-polyfill';
-import { devStorage } from './dev-polyfill';
+import { devStorage, env } from './dev-polyfill';
 import { createRequestHandler } from './handler';
 import { createIsKeyValid } from './key-validation';
 
-declare let S3_ENDPOINT: string;
-declare let S3_ACCESS_KEY_ID: string;
-declare let S3_SECRET_ACCESS_KEY: string;
-declare let S3_BUCKET_NAME: string;
-declare let S3_PUBLIC_URL: string;
-
 const s3 = {
   client: new AwsClient({
-    accessKeyId: S3_ACCESS_KEY_ID,
-    secretAccessKey: S3_SECRET_ACCESS_KEY,
+    accessKeyId: env.S3_ACCESS_KEY_ID,
+    secretAccessKey: env.S3_SECRET_ACCESS_KEY,
     service: 's3',
   }),
-  bucketName: S3_BUCKET_NAME,
-  endpoint: S3_ENDPOINT,
+  bucketName: env.S3_BUCKET_NAME,
+  endpoint: env.S3_ENDPOINT,
 };
 
 // eslint-disable-next-line no-process-env
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
 
-/**
- * KV Storage for the CDN
- */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-declare let HIVE_DATA: KVNamespace;
-
 const handleRequest = createRequestHandler({
-  getRawStoreValue: value => HIVE_DATA.get(value),
+  getRawStoreValue: value => env.HIVE_DATA.get(value),
   isKeyValid: createIsKeyValid({ s3, getCache: null, waitUntil: null, analytics: null }),
 });
 
-const artifactStorageReader = new ArtifactStorageReader(s3, S3_PUBLIC_URL);
+const artifactStorageReader = new ArtifactStorageReader(s3, env.S3_PUBLIC_URL);
 
 const handleArtifactRequest = createArtifactRequestHandler({
   isKeyValid: createIsKeyValid({ s3, getCache: null, waitUntil: null, analytics: null }),

@@ -21,14 +21,6 @@ jobs:
       - name: lint .env.template files
         run: pnpm lint:env-template
 
-      - name: eslint cache
-        uses: actions/cache@v3
-        with:
-          path: '.eslintcache'
-          key: ${{ runner.os }}-eslint-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-eslint
-
       - name: Cache ESLint and Prettier
         uses: actions/cache@v3
         with:
@@ -41,22 +33,30 @@ jobs:
 
       - name: eslint
         id: eslint
-        run: pnpm lint
+        run: |
+          pnpm lint || \
+          ( \
+            echo "" && \
+            echo "To fix it, run" && \
+            echo "$ pnpm run lint:fix" && \
+            echo "" && \
+            exit 1 \
+          )
         env:
           TIMING: 'true'
-          DEBUG: 'eslint:cli-engine'
-
-      - name: eslint tip
-        if: ${{ steps.eslint.outcome }} == 'failure'
-        run: echo "Run pnpm lint --fix"
 
       - name: prettier
         id: prettier
-        run: pnpm lint:prettier
-
-      - name: eslint tip
-        if: ${{ steps.prettier.outcome }} == 'failure'
-        run: echo "Run pnpm format"
+        shell: sh
+        run: |
+          pnpm lint:prettier || \
+          ( \
+            echo "" && \
+            echo "To fix it, run" && \
+            echo "$ pnpm run prettier" && \
+            echo "" && \
+            exit 1 \
+          )
 
       - name: Generate Types
         run: yarn graphql:generate

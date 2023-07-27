@@ -29,6 +29,7 @@ import { build } from 'esbuild';
       bundle: true,
       platform: 'browser',
       target: 'chrome95',
+      format: 'esm',
       minify: false,
       outfile: workerOutputPath,
       treeShaking: true,

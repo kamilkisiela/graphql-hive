@@ -29,10 +29,11 @@ export class CloudflareCDN {
       content: readFileSync(
         // eslint-disable-next-line no-process-env
         process.env.CDN_WORKER_ARTIFACT_PATH ||
-          resolve(__dirname, '../../packages/services/cdn-worker/dist/index.worker.js'),
+          resolve(__dirname, '../../packages/services/cdn-worker/dist/index.worker.mjs'),
         'utf-8',
       ),
       name: `hive-storage-cdn-${this.config.envName}`,
+      module: true,
       kvNamespaceBindings: [
         {
           // HIVE_DATA is in use in cdn-script.js as well, its the name of the global variable
