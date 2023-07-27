@@ -12,7 +12,7 @@ import rimraf from 'rimraf';
 
 const cwd = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-const cacheDir = 'node_modules/.cache/turbo';
+const cacheDir = path.join('node_modules', '.cache', 'turbo');
 const cleanupDateFile = path.resolve(cwd, cacheDir, 'last-cleanup.txt');
 
 function main() {
@@ -34,7 +34,7 @@ function main() {
 
   console.log('[turborepo-cleanup] Cleaning up the cache.');
 
-  rimraf.sync(path.resolve(cwd, cacheDir, '*'));
+  rimraf.sync(path.resolve(cwd, cacheDir));
   fs.mkdirSync(path.resolve(cwd, cacheDir), { recursive: true });
   fs.writeFileSync(cleanupDateFile, Date.now().toString(), 'utf-8');
 }
