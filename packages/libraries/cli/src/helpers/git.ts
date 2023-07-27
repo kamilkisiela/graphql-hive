@@ -1,6 +1,7 @@
-import { exec } from 'child_process';
-import { readFileSync } from 'fs';
+import { exec } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import ci from 'env-ci';
+import { processCwd, processEnv } from './process';
 
 interface CIRunner {
   detect(): boolean;
@@ -20,7 +21,7 @@ function getLatestCommitFromGit() {
     hash: string;
     author: string;
   } | null>(resolve => {
-    exec(latestCommitCommand, { cwd: process.cwd() }, (_, stdout) => {
+    exec(latestCommitCommand, { cwd: processCwd }, (_, stdout) => {
       if (stdout.includes(splitBy)) {
         const [hash, authorName, authorEmail] = stdout.split(splitBy);
         if (hash && authorName) {
@@ -47,21 +48,21 @@ function useGitHubAction(): CIRunner {
   return {
     detect() {
       // eslint-disable-next-line no-process-env
-      return !!process.env.GITHUB_ACTIONS;
+      return !!processEnv['GITHUB_ACTIONS'];
     },
     env() {
       const isPr =
         // eslint-disable-next-line no-process-env
-        process.env.GITHUB_EVENT_NAME === 'pull_request' ||
+        processEnv['GITHUB_EVENT_NAME'] === 'pull_request' ||
         // eslint-disable-next-line no-process-env
-        process.env.GITHUB_EVENT_NAME === 'pull_request_target';
+        processEnv['GITHUB_EVENT_NAME'] === 'pull_request_target';
 
       if (isPr) {
         try {
           // eslint-disable-next-line no-process-env
-          const event = process.env.GITHUB_EVENT_PATH
+          const event = processEnv['GITHUB_EVENT_PATH']
             ? // eslint-disable-next-line no-process-env
-              JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf-8'))
+              JSON.parse(readFileSync(processEnv['GITHUB_EVENT_PATH'], 'utf-8'))
             : undefined;
 
           if (event?.pull_request) {

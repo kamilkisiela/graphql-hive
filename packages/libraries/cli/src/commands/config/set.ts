@@ -1,26 +1,26 @@
-import { Args } from '@oclif/core';
-import Command from '../../base-command';
-import { allowedKeys, ValidConfigurationKeys } from '../../helpers/config';
+import { createCommand } from '../../helpers/command';
+import { coerceToAllowedKey } from '../../helpers/config';
 
-export default class SetConfig extends Command {
-  static description = 'updates specific cli configuration';
-  static args = {
-    key: Args.string({
-      name: 'key',
-      required: true,
-      description: 'config key',
-      options: allowedKeys,
-    }),
-    value: Args.string({
-      name: 'value',
-      required: true,
-      description: 'config value',
-    }),
-  };
-
-  async run() {
-    const { args } = await this.parse(SetConfig);
-    this._userConfig.set(args.key as ValidConfigurationKeys, args.value);
-    this.success(this.bolderize(`Config flag "${args.key}" was set to "${args.value}"`));
-  }
-}
+export default createCommand((yargs, ctx) => {
+  return yargs.command(
+    'config:set <key> <value>',
+    'updates specific cli configuration',
+    y =>
+      y
+        .positional('key', {
+          type: 'string',
+          description: 'config key',
+          coerce: coerceToAllowedKey,
+          demandOption: true,
+        })
+        .positional('value', {
+          type: 'string',
+          description: 'config value',
+          demandOption: true,
+        }),
+    async args => {
+      ctx.userConfig.set(args.key, args.value);
+      ctx.logger.success(ctx.bolderize(`Config flag "${args.key}" was set to "${args.value}"`));
+    },
+  );
+});

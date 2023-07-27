@@ -1,9 +1,8 @@
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { GraphQLError, print } from 'graphql';
 import { transformCommentsToDescriptions } from '@graphql-tools/utils';
-import { Args, Errors, Flags } from '@oclif/core';
-import Command from '../../base-command';
 import { graphql } from '../../gql';
+import { createCommand } from '../../helpers/command';
 import { graphqlEndpoint } from '../../helpers/config';
 import { gitInfo } from '../../helpers/git';
 import { loadSchema, minifySchema, renderChanges, renderErrors } from '../../helpers/schema';
@@ -59,156 +58,116 @@ const schemaPublishMutation = graphql(/* GraphQL */ `
   }
 `);
 
-export default class SchemaPublish extends Command {
-  static description = 'publishes schema';
-  static flags = {
-    service: Flags.string({
-      description: 'service name (only for distributed schemas)',
-    }),
-    url: Flags.string({
-      description: 'service url (only for distributed schemas)',
-    }),
-    metadata: Flags.string({
-      description:
-        'additional metadata to attach to the GraphQL schema. This can be a string with a valid JSON, or a path to a file containing a valid JSON',
-    }),
-    'registry.endpoint': Flags.string({
-      description: 'registry endpoint',
-    }),
-    /** @deprecated */
-    registry: Flags.string({
-      description: 'registry address',
-      deprecated: {
-        message: 'use --registry.endpoint instead',
-        version: '0.21.0',
-      },
-    }),
-    'registry.accessToken': Flags.string({
-      description: 'registry access token',
-    }),
-    /** @deprecated */
-    token: Flags.string({
-      description: 'api token',
-      deprecated: {
-        message: 'use --registry.accessToken instead',
-        version: '0.21.0',
-      },
-    }),
-    author: Flags.string({
-      description: 'author of the change',
-    }),
-    commit: Flags.string({
-      description: 'associated commit sha',
-    }),
-    github: Flags.boolean({
-      description: 'Connect with GitHub Application',
-      default: false,
-    }),
-    force: Flags.boolean({
-      description: 'force publish even on breaking changes',
-      deprecated: {
-        message: '--force is enabled by default for newly created projects',
-      },
-    }),
-    experimental_acceptBreakingChanges: Flags.boolean({
-      description:
-        '(experimental) accept breaking changes and mark schema as valid (only if composable)',
-      deprecated: {
-        message:
-          '--experimental_acceptBreakingChanges is enabled by default for newly created projects',
-      },
-    }),
-    require: Flags.string({
-      description:
-        'Loads specific require.extensions before running the codegen and reading the configuration',
-      default: [],
-      multiple: true,
-    }),
-  };
-
-  static args = {
-    file: Args.string({
-      name: 'file',
-      required: true,
-      description: 'Path to the schema file(s)',
-      hidden: false,
-    }),
-  };
-
-  resolveMetadata(metadata: string | undefined): string | undefined {
-    if (!metadata) {
-      return;
-    }
-
-    try {
-      JSON.parse(metadata);
-      // If we are able to parse it, it means it's a valid JSON, let's use it as-is
-
-      return metadata;
-    } catch (e) {
-      // If we can't parse it, we can try to load it from FS
-      const exists = existsSync(metadata);
-
-      if (!exists) {
-        throw new Error(
-          `Failed to load metadata from "${metadata}": Please specify a path to an existing file, or a string with valid JSON.`,
-        );
-      }
-
-      try {
-        const fileContent = readFileSync(metadata, 'utf-8');
-        JSON.parse(fileContent);
-
-        return fileContent;
-      } catch (e) {
-        throw new Error(
-          `Failed to load metadata from file "${metadata}": Please make sure the file is readable and contains a valid JSON`,
-        );
-      }
-    }
-  }
-
-  async run() {
-    try {
-      const { flags, args } = await this.parse(SchemaPublish);
-
-      await this.require(flags);
-
-      const endpoint = this.ensure({
+export default createCommand((yargs, ctx) =>
+  yargs.command(
+    'schema:publish <file>',
+    'publishes schema',
+    y =>
+      y
+        .positional('file', {
+          type: 'string',
+          demandOption: true,
+          description: 'Path to the schema file(s)',
+        })
+        .option('commit', {
+          type: 'string',
+          description: 'Associated commit sha',
+        })
+        .option('author', {
+          type: 'string',
+          description: 'Author of the change',
+        })
+        .option('service', {
+          type: 'string',
+          description: 'service name (only for distributed schemas)',
+        })
+        .option('url', {
+          type: 'string',
+          description: 'service url (only for distributed schemas)',
+        })
+        .option('metadata', {
+          type: 'string',
+          description: 'additional metadata to attach to the GraphQL schema',
+        })
+        .option('force', {
+          type: 'boolean',
+          description: 'force publish even on breaking changes',
+          default: false,
+          deprecated: '--force is enabled by default for newly created projects',
+        })
+        .option('experimental_acceptBreakingChanges', {
+          type: 'boolean',
+          description:
+            '(experimental) accept breaking changes and mark schema as valid (only if composable)',
+          deprecated:
+            '--experimental_acceptBreakingChanges is enabled by default for newly created projects',
+        })
+        .option('require', {
+          type: 'string',
+          array: true,
+          description:
+            'Loads specific require.extensions before running the codegen and reading the configuration',
+          default: [],
+        })
+        .option('github', {
+          type: 'boolean',
+          description: 'Connect with GitHub Application',
+          default: false,
+        })
+        .option('registry.endpoint', {
+          type: 'string',
+          description: 'registry endpoint',
+        })
+        .option('registry.accessToken', {
+          type: 'string',
+          description: 'registry access token',
+        })
+        .option('registry', {
+          type: 'string',
+          description: 'registry address',
+          deprecated: 'use --registry.endpoint',
+        })
+        .option('token', {
+          type: 'string',
+          description: 'api token',
+          deprecated: 'use --registry.accessToken',
+        }),
+    async args => {
+      const endpoint = ctx.ensure({
         key: 'registry.endpoint',
-        args: flags,
+        args,
         legacyFlagName: 'registry',
         defaultValue: graphqlEndpoint,
         env: 'HIVE_REGISTRY',
       });
-      const accessToken = this.ensure({
+      const accessToken = ctx.ensure({
         key: 'registry.accessToken',
-        args: flags,
+        args,
         legacyFlagName: 'token',
         env: 'HIVE_TOKEN',
       });
-      const service = flags.service;
-      const url = flags.url;
+      const service = args.service;
+      const url = args.url;
       const file = args.file;
-      const force = flags.force;
-      const experimental_acceptBreakingChanges = flags.experimental_acceptBreakingChanges;
-      const metadata = this.resolveMetadata(flags.metadata);
-      const usesGitHubApp = flags.github;
+      const force = args.force;
+      const experimental_acceptBreakingChanges = args.experimental_acceptBreakingChanges;
+      const metadata = resolveMetadata(args.metadata);
+      const usesGitHubApp = args.github;
 
-      let commit: string | undefined | null = this.maybe({
+      let commit: string | undefined | null = ctx.maybe({
         key: 'commit',
-        args: flags,
+        args,
         env: 'HIVE_COMMIT',
       });
-      let author: string | undefined | null = this.maybe({
+      let author: string | undefined | null = ctx.maybe({
         key: 'author',
-        args: flags,
+        args,
         env: 'HIVE_AUTHOR',
       });
 
       if (!commit || !author) {
         const git = await gitInfo(() => {
-          this.warn(`No git information found. Couldn't resolve author and commit.`);
+          ctx.logger.infoWarning(`No git information found. Couldn't resolve author and commit.`);
         });
 
         if (!commit) {
@@ -221,11 +180,13 @@ export default class SchemaPublish extends Command {
       }
 
       if (!author) {
-        throw new Errors.CLIError(`Missing "author"`);
+        return ctx.exit('failure', {
+          message: `Missing "author"`,
+        });
       }
 
       if (!commit) {
-        throw new Errors.CLIError(`Missing "commit"`);
+        return ctx.exit('failure', { message: `Missing "commit"` });
       }
 
       let sdl: string;
@@ -245,7 +206,7 @@ export default class SchemaPublish extends Command {
         throw err;
       }
 
-      const result = await this.registryApi(endpoint, accessToken).request(schemaPublishMutation, {
+      const result = await ctx.graphql(endpoint, accessToken).request(schemaPublishMutation, {
         input: {
           service,
           url,
@@ -264,66 +225,92 @@ export default class SchemaPublish extends Command {
         const changes = result.schemaPublish.changes;
 
         if (result.schemaPublish.initial) {
-          this.success('Published initial schema.');
+          ctx.logger.success('Published initial schema.');
         } else if (result.schemaPublish.successMessage) {
-          this.success(result.schemaPublish.successMessage);
+          ctx.logger.success(result.schemaPublish.successMessage);
         } else if (changes && changes.total === 0) {
-          this.success('No changes. Skipping.');
+          ctx.logger.success('No changes. Skipping.');
         } else {
           if (changes) {
-            renderChanges.call(this, changes);
+            renderChanges(ctx, changes);
           }
-          this.success('Schema published');
+          ctx.logger.success('Schema published');
         }
 
         if (result.schemaPublish.linkToWebsite) {
-          this.info(`Available at ${result.schemaPublish.linkToWebsite}`);
+          ctx.logger.info(`Available at ${result.schemaPublish.linkToWebsite}`);
         }
       } else if (result.schemaPublish.__typename === 'SchemaPublishMissingServiceError') {
-        this.fail(
-          `${result.schemaPublish.missingServiceError} Please use the '--service <name>' parameter.`,
-        );
-        this.exit(1);
+        ctx.exit('failure', {
+          message: `${result.schemaPublish.missingServiceError} Please use the '--service <name>' parameter.`,
+        });
       } else if (result.schemaPublish.__typename === 'SchemaPublishMissingUrlError') {
-        this.fail(
-          `${result.schemaPublish.missingUrlError} Please use the '--url <url>' parameter.`,
-        );
-        this.exit(1);
+        ctx.exit('failure', {
+          message: `${result.schemaPublish.missingUrlError} Please use the '--url <url>' parameter.`,
+        });
       } else if (result.schemaPublish.__typename === 'SchemaPublishError') {
         const changes = result.schemaPublish.changes;
         const errors = result.schemaPublish.errors;
-        renderErrors.call(this, errors);
+        renderErrors(ctx, errors);
 
         if (changes && changes.total) {
-          this.log('');
-          renderChanges.call(this, changes);
+          ctx.logger.log('');
+          renderChanges(ctx, changes);
         }
-        this.log('');
+        ctx.logger.log('');
 
         if (!force) {
-          this.fail('Failed to publish schema');
-          this.exit(1);
+          ctx.exit('failure', {
+            message: 'Failed to publish schema',
+          });
         } else {
-          this.success('Schema published (forced)');
+          ctx.logger.success('Schema published (forced)');
         }
 
         if (result.schemaPublish.linkToWebsite) {
-          this.info(`Available at ${result.schemaPublish.linkToWebsite}`);
+          ctx.logger.info(`Available at ${result.schemaPublish.linkToWebsite}`);
         }
       } else if (result.schemaPublish.__typename === 'GitHubSchemaPublishSuccess') {
-        this.success(result.schemaPublish.message);
+        ctx.logger.success(result.schemaPublish.message);
       } else {
-        this.error(
-          'message' in result.schemaPublish ? result.schemaPublish.message : 'Unknown error',
-        );
+        ctx.exit('failure', {
+          message:
+            'message' in result.schemaPublish ? result.schemaPublish.message : 'Unknown error',
+        });
       }
-    } catch (error) {
-      if (error instanceof Errors.ExitError) {
-        throw error;
-      } else {
-        this.fail('Failed to publish schema');
-        this.handleFetchError(error);
-      }
+    },
+  ),
+);
+
+function resolveMetadata(metadata: string | undefined): string | undefined {
+  if (!metadata) {
+    return;
+  }
+
+  try {
+    JSON.parse(metadata);
+    // If we are able to parse it, it means it's a valid JSON, let's use it as-is
+
+    return metadata;
+  } catch (e) {
+    // If we can't parse it, we can try to load it from FS
+    const exists = existsSync(metadata);
+
+    if (!exists) {
+      throw new Error(
+        `Failed to load metadata from "${metadata}": Please specify a path to an existing file, or a string with valid JSON.`,
+      );
+    }
+
+    try {
+      const fileContent = readFileSync(metadata, 'utf-8');
+      JSON.parse(fileContent);
+
+      return fileContent;
+    } catch (e) {
+      throw new Error(
+        `Failed to load metadata from file "${metadata}": Please make sure the file is readable and contains a valid JSON`,
+      );
     }
   }
 }

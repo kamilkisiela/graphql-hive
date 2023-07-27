@@ -1,10 +1,13 @@
-import Command from '../../base-command';
+import { createCommand } from '../../helpers/command';
 
-export default class ResetConfig extends Command {
-  static description = 'resets local cli configuration';
-
-  async run() {
-    this._userConfig.clear();
-    this.success('Config cleared.');
-  }
-}
+export default createCommand((yargs, ctx) => {
+  return yargs.command(
+    'config:reset',
+    'resets local cli configuration',
+    y => y,
+    async () => {
+      ctx.userConfig.clear();
+      ctx.logger.success(ctx.bolderize('Config cleared.'));
+    },
+  );
+});

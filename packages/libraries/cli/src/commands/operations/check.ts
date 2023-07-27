@@ -1,8 +1,7 @@
 import { buildSchema, GraphQLError, Source } from 'graphql';
 import { InvalidDocument, validate } from '@graphql-inspector/core';
-import { Args, Errors, Flags } from '@oclif/core';
-import Command from '../../base-command';
 import { graphql } from '../../gql';
+import { Context, createCommand } from '../../helpers/command';
 import { graphqlEndpoint } from '../../helpers/config';
 import { loadOperations } from '../../helpers/operations';
 
@@ -14,63 +13,54 @@ const fetchLatestVersionQuery = graphql(/* GraphQL */ `
   }
 `);
 
-export default class OperationsCheck extends Command {
-  static description = 'checks operations against a published schema';
-  static flags = {
-    'registry.endpoint': Flags.string({
-      description: 'registry endpoint',
-    }),
-    /** @deprecated */
-    registry: Flags.string({
-      description: 'registry address',
-      deprecated: {
-        message: 'use --registry.endpoint instead',
-        version: '0.21.0',
-      },
-    }),
-    'registry.accessToken': Flags.string({
-      description: 'registry access token',
-    }),
-    /** @deprecated */
-    token: Flags.string({
-      description: 'api token',
-      deprecated: {
-        message: 'use --registry.accessToken instead',
-        version: '0.21.0',
-      },
-    }),
-    require: Flags.string({
-      description: 'Loads specific require.extensions before running the command',
-      default: [],
-      multiple: true,
-    }),
-  };
-
-  static args = {
-    file: Args.string({
-      name: 'file',
-      required: true,
-      description: 'Glob pattern to find the operations',
-      hidden: false,
-    }),
-  };
-
-  async run() {
-    try {
-      const { flags, args } = await this.parse(OperationsCheck);
-
-      await this.require(flags);
-
-      const endpoint = this.ensure({
+export default createCommand((yargs, ctx) => {
+  return yargs.command(
+    'operations:check <file>',
+    'Checks operations against a published schema',
+    y =>
+      y
+        .positional('file', {
+          describe: 'Glob pattern to find the operations',
+          demandOption: true,
+          type: 'string',
+        })
+        .option('require', {
+          type: 'string',
+          array: true,
+          description:
+            'Loads specific require.extensions before running the codegen and reading the configuration',
+          default: [],
+        })
+        .option('registry.endpoint', {
+          type: 'string',
+          description: 'registry endpoint',
+        })
+        .option('registry.accessToken', {
+          type: 'string',
+          description: 'registry access token',
+        })
+        .option('registry', {
+          type: 'string',
+          description: 'registry address',
+          deprecated: 'use --registry.endpoint',
+        })
+        .option('token', {
+          type: 'string',
+          description: 'api token',
+          deprecated: 'use --registry.accessToken',
+        }),
+    async args => {
+      await ctx.require(args.require);
+      const endpoint = ctx.ensure({
         key: 'registry.endpoint',
-        args: flags,
+        args,
         legacyFlagName: 'registry',
         defaultValue: graphqlEndpoint,
         env: 'HIVE_REGISTRY',
       });
-      const accessToken = this.ensure({
+      const accessToken = ctx.ensure({
         key: 'registry.accessToken',
-        args: flags,
+        args,
         legacyFlagName: 'token',
         env: 'HIVE_TOKEN',
       });
@@ -81,17 +71,24 @@ export default class OperationsCheck extends Command {
       });
 
       if (operations.length === 0) {
-        this.info('No operations found');
-        this.exit(0);
+        ctx.logger.info('No operations found');
+        ctx.exit('success');
         return;
       }
 
-      const result = await this.registryApi(endpoint, accessToken).request(fetchLatestVersionQuery);
+      const result = await ctx
+        .graphql(endpoint, accessToken)
+        .request(fetchLatestVersionQuery)
+        .catch(error => {
+          return ctx.handleFetchError(error);
+        });
 
       const sdl = result.latestValidVersion?.sdl;
 
       if (!sdl) {
-        this.error('Could not find a published schema. Please publish a valid schema first.');
+        return ctx.exit('failure', {
+          message: 'Could not find a published schema. Please publish a valid schema first.',
+        });
       }
 
       const schema = buildSchema(sdl, {
@@ -105,44 +102,38 @@ export default class OperationsCheck extends Command {
       );
 
       if (invalidOperations.length === 0) {
-        this.success('All operations are valid');
-        this.exit(0);
+        ctx.logger.success('All operations are valid');
+        ctx.exit('success');
         return;
       }
 
-      this.fail('Some operations are invalid');
+      ctx.logger.fail('Some operations are invalid');
 
-      this.log(
+      ctx.logger.log(
         ['', `Total: ${operations.length}`, `Invalid: ${invalidOperations.length}`, ''].join('\n'),
       );
 
-      this.printInvalidDocuments(invalidOperations, 'errors');
-    } catch (error) {
-      if (error instanceof Errors.ExitError) {
-        throw error;
-      } else {
-        this.fail('Failed to validate operations');
-        this.handleFetchError(error);
-      }
+      printInvalidDocuments(invalidOperations, 'errors', ctx);
+    },
+  );
+});
+
+function printInvalidDocuments(
+  invalidDocuments: InvalidDocument[],
+  listKey: 'errors' | 'deprecated',
+  ctx: Context,
+): void {
+  invalidDocuments.forEach(doc => {
+    if (doc.errors.length) {
+      renderErrors(doc.source.name, doc[listKey], ctx).forEach(line => {
+        ctx.logger.log(line);
+      });
     }
-  }
+  });
+}
 
-  private printInvalidDocuments(
-    invalidDocuments: InvalidDocument[],
-    listKey: 'errors' | 'deprecated',
-  ): void {
-    invalidDocuments.forEach(doc => {
-      if (doc.errors.length) {
-        this.renderErrors(doc.source.name, doc[listKey]).forEach(line => {
-          this.log(line);
-        });
-      }
-    });
-  }
+function renderErrors(sourceName: string, errors: GraphQLError[], ctx: Context): string[] {
+  const errorsAsString = errors.map(e => ` - ${ctx.bolderize(e.message)}`).join('\n');
 
-  private renderErrors(sourceName: string, errors: GraphQLError[]): string[] {
-    const errorsAsString = errors.map(e => ` - ${this.bolderize(e.message)}`).join('\n');
-
-    return [`ERROR in ${sourceName}:\n`, errorsAsString, '\n\n'];
-  }
+  return [`ERROR in ${sourceName}:\n`, errorsAsString, '\n\n'];
 }

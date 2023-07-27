@@ -6,7 +6,7 @@ import { execaCommand } from '@esm2cjs/execa';
 import { fetchLatestSchema, fetchLatestValidSchema } from './flow';
 import { getServiceHost } from './utils';
 
-const binPath = resolve(__dirname, '../../packages/libraries/cli/bin/run');
+const binPath = resolve(__dirname, '../../packages/libraries/cli/dist/cjs/bin.js');
 const cliDir = resolve(__dirname, '../../packages/libraries/cli');
 
 async function generateTmpFile(content: string, extension: string) {

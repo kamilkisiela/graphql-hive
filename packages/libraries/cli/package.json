@@ -1,6 +1,7 @@
 {
   "name": "@graphql-hive/cli",
   "version": "0.26.0",
+  "type": "module",
   "description": "A CLI util to manage and control your GraphQL Hive",
   "repository": {
     "type": "git",
@@ -18,32 +19,49 @@
     "node": ">=14.0.0"
   },
   "bin": {
-    "hive": "./bin/run"
+    "hive": "dist/cjs/bin.js"
   },
-  "main": "dist/index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "exports": {
+    ".": {
+      "require": {
+        "types": "./dist/typings/index.d.cts",
+        "default": "./dist/cjs/index.js"
+      },
+      "import": {
+        "types": "./dist/typings/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "default": {
+        "types": "./dist/typings/index.d.ts",
+        "default": "./dist/esm/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "typings": "dist/typings/index.d.ts",
   "files": [
-    "/bin",
-    "/dist",
-    "/oclif.manifest.json"
+    "/dist"
   ],
   "keywords": [
     "graphql"
   ],
   "scripts": {
-    "build": "tsc",
-    "oclif:pack": "npm pack && pnpm oclif pack tarballs --no-xz && pnpm oclif pack win",
-    "oclif:upload": "pnpm oclif upload tarballs --no-xz && pnpm oclif upload win",
-    "postpack": "rm -f oclif.manifest.json",
+    "build": "pnpm tsx ./scripts/version.ts && bob build --single && tsx ../../../scripts/runify.ts",
+    "compile": "pnpm tsx ./scripts/node-to-deno.ts && pnpm compile:lin && pnpm compile:mac && pnpm compile:win",
+    "compile:lin": "deno compile -A deno/index.ts --no-check --output binaries/hive-linux   --target x86_64-unknown-linux-gnu",
+    "compile:mac": "deno compile -A deno/index.ts --no-check --output binaries/hive-macos   --target x86_64-apple-darwin",
+    "compile:win": "deno compile -A deno/index.ts --no-check --output binaries/hive-windows --target x86_64-pc-windows-msvc",
     "prebuild": "rimraf dist",
-    "prepack": "rimraf lib && tsc -b && oclif manifest && oclif readme",
     "schema:check:federation": "pnpm start schema:check examples/federation.graphql --service reviews",
     "schema:check:single": "pnpm start schema:check examples/single.graphql",
     "schema:check:stitching": "pnpm start schema:check --service posts examples/stitching.posts.graphql",
     "schema:publish:federation": "pnpm start schema:publish --service reviews --url reviews.com/graphql examples/federation.reviews.graphql",
-    "start": "./bin/dev",
-    "version": "oclif readme && git add README.md"
+    "start": "tsx ./src/index.ts"
   },
   "dependencies": {
+    "@deno/shim-deno": "0.16.1",
     "@graphql-hive/core": "0.2.3",
     "@graphql-inspector/core": "4.2.2",
     "@graphql-tools/code-file-loader": "~8.0.0",
@@ -53,9 +71,6 @@
     "@graphql-tools/url-loader": "~8.0.0",
     "@graphql-tools/utils": "10.0.3",
     "@graphql-typed-document-node/core": "3.2.0",
-    "@oclif/core": "^2.8.5",
-    "@oclif/plugin-help": "5.2.10",
-    "@oclif/plugin-update": "3.1.19",
     "@whatwg-node/fetch": "0.9.9",
     "colors": "1.4.0",
     "env-ci": "7.3.0",
@@ -65,30 +80,23 @@
     "log-symbols": "4.1.0",
     "mkdirp": "2.1.6",
     "tslib": "2.5.3",
+    "yargs": "17.7.2",
     "zod": "3.21.4"
   },
   "devDependencies": {
     "@types/env-ci": "3.1.1",
     "@types/mkdirp": "1.0.2",
-    "oclif": "3.9.1",
-    "rimraf": "4.4.1",
-    "ts-node": "10.9.1"
+    "@types/yargs": "17.0.24",
+    "rimraf": "4.4.1"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public"
   },
-  "oclif": {
-    "commands": "./dist/commands",
-    "bin": "hive",
-    "plugins": [
-      "@oclif/plugin-help",
-      "@oclif/plugin-update"
-    ],
-    "update": {
-      "s3": {
-        "bucket": "graphql-hive-cli"
-      }
-    }
+  "buildOptions": {
+    "distDir": "dist/bundle"
+  },
+  "typescript": {
+    "definition": "dist/typings/index.d.ts"
   }
 }

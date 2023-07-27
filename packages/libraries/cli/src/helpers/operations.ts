@@ -1,10 +1,11 @@
-import { promises as fs } from 'fs';
-import { relative } from 'path';
+import { promises as fs } from 'node:fs';
+import { relative } from 'node:path';
 import { parse } from 'graphql';
 import { normalizeOperation } from '@graphql-hive/core';
 import { CodeFileLoader } from '@graphql-tools/code-file-loader';
 import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
 import { loadDocuments } from '@graphql-tools/load';
+import { processCwd } from './process';
 
 export async function loadOperations(
   file: string,
@@ -48,7 +49,7 @@ export async function loadOperations(
     return operations;
   }
 
-  const cwd = process.cwd();
+  const cwd = processCwd;
   const sources = await loadDocuments(file, {
     cwd,
     loaders: [new CodeFileLoader(), new GraphQLFileLoader()],

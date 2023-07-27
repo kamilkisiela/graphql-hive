@@ -1,7 +1,8 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import mkdirp from 'mkdirp';
 import * as zod from 'zod';
+import { processEnv } from './process';
 
 const LegacyConfigModel = zod.object({
   registry: zod.string().optional(),
@@ -96,6 +97,14 @@ export const graphqlEndpoint = 'https://app.graphql-hive.com/graphql';
 
 export const allowedKeys = Array.from(getAllowedConfigKeys(ConfigModel));
 
+export function coerceToAllowedKey(key: any) {
+  if (allowedKeys.includes(key)) {
+    return key as ValidConfigurationKeys;
+  }
+
+  throw new Error(`Invalid configuration key: ${key}`);
+}
+
 export class Config {
   private cache?: ConfigModelType;
   private filepath: string;
@@ -181,7 +190,7 @@ export class Config {
 
   private readSpace(content: Record<string, any>) {
     // eslint-disable-next-line no-process-env
-    const space = process.env.HIVE_SPACE;
+    const space = processEnv['HIVE_SPACE'];
 
     if (space) {
       return content[space];

@@ -1,7 +1,6 @@
 import colors from 'colors';
-import { Flags } from '@oclif/core';
-import Command from '../base-command';
 import { graphql } from '../gql';
+import { createCommand } from '../helpers/command';
 import { graphqlEndpoint } from '../helpers/config';
 
 const myTokenInfoQuery = graphql(/* GraphQL */ `
@@ -36,90 +35,87 @@ const myTokenInfoQuery = graphql(/* GraphQL */ `
   }
 `);
 
-export default class WhoAmI extends Command {
-  static description = 'shows information about the current token';
-  static flags = {
-    'registry.endpoint': Flags.string({
-      description: 'registry endpoint',
-    }),
-    /** @deprecated */
-    registry: Flags.string({
-      description: 'registry address',
-      deprecated: {
-        message: 'use --registry.endpoint instead',
-        version: '0.21.0',
-      },
-    }),
-    'registry.accessToken': Flags.string({
-      description: 'registry access token',
-    }),
-    /** @deprecated */
-    token: Flags.string({
-      description: 'api token',
-      deprecated: {
-        message: 'use --registry.accessToken instead',
-        version: '0.21.0',
-      },
-    }),
-  };
-
-  async run() {
-    const { flags } = await this.parse(WhoAmI);
-
-    const registry = this.ensure({
-      key: 'registry.endpoint',
-      legacyFlagName: 'registry',
-      args: flags,
-      defaultValue: graphqlEndpoint,
-      env: 'HIVE_REGISTRY',
-    });
-    const token = this.ensure({
-      key: 'registry.accessToken',
-      legacyFlagName: 'token',
-      args: flags,
-      env: 'HIVE_TOKEN',
-    });
-
-    const result = await this.registryApi(registry, token)
-      .request(myTokenInfoQuery)
-      .catch(error => {
-        this.handleFetchError(error);
+export default createCommand((yargs, ctx) => {
+  return yargs.command(
+    'whoami',
+    'shows information about the current token',
+    y =>
+      y
+        .option('registry.endpoint', {
+          type: 'string',
+          description: 'registry endpoint',
+        })
+        .option('registry.accessToken', {
+          type: 'string',
+          description: 'registry access token',
+        })
+        .option('registry', {
+          type: 'string',
+          description: 'registry address',
+          deprecated: 'use --registry.endpoint',
+        })
+        .option('token', {
+          type: 'string',
+          description: 'api token',
+          deprecated: 'use --registry.accessToken',
+        }),
+    async args => {
+      const registry = ctx.ensure({
+        key: 'registry.endpoint',
+        legacyFlagName: 'registry',
+        args,
+        defaultValue: graphqlEndpoint,
+        env: 'HIVE_REGISTRY',
+      });
+      const token = ctx.ensure({
+        key: 'registry.accessToken',
+        legacyFlagName: 'token',
+        args,
+        env: 'HIVE_TOKEN',
       });
 
-    if (result.tokenInfo.__typename === 'TokenInfo') {
-      const { tokenInfo } = result;
-      const { organization, project, target } = tokenInfo;
+      const result = await ctx
+        .graphql(registry, token)
+        .request(myTokenInfoQuery)
+        .catch(error => {
+          return ctx.handleFetchError(error);
+        });
 
-      const organizationUrl = `https://app.graphql-hive.com/${organization.cleanId}`;
-      const projectUrl = `${organizationUrl}/${project.cleanId}`;
-      const targetUrl = `${projectUrl}/${target.cleanId}`;
+      if (result.tokenInfo.__typename === 'TokenInfo') {
+        const { tokenInfo } = result;
+        const { organization, project, target } = tokenInfo;
 
-      const access = {
-        yes: colors.green('Yes'),
-        not: colors.red('No access'),
-      };
+        const organizationUrl = `https://app.graphql-hive.com/${organization.cleanId}`;
+        const projectUrl = `${organizationUrl}/${project.cleanId}`;
+        const targetUrl = `${projectUrl}/${target.cleanId}`;
 
-      const print = createPrinter({
-        'Token name:': [colors.bold(tokenInfo.token.name)],
-        ' ': [''],
-        'Organization:': [colors.bold(organization.name), colors.dim(organizationUrl)],
-        'Project:': [colors.bold(project.name), colors.dim(projectUrl)],
-        'Target:': [colors.bold(target.name), colors.dim(targetUrl)],
-        '  ': [''],
-        'Access to schema:publish': [tokenInfo.canPublishSchema ? access.yes : access.not],
-        'Access to schema:check': [tokenInfo.canCheckSchema ? access.yes : access.not],
-        'Access to operation:publish': [tokenInfo.canPublishOperations ? access.yes : access.not],
-      });
+        const access = {
+          yes: colors.green('Yes'),
+          not: colors.red('No access'),
+        };
 
-      this.log(print());
-    } else if (result.tokenInfo.__typename === 'TokenNotFoundError') {
-      this.error(`Token not found. Reason: ${result.tokenInfo.message}`, {
-        exit: 0,
-        suggestions: [`How to create a token? https://docs.graphql-hive.com/features/tokens`],
-      });
-    }
-  }
-}
+        const print = createPrinter({
+          'Token name:': [colors.bold(tokenInfo.token.name)],
+          ' ': [''],
+          'Organization:': [colors.bold(organization.name), colors.dim(organizationUrl)],
+          'Project:': [colors.bold(project.name), colors.dim(projectUrl)],
+          'Target:': [colors.bold(target.name), colors.dim(targetUrl)],
+          '  ': [''],
+          'Access to schema:publish': [tokenInfo.canPublishSchema ? access.yes : access.not],
+          'Access to schema:check': [tokenInfo.canCheckSchema ? access.yes : access.not],
+          'Access to operation:publish': [tokenInfo.canPublishOperations ? access.yes : access.not],
+        });
+
+        ctx.logger.log(print());
+      } else if (result.tokenInfo.__typename === 'TokenNotFoundError') {
+        ctx.exit('failure', {
+          message: `Token not found. Reason: ${result.tokenInfo.message}`,
+          suggestion: `How to create a token? https://docs.graphql-hive.com/features/tokens`,
+        });
+      }
+    },
+  );
+});
 
 function createPrinter(records: { [label: string]: [value: string, extra?: string] }) {
   const labels = Object.keys(records);

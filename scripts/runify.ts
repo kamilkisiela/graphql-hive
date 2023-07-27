@@ -11,6 +11,7 @@ const requireShim = fs.readFileSync(normalize(join(__dirname, './banner.js')), '
 
 interface BuildOptions {
   external?: string[];
+  distDir?: string;
   next?: {
     header?: string;
   };
@@ -27,7 +28,7 @@ async function runify(packagePath: string) {
   if (isNext(pkg)) {
     const additionalRequire = pkg?.buildOptions?.next?.header ?? null;
     await buildWithNext(cwd, additionalRequire);
-    await rewritePackageJson(pkg, cwd, newPkg => ({
+    await rewritePackageJson(pkg, cwd, buildOptions, newPkg => ({
       ...newPkg,
       dependencies: pkg.dependencies,
       type: 'commonjs',
@@ -40,7 +41,7 @@ async function runify(packagePath: string) {
       Object.keys(pkg.dependencies ?? {}),
       pkg.type === 'module',
     );
-    await rewritePackageJson(pkg, cwd);
+    await rewritePackageJson(pkg, cwd, buildOptions);
   }
 
   console.log(`Built!`);
@@ -57,9 +58,11 @@ export async function readPackageJson(baseDir: string) {
 async function rewritePackageJson(
   pkg: Record<string, any>,
   cwd: string,
+  buildOptions: BuildOptions,
   modify?: (pkg: any) => any,
 ) {
   let filename = 'index.js';
+  const distDir = (buildOptions.distDir ?? 'dist').replace(/\//g, sep);
 
   let newPkg: Record<string, any> = {
     bin: filename,
@@ -76,7 +79,7 @@ async function rewritePackageJson(
     newPkg = modify(newPkg);
   }
 
-  await fs.writeFile(join(cwd, 'dist', 'package.json'), JSON.stringify(newPkg, null, 2), {
+  await fs.writeFile(join(cwd, distDir, 'package.json'), JSON.stringify(newPkg, null, 2), {
     encoding: 'utf-8',
   });
 }
@@ -138,7 +141,8 @@ async function compile(
   dependencies: string[],
   useEsm = false,
 ) {
-  const out = normalize(join(cwd, 'dist'));
+  const distDir = (buildOptions.distDir ?? 'dist').replace(/\//g, sep);
+  const out = normalize(join(cwd, distDir));
 
   await tsup({
     entryPoints: [normalize(join(cwd, entryPoint))],

@@ -5,13 +5,14 @@ import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
 import { JsonFileLoader } from '@graphql-tools/json-file-loader';
 import { loadTypedefs } from '@graphql-tools/load';
 import { UrlLoader } from '@graphql-tools/url-loader';
-import baseCommand from '../base-command';
 import {
   CriticalityLevel,
   SchemaChangeConnection,
   SchemaErrorConnection,
   SchemaWarningConnection,
 } from '../gql/graphql';
+import type { Context } from './command';
+import { processCwd } from './process';
 
 const indent = '  ';
 
@@ -21,41 +22,41 @@ const criticalityMap: Record<CriticalityLevel, string> = {
   [CriticalityLevel.Dangerous]: colors.yellow('-'),
 };
 
-export function renderErrors(this: baseCommand, errors: SchemaErrorConnection) {
-  this.fail(`Detected ${errors.total} error${errors.total > 1 ? 's' : ''}`);
-  this.log('');
+export function renderErrors(ctx: Context, errors: SchemaErrorConnection) {
+  ctx.logger.fail(`Detected ${errors.total} error${errors.total > 1 ? 's' : ''}`);
+  ctx.logger.log('');
 
   errors.nodes.forEach(error => {
-    this.log(String(indent), colors.red('-'), this.bolderize(error.message));
+    ctx.logger.log(String(indent), colors.red('-'), ctx.bolderize(error.message));
   });
 }
 
-export function renderChanges(this: baseCommand, changes: SchemaChangeConnection) {
-  this.info(`Detected ${changes.total} change${changes.total > 1 ? 's' : ''}`);
-  this.log('');
+export function renderChanges(ctx: Context, changes: SchemaChangeConnection) {
+  ctx.logger.info(`Detected ${changes.total} change${changes.total > 1 ? 's' : ''}`);
+  ctx.logger.log('');
 
   changes.nodes.forEach(change => {
-    this.log(indent, criticalityMap[change.criticality], this.bolderize(change.message));
+    ctx.logger.log(indent, criticalityMap[change.criticality], ctx.bolderize(change.message));
   });
 }
 
-export function renderWarnings(this: baseCommand, warnings: SchemaWarningConnection) {
-  this.log('');
-  this.infoWarning(`Detected ${warnings.total} warning${warnings.total > 1 ? 's' : ''}`);
-  this.log('');
+export function renderWarnings(ctx: Context, warnings: SchemaWarningConnection) {
+  ctx.logger.log('');
+  ctx.logger.infoWarning(`Detected ${warnings.total} warning${warnings.total > 1 ? 's' : ''}`);
+  ctx.logger.log('');
 
   warnings.nodes.forEach(warning => {
-    const details = [warning.source ? `source: ${this.bolderize(warning.source)}` : undefined]
+    const details = [warning.source ? `source: ${ctx.bolderize(warning.source)}` : undefined]
       .filter(Boolean)
       .join(', ');
 
-    this.log(indent, `- ${this.bolderize(warning.message)}${details ? ` (${details})` : ''}`);
+    ctx.logger.log(indent, `- ${ctx.bolderize(warning.message)}${details ? ` (${details})` : ''}`);
   });
 }
 
 export async function loadSchema(file: string) {
   const sources = await loadTypedefs(file, {
-    cwd: process.cwd(),
+    cwd: processCwd,
     loaders: [new CodeFileLoader(), new GraphQLFileLoader(), new JsonFileLoader(), new UrlLoader()],
   });
 

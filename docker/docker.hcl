@@ -352,7 +352,7 @@ target "apollo-router" {
 
 target "cli" {
   inherits = ["cli-base", get_target()]
-  context = "${PWD}/packages/libraries/cli"
+  context = "${PWD}/packages/libraries/cli/dist/bundle"
   args = {
     IMAGE_TITLE = "graphql-hive/cli"
     IMAGE_DESCRIPTION = "GraphQL Hive CLI"

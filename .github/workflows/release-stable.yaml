@@ -51,26 +51,32 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "publish=true" >> $GITHUB_OUTPUT
 
-      # Needed for `oclif pack win`
-      - name: Install NSIS
-        run: |
-          sudo apt-get -y install nsis
-
-      - name: pack tarballs
+      - name: Setup Deno
         if: steps.cli.outputs.publish == 'true'
-        working-directory: packages/libraries/cli
-        run: pnpm oclif:pack
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
 
-      - name: upload tarballs
+      - name: compile binaries
         if: steps.cli.outputs.publish == 'true'
-        working-directory: packages/libraries/cli
-        run: pnpm oclif:upload
+        working-directory: ./packages/libraries/cli
+        run: pnpm compile
 
-      - name: promote tarballs
+      - name: push and tag binaries
+        uses: EndBug/add-and-commit@v9
         if: steps.cli.outputs.publish == 'true'
-        working-directory: packages/libraries/cli
-        env:
-          VERSION: ${{ steps.cli.outputs.version }}
-        run:
-          pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION --win || pnpm oclif
-          promote --no-xz --sha ${GITHUB_SHA:0:8} --version $VERSION --win
+        with:
+          # The arguments for the `git add` command (see the paragraph below for more info)
+          add: 'packages/libraries/cli/binaries'
+          message: 'Release CLI ${{ steps.cli.outputs.version }}'
+          new_branch: release-cli-${{ steps.cli.outputs.version }}
+          pathspec_error_handling: exitAtEnd
+
+          # Whether to push the commit and, if any, its tags to the repo. It can also be used to set the git push arguments (see the paragraph below for more info)
+          push: true
+
+          # Arguments for the git tag command (the tag name always needs to be the first word not preceded by an hyphen)
+          tag: 'cli-${{ steps.cli.outputs.version }} --force'
+
+          # Arguments for the git push --tags command (any additional argument will be added after --tags)
+          tag_push: '--force'
