@@ -43,10 +43,6 @@
       "dependsOn": ["^build", "@hive/app#build"],
       "outputs": ["dist/**"]
     },
-    "typecheck": {
-      "outputs": [""],
-      "cache": false
-    },
     "check:build": {
       "outputs": [""]
     }

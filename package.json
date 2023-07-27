@@ -45,7 +45,7 @@
     "test": "vitest",
     "test:e2e": "CYPRESS_BASE_URL=$HIVE_APP_BASE_URL cypress run",
     "test:integration": "cd integration-tests && pnpm test:integration",
-    "typecheck": "pnpm turbo typecheck --color",
+    "typecheck": "pnpm run -r typecheck",
     "upload-sourcemaps": "./scripts/upload-sourcemaps.sh",
     "workspace": "pnpm run --filter $1 $2"
   },
