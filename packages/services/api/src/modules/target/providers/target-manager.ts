@@ -258,11 +258,11 @@ export class TargetManager {
     return result;
   }
 
-  async updateTargetExplorerEndpointUrl(args: {
+  async updateTargetGraphQLEndpointUrl(args: {
     organizationId: string;
     projectId: string;
     targetId: string;
-    explorerEndpointUrl: string | null;
+    graphqlEndpointUrl: string | null;
   }) {
     await this.authManager.ensureTargetAccess({
       organization: args.organizationId,
@@ -271,19 +271,19 @@ export class TargetManager {
       scope: TargetAccessScope.SETTINGS,
     });
 
-    const explorerEndpointUrl = TargetExplorerEndpointUrlModel.safeParse(args.explorerEndpointUrl);
+    const graphqlEndpointUrl = TargetGraphQLEndpointUrlModel.safeParse(args.graphqlEndpointUrl);
 
-    if (explorerEndpointUrl.success === false) {
+    if (graphqlEndpointUrl.success === false) {
       return {
         type: 'error',
-        reason: explorerEndpointUrl.error.message,
+        reason: graphqlEndpointUrl.error.message,
       } as const;
     }
 
-    const target = await this.storage.updateTargetExplorerEndpointUrl({
+    const target = await this.storage.updateTargetGraphQLEndpointUrl({
       organizationId: args.organizationId,
       targetId: args.targetId,
-      explorerEndpointUrl: explorerEndpointUrl.data,
+      graphqlEndpointUrl: graphqlEndpointUrl.data,
     });
 
     if (!target) {
@@ -300,7 +300,7 @@ export class TargetManager {
   }
 }
 
-const TargetExplorerEndpointUrlModel = zod
+const TargetGraphQLEndpointUrlModel = zod
   .string()
   .max(300, {
     message: 'Must be less than 300 characters.',

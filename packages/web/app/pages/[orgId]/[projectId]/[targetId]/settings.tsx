@@ -708,15 +708,15 @@ function TargetName(props: {
   );
 }
 
-const TargetSettingsPage_UpdateTargetExplorerEndpointUrl = graphql(`
-  mutation TargetSettingsPage_UpdateTargetExplorerEndpointUrl(
-    $input: UpdateTargetExplorerEndpointUrlInput!
+const TargetSettingsPage_UpdateTargetGraphQLEndpointUrl = graphql(`
+  mutation TargetSettingsPage_UpdateTargetGraphQLEndpointUrl(
+    $input: UpdateTargetGraphQLEndpointUrlInput!
   ) {
-    updateTargetExplorerEndpointUrl(input: $input) {
+    updateTargetGraphQLEndpointUrl(input: $input) {
       ok {
         target {
           id
-          explorerEndpointUrl
+          graphqlEndpointUrl
         }
       }
       error {
@@ -726,22 +726,22 @@ const TargetSettingsPage_UpdateTargetExplorerEndpointUrl = graphql(`
   }
 `);
 
-function ExplorerEndpointUrl(props: {
-  explorerEndpointUrl: string | null;
+function GraphQLEndpointUrl(props: {
+  graphqlEndpointUrl: string | null;
   organizationId: string;
   projectId: string;
   targetId: string;
 }): ReactElement {
   const router = useRouteSelector();
-  const [mutation, mutate] = useMutation(TargetSettingsPage_UpdateTargetExplorerEndpointUrl);
+  const [mutation, mutate] = useMutation(TargetSettingsPage_UpdateTargetGraphQLEndpointUrl);
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
     useFormik({
       enableReinitialize: true,
       initialValues: {
-        explorerEndpointUrl: props.explorerEndpointUrl || '',
+        graphqlEndpointUrl: props.graphqlEndpointUrl || '',
       },
       validationSchema: Yup.object().shape({
-        explorerEndpointUrl: Yup.string()
+        graphqlEndpointUrl: Yup.string()
           .url('Please enter a valid url.')
           .min(1, 'Please enter a valid url.')
           .max(300, 'Max 300 chars.'),
@@ -752,15 +752,14 @@ function ExplorerEndpointUrl(props: {
             organization: props.organizationId,
             project: props.projectId,
             target: props.targetId,
-            explorerEndpointUrl:
-              values.explorerEndpointUrl === '' ? null : values.explorerEndpointUrl,
+            graphqlEndpointUrl: values.graphqlEndpointUrl === '' ? null : values.graphqlEndpointUrl,
           },
         }),
     });
 
   return (
     <Card>
-      <Heading className="mb-2">Endpoint URL</Heading>
+      <Heading className="mb-2">GraphQL Endpoint URL</Heading>
       <div className="text-sm text-gray-400">
         The endpoint url will be used for querying the target from the{' '}
         <NextLink
@@ -773,12 +772,12 @@ function ExplorerEndpointUrl(props: {
       <form onSubmit={handleSubmit} className="flex gap-x-2 mt-2">
         <Input
           placeholder="Endpoint Url"
-          name="explorerEndpointUrl"
-          value={values.explorerEndpointUrl}
+          name="graphqlEndpointUrl"
+          value={values.graphqlEndpointUrl}
           onChange={handleChange}
           onBlur={handleBlur}
           disabled={isSubmitting}
-          isInvalid={touched.explorerEndpointUrl && !!errors.explorerEndpointUrl}
+          isInvalid={touched.graphqlEndpointUrl && !!errors.graphqlEndpointUrl}
           className="w-96"
         />
         <Button
@@ -791,16 +790,16 @@ function ExplorerEndpointUrl(props: {
           Save
         </Button>
       </form>
-      {touched.explorerEndpointUrl && (errors.explorerEndpointUrl || mutation.error) && (
+      {touched.graphqlEndpointUrl && (errors.graphqlEndpointUrl || mutation.error) && (
         <div className="mt-2 text-red-500">
-          {errors.explorerEndpointUrl ??
+          {errors.graphqlEndpointUrl ??
             mutation.error?.graphQLErrors[0]?.message ??
             mutation.error?.message}
         </div>
       )}
-      {mutation.data?.updateTargetExplorerEndpointUrl.error && (
+      {mutation.data?.updateTargetGraphQLEndpointUrl.error && (
         <div className="mt-2 text-red-500">
-          {mutation.data.updateTargetExplorerEndpointUrl.error.message}
+          {mutation.data.updateTargetGraphQLEndpointUrl.error.message}
         </div>
       )}
     </Card>
@@ -912,7 +911,7 @@ const TargetSettingsPageQuery = graphql(`
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       cleanId
       name
-      explorerEndpointUrl
+      graphqlEndpointUrl
       ...TargetSettingsPage_TargetFragment
     }
     me {
@@ -976,11 +975,11 @@ function TargetSettingsContent() {
             projectId={currentProject.cleanId}
             organizationId={currentOrganization.cleanId}
           />
-          <ExplorerEndpointUrl
+          <GraphQLEndpointUrl
             targetId={currentTarget.cleanId}
             projectId={currentProject.cleanId}
             organizationId={currentOrganization.cleanId}
-            explorerEndpointUrl={currentTarget.explorerEndpointUrl ?? null}
+            graphqlEndpointUrl={currentTarget.graphqlEndpointUrl ?? null}
           />
           {canAccessTokens && <RegistryAccessTokens me={organizationForSettings.me} />}
           {canAccessTokens && <CDNAccessTokens me={organizationForSettings.me} />}

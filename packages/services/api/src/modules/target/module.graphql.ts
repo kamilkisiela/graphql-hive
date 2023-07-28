@@ -18,29 +18,29 @@ export default gql`
     "
     Updates the target's explorer endpoint url.
     """
-    updateTargetExplorerEndpointUrl(
-      input: UpdateTargetExplorerEndpointUrlInput!
-    ): UpdateTargetExplorerEndpointUrlResult!
+    updateTargetGraphQLEndpointUrl(
+      input: UpdateTargetGraphQLEndpointUrlInput!
+    ): UpdateTargetGraphQLEndpointUrlResult!
   }
 
-  input UpdateTargetExplorerEndpointUrlInput {
+  input UpdateTargetGraphQLEndpointUrlInput {
     organization: ID!
     project: ID!
     target: ID!
-    explorerEndpointUrl: String
+    graphqlEndpointUrl: String
   }
 
-  type UpdateTargetExplorerEndpointUrlOk {
+  type UpdateTargetGraphQLEndpointUrlOk {
     target: Target!
   }
 
-  type UpdateTargetExplorerEndpointUrlError {
+  type UpdateTargetGraphQLEndpointUrlError {
     message: String!
   }
 
-  type UpdateTargetExplorerEndpointUrlResult {
-    ok: UpdateTargetExplorerEndpointUrlOk
-    error: UpdateTargetExplorerEndpointUrlError
+  type UpdateTargetGraphQLEndpointUrlResult {
+    ok: UpdateTargetGraphQLEndpointUrlOk
+    error: UpdateTargetGraphQLEndpointUrlError
   }
 
   type UpdateTargetNameResult {
@@ -146,7 +146,7 @@ export default gql`
     """
     The endpoint url of the target's explorer instance.
     """
-    explorerEndpointUrl: String
+    graphqlEndpointUrl: String
     validationSettings: TargetValidationSettings!
   }
 

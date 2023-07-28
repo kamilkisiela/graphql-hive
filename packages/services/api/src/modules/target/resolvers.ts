@@ -266,7 +266,7 @@ export const resolvers: TargetModule.Resolvers = {
         },
       };
     },
-    async updateTargetExplorerEndpointUrl(_, { input }, { injector }) {
+    async updateTargetGraphQLEndpointUrl(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organizationId, projectId, targetId] = await Promise.all([
         translator.translateOrganizationId(input),
@@ -274,11 +274,11 @@ export const resolvers: TargetModule.Resolvers = {
         translator.translateTargetId(input),
       ]);
 
-      const result = await injector.get(TargetManager).updateTargetExplorerEndpointUrl({
+      const result = await injector.get(TargetManager).updateTargetGraphQLEndpointUrl({
         organizationId,
         projectId,
         targetId,
-        explorerEndpointUrl: input.explorerEndpointUrl ?? null,
+        graphqlEndpointUrl: input.graphqlEndpointUrl ?? null,
       });
 
       if (result.type === 'error') {

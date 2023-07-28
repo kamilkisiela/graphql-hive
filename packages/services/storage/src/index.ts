@@ -2245,7 +2245,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 'cleanId', t."clean_id",
                 'name', t."name",
                 'projectId', t."project_id",
-                'explorerEndpointUrl', t."explorer_endpoint_url"
+                'graphqlEndpointUrl', t."graphql_endpoint_url"
               )
             ) as target,
             jsonb_agg(p.*) as project,
@@ -2274,7 +2274,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 'cleanId', t."clean_id",
                 'name', t."name",
                 'projectId', t."project_id",
-                'explorerEndpointUrl', t."explorer_endpoint_url"
+                'graphqlEndpointUrl', t."graphql_endpoint_url"
               )
             ) as target,
             jsonb_agg(p.*) as project,
@@ -2302,7 +2302,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 'cleanId', t."clean_id",
                 'name', t."name",
                 'projectId', t."project_id",
-                'explorerEndpointUrl', t."explorer_endpoint_url"
+                'graphqlEndpointUrl', t."graphql_endpoint_url"
               )
             ) as target,
             jsonb_agg(p.*) as project,
@@ -3695,12 +3695,12 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return transformUser(result);
     },
 
-    async updateTargetExplorerEndpointUrl(args) {
+    async updateTargetGraphQLEndpointUrl(args) {
       const result = await pool.maybeOne<unknown>(sql`
         UPDATE
           "public"."targets"
         SET
-          "explorer_endpoint_url" = ${args.explorerEndpointUrl}
+          "graphql_endpoint_url" = ${args.graphqlEndpointUrl}
         WHERE
           "id" = ${args.targetId}
         RETURNING
@@ -4044,7 +4044,7 @@ const targetSQLFields = sql`
   "clean_id" as "cleanId",
   "name",
   "project_id" as "projectId",
-  "explorer_endpoint_url" as "explorerEndpointUrl"
+  "graphql_endpoint_url" as "graphqlEndpointUrl"
 `;
 
 const TargetModel = zod.object({
@@ -4052,7 +4052,7 @@ const TargetModel = zod.object({
   cleanId: zod.string(),
   name: zod.string(),
   projectId: zod.string(),
-  explorerEndpointUrl: zod.string().nullable(),
+  graphqlEndpointUrl: zod.string().nullable(),
 });
 
 export * from './schema-change-model';
