@@ -49,13 +49,6 @@ jobs:
         working-directory: ./packages/libraries/cli
         run: pnpm compile
 
-      - name: Permissions
-        working-directory: ./packages/libraries/cli
-        run: |
-          chmod +x ./binaries/hive-macos
-          chmod +x ./binaries/hive-linux
-          chmod +x ./binaries/hive-windows.exe
-
       - name: upload macos
         uses: actions/upload-artifact@v3
         with:
@@ -113,8 +106,12 @@ jobs:
 
       - name: Run on MacOS
         if: matrix.os == 'macos-latest'
-        run: ./hive-macos --version || exit 1
+        run: |
+          chmod +x ./hive-macos
+          ./hive-macos --version || exit 1
 
       - name: Run on Linux
         if: matrix.os == 'ubuntu-latest'
-        run: ./hive-linux --version || exit 1
+        run: |
+          chmod +x ./hive-linux
+          ./hive-linux --version || exit 1
