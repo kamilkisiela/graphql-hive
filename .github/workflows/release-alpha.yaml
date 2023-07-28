@@ -49,6 +49,13 @@ jobs:
         working-directory: ./packages/libraries/cli
         run: pnpm compile
 
+      - name: Permissions
+        working-directory: ./packages/libraries/cli
+        run: |
+          chmod +x ./binaries/hive-macos
+          chmod +x ./binaries/hive-linux
+          chmod +x ./binaries/hive-windows.exe
+
       - name: upload macos
         uses: actions/upload-artifact@v3
         with:
