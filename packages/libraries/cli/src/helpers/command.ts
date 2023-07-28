@@ -75,7 +75,6 @@ function cleanRequestId(requestId?: string | null) {
 
 export function buildContext() {
   const userConfig = new Config({
-    // eslint-disable-next-line no-process-env
     filepath: processEnv['HIVE_CONFIG'],
     rootDir: processCwd,
   });
@@ -164,9 +163,7 @@ export function buildContext() {
         return args[legacyFlagName] as any as NonNullable<GetConfigurationValueType<TKey>>;
       }
 
-      // eslint-disable-next-line no-process-env
       if (env && processEnv[env]) {
-        // eslint-disable-next-line no-process-env
         return processEnv[env] as TArgs[keyof TArgs] as NonNullable<
           GetConfigurationValueType<TKey>
         >;

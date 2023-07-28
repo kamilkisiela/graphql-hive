@@ -40,45 +40,32 @@ jobs:
         run: |
           sudo apt-get -y install nsis
 
-      - name: pack tarballs
-        working-directory: packages/libraries/cli
-        run: pnpm oclif:pack
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
 
-      - name: upload darwin arm64
+      - name: compile binaries
+        working-directory: ./packages/libraries/cli
+        run: pnpm compile
+
+      - name: upload macos
         uses: actions/upload-artifact@v3
         with:
-          name: hive-cli-darwin-arm64
-          path: ./packages/libraries/cli/dist/*-darwin-arm64.tar.gz
+          name: hive-cli-macos
+          path: ./packages/libraries/cli/binaries/hive-macos
 
-      - name: upload darwin x64
+      - name: upload linux
         uses: actions/upload-artifact@v3
         with:
-          name: hive-cli-darwin-x64
-          path: ./packages/libraries/cli/dist/*-darwin-x64.tar.gz
+          name: hive-cli-linux
+          path: ./packages/libraries/cli/binaries/hive-linux
 
-      - name: upload windows x64
+      - name: upload windows
         uses: actions/upload-artifact@v3
         with:
-          name: hive-cli-windows-x64
-          path: ./packages/libraries/cli/dist/win32/*-x64.exe
-
-      - name: upload windows x86
-        uses: actions/upload-artifact@v3
-        with:
-          name: hive-cli-windows-x86
-          path: ./packages/libraries/cli/dist/win32/*-x86.exe
-
-      - name: upload linux arm
-        uses: actions/upload-artifact@v3
-        with:
-          name: hive-cli-linux-arm
-          path: ./packages/libraries/cli/dist/*-linux-arm.tar.gz
-
-      - name: upload linux x64
-        uses: actions/upload-artifact@v3
-        with:
-          name: hive-cli-linux-x64
-          path: ./packages/libraries/cli/dist/*-linux-x64.tar.gz
+          name: hive-cli-windows
+          path: ./packages/libraries/cli/binaries/hive-windows.exe
 
   cli-test:
     strategy:
@@ -91,19 +78,19 @@ jobs:
         if: matrix.os == 'macos-latest'
         uses: actions/download-artifact@v3
         with:
-          name: hive-cli-darwin-x64
+          name: hive-cli-macos
 
       - name: Pull artifact for ubuntu
         if: matrix.os == 'ubuntu-latest'
         uses: actions/download-artifact@v3
         with:
-          name: hive-cli-linux-x64
+          name: hive-cli-linux
 
-      - name: Pull artifact for windows
-        if: matrix.os == 'windows-latest'
-        uses: actions/download-artifact@v3
-        with:
-          name: hive-cli-windows-x64
+      # - name: Pull artifact for windows
+      #   if: matrix.os == 'windows-latest'
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: hive-cli-windows
 
       - name: Unzip and run
         run: |
@@ -116,6 +103,11 @@ jobs:
               command -v node
               exit 1
           fi
-          tar -xzf *.tar.gz
-          # Expect the command to succeed
-          ./hive/bin/hive --version || exit 1
+
+      - name: Run on MacOS
+        if: matrix.os == 'macos-latest'
+        run: ./hive-macos --version || exit 1
+
+      - name: Run on Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: ./hive-linux --version || exit 1

@@ -10,6 +10,7 @@ __generated__/
 /packages/services/storage/src/db/types.ts
 /packages/libraries/cli/src/sdk.ts
 /packages/libraries/cli/src/gql/
+/packages/libraries/cli/deno/
 /packages/web/app/src/gql/**
 /packages/web/app/src/graphql/index.ts
 /packages/web/app/next.config.mjs

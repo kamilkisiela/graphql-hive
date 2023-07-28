@@ -47,22 +47,17 @@ function getLatestCommitFromGit() {
 function useGitHubAction(): CIRunner {
   return {
     detect() {
-      // eslint-disable-next-line no-process-env
       return !!processEnv['GITHUB_ACTIONS'];
     },
     env() {
       const isPr =
-        // eslint-disable-next-line no-process-env
         processEnv['GITHUB_EVENT_NAME'] === 'pull_request' ||
-        // eslint-disable-next-line no-process-env
         processEnv['GITHUB_EVENT_NAME'] === 'pull_request_target';
 
       if (isPr) {
         try {
-          // eslint-disable-next-line no-process-env
           const event = processEnv['GITHUB_EVENT_PATH']
-            ? // eslint-disable-next-line no-process-env
-              JSON.parse(readFileSync(processEnv['GITHUB_EVENT_PATH'], 'utf-8'))
+            ? JSON.parse(readFileSync(processEnv['GITHUB_EVENT_PATH'], 'utf-8'))
             : undefined;
 
           if (event?.pull_request) {

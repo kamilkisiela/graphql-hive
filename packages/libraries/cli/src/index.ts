@@ -38,7 +38,7 @@ const root = yargs(processArgs)
   .version(version);
 const ctx = buildContext();
 
-commands
+void commands
   .reduce((cli, cmd) => cmd(cli, ctx), root)
   .help()
   .showHelpOnFail(false).argv;
