@@ -2,11 +2,9 @@ import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { GraphiQL } from 'graphiql';
 import { buildSchema } from 'graphql';
-import { LinkIcon } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts/target';
-import { ConnectLabModal } from '@/components/target/laboratory/connect-lab-modal';
 import { CreateCollectionModal } from '@/components/target/laboratory/create-collection-modal';
 import { CreateOperationModal } from '@/components/target/laboratory/create-operation-modal';
 import { DeleteCollectionModal } from '@/components/target/laboratory/delete-collection-modal';
@@ -28,7 +26,7 @@ import {
   Tooltip as GraphiQLTooltip,
   useEditorContext,
 } from '@graphiql/react';
-import { createGraphiQLFetcher } from '@graphiql/toolkit';
+import { createGraphiQLFetcher, Fetcher } from '@graphiql/toolkit';
 import { BookmarkIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
 import 'graphiql/graphiql.css';
 import NextLink from 'next/link';
@@ -652,7 +650,6 @@ const TargetLaboratoryPageQuery = graphql(`
 `);
 
 function LaboratoryPageContent() {
-  const [isModalOpen, toggleModalOpen] = useToggle();
   const router = useRouteSelector();
   const [query] = useQuery({
     query: TargetLaboratoryPageQuery,
@@ -663,9 +660,6 @@ function LaboratoryPageContent() {
     },
   });
 
-  const endpoint =
-    query.data?.target?.graphqlEndpointUrl ??
-    `${location.origin}/api/lab/${router.organizationId}/${router.projectId}/${router.targetId}`;
   const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
   const currentProject = query.data?.project;
@@ -684,6 +678,14 @@ function LaboratoryPageContent() {
     return buildSchema(query.data.target.latestSchemaVersion.sdl);
   }, [query.data?.target?.latestSchemaVersion?.sdl]);
 
+  const fetcher = useMemo<Fetcher>(() => {
+    if (!query.data?.target?.graphqlEndpointUrl) {
+      return () => Promise.reject(new Error('No GraphQL endpoint configured.'));
+    }
+
+    return createGraphiQLFetcher({ url: query.data.target.graphqlEndpointUrl });
+  }, [query.data?.target?.graphqlEndpointUrl]);
+
   if (query.error) {
     return <QueryError error={query.error} />;
   }
@@ -696,19 +698,6 @@ function LaboratoryPageContent() {
       me={me ?? null}
       organizations={organizationConnection ?? null}
       isCDNEnabled={isCDNEnabled ?? null}
-      connect={
-        <div>
-          <Button onClick={toggleModalOpen} variant="link" className="text-orange-500">
-            <LinkIcon size={16} className="mr-2 inline" />
-            Use Schema Externally
-          </Button>
-          <ConnectLabModal
-            isOpen={isModalOpen}
-            toggleModalOpen={toggleModalOpen}
-            endpoint={endpoint}
-          />
-        </div>
-      }
     >
       <div className="py-6 flex">
         <div className="flex-1">
@@ -749,7 +738,7 @@ function LaboratoryPageContent() {
       `}</style>
       {query.fetching ? null : (
         <GraphiQL
-          fetcher={createGraphiQLFetcher({ url: endpoint })}
+          fetcher={fetcher}
           toolbar={{
             additionalContent: (
               <>
@@ -773,14 +762,16 @@ function LaboratoryPageContent() {
                     <span>{query.data?.target?.graphqlEndpointUrl}</span>.
                   </>
                 ) : (
-                  <>No endpoint is linked. Mocks are used.</>
+                  <>No endpoint is linked. You can not execute any operations.</>
                 )
               }
             >
               <span className="text-xs font-normal pr-2 cursor-help">
-                {query.data?.target?.graphqlEndpointUrl
-                  ? 'Querying GraphQL API'
-                  : 'Querying Mock endpoint'}
+                {query.data?.target?.graphqlEndpointUrl ? (
+                  'Querying GraphQL API'
+                ) : (
+                  <span className="text-red-500">No endpoint is linked.</span>
+                )}
               </span>
             </Tooltip>
             <HiveLogo className="h-6 w-auto" />

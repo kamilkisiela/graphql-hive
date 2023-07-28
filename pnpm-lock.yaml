@@ -1459,9 +1459,6 @@ importers:
       '@graphiql/toolkit':
         specifier: 0.8.4
         version: 0.8.4(@types/node@18.16.19)(graphql@16.6.0)
-      '@graphql-tools/mock':
-        specifier: 9.0.0
-        version: 9.0.0(graphql@16.6.0)
       '@headlessui/react':
         specifier: 1.7.15
         version: 1.7.15(react-dom@18.2.0)(react@18.2.0)
@@ -7219,19 +7216,6 @@ packages:
       '@graphql-tools/utils': 10.0.3(graphql@16.6.0)
       graphql: 16.6.0
       tslib: 2.5.3
-
-  /@graphql-tools/mock@9.0.0(graphql@16.6.0):
-    resolution: {integrity: sha512-Vbb4RNTT9T3fXjmzACcflOh79vKBaC/J21eCJ0eug1ZdaM2QXVHQ3lxE6HNOlAENHXjwJINz1AnKsvF3bpeSKA==}
-    engines: {node: '>=16.0.0'}
-    peerDependencies:
-      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-    dependencies:
-      '@graphql-tools/schema': 10.0.0(graphql@16.6.0)
-      '@graphql-tools/utils': 10.0.3(graphql@16.6.0)
-      fast-json-stable-stringify: 2.1.0
-      graphql: 16.6.0
-      tslib: 2.5.3
-    dev: false
 
   /@graphql-tools/optimize@2.0.0(graphql@16.6.0):
     resolution: {integrity: sha512-nhdT+CRGDZ+bk68ic+Jw1OZ99YCDIKYA5AlVAnBHJvMawSx9YQqQAIj4refNc1/LRieGiuWvhbG3jvPVYho0Dg==}
