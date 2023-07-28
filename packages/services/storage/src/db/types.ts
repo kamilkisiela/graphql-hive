@@ -246,6 +246,7 @@ export interface targets {
   base_schema: string | null;
   clean_id: string;
   created_at: Date;
+  graphql_endpoint_url: string | null;
   id: string;
   name: string;
   project_id: string;
