@@ -67,6 +67,7 @@
     "**/temp",
     "**/tmp",
     "packages/web",
-    "packages/services/*-worker"
+    "packages/services/*-worker",
+    "packages/libraries/cli/deno/**"
   ]
 }
