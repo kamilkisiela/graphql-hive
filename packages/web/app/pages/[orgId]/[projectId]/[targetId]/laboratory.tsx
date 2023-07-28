@@ -1,6 +1,7 @@
-import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { GraphiQL } from 'graphiql';
+import { buildSchema } from 'graphql';
 import { LinkIcon } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
@@ -10,9 +11,9 @@ import { CreateCollectionModal } from '@/components/target/laboratory/create-col
 import { CreateOperationModal } from '@/components/target/laboratory/create-operation-modal';
 import { DeleteCollectionModal } from '@/components/target/laboratory/delete-collection-modal';
 import { DeleteOperationModal } from '@/components/target/laboratory/delete-operation-modal';
-import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
-import { Accordion, DocsLink, Link, MetaTitle, Spinner } from '@/components/v2';
+import { Accordion, DocsLink, Link, MetaTitle, Spinner, Tooltip } from '@/components/v2';
+import { Button } from '@/components/v2/button';
 import { HiveLogo, PlusIcon, SaveIcon, ShareIcon } from '@/components/v2/icon';
 import { graphql } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
@@ -30,6 +31,7 @@ import {
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import { BookmarkIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
 import 'graphiql/graphiql.css';
+import NextLink from 'next/link';
 import { cx } from 'class-variance-authority';
 import { EditOperationModal } from '@/components/target/laboratory/edit-operation-modal';
 import { QueryError } from '@/components/ui/query-error';
@@ -273,7 +275,7 @@ const AddCollectionItemButton = (props: { collectionId: string }): ReactElement 
       }}
       disabled={createOperationState.fetching}
     >
-      <PlusIcon size={10} className="mr-1" /> Add Operation
+      <PlusIcon size={10} className="mr-1 inline" /> Add Operation
     </Button>
   );
 };
@@ -636,6 +638,11 @@ const TargetLaboratoryPageQuery = graphql(`
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
+      graphqlEndpointUrl
+      latestSchemaVersion {
+        id
+        sdl
+      }
     }
     me {
       ...TargetLayout_MeFragment
@@ -656,7 +663,9 @@ function LaboratoryPageContent() {
     },
   });
 
-  const endpoint = `${location.origin}/api/lab/${router.organizationId}/${router.projectId}/${router.targetId}`;
+  const endpoint =
+    query.data?.target?.graphqlEndpointUrl ??
+    `${location.origin}/api/lab/${router.organizationId}/${router.projectId}/${router.targetId}`;
   const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
   const currentProject = query.data?.project;
@@ -667,6 +676,13 @@ function LaboratoryPageContent() {
     canEdit: canAccessTarget(TargetAccessScope.Settings, currentOrganization?.me ?? null),
     canDelete: canAccessTarget(TargetAccessScope.Delete, currentOrganization?.me ?? null),
   });
+
+  const schema = useMemo(() => {
+    if (!query.data?.target?.latestSchemaVersion?.sdl) {
+      return null;
+    }
+    return buildSchema(query.data.target.latestSchemaVersion.sdl);
+  }, [query.data?.target?.latestSchemaVersion?.sdl]);
 
   if (query.error) {
     return <QueryError error={query.error} />;
@@ -683,7 +699,7 @@ function LaboratoryPageContent() {
       connect={
         <div>
           <Button onClick={toggleModalOpen} variant="link" className="text-orange-500">
-            <LinkIcon size={16} className="mr-2" />
+            <LinkIcon size={16} className="mr-2 inline" />
             Use Schema Externally
           </Button>
           <ConnectLabModal
@@ -694,17 +710,27 @@ function LaboratoryPageContent() {
         </div>
       }
     >
-      <div className="py-6">
-        <Title>Laboratory</Title>
-        <Subtitle>
-          Explore your GraphQL schema and run queries against a mocked version of your GraphQL
-          service.
-        </Subtitle>
-        <p>
-          <DocsLink className="text-muted-foreground text-sm" href="/features/laboratory">
-            Learn more about the Laboratory
-          </DocsLink>
-        </p>
+      <div className="py-6 flex">
+        <div className="flex-1">
+          <Title>Laboratory</Title>
+          <Subtitle>Explore your GraphQL schema and run queries against your GraphQL API.</Subtitle>
+          <p>
+            <DocsLink className="text-muted-foreground text-sm" href="/features/laboratory">
+              Learn more about the Laboratory
+            </DocsLink>
+          </p>
+        </div>
+        <div className="ml-auto mr-0 flex">
+          {query.data && !query.data.target?.graphqlEndpointUrl ? (
+            <div className="self-center">
+              <NextLink
+                href={`/${router.organizationId}/${router.projectId}/${router.targetId}/settings`}
+              >
+                <Button variant="primary">Connect GraphQL API Endpoint</Button>
+              </NextLink>
+            </div>
+          ) : null}
+        </div>
       </div>
       <style global jsx>{`
         .graphiql-container {
@@ -736,8 +762,27 @@ function LaboratoryPageContent() {
           shouldPersistHeaders={false}
           plugins={[operationCollectionsPlugin]}
           visiblePlugin={operationCollectionsPlugin}
+          schema={schema}
         >
           <GraphiQL.Logo>
+            <Tooltip
+              content={
+                query.data?.target?.graphqlEndpointUrl ? (
+                  <>
+                    Operations are executed against{' '}
+                    <span>{query.data?.target?.graphqlEndpointUrl}</span>.
+                  </>
+                ) : (
+                  <>No endpoint is linked. Mocks are used.</>
+                )
+              }
+            >
+              <span className="text-xs font-normal pr-2 cursor-help">
+                {query.data?.target?.graphqlEndpointUrl
+                  ? 'Querying GraphQL API'
+                  : 'Querying Mock endpoint'}
+              </span>
+            </Tooltip>
             <HiveLogo className="h-6 w-auto" />
           </GraphiQL.Logo>
         </GraphiQL>
