@@ -584,6 +584,7 @@ export class OperationsReader {
             extra: [sql`hash = ${hash}`],
           })}
         LIMIT 1
+        SETTINGS allow_asynchronous_read_from_io_pool_for_merge_tree = 1
       `,
       queryId: 'read_body',
       timeout: 10_000,
