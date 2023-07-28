@@ -1,5 +1,6 @@
 import { Injectable, Scope } from 'graphql-modules';
 import { paramCase } from 'param-case';
+import * as zod from 'zod';
 import type { Target, TargetSettings } from '../../../shared/entities';
 import { share, uuid } from '../../../shared/helpers';
 import { ActivityManager } from '../../activity/providers/activity-manager';
@@ -256,4 +257,53 @@ export class TargetManager {
 
     return result;
   }
+
+  async updateTargetExplorerEndpointUrl(args: {
+    organizationId: string;
+    projectId: string;
+    targetId: string;
+    explorerEndpointUrl: string | null;
+  }) {
+    await this.authManager.ensureTargetAccess({
+      organization: args.organizationId,
+      project: args.projectId,
+      target: args.targetId,
+      scope: TargetAccessScope.SETTINGS,
+    });
+
+    const explorerEndpointUrl = TargetExplorerEndpointUrlModel.safeParse(args.explorerEndpointUrl);
+
+    if (explorerEndpointUrl.success === false) {
+      return {
+        type: 'error',
+        reason: explorerEndpointUrl.error.message,
+      } as const;
+    }
+
+    const target = await this.storage.updateTargetExplorerEndpointUrl({
+      organizationId: args.organizationId,
+      targetId: args.targetId,
+      explorerEndpointUrl: explorerEndpointUrl.data,
+    });
+
+    if (!target) {
+      return {
+        type: 'error',
+        reason: 'Target not found.',
+      } as const;
+    }
+
+    return {
+      type: 'ok',
+      target,
+    } as const;
+  }
 }
+
+const TargetExplorerEndpointUrlModel = zod
+  .string()
+  .max(300, {
+    message: 'Must be less than 300 characters.',
+  })
+  .url()
+  .nullable();

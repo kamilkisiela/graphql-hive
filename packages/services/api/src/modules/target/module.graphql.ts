@@ -14,6 +14,33 @@ export default gql`
       input: UpdateTargetValidationSettingsInput!
     ): UpdateTargetValidationSettingsResult!
     setTargetValidation(input: SetTargetValidationInput!): Target!
+    """
+    "
+    Updates the target's explorer endpoint url.
+    """
+    updateTargetExplorerEndpointUrl(
+      input: UpdateTargetExplorerEndpointUrlInput!
+    ): UpdateTargetExplorerEndpointUrlResult!
+  }
+
+  input UpdateTargetExplorerEndpointUrlInput {
+    organization: ID!
+    project: ID!
+    target: ID!
+    explorerEndpointUrl: String
+  }
+
+  type UpdateTargetExplorerEndpointUrlOk {
+    target: Target!
+  }
+
+  type UpdateTargetExplorerEndpointUrlError {
+    message: String!
+  }
+
+  type UpdateTargetExplorerEndpointUrlResult {
+    ok: UpdateTargetExplorerEndpointUrlOk
+    error: UpdateTargetExplorerEndpointUrlError
   }
 
   type UpdateTargetNameResult {
@@ -116,6 +143,10 @@ export default gql`
     cleanId: ID!
     name: String!
     project: Project!
+    """
+    The endpoint url of the target's explorer instance.
+    """
+    explorerEndpointUrl: String
     validationSettings: TargetValidationSettings!
   }
 

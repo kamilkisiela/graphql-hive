@@ -259,6 +259,12 @@ export interface Storage {
     _: TargetSelector & Pick<Project, 'name' | 'cleanId'> & { user: string },
   ): Promise<Target | never>;
 
+  updateTargetExplorerEndpointUrl(_: {
+    targetId: string;
+    organizationId: string;
+    explorerEndpointUrl: string | null;
+  }): Promise<Target | null>;
+
   deleteTarget(_: TargetSelector): Promise<
     | (Target & {
         tokens: string[];

@@ -266,6 +266,35 @@ export const resolvers: TargetModule.Resolvers = {
         },
       };
     },
+    async updateTargetExplorerEndpointUrl(_, { input }, { injector }) {
+      const translator = injector.get(IdTranslator);
+      const [organizationId, projectId, targetId] = await Promise.all([
+        translator.translateOrganizationId(input),
+        translator.translateProjectId(input),
+        translator.translateTargetId(input),
+      ]);
+
+      const result = await injector.get(TargetManager).updateTargetExplorerEndpointUrl({
+        organizationId,
+        projectId,
+        targetId,
+        explorerEndpointUrl: input.explorerEndpointUrl ?? null,
+      });
+
+      if (result.type === 'error') {
+        return {
+          error: {
+            message: result.reason,
+          },
+        };
+      }
+
+      return {
+        ok: {
+          target: result.target,
+        },
+      };
+    },
   },
   Project: {
     targets(project, _, { injector }) {

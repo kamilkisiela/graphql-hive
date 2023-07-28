@@ -1,4 +1,5 @@
 import React, { ReactElement, useCallback, useState } from 'react';
+import NextLink from 'next/link';
 import clsx from 'clsx';
 import { formatISO, subDays } from 'date-fns';
 import { useFormik } from 'formik';
@@ -707,6 +708,105 @@ function TargetName(props: {
   );
 }
 
+const TargetSettingsPage_UpdateTargetExplorerEndpointUrl = graphql(`
+  mutation TargetSettingsPage_UpdateTargetExplorerEndpointUrl(
+    $input: UpdateTargetExplorerEndpointUrlInput!
+  ) {
+    updateTargetExplorerEndpointUrl(input: $input) {
+      ok {
+        target {
+          id
+          explorerEndpointUrl
+        }
+      }
+      error {
+        message
+      }
+    }
+  }
+`);
+
+function ExplorerEndpointUrl(props: {
+  explorerEndpointUrl: string | null;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+}): ReactElement {
+  const router = useRouteSelector();
+  const [mutation, mutate] = useMutation(TargetSettingsPage_UpdateTargetExplorerEndpointUrl);
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
+    useFormik({
+      enableReinitialize: true,
+      initialValues: {
+        explorerEndpointUrl: props.explorerEndpointUrl || '',
+      },
+      validationSchema: Yup.object().shape({
+        explorerEndpointUrl: Yup.string()
+          .url('Please enter a valid url.')
+          .min(1, 'Please enter a valid url.')
+          .max(300, 'Max 300 chars.'),
+      }),
+      onSubmit: values =>
+        mutate({
+          input: {
+            organization: props.organizationId,
+            project: props.projectId,
+            target: props.targetId,
+            explorerEndpointUrl:
+              values.explorerEndpointUrl === '' ? null : values.explorerEndpointUrl,
+          },
+        }),
+    });
+
+  return (
+    <Card>
+      <Heading className="mb-2">Endpoint URL</Heading>
+      <div className="text-sm text-gray-400">
+        The endpoint url will be used for querying the target from the{' '}
+        <NextLink
+          href={`/${router.organizationId}/${router.projectId}/${router.targetId}/laboratory`}
+        >
+          Hive Laboratory
+        </NextLink>
+        .
+      </div>
+      <form onSubmit={handleSubmit} className="flex gap-x-2 mt-2">
+        <Input
+          placeholder="Endpoint Url"
+          name="explorerEndpointUrl"
+          value={values.explorerEndpointUrl}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          disabled={isSubmitting}
+          isInvalid={touched.explorerEndpointUrl && !!errors.explorerEndpointUrl}
+          className="w-96"
+        />
+        <Button
+          type="submit"
+          variant="primary"
+          size="large"
+          disabled={isSubmitting}
+          className="px-10"
+        >
+          Save
+        </Button>
+      </form>
+      {touched.explorerEndpointUrl && (errors.explorerEndpointUrl || mutation.error) && (
+        <div className="mt-2 text-red-500">
+          {errors.explorerEndpointUrl ??
+            mutation.error?.graphQLErrors[0]?.message ??
+            mutation.error?.message}
+        </div>
+      )}
+      {mutation.data?.updateTargetExplorerEndpointUrl.error && (
+        <div className="mt-2 text-red-500">
+          {mutation.data.updateTargetExplorerEndpointUrl.error.message}
+        </div>
+      )}
+    </Card>
+  );
+}
+
 const TargetSettingsPage_UpdateTargetNameMutation = graphql(`
   mutation TargetSettingsPage_UpdateTargetName($input: UpdateTargetNameInput!) {
     updateTargetName(input: $input) {
@@ -812,6 +912,7 @@ const TargetSettingsPageQuery = graphql(`
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       cleanId
       name
+      explorerEndpointUrl
       ...TargetSettingsPage_TargetFragment
     }
     me {
@@ -874,6 +975,12 @@ function TargetSettingsContent() {
             targetId={currentTarget.cleanId}
             projectId={currentProject.cleanId}
             organizationId={currentOrganization.cleanId}
+          />
+          <ExplorerEndpointUrl
+            targetId={currentTarget.cleanId}
+            projectId={currentProject.cleanId}
+            organizationId={currentOrganization.cleanId}
+            explorerEndpointUrl={currentTarget.explorerEndpointUrl ?? null}
           />
           {canAccessTokens && <RegistryAccessTokens me={organizationForSettings.me} />}
           {canAccessTokens && <CDNAccessTokens me={organizationForSettings.me} />}
