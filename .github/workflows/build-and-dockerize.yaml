@@ -53,7 +53,13 @@ jobs:
 
       - name: build packages and applications
         if: ${{ inputs.build }}
-        run: pnpm build
+        run: pnpm build --summarize
+
+      - name: upload turbo summary
+        uses: actions/upload-artifact@v3
+        with:
+          name: turbo-summary
+          path: ./.turbo/runs/*.json
 
       - name: test ESM & CJS exports integrity
         if: ${{ inputs.build }}
