@@ -14,6 +14,33 @@ export default gql`
       input: UpdateTargetValidationSettingsInput!
     ): UpdateTargetValidationSettingsResult!
     setTargetValidation(input: SetTargetValidationInput!): Target!
+    """
+    "
+    Updates the target's explorer endpoint url.
+    """
+    updateTargetGraphQLEndpointUrl(
+      input: UpdateTargetGraphQLEndpointUrlInput!
+    ): UpdateTargetGraphQLEndpointUrlResult!
+  }
+
+  input UpdateTargetGraphQLEndpointUrlInput {
+    organization: ID!
+    project: ID!
+    target: ID!
+    graphqlEndpointUrl: String
+  }
+
+  type UpdateTargetGraphQLEndpointUrlOk {
+    target: Target!
+  }
+
+  type UpdateTargetGraphQLEndpointUrlError {
+    message: String!
+  }
+
+  type UpdateTargetGraphQLEndpointUrlResult {
+    ok: UpdateTargetGraphQLEndpointUrlOk
+    error: UpdateTargetGraphQLEndpointUrlError
   }
 
   type UpdateTargetNameResult {
@@ -116,6 +143,10 @@ export default gql`
     cleanId: ID!
     name: String!
     project: Project!
+    """
+    The endpoint url of the target's explorer instance.
+    """
+    graphqlEndpointUrl: String
     validationSettings: TargetValidationSettings!
   }
 

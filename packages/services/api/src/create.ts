@@ -17,7 +17,6 @@ import {
   GITHUB_APP_CONFIG,
   GitHubApplicationConfig,
 } from './modules/integrations/providers/github-integration-manager';
-import { labModule } from './modules/lab';
 import { oidcIntegrationsModule } from './modules/oidc-integrations';
 import { OIDC_INTEGRATIONS_ENABLED } from './modules/oidc-integrations/providers/tokens';
 import { operationsModule } from './modules/operations';
@@ -74,7 +73,6 @@ const modules = [
   operationsModule,
   tokenModule,
   persistedOperationModule,
-  labModule,
   integrationsModule,
   alertsModule,
   feedbackModule,

@@ -264,6 +264,7 @@ export interface Target {
   projectId: string;
   orgId: string;
   name: string;
+  graphqlEndpointUrl: string | null;
 }
 
 export interface Token {

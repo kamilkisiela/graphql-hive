@@ -24,7 +24,6 @@ import type {
   ProjectAccessScope,
   Schema,
   Storage,
-  Target,
   TargetAccessScope,
   TargetSettings,
   User,
@@ -208,16 +207,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     };
   }
 
-  function transformTarget(target: targets, orgId: string): Target {
-    return {
-      id: target.id,
-      cleanId: target.clean_id,
-      name: target.name,
-      projectId: target.project_id,
-      orgId,
-    };
-  }
-
   function transformSchema(
     schema: Pick<
       OverrideProp<schema_log, 'action', 'PUSH'>,
@@ -321,7 +310,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
   function transformActivity(row: {
     activity: [activities];
-    target: [targets];
+    target: [Record<string, unknown>];
     project: [projects];
     organization: [organizations];
     user: [users];
@@ -337,7 +326,12 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       type: activity.activity_type,
       meta: activity.activity_metadata,
       createdAt: activity.created_at,
-      target: target ? transformTarget(target, organization.id) : undefined,
+      target: target['id']
+        ? {
+            ...TargetModel.parse(target),
+            orgId: organization.id,
+          }
+        : undefined,
       project: project ? transformProject(project) : undefined,
       organization: transformOrganization(organization),
       user: user ? transformUser(user) : undefined,
@@ -1338,29 +1332,38 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       };
     },
     async createTarget({ organization, project, name, cleanId }) {
-      return transformTarget(
-        await pool.one<Slonik<targets>>(
-          sql`
-            INSERT INTO public.targets
-              (name, clean_id, project_id)
-            VALUES
-              (${name}, ${cleanId}, ${project})
-            RETURNING *
-          `,
-        ),
-        organization,
-      );
+      const result = await pool.maybeOne<unknown>(sql`
+        INSERT INTO public.targets
+          (name, clean_id, project_id)
+        VALUES
+          (${name}, ${cleanId}, ${project})
+        RETURNING
+          ${targetSQLFields}
+      `);
+
+      return {
+        ...TargetModel.parse(result),
+        orgId: organization,
+      };
     },
     async updateTargetName({ organization, project, target, name, cleanId }) {
-      return transformTarget(
-        await pool.one<Slonik<targets>>(sql`
-          UPDATE public.targets
-          SET name = ${name}, clean_id = ${cleanId}
-          WHERE id = ${target} AND project_id = ${project}
-          RETURNING *
-        `),
-        organization,
-      );
+      const result = await pool.one<Record<string, unknown>>(sql`
+        UPDATE
+          public.targets
+        SET
+          "name" = ${name},
+          "clean_id" = ${cleanId}
+        WHERE
+          "id" = ${target}
+          AND "project_id" = ${project}
+        RETURNING
+          ${targetSQLFields}
+      `);
+
+      return {
+        ...TargetModel.parse(result),
+        orgId: organization,
+      };
     },
     async deleteTarget({ organization, target }) {
       const result = await pool.transaction(async t => {
@@ -1372,7 +1375,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           sql`
             DELETE FROM public.targets
             WHERE id = ${target}
-            RETURNING *
+            RETURNING
+              ${targetSQLFields}
           `,
         );
 
@@ -1385,7 +1389,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       });
 
       return {
-        ...transformTarget(result.target, organization),
+        ...TargetModel.parse(result.target),
+        orgId: organization,
         tokens: result.tokens,
       };
     },
@@ -1411,19 +1416,27 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
         const uniqueSelectors = Array.from(uniqueSelectorsMap.values());
 
-        const rows = await pool.many<Slonik<targets>>(
-          sql`
-            SELECT * FROM public.targets
-            WHERE (id, project_id) IN ((${sql.join(
-              uniqueSelectors.map(s => sql`${s.target}, ${s.project}`),
-              sql`), (`,
-            )}))
-          `,
-        );
+        const rows = await pool
+          .many<unknown>(
+            sql`
+              SELECT
+                ${targetSQLFields}
+              FROM
+                public.targets
+              WHERE
+                (id, project_id) IN (
+                  (${sql.join(
+                    uniqueSelectors.map(s => sql`${s.target}, ${s.project}`),
+                    sql`), (`,
+                  )})
+                )
+            `,
+          )
+          .then(rows => rows.map(row => TargetModel.parse(row)));
 
         return selectors.map(selector => {
           const row = rows.find(
-            row => row.id === selector.target && row.project_id === selector.project,
+            row => row.id === selector.target && row.projectId === selector.project,
           );
 
           if (!row) {
@@ -1434,27 +1447,50 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             );
           }
 
-          return Promise.resolve(transformTarget(row, selector.organization));
+          return Promise.resolve({
+            ...row,
+            orgId: selector.organization,
+          });
         });
       },
     ),
     async getTargetByCleanId({ organization, project, cleanId }) {
-      const result = await pool.maybeOne<Slonik<targets>>(
-        sql`SELECT * FROM public.targets WHERE clean_id = ${cleanId} AND project_id = ${project} LIMIT 1`,
-      );
+      const result = await pool.maybeOne<unknown>(sql`
+        SELECT
+          ${targetSQLFields}
+        FROM
+          public.targets
+        WHERE
+          clean_id = ${cleanId}
+          AND project_id = ${project}
+        LIMIT 1
+      `);
 
       if (!result) {
         return null;
       }
 
-      return transformTarget(result, organization);
+      return {
+        ...TargetModel.parse(result),
+        orgId: organization,
+      };
     },
     async getTargets({ organization, project }) {
-      const results = await pool.query<Slonik<targets>>(
-        sql`SELECT * FROM public.targets WHERE project_id = ${project} ORDER BY created_at DESC`,
-      );
+      const results = await pool.query<unknown>(sql`
+        SELECT
+          ${targetSQLFields}
+        FROM
+          public.targets
+        WHERE
+          project_id = ${project}
+        ORDER BY
+          created_at DESC
+      `);
 
-      return results.rows.map(r => transformTarget(r, organization));
+      return results.rows.map(r => ({
+        ...TargetModel.parse(r),
+        orgId: organization,
+      }));
     },
     async getTargetIdsOfOrganization({ organization }) {
       const results = await pool.query<Slonik<Pick<targets, 'id'>>>(
@@ -2203,7 +2239,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         query = sql`
           SELECT
             jsonb_agg(a.*) as activity,
-            jsonb_agg(t.*) as target,
+            jsonb_agg(
+              json_build_object(
+                'id', t."id",
+                'cleanId', t."clean_id",
+                'name', t."name",
+                'projectId', t."project_id",
+                'graphqlEndpointUrl', t."graphql_endpoint_url"
+              )
+            ) as target,
             jsonb_agg(p.*) as project,
             jsonb_agg(o.*) as organization,
             jsonb_agg(u.*) as user
@@ -2224,7 +2268,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         query = sql`
           SELECT
             jsonb_agg(a.*) as activity,
-            jsonb_agg(t.*) as target,
+            jsonb_agg(
+              json_build_object(
+                'id', t."id",
+                'cleanId', t."clean_id",
+                'name', t."name",
+                'projectId', t."project_id",
+                'graphqlEndpointUrl', t."graphql_endpoint_url"
+              )
+            ) as target,
             jsonb_agg(p.*) as project,
             jsonb_agg(o.*) as organization,
             jsonb_agg(u.*) as user
@@ -2244,7 +2296,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         query = sql`
           SELECT
             jsonb_agg(a.*) as activity,
-            jsonb_agg(t.*) as target,
+            jsonb_agg(
+              json_build_object(
+                'id', t."id",
+                'cleanId', t."clean_id",
+                'name', t."name",
+                'projectId', t."project_id",
+                'graphqlEndpointUrl', t."graphql_endpoint_url"
+              )
+            ) as target,
             jsonb_agg(p.*) as project,
             jsonb_agg(o.*) as organization,
             jsonb_agg(u.*) as user
@@ -2262,7 +2322,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.query<
         Slonik<{
           activity: [activities];
-          target: [targets];
+          target: [Record<string, unknown>];
           project: [projects];
           organization: [organizations];
           user: [users];
@@ -3634,6 +3694,28 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return transformUser(result);
     },
+
+    async updateTargetGraphQLEndpointUrl(args) {
+      const result = await pool.maybeOne<unknown>(sql`
+        UPDATE
+          "public"."targets"
+        SET
+          "graphql_endpoint_url" = ${args.graphqlEndpointUrl}
+        WHERE
+          "id" = ${args.targetId}
+        RETURNING
+          ${targetSQLFields}
+      `);
+
+      if (result === null) {
+        return null;
+      }
+
+      return {
+        ...TargetModel.parse(result),
+        orgId: args.organizationId,
+      };
+    },
   };
 
   return storage;
@@ -3956,5 +4038,21 @@ const schemaCheckSQLFields = sql`
   , coalesce("is_manually_approved", false) as "isManuallyApproved"
   , "manual_approval_user_id" as "manualApprovalUserId"
 `;
+
+const targetSQLFields = sql`
+  "id",
+  "clean_id" as "cleanId",
+  "name",
+  "project_id" as "projectId",
+  "graphql_endpoint_url" as "graphqlEndpointUrl"
+`;
+
+const TargetModel = zod.object({
+  id: zod.string(),
+  cleanId: zod.string(),
+  name: zod.string(),
+  projectId: zod.string(),
+  graphqlEndpointUrl: zod.string().nullable(),
+});
 
 export * from './schema-change-model';

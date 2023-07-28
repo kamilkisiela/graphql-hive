@@ -259,6 +259,12 @@ export interface Storage {
     _: TargetSelector & Pick<Project, 'name' | 'cleanId'> & { user: string },
   ): Promise<Target | never>;
 
+  updateTargetGraphQLEndpointUrl(_: {
+    targetId: string;
+    organizationId: string;
+    graphqlEndpointUrl: string | null;
+  }): Promise<Target | null>;
+
   deleteTarget(_: TargetSelector): Promise<
     | (Target & {
         tokens: string[];

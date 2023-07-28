@@ -308,14 +308,6 @@ export async function main() {
     });
 
     server.route({
-      method: 'GET',
-      url: '/lab/:org/:project/:target',
-      async handler(req, res) {
-        res.status(200).send({ ok: true }); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
-      },
-    });
-
-    server.route({
       method: ['GET', 'HEAD'],
       url: '/_readiness',
       async handler(req, res) {

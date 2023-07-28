@@ -1,3 +1,4 @@
+import migration_2023_07_27T11_44_36_graphql_endpoint from './actions/2023.07.27T11.44.36.graphql-endpoint';
 import { type DatabasePool } from 'slonik';
 import migration_2021_03_05T19_06_23_initial from './actions/2021-03-05T19-06-23.initial';
 import migration_2021_03_08T11_02_26_urls from './actions/2021-03-08T11-02-26.urls';
@@ -104,5 +105,6 @@ export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) 
       migration_2023_06_01T09_07_53_create_collections,
       migration_2023_06_06T11_26_04_schema_checks,
       migration_2023_07_10T11_26_04_schema_checks_manual_approval,
+      migration_2023_07_27T11_44_36_graphql_endpoint,
     ],
   });
