@@ -172,9 +172,9 @@ dependencies = [
 
 [[package]]
 name = "apollo-router"
-version = "1.25.0"
+version = "1.26.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa9bf7f8f03aa6afe64e9a9ac4be63d304007f47cb92722d3d8b67a86e4d5187"
+checksum = "de5da7b5d4df74ea77323a759137f8dc5990d305df96856698907f25144ee189"
 dependencies = [
  "access-json",
  "anyhow",
