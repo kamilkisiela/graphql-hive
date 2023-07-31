@@ -66,6 +66,7 @@ export const frontendConfig = () => {
       }),
       EmailVerification.init({
         mode: env.auth.requireEmailVerification ? 'REQUIRED' : 'OPTIONAL',
+        disableDefaultUI: true,
       }),
       SessionReact.init(),
     ],
