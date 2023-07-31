@@ -2,6 +2,7 @@ import { ReactElement, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
+import { EmailVerificationPreBuiltUI } from 'supertokens-auth-react/recipe/emailverification/prebuiltui';
 import { ThirdPartyEmailPasswordPreBuiltUI } from 'supertokens-auth-react/recipe/thirdpartyemailpassword/prebuiltui';
 import { getRoutingComponent } from 'supertokens-auth-react/ui';
 import { FullLogo } from '@/components/common/Logo';
@@ -30,7 +31,10 @@ export const getServerSideProps: GetServerSideProps = async context => {
 };
 
 const SuperTokensComponentNoSSR = dynamic(
-  () => Promise.resolve(() => getRoutingComponent([ThirdPartyEmailPasswordPreBuiltUI])),
+  () =>
+    Promise.resolve(() =>
+      getRoutingComponent([ThirdPartyEmailPasswordPreBuiltUI, EmailVerificationPreBuiltUI]),
+    ),
   {
     ssr: false,
   },
