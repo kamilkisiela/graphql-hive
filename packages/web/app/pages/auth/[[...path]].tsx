@@ -2,8 +2,7 @@ import { ReactElement, useEffect } from 'react';
 import { GetServerSideProps } from 'next';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
-import { EmailVerification } from 'supertokens-auth-react/recipe/emailverification/prebuiltui';
+import { EmailVerificationPreBuiltUI } from 'supertokens-auth-react/recipe/emailverification/prebuiltui';
 import { ThirdPartyEmailPasswordPreBuiltUI } from 'supertokens-auth-react/recipe/thirdpartyemailpassword/prebuiltui';
 import { getRoutingComponent } from 'supertokens-auth-react/ui';
 import { FullLogo } from '@/components/common/Logo';
@@ -32,21 +31,19 @@ export const getServerSideProps: GetServerSideProps = async context => {
 };
 
 const SuperTokensComponentNoSSR = dynamic(
-  () => Promise.resolve(() => getRoutingComponent([ThirdPartyEmailPasswordPreBuiltUI])),
+  () =>
+    Promise.resolve(() =>
+      getRoutingComponent([ThirdPartyEmailPasswordPreBuiltUI, EmailVerificationPreBuiltUI]),
+    ),
   {
     ssr: false,
   },
 );
 
-const EmailVerificationNoSSR = dynamic(() => Promise.resolve(EmailVerification), {
-  ssr: false,
-});
-
 /**
  * Route for showing the SuperTokens login page.
  */
 export default function Auth(props: { oidcProviderId: string | null }): ReactElement {
-  const router = useRouter();
   useEffect(() => {
     if (props.oidcProviderId) {
       void startAuthFlowForOIDCProvider(props.oidcProviderId);
@@ -87,10 +84,6 @@ export default function Auth(props: { oidcProviderId: string | null }): ReactEle
         color={{ main: '#fff', sub: '#fff' }}
       />
       {props.oidcProviderId ? null : <SuperTokensComponentNoSSR />}
-      {/** TODO: For some reason we now need to render the UI manually...  */}
-      {router.asPath.startsWith('/auth/verify-email') && env.auth.requireEmailVerification ? (
-        <EmailVerificationNoSSR />
-      ) : null}
     </div>
   );
 }
