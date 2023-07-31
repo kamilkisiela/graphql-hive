@@ -389,7 +389,7 @@ function OperationsTableContainer({
           p90: op.duration.p90,
           p95: op.duration.p95,
           p99: op.duration.p99,
-          failureRate: 1 - op.countOk / op.count,
+          failureRate: (1 - op.countOk / op.count) * 100,
           requests: op.count,
           percentage: op.percentage,
           hash: op.operationHash!,
