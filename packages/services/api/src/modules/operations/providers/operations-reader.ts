@@ -67,7 +67,7 @@ function pickQueryByPeriod(
       timeout: number;
       span?: Span | undefined;
     };
-    regular: {
+    minutely: {
       query: SqlValue;
       queryId: string;
       timeout: number;
@@ -94,7 +94,7 @@ function pickQueryByPeriod(
       return queryMap.hourly;
     }
 
-    return queryMap.regular;
+    return queryMap.minutely;
   }
 
   if (distanceInHours > 24) {
@@ -105,7 +105,7 @@ function pickQueryByPeriod(
     return queryMap.hourly;
   }
 
-  return queryMap.regular;
+  return queryMap.minutely;
 }
 
 @Injectable({
@@ -165,7 +165,7 @@ export class OperationsReader {
       // The hash column is basically a unique identifier of a GraphQL operation.
       conditions.push(sql`
         hash NOT IN (
-          SELECT hash FROM clients_daily ${this.createFilter({
+          SELECT hash FROM clients_daily_2 ${this.createFilter({
             target,
             period,
             extra: [sql`client_name IN (${sql.array(excludedClients, 'String')})`],
@@ -182,7 +182,7 @@ export class OperationsReader {
             SELECT
               coordinate,
               sum(total) as total
-            FROM coordinates_daily
+            FROM coordinates_daily_2
             ${this.createFilter({
               target,
               period,
@@ -224,13 +224,68 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       exists: number;
     }>({
-      query: sql`SELECT 1 as exists FROM operations_daily ${this.createFilter({ target })} LIMIT 1`,
+      query: sql`SELECT 1 as exists FROM operations_daily_2 ${this.createFilter({
+        target,
+      })} LIMIT 1`,
       queryId: 'has_collected_operations',
       timeout: 10_000,
       span,
     });
 
     return result.rows > 0;
+  }
+
+  @sentry('OperationsReader.countOperationsWithoutDetails')
+  async countOperationsWithoutDetails(
+    {
+      target,
+      period,
+    }: {
+      target: string | readonly string[];
+      period: DateRange;
+    },
+    span?: Span,
+  ): Promise<number> {
+    const query = pickQueryByPeriod(
+      {
+        daily: {
+          query: sql`SELECT sum(total) as total FROM clients_daily_2 ${this.createFilter({
+            target,
+            period,
+          })}`,
+          queryId: 'count_operations_daily',
+          timeout: 10_000,
+          span,
+        },
+        hourly: {
+          query: sql`SELECT sum(total) as total FROM operations_hourly_2 ${this.createFilter({
+            target,
+            period,
+          })}`,
+          queryId: 'count_operations_hourly',
+          timeout: 15_000,
+          span,
+        },
+        minutely: {
+          query: sql`SELECT sum(total) as total FROM operations_minutely_2 ${this.createFilter({
+            target,
+            period,
+          })}`,
+          queryId: 'count_operations_regular',
+          timeout: 30_000,
+          span,
+        },
+      },
+      period ?? null,
+    );
+
+    const result = await this.clickHouse.query<{
+      total: number;
+    }>(query);
+
+    const total = ensureNumber(result.data[0].total);
+
+    return total;
   }
 
   @sentry('OperationsReader.countOperations')
@@ -255,7 +310,7 @@ export class OperationsReader {
     const query = pickQueryByPeriod(
       {
         daily: {
-          query: sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_daily ${this.createFilter(
+          query: sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_daily_2 ${this.createFilter(
             {
               target,
               period,
@@ -268,7 +323,7 @@ export class OperationsReader {
           span,
         },
         hourly: {
-          query: sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_hourly ${this.createFilter(
+          query: sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_hourly_2 ${this.createFilter(
             {
               target,
               period,
@@ -280,8 +335,8 @@ export class OperationsReader {
           timeout: 15_000,
           span,
         },
-        regular: {
-          query: sql`SELECT count() as total, sum(ok) as totalOk FROM operations ${this.createFilter(
+        minutely: {
+          query: sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_minutely_2 ${this.createFilter(
             {
               target,
               period,
@@ -347,7 +402,7 @@ export class OperationsReader {
         daily: {
           query: sql`
             SELECT count(distinct hash) as total
-            FROM operations_daily
+            FROM operations_daily_2
             ${this.createFilter({
               target,
               period,
@@ -362,7 +417,7 @@ export class OperationsReader {
         hourly: {
           query: sql`
             SELECT count(distinct hash) as total
-            FROM operations_hourly
+            FROM operations_hourly_2
             ${this.createFilter({
               target,
               period,
@@ -374,10 +429,10 @@ export class OperationsReader {
           timeout: 15_000,
           span,
         },
-        regular: {
+        minutely: {
           query: sql`
             SELECT count(distinct hash) as total
-            FROM operations
+            FROM operations_minutely_2
             ${this.createFilter({
               target,
               period,
@@ -429,7 +484,7 @@ export class OperationsReader {
         daily: {
           query: sql`
             SELECT sum(total) as total, sum(total_ok) as totalOk, hash 
-            FROM operations_daily
+            FROM operations_daily_2
             ${this.createFilter({
               target,
               period,
@@ -448,7 +503,7 @@ export class OperationsReader {
               sum(total) as total,
               sum(total_ok) as totalOk,
               hash
-            FROM operations_hourly
+            FROM operations_hourly_2
             ${this.createFilter({
               target,
               period,
@@ -461,10 +516,10 @@ export class OperationsReader {
           timeout: 15_000,
           span,
         },
-        regular: {
+        minutely: {
           query: sql`
-            SELECT count() as total, sum(ok) as totalOk, hash
-            FROM operations
+            SELECT sum(total) as total, sum(total_ok) as totalOk, hash
+            FROM operations_minutely_2
             ${this.createFilter({
               target,
               period,
@@ -497,7 +552,7 @@ export class OperationsReader {
             name,
             hash,
             operation_kind
-          FROM operation_collection
+          FROM operation_collection_details_2
             ${this.createFilter({
               target,
               operations,
@@ -555,7 +610,7 @@ export class OperationsReader {
       query: sql`
         SELECT 
           body
-        FROM operation_collection
+        FROM operation_collection_body_2
           ${this.createFilter({
             target,
             extra: [sql`hash = ${hash}`],
@@ -608,7 +663,7 @@ export class OperationsReader {
                 sum(total) as total,
                 client_name,
                 client_version
-              FROM clients_daily
+              FROM clients_daily_2
               ${this.createFilter({
                 target,
                 period,
@@ -623,10 +678,10 @@ export class OperationsReader {
           hourly: {
             query: sql`
               SELECT 
-                count(*) as total,
+                sum(total) as total,
                 client_name,
                 client_version
-              FROM operations
+              FROM operations_hourly_2
               ${this.createFilter({
                 target,
                 period,
@@ -638,13 +693,13 @@ export class OperationsReader {
             timeout: 10_000,
             span,
           },
-          regular: {
+          minutely: {
             query: sql`
               SELECT 
-                count(*) as total,
+                sum(total) as total,
                 client_name,
                 client_version
-              FROM operations
+              FROM operations_minutely_2
               ${this.createFilter({
                 target,
                 period,
@@ -820,7 +875,7 @@ export class OperationsReader {
         SELECT 
           sum(total) as count,
           client_name
-        FROM clients_daily
+        FROM clients_daily_2
         ${this.createFilter({
           target,
           period,
@@ -925,7 +980,7 @@ export class OperationsReader {
                       1000) as date,
                       sum(total) as total,
                       target
-                    FROM operations_daily
+                    FROM operations_daily_2
                     ${this.createFilter({ target: targets, period })}
                     GROUP BY date, target
                     ORDER BY date
@@ -945,7 +1000,7 @@ export class OperationsReader {
                       1000) as date,
                       sum(total) as total,
                       target
-                    FROM operations_hourly
+                    FROM operations_hourly_2
                     ${this.createFilter({ target: targets, period })}
                     GROUP BY date, target
                     ORDER BY date
@@ -953,7 +1008,7 @@ export class OperationsReader {
                   queryId: 'targets_count_over_time_hourly',
                   timeout: 15_000,
                 },
-                regular: {
+                minutely: {
                   query: sql`
                     SELECT 
                       multiply(
@@ -963,9 +1018,9 @@ export class OperationsReader {
                           )}, 'UTC'),
                         'UTC'),
                       1000) as date,
-                      count(*) as total,
+                      sum(total) as total,
                       target
-                    FROM operations
+                    FROM operations_minutely_2
                     ${this.createFilter({ target: targets, period })}
                     GROUP BY date, target
                     ORDER BY date
@@ -1182,7 +1237,7 @@ export class OperationsReader {
             query: sql`
               SELECT 
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
-              FROM operations_daily
+              FROM operations_daily_2
               ${this.createFilter({ target, period, operations, clients })}
             `,
             queryId: 'general_duration_percentiles_daily',
@@ -1193,18 +1248,18 @@ export class OperationsReader {
             query: sql`
               SELECT 
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
-              FROM operations_hourly
+              FROM operations_hourly_2
               ${this.createFilter({ target, period, operations, clients })}
             `,
             queryId: 'general_duration_percentiles_hourly',
             timeout: 15_000,
             span,
           },
-          regular: {
+          minutely: {
             query: sql`
               SELECT 
-                quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles
-              FROM operations
+                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
+              FROM operations_minutely_2
               ${this.createFilter({ target, period, operations, clients })}
             `,
             queryId: 'general_duration_percentiles_regular',
@@ -1245,7 +1300,7 @@ export class OperationsReader {
               SELECT 
                 hash,
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
-              FROM operations_daily
+              FROM operations_daily_2
               ${this.createFilter({ target, period, operations, clients })}
               GROUP BY hash
             `,
@@ -1258,7 +1313,7 @@ export class OperationsReader {
               SELECT 
                 hash,
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
-              FROM operations_hourly
+              FROM operations_hourly_2
               ${this.createFilter({ target, period, operations, clients })}
               GROUP BY hash
             `,
@@ -1266,12 +1321,12 @@ export class OperationsReader {
             timeout: 15_000,
             span,
           },
-          regular: {
+          minutely: {
             query: sql`
               SELECT 
-                hash,
-                quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles
-              FROM operations
+              hash,
+              quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
+              FROM operations_minutely_2
               ${this.createFilter({ target, period, operations, clients })}
               GROUP BY hash
             `,
@@ -1304,7 +1359,7 @@ export class OperationsReader {
       client_name: string;
     }>({
       queryId: 'client_names_per_target_v2',
-      query: sql`SELECT client_name FROM clients_daily ${this.createFilter({
+      query: sql`SELECT client_name FROM clients_daily_2 ${this.createFilter({
         target,
         period,
       })} GROUP BY client_name`,
@@ -1353,7 +1408,7 @@ export class OperationsReader {
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles,
                 sum(total) as total,
                 sum(total_ok) as totalOk
-              FROM operations_daily
+              FROM operations_daily_2
     }: {
               ${this.createFilter({ target, period, operations, clients })}
               GROUP BY date
@@ -1376,7 +1431,7 @@ export class OperationsReader {
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles,
                 sum(total) as total,
                 sum(total_ok) as totalOk
-              FROM operations_hourly
+              FROM operations_hourly_2
               ${this.createFilter({ target, period, operations, clients })}
               GROUP BY date
               ORDER BY date
@@ -1385,7 +1440,7 @@ export class OperationsReader {
             timeout: 15_000,
             span,
           },
-          regular: {
+          minutely: {
             query: sql`
               SELECT 
                 multiply(
@@ -1395,10 +1450,10 @@ export class OperationsReader {
                     )}, 'UTC'),
                   'UTC'),
                 1000) as date,
-                quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles,
-                count(*) as total,
-                sum(ok) as totalOk
-              FROM operations
+                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles,
+                sum(total) as total,
+                sum(total_ok) as totalOk
+              FROM operations_minutely_2
               ${this.createFilter({ target, period, operations, clients })}
               GROUP BY date
               ORDER BY date
@@ -1523,7 +1578,7 @@ export class OperationsReader {
       total: number;
     }>({
       query: sql`
-        SELECT coordinate, sum(total) as total FROM coordinates_daily
+        SELECT coordinate, sum(total) as total FROM coordinates_daily_2
         ${this.createFilter({
           target,
           period,
@@ -1546,7 +1601,7 @@ export class OperationsReader {
       total: number;
     }>({
       query: sql`
-        SELECT coordinate, sum(total) as total FROM coordinates_daily
+        SELECT coordinate, sum(total) as total FROM coordinates_daily_2
         ${this.createFilter({
           target,
           period,
@@ -1581,7 +1636,7 @@ export class OperationsReader {
       total: string;
       target: string;
     }>({
-      query: sql`SELECT sum(total) as total, target from operations_daily WHERE ${dateRangeFilter} GROUP BY target`,
+      query: sql`SELECT sum(total) as total, target from operations_daily_2 WHERE ${dateRangeFilter} GROUP BY target`,
       queryId: 'admin_operations_per_target',
       timeout: 15_000,
     });
@@ -1624,7 +1679,9 @@ export class OperationsReader {
             'UTC'),
           1000) as date,
           sum(total) as total
-        FROM ${sql.raw(days > 1 && days >= resolution ? 'operations_daily' : 'operations_hourly')}
+        FROM ${sql.raw(
+          days > 1 && days >= resolution ? 'operations_daily_2' : 'operations_hourly_2',
+        )}
         WHERE ${dateRangeFilter}
         GROUP BY date
         ORDER BY date

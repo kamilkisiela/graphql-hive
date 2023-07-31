@@ -244,7 +244,7 @@ export class OperationsManager {
         target,
         period,
       }),
-      this.reader.countOperations({ target, period }).then(r => r.total),
+      this.reader.countOperationsWithoutDetails({ target, period }),
     ]);
 
     return {
@@ -304,7 +304,7 @@ export class OperationsManager {
         period,
         excludedClients,
       }),
-      this.reader.countOperations({ target, period }).then(r => r.total),
+      this.reader.countOperationsWithoutDetails({ target, period }),
     ]);
 
     return Object.keys(totalFields).map(id => {

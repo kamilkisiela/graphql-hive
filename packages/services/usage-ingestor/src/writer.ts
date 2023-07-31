@@ -56,7 +56,7 @@ export function createWriter({
 
       const csv = joinIntoSingleMessage(operations);
       const compressed = await compress(csv);
-      const sql = `INSERT INTO operations (${operationsFields}) FORMAT CSV`;
+      const sql = `INSERT INTO operations_2 (${operationsFields}) FORMAT CSV`;
 
       await writeCsv(clickhouse, agents, sql, compressed, logger, 3);
     },
@@ -67,7 +67,7 @@ export function createWriter({
 
       const csv = joinIntoSingleMessage(records);
       const compressed = await compress(csv);
-      const sql = `INSERT INTO operation_collection (${registryFields}) FORMAT CSV`;
+      const sql = `INSERT INTO operation_collection_2 (${registryFields}) FORMAT CSV`;
 
       await writeCsv(clickhouse, agents, sql, compressed, logger, 3);
     },

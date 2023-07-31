@@ -51,7 +51,7 @@ export function createEstimator(config: {
           SELECT
             target,
             sum(total) as total
-          FROM operations_hourly
+          FROM operations_hourly_2
           ${filter}
           GROUP BY target
         `,
@@ -78,7 +78,7 @@ export function createEstimator(config: {
         query: sql`
           SELECT 
             sum(total) as total
-          FROM operations_hourly
+          FROM operations_hourly_2
           ${filter}
         `,
         queryId: 'usage_estimator_count_operations',
