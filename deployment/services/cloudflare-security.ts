@@ -29,7 +29,9 @@ export function deployCloudFlareSecurityTransform(options: {
 
   const expression = `not http.request.uri.path in { ${toExpressionList(
     options.ignoredPaths,
-  )} } and not http.host in { ${toExpressionList(options.ignoredHosts)} }`;
+  )} } and not http.host in { ${toExpressionList(
+    options.ignoredHosts,
+  )} } and not ends_with(http.request.uri.path, "/laboratory")`;
 
   const monacoCdnDynamicBasePath: `https://${string}/` = `https://cdn.jsdelivr.net/npm/monaco-editor@${monacoEditorVersion}/`;
   const monacoCdnStaticBasePath: `https://${string}/` = `https://cdn.jsdelivr.net/npm/monaco-editor@0.33.0/`;
@@ -58,7 +60,7 @@ export function deployCloudFlareSecurityTransform(options: {
   connect-src 'self' {DYNAMIC_HOST_PLACEHOLDER} ${cspHosts}; 
   media-src ${crispHost};
   style-src-elem 'self' 'unsafe-inline' ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} fonts.googleapis.com rsms.me ${crispHost};
-  font-src 'self' fonts.gstatic.com rsms.me ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} ${crispHost};
+  font-src 'self' data: fonts.gstatic.com rsms.me ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} ${crispHost};
   img-src * 'self' data: https: https://image.crisp.chat https://storage.crisp.chat ${gtmHost} ${crispHost};
 `;
 
