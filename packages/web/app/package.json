@@ -16,6 +16,7 @@
   "dependencies": {
     "@graphiql/react": "0.18.0-alpha.0",
     "@graphiql/toolkit": "0.8.4",
+    "@graphql-tools/mock": "9.0.0",
     "@headlessui/react": "1.7.15",
     "@monaco-editor/react": "4.5.1",
     "@n1ru4l/react-time-ago": "1.1.0",
@@ -35,6 +36,7 @@
     "@radix-ui/react-toggle-group": "1.0.4",
     "@radix-ui/react-toolbar": "1.0.4",
     "@radix-ui/react-tooltip": "1.0.6",
+    "@repeaterjs/repeater": "3.0.4",
     "@sentry/nextjs": "7.59.3",
     "@sentry/types": "7.59.3",
     "@stripe/react-stripe-js": "2.1.1",
