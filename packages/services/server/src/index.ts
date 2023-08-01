@@ -4,7 +4,7 @@ import got from 'got';
 import { DocumentNode, GraphQLError, stripIgnoredCharacters } from 'graphql';
 import 'reflect-metadata';
 import zod from 'zod';
-import { createRegistry, CryptoProvider, LogFn, Logger } from '@hive/api';
+import { createRegistry, createTaskRunner, CryptoProvider, LogFn, Logger } from '@hive/api';
 import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
 import { ArtifactStorageReader } from '@hive/cdn-script/artifact-storage-reader';
 import { AwsClient } from '@hive/cdn-script/aws';
@@ -137,6 +137,19 @@ export async function main() {
         fn(msg, ...args);
       }
     };
+  }
+
+  if (env.hiveServices.usageEstimator) {
+    const storageTask = createTaskRunner({
+      async run() {
+        await storage.purgeExpiredSchemaChecks({
+          expiresAt: new Date(),
+        });
+      },
+      interval: 60_000,
+      logger: server.log,
+    });
+    storageTask.start();
   }
 
   try {

@@ -18,6 +18,7 @@ import { CdnProvider } from '../../cdn/providers/cdn.provider';
 import { GitHubIntegrationManager } from '../../integrations/providers/github-integration-manager';
 import { OrganizationManager } from '../../organization/providers/organization-manager';
 import { ProjectManager } from '../../project/providers/project-manager';
+import { RateLimitProvider } from '../../rate-limit/providers/rate-limit.provider';
 import { DistributedCache } from '../../shared/providers/distributed-cache';
 import { Logger } from '../../shared/providers/logger';
 import { Mutex } from '../../shared/providers/mutex';
@@ -129,6 +130,7 @@ export class SchemaPublisher {
     private helper: SchemaHelper,
     private artifactStorageWriter: ArtifactStorageWriter,
     private mutex: Mutex,
+    private rateLimit: RateLimitProvider,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
     singleModel: SingleModel,
     compositeModel: CompositeModel,
@@ -300,6 +302,9 @@ export class SchemaPublisher {
 
     let schemaCheck: null | SchemaCheck = null;
 
+    const retention = await this.rateLimit.getRetention({ targetId: target.id });
+    const expiresAt = retention ? new Date(Date.now() + retention * millisecondsPerDay) : null;
+
     if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
       schemaCheck = await this.storage.createSchemaCheck({
         schemaSDL: sdl,
@@ -326,6 +331,7 @@ export class SchemaPublisher {
         isManuallyApproved: false,
         manualApprovalUserId: null,
         githubCheckRunId: null,
+        expiresAt,
       });
     }
 
@@ -383,6 +389,7 @@ export class SchemaPublisher {
         isManuallyApproved: false,
         manualApprovalUserId: null,
         githubCheckRunId: null,
+        expiresAt,
       });
     }
 
@@ -1518,3 +1525,5 @@ function tryPrettifySDL(sdl: string): string {
     return sdl;
   }
 }
+
+const millisecondsPerDay = 60 * 60 * 24 * 1000;

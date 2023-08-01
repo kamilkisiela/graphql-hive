@@ -49,6 +49,7 @@ import migration_2023_05_12T08_29_06_store_supergraph_on_schema_versions from '.
 import migration_2023_06_01T09_07_53_create_collections from './actions/2023.06.01T09.07.53.create_collections';
 import migration_2023_06_06T11_26_04_schema_checks from './actions/2023.06.06T11.26.04.schema-checks';
 import migration_2023_07_10T11_26_04_schema_checks_manual_approval from './actions/2023.07.10T11.26.04.schema-checks-manual-approval';
+import migration_2023_08_01T11_44_36_schema_checks_expires_at from './actions/2023.08.01T11.44.36.schema-checks-expires-at';
 import { runMigrations } from './pg-migrator';
 
 export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) =>
@@ -106,5 +107,6 @@ export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) 
       migration_2023_06_06T11_26_04_schema_checks,
       migration_2023_07_10T11_26_04_schema_checks_manual_approval,
       migration_2023_07_27T11_44_36_graphql_endpoint,
+      migration_2023_08_01T11_44_36_schema_checks_expires_at,
     ],
   });
