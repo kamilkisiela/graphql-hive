@@ -29,9 +29,7 @@ export function deployCloudFlareSecurityTransform(options: {
 
   const expression = `not http.request.uri.path in { ${toExpressionList(
     options.ignoredPaths,
-  )} } and not http.host in { ${toExpressionList(
-    options.ignoredHosts,
-  )} } and not ends_with(http.request.uri.path, "/laboratory")`;
+  )} } and not http.host in { ${toExpressionList(options.ignoredHosts)} }`;
 
   const monacoCdnDynamicBasePath: `https://${string}/` = `https://cdn.jsdelivr.net/npm/monaco-editor@${monacoEditorVersion}/`;
   const monacoCdnStaticBasePath: `https://${string}/` = `https://cdn.jsdelivr.net/npm/monaco-editor@0.33.0/`;
