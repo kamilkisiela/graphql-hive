@@ -5,12 +5,22 @@ import { buildSchema } from 'graphql';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts/target';
+import { ConnectLabModal } from '@/components/target/laboratory/connect-lab-modal';
 import { CreateCollectionModal } from '@/components/target/laboratory/create-collection-modal';
 import { CreateOperationModal } from '@/components/target/laboratory/create-operation-modal';
 import { DeleteCollectionModal } from '@/components/target/laboratory/delete-collection-modal';
 import { DeleteOperationModal } from '@/components/target/laboratory/delete-operation-modal';
 import { Subtitle, Title } from '@/components/ui/page';
-import { Accordion, DocsLink, Link, MetaTitle, Spinner, Tooltip } from '@/components/v2';
+import {
+  Accordion,
+  DocsLink,
+  Link,
+  MetaTitle,
+  Spinner,
+  ToggleGroup,
+  ToggleGroupItem,
+  Tooltip,
+} from '@/components/v2';
 import { Button } from '@/components/v2/button';
 import { HiveLogo, PlusIcon, SaveIcon, ShareIcon } from '@/components/v2/icon';
 import { graphql } from '@/gql';
@@ -31,8 +41,10 @@ import { BookmarkIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
 import 'graphiql/graphiql.css';
 import NextLink from 'next/link';
 import { cx } from 'class-variance-authority';
+import clsx from 'clsx';
 import { EditOperationModal } from '@/components/target/laboratory/edit-operation-modal';
 import { QueryError } from '@/components/ui/query-error';
+import { useResetState } from '@/lib/hooks/use-reset-state';
 import { Repeater } from '@repeaterjs/repeater';
 
 function Share(): ReactElement {
@@ -660,6 +672,7 @@ function LaboratoryPageContent() {
       targetId: router.targetId,
     },
   });
+  const [isConnectLabModalOpen, toggleConnectLabModal] = useToggle();
 
   const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
@@ -679,23 +692,41 @@ function LaboratoryPageContent() {
     return buildSchema(query.data.target.latestSchemaVersion.sdl);
   }, [query.data?.target?.latestSchemaVersion?.sdl]);
 
-  const fetcher = useMemo<Fetcher>(() => {
-    if (!query.data?.target?.graphqlEndpointUrl) {
-      return () => Promise.reject(new Error('No GraphQL endpoint configured.'));
+  const [actualSelectedApiEndpoint, setEndpointType] = useApiTabValueState(
+    query.data?.target?.graphqlEndpointUrl ?? null,
+  );
+
+  const mockEndpoint = useMemo(() => {
+    if (globalThis.window) {
+      return `${location.origin}/api/lab/${router.organizationId}/${router.projectId}/${router.targetId}`;
     }
 
-    const fetcher = createGraphiQLFetcher({ url: query.data.target.graphqlEndpointUrl });
+    return '';
+  }, [router.organizationId, router.projectId, router.targetId]);
 
+  const fetcher = useMemo<Fetcher>(() => {
     return async (params, opts) => {
+      const fetcher = createGraphiQLFetcher({
+        url:
+          (actualSelectedApiEndpoint === 'linkedApi'
+            ? query.data?.target?.graphqlEndpointUrl
+            : undefined) ?? mockEndpoint,
+      });
+
       const result = await fetcher(params, opts);
 
       // We only want to expose the error message, not the whole stack trace.
       if (isAsyncIterable(result)) {
         return new Repeater(async (push, stop) => {
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
+          stop.then(
+            () => 'return' in result && result.return instanceof Function && result.return(),
+          );
           try {
             for await (const value of result) {
               await push(value);
             }
+            stop();
           } catch (err: unknown) {
             const error = new Error(err instanceof Error ? err.message : 'Unexpected error.');
             Object.defineProperty(error, 'stack', {
@@ -710,7 +741,7 @@ function LaboratoryPageContent() {
 
       return result;
     };
-  }, [query.data?.target?.graphqlEndpointUrl]);
+  }, [query.data?.target?.graphqlEndpointUrl, actualSelectedApiEndpoint]);
 
   if (query.error) {
     return <QueryError error={query.error} />;
@@ -735,16 +766,62 @@ function LaboratoryPageContent() {
             </DocsLink>
           </p>
         </div>
-        <div className="ml-auto mr-0 flex">
-          {query.data && !query.data.target?.graphqlEndpointUrl ? (
-            <div className="self-center">
+        <div className="ml-auto mr-0 flex flex-col justify-center">
+          <div>
+            {query.data && !query.data.target?.graphqlEndpointUrl ? (
               <NextLink
                 href={`/${router.organizationId}/${router.projectId}/${router.targetId}/settings`}
               >
-                <Button variant="primary">Connect GraphQL API Endpoint</Button>
+                <Button variant="primary" className="mr-2">
+                  Connect GraphQL API Endpoint
+                </Button>
               </NextLink>
-            </div>
-          ) : null}
+            ) : null}
+            <Button variant="primary" onClick={toggleConnectLabModal}>
+              Consume Mock Schema externally
+            </Button>
+          </div>
+          <div className="self-end pt-2">
+            <span className="text-xs font-bold mr-2">Query</span>
+            <ToggleGroup
+              defaultValue="list"
+              onValueChange={newValue => {
+                setEndpointType(newValue as 'mockApi' | 'linkedApi');
+              }}
+              value="mock"
+              type="single"
+              className="bg-gray-900/50 text-gray-500"
+            >
+              <ToggleGroupItem
+                key="mockApi"
+                value="mockApi"
+                title="Use Mock Schema"
+                className={clsx(
+                  'hover:text-white text-xs',
+                  !query.fetching &&
+                    actualSelectedApiEndpoint === 'mockApi' &&
+                    'bg-gray-800 text-white',
+                )}
+                disabled={query.fetching}
+              >
+                Mock
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                key="linkedApi"
+                value="linkedApi"
+                title="Use API endpoint"
+                className={clsx(
+                  'hover:text-white text-xs',
+                  !query.fetching &&
+                    actualSelectedApiEndpoint === 'linkedApi' &&
+                    'bg-gray-800 text-white',
+                )}
+                disabled={!query.data?.target?.graphqlEndpointUrl || query.fetching}
+              >
+                API
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
         </div>
       </div>
       <style global jsx>{`
@@ -782,28 +859,31 @@ function LaboratoryPageContent() {
           <GraphiQL.Logo>
             <Tooltip
               content={
-                query.data?.target?.graphqlEndpointUrl ? (
+                actualSelectedApiEndpoint === 'linkedApi' ? (
                   <>
                     Operations are executed against{' '}
                     <span>{query.data?.target?.graphqlEndpointUrl}</span>.
                   </>
                 ) : (
-                  <>No endpoint is linked. You can not execute any operations.</>
+                  <>Operations are executed against the mock endpoint.</>
                 )
               }
             >
               <span className="text-xs font-normal pr-2 cursor-help">
-                {query.data?.target?.graphqlEndpointUrl ? (
-                  'Querying GraphQL API'
-                ) : (
-                  <span className="text-red-500">No endpoint is linked.</span>
-                )}
+                {actualSelectedApiEndpoint === 'linkedApi'
+                  ? 'Querying GraphQL API'
+                  : 'Querying Mock API'}
               </span>
             </Tooltip>
             <HiveLogo className="h-6 w-auto" />
           </GraphiQL.Logo>
         </GraphiQL>
       )}
+      <ConnectLabModal
+        endpoint={mockEndpoint}
+        close={toggleConnectLabModal}
+        isOpen={isConnectLabModalOpen}
+      />
     </TargetLayout>
   );
 }
@@ -820,3 +900,29 @@ function LaboratoryPage(): ReactElement {
 export const getServerSideProps = withSessionProtection();
 
 export default authenticated(LaboratoryPage);
+
+function useApiTabValueState(graphqlEndpointUrl: string | null) {
+  const [state, setState] = useResetState<'mockApi' | 'linkedApi'>(() => {
+    const value = globalThis.window?.localStorage.getItem('hive:laboratory-tab-value');
+    if (!value || !['mockApi', 'linkedApi'].includes(value)) {
+      return graphqlEndpointUrl ? 'linkedApi' : 'mockApi';
+    }
+
+    if (value === 'linkedApi' && graphqlEndpointUrl) {
+      return 'linkedApi';
+    }
+
+    return 'mockApi';
+  }, [graphqlEndpointUrl]);
+
+  return [
+    state,
+    useCallback(
+      (state: 'mockApi' | 'linkedApi') => {
+        globalThis.window?.localStorage.setItem('hive:laboratory-tab-value', state);
+        setState(state);
+      },
+      [setState],
+    ),
+  ] as const;
+}

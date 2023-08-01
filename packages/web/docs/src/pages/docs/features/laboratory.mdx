@@ -26,3 +26,67 @@ You can set the GraphQL endpoint URL within the target settings.
 Afterwards you can execute queries against your actual GraphQL API. Please make sure to set the
 according CORS headers on your server for allowing the Laboratory to access your API from within the
 browser.
+
+## Built-in Mocks
+
+You may execute operations directly from the built-in GraphQL, and the results will be fully
+mocked - powered by
+[GraphQL-Tools mocking capabilities](https://the-guild.dev/graphql/tools/docs/mocking).
+
+Hive allow you to consume and use the Laboratory schema with your configured mocks while developing,
+without running any GraphQL server or gateway.
+
+1. [Up-to-date GraphQL Introspection](https://graphql.org/learn/introspection/) for using with
+   develpoment tools.
+2. Mocks for executed GraphQL operations.
+
+### Mock Endpoint
+
+To get started with using the Laboratory mock schema externally, create a
+[Registry Access Token](/docs/management/targets#registry-access-tokens). You only need to have the
+`read` access to the target (or, use the **Schema Check Only** preset).
+
+Now, click on the **Use Schema Externally** button on the Laboratory page, and follow the
+instructions on the form:
+
+<NextImage alt="Lab Form" src={labFormImage} className="mt-6 max-w-xl drop-shadow-md" />
+
+To test access to your setup, try running a `curl` command to run a simple GraphQL query against
+your mocked schema:
+
+```bash
+curl -X POST -H "X-Hive-Key: HIVE_TOKEN_HERE" -H "Content-Type: application/json" \
+  LAB_ENDPOINT_HERE \
+  --data-raw '{"query": "{ __typename }"}'
+```
+
+### With GraphQL-Code-Generator
+
+<Callout>
+  We recommend using the CDN for consuming the GraphQL schema in your project. [See GraphQL Code
+  Generator Integration](/docs/integrations/graphql-code-generator).
+</Callout>
+
+Since the Laboratory schema is a valid GraphQL schema, and supports introspection, you may use it
+directly with tools like [GraphQL-Code-Generator](https://the-guild.dev/graphql/codegen). Here's a
+snippet for using it in a project:
+
+```ts filename="codegen.ts"
+import { CodegenConfig } from '@graphql-codegen/cli'
+
+const labEndpoint = 'LAB_ENDPOINT_HERE'
+const labToken = process.env.HIVE_LAB_TOKEN
+
+const config: CodegenConfig = {
+  schema: [
+    {
+      [labEndpoint]: {
+        headers: {
+          'X-Hive-Key': labToken
+        }
+      }
+    }
+  ]
+}
+export default config
+```
