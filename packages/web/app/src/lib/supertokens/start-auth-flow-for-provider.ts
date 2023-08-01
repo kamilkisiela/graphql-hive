@@ -4,10 +4,10 @@ import { env } from '@/env/frontend';
 /**
  * utility for starting the login flow manually without clicking a button
  */
-export const startAuthFlowForProvider = async (providerId: 'google' | 'okta' | 'github') => {
+export const startAuthFlowForProvider = async (thirdPartyId: 'google' | 'okta' | 'github') => {
   const authUrl = await getAuthorisationURLWithQueryParamsAndSetState({
-    providerId,
-    authorisationURL: `${env.appBaseUrl}/auth/callback/${providerId}`,
+    thirdPartyId,
+    frontendRedirectURI: `${env.appBaseUrl}/auth/callback/${thirdPartyId}`,
   });
 
   window.location.assign(authUrl);

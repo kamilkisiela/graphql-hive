@@ -1,4 +1,5 @@
 import { ExpressRequest } from 'supertokens-node/lib/build/framework/express/framework';
+import { ProviderInput } from 'supertokens-node/recipe/thirdparty/types';
 import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemailpassword';
 import { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
 import zod from 'zod';
@@ -128,11 +129,14 @@ export const getOIDCThirdPartyEmailPasswordNodeOverrides = (args: {
   }),
 });
 
-export const createOIDCSuperTokensNoopProvider = () => ({
-  id: 'oidc',
-  get() {
-    throw new Error('Provider implementation was not provided via overrides.');
+export const createOIDCSuperTokensNoopProvider = (): ProviderInput => ({
+  config: {
+    thirdPartyId: 'oidc',
   },
+  // id: 'oidc',
+  // get() {
+  //   throw new Error('Provider implementation was not provided via overrides.');
+  // },
 });
 
 const fetchOIDCConfig = async (

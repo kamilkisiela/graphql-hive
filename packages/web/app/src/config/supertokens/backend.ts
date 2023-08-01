@@ -2,7 +2,7 @@ import * as crypto from 'node:crypto';
 import { OverrideableBuilder } from 'supertokens-js-override/lib/build';
 import EmailVerification from 'supertokens-node/recipe/emailverification';
 import SessionNode from 'supertokens-node/recipe/session';
-import { TypeProvider } from 'supertokens-node/recipe/thirdparty/types';
+import { type ProviderInput } from 'supertokens-node/recipe/thirdparty/types';
 import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemailpassword';
 import { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
 import { TypeInput } from 'supertokens-node/types';
@@ -28,23 +28,33 @@ export const backendConfig = (): TypeInput => {
   const internalApi = createTRPCProxyClient<InternalApi>({
     links: [httpLink({ url: `${env.serverEndpoint}/trpc` })],
   });
-  const providers: TypeProvider[] = [];
+  const providers: ProviderInput[] = [];
 
   if (env.auth.github) {
-    providers.push(
-      ThirdPartyEmailPasswordNode.Github({
-        clientId: env.auth.github.clientId,
-        clientSecret: env.auth.github.clientSecret,
-      }),
-    );
+    providers.push({
+      config: {
+        thirdPartyId: 'github',
+        clients: [
+          {
+            clientId: env.auth.github.clientId,
+            clientSecret: env.auth.github.clientSecret,
+          },
+        ],
+      },
+    });
   }
   if (env.auth.google) {
-    providers.push(
-      ThirdPartyEmailPasswordNode.Google({
-        clientId: env.auth.google.clientId,
-        clientSecret: env.auth.google.clientSecret,
-      }),
-    );
+    providers.push({
+      config: {
+        thirdPartyId: 'google',
+        clients: [
+          {
+            clientId: env.auth.google.clientId,
+            clientSecret: env.auth.google.clientSecret,
+          },
+        ],
+      },
+    });
   }
 
   if (env.auth.okta) {
@@ -289,7 +299,7 @@ const getAuth0Overrides = (config: Exclude<typeof env.auth.legacyAuth0, null>) =
 
         if (email) {
           // We first use the existing implementation for looking for users within supertokens.
-          const users = await ThirdPartyEmailPasswordNode.getUsersByEmail(email);
+          const users = await ThirdPartyEmailPasswordNode.getUsersByEmail('public', email);
 
           // If there is no email/password SuperTokens user yet, we need to check if there is an Auth0 user for this email.
           if (!users.some(user => user.thirdParty == null)) {
@@ -302,6 +312,7 @@ const getAuth0Overrides = (config: Exclude<typeof env.auth.legacyAuth0, null>) =
             if (dbUser) {
               // If we have this user within our database we create our new supertokens user
               const newUserResult = await ThirdPartyEmailPasswordNode.emailPasswordSignUp(
+                'public',
                 dbUser.email,
                 await generateRandomPassword(),
               );
@@ -331,6 +342,7 @@ const getAuth0Overrides = (config: Exclude<typeof env.auth.legacyAuth0, null>) =
         if (await doesUserExistInAuth0(config, input.email)) {
           // check if user exists in SuperTokens
           const superTokensUsers = await this.getUsersByEmail({
+            tenantId: 'public',
             email: input.email,
             userContext: input.userContext,
           });
