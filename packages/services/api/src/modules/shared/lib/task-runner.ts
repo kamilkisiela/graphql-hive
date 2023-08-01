@@ -14,7 +14,7 @@ export const createTaskRunner = (args: {
 
   async function loop() {
     task = scheduleTask({
-      runAt: args.interval,
+      runInMilliSeconds: args.interval,
       run: args.run,
       logger: args.logger,
       name: 'schema-purge',
@@ -47,23 +47,24 @@ export const createTaskRunner = (args: {
 };
 
 const scheduleTask = (args: {
-  runAt: number;
+  runInMilliSeconds: number;
   run: () => Promise<void>;
   name: string;
   logger: Logger;
 }) => {
-  args.logger.info(
-    `Scheduling task "${args.name}" to run at ${new Date(args.runAt).toISOString()}`,
-  );
+  const runsAt = new Date(Date.now() + args.runInMilliSeconds).toISOString();
+  args.logger.info(`Scheduling task "${args.name}" to run at ${runsAt}.`);
   let timeout: null | NodeJS.Timeout = setTimeout(async () => {
     timeout = null;
-    args.logger.info(`Running task "${args.name}" to run at ${new Date(args.runAt).toISOString()}`);
-    await args.run();
-    args.logger.info(
-      `Completed running task "${args.name}" to run at ${new Date(args.runAt).toISOString()}`,
-    );
+    args.logger.info(`Running task "${args.name}" to run at ${runsAt}.`);
+    try {
+      await args.run();
+    } catch (err: unknown) {
+      args.logger.error(`Failed to run task "${args.name}" to run at ${runsAt}.`, err);
+    }
+    args.logger.info(`Completed running task "${args.name}" to run at ${runsAt}.`);
     deferred.resolve();
-  }, args.runAt);
+  }, args.runInMilliSeconds);
   const deferred = createDeferred();
 
   return {
