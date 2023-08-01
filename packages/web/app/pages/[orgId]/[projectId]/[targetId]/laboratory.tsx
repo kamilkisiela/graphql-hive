@@ -10,6 +10,7 @@ import { CreateCollectionModal } from '@/components/target/laboratory/create-col
 import { CreateOperationModal } from '@/components/target/laboratory/create-operation-modal';
 import { DeleteCollectionModal } from '@/components/target/laboratory/delete-collection-modal';
 import { DeleteOperationModal } from '@/components/target/laboratory/delete-operation-modal';
+import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
 import {
   Accordion,
@@ -21,7 +22,6 @@ import {
   ToggleGroupItem,
   Tooltip,
 } from '@/components/v2';
-import { Button } from '@/components/v2/button';
 import { HiveLogo, PlusIcon, SaveIcon, ShareIcon } from '@/components/v2/icon';
 import { graphql } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
@@ -659,6 +659,7 @@ const TargetLaboratoryPageQuery = graphql(`
       ...TargetLayout_MeFragment
     }
     ...TargetLayout_IsCDNEnabledFragment
+    ...Laboratory_IsCDNEnabledFragment
   }
 `);
 
@@ -772,13 +773,13 @@ function LaboratoryPageContent() {
               <NextLink
                 href={`/${router.organizationId}/${router.projectId}/${router.targetId}/settings`}
               >
-                <Button variant="primary" className="mr-2">
+                <Button variant="outline" className="mr-2" size="sm">
                   Connect GraphQL API Endpoint
                 </Button>
               </NextLink>
             ) : null}
-            <Button variant="primary" onClick={toggleConnectLabModal}>
-              Consume Mock Schema externally
+            <Button onClick={toggleConnectLabModal} variant="ghost" size="sm">
+              Mock Data Endpoint
             </Button>
           </div>
           <div className="self-end pt-2">
@@ -883,6 +884,7 @@ function LaboratoryPageContent() {
         endpoint={mockEndpoint}
         close={toggleConnectLabModal}
         isOpen={isConnectLabModalOpen}
+        isCDNEnabled={query.data ?? null}
       />
     </TargetLayout>
   );

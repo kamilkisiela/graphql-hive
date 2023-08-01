@@ -265,7 +265,7 @@ export const TargetLayout = ({
             // eslint-disable-next-line unicorn/no-negated-condition
             connect != null ? (
               connect
-            ) : isCDNEnabled ? (
+            ) : isCDNEnabled?.isCDNEnabled ? (
               <>
                 <Button onClick={toggleModalOpen} variant="link" className="text-orange-500">
                   <Link size={16} className="mr-2" />
