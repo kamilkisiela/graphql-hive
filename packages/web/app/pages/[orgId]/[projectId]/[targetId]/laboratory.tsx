@@ -26,13 +26,14 @@ import {
   Tooltip as GraphiQLTooltip,
   useEditorContext,
 } from '@graphiql/react';
-import { createGraphiQLFetcher, Fetcher } from '@graphiql/toolkit';
+import { createGraphiQLFetcher, Fetcher, isAsyncIterable } from '@graphiql/toolkit';
 import { BookmarkIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
 import 'graphiql/graphiql.css';
 import NextLink from 'next/link';
 import { cx } from 'class-variance-authority';
 import { EditOperationModal } from '@/components/target/laboratory/edit-operation-modal';
 import { QueryError } from '@/components/ui/query-error';
+import { Repeater } from '@repeaterjs/repeater';
 
 function Share(): ReactElement {
   const label = 'Share query';
@@ -683,7 +684,32 @@ function LaboratoryPageContent() {
       return () => Promise.reject(new Error('No GraphQL endpoint configured.'));
     }
 
-    return createGraphiQLFetcher({ url: query.data.target.graphqlEndpointUrl });
+    const fetcher = createGraphiQLFetcher({ url: query.data.target.graphqlEndpointUrl });
+
+    return async (params, opts) => {
+      const result = await fetcher(params, opts);
+
+      // We only want to expose the error message, not the whole stack trace.
+      if (isAsyncIterable(result)) {
+        return new Repeater(async (push, stop) => {
+          try {
+            for await (const value of result) {
+              await push(value);
+            }
+          } catch (err: unknown) {
+            const error = new Error(err instanceof Error ? err.message : 'Unexpected error.');
+            Object.defineProperty(error, 'stack', {
+              get() {
+                return undefined;
+              },
+            });
+            stop(error);
+          }
+        });
+      }
+
+      return result;
+    };
   }, [query.data?.target?.graphqlEndpointUrl]);
 
   if (query.error) {
