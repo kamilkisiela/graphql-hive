@@ -749,6 +749,7 @@ export class OperationsReader {
             extra: [sql`coordinate = ${args.typename} OR coordinate LIKE ${args.typename + '.%'}`],
           })}
           GROUP BY co.hash, co.coordinate
+          SETTINGS join_algorithm = 'parallel_hash'
         `,
       timeout: 15_000,
     });
