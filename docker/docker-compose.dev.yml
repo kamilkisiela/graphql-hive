@@ -167,6 +167,7 @@ services:
       CLIENTS_CONFIGURATION_PATH: /tmp/config/clients-config.json
     volumes:
       - ./configs/oidc-server-mock/clients-config.json:/tmp/config/clients-config.json:ro
+      - ./configs/oidc-server-mock/users-config.json:/tmp/config/users-config.json:ro
     networks:
       - 'stack'
 

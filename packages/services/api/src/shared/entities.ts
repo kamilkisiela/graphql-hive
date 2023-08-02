@@ -297,6 +297,7 @@ export interface Member {
   user: User;
   organization: string;
   scopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
+  oidcIntegrationId: string | null;
 }
 
 export interface TargetSettings {
