@@ -746,7 +746,9 @@ export class OperationsReader {
           ${this.createFilter({
             target: args.targetId,
             period: args.period,
-            extra: [sql`coordinate = ${args.typename} OR coordinate LIKE ${args.typename + '.%'}`],
+            extra: [
+              sql`( coordinate = ${args.typename} OR coordinate LIKE ${args.typename + '.%'} )`,
+            ],
           })}
           GROUP BY co.hash, co.coordinate
           SETTINGS join_algorithm = 'parallel_hash'
