@@ -116,6 +116,7 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
     const code = (error as Record<string, unknown | undefined>)?.['code'] ?? '';
     const message = (error as Record<string, unknown | undefined>)?.['message'] ?? '';
 
+    res.setHeader('x-request-id', requestId);
     res.status(status).json({
       code,
       error: message,
@@ -128,7 +129,7 @@ export default wrapApiHandlerWithSentry(graphql, 'api/proxy');
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '6mb',
+      sizeLimit: '10mb',
     },
     externalResolver: true,
   },

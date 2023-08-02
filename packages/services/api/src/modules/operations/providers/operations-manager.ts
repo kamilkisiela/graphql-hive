@@ -696,32 +696,30 @@ export class OperationsManager {
     });
   }
 
-  private clientListForSchemaCoordinateDataLoaderCache = new Map<
+  private clientNamesPerCoordinateOfTypeDataLoaderCache = new Map<
     string,
-    DataLoader<string, Array<string> | null>
+    DataLoader<string, Map<string, Set<string>>>
   >();
 
-  private getClientListForSchemaCoordinateDataLoader(args: { target: string; period: DateRange }) {
+  private getClientNamesPerCoordinateOfTypeLoader(args: { target: string; period: DateRange }) {
+    // Stores a DataLoader per target and date range
+    // A many type names can share the same DataLoader as long as they share the same target and date range.
     const cacheKey = [args.target, args.period.from, args.period.to].join('__');
-    let loader = this.clientListForSchemaCoordinateDataLoaderCache.get(cacheKey);
+    let loader = this.clientNamesPerCoordinateOfTypeDataLoaderCache.get(cacheKey);
 
     if (loader == null) {
-      loader = new DataLoader<string, Array<string> | null>(async schemaCoordinates => {
-        const clientsBySchemaCoordinate = await this.reader.getClientListForSchemaCoordinates({
-          targetId: args.target,
-          period: args.period,
-          schemaCoordinates,
-        });
-
-        return schemaCoordinates.map(schemaCoordinate => {
-          const clients = clientsBySchemaCoordinate.get(schemaCoordinate);
-          if (clients == null) {
-            return null;
-          }
-          return Array.from(clients);
-        });
+      loader = new DataLoader<string, Map<string, Set<string>>>(typenames => {
+        return Promise.all(
+          typenames.map(typename => {
+            return this.reader.getClientNamesPerCoordinateOfType({
+              targetId: args.target,
+              period: args.period,
+              typename,
+            });
+          }),
+        );
       });
-      this.clientListForSchemaCoordinateDataLoaderCache.set(cacheKey, loader);
+      this.clientNamesPerCoordinateOfTypeDataLoaderCache.set(cacheKey, loader);
     }
 
     return loader;
@@ -731,10 +729,11 @@ export class OperationsManager {
    * Receive a list of clients that queried a specific schema coordinate.
    * Uses DataLoader underneath for batching.
    */
-  async getClientListForSchemaCoordinate(
+  async getClientNamesPerCoordinateOfType(
     args: {
       period: DateRange;
       schemaCoordinate: string;
+      typename: string;
     } & TargetSelector,
   ) {
     await this.authManager.ensureTargetAccess({
@@ -744,12 +743,14 @@ export class OperationsManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    const loader = this.getClientListForSchemaCoordinateDataLoader({
+    const loader = this.getClientNamesPerCoordinateOfTypeLoader({
       target: args.target,
       period: args.period,
     });
 
-    return loader.load(args.schemaCoordinate);
+    const clientNamesCoordinateMap = await loader.load(args.typename);
+
+    return Array.from(clientNamesCoordinateMap.get(args.schemaCoordinate) ?? []);
   }
 
   async hasOperationsForOrganization(selector: OrganizationSelector): Promise<boolean> {
