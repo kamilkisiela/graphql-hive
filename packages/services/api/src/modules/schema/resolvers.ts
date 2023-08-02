@@ -1762,11 +1762,16 @@ function withUsedByClients<
             return null;
           }
 
-          return deps.operationsManager.getClientListForSchemaCoordinate({
-            ...deps.selector,
-            period: deps.period,
-            schemaCoordinate,
-          });
+          return deps.operationsManager
+            .getClientListForSchemaCoordinate({
+              ...deps.selector,
+              period: deps.period,
+              schemaCoordinate,
+            })
+            .catch(err => {
+              console.error(err);
+              return null;
+            });
         },
       },
     ]),
