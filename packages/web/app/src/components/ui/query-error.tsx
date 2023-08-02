@@ -1,5 +1,7 @@
 import { ReactElement } from 'react';
+import { useRouter } from 'next/router';
 import cookies from 'js-cookie';
+import { LogOutIcon } from 'lucide-react';
 import { CombinedError } from 'urql';
 import { Button } from '@/components/ui/button';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
@@ -12,6 +14,7 @@ export function QueryError({
   error: CombinedError;
   showError?: boolean;
 }): ReactElement {
+  const router = useRouter();
   const requestId =
     error &&
     'response' in error &&
@@ -26,6 +29,13 @@ export function QueryError({
 
   return (
     <div className="h-full w-full flex items-center justify-center">
+      <Button
+        variant="outline"
+        onClick={() => router.push('/logout')}
+        className="absolute top-6 right-6"
+      >
+        <LogOutIcon className="mr-2 h-4 w-4" /> Sign out
+      </Button>
       <div className="flex sm:flex-row flex-col items-center gap-x-6 max-w-[960px]">
         <img
           src="/images/figures/connection.svg"
@@ -53,6 +63,7 @@ export function QueryError({
                 </p>
               </div>
             )}
+
             {requestId ? (
               <div className="mt-6 text-xs">
                 <div className="inline-flex items-center text-gray-300">
