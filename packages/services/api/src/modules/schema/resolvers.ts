@@ -1093,6 +1093,7 @@ export const resolvers: SchemaModule.Resolvers = {
             selector: source.usage,
             period: source.usage.period,
             operationsManager,
+            typename: entity.name,
           }),
         );
 
@@ -1198,7 +1199,7 @@ export const resolvers: SchemaModule.Resolvers = {
       const typeMap = schema.getTypeMap();
       const operationsManager = injector.get(OperationsManager);
 
-      async function getStats() {
+      async function getStats(typename: string) {
         const stats = await operationsManager.countCoordinatesOfTarget({
           target: usage.target,
           organization: usage.organization,
@@ -1210,6 +1211,7 @@ export const resolvers: SchemaModule.Resolvers = {
           selector: usage,
           period: usage.period,
           operationsManager,
+          typename,
         });
       }
 
@@ -1224,7 +1226,7 @@ export const resolvers: SchemaModule.Resolvers = {
           types.push({
             entity,
             get usage() {
-              return getStats();
+              return getStats(entity.name);
             },
             supergraph: supergraph
               ? {
@@ -1240,7 +1242,7 @@ export const resolvers: SchemaModule.Resolvers = {
           types.push({
             entity,
             get usage() {
-              return getStats();
+              return getStats(entity.name);
             },
             supergraph: supergraph
               ? {
@@ -1256,7 +1258,7 @@ export const resolvers: SchemaModule.Resolvers = {
           types.push({
             entity,
             get usage() {
-              return getStats();
+              return getStats(entity.name);
             },
             supergraph: supergraph
               ? {
@@ -1272,7 +1274,7 @@ export const resolvers: SchemaModule.Resolvers = {
           types.push({
             entity,
             get usage() {
-              return getStats();
+              return getStats(entity.name);
             },
             supergraph: supergraph
               ? {
@@ -1287,7 +1289,7 @@ export const resolvers: SchemaModule.Resolvers = {
           types.push({
             entity,
             get usage() {
-              return getStats();
+              return getStats(entity.name);
             },
             supergraph: supergraph
               ? {
@@ -1304,7 +1306,7 @@ export const resolvers: SchemaModule.Resolvers = {
           types.push({
             entity,
             get usage() {
-              return getStats();
+              return getStats(entity.name);
             },
             supergraph: supergraph
               ? {
@@ -1344,6 +1346,7 @@ export const resolvers: SchemaModule.Resolvers = {
                 selector: usage,
                 period: usage.period,
                 operationsManager,
+                typename: entity.name,
               }),
             );
         },
@@ -1382,6 +1385,7 @@ export const resolvers: SchemaModule.Resolvers = {
                 selector: usage,
                 period: usage.period,
                 operationsManager,
+                typename: entity.name,
               }),
             );
         },
@@ -1421,6 +1425,7 @@ export const resolvers: SchemaModule.Resolvers = {
                 selector: usage,
                 period: usage.period,
                 operationsManager,
+                typename: entity.name,
               }),
             );
         },
@@ -1750,6 +1755,7 @@ function withUsedByClients<
     selector: TargetSelector;
     operationsManager: OperationsManager;
     period: DateRange;
+    typename: string;
   },
 ): Record<string, T & { usedByClients: PromiseOrValue<Array<string> | null> }> {
   return Object.fromEntries(
@@ -1762,16 +1768,13 @@ function withUsedByClients<
             return null;
           }
 
-          return deps.operationsManager
-            .getClientListForSchemaCoordinate({
-              ...deps.selector,
-              period: deps.period,
-              schemaCoordinate,
-            })
-            .catch(err => {
-              console.error(err);
-              return null;
-            });
+          // It's using DataLoader under the hood so it's safe to call it multiple times for different coordinates
+          return deps.operationsManager.getClientNamesPerCoordinateOfType({
+            ...deps.selector,
+            period: deps.period,
+            typename: deps.typename,
+            schemaCoordinate,
+          });
         },
       },
     ]),
