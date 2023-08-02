@@ -109,6 +109,13 @@ export class OrganizationManager {
       };
     }
 
+    if (member.oidcIntegrationId !== null) {
+      return {
+        result: false,
+        reason: 'Cannot leave an organization as an OIDC member.',
+      };
+    }
+
     const membersCount = await this.countOrganizationMembers({
       organization: organizationId,
     });

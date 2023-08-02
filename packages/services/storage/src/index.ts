@@ -150,6 +150,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       user: transformUser(user),
       scopes: (user.scopes as Member['scopes']) || [],
       organization: user.organization_id,
+      oidcIntegrationId: user.oidc_integration_id ?? null,
     };
   }
 
