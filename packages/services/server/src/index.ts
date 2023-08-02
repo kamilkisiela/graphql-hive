@@ -4,7 +4,7 @@ import got from 'got';
 import { DocumentNode, GraphQLError, stripIgnoredCharacters } from 'graphql';
 import 'reflect-metadata';
 import zod from 'zod';
-import { createRegistry, CryptoProvider, LogFn, Logger } from '@hive/api';
+import { createRegistry, createTaskRunner, CryptoProvider, LogFn, Logger } from '@hive/api';
 import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
 import { ArtifactStorageReader } from '@hive/cdn-script/artifact-storage-reader';
 import { AwsClient } from '@hive/cdn-script/aws';
@@ -87,9 +87,35 @@ export async function main() {
 
   const storage = await createPostgreSQLStorage(createConnectionString(env.postgres), 10);
 
+  let expiredSchemaCheckPurgeTaskRunner: null | ReturnType<typeof createTaskRunner> = null;
+
+  if (!env.hiveServices.usageEstimator) {
+    server.log.debug(
+      'Usage estimation is disabled. Skip scheduling purge tasks for expired schema checks.',
+    );
+  } else {
+    server.log.debug(
+      `Usage estimation is enabled. Start scheduling purge tasks for expired schema checks every ${env.hiveServices.usageEstimator.dateRetentionPurgeIntervalMinutes} minutes.`,
+    );
+    expiredSchemaCheckPurgeTaskRunner = createTaskRunner({
+      async run() {
+        await storage.purgeExpiredSchemaChecks({
+          expiresAt: new Date(),
+        });
+      },
+      interval: env.hiveServices.usageEstimator.dateRetentionPurgeIntervalMinutes * 60 * 1000,
+      logger: server.log,
+    });
+    expiredSchemaCheckPurgeTaskRunner.start();
+  }
+
   registerShutdown({
     logger: server.log,
     async onShutdown() {
+      if (expiredSchemaCheckPurgeTaskRunner) {
+        server.log.info('Stopping expired schema check purge task...');
+        await expiredSchemaCheckPurgeTaskRunner.stop();
+      }
       server.log.info('Stopping HTTP server listener...');
       await server.close();
       server.log.info('Stopping Storage handler...');
@@ -161,8 +187,7 @@ export async function main() {
         },
       };
     }
-
-    const graphqlLogger = createGraphQLLogger();
+    const logger = createGraphQLLogger();
     const registry = createRegistry({
       app: env.hiveServices.webApp
         ? {
@@ -191,7 +216,7 @@ export async function main() {
       schemaPolicyService: {
         endpoint: env.hiveServices.schemaPolicy ? env.hiveServices.schemaPolicy.endpoint : null,
       },
-      logger: graphqlLogger,
+      logger,
       storage,
       redis: {
         host: env.redis.host,
@@ -267,7 +292,7 @@ export async function main() {
       isProduction: env.environment === 'prod',
       release: env.release,
       hiveConfig: env.hive,
-      logger: graphqlLogger as any,
+      logger: logger as any,
       persistedOperations,
     });
 

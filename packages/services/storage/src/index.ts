@@ -3501,6 +3501,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "is_manually_approved"
           , "manual_approval_user_id"
           , "github_check_run_id"
+          , "expires_at"
         )
         VALUES (
           ${args.schemaSDL}
@@ -3519,6 +3520,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , ${args.isManuallyApproved}
           , ${args.manualApprovalUserId}
           , ${args.githubCheckRunId}
+          , ${args.expiresAt?.toISOString() ?? null}
         )
         RETURNING
           ${schemaCheckSQLFields}
@@ -3715,6 +3717,18 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         ...TargetModel.parse(result),
         orgId: args.organizationId,
       };
+    },
+
+    async purgeExpiredSchemaChecks(args) {
+      await pool.query(sql`
+        DELETE
+        FROM
+          "public"."schema_checks"
+        WHERE
+          "expires_at" <= ${args.expiresAt.toISOString()}
+      `);
+
+      return 0;
     },
   };
 

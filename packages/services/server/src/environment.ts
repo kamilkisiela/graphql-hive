@@ -27,6 +27,7 @@ const EnvironmentModel = zod.object({
   SCHEMA_POLICY_ENDPOINT: emptyString(zod.string().url().optional()),
   TOKENS_ENDPOINT: zod.string().url(),
   USAGE_ESTIMATOR_ENDPOINT: emptyString(zod.string().url().optional()),
+  USAGE_ESTIMATOR_RETENTION_PURGE_INTERVAL_MINUTES: emptyString(NumberFromString.optional()),
   BILLING_ENDPOINT: emptyString(zod.string().url().optional()),
   EMAILS_ENDPOINT: emptyString(zod.string().url().optional()),
   WEBHOOKS_ENDPOINT: zod.string().url(),
@@ -115,6 +116,7 @@ const HiveModel = zod.union([
     HIVE_API_TOKEN: zod.string(),
     HIVE_USAGE: zod.union([zod.literal('0'), zod.literal('1')]).optional(),
     HIVE_USAGE_ENDPOINT: zod.string().url().optional(),
+    HIVE_USAGE_DATA_RETENTION_PURGE_INTERVAL_MINUTES: emptyString(NumberFromString.optional()),
     HIVE_REPORTING: zod.union([zod.literal('0'), zod.literal('1')]).optional(),
     HIVE_REPORTING_ENDPOINT: zod.string().url().optional(),
   }),
@@ -236,7 +238,12 @@ const hiveConfig =
         token: hive.HIVE_API_TOKEN,
         reporting:
           hive.HIVE_REPORTING === '1' ? { endpoint: hive.HIVE_REPORTING_ENDPOINT ?? null } : null,
-        usage: hive.HIVE_USAGE === '1' ? { endpoint: hive.HIVE_USAGE_ENDPOINT ?? null } : null,
+        usage:
+          hive.HIVE_USAGE === '1'
+            ? {
+                endpoint: hive.HIVE_USAGE_ENDPOINT ?? null,
+              }
+            : null,
       }
     : null;
 
@@ -266,7 +273,10 @@ export const env = {
         }
       : null,
     usageEstimator: base.USAGE_ESTIMATOR_ENDPOINT
-      ? { endpoint: base.USAGE_ESTIMATOR_ENDPOINT }
+      ? {
+          endpoint: base.USAGE_ESTIMATOR_ENDPOINT,
+          dateRetentionPurgeIntervalMinutes: 5,
+        }
       : null,
     billing: base.BILLING_ENDPOINT ? { endpoint: base.BILLING_ENDPOINT } : null,
     emails: base.EMAILS_ENDPOINT ? { endpoint: base.EMAILS_ENDPOINT } : null,

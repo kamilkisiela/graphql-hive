@@ -21,6 +21,7 @@ export type {
   OrganizationBilling,
   OrganizationInvitation,
 } from './shared/entities';
+export { createTaskRunner } from './modules/shared/lib/task-runner';
 export { minifySchema } from './shared/schema';
 export { HiveError } from './shared/errors';
 export { ProjectType } from './__generated__/types';
