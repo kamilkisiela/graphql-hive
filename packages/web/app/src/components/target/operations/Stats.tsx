@@ -768,6 +768,7 @@ export function OperationsStats({
   period,
   operationsFilter,
   clientNamesFilter,
+  resolution,
 }: {
   organization: string;
   project: string;
@@ -776,10 +777,10 @@ export function OperationsStats({
     from: string;
     to: string;
   };
+  resolution: number;
   operationsFilter: string[];
   clientNamesFilter: Array<string>;
 }): ReactElement {
-  const resolution = 90;
   const [query, refetchQuery] = useQuery({
     query: Stats_GeneralOperationsStatsQuery,
     variables: {
