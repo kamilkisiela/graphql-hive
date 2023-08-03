@@ -1,5 +1,5 @@
 import NextImage from 'next/image'
-import { Callout, PackageCmd, Steps, Tab, Tabs } from '@theguild/components'
+import { Callout, Steps, Tab, Tabs } from '@theguild/components'
 import externalCompositionInvalid from '../../../../public/docs/pages/management/external-composition-invalid.png'
 import externalCompositionValid from '../../../../public/docs/pages/management/external-composition-valid.png'
 import externalCompositionOff from '../../../../public/docs/pages/management/external-schema-composition-disabled.png'
@@ -15,7 +15,7 @@ To make this process easier, we've implemented the actual service that you need 
 a JavaScript library, or as a Docker image that can be deployed anywhere.
 
 <Callout type="warning">
-  
+
 **Why external composition is required for Apollo Federation v2?**
 
 As part of the Apollo Federation v2 release,
@@ -92,7 +92,9 @@ do that.
 The following example shows how to implement an External Composition endpoint for Apollo Federation
 v2 in NodeJS.
 
-<PackageCmd packages={['-D @graphql-hive/external-composition']} />
+```sh npm2yarn
+npm i -D @graphql-hive/external-composition
+```
 
 <Callout type="info">
   The `@graphql-hive/external-composition` library provides a thin `compose` function to bring
