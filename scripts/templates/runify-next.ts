@@ -14,8 +14,15 @@ const loggerHandler = require('pino-http')({
   quietReqLogger: true,
   autoLogging: {
     ignore(req) {
+      const isHealthCheck = req.url.startsWith('/api/health');
+
+      if (isHealthCheck) {
+        return true;
+      }
+
       const isApi = req.url.startsWith('/api');
       const isAuth = req.url.startsWith('/auth');
+
       return !isApi && !isAuth;
     },
   },
@@ -24,7 +31,7 @@ const loggerHandler = require('pino-http')({
     if (existingID) {
       return existingID;
     }
-    const id = randomUUID();
+    const id = 'gen-' + randomUUID();
     res.setHeader('x-request-id', id);
     return id;
   },
