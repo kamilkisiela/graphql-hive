@@ -53,8 +53,15 @@ export function renderWarnings(this: baseCommand, warnings: SchemaWarningConnect
   });
 }
 
-export async function loadSchema(file: string) {
+export async function loadSchema(
+  file: string,
+  options?: {
+    headers?: Record<string, string>;
+    method?: 'GET' | 'POST';
+  },
+) {
   const sources = await loadTypedefs(file, {
+    ...options,
     cwd: process.cwd(),
     loaders: [new CodeFileLoader(), new GraphQLFileLoader(), new JsonFileLoader(), new UrlLoader()],
   });
