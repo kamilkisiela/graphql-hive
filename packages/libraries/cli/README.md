@@ -175,7 +175,7 @@ ARGUMENTS
 
 FLAGS
   --header=<value>...  HTTP header to add to the introspection request (in key:value format)
-  --write=<value>      Write to a file
+  --write=<value>      Write to a file (possible extensions: .graphql, .gql, .gqls, .graphqls, .json)
 
 DESCRIPTION
   introspects a GraphQL Schema

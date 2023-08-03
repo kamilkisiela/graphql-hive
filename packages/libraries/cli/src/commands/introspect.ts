@@ -10,7 +10,7 @@ export default class Introspect extends Command {
   static flags = {
     write: Flags.string({
       aliases: ['W'],
-      description: 'Write to a file',
+      description: 'Write to a file (possible extensions: .graphql, .gql, .gqls, .graphqls, .json)',
     }),
     header: Flags.string({
       aliases: ['H'],
