@@ -53,6 +53,7 @@ import migration_2023_08_01T11_44_36_schema_checks_expires_at from './actions/20
 import migration_2023_09_01T09_54_00_zendesk_support from './actions/2023.09.01T09.54.00.zendesk-support';
 import migration_2023_09_25T15_23_00_github_check_with_project_name from './actions/2023.09.25T15.23.00.github-check-with-project-name';
 import migration_2023_09_28T14_14_14_native_fed_v2 from './actions/2023.09.28T14.14.14.native-fed-v2';
+import migration_2023_10_05T11_44_36_schema_checks_github_repository from './actions/2023.10.05T11.44.36.schema-checks-github-repository';
 import { runMigrations } from './pg-migrator';
 
 export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) =>
@@ -114,5 +115,6 @@ export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) 
       migration_2023_09_01T09_54_00_zendesk_support,
       migration_2023_09_25T15_23_00_github_check_with_project_name,
       migration_2023_09_28T14_14_14_native_fed_v2,
+      migration_2023_10_05T11_44_36_schema_checks_github_repository,
     ],
   });

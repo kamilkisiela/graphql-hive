@@ -867,6 +867,7 @@ const SchemaCheckSharedFieldsModel = z.object({
     })
     .nullable(),
   githubCheckRunId: z.number().nullable(),
+  githubRepository: z.string().nullable(),
 });
 
 const SchemaCheckInputModel = z.intersection(

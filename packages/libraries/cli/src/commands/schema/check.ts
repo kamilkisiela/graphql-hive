@@ -168,22 +168,28 @@ export default class SchemaCheck extends Command {
 
       invariant(typeof sdl === 'string' && sdl.length > 0, 'Schema seems empty');
 
+      let github: null | {
+        commit: string;
+        repository: string | null;
+      } = null;
+
       if (usesGitHubApp) {
         invariant(
           typeof commit === 'string',
           `Couldn't resolve commit sha required for GitHub Application`,
         );
+        github = {
+          commit: commit!,
+          // eslint-disable-next-line no-process-env
+          repository: process.env['GITHUB_ACTION_REPOSITORY'] ?? null,
+        };
       }
 
       const result = await this.registryApi(endpoint, accessToken).request(schemaCheckMutation, {
         input: {
           service,
           sdl: minifySchema(sdl),
-          github: usesGitHubApp
-            ? {
-                commit: commit!,
-              }
-            : null,
+          github,
           meta:
             !!commit && !!author
               ? {

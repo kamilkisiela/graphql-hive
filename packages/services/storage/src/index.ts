@@ -3524,6 +3524,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "is_manually_approved"
           , "manual_approval_user_id"
           , "github_check_run_id"
+          , "github_repository"
           , "expires_at"
         )
         VALUES (
@@ -3543,6 +3544,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , ${args.isManuallyApproved}
           , ${args.manualApprovalUserId}
           , ${args.githubCheckRunId}
+          , ${args.githubRepository}
           , ${args.expiresAt?.toISOString() ?? null}
         )
         RETURNING
@@ -4140,6 +4142,7 @@ const schemaCheckSQLFields = sql`
   , "composite_schema_sdl" as "compositeSchemaSDL"
   , "supergraph_sdl" as "supergraphSDL"
   , "github_check_run_id" as "githubCheckRunId"
+  , "github_repository" as "githubRepository"
   , coalesce("is_manually_approved", false) as "isManuallyApproved"
   , "manual_approval_user_id" as "manualApprovalUserId"
 `;

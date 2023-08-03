@@ -380,6 +380,10 @@ export default gql`
 
   input GitHubSchemaCheckInput {
     commit: String!
+    """
+    The repository name of the schema check.
+    """
+    repository: String
   }
 
   input SchemaCompareInput {
