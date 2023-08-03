@@ -3,6 +3,7 @@ import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemail
 import { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
 import zod from 'zod';
 import { env } from '@/env/backend';
+import { getLogger } from '@/server-logger';
 // eslint-disable-next-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
 import { type InternalApi } from '@hive/server';
 import { CreateTRPCProxyClient } from '@trpc/client';
@@ -35,7 +36,8 @@ const createOIDCSuperTokensProvider = (oidcConfig: {
         },
       }).then(res => res.json());
 
-      console.info(
+      const logger = getLogger();
+      logger.info(
         `getProfileInfo: fetched OIDC (${
           oidcConfig.userinfoEndpoint
         }) profile info: ${JSON.stringify(rawData)}`,
@@ -82,6 +84,8 @@ const getOIDCIdFromInput = (input: { userContext: any }): string => {
   const oidcId = new URL(originalUrl).searchParams.get('oidc_id');
 
   if (typeof oidcId !== 'string') {
+    const logger = getLogger();
+    logger.error('Invalid OIDC ID sent from client: %s', oidcId);
     throw new Error('Invalid OIDC ID sent from client.');
   }
 
@@ -131,6 +135,8 @@ export const getOIDCThirdPartyEmailPasswordNodeOverrides = (args: {
 export const createOIDCSuperTokensNoopProvider = () => ({
   id: 'oidc',
   get() {
+    const logger = getLogger();
+    logger.error('OIDC provider implementation was not provided via overrides.');
     throw new Error('Provider implementation was not provided via overrides.');
   },
 });
@@ -148,6 +154,8 @@ const fetchOIDCConfig = async (
 }> => {
   const result = await internalApi.getOIDCIntegrationById.query({ oidcIntegrationId });
   if (result === null) {
+    const logger = getLogger();
+    logger.error('OIDC integration not found: %s', oidcIntegrationId);
     throw new Error('OIDC integration not found.');
   }
   return result;

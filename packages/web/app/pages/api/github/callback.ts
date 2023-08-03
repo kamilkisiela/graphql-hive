@@ -15,6 +15,8 @@ export async function ensureGithubIntegration(
     headers: {
       ...req.headers,
       'content-type': 'application/json',
+      'graphql-client-name': 'Hive App',
+      'graphql-client-version': env.release,
     },
     operationName: 'addGitHubIntegration',
     query: /* GraphQL */ `
@@ -32,7 +34,6 @@ export async function ensureGithubIntegration(
 }
 
 export default async function githubCallback(req: NextApiRequest, res: NextApiResponse) {
-  console.log('GitHub Integration Callback');
   const installationId = req.query.installation_id as string;
   const orgId = req.query.state as string;
 

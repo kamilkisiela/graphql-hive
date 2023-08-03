@@ -1,5 +1,6 @@
 import { NextPageContext } from 'next';
 import NextErrorComponent from 'next/error';
+import { getLogger } from '@/server-logger';
 import { captureException, flush } from '@sentry/nextjs';
 
 const MyError = ({
@@ -23,7 +24,7 @@ const MyError = ({
 };
 
 MyError.getInitialProps = async (props: NextPageContext) => {
-  console.log(props);
+  const logger = getLogger(props.req);
   const errorInitialProps = await NextErrorComponent.getInitialProps({
     res: props.res,
     err: props.err,
@@ -49,6 +50,7 @@ MyError.getInitialProps = async (props: NextPageContext) => {
 
   if (err) {
     captureException(err);
+    logger.error(err);
 
     // Flushing before returning is necessary if deploying to Vercel, see
     // https://vercel.com/docs/platform/limits#streaming-responses
@@ -61,6 +63,7 @@ MyError.getInitialProps = async (props: NextPageContext) => {
   // information about what the error might be. This is unexpected and may
   // indicate a bug introduced in Next.js, so record it in Sentry
   captureException(new Error(`_error.tsx getInitialProps missing data at path: ${asPath}`));
+  logger.error(`_error.tsx getInitialProps missing data at path: ${asPath}`);
   await flush(2000);
 
   return errorInitialProps;

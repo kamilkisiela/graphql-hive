@@ -1,14 +1,16 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { env } from '@/env/backend';
+import { getLogger } from '@/server-logger';
 
 export default async function githubConnectOrg(req: NextApiRequest, res: NextApiResponse) {
-  console.log('Connect to Github');
+  const logger = getLogger(req);
   if (!env.github) {
+    logger.error('GitHub is not set up.');
     throw new Error('GitHub is not set up.');
   }
 
   const { orgId } = req.query;
-  console.log('Organization', orgId);
+  logger.info('Connect to GitHub (orgId=%s)', orgId);
 
   const url = `https://github.com/apps/${env.github.appName}/installations/new`;
 
