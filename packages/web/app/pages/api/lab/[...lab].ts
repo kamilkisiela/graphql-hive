@@ -61,9 +61,15 @@ async function lab(req: NextApiRequest, res: NextApiResponse) {
     },
   };
 
+  if (req['headers']['x-request-id']) {
+    headers['x-request-id'] = req['headers']['x-request-id'] as string;
+  }
+
   const response = await fetch(url, {
     headers: {
       'content-type': 'application/json',
+      'graphql-client-name': 'Hive App',
+      'graphql-client-version': env.release,
       ...headers,
     },
     method: 'POST',

@@ -15,6 +15,8 @@ export async function ensureGithubIntegration(
     headers: {
       ...req.headers,
       'content-type': 'application/json',
+      'graphql-client-name': 'Hive App',
+      'graphql-client-version': env.release,
     },
     operationName: 'addGitHubIntegration',
     query: /* GraphQL */ `

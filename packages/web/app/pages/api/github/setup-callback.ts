@@ -26,6 +26,8 @@ export default async function githubSetupCallback(req: NextApiRequest, res: Next
       headers: {
         ...req.headers,
         'content-type': 'application/json',
+        'graphql-client-name': 'Hive App',
+        'graphql-client-version': env.release,
       },
       operationName: 'getOrganizationByGitHubInstallationId',
       query: /* GraphQL */ `

@@ -53,6 +53,8 @@ export default async function slackCallback(req: NextApiRequest, res: NextApiRes
     headers: {
       ...req.headers,
       'content-type': 'application/json',
+      'graphql-client-name': 'Hive App',
+      'graphql-client-version': env.release,
     },
     operationName: 'addSlackIntegration',
     query: /* GraphQL */ `
