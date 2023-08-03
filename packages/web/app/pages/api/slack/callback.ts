@@ -2,6 +2,7 @@ import { stringify } from 'node:querystring';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { env } from '@/env/backend';
 import { graphql } from '@/lib/api/utils';
+import { getLogger } from '@/server-logger';
 
 async function fetchData({
   url,
@@ -22,7 +23,7 @@ async function fetchData({
 }
 
 export default async function slackCallback(req: NextApiRequest, res: NextApiResponse) {
-  console.log('Slack Integration Callback');
+  const logger = getLogger(req);
 
   if (env.slack === null) {
     throw new Error('The Slack integration is not enabled.');
@@ -30,6 +31,8 @@ export default async function slackCallback(req: NextApiRequest, res: NextApiRes
 
   const { code } = req.query;
   const orgId = req.query.state;
+
+  logger.info('Fetching data from Slack API (orgId=%s)', orgId);
 
   const slackResponse = await fetchData({
     url: 'https://slack.com/api/oauth.v2.access',

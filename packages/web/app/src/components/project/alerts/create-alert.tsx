@@ -83,7 +83,6 @@ export const CreateAlertModal = (props: {
           type: values.type,
         },
       });
-      console.log({ data, error });
       if (!error && data?.addAlert) {
         toggleModalOpen();
       }

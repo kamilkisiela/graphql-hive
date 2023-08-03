@@ -1,7 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getLogger } from '@/server-logger';
 import { captureException } from '@sentry/nextjs';
 
 async function joinWaitingList(req: NextApiRequest, res: NextApiResponse) {
+  const logger = getLogger(req);
+
   function success(message: string) {
     res.status(200).json({
       ok: true,
@@ -17,7 +20,7 @@ async function joinWaitingList(req: NextApiRequest, res: NextApiResponse) {
   }
 
   try {
-    console.log('Joining the waiting list (input=%o)', req.body);
+    logger.info('Joining the waiting list (input=%o)', req.body);
 
     if (req.body.email) {
       await fetch(`https://guild-ms-slack-bot.vercel.app/api/hive?email=${req.body.email}`, {
@@ -29,9 +32,9 @@ async function joinWaitingList(req: NextApiRequest, res: NextApiResponse) {
 
     return success('Thank you for joining our waiting list!');
   } catch (error) {
-    console.error(`Failed to join waiting list: ${error}`);
-    console.error(error);
     captureException(error);
+    logger.error(`Failed to join waiting list: ${error}`);
+    logger.error(error);
     return failure('Failed to join. Try again or contact@the-guild.dev');
   }
 }

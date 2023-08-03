@@ -99,8 +99,6 @@ export function Alerts(props: {
   const [isModalOpen, toggleModalOpen] = useToggle();
   const alerts = props.alerts ?? [];
 
-  console.log('isModalOpen', isModalOpen);
-
   return (
     <>
       <Card>

@@ -2,10 +2,12 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import hyperid from 'hyperid';
 import { env } from '@/env/backend';
 import { extractAccessTokenFromRequest } from '@/lib/api/extract-access-token-from-request';
+import { getLogger } from '@/server-logger';
 import { captureException, getCurrentHub, wrapApiHandlerWithSentry } from '@sentry/nextjs';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 async function graphql(req: NextApiRequest, res: NextApiResponse) {
+  const logger = getLogger(req);
   const url = env.graphqlEndpoint;
 
   const requestIdHeader = req.headers['x-request-id'];
@@ -57,6 +59,7 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
     accessToken = await extractAccessTokenFromRequest(req, res);
   } catch (error) {
     captureException(error);
+    logger.error(error);
   }
 
   // For convenience, we allow to pass the access token in the Authorization header
@@ -105,8 +108,8 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
 
     res.status(200).json(parsedData);
   } catch (error) {
-    console.error(error);
     captureException(error);
+    logger.error(error);
 
     graphqlSpan?.setHttpStatus(500);
     graphqlSpan?.finish();
