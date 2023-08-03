@@ -2704,7 +2704,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const data = await pool.maybeOne<Record<string, string>>(
         sql`SELECT base_schema FROM public.targets WHERE id=${target} AND project_id=${project}`,
       );
-      return data!.base_schema;
+      return data?.base_schema ?? null;
     },
     async updateBaseSchema({ project, target }, base) {
       if (base) {
