@@ -729,30 +729,62 @@ export class OperationsReader {
 
     const dbResult = await this.clickHouse.query({
       queryId: 'get_hashes_for_schema_coordinates',
+      // KAMIL: I know this query is a bit weird, but it's the best I could come up with.
+      // It processed 27x less rows than the previous version.
+      // It's 30x faster.
+      // It consumes 36x less memory (~8MB).
+      // It obviously depends on the amount of original data, but I tested it on a multiple datasets
+      // and the ratio is always similar.
+      // I'm open to suggestions on how to improve it.
+      //
+      // What the query does is:
+      // 1. Fetches all coordinates of a given type, with associated operation hashes.
+      // 2. Fetches all client names (groups them by hash) of a given hash.
+      // 3. Groups rows by coordinate.
+      // 4. Merges client names and removes duplicates.
+      //
+      // Why it's faster then the previous version?
+      // It's using sub queries instead of joins (yeah there is a join but with preselected list of rows).
+      // It fetches much less data.
+      // It fetches rows more accurately.
       query: sql`
+        SELECT
+          co.coordinate AS coordinate,
+          groupUniqArrayArray(cl.client_names) AS client_names
+        FROM
+        (
           SELECT
             co.coordinate,
-            arrayDistinct(groupArray(cl.client_name)) as client_names
-          FROM coordinates_daily as co
-            LEFT JOIN clients_daily as cl ON (
-              co.hash = cl.hash AND 
-              ${this.createFilter({
-                target: args.targetId,
-                period: args.period,
-                skipWhere: true,
-                namespace: 'cl',
-              })}
-            )
+            co.hash
+          FROM coordinates_daily AS co
           ${this.createFilter({
             target: args.targetId,
             period: args.period,
             extra: [
-              sql`( coordinate = ${args.typename} OR coordinate LIKE ${args.typename + '.%'} )`,
+              sql`( co.coordinate = ${args.typename} OR co.coordinate LIKE ${
+                args.typename + '.%'
+              } )`,
             ],
+            namespace: 'co',
           })}
-          GROUP BY co.hash
-          SETTINGS join_algorithm = 'parallel_hash'
-        `,
+          GROUP BY co.coordinate, co.hash
+        ) AS co
+        LEFT JOIN
+        (
+            SELECT
+              arrayDistinct(groupArray(client_name)) AS client_names,
+              cl.hash AS hash
+            FROM clients_daily AS cl
+            ${this.createFilter({
+              target: args.targetId,
+              period: args.period,
+              namespace: 'cl',
+            })}
+            GROUP BY cl.hash
+        ) AS cl ON co.hash = cl.hash
+        GROUP BY co.coordinate
+        SETTINGS join_algorithm = 'parallel_hash'
+      `,
       timeout: 15_000,
     });
 
