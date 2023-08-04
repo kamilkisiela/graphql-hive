@@ -298,6 +298,14 @@ export class SchemaPublisher {
         throw new HiveError(`${project.type} project (${modelVersion}) not supported`);
     }
 
+    // store schema that is being checked in checksums table
+    // TODO: fetch supergraph schema checksum from composite
+
+    let schemaChecksum = await this.storage.createSchemaSDLChecksum({
+      targetId: target.id,
+      schemaSDL: sdl,
+    });
+
     let schemaCheck: null | SchemaCheck = null;
 
     if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
@@ -326,6 +334,8 @@ export class SchemaPublisher {
         isManuallyApproved: false,
         manualApprovalUserId: null,
         githubCheckRunId: null,
+        schemaChecksum: null,
+        supergraphSchemaChecksum: null,
       });
     }
 
@@ -383,6 +393,8 @@ export class SchemaPublisher {
         isManuallyApproved: false,
         manualApprovalUserId: null,
         githubCheckRunId: null,
+        schemaChecksum: schemaChecksum.checksum,
+        supergraphSchemaChecksum: null,
       });
     }
 

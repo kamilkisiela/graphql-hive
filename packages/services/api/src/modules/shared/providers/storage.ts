@@ -30,6 +30,7 @@ import type {
   PersistedOperation,
   Project,
   Schema,
+  SchemaChecksum,
   SchemaLog,
   SchemaPolicy,
   SchemaVersion,
@@ -404,6 +405,11 @@ export interface Storage {
       ),
   ): Promise<SchemaVersion | never>;
 
+  createSchemaSDLChecksum(_: {
+    schemaSDL: string;
+    targetId: string;
+  }): Promise<SchemaChecksum | never>;
+
   /**
    * Returns the changes between the given version and the previous version.
    * If it return `null` the schema version does not have any changes persisted.
@@ -413,7 +419,7 @@ export interface Storage {
 
   updateVersionStatus(
     _: {
-      valid: boolean;
+      valid: boolean; 
       version: string;
     } & TargetSelector,
   ): Promise<SchemaVersion | never>;

@@ -1,5 +1,5 @@
 import { DocumentNode, GraphQLError, parse, SourceLocation } from 'graphql';
-import { z } from 'zod';
+import { number, z } from 'zod';
 import type { AvailableRulesResponse, PolicyConfigurationObject } from '@hive/policy';
 import type { CompositionFailureError } from '@hive/schema';
 import type { schema_policy_resource, SchemaCompositionError } from '@hive/storage';
@@ -76,6 +76,14 @@ export interface SchemaVersion {
   compositeSchemaSDL: null | string;
   supergraphSDL: null | string;
   schemaCompositionErrors: Array<SchemaCompositionError> | null;
+}
+
+export interface SchemaChecksum {
+  checksum: number;
+  schemaSdl: string;
+  targetId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface SchemaObject {

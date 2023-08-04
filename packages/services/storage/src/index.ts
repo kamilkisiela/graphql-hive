@@ -3441,6 +3441,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "is_manually_approved"
           , "manual_approval_user_id"
           , "github_check_run_id"
+          , "schema_checkshum"
+          , "supergraph_schema_checksum"
         )
         VALUES (
           ${args.schemaSDL}
@@ -3459,6 +3461,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , ${args.isManuallyApproved}
           , ${args.manualApprovalUserId}
           , ${args.githubCheckRunId}
+          , ${args.schemaChecksum}
+          , ${args.supergraphSchemaChecksum}
         )
         RETURNING
           ${schemaCheckSQLFields}
