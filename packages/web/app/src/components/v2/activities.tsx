@@ -31,9 +31,9 @@ export const getActivity = (
     <Link
       variant="primary"
       href={{
-        pathname: '/[orgId]/[projectId]',
+        pathname: '/[organizationId]/[projectId]',
         query: {
-          orgId: organization.cleanId,
+          organizationId: organization.cleanId,
           projectId: activity.project.cleanId,
         },
       }}
@@ -42,19 +42,20 @@ export const getActivity = (
     </Link>
   );
 
-  const targetHref = 'target' in activity &&
-    !!activity.target && {
-      pathname: '/[orgId]/[projectId]/[targetId]',
-      query: {
-        orgId: organization.cleanId,
-        projectId: activity.project.cleanId,
-        targetId: activity.target.cleanId,
-      },
-    };
+  const targetHref =
+    'target' in activity && !!activity.target
+      ? {
+          pathname: '/[organizationId]/[projectId]/[targetId]',
+          query: {
+            organizationId: organization.cleanId,
+            projectId: activity.project.cleanId,
+            targetId: activity.target.cleanId,
+          },
+        }
+      : '#';
 
   const targetLink = 'target' in activity && !!activity.target && (
-    /* TODO: figure out what is going on with targetHref... */
-    <Link variant="primary" href={targetHref as any}>
+    <Link variant="primary" href={targetHref}>
       {activity.target.name}
     </Link>
   );
@@ -185,8 +186,8 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} changed {/* TODO: figure out what is going on with targetHref... */}
-            <Link variant="primary" href={targetHref as any}>
+            {user.displayName} changed{' '}
+            <Link variant="primary" href={targetHref}>
               {activity.value}
             </Link>{' '}
             target name in {projectLink} project

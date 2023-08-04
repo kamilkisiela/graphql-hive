@@ -87,7 +87,7 @@ export function ProjectLayout({
   const router = useRouteSelector();
   const [isModalOpen, toggleModalOpen] = useToggle();
 
-  const { organizationId: orgId, projectId } = router;
+  const { organizationId: orgId } = router;
 
   const currentOrganization = useFragment(
     ProjectLayout_CurrentOrganizationFragment,
@@ -119,7 +119,13 @@ export function ProjectLayout({
           <div className="flex flex-row items-center gap-4">
             <HiveLink className="w-8 h-8" />
             {currentOrganization ? (
-              <NextLink href={`/${orgId}`} className="shrink-0 font-medium truncate max-w-[200px]">
+              <NextLink
+                href={{
+                  pathname: '/[organizationId]',
+                  query: { organizationId: currentOrganization.cleanId },
+                }}
+                className="shrink-0 font-medium truncate max-w-[200px]"
+              >
                 {currentOrganization.name}
               </NextLink>
             ) : (
@@ -164,19 +170,39 @@ export function ProjectLayout({
       </header>
 
       {value === 'settings' || currentProject?.registryModel !== 'LEGACY' ? null : (
-        <ProjectMigrationToast orgId={orgId} projectId={projectId} />
+        <ProjectMigrationToast orgId={orgId} projectId={currentProject.cleanId} />
       )}
+
       <div className="relative border-b border-gray-800">
         <div className="container flex justify-between items-center">
-          {currentOrganization ? (
+          {currentOrganization && currentProject ? (
             <Tabs value={value}>
               <Tabs.List>
                 <Tabs.Trigger value={TabValue.Targets} asChild>
-                  <NextLink href={`/${orgId}/${projectId}`}>Targets</NextLink>
+                  <NextLink
+                    href={{
+                      pathname: '/[organizationId]/[projectId]',
+                      query: {
+                        organizationId: currentOrganization.cleanId,
+                        projectId: currentProject.cleanId,
+                      },
+                    }}
+                  >
+                    Targets
+                  </NextLink>
                 </Tabs.Trigger>
                 {canAccessProject(ProjectAccessScope.Alerts, currentOrganization.me) && (
                   <Tabs.Trigger value={TabValue.Alerts} asChild>
-                    <NextLink href={`/${orgId}/${projectId}/view/${TabValue.Alerts}`}>
+                    <NextLink
+                      href={{
+                        pathname: '/[organizationId]/[projectId]/view/[tab]',
+                        query: {
+                          organizationId: currentOrganization.cleanId,
+                          projectId: currentProject.cleanId,
+                          tab: TabValue.Alerts,
+                        },
+                      }}
+                    >
                       Alerts
                     </NextLink>
                   </Tabs.Trigger>
@@ -184,12 +210,30 @@ export function ProjectLayout({
                 {canAccessProject(ProjectAccessScope.Settings, currentOrganization.me) && (
                   <>
                     <Tabs.Trigger value={TabValue.Policy} asChild>
-                      <NextLink href={`/${orgId}/${projectId}/view/${TabValue.Policy}`}>
+                      <NextLink
+                        href={{
+                          pathname: '/[organizationId]/[projectId]/view/[tab]',
+                          query: {
+                            organizationId: currentOrganization.cleanId,
+                            projectId: currentProject.cleanId,
+                            tab: TabValue.Policy,
+                          },
+                        }}
+                      >
                         Policy
                       </NextLink>
                     </Tabs.Trigger>
                     <Tabs.Trigger value={TabValue.Settings} asChild>
-                      <NextLink href={`/${orgId}/${projectId}/view/${TabValue.Settings}`}>
+                      <NextLink
+                        href={{
+                          pathname: '/[organizationId]/[projectId]/view/[tab]',
+                          query: {
+                            organizationId: currentOrganization.cleanId,
+                            projectId: currentProject.cleanId,
+                            tab: TabValue.Settings,
+                          },
+                        }}
+                      >
                         Settings
                       </NextLink>
                     </Tabs.Trigger>

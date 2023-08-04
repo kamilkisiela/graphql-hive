@@ -21,7 +21,15 @@ function SubgraphChip(props: { text: string; tooltip: boolean }): React.ReactEle
 
   const inner = (
     <Link
-      href={`/${router.organizationId}/${router.projectId}/${router.targetId}#${props.text}`}
+      href={{
+        pathname: '/[organizationId]/[projectId]/[targetId]#[text]',
+        query: {
+          organizationId: router.organizationId,
+          projectId: router.projectId,
+          targetId: router.targetId,
+          text: props.text,
+        },
+      }}
       style={{ backgroundColor: stringToHslColor(props.text) }}
       className="drop-shadow-md my-[2px] ml-[6px] h-[22px] cursor-pointer items-center justify-between rounded-[16px] pr-[6px] pl-[8px] py-0 text-[10px] font-normal normal-case leading-loose text-[#4f4f4f] inline-block max-w-[100px] whitespace-nowrap overflow-hidden text-ellipsis"
     >

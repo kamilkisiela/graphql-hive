@@ -383,7 +383,15 @@ function GraphQLTypeAsLink(props: { type: string }): ReactElement {
   return (
     <Link
       className="text-orange-500"
-      href={`/${router.organizationId}/${router.projectId}/${router.targetId}/explorer/${typename}`}
+      href={{
+        pathname: '/[organizationId]/[projectId]/[targetId]/explorer/[typename]',
+        query: {
+          organizationId: router.organizationId,
+          projectId: router.projectId,
+          graphId: router.targetId,
+          typename,
+        },
+      }}
     >
       {props.type}
     </Link>

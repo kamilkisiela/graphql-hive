@@ -156,7 +156,13 @@ export function UserMenu(props: {
                   ) : null}
                   <DropdownMenuSeparator />
                   {organizations.nodes.map(org => (
-                    <NextLink href={`/${org.cleanId}`} key={org.cleanId}>
+                    <NextLink
+                      href={{
+                        pathname: '/[organizationId]',
+                        query: { organizationId: org.cleanId },
+                      }}
+                      key={org.cleanId}
+                    >
                       <DropdownMenuItem active={currentOrganization?.cleanId === org.cleanId}>
                         {org.name}
                       </DropdownMenuItem>

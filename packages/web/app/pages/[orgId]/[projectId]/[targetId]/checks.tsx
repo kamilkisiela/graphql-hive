@@ -90,7 +90,15 @@ const Navigation = (props: {
             >
               <NextLink
                 key={edge.node.id}
-                href={`/${router.organizationId}/${router.projectId}/${router.targetId}/checks/${edge.node.id}`}
+                href={{
+                  pathname: '/[organizationId]/[projectId]/[targetId]/checks/[checkId]',
+                  query: {
+                    organizationId: router.organizationId,
+                    projectId: router.projectId,
+                    targetId: router.targetId,
+                    checkId: edge.node.id,
+                  },
+                }}
                 scroll={false} // disable the scroll to top on page
               >
                 <h3 className="truncate font-semibold text-sm">

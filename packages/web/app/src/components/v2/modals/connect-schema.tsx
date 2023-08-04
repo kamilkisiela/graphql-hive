@@ -116,7 +116,14 @@ export const ConnectSchemaModal = ({
             <Link
               variant="primary"
               className="font-bold underline"
-              href={`/${router.organizationId}/${router.projectId}/${router.targetId}/settings#cdn-access-tokens`}
+              href={{
+                pathname: '/[organizationId]/[projectId]/[targetId]/settings#cdn-access-tokens',
+                query: {
+                  organizationId: router.organizationId,
+                  projectId: router.projectId,
+                  targetId: router.targetId,
+                },
+              }}
               target="_blank"
               rel="noreferrer"
             >

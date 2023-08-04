@@ -119,7 +119,14 @@ function Integrations(): ReactElement | null {
             </Button>
           ) : (
             <Button variant="secondary" asChild>
-              <NextLink href={`/api/slack/connect/${orgId}`}>
+              <NextLink
+                href={{
+                  pathname: '/api/slack/connect/[organizationId]',
+                  query: {
+                    organizationId: orgId,
+                  },
+                }}
+              >
                 <SlackIcon className="mr-2" />
                 Connect Slack
               </NextLink>
@@ -148,12 +155,28 @@ function Integrations(): ReactElement | null {
                   Disconnect GitHub
                 </Button>
                 <Button variant="link" asChild>
-                  <NextLink href={`/api/github/connect/${orgId}`}>Adjust permissions</NextLink>
+                  <NextLink
+                    href={{
+                      pathname: '/api/github/connect/[organizationId]',
+                      query: {
+                        organization: orgId,
+                      },
+                    }}
+                  >
+                    Adjust permissions
+                  </NextLink>
                 </Button>
               </>
             ) : (
               <Button variant="secondary" asChild>
-                <NextLink href={`/api/github/connect/${orgId}`}>
+                <NextLink
+                  href={{
+                    pathname: '/api/github/connect/[organizationId]',
+                    query: {
+                      organization: orgId,
+                    },
+                  }}
+                >
                   <GitHubIcon className="mr-2" />
                   Connect GitHub
                 </NextLink>

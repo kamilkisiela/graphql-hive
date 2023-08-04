@@ -130,7 +130,14 @@ function SubscriptionPageContent() {
           </div>
           <div>
             <Button asChild>
-              <NextLink href={`/${currentOrganization.cleanId}/view/manage-subscription`}>
+              <NextLink
+                href={{
+                  pathname: '/[organizationId]/view/manage-subscription',
+                  query: {
+                    organizationId: currentOrganization.cleanId,
+                  },
+                }}
+              >
                 Manage subscription
               </NextLink>
             </Button>

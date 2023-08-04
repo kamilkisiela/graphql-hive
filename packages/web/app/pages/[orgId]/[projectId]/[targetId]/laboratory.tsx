@@ -157,6 +157,7 @@ const CollectionItem = (props: {
     <div key={props.node.id} className="flex justify-between items-center">
       <Link
         href={{
+          pathname: '/[orgId]/[projectId]/[targetId]/laboratory/[operation]',
           query: {
             operation: props.node.id,
             orgId: router.organizationId,
@@ -771,7 +772,14 @@ function LaboratoryPageContent() {
           <div>
             {query.data && !query.data.target?.graphqlEndpointUrl ? (
               <NextLink
-                href={`/${router.organizationId}/${router.projectId}/${router.targetId}/settings`}
+                href={{
+                  pathname: '/[organizationId]/[projectId]/[targetId]/settings',
+                  query: {
+                    organizationId: router.organizationId,
+                    projectId: router.projectId,
+                    targetId: router.targetId,
+                  },
+                }}
               >
                 <Button variant="outline" className="mr-2" size="sm">
                   Connect GraphQL API Endpoint
