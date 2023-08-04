@@ -24,7 +24,6 @@ export const getServerSideProps: GetServerSideProps = async context => {
 
   // See counter-part in '@/config/supertokens/frontend.ts'
   if (env.auth.organizationOIDC === true) {
-    const url = new URL(env.appBaseUrl + (context.req.url ?? ''));
     const oidcProviderId = url.searchParams.get('id');
 
     if (url.pathname === '/auth/oidc') {
