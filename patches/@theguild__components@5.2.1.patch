@@ -1,0 +1,47 @@
+diff --git a/dist/index.js b/dist/index.js
+index 027689af48e0890751c8055fee5b63a6034ff415..a31866a79abaee51f7fa610019e77436d1012d64 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -2907,7 +2907,7 @@ function Tabs2({
+ 
+ // src/define-config.tsx
+ import { useRouter as useRouter3 } from "next/router";
+-import { Navbar, useConfig } from "nextra-theme-docs";
++import { Navbar, useConfig, Flexsearch } from "nextra-theme-docs";
+ import { Fragment as Fragment8, jsx as jsx45, jsxs as jsxs31 } from "react/jsx-runtime";
+ function defineConfig({
+   siteName: originalSiteName,
+@@ -2937,12 +2937,16 @@ function defineConfig({
+     },
+     navbar: {
+       component: (props) => /* @__PURE__ */ jsxs31(Fragment8, { children: [
+-        /* @__PURE__ */ jsx45(Header, { accentColor: "#1cc8ee", searchBarProps: { version: "v2" } }),
++        /* @__PURE__ */ jsx45(Header, { accentColor: "#1cc8ee", searchBarProps: { version: "v2" }, search: false }),
+         /* @__PURE__ */ jsx45(Navbar, { ...props })
+       ] })
+     },
+     search: {
+-      component: null
++      component: props => jsx45(Flexsearch, { ...props }),
++      emptyResult: () => jsx45("span", { className: "nx-block nx-select-none nx-p-8 nx-text-center nx-text-sm nx-text-gray-400", children: "No results found." }),
++      error: "Failed to load search index.",
++      loading: () => jsxs31(Fragment8, { children: ["Loading…"] }),
++      placeholder:() => "Search documentation…",
+     },
+     sidebar: {
+       defaultMenuCollapseLevel: 1,
+diff --git a/dist/next.config.mjs b/dist/next.config.mjs
+index 6ef98a9b58de5349c45395a11f3cc91c8d25866e..0e6d35c788c0b8e96a9d572b66436259d19aa395 100644
+--- a/dist/next.config.mjs
++++ b/dist/next.config.mjs
+@@ -79,7 +79,9 @@ var withGuildDocs = ({
+     mdxOptions: {
+       remarkPlugins: defaultRemarkPlugins
+     },
+-    flexsearch: false
++    flexsearch: {
++      codeblocks: false
++    },
+   });
+   const siteUrl = process.env.SITE_URL || "";
+   return withBundleAnalyzer(

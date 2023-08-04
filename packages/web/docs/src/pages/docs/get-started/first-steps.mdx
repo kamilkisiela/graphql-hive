@@ -1,5 +1,5 @@
 import NextImage from 'next/image'
-import { Callout, Card, Cards, PackageCmd, Steps } from '@theguild/components'
+import { Callout, Card, Cards, Steps } from '@theguild/components'
 import orgImage from '../../../../public/docs/pages/first-steps/org.png'
 import projectImage from '../../../../public/docs/pages/first-steps/project.png'
 import signupImage from '../../../../public/docs/pages/first-steps/signup.png'
@@ -52,7 +52,9 @@ Hive CLI is a command-line tool that allows you to manage your GraphQL schemas t
 
 If you are running a JavaScript/NodeJS project, you can install Hive CLI from the `npm` registry:
 
-<PackageCmd packages={['-D @graphql-hive/cli']} />
+```sh npm2yarn
+npm i -D @graphql-hive/cli
+```
 
 <Callout type="info">
   We recommend installing Hive CLI as part of your project, under `devDependencies`, instead of
