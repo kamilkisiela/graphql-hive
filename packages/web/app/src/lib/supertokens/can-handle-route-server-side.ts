@@ -21,6 +21,7 @@ if (env.auth.github) {
 }
 if (env.auth.organizationOIDC) {
   supertokenRoutes.add('/auth/oidc');
+  supertokenRoutes.add('/auth/callback/oidc');
 }
 
 export function canHandleRouteServerSide(path: string) {
