@@ -123,9 +123,14 @@ export const internalApiRouter = t.router({
       }),
     )
     .query(async ({ input, ctx }) => {
+      if (z.string().uuid().safeParse(input.oidcIntegrationId).success === false) {
+        return null;
+      }
+
       const result = await ctx.storage.getOIDCIntegrationById({
         oidcIntegrationId: input.oidcIntegrationId,
       });
+
       if (result == null) {
         return null;
       }

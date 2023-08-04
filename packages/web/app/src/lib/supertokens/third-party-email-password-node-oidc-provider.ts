@@ -105,6 +105,13 @@ export const getOIDCThirdPartyEmailPasswordNodeOverrides = (args: {
       const oidcId = getOIDCIdFromInput(input);
       const config = await fetchOIDCConfig(args.internalApi, oidcId);
 
+      if (config === null) {
+        return {
+          status: 'GENERAL_ERROR',
+          message: 'Could not find OIDC integration.',
+        };
+      }
+
       return originalImplementation.thirdPartySignInUpPOST!({
         ...input,
         provider: createOIDCSuperTokensProvider(config),
@@ -121,6 +128,13 @@ export const getOIDCThirdPartyEmailPasswordNodeOverrides = (args: {
 
       const oidcId = getOIDCIdFromInput(input);
       const config = await fetchOIDCConfig(args.internalApi, oidcId);
+
+      if (config === null) {
+        return {
+          status: 'GENERAL_ERROR',
+          message: 'Could not find OIDC integration.',
+        };
+      }
 
       const result = originalImplementation.authorisationUrlGET!({
         ...input,
@@ -151,12 +165,12 @@ const fetchOIDCConfig = async (
   tokenEndpoint: string;
   userinfoEndpoint: string;
   authorizationEndpoint: string;
-}> => {
+} | null> => {
   const result = await internalApi.getOIDCIntegrationById.query({ oidcIntegrationId });
   if (result === null) {
     const logger = getLogger();
     logger.error('OIDC integration not found: %s', oidcIntegrationId);
-    throw new Error('OIDC integration not found.');
+    return null;
   }
   return result;
 };
