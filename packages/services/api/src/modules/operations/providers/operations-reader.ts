@@ -750,7 +750,7 @@ export class OperationsReader {
               sql`( coordinate = ${args.typename} OR coordinate LIKE ${args.typename + '.%'} )`,
             ],
           })}
-          GROUP BY co.hash, co.coordinate
+          GROUP BY co.hash
           SETTINGS join_algorithm = 'parallel_hash'
         `,
       timeout: 15_000,
