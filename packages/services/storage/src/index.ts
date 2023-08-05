@@ -7,6 +7,7 @@ import {
   UniqueIntegrityConstraintViolationError,
 } from 'slonik';
 import { update } from 'slonik-utilities';
+import ssri from 'ssri';
 import zod from 'zod';
 import type { Change } from '@graphql-inspector/core';
 import type {
@@ -32,6 +33,7 @@ import type {
 import { batch } from '@theguild/buddy';
 import { ProjectType } from '../../api/src';
 import {
+  SchemaChecksum,
   type CDNAccessToken,
   type OIDCIntegration,
   type SchemaLog,
@@ -51,6 +53,7 @@ import {
   projects,
   schema_log as schema_log_in_db,
   schema_policy_config,
+  schema_sdl_checksums,
   schema_version_to_log,
   schema_versions,
   target_validation,
@@ -113,6 +116,14 @@ function getProviderBasedOnExternalId(externalId: string): AuthProvider {
   return 'AUTH0';
 }
 
+function getIntegrityHashOf(input: string): string {
+  return ssri
+    .fromData(input, {
+      algorithms: ['sha512'],
+    })
+    .toString({ sep: '\n' });
+}
+
 export async function createStorage(connection: string, maximumPoolSize: number): Promise<Storage> {
   const pool = await getPool(connection, maximumPoolSize);
 
@@ -139,6 +150,16 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       resource: schema_policy.resource_type,
       resourceId: schema_policy.resource_id,
       allowOverrides: schema_policy.allow_overriding,
+    };
+  }
+
+  function transformSchemaSDLChecksum(schema_sdl_checksum: schema_sdl_checksums): SchemaChecksum {
+    return {
+      checksum: schema_sdl_checksum.checksum,
+      createdAt: schema_sdl_checksum.created_at,
+      updatedAt: schema_sdl_checksum.updated_at,
+      targetId: schema_sdl_checksum.target_id,
+      schemaSdl: schema_sdl_checksum.schema_sdl,
     };
   }
 
@@ -2109,6 +2130,21 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return output.version;
     },
 
+    async createSchemaSDLChecksum(args) {
+      if (args.schemaSDL === null || args.schemaSDL === undefined) {
+        return null;
+      }
+
+      const checksum = getIntegrityHashOf(args.schemaSDL);
+      const result = await pool.one<schema_sdl_checksums>(sql`
+          INSERT INTO schema_sdl_checksums ("schema_sdl", "checksum", "target_id")
+          VALUES (${args.schemaSDL}, ${checksum}, ${args.targetId}) ON CONFLICT(checksum, target_id)
+          DO UPDATE SET updated_at = NOW()
+          RETURNING *;
+        `);
+      return transformSchemaSDLChecksum(result);
+    },
+
     async getSchemaChangesForVersion(args) {
       // TODO: should this be paginated?
       const changes = await pool.query<unknown>(sql`
@@ -3441,7 +3477,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "is_manually_approved"
           , "manual_approval_user_id"
           , "github_check_run_id"
-          , "schema_checkshum"
+          , "schema_checksum"
+          , "composite_schema_checksum"
           , "supergraph_schema_checksum"
         )
         VALUES (
@@ -3462,12 +3499,12 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , ${args.manualApprovalUserId}
           , ${args.githubCheckRunId}
           , ${args.schemaChecksum}
+          , ${args.compositeSchemaChecksum}
           , ${args.supergraphSchemaChecksum}
         )
         RETURNING
           ${schemaCheckSQLFields}
       `);
-
       return SchemaCheckModel.parse(result);
     },
     async findSchemaCheck(args) {
@@ -3956,6 +3993,9 @@ const schemaCheckSQLFields = sql`
   , "schema_policy_errors" as "schemaPolicyErrors"
   , "composite_schema_sdl" as "compositeSchemaSDL"
   , "supergraph_sdl" as "supergraphSDL"
+  , "schema_checksum" as "schemaChecksum"
+  , "composite_schema_checksum" as "compositeSchemaChecksum"
+  , "supergraph_schema_checksum" as "supergraphSchemaChecksum"
   , "github_check_run_id" as "githubCheckRunId"
   , coalesce("is_manually_approved", false) as "isManuallyApproved"
   , "manual_approval_user_id" as "manualApprovalUserId"

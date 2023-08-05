@@ -821,17 +821,17 @@ const FailedSchemaCheckPartialModel = z.intersection(
       compositeSchemaSDL: z.null(),
       supergraphSDL: z.null(),
 
-      schemaChecksum: z.null(),
+      compositeSchemaChecksum: z.null(),
       supergraphSchemaChecksum: z.null(),
     }),
     z.object({
       schemaCompositionErrors: z.null(),
 
-      compositeSchemaSDL: z.string(),
+      compositeSchemaSDL: z.string().nullable(),
       supergraphSDL: z.string().nullable(),
 
-      schemaChecksum: z.number().nullable(),
-      supergraphSchemaChecksum: z.number().nullable(),
+      compositeSchemaChecksum: z.string().nullable(),
+      supergraphSchemaChecksum: z.string().nullable(),
     }),
   ]),
 );
@@ -849,8 +849,8 @@ const SuccessfulSchemaCheckPartialModel = z.intersection(
     compositeSchemaSDL: z.string(),
     supergraphSDL: z.string().nullable(),
 
-    schemaChecksum: z.number().nullable(),
-    supergraphSchemaChecksum: z.number().nullable(),
+    compositeSchemaChecksum: z.string().nullable(),
+    supergraphSchemaChecksum: z.string().nullable(),
   }),
   z.union([
     z.object({
@@ -866,6 +866,7 @@ const SuccessfulSchemaCheckPartialModel = z.intersection(
 
 const SchemaCheckSharedFieldsModel = z.object({
   schemaSDL: z.string(),
+  schemaChecksum: z.string().nullable(),
   serviceName: z.string().nullable(),
   targetId: z.string(),
   schemaVersionId: z.string().nullable(),

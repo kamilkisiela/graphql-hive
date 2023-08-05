@@ -166,6 +166,7 @@ export interface projects {
 
 export interface schema_checks {
   breaking_schema_changes: any | null;
+  composite_schema_checksum: string | null;
   composite_schema_sdl: string | null;
   created_at: Date;
   github_check_run_id: string | null;
@@ -175,12 +176,14 @@ export interface schema_checks {
   manual_approval_user_id: string | null;
   meta: any | null;
   safe_schema_changes: any | null;
+  schema_checksum: string | null;
   schema_composition_errors: any | null;
   schema_policy_errors: any | null;
   schema_policy_warnings: any | null;
   schema_sdl: string;
   schema_version_id: string | null;
   service_name: string | null;
+  supergraph_schema_checksum: string | null;
   supergraph_sdl: string | null;
   target_id: string;
   updated_at: Date;
@@ -206,6 +209,14 @@ export interface schema_policy_config {
   created_at: Date;
   resource_id: string;
   resource_type: schema_policy_resource;
+  updated_at: Date;
+}
+
+export interface schema_sdl_checksums {
+  checksum: string;
+  created_at: Date;
+  schema_sdl: string;
+  target_id: string;
   updated_at: Date;
 }
 
@@ -314,6 +325,7 @@ export interface DBTables {
   schema_checks: schema_checks;
   schema_log: schema_log;
   schema_policy_config: schema_policy_config;
+  schema_sdl_checksums: schema_sdl_checksums;
   schema_version_changes: schema_version_changes;
   schema_version_to_log: schema_version_to_log;
   schema_versions: schema_versions;

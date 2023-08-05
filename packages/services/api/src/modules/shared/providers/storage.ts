@@ -406,9 +406,9 @@ export interface Storage {
   ): Promise<SchemaVersion | never>;
 
   createSchemaSDLChecksum(_: {
-    schemaSDL: string;
+    schemaSDL: string | null | undefined;
     targetId: string;
-  }): Promise<SchemaChecksum | never>;
+  }): Promise<SchemaChecksum | never | null>;
 
   /**
    * Returns the changes between the given version and the previous version.
@@ -419,7 +419,7 @@ export interface Storage {
 
   updateVersionStatus(
     _: {
-      valid: boolean; 
+      valid: boolean;
       version: string;
     } & TargetSelector,
   ): Promise<SchemaVersion | never>;

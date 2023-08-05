@@ -1149,6 +1149,9 @@ importers:
       slonik-utilities:
         specifier: 1.9.4
         version: 1.9.4(slonik@30.4.4)
+      ssri:
+        specifier: 10.0.4
+        version: 10.0.4
       zod:
         specifier: 3.21.4
         version: 3.21.4
@@ -1165,6 +1168,9 @@ importers:
       '@types/pg':
         specifier: 8.10.2
         version: 8.10.2
+      '@types/ssri':
+        specifier: 7.1.1
+        version: 7.1.1
       pg-promise:
         specifier: 11.5.0
         version: 11.5.0
@@ -12664,6 +12670,12 @@ packages:
       '@types/node': 18.16.19
     dev: true
 
+  /@types/ssri@7.1.1:
+    resolution: {integrity: sha512-DPP/jkDaqGiyU75MyMURxLWyYLwKSjnAuGe9ZCsLp9QZOpXmDfuevk769F0BS86TmRuD5krnp06qw9nSoNO+0g==}
+    dependencies:
+      '@types/node': 18.16.19
+    dev: true
+
   /@types/supports-color@8.1.1:
     resolution: {integrity: sha512-dPWnWsf+kzIG140B8z2w3fr5D03TLWbOAFQl45xUpI3vcizeXriNR5VYkWZ+WTMsUHqZ9Xlt3hrxGNANFyNQfw==}
     dev: true
@@ -14664,7 +14676,7 @@ packages:
       minipass-pipeline: 1.2.4
       p-map: 4.0.0
       promise-inflight: 1.0.1(bluebird@3.7.2)
-      ssri: 10.0.1
+      ssri: 10.0.4
       tar: 6.1.13
       unique-filename: 3.0.0
     transitivePeerDependencies:
@@ -21809,7 +21821,7 @@ packages:
       negotiator: 0.6.3
       promise-retry: 2.0.1
       socks-proxy-agent: 7.0.0
-      ssri: 10.0.1
+      ssri: 10.0.4
     transitivePeerDependencies:
       - bluebird
       - supports-color
@@ -24532,7 +24544,7 @@ packages:
       read-package-json: 6.0.3
       read-package-json-fast: 3.0.2
       sigstore: 1.5.2
-      ssri: 10.0.1
+      ssri: 10.0.4
       tar: 6.1.13
     transitivePeerDependencies:
       - bluebird
@@ -27905,11 +27917,11 @@ packages:
       tweetnacl: 0.14.5
     dev: true
 
-  /ssri@10.0.1:
-    resolution: {integrity: sha512-WVy6di9DlPOeBWEjMScpNipeSX2jIZBGEn5Uuo8Q7aIuFEuDX0pw8RxcOjlD1TWP4obi24ki7m/13+nFpcbXrw==}
+  /ssri@10.0.4:
+    resolution: {integrity: sha512-12+IR2CB2C28MMAw0Ncqwj5QbTcs0nGIhgJzYWzDkb21vWmfNI83KS4f3Ci6GI98WreIfG7o9UXp3C0qbpA8nQ==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dependencies:
-      minipass: 4.2.4
+      minipass: 5.0.0
 
   /ssri@6.0.2:
     resolution: {integrity: sha512-cepbSq/neFK7xB6A50KHN0xHDotYzq58wWCa5LeWqnPrHG8GzfEjO/4O8kpmcGW+oaxkvhEJCWgbgNk4/ZV93Q==}

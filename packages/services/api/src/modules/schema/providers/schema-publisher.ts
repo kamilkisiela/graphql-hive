@@ -301,16 +301,27 @@ export class SchemaPublisher {
     // store schema that is being checked in checksums table
     // TODO: fetch supergraph schema checksum from composite
 
-    let schemaChecksum = await this.storage.createSchemaSDLChecksum({
-      targetId: target.id,
-      schemaSDL: sdl,
-    });
+    const [schemaChecksum, compositeSchemaChecksum, supergraphSchemachecksum] = await Promise.all([
+      this.storage.createSchemaSDLChecksum({
+        targetId: target.id,
+        schemaSDL: sdl,
+      }),
+      this.storage.createSchemaSDLChecksum({
+        targetId: target.id,
+        schemaSDL: checkResult.state?.composition.compositeSchemaSDL,
+      }),
+      this.storage.createSchemaSDLChecksum({
+        targetId: target.id,
+        schemaSDL: checkResult.state?.composition.supergraphSDL,
+      }),
+    ]);
 
     let schemaCheck: null | SchemaCheck = null;
 
     if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
       schemaCheck = await this.storage.createSchemaCheck({
         schemaSDL: sdl,
+        schemaChecksum: schemaChecksum?.checksum ?? null,
         serviceName: input.service ?? null,
         meta: input.meta ?? null,
         targetId: target.id,
@@ -325,17 +336,19 @@ export class SchemaPublisher {
               schemaCompositionErrors: checkResult.state.composition.errors,
               compositeSchemaSDL: null,
               supergraphSDL: null,
+              compositeSchemaChecksum: null,
+              supergraphSchemaChecksum: null,
             }
           : {
               schemaCompositionErrors: null,
               compositeSchemaSDL: checkResult.state.composition.compositeSchemaSDL,
               supergraphSDL: checkResult.state.composition.supergraphSDL,
+              compositeSchemaChecksum: compositeSchemaChecksum?.checksum ?? null,
+              supergraphSchemaChecksum: supergraphSchemachecksum?.checksum ?? null,
             }),
         isManuallyApproved: false,
         manualApprovalUserId: null,
         githubCheckRunId: null,
-        schemaChecksum: null,
-        supergraphSchemaChecksum: null,
       });
     }
 
@@ -378,6 +391,7 @@ export class SchemaPublisher {
 
       schemaCheck = await this.storage.createSchemaCheck({
         schemaSDL: sdl,
+        schemaChecksum: schemaChecksum?.checksum ?? null,
         serviceName: input.service ?? null,
         meta: input.meta ?? null,
         targetId: target.id,
@@ -393,8 +407,8 @@ export class SchemaPublisher {
         isManuallyApproved: false,
         manualApprovalUserId: null,
         githubCheckRunId: null,
-        schemaChecksum: schemaChecksum.checksum,
-        supergraphSchemaChecksum: null,
+        compositeSchemaChecksum: compositeSchemaChecksum?.checksum ?? null,
+        supergraphSchemaChecksum: supergraphSchemachecksum?.checksum ?? null,
       });
     }
 

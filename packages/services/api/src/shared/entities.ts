@@ -79,7 +79,7 @@ export interface SchemaVersion {
 }
 
 export interface SchemaChecksum {
-  checksum: number;
+  checksum: string;
   schemaSdl: string;
   targetId: string;
   createdAt: Date;
