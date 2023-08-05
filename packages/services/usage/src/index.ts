@@ -96,7 +96,13 @@ async function main() {
         }
 
         if (!token) {
-          void res.status(400).send('Missing token');
+          void res.status(401).send('Missing token');
+          httpRequestsWithoutToken.inc();
+          return;
+        }
+
+        if (token.length !== 32) {
+          void res.status(401).send('Invalid token');
           httpRequestsWithoutToken.inc();
           return;
         }
@@ -111,7 +117,7 @@ async function main() {
           });
           httpRequestsWithNonExistingToken.inc();
           req.log.info('Token not found (token=%s)', maskedToken);
-          void res.status(400).send('Missing token');
+          void res.status(401).send('Missing token');
           return;
         }
 

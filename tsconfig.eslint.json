@@ -15,7 +15,9 @@
     ".eslintrc.cjs",
     "vitest.config.ts",
     "scripts/serializer.ts",
-    "packages/web/app/.babelrc.cjs"
+    "packages/web/app/.babelrc.cjs",
+    "configs",
+    "codegen.mts"
   ],
   "exclude": ["**/node_modules/**", "**/dist", "**/temp", "**/tmp"]
 }

@@ -16,13 +16,22 @@ GraphQL schema full documentation.
 
 <NextImage alt="Lab" src={labImage} className="mt-6 max-w-3xl drop-shadow-md" />
 
+## Link a Laboratory Endpoint
+
+You can link your actual GraphQL API endpoint to the Laboratory, so you can query for the actual
+data.
+
+You can set the GraphQL endpoint URL within the target settings.
+
+Afterwards you can execute queries against your actual GraphQL API. Please make sure to set the
+according CORS headers on your server for allowing the Laboratory to access your API from within the
+browser.
+
 ## Built-in Mocks
 
 You may execute operations directly from the built-in GraphQL, and the results will be fully
 mocked - powered by
 [GraphQL-Tools mocking capabilities](https://the-guild.dev/graphql/tools/docs/mocking).
-
-## Using Externally
 
 Hive allow you to consume and use the Laboratory schema with your configured mocks while developing,
 without running any GraphQL server or gateway.
@@ -31,9 +40,9 @@ without running any GraphQL server or gateway.
    develpoment tools.
 2. Mocks for executed GraphQL operations.
 
-### Laboratory Endpoint
+### Mock Endpoint
 
-To get started with using the Laboratory schema externally, create a
+To get started with using the Laboratory mock schema externally, create a
 [Registry Access Token](/docs/management/targets#registry-access-tokens). You only need to have the
 `read` access to the target (or, use the **Schema Check Only** preset).
 
@@ -52,6 +61,11 @@ curl -X POST -H "X-Hive-Key: HIVE_TOKEN_HERE" -H "Content-Type: application/json
 ```
 
 ### With GraphQL-Code-Generator
+
+<Callout>
+  We recommend using the CDN for consuming the GraphQL schema in your project. [See GraphQL Code
+  Generator Integration](/docs/integrations/graphql-code-generator).
+</Callout>
 
 Since the Laboratory schema is a valid GraphQL schema, and supports introspection, you may use it
 directly with tools like [GraphQL-Code-Generator](https://the-guild.dev/graphql/codegen). Here's a
@@ -76,7 +90,3 @@ const config: CodegenConfig = {
 }
 export default config
 ```
-
-Additional resources:
-
-- [GraphQL-Code-Generator documentation](https://the-guild.dev/graphql/codegen/docs/getting-started)

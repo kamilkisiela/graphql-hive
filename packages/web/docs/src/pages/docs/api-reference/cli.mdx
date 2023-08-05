@@ -1,4 +1,4 @@
-import { Callout, PackageCmd } from '@theguild/components'
+import { Callout } from '@theguild/components'
 
 # Hive CLI (Command Line Interface)
 
@@ -11,7 +11,9 @@ Hive targets schemas using the Hive CLI.
 
 If you are running a JavaScript/NodeJS project, you can install Hive CLI from the `npm` registry:
 
-<PackageCmd packages={['-D @graphql-hive/cli']} />
+```sh npm2yarn
+npm i -D @graphql-hive/cli
+```
 
 <Callout type="info">
   We recommend installing Hive CLI as part of your project, under `devDependencies`, instead of

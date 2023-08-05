@@ -1,5 +1,5 @@
 import nock from 'nock';
-import { isSignatureValid } from '../src/auth';
+import { createSignatureValidator } from '../src/auth';
 import '../src/dev-polyfill';
 import { InvalidRequestFormat, InvalidSignature, MissingSignature } from '../src/errors';
 import { handleRequest } from '../src/handler';
@@ -7,16 +7,8 @@ import { handleRequest } from '../src/handler';
 const SignatureValidators = {
   AlwaysTrue: () => true,
   AlwaysFalse: () => false,
-  Real: isSignatureValid,
+  Real: createSignatureValidator,
 };
-
-function mockWorkerEnv(input: { SIGNATURE: string }) {
-  Object.defineProperties(globalThis, {
-    SIGNATURE: {
-      value: input.SIGNATURE,
-    },
-  });
-}
 
 function clearWorkerEnv() {
   Object.defineProperties(globalThis, {
@@ -37,25 +29,17 @@ afterEach(nock.cleanAll);
 test('401 on missing signature', async () => {
   const SIGNATURE = '123456';
 
-  mockWorkerEnv({
-    SIGNATURE,
-  });
-
   const request = new Request('https://fake-worker.com/', {
     method: 'POST',
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, logger);
+  const response = await handleRequest(request, SignatureValidators.Real(SIGNATURE), logger);
   expect(response instanceof MissingSignature).toBeTruthy();
   expect(response.status).toBe(401);
 });
 
 test('403 on non-matching signature', async () => {
   const SIGNATURE = '123456';
-
-  mockWorkerEnv({
-    SIGNATURE,
-  });
 
   const request = new Request('https://fake-worker.com/', {
     method: 'POST',
@@ -64,17 +48,13 @@ test('403 on non-matching signature', async () => {
     },
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, logger);
+  const response = await handleRequest(request, SignatureValidators.Real(SIGNATURE), logger);
   expect(response instanceof InvalidSignature).toBeTruthy();
   expect(response.status).toBe(403);
 });
 
 test('405 allow only POST method', async () => {
   const SIGNATURE = '123456';
-
-  mockWorkerEnv({
-    SIGNATURE,
-  });
 
   let request = new Request('https://fake-worker.com/', {
     method: 'GET',
@@ -83,7 +63,7 @@ test('405 allow only POST method', async () => {
     },
   });
 
-  let response = await handleRequest(request, SignatureValidators.Real, logger);
+  let response = await handleRequest(request, SignatureValidators.Real(SIGNATURE), logger);
   expect(response.status).toBe(405);
 
   request = new Request('https://fake-worker.com/', {
@@ -94,16 +74,12 @@ test('405 allow only POST method', async () => {
     body: JSON.stringify({}),
   });
 
-  response = await handleRequest(request, SignatureValidators.Real, logger);
+  response = await handleRequest(request, SignatureValidators.Real(SIGNATURE), logger);
   expect(response.status).toBe(405);
 });
 
 test('400 on invalid request format', async () => {
   const SIGNATURE = '123456';
-
-  mockWorkerEnv({
-    SIGNATURE,
-  });
 
   const request = new Request('https://fake-worker.com/', {
     method: 'POST',
@@ -113,7 +89,7 @@ test('400 on invalid request format', async () => {
     body: JSON.stringify({}),
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, logger);
+  const response = await handleRequest(request, SignatureValidators.Real(SIGNATURE), logger);
   expect(response instanceof InvalidRequestFormat).toBeTruthy();
   expect(response.status).toBe(400);
 });
@@ -127,10 +103,6 @@ test('GET text/plain', async () => {
     .reply(200, 'OK');
 
   const SIGNATURE = '123456';
-
-  mockWorkerEnv({
-    SIGNATURE,
-  });
 
   const request = new Request('https://fake-worker.com/', {
     method: 'POST',
@@ -147,7 +119,7 @@ test('GET text/plain', async () => {
     }),
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, logger);
+  const response = await handleRequest(request, SignatureValidators.Real(SIGNATURE), logger);
   expect(response.status).toBe(200);
   expect(await response.text()).toBe('OK');
 });
@@ -164,10 +136,6 @@ test('GET application/json', async () => {
 
   const SIGNATURE = '123456';
 
-  mockWorkerEnv({
-    SIGNATURE,
-  });
-
   const request = new Request('https://fake-worker.com/', {
     method: 'POST',
     headers: {
@@ -183,7 +151,7 @@ test('GET application/json', async () => {
     }),
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, logger);
+  const response = await handleRequest(request, SignatureValidators.Real(SIGNATURE), logger);
   expect(response.status).toBe(200);
   expect(await response.text()).toBe(
     JSON.stringify({
@@ -202,10 +170,6 @@ test('POST text/plain', async () => {
 
   const SIGNATURE = '123456';
 
-  mockWorkerEnv({
-    SIGNATURE,
-  });
-
   const request = new Request('https://fake-worker.com/', {
     method: 'POST',
     headers: {
@@ -221,7 +185,7 @@ test('POST text/plain', async () => {
     }),
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, logger);
+  const response = await handleRequest(request, SignatureValidators.Real(SIGNATURE), logger);
   expect(response.status).toBe(200);
   expect(await response.text()).toBe('OK');
 });
@@ -238,10 +202,6 @@ test('POST application/json', async () => {
 
   const SIGNATURE = '123456';
 
-  mockWorkerEnv({
-    SIGNATURE,
-  });
-
   const request = new Request('https://fake-worker.com/', {
     method: 'POST',
     headers: {
@@ -257,7 +217,7 @@ test('POST application/json', async () => {
     }),
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, logger);
+  const response = await handleRequest(request, SignatureValidators.Real(SIGNATURE), logger);
   expect(response.status).toBe(200);
   expect(await response.text()).toBe(
     JSON.stringify({
@@ -281,10 +241,6 @@ test('POST application/json + body', async () => {
 
   const SIGNATURE = '123456';
 
-  mockWorkerEnv({
-    SIGNATURE,
-  });
-
   const request = new Request('https://fake-worker.com/', {
     method: 'POST',
     headers: {
@@ -303,7 +259,7 @@ test('POST application/json + body', async () => {
     }),
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, logger);
+  const response = await handleRequest(request, SignatureValidators.Real(SIGNATURE), logger);
   expect(response.status).toBe(200);
   expect(await response.text()).toBe(
     JSON.stringify({
@@ -318,10 +274,6 @@ test('passthrough errors', async () => {
   nock('http://localhost').get('/error').once().reply(500, 'Internal Server Error');
 
   const SIGNATURE = '123456';
-
-  mockWorkerEnv({
-    SIGNATURE,
-  });
 
   const request = new Request('https://fake-worker.com/', {
     method: 'POST',
@@ -338,7 +290,7 @@ test('passthrough errors', async () => {
     }),
   });
 
-  const response = await handleRequest(request, SignatureValidators.Real, logger);
+  const response = await handleRequest(request, SignatureValidators.Real(SIGNATURE), logger);
   expect(response.status).toBe(500);
   expect(await response.text()).toBe('Internal Server Error');
 });

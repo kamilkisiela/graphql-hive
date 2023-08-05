@@ -1,4 +1,5 @@
 import React, { ReactElement, useCallback, useState } from 'react';
+import NextLink from 'next/link';
 import clsx from 'clsx';
 import { formatISO, subDays } from 'date-fns';
 import { useFormik } from 'formik';
@@ -30,14 +31,53 @@ import {
 import { Combobox } from '@/components/v2/combobox';
 import { CreateAccessTokenModal, DeleteTargetModal } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { DeleteTokensDocument, SetTargetValidationDocument, TokensDocument } from '@/graphql';
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
+const SetTargetValidationMutation = graphql(`
+  mutation Settings_SetTargetValidation($input: SetTargetValidationInput!) {
+    setTargetValidation(input: $input) {
+      id
+      validationSettings {
+        ...TargetValidationSettingsFields
+      }
+    }
+  }
+`);
+
 const RegistryAccessTokens_MeFragment = graphql(`
   fragment RegistryAccessTokens_MeFragment on Member {
     ...CanAccessTarget_MemberFragment
+  }
+`);
+
+export const DeleteTokensDocument = graphql(`
+  mutation deleteTokens($input: DeleteTokensInput!) {
+    deleteTokens(input: $input) {
+      selector {
+        organization
+        project
+        target
+      }
+      deletedTokens
+    }
+  }
+`);
+
+export const TokensDocument = graphql(`
+  query tokens($selector: TargetSelectorInput!) {
+    tokens(selector: $selector) {
+      total
+      nodes {
+        ...TokenFields
+        id
+        alias
+        name
+        lastUsedAt
+        date
+      }
+    }
   }
 `);
 
@@ -350,7 +390,7 @@ function floorDate(date: Date): Date {
 
 const ConditionalBreakingChanges = (): ReactElement => {
   const router = useRouteSelector();
-  const [targetValidation, setValidation] = useMutation(SetTargetValidationDocument);
+  const [targetValidation, setValidation] = useMutation(SetTargetValidationMutation);
   const [mutation, updateValidation] = useMutation(
     TargetSettingsPage_UpdateTargetValidationSettingsMutation,
   );
@@ -668,6 +708,104 @@ function TargetName(props: {
   );
 }
 
+const TargetSettingsPage_UpdateTargetGraphQLEndpointUrl = graphql(`
+  mutation TargetSettingsPage_UpdateTargetGraphQLEndpointUrl(
+    $input: UpdateTargetGraphQLEndpointUrlInput!
+  ) {
+    updateTargetGraphQLEndpointUrl(input: $input) {
+      ok {
+        target {
+          id
+          graphqlEndpointUrl
+        }
+      }
+      error {
+        message
+      }
+    }
+  }
+`);
+
+function GraphQLEndpointUrl(props: {
+  graphqlEndpointUrl: string | null;
+  organizationId: string;
+  projectId: string;
+  targetId: string;
+}): ReactElement {
+  const router = useRouteSelector();
+  const [mutation, mutate] = useMutation(TargetSettingsPage_UpdateTargetGraphQLEndpointUrl);
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
+    useFormik({
+      enableReinitialize: true,
+      initialValues: {
+        graphqlEndpointUrl: props.graphqlEndpointUrl || '',
+      },
+      validationSchema: Yup.object().shape({
+        graphqlEndpointUrl: Yup.string()
+          .url('Please enter a valid url.')
+          .min(1, 'Please enter a valid url.')
+          .max(300, 'Max 300 chars.'),
+      }),
+      onSubmit: values =>
+        mutate({
+          input: {
+            organization: props.organizationId,
+            project: props.projectId,
+            target: props.targetId,
+            graphqlEndpointUrl: values.graphqlEndpointUrl === '' ? null : values.graphqlEndpointUrl,
+          },
+        }),
+    });
+
+  return (
+    <Card>
+      <Heading className="mb-2">GraphQL Endpoint URL</Heading>
+      <div className="text-sm text-gray-400">
+        The endpoint url will be used for querying the target from the{' '}
+        <NextLink
+          href={`/${router.organizationId}/${router.projectId}/${router.targetId}/laboratory`}
+        >
+          Hive Laboratory
+        </NextLink>
+        .
+      </div>
+      <form onSubmit={handleSubmit} className="flex gap-x-2 mt-2">
+        <Input
+          placeholder="Endpoint Url"
+          name="graphqlEndpointUrl"
+          value={values.graphqlEndpointUrl}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          disabled={isSubmitting}
+          isInvalid={touched.graphqlEndpointUrl && !!errors.graphqlEndpointUrl}
+          className="w-96"
+        />
+        <Button
+          type="submit"
+          variant="primary"
+          size="large"
+          disabled={isSubmitting}
+          className="px-10"
+        >
+          Save
+        </Button>
+      </form>
+      {touched.graphqlEndpointUrl && (errors.graphqlEndpointUrl || mutation.error) && (
+        <div className="mt-2 text-red-500">
+          {errors.graphqlEndpointUrl ??
+            mutation.error?.graphQLErrors[0]?.message ??
+            mutation.error?.message}
+        </div>
+      )}
+      {mutation.data?.updateTargetGraphQLEndpointUrl.error && (
+        <div className="mt-2 text-red-500">
+          {mutation.data.updateTargetGraphQLEndpointUrl.error.message}
+        </div>
+      )}
+    </Card>
+  );
+}
+
 const TargetSettingsPage_UpdateTargetNameMutation = graphql(`
   mutation TargetSettingsPage_UpdateTargetName($input: UpdateTargetNameInput!) {
     updateTargetName(input: $input) {
@@ -773,6 +911,7 @@ const TargetSettingsPageQuery = graphql(`
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       cleanId
       name
+      graphqlEndpointUrl
       ...TargetSettingsPage_TargetFragment
     }
     me {
@@ -835,6 +974,12 @@ function TargetSettingsContent() {
             targetId={currentTarget.cleanId}
             projectId={currentProject.cleanId}
             organizationId={currentOrganization.cleanId}
+          />
+          <GraphQLEndpointUrl
+            targetId={currentTarget.cleanId}
+            projectId={currentProject.cleanId}
+            organizationId={currentOrganization.cleanId}
+            graphqlEndpointUrl={currentTarget.graphqlEndpointUrl ?? null}
           />
           {canAccessTokens && <RegistryAccessTokens me={organizationForSettings.me} />}
           {canAccessTokens && <CDNAccessTokens me={organizationForSettings.me} />}

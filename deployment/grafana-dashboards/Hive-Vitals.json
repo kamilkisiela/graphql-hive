@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 19,
+  "id": 46,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -831,6 +831,191 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
+      "id": 74,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "process_resident_memory_bytes{pod=~\"schema-.*\"}",
+          "instant": false,
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Schema service memory",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 31
+      },
+      "id": 75,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "irate(process_cpu_user_seconds_total{pod=~\"schema-.*\"}[$__range])",
+          "instant": false,
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Schema Service CPU usage",
+      "type": "timeseries"
+    },
+    {
       "collapsed": false,
       "datasource": {
         "type": "datasource",
@@ -840,7 +1025,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 39
       },
       "id": 8,
       "panels": [],
@@ -896,7 +1081,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "orange",
@@ -912,7 +1098,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 24
+        "y": 40
       },
       "id": 4,
       "options": {
@@ -989,7 +1175,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -1001,7 +1188,7 @@
         "h": 7,
         "w": 6,
         "x": 12,
-        "y": 24
+        "y": 40
       },
       "id": 38,
       "options": {
@@ -1052,7 +1239,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -1064,7 +1252,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 24
+        "y": 40
       },
       "id": 29,
       "options": {
@@ -1079,7 +1267,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.3.6",
+      "pluginVersion": "10.0.3-cloud.3.cec3ab0e",
       "targets": [
         {
           "datasource": {
@@ -1145,7 +1333,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -1157,7 +1346,7 @@
         "h": 7,
         "w": 6,
         "x": 0,
-        "y": 31
+        "y": 47
       },
       "id": 37,
       "options": {
@@ -1237,7 +1426,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -1249,7 +1439,7 @@
         "h": 7,
         "w": 6,
         "x": 6,
-        "y": 31
+        "y": 47
       },
       "id": 36,
       "options": {
@@ -1329,7 +1519,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -1341,7 +1532,7 @@
         "h": 7,
         "w": 6,
         "x": 12,
-        "y": 31
+        "y": 47
       },
       "id": 23,
       "options": {
@@ -1420,7 +1611,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -1432,7 +1624,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 31
+        "y": 47
       },
       "id": 42,
       "options": {
@@ -1524,7 +1716,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1539,7 +1732,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 54
       },
       "id": 16,
       "options": {
@@ -1632,7 +1825,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1647,7 +1841,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 45
+        "y": 61
       },
       "id": 21,
       "options": {
@@ -1739,7 +1933,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -1754,7 +1949,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 51
+        "y": 67
       },
       "id": 52,
       "options": {
@@ -1794,7 +1989,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 57
+        "y": 73
       },
       "id": 44,
       "panels": [],
@@ -1827,7 +2022,7 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 58
+        "y": 74
       },
       "id": 46,
       "options": {
@@ -1895,7 +2090,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 58
+        "y": 74
       },
       "id": 48,
       "options": {
@@ -1944,7 +2139,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 64
+        "y": 80
       },
       "id": 25,
       "panels": [],
@@ -2001,7 +2196,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -2013,7 +2209,7 @@
         "h": 6,
         "w": 18,
         "x": 0,
-        "y": 65
+        "y": 81
       },
       "id": 40,
       "options": {
@@ -2079,7 +2275,8 @@
             "mode": "percentage",
             "steps": [
               {
-                "color": "red"
+                "color": "red",
+                "value": null
               },
               {
                 "color": "orange",
@@ -2103,7 +2300,7 @@
         "h": 6,
         "w": 6,
         "x": 18,
-        "y": 65
+        "y": 81
       },
       "id": 51,
       "options": {
@@ -2118,7 +2315,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.3.6",
+      "pluginVersion": "10.0.3-cloud.3.cec3ab0e",
       "targets": [
         {
           "datasource": {
@@ -2213,7 +2410,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -2225,7 +2423,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 71
+        "y": 87
       },
       "id": 31,
       "options": {
@@ -2304,7 +2502,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -2316,7 +2515,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 78
+        "y": 94
       },
       "id": 27,
       "options": {
@@ -2403,7 +2602,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -2415,7 +2615,7 @@
         "h": 7,
         "w": 18,
         "x": 0,
-        "y": 87
+        "y": 103
       },
       "id": 49,
       "options": {
@@ -2466,7 +2666,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -2478,7 +2679,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 87
+        "y": 103
       },
       "id": 50,
       "options": {
@@ -2493,7 +2694,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.3.6",
+      "pluginVersion": "10.0.3-cloud.3.cec3ab0e",
       "targets": [
         {
           "datasource": {
@@ -2557,7 +2758,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -2572,7 +2774,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 94
+        "y": 110
       },
       "id": 33,
       "options": {
@@ -2660,7 +2862,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -2675,7 +2878,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 94
+        "y": 110
       },
       "id": 34,
       "options": {
@@ -2728,7 +2931,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 101
+        "y": 117
       },
       "id": 6,
       "panels": [],
@@ -2784,7 +2987,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -2796,7 +3000,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 102
+        "y": 118
       },
       "id": 3,
       "options": {
@@ -2876,7 +3080,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -2892,7 +3097,7 @@
         "h": 7,
         "w": 6,
         "x": 12,
-        "y": 102
+        "y": 118
       },
       "id": 30,
       "options": {
@@ -2972,7 +3177,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -2984,7 +3190,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 102
+        "y": 118
       },
       "id": 39,
       "options": {
@@ -3027,7 +3233,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 109
+        "y": 125
       },
       "id": 11,
       "panels": [],
@@ -3082,7 +3288,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -3094,7 +3301,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 110
+        "y": 126
       },
       "id": 54,
       "options": {
@@ -3170,7 +3377,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -3186,7 +3394,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 116
+        "y": 132
       },
       "id": 13,
       "options": {
@@ -3291,7 +3499,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               },
               {
                 "color": "red",
@@ -3307,7 +3516,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 116
+        "y": 132
       },
       "id": 14,
       "options": {
@@ -3364,7 +3573,7 @@
     "list": [
       {
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "Azure Monitor",
           "value": "Azure Monitor"
         },
@@ -3374,6 +3583,7 @@
         "name": "Subscription",
         "options": [],
         "query": "grafana-azure-monitor-datasource",
+        "queryValue": "",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -3388,7 +3598,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "Hive Vitals Overview",
-  "uid": "TlewVya7z",
-  "version": 109,
+  "uid": "u3AKN0aVk",
+  "version": 5,
   "weekStart": ""
 }

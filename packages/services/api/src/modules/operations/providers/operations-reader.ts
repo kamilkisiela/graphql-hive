@@ -9,35 +9,12 @@ import { ClickHouse, RowOf, sql } from './clickhouse-client';
 import { calculateTimeWindow } from './helpers';
 import { SqlValue } from './sql';
 
-const GetHashesForSchemaCoordinateModel = z
-  .array(
-    z.object({
-      hash: z.string(),
-      coordinate: z.string(),
-    }),
-  )
-  .transform(data => (data.length === 0 ? null : data));
-
-const GetClientNamesForHashesModel = z
-  .array(
-    z.object({
-      clientName: z.string(),
-      hash: z.string(),
-    }),
-  )
-  .transform(data => {
-    const map = new Map<string, Set<string>>();
-    for (const record of data) {
-      let clientNames = map.get(record.hash);
-      if (clientNames == null) {
-        clientNames = new Set();
-        map.set(record.hash, clientNames);
-      }
-      clientNames.add(record.clientName === '' ? 'unknown' : record.clientName);
-    }
-
-    return map;
-  });
+const CoordinateClientNamesGroupModel = z.array(
+  z.object({
+    coordinate: z.string(),
+    client_names: z.array(z.string()),
+  }),
+);
 
 function formatDate(date: Date): string {
   return format(addMinutes(date, date.getTimezoneOffset()), 'yyyy-MM-dd HH:mm:ss');
@@ -584,6 +561,7 @@ export class OperationsReader {
             extra: [sql`hash = ${hash}`],
           })}
         LIMIT 1
+        SETTINGS allow_asynchronous_read_from_io_pool_for_merge_tree = 1
       `,
       queryId: 'read_body',
       timeout: 10_000,
@@ -732,96 +710,88 @@ export class OperationsReader {
     });
   }
 
-  @sentry('OperationsReader.getClientListForSchemaCoordinates')
-  async getClientListForSchemaCoordinates(args: {
+  @sentry('OperationsReader.getClientNamesPerCoordinateOfType')
+  async getClientNamesPerCoordinateOfType(args: {
     targetId: string;
     period: DateRange;
-    schemaCoordinates: ReadonlyArray<string>;
+    typename: string;
   }): Promise<Map<string, Set<string>>> {
-    // 1. Fetch all hashes for schema coordinates
-    const hashQuery = sql`
-      SELECT
-        "hash",
-        "coordinate"
-      FROM
-        "coordinates_daily"
-      ${this.createFilter({
-        target: args.targetId,
-        period: args.period,
-        extra: [sql`coordinate IN (${sql.array(args.schemaCoordinates, 'String')})`],
-      })}
-      GROUP BY
-        "hash",
-        "coordinate"
-    `;
+    // The Explorer page is the only consumer of this method.
+    // It displays:
+    // - a list of fields of a given (interface, input object, object) type (in this case we can use Type.*)
+    // - a list of fields of root types (in this case we can use Query.*, Mutation.*, Subscription.*)
+    // - enums (in this case we can use Enum.* + Enum)
+    // - union (in this case we can use Union.* + Union)
+    // - scalar (in this case we can use Scalar)
+    // We clearly over-fetch here as we fetch all coordinates of a given type,
+    // even though some coordinates may no longer be used in the schema.
+    // But it's a fine tradeoff for the sake of simplicity.
 
-    const hashesForSchemaCoordinates = await this.clickHouse
-      .query({
-        queryId: 'get_hashes_for_schema_coordinates',
-        query: hashQuery,
-        timeout: 10_000,
-      })
-      .then(result => GetHashesForSchemaCoordinateModel.parse(result.data));
+    const dbResult = await this.clickHouse.query({
+      queryId: 'get_hashes_for_schema_coordinates',
+      // KAMIL: I know this query is a bit weird, but it's the best I could come up with.
+      // It processed 27x less rows than the previous version.
+      // It's 30x faster.
+      // It consumes 36x less memory (~8MB).
+      // It obviously depends on the amount of original data, but I tested it on a multiple datasets
+      // and the ratio is always similar.
+      // I'm open to suggestions on how to improve it.
+      //
+      // What the query does is:
+      // 1. Fetches all coordinates of a given type, with associated operation hashes.
+      // 2. Fetches all client names (groups them by hash) of a given hash.
+      // 3. Groups rows by coordinate.
+      // 4. Merges client names and removes duplicates.
+      //
+      // Why it's faster then the previous version?
+      // It's using sub queries instead of joins (yeah there is a join but with preselected list of rows).
+      // It fetches much less data.
+      // It fetches rows more accurately.
+      query: sql`
+        SELECT
+          co.coordinate AS coordinate,
+          groupUniqArrayArray(cl.client_names) AS client_names
+        FROM
+        (
+          SELECT
+            co.coordinate,
+            co.hash
+          FROM coordinates_daily AS co
+          ${this.createFilter({
+            target: args.targetId,
+            period: args.period,
+            extra: [
+              sql`( co.coordinate = ${args.typename} OR co.coordinate LIKE ${
+                args.typename + '.%'
+              } )`,
+            ],
+            namespace: 'co',
+          })}
+          GROUP BY co.coordinate, co.hash
+        ) AS co
+        LEFT JOIN
+        (
+            SELECT
+              arrayDistinct(groupArray(client_name)) AS client_names,
+              cl.hash AS hash
+            FROM clients_daily AS cl
+            ${this.createFilter({
+              target: args.targetId,
+              period: args.period,
+              namespace: 'cl',
+            })}
+            GROUP BY cl.hash
+        ) AS cl ON co.hash = cl.hash
+        GROUP BY co.coordinate
+        SETTINGS join_algorithm = 'parallel_hash'
+      `,
+      timeout: 15_000,
+    });
 
-    if (hashesForSchemaCoordinates === null) {
-      return new Map();
-    }
-
-    // 1. Fetch all client names for hashes
-    const clientNamesForHashesQuery = sql`
-      SELECT
-        "client_name" as "clientName",
-        "hash"
-      FROM
-        "clients_daily"
-      ${this.createFilter({
-        target: args.targetId,
-        period: args.period,
-        extra: [
-          sql`
-            "hash" IN (
-              ${sql.array(
-                hashesForSchemaCoordinates.map(record => record.hash),
-                'String',
-              )}
-            )
-          `,
-        ],
-      })}
-      GROUP BY
-        "client_name",
-        "hash"
-    `;
-
-    const clientNamesForHashes = await this.clickHouse
-      .query({
-        queryId: 'get_client_names_for_hashes',
-        query: clientNamesForHashesQuery,
-        timeout: 10_000,
-      })
-      .then(result => GetClientNamesForHashesModel.parse(result.data));
-
-    // 3. Match hashes to schema coordinates
-    const clientsBySchemaCoordinate = new Map<string, Set<string>>();
-
-    for (const record of hashesForSchemaCoordinates) {
-      const newItems = clientNamesForHashes.get(record.hash);
-      if (newItems === undefined) {
-        continue;
-      }
-
-      let mapping = clientsBySchemaCoordinate.get(record.coordinate);
-      if (mapping == null) {
-        mapping = new Set();
-        clientsBySchemaCoordinate.set(record.coordinate, mapping);
-      }
-
-      for (const item of newItems) {
-        mapping.add(item);
-      }
-    }
-
-    return clientsBySchemaCoordinate;
+    const list = CoordinateClientNamesGroupModel.parse(dbResult.data);
+    return new Map<string, Set<string>>(
+      list.map(item => [item.coordinate, new Set(item.client_names)]),
+    );
   }
 
   @sentry('OperationsReader.readUniqueClientNames')
@@ -1675,43 +1645,51 @@ export class OperationsReader {
     operations,
     clients,
     extra = [],
+    skipWhere = false,
+    namespace,
   }: {
     target?: string | readonly string[];
     period?: DateRange;
     operations?: readonly string[];
     clients?: readonly string[];
     extra?: SqlValue[];
+    skipWhere?: boolean;
+    namespace?: string;
   }): SqlValue {
     const where: SqlValue[] = [];
 
+    const columnPrefix = sql.raw(namespace ? `${namespace}.` : '');
+
     if (target) {
       if (Array.isArray(target)) {
-        where.push(sql`target IN (${sql.array(target, 'String')})`);
+        where.push(sql`${columnPrefix}target IN (${sql.array(target, 'String')})`);
       } else {
-        where.push(sql`target = ${target as string}`);
+        where.push(sql`${columnPrefix}target = ${target as string}`);
       }
     }
 
     if (period) {
       where.push(
-        sql`timestamp >= toDateTime(${formatDate(period.from)}, 'UTC')`,
-        sql`timestamp <= toDateTime(${formatDate(period.to)}, 'UTC')`,
+        sql`${columnPrefix}timestamp >= toDateTime(${formatDate(period.from)}, 'UTC')`,
+        sql`${columnPrefix}timestamp <= toDateTime(${formatDate(period.to)}, 'UTC')`,
       );
     }
 
     if (operations?.length) {
-      where.push(sql`(hash) IN (${sql.array(operations, 'String')})`);
+      where.push(sql`(${columnPrefix}hash) IN (${sql.array(operations, 'String')})`);
     }
 
     if (clients?.length) {
-      where.push(sql`"client_name" IN (${sql.array(clients, 'String')})`);
+      where.push(sql`${sql.raw(namespace ?? '')}client_name IN (${sql.array(clients, 'String')})`);
     }
 
     if (extra.length) {
       where.push(...extra);
     }
 
-    const statement = where.length ? sql` PREWHERE ${sql.join(where, ' AND ')} ` : sql``;
+    const statement = where.length
+      ? sql` ${sql.raw(skipWhere ? '' : 'PREWHERE')} ${sql.join(where, ' AND ')} `
+      : sql``;
 
     return statement;
   }

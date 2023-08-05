@@ -3,8 +3,9 @@ import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemail
 import { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
 import zod from 'zod';
 import { env } from '@/env/backend';
+import { getLogger } from '@/server-logger';
 // eslint-disable-next-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
-import { InternalApi } from '@hive/server';
+import { type InternalApi } from '@hive/server';
 import { CreateTRPCProxyClient } from '@trpc/client';
 
 const OIDCProfileInfoSchema = zod.object({
@@ -35,7 +36,8 @@ const createOIDCSuperTokensProvider = (oidcConfig: {
         },
       }).then(res => res.json());
 
-      console.info(
+      const logger = getLogger();
+      logger.info(
         `getProfileInfo: fetched OIDC (${
           oidcConfig.userinfoEndpoint
         }) profile info: ${JSON.stringify(rawData)}`,
@@ -82,6 +84,8 @@ const getOIDCIdFromInput = (input: { userContext: any }): string => {
   const oidcId = new URL(originalUrl).searchParams.get('oidc_id');
 
   if (typeof oidcId !== 'string') {
+    const logger = getLogger();
+    logger.error('Invalid OIDC ID sent from client: %s', oidcId);
     throw new Error('Invalid OIDC ID sent from client.');
   }
 
@@ -101,6 +105,13 @@ export const getOIDCThirdPartyEmailPasswordNodeOverrides = (args: {
       const oidcId = getOIDCIdFromInput(input);
       const config = await fetchOIDCConfig(args.internalApi, oidcId);
 
+      if (config === null) {
+        return {
+          status: 'GENERAL_ERROR',
+          message: 'Could not find OIDC integration.',
+        };
+      }
+
       return originalImplementation.thirdPartySignInUpPOST!({
         ...input,
         provider: createOIDCSuperTokensProvider(config),
@@ -118,6 +129,13 @@ export const getOIDCThirdPartyEmailPasswordNodeOverrides = (args: {
       const oidcId = getOIDCIdFromInput(input);
       const config = await fetchOIDCConfig(args.internalApi, oidcId);
 
+      if (config === null) {
+        return {
+          status: 'GENERAL_ERROR',
+          message: 'Could not find OIDC integration.',
+        };
+      }
+
       const result = originalImplementation.authorisationUrlGET!({
         ...input,
         provider: createOIDCSuperTokensProvider(config),
@@ -131,6 +149,8 @@ export const getOIDCThirdPartyEmailPasswordNodeOverrides = (args: {
 export const createOIDCSuperTokensNoopProvider = () => ({
   id: 'oidc',
   get() {
+    const logger = getLogger();
+    logger.error('OIDC provider implementation was not provided via overrides.');
     throw new Error('Provider implementation was not provided via overrides.');
   },
 });
@@ -145,10 +165,12 @@ const fetchOIDCConfig = async (
   tokenEndpoint: string;
   userinfoEndpoint: string;
   authorizationEndpoint: string;
-}> => {
+} | null> => {
   const result = await internalApi.getOIDCIntegrationById.query({ oidcIntegrationId });
   if (result === null) {
-    throw new Error('OIDC integration not found.');
+    const logger = getLogger();
+    logger.error('OIDC integration not found: %s', oidcIntegrationId);
+    return null;
   }
   return result;
 };

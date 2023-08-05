@@ -4,7 +4,6 @@ export default gql`
   extend type Query {
     lab(selector: TargetSelectorInput!): Lab
   }
-
   type Lab {
     schema: String!
     mocks: JSON

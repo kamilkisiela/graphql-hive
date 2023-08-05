@@ -169,6 +169,7 @@ export interface schema_checks {
   composite_schema_checksum: string | null;
   composite_schema_sdl: string | null;
   created_at: Date;
+  expires_at: Date | null;
   github_check_run_id: string | null;
   id: string;
   is_manually_approved: boolean | null;
@@ -257,6 +258,7 @@ export interface targets {
   base_schema: string | null;
   clean_id: string;
   created_at: Date;
+  graphql_endpoint_url: string | null;
   id: string;
   name: string;
   project_id: string;

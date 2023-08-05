@@ -1,31 +1,32 @@
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { GraphiQL } from 'graphiql';
-import { LinkIcon } from 'lucide-react';
+import { buildSchema } from 'graphql';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { TargetLayout } from '@/components/layouts/target';
+import { ConnectLabModal } from '@/components/target/laboratory/connect-lab-modal';
+import { CreateCollectionModal } from '@/components/target/laboratory/create-collection-modal';
+import { CreateOperationModal } from '@/components/target/laboratory/create-operation-modal';
+import { DeleteCollectionModal } from '@/components/target/laboratory/delete-collection-modal';
+import { DeleteOperationModal } from '@/components/target/laboratory/delete-operation-modal';
 import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
-import { Accordion, DocsLink, EmptyList, Link, MetaTitle, Spinner } from '@/components/v2';
-import { HiveLogo, SaveIcon } from '@/components/v2/icon';
 import {
-  CreateCollectionModal,
-  CreateOperationModal,
-  DeleteCollectionModal,
-  DeleteOperationModal,
-} from '@/components/v2/modals';
-import { ConnectLabModal } from '@/components/v2/modals/connect-lab';
+  Accordion,
+  DocsLink,
+  Link,
+  MetaTitle,
+  Spinner,
+  ToggleGroup,
+  ToggleGroupItem,
+  Tooltip,
+} from '@/components/v2';
+import { HiveLogo, PlusIcon, SaveIcon, ShareIcon } from '@/components/v2/icon';
 import { graphql } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
 import { canAccessTarget } from '@/lib/access/target';
-import {
-  useClipboard,
-  useCollections,
-  useNotifications,
-  useRouteSelector,
-  useToggle,
-} from '@/lib/hooks';
+import { useClipboard, useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { cn } from '@/lib/utils';
 import {
@@ -35,10 +36,16 @@ import {
   Tooltip as GraphiQLTooltip,
   useEditorContext,
 } from '@graphiql/react';
-import { createGraphiQLFetcher } from '@graphiql/toolkit';
-import { BookmarkIcon, DotsVerticalIcon, Share2Icon } from '@radix-ui/react-icons';
+import { createGraphiQLFetcher, Fetcher, isAsyncIterable } from '@graphiql/toolkit';
+import { BookmarkIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
 import 'graphiql/graphiql.css';
+import NextLink from 'next/link';
+import { cx } from 'class-variance-authority';
+import clsx from 'clsx';
+import { EditOperationModal } from '@/components/target/laboratory/edit-operation-modal';
 import { QueryError } from '@/components/ui/query-error';
+import { useResetState } from '@/lib/hooks/use-reset-state';
+import { Repeater } from '@repeaterjs/repeater';
 
 function Share(): ReactElement {
   const label = 'Share query';
@@ -55,7 +62,7 @@ function Share(): ReactElement {
           await copyToClipboard(window.location.href);
         }}
       >
-        <Share2Icon className="graphiql-toolbar-icon" />
+        <ShareIcon className="graphiql-toolbar-icon" />
       </GraphiQLButton>
     </GraphiQLTooltip>
   );
@@ -98,6 +105,245 @@ function useCurrentOperation() {
   return operationId ? data?.target?.documentCollectionOperation : null;
 }
 
+const CreateOperationMutation = graphql(`
+  mutation CreateOperation(
+    $selector: TargetSelectorInput!
+    $input: CreateDocumentCollectionOperationInput!
+  ) {
+    createOperationInDocumentCollection(selector: $selector, input: $input) {
+      error {
+        message
+      }
+      ok {
+        operation {
+          id
+          name
+        }
+        updatedTarget {
+          id
+          documentCollections {
+            edges {
+              cursor
+              node {
+                id
+                operations {
+                  edges {
+                    node {
+                      id
+                    }
+                    cursor
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`);
+
+const CollectionItem = (props: {
+  node: { id: string; name: string };
+  canDelete: boolean;
+  canEdit: boolean;
+  onDelete: (operationId: string) => void;
+  onEdit: (operationId: string) => void;
+}): ReactElement => {
+  const router = useRouteSelector();
+  const copyToClipboard = useClipboard();
+
+  return (
+    <div key={props.node.id} className="flex justify-between items-center">
+      <Link
+        href={{
+          query: {
+            operation: props.node.id,
+            orgId: router.organizationId,
+            projectId: router.projectId,
+            targetId: router.targetId,
+          },
+        }}
+        className={cn(
+          'hover:bg-gray-100/10 w-full rounded p-2 !text-gray-300',
+          router.query.operation === props.node.id && 'bg-gray-100/10 text-white',
+        )}
+        onClick={ev => {
+          ev.preventDefault();
+          void router.push(
+            {
+              query: {
+                operation: props.node.id,
+                orgId: router.organizationId,
+                projectId: router.projectId,
+                targetId: router.targetId,
+              },
+            },
+            undefined,
+            {
+              scroll: false,
+              shallow: true,
+            },
+          );
+        }}
+      >
+        {props.node.name}
+      </Link>
+      <GraphiQLDropdownMenu
+        // https://github.com/radix-ui/primitives/issues/1241#issuecomment-1580887090
+        modal={false}
+      >
+        <GraphiQLDropdownMenu.Button
+          className="graphiql-toolbar-button opacity-0 [div:hover>&]:opacity-100 transition [div:hover>&]:bg-transparent"
+          aria-label="More"
+          data-cy="operation-3-dots"
+        >
+          <DotsVerticalIcon />
+        </GraphiQLDropdownMenu.Button>
+
+        <GraphiQLDropdownMenu.Content>
+          <GraphiQLDropdownMenu.Item
+            onSelect={async () => {
+              const url = new URL(window.location.href);
+              await copyToClipboard(`${url.origin}${url.pathname}?operation=${props.node.id}`);
+            }}
+          >
+            Copy link to operation
+          </GraphiQLDropdownMenu.Item>
+          {props.canEdit ? (
+            <GraphiQLDropdownMenu.Item
+              onSelect={async () => {
+                props.onEdit(props.node.id);
+              }}
+            >
+              Edit
+            </GraphiQLDropdownMenu.Item>
+          ) : null}
+          {props.canDelete ? (
+            <GraphiQLDropdownMenu.Item
+              onSelect={() => {
+                props.onDelete(props.node.id);
+              }}
+              className="!text-red-500"
+              data-cy="remove-operation"
+            >
+              Delete
+            </GraphiQLDropdownMenu.Item>
+          ) : null}
+        </GraphiQLDropdownMenu.Content>
+      </GraphiQLDropdownMenu>
+    </div>
+  );
+};
+
+const AddCollectionItemButton = (props: { collectionId: string }): ReactElement => {
+  const [createOperationState, createOperation] = useMutation(CreateOperationMutation);
+  const router = useRouteSelector();
+  const notify = useNotifications();
+
+  return (
+    <Button
+      variant="link"
+      className="py-0 px-2 text-gray-500 hover:text-white hover:no-underline"
+      onClick={async () => {
+        const result = await createOperation({
+          input: {
+            collectionId: props.collectionId,
+            name: 'New Operation',
+            query: '{}',
+            headers: '',
+            variables: '',
+          },
+          selector: {
+            target: router.targetId,
+            organization: router.organizationId,
+            project: router.projectId,
+          },
+        });
+        if (result.error) {
+          notify("Couldn't create operation. Please try again later.", 'error');
+        }
+        if (result.data?.createOperationInDocumentCollection.error) {
+          notify(result.data.createOperationInDocumentCollection.error.message, 'error');
+        }
+        if (result.data?.createOperationInDocumentCollection.ok) {
+          void router.push(
+            {
+              query: {
+                operation: result.data.createOperationInDocumentCollection.ok.operation.id,
+                orgId: router.organizationId,
+                projectId: router.projectId,
+                targetId: router.targetId,
+              },
+            },
+            undefined,
+            {
+              scroll: false,
+              shallow: true,
+            },
+          );
+        }
+      }}
+      disabled={createOperationState.fetching}
+    >
+      <PlusIcon size={10} className="mr-1 inline" /> Add Operation
+    </Button>
+  );
+};
+
+export const CollectionsQuery = graphql(`
+  query Collections($selector: TargetSelectorInput!) {
+    target(selector: $selector) {
+      id
+      documentCollections {
+        edges {
+          cursor
+          node {
+            id
+            name
+            operations(first: 100) {
+              edges {
+                node {
+                  id
+                  name
+                }
+                cursor
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`);
+
+export function useCollections() {
+  const router = useRouteSelector();
+  const [{ data, error, fetching }] = useQuery({
+    query: CollectionsQuery,
+    variables: {
+      selector: {
+        target: router.targetId,
+        organization: router.organizationId,
+        project: router.projectId,
+      },
+    },
+  });
+
+  const notify = useNotifications();
+
+  useEffect(() => {
+    if (error) {
+      notify(error.message, 'error');
+    }
+  }, [error]);
+
+  return {
+    collections: data?.target?.documentCollections.edges.map(v => v.node) || [],
+    fetching,
+  };
+}
+
 function useOperationCollectionsPlugin({
   canDelete,
   canEdit,
@@ -108,107 +354,75 @@ function useOperationCollectionsPlugin({
   return {
     title: 'Operation Collections',
     icon: BookmarkIcon,
-    content: function Content() {
-      const [isCollectionModalOpen, toggleCollectionModal] = useToggle();
-      const { collections, loading } = useCollections();
-      const [collectionId, setCollectionId] = useState('');
-      const [operationId, setOperationId] = useState('');
-      const [isDeleteCollectionModalOpen, toggleDeleteCollectionModalOpen] = useToggle();
-      const [isDeleteOperationModalOpen, toggleDeleteOperationModalOpen] = useToggle();
-      const copyToClipboard = useClipboard();
-      const router = useRouteSelector();
+    content: useCallback(
+      function Content() {
+        const [isCollectionModalOpen, toggleCollectionModal] = useToggle();
+        const { collections, fetching: loading } = useCollections();
+        const [collectionId, setCollectionId] = useState('');
+        const [isDeleteCollectionModalOpen, toggleDeleteCollectionModalOpen] = useToggle();
+        const [operationToDeleteId, setOperationToDeleteId] = useState<null | string>(null);
+        const [operationToEditId, setOperationToEditId] = useState<null | string>(null);
+        const router = useRouteSelector();
 
-      const currentOperation = useCurrentOperation();
-      const editorContext = useEditorContext({ nonNull: true });
+        const currentOperation = useCurrentOperation();
+        const editorContext = useEditorContext({ nonNull: true });
 
-      const hasAllEditors = !!(
-        editorContext.queryEditor &&
-        editorContext.variableEditor &&
-        editorContext.headerEditor
-      );
+        const hasAllEditors = !!(
+          editorContext.queryEditor &&
+          editorContext.variableEditor &&
+          editorContext.headerEditor
+        );
 
-      const queryParamsOperationId = router.query.operation as string;
+        const queryParamsOperationId = router.query.operation as string;
 
-      const tabsCount = editorContext.tabs.length;
-
-      useEffect(() => {
-        if (tabsCount !== 1) {
-          for (let index = 1; index < tabsCount; index++) {
-            // Workaround to close opened tabs from end, to avoid bug when tabs are still opened
-            editorContext.closeTab(tabsCount - index);
+        useEffect(() => {
+          if (!hasAllEditors) {
+            return;
           }
-          const { operation: _paramToRemove, ...query } = router.query;
-          void router.push({ query });
-        }
-      }, [tabsCount]);
 
-      useEffect(() => {
-        if (!hasAllEditors) return;
+          if (queryParamsOperationId && currentOperation) {
+            // Set selected operation in editors
+            editorContext.queryEditor.setValue(currentOperation.query);
+            editorContext.variableEditor.setValue(currentOperation.variables);
+            editorContext.headerEditor.setValue(currentOperation.headers);
+          } else {
+            // Clear editors if operation not selected
+            editorContext.queryEditor.setValue('');
+            editorContext.variableEditor.setValue('');
+            editorContext.headerEditor.setValue('');
+          }
+        }, [hasAllEditors, queryParamsOperationId, currentOperation]);
 
-        if (queryParamsOperationId && currentOperation) {
-          // Set selected operation in editors
-          editorContext.queryEditor.setValue(currentOperation.query);
-          editorContext.variableEditor.setValue(currentOperation.variables);
-          editorContext.headerEditor.setValue(currentOperation.headers);
-        } else {
-          // Clear editors if operation not selected
-          editorContext.queryEditor.setValue('');
-          editorContext.variableEditor.setValue('');
-          editorContext.headerEditor.setValue('');
-        }
-      }, [hasAllEditors, queryParamsOperationId, currentOperation]);
+        const shouldShowMenu = canEdit || canDelete;
 
-      const shouldShowMenu = canEdit || canDelete;
+        const initialSelectedCollection =
+          currentOperation?.id &&
+          collections?.find(c =>
+            c.operations.edges.some(({ node }) => node.id === currentOperation.id),
+          )?.id;
 
-      const initialSelectedCollection =
-        currentOperation?.id &&
-        collections?.find(c =>
-          c.operations.edges.some(({ node }) => node.id === currentOperation.id),
-        )?.id;
-
-      return (
-        <>
-          <div className="flex justify-between">
-            <Title>Collections</Title>
-            {canEdit ? (
-              <Button
-                variant="link"
-                onClick={() => {
-                  if (collectionId) setCollectionId('');
-                  toggleCollectionModal();
-                }}
-                data-cy="create-collection"
+        return (
+          <div className="h-full flex flex-col">
+            <div className="flex justify-between">
+              <Title>Collections</Title>
+            </div>
+            {loading ? (
+              <div className="flex justify-center h-fit flex-1 items-center">
+                <div className="flex items-center flex-col">
+                  <Spinner />
+                  <div className="text-xs mt-2">Loading collections</div>
+                </div>
+              </div>
+            ) : collections?.length ? (
+              <Accordion
+                defaultValue={initialSelectedCollection ? [initialSelectedCollection] : undefined}
+                className="mt-5 space-y-0"
+                type="multiple"
               >
-                + Create
-              </Button>
-            ) : null}
-          </div>
-          <p className="mb-3 font-light text-gray-300 text-xs">Shared across your organization</p>
-          {loading ? (
-            <Spinner />
-          ) : (
-            <Accordion defaultValue={initialSelectedCollection}>
-              <CreateCollectionModal
-                isOpen={isCollectionModalOpen}
-                toggleModalOpen={toggleCollectionModal}
-                collectionId={collectionId}
-              />
-              <DeleteCollectionModal
-                isOpen={isDeleteCollectionModalOpen}
-                toggleModalOpen={toggleDeleteCollectionModalOpen}
-                collectionId={collectionId}
-              />
-              <DeleteOperationModal
-                isOpen={isDeleteOperationModalOpen}
-                toggleModalOpen={toggleDeleteOperationModalOpen}
-                operationId={operationId}
-              />
-              {collections?.length ? (
-                collections.map(collection => (
+                {collections.map(collection => (
                   <Accordion.Item key={collection.id} value={collection.id}>
                     <div className="flex">
-                      <Accordion.Header>{collection.name}</Accordion.Header>
-
+                      <Accordion.Header triggerClassName="pl-1">{collection.name}</Accordion.Header>
                       {shouldShowMenu ? (
                         <GraphiQLDropdownMenu
                           // https://github.com/radix-ui/primitives/issues/1241#issuecomment-1580887090
@@ -249,94 +463,71 @@ function useOperationCollectionsPlugin({
                     <Accordion.Content className="pr-0">
                       {collection.operations.edges.length
                         ? collection.operations.edges.map(({ node }) => (
-                            <div key={node.id} className="flex justify-between items-center">
-                              <Link
-                                href={{
-                                  query: {
-                                    operation: node.id,
-                                    orgId: router.organizationId,
-                                    projectId: router.projectId,
-                                    targetId: router.targetId,
-                                  },
-                                }}
-                                className={cn(
-                                  'hover:bg-gray-100/10 w-full rounded p-2 !text-gray-300',
-                                  router.query.operation === node.id && 'bg-gray-100/10',
-                                )}
-                                onClick={ev => {
-                                  ev.preventDefault();
-                                  void router.push(
-                                    {
-                                      query: {
-                                        operation: node.id,
-                                        orgId: router.organizationId,
-                                        projectId: router.projectId,
-                                        targetId: router.targetId,
-                                      },
-                                    },
-                                    undefined,
-                                    {
-                                      scroll: false,
-                                    },
-                                  );
-                                }}
-                              >
-                                {node.name}
-                              </Link>
-                              <GraphiQLDropdownMenu
-                                // https://github.com/radix-ui/primitives/issues/1241#issuecomment-1580887090
-                                modal={false}
-                              >
-                                <GraphiQLDropdownMenu.Button
-                                  className="graphiql-toolbar-button opacity-0 [div:hover>&]:opacity-100 transition"
-                                  aria-label="More"
-                                  data-cy="operation-3-dots"
-                                >
-                                  <DotsVerticalIcon />
-                                </GraphiQLDropdownMenu.Button>
-
-                                <GraphiQLDropdownMenu.Content>
-                                  <GraphiQLDropdownMenu.Item
-                                    onSelect={async () => {
-                                      const url = new URL(window.location.href);
-                                      await copyToClipboard(
-                                        `${url.origin}${url.pathname}?operation=${node.id}`,
-                                      );
-                                    }}
-                                  >
-                                    Copy link to operation
-                                  </GraphiQLDropdownMenu.Item>
-                                  {canDelete ? (
-                                    <GraphiQLDropdownMenu.Item
-                                      onSelect={() => {
-                                        setOperationId(node.id);
-                                        toggleDeleteOperationModalOpen();
-                                      }}
-                                      className="!text-red-500"
-                                      data-cy="remove-operation"
-                                    >
-                                      Delete
-                                    </GraphiQLDropdownMenu.Item>
-                                  ) : null}
-                                </GraphiQLDropdownMenu.Content>
-                              </GraphiQLDropdownMenu>
-                            </div>
+                            <CollectionItem
+                              key={node.id}
+                              node={node}
+                              canDelete={canDelete}
+                              canEdit={canEdit}
+                              onDelete={setOperationToDeleteId}
+                              onEdit={setOperationToEditId}
+                            />
                           ))
-                        : 'No operations yet. Use the editor to create an operation, and click Save to store and share it.'}
+                        : null}
+                      <AddCollectionItemButton collectionId={collection.id} />
                     </Accordion.Content>
                   </Accordion.Item>
-                ))
-              ) : (
-                <EmptyList
-                  title="Add your first collection"
-                  description="Collections shared across organization"
-                />
-              )}
-            </Accordion>
-          )}
-        </>
-      );
-    },
+                ))}
+              </Accordion>
+            ) : (
+              <div className="flex justify-center h-fit flex-1 items-center">
+                <div className="flex items-center flex-col">
+                  <BookmarkIcon width={30} height={30} />
+                  <div className="text-xs mt-2">There are no collections available.</div>
+                  {canEdit ? (
+                    <Button
+                      onClick={() => {
+                        if (collectionId) {
+                          setCollectionId('');
+                        }
+                        toggleCollectionModal();
+                      }}
+                      data-cy="create-collection"
+                      className="mt-3"
+                    >
+                      Create your first Collection.
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+            )}
+            <CreateCollectionModal
+              isOpen={isCollectionModalOpen}
+              toggleModalOpen={toggleCollectionModal}
+              collectionId={collectionId}
+            />
+            <DeleteCollectionModal
+              isOpen={isDeleteCollectionModalOpen}
+              toggleModalOpen={toggleDeleteCollectionModalOpen}
+              collectionId={collectionId}
+            />
+            {operationToDeleteId === null ? null : (
+              <DeleteOperationModal
+                close={() => setOperationToDeleteId(null)}
+                operationId={operationToDeleteId}
+              />
+            )}
+            {operationToEditId === null ? null : (
+              <EditOperationModal
+                key={operationToEditId}
+                operationId={operationToEditId}
+                close={() => setOperationToEditId(null)}
+              />
+            )}
+          </div>
+        );
+      },
+      [canEdit, canDelete],
+    ),
   };
 }
 
@@ -375,54 +566,67 @@ function Save(): ReactElement {
     currentOperation.query === queryEditor?.getValue() &&
     currentOperation.variables === variableEditor?.getValue() &&
     currentOperation.headers === headerEditor?.getValue();
-  const operationId = currentOperation?.id;
-  const label = isSame ? undefined : operationId ? 'Update saved operation' : 'Save operation';
-  const button = (
-    <GraphiQLButton
-      className="graphiql-toolbar-button"
-      data-cy="save-collection"
-      aria-label={label}
-      disabled={isSame}
-      onClick={async () => {
-        if (!collections?.length) {
-          notify('You must create collection first!', 'warning');
-          return;
-        }
-        if (!operationId) {
-          toggle();
-          return;
-        }
-        const { error, data } = await mutateUpdate({
-          selector: {
-            target: routeSelector.targetId,
-            organization: routeSelector.organizationId,
-            project: routeSelector.projectId,
-          },
-          input: {
-            name: currentOperation.name,
-            collectionId: currentOperation.collection.id,
-            query: queryEditor?.getValue(),
-            variables: variableEditor?.getValue(),
-            headers: headerEditor?.getValue(),
-            operationId,
-          },
-        });
-        if (data) {
-          notify('Updated!', 'success');
-        }
-        if (error) {
-          notify(error.message, 'error');
-        }
-      }}
-    >
-      <SaveIcon className="graphiql-toolbar-icon !h-5 w-auto" />
-    </GraphiQLButton>
-  );
 
   return (
     <>
-      {label ? <GraphiQLTooltip label={label}>{button}</GraphiQLTooltip> : button}
-      {isOpen ? <CreateOperationModal isOpen={isOpen} toggleModalOpen={toggle} /> : null}
+      <GraphiQLDropdownMenu
+        // https://github.com/radix-ui/primitives/issues/1241#issuecomment-1580887090
+        modal={false}
+      >
+        <GraphiQLDropdownMenu.Button
+          className="graphiql-toolbar-button"
+          aria-label="More"
+          data-cy="save-operation"
+        >
+          <SaveIcon className="graphiql-toolbar-icon !h-5 w-auto" />
+        </GraphiQLDropdownMenu.Button>
+        <GraphiQLDropdownMenu.Content>
+          <GraphiQLDropdownMenu.Item
+            disabled={isSame}
+            className={cx(isSame && 'cursor-default hover:bg-transparent text-gray-400')}
+            onClick={async () => {
+              if (!currentOperation || isSame) {
+                return;
+              }
+              const { error, data } = await mutateUpdate({
+                selector: {
+                  target: routeSelector.targetId,
+                  organization: routeSelector.organizationId,
+                  project: routeSelector.projectId,
+                },
+                input: {
+                  name: currentOperation.name,
+                  collectionId: currentOperation.collection.id,
+                  query: queryEditor?.getValue(),
+                  variables: variableEditor?.getValue(),
+                  headers: headerEditor?.getValue(),
+                  operationId: currentOperation.id,
+                },
+              });
+              if (data) {
+                notify('Updated!', 'success');
+              }
+              if (error) {
+                notify(error.message, 'error');
+              }
+            }}
+          >
+            Save
+          </GraphiQLDropdownMenu.Item>
+          <GraphiQLDropdownMenu.Item
+            onClick={async () => {
+              if (!collections.length) {
+                notify('Please create a collection first.', 'error');
+                return;
+              }
+              toggle();
+            }}
+          >
+            Save as
+          </GraphiQLDropdownMenu.Item>
+        </GraphiQLDropdownMenu.Content>
+      </GraphiQLDropdownMenu>
+      <CreateOperationModal isOpen={isOpen} close={toggle} />
     </>
   );
 }
@@ -445,16 +649,21 @@ const TargetLaboratoryPageQuery = graphql(`
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
+      graphqlEndpointUrl
+      latestSchemaVersion {
+        id
+        sdl
+      }
     }
     me {
       ...TargetLayout_MeFragment
     }
     ...TargetLayout_IsCDNEnabledFragment
+    ...Laboratory_IsCDNEnabledFragment
   }
 `);
 
 function LaboratoryPageContent() {
-  const [isModalOpen, toggleModalOpen] = useToggle();
   const router = useRouteSelector();
   const [query] = useQuery({
     query: TargetLaboratoryPageQuery,
@@ -464,8 +673,8 @@ function LaboratoryPageContent() {
       targetId: router.targetId,
     },
   });
+  const [isConnectLabModalOpen, toggleConnectLabModal] = useToggle();
 
-  const endpoint = `${location.origin}/api/lab/${router.organizationId}/${router.projectId}/${router.targetId}`;
   const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
   const currentProject = query.data?.project;
@@ -476,6 +685,64 @@ function LaboratoryPageContent() {
     canEdit: canAccessTarget(TargetAccessScope.Settings, currentOrganization?.me ?? null),
     canDelete: canAccessTarget(TargetAccessScope.Delete, currentOrganization?.me ?? null),
   });
+
+  const schema = useMemo(() => {
+    if (!query.data?.target?.latestSchemaVersion?.sdl) {
+      return null;
+    }
+    return buildSchema(query.data.target.latestSchemaVersion.sdl);
+  }, [query.data?.target?.latestSchemaVersion?.sdl]);
+
+  const [actualSelectedApiEndpoint, setEndpointType] = useApiTabValueState(
+    query.data?.target?.graphqlEndpointUrl ?? null,
+  );
+
+  const mockEndpoint = useMemo(() => {
+    if (globalThis.window) {
+      return `${location.origin}/api/lab/${router.organizationId}/${router.projectId}/${router.targetId}`;
+    }
+
+    return '';
+  }, [router.organizationId, router.projectId, router.targetId]);
+
+  const fetcher = useMemo<Fetcher>(() => {
+    return async (params, opts) => {
+      const fetcher = createGraphiQLFetcher({
+        url:
+          (actualSelectedApiEndpoint === 'linkedApi'
+            ? query.data?.target?.graphqlEndpointUrl
+            : undefined) ?? mockEndpoint,
+      });
+
+      const result = await fetcher(params, opts);
+
+      // We only want to expose the error message, not the whole stack trace.
+      if (isAsyncIterable(result)) {
+        return new Repeater(async (push, stop) => {
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
+          stop.then(
+            () => 'return' in result && result.return instanceof Function && result.return(),
+          );
+          try {
+            for await (const value of result) {
+              await push(value);
+            }
+            stop();
+          } catch (err: unknown) {
+            const error = new Error(err instanceof Error ? err.message : 'Unexpected error.');
+            Object.defineProperty(error, 'stack', {
+              get() {
+                return undefined;
+              },
+            });
+            stop(error);
+          }
+        });
+      }
+
+      return result;
+    };
+  }, [query.data?.target?.graphqlEndpointUrl, actualSelectedApiEndpoint]);
 
   if (query.error) {
     return <QueryError error={query.error} />;
@@ -489,31 +756,74 @@ function LaboratoryPageContent() {
       me={me ?? null}
       organizations={organizationConnection ?? null}
       isCDNEnabled={isCDNEnabled ?? null}
-      connect={
-        <div>
-          <Button onClick={toggleModalOpen} variant="link" className="text-orange-500">
-            <LinkIcon size={16} className="mr-2" />
-            Use Schema Externally
-          </Button>
-          <ConnectLabModal
-            isOpen={isModalOpen}
-            toggleModalOpen={toggleModalOpen}
-            endpoint={endpoint}
-          />
-        </div>
-      }
     >
-      <div className="py-6">
-        <Title>Laboratory</Title>
-        <Subtitle>
-          Explore your GraphQL schema and run queries against a mocked version of your GraphQL
-          service.
-        </Subtitle>
-        <p>
-          <DocsLink className="text-muted-foreground text-sm" href="/features/laboratory">
-            Learn more about the Laboratory
-          </DocsLink>
-        </p>
+      <div className="py-6 flex">
+        <div className="flex-1">
+          <Title>Laboratory</Title>
+          <Subtitle>Explore your GraphQL schema and run queries against your GraphQL API.</Subtitle>
+          <p>
+            <DocsLink className="text-muted-foreground text-sm" href="/features/laboratory">
+              Learn more about the Laboratory
+            </DocsLink>
+          </p>
+        </div>
+        <div className="ml-auto mr-0 flex flex-col justify-center">
+          <div>
+            {query.data && !query.data.target?.graphqlEndpointUrl ? (
+              <NextLink
+                href={`/${router.organizationId}/${router.projectId}/${router.targetId}/settings`}
+              >
+                <Button variant="outline" className="mr-2" size="sm">
+                  Connect GraphQL API Endpoint
+                </Button>
+              </NextLink>
+            ) : null}
+            <Button onClick={toggleConnectLabModal} variant="ghost" size="sm">
+              Mock Data Endpoint
+            </Button>
+          </div>
+          <div className="self-end pt-2">
+            <span className="text-xs font-bold mr-2">Query</span>
+            <ToggleGroup
+              defaultValue="list"
+              onValueChange={newValue => {
+                setEndpointType(newValue as 'mockApi' | 'linkedApi');
+              }}
+              value="mock"
+              type="single"
+              className="bg-gray-900/50 text-gray-500"
+            >
+              <ToggleGroupItem
+                key="mockApi"
+                value="mockApi"
+                title="Use Mock Schema"
+                className={clsx(
+                  'hover:text-white text-xs',
+                  !query.fetching &&
+                    actualSelectedApiEndpoint === 'mockApi' &&
+                    'bg-gray-800 text-white',
+                )}
+                disabled={query.fetching}
+              >
+                Mock
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                key="linkedApi"
+                value="linkedApi"
+                title="Use API endpoint"
+                className={clsx(
+                  'hover:text-white text-xs',
+                  !query.fetching &&
+                    actualSelectedApiEndpoint === 'linkedApi' &&
+                    'bg-gray-800 text-white',
+                )}
+                disabled={!query.data?.target?.graphqlEndpointUrl || query.fetching}
+              >
+                API
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+        </div>
       </div>
       <style global jsx>{`
         .graphiql-container {
@@ -521,10 +831,18 @@ function LaboratoryPageContent() {
           --color-primary: 40, 89%, 60% !important;
           min-height: 600px;
         }
+
+        .graphiql-container .graphiql-tab-add {
+          display: none;
+        }
+
+        .graphiql-container .graphiql-toolbar-icon {
+          color: #4c5462;
+        }
       `}</style>
       {query.fetching ? null : (
         <GraphiQL
-          fetcher={createGraphiQLFetcher({ url: endpoint })}
+          fetcher={fetcher}
           toolbar={{
             additionalContent: (
               <>
@@ -537,12 +855,37 @@ function LaboratoryPageContent() {
           shouldPersistHeaders={false}
           plugins={[operationCollectionsPlugin]}
           visiblePlugin={operationCollectionsPlugin}
+          schema={schema}
         >
           <GraphiQL.Logo>
+            <Tooltip
+              content={
+                actualSelectedApiEndpoint === 'linkedApi' ? (
+                  <>
+                    Operations are executed against{' '}
+                    <span>{query.data?.target?.graphqlEndpointUrl}</span>.
+                  </>
+                ) : (
+                  <>Operations are executed against the mock endpoint.</>
+                )
+              }
+            >
+              <span className="text-xs font-normal pr-2 cursor-help">
+                {actualSelectedApiEndpoint === 'linkedApi'
+                  ? 'Querying GraphQL API'
+                  : 'Querying Mock API'}
+              </span>
+            </Tooltip>
             <HiveLogo className="h-6 w-auto" />
           </GraphiQL.Logo>
         </GraphiQL>
       )}
+      <ConnectLabModal
+        endpoint={mockEndpoint}
+        close={toggleConnectLabModal}
+        isOpen={isConnectLabModalOpen}
+        isCDNEnabled={query.data ?? null}
+      />
     </TargetLayout>
   );
 }
@@ -559,3 +902,29 @@ function LaboratoryPage(): ReactElement {
 export const getServerSideProps = withSessionProtection();
 
 export default authenticated(LaboratoryPage);
+
+function useApiTabValueState(graphqlEndpointUrl: string | null) {
+  const [state, setState] = useResetState<'mockApi' | 'linkedApi'>(() => {
+    const value = globalThis.window?.localStorage.getItem('hive:laboratory-tab-value');
+    if (!value || !['mockApi', 'linkedApi'].includes(value)) {
+      return graphqlEndpointUrl ? 'linkedApi' : 'mockApi';
+    }
+
+    if (value === 'linkedApi' && graphqlEndpointUrl) {
+      return 'linkedApi';
+    }
+
+    return 'mockApi';
+  }, [graphqlEndpointUrl]);
+
+  return [
+    state,
+    useCallback(
+      (state: 'mockApi' | 'linkedApi') => {
+        globalThis.window?.localStorage.setItem('hive:laboratory-tab-value', state);
+        setState(state);
+      },
+      [setState],
+    ),
+  ] as const;
+}

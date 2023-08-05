@@ -149,13 +149,13 @@ const SchemaView_TargetFragment = graphql(`
     cleanId
     latestSchemaVersion {
       id
-      valid
       schemas {
         nodes {
           __typename
           ...SchemaView_SchemaFragment
         }
       }
+      ...MarkAsValid_SchemaVersionFragment
     }
   }
 `);

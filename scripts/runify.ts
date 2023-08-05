@@ -98,6 +98,8 @@ async function buildWithNext(cwd: string, additionalRequire: string | null) {
     });
   }
 
+  const template = await fs.readFile(join(__dirname, 'templates/runify-next.ts'), 'utf-8');
+
   await Promise.all([
     fs.copy(join(cwd, '.next'), join(cwd, 'dist/.next'), {
       filter(src) {
@@ -108,25 +110,10 @@ async function buildWithNext(cwd: string, additionalRequire: string | null) {
     fs.copy(join(cwd, 'public'), join(cwd, 'dist/public')),
     fs.writeFile(
       join(cwd, 'dist/index.js'),
-      [
-        `#!/usr/bin/env node`,
-        `process.on('SIGTERM', () => process.exit(0))`,
-        `process.on('SIGINT', () => process.exit(0))`,
+      template.replace(
+        '// <-- additionalRequire -->',
         additionalRequire ? `require('${additionalRequire.replace('.ts', '')}')` : ``,
-        `
-          require('next/dist/server/lib/start-server').startServer({
-            dir: __dirname,
-            hostname: '0.0.0.0',
-            port: parseInt(process.env.PORT),
-            conf: {},
-            isDev: false,
-            useWorkers: false,
-          }).catch((err)=>{
-            console.error(err);
-            process.exit(1);
-          })
-        `,
-      ].join('\n'),
+      ),
     ),
   ]);
 }

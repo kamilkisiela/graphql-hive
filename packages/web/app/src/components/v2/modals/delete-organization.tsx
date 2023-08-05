@@ -3,9 +3,22 @@ import { useRouter } from 'next/router';
 import { useMutation } from 'urql';
 import { Button, Heading, Modal } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { DeleteOrganizationDocument } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 import { TrashIcon } from '@radix-ui/react-icons';
+
+export const DeleteOrganizationDocument = graphql(`
+  mutation deleteOrganization($selector: OrganizationSelectorInput!) {
+    deleteOrganization(selector: $selector) {
+      selector {
+        organization
+      }
+      organization {
+        __typename
+        id
+      }
+    }
+  }
+`);
 
 const DeleteOrganizationModal_OrganizationFragment = graphql(`
   fragment DeleteOrganizationModal_OrganizationFragment on Organization {

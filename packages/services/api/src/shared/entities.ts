@@ -272,6 +272,7 @@ export interface Target {
   projectId: string;
   orgId: string;
   name: string;
+  graphqlEndpointUrl: string | null;
 }
 
 export interface Token {
@@ -304,6 +305,7 @@ export interface Member {
   user: User;
   organization: string;
   scopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
+  oidcIntegrationId: string | null;
 }
 
 export interface TargetSettings {

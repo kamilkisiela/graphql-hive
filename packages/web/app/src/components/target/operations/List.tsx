@@ -18,8 +18,8 @@ import {
   Tr,
 } from '@/components/v2';
 import { env } from '@/env/frontend';
-import { graphql } from '@/gql';
-import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { DateRangeInput } from '@/graphql';
 import { useDecimal, useFormattedDuration, useFormattedNumber, useToggle } from '@/lib/hooks';
 import { ChevronUpIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import {
@@ -203,7 +203,7 @@ function OperationsTable({
   organization: string;
   project: string;
   target: string;
-  clients: readonly { name: string }[];
+  clients: readonly { name: string }[] | null;
   clientFilter: string | null;
   setClientFilter: (filter: string) => void;
 }): ReactElement {
@@ -322,53 +322,83 @@ function OperationsTable({
   );
 }
 
+const OperationsTableContainer_OperationsStatsFragment = graphql(`
+  fragment OperationsTableContainer_OperationsStatsFragment on OperationsStats {
+    clients {
+      nodes {
+        name
+      }
+    }
+    operations {
+      nodes {
+        id
+        name
+        operationHash
+        kind
+        duration {
+          p90
+          p95
+          p99
+        }
+        countOk
+        count
+        percentage
+      }
+    }
+  }
+`);
+
 function OperationsTableContainer({
-  operations,
   operationsFilter,
   organization,
   project,
   target,
-  clients,
   clientFilter,
   setClientFilter,
   className,
+  ...props
 }: {
-  operations: readonly OperationStatsFieldsFragment[];
+  operationStats: FragmentType<typeof OperationsTableContainer_OperationsStatsFragment> | null;
   operationsFilter: readonly string[];
   organization: string;
   project: string;
   target: string;
-  clients: readonly { name: string }[];
   clientFilter: string | null;
   setClientFilter: (client: string) => void;
   className?: string;
 }): ReactElement {
+  const operationStats = useFragment(
+    OperationsTableContainer_OperationsStatsFragment,
+    props.operationStats,
+  );
   const data = useMemo(() => {
     const records: Operation[] = [];
-    for (const op of operations) {
-      if (
-        operationsFilter.length > 0 &&
-        op.operationHash &&
-        !operationsFilter.includes(op.operationHash)
-      ) {
-        continue;
+    if (operationStats) {
+      for (const op of operationStats.operations.nodes) {
+        if (
+          operationsFilter.length > 0 &&
+          op.operationHash &&
+          !operationsFilter.includes(op.operationHash)
+        ) {
+          continue;
+        }
+        records.push({
+          id: op.id,
+          name: op.name,
+          kind: op.kind,
+          p90: op.duration.p90,
+          p95: op.duration.p95,
+          p99: op.duration.p99,
+          failureRate: (1 - op.countOk / op.count) * 100,
+          requests: op.count,
+          percentage: op.percentage,
+          hash: op.operationHash!,
+        });
       }
-      records.push({
-        id: op.id,
-        name: op.name,
-        kind: op.kind,
-        p90: op.duration.p90,
-        p95: op.duration.p95,
-        p99: op.duration.p99,
-        failureRate: 1 - op.countOk / op.count,
-        requests: op.count,
-        percentage: op.percentage,
-        hash: op.operationHash!,
-      });
     }
 
     return records;
-  }, [operations, operationsFilter]);
+  }, [operationStats?.operations.nodes, operationsFilter]);
 
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 20 });
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -403,12 +433,30 @@ function OperationsTableContainer({
       organization={organization}
       project={project}
       target={target}
-      clients={clients}
+      clients={operationStats?.clients.nodes ?? null}
       clientFilter={clientFilter}
       setClientFilter={setClientFilter}
     />
   );
 }
+
+const OperationsList_OperationsStatsQuery = graphql(`
+  query OperationsList_OperationsStats($selector: OperationsStatsSelectorInput!) {
+    operationsStats(selector: $selector) {
+      clients {
+        nodes {
+          __typename
+        }
+      }
+      operations {
+        nodes {
+          __typename
+        }
+      }
+      ...OperationsTableContainer_OperationsStatsFragment
+    }
+  }
+`);
 
 export function OperationsList({
   className,
@@ -429,7 +477,7 @@ export function OperationsList({
 }): ReactElement {
   const [clientFilter, setClientFilter] = useState<string | null>(null);
   const [query, refetch] = useQuery({
-    query: OperationsStatsDocument,
+    query: OperationsList_OperationsStatsQuery,
     variables: {
       selector: {
         organization,
@@ -441,8 +489,6 @@ export function OperationsList({
       },
     },
   });
-  const operations = query.data?.operationsStats?.operations?.nodes ?? [];
-  const clients = query.data?.operationsStats?.clients?.nodes ?? [];
 
   return (
     <OperationsFallback
@@ -451,10 +497,9 @@ export function OperationsList({
       refetch={() => refetch({ requestPolicy: 'cache-and-network' })}
     >
       <OperationsTableContainer
-        operations={operations}
+        operationStats={query.data?.operationsStats ?? null}
         operationsFilter={operationsFilter}
         className={className}
-        clients={clients}
         setClientFilter={setClientFilter}
         clientFilter={clientFilter}
         organization={organization}

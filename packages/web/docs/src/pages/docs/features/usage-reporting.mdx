@@ -1,6 +1,6 @@
 import NextImage from 'next/image'
 import { Tab, Tabs } from 'nextra-theme-docs'
-import { Callout, PackageCmd } from '@theguild/components'
+import { Callout } from '@theguild/components'
 import monitoringViewImage from '../../../../public/docs/pages/features/monitoring-view.png'
 import usageClientsImage from '../../../../public/docs/pages/features/usage-clients.png'
 import usageLatencyImage from '../../../../public/docs/pages/features/usage-latency-over-time.png'
@@ -41,7 +41,7 @@ The following information is included in usage reporting:
 2. **Operation Type**: the type of the operation (`query`, `mutation`, or `subscription`).
 3. **Coordinated**: a simple array-based strcuture that represents what fields, arguments, and types
    were used in the operation (for example: `Query.user`, `Query.user.id` `User`).
-4. **Client Identifier**: the identiifer of the client that sent the operation. This is useful to
+4. **Client Identifier**: the identifier of the client that sent the operation. This is useful to
    understand the distribution of your consumers.
 5. **Date**: the date and time when the operation was executed.
 

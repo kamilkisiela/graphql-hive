@@ -2,9 +2,11 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { buildSchema, execute, GraphQLError, parse } from 'graphql';
 import { env } from '@/env/backend';
 import { extractAccessTokenFromRequest } from '@/lib/api/extract-access-token-from-request';
+import { getLogger } from '@/server-logger';
 import { addMocksToSchema } from '@graphql-tools/mock';
 
 async function lab(req: NextApiRequest, res: NextApiResponse) {
+  const logger = getLogger(req);
   const url = env.graphqlEndpoint;
   const labParams = req.query.lab || [];
 
@@ -59,9 +61,15 @@ async function lab(req: NextApiRequest, res: NextApiResponse) {
     },
   };
 
+  if (req['headers']['x-request-id']) {
+    headers['x-request-id'] = req['headers']['x-request-id'] as string;
+  }
+
   const response = await fetch(url, {
     headers: {
       'content-type': 'application/json',
+      'graphql-client-name': 'Hive App',
+      'graphql-client-version': env.release,
       ...headers,
     },
     method: 'POST',
@@ -100,7 +108,7 @@ async function lab(req: NextApiRequest, res: NextApiResponse) {
 
     res.status(200).json(result);
   } catch (e) {
-    console.log(e);
+    logger.error(e);
     res.status(200).json({
       errors: [e],
     });

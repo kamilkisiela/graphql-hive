@@ -4,11 +4,8 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { Section } from '@/components/common';
 import { CHART_PRIMARY_COLOR } from '@/constants';
-import {
-  DateRangeInput,
-  GeneralOperationsStatsDocument,
-  GeneralOperationsStatsQuery,
-} from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { DateRangeInput } from '@/graphql';
 import {
   formatDuration,
   formatNumber,
@@ -22,6 +19,28 @@ import { cn } from '@/lib/utils';
 import { useChartStyles } from '@/utils';
 import { OperationsFallback } from './Fallback';
 import { createEmptySeries, fullSeries, resolutionToMilliseconds } from './utils';
+
+const Stats_GeneralOperationsStatsQuery = graphql(`
+  query Stats_GeneralOperationsStats($selector: OperationsStatsSelectorInput!, $resolution: Int!) {
+    operationsStats(selector: $selector) {
+      ... on OperationsStats {
+        totalRequests
+        totalFailures
+        totalOperations
+        duration {
+          p75
+          p90
+          p95
+          p99
+        }
+      }
+      ...OverTimeStats_OperationsStatsFragment
+      ...RpmOverTimeStats_OperationStatsFragment
+      ...LatencyOverTimeStats_OperationStatsFragment
+      ...ClientsStats_OperationsStatsFragment
+    }
+  }
+`);
 
 const classes = {
   root: cn('text-center'),
@@ -121,17 +140,31 @@ function FailureRateStats({
   );
 }
 
+const OverTimeStats_OperationsStatsFragment = graphql(`
+  fragment OverTimeStats_OperationsStatsFragment on OperationsStats {
+    failuresOverTime(resolution: $resolution) {
+      date
+      value
+    }
+    requestsOverTime(resolution: $resolution) {
+      date
+      value
+    }
+  }
+`);
+
 function OverTimeStats({
   period,
   resolution,
-  requestsOverTime = [],
-  failuresOverTime = [],
+  operationStats,
 }: {
   period: DateRangeInput;
   resolution: number;
-  requestsOverTime?: GeneralOperationsStatsQuery['operationsStats']['requestsOverTime'];
-  failuresOverTime?: GeneralOperationsStatsQuery['operationsStats']['failuresOverTime'];
+  operationStats: FragmentType<typeof OverTimeStats_OperationsStatsFragment> | null;
 }): ReactElement {
+  const { failuresOverTime = [], requestsOverTime = [] } =
+    useFragment(OverTimeStats_OperationsStatsFragment, operationStats) ?? {};
+
   const styles = useChartStyles();
   const interval = resolutionToMilliseconds(resolution, period);
   const requests = useMemo(() => {
@@ -250,15 +283,34 @@ function OverTimeStats({
   );
 }
 
-function ClientsStats({
-  clients = [],
-}: {
-  clients?: GeneralOperationsStatsQuery['operationsStats']['clients']['nodes'];
+const ClientsStats_OperationsStatsFragment = graphql(`
+  fragment ClientsStats_OperationsStatsFragment on OperationsStats {
+    clients {
+      nodes {
+        name
+        count
+        percentage
+        versions {
+          version
+          count
+          percentage
+        }
+      }
+      total
+    }
+  }
+`);
+
+function ClientsStats(props: {
+  operationStats: FragmentType<typeof ClientsStats_OperationsStatsFragment> | null;
 }): ReactElement {
   const styles = useChartStyles();
+  const operationStats = useFragment(ClientsStats_OperationsStatsFragment, props.operationStats);
   const sortedClients = useMemo(() => {
-    return clients?.length ? clients.slice().sort((a, b) => b.count - a.count) : [];
-  }, [clients]);
+    return operationStats?.clients.nodes?.length
+      ? operationStats.clients.nodes.slice().sort((a, b) => b.count - a.count)
+      : [];
+  }, [operationStats?.clients.nodes]);
   const byClient = useMemo(() => {
     let values: string[] = [];
     const labels: string[] = [];
@@ -438,20 +490,36 @@ function ClientsStats({
   );
 }
 
+const LatencyOverTimeStats_OperationStatsFragment = graphql(`
+  fragment LatencyOverTimeStats_OperationStatsFragment on OperationsStats {
+    durationOverTime(resolution: $resolution) {
+      date
+      duration {
+        p75
+        p90
+        p95
+        p99
+      }
+    }
+  }
+`);
+
 function LatencyOverTimeStats({
   period,
   resolution,
-  duration = [],
+  operationStats,
 }: {
   period: {
     from: string;
     to: string;
   };
   resolution: number;
-  duration?: GeneralOperationsStatsQuery['operationsStats']['durationOverTime'];
+  operationStats?: FragmentType<typeof LatencyOverTimeStats_OperationStatsFragment> | null;
 }): ReactElement {
   const styles = useChartStyles();
   const interval = resolutionToMilliseconds(resolution, period);
+  const { durationOverTime: duration = [] } =
+    useFragment(LatencyOverTimeStats_OperationStatsFragment, operationStats) ?? {};
   const p75 = useMemo(() => {
     if (duration?.length) {
       return fullSeries(
@@ -576,20 +644,30 @@ function LatencyOverTimeStats({
   );
 }
 
+const RpmOverTimeStats_OperationStatsFragment = graphql(`
+  fragment RpmOverTimeStats_OperationStatsFragment on OperationsStats {
+    requestsOverTime(resolution: $resolution) {
+      date
+      value
+    }
+  }
+`);
+
 function RpmOverTimeStats({
   period,
   resolution,
-  requestsOverTime = [],
+  operationStats,
 }: {
   period: {
     from: string;
     to: string;
   };
   resolution: number;
-  requestsOverTime?: GeneralOperationsStatsQuery['operationsStats']['requestsOverTime'];
+  operationStats: FragmentType<typeof RpmOverTimeStats_OperationStatsFragment> | null;
 }): ReactElement {
   const styles = useChartStyles();
-  const requests = requestsOverTime ?? [];
+  const { requestsOverTime: requests = [] } =
+    useFragment(RpmOverTimeStats_OperationStatsFragment, operationStats) ?? {};
 
   const interval = resolutionToMilliseconds(resolution, period);
   const windowInM = interval / (60 * 1000);
@@ -690,6 +768,7 @@ export function OperationsStats({
   period,
   operationsFilter,
   clientNamesFilter,
+  resolution,
 }: {
   organization: string;
   project: string;
@@ -698,12 +777,12 @@ export function OperationsStats({
     from: string;
     to: string;
   };
+  resolution: number;
   operationsFilter: string[];
   clientNamesFilter: Array<string>;
 }): ReactElement {
-  const resolution = 90;
   const [query, refetchQuery] = useQuery({
-    query: GeneralOperationsStatsDocument,
+    query: Stats_GeneralOperationsStatsQuery,
     variables: {
       selector: {
         organization,
@@ -749,15 +828,14 @@ export function OperationsStats({
         </div>
       </OperationsFallback>
       <div>
-        <ClientsStats clients={operationsStats?.clients?.nodes} />
+        <ClientsStats operationStats={operationsStats ?? null} />
       </div>
       <div>
         <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
           <OverTimeStats
             period={period}
             resolution={resolution}
-            requestsOverTime={operationsStats?.requestsOverTime}
-            failuresOverTime={operationsStats?.failuresOverTime}
+            operationStats={operationsStats ?? null}
           />
         </OperationsFallback>
       </div>
@@ -766,7 +844,7 @@ export function OperationsStats({
           <RpmOverTimeStats
             period={period}
             resolution={resolution}
-            requestsOverTime={operationsStats?.requestsOverTime}
+            operationStats={operationsStats ?? null}
           />
         </OperationsFallback>
       </div>
@@ -774,7 +852,7 @@ export function OperationsStats({
         <OperationsFallback isError={isError} refetch={refetch}>
           <LatencyOverTimeStats
             period={period}
-            duration={operationsStats?.durationOverTime}
+            operationStats={operationsStats ?? null}
             resolution={resolution}
           />
         </OperationsFallback>

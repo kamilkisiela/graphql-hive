@@ -2,6 +2,7 @@
 name = "graphql-hive-router"
 version = "0.0.1"
 authors = ["Kamil Kisiela <kamil.kisiela@gmail.com>"]
+repository = "https://github.com/kamilkisiela/graphql-hive/"
 edition = "2021"
 license = "MIT"
 publish = false

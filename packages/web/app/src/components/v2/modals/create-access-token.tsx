@@ -20,7 +20,7 @@ import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '
 import { scopes } from '@/lib/access/common';
 import { useRouteSelector } from '@/lib/hooks';
 
-const CreateAccessToken_CreateTokenMutation = graphql(`
+export const CreateAccessToken_CreateTokenMutation = graphql(`
   mutation CreateAccessToken_CreateToken($input: CreateTokenInput!) {
     createToken(input: $input) {
       ok {

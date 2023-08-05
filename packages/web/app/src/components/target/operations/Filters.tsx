@@ -4,26 +4,43 @@ import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { Button, Checkbox, Drawer, Input, Spinner } from '@/components/v2';
-import { DateRangeInput, OperationsStatsDocument, OperationStatsFieldsFragment } from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
+import { DateRangeInput } from '@/graphql';
 import { useFormattedNumber, useRouteSelector, useToggle } from '@/lib/hooks';
 import { ChevronUpIcon } from '@radix-ui/react-icons';
+
+const OperationsFilter_OperationStatsConnectionFragment = graphql(`
+  fragment OperationsFilter_OperationStatsConnectionFragment on OperationStatsConnection {
+    nodes {
+      id
+      operationHash
+      name
+      ...OperationRow_OperationStatsFragment
+    }
+  }
+`);
 
 function OperationsFilter({
   onClose,
   isOpen,
   onFilter,
-  operations,
+  operationStatsConnection,
   selected,
 }: {
   onClose(): void;
   onFilter(keys: string[]): void;
   isOpen: boolean;
-  operations: readonly OperationStatsFieldsFragment[];
+  operationStatsConnection: FragmentType<typeof OperationsFilter_OperationStatsConnectionFragment>;
   selected?: string[];
 }): ReactElement {
+  const operations = useFragment(
+    OperationsFilter_OperationStatsConnectionFragment,
+    operationStatsConnection,
+  );
+
   function getOperationHashes() {
     const items: string[] = [];
-    for (const op of operations) {
+    for (const op of operations.nodes) {
       if (op.operationHash) {
         items.push(op.operationHash);
       }
@@ -51,7 +68,9 @@ function OperationsFilter({
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedFilter = useDebouncedCallback((value: string) => {
     setVisibleOperations(
-      operations.filter(op => op.name.toLocaleLowerCase().includes(value.toLocaleLowerCase())),
+      operations.nodes.filter(op =>
+        op.name.toLocaleLowerCase().includes(value.toLocaleLowerCase()),
+      ),
     );
   }, 500);
 
@@ -65,7 +84,7 @@ function OperationsFilter({
     [setSearchTerm, debouncedFilter],
   );
 
-  const [visibleOperations, setVisibleOperations] = useState(operations);
+  const [visibleOperations, setVisibleOperations] = useState(operations.nodes);
 
   const selectAll = useCallback(() => {
     setSelectedItems(getOperationHashes());
@@ -82,7 +101,7 @@ function OperationsFilter({
         <OperationRow
           style={style}
           key={operation.id}
-          operation={operation}
+          operationStats={operation}
           selected={selectedItems.includes(operation.operationHash || '')}
           onSelect={onSelect}
         />
@@ -103,7 +122,7 @@ function OperationsFilter({
           value={searchTerm}
           onClear={() => {
             setSearchTerm('');
-            setVisibleOperations(operations);
+            setVisibleOperations(operations.nodes);
           }}
         />
         <div className="flex gap-2 items-center w-full">
@@ -151,6 +170,17 @@ function OperationsFilter({
   );
 }
 
+const OperationsFilterContainer_OperationStatsQuery = graphql(`
+  query OperationsFilterContainer_OperationStatsQuery($selector: OperationsStatsSelectorInput!) {
+    operationsStats(selector: $selector) {
+      operations {
+        ...OperationsFilter_OperationStatsConnectionFragment
+        total
+      }
+    }
+  }
+`);
+
 function OperationsFilterContainer({
   period,
   isOpen,
@@ -166,7 +196,7 @@ function OperationsFilterContainer({
 }): ReactElement | null {
   const router = useRouteSelector();
   const [query] = useQuery({
-    query: OperationsStatsDocument,
+    query: OperationsFilterContainer_OperationStatsQuery,
     variables: {
       selector: {
         organization: router.organizationId,
@@ -186,32 +216,40 @@ function OperationsFilterContainer({
     return <Spinner />;
   }
 
-  const allOperations = query.data.operationsStats?.operations?.nodes ?? [];
-
   return (
     <OperationsFilter
-      operations={allOperations}
+      operationStatsConnection={query.data.operationsStats?.operations}
       selected={selected}
       isOpen={isOpen}
       onClose={onClose}
       onFilter={hashes => {
-        onFilter(hashes.length === allOperations.length ? [] : hashes);
+        onFilter(hashes.length === query.data?.operationsStats.operations.total ? [] : hashes);
       }}
     />
   );
 }
 
+const OperationRow_OperationStatsFragment = graphql(`
+  fragment OperationRow_OperationStatsFragment on OperationStats {
+    id
+    name
+    operationHash
+    count
+  }
+`);
+
 function OperationRow({
-  operation,
+  operationStats,
   selected,
   onSelect,
   style,
 }: {
-  operation: OperationStatsFieldsFragment;
+  operationStats: FragmentType<typeof OperationRow_OperationStatsFragment>;
   selected: boolean;
   onSelect(id: string, selected: boolean): void;
   style: any;
 }): ReactElement {
+  const operation = useFragment(OperationRow_OperationStatsFragment, operationStats);
   const requests = useFormattedNumber(operation.count);
   const hash = operation.operationHash || '';
   const change = useCallback(() => {
@@ -261,17 +299,25 @@ export function OperationsFilterTrigger({
   );
 }
 
+const ClientRow_ClientStatsFragment = graphql(`
+  fragment ClientRow_ClientStatsFragment on ClientStats {
+    name
+    count
+  }
+`);
+
 function ClientRow({
-  client,
   selected,
   onSelect,
   style,
+  ...props
 }: {
-  client: { name: string; count: number };
+  client: FragmentType<typeof ClientRow_ClientStatsFragment>;
   selected: boolean;
   onSelect(id: string, selected: boolean): void;
   style: any;
 }): ReactElement {
+  const client = useFragment(ClientRow_ClientStatsFragment, props.client);
   const requests = useFormattedNumber(client.count);
   const hash = client.name;
   const change = useCallback(() => {
@@ -294,21 +340,34 @@ function ClientRow({
   );
 }
 
+const ClientsFilter_ClientStatsConnectionFragment = graphql(`
+  fragment ClientsFilter_ClientStatsConnectionFragment on ClientStatsConnection {
+    nodes {
+      name
+      ...ClientRow_ClientStatsFragment
+    }
+  }
+`);
+
 function ClientsFilter({
   onClose,
   isOpen,
   onFilter,
-  clients,
+  clientStatsConnection,
   selected,
 }: {
   onClose(): void;
   onFilter(keys: string[]): void;
   isOpen: boolean;
-  clients: readonly { name: string; count: number }[];
+  clientStatsConnection: FragmentType<typeof ClientsFilter_ClientStatsConnectionFragment>;
   selected?: string[];
 }): ReactElement {
+  const clientConnection = useFragment(
+    ClientsFilter_ClientStatsConnectionFragment,
+    clientStatsConnection,
+  );
   function getClientNames() {
-    return clients.map(client => client.name);
+    return clientConnection.nodes.map(client => client.name);
   }
 
   const [selectedItems, setSelectedItems] = useState<string[]>(() =>
@@ -331,7 +390,9 @@ function ClientsFilter({
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedFilter = useDebouncedCallback((value: string) => {
     setVisibleOperations(
-      clients.filter(client => client.name.toLocaleLowerCase().includes(value.toLocaleLowerCase())),
+      clientConnection.nodes.filter(client =>
+        client.name.toLocaleLowerCase().includes(value.toLocaleLowerCase()),
+      ),
     );
   }, 500);
 
@@ -345,11 +406,11 @@ function ClientsFilter({
     [setSearchTerm, debouncedFilter],
   );
 
-  const [visibleOperations, setVisibleOperations] = useState(clients);
+  const [visibleOperations, setVisibleOperations] = useState(clientConnection.nodes);
 
   const selectAll = useCallback(() => {
     setSelectedItems(getClientNames());
-  }, [clients]);
+  }, [clientConnection.nodes]);
   const selectNone = useCallback(() => {
     setSelectedItems([]);
   }, [setSelectedItems]);
@@ -383,7 +444,7 @@ function ClientsFilter({
           value={searchTerm}
           onClear={() => {
             setSearchTerm('');
-            setVisibleOperations(clients);
+            setVisibleOperations(clientConnection.nodes);
           }}
         />
         <div className="flex gap-2 items-center w-full">
@@ -431,6 +492,19 @@ function ClientsFilter({
   );
 }
 
+const ClientsFilterContainer_ClientStatsQuery = graphql(`
+  query ClientsFilterContainer_ClientStats($selector: OperationsStatsSelectorInput!) {
+    operationsStats(selector: $selector) {
+      clients {
+        ...ClientsFilter_ClientStatsConnectionFragment
+        nodes {
+          __typename
+        }
+      }
+    }
+  }
+`);
+
 function ClientsFilterContainer({
   period,
   isOpen,
@@ -446,7 +520,7 @@ function ClientsFilterContainer({
 }): ReactElement | null {
   const router = useRouteSelector();
   const [query] = useQuery({
-    query: OperationsStatsDocument,
+    query: ClientsFilterContainer_ClientStatsQuery,
     variables: {
       selector: {
         organization: router.organizationId,
@@ -466,11 +540,11 @@ function ClientsFilterContainer({
     return <Spinner />;
   }
 
-  const allClients = query.data.operationsStats?.clients?.nodes ?? [];
+  const allClients = query.data.operationsStats?.clients.nodes ?? [];
 
   return (
     <ClientsFilter
-      clients={allClients}
+      clientStatsConnection={query.data.operationsStats.clients}
       selected={selected}
       isOpen={isOpen}
       onClose={onClose}

@@ -260,6 +260,12 @@ export interface Storage {
     _: TargetSelector & Pick<Project, 'name' | 'cleanId'> & { user: string },
   ): Promise<Target | never>;
 
+  updateTargetGraphQLEndpointUrl(_: {
+    targetId: string;
+    organizationId: string;
+    graphqlEndpointUrl: string | null;
+  }): Promise<Target | null>;
+
   deleteTarget(_: TargetSelector): Promise<
     | (Target & {
         tokens: string[];
@@ -690,7 +696,11 @@ export interface Storage {
   /**
    * Persist a schema check record in the database.
    */
-  createSchemaCheck(input: SchemaCheckInput): Promise<SchemaCheck>;
+  createSchemaCheck(_: SchemaCheckInput & { expiresAt: Date | null }): Promise<SchemaCheck>;
+  /**
+   * Delete the expired schema checks from the database.
+   */
+  purgeExpiredSchemaChecks(_: { expiresAt: Date }): Promise<number>;
   /**
    * Find schema check for a given ID and target.
    */

@@ -7,6 +7,8 @@
     "tsconfig.json",
     "scripts/patch-manifests.js",
     "scripts/banner.js",
+    "scripts/runify.ts",
+    "scripts/templates/runify-next.ts",
     "patches/*"
   ],
   "pipeline": {
@@ -39,8 +41,9 @@
       "dependsOn": ["^build", "@graphql-hive/client#build"],
       "outputs": ["dist/**"]
     },
-    "typecheck": {
-      "outputs": [""]
+    "@hive/server#build": {
+      "dependsOn": ["^build", "@hive/app#build"],
+      "outputs": ["dist/**"]
     },
     "check:build": {
       "outputs": [""]

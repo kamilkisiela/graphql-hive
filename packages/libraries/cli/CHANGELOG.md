@@ -1,5 +1,13 @@
 # @graphql-hive/cli
 
+## 0.27.0
+
+### Minor Changes
+
+- [#2697](https://github.com/kamilkisiela/graphql-hive/pull/2697)
+  [`0475ca9`](https://github.com/kamilkisiela/graphql-hive/commit/0475ca9ea8d5b317c7764a5d666eaf3d7f36a3e1)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Adds introspect command
+
 ## 0.26.0
 
 ### Minor Changes

@@ -1,16 +1,30 @@
 import { ReactElement, useCallback } from 'react';
 import { useMutation } from 'urql';
 import { Button, Tooltip } from '@/components/v2';
-import { SchemaVersionFieldsFragment, UpdateSchemaVersionStatusDocument } from '@/graphql';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
 
-export function MarkAsValid({
-  version,
-}: {
-  version: Pick<SchemaVersionFieldsFragment, 'id' | 'valid'>;
+const UpdateSchemaVersionStatusMutation = graphql(`
+  mutation updateSchemaVersionStatus($input: SchemaVersionUpdateInput!) {
+    updateSchemaVersionStatus(input: $input) {
+      ...SchemaVersionFields
+    }
+  }
+`);
+
+const MarkAsValid_SchemaVersionFragment = graphql(`
+  fragment MarkAsValid_SchemaVersionFragment on SchemaVersion {
+    id
+    valid
+  }
+`);
+
+export function MarkAsValid(props: {
+  version: FragmentType<typeof MarkAsValid_SchemaVersionFragment>;
 }): ReactElement | null {
   const router = useRouteSelector();
-  const [mutation, mutate] = useMutation(UpdateSchemaVersionStatusDocument);
+  const version = useFragment(MarkAsValid_SchemaVersionFragment, props.version);
+  const [mutation, mutate] = useMutation(UpdateSchemaVersionStatusMutation);
   const markAsValid = useCallback(async () => {
     await mutate({
       input: {

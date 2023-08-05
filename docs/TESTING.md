@@ -18,7 +18,7 @@ Integration tests are based pre-built Docker images, so you can run it in 2 mode
 
 #### Running from Source Code
 
-**TL;DR**: Use `pnpm integration:prepare` command to setup the complete environment from locally
+**TL;DR**: Use `pnpm integration:prepare` command to set up the complete environment from locally
 running integration tests. You can ignore the rest of the commands in this section, if this script
 worked for you, and just run `pnpm test:integration` to run the actual tests.
 
@@ -27,32 +27,30 @@ image.
 
 To do so, follow these instructions:
 
-2. Install all deps: `pnpm i`
-3. Generate types: `pnpm graphql:generate`
-4. Build source code: `pnpm build`
-5. Set env vars:
-
-```bash
-export COMMIT_SHA="local"
-export RELEASE="local"
-export BRANCH_NAME="local"
-export BUILD_TYPE=""
-export DOCKER_TAG=":local"
-```
-
-6. Compile a local Docker image by running:
+1. Install all deps: `pnpm i`
+2. Generate types: `pnpm graphql:generate`
+3. Build source code: `pnpm build`
+4. Set env vars:
+   ```bash
+   export COMMIT_SHA="local"
+   export RELEASE="local"
+   export BRANCH_NAME="local"
+   export BUILD_TYPE=""
+   export DOCKER_TAG=":local"
+   ```
+5. Compile a local Docker image by running:
    `docker buildx bake -f docker/docker.hcl integration-tests --load`
-7. Use Docker Compose to run the built containers (based on `community` compose file), along with
+6. Use Docker Compose to run the built containers (based on `community` compose file), along with
    the extra containers:
 
-```bash
-export DOCKER_TAG=":local"
-export DOCKER_REGISTRY=""
+   ```bash
+   export DOCKER_TAG=":local"
+   export DOCKER_REGISTRY=""
+   
+   docker compose -f ./docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
+   ```
 
-docker compose -f ./docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
-```
-
-8. Run the tests: `pnpm --filter integration-tests test:integration`
+7. Run the tests: `pnpm --filter integration-tests test:integration`
 
 #### Running from Pre-Built Docker Image
 
@@ -66,12 +64,12 @@ To run integration tests locally, from the pre-build Docker image, follow:
    is done successfully)
 5. Set the needed env vars, and use Docker Compose to run all local services:
 
-```bash
-export DOCKER_REGISTRY="ghcr.io/kamilkisiela/graphql-hive/"
-export DOCKER_TAG=":IMAGE_TAG_HERE"
-
-docker compose -f ./docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
-```
+   ```bash
+   export DOCKER_REGISTRY="ghcr.io/kamilkisiela/graphql-hive/"
+   export DOCKER_TAG=":IMAGE_TAG_HERE"
+   
+   docker compose -f ./docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
+   ```
 
 6. Run the tests: `pnpm --filter integration-tests test:integration`
 
@@ -90,15 +88,13 @@ To run e2e tests locally, from the local source code, follow:
 3. Generate types: `pnpm graphql:generate`
 4. Build source code: `pnpm build`
 5. Set env vars:
-
-```bash
-export COMMIT_SHA="local"
-export RELEASE="local"
-export BRANCH_NAME="local"
-export BUILD_TYPE=""
-export DOCKER_TAG=":local"
-```
-
+   ```bash
+   export COMMIT_SHA="local"
+   export RELEASE="local"
+   export BRANCH_NAME="local"
+   export BUILD_TYPE=""
+   export DOCKER_TAG=":local"
+   ```
 6. Compile a local Docker image by running: `docker buildx bake -f docker/docker.hcl build --load`
 7. Run the e2e environment, by running:
    `docker compose -f ./docker/docker-compose.community.yml -f ./docker/docker-compose.end2end.yml --env-file ./integration-tests/.env up -d --wait`
@@ -114,12 +110,10 @@ To run integration tests locally, from the pre-build Docker image, follow:
 3. Generate types: `pnpm graphql:generate`
 4. Build source code: `pnpm build`
 5. Decide on the commit ID / Docker image tag you would like to use and set it as env var:
-
-```bash
-export DOCKER_REGISTRY="ghcr.io/kamilkisiela/graphql-hive/"
-export DOCKER_TAG=":IMAGE_TAG_HERE"
-```
-
+   ```bash
+   export DOCKER_REGISTRY="ghcr.io/kamilkisiela/graphql-hive/"
+   export DOCKER_TAG=":IMAGE_TAG_HERE"
+   ```
 6. Run the e2e environment, by running:
    `docker compose -f ./docker/docker-compose.community.yml --env-file ./integration-tests/.env up -d --wait`
 7. Run Cypress: `pnpm test:e2e`
@@ -142,6 +136,6 @@ Keep in mind that integration tests are running a combination of 2 Docker Compos
 If you are having issues with running Docker images, follow these instructions:
 
 1. Make sure you have the latest Docker installed.
-1. Make sure no containers are running (`docker ps` and then `docker stop CONTAINER_ID`).
-1. Delete the local volume used for testing, it's located under `.hive` directory.
-1. Try to run `docker system prune` to clean all the Docker images, containers, networks and caches.
+2. Make sure no containers are running (`docker ps` and then `docker stop CONTAINER_ID`).
+3. Delete the local volume used for testing, it's located under `.hive` directory.
+4. Try to run `docker system prune` to clean all the Docker images, containers, networks and caches.

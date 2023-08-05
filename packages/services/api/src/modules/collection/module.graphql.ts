@@ -64,8 +64,8 @@ export const typeDefs = gql`
   input UpdateDocumentCollectionOperationInput {
     operationId: ID!
     collectionId: ID!
-    name: String!
-    query: String!
+    name: String
+    query: String
     variables: String
     headers: String
   }

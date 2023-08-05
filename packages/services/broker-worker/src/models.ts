@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { isSignatureValid } from './auth';
+import type { SignatureValidator } from './auth';
 import { InvalidRequestFormat, InvalidSignature, MissingSignature } from './errors';
 import type { Logger } from './types';
 
@@ -21,7 +21,7 @@ const RequestModelSchema = z.union([
 
 export async function parseIncomingRequest(
   request: Request,
-  keyValidator: typeof isSignatureValid,
+  keyValidator: SignatureValidator,
   logger: Logger,
 ): Promise<{ error: Response } | z.infer<typeof RequestModelSchema>> {
   if (request.method !== 'POST') {

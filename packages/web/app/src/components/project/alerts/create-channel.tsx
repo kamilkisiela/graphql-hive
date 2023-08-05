@@ -77,7 +77,6 @@ export const CreateChannelModal = ({
           console.error(error);
         }
         if (data?.addAlertChannel.error) {
-          console.log('local error');
           console.error(data.addAlertChannel.error);
         }
         if (data?.addAlertChannel.ok) {

@@ -18,13 +18,14 @@ type Period = {
   to: string;
 };
 
-function floorDate(date: Date): Date {
-  const time = 1000 * 60;
-  return new Date(Math.floor(date.getTime() / time) * time);
+function toStartOfToday(): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
 }
 
 function createPeriod(option: PeriodOption): Period {
-  const now = floorDate(new Date());
+  const now = toStartOfToday();
   const value = parseInt(option.replace('d', ''), 10);
 
   return {

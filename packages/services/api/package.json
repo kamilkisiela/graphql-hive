@@ -17,13 +17,13 @@
     "@graphql-inspector/core": "4.2.2",
     "@octokit/app": "13.1.8",
     "@octokit/request-error": "3.0.2",
-    "@sentry/node": "7.56.0",
-    "@sentry/types": "7.56.0",
+    "@sentry/node": "7.59.3",
+    "@sentry/types": "7.59.3",
     "@slack/web-api": "6.8.1",
     "@theguild/buddy": "0.1.0",
     "@trpc/client": "10.31.0",
     "@trpc/server": "10.31.0",
-    "@whatwg-node/fetch": "0.9.7",
+    "@whatwg-node/fetch": "0.9.9",
     "agentkeepalive": "4.3.0",
     "bcryptjs": "2.4.3",
     "dataloader": "2.2.2",
@@ -59,7 +59,7 @@
     "@types/lodash": "4.14.195",
     "@types/ms": "0.7.31",
     "@types/object-hash": "3.0.2",
-    "ioredis-mock": "8.7.0",
+    "ioredis-mock": "8.8.1",
     "tslib": "2.5.3"
   }
 }

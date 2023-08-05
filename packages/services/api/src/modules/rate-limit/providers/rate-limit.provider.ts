@@ -51,4 +51,15 @@ export class RateLimitProvider {
 
     return await this.rateLimit.checkRateLimit.query(input);
   }
+
+  @sentry('RateLimitProvider.getRetention')
+  async getRetention(input: RateLimitApiInput['getRetention']) {
+    if (this.rateLimit === null) {
+      return null;
+    }
+
+    this.logger.debug(`Getting retention for target id="${input.targetId}"`);
+
+    return await this.rateLimit.getRetention.query(input);
+  }
 }

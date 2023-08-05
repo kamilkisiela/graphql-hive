@@ -1,10 +1,3 @@
-import {
-  OrganizationActivitiesQuery,
-  ProjectActivitiesQuery,
-  TargetActivitiesQuery,
-} from '@/graphql';
+import { OrganizationActivitiesQuery } from '@/graphql';
 
-export type ActivityNode =
-  | OrganizationActivitiesQuery['organizationActivities']['nodes'][0]
-  | ProjectActivitiesQuery['projectActivities']['nodes'][0]
-  | TargetActivitiesQuery['targetActivities']['nodes'][0];
+export type ActivityNode = OrganizationActivitiesQuery['organizationActivities']['nodes'][0];

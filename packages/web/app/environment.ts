@@ -38,6 +38,9 @@ const BaseSchema = zod.object({
   AUTH_REQUIRE_EMAIL_VERIFICATION: emptyString(
     zod.union([zod.literal('1'), zod.literal('0')]).optional(),
   ),
+  GRAPHQL_PERSISTED_OPERATIONS: emptyString(
+    zod.union([zod.literal('1'), zod.literal('0')]).optional(),
+  ),
 });
 
 const IntegrationSlackSchema = zod.union([
@@ -231,6 +234,9 @@ const config = {
   },
   sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
   stripePublicKey: base.STRIPE_PUBLIC_KEY ?? null,
+  graphql: {
+    persistedOperations: base.GRAPHQL_PERSISTED_OPERATIONS === '1',
+  },
 } as const;
 
 declare global {

@@ -1,4 +1,5 @@
 import { ComponentProps, ReactElement, ReactNode } from 'react';
+import { cx } from 'class-variance-authority';
 import { clsx } from 'clsx';
 import * as A from '@radix-ui/react-accordion';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
@@ -15,6 +16,7 @@ function Wrapper({
 }: {
   defaultValue?: string | Array<string>;
   children: ReactNode;
+  className?: string;
 } & AccordionProps &
   (
     | { type?: 'single'; defaultValue?: string }
@@ -27,7 +29,7 @@ function Wrapper({
       type={type}
       defaultValue={defaultValue}
       collapsible
-      className="space-y-4 w-full"
+      className={cx('w-full', props.className)}
       data-cy="accordion"
     >
       {children}
@@ -55,9 +57,11 @@ function Item({
 function Header({
   children,
   className,
+  triggerClassName,
 }: {
   children: ReactNode;
   className?: string;
+  triggerClassName?: string;
 }): ReactElement {
   return (
     <A.Header className={clsx('w-full', className)}>
@@ -67,6 +71,7 @@ function Header({
           'radix-state-open:rounded-t-lg radix-state-closed:rounded-lg',
           'focus:outline-none',
           'inline-flex w-full items-center justify-between px-4 py-2 text-left',
+          triggerClassName,
         )}
       >
         <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{children}</span>

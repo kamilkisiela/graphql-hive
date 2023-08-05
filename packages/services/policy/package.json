@@ -10,11 +10,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@graphql-eslint/eslint-plugin": "3.19.1",
-    "@sentry/node": "7.56.0",
-    "@sentry/tracing": "7.56.0",
+    "@graphql-eslint/eslint-plugin": "3.20.1",
+    "@sentry/node": "7.59.3",
+    "@sentry/tracing": "7.59.3",
     "@trpc/server": "10.31.0",
-    "@whatwg-node/fetch": "0.9.7",
+    "@whatwg-node/fetch": "0.9.9",
     "ajv": "8.12.0",
     "dotenv": "16.3.1",
     "eslint": "8.43.0",
@@ -25,7 +25,7 @@
   "devDependencies": {
     "@hive/service-common": "workspace:*",
     "fastify": "3.29.5",
-    "pino-pretty": "10.0.1"
+    "pino-pretty": "10.1.0"
   },
   "buildOptions": {
     "runify": true,

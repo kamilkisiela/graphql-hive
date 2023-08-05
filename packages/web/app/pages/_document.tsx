@@ -9,6 +9,9 @@ export default class MyDocument extends Document<{
   frontendEnv: typeof import('@/config/frontend-env')['env'];
 }> {
   static async getInitialProps(ctx: DocumentContext) {
+    if (globalThis.process.env.BUILD !== '1') {
+      await import('../environment');
+    }
     const { env: frontendEnv } = await import('@/config/frontend-env');
     const initialProps = await Document.getInitialProps(ctx);
     const page = await ctx.renderPage();

@@ -23,30 +23,79 @@ function floorDate(date: Date): Date {
 }
 
 const DateRange = {
-  '30d': 'Last 30 days',
-  '14d': 'Last 14 days',
-  '7d': 'Last 7 days',
-  '1d': 'Last 24 hours',
-  '1h': 'Last hour',
+  '90d': {
+    resolution: 90,
+    label: 'Last 90 days',
+  },
+  '60d': {
+    resolution: 60,
+    label: 'Last 60 days',
+  },
+  '30d': {
+    resolution: 60,
+    label: 'Last 30 days',
+  },
+  '14d': {
+    resolution: 60,
+    label: 'Last 14 days',
+  },
+  '7d': {
+    resolution: 60,
+    label: 'Last 7 days',
+  },
+  '1d': {
+    resolution: 60,
+    label: 'Last 24 hours',
+  },
+  '1h': {
+    resolution: 60,
+    label: 'Last hour',
+  },
 };
 
 type PeriodKey = keyof typeof DateRange;
+
+function isDayBasedPeriodKey<T extends PeriodKey>(
+  periodKey: T,
+): periodKey is Extract<T, `${number}d`> {
+  return periodKey.endsWith('d');
+}
 
 function OperationsView({
   organizationCleanId,
   projectCleanId,
   targetCleanId,
+  dataRetentionInDays,
 }: {
   organizationCleanId: string;
   projectCleanId: string;
   targetCleanId: string;
+  dataRetentionInDays: number;
 }): ReactElement {
   const router = useRouter();
   const [href, periodParam] = router.asPath.split('?');
-  const selectedPeriod: PeriodKey =
+  let selectedPeriod: PeriodKey =
     (new URLSearchParams(periodParam).get('period') as PeriodKey) ?? '1d';
   const [selectedOperations, setSelectedOperations] = useState<string[]>([]);
   const [selectedClients, setSelectedClients] = useState<string[]>([]);
+  const availablePeriodOptions = useMemo<PeriodKey[]>(() => {
+    return Object.keys(DateRange).filter(key => {
+      const periodKey = key as PeriodKey;
+
+      if (isDayBasedPeriodKey(periodKey)) {
+        // Only show day based periods that are within the data retention period
+        const daysBack = parseInt(periodKey.replace('d', ''), 10);
+        return daysBack <= dataRetentionInDays;
+      }
+
+      return true;
+    }) as PeriodKey[];
+  }, [dataRetentionInDays]);
+
+  if (!availablePeriodOptions.includes(selectedPeriod)) {
+    selectedPeriod = '1d';
+  }
+
   const period = useMemo(() => {
     const now = floorDate(new Date());
     const sub = selectedPeriod.endsWith('h') ? 'h' : selectedPeriod.endsWith('m') ? 'm' : 'd';
@@ -62,7 +111,7 @@ function OperationsView({
     const to = formatISO(now);
 
     return { from, to };
-  }, [selectedPeriod]);
+  }, [selectedPeriod, availablePeriodOptions]);
 
   const updatePeriod = useCallback(
     (value: string) => {
@@ -92,7 +141,10 @@ function OperationsView({
           <RadixSelect
             onChange={updatePeriod}
             defaultValue={selectedPeriod}
-            options={Object.entries(DateRange).map(([value, label]) => ({ value, label }))}
+            options={availablePeriodOptions.map(key => ({
+              value: key,
+              label: DateRange[key].label,
+            }))}
           />
         </div>
       </div>
@@ -103,6 +155,7 @@ function OperationsView({
         period={period}
         operationsFilter={selectedOperations}
         clientNamesFilter={selectedClients}
+        resolution={DateRange[selectedPeriod].resolution}
       />
       <OperationsList
         className="mt-12"
@@ -126,6 +179,9 @@ const TargetOperationsPageQuery = graphql(`
       organization {
         ...TargetLayout_CurrentOrganizationFragment
         cleanId
+        rateLimit {
+          retentionInDays
+        }
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
@@ -183,6 +239,7 @@ function TargetOperationsPageContent() {
             organizationCleanId={currentOrganization.cleanId}
             projectCleanId={currentProject.cleanId}
             targetCleanId={currentTarget.cleanId}
+            dataRetentionInDays={currentOrganization.rateLimit.retentionInDays}
           />
         ) : (
           <div className="py-8">
