@@ -298,9 +298,6 @@ export class SchemaPublisher {
         throw new HiveError(`${project.type} project (${modelVersion}) not supported`);
     }
 
-    // store schema that is being checked in checksums table
-    // TODO: fetch supergraph schema checksum from composite
-
     const [schemaChecksum, compositeSchemaChecksum, supergraphSchemachecksum] = await Promise.all([
       this.storage.createSchemaSDLChecksum({
         targetId: target.id,
