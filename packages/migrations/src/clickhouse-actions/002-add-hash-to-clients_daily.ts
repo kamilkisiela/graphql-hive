@@ -13,7 +13,7 @@
  */
 import type { Action } from '../clickhouse';
 
-const action: Action = async (exec, isGraphQLHiveCloud) => {
+const action: Action = async (exec, _query, isGraphQLHiveCloud) => {
   // Create materialized views
   await Promise.all(
     [
