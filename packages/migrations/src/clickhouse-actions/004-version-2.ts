@@ -5,25 +5,29 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
   // Create new tables
   await Promise.all(
     [
+      // New and improved codec
+      // TODO: should we even partition the table? Maybe for the sake of full data migration
       `
-      CREATE TABLE IF NOT EXISTS default.operation_collection_new
-      (
-        target LowCardinality(String) CODEC(ZSTD(1)),
-        hash String CODEC(ZSTD(1)),
-        name String CODEC(ZSTD(1)),
-        body String CODEC(ZSTD(1)),
-        operation_kind String CODEC(ZSTD(1)),
-        coordinates Array(String) CODEC(ZSTD(1)),
-        total UInt32 CODEC(T64, ZSTD(1)),
-        timestamp DateTime('UTC') CODEC(DoubleDelta, LZ4),
-        expires_at DateTime('UTC') CODEC(DoubleDelta, LZ4)
-      )
-      ENGINE = SummingMergeTree
-      PARTITION BY toYYYYMM(timestamp)
-      PRIMARY KEY (target, hash)
-      ORDER BY (target, hash, timestamp)
-      SETTINGS index_granularity = 8192
-    `,
+        CREATE TABLE IF NOT EXISTS default.operation_collection_new
+        (
+          target LowCardinality(String) CODEC(ZSTD(1)),
+          hash String CODEC(ZSTD(1)),
+          name String CODEC(ZSTD(1)),
+          body String CODEC(ZSTD(1)),
+          operation_kind String CODEC(ZSTD(1)),
+          coordinates Array(String) CODEC(ZSTD(1)),
+          total UInt32 CODEC(T64, ZSTD(1)),
+          timestamp DateTime('UTC') CODEC(DoubleDelta, LZ4),
+          expires_at DateTime('UTC') CODEC(DoubleDelta, LZ4)
+        )
+        ENGINE = SummingMergeTree
+        PARTITION BY toYYYYMM(timestamp)
+        PRIMARY KEY (target, hash)
+        ORDER BY (target, hash, timestamp)
+        SETTINGS index_granularity = 8192
+      `,
+      // New and improved codec
+      // TODO: should we even partition the table? Maybe for the sake of full data migration
       `
       CREATE TABLE IF NOT EXISTS default.operations_new
       (
@@ -38,7 +42,7 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
         client_version String CODEC(ZSTD(1))
       )
       ENGINE = MergeTree
-      PARTITION BY toYYYYMMDD(timestamp)
+      PARTITION BY toYYYYMM(timestamp)
       PRIMARY KEY (target, hash)
       ORDER BY (target, hash, timestamp)
       SETTINGS index_granularity = 8192
@@ -49,6 +53,7 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
   // Create Materialized Views
   await Promise.all([
     // `operations`
+    // Completely new view, aggregates data by minute
     `
       CREATE MATERIALIZED VIEW IF NOT EXISTS default.operations_minutely_new
       (
@@ -86,6 +91,8 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
         client_version,
         timestamp
     `,
+    // Adds TTL to the view, no longer depends on `expires_at`
+    // Adds and improves codecs
     `
       CREATE MATERIALIZED VIEW IF NOT EXISTS default.operations_hourly_new
       (
@@ -123,6 +130,7 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
         client_version,
         timestamp
     `,
+    // Adds and improves codecs
     `
       CREATE MATERIALIZED VIEW IF NOT EXISTS default.operations_daily_new
       (
@@ -163,6 +171,7 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
         timestamp,
         expires_at
     `,
+    // Adds and improves codecs
     `
       CREATE MATERIALIZED VIEW IF NOT EXISTS default.clients_daily_new
       (
@@ -200,6 +209,7 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
         expires_at
     `,
     // `operation_collection`
+    // Adds and improves codecs
     `
       CREATE MATERIALIZED VIEW IF NOT EXISTS default.coordinates_daily_new
       (
@@ -233,6 +243,7 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
         timestamp,
         expires_at
     `,
+    // Adds a new view to easily and quickly query operation bodies
     `
       CREATE MATERIALIZED VIEW IF NOT EXISTS default.operation_collection_body_new
       (
@@ -260,6 +271,7 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
         body,
         expires_at
     `,
+    // Adds a new view to easily and quickly query operation details
     `
       CREATE MATERIALIZED VIEW IF NOT EXISTS default.operation_collection_details_new
       (
