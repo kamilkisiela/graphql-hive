@@ -112,7 +112,7 @@ export function createWriter({
   }
 
   return {
-    async writeOperations(operations: string[]) {
+    async writeOperations(operations: string[], migrationSpecificOperations: string[]) {
       if (operations.length === 0) {
         return;
       }
@@ -123,21 +123,40 @@ export function createWriter({
         throw new Error('Missing operations table');
       }
 
-      const tablesToWriteTo =
-        // operations and operations_new
-        tableNames.has('operations') && tableNames.has('operations_new')
-          ? ['operations', 'operations_new']
-          : // operations and operations_old
-          tableNames.has('operations') && tableNames.has('operations_old')
-          ? ['operations', 'operations_old']
-          : // operations and NO operations_new and NO operations_old
-          tableNames.has('operations')
-          ? ['operations']
-          : [];
+      const shouldUsePartialOperations =
+        tableNames.has('operations') && tableNames.has('operations_new') ? true : false;
 
-      if (tablesToWriteTo.length === 0) {
-        throw new Error('No tables to write to');
+      if (shouldUsePartialOperations) {
+        await Promise.all([
+          // operations
+          writeCsv(
+            clickhouse,
+            agents,
+            `INSERT INTO operations (${operationsFields}) FORMAT CSV`,
+            await compress(joinIntoSingleMessage(operations)),
+            logger,
+            3,
+          ),
+          // operations_new
+          migrationSpecificOperations.length > 0
+            ? writeCsv(
+                clickhouse,
+                agents,
+                `INSERT INTO operations_new (${operationsFields}) FORMAT CSV`,
+                await compress(joinIntoSingleMessage(migrationSpecificOperations)),
+                logger,
+                3,
+              )
+            : Promise.resolve(),
+        ]);
+        return;
       }
+
+      // TODO: Check if Buffer can be read read in parallel by two functions
+      const tablesToWriteTo =
+        tableNames.has('operations') && tableNames.has('operations_old')
+          ? ['operations', 'operations_old']
+          : ['operations'];
 
       const csv = joinIntoSingleMessage(operations);
       const compressed = await compress(csv);
@@ -149,7 +168,7 @@ export function createWriter({
         }),
       );
     },
-    async writeRegistry(records: string[]) {
+    async writeRegistry(records: string[], migrationSpecificRecords: string[]) {
       if (records.length === 0) {
         return;
       }
@@ -160,19 +179,42 @@ export function createWriter({
         throw new Error('Missing operation_collection table');
       }
 
-      const tablesToWriteTo =
+      const shouldUsePartialRecords =
         tableNames.has('operation_collection') && tableNames.has('operation_collection_new')
-          ? ['operation_collection', 'operation_collection_new']
-          : tableNames.has('operation_collection') && tableNames.has('operation_collection_old')
-          ? ['operation_collection', 'operation_collection_old']
-          : // operation_collection and NO operation_collection_new and NO operation_collection_old
-          tableNames.has('operation_collection')
-          ? ['operation_collection']
-          : [];
+          ? true
+          : false;
 
-      if (tablesToWriteTo.length === 0) {
-        throw new Error('No tables to write to');
+      if (shouldUsePartialRecords) {
+        await Promise.all([
+          // operation_collection
+          writeCsv(
+            clickhouse,
+            agents,
+            `INSERT INTO operation_collection (${registryFields}) FORMAT CSV`,
+            await compress(joinIntoSingleMessage(records)),
+            logger,
+            3,
+          ),
+          // operation_collection_new
+          migrationSpecificRecords.length > 0
+            ? writeCsv(
+                clickhouse,
+                agents,
+                `INSERT INTO operation_collection_new (${registryFields}) FORMAT CSV`,
+                await compress(joinIntoSingleMessage(migrationSpecificRecords)),
+                logger,
+                3,
+              )
+            : Promise.resolve(),
+        ]);
+        return;
       }
+
+      // TODO: Check if Buffer can be read read in parallel by two functions
+      const tablesToWriteTo =
+        tableNames.has('operation_collection') && tableNames.has('operation_collection_old')
+          ? ['operation_collection', 'operation_collection_old']
+          : ['operation_collection'];
 
       const csv = joinIntoSingleMessage(records);
       const compressed = await compress(csv);
