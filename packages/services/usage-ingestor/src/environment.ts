@@ -97,14 +97,18 @@ const LogModel = zod.object({
 
 const MigrationModel = zod.object({
   // Write operations to new tables when their timestamp >= YYYY-MM-DD 00:00:00 UTC
-  MIGRATION_V2_INGEST_AFTER_UTC: zod
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD format required')
-    .transform(value => {
-      const [year, month, day] = value.split('-').map(Number);
-      const utcDate = Date.UTC(year, month - 1, day, 0, 0, 0);
-      return utcDate;
-    }),
+  // Required only when doing a manual migration.
+  MIGRATION_V2_INGEST_AFTER_UTC: emptyString(
+    zod
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD format required')
+      .transform(value => {
+        const [year, month, day] = value.split('-').map(Number);
+        const utcDate = Date.UTC(year, month - 1, day, 0, 0, 0);
+        return utcDate;
+      })
+      .optional(),
+  ),
 });
 
 const configs = {

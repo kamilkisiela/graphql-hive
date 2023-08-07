@@ -100,7 +100,10 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
             continue;
           }
 
-          const passToMigration = rawOperation.timestamp >= env.migration.v2IngestAfter;
+          const passToMigration =
+            env.migration.v2IngestAfter && rawOperation.timestamp >= env.migration.v2IngestAfter
+              ? true
+              : false;
 
           const sample = operationSample.get(rawOperation.operationMapKey);
 
