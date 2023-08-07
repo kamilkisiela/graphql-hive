@@ -368,8 +368,8 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
 
   // Apply TTLs to new tables
   await Promise.all([
-    exec(`ALTER TABLE default.operations ADD TTL timestamp + INTERVAL 3 HOURS`),
-    exec(`ALTER TABLE default.operation_collection ADD TTL timestamp + INTERVAL 3 HOURS`),
+    exec(`ALTER TABLE default.operations MODIFY TTL timestamp + INTERVAL 3 HOURS`),
+    exec(`ALTER TABLE default.operation_collection MODIFY TTL timestamp + INTERVAL 3 HOURS`),
   ]);
 
   // Drop old tables

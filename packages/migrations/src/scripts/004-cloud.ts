@@ -165,8 +165,8 @@ async function main() {
   ]);
   // New tables
   await Promise.all([
-    exec(`RENAME TABLE default.operations_new TO default.operations`),
-    exec(`RENAME TABLE default.operation_collection_new TO default.operation_collection`),
+    execute(`RENAME TABLE default.operations_new TO default.operations`),
+    execute(`RENAME TABLE default.operation_collection_new TO default.operation_collection`),
   ]);
   // New views
   await Promise.all([
