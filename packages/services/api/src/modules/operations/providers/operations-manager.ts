@@ -624,34 +624,6 @@ export class OperationsManager {
     });
   }
 
-  async readDurationHistogram({
-    period,
-    organization,
-    project,
-    target,
-    operations,
-    clients,
-  }: {
-    period: DateRange;
-    operations?: readonly string[];
-    clients?: readonly string[];
-  } & TargetSelector) {
-    this.logger.info('Reading duration histogram (period=%o, target=%s)', period, target);
-    await this.authManager.ensureTargetAccess({
-      organization,
-      project,
-      target,
-      scope: TargetAccessScope.REGISTRY_READ,
-    });
-
-    return this.reader.durationHistogram({
-      target,
-      period,
-      operations,
-      clients,
-    });
-  }
-
   async readUniqueClients({
     period,
     organization,

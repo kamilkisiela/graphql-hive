@@ -26,7 +26,6 @@ export const urqlClient = createClient({
         OperationsStats: noKey,
         DurationStats: noKey,
         OrganizationPayload: noKey,
-        DurationHistogram: noKey,
         SchemaCompareResult: noKey,
         SchemaChange: noKey,
         SchemaDiff: noKey,
