@@ -51,10 +51,11 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
   );
 
   // Create Materialized Views
-  await Promise.all([
-    // `operations`
-    // Completely new view, aggregates data by minute
-    `
+  await Promise.all(
+    [
+      // `operations`
+      // Completely new view, aggregates data by minute
+      `
       CREATE MATERIALIZED VIEW IF NOT EXISTS default.operations_minutely_new
       (
         target LowCardinality(String) CODEC(ZSTD(1)),
@@ -91,9 +92,9 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
         client_version,
         timestamp
     `,
-    // Adds TTL to the view, no longer depends on `expires_at`
-    // Adds and improves codecs
-    `
+      // Adds TTL to the view, no longer depends on `expires_at`
+      // Adds and improves codecs
+      `
       CREATE MATERIALIZED VIEW IF NOT EXISTS default.operations_hourly_new
       (
         target LowCardinality(String) CODEC(ZSTD(1)),
@@ -130,8 +131,8 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
         client_version,
         timestamp
     `,
-    // Adds and improves codecs
-    `
+      // Adds and improves codecs
+      `
       CREATE MATERIALIZED VIEW IF NOT EXISTS default.operations_daily_new
       (
         target LowCardinality(String) CODEC(ZSTD(1)),
@@ -171,8 +172,8 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
         timestamp,
         expires_at
     `,
-    // Adds and improves codecs
-    `
+      // Adds and improves codecs
+      `
       CREATE MATERIALIZED VIEW IF NOT EXISTS default.clients_daily_new
       (
         target LowCardinality(String) CODEC(ZSTD(1)),
@@ -208,9 +209,9 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
         timestamp,
         expires_at
     `,
-    // `operation_collection`
-    // Adds and improves codecs
-    `
+      // `operation_collection`
+      // Adds and improves codecs
+      `
       CREATE MATERIALIZED VIEW IF NOT EXISTS default.coordinates_daily_new
       (
         target LowCardinality(String) CODEC(ZSTD(1)),
@@ -243,8 +244,8 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
         timestamp,
         expires_at
     `,
-    // Adds a new view to easily and quickly query operation bodies
-    `
+      // Adds a new view to easily and quickly query operation bodies
+      `
       CREATE MATERIALIZED VIEW IF NOT EXISTS default.operation_collection_body_new
       (
         target LowCardinality(String) CODEC(ZSTD(1)),
@@ -271,8 +272,8 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
         body,
         expires_at
     `,
-    // Adds a new view to easily and quickly query operation details
-    `
+      // Adds a new view to easily and quickly query operation details
+      `
       CREATE MATERIALIZED VIEW IF NOT EXISTS default.operation_collection_details_new
       (
         target LowCardinality(String) CODEC(ZSTD(1)),
@@ -302,7 +303,8 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
         operation_kind,
         expires_at
     `,
-  ]);
+    ].map(exec),
+  );
 
   const totalOperationsResponse = await query(
     `SELECT if(count() > ${50_000_000}, 'big', 'small') as size FROM default.operations`,
