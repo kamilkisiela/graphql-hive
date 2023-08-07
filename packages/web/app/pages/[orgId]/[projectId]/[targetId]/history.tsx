@@ -95,7 +95,15 @@ function ListPage({
         >
           <NextLink
             key={version.id}
-            href={`/${router.organizationId}/${router.projectId}/${router.targetId}/history/${version.id}`}
+            href={{
+              pathname: '/[organizationId]/[projectId]/[targetId]/history/[versionId]',
+              query: {
+                organizationId: router.organizationId,
+                projectId: router.projectId,
+                targetId: router.targetId,
+                versionId: version.id,
+              },
+            }}
             scroll={false} // disable the scroll to top on page
           >
             <h3 className="truncate font-semibold text-sm">

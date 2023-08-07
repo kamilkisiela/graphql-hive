@@ -139,11 +139,26 @@ export function OrganizationLayout({
             <Tabs value={value}>
               <Tabs.List>
                 <Tabs.Trigger value={TabValue.Overview} asChild>
-                  <NextLink href={`/${currentOrganization.cleanId}`}>Overview</NextLink>
+                  <NextLink
+                    href={{
+                      pathname: '/[organizationId]',
+                      query: { organizationId: currentOrganization.cleanId },
+                    }}
+                  >
+                    Overview
+                  </NextLink>
                 </Tabs.Trigger>
                 {canAccessOrganization(OrganizationAccessScope.Members, meInCurrentOrg) && (
                   <Tabs.Trigger value={TabValue.Members} asChild>
-                    <NextLink href={`/${currentOrganization.cleanId}/view/${TabValue.Members}`}>
+                    <NextLink
+                      href={{
+                        pathname: '/[organizationId]/view/[tab]',
+                        query: {
+                          organizationId: currentOrganization.cleanId,
+                          tab: TabValue.Members,
+                        },
+                      }}
+                    >
                       Members
                     </NextLink>
                   </Tabs.Trigger>
@@ -151,12 +166,28 @@ export function OrganizationLayout({
                 {canAccessOrganization(OrganizationAccessScope.Settings, meInCurrentOrg) && (
                   <>
                     <Tabs.Trigger value={TabValue.Policy} asChild>
-                      <NextLink href={`/${currentOrganization.cleanId}/view/${TabValue.Policy}`}>
+                      <NextLink
+                        href={{
+                          pathname: '/[organizationId]/view/[tab]',
+                          query: {
+                            organizationId: currentOrganization.cleanId,
+                            tab: TabValue.Policy,
+                          },
+                        }}
+                      >
                         Policy
                       </NextLink>
                     </Tabs.Trigger>
                     <Tabs.Trigger value={TabValue.Settings} asChild>
-                      <NextLink href={`/${currentOrganization.cleanId}/view/${TabValue.Settings}`}>
+                      <NextLink
+                        href={{
+                          pathname: '/[organizationId]/view/[tab]',
+                          query: {
+                            organizationId: currentOrganization.cleanId,
+                            tab: TabValue.Settings,
+                          },
+                        }}
+                      >
                         Settings
                       </NextLink>
                     </Tabs.Trigger>
@@ -166,7 +197,13 @@ export function OrganizationLayout({
                   canAccessOrganization(OrganizationAccessScope.Settings, meInCurrentOrg) && (
                     <Tabs.Trigger value={TabValue.Subscription} asChild>
                       <NextLink
-                        href={`/${currentOrganization.cleanId}/view/${TabValue.Subscription}`}
+                        href={{
+                          pathname: '/[organizationId]/view/[tab]',
+                          query: {
+                            organizationId: currentOrganization.cleanId,
+                            tab: TabValue.Subscription,
+                          },
+                        }}
                       >
                         Subscription
                       </NextLink>

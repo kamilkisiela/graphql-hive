@@ -47,6 +47,7 @@ const projectTypeFullNames = {
 
 const ProjectCard = (props: {
   project: FragmentType<typeof ProjectCard_ProjectFragment> | null;
+  cleanOrganizationId: string | null;
   highestNumberOfRequests: number;
   period: {
     from: string;
@@ -57,9 +58,7 @@ const ProjectCard = (props: {
   days: number;
 }): ReactElement | null => {
   const project = useFragment(ProjectCard_ProjectFragment, props.project);
-  const router = useRouteSelector();
 
-  const href = project ? `/${router.organizationId}/${project.cleanId}` : '';
   const { period, highestNumberOfRequests } = props;
 
   const interval = resolutionToMilliseconds(props.days, period);
@@ -87,7 +86,17 @@ const ProjectCard = (props: {
   return (
     <Card
       as={NextLink}
-      href={href}
+      href={
+        project && props.cleanOrganizationId
+          ? {
+              pathname: '/[organizationId]/[projectId]',
+              query: {
+                organizationId: props.cleanOrganizationId,
+                projectId: project.cleanId,
+              },
+            }
+          : '#'
+      }
       className="h-full pt-4 px-0 self-start hover:bg-gray-800/40 hover:shadow-md hover:shadow-gray-800/50"
     >
       <TooltipProvider>
@@ -233,6 +242,7 @@ const OrganizationProjectsPageQuery = graphql(`
     organization(selector: { organization: $organizationId }) {
       organization {
         ...OrganizationLayout_CurrentOrganizationFragment
+        cleanId
       }
     }
     projects(selector: { organization: $organizationId }) {
@@ -343,6 +353,7 @@ function OrganizationPageContent() {
                   .map(project => (
                     <ProjectCard
                       key={project.id}
+                      cleanOrganizationId={currentOrganization.cleanId}
                       days={days}
                       highestNumberOfRequests={highestNumberOfRequests}
                       period={period.current!}
@@ -362,6 +373,7 @@ function OrganizationPageContent() {
                   highestNumberOfRequests={highestNumberOfRequests}
                   period={period.current!}
                   project={null}
+                  cleanOrganizationId={null}
                   requestsOverTime={null}
                   schemaVersionsCount={null}
                 />

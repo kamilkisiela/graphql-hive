@@ -155,7 +155,15 @@ function GitHubIntegration(props: { gitRepository: string | null }): ReactElemen
           ) : (
             <Tag className="!p-4">
               The organization is not connected to our GitHub Application.
-              <Link variant="primary" href={`/${router.organizationId}/view/settings`}>
+              <Link
+                variant="primary"
+                href={{
+                  pathname: '/[organizationId]/view/settings',
+                  query: {
+                    organizationId: router.organizationId,
+                  },
+                }}
+              >
                 Visit settings
               </Link>
               to configure it.

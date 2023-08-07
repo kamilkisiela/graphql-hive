@@ -763,7 +763,14 @@ function GraphQLEndpointUrl(props: {
       <div className="text-sm text-gray-400">
         The endpoint url will be used for querying the target from the{' '}
         <NextLink
-          href={`/${router.organizationId}/${router.projectId}/${router.targetId}/laboratory`}
+          href={{
+            pathname: '/[organizationId]/[projectId]/[targetId]/laboratory',
+            query: {
+              organizationId: router.organizationId,
+              projectId: router.projectId,
+              targetId: router.targetId,
+            },
+          }}
         >
           Hive Laboratory
         </NextLink>
