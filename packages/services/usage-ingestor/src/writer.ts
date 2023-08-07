@@ -33,6 +33,17 @@ const agentConfig: Agent.HttpOptions = {
   scheduling: 'lifo',
 };
 
+function isQueryResponse<T>(response: unknown): response is {
+  data: readonly T[];
+} {
+  return (
+    typeof response === 'object' &&
+    response !== null &&
+    'data' in response &&
+    Array.isArray((response as { data: unknown }).data)
+  );
+}
+
 export function createWriter({
   clickhouse,
   logger,
@@ -48,28 +59,130 @@ export function createWriter({
     https: httpsAgent,
   };
 
+  async function fetchTableNames() {
+    const query = `SELECT name FROM system.tables WHERE database = 'default'`;
+    const response = await got
+      .post(`${clickhouse.protocol ?? 'https'}://${clickhouse.host}:${clickhouse.port}`, {
+        body: query,
+        username: clickhouse.username,
+        password: clickhouse.password,
+        headers: {
+          Accept: 'application/json',
+        },
+        searchParams: {
+          default_format: 'JSON',
+          wait_end_of_query: '1',
+        },
+        timeout: {
+          lookup: 2000,
+          connect: 2000,
+          secureConnect: 2000,
+          request: 30_000,
+        },
+        agent: {
+          http: agents.http,
+          https: agents.https,
+        },
+        responseType: 'json',
+      })
+      .then(response => response.body)
+      .catch(error => {
+        Sentry.captureException(error, {
+          level: 'error',
+          tags: {
+            clickhouse_host: clickhouse.host,
+          },
+          extra: {
+            query,
+            clickhouse: {
+              protocol: clickhouse.protocol,
+              host: clickhouse.host,
+              port: clickhouse.port,
+            },
+          },
+        });
+        return Promise.reject(error);
+      });
+
+    if (isQueryResponse<{ name: string }>(response)) {
+      return new Set(response.data.map(row => row.name));
+    }
+
+    throw new Error('Unexpected response from ClickHouse (queryId: fetchTableNames)');
+  }
+
   return {
     async writeOperations(operations: string[]) {
       if (operations.length === 0) {
         return;
       }
 
+      const tableNames = await fetchTableNames();
+
+      if (!tableNames.has('operations')) {
+        throw new Error('Missing operations table');
+      }
+
+      const tablesToWriteTo =
+        // operations and operations_new
+        tableNames.has('operations') && tableNames.has('operations_new')
+          ? ['operations', 'operations_new']
+          : // operations and operations_old
+          tableNames.has('operations') && tableNames.has('operations_old')
+          ? ['operations', 'operations_old']
+          : // operations and NO operations_new and NO operations_old
+          tableNames.has('operations')
+          ? ['operations']
+          : [];
+
+      if (tablesToWriteTo.length === 0) {
+        throw new Error('No tables to write to');
+      }
+
       const csv = joinIntoSingleMessage(operations);
       const compressed = await compress(csv);
-      const sql = `INSERT INTO operations_2 (${operationsFields}) FORMAT CSV`;
 
-      await writeCsv(clickhouse, agents, sql, compressed, logger, 3);
+      await Promise.all(
+        tablesToWriteTo.map(async table => {
+          const sql = `INSERT INTO ${table} (${operationsFields}) FORMAT CSV`;
+          await writeCsv(clickhouse, agents, sql, compressed, logger, 3);
+        }),
+      );
     },
     async writeRegistry(records: string[]) {
       if (records.length === 0) {
         return;
       }
 
+      const tableNames = await fetchTableNames();
+
+      if (!tableNames.has('operation_collection')) {
+        throw new Error('Missing operation_collection table');
+      }
+
+      const tablesToWriteTo =
+        tableNames.has('operation_collection') && tableNames.has('operation_collection_new')
+          ? ['operation_collection', 'operation_collection_new']
+          : tableNames.has('operation_collection') && tableNames.has('operation_collection_old')
+          ? ['operation_collection', 'operation_collection_old']
+          : // operation_collection and NO operation_collection_new and NO operation_collection_old
+          tableNames.has('operation_collection')
+          ? ['operation_collection']
+          : [];
+
+      if (tablesToWriteTo.length === 0) {
+        throw new Error('No tables to write to');
+      }
+
       const csv = joinIntoSingleMessage(records);
       const compressed = await compress(csv);
-      const sql = `INSERT INTO operation_collection_2 (${registryFields}) FORMAT CSV`;
 
-      await writeCsv(clickhouse, agents, sql, compressed, logger, 3);
+      await Promise.all(
+        tablesToWriteTo.map(async table => {
+          const sql = `INSERT INTO ${table} (${registryFields}) FORMAT CSV`;
+          await writeCsv(clickhouse, agents, sql, compressed, logger, 3);
+        }),
+      );
     },
     destroy() {
       httpAgent.destroy();

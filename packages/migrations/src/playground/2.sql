@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS default.operation_collection_2
+CREATE TABLE IF NOT EXISTS default.operation_collection_v2
 (
   target LowCardinality(String) CODEC(ZSTD(1)),
   hash String CODEC(ZSTD(1)),
@@ -17,9 +17,6 @@ PRIMARY KEY (target, hash)
 ORDER BY (target, hash, timestamp)
 TTL timestamp + INTERVAL 1 DAY -- to insert old data, we need to remove TTL and apply it later on
 SETTINGS index_granularity = 8192
-
--- 75134323 rows in 1163 seconds (64604 rows/s)
--- 3B rows in 1 day
 
 CREATE TABLE IF NOT EXISTS default.operations_2
 (
