@@ -157,12 +157,12 @@ const CollectionItem = (props: {
     <div key={props.node.id} className="flex justify-between items-center">
       <Link
         href={{
-          pathname: '/[orgId]/[projectId]/[targetId]/laboratory/[operation]',
+          pathname: '/[organizationId]/[projectId]/[targetId]/laboratory/[operationId]',
           query: {
-            operation: props.node.id,
-            orgId: router.organizationId,
+            organizationId: router.organizationId,
             projectId: router.projectId,
             targetId: router.targetId,
+            operationId: props.node.id,
           },
         }}
         className={cn(

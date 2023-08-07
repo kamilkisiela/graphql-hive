@@ -388,7 +388,7 @@ function GraphQLTypeAsLink(props: { type: string }): ReactElement {
         query: {
           organizationId: router.organizationId,
           projectId: router.projectId,
-          graphId: router.targetId,
+          targetId: router.targetId,
           typename,
         },
       }}

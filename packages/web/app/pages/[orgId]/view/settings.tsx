@@ -159,7 +159,7 @@ function Integrations(): ReactElement | null {
                     href={{
                       pathname: '/api/github/connect/[organizationId]',
                       query: {
-                        organization: orgId,
+                        organizationId: orgId,
                       },
                     }}
                   >
@@ -173,7 +173,7 @@ function Integrations(): ReactElement | null {
                   href={{
                     pathname: '/api/github/connect/[organizationId]',
                     query: {
-                      organization: orgId,
+                      organizationId: orgId,
                     },
                   }}
                 >
