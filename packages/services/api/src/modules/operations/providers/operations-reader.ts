@@ -1,4 +1,12 @@
-import { addMinutes, differenceInDays, format, subHours } from 'date-fns';
+import {
+  addMinutes,
+  differenceInDays,
+  format,
+  startOfDay,
+  startOfHour,
+  startOfMinute,
+  subHours,
+} from 'date-fns';
 import { Injectable } from 'graphql-modules';
 import * as z from 'zod';
 import type { Span } from '@sentry/types';
@@ -127,9 +135,9 @@ export class OperationsReader {
 
     // The oldest data point we can fetch from the database, per table.
     const tableOldestDateTimePoint = {
-      daily: subHours(new Date(), tableTTLInHours.daily),
-      hourly: subHours(new Date(), tableTTLInHours.hourly),
-      minutely: subHours(new Date(), tableTTLInHours.minutely),
+      daily: startOfDay(subHours(new Date(), tableTTLInHours.daily)),
+      hourly: startOfHour(subHours(new Date(), tableTTLInHours.hourly)),
+      minutely: startOfMinute(subHours(new Date(), tableTTLInHours.minutely)),
     };
 
     let selectedQueryType: 'daily' | 'hourly' | 'minutely';
@@ -180,7 +188,7 @@ export class OperationsReader {
       selectedQueryType = 'minutely';
     }
 
-    if (tableOldestDateTimePoint[selectedQueryType].getTime() >= period.from.getTime()) {
+    if (tableOldestDateTimePoint[selectedQueryType].getTime() > period.from.getTime()) {
       if (dataPoints) {
         // If the oldest data point is newer than the requested data range,
         // and the user requested a specific resolution
@@ -850,12 +858,26 @@ export class OperationsReader {
             span,
           },
           hourly: {
-            query: sql`
+            query: (await this.canUseNewTable('operations_minutely'))
+              ? sql`
               SELECT 
                 sum(total) as total,
                 client_name,
                 client_version
               FROM operations_hourly
+              ${this.createFilter({
+                target,
+                period,
+                operations,
+              })}
+              GROUP BY client_name, client_version
+            `
+              : sql`
+              SELECT 
+                count(*) as total,
+                client_name,
+                client_version
+              FROM operations
               ${this.createFilter({
                 target,
                 period,
