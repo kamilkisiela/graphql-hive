@@ -56,8 +56,11 @@ export async function handleRequest(
   logger.info(
     `Received response from ${parsedRequest.url} with status ${response.status} (${response.statusText}}`,
   );
-  const text = await gatherResponse(response);
-  logger.info(`Collected response body (length=${text.length})`);
+  const text = await gatherResponse(response).catch(error => {
+    logger.error(`Failed to collect response body from ${parsedRequest.url}`, error);
+    return Promise.reject(error);
+  });
+  logger.info(`Collected response body from ${parsedRequest.url} (length=${text.length})`);
   return new Response(text, {
     status: response.status,
     statusText: response.statusText,
