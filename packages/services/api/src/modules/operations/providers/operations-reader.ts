@@ -1,10 +1,11 @@
-import { addMinutes, differenceInDays, format } from 'date-fns';
+import { addMinutes, differenceInDays, format, subHours } from 'date-fns';
 import { Injectable } from 'graphql-modules';
 import * as z from 'zod';
 import type { Span } from '@sentry/types';
 import { batch } from '@theguild/buddy';
 import type { DateRange } from '../../../shared/entities';
 import { sentry } from '../../../shared/sentry';
+import { Logger } from '../../shared/providers/logger';
 import { ClickHouse, RowOf, sql } from './clickhouse-client';
 import { calculateTimeWindow } from './helpers';
 import { SqlValue } from './sql';
@@ -53,66 +54,11 @@ function ensureNumber(value: number | string): number {
   return parseFloat(value);
 }
 
-function pickQueryByPeriod(
-  queryMap: {
-    hourly: {
-      query: SqlValue;
-      queryId: string;
-      timeout: number;
-      span?: Span | undefined;
-    };
-    daily: {
-      query: SqlValue;
-      queryId: string;
-      timeout: number;
-      span?: Span | undefined;
-    };
-    minutely: {
-      query: SqlValue;
-      queryId: string;
-      timeout: number;
-      span?: Span | undefined;
-    };
-  },
-  period: DateRange | null,
-  resolution?: number,
-) {
-  if (!period) {
-    return queryMap.daily;
-  }
-
-  const distance = period.to.getTime() - period.from.getTime();
-  const distanceInHours = distance / 1000 / 60 / 60;
-  const distanceInDays = distance / 1000 / 60 / 60 / 24;
-
-  if (resolution) {
-    if (distanceInDays >= resolution) {
-      return queryMap.daily;
-    }
-
-    if (distanceInHours >= resolution) {
-      return queryMap.hourly;
-    }
-
-    return queryMap.minutely;
-  }
-
-  if (distanceInHours > 24) {
-    return queryMap.daily;
-  }
-
-  if (distanceInHours > 1) {
-    return queryMap.hourly;
-  }
-
-  return queryMap.minutely;
-}
-
 @Injectable({
   global: true,
 })
 export class OperationsReader {
-  constructor(private clickHouse: ClickHouse) {}
+  constructor(private clickHouse: ClickHouse, private logger: Logger) {}
 
   private _useNewTables: Promise<boolean> | null = null;
 
@@ -131,6 +77,132 @@ export class OperationsReader {
     }
 
     return this._useNewTables;
+  }
+
+  private pickQueryByPeriod(
+    queryMap: {
+      hourly: {
+        query: SqlValue;
+        queryId: string;
+        timeout: number;
+        span?: Span | undefined;
+      };
+      daily: {
+        query: SqlValue;
+        queryId: string;
+        timeout: number;
+        span?: Span | undefined;
+      };
+      minutely: {
+        query: SqlValue;
+        queryId: string;
+        timeout: number;
+        span?: Span | undefined;
+      };
+    },
+    period: DateRange | null,
+    resolution?: number,
+  ) {
+    if (!period) {
+      return queryMap.daily;
+    }
+
+    const dataPoints = resolution;
+    const timeDifference = period.to.getTime() - period.from.getTime();
+    const timeDifferenceInHours = timeDifference / 1000 / 60 / 60;
+    const timeDifferenceInDays = timeDifference / 1000 / 60 / 60 / 24;
+
+    // How long rows are kept in the database, per table.
+    const tableTTLInHours = {
+      daily: 365 * 24,
+      hourly: 30 * 24,
+      minutely: 24,
+    };
+
+    // The oldest data point we can fetch from the database, per table.
+    const tableOldestDateTimePoint = {
+      daily: subHours(new Date(), tableTTLInHours.daily),
+      hourly: subHours(new Date(), tableTTLInHours.hourly),
+      minutely: subHours(new Date(), tableTTLInHours.minutely),
+    };
+
+    let selectedQueryType: 'daily' | 'hourly' | 'minutely';
+
+    // If the user requested a specific resolution, we need to pick the right table.
+    //
+    if (dataPoints) {
+      const interval = calculateTimeWindow({ period, resolution });
+
+      if (timeDifferenceInDays >= dataPoints) {
+        // If user selected a date range of 60 days or more and requested 30 data points
+        // we can use daily table as each data point represents at least 1 day.
+        selectedQueryType = 'daily';
+
+        if (interval.unit !== 'd') {
+          this.logger.error(
+            `Calculated interval ${interval.value}${
+              interval.unit
+            } for the requested date range ${formatDate(period.from)} - ${formatDate(
+              period.to,
+            )} does not satisfy the daily table.`,
+          );
+          throw new Error(`Invalid number of data points for the requested date range`);
+        }
+      } else if (timeDifferenceInHours >= dataPoints) {
+        // Same as for daily table, but for hourly table.
+        // If data point represents at least 1 full hour, use hourly table.
+        selectedQueryType = 'hourly';
+
+        if (interval.unit === 'm') {
+          this.logger.error(
+            `Calculated interval ${interval.value}${
+              interval.unit
+            } for the requested date range ${formatDate(period.from)} - ${formatDate(
+              period.to,
+            )} does not satisfy the hourly table.`,
+          );
+          throw new Error(`Invalid number of data points for the requested date range`);
+        }
+      } else {
+        selectedQueryType = 'minutely';
+      }
+    } else if (timeDifferenceInHours > 24) {
+      selectedQueryType = 'daily';
+    } else if (timeDifferenceInHours > 1) {
+      selectedQueryType = 'hourly';
+    } else {
+      selectedQueryType = 'minutely';
+    }
+
+    if (tableOldestDateTimePoint[selectedQueryType].getTime() >= period.from.getTime()) {
+      if (dataPoints) {
+        // If the oldest data point is newer than the requested data range,
+        // and the user requested a specific resolution
+        const interval = calculateTimeWindow({ period, resolution });
+        this.logger.error(
+          `Requested date range ${formatDate(period.from)} - ${formatDate(
+            period.to,
+          )} is older than the oldest available data point ${formatDate(
+            tableOldestDateTimePoint[selectedQueryType],
+          )} for the selected query type ${selectedQueryType}. The requested resolution is ${
+            interval.value
+          } ${interval.unit}.`,
+        );
+        throw new Error(`The requested date range is too old for the selected query type.`);
+      } else {
+        // If the oldest data point is newer than the requested data range,
+        // but the user didn't request a specific resolution, it's fine.
+        this.logger.warn(
+          `[OPERATIONS_READER_TTL_DATE_RANGE_WARN] The requested date range is too old for the selected query type. Requested date range ${formatDate(
+            period.from,
+          )} - ${formatDate(period.to)} is older than the oldest available data point ${formatDate(
+            tableOldestDateTimePoint[selectedQueryType],
+          )}`,
+        );
+      }
+    }
+
+    return queryMap[selectedQueryType];
   }
 
   @sentry('OperationsReader.countField')
@@ -265,7 +337,7 @@ export class OperationsReader {
     },
     span?: Span,
   ): Promise<number> {
-    const query = pickQueryByPeriod(
+    const query = this.pickQueryByPeriod(
       {
         daily: {
           query: sql`SELECT sum(total) as total FROM clients_daily ${this.createFilter({
@@ -331,7 +403,7 @@ export class OperationsReader {
     ok: number;
     notOk: number;
   }> {
-    const query = pickQueryByPeriod(
+    const query = this.pickQueryByPeriod(
       {
         daily: {
           query: sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_daily ${this.createFilter(
@@ -428,7 +500,7 @@ export class OperationsReader {
     },
     span?: Span,
   ): Promise<number> {
-    const query = pickQueryByPeriod(
+    const query = this.pickQueryByPeriod(
       {
         daily: {
           query: sql`
@@ -521,7 +593,7 @@ export class OperationsReader {
       percentage: number;
     }>
   > {
-    const query = pickQueryByPeriod(
+    const query = this.pickQueryByPeriod(
       {
         daily: {
           query: sql`
@@ -736,7 +808,7 @@ export class OperationsReader {
       client_name: string;
       client_version: string;
     }>(
-      pickQueryByPeriod(
+      this.pickQueryByPeriod(
         {
           daily: {
             query: sql`
@@ -1061,7 +1133,7 @@ export class OperationsReader {
             target: string;
             total: number;
           }>(
-            pickQueryByPeriod(
+            this.pickQueryByPeriod(
               {
                 daily: {
                   query: sql`
@@ -1293,7 +1365,7 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       percentiles: [number, number, number, number];
     }>(
-      pickQueryByPeriod(
+      this.pickQueryByPeriod(
         {
           daily: {
             query: sql`
@@ -1362,7 +1434,7 @@ export class OperationsReader {
       hash: string;
       percentiles: [number, number, number, number];
     }>(
-      pickQueryByPeriod(
+      this.pickQueryByPeriod(
         {
           daily: {
             query: sql`
@@ -1471,7 +1543,7 @@ export class OperationsReader {
       totalOk: number;
       percentiles: [number, number, number, number];
     }>(
-      pickQueryByPeriod(
+      this.pickQueryByPeriod(
         {
           daily: {
             query: sql`
