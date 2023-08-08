@@ -96,7 +96,9 @@ async function composeFederationWithCache(body: string, signature: string) {
 export const createRequestListener = (env: ResolvedEnv): ReturnType<typeof createServerAdapter> =>
   createServerAdapter(async request => {
     const url = new URL(request.url);
-    const httpRequestDetails = `[${request.method}] ${url.pathname}`;
+    const httpRequestId = request.headers.get('x-hive-request-id');
+    const httpRequestDetails =
+      `[${request.method}] ${url.pathname}` + (httpRequestId ? ` (${httpRequestId})` : '');
     console.log(`${httpRequestDetails} - start`);
 
     if (url.pathname === '/_readiness') {

@@ -24,7 +24,9 @@ export async function handleRequest(
   request: Request,
   keyValidator: SignatureValidator,
   logger: Logger,
+  requestId: string,
 ) {
+  logger.info(`Received request with id ${requestId}`);
   const parsedRequest = await parseIncomingRequest(request, keyValidator, logger);
 
   if ('error' in parsedRequest) {
@@ -37,14 +39,20 @@ export async function handleRequest(
     parsedRequest.method === 'GET'
       ? {
           method: 'GET',
-          headers: parsedRequest.headers,
+          headers: {
+            ...parsedRequest.headers,
+            'x-hive-request-id': requestId,
+          },
           signal: request.signal,
           redirect: 'follow',
         }
       : {
           method: 'POST',
           body: parsedRequest.body,
-          headers: parsedRequest.headers,
+          headers: {
+            ...parsedRequest.headers,
+            'x-hive-request-id': requestId,
+          },
           signal: request.signal,
           redirect: 'follow',
         };

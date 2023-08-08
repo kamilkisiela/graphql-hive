@@ -20,7 +20,14 @@ function main() {
       }),
   );
 
-  app.all('*', (request: Request) => handleRequest(request, isSignatureValid, console));
+  app.all('*', (request: Request) =>
+    handleRequest(
+      request,
+      isSignatureValid,
+      console,
+      request.headers.get('x-request-id') ?? Math.random().toString(16).substring(2),
+    ),
+  );
 
   const server = createServer(app);
 
