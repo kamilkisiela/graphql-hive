@@ -96,6 +96,7 @@ async function composeFederationWithCache(body: string, signature: string) {
 export const createRequestListener = (env: ResolvedEnv): ReturnType<typeof createServerAdapter> =>
   createServerAdapter(async request => {
     const url = new URL(request.url);
+    console.log(`[${request.method}] ${url.pathname}`);
 
     if (url.pathname === '/_readiness') {
       return new Response('Ok.', {
@@ -109,7 +110,11 @@ export const createRequestListener = (env: ResolvedEnv): ReturnType<typeof creat
         return new Response(`Missing signature header '${signatureHeaderName}'.`, { status: 400 });
       }
 
-      const body = await request.text();
+      const body = await request.text().catch(error => {
+        console.error(error);
+        console.log(`[${request.method}] ${url.pathname} - 500`);
+        return Promise.reject(error);
+      });
 
       const error = verifyRequest({
         // Stringified body, or raw body if you have access to it
@@ -121,11 +126,13 @@ export const createRequestListener = (env: ResolvedEnv): ReturnType<typeof creat
       });
 
       if (error) {
+        console.log(`[${request.method}] ${url.pathname} - 500`);
         return new Response(error, { status: 500 });
       }
 
       const result = await composeFederationWithCache(body, signatureHeaderValue);
 
+      console.log(`[${request.method}] ${url.pathname} - 200`);
       return new Response(result, {
         status: 200,
         headers: {
@@ -134,7 +141,8 @@ export const createRequestListener = (env: ResolvedEnv): ReturnType<typeof creat
       });
     }
 
-    return new Response('', {
+    console.log(`[${request.method}] ${url.pathname} - 404`);
+    return new Response('Route not found', {
       status: 404,
     });
   });
