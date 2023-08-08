@@ -13,6 +13,7 @@ import { AuthManager } from '../../auth/providers/auth-manager';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 import { GitHubIntegrationManager } from '../../integrations/providers/github-integration-manager';
+import { OrganizationManager } from '../../organization/providers/organization-manager';
 import { ProjectManager } from '../../project/providers/project-manager';
 import { CryptoProvider } from '../../shared/providers/crypto';
 import { Logger } from '../../shared/providers/logger';
@@ -22,6 +23,7 @@ import {
   Storage,
   TargetSelector,
 } from '../../shared/providers/storage';
+import { TargetManager } from '../../target/providers/target-manager';
 import { schemaChangeFromMeta } from '../schema-change-from-meta';
 import { SCHEMA_MODULE_CONFIG, type SchemaModuleConfig } from './config';
 import { FederationOrchestrator } from './orchestrators/federation';
@@ -66,6 +68,8 @@ export class SchemaManager {
     private federationOrchestrator: FederationOrchestrator,
     private crypto: CryptoProvider,
     private githubIntegrationManager: GitHubIntegrationManager,
+    private targetManager: TargetManager,
+    private organizationManager: OrganizationManager,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
   ) {
     this.logger = logger.child({ source: 'SchemaManager' });
@@ -774,6 +778,36 @@ export class SchemaManager {
       organizationId: args.organizationId,
       userId: args.userId,
     });
+  }
+
+  async getSchemaVersionByActionId(args: { actionId: string }) {
+    const [target, organization] = await Promise.all([
+      this.targetManager.getTargetFromToken(),
+      this.organizationManager.getOrganizationFromToken(),
+    ]);
+
+    this.logger.debug('Fetch schema version by action id. (args=%o)', {
+      projectId: target.projectId,
+      targetId: target.id,
+      actionId: args.actionId,
+    });
+
+    const record = await this.storage.getSchemaVersionByActionId({
+      projectId: target.projectId,
+      targetId: target.id,
+      actionId: args.actionId,
+    });
+
+    if (!record) {
+      return null;
+    }
+
+    return {
+      ...record,
+      project: target.projectId,
+      target: target.id,
+      organization: organization.id,
+    };
   }
 }
 

@@ -3731,6 +3731,42 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return 0;
     },
+
+    async getSchemaVersionByActionId(args) {
+      const record = await pool.maybeOne<unknown>(sql`
+        SELECT
+          "id",
+          "is_composable",
+          to_json("schema_versions"."created_at") as "created_at",
+          "action_id",
+          "base_schema",
+          "has_persisted_schema_changes",
+          "previous_schema_version_id",
+          "composite_schema_sdl",
+          "supergraph_sdl",
+          "schema_composition_errors"
+        FROM
+          "schema_versions"
+        WHERE
+          "action_id" = ANY(
+            SELECT
+              "id"
+            FROM
+              "schema_log"
+            WHERE
+              "schema_log"."project_id" = ${args.projectId}
+              AND "schema_log"."target_id" = ${args.targetId}
+              AND "schema_log"."commit" = ${args.actionId}
+          )
+        LIMIT 1
+      `);
+
+      if (!record) {
+        return null;
+      }
+
+      return SchemaVersionModel.parse(record);
+    },
   };
 
   return storage;
