@@ -65,6 +65,7 @@ export function deployUsageIngestor({
         KAFKA_CONSUMER_GROUP: kafka.config.consumerGroup,
         RELEASE: release,
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
+        MIGRATION_V2_INGEST_AFTER_UTC: '2023-08-08', // TODO: Move it to pulumi config files
       },
       exposesMetrics: true,
       port: 4000,
