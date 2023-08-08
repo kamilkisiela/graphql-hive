@@ -141,7 +141,7 @@ describe('Document Collections', () => {
           }),
         ).rejects.toMatchInlineSnapshot(`
             [Error: Expected GraphQL response to have no errors, but got 1 errors:
-            	No access (reason: "Missing target:settings permission")
+            	No access (reason: "Missing target:registry:write permission")
             	endpoint: http://localhost:8082/graphql
             	query:
             mutation CreateCollection($selector: TargetSelectorInput!, $input: CreateDocumentCollectionInput!) {
@@ -183,7 +183,7 @@ describe('Document Collections', () => {
             {
               "errors": [
                 {
-                  "message": "No access (reason: \\"Missing target:settings permission\\")",
+                  "message": "No access (reason: \\"Missing target:registry:write permission\\")",
                   "locations": [
                     {
                       "line": 2,
@@ -226,7 +226,7 @@ describe('Document Collections', () => {
           }),
         ).rejects.toMatchInlineSnapshot(`
             [Error: Expected GraphQL response to have no errors, but got 1 errors:
-            	No access (reason: "Missing target:settings permission")
+            	No access (reason: "Missing target:registry:write permission")
             	endpoint: http://localhost:8082/graphql
             	query:
             mutation UpdateCollection($selector: TargetSelectorInput!, $input: UpdateDocumentCollectionInput!) {
@@ -268,7 +268,7 @@ describe('Document Collections', () => {
             {
               "errors": [
                 {
-                  "message": "No access (reason: \\"Missing target:settings permission\\")",
+                  "message": "No access (reason: \\"Missing target:registry:write permission\\")",
                   "locations": [
                     {
                       "line": 2,
@@ -309,7 +309,7 @@ describe('Document Collections', () => {
           }),
         ).rejects.toMatchInlineSnapshot(`
             [Error: Expected GraphQL response to have no errors, but got 1 errors:
-            	No access (reason: "Missing target:settings permission")
+            	No access (reason: "Missing target:registry:write permission")
             	endpoint: http://localhost:8082/graphql
             	query:
             mutation DeleteCollection($selector: TargetSelectorInput!, $id: ID!) {
@@ -337,7 +337,7 @@ describe('Document Collections', () => {
             {
               "errors": [
                 {
-                  "message": "No access (reason: \\"Missing target:settings permission\\")",
+                  "message": "No access (reason: \\"Missing target:registry:write permission\\")",
                   "locations": [
                     {
                       "line": 2,
