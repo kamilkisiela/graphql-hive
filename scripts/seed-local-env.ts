@@ -4,11 +4,27 @@ import { fetch } from '@whatwg-node/fetch';
 
 const isFederation = process.env.FEDERATION === '1';
 
-const reportingEndpoint = process.env.STAGING
-  ? 'https://app.staging.graphql-hive.com/registry'
-  : process.env.DEV
-  ? 'https://app.dev.graphql-hive.com/registry'
-  : 'http://localhost:3001/graphql';
+const envName = process.env.STAGING ? 'staging' : process.env.DEV ? 'dev' : 'local';
+
+const schemaReportingEndpoint =
+  envName === 'staging'
+    ? 'https://app.staging.graphql-hive.com/registry'
+    : envName === 'dev'
+    ? 'https://app.dev.graphql-hive.com/registry'
+    : 'http://localhost:3001/graphql';
+
+const usageReportingEndpoint =
+  envName === 'staging'
+    ? 'https://app.staging.graphql-hive.com/usage'
+    : envName === 'dev'
+    ? 'https://app.dev.graphql-hive.com/usage'
+    : 'http://localhost:4001';
+
+console.log(`
+  Environment:                ${envName}
+  Schema reporting endpoint:  ${schemaReportingEndpoint}
+  Usage reporting endpoint:   ${usageReportingEndpoint}
+`);
 
 const createInstance = (
   service: null | {
@@ -20,26 +36,17 @@ const createInstance = (
     token: process.env.TOKEN!,
     agent: {
       name: 'Hive Seed Script',
+      maxSize: 10,
     },
     debug: true,
     enabled: true,
-    reporting: {
-      endpoint: reportingEndpoint,
-      author: 'Hive Seed Script',
-      commit: '1',
-      serviceName: service?.name,
-      serviceUrl: service?.url,
-    },
+    reporting: false,
     usage: {
       clientInfo: () => ({
         name: 'Fake Hive Client',
         version: '1.1.1',
       }),
-      endpoint: process.env.STAGING
-        ? 'https://app.staging.graphql-hive.com/usage'
-        : process.env.DEV
-        ? 'https://app.dev.graphql-hive.com/usage'
-        : 'http://localhost:4001',
+      endpoint: usageReportingEndpoint,
       max: 10,
       sampleRate: 1,
     },
@@ -293,7 +300,7 @@ async function federation() {
     scalar DateTime
   `;
 
-  let res = await fetch(reportingEndpoint, {
+  let res = await fetch(schemaReportingEndpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -314,7 +321,7 @@ async function federation() {
   }).then(res => res.json());
   console.log(JSON.stringify(res, null, 2));
 
-  res = await fetch(reportingEndpoint, {
+  res = await fetch(schemaReportingEndpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -336,7 +343,7 @@ async function federation() {
 
   console.log(JSON.stringify(res, null, 2));
 
-  res = await fetch(reportingEndpoint, {
+  res = await fetch(schemaReportingEndpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -358,7 +365,7 @@ async function federation() {
 
   console.log(JSON.stringify(res, null, 2));
 
-  res = await fetch(reportingEndpoint, {
+  res = await fetch(schemaReportingEndpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -380,7 +387,7 @@ async function federation() {
 
   console.log(JSON.stringify(res, null, 2));
 
-  res = await fetch(reportingEndpoint, {
+  res = await fetch(schemaReportingEndpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

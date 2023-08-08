@@ -6,7 +6,7 @@ const MigrationModel = zod.object({
   // Write operations to new tables when their timestamp >= YYYY-MM-DD 00:00:00 UTC
   MIGRATION_V2_INGEST_AFTER_UTC: zod
     .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD format required'),
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'MIGRATION_V2_INGEST_AFTER_UTC in YYYY-MM-DD format required'),
 });
 
 const InsertStatementsModel = zod.object({
@@ -30,13 +30,14 @@ async function main() {
 
   const endpoint = `${clickhouse.protocol}://${clickhouse.host}:${clickhouse.port}`;
 
-  function execute(query: string) {
+  function execute(query: string, settings?: Record<string, string>) {
     return got
       .post(endpoint, {
         body: query,
         searchParams: {
           default_format: 'JSON',
           wait_end_of_query: '1',
+          ...settings,
         },
         headers: {
           Accept: 'text/plain',
@@ -70,7 +71,7 @@ async function main() {
     WHERE
       database = 'default'
       AND table = 'operations'
-      AND toInt32(partition) < toInt32('${ingestAfter}')
+      AND toInt32(partition) < toInt32('${ingestAfter.replace(/-/g, '')}')
     GROUP BY
       database,
       table,
@@ -118,7 +119,7 @@ async function main() {
     WHERE
       database = 'default'
       AND table = 'operation_collection'
-      AND toInt32(partition) < toInt32('${ingestAfter}')
+      AND toInt32(partition) < toInt32('${ingestAfter.replace(/-/g, '')}')
     GROUP BY
       database,
       table,
@@ -181,6 +182,199 @@ async function main() {
     execute(
       `RENAME TABLE default.operation_collection_details_new TO default.operation_collection_details`,
     ),
+  ]);
+
+  const createSelectStatementForOperationsMinutely = (
+    tableName: 'operations' | 'operations_new',
+  ) => `
+    SELECT
+      target,
+      toStartOfHour(timestamp) AS timestamp,
+      hash,
+      client_name,
+      client_version,
+      count() AS total,
+      sum(ok) AS total_ok,
+      avgState(duration) AS duration_avg,
+      quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
+    FROM default.${tableName}
+    GROUP BY
+      target,
+      hash,
+      client_name,
+      client_version,
+      timestamp
+  `;
+
+  const createSelectStatementForOperationsHourly = (tableName: 'operations' | 'operations_new') => `
+    SELECT
+      target,
+      toStartOfHour(timestamp) AS timestamp,
+      hash,
+      client_name,
+      client_version,
+      count() AS total,
+      sum(ok) AS total_ok,
+      avgState(duration) AS duration_avg,
+      quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
+    FROM default.${tableName}
+    GROUP BY
+      target,
+      hash,
+      client_name,
+      client_version,
+      timestamp
+  `;
+
+  const createSelectStatementForOperationsDaily = (tableName: 'operations' | 'operations_new') => `
+    SELECT
+      target,
+      toStartOfDay(timestamp) AS timestamp,
+      toStartOfDay(expires_at) AS expires_at,
+      hash,
+      client_name,
+      client_version,
+      count() AS total,
+      sum(ok) AS total_ok,
+      avgState(duration) AS duration_avg,
+      quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
+    FROM default.${tableName}
+    GROUP BY
+      target,
+      hash,
+      client_name,
+      client_version,
+      timestamp,
+      expires_at
+  `;
+
+  const createSelectStatementForClientsDaily = (tableName: 'operations' | 'operations_new') => `
+    SELECT
+      target,
+      client_name,
+      client_version,
+      hash,
+      toStartOfDay(timestamp) AS timestamp,
+      toStartOfDay(expires_at) AS expires_at,
+      count() AS total
+    FROM default.${tableName}
+    GROUP BY
+      target,
+      client_name,
+      client_version,
+      hash,
+      timestamp,
+      expires_at
+  `;
+
+  const createSelectStatementForCoordinatesDaily = (
+    tableName: 'operation_collection_new' | 'operation_collection',
+  ) => `
+    SELECT
+      target,
+      hash,
+      toStartOfDay(timestamp) AS timestamp,
+      toStartOfDay(expires_at) AS expires_at,
+      sum(total) AS total,
+      coordinate
+    FROM default.${tableName}
+    ARRAY JOIN coordinates as coordinate
+    GROUP BY
+      target,
+      coordinate,
+      hash,
+      timestamp,
+      expires_at
+  `;
+
+  const createSelectStatementForOperationCollectionBody = (
+    tableName: 'operation_collection_new' | 'operation_collection',
+  ) => `
+    SELECT
+      target,
+      hash,
+      body,
+      toStartOfDay(expires_at) AS expires_at
+    FROM default.${tableName}
+    GROUP BY
+      target,
+      hash,
+      body,
+      expires_at
+  `;
+
+  const createSelectStatementForOperationCollectionDetails = (
+    tableName: 'operation_collection_new' | 'operation_collection',
+  ) => `
+    SELECT
+      target,
+      name,
+      hash,
+      operation_kind,
+      toStartOfDay(expires_at) AS expires_at
+    FROM default.${tableName}
+    GROUP BY
+      target,
+      name,
+      hash,
+      operation_kind,
+      expires_at
+  `;
+
+  // TODO: check if `allow_experimental_alter_materialized_view_structure` is available in ClickHouse Cloud
+  const modifyQuerySettings = { allow_experimental_alter_materialized_view_structure: '1' };
+  // Modify AS SELECT queries
+  await Promise.all([
+    execute(
+      `
+        ALTER TABLE default.operations_minutely
+        MODIFY QUERY ${createSelectStatementForOperationsMinutely('operations')}
+      `,
+      modifyQuerySettings,
+    ),
+    execute(
+      `
+        ALTER TABLE default.operations_hourly
+        MODIFY QUERY ${createSelectStatementForOperationsHourly('operations')}
+      `,
+      modifyQuerySettings,
+    ),
+    execute(
+      `
+        ALTER TABLE default.operations_daily
+        MODIFY QUERY ${createSelectStatementForOperationsDaily('operations')}
+      `,
+      modifyQuerySettings,
+    ),
+    execute(
+      `
+        ALTER TABLE default.coordinates_daily
+        MODIFY QUERY ${createSelectStatementForCoordinatesDaily('operation_collection')}
+      `,
+      modifyQuerySettings,
+    ),
+    execute(
+      `
+        ALTER TABLE default.clients_daily
+        MODIFY QUERY ${createSelectStatementForClientsDaily('operations')}
+      `,
+      modifyQuerySettings,
+    ),
+    execute(
+      `
+        ALTER TABLE default.operation_collection_body
+        MODIFY QUERY ${createSelectStatementForOperationCollectionBody('operation_collection')}
+      `,
+      modifyQuerySettings,
+    ),
+    execute(
+      `
+        ALTER TABLE default.operation_collection_details
+        MODIFY QUERY ${createSelectStatementForOperationCollectionDetails('operation_collection')}
+      `,
+      modifyQuerySettings,
+    ),
+    // TODO: modify query of old views as well
   ]);
 
   // Do the rest of the migration manually, when it's the right time.

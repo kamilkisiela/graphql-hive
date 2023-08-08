@@ -456,7 +456,6 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
       `,
       modifyQuerySettings,
     ),
-    // TODO: modify query of old views as well
   ]);
 
   // Apply TTLs to new tables
