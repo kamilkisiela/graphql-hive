@@ -97,7 +97,11 @@ export const resolvers: CollectionModule.Resolvers = {
   },
   Mutation: {
     async createDocumentCollection(_, { selector, input }, { injector }) {
-      const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
+      const target = await validateTargetAccess(
+        injector,
+        selector,
+        TargetAccessScope.REGISTRY_WRITE,
+      );
       const result = await injector.get(CollectionProvider).createCollection(target.id, input);
 
       return {
@@ -109,7 +113,11 @@ export const resolvers: CollectionModule.Resolvers = {
       };
     },
     async updateDocumentCollection(_, { selector, input }, { injector }) {
-      const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
+      const target = await validateTargetAccess(
+        injector,
+        selector,
+        TargetAccessScope.REGISTRY_WRITE,
+      );
       const result = await injector.get(CollectionProvider).updateCollection(input);
 
       if (!result) {
@@ -130,7 +138,11 @@ export const resolvers: CollectionModule.Resolvers = {
       };
     },
     async deleteDocumentCollection(_, { selector, id }, { injector }) {
-      const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
+      const target = await validateTargetAccess(
+        injector,
+        selector,
+        TargetAccessScope.REGISTRY_WRITE,
+      );
       await injector.get(CollectionProvider).deleteCollection(id);
 
       return {
@@ -144,7 +156,11 @@ export const resolvers: CollectionModule.Resolvers = {
     async createOperationInDocumentCollection(_, { selector, input }, { injector }) {
       try {
         OperationValidationInputModel.parse(input);
-        const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
+        const target = await validateTargetAccess(
+          injector,
+          selector,
+          TargetAccessScope.REGISTRY_WRITE,
+        );
         const result = await injector.get(CollectionProvider).createOperation(input);
         const collection = await injector
           .get(CollectionProvider)
@@ -183,7 +199,11 @@ export const resolvers: CollectionModule.Resolvers = {
     async updateOperationInDocumentCollection(_, { selector, input }, { injector }) {
       try {
         OperationValidationInputModel.parse(input);
-        const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
+        const target = await validateTargetAccess(
+          injector,
+          selector,
+          TargetAccessScope.REGISTRY_WRITE,
+        );
         const result = await injector.get(CollectionProvider).updateOperation(input);
 
         if (!result) {
@@ -221,7 +241,11 @@ export const resolvers: CollectionModule.Resolvers = {
       }
     },
     async deleteOperationInDocumentCollection(_, { selector, id }, { injector }) {
-      const target = await validateTargetAccess(injector, selector, TargetAccessScope.SETTINGS);
+      const target = await validateTargetAccess(
+        injector,
+        selector,
+        TargetAccessScope.REGISTRY_WRITE,
+      );
       const operation = await injector.get(CollectionProvider).getOperation(id);
 
       if (!operation) {
