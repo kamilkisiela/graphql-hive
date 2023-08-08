@@ -212,6 +212,10 @@ services:
   clickhouse:
     ports:
       - '8123:8123'
+    volumes:
+      - ./.hive/clickhouse/logs:/var/log/clickhouse-server
+      - ./.hive/clickhouse/db:/var/lib/clickhouse
+
   supertokens:
     ports:
       - '3567:3567'

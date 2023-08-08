@@ -47,10 +47,148 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
       ORDER BY (target, hash, timestamp)
       SETTINGS index_granularity = 8192
     `,
-    ].map(exec),
+    ].map(q => exec(q)),
   );
 
   // Create Materialized Views
+
+  const createSelectStatementForOperationsMinutely = (
+    tableName: 'operations' | 'operations_new',
+  ) => `
+    SELECT
+      target,
+      toStartOfHour(timestamp) AS timestamp,
+      hash,
+      client_name,
+      client_version,
+      count() AS total,
+      sum(ok) AS total_ok,
+      avgState(duration) AS duration_avg,
+      quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
+    FROM default.${tableName}
+    GROUP BY
+      target,
+      hash,
+      client_name,
+      client_version,
+      timestamp
+  `;
+
+  const createSelectStatementForOperationsHourly = (tableName: 'operations' | 'operations_new') => `
+    SELECT
+      target,
+      toStartOfHour(timestamp) AS timestamp,
+      hash,
+      client_name,
+      client_version,
+      count() AS total,
+      sum(ok) AS total_ok,
+      avgState(duration) AS duration_avg,
+      quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
+    FROM default.${tableName}
+    GROUP BY
+      target,
+      hash,
+      client_name,
+      client_version,
+      timestamp
+  `;
+
+  const createSelectStatementForOperationsDaily = (tableName: 'operations' | 'operations_new') => `
+    SELECT
+      target,
+      toStartOfDay(timestamp) AS timestamp,
+      toStartOfDay(expires_at) AS expires_at,
+      hash,
+      client_name,
+      client_version,
+      count() AS total,
+      sum(ok) AS total_ok,
+      avgState(duration) AS duration_avg,
+      quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
+    FROM default.${tableName}
+    GROUP BY
+      target,
+      hash,
+      client_name,
+      client_version,
+      timestamp,
+      expires_at
+  `;
+
+  const createSelectStatementForClientsDaily = (tableName: 'operations' | 'operations_new') => `
+    SELECT
+      target,
+      client_name,
+      client_version,
+      hash,
+      toStartOfDay(timestamp) AS timestamp,
+      toStartOfDay(expires_at) AS expires_at,
+      count() AS total
+    FROM default.${tableName}
+    GROUP BY
+      target,
+      client_name,
+      client_version,
+      hash,
+      timestamp,
+      expires_at
+  `;
+
+  const createSelectStatementForCoordinatesDaily = (
+    tableName: 'operation_collection_new' | 'operation_collection',
+  ) => `
+    SELECT
+      target,
+      hash,
+      toStartOfDay(timestamp) AS timestamp,
+      toStartOfDay(expires_at) AS expires_at,
+      sum(total) AS total,
+      coordinate
+    FROM default.${tableName}
+    ARRAY JOIN coordinates as coordinate
+    GROUP BY
+      target,
+      coordinate,
+      hash,
+      timestamp,
+      expires_at
+  `;
+
+  const createSelectStatementForOperationCollectionBody = (
+    tableName: 'operation_collection_new' | 'operation_collection',
+  ) => `
+    SELECT
+      target,
+      hash,
+      body,
+      toStartOfDay(expires_at) AS expires_at
+    FROM default.${tableName}
+    GROUP BY
+      target,
+      hash,
+      body,
+      expires_at
+  `;
+
+  const createSelectStatementForOperationCollectionDetails = (
+    tableName: 'operation_collection_new' | 'operation_collection',
+  ) => `
+    SELECT
+      target,
+      name,
+      hash,
+      operation_kind,
+      toStartOfDay(expires_at) AS expires_at
+    FROM default.${tableName}
+    GROUP BY
+      target,
+      name,
+      hash,
+      operation_kind,
+      expires_at
+  `;
+
   await Promise.all(
     [
       // `operations`
@@ -74,23 +212,7 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
       ORDER BY (target, hash, client_name, client_version, timestamp)
       TTL timestamp + INTERVAL 24 HOUR
       SETTINGS index_granularity = 8192 AS
-      SELECT
-        target,
-        toStartOfHour(timestamp) AS timestamp,
-        hash,
-        client_name,
-        client_version,
-        count() AS total,
-        sum(ok) AS total_ok,
-        avgState(duration) AS duration_avg,
-        quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
-      FROM default.operations_new
-      GROUP BY
-        target,
-        hash,
-        client_name,
-        client_version,
-        timestamp
+      ${createSelectStatementForOperationsMinutely('operations_new')}
     `,
       // Adds TTL to the view, no longer depends on `expires_at`
       // Adds and improves codecs
@@ -113,23 +235,7 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
       ORDER BY (target, hash, client_name, client_version, timestamp)
       TTL timestamp + INTERVAL 30 DAY
       SETTINGS index_granularity = 8192 AS
-      SELECT
-        target,
-        toStartOfHour(timestamp) AS timestamp,
-        hash,
-        client_name,
-        client_version,
-        count() AS total,
-        sum(ok) AS total_ok,
-        avgState(duration) AS duration_avg,
-        quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
-      FROM default.operations_new
-      GROUP BY
-        target,
-        hash,
-        client_name,
-        client_version,
-        timestamp
+      ${createSelectStatementForOperationsHourly('operations_new')}
     `,
       // Adds and improves codecs
       `
@@ -152,25 +258,7 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
       ORDER BY (target, hash, client_name, client_version, timestamp)
       TTL expires_at
       SETTINGS index_granularity = 8192 AS
-      SELECT
-        target,
-        toStartOfDay(timestamp) AS timestamp,
-        toStartOfDay(expires_at) AS expires_at,
-        hash,
-        client_name,
-        client_version,
-        count() AS total,
-        sum(ok) AS total_ok,
-        avgState(duration) AS duration_avg,
-        quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
-      FROM default.operations_new
-      GROUP BY
-        target,
-        hash,
-        client_name,
-        client_version,
-        timestamp,
-        expires_at
+      ${createSelectStatementForOperationsDaily('operations_new')}
     `,
       // Adds and improves codecs
       `
@@ -192,22 +280,7 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
       TTL expires_at
       SETTINGS index_granularity = 8192
       AS
-      SELECT
-        target,
-        client_name,
-        client_version,
-        hash,
-        toStartOfDay(timestamp) AS timestamp,
-        toStartOfDay(expires_at) AS expires_at,
-        count() AS total
-      FROM default.operations_new
-      GROUP BY
-        target,
-        client_name,
-        client_version,
-        hash,
-        timestamp,
-        expires_at
+      ${createSelectStatementForClientsDaily('operations_new')}
     `,
       // `operation_collection`
       // Adds and improves codecs
@@ -228,21 +301,7 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
       TTL expires_at
       SETTINGS index_granularity = 8192
       AS
-      SELECT
-        target,
-        hash,
-        toStartOfDay(timestamp) AS timestamp,
-        toStartOfDay(expires_at) AS expires_at,
-        sum(total) AS total,
-        coordinate
-      FROM default.operation_collection_new
-      ARRAY JOIN coordinates as coordinate
-      GROUP BY
-        target,
-        coordinate,
-        hash,
-        timestamp,
-        expires_at
+      ${createSelectStatementForCoordinatesDaily('operation_collection_new')}
     `,
       // Adds a new view to easily and quickly query operation bodies
       `
@@ -260,17 +319,7 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
       TTL expires_at
       SETTINGS index_granularity = 8192
       AS
-      SELECT
-        target,
-        hash,
-        body,
-        toStartOfDay(expires_at) AS expires_at
-      FROM default.operation_collection_new
-      GROUP BY
-        target,
-        hash,
-        body,
-        expires_at
+      ${createSelectStatementForOperationCollectionBody('operation_collection_new')}
     `,
       // Adds a new view to easily and quickly query operation details
       `
@@ -289,21 +338,9 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
       TTL expires_at
       SETTINGS index_granularity = 8192
       AS
-      SELECT
-        target,
-        name,
-        hash,
-        operation_kind,
-        toStartOfDay(expires_at) AS expires_at
-      FROM default.operation_collection_new
-      GROUP BY
-        target,
-        name,
-        hash,
-        operation_kind,
-        expires_at
+      ${createSelectStatementForOperationCollectionDetails('operation_collection_new')}
     `,
-    ].map(exec),
+    ].map(q => exec(q)),
   );
 
   const totalOperationsResponse = await query(
@@ -363,6 +400,61 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
     exec(`RENAME TABLE default.operation_collection_body_new TO default.operation_collection_body`),
     exec(
       `RENAME TABLE default.operation_collection_details_new TO default.operation_collection_details`,
+    ),
+  ]);
+
+  // TODO: check if `allow_experimental_alter_materialized_view_structure` is available in ClickHouse Cloud
+  const modifyQuerySettings = { allow_experimental_alter_materialized_view_structure: '1' };
+  // Modify AS SELECT queries
+  await Promise.all([
+    exec(
+      `
+        ALTER TABLE default.operations_minutely
+        MODIFY QUERY ${createSelectStatementForOperationsMinutely('operations')}
+      `,
+      modifyQuerySettings,
+    ),
+    exec(
+      `
+        ALTER TABLE default.operations_hourly
+        MODIFY QUERY ${createSelectStatementForOperationsHourly('operations')}
+      `,
+      modifyQuerySettings,
+    ),
+    exec(
+      `
+        ALTER TABLE default.operations_daily
+        MODIFY QUERY ${createSelectStatementForOperationsDaily('operations')}
+      `,
+      modifyQuerySettings,
+    ),
+    exec(
+      `
+        ALTER TABLE default.coordinates_daily
+        MODIFY QUERY ${createSelectStatementForCoordinatesDaily('operation_collection')}
+      `,
+      modifyQuerySettings,
+    ),
+    exec(
+      `
+        ALTER TABLE default.clients_daily
+        MODIFY QUERY ${createSelectStatementForClientsDaily('operations')}
+      `,
+      modifyQuerySettings,
+    ),
+    exec(
+      `
+        ALTER TABLE default.operation_collection_body
+        MODIFY QUERY ${createSelectStatementForOperationCollectionBody('operation_collection')}
+      `,
+      modifyQuerySettings,
+    ),
+    exec(
+      `
+        ALTER TABLE default.operation_collection_details
+        MODIFY QUERY ${createSelectStatementForOperationCollectionDetails('operation_collection')}
+      `,
+      modifyQuerySettings,
     ),
   ]);
 

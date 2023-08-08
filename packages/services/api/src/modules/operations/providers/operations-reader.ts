@@ -60,23 +60,26 @@ function ensureNumber(value: number | string): number {
 export class OperationsReader {
   constructor(private clickHouse: ClickHouse, private logger: Logger) {}
 
-  private _useNewTables: Promise<boolean> | null = null;
+  private _tableNamesPromise: Promise<string[]> | null = null;
 
-  private canUseNewTables() {
-    if (this._useNewTables === null) {
-      this._useNewTables = this.clickHouse
+  private canUseNewTable(
+    tableName: 'operations_minutely' | 'operation_collection_body' | 'operation_collection_details',
+  ) {
+    if (this._tableNamesPromise === null) {
+      this._tableNamesPromise = this.clickHouse
         .query<{
           name: string;
         }>({
-          // Use new tables only if `operations` became `operations_old` and `operations_new` turned into `operations`.
-          query: sql`SELECT name FROM system.tables WHERE database = 'default' AND name IN ('operations', 'operations_old') LIMIT 2`,
+          query: sql`SELECT name FROM system.tables WHERE database = 'default'`,
           queryId: 'can_use_new_tables',
           timeout: 10_000,
         })
-        .then(result => result.rows === 2);
+        .then(result => result.data.map(row => row.name));
     }
 
-    return this._useNewTables;
+    // If the table name is in the list, it means we completed the migration.
+    // If the migration is not completed then the name would contain the `_new` suffix.
+    return this._tableNamesPromise.then(tableNames => tableNames.includes(tableName));
   }
 
   private pickQueryByPeriod(
@@ -104,7 +107,10 @@ export class OperationsReader {
     resolution?: number,
   ) {
     if (!period) {
-      return queryMap.daily;
+      return {
+        ...queryMap.daily,
+        queryType: 'daily' as const,
+      };
     }
 
     const dataPoints = resolution;
@@ -202,7 +208,10 @@ export class OperationsReader {
       }
     }
 
-    return queryMap[selectedQueryType];
+    return {
+      ...queryMap[selectedQueryType],
+      queryType: selectedQueryType,
+    };
   }
 
   @sentry('OperationsReader.countField')
@@ -358,7 +367,7 @@ export class OperationsReader {
           span,
         },
         minutely: {
-          query: (await this.canUseNewTables())
+          query: (await this.canUseNewTable('operations_minutely'))
             ? sql`SELECT sum(total) as total FROM operations_minutely ${this.createFilter({
                 target,
                 period,
@@ -432,7 +441,7 @@ export class OperationsReader {
           span,
         },
         minutely: {
-          query: (await this.canUseNewTables())
+          query: (await this.canUseNewTable('operations_minutely'))
             ? sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_minutely ${this.createFilter(
                 {
                   target,
@@ -533,7 +542,7 @@ export class OperationsReader {
           span,
         },
         minutely: {
-          query: (await this.canUseNewTables())
+          query: (await this.canUseNewTable('operations_minutely'))
             ? sql`
               SELECT count(distinct hash) as total
               FROM operations_minutely
@@ -631,7 +640,7 @@ export class OperationsReader {
           span,
         },
         minutely: {
-          query: (await this.canUseNewTables())
+          query: (await this.canUseNewTable('operations_minutely'))
             ? sql`
               SELECT sum(total) as total, sum(total_ok) as totalOk, hash
               FROM operations_minutely
@@ -673,7 +682,7 @@ export class OperationsReader {
         hash: string;
         operation_kind: string;
       }>({
-        query: (await this.canUseNewTables())
+        query: (await this.canUseNewTable('operation_collection_details'))
           ? sql`
             SELECT 
               name,
@@ -682,8 +691,20 @@ export class OperationsReader {
             FROM operation_collection_details
               ${this.createFilter({
                 target,
-                operations,
-                period,
+                extra: [
+                  sql`
+                    hash IN (
+                      SELECT hash
+                      FROM ${sql.raw('operations_' + query.queryType)}
+                      ${this.createFilter({
+                        target,
+                        period,
+                        operations,
+                      })}
+                      GROUP BY hash
+                    )
+                  `,
+                ],
               })}
             GROUP BY name, hash, operation_kind
           `
@@ -748,7 +769,7 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       body: string;
     }>({
-      query: (await this.canUseNewTables())
+      query: (await this.canUseNewTable('operation_collection_body'))
         ? sql`
           SELECT 
             body
@@ -847,7 +868,7 @@ export class OperationsReader {
             span,
           },
           minutely: {
-            query: (await this.canUseNewTables())
+            query: (await this.canUseNewTable('operations_minutely'))
               ? sql`
                 SELECT 
                   sum(total) as total,
@@ -1176,7 +1197,7 @@ export class OperationsReader {
                   timeout: 15_000,
                 },
                 minutely: {
-                  query: (await this.canUseNewTables())
+                  query: (await this.canUseNewTable('operations_minutely'))
                     ? sql`
                       SELECT 
                         multiply(
@@ -1390,7 +1411,7 @@ export class OperationsReader {
             span,
           },
           minutely: {
-            query: (await this.canUseNewTables())
+            query: (await this.canUseNewTable('operations_minutely'))
               ? sql`
                 SELECT 
                   quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
@@ -1463,7 +1484,7 @@ export class OperationsReader {
             span,
           },
           minutely: {
-            query: (await this.canUseNewTables())
+            query: (await this.canUseNewTable('operations_minutely'))
               ? sql`
                 SELECT 
                   hash,
@@ -1591,7 +1612,7 @@ export class OperationsReader {
             span,
           },
           minutely: {
-            query: (await this.canUseNewTables())
+            query: (await this.canUseNewTable('operations_minutely'))
               ? sql`
                 SELECT 
                   multiply(

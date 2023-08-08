@@ -127,6 +127,11 @@ export function createWriter({
         tableNames.has('operations') && tableNames.has('operations_new') ? true : false;
 
       if (shouldUsePartialOperations) {
+        logger.debug(
+          'Using partial records for operations (originalSize: %s, partialSize: %s)',
+          operations.length,
+          migrationSpecificOperations.length ?? '0',
+        );
         await Promise.all([
           // operations
           writeCsv(
@@ -185,6 +190,11 @@ export function createWriter({
           : false;
 
       if (shouldUsePartialRecords) {
+        logger.debug(
+          'Using partial records for operation_collection (originalSize: %s, partialSize: %s)',
+          records.length,
+          migrationSpecificRecords.length ?? '0',
+        );
         await Promise.all([
           // operation_collection
           writeCsv(

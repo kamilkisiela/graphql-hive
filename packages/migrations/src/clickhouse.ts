@@ -22,7 +22,7 @@ interface QueryResponse<T> {
 }
 
 export type Action = (
-  exec: (query: string) => Promise<void>,
+  exec: (query: string, settings?: Record<string, string>) => Promise<void>,
   query: (queryString: string) => Promise<QueryResponse<unknown>>,
   isGraphQLHiveCloud: boolean,
 ) => Promise<void>;
@@ -79,13 +79,14 @@ export async function migrateClickHouse(
     },
   });
 
-  function exec(query: string) {
+  function exec(query: string, settings?: Record<string, string>) {
     return got
       .post(endpoint, {
         body: query,
         searchParams: {
           default_format: 'JSON',
           wait_end_of_query: '1',
+          ...settings,
         },
         headers: {
           Accept: 'text/plain',
@@ -167,8 +168,8 @@ export async function migrateClickHouse(
 
     try {
       await action(
-        async query => {
-          await exec(query);
+        async (query, settings) => {
+          await exec(query, settings);
         },
         query,
         isGraphQLHiveCloud,
