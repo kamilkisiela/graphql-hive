@@ -460,8 +460,8 @@ importers:
   packages/libraries/external-composition:
     devDependencies:
       '@apollo/composition':
-        specifier: 2.5.1
-        version: 2.5.1(graphql@16.6.0)
+        specifier: 2.4.12
+        version: 2.4.12(graphql@16.6.0)
       esbuild:
         specifier: 0.17.19
         version: 0.17.19
@@ -817,14 +817,14 @@ importers:
   packages/services/external-composition/federation-2:
     dependencies:
       '@apollo/composition':
-        specifier: ^2.4.5
-        version: 2.4.5(graphql@16.6.0)
+        specifier: 2.4.12
+        version: 2.4.12(graphql@16.6.0)
       '@whatwg-node/fetch':
-        specifier: ^0.9.0
-        version: 0.9.0
+        specifier: 0.9.9
+        version: 0.9.9
       '@whatwg-node/server':
-        specifier: ^0.9.0
-        version: 0.9.0
+        specifier: 0.9.9
+        version: 0.9.9
       graphql:
         specifier: ^16.6.0
         version: 16.6.0
@@ -2066,16 +2066,15 @@ packages:
     dependencies:
       graphql: 16.6.0
 
-  /@apollo/composition@2.4.5(graphql@16.6.0):
-    resolution: {integrity: sha512-n7w8gk678CEXjMVa/tXUuuD25Nt+v19AHQ1BCUqVBeaLfH3PzTQPNkRBjXpiX0IZJA7zttwyWw8JeYak11giIQ==}
+  /@apollo/composition@2.4.12(graphql@16.6.0):
+    resolution: {integrity: sha512-bvaOt6PHIsz0tMi7ioKO60scUTt4BBpXvGNnrUvXdm/hV8jvFK7EKIjfxe6r6lNAl9YBoKXRGL1d6Go8CupE8w==}
     engines: {node: '>=14.15.0'}
     peerDependencies:
       graphql: ^16.5.0
     dependencies:
-      '@apollo/federation-internals': 2.4.5(graphql@16.6.0)
-      '@apollo/query-graphs': 2.4.5(graphql@16.6.0)
+      '@apollo/federation-internals': 2.4.12(graphql@16.6.0)
+      '@apollo/query-graphs': 2.4.12(graphql@16.6.0)
       graphql: 16.6.0
-    dev: false
 
   /@apollo/composition@2.5.1(graphql@16.6.0):
     resolution: {integrity: sha512-oLMlDF27Wr9Ao4JlGFQ3GJZU4S23qeClHJpcDDPZIC4j/5hDsU3Exw9kUtyFmENYOJ2Y4q1CEBd3yryX/oa6ww==}
@@ -2086,9 +2085,10 @@ packages:
       '@apollo/federation-internals': 2.5.1(graphql@16.6.0)
       '@apollo/query-graphs': 2.5.1(graphql@16.6.0)
       graphql: 16.6.0
+    dev: false
 
-  /@apollo/federation-internals@2.4.5(graphql@16.6.0):
-    resolution: {integrity: sha512-yXZJ5gOArKFQ6Eyon5o8sbxw+sM/Wznl5ECptf/gkCKS51+AhrVjJu41frWhcKdoeufy835v5XVjeXRx9WO6Ug==}
+  /@apollo/federation-internals@2.4.12(graphql@16.6.0):
+    resolution: {integrity: sha512-kd9rGahXUWeRZuGcAJXVE57RRzlaxDy8r20u5z2g5gGwgfbcLXMTpNStyNHYIWUFPxtT3Ho2hQqnC7MjpX7GLw==}
     engines: {node: '>=14.15.0'}
     peerDependencies:
       graphql: ^16.5.0
@@ -2098,7 +2098,6 @@ packages:
       graphql: 16.6.0
       js-levenshtein: 1.1.6
       uuid: 9.0.0
-    dev: false
 
   /@apollo/federation-internals@2.5.1(graphql@16.6.0):
     resolution: {integrity: sha512-+TSt+GJWBeDiHRsLhaake2sYDni2yW3f4xRSq3+I6vsHs1GIcKgUbhq4fiDe61v6OXU1IckuI+TELRSMZNNh6A==}
@@ -2195,18 +2194,17 @@ packages:
       long: 4.0.0
     dev: false
 
-  /@apollo/query-graphs@2.4.5(graphql@16.6.0):
-    resolution: {integrity: sha512-6u8MwTSoANsKfw+Fut0P2u9Ngkaw4HQirfiHAuE0cQEUU38ibetWXFUkQ2SEpCfcf5bw71/Mx7g0TDV8figEgQ==}
+  /@apollo/query-graphs@2.4.12(graphql@16.6.0):
+    resolution: {integrity: sha512-vLQK2tnRhip4vUDRIbygqjW4l5yJvAle4n1ZBRLsFFb2JvjA1mIUsHGyNwtUc7NWdILpE4e1Q2rwFnOrtO8eHA==}
     engines: {node: '>=14.15.0'}
     peerDependencies:
       graphql: ^16.5.0
     dependencies:
-      '@apollo/federation-internals': 2.4.5(graphql@16.6.0)
+      '@apollo/federation-internals': 2.4.12(graphql@16.6.0)
       deep-equal: 2.1.0
       graphql: 16.6.0
       ts-graphviz: 1.5.5
       uuid: 9.0.0
-    dev: false
 
   /@apollo/query-graphs@2.5.1(graphql@16.6.0):
     resolution: {integrity: sha512-pZOSj30Kc99xA+8+Mzpp1sTtC5Z6JVlx5tWtjZOeQDtSgNwgVQEwHLP3qHrfycofzMoj+Bk6v1bX8fvKJ2RvDA==}
@@ -2219,6 +2217,7 @@ packages:
       graphql: 16.6.0
       ts-graphviz: 1.5.5
       uuid: 9.0.0
+    dev: false
 
   /@apollo/query-planner@2.5.1(graphql@16.6.0):
     resolution: {integrity: sha512-RPs28QW6rsmTGGhbLBzAltlSCvKEAsv4Dhj/IeR2KPzmj44/27FPQtRf3xQa4Sb/hjjJ4P9Md0W5ybZJfDIMWg==}
@@ -13219,14 +13218,6 @@ packages:
       urlpattern-polyfill: 8.0.2
       web-streams-polyfill: 3.2.1
 
-  /@whatwg-node/fetch@0.9.0:
-    resolution: {integrity: sha512-zEyXaoz5w6BpKYKyZLTwBA41fqGuscOvSoPHytADRo1FY/s/fmjwiKq4QGmB88DlNuQ8e57s6AgWqIYyAT0Zmg==}
-    engines: {node: '>=16.0.0'}
-    dependencies:
-      '@whatwg-node/node-fetch': 0.4.0
-      urlpattern-polyfill: 8.0.2
-    dev: false
-
   /@whatwg-node/fetch@0.9.9:
     resolution: {integrity: sha512-OTVoDm039CNyAWSRc2WBimMl/N9J4Fk2le21Xzcf+3OiWPNNSIbMnpWKBUyraPh2d9SAEgoBdQxTfVNihXgiUw==}
     engines: {node: '>=16.0.0'}
@@ -13242,17 +13233,6 @@ packages:
       fast-querystring: 1.1.1
       fast-url-parser: 1.1.3
       tslib: 2.5.3
-
-  /@whatwg-node/node-fetch@0.4.0:
-    resolution: {integrity: sha512-aFfJNTMwkWrkl8I9nTkslVjPlkL+zb/Z71ng+71UbYYm1gPHfltHHXBiM99aZgUCaqyvaR5XzzwyCL6m0ikqsA==}
-    engines: {node: '>=16.0.0'}
-    dependencies:
-      '@whatwg-node/events': 0.1.1
-      busboy: 1.6.0
-      fast-querystring: 1.1.1
-      fast-url-parser: 1.1.3
-      tslib: 2.5.3
-    dev: false
 
   /@whatwg-node/node-fetch@0.4.11:
     resolution: {integrity: sha512-JRMx/yrBW/PXUH+0EIurUIQtAsEMrHtZBBKv6b+YCK1yG7pMNqtkl5Z39Rynq8ysVc/I6yTtNwkCy9bz5To1vw==}
@@ -13271,14 +13251,6 @@ packages:
       tslib: 2.5.3
     dev: true
 
-  /@whatwg-node/server@0.9.0:
-    resolution: {integrity: sha512-dEpgIgLlUA9IRIUbAhsPuFvJjuAQIjWqRhNc6VpMMLnumw2bvOHd9b/Nm2UN9cLvUSSA6//Fy+v0jhxiA2LFAw==}
-    engines: {node: '>=16.0.0'}
-    dependencies:
-      '@whatwg-node/fetch': 0.9.9
-      tslib: 2.5.3
-    dev: false
-
   /@whatwg-node/server@0.9.1:
     resolution: {integrity: sha512-Zq0FWafIlJzYyyAL7UwzsEhqSMzvKci/XqIFKpC4V031PxKKPBmZSP1mXCew5eZFW8Z5Sj6bZNi2CIsHd062ug==}
     engines: {node: '>=16.0.0'}
@@ -13292,6 +13264,14 @@ packages:
     dependencies:
       '@whatwg-node/fetch': 0.9.9
       tslib: 2.5.3
+
+  /@whatwg-node/server@0.9.9:
+    resolution: {integrity: sha512-ciD7qk+QqJ9KaWns+nEeYmjso6ouZxXvurzsV4ly0Nbyo/eKZ/w6w4xfyHaA8tqsaq/6MbSZBQu/Mtg19idyxg==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@whatwg-node/fetch': 0.9.9
+      tslib: 2.5.3
+    dev: false
 
   /@xtuc/ieee754@1.2.0:
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}

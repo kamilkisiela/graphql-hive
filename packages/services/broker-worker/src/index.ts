@@ -70,7 +70,7 @@ const handler: ExportedHandler<Env> = {
     }
 
     try {
-      return await handleRequest(request, isSignatureValid, logger).finally(() => {
+      return await handleRequest(request, isSignatureValid, logger, requestId).finally(() => {
         flush();
       });
     } catch (error) {

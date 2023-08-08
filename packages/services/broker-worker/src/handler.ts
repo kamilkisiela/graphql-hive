@@ -24,7 +24,9 @@ export async function handleRequest(
   request: Request,
   keyValidator: SignatureValidator,
   logger: Logger,
+  requestId: string,
 ) {
+  logger.info(`Received request with id ${requestId}`);
   const parsedRequest = await parseIncomingRequest(request, keyValidator, logger);
 
   if ('error' in parsedRequest) {
@@ -37,14 +39,20 @@ export async function handleRequest(
     parsedRequest.method === 'GET'
       ? {
           method: 'GET',
-          headers: parsedRequest.headers,
+          headers: {
+            ...parsedRequest.headers,
+            'x-hive-request-id': requestId,
+          },
           signal: request.signal,
           redirect: 'follow',
         }
       : {
           method: 'POST',
           body: parsedRequest.body,
-          headers: parsedRequest.headers,
+          headers: {
+            ...parsedRequest.headers,
+            'x-hive-request-id': requestId,
+          },
           signal: request.signal,
           redirect: 'follow',
         };
@@ -56,8 +64,11 @@ export async function handleRequest(
   logger.info(
     `Received response from ${parsedRequest.url} with status ${response.status} (${response.statusText}}`,
   );
-  const text = await gatherResponse(response);
-  logger.info(`Collected response body (length=${text.length})`);
+  const text = await gatherResponse(response).catch(error => {
+    logger.error(`Failed to collect response body from ${parsedRequest.url}`, error);
+    return Promise.reject(error);
+  });
+  logger.info(`Collected response body from ${parsedRequest.url} (length=${text.length})`);
   return new Response(text, {
     status: response.status,
     statusText: response.statusText,

@@ -238,8 +238,9 @@ async function callExternalService(
       body: input.body,
       responseType: 'text',
       retry: {
-        limit: 2,
-        methods: ['POST'],
+        limit: 5,
+        methods: ['POST', ...(got.defaults.options.retry.methods ?? [])],
+        statusCodes: [404].concat(got.defaults.options.retry.statusCodes ?? []),
         backoffLimit: 500,
       },
       timeout: {
