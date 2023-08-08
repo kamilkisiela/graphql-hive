@@ -92,7 +92,7 @@ const action: Action = async (exec, _query, isGraphQLHiveCloud) => {
           timestamp,
           expires_at
     `,
-    ].map(exec),
+    ].map(q => exec(q)),
   );
 
   // Run the rest of the migration only for self-hosted instances, not for Cloud.
