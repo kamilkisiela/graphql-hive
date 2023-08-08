@@ -1,0 +1,21 @@
+import { Callout } from '@theguild/components'
+
+# CDN Artifacts
+
+By default, the self-hosted Hive instance does not come with an CDN, as this requires an external
+service such as Cloudflare. However, you can enable fallback CDN route handlers that are exposed via
+the `server` docker container.
+
+<Callout>
+  Please not that these route handlers are obviously not as performant and highly-available as a
+  real CDN.
+</Callout>
+
+You need to set the following environment variables.
+
+```bash filename="Environment variables for the server container"
+# Enable the CDN API route handlers
+CDN_API=1
+# The (public) base url of the server container
+CDN_API_BASE_URL=http://localhost:8082
+```
