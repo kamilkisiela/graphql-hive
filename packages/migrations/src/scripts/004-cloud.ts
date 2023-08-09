@@ -330,7 +330,6 @@ async function main() {
         settings: modifyQuerySettings,
       },
     ),
-    // TODO: modify query of old views as well
   ]);
 
   progressBar.stop();
