@@ -1,6 +1,6 @@
 import { buildSchema, GraphQLError, Source } from 'graphql';
 import { InvalidDocument, validate } from '@graphql-inspector/core';
-import { Args, Errors, Flags } from '@oclif/core';
+import { Args, Errors, Flags, ux } from '@oclif/core';
 import Command from '../../base-command';
 import { graphql } from '../../gql';
 import { graphqlEndpoint } from '../../helpers/config';
@@ -104,19 +104,29 @@ export default class OperationsCheck extends Command {
         operations.map(s => new Source(s.content, s.location)),
       );
 
-      if (invalidOperations.length === 0) {
-        this.success('All operations are valid');
+      const operationsWithErrors = invalidOperations.filter(o => o.errors.length > 0);
+
+      if (operationsWithErrors.length === 0) {
+        this.success(`All operations are valid (${operations.length})`);
         this.exit(0);
         return;
       }
 
-      this.fail('Some operations are invalid');
-
+      ux.styledHeader('Summary');
       this.log(
-        ['', `Total: ${operations.length}`, `Invalid: ${invalidOperations.length}`, ''].join('\n'),
+        [
+          `Total: ${operations.length}`,
+          `Invalid: ${operationsWithErrors.length} (${Math.floor(
+            (operationsWithErrors.length / operations.length) * 100,
+          )}%)`,
+          '',
+        ].join('\n'),
       );
 
-      this.printInvalidDocuments(invalidOperations, 'errors');
+      ux.styledHeader('Details');
+
+      this.printInvalidDocuments(operationsWithErrors);
+      this.exit(1);
     } catch (error) {
       if (error instanceof Errors.ExitError) {
         throw error;
@@ -127,22 +137,17 @@ export default class OperationsCheck extends Command {
     }
   }
 
-  private printInvalidDocuments(
-    invalidDocuments: InvalidDocument[],
-    listKey: 'errors' | 'deprecated',
-  ): void {
+  private printInvalidDocuments(invalidDocuments: InvalidDocument[]): void {
     invalidDocuments.forEach(doc => {
-      if (doc.errors.length) {
-        this.renderErrors(doc.source.name, doc[listKey]).forEach(line => {
-          this.log(line);
-        });
-      }
+      this.renderErrors(doc.source.name, doc.errors);
     });
   }
 
-  private renderErrors(sourceName: string, errors: GraphQLError[]): string[] {
-    const errorsAsString = errors.map(e => ` - ${this.bolderize(e.message)}`).join('\n');
-
-    return [`ERROR in ${sourceName}:\n`, errorsAsString, '\n\n'];
+  private renderErrors(sourceName: string, errors: GraphQLError[]) {
+    this.fail(sourceName);
+    errors.forEach(e => {
+      this.log(` - ${this.bolderize(e.message)}`);
+    });
+    this.log('');
   }
 }
