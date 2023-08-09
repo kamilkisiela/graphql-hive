@@ -1,3 +1,5 @@
+[![GraphQL Conf 2023](/GraphQLConf-2023-Banner.png)](https://graphql.org/conf/)
+
 # GraphQL Hive
 
 GraphQL Hive provides all the tools the get visibility of your GraphQL architecture at all stages,
