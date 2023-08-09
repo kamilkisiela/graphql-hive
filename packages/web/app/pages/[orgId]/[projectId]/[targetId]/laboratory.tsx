@@ -175,7 +175,7 @@ const CollectionItem = (props: {
             {
               query: {
                 operation: props.node.id,
-                orgId: router.organizationId,
+                organizationId: router.organizationId,
                 projectId: router.projectId,
                 targetId: router.targetId,
               },

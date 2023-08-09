@@ -24,8 +24,8 @@ export default withBundleAnalyzer({
   redirects: async () => [
     // Redirect organization routes
     {
-      source: '/:orgId/view/subscription/manage',
-      destination: '/:orgId/view/subscription',
+      source: '/:organizationId/view/subscription/manage',
+      destination: '/:organizationId/view/subscription',
       permanent: true,
     },
   ],

@@ -12,14 +12,14 @@ export function useRouteSelector() {
 
   const visitOrganization = useCallback(
     ({ organizationId }: { organizationId: string }) => {
-      void push('/[orgId]', `/${organizationId}`);
+      void push('/[organizationId]', `/${organizationId}`);
     },
     [push],
   );
 
   const visitProject = useCallback(
     ({ organizationId, projectId }: { organizationId: string; projectId: string }) => {
-      void push('/[orgId]/[projectId]', `/${organizationId}/${projectId}`);
+      void push('/[organizationId]/[projectId]', `/${organizationId}/${projectId}`);
     },
     [push],
   );
@@ -34,7 +34,10 @@ export function useRouteSelector() {
       projectId: string;
       targetId: string;
     }) => {
-      void push('/[orgId]/[projectId]/[targetId]', `/${organizationId}/${projectId}/${targetId}`);
+      void push(
+        '/[organizationId]/[projectId]/[targetId]',
+        `/${organizationId}/${projectId}/${targetId}`,
+      );
     },
     [push],
   );
@@ -79,7 +82,7 @@ export function useRouteSelector() {
       push,
       replace,
       visitHome,
-      organizationId: router.query.orgId as string,
+      organizationId: router.query.organizationId as string,
       visitOrganization,
       projectId: router.query.projectId as string,
       visitProject,

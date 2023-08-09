@@ -35,10 +35,10 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
     const handleRouteChange = (url: string) => {
       gtag.pageview(url);
 
-      const orgId = Router.query.orgId as string;
+      const orgId = Router.query.organizationId as string;
       const lastVisitedOrgCookieValue = cookies.get(LAST_VISITED_ORG_KEY);
 
-      // Make sure we do have orgId and the cookie is not in the legacy format
+      // Make sure we do have organizationId and the cookie is not in the legacy format
       if (lastVisitedOrgCookieValue?.includes(':') && orgId) {
         const [lastVisitedOrgId, checksum] = lastVisitedOrgCookieValue.split(':');
 

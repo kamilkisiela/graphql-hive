@@ -20,11 +20,11 @@ import { graphql } from '@/gql';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
 import { OrganizationsQuery } from '../../pages';
-import { CollectionsQuery } from '../../pages/[orgId]/[projectId]/[targetId]/laboratory';
+import { CollectionsQuery } from '../../pages/[organizationId]/[projectId]/[targetId]/laboratory';
 import {
   TokensDocument,
   type DeleteTokensDocument,
-} from '../../pages/[orgId]/[projectId]/[targetId]/settings';
+} from '../../pages/[organizationId]/[projectId]/[targetId]/settings';
 
 const TargetsDocument = graphql(`
   query targets($selector: ProjectSelectorInput!) {

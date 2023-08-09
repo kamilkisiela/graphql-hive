@@ -38,8 +38,8 @@ export function useOrganizationAccess({
     canAccess,
     redirectTo: redirect
       ? router => ({
-          route: '/[orgId]',
-          as: `/${router.query.orgId}`,
+          route: '/[organizationId]',
+          as: `/${router.query.organizationId}`,
         })
       : undefined,
     entity: member,
