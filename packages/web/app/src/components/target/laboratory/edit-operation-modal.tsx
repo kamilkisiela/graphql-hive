@@ -1,6 +1,6 @@
 import { ReactElement, useMemo } from 'react';
 import { useFormik } from 'formik';
-import { useCollections } from 'packages/web/app/pages/[orgId]/[projectId]/[targetId]/laboratory';
+import { useCollections } from 'packages/web/app/pages/[organizationId]/[projectId]/[targetId]/laboratory';
 import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal } from '@/components/v2';

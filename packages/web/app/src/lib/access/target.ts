@@ -38,8 +38,8 @@ export function useTargetAccess({
     canAccess,
     redirectTo: redirect
       ? router => ({
-          route: '/[orgId]/[projectId]/[targetId]',
-          as: `/${router.query.orgId}/${router.query.projectId}/${router.query.targetId}`,
+          route: '/[organizationId]/[projectId]/[targetId]',
+          as: `/${router.query.organizationId}/${router.query.projectId}/${router.query.targetId}`,
         })
       : undefined,
     entity: member,

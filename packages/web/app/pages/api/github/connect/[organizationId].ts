@@ -9,12 +9,12 @@ export default async function githubConnectOrg(req: NextApiRequest, res: NextApi
     throw new Error('GitHub is not set up.');
   }
 
-  const { orgId } = req.query;
-  logger.info('Connect to GitHub (orgId=%s)', orgId);
+  const { organizationId } = req.query;
+  logger.info('Connect to GitHub (orgId=%s)', organizationId);
 
   const url = `https://github.com/apps/${env.github.appName}/installations/new`;
 
   const redirectUrl = `${env.appBaseUrl}/api/github/callback`;
 
-  res.redirect(`${url}?state=${orgId}&redirect_url=${redirectUrl}`);
+  res.redirect(`${url}?state=${organizationId}&redirect_url=${redirectUrl}`);
 }

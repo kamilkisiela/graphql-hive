@@ -38,8 +38,8 @@ export function useProjectAccess({
     canAccess,
     redirectTo: redirect
       ? router => ({
-          route: '/[orgId]/[projectId]',
-          as: `/${router.query.orgId}/${router.query.projectId}`,
+          route: '/[organizationId]/[projectId]',
+          as: `/${router.query.organizationId}/${router.query.projectId}`,
         })
       : undefined,
     entity: member,

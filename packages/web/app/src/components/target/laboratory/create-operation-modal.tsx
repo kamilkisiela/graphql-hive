@@ -6,7 +6,7 @@ import { Button, Heading, Input, Modal, Select } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
 import { useEditorContext } from '@graphiql/react';
-import { useCollections } from '../../../../pages/[orgId]/[projectId]/[targetId]/laboratory';
+import { useCollections } from '../../../../pages/[organizationId]/[projectId]/[targetId]/laboratory';
 
 const CreateOperationMutation = graphql(`
   mutation CreateOperation(

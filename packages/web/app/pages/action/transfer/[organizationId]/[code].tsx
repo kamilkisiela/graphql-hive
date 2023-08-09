@@ -50,7 +50,7 @@ const OrganizationTransferPage_AnswerRequest = graphql(`
 function OrganizationTransferPage() {
   const router = useRouteSelector();
   const notify = useNotifications();
-  const orgId = router.query.orgId as string;
+  const orgId = router.query.organizationId as string;
   const code = router.query.code as string;
   const [query] = useQuery({
     query: OrganizationTransferPage_GetRequest,
