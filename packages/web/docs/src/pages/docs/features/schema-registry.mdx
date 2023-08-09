@@ -174,7 +174,19 @@ performed to ensure a schema is valid:
 For additional reading:
 
 - [Checking a schema using Hive CLI](/docs/api-reference/cli#check-a-schema)
-- [`schema:check` command reference](/docs/api-reference/cli#hive-schemacheck-file)
+
+### Fetch a schema
+
+Sometimes it is useful to fetch a schema (SDL or Supergraph) from Hive, for example, to use it in a
+local development. This can be done using the `schema:fetch` command.
+
+<Callout type="info">
+  Don't confuse this with the [high-availability CDN](/docs/features/high-availability-cdn.mdx).
+  This command is used to fetch a schema from the API wherhe the CDN always represents the latest
+  valid schema.
+</Callout>
+
+- [Fetch a schema using Hive CLI](/docs/api-reference/cli#fetch-a-schema-from-the-registry)
 
 ### Delete a service
 
