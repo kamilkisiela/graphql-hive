@@ -1,5 +1,15 @@
+import cliProgress from 'cli-progress';
 import got from 'got';
 import zod from 'zod';
+import {
+  createSelectStatementForClientsDaily,
+  createSelectStatementForCoordinatesDaily,
+  createSelectStatementForOperationCollectionBody,
+  createSelectStatementForOperationCollectionDetails,
+  createSelectStatementForOperationsDaily,
+  createSelectStatementForOperationsHourly,
+  createSelectStatementForOperationsMinutely,
+} from '../clickhouse-actions/004-version-2.js';
 import { env } from '../environment.js';
 
 const MigrationModel = zod.object({
@@ -30,14 +40,20 @@ async function main() {
 
   const endpoint = `${clickhouse.protocol}://${clickhouse.host}:${clickhouse.port}`;
 
-  function execute(query: string, settings?: Record<string, string>) {
+  function execute(
+    query: string,
+    options?: {
+      progressBar?: cliProgress.SingleBar;
+      settings?: Record<string, string>;
+    },
+  ) {
     return got
       .post(endpoint, {
         body: query,
         searchParams: {
           default_format: 'JSON',
           wait_end_of_query: '1',
-          ...settings,
+          ...options?.settings,
         },
         headers: {
           Accept: 'text/plain',
@@ -52,6 +68,12 @@ async function main() {
         }
 
         return Promise.reject(error);
+      })
+      .then(response => {
+        if (options?.progressBar) {
+          options.progressBar.increment();
+        }
+        return Promise.resolve(response);
       });
   }
 
@@ -81,6 +103,10 @@ async function main() {
     ;
   `).then(response => InsertStatementsModel.parse(JSON.parse(response.body)));
 
+  const progressBar = new cliProgress.MultiBar({}, cliProgress.Presets.shades_classic);
+
+  const operationsTableBar = progressBar.create(operationsStatements.data.length, 0);
+
   for (const record of operationsStatements.data) {
     let retry = 0;
 
@@ -93,7 +119,9 @@ async function main() {
         console.log(
           `insert rows from 'operations' ${record.year}-${record.month}-${record.day} ${retry}`,
         );
-        await execute(record.insertStatement);
+        await execute(record.insertStatement, {
+          progressBar: operationsTableBar,
+        });
         break;
       } catch (error) {
         console.error(error);
@@ -102,6 +130,7 @@ async function main() {
       }
     }
   }
+  operationsTableBar.stop();
 
   const operationCollectionStatements = await execute(`
     SELECT
@@ -129,6 +158,11 @@ async function main() {
     ;
   `).then(response => InsertStatementsModel.parse(JSON.parse(response.body)));
 
+  const operationCollectionTableBar = progressBar.create(
+    operationCollectionStatements.data.length,
+    0,
+  );
+
   for (const record of operationCollectionStatements.data) {
     let retry = 0;
 
@@ -141,7 +175,9 @@ async function main() {
         console.log(
           `insert rows from 'operation_collection' ${record.year}-${record.month}-${record.day} ${retry}`,
         );
-        await execute(record.insertStatement);
+        await execute(record.insertStatement, {
+          progressBar: operationCollectionTableBar,
+        });
         break;
       } catch (error) {
         console.error(error);
@@ -151,176 +187,76 @@ async function main() {
     }
   }
 
+  operationCollectionTableBar.stop();
+
+  const renamingBar = progressBar.create(15, 0);
+
   // Rename tables
   // Old tables
   await Promise.all([
-    execute(`RENAME TABLE default.operations TO default.operations_old`),
-    execute(`RENAME TABLE default.operation_collection TO default.operation_collection_old`),
+    execute(`RENAME TABLE default.operations TO default.operations_old`, {
+      progressBar: renamingBar,
+    }),
+    execute(`RENAME TABLE default.operation_collection TO default.operation_collection_old`, {
+      progressBar: renamingBar,
+    }),
   ]);
   // Old views
   await Promise.all([
-    execute(`RENAME TABLE default.operations_hourly TO default.operations_hourly_old`),
-    execute(`RENAME TABLE default.operations_daily TO default.operations_daily_old`),
-    execute(`RENAME TABLE default.coordinates_daily TO default.coordinates_daily_old`),
-    execute(`RENAME TABLE default.clients_daily TO default.clients_daily_old`),
+    execute(`RENAME TABLE default.operations_hourly TO default.operations_hourly_old`, {
+      progressBar: renamingBar,
+    }),
+    execute(`RENAME TABLE default.operations_daily TO default.operations_daily_old`, {
+      progressBar: renamingBar,
+    }),
+    execute(`RENAME TABLE default.coordinates_daily TO default.coordinates_daily_old`, {
+      progressBar: renamingBar,
+    }),
+    execute(`RENAME TABLE default.clients_daily TO default.clients_daily_old`, {
+      progressBar: renamingBar,
+    }),
   ]);
   // New tables
   await Promise.all([
-    execute(`RENAME TABLE default.operations_new TO default.operations`),
-    execute(`RENAME TABLE default.operation_collection_new TO default.operation_collection`),
+    execute(`RENAME TABLE default.operations_new TO default.operations`, {
+      progressBar: renamingBar,
+    }),
+    execute(`RENAME TABLE default.operation_collection_new TO default.operation_collection`, {
+      progressBar: renamingBar,
+    }),
   ]);
   // New views
   await Promise.all([
-    execute(`RENAME TABLE default.operations_minutely_new TO default.operations_minutely`),
-    execute(`RENAME TABLE default.operations_hourly_new TO default.operations_hourly`),
-    execute(`RENAME TABLE default.operations_daily_new TO default.operations_daily`),
-    execute(`RENAME TABLE default.coordinates_daily_new TO default.coordinates_daily`),
-    execute(`RENAME TABLE default.clients_daily_new TO default.clients_daily`),
+    execute(`RENAME TABLE default.operations_minutely_new TO default.operations_minutely`, {
+      progressBar: renamingBar,
+    }),
+    execute(`RENAME TABLE default.operations_hourly_new TO default.operations_hourly`, {
+      progressBar: renamingBar,
+    }),
+    execute(`RENAME TABLE default.operations_daily_new TO default.operations_daily`, {
+      progressBar: renamingBar,
+    }),
+    execute(`RENAME TABLE default.coordinates_daily_new TO default.coordinates_daily`, {
+      progressBar: renamingBar,
+    }),
+    execute(`RENAME TABLE default.clients_daily_new TO default.clients_daily`, {
+      progressBar: renamingBar,
+    }),
     execute(
       `RENAME TABLE default.operation_collection_body_new TO default.operation_collection_body`,
+      {
+        progressBar: renamingBar,
+      },
     ),
     execute(
       `RENAME TABLE default.operation_collection_details_new TO default.operation_collection_details`,
+      {
+        progressBar: renamingBar,
+      },
     ),
   ]);
 
-  const createSelectStatementForOperationsMinutely = (
-    tableName: 'operations' | 'operations_new',
-  ) => `
-    SELECT
-      target,
-      toStartOfHour(timestamp) AS timestamp,
-      hash,
-      client_name,
-      client_version,
-      count() AS total,
-      sum(ok) AS total_ok,
-      avgState(duration) AS duration_avg,
-      quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
-    FROM default.${tableName}
-    GROUP BY
-      target,
-      hash,
-      client_name,
-      client_version,
-      timestamp
-  `;
-
-  const createSelectStatementForOperationsHourly = (tableName: 'operations' | 'operations_new') => `
-    SELECT
-      target,
-      toStartOfHour(timestamp) AS timestamp,
-      hash,
-      client_name,
-      client_version,
-      count() AS total,
-      sum(ok) AS total_ok,
-      avgState(duration) AS duration_avg,
-      quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
-    FROM default.${tableName}
-    GROUP BY
-      target,
-      hash,
-      client_name,
-      client_version,
-      timestamp
-  `;
-
-  const createSelectStatementForOperationsDaily = (tableName: 'operations' | 'operations_new') => `
-    SELECT
-      target,
-      toStartOfDay(timestamp) AS timestamp,
-      toStartOfDay(expires_at) AS expires_at,
-      hash,
-      client_name,
-      client_version,
-      count() AS total,
-      sum(ok) AS total_ok,
-      avgState(duration) AS duration_avg,
-      quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
-    FROM default.${tableName}
-    GROUP BY
-      target,
-      hash,
-      client_name,
-      client_version,
-      timestamp,
-      expires_at
-  `;
-
-  const createSelectStatementForClientsDaily = (tableName: 'operations' | 'operations_new') => `
-    SELECT
-      target,
-      client_name,
-      client_version,
-      hash,
-      toStartOfDay(timestamp) AS timestamp,
-      toStartOfDay(expires_at) AS expires_at,
-      count() AS total
-    FROM default.${tableName}
-    GROUP BY
-      target,
-      client_name,
-      client_version,
-      hash,
-      timestamp,
-      expires_at
-  `;
-
-  const createSelectStatementForCoordinatesDaily = (
-    tableName: 'operation_collection_new' | 'operation_collection',
-  ) => `
-    SELECT
-      target,
-      hash,
-      toStartOfDay(timestamp) AS timestamp,
-      toStartOfDay(expires_at) AS expires_at,
-      sum(total) AS total,
-      coordinate
-    FROM default.${tableName}
-    ARRAY JOIN coordinates as coordinate
-    GROUP BY
-      target,
-      coordinate,
-      hash,
-      timestamp,
-      expires_at
-  `;
-
-  const createSelectStatementForOperationCollectionBody = (
-    tableName: 'operation_collection_new' | 'operation_collection',
-  ) => `
-    SELECT
-      target,
-      hash,
-      body,
-      toStartOfDay(expires_at) AS expires_at
-    FROM default.${tableName}
-    GROUP BY
-      target,
-      hash,
-      body,
-      expires_at
-  `;
-
-  const createSelectStatementForOperationCollectionDetails = (
-    tableName: 'operation_collection_new' | 'operation_collection',
-  ) => `
-    SELECT
-      target,
-      name,
-      hash,
-      operation_kind,
-      toStartOfDay(expires_at) AS expires_at
-    FROM default.${tableName}
-    GROUP BY
-      target,
-      name,
-      hash,
-      operation_kind,
-      expires_at
-  `;
-
+  const modifyQueryBar = progressBar.create(7, 0);
   // TODO: check if `allow_experimental_alter_materialized_view_structure` is available in ClickHouse Cloud
   const modifyQuerySettings = { allow_experimental_alter_materialized_view_structure: '1' };
   // Modify AS SELECT queries
@@ -330,54 +266,78 @@ async function main() {
         ALTER TABLE default.operations_minutely
         MODIFY QUERY ${createSelectStatementForOperationsMinutely('operations')}
       `,
-      modifyQuerySettings,
+      {
+        progressBar: modifyQueryBar,
+        settings: modifyQuerySettings,
+      },
     ),
     execute(
       `
         ALTER TABLE default.operations_hourly
         MODIFY QUERY ${createSelectStatementForOperationsHourly('operations')}
       `,
-      modifyQuerySettings,
+      {
+        progressBar: modifyQueryBar,
+        settings: modifyQuerySettings,
+      },
     ),
     execute(
       `
         ALTER TABLE default.operations_daily
         MODIFY QUERY ${createSelectStatementForOperationsDaily('operations')}
       `,
-      modifyQuerySettings,
+      {
+        progressBar: modifyQueryBar,
+        settings: modifyQuerySettings,
+      },
     ),
     execute(
       `
         ALTER TABLE default.coordinates_daily
         MODIFY QUERY ${createSelectStatementForCoordinatesDaily('operation_collection')}
       `,
-      modifyQuerySettings,
+      {
+        progressBar: modifyQueryBar,
+        settings: modifyQuerySettings,
+      },
     ),
     execute(
       `
         ALTER TABLE default.clients_daily
         MODIFY QUERY ${createSelectStatementForClientsDaily('operations')}
       `,
-      modifyQuerySettings,
+      {
+        progressBar: modifyQueryBar,
+        settings: modifyQuerySettings,
+      },
     ),
     execute(
       `
         ALTER TABLE default.operation_collection_body
         MODIFY QUERY ${createSelectStatementForOperationCollectionBody('operation_collection')}
       `,
-      modifyQuerySettings,
+      {
+        progressBar: modifyQueryBar,
+        settings: modifyQuerySettings,
+      },
     ),
     execute(
       `
         ALTER TABLE default.operation_collection_details
         MODIFY QUERY ${createSelectStatementForOperationCollectionDetails('operation_collection')}
       `,
-      modifyQuerySettings,
+      {
+        progressBar: modifyQueryBar,
+        settings: modifyQuerySettings,
+      },
     ),
     // TODO: modify query of old views as well
   ]);
 
-  // Do the rest of the migration manually, when it's the right time.
+  progressBar.stop();
+
+  console.log(`Delete old tables and views manually. SQL statements are available in the script.`);
+  console.log(`It's a manual process to avoid accidental deletion of data.`);
 
   // Apply TTLs to new tables
   // await Promise.all([

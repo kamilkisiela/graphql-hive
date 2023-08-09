@@ -1,12 +1,156 @@
 import { z } from 'zod';
 import type { Action } from '../clickhouse';
 
+export const createSelectStatementForOperationsMinutely = (
+  tableName: 'operations' | 'operations_new',
+) => `
+  SELECT
+    target,
+    toStartOfHour(timestamp) AS timestamp,
+    hash,
+    client_name,
+    client_version,
+    count() AS total,
+    sum(ok) AS total_ok,
+    avgState(duration) AS duration_avg,
+    quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
+  FROM default.${tableName}
+  GROUP BY
+    target,
+    hash,
+    client_name,
+    client_version,
+    timestamp
+`;
+
+export const createSelectStatementForOperationsHourly = (
+  tableName: 'operations' | 'operations_new',
+) => `
+  SELECT
+    target,
+    toStartOfHour(timestamp) AS timestamp,
+    hash,
+    client_name,
+    client_version,
+    count() AS total,
+    sum(ok) AS total_ok,
+    avgState(duration) AS duration_avg,
+    quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
+  FROM default.${tableName}
+  GROUP BY
+    target,
+    hash,
+    client_name,
+    client_version,
+    timestamp
+`;
+
+export const createSelectStatementForOperationsDaily = (
+  tableName: 'operations' | 'operations_new',
+) => `
+  SELECT
+    target,
+    toStartOfDay(timestamp) AS timestamp,
+    toStartOfDay(expires_at) AS expires_at,
+    hash,
+    client_name,
+    client_version,
+    count() AS total,
+    sum(ok) AS total_ok,
+    avgState(duration) AS duration_avg,
+    quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
+  FROM default.${tableName}
+  GROUP BY
+    target,
+    hash,
+    client_name,
+    client_version,
+    timestamp,
+    expires_at
+`;
+
+export const createSelectStatementForClientsDaily = (
+  tableName: 'operations' | 'operations_new',
+) => `
+  SELECT
+    target,
+    client_name,
+    client_version,
+    hash,
+    toStartOfDay(timestamp) AS timestamp,
+    toStartOfDay(expires_at) AS expires_at,
+    count() AS total
+  FROM default.${tableName}
+  GROUP BY
+    target,
+    client_name,
+    client_version,
+    hash,
+    timestamp,
+    expires_at
+`;
+
+export const createSelectStatementForCoordinatesDaily = (
+  tableName: 'operation_collection_new' | 'operation_collection',
+) => `
+  SELECT
+    target,
+    hash,
+    toStartOfDay(timestamp) AS timestamp,
+    toStartOfDay(expires_at) AS expires_at,
+    sum(total) AS total,
+    coordinate
+  FROM default.${tableName}
+  ARRAY JOIN coordinates as coordinate
+  GROUP BY
+    target,
+    coordinate,
+    hash,
+    timestamp,
+    expires_at
+`;
+
+export const createSelectStatementForOperationCollectionBody = (
+  tableName: 'operation_collection_new' | 'operation_collection',
+) => `
+  SELECT
+    target,
+    hash,
+    body,
+    toStartOfDay(expires_at) AS expires_at
+  FROM default.${tableName}
+  GROUP BY
+    target,
+    hash,
+    body,
+    expires_at
+`;
+
+export const createSelectStatementForOperationCollectionDetails = (
+  tableName: 'operation_collection_new' | 'operation_collection',
+) => `
+  SELECT
+    target,
+    name,
+    hash,
+    operation_kind,
+    toStartOfDay(expires_at) AS expires_at
+  FROM default.${tableName}
+  GROUP BY
+    target,
+    name,
+    hash,
+    operation_kind,
+    expires_at
+`;
+
 export const action: Action = async (exec, query, isClickHouseCloud) => {
+  let label = 'Created new tables';
+  console.time(label);
   // Create new tables
   await Promise.all(
     [
       // New and improved codec
-      // TODO: should we even partition the table? Maybe for the sake of full data migration
       `
         CREATE TABLE IF NOT EXISTS default.operation_collection_new
         (
@@ -27,7 +171,6 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
         SETTINGS index_granularity = 8192
       `,
       // New and improved codec
-      // TODO: should we even partition the table? Maybe for the sake of full data migration
       `
       CREATE TABLE IF NOT EXISTS default.operations_new
       (
@@ -49,146 +192,11 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
     `,
     ].map(q => exec(q)),
   );
+  console.timeEnd(label);
 
+  label = 'Created new views';
+  console.time(label);
   // Create Materialized Views
-
-  const createSelectStatementForOperationsMinutely = (
-    tableName: 'operations' | 'operations_new',
-  ) => `
-    SELECT
-      target,
-      toStartOfHour(timestamp) AS timestamp,
-      hash,
-      client_name,
-      client_version,
-      count() AS total,
-      sum(ok) AS total_ok,
-      avgState(duration) AS duration_avg,
-      quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
-    FROM default.${tableName}
-    GROUP BY
-      target,
-      hash,
-      client_name,
-      client_version,
-      timestamp
-  `;
-
-  const createSelectStatementForOperationsHourly = (tableName: 'operations' | 'operations_new') => `
-    SELECT
-      target,
-      toStartOfHour(timestamp) AS timestamp,
-      hash,
-      client_name,
-      client_version,
-      count() AS total,
-      sum(ok) AS total_ok,
-      avgState(duration) AS duration_avg,
-      quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
-    FROM default.${tableName}
-    GROUP BY
-      target,
-      hash,
-      client_name,
-      client_version,
-      timestamp
-  `;
-
-  const createSelectStatementForOperationsDaily = (tableName: 'operations' | 'operations_new') => `
-    SELECT
-      target,
-      toStartOfDay(timestamp) AS timestamp,
-      toStartOfDay(expires_at) AS expires_at,
-      hash,
-      client_name,
-      client_version,
-      count() AS total,
-      sum(ok) AS total_ok,
-      avgState(duration) AS duration_avg,
-      quantilesState(0.75, 0.9, 0.95, 0.99)(duration) AS duration_quantiles
-    FROM default.${tableName}
-    GROUP BY
-      target,
-      hash,
-      client_name,
-      client_version,
-      timestamp,
-      expires_at
-  `;
-
-  const createSelectStatementForClientsDaily = (tableName: 'operations' | 'operations_new') => `
-    SELECT
-      target,
-      client_name,
-      client_version,
-      hash,
-      toStartOfDay(timestamp) AS timestamp,
-      toStartOfDay(expires_at) AS expires_at,
-      count() AS total
-    FROM default.${tableName}
-    GROUP BY
-      target,
-      client_name,
-      client_version,
-      hash,
-      timestamp,
-      expires_at
-  `;
-
-  const createSelectStatementForCoordinatesDaily = (
-    tableName: 'operation_collection_new' | 'operation_collection',
-  ) => `
-    SELECT
-      target,
-      hash,
-      toStartOfDay(timestamp) AS timestamp,
-      toStartOfDay(expires_at) AS expires_at,
-      sum(total) AS total,
-      coordinate
-    FROM default.${tableName}
-    ARRAY JOIN coordinates as coordinate
-    GROUP BY
-      target,
-      coordinate,
-      hash,
-      timestamp,
-      expires_at
-  `;
-
-  const createSelectStatementForOperationCollectionBody = (
-    tableName: 'operation_collection_new' | 'operation_collection',
-  ) => `
-    SELECT
-      target,
-      hash,
-      body,
-      toStartOfDay(expires_at) AS expires_at
-    FROM default.${tableName}
-    GROUP BY
-      target,
-      hash,
-      body,
-      expires_at
-  `;
-
-  const createSelectStatementForOperationCollectionDetails = (
-    tableName: 'operation_collection_new' | 'operation_collection',
-  ) => `
-    SELECT
-      target,
-      name,
-      hash,
-      operation_kind,
-      toStartOfDay(expires_at) AS expires_at
-    FROM default.${tableName}
-    GROUP BY
-      target,
-      name,
-      hash,
-      operation_kind,
-      expires_at
-  `;
-
   await Promise.all(
     [
       // `operations`
@@ -342,6 +350,7 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
     `,
     ].map(q => exec(q)),
   );
+  console.timeEnd(label);
 
   const totalOperationsResponse = await query(
     `SELECT if(count() > ${50_000_000}, 'big', 'small') as size FROM default.operations`,
@@ -356,22 +365,22 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
     console.log(
       `${
         isBig ? 'Detected more than 100M rows in operations table.' : 'Detected ClickHouse Cloud.'
-      }. Follow a manual migration process from now on.`,
+      }. Follow a manual migration process from now on. See: packages/migrations/src/scripts/004-cloud.ts`,
     );
-
-    console.log('Step 1: Insert data from old tables into new tables');
-    console.log('Step 2: Rename tables and views (old -> old_old, new -> old)');
-    console.log('Step 3: Apply TTLs to new tables');
-    console.log('Step 4: Drop old tables and views');
     return;
   }
 
   // Insert data from old tables into new tables
+  label = 'Inserted data into new tables';
+  console.time(label);
   await Promise.all([
     exec(`INSERT INTO default.operations_new SELECT * FROM default.operations`),
     exec(`INSERT INTO default.operation_collection_new SELECT * FROM default.operation_collection`),
   ]);
+  console.timeEnd(label);
 
+  label = 'Renamed tables and views';
+  console.time(label);
   // Rename tables
   // Old tables
   await Promise.all([
@@ -402,7 +411,10 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
       `RENAME TABLE default.operation_collection_details_new TO default.operation_collection_details`,
     ),
   ]);
+  console.timeEnd(label);
 
+  label = 'Modified AS SELECT queries';
+  console.time(label);
   // TODO: check if `allow_experimental_alter_materialized_view_structure` is available in ClickHouse Cloud
   const modifyQuerySettings = { allow_experimental_alter_materialized_view_structure: '1' };
   // Modify AS SELECT queries
@@ -457,13 +469,19 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
       modifyQuerySettings,
     ),
   ]);
+  console.timeEnd(label);
 
+  label = 'Applied TTLs to new tables';
+  console.time(label);
   // Apply TTLs to new tables
   await Promise.all([
     exec(`ALTER TABLE default.operations MODIFY TTL timestamp + INTERVAL 3 HOUR`),
     exec(`ALTER TABLE default.operation_collection MODIFY TTL timestamp + INTERVAL 3 HOUR`),
   ]);
+  console.timeEnd(label);
 
+  label = 'Dropped old tables and views';
+  console.time(label);
   // Drop old tables
   await Promise.all([
     exec(`DROP TABLE default.operations_old`),
@@ -476,4 +494,5 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
     exec(`DROP TABLE default.coordinates_daily_old`),
     exec(`DROP TABLE default.clients_daily_old`),
   ]);
+  console.timeEnd(label);
 };

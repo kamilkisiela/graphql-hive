@@ -3,6 +3,8 @@ import { createHive } from '@graphql-hive/client';
 import { fetch } from '@whatwg-node/fetch';
 
 const isFederation = process.env.FEDERATION === '1';
+const isSchemaReportingEnabled = process.env.SCHEMA_REPORTING !== '0';
+const isUsageReportingEnabled = process.env.USAGE_REPORTING !== '0';
 
 const envName = process.env.STAGING ? 'staging' : process.env.DEV ? 'dev' : 'local';
 
@@ -24,6 +26,9 @@ console.log(`
   Environment:                ${envName}
   Schema reporting endpoint:  ${schemaReportingEndpoint}
   Usage reporting endpoint:   ${usageReportingEndpoint}
+
+  Schema reporting:           ${isSchemaReportingEnabled ? 'enabled' : 'disabled'}
+  Usage reporting:            ${isUsageReportingEnabled ? 'enabled' : 'disabled'}
 `);
 
 const createInstance = (
@@ -40,16 +45,26 @@ const createInstance = (
     },
     debug: true,
     enabled: true,
-    reporting: false,
-    usage: {
-      clientInfo: () => ({
-        name: 'Fake Hive Client',
-        version: '1.1.1',
-      }),
-      endpoint: usageReportingEndpoint,
-      max: 10,
-      sampleRate: 1,
-    },
+    reporting: isSchemaReportingEnabled
+      ? {
+          endpoint: schemaReportingEndpoint,
+          author: 'Hive Seed Script',
+          commit: '1',
+          serviceName: service?.name,
+          serviceUrl: service?.url,
+        }
+      : false,
+    usage: isUsageReportingEnabled
+      ? {
+          clientInfo: () => ({
+            name: 'Fake Hive Client',
+            version: '1.1.1',
+          }),
+          endpoint: usageReportingEndpoint,
+          max: 10,
+          sampleRate: 1,
+        }
+      : false,
   });
 };
 
