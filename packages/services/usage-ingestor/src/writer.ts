@@ -157,7 +157,6 @@ export function createWriter({
         return;
       }
 
-      // TODO: Check if Buffer can be read read in parallel by two functions
       const tablesToWriteTo =
         tableNames.has('operations') && tableNames.has('operations_old')
           ? ['operations', 'operations_old']
@@ -220,7 +219,6 @@ export function createWriter({
         return;
       }
 
-      // TODO: Check if Buffer can be read read in parallel by two functions
       const tablesToWriteTo =
         tableNames.has('operation_collection') && tableNames.has('operation_collection_old')
           ? ['operation_collection', 'operation_collection_old']

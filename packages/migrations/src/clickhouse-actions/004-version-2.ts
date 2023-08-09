@@ -415,7 +415,6 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
 
   label = 'Modified AS SELECT queries';
   console.time(label);
-  // TODO: check if `allow_experimental_alter_materialized_view_structure` is available in ClickHouse Cloud
   const modifyQuerySettings = { allow_experimental_alter_materialized_view_structure: '1' };
   // Modify AS SELECT queries
   await Promise.all([
