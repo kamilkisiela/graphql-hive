@@ -1,5 +1,19 @@
 # @graphql-hive/cli
 
+## 0.27.1
+
+### Patch Changes
+
+- [#2723](https://github.com/kamilkisiela/graphql-hive/pull/2723)
+  [`2a13ed4`](https://github.com/kamilkisiela/graphql-hive/commit/2a13ed498a46f6647bfbc7d583bcb75ddf81a774)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Add missing exit(1)
+
+- [#2723](https://github.com/kamilkisiela/graphql-hive/pull/2723)
+  [`2a13ed4`](https://github.com/kamilkisiela/graphql-hive/commit/2a13ed498a46f6647bfbc7d583bcb75ddf81a774)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Fix empty error list when running
+  operations:check command (cause of the issue: GraphQL Inspector returns both errors and
+  deprecation warnings)
+
 ## 0.27.0
 
 ### Minor Changes
