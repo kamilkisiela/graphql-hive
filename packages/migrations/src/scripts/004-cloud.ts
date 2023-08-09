@@ -257,7 +257,6 @@ async function main() {
   ]);
 
   const modifyQueryBar = progressBar.create(7, 0);
-  // TODO: check if `allow_experimental_alter_materialized_view_structure` is available in ClickHouse Cloud
   const modifyQuerySettings = { allow_experimental_alter_materialized_view_structure: '1' };
   // Modify AS SELECT queries
   await Promise.all([
