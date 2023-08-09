@@ -13,6 +13,12 @@
     "href": "https://app.graphql-hive.com",
     "newWindow": true
   },
+  "status": {
+    "title": "Status",
+    "type": "page",
+    "href": "https://status.graphql-hive.com",
+    "newWindow": true
+  },
   "docs": {
     "title": "Documentation",
     "type": "page",
