@@ -116,9 +116,6 @@ async function main() {
       }
       try {
         retry++;
-        console.log(
-          `insert rows from 'operations' ${record.year}-${record.month}-${record.day} ${retry}`,
-        );
         await execute(record.insertStatement, {
           progressBar: operationsTableBar,
         });
@@ -172,9 +169,6 @@ async function main() {
       }
       try {
         retry++;
-        console.log(
-          `insert rows from 'operation_collection' ${record.year}-${record.month}-${record.day} ${retry}`,
-        );
         await execute(record.insertStatement, {
           progressBar: operationCollectionTableBar,
         });
