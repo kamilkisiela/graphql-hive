@@ -208,6 +208,48 @@ export class SchemaPublisher {
       projectType: project.type,
     });
 
+    const githubRepository: null | `${string}/${string}` = null;
+
+    // Verify that the GitHub repository can be accessed by the user
+    if (input.github?.repository != null) {
+      if (!isGitHubOwnerRepositoryNameValid(input.github.repository)) {
+        return {
+          __typename: 'SchemaCheckError',
+          valid: false,
+          changes: [],
+          warnings: [],
+          errors: [
+            {
+              message: 'Invalid github repository name provided.',
+            },
+          ],
+        } as const;
+      }
+      const hasAccessToGitHubRepository =
+        await this.gitHubIntegrationManager.hasAccessToGitHubRepositoryAccess({
+          selector: {
+            organization: organization.id,
+          },
+          repositoryName: input.github.repository,
+        });
+
+      if (!hasAccessToGitHubRepository) {
+        return {
+          __typename: 'SchemaCheckError',
+          valid: false,
+          changes: [],
+          warnings: [],
+          errors: [
+            {
+              message:
+                `Missing permissions for updating check-runs on GitHub repository '${input.github.repository}'. ` +
+                'Please make sure that the GitHub App has access on the repository.',
+            },
+          ],
+        } as const;
+      }
+    }
+
     await this.schemaManager.completeGetStartedCheck({
       organization: project.orgId,
       step: 'checkingSchema',
@@ -298,22 +340,6 @@ export class SchemaPublisher {
         break;
       default:
         throw new HiveError(`${project.type} project (${modelVersion}) not supported`);
-    }
-
-    const githubRepository = input.github?.repository ?? null;
-
-    if (githubRepository != null && !isGitHubOwnerRepositoryNameValid(githubRepository)) {
-      return {
-        __typename: 'SchemaCheckError',
-        valid: false,
-        changes: [],
-        warnings: [],
-        errors: [
-          {
-            message: 'Invalid github repository name provided.',
-          },
-        ],
-      } as const;
     }
 
     let schemaCheck: null | SchemaCheck = null;
@@ -1579,9 +1605,9 @@ function tryPrettifySDL(sdl: string): string {
 
 const millisecondsPerDay = 60 * 60 * 24 * 1000;
 
-function isGitHubOwnerRepositoryNameValid(repository: string) {
+function isGitHubOwnerRepositoryNameValid(repository: string): repository is `${string}/${string}` {
   const [owner, name] = repository.split('/');
-  return owner && isAlphaNumeric(owner) && name && isAlphaNumeric(name);
+  return !!owner && isAlphaNumeric(owner) && !!name && isAlphaNumeric(name);
 }
 
 function isAlphaNumeric(str: string) {
