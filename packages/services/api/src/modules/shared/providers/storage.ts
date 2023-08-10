@@ -226,10 +226,6 @@ export interface Storage {
     _: ProjectSelector & Pick<Project, 'name' | 'cleanId'> & { user: string },
   ): Promise<Project | never>;
 
-  updateProjectGitRepository(
-    _: ProjectSelector & Pick<Project, 'gitRepository'>,
-  ): Promise<Project | never>;
-
   enableExternalSchemaComposition(
     _: ProjectSelector & {
       endpoint: string;

@@ -1022,6 +1022,16 @@ export const resolvers: SchemaModule.Resolvers = {
       };
     },
     date: version => version.createdAt,
+    async githubMetadata(version) {
+      if (version.github) {
+        return {
+          repository: version.github.repository,
+          commit: version.github.sha,
+        };
+      }
+      // TODO: we could do a fallback using the schema log + project git repository.
+      return null;
+    },
   },
   SchemaCompareError: {
     __isTypeOf(source: unknown) {

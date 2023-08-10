@@ -1272,16 +1272,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `),
       );
     },
-    async updateProjectGitRepository({ gitRepository, organization, project }) {
-      return transformProject(
-        await pool.one<Slonik<projects>>(sql`
-          UPDATE public.projects
-          SET git_repository = ${gitRepository ?? null}
-          WHERE id = ${project} AND org_id = ${organization}
-          RETURNING *
-        `),
-      );
-    },
     async enableExternalSchemaComposition({ project, endpoint, encryptedSecret }) {
       return transformProject(
         await pool.one<Slonik<projects>>(sql`

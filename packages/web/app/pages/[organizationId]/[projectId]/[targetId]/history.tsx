@@ -43,6 +43,10 @@ const HistoryPage_VersionsPageQuery = graphql(`
           }
         }
         baseSchema
+        githubMetadata {
+          repository
+          commit
+        }
       }
       pageInfo {
         hasNextPage
@@ -54,13 +58,11 @@ const HistoryPage_VersionsPageQuery = graphql(`
 // URQL's Infinite scrolling pattern
 // https://formidable.com/open-source/urql/docs/basics/ui-patterns/#infinite-scrolling
 function ListPage({
-  gitRepository,
   variables,
   isLastPage,
   onLoadMore,
   versionId,
 }: {
-  gitRepository?: string;
   variables: { after: string; limit: number };
   isLastPage: boolean;
   onLoadMore: (after: string) => void;
@@ -129,12 +131,12 @@ function ListPage({
               ) : null}
             </div>
           </NextLink>
-          {gitRepository && 'commit' in version.log && version.log.commit ? (
+          {version.githubMetadata ? (
             <a
               className="text-xs font-medium text-gray-500 hover:text-gray-400"
               target="_blank"
               rel="noreferrer"
-              href={`https://github.com/${gitRepository}/commit/${version.log.commit}`}
+              href={`https://github.com/${version.githubMetadata.repository}/commit/${version.githubMetadata.commit}`}
             >
               <ExternalLinkIcon className="inline" /> associated with Git commit
             </a>
@@ -350,7 +352,6 @@ const TargetHistoryPageQuery = graphql(`
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
       ...TargetLayout_CurrentProjectFragment
-      gitRepository
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
@@ -412,7 +413,6 @@ function HistoryPageContent() {
               <div className="flex min-w-[420px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
                 {pageVariables.map((variables, i) => (
                   <ListPage
-                    gitRepository={currentProject?.gitRepository ?? undefined}
                     key={variables.after || 'initial'}
                     variables={variables}
                     isLastPage={i === pageVariables.length - 1}

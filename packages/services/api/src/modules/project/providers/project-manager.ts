@@ -1,9 +1,7 @@
 import { Injectable, Scope } from 'graphql-modules';
 import { paramCase } from 'param-case';
 import type { Project, ProjectType } from '../../../shared/entities';
-import { HiveError } from '../../../shared/errors';
 import { share, uuid } from '../../../shared/helpers';
-import { isGitHubRepositoryString } from '../../../shared/is-github-repository-string';
 import { ActivityManager } from '../../activity/providers/activity-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
@@ -172,29 +170,5 @@ export class ProjectManager {
     });
 
     return result;
-  }
-
-  async updateGitRepository(
-    args: {
-      gitRepository?: string | null;
-    } & ProjectSelector,
-  ): Promise<Project> {
-    this.logger.info('Updating a project git repository (input=%o)', args);
-    await this.authManager.ensureProjectAccess({
-      ...args,
-      scope: ProjectAccessScope.SETTINGS,
-    });
-
-    const gitRepository = args.gitRepository?.trim() === '' ? null : args.gitRepository ?? null;
-
-    if (gitRepository != null && !isGitHubRepositoryString(gitRepository)) {
-      throw new HiveError('Invalid git repository string.');
-    }
-
-    return this.storage.updateProjectGitRepository({
-      gitRepository,
-      organization: args.organization,
-      project: args.project,
-    });
   }
 }

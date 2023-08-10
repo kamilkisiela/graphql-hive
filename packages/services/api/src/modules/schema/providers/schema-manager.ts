@@ -744,13 +744,14 @@ export class SchemaManager {
         organization: args.organizationId,
         project: args.projectId,
       });
-      if (!project.gitRepository) {
+      const gitRepository = schemaCheck.githubRepository ?? project.gitRepository;
+      if (!gitRepository) {
         this.logger.debug(
-          'Skip updating GitHub schema check. Project has no git repository connected. (args=%o).',
+          'Skip updating GitHub schema check. Schema check has no git repository or project has no git repository connected. (args=%o).',
           args,
         );
       } else {
-        const [owner, repository] = project.gitRepository.split('/');
+        const [owner, repository] = gitRepository.split('/');
         const result = await this.githubIntegrationManager.updateCheckRunToSuccess({
           organizationId: args.organizationId,
           checkRun: {

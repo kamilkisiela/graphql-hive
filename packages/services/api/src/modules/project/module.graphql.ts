@@ -9,9 +9,6 @@ export default gql`
   extend type Mutation {
     createProject(input: CreateProjectInput!): CreateProjectResult!
     updateProjectName(input: UpdateProjectNameInput!): UpdateProjectNameResult!
-    updateProjectGitRepository(
-      input: UpdateProjectGitRepositoryInput!
-    ): UpdateProjectGitRepositoryResult!
     deleteProject(selector: ProjectSelectorInput!): DeleteProjectPayload!
   }
 
