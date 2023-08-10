@@ -14,7 +14,7 @@ async function main() {
   if (env.sentry) {
     Sentry.init({
       serverName: 'schema',
-      enabled: !!env.sentry,
+      enabled: true,
       environment: env.environment,
       dsn: env.sentry.dsn,
       release: env.release,
@@ -32,9 +32,7 @@ async function main() {
 
   registerShutdown({
     logger: server.log,
-    async onShutdown() {
-      await server.close();
-    },
+    onShutdown: server.close,
   });
 
   try {

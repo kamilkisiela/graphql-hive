@@ -9,8 +9,8 @@
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts",
     "typecheck": "tsc --noEmit"
   },
-  "devDependencies": {
-    "@graphql-eslint/eslint-plugin": "3.20.1",
+  "dependencies": {
+    "@graphql-eslint/eslint-plugin": "4.0.0-alpha-20230810160036-304c2c0",
     "@hive/service-common": "workspace:*",
     "@sentry/node": "7.69.0",
     "@sentry/tracing": "7.69.0",

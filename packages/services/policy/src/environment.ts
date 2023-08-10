@@ -12,7 +12,7 @@ const NumberFromString = zod.preprocess(numberFromNumberOrNumberString, zod.numb
 // treat an empty string (`''`) as undefined
 const emptyString = <T extends zod.ZodType>(input: T) => {
   return zod.preprocess((value: unknown) => {
-    if (value === '') return undefined;
+    if (value === '') return;
     return value;
   }, input);
 };

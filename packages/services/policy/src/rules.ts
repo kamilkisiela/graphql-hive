@@ -5,7 +5,7 @@ type RuleName = keyof AllRulesType;
 
 const SKIPPED_RULES: RuleName[] = [
   // Skipped because in order to operate, it needs operations.
-  // Also it does not make sense to run it as part of a schema check.
+  // Also, it does not make sense to run it as part of a schema check.
   'no-unused-fields',
 ];
 
@@ -34,7 +34,7 @@ function patchRulesConfig<T extends RuleName>(
       delete ruleDef.meta.schema.items.properties.VariableDefinition;
       delete ruleDef.meta.schema.items.properties.OperationDefinition;
 
-      // Get rid of "definitions" references becuse it's breaking Monaco editor in the frontend
+      // Get rid of "definitions" references because it's breaking Monaco editor in the frontend
       Object.entries(ruleDef.meta.schema.items.properties).forEach(([, propDef]) => {
         if (propDef && typeof propDef === 'object' && 'oneOf' in propDef) {
           propDef.oneOf = [
