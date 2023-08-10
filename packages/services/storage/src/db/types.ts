@@ -175,6 +175,7 @@ export interface schema_checks {
   expires_at: Date | null;
   github_check_run_id: string | null;
   github_repository: string | null;
+  github_sha: string | null;
   id: string;
   is_manually_approved: boolean | null;
   is_success: boolean;
