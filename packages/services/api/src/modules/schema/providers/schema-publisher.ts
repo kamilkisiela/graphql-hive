@@ -305,6 +305,8 @@ export class SchemaPublisher {
     const retention = await this.rateLimit.getRetention({ targetId: target.id });
     const expiresAt = retention ? new Date(Date.now() + retention * millisecondsPerDay) : null;
 
+    const hasChemaChanges = !!checkResult?.state?.schemaChanges;
+
     if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
       schemaCheck = await this.storage.createSchemaCheck({
         schemaSDL: sdl,
@@ -372,8 +374,10 @@ export class SchemaPublisher {
         }
       }
 
+      const hasSchemaChanges = !!checkResult?.state?.schemaChanges;
+
       schemaCheck = await this.storage.createSchemaCheck({
-        schemaSDL: sdl,
+        schemaSDL: hasSchemaChanges ? sdl : '',
         serviceName: input.service ?? null,
         meta: input.meta ?? null,
         targetId: target.id,
@@ -384,8 +388,8 @@ export class SchemaPublisher {
         schemaPolicyWarnings: checkResult.state?.schemaPolicyWarnings ?? null,
         schemaPolicyErrors: null,
         schemaCompositionErrors: null,
-        compositeSchemaSDL: composition.compositeSchemaSDL,
-        supergraphSDL: composition.supergraphSDL,
+        compositeSchemaSDL: hasSchemaChanges ? composition.compositeSchemaSDL : '',
+        supergraphSDL: hasSchemaChanges ? composition.supergraphSDL : null,
         isManuallyApproved: false,
         manualApprovalUserId: null,
         githubCheckRunId: null,
