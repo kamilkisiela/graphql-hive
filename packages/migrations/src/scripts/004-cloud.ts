@@ -105,7 +105,9 @@ async function main() {
 
   const progressBar = new cliProgress.MultiBar({}, cliProgress.Presets.shades_classic);
 
-  const operationsTableBar = progressBar.create(operationsStatements.data.length, 0);
+  const operationsTableBar = progressBar.create(operationsStatements.data.length, 0, null, {
+    format: 'operations           [{bar}] {percentage}% | ETA: {eta}s | {value}/{total}',
+  });
 
   for (const record of operationsStatements.data) {
     let retry = 0;
@@ -158,6 +160,10 @@ async function main() {
   const operationCollectionTableBar = progressBar.create(
     operationCollectionStatements.data.length,
     0,
+    null,
+    {
+      format: 'operation_collection [{bar}] {percentage}% | ETA: {eta}s | {value}/{total}',
+    },
   );
 
   for (const record of operationCollectionStatements.data) {
@@ -183,7 +189,9 @@ async function main() {
 
   operationCollectionTableBar.stop();
 
-  const renamingBar = progressBar.create(15, 0);
+  const renamingBar = progressBar.create(15, 0, null, {
+    format: 'renaming             [{bar}] {percentage}% | ETA: {eta}s | {value}/{total}',
+  });
 
   // Rename tables
   // Old tables
@@ -250,7 +258,9 @@ async function main() {
     ),
   ]);
 
-  const modifyQueryBar = progressBar.create(7, 0);
+  const modifyQueryBar = progressBar.create(7, 0, null, {
+    format: 'modifying views      [{bar}] {percentage}% | ETA: {eta}s | {value}/{total}',
+  });
   const modifyQuerySettings = { allow_experimental_alter_materialized_view_structure: '1' };
   // Modify AS SELECT queries
   await Promise.all([
@@ -328,27 +338,24 @@ async function main() {
 
   progressBar.stop();
 
-  console.log(`Delete old tables and views manually. SQL statements are available in the script.`);
-  console.log(`It's a manual process to avoid accidental deletion of data.`);
+  console.log(`! Delete old tables and views manually.`);
+  console.log(`! It's a manual process to avoid accidental deletion of data.`);
 
-  // Apply TTLs to new tables
-  // await Promise.all([
-  //   execute(`ALTER TABLE default.operations ADD TTL timestamp + INTERVAL 3 HOURS`),
-  //   execute(`ALTER TABLE default.operation_collection ADD TTL timestamp + INTERVAL 3 HOURS`),
-  // ]);
+  console.log('\n1. Apply TTLs to new tables');
+  console.log(`  ALTER TABLE default.operations MODIFY TTL timestamp + INTERVAL 3 HOUR`);
+  console.log(`  ALTER TABLE default.operation_collection MODIFY TTL timestamp + INTERVAL 3 HOUR`);
 
-  // Drop old tables
-  // await Promise.all([
-  //   execute(`DROP TABLE default.operations_old`),
-  //   execute(`DROP TABLE default.operation_collection_old`),
-  // ]);
-  // Drop old views
-  // await Promise.all([
-  //   execute(`DROP TABLE default.operations_hourly_old`),
-  //   execute(`DROP TABLE default.operations_daily_old`),
-  //   execute(`DROP TABLE default.coordinates_daily_old`),
-  //   execute(`DROP TABLE default.clients_daily_old`),
-  // ]);
+  console.log('\n2. Drop old tables');
+  console.log(`  DROP TABLE default.operations_old`);
+  console.log(`  DROP TABLE default.operation_collection_old`);
+
+  console.log('\n3. Drop old views');
+  console.log(`  DROP TABLE default.operations_hourly_old`);
+  console.log(`  DROP TABLE default.operations_daily_old`);
+  console.log(`  DROP TABLE default.coordinates_daily_old`);
+  console.log(`  DROP TABLE default.clients_daily_old`);
+
+  console.log('\n4. Enjoy storage size reduction!');
 }
 
 main();
