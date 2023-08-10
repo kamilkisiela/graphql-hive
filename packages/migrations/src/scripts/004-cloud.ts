@@ -10,7 +10,7 @@ import {
   createSelectStatementForOperationsHourly,
   createSelectStatementForOperationsMinutely,
 } from '../clickhouse-actions/004-version-2.js';
-import { env } from '../environment.js';
+import { env } from './environment.js';
 
 const MigrationModel = zod.object({
   // Write operations to new tables when their timestamp >= YYYY-MM-DD 00:00:00 UTC

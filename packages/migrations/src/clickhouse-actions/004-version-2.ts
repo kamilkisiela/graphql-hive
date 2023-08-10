@@ -364,7 +364,7 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
   if (isClickHouseCloud || isBig) {
     console.log(
       `${
-        isBig ? 'Detected more than 100M rows in operations table.' : 'Detected ClickHouse Cloud.'
+        isBig ? 'Detected more than 50M rows in operations table.' : 'Detected ClickHouse Cloud.'
       }. Follow a manual migration process from now on. See: packages/migrations/src/scripts/004-cloud.ts`,
     );
     return;

@@ -1,6 +1,6 @@
 import got from 'got';
 import zod from 'zod';
-import { env } from '../environment.js';
+import { env } from './environment.js';
 
 const Model = zod.object({
   data: zod.array(
