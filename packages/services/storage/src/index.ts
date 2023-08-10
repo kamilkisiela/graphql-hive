@@ -4145,6 +4145,7 @@ const schemaCheckSQLFields = sql`
   , "supergraph_sdl" as "supergraphSDL"
   , "github_check_run_id" as "githubCheckRunId"
   , "github_repository" as "githubRepository"
+  , "github_sha" as "githubSha"
   , coalesce("is_manually_approved", false) as "isManuallyApproved"
   , "manual_approval_user_id" as "manualApprovalUserId"
 `;
