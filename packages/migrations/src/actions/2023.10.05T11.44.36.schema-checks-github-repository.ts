@@ -5,6 +5,7 @@ export default {
   run: ({ sql }) => sql`
     ALTER TABLE "public"."schema_checks"
       ADD COLUMN "github_repository" text
+      , ADD COLUMN "github_sha" text
     ;
   `,
 } satisfies MigrationExecutor;

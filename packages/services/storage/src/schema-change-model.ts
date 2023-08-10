@@ -866,8 +866,12 @@ const SchemaCheckSharedFieldsModel = z.object({
       commit: z.string(),
     })
     .nullable(),
+  // github specific data
   githubCheckRunId: z.number().nullable(),
+  // TODO: these two always come together
+  // we need to improve the model code to reflect that
   githubRepository: z.string().nullable(),
+  githubSha: z.string().nullable(),
 });
 
 const SchemaCheckInputModel = z.intersection(
