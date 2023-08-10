@@ -10,7 +10,6 @@ import {
   renderErrors,
   renderWarnings,
 } from '../../helpers/schema';
-import { invariant } from '../../helpers/validation';
 
 const schemaCheckMutation = graphql(/* GraphQL */ `
   mutation schemaCheck($input: SchemaCheckInput!, $usesGitHubApp: Boolean!) {
@@ -166,7 +165,9 @@ export default class SchemaCheck extends Command {
       const commit = flags.commit || git?.commit;
       const author = flags.author || git?.author;
 
-      invariant(typeof sdl === 'string' && sdl.length > 0, 'Schema seems empty');
+      if (typeof sdl !== 'string' || sdl.length === 0) {
+        throw new Errors.CLIError('Schema seems empty');
+      }
 
       let github: null | {
         commit: string;
@@ -174,14 +175,18 @@ export default class SchemaCheck extends Command {
       } = null;
 
       if (usesGitHubApp) {
-        invariant(
-          typeof commit === 'string',
-          `Couldn't resolve commit sha required for GitHub Application`,
-        );
+        if (!commit) {
+          throw new Errors.CLIError(`Couldn't resolve commit sha required for GitHub Application`);
+        }
+        // eslint-disable-next-line no-process-env
+        const repository = process.env['GITHUB_ACTION_REPOSITORY'] ?? null;
+        if (!repository) {
+          throw new Errors.CLIError(`Missing "GITHUB_ACTION_REPOSITORY" environment variable.`);
+        }
+
         github = {
-          commit: commit!,
-          // eslint-disable-next-line no-process-env
-          repository: process.env['GITHUB_ACTION_REPOSITORY'] ?? null,
+          commit: commit,
+          repository,
         };
       }
 
