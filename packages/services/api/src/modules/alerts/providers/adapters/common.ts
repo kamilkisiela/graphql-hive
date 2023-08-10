@@ -1,20 +1,17 @@
 import { Change, CriticalityLevel } from '@graphql-inspector/core';
 import type * as Types from '../../../../__generated__/types';
-import {
-  Alert,
-  AlertChannel,
-  Organization,
-  Project,
-  SchemaVersion,
-  Target,
-} from '../../../../shared/entities';
+import { Alert, AlertChannel, Organization, Project, Target } from '../../../../shared/entities';
 
 export interface SchemaChangeNotificationInput {
   event: {
     organization: Pick<Organization, 'id' | 'cleanId' | 'name'>;
     project: Pick<Project, 'id' | 'cleanId' | 'name'>;
     target: Pick<Target, 'id' | 'cleanId' | 'name'>;
-    schema: Pick<SchemaVersion, 'id' | 'commit' | 'valid'>;
+    schema: {
+      id: string;
+      commit: string;
+      valid: boolean;
+    };
     changes: Array<Change>;
     messages: string[];
     errors: Types.SchemaError[];

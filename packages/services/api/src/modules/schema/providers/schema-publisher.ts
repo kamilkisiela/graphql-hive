@@ -1167,7 +1167,7 @@ export class SchemaPublisher {
           project,
           target,
           schema: {
-            ...schemaVersion,
+            id: schemaVersion.id,
             commit: schemaVersion.actionId,
             valid: schemaVersion.isComposable,
           },
