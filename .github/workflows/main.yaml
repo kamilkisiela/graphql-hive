@@ -16,27 +16,27 @@ jobs:
       uploadJavaScriptArtifacts: true
     secrets: inherit
 
-#   # Trigger deployment
-#   deploy:
-#     name: trigger staging deployment
-#     needs:
-#       - build
-#     runs-on: ubuntu-22.04
-#     steps:
-#       - name: Dispatch Deployment
-#         run: |
-#           curl --request POST \
-#             --url 'https://api.github.com/repos/${{ secrets.PRIVATE_REPO_OWNER }}/${{ secrets.PRIVATE_REPO_NAME }}/dispatches' \
-#             --header 'Accept: application/vnd.github.everest-preview+json' \
-#             --header 'Authorization: token ${{ secrets.GH_PAT }}' \
-#             --header 'Content-Type: application/json' \
-#             --data '{
-#             "event_type": "deploy-staging",
-#             "client_payload": {
-#               "actor": "${{ github.actor }}",
-#               "ref": "${{ github.sha }}"
-#             }
-#           }'
+  #   # Trigger deployment
+  #   deploy:
+  #     name: trigger staging deployment
+  #     needs:
+  #       - build
+  #     runs-on: ubuntu-22.04
+  #     steps:
+  #       - name: Dispatch Deployment
+  #         run: |
+  #           curl --request POST \
+  #             --url 'https://api.github.com/repos/${{ secrets.PRIVATE_REPO_OWNER }}/${{ secrets.PRIVATE_REPO_NAME }}/dispatches' \
+  #             --header 'Accept: application/vnd.github.everest-preview+json' \
+  #             --header 'Authorization: token ${{ secrets.GH_PAT }}' \
+  #             --header 'Content-Type: application/json' \
+  #             --data '{
+  #             "event_type": "deploy-staging",
+  #             "client_payload": {
+  #               "actor": "${{ github.actor }}",
+  #               "ref": "${{ github.sha }}"
+  #             }
+  #           }'
 
   # ESLint and Prettier
   code-style:
