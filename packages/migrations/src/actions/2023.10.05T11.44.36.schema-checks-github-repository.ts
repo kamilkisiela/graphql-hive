@@ -7,5 +7,10 @@ export default {
       ADD COLUMN "github_repository" text
       , ADD COLUMN "github_sha" text
     ;
+
+    ALTER TABLE "public"."schema_versions"
+      ADD COLUMN "github_repository" text
+      , ADD COLUMN "github_sha" text
+    ;
   `,
 } satisfies MigrationExecutor;
