@@ -792,6 +792,13 @@ export class SchemaManager {
       actionId: args.actionId,
     });
 
+    await this.authManager.ensureTargetAccess({
+      organization: organization.id,
+      project: target.projectId,
+      target: target.id,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
     const record = await this.storage.getSchemaVersionByActionId({
       projectId: target.projectId,
       targetId: target.id,

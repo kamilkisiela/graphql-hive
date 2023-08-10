@@ -58,7 +58,7 @@ export default class SchemaFetch extends Command {
   };
 
   static args = {
-    service: Args.string({
+    actionId: Args.string({
       name: 'actionId' as const,
       required: true,
       description: 'action id (e.g. commit sha)',
@@ -81,7 +81,7 @@ export default class SchemaFetch extends Command {
       env: 'HIVE_TOKEN',
     });
 
-    const actionId: string = args.service;
+    const actionId: string = args.actionId;
 
     const sdlType = this.ensure({
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
