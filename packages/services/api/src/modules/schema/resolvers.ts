@@ -116,7 +116,7 @@ export const resolvers: SchemaModule.Resolvers = {
         target,
       });
 
-      if ('changes' in result) {
+      if ('changes' in result && result.changes) {
         return {
           ...result,
           changes: result.changes.map(toGraphQLSchemaChange),

@@ -217,9 +217,9 @@ export class SchemaPublisher {
       if (input.github.repository) {
         if (!isGitHubOwnerRepositoryNameValid(input.github.repository)) {
           return {
-            __typename: 'GitHubSchemaCheckError',
+            __typename: 'GitHubSchemaCheckError' as const,
             message: 'Invalid github repository name provided.',
-          } as const;
+          };
         }
         github = {
           repository: input.github.repository,
@@ -227,9 +227,9 @@ export class SchemaPublisher {
         };
       } else if (project.gitRepository == null) {
         return {
-          __typename: 'GitHubSchemaCheckError',
+          __typename: 'GitHubSchemaCheckError' as const,
           message: 'Git repository is not configured for this project',
-        } as const;
+        };
       } else {
         github = {
           repository: project.gitRepository,
@@ -250,11 +250,11 @@ export class SchemaPublisher {
 
       if (!hasAccessToGitHubRepository) {
         return {
-          __typename: 'GitHubSchemaCheckError',
+          __typename: 'GitHubSchemaCheckError' as const,
           message:
             `Missing permissions for updating check-runs on GitHub repository '${github.repository}'. ` +
             'Please make sure that the GitHub App has access on the repository.',
-        } as const;
+        };
       }
     }
 
