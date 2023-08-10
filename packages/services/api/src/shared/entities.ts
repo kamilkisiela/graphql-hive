@@ -78,9 +78,9 @@ export interface DateRange {
 
 export interface SchemaVersion {
   id: string;
-  valid: boolean;
   createdAt: string;
-  commit: string;
+  isComposable: boolean;
+  actionId: string;
   baseSchema: string | null;
   hasPersistedSchemaChanges: boolean;
   previousSchemaVersionId: null | string;
@@ -261,7 +261,7 @@ export interface Project {
   type: ProjectType;
   buildUrl?: string | null;
   validationUrl?: string | null;
-  gitRepository?: string | null;
+  gitRepository?: `${string}/${string}` | null;
   legacyRegistryModel: boolean;
   useProjectNameInGithubCheck: boolean;
   externalComposition: {

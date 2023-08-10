@@ -407,6 +407,10 @@ export interface Storage {
       actionFn(): Promise<void>;
       changes: Array<Change>;
       previousSchemaVersion: null | string;
+      github: null | {
+        repository: string;
+        sha: string;
+      };
     } & TargetSelector) &
       (
         | {

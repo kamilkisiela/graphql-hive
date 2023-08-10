@@ -139,7 +139,7 @@ export class GitHubIntegrationManager {
   /**
    * Check whether the given organization has access to a given GitHub repository.
    */
-  async hasAccessToGitHubRepositoryAccess(props: {
+  async hasAccessToGitHubRepository(props: {
     selector: OrganizationSelector;
     repositoryName: `${string}/${string}`;
   }): Promise<boolean> {

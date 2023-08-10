@@ -330,6 +330,10 @@ export class SchemaManager {
       actionFn(): Promise<void>;
       changes: Array<Change>;
       previousSchemaVersion: string | null;
+      github: null | {
+        repository: string;
+        sha: string;
+      };
     } & TargetSelector) &
       (
         | {

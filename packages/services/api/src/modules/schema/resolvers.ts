@@ -753,7 +753,7 @@ export const resolvers: SchemaModule.Resolvers = {
   SchemaVersion: {
     async log(version, _, { injector }) {
       const log = await injector.get(SchemaManager).getSchemaLog({
-        commit: version.commit,
+        commit: version.actionId,
         organization: version.organization,
         project: version.project,
         target: version.target,
