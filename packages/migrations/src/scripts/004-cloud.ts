@@ -1,5 +1,5 @@
 import cliProgress from 'cli-progress';
-import got from 'got';
+import got, { HTTPError } from 'got';
 import zod from 'zod';
 import {
   createSelectStatementForClientsDaily,
@@ -18,6 +18,10 @@ const MigrationModel = zod.object({
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'MIGRATION_V2_INGEST_AFTER_UTC in YYYY-MM-DD format required'),
 });
+
+function waitFor(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 const InsertStatementsModel = zod.object({
   data: zod.array(
@@ -114,16 +118,24 @@ async function main() {
 
     while (true) {
       if (retry > 5) {
-        throw new Error('Exceeded retry limit. Aborting.');
+        throw new Error(
+          `Exceeded retry limit. Aborting operations FROM ${record.year}-${record.month}-${record.day}`,
+        );
       }
       try {
         retry++;
         await execute(record.insertStatement, {
           progressBar: operationsTableBar,
         });
-        break;
+        await waitFor(1500);
       } catch (error) {
-        console.error(error);
+        if (error instanceof HTTPError) {
+          console.log(`[FAILURE] ${error.options.body}`);
+          console.log(`[${error.code}]`, error.response.body);
+          console.log('Retrying...');
+        } else {
+          console.error(error);
+        }
         await new Promise(resolve => setTimeout(resolve, retry * 1500));
         continue;
       }
@@ -171,16 +183,25 @@ async function main() {
 
     while (true) {
       if (retry > 5) {
-        throw new Error('Exceeded retry limit. Aborting.');
+        throw new Error(
+          `Exceeded retry limit. Aborting operation_collection FROM ${record.year}-${record.month}-${record.day}`,
+        );
       }
       try {
         retry++;
         await execute(record.insertStatement, {
           progressBar: operationCollectionTableBar,
         });
+        await waitFor(1500);
         break;
       } catch (error) {
-        console.error(error);
+        if (error instanceof HTTPError) {
+          console.log(`[FAILURE] ${error.options.body}`);
+          console.log(`[${error.code}]`, error.response.body);
+          console.log('Retrying...');
+        } else {
+          console.error(error);
+        }
         await new Promise(resolve => setTimeout(resolve, retry * 1500));
         continue;
       }

@@ -1602,7 +1602,6 @@ export class OperationsReader {
                 sum(total) as total,
                 sum(total_ok) as totalOk
               FROM operations_daily
-    }: {
               ${this.createFilter({ target, period, operations, clients })}
               GROUP BY date
               ORDER BY date
