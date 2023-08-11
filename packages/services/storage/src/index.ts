@@ -4105,6 +4105,8 @@ const schemaVersionSQLFields = (t = sql``) => sql`
   , ${t}"composite_schema_sdl" as "compositeSchemaSDL"
   , ${t}"supergraph_sdl" as "supergraphSDL"
   , ${t}"schema_composition_errors" as "schemaCompositionErrors"
+  , ${t}"github_repository" as "githubRepository"
+  , ${t}"github_sha" as "githubSha"
 `;
 
 const targetSQLFields = sql`
