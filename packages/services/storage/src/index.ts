@@ -4035,16 +4035,7 @@ async function insertSchemaVersion(
         ${args.github?.sha ?? null}
       )
     RETURNING
-      id,
-      is_composable,
-      to_json(created_at) as "created_at",
-      action_id,
-      base_schema,
-      has_persisted_schema_changes,
-      previous_schema_version_id,
-      composite_schema_sdl,
-      supergraph_sdl,
-      schema_composition_errors
+      ${schemaVersionSQLFields()}
   `;
 
   return await trx.one(query).then(SchemaVersionModel.parse);
