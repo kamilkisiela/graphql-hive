@@ -900,7 +900,6 @@ export class SchemaPublisher {
       };
     } else if (input.github != null) {
       if (!project.gitRepository) {
-        // Legacy case
         return {
           __typename: 'GitHubSchemaPublishError',
           message: 'Git repository is not configured for this project.',

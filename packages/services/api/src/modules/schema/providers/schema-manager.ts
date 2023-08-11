@@ -872,6 +872,41 @@ export class SchemaManager {
     );
     return true;
   }
+
+  async getGitHubMetadata(schemaVersion: SchemaVersion): Promise<null | {
+    repository: `${string}/${string}`;
+    commit: string;
+  }> {
+    if (schemaVersion.github) {
+      return {
+        repository: schemaVersion.github.repository as `${string}/${string}`,
+        commit: schemaVersion.github.sha,
+      };
+    }
+
+    const log = await this.getSchemaLog({
+      commit: schemaVersion.actionId,
+      organization: schemaVersion.organization,
+      project: schemaVersion.project,
+      target: schemaVersion.target,
+    });
+
+    if ('commit' in log && log.commit) {
+      const project = await this.storage.getProject({
+        organization: schemaVersion.organization,
+        project: schemaVersion.project,
+      });
+
+      if (project.gitRepository) {
+        return {
+          repository: project.gitRepository,
+          commit: log.commit,
+        };
+      }
+    }
+
+    return null;
+  }
 }
 
 /**

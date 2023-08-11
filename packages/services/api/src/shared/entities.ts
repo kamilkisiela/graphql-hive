@@ -265,6 +265,10 @@ export interface Project {
   type: ProjectType;
   buildUrl?: string | null;
   validationUrl?: string | null;
+  /**
+   * @deprecated A project is no longer linked to a single git repository as a project can be composed of multiple git repositories.
+   * TODO: All code referencing this field should be removed at some point.
+   */
   gitRepository?: `${string}/${string}` | null;
   legacyRegistryModel: boolean;
   useProjectNameInGithubCheck: boolean;
