@@ -45,23 +45,21 @@ Choose a project type based on your project's stack, and then enter the project 
 ### GitHub Repository
 
 Once you have your
-[Hive organization integrated with GitHub](/docs/management/organizations#github), you can connect
-between a project and a GitHub repository.
+[Hive organization integrated with GitHub](/docs/management/organizations#github), no additional
+steps are needed. Please double check that the GitHub integration has access to all the GitHub
+repositories you plan to use with Hive.
 
-From the project's **Settings** tab, you can use the **Git Repository** section to select a
-repository to associate with your Hive projects.
+<Callout>
+  Previously, you could only connect a single GitHub repository to a project. However, that does not
+  make sense when using federated/composite schema project the subgraphs can be in different
+  repositories.
+</Callout>
 
-Associating a repository with your project will allow you to:
+Having a Project connected with your GitHub repositories gives you the following benefits:
 
-- Publish **Check Suite** back to GitHub (when `--github` flag is enabled for your `schema:publish`
-  and `schema:check` commands - [read more here](/docs/integrations/ci-cd)).
-
-<NextImage
-  alt="GitHub Check Suite"
-  src={githubIntegrationImage}
-  className="mt-6 max-w-lg drop-shadow-md"
-/>
-
+- Publish **Check Suite** back to GitHub (when `--github` flag is used for your `schema:publish` and
+  `schema:check` commands -
+  [you can learn move about this feature here](/docs/api-reference/cli#cli-and-github-integration)).
 - Have direct connection between a schema version and a Git commit in your repository in Hive
   dashboard.
 
@@ -70,10 +68,6 @@ Associating a repository with your project will allow you to:
   src={projectGitLinkImage}
   className="mt-6 max-w-lg drop-shadow-md"
 />
-
-Once a project is associated with a repository, you can specify `--github` flag when running Hive
-CLI commands, and get the results reported back to GitHub
-([you can learn move about this feature here](/docs/api-reference/cli#cli-and-github-integration)).
 
 ### Rename a project
 

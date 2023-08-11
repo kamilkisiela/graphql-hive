@@ -20,9 +20,10 @@ If you are using a different runtime environment for your project, you should in
 If you are using GitHub Actions, you can specify an additional flag to the Hive CLI: `--github`.
 
 If [GitHub Integration](/docs/management/organizations#github) is enabled for your organization, and
-a [GitHub repository is linked to the Hive project](/docs/management/projects#github-repository) is
-active, you may specify an additional `--github` flag to report the results back to GitHub as Check
-Suite (for `schema:check` and `schema:publish` commands):
+the
+[GitHub repository has access to the GitHub repository the action is running from](/docs/management/projects#github-repository)
+is active, you may specify an additional `--github` flag to report the results back to GitHub as
+Check Suite (for `schema:check` and `schema:publish` commands):
 
 ```bash
 hive schema:publish schema.graphql --github
