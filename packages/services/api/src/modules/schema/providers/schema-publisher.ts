@@ -305,8 +305,6 @@ export class SchemaPublisher {
     const retention = await this.rateLimit.getRetention({ targetId: target.id });
     const expiresAt = retention ? new Date(Date.now() + retention * millisecondsPerDay) : null;
 
-    const hasChemaChanges = !!checkResult?.state?.schemaChanges;
-
     if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
       schemaCheck = await this.storage.createSchemaCheck({
         schemaSDL: sdl,
