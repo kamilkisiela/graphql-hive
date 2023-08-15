@@ -16,9 +16,6 @@ if (env.auth.google) {
 if (env.auth.okta) {
   supertokenRoutes.add('/auth/callback/okta');
 }
-if (env.auth.github) {
-  supertokenRoutes.add('/auth/callback/github');
-}
 if (env.auth.organizationOIDC) {
   supertokenRoutes.add('/auth/oidc');
   supertokenRoutes.add('/auth/callback/oidc');
