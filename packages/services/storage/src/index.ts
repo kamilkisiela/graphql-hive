@@ -3532,12 +3532,14 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async findSchemaCheck(args) {
       const result = await pool.maybeOne<unknown>(sql`
         SELECT
-          ${schemaCheckSQLFields}
+          ${schemaCheckSQLFieldsFallback}
         FROM
-          "public"."schema_checks"
+          "public"."schema_checks" sc
+        JOIN "public"."schema_versions" sv
+        ON sv.id = sc.schema_version_id
         WHERE
-          "id" = ${args.schemaCheckId}
-          AND "target_id" = ${args.targetId}
+          "sc"."id" = ${args.schemaCheckId}
+          AND "sc"."target_id" = ${args.targetId}
       `);
 
       if (result == null) {
@@ -3549,7 +3551,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async setSchemaCheckGithubCheckRunId(args) {
       const result = await pool.maybeOne<unknown>(sql`
         UPDATE
-          "public"."schema_checks"
+          "public"."schema_checks" sc
         SET
           "github_check_run_id" = ${args.githubCheckRunId}
         WHERE
@@ -3567,7 +3569,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async approveFailedSchemaCheck(args) {
       const result = await pool.maybeOne<unknown>(sql`
         UPDATE
-          "public"."schema_checks"
+          "public"."schema_checks" sc
         SET
           "is_success" = true
           , "is_manually_approved" = true
@@ -3600,28 +3602,30 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       const result = await pool.any<unknown>(sql`
         SELECT
-          ${schemaCheckSQLFields}
+          ${schemaCheckSQLFieldsFallback}
         FROM
-          "public"."schema_checks"
+          "public"."schema_checks" "sc"
+        JOIN "public"."schema_versions" sv
+        ON sv.id = sc.schema_version_id
         WHERE
-          "target_id" = ${args.targetId}
+          "sc"."target_id" = ${args.targetId}
           ${
             cursor
               ? sql`
                 AND (
                   (
-                    "created_at" = ${cursor.createdAt}
-                    AND "id" < ${cursor.id}
+                    "sc"."created_at" = ${cursor.createdAt}
+                    AND "sc"."id" < ${cursor.id}
                   )
-                  OR "created_at" < ${cursor.createdAt}
+                  OR "sc"."created_at" < ${cursor.createdAt}
                 )
               `
               : sql``
           }
         ORDER BY
-          "target_id" ASC
-          , "created_at" DESC
-          , "id" DESC
+          "sc"."target_id" ASC
+          , "sc"."created_at" DESC
+          , "sc"."id" DESC
         LIMIT ${limit + 1}
       `);
 
@@ -4049,6 +4053,28 @@ const schemaCheckSQLFields = sql`
   , "schema_policy_errors" as "schemaPolicyErrors"
   , "composite_schema_sdl" as "compositeSchemaSDL"
   , "supergraph_sdl" as "supergraphSDL"
+  , "github_check_run_id" as "githubCheckRunId"
+  , coalesce("is_manually_approved", false) as "isManuallyApproved"
+  , "manual_approval_user_id" as "manualApprovalUserId"
+`;
+
+const schemaCheckSQLFieldsFallback = sql`
+  "sc"."id"
+  , to_json("sc"."created_at") as "createdAt"
+  , to_json("sc"."updated_at") as "updatedAt"
+  , coalesce("sc"."schema_sdl", "sv"."base_schema") as "schemaSDL"
+  , "service_name" as "serviceName"
+  , "meta"
+  , "sc"."target_id" as "targetId"
+  , "schema_version_id" as "schemaVersionId"
+  , "is_success" as "isSuccess"
+  , "sc"."schema_composition_errors" as "schemaCompositionErrors"
+  , "breaking_schema_changes" as "breakingSchemaChanges"
+  , "safe_schema_changes" as "safeSchemaChanges"
+  , "schema_policy_warnings" as "schemaPolicyWarnings"
+  , "schema_policy_errors" as "schemaPolicyErrors"
+  , coalesce("sc"."composite_schema_sdl", "sv"."composite_schema_sdl") as "compositeSchemaSDL"
+  , coalesce("sc"."supergraph_sdl", "sv"."supergraph_sdl") as "supergraphSDL"
   , "github_check_run_id" as "githubCheckRunId"
   , coalesce("is_manually_approved", false) as "isManuallyApproved"
   , "manual_approval_user_id" as "manualApprovalUserId"

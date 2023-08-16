@@ -375,7 +375,7 @@ export class SchemaPublisher {
       const hasSchemaChanges = !!checkResult?.state?.schemaChanges;
 
       schemaCheck = await this.storage.createSchemaCheck({
-        schemaSDL: hasSchemaChanges ? sdl : '',
+        schemaSDL: hasSchemaChanges ? sdl : null,
         serviceName: input.service ?? null,
         meta: input.meta ?? null,
         targetId: target.id,
@@ -386,7 +386,7 @@ export class SchemaPublisher {
         schemaPolicyWarnings: checkResult.state?.schemaPolicyWarnings ?? null,
         schemaPolicyErrors: null,
         schemaCompositionErrors: null,
-        compositeSchemaSDL: hasSchemaChanges ? composition.compositeSchemaSDL : '',
+        compositeSchemaSDL: hasSchemaChanges ? composition.compositeSchemaSDL : null,
         supergraphSDL: hasSchemaChanges ? composition.supergraphSDL : null,
         isManuallyApproved: false,
         manualApprovalUserId: null,
