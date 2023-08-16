@@ -824,7 +824,7 @@ const FailedSchemaCheckPartialModel = z.intersection(
     z.object({
       schemaCompositionErrors: z.null(),
 
-      compositeSchemaSDL: z.string(),
+      compositeSchemaSDL: z.string().nullable(),
       supergraphSDL: z.string().nullable(),
     }),
   ]),
