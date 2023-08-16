@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic';
 import { loader, DiffEditor as MonacoDiffEditor } from '@monaco-editor/react';
-import * as pkg from '../../package.json' assert { type: 'json' };
+import pkg from '../../package.json' assert { type: 'json' };
 
 loader.config({
   paths: {
