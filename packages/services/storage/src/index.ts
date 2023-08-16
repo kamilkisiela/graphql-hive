@@ -3534,8 +3534,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         SELECT
           ${schemaCheckSQLFieldsFallback}
         FROM
-          "public"."schema_checks" sc
-        JOIN "public"."schema_versions" sv
+          "public"."schema_checks" "sc"
+        JOIN "public"."schema_versions" "sv"
         ON sv.id = sc.schema_version_id
         WHERE
           "sc"."id" = ${args.schemaCheckId}
@@ -3551,7 +3551,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async setSchemaCheckGithubCheckRunId(args) {
       const result = await pool.maybeOne<unknown>(sql`
         UPDATE
-          "public"."schema_checks" sc
+          "public"."schema_checks"
         SET
           "github_check_run_id" = ${args.githubCheckRunId}
         WHERE
@@ -3569,7 +3569,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async approveFailedSchemaCheck(args) {
       const result = await pool.maybeOne<unknown>(sql`
         UPDATE
-          "public"."schema_checks" sc
+          "public"."schema_checks"
         SET
           "is_success" = true
           , "is_manually_approved" = true

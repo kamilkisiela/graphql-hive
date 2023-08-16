@@ -840,7 +840,7 @@ const SuccessfulSchemaCheckPartialModel = z.intersection(
     schemaPolicyWarnings: z.array(SchemaPolicyWarningModel).nullable(),
     schemaPolicyErrors: z.array(SchemaPolicyWarningModel).nullable(),
 
-    compositeSchemaSDL: z.string(),
+    compositeSchemaSDL: z.string().nullable(),
     supergraphSDL: z.string().nullable(),
   }),
   z.union([
@@ -856,7 +856,7 @@ const SuccessfulSchemaCheckPartialModel = z.intersection(
 );
 
 const SchemaCheckSharedFieldsModel = z.object({
-  schemaSDL: z.string(),
+  schemaSDL: z.string().nullable(),
   serviceName: z.string().nullable(),
   targetId: z.string(),
   schemaVersionId: z.string().nullable(),
