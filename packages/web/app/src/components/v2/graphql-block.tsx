@@ -14,16 +14,22 @@ export function GraphQLHighlight({
   const pretty = usePrettify(code);
 
   return (
-    <SchemaEditor
-      theme="vs-dark"
-      options={{
-        readOnly: true,
-        lineNumbers: 'on',
+    <div
+      style={{
+        height: '60vh',
       }}
-      height="60vh"
-      {...props}
-      schema={pretty}
-    />
+    >
+      <SchemaEditor
+        theme="vs-dark"
+        options={{
+          readOnly: true,
+          lineNumbers: 'on',
+        }}
+        height="60vh"
+        {...props}
+        schema={pretty}
+      />
+    </div>
   );
 }
 
