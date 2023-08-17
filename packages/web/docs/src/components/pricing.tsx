@@ -1,5 +1,32 @@
 import { ReactElement, ReactNode } from 'react';
+import Link from 'next/link';
+import clsx from 'clsx';
 import { Arrow, Content, Root, Trigger } from '@radix-ui/react-tooltip';
+
+const linkClass = clsx(
+  'flex flex-row items-center justify-between',
+  'w-full cursor-pointer whitespace-nowrap',
+  'transition-colors duration-150',
+  'text-sm text-white font-medium',
+  'rounded-md py-2 px-3',
+  'bg-gray-300/10 hover:bg-gray-300/20',
+);
+
+const ArrowIcon = ({ size }: { size: number }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="m9 18 6-6-6-6" />
+  </svg>
+);
 
 function Tooltip({ content, children }: { content: string; children: ReactNode }) {
   return (
@@ -21,17 +48,36 @@ function Plan(plan: {
   description: string;
   price: ReactNode | string;
   features: (ReactNode | string)[];
+  linkText: string;
+  linkOnClick?: () => void;
   footer?: ReactNode;
 }): ReactElement {
   return (
     <div className="flex w-full flex-col items-start rounded-md border border-gray-700 p-4 hover:border-gray-600 md:w-1/3">
-      <div className="flex h-full flex-col justify-between">
+      <div className="flex h-full w-full flex-col justify-between">
         <div>
           <h2 className="flex items-center justify-between text-base font-bold text-white">
             {plan.name}
           </h2>
           <div className="text-3xl font-bold text-white">{plan.price}</div>
           <div className="mt-3 text-sm text-gray-500">{plan.description}</div>
+          <div className="pt-6">
+            {plan.linkOnClick ? (
+              <div onClick={plan.linkOnClick} className={linkClass}>
+                <div>{plan.linkText}</div>
+                <div>
+                  <ArrowIcon size={16} />
+                </div>
+              </div>
+            ) : (
+              <Link href="https://app.graphql-hive.com" className={linkClass}>
+                <div>{plan.linkText}</div>
+                <div>
+                  <ArrowIcon size={16} />
+                </div>
+              </Link>
+            )}
+          </div>
           <div>
             <ul className="mt-6 list-disc px-5 text-gray-500">
               {plan.features.map((feature, i) => (
@@ -77,6 +123,7 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
             name="Hobby"
             description="For personal or small projects"
             price="Free"
+            linkText="Start for free"
             features={[
               'Unlimited seats, projects and organizations',
               'Unlimited schema pushes & checks',
@@ -95,15 +142,16 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
                 $10<span className="text-sm text-gray-500">/mo</span>
               </Tooltip>
             }
+            linkText="Get started"
             features={[
               <Tooltip content={OPERATIONS_EXPLAINER}>+ $10 per 1M operations</Tooltip>,
-              'Change your plan at any time',
+              'Adjust your plan at any time',
               <strong>Everything in Hobby plan, and:</strong>,
               <Tooltip content={USAGE_DATA_RETENTION_EXPLAINER}>
                 90 days of usage data retention
               </Tooltip>,
             ]}
-            footer={<div className="mb-2 text-sm font-bold">🎉 Free 30 days trial period</div>}
+            footer={<div className="text-sm font-bold">🎉 Free 30 days trial period</div>}
           />
           <Plan
             name="Enterprise"
@@ -118,6 +166,10 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
                 Contact us
               </span>
             }
+            linkText="Contact us"
+            linkOnClick={() => {
+              (window as any).$crisp?.push(['do', 'chat:open']);
+            }}
             features={[
               <Tooltip content={OPERATIONS_EXPLAINER}>Custom limit of operations</Tooltip>,
               'Change your plan at any time',
@@ -126,14 +178,12 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
                 12 months of usage data retention
               </Tooltip>,
               <span className="gap-1">
-                GraphQL/APIs support and guidance
-                <br />
-                from{' '}
+                GraphQL / APIs support and guidance from{' '}
                 <a
                   href="https://the-guild.dev"
                   target="_blank"
                   rel="noreferrer"
-                  className="font-medium text-orange-500 transition-colors hover:underline"
+                  className="font-medium text-yellow-500 transition-colors hover:underline"
                 >
                   The Guild
                 </a>

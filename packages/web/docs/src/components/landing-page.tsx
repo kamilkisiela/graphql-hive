@@ -1,14 +1,16 @@
 import { ReactElement, ReactNode, useCallback, useState } from 'react';
+import Head from 'next/head';
 import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
 import clsx from 'clsx';
+import CountUp from 'react-countup';
 import { FiGithub, FiGlobe, FiRadio, FiServer } from 'react-icons/fi';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { useMounted } from '@theguild/components';
 import { Pricing } from './pricing';
 import cicdImage from '../../public/any-ci-cd.svg';
-import monitoringImage from '../../public/features/monitoring-preview.png';
-import schemaHistoryImage from '../../public/features/schema-history.png';
+import monitoringImage from '../../public/features/new/monitoring-preview.png';
+import schemaHistoryImage from '../../public/features/new/schema-history.png';
 
 const classes = {
   link: clsx(
@@ -16,15 +18,31 @@ const classes = {
     'dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700',
   ),
   feature: clsx(
-    'w-full py-24',
-    'odd:bg-gray-50 odd:dark:bg-gray-900',
-    'even:bg-white even:dark:bg-black',
+    'w-full py-24 ',
+    'even:bg-gray-50 even:dark:bg-gray-900',
+    'odd:bg-white odd:dark:bg-black',
   ),
   root: clsx('flex flex-1 flex-row gap-6 md:flex-col lg:flex-row'),
   content: clsx('flex flex-col text-black dark:text-white'),
   title: clsx('text-xl font-semibold'),
   description: clsx('text-gray-600 dark:text-gray-400'),
 };
+
+const BookIcon = (props: { size: number }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={props.size}
+    height={props.size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+  </svg>
+);
 
 const CookiesConsent = (): ReactElement => {
   const [show, setShow] = useState(() => localStorage.getItem('cookies') !== 'true');
@@ -40,7 +58,7 @@ const CookiesConsent = (): ReactElement => {
 
   return (
     <div className="fixed bottom-0 flex w-full flex-wrap items-center justify-center gap-4 bg-gray-100 px-5 py-7 text-center lg:flex-nowrap lg:justify-between lg:text-left">
-      <div className="text-dark w-full text-sm">
+      <div className="w-full text-sm">
         <p>This website uses cookies to analyze site usage and improve your experience.</p>
         <p>If you continue to use our services, you are agreeing to the use of such cookies.</p>
       </div>
@@ -91,12 +109,12 @@ const renderFeatures = ({ title, description }) => (
 
 function Hero() {
   return (
-    <div className="w-full">
-      <div className="my-6 py-20 px-2 sm:py-24 lg:py-32">
-        <h1 className="mx-auto max-w-screen-md bg-gradient-to-r from-yellow-500 to-orange-600 bg-clip-text text-center text-5xl font-extrabold text-transparent dark:from-yellow-400 dark:to-orange-500 sm:text-5xl lg:text-6xl">
-          Take full control of your GraphQL API
+    <div className="w-full relative">
+      <div className="my-6 py-20 px-2 sm:py-24 lg:py-32 relative">
+        <h1 className="mx-auto max-w-screen-lg bg-gradient-to-r from-yellow-500 via-orange-400 to-yellow-500 bg-clip-text text-center text-5xl font-extrabold text-transparent dark:from-yellow-400 dark:to-orange-500 sm:text-5xl lg:text-6xl">
+          Full Control Over GraphQL
         </h1>
-        <p className="mx-auto mt-6 max-w-screen-sm text-center text-2xl text-gray-600 dark:text-gray-400">
+        <p className="mx-auto mt-6 max-w-screen-sm text-center text-lg text-gray-700 dark:text-gray-200">
           Prevent breaking changes, monitor performance of your GraphQL API, and manage your API
           gateway
         </p>
@@ -109,7 +127,7 @@ function Hero() {
               'dark:bg-yellow-600 dark:hover:bg-yellow-500/100',
             )}
           >
-            Sign up for free
+            Start for free
           </a>
           <Link href="/docs" className={classes.link}>
             Documentation
@@ -118,7 +136,7 @@ function Hero() {
             className={clsx(classes.link, 'flex flex-row items-center gap-2')}
             href="https://github.com/kamilkisiela/graphql-hive"
           >
-            <FiGithub /> GitHub
+            <FiGithub /> Star on GitHub
           </a>
         </div>
       </div>
@@ -136,9 +154,10 @@ function Feature(props: {
   }[];
   image: StaticImageData;
   gradient: number;
+  documentationLink?: string;
   flipped?: boolean;
 }) {
-  const { title, description, highlights, image, gradient, flipped } = props;
+  const { title, description, highlights, image, gradient, flipped, documentationLink } = props;
   const [start, end] = pickGradient(gradient);
 
   return (
@@ -158,6 +177,22 @@ function Feature(props: {
               {title}
             </h2>
             <div className="text-lg leading-7 text-gray-600 dark:text-gray-400">{description}</div>
+            {documentationLink ? (
+              <div className="pt-12">
+                <a
+                  href={documentationLink}
+                  className="group inline-flex font-semibold items-center transition hover:underline underline-offset-8 gap-x-2"
+                  style={{
+                    color: start,
+                  }}
+                >
+                  <div>
+                    <BookIcon size={16} />
+                  </div>
+                  <div>Learn more</div>
+                </a>
+              </div>
+            ) : null}
           </div>
           <div
             className="relative flex grow flex-col items-center justify-center overflow-hidden rounded-3xl p-8"
@@ -184,15 +219,57 @@ function Feature(props: {
   );
 }
 
+function StatsItem(props: { label: string; value: number; suffix: string; decimal?: boolean }) {
+  return (
+    <div>
+      <div className="font-bold text-5xl text-center">
+        <CountUp
+          start={0}
+          end={props.value}
+          duration={2}
+          decimals={props.decimal ? 1 : 0}
+          decimal="."
+          scrollSpyDelay={100}
+          enableScrollSpy
+          scrollSpyOnce
+        />
+        {props.suffix}+
+      </div>
+      <div className="text-gray-600 dark:text-gray-400 uppercase font-semibold text-center">
+        {props.label}
+      </div>
+    </div>
+  );
+}
+
+function Stats() {
+  return (
+    <div className="even:bg-gray-50 even:dark:bg-gray-900">
+      <div className="container mx-auto box-border grid grid-cols-2 lg:grid-cols-4 gap-8 px-6 py-12">
+        <StatsItem label="Happy users" value={2.9} suffix="K" decimal />
+        <StatsItem label="Registered Schemas" value={120} suffix="K" />
+        <StatsItem label="Collected Operations" value={150} suffix="B" />
+        <StatsItem label="GitHub Commits" value={2.2} suffix="K" decimal />
+      </div>
+    </div>
+  );
+}
+
 export function IndexPage(): ReactElement {
   const mounted = useMounted();
   return (
     <Tooltip.Provider>
-      <div className="flex h-full flex-col">
+      <Head>
+        <link rel="preconnect" href="https://rsms.me/" />
+        <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+      </Head>
+      <div className="flex h-full flex-col font-display">
         <Hero />
+        <Stats />
         <div className="flex flex-col">
           <Feature
             title="Schema Registry"
+            documentationLink="/docs/features/schema-registry"
             description={
               <div className="space-y-2">
                 <p>Push GraphQL schema to the registry and track the history of changes.</p>
@@ -221,6 +298,7 @@ export function IndexPage(): ReactElement {
           />
           <Feature
             title="Monitoring"
+            documentationLink="/docs/features/usage-reporting"
             description={
               <div className="flex flex-col gap-y-24">
                 <div>
