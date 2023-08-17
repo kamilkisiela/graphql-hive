@@ -813,6 +813,7 @@ const FailedSchemaCheckPartialModel = z.intersection(
 
     isManuallyApproved: z.literal(false),
     manualApprovalUserId: z.null(),
+    schemaSDL: z.string().nullable(),
   }),
   z.union([
     z.object({
@@ -830,33 +831,38 @@ const FailedSchemaCheckPartialModel = z.intersection(
   ]),
 );
 
-const SuccessfulSchemaCheckPartialModel = z.intersection(
-  z.object({
-    isSuccess: z.literal(true),
-    schemaCompositionErrors: z.null(),
-
-    safeSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
-    breakingSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
-    schemaPolicyWarnings: z.array(SchemaPolicyWarningModel).nullable(),
-    schemaPolicyErrors: z.array(SchemaPolicyWarningModel).nullable(),
-
-    compositeSchemaSDL: z.string().nullable(),
-    supergraphSDL: z.string().nullable(),
-  }),
-  z.union([
+const SuccessfulSchemaCheckPartialModel = z
+  .intersection(
     z.object({
-      isManuallyApproved: z.literal(true),
-      manualApprovalUserId: z.string().nullable(),
+      isSuccess: z.literal(true),
+      schemaCompositionErrors: z.null(),
+
+      safeSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
+      breakingSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
+      schemaPolicyWarnings: z.array(SchemaPolicyWarningModel).nullable(),
+      schemaPolicyErrors: z.array(SchemaPolicyWarningModel).nullable(),
+
+      schemaSDL: z.string().nullable(),
+      compositeSchemaSDL: z.string().nullable(),
+      supergraphSDL: z.string().nullable(),
     }),
-    z.object({
-      isManuallyApproved: z.literal(false),
-      manualApprovalUserId: z.null(),
-    }),
-  ]),
-);
+    z.union([
+      z.object({
+        isManuallyApproved: z.literal(true),
+        manualApprovalUserId: z.string().nullable(),
+      }),
+      z.object({
+        isManuallyApproved: z.literal(false),
+        manualApprovalUserId: z.null(),
+      }),
+    ]),
+  )
+  .transform(value => ({
+    ...value,
+    schemaSDL: value.schemaSDL ?? value.compositeSchemaSDL,
+  }));
 
 const SchemaCheckSharedFieldsModel = z.object({
-  schemaSDL: z.string().nullable(),
   serviceName: z.string().nullable(),
   targetId: z.string(),
   schemaVersionId: z.string().nullable(),

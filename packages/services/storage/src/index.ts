@@ -4062,7 +4062,7 @@ const schemaCheckSQLFieldsFallback = sql`
   "sc"."id"
   , to_json("sc"."created_at") as "createdAt"
   , to_json("sc"."updated_at") as "updatedAt"
-  , coalesce("sc"."schema_sdl", "sv"."base_schema") as "schemaSDL"
+  , "sc"."schema_sdl" as "schemaSDL"
   , "service_name" as "serviceName"
   , "meta"
   , "sc"."target_id" as "targetId"
