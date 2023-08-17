@@ -1,4 +1,4 @@
-import { ChangeEventHandler, ReactElement, useCallback, useState } from 'react';
+import { ChangeEventHandler, ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { authenticated } from '@/components/authenticated-container';
@@ -28,12 +28,22 @@ function isCompositeSchema(
   return schema.__typename === 'CompositeSchema';
 }
 
-function SchemaBlock({ schema }: { schema: CompositeSchema }) {
+function SchemaBlock({ schema, scrollToMe }: { schema: CompositeSchema; scrollToMe: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const scrolled = useRef(false);
+
+  useEffect(() => {
+    if (scrollToMe && ref.current && scrolled.current === false) {
+      ref.current.scrollIntoView({ behavior: 'smooth' });
+      scrolled.current = true;
+    }
+  }, [ref.current, scrolled.current]);
+
   return (
     <Accordion.Item value={schema.id} key={schema.id} className="border-2 border-gray-900/50">
       <Accordion.Header>
-        <div>
-          <div className="text-base" id={schema.service ?? undefined}>
+        <div ref={ref}>
+          <div className="text-base" id={schema.service ? `service-${schema.service}` : undefined}>
             {schema.service ?? 'SDL'}
           </div>
           {schema.url ? <div className="text-xs text-gray-500">{schema.url}</div> : null}
@@ -93,13 +103,21 @@ function Schemas({
       {displayFormat === 'dynamic' ? (
         <Accordion type="multiple">
           {filteredSchemas.map(schema => (
-            <SchemaBlock key={schema.id} schema={schema} />
+            <SchemaBlock
+              key={schema.id}
+              schema={schema}
+              scrollToMe={filterService?.toLowerCase() === schema.service?.toLowerCase()}
+            />
           ))}
         </Accordion>
       ) : (
         <Accordion type="multiple" value={filteredSchemas.map(s => s.id)} disabled>
           {filteredSchemas.map(schema => (
-            <SchemaBlock key={schema.id} schema={schema} />
+            <SchemaBlock
+              key={schema.id}
+              schema={schema}
+              scrollToMe={filterService?.toLowerCase() === schema.service?.toLowerCase()}
+            />
           ))}
         </Accordion>
       )}
@@ -164,12 +182,13 @@ function SchemaView(props: {
   organization: FragmentType<typeof SchemaView_OrganizationFragment>;
   project: FragmentType<typeof SchemaView_ProjectFragment>;
   target: FragmentType<typeof SchemaView_TargetFragment>;
+  highlightedService: string | null;
 }): ReactElement | null {
   const organization = useFragment(SchemaView_OrganizationFragment, props.organization);
   const project = useFragment(SchemaView_ProjectFragment, props.project);
   const target = useFragment(SchemaView_TargetFragment, props.target);
-  const [filterService, setFilterService] = useState('');
-  const [term, setTerm] = useState('');
+  const [filterService, setFilterService] = useState(props.highlightedService ?? '');
+  const [term, setTerm] = useState(props.highlightedService ?? '');
   const debouncedFilter = useDebouncedCallback((value: string) => {
     setFilterService(value);
   }, 500);
@@ -204,7 +223,7 @@ function SchemaView(props: {
   }
 
   const canMarkAsValid = project.registryModel === RegistryModel.Legacy;
-  const showExtra = canManage && project.registryModel === RegistryModel.Legacy;
+  const showExtra = canManage;
 
   return (
     <>
@@ -283,6 +302,7 @@ function Page() {
   const organizationConnection = query.data?.organizations;
   const target = query.data?.target;
   const isCDNEnabled = query.data;
+  const serviceNameFromHash = router.asPath.split('#')[1]?.replace('service-', '') ?? null;
 
   return (
     <TargetLayout
@@ -299,7 +319,12 @@ function Page() {
       </div>
       <div>
         {query.fetching ? null : currentOrganization && currentProject && target ? (
-          <SchemaView organization={currentOrganization} project={currentProject} target={target} />
+          <SchemaView
+            organization={currentOrganization}
+            project={currentProject}
+            target={target}
+            highlightedService={serviceNameFromHash}
+          />
         ) : null}
       </div>
     </TargetLayout>
