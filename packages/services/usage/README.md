@@ -12,6 +12,7 @@ The data is written to a Kafka broker, form Kafka the data is feed into clickhou
 | `PORT`                              | No       | The port this service is running on.                                                  | `4001`                                               |
 | `TOKENS_ENDPOINT`                   | **Yes**  | The endpoint of the tokens service.                                                   | `http://127.0.0.1:6001`                              |
 | `RATE_LIMIT_ENDPOINT`               | No       | The endpoint of the rate limiting service.                                            | `http://127.0.0.1:4012`                              |
+| `RATE_LIMIT_CACHE_TTL_IN_MS`        | No       | The TTL of the rate limiting cache.                                                   | `30000`                                              |
 | `KAFKA_TOPIC`                       | **Yes**  | The kafka topic.                                                                      | `usage_reports_v2`                                   |
 | `KAFKA_CONSUMER_GROUP`              | **Yes**  | The kafka consumer group.                                                             | `usage_reports_v2`                                   |
 | `KAFKA_BROKER`                      | **Yes**  | The address of the Kafka broker.                                                      | `127.0.0.1:29092`                                    |

@@ -7,6 +7,7 @@ import { fetch } from '@whatwg-node/fetch';
 export function createUsageRateLimit(config: {
   endpoint: string | null;
   logger: FastifyLoggerInstance;
+  cacheTTLInMs: number;
 }) {
   const logger = config.logger;
 
@@ -28,8 +29,14 @@ export function createUsageRateLimit(config: {
       }),
     ],
   });
-  const cache = LRU<Promise<RateLimitApiOutput['checkRateLimit'] | null>>(1000, 30_000);
-  const retentionCache = LRU<Promise<RateLimitApiOutput['getRetention'] | null>>(1000, 30_000);
+  const cache = LRU<Promise<RateLimitApiOutput['checkRateLimit'] | null>>(
+    1000,
+    config.cacheTTLInMs,
+  );
+  const retentionCache = LRU<Promise<RateLimitApiOutput['getRetention'] | null>>(
+    1000,
+    config.cacheTTLInMs,
+  );
 
   async function fetchFreshRetentionInfo(input: RateLimitApiInput['getRetention']) {
     return rateLimit.getRetention.query(input);

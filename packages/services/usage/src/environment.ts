@@ -21,6 +21,7 @@ const EnvironmentModel = zod.object({
   PORT: emptyString(NumberFromString.optional()),
   TOKENS_ENDPOINT: zod.string().url(),
   RATE_LIMIT_ENDPOINT: emptyString(zod.string().url().optional()),
+  RATE_LIMIT_CACHE_TTL_IN_MS: emptyString(NumberFromString.optional()),
   ENVIRONMENT: emptyString(zod.string().optional()),
   RELEASE: emptyString(zod.string().optional()),
 });
@@ -136,6 +137,7 @@ export const env = {
     rateLimit: base.RATE_LIMIT_ENDPOINT
       ? {
           endpoint: base.RATE_LIMIT_ENDPOINT,
+          cacheTTLInMs: base.RATE_LIMIT_CACHE_TTL_IN_MS ?? 30_000,
         }
       : null,
   },

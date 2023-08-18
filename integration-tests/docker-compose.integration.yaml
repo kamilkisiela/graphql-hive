@@ -119,7 +119,6 @@ services:
       CLICKHOUSE_USERNAME: '${CLICKHOUSE_USER}'
       CLICKHOUSE_PASSWORD: '${CLICKHOUSE_PASSWORD}'
       PORT: 3008
-      FF_CLICKHOUSE_V2_TABLES: ${FF_CLICKHOUSE_V2_TABLES:-}
 
   rate-limit:
     image: '${DOCKER_REGISTRY}rate-limit${DOCKER_TAG}'
@@ -219,6 +218,7 @@ services:
   usage:
     environment:
       RATE_LIMIT_ENDPOINT: '${RATE_LIMIT_ENDPOINT}'
+      RATE_LIMIT_CACHE_TTL_IN_MS: '${RATE_LIMIT_CACHE_TTL_IN_MS}'
       LOG_LEVEL: debug
     depends_on:
       broker:

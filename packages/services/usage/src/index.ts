@@ -71,6 +71,7 @@ async function main() {
       ? createUsageRateLimit({
           endpoint: env.hive.rateLimit.endpoint,
           logger: server.log,
+          cacheTTLInMs: env.hive.rateLimit.cacheTTLInMs,
         })
       : null;
 
