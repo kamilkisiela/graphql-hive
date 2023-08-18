@@ -495,6 +495,3 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
   ]);
   console.timeEnd(label);
 };
-
-// ISSUES:
-// - operations_daily and operations_hourly are missing client_version column... The CREATE TABLE statement is missing it for some reason.
