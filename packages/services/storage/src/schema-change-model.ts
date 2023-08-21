@@ -801,35 +801,40 @@ const SchemaChangeModelWithIsSafeBreakingChange = z.intersection(
   z.object({ isSafeBasedOnUsage: z.boolean().optional() }),
 );
 
-const FailedSchemaCheckPartialModel = z.intersection(
-  z.object({
-    isSuccess: z.literal(false),
-
-    breakingSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
-    safeSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
-
-    schemaPolicyWarnings: z.array(SchemaPolicyWarningModel).nullable(),
-    schemaPolicyErrors: z.array(SchemaPolicyWarningModel).nullable(),
-
-    isManuallyApproved: z.literal(false),
-    manualApprovalUserId: z.null(),
-    schemaSDL: z.string().nullable(),
-  }),
-  z.union([
+const FailedSchemaCheckPartialModel = z
+  .intersection(
     z.object({
-      schemaCompositionErrors: z.array(SchemaCompositionErrorModel),
+      isSuccess: z.literal(false),
 
-      compositeSchemaSDL: z.null(),
-      supergraphSDL: z.null(),
-    }),
-    z.object({
-      schemaCompositionErrors: z.null(),
+      breakingSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
+      safeSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
 
-      compositeSchemaSDL: z.string().nullable(),
-      supergraphSDL: z.string().nullable(),
+      schemaPolicyWarnings: z.array(SchemaPolicyWarningModel).nullable(),
+      schemaPolicyErrors: z.array(SchemaPolicyWarningModel).nullable(),
+
+      isManuallyApproved: z.literal(false),
+      manualApprovalUserId: z.null(),
+      schemaSDL: z.string().nullable(),
     }),
-  ]),
-);
+    z.union([
+      z.object({
+        schemaCompositionErrors: z.array(SchemaCompositionErrorModel),
+
+        compositeSchemaSDL: z.null(),
+        supergraphSDL: z.null(),
+      }),
+      z.object({
+        schemaCompositionErrors: z.null(),
+
+        compositeSchemaSDL: z.string().nullable(),
+        supergraphSDL: z.string().nullable(),
+      }),
+    ]),
+  )
+  .transform(value => ({
+    ...value,
+    supergraphSDL: value.schemaCompositionErrors ? null : value.supergraphSDL,
+  }));
 
 const SuccessfulSchemaCheckPartialModel = z
   .intersection(
