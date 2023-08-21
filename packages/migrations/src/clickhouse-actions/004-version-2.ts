@@ -144,9 +144,11 @@ export const createSelectStatementForOperationCollectionDetails = (
     expires_at
 `;
 
-const SystemSettingsModel = z.object({
-  value: z.string(),
-});
+const SystemSettingsModel = z.array(
+  z.object({
+    value: z.string(),
+  }),
+);
 
 export const action: Action = async (exec, query, isClickHouseCloud) => {
   const allowExperimentalAlterMaterializedViewStructure = await query(
@@ -155,7 +157,7 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
       FROM system.settings 
       WHERE name = 'allow_experimental_alter_materialized_view_structure'
       SETTINGS allow_experimental_alter_materialized_view_structure=1`,
-  ).then(async r => SystemSettingsModel.parse(r.data));
+  ).then(async r => SystemSettingsModel.parse(r.data)[0]);
   if (allowExperimentalAlterMaterializedViewStructure.value !== '1') {
     throw new Error(
       'Migration is not possible. Please enable allow_experimental_alter_materialized_view_structure system setting.',
