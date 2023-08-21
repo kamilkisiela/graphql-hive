@@ -1616,7 +1616,7 @@ export class OperationsReader {
             ${sql.raw(quantiles)} as percentiles,
             ${sql.raw(total)} as total,
             ${sql.raw(totalOk)} as totalOk
-          FROM ${tableName}
+          FROM ${sql.raw(tableName)}
           ${this.createFilter({ target, period, operations, clients })}
           GROUP BY date
           ORDER BY date
