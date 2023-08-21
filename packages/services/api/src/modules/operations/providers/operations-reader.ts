@@ -1579,6 +1579,55 @@ export class OperationsReader {
     },
     span?: Span,
   ) {
+    const createSQLQuery = (tableName: string, isAggregation: boolean) => {
+      const startDateTimeFormatted = formatDate(period.from);
+      const endDateTimeFormatted = formatDate(period.to);
+      const interval = calculateTimeWindow({ period, resolution });
+      const intervalUnit =
+        interval.unit === 'd' ? 'DAY' : interval.unit === 'h' ? 'HOUR' : 'MINUTE';
+
+      // TODO: remove this once we shift to the new table structure (PR #2712)
+      const quantiles = isAggregation
+        ? 'quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles)'
+        : 'quantiles(0.75, 0.90, 0.95, 0.99)(duration)';
+      const total = isAggregation ? 'sum(total)' : 'count(*)';
+      const totalOk = isAggregation ? 'sum(total_ok)' : 'sum(ok)';
+
+      return sql`
+        WITH
+          toDateTime(${startDateTimeFormatted}, 'UTC') as start_date_time,
+          toDateTime(${endDateTimeFormatted}, 'UTC') as end_date_time,
+          ${intervalUnit} as interval_unit,
+          toUInt16(${String(interval.value)}) as interval_value
+        SELECT
+          multiply(toUnixTimestamp(date, 'UTC'), 1000) as date,
+          percentiles,
+          total,
+          totalOk
+        FROM (
+          SELECT
+            date_add(
+                ${sql.raw(intervalUnit)},
+                ceil(
+                  date_diff(interval_unit, start_date_time, timestamp, 'UTC') / interval_value
+                ) as UInt16 * interval_value,
+                start_date_time
+            ) as date,
+            ${sql.raw(quantiles)} as percentiles,
+            ${sql.raw(total)} as total,
+            ${sql.raw(totalOk)} as totalOk
+          FROM ${tableName}
+          ${this.createFilter({ target, period, operations, clients })}
+          GROUP BY date
+          ORDER BY date
+          WITH FILL
+            FROM toDateTime(${startDateTimeFormatted}, 'UTC')
+            TO toDateTime(${endDateTimeFormatted}, 'UTC')
+            STEP INTERVAL ${this.clickHouse.translateWindow(interval)}
+        )
+      `;
+    };
+
     // multiply by 1000 to convert to milliseconds
     const result = await this.clickHouse.query<{
       date: number;
@@ -1589,85 +1638,21 @@ export class OperationsReader {
       this.pickQueryByPeriod(
         {
           daily: {
-            query: sql`
-              SELECT 
-                multiply(
-                  toUnixTimestamp(
-                    toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                      calculateTimeWindow({ period, resolution }),
-                    )}, 'UTC'),
-                  'UTC'),
-                1000) as date,
-                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles,
-                sum(total) as total,
-                sum(total_ok) as totalOk
-              FROM operations_daily
-              ${this.createFilter({ target, period, operations, clients })}
-              GROUP BY date
-              ORDER BY date
-            `,
+            query: createSQLQuery('operations_daily', true),
             queryId: 'duration_and_count_over_time_daily',
             timeout: 15_000,
             span,
           },
           hourly: {
-            query: sql`
-              SELECT 
-                multiply(
-                  toUnixTimestamp(
-                    toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                      calculateTimeWindow({ period, resolution }),
-                    )}, 'UTC'),
-                  'UTC'),
-                1000) as date,
-                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles,
-                sum(total) as total,
-                sum(total_ok) as totalOk
-              FROM operations_hourly
-              ${this.createFilter({ target, period, operations, clients })}
-              GROUP BY date
-              ORDER BY date
-            `,
+            query: createSQLQuery('operations_hourly', true),
             queryId: 'duration_and_count_over_time_hourly',
             timeout: 15_000,
             span,
           },
           minutely: {
             query: (await this.canUseNewTable('operations_minutely'))
-              ? sql`
-                SELECT 
-                  multiply(
-                    toUnixTimestamp(
-                      toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                        calculateTimeWindow({ period, resolution }),
-                      )}, 'UTC'),
-                    'UTC'),
-                  1000) as date,
-                  quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles,
-                  sum(total) as total,
-                  sum(total_ok) as totalOk
-                FROM operations_minutely
-                ${this.createFilter({ target, period, operations, clients })}
-                GROUP BY date
-                ORDER BY date
-            `
-              : sql`
-                SELECT 
-                  multiply(
-                    toUnixTimestamp(
-                      toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                        calculateTimeWindow({ period, resolution }),
-                      )}, 'UTC'),
-                    'UTC'),
-                  1000) as date,
-                  quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles,
-                  count(*) as total,
-                  sum(ok) as totalOk
-                FROM operations
-                ${this.createFilter({ target, period, operations, clients })}
-                GROUP BY date
-                ORDER BY date
-            `,
+              ? createSQLQuery('operations_minutely', true)
+              : createSQLQuery('operations', true),
             queryId: 'duration_and_count_over_time_regular',
             timeout: 15_000,
             span,

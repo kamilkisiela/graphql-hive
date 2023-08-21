@@ -6,7 +6,7 @@ export const createSelectStatementForOperationsMinutely = (
 ) => `
   SELECT
     target,
-    toStartOfHour(timestamp) AS timestamp,
+    toStartOfMinute(timestamp) AS timestamp,
     hash,
     client_name,
     client_version,
@@ -144,7 +144,24 @@ export const createSelectStatementForOperationCollectionDetails = (
     expires_at
 `;
 
+const SystemSettingsModel = z.object({
+  value: z.string(),
+});
+
 export const action: Action = async (exec, query, isClickHouseCloud) => {
+  const allowExperimentalAlterMaterializedViewStructure = await query(
+    `
+      SELECT value 
+      FROM system.settings 
+      WHERE name = 'allow_experimental_alter_materialized_view_structure'
+      SETTINGS allow_experimental_alter_materialized_view_structure=1`,
+  ).then(async r => SystemSettingsModel.parse(r.data));
+  if (allowExperimentalAlterMaterializedViewStructure.value !== '1') {
+    throw new Error(
+      'Migration is not possible. Please enable allow_experimental_alter_materialized_view_structure system setting.',
+    );
+  }
+
   let label = 'Created new tables';
   console.time(label);
   // Create new tables
