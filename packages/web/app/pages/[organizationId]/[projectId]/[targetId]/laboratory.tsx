@@ -847,10 +847,20 @@ function LaboratoryPageContent() {
         .graphiql-container .graphiql-toolbar-icon {
           color: #4c5462;
         }
+
         .graphiql-container .graphiql-doc-explorer-search {
           background-color: #070d17;
         }
+
+        .graphiql-container .cm-punctuation {
+          color: #ccc;
+        }
+
+        .graphiql-container .cm-punctuation:hover {
+          color: #ffffff;
+        }
       `}</style>
+
       {query.fetching ? null : (
         <GraphiQL
           fetcher={fetcher}
