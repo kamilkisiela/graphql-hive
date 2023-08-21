@@ -25,18 +25,18 @@ ENVIRONMENT=local
   you only need to run GraphQL Codegen)
 - Run `pnpm build` to build all services
 - Click on `Start Hive` in the bottom bar of VSCode
-- If you are not added to the list of guest users, request access from The Guild maintainers
-  - Alternatively,
-    [configure hive to use your own Auth0 Application](#setting-up-auth0-app-for-developing)
 - Open the UI (`http://localhost:3000` by default) and Sign in with any of the identity provider
 - Once this is done, you should be able to login and use the project
 - Once you generate the token against your organization/personal account in hive, the same can be
   added locally to `hive.json` within `packages/libraries/cli` which can be used to interact via the
-  hive cli with the registry
+  hive cli with the registry (Use `http://localhost:3001/graphql` as the `registry.endpoint` value
+  in `hive.json`)
+- Now you can use Hive locally. All other steps in this document are optional and only necessary if
+  you work on specific features.
 
 ## Development Seed
 
-We have a script to feed your local instance of Hive.
+We have a script to feed your local instance of Hive with initial seed data. This step is optional.
 
 1. Use `Start Hive` to run your local Hive instance
 2. Make sure `usage` and `usage-ingestor` are running as well (with `pnpm dev`)
@@ -140,7 +140,8 @@ password
 
 ### Legacy Auth0 Integration
 
-**Note:** If you are not working at The Guild, you can safely ignore this section.
+**Note:** If you are not working at The Guild or on the legacy Auth0 sign-up feature, you can safely
+ignore this section.
 
 Since we migrated from Auth0 to SuperTokens there is a compatibility layer for importing/migrating
 accounts from Auth0 to SuperTokens.
