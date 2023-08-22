@@ -1821,17 +1821,20 @@ export class OperationsReader {
       to: Date;
     };
   }) {
-    const dateRangeFilter = sql.raw(`
-      timestamp >= FROM_UNIXTIME(${Math.floor(period.from.getTime() / 1000)})
-      AND
-      timestamp < FROM_UNIXTIME(${Math.floor(period.to.getTime() / 1000)})
-    `);
-
     const result = await this.clickHouse.query<{
       total: string;
       target: string;
     }>({
-      query: sql`SELECT sum(total) as total, target from operations_daily WHERE ${dateRangeFilter} GROUP BY target`,
+      query: sql`
+        SELECT
+          sum(total) as total,
+          target
+        FROM operations_daily
+        PREWHERE
+          timestamp >= toDateTime(${formatDate(period.from)}, 'UTC')
+          AND
+          timestamp <= toDateTime(${formatDate(period.to)}, 'UTC')
+        GROUP BY target`,
       queryId: 'admin_operations_per_target',
       timeout: 15_000,
     });
@@ -1851,37 +1854,56 @@ export class OperationsReader {
     };
   }) {
     const days = differenceInDays(period.to, period.from);
-    const resolution = 90;
-    const dateRangeFilter = sql.raw(`
-      timestamp >= FROM_UNIXTIME(${Math.floor(period.from.getTime() / 1000)})
-      AND
-      timestamp < FROM_UNIXTIME(${Math.floor(period.to.getTime() / 1000)})
-    `);
+    const resolution = days <= 1 ? 60 : days;
+
+    const createSQL = (tableName: string) => sql`
+      SELECT 
+        multiply(
+          toUnixTimestamp(
+            toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
+              calculateTimeWindow({
+                period,
+                resolution,
+              }),
+            )}, 'UTC'),
+          'UTC'),
+        1000) as date,
+        sum(total) as total
+      FROM ${sql.raw(tableName)}
+      PREWHERE 
+        timestamp >= toDateTime(${formatDate(period.from)}, 'UTC')
+        AND
+        timestamp <= toDateTime(${formatDate(period.to)}, 'UTC')
+      GROUP BY date
+      ORDER BY date
+    `;
+
     const result = await this.clickHouse.query<{
       date: number;
       total: string;
-    }>({
-      query: sql`
-        SELECT 
-          multiply(
-            toUnixTimestamp(
-              toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                calculateTimeWindow({
-                  period,
-                  resolution,
-                }),
-              )}, 'UTC'),
-            'UTC'),
-          1000) as date,
-          sum(total) as total
-        FROM ${sql.raw(days > 1 && days >= resolution ? 'operations_daily' : 'operations_hourly')}
-        WHERE ${dateRangeFilter}
-        GROUP BY date
-        ORDER BY date
-      `,
-      queryId: 'admin_operations_per_target',
-      timeout: 15_000,
-    });
+    }>(
+      this.pickQueryByPeriod(
+        {
+          daily: {
+            query: createSQL('operations_daily'),
+            queryId: 'admin_operations_per_target_daily',
+            timeout: 15_000,
+          },
+          hourly: {
+            query: createSQL('operations_hourly'),
+            queryId: 'admin_operations_per_target_hourly',
+            timeout: 15_000,
+          },
+          minutely: {
+            query: createSQL('operations_minutely'),
+            queryId: 'admin_operations_per_target_minutely',
+            timeout: 15_000,
+          },
+        },
+        period,
+        resolution,
+      ),
+    );
 
     return result.data.map(row => ({
       date: ensureNumber(row.date) as any,
