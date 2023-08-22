@@ -1,14 +1,15 @@
-import { ReactElement, ReactNode, useCallback, useState } from 'react';
-import Head from 'next/head';
+import { ReactElement, ReactNode } from 'react';
 import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
 import clsx from 'clsx';
-import CountUp from 'react-countup';
-import { FiGithub, FiGlobe, FiRadio, FiServer } from 'react-icons/fi';
+import { FiGithub, FiGlobe, FiPackage, FiServer, FiTruck } from 'react-icons/fi';
 import * as Tooltip from '@radix-ui/react-tooltip';
-import { useMounted } from '@theguild/components';
+import { BookIcon } from './book-icon';
+import { Hero, HeroLinks, HeroSubtitle, HeroTitle } from './hero';
+import { Highlights, HighlightTextLink } from './highlights';
+import { Page } from './page';
 import { Pricing } from './pricing';
-import cicdImage from '../../public/any-ci-cd.svg';
+import { StatsItem, StatsList } from './stats';
 import monitoringImage from '../../public/features/new/monitoring-preview.png';
 import schemaHistoryImage from '../../public/features/new/schema-history.png';
 
@@ -26,58 +27,6 @@ const classes = {
   content: clsx('flex flex-col text-black dark:text-white'),
   title: clsx('text-xl font-semibold'),
   description: clsx('text-gray-600 dark:text-gray-400'),
-};
-
-const BookIcon = (props: { size: number }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width={props.size}
-    height={props.size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-  </svg>
-);
-
-const CookiesConsent = (): ReactElement => {
-  const [show, setShow] = useState(() => localStorage.getItem('cookies') !== 'true');
-
-  const accept = useCallback(() => {
-    setShow(false);
-    localStorage.setItem('cookies', 'true');
-  }, []);
-
-  if (!show) {
-    return null;
-  }
-
-  return (
-    <div className="fixed bottom-0 flex w-full flex-wrap items-center justify-center gap-4 bg-gray-100 px-5 py-7 text-center lg:flex-nowrap lg:justify-between lg:text-left">
-      <div className="w-full text-sm">
-        <p>This website uses cookies to analyze site usage and improve your experience.</p>
-        <p>If you continue to use our services, you are agreeing to the use of such cookies.</p>
-      </div>
-      <div className="flex shrink-0 items-center gap-4 lg:pr-24">
-        <a
-          href="https://the-guild.dev/graphql/hive/privacy-policy.pdf"
-          className="whitespace-nowrap text-yellow-600 hover:underline"
-        >
-          Privacy Policy
-        </a>
-        <button
-          className="rounded-md bg-yellow-500 px-5 py-2 text-white hover:bg-yellow-700 focus:outline-none"
-          onClick={accept}
-        >
-          Allow Cookies
-        </button>
-      </div>
-    </div>
-  );
 };
 
 const gradients: [string, string][] = [
@@ -98,66 +47,44 @@ function pickGradient(i: number): [string, string] {
   return gradient;
 }
 
-const renderFeatures = ({ title, description }) => (
+const renderFeatures = ({
+  title,
+  description,
+  documentationLink,
+}: {
+  title: string;
+  description: ReactNode;
+  documentationLink?: string;
+}) => (
   <div className={classes.root} key={title}>
     <div className={classes.content}>
       <h3 className={clsx(classes.title, 'text-lg')}>{title}</h3>
       <p className={clsx(classes.description, 'text-sm')}>{description}</p>
+      {documentationLink ? (
+        <Link
+          href={documentationLink}
+          className="group inline-flex text-sm items-center transition hover:underline underline-offset-8 gap-x-2 mt-2"
+        >
+          <div>
+            <BookIcon size={16} />
+          </div>
+          <div>Learn more</div>
+        </Link>
+      ) : null}
     </div>
   </div>
 );
 
-function Hero() {
-  return (
-    <div className="w-full relative">
-      <div className="my-6 py-20 px-2 sm:py-24 lg:py-32 relative">
-        <h1 className="mx-auto max-w-screen-lg bg-gradient-to-r from-yellow-500 via-orange-400 to-yellow-500 bg-clip-text text-center text-5xl font-extrabold text-transparent dark:from-yellow-400 dark:to-orange-500 sm:text-5xl lg:text-6xl">
-          Full Control Over GraphQL
-        </h1>
-        <p className="mx-auto mt-6 max-w-screen-sm text-center text-lg text-gray-700 dark:text-gray-200">
-          Prevent breaking changes, monitor performance of your GraphQL API, and manage your API
-          gateway
-        </p>
-        <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <a
-            href="https://app.graphql-hive.com"
-            className={clsx(
-              'inline-block rounded-lg px-6 py-3 font-medium text-white shadow-sm',
-              'bg-yellow-500 hover:bg-yellow-500/75',
-              'dark:bg-yellow-600 dark:hover:bg-yellow-500/100',
-            )}
-          >
-            Start for free
-          </a>
-          <Link href="/docs" className={classes.link}>
-            Documentation
-          </Link>
-          <a
-            className={clsx(classes.link, 'flex flex-row items-center gap-2')}
-            href="https://github.com/kamilkisiela/graphql-hive"
-          >
-            <FiGithub /> Star on GitHub
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function Feature(props: {
   title: string;
   description: ReactNode;
-  highlights?: {
-    title: string;
-    description: ReactNode;
-    icon?: ReactNode;
-  }[];
-  image: StaticImageData;
+  image?: StaticImageData;
+  highlights?: { title: string; description: string; documentationLink?: string }[];
   gradient: number;
   documentationLink?: string;
   flipped?: boolean;
 }) {
-  const { title, description, highlights, image, gradient, flipped, documentationLink } = props;
+  const { title, description, image, gradient, flipped, documentationLink, highlights } = props;
   const [start, end] = pickGradient(gradient);
 
   return (
@@ -171,7 +98,7 @@ function Feature(props: {
         >
           <div className="flex w-full shrink-0 flex-col gap-4 md:w-2/5 lg:w-1/3">
             <h2
-              className="bg-clip-text text-5xl font-semibold leading-normal text-transparent dark:text-transparent"
+              className="bg-clip-text text-4xl font-semibold leading-normal text-transparent dark:text-transparent"
               style={{ backgroundImage: `linear-gradient(-70deg, ${end}, ${start})` }}
             >
               {title}
@@ -179,7 +106,7 @@ function Feature(props: {
             <div className="text-lg leading-7 text-gray-600 dark:text-gray-400">{description}</div>
             {documentationLink ? (
               <div className="pt-12">
-                <a
+                <Link
                   href={documentationLink}
                   className="group inline-flex font-semibold items-center transition hover:underline underline-offset-8 gap-x-2"
                   style={{
@@ -190,114 +117,149 @@ function Feature(props: {
                     <BookIcon size={16} />
                   </div>
                   <div>Learn more</div>
-                </a>
+                </Link>
               </div>
             ) : null}
           </div>
-          <div
-            className="relative flex grow flex-col items-center justify-center overflow-hidden rounded-3xl p-8"
-            style={{ backgroundImage: `linear-gradient(70deg, ${start}, ${end})` }}
-          >
-            <Image {...image} className="rounded-2xl" alt={title} />
-          </div>
+
+          {highlights ? (
+            <div className="flex grow flex-col items-center justify-center overflow-hidden rounded-3xl p-4">
+              <div className="flex flex-col gap-y-12">{highlights.map(renderFeatures)}</div>
+            </div>
+          ) : null}
+
+          {image ? (
+            <div
+              className="relative flex grow flex-col items-center justify-center overflow-hidden rounded-3xl p-4"
+              style={{ backgroundImage: `linear-gradient(70deg, ${start}, ${end})` }}
+            >
+              <Image {...image} className="rounded-2xl" alt={title} />
+            </div>
+          ) : null}
         </div>
-        {Array.isArray(highlights) && highlights.length > 0 && (
-          <div className="flex flex-col justify-between gap-12 md:flex-row">
-            {highlights.map(({ title, description, icon }) => (
-              <div className={classes.root} key={title}>
-                <div className="h-16 w-16 shrink-0 text-yellow-500">{icon}</div>
-                <div className={classes.content}>
-                  <h3 className={classes.title}>{title}</h3>
-                  <p className={classes.description}>{description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function StatsItem(props: { label: string; value: number; suffix: string; decimal?: boolean }) {
-  return (
-    <div>
-      <div className="font-bold text-5xl text-center">
-        <CountUp
-          start={0}
-          end={props.value}
-          duration={2}
-          decimals={props.decimal ? 1 : 0}
-          decimal="."
-          scrollSpyDelay={100}
-          enableScrollSpy
-          scrollSpyOnce
-        />
-        {props.suffix}+
-      </div>
-      <div className="text-gray-600 dark:text-gray-400 uppercase font-semibold text-center">
-        {props.label}
-      </div>
-    </div>
-  );
-}
-
-function Stats() {
-  return (
-    <div className="even:bg-gray-50 even:dark:bg-gray-900">
-      <div className="container mx-auto box-border grid grid-cols-2 lg:grid-cols-4 gap-8 px-6 py-12">
-        <StatsItem label="Happy users" value={2.9} suffix="K" decimal />
-        <StatsItem label="Registered Schemas" value={120} suffix="K" />
-        <StatsItem label="Collected Operations" value={150} suffix="B" />
-        <StatsItem label="GitHub Commits" value={2.2} suffix="K" decimal />
       </div>
     </div>
   );
 }
 
 export function IndexPage(): ReactElement {
-  const mounted = useMounted();
   return (
     <Tooltip.Provider>
-      <Head>
-        <link rel="preconnect" href="https://rsms.me/" />
-        <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
-      </Head>
-      <div className="flex h-full flex-col font-display">
-        <Hero />
-        <Stats />
+      <Page>
+        <Hero>
+          <HeroTitle>Full Control Over GraphQL</HeroTitle>
+          <HeroSubtitle>
+            Prevent breaking changes, monitor performance of your GraphQL API, and manage your API
+            gateway
+          </HeroSubtitle>
+          <HeroLinks>
+            <>
+              <a
+                href="https://app.graphql-hive.com"
+                className={clsx(
+                  'inline-block rounded-lg px-6 py-3 font-medium text-white shadow-sm',
+                  'bg-yellow-500 hover:bg-yellow-500/75',
+                  'dark:bg-yellow-600 dark:hover:bg-yellow-500/100',
+                )}
+              >
+                Start for free
+              </a>
+              <Link href="/docs" className={classes.link}>
+                Documentation
+              </Link>
+              <a
+                className={clsx(classes.link, 'flex flex-row items-center gap-2')}
+                href="https://github.com/kamilkisiela/graphql-hive"
+              >
+                <FiGithub /> Star on GitHub
+              </a>
+            </>
+          </HeroLinks>
+        </Hero>
+        <div className="even:bg-gray-50 even:dark:bg-gray-900">
+          <StatsList>
+            <StatsItem label="Happy users" value={2.9} suffix="K" decimal />
+            <StatsItem label="Registered Schemas" value={120} suffix="K" />
+            <StatsItem label="Collected Operations" value={150} suffix="B" />
+            <StatsItem label="GitHub Commits" value={2.2} suffix="K" decimal />
+          </StatsList>
+        </div>
         <div className="flex flex-col">
           <Feature
             title="Schema Registry"
             documentationLink="/docs/features/schema-registry"
             description={
-              <div className="space-y-2">
-                <p>Push GraphQL schema to the registry and track the history of changes.</p>
-                <p>All your GraphQL services in one place.</p>
+              <div className="flex flex-col gap-y-24">
+                <div>
+                  <p>Push GraphQL schema to the registry and track the history of changes.</p>
+                  <p>All your GraphQL services in one place.</p>
+                </div>
+                <div className="flex flex-col gap-y-12">
+                  {[
+                    {
+                      title: 'Version control system for GraphQL',
+                      description:
+                        'Track every modification of your GraphQL API across different environments, such as staging and production.',
+                    },
+                    {
+                      title: 'Schema checks',
+                      description:
+                        'Detect breaking changes and composition errors, prevent them from being deployed.',
+                    },
+                    {
+                      title: 'Schema Explorer',
+                      description:
+                        'Navigate through your GraphQL schema and understand which types and fields are referenced from which subgraphs.',
+                    },
+                  ].map(renderFeatures)}
+                </div>
               </div>
             }
-            highlights={[
-              {
-                title: 'Manage your Gateway',
-                description: 'Connect to Apollo Federation, GraphQL Mesh, Stitching and more.',
-                icon: <FiServer className="h-full w-full" />,
-              },
-              {
-                title: 'Global Edge Network',
-                description: 'Access the registry from any place on earth within milliseconds.',
-                icon: <FiGlobe className="h-full w-full" />,
-              },
-              {
-                title: 'Make it smarter',
-                description: 'Detect unused parts of Schema thanks to GraphQL analytics.',
-                icon: <FiRadio className="h-full w-full" />,
-              },
-            ]}
             image={schemaHistoryImage}
             gradient={0}
           />
+          <div className="even:bg-gray-50 even:dark:bg-gray-900">
+            <Highlights
+              items={[
+                {
+                  title: 'Manage your Gateway',
+                  description: (
+                    <>
+                      Connect to{' '}
+                      <HighlightTextLink href="/docs/get-started/apollo-federation">
+                        Apollo Federation
+                      </HighlightTextLink>
+                      ,{' '}
+                      <HighlightTextLink href="/docs/integrations/graphql-mesh">
+                        GraphQL Mesh
+                      </HighlightTextLink>
+                      ,{' '}
+                      <HighlightTextLink href="/docs/integrations/schema-stitching">
+                        Stitching
+                      </HighlightTextLink>{' '}
+                      and more.
+                    </>
+                  ),
+                  icon: <FiServer className="h-full w-full" />,
+                  documentationLink: '/docs/get-started/apollo-federation',
+                },
+                {
+                  title: 'Global Edge Network',
+                  description: 'Access the registry from any place on earth within milliseconds.',
+                  icon: <FiGlobe className="h-full w-full" />,
+                  documentationLink: '/docs/features/high-availability-cdn',
+                },
+                {
+                  title: 'Apollo GraphOS alternative',
+                  description: 'GraphQL Hive is a drop-in replacement for Apollo GraphOS.',
+                  icon: <FiPackage className="h-full w-full" />,
+                  documentationLink: '/docs/get-started/apollo-federation',
+                },
+              ]}
+            />
+          </div>
           <Feature
-            title="Monitoring"
+            title="GraphQL Monitoring"
             documentationLink="/docs/features/usage-reporting"
             description={
               <div className="flex flex-col gap-y-24">
@@ -316,7 +278,7 @@ export function IndexPage(): ReactElement {
                     },
                     {
                       title: 'Overall performance',
-                      description: 'Get a global overview of the usage of your GraphQL API.',
+                      description: 'Get a global overview of the usage of GraphQL API.',
                     },
                     {
                       title: 'Query performance',
@@ -331,35 +293,61 @@ export function IndexPage(): ReactElement {
             flipped
           />
           <Feature
-            title="Analytics"
+            title="Schema Management"
             description={
               <div className="flex flex-col gap-y-12">
                 <div>
-                  <p>Maintain your GraphQL API across many teams without concerns.</p>
-                </div>
-                <div className="flex flex-col gap-y-12">
-                  {[
-                    {
-                      title: 'Prevent Breaking Changes',
-                      description:
-                        'Combination of Schema Registry and GraphQL Monitoring helps you evolve your GraphQL API.',
-                    },
-                    {
-                      title: 'Detect unused fields',
-                      description:
-                        'Helps you understand the coverage of GraphQL schema and safely remove the unused part.',
-                    },
-                    {
-                      title: 'Alerts and notifications',
-                      description: 'Stay on top of everything with Slack notifications.',
-                    },
-                  ].map(renderFeatures)}
+                  <p>Maintain GraphQL API across many teams without concerns.</p>
                 </div>
               </div>
             }
-            image={cicdImage}
             gradient={2}
+            highlights={[
+              {
+                title: 'Prevent Breaking Changes',
+                description:
+                  'Combination of Schema Registry and GraphQL Monitoring helps you evolve GraphQL API with confidence.',
+                documentationLink: '/docs/management/targets#conditional-breaking-changes',
+              },
+              {
+                title: 'Detect unused fields',
+                description:
+                  'Helps you understand the coverage of GraphQL schema and safely remove the unused part.',
+                documentationLink: '/docs/features/usage-reporting',
+              },
+              {
+                title: 'Schema Policy',
+                description:
+                  'Lint, verify, and enforce best practices across the entire federated graph.',
+                documentationLink: '/docs/features/schema-policy',
+              },
+            ]}
           />
+          <div className="even:bg-gray-50 even:dark:bg-gray-900">
+            <Highlights
+              items={[
+                {
+                  title: 'GitHub Integration',
+                  description: 'Our CLI integrates smoothly with GitHub Actions / repositories.',
+                  icon: <FiGithub className="h-full w-full" />,
+                  documentationLink: '/docs/integrations/ci-cd#github-check-suites',
+                },
+                {
+                  title: 'Works with every CI/CD',
+                  description: 'Connect GraphQL Hive CLI to CI/CD of your choice.',
+                  icon: <FiTruck className="h-full w-full" />,
+                  documentationLink: '/docs/integrations/ci-cd',
+                },
+                {
+                  title: 'On-premise or Cloud',
+                  description:
+                    'GraphQL Hive is MIT licensed, you can host it on your own infrastructure.',
+                  icon: <FiServer className="h-full w-full" />,
+                  documentationLink: '/docs/self-hosting/get-started',
+                },
+              ]}
+            />
+          </div>
           <div className={classes.feature}>
             <div className="container mx-auto box-border flex flex-col gap-y-24 px-6">
               <div className="text-center">
@@ -399,8 +387,7 @@ export function IndexPage(): ReactElement {
           </div>
         </div>
         <Pricing gradient={gradients[4]} />
-      </div>
-      {mounted && <CookiesConsent />}
+      </Page>
     </Tooltip.Provider>
   );
 }
