@@ -847,6 +847,9 @@ function LaboratoryPageContent() {
         .graphiql-container .graphiql-toolbar-icon {
           color: #4c5462;
         }
+        .graphiql-container .graphiql-doc-explorer-search {
+          background-color: #070d17;
+        }
       `}</style>
       {query.fetching ? null : (
         <GraphiQL
