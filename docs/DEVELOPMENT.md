@@ -29,7 +29,7 @@ ENVIRONMENT=local
   - Alternatively,
     [configure hive to use your own Auth0 Application](#setting-up-auth0-app-for-developing)
 - Open the UI (`http://localhost:3000` by default) and Sign in with any of the identity provider
-- Once this is done, you should be able to login and use the project
+- Once this is done, you should be able to log in and use the project
 - Once you generate the token against your organization/personal account in hive, the same can be
   added locally to `hive.json` within `packages/libraries/cli` which can be used to interact via the
   hive cli with the registry

@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import zod from 'zod';
 
 const isNumberString = (input: unknown) => zod.string().regex(/^\d+$/).safeParse(input).success;
@@ -39,6 +40,9 @@ const KafkaBaseModel = zod.object({
   KAFKA_BROKER: zod.string(),
   KAFKA_TOPIC: zod.string(),
   KAFKA_SSL: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
+  KAFKA_SSL_CA_PATH: zod.string().optional(),
+  KAFKA_SSL_CERT_PATH: zod.string().optional(),
+  KAFKA_SSL_KEY_PATH: zod.string().optional(),
   KAFKA_BUFFER_SIZE: NumberFromString,
   KAFKA_BUFFER_INTERVAL: NumberFromString,
   KAFKA_BUFFER_DYNAMIC: zod.union([zod.literal('1'), zod.literal('0')]),
@@ -143,7 +147,18 @@ export const env = {
     topic: kafka.KAFKA_TOPIC,
     connection: {
       broker: kafka.KAFKA_BROKER,
-      isSSL: kafka.KAFKA_SSL === '1',
+      ssl:
+        kafka.KAFKA_SSL === '1'
+          ? kafka.KAFKA_SSL_CA_PATH != null &&
+            kafka.KAFKA_SSL_CERT_PATH != null &&
+            kafka.KAFKA_SSL_KEY_PATH != null
+            ? {
+                ca: fs.readFileSync(kafka.KAFKA_SSL_CA_PATH),
+                cert: fs.readFileSync(kafka.KAFKA_SSL_CERT_PATH),
+                key: fs.readFileSync(kafka.KAFKA_SSL_KEY_PATH),
+              }
+            : true
+          : false,
       sasl:
         kafka.KAFKA_SASL_MECHANISM != null
           ? {
