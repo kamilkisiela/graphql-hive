@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import zod, { optional } from 'zod';
+import zod from 'zod';
 
 const isNumberString = (input: unknown) => zod.string().regex(/^\d+$/).safeParse(input).success;
 
