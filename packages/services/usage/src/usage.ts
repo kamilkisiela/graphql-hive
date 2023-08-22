@@ -114,7 +114,7 @@ export function createUsage(config: {
   const kafka = new Kafka({
     clientId: 'usage',
     brokers: [config.kafka.connection.broker],
-    ssl: config.kafka.connection.isSSL,
+    ssl: config.kafka.connection.ssl,
     sasl:
       config.kafka.connection.sasl?.mechanism === 'plain'
         ? {
