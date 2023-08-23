@@ -6,15 +6,25 @@ mod registry_logger;
 mod usage;
 
 use registry::HiveRegistry;
+use tokio::runtime::Runtime;
 use usage::register;
 
 fn main() {
     // Register the usage reporting plugin
     register();
 
-    // Initialize the Hive Registry and start the Apollo Router
-    match HiveRegistry::new(None).and(apollo_router::main()) {
-        Ok(_) => {}
+    // Create a new Tokio runtime for the HiveRegistry initialization
+    let hive_runtime = Runtime::new().unwrap();
+
+    let result = hive_runtime.block_on(HiveRegistry::new(None));
+
+    match result {
+        Ok(_) => {
+            if let Err(e) = apollo_router::main() {
+                eprintln!("{}", e);
+                std::process::exit(1);
+            }
+        }
         Err(e) => {
             eprintln!("{}", e);
             std::process::exit(1);

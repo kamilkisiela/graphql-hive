@@ -1,11 +1,14 @@
+use crate::registry_logger::Logger;
+
 use super::graphql::OperationProcessor;
 use graphql_parser::schema::{parse_schema, Document};
 use serde::Serialize;
 use std::{
     collections::{HashMap, VecDeque},
-    sync::{Arc, Mutex},
-    time::Duration,
+    sync::Arc,
 };
+use tokio::sync::Mutex as AsyncMutex;
+use tokio::time::Duration;
 
 static COMMIT: Option<&'static str> = option_env!("GITHUB_SHA");
 
@@ -78,9 +81,8 @@ impl State {
         }
     }
 
-    pub fn push(&mut self, report: ExecutionReport) -> usize {
+    pub fn push(&mut self, report: ExecutionReport) {
         self.buffer.push_back(report);
-        self.buffer.len()
     }
 
     pub fn drain(&mut self) -> Vec<ExecutionReport> {
@@ -92,12 +94,11 @@ impl State {
 pub struct UsageAgent {
     token: String,
     endpoint: String,
-    buffer_size: usize,
     accept_invalid_certs: bool,
     /// We need the Arc wrapper to be able to clone the agent while preserving multiple mutable reference to processor
     /// We also need the Mutex wrapper bc we cannot borrow data in an `Arc` as mutable
-    pub state: Arc<Mutex<State>>,
-    processor: Arc<Mutex<OperationProcessor>>,
+    pub state: Arc<tokio::sync::Mutex<State>>,
+    processor: Arc<tokio::sync::Mutex<OperationProcessor>>,
 }
 
 fn non_empty_string(value: Option<String>) -> Option<String> {
@@ -111,49 +112,65 @@ fn non_empty_string(value: Option<String>) -> Option<String> {
 }
 
 impl UsageAgent {
-    pub fn new(
+    pub async fn new(
         schema: String,
         token: String,
         endpoint: String,
-        buffer_size: usize,
         accept_invalid_certs: bool,
     ) -> Self {
         let schema = parse_schema::<String>(&schema)
             .expect("Failed to parse schema")
             .into_static();
-        let state = Arc::new(Mutex::new(State::new(schema)));
-        let processor = Arc::new(Mutex::new(OperationProcessor::new()));
+        let state = Arc::new(AsyncMutex::new(State::new(schema)));
+        let processor = Arc::new(AsyncMutex::new(OperationProcessor::new()));
 
         let agent = Self {
             state,
             processor,
             endpoint,
             token,
-            buffer_size,
             accept_invalid_certs,
         };
 
-        let mut agent_for_interval = agent.clone();
+        let agent_clone = agent.clone();
 
-        // TODO: make this working
-        // tokio::task::spawn(async move {
-        //     if let Some(shutdown_signal) = shutdown_signal {
-        //         tracing::info!("waiting for shutdown signal");
-        //         shutdown_signal.await.expect("shutdown signal");
-        //         tracing::info!("Flushing reports because of shutdown signal");
-        //         // agent_for_shutdown_signal.clone().flush().await;
-        //         // tracing::info!("Flushed because of shutdown");
-        //     }
+        tokio::task::spawn(async move {
+            let logger = Logger::new();
 
-        std::thread::spawn(move || loop {
-            std::thread::sleep(Duration::from_secs(5));
-            agent_for_interval.flush();
+            let mut consecutive_sec_no_flush_count = 0.0;
+
+            loop {
+                let state_lock = agent_clone.state.lock().await;
+                let buffer_size = state_lock.buffer.len();
+                // drop the `state_lock` early, as soon as we get the buffer_size and not througout the scope of the loop
+                drop(state_lock);
+
+                if buffer_size >= 1000 || consecutive_sec_no_flush_count >= 10.0 {
+                    let mut inner_agent_clone = agent_clone.clone();
+                    let child_task = tokio::task::spawn(async move {
+                        inner_agent_clone.flush().await;
+                    });
+
+                    let result = child_task.await;
+
+                    if result.is_err() {
+                        logger.error("A panic occurred inside the flush task, but it was caught and the loop will continue.");
+                        logger.error(&result.err().unwrap().to_string());
+                    }
+
+                    consecutive_sec_no_flush_count = 0.0;
+                } else {
+                    consecutive_sec_no_flush_count += 0.1;
+                }
+
+                tokio::time::sleep(Duration::from_millis(100)).await;
+            }
         });
 
         agent
     }
 
-    fn produce_report(&mut self, reports: Vec<ExecutionReport>) -> Report {
+    async fn produce_report(&mut self, reports: Vec<ExecutionReport>) -> Report {
         let mut report = Report {
             size: 0,
             map: HashMap::new(),
@@ -165,15 +182,8 @@ impl UsageAgent {
             let operation = self
                 .processor
                 .lock()
-                .expect("Unable to acquire the OperationProcessor in produce_report")
-                .process(
-                    &op.operation_body,
-                    &self
-                        .state
-                        .lock()
-                        .expect("Unable to acquire State in produce_report")
-                        .schema,
-                );
+                .await
+                .process(&op.operation_body, &self.state.lock().await.schema);
             match operation {
                 Err(e) => {
                     tracing::warn!(
@@ -228,26 +238,26 @@ impl UsageAgent {
         report
     }
 
-    pub fn add_report(&mut self, execution_report: ExecutionReport) {
-        let size = self
-            .state
-            .lock()
-            .expect("Unable to acquire State in add_report")
-            .push(execution_report);
-        self.flush_if_full(size);
+    pub async fn add_report(&mut self, execution_report: ExecutionReport) {
+        self.state.lock().await.push(execution_report);
     }
 
-    pub fn send_report(&self, report: Report) -> Result<(), String> {
+    pub async fn send_report(&self, report: Report, buffer_size: usize) -> Result<(), String> {
         const DELAY_BETWEEN_TRIES: Duration = Duration::from_millis(500);
         const MAX_TRIES: u8 = 3;
 
-        let client = reqwest::blocking::Client::builder()
+        let client = reqwest::Client::builder()
             .danger_accept_invalid_certs(self.accept_invalid_certs)
+            .connect_timeout(Duration::from_secs(10))
+            .timeout(Duration::from_secs(60))
             .build()
             .map_err(|err| err.to_string())?;
-        let mut error_message = "Unexpected error".to_string();
+        let mut error_message =
+            "Unexpected error: Sending the report has failed for 3 consecutive tries!".to_string();
 
-        for _ in 0..MAX_TRIES {
+        for try_num in 0..MAX_TRIES {
+            tracing::debug!("Sending {} Reports, try number: {try_num}", buffer_size);
+
             let resp = client
                 .post(self.endpoint.clone())
                 .header(
@@ -260,6 +270,7 @@ impl UsageAgent {
                 )
                 .json(&report)
                 .send()
+                .await
                 .map_err(|e| e.to_string())?;
 
             match resp.status() {
@@ -276,33 +287,26 @@ impl UsageAgent {
                     error_message = format!(
                         "Could not send usage report: ({}) {}",
                         resp.status().as_str(),
-                        resp.text().unwrap_or_default()
+                        resp.text().await.unwrap_or_default()
                     );
                 }
             }
-            std::thread::sleep(DELAY_BETWEEN_TRIES);
+
+            tokio::time::sleep(DELAY_BETWEEN_TRIES).await;
         }
 
         Err(error_message)
     }
 
-    pub fn flush_if_full(&mut self, size: usize) {
-        if size >= self.buffer_size {
-            self.flush();
-        }
-    }
+    pub async fn flush(&mut self) {
+        let mut state_lock = self.state.lock().await;
+        let execution_reports = state_lock.drain();
+        drop(state_lock); // Drop the lock immediately after acquiring and draining, so adding reports isn't blocked while flushing.
 
-    pub fn flush(&mut self) {
-        let execution_reports = self
-            .state
-            .lock()
-            .expect("Unable to acquire State in flush")
-            .drain();
         let size = execution_reports.len();
-
         if size > 0 {
-            let report = self.produce_report(execution_reports);
-            match self.send_report(report) {
+            let report = self.produce_report(execution_reports).await;
+            match self.send_report(report, size).await {
                 Ok(_) => tracing::debug!("Reported {} operations", size),
                 Err(e) => tracing::error!("{}", e),
             }

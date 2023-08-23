@@ -3,8 +3,9 @@ use anyhow::{anyhow, Result};
 use sha2::Digest;
 use sha2::Sha256;
 use std::env;
-use std::io::Write;
-use std::thread;
+use tokio::fs::{self, File};
+use tokio::io::AsyncWriteExt;
+use tokio::task;
 
 #[derive(Debug, Clone)]
 pub struct HiveRegistry {
@@ -23,87 +24,64 @@ pub struct HiveRegistryConfig {
     accept_invalid_certs: Option<bool>,
 }
 
-static COMMIT: Option<&'static str> = option_env!("GITHUB_SHA");
-
-impl HiveRegistry {
-    pub fn new(user_config: Option<HiveRegistryConfig>) -> Result<()> {
-        let mut config = HiveRegistryConfig {
+impl Default for HiveRegistryConfig {
+    fn default() -> Self {
+        HiveRegistryConfig {
             endpoint: None,
             key: None,
             poll_interval: None,
             accept_invalid_certs: Some(true),
-        };
-
-        // Pass values from user's config
-        if let Some(user_config) = user_config {
-            config.endpoint = user_config.endpoint;
-            config.key = user_config.key;
-            config.poll_interval = user_config.poll_interval;
-            config.accept_invalid_certs = user_config.accept_invalid_certs;
         }
+    }
+}
+
+static COMMIT: Option<&'static str> = option_env!("GITHUB_SHA");
+
+impl HiveRegistry {
+    pub async fn new(user_config: Option<HiveRegistryConfig>) -> Result<()> {
+        let mut config = user_config.unwrap_or_default();
 
         // Pass values from environment variables if they are not set in the user's config
+        config.endpoint = config
+            .endpoint
+            .or_else(|| env::var("HIVE_CDN_ENDPOINT").ok());
+        config.key = config.key.or_else(|| env::var("HIVE_CDN_KEY").ok());
 
-        if config.endpoint.is_none() {
-            if let Ok(endpoint) = env::var("HIVE_CDN_ENDPOINT") {
-                config.endpoint = Some(endpoint);
-            }
-        }
+        config.poll_interval = config.poll_interval.or_else(|| {
+            env::var("HIVE_CDN_POLL_INTERVAL")
+                .ok()
+                .and_then(|s| s.parse().ok())
+                .or_else(|| panic!("failed to parse HIVE_CDN_POLL_INTERVAL"))
+        });
 
-        if config.key.is_none() {
-            if let Ok(key) = env::var("HIVE_CDN_KEY") {
-                config.key = Some(key);
-            }
-        }
-
-        if config.poll_interval.is_none() {
-            if let Ok(poll_interval) = env::var("HIVE_CDN_POLL_INTERVAL") {
-                config.poll_interval = Some(
-                    poll_interval
-                        .parse()
-                        .expect("failed to parse HIVE_CDN_POLL_INTERVAL"),
-                );
-            }
-        }
-
-        if config.accept_invalid_certs.is_none() {
-            if let Ok(accept_invalid_certs) = env::var("HIVE_CDN_ACCEPT_INVALID_CERTS") {
-                config.accept_invalid_certs = Some(
-                    accept_invalid_certs.eq("1")
-                        || accept_invalid_certs.to_lowercase().eq("true")
-                        || accept_invalid_certs.to_lowercase().eq("on"),
-                );
-            }
-        }
+        config.accept_invalid_certs = config.accept_invalid_certs.or_else(|| {
+            env::var("HIVE_CDN_ACCEPT_INVALID_CERTS")
+                .ok()
+                .map(|s| s == "1" || s.to_lowercase() == "true" || s.to_lowercase() == "on")
+        });
 
         // Resolve values
         let endpoint = config.endpoint.unwrap_or_else(|| "".to_string());
         let key = config.key.unwrap_or_else(|| "".to_string());
-        let poll_interval: u64 = match config.poll_interval {
-            Some(value) => value,
-            None => 10,
-        };
-        let accept_invalid_certs = config.accept_invalid_certs.unwrap_or_else(|| false);
+        let poll_interval = config.poll_interval.unwrap_or(10);
+        let accept_invalid_certs = config.accept_invalid_certs.unwrap_or(false);
 
         let logger = Logger::new();
 
-        // In case of an endpoint and an key being empty, we don't start the polling and skip the registry
-        if endpoint.is_empty() && key.is_empty() {
-            logger.info("You're not using GraphQL Hive as the source of schema.");
-            logger.info(
-                "Reason: could not find HIVE_CDN_KEY and HIVE_CDN_ENDPOINT environment variables.",
-            );
-            return Ok(());
-        }
-
-        // Throw if endpoint is empty
-        if endpoint.is_empty() {
-            return Err(anyhow!("environment variable HIVE_CDN_ENDPOINT not found",));
-        }
-
-        // Throw if key is empty
-        if key.is_empty() {
-            return Err(anyhow!("environment variable HIVE_CDN_KEY not found"));
+        match (endpoint.is_empty(), key.is_empty()) {
+            (_empty_endpoint @ true, _empty_key @ true) => {
+                // don't start the polling and skip the registry
+                logger.info("You're not using GraphQL Hive as the source of schema.");
+                logger.info("Reason: could not find HIVE_CDN_KEY and HIVE_CDN_ENDPOINT environment variables.");
+                return Ok(());
+            }
+            (_endpoint_empty @ true, _) => {
+                return Err(anyhow!("environment variable HIVE_CDN_ENDPOINT not found"));
+            }
+            (_, _key_empty @ true) => {
+                return Err(anyhow!("environment variable HIVE_CDN_KEY not found"));
+            }
+            _ => {}
         }
 
         // A hacky way to force the router to use GraphQL Hive CDN as the source of schema.
@@ -122,7 +100,7 @@ impl HiveRegistry {
             logger,
         };
 
-        match registry.initial_supergraph() {
+        match registry.initial_supergraph().await {
             Ok(_) => {
                 registry
                     .logger
@@ -134,16 +112,18 @@ impl HiveRegistry {
             }
         }
 
-        thread::spawn(move || loop {
-            thread::sleep(std::time::Duration::from_secs(poll_interval));
-            registry.poll()
+        task::spawn(async move {
+            loop {
+                tokio::time::sleep(std::time::Duration::from_secs(poll_interval)).await;
+                registry.poll().await;
+            }
         });
 
         Ok(())
     }
 
-    fn fetch_supergraph(&mut self, etag: Option<String>) -> Result<Option<String>, String> {
-        let client = reqwest::blocking::Client::builder()
+    async fn fetch_supergraph(&mut self, etag: Option<String>) -> Result<Option<String>, String> {
+        let client = reqwest::Client::builder()
             .danger_accept_invalid_certs(self.accept_invalid_certs)
             .build()
             .map_err(|err| err.to_string())?;
@@ -166,6 +146,7 @@ impl HiveRegistry {
             .get(format!("{}/supergraph", self.endpoint))
             .headers(headers)
             .send()
+            .await
             .map_err(|e| e.to_string())?;
 
         match resp.headers().get("etag") {
@@ -182,16 +163,20 @@ impl HiveRegistry {
             return Ok(None);
         }
 
-        Ok(Some(resp.text().map_err(|e| e.to_string())?))
+        Ok(Some(resp.text().await.map_err(|e| e.to_string())?))
     }
 
-    fn initial_supergraph(&mut self) -> Result<(), String> {
-        let mut file = std::fs::File::create(self.file_name.clone()).map_err(|e| e.to_string())?;
-        let resp = self.fetch_supergraph(None)?;
+    async fn initial_supergraph(&mut self) -> Result<(), String> {
+        // Using async File create and write_all
+        let mut file = File::create(self.file_name.clone())
+            .await
+            .map_err(|e| e.to_string())?;
+        let resp = self.fetch_supergraph(None).await?;
 
         match resp {
             Some(supergraph) => {
                 file.write_all(supergraph.as_bytes())
+                    .await
                     .map_err(|e| e.to_string())?;
             }
             None => {
@@ -206,11 +191,13 @@ impl HiveRegistry {
         self.etag = etag;
     }
 
-    fn poll(&mut self) {
-        match self.fetch_supergraph(self.etag.clone()) {
+    async fn poll(&mut self) {
+        match self.fetch_supergraph(self.etag.clone()).await {
             Ok(new_supergraph) => {
                 if let Some(new_supergraph) = new_supergraph {
-                    let current_file = std::fs::read_to_string(self.file_name.clone())
+                    // Changes to use async read_to_string and write
+                    let current_file = fs::read_to_string(self.file_name.clone())
+                        .await
                         .expect("Could not read file");
                     let current_supergraph_hash = hash(current_file.as_bytes());
 
@@ -218,7 +205,8 @@ impl HiveRegistry {
 
                     if current_supergraph_hash != new_supergraph_hash {
                         self.logger.info("New supergraph detected!");
-                        std::fs::write(self.file_name.clone(), new_supergraph)
+                        fs::write(self.file_name.clone(), new_supergraph)
+                            .await
                             .expect("Could not write file");
                     }
                 }

@@ -14,9 +14,9 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::env;
 use std::sync::Arc;
-use std::sync::Mutex;
 use std::time::Instant;
 use std::time::{SystemTime, UNIX_EPOCH};
+use tokio::sync::Mutex as AsyncMutex;
 use tower::BoxError;
 use tower::ServiceBuilder;
 use tower::ServiceExt;
@@ -35,7 +35,7 @@ struct OperationContext {
 
 struct UsagePlugin {
     config: Config,
-    agent: Option<Arc<Mutex<UsageAgent>>>,
+    agent: Option<Arc<AsyncMutex<UsageAgent>>>,
 }
 
 #[derive(Clone, Debug, Deserialize, JsonSchema)]
@@ -51,9 +51,6 @@ struct Config {
     exclude: Option<Vec<String>>,
     client_name_header: Option<String>,
     client_version_header: Option<String>,
-    /// A maximum number of operations to hold in a buffer before sending to GraphQL Hive
-    /// Default: 1000
-    buffer_size: Option<usize>,
     /// Accept invalid SSL certificates
     /// Default: false
     accept_invalid_certs: Option<bool>,
@@ -68,7 +65,6 @@ impl Default for Config {
             client_name_header: None,
             client_version_header: None,
             accept_invalid_certs: Some(false),
-            buffer_size: Some(1000),
         }
     }
 }
@@ -168,19 +164,20 @@ impl Plugin for UsagePlugin {
         };
 
         let enabled = init.config.enabled.unwrap_or(true);
-        let buffer_size = init.config.buffer_size.unwrap_or(1000);
         let accept_invalid_certs = init.config.accept_invalid_certs.unwrap_or(false);
 
         Ok(UsagePlugin {
             config: init.config,
             agent: match enabled {
-                true => Some(Arc::new(Mutex::new(UsageAgent::new(
-                    init.supergraph_sdl.to_string(),
-                    token,
-                    endpoint,
-                    buffer_size,
-                    accept_invalid_certs,
-                )))),
+                true => Some(Arc::new(AsyncMutex::new(
+                    UsageAgent::new(
+                        init.supergraph_sdl.to_string(),
+                        token,
+                        endpoint,
+                        accept_invalid_certs,
+                    )
+                    .await,
+                ))),
                 false => None,
             },
         })
@@ -192,95 +189,115 @@ impl Plugin for UsagePlugin {
             None => ServiceBuilder::new().service(service).boxed(),
             Some(agent) => {
                 ServiceBuilder::new()
-                .map_future_with_request_data(
-                    move |req: &supergraph::Request| {
-                        Self::populate_context(config.clone(), req);
-                        req.context.clone()
-                    },
-                    move |ctx: Context, fut| {
-                        let agent_clone = agent.clone();
-                        async move {
-                            let start = Instant::now();
-    
-                            // nested async block, bc async is unstable with closures that receive arguments
-                            let operation_context = ctx
-                                .get::<_, OperationContext>(OPERATION_CONTEXT)
-                                .unwrap_or_default()
-                                .unwrap();
-    
-                            let result: supergraph::ServiceResult = fut.await;
-    
-                            if operation_context.dropped {
-                                tracing::debug!("Dropping operation (phase: SAMPLING): {}", operation_context.operation_name.clone().or_else(|| Some("anonymous".to_string())).unwrap());
-                                return result;
-                            }
-    
-                            let OperationContext {
-                                client_name,
-                                client_version,
-                                operation_name,
-                                timestamp,
-                                operation_body,
-                                ..
-                            } = operation_context;
-    
-                            let duration = start.elapsed();
-    
-                            match result {
-                                Err(e) => {
-                                    agent_clone
-                                        .clone()
-                                        .lock()
-                                        .expect("Unable to acquire Agent in supergraph_service (error)")
-                                        .add_report(ExecutionReport {
-                                            client_name,
-                                            client_version,
-                                            timestamp,
-                                            duration,
-                                            ok: false,
-                                            errors: 1,
-                                            operation_body,
-                                            operation_name,
-                                        });
-                                    Err(e)
+                    .map_future_with_request_data(
+                        move |req: &supergraph::Request| {
+                            Self::populate_context(config.clone(), req);
+                            req.context.clone()
+                        },
+                        move |ctx: Context, fut| {
+                            let agent_clone = agent.clone();
+                            async move {
+                                let start = Instant::now();
+
+                                // nested async block, bc async is unstable with closures that receive arguments
+                                let operation_context = ctx
+                                    .get::<_, OperationContext>(OPERATION_CONTEXT)
+                                    .unwrap_or_default()
+                                    .unwrap();
+
+                                let result: supergraph::ServiceResult = fut.await;
+
+                                if operation_context.dropped {
+                                    tracing::debug!(
+                                        "Dropping operation (phase: SAMPLING): {}",
+                                        operation_context
+                                            .operation_name
+                                            .clone()
+                                            .or_else(|| Some("anonymous".to_string()))
+                                            .unwrap()
+                                    );
+                                    return result;
                                 }
-                                Ok(router_response) => {
-                                    let is_failure = !router_response.response.status().is_success();
-                                    Ok(router_response.map(move |response_stream| {
-                                        let client_name = client_name.clone();
-                                        let client_version = client_version.clone();
-                                        let operation_body = operation_body.clone();
-                                        let operation_name = operation_name.clone();
-    
-                                        let res = response_stream
-                                            .map(move |response| {
-                                                // make sure we send a single report, not for each chunk
-                                                let response_has_errors = !response.errors.is_empty();
-                                                agent_clone.clone().lock()
-                                                .expect("Unable to acquire Agent in supergraph_service (ok)").add_report(ExecutionReport {
-                                                    client_name: client_name.clone(),
-                                                    client_version: client_version.clone(),
-                                                    timestamp,
-                                                    duration,
-                                                    ok: !is_failure && !response_has_errors,
-                                                    errors: response.errors.len(),
-                                                    operation_body: operation_body.clone(),
-                                                    operation_name: operation_name.clone(),
-                                                });
-    
-                                                response
+
+                                let OperationContext {
+                                    client_name,
+                                    client_version,
+                                    operation_name,
+                                    timestamp,
+                                    operation_body,
+                                    ..
+                                } = operation_context;
+
+                                let duration = start.elapsed();
+
+                                match result {
+                                    Err(e) => {
+                                        agent_clone
+                                            .clone()
+                                            .lock()
+                                            .await
+                                            .add_report(ExecutionReport {
+                                                client_name,
+                                                client_version,
+                                                timestamp,
+                                                duration,
+                                                ok: false,
+                                                errors: 1,
+                                                operation_body,
+                                                operation_name,
                                             })
-                                            .boxed();
-    
-                                        res
-                                    }))
+                                            .await;
+                                        Err(e)
+                                    }
+                                    Ok(router_response) => {
+                                        let is_failure =
+                                            !router_response.response.status().is_success();
+                                        Ok(router_response.map(move |response_stream| {
+                                            let res = response_stream
+                                                .then(move |response| {
+                                                    let agent_clone_inner = agent_clone.clone();
+                                                    let client_name = client_name.clone();
+                                                    let client_version = client_version.clone();
+                                                    let operation_body = operation_body.clone();
+                                                    let operation_name = operation_name.clone();
+
+                                                    async move {
+                                                        // make sure we send a single report, not for each chunk
+                                                        let response_has_errors =
+                                                            !response.errors.is_empty();
+                                                        agent_clone_inner
+                                                            .lock()
+                                                            .await
+                                                            .add_report(ExecutionReport {
+                                                                client_name: client_name.clone(),
+                                                                client_version: client_version
+                                                                    .clone(),
+                                                                timestamp,
+                                                                duration,
+                                                                ok: !is_failure
+                                                                    && !response_has_errors,
+                                                                errors: response.errors.len(),
+                                                                operation_body: operation_body
+                                                                    .clone(),
+                                                                operation_name: operation_name
+                                                                    .clone(),
+                                                            })
+                                                            .await;
+
+                                                        response
+                                                    }
+                                                })
+                                                .boxed();
+
+                                            res
+                                        }))
+                                    }
                                 }
                             }
-                        }
-                    },
-                )
-                .service(service)
-                .boxed()
+                        },
+                    )
+                    .service(service)
+                    .boxed()
             }
         }
     }
