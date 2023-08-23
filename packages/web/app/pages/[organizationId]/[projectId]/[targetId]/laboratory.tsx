@@ -839,16 +839,21 @@ function LaboratoryPageContent() {
           --color-primary: 40, 89%, 60% !important;
           min-height: 600px;
         }
-
         .graphiql-container .graphiql-tab-add {
           display: none;
         }
-
         .graphiql-container .graphiql-toolbar-icon {
           color: #4c5462;
         }
+
         .graphiql-container .graphiql-doc-explorer-search {
           background-color: #070d17;
+        }
+        .graphiql-container .cm-punctuation {
+          color: #ccc;
+        }
+        .graphiql-container .cm-punctuation:hover {
+          color: #ffffff;
         }
       `}</style>
       {query.fetching ? null : (
