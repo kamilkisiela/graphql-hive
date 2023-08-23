@@ -800,7 +800,7 @@ function ChecksPageContent() {
               </div>
             ) : (
               <div>
-                <div className="text-sm">
+                <div className="text-sm cursor-default">
                   {hasActiveSchemaCheck ? 'List is empty' : 'Your schema check list is empty'}
                 </div>
                 <DocsLink href="/features/schema-registry#check-a-schema">
