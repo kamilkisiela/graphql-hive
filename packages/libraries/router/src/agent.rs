@@ -137,7 +137,7 @@ impl UsageAgent {
         tokio::task::spawn(async move {
             let logger = Logger::new();
 
-            let mut consecutive_sec_no_flush_count = 0.0;
+            let mut consecutive_sec_no_flush_count = 0;
 
             loop {
                 let state_lock = agent_clone.state.lock().await;
@@ -145,8 +145,9 @@ impl UsageAgent {
                 // drop the `state_lock` early, as soon as we get the buffer_size and not througout the scope of the loop
                 drop(state_lock);
 
-                if buffer_size >= 1000 || consecutive_sec_no_flush_count >= 10.0 {
+                if buffer_size >= 1000 || consecutive_sec_no_flush_count >= 10 {
                     let mut inner_agent_clone = agent_clone.clone();
+
                     let child_task = tokio::task::spawn(async move {
                         inner_agent_clone.flush().await;
                     });
@@ -158,12 +159,12 @@ impl UsageAgent {
                         logger.error(&result.err().unwrap().to_string());
                     }
 
-                    consecutive_sec_no_flush_count = 0.0;
+                    consecutive_sec_no_flush_count = 0;
                 } else {
-                    consecutive_sec_no_flush_count += 0.1;
+                    consecutive_sec_no_flush_count += 5;
                 }
 
-                tokio::time::sleep(Duration::from_millis(100)).await;
+                tokio::time::sleep(Duration::from_secs(5)).await;
             }
         });
 
@@ -248,7 +249,7 @@ impl UsageAgent {
 
         let client = reqwest::Client::builder()
             .danger_accept_invalid_certs(self.accept_invalid_certs)
-            .connect_timeout(Duration::from_secs(10))
+            .connect_timeout(Duration::from_secs(5))
             .timeout(Duration::from_secs(60))
             .build()
             .map_err(|err| err.to_string())?;
