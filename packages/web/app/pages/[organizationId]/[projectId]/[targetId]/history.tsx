@@ -320,7 +320,7 @@ function ComparisonView({ versionId }: { versionId: string }) {
               after={comparison.service?.after ?? ''}
             />
           ) : (
-            <div>
+            <div className="cursor-default">
               <div className="m-3 p-4">
                 <div className="mb-3 flex items-center gap-3">
                   <CheckCircledIcon className="h-4 w-auto text-emerald-500" />
