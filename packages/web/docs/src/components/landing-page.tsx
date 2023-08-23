@@ -452,7 +452,7 @@ export function IndexPage(): ReactElement {
           </div>
           <div className={cn(classes.feature, 'py-24')}>
             <h2 className="text-3xl font-semibold leading-normal tracking-tight text-center mb-12">
-              Perfect fit for your GraphQL Gateway
+              Fits your infrastructure
             </h2>
             <Highlights
               items={[
