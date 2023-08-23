@@ -363,7 +363,7 @@ export function IndexPage(): ReactElement {
                 },
                 {
                   title: 'Apollo GraphOS alternative',
-                  description: 'GraphQL Hive is a drop-in replacement for Apollo GraphOS.',
+                  description: 'GraphQL Hive is a drop-in replacement for Apollo GraphOS Studio.',
                   icon: <FiPackage strokeWidth={1} className="h-full w-full" />,
                   documentationLink: '/docs/get-started/apollo-federation',
                 },
