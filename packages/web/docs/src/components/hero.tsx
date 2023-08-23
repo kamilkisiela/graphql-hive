@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 
 export function HeroTitle(props: { children: ReactNode }) {
   return (
-    <h1 className="mx-auto max-w-screen-lg bg-gradient-to-r from-yellow-500 via-orange-400 to-yellow-500 bg-clip-text text-center text-5xl font-extrabold text-transparent dark:from-yellow-400 dark:to-orange-500 sm:text-5xl lg:text-6xl">
+    <h1 className="mx-auto max-w-screen-lg bg-gradient-to-r from-yellow-500 via-orange-400 to-yellow-500 bg-clip-text text-center text-5xl font-semibold text-transparent dark:from-yellow-400 dark:to-orange-500 sm:text-5xl lg:text-6xl">
       {props.children}
     </h1>
   );
@@ -10,7 +10,7 @@ export function HeroTitle(props: { children: ReactNode }) {
 
 export function HeroSubtitle(props: { children: ReactNode }) {
   return (
-    <p className="mx-auto mt-6 max-w-screen-sm text-center text-lg text-gray-700 dark:text-gray-200">
+    <p className="mx-auto mt-6 max-w-screen-sm text-center text-lg text-gray-700 dark:text-gray-200 font-light">
       {props.children}
     </p>
   );
