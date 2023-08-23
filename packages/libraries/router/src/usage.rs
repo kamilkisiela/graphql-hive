@@ -171,9 +171,7 @@ impl Plugin for UsagePlugin {
         let buffer_size = init.config.buffer_size.unwrap_or(1000);
         let accept_invalid_certs = init.config.accept_invalid_certs.unwrap_or(false);
 
-        Ok(UsagePlugin {
-            config: init.config,
-            agent: match enabled {
+        let agent = match enabled {
                 true => Some(Arc::new(Mutex::new(UsageAgent::new(
                     init.supergraph_sdl.to_string(),
                     token,
@@ -182,7 +180,22 @@ impl Plugin for UsagePlugin {
                     accept_invalid_certs,
                 )))),
                 false => None,
-            },
+            };
+            
+         if let Some(ref agent) = agent {
+            let agent_clone = agent.clone();
+            std::thread::spawn(  move || {
+                loop {
+                    std::thread::sleep(std::time::Duration::from_secs(1));
+                    let mem_usage = agent_clone.lock().unwrap().memory_usage();
+                    tracing::error!("Memory Usage: {}", mem_usage);
+                }
+            });
+        }
+
+        Ok(UsagePlugin {
+            config: init.config,
+            agent,
         })
     }
 

@@ -1,8 +1,11 @@
+use crate::registry_logger::Logger;
+
 use super::graphql::OperationProcessor;
 use graphql_parser::schema::{parse_schema, Document};
 use serde::Serialize;
 use std::{
     collections::{HashMap, VecDeque},
+    mem::size_of,
     sync::{Arc, Mutex},
     time::Duration,
 };
@@ -64,6 +67,14 @@ pub struct ExecutionReport {
     pub operation_name: Option<String>,
 }
 
+impl ExecutionReport {
+    pub fn memory_usage(&self) -> usize {
+        // Approximate memory usage for ExecutionReport struct
+        // Replace with actual fields and their sizes
+        size_of::<Self>()
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct State {
     buffer: VecDeque<ExecutionReport>,
@@ -71,6 +82,14 @@ pub struct State {
 }
 
 impl State {
+    pub fn memory_usage(&self) -> usize {
+        // buffer and schema memory
+        let buffer_mem = self.buffer.iter().map(|x| x.memory_usage()).sum::<usize>();
+        let schema_mem = size_of::<Document<String>>();
+
+        buffer_mem + schema_mem
+    }
+
     fn new(schema: Document<'static, String>) -> Self {
         Self {
             buffer: VecDeque::new(),
@@ -111,6 +130,17 @@ fn non_empty_string(value: Option<String>) -> Option<String> {
 }
 
 impl UsageAgent {
+    pub fn memory_usage(&self) -> usize {
+        // token, endpoint and boolean memory
+        let base_size = size_of::<String>() * 2 + size_of::<bool>();
+
+        // memory of state and processor
+        let state_mem = self.state.lock().unwrap().memory_usage();
+        let processor_mem = self.processor.lock().unwrap().memory_usage();
+
+        base_size + state_mem + processor_mem
+    }
+
     pub fn new(
         schema: String,
         token: String,
