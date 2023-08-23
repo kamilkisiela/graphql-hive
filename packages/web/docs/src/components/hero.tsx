@@ -24,6 +24,21 @@ export function HeroLinks(props: { children: ReactNode }) {
   );
 }
 
+export function HereTrustedBy(props: { children: ReactNode }) {
+  return (
+    <div className="mt-24 lg:mt-36">
+      <div className="mx-auto lg:max-w-screen-lg max-w-[80%] text-center">
+        <p className="text-gray-700 text-sm">
+          Trusted by global enterprises and fast-moving startups.
+        </p>
+        <div className="mt-10 flex flex-row flex-wrap items-center justify-center gap-x-12 gap-y-6 text-gray-700">
+          {props.children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function Hero(props: { children: ReactNode }) {
   return (
     <div className="w-full relative overflow-hidden bg-white">
