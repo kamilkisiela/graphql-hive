@@ -5,6 +5,7 @@ use graphql_parser::schema::{parse_schema, Document};
 use serde::Serialize;
 use std::{
     collections::{HashMap, VecDeque},
+    mem::size_of,
     sync::Arc,
 };
 use tokio::sync::Mutex as AsyncMutex;
@@ -67,6 +68,14 @@ pub struct ExecutionReport {
     pub operation_name: Option<String>,
 }
 
+impl ExecutionReport {
+    pub fn memory_usage(&self) -> usize {
+        // Approximate memory usage for ExecutionReport struct
+        // Replace with actual fields and their sizes
+        size_of::<Self>()
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct State {
     buffer: VecDeque<ExecutionReport>,
@@ -74,6 +83,14 @@ pub struct State {
 }
 
 impl State {
+    pub fn memory_usage(&self) -> usize {
+        // buffer and schema memory
+        let buffer_mem = self.buffer.iter().map(|x| x.memory_usage()).sum::<usize>();
+        let schema_mem = size_of::<Document<String>>();
+
+        buffer_mem + schema_mem
+    }
+
     fn new(schema: Document<'static, String>) -> Self {
         Self {
             buffer: VecDeque::new(),
@@ -81,8 +98,9 @@ impl State {
         }
     }
 
-    pub fn push(&mut self, report: ExecutionReport) {
+    pub fn push(&mut self, report: ExecutionReport) -> usize {
         self.buffer.push_back(report);
+        self.buffer.len()
     }
 
     pub fn drain(&mut self) -> Vec<ExecutionReport> {
@@ -94,6 +112,7 @@ impl State {
 pub struct UsageAgent {
     token: String,
     endpoint: String,
+    buffer_size: usize,
     accept_invalid_certs: bool,
     /// We need the Arc wrapper to be able to clone the agent while preserving multiple mutable reference to processor
     /// We also need the Mutex wrapper bc we cannot borrow data in an `Arc` as mutable
@@ -112,10 +131,22 @@ fn non_empty_string(value: Option<String>) -> Option<String> {
 }
 
 impl UsageAgent {
+    pub async fn memory_usage(&self) -> usize {
+        // token, endpoint and boolean memory
+        let base_size = size_of::<String>() * 2 + size_of::<bool>();
+
+        // memory of state and processor
+        let state_mem = self.state.lock().await.memory_usage();
+        let processor_mem = self.processor.lock().await.memory_usage();
+
+        base_size + state_mem + processor_mem
+    }
+
     pub async fn new(
         schema: String,
         token: String,
         endpoint: String,
+        buffer_size: usize,
         accept_invalid_certs: bool,
     ) -> Self {
         let schema = parse_schema::<String>(&schema)
@@ -129,6 +160,7 @@ impl UsageAgent {
             processor,
             endpoint,
             token,
+            buffer_size,
             accept_invalid_certs,
         };
 
@@ -137,34 +169,21 @@ impl UsageAgent {
         tokio::task::spawn(async move {
             let logger = Logger::new();
 
-            let mut consecutive_sec_no_flush_count = 0;
-
             loop {
-                let state_lock = agent_clone.state.lock().await;
-                let buffer_size = state_lock.buffer.len();
-                // drop the `state_lock` early, as soon as we get the buffer_size and not througout the scope of the loop
-                drop(state_lock);
-
-                if buffer_size >= 1000 || consecutive_sec_no_flush_count >= 10 {
-                    let mut inner_agent_clone = agent_clone.clone();
-
-                    let child_task = tokio::task::spawn(async move {
-                        inner_agent_clone.flush().await;
-                    });
-
-                    let result = child_task.await;
-
-                    if result.is_err() {
-                        logger.error("A panic occurred inside the flush task, but it was caught and the loop will continue.");
-                        logger.error(&result.err().unwrap().to_string());
-                    }
-
-                    consecutive_sec_no_flush_count = 0;
-                } else {
-                    consecutive_sec_no_flush_count += 5;
-                }
-
                 tokio::time::sleep(Duration::from_secs(5)).await;
+
+                let mut inner_agent_clone = agent_clone.clone();
+
+                let child_task = tokio::task::spawn(async move {
+                    inner_agent_clone.flush().await;
+                });
+
+                let result = child_task.await;
+
+                if result.is_err() {
+                    logger.error("A panic occurred inside the flush task, but it was caught and the loop will continue.");
+                    logger.error(&result.err().unwrap().to_string());
+                }
             }
         });
 
@@ -240,7 +259,8 @@ impl UsageAgent {
     }
 
     pub async fn add_report(&mut self, execution_report: ExecutionReport) {
-        self.state.lock().await.push(execution_report);
+        let size = self.state.lock().await.push(execution_report);
+        self.flush_if_full(size).await;
     }
 
     pub async fn send_report(&self, report: Report, buffer_size: usize) -> Result<(), String> {
@@ -253,6 +273,7 @@ impl UsageAgent {
             .timeout(Duration::from_secs(60))
             .build()
             .map_err(|err| err.to_string())?;
+
         let mut error_message =
             "Unexpected error: Sending the report has failed for 3 consecutive tries!".to_string();
 
@@ -297,6 +318,12 @@ impl UsageAgent {
         }
 
         Err(error_message)
+    }
+
+    pub async fn flush_if_full(&mut self, size: usize) {
+        if size >= self.buffer_size {
+            self.flush().await;
+        }
     }
 
     pub async fn flush(&mut self) {

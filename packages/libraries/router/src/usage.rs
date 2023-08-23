@@ -51,6 +51,9 @@ struct Config {
     exclude: Option<Vec<String>>,
     client_name_header: Option<String>,
     client_version_header: Option<String>,
+    /// A maximum number of operations to hold in a buffer before sending to GraphQL Hive
+    /// Default: 1000
+    buffer_size: Option<usize>,
     /// Accept invalid SSL certificates
     /// Default: false
     accept_invalid_certs: Option<bool>,
@@ -65,6 +68,7 @@ impl Default for Config {
             client_name_header: None,
             client_version_header: None,
             accept_invalid_certs: Some(false),
+            buffer_size: Some(1000),
         }
     }
 }
@@ -160,31 +164,47 @@ impl Plugin for UsagePlugin {
         let endpoint = env::var("HIVE_ENDPOINT");
         let endpoint = match endpoint {
             Ok(endpoint) => endpoint,
-            Err(_) => "https://app.graphql-hive.com/usage".to_string(),
+            Err(_) => "https://app.dev.graphql-hive.com/usage".to_string(),
         };
 
         let enabled = init.config.enabled.unwrap_or(true);
+        let buffer_size = init.config.buffer_size.unwrap_or(1000);
         let accept_invalid_certs = init.config.accept_invalid_certs.unwrap_or(false);
+
+        let agent = match enabled {
+            true => Some(Arc::new(AsyncMutex::new(
+                UsageAgent::new(
+                    init.supergraph_sdl.to_string(),
+                    token,
+                    endpoint,
+                    buffer_size,
+                    accept_invalid_certs,
+                )
+                .await,
+            ))),
+            false => None,
+        };
+
+        if let Some(ref agent) = agent {
+            let agent_clone = agent.clone();
+            tokio::spawn(async move {
+                loop {
+                    tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                    let mem_usage = agent_clone.lock().await.memory_usage().await;
+                    tracing::error!("Memory Usage: {}", mem_usage);
+                }
+            });
+        }
 
         Ok(UsagePlugin {
             config: init.config,
-            agent: match enabled {
-                true => Some(Arc::new(AsyncMutex::new(
-                    UsageAgent::new(
-                        init.supergraph_sdl.to_string(),
-                        token,
-                        endpoint,
-                        accept_invalid_certs,
-                    )
-                    .await,
-                ))),
-                false => None,
-            },
+            agent,
         })
     }
 
     fn supergraph_service(&self, service: supergraph::BoxService) -> supergraph::BoxService {
         let config = self.config.clone();
+
         match self.agent.clone() {
             None => ServiceBuilder::new().service(service).boxed(),
             Some(agent) => {

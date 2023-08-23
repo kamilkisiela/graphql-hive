@@ -8,6 +8,7 @@ use std::cmp::Ordering;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::mem::size_of;
 use std::num::NonZeroUsize;
 
 use graphql_parser::minify_query;
@@ -504,11 +505,30 @@ pub struct ProcessedOperation {
     pub coordinates: Vec<String>,
 }
 
+impl ProcessedOperation {
+    pub fn memory_usage(&self) -> usize {
+        // Approximate memory usage for ProcessedOperation struct
+        size_of::<String>() * 2
+            + self.coordinates.iter().map(|c| c.len()).sum::<usize>() * size_of::<char>()
+    }
+}
+
 pub struct OperationProcessor {
     cache: LruCache<String, Option<ProcessedOperation>>,
 }
 
 impl OperationProcessor {
+    pub fn memory_usage(&self) -> usize {
+        // cache memory
+        self.cache
+            .iter()
+            .map(|(_, v)| match v {
+                Some(op) => op.memory_usage(),
+                None => 0,
+            })
+            .sum::<usize>()
+    }
+
     pub fn new() -> OperationProcessor {
         OperationProcessor {
             cache: LruCache::new(NonZeroUsize::new(1000).unwrap()),
