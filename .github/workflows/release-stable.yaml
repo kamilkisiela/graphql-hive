@@ -87,6 +87,7 @@ jobs:
       imageTag: ${{ needs.publish.outputs.version }}
       publishSourceMaps: false
       publishLatest: true
+      publishPrComment: false
       targets: cli
       uploadJavaScriptArtifacts: false
     secrets: inherit
