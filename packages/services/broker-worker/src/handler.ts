@@ -66,11 +66,9 @@ export async function handleRequest(
   );
 
   const resolveResponseBody =
-    parsedRequest.method === 'GET'
-      ? true
-      : 'resolveResponseBody' in parsedRequest
-      ? parsedRequest.resolveResponseBody
-      : false;
+    'resolveResponseBody' in parsedRequest
+      ? parsedRequest.resolveResponseBody // POST requests default to true
+      : parsedRequest.method === 'GET'; // GET requests are always true;
 
   const text = resolveResponseBody
     ? await gatherResponse(response).catch(error => {
