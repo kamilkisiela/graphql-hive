@@ -16,6 +16,7 @@ const RequestModelSchema = z.union([
     url: z.string().min(1),
     headers: z.record(z.string()).optional(),
     body: z.string().optional(),
+    resolveResponseBody: z.boolean().optional().default(true),
   }),
 ]);
 
