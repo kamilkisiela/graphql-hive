@@ -380,26 +380,6 @@ group "build" {
     "server",
     "stripe-billing",
     "composition-federation-2",
-    "app",
-    "cli"
-  ]
-}
-
-group "build" {
-  targets = [
-    "emails",
-    "rate-limit",
-    "schema",
-    "policy",
-    "storage",
-    "tokens",
-    "usage-estimator",
-    "usage-ingestor",
-    "usage",
-    "webhooks",
-    "server",
-    "stripe-billing",
-    "composition-federation-2",
     "app"
   ]
 }
