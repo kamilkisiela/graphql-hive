@@ -403,10 +403,11 @@ export function IndexPage(): ReactElement {
                     documentationLink: '/docs/features/high-availability-cdn',
                   },
                   {
-                    title: 'Apollo GraphOS alternative',
-                    description: 'GraphQL Hive is a drop-in replacement for Apollo GraphOS Studio.',
+                    title: 'Apollo Studio alternative',
+                    description:
+                      'GraphQL Hive is a drop-in replacement for Apollo Studio (Apollo GraphOS).',
                     icon: <FiPackage strokeWidth={1} className="h-full w-full" />,
-                    documentationLink: '/docs/get-started/apollo-federation',
+                    documentationLink: '/docs/use-cases/apollo-studio',
                   },
                 ]}
               />
