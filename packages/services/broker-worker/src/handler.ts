@@ -66,7 +66,11 @@ export async function handleRequest(
   );
 
   const resolveResponseBody =
-    'resolveResponseBody' in parsedRequest ? parsedRequest.resolveResponseBody : false;
+    parsedRequest.method === 'GET'
+      ? true
+      : 'resolveResponseBody' in parsedRequest
+      ? parsedRequest.resolveResponseBody
+      : false;
 
   const text = resolveResponseBody
     ? await gatherResponse(response).catch(error => {
