@@ -64,10 +64,18 @@ export async function handleRequest(
   logger.info(
     `Received response from ${parsedRequest.url} with status ${response.status} (${response.statusText}}`,
   );
-  const text = await gatherResponse(response).catch(error => {
-    logger.error(`Failed to collect response body from ${parsedRequest.url}`, error);
-    return Promise.reject(error);
-  });
+
+  const resolveResponseBody =
+    'resolveResponseBody' in parsedRequest
+      ? parsedRequest.resolveResponseBody // POST requests default to true
+      : parsedRequest.method === 'GET'; // GET requests are always true;
+
+  const text = resolveResponseBody
+    ? await gatherResponse(response).catch(error => {
+        logger.error(`Failed to collect response body from ${parsedRequest.url}`, error);
+        return Promise.reject(error);
+      })
+    : 'No response body as requested by the client (resolveResponseBody: false)';
   logger.info(`Collected response body from ${parsedRequest.url} (length=${text.length})`);
   return new Response(text, {
     status: response.status,
