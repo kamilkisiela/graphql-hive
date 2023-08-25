@@ -1,0 +1,1 @@
+{"code":"INVALID_AUTH_KEY","error":"Hive CDN authentication key is invalid, or it does not match the requested target ID.","description":"Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage"}

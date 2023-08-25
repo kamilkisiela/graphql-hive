@@ -164,7 +164,7 @@ impl Plugin for UsagePlugin {
         let endpoint = env::var("HIVE_ENDPOINT");
         let endpoint = match endpoint {
             Ok(endpoint) => endpoint,
-            Err(_) => "https://app.dev.graphql-hive.com/usage".to_string(),
+            Err(_) => "https://app.graphql-hive.com/usage".to_string(),
         };
 
         let enabled = init.config.enabled.unwrap_or(true);
@@ -219,13 +219,13 @@ impl Plugin for UsagePlugin {
                             async move {
                                 let start = Instant::now();
 
-                                // nested async block, bc async is unstable with closures that receive arguments
                                 let operation_context = ctx
                                     .get::<_, OperationContext>(OPERATION_CONTEXT)
                                     .unwrap_or_default()
                                     .unwrap();
 
-                                let result: supergraph::ServiceResult = fut.await;
+                                let result: Result<supergraph::ServiceResult, _> =
+                                    tokio::spawn(fut).await;
 
                                 if operation_context.dropped {
                                     tracing::debug!(
@@ -236,7 +236,7 @@ impl Plugin for UsagePlugin {
                                             .or_else(|| Some("anonymous".to_string()))
                                             .unwrap()
                                     );
-                                    return result;
+                                    return result.expect("Failed to get result from spawned task");
                                 }
 
                                 let OperationContext {
@@ -251,25 +251,30 @@ impl Plugin for UsagePlugin {
                                 let duration = start.elapsed();
 
                                 match result {
-                                    Err(e) => {
-                                        agent_clone
-                                            .clone()
-                                            .lock()
-                                            .await
-                                            .add_report(ExecutionReport {
-                                                client_name,
-                                                client_version,
-                                                timestamp,
-                                                duration,
-                                                ok: false,
-                                                errors: 1,
-                                                operation_body,
-                                                operation_name,
-                                            })
-                                            .await;
+                                    Err(_) => {
+                                        // Handle the error due to tokio::spawn failure
+                                        panic!("Failed to run the task in background");
+                                    }
+                                    Ok(Err(e)) => {
+                                        let _ = tokio::spawn(async move {
+                                            agent_clone
+                                                .lock()
+                                                .await
+                                                .add_report(ExecutionReport {
+                                                    client_name,
+                                                    client_version,
+                                                    timestamp,
+                                                    duration,
+                                                    ok: false,
+                                                    errors: 1,
+                                                    operation_body,
+                                                    operation_name,
+                                                })
+                                                .await;
+                                        });
                                         Err(e)
                                     }
-                                    Ok(router_response) => {
+                                    Ok(Ok(router_response)) => {
                                         let is_failure =
                                             !router_response.response.status().is_success();
                                         Ok(router_response.map(move |response_stream| {
@@ -282,27 +287,30 @@ impl Plugin for UsagePlugin {
                                                     let operation_name = operation_name.clone();
 
                                                     async move {
-                                                        // make sure we send a single report, not for each chunk
                                                         let response_has_errors =
                                                             !response.errors.is_empty();
-                                                        agent_clone_inner
-                                                            .lock()
-                                                            .await
-                                                            .add_report(ExecutionReport {
-                                                                client_name: client_name.clone(),
-                                                                client_version: client_version
-                                                                    .clone(),
-                                                                timestamp,
-                                                                duration,
-                                                                ok: !is_failure
-                                                                    && !response_has_errors,
-                                                                errors: response.errors.len(),
-                                                                operation_body: operation_body
-                                                                    .clone(),
-                                                                operation_name: operation_name
-                                                                    .clone(),
-                                                            })
-                                                            .await;
+                                                        let clone = response.clone();
+                                                        let _ = tokio::spawn(async move {
+                                                            agent_clone_inner
+                                                                .lock()
+                                                                .await
+                                                                .add_report(ExecutionReport {
+                                                                    client_name: client_name
+                                                                        .clone(),
+                                                                    client_version: client_version
+                                                                        .clone(),
+                                                                    timestamp,
+                                                                    duration,
+                                                                    ok: !is_failure
+                                                                        && !response_has_errors,
+                                                                    errors: clone.errors.len(),
+                                                                    operation_body: operation_body
+                                                                        .clone(),
+                                                                    operation_name: operation_name
+                                                                        .clone(),
+                                                                })
+                                                                .await;
+                                                        });
 
                                                         response
                                                     }

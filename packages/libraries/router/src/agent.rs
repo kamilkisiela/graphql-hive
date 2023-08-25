@@ -1,12 +1,19 @@
 use crate::registry_logger::Logger;
 
 use super::graphql::OperationProcessor;
+use async_std::task;
 use graphql_parser::schema::{parse_schema, Document};
+use reqwest::Client;
 use serde::Serialize;
 use std::{
     collections::{HashMap, VecDeque},
     mem::size_of,
     sync::Arc,
+};
+use surf::{
+    self,
+    http::{self, headers},
+    StatusCode,
 };
 use tokio::sync::Mutex as AsyncMutex;
 use tokio::time::Duration;
@@ -104,7 +111,10 @@ impl State {
     }
 
     pub fn drain(&mut self) -> Vec<ExecutionReport> {
-        self.buffer.drain(0..).collect::<Vec<ExecutionReport>>()
+        let value = self.buffer.drain(0..).collect::<Vec<ExecutionReport>>();
+        self.buffer.shrink_to_fit();
+
+        value
     }
 }
 
@@ -118,6 +128,7 @@ pub struct UsageAgent {
     /// We also need the Mutex wrapper bc we cannot borrow data in an `Arc` as mutable
     pub state: Arc<tokio::sync::Mutex<State>>,
     processor: Arc<tokio::sync::Mutex<OperationProcessor>>,
+    client: Client,
 }
 
 fn non_empty_string(value: Option<String>) -> Option<String> {
@@ -155,6 +166,15 @@ impl UsageAgent {
         let state = Arc::new(AsyncMutex::new(State::new(schema)));
         let processor = Arc::new(AsyncMutex::new(OperationProcessor::new()));
 
+        let client = reqwest::Client::builder()
+            .danger_accept_invalid_certs(accept_invalid_certs)
+            .connect_timeout(Duration::from_secs(2))
+            .timeout(Duration::from_secs(5))
+            .pool_max_idle_per_host(2)
+            .build()
+            .map_err(|err| err.to_string())
+            .expect("Error: couldn't instantiate the http client for sending reports");
+
         let agent = Self {
             state,
             processor,
@@ -162,6 +182,7 @@ impl UsageAgent {
             token,
             buffer_size,
             accept_invalid_certs,
+            client,
         };
 
         let agent_clone = agent.clone();
@@ -267,20 +288,14 @@ impl UsageAgent {
         const DELAY_BETWEEN_TRIES: Duration = Duration::from_millis(500);
         const MAX_TRIES: u8 = 3;
 
-        let client = reqwest::Client::builder()
-            .danger_accept_invalid_certs(self.accept_invalid_certs)
-            .connect_timeout(Duration::from_secs(5))
-            .timeout(Duration::from_secs(60))
-            .build()
-            .map_err(|err| err.to_string())?;
-
         let mut error_message =
             "Unexpected error: Sending the report has failed for 3 consecutive tries!".to_string();
 
         for try_num in 0..MAX_TRIES {
-            tracing::debug!("Sending {} Reports, try number: {try_num}", buffer_size);
+            tracing::debug!("Sending {} Reports, try number: {}", buffer_size, try_num);
 
-            let resp = client
+            let resp = self
+                .client
                 .post(self.endpoint.clone())
                 .header(
                     reqwest::header::AUTHORIZATION,
@@ -314,7 +329,7 @@ impl UsageAgent {
                 }
             }
 
-            tokio::time::sleep(DELAY_BETWEEN_TRIES).await;
+            async_std::task::sleep(DELAY_BETWEEN_TRIES).await;
         }
 
         Err(error_message)
@@ -334,6 +349,7 @@ impl UsageAgent {
         let size = execution_reports.len();
         if size > 0 {
             let report = self.produce_report(execution_reports).await;
+
             match self.send_report(report, size).await {
                 Ok(_) => tracing::debug!("Reported {} operations", size),
                 Err(e) => tracing::error!("{}", e),
