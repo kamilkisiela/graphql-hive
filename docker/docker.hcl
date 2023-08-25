@@ -380,8 +380,7 @@ group "build" {
     "server",
     "stripe-billing",
     "composition-federation-2",
-    "app",
-    "cli"
+    "app"
   ]
 }
 

@@ -90,7 +90,7 @@ export function SchemaExplorerFilter({
   return (
     <div className="flex flex-row items-center gap-x-4">
       <Autocomplete
-        className="grow min-w-[250px]"
+        className="grow min-w-[250px] cursor-text"
         placeholder="Search for a type"
         defaultValue={typename ? { value: typename, label: typename } : null}
         options={types}
@@ -104,7 +104,7 @@ export function SchemaExplorerFilter({
       <RadixSelect placeholder="Select a date range" {...periodSelector} />
       <div className="flex flex-row items-center gap-4">
         <Switch checked={!collapsed} onCheckedChange={toggleCollapsed} />
-        <div>
+        <div className="cursor-default">
           <div>Show all arguments</div>
           <p className="text-xs text-gray-500">List of arguments is collapsed by default</p>
         </div>

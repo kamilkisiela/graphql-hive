@@ -7,7 +7,7 @@ export const Switch = ({ className, disabled, ...props }: SwitchProps): ReactEle
   return (
     <SwitchPrimitive.Root
       className={clsx(
-        'relative h-[25px] w-[45px] rounded-full bg-gray-800 focus:ring disabled:cursor-not-allowed',
+        'relative h-[25px] w-[45px] rounded-full bg-gray-800 focus:ring  disabled:cursor-not-allowed',
         className,
       )}
       disabled={disabled}

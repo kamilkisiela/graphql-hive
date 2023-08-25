@@ -23,7 +23,7 @@ const IndexPage = (): ReactElement => {
         <Heading size="2xl" className="mt-[22px] mb-[5px]">
           Hive
         </Heading>
-        <p className="font-light text-gray-500">Schema Registry for your GraphQL Workflows</p>
+        <p className="font-light text-gray-500">Open GraphQL Platform</p>
       </div>
 
       <div className="grow px-9 pt-11 pb-9">

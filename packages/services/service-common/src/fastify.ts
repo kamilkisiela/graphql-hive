@@ -13,10 +13,11 @@ export async function createServer(options: {
     requests: boolean;
     level: string;
   };
+  bodyLimit?: number;
 }) {
   const server = fastify({
     disableRequestLogging: true,
-    bodyLimit: 11e6, // 11 mb
+    bodyLimit: options.bodyLimit,
     logger: {
       level: options.log.level,
     },

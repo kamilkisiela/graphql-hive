@@ -57,6 +57,7 @@ export function createWebhookJob({ config }: { config: Config }) {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify(job.data.event),
+            resolveResponseBody: false,
           },
         });
       } else {

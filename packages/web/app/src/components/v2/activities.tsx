@@ -297,6 +297,7 @@ const ActivityContainer = (props: { children: ReactNode }) => (
     last:border-b-0
     last:pb-0
     first-of-type:mt-0
+    cursor-default
   "
   >
     {props.children}

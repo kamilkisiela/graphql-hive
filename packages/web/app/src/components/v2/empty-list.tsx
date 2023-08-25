@@ -16,7 +16,10 @@ export const EmptyList = ({
   className?: string;
 }): ReactElement => {
   return (
-    <Card className={cn('flex grow flex-col items-center gap-y-2', className)} data-cy="empty-list">
+    <Card
+      className={cn('flex grow flex-col items-center gap-y-2 cursor-default', className)}
+      data-cy="empty-list"
+    >
       <Image
         src={magnifier}
         alt="Magnifier illustration"

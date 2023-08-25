@@ -41,6 +41,10 @@ export default gql`
     """
     Requires API Token
     """
+    schemaVersionForActionId(actionId: ID!): SchemaVersion
+    """
+    Requires API Token
+    """
     latestVersion: SchemaVersion
     """
     Requires API Token
