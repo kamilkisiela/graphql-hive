@@ -6,6 +6,7 @@ import {
   startOfHour,
   startOfMinute,
   subHours,
+  subMinutes,
 } from 'date-fns';
 import { Injectable } from 'graphql-modules';
 import * as z from 'zod';
@@ -134,10 +135,14 @@ export class OperationsReader {
     };
 
     // The oldest data point we can fetch from the database, per table.
+    // ! We subtract 2 minutes as we round the date to the nearest minute on UI
+    //   and there's also a chance that request will be made at 59th second of the minute
+    //   and by the time it this function is called the minute will change.
+    //   That's why we use 2 minutes as a buffer.
     const tableOldestDateTimePoint = {
-      daily: startOfDay(subHours(new Date(), tableTTLInHours.daily)),
-      hourly: startOfHour(subHours(new Date(), tableTTLInHours.hourly)),
-      minutely: startOfMinute(subHours(new Date(), tableTTLInHours.minutely)),
+      daily: subMinutes(startOfDay(subHours(new Date(), tableTTLInHours.daily)), 2),
+      hourly: subMinutes(startOfHour(subHours(new Date(), tableTTLInHours.hourly)), 2),
+      minutely: subMinutes(startOfMinute(subHours(new Date(), tableTTLInHours.minutely)), 2),
     };
 
     let selectedQueryType: 'daily' | 'hourly' | 'minutely';
