@@ -153,7 +153,7 @@ impl UsageAgent {
         agent
     }
 
-    fn produce_report(&mut self, reports: Vec<ExecutionReport>) -> Report {
+    fn produce_report(&self, reports: Vec<ExecutionReport>) -> Report {
         let mut report = Report {
             size: 0,
             map: HashMap::new(),
@@ -228,21 +228,25 @@ impl UsageAgent {
         report
     }
 
-    pub fn add_report(&mut self, execution_report: ExecutionReport) {
+    pub fn add_report(&self, execution_report: ExecutionReport) {
         let size = self
             .state
             .lock()
             .expect("Unable to acquire State in add_report")
             .push(execution_report);
+
         self.flush_if_full(size);
     }
 
-    pub fn send_report(&self, report: Report) -> Result<(), String> {
+    pub async fn send_report(&self, report: Report) -> Result<(), String> {
         const DELAY_BETWEEN_TRIES: Duration = Duration::from_millis(500);
         const MAX_TRIES: u8 = 3;
 
-        let client = reqwest::blocking::Client::builder()
+        let client = reqwest::Client::builder()
             .danger_accept_invalid_certs(self.accept_invalid_certs)
+            .connect_timeout(Duration::from_secs(10))
+            .timeout(Duration::from_secs(2))
+            // .timeout(Duration::from_secs(60))
             .build()
             .map_err(|err| err.to_string())?;
         let mut error_message = "Unexpected error".to_string();
@@ -260,6 +264,7 @@ impl UsageAgent {
                 )
                 .json(&report)
                 .send()
+                .await
                 .map_err(|e| e.to_string())?;
 
             match resp.status() {
@@ -276,7 +281,7 @@ impl UsageAgent {
                     error_message = format!(
                         "Could not send usage report: ({}) {}",
                         resp.status().as_str(),
-                        resp.text().unwrap_or_default()
+                        resp.text().await.unwrap_or_default()
                     );
                 }
             }
@@ -286,13 +291,16 @@ impl UsageAgent {
         Err(error_message)
     }
 
-    pub fn flush_if_full(&mut self, size: usize) {
+    pub fn flush_if_full(&self, size: usize) {
         if size >= self.buffer_size {
-            self.flush();
+            let cloned_self = self.clone();
+            tokio::task::spawn(async move {
+                cloned_self.flush().await;
+            });
         }
     }
 
-    pub fn flush(&mut self) {
+    pub async fn flush(&self) {
         let execution_reports = self
             .state
             .lock()
@@ -302,7 +310,7 @@ impl UsageAgent {
 
         if size > 0 {
             let report = self.produce_report(execution_reports);
-            match self.send_report(report) {
+            match self.send_report(report).await {
                 Ok(_) => tracing::debug!("Reported {} operations", size),
                 Err(e) => tracing::error!("{}", e),
             }
