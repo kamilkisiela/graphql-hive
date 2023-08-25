@@ -44,6 +44,24 @@ export default class OperationsCheck extends Command {
       default: [],
       multiple: true,
     }),
+    graphqlTag: Flags.string({
+      description: [
+        'Identify template literals containing GraphQL queries in JavaScript/TypeScript code. Supports multiple values.',
+        'Examples:',
+        '  --graphqlTag graphql-tag (Equivalent to: import gqlTagFunction from "graphql-tag")',
+        '  --graphqlTag graphql:react-relay (Equivalent to: import { graphql } from "react-relay")',
+      ].join('\n'),
+      multiple: true,
+    }),
+    globalGraphqlTag: Flags.string({
+      description: [
+        'Allows to use a global identifier instead of a module import. Similar to --graphqlTag.',
+        'Examples:',
+        '  --globalGraphqlTag gql (Supports: export const meQuery = gql`{ me { id } }`)',
+        '  --globalGraphqlTag graphql (Supports: export const meQuery = graphql`{ me { id } }`)',
+      ].join('\n'),
+      multiple: true,
+    }),
   };
 
   static args = {
@@ -74,10 +92,21 @@ export default class OperationsCheck extends Command {
         legacyFlagName: 'token',
         env: 'HIVE_TOKEN',
       });
+      const graphqlTag = flags.graphqlTag;
+      const globalGraphqlTag = flags.globalGraphqlTag;
+
       const file: string = args.file;
 
       const operations = await loadOperations(file, {
         normalize: false,
+        pluckModules: graphqlTag?.map(tag => {
+          const [name, identifier] = tag.split(':');
+          return {
+            name,
+            identifier,
+          };
+        }),
+        pluckGlobalGqlIdentifierName: globalGraphqlTag,
       });
 
       if (operations.length === 0) {

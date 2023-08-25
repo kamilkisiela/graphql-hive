@@ -10,6 +10,10 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+    outputs:
+      publish: ${{ steps.cli.outputs.publish }}
+      version: ${{ steps.cli.outputs.version }}
+
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -74,3 +78,16 @@ jobs:
         run:
           pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION --win || pnpm oclif
           promote --no-xz --sha ${GITHUB_SHA:0:8} --version $VERSION --win
+
+  publish_docker:
+    needs: publish
+    uses: ./.github/workflows/build-and-dockerize.yaml
+    if: needs.publish.outputs.publish == 'true'
+    with:
+      imageTag: ${{ needs.publish.outputs.version }}
+      publishSourceMaps: false
+      publishLatest: true
+      publishPrComment: false
+      targets: cli
+      uploadJavaScriptArtifacts: false
+    secrets: inherit

@@ -381,7 +381,7 @@ export function CDNAccessTokens(props: {
       <Heading id="cdn-access-tokens" className="mb-2">
         CDN Access Token
       </Heading>
-      <div className="text-sm text-gray-400">
+      <div className="text-sm text-gray-400 cursor-default">
         CDN Access Tokens are used to access to Hive High-Availability CDN and read your schema
         artifacts.
         <br />

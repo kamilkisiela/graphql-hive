@@ -1,5 +1,29 @@
 # @graphql-hive/cli
 
+## 0.29.0
+
+### Minor Changes
+
+- [#2569](https://github.com/kamilkisiela/graphql-hive/pull/2569)
+  [`5bef13b`](https://github.com/kamilkisiela/graphql-hive/commit/5bef13b15e05b639c76ea7d847045d017a12c8a7)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Add ability to identify non-standard
+  template litarls in operations:check command
+
+## 0.28.0
+
+### Minor Changes
+
+- [#2720](https://github.com/kamilkisiela/graphql-hive/pull/2720)
+  [`79227f8`](https://github.com/kamilkisiela/graphql-hive/commit/79227f86bd7c03730cd752a8ecdcefca2f714c2e)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Fetch a specific schema sdl or supergraph from the
+  API using the action id (commit sha) with the `hive schema:fetch` command.
+
+  Example:
+
+  ```bash
+  hive schema:fetch 99dad865e1d710b359049f52be0b018 -T supergraph -W supergraph.graphql
+  ```
+
 ## 0.27.1
 
 ### Patch Changes

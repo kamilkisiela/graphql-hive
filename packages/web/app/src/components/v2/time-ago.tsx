@@ -29,7 +29,7 @@ export const TimeAgo = ({
         <time
           dateTime={formattedDate}
           title={formattedDate}
-          className={clsx('whitespace-nowrap', className)}
+          className={clsx('whitespace-nowrap cursor-default', className)}
         >
           {value}
         </time>

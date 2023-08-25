@@ -120,7 +120,7 @@ function RegistryAccessTokens(props: {
   return (
     <Card>
       <Heading className="mb-2">Registry Access Tokens</Heading>
-      <div className="text-sm text-gray-400">
+      <div className="text-sm text-gray-400 cursor-default">
         Registry Access Tokens are used to access to Hive Registry and perform actions on your
         targets/projects. In most cases, this token is used from the Hive CLI.
       </div>
@@ -206,7 +206,7 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
   return (
     <Card>
       <Heading className="mb-2">Extend Your Schema</Heading>
-      <div className="text-sm text-gray-400">
+      <div className="text-sm text-gray-400 cursor-default">
         Schema Extensions is pre-defined GraphQL schema that is automatically merged with your
         published schemas, before being checked and validated.
         <br />
@@ -479,7 +479,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
             />
           )}
         </Heading>
-        <div className="text-sm text-gray-400">
+        <div className="text-sm text-gray-400 cursor-default">
           Conditional Breaking Changes can change the behavior of schema checks, based on real
           traffic data sent to Hive.{' '}
           <DocsLink href="/management/targets#conditional-breaking-changes">Learn more</DocsLink>
@@ -665,7 +665,7 @@ function TargetName(props: {
   return (
     <Card>
       <Heading className="mb-2">Target Name</Heading>
-      <div className="text-sm text-gray-400">
+      <div className="text-sm text-gray-400 cursor-default">
         Changing the name of your target will also change the slug of your target URL, and will
         invalidate any existing links to your target.
         <br />
@@ -760,7 +760,7 @@ function GraphQLEndpointUrl(props: {
   return (
     <Card>
       <Heading className="mb-2">GraphQL Endpoint URL</Heading>
-      <div className="text-sm text-gray-400">
+      <div className="text-sm text-gray-400 cursor-default">
         The endpoint url will be used for querying the target from the{' '}
         <NextLink
           href={{
@@ -859,11 +859,11 @@ function TargetDelete(props: { organizationId: string; projectId: string; target
 
   return (
     <>
-      <Card>
+      <Card className="mb-10">
         <div className="flex items-center justify-between">
           <div>
             <Heading className="mb-2">Delete Target</Heading>
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-gray-400 cursor-default">
               Deleting an project also delete all schemas and data associated with it.
               <br />
               <DocsLink href="/management/targets#delete-a-target">

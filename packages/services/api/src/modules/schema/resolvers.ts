@@ -653,6 +653,11 @@ export const resolvers: SchemaModule.Resolvers = {
         },
       };
     },
+    async schemaVersionForActionId(_, { actionId }, { injector }) {
+      return injector.get(SchemaManager).getSchemaVersionByActionId({
+        actionId,
+      });
+    },
   },
   Target: {
     latestSchemaVersion(target, _, { injector }) {

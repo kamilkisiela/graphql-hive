@@ -50,6 +50,7 @@ async function main() {
       level: env.log.level,
       requests: env.log.requests,
     },
+    bodyLimit: env.http.bodyLimit,
   });
 
   registerShutdown({

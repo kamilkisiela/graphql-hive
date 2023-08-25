@@ -9,7 +9,7 @@ export function StatsItem(props: {
 }) {
   return (
     <div>
-      <div className="font-bold text-5xl text-center">
+      <div className="font-bold text-5xl text-center text-black">
         <CountUp
           start={0}
           end={props.value}
@@ -22,9 +22,7 @@ export function StatsItem(props: {
         />
         {props.suffix}+
       </div>
-      <div className="text-gray-600 dark:text-gray-400 uppercase font-semibold text-center">
-        {props.label}
-      </div>
+      <div className="text-gray-600 uppercase font-semibold text-center">{props.label}</div>
     </div>
   );
 }

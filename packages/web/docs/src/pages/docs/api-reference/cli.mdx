@@ -190,6 +190,33 @@ git config --global user.email "john@doe.org"
 
 </Callout>
 
+### Fetch a schema from the Registry
+
+Sometimes it is useful to fetch a schema (SDL or Supergraph) from Hive, for example, to use it in a
+local development. This can be done using the `schema:fetch` command.
+
+<Callout type="info">
+  Don't confuse this with the [high-availability CDN](/docs/features/high-availability-cdn.mdx).
+  This command is used to fetch a schema from the API wherhe the CDN always represents the latest
+  valid schema.
+</Callout>
+
+You can fetch a schema by using the action id (commit sha) that was used for publishing the schema
+version. The `--write` option can be used for writing the schema to a file.
+
+```bash
+hive schema:fetch --type sdl --write schema.graphql feb8aa9ec8932eb
+```
+
+For projects with a supergraph it is also possible to fetch the supergraph.
+
+```bash
+hive schema:fetch --type supergraph --write supergraph.graphql feb8aa9ec8932eb
+```
+
+For more information please refer to the
+[CLI readme](https://github.com/kamilkisiela/graphql-hive/blob/main/packages/libraries/cli/README.md#commands).
+
 ### Fetch a schema from CDN
 
 You can fetch the GraphQL schema from the CDN using the `artifact:fetch` command.
