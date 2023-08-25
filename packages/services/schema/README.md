@@ -13,7 +13,7 @@ of subschemas.
 | `REDIS_PASSWORD`                    | **Yes**  | The password of your redis instance.                                                  | `"apollorocks"`                                      |
 | `ENCRYPTION_SECRET`                 | **Yes**  | Secret for encrypting stuff.                                                          | `8ebe95cg21c1fee355e9fa32c8c33141`                   |
 | `ENVIRONMENT`                       | No       | The environment of your Hive app. (**Note:** This will be used for Sentry reporting.) | `staging`                                            |
-| `BODY_LIMIT`                        | No       | Maximum payload size. Defaults to 11 MB.                                              | `11000000`                                           |
+| `BODY_LIMIT`                        | No       | Maximum payload size in bytes. Defaults to 11 MB.                                     | `11000000`                                           |
 | `SENTRY`                            | No       | Whether Sentry error reporting should be enabled.                                     | `1` (enabled) or `0` (disabled)                      |
 | `SENTRY_DSN`                        | No       | The DSN for reporting errors to Sentry.                                               | `https://dooobars@o557896.ingest.sentry.io/12121212` |
 | `PROMETHEUS_METRICS`                | No       | Whether Prometheus metrics should be enabled                                          | `1` (enabled) or `0` (disabled)                      |

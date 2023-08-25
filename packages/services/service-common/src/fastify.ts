@@ -17,7 +17,7 @@ export async function createServer(options: {
 }) {
   const server = fastify({
     disableRequestLogging: true,
-    bodyLimit: options.bodyLimit ?? 11e6, // default 11 mb
+    bodyLimit: options.bodyLimit,
     logger: {
       level: options.log.level,
     },
