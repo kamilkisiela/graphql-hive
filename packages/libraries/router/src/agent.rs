@@ -246,7 +246,6 @@ impl UsageAgent {
             .danger_accept_invalid_certs(self.accept_invalid_certs)
             .connect_timeout(Duration::from_secs(10))
             .timeout(Duration::from_secs(60))
-            // .timeout(Duration::from_secs(60))
             .build()
             .map_err(|err| err.to_string())?;
         let mut error_message = "Unexpected error".to_string();

@@ -10,6 +10,12 @@ export async function loadOperations(
   file: string,
   options?: {
     normalize?: boolean;
+    pluckModules?:
+      | {
+          name: string;
+          identifier?: string;
+        }[];
+    pluckGlobalGqlIdentifierName?: string[];
   },
 ): Promise<
   Array<{
@@ -19,6 +25,8 @@ export async function loadOperations(
   }>
 > {
   const shouldNormalize = options?.normalize ?? true;
+  const pluckModules = options?.pluckModules;
+  const pluckGlobalGqlIdentifierName = options?.pluckGlobalGqlIdentifierName;
 
   if (file.toLowerCase().endsWith('.json')) {
     const output: Record<string, string> = JSON.parse(await fs.readFile(file, 'utf8'));
@@ -51,7 +59,15 @@ export async function loadOperations(
   const cwd = process.cwd();
   const sources = await loadDocuments(file, {
     cwd,
-    loaders: [new CodeFileLoader(), new GraphQLFileLoader()],
+    loaders: [
+      new CodeFileLoader({
+        pluckConfig: {
+          modules: pluckModules,
+          globalGqlIdentifierName: pluckGlobalGqlIdentifierName,
+        },
+      }),
+      new GraphQLFileLoader(),
+    ],
   });
 
   return sources.map(source => ({

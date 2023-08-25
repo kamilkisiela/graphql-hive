@@ -26,9 +26,15 @@ export async function parseIncomingRequest(
   logger: Logger,
 ): Promise<{ error: Response } | z.infer<typeof RequestModelSchema>> {
   if (request.method !== 'POST') {
+    logger.info(`Received ${request.method} request, returning 405`);
     logger.error(
       'Failed to parse request',
       new Error(`Only POST requests are allowed, got ${request.method}`),
+    );
+    logger.info(
+      `Request details - url=${request.url}, headers=${JSON.stringify(
+        Object.fromEntries(request.headers.entries()),
+      )}`,
     );
     return {
       error: new Response('Only POST requests are allowed', {

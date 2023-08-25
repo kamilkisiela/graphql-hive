@@ -1,5 +1,14 @@
 # @graphql-hive/cli
 
+## 0.29.0
+
+### Minor Changes
+
+- [#2569](https://github.com/kamilkisiela/graphql-hive/pull/2569)
+  [`5bef13b`](https://github.com/kamilkisiela/graphql-hive/commit/5bef13b15e05b639c76ea7d847045d017a12c8a7)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Add ability to identify non-standard
+  template litarls in operations:check command
+
 ## 0.28.0
 
 ### Minor Changes

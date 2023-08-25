@@ -44,6 +44,7 @@ curl -sSL https://graphql-hive.com/install.sh | sh
 - [`hive operations:check FILE`](#hive-operationscheck-file)
 - [`hive schema:check FILE`](#hive-schemacheck-file)
 - [`hive schema:delete SERVICE`](#hive-schemadelete-service)
+- [`hive schema:fetch ACTIONID`](#hive-schemafetch-actionid)
 - [`hive schema:publish FILE`](#hive-schemapublish-file)
 - [`hive update [CHANNEL]`](#hive-update-channel)
 - [`hive whoami`](#hive-whoami)
@@ -69,7 +70,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/artifact/fetch.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.27.0/dist/commands/artifact/fetch.js)_
+[dist/commands/artifact/fetch.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/artifact/fetch.js)_
 
 ## `hive config:delete KEY`
 
@@ -87,7 +88,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.27.0/dist/commands/config/delete.js)_
+[dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/config/delete.js)_
 
 ## `hive config:get KEY`
 
@@ -105,7 +106,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.27.0/dist/commands/config/get.js)_
+[dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/config/get.js)_
 
 ## `hive config:reset`
 
@@ -120,7 +121,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.27.0/dist/commands/config/reset.js)_
+[dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/config/reset.js)_
 
 ## `hive config:set KEY VALUE`
 
@@ -139,7 +140,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.27.0/dist/commands/config/set.js)_
+[dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/config/set.js)_
 
 ## `hive help [COMMANDS]`
 
@@ -182,7 +183,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/introspect.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.27.0/dist/commands/introspect.js)_
+[dist/commands/introspect.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/introspect.js)_
 
 ## `hive operations:check FILE`
 
@@ -191,24 +192,45 @@ checks operations against a published schema
 ```
 USAGE
   $ hive operations:check FILE [--registry.endpoint <value>] [--registry <value>] [--registry.accessToken <value>]
-    [--token <value>] [--require <value>]
+    [--token <value>] [--require <value>] [--graphqlTag <value>] [--globalGraphqlTag <value>]
 
 ARGUMENTS
   FILE  Glob pattern to find the operations
 
 FLAGS
-  --registry=<value>              registry address
-  --registry.accessToken=<value>  registry access token
-  --registry.endpoint=<value>     registry endpoint
-  --require=<value>...            [default: ] Loads specific require.extensions before running the command
-  --token=<value>                 api token
+  --globalGraphqlTag=<value>...
+      Allows to use a global identifier instead of a module import. Similar to --graphqlTag.
+      Examples:
+      --globalGraphqlTag gql (Supports: export const meQuery = gql`{ me { id } }`)
+      --globalGraphqlTag graphql (Supports: export const meQuery = graphql`{ me { id } }`)
+
+  --graphqlTag=<value>...
+      Identify template literals containing GraphQL queries in JavaScript/TypeScript code. Supports multiple values.
+      Examples:
+      --graphqlTag graphql-tag (Equivalent to: import gqlTagFunction from "graphql-tag")
+      --graphqlTag graphql:react-relay (Equivalent to: import { graphql } from "react-relay")
+
+  --registry=<value>
+      registry address
+
+  --registry.accessToken=<value>
+      registry access token
+
+  --registry.endpoint=<value>
+      registry endpoint
+
+  --require=<value>...
+      [default: ] Loads specific require.extensions before running the command
+
+  --token=<value>
+      api token
 
 DESCRIPTION
   checks operations against a published schema
 ```
 
 _See code:
-[dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.27.0/dist/commands/operations/check.js)_
+[dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/operations/check.js)_
 
 ## `hive schema:check FILE`
 
@@ -241,7 +263,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.27.0/dist/commands/schema/check.js)_
+[dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/schema/check.js)_
 
 ## `hive schema:delete SERVICE`
 
@@ -268,7 +290,35 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.27.0/dist/commands/schema/delete.js)_
+[dist/commands/schema/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/schema/delete.js)_
+
+## `hive schema:fetch ACTIONID`
+
+fetch schema or supergraph from the Hive API
+
+```
+USAGE
+  $ hive schema:fetch ACTIONID [--registry <value>] [--token <value>] [--registry.endpoint <value>]
+    [--registry.accessToken <value>] [--type <value>] [--write <value>] [--outputFile <value>]
+
+ARGUMENTS
+  ACTIONID  action id (e.g. commit sha)
+
+FLAGS
+  --outputFile=<value>            whether to write to a file instead of stdout
+  --registry=<value>              registry address
+  --registry.accessToken=<value>  registry access token
+  --registry.endpoint=<value>     registry endpoint
+  --token=<value>                 api token
+  --type=<value>                  Type to fetch (possible types: sdl, supergraph)
+  --write=<value>                 Write to a file (possible extensions: .graphql, .gql, .gqls, .graphqls)
+
+DESCRIPTION
+  fetch schema or supergraph from the Hive API
+```
+
+_See code:
+[dist/commands/schema/fetch.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/schema/fetch.js)_
 
 ## `hive schema:publish FILE`
 
@@ -306,7 +356,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.27.0/dist/commands/schema/publish.js)_
+[dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/schema/publish.js)_
 
 ## `hive update [CHANNEL]`
 
@@ -366,7 +416,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.27.0/dist/commands/whoami.js)_
+[dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/whoami.js)_
 
 <!-- commandsstop -->
 
