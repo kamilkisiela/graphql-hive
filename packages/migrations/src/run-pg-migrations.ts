@@ -57,6 +57,7 @@ import migration_2023_10_26T12_44_36_schema_checks_filters_index from './actions
 import migration_2023_10_30T00_00_00_drop_persisted_operations from './actions/2023.10.30T00-00-00.drop-persisted-operations';
 import migration_2023_11_02T14_41_41_schema_checks_dedup from './actions/2023.11.02T14.41.41.schema-checks-dedup';
 import migration_2023_11_09T00_00_00_schema_check_approval from './actions/2023.11.09T00.00.00.schema-check-approval';
+import migration_2023_11_22T13_57_00_no_auth0 from './actions/2023.11.22T13.57.00.no-auth0';
 import { runMigrations } from './pg-migrator';
 
 export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) =>
@@ -122,5 +123,6 @@ export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) 
       migration_2023_10_30T00_00_00_drop_persisted_operations,
       migration_2023_11_02T14_41_41_schema_checks_dedup,
       migration_2023_11_09T00_00_00_schema_check_approval,
+      migration_2023_11_22T13_57_00_no_auth0,
     ],
   });

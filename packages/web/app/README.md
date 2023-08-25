@@ -50,21 +50,6 @@ This is only important if you are hosting Hive for getting 💰.
 | ------------------- | -------- | ---------------------- | ---------------------- |
 | `STRIPE_PUBLIC_KEY` | No       | The Stripe Public Key. | `g6aff8102efda5e1d12e` |
 
-### Legacy Auth0 Configuration
-
-If you are not self-hosting GraphQL Hive, you can ignore this section. It is only required for the
-legacy Auth0 compatibility layer.
-
-| Name                                      | Required                                   | Description                                                                                               | Example Value                               |
-| ----------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| `AUTH_LEGACY_AUTH0`                       | No                                         | Whether the legacy Auth0 import is enabled.                                                               | `1` (enabled) or `0` (disabled)             |
-| `AUTH_LEGACY_AUTH0_CLIENT_ID`             | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The Auth0 client ID.                                                                                      | `rDSpExxD8sfqlpF1kbxxLkMNYI2Sxxx`           |
-| `AUTH_LEGACY_AUTH0_CLIENT_SECRET`         | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The Auth0 client secret.                                                                                  | `e43f156xx54en2b56117dc4abc4491dxxbb6b187`  |
-| `AUTH_LEGACY_AUTH0_ISSUER_BASE_URL`       | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The Auth0 issuer base url.                                                                                | `https://your-project.us.auth0.com`         |
-| `AUTH_LEGACY_AUTH0_AUDIENCE`              | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The Auth0 audience                                                                                        | `https://your-project.us.auth0.com/api/v2/` |
-| `AUTH_LEGACY_AUTH0_INTERNAL_API_ENDPOINT` | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The internal endpoint for importing Auth0 accounts. (**Note:** This route is within the GraphQL service.) | `http://127.0.0.1:4000/__legacy`            |
-| `AUTH_LEGACY_AUTH0_INTERNAL_API_KEY`      | No (**Yes** if `AUTH_LEGACY_AUTH0` is set) | The internal endpoint key.                                                                                | `iliketurtles`                              |
-
 ### Building the Docker Image
 
 **Prerequisites:** Make sure you built the mono-repository using `pnpm build`.

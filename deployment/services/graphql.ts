@@ -48,7 +48,6 @@ export function deployGraphQL({
   billing,
   emails,
   supertokensConfig,
-  auth0Config,
   s3Config,
   zendeskConfig,
   imagePullSecret,
@@ -74,9 +73,6 @@ export function deployGraphQL({
   supertokensConfig: {
     endpoint: Output<string>;
     apiKey: Output<string>;
-  };
-  auth0Config: {
-    internalApiKey: Output<string>;
   };
   s3Config: {
     endpoint: string;
@@ -175,8 +171,6 @@ export function deployGraphQL({
         // Auth
         SUPERTOKENS_CONNECTION_URI: supertokensConfig.endpoint,
         SUPERTOKENS_API_KEY: supertokensConfig.apiKey,
-        AUTH_LEGACY_AUTH0: '1',
-        AUTH_LEGACY_AUTH0_INTERNAL_API_KEY: auth0Config.internalApiKey,
         AUTH_ORGANIZATION_OIDC: '1',
         // Various
         GRAPHQL_PERSISTED_OPERATIONS_PATH: './persisted-operations.json',
