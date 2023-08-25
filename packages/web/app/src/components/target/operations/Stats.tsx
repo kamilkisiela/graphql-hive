@@ -800,11 +800,12 @@ export function OperationsStats({
         </div>
       </OperationsFallback>
       <div>
-        <ClientsStats operationStats={operationsStats ?? null} />
+        <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
+          <ClientsStats operationStats={operationsStats ?? null} />
+        </OperationsFallback>
       </div>
       <div>
         <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
-          {/* THIS */}
           <OverTimeStats
             period={period}
             resolution={resolution}
@@ -814,7 +815,6 @@ export function OperationsStats({
       </div>
       <div>
         <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
-          {/* THIS */}
           <RpmOverTimeStats
             period={period}
             resolution={resolution}
@@ -824,7 +824,6 @@ export function OperationsStats({
       </div>
       <div>
         <OperationsFallback isError={isError} refetch={refetch}>
-          {/* THIS */}
           <LatencyOverTimeStats
             period={period}
             operationStats={operationsStats ?? null}
