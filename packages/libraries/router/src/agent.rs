@@ -245,7 +245,7 @@ impl UsageAgent {
         let client = reqwest::Client::builder()
             .danger_accept_invalid_certs(self.accept_invalid_certs)
             .connect_timeout(Duration::from_secs(10))
-            .timeout(Duration::from_secs(2))
+            .timeout(Duration::from_secs(60))
             // .timeout(Duration::from_secs(60))
             .build()
             .map_err(|err| err.to_string())?;
