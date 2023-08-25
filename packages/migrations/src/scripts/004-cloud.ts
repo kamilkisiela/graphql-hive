@@ -9,6 +9,7 @@ import {
   createSelectStatementForOperationsDaily,
   createSelectStatementForOperationsHourly,
   createSelectStatementForOperationsMinutely,
+  createSelectStatementForTargetExistence,
 } from '../clickhouse-actions/004-version-2.js';
 import { env } from './environment.js';
 
@@ -349,6 +350,16 @@ async function main() {
       `
         ALTER TABLE default.operation_collection_details
         MODIFY QUERY ${createSelectStatementForOperationCollectionDetails('operation_collection')}
+      `,
+      {
+        progressBar: modifyQueryBar,
+        settings: modifyQuerySettings,
+      },
+    ),
+    execute(
+      `
+        ALTER TABLE default.target_existence
+        MODIFY QUERY ${createSelectStatementForTargetExistence('operations')}
       `,
       {
         progressBar: modifyQueryBar,

@@ -144,6 +144,18 @@ export const createSelectStatementForOperationCollectionDetails = (
     expires_at
 `;
 
+export const createSelectStatementForTargetExistence = (
+  tableName: 'operations' | 'operations_new',
+) => `
+  SELECT
+    target,
+    toStartOfDay(expires_at) AS expires_at
+  FROM default.${tableName}
+  GROUP BY
+    target,
+    expires_at
+`;
+
 const SystemSettingsModel = z.array(
   z.object({
     value: z.string(),
@@ -367,6 +379,21 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
       AS
       ${createSelectStatementForOperationCollectionDetails('operation_collection_new')}
     `,
+      `
+      CREATE MATERIALIZED VIEW IF NOT EXISTS default.target_existence
+      (
+        target LowCardinality(String) CODEC(ZSTD(1)),
+        expires_at DateTime('UTC') CODEC(DoubleDelta, LZ4)
+      )
+      ENGINE = ReplacingMergeTree
+      PARTITION BY tuple()
+      PRIMARY KEY (target)
+      ORDER BY (target)
+      TTL expires_at
+      SETTINGS index_granularity = 8192
+      AS
+      ${createSelectStatementForTargetExistence('operations_new')}
+    `,
     ].map(q => exec(q)),
   );
   console.timeEnd(label);
@@ -483,6 +510,13 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
       `
         ALTER TABLE default.operation_collection_details
         MODIFY QUERY ${createSelectStatementForOperationCollectionDetails('operation_collection')}
+      `,
+      modifyQuerySettings,
+    ),
+    exec(
+      `
+        ALTER TABLE default.target_existence
+        MODIFY QUERY ${createSelectStatementForTargetExistence('operations')}
       `,
       modifyQuerySettings,
     ),

@@ -332,9 +332,17 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       exists: number;
     }>({
-      query: sql`SELECT 1 as exists FROM operations_daily ${this.createFilter({
-        target,
-      })} LIMIT 1`,
+      query: (await this.canUseNewTable('operations_minutely'))
+        ? sql`
+          SELECT 1 as exists FROM target_existence ${this.createFilter({
+            target,
+          })} GROUP BY target LIMIT 1
+        `
+        : sql`
+          SELECT 1 as exists FROM operations_daily ${this.createFilter({
+            target,
+          })} GROUP BY target LIMIT 1
+        `,
       queryId: 'has_collected_operations',
       timeout: 10_000,
       span,
