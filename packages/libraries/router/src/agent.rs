@@ -1,11 +1,13 @@
 use super::graphql::OperationProcessor;
 use graphql_parser::schema::{parse_schema, Document};
+use reqwest::Client;
 use serde::Serialize;
 use std::{
     collections::{HashMap, VecDeque},
     sync::{Arc, Mutex},
     time::Duration,
 };
+use tokio::sync::Mutex as AsyncMutex;
 
 static COMMIT: Option<&'static str> = option_env!("GITHUB_SHA");
 
@@ -98,6 +100,7 @@ pub struct UsageAgent {
     /// We also need the Mutex wrapper bc we cannot borrow data in an `Arc` as mutable
     pub state: Arc<Mutex<State>>,
     processor: Arc<Mutex<OperationProcessor>>,
+    client: Client,
 }
 
 fn non_empty_string(value: Option<String>) -> Option<String> {
@@ -124,6 +127,14 @@ impl UsageAgent {
         let state = Arc::new(Mutex::new(State::new(schema)));
         let processor = Arc::new(Mutex::new(OperationProcessor::new()));
 
+        let client = reqwest::Client::builder()
+            .danger_accept_invalid_certs(true)
+            .connect_timeout(Duration::from_secs(10))
+            .timeout(Duration::from_secs(60))
+            .build()
+            .map_err(|err| err.to_string())
+            .expect("Couldn't instantiate the http client for reports sending!");
+
         let agent = Self {
             state,
             processor,
@@ -131,23 +142,20 @@ impl UsageAgent {
             token,
             buffer_size,
             accept_invalid_certs,
+            client,
         };
 
-        let mut agent_for_interval = agent.clone();
+        let agent_for_interval = AsyncMutex::new(Arc::new(agent.clone()));
 
-        // TODO: make this working
-        // tokio::task::spawn(async move {
-        //     if let Some(shutdown_signal) = shutdown_signal {
-        //         tracing::info!("waiting for shutdown signal");
-        //         shutdown_signal.await.expect("shutdown signal");
-        //         tracing::info!("Flushing reports because of shutdown signal");
-        //         // agent_for_shutdown_signal.clone().flush().await;
-        //         // tracing::info!("Flushed because of shutdown");
-        //     }
+        tokio::task::spawn(async move {
+            loop {
+                tokio::time::sleep(Duration::from_secs(5)).await;
 
-        std::thread::spawn(move || loop {
-            std::thread::sleep(Duration::from_secs(5));
-            agent_for_interval.flush();
+                let agent_ref = agent_for_interval.lock().await.clone();
+                tokio::task::spawn(async move {
+                    agent_ref.flush().await;
+                });
+            }
         });
 
         agent
@@ -242,17 +250,12 @@ impl UsageAgent {
         const DELAY_BETWEEN_TRIES: Duration = Duration::from_millis(500);
         const MAX_TRIES: u8 = 3;
 
-        let client = reqwest::Client::builder()
-            .danger_accept_invalid_certs(self.accept_invalid_certs)
-            .connect_timeout(Duration::from_secs(10))
-            .timeout(Duration::from_secs(60))
-            .build()
-            .map_err(|err| err.to_string())?;
         let mut error_message = "Unexpected error".to_string();
 
         for _ in 0..MAX_TRIES {
-            let resp = client
-                .post(self.endpoint.clone())
+            let resp = self
+                .client
+                .post("http://localhost:58080/delay/5".to_string())
                 .header(
                     reqwest::header::AUTHORIZATION,
                     format!("Bearer {}", self.token.clone()),
@@ -265,6 +268,8 @@ impl UsageAgent {
                 .send()
                 .await
                 .map_err(|e| e.to_string())?;
+
+            println!("{:#?}", resp);
 
             match resp.status() {
                 reqwest::StatusCode::OK => {
@@ -284,7 +289,7 @@ impl UsageAgent {
                     );
                 }
             }
-            std::thread::sleep(DELAY_BETWEEN_TRIES);
+            tokio::time::sleep(DELAY_BETWEEN_TRIES).await;
         }
 
         Err(error_message)
