@@ -20,16 +20,16 @@ const TTLSeconds = {
   /**
    * TTL for tokens that don't exist in the DB.
    */
-  notFound: 60, // seconds
+  notFound: 120, // seconds
   /**
    * TTL for tokens that exist in the DB.
    */
-  found: 60 * 5, // 5 minutes
+  found: 60 * 15, // 5 minutes
   /**
    * TTL for tokens in the in-memory cache.
    * Helps to reduce the traffic that goes to Redis (as we read the token from in-memory cache first) and in case Redis is down.
    */
-  inMemory: 60, // seconds
+  inMemory: 120, // seconds
 };
 
 function useSafeRedis(redis: Redis, logger: FastifyLoggerInstance) {
@@ -232,8 +232,7 @@ export function useCache(
 
   async function readiness() {
     return (
-      started &&
-      (redisInstance.status === 'ready' || redisInstance.status === 'reconnecting')
+      started && (redisInstance.status === 'ready' || redisInstance.status === 'reconnecting')
       // && (await (await getStorage()).isReady())
     );
   }
