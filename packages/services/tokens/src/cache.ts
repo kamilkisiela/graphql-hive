@@ -233,8 +233,8 @@ export function useCache(
   async function readiness() {
     return (
       started &&
-      (redisInstance.status === 'ready' || redisInstance.status === 'reconnecting') &&
-      (await (await getStorage()).isReady())
+      (redisInstance.status === 'ready' || redisInstance.status === 'reconnecting')
+      // && (await (await getStorage()).isReady())
     );
   }
 
