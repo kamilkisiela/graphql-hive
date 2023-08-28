@@ -78,14 +78,14 @@ jobs:
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: '1.71.1'
           target: ${{ env.RUST_TARGET }}
           default: true
           override: true
 
       - name: Set default target
         run: |
-          rustup default stable-${{ env.RUST_TARGET }}
+          rustup default 1.71.1-${{ env.RUST_TARGET }}
 
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
