@@ -55,9 +55,11 @@ struct Config {
     /// Default: 1000
     buffer_size: Option<usize>,
     /// A timeout for only the connect phase of a request to GraphQL Hive
+    /// Unit: seconds
     /// Default: 5 (s)
     connect_timeout: Option<u64>,
     /// A timeout for the entire request to GraphQL Hive
+    /// Unit: seconds
     /// Default: 15 (s)
     request_timeout: Option<u64>,
     /// Accept invalid SSL certificates
@@ -75,8 +77,8 @@ impl Default for Config {
             client_version_header: None,
             accept_invalid_certs: Some(false),
             buffer_size: Some(1000),
-            connect_timeout: Some(5000),
-            request_timeout: Some(15000),
+            connect_timeout: Some(5),
+            request_timeout: Some(15),
         }
     }
 }
