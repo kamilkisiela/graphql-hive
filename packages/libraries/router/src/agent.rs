@@ -7,6 +7,7 @@ use std::{
     sync::{Arc, Mutex},
     time::Duration,
 };
+use thiserror::Error;
 use tokio::sync::Mutex as AsyncMutex;
 
 static COMMIT: Option<&'static str> = option_env!("GITHUB_SHA");
@@ -90,6 +91,15 @@ impl State {
     }
 }
 
+impl Default for State {
+    fn default() -> Self {
+        Self {
+            buffer: VecDeque::new(),
+            schema: Default::default(),
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct UsageAgent {
     token: String,
@@ -110,6 +120,20 @@ fn non_empty_string(value: Option<String>) -> Option<String> {
         },
         None => None,
     }
+}
+
+#[derive(Error, Debug)]
+pub enum AgentError {
+    #[error("unable to acquire lock for {0} in {1}, reason {2}")]
+    Lock(String, String, String),
+    #[error("unable to send report: token is missing")]
+    Unauthorized,
+    #[error("unable to send report: no access")]
+    Forbidden,
+    #[error("unable to send report: rate limited")]
+    RateLimited,
+    #[error("unable to send report: {0}")]
+    Unknown(String),
 }
 
 impl UsageAgent {
@@ -161,7 +185,7 @@ impl UsageAgent {
         agent
     }
 
-    fn produce_report(&self, reports: Vec<ExecutionReport>) -> Report {
+    fn produce_report(&self, reports: Vec<ExecutionReport>) -> Result<Report, AgentError> {
         let mut report = Report {
             size: 0,
             map: HashMap::new(),
@@ -173,13 +197,25 @@ impl UsageAgent {
             let operation = self
                 .processor
                 .lock()
-                .expect("Unable to acquire the OperationProcessor in produce_report")
+                .map_err(|e| {
+                    AgentError::Lock(
+                        "OperationProcessor".to_string(),
+                        "produce_report".to_string(),
+                        e.to_string(),
+                    )
+                })?
                 .process(
                     &op.operation_body,
                     &self
                         .state
                         .lock()
-                        .expect("Unable to acquire State in produce_report")
+                        .map_err(|e| {
+                            AgentError::Lock(
+                                "State".to_string(),
+                                "produce_report".to_string(),
+                                e.to_string(),
+                            )
+                        })?
                         .schema,
                 );
             match operation {
@@ -233,24 +269,28 @@ impl UsageAgent {
             }
         }
 
-        report
+        Ok(report)
     }
 
-    pub fn add_report(&self, execution_report: ExecutionReport) {
+    pub fn add_report(&self, execution_report: ExecutionReport) -> Result<(), AgentError> {
         let size = self
             .state
             .lock()
-            .expect("Unable to acquire State in add_report")
+            .map_err(|e| {
+                AgentError::Lock("State".to_string(), "add_report".to_string(), e.to_string())
+            })?
             .push(execution_report);
 
-        self.flush_if_full(size);
+        self.flush_if_full(size)?;
+
+        Ok(())
     }
 
-    pub async fn send_report(&self, report: Report) -> Result<(), String> {
+    pub async fn send_report(&self, report: Report) -> Result<(), AgentError> {
         const DELAY_BETWEEN_TRIES: Duration = Duration::from_millis(500);
         const MAX_TRIES: u8 = 3;
 
-        let mut error_message = "Unexpected error".to_string();
+        let mut error_message = "unexpected error".to_string();
 
         for _ in 0..MAX_TRIES {
             let resp = self
@@ -267,24 +307,24 @@ impl UsageAgent {
                 .json(&report)
                 .send()
                 .await
-                .map_err(|e| e.to_string())?;
+                .map_err(|e| AgentError::Unknown(e.to_string()))?;
 
             match resp.status() {
                 reqwest::StatusCode::OK => {
                     return Ok(());
                 }
                 reqwest::StatusCode::UNAUTHORIZED => {
-                    return Err("Token is missing".to_string());
+                    return Err(AgentError::Unauthorized);
                 }
                 reqwest::StatusCode::FORBIDDEN => {
-                    return Err("No access".to_string());
+                    return Err(AgentError::Forbidden);
                 }
                 reqwest::StatusCode::TOO_MANY_REQUESTS => {
-                    return Err("Rate limited".to_string());
+                    return Err(AgentError::RateLimited);
                 }
                 _ => {
                     error_message = format!(
-                        "Could not send usage report: ({}) {}",
+                        "({}) {}",
                         resp.status().as_str(),
                         resp.text().await.unwrap_or_default()
                     );
@@ -293,32 +333,42 @@ impl UsageAgent {
             tokio::time::sleep(DELAY_BETWEEN_TRIES).await;
         }
 
-        Err(error_message)
+        Err(AgentError::Unknown(error_message))
     }
 
-    pub fn flush_if_full(&self, size: usize) {
+    pub fn flush_if_full(&self, size: usize) -> Result<(), AgentError> {
         if size >= self.buffer_size {
             let cloned_self = self.clone();
             tokio::task::spawn(async move {
                 cloned_self.flush().await;
             });
         }
+
+        Ok(())
     }
 
     pub async fn flush(&self) {
-        let execution_reports = self
-            .state
-            .lock()
-            .expect("Unable to acquire State in flush")
-            .drain();
+        let execution_reports = drain_reports(&self.state);
         let size = execution_reports.len();
 
         if size > 0 {
-            let report = self.produce_report(execution_reports);
-            match self.send_report(report).await {
-                Ok(_) => tracing::debug!("Reported {} operations", size),
+            match self.produce_report(execution_reports) {
+                Ok(report) => match self.send_report(report).await {
+                    Ok(_) => tracing::debug!("Reported {} operations", size),
+                    Err(e) => tracing::error!("{}", e),
+                },
                 Err(e) => tracing::error!("{}", e),
             }
+        }
+    }
+}
+
+fn drain_reports(state: &Arc<Mutex<State>>) -> Vec<ExecutionReport> {
+    match state.lock() {
+        Ok(mut state) => state.drain(),
+        Err(e) => {
+            tracing::error!("Unable to acquire lock for State in drain_reports: {}", e);
+            Vec::new()
         }
     }
 }
