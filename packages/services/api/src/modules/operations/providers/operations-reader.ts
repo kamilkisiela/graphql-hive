@@ -1665,7 +1665,7 @@ export class OperationsReader {
           minutely: {
             query: (await this.canUseNewTable('operations_minutely'))
               ? createSQLQuery('operations_minutely', true)
-              : createSQLQuery('operations', true),
+              : createSQLQuery('operations', false),
             queryId: 'duration_and_count_over_time_regular',
             timeout: 15_000,
             span,
