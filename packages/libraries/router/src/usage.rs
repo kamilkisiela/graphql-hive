@@ -302,13 +302,8 @@ impl Plugin for UsagePlugin {
 
 impl Drop for UsagePlugin {
     fn drop(&mut self) {
-        tracing::debug!("`UsagePlugin` has been dropped!");
-        // Shut down the stuff.
-        // if let Some(sender) = self.shutdown_signal.take() {
-        //     // Currently, this does nothing, as it sends a graceful process termination, but no receiver is setup to handle it
-        //     let _ = sender.send(());
-        //     tracing::warn!("`UsagePlugin` has been dropped!");
-        // }
+        tracing::debug!("UsagePlugin has been dropped!");
+        // TODO: flush the buffer
     }
 }
 
