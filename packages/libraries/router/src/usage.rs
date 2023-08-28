@@ -1,4 +1,4 @@
-use crate::agent::{ExecutionReport, UsageAgent};
+use crate::agent::{AgentError, ExecutionReport, UsageAgent};
 use apollo_router::layers::ServiceBuilderExt;
 use apollo_router::plugin::Plugin;
 use apollo_router::plugin::PluginInit;
@@ -177,16 +177,35 @@ impl Plugin for UsagePlugin {
         };
 
         let default_config = Config::default();
-        let enabled = init.config.enabled.or(default_config.enabled).expect("enabled has default value");
-        let buffer_size = init.config.buffer_size.or(default_config.buffer_size).expect("buffer_size has default value");
-        let accept_invalid_certs = init.config.accept_invalid_certs.or(default_config.accept_invalid_certs).expect("accept_invalid_certs has default value");
-        let connect_timeout = init.config.connect_timeout.or(default_config.connect_timeout).expect("connect_timeout has default value");
-        let request_timeout = init.config.request_timeout.or(default_config.request_timeout).expect("request_timeout has default value");
+        let enabled = init
+            .config
+            .enabled
+            .or(default_config.enabled)
+            .expect("enabled has default value");
+        let buffer_size = init
+            .config
+            .buffer_size
+            .or(default_config.buffer_size)
+            .expect("buffer_size has default value");
+        let accept_invalid_certs = init
+            .config
+            .accept_invalid_certs
+            .or(default_config.accept_invalid_certs)
+            .expect("accept_invalid_certs has default value");
+        let connect_timeout = init
+            .config
+            .connect_timeout
+            .or(default_config.connect_timeout)
+            .expect("connect_timeout has default value");
+        let request_timeout = init
+            .config
+            .request_timeout
+            .or(default_config.request_timeout)
+            .expect("request_timeout has default value");
 
         if enabled {
             tracing::info!("Starting GraphQL Hive Usage plugin");
         }
-
 
         Ok(UsagePlugin {
             config: init.config,
@@ -211,98 +230,124 @@ impl Plugin for UsagePlugin {
             None => ServiceBuilder::new().service(service).boxed(),
             Some(agent) => {
                 ServiceBuilder::new()
-                .map_future_with_request_data(
-                    move |req: &supergraph::Request| {
-                        Self::populate_context(config.clone(), req);
-                        req.context.clone()
-                    },
-                    move |ctx: Context, fut| {
-                        let agent_clone = agent.clone();
-                        async move {
-                            let start = Instant::now();
-    
-                            // nested async block, bc async is unstable with closures that receive arguments
-                            let operation_context = ctx
-                                .get::<_, OperationContext>(OPERATION_CONTEXT)
-                                .unwrap_or_default()
-                                .unwrap();
-    
-                            let result: supergraph::ServiceResult = fut.await;
-    
-                            if operation_context.dropped {
-                                tracing::debug!("Dropping operation (phase: SAMPLING): {}", operation_context.operation_name.clone().or_else(|| Some("anonymous".to_string())).unwrap());
-                                return result;
-                            }
-    
-                            let OperationContext {
-                                client_name,
-                                client_version,
-                                operation_name,
-                                timestamp,
-                                operation_body,
-                                ..
-                            } = operation_context;
-    
-                            let duration = start.elapsed();
-    
-                            match result {
-                                Err(e) => {
-                                    agent_clone
-                                        .clone()
-                                        .lock()
-                                        .expect("Unable to acquire Agent in supergraph_service (error)")
-                                        .add_report(ExecutionReport {
-                                            client_name,
-                                            client_version,
-                                            timestamp,
-                                            duration,
-                                            ok: false,
-                                            errors: 1,
-                                            operation_body,
-                                            operation_name,
-                                        });
-                                    Err(e)
+                    .map_future_with_request_data(
+                        move |req: &supergraph::Request| {
+                            Self::populate_context(config.clone(), req);
+                            req.context.clone()
+                        },
+                        move |ctx: Context, fut| {
+                            let agent_clone = agent.clone();
+                            async move {
+                                let start = Instant::now();
+
+                                // nested async block, bc async is unstable with closures that receive arguments
+                                let operation_context = ctx
+                                    .get::<_, OperationContext>(OPERATION_CONTEXT)
+                                    .unwrap_or_default()
+                                    .unwrap();
+
+                                let result: supergraph::ServiceResult = fut.await;
+
+                                if operation_context.dropped {
+                                    tracing::debug!(
+                                        "Dropping operation (phase: SAMPLING): {}",
+                                        operation_context
+                                            .operation_name
+                                            .clone()
+                                            .or_else(|| Some("anonymous".to_string()))
+                                            .unwrap()
+                                    );
+                                    return result;
                                 }
-                                Ok(router_response) => {
-                                    let is_failure = !router_response.response.status().is_success();
-                                    Ok(router_response.map(move |response_stream| {
-                                        let client_name = client_name.clone();
-                                        let client_version = client_version.clone();
-                                        let operation_body = operation_body.clone();
-                                        let operation_name = operation_name.clone();
-    
-                                        let res = response_stream
-                                            .map(move |response| {
-                                                // make sure we send a single report, not for each chunk
-                                                let response_has_errors = !response.errors.is_empty();
-                                                agent_clone.clone().lock()
-                                                .expect("Unable to acquire Agent in supergraph_service (ok)").add_report(ExecutionReport {
-                                                    client_name: client_name.clone(),
-                                                    client_version: client_version.clone(),
-                                                    timestamp,
-                                                    duration,
-                                                    ok: !is_failure && !response_has_errors,
-                                                    errors: response.errors.len(),
-                                                    operation_body: operation_body.clone(),
-                                                    operation_name: operation_name.clone(),
-                                                });
-    
-                                                response
-                                            })
-                                            .boxed();
-    
-                                        res
-                                    }))
+
+                                let OperationContext {
+                                    client_name,
+                                    client_version,
+                                    operation_name,
+                                    timestamp,
+                                    operation_body,
+                                    ..
+                                } = operation_context;
+
+                                let duration = start.elapsed();
+
+                                match result {
+                                    Err(e) => {
+                                        try_add_report(
+                                            agent_clone.clone(),
+                                            ExecutionReport {
+                                                client_name,
+                                                client_version,
+                                                timestamp,
+                                                duration,
+                                                ok: false,
+                                                errors: 1,
+                                                operation_body,
+                                                operation_name,
+                                            },
+                                        );
+                                        Err(e)
+                                    }
+                                    Ok(router_response) => {
+                                        let is_failure =
+                                            !router_response.response.status().is_success();
+                                        Ok(router_response.map(move |response_stream| {
+                                            let client_name = client_name.clone();
+                                            let client_version = client_version.clone();
+                                            let operation_body = operation_body.clone();
+                                            let operation_name = operation_name.clone();
+
+                                            let res = response_stream
+                                                .map(move |response| {
+                                                    // make sure we send a single report, not for each chunk
+                                                    let response_has_errors =
+                                                        !response.errors.is_empty();
+                                                    try_add_report(
+                                                        agent_clone.clone(),
+                                                        ExecutionReport {
+                                                            client_name: client_name.clone(),
+                                                            client_version: client_version.clone(),
+                                                            timestamp,
+                                                            duration,
+                                                            ok: !is_failure && !response_has_errors,
+                                                            errors: response.errors.len(),
+                                                            operation_body: operation_body.clone(),
+                                                            operation_name: operation_name.clone(),
+                                                        },
+                                                    );
+
+                                                    response
+                                                })
+                                                .boxed();
+
+                                            res
+                                        }))
+                                    }
                                 }
                             }
-                        }
-                    },
-                )
-                .service(service)
-                .boxed()
+                        },
+                    )
+                    .service(service)
+                    .boxed()
             }
         }
     }
+}
+
+fn try_add_report(agent: Arc<Mutex<UsageAgent>>, execution_report: ExecutionReport) {
+    agent
+        .lock()
+        .map_err(|e| {
+            AgentError::Lock(
+                "Agent".to_string(),
+                "supergraph_service".to_string(),
+                e.to_string(),
+            )
+        })
+        .and_then(|a| a.add_report(execution_report))
+        .unwrap_or_else(|e| {
+            tracing::error!("Error adding report: {}", e);
+        });
 }
 
 impl Drop for UsagePlugin {
