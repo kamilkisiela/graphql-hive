@@ -253,7 +253,7 @@ impl UsageAgent {
         for _ in 0..MAX_TRIES {
             let resp = self
                 .client
-                .post("http://localhost:58080/delay/5".to_string())
+                .post(self.endpoint.clone())
                 .header(
                     reqwest::header::AUTHORIZATION,
                     format!("Bearer {}", self.token.clone()),
