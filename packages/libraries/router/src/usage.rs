@@ -168,7 +168,6 @@ impl Plugin for UsagePlugin {
     type Config = Config;
 
     async fn new(init: PluginInit<Config>) -> Result<Self, BoxError> {
-        tracing::info!("Starting GraphQL Hive Usage plugin");
         let token =
             env::var("HIVE_TOKEN").map_err(|_| "environment variable HIVE_TOKEN not found")?;
         let endpoint = env::var("HIVE_ENDPOINT");
@@ -183,6 +182,10 @@ impl Plugin for UsagePlugin {
         let accept_invalid_certs = init.config.accept_invalid_certs.or(default_config.accept_invalid_certs).expect("accept_invalid_certs has default value");
         let connect_timeout = init.config.connect_timeout.or(default_config.connect_timeout).expect("connect_timeout has default value");
         let request_timeout = init.config.request_timeout.or(default_config.request_timeout).expect("request_timeout has default value");
+
+        if enabled {
+            tracing::info!("Starting GraphQL Hive Usage plugin");
+        }
 
 
         Ok(UsagePlugin {
