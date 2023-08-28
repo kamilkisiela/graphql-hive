@@ -54,6 +54,12 @@ struct Config {
     /// A maximum number of operations to hold in a buffer before sending to GraphQL Hive
     /// Default: 1000
     buffer_size: Option<usize>,
+    /// A timeout for only the connect phase of a request to GraphQL Hive
+    /// Default: 5 (s)
+    connect_timeout: Option<u64>,
+    /// A timeout for the entire request to GraphQL Hive
+    /// Default: 15 (s)
+    request_timeout: Option<u64>,
     /// Accept invalid SSL certificates
     /// Default: false
     accept_invalid_certs: Option<bool>,
@@ -69,6 +75,8 @@ impl Default for Config {
             client_version_header: None,
             accept_invalid_certs: Some(false),
             buffer_size: Some(1000),
+            connect_timeout: Some(5000),
+            request_timeout: Some(15000),
         }
     }
 }
@@ -167,9 +175,13 @@ impl Plugin for UsagePlugin {
             Err(_) => "https://app.graphql-hive.com/usage".to_string(),
         };
 
-        let enabled = init.config.enabled.unwrap_or(true);
-        let buffer_size = init.config.buffer_size.unwrap_or(1000);
-        let accept_invalid_certs = init.config.accept_invalid_certs.unwrap_or(false);
+        let default_config = Config::default();
+        let enabled = init.config.enabled.or(default_config.enabled).expect("enabled has default value");
+        let buffer_size = init.config.buffer_size.or(default_config.buffer_size).expect("buffer_size has default value");
+        let accept_invalid_certs = init.config.accept_invalid_certs.or(default_config.accept_invalid_certs).expect("accept_invalid_certs has default value");
+        let connect_timeout = init.config.connect_timeout.or(default_config.connect_timeout).expect("connect_timeout has default value");
+        let request_timeout = init.config.request_timeout.or(default_config.request_timeout).expect("request_timeout has default value");
+
 
         Ok(UsagePlugin {
             config: init.config,
@@ -179,6 +191,8 @@ impl Plugin for UsagePlugin {
                     token,
                     endpoint,
                     buffer_size,
+                    connect_timeout,
+                    request_timeout,
                     accept_invalid_certs,
                 )))),
                 false => None,

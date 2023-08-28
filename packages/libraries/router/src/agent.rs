@@ -118,6 +118,8 @@ impl UsageAgent {
         token: String,
         endpoint: String,
         buffer_size: usize,
+        connect_timeout: u64,
+        request_timeout: u64,
         accept_invalid_certs: bool,
     ) -> Self {
         let schema = parse_schema::<String>(&schema)
@@ -128,8 +130,8 @@ impl UsageAgent {
 
         let client = reqwest::Client::builder()
             .danger_accept_invalid_certs(accept_invalid_certs)
-            .connect_timeout(Duration::from_secs(5))
-            .timeout(Duration::from_secs(30))
+            .connect_timeout(Duration::from_secs(connect_timeout))
+            .timeout(Duration::from_secs(request_timeout))
             .build()
             .map_err(|err| err.to_string())
             .expect("Couldn't instantiate the http client for reports sending!");
@@ -271,11 +273,14 @@ impl UsageAgent {
                 reqwest::StatusCode::OK => {
                     return Ok(());
                 }
-                reqwest::StatusCode::BAD_REQUEST => {
+                reqwest::StatusCode::UNAUTHORIZED => {
                     return Err("Token is missing".to_string());
                 }
                 reqwest::StatusCode::FORBIDDEN => {
                     return Err("No access".to_string());
+                }
+                reqwest::StatusCode::TOO_MANY_REQUESTS => {
+                    return Err("Rate limited".to_string());
                 }
                 _ => {
                     error_message = format!(
