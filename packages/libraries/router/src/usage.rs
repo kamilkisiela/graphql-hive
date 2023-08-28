@@ -33,8 +33,16 @@ struct OperationContext {
     pub(crate) dropped: bool,
 }
 
+#[derive(Clone, Debug)]
+struct OperationConfig {
+    sample_rate: f64,
+    exclude: Option<Vec<String>>,
+    client_name_header: String,
+    client_version_header: String,
+}
+
 struct UsagePlugin {
-    config: Config,
+    config: OperationConfig,
     agent: Option<Arc<Mutex<UsageAgent>>>,
 }
 
@@ -84,17 +92,10 @@ impl Default for Config {
 }
 
 impl UsagePlugin {
-    fn populate_context(config: Config, req: &supergraph::Request) {
+    fn populate_context(config: OperationConfig, req: &supergraph::Request) {
         let context = &req.context;
         let http_request = &req.supergraph_request;
         let headers = http_request.headers();
-
-        let client_name_header = config
-            .client_name_header
-            .unwrap_or("graphql-client-name".to_string());
-        let client_version_header = config
-            .client_version_header
-            .unwrap_or("graphql-client-version".to_string());
 
         let get_header_value = |key: &str| {
             headers
@@ -106,8 +107,8 @@ impl UsagePlugin {
                 .map(|v| v.to_string())
         };
 
-        let client_name = get_header_value(&client_name_header);
-        let client_version = get_header_value(&client_version_header);
+        let client_name = get_header_value(&config.client_name_header);
+        let client_version = get_header_value(&config.client_version_header);
 
         let operation_name = req.supergraph_request.body().operation_name.clone();
         let operation_body = req
@@ -117,7 +118,6 @@ impl UsagePlugin {
             .clone()
             .expect("operation body should not be empty");
 
-        let sample_rate = config.sample_rate.clone();
         let excluded_operation_names: HashSet<String> = config
             .exclude
             .unwrap_or_else(|| vec![])
@@ -126,13 +126,8 @@ impl UsagePlugin {
             .collect();
 
         let mut rng = rand::thread_rng();
-        let mut dropped = match sample_rate {
-            Some(rate) => {
-                let num: f64 = rng.gen();
-                num > rate
-            }
-            None => false,
-        };
+        let sampled = rng.gen::<f64>() < config.sample_rate;
+        let mut dropped = !sampled;
 
         if !dropped {
             match &operation_name {
@@ -177,28 +172,24 @@ impl Plugin for UsagePlugin {
         };
 
         let default_config = Config::default();
-        let enabled = init
-            .config
+        let user_config = init.config;
+        let enabled = user_config
             .enabled
             .or(default_config.enabled)
             .expect("enabled has default value");
-        let buffer_size = init
-            .config
+        let buffer_size = user_config
             .buffer_size
             .or(default_config.buffer_size)
             .expect("buffer_size has default value");
-        let accept_invalid_certs = init
-            .config
+        let accept_invalid_certs = user_config
             .accept_invalid_certs
             .or(default_config.accept_invalid_certs)
             .expect("accept_invalid_certs has default value");
-        let connect_timeout = init
-            .config
+        let connect_timeout = user_config
             .connect_timeout
             .or(default_config.connect_timeout)
             .expect("connect_timeout has default value");
-        let request_timeout = init
-            .config
+        let request_timeout = user_config
             .request_timeout
             .or(default_config.request_timeout)
             .expect("request_timeout has default value");
@@ -208,7 +199,21 @@ impl Plugin for UsagePlugin {
         }
 
         Ok(UsagePlugin {
-            config: init.config,
+            config: OperationConfig {
+                sample_rate: user_config
+                    .sample_rate
+                    .or(default_config.sample_rate)
+                    .expect("sample_rate has default value"),
+                exclude: user_config.exclude.or(default_config.exclude),
+                client_name_header: user_config
+                    .client_name_header
+                    .or(default_config.client_name_header)
+                    .expect("client_name_header has default value"),
+                client_version_header: user_config
+                    .client_version_header
+                    .or(default_config.client_version_header)
+                    .expect("client_version_header has default value"),
+            },
             agent: match enabled {
                 true => Some(Arc::new(Mutex::new(UsageAgent::new(
                     init.supergraph_sdl.to_string(),
