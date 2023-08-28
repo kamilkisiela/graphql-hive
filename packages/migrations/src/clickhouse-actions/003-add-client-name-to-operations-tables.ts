@@ -1,6 +1,6 @@
 import type { Action } from '../clickhouse';
 
-const action: Action = async (exec, isGraphQLHiveCloud) => {
+const action: Action = async (exec, _query, isGraphQLHiveCloud) => {
   // Create materialized views
   await Promise.all(
     [
@@ -92,7 +92,7 @@ const action: Action = async (exec, isGraphQLHiveCloud) => {
           timestamp,
           expires_at
     `,
-    ].map(exec),
+    ].map(q => exec(q)),
   );
 
   // Run the rest of the migration only for self-hosted instances, not for Cloud.

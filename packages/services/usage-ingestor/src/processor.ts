@@ -16,6 +16,7 @@ import type {
   RawOperationMapRecord,
   RawReport,
 } from '@hive/usage-common';
+import { env } from './environment';
 import { cache, errorOkTuple } from './helpers';
 import {
   normalizeCacheMisses,
@@ -59,11 +60,25 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
 
       const serializedOperations: string[] = [];
       const serializedRegistryRecords: string[] = [];
+      const migration: {
+        serializedOperations: string[];
+        serializedRegistryRecords: string[];
+      } = {
+        serializedOperations: [],
+        serializedRegistryRecords: [],
+      };
 
       for (const rawReport of rawReports) {
         reportSize.observe(rawReport.size);
 
         const operationSample = new Map<
+          string,
+          {
+            operation: RawOperation;
+            size: number;
+          }
+        >();
+        const migrationOperationSample = new Map<
           string,
           {
             operation: RawOperation;
@@ -85,6 +100,11 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
             continue;
           }
 
+          const passToMigration =
+            env.migration.v2IngestAfter && rawOperation.timestamp >= env.migration.v2IngestAfter
+              ? true
+              : false;
+
           const sample = operationSample.get(rawOperation.operationMapKey);
 
           // count operations per operationMapKey
@@ -97,7 +117,24 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
             sample.size += 1;
           }
 
-          serializedOperations.push(stringifyOperation(processedOperation));
+          const stringifiedOperation = stringifyOperation(processedOperation);
+          serializedOperations.push(stringifiedOperation);
+
+          if (passToMigration) {
+            const migrationSample = migrationOperationSample.get(rawOperation.operationMapKey);
+
+            // count operations per operationMapKey
+            if (!migrationSample) {
+              migrationOperationSample.set(rawOperation.operationMapKey, {
+                operation: rawOperation,
+                size: 1,
+              });
+            } else {
+              migrationSample.size += 1;
+            }
+
+            migration.serializedOperations.push(stringifiedOperation);
+          }
         }
 
         for (const group of operationSample.values()) {
@@ -135,11 +172,51 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
             }),
           );
         }
+
+        for (const group of migrationOperationSample.values()) {
+          const operationMapRecord = rawReport.map[group.operation.operationMapKey];
+
+          if (!operationMapRecord) {
+            logger.warn(`Operation map record not found key=%s`, group.operation.operationMapKey);
+            continue;
+          }
+
+          const { value: normalized } = normalize(operationMapRecord);
+
+          if (normalized === null) {
+            // The operation should be ignored
+            continue;
+          }
+
+          const operationHash = normalized.hash ?? 'unknown';
+          const timestamp =
+            typeof group.operation.timestamp === 'string'
+              ? parseInt(group.operation.timestamp, 10)
+              : group.operation.timestamp;
+
+          migration.serializedRegistryRecords.push(
+            stringifyRegistryRecord({
+              size: group.size,
+              target: rawReport.target,
+              hash: operationHash,
+              name: operationMapRecord.operationName ?? normalized.name,
+              body: normalized.body,
+              operation_kind: normalized.type,
+              coordinates: normalized.coordinates,
+              expires_at: group.operation.expiresAt || timestamp + 30 * DAY_IN_MS,
+              timestamp,
+            }),
+          );
+        }
       }
 
       return {
         operations: serializedOperations,
         registryRecords: serializedRegistryRecords,
+        migration: {
+          operations: migration.serializedOperations,
+          records: migration.serializedRegistryRecords,
+        },
       };
     },
   };

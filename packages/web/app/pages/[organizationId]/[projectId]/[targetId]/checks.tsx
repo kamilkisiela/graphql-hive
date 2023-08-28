@@ -244,7 +244,7 @@ const PolicyBlock = (props: {
         {policies.edges.map((edge, key) => (
           <li
             key={key}
-            className={cn(props.type === 'warning' ? 'text-yellow-400' : 'text-red-400')}
+            className={cn(props.type === 'warning' ? 'text-yellow-400' : 'text-red-400', ' my-1')}
           >
             <span className="text-gray-600 dark:text-white">{labelize(edge.node.message)}</span>
           </li>

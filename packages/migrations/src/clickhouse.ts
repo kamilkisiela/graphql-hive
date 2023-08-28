@@ -13,8 +13,17 @@ const MigrationsTableModel = z.object({
 // eslint-disable-next-line no-process-env
 const isGraphQLHiveCloud = process.env.CLICKHOUSE_MIGRATOR_GRAPHQL_HIVE_CLOUD === '1';
 
+interface QueryResponse<T> {
+  data: readonly T[];
+  rows: number;
+  statistics: {
+    elapsed: number;
+  };
+}
+
 export type Action = (
-  exec: (query: string) => Promise<void>,
+  exec: (query: string, settings?: Record<string, string>) => Promise<void>,
+  query: (queryString: string) => Promise<QueryResponse<unknown>>,
   isGraphQLHiveCloud: boolean,
 ) => Promise<void>;
 
@@ -70,13 +79,14 @@ export async function migrateClickHouse(
     },
   });
 
-  function exec(query: string) {
+  function exec(query: string, settings?: Record<string, string>) {
     return got
       .post(endpoint, {
         body: query,
         searchParams: {
           default_format: 'JSON',
           wait_end_of_query: '1',
+          ...settings,
         },
         headers: {
           Accept: 'text/plain',
@@ -92,6 +102,34 @@ export async function migrateClickHouse(
 
         return Promise.reject(error);
       });
+  }
+
+  function query(queryString: string) {
+    return got
+      .post<QueryResponse<unknown>>(endpoint, {
+        body: queryString,
+        searchParams: {
+          default_format: 'JSON',
+          wait_end_of_query: '1',
+        },
+        headers: {
+          'Accept-Encoding': 'gzip',
+          Accept: 'application/json',
+        },
+        decompress: true,
+        username: clickhouse.username,
+        password: clickhouse.password,
+        responseType: 'json',
+      })
+      .catch(error => {
+        const body = error?.response?.body;
+        if (body) {
+          console.error(body);
+        }
+
+        return Promise.reject(error);
+      })
+      .then(r => r.body);
   }
 
   // Create migrations table
@@ -116,6 +154,7 @@ export async function migrateClickHouse(
     import('./clickhouse-actions/001-initial'),
     import('./clickhouse-actions/002-add-hash-to-clients_daily'),
     import('./clickhouse-actions/003-add-client-name-to-operations-tables'),
+    import('./clickhouse-actions/004-version-2'),
   ]);
 
   async function actionRunner(action: Action, index: number) {
@@ -128,9 +167,13 @@ export async function migrateClickHouse(
     }
 
     try {
-      await action(async query => {
-        await exec(query);
-      }, isGraphQLHiveCloud);
+      await action(
+        async (query, settings) => {
+          await exec(query, settings);
+        },
+        query,
+        isGraphQLHiveCloud,
+      );
     } catch (error) {
       console.error(error);
       process.exit(1);

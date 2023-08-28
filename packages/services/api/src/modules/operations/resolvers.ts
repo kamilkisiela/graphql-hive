@@ -277,44 +277,6 @@ export const resolvers: OperationsModule.Resolvers = {
         clients,
       });
     },
-    async durationHistogram(
-      { organization, project, target, period, operations: operationsFilter, clients },
-      _,
-      { injector },
-    ) {
-      const histogram = await injector.get(OperationsManager).readDurationHistogram({
-        organization,
-        project,
-        target,
-        period,
-        operations: operationsFilter,
-        clients,
-      });
-
-      const uniqueDurations = new Map<
-        number,
-        {
-          duration: number;
-          count: number;
-        }
-      >();
-
-      for (let i = 0; i < histogram.length; i++) {
-        const node = histogram[i];
-        const slot = Math.floor(nsToMs(node.duration) / 50);
-
-        if (uniqueDurations.has(slot)) {
-          uniqueDurations.get(slot)!.count += node.count;
-        } else {
-          uniqueDurations.set(slot, {
-            duration: (slot + 1) * 50,
-            count: node.count,
-          });
-        }
-      }
-
-      return Array.from(uniqueDurations.values());
-    },
   },
   DurationStats: {
     p75(value) {

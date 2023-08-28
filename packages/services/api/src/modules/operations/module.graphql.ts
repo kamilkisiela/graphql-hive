@@ -84,7 +84,6 @@ export default gql`
     totalRequests: SafeInt!
     totalFailures: SafeInt!
     totalOperations: Int!
-    durationHistogram(resolution: Int!): [DurationHistogram!]!
     duration: DurationStats!
     operations: OperationStatsConnection!
     clients: ClientStatsConnection!
@@ -155,11 +154,6 @@ export default gql`
   type DurationOverTime {
     date: DateTime!
     duration: DurationStats!
-  }
-
-  type DurationHistogram {
-    duration: Int!
-    count: SafeInt!
   }
 
   extend type OrganizationGetStarted {

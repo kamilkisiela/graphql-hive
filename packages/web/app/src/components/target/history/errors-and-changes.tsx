@@ -37,7 +37,7 @@ export function ChangesBlock(props: {
         {props.changes.map((change, key) => (
           <li
             key={key}
-            className={clsx(criticalityLevelMapping[props.criticality] ?? 'text-red-400')}
+            className={clsx(criticalityLevelMapping[props.criticality] ?? 'text-red-400', ' my-1')}
           >
             <MaybeWrapTooltip tooltip={change.criticalityReason ?? null}>
               <span className="text-gray-600 dark:text-white">{labelize(change.message)}</span>
@@ -69,7 +69,7 @@ function ErrorsBlock({ title, errors }: { errors: string[]; title: React.ReactNo
       <h2 className="mb-2 text-sm font-medium text-gray-900 dark:text-white">{title}</h2>
       <ul className="list-inside list-disc pl-3 text-sm leading-relaxed">
         {errors.map((error, key) => (
-          <li key={key} className="text-red-400">
+          <li key={key} className="text-red-400 my-1">
             <span className="text-gray-600 dark:text-white">{labelize(error)}</span>
           </li>
         ))}

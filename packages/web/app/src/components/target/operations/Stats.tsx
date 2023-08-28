@@ -18,7 +18,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useChartStyles } from '@/utils';
 import { OperationsFallback } from './Fallback';
-import { createEmptySeries, fullSeries, resolutionToMilliseconds } from './utils';
+import { createEmptySeries, resolutionToMilliseconds } from './utils';
 
 const Stats_GeneralOperationsStatsQuery = graphql(`
   query Stats_GeneralOperationsStats($selector: OperationsStatsSelectorInput!, $resolution: Int!) {
@@ -169,11 +169,7 @@ function OverTimeStats({
   const interval = resolutionToMilliseconds(resolution, period);
   const requests = useMemo(() => {
     if (requestsOverTime?.length) {
-      return fullSeries(
-        requestsOverTime.map<[string, number]>(node => [node.date, node.value]),
-        interval,
-        period,
-      );
+      return requestsOverTime.map<[string, number]>(node => [node.date, node.value]);
     }
 
     return createEmptySeries({ interval, period });
@@ -181,11 +177,7 @@ function OverTimeStats({
 
   const failures = useMemo(() => {
     if (failuresOverTime?.length) {
-      return fullSeries(
-        failuresOverTime.map<[string, number]>(node => [node.date, node.value]),
-        interval,
-        period,
-      );
+      return failuresOverTime.map<[string, number]>(node => [node.date, node.value]);
     }
 
     return createEmptySeries({ interval, period });
@@ -522,44 +514,28 @@ function LatencyOverTimeStats({
     useFragment(LatencyOverTimeStats_OperationStatsFragment, operationStats) ?? {};
   const p75 = useMemo(() => {
     if (duration?.length) {
-      return fullSeries(
-        duration.map<[string, number]>(node => [node.date, node.duration.p75]),
-        interval,
-        period,
-      );
+      return duration.map<[string, number]>(node => [node.date, node.duration.p75]);
     }
 
     return createEmptySeries({ interval, period });
   }, [duration, interval, period]);
   const p90 = useMemo(() => {
     if (duration?.length) {
-      return fullSeries(
-        duration.map<[string, number]>(node => [node.date, node.duration.p90]),
-        interval,
-        period,
-      );
+      return duration.map<[string, number]>(node => [node.date, node.duration.p90]);
     }
 
     return createEmptySeries({ interval, period });
   }, [duration, interval, period]);
   const p95 = useMemo(() => {
     if (duration?.length) {
-      return fullSeries(
-        duration.map<[string, number]>(node => [node.date, node.duration.p95]),
-        interval,
-        period,
-      );
+      return duration.map<[string, number]>(node => [node.date, node.duration.p95]);
     }
 
     return createEmptySeries({ interval, period });
   }, [duration, interval, period]);
   const p99 = useMemo(() => {
     if (duration?.length) {
-      return fullSeries(
-        duration.map<[string, number]>(node => [node.date, node.duration.p99]),
-        interval,
-        period,
-      );
+      return duration.map<[string, number]>(node => [node.date, node.duration.p99]);
     }
 
     return createEmptySeries({ interval, period });
@@ -673,14 +649,10 @@ function RpmOverTimeStats({
   const windowInM = interval / (60 * 1000);
   const rpmOverTime = useMemo(() => {
     if (requests.length) {
-      return fullSeries(
-        requests.map<[string, number]>(node => [
-          node.date,
-          parseFloat((node.value / windowInM).toFixed(4)),
-        ]),
-        interval,
-        period,
-      );
+      return requests.map<[string, number]>(node => [
+        node.date,
+        parseFloat((node.value / windowInM).toFixed(4)),
+      ]);
     }
 
     return createEmptySeries({ interval, period });
@@ -828,7 +800,9 @@ export function OperationsStats({
         </div>
       </OperationsFallback>
       <div>
-        <ClientsStats operationStats={operationsStats ?? null} />
+        <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
+          <ClientsStats operationStats={operationsStats ?? null} />
+        </OperationsFallback>
       </div>
       <div>
         <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
