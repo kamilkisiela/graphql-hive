@@ -87,6 +87,12 @@ export function splitReport(report: RawReport, numOfChunks: number) {
   return reports;
 }
 
+function ensureIncomingMessageValidity(incoming: Partial<IncomingReport>) {
+  if (!incoming || !incoming.operations || !Array.isArray(incoming.operations)) {
+    throw new Error('Invalid incoming message');
+  }
+}
+
 export function createUsage(config: {
   logger: FastifyLoggerInstance;
   kafka: {
@@ -313,6 +319,7 @@ export function createUsage(config: {
       const now = Date.now();
 
       const incoming = ensureReportFormat(incomingReport);
+      ensureIncomingMessageValidity(incoming);
 
       const size = incoming.operations.length;
       totalReports.inc();
