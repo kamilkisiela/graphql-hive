@@ -17,7 +17,7 @@ export class Proxy {
       path: string;
       service: k8s.core.v1.Service;
       timeoutInSeconds?: number;
-      retryOnReset?: boolean;
+      retriable?: boolean;
       customRewrite?: string;
       virtualHost?: Output<string>;
       httpsUpstream?: boolean;
@@ -94,7 +94,7 @@ export class Proxy {
                         },
                       }
                     : {}),
-                  ...(route.retryOnReset
+                  ...(route.retriable
                     ? {
                         retryPolicy: {
                           count: 2,

@@ -52,7 +52,7 @@ export function deployProxy({
         customRewrite: '/graphql',
         service: graphql.service,
         timeoutInSeconds: 60,
-        retryOnReset: true,
+        retriable: true,
       },
       {
         name: 'graphql-api',
@@ -60,13 +60,13 @@ export function deployProxy({
         customRewrite: '/graphql',
         service: graphql.service,
         timeoutInSeconds: 60,
-        retryOnReset: true,
+        retriable: true,
       },
       {
         name: 'usage',
         path: '/usage',
         service: usage.service,
-        retryOnReset: true,
+        retriable: true,
       },
     ])
     .get();
