@@ -76,6 +76,7 @@ export const invalidRawOperations = new metrics.Counter({
 export const collectDuration = new metrics.Histogram({
   name: 'usage_raw_collect_duration_seconds',
   help: 'Collect duration in seconds',
+  labelNames: ['status'],
 });
 
 export const compressDuration = new metrics.Histogram({

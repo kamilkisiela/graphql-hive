@@ -98,7 +98,8 @@ export class Proxy {
                     ? {
                         retryPolicy: {
                           count: 2,
-                          retryOn: ['reset'],
+                          retryOn: ['reset', 'retriable-status-codes'],
+                          retriableStatusCodes: [503],
                         },
                       }
                     : {}),

@@ -158,11 +158,27 @@ async function main() {
 
         const stopTimer = collectDuration.startTimer();
         try {
+          if (readiness() === false) {
+            req.log.warn('Not ready to collect report (token=%s)', maskedToken);
+            stopTimer({
+              status: 'not_ready',
+            });
+            // 503 - Service Unavailable
+            // The server is currently unable to handle the request due being not ready.
+            // This tells the gateway to retry the request and not to drop it.
+            void res.status(503).send();
+            return;
+          }
+
           const result = await collect(req.body, tokenInfo, retentionInfo);
-          stopTimer();
+          stopTimer({
+            status: 'success',
+          });
           void res.status(200).send(result);
         } catch (error) {
-          stopTimer();
+          stopTimer({
+            status: 'error',
+          });
           req.log.error('Failed to collect report (token=%s)', maskedToken);
           req.log.error(error, 'Failed to collect');
           Sentry.captureException(error, {
