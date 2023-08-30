@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "toucan-js": "3.1.0",
+    "toucan-js": "3.2.3",
     "workers-loki-logger": "0.1.15",
     "zod": "3.21.4"
   },
