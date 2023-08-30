@@ -13,6 +13,7 @@ import * as z from 'zod';
 import type { Span } from '@sentry/types';
 import { batch } from '@theguild/buddy';
 import type { DateRange } from '../../../shared/entities';
+import { atomic } from '../../../shared/helpers';
 import { sentry } from '../../../shared/sentry';
 import { Logger } from '../../shared/providers/logger';
 import { ClickHouse, RowOf, sql } from './clickhouse-client';
@@ -69,26 +70,22 @@ function ensureNumber(value: number | string): number {
 export class OperationsReader {
   constructor(private clickHouse: ClickHouse, private logger: Logger) {}
 
-  private _tableNamesPromise: Promise<string[]> | null = null;
-
+  @atomic((tableName: Parameters<OperationsReader['canUseNewTable']>[0]) => tableName)
   private canUseNewTable(
     tableName: 'operations_minutely' | 'operation_collection_body' | 'operation_collection_details',
   ) {
-    if (this._tableNamesPromise === null) {
-      this._tableNamesPromise = this.clickHouse
-        .query<{
-          name: string;
-        }>({
-          query: sql`SELECT name FROM system.tables WHERE database = 'default'`,
-          queryId: 'can_use_new_tables',
-          timeout: 10_000,
-        })
-        .then(result => result.data.map(row => row.name));
-    }
-
     // If the table name is in the list, it means we completed the migration.
     // If the migration is not completed then the name would contain the `_new` suffix.
-    return this._tableNamesPromise.then(tableNames => tableNames.includes(tableName));
+    return this.clickHouse
+      .query<{
+        name: string;
+      }>({
+        query: sql`SELECT name FROM system.tables WHERE database = 'default'`,
+        queryId: 'can_use_new_tables',
+        timeout: 10_000,
+      })
+      .then(result => result.data.map(row => row.name))
+      .then(tableNames => tableNames.includes(tableName));
   }
 
   private pickQueryByPeriod(
