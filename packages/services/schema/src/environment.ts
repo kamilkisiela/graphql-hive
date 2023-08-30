@@ -20,7 +20,7 @@ const emptyString = <T extends zod.ZodType>(input: T) => {
 
 const EnvironmentModel = zod.object({
   PORT: emptyString(NumberFromString().optional()),
-  BODY_LIMIT: NumberFromString().optional().default(/* 11mb in bytes */ 11e6),
+  BODY_LIMIT: NumberFromString().optional().default(/* 15mb in bytes */ 15e6),
   ENVIRONMENT: emptyString(zod.string().optional()),
   RELEASE: emptyString(zod.string().optional()),
   ENCRYPTION_SECRET: zod.string(),
