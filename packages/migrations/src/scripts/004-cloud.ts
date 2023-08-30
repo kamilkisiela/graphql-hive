@@ -129,6 +129,7 @@ async function main() {
           progressBar: operationsTableBar,
         });
         await waitFor(1500);
+        break;
       } catch (error) {
         if (error instanceof HTTPError) {
           console.log(`[FAILURE] ${error.options.body}`);
