@@ -250,7 +250,7 @@ globalThis['__backend_env'] = config;
 Sentry.init({
   serverName: 'app',
   enabled: !!config.sentry,
-  enableTracing: true,
+  enableTracing: false,
   tracesSampleRate: 1,
   dsn: config.sentry?.dsn,
   release: config.release,
@@ -258,7 +258,7 @@ Sentry.init({
   integrations: [
     // HTTP integration is only available on the server
     new Integrations.Http({
-      tracing: true,
+      tracing: false,
     }),
   ],
 });
