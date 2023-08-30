@@ -48,6 +48,8 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
   };
 
   scope.setTransactionName(`proxy.${body?.operationName || 'unknown'}`);
+  scope.setTag('graphql_client_name', 'Hive App');
+  scope.setTag('graphql_client_version', env.release);
 
   const accessSpan = rootSpan?.startChild({
     op: 'app.accessToken',
