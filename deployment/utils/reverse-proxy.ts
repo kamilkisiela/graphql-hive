@@ -47,9 +47,6 @@ export class Proxy {
         apiVersion: 'projectcontour.io/v1',
         kind: 'HTTPProxy',
         metadata: {
-          annotations: {
-            'ingress.kubernetes.io/force-ssl-redirect': 'true',
-          },
           name: `ingress-${dns.record}`,
         },
         spec: {
