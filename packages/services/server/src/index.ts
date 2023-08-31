@@ -269,6 +269,7 @@ export async function main() {
           }
         : {},
       organizationOIDC: env.organizationOIDC,
+      supportConfig: env.zendeskSupport,
     });
 
     let persistedOperations: Record<string, DocumentNode | string> | null = null;

@@ -17,7 +17,6 @@ import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/org
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { useRouteSelector } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { openChatSupport } from '@/utils';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 
 const ManageSubscriptionInner_OrganizationFragment = graphql(`
@@ -252,8 +251,8 @@ function Inner(props: {
 
     if (plan === 'ENTERPRISE') {
       return (
-        <Button type="button" onClick={openChatSupport}>
-          Contact Us
+        <Button type="button" asChild>
+          <a href="emailto:contact@graphql-hive.com">Contact Us</a>
         </Button>
       );
     }

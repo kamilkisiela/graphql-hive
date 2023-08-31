@@ -46,6 +46,18 @@ const SentryModel = zod.union([
   }),
 ]);
 
+const ZendeskSupportModel = zod.union([
+  zod.object({
+    ZENDESK_SUPPORT: emptyString(zod.literal('0').optional()),
+  }),
+  zod.object({
+    ZENDESK_SUPPORT: zod.literal('1'),
+    ZENDESK_USERNAME: zod.string(),
+    ZENDESK_PASSWORD: zod.string(),
+    ZENDESK_SUBDOMAIN: zod.string(),
+  }),
+]);
+
 const PostgresModel = zod.object({
   POSTGRES_SSL: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
   POSTGRES_HOST: zod.string(),
@@ -194,6 +206,8 @@ const configs = {
   s3: S3Model.safeParse(process.env),
   // eslint-disable-next-line no-process-env
   log: LogModel.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
+  zendeskSupport: ZendeskSupportModel.safeParse(process.env),
 };
 
 const environmentErrors: Array<string> = [];
@@ -231,6 +245,7 @@ const cdnApi = extractConfig(configs.cdnApi);
 const authLegacyAuth0 = extractConfig(configs.authLegacyAuth0);
 const hive = extractConfig(configs.hive);
 const s3 = extractConfig(configs.s3);
+const zendeskSupport = extractConfig(configs.zendeskSupport);
 
 const hiveConfig =
   hive.HIVE === '1'
@@ -366,4 +381,12 @@ export const env = {
   graphql: {
     persistedOperationsPath: base.GRAPHQL_PERSISTED_OPERATIONS_PATH ?? null,
   },
+  zendeskSupport:
+    zendeskSupport.ZENDESK_SUPPORT === '1'
+      ? {
+          username: zendeskSupport.ZENDESK_USERNAME,
+          password: zendeskSupport.ZENDESK_PASSWORD,
+          subdomain: zendeskSupport.ZENDESK_SUBDOMAIN,
+        }
+      : null,
 } as const;

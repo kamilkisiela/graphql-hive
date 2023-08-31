@@ -14,15 +14,8 @@ import { env } from '@/env/frontend';
 import * as gtag from '@/lib/gtag';
 import { urqlClient } from '@/lib/urql';
 import { configureScope, init } from '@sentry/nextjs';
-import '../src/wdyr';
 import '../public/styles.css';
 import 'react-toastify/dist/ReactToastify.css';
-
-function identifyOnCrisp(email: string): void {
-  if (email) {
-    window.$crisp?.push(['set', 'user:email', email]);
-  }
-}
 
 function identifyOnSentry(userId: string, email: string): void {
   configureScope(scope => {
@@ -63,7 +56,6 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
         return;
       }
       const payload = await Session.getAccessTokenPayloadSecurely();
-      identifyOnCrisp(payload.email);
       identifyOnSentry(payload.superTokensUserId, payload.email);
     });
   }, []);
@@ -90,28 +82,6 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
             }}
           />
         </>
-      )}
-      {env.analytics.crispWebsiteId && (
-        <Script
-          id="crisp-init"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              if (typeof window !== 'undefined') {
-                window.$crisp = [];
-                window.CRISP_WEBSITE_ID = '${env.analytics.crispWebsiteId}';
-                (function () {
-                  d = document;
-                  s = d.createElement('script');
-                  s.src = 'https://client.crisp.chat/l.js';
-                  s.async = 1;
-                  d.getElementsByTagName('head')[0].appendChild(s);
-                })();
-
-                window.$crisp.push(['set', 'session:segments', [['hive-app']]]);
-              }`,
-          }}
-        />
       )}
 
       <SuperTokensWrapper>

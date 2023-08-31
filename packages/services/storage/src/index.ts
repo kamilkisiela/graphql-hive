@@ -126,6 +126,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       isAdmin: user.is_admin ?? false,
       externalAuthUserId: user.external_auth_user_id ?? null,
       oidcIntegrationId: user.oidc_integration_id ?? null,
+      zendeskId: user.zendesk_user_id ?? null,
     };
   }
 
@@ -142,7 +143,10 @@ export async function createStorage(connection: string, maximumPoolSize: number)
   }
 
   function transformMember(
-    user: users & Pick<organization_member, 'scopes' | 'organization_id'> & { is_owner: boolean },
+    user: users &
+      Pick<organization_member, 'scopes' | 'organization_id' | 'connected_to_zendesk'> & {
+        is_owner: boolean;
+      },
   ): Member {
     return {
       id: user.id,
@@ -151,6 +155,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       scopes: (user.scopes as Member['scopes']) || [],
       organization: user.organization_id,
       oidcIntegrationId: user.oidc_integration_id ?? null,
+      connectedToZendesk: user.connected_to_zendesk ?? false,
     };
   }
 
@@ -174,6 +179,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         enablingUsageBasedBreakingChanges: organization.get_started_usage_breaking,
       },
       featureFlags: decodeFeatureFlags(organization.feature_flags),
+      zendeskId: organization.zendesk_organization_id ?? null,
     };
   }
 
@@ -753,10 +759,12 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     getOrganizationOwner: batch(async selectors => {
       const organizations = selectors.map(s => s.organization);
       const owners = await pool.query<
-        Slonik<users & Pick<organization_member, 'scopes' | 'organization_id'>>
+        Slonik<
+          users & Pick<organization_member, 'scopes' | 'organization_id' | 'connected_to_zendesk'>
+        >
       >(
         sql`
-        SELECT u.*, om.scopes, om.organization_id FROM public.organizations as o
+        SELECT u.*, om.scopes, om.organization_id, om.connected_to_zendesk FROM public.organizations as o
         LEFT JOIN public.users as u ON (u.id = o.user_id)
         LEFT JOIN public.organization_member as om ON (om.user_id = u.id AND om.organization_id = o.id)
         WHERE o.id IN (${sql.join(organizations, sql`, `)})`,
@@ -789,7 +797,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const allMembers = await pool.query<
         Slonik<
           users &
-            Pick<organization_member, 'scopes' | 'organization_id'> & {
+            Pick<organization_member, 'scopes' | 'organization_id' | 'connected_to_zendesk'> & {
               is_owner: boolean;
             }
         >
@@ -799,6 +807,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           u.*,
           om.scopes,
           om.organization_id,
+          om.connected_to_zendesk,
           CASE WHEN o.user_id = om.user_id THEN true ELSE false END AS is_owner
         FROM public.organization_member as om
         LEFT JOIN public.organizations as o ON (o.id = om.organization_id)
@@ -823,7 +832,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const member = await pool.maybeOne<
         Slonik<
           users &
-            Pick<organization_member, 'organization_id' | 'scopes'> & {
+            Pick<organization_member, 'organization_id' | 'scopes' | 'connected_to_zendesk'> & {
               is_owner: boolean;
             }
         >
@@ -833,6 +842,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             u.*,
             om.scopes,
             om.organization_id,
+            om.connected_to_zendesk,
             CASE WHEN o.user_id = om.user_id THEN true ELSE false END AS is_owner
           FROM public.organization_member as om
           LEFT JOIN public.organizations as o ON (o.id = om.organization_id)
@@ -3766,6 +3776,38 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       }
 
       return SchemaVersionModel.parse(record);
+    },
+    // Zendesk
+    async setZendeskOrganizationId({ organizationId, zendeskId }) {
+      await pool.query(sql`
+        UPDATE
+          "public"."organizations"
+        SET
+          "zendesk_organization_id" = ${zendeskId}
+        WHERE
+          "id" = ${organizationId}
+      `);
+    },
+    async setZendeskUserId({ userId, zendeskId }) {
+      await pool.query(sql`
+        UPDATE
+          "public"."users"
+        SET
+          "zendesk_user_id" = ${zendeskId}
+        WHERE
+          "id" = ${userId}
+      `);
+    },
+    async setZendeskOrganizationUserConnection({ organizationId, userId }) {
+      await pool.query(sql`
+        UPDATE
+          "public"."organization_member"
+        SET
+          "connected_to_zendesk" = true
+        WHERE
+          "organization_id" = ${organizationId}
+          AND "user_id" = ${userId}
+      `);
     },
   };
 

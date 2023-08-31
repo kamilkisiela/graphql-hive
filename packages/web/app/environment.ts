@@ -31,7 +31,6 @@ const BaseSchema = zod.object({
   SUPERTOKENS_API_KEY: zod.string(),
   INTEGRATION_GITHUB_APP_NAME: emptyString(zod.string().optional()),
   GA_TRACKING_ID: emptyString(zod.string().optional()),
-  CRISP_WEBSITE_ID: emptyString(zod.string().optional()),
   DOCS_URL: emptyString(zod.string().url().optional()),
   STRIPE_PUBLIC_KEY: emptyString(zod.string().optional()),
   RELEASE: emptyString(zod.string().optional()),
@@ -189,7 +188,6 @@ const config = {
   github: base.INTEGRATION_GITHUB_APP_NAME ? { appName: base.INTEGRATION_GITHUB_APP_NAME } : null,
   analytics: {
     googleAnalyticsTrackingId: base.GA_TRACKING_ID,
-    crispWebsiteId: base.CRISP_WEBSITE_ID,
   },
   docsUrl: base.DOCS_URL,
   auth: {

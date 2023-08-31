@@ -1,4 +1,5 @@
 import NextLink from 'next/link';
+import { LifeBuoyIcon } from 'lucide-react';
 import { FaGithub, FaGoogle, FaKey, FaUsersSlash } from 'react-icons/fa';
 import {
   DropdownMenu,
@@ -204,6 +205,19 @@ export function UserMenu(props: {
                     Documentation
                   </a>
                 </DropdownMenuItem>
+              ) : null}
+              {currentOrganization ? (
+                <NextLink
+                  href={{
+                    pathname: '/[organizationId]/view/support',
+                    query: { organizationId: currentOrganization.cleanId },
+                  }}
+                >
+                  <DropdownMenuItem>
+                    <LifeBuoyIcon className="mr-2 h-4 w-4" />
+                    Support
+                  </DropdownMenuItem>
+                </NextLink>
               ) : null}
               <DropdownMenuItem asChild>
                 <a href="https://status.graphql-hive.com" target="_blank" rel="noreferrer">

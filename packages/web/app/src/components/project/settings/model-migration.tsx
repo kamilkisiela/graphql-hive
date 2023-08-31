@@ -3,8 +3,7 @@ import { useMutation } from 'urql';
 import { Button, Card, Heading, Tooltip } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { RegistryModel } from '@/graphql';
-import { useNotifications } from '@/lib/hooks';
-import { openChatSupport } from '@/utils';
+import { useNotifications, useRouteSelector } from '@/lib/hooks';
 import { CheckIcon, Cross2Icon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 
 const divider = <div className="border-b border-gray-900 mt-4" />;
@@ -138,6 +137,7 @@ export function ModelMigrationSettings(props: {
   const isStitching = project.type === 'STITCHING';
   const isComposite = isStitching || project.type === 'FEDERATION';
   const notify = useNotifications();
+  const router = useRouteSelector();
 
   const [{ fetching }, upgradeMutation] = useMutation(
     ModelMigrationSettings_upgradeProjectRegistryModelMutation,
@@ -186,8 +186,17 @@ export function ModelMigrationSettings(props: {
           <Button variant="primary" size="large" disabled={fetching} onClick={upgrade}>
             Upgrade my project
           </Button>
-          <Button variant="secondary" size="large" onClick={openChatSupport}>
-            Live Chat
+          <Button
+            variant="secondary"
+            size="large"
+            onClick={() => {
+              void router.push({
+                href: '/[organizationId]/view/support',
+                query: { organizationId: props.organizationId },
+              });
+            }}
+          >
+            Talk to us
           </Button>
         </div>
       </div>
@@ -316,10 +325,18 @@ export function ModelMigrationSettings(props: {
             <QuestionMarkCircledIcon className="h-5 w-auto" />
             <div className="font-light text-gray-300 text-sm">
               If you're having difficulty comprehending the changes,{' '}
-              <Button variant="link" onClick={openChatSupport}>
+              <Button
+                variant="link"
+                onClick={() => {
+                  void router.push({
+                    href: '/[organizationId]/view/support',
+                    query: { organizationId: props.organizationId },
+                  });
+                }}
+              >
                 talk to us
-              </Button>{' '}
-              through the live chat.
+              </Button>
+              .
             </div>
           </div>
         </div>

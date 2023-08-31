@@ -103,6 +103,7 @@ export interface organization_invitations {
 }
 
 export interface organization_member {
+  connected_to_zendesk: boolean;
   organization_id: string;
   role: user_role;
   scopes: Array<string> | null;
@@ -130,6 +131,7 @@ export interface organizations {
   plan_name: string;
   slack_token: string | null;
   user_id: string;
+  zendesk_organization_id: string | null;
 }
 
 export interface organizations_billing {
@@ -281,6 +283,7 @@ export interface users {
   is_admin: boolean | null;
   oidc_integration_id: string | null;
   supertoken_user_id: string | null;
+  zendesk_user_id: string | null;
 }
 
 export interface version_commit {
