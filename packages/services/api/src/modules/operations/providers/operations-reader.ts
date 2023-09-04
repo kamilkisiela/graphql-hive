@@ -13,7 +13,6 @@ import * as z from 'zod';
 import type { Span } from '@sentry/types';
 import { batch } from '@theguild/buddy';
 import type { DateRange } from '../../../shared/entities';
-import { atomic } from '../../../shared/helpers';
 import { sentry } from '../../../shared/sentry';
 import { Logger } from '../../shared/providers/logger';
 import { ClickHouse, RowOf, sql } from './clickhouse-client';
@@ -69,24 +68,6 @@ function ensureNumber(value: number | string): number {
 })
 export class OperationsReader {
   constructor(private clickHouse: ClickHouse, private logger: Logger) {}
-
-  @atomic((tableName: Parameters<OperationsReader['canUseNewTable']>[0]) => tableName)
-  private canUseNewTable(
-    tableName: 'operations_minutely' | 'operation_collection_body' | 'operation_collection_details',
-  ) {
-    // If the table name is in the list, it means we completed the migration.
-    // If the migration is not completed then the name would contain the `_new` suffix.
-    return this.clickHouse
-      .query<{
-        name: string;
-      }>({
-        query: sql`SELECT name FROM system.tables WHERE database = 'default'`,
-        queryId: 'can_use_new_tables',
-        timeout: 10_000,
-      })
-      .then(result => result.data.map(row => row.name))
-      .then(tableNames => tableNames.includes(tableName));
-  }
 
   private pickQueryByPeriod(
     queryMap: {
@@ -334,17 +315,11 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       exists: number;
     }>({
-      query: (await this.canUseNewTable('operations_minutely'))
-        ? sql`
-          SELECT 1 as exists FROM target_existence ${this.createFilter({
-            target,
-          })} GROUP BY target LIMIT 1
-        `
-        : sql`
-          SELECT 1 as exists FROM operations_daily ${this.createFilter({
-            target,
-          })} GROUP BY target LIMIT 1
-        `,
+      query: sql`
+        SELECT 1 as exists FROM target_existence ${this.createFilter({
+          target,
+        })} GROUP BY target LIMIT 1
+      `,
       queryId: 'has_collected_operations',
       timeout: 10_000,
       span,
@@ -385,15 +360,10 @@ export class OperationsReader {
           span,
         },
         minutely: {
-          query: (await this.canUseNewTable('operations_minutely'))
-            ? sql`SELECT sum(total) as total FROM operations_minutely ${this.createFilter({
-                target,
-                period,
-              })}`
-            : sql`SELECT count() as total FROM operations ${this.createFilter({
-                target,
-                period,
-              })}`,
+          query: sql`SELECT sum(total) as total FROM operations_minutely ${this.createFilter({
+            target,
+            period,
+          })}`,
           queryId: 'count_operations_regular',
           timeout: 30_000,
           span,
@@ -459,21 +429,14 @@ export class OperationsReader {
           span,
         },
         minutely: {
-          query: (await this.canUseNewTable('operations_minutely'))
-            ? sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_minutely ${this.createFilter(
-                {
-                  target,
-                  period,
-                  operations,
-                  clients,
-                },
-              )}`
-            : sql`SELECT count() as total, sum(ok) as totalOk FROM operations ${this.createFilter({
-                target,
-                period,
-                operations,
-                clients,
-              })}`,
+          query: sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_minutely ${this.createFilter(
+            {
+              target,
+              period,
+              operations,
+              clients,
+            },
+          )}`,
           queryId: 'count_operations_regular',
           timeout: 30_000,
           span,
@@ -560,27 +523,16 @@ export class OperationsReader {
           span,
         },
         minutely: {
-          query: (await this.canUseNewTable('operations_minutely'))
-            ? sql`
-              SELECT count(distinct hash) as total
-              FROM operations_minutely
-              ${this.createFilter({
-                target,
-                period,
-                operations,
-                clients,
-              })}
-            `
-            : sql`
-              SELECT count(distinct hash) as total
-              FROM operations
-              ${this.createFilter({
-                target,
-                period,
-                operations,
-                clients,
-              })}
-            `,
+          query: sql`
+            SELECT count(distinct hash) as total
+            FROM operations_minutely
+            ${this.createFilter({
+              target,
+              period,
+              operations,
+              clients,
+            })}
+          `,
           queryId: 'count_unique_documents',
           timeout: 15_000,
           span,
@@ -658,29 +610,17 @@ export class OperationsReader {
           span,
         },
         minutely: {
-          query: (await this.canUseNewTable('operations_minutely'))
-            ? sql`
-              SELECT sum(total) as total, sum(total_ok) as totalOk, hash
-              FROM operations_minutely
-              ${this.createFilter({
-                target,
-                period,
-                operations,
-                clients,
-              })}
-              GROUP BY hash
-            `
-            : sql`
-              SELECT count() as total, sum(ok) as totalOk, hash
-              FROM operations
-              ${this.createFilter({
-                target,
-                period,
-                operations,
-                clients,
-              })}
-              GROUP BY hash
-            `,
+          query: sql`
+            SELECT sum(total) as total, sum(total_ok) as totalOk, hash
+            FROM operations_minutely
+            ${this.createFilter({
+              target,
+              period,
+              operations,
+              clients,
+            })}
+            GROUP BY hash
+          `,
           queryId: 'read_unique_documents',
           timeout: 15_000,
           span,
@@ -700,45 +640,31 @@ export class OperationsReader {
         hash: string;
         operation_kind: string;
       }>({
-        query: (await this.canUseNewTable('operation_collection_details'))
-          ? sql`
-            SELECT 
-              name,
-              hash,
-              operation_kind
-            FROM operation_collection_details
-              ${this.createFilter({
-                target,
-                extra: [
-                  sql`
-                    hash IN (
-                      SELECT hash
-                      FROM ${sql.raw('operations_' + query.queryType)}
-                      ${this.createFilter({
-                        target,
-                        period,
-                        operations,
-                      })}
-                      GROUP BY hash
-                    )
-                  `,
-                ],
-              })}
-            GROUP BY name, hash, operation_kind
-          `
-          : sql`
-            SELECT 
-              name,
-              hash,
-              operation_kind
-            FROM operation_collection
-              ${this.createFilter({
-                target,
-                operations,
-                period,
-              })}
-            GROUP BY name, hash, operation_kind
-          `,
+        query: sql`
+          SELECT 
+            name,
+            hash,
+            operation_kind
+          FROM operation_collection_details
+            ${this.createFilter({
+              target,
+              extra: [
+                sql`
+                  hash IN (
+                    SELECT hash
+                    FROM ${sql.raw('operations_' + query.queryType)}
+                    ${this.createFilter({
+                      target,
+                      period,
+                      operations,
+                    })}
+                    GROUP BY hash
+                  )
+                `,
+              ],
+            })}
+          GROUP BY name, hash, operation_kind
+        `,
         queryId: 'operations_registry',
         timeout: 15_000,
         span,
@@ -787,29 +713,17 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       body: string;
     }>({
-      query: (await this.canUseNewTable('operation_collection_body'))
-        ? sql`
-          SELECT 
-            body
-          FROM operation_collection_body
-            ${this.createFilter({
-              target,
-              extra: [sql`hash = ${hash}`],
-            })}
-          LIMIT 1
-          SETTINGS allow_asynchronous_read_from_io_pool_for_merge_tree = 1
-        `
-        : sql`
-          SELECT 
-            body
-          FROM operation_collection
-            ${this.createFilter({
-              target,
-              extra: [sql`hash = ${hash}`],
-            })}
-          LIMIT 1
-          SETTINGS allow_asynchronous_read_from_io_pool_for_merge_tree = 1
-        `,
+      query: sql`
+        SELECT 
+          body
+        FROM operation_collection_body
+          ${this.createFilter({
+            target,
+            extra: [sql`hash = ${hash}`],
+          })}
+        LIMIT 1
+        SETTINGS allow_asynchronous_read_from_io_pool_for_merge_tree = 1
+      `,
       queryId: 'read_body',
       timeout: 10_000,
       span,
@@ -868,26 +782,12 @@ export class OperationsReader {
             span,
           },
           hourly: {
-            query: (await this.canUseNewTable('operations_minutely'))
-              ? sql`
+            query: sql`
               SELECT 
                 sum(total) as total,
                 client_name,
                 client_version
               FROM operations_hourly
-              ${this.createFilter({
-                target,
-                period,
-                operations,
-              })}
-              GROUP BY client_name, client_version
-            `
-              : sql`
-              SELECT 
-                count(*) as total,
-                client_name,
-                client_version
-              FROM operations
               ${this.createFilter({
                 target,
                 period,
@@ -900,33 +800,19 @@ export class OperationsReader {
             span,
           },
           minutely: {
-            query: (await this.canUseNewTable('operations_minutely'))
-              ? sql`
-                SELECT 
-                  sum(total) as total,
-                  client_name,
-                  client_version
-                FROM operations_minutely
-                ${this.createFilter({
-                  target,
-                  period,
-                  operations,
-                })}
-                GROUP BY client_name, client_version
-              `
-              : sql`
-                SELECT 
-                  count(*) as total,
-                  client_name,
-                  client_version
-                FROM operations
-                ${this.createFilter({
-                  target,
-                  period,
-                  operations,
-                })}
-                GROUP BY client_name, client_version
-              `,
+            query: sql`
+              SELECT 
+                sum(total) as total,
+                client_name,
+                client_version
+              FROM operations_minutely
+              ${this.createFilter({
+                target,
+                period,
+                operations,
+              })}
+              GROUP BY client_name, client_version
+            `,
             queryId: 'count_clients_regular',
             timeout: 10_000,
             span,
@@ -1229,39 +1115,22 @@ export class OperationsReader {
                   timeout: 15_000,
                 },
                 minutely: {
-                  query: (await this.canUseNewTable('operations_minutely'))
-                    ? sql`
-                      SELECT 
-                        multiply(
-                          toUnixTimestamp(
-                            toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                              calculateTimeWindow({ period, resolution }),
-                            )}, 'UTC'),
-                          'UTC'),
-                        1000) as date,
-                        sum(total) as total,
-                        target
-                      FROM operations_minutely
-                      ${this.createFilter({ target: targets, period })}
-                      GROUP BY date, target
-                      ORDER BY date
-                    `
-                    : sql`
-                      SELECT 
-                        multiply(
-                          toUnixTimestamp(
-                            toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                              calculateTimeWindow({ period, resolution }),
-                            )}, 'UTC'),
-                          'UTC'),
-                        1000) as date,
-                        count(*) as total,
-                        target
-                      FROM operations
-                      ${this.createFilter({ target: targets, period })}
-                      GROUP BY date, target
-                      ORDER BY date
-                    `,
+                  query: sql`
+                    SELECT 
+                      multiply(
+                        toUnixTimestamp(
+                          toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
+                            calculateTimeWindow({ period, resolution }),
+                          )}, 'UTC'),
+                        'UTC'),
+                      1000) as date,
+                      sum(total) as total,
+                      target
+                    FROM operations_minutely
+                    ${this.createFilter({ target: targets, period })}
+                    GROUP BY date, target
+                    ORDER BY date
+                  `,
                   queryId: 'targets_count_over_time_regular',
                   timeout: 15_000,
                 },
@@ -1443,19 +1312,12 @@ export class OperationsReader {
             span,
           },
           minutely: {
-            query: (await this.canUseNewTable('operations_minutely'))
-              ? sql`
-                SELECT 
-                  quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
-                FROM operations_minutely
-                ${this.createFilter({ target, period, operations, clients })}
-              `
-              : sql`
-                SELECT 
-                  quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles
-                FROM operations
-                ${this.createFilter({ target, period, operations, clients })}
-              `,
+            query: sql`
+              SELECT 
+                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
+              FROM operations_minutely
+              ${this.createFilter({ target, period, operations, clients })}
+            `,
             queryId: 'general_duration_percentiles_regular',
             timeout: 15_000,
             span,
@@ -1516,23 +1378,14 @@ export class OperationsReader {
             span,
           },
           minutely: {
-            query: (await this.canUseNewTable('operations_minutely'))
-              ? sql`
-                SELECT 
-                  hash,
-                  quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
-                FROM operations_minutely
-                ${this.createFilter({ target, period, operations, clients })}
-                GROUP BY hash
-              `
-              : sql`
-                SELECT 
-                  hash,
-                  quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles
-                FROM operations
-                ${this.createFilter({ target, period, operations, clients })}
-                GROUP BY hash
-              `,
+            query: sql`
+              SELECT 
+                hash,
+                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
+              FROM operations_minutely
+              ${this.createFilter({ target, period, operations, clients })}
+              GROUP BY hash
+            `,
             queryId: 'duration_percentiles_regular',
             timeout: 15_000,
             span,
@@ -1660,9 +1513,7 @@ export class OperationsReader {
             span,
           },
           minutely: {
-            query: (await this.canUseNewTable('operations_minutely'))
-              ? createSQLQuery('operations_minutely', true)
-              : createSQLQuery('operations', false),
+            query: createSQLQuery('operations_minutely', true),
             queryId: 'duration_and_count_over_time_regular',
             timeout: 15_000,
             span,

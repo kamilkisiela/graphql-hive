@@ -199,13 +199,13 @@ async function processMessage({
   // Decompress and parse the message to get a list of reports
   const rawReports: RawReport[] = JSON.parse((await decompress(message.value!)).toString());
 
-  const { operations, registryRecords, migration } = await processor.processReports(rawReports);
+  const { operations, registryRecords } = await processor.processReports(rawReports);
 
   try {
     // .then and .catch looks weird but async/await with try/catch and Promise.all is even weirder
     await Promise.all([
       writer
-        .writeRegistry(registryRecords, migration.records)
+        .writeRegistry(registryRecords)
         .then(value => {
           ingestedOperationRegistryWrites.inc(registryRecords.length);
           return Promise.resolve(value);
@@ -215,7 +215,7 @@ async function processMessage({
           return Promise.reject(error);
         }),
       writer
-        .writeOperations(operations, migration.operations)
+        .writeOperations(operations)
         .then(value => {
           ingestedOperationsWrites.inc(operations.length);
           return Promise.resolve(value);
