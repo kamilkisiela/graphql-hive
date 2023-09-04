@@ -56,14 +56,30 @@ export class HttpClient {
         return Promise.resolve(response.body);
       },
       error => {
-        console.error(error);
-        Sentry.captureException(error);
+        if (opts.context?.description) {
+          span.setTag('contextDescription', opts.context.description);
+          console.log('Request context description:', opts.context.description);
+        }
+
+        let details: string | null = null;
 
         if (error instanceof HTTPError) {
           span.setHttpStatus(error.response.statusCode);
-        }
 
+          if (typeof error.response.body === 'string') {
+            details = error.response.body;
+            console.error(details);
+          }
+        }
         span.setStatus(error instanceof TimeoutError ? 'deadline_exceeded' : 'internal_error');
+
+        console.error(error);
+        Sentry.captureException(error, {
+          extra: {
+            details,
+          },
+        });
+
         span.finish();
         return Promise.reject(error);
       },

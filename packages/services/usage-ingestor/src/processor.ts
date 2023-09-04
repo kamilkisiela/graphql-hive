@@ -97,7 +97,8 @@ export function createProcessor(config: { logger: FastifyLoggerInstance }) {
             sample.size += 1;
           }
 
-          serializedOperations.push(stringifyOperation(processedOperation));
+          const stringifiedOperation = stringifyOperation(processedOperation);
+          serializedOperations.push(stringifiedOperation);
         }
 
         for (const group of operationSample.values()) {

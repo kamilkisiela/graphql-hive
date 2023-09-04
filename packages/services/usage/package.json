@@ -9,7 +9,10 @@
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/dev.ts",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
+  "devDependencies": {
+    "@hive/service-common": "workspace:*",
+    "@hive/tokens": "workspace:*",
+    "@hive/usage-common": "workspace:*",
     "@sentry/node": "7.59.3",
     "@trpc/client": "10.31.0",
     "@trpc/server": "10.31.0",
@@ -19,13 +22,8 @@
     "got": "12.6.1",
     "graphql": "16.6.0",
     "kafkajs": "2.2.4",
+    "pino-pretty": "10.1.0",
     "tiny-lru": "8.0.2",
     "zod": "3.21.4"
-  },
-  "devDependencies": {
-    "@hive/service-common": "workspace:*",
-    "@hive/tokens": "workspace:*",
-    "@hive/usage-common": "workspace:*",
-    "pino-pretty": "10.1.0"
   }
 }

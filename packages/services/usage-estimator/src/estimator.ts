@@ -23,7 +23,7 @@ export function createEstimator(config: {
   const { logger } = config;
   const httpClient = new HttpClient();
   const clickhouse = new ClickHouse(config.clickhouse, httpClient, config.logger);
-  const operationsReader = new OperationsReader(clickhouse);
+  const operationsReader = new OperationsReader(clickhouse, logger);
 
   return {
     readiness() {

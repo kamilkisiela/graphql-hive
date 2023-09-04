@@ -1,6 +1,6 @@
 import { ReactElement, ReactNode } from 'react';
-import clsx from 'clsx';
 import { Button } from '@/components/v2';
+import { cn } from '@/lib/utils';
 
 export function OperationsFallback({
   isError,
@@ -15,7 +15,7 @@ export function OperationsFallback({
 }): ReactElement {
   return (
     <div className="relative">
-      <div className={clsx(isError && 'blur-sm', isFetching ? 'opacity-50' : 'opacity-100')}>
+      <div className={cn(isError && 'blur-sm', isFetching ? 'opacity-30' : 'opacity-100')}>
         {children}
       </div>
       {isError ? (

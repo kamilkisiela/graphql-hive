@@ -1,7 +1,7 @@
 import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
 import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
+import { isProduction, isStaging } from '../utils/helpers';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { Clickhouse } from './clickhouse';
 import { DbMigrations } from './db-migrations';
@@ -9,6 +9,8 @@ import { Kafka } from './kafka';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
+
+const clickHouseConfig = new pulumi.Config('clickhouse');
 
 export type UsageIngestor = ReturnType<typeof deployUsageIngestor>;
 
@@ -46,6 +48,13 @@ export function deployUsageIngestor({
     CLICKHOUSE_ASYNC_INSERT_MAX_DATA_SIZE: '200000000', // flush data when the buffer reaches 200MB
   };
 
+  // Require migrationV2DataIngestionStartDate only in production and staging
+  // Remove it once we are done with migration.
+  const clickHouseMigrationV2DataIngestionStartDate =
+    isProduction(deploymentEnv) || isStaging(deploymentEnv)
+      ? clickHouseConfig.require('migrationV2DataIngestionStartDate')
+      : '';
+
   return new ServiceDeployment(
     'usage-ingestor-service',
     {
@@ -65,6 +74,7 @@ export function deployUsageIngestor({
         KAFKA_CONSUMER_GROUP: kafka.config.consumerGroup,
         RELEASE: release,
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
+        MIGRATION_V2_INGEST_AFTER_UTC: clickHouseMigrationV2DataIngestionStartDate,
       },
       exposesMetrics: true,
       port: 4000,

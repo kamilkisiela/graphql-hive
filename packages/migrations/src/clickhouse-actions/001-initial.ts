@@ -182,6 +182,6 @@ const statements = [
   `,
 ];
 
-const action: Action = exec => Promise.all(statements.map(exec)).then(() => {});
+const action: Action = exec => Promise.all(statements.map(q => exec(q))).then(() => {});
 
 export { action };

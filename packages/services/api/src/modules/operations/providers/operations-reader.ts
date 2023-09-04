@@ -1,10 +1,20 @@
-import { addMinutes, differenceInDays, format } from 'date-fns';
+import {
+  addMinutes,
+  differenceInDays,
+  format,
+  startOfDay,
+  startOfHour,
+  startOfMinute,
+  subHours,
+  subMinutes,
+} from 'date-fns';
 import { Injectable } from 'graphql-modules';
 import * as z from 'zod';
 import type { Span } from '@sentry/types';
 import { batch } from '@theguild/buddy';
 import type { DateRange } from '../../../shared/entities';
 import { sentry } from '../../../shared/sentry';
+import { Logger } from '../../shared/providers/logger';
 import { ClickHouse, RowOf, sql } from './clickhouse-client';
 import { calculateTimeWindow } from './helpers';
 import { SqlValue } from './sql';
@@ -53,66 +63,147 @@ function ensureNumber(value: number | string): number {
   return parseFloat(value);
 }
 
-function pickQueryByPeriod(
-  queryMap: {
-    hourly: {
-      query: SqlValue;
-      queryId: string;
-      timeout: number;
-      span?: Span | undefined;
-    };
-    daily: {
-      query: SqlValue;
-      queryId: string;
-      timeout: number;
-      span?: Span | undefined;
-    };
-    regular: {
-      query: SqlValue;
-      queryId: string;
-      timeout: number;
-      span?: Span | undefined;
-    };
-  },
-  period: DateRange | null,
-  resolution?: number,
-) {
-  if (!period) {
-    return queryMap.daily;
-  }
-
-  const distance = period.to.getTime() - period.from.getTime();
-  const distanceInHours = distance / 1000 / 60 / 60;
-  const distanceInDays = distance / 1000 / 60 / 60 / 24;
-
-  if (resolution) {
-    if (distanceInDays >= resolution) {
-      return queryMap.daily;
-    }
-
-    if (distanceInHours >= resolution) {
-      return queryMap.hourly;
-    }
-
-    return queryMap.regular;
-  }
-
-  if (distanceInHours > 24) {
-    return queryMap.daily;
-  }
-
-  if (distanceInHours > 1) {
-    return queryMap.hourly;
-  }
-
-  return queryMap.regular;
-}
-
 @Injectable({
   global: true,
 })
 export class OperationsReader {
-  constructor(private clickHouse: ClickHouse) {}
+  constructor(private clickHouse: ClickHouse, private logger: Logger) {}
+
+  private pickQueryByPeriod(
+    queryMap: {
+      hourly: {
+        query: SqlValue;
+        queryId: string;
+        timeout: number;
+        span?: Span | undefined;
+      };
+      daily: {
+        query: SqlValue;
+        queryId: string;
+        timeout: number;
+        span?: Span | undefined;
+      };
+      minutely: {
+        query: SqlValue;
+        queryId: string;
+        timeout: number;
+        span?: Span | undefined;
+      };
+    },
+    period: DateRange | null,
+    resolution?: number,
+  ) {
+    if (!period) {
+      return {
+        ...queryMap.daily,
+        queryType: 'daily' as const,
+      };
+    }
+
+    const dataPoints = resolution;
+    const timeDifference = period.to.getTime() - period.from.getTime();
+    const timeDifferenceInHours = timeDifference / 1000 / 60 / 60;
+    const timeDifferenceInDays = timeDifference / 1000 / 60 / 60 / 24;
+
+    // How long rows are kept in the database, per table.
+    const tableTTLInHours = {
+      daily: 365 * 24,
+      hourly: 30 * 24,
+      minutely: 24,
+    };
+
+    // The oldest data point we can fetch from the database, per table.
+    // ! We subtract 2 minutes as we round the date to the nearest minute on UI
+    //   and there's also a chance that request will be made at 59th second of the minute
+    //   and by the time it this function is called the minute will change.
+    //   That's why we use 2 minutes as a buffer.
+    const tableOldestDateTimePoint = {
+      daily: subMinutes(startOfDay(subHours(new Date(), tableTTLInHours.daily)), 2),
+      hourly: subMinutes(startOfHour(subHours(new Date(), tableTTLInHours.hourly)), 2),
+      minutely: subMinutes(startOfMinute(subHours(new Date(), tableTTLInHours.minutely)), 2),
+    };
+
+    let selectedQueryType: 'daily' | 'hourly' | 'minutely';
+
+    // If the user requested a specific resolution, we need to pick the right table.
+    //
+    if (dataPoints) {
+      const interval = calculateTimeWindow({ period, resolution });
+
+      if (timeDifferenceInDays >= dataPoints) {
+        // If user selected a date range of 60 days or more and requested 30 data points
+        // we can use daily table as each data point represents at least 1 day.
+        selectedQueryType = 'daily';
+
+        if (interval.unit !== 'd') {
+          this.logger.error(
+            `Calculated interval ${interval.value}${
+              interval.unit
+            } for the requested date range ${formatDate(period.from)} - ${formatDate(
+              period.to,
+            )} does not satisfy the daily table.`,
+          );
+          throw new Error(`Invalid number of data points for the requested date range`);
+        }
+      } else if (timeDifferenceInHours >= dataPoints) {
+        // Same as for daily table, but for hourly table.
+        // If data point represents at least 1 full hour, use hourly table.
+        selectedQueryType = 'hourly';
+
+        if (interval.unit === 'm') {
+          this.logger.error(
+            `Calculated interval ${interval.value}${
+              interval.unit
+            } for the requested date range ${formatDate(period.from)} - ${formatDate(
+              period.to,
+            )} does not satisfy the hourly table.`,
+          );
+          throw new Error(`Invalid number of data points for the requested date range`);
+        }
+      } else {
+        selectedQueryType = 'minutely';
+      }
+    } else if (timeDifferenceInHours > 24) {
+      selectedQueryType = 'daily';
+    } else if (timeDifferenceInHours > 1) {
+      selectedQueryType = 'hourly';
+    } else {
+      selectedQueryType = 'minutely';
+    }
+
+    if (tableOldestDateTimePoint[selectedQueryType].getTime() > period.from.getTime()) {
+      if (dataPoints) {
+        // If the oldest data point is newer than the requested data range,
+        // and the user requested a specific resolution
+        const interval = calculateTimeWindow({ period, resolution });
+        this.logger.error(
+          `Requested date range ${formatDate(period.from)} - ${formatDate(
+            period.to,
+          )} is older than the oldest available data point ${formatDate(
+            tableOldestDateTimePoint[selectedQueryType],
+          )} for the selected query type ${selectedQueryType}. The requested resolution is ${
+            interval.value
+          } ${interval.unit}.`,
+        );
+        throw new Error(`The requested date range is too old for the selected query type.`);
+      } else {
+        // If the oldest data point is newer than the requested data range,
+        // but the user didn't request a specific resolution, it's fine.
+        this.logger.warn(
+          `[OPERATIONS_READER_TTL_DATE_RANGE_WARN] The requested date range is too old for the selected query type. Requested date range ${formatDate(
+            period.from,
+          )} - ${formatDate(period.to)} is older than the oldest available data point ${formatDate(
+            tableOldestDateTimePoint[selectedQueryType],
+          )}`,
+        );
+      }
+    }
+
+    return {
+      ...queryMap[selectedQueryType],
+      queryType: selectedQueryType,
+    };
+  }
 
   @sentry('OperationsReader.countField')
   async countField({
@@ -224,13 +315,70 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       exists: number;
     }>({
-      query: sql`SELECT 1 as exists FROM operations_daily ${this.createFilter({ target })} LIMIT 1`,
+      query: sql`
+        SELECT 1 as exists FROM target_existence ${this.createFilter({
+          target,
+        })} GROUP BY target LIMIT 1
+      `,
       queryId: 'has_collected_operations',
       timeout: 10_000,
       span,
     });
 
     return result.rows > 0;
+  }
+
+  @sentry('OperationsReader.countOperationsWithoutDetails')
+  async countOperationsWithoutDetails(
+    {
+      target,
+      period,
+    }: {
+      target: string | readonly string[];
+      period: DateRange;
+    },
+    span?: Span,
+  ): Promise<number> {
+    const query = this.pickQueryByPeriod(
+      {
+        daily: {
+          query: sql`SELECT sum(total) as total FROM clients_daily ${this.createFilter({
+            target,
+            period,
+          })}`,
+          queryId: 'count_operations_daily',
+          timeout: 10_000,
+          span,
+        },
+        hourly: {
+          query: sql`SELECT sum(total) as total FROM operations_hourly ${this.createFilter({
+            target,
+            period,
+          })}`,
+          queryId: 'count_operations_hourly',
+          timeout: 15_000,
+          span,
+        },
+        minutely: {
+          query: sql`SELECT sum(total) as total FROM operations_minutely ${this.createFilter({
+            target,
+            period,
+          })}`,
+          queryId: 'count_operations_regular',
+          timeout: 30_000,
+          span,
+        },
+      },
+      period ?? null,
+    );
+
+    const result = await this.clickHouse.query<{
+      total: number;
+    }>(query);
+
+    const total = ensureNumber(result.data[0].total);
+
+    return total;
   }
 
   @sentry('OperationsReader.countOperations')
@@ -252,7 +400,7 @@ export class OperationsReader {
     ok: number;
     notOk: number;
   }> {
-    const query = pickQueryByPeriod(
+    const query = this.pickQueryByPeriod(
       {
         daily: {
           query: sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_daily ${this.createFilter(
@@ -280,8 +428,8 @@ export class OperationsReader {
           timeout: 15_000,
           span,
         },
-        regular: {
-          query: sql`SELECT count() as total, sum(ok) as totalOk FROM operations ${this.createFilter(
+        minutely: {
+          query: sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_minutely ${this.createFilter(
             {
               target,
               period,
@@ -342,7 +490,7 @@ export class OperationsReader {
     },
     span?: Span,
   ): Promise<number> {
-    const query = pickQueryByPeriod(
+    const query = this.pickQueryByPeriod(
       {
         daily: {
           query: sql`
@@ -374,10 +522,10 @@ export class OperationsReader {
           timeout: 15_000,
           span,
         },
-        regular: {
+        minutely: {
           query: sql`
             SELECT count(distinct hash) as total
-            FROM operations
+            FROM operations_minutely
             ${this.createFilter({
               target,
               period,
@@ -424,7 +572,7 @@ export class OperationsReader {
       percentage: number;
     }>
   > {
-    const query = pickQueryByPeriod(
+    const query = this.pickQueryByPeriod(
       {
         daily: {
           query: sql`
@@ -461,10 +609,10 @@ export class OperationsReader {
           timeout: 15_000,
           span,
         },
-        regular: {
+        minutely: {
           query: sql`
-            SELECT count() as total, sum(ok) as totalOk, hash
-            FROM operations
+            SELECT sum(total) as total, sum(total_ok) as totalOk, hash
+            FROM operations_minutely
             ${this.createFilter({
               target,
               period,
@@ -497,13 +645,26 @@ export class OperationsReader {
             name,
             hash,
             operation_kind
-          FROM operation_collection
+          FROM operation_collection_details
             ${this.createFilter({
               target,
-              operations,
-              period,
+              extra: [
+                sql`
+                  hash IN (
+                    SELECT hash
+                    FROM ${sql.raw('operations_' + query.queryType)}
+                    ${this.createFilter({
+                      target,
+                      period,
+                      operations,
+                    })}
+                    GROUP BY hash
+                  )
+                `,
+              ],
             })}
-          GROUP BY name, hash, operation_kind`,
+          GROUP BY name, hash, operation_kind
+        `,
         queryId: 'operations_registry',
         timeout: 15_000,
         span,
@@ -555,7 +716,7 @@ export class OperationsReader {
       query: sql`
         SELECT 
           body
-        FROM operation_collection
+        FROM operation_collection_body
           ${this.createFilter({
             target,
             extra: [sql`hash = ${hash}`],
@@ -600,7 +761,7 @@ export class OperationsReader {
       client_name: string;
       client_version: string;
     }>(
-      pickQueryByPeriod(
+      this.pickQueryByPeriod(
         {
           daily: {
             query: sql`
@@ -623,10 +784,10 @@ export class OperationsReader {
           hourly: {
             query: sql`
               SELECT 
-                count(*) as total,
+                sum(total) as total,
                 client_name,
                 client_version
-              FROM operations
+              FROM operations_hourly
               ${this.createFilter({
                 target,
                 period,
@@ -638,13 +799,13 @@ export class OperationsReader {
             timeout: 10_000,
             span,
           },
-          regular: {
+          minutely: {
             query: sql`
               SELECT 
-                count(*) as total,
+                sum(total) as total,
                 client_name,
                 client_version
-              FROM operations
+              FROM operations_minutely
               ${this.createFilter({
                 target,
                 period,
@@ -911,7 +1072,7 @@ export class OperationsReader {
             target: string;
             total: number;
           }>(
-            pickQueryByPeriod(
+            this.pickQueryByPeriod(
               {
                 daily: {
                   query: sql`
@@ -953,7 +1114,7 @@ export class OperationsReader {
                   queryId: 'targets_count_over_time_hourly',
                   timeout: 15_000,
                 },
-                regular: {
+                minutely: {
                   query: sql`
                     SELECT 
                       multiply(
@@ -963,9 +1124,9 @@ export class OperationsReader {
                           )}, 'UTC'),
                         'UTC'),
                       1000) as date,
-                      count(*) as total,
+                      sum(total) as total,
                       target
-                    FROM operations
+                    FROM operations_minutely
                     ${this.createFilter({ target: targets, period })}
                     GROUP BY date, target
                     ORDER BY date
@@ -1108,56 +1269,6 @@ export class OperationsReader {
     });
   }
 
-  @sentry('OperationsReader.durationHistogram')
-  async durationHistogram(
-    {
-      target,
-      period,
-      operations,
-      clients,
-    }: {
-      target: string;
-      period: DateRange;
-      operations?: readonly string[];
-      clients?: readonly string[];
-    },
-    span?: Span,
-  ): Promise<
-    Array<{
-      duration: number;
-      count: number;
-    }>
-  > {
-    const result = await this.clickHouse.query<{
-      latency: number;
-      total: number;
-    }>({
-      query: sql`
-        WITH histogram(90)(logDuration) AS hist
-        SELECT
-            arrayJoin(hist).1 as latency,
-            arrayJoin(hist).3 as total
-        FROM
-        (
-            SELECT log10(duration) as logDuration
-            FROM operations_new
-            ${this.createFilter({ target, period, operations, clients })}
-        )
-        ORDER BY latency
-      `,
-      queryId: 'duration_histogram',
-      timeout: 60_000,
-      span,
-    });
-
-    return result.data.map(row => {
-      return {
-        duration: Math.round(Math.pow(10, row.latency)),
-        count: Math.round(row.total),
-      };
-    });
-  }
-
   @sentry('OperationsReader.generalDurationPercentiles')
   async generalDurationPercentiles(
     {
@@ -1176,7 +1287,7 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       percentiles: [number, number, number, number];
     }>(
-      pickQueryByPeriod(
+      this.pickQueryByPeriod(
         {
           daily: {
             query: sql`
@@ -1200,11 +1311,11 @@ export class OperationsReader {
             timeout: 15_000,
             span,
           },
-          regular: {
+          minutely: {
             query: sql`
               SELECT 
-                quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles
-              FROM operations
+                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
+              FROM operations_minutely
               ${this.createFilter({ target, period, operations, clients })}
             `,
             queryId: 'general_duration_percentiles_regular',
@@ -1238,7 +1349,7 @@ export class OperationsReader {
       hash: string;
       percentiles: [number, number, number, number];
     }>(
-      pickQueryByPeriod(
+      this.pickQueryByPeriod(
         {
           daily: {
             query: sql`
@@ -1266,12 +1377,12 @@ export class OperationsReader {
             timeout: 15_000,
             span,
           },
-          regular: {
+          minutely: {
             query: sql`
               SELECT 
                 hash,
-                quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles
-              FROM operations
+                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
+              FROM operations_minutely
               ${this.createFilter({ target, period, operations, clients })}
               GROUP BY hash
             `,
@@ -1331,6 +1442,55 @@ export class OperationsReader {
     },
     span?: Span,
   ) {
+    const createSQLQuery = (tableName: string, isAggregation: boolean) => {
+      const startDateTimeFormatted = formatDate(period.from);
+      const endDateTimeFormatted = formatDate(period.to);
+      const interval = calculateTimeWindow({ period, resolution });
+      const intervalUnit =
+        interval.unit === 'd' ? 'DAY' : interval.unit === 'h' ? 'HOUR' : 'MINUTE';
+
+      // TODO: remove this once we shift to the new table structure (PR #2712)
+      const quantiles = isAggregation
+        ? 'quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles)'
+        : 'quantiles(0.75, 0.90, 0.95, 0.99)(duration)';
+      const total = isAggregation ? 'sum(total)' : 'count(*)';
+      const totalOk = isAggregation ? 'sum(total_ok)' : 'sum(ok)';
+
+      return sql`
+        WITH
+          toDateTime(${startDateTimeFormatted}, 'UTC') as start_date_time,
+          toDateTime(${endDateTimeFormatted}, 'UTC') as end_date_time,
+          ${intervalUnit} as interval_unit,
+          toUInt16(${String(interval.value)}) as interval_value
+        SELECT
+          multiply(toUnixTimestamp(date, 'UTC'), 1000) as date,
+          percentiles,
+          total,
+          totalOk
+        FROM (
+          SELECT
+            date_add(
+                ${sql.raw(intervalUnit)},
+                ceil(
+                  date_diff(interval_unit, start_date_time, timestamp, 'UTC') / interval_value
+                ) as UInt16 * interval_value,
+                start_date_time
+            ) as date,
+            ${sql.raw(quantiles)} as percentiles,
+            ${sql.raw(total)} as total,
+            ${sql.raw(totalOk)} as totalOk
+          FROM ${sql.raw(tableName)}
+          ${this.createFilter({ target, period, operations, clients })}
+          GROUP BY date
+          ORDER BY date
+          WITH FILL
+            FROM toDateTime(${startDateTimeFormatted}, 'UTC')
+            TO toDateTime(${endDateTimeFormatted}, 'UTC')
+            STEP INTERVAL ${this.clickHouse.translateWindow(interval)}
+        )
+      `;
+    };
+
     // multiply by 1000 to convert to milliseconds
     const result = await this.clickHouse.query<{
       date: number;
@@ -1338,71 +1498,22 @@ export class OperationsReader {
       totalOk: number;
       percentiles: [number, number, number, number];
     }>(
-      pickQueryByPeriod(
+      this.pickQueryByPeriod(
         {
           daily: {
-            query: sql`
-              SELECT 
-                multiply(
-                  toUnixTimestamp(
-                    toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                      calculateTimeWindow({ period, resolution }),
-                    )}, 'UTC'),
-                  'UTC'),
-                1000) as date,
-                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles,
-                sum(total) as total,
-                sum(total_ok) as totalOk
-              FROM operations_daily
-    }: {
-              ${this.createFilter({ target, period, operations, clients })}
-              GROUP BY date
-              ORDER BY date
-            `,
+            query: createSQLQuery('operations_daily', true),
             queryId: 'duration_and_count_over_time_daily',
             timeout: 15_000,
             span,
           },
           hourly: {
-            query: sql`
-              SELECT 
-                multiply(
-                  toUnixTimestamp(
-                    toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                      calculateTimeWindow({ period, resolution }),
-                    )}, 'UTC'),
-                  'UTC'),
-                1000) as date,
-                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles,
-                sum(total) as total,
-                sum(total_ok) as totalOk
-              FROM operations_hourly
-              ${this.createFilter({ target, period, operations, clients })}
-              GROUP BY date
-              ORDER BY date
-            `,
+            query: createSQLQuery('operations_hourly', true),
             queryId: 'duration_and_count_over_time_hourly',
             timeout: 15_000,
             span,
           },
-          regular: {
-            query: sql`
-              SELECT 
-                multiply(
-                  toUnixTimestamp(
-                    toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                      calculateTimeWindow({ period, resolution }),
-                    )}, 'UTC'),
-                  'UTC'),
-                1000) as date,
-                quantiles(0.75, 0.90, 0.95, 0.99)(duration) as percentiles,
-                count(*) as total,
-                sum(ok) as totalOk
-              FROM operations
-              ${this.createFilter({ target, period, operations, clients })}
-              GROUP BY date
-              ORDER BY date
-            `,
+          minutely: {
+            query: createSQLQuery('operations_minutely', true),
             queryId: 'duration_and_count_over_time_regular',
             timeout: 15_000,
             span,
@@ -1571,17 +1682,20 @@ export class OperationsReader {
       to: Date;
     };
   }) {
-    const dateRangeFilter = sql.raw(`
-      timestamp >= FROM_UNIXTIME(${Math.floor(period.from.getTime() / 1000)})
-      AND
-      timestamp < FROM_UNIXTIME(${Math.floor(period.to.getTime() / 1000)})
-    `);
-
     const result = await this.clickHouse.query<{
       total: string;
       target: string;
     }>({
-      query: sql`SELECT sum(total) as total, target from operations_daily WHERE ${dateRangeFilter} GROUP BY target`,
+      query: sql`
+        SELECT
+          sum(total) as total,
+          target
+        FROM operations_daily
+        PREWHERE
+          timestamp >= toDateTime(${formatDate(period.from)}, 'UTC')
+          AND
+          timestamp <= toDateTime(${formatDate(period.to)}, 'UTC')
+        GROUP BY target`,
       queryId: 'admin_operations_per_target',
       timeout: 15_000,
     });
@@ -1601,37 +1715,56 @@ export class OperationsReader {
     };
   }) {
     const days = differenceInDays(period.to, period.from);
-    const resolution = 90;
-    const dateRangeFilter = sql.raw(`
-      timestamp >= FROM_UNIXTIME(${Math.floor(period.from.getTime() / 1000)})
-      AND
-      timestamp < FROM_UNIXTIME(${Math.floor(period.to.getTime() / 1000)})
-    `);
+    const resolution = days <= 1 ? 60 : days;
+
+    const createSQL = (tableName: string) => sql`
+      SELECT 
+        multiply(
+          toUnixTimestamp(
+            toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
+              calculateTimeWindow({
+                period,
+                resolution,
+              }),
+            )}, 'UTC'),
+          'UTC'),
+        1000) as date,
+        sum(total) as total
+      FROM ${sql.raw(tableName)}
+      PREWHERE 
+        timestamp >= toDateTime(${formatDate(period.from)}, 'UTC')
+        AND
+        timestamp <= toDateTime(${formatDate(period.to)}, 'UTC')
+      GROUP BY date
+      ORDER BY date
+    `;
+
     const result = await this.clickHouse.query<{
       date: number;
       total: string;
-    }>({
-      query: sql`
-        SELECT 
-          multiply(
-            toUnixTimestamp(
-              toStartOfInterval(timestamp, INTERVAL ${this.clickHouse.translateWindow(
-                calculateTimeWindow({
-                  period,
-                  resolution,
-                }),
-              )}, 'UTC'),
-            'UTC'),
-          1000) as date,
-          sum(total) as total
-        FROM ${sql.raw(days > 1 && days >= resolution ? 'operations_daily' : 'operations_hourly')}
-        WHERE ${dateRangeFilter}
-        GROUP BY date
-        ORDER BY date
-      `,
-      queryId: 'admin_operations_per_target',
-      timeout: 15_000,
-    });
+    }>(
+      this.pickQueryByPeriod(
+        {
+          daily: {
+            query: createSQL('operations_daily'),
+            queryId: 'admin_operations_per_target_daily',
+            timeout: 15_000,
+          },
+          hourly: {
+            query: createSQL('operations_hourly'),
+            queryId: 'admin_operations_per_target_hourly',
+            timeout: 15_000,
+          },
+          minutely: {
+            query: createSQL('operations_minutely'),
+            queryId: 'admin_operations_per_target_minutely',
+            timeout: 15_000,
+          },
+        },
+        period,
+        resolution,
+      ),
+    );
 
     return result.data.map(row => ({
       date: ensureNumber(row.date) as any,

@@ -45,7 +45,9 @@ export const resolvers: IntegrationsModule.Resolvers = {
         organization: organizationId,
       });
 
-      const organization = await injector.get(OrganizationManager).getOrganization(input);
+      const organization = await injector.get(OrganizationManager).getOrganization({
+        organization: organizationId,
+      });
       return { organization };
     },
     async addGitHubIntegration(_, { input }, { injector }) {
@@ -65,7 +67,9 @@ export const resolvers: IntegrationsModule.Resolvers = {
         organization: organizationId,
       });
 
-      const organization = await injector.get(OrganizationManager).getOrganization(input);
+      const organization = await injector.get(OrganizationManager).getOrganization({
+        organization: organizationId,
+      });
       return { organization };
     },
   },

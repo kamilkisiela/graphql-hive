@@ -56,9 +56,15 @@ export function createWriter({
 
       const csv = joinIntoSingleMessage(operations);
       const compressed = await compress(csv);
-      const sql = `INSERT INTO operations (${operationsFields}) FORMAT CSV`;
 
-      await writeCsv(clickhouse, agents, sql, compressed, logger, 3);
+      await writeCsv(
+        clickhouse,
+        agents,
+        `INSERT INTO operations (${operationsFields}) FORMAT CSV`,
+        compressed,
+        logger,
+        3,
+      );
     },
     async writeRegistry(records: string[]) {
       if (records.length === 0) {
@@ -67,9 +73,15 @@ export function createWriter({
 
       const csv = joinIntoSingleMessage(records);
       const compressed = await compress(csv);
-      const sql = `INSERT INTO operation_collection (${registryFields}) FORMAT CSV`;
 
-      await writeCsv(clickhouse, agents, sql, compressed, logger, 3);
+      await writeCsv(
+        clickhouse,
+        agents,
+        `INSERT INTO operation_collection (${registryFields}) FORMAT CSV`,
+        compressed,
+        logger,
+        3,
+      );
     },
     destroy() {
       httpAgent.destroy();

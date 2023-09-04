@@ -1,8 +1,10 @@
-import { ReactElement, useCallback, useMemo } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
+import { ChevronUp } from 'lucide-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { Section } from '@/components/common';
+import { Button } from '@/components/ui/button';
 import { CHART_PRIMARY_COLOR } from '@/constants';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { DateRangeInput } from '@/graphql';
@@ -18,7 +20,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useChartStyles } from '@/utils';
 import { OperationsFallback } from './Fallback';
-import { createEmptySeries, fullSeries, resolutionToMilliseconds } from './utils';
+import { createEmptySeries, resolutionToMilliseconds } from './utils';
 
 const Stats_GeneralOperationsStatsQuery = graphql(`
   query Stats_GeneralOperationsStats($selector: OperationsStatsSelectorInput!, $resolution: Int!) {
@@ -169,11 +171,7 @@ function OverTimeStats({
   const interval = resolutionToMilliseconds(resolution, period);
   const requests = useMemo(() => {
     if (requestsOverTime?.length) {
-      return fullSeries(
-        requestsOverTime.map<[string, number]>(node => [node.date, node.value]),
-        interval,
-        period,
-      );
+      return requestsOverTime.map<[string, number]>(node => [node.date, node.value]);
     }
 
     return createEmptySeries({ interval, period });
@@ -181,11 +179,7 @@ function OverTimeStats({
 
   const failures = useMemo(() => {
     if (failuresOverTime?.length) {
-      return fullSeries(
-        failuresOverTime.map<[string, number]>(node => [node.date, node.value]),
-        interval,
-        period,
-      );
+      return failuresOverTime.map<[string, number]>(node => [node.date, node.value]);
     }
 
     return createEmptySeries({ interval, period });
@@ -301,6 +295,29 @@ const ClientsStats_OperationsStatsFragment = graphql(`
   }
 `);
 
+function getLevelOption() {
+  return [
+    {
+      itemStyle: {
+        borderWidth: 0,
+        gapWidth: 5,
+      },
+    },
+    {
+      itemStyle: {
+        gapWidth: 1,
+      },
+    },
+    {
+      colorSaturation: [0.35, 0.5],
+      itemStyle: {
+        gapWidth: 1,
+        borderColorSaturation: 0.6,
+      },
+    },
+  ];
+}
+
 function ClientsStats(props: {
   operationStats: FragmentType<typeof ClientsStats_OperationsStatsFragment> | null;
 }): ReactElement {
@@ -387,6 +404,46 @@ function ClientsStats(props: {
     return { labels, values };
   }, [sortedClients]);
 
+  const byClientAndVersion = useMemo(() => {
+    const dataPoints: Array<{
+      value: number;
+      name: string;
+      path: string;
+      children: Array<{
+        value: number;
+        name: string;
+        path: string;
+      }>;
+    }> = [];
+    if (sortedClients?.length) {
+      for (const client of sortedClients) {
+        const versions: Array<{
+          value: number;
+          name: string;
+          path: string;
+        }> = [];
+
+        for (const version of client.versions) {
+          versions.push({
+            value: version.count,
+            name: version.version,
+            path: `${client.name}@${version.version}`,
+          });
+        }
+
+        dataPoints.push({
+          value: client.count,
+          name: client.name,
+          path: client.name,
+          children: versions,
+        });
+      }
+    }
+    return dataPoints;
+  }, [sortedClients]);
+
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <div className="w-full rounded-md bg-gray-900/50 p-5 border border-gray-800">
       <Section.Title>Clients</Section.Title>
@@ -403,7 +460,10 @@ function ClientsStats(props: {
           return (
             <>
               <ReactECharts
-                style={{ width: innerWidth / 2, height: 200 }}
+                style={{
+                  width: innerWidth / 2,
+                  height: 200,
+                }}
                 option={{
                   ...styles,
                   grid: {
@@ -486,6 +546,83 @@ function ClientsStats(props: {
           );
         }}
       </AutoSizer>
+      {isOpen ? (
+        <AutoSizer disableHeight className="mt-5 w-full">
+          {size => {
+            if (!size.width) {
+              return <></>;
+            }
+
+            const gapX4 = 16;
+            const innerWidth = size.width - gapX4;
+
+            return (
+              <ReactECharts
+                style={{ width: innerWidth, height: 400, marginLeft: 'auto', marginRight: 'auto' }}
+                option={{
+                  ...styles,
+                  grid: {
+                    left: 20,
+                    top: 20,
+                    right: 20,
+                    bottom: 20,
+                    containLabel: true,
+                  },
+                  tooltip: {
+                    trigger: 'item',
+                    formatter(dataPoint: {
+                      data: {
+                        name: string;
+                        value: number;
+                      };
+                    }) {
+                      return `${dataPoint.data.name}: ${formatNumber(dataPoint.data.value)}`;
+                    },
+                  },
+                  legend: {
+                    show: false,
+                  },
+                  series: [
+                    {
+                      name: 'All clients and versions',
+                      type: 'treemap',
+                      label: {
+                        show: true,
+                        formatter: '{b}',
+                      },
+                      upperLabel: {
+                        show: true,
+                        height: 30,
+                        color: '#fff',
+                        backgroundColor: 'transparent',
+                        padding: 5,
+                        fontWeight: 'bold',
+                      },
+                      itemStyle: {
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                      },
+                      levels: getLevelOption(),
+                      data: byClientAndVersion,
+                      color: CHART_PRIMARY_COLOR,
+                    },
+                  ],
+                }}
+              />
+            );
+          }}
+        </AutoSizer>
+      ) : null}
+      <div className="w-full mt-5 text-center">
+        <Button variant="outline" onClick={() => setIsOpen(value => !value)}>
+          {isOpen ? (
+            <>
+              <ChevronUp className="mr-2 h-4 w-4" /> Hide
+            </>
+          ) : (
+            'Display all versions'
+          )}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -522,44 +659,28 @@ function LatencyOverTimeStats({
     useFragment(LatencyOverTimeStats_OperationStatsFragment, operationStats) ?? {};
   const p75 = useMemo(() => {
     if (duration?.length) {
-      return fullSeries(
-        duration.map<[string, number]>(node => [node.date, node.duration.p75]),
-        interval,
-        period,
-      );
+      return duration.map<[string, number]>(node => [node.date, node.duration.p75]);
     }
 
     return createEmptySeries({ interval, period });
   }, [duration, interval, period]);
   const p90 = useMemo(() => {
     if (duration?.length) {
-      return fullSeries(
-        duration.map<[string, number]>(node => [node.date, node.duration.p90]),
-        interval,
-        period,
-      );
+      return duration.map<[string, number]>(node => [node.date, node.duration.p90]);
     }
 
     return createEmptySeries({ interval, period });
   }, [duration, interval, period]);
   const p95 = useMemo(() => {
     if (duration?.length) {
-      return fullSeries(
-        duration.map<[string, number]>(node => [node.date, node.duration.p95]),
-        interval,
-        period,
-      );
+      return duration.map<[string, number]>(node => [node.date, node.duration.p95]);
     }
 
     return createEmptySeries({ interval, period });
   }, [duration, interval, period]);
   const p99 = useMemo(() => {
     if (duration?.length) {
-      return fullSeries(
-        duration.map<[string, number]>(node => [node.date, node.duration.p99]),
-        interval,
-        period,
-      );
+      return duration.map<[string, number]>(node => [node.date, node.duration.p99]);
     }
 
     return createEmptySeries({ interval, period });
@@ -673,14 +794,10 @@ function RpmOverTimeStats({
   const windowInM = interval / (60 * 1000);
   const rpmOverTime = useMemo(() => {
     if (requests.length) {
-      return fullSeries(
-        requests.map<[string, number]>(node => [
-          node.date,
-          parseFloat((node.value / windowInM).toFixed(4)),
-        ]),
-        interval,
-        period,
-      );
+      return requests.map<[string, number]>(node => [
+        node.date,
+        parseFloat((node.value / windowInM).toFixed(4)),
+      ]);
     }
 
     return createEmptySeries({ interval, period });
@@ -828,7 +945,9 @@ export function OperationsStats({
         </div>
       </OperationsFallback>
       <div>
-        <ClientsStats operationStats={operationsStats ?? null} />
+        <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
+          <ClientsStats operationStats={operationsStats ?? null} />
+        </OperationsFallback>
       </div>
       <div>
         <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>

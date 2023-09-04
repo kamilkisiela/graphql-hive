@@ -95,6 +95,22 @@ const LogModel = zod.object({
   ),
 });
 
+const MigrationModel = zod.object({
+  // Write operations to new tables when their timestamp >= YYYY-MM-DD 00:00:00 UTC
+  // Required only when doing a manual migration.
+  MIGRATION_V2_INGEST_AFTER_UTC: emptyString(
+    zod
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD format required')
+      .transform(value => {
+        const [year, month, day] = value.split('-').map(Number);
+        const utcDate = Date.UTC(year, month - 1, day, 0, 0, 0);
+        return utcDate;
+      })
+      .optional(),
+  ),
+});
+
 const configs = {
   // eslint-disable-next-line no-process-env
   base: EnvironmentModel.safeParse(process.env),
@@ -108,6 +124,8 @@ const configs = {
   log: LogModel.safeParse(process.env),
   // eslint-disable-next-line no-process-env
   clickhouse: ClickHouseModel.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
+  migration: MigrationModel.safeParse(process.env),
 };
 
 const environmentErrors: Array<string> = [];
@@ -137,6 +155,7 @@ const kafka = extractConfig(configs.kafka);
 const prometheus = extractConfig(configs.prometheus);
 const log = extractConfig(configs.log);
 const clickhouse = extractConfig(configs.clickhouse);
+const migration = extractConfig(configs.migration);
 
 export const env = {
   environment: base.ENVIRONMENT,
@@ -195,6 +214,9 @@ export const env = {
           },
         }
       : null,
+  migration: {
+    v2IngestAfter: migration.MIGRATION_V2_INGEST_AFTER_UTC,
+  },
 } as const;
 
 export type KafkaEnvironment = typeof env.kafka;

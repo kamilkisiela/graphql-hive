@@ -16,25 +16,23 @@
     "migration:run": "pnpm db:migrator up",
     "test": "node --experimental-specifier-resolution=node --loader ts-node/esm ./test/*.test.ts"
   },
-  "dependencies": {
-    "@graphql-hive/core": "workspace:*",
-    "@whatwg-node/fetch": "0.9.9",
-    "bcryptjs": "2.4.3",
-    "dotenv": "16.3.1",
-    "got": "12.6.1",
-    "p-limit": "4.0.0",
-    "slonik": "30.4.4",
-    "zod": "3.21.4"
-  },
   "devDependencies": {
+    "@graphql-hive/core": "workspace:*",
     "@types/bcryptjs": "2.4.2",
     "@types/node": "18.16.19",
     "@types/pg": "8.10.2",
+    "@whatwg-node/fetch": "0.9.9",
+    "bcryptjs": "2.4.3",
     "copyfiles": "2.4.1",
+    "dotenv": "16.3.1",
+    "got": "12.6.1",
+    "p-limit": "4.0.0",
     "pg-promise": "11.5.0",
+    "slonik": "30.4.4",
     "ts-node": "10.9.1",
     "tslib": "2.5.3",
-    "typescript": "5.1.6"
+    "typescript": "5.1.6",
+    "zod": "3.21.4"
   },
   "buildOptions": {
     "external": [

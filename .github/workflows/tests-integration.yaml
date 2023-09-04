@@ -72,7 +72,7 @@ jobs:
           docker compose -f docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env logs
 
       - name: run integration tests
-        timeout-minutes: 5
+        timeout-minutes: 10
         env:
           HIVE_DEBUG: 1
         run: |

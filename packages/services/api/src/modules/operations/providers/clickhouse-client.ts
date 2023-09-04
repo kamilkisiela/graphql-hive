@@ -93,6 +93,8 @@ export class ClickHouse {
           },
           searchParams: {
             default_format: 'JSON',
+            // Max execution time in seconds
+            max_execution_time: timeout / 1000,
             ...toQueryParams(query),
           },
           username: this.config.username,

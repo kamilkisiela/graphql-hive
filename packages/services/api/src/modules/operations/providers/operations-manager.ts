@@ -244,7 +244,7 @@ export class OperationsManager {
         target,
         period,
       }),
-      this.reader.countOperations({ target, period }).then(r => r.total),
+      this.reader.countOperationsWithoutDetails({ target, period }),
     ]);
 
     return {
@@ -304,7 +304,7 @@ export class OperationsManager {
         period,
         excludedClients,
       }),
-      this.reader.countOperations({ target, period }).then(r => r.total),
+      this.reader.countOperationsWithoutDetails({ target, period }),
     ]);
 
     return Object.keys(totalFields).map(id => {
@@ -617,34 +617,6 @@ export class OperationsManager {
     });
 
     return this.reader.durationPercentiles({
-      target,
-      period,
-      operations,
-      clients,
-    });
-  }
-
-  async readDurationHistogram({
-    period,
-    organization,
-    project,
-    target,
-    operations,
-    clients,
-  }: {
-    period: DateRange;
-    operations?: readonly string[];
-    clients?: readonly string[];
-  } & TargetSelector) {
-    this.logger.info('Reading duration histogram (period=%o, target=%s)', period, target);
-    await this.authManager.ensureTargetAccess({
-      organization,
-      project,
-      target,
-      scope: TargetAccessScope.REGISTRY_READ,
-    });
-
-    return this.reader.durationHistogram({
       target,
       period,
       operations,
