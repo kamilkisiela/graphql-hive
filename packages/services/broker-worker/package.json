@@ -8,11 +8,6 @@
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.worker.ts src/dev.ts",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "toucan-js": "3.2.3",
-    "workers-loki-logger": "0.1.15",
-    "zod": "3.21.4"
-  },
   "devDependencies": {
     "@cloudflare/workers-types": "4.20230717.1",
     "@types/service-worker-mock": "2.0.1",
@@ -21,6 +16,9 @@
     "esbuild": "0.17.19",
     "itty-router": "2.6.6",
     "itty-router-extras": "0.4.5",
-    "nock": "13.3.2"
+    "nock": "13.3.2",
+    "toucan-js": "3.2.3",
+    "workers-loki-logger": "0.1.15",
+    "zod": "3.21.4"
   }
 }
