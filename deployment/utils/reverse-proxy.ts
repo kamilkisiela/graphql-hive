@@ -17,7 +17,7 @@ export class Proxy {
       path: string;
       service: k8s.core.v1.Service;
       timeoutInSeconds?: number;
-      retryOnReset?: boolean;
+      retriable?: boolean;
       customRewrite?: string;
       virtualHost?: Output<string>;
       httpsUpstream?: boolean;
@@ -47,9 +47,6 @@ export class Proxy {
         apiVersion: 'projectcontour.io/v1',
         kind: 'HTTPProxy',
         metadata: {
-          annotations: {
-            'ingress.kubernetes.io/force-ssl-redirect': 'true',
-          },
           name: `ingress-${dns.record}`,
         },
         spec: {
@@ -94,11 +91,12 @@ export class Proxy {
                         },
                       }
                     : {}),
-                  ...(route.retryOnReset
+                  ...(route.retriable
                     ? {
                         retryPolicy: {
                           count: 2,
-                          retryOn: ['reset'],
+                          retryOn: ['reset', 'retriable-status-codes'],
+                          retriableStatusCodes: [503],
                         },
                       }
                     : {}),
