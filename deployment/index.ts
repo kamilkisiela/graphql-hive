@@ -27,7 +27,7 @@ import { deployWebhooks } from './services/webhooks';
 import { DeploymentEnvironment } from './types';
 import { optimizeAzureCluster } from './utils/azure-helpers';
 import { createDockerImageFactory } from './utils/docker-images';
-import { isDefined } from './utils/helpers';
+import { isDefined, isProduction } from './utils/helpers';
 
 optimizeAzureCluster();
 
@@ -237,6 +237,8 @@ const supertokens = deploySuperTokens(
   { dependencies: [dbMigrations] },
 );
 
+const zendeskConfig = new pulumi.Config('zendesk');
+
 const graphqlApi = deployGraphQL({
   clickhouse: clickhouseApi,
   image: dockerImages.getImageId('server', imagesTag),
@@ -264,6 +266,13 @@ const graphqlApi = deployGraphQL({
     internalApiKey: auth0LegacyMigrationKey.result,
   },
   s3Config,
+  zendeskConfig: isProduction(deploymentEnv)
+    ? {
+        subdomain: zendeskConfig.require('subdomain'),
+        username: zendeskConfig.require('username'),
+        password: zendeskConfig.requireSecret('password'),
+      }
+    : null,
 });
 
 const app = deployApp({
@@ -283,6 +292,7 @@ const app = deployApp({
   githubConfig,
   googleConfig,
   emailsEndpoint: emailsApi.localEndpoint,
+  zendeskSupport: isProduction(deploymentEnv),
 });
 
 const proxy = deployProxy({

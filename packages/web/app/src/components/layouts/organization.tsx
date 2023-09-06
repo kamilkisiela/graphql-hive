@@ -6,6 +6,7 @@ import { UserMenu } from '@/components/ui/user-menu';
 import { HiveLink, Tabs } from '@/components/v2';
 import { PlusIcon } from '@/components/v2/icon';
 import { CreateProjectModal } from '@/components/v2/modals';
+import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import {
   canAccessOrganization,
@@ -194,21 +195,22 @@ export function OrganizationLayout({
                     </Tabs.Trigger>
                   </>
                 )}
-                {canAccessOrganization(OrganizationAccessScope.Read, meInCurrentOrg) && (
-                  <Tabs.Trigger value={TabValue.Support} asChild>
-                    <NextLink
-                      href={{
-                        pathname: '/[organizationId]/view/[tab]',
-                        query: {
-                          organizationId: currentOrganization.cleanId,
-                          tab: TabValue.Support,
-                        },
-                      }}
-                    >
-                      Support
-                    </NextLink>
-                  </Tabs.Trigger>
-                )}
+                {canAccessOrganization(OrganizationAccessScope.Read, meInCurrentOrg) &&
+                  env.zendeskSupport && (
+                    <Tabs.Trigger value={TabValue.Support} asChild>
+                      <NextLink
+                        href={{
+                          pathname: '/[organizationId]/view/[tab]',
+                          query: {
+                            organizationId: currentOrganization.cleanId,
+                            tab: TabValue.Support,
+                          },
+                        }}
+                      >
+                        Support
+                      </NextLink>
+                    </Tabs.Trigger>
+                  )}
                 {getIsStripeEnabled() &&
                   canAccessOrganization(OrganizationAccessScope.Settings, meInCurrentOrg) && (
                     <Tabs.Trigger value={TabValue.Subscription} asChild>

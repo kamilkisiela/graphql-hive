@@ -206,7 +206,7 @@ export function UserMenu(props: {
                   </a>
                 </DropdownMenuItem>
               ) : null}
-              {currentOrganization ? (
+              {currentOrganization && env.zendeskSupport ? (
                 <NextLink
                   href={{
                     pathname: '/[organizationId]/view/support',

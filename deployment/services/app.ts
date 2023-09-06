@@ -27,6 +27,7 @@ export function deployApp({
   githubConfig,
   imagePullSecret,
   emailsEndpoint,
+  zendeskSupport,
 }: {
   image: string;
   release: string;
@@ -50,6 +51,7 @@ export function deployApp({
     clientSecret: pulumi.Output<string>;
   };
   emailsEndpoint: pulumi.Output<string>;
+  zendeskSupport: boolean,
 }) {
   return new ServiceDeployment(
     'app',
@@ -124,6 +126,11 @@ export function deployApp({
           name: 'GRAPHQL_PERSISTED_OPERATIONS',
           value: '1',
         },
+
+        {
+          name: 'ZENDESK_SUPPORT',
+          value: zendeskSupport ? '1' : '0',
+        }
 
         //
         // AUTH
