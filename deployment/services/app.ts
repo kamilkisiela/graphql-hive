@@ -51,7 +51,7 @@ export function deployApp({
     clientSecret: pulumi.Output<string>;
   };
   emailsEndpoint: pulumi.Output<string>;
-  zendeskSupport: boolean,
+  zendeskSupport: boolean;
 }) {
   return new ServiceDeployment(
     'app',
