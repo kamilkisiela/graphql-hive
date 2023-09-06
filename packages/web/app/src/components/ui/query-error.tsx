@@ -1,11 +1,11 @@
 import { ReactElement } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import cookies from 'js-cookie';
 import { LogOutIcon } from 'lucide-react';
 import { CombinedError } from 'urql';
 import { Button } from '@/components/ui/button';
 import { LAST_VISITED_ORG_KEY } from '@/constants';
-import { openChatSupport } from '@/utils';
 
 export function QueryError({
   error,
@@ -26,6 +26,8 @@ export function QueryError({
   const isNetworkError = !!error.networkError;
   const isExpectedError = !isNetworkError && !containsUnexpectedError;
   const shouldShowError = typeof showError === 'boolean' ? showError : isExpectedError;
+  const organizationId =
+    typeof router.query.organizationId === 'string' ? router.query.organizationId : null;
 
   return (
     <div className="h-full w-full flex items-center justify-center">
@@ -52,13 +54,22 @@ export function QueryError({
                 <p>Don't worry, our technical support got this error reported automatically.</p>
                 <p>
                   If you wish to track it later or share more details with us,{' '}
-                  <Button
-                    variant="link"
-                    className="h-auto p-0 text-orange-500"
-                    onClick={openChatSupport}
-                  >
-                    you can use the support chat
-                  </Button>
+                  {organizationId ? (
+                    <Button variant="link" className="h-auto p-0 text-orange-500" asChild>
+                      <Link
+                        href={{
+                          pathname: '/[organizationId]/view/support',
+                          query: { organizationId },
+                        }}
+                      >
+                        you can use the support
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button variant="link" className="h-auto p-0 text-orange-500" asChild>
+                      <a href="emailto:support@graphql-hive.com">you can use the support</a>
+                    </Button>
+                  )}
                   .
                 </p>
               </div>

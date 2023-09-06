@@ -755,6 +755,14 @@ export interface Storage {
    * Get an user that belongs to a specific organization by id.
    */
   getOrganizationUser(_: { organizationId: string; userId: string }): Promise<User | null>;
+
+  // Zendesk
+  setZendeskUserId(_: { userId: string; zendeskId: string }): Promise<void>;
+  setZendeskOrganizationId(_: { organizationId: string; zendeskId: string }): Promise<void>;
+  setZendeskOrganizationUserConnection(_: {
+    userId: string;
+    organizationId: string;
+  }): Promise<void>;
 }
 
 @Injectable()

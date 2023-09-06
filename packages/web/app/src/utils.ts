@@ -4,10 +4,6 @@ export function truthy<T>(value: T): value is Truthy<T> {
   return !!value;
 }
 
-export function openChatSupport() {
-  window.$crisp?.push(['do', 'chat:open']);
-}
-
 const darkChartStyles = {
   backgroundColor: 'transparent',
   textStyle: { color: '#fff' },

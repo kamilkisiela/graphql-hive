@@ -60,6 +60,17 @@ export type CompositeSchema = PushedCompositeSchema;
 export type Schema = SingleSchema | CompositeSchema;
 export type SchemaLog = SingleSchema | PushedCompositeSchema | DeletedCompositeSchema;
 
+export enum SupportTicketPriority {
+  NORMAL = 'normal',
+  HIGH = 'high',
+  URGENT = 'urgent',
+}
+
+export enum SupportTicketStatus {
+  OPEN = 'open',
+  SOLVED = 'solved',
+}
+
 export interface DateRange {
   from: Date;
   to: Date;
@@ -157,6 +168,7 @@ export interface Organization {
   featureFlags: {
     compareToPreviousComposableVersion: boolean;
   };
+  zendeskId: string | null;
 }
 
 export interface OrganizationInvitation {
@@ -289,6 +301,7 @@ export interface User {
   isAdmin: boolean;
   externalAuthUserId: string | null;
   oidcIntegrationId: string | null;
+  zendeskId: string | null;
 }
 
 export interface Member {
@@ -298,6 +311,7 @@ export interface Member {
   organization: string;
   scopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
   oidcIntegrationId: string | null;
+  connectedToZendesk: boolean;
 }
 
 export interface TargetSettings {

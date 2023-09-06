@@ -3,11 +3,13 @@ import { got, HTTPError, TimeoutError } from 'got';
 import { Injectable } from 'graphql-modules';
 import * as Sentry from '@sentry/node';
 import type { Span } from '@sentry/types';
+import type { Logger } from './logger';
 
 interface HttpClientOptions extends OptionsOfJSONResponseBody {
   method: 'GET' | 'POST' | 'DELETE' | 'PUT';
   context?: {
     description?: string;
+    logger?: Logger;
   };
 }
 
@@ -35,6 +37,8 @@ export class HttpClient {
       description: opts?.context?.description ?? `${opts.method} ${url}`,
     });
 
+    const logger = opts?.context?.logger ?? console;
+
     const request = got<T>(url, {
       ...opts,
       throwHttpErrors: true,
@@ -58,7 +62,7 @@ export class HttpClient {
       error => {
         if (opts.context?.description) {
           span.setTag('contextDescription', opts.context.description);
-          console.log('Request context description:', opts.context.description);
+          logger.debug('Request context description %s', opts.context.description);
         }
 
         let details: string | null = null;
@@ -68,12 +72,15 @@ export class HttpClient {
 
           if (typeof error.response.body === 'string') {
             details = error.response.body;
-            console.error(details);
+            logger.error(details);
+          } else if (typeof error.response.body === 'object') {
+            details = JSON.stringify(error.response.body);
+            logger.error(details);
           }
         }
         span.setStatus(error instanceof TimeoutError ? 'deadline_exceeded' : 'internal_error');
 
-        console.error(error);
+        logger.error(error);
         Sentry.captureException(error, {
           extra: {
             details,

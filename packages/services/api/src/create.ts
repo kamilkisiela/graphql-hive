@@ -54,6 +54,8 @@ import { REDIS_CONFIG, RedisConfig, RedisProvider } from './modules/shared/provi
 import { S3_CONFIG, type S3Config } from './modules/shared/providers/s3-config';
 import { Storage } from './modules/shared/providers/storage';
 import { WEB_APP_URL } from './modules/shared/providers/tokens';
+import { supportModule } from './modules/support';
+import { provideSupportConfig, SupportConfig } from './modules/support/providers/config';
 import { targetModule } from './modules/target';
 import { tokenModule } from './modules/token';
 import { TOKENS_CONFIG, TokensConfig } from './modules/token/providers/tokens';
@@ -107,6 +109,7 @@ export function createRegistry({
   feedback,
   billing,
   schemaConfig,
+  supportConfig,
   emailsEndpoint,
   organizationOIDC,
 }: {
@@ -139,6 +142,7 @@ export function createRegistry({
   } | null;
   billing: BillingConfig;
   schemaConfig: SchemaModuleConfig;
+  supportConfig: SupportConfig | null;
   emailsEndpoint?: string;
   organizationOIDC: boolean;
 }) {
@@ -267,6 +271,11 @@ export function createRegistry({
       useValue: emailsEndpoint,
       scope: Scope.Singleton,
     });
+    modules.push(supportModule);
+  }
+
+  if (supportConfig) {
+    providers.push(provideSupportConfig(supportConfig));
   }
 
   return createApplication({

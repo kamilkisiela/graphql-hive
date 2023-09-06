@@ -22,6 +22,7 @@ enum TabValue {
   Members = 'members',
   Settings = 'settings',
   Policy = 'policy',
+  Support = 'support',
   Subscription = 'subscription',
 }
 
@@ -63,7 +64,7 @@ export function OrganizationLayout({
   className,
   ...props
 }: {
-  value?: 'overview' | 'members' | 'settings' | 'subscription' | 'policy';
+  value?: 'overview' | 'members' | 'settings' | 'subscription' | 'policy' | 'support';
   className?: string;
   me: FragmentType<typeof OrganizationLayout_MeFragment> | null;
   currentOrganization: FragmentType<typeof OrganizationLayout_CurrentOrganizationFragment> | null;
@@ -192,6 +193,21 @@ export function OrganizationLayout({
                       </NextLink>
                     </Tabs.Trigger>
                   </>
+                )}
+                {canAccessOrganization(OrganizationAccessScope.Read, meInCurrentOrg) && (
+                  <Tabs.Trigger value={TabValue.Support} asChild>
+                    <NextLink
+                      href={{
+                        pathname: '/[organizationId]/view/[tab]',
+                        query: {
+                          organizationId: currentOrganization.cleanId,
+                          tab: TabValue.Support,
+                        },
+                      }}
+                    >
+                      Support
+                    </NextLink>
+                  </Tabs.Trigger>
                 )}
                 {getIsStripeEnabled() &&
                   canAccessOrganization(OrganizationAccessScope.Settings, meInCurrentOrg) && (
