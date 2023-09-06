@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import { z } from 'zod';
-import { SupportTicketPriority, SupportTicketStatus } from '../../../shared/entities';
+import { Organization, SupportTicketPriority, SupportTicketStatus } from '../../../shared/entities';
 import { atomic } from '../../../shared/helpers';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/scopes';
@@ -479,6 +479,11 @@ export class SupportManager {
       )
       .digest('hex');
 
+    const organization = await this.organizationManager.getOrganization({
+      organization: input.organizationId,
+    });
+    const customerType = this.resolveCustomerType(organization);
+
     const response = await this.httpClient
       .post(`https://${this.config.subdomain}.zendesk.com/api/v2/tickets`, {
         username: this.config.username,
@@ -493,6 +498,7 @@ export class SupportManager {
             },
             priority: request.data.priority,
             subject: request.data.subject,
+            custom_fields: [{ id: /* Customer Type */ 18185379454865, value: customerType }],
           },
         },
         headers: {
@@ -602,5 +608,21 @@ export class SupportManager {
       },
       error: null,
     };
+  }
+
+  private resolveCustomerType(organization: Organization): string {
+    const billingPlanMap: Record<string, string> = {
+      ENTERPRISE: 'Enterprise',
+      PRO: 'Pro',
+      HOBBY: 'Hobby',
+    };
+
+    const customerType = billingPlanMap[organization.billingPlan];
+
+    if (customerType) {
+      return customerType;
+    }
+
+    throw new Error(`Unknown billing plan: ${organization.billingPlan}`);
   }
 }
