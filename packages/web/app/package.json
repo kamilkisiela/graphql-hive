@@ -98,6 +98,7 @@
     "@graphql-codegen/client-preset-swc-plugin": "0.2.0",
     "@graphql-typed-document-node/core": "3.2.0",
     "@hive/emails": "workspace:*",
+    "@hive/server": "workspace:*",
     "@next/bundle-analyzer": "13.4.11",
     "@sentry/types": "7.59.3",
     "@storybook/addon-essentials": "7.0.23",
