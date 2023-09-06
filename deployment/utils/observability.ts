@@ -236,7 +236,10 @@ export class Observability {
               envoy_json_logs: {
                 type: 'remap',
                 inputs: ['envoy_logs'],
-                drop_on_error: false,
+                // Avoid sending the event to the sink
+                drop_on_error: true,
+                // Route the dropped events to the debug_dropped sink
+                reroute_dropped: true,
                 source: '. |= object!(parse_json!(.message))',
               },
               envoy_error_logs: {
@@ -252,6 +255,12 @@ export class Observability {
               //   inputs: ['kubernetes_logs'],
               //   encoding: { codec: 'json' },
               // },
+              // Debug dropped messages (envoy_json_logs)
+              debug_dropped: {
+                type: 'console',
+                inputs: ['dropped'],
+                encoding: { codec: 'json' },
+              },
               grafana_lab: {
                 type: 'loki',
                 inputs: ['kubernetes_logs', 'envoy_error_logs'],
@@ -269,6 +278,8 @@ export class Observability {
                 encoding: {
                   codec: 'text',
                 },
+                out_of_order_action: 'accept',
+                remove_timestamp: false,
               },
             },
           },
