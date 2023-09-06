@@ -258,7 +258,7 @@ export class Observability {
               // Debug dropped messages (envoy_json_logs)
               debug_dropped: {
                 type: 'console',
-                inputs: ['dropped'],
+                inputs: ['envoy_json_logs.dropped'],
                 encoding: { codec: 'json' },
               },
               grafana_lab: {
