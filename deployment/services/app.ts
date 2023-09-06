@@ -130,7 +130,7 @@ export function deployApp({
         {
           name: 'ZENDESK_SUPPORT',
           value: zendeskSupport ? '1' : '0',
-        }
+        },
 
         //
         // AUTH
