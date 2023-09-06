@@ -35,6 +35,7 @@ export const env = {
   graphql: {
     persistedOperations: backendEnv.graphql.persistedOperations,
   },
+  zendeskSupport: backendEnv.zendeskSupport,
 } as const;
 
 declare global {

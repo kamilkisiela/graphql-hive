@@ -40,6 +40,7 @@ const BaseSchema = zod.object({
   GRAPHQL_PERSISTED_OPERATIONS: emptyString(
     zod.union([zod.literal('1'), zod.literal('0')]).optional(),
   ),
+  ZENDESK_SUPPORT: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
 });
 
 const IntegrationSlackSchema = zod.union([
@@ -235,6 +236,7 @@ const config = {
   graphql: {
     persistedOperations: base.GRAPHQL_PERSISTED_OPERATIONS === '1',
   },
+  zendeskSupport: base.ZENDESK_SUPPORT === '1',
 } as const;
 
 declare global {

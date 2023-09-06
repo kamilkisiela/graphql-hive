@@ -50,6 +50,7 @@ export function deployGraphQL({
   supertokensConfig,
   auth0Config,
   s3Config,
+  zendeskConfig,
   imagePullSecret,
   cdnAuthPrivateKey,
 }: {
@@ -83,6 +84,11 @@ export function deployGraphQL({
     accessKeyId: Output<string>;
     secretAccessKey: Output<string>;
   };
+  zendeskConfig: {
+    username: string;
+    password: Output<string>;
+    subdomain: string;
+  } | null;
   imagePullSecret: k8s.core.v1.Secret;
 }) {
   const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
@@ -150,6 +156,17 @@ export function deployGraphQL({
         HIVE_USAGE: '1',
         HIVE_USAGE_ENDPOINT: serviceLocalEndpoint(usage.service),
         HIVE_REPORTING_ENDPOINT: 'http://0.0.0.0:4000/graphql',
+        // Zendesk
+        ...(zendeskConfig
+          ? {
+              ZENDESK_SUPPORT: '1',
+              ZENDESK_USERNAME: zendeskConfig.username,
+              ZENDESK_PASSWORD: zendeskConfig.password,
+              ZENDESK_SUBDOMAIN: zendeskConfig.subdomain,
+            }
+          : {
+              ZENDESK_SUPPORT: '0',
+            }),
         //
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
         INTEGRATION_GITHUB: '1',
