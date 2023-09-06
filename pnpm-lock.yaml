@@ -1111,6 +1111,9 @@ importers:
       fastify-plugin:
         specifier: 3.0.1
         version: 3.0.1
+      p-retry:
+        specifier: 6.0.0
+        version: 6.0.0
       prom-client:
         specifier: 14.2.0
         version: 14.2.0
@@ -24615,6 +24618,14 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       '@types/retry': 0.12.0
+      retry: 0.13.1
+    dev: true
+
+  /p-retry@6.0.0:
+    resolution: {integrity: sha512-6NuuXu8Upembd4sNdo4PRbs+M6aHgBTrFE6lkH0YKjVzne3cDW4gkncB98ty/bkMxLxLVNeD5bX9FyWjM7WZ+A==}
+    engines: {node: '>=16.17'}
+    dependencies:
+      '@types/retry': 0.12.2
       retry: 0.13.1
     dev: true
 
