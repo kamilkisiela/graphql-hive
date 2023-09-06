@@ -347,7 +347,7 @@ export function IndexPage(): ReactElement {
             <div className="w-full absolute h-[1px] top-0 opacity-25 bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300" />
           </div>
           <StatsList>
-            <StatsItem label="Happy users" value={2.9} suffix="K" decimal />
+            <StatsItem label="Happy users" value={3.0} suffix="K" decimal />
             <StatsItem label="Registered Schemas" value={120} suffix="K" />
             <StatsItem label="Collected Operations" value={150} suffix="B" />
             <StatsItem label="GitHub Commits" value={2.2} suffix="K" decimal />
