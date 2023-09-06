@@ -201,3 +201,52 @@ test('timeout', async ({ expect }) => {
   await expect(run({})).rejects.toThrowError(/timeout/i);
   expect(spy).toHaveBeenCalledTimes(2);
 });
+
+test('run action again when the action expires', async ({ expect }) => {
+  const ttlMs = 10;
+  const redis = new Redis();
+  const prefix = randomString();
+  const pollIntervalMs = 5;
+  const timeoutMs = 50;
+  const cacheForRequest1 = createCache({
+    redis,
+    logger: {
+      debug: vi.fn() as any,
+      warn: vi.fn() as any,
+    },
+    prefix,
+    pollIntervalMs,
+    timeoutMs,
+    ttlMs,
+  });
+
+  const cacheForRequest2 = createCache({
+    redis,
+    logger: {
+      debug: vi.fn() as any,
+      warn: vi.fn() as any,
+    },
+    prefix,
+    pollIntervalMs,
+    timeoutMs,
+    ttlMs,
+  });
+
+  const actionId = randomString();
+  async function actionFn() {
+    await waitFor(timeoutMs);
+    return 'foo';
+  }
+
+  const exec1 = cacheForRequest1.reuse(actionId, actionFn);
+  const exec2 = cacheForRequest2.reuse(actionId, actionFn);
+
+  const run1 = exec1({});
+  const run2 = exec2({});
+  // force the cache to expire
+  await waitFor(ttlMs + 10);
+  await redis.flushall();
+
+  await expect(run1).resolves.toBe('foo');
+  await expect(run2).resolves.toBe('foo');
+});

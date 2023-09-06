@@ -95,58 +95,68 @@ export function createCache(options: {
     );
   }
 
+  async function runAction<I, O>(
+    groupKey: string,
+    factory: (input: I) => Promise<O>,
+    input: I,
+    attempt: number,
+  ): Promise<O> {
+    const id = `${prefix}:${groupKey}:${createChecksum(input)}`;
+    if (attempt === 3) {
+      logger.debug('Too many attempts (id=%s)', id);
+      throw new Error('Too many attempts');
+    }
+
+    const start = await startAction(id);
+
+    if (start.status === 'reusing') {
+      let cached = await readAction<O>(id);
+
+      const startedAt = Date.now();
+      while (cached && cached.status === 'started') {
+        logger.debug('Waiting for action to complete (id=%s, time=%s)', id, Date.now() - startedAt);
+        await new Promise(resolve => setTimeout(resolve, pollIntervalMs));
+        cached = await readAction<O>(id);
+      }
+
+      if (cached) {
+        if (cached.status === 'failed') {
+          logger.debug('Rejecting action from cache (id=%s)', id);
+          if (cached.error.startsWith('TimeoutError:')) {
+            throw new TimeoutError(cached.error.replace('TimeoutError:', ''));
+          }
+          throw new Error(cached.error);
+        }
+
+        logger.debug('Resolving action from cache (id=%s)', id);
+        return cached.result;
+      }
+
+      logger.debug('Cache expired, re-running action (id=%s, attempt=%s)', id, ++attempt);
+      return runAction(groupKey, factory, input, attempt);
+    }
+
+    try {
+      logger.debug('Executing action (id=%s)', id);
+      const result = await pTimeout(factory(input), {
+        milliseconds: timeoutMs,
+        message: `Timeout: took longer than ${timeoutMs}ms to complete`,
+      });
+      await completeAction(id, result);
+      return result;
+    } catch (error) {
+      await failAction(id, String(error));
+      throw error;
+    }
+  }
+
   return {
     timeoutMs,
     isTimeoutError(error: unknown): error is TimeoutError {
       return error instanceof TimeoutError;
     },
     reuse<I, O>(groupKey: string, factory: (input: I) => Promise<O>): (input: I) => Promise<O> {
-      return async input => {
-        const id = `${prefix}:${groupKey}:${createChecksum(input)}`;
-        const start = await startAction(id);
-
-        if (start.status === 'reusing') {
-          let cached = await readAction<O>(id);
-          const startedAt = Date.now();
-          while (cached && cached.status === 'started') {
-            logger.debug(
-              'Waiting for action to complete (id=%s, time=%s)',
-              id,
-              Date.now() - startedAt,
-            );
-            await new Promise(resolve => setTimeout(resolve, pollIntervalMs));
-            cached = await readAction<O>(id);
-          }
-
-          if (cached) {
-            if (cached.status === 'failed') {
-              logger.debug('Rejecting action from cache (id=%s)', id);
-              if (cached.error.startsWith('TimeoutError:')) {
-                throw new TimeoutError(cached.error.replace('TimeoutError:', ''));
-              }
-              throw new Error(cached.error);
-            }
-
-            logger.debug('Resolving action from cache (id=%s)', id);
-            return cached.result;
-          }
-
-          logger.warn('Hey Ghostbusters, we have a ghost (id=%s)', id);
-          throw new Error('We have a ghost.');
-        }
-
-        try {
-          const result = await pTimeout(factory(input), {
-            milliseconds: timeoutMs,
-            message: `Timeout: took longer than ${timeoutMs}ms to complete`,
-          });
-          await completeAction(id, result);
-          return result;
-        } catch (error) {
-          await failAction(id, String(error));
-          throw error;
-        }
-      };
+      return async input => runAction(groupKey, factory, input, 1);
     },
   };
 }
