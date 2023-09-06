@@ -612,9 +612,9 @@ export class SupportManager {
 
   private resolveCustomerType(organization: Organization): string {
     const billingPlanMap: Record<string, string> = {
-      ENTERPRISE: 'Enterprise',
-      PRO: 'Pro',
-      HOBBY: 'Hobby',
+      ENTERPRISE: 'enterprise_customer',
+      PRO: 'pro_customer',
+      HOBBY: 'hobby_customer',
     };
 
     const customerType = billingPlanMap[organization.billingPlan];
