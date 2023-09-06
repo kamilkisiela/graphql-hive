@@ -1,3 +1,4 @@
+import pRetry from 'p-retry';
 import { fetch } from '@whatwg-node/fetch';
 import { invariant } from './helpers';
 
@@ -43,7 +44,9 @@ export function startHeartbeats(config: { enabled: boolean }): Heartbeats {
   async function beat() {
     try {
       if (await isReady()) {
-        await fetch(endpoint, { method: 'GET' });
+        await pRetry(() => fetch(endpoint, { method: 'GET' }), {
+          retries: 3,
+        });
       }
     } catch (error) {
       onError(error as any);
