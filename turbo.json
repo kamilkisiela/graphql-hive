@@ -42,7 +42,7 @@
       "outputs": ["dist/**"]
     },
     "@hive/server#build": {
-      "dependsOn": ["^build", "@hive/app#build"],
+      "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "check:build": {
