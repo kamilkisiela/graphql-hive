@@ -5,8 +5,9 @@ import { FiGithub, FiGlobe, FiLogIn, FiPackage, FiServer, FiTruck } from 'react-
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { cn } from '../lib';
 import { BookIcon } from './book-icon';
-import { Hero, HeroLinks, HeroSubtitle, HeroTitle } from './hero';
+import { HereTrustedBy, Hero, HeroLinks, HeroSubtitle, HeroTitle } from './hero';
 import { Highlights, HighlightTextLink } from './highlights';
+import { AligentLogo, KarrotLogo, LinktreeLogo, MeetupLogo, SoundYXZLogo } from './logos';
 import { Page } from './page';
 import { Pricing } from './pricing';
 import { StatsItem, StatsList } from './stats';
@@ -318,13 +319,35 @@ export function IndexPage(): ReactElement {
               </a>
             </>
           </HeroLinks>
+          <HereTrustedBy>
+            <MeetupLogo
+              className="opacity-50 hover:opacity-100 transition-opacity duration-300 ease-in-out"
+              height={32}
+            />
+            <LinktreeLogo
+              className="opacity-50 hover:opacity-100 transition-opacity duration-300 ease-in-out"
+              height={22}
+            />
+            <KarrotLogo
+              height={28}
+              className="opacity-50 hover:opacity-100 transition-opacity duration-300 ease-in-out"
+            />
+            <AligentLogo
+              className="opacity-50 hover:opacity-100 transition-opacity duration-300 ease-in-out"
+              height={32}
+            />
+            <SoundYXZLogo
+              className="opacity-50 hover:opacity-100 transition-opacity duration-300 ease-in-out"
+              height={32}
+            />
+          </HereTrustedBy>
         </Hero>
         <div className="even:bg-gray-50 relative">
           <div>
             <div className="w-full absolute h-[1px] top-0 opacity-25 bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300" />
           </div>
           <StatsList>
-            <StatsItem label="Happy users" value={2.9} suffix="K" decimal />
+            <StatsItem label="Happy users" value={3.0} suffix="K" decimal />
             <StatsItem label="Registered Schemas" value={120} suffix="K" />
             <StatsItem label="Collected Operations" value={150} suffix="B" />
             <StatsItem label="GitHub Commits" value={2.2} suffix="K" decimal />
