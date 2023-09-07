@@ -129,9 +129,14 @@ function Inner(props: {
   const [paymentDetailsValid, setPaymentDetailsValid] = useState(
     !!organization.billingConfiguration?.paymentMethod,
   );
-  const upgradeToProMutation = useMutation(BillingUpgradeToProMutation);
-  const downgradeToHobbyMutation = useMutation(BillingDowngradeMutation);
-  const updateOrgRateLimitMutation = useMutation(UpdateOrgRateLimitMutation);
+  const [upgradeToProMutationState, upgradeToProMutation] = useMutation(
+    BillingUpgradeToProMutation,
+  );
+  const [downgradeToHobbyMutationState, downgradeToHobbyMutation] =
+    useMutation(BillingDowngradeMutation);
+  const [updateOrgRateLimitMutationState, updateOrgRateLimitMutation] = useMutation(
+    UpdateOrgRateLimitMutation,
+  );
   const planSummaryRef = useRef<HTMLDivElement>(null);
 
   const [plan, setPlan] = useState<BillingPlanType>(organization?.plan || 'HOBBY');
@@ -180,7 +185,16 @@ function Inner(props: {
     return null;
   }
 
-  const upgrade = async () => {
+  const isFetching =
+    updateOrgRateLimitMutationState.fetching ||
+    downgradeToHobbyMutationState.fetching ||
+    upgradeToProMutationState.fetching;
+
+  const upgrade = useCallback(async () => {
+    if (isFetching) {
+      return;
+    }
+
     let paymentMethodId: string | null = null;
 
     if (organization.billingConfiguration.paymentMethod === null) {
@@ -206,7 +220,7 @@ function Inner(props: {
       paymentMethodId = paymentMethod.id;
     }
 
-    await upgradeToProMutation[1]({
+    await upgradeToProMutation({
       organization: organization.cleanId,
       monthlyLimits: {
         operations: operationsRateLimit * 1_000_000,
@@ -214,29 +228,45 @@ function Inner(props: {
       paymentMethodId,
       couponCode: couponCode.trim() === '' ? null : couponCode.trim(),
     });
-  };
+  }, [
+    organization,
+    stripe,
+    elements,
+    upgradeToProMutation,
+    isFetching,
+    operationsRateLimit,
+    couponCode,
+  ]);
 
-  const downgrade = async () => {
-    await downgradeToHobbyMutation[1]({
+  const downgrade = useCallback(async () => {
+    if (isFetching) {
+      return;
+    }
+
+    await downgradeToHobbyMutation({
       organization: organization.cleanId,
     });
-  };
+  }, [organization.cleanId, downgradeToHobbyMutation, isFetching]);
 
-  const updateLimits = async () => {
-    await updateOrgRateLimitMutation[1]({
+  const updateLimits = useCallback(async () => {
+    if (isFetching) {
+      return;
+    }
+
+    await updateOrgRateLimitMutation({
       organization: organization.cleanId,
       monthlyLimits: {
         operations: operationsRateLimit * 1_000_000,
       },
     });
-  };
+  }, [organization.cleanId, operationsRateLimit, updateOrgRateLimitMutation, isFetching]);
 
   const renderActions = () => {
     if (plan === organization.plan) {
       if (organization.rateLimit.operations !== operationsRateLimit * 1_000_000) {
         return (
           <>
-            <Button type="button" onClick={updateLimits}>
+            <Button type="button" onClick={updateLimits} disabled={isFetching}>
               Update Limits
             </Button>
             <Section.Subtitle className="mt-4">
@@ -259,7 +289,7 @@ function Inner(props: {
 
     if (plan === 'PRO') {
       return (
-        <Button type="button" onClick={upgrade} disabled={!paymentDetailsValid}>
+        <Button type="button" onClick={upgrade} disabled={!paymentDetailsValid || isFetching}>
           Upgrade to Pro
         </Button>
       );
@@ -267,7 +297,7 @@ function Inner(props: {
 
     if (plan === 'HOBBY') {
       return (
-        <Button type="button" onClick={downgrade}>
+        <Button type="button" onClick={downgrade} disabled={isFetching}>
           Downgrade to Hobby
         </Button>
       );
@@ -277,9 +307,9 @@ function Inner(props: {
   };
 
   const error =
-    upgradeToProMutation[0].error ||
-    downgradeToHobbyMutation[0].error ||
-    updateOrgRateLimitMutation[0].error;
+    upgradeToProMutationState.error ||
+    downgradeToHobbyMutationState.error ||
+    updateOrgRateLimitMutationState.error;
 
   const billingPlans = useFragment(
     ManageSubscriptionInner_BillingPlansFragment,
@@ -334,6 +364,7 @@ function Inner(props: {
                   <Slider
                     min={1}
                     max={300}
+                    disabled={isFetching}
                     value={[operationsRateLimit]}
                     onValueChange={onOperationsRateLimitChange}
                   />
@@ -362,6 +393,7 @@ function Inner(props: {
                       className="w-full"
                       size="medium"
                       value={couponCode ?? ''}
+                      disabled={isFetching}
                       onChange={e => setCouponCode(e.target.value)}
                       placeholder="Code"
                     />
