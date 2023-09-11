@@ -126,7 +126,7 @@ const handler: ExportedHandler<Env> = {
     });
 
     try {
-      return await router.handle(request, sentry.captureException).then(response => {
+      return await router.handle(request, sentry.captureException.bind(sentry)).then(response => {
         if (response) {
           return response;
         }
