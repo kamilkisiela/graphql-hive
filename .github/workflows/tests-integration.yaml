@@ -48,6 +48,10 @@ jobs:
           cacheNext: false
           cacheTurbo: true
 
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
       - name: prepare packages
         run: (cd integration-tests && bun run prepare:env)
 

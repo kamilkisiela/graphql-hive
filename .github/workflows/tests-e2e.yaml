@@ -32,6 +32,10 @@ jobs:
           cacheNext: false
           cacheTurbo: false
 
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
       - name: Install Cypress binary
         run: pnpm cypress install
 

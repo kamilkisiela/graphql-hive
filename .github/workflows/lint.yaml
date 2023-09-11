@@ -18,6 +18,10 @@ jobs:
           cacheNext: false
           cacheTurbo: false
 
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
       - name: lint .env.template files
         run: bun run lint:env-template
 

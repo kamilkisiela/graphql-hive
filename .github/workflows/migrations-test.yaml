@@ -38,6 +38,10 @@ jobs:
           cacheNext: false
           cacheTurbo: false
 
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
       - name: migrations tests
         run: bun run test
         working-directory: packages/migrations

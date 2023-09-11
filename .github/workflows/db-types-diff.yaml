@@ -36,17 +36,21 @@ jobs:
           cacheNext: false
           cacheTurbo: false
 
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
       - name: create database
         working-directory: packages/migrations
-        run: pnpm db:create
+        run: bun run db:create
 
       - name: migrate database
         working-directory: packages/migrations
-        run: pnpm db:migrator up
+        run: bun run db:migrator up
 
       - name: generate database types
         working-directory: packages/services/storage
-        run: pnpm db:generate
+        run: bun run db:generate
 
       - name: check database types
         run: git diff --exit-code ./packages/services/storage/src/db/types.ts

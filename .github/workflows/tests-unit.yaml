@@ -17,5 +17,9 @@ jobs:
           cacheNext: false
           cacheTurbo: false
 
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
       - name: unit tests
         run: bun run test
