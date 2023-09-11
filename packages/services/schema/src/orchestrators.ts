@@ -20,6 +20,11 @@ import type { ErrorCode } from '@graphql-hive/external-composition';
 import { stitchSchemas } from '@graphql-tools/stitch';
 import { stitchingDirectives } from '@graphql-tools/stitching-directives';
 import type { FastifyLoggerInstance } from '@hive/service-common';
+import {
+  composeServices as nativeComposeServices,
+  compositionHasErrors as nativeCompositionHasErrors,
+  stripFederationFromSupergraph,
+} from '@theguild/federation-composition';
 import type { Cache } from './cache';
 import type {
   ComposeAndValidateInput,
@@ -161,6 +166,7 @@ interface Orchestrator {
   composeAndValidate(
     input: ComposeAndValidateInput,
     external: ExternalComposition,
+    native: boolean,
   ): Promise<ComposeAndValidateOutput>;
 }
 
@@ -297,6 +303,70 @@ async function callExternalService(
   }
 }
 
+function composeFederationV1(
+  subgraphs: Array<{
+    typeDefs: DocumentNode;
+    name: string;
+    url: string | undefined;
+  }>,
+): CompositionResult & {
+  includesNetworkError: boolean;
+} {
+  const result = composeAndValidate(subgraphs);
+
+  if (compositionHasErrors(result)) {
+    return {
+      type: 'failure',
+      result: {
+        errors: result.errors.map(errorWithPossibleCode),
+        sdl: result.schema ? printSchema(result.schema) : undefined,
+      },
+      includesNetworkError: false,
+    };
+  }
+
+  return {
+    type: 'success',
+    result: {
+      supergraph: result.supergraphSdl,
+      sdl: printSchema(result.schema),
+    },
+    includesNetworkError: false,
+  };
+}
+
+function composeFederationV2(
+  subgraphs: Array<{
+    typeDefs: DocumentNode;
+    name: string;
+    url: string | undefined;
+  }>,
+): CompositionResult & {
+  includesNetworkError: boolean;
+} {
+  const result = nativeComposeServices(subgraphs);
+
+  if (nativeCompositionHasErrors(result)) {
+    return {
+      type: 'failure',
+      result: {
+        errors: result.errors.map(errorWithPossibleCode),
+        sdl: undefined,
+      },
+      includesNetworkError: false,
+    };
+  }
+
+  return {
+    type: 'success',
+    result: {
+      supergraph: result.supergraphSdl,
+      sdl: print(stripFederationFromSupergraph(parse(result.supergraphSdl))),
+    },
+    includesNetworkError: false,
+  };
+}
+
 const createFederation: (
   cache: Cache,
   logger: FastifyLoggerInstance,
@@ -307,13 +377,31 @@ const createFederation: (
     {
       schemas: ComposeAndValidateInput;
       external: ExternalComposition;
+      native: boolean;
     },
     CompositionResult & {
       includesNetworkError: boolean;
     }
   >(
     'federation',
-    async ({ schemas, external }) => {
+    async ({ schemas, external, native }) => {
+      const subgraphs = schemas.map(schema => {
+        return {
+          typeDefs: trimDescriptions(parse(schema.raw)),
+          name: schema.source,
+          url: 'url' in schema && typeof schema.url === 'string' ? schema.url : undefined,
+        };
+      });
+
+      // Federation v2
+      if (native) {
+        logger.debug(
+          'Using built-in Federation v2 composition service (schemas=%s)',
+          schemas.length,
+        );
+        return composeFederationV2(subgraphs);
+      }
+
       if (external) {
         logger.debug(
           'Using external composition service (url=%s, schemas=%s)',
@@ -321,11 +409,11 @@ const createFederation: (
           schemas.length,
         );
         const body = JSON.stringify(
-          schemas.map(schema => {
+          subgraphs.map(subgraph => {
             return {
-              sdl: print(trimDescriptions(parse(schema.raw))),
-              name: schema.source,
-              url: 'url' in schema && typeof schema.url === 'string' ? schema.url : undefined,
+              sdl: print(subgraph.typeDefs),
+              name: subgraph.name,
+              url: 'url' in subgraph && typeof subgraph.url === 'string' ? subgraph.url : undefined,
             };
           }),
         );
@@ -381,35 +469,9 @@ const createFederation: (
 
       logger.debug('Using built-in composition service (schemas=%s)', schemas.length);
 
-      const result = composeAndValidate(
-        schemas.map(schema => {
-          return {
-            typeDefs: trimDescriptions(parse(schema.raw)),
-            name: schema.source,
-            url: 'url' in schema && typeof schema.url === 'string' ? schema.url : undefined,
-          };
-        }),
-      );
-
-      if (compositionHasErrors(result)) {
-        return {
-          type: 'failure',
-          result: {
-            errors: result.errors.map(errorWithPossibleCode),
-            sdl: result.schema ? printSchema(result.schema) : undefined,
-          },
-          includesNetworkError: false,
-        };
-      }
-
-      return {
-        type: 'success',
-        result: {
-          supergraph: result.supergraphSdl,
-          sdl: printSchema(result.schema),
-        },
-        includesNetworkError: false,
-      };
+      // Federation v1
+      logger.debug('Using built-in Federation v1 composition service (schemas=%s)', schemas.length);
+      return composeFederationV1(subgraphs);
     },
     function pickCacheType(result) {
       return 'includesNetworkError' in result && result.includesNetworkError === true
@@ -419,9 +481,9 @@ const createFederation: (
   );
 
   return {
-    async composeAndValidate(schemas, external) {
+    async composeAndValidate(schemas, external, native) {
       try {
-        const composed = await compose({ schemas, external });
+        const composed = await compose({ schemas, external, native });
 
         return {
           errors: composed.type === 'failure' ? composed.result.errors : [],

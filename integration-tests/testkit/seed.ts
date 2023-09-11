@@ -179,6 +179,13 @@ export function initSeed() {
                 project,
                 targets,
                 target,
+                async setNativeFederation(enabled: boolean) {
+                  const pool = await poolPromise;
+
+                  await pool.query(sql`
+                    UPDATE public.projects SET native_federation = ${enabled} WHERE id = ${project.id}
+                  `);
+                },
                 async setProjectSchemaPolicy(policy: SchemaPolicyInput) {
                   const result = await execute({
                     document: UpdateSchemaPolicyForProject,

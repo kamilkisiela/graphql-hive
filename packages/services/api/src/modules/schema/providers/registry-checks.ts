@@ -5,7 +5,7 @@ import hashObject from 'object-hash';
 import { CriticalityLevel, type Change } from '@graphql-inspector/core';
 import type { CheckPolicyResponse } from '@hive/policy';
 import type { CompositionFailureError } from '@hive/schema';
-import { Schema } from '../../../shared/entities';
+import { ProjectType, Schema } from '../../../shared/entities';
 import { buildSchema } from '../../../shared/schema';
 import { SchemaPolicyProvider } from '../../policy/providers/schema-policy.provider';
 import {
@@ -14,6 +14,7 @@ import {
 } from '../schema-change-from-meta';
 import type {
   Orchestrator,
+  Organization,
   Project,
   PushedCompositeSchema,
   SingleSchema,
@@ -109,17 +110,22 @@ export class RegistryChecks {
   async composition({
     orchestrator,
     project,
+    organization,
     schemas,
     baseSchema,
   }: {
     orchestrator: Orchestrator;
     project: Project;
+    organization: Organization;
     schemas: Schemas;
     baseSchema: string | null;
   }) {
     const result = await orchestrator.composeAndValidate(
       extendWithBase(schemas, baseSchema).map(s => this.helper.createSchemaObject(s)),
-      project.externalComposition,
+      {
+        external: project.externalComposition,
+        native: this.checkProjectNativeFederationSupport(project, organization),
+      },
     );
 
     const validationErrors = result.errors;
@@ -157,6 +163,7 @@ export class RegistryChecks {
   async policyCheck({
     orchestrator,
     project,
+    organization,
     schemas,
     selector,
     modifiedSdl,
@@ -165,6 +172,7 @@ export class RegistryChecks {
     orchestrator: Orchestrator;
     schemas: [SingleSchema] | PushedCompositeSchema[];
     project: Project;
+    organization: Organization;
     modifiedSdl: string;
     selector: {
       organization: string;
@@ -175,7 +183,10 @@ export class RegistryChecks {
   }) {
     const result = await orchestrator.composeAndValidate(
       extendWithBase(schemas, baseSchema).map(s => this.helper.createSchemaObject(s)),
-      project.externalComposition,
+      {
+        external: project.externalComposition,
+        native: this.checkProjectNativeFederationSupport(project, organization),
+      },
     );
 
     if (result.sdl == null) {
@@ -215,6 +226,7 @@ export class RegistryChecks {
   async diff({
     orchestrator,
     project,
+    organization,
     schemas,
     version,
     selector,
@@ -222,6 +234,7 @@ export class RegistryChecks {
   }: {
     orchestrator: Orchestrator;
     project: Project;
+    organization: Organization;
     schemas: [SingleSchema] | PushedCompositeSchema[];
     version: LatestVersion;
     selector: {
@@ -241,11 +254,17 @@ export class RegistryChecks {
     const [existingSchemaResult, incomingSchemaResult] = await Promise.all([
       orchestrator.composeAndValidate(
         version.schemas.map(s => this.helper.createSchemaObject(s)),
-        project.externalComposition,
+        {
+          external: project.externalComposition,
+          native: this.checkProjectNativeFederationSupport(project, organization),
+        },
       ),
       orchestrator.composeAndValidate(
         schemas.map(s => this.helper.createSchemaObject(s)),
-        project.externalComposition,
+        {
+          external: project.externalComposition,
+          native: this.checkProjectNativeFederationSupport(project, organization),
+        },
       ),
     ]);
 
@@ -426,6 +445,44 @@ export class RegistryChecks {
         reason: String(e instanceof Error ? e.message : e),
       } satisfies CheckResult;
     }
+  }
+
+  private checkProjectNativeFederationSupport(
+    project: Project,
+    organization: Organization,
+  ): boolean {
+    if (project.type !== ProjectType.FEDERATION) {
+      return false;
+    }
+
+    if (project.nativeFederation === false) {
+      return false;
+    }
+
+    if (project.legacyRegistryModel === true) {
+      this.logger.warn(
+        'Project is using legacy registry model, ignoring native Federation support (organization=%s, project=%s)',
+        organization.id,
+        project.id,
+      );
+      return false;
+    }
+
+    if (organization.featureFlags.compareToPreviousComposableVersion === false) {
+      this.logger.warn(
+        'Organization has compareToPreviousComposableVersion FF disabled, ignoring native Federation support (organization=%s, project=%s)',
+        organization.id,
+        project.id,
+      );
+      return false;
+    }
+
+    this.logger.debug(
+      'Native Federation support available (organization=%s, project=%s)',
+      organization.id,
+      project.id,
+    );
+    return true;
   }
 }
 

@@ -1,20 +1,33 @@
 import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
+import { normalizeCliOutput } from '../../../scripts/serializers/cli-output';
 import { createCLI, schemaPublish } from '../../testkit/cli';
 import { prepareProject } from '../../testkit/registry-models';
 import { initSeed } from '../../testkit/seed';
 
 const cases = [
-  ['default' as const, [] as [string, boolean][]],
+  ['default' as const, [] as [string, boolean][], false],
   [
     'compareToPreviousComposableVersion' as const,
     [['compareToPreviousComposableVersion', true]] as [string, boolean][],
+    false,
   ],
-] as Array<['default' | 'compareToPreviousComposableVersion', Array<[string, boolean]>]>;
+  [
+    'nativeFederation' as const,
+    [['compareToPreviousComposableVersion', true]] as [string, boolean][],
+    true,
+  ],
+] as Array<
+  [
+    'default' | 'compareToPreviousComposableVersion' | 'nativeFederation',
+    Array<[string, boolean]>,
+    boolean,
+  ]
+>;
 
 describe('publish', () => {
-  describe.each(cases)('%s', (caseName, ffs) => {
+  describe.concurrent.each(cases)('%s', (caseName, ffs, nativeFederation) => {
     test.concurrent('accepted: composable', async () => {
-      const { publish } = await prepare(ffs);
+      const { publish } = await prepare(ffs, nativeFederation);
       await publish({
         sdl: `type Query { topProductName: String }`,
         serviceName: 'products',
@@ -24,7 +37,7 @@ describe('publish', () => {
     });
 
     test.concurrent('accepted: composable, breaking changes', async () => {
-      const { publish } = await prepare(ffs);
+      const { publish } = await prepare(ffs, nativeFederation);
       await publish({
         sdl: /* GraphQL */ `
           type Query {
@@ -51,7 +64,7 @@ describe('publish', () => {
     test.concurrent(
       `${caseName === 'default' ? 'rejected' : 'accepted'}: not composable (graphql errors)`,
       async () => {
-        const { publish } = await prepare(ffs);
+        const { publish } = await prepare(ffs, nativeFederation);
 
         // non-composable
         await publish({
@@ -68,7 +81,7 @@ describe('publish', () => {
     );
 
     test.concurrent('accepted: composable, previous version was not', async () => {
-      const { publish } = await prepare(ffs);
+      const { publish } = await prepare(ffs, nativeFederation);
 
       // non-composable
       await publish({
@@ -104,7 +117,7 @@ describe('publish', () => {
     });
 
     test.concurrent('accepted: composable, no changes', async () => {
-      const { publish } = await prepare(ffs);
+      const { publish } = await prepare(ffs, nativeFederation);
 
       // composable
       await publish({
@@ -132,7 +145,7 @@ describe('publish', () => {
     });
 
     test.concurrent('accepted: composable, new url', async () => {
-      const { publish } = await prepare(ffs);
+      const { publish } = await prepare(ffs, nativeFederation);
 
       // composable
       await publish({
@@ -160,7 +173,7 @@ describe('publish', () => {
     });
 
     test.concurrent('rejected: missing service name', async () => {
-      const { publish } = await prepare(ffs);
+      const { publish } = await prepare(ffs, nativeFederation);
 
       // composable
       await publish({
@@ -175,7 +188,7 @@ describe('publish', () => {
     });
 
     test.concurrent('rejected: missing service url', async () => {
-      const { publish } = await prepare(ffs);
+      const { publish } = await prepare(ffs, nativeFederation);
 
       // composable
       await publish({
@@ -190,15 +203,15 @@ describe('publish', () => {
     });
 
     test.concurrent('CLI output', async ({ expect }) => {
-      const { publish } = await prepare(ffs);
+      const { publish } = await prepare(ffs, nativeFederation);
 
       const service = {
         serviceName: 'products',
         serviceUrl: 'http://products:3000/graphql',
       };
 
-      await expect(
-        publish({
+      let output = normalizeCliOutput(
+        (await publish({
           sdl: /* GraphQL */ `
             type Query {
               topProduct: Product
@@ -211,14 +224,18 @@ describe('publish', () => {
           `,
           ...service,
           expect: 'latest-composable',
-        }),
-      ).resolves.toMatchInlineSnapshot(`
-        v Published initial schema.
-        i Available at http://localhost:8080/$organization/$project/production
-      `);
+        })) ?? '',
+      );
 
-      await expect(
-        publish({
+      expect(output).toEqual(expect.stringContaining(`v Published initial schema.`));
+      expect(output).toEqual(
+        expect.stringContaining(
+          `i Available at http://localhost:8080/$organization/$project/production`,
+        ),
+      );
+
+      output = normalizeCliOutput(
+        (await publish({
           sdl: /* GraphQL */ `
             type Query {
               topProduct: Product
@@ -232,19 +249,23 @@ describe('publish', () => {
           `,
           ...service,
           expect: 'latest-composable',
-        }),
-      ).resolves.toMatchInlineSnapshot(`
-        v Schema published
-        i Available at http://localhost:8080/$organization/$project/production/history/$version
-      `);
+        })) ?? '',
+      );
+
+      expect(output).toEqual(expect.stringContaining(`v Schema published`));
+      expect(output).toEqual(
+        expect.stringContaining(
+          `i Available at http://localhost:8080/$organization/$project/production/history/$version`,
+        ),
+      );
     });
   });
 });
 
 describe('check', () => {
-  describe.each(cases)('%s', (_, ffs) => {
+  describe.concurrent.each(cases)('%s', (caseName, ffs, nativeFederation) => {
     test.concurrent('accepted: composable, no breaking changes', async () => {
-      const { publish, check } = await prepare(ffs);
+      const { publish, check } = await prepare(ffs, nativeFederation);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -272,7 +293,7 @@ describe('check', () => {
     });
 
     test.concurrent('accepted: composable, previous version was not', async () => {
-      const { publish, check } = await prepare(ffs);
+      const { publish, check } = await prepare(ffs, nativeFederation);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -306,7 +327,7 @@ describe('check', () => {
     });
 
     test.concurrent('accepted: no changes', async () => {
-      const { publish, check } = await prepare(ffs);
+      const { publish, check } = await prepare(ffs, nativeFederation);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -331,7 +352,7 @@ describe('check', () => {
     });
 
     test.concurrent('rejected: missing service name', async () => {
-      const { check } = await prepare(ffs);
+      const { check } = await prepare(ffs, nativeFederation);
 
       const message = await check({
         sdl: /* GraphQL */ `
@@ -346,7 +367,7 @@ describe('check', () => {
     });
 
     test.concurrent('rejected: composable, breaking changes', async () => {
-      const { publish, check } = await prepare(ffs);
+      const { publish, check } = await prepare(ffs, nativeFederation);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -373,7 +394,7 @@ describe('check', () => {
     });
 
     test.concurrent('rejected: not composable, no breaking changes', async () => {
-      const { publish, check } = await prepare(ffs);
+      const { publish, check } = await prepare(ffs, nativeFederation);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -401,7 +422,7 @@ describe('check', () => {
     });
 
     test.concurrent('rejected: not composable, breaking changes', async () => {
-      const { publish, check } = await prepare(ffs);
+      const { publish, check } = await prepare(ffs, nativeFederation);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -419,31 +440,37 @@ describe('check', () => {
         expect: 'latest-composable',
       });
 
-      const message = await check({
-        sdl: /* GraphQL */ `
-          type Query {
-            product(id: ID!): Product
-          }
+      const message = normalizeCliOutput(
+        await check({
+          sdl: /* GraphQL */ `
+            type Query {
+              product(id: ID!): Product
+            }
 
-          type Product @key(fields: "it") {
-            id: ID!
-            name: String
-          }
-        `,
-        serviceName: 'products',
-        expect: 'rejected',
-      });
+            type Product @key(fields: "it") {
+              id: ID!
+              name: String
+            }
+          `,
+          serviceName: 'products',
+          expect: 'rejected',
+        }),
+      );
 
-      expect(message).toMatch('Product.it');
-      expect(message).toMatch('topProduct');
+      if (caseName === 'nativeFederation') {
+        expect(message).toContain('Cannot query field it on type Product');
+      } else {
+        expect(message).toMatch('Product.it');
+        expect(message).toMatch('topProduct');
+      }
     });
   });
 });
 
 describe('delete', () => {
-  describe.each(cases)('%s', (_, ffs) => {
+  describe.concurrent.each(cases)('%s', (_, ffs, nativeFederation) => {
     test.concurrent('accepted: composable before and after', async () => {
-      const cli = await prepare(ffs);
+      const cli = await prepare(ffs, nativeFederation);
 
       await cli.publish({
         sdl: /* GraphQL */ `
@@ -486,7 +513,7 @@ describe('delete', () => {
     });
 
     test.concurrent('rejected: unknown service', async () => {
-      const cli = await prepare(ffs);
+      const cli = await prepare(ffs, nativeFederation);
 
       await cli.publish({
         sdl: /* GraphQL */ `
@@ -515,7 +542,7 @@ describe('delete', () => {
 });
 
 describe('other', () => {
-  describe.each(cases)('%s', (_, ffs) => {
+  describe.concurrent.each(cases)('%s', (_, ffs) => {
     test.concurrent('service url should be available in supergraph', async () => {
       const { createOrg } = await initSeed().createOwner();
       const { inviteAndJoinMember, createProject } = await createOrg();
@@ -718,11 +745,17 @@ describe('other', () => {
   });
 });
 
-async function prepare(featureFlags: Array<[string, boolean]> = []) {
-  const { tokens, setFeatureFlag } = await prepareProject(ProjectType.Federation);
+async function prepare(featureFlags: Array<[string, boolean]> = [], nativeFederation = false) {
+  const { tokens, setFeatureFlag, setNativeFederation } = await prepareProject(
+    ProjectType.Federation,
+  );
 
   for await (const [name, enabled] of featureFlags) {
     await setFeatureFlag(name, enabled);
+  }
+
+  if (nativeFederation === true) {
+    await setNativeFederation(true);
   }
 
   return createCLI(tokens.registry);

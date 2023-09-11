@@ -8,12 +8,10 @@ export async function prepareProject(
   const { createOrg } = await initSeed().createOwner();
   const { organization, createProject, setFeatureFlag, setOrganizationSchemaPolicy } =
     await createOrg();
-  const { project, createToken, target, targets, setProjectSchemaPolicy } = await createProject(
-    projectType,
-    {
+  const { project, createToken, target, targets, setProjectSchemaPolicy, setNativeFederation } =
+    await createProject(projectType, {
       useLegacyRegistryModels: model === RegistryModel.Legacy,
-    },
-  );
+    });
 
   // Create a token with write rights
   const { secret: readwriteToken } = await createToken({
@@ -46,5 +44,6 @@ export async function prepareProject(
       },
     },
     setFeatureFlag,
+    setNativeFederation,
   };
 }

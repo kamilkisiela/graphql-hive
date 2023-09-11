@@ -1,5 +1,6 @@
 import { AuthManager } from '../auth/providers/auth-manager';
 import { TargetAccessScope } from '../auth/providers/target-access';
+import { OrganizationManager } from '../organization/providers/organization-manager';
 import { ProjectManager } from '../project/providers/project-manager';
 import { ensureSDL, SchemaHelper } from '../schema/providers/schema-helper';
 import { SchemaManager } from '../schema/providers/schema-manager';
@@ -35,7 +36,11 @@ export const resolvers: LabModule.Resolvers = {
         return null;
       }
 
-      const [schemas, { type, externalComposition }] = await Promise.all([
+      const [
+        schemas,
+        { type, externalComposition, nativeFederation, legacyRegistryModel },
+        { featureFlags },
+      ] = await Promise.all([
         schemaManager.getSchemasOfVersion({
           organization,
           project,
@@ -46,6 +51,9 @@ export const resolvers: LabModule.Resolvers = {
           organization,
           project,
         }),
+        injector.get(OrganizationManager).getOrganization({
+          organization,
+        }),
       ]);
 
       const orchestrator = schemaManager.matchOrchestrator(type);
@@ -54,7 +62,20 @@ export const resolvers: LabModule.Resolvers = {
       const schema = await ensureSDL(
         orchestrator.composeAndValidate(
           schemas.map(s => helper.createSchemaObject(s)),
-          externalComposition,
+          {
+            external: externalComposition,
+            native: schemaManager.checkProjectNativeFederationSupport({
+              project: {
+                id: project,
+                nativeFederation,
+                legacyRegistryModel,
+              },
+              organization: {
+                id: organization,
+                featureFlags,
+              },
+            }),
+          },
         ),
       );
 

@@ -269,6 +269,7 @@ export interface Project {
     endpoint?: string | null;
     encryptedSecret?: string | null;
   };
+  nativeFederation: boolean;
 }
 
 export interface Target {
@@ -334,7 +335,10 @@ export interface ComposeAndValidateResult {
 export interface Orchestrator {
   composeAndValidate(
     schemas: SchemaObject[],
-    config: Project['externalComposition'],
+    config: {
+      external: Project['externalComposition'] | null;
+      native: boolean;
+    },
   ): Promise<ComposeAndValidateResult>;
 }
 

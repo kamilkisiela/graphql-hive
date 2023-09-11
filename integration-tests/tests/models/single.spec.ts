@@ -1,4 +1,5 @@
 import { ProjectType } from '@app/gql/graphql';
+import { normalizeCliOutput } from '../../../scripts/serializers/cli-output';
 import { createCLI } from '../../testkit/cli';
 import { prepareProject } from '../../testkit/registry-models';
 
@@ -11,7 +12,7 @@ const cases = [
 ] as Array<['default' | 'compareToPreviousComposableVersion', Array<[string, boolean]>]>;
 
 describe('publish', () => {
-  describe.each(cases)('%s', (caseName, ffs) => {
+  describe.concurrent.each(cases)('%s', (caseName, ffs) => {
     test.concurrent('accepted: composable', async () => {
       const { publish } = await prepare(ffs);
       await publish({
@@ -84,8 +85,8 @@ describe('publish', () => {
     test.concurrent('CLI output', async ({ expect }) => {
       const { publish } = await prepare(ffs);
 
-      await expect(
-        publish({
+      let output = normalizeCliOutput(
+        (await publish({
           sdl: /* GraphQL */ `
             type Query {
               topProduct: Product
@@ -97,14 +98,18 @@ describe('publish', () => {
             }
           `,
           expect: 'latest-composable',
-        }),
-      ).resolves.toMatchInlineSnapshot(`
-      v Published initial schema.
-      i Available at http://localhost:8080/$organization/$project/production
-    `);
+        })) ?? '',
+      );
 
-      await expect(
-        publish({
+      expect(output).toEqual(expect.stringContaining(`v Published initial schema.`));
+      expect(output).toEqual(
+        expect.stringContaining(
+          `i Available at http://localhost:8080/$organization/$project/production`,
+        ),
+      );
+
+      output = normalizeCliOutput(
+        (await publish({
           sdl: /* GraphQL */ `
             type Query {
               topProduct: Product
@@ -117,17 +122,21 @@ describe('publish', () => {
             }
           `,
           expect: 'latest-composable',
-        }),
-      ).resolves.toMatchInlineSnapshot(`
-      v Schema published
-      i Available at http://localhost:8080/$organization/$project/production/history/$version
-    `);
+        })) ?? '',
+      );
+
+      expect(output).toEqual(expect.stringContaining(`v Schema published`));
+      expect(output).toEqual(
+        expect.stringContaining(
+          `i Available at http://localhost:8080/$organization/$project/production/history/$version`,
+        ),
+      );
     });
   });
 });
 
 describe('check', () => {
-  describe.each(cases)('%s', (_, ffs) => {
+  describe.concurrent.each(cases)('%s', (_, ffs) => {
     test.concurrent('accepted: composable, no breaking changes', async () => {
       const { publish, check } = await prepare(ffs);
 
@@ -261,7 +270,7 @@ describe('check', () => {
 });
 
 describe('delete', () => {
-  describe.each(cases)('%s', (_, ffs) => {
+  describe.concurrent.each(cases)('%s', (_, ffs) => {
     test.concurrent('not supported', async () => {
       const cli = await prepare(ffs);
 

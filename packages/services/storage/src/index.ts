@@ -212,6 +212,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         endpoint: project.external_composition_endpoint,
         encryptedSecret: project.external_composition_secret,
       },
+      nativeFederation: project.native_federation === true,
     };
   }
 

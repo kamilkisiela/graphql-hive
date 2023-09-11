@@ -81,7 +81,7 @@ export function createCLI(tokens: { readwrite: string; readonly: string }) {
     legacy_force?: boolean;
     legacy_acceptBreakingChanges?: boolean;
     expect: 'latest' | 'latest-composable' | 'ignored' | 'rejected';
-  }) {
+  }): Promise<string> {
     const publishName = ` #${++publishCount}`;
     const commit = randomUUID();
 
@@ -116,7 +116,7 @@ export function createCLI(tokens: { readwrite: string; readonly: string }) {
         `${publishName} was expected to be rejected but was published`,
       ).not.toEqual(expectedCommit);
 
-      return;
+      return '';
     }
 
     // throw if the command fails
@@ -133,7 +133,7 @@ export function createCLI(tokens: { readwrite: string; readonly: string }) {
         latestSchemaCommit,
         `${publishName} was expected to be ignored but it was published`,
       ).not.toEqual(expectedCommit);
-      return;
+      return '';
     }
     // Check if the schema was published
     expect(latestSchemaCommit, `${publishName} was expected to be published`).toEqual(
@@ -172,7 +172,7 @@ export function createCLI(tokens: { readwrite: string; readonly: string }) {
     sdl: string;
     serviceName?: string;
     expect: 'approved' | 'rejected';
-  }) {
+  }): Promise<string> {
     const cmd = schemaCheck([
       '--registry.accessToken',
       tokens.readonly,
@@ -193,7 +193,7 @@ export function createCLI(tokens: { readwrite: string; readonly: string }) {
   }: {
     serviceName?: string;
     expect: 'latest' | 'latest-composable' | 'rejected';
-  }) {
+  }): Promise<string> {
     const cmd = schemaDelete(['--token', tokens.readwrite, '--confirm', serviceName ?? '']);
 
     const before = {
