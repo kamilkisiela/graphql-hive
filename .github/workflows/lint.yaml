@@ -19,7 +19,7 @@ jobs:
           cacheTurbo: false
 
       - name: lint .env.template files
-        run: pnpm lint:env-template
+        run: bun run lint:env-template
 
       - name: Cache ESLint and Prettier
         uses: actions/cache@v3
@@ -34,7 +34,7 @@ jobs:
       - name: eslint
         id: eslint
         run: |
-          pnpm lint || \
+          bun run lint || \
           ( \
             echo "" && \
             echo "To fix it, run" && \
@@ -49,7 +49,7 @@ jobs:
         id: prettier
         shell: sh
         run: |
-          pnpm lint:prettier || \
+          bun run lint:prettier || \
           ( \
             echo "" && \
             echo "To fix it, run" && \
@@ -59,11 +59,11 @@ jobs:
           )
 
       - name: Generate Types
-        run: yarn graphql:generate
+        run: bun run graphql:generate
 
       - name: Operation Check
         run: |
-          npx graphql-inspector validate \
+          bunx graphql-inspector validate \
             "packages/web/app/{src,pages}/**/*.{graphql,tsx}|packages/libraries/cli/**/*.graphql|packages/web/app/src/lib/**/*.ts" \
             "packages/**/module.graphql.ts" \
             --maxDepth=20 \

@@ -33,7 +33,7 @@ jobs:
           cacheTurbo: true
 
       - name: build libraries
-        run: pnpm build:libraries
+        run: bun run build:libraries
 
       # Needed for `oclif pack win`
       - name: Install NSIS
@@ -42,7 +42,7 @@ jobs:
 
       - name: pack tarballs
         working-directory: packages/libraries/cli
-        run: pnpm oclif:pack
+        run: bun run oclif:pack
 
       - name: upload darwin arm64
         uses: actions/upload-artifact@v3

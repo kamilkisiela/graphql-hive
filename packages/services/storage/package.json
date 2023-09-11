@@ -12,7 +12,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "build": "tsx ../../../scripts/runify.ts",
+    "build": "bun run ../../../scripts/runify.ts",
     "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts"
   },
   "devDependencies": {

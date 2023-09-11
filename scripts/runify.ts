@@ -1,5 +1,6 @@
 // It was ported from `bob runify --single` command.
 // The idea here is to compile a node service to a single file (not in case of next) and make it executable.
+/// <reference types="bun-types" />
 import { join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'fs-extra';
@@ -127,20 +128,32 @@ async function compile(
 ) {
   const out = normalize(join(cwd, 'dist'));
 
-  await tsup({
-    entryPoints: [normalize(join(cwd, entryPoint))],
-    outDir: out,
-    target: 'node18',
-    format: [useEsm ? 'esm' : 'cjs'],
+  await fs.remove(out);
+  console.log('Bun.build', typeof Bun.build);
+  const r = await Bun.build({
+    entrypoints: [normalize(join(cwd, entryPoint))],
+    outdir: out,
+    target: 'node',
+    format: 'esm',
     splitting: false,
-    sourcemap: true,
-    clean: true,
-    shims: true,
-    skipNodeModulesBundle: false,
-    noExternal: dependencies,
+    sourcemap: 'external',
     external: buildOptions.external,
-    banner: {
-      js: requireShim,
-    },
   });
+
+  // await tsup({
+  //   entryPoints: [normalize(join(cwd, entryPoint))],
+  //   outDir: out,
+  //   target: 'node18',
+  //   format: [useEsm ? 'esm' : 'cjs'],
+  //   splitting: false,
+  //   sourcemap: true,
+  //   clean: true,
+  //   shims: true,
+  //   skipNodeModulesBundle: false,
+  //   noExternal: dependencies,
+  //   external: buildOptions.external,
+  //   banner: {
+  //     js: requireShim,
+  //   },
+  // });
 }

@@ -54,6 +54,10 @@ runs:
         node-version-file: .node-version
         cache: ${{ steps.pnpm.outputs.cache }}
 
+    - uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+
     - name: Cache Turbo
       uses: actions/cache@v3
       if: ${{ inputs.cacheNext == 'true' }}
@@ -87,4 +91,4 @@ runs:
       if: ${{ inputs.codegen == 'true' }}
       shell: bash
       working-directory: ${{ inputs.workingDirectory }}
-      run: pnpm graphql:generate
+      run: bun run graphql:generate

@@ -18,4 +18,4 @@ jobs:
           cacheTurbo: false
 
       - name: unit tests
-        run: pnpm test
+        run: bun run test

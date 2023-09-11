@@ -39,5 +39,5 @@ jobs:
           cacheTurbo: false
 
       - name: migrations tests
-        run: pnpm test
+        run: bun run test
         working-directory: packages/migrations

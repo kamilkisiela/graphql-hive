@@ -4,7 +4,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "BUILD=1 tsx ../../../../scripts/runify.ts",
+    "build": "BUILD=1 bun run ../../../../scripts/runify.ts",
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/index.ts"
   },
   "devDependencies": {

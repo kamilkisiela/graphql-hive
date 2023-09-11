@@ -59,7 +59,7 @@ jobs:
         timeout-minutes: 6
         uses: cypress-io/github-action@v5
         with:
-          command: pnpm test:e2e
+          command: bun run test:e2e
           install: false
 
       - uses: actions/upload-artifact@v3.1.2

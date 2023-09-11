@@ -53,11 +53,11 @@ jobs:
 
       - name: build packages and applications
         if: ${{ inputs.build }}
-        run: pnpm build
+        run: bun run build
 
       - name: test ESM & CJS exports integrity
         if: ${{ inputs.build }}
-        run: pnpm turbo check:build
+        run: bunx turbo check:build
 
       - uses: vimtor/action-zip@v1
         name: archive javascript artifacts

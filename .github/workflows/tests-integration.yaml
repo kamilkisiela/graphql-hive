@@ -49,7 +49,7 @@ jobs:
           cacheTurbo: true
 
       - name: prepare packages
-        run: pnpm --filter integration-tests prepare:env
+        run: (cd integration-tests && bun run prepare:env)
 
       - name: patch compose file volumes
         uses: mikefarah/yq@v4.34.1
@@ -73,10 +73,11 @@ jobs:
 
       - name: run integration tests
         timeout-minutes: 10
+        working-directory: integration-tests
         env:
           HIVE_DEBUG: 1
         run: |
-          VITEST_MAX_THREADS=${{ steps.cpu-cores.outputs.count }} pnpm --filter integration-tests test:integration --shard=${{ matrix.shardIndex }}/3
+          VITEST_MAX_THREADS=${{ steps.cpu-cores.outputs.count }} bun run test:integration --shard=${{ matrix.shardIndex }}/3
 
       - name: log dump
         if: ${{ failure() }}

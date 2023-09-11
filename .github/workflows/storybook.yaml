@@ -42,7 +42,7 @@ jobs:
           prId: ${{ github.event.pull_request.number }}
           mainBranch: main
           websiteDirectory: ./
-          buildScript: cd packages/web/app && pnpm build-storybook
+          buildScript: cd packages/web/app && bun run build-storybook
           artifactDir: packages/web/app/storybook-static
           commentId: storybook-deployment
           commentTitle: '📚 Storybook Deployment'

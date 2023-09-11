@@ -42,5 +42,5 @@ jobs:
           prId: ${{ github.event.pull_request.number }}
           mainBranch: main
           websiteDirectory: ./
-          buildScript: cd packages/web/docs && pnpm build && pnpm next export
+          buildScript: cd packages/web/docs && bun run build && bunx next export
           artifactDir: packages/web/docs/out

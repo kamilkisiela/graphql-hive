@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "analyze": "pnpm build:config && ANALYZE=1 next build",
-    "build": "pnpm build:config && BUILD=1 next build && tsx ../../../scripts/runify.ts",
+    "build": "pnpm build:config && BUILD=1 next build && bun run ../../../scripts/runify.ts",
     "build-storybook": "storybook build",
     "build:config": "tsup-node --no-splitting --out-dir . --loader \".mts=ts\" --format esm --target node18 next.config.mts",
     "dev": "pnpm build:config && next dev | pino-pretty",

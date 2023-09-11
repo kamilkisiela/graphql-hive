@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { join, resolve } from 'path';
+import type { Options } from 'tsup';
 import { getPackagesSync } from '@manypkg/get-packages';
 
 const rootDir = resolve(__dirname, '../../');
@@ -53,7 +54,7 @@ export const targetFromNodeVersion = () => {
   return `node${clean[0]}` as any;
 };
 
-export const watchEntryPlugin = () => {
+export const watchEntryPlugin: () => NonNullable<Options['plugins']>[number] = () => {
   return {
     name: 'node-watch-entry',
     esbuildOptions(options) {
