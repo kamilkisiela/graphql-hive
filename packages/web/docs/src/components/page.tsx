@@ -15,7 +15,7 @@ const CookiesConsent = (): ReactElement => {
   }
 
   return (
-    <div className="fixed bottom-0 flex w-full flex-wrap items-center justify-center gap-4 text-black bg-gray-100 px-5 py-7 text-center lg:flex-nowrap lg:justify-between lg:text-left">
+    <div className="fixed bottom-0 flex w-full flex-wrap items-center justify-center gap-4 text-black bg-gray-100 px-5 py-7 text-center lg:flex-nowrap lg:justify-between lg:text-left z-50">
       <div className="w-full text-sm">
         <p>This website uses cookies to analyze site usage and improve your experience.</p>
         <p>If you continue to use our services, you are agreeing to the use of such cookies.</p>
