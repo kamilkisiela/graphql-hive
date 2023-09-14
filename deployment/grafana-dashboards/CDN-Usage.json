@@ -24,12 +24,13 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 40,
+  "id": 50,
   "links": [],
   "liveNow": false,
   "panels": [
     {
       "datasource": {
+        "type": "vertamedia-clickhouse-datasource",
         "uid": "$Subscription"
       },
       "fieldConfig": {
@@ -42,6 +43,7 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
+            "axisShow": false,
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 0,
@@ -51,6 +53,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -85,6 +88,335 @@
         "w": 17,
         "x": 0,
         "y": 0
+      },
+      "id": 12,
+      "options": {
+        "legend": {
+          "calcs": ["mean"],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "uid": "$Subscription"
+          },
+          "dateTimeColDataType": "timestamp",
+          "dateTimeType": "DATETIME",
+          "datetimeLoading": false,
+          "extrapolate": true,
+          "format": "time_series",
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+          "intervalFactor": 1,
+          "query": "SELECT\n    $timeSeries AS t,\n    blob1 AS statusCode,\n    COUNT() as total\nFROM hive_ha_cdn_response_ENV_NAME\n\nWHERE $timeFilter\n\nGROUP BY\n    statusCode,\n    t\nORDER BY t\n",
+          "rawQuery": "SELECT\n    (intDiv(toUInt32(timestamp), 20) * 20) * 1000 AS t,\n    blob1 AS statusCode,\n    COUNT() as total\nFROM hive_ha_cdn_response_ENV_NAME\n\nWHERE timestamp >= toDateTime(1694666628) AND timestamp <= toDateTime(1694688228)\n\nGROUP BY\n    statusCode,\n    t\nORDER BY t",
+          "refId": "A",
+          "round": "0s",
+          "skip_comments": true
+        }
+      ],
+      "title": "Requests by status code",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "vertamedia-clickhouse-datasource",
+        "uid": "$Subscription"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "decimals": 2,
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 7,
+        "x": 17,
+        "y": 0
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": ["percent"]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": ["mean"],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "uid": "$Subscription"
+          },
+          "dateTimeColDataType": "timestamp",
+          "dateTimeType": "DATETIME",
+          "datetimeLoading": false,
+          "extrapolate": true,
+          "format": "time_series",
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+          "intervalFactor": 1,
+          "query": "SELECT\n    $timeSeries AS t,\n    blob1 AS statusCode,\n    COUNT() as total\nFROM hive_ha_cdn_response_ENV_NAME\n\nWHERE $timeFilter\n\nGROUP BY\n    statusCode,\n    t\nORDER BY t\n",
+          "rawQuery": "SELECT\n    (intDiv(toUInt32(timestamp), 20) * 20) * 1000 AS t,\n    blob1 AS statusCode,\n    COUNT() as total\nFROM hive_ha_cdn_response_ENV_NAME\n\nWHERE timestamp >= toDateTime(1694666678) AND timestamp <= toDateTime(1694688278)\n\nGROUP BY\n    statusCode,\n    t\nORDER BY t",
+          "refId": "A",
+          "round": "0s",
+          "skip_comments": true
+        }
+      ],
+      "title": "Response by status code",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "vertamedia-clickhouse-datasource",
+        "uid": "$Subscription"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisShow": false,
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 17,
+        "x": 0,
+        "y": 7
+      },
+      "id": 14,
+      "options": {
+        "legend": {
+          "calcs": ["mean"],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "uid": "$Subscription"
+          },
+          "dateTimeColDataType": "timestamp",
+          "dateTimeType": "DATETIME",
+          "datetimeLoading": false,
+          "extrapolate": true,
+          "format": "time_series",
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+          "intervalFactor": 1,
+          "query": "SELECT\n    $timeSeries AS t,\n    blob1 AS action,\n    blob2 AS statusCode,\n    COUNT() as total\nFROM hive_ha_cdn_r2_ENV_NAME\n\nWHERE $timeFilter\n\nGROUP BY\n    action,\n    statusCode,\n    t\nORDER BY t\n",
+          "rawQuery": "SELECT\n    (intDiv(toUInt32(timestamp), 20) * 20) * 1000 AS t,\n    blob1 AS action,\n    blob2 AS statusCode,\n    COUNT() as total\nFROM hive_ha_cdn_r2_ENV_NAME\n\nWHERE timestamp >= toDateTime(1694666810) AND timestamp <= toDateTime(1694688410)\n\nGROUP BY\n    action,\n    statusCode,\n    t\nORDER BY t",
+          "refId": "A",
+          "round": "0s",
+          "skip_comments": true
+        }
+      ],
+      "title": "R2 calls",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "vertamedia-clickhouse-datasource",
+        "uid": "$Subscription"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "decimals": 2,
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 7,
+        "x": 17,
+        "y": 7
+      },
+      "id": 15,
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "values": ["percent"]
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": ["mean"],
+          "fields": "",
+          "values": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "uid": "$Subscription"
+          },
+          "dateTimeColDataType": "timestamp",
+          "dateTimeType": "DATETIME",
+          "datetimeLoading": false,
+          "extrapolate": true,
+          "format": "time_series",
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+          "intervalFactor": 1,
+          "query": "SELECT\n    $timeSeries AS t,\n    blob1 AS action,\n    blob2 AS statusCode,\n    COUNT() as total\nFROM hive_ha_cdn_r2_ENV_NAME\n\nWHERE $timeFilter\n\nGROUP BY\n    action,\n    statusCode,\n    t\nORDER BY t\n",
+          "rawQuery": "SELECT\n    (intDiv(toUInt32(timestamp), 20) * 20) * 1000 AS t,\n    blob1 AS action,\n    blob2 AS statusCode,\n    COUNT() as total\nFROM hive_ha_cdn_r2_ENV_NAME\n\nWHERE timestamp >= toDateTime(1694666815) AND timestamp <= toDateTime(1694688415)\n\nGROUP BY\n    action,\n    statusCode,\n    t\nORDER BY t",
+          "refId": "A",
+          "round": "0s",
+          "skip_comments": true
+        }
+      ],
+      "title": "R2 calls",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "uid": "$Subscription"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisShow": false,
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 17,
+        "x": 0,
+        "y": 14
       },
       "id": 2,
       "options": {
@@ -146,9 +478,9 @@
         "h": 7,
         "w": 7,
         "x": 17,
-        "y": 0
+        "y": 14
       },
-      "id": 11,
+      "id": 13,
       "options": {
         "legend": {
           "displayMode": "table",
@@ -204,6 +536,7 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
+            "axisShow": false,
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 0,
@@ -213,6 +546,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -246,7 +580,7 @@
         "h": 6,
         "w": 17,
         "x": 0,
-        "y": 7
+        "y": 21
       },
       "id": 3,
       "options": {
@@ -308,7 +642,7 @@
         "h": 6,
         "w": 7,
         "x": 17,
-        "y": 7
+        "y": 21
       },
       "id": 5,
       "options": {
@@ -366,6 +700,7 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
+            "axisShow": false,
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 0,
@@ -375,6 +710,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -418,7 +754,7 @@
         "h": 6,
         "w": 14,
         "x": 0,
-        "y": 13
+        "y": 27
       },
       "id": 6,
       "options": {
@@ -480,7 +816,7 @@
         "h": 6,
         "w": 8,
         "x": 14,
-        "y": 13
+        "y": 27
       },
       "id": 7,
       "options": {
@@ -559,7 +895,7 @@
         "h": 6,
         "w": 2,
         "x": 22,
-        "y": 13
+        "y": 27
       },
       "id": 8,
       "options": {
@@ -574,7 +910,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.4-2911eec",
+      "pluginVersion": "10.2.0-60477",
       "targets": [
         {
           "datasource": {
@@ -611,6 +947,7 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
+            "axisShow": false,
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 0,
@@ -620,6 +957,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -657,7 +995,7 @@
         "h": 7,
         "w": 17,
         "x": 0,
-        "y": 19
+        "y": 33
       },
       "id": 10,
       "options": {
@@ -719,7 +1057,7 @@
         "h": 7,
         "w": 7,
         "x": 17,
-        "y": 19
+        "y": 33
       },
       "id": 4,
       "options": {
@@ -766,15 +1104,14 @@
   "refresh": "5s",
   "revision": 1,
   "schemaVersion": 38,
-  "style": "dark",
   "tags": ["hive", "cdn"],
   "templating": {
     "list": [
       {
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "CDN",
-          "value": "CDN"
+          "value": "ZTe-Py5Vz"
         },
         "hide": 0,
         "includeAll": false,
@@ -796,7 +1133,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "CDN Usage",
-  "uid": "HBJSys5Vz",
-  "version": 12,
+  "uid": "0xuKHA-Vk",
+  "version": 2,
   "weekStart": ""
 }
