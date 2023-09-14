@@ -1,0 +1,68 @@
+diff --git a/dist/components/GraphiQL.js b/dist/components/GraphiQL.js
+index a284e988f1aaa4420f59bc5f05dd9110cb4242c2..f3aca93bdb7132e28277b2dfa5c672c345df3c65 100644
+--- a/dist/components/GraphiQL.js
++++ b/dist/components/GraphiQL.js
+@@ -96,6 +96,12 @@ function GraphiQLInterface(props) {
+     var merge = (0, react_2.useMergeQuery)();
+     var prettify = (0, react_2.usePrettifyEditors)();
+     var _d = (0, react_2.useTheme)(), theme = _d.theme, setTheme = _d.setTheme;
++
++    // Patch based on https://github.com/graphql/graphiql/pull/3407
++    if (theme !== 'dark') {
++        setTheme('dark');
++    }
++
+     var PluginContent = (_b = pluginContext === null || pluginContext === void 0 ? void 0 : pluginContext.visiblePlugin) === null || _b === void 0 ? void 0 : _b.content;
+     var pluginResize = (0, react_2.useDragResize)({
+         defaultSizeRelation: 1 / 3,
+@@ -337,15 +343,7 @@ function GraphiQLInterface(props) {
+                     react_1.default.createElement(react_2.ButtonGroup, null,
+                         react_1.default.createElement(react_2.Button, { type: "button", id: "enable-persist-headers", className: editorContext.shouldPersistHeaders ? 'active' : '', "data-value": "true", onClick: handlePersistHeaders }, "On"),
+                         react_1.default.createElement(react_2.Button, { type: "button", id: "disable-persist-headers", className: editorContext.shouldPersistHeaders ? '' : 'active', onClick: handlePersistHeaders }, "Off")))) : null,
+-                react_1.default.createElement("div", { className: "graphiql-dialog-section" },
+-                    react_1.default.createElement("div", null,
+-                        react_1.default.createElement("div", { className: "graphiql-dialog-section-title" }, "Theme"),
+-                        react_1.default.createElement("div", { className: "graphiql-dialog-section-caption" }, "Adjust how the interface looks like.")),
+-                    react_1.default.createElement("div", null,
+-                        react_1.default.createElement(react_2.ButtonGroup, null,
+-                            react_1.default.createElement(react_2.Button, { type: "button", className: theme === null ? 'active' : '', onClick: handleChangeTheme }, "System"),
+-                            react_1.default.createElement(react_2.Button, { type: "button", className: theme === 'light' ? 'active' : '', "data-theme": "light", onClick: handleChangeTheme }, "Light"),
+-                            react_1.default.createElement(react_2.Button, { type: "button", className: theme === 'dark' ? 'active' : '', "data-theme": "dark", onClick: handleChangeTheme }, "Dark")))),
++                // Patch based on https://github.com/graphql/graphiql/pull/3407
+                 storageContext ? (react_1.default.createElement("div", { className: "graphiql-dialog-section" },
+                     react_1.default.createElement("div", null,
+                         react_1.default.createElement("div", { className: "graphiql-dialog-section-title" }, "Clear storage"),
+diff --git a/esm/components/GraphiQL.js b/esm/components/GraphiQL.js
+index e361d03f6fcd8290c8f8b2f23dccb16aa7c2a2ff..67d466cfa987e6a063e7d04a1c46341ce1c89f6f 100644
+--- a/esm/components/GraphiQL.js
++++ b/esm/components/GraphiQL.js
+@@ -69,6 +69,12 @@ export function GraphiQLInterface(props) {
+     var merge = useMergeQuery();
+     var prettify = usePrettifyEditors();
+     var _d = useTheme(), theme = _d.theme, setTheme = _d.setTheme;
++
++    // Patch based on https://github.com/graphql/graphiql/pull/3407
++    if (theme !== 'dark') {
++        setTheme('dark');
++    }
++
+     var PluginContent = (_b = pluginContext === null || pluginContext === void 0 ? void 0 : pluginContext.visiblePlugin) === null || _b === void 0 ? void 0 : _b.content;
+     var pluginResize = useDragResize({
+         defaultSizeRelation: 1 / 3,
+@@ -310,15 +316,7 @@ export function GraphiQLInterface(props) {
+                     React.createElement(ButtonGroup, null,
+                         React.createElement(Button, { type: "button", id: "enable-persist-headers", className: editorContext.shouldPersistHeaders ? 'active' : '', "data-value": "true", onClick: handlePersistHeaders }, "On"),
+                         React.createElement(Button, { type: "button", id: "disable-persist-headers", className: editorContext.shouldPersistHeaders ? '' : 'active', onClick: handlePersistHeaders }, "Off")))) : null,
+-                React.createElement("div", { className: "graphiql-dialog-section" },
+-                    React.createElement("div", null,
+-                        React.createElement("div", { className: "graphiql-dialog-section-title" }, "Theme"),
+-                        React.createElement("div", { className: "graphiql-dialog-section-caption" }, "Adjust how the interface looks like.")),
+-                    React.createElement("div", null,
+-                        React.createElement(ButtonGroup, null,
+-                            React.createElement(Button, { type: "button", className: theme === null ? 'active' : '', onClick: handleChangeTheme }, "System"),
+-                            React.createElement(Button, { type: "button", className: theme === 'light' ? 'active' : '', "data-theme": "light", onClick: handleChangeTheme }, "Light"),
+-                            React.createElement(Button, { type: "button", className: theme === 'dark' ? 'active' : '', "data-theme": "dark", onClick: handleChangeTheme }, "Dark")))),
++                // Patch based on https://github.com/graphql/graphiql/pull/3407
+                 storageContext ? (React.createElement("div", { className: "graphiql-dialog-section" },
+                     React.createElement("div", null,
+                         React.createElement("div", { className: "graphiql-dialog-section-title" }, "Clear storage"),
