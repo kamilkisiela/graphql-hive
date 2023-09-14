@@ -49,6 +49,15 @@ type Event =
   | {
       type: 'error';
       value: [string, string] | [string];
+    }
+  | {
+      type: 'r2';
+      action: 'HEAD artifact' | 'GET cdn-legacy-keys' | 'GET cdn-access-token';
+      statusCode: number;
+    }
+  | {
+      type: 'response';
+      statusCode: number;
     };
 
 export function createAnalytics(
@@ -68,7 +77,7 @@ export function createAnalytics(
         case 'artifact':
           return engines.usage.writeDataPoint({
             blobs: [event.version, event.value, targetId],
-            indexes: [targetId.substr(0, 32)],
+            indexes: [targetId.substring(0, 32)],
           });
         case 'error':
           return engines.error.writeDataPoint({
@@ -83,7 +92,7 @@ export function createAnalytics(
                   event.value.version,
                   event.value.isValid ? 'valid' : 'invalid',
                 ],
-                indexes: [targetId.substr(0, 32)],
+                indexes: [targetId.substring(0, 32)],
               });
             case 'cache-write':
               return engines.keyValidation.writeDataPoint({
@@ -92,12 +101,12 @@ export function createAnalytics(
                   event.value.version,
                   event.value.isValid ? 'valid' : 'invalid',
                 ],
-                indexes: [targetId.substr(0, 32)],
+                indexes: [targetId.substring(0, 32)],
               });
             case 's3-key-validation':
               return engines.keyValidation.writeDataPoint({
                 blobs: ['s3-key-validation', event.value.version, event.value.status],
-                indexes: [targetId.substr(0, 32)],
+                indexes: [targetId.substring(0, 32)],
               });
           }
       }

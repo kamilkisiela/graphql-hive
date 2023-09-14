@@ -126,6 +126,15 @@ const handleLegacyCDNAccessToken = async (args: {
     },
   );
 
+  args.analytics?.track(
+    {
+      type: 'r2',
+      statusCode: key.status,
+      action: 'GET cdn-legacy-keys',
+    },
+    args.targetId,
+  );
+
   if (key.status !== 200) {
     return withCache(false);
   }
@@ -236,6 +245,15 @@ async function handleCDNAccessToken(
     {
       method: 'GET',
     },
+  );
+
+  deps.analytics?.track(
+    {
+      type: 'r2',
+      statusCode: key.status,
+      action: 'GET cdn-access-token',
+    },
+    targetId,
   );
 
   if (key.status !== 200) {

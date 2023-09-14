@@ -1,3 +1,4 @@
+import type { Analytics } from './analytics';
 import { AwsClient } from './aws';
 
 const presignedUrlExpirationSeconds = 60;
@@ -23,6 +24,7 @@ export class ArtifactStorageReader {
     },
     /** The public URL in case the public S3 endpoint differs from the internal S3 endpoint. E.g. within a docker network. */
     publicUrl: string | null,
+    private analytics: Analytics,
   ) {
     this.publicUrl = publicUrl ? new URL(publicUrl) : null;
   }
@@ -71,6 +73,14 @@ export class ArtifactStorageReader {
           signQuery: true,
         },
       },
+    );
+    this.analytics.track(
+      {
+        type: 'r2',
+        statusCode: response.status,
+        action: 'HEAD artifact',
+      },
+      targetId,
     );
 
     if (response.status === 200) {

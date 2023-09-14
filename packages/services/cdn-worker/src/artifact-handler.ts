@@ -1,12 +1,11 @@
 import itty from 'itty-router';
 import zod from 'zod';
-import { createFetch, type Request } from '@whatwg-node/fetch';
+import { type Request } from '@whatwg-node/fetch';
 import { createAnalytics, type Analytics } from './analytics';
 import { type ArtifactsType } from './artifact-storage-reader';
 import { InvalidAuthKeyResponse, MissingAuthKeyResponse } from './errors';
 import type { KeyValidator } from './key-validation';
-
-const { Response } = createFetch({ useNodeFetch: true });
+import { createResponse } from './tracked-response';
 
 type ArtifactRequestHandler = {
   getArtifactAction: (
@@ -67,19 +66,35 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
       const parseResult = ParamsModel.safeParse(request.params);
 
       if (parseResult.success === false) {
-        return new Response('Not found.', { status: 404 });
+        analytics.track(
+          { type: 'error', value: ['invalid-params'] },
+          request.params?.targetId ?? 'unknown',
+        );
+        return createResponse(
+          analytics,
+          'Not found.',
+          {
+            status: 404,
+          },
+          request.params?.targetId ?? 'unknown',
+        );
       }
 
       const params = parseResult.data;
 
       /** Legacy handling for old client SDK versions. */
       if (params.artifactType === 'schema') {
-        return new Response('Found.', {
-          status: 301,
-          headers: {
-            Location: request.url.replace('/schema', '/services'),
+        return createResponse(
+          analytics,
+          'Found.',
+          {
+            status: 301,
+            headers: {
+              Location: request.url.replace('/schema', '/services'),
+            },
           },
-        });
+          params.targetId,
+        );
       }
 
       const maybeResponse = await authenticate(request, params.targetId);
@@ -113,20 +128,35 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
       if (!result) {
         return (
           deps.fallback?.(request, params) ??
-          new Response('Something went wrong, really wrong.', { status: 500 })
+          createResponse(
+            analytics,
+            'Something went wrong, really wrong.',
+            { status: 500 },
+            params.targetId,
+          )
         );
       }
 
       if (result.type === 'notModified') {
-        return new Response('', {
-          status: 304,
-        });
+        return createResponse(
+          analytics,
+          '',
+          {
+            status: 304,
+          },
+          params.targetId,
+        );
       }
       if (result.type === 'notFound') {
-        return new Response('Not found.', { status: 404 });
+        return createResponse(analytics, 'Not found.', { status: 404 }, params.targetId);
       }
       if (result.type === 'redirect') {
-        return new Response('Found.', { status: 302, headers: { Location: result.location } });
+        return createResponse(
+          analytics,
+          'Found.',
+          { status: 302, headers: { Location: result.location } },
+          params.targetId,
+        );
       }
     },
   );
