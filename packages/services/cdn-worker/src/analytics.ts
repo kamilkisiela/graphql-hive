@@ -65,6 +65,8 @@ export function createAnalytics(
     usage: AnalyticsEngine;
     error: AnalyticsEngine;
     keyValidation: AnalyticsEngine;
+    r2: AnalyticsEngine;
+    response: AnalyticsEngine;
   } | null = null,
 ) {
   return {
@@ -82,6 +84,16 @@ export function createAnalytics(
         case 'error':
           return engines.error.writeDataPoint({
             blobs: event.value,
+          });
+        case 'r2':
+          return engines.r2.writeDataPoint({
+            blobs: [event.action, event.statusCode.toString()],
+            indexes: [targetId.substring(0, 32)],
+          });
+        case 'response':
+          return engines.response.writeDataPoint({
+            blobs: [event.statusCode.toString()],
+            indexes: [targetId.substring(0, 32)],
           });
         case 'key-validation':
           switch (event.value.type) {
