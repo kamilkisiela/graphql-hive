@@ -46,13 +46,13 @@ const handler: ExportedHandler<Env> = {
       endpoint: env.S3_ENDPOINT,
     };
 
-    const artifactStorageReader = new ArtifactStorageReader(s3, null);
-
     const analytics = createAnalytics({
       usage: env.USAGE_ANALYTICS,
       error: env.ERROR_ANALYTICS,
       keyValidation: env.KEY_VALIDATION_ANALYTICS,
     });
+
+    const artifactStorageReader = new ArtifactStorageReader(s3, null, analytics);
 
     const isKeyValid = createIsKeyValid({
       waitUntil: p => ctx.waitUntil(p),
