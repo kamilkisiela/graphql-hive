@@ -54,6 +54,14 @@ export class CloudflareCDN {
           name: 'KEY_VALIDATION_ANALYTICS',
           dataset: `hive_ha_cdn_key_validation_${this.config.envName}`,
         },
+        {
+          name: 'R2_ANALYTICS',
+          dataset: `hive_ha_cdn_r2_${this.config.envName}`,
+        },
+        {
+          name: 'RESPONSE_ANALYTICS',
+          dataset: `hive_ha_cdn_response_${this.config.envName}`,
+        },
       ],
       secretTextBindings: [
         {
