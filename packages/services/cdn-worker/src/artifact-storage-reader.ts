@@ -24,7 +24,7 @@ export class ArtifactStorageReader {
     },
     /** The public URL in case the public S3 endpoint differs from the internal S3 endpoint. E.g. within a docker network. */
     publicUrl: string | null,
-    private analytics: Analytics,
+    private analytics: Analytics | null,
   ) {
     this.publicUrl = publicUrl ? new URL(publicUrl) : null;
   }
@@ -74,7 +74,7 @@ export class ArtifactStorageReader {
         },
       },
     );
-    this.analytics.track(
+    this.analytics?.track(
       {
         type: 'r2',
         statusCode: response.status,
