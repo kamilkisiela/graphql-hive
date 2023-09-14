@@ -9,6 +9,7 @@ import {
   MissingTargetIDErrorResponse,
 } from './errors';
 import type { KeyValidator } from './key-validation';
+import { createResponse } from './tracked-response';
 
 async function createETag(value: string) {
   const myText = new TextEncoder().encode(value);
@@ -38,23 +39,33 @@ const createArtifactTypesHandlers = (
    * Returns SchemaArtifact or SchemaArtifact[], same way as it's stored in the storage
    */
   schema: (targetId: string, artifactType: string, rawValue: string, etag: string) =>
-    new Response(rawValue, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        etag,
+    createResponse(
+      analytics,
+      rawValue,
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          etag,
+        },
       },
-    }),
+      targetId,
+    ),
   /**
    * Returns Federation Supergraph, we store it as-is.
    */
   supergraph: (targetId: string, artifactType: string, rawValue: string, etag: string) =>
-    new Response(rawValue, {
-      status: 200,
-      headers: {
-        etag,
+    createResponse(
+      analytics,
+      rawValue,
+      {
+        status: 200,
+        headers: {
+          etag,
+        },
       },
-    }),
+      targetId,
+    ),
   sdl: (targetId: string, artifactType: string, rawValue: string, etag: string) => {
     if (rawValue.startsWith('[')) {
       return new InvalidArtifactMatch(artifactType, targetId, analytics);
@@ -62,24 +73,34 @@ const createArtifactTypesHandlers = (
 
     const parsed = JSON.parse(rawValue) as SchemaArtifact;
 
-    return new Response(parsed.sdl, {
-      status: 200,
-      headers: {
-        etag,
+    return createResponse(
+      analytics,
+      parsed.sdl,
+      {
+        status: 200,
+        headers: {
+          etag,
+        },
       },
-    });
+      targetId,
+    );
   },
   /**
    * Returns Metadata same way as it's stored in the storage
    */
   metadata: (targetId: string, artifactType: string, rawValue: string, etag: string) =>
-    new Response(rawValue, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        etag,
+    createResponse(
+      analytics,
+      rawValue,
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          etag,
+        },
       },
-    }),
+      targetId,
+    ),
   introspection: (targetId: string, artifactType: string, rawValue: string, etag: string) => {
     if (rawValue.startsWith('[')) {
       return new InvalidArtifactMatch(artifactType, targetId, analytics);
@@ -90,13 +111,18 @@ const createArtifactTypesHandlers = (
     const schema = buildSchema(rawSdl);
     const introspection = introspectionFromSchema(schema);
 
-    return new Response(JSON.stringify(introspection), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        etag,
+    return createResponse(
+      analytics,
+      JSON.stringify(introspection),
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          etag,
+        },
       },
-    });
+      targetId,
+    );
   },
 });
 
@@ -205,7 +231,7 @@ export const createRequestHandler = (deps: RequestHandlerDependencies) => {
       const ifNoneMatch = request.headers.get('if-none-match');
 
       if (ifNoneMatch && ifNoneMatch === etag) {
-        return new Response(null, { status: 304 });
+        return createResponse(analytics, null, { status: 304 }, targetId);
       }
 
       switch (artifactType) {
@@ -220,9 +246,14 @@ export const createRequestHandler = (deps: RequestHandlerDependencies) => {
         case 'metadata':
           return artifactTypesHandlers.metadata(targetId, artifactType, rawValue, etag);
         default:
-          return new Response(null, {
-            status: 500,
-          });
+          return createResponse(
+            analytics,
+            null,
+            {
+              status: 500,
+            },
+            targetId,
+          );
       }
     } else {
       console.log(

@@ -20,6 +20,13 @@ export class MissingTargetIDErrorResponse extends Response {
     );
 
     analytics.track({ type: 'error', value: ['missing_target_id'] }, 'unknown');
+    analytics.track(
+      {
+        type: 'response',
+        statusCode: 400,
+      },
+      'unknown',
+    );
   }
 }
 
@@ -39,6 +46,13 @@ export class InvalidArtifactTypeResponse extends Response {
       },
     );
     analytics.track({ type: 'error', value: ['invalid_artifact_type', artifactType] }, 'unknown');
+    analytics.track(
+      {
+        type: 'response',
+        statusCode: 400,
+      },
+      'unknown',
+    );
   }
 }
 
@@ -58,6 +72,13 @@ export class MissingAuthKeyResponse extends Response {
       },
     );
     analytics.track({ type: 'error', value: ['missing_auth_key'] }, 'unknown');
+    analytics.track(
+      {
+        type: 'response',
+        statusCode: 400,
+      },
+      'unknown',
+    );
   }
 }
 
@@ -77,6 +98,13 @@ export class InvalidAuthKeyResponse extends Response {
       },
     );
     analytics.track({ type: 'error', value: ['invalid_auth_key'] }, 'unknown');
+    analytics.track(
+      {
+        type: 'response',
+        statusCode: 403,
+      },
+      'unknown',
+    );
   }
 }
 
@@ -96,6 +124,13 @@ export class CDNArtifactNotFound extends Response {
       },
     );
     analytics.track({ type: 'error', value: ['artifact_not_found', artifactType] }, targetId);
+    analytics.track(
+      {
+        type: 'response',
+        statusCode: 404,
+      },
+      targetId,
+    );
   }
 }
 
@@ -115,6 +150,13 @@ export class InvalidArtifactMatch extends Response {
       },
     );
     analytics.track({ type: 'error', value: ['invalid_artifact_match', artifactType] }, targetId);
+    analytics.track(
+      {
+        type: 'response',
+        statusCode: 400,
+      },
+      targetId,
+    );
   }
 }
 
@@ -134,5 +176,12 @@ export class UnexpectedError extends Response {
       },
     );
     analytics.track({ type: 'error', value: ['unexpected_error'] }, 'unknown');
+    analytics.track(
+      {
+        type: 'response',
+        statusCode: 500,
+      },
+      'unknown',
+    );
   }
 }

@@ -7,6 +7,7 @@ import { AwsClient } from './aws';
 import { UnexpectedError } from './errors';
 import { createRequestHandler } from './handler';
 import { createIsKeyValid } from './key-validation';
+import { createResponse } from './tracked-response';
 
 type Env = {
   S3_ENDPOINT: string;
@@ -45,13 +46,13 @@ const handler: ExportedHandler<Env> = {
       endpoint: env.S3_ENDPOINT,
     };
 
-    const artifactStorageReader = new ArtifactStorageReader(s3, null);
-
     const analytics = createAnalytics({
       usage: env.USAGE_ANALYTICS,
       error: env.ERROR_ANALYTICS,
       keyValidation: env.KEY_VALIDATION_ANALYTICS,
     });
+
+    const artifactStorageReader = new ArtifactStorageReader(s3, null, analytics);
 
     const isKeyValid = createIsKeyValid({
       waitUntil: p => ctx.waitUntil(p),
@@ -130,7 +131,7 @@ const handler: ExportedHandler<Env> = {
         if (response) {
           return response;
         }
-        return new Response('Not found', { status: 404 });
+        return createResponse(analytics, 'Not found', { status: 404 }, 'unknown');
       });
     } catch (error) {
       console.error(error);
