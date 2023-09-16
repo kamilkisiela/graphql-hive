@@ -235,6 +235,7 @@ const googleConfig = {
 const supertokens = deploySuperTokens(
   { apiKey: supertokensApiKey.result },
   { dependencies: [dbMigrations] },
+  deploymentEnv,
 );
 
 const zendeskConfig = new pulumi.Config('zendesk');
