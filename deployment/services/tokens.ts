@@ -43,7 +43,7 @@ export function deployTokens({
       livenessProbe: '/_health',
       exposesMetrics: true,
       availabilityOnEveryNode: true,
-      replicas: isProduction(deploymentEnv) ? 2 : 1,
+      replicas: isProduction(deploymentEnv) ? 3 : 1,
       image,
       env: {
         ...deploymentEnv,

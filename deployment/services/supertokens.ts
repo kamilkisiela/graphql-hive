@@ -1,6 +1,8 @@
 import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
 import { Output } from '@pulumi/pulumi';
+import { DeploymentEnvironment } from '../types';
+import { isProduction } from '../utils/helpers';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 
 export function deploySuperTokens(
@@ -8,6 +10,7 @@ export function deploySuperTokens(
   resourceOptions: {
     dependencies: pulumi.Resource[];
   },
+  deploymentEnv: DeploymentEnvironment,
 ) {
   const apiConfig = new pulumi.Config('api');
 
@@ -55,7 +58,7 @@ export function deploySuperTokens(
   const deployment = new kx.Deployment(
     'supertokens',
     {
-      spec: pb.asDeploymentSpec({ replicas: 1 }), // <-- here,
+      spec: pb.asDeploymentSpec({ replicas: isProduction(deploymentEnv) ? 3 : 1 }),
     },
     {
       dependsOn: resourceOptions.dependencies,

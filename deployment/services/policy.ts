@@ -2,6 +2,7 @@ import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
 import { DeploymentEnvironment } from '../types';
 import { ServiceDeployment } from '../utils/service-deployment';
+import { isProduction } from '../utils/helpers';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
@@ -31,7 +32,7 @@ export function deploySchemaPolicy({
     readinessProbe: '/_readiness',
     livenessProbe: '/_health',
     exposesMetrics: true,
-    replicas: 1,
+    replicas: isProduction(deploymentEnv) ? 2 : 1,
     pdb: true,
   }).deploy();
 }

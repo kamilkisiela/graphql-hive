@@ -97,10 +97,17 @@ export class ServiceDeployment {
     const topologySpreadConstraints: k8s.types.input.core.v1.TopologySpreadConstraint[] = [];
 
     if (this.options.availabilityOnEveryNode) {
+      // This will ensure that services that has >1 replicas will be scheduled on every available node
+      // and ensure that we are not exposed to downtime issues caused by node failures/restarts:
       topologySpreadConstraints.push({
         maxSkew: 1,
-        topologyKey: 'zone',
-        whenUnsatisfiable: 'ScheduleAnyway',
+        topologyKey: 'topology.kubernetes.io/zone',
+        whenUnsatisfiable: 'DoNotSchedule',
+        labelSelector: {
+          matchLabels: {
+            app: this.name,
+          },
+        },
       });
     }
 
@@ -162,6 +169,10 @@ export class ServiceDeployment {
       annotations: {},
     };
 
+    metadata.labels = {
+      app: this.name,
+    };
+
     if (this.options.exposesMetrics) {
       metadata.annotations = {
         'prometheus.io/port': '10254',
@@ -186,6 +197,7 @@ export class ServiceDeployment {
           },
           {
             annotations: metadata.annotations,
+            labels: metadata.labels,
           },
         ),
       },

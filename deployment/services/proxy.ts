@@ -27,7 +27,7 @@ export function deployProxy({
     address: commonConfig.get('staticIp'),
     aksReservedIpResourceGroup: commonConfig.get('aksReservedIpResourceGroup'),
   })
-    .deployProxy({ replicas: isProduction(deploymentEnv) ? 2 : 1 })
+    .deployProxy({ replicas: isProduction(deploymentEnv) ? 3 : 1 })
     .registerService({ record: appHostname }, [
       {
         name: 'app',
