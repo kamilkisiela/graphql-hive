@@ -33,6 +33,7 @@ export class ServiceDeployment {
           cpuAverageToScale: number;
         };
       };
+      availabilityOnEveryNode?: boolean;
       command?: string[];
     },
     protected dependencies?: Array<pulumi.Resource | undefined | null>,
@@ -93,6 +94,16 @@ export class ServiceDeployment {
       );
     }
 
+    const topologySpreadConstraints: k8s.types.input.core.v1.TopologySpreadConstraint[] = [];
+
+    if (this.options.availabilityOnEveryNode) {
+      topologySpreadConstraints.push({
+        maxSkew: 1,
+        topologyKey: 'zone',
+        whenUnsatisfiable: 'ScheduleAnyway',
+      });
+    }
+
     const pb = new PodBuilder({
       restartPolicy: asJob ? 'Never' : 'Always',
       imagePullSecrets: this.options.imagePullSecret
@@ -100,6 +111,7 @@ export class ServiceDeployment {
         : undefined,
       terminationGracePeriodSeconds: 60,
       volumes: this.options.volumes,
+      topologySpreadConstraints,
       containers: [
         {
           livenessProbe,

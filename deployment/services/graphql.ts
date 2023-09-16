@@ -105,6 +105,7 @@ export function deployGraphQL({
       pdb: true,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
+      availabilityOnEveryNode: true,
       env: {
         ...apiEnv,
         ...deploymentEnv,

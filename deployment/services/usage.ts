@@ -47,6 +47,7 @@ export function deployUsage({
       replicas,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
+      availabilityOnEveryNode: true,
       env: {
         ...deploymentEnv,
         ...commonEnv,

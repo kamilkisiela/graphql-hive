@@ -31,6 +31,7 @@ export function deploySchema({
     {
       image,
       imagePullSecret,
+      availabilityOnEveryNode: true,
       env: {
         ...deploymentEnv,
         ...commonEnv,

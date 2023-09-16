@@ -63,6 +63,7 @@ export function deployUsageIngestor({
       replicas,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
+      availabilityOnEveryNode: true,
       env: {
         ...deploymentEnv,
         ...commonEnv,

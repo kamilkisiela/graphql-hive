@@ -42,6 +42,7 @@ export function deployTokens({
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       exposesMetrics: true,
+      availabilityOnEveryNode: true,
       replicas: isProduction(deploymentEnv) ? 2 : 1,
       image,
       env: {
