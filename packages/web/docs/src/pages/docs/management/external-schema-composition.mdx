@@ -43,9 +43,13 @@ Hive Cloud->>Hive CLI: Composition Summary
 ```
 
 <Callout>
-  Your deployed external composition service needs to be available publicly, to make it possible for
-  Hive Cloud service to communicate with it. Don't worry: we've implemented a security layer to make
-  sure only Hive can communicate with your service.
+Your deployed external composition service needs to be available publicly, to make it possible for
+Hive Cloud service to communicate with it. Don't worry: we've implemented a security layer to make
+sure only Hive can communicate with your service.
+
+Hive Cloud uses Cloudflare Worker to communicate with your service. This means that service's
+address must contain a valid hostname (not an IP address), and the port must be standard.
+
 </Callout>
 
 ## Integration Guide
