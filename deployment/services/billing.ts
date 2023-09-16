@@ -2,11 +2,11 @@ import { parse } from 'pg-connection-string';
 import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
 import { DeploymentEnvironment } from '../types';
+import { isProduction } from '../utils/helpers';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
 import { UsageEstimator } from './usage-estimation';
-import { isProduction } from '../utils/helpers';
 
 const billingConfig = new pulumi.Config('billing');
 const commonConfig = new pulumi.Config('common');
