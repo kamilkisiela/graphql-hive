@@ -152,6 +152,11 @@ a notification is triggered.
   different.
 </Callout>
 
+<Callout type="warning">
+  Hive Cloud uses Cloudflare Worker to communicate with your endpoint. This means that endpoint's
+  address must contain a valid hostname (not an IP address), and the port must be standard.
+</Callout>
+
 <NextImage
   alt="HTTP Alert Configuration"
   src={projectHttpAlertImage}
