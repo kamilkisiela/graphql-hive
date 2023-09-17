@@ -188,8 +188,8 @@ importers:
   deployment:
     devDependencies:
       '@lbrlabs/pulumi-grafana':
-        specifier: 0.0.10
-        version: 0.0.10
+        specifier: 0.1.0
+        version: 0.1.0
       '@manypkg/get-packages':
         specifier: 2.2.0
         version: 2.2.0
@@ -7787,8 +7787,8 @@ packages:
     resolution: {integrity: sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==}
     dev: true
 
-  /@lbrlabs/pulumi-grafana@0.0.10:
-    resolution: {integrity: sha512-QVpuvsA6ensDH5rxZEfU4C3Vuj6kEdmeQxY1bRF5dL2y5JXelwqPLAeT4CNJ2Dxb6ZUZYDrvP2PIIBSlmMafxg==}
+  /@lbrlabs/pulumi-grafana@0.1.0:
+    resolution: {integrity: sha512-REc/LQOy17O9jbZnBNm4tLjLJKxOfLaWPIB2CFiAtM1VzwU3FzZQFs0K+XGkuZwWdB+tl2/VHdHv+FqsUrit2w==}
     requiresBuild: true
     dependencies:
       '@pulumi/pulumi': 3.73.0
