@@ -54,7 +54,7 @@ export function deployEmails({
       livenessProbe: '/_health',
       exposesMetrics: true,
       image,
-      replicas: isProduction(deploymentEnv) ? 2 : 1,
+      replicas: isProduction(deploymentEnv) ? 3 : 1,
     },
     [redis.deployment, redis.service],
   ).deploy();

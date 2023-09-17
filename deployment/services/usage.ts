@@ -33,7 +33,7 @@ export function deployUsage({
   rateLimit: RateLimitService;
   imagePullSecret: k8s.core.v1.Secret;
 }) {
-  const replicas = isProduction(deploymentEnv) ? 2 : 1;
+  const replicas = isProduction(deploymentEnv) ? 3 : 1;
   const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
   const maxReplicas = isProduction(deploymentEnv) ? 6 : 2;
   const kafkaBufferDynamic =

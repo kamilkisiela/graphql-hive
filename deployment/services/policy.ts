@@ -32,7 +32,7 @@ export function deploySchemaPolicy({
     readinessProbe: '/_readiness',
     livenessProbe: '/_health',
     exposesMetrics: true,
-    replicas: isProduction(deploymentEnv) ? 2 : 1,
+    replicas: isProduction(deploymentEnv) ? 3 : 1,
     pdb: true,
   }).deploy();
 }
