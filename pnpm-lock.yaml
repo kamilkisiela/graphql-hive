@@ -1112,8 +1112,8 @@ importers:
         specifier: 3.29.5
         version: 3.29.5
       fastify-cors:
-        specifier: 6.0.2
-        version: 6.0.2
+        specifier: 6.0.3
+        version: 6.0.3
       fastify-plugin:
         specifier: 3.0.1
         version: 3.0.1
@@ -18140,8 +18140,8 @@ packages:
     engines: {node: '>= 4.9.1'}
     dev: true
 
-  /fastify-cors@6.0.2:
-    resolution: {integrity: sha512-sE0AOyzmj5hLLRRVgenjA6G2iOGX35/1S3QGYB9rr9TXelMZB3lFrXy4CzwYVOMiujJeMiLgO4J7eRm8sQSv8Q==}
+  /fastify-cors@6.0.3:
+    resolution: {integrity: sha512-fMbXubKKyBHHCfSBtsCi3+7VyVRdhJQmGes5gM+eGKkRErCdm0NaYO0ozd31BQBL1ycoTIjbqOZhJo4RTF/Vlg==}
     dependencies:
       fastify-plugin: 3.0.1
       vary: 1.1.2
