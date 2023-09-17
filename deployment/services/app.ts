@@ -1,6 +1,7 @@
 import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
 import { DeploymentEnvironment } from '../types';
+import { isProduction } from '../utils/helpers';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
@@ -57,6 +58,7 @@ export function deployApp({
     'app',
     {
       image,
+      replicas: isProduction(deploymentEnv) ? 3 : 1,
       imagePullSecret,
       readinessProbe: '/api/health',
       livenessProbe: '/api/health',

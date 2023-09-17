@@ -31,7 +31,7 @@ export function deployUsageEstimation({
     {
       image,
       imagePullSecret,
-      replicas: isProduction(deploymentEnv) ? 2 : 1,
+      replicas: isProduction(deploymentEnv) ? 3 : 1,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       env: {

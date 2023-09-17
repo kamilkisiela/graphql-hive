@@ -48,7 +48,7 @@ export function deployWebhooks({
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       exposesMetrics: true,
-      replicas: isProduction(deploymentEnv) ? 2 : 1,
+      replicas: isProduction(deploymentEnv) ? 3 : 1,
       image,
     },
     [redis.deployment, redis.service],
