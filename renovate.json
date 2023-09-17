@@ -2,7 +2,7 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>the-guild-org/shared-config:renovate", ":preserveSemverRanges"],
   "constraints": {
-    "pnpm": "8.6.0"
+    "pnpm": "8.7.5"
   },
   "prConcurrentLimit": 10,
   "packageRules": [
