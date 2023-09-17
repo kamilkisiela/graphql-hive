@@ -10,7 +10,7 @@
   "devDependencies": {
     "@apollo/gateway": "2.5.1",
     "@apollo/server": "4.8.0",
-    "@aws-sdk/client-s3": "3.359.0",
+    "@aws-sdk/client-s3": "3.414.0",
     "@esm2cjs/execa": "6.1.1-cjs.1",
     "@graphql-hive/client": "workspace:*",
     "@graphql-hive/core": "workspace:*",
