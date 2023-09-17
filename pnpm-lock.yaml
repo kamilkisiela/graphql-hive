@@ -643,8 +643,8 @@ importers:
         specifier: 5.3.2
         version: 5.3.2
       ioredis-mock:
-        specifier: 8.8.1
-        version: 8.8.1(@types/ioredis-mock@8.2.2)(ioredis@5.3.2)
+        specifier: 8.8.3
+        version: 8.8.3(@types/ioredis-mock@8.2.2)(ioredis@5.3.2)
       lodash:
         specifier: 4.17.21
         version: 4.17.21
@@ -976,8 +976,8 @@ importers:
         specifier: 5.3.2
         version: 5.3.2
       ioredis-mock:
-        specifier: 8.8.1
-        version: 8.8.1(@types/ioredis-mock@8.2.2)(ioredis@5.3.2)
+        specifier: 8.8.3
+        version: 8.8.3(@types/ioredis-mock@8.2.2)(ioredis@5.3.2)
       p-timeout:
         specifier: 6.1.2
         version: 6.1.2
@@ -20273,8 +20273,8 @@ packages:
     dependencies:
       loose-envify: 1.4.0
 
-  /ioredis-mock@8.8.1(@types/ioredis-mock@8.2.2)(ioredis@5.3.2):
-    resolution: {integrity: sha512-zXSaDf86EcDFVf8jMOirWU6Js4WcwLd/cxwJiCh9EbD1GoHfeE/fVqLhLz/l1MkyL85Fb6MwfF2Fr/9819Ul9Q==}
+  /ioredis-mock@8.8.3(@types/ioredis-mock@8.2.2)(ioredis@5.3.2):
+    resolution: {integrity: sha512-LkF17WIyYkPfUhvp0fjIZ+HKhILEoq1J2b71vv+9EOW054UlkySVEvgQ2RolXM+eI759MteHtXQvv0oRn0lkUg==}
     engines: {node: '>=12.22'}
     peerDependencies:
       '@types/ioredis-mock': ^8
