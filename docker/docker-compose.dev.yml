@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   db:
-    image: postgres:14.8-alpine
+    image: postgres:14.9-alpine
     networks:
       - 'stack'
     healthcheck:
