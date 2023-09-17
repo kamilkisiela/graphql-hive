@@ -60,6 +60,7 @@ export function deployApp({
       imagePullSecret,
       readinessProbe: '/api/health',
       livenessProbe: '/api/health',
+      availabilityOnEveryNode: true,
       env: [
         { name: 'DEPLOYED_DNS', value: deploymentEnv.DEPLOYED_DNS },
         { name: 'NODE_ENV', value: 'production' },

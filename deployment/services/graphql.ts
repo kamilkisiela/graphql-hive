@@ -101,10 +101,11 @@ export function deployGraphQL({
     {
       imagePullSecret,
       image,
-      replicas: isProduction(deploymentEnv) ? 2 : 1,
+      replicas: isProduction(deploymentEnv) ? 3 : 1,
       pdb: true,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
+      availabilityOnEveryNode: true,
       env: {
         ...apiEnv,
         ...deploymentEnv,

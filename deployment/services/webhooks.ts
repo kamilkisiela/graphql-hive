@@ -1,6 +1,7 @@
 import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
 import { DeploymentEnvironment } from '../types';
+import { isProduction } from '../utils/helpers';
 import { ServiceDeployment } from '../utils/service-deployment';
 import type { Broker } from './cf-broker';
 import { Redis } from './redis';
@@ -47,7 +48,7 @@ export function deployWebhooks({
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       exposesMetrics: true,
-      replicas: 1,
+      replicas: isProduction(deploymentEnv) ? 2 : 1,
       image,
     },
     [redis.deployment, redis.service],
