@@ -63,7 +63,7 @@
     "@envelop/types": "4.0.0",
     "@types/async-retry": "1.4.5",
     "graphql-yoga": "4.0.3",
-    "nock": "13.3.2",
+    "nock": "13.3.3",
     "vitest": "0.31.1"
   },
   "publishConfig": {

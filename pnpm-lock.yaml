@@ -437,8 +437,8 @@ importers:
         specifier: 4.0.3
         version: 4.0.3(graphql@16.6.0)
       nock:
-        specifier: 13.3.2
-        version: 13.3.2
+        specifier: 13.3.3
+        version: 13.3.3
       vitest:
         specifier: 0.31.1
         version: 0.31.1
@@ -703,8 +703,8 @@ importers:
         specifier: 0.4.5
         version: 0.4.5
       nock:
-        specifier: 13.3.2
-        version: 13.3.2
+        specifier: 13.3.3
+        version: 13.3.3
       toucan-js:
         specifier: 3.2.3
         version: 3.2.3
@@ -23840,8 +23840,8 @@ packages:
       tslib: 2.5.3
     dev: true
 
-  /nock@13.3.2:
-    resolution: {integrity: sha512-CwbljitiWJhF1gL83NbanhoKs1l23TDlRioNraPTZrzZIEooPemrHRj5m0FZCPkB1ecdYCSWWGcHysJgX/ngnQ==}
+  /nock@13.3.3:
+    resolution: {integrity: sha512-z+KUlILy9SK/RjpeXDiDUEAq4T94ADPHE3qaRkf66mpEhzc/ytOMm3Bwdrbq6k1tMWkbdujiKim3G2tfQARuJw==}
     engines: {node: '>= 10.13'}
     dependencies:
       debug: 4.3.4(supports-color@8.1.1)
