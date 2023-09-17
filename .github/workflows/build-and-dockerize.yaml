@@ -91,7 +91,7 @@ jobs:
 
       - name: login to docker registry
         if: ${{ inputs.dockerize }}
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ${{ inputs.registry }}
           username: ${{ github.actor }}
