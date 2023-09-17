@@ -12,7 +12,7 @@
     "@pulumi/kubernetesx": "0.1.6",
     "@pulumi/pulumi": "3.73.0",
     "@pulumi/random": "4.13.2",
-    "@types/js-yaml": "4.0.5",
+    "@types/js-yaml": "4.0.6",
     "@types/mime-types": "2.1.1",
     "@types/node": "18.16.19",
     "js-yaml": "4.1.0",
