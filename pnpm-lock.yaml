@@ -571,8 +571,8 @@ importers:
         specifier: 13.1.8
         version: 13.1.8
       '@octokit/request-error':
-        specifier: 3.0.2
-        version: 3.0.2
+        specifier: 3.0.3
+        version: 3.0.3
       '@sentry/node':
         specifier: 7.59.3
         version: 7.59.3
@@ -8705,7 +8705,7 @@ packages:
       '@octokit/auth-oauth-app': 5.0.4
       '@octokit/auth-oauth-user': 2.0.4
       '@octokit/request': 6.2.2
-      '@octokit/request-error': 3.0.2
+      '@octokit/request-error': 3.0.3
       '@octokit/types': 9.0.0
       deprecation: 2.3.1
       lru-cache: 9.1.1
@@ -8773,7 +8773,7 @@ packages:
     resolution: {integrity: sha512-IyfLo1T5GmIC9+07hHGlD3gHtZI1Bona8PLhHXUnwcYDuZt0BhjlNJDYMoPG21C4r7v7+ZSxQHBKrGgkxpYb7A==}
     engines: {node: '>= 14'}
     dependencies:
-      '@octokit/request-error': 3.0.2
+      '@octokit/request-error': 3.0.3
       '@octokit/types': 8.0.0
     dev: true
 
@@ -8798,7 +8798,7 @@ packages:
       '@octokit/auth-token': 3.0.2
       '@octokit/graphql': 5.0.4
       '@octokit/request': 6.2.2
-      '@octokit/request-error': 3.0.2
+      '@octokit/request-error': 3.0.3
       '@octokit/types': 8.0.0
       before-after-hook: 2.2.3
       universal-user-agent: 6.0.0
@@ -8872,7 +8872,7 @@ packages:
     dependencies:
       '@octokit/oauth-authorization-url': 5.0.0
       '@octokit/request': 6.2.2
-      '@octokit/request-error': 3.0.2
+      '@octokit/request-error': 3.0.3
       '@octokit/types': 8.0.0
       btoa-lite: 1.0.0
     transitivePeerDependencies:
@@ -8936,11 +8936,11 @@ packages:
       once: 1.4.0
     dev: true
 
-  /@octokit/request-error@3.0.2:
-    resolution: {integrity: sha512-WMNOFYrSaX8zXWoJg9u/pKgWPo94JXilMLb2VManNOby9EZxrQaBe/QSC4a1TzpAlpxofg2X/jMnCyZgL6y7eg==}
+  /@octokit/request-error@3.0.3:
+    resolution: {integrity: sha512-crqw3V5Iy2uOU5Np+8M/YexTlT8zxCfI+qu+LxUB7SZpje4Qmx3mub5DfEKSO8Ylyk0aogi6TYdf6kxzh2BguQ==}
     engines: {node: '>= 14'}
     dependencies:
-      '@octokit/types': 8.0.0
+      '@octokit/types': 9.0.0
       deprecation: 2.3.1
       once: 1.4.0
     dev: true
@@ -8963,7 +8963,7 @@ packages:
     engines: {node: '>= 14'}
     dependencies:
       '@octokit/endpoint': 7.0.3
-      '@octokit/request-error': 3.0.2
+      '@octokit/request-error': 3.0.3
       '@octokit/types': 8.0.0
       is-plain-object: 5.0.0
       node-fetch: 2.6.12
@@ -9015,7 +9015,7 @@ packages:
     resolution: {integrity: sha512-BZYBRB8zUm8QJOkpmmg2VWzHq21qVW6vzmZw7gXhoPp/fia1N+HKF/caWyCcKpSE4DYBnPukJ9HtpMcC2GZiRw==}
     engines: {node: '>= 14'}
     dependencies:
-      '@octokit/request-error': 3.0.2
+      '@octokit/request-error': 3.0.3
       '@octokit/webhooks-methods': 3.0.1(patch_hash=ckboo4crezw7uvstxm24ozngtq)
       '@octokit/webhooks-types': 6.7.0
       aggregate-error: 3.1.0
