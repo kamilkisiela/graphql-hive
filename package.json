@@ -61,7 +61,7 @@
     "@graphql-codegen/typescript": "4.0.1",
     "@graphql-codegen/typescript-operations": "4.0.1",
     "@graphql-codegen/typescript-resolvers": "4.0.1",
-    "@graphql-inspector/cli": "3.4.19",
+    "@graphql-inspector/cli": "4.0.2",
     "@manypkg/get-packages": "2.2.0",
     "@next/eslint-plugin-next": "13.4.11",
     "@sentry/cli": "2.19.4",
