@@ -96,7 +96,7 @@ services:
       - ./.hive/broker/db:/var/lib/kafka/data
 
   redis:
-    image: bitnami/redis:7.0.11
+    image: bitnami/redis:7.2.1
     networks:
       - 'stack'
     healthcheck:
