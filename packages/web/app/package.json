@@ -126,7 +126,7 @@
     "rimraf": "4.4.1",
     "storybook": "7.0.23",
     "tailwindcss": "3.3.3",
-    "tailwindcss-animate": "1.0.6",
+    "tailwindcss-animate": "1.0.7",
     "tailwindcss-radix": "2.8.0"
   },
   "buildOptions": {
