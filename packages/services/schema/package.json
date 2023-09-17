@@ -15,7 +15,7 @@
     "@graphql-tools/stitch": "9.0.0",
     "@graphql-tools/stitching-directives": "3.0.0",
     "@hive/service-common": "workspace:*",
-    "@sentry/node": "7.59.3",
+    "@sentry/node": "7.69.0",
     "@trpc/server": "10.31.0",
     "@types/async-retry": "1.4.5",
     "@types/ioredis-mock": "8.2.2",

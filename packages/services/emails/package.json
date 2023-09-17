@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@hive/service-common": "workspace:*",
-    "@sentry/node": "7.59.3",
+    "@sentry/node": "7.69.0",
     "@trpc/server": "10.31.0",
     "@types/mjml": "4.7.1",
     "@types/nodemailer": "6.4.10",
