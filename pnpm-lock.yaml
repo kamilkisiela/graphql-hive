@@ -125,8 +125,8 @@ importers:
         specifier: 8.43.0
         version: 8.43.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
       eslint-plugin-cypress:
-        specifier: 2.13.3
-        version: 2.13.3(eslint@8.43.0)
+        specifier: 2.14.0
+        version: 2.14.0(eslint@8.43.0)
       eslint-plugin-hive:
         specifier: file:./rules
         version: file:rules
@@ -17380,13 +17380,13 @@ packages:
       - supports-color
     dev: true
 
-  /eslint-plugin-cypress@2.13.3(eslint@8.43.0):
-    resolution: {integrity: sha512-nAPjZE5WopCsgJwl3vHm5iafpV+ZRO76Z9hMyRygWhmg5ODXDPd+9MaPl7kdJ2azj+sO87H3P1PRnggIrz848g==}
+  /eslint-plugin-cypress@2.14.0(eslint@8.43.0):
+    resolution: {integrity: sha512-eW6tv7iIg7xujleAJX4Ujm649Bf5jweqa4ObPEIuueYRyLZt7qXGWhCY/n4bfeFW/j6nQZwbIBHKZt6EKcL/cg==}
     peerDependencies:
       eslint: '>= 3.2.1'
     dependencies:
       eslint: 8.43.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
-      globals: 11.12.0
+      globals: 13.21.0
     dev: true
 
   /eslint-plugin-es-x@7.1.0(eslint@8.43.0):
@@ -19066,6 +19066,13 @@ packages:
 
   /globals@13.19.0:
     resolution: {integrity: sha512-dkQ957uSRWHw7CFXLUtUHQI3g3aWApYhfNR2O6jn/907riyTYKVBmxYVROkBcY614FSSeSJh7Xm7SrUWCxvJMQ==}
+    engines: {node: '>=8'}
+    dependencies:
+      type-fest: 0.20.2
+    dev: true
+
+  /globals@13.21.0:
+    resolution: {integrity: sha512-ybyme3s4yy/t/3s35bewwXKOf7cvzfreG2lH0lZl0JB7I4GxRP2ghxOK/Nb9EkRXdbBXZLfq/p/0W2JUONB/Gg==}
     engines: {node: '>=8'}
     dependencies:
       type-fest: 0.20.2
