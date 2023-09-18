@@ -41,7 +41,7 @@
     "pino-pretty": "10.1.0",
     "prom-client": "14.2.0",
     "reflect-metadata": "0.1.13",
-    "tslib": "2.5.3",
+    "tslib": "2.6.2",
     "zod": "3.21.4"
   },
   "buildOptions": {

@@ -27,7 +27,7 @@
     "p-timeout": "6.1.2",
     "pino-pretty": "10.1.0",
     "sendmail": "1.6.1",
-    "tslib": "2.5.3",
+    "tslib": "2.6.2",
     "zod": "3.21.4"
   }
 }
