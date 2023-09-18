@@ -3,12 +3,10 @@ import { useRouter } from 'next/router';
 import { formatISO, subDays, subHours, subMinutes } from 'date-fns';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
+import { Section } from '@/components/common';
+import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
 import { TargetLayout } from '@/components/layouts/target';
-import {
-  ClientsFilterTrigger,
-  OperationsFilterTrigger,
-} from '@/components/target/operations/Filters';
-import { OperationsList } from '@/components/target/operations/List';
+import { ClientsFilterTrigger } from '@/components/target/operations/Filters';
 import { OperationsStats } from '@/components/target/operations/Stats';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
@@ -16,6 +14,45 @@ import { EmptyList, MetaTitle, RadixSelect } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
+
+const GraphQLOperationBody_GetOperationBodyQuery = graphql(`
+  query GraphQLOperationBody_GetOperationBodyQuery($selector: OperationBodyByHashInput!) {
+    operationBodyByHash(selector: $selector)
+  }
+`);
+
+export function GraphQLOperationBody({
+  hash,
+  organization,
+  project,
+  target,
+}: {
+  hash: string;
+  organization: string;
+  project: string;
+  target: string;
+}) {
+  const [result] = useQuery({
+    query: GraphQLOperationBody_GetOperationBodyQuery,
+    variables: { selector: { hash, organization, project, target } },
+  });
+
+  const { data, fetching, error } = result;
+
+  if (fetching) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Oh no... {error.message}</div>;
+  }
+
+  if (data?.operationBodyByHash) {
+    return <GraphQLHighlight className="pt-6" code={data.operationBodyByHash} />;
+  }
+
+  return null;
+}
 
 function floorDate(date: Date): Date {
   const time = 1000 * 60;
@@ -61,22 +98,25 @@ function isDayBasedPeriodKey<T extends PeriodKey>(
   return periodKey.endsWith('d');
 }
 
-function OperationsView({
+function OperationView({
   organizationCleanId,
   projectCleanId,
   targetCleanId,
   dataRetentionInDays,
+  operationHash,
+  operationName,
 }: {
   organizationCleanId: string;
   projectCleanId: string;
   targetCleanId: string;
   dataRetentionInDays: number;
+  operationHash: string;
+  operationName: string;
 }): ReactElement {
   const router = useRouter();
   const [href, periodParam] = router.asPath.split('?');
   let selectedPeriod: PeriodKey =
     (new URLSearchParams(periodParam).get('period') as PeriodKey) ?? '1d';
-  const [selectedOperations, setSelectedOperations] = useState<string[]>([]);
   const [selectedClients, setSelectedClients] = useState<string[]>([]);
   const availablePeriodOptions = useMemo<PeriodKey[]>(() => {
     return Object.keys(DateRange).filter(key => {
@@ -120,19 +160,16 @@ function OperationsView({
     [href, router],
   );
 
+  const operationsList = useMemo(() => [operationHash], [operationHash]);
+
   return (
     <>
       <div className="py-6 flex flex-row items-center justify-between">
         <div>
-          <Title>Operations</Title>
-          <Subtitle>Observe GraphQL requests and see how the API is consumed.</Subtitle>
+          <Title>{operationName}</Title>
+          <Subtitle>Performance of individual GraphQL operation</Subtitle>
         </div>
         <div className="flex justify-end gap-x-2">
-          <OperationsFilterTrigger
-            period={period}
-            selected={selectedOperations}
-            onFilter={setSelectedOperations}
-          />
           <ClientsFilterTrigger
             period={period}
             selected={selectedClients}
@@ -153,27 +190,26 @@ function OperationsView({
         project={projectCleanId}
         target={targetCleanId}
         period={period}
-        operationsFilter={selectedOperations}
+        operationsFilter={operationsList}
         clientNamesFilter={selectedClients}
         resolution={DateRange[selectedPeriod].resolution}
-        mode="operation-list"
+        mode="operation-page"
       />
-      <OperationsList
-        className="mt-12"
-        period={period}
-        organization={organizationCleanId}
-        project={projectCleanId}
-        target={targetCleanId}
-        operationsFilter={selectedOperations}
-        clientNamesFilter={selectedClients}
-        selectedPeriod={selectedPeriod}
-      />
+      <div className="w-full rounded-md bg-gray-900/50 p-5 border border-gray-800 mt-12">
+        <Section.Title>Operation body</Section.Title>
+        <GraphQLOperationBody
+          organization={organizationCleanId}
+          project={projectCleanId}
+          target={targetCleanId}
+          hash={operationHash}
+        />
+      </div>
     </>
   );
 }
 
-const TargetOperationsPageQuery = graphql(`
-  query TargetOperationsPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+const TargetOperationPageQuery = graphql(`
+  query TargetOperationPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
     organizations {
       ...TargetLayout_OrganizationConnectionFragment
     }
@@ -203,10 +239,16 @@ const TargetOperationsPageQuery = graphql(`
   }
 `);
 
-function TargetOperationsPageContent() {
+function TargetOperationPageContent({
+  operationHash,
+  operationName,
+}: {
+  operationHash: string;
+  operationName: string;
+}) {
   const router = useRouteSelector();
   const [query] = useQuery({
-    query: TargetOperationsPageQuery,
+    query: TargetOperationPageQuery,
     variables: {
       organizationId: router.organizationId,
       projectId: router.projectId,
@@ -237,11 +279,13 @@ function TargetOperationsPageContent() {
     >
       {currentOrganization && currentProject && currentTarget ? (
         hasCollectedOperations ? (
-          <OperationsView
+          <OperationView
             organizationCleanId={currentOrganization.cleanId}
             projectCleanId={currentProject.cleanId}
             targetCleanId={currentTarget.cleanId}
             dataRetentionInDays={currentOrganization.rateLimit.retentionInDays}
+            operationHash={operationHash}
+            operationName={operationName}
           />
         ) : (
           <div className="py-8">
@@ -257,15 +301,26 @@ function TargetOperationsPageContent() {
   );
 }
 
-function OperationsPage(): ReactElement {
+function OperationPage(): ReactElement {
+  const router = useRouter();
+  const { operationHash, operationName } = router.query;
+
+  if (!operationHash || typeof operationHash !== 'string') {
+    throw new Error('Invalid operation hash');
+  }
+
+  if (!operationName || typeof operationName !== 'string') {
+    throw new Error('Invalid operation name');
+  }
+
   return (
     <>
-      <MetaTitle title="Operations" />
-      <TargetOperationsPageContent />
+      <MetaTitle title={`Operation ${operationName}`} />
+      <TargetOperationPageContent operationHash={operationHash} operationName={operationName} />
     </>
   );
 }
 
 export const getServerSideProps = withSessionProtection();
 
-export default authenticated(OperationsPage);
+export default authenticated(OperationPage);
