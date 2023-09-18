@@ -26,6 +26,7 @@ import type {
   GraphQLUnionTypeMapper,
   SchemaCompareError,
   SchemaCompareResult,
+  SchemaCoordinateUsageTypeMapper,
   WithGraphQLParentInfo,
   WithSchemaCoordinatesUsage,
 } from '../../shared/mappers';
@@ -69,18 +70,23 @@ async function usage(
         }>
       >,
   _: unknown,
-) {
+): Promise<SchemaCoordinateUsageTypeMapper> {
   const coordinate =
     'parent' in source ? `${source.parent.coordinate}.${source.entity.name}` : source.entity.name;
   const usage = (await source.usage)[coordinate];
 
-  return usage
+  return usage && usage.total > 0
     ? {
         total: usage.total,
-        isUsed: usage.total > 0,
+        isUsed: true,
         get usedByClients() {
           return usage.usedByClients;
         },
+        period: usage.period,
+        organization: usage.organization,
+        project: usage.project,
+        target: usage.target,
+        coordinate: coordinate,
       }
     : {
         total: 0,
@@ -1074,6 +1080,27 @@ export const resolvers: SchemaModule.Resolvers = {
       });
     },
   },
+  SchemaCoordinateUsage: {
+    async topOperations(source, { limit }, { injector }) {
+      if (!source.isUsed) {
+        return [];
+      }
+      const operations = await injector.get(OperationsManager).getTopOperationForCoordinate({
+        organizationId: source.organization,
+        projectId: source.project,
+        targetId: source.target,
+        coordinate: source.coordinate,
+        period: source.period,
+        limit,
+      });
+
+      return operations.map(op => ({
+        name: op.operationName,
+        hash: op.operationHash,
+        count: op.count,
+      }));
+    },
+  },
   SchemaExplorer: {
     async type(source, { name }, { injector }) {
       const entity = source.schema.getType(name);
@@ -1757,16 +1784,32 @@ function withUsedByClients<
 >(
   input: Record<string, T>,
   deps: {
-    selector: TargetSelector;
     operationsManager: OperationsManager;
+    selector: TargetSelector;
     period: DateRange;
     typename: string;
   },
-): Record<string, T & { usedByClients: PromiseOrValue<Array<string> | null> }> {
+): Record<
+  string,
+  T & {
+    usedByClients: PromiseOrValue<Array<string> | null>;
+    period: DateRange;
+    organization: string;
+    project: string;
+    target: string;
+    typename: string;
+  }
+> {
   return Object.fromEntries(
     Object.entries(input).map(([schemaCoordinate, record]) => [
       schemaCoordinate,
       {
+        selector: deps.selector,
+        period: deps.period,
+        typename: deps.typename,
+        organization: deps.selector.organization,
+        project: deps.selector.project,
+        target: deps.selector.target,
         ...record,
         get usedByClients() {
           if (record.isUsed === false) {

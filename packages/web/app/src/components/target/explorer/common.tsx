@@ -5,7 +5,7 @@ import { PulseIcon, UsersIcon } from '@/components/v2/icon';
 import { Link } from '@/components/v2/link';
 import { Markdown } from '@/components/v2/markdown';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { formatNumber, useRouteSelector } from '@/lib/hooks';
+import { formatNumber, toDecimal, useRouteSelector } from '@/lib/hooks';
 import { ChatBubbleIcon } from '@radix-ui/react-icons';
 import * as P from '@radix-ui/react-popover';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
@@ -52,12 +52,20 @@ const SchemaExplorerUsageStats_UsageFragment = graphql(`
     total
     isUsed
     usedByClients
+    topOperations(limit: 5) {
+      count
+      name
+      hash
+    }
   }
 `);
 
 export function SchemaExplorerUsageStats(props: {
   usage: FragmentType<typeof SchemaExplorerUsageStats_UsageFragment>;
   totalRequests: number;
+  organizationCleanId: string;
+  projectCleanId: string;
+  targetCleanId: string;
 }) {
   const usage = useFragment(SchemaExplorerUsageStats_UsageFragment, props.usage);
   const percentage = props.totalRequests ? (usage.total / props.totalRequests) * 100 : 0;
@@ -70,26 +78,77 @@ export function SchemaExplorerUsageStats(props: {
             {formatNumber(usage.total)}
           </div>
           <div
-            title={`${percentage.toFixed(2)}% of all requests`}
-            className="relative mt-1 w-full overflow-hidden rounded bg-orange-500/20"
+            title={`${toDecimal(percentage)}% of all requests`}
+            className="relative mt-1 w-full overflow-hidden rounded z-0 bg-orange-500/20"
             style={{ width: 50, height: 5 }}
           >
-            <div className="h-full bg-orange-500" style={{ width: `${percentage}%` }} />
+            <div className="h-full bg-orange-500 z-0" style={{ width: `${percentage}%` }} />
           </div>
         </div>
         <Tooltip
           content={
-            <>
+            <div className="z-10">
               <div className="font-bold mb-1 text-lg">Field Usage</div>
               {usage.isUsed === false ? (
                 <div>This field is currently not in use.</div>
               ) : (
-                <ul>
-                  <li>This field has been queried in {usage.total} requests.</li>
-                  <li>{percentage.toFixed(2)}% of all requests use this field.</li>
-                </ul>
+                <div>
+                  <ul>
+                    <li>
+                      This field has been queried in <strong>{formatNumber(usage.total)}</strong>{' '}
+                      requests.
+                    </li>
+                    <li>
+                      <strong>{toDecimal(percentage)}%</strong> of all requests use this field.
+                    </li>
+                  </ul>
+
+                  {Array.isArray(usage.topOperations) ? (
+                    <>
+                      <table className="mt-4 table-auto">
+                        <thead>
+                          <tr>
+                            <th className="text-left p-2 pl-0">Top 5 Operations</th>
+                            <th className="text-center p-2">Reqs</th>
+                            <th className="text-center p-2">Of total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {usage.topOperations.map(op => (
+                            <tr key={op.hash}>
+                              <td className="text-left px-2 pl-0">
+                                <Link
+                                  className="text-orange-500 hover:underline hover:underline-offset-2 hover:text-orange-500"
+                                  href={{
+                                    pathname:
+                                      '/[organizationId]/[projectId]/[targetId]/operations/[operationName]/[operationHash]',
+                                    query: {
+                                      organizationId: props.organizationCleanId,
+                                      projectId: props.projectCleanId,
+                                      targetId: props.targetCleanId,
+                                      operationName: `${op.hash.substring(0, 4)}_${op.name}`,
+                                      operationHash: op.hash,
+                                    },
+                                  }}
+                                >
+                                  {op.hash.substring(0, 4)}_{op.name}
+                                </Link>
+                              </td>
+                              <td className="font-bold text-center px-2">
+                                {formatNumber(op.count)}
+                              </td>
+                              <td className="font-bold text-center px-2">
+                                {toDecimal((op.count / usage.total) * 100)}%
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </>
+                  ) : null}
+                </div>
               )}
-            </>
+            </div>
           }
         >
           <div className="text-xl cursor-help">
@@ -187,6 +246,9 @@ export function GraphQLTypeCard(props: {
   totalRequests?: number;
   usage?: FragmentType<typeof SchemaExplorerUsageStats_UsageFragment>;
   supergraphMetadata?: FragmentType<typeof GraphQLTypeCard_SupergraphMetadataFragment> | null;
+  targetCleanId: string;
+  projectCleanId: string;
+  organizationCleanId: string;
   children: ReactNode;
 }): ReactElement {
   const supergraphMetadata = useFragment(
@@ -214,7 +276,13 @@ export function GraphQLTypeCard(props: {
           </div>
         ) : null}
         {props.usage && typeof props.totalRequests !== 'undefined' ? (
-          <SchemaExplorerUsageStats totalRequests={props.totalRequests} usage={props.usage} />
+          <SchemaExplorerUsageStats
+            totalRequests={props.totalRequests}
+            usage={props.usage}
+            organizationCleanId={props.organizationCleanId}
+            projectCleanId={props.projectCleanId}
+            targetCleanId={props.targetCleanId}
+          />
         ) : null}
         {supergraphMetadata ? (
           <SupergraphMetadataList supergraphMetadata={supergraphMetadata} />
@@ -310,6 +378,9 @@ export function GraphQLFields(props: {
   fields: Array<FragmentType<typeof GraphQLFields_FieldFragment>>;
   totalRequests: number;
   collapsed?: boolean;
+  targetCleanId: string;
+  projectCleanId: string;
+  organizationCleanId: string;
 }) {
   const { totalRequests } = props;
   const [fields, collapsed, expand] = useCollapsibleList(
@@ -335,7 +406,13 @@ export function GraphQLFields(props: {
                   <SupergraphMetadataList supergraphMetadata={field.supergraphMetadata} />
                 </div>
               ) : null}
-              <SchemaExplorerUsageStats totalRequests={totalRequests} usage={field.usage} />
+              <SchemaExplorerUsageStats
+                totalRequests={totalRequests}
+                usage={field.usage}
+                targetCleanId={props.targetCleanId}
+                projectCleanId={props.projectCleanId}
+                organizationCleanId={props.organizationCleanId}
+              />
             </div>
           </GraphQLTypeCardListItem>
         );
@@ -356,6 +433,9 @@ export function GraphQLFields(props: {
 export function GraphQLInputFields(props: {
   fields: FragmentType<typeof GraphQLInputFields_InputFieldFragment>[];
   totalRequests: number;
+  targetCleanId: string;
+  projectCleanId: string;
+  organizationCleanId: string;
 }): ReactElement {
   const fields = useFragment(GraphQLInputFields_InputFieldFragment, props.fields);
   return (
@@ -368,7 +448,13 @@ export function GraphQLInputFields(props: {
               <span className="mr-1">:</span>
               <GraphQLTypeAsLink type={field.type} />
             </div>
-            <SchemaExplorerUsageStats totalRequests={props.totalRequests} usage={field.usage} />
+            <SchemaExplorerUsageStats
+              totalRequests={props.totalRequests}
+              usage={field.usage}
+              targetCleanId={props.targetCleanId}
+              projectCleanId={props.projectCleanId}
+              organizationCleanId={props.organizationCleanId}
+            />
           </GraphQLTypeCardListItem>
         );
       })}

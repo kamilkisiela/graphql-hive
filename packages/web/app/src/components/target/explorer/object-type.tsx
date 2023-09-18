@@ -22,6 +22,9 @@ export function GraphQLObjectTypeComponent(props: {
   type: FragmentType<typeof GraphQLObjectTypeComponent_TypeFragment>;
   totalRequests: number;
   collapsed?: boolean;
+  organizationCleanId: string;
+  projectCleanId: string;
+  targetCleanId: string;
 }) {
   const ttype = useFragment(GraphQLObjectTypeComponent_TypeFragment, props.type);
   return (
@@ -31,11 +34,17 @@ export function GraphQLObjectTypeComponent(props: {
       description={ttype.description}
       implements={ttype.interfaces}
       supergraphMetadata={ttype.supergraphMetadata}
+      targetCleanId={props.targetCleanId}
+      projectCleanId={props.projectCleanId}
+      organizationCleanId={props.organizationCleanId}
     >
       <GraphQLFields
         fields={ttype.fields}
         totalRequests={props.totalRequests}
         collapsed={props.collapsed}
+        targetCleanId={props.targetCleanId}
+        projectCleanId={props.projectCleanId}
+        organizationCleanId={props.organizationCleanId}
       />
     </GraphQLTypeCard>
   );

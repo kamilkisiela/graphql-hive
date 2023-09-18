@@ -30,6 +30,9 @@ export const GraphQLEnumTypeComponent_TypeFragment = graphql(`
 export function GraphQLEnumTypeComponent(props: {
   type: FragmentType<typeof GraphQLEnumTypeComponent_TypeFragment>;
   totalRequests: number;
+  organizationCleanId: string;
+  projectCleanId: string;
+  targetCleanId: string;
 }) {
   const ttype = useFragment(GraphQLEnumTypeComponent_TypeFragment, props.type);
   return (
@@ -38,6 +41,9 @@ export function GraphQLEnumTypeComponent(props: {
       kind="enum"
       description={ttype.description}
       supergraphMetadata={ttype.supergraphMetadata}
+      targetCleanId={props.targetCleanId}
+      projectCleanId={props.projectCleanId}
+      organizationCleanId={props.organizationCleanId}
     >
       <div className="flex flex-col">
         {ttype.values.map((value, i) => (
@@ -46,7 +52,13 @@ export function GraphQLEnumTypeComponent(props: {
             {value.supergraphMetadata ? (
               <SupergraphMetadataList supergraphMetadata={value.supergraphMetadata} />
             ) : null}
-            <SchemaExplorerUsageStats totalRequests={props.totalRequests} usage={value.usage} />
+            <SchemaExplorerUsageStats
+              totalRequests={props.totalRequests}
+              usage={value.usage}
+              targetCleanId={props.targetCleanId}
+              projectCleanId={props.projectCleanId}
+              organizationCleanId={props.organizationCleanId}
+            />
           </GraphQLTypeCardListItem>
         ))}
       </div>

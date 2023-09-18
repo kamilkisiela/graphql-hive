@@ -35,21 +35,72 @@ const TypeRenderFragment = graphql(`
 function TypeRenderer(props: {
   type: FragmentType<typeof TypeRenderFragment>;
   totalRequests: number;
+  organizationCleanId: string;
+  projectCleanId: string;
+  targetCleanId: string;
 }) {
   const ttype = useFragment(TypeRenderFragment, props.type);
   switch (ttype.__typename) {
     case 'GraphQLObjectType':
-      return <GraphQLObjectTypeComponent type={ttype} totalRequests={props.totalRequests} />;
+      return (
+        <GraphQLObjectTypeComponent
+          type={ttype}
+          totalRequests={props.totalRequests}
+          targetCleanId={props.targetCleanId}
+          projectCleanId={props.projectCleanId}
+          organizationCleanId={props.organizationCleanId}
+        />
+      );
     case 'GraphQLInterfaceType':
-      return <GraphQLInterfaceTypeComponent type={ttype} totalRequests={props.totalRequests} />;
+      return (
+        <GraphQLInterfaceTypeComponent
+          type={ttype}
+          totalRequests={props.totalRequests}
+          targetCleanId={props.targetCleanId}
+          projectCleanId={props.projectCleanId}
+          organizationCleanId={props.organizationCleanId}
+        />
+      );
     case 'GraphQLUnionType':
-      return <GraphQLUnionTypeComponent type={ttype} totalRequests={props.totalRequests} />;
+      return (
+        <GraphQLUnionTypeComponent
+          type={ttype}
+          totalRequests={props.totalRequests}
+          targetCleanId={props.targetCleanId}
+          projectCleanId={props.projectCleanId}
+          organizationCleanId={props.organizationCleanId}
+        />
+      );
     case 'GraphQLEnumType':
-      return <GraphQLEnumTypeComponent type={ttype} totalRequests={props.totalRequests} />;
+      return (
+        <GraphQLEnumTypeComponent
+          type={ttype}
+          totalRequests={props.totalRequests}
+          targetCleanId={props.targetCleanId}
+          projectCleanId={props.projectCleanId}
+          organizationCleanId={props.organizationCleanId}
+        />
+      );
     case 'GraphQLInputObjectType':
-      return <GraphQLInputObjectTypeComponent type={ttype} totalRequests={props.totalRequests} />;
+      return (
+        <GraphQLInputObjectTypeComponent
+          type={ttype}
+          totalRequests={props.totalRequests}
+          targetCleanId={props.targetCleanId}
+          projectCleanId={props.projectCleanId}
+          organizationCleanId={props.organizationCleanId}
+        />
+      );
     case 'GraphQLScalarType':
-      return <GraphQLScalarTypeComponent type={ttype} totalRequests={props.totalRequests} />;
+      return (
+        <GraphQLScalarTypeComponent
+          type={ttype}
+          totalRequests={props.totalRequests}
+          targetCleanId={props.targetCleanId}
+          projectCleanId={props.projectCleanId}
+          organizationCleanId={props.organizationCleanId}
+        />
+      );
     default:
       return <div>Unknown type: {(ttype as any).__typename}</div>;
   }
@@ -165,7 +216,13 @@ function TypeExplorerPageContent({ typename }: { typename: string }) {
         ) : null}
       </div>
       {query.fetching ? null : latestSchemaVersion && type ? (
-        <TypeRenderer totalRequests={query.data?.operationsStats.totalRequests ?? 0} type={type} />
+        <TypeRenderer
+          totalRequests={query.data?.operationsStats.totalRequests ?? 0}
+          type={type}
+          organizationCleanId={router.organizationId}
+          projectCleanId={router.projectId}
+          targetCleanId={router.targetId}
+        />
       ) : type ? (
         noSchemaVersion
       ) : (

@@ -725,6 +725,84 @@ export class OperationsManager {
     return Array.from(clientNamesCoordinateMap.get(args.schemaCoordinate) ?? []);
   }
 
+  private topOperationForTypeDataLoaderCache = new Map<
+    string,
+    DataLoader<
+      string,
+      Array<{
+        operationName: string;
+        operationHash: string;
+        count: number;
+      }>
+    >
+  >();
+
+  private getTopOperationForTypeLoader(args: { target: string; period: DateRange; limit: number }) {
+    // Stores a DataLoader per target, date range and limit
+    // A many type names can share the same DataLoader as long as they share the same target, date range and limit.
+    const cacheKey = [args.target, args.limit, args.period.from, args.period.to].join('__');
+    let loader = this.topOperationForTypeDataLoaderCache.get(cacheKey);
+
+    if (loader == null) {
+      loader = new DataLoader<
+        string,
+        Array<{
+          operationName: string;
+          operationHash: string;
+          count: number;
+        }>
+      >(async coordinates => {
+        const typeNames = coordinates
+          .map(coordinate => coordinate.split('.')[0])
+          .filter(
+            // Remove duplicates
+            (value, index, self) => self.indexOf(value) === index,
+          );
+        try {
+          const result = await this.reader.getTopOperationsForTypes({
+            targetId: args.target,
+            period: args.period,
+            limit: args.limit,
+            typeNames,
+          });
+
+          return coordinates.map(coordinate => {
+            return result.get(coordinate) ?? [];
+          });
+        } catch (error) {
+          return coordinates.map(() => error as Error);
+        }
+      });
+      this.topOperationForTypeDataLoaderCache.set(cacheKey, loader);
+    }
+
+    return loader;
+  }
+
+  async getTopOperationForCoordinate(args: {
+    targetId: string;
+    projectId: string;
+    organizationId: string;
+    period: DateRange;
+    limit: number;
+    coordinate: string;
+  }) {
+    await this.authManager.ensureTargetAccess({
+      organization: args.organizationId,
+      project: args.projectId,
+      target: args.targetId,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    const loader = this.getTopOperationForTypeLoader({
+      target: args.targetId,
+      period: args.period,
+      limit: args.limit,
+    });
+
+    return Array.from((await loader.load(args.coordinate)) ?? []);
+  }
+
   async hasOperationsForOrganization(selector: OrganizationSelector): Promise<boolean> {
     this.logger.info(
       'Checking existence of collected operations (organization=%s)',

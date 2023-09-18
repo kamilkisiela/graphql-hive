@@ -871,6 +871,81 @@ export class OperationsReader {
     });
   }
 
+  @sentry('OperationsReader.getTopOperationsPerCoordinate')
+  async getTopOperationsForTypes(args: {
+    targetId: string;
+    period: DateRange;
+    limit: number;
+    typeNames: readonly string[];
+  }): Promise<
+    Map<
+      string,
+      Array<{
+        operationName: string;
+        operationHash: string;
+        count: number;
+      }>
+    >
+  > {
+    const ORs = args.typeNames.map(
+      typeName =>
+        sql`( cd.coordinate = ${typeName} OR (cd.coordinate LIKE ${
+          typeName + '.%'
+        } AND cd.coordinate NOT LIKE ${typeName + '.%.%'}) )`,
+    );
+
+    const result = await this.clickHouse.query<{
+      total: string;
+      hash: string;
+      name: string;
+      coordinate: string;
+    }>({
+      queryId: 'get_top_operations_for_types',
+      query: sql`
+        SELECT sum(cd.total) as total, cd.hash as hash, ocd.name as name, cd.coordinate as coordinate
+        FROM coordinates_daily as cd
+        LEFT JOIN operation_collection_details as ocd ON (ocd.hash = cd.hash AND ocd.target = ${
+          args.targetId
+        })
+        ${this.createFilter({
+          target: args.targetId,
+          period: args.period,
+          extra: [sql`(${sql.join(ORs, ' OR ')})`],
+          namespace: 'cd',
+        })}
+        GROUP BY cd.hash, ocd.name, cd.coordinate
+        ORDER by total DESC
+        LIMIT ${sql.raw(String(args.limit))} by cd.coordinate
+      `,
+      timeout: 15_000,
+    });
+
+    const coordinateToTopOperations = new Map<
+      string,
+      Array<{
+        operationName: string;
+        operationHash: string;
+        count: number;
+      }>
+    >();
+    for (const row of result.data) {
+      const existing = coordinateToTopOperations.get(row.coordinate);
+      const op = {
+        operationName: row.name,
+        operationHash: row.hash,
+        count: ensureNumber(row.total),
+      };
+
+      if (existing) {
+        existing.push(op);
+      } else {
+        coordinateToTopOperations.set(row.coordinate, [op]);
+      }
+    }
+
+    return coordinateToTopOperations;
+  }
+
   @sentry('OperationsReader.getClientNamesPerCoordinateOfType')
   async getClientNamesPerCoordinateOfType(args: {
     targetId: string;

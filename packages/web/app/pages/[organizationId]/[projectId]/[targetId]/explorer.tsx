@@ -33,6 +33,9 @@ const ExplorerPage_SchemaExplorerFragment = graphql(`
 function SchemaView(props: {
   explorer: FragmentType<typeof ExplorerPage_SchemaExplorerFragment>;
   totalRequests: number;
+  organizationCleanId: string;
+  projectCleanId: string;
+  targetCleanId: string;
 }) {
   const { query, mutation, subscription } = useFragment(
     ExplorerPage_SchemaExplorerFragment,
@@ -43,13 +46,34 @@ function SchemaView(props: {
   return (
     <div className="flex flex-col gap-4">
       {query ? (
-        <GraphQLObjectTypeComponent type={query} totalRequests={totalRequests} collapsed />
+        <GraphQLObjectTypeComponent
+          type={query}
+          totalRequests={totalRequests}
+          collapsed
+          targetCleanId={props.targetCleanId}
+          projectCleanId={props.projectCleanId}
+          organizationCleanId={props.organizationCleanId}
+        />
       ) : null}
       {mutation ? (
-        <GraphQLObjectTypeComponent type={mutation} totalRequests={totalRequests} collapsed />
+        <GraphQLObjectTypeComponent
+          type={mutation}
+          totalRequests={totalRequests}
+          collapsed
+          targetCleanId={props.targetCleanId}
+          projectCleanId={props.projectCleanId}
+          organizationCleanId={props.organizationCleanId}
+        />
       ) : null}
       {subscription ? (
-        <GraphQLObjectTypeComponent type={subscription} totalRequests={totalRequests} collapsed />
+        <GraphQLObjectTypeComponent
+          type={subscription}
+          totalRequests={totalRequests}
+          collapsed
+          targetCleanId={props.targetCleanId}
+          projectCleanId={props.projectCleanId}
+          organizationCleanId={props.organizationCleanId}
+        />
       ) : null}
     </div>
   );
@@ -164,6 +188,9 @@ function ExplorerPageContent() {
         <SchemaView
           totalRequests={query.data?.operationsStats.totalRequests ?? 0}
           explorer={explorer}
+          organizationCleanId={router.organizationId}
+          projectCleanId={router.projectId}
+          targetCleanId={router.targetId}
         />
       ) : (
         noSchemaVersion

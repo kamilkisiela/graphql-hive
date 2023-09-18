@@ -69,4 +69,4 @@ jobs:
             --maxDepth=20 \
             --maxAliasCount=20 \
             --maxDirectiveCount=20 \
-            --maxTokenCount=850
+            --maxTokenCount=1000
