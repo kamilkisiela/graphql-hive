@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@graphiql/react": "0.18.0-alpha.0",
-    "@graphiql/toolkit": "0.8.4",
+    "@graphiql/toolkit": "0.9.1",
     "@graphql-tools/mock": "9.0.0",
     "@headlessui/react": "1.7.17",
     "@hookform/resolvers": "3.3.1",
