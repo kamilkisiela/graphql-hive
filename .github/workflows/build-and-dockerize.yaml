@@ -81,7 +81,7 @@ jobs:
 
       - name: configure eqemu
         if: ${{ inputs.dockerize }}
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: 'linux/arm64,linux/amd64'
 
