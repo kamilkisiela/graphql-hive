@@ -54,7 +54,7 @@
     "@graphql-tools/utils": "10.0.3",
     "@graphql-typed-document-node/core": "3.2.0",
     "@oclif/core": "^2.8.5",
-    "@oclif/plugin-help": "5.2.10",
+    "@oclif/plugin-help": "5.2.19",
     "@oclif/plugin-update": "3.2.3",
     "@whatwg-node/fetch": "0.9.9",
     "colors": "1.4.0",
