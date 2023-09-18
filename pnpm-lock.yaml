@@ -143,8 +143,8 @@ importers:
         specifier: 8.0.3
         version: 8.0.3
       jest-snapshot-serializer-raw:
-        specifier: 1.2.0
-        version: 1.2.0
+        specifier: 2.0.0
+        version: 2.0.0
       lint-staged:
         specifier: 13.2.3
         version: 13.2.3
@@ -21510,9 +21510,9 @@ packages:
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     dev: true
 
-  /jest-snapshot-serializer-raw@1.2.0:
-    resolution: {integrity: sha512-Cnp2u7GkaXBVOOelhU94x6Kb/10WJjQtgKDvqynnYGNGQlKBj06x8QZmRkL8XWWVLQ5DKA2fT5rY9kRd512JcA==}
-    engines: {node: '>= 4'}
+  /jest-snapshot-serializer-raw@2.0.0:
+    resolution: {integrity: sha512-E/gWFBAltOPQVAvafH/zYkob3G/TqL/DFG3fHurinwLcFRkz6kASjuihyJJ6zoizlLUNaiOdS3v5ZflTvifpBA==}
+    engines: {node: '>=16'}
     dev: true
 
   /jest-util@29.4.3:
