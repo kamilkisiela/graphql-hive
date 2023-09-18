@@ -12,7 +12,7 @@ jobs:
 
       - name: Get changed files
         id: website-files
-        uses: tj-actions/changed-files@v36
+        uses: tj-actions/changed-files@v39
         with:
           files: |
             packages/web/docs/**
