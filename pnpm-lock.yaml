@@ -1682,8 +1682,8 @@ importers:
         specifier: 1.10.6
         version: 1.10.6(react@18.2.0)
       wonka:
-        specifier: 6.3.2
-        version: 6.3.2
+        specifier: 6.3.4
+        version: 6.3.4
       yup:
         specifier: 1.2.0
         version: 1.2.0
@@ -13190,7 +13190,7 @@ packages:
     resolution: {integrity: sha512-Vs3nOSAnYftqOCg034Ostp/uSqWlQg5ryLIzcOrm8+O43s4M+Ew4GQAuemIH7ZDB8dek6h61zzWI3ujd8FH3NA==}
     dependencies:
       '@0no-co/graphql.web': 1.0.1(graphql@16.6.0)
-      wonka: 6.3.2
+      wonka: 6.3.4
     transitivePeerDependencies:
       - graphql
     dev: false
@@ -13200,7 +13200,7 @@ packages:
     dependencies:
       '@0no-co/graphql.web': 1.0.1(graphql@16.6.0)
       '@urql/core': 4.0.10(graphql@16.6.0)
-      wonka: 6.3.2
+      wonka: 6.3.4
     transitivePeerDependencies:
       - graphql
     dev: false
@@ -13209,7 +13209,7 @@ packages:
     resolution: {integrity: sha512-EG0835VoNC4a1Tjv58z0V01/jX1L3+TEEEglI8rTMfE0KUdGKpqel6vqz2W6L52RdGiZgh0cY+wgfy/xAZT2ug==}
     dependencies:
       '@urql/core': 4.0.10(graphql@16.6.0)
-      wonka: 6.3.2
+      wonka: 6.3.4
     transitivePeerDependencies:
       - graphql
     dev: false
@@ -30370,7 +30370,7 @@ packages:
     dependencies:
       '@urql/core': 4.0.10(graphql@16.6.0)
       react: 18.2.0
-      wonka: 6.3.2
+      wonka: 6.3.4
     transitivePeerDependencies:
       - graphql
     dev: false
@@ -31134,8 +31134,8 @@ packages:
     dependencies:
       string-width: 4.2.3
 
-  /wonka@6.3.2:
-    resolution: {integrity: sha512-2xXbQ1LnwNS7egVm1HPhW2FyKrekolzhpM3mCwXdQr55gO+tAiY76rhb32OL9kKsW8taj++iP7C6hxlVzbnvrw==}
+  /wonka@6.3.4:
+    resolution: {integrity: sha512-CjpbqNtBGNAeyNS/9W6q3kSkKE52+FjIj7AkFlLr11s/VWGUu6a2CdYSdGxocIhIVjaW/zchesBQUKPVU69Cqg==}
     dev: false
 
   /word-wrap@1.2.3:
