@@ -87,7 +87,7 @@ jobs:
 
       - name: configure docker buildx
         if: ${{ inputs.dockerize }}
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: login to docker registry
         if: ${{ inputs.dockerize }}
