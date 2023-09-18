@@ -15,7 +15,7 @@
     "@graphql-tools/stitch": "9.0.0",
     "@graphql-tools/stitching-directives": "3.0.0",
     "@hive/service-common": "workspace:*",
-    "@sentry/node": "7.59.3",
+    "@sentry/node": "7.69.0",
     "@trpc/server": "10.31.0",
     "@types/async-retry": "1.4.5",
     "@types/ioredis-mock": "8.2.2",
@@ -25,7 +25,7 @@
     "got": "12.6.1",
     "graphql": "16.6.0",
     "ioredis": "5.3.2",
-    "ioredis-mock": "8.8.1",
+    "ioredis-mock": "8.8.3",
     "p-timeout": "6.1.2",
     "pino-pretty": "10.1.0",
     "zod": "3.21.4"

@@ -6,7 +6,7 @@ networks:
 
 services:
   db:
-    image: postgres:14.8-alpine
+    image: postgres:14.9-alpine
     environment:
       POSTGRES_DB: '${POSTGRES_DB}'
       POSTGRES_USER: '${POSTGRES_USER}'
@@ -23,7 +23,7 @@ services:
       - ./.hive/postgres:/var/lib/postgresql/data
 
   clickhouse:
-    image: clickhouse/clickhouse-server:23.5-alpine
+    image: clickhouse/clickhouse-server:23.8-alpine
     healthcheck:
       test: ['CMD', 'wget', '--spider', '-q', 'localhost:8123/ping']
       interval: 5s
@@ -39,7 +39,7 @@ services:
       - ./.hive/clickhouse/db:/var/lib/clickhouse
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.4.0
+    image: confluentinc/cp-zookeeper:7.5.0
     hostname: zookeeper
     networks:
       - 'stack'
@@ -54,7 +54,7 @@ services:
       - ./.hive/zookeeper/db:/var/lib/zookeeper/data
 
   broker:
-    image: confluentinc/cp-kafka:7.4.0
+    image: confluentinc/cp-kafka:7.5.0
     hostname: broker
     depends_on:
       zookeeper:
@@ -96,7 +96,7 @@ services:
       - ./.hive/broker/db:/var/lib/kafka/data
 
   redis:
-    image: bitnami/redis:7.0.11
+    image: bitnami/redis:7.2.1
     networks:
       - 'stack'
     healthcheck:
@@ -159,7 +159,7 @@ services:
       myminio/artifacts; exit 0"
 
   s3_reverse_proxy:
-    image: caddy:2.6.4-alpine
+    image: caddy:2.7.4-alpine
     depends_on:
       s3:
         condition: service_healthy

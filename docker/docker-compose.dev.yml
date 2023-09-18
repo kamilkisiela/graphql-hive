@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   db:
-    image: postgres:14.8-alpine
+    image: postgres:14.9-alpine
     networks:
       - 'stack'
     healthcheck:
@@ -20,7 +20,7 @@ services:
       - '5432:5432'
 
   redis:
-    image: docker.io/bitnami/redis:7.0.11
+    image: docker.io/bitnami/redis:7.2.1
     networks:
       - 'stack'
     healthcheck:
@@ -69,7 +69,7 @@ services:
       ls myminio/artifacts >/dev/null 2>&1 || /usr/bin/mc mb myminio/artifacts; exit 0"
 
   clickhouse:
-    image: clickhouse/clickhouse-server:23.5-alpine
+    image: clickhouse/clickhouse-server:23.8-alpine
     environment:
       CLICKHOUSE_USER: test
       CLICKHOUSE_PASSWORD: test

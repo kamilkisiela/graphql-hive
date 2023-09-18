@@ -10,13 +10,13 @@
     "@trpc/server": "10.31.0"
   },
   "devDependencies": {
-    "@sentry/node": "7.59.3",
-    "@sentry/types": "7.59.3",
-    "@sentry/utils": "7.59.3",
+    "@sentry/node": "7.69.0",
+    "@sentry/types": "7.69.0",
+    "@sentry/utils": "7.69.0",
     "@whatwg-node/fetch": "0.9.9",
     "fastify": "3.29.5",
-    "fastify-cors": "6.0.2",
-    "fastify-plugin": "3.0.1",
+    "fastify-cors": "6.0.3",
+    "fastify-plugin": "4.5.1",
     "p-retry": "6.0.0",
     "prom-client": "14.2.0",
     "zod": "3.21.4"

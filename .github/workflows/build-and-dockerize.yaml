@@ -41,7 +41,7 @@ jobs:
       pull-requests: write
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
@@ -91,7 +91,7 @@ jobs:
 
       - name: login to docker registry
         if: ${{ inputs.dockerize }}
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ${{ inputs.registry }}
           username: ${{ github.actor }}
@@ -128,7 +128,7 @@ jobs:
         timeout-minutes: 360
         id: docker-bake
         if: ${{ inputs.dockerize }}
-        uses: docker/bake-action@v3
+        uses: docker/bake-action@v4
         env:
           DOCKER_REGISTRY: ${{ inputs.registry }}/${{ inputs.imageName }}/
           COMMIT_SHA: ${{ inputs.imageTag }}

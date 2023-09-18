@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@graphql-hive/core": "0.2.3",
-    "@graphql-inspector/core": "4.2.2",
+    "@graphql-inspector/core": "5.0.1",
     "@graphql-tools/code-file-loader": "~8.0.0",
     "@graphql-tools/graphql-file-loader": "~8.0.0",
     "@graphql-tools/json-file-loader": "~8.0.0",
@@ -55,7 +55,7 @@
     "@graphql-typed-document-node/core": "3.2.0",
     "@oclif/core": "^2.8.5",
     "@oclif/plugin-help": "5.2.10",
-    "@oclif/plugin-update": "3.1.19",
+    "@oclif/plugin-update": "3.2.3",
     "@whatwg-node/fetch": "0.9.9",
     "colors": "1.4.0",
     "env-ci": "7.3.0",
