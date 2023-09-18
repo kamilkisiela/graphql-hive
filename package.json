@@ -55,7 +55,7 @@
     "@changesets/cli": "2.26.2",
     "@graphql-codegen/add": "5.0.0",
     "@graphql-codegen/cli": "4.0.1",
-    "@graphql-codegen/client-preset": "4.0.1",
+    "@graphql-codegen/client-preset": "4.1.0",
     "@graphql-codegen/graphql-modules-preset": "4.0.1",
     "@graphql-codegen/typed-document-node": "5.0.1",
     "@graphql-codegen/typescript": "4.0.1",
