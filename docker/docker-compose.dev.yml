@@ -69,7 +69,7 @@ services:
       ls myminio/artifacts >/dev/null 2>&1 || /usr/bin/mc mb myminio/artifacts; exit 0"
 
   clickhouse:
-    image: clickhouse/clickhouse-server:23.5-alpine
+    image: clickhouse/clickhouse-server:23.8-alpine
     environment:
       CLICKHOUSE_USER: test
       CLICKHOUSE_PASSWORD: test
