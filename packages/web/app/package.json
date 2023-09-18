@@ -54,7 +54,7 @@
     "clsx": "1.2.1",
     "cookies": "0.8.0",
     "date-fns": "2.30.0",
-    "dompurify": "3.0.3",
+    "dompurify": "3.0.5",
     "echarts": "5.4.2",
     "echarts-for-react": "3.0.2",
     "formik": "2.2.9",
