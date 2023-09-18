@@ -1115,8 +1115,8 @@ importers:
         specifier: 6.0.3
         version: 6.0.3
       fastify-plugin:
-        specifier: 3.0.1
-        version: 3.0.1
+        specifier: 4.5.1
+        version: 4.5.1
       p-retry:
         specifier: 6.0.0
         version: 6.0.0
@@ -18669,6 +18669,10 @@ packages:
 
   /fastify-plugin@3.0.1:
     resolution: {integrity: sha512-qKcDXmuZadJqdTm6vlCqioEbyewF60b/0LOFCcYN1B6BIZGlYJumWWOYs70SFYLDAH4YqdE1cxH/RKMG7rFxgA==}
+    dev: true
+
+  /fastify-plugin@4.5.1:
+    resolution: {integrity: sha512-stRHYGeuqpEZTL1Ef0Ovr2ltazUT9g844X5z/zEBFLG8RYlpDiOCIG+ATvYEp+/zmc7sN29mcIMp8gvYplYPIQ==}
     dev: true
 
   /fastify@3.29.5:
