@@ -58,7 +58,7 @@ jobs:
 
       - name: get cpu count for vitest
         id: cpu-cores
-        uses: SimenB/github-actions-cpu-cores@v1
+        uses: SimenB/github-actions-cpu-cores@v2
 
       - name: run containers
         timeout-minutes: 8
