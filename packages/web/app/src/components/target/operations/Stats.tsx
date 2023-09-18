@@ -5,6 +5,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { Section } from '@/components/common';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CHART_PRIMARY_COLOR } from '@/constants';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { DateRangeInput } from '@/graphql';
@@ -23,7 +24,14 @@ import { OperationsFallback } from './Fallback';
 import { createEmptySeries, resolutionToMilliseconds } from './utils';
 
 const Stats_GeneralOperationsStatsQuery = graphql(`
-  query Stats_GeneralOperationsStats($selector: OperationsStatsSelectorInput!, $resolution: Int!) {
+  query Stats_GeneralOperationsStats(
+    $selector: OperationsStatsSelectorInput!
+    $allOperationsSelector: OperationsStatsSelectorInput!
+    $resolution: Int!
+  ) {
+    allOperations: operationsStats(selector: $allOperationsSelector) {
+      totalRequests
+    }
     operationsStats(selector: $selector) {
       ... on OperationsStats {
         totalRequests
@@ -65,10 +73,49 @@ function UniqueOperationsStats({ operations = 0 }: { operations?: number }): Rea
   const value = useFormattedNumber(operations);
 
   return (
-    <div className={classes.root}>
-      <h2 className={classes.value}>{value}</h2>
-      <p className={classes.title}>Unique Operations</p>
-    </div>
+    <TooltipProvider>
+      <div className={classes.root}>
+        <Tooltip>
+          <TooltipTrigger>
+            <h2 className={classes.value}>{value}</h2>
+            <p className={classes.title}>Unique Operations</p>
+          </TooltipTrigger>
+          <TooltipContent>
+            Count of unique operations that have been requested, taking into account applied
+            filters.
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    </TooltipProvider>
+  );
+}
+
+function OperationRelativeFrequency({
+  allOperationRequests,
+  operationRequests,
+}: {
+  allOperationRequests: number;
+  operationRequests: number;
+}): ReactElement {
+  const rate = allOperationRequests
+    ? `${toDecimal((operationRequests * 100) / allOperationRequests)}%`
+    : '-';
+
+  return (
+    <TooltipProvider>
+      <div className={classes.root}>
+        <Tooltip>
+          <TooltipTrigger>
+            <h2 className={classes.value}>{rate}</h2>
+            <p className={classes.title}>Total traffic ratio</p>
+          </TooltipTrigger>
+          <TooltipContent>
+            The proportion of traffic accounted for by this operation, taking into account applied
+            filters, in relation to the total target traffic.
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    </TooltipProvider>
   );
 }
 
@@ -709,7 +756,7 @@ function LatencyOverTimeStats({
   return (
     <div className="rounded-md bg-gray-900/50 p-5 border border-gray-800">
       <Section.Title>Latency over time</Section.Title>
-      <Section.Subtitle>Timeline of latency of GraphQL Operations</Section.Subtitle>
+      <Section.Subtitle>Timeline of latency of GraphQL requests</Section.Subtitle>
       <AutoSizer disableHeight>
         {size => (
           <ReactECharts
@@ -806,7 +853,7 @@ function RpmOverTimeStats({
   return (
     <div className="rounded-md bg-gray-900/50 p-5 border border-gray-800">
       <Section.Title>RPM over time</Section.Title>
-      <Section.Subtitle>Timeline of GraphQL requests and failures</Section.Subtitle>
+      <Section.Subtitle>Requests per minute</Section.Subtitle>
       <AutoSizer disableHeight>
         {size => (
           <ReactECharts
@@ -886,6 +933,7 @@ export function OperationsStats({
   operationsFilter,
   clientNamesFilter,
   resolution,
+  mode,
 }: {
   organization: string;
   project: string;
@@ -897,6 +945,7 @@ export function OperationsStats({
   resolution: number;
   operationsFilter: string[];
   clientNamesFilter: Array<string>;
+  mode: 'operation-page' | 'operation-list';
 }): ReactElement {
   const [query, refetchQuery] = useQuery({
     query: Stats_GeneralOperationsStatsQuery,
@@ -908,6 +957,12 @@ export function OperationsStats({
         period,
         operations: operationsFilter,
         clientNames: clientNamesFilter,
+      },
+      allOperationsSelector: {
+        organization,
+        project,
+        target,
+        period,
       },
       resolution,
     },
@@ -923,6 +978,7 @@ export function OperationsStats({
   const isError = !!query.error;
 
   const operationsStats = query.data?.operationsStats;
+  const allOperationsStats = query.data?.allOperations;
 
   return (
     <section className="text-gray-600 dark:text-gray-400 space-y-12 transition-opacity ease-in-out duration-700">
@@ -930,7 +986,14 @@ export function OperationsStats({
         <div className="grid gap-y-4 grid-cols-4 rounded-md p-5 border border-gray-800 bg-gray-900/50">
           <RequestsStats requests={operationsStats?.totalRequests} />
           <RPM requests={operationsStats?.totalRequests} period={period} />
-          <UniqueOperationsStats operations={operationsStats?.totalOperations} />
+          {mode === 'operation-list' ? (
+            <UniqueOperationsStats operations={operationsStats?.totalOperations} />
+          ) : (
+            <OperationRelativeFrequency
+              allOperationRequests={allOperationsStats?.totalRequests ?? 0}
+              operationRequests={operationsStats?.totalRequests ?? 0}
+            />
+          )}
           <SuccessRateStats
             requests={operationsStats?.totalRequests}
             totalFailures={operationsStats?.totalFailures}

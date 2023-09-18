@@ -1,26 +1,14 @@
 import { ReactElement, SetStateAction, useCallback, useMemo, useState } from 'react';
+import Link from 'next/link';
 import clsx from 'clsx';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { Scale, Section } from '@/components/common';
-import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
-import {
-  Button,
-  Drawer,
-  Input,
-  Sortable,
-  Table,
-  TBody,
-  Td,
-  Th,
-  THead,
-  Tooltip,
-  Tr,
-} from '@/components/v2';
+import { Button, Input, Sortable, Table, TBody, Td, Th, THead, Tooltip, Tr } from '@/components/v2';
 import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { DateRangeInput } from '@/graphql';
-import { useDecimal, useFormattedDuration, useFormattedNumber, useToggle } from '@/lib/hooks';
+import { useDecimal, useFormattedDuration, useFormattedNumber } from '@/lib/hooks';
 import { ChevronUpIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import {
   createTable,
@@ -47,57 +35,19 @@ interface Operation {
   hash: string;
 }
 
-const GraphQLOperationBody_GetOperationBodyQuery = graphql(`
-  query GraphQLOperationBody_GetOperationBodyQuery($selector: OperationBodyByHashInput!) {
-    operationBodyByHash(selector: $selector)
-  }
-`);
-
-function GraphQLOperationBody({
-  hash,
-  organization,
-  project,
-  target,
-}: {
-  hash: string;
-  organization: string;
-  project: string;
-  target: string;
-}) {
-  const [result] = useQuery({
-    query: GraphQLOperationBody_GetOperationBodyQuery,
-    variables: { selector: { hash, organization, project, target } },
-  });
-
-  const { data, fetching, error } = result;
-
-  if (fetching) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Oh no... {error.message}</div>;
-  }
-
-  if (data?.operationBodyByHash) {
-    return <GraphQLHighlight className="pt-6" code={data.operationBodyByHash} />;
-  }
-
-  return null;
-}
-
 function OperationRow({
   operation,
   organization,
   project,
   target,
+  selectedPeriod,
 }: {
   operation: Operation;
   organization: string;
   project: string;
   target: string;
+  selectedPeriod: string;
 }): ReactElement {
-  const [isOpen, toggle] = useToggle();
   const count = useFormattedNumber(operation.requests);
   const percentage = useDecimal(operation.percentage);
   const failureRate = useDecimal(operation.failureRate);
@@ -110,9 +60,25 @@ function OperationRow({
       <Tr>
         <Td className="font-medium truncate">
           <div className="flex gap-2 items-center">
-            <Button variant="link" onClick={toggle}>
-              {operation.name}
-            </Button>
+            <Link
+              href={{
+                pathname:
+                  '/[organizationId]/[projectId]/[targetId]/operations/[operationName]/[operationHash]',
+                query: {
+                  organizationId: organization,
+                  projectId: project,
+                  targetId: target,
+                  operationName: operation.name,
+                  operationHash: operation.hash,
+                  period: selectedPeriod,
+                },
+              }}
+              passHref
+            >
+              <Button variant="link" as="a">
+                {operation.name}
+              </Button>
+            </Link>
             {operation.name === 'anonymous' && (
               <Tooltip.Provider delayDuration={200}>
                 <Tooltip content="Anonymous operation detected. Naming your operations is a recommended practice">
@@ -135,17 +101,6 @@ function OperationRow({
           <Scale value={operation.percentage} size={10} max={100} className="justify-end" />
         </Td>
       </Tr>
-      <Drawer open={isOpen} onOpenChange={toggle} width="60%">
-        <Drawer.Title>
-          {operation.kind} {operation.name}
-        </Drawer.Title>
-        <GraphQLOperationBody
-          hash={operation.hash}
-          organization={organization}
-          project={project}
-          target={target}
-        />
-      </Drawer>
     </>
   );
 }
@@ -193,6 +148,7 @@ function OperationsTable({
   organization,
   project,
   target,
+  selectedPeriod,
 }: {
   operations: Operation[];
   pagination: PaginationState;
@@ -206,6 +162,7 @@ function OperationsTable({
   clients: readonly { name: string }[] | null;
   clientFilter: string | null;
   setClientFilter: (filter: string) => void;
+  selectedPeriod: string;
 }): ReactElement {
   const tableInstance = useTableInstance(table, {
     columns,
@@ -274,6 +231,7 @@ function OperationsTable({
                     organization={organization}
                     project={project}
                     target={target}
+                    selectedPeriod={selectedPeriod}
                   />
                 ),
             )}
@@ -356,6 +314,7 @@ function OperationsTableContainer({
   clientFilter,
   setClientFilter,
   className,
+  selectedPeriod,
   ...props
 }: {
   operationStats: FragmentType<typeof OperationsTableContainer_OperationsStatsFragment> | null;
@@ -363,6 +322,7 @@ function OperationsTableContainer({
   organization: string;
   project: string;
   target: string;
+  selectedPeriod: string;
   clientFilter: string | null;
   setClientFilter: (client: string) => void;
   className?: string;
@@ -436,6 +396,7 @@ function OperationsTableContainer({
       clients={operationStats?.clients.nodes ?? null}
       clientFilter={clientFilter}
       setClientFilter={setClientFilter}
+      selectedPeriod={selectedPeriod}
     />
   );
 }
@@ -466,6 +427,7 @@ export function OperationsList({
   period,
   operationsFilter = [],
   clientNamesFilter = [],
+  selectedPeriod,
 }: {
   className?: string;
   organization: string;
@@ -474,6 +436,7 @@ export function OperationsList({
   period: DateRangeInput;
   operationsFilter: readonly string[];
   clientNamesFilter: string[];
+  selectedPeriod: string;
 }): ReactElement {
   const [clientFilter, setClientFilter] = useState<string | null>(null);
   const [query, refetch] = useQuery({
@@ -505,6 +468,7 @@ export function OperationsList({
         organization={organization}
         project={project}
         target={target}
+        selectedPeriod={selectedPeriod}
       />
     </OperationsFallback>
   );
