@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'packages/libraries/router/**'
+      - 'docker/router.dockerfile'
       - 'scripts/compress/**'
       - 'configs/cargo/Cargo.lock'
       - 'Cargo.lock'
