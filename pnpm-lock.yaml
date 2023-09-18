@@ -1825,8 +1825,8 @@ importers:
         specifier: 18.2.15
         version: 18.2.15
       next-sitemap:
-        specifier: 4.1.8
-        version: 4.1.8(next@13.4.11)
+        specifier: 4.2.3
+        version: 4.2.3(next@13.4.11)
       postcss:
         specifier: 8.4.26
         version: 8.4.26
@@ -24197,8 +24197,8 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /next-sitemap@4.1.8(next@13.4.11):
-    resolution: {integrity: sha512-XAXpBHX4o89JfMgvrm0zimlZwpu2iBPXHpimJMUrqOZSc4C2oB1Lv89mxuVON9IE8HOezaM+w4GjJxcYCuGPTQ==}
+  /next-sitemap@4.2.3(next@13.4.11):
+    resolution: {integrity: sha512-vjdCxeDuWDzldhCnyFCQipw5bfpl4HmZA7uoo3GAaYGjGgfL4Cxb1CiztPuWGmS+auYs7/8OekRS8C2cjdAsjQ==}
     engines: {node: '>=14.18'}
     hasBin: true
     peerDependencies:
