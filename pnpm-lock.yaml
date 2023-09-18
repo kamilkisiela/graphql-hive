@@ -1631,8 +1631,8 @@ importers:
         specifier: 7.46.1
         version: 7.46.1(react@18.2.0)
       react-icons:
-        specifier: 4.9.0
-        version: 4.9.0(react@18.2.0)
+        specifier: 4.11.0
+        version: 4.11.0(react@18.2.0)
       react-select:
         specifier: 5.7.3
         version: 5.7.3(@babel/core@7.22.8)(@types/react@18.2.15)(react-dom@18.2.0)(react@18.2.0)
@@ -1812,8 +1812,8 @@ importers:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
       react-icons:
-        specifier: 4.9.0
-        version: 4.9.0(react@18.2.0)
+        specifier: 4.11.0
+        version: 4.11.0(react@18.2.0)
       tailwind-merge:
         specifier: 1.14.0
         version: 1.14.0
@@ -26395,12 +26395,6 @@ packages:
       is-reference: 3.0.0
     dev: false
 
-  /pg-cloudflare@1.1.0:
-    resolution: {integrity: sha512-tGM8/s6frwuAIyRcJ6nWcIvd3+3NmUKIs6OjviIm1HPPFEt5MzQDOTBQyhPWg/m0kCl95M6gA1JaIXtS8KovOA==}
-    requiresBuild: true
-    dev: true
-    optional: true
-
   /pg-cloudflare@1.1.1:
     resolution: {integrity: sha512-xWPagP/4B6BgFO+EKz3JONXv3YDgvkbVrGw2mTo3D6tVDQRh1e7cqVGvyR3BE+eQgAvx1XhW/iEASj4/jCWl3Q==}
     requiresBuild: true
@@ -26545,7 +26539,7 @@ packages:
       pg-types: 2.2.0
       pgpass: 1.0.5
     optionalDependencies:
-      pg-cloudflare: 1.1.0
+      pg-cloudflare: 1.1.1
     dev: true
 
   /pg@8.11.3:
@@ -27847,8 +27841,8 @@ packages:
       react: 18.2.0
     dev: false
 
-  /react-icons@4.9.0(react@18.2.0):
-    resolution: {integrity: sha512-ijUnFr//ycebOqujtqtV9PFS7JjhWg0QU6ykURVHuL4cbofvRCf3f6GMn9+fBktEFQOIVZnuAYLZdiyadRQRFg==}
+  /react-icons@4.11.0(react@18.2.0):
+    resolution: {integrity: sha512-V+4khzYcE5EBk/BvcuYRq6V/osf11ODUM2J8hg2FDSswRrGvqiYUYPRy4OdrWaQOBj4NcpJfmHZLNaD+VH0TyA==}
     peerDependencies:
       react: '*'
     dependencies:
