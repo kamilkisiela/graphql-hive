@@ -256,7 +256,7 @@ function Feature(props: {
                   {highlights.map((highlight, i) => (
                     <div key={i} className={cn(activeHighlight === i ? 'block' : 'hidden')}>
                       <div className="relative sm:px-6 lg:hidden">
-                        <p className="relative mx-auto max-w-2xl text-base sm:text-center">
+                        <p className="relative mx-auto max-w-2xl text-black text-base sm:text-center">
                           {highlight.description}
                         </p>
                       </div>
@@ -392,7 +392,7 @@ export function IndexPage(): ReactElement {
               <div className="absolute opacity-[0.15] w-[60vw] h-[255px] -right-[200px] -top-[200px] blur-3xl bg-gradient-to-b from-gray-300 to-gray-50" />
             </div>
             <div className="py-24">
-              <h2 className="text-3xl font-semibold leading-normal tracking-tight text-center mb-12 text-black">
+              <h2 className="base:mr-1 ml-1 text-3xl font-semibold leading-normal tracking-tight text-center mb-12 text-black">
                 Perfect fit for your GraphQL Gateway
               </h2>
               <Highlights
