@@ -31,7 +31,7 @@ RUN touch ./src/main.rs
 RUN cargo build --release
 
 # Runtime
-FROM debian:bullseye-slim as runtime
+FROM debian:latest as runtime
 
 RUN apt-get update
 RUN apt-get -y install ca-certificates
