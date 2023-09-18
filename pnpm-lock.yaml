@@ -1667,8 +1667,8 @@ importers:
         specifier: 0.6.0
         version: 0.6.0
       tailwind-merge:
-        specifier: 1.13.2
-        version: 1.13.2
+        specifier: 1.14.0
+        version: 1.14.0
       tslib:
         specifier: 2.5.3
         version: 2.5.3
@@ -29319,10 +29319,6 @@ packages:
 
   /tabbable@6.2.0:
     resolution: {integrity: sha512-Cat63mxsVJlzYvN51JmVXIgNoUokrIaT2zLclCXjRd8boZ0004U4KCs/sToJ75C6sdlByWxpYnb5Boif1VSFew==}
-    dev: false
-
-  /tailwind-merge@1.13.2:
-    resolution: {integrity: sha512-R2/nULkdg1VR/EL4RXg4dEohdoxNUJGLMnWIQnPKL+O9Twu7Cn3Rxi4dlXkDzZrEGtR+G+psSXFouWlpTyLhCQ==}
     dev: false
 
   /tailwind-merge@1.14.0:
