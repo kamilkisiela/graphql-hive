@@ -20,6 +20,9 @@ export const GraphQLInputObjectTypeComponent_TypeFragment = graphql(`
 export function GraphQLInputObjectTypeComponent(props: {
   type: FragmentType<typeof GraphQLInputObjectTypeComponent_TypeFragment>;
   totalRequests: number;
+  organizationCleanId: string;
+  projectCleanId: string;
+  targetCleanId: string;
 }) {
   const ttype = useFragment(GraphQLInputObjectTypeComponent_TypeFragment, props.type);
   return (
@@ -30,8 +33,17 @@ export function GraphQLInputObjectTypeComponent(props: {
       totalRequests={props.totalRequests}
       usage={ttype.usage}
       supergraphMetadata={ttype.supergraphMetadata}
+      targetCleanId={props.targetCleanId}
+      projectCleanId={props.projectCleanId}
+      organizationCleanId={props.organizationCleanId}
     >
-      <GraphQLInputFields fields={ttype.fields} totalRequests={props.totalRequests} />
+      <GraphQLInputFields
+        fields={ttype.fields}
+        totalRequests={props.totalRequests}
+        targetCleanId={props.targetCleanId}
+        projectCleanId={props.projectCleanId}
+        organizationCleanId={props.organizationCleanId}
+      />
     </GraphQLTypeCard>
   );
 }

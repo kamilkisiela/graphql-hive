@@ -502,6 +502,16 @@ export default gql`
     Is null if used by none clients.
     """
     usedByClients: [String!]
+    topOperations(limit: Int!): [SchemaCoordinateUsageOperation!]!
+  }
+
+  type SchemaCoordinateUsageOperation {
+    name: String!
+    hash: String!
+    """
+    The number of times the operation was called.
+    """
+    count: Float!
   }
 
   type SupergraphMetadata {

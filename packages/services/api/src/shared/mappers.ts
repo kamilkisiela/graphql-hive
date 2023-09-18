@@ -58,6 +58,11 @@ export type WithSchemaCoordinatesUsage<T> = T & {
     [coordinate: string]: {
       total: number;
       usedByClients: PromiseOrValue<Array<string> | null>;
+      period: DateRange;
+      organization: string;
+      project: string;
+      target: string;
+      typename: string;
     };
   }>;
 };
@@ -230,11 +235,22 @@ export type AdminStats = {
   };
 };
 
-export type SchemaCoordinateUsageTypeMapper = {
-  isUsed: boolean;
-  total: number;
-  usedByClients: PromiseOrValue<Array<string> | null>;
-};
+export type SchemaCoordinateUsageTypeMapper =
+  | {
+      isUsed: true;
+      total: number;
+      usedByClients: PromiseOrValue<Array<string> | null>;
+      period: DateRange;
+      organization: string;
+      project: string;
+      target: string;
+      coordinate: string;
+    }
+  | {
+      isUsed: false;
+      total: number;
+      usedByClients: null;
+    };
 
 export type DocumentCollectionConnection = ReadonlyArray<DocumentCollection>;
 export type DocumentCollectionOperationsConnection = ReadonlyArray<DocumentCollectionOperation>;

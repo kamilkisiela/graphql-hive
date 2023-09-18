@@ -21,6 +21,9 @@ export const GraphQLInterfaceTypeComponent_TypeFragment = graphql(`
 export function GraphQLInterfaceTypeComponent(props: {
   type: FragmentType<typeof GraphQLInterfaceTypeComponent_TypeFragment>;
   totalRequests: number;
+  organizationCleanId: string;
+  projectCleanId: string;
+  targetCleanId: string;
 }) {
   const ttype = useFragment(GraphQLInterfaceTypeComponent_TypeFragment, props.type);
   return (
@@ -30,8 +33,17 @@ export function GraphQLInterfaceTypeComponent(props: {
       description={ttype.description}
       implements={ttype.interfaces}
       supergraphMetadata={ttype.supergraphMetadata}
+      targetCleanId={props.targetCleanId}
+      projectCleanId={props.projectCleanId}
+      organizationCleanId={props.organizationCleanId}
     >
-      <GraphQLFields fields={ttype.fields} totalRequests={props.totalRequests} />
+      <GraphQLFields
+        fields={ttype.fields}
+        totalRequests={props.totalRequests}
+        targetCleanId={props.targetCleanId}
+        projectCleanId={props.projectCleanId}
+        organizationCleanId={props.organizationCleanId}
+      />
     </GraphQLTypeCard>
   );
 }
