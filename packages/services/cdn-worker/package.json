@@ -29,6 +29,6 @@
     "itty-router": "2.6.6",
     "itty-router-extras": "0.4.5",
     "toucan-js": "3.2.3",
-    "zod": "3.21.4"
+    "zod": "3.22.2"
   }
 }

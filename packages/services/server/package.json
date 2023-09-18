@@ -42,7 +42,7 @@
     "prom-client": "14.2.0",
     "reflect-metadata": "0.1.13",
     "tslib": "2.6.2",
-    "zod": "3.21.4"
+    "zod": "3.22.2"
   },
   "buildOptions": {
     "external": [
