@@ -201,10 +201,10 @@ importers:
         version: 3.29.1
       '@pulumi/kubernetesx':
         specifier: 0.1.6
-        version: 0.1.6(@pulumi/kubernetes@3.29.1)(@pulumi/pulumi@3.73.0)
+        version: 0.1.6(@pulumi/kubernetes@3.29.1)(@pulumi/pulumi@3.83.0)
       '@pulumi/pulumi':
-        specifier: 3.73.0
-        version: 3.73.0
+        specifier: 3.83.0
+        version: 3.83.0
       '@pulumi/random':
         specifier: 4.13.4
         version: 4.13.4
@@ -3041,7 +3041,7 @@ packages:
       debug: 4.3.4(supports-color@8.1.1)
       gensync: 1.0.0-beta.2
       json5: 2.2.3
-      semver: 6.3.0
+      semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -3112,7 +3112,7 @@ packages:
       '@babel/helper-validator-option': 7.21.0
       browserslist: 4.21.5
       lru-cache: 5.1.1
-      semver: 6.3.0
+      semver: 6.3.1
     dev: true
 
   /@babel/helper-compilation-targets@7.21.5(@babel/core@7.22.8):
@@ -3126,7 +3126,7 @@ packages:
       '@babel/helper-validator-option': 7.21.0
       browserslist: 4.21.5
       lru-cache: 5.1.1
-      semver: 6.3.0
+      semver: 6.3.1
     dev: true
 
   /@babel/helper-compilation-targets@7.22.15:
@@ -3210,7 +3210,7 @@ packages:
       debug: 4.3.4(supports-color@8.1.1)
       lodash.debounce: 4.0.8
       resolve: 1.22.2
-      semver: 6.3.0
+      semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -3226,7 +3226,7 @@ packages:
       debug: 4.3.4(supports-color@8.1.1)
       lodash.debounce: 4.0.8
       resolve: 1.22.2
-      semver: 6.3.0
+      semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -4933,7 +4933,7 @@ packages:
       babel-plugin-polyfill-corejs2: 0.3.3(@babel/core@7.22.8)
       babel-plugin-polyfill-corejs3: 0.6.0(@babel/core@7.22.8)
       babel-plugin-polyfill-regenerator: 0.4.1(@babel/core@7.22.8)
-      semver: 6.3.0
+      semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -5191,7 +5191,7 @@ packages:
       babel-plugin-polyfill-corejs3: 0.6.0(@babel/core@7.21.5)
       babel-plugin-polyfill-regenerator: 0.4.1(@babel/core@7.21.5)
       core-js-compat: 3.28.0
-      semver: 6.3.0
+      semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -5277,7 +5277,7 @@ packages:
       babel-plugin-polyfill-corejs3: 0.6.0(@babel/core@7.22.8)
       babel-plugin-polyfill-regenerator: 0.4.1(@babel/core@7.22.8)
       core-js-compat: 3.28.0
-      semver: 6.3.0
+      semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -8281,11 +8281,23 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /@grpc/grpc-js@1.3.8:
-    resolution: {integrity: sha512-4qJqqn+CU/nBydz9ePJP+oa8dz0U42Ut/GejlbyaQ1xTkynCc+ndNHHnISlNeHawDsv4MOAyP3mV/EnDNUw2zA==}
+  /@grpc/grpc-js@1.9.3:
+    resolution: {integrity: sha512-b8iWtdrYIeT5fdZdS4Br/6h/kuk0PW5EVBUGk1amSbrpL8DlktJD43CdcCWwRdd6+jgwHhADSbL9CsNnm6EUPA==}
     engines: {node: ^8.13.0 || >=10.10.0}
     dependencies:
+      '@grpc/proto-loader': 0.7.9
       '@types/node': 18.16.19
+    dev: true
+
+  /@grpc/proto-loader@0.7.9:
+    resolution: {integrity: sha512-YJsOehVXzgurc+lLAxYnlSMc1p/Gu6VAvnfx0ATi2nzvr0YZcjhmZDeY8SeAKv1M7zE3aEJH0Xo9mK1iZ8GYoQ==}
+    engines: {node: '>=6'}
+    hasBin: true
+    dependencies:
+      lodash.camelcase: 4.3.0
+      long: 5.2.3
+      protobufjs: 7.2.5
+      yargs: 17.7.2
     dev: true
 
   /@headlessui/react@1.7.17(react-dom@18.2.0)(react@18.2.0):
@@ -8498,7 +8510,7 @@ packages:
     resolution: {integrity: sha512-REc/LQOy17O9jbZnBNm4tLjLJKxOfLaWPIB2CFiAtM1VzwU3FzZQFs0K+XGkuZwWdB+tl2/VHdHv+FqsUrit2w==}
     requiresBuild: true
     dependencies:
-      '@pulumi/pulumi': 3.73.0
+      '@pulumi/pulumi': 3.83.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -10050,7 +10062,7 @@ packages:
     resolution: {integrity: sha512-cwdB70bLeKL/VNIqqOD5fpHQcocVmpHuiHH589eR+QUfbLa4f+M8yA/TTCcxx2AFFctTqO5wgVuC+faL8xZmWQ==}
     requiresBuild: true
     dependencies:
-      '@pulumi/pulumi': 3.73.0
+      '@pulumi/pulumi': 3.83.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -10059,7 +10071,7 @@ packages:
     resolution: {integrity: sha512-0IDCtOHP2eeVM6Ls2a3x2kv9C7RYWHW+ZLf8dBxIEfsl8kz1jI44uaND3/rTdTuy8t1WEfdlezwVCxAqJL2r1Q==}
     requiresBuild: true
     dependencies:
-      '@pulumi/pulumi': 3.73.0
+      '@pulumi/pulumi': 3.83.0
       '@types/glob': 5.0.37
       '@types/node-fetch': 2.6.4
       '@types/tmp': 0.0.33
@@ -10072,24 +10084,25 @@ packages:
       - supports-color
     dev: true
 
-  /@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@3.29.1)(@pulumi/pulumi@3.73.0):
+  /@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@3.29.1)(@pulumi/pulumi@3.83.0):
     resolution: {integrity: sha512-9VL4Yi4b4aLC/obBarJuNkm86kABByUZICYPSTdV396MGZtOc066o2brsB+kWVQcVfkYVXTPrpjIkAwBXXnzGw==}
     peerDependencies:
       '@pulumi/kubernetes': ^3.0.0
       '@pulumi/pulumi': ^3.0.0
     dependencies:
       '@pulumi/kubernetes': 3.29.1
-      '@pulumi/pulumi': 3.73.0
+      '@pulumi/pulumi': 3.83.0
     dev: true
 
-  /@pulumi/pulumi@3.73.0:
-    resolution: {integrity: sha512-Yln/3jeIW3G6VM3zZgF53twPC/Mzfwy4LkDxI5kaWppeB+34TmbCJJeq309dT1IvGWUpN33Sndu/81ouP3cmfg==}
+  /@pulumi/pulumi@3.83.0:
+    resolution: {integrity: sha512-0LrSovjff6dpfcH9ZRmktLYbCETltT2fWW8YwjYjboTIsB3m12TMYzs2oZ6yCiuG+3T3L+hr5mZsH9j01HnNbA==}
     engines: {node: '>=8.13.0 || >=10.10.0'}
     dependencies:
-      '@grpc/grpc-js': 1.3.8
+      '@grpc/grpc-js': 1.9.3
       '@logdna/tail-file': 2.2.0
       '@opentelemetry/api': 1.2.0
       '@opentelemetry/exporter-zipkin': 1.7.0(@opentelemetry/api@1.2.0)
+      '@opentelemetry/instrumentation': 0.32.0(@opentelemetry/api@1.2.0)
       '@opentelemetry/instrumentation-grpc': 0.32.0(@opentelemetry/api@1.2.0)
       '@opentelemetry/resources': 1.7.0(@opentelemetry/api@1.2.0)
       '@opentelemetry/sdk-trace-base': 1.7.0(@opentelemetry/api@1.2.0)
@@ -10102,9 +10115,10 @@ packages:
       js-yaml: 3.14.1
       minimist: 1.2.8
       normalize-package-data: 3.0.3
+      pkg-dir: 7.0.0
       read-package-tree: 5.3.1
       require-from-string: 2.0.2
-      semver: 7.5.3
+      semver: 7.5.4
       source-map-support: 0.5.21
       ts-node: 7.0.1
       typescript: 3.8.3
@@ -10120,7 +10134,7 @@ packages:
   /@pulumi/random@4.13.4:
     resolution: {integrity: sha512-PvmBma+/sFWh4NFXyViXDu01ZNvhoWLVHMIJRCXBjWcyzX6L2NPt5BqsHn/afiCESd5Q4tZqj3KZn6z5WS/2iQ==}
     dependencies:
-      '@pulumi/pulumi': 3.73.0
+      '@pulumi/pulumi': 3.83.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -15298,7 +15312,7 @@ packages:
       '@babel/compat-data': 7.21.7
       '@babel/core': 7.21.5
       '@babel/helper-define-polyfill-provider': 0.3.3(@babel/core@7.21.5)
-      semver: 6.3.0
+      semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -15311,7 +15325,7 @@ packages:
       '@babel/compat-data': 7.21.7
       '@babel/core': 7.22.8
       '@babel/helper-define-polyfill-provider': 0.3.3(@babel/core@7.22.8)
-      semver: 6.3.0
+      semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -17657,6 +17671,7 @@ packages:
 
   /debuglog@1.0.1:
     resolution: {integrity: sha512-syBZ+rnAK3EgMsH2aYEOLUW7mZSY9Gb+0wUMCFsZvcmiz+HigA0LOcq/HoQqVuGG+EKykunc7QG2bzrponfaSw==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     dev: true
 
   /decamelize-keys@1.1.0:
@@ -18651,7 +18666,7 @@ packages:
       minimatch: 3.1.2
       object.values: 1.1.6
       resolve: 1.22.2
-      semver: 6.3.0
+      semver: 6.3.1
       tsconfig-paths: 3.14.1
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
@@ -18693,7 +18708,7 @@ packages:
       minimatch: 3.1.2
       object.entries: 1.1.6
       object.fromentries: 2.0.6
-      semver: 6.3.0
+      semver: 6.3.1
     dev: true
 
   /eslint-plugin-markdown@3.0.0(eslint@8.43.0):
@@ -18782,7 +18797,7 @@ packages:
       object.values: 1.1.6
       prop-types: 15.8.1
       resolve: 2.0.0-next.4
-      semver: 6.3.0
+      semver: 6.3.1
       string.prototype.matchall: 4.0.8
     dev: true
 
@@ -19621,6 +19636,14 @@ packages:
     dependencies:
       locate-path: 6.0.0
       path-exists: 4.0.0
+    dev: true
+
+  /find-up@6.3.0:
+    resolution: {integrity: sha512-v2ZsoEuVHYy8ZIlYqwPe/39Cy+cFDzp4dXPaxNvkEuouymu+2Jbz0PxpKarJHYJTmv2HWT3O382qY8l4jMWthw==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+    dependencies:
+      locate-path: 7.2.0
+      path-exists: 5.0.0
     dev: true
 
   /find-yarn-workspace-root2@1.2.16:
@@ -22176,7 +22199,7 @@ packages:
       '@babel/parser': 7.21.8
       '@istanbuljs/schema': 0.1.3
       istanbul-lib-coverage: 3.2.0
-      semver: 6.3.0
+      semver: 6.3.1
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -22993,9 +23016,20 @@ packages:
       p-locate: 5.0.0
     dev: true
 
+  /locate-path@7.2.0:
+    resolution: {integrity: sha512-gvVijfZvn7R+2qyPX8mAuKcFGDf6Nc61GdvGafQsHL0sBIxfKzA+usWn4GFC/bk+QdwPUD4kWFJLhElipq+0VA==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+    dependencies:
+      p-locate: 6.0.0
+    dev: true
+
   /lodash-es@4.17.21:
     resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
     dev: false
+
+  /lodash.camelcase@4.3.0:
+    resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
+    dev: true
 
   /lodash.clone@4.5.0:
     resolution: {integrity: sha512-GhrVeweiTD6uTmmn5hV/lzgCQhccwReIVRLHp7LT4SopOjqEZ5BbX8b5WWEtAKasjmy8hR7ZPwsYlxRCku5odg==}
@@ -23099,6 +23133,10 @@ packages:
 
   /long@4.0.0:
     resolution: {integrity: sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==}
+
+  /long@5.2.3:
+    resolution: {integrity: sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==}
+    dev: true
 
   /longest-streak@3.0.1:
     resolution: {integrity: sha512-cHlYSUpL2s7Fb3394mYxwTYj8niTaNHUCLr0qdiCXQfSjfuA7CKofpX2uSwEfFDQ0EB7JcnMnm+GjbqqoinYYg==}
@@ -23226,7 +23264,7 @@ packages:
     resolution: {integrity: sha512-g3FeP20LNwhALb/6Cz6Dd4F2ngze0jz7tbzrD2wAV+o9FeNHe4rL+yK2md0J/fiSf1sa1ADhXqi5+oVwOM/eGw==}
     engines: {node: '>=8'}
     dependencies:
-      semver: 6.3.0
+      semver: 6.3.1
     dev: true
 
   /make-error@1.3.6:
@@ -25912,6 +25950,13 @@ packages:
       p-limit: 3.1.0
     dev: true
 
+  /p-locate@6.0.0:
+    resolution: {integrity: sha512-wPrq66Llhl7/4AGC6I+cqxT07LhXvWL08LNXz1fENOw0Ap4sRZZ/gZpTTJ5jpurzzzfS2W/Ge9BY3LgLjCShcw==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+    dependencies:
+      p-limit: 4.0.0
+    dev: true
+
   /p-map@2.1.0:
     resolution: {integrity: sha512-y3b8Kpd8OAN444hxfBbFfj1FY/RjtTd8tzYwhUqNYXx0fXx2iX4maP4Qr6qhIKbQXI02wTLAda4fYUbDagTUFw==}
     engines: {node: '>=6'}
@@ -26247,6 +26292,11 @@ packages:
   /path-exists@4.0.0:
     resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==}
     engines: {node: '>=8'}
+    dev: true
+
+  /path-exists@5.0.0:
+    resolution: {integrity: sha512-RjhtfwJOxzcFmNOi6ltcbcu4Iu+FL3zEj83dk4kAS+fVpTxXLO1b38RvJgT/0QwvV/L3aY9TAnyv0EOqW4GoMQ==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dev: true
 
   /path-is-absolute@1.0.1:
@@ -26688,6 +26738,13 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       find-up: 5.0.0
+    dev: true
+
+  /pkg-dir@7.0.0:
+    resolution: {integrity: sha512-Ie9z/WINcxxLp27BKOCHGde4ITq9UklYKDzVo1nhk5sqGEXU3FpkwP5GM2voTGJkGd9B3Otl+Q4uwSOeSUtOBA==}
+    engines: {node: '>=14.16'}
+    dependencies:
+      find-up: 6.3.0
     dev: true
 
   /pkg-types@1.0.2:
@@ -27475,6 +27532,25 @@ packages:
 
   /proto-list@1.2.4:
     resolution: {integrity: sha512-vtK/94akxsTMhe0/cbfpR+syPuszcuwhqVjJq26CuNDgFGj682oRBXOP5MJpv2r7JtE8MsiepGIqvvOTBwn2vA==}
+    dev: true
+
+  /protobufjs@7.2.5:
+    resolution: {integrity: sha512-gGXRSXvxQ7UiPgfw8gevrfRWcTlSbOFg+p/N+JVJEK5VhueL2miT6qTymqAmjr1Q5WbOCyJbyrk6JfWKwlFn6A==}
+    engines: {node: '>=12.0.0'}
+    requiresBuild: true
+    dependencies:
+      '@protobufjs/aspromise': 1.1.2
+      '@protobufjs/base64': 1.1.2
+      '@protobufjs/codegen': 2.0.4
+      '@protobufjs/eventemitter': 1.1.0
+      '@protobufjs/fetch': 1.1.0
+      '@protobufjs/float': 1.0.2
+      '@protobufjs/inquire': 1.1.0
+      '@protobufjs/path': 1.1.2
+      '@protobufjs/pool': 1.1.0
+      '@protobufjs/utf8': 1.1.0
+      '@types/node': 18.16.19
+      long: 5.2.3
     dev: true
 
   /protocols@2.0.1:
@@ -28888,11 +28964,6 @@ packages:
   /semver@5.7.1:
     resolution: {integrity: sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==}
     hasBin: true
-
-  /semver@6.3.0:
-    resolution: {integrity: sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==}
-    hasBin: true
-    dev: true
 
   /semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
