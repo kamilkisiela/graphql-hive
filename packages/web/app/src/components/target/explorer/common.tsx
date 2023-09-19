@@ -138,7 +138,7 @@ export function SchemaExplorerUsageStats(props: {
                                 {formatNumber(op.count)}
                               </td>
                               <td className="font-bold text-center px-2">
-                                {toDecimal((op.count / usage.total) * 100)}%
+                                {toDecimal((op.count / props.totalRequests) * 100)}%
                               </td>
                             </tr>
                           ))}
