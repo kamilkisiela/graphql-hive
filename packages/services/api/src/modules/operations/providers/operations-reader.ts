@@ -906,7 +906,6 @@ export class OperationsReader {
           SELECT
               sum(cd.total) as total, cd.hash as hash, cd.coordinate as coordinate
           FROM coordinates_daily as cd
-          PREWHERE 
             ${this.createFilter({
               target: args.targetId,
               period: args.period,
