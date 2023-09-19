@@ -5,7 +5,7 @@ import type { Span } from '@sentry/types';
 import { atomic } from '../../../shared/helpers';
 import { HttpClient } from '../../shared/providers/http-client';
 import { Logger } from '../../shared/providers/logger';
-import { sql, SqlStatement, toQueryParams } from './sql';
+import { printWithValues, sql, SqlStatement, toQueryParams } from './sql';
 import type { ClickHouseConfig } from './tokens';
 import { CLICKHOUSE_CONFIG } from './tokens';
 
@@ -76,7 +76,7 @@ export class ClickHouse {
 
     this.logger.debug(
       `Executing ClickHouse Query: %s`,
-      query.sql.replace(/\n/g, ' ').replace(/\s+/g, ' '),
+      printWithValues(query).replace(/\n/g, ' ').replace(/\s+/g, ' '),
     );
 
     const response = await this.httpClient

@@ -871,7 +871,7 @@ export class OperationsReader {
     });
   }
 
-  @sentry('OperationsReader.getTopOperationsPerCoordinate')
+  @sentry('OperationsReader.getTopOperationsForTypes')
   async getTopOperationsForTypes(args: {
     targetId: string;
     period: DateRange;
@@ -902,20 +902,27 @@ export class OperationsReader {
     }>({
       queryId: 'get_top_operations_for_types',
       query: sql`
-        SELECT sum(cd.total) as total, cd.hash as hash, ocd.name as name, cd.coordinate as coordinate
-        FROM coordinates_daily as cd
-        LEFT JOIN operation_collection_details as ocd ON (ocd.hash = cd.hash AND ocd.target = ${
-          args.targetId
-        })
-        ${this.createFilter({
-          target: args.targetId,
-          period: args.period,
-          extra: [sql`(${sql.join(ORs, ' OR ')})`],
-          namespace: 'cd',
-        })}
-        GROUP BY cd.hash, ocd.name, cd.coordinate
-        ORDER by total DESC
-        LIMIT ${sql.raw(String(args.limit))} by cd.coordinate
+        WITH coordinates as (
+          SELECT
+              sum(cd.total) as total, cd.hash as hash, cd.coordinate as coordinate
+          FROM coordinates_daily as cd
+            ${this.createFilter({
+              target: args.targetId,
+              period: args.period,
+              extra: [sql`(${sql.join(ORs, ' OR ')})`],
+              namespace: 'cd',
+            })}
+          GROUP BY cd.hash, cd.coordinate ORDER by total DESC LIMIT ${sql.raw(
+            String(args.limit),
+          )} by cd.coordinate
+        )
+        SELECT total, hash, coordinate, ocd.name
+        FROM coordinates as c LEFT JOIN (
+            SELECT ocd.name, ocd.hash
+            FROM operation_collection_details as ocd
+            WHERE ocd.target = ${args.targetId} AND hash IN (SELECT hash FROM coordinates)
+            LIMIT 1 BY ocd.hash
+        ) as ocd ON ocd.hash = c.hash
       `,
       timeout: 15_000,
     });
