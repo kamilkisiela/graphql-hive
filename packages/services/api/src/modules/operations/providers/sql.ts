@@ -231,6 +231,35 @@ export function toQueryParams(statement: SqlStatement): Record<string, string> {
   return params;
 }
 
+export function printWithValues(statement: SqlStatement): string {
+  const sql = statement.sql;
+  const values = statement.values;
+
+  return sql.replace(/\{p(\d+)[^}]+\}/g, (_, pN) => {
+    // it's 1-indexed
+    const index = parseInt(pN, 10) - 1;
+    const value = values[index];
+
+    if (value === undefined) {
+      throw new Error('SQL tag cannot be bound an undefined value.');
+    }
+
+    return printValue(value);
+  });
+}
+
+function printValue(value: Value): string {
+  if (typeof value === 'string') {
+    return `'${value}'`;
+  }
+
+  if (Array.isArray(value)) {
+    return `[${value.map(v => `'${v}'`).join(', ')}]`;
+  }
+
+  throw new Error('sql: Unexpected value. Expected a string or an array of strings.');
+}
+
 function stringifyValue(value: Value): string {
   if (typeof value === 'string') {
     return value;

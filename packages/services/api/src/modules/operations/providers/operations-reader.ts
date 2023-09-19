@@ -871,7 +871,7 @@ export class OperationsReader {
     });
   }
 
-  @sentry('OperationsReader.getTopOperationsPerCoordinate')
+  @sentry('OperationsReader.getTopOperationsForTypes')
   async getTopOperationsForTypes(args: {
     targetId: string;
     period: DateRange;
