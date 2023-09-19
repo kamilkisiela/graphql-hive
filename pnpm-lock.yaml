@@ -1553,8 +1553,8 @@ importers:
         specifier: 0.9.9
         version: 0.9.9
       class-variance-authority:
-        specifier: 0.6.0
-        version: 0.6.0(typescript@5.2.2)
+        specifier: 0.7.0
+        version: 0.7.0
       clsx:
         specifier: 1.2.1
         version: 1.2.1
@@ -16302,16 +16302,10 @@ packages:
       static-extend: 0.1.2
     dev: false
 
-  /class-variance-authority@0.6.0(typescript@5.2.2):
-    resolution: {integrity: sha512-qdRDgfjx3GRb9fpwpSvn+YaidnT7IUJNe4wt5/SWwM+PmUwJUhQRk/8zAyNro0PmVfmen2635UboTjIBXXxy5A==}
-    peerDependencies:
-      typescript: '>= 4.5.5 < 6'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
+  /class-variance-authority@0.7.0:
+    resolution: {integrity: sha512-jFI8IQw4hczaL4ALINxqLEXQbWcNjoSkloa4IaufXCJr6QawJyw7tuRysRsrE8w2p/4gGaxKIt/hX3qz/IbD1A==}
     dependencies:
-      clsx: 1.2.1
-      typescript: 5.2.2
+      clsx: 2.0.0
     dev: false
 
   /classnames@2.3.2:
@@ -16493,6 +16487,11 @@ packages:
 
   /clsx@1.2.1:
     resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
+    engines: {node: '>=6'}
+    dev: false
+
+  /clsx@2.0.0:
+    resolution: {integrity: sha512-rQ1+kcj+ttHG0MKVGBUXwayCCF1oh39BF5COIpRzuCEv8Mwjv0XucrI2ExNTOn9IlLifGClWQcU9BrZORvtw6Q==}
     engines: {node: '>=6'}
     dev: false
 
