@@ -51,7 +51,7 @@
     "@urql/exchange-persisted": "4.0.1",
     "@whatwg-node/fetch": "0.9.9",
     "class-variance-authority": "0.7.0",
-    "clsx": "1.2.1",
+    "clsx": "2.0.0",
     "cookies": "0.8.0",
     "date-fns": "2.30.0",
     "dompurify": "3.0.5",
