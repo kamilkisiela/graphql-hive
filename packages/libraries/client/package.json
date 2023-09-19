@@ -59,7 +59,7 @@
   "devDependencies": {
     "@apollo/federation": "0.38.1",
     "@apollo/server": "4.9.3",
-    "@apollo/subgraph": "2.5.4",
+    "@apollo/subgraph": "2.5.5",
     "@envelop/types": "4.0.1",
     "@types/async-retry": "1.4.5",
     "graphql-yoga": "4.0.4",
