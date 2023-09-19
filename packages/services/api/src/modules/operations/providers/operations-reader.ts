@@ -904,9 +904,12 @@ export class OperationsReader {
       query: sql`
         SELECT sum(cd.total) as total, cd.hash as hash, ocd.name as name, cd.coordinate as coordinate
         FROM coordinates_daily as cd
-        LEFT JOIN operation_collection_details as ocd ON (ocd.hash = cd.hash AND ocd.target = ${
-          args.targetId
-        })
+        INNER JOIN (
+          SELECT ocd.name, ocd.hash
+          FROM operation_collection_details as ocd
+          WHERE ocd.target = ${args.targetId}
+          LIMIT 1 BY ocd.hash
+        ) as ocd ON ocd.hash = cd.hash
         ${this.createFilter({
           target: args.targetId,
           period: args.period,
