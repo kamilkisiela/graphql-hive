@@ -27,7 +27,7 @@
     "date-fns": "2.30.0",
     "dockerode": "3.3.5",
     "dotenv": "16.3.1",
-    "graphql": "16.6.0",
+    "graphql": "16.8.1",
     "human-id": "4.0.0",
     "ioredis": "5.3.2",
     "slonik": "30.4.4",
