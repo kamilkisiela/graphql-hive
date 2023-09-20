@@ -483,8 +483,8 @@ importers:
         specifier: workspace:*
         version: link:../libraries/core/dist
       '@types/bcryptjs':
-        specifier: 2.4.2
-        version: 2.4.2
+        specifier: 2.4.4
+        version: 2.4.4
       '@types/node':
         specifier: 18.17.17
         version: 18.17.17
@@ -592,8 +592,8 @@ importers:
         specifier: 10.38.3
         version: 10.38.3
       '@types/bcryptjs':
-        specifier: 2.4.2
-        version: 2.4.2
+        specifier: 2.4.4
+        version: 2.4.4
       '@types/ioredis-mock':
         specifier: 8.2.2
         version: 8.2.2
@@ -13375,8 +13375,8 @@ packages:
       '@babel/types': 7.22.19
     dev: true
 
-  /@types/bcryptjs@2.4.2:
-    resolution: {integrity: sha512-LiMQ6EOPob/4yUL66SZzu6Yh77cbzJFYll+ZfaPiPPFswtIlA/Fs1MzdKYA7JApHU49zQTbJGX3PDmCpIdDBRQ==}
+  /@types/bcryptjs@2.4.4:
+    resolution: {integrity: sha512-9wlJI7k5gRyJEC4yrV7DubzNQFTPiykYxUA6lBtsk5NlOfW9oWLJ1HdIA4YtE+6C3i3mTpDQQEosJ2rVZfBWnw==}
     dev: true
 
   /@types/body-parser@1.19.2:
