@@ -23,7 +23,7 @@
     "graphql": "16.6.0",
     "kafkajs": "2.2.4",
     "pino-pretty": "10.2.0",
-    "tiny-lru": "8.0.2",
+    "tiny-lru": "11.1.2",
     "zod": "3.22.2"
   }
 }
