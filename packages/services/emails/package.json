@@ -18,7 +18,7 @@
     "@types/nodemailer": "6.4.10",
     "@types/sendmail": "1.4.4",
     "@whatwg-node/fetch": "0.9.9",
-    "bullmq": "3.15.8",
+    "bullmq": "4.11.4",
     "copyfiles": "2.4.1",
     "dotenv": "16.3.1",
     "ioredis": "5.3.2",
