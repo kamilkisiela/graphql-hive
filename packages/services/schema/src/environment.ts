@@ -39,6 +39,7 @@ const RequestBrokerModel = zod.union([
 
 const TimingsModel = zod.object({
   SCHEMA_CACHE_TTL_MS: NumberFromString().default(30000),
+  SCHEMA_CACHE_SUCCESS_TTL_MS: zod.optional(NumberFromString()),
   SCHEMA_COMPOSITION_TIMEOUT_MS: NumberFromString(25000).default(25000),
   SCHEMA_CACHE_POLL_INTERVAL_MS: NumberFromString(100).default(150),
 });
@@ -157,6 +158,9 @@ export const env = {
       : null,
   timings: {
     cacheTTL: timings.SCHEMA_CACHE_TTL_MS,
+    cacheSuccessTTL:
+      timings.SCHEMA_CACHE_SUCCESS_TTL_MS ||
+      timings.SCHEMA_CACHE_TTL_MS /* Fallback to cacheTTL if not set */,
     cachePollInterval: timings.SCHEMA_CACHE_POLL_INTERVAL_MS,
     schemaCompositionTimeout: timings.SCHEMA_COMPOSITION_TIMEOUT_MS,
   },

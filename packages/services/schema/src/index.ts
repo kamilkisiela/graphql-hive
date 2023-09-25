@@ -111,7 +111,10 @@ async function main() {
           logger: req.log,
           pollIntervalMs: env.timings.cachePollInterval,
           timeoutMs: env.timings.schemaCompositionTimeout,
-          ttlMs: env.timings.cacheTTL,
+          ttlMs: {
+            success: env.timings.cacheSuccessTTL,
+            failure: env.timings.cacheTTL,
+          },
         });
         return { cache, req, decrypt, broker: env.requestBroker };
       },
