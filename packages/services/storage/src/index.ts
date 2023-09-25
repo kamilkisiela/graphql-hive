@@ -206,6 +206,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       validationUrl: project.validation_url,
       gitRepository: project.git_repository,
       legacyRegistryModel: project.legacy_registry_model,
+      useProjectNameInGithubCheck: project.github_check_with_project_name === true,
       externalComposition: {
         enabled: project.external_composition_enabled,
         endpoint: project.external_composition_endpoint,

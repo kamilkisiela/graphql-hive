@@ -263,6 +263,7 @@ export interface Project {
   validationUrl?: string | null;
   gitRepository?: string | null;
   legacyRegistryModel: boolean;
+  useProjectNameInGithubCheck: boolean;
   externalComposition: {
     enabled: boolean;
     endpoint?: string | null;

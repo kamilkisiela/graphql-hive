@@ -158,6 +158,7 @@ export interface projects {
   external_composition_endpoint: string | null;
   external_composition_secret: string | null;
   git_repository: string | null;
+  github_check_with_project_name: boolean;
   id: string;
   legacy_registry_model: boolean;
   name: string;
