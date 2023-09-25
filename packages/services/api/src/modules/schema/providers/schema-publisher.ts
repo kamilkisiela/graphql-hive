@@ -1181,7 +1181,7 @@ export class SchemaPublisher {
         repositoryName,
         output: {
           title,
-          summary,
+          summary: summary.length > 60_000 ? summary.slice(0, 60_000) + '...' : summary,
         },
         detailsUrl:
           (schemaCheckId &&
