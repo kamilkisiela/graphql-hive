@@ -695,17 +695,14 @@ importers:
         specifier: 0.9.13
         version: 0.9.13
       '@whatwg-node/server':
-        specifier: 0.9.14
-        version: 0.9.14
+        specifier: 0.9.10
+        version: 0.9.10
       esbuild:
         specifier: 0.17.19
         version: 0.17.19
       itty-router:
-        specifier: 2.6.6
-        version: 2.6.6
-      itty-router-extras:
-        specifier: 0.4.5
-        version: 0.4.5
+        specifier: 4.0.23
+        version: 4.0.23
       nock:
         specifier: 13.3.3
         version: 13.3.3
@@ -731,8 +728,8 @@ importers:
         specifier: 0.9.13
         version: 0.9.13
       '@whatwg-node/server':
-        specifier: 0.9.14
-        version: 0.9.14
+        specifier: 0.9.10
+        version: 0.9.10
       bcryptjs:
         specifier: 2.4.3
         version: 2.4.3
@@ -830,8 +827,8 @@ importers:
         specifier: 0.9.13
         version: 0.9.13
       '@whatwg-node/server':
-        specifier: 0.9.14
-        version: 0.9.14
+        specifier: 0.9.10
+        version: 0.9.10
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -1058,8 +1055,8 @@ importers:
         specifier: 0.9.13
         version: 0.9.13
       '@whatwg-node/server':
-        specifier: 0.9.14
-        version: 0.9.14
+        specifier: 0.9.10
+        version: 0.9.10
       dotenv:
         specifier: 16.3.1
         version: 16.3.1
@@ -14360,8 +14357,8 @@ packages:
       fast-url-parser: 1.1.3
       tslib: 2.6.2
 
-  /@whatwg-node/server@0.9.14:
-    resolution: {integrity: sha512-I8TT0NoCP+xThLBuGlU6dgq5wpExkphNMo2geZwQW0vAmEPtc3MNMZMIYqg5GyNmpv5Nf7fnxb8tVOIHbDvuDA==}
+  /@whatwg-node/server@0.9.10:
+    resolution: {integrity: sha512-CoFEflKASUL+gCDF21TwRmQ8kUIYcE++09h3D20XuWP+dsjiA4FBBGFNjIafKM5MNqiK6ncX0YBpRqeAwIFlbw==}
     engines: {node: '>=16.0.0'}
     dependencies:
       '@whatwg-node/fetch': 0.9.13
@@ -20587,7 +20584,7 @@ packages:
       '@graphql-yoga/logger': 1.0.0
       '@graphql-yoga/subscription': 4.0.0
       '@whatwg-node/fetch': 0.9.13
-      '@whatwg-node/server': 0.9.14
+      '@whatwg-node/server': 0.9.10
       dset: 3.1.2
       graphql: 16.8.1
       lru-cache: 10.0.0
@@ -22114,6 +22111,10 @@ packages:
 
   /itty-router@2.6.6:
     resolution: {integrity: sha512-hIPHtXGymCX7Lzb2I4G6JgZFE4QEEQwst9GORK7sMYUpJvLfy4yZJr95r04e8DzoAnj6HcxM2m4TbK+juu+18g==}
+    dev: true
+
+  /itty-router@4.0.23:
+    resolution: {integrity: sha512-tP1NI8PVK43vWlBnIPqj47ni5FDSczFviA4wgBznscndo8lEvBA+pO3DD1rNbIQPcZhprr775iUTunyGvQMcBw==}
     dev: true
 
   /jackspeak@2.2.1:
