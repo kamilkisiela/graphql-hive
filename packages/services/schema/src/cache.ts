@@ -8,6 +8,8 @@ function createChecksum<TInput>(input: TInput): string {
   return createHash('sha256').update(JSON.stringify(input)).digest('hex');
 }
 
+type CacheTTLType = 'long' | 'short';
+
 export function createCache(options: {
   redis: Redis;
   logger: Pick<FastifyLoggerInstance, 'debug' | 'warn'>;
@@ -92,11 +94,15 @@ export function createCache(options: {
     } as const;
   }
 
-  async function completeAction<T>(id: string, data: T): Promise<void> {
+  async function completeAction<T>(
+    id: string,
+    data: T,
+    pickCacheType: (data: T) => CacheTTLType,
+  ): Promise<void> {
     logger.debug('Completing action (id=%s)', id);
     await redis.psetex(
       id,
-      ttlMs.success,
+      pickCacheType(data) === 'long' ? ttlMs.success : ttlMs.failure,
       JSON.stringify({
         status: 'completed',
         result: data,
@@ -119,6 +125,7 @@ export function createCache(options: {
   async function runAction<I, O>(
     groupKey: string,
     factory: (input: I) => Promise<O>,
+    pickCacheType: (output: O) => CacheTTLType,
     input: I,
     attempt: number,
   ): Promise<O> {
@@ -166,7 +173,7 @@ export function createCache(options: {
       }
 
       logger.debug('Cache expired, re-running action (id=%s, attempt=%s)', id, ++attempt);
-      return runAction(groupKey, factory, input, attempt);
+      return runAction(groupKey, factory, pickCacheType, input, attempt);
     }
 
     try {
@@ -175,7 +182,7 @@ export function createCache(options: {
         milliseconds: timeoutMs,
         message: `Timeout: took longer than ${timeoutMs}ms to complete`,
       });
-      await completeAction(id, result);
+      await completeAction(id, result, pickCacheType);
       externalCompositionCounter.inc({
         cache: 'miss',
         type: 'success',
@@ -196,8 +203,12 @@ export function createCache(options: {
     isTimeoutError(error: unknown): error is TimeoutError {
       return error instanceof TimeoutError;
     },
-    reuse<I, O>(groupKey: string, factory: (input: I) => Promise<O>): (input: I) => Promise<O> {
-      return async input => runAction(groupKey, factory, input, 1);
+    reuse<I, O>(
+      groupKey: string,
+      factory: (input: I) => Promise<O>,
+      pickCacheType: (output: O) => CacheTTLType = () => 'long',
+    ): (input: I) => Promise<O> {
+      return async input => runAction(groupKey, factory, pickCacheType, input, 1);
     },
   };
 }

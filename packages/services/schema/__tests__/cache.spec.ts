@@ -274,3 +274,63 @@ test('run action again when the action expires', async ({ expect }) => {
   await expect(run1).resolves.toBe('foo');
   await expect(run2).resolves.toBe('foo');
 });
+
+test('decide on cache duration', async ({ expect }) => {
+  const ttlMs = {
+    success: 200,
+    failure: 50,
+  };
+  const cache = createCache({
+    redis: new Redis(),
+    logger: {
+      debug: vi.fn() as any,
+      warn: vi.fn() as any,
+    },
+    prefix: randomString(),
+    pollIntervalMs: 10,
+    timeoutMs: 50,
+    ttlMs,
+  });
+
+  const spy = vi.fn();
+  let calls = 0;
+
+  const run = cache.reuse(
+    randomString(),
+    async () => {
+      spy();
+      calls++;
+      await waitFor(ttlMs.failure / 2);
+
+      if (calls >= 2) {
+        // second time and after
+        return 'bar';
+      }
+
+      return 'foo';
+    },
+    result => (result === 'foo' ? 'long' : 'short'),
+  );
+
+  const run1 = run({});
+  const run2 = run({});
+  await expect(run1).resolves.toBe('foo');
+  await expect(run2).resolves.toBe('foo');
+  expect(spy).toHaveBeenCalledTimes(1);
+
+  // Wait for the cache to expire
+  await waitFor(ttlMs.success + 10);
+
+  // Run it again
+  await expect(run({})).resolves.toBe('bar');
+  expect(spy).toHaveBeenCalledTimes(2);
+  // Run it again, but this time it hits the cache (persisted success with short ttl)
+  await expect(run({})).resolves.toBe('bar');
+  expect(spy).toHaveBeenCalledTimes(2);
+
+  // Wait for the cache to expire
+  await waitFor(ttlMs.failure + 10);
+  // Run it again, but this time it calls the factory function
+  await expect(run({})).resolves.toBe('bar');
+  expect(spy).toHaveBeenCalledTimes(3);
+});
