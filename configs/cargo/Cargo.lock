@@ -168,9 +168,9 @@ dependencies = [
 
 [[package]]
 name = "apollo-router"
-version = "1.30.0"
+version = "1.30.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6e0475e873b5523a01b67ab2c921c6c451dda88d47cb93e25285c79c5cf4f6bc"
+checksum = "f216c8084e980381b902311ea990d3289bab42bd5a98cdf3bc0c4a90262379fc"
 dependencies = [
  "access-json",
  "anyhow",
@@ -222,7 +222,7 @@ dependencies = [
  "lazy_static",
  "libc",
  "linkme",
- "lru 0.11.0",
+ "lru",
  "maplit",
  "mediatype",
  "memchr",
@@ -2094,7 +2094,7 @@ dependencies = [
  "graphql-parser 0.4.0 (git+https://github.com/graphql-rust/graphql-parser.git?rev=8d76425d83c40670570cc325f57c730262f07456)",
  "graphql-tools",
  "http",
- "lru 0.10.0",
+ "lru",
  "md5",
  "rand 0.8.5",
  "reqwest",
@@ -2220,15 +2220,6 @@ name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
-
-[[package]]
-name = "hashbrown"
-version = "0.13.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43a3c133739dddd0d2990f9a4bdf8eb4b21ef50e4851ca85ab661199821d510e"
-dependencies = [
- "ahash",
-]
 
 [[package]]
 name = "hashbrown"
@@ -2848,15 +2839,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "abb12e687cfb44aa40f41fc3978ef76448f9b6038cad6aef4259d3c095a2382e"
 dependencies = [
  "cfg-if",
-]
-
-[[package]]
-name = "lru"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03f1160296536f10c833a82dca22267d5486734230d47bf00bf435885814ba1e"
-dependencies = [
- "hashbrown 0.13.2",
 ]
 
 [[package]]
