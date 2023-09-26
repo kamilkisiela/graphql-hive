@@ -19,7 +19,10 @@ test('catch sync exception', async ({ expect }) => {
     prefix: randomString(),
     pollIntervalMs: 30,
     timeoutMs: 100,
-    ttlMs: 100,
+    ttlMs: {
+      success: 100,
+      failure: 100,
+    },
   });
 
   const run = cache.reuse(randomString(), () => {
@@ -39,7 +42,10 @@ test('catch async exception', async ({ expect }) => {
     prefix: randomString(),
     pollIntervalMs: 30,
     timeoutMs: 100,
-    ttlMs: 100,
+    ttlMs: {
+      success: 100,
+      failure: 100,
+    },
   });
 
   const run = cache.reuse(randomString(), async () => {
@@ -59,7 +65,10 @@ test('share execution', async ({ expect }) => {
     prefix: randomString(),
     pollIntervalMs: 30,
     timeoutMs: 100,
-    ttlMs: 100,
+    ttlMs: {
+      success: 100,
+      failure: 100,
+    },
   });
 
   const spy = vi.fn();
@@ -79,7 +88,10 @@ test('share execution', async ({ expect }) => {
 });
 
 test('cache the result of an action', async ({ expect }) => {
-  const ttlMs = 100;
+  const ttlMs = {
+    success: 200,
+    failure: 100,
+  };
   const cache = createCache({
     redis: new Redis(),
     logger: {
@@ -103,12 +115,12 @@ test('cache the result of an action', async ({ expect }) => {
   await expect(run({})).resolves.toBe('foo');
   expect(spy).toHaveBeenCalledTimes(1);
 
-  await waitFor(ttlMs / 2);
+  await waitFor(ttlMs.success / 2);
 
   await expect(run({})).resolves.toBe('foo');
   expect(spy).toHaveBeenCalledTimes(1);
 
-  await waitFor(ttlMs);
+  await waitFor(ttlMs.success);
   await expect(run({})).resolves.toBe('foo');
   expect(spy).toHaveBeenCalledTimes(2);
 });
@@ -116,7 +128,10 @@ test('cache the result of an action', async ({ expect }) => {
 test('do not purge the cache when an action fails, persist the failure for some time', async ({
   expect,
 }) => {
-  const ttlMs = 50;
+  const ttlMs = {
+    success: 200,
+    failure: 50,
+  };
   const cache = createCache({
     redis: new Redis(),
     logger: {
@@ -135,7 +150,7 @@ test('do not purge the cache when an action fails, persist the failure for some 
   const run = cache.reuse(randomString(), async () => {
     spy();
     calls++;
-    await waitFor(ttlMs / 2);
+    await waitFor(ttlMs.failure / 2);
 
     if (calls >= 2) {
       // Fail the second time and after
@@ -152,7 +167,7 @@ test('do not purge the cache when an action fails, persist the failure for some 
   expect(spy).toHaveBeenCalledTimes(1);
 
   // Wait for the cache to expire
-  await waitFor(ttlMs + 10);
+  await waitFor(ttlMs.success + 10);
 
   // Run it again
   await expect(run({})).rejects.toThrow('test');
@@ -162,7 +177,7 @@ test('do not purge the cache when an action fails, persist the failure for some 
   expect(spy).toHaveBeenCalledTimes(2);
 
   // Wait for the cache to expire
-  await waitFor(ttlMs + 10);
+  await waitFor(ttlMs.failure + 10);
   // Run it again, but this time it calls the factory function
   await expect(run({})).rejects.toThrow('test');
   expect(spy).toHaveBeenCalledTimes(3);
@@ -180,7 +195,10 @@ test('timeout', async ({ expect }) => {
     prefix: randomString(),
     pollIntervalMs: 10,
     timeoutMs,
-    ttlMs,
+    ttlMs: {
+      success: ttlMs,
+      failure: ttlMs,
+    },
   });
 
   const spy = vi.fn();
@@ -217,7 +235,10 @@ test('run action again when the action expires', async ({ expect }) => {
     prefix,
     pollIntervalMs,
     timeoutMs,
-    ttlMs,
+    ttlMs: {
+      success: ttlMs,
+      failure: ttlMs,
+    },
   });
 
   const cacheForRequest2 = createCache({
@@ -229,7 +250,10 @@ test('run action again when the action expires', async ({ expect }) => {
     prefix,
     pollIntervalMs,
     timeoutMs,
-    ttlMs,
+    ttlMs: {
+      success: ttlMs,
+      failure: ttlMs,
+    },
   });
 
   const actionId = randomString();

@@ -2,6 +2,7 @@ import { createHash } from 'crypto';
 import type { Redis } from 'ioredis';
 import pTimeout, { TimeoutError } from 'p-timeout';
 import type { FastifyLoggerInstance } from '@hive/service-common';
+import { externalCompositionCounter } from './metrics';
 
 function createChecksum<TInput>(input: TInput): string {
   return createHash('sha256').update(JSON.stringify(input)).digest('hex');
@@ -25,19 +26,39 @@ export function createCache(options: {
   /**
    * How long to keep the result of an action in Redis
    */
-  ttlMs: number;
+  ttlMs: {
+    /**
+     * How long to keep a successful action in Redis
+     */
+    success: number;
+    /**
+     * How long to keep a failed action in Redis
+     */
+    failure: number;
+  };
 }) {
   const { prefix, redis, logger, pollIntervalMs, timeoutMs } = options;
 
-  if (options.ttlMs < timeoutMs) {
+  if (options.ttlMs.failure < timeoutMs) {
     // Actions will expire before they finish (when timeoutMs is reached)
     logger.warn(
-      'TTL is less than timeout, this will cause issues. (ttlMs=%s, timeoutMs=%s)',
-      options.ttlMs,
+      'TTL (failure) is less than timeout, this will cause issues. (ttlMs=%s, timeoutMs=%s)',
+      options.ttlMs.failure,
       timeoutMs,
     );
 
-    options.ttlMs = timeoutMs;
+    options.ttlMs.failure = timeoutMs;
+  }
+
+  if (options.ttlMs.success < timeoutMs) {
+    // Actions will expire before they finish (when timeoutMs is reached)
+    logger.warn(
+      'TTL (success) is less than timeout, this will cause issues. (ttlMs=%s, timeoutMs=%s)',
+      options.ttlMs.success,
+      timeoutMs,
+    );
+
+    options.ttlMs.success = timeoutMs;
   }
 
   const ttlMs = options.ttlMs;
@@ -59,7 +80,7 @@ export function createCache(options: {
 
     if (inserted) {
       logger.debug('Started action (id=%s)', id);
-      await redis.pexpire(id, ttlMs);
+      await redis.pexpire(id, ttlMs.success);
       return {
         status: 'started',
       } as const;
@@ -75,7 +96,7 @@ export function createCache(options: {
     logger.debug('Completing action (id=%s)', id);
     await redis.psetex(
       id,
-      ttlMs,
+      ttlMs.success,
       JSON.stringify({
         status: 'completed',
         result: data,
@@ -87,7 +108,7 @@ export function createCache(options: {
     logger.debug('Failing action (id=%s, reason=%s)', id, reason);
     await redis.psetex(
       id,
-      ttlMs,
+      ttlMs.failure,
       JSON.stringify({
         status: 'failed',
         error: reason,
@@ -123,12 +144,24 @@ export function createCache(options: {
         if (cached.status === 'failed') {
           logger.debug('Rejecting action from cache (id=%s)', id);
           if (cached.error.startsWith('TimeoutError:')) {
+            externalCompositionCounter.inc({
+              cache: 'hit',
+              type: 'timeout',
+            });
             throw new TimeoutError(cached.error.replace('TimeoutError:', ''));
           }
+          externalCompositionCounter.inc({
+            cache: 'hit',
+            type: 'failure',
+          });
           throw new Error(cached.error);
         }
 
         logger.debug('Resolving action from cache (id=%s)', id);
+        externalCompositionCounter.inc({
+          cache: 'hit',
+          type: 'success',
+        });
         return cached.result;
       }
 
@@ -143,8 +176,16 @@ export function createCache(options: {
         message: `Timeout: took longer than ${timeoutMs}ms to complete`,
       });
       await completeAction(id, result);
+      externalCompositionCounter.inc({
+        cache: 'miss',
+        type: 'success',
+      });
       return result;
     } catch (error) {
+      externalCompositionCounter.inc({
+        cache: 'miss',
+        type: error instanceof TimeoutError ? 'timeout' : 'failure',
+      });
       await failAction(id, String(error));
       throw error;
     }
