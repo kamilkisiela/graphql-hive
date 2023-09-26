@@ -12,7 +12,7 @@
     "@graphql-hive/external-composition": "workspace:*",
     "@whatwg-node/fetch": "0.9.13",
     "@whatwg-node/server": "0.9.14",
-    "graphql": "^16.6.0",
+    "graphql": "16.8.1",
     "lru-cache": "^7.17.0",
     "zod": "3.22.2"
   }

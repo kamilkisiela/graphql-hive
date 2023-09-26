@@ -49,6 +49,7 @@
   },
   "devDependencies": {
     "@types/lodash.sortby": "4.7.7",
+    "graphql": "16.8.1",
     "tslib": "2.6.2"
   },
   "publishConfig": {

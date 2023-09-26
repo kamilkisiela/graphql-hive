@@ -59,7 +59,7 @@
     "@whatwg-node/fetch": "0.9.13",
     "colors": "1.4.0",
     "env-ci": "7.3.0",
-    "graphql": "^16.0.0",
+    "graphql": "^16.8.1",
     "graphql-request": "5.1.0",
     "graphql-tag": "2.12.6",
     "log-symbols": "4.1.0",
@@ -70,6 +70,7 @@
   "devDependencies": {
     "@types/env-ci": "3.1.1",
     "@types/mkdirp": "1.0.2",
+    "graphql": "16.8.1",
     "oclif": "3.17.1",
     "rimraf": "4.4.1",
     "ts-node": "10.9.1"
