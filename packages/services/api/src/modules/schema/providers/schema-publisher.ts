@@ -1173,7 +1173,12 @@ export class SchemaPublisher {
       }
 
       const checkRun = await this.gitHubIntegrationManager.createCheckRun({
-        name: buildGitHubActionCheckName(target.name, serviceName ?? null),
+        name: buildGitHubActionCheckName({
+          projectName: project.name,
+          targetName: target.name,
+          serviceName,
+          includeProjectName: project.useProjectNameInGithubCheck,
+        }),
         conclusion: conclusion === SchemaCheckConclusion.Success ? 'success' : 'failure',
         sha,
         organization: project.orgId,
@@ -1514,8 +1519,19 @@ function writeChanges(type: string, changes: ReadonlyArray<Change>, lines: strin
   }
 }
 
-function buildGitHubActionCheckName(target: string, service: string | null) {
-  return `GraphQL Hive > schema:check > ${target}` + (service ? ` > ${service}` : '');
+function buildGitHubActionCheckName(input: {
+  targetName: string;
+  projectName: string;
+  serviceName: string | null;
+  includeProjectName: boolean;
+}) {
+  const path = [
+    input.includeProjectName ? input.projectName : null,
+    input.targetName,
+    input.serviceName,
+  ].filter((val): val is string => typeof val === 'string');
+
+  return `GraphQL Hive > schema:check > ${path.join(' > ')}`;
 }
 
 function tryPrettifySDL(sdl: string): string {
