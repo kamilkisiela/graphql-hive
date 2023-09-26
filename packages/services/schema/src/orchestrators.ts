@@ -59,6 +59,7 @@ interface CompositionFailure {
     errors: CompositionFailureError[];
     raw?: string;
   };
+  includesNetworkError?: boolean;
 }
 
 const { allStitchingDirectivesTypeDefs, stitchingDirectivesValidator } = stitchingDirectives();
@@ -109,6 +110,7 @@ const EXTERNAL_COMPOSITION_RESULT = z.union([
           ),
         })
         .required(),
+      includesNetworkError: z.boolean().optional(),
     })
     .required(),
 ]);
@@ -263,6 +265,7 @@ async function callExternalService(
               },
             ],
           },
+          includesNetworkError: true,
         } satisfies CompositionFailure;
       }
       if (error.response) {
@@ -284,6 +287,7 @@ async function callExternalService(
                   },
                 ],
               },
+              includesNetworkError: true,
             } satisfies CompositionFailure;
           }
         }
@@ -303,6 +307,7 @@ async function callExternalService(
               },
             ],
           },
+          includesNetworkError: true,
         } satisfies CompositionFailure;
       }
     }
@@ -322,102 +327,113 @@ const createFederation: (
       schemas: ComposeAndValidateInput;
       external: ExternalComposition;
     },
-    CompositionSuccess | CompositionFailure
-  >('federation', async ({ schemas, external }) => {
-    if (external) {
-      logger.debug(
-        'Using external composition service (url=%s, schemas=%s)',
-        external.endpoint,
-        schemas.length,
-      );
-      const body = JSON.stringify(
+    (CompositionSuccess | CompositionFailure) & {
+      includesNetworkError: boolean;
+    }
+  >(
+    'federation',
+    async ({ schemas, external }) => {
+      if (external) {
+        logger.debug(
+          'Using external composition service (url=%s, schemas=%s)',
+          external.endpoint,
+          schemas.length,
+        );
+        const body = JSON.stringify(
+          schemas.map(schema => {
+            return {
+              sdl: print(trimDescriptions(parse(schema.raw))),
+              name: schema.source,
+              url: 'url' in schema && typeof schema.url === 'string' ? schema.url : undefined,
+            };
+          }),
+        );
+        const signature = hash(decrypt(external.encryptedSecret), 'sha256', body);
+        logger.debug(
+          'Calling external composition service (url=%s, broker=%s)',
+          external.endpoint,
+          external.broker ? 'yes' : 'no',
+        );
+
+        const request = {
+          url: external.endpoint,
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'x-hive-signature-256': signature,
+          } as const,
+          body,
+        };
+
+        const parseResult = EXTERNAL_COMPOSITION_RESULT.safeParse(
+          await (external.broker
+            ? callExternalServiceViaBroker(
+                external.broker,
+                {
+                  method: 'POST',
+                  ...request,
+                },
+                logger,
+                cache.timeoutMs,
+                requestId,
+              )
+            : callExternalService(request, logger, cache.timeoutMs)),
+        );
+
+        if (!parseResult.success) {
+          throw new Error(`External composition failure: invalid shape of data`);
+        }
+
+        if (parseResult.data.type === 'success') {
+          return {
+            type: 'success',
+            result: {
+              supergraphSdl: parseResult.data.result.supergraph,
+              raw: parseResult.data.result.sdl,
+            },
+            includesNetworkError: false,
+          };
+        }
+
+        return parseResult.data;
+      }
+
+      logger.debug('Using built-in composition service (schemas=%s)', schemas.length);
+
+      const result = composeAndValidate(
         schemas.map(schema => {
           return {
-            sdl: print(trimDescriptions(parse(schema.raw))),
+            typeDefs: trimDescriptions(parse(schema.raw)),
             name: schema.source,
             url: 'url' in schema && typeof schema.url === 'string' ? schema.url : undefined,
           };
         }),
       );
-      const signature = hash(decrypt(external.encryptedSecret), 'sha256', body);
-      logger.debug(
-        'Calling external composition service (url=%s, broker=%s)',
-        external.endpoint,
-        external.broker ? 'yes' : 'no',
-      );
 
-      const request = {
-        url: external.endpoint,
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-          'x-hive-signature-256': signature,
-        } as const,
-        body,
-      };
-
-      const parseResult = EXTERNAL_COMPOSITION_RESULT.safeParse(
-        await (external.broker
-          ? callExternalServiceViaBroker(
-              external.broker,
-              {
-                method: 'POST',
-                ...request,
-              },
-              logger,
-              cache.timeoutMs,
-              requestId,
-            )
-          : callExternalService(request, logger, cache.timeoutMs)),
-      );
-
-      if (!parseResult.success) {
-        throw new Error(`External composition failure: invalid shape of data`);
-      }
-
-      if (parseResult.data.type === 'success') {
+      if (compositionHasErrors(result)) {
         return {
-          type: 'success',
+          type: 'failure',
           result: {
-            supergraphSdl: parseResult.data.result.supergraph,
-            raw: parseResult.data.result.sdl,
+            errors: result.errors.map(errorWithPossibleCode),
+            raw: result.schema ? printSchema(result.schema) : undefined,
           },
+          includesNetworkError: false,
         };
       }
 
-      return parseResult.data;
-    }
-
-    logger.debug('Using built-in composition service (schemas=%s)', schemas.length);
-
-    const result = composeAndValidate(
-      schemas.map(schema => {
-        return {
-          typeDefs: trimDescriptions(parse(schema.raw)),
-          name: schema.source,
-          url: 'url' in schema && typeof schema.url === 'string' ? schema.url : undefined,
-        };
-      }),
-    );
-
-    if (compositionHasErrors(result)) {
       return {
-        type: 'failure',
+        type: 'success',
         result: {
-          errors: result.errors.map(errorWithPossibleCode),
-          raw: result.schema ? printSchema(result.schema) : undefined,
+          supergraphSdl: result.supergraphSdl,
+          raw: printSchema(result.schema),
         },
+        includesNetworkError: false,
       };
-    }
-
-    return {
-      type: 'success',
-      result: {
-        supergraphSdl: result.supergraphSdl,
-        raw: printSchema(result.schema),
-      },
-    };
-  });
+    },
+    function pickCacheType(result) {
+      return result.includesNetworkError ? 'short' : 'long';
+    },
+  );
 
   return {
     async composeAndValidate(schemas, external) {
@@ -428,6 +444,8 @@ const createFederation: (
           errors: composed.type === 'failure' ? composed.result.errors : [],
           sdl: composed.result.raw ?? null,
           supergraph: 'supergraphSdl' in composed.result ? composed.result.supergraphSdl : null,
+          includesNetworkError:
+            composed.type === 'failure' && composed.includesNetworkError === true,
         };
       } catch (error) {
         if (cache.isTimeoutError(error)) {
@@ -440,6 +458,7 @@ const createFederation: (
             ],
             sdl: null,
             supergraph: null,
+            includesNetworkError: true,
           };
         }
 
