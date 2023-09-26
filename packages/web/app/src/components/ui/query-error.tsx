@@ -18,6 +18,7 @@ export function QueryError({
   const requestId =
     error &&
     'response' in error &&
+    error?.response?.headers &&
     error.response.headers.get('x-request-id')?.split(',')[0].trim();
 
   cookies.remove(LAST_VISITED_ORG_KEY);
