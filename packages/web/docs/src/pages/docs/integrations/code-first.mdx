@@ -163,14 +163,21 @@ with open('schema.graphql', 'w') as f:
 [Strawberry](https://strawberry.rocks/) is a Python library for building GraphQL APIs using a Python
 3 and code-first approach.
 
-The following snippet might help you to print the schema to a file:
+Strawberry provides a command-line interface to export the schema to a GraphQL file, for example, assuming
+we have the following `schema.py` file:
 
 ```python
 import strawberry
-import typing
-from graphql import print_schema
 
-schema = strawberry.Schema(query=Query)
-with open('schema.graphql', 'w+') as f:
-    f.write(print_schema(schema._schema))
+@strawberry.type
+class Query:
+    hello: str = strawberry.field(resolver=lambda: "hello world")
+
+schema = strawberry.Schema(Query)
+```
+
+we can use the following command to export the schema to a `.graphql` file
+
+```bash
+strawberry export-schema schema > schema.graphql
 ```
