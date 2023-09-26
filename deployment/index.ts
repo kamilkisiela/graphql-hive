@@ -29,6 +29,9 @@ import { optimizeAzureCluster } from './utils/azure-helpers';
 import { createDockerImageFactory } from './utils/docker-images';
 import { isDefined, isProduction } from './utils/helpers';
 
+// eslint-disable-next-line no-process-env
+process.env.PULUMI_K8S_SUPPRESS_HELM_HOOK_WARNINGS = '1';
+
 optimizeAzureCluster();
 
 const dockerConfig = new pulumi.Config('docker');

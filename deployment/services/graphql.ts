@@ -22,6 +22,7 @@ import { Webhooks } from './webhooks';
 
 const commonConfig = new pulumi.Config('common');
 const cloudflareConfig = new pulumi.Config('cloudflare');
+const cloudflareCustomConfig = new pulumi.Config('cloudflareCustom');
 const apiConfig = new pulumi.Config('api');
 const githubAppConfig = new pulumi.Config('ghapp');
 
@@ -146,7 +147,7 @@ export function deployGraphQL({
         // CDN
         CDN_CF: '1',
         CDN_CF_BASE_PATH: 'https://api.cloudflare.com/client/v4/accounts',
-        CDN_CF_ACCOUNT_ID: cloudflareConfig.require('accountId'),
+        CDN_CF_ACCOUNT_ID: cloudflareCustomConfig.require('accountId'),
         CDN_CF_AUTH_TOKEN: cloudflareConfig.requireSecret('apiToken'),
         CDN_CF_NAMESPACE_ID: cdn.cfStorageNamespaceId,
         CDN_CF_BASE_URL: cdn.workerBaseUrl,
