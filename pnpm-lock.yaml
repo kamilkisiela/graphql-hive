@@ -32,9 +32,9 @@ patchedDependencies:
   '@theguild/editor@1.2.5':
     hash: pz2nlsfawfhpo6sw62ecmp2yum
     path: patches/@theguild__editor@1.2.5.patch
-  bullmq@3.15.8:
+  bullmq@4.11.4:
     hash: kobtuuqaglbtaadx3jiqtahl3i
-    path: patches/bullmq@3.15.8.patch
+    path: patches/bullmq@4.11.4.patch
   eslint@8.50.0:
     hash: fjbpfrtrjd6idngyeqxnwopfva
     path: patches/eslint@8.50.0.patch
@@ -782,8 +782,8 @@ importers:
         specifier: 0.9.9
         version: 0.9.9
       bullmq:
-        specifier: 3.15.8
-        version: 3.15.8(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
+        specifier: 4.11.4
+        version: 4.11.4(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -1416,8 +1416,8 @@ importers:
         specifier: 10.38.3
         version: 10.38.3
       bullmq:
-        specifier: 3.15.8
-        version: 3.15.8(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
+        specifier: 4.11.4
+        version: 4.11.4(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -14491,7 +14491,6 @@ packages:
     resolution: {integrity: sha512-F0SAmZ8iUtS//m8DmCTA0jlh6TDKkHQyK6xc6V4KDTyZKA9dnvX9/3sRTVQrWm79glUAZbnmmNcdYwUIHWVybw==}
     engines: {node: '>=0.4.0'}
     hasBin: true
-    dev: true
 
   /acorn@8.8.0:
     resolution: {integrity: sha512-QOxyigPVrpZ2GXT+PFyZTl6TtOFc5egxHIP9IlQ+RbupQuX4RkT/Bee4/kQuC02Xkzg84JcT7oLYtDIQxp+v7w==}
@@ -15745,15 +15744,16 @@ packages:
       semver: 7.5.4
     dev: true
 
-  /bullmq@3.15.8(patch_hash=kobtuuqaglbtaadx3jiqtahl3i):
-    resolution: {integrity: sha512-k3uimHGhl5svqD7SEak+iI6c5DxeLOaOXzCufI9Ic0ST3nJr69v71TGR4cXCTXdgCff3tLec5HgoBnfyWjgn5A==}
+  /bullmq@4.11.4(patch_hash=kobtuuqaglbtaadx3jiqtahl3i):
+    resolution: {integrity: sha512-LuCR3ILngYa3CLC5jyf8DU4Yokj9T12MWwBogP3S4IiJUtbJsQ9GTGFxho3imRxXfcd9DUfrABT/pSoqVigXiQ==}
     dependencies:
       cron-parser: 4.6.0
       glob: 8.1.0
       ioredis: 5.3.2
       lodash: 4.17.21
       msgpackr: 1.7.2
-      semver: 7.5.1
+      node-abort-controller: 3.1.1
+      semver: 7.5.4
       tslib: 2.6.2
       uuid: 9.0.0
     transitivePeerDependencies:
@@ -30176,7 +30176,7 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
     dependencies:
-      acorn: 8.8.2
+      acorn: 8.10.0
       commander: 2.20.3
       source-map: 0.6.1
       source-map-support: 0.5.21
