@@ -13,7 +13,7 @@
   "devDependencies": {
     "@hive/service-common": "workspace:*",
     "@sentry/node": "7.69.0",
-    "@trpc/server": "10.38.3",
+    "@trpc/server": "10.38.4",
     "bullmq": "4.11.4",
     "copyfiles": "2.4.1",
     "dotenv": "16.3.1",
