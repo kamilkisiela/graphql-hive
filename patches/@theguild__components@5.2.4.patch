@@ -1,5 +1,5 @@
 diff --git a/dist/index.js b/dist/index.js
-index 027689af48e0890751c8055fee5b63a6034ff415..a31866a79abaee51f7fa610019e77436d1012d64 100644
+index 8bc5c9d19987f1995266503a5041124c0a83108f..74dc8add706d827e188b941df6f5b4c325af805a 100644
 --- a/dist/index.js
 +++ b/dist/index.js
 @@ -2907,7 +2907,7 @@ function Tabs2({
@@ -31,10 +31,10 @@ index 027689af48e0890751c8055fee5b63a6034ff415..a31866a79abaee51f7fa610019e77436
      sidebar: {
        defaultMenuCollapseLevel: 1,
 diff --git a/dist/next.config.mjs b/dist/next.config.mjs
-index 6ef98a9b58de5349c45395a11f3cc91c8d25866e..0e6d35c788c0b8e96a9d572b66436259d19aa395 100644
+index 88622019e45209f9e7d07f97ab47cc5b3b3a0db1..b214f983119d770e0916c97d42ce133825a9c4c8 100644
 --- a/dist/next.config.mjs
 +++ b/dist/next.config.mjs
-@@ -79,7 +79,9 @@ var withGuildDocs = ({
+@@ -70,7 +70,9 @@ var withGuildDocs = ({
      mdxOptions: {
        remarkPlugins: defaultRemarkPlugins
      },
