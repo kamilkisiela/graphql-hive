@@ -8,7 +8,6 @@ export class CloudflareCDN {
     private config: {
       envName: string;
       zoneId: string;
-      accountId: string;
       cdnDnsRecord: string;
       sentryDsn: string;
       release: string;
@@ -22,90 +21,106 @@ export class CloudflareCDN {
   ) {}
 
   deploy() {
-    const kvStorage = new cf.WorkersKvNamespace('hive-ha-storage', {
-      title: `hive-ha-cdn-${this.config.envName}`,
-      accountId: this.config.accountId,
-    });
+    const kvStorage = new cf.WorkersKvNamespace(
+      'hive-ha-storage',
+      {
+        title: `hive-ha-cdn-${this.config.envName}`,
+      },
+      {
+        protect: true,
+      },
+    );
 
-    const script = new cf.WorkerScript('hive-ha-worker', {
-      accountId: this.config.accountId,
-      content: readFileSync(
-        // eslint-disable-next-line no-process-env
-        process.env.CDN_WORKER_ARTIFACT_PATH ||
-          resolve(__dirname, '../../packages/services/cdn-worker/dist/index.worker.mjs'),
-        'utf-8',
-      ),
-      name: `hive-storage-cdn-${this.config.envName}`,
-      module: true,
-      kvNamespaceBindings: [
-        {
-          // HIVE_DATA is in use in cdn-script.js as well, its the name of the global variable
-          name: 'HIVE_DATA',
-          namespaceId: kvStorage.id,
-        },
-      ],
-      analyticsEngineBindings: [
-        {
-          name: 'USAGE_ANALYTICS',
-          dataset: `hive_ha_cdn_usage_${this.config.envName}`,
-        },
-        {
-          name: 'ERROR_ANALYTICS',
-          dataset: `hive_ha_cdn_error_${this.config.envName}`,
-        },
-        {
-          name: 'KEY_VALIDATION_ANALYTICS',
-          dataset: `hive_ha_cdn_key_validation_${this.config.envName}`,
-        },
-        {
-          name: 'R2_ANALYTICS',
-          dataset: `hive_ha_cdn_r2_${this.config.envName}`,
-        },
-        {
-          name: 'RESPONSE_ANALYTICS',
-          dataset: `hive_ha_cdn_response_${this.config.envName}`,
-        },
-      ],
-      secretTextBindings: [
-        {
-          name: 'SENTRY_DSN',
-          text: this.config.sentryDsn,
-        },
-        {
-          name: 'SENTRY_ENVIRONMENT',
-          text: this.config.envName,
-        },
-        {
-          name: 'SENTRY_RELEASE',
-          text: this.config.release,
-        },
-        {
-          name: 'S3_ENDPOINT',
-          text: this.config.s3Config.endpoint,
-        },
-        {
-          name: 'S3_ACCESS_KEY_ID',
-          text: this.config.s3Config.accessKeyId,
-        },
-        {
-          name: 'S3_SECRET_ACCESS_KEY',
-          text: this.config.s3Config.secretAccessKey,
-        },
-        {
-          name: 'S3_BUCKET_NAME',
-          text: this.config.s3Config.bucketName,
-        },
-      ],
-    });
+    const script = new cf.WorkerScript(
+      'hive-ha-worker',
+      {
+        content: readFileSync(
+          // eslint-disable-next-line no-process-env
+          process.env.CDN_WORKER_ARTIFACT_PATH ||
+            resolve(__dirname, '../../packages/services/cdn-worker/dist/index.worker.mjs'),
+          'utf-8',
+        ),
+        name: `hive-storage-cdn-${this.config.envName}`,
+        module: true,
+        kvNamespaceBindings: [
+          {
+            // HIVE_DATA is in use in cdn-script.js as well, its the name of the global variable
+            name: 'HIVE_DATA',
+            namespaceId: kvStorage.id,
+          },
+        ],
+        analyticsEngineBindings: [
+          {
+            name: 'USAGE_ANALYTICS',
+            dataset: `hive_ha_cdn_usage_${this.config.envName}`,
+          },
+          {
+            name: 'ERROR_ANALYTICS',
+            dataset: `hive_ha_cdn_error_${this.config.envName}`,
+          },
+          {
+            name: 'KEY_VALIDATION_ANALYTICS',
+            dataset: `hive_ha_cdn_key_validation_${this.config.envName}`,
+          },
+          {
+            name: 'R2_ANALYTICS',
+            dataset: `hive_ha_cdn_r2_${this.config.envName}`,
+          },
+          {
+            name: 'RESPONSE_ANALYTICS',
+            dataset: `hive_ha_cdn_response_${this.config.envName}`,
+          },
+        ],
+        secretTextBindings: [
+          {
+            name: 'SENTRY_DSN',
+            text: this.config.sentryDsn,
+          },
+          {
+            name: 'SENTRY_ENVIRONMENT',
+            text: this.config.envName,
+          },
+          {
+            name: 'SENTRY_RELEASE',
+            text: this.config.release,
+          },
+          {
+            name: 'S3_ENDPOINT',
+            text: this.config.s3Config.endpoint,
+          },
+          {
+            name: 'S3_ACCESS_KEY_ID',
+            text: this.config.s3Config.accessKeyId,
+          },
+          {
+            name: 'S3_SECRET_ACCESS_KEY',
+            text: this.config.s3Config.secretAccessKey,
+          },
+          {
+            name: 'S3_BUCKET_NAME',
+            text: this.config.s3Config.bucketName,
+          },
+        ],
+      },
+      {
+        protect: true,
+      },
+    );
 
     const workerBase = this.config.cdnDnsRecord;
     const workerUrl = `https://${workerBase}`;
 
-    new cf.WorkerRoute('cf-hive-worker', {
-      scriptName: script.name,
-      pattern: `${workerBase}/*`,
-      zoneId: this.config.zoneId,
-    });
+    new cf.WorkerRoute(
+      'cf-hive-worker',
+      {
+        scriptName: script.name,
+        pattern: `${workerBase}/*`,
+        zoneId: this.config.zoneId,
+      },
+      {
+        protect: true,
+      },
+    );
 
     return {
       workerBaseUrl: workerUrl,
@@ -119,7 +134,6 @@ export class CloudflareBroker {
     private config: {
       envName: string;
       zoneId: string;
-      accountId: string;
       cdnDnsRecord: string;
       secretSignature: pulumi.Output<string>;
       sentryDsn: string;
@@ -170,7 +184,6 @@ export class CloudflareBroker {
     }
 
     const script = new cf.WorkerScript('hive-broker-worker', {
-      accountId: this.config.accountId,
       content: readFileSync(
         // eslint-disable-next-line no-process-env
         process.env.BROKER_WORKER_ARTIFACT_PATH ||
