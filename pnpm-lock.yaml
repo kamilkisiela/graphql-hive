@@ -1732,8 +1732,8 @@ importers:
         specifier: 7.0.23
         version: 7.0.23(react-dom@18.2.0)(react@18.2.0)(typescript@5.2.2)
       '@types/cookies':
-        specifier: 0.7.7
-        version: 0.7.7
+        specifier: 0.7.8
+        version: 0.7.8
       '@types/dompurify':
         specifier: 3.0.2
         version: 3.0.2
@@ -13404,8 +13404,8 @@ packages:
     dependencies:
       '@types/node': 18.17.17
 
-  /@types/cookies@0.7.7:
-    resolution: {integrity: sha512-h7BcvPUogWbKCzBR2lY4oqaZbO3jXZksexYJVFvkrFeLgbZjQkU4x8pRq6eg2MHXQhY0McQdqmmsxRWlVAHooA==}
+  /@types/cookies@0.7.8:
+    resolution: {integrity: sha512-y6KhF1GtsLERUpqOV+qZJrjUGzc0GE6UTa0b5Z/LZ7Nm2mKSdCXmS6Kdnl7fctPNnMSouHjxqEWI12/YqQfk5w==}
     dependencies:
       '@types/connect': 3.4.35
       '@types/express': 4.17.14

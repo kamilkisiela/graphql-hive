@@ -111,7 +111,7 @@
     "@storybook/blocks": "7.0.23",
     "@storybook/nextjs": "7.0.23",
     "@storybook/react": "7.0.23",
-    "@types/cookies": "0.7.7",
+    "@types/cookies": "0.7.8",
     "@types/dompurify": "3.0.2",
     "@types/js-cookie": "3.0.4",
     "@types/react": "18.2.22",
