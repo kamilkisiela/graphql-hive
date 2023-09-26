@@ -16,7 +16,7 @@ describe('migration: github-check-with-project-name', async () => {
       const org = await db.one<{
         id: string;
       }>(
-        sql`INSERT INTO public.organizations (clean_id, name, user_id, type) VALUES ('org-1', 'org-1', ${user.id}, 'REGULAR') RETURNING id;`,
+        sql`INSERT INTO public.organizations (clean_id, name, user_id) VALUES ('org-1', 'org-1', ${user.id}) RETURNING id;`,
       );
       const oldProject = await db.one(
         sql`INSERT INTO public.projects (clean_id, name, type, org_id) VALUES ('proj-1', 'proj-1', 'SINGLE', ${org.id}) RETURNING id;`,
