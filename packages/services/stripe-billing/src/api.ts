@@ -236,7 +236,7 @@ export const stripeBillingApiRouter = t.router({
       }
 
       const actualSubscription = subscriptions[0];
-      const response = await ctx.stripe.subscriptions.del(actualSubscription.id, {
+      const response = await ctx.stripe.subscriptions.cancel(actualSubscription.id, {
         prorate: true,
       });
 
