@@ -1,5 +1,10 @@
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { GraphQLTypeCard, GraphQLTypeCardListItem, SchemaExplorerUsageStats } from './common';
+import {
+  GraphQLTypeCard,
+  GraphQLTypeCardListItem,
+  LinkToCoordinatePage,
+  SchemaExplorerUsageStats,
+} from './common';
 import { SupergraphMetadataList } from './super-graph-metadata';
 
 export const GraphQLEnumTypeComponent_TypeFragment = graphql(`
@@ -48,7 +53,11 @@ export function GraphQLEnumTypeComponent(props: {
       <div className="flex flex-col">
         {ttype.values.map((value, i) => (
           <GraphQLTypeCardListItem index={i}>
-            <div>{value.name}</div>
+            <div>
+              <LinkToCoordinatePage coordinate={`${ttype.name}.${value.name}`}>
+                {value.name}
+              </LinkToCoordinatePage>
+            </div>
             {value.supergraphMetadata ? (
               <SupergraphMetadataList supergraphMetadata={value.supergraphMetadata} />
             ) : null}

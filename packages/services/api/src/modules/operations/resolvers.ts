@@ -54,6 +54,22 @@ export const resolvers: OperationsModule.Resolvers = {
         period: parseDateRangeInput(selector.period),
       });
     },
+    async schemaCoordinateStats(_, { selector }, { injector }) {
+      const translator = injector.get(IdTranslator);
+      const [organization, project, target] = await Promise.all([
+        translator.translateOrganizationId(selector),
+        translator.translateProjectId(selector),
+        translator.translateTargetId(selector),
+      ]);
+
+      return {
+        period: parseDateRangeInput(selector.period),
+        organization,
+        project,
+        target,
+        schemaCoordinate: selector.schemaCoordinate,
+      };
+    },
     async operationsStats(_, { selector }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organization, project, target] = await Promise.all([
@@ -123,6 +139,78 @@ export const resolvers: OperationsModule.Resolvers = {
         project,
         target,
         hash: selector.hash,
+      });
+    },
+  },
+  SchemaCoordinateStats: {
+    totalRequests({ organization, project, target, period, schemaCoordinate }, _, { injector }) {
+      return injector.get(OperationsManager).countRequestsWithSchemaCoordinate({
+        organization,
+        project,
+        target,
+        period,
+        schemaCoordinate,
+      });
+    },
+    requestsOverTime(
+      { organization, project, target, period, schemaCoordinate },
+      { resolution },
+      { injector },
+    ) {
+      return injector.get(OperationsManager).readRequestsOverTime({
+        target,
+        project,
+        organization,
+        period,
+        resolution,
+        schemaCoordinate,
+      });
+    },
+    async operations(
+      { organization, project, target, period, schemaCoordinate },
+      args,
+      { injector },
+    ) {
+      const operationsManager = injector.get(OperationsManager);
+      const [operations, durations] = await Promise.all([
+        operationsManager.readOperationsStats({
+          organization,
+          project,
+          target,
+          period,
+          schemaCoordinate,
+        }),
+        operationsManager.readDetailedDurationPercentiles({
+          organization,
+          project,
+          target,
+          period,
+          schemaCoordinate,
+        }),
+      ]);
+
+      return operations
+        .map(op => {
+          return {
+            id: hash(`${op.operationName}__${op.operationHash}`),
+            kind: op.kind,
+            name: op.operationName,
+            count: op.count,
+            countOk: op.countOk,
+            percentage: op.percentage,
+            duration: durations.get(op.operationHash)!,
+            operationHash: op.operationHash,
+          };
+        })
+        .sort((a, b) => b.count - a.count);
+    },
+    clients({ organization, project, target, period, schemaCoordinate }, _, { injector }) {
+      return injector.get(OperationsManager).readUniqueClients({
+        target,
+        project,
+        organization,
+        period,
+        schemaCoordinate,
       });
     },
   },

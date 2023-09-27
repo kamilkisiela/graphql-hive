@@ -1,4 +1,4 @@
-import itty from 'itty-router';
+import * as itty from 'itty-router';
 import { Toucan } from 'toucan-js';
 import { AnalyticsEngine, createAnalytics } from './analytics';
 import { createArtifactRequestHandler } from './artifact-handler';

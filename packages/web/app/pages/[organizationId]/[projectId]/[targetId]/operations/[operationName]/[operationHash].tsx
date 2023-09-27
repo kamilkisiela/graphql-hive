@@ -1,6 +1,5 @@
-import { ReactElement, useCallback, useMemo, useState } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { formatISO, subDays, subHours, subMinutes } from 'date-fns';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Section } from '@/components/common';
@@ -13,6 +12,7 @@ import { QueryError } from '@/components/ui/query-error';
 import { EmptyList, MetaTitle, RadixSelect } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
+import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const GraphQLOperationBody_GetOperationBodyQuery = graphql(`
@@ -54,50 +54,6 @@ export function GraphQLOperationBody({
   return null;
 }
 
-function floorDate(date: Date): Date {
-  const time = 1000 * 60;
-  return new Date(Math.floor(date.getTime() / time) * time);
-}
-
-const DateRange = {
-  '90d': {
-    resolution: 90,
-    label: 'Last 90 days',
-  },
-  '60d': {
-    resolution: 60,
-    label: 'Last 60 days',
-  },
-  '30d': {
-    resolution: 60,
-    label: 'Last 30 days',
-  },
-  '14d': {
-    resolution: 60,
-    label: 'Last 14 days',
-  },
-  '7d': {
-    resolution: 60,
-    label: 'Last 7 days',
-  },
-  '1d': {
-    resolution: 60,
-    label: 'Last 24 hours',
-  },
-  '1h': {
-    resolution: 60,
-    label: 'Last hour',
-  },
-};
-
-type PeriodKey = keyof typeof DateRange;
-
-function isDayBasedPeriodKey<T extends PeriodKey>(
-  periodKey: T,
-): periodKey is Extract<T, `${number}d`> {
-  return periodKey.endsWith('d');
-}
-
 function OperationView({
   organizationCleanId,
   projectCleanId,
@@ -113,53 +69,17 @@ function OperationView({
   operationHash: string;
   operationName: string;
 }): ReactElement {
-  const router = useRouter();
-  const [href, periodParam] = router.asPath.split('?');
-  let selectedPeriod: PeriodKey =
-    (new URLSearchParams(periodParam).get('period') as PeriodKey) ?? '1d';
+  const {
+    updateDateRangeByKey,
+    dateRangeKey,
+    displayDateRangeLabel,
+    availableDateRangeOptions,
+    dateRange,
+    resolution,
+  } = useDateRangeController({
+    dataRetentionInDays,
+  });
   const [selectedClients, setSelectedClients] = useState<string[]>([]);
-  const availablePeriodOptions = useMemo<PeriodKey[]>(() => {
-    return Object.keys(DateRange).filter(key => {
-      const periodKey = key as PeriodKey;
-
-      if (isDayBasedPeriodKey(periodKey)) {
-        // Only show day based periods that are within the data retention period
-        const daysBack = parseInt(periodKey.replace('d', ''), 10);
-        return daysBack <= dataRetentionInDays;
-      }
-
-      return true;
-    }) as PeriodKey[];
-  }, [dataRetentionInDays]);
-
-  if (!availablePeriodOptions.includes(selectedPeriod)) {
-    selectedPeriod = '1d';
-  }
-
-  const period = useMemo(() => {
-    const now = floorDate(new Date());
-    const sub = selectedPeriod.endsWith('h') ? 'h' : selectedPeriod.endsWith('m') ? 'm' : 'd';
-
-    const value = parseInt(selectedPeriod.replace(sub, ''));
-    const from = formatISO(
-      sub === 'h'
-        ? subHours(now, value)
-        : sub === 'm'
-        ? subMinutes(now, value)
-        : subDays(now, value),
-    );
-    const to = formatISO(now);
-
-    return { from, to };
-  }, [selectedPeriod, availablePeriodOptions]);
-
-  const updatePeriod = useCallback(
-    (value: string) => {
-      void router.push(`${href}?period=${value}`);
-    },
-    [href, router],
-  );
-
   const operationsList = useMemo(() => [operationHash], [operationHash]);
 
   return (
@@ -171,16 +91,16 @@ function OperationView({
         </div>
         <div className="flex justify-end gap-x-2">
           <ClientsFilterTrigger
-            period={period}
+            period={dateRange}
             selected={selectedClients}
             onFilter={setSelectedClients}
           />
           <RadixSelect
-            onChange={updatePeriod}
-            defaultValue={selectedPeriod}
-            options={availablePeriodOptions.map(key => ({
+            onChange={updateDateRangeByKey}
+            defaultValue={dateRangeKey}
+            options={availableDateRangeOptions.map(key => ({
               value: key,
-              label: DateRange[key].label,
+              label: displayDateRangeLabel(key),
             }))}
           />
         </div>
@@ -189,10 +109,10 @@ function OperationView({
         organization={organizationCleanId}
         project={projectCleanId}
         target={targetCleanId}
-        period={period}
+        period={dateRange}
         operationsFilter={operationsList}
         clientNamesFilter={selectedClients}
-        resolution={DateRange[selectedPeriod].resolution}
+        resolution={resolution}
         mode="operation-page"
       />
       <div className="w-full rounded-md bg-gray-900/50 p-5 border border-gray-800 mt-12">

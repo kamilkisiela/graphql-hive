@@ -212,6 +212,14 @@ export interface OperationsStats {
   clients: readonly string[];
 }
 
+export interface SchemaCoordinateStats {
+  organization: string;
+  project: string;
+  target: string;
+  period: DateRange;
+  schemaCoordinate: string;
+}
+
 export interface DurationStats {
   p75: number | null;
   p90: number | null;

@@ -1,5 +1,5 @@
 import { createServer } from 'http';
-import itty from 'itty-router';
+import * as itty from 'itty-router';
 import { json, withParams } from 'itty-router-extras';
 import { createServerAdapter } from '@whatwg-node/server';
 import { createArtifactRequestHandler } from './artifact-handler';
@@ -28,7 +28,7 @@ const handleRequest = createRequestHandler({
   isKeyValid: createIsKeyValid({ s3, getCache: null, waitUntil: null, analytics: null }),
 });
 
-const artifactStorageReader = new ArtifactStorageReader(s3, env.S3_PUBLIC_URL);
+const artifactStorageReader = new ArtifactStorageReader(s3, env.S3_PUBLIC_URL, null);
 
 const handleArtifactRequest = createArtifactRequestHandler({
   isKeyValid: createIsKeyValid({ s3, getCache: null, waitUntil: null, analytics: null }),

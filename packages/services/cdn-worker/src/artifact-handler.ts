@@ -1,4 +1,4 @@
-import itty from 'itty-router';
+import * as itty from 'itty-router';
 import zod from 'zod';
 import { type Request } from '@whatwg-node/fetch';
 import { createAnalytics, type Analytics } from './analytics';
