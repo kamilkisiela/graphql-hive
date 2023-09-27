@@ -39,6 +39,7 @@ export function GraphQLObjectTypeComponent(props: {
       organizationCleanId={props.organizationCleanId}
     >
       <GraphQLFields
+        typeName={ttype.name}
         fields={ttype.fields}
         totalRequests={props.totalRequests}
         collapsed={props.collapsed}

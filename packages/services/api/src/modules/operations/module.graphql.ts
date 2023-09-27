@@ -5,6 +5,7 @@ export default gql`
     fieldStats(selector: FieldStatsInput!): FieldStats!
     fieldListStats(selector: FieldListStatsInput!): [FieldStats!]!
     operationsStats(selector: OperationsStatsSelectorInput!): OperationsStats!
+    schemaCoordinateStats(selector: SchemaCoordinateStatsInput!): SchemaCoordinateStats!
     hasCollectedOperations(selector: TargetSelectorInput!): Boolean!
     clientStatsByTargets(selector: ClientStatsByTargetsInput!): ClientStatsConnection!
     operationBodyByHash(selector: OperationBodyByHashInput!): String
@@ -24,6 +25,14 @@ export default gql`
     project: ID!
     target: ID!
     hash: String!
+  }
+
+  input SchemaCoordinateStatsInput {
+    organization: ID!
+    project: ID!
+    target: ID!
+    period: DateRangeInput!
+    schemaCoordinate: String!
   }
 
   input ClientStatsByTargetsInput {
@@ -75,6 +84,13 @@ export default gql`
     argument: String
     count: SafeInt!
     percentage: Float!
+  }
+
+  type SchemaCoordinateStats {
+    requestsOverTime(resolution: Int!): [RequestsOverTime!]!
+    totalRequests: SafeInt!
+    operations: OperationStatsConnection!
+    clients: ClientStatsConnection!
   }
 
   type OperationsStats {

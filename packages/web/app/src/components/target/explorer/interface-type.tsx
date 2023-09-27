@@ -38,6 +38,7 @@ export function GraphQLInterfaceTypeComponent(props: {
       organizationCleanId={props.organizationCleanId}
     >
       <GraphQLFields
+        typeName={ttype.name}
         fields={ttype.fields}
         totalRequests={props.totalRequests}
         targetCleanId={props.targetCleanId}

@@ -165,6 +165,38 @@ export class OperationsManager {
     );
   }
 
+  async countRequestsWithSchemaCoordinate({
+    organization,
+    project,
+    target,
+    period,
+    schemaCoordinate,
+  }: {
+    period: DateRange;
+    schemaCoordinate: string;
+  } & Listify<TargetSelector, 'target'>) {
+    this.logger.info(
+      'Counting requests with schema coordinate (period=%s, target=%s, coordinate=%s)',
+      period,
+      target,
+      schemaCoordinate,
+    );
+    await this.authManager.ensureTargetAccess({
+      organization,
+      project,
+      target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    return this.reader
+      .countOperations({
+        target,
+        period,
+        schemaCoordinate,
+      })
+      .then(r => r.total);
+  }
+
   async countRequests({
     organization,
     project,
@@ -172,10 +204,11 @@ export class OperationsManager {
     period,
     operations,
     clients,
-  }: { period: DateRange; operations?: readonly string[]; clients?: readonly string[] } & Listify<
-    TargetSelector,
-    'target'
-  >) {
+  }: {
+    period: DateRange;
+    operations?: readonly string[];
+    clients?: readonly string[];
+  } & Listify<TargetSelector, 'target'>) {
     this.logger.info('Counting requests (period=%s, target=%s)', period, target);
     await this.authManager.ensureTargetAccess({
       organization,
@@ -329,10 +362,12 @@ export class OperationsManager {
     target,
     operations,
     clients,
+    schemaCoordinate,
   }: {
     period: DateRange;
     operations?: readonly string[];
     clients?: readonly string[];
+    schemaCoordinate?: string;
   } & TargetSelector) {
     this.logger.info('Reading operations stats (period=%o, target=%s)', period, target);
     await this.authManager.ensureTargetAccess({
@@ -348,6 +383,7 @@ export class OperationsManager {
       period,
       operations,
       clients,
+      schemaCoordinate,
     });
   }
 
@@ -462,11 +498,13 @@ export class OperationsManager {
     target,
     operations,
     clients,
+    schemaCoordinate,
   }: {
     period: DateRange;
     resolution: number;
     operations?: readonly string[];
     clients?: readonly string[];
+    schemaCoordinate?: string;
   } & TargetSelector) {
     this.logger.info(
       'Reading requests over time (period=%o, resolution=%s, target=%s)',
@@ -487,6 +525,7 @@ export class OperationsManager {
       resolution,
       operations,
       clients,
+      schemaCoordinate,
     });
   }
 
@@ -598,10 +637,12 @@ export class OperationsManager {
     target,
     operations,
     clients,
+    schemaCoordinate,
   }: {
     period: DateRange;
     operations?: readonly string[];
     clients?: readonly string[];
+    schemaCoordinate?: string;
   } & TargetSelector) {
     this.logger.info(
       'Reading detailed duration percentiles (period=%o, target=%s, clientFilter=%s)',
@@ -621,6 +662,7 @@ export class OperationsManager {
       period,
       operations,
       clients,
+      schemaCoordinate,
     });
   }
 
@@ -630,7 +672,12 @@ export class OperationsManager {
     project,
     target,
     operations,
-  }: { period: DateRange; operations?: readonly string[] } & TargetSelector) {
+    schemaCoordinate,
+  }: {
+    period: DateRange;
+    operations?: readonly string[];
+    schemaCoordinate?: string;
+  } & TargetSelector) {
     this.logger.info('Counting unique clients (period=%o, target=%s)', period, target);
     await this.authManager.ensureTargetAccess({
       organization,
@@ -643,6 +690,7 @@ export class OperationsManager {
       target,
       period,
       operations,
+      schemaCoordinate,
     });
   }
 

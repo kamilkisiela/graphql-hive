@@ -388,11 +388,13 @@ export class OperationsReader {
       period,
       operations,
       clients,
+      schemaCoordinate,
     }: {
       target: string | readonly string[];
       period: DateRange;
       operations?: readonly string[];
       clients?: readonly string[];
+      schemaCoordinate?: string;
     },
     span?: Span,
   ): Promise<{
@@ -409,6 +411,15 @@ export class OperationsReader {
               period,
               operations,
               clients,
+              extra: schemaCoordinate
+                ? [
+                    sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
+                      target,
+                      period,
+                      extra: [sql`coordinate = ${schemaCoordinate}`],
+                    })})`,
+                  ]
+                : [],
             },
           )}`,
           queryId: 'count_operations_daily',
@@ -422,6 +433,15 @@ export class OperationsReader {
               period,
               operations,
               clients,
+              extra: schemaCoordinate
+                ? [
+                    sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
+                      target,
+                      period,
+                      extra: [sql`coordinate = ${schemaCoordinate}`],
+                    })})`,
+                  ]
+                : [],
             },
           )}`,
           queryId: 'count_operations_hourly',
@@ -435,6 +455,15 @@ export class OperationsReader {
               period,
               operations,
               clients,
+              extra: schemaCoordinate
+                ? [
+                    sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
+                      target,
+                      period,
+                      extra: [sql`coordinate = ${schemaCoordinate}`],
+                    })})`,
+                  ]
+                : [],
             },
           )}`,
           queryId: 'count_operations_regular',
@@ -555,11 +584,13 @@ export class OperationsReader {
       period,
       operations,
       clients,
+      schemaCoordinate,
     }: {
       target: string;
       period: DateRange;
       operations?: readonly string[];
       clients?: readonly string[];
+      schemaCoordinate?: string;
     },
     span?: Span,
   ): Promise<
@@ -583,6 +614,15 @@ export class OperationsReader {
               period,
               operations,
               clients,
+              extra: schemaCoordinate
+                ? [
+                    sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
+                      target,
+                      period,
+                      extra: [sql`coordinate = ${schemaCoordinate}`],
+                    })})`,
+                  ]
+                : [],
             })}
             GROUP BY hash
           `,
@@ -602,6 +642,15 @@ export class OperationsReader {
               period,
               operations,
               clients,
+              extra: schemaCoordinate
+                ? [
+                    sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
+                      target,
+                      period,
+                      extra: [sql`coordinate = ${schemaCoordinate}`],
+                    })})`,
+                  ]
+                : [],
             })}
             GROUP BY hash
           `,
@@ -618,6 +667,15 @@ export class OperationsReader {
               period,
               operations,
               clients,
+              extra: schemaCoordinate
+                ? [
+                    sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
+                      target,
+                      period,
+                      extra: [sql`coordinate = ${schemaCoordinate}`],
+                    })})`,
+                  ]
+                : [],
             })}
             GROUP BY hash
           `,
@@ -657,6 +715,15 @@ export class OperationsReader {
                       target,
                       period,
                       operations,
+                      extra: schemaCoordinate
+                        ? [
+                            sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
+                              target,
+                              period,
+                              extra: [sql`coordinate = ${schemaCoordinate}`],
+                            })})`,
+                          ]
+                        : [],
                     })}
                     GROUP BY hash
                   )
@@ -738,10 +805,12 @@ export class OperationsReader {
       target,
       period,
       operations,
+      schemaCoordinate,
     }: {
       target: string;
       period: DateRange;
       operations?: readonly string[];
+      schemaCoordinate?: string;
     },
     span?: Span,
   ): Promise<
@@ -774,6 +843,15 @@ export class OperationsReader {
                 target,
                 period,
                 operations,
+                extra: schemaCoordinate
+                  ? [
+                      sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
+                        target,
+                        period,
+                        extra: [sql`coordinate = ${schemaCoordinate}`],
+                      })})`,
+                    ]
+                  : [],
               })}
               GROUP BY client_name, client_version
             `,
@@ -792,6 +870,15 @@ export class OperationsReader {
                 target,
                 period,
                 operations,
+                extra: schemaCoordinate
+                  ? [
+                      sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
+                        target,
+                        period,
+                        extra: [sql`coordinate = ${schemaCoordinate}`],
+                      })})`,
+                    ]
+                  : [],
               })}
               GROUP BY client_name, client_version
             `,
@@ -810,6 +897,15 @@ export class OperationsReader {
                 target,
                 period,
                 operations,
+                extra: schemaCoordinate
+                  ? [
+                      sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
+                        target,
+                        period,
+                        extra: [sql`coordinate = ${schemaCoordinate}`],
+                      })})`,
+                    ]
+                  : [],
               })}
               GROUP BY client_name, client_version
             `,
@@ -1274,12 +1370,14 @@ export class OperationsReader {
     resolution,
     operations,
     clients,
+    schemaCoordinate,
   }: {
     target: string;
     period: DateRange;
     resolution: number;
     operations?: readonly string[];
     clients?: readonly string[];
+    schemaCoordinate?: string;
   }) {
     const results = await this.getDurationAndCountOverTime({
       target,
@@ -1287,6 +1385,7 @@ export class OperationsReader {
       resolution,
       operations,
       clients,
+      schemaCoordinate,
     });
 
     return results.map(row => ({
@@ -1419,11 +1518,13 @@ export class OperationsReader {
       period,
       operations,
       clients,
+      schemaCoordinate,
     }: {
       target: string;
       period: DateRange;
       operations?: readonly string[];
       clients?: readonly string[];
+      schemaCoordinate?: string;
     },
     span?: Span,
   ) {
@@ -1439,7 +1540,21 @@ export class OperationsReader {
                 hash,
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
               FROM operations_daily
-              ${this.createFilter({ target, period, operations, clients })}
+              ${this.createFilter({
+                target,
+                period,
+                operations,
+                clients,
+                extra: schemaCoordinate
+                  ? [
+                      sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
+                        target,
+                        period,
+                        extra: [sql`coordinate = ${schemaCoordinate}`],
+                      })})`,
+                    ]
+                  : [],
+              })}
               GROUP BY hash
             `,
             queryId: 'duration_percentiles_daily',
@@ -1452,7 +1567,21 @@ export class OperationsReader {
                 hash,
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
               FROM operations_hourly
-              ${this.createFilter({ target, period, operations, clients })}
+              ${this.createFilter({
+                target,
+                period,
+                operations,
+                clients,
+                extra: schemaCoordinate
+                  ? [
+                      sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
+                        target,
+                        period,
+                        extra: [sql`coordinate = ${schemaCoordinate}`],
+                      })})`,
+                    ]
+                  : [],
+              })}
               GROUP BY hash
             `,
             queryId: 'duration_percentiles_hourly',
@@ -1465,7 +1594,21 @@ export class OperationsReader {
                 hash,
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
               FROM operations_minutely
-              ${this.createFilter({ target, period, operations, clients })}
+              ${this.createFilter({
+                target,
+                period,
+                operations,
+                clients,
+                extra: schemaCoordinate
+                  ? [
+                      sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
+                        target,
+                        period,
+                        extra: [sql`coordinate = ${schemaCoordinate}`],
+                      })})`,
+                    ]
+                  : [],
+              })}
               GROUP BY hash
             `,
             queryId: 'duration_percentiles_regular',
@@ -1515,12 +1658,14 @@ export class OperationsReader {
       resolution,
       operations,
       clients,
+      schemaCoordinate,
     }: {
       target: string;
       period: DateRange;
       resolution: number;
       operations?: readonly string[];
       clients?: readonly string[];
+      schemaCoordinate?: string;
     },
     span?: Span,
   ) {
@@ -1562,7 +1707,21 @@ export class OperationsReader {
             ${sql.raw(total)} as total,
             ${sql.raw(totalOk)} as totalOk
           FROM ${sql.raw(tableName)}
-          ${this.createFilter({ target, period, operations, clients })}
+          ${this.createFilter({
+            target,
+            period,
+            operations,
+            clients,
+            extra: schemaCoordinate
+              ? [
+                  sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
+                    target,
+                    period,
+                    extra: [sql`coordinate = ${schemaCoordinate}`],
+                  })})`,
+                ]
+              : [],
+          })}
           GROUP BY date
           ORDER BY date
           WITH FILL
@@ -1573,38 +1732,38 @@ export class OperationsReader {
       `;
     };
 
+    const query = this.pickQueryByPeriod(
+      {
+        daily: {
+          query: createSQLQuery('operations_daily', true),
+          queryId: 'duration_and_count_over_time_daily',
+          timeout: 15_000,
+          span,
+        },
+        hourly: {
+          query: createSQLQuery('operations_hourly', true),
+          queryId: 'duration_and_count_over_time_hourly',
+          timeout: 15_000,
+          span,
+        },
+        minutely: {
+          query: createSQLQuery('operations_minutely', true),
+          queryId: 'duration_and_count_over_time_regular',
+          timeout: 15_000,
+          span,
+        },
+      },
+      period,
+      resolution,
+    );
+
     // multiply by 1000 to convert to milliseconds
     const result = await this.clickHouse.query<{
       date: number;
       total: number;
       totalOk: number;
       percentiles: [number, number, number, number];
-    }>(
-      this.pickQueryByPeriod(
-        {
-          daily: {
-            query: createSQLQuery('operations_daily', true),
-            queryId: 'duration_and_count_over_time_daily',
-            timeout: 15_000,
-            span,
-          },
-          hourly: {
-            query: createSQLQuery('operations_hourly', true),
-            queryId: 'duration_and_count_over_time_hourly',
-            timeout: 15_000,
-            span,
-          },
-          minutely: {
-            query: createSQLQuery('operations_minutely', true),
-            queryId: 'duration_and_count_over_time_regular',
-            timeout: 15_000,
-            span,
-          },
-        },
-        period,
-        resolution,
-      ),
-    );
+    }>(query);
 
     return result.data.map(row => {
       return {

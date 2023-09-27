@@ -294,6 +294,7 @@ export function GraphQLTypeCard(props: {
 }
 
 function GraphQLArguments(props: {
+  parentCoordinate: string;
   args: FragmentType<typeof GraphQLArguments_ArgumentFragment>[];
 }) {
   const args = useFragment(GraphQLArguments_ArgumentFragment, props.args);
@@ -312,9 +313,10 @@ function GraphQLArguments(props: {
         <span className="text-gray-400">(</span>
         <div className="pl-4">
           {args.map(arg => {
+            const coordinate = `${props.parentCoordinate}.${arg.name}`;
             return (
               <div key={arg.name}>
-                {arg.name}
+                <LinkToCoordinatePage coordinate={coordinate}>{arg.name}</LinkToCoordinatePage>
                 {': '}
                 <GraphQLTypeAsLink type={arg.type} />
                 {arg.description ? <Description description={arg.description} /> : null}
@@ -332,9 +334,10 @@ function GraphQLArguments(props: {
       <span className="text-gray-400">(</span>
       <span className="space-x-2">
         {args.slice(0, 2).map(arg => {
+          const coordinate = `${props.parentCoordinate}.${arg.name}`;
           return (
             <span key={arg.name}>
-              {arg.name}
+              <LinkToCoordinatePage coordinate={coordinate}>{arg.name}</LinkToCoordinatePage>
               {': '}
               <GraphQLTypeAsLink type={arg.type} />
             </span>
@@ -375,6 +378,7 @@ export function GraphQLTypeCardListItem(props: {
 }
 
 export function GraphQLFields(props: {
+  typeName: string;
   fields: Array<FragmentType<typeof GraphQLFields_FieldFragment>>;
   totalRequests: number;
   collapsed?: boolean;
@@ -392,11 +396,15 @@ export function GraphQLFields(props: {
   return (
     <div className="flex flex-col">
       {fields.map((field, i) => {
+        const coordinate = `${props.typeName}.${field.name}`;
+
         return (
           <GraphQLTypeCardListItem key={field.name} index={i}>
             <div>
-              {field.name}
-              {field.args.length > 0 ? <GraphQLArguments args={field.args} /> : null}
+              <LinkToCoordinatePage coordinate={coordinate}>{field.name}</LinkToCoordinatePage>
+              {field.args.length > 0 ? (
+                <GraphQLArguments parentCoordinate={coordinate} args={field.args} />
+              ) : null}
               <span className="mr-1">:</span>
               <GraphQLTypeAsLink type={field.type} />
             </div>
@@ -431,6 +439,7 @@ export function GraphQLFields(props: {
 }
 
 export function GraphQLInputFields(props: {
+  typeName: string;
   fields: FragmentType<typeof GraphQLInputFields_InputFieldFragment>[];
   totalRequests: number;
   targetCleanId: string;
@@ -441,10 +450,11 @@ export function GraphQLInputFields(props: {
   return (
     <div className="flex flex-col">
       {fields.map((field, i) => {
+        const coordinate = `${props.typeName}.${field.name}`;
         return (
           <GraphQLTypeCardListItem key={field.name} index={i}>
             <div>
-              {field.name}
+              <LinkToCoordinatePage coordinate={coordinate}>{field.name}</LinkToCoordinatePage>
               <span className="mr-1">:</span>
               <GraphQLTypeAsLink type={field.type} />
             </div>
@@ -480,6 +490,31 @@ function GraphQLTypeAsLink(props: { type: string }): ReactElement {
       }}
     >
       {props.type}
+    </Link>
+  );
+}
+
+export function LinkToCoordinatePage(props: {
+  coordinate: string;
+  children: ReactNode;
+}): ReactElement {
+  const router = useRouteSelector();
+
+  return (
+    <Link
+      className="text-orange-500"
+      href={{
+        pathname:
+          '/[organizationId]/[projectId]/[targetId]/operations/schema-coordinate/[coordinate]',
+        query: {
+          organizationId: router.organizationId,
+          projectId: router.projectId,
+          targetId: router.targetId,
+          coordinate: props.coordinate,
+        },
+      }}
+    >
+      {props.children}
     </Link>
   );
 }

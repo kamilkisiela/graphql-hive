@@ -59,6 +59,8 @@ const config: CodegenConfig = {
             '../shared/mappers#OperationStatsConnection as OperationStatsConnectionMapper',
           ClientStatsConnection:
             '../shared/mappers#ClientStatsConnection as ClientStatsConnectionMapper',
+          SchemaCoordinateStats:
+            '../shared/mappers#SchemaCoordinateStats as SchemaCoordinateStatsMapper',
           OperationsStats: '../shared/mappers#OperationsStats as OperationsStatsMapper',
           DurationStats: '../shared/mappers#DurationStats as DurationStatsMapper',
           SchemaComparePayload:
