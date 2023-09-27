@@ -63,7 +63,7 @@
     "@graphql-codegen/typescript-resolvers": "4.0.1",
     "@graphql-inspector/cli": "4.0.2",
     "@manypkg/get-packages": "2.2.0",
-    "@next/eslint-plugin-next": "13.4.11",
+    "@next/eslint-plugin-next": "13.5.3",
     "@sentry/cli": "2.20.7",
     "@swc/core": "1.3.85",
     "@theguild/eslint-config": "0.11.0",
@@ -74,10 +74,10 @@
     "dotenv": "16.3.1",
     "eslint": "8.50.0",
     "eslint-plugin-cypress": "2.15.1",
-    "eslint-plugin-hive": "file:./rules",
+    "eslint-plugin-hive": "file:rules",
     "eslint-plugin-tailwindcss": "3.12.1",
     "fs-extra": "11.1.1",
-    "graphql": "16.6.0",
+    "graphql": "16.8.1",
     "husky": "8.0.3",
     "jest-snapshot-serializer-raw": "2.0.0",
     "lint-staged": "14.0.1",
@@ -89,7 +89,7 @@
     "rimraf": "4.4.1",
     "ts-node": "10.9.1",
     "tsup": "7.2.0",
-    "tsx": "3.12.10",
+    "tsx": "3.13.0",
     "turbo": "1.10.14",
     "typescript": "5.2.2",
     "vitest": "0.31.1"
@@ -122,10 +122,11 @@
       "eslint@8.50.0": "patches/eslint@8.50.0.patch",
       "@oclif/core@2.8.5": "patches/@oclif__core@2.8.5.patch",
       "@graphql-eslint/eslint-plugin@3.20.1": "patches/@graphql-eslint__eslint-plugin@3.20.1.patch",
-      "nextra-theme-docs@2.9.0": "patches/nextra-theme-docs@2.9.0.patch",
-      "@theguild/components@5.2.1": "patches/@theguild__components@5.2.1.patch",
       "graphiql@3.0.0-alpha.0": "patches/graphiql@3.0.0-alpha.0.patch",
-      "@graphiql/react@0.18.0-alpha.0": "patches/@graphiql__react@0.18.0-alpha.0.patch"
+      "@graphiql/react@0.18.0-alpha.0": "patches/@graphiql__react@0.18.0-alpha.0.patch",
+      "nextra-theme-docs@2.12.3": "patches/nextra-theme-docs@2.12.3.patch",
+      "@theguild/components@5.2.4": "patches/@theguild__components@5.2.4.patch",
+      "nextra@2.12.3": "patches/nextra@2.12.3.patch"
     }
   }
 }

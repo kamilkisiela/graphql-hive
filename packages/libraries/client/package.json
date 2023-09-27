@@ -62,6 +62,7 @@
     "@apollo/subgraph": "2.5.5",
     "@envelop/types": "4.0.1",
     "@types/async-retry": "1.4.5",
+    "graphql": "16.8.1",
     "graphql-yoga": "4.0.4",
     "nock": "13.3.3",
     "vitest": "0.31.1"
