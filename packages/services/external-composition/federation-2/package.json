@@ -13,7 +13,7 @@
     "@whatwg-node/fetch": "0.9.13",
     "@whatwg-node/server": "0.9.10",
     "graphql": "16.8.1",
-    "lru-cache": "^7.17.0",
+    "lru-cache": "^10.0.0",
     "zod": "3.22.2"
   }
 }
