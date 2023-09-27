@@ -197,8 +197,8 @@ importers:
         specifier: 2.2.0
         version: 2.2.0
       '@pulumi/cloudflare':
-        specifier: 5.11.0
-        version: 5.11.0
+        specifier: 4.16.0
+        version: 4.16.0
       '@pulumi/kubernetes':
         specifier: 4.3.0
         version: 4.3.0
@@ -9733,8 +9733,9 @@ packages:
   /@protobufjs/utf8@1.1.0:
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
 
-  /@pulumi/cloudflare@5.11.0:
-    resolution: {integrity: sha512-CIEW9Hlh2KjZvQRCFdlZCWktUet3dDjgVyaX8cBkqJvy7QIjNyleB2Swf/kjZZkJJyMrHGDkj9RugXqj08giuQ==}
+  /@pulumi/cloudflare@4.16.0:
+    resolution: {integrity: sha512-cwdB70bLeKL/VNIqqOD5fpHQcocVmpHuiHH589eR+QUfbLa4f+M8yA/TTCcxx2AFFctTqO5wgVuC+faL8xZmWQ==}
+    requiresBuild: true
     dependencies:
       '@pulumi/pulumi': 3.85.0
     transitivePeerDependencies:
