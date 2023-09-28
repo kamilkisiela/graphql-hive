@@ -716,6 +716,64 @@ export class OperationsManager {
     });
   }
 
+  async readClientVersions({
+    period,
+    organization,
+    project,
+    target,
+    clientName,
+    limit,
+  }: {
+    period: DateRange;
+    clientName: string;
+    limit: number;
+  } & TargetSelector) {
+    this.logger.info('Read client versions (period=%o, target=%s)', period, target);
+    await this.authManager.ensureTargetAccess({
+      organization,
+      project,
+      target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    return this.reader.readClientVersions({
+      target,
+      period,
+      limit,
+      clientName,
+    });
+  }
+
+  async countClientVersions({
+    period,
+    organization,
+    project,
+    target,
+    clientName,
+  }: {
+    period: DateRange;
+    clientName: string;
+  } & TargetSelector) {
+    this.logger.info(
+      'Count client versions (period=%o, target=%s, client=%s)',
+      period,
+      target,
+      clientName,
+    );
+    await this.authManager.ensureTargetAccess({
+      organization,
+      project,
+      target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    return this.reader.countClientVersions({
+      target,
+      period,
+      clientName,
+    });
+  }
+
   private clientNamesPerCoordinateOfTypeDataLoaderCache = new Map<
     string,
     DataLoader<string, Map<string, Set<string>>>

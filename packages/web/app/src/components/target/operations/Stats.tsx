@@ -17,6 +17,7 @@ import {
   useFormattedDuration,
   useFormattedNumber,
   useFormattedThroughput,
+  useRouteSelector,
 } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { useChartStyles } from '@/utils';
@@ -368,6 +369,7 @@ function getLevelOption() {
 function ClientsStats(props: {
   operationStats: FragmentType<typeof ClientsStats_OperationsStatsFragment> | null;
 }): ReactElement {
+  const router = useRouteSelector();
   const styles = useChartStyles();
   const operationStats = useFragment(ClientsStats_OperationsStatsFragment, props.operationStats);
   const sortedClients = useMemo(() => {
@@ -491,6 +493,23 @@ function ClientsStats(props: {
 
   const [isOpen, setIsOpen] = useState(false);
 
+  const onClientNameClick = useCallback(
+    (ev: { componentType: string; targetType: string; value: string }) => {
+      if (ev.componentType === 'yAxis' && ev.targetType === 'axisLabel') {
+        void router.push({
+          pathname: '/[organizationId]/[projectId]/[targetId]/operations/client/[name]',
+          query: {
+            organizationId: router.organizationId,
+            projectId: router.projectId,
+            targetId: router.targetId,
+            name: ev.value,
+          },
+        });
+      }
+    },
+    [router],
+  );
+
   return (
     <div className="w-full rounded-md bg-gray-900/50 p-5 border border-gray-800">
       <Section.Title>Clients</Section.Title>
@@ -510,6 +529,9 @@ function ClientsStats(props: {
                 style={{
                   width: innerWidth / 2,
                   height: 200,
+                }}
+                onEvents={{
+                  click: onClientNameClick,
                 }}
                 option={{
                   ...styles,
@@ -539,6 +561,7 @@ function ClientsStats(props: {
                   yAxis: {
                     type: 'category',
                     data: byClient.labels,
+                    triggerEvent: true,
                   },
                   series: [
                     {

@@ -854,6 +854,7 @@ export class OperationsReader {
                   : [],
               })}
               GROUP BY client_name, client_version
+              ORDER BY total DESC
             `,
             queryId: 'count_clients_daily',
             timeout: 10_000,
@@ -881,6 +882,7 @@ export class OperationsReader {
                   : [],
               })}
               GROUP BY client_name, client_version
+              ORDER BY total DESC
             `,
             queryId: 'count_clients_hourly',
             timeout: 10_000,
@@ -908,6 +910,7 @@ export class OperationsReader {
                   : [],
               })}
               GROUP BY client_name, client_version
+              ORDER BY total DESC
             `,
             queryId: 'count_clients_regular',
             timeout: 10_000,
@@ -965,6 +968,178 @@ export class OperationsReader {
         percentage: (client.total / total) * 100,
       };
     });
+  }
+
+  @sentry('OperationsReader.readClientVersions')
+  async readClientVersions(
+    {
+      target,
+      period,
+      clientName,
+      limit,
+    }: {
+      target: string;
+      period: DateRange;
+      clientName: string;
+      limit: number;
+    },
+    span?: Span,
+  ): Promise<{ version: string; count: number; percentage: number }[]> {
+    const result = await this.clickHouse.query<{
+      total: string;
+      client_version: string;
+    }>(
+      this.pickQueryByPeriod(
+        {
+          daily: {
+            query: sql`
+              SELECT 
+                sum(total) as total,
+                client_version
+              FROM clients_daily
+              ${this.createFilter({
+                target,
+                period,
+                clients: [clientName],
+              })}
+              GROUP BY client_version
+              ORDER BY total DESC
+              LIMIT ${sql.raw(limit.toString())}
+            `,
+            queryId: 'read_client_versions_daily',
+            timeout: 10_000,
+            span,
+          },
+          hourly: {
+            query: sql`
+              SELECT 
+                sum(total) as total,
+                client_version
+              FROM operations_hourly
+              ${this.createFilter({
+                target,
+                period,
+                clients: [clientName],
+              })}
+              GROUP BY client_version
+              ORDER BY total DESC
+              LIMIT ${sql.raw(limit.toString())}
+            `,
+            queryId: 'read_client_versions_hourly',
+            timeout: 10_000,
+            span,
+          },
+          minutely: {
+            query: sql`
+              SELECT 
+                sum(total) as total,
+                client_version
+              FROM operations_minutely
+              ${this.createFilter({
+                target,
+                period,
+                clients: [clientName],
+              })}
+              GROUP BY client_version
+              ORDER BY total DESC
+              LIMIT ${sql.raw(limit.toString())}
+            `,
+            queryId: 'read_client_versions_regular',
+            timeout: 10_000,
+            span,
+          },
+        },
+        period,
+      ),
+    );
+
+    const total = result.data.reduce((sum, row) => sum + parseInt(row.total, 10), 0);
+
+    return result.data.map(row => {
+      const versionTotal = ensureNumber(row.total);
+      return {
+        version: row.client_version || 'unknown',
+        count: versionTotal,
+        percentage: (versionTotal / total) * 100,
+      };
+    });
+  }
+
+  @sentry('OperationsReader.readClientVersions')
+  async countClientVersions(
+    {
+      target,
+      period,
+      clientName,
+    }: {
+      target: string;
+      period: DateRange;
+      clientName: string;
+    },
+    span?: Span,
+  ): Promise<number> {
+    const result = await this.clickHouse.query<{
+      total: string;
+    }>(
+      this.pickQueryByPeriod(
+        {
+          daily: {
+            query: sql`
+              SELECT 
+                count(distinct client_version) as total
+              FROM clients_daily
+              ${this.createFilter({
+                target,
+                period,
+                clients: [clientName],
+              })}
+              GROUP BY client_name
+              LIMIT 1
+            `,
+            queryId: 'count_client_versions_daily',
+            timeout: 10_000,
+            span,
+          },
+          hourly: {
+            query: sql`
+              SELECT 
+                count(distinct client_version) as total
+              FROM operations_hourly
+              ${this.createFilter({
+                target,
+                period,
+                clients: [clientName],
+              })}
+              GROUP BY client_name
+              LIMIT 1
+            `,
+            queryId: 'count_client_versions_hourly',
+            timeout: 10_000,
+            span,
+          },
+          minutely: {
+            query: sql`
+              SELECT 
+                count(distinct client_version) as total
+              FROM operations_minutely
+              ${this.createFilter({
+                target,
+                period,
+                clients: [clientName],
+              })}
+              GROUP BY client_name
+              LIMIT 1
+            `,
+            queryId: 'count_client_versions_regular',
+            timeout: 10_000,
+            span,
+          },
+        },
+        period,
+      ),
+    );
+
+    return result.data.length > 0 ? ensureNumber(result.data[0].total) : 0;
   }
 
   @sentry('OperationsReader.getTopOperationsForTypes')

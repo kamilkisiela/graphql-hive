@@ -165,9 +165,23 @@ export function SchemaExplorerUsageStats(props: {
                 <>
                   <div className="mb-2">This field is used by the following clients:</div>
                   <ul>
-                    {usage.usedByClients.map(item => (
-                      <li key={item} className="font-bold">
-                        {item}
+                    {usage.usedByClients.map(clientName => (
+                      <li key={clientName} className="font-bold">
+                        <Link
+                          className="text-orange-500 hover:underline hover:underline-offset-2 hover:text-orange-500"
+                          href={{
+                            pathname:
+                              '/[organizationId]/[projectId]/[targetId]/operations/client/[name]',
+                            query: {
+                              organizationId: props.organizationCleanId,
+                              projectId: props.projectCleanId,
+                              targetId: props.targetCleanId,
+                              name: clientName,
+                            },
+                          }}
+                        >
+                          {clientName}
+                        </Link>
                       </li>
                     ))}
                   </ul>
