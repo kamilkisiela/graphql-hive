@@ -1,11 +1,12 @@
 import { createHash } from 'crypto';
 import type { Redis } from 'ioredis';
+import stringify from 'json-stable-stringify';
 import pTimeout, { TimeoutError } from 'p-timeout';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import { externalCompositionCounter } from './metrics';
 
 function createChecksum<TInput>(input: TInput): string {
-  return createHash('sha256').update(JSON.stringify(input)).digest('hex');
+  return createHash('sha256').update(stringify(input)).digest('hex');
 }
 
 type CacheTTLType = 'long' | 'short';
