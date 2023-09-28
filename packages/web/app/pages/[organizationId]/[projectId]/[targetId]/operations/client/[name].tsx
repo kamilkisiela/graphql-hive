@@ -321,6 +321,9 @@ function ClientView(props: {
                 {props.clientName} had {isLoading ? '-' : totalVersions}{' '}
                 {totalVersions > 1 ? 'versions' : 'version'} in{' '}
                 {displayDateRangeLabel(dateRangeKey).toLowerCase()}.
+                {!isLoading && totalVersions > 25
+                  ? 'Displaying only 25 most popular versions'
+                  : null}
               </CardDescription>
             </CardHeader>
             <CardContent className="basis-0 grow overflow-y-auto min-h-[170px]">
