@@ -1,6 +1,27 @@
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode, useCallback, useState } from 'react';
 import NextLink from 'next/link';
+import {
+  ArrowLeftIcon,
+  ArrowLeftRightIcon,
+  CalendarDaysIcon,
+  CreditCardIcon,
+  FileTextIcon,
+  LayoutDashboardIcon,
+  LifeBuoyIcon,
+  SettingsIcon,
+  SirenIcon,
+  UsersIcon,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  useCommand,
+} from '@/components/ui/command';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { UserMenu } from '@/components/ui/user-menu';
 import { HiveLink, Tabs } from '@/components/v2';
@@ -14,6 +35,7 @@ import {
   useOrganizationAccess,
 } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
+import { getDocsUrl } from '@/lib/docs-url';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { ProPlanBilling } from '../organization/billing/ProPlanBillingWarm';
 import { RateLimitWarn } from '../organization/billing/RateLimitWarn';
@@ -74,11 +96,31 @@ export function OrganizationLayout({
 }): ReactElement | null {
   const router = useRouteSelector();
   const [isModalOpen, toggleModalOpen] = useToggle();
+  const cmd = useCommand();
+  const [cmdPage, setCmdPage] = useState<'root' | 'projects'>('root');
+  const docsUrl = getDocsUrl();
 
   const currentOrganization = useFragment(
     OrganizationLayout_CurrentOrganizationFragment,
     props.currentOrganization,
   );
+
+  const visitOrganization = useCallback(
+    (id: string) => {
+      router.visitOrganization({
+        organizationId: id,
+      });
+    },
+    [router],
+  );
+
+  const goBack = useCallback(() => {
+    setCmdPage('root');
+  }, [setCmdPage]);
+
+  const goToProjects = useCallback(() => {
+    setCmdPage('projects');
+  }, [setCmdPage]);
 
   useOrganizationAccess({
     member: currentOrganization?.me ?? null,
@@ -96,19 +138,102 @@ export function OrganizationLayout({
 
   return (
     <>
+      <CommandDialog open={cmd.isOpen} onOpenChange={cmd.toggle}>
+        <CommandInput
+          placeholder={cmdPage === 'root' ? 'Type a command or search...' : 'Search projects...'}
+        />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+
+          {cmdPage === 'projects' ? (
+            <>
+              <CommandGroup>
+                <CommandItem onSelect={goBack}>
+                  <ArrowLeftIcon className="mr-2 h-4 w-4" /> Go back
+                </CommandItem>
+                <CommandItem>project 1</CommandItem>
+                <CommandItem>project 2</CommandItem>
+                <CommandItem>project 3</CommandItem>
+              </CommandGroup>
+            </>
+          ) : null}
+
+          {cmdPage === 'root' ? (
+            <>
+              <CommandGroup heading="Projects">
+                <CommandItem onSelect={goToProjects}>
+                  <ArrowLeftRightIcon className="mr-2 h-4 w-4" /> Search organizations...
+                </CommandItem>
+                <CommandItem onSelect={toggleModalOpen}>
+                  <PlusIcon className="mr-2 h-4 w-4" /> Create new project...
+                </CommandItem>
+              </CommandGroup>
+              <CommandGroup heading="Pages">
+                <CommandItem>
+                  <LayoutDashboardIcon className="mr-2 h-4 w-4" /> Go to Overview
+                </CommandItem>
+                <CommandItem>
+                  <UsersIcon className="mr-2 h-4 w-4" /> Go to Members
+                </CommandItem>
+                <CommandItem>
+                  <SirenIcon className="mr-2 h-4 w-4" /> Go to Policy
+                </CommandItem>
+                <CommandItem>
+                  <SettingsIcon className="mr-2 h-4 w-4" /> Go to Settings
+                </CommandItem>
+                <CommandItem>
+                  <CreditCardIcon className="mr-2 h-4 w-4" /> Manage Subscription
+                </CommandItem>
+              </CommandGroup>
+              <CommandGroup heading="Help">
+                <CommandItem
+                  onSelect={() => {
+                    void router.push('https://cal.com/team/the-guild/graphql-hive-15m');
+                  }}
+                >
+                  <CalendarDaysIcon className="mr-2 h-4 w-4" /> Schedule a meeting
+                </CommandItem>
+                {docsUrl ? (
+                  <CommandItem
+                    onSelect={() => {
+                      void router.push(docsUrl);
+                    }}
+                  >
+                    <FileTextIcon className="mr-2 h-4 w-4" /> Visit documentation
+                  </CommandItem>
+                ) : null}
+                <CommandItem>
+                  <LifeBuoyIcon className="mr-2 h-4 w-4" /> Contact support
+                </CommandItem>
+              </CommandGroup>
+            </>
+          ) : null}
+          {/* {currentOrganization && organizations ? (
+            <>
+              <CommandSeparator />
+              <CommandGroup heading="Organizations">
+                {organizations.map(org => (
+                  <CommandItem
+                    key={org.cleanId}
+                    onSelect={() => {
+                      console.log('command clicked');
+                      visitOrganization(org.cleanId);
+                    }}
+                  >
+                    {org.name}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </>
+          ) : null} */}
+        </CommandList>
+      </CommandDialog>
       <header>
         <div className="container flex h-[84px] items-center justify-between">
           <div className="flex flex-row items-center gap-4">
             <HiveLink className="w-8 h-8" />
             {currentOrganization && organizations ? (
-              <Select
-                defaultValue={currentOrganization.cleanId}
-                onValueChange={id => {
-                  router.visitOrganization({
-                    organizationId: id,
-                  });
-                }}
-              >
+              <Select defaultValue={currentOrganization.cleanId} onValueChange={visitOrganization}>
                 <SelectTrigger variant="default">
                   <div className="font-medium" data-cy="organization-picker-current">
                     {currentOrganization.name}

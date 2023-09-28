@@ -52,6 +52,7 @@
     "@whatwg-node/fetch": "0.9.13",
     "class-variance-authority": "0.7.0",
     "clsx": "2.0.0",
+    "cmdk": "0.2.0",
     "cookies": "0.8.0",
     "date-fns": "2.30.0",
     "dompurify": "3.0.5",
