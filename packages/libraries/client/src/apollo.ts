@@ -176,6 +176,15 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
       if (isLegacyV3) {
         return Promise.resolve({
           async willSendResponse(ctx) {
+            if (!ctx.document) {
+              const details = ctx.operationName ? `operationName: ${ctx.operationName}` : '';
+              complete(args, {
+                action: 'abort',
+                reason: 'Document is not available' + (details ? ` (${details})` : ''),
+              });
+              return;
+            }
+
             doc = ctx.document!;
             complete(args, ctx.response as any);
           },
@@ -185,7 +194,16 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
       // v4
       return Promise.resolve({
         async willSendResponse(ctx) {
-          doc = ctx.document!;
+          if (!ctx.document) {
+            const details = ctx.operationName ? `operationName: ${ctx.operationName}` : '';
+            complete(args, {
+              action: 'abort',
+              reason: 'Document is not available' + (details ? ` (${details})` : ''),
+            });
+            return;
+          }
+
+          doc = ctx.document;
           if (ctx.response.body.kind === 'incremental') {
             complete(args, {
               action: 'abort',
