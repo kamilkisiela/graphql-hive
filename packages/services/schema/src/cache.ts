@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
+import stringify from 'fast-json-stable-stringify';
 import type { Redis } from 'ioredis';
-import stringify from 'json-stable-stringify';
 import pTimeout, { TimeoutError } from 'p-timeout';
 import type { FastifyLoggerInstance } from '@hive/service-common';
 import { externalCompositionCounter } from './metrics';
