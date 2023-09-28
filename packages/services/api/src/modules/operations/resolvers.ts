@@ -70,6 +70,22 @@ export const resolvers: OperationsModule.Resolvers = {
         schemaCoordinate: selector.schemaCoordinate,
       };
     },
+    async clientStats(_, { selector }, { injector }) {
+      const translator = injector.get(IdTranslator);
+      const [organization, project, target] = await Promise.all([
+        translator.translateOrganizationId(selector),
+        translator.translateProjectId(selector),
+        translator.translateTargetId(selector),
+      ]);
+
+      return {
+        period: parseDateRangeInput(selector.period),
+        organization,
+        project,
+        target,
+        clientName: selector.client,
+      };
+    },
     async operationsStats(_, { selector }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organization, project, target] = await Promise.all([
@@ -211,6 +227,84 @@ export const resolvers: OperationsModule.Resolvers = {
         organization,
         period,
         schemaCoordinate,
+      });
+    },
+  },
+  ClientStats: {
+    totalRequests({ organization, project, target, period, clientName }, _, { injector }) {
+      return injector.get(OperationsManager).countRequests({
+        organization,
+        project,
+        target,
+        period,
+        clients: [clientName],
+      });
+    },
+    totalVersions({ organization, project, target, period, clientName }, _, { injector }) {
+      return injector.get(OperationsManager).countClientVersions({
+        organization,
+        project,
+        target,
+        period,
+        clientName,
+      });
+    },
+    requestsOverTime(
+      { organization, project, target, period, clientName },
+      { resolution },
+      { injector },
+    ) {
+      return injector.get(OperationsManager).readRequestsOverTime({
+        target,
+        project,
+        organization,
+        period,
+        resolution,
+        clients: [clientName],
+      });
+    },
+    async operations({ organization, project, target, period, clientName }, args, { injector }) {
+      const operationsManager = injector.get(OperationsManager);
+      const [operations, durations] = await Promise.all([
+        operationsManager.readOperationsStats({
+          organization,
+          project,
+          target,
+          period,
+          clients: [clientName],
+        }),
+        operationsManager.readDetailedDurationPercentiles({
+          organization,
+          project,
+          target,
+          period,
+          clients: [clientName],
+        }),
+      ]);
+
+      return operations
+        .map(op => {
+          return {
+            id: hash(`${op.operationName}__${op.operationHash}`),
+            kind: op.kind,
+            name: op.operationName,
+            count: op.count,
+            countOk: op.countOk,
+            percentage: op.percentage,
+            duration: durations.get(op.operationHash)!,
+            operationHash: op.operationHash,
+          };
+        })
+        .sort((a, b) => b.count - a.count);
+    },
+    async versions({ organization, project, target, period, clientName }, { limit }, { injector }) {
+      return injector.get(OperationsManager).readClientVersions({
+        target,
+        project,
+        organization,
+        period,
+        clientName,
+        limit,
       });
     },
   },
@@ -366,7 +460,7 @@ export const resolvers: OperationsModule.Resolvers = {
       });
     },
   },
-  DurationStats: {
+  DurationValues: {
     p75(value) {
       return transformPercentile(value.p75);
     },
@@ -380,8 +474,8 @@ export const resolvers: OperationsModule.Resolvers = {
       return transformPercentile(value.p99);
     },
   },
-  OperationStatsConnection: createConnection(),
-  ClientStatsConnection: createConnection(),
+  OperationStatsValuesConnection: createConnection(),
+  ClientStatsValuesConnection: createConnection(),
   OrganizationGetStarted: {
     reportingOperations(organization, _, { injector }) {
       if (organization.reportingOperations === true) {

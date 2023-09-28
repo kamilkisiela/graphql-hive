@@ -12,8 +12,8 @@ import type {
   GraphQLUnionType,
 } from 'graphql';
 import type {
-  ClientStats,
-  OperationStats,
+  ClientStatsValues,
+  OperationStatsValues,
   SchemaChange,
   SchemaError,
 } from '../__generated__/types';
@@ -168,10 +168,10 @@ export type TargetConnection = readonly Target[];
 export type PersistedOperationConnection = readonly PersistedOperation[];
 export type SchemaConnection = readonly Schema[];
 export type TokenConnection = readonly Token[];
-export type OperationStatsConnection = ReadonlyArray<
-  Omit<OperationStats, 'duration'> & { duration: DurationStats }
+export type OperationStatsValuesConnection = ReadonlyArray<
+  Omit<OperationStatsValues, 'duration'> & { duration: DurationValues }
 >;
-export type ClientStatsConnection = readonly ClientStats[];
+export type ClientStatsValuesConnection = readonly ClientStatsValues[];
 export type SchemaVersionConnection = {
   nodes: readonly SchemaVersion[];
   hasMore: boolean;
@@ -220,7 +220,15 @@ export interface SchemaCoordinateStats {
   schemaCoordinate: string;
 }
 
-export interface DurationStats {
+export interface ClientStats {
+  organization: string;
+  project: string;
+  target: string;
+  period: DateRange;
+  clientName: string;
+}
+
+export interface DurationValues {
   p75: number | null;
   p90: number | null;
   p95: number | null;

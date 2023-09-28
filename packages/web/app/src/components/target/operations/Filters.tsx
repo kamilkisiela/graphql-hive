@@ -9,13 +9,13 @@ import { DateRangeInput } from '@/graphql';
 import { useFormattedNumber, useRouteSelector, useToggle } from '@/lib/hooks';
 import { ChevronUpIcon } from '@radix-ui/react-icons';
 
-const OperationsFilter_OperationStatsConnectionFragment = graphql(`
-  fragment OperationsFilter_OperationStatsConnectionFragment on OperationStatsConnection {
+const OperationsFilter_OperationStatsValuesConnectionFragment = graphql(`
+  fragment OperationsFilter_OperationStatsValuesConnectionFragment on OperationStatsValuesConnection {
     nodes {
       id
       operationHash
       name
-      ...OperationRow_OperationStatsFragment
+      ...OperationRow_OperationStatsValuesFragment
     }
   }
 `);
@@ -30,11 +30,13 @@ function OperationsFilter({
   onClose(): void;
   onFilter(keys: string[]): void;
   isOpen: boolean;
-  operationStatsConnection: FragmentType<typeof OperationsFilter_OperationStatsConnectionFragment>;
+  operationStatsConnection: FragmentType<
+    typeof OperationsFilter_OperationStatsValuesConnectionFragment
+  >;
   selected?: string[];
 }): ReactElement {
   const operations = useFragment(
-    OperationsFilter_OperationStatsConnectionFragment,
+    OperationsFilter_OperationStatsValuesConnectionFragment,
     operationStatsConnection,
   );
 
@@ -174,7 +176,7 @@ const OperationsFilterContainer_OperationStatsQuery = graphql(`
   query OperationsFilterContainer_OperationStatsQuery($selector: OperationsStatsSelectorInput!) {
     operationsStats(selector: $selector) {
       operations {
-        ...OperationsFilter_OperationStatsConnectionFragment
+        ...OperationsFilter_OperationStatsValuesConnectionFragment
         total
       }
     }
@@ -229,8 +231,8 @@ function OperationsFilterContainer({
   );
 }
 
-const OperationRow_OperationStatsFragment = graphql(`
-  fragment OperationRow_OperationStatsFragment on OperationStats {
+const OperationRow_OperationStatsValuesFragment = graphql(`
+  fragment OperationRow_OperationStatsValuesFragment on OperationStatsValues {
     id
     name
     operationHash
@@ -244,12 +246,12 @@ function OperationRow({
   onSelect,
   style,
 }: {
-  operationStats: FragmentType<typeof OperationRow_OperationStatsFragment>;
+  operationStats: FragmentType<typeof OperationRow_OperationStatsValuesFragment>;
   selected: boolean;
   onSelect(id: string, selected: boolean): void;
   style: any;
 }): ReactElement {
-  const operation = useFragment(OperationRow_OperationStatsFragment, operationStats);
+  const operation = useFragment(OperationRow_OperationStatsValuesFragment, operationStats);
   const requests = useFormattedNumber(operation.count);
   const hash = operation.operationHash || '';
   const change = useCallback(() => {
@@ -299,8 +301,8 @@ export function OperationsFilterTrigger({
   );
 }
 
-const ClientRow_ClientStatsFragment = graphql(`
-  fragment ClientRow_ClientStatsFragment on ClientStats {
+const ClientRow_ClientStatsValuesFragment = graphql(`
+  fragment ClientRow_ClientStatsValuesFragment on ClientStatsValues {
     name
     count
   }
@@ -312,12 +314,12 @@ function ClientRow({
   style,
   ...props
 }: {
-  client: FragmentType<typeof ClientRow_ClientStatsFragment>;
+  client: FragmentType<typeof ClientRow_ClientStatsValuesFragment>;
   selected: boolean;
   onSelect(id: string, selected: boolean): void;
   style: any;
 }): ReactElement {
-  const client = useFragment(ClientRow_ClientStatsFragment, props.client);
+  const client = useFragment(ClientRow_ClientStatsValuesFragment, props.client);
   const requests = useFormattedNumber(client.count);
   const hash = client.name;
   const change = useCallback(() => {
@@ -340,11 +342,11 @@ function ClientRow({
   );
 }
 
-const ClientsFilter_ClientStatsConnectionFragment = graphql(`
-  fragment ClientsFilter_ClientStatsConnectionFragment on ClientStatsConnection {
+const ClientsFilter_ClientStatsValuesConnectionFragment = graphql(`
+  fragment ClientsFilter_ClientStatsValuesConnectionFragment on ClientStatsValuesConnection {
     nodes {
       name
-      ...ClientRow_ClientStatsFragment
+      ...ClientRow_ClientStatsValuesFragment
     }
   }
 `);
@@ -359,11 +361,11 @@ function ClientsFilter({
   onClose(): void;
   onFilter(keys: string[]): void;
   isOpen: boolean;
-  clientStatsConnection: FragmentType<typeof ClientsFilter_ClientStatsConnectionFragment>;
+  clientStatsConnection: FragmentType<typeof ClientsFilter_ClientStatsValuesConnectionFragment>;
   selected?: string[];
 }): ReactElement {
   const clientConnection = useFragment(
-    ClientsFilter_ClientStatsConnectionFragment,
+    ClientsFilter_ClientStatsValuesConnectionFragment,
     clientStatsConnection,
   );
   function getClientNames() {
@@ -496,7 +498,7 @@ const ClientsFilterContainer_ClientStatsQuery = graphql(`
   query ClientsFilterContainer_ClientStats($selector: OperationsStatsSelectorInput!) {
     operationsStats(selector: $selector) {
       clients {
-        ...ClientsFilter_ClientStatsConnectionFragment
+        ...ClientsFilter_ClientStatsValuesConnectionFragment
         nodes {
           __typename
         }

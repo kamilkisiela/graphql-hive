@@ -55,14 +55,15 @@ const config: CodegenConfig = {
           TargetConnection: '../shared/mappers#TargetConnection as TargetConnectionMapper',
           SchemaConnection: '../shared/mappers#SchemaConnection as SchemaConnectionMapper',
           TokenConnection: '../shared/mappers#TokenConnection as TokenConnectionMapper',
-          OperationStatsConnection:
-            '../shared/mappers#OperationStatsConnection as OperationStatsConnectionMapper',
-          ClientStatsConnection:
-            '../shared/mappers#ClientStatsConnection as ClientStatsConnectionMapper',
+          OperationStatsValuesConnection:
+            '../shared/mappers#OperationStatsValuesConnection as OperationStatsValuesConnectionMapper',
+          ClientStatsValuesConnection:
+            '../shared/mappers#ClientStatsValuesConnection as ClientStatsValuesConnectionMapper',
           SchemaCoordinateStats:
             '../shared/mappers#SchemaCoordinateStats as SchemaCoordinateStatsMapper',
+          ClientStats: '../shared/mappers#ClientStats as ClientStatsMapper',
           OperationsStats: '../shared/mappers#OperationsStats as OperationsStatsMapper',
-          DurationStats: '../shared/mappers#DurationStats as DurationStatsMapper',
+          DurationValues: '../shared/mappers#DurationValues as DurationValuesMapper',
           SchemaComparePayload:
             '../shared/mappers#SchemaComparePayload as SchemaComparePayloadMapper',
           SchemaCompareResult: '../shared/mappers#SchemaCompareResult as SchemaCompareResultMapper',

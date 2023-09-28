@@ -2,12 +2,13 @@ import { gql } from 'graphql-modules';
 
 export default gql`
   extend type Query {
-    fieldStats(selector: FieldStatsInput!): FieldStats!
-    fieldListStats(selector: FieldListStatsInput!): [FieldStats!]!
+    fieldStats(selector: FieldStatsInput!): FieldStatsValues!
+    fieldListStats(selector: FieldListStatsInput!): [FieldStatsValues!]!
     operationsStats(selector: OperationsStatsSelectorInput!): OperationsStats!
     schemaCoordinateStats(selector: SchemaCoordinateStatsInput!): SchemaCoordinateStats!
+    clientStats(selector: ClientStatsInput!): ClientStats!
     hasCollectedOperations(selector: TargetSelectorInput!): Boolean!
-    clientStatsByTargets(selector: ClientStatsByTargetsInput!): ClientStatsConnection!
+    clientStatsByTargets(selector: ClientStatsByTargetsInput!): ClientStatsValuesConnection!
     operationBodyByHash(selector: OperationBodyByHashInput!): String
   }
 
@@ -25,6 +26,14 @@ export default gql`
     project: ID!
     target: ID!
     hash: String!
+  }
+
+  input ClientStatsInput {
+    organization: ID!
+    project: ID!
+    target: ID!
+    period: DateRangeInput!
+    client: String!
   }
 
   input SchemaCoordinateStatsInput {
@@ -78,7 +87,7 @@ export default gql`
     argument: String
   }
 
-  type FieldStats {
+  type FieldStatsValues {
     type: String!
     field: String!
     argument: String
@@ -86,11 +95,19 @@ export default gql`
     percentage: Float!
   }
 
+  type ClientStats {
+    requestsOverTime(resolution: Int!): [RequestsOverTime!]!
+    totalRequests: SafeInt!
+    totalVersions: SafeInt!
+    operations: OperationStatsValuesConnection!
+    versions(limit: Int!): [ClientVersionStatsValues!]!
+  }
+
   type SchemaCoordinateStats {
     requestsOverTime(resolution: Int!): [RequestsOverTime!]!
     totalRequests: SafeInt!
-    operations: OperationStatsConnection!
-    clients: ClientStatsConnection!
+    operations: OperationStatsValuesConnection!
+    clients: ClientStatsValuesConnection!
   }
 
   type OperationsStats {
@@ -100,29 +117,29 @@ export default gql`
     totalRequests: SafeInt!
     totalFailures: SafeInt!
     totalOperations: Int!
-    duration: DurationStats!
-    operations: OperationStatsConnection!
-    clients: ClientStatsConnection!
+    duration: DurationValues!
+    operations: OperationStatsValuesConnection!
+    clients: ClientStatsValuesConnection!
   }
 
-  type OperationStatsConnection {
-    nodes: [OperationStats!]!
+  type OperationStatsValuesConnection {
+    nodes: [OperationStatsValues!]!
     total: Int!
   }
 
-  type ClientStatsConnection {
-    nodes: [ClientStats!]!
+  type ClientStatsValuesConnection {
+    nodes: [ClientStatsValues!]!
     total: Int!
   }
 
-  type DurationStats {
+  type DurationValues {
     p75: Int!
     p90: Int!
     p95: Int!
     p99: Int!
   }
 
-  type OperationStats {
+  type OperationStatsValues {
     id: ID!
     operationHash: String
     kind: String!
@@ -136,23 +153,23 @@ export default gql`
     """
     countOk: SafeInt!
     percentage: Float!
-    duration: DurationStats!
+    duration: DurationValues!
   }
 
-  type ClientStats {
+  type ClientStatsValues {
     name: String!
-    versions: [ClientVersionStats!]!
+    versions: [ClientVersionStatsValues!]!
     count: Float!
     percentage: Float!
   }
 
-  type ClientVersionStats {
+  type ClientVersionStatsValues {
     version: String!
     count: Float!
     percentage: Float!
   }
 
-  type ClientNameStats {
+  type ClientNameStatsValues {
     name: String!
     count: Float!
   }
@@ -169,7 +186,7 @@ export default gql`
 
   type DurationOverTime {
     date: DateTime!
-    duration: DurationStats!
+    duration: DurationValues!
   }
 
   extend type OrganizationGetStarted {

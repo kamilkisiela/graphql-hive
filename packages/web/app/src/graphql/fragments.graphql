@@ -70,22 +70,6 @@ fragment UserFields on User {
   isAdmin
 }
 
-fragment OperationStatsFields on OperationStats {
-  id
-  operationHash
-  name
-  kind
-  count
-  countOk
-  percentage
-  duration {
-    p75
-    p90
-    p95
-    p99
-  }
-}
-
 fragment SchemaVersionFields on SchemaVersion {
   id
   date
