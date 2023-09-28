@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useMemo, useRef, useState } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { ChevronUp } from 'lucide-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
