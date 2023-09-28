@@ -87,12 +87,14 @@ export class SingleModel {
       this.checks.composition({
         orchestrator: this.orchestrator,
         project,
+        organization,
         schemas,
         baseSchema,
       }),
       this.checks.diff({
         orchestrator: this.orchestrator,
         project,
+        organization,
         schemas,
         selector,
         version: compareToLatest ? latest : latestComposable,
@@ -101,6 +103,7 @@ export class SingleModel {
       this.checks.policyCheck({
         orchestrator: this.orchestrator,
         project,
+        organization,
         selector,
         schemas,
         modifiedSdl: input.sdl,
@@ -191,6 +194,7 @@ export class SingleModel {
       this.checks.composition({
         orchestrator: this.orchestrator,
         project,
+        organization,
         baseSchema,
         schemas: [
           baseSchema
@@ -205,6 +209,7 @@ export class SingleModel {
       this.checks.diff({
         orchestrator: this.orchestrator,
         project,
+        organization,
         schemas,
         selector: {
           target: target.id,

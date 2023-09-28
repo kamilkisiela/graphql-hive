@@ -162,6 +162,7 @@ export interface projects {
   id: string;
   legacy_registry_model: boolean;
   name: string;
+  native_federation: boolean | null;
   org_id: string;
   type: string;
   validation_url: string | null;

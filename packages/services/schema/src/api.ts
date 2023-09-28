@@ -34,48 +34,53 @@ const EXTERNAL_VALIDATION = z
 export const schemaBuilderApiRouter = t.router({
   composeAndValidate: procedure
     .input(
-      z.union([
-        z
-          .object({
-            type: z.literal('single'),
-            schemas: z.array(
-              z
-                .object({
-                  raw: z.string().min(1),
-                  source: z.string().min(1),
-                })
-                .required(),
-            ),
-            external: EXTERNAL_VALIDATION,
-          })
-          .required(),
-        z
-          .object({
-            type: z.union([z.literal('federation'), z.literal('stitching')]),
-            schemas: z.array(
-              z
-                .object({
-                  raw: z.string().min(1),
-                  source: z.string().min(1),
-                  url: z.string().nullish(),
-                })
-                .required(),
-            ),
-            external: EXTERNAL_VALIDATION,
-          })
-          .required(),
+      z.discriminatedUnion('type', [
+        z.object({
+          type: z.literal('single'),
+          schemas: z.array(
+            z.object({
+              raw: z.string().min(1),
+              source: z.string().min(1),
+            }),
+          ),
+        }),
+        z.object({
+          type: z.literal('federation'),
+          schemas: z.array(
+            z
+              .object({
+                raw: z.string().min(1),
+                source: z.string().min(1),
+                url: z.string().nullish(),
+              })
+              .required(),
+          ),
+          external: EXTERNAL_VALIDATION,
+          native: z.boolean().optional(),
+        }),
+        z.object({
+          type: z.literal('stitching'),
+          schemas: z.array(
+            z.object({
+              raw: z.string().min(1),
+              source: z.string().min(1),
+              url: z.string().nullish(),
+            }),
+          ),
+        }),
       ]),
     )
     .mutation(async ({ ctx, input }) => {
       composeAndValidateCounter.inc({ type: input.type });
       return await pickOrchestrator(input.type, ctx.cache, ctx.req, ctx.decrypt).composeAndValidate(
         input.schemas,
-        input.external
+        'external' in input && input.external
           ? {
               ...input.external,
               broker: ctx.broker,
             }
           : null,
+        'native' in input && input.native ? true : false,
       );
     }),
 });

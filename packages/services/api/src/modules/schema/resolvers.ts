@@ -423,15 +423,13 @@ export const resolvers: SchemaModule.Resolvers = {
         const getBeforeSchemaSDL = async () => {
           const orchestrator = schemaManager.matchOrchestrator(project.type);
 
-          const { schemas: schemasBefore } = await injector
-            .get(SchemaManager)
-            .getSchemasOfPreviousVersion({
-              organization: organizationId,
-              project: projectId,
-              target: targetId,
-              version: selector.version,
-              onlyComposable: organization.featureFlags.compareToPreviousComposableVersion === true,
-            });
+          const { schemas: schemasBefore } = await schemaManager.getSchemasOfPreviousVersion({
+            organization: organizationId,
+            project: projectId,
+            target: targetId,
+            version: selector.version,
+            onlyComposable: organization.featureFlags.compareToPreviousComposableVersion === true,
+          });
 
           if (schemasBefore.length === 0) {
             return null;
@@ -439,7 +437,13 @@ export const resolvers: SchemaModule.Resolvers = {
           const { raw } = await ensureSDL(
             orchestrator.composeAndValidate(
               schemasBefore.map(s => helper.createSchemaObject(s)),
-              project.externalComposition,
+              {
+                external: project.externalComposition,
+                native: schemaManager.checkProjectNativeFederationSupport({
+                  project,
+                  organization,
+                }),
+              },
             ),
           );
 
@@ -502,14 +506,26 @@ export const resolvers: SchemaModule.Resolvers = {
           ? ensureSDL(
               orchestrator.composeAndValidate(
                 schemasBefore.map(s => helper.createSchemaObject(s)),
-                project.externalComposition,
+                {
+                  external: project.externalComposition,
+                  native: schemaManager.checkProjectNativeFederationSupport({
+                    project,
+                    organization,
+                  }),
+                },
               ),
             )
           : null,
         ensureSDL(
           orchestrator.composeAndValidate(
             schemasAfter.map(s => helper.createSchemaObject(s)),
-            project.externalComposition,
+            {
+              external: project.externalComposition,
+              native: schemaManager.checkProjectNativeFederationSupport({
+                project,
+                organization,
+              }),
+            },
           ),
           organization.featureFlags.compareToPreviousComposableVersion === true
             ? // Do not show schema changes if the new version is not composable
@@ -785,7 +801,7 @@ export const resolvers: SchemaModule.Resolvers = {
     async errors(version, _, { injector }) {
       const schemaManager = injector.get(SchemaManager);
       const schemaHelper = injector.get(SchemaHelper);
-      const [schemas, project] = await Promise.all([
+      const [schemas, project, organization] = await Promise.all([
         schemaManager.getMaybeSchemasOfVersion({
           version: version.id,
           organization: version.organization,
@@ -796,6 +812,9 @@ export const resolvers: SchemaModule.Resolvers = {
           organization: version.organization,
           project: version.project,
         }),
+        injector.get(OrganizationManager).getOrganization({
+          organization: version.organization,
+        }),
       ]);
 
       if (schemas.length === 0) {
@@ -805,16 +824,27 @@ export const resolvers: SchemaModule.Resolvers = {
       const orchestrator = schemaManager.matchOrchestrator(project.type);
       const validation = await orchestrator.composeAndValidate(
         schemas.map(s => schemaHelper.createSchemaObject(s)),
-        project.externalComposition,
+        {
+          external: project.externalComposition,
+          native: schemaManager.checkProjectNativeFederationSupport({
+            project,
+            organization,
+          }),
+        },
       );
 
       return validation.errors;
     },
     async supergraph(version, _, { injector }) {
-      const project = await injector.get(ProjectManager).getProject({
-        organization: version.organization,
-        project: version.project,
-      });
+      const [project, organization] = await Promise.all([
+        injector.get(ProjectManager).getProject({
+          organization: version.organization,
+          project: version.project,
+        }),
+        injector.get(OrganizationManager).getOrganization({
+          organization: version.organization,
+        }),
+      ]);
 
       if (project.type !== ProjectType.FEDERATION) {
         return null;
@@ -843,15 +873,26 @@ export const resolvers: SchemaModule.Resolvers = {
       return orchestrator
         .composeAndValidate(
           schemas.map(s => helper.createSchemaObject(s)),
-          project.externalComposition,
+          {
+            external: project.externalComposition,
+            native: schemaManager.checkProjectNativeFederationSupport({
+              project,
+              organization,
+            }),
+          },
         )
         .then(r => r.supergraph);
     },
     async sdl(version, _, { injector }) {
-      const project = await injector.get(ProjectManager).getProject({
-        organization: version.organization,
-        project: version.project,
-      });
+      const [project, organization] = await Promise.all([
+        injector.get(ProjectManager).getProject({
+          organization: version.organization,
+          project: version.project,
+        }),
+        injector.get(OrganizationManager).getOrganization({
+          organization: version.organization,
+        }),
+      ]);
 
       const schemaManager = injector.get(SchemaManager);
       const orchestrator = schemaManager.matchOrchestrator(project.type);
@@ -873,7 +914,13 @@ export const resolvers: SchemaModule.Resolvers = {
         await ensureSDL(
           orchestrator.composeAndValidate(
             schemas.map(s => helper.createSchemaObject(s)),
-            project.externalComposition,
+            {
+              external: project.externalComposition,
+              native: schemaManager.checkProjectNativeFederationSupport({
+                project,
+                organization,
+              }),
+            },
           ),
         )
       ).raw;
@@ -882,10 +929,15 @@ export const resolvers: SchemaModule.Resolvers = {
       return version.baseSchema || null;
     },
     async explorer(version, { usage }, { injector }) {
-      const project = await injector.get(ProjectManager).getProject({
-        organization: version.organization,
-        project: version.project,
-      });
+      const [project, organization] = await Promise.all([
+        injector.get(ProjectManager).getProject({
+          organization: version.organization,
+          project: version.project,
+        }),
+        injector.get(OrganizationManager).getOrganization({
+          organization: version.organization,
+        }),
+      ]);
 
       const schemaManager = injector.get(SchemaManager);
       const orchestrator = schemaManager.matchOrchestrator(project.type);
@@ -908,7 +960,13 @@ export const resolvers: SchemaModule.Resolvers = {
 
           const result = await orchestrator.composeAndValidate(
             schemas.map(s => helper.createSchemaObject(s)),
-            project.externalComposition,
+            {
+              external: project.externalComposition,
+              native: schemaManager.checkProjectNativeFederationSupport({
+                project,
+                organization,
+              }),
+            },
           );
 
           if (result.supergraph) {
@@ -936,7 +994,13 @@ export const resolvers: SchemaModule.Resolvers = {
         const schema = await ensureSDL(
           orchestrator.composeAndValidate(
             schemas.map(s => helper.createSchemaObject(s)),
-            project.externalComposition,
+            {
+              external: project.externalComposition,
+              native: schemaManager.checkProjectNativeFederationSupport({
+                project,
+                organization,
+              }),
+            },
           ),
         );
 

@@ -4,7 +4,12 @@ import { StitchingOrchestrator } from '../orchestrators/stitching';
 import { RegistryChecks } from '../registry-checks';
 import { swapServices } from '../schema-helper';
 import type { PublishInput } from '../schema-publisher';
-import type { Project, PushedCompositeSchema, Target } from './../../../../shared/entities';
+import type {
+  Organization,
+  Project,
+  PushedCompositeSchema,
+  Target,
+} from './../../../../shared/entities';
 import { ProjectType } from './../../../../shared/entities';
 import { Logger } from './../../../shared/providers/logger';
 import {
@@ -35,6 +40,7 @@ export class CompositeLegacyModel {
     selector,
     latest,
     project,
+    organization,
     baseSchema,
   }: {
     input: {
@@ -52,6 +58,7 @@ export class CompositeLegacyModel {
     } | null;
     baseSchema: string | null;
     project: Project;
+    organization: Organization;
   }): Promise<SchemaCheckResult> {
     const incoming: PushedCompositeSchema = {
       kind: 'composite',
@@ -90,12 +97,14 @@ export class CompositeLegacyModel {
       this.checks.composition({
         orchestrator,
         project,
+        organization,
         schemas,
         baseSchema,
       }),
       this.checks.diff({
         orchestrator,
         project,
+        organization,
         schemas,
         selector,
         version: latestVersion,
@@ -132,10 +141,12 @@ export class CompositeLegacyModel {
     target,
     latest,
     project,
+    organization,
     baseSchema,
   }: {
     input: PublishInput;
     project: Project;
+    organization: Organization;
     target: Target;
     latest: {
       isComposable: boolean;
@@ -226,6 +237,7 @@ export class CompositeLegacyModel {
       this.checks.composition({
         orchestrator,
         project,
+        organization,
         schemas,
         baseSchema,
       }),
@@ -237,6 +249,7 @@ export class CompositeLegacyModel {
           organization: project.orgId,
         },
         project,
+        organization,
         schemas,
         version: latestVersion,
         includeUrlChanges: true,

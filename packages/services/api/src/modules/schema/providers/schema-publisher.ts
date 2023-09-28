@@ -358,7 +358,13 @@ export class SchemaPublisher {
 
           const result = await orchestrator.composeAndValidate(
             latestVersion.schemas.map(s => this.helper.createSchemaObject(s)),
-            project.externalComposition,
+            {
+              external: project.externalComposition,
+              native: this.schemaManager.checkProjectNativeFederationSupport({
+                project,
+                organization,
+              }),
+            },
           );
 
           if (result.sdl == null) {
@@ -522,7 +528,10 @@ export class SchemaPublisher {
       // if it is the latest version, we should update the CDN
       if (latestVersion.id === updateResult.id) {
         this.logger.info('Version is now promoted to latest valid (version=%s)', latestVersion.id);
-        const [project, target, schemas] = await Promise.all([
+        const [organization, project, target, schemas] = await Promise.all([
+          this.organizationManager.getOrganization({
+            organization: input.organization,
+          }),
           this.projectManager.getProject({
             organization: input.organization,
             project: input.project,
@@ -543,10 +552,13 @@ export class SchemaPublisher {
 
         const orchestrator = this.schemaManager.matchOrchestrator(project.type);
         const schemaObjects = schemas.map(s => this.helper.createSchemaObject(s));
-        const compositionResult = await orchestrator.composeAndValidate(
-          schemaObjects,
-          project.externalComposition,
-        );
+        const compositionResult = await orchestrator.composeAndValidate(schemaObjects, {
+          external: project.externalComposition,
+          native: this.schemaManager.checkProjectNativeFederationSupport({
+            project,
+            organization,
+          }),
+        });
 
         this.logger.info(
           'Deploying version to CDN (reason="status_change" version=%s)',

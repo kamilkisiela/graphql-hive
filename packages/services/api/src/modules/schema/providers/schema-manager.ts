@@ -5,7 +5,13 @@ import { z } from 'zod';
 import { Change } from '@graphql-inspector/core';
 import type { SchemaCheck, SchemaCompositionError } from '@hive/storage';
 import { RegistryModel } from '../../../__generated__/types';
-import { DateRange, Orchestrator, ProjectType } from '../../../shared/entities';
+import {
+  DateRange,
+  Orchestrator,
+  Organization,
+  Project,
+  ProjectType,
+} from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { atomic, stringifySelector } from '../../../shared/helpers';
 import { SchemaVersion } from '../../../shared/mappers';
@@ -363,10 +369,15 @@ export class SchemaManager {
       scope: ProjectAccessScope.SETTINGS,
     });
 
-    const project = await this.storage.getProject({
-      organization: selector.organizationId,
-      project: selector.projectId,
-    });
+    const [project, organization] = await Promise.all([
+      this.storage.getProject({
+        organization: selector.organizationId,
+        project: selector.projectId,
+      }),
+      this.storage.getOrganization({
+        organization: selector.organizationId,
+      }),
+    ]);
 
     if (project.type !== ProjectType.FEDERATION) {
       throw new HiveError(
@@ -390,7 +401,13 @@ export class SchemaManager {
             url: null,
           },
         ],
-        project.externalComposition,
+        {
+          external: project.externalComposition,
+          native: this.checkProjectNativeFederationSupport({
+            project,
+            organization,
+          }),
+        },
       );
 
       if (errors.length > 0) {
@@ -815,6 +832,40 @@ export class SchemaManager {
       target: target.id,
       organization: organization.id,
     };
+  }
+
+  checkProjectNativeFederationSupport(input: {
+    project: Pick<Project, 'id' | 'legacyRegistryModel' | 'nativeFederation'>;
+    organization: Pick<Organization, 'id' | 'featureFlags'>;
+  }) {
+    if (input.project.nativeFederation === false) {
+      return false;
+    }
+
+    if (input.project.legacyRegistryModel === true) {
+      this.logger.warn(
+        'Project is using legacy registry model, ignoring native Federation support (organization=%s, project=%s)',
+        input.organization.id,
+        input.project.id,
+      );
+      return false;
+    }
+
+    if (input.organization.featureFlags.compareToPreviousComposableVersion === false) {
+      this.logger.warn(
+        'Organization has compareToPreviousComposableVersion FF disabled, ignoring native Federation support (organization=%s, project=%s)',
+        input.organization.id,
+        input.project.id,
+      );
+      return false;
+    }
+
+    this.logger.debug(
+      'Native Federation support available (organization=%s, project=%s)',
+      input.organization.id,
+      input.project.id,
+    );
+    return true;
   }
 }
 

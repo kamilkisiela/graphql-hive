@@ -113,12 +113,14 @@ export class CompositeModel {
       this.checks.composition({
         orchestrator,
         project,
+        organization,
         schemas,
         baseSchema,
       }),
       this.checks.diff({
         orchestrator,
         project,
+        organization,
         schemas,
         selector,
         version: compareToLatest ? latest : latestComposable,
@@ -127,6 +129,7 @@ export class CompositeModel {
       this.checks.policyCheck({
         orchestrator,
         project,
+        organization,
         selector,
         schemas,
         modifiedSdl: incoming.sdl,
@@ -268,12 +271,14 @@ export class CompositeModel {
       this.checks.composition({
         orchestrator,
         project,
+        organization,
         schemas,
         baseSchema,
       }),
       this.checks.diff({
         orchestrator,
         project,
+        organization,
         schemas,
         selector: {
           target: target.id,
@@ -411,12 +416,14 @@ export class CompositeModel {
       this.checks.composition({
         orchestrator,
         project,
+        organization,
         schemas,
         baseSchema,
       }),
       this.checks.diff({
         orchestrator,
         project,
+        organization,
         schemas,
         selector,
         version: compareToLatest ? latestVersion : latestComposable,

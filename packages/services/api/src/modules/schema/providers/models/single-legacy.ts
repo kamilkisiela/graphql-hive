@@ -2,7 +2,7 @@ import { Injectable, Scope } from 'graphql-modules';
 import { SingleOrchestrator } from '../orchestrators/single';
 import { RegistryChecks } from '../registry-checks';
 import type { PublishInput } from '../schema-publisher';
-import type { Project, SingleSchema, Target } from './../../../../shared/entities';
+import type { Organization, Project, SingleSchema, Target } from './../../../../shared/entities';
 import { Logger } from './../../../shared/providers/logger';
 import {
   buildSchemaCheckFailureState,
@@ -31,6 +31,7 @@ export class SingleLegacyModel {
     selector,
     latest,
     project,
+    organization,
     baseSchema,
   }: {
     input: {
@@ -47,6 +48,7 @@ export class SingleLegacyModel {
     } | null;
     baseSchema: string | null;
     project: Project;
+    organization: Organization;
   }): Promise<SchemaCheckResult> {
     const incoming: SingleSchema = {
       kind: 'single',
@@ -80,12 +82,14 @@ export class SingleLegacyModel {
       this.checks.composition({
         orchestrator: this.orchestrator,
         project,
+        organization,
         schemas,
         baseSchema,
       }),
       this.checks.diff({
         orchestrator: this.orchestrator,
         project,
+        organization,
         schemas,
         selector,
         version: latestVersion,
@@ -122,10 +126,12 @@ export class SingleLegacyModel {
     target,
     latest,
     project,
+    organization,
     baseSchema,
   }: {
     input: PublishInput;
     project: Project;
+    organization: Organization;
     target: Target;
     latest: {
       isComposable: boolean;
@@ -167,6 +173,7 @@ export class SingleLegacyModel {
       this.checks.composition({
         orchestrator: this.orchestrator,
         project,
+        organization,
         baseSchema,
         schemas: [
           baseSchema
@@ -185,6 +192,7 @@ export class SingleLegacyModel {
           organization: project.orgId,
         },
         project,
+        organization,
         schemas,
         version: latestVersion,
         includeUrlChanges: false,

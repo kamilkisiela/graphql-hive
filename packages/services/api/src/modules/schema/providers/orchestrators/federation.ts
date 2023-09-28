@@ -60,7 +60,13 @@ export class FederationOrchestrator implements Orchestrator {
   }
 
   @sentry('FederationOrchestrator.composeAndValidate')
-  async composeAndValidate(schemas: SchemaObject[], external: Project['externalComposition']) {
+  async composeAndValidate(
+    schemas: SchemaObject[],
+    config: {
+      external: Project['externalComposition'];
+      native: boolean;
+    },
+  ) {
     this.logger.debug('Composing and Validating Federated Schemas');
     const result = await this.schemaService.composeAndValidate.mutate({
       type: 'federation',
@@ -69,7 +75,8 @@ export class FederationOrchestrator implements Orchestrator {
         source: s.source,
         url: s.url ?? null,
       })),
-      external: this.createConfig(external),
+      external: this.createConfig(config.external),
+      native: config.native,
     });
 
     return result;

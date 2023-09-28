@@ -46,7 +46,6 @@ export class StitchingOrchestrator implements Orchestrator {
         source: s.source,
         url: s.url ?? null,
       })),
-      external: null,
     });
 
     return result;
