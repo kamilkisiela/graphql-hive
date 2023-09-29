@@ -4,7 +4,19 @@ import clsx from 'clsx';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { Scale, Section } from '@/components/common';
-import { Button, Input, Sortable, Table, TBody, Td, Th, THead, Tooltip, Tr } from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Button as OldButton,
+  Sortable,
+  Table,
+  TBody,
+  Td,
+  Th,
+  THead,
+  Tooltip,
+  Tr,
+} from '@/components/v2';
 import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { DateRangeInput } from '@/graphql';
@@ -75,9 +87,9 @@ function OperationRow({
               }}
               passHref
             >
-              <Button variant="link" as="a" className="block truncate max-w-[300px]">
+              <OldButton variant="link" as="a" className="block truncate max-w-[300px]">
                 {operation.name}
-              </Button>
+              </OldButton>
             </Link>
             {operation.name === 'anonymous' && (
               <Tooltip.Provider delayDuration={200}>
@@ -269,11 +281,16 @@ function OperationsTable({
         </TBody>
       </Table>
       <div className="flex items-center gap-2 mt-6">
-        <Button onClick={firstPage} disabled={!tableInstance.getCanPreviousPage()}>
+        <Button
+          onClick={firstPage}
+          variant="outline"
+          disabled={!tableInstance.getCanPreviousPage()}
+        >
           First
         </Button>
         <Button
           aria-label="Go to previous page"
+          variant="outline"
           onClick={tableInstance.previousPage}
           disabled={!tableInstance.getCanPreviousPage()}
         >
@@ -284,22 +301,19 @@ function OperationsTable({
         </span>
         <Button
           aria-label="Go to next page"
+          variant="outline"
           onClick={tableInstance.nextPage}
           disabled={!tableInstance.getCanNextPage()}
         >
           <ChevronUpIcon className="rotate-90 h-5 w-auto" />
         </Button>
-        <Button onClick={lastPage} disabled={!tableInstance.getCanNextPage()}>
+        <Button variant="outline" onClick={lastPage} disabled={!tableInstance.getCanNextPage()}>
           Last
         </Button>
+        <div className="ml-6">Go to:</div>
         <Input
-          prefix={
-            <label htmlFor="page" className="shrink-0">
-              Go to:
-            </label>
-          }
           id="page"
-          size="medium"
+          className="w-16"
           type="number"
           defaultValue={tableInstance.getState().pagination.pageIndex + 1}
           onChange={e => {
