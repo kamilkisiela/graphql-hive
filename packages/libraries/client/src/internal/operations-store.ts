@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { DocumentNode } from 'graphql';
 import { parse, stripIgnoredCharacters } from 'graphql';
+import { version } from '../version.js';
 import type { HivePluginOptions } from './types.js';
 
 export interface OperationsStore {
@@ -52,6 +53,8 @@ export function createOperationsStore(pluginOptions: HivePluginOptions): Operati
         headers: {
           'content-type': 'application/json',
           Authorization: `Bearer ${token}`,
+          'graphql-client-name': 'Hive Client',
+          'graphql-client-version': version,
         },
       },
     );
