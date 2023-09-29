@@ -7,7 +7,7 @@ import { Globe, History } from 'lucide-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { ProjectLayout } from '@/components/layouts/project';
+import { Page, ProjectLayout } from '@/components/layouts/project';
 import {
   createEmptySeries,
   fullSeries,
@@ -208,7 +208,7 @@ const TargetCard = (props: {
   );
 };
 
-const Page = () => {
+const ProjectsPageContent = () => {
   const router = useRouteSelector();
   const period = useRef<{
     from: string;
@@ -260,7 +260,7 @@ const Page = () => {
 
   return (
     <ProjectLayout
-      value="targets"
+      page={Page.Targets}
       className="flex justify-between gap-12"
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}
@@ -371,7 +371,7 @@ function ProjectsPage(): ReactElement {
   return (
     <>
       <MetaTitle title="Targets" />
-      <Page />
+      <ProjectsPageContent />
     </>
   );
 }

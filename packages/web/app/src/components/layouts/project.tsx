@@ -11,7 +11,7 @@ import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/ac
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { ProjectMigrationToast } from '../project/migration-toast';
 
-enum TabValue {
+export enum Page {
   Targets = 'targets',
   Alerts = 'alerts',
   Policy = 'policy',
@@ -72,11 +72,11 @@ const ProjectLayout_ProjectConnectionFragment = graphql(`
 
 export function ProjectLayout({
   children,
-  value,
+  page,
   className,
   ...props
 }: {
-  value: 'targets' | 'alerts' | 'settings' | 'policy';
+  page: Page;
   className?: string;
   me: FragmentType<typeof ProjectLayout_MeFragment> | null;
   currentOrganization: FragmentType<typeof ProjectLayout_CurrentOrganizationFragment> | null;
@@ -169,16 +169,16 @@ export function ProjectLayout({
         </div>
       </header>
 
-      {value === 'settings' || currentProject?.registryModel !== 'LEGACY' ? null : (
+      {page === Page.Settings || currentProject?.registryModel !== 'LEGACY' ? null : (
         <ProjectMigrationToast orgId={orgId} projectId={currentProject.cleanId} />
       )}
 
       <div className="relative border-b border-gray-800">
         <div className="container flex justify-between items-center">
           {currentOrganization && currentProject ? (
-            <Tabs value={value}>
+            <Tabs value={page}>
               <Tabs.List>
-                <Tabs.Trigger value={TabValue.Targets} asChild>
+                <Tabs.Trigger value={Page.Targets} asChild>
                   <NextLink
                     href={{
                       pathname: '/[organizationId]/[projectId]',
@@ -192,14 +192,14 @@ export function ProjectLayout({
                   </NextLink>
                 </Tabs.Trigger>
                 {canAccessProject(ProjectAccessScope.Alerts, currentOrganization.me) && (
-                  <Tabs.Trigger value={TabValue.Alerts} asChild>
+                  <Tabs.Trigger value={Page.Alerts} asChild>
                     <NextLink
                       href={{
                         pathname: '/[organizationId]/[projectId]/view/[tab]',
                         query: {
                           organizationId: currentOrganization.cleanId,
                           projectId: currentProject.cleanId,
-                          tab: TabValue.Alerts,
+                          tab: Page.Alerts,
                         },
                       }}
                     >
@@ -209,28 +209,28 @@ export function ProjectLayout({
                 )}
                 {canAccessProject(ProjectAccessScope.Settings, currentOrganization.me) && (
                   <>
-                    <Tabs.Trigger value={TabValue.Policy} asChild>
+                    <Tabs.Trigger value={Page.Policy} asChild>
                       <NextLink
                         href={{
                           pathname: '/[organizationId]/[projectId]/view/[tab]',
                           query: {
                             organizationId: currentOrganization.cleanId,
                             projectId: currentProject.cleanId,
-                            tab: TabValue.Policy,
+                            tab: Page.Policy,
                           },
                         }}
                       >
                         Policy
                       </NextLink>
                     </Tabs.Trigger>
-                    <Tabs.Trigger value={TabValue.Settings} asChild>
+                    <Tabs.Trigger value={Page.Settings} asChild>
                       <NextLink
                         href={{
                           pathname: '/[organizationId]/[projectId]/view/[tab]',
                           query: {
                             organizationId: currentOrganization.cleanId,
                             projectId: currentProject.cleanId,
-                            tab: TabValue.Settings,
+                            tab: Page.Settings,
                           },
                         }}
                       >

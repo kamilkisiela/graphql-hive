@@ -1,7 +1,7 @@
 import { ReactElement, useState } from 'react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { ProjectLayout } from '@/components/layouts/project';
+import { Page, ProjectLayout } from '@/components/layouts/project';
 import { AlertsTable, AlertsTable_AlertFragment } from '@/components/project/alerts/alerts-table';
 import {
   ChannelsTable,
@@ -234,7 +234,7 @@ function AlertsPageContent() {
       currentProject={currentProject ?? null}
       organizations={organizationConnection ?? null}
       me={me ?? null}
-      value="alerts"
+      page={Page.Alerts}
       className="flex flex-col gap-y-10"
     >
       <div>

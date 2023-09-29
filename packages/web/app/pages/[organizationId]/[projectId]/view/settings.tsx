@@ -3,7 +3,7 @@ import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
-import { ProjectLayout } from '@/components/layouts/project';
+import { Page, ProjectLayout } from '@/components/layouts/project';
 import { ExternalCompositionSettings } from '@/components/project/settings/external-composition';
 import { ModelMigrationSettings } from '@/components/project/settings/model-migration';
 import { Button } from '@/components/ui/button';
@@ -309,7 +309,7 @@ function ProjectSettingsContent() {
       currentProject={currentProject ?? null}
       organizations={organizationConnection ?? null}
       me={me ?? null}
-      value="settings"
+      page={Page.Settings}
       className="flex flex-col gap-y-10"
     >
       <div>
