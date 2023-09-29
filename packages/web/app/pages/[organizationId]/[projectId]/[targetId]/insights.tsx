@@ -1,12 +1,13 @@
-import { ReactElement, useMemo, useState } from 'react';
-import { useRouter } from 'next/router';
+import { ReactElement, useState } from 'react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { Section } from '@/components/common';
-import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
-import { TargetLayout } from '@/components/layouts/target';
-import { ClientsFilterTrigger } from '@/components/target/operations/Filters';
-import { OperationsStats } from '@/components/target/operations/Stats';
+import { Page, TargetLayout } from '@/components/layouts/target';
+import {
+  ClientsFilterTrigger,
+  OperationsFilterTrigger,
+} from '@/components/target/insights/Filters';
+import { OperationsList } from '@/components/target/insights/List';
+import { OperationsStats } from '@/components/target/insights/Stats';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { EmptyList, MetaTitle, RadixSelect } from '@/components/v2';
@@ -15,60 +16,19 @@ import { useRouteSelector } from '@/lib/hooks';
 import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const GraphQLOperationBody_GetOperationBodyQuery = graphql(`
-  query GraphQLOperationBody_GetOperationBodyQuery($selector: OperationBodyByHashInput!) {
-    operationBodyByHash(selector: $selector)
-  }
-`);
-
-export function GraphQLOperationBody({
-  hash,
-  organization,
-  project,
-  target,
-}: {
-  hash: string;
-  organization: string;
-  project: string;
-  target: string;
-}) {
-  const [result] = useQuery({
-    query: GraphQLOperationBody_GetOperationBodyQuery,
-    variables: { selector: { hash, organization, project, target } },
-  });
-
-  const { data, fetching, error } = result;
-
-  if (fetching) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Oh no... {error.message}</div>;
-  }
-
-  if (data?.operationBodyByHash) {
-    return <GraphQLHighlight className="pt-6" code={data.operationBodyByHash} />;
-  }
-
-  return null;
-}
-
-function OperationView({
+function OperationsView({
   organizationCleanId,
   projectCleanId,
   targetCleanId,
   dataRetentionInDays,
-  operationHash,
-  operationName,
 }: {
   organizationCleanId: string;
   projectCleanId: string;
   targetCleanId: string;
   dataRetentionInDays: number;
-  operationHash: string;
-  operationName: string;
 }): ReactElement {
+  const [selectedOperations, setSelectedOperations] = useState<string[]>([]);
+  const [selectedClients, setSelectedClients] = useState<string[]>([]);
   const {
     updateDateRangeByKey,
     dateRangeKey,
@@ -79,17 +39,20 @@ function OperationView({
   } = useDateRangeController({
     dataRetentionInDays,
   });
-  const [selectedClients, setSelectedClients] = useState<string[]>([]);
-  const operationsList = useMemo(() => [operationHash], [operationHash]);
 
   return (
     <>
       <div className="py-6 flex flex-row items-center justify-between">
         <div>
-          <Title>{operationName}</Title>
-          <Subtitle>Performance of individual GraphQL operation</Subtitle>
+          <Title>Operations</Title>
+          <Subtitle>Observe GraphQL requests and see how the API is consumed.</Subtitle>
         </div>
         <div className="flex justify-end gap-x-2">
+          <OperationsFilterTrigger
+            period={dateRange}
+            selected={selectedOperations}
+            onFilter={setSelectedOperations}
+          />
           <ClientsFilterTrigger
             period={dateRange}
             selected={selectedClients}
@@ -110,26 +73,27 @@ function OperationView({
         project={projectCleanId}
         target={targetCleanId}
         period={dateRange}
-        operationsFilter={operationsList}
+        operationsFilter={selectedOperations}
         clientNamesFilter={selectedClients}
         resolution={resolution}
-        mode="operation-page"
+        mode="operation-list"
       />
-      <div className="w-full rounded-md bg-gray-900/50 p-5 border border-gray-800 mt-12">
-        <Section.Title>Operation body</Section.Title>
-        <GraphQLOperationBody
-          organization={organizationCleanId}
-          project={projectCleanId}
-          target={targetCleanId}
-          hash={operationHash}
-        />
-      </div>
+      <OperationsList
+        className="mt-12"
+        period={dateRange}
+        organization={organizationCleanId}
+        project={projectCleanId}
+        target={targetCleanId}
+        operationsFilter={selectedOperations}
+        clientNamesFilter={selectedClients}
+        selectedPeriod={dateRangeKey}
+      />
     </>
   );
 }
 
-const TargetOperationPageQuery = graphql(`
-  query TargetOperationPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+const TargetOperationsPageQuery = graphql(`
+  query TargetOperationsPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
     organizations {
       ...TargetLayout_OrganizationConnectionFragment
     }
@@ -159,16 +123,10 @@ const TargetOperationPageQuery = graphql(`
   }
 `);
 
-function TargetOperationPageContent({
-  operationHash,
-  operationName,
-}: {
-  operationHash: string;
-  operationName: string;
-}) {
+function TargetOperationsPageContent() {
   const router = useRouteSelector();
   const [query] = useQuery({
-    query: TargetOperationPageQuery,
+    query: TargetOperationsPageQuery,
     variables: {
       organizationId: router.organizationId,
       projectId: router.projectId,
@@ -190,7 +148,7 @@ function TargetOperationPageContent({
 
   return (
     <TargetLayout
-      value="operations"
+      page={Page.Insights}
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}
       me={me ?? null}
@@ -199,13 +157,11 @@ function TargetOperationPageContent({
     >
       {currentOrganization && currentProject && currentTarget ? (
         hasCollectedOperations ? (
-          <OperationView
+          <OperationsView
             organizationCleanId={currentOrganization.cleanId}
             projectCleanId={currentProject.cleanId}
             targetCleanId={currentTarget.cleanId}
             dataRetentionInDays={currentOrganization.rateLimit.retentionInDays}
-            operationHash={operationHash}
-            operationName={operationName}
           />
         ) : (
           <div className="py-8">
@@ -221,26 +177,15 @@ function TargetOperationPageContent({
   );
 }
 
-function OperationPage(): ReactElement {
-  const router = useRouter();
-  const { operationHash, operationName } = router.query;
-
-  if (!operationHash || typeof operationHash !== 'string') {
-    throw new Error('Invalid operation hash');
-  }
-
-  if (!operationName || typeof operationName !== 'string') {
-    throw new Error('Invalid operation name');
-  }
-
+function InsightsPage(): ReactElement {
   return (
     <>
-      <MetaTitle title={`Operation ${operationName}`} />
-      <TargetOperationPageContent operationHash={operationHash} operationName={operationName} />
+      <MetaTitle title="Insights" />
+      <TargetOperationsPageContent />
     </>
   );
 }
 
 export const getServerSideProps = withSessionProtection();
 
-export default authenticated(OperationPage);
+export default authenticated(InsightsPage);

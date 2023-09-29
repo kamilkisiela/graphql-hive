@@ -6,7 +6,7 @@ import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
-import { TargetLayout } from '@/components/layouts/target';
+import { Page, TargetLayout } from '@/components/layouts/target';
 import { SchemaEditor } from '@/components/schema-editor';
 import { CDNAccessTokens } from '@/components/target/settings/cdn-access-tokens';
 import { Subtitle, Title } from '@/components/ui/page';
@@ -963,7 +963,7 @@ function TargetSettingsContent() {
 
   return (
     <TargetLayout
-      value="settings"
+      page={Page.Settings}
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}
       me={me ?? null}

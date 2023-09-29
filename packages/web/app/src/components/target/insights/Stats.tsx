@@ -497,7 +497,7 @@ function ClientsStats(props: {
     (ev: { componentType: string; targetType: string; value: string }) => {
       if (ev.componentType === 'yAxis' && ev.targetType === 'axisLabel') {
         void router.push({
-          pathname: '/[organizationId]/[projectId]/[targetId]/operations/client/[name]',
+          pathname: '/[organizationId]/[projectId]/[targetId]/insights/client/[name]',
           query: {
             organizationId: router.organizationId,
             projectId: router.projectId,

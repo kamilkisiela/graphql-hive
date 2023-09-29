@@ -63,7 +63,7 @@ function OperationRow({
             <Link
               href={{
                 pathname:
-                  '/[organizationId]/[projectId]/[targetId]/operations/[operationName]/[operationHash]',
+                  '/[organizationId]/[projectId]/[targetId]/insights/[operationName]/[operationHash]',
                 query: {
                   organizationId: organization,
                   projectId: project,

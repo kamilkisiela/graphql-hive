@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { TargetLayout } from '@/components/layouts/target';
+import { Page, TargetLayout } from '@/components/layouts/target';
 import { SchemaExplorerFilter } from '@/components/target/explorer/filter';
 import { GraphQLObjectTypeComponent } from '@/components/target/explorer/object-type';
 import {
@@ -163,7 +163,7 @@ function ExplorerPageContent() {
 
   return (
     <TargetLayout
-      value="explorer"
+      page={Page.Explorer}
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}
       me={me ?? null}

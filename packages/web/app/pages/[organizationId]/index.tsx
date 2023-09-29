@@ -12,7 +12,7 @@ import {
   createEmptySeries,
   fullSeries,
   resolutionToMilliseconds,
-} from '@/components/target/operations/utils';
+} from '@/components/target/insights/utils';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';

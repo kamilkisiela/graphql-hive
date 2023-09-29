@@ -12,12 +12,12 @@ import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { ProjectMigrationToast } from '../project/migration-toast';
 
-enum TabValue {
+export enum Page {
   Schema = 'schema',
   Explorer = 'explorer',
   Checks = 'checks',
   History = 'history',
-  Operations = 'operations',
+  Insights = 'insights',
   Laboratory = 'laboratory',
   Settings = 'settings',
 }
@@ -86,11 +86,11 @@ const TargetLayout_IsCDNEnabledFragment = graphql(`
 export const TargetLayout = ({
   children,
   connect,
-  value,
+  page,
   className,
   ...props
 }: {
-  value: 'schema' | 'explorer' | 'checks' | 'history' | 'operations' | 'laboratory' | 'settings';
+  page: Page;
   className?: string;
   children: ReactNode;
   connect?: ReactNode;
@@ -223,11 +223,11 @@ export const TargetLayout = ({
       <div className="relative border-b border-gray-800">
         <div className="container flex justify-between items-center">
           {currentOrganization && currentProject && currentTarget ? (
-            <Tabs className="flex h-full grow flex-col" value={value}>
+            <Tabs className="flex h-full grow flex-col" value={page}>
               <Tabs.List>
                 {canAccessSchema && (
                   <>
-                    <Tabs.Trigger value={TabValue.Schema} asChild>
+                    <Tabs.Trigger value={Page.Schema} asChild>
                       <NextLink
                         href={{
                           pathname: '/[organizationId]/[projectId]/[targetId]',
@@ -241,7 +241,7 @@ export const TargetLayout = ({
                         Schema
                       </NextLink>
                     </Tabs.Trigger>
-                    <Tabs.Trigger value={TabValue.Checks} asChild>
+                    <Tabs.Trigger value={Page.Checks} asChild>
                       <NextLink
                         href={{
                           pathname: '/[organizationId]/[projectId]/[targetId]/checks',
@@ -255,7 +255,7 @@ export const TargetLayout = ({
                         Checks
                       </NextLink>
                     </Tabs.Trigger>
-                    <Tabs.Trigger value={TabValue.Explorer} asChild>
+                    <Tabs.Trigger value={Page.Explorer} asChild>
                       <NextLink
                         href={{
                           pathname: '/[organizationId]/[projectId]/[targetId]/explorer',
@@ -269,7 +269,7 @@ export const TargetLayout = ({
                         Explorer
                       </NextLink>
                     </Tabs.Trigger>
-                    <Tabs.Trigger value={TabValue.History} asChild>
+                    <Tabs.Trigger value={Page.History} asChild>
                       <NextLink
                         href={{
                           pathname: '/[organizationId]/[projectId]/[targetId]/history',
@@ -283,10 +283,10 @@ export const TargetLayout = ({
                         History
                       </NextLink>
                     </Tabs.Trigger>
-                    <Tabs.Trigger value={TabValue.Operations} asChild>
+                    <Tabs.Trigger value={Page.Insights} asChild>
                       <NextLink
                         href={{
-                          pathname: '/[organizationId]/[projectId]/[targetId]/operations',
+                          pathname: '/[organizationId]/[projectId]/[targetId]/insights',
                           query: {
                             organizationId: currentOrganization.cleanId,
                             projectId: currentProject.cleanId,
@@ -294,10 +294,10 @@ export const TargetLayout = ({
                           },
                         }}
                       >
-                        Operations
+                        Insights
                       </NextLink>
                     </Tabs.Trigger>
-                    <Tabs.Trigger value={TabValue.Laboratory} asChild>
+                    <Tabs.Trigger value={Page.Laboratory} asChild>
                       <NextLink
                         href={{
                           pathname: '/[organizationId]/[projectId]/[targetId]/laboratory',
@@ -314,7 +314,7 @@ export const TargetLayout = ({
                   </>
                 )}
                 {canAccessSettings && (
-                  <Tabs.Trigger value={TabValue.Settings} asChild>
+                  <Tabs.Trigger value={Page.Settings} asChild>
                     <NextLink
                       href={{
                         pathname: '/[organizationId]/[projectId]/[targetId]/settings',
