@@ -237,7 +237,7 @@ export const resolvers: OperationsModule.Resolvers = {
         project,
         target,
         period,
-        clients: [clientName],
+        clients: clientName === 'unknown' ? ['unknown', ''] : [clientName],
       });
     },
     totalVersions({ organization, project, target, period, clientName }, _, { injector }) {
@@ -260,7 +260,7 @@ export const resolvers: OperationsModule.Resolvers = {
         organization,
         period,
         resolution,
-        clients: [clientName],
+        clients: clientName === 'unknown' ? ['unknown', ''] : [clientName],
       });
     },
     async operations({ organization, project, target, period, clientName }, args, { injector }) {
@@ -271,14 +271,14 @@ export const resolvers: OperationsModule.Resolvers = {
           project,
           target,
           period,
-          clients: [clientName],
+          clients: clientName === 'unknown' ? ['unknown', ''] : [clientName],
         }),
         operationsManager.readDetailedDurationPercentiles({
           organization,
           project,
           target,
           period,
-          clients: [clientName],
+          clients: clientName === 'unknown' ? ['unknown', ''] : [clientName],
         }),
       ]);
 
