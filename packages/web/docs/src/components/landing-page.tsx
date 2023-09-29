@@ -233,7 +233,7 @@ function Feature(props: {
             </div>
             {imagelessHighlights ? (
               <div className="flex flex-col lg:flex-row justify-center mt-16 pt-10 sm:gap-y-6 md:mt-20 lg:pt-0">
-                {imagelessHighlights.map((highlight, i) => (
+                {imagelessHighlights.map(highlight => (
                   <Highlight
                     {...highlight}
                     endColor={end}
