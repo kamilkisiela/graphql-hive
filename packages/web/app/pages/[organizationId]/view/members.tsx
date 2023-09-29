@@ -3,7 +3,7 @@ import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
-import { OrganizationLayout } from '@/components/layouts/organization';
+import { OrganizationLayout, Page } from '@/components/layouts/organization';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Subtitle, Title } from '@/components/ui/page';
@@ -270,7 +270,7 @@ const OrganizationInvitations = (props: {
   ) : null;
 };
 
-function Page(props: {
+function PageContent(props: {
   organization: FragmentType<typeof Page_OrganizationFragment>;
   me?: FragmentType<typeof OrganizationMembersPage_MeFragment>;
 }) {
@@ -441,13 +441,13 @@ function SettingsPageContent() {
 
   return (
     <OrganizationLayout
-      value="members"
+      page={Page.Members}
       className="flex flex-col gap-y-10"
       currentOrganization={currentOrganization ?? null}
       organizations={organizationConnection ?? null}
       me={me ?? null}
     >
-      {currentOrganization ? <Page organization={currentOrganization} me={me} /> : null}
+      {currentOrganization ? <PageContent organization={currentOrganization} me={me} /> : null}
     </OrganizationLayout>
   );
 }

@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useMutation, useQuery } from 'urql';
 import { z } from 'zod';
 import { authenticated } from '@/components/authenticated-container';
-import { OrganizationLayout } from '@/components/layouts/organization';
+import { OrganizationLayout, Page } from '@/components/layouts/organization';
 import { Priority, priorityDescription, Status } from '@/components/organization/support';
 import { Button } from '@/components/ui/button';
 import {
@@ -435,7 +435,7 @@ function SupportPageContent() {
 
   return (
     <OrganizationLayout
-      value="support"
+      page={Page.Support}
       className="flex flex-col gap-y-10"
       currentOrganization={currentOrganization ?? null}
       organizations={organizationConnection ?? null}

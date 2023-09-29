@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { OrganizationLayout } from '@/components/layouts/organization';
+import { OrganizationLayout, Page } from '@/components/layouts/organization';
 import { PolicySettings } from '@/components/policy/policy-settings';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -98,7 +98,7 @@ function PolicyPageContent() {
 
   return (
     <OrganizationLayout
-      value="policy"
+      page={Page.Policy}
       className="flex flex-col gap-y-10"
       currentOrganization={currentOrganization ?? null}
       organizations={organizationConnection ?? null}

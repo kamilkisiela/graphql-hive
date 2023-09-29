@@ -4,7 +4,7 @@ import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
-import { OrganizationLayout } from '@/components/layouts/organization';
+import { OrganizationLayout, Page } from '@/components/layouts/organization';
 import { OIDCIntegrationSection } from '@/components/organization/settings/oidc-integration-section';
 import { Button } from '@/components/ui/button';
 import {
@@ -450,7 +450,7 @@ function SettingsPageContent() {
 
   return (
     <OrganizationLayout
-      value="settings"
+      page={Page.Settings}
       className="flex flex-col gap-y-10"
       currentOrganization={currentOrganization ?? null}
       organizations={organizationConnection ?? null}
