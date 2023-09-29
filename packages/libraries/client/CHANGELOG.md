@@ -1,5 +1,14 @@
 # @graphql-hive/client
 
+## 0.24.2
+
+### Patch Changes
+
+- [#2979](https://github.com/kamilkisiela/graphql-hive/pull/2979)
+  [`fa18b0a`](https://github.com/kamilkisiela/graphql-hive/commit/fa18b0a36b67a26479cad4fad63cabcaf58e1c1b)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Detect missing DocumentNode in Apollo
+  Server
+
 ## 0.24.1
 
 ### Patch Changes
