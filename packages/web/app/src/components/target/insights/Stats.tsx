@@ -437,6 +437,7 @@ function ClientsStats(props: {
       ? operationStats.clients.nodes.slice().sort((a, b) => b.count - a.count)
       : [];
   }, [operationStats?.clients.nodes]);
+  const otherClientsPrefix = 'Other clients';
   const byClient = useMemo(() => {
     let values: string[] = [];
     const labels: string[] = [];
@@ -458,7 +459,7 @@ function ClientsStats(props: {
           labels.push(
             sortedClients.length === 5
               ? client.name
-              : `Other clients (${sortedClients.length - 4})`,
+              : `${otherClientsPrefix} (${sortedClients.length - 4})`,
           );
         }
       }
@@ -556,6 +557,11 @@ function ClientsStats(props: {
   const onClientNameClick = useCallback(
     (ev: { componentType: string; targetType: string; value: string }) => {
       if (ev.componentType === 'yAxis' && ev.targetType === 'axisLabel') {
+        if (ev.value.startsWith(otherClientsPrefix)) {
+          // Label for "Other clients" was clicked, do nothing
+          return;
+        }
+
         void router.push({
           pathname: '/[organizationId]/[projectId]/[targetId]/insights/client/[name]',
           query: {

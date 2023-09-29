@@ -1000,7 +1000,7 @@ export class OperationsReader {
               ${this.createFilter({
                 target,
                 period,
-                clients: [clientName],
+                clients: clientName === 'unknown' ? [clientName, ''] : [clientName],
               })}
               GROUP BY client_version
               ORDER BY total DESC
@@ -1019,7 +1019,7 @@ export class OperationsReader {
               ${this.createFilter({
                 target,
                 period,
-                clients: [clientName],
+                clients: clientName === 'unknown' ? [clientName, ''] : [clientName],
               })}
               GROUP BY client_version
               ORDER BY total DESC
@@ -1038,7 +1038,7 @@ export class OperationsReader {
               ${this.createFilter({
                 target,
                 period,
-                clients: [clientName],
+                clients: clientName === 'unknown' ? [clientName, ''] : [clientName],
               })}
               GROUP BY client_version
               ORDER BY total DESC
@@ -1091,10 +1091,8 @@ export class OperationsReader {
               ${this.createFilter({
                 target,
                 period,
-                clients: [clientName],
+                clients: clientName === 'unknown' ? [clientName, ''] : [clientName],
               })}
-              GROUP BY client_name
-              LIMIT 1
             `,
             queryId: 'count_client_versions_daily',
             timeout: 10_000,
@@ -1108,10 +1106,8 @@ export class OperationsReader {
               ${this.createFilter({
                 target,
                 period,
-                clients: [clientName],
+                clients: clientName === 'unknown' ? [clientName, ''] : [clientName],
               })}
-              GROUP BY client_name
-              LIMIT 1
             `,
             queryId: 'count_client_versions_hourly',
             timeout: 10_000,
@@ -1125,10 +1121,8 @@ export class OperationsReader {
               ${this.createFilter({
                 target,
                 period,
-                clients: [clientName],
+                clients: clientName === 'unknown' ? [clientName, ''] : [clientName],
               })}
-              GROUP BY client_name
-              LIMIT 1
             `,
             queryId: 'count_client_versions_regular',
             timeout: 10_000,
