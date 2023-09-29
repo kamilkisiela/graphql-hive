@@ -65,7 +65,7 @@ export const Input = forwardRef<
 
         {suffix}
 
-        {props.value && onClear && (
+        {props.value && onClear ? (
           <button
             aria-label="Reset"
             onClick={onClear}
@@ -89,7 +89,7 @@ export const Input = forwardRef<
               />
             </svg>
           </button>
-        )}
+        ) : null}
       </div>
     );
   },
