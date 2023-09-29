@@ -1,13 +1,13 @@
 import { ReactElement, useState } from 'react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { TargetLayout } from '@/components/layouts/target';
+import { Page, TargetLayout } from '@/components/layouts/target';
 import {
   ClientsFilterTrigger,
   OperationsFilterTrigger,
-} from '@/components/target/operations/Filters';
-import { OperationsList } from '@/components/target/operations/List';
-import { OperationsStats } from '@/components/target/operations/Stats';
+} from '@/components/target/insights/Filters';
+import { OperationsList } from '@/components/target/insights/List';
+import { OperationsStats } from '@/components/target/insights/Stats';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { EmptyList, MetaTitle, RadixSelect } from '@/components/v2';
@@ -44,7 +44,7 @@ function OperationsView({
     <>
       <div className="py-6 flex flex-row items-center justify-between">
         <div>
-          <Title>Operations</Title>
+          <Title>Insights</Title>
           <Subtitle>Observe GraphQL requests and see how the API is consumed.</Subtitle>
         </div>
         <div className="flex justify-end gap-x-2">
@@ -76,6 +76,7 @@ function OperationsView({
         operationsFilter={selectedOperations}
         clientNamesFilter={selectedClients}
         resolution={resolution}
+        dateRangeText={displayDateRangeLabel(dateRangeKey)}
         mode="operation-list"
       />
       <OperationsList
@@ -148,7 +149,7 @@ function TargetOperationsPageContent() {
 
   return (
     <TargetLayout
-      value="operations"
+      page={Page.Insights}
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}
       me={me ?? null}
@@ -177,10 +178,10 @@ function TargetOperationsPageContent() {
   );
 }
 
-function OperationsPage(): ReactElement {
+function InsightsPage(): ReactElement {
   return (
     <>
-      <MetaTitle title="Operations" />
+      <MetaTitle title="Insights" />
       <TargetOperationsPageContent />
     </>
   );
@@ -188,4 +189,4 @@ function OperationsPage(): ReactElement {
 
 export const getServerSideProps = withSessionProtection();
 
-export default authenticated(OperationsPage);
+export default authenticated(InsightsPage);

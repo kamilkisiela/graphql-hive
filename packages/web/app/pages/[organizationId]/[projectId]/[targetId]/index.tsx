@@ -2,7 +2,7 @@ import { ChangeEventHandler, ReactElement, useCallback, useEffect, useRef, useSt
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { authenticated } from '@/components/authenticated-container';
-import { TargetLayout } from '@/components/layouts/target';
+import { Page, TargetLayout } from '@/components/layouts/target';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
@@ -281,7 +281,7 @@ const TargetSchemaPageQuery = graphql(`
   }
 `);
 
-function Page() {
+function TargetSchemaPage() {
   const router = useRouteSelector();
   const [query] = useQuery({
     query: TargetSchemaPageQuery,
@@ -306,7 +306,7 @@ function Page() {
 
   return (
     <TargetLayout
-      value="schema"
+      page={Page.Schema}
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}
       me={me ?? null}
@@ -335,7 +335,7 @@ function SchemaPage(): ReactElement {
   return (
     <>
       <MetaTitle title="Schema" />
-      <Page />
+      <TargetSchemaPage />
     </>
   );
 }

@@ -2,7 +2,7 @@ import { ReactElement, useCallback, useState } from 'react';
 import NextLink from 'next/link';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { TargetLayout } from '@/components/layouts/target';
+import { Page, TargetLayout } from '@/components/layouts/target';
 import { VersionErrorsAndChanges } from '@/components/target/history/errors-and-changes';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
@@ -392,7 +392,7 @@ function HistoryPageContent() {
 
   return (
     <TargetLayout
-      value="history"
+      page={Page.History}
       className="h-full"
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}

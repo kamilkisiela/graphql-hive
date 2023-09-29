@@ -4,7 +4,7 @@ import { GraphiQL } from 'graphiql';
 import { buildSchema } from 'graphql';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { TargetLayout } from '@/components/layouts/target';
+import { Page, TargetLayout } from '@/components/layouts/target';
 import { ConnectLabModal } from '@/components/target/laboratory/connect-lab-modal';
 import { CreateCollectionModal } from '@/components/target/laboratory/create-collection-modal';
 import { CreateOperationModal } from '@/components/target/laboratory/create-operation-modal';
@@ -751,7 +751,7 @@ function LaboratoryPageContent() {
 
   return (
     <TargetLayout
-      value="laboratory"
+      page={Page.Laboratory}
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}
       me={me ?? null}

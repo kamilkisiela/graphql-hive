@@ -3,7 +3,7 @@ import NextLink from 'next/link';
 import clsx from 'clsx';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { TargetLayout } from '@/components/layouts/target';
+import { Page, TargetLayout } from '@/components/layouts/target';
 import { SchemaEditor } from '@/components/schema-editor';
 import { ChangesBlock, labelize } from '@/components/target/history/errors-and-changes';
 import { Subtitle, Title } from '@/components/ui/page';
@@ -766,7 +766,7 @@ function ChecksPageContent() {
   return (
     <>
       <TargetLayout
-        value="checks"
+        page={Page.Checks}
         className="h-full"
         currentOrganization={currentOrganization ?? null}
         currentProject={currentProject ?? null}

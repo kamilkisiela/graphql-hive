@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { useMutation, useQuery } from 'urql';
 import { z } from 'zod';
 import { authenticated } from '@/components/authenticated-container';
-import { OrganizationLayout } from '@/components/layouts/organization';
+import { OrganizationLayout, Page } from '@/components/layouts/organization';
 import { priorityDescription, statusDescription } from '@/components/organization/support';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
@@ -301,7 +301,7 @@ const SupportTicketPageQuery = graphql(`
   }
 `);
 
-function SupportTicketPage() {
+function SupportTicketPageContent() {
   const router = useRouteSelector();
   const ticketId = router.query.ticketId as string;
   const [query, refetchQuery] = useQuery({
@@ -330,7 +330,7 @@ function SupportTicketPage() {
 
   return (
     <OrganizationLayout
-      value="support"
+      page={Page.Support}
       className="flex flex-col gap-y-10"
       currentOrganization={currentOrganization ?? null}
       organizations={organizationConnection ?? null}
@@ -352,18 +352,18 @@ function SupportTicketPage() {
   );
 }
 
-function Page() {
+function SupportTicketPage() {
   const router = useRouteSelector();
   const ticketId = router.query.ticketId as string;
 
   return (
     <>
       <MetaTitle title={`Support Ticket #${ticketId}`} />
-      <SupportTicketPage />
+      <SupportTicketPageContent />
     </>
   );
 }
 
 export const getServerSideProps = withSessionProtection();
 
-export default authenticated(Page);
+export default authenticated(SupportTicketPage);

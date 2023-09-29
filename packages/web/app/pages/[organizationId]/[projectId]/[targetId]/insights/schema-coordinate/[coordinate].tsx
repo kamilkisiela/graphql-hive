@@ -3,11 +3,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { differenceInMilliseconds } from 'date-fns';
 import ReactECharts from 'echarts-for-react';
-import { ActivityIcon, BookIcon, GlobeIcon, HistoryIcon } from 'lucide-react';
+import { ActivityIcon, BookIcon, GlobeIcon, TabletSmartphoneIcon } from 'lucide-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { TargetLayout } from '@/components/layouts/target';
+import { Page, TargetLayout } from '@/components/layouts/target';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
@@ -26,15 +26,17 @@ import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { useChartStyles } from '@/utils';
 
-const ClientView_ClientStatsQuery = graphql(`
-  query ClientView_ClientStatsQuery($selector: ClientStatsInput!, $resolution: Int!) {
-    clientStats(selector: $selector) {
+const SchemaCoordinateView_SchemaCoordinateStatsQuery = graphql(`
+  query SchemaCoordinateView_SchemaCoordinateStatsQuery(
+    $selector: SchemaCoordinateStatsInput!
+    $resolution: Int!
+  ) {
+    schemaCoordinateStats(selector: $selector) {
       requestsOverTime(resolution: $resolution) {
         date
         value
       }
       totalRequests
-      totalVersions
       operations {
         nodes {
           id
@@ -43,16 +45,18 @@ const ClientView_ClientStatsQuery = graphql(`
           count
         }
       }
-      versions(limit: 25) {
-        version
-        count
+      clients {
+        nodes {
+          name
+          count
+        }
       }
     }
   }
 `);
 
-function ClientView(props: {
-  clientName: string;
+function SchemaCoordinateView(props: {
+  coordinate: string;
   dataRetentionInDays: number;
   organizationCleanId: string;
   projectCleanId: string;
@@ -72,13 +76,13 @@ function ClientView(props: {
   });
 
   const [query] = useQuery({
-    query: ClientView_ClientStatsQuery,
+    query: SchemaCoordinateView_SchemaCoordinateStatsQuery,
     variables: {
       selector: {
         organization: props.organizationCleanId,
         project: props.projectCleanId,
         target: props.targetCleanId,
-        client: props.clientName,
+        schemaCoordinate: props.coordinate,
         period: dateRange,
       },
       resolution,
@@ -90,7 +94,7 @@ function ClientView(props: {
   }
 
   const isLoading = query.fetching;
-  const points = query.data?.clientStats?.requestsOverTime;
+  const points = query.data?.schemaCoordinateStats?.requestsOverTime;
   const requestsOverTime = useMemo(() => {
     if (!points) {
       return [];
@@ -98,16 +102,16 @@ function ClientView(props: {
 
     return points.map(node => [node.date, node.value]);
   }, [points]);
-  const totalRequests = query.data?.clientStats?.totalRequests ?? 0;
-  const totalVersions = query.data?.clientStats?.totalVersions ?? 0;
-  const totalOperations = query.data?.clientStats?.operations.nodes.length ?? 0;
+  const totalRequests = query.data?.schemaCoordinateStats?.totalRequests ?? 0;
+  const totalOperations = query.data?.schemaCoordinateStats?.operations.nodes.length ?? 0;
+  const totalClients = query.data?.schemaCoordinateStats?.clients.nodes.length ?? 0;
 
   return (
     <>
       <div className="py-6 flex flex-row items-center justify-between">
         <div>
-          <Title>{props.clientName}</Title>
-          <Subtitle>GraphQL API consumer insights</Subtitle>
+          <Title>{props.coordinate}</Title>
+          <Subtitle>Schema coordinate insights</Subtitle>
         </div>
         <div className="flex justify-end gap-x-2">
           <Select
@@ -176,19 +180,19 @@ function ClientView(props: {
                 <CardContent>
                   <div className="text-2xl font-bold">{isLoading ? '-' : totalOperations}</div>
                   <p className="text-xs text-muted-foreground">
-                    Documents requested by selected client
+                    GraphQL documents with selected coordinate
                   </p>
                 </CardContent>
               </Card>
               <Card className="bg-gray-900/50">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Versions</CardTitle>
-                  <HistoryIcon className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium">Consumers</CardTitle>
+                  <TabletSmartphoneIcon className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{isLoading ? '-' : totalVersions}</div>
+                  <div className="text-2xl font-bold">{isLoading ? '-' : totalClients}</div>
                   <p className="text-xs text-muted-foreground">
-                    Versions in {displayDateRangeLabel(dateRangeKey).toLowerCase()}
+                    GraphQL clients in {displayDateRangeLabel(dateRangeKey).toLowerCase()}
                   </p>
                 </CardContent>
               </Card>
@@ -199,7 +203,7 @@ function ClientView(props: {
               <CardHeader>
                 <CardTitle>Activity</CardTitle>
                 <CardDescription>
-                  GraphQL requests from {props.clientName} over time
+                  GraphQL requests with {props.coordinate} over time
                 </CardDescription>
               </CardHeader>
               <CardContent className="basis-0 grow min-h-[150px]">
@@ -273,7 +277,7 @@ function ClientView(props: {
             <CardHeader>
               <CardTitle>Operations</CardTitle>
               <CardDescription>
-                {props.clientName} requested {isLoading ? '-' : totalOperations}{' '}
+                {props.coordinate} was used by {isLoading ? '-' : totalOperations}{' '}
                 {totalOperations > 1 ? 'operations' : 'operation'} in{' '}
                 {displayDateRangeLabel(dateRangeKey).toLowerCase()}
               </CardDescription>
@@ -282,14 +286,14 @@ function ClientView(props: {
               <div className="space-y-2">
                 {isLoading
                   ? null
-                  : query.data?.clientStats.operations.nodes.map(operation => (
+                  : query.data?.schemaCoordinateStats.operations.nodes.map(operation => (
                       <div key={operation.id} className="flex items-center">
                         <p className="text-sm font-medium truncate">
                           <Link
                             className="text-orange-500 hover:underline hover:underline-offset-2 hover:text-orange-500"
                             href={{
                               pathname:
-                                '/[organizationId]/[projectId]/[targetId]/operations/[operationName]/[operationHash]',
+                                '/[organizationId]/[projectId]/[targetId]/insights/[operationName]/[operationHash]',
                               query: {
                                 organizationId: props.organizationCleanId,
                                 projectId: props.projectCleanId,
@@ -316,27 +320,40 @@ function ClientView(props: {
 
           <Card className="col-span-3 bg-gray-900/50 flex flex-col h-full">
             <CardHeader>
-              <CardTitle>Versions</CardTitle>
+              <CardTitle>Clients</CardTitle>
               <CardDescription>
-                {props.clientName} had {isLoading ? '-' : totalVersions}{' '}
-                {totalVersions > 1 ? 'versions' : 'version'} in{' '}
+                {props.coordinate} was used by {isLoading ? '-' : totalClients}{' '}
+                {totalClients > 1 ? 'clients' : 'client'} in{' '}
                 {displayDateRangeLabel(dateRangeKey).toLowerCase()}.
-                {!isLoading && totalVersions > 25
-                  ? 'Displaying only 25 most popular versions'
-                  : null}
               </CardDescription>
             </CardHeader>
             <CardContent className="basis-0 grow overflow-y-auto min-h-[170px]">
               <div className="space-y-2">
                 {isLoading
                   ? null
-                  : query.data?.clientStats.versions.map(version => (
-                      <div key={version.version} className="flex items-center">
-                        <p className="text-sm font-medium truncate">{version.version}</p>
+                  : query.data?.schemaCoordinateStats.clients.nodes.map(client => (
+                      <div key={client.name} className="flex items-center">
+                        <p className="text-sm font-medium truncate">
+                          <Link
+                            className="text-orange-500 hover:underline hover:underline-offset-2 hover:text-orange-500"
+                            href={{
+                              pathname:
+                                '/[organizationId]/[projectId]/[targetId]/insights/client/[name]',
+                              query: {
+                                organizationId: props.organizationCleanId,
+                                projectId: props.projectCleanId,
+                                targetId: props.targetCleanId,
+                                name: client.name,
+                              },
+                            }}
+                          >
+                            {client.name}
+                          </Link>
+                        </p>
                         <div className="ml-auto font-light flex flex-row justify-end items-center text-sm min-w-[150px]">
-                          <div>{formatNumber(version.count)}</div>
+                          <div>{formatNumber(client.count)}</div>
                           <div className="min-w-[70px] text-right">
-                            {toDecimal((version.count * 100) / totalRequests)}%
+                            {toDecimal((client.count * 100) / totalRequests)}%
                           </div>
                         </div>
                       </div>
@@ -350,8 +367,8 @@ function ClientView(props: {
   );
 }
 
-const ClientOperationsPageQuery = graphql(`
-  query ClientOperationsPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+const TargetSchemaCoordinatePageQuery = graphql(`
+  query TargetSchemaCoordinatePageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
     organizations {
       ...TargetLayout_OrganizationConnectionFragment
     }
@@ -381,10 +398,10 @@ const ClientOperationsPageQuery = graphql(`
   }
 `);
 
-function ClientOperationsPageContent({ clientName }: { clientName: string }) {
+function TargetSchemaCoordinatePageContent({ coordinate }: { coordinate: string }) {
   const router = useRouteSelector();
   const [query] = useQuery({
-    query: ClientOperationsPageQuery,
+    query: TargetSchemaCoordinatePageQuery,
     variables: {
       organizationId: router.organizationId,
       projectId: router.projectId,
@@ -406,7 +423,7 @@ function ClientOperationsPageContent({ clientName }: { clientName: string }) {
 
   return (
     <TargetLayout
-      value="operations"
+      page={Page.Insights}
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}
       me={me ?? null}
@@ -415,8 +432,8 @@ function ClientOperationsPageContent({ clientName }: { clientName: string }) {
     >
       {currentOrganization && currentProject && currentTarget ? (
         hasCollectedOperations ? (
-          <ClientView
-            clientName={clientName}
+          <SchemaCoordinateView
+            coordinate={coordinate}
             dataRetentionInDays={currentOrganization.rateLimit.retentionInDays}
             organizationCleanId={router.organizationId}
             projectCleanId={router.projectId}
@@ -436,22 +453,22 @@ function ClientOperationsPageContent({ clientName }: { clientName: string }) {
   );
 }
 
-function ClientOperationsPage(): ReactElement {
+function SchemaCoordinatePage(): ReactElement {
   const router = useRouter();
-  const { name } = router.query;
+  const { coordinate } = router.query;
 
-  if (!name || typeof name !== 'string') {
-    throw new Error('Invalid client name');
+  if (!coordinate || typeof coordinate !== 'string') {
+    throw new Error('Invalid coordinate');
   }
 
   return (
     <>
-      <MetaTitle title={`${name} - client`} />
-      <ClientOperationsPageContent clientName={name} />
+      <MetaTitle title={`${coordinate} - schema coordinate`} />
+      <TargetSchemaCoordinatePageContent coordinate={coordinate} />
     </>
   );
 }
 
 export const getServerSideProps = withSessionProtection();
 
-export default authenticated(ClientOperationsPage);
+export default authenticated(SchemaCoordinatePage);

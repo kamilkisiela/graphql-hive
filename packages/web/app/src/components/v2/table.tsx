@@ -1,9 +1,9 @@
 import { ComponentProps, ReactElement } from 'react';
-import clsx from 'clsx';
+import { cn } from '@/lib/utils';
 
 function Table({ children, className, ...props }: ComponentProps<'table'>): ReactElement {
   return (
-    <table className={clsx('w-full', className)} {...props}>
+    <table className={cn('w-full', className)} {...props}>
       {children}
     </table>
   );
@@ -31,7 +31,7 @@ function TFoot({ children, ...props }: ComponentProps<'tfoot'>): ReactElement {
 
 function Th({ children, className, align = 'left', ...props }: ComponentProps<'th'>): ReactElement {
   return (
-    <th className={clsx('px-5 py-4', className)} align={align} {...props}>
+    <th className={cn('px-5 py-4', className)} align={align} {...props}>
       {children}
     </th>
   );
@@ -40,7 +40,7 @@ function Th({ children, className, align = 'left', ...props }: ComponentProps<'t
 function Tr({ children, className, ...props }: ComponentProps<'tr'>): ReactElement {
   return (
     <tr
-      className={clsx('border border-gray-600/10 text-xs odd:bg-gray-600/10', className)}
+      className={cn('border border-gray-600/10 text-xs odd:bg-gray-600/10', className)}
       {...props}
     >
       {children}
@@ -51,8 +51,8 @@ function Tr({ children, className, ...props }: ComponentProps<'tr'>): ReactEleme
 function Td({ children, className, ...props }: ComponentProps<'td'>): ReactElement {
   return (
     <td
-      className={clsx(
-        'break-all px-5 py-4 text-sm',
+      className={cn(
+        'break-all px-4 py-2 text-sm',
         className,
         // column.align === 'right' && 'text-right',
         // column.width === 'auto' && 'w-1',

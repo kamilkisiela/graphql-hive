@@ -121,7 +121,7 @@ export function SchemaExplorerUsageStats(props: {
                                   className="text-orange-500 hover:underline hover:underline-offset-2 hover:text-orange-500"
                                   href={{
                                     pathname:
-                                      '/[organizationId]/[projectId]/[targetId]/operations/[operationName]/[operationHash]',
+                                      '/[organizationId]/[projectId]/[targetId]/insights/[operationName]/[operationHash]',
                                     query: {
                                       organizationId: props.organizationCleanId,
                                       projectId: props.projectCleanId,
@@ -171,7 +171,7 @@ export function SchemaExplorerUsageStats(props: {
                           className="text-orange-500 hover:underline hover:underline-offset-2 hover:text-orange-500"
                           href={{
                             pathname:
-                              '/[organizationId]/[projectId]/[targetId]/operations/client/[name]',
+                              '/[organizationId]/[projectId]/[targetId]/insights/client/[name]',
                             query: {
                               organizationId: props.organizationCleanId,
                               projectId: props.projectCleanId,
@@ -527,7 +527,7 @@ export function LinkToCoordinatePage(props: {
       className="text-orange-500"
       href={{
         pathname:
-          '/[organizationId]/[projectId]/[targetId]/operations/schema-coordinate/[coordinate]',
+          '/[organizationId]/[projectId]/[targetId]/insights/schema-coordinate/[coordinate]',
         query: {
           organizationId: router.organizationId,
           projectId: router.projectId,

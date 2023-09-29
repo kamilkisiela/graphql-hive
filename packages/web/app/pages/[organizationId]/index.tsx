@@ -7,12 +7,12 @@ import { Globe, History } from 'lucide-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { OrganizationLayout } from '@/components/layouts/organization';
+import { OrganizationLayout, Page } from '@/components/layouts/organization';
 import {
   createEmptySeries,
   fullSeries,
   resolutionToMilliseconds,
-} from '@/components/target/operations/utils';
+} from '@/components/target/insights/utils';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -319,7 +319,7 @@ function OrganizationPageContent() {
 
   return (
     <OrganizationLayout
-      value="overview"
+      page={Page.Overview}
       className="flex justify-between gap-12"
       currentOrganization={currentOrganization ?? null}
       organizations={organizationConnection ?? null}

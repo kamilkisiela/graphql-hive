@@ -1,5 +1,4 @@
 import { ComponentProps, ReactElement, ReactNode } from 'react';
-import { clsx } from 'clsx';
 import { Tooltip } from '@/components/v2/tooltip';
 import { TriangleUpIcon } from '@radix-ui/react-icons';
 import { SortDirection } from '@tanstack/react-table';
@@ -23,15 +22,13 @@ export function Sortable({
 
   return (
     <Tooltip content={tooltipText}>
-      <button className="flex gap-2 items-center justify-center" onClick={onClick}>
-        {children}
+      <button className="flex items-center justify-center" onClick={onClick}>
+        <div>{children}</div>
 
-        <span>
-          <TriangleUpIcon className={clsx(sortOrder === 'asc' && 'text-orange-500')} />
-          <TriangleUpIcon
-            className={clsx('rotate-180', sortOrder === 'desc' && 'text-orange-500')}
-          />
-        </span>
+        {sortOrder === 'asc' ? <TriangleUpIcon className="text-orange-500 ml-2" /> : null}
+        {sortOrder === 'desc' ? (
+          <TriangleUpIcon className="rotate-180 text-orange-500 ml-2" />
+        ) : null}
       </button>
     </Tooltip>
   );

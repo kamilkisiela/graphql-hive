@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { ProjectLayout } from '@/components/layouts/project';
+import { Page, ProjectLayout } from '@/components/layouts/project';
 import { PolicySettings } from '@/components/policy/policy-settings';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Subtitle, Title } from '@/components/ui/page';
@@ -113,7 +113,7 @@ function ProjectPolicyContent() {
       currentProject={currentProject ?? null}
       organizations={organizationConnection ?? null}
       me={me ?? null}
-      value="policy"
+      page={Page.Policy}
       className="flex flex-col gap-y-10"
     >
       <div>

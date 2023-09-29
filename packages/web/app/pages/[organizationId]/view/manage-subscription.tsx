@@ -3,7 +3,7 @@ import NextLink from 'next/link';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Section } from '@/components/common';
-import { OrganizationLayout } from '@/components/layouts/organization';
+import { OrganizationLayout, Page } from '@/components/layouts/organization';
 import { BillingPaymentMethod } from '@/components/organization/billing/BillingPaymentMethod';
 import { BillingPlanPicker } from '@/components/organization/billing/BillingPlanPicker';
 import { PlanSummary } from '@/components/organization/billing/PlanSummary';
@@ -471,7 +471,7 @@ function ManageSubscriptionPageContent() {
 
   return (
     <OrganizationLayout
-      value="subscription"
+      page={Page.Subscription}
       className="flex flex-col gap-y-10"
       currentOrganization={currentOrganization}
       organizations={organizationConnection}

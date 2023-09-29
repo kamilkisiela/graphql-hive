@@ -18,7 +18,7 @@ import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { ProPlanBilling } from '../organization/billing/ProPlanBillingWarm';
 import { RateLimitWarn } from '../organization/billing/RateLimitWarn';
 
-enum TabValue {
+export enum Page {
   Overview = 'overview',
   Members = 'members',
   Settings = 'settings',
@@ -61,11 +61,11 @@ const OrganizationLayout_OrganizationConnectionFragment = graphql(`
 
 export function OrganizationLayout({
   children,
-  value,
+  page,
   className,
   ...props
 }: {
-  value?: 'overview' | 'members' | 'settings' | 'subscription' | 'policy' | 'support';
+  page?: Page;
   className?: string;
   me: FragmentType<typeof OrganizationLayout_MeFragment> | null;
   currentOrganization: FragmentType<typeof OrganizationLayout_CurrentOrganizationFragment> | null;
@@ -138,9 +138,9 @@ export function OrganizationLayout({
       <div className="relative border-b border-gray-800">
         <div className="container flex justify-between items-center">
           {currentOrganization && meInCurrentOrg ? (
-            <Tabs value={value}>
+            <Tabs value={page}>
               <Tabs.List>
-                <Tabs.Trigger value={TabValue.Overview} asChild>
+                <Tabs.Trigger value={Page.Overview} asChild>
                   <NextLink
                     href={{
                       pathname: '/[organizationId]',
@@ -151,13 +151,13 @@ export function OrganizationLayout({
                   </NextLink>
                 </Tabs.Trigger>
                 {canAccessOrganization(OrganizationAccessScope.Members, meInCurrentOrg) && (
-                  <Tabs.Trigger value={TabValue.Members} asChild>
+                  <Tabs.Trigger value={Page.Members} asChild>
                     <NextLink
                       href={{
                         pathname: '/[organizationId]/view/[tab]',
                         query: {
                           organizationId: currentOrganization.cleanId,
-                          tab: TabValue.Members,
+                          tab: Page.Members,
                         },
                       }}
                     >
@@ -167,26 +167,26 @@ export function OrganizationLayout({
                 )}
                 {canAccessOrganization(OrganizationAccessScope.Settings, meInCurrentOrg) && (
                   <>
-                    <Tabs.Trigger value={TabValue.Policy} asChild>
+                    <Tabs.Trigger value={Page.Policy} asChild>
                       <NextLink
                         href={{
                           pathname: '/[organizationId]/view/[tab]',
                           query: {
                             organizationId: currentOrganization.cleanId,
-                            tab: TabValue.Policy,
+                            tab: Page.Policy,
                           },
                         }}
                       >
                         Policy
                       </NextLink>
                     </Tabs.Trigger>
-                    <Tabs.Trigger value={TabValue.Settings} asChild>
+                    <Tabs.Trigger value={Page.Settings} asChild>
                       <NextLink
                         href={{
                           pathname: '/[organizationId]/view/[tab]',
                           query: {
                             organizationId: currentOrganization.cleanId,
-                            tab: TabValue.Settings,
+                            tab: Page.Settings,
                           },
                         }}
                       >
@@ -197,13 +197,13 @@ export function OrganizationLayout({
                 )}
                 {canAccessOrganization(OrganizationAccessScope.Read, meInCurrentOrg) &&
                   env.zendeskSupport && (
-                    <Tabs.Trigger value={TabValue.Support} asChild>
+                    <Tabs.Trigger value={Page.Support} asChild>
                       <NextLink
                         href={{
                           pathname: '/[organizationId]/view/[tab]',
                           query: {
                             organizationId: currentOrganization.cleanId,
-                            tab: TabValue.Support,
+                            tab: Page.Support,
                           },
                         }}
                       >
@@ -213,13 +213,13 @@ export function OrganizationLayout({
                   )}
                 {getIsStripeEnabled() &&
                   canAccessOrganization(OrganizationAccessScope.Settings, meInCurrentOrg) && (
-                    <Tabs.Trigger value={TabValue.Subscription} asChild>
+                    <Tabs.Trigger value={Page.Subscription} asChild>
                       <NextLink
                         href={{
                           pathname: '/[organizationId]/view/[tab]',
                           query: {
                             organizationId: currentOrganization.cleanId,
-                            tab: TabValue.Subscription,
+                            tab: Page.Subscription,
                           },
                         }}
                       >

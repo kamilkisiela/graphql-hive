@@ -4,9 +4,9 @@ import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Section } from '@/components/common';
 import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
-import { TargetLayout } from '@/components/layouts/target';
-import { ClientsFilterTrigger } from '@/components/target/operations/Filters';
-import { OperationsStats } from '@/components/target/operations/Stats';
+import { Page, TargetLayout } from '@/components/layouts/target';
+import { ClientsFilterTrigger } from '@/components/target/insights/Filters';
+import { OperationsStats } from '@/components/target/insights/Stats';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { EmptyList, MetaTitle, RadixSelect } from '@/components/v2';
@@ -87,7 +87,7 @@ function OperationView({
       <div className="py-6 flex flex-row items-center justify-between">
         <div>
           <Title>{operationName}</Title>
-          <Subtitle>Performance of individual GraphQL operation</Subtitle>
+          <Subtitle>Insights of individual GraphQL operation</Subtitle>
         </div>
         <div className="flex justify-end gap-x-2">
           <ClientsFilterTrigger
@@ -110,6 +110,7 @@ function OperationView({
         project={projectCleanId}
         target={targetCleanId}
         period={dateRange}
+        dateRangeText={displayDateRangeLabel(dateRangeKey)}
         operationsFilter={operationsList}
         clientNamesFilter={selectedClients}
         resolution={resolution}
@@ -128,8 +129,8 @@ function OperationView({
   );
 }
 
-const TargetOperationPageQuery = graphql(`
-  query TargetOperationPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+const OperationInsightsPageQuery = graphql(`
+  query OperationInsightsPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
     organizations {
       ...TargetLayout_OrganizationConnectionFragment
     }
@@ -159,7 +160,7 @@ const TargetOperationPageQuery = graphql(`
   }
 `);
 
-function TargetOperationPageContent({
+function OperationInsightsContent({
   operationHash,
   operationName,
 }: {
@@ -168,7 +169,7 @@ function TargetOperationPageContent({
 }) {
   const router = useRouteSelector();
   const [query] = useQuery({
-    query: TargetOperationPageQuery,
+    query: OperationInsightsPageQuery,
     variables: {
       organizationId: router.organizationId,
       projectId: router.projectId,
@@ -190,7 +191,7 @@ function TargetOperationPageContent({
 
   return (
     <TargetLayout
-      value="operations"
+      page={Page.Insights}
       currentOrganization={currentOrganization ?? null}
       currentProject={currentProject ?? null}
       me={me ?? null}
@@ -221,7 +222,7 @@ function TargetOperationPageContent({
   );
 }
 
-function OperationPage(): ReactElement {
+function OperationInsightsPage(): ReactElement {
   const router = useRouter();
   const { operationHash, operationName } = router.query;
 
@@ -236,11 +237,11 @@ function OperationPage(): ReactElement {
   return (
     <>
       <MetaTitle title={`Operation ${operationName}`} />
-      <TargetOperationPageContent operationHash={operationHash} operationName={operationName} />
+      <OperationInsightsContent operationHash={operationHash} operationName={operationName} />
     </>
   );
 }
 
 export const getServerSideProps = withSessionProtection();
 
-export default authenticated(OperationPage);
+export default authenticated(OperationInsightsPage);
