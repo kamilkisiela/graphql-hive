@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode } from 'react';
+import React, { ReactElement, ReactNode, useMemo } from 'react';
 import { clsx } from 'clsx';
 import { Tooltip } from '@/components/v2';
 import { PulseIcon, UsersIcon } from '@/components/v2/icon';
@@ -209,6 +209,7 @@ const GraphQLFields_FieldFragment = graphql(`
     isDeprecated
     deprecationReason
     usage {
+      total
       ...SchemaExplorerUsageStats_UsageFragment
     }
     args {
@@ -228,6 +229,7 @@ const GraphQLArguments_ArgumentFragment = graphql(`
     isDeprecated
     deprecationReason
     usage {
+      total
       ...SchemaExplorerUsageStats_UsageFragment
     }
   }
@@ -241,6 +243,7 @@ const GraphQLInputFields_InputFieldFragment = graphql(`
     isDeprecated
     deprecationReason
     usage {
+      total
       ...SchemaExplorerUsageStats_UsageFragment
     }
   }
@@ -407,9 +410,14 @@ export function GraphQLFields(props: {
     props.collapsed ?? false,
   );
 
+  const sortedFields = useMemo(
+    () => [...fields].sort((a, b) => a.usage.total - b.usage.total),
+    [fields],
+  );
+
   return (
     <div className="flex flex-col">
-      {fields.map((field, i) => {
+      {sortedFields.map((field, i) => {
         const coordinate = `${props.typeName}.${field.name}`;
 
         return (
@@ -441,11 +449,11 @@ export function GraphQLFields(props: {
       })}
       {collapsed ? (
         <GraphQLTypeCardListItem
-          index={fields.length}
+          index={sortedFields.length}
           className="cursor-pointer font-semibold hover:bg-gray-800"
           onClick={expand}
         >
-          Show {props.fields.length - fields.length} more fields
+          Show {props.fields.length - sortedFields.length} more fields
         </GraphQLTypeCardListItem>
       ) : null}
     </div>
