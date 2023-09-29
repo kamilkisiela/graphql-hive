@@ -59,9 +59,12 @@ export function initSeed() {
     port: ensureEnv('POSTGRES_PORT'),
     db: ensureEnv('POSTGRES_DB'),
   };
-  const poolPromise = createPool(
-    `postgres://${pg.user}:${pg.password}@${pg.host}:${pg.port}/${pg.db}?sslmode=disable`,
-  );
+
+  function createConnectionPool() {
+    return createPool(
+      `postgres://${pg.user}:${pg.password}@${pg.host}:${pg.port}/${pg.db}?sslmode=disable`,
+    );
+  }
 
   return {
     authenticate: authenticate,
@@ -85,7 +88,7 @@ export function initSeed() {
           return {
             organization,
             async setFeatureFlag(name: string, enabled: boolean) {
-              const pool = await poolPromise;
+              const pool = await createConnectionPool();
 
               await pool.query(sql`
                 UPDATE public.organizations SET feature_flags = ${sql.jsonb({
@@ -93,6 +96,8 @@ export function initSeed() {
                 })}
                 WHERE id = ${organization.id}
               `);
+
+              await pool.end();
             },
             async setOrganizationSchemaPolicy(policy: SchemaPolicyInput, allowOverrides: boolean) {
               const result = await execute({
@@ -180,7 +185,7 @@ export function initSeed() {
                 targets,
                 target,
                 async setNativeFederation(enabled: boolean) {
-                  const pool = await poolPromise;
+                  const pool = await createConnectionPool();
 
                   await pool.query(sql`
                     UPDATE public.projects SET native_federation = ${enabled} WHERE id = ${project.id}
