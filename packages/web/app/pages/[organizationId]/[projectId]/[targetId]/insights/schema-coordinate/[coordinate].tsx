@@ -111,7 +111,7 @@ function SchemaCoordinateView(props: {
       <div className="py-6 flex flex-row items-center justify-between">
         <div>
           <Title>{props.coordinate}</Title>
-          <Subtitle>Detailed view of schema coordinate usage</Subtitle>
+          <Subtitle>Schema coordinate insights</Subtitle>
         </div>
         <div className="flex justify-end gap-x-2">
           <Select

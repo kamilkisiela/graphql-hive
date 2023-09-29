@@ -44,7 +44,7 @@ function OperationsView({
     <>
       <div className="py-6 flex flex-row items-center justify-between">
         <div>
-          <Title>Operations</Title>
+          <Title>Insights</Title>
           <Subtitle>Observe GraphQL requests and see how the API is consumed.</Subtitle>
         </div>
         <div className="flex justify-end gap-x-2">

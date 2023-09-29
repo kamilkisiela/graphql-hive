@@ -87,7 +87,7 @@ function OperationView({
       <div className="py-6 flex flex-row items-center justify-between">
         <div>
           <Title>{operationName}</Title>
-          <Subtitle>Performance of individual GraphQL operation</Subtitle>
+          <Subtitle>Insights of individual GraphQL operation</Subtitle>
         </div>
         <div className="flex justify-end gap-x-2">
           <ClientsFilterTrigger
