@@ -408,7 +408,7 @@ export function GraphQLFields(props: {
   const sortedFields = useMemo(
     () =>
       [...fieldsFromFragment].sort(
-        // Sort by usage DESC, name DESC
+        // Sort by usage DESC, name ASC
         (a, b) => b.usage.total - a.usage.total || a.name.localeCompare(b.name),
       ),
     [fieldsFromFragment],
