@@ -98,6 +98,8 @@ export function createHive(options: HivePluginOptions): HiveClient {
             'content-type': 'application/json',
             Authorization: `Bearer ${options.token}`,
             'user-agent': `hive-client/${version}`,
+            'graphql-client-name': 'Hive Client',
+            'graphql-client-version': version,
           },
           timeout: 30_000,
           decompress: true,
