@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode } from 'react';
+import React, { ReactElement, ReactNode, useMemo } from 'react';
 import { clsx } from 'clsx';
 import { Tooltip } from '@/components/v2';
 import { PulseIcon, UsersIcon } from '@/components/v2/icon';
@@ -209,6 +209,7 @@ const GraphQLFields_FieldFragment = graphql(`
     isDeprecated
     deprecationReason
     usage {
+      total
       ...SchemaExplorerUsageStats_UsageFragment
     }
     args {
@@ -228,6 +229,7 @@ const GraphQLArguments_ArgumentFragment = graphql(`
     isDeprecated
     deprecationReason
     usage {
+      total
       ...SchemaExplorerUsageStats_UsageFragment
     }
   }
@@ -241,6 +243,7 @@ const GraphQLInputFields_InputFieldFragment = graphql(`
     isDeprecated
     deprecationReason
     usage {
+      total
       ...SchemaExplorerUsageStats_UsageFragment
     }
   }
@@ -401,11 +404,16 @@ export function GraphQLFields(props: {
   organizationCleanId: string;
 }) {
   const { totalRequests } = props;
-  const [fields, collapsed, expand] = useCollapsibleList(
-    useFragment(GraphQLFields_FieldFragment, props.fields),
-    5,
-    props.collapsed ?? false,
+  const fieldsFromFragment = useFragment(GraphQLFields_FieldFragment, props.fields);
+  const sortedFields = useMemo(
+    () =>
+      [...fieldsFromFragment].sort(
+        // Sort by usage DESC, name ASC
+        (a, b) => b.usage.total - a.usage.total || a.name.localeCompare(b.name),
+      ),
+    [fieldsFromFragment],
   );
+  const [fields, collapsed, expand] = useCollapsibleList(sortedFields, 5, props.collapsed ?? false);
 
   return (
     <div className="flex flex-col">
