@@ -65,7 +65,7 @@
     "graphql": "16.8.1",
     "graphql-yoga": "4.0.4",
     "nock": "13.3.3",
-    "vitest": "0.34.3"
+    "vitest": "0.34.6"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
