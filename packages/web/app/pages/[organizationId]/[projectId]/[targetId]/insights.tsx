@@ -76,6 +76,7 @@ function OperationsView({
         operationsFilter={selectedOperations}
         clientNamesFilter={selectedClients}
         resolution={resolution}
+        dateRangeText={displayDateRangeLabel(dateRangeKey)}
         mode="operation-list"
       />
       <OperationsList

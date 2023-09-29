@@ -110,6 +110,7 @@ function OperationView({
         project={projectCleanId}
         target={targetCleanId}
         period={dateRange}
+        dateRangeText={displayDateRangeLabel(dateRangeKey)}
         operationsFilter={operationsList}
         clientNamesFilter={selectedClients}
         resolution={resolution}

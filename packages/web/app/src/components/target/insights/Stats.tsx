@@ -1,11 +1,21 @@
 import { ReactElement, useCallback, useMemo, useState } from 'react';
+import { differenceInMilliseconds } from 'date-fns';
 import ReactECharts from 'echarts-for-react';
-import { ChevronUp } from 'lucide-react';
+import {
+  ActivityIcon,
+  BookIcon,
+  ChevronUp,
+  FrownIcon,
+  GaugeIcon,
+  GlobeIcon,
+  PercentIcon,
+  SmileIcon,
+} from 'lucide-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { Section } from '@/components/common';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CHART_PRIMARY_COLOR } from '@/constants';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { DateRangeInput } from '@/graphql';
@@ -19,7 +29,6 @@ import {
   useFormattedThroughput,
   useRouteSelector,
 } from '@/lib/hooks';
-import { cn } from '@/lib/utils';
 import { useChartStyles } from '@/utils';
 import { OperationsFallback } from './Fallback';
 import { createEmptySeries, resolutionToMilliseconds } from './utils';
@@ -53,41 +62,50 @@ const Stats_GeneralOperationsStatsQuery = graphql(`
   }
 `);
 
-const classes = {
-  root: cn('text-center'),
-  value: cn('font-normal text-3xl text-gray-900 dark:text-white'),
-  title: cn('text-sm leading-relaxed'),
-};
-
-function RequestsStats({ requests = 0 }: { requests?: number }): ReactElement {
+function RequestsStats({
+  requests = 0,
+}: {
+  requests?: number;
+  dateRangeText: string;
+}): ReactElement {
   const value = useFormattedNumber(requests);
 
   return (
-    <div className={classes.root}>
-      <h2 className={classes.value}>{value}</h2>
-      <p className={classes.title}>Requests</p>
-    </div>
+    <Card className="bg-gray-900/50">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">Requests</CardTitle>
+        <GlobeIcon className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        <p className="text-xs text-muted-foreground">Total requests served</p>
+      </CardContent>
+    </Card>
   );
 }
 
-function UniqueOperationsStats({ operations = 0 }: { operations?: number }): ReactElement {
+function UniqueOperationsStats({
+  operations = 0,
+  dateRangeText,
+}: {
+  operations?: number;
+  dateRangeText: string;
+}): ReactElement {
   const value = useFormattedNumber(operations);
 
   return (
-    <TooltipProvider>
-      <div className={classes.root}>
-        <Tooltip>
-          <TooltipTrigger>
-            <h2 className={classes.value}>{value}</h2>
-            <p className={classes.title}>Unique Operations</p>
-          </TooltipTrigger>
-          <TooltipContent>
-            Count of unique operations that have been requested, taking into account applied
-            filters.
-          </TooltipContent>
-        </Tooltip>
-      </div>
-    </TooltipProvider>
+    <Card className="bg-gray-900/50">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">Operations</CardTitle>
+        <BookIcon className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        <p className="text-xs text-muted-foreground">
+          Distinct GraphQL operations in {dateRangeText}
+        </p>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -97,45 +115,60 @@ function OperationRelativeFrequency({
 }: {
   allOperationRequests: number;
   operationRequests: number;
+  dateRangeText: string;
 }): ReactElement {
   const rate = allOperationRequests
     ? `${toDecimal((operationRequests * 100) / allOperationRequests)}%`
     : '-';
 
   return (
-    <TooltipProvider>
-      <div className={classes.root}>
-        <Tooltip>
-          <TooltipTrigger>
-            <h2 className={classes.value}>{rate}</h2>
-            <p className={classes.title}>Total traffic ratio</p>
-          </TooltipTrigger>
-          <TooltipContent>
-            The proportion of traffic accounted for by this operation, taking into account applied
-            filters, in relation to the total target traffic.
-          </TooltipContent>
-        </Tooltip>
-      </div>
-    </TooltipProvider>
+    <Card className="bg-gray-900/50">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">Relative Request Frequency</CardTitle>
+        <PercentIcon className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{rate}</div>
+        <p className="text-xs text-muted-foreground">The impact on the overall API traffic</p>
+      </CardContent>
+    </Card>
   );
 }
 
-function PercentileStats({ value, title }: { value?: number; title: string }): ReactElement {
+function PercentileStats({
+  value,
+  percentile,
+  dateRangeText,
+}: {
+  value?: number;
+  percentile: number;
+  dateRangeText: string;
+}): ReactElement {
   const formatted = useFormattedDuration(value);
 
   return (
-    <div className={classes.root}>
-      <h2 className={classes.value}>{formatted}</h2>
-      <p className={classes.title}>{title}</p>
-    </div>
+    <Card className="bg-gray-900/50">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">p{percentile}</CardTitle>
+        <GaugeIcon className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{formatted}</div>
+        <p className="text-xs text-muted-foreground">
+          Latency p{percentile} in {dateRangeText}
+        </p>
+      </CardContent>
+    </Card>
   );
 }
 
 function RPM({
   period,
+  dateRangeText,
   requests = 0,
 }: {
   requests?: number;
+  dateRangeText: string;
   period: {
     from: string;
     to: string;
@@ -143,22 +176,31 @@ function RPM({
 }): ReactElement {
   const throughput = useFormattedThroughput({
     requests,
-    window: new Date(period.to).getTime() - new Date(period.from).getTime(),
+    window: differenceInMilliseconds(new Date(period.to), new Date(period.from)),
   });
+
   return (
-    <div className={classes.root}>
-      <h2 className={classes.value}>{throughput}</h2>
-      <p className={classes.title}>RPM</p>
-    </div>
+    <Card className="bg-gray-900/50">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">Requests per minute</CardTitle>
+        <ActivityIcon className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{throughput}</div>
+        <p className="text-xs text-muted-foreground">Throughput in {dateRangeText}</p>
+      </CardContent>
+    </Card>
   );
 }
 
 function SuccessRateStats({
   requests = 0,
   totalFailures = 0,
+  dateRangeText,
 }: {
   requests?: number;
   totalFailures?: number;
+  dateRangeText: string;
 }): ReactElement {
   const rate =
     requests || totalFailures
@@ -166,27 +208,45 @@ function SuccessRateStats({
       : '-';
 
   return (
-    <div className={classes.root}>
-      <h2 className={cn(classes.value, 'text-emerald-500 dark:text-emerald-500')}>{rate}</h2>
-      <p className={classes.title}>Success rate</p>
-    </div>
+    <Card className="bg-gray-900/50">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium text-emerald-500 dark:text-emerald-500">
+          Success rate
+        </CardTitle>
+        <SmileIcon className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{rate}</div>
+        <p className="text-xs text-muted-foreground">Successful requests in {dateRangeText}</p>
+      </CardContent>
+    </Card>
   );
 }
 
 function FailureRateStats({
   requests = 0,
   totalFailures = 0,
+  dateRangeText,
 }: {
   requests?: number;
   totalFailures?: number;
+  dateRangeText: string;
 }): ReactElement {
   const rate = requests || totalFailures ? `${toDecimal((totalFailures * 100) / requests)}%` : '-';
 
   return (
-    <div className={cn(classes.root)}>
-      <h2 className={cn(classes.value, 'text-red-500 dark:text-red-500')}>{rate}</h2>
-      <p className={classes.title}>Failure rate</p>
-    </div>
+    <Card className="bg-gray-900/50">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium text-red-500 dark:text-red-500">
+          Failure rate
+        </CardTitle>
+        <FrownIcon className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{rate}</div>
+        <p className="text-xs text-muted-foreground">Failed requests in {dateRangeText}</p>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -957,6 +1017,7 @@ export function OperationsStats({
   clientNamesFilter,
   resolution,
   mode,
+  dateRangeText,
 }: {
   organization: string;
   project: string;
@@ -965,6 +1026,7 @@ export function OperationsStats({
     from: string;
     to: string;
   };
+  dateRangeText: string;
   resolution: number;
   operationsFilter: string[];
   clientNamesFilter: Array<string>;
@@ -1002,31 +1064,54 @@ export function OperationsStats({
 
   const operationsStats = query.data?.operationsStats;
   const allOperationsStats = query.data?.allOperations;
+  dateRangeText = dateRangeText.toLowerCase();
 
   return (
     <section className="text-gray-600 dark:text-gray-400 space-y-12 transition-opacity ease-in-out duration-700">
       <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
-        <div className="grid gap-y-4 grid-cols-4 rounded-md p-5 border border-gray-800 bg-gray-900/50">
-          <RequestsStats requests={operationsStats?.totalRequests} />
-          <RPM requests={operationsStats?.totalRequests} period={period} />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <RequestsStats requests={operationsStats?.totalRequests} dateRangeText={dateRangeText} />
+          <RPM
+            requests={operationsStats?.totalRequests}
+            period={period}
+            dateRangeText={dateRangeText}
+          />
           {mode === 'operation-list' ? (
-            <UniqueOperationsStats operations={operationsStats?.totalOperations} />
+            <UniqueOperationsStats
+              operations={operationsStats?.totalOperations}
+              dateRangeText={dateRangeText}
+            />
           ) : (
             <OperationRelativeFrequency
               allOperationRequests={allOperationsStats?.totalRequests ?? 0}
               operationRequests={operationsStats?.totalRequests ?? 0}
+              dateRangeText={dateRangeText}
             />
           )}
           <SuccessRateStats
             requests={operationsStats?.totalRequests}
             totalFailures={operationsStats?.totalFailures}
+            dateRangeText={dateRangeText}
           />
-          <PercentileStats value={operationsStats?.duration?.p99} title="Latency p99" />
-          <PercentileStats value={operationsStats?.duration?.p95} title="Latency p95" />
-          <PercentileStats value={operationsStats?.duration?.p90} title="Latency p90" />
+          <PercentileStats
+            value={operationsStats?.duration?.p99}
+            percentile={99}
+            dateRangeText={dateRangeText}
+          />
+          <PercentileStats
+            value={operationsStats?.duration?.p95}
+            percentile={95}
+            dateRangeText={dateRangeText}
+          />
+          <PercentileStats
+            value={operationsStats?.duration?.p90}
+            percentile={90}
+            dateRangeText={dateRangeText}
+          />
           <FailureRateStats
             requests={operationsStats?.totalRequests}
             totalFailures={operationsStats?.totalFailures}
+            dateRangeText={dateRangeText}
           />
         </div>
       </OperationsFallback>

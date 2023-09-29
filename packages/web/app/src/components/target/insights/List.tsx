@@ -58,7 +58,7 @@ function OperationRow({
   return (
     <>
       <Tr>
-        <Td className="font-medium truncate">
+        <Td className="font-medium">
           <div className="flex gap-2 items-center">
             <Link
               href={{
@@ -75,7 +75,7 @@ function OperationRow({
               }}
               passHref
             >
-              <Button variant="link" as="a">
+              <Button variant="link" as="a" className="block truncate max-w-[300px]">
                 {operation.name}
               </Button>
             </Link>
@@ -88,16 +88,16 @@ function OperationRow({
             )}
           </div>
         </Td>
-        <Td align="center">{operation.kind}</Td>
+        <Td align="center" className="text-xs">
+          {operation.kind}
+        </Td>
         <Td align="center">{p90}</Td>
         <Td align="center">{p95}</Td>
         <Td align="center">{p99}</Td>
         <Td align="center">{failureRate}%</Td>
         <Td align="center">{count}</Td>
-        <Td align="right" width="1">
-          {percentage}%
-        </Td>
-        <Td width="1">
+        <Td align="right">{percentage}%</Td>
+        <Td>
           <Scale value={operation.percentage} size={10} max={100} className="justify-end" />
         </Td>
       </Tr>
@@ -105,34 +105,62 @@ function OperationRow({
   );
 }
 
-const table = createTable().setRowType<Operation>();
+const table = createTable()
+  .setTableMetaType<{
+    align: 'left' | 'center' | 'right';
+  }>()
+  .setRowType<Operation>();
 
 const columns = [
   table.createDataColumn('name', {
     header: 'Operations',
     enableSorting: false,
+    meta: {
+      align: 'left',
+    },
   }),
   table.createDataColumn('kind', {
     header: 'Kind',
     enableSorting: false,
+    meta: {
+      align: 'center',
+    },
   }),
   table.createDataColumn('p90', {
     header: 'p90',
+    meta: {
+      align: 'center',
+    },
   }),
   table.createDataColumn('p95', {
     header: 'p95',
+    meta: {
+      align: 'center',
+    },
   }),
   table.createDataColumn('p99', {
     header: 'p99',
+    meta: {
+      align: 'center',
+    },
   }),
   table.createDataColumn('failureRate', {
     header: 'Failure Rate',
+    meta: {
+      align: 'center',
+    },
   }),
   table.createDataColumn('requests', {
     header: 'Requests',
+    meta: {
+      align: 'center',
+    },
   }),
   table.createDataColumn('percentage', {
     header: 'Traffic',
+    meta: {
+      align: 'right',
+    },
   }),
 ];
 
@@ -191,6 +219,7 @@ function OperationsTable({
   }, 500);
 
   const { headers } = tableInstance.getHeaderGroups()[0];
+
   return (
     <div className={clsx('rounded-md p-5 border border-gray-800 bg-gray-900/50', className)}>
       <Section.Title>Operations</Section.Title>
@@ -201,9 +230,11 @@ function OperationsTable({
           <Tooltip.Provider>
             {headers.map(header => {
               const canSort = header.column.getCanSort();
+              const align: 'center' | 'left' | 'right' =
+                (header.column.columnDef.meta as any)?.align || 'left';
               const name = header.renderHeader();
               return (
-                <Th key={header.id}>
+                <Th key={header.id} className="text-sm font-semibold" align={align}>
                   {canSort ? (
                     <Sortable
                       sortOrder={header.column.getIsSorted()}
