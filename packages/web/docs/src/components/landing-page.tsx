@@ -1,4 +1,5 @@
 import { ReactElement, ReactNode, useState } from 'react';
+import Head from 'next/head';
 import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
 import { FiGithub, FiGlobe, FiLogIn, FiPackage, FiServer, FiTruck } from 'react-icons/fi';
@@ -175,6 +176,13 @@ function Feature(props: {
 
   return (
     <>
+      <Head>
+        {highlights
+          ? highlights.map(highlight => (
+              <link key={highlight.image.src} rel="preload" as="image" href={highlight.image.src} />
+            ))
+          : null}
+      </Head>
       <div className={cn(classes.feature, 'relative overflow-hidden')}>
         <div>
           <div
@@ -226,7 +234,12 @@ function Feature(props: {
             {imagelessHighlights ? (
               <div className="flex flex-col lg:flex-row justify-center mt-16 pt-10 sm:gap-y-6 md:mt-20 lg:pt-0">
                 {imagelessHighlights.map((highlight, i) => (
-                  <Highlight {...highlight} endColor={end} startColor={start} key={i} />
+                  <Highlight
+                    {...highlight}
+                    endColor={end}
+                    startColor={start}
+                    key={highlight.title}
+                  />
                 ))}
               </div>
             ) : null}
@@ -234,21 +247,19 @@ function Feature(props: {
               <div className="mt-0 lg:mt-16 grid grid-cols-1 items-center gap-y-2 pt-10 sm:gap-y-6 md:mt-20 lg:grid-cols-12 lg:pt-0">
                 <div className="w-full lg:w-auto flex overflow-x-auto pb-4 sm:mx-0 sm:overflow-visible sm:pb-0 lg:col-span-5">
                   <div className="w-full">
-                    {highlights ? (
-                      <div className="flex lg:flex-col lg:gap-y-12 gap-x-0 flex-row justify-evenly">
-                        {highlights.map((highlight, i) => (
-                          <Highlight
-                            {...highlight}
-                            endColor={end}
-                            startColor={start}
-                            key={i}
-                            index={i}
-                            active={activeHighlight === i}
-                            onClick={setActiveHighlight}
-                          />
-                        ))}
-                      </div>
-                    ) : null}
+                    <div className="flex lg:flex-col lg:gap-y-12 gap-x-0 flex-row justify-evenly">
+                      {highlights.map((highlight, i) => (
+                        <Highlight
+                          {...highlight}
+                          endColor={end}
+                          startColor={start}
+                          key={highlight.title}
+                          index={i}
+                          active={activeHighlight === i}
+                          onClick={setActiveHighlight}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
                 <div className="hidden lg:block" />
