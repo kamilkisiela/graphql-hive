@@ -81,7 +81,7 @@
     "husky": "8.0.3",
     "jest-snapshot-serializer-raw": "2.0.0",
     "lint-staged": "14.0.1",
-    "pg": "^8.10.0",
+    "pg": "8.11.3",
     "prettier": "2.8.8",
     "prettier-plugin-sql": "0.15.1",
     "prettier-plugin-tailwindcss": "0.4.1",
