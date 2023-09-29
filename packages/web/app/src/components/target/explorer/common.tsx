@@ -404,20 +404,20 @@ export function GraphQLFields(props: {
   organizationCleanId: string;
 }) {
   const { totalRequests } = props;
-  const [fields, collapsed, expand] = useCollapsibleList(
-    useFragment(GraphQLFields_FieldFragment, props.fields),
-    5,
-    props.collapsed ?? false,
-  );
-
+  const fieldsFromFragment = useFragment(GraphQLFields_FieldFragment, props.fields);
   const sortedFields = useMemo(
-    () => [...fields].sort((a, b) => a.usage.total - b.usage.total),
-    [fields],
+    () =>
+      [...fieldsFromFragment].sort(
+        // Sort by usage DESC, name DESC
+        (a, b) => b.usage.total - a.usage.total || a.name.localeCompare(b.name),
+      ),
+    [fieldsFromFragment],
   );
+  const [fields, collapsed, expand] = useCollapsibleList(sortedFields, 5, props.collapsed ?? false);
 
   return (
     <div className="flex flex-col">
-      {sortedFields.map((field, i) => {
+      {fields.map((field, i) => {
         const coordinate = `${props.typeName}.${field.name}`;
 
         return (
@@ -449,11 +449,11 @@ export function GraphQLFields(props: {
       })}
       {collapsed ? (
         <GraphQLTypeCardListItem
-          index={sortedFields.length}
+          index={fields.length}
           className="cursor-pointer font-semibold hover:bg-gray-800"
           onClick={expand}
         >
-          Show {props.fields.length - sortedFields.length} more fields
+          Show {props.fields.length - fields.length} more fields
         </GraphQLTypeCardListItem>
       ) : null}
     </div>
