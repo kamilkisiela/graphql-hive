@@ -148,7 +148,9 @@ function Comment({ node }: { node: FragmentType<typeof Comment_SupportTicketComm
           <TimeAgo date={comment.createdAt} className="text-gray-500" />
         </TooltipContent>
       </Tooltip>
-      {isSupport ? <img className="block w-6 h-6" src="/just-logo.svg" /> : null}
+      {isSupport ? (
+        <img className="block w-6 h-6" src="/just-logo.svg" alt="GraphQL Hive logo" />
+      ) : null}
     </div>
   );
 }
