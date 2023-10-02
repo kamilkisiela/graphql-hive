@@ -10,7 +10,7 @@ const pkg = JSON.parse(readFileSync(join(__dirname, 'package.json'), 'utf8'));
 await tsup({
   entry: [join(__dirname, 'example.mjs')],
   outDir: join(__dirname, 'dist'),
-  target: 'node18',
+  target: 'node20',
   format: ['esm'],
   splitting: false,
   sourcemap: true,

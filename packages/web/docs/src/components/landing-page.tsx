@@ -192,13 +192,13 @@ function Feature(props: {
             }}
           />
           <div
-            className="absolute opacity-[0.15] w-[60vw] h-[255px] -left-[200px] -top-[200px] blur-3xl"
+            className="absolute opacity-[0.15] w-[60vw] h-[255px] left-[-200px] top-[-200px] blur-3xl"
             style={{
               backgroundImage: `linear-gradient(180deg, ${end}, ${start})`,
             }}
           />
           <div
-            className="absolute opacity-[0.15] w-[60vw] h-[255px] -right-[200px] -top-[200px] blur-3xl"
+            className="absolute opacity-[0.15] w-[60vw] h-[255px] right-[-200px] top-[-200px] blur-3xl"
             style={{
               backgroundImage: `linear-gradient(180deg, ${start}, ${end})`,
             }}
@@ -399,8 +399,8 @@ export function IndexPage(): ReactElement {
           <div className={cn(classes.feature, 'relative overflow-hidden')}>
             <div>
               <div className="w-full absolute h-[1px] top-0 opacity-25 bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300" />
-              <div className="absolute opacity-[0.15] w-[60vw] h-[255px] -left-[200px] -top-[200px] blur-3xl bg-gradient-to-b from-gray-50 to-gray-300" />
-              <div className="absolute opacity-[0.15] w-[60vw] h-[255px] -right-[200px] -top-[200px] blur-3xl bg-gradient-to-b from-gray-300 to-gray-50" />
+              <div className="absolute opacity-[0.15] w-[60vw] h-[255px] left-[-200px] top-[-200px] blur-3xl bg-gradient-to-b from-gray-50 to-gray-300" />
+              <div className="absolute opacity-[0.15] w-[60vw] h-[255px] right-[-200px] top-[-200px] blur-3xl bg-gradient-to-b from-gray-300 to-gray-50" />
             </div>
             <div className="py-24">
               <h2 className="base:mr-1 ml-1 text-3xl font-semibold leading-normal tracking-tight text-center mb-12 text-black">
@@ -535,8 +535,8 @@ export function IndexPage(): ReactElement {
           <div className={cn(classes.feature, 'relative overflow-hidden')}>
             <div>
               <div className="w-full absolute h-[1px] top-0 opacity-25 bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300" />
-              <div className="absolute opacity-[0.15] w-[60vw] h-[255px] -left-[200px] -top-[200px] blur-3xl bg-gradient-to-b from-gray-600 to-gray-900" />
-              <div className="absolute opacity-[0.15] w-[60vw] h-[255px] -right-[200px] -top-[200px] blur-3xl bg-gradient-to-b from-gray-900 to-gray-600" />
+              <div className="absolute opacity-[0.15] w-[60vw] h-[255px] left-[-200px] top-[-200px] blur-3xl bg-gradient-to-b from-gray-600 to-gray-900" />
+              <div className="absolute opacity-[0.15] w-[60vw] h-[255px] right-[-200px] top-[-200px] blur-3xl bg-gradient-to-b from-gray-900 to-gray-600" />
             </div>
             <div className="py-24">
               <h2 className="text-3xl font-semibold leading-normal tracking-tight text-center mb-12 text-black">
@@ -576,13 +576,13 @@ export function IndexPage(): ReactElement {
                 }}
               />
               <div
-                className="absolute opacity-[0.15] w-[60vw] h-[255px] -left-[200px] -top-[200px] blur-3xl"
+                className="absolute opacity-[0.15] w-[60vw] h-[255px] left-[-200px] top-[-200px] blur-3xl"
                 style={{
                   backgroundImage: `linear-gradient(180deg, ${gradients[3][0]}, ${gradients[3][1]})`,
                 }}
               />
               <div
-                className="absolute opacity-[0.15] w-[60vw] h-[255px] -right-[200px] -top-[200px] blur-3xl"
+                className="absolute opacity-[0.15] w-[60vw] h-[255px] right-[-200px] top-[-200px] blur-3xl"
                 style={{
                   backgroundImage: `linear-gradient(180deg, ${gradients[3][1]}, ${gradients[3][0]})`,
                 }}
