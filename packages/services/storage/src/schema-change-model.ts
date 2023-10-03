@@ -1,5 +1,5 @@
 /** These mirror DB models from  */
-import { RegistryServiceUrlChangeSerializableChange } from 'packages/services/api/src/modules/schema/schema-change-from-meta';
+import type { RegistryServiceUrlChangeSerializableChange } from 'packages/services/api/src/modules/schema/schema-change-from-meta';
 import { z } from 'zod';
 import type {
   ChangeType,
@@ -801,61 +801,53 @@ const SchemaChangeModelWithIsSafeBreakingChange = z.intersection(
   z.object({ isSafeBasedOnUsage: z.boolean().optional() }),
 );
 
-const FailedSchemaCheckPartialModel = z.intersection(
-  z.object({
-    isSuccess: z.literal(false),
+// Schema Checks
 
-    breakingSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
-    safeSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
+const FailedSchemaCompositionOutputFields = {
+  schemaCompositionErrors: z.array(SchemaCompositionErrorModel),
+  compositeSchemaSDL: z.null(),
+  supergraphSDL: z.null(),
+};
 
-    schemaPolicyWarnings: z.array(SchemaPolicyWarningModel).nullable(),
-    schemaPolicyErrors: z.array(SchemaPolicyWarningModel).nullable(),
+const FailedSchemaCompositionInputFields = {
+  ...FailedSchemaCompositionOutputFields,
+  compositeSchemaSDLHash: z.null(),
+  supergraphSDLHash: z.null(),
+};
 
-    isManuallyApproved: z.literal(false),
-    manualApprovalUserId: z.null(),
-  }),
-  z.union([
-    z.object({
-      schemaCompositionErrors: z.array(SchemaCompositionErrorModel),
+const SuccessfulSchemaCompositionOutputFields = {
+  schemaCompositionErrors: z.null(),
+  compositeSchemaSDL: z.string(),
+  supergraphSDL: z.string().nullable(),
+};
 
-      compositeSchemaSDL: z.null(),
-      supergraphSDL: z.null(),
-    }),
-    z.object({
-      schemaCompositionErrors: z.null(),
+const SuccessfulSchemaCompositionInputFields = {
+  ...SuccessfulSchemaCompositionOutputFields,
+  compositeSchemaSDLHash: z.string(),
+  supergraphSDLHash: z.string().nullable(),
+};
 
-      compositeSchemaSDL: z.string(),
-      supergraphSDL: z.string().nullable(),
-    }),
-  ]),
-);
+const SchemaCheckSharedPolicyFields = {
+  schemaPolicyWarnings: z.array(SchemaPolicyWarningModel).nullable(),
+  schemaPolicyErrors: z.array(SchemaPolicyWarningModel).nullable(),
+};
 
-const SuccessfulSchemaCheckPartialModel = z.intersection(
-  z.object({
-    isSuccess: z.literal(true),
-    schemaCompositionErrors: z.null(),
+const SchemaCheckSharedChangesFields = {
+  safeSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
+  breakingSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
+};
 
-    safeSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
-    breakingSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
-    schemaPolicyWarnings: z.array(SchemaPolicyWarningModel).nullable(),
-    schemaPolicyErrors: z.array(SchemaPolicyWarningModel).nullable(),
+const ManuallyApprovedSchemaCheckFields = {
+  isManuallyApproved: z.literal(true),
+  manualApprovalUserId: z.string().nullable(),
+};
 
-    compositeSchemaSDL: z.string(),
-    supergraphSDL: z.string().nullable(),
-  }),
-  z.union([
-    z.object({
-      isManuallyApproved: z.literal(true),
-      manualApprovalUserId: z.string().nullable(),
-    }),
-    z.object({
-      isManuallyApproved: z.literal(false),
-      manualApprovalUserId: z.null(),
-    }),
-  ]),
-);
+const NotManuallyApprovedSchemaCheckFields = {
+  isManuallyApproved: z.literal(false),
+  manualApprovalUserId: z.null(),
+};
 
-const SchemaCheckSharedFieldsModel = z.object({
+const SchemaCheckSharedOutputFields = {
   schemaSDL: z.string(),
   serviceName: z.string().nullable(),
   targetId: z.string(),
@@ -872,35 +864,81 @@ const SchemaCheckSharedFieldsModel = z.object({
   // we need to improve the model code to reflect that
   githubRepository: z.string().nullable(),
   githubSha: z.string().nullable(),
-});
+};
 
-const SchemaCheckInputModel = z.intersection(
-  SchemaCheckSharedFieldsModel,
-  z.union([FailedSchemaCheckPartialModel, SuccessfulSchemaCheckPartialModel]),
-);
+const SchemaCheckSharedInputFields = {
+  ...SchemaCheckSharedOutputFields,
+  schemaSDLHash: z.string(),
+};
 
-const PersistedSchemaCheckPartialModel = z.object({
+const SchemaCheckInputModel = z.union([
+  z.intersection(
+    z.object({
+      isSuccess: z.literal(false),
+      ...SchemaCheckSharedPolicyFields,
+      ...SchemaCheckSharedChangesFields,
+      ...NotManuallyApprovedSchemaCheckFields,
+      ...SchemaCheckSharedInputFields,
+    }),
+    z.union([
+      z.object(FailedSchemaCompositionInputFields),
+      z.object(SuccessfulSchemaCompositionInputFields),
+    ]),
+  ),
+  z.intersection(
+    z.object({
+      isSuccess: z.literal(true),
+      ...SchemaCheckSharedPolicyFields,
+      ...SchemaCheckSharedChangesFields,
+      ...SuccessfulSchemaCompositionInputFields,
+      ...SchemaCheckSharedInputFields,
+    }),
+    z.union([
+      z.object({ ...ManuallyApprovedSchemaCheckFields }),
+      z.object({ ...NotManuallyApprovedSchemaCheckFields }),
+    ]),
+  ),
+]);
+
+const PersistedSchemaCheckFields = {
   id: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
-});
+};
 
-export const FailedSchemaCheckModel = z.intersection(
-  SchemaCheckSharedFieldsModel,
-  z.intersection(PersistedSchemaCheckPartialModel, FailedSchemaCheckPartialModel),
-);
-
-export const SuccessfulSchemaCheckModel = z.intersection(
-  SchemaCheckSharedFieldsModel,
-  z.intersection(PersistedSchemaCheckPartialModel, SuccessfulSchemaCheckPartialModel),
-);
-
-export const SchemaCheckModel = z.union([FailedSchemaCheckModel, SuccessfulSchemaCheckModel]);
+export const SchemaCheckModel = z.union([
+  z.intersection(
+    z.object({
+      isSuccess: z.literal(false),
+      ...SchemaCheckSharedPolicyFields,
+      ...SchemaCheckSharedChangesFields,
+      ...PersistedSchemaCheckFields,
+      ...NotManuallyApprovedSchemaCheckFields,
+      ...SchemaCheckSharedOutputFields,
+    }),
+    z.union([
+      z.object(FailedSchemaCompositionOutputFields),
+      z.object(SuccessfulSchemaCompositionOutputFields),
+    ]),
+  ),
+  z.intersection(
+    z.object({
+      isSuccess: z.literal(true),
+      ...SchemaCheckSharedPolicyFields,
+      ...SchemaCheckSharedChangesFields,
+      ...SuccessfulSchemaCompositionOutputFields,
+      ...PersistedSchemaCheckFields,
+      ...SchemaCheckSharedOutputFields,
+    }),
+    z.union([
+      z.object({ ...ManuallyApprovedSchemaCheckFields }),
+      z.object({ ...NotManuallyApprovedSchemaCheckFields }),
+    ]),
+  ),
+]);
 
 export type SchemaCheckInput = z.TypeOf<typeof SchemaCheckInputModel>;
 export type SchemaCheck = z.TypeOf<typeof SchemaCheckModel>;
-export type FailedSchemaCheck = z.TypeOf<typeof FailedSchemaCheckModel>;
-export type SuccessfulSchemaCheck = z.TypeOf<typeof SuccessfulSchemaCheckModel>;
 
 export const TargetBreadcrumbModel = z.object({
   organization: z.string(),
