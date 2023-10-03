@@ -30,6 +30,6 @@
     "ioredis-mock": "8.8.3",
     "p-timeout": "6.1.2",
     "pino-pretty": "10.2.0",
-    "zod": "3.22.2"
+    "zod": "3.22.3"
   }
 }
