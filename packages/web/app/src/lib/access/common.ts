@@ -13,6 +13,16 @@ export interface Scope<T> {
 
 export const NoAccess = 'no-access';
 
+export const RegistryAccessScope = {
+  name: 'Registry',
+  description:
+    'Manage schema registry (publish new schemas, run schema checks, report usage, etc.)',
+  mapping: {
+    'read-only': TargetAccessScope.RegistryRead,
+    'read-write': TargetAccessScope.RegistryWrite,
+  },
+};
+
 export const scopes: {
   organization: readonly Scope<OrganizationAccessScope>[];
   project: readonly Scope<ProjectAccessScope>[];
@@ -87,15 +97,7 @@ export const scopes: {
         'read-write': TargetAccessScope.Delete,
       },
     },
-    {
-      name: 'Registry',
-      description:
-        'Manage schema registry (publish new schemas, run schema checks, report usage, etc.)',
-      mapping: {
-        'read-only': TargetAccessScope.RegistryRead,
-        'read-write': TargetAccessScope.RegistryWrite,
-      },
-    },
+    RegistryAccessScope,
     {
       name: 'Settings',
       description: "Manage organization's settings (change its name, etc.)",
