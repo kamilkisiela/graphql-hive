@@ -28,6 +28,7 @@ const TargetLayout_CurrentOrganizationFragment = graphql(`
     name
     cleanId
     me {
+      id
       ...CanAccessTarget_MemberFragment
     }
     ...UserMenu_CurrentOrganizationFragment

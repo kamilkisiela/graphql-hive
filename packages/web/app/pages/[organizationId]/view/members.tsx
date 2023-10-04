@@ -211,6 +211,7 @@ const Invitation = (props: {
 const Page_OrganizationFragment = graphql(`
   fragment Page_OrganizationFragment on Organization {
     me {
+      id
       ...CanAccessOrganization_MemberFragment
       ...ChangePermissionsModal_MemberFragment
     }
@@ -223,6 +224,7 @@ const Page_OrganizationFragment = graphql(`
         id
         ...ChangePermissionsModal_MemberFragment
         user {
+          id
           provider
           displayName
           email
@@ -237,6 +239,7 @@ const Page_OrganizationFragment = graphql(`
 
 const OrganizationInvitations_OrganizationFragment = graphql(`
   fragment OrganizationInvitations_OrganizationFragment on Organization {
+    id
     cleanId
     invitations {
       nodes {
@@ -414,6 +417,7 @@ const OrganizationMembersPageQuery = graphql(`
       ...OrganizationLayout_OrganizationConnectionFragment
     }
     me {
+      id
       ...OrganizationLayout_MeFragment
       ...OrganizationMembersPage_MeFragment
     }

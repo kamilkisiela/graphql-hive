@@ -148,6 +148,7 @@ const OperationInsightsPageQuery = graphql(`
       cleanId
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+      id
       cleanId
     }
     hasCollectedOperations(

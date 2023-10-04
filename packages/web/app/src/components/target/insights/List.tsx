@@ -456,6 +456,7 @@ const OperationsList_OperationsStatsQuery = graphql(`
       }
       operations {
         nodes {
+          id
           __typename
         }
       }

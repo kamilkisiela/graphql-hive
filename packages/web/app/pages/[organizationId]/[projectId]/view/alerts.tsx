@@ -155,8 +155,10 @@ export function Alerts(props: {
 
 const ProjectAlertsPage_OrganizationFragment = graphql(`
   fragment ProjectAlertsPage_OrganizationFragment on Organization {
+    id
     cleanId
     me {
+      id
       ...CanAccessProject_MemberFragment
     }
   }
@@ -189,6 +191,7 @@ const ProjectAlertsPageQuery = graphql(`
       ...ProjectLayout_OrganizationConnectionFragment
     }
     me {
+      id
       ...ProjectLayout_MeFragment
     }
   }

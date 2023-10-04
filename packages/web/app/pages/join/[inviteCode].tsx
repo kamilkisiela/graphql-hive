@@ -24,6 +24,7 @@ const JoinOrganizationPage_JoinOrganizationMutation = graphql(`
           organization
         }
         organization {
+          id
           name
           cleanId
         }

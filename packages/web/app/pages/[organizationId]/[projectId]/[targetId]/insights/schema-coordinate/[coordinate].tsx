@@ -383,9 +383,11 @@ const TargetSchemaCoordinatePageQuery = graphql(`
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
       ...TargetLayout_CurrentProjectFragment
+      id
       cleanId
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+      id
       cleanId
     }
     hasCollectedOperations(

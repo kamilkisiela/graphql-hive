@@ -50,6 +50,7 @@ const GithubIntegration_GithubIntegrationDetailsQuery = graphql(`
   query getGitHubIntegrationDetails($selector: OrganizationSelectorInput!) {
     organization(selector: $selector) {
       organization {
+        id
         gitHubIntegration {
           repositories {
             nameWithOwner
@@ -208,8 +209,11 @@ const ProjectSettingsPage_UpdateProjectNameMutation = graphql(`
 
 const ProjectSettingsPage_OrganizationFragment = graphql(`
   fragment ProjectSettingsPage_OrganizationFragment on Organization {
+    id
     cleanId
+    name
     me {
+      id
       ...CanAccessProject_MemberFragment
     }
     ...ExternalCompositionSettings_OrganizationFragment
@@ -242,6 +246,7 @@ const ProjectSettingsPageQuery = graphql(`
       ...ProjectLayout_OrganizationConnectionFragment
     }
     me {
+      id
       ...ProjectLayout_MeFragment
     }
     isGitHubIntegrationFeatureEnabled

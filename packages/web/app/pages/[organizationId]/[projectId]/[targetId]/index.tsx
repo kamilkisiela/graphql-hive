@@ -164,6 +164,7 @@ const SchemaView_SchemaFragment = graphql(`
 
 const SchemaView_TargetFragment = graphql(`
   fragment SchemaView_TargetFragment on Target {
+    id
     cleanId
     latestSchemaVersion {
       id

@@ -30,6 +30,7 @@ const ProjectPolicyPageQuery = graphql(`
           }
         }
         me {
+          id
           ...CanAccessProject_MemberFragment
         }
         ...ProjectLayout_CurrentOrganizationFragment
@@ -49,6 +50,7 @@ const ProjectPolicyPageQuery = graphql(`
       ...ProjectLayout_OrganizationConnectionFragment
     }
     me {
+      id
       ...ProjectLayout_MeFragment
     }
   }

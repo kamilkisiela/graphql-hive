@@ -362,6 +362,7 @@ const ProjectOverviewPageQuery = graphql(`
       }
     }
     me {
+      id
       ...ProjectLayout_MeFragment
     }
   }
