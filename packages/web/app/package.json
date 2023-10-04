@@ -124,7 +124,7 @@
     "postcss": "8.4.31",
     "postcss-loader": "7.3.3",
     "rimraf": "4.4.1",
-    "storybook": "7.4.5",
+    "storybook": "7.4.6",
     "tailwindcss": "3.3.3",
     "tailwindcss-animate": "1.0.7",
     "tailwindcss-radix": "2.8.0"
