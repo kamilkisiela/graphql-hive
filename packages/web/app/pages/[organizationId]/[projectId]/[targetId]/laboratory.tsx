@@ -641,6 +641,7 @@ const TargetLaboratoryPageQuery = graphql(`
       organization {
         ...TargetLayout_CurrentOrganizationFragment
         me {
+          id
           ...CanAccessTarget_MemberFragment
         }
       }
@@ -657,6 +658,7 @@ const TargetLaboratoryPageQuery = graphql(`
       }
     }
     me {
+      id
       ...TargetLayout_MeFragment
     }
     ...TargetLayout_IsCDNEnabledFragment

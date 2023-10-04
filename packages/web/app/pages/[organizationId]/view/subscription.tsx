@@ -35,6 +35,7 @@ const SubscriptionPage_OrganizationFragment = graphql(`
         id
       }
       upcomingInvoice {
+        id
         amount
         date
       }

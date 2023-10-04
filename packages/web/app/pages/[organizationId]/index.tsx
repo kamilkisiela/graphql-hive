@@ -242,6 +242,7 @@ const OrganizationProjectsPageQuery = graphql(`
     organization(selector: { organization: $organizationId }) {
       organization {
         ...OrganizationLayout_CurrentOrganizationFragment
+        id
         cleanId
       }
     }

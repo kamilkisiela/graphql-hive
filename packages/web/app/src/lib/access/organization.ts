@@ -6,6 +6,7 @@ export { OrganizationAccessScope };
 
 const CanAccessOrganization_MemberFragment = graphql(`
   fragment CanAccessOrganization_MemberFragment on Member {
+    id
     organizationAccessScopes
   }
 `);

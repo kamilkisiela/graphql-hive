@@ -6,6 +6,7 @@ export { ProjectAccessScope };
 
 const CanAccessProject_MemberFragment = graphql(`
   fragment CanAccessProject_MemberFragment on Member {
+    id
     projectAccessScopes
   }
 `);

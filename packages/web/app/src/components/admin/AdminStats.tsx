@@ -175,12 +175,15 @@ const AdminStatsQuery = graphql(`
             cleanId
             name
             owner {
+              id
               user {
+                id
                 email
               }
             }
             members {
               nodes {
+                id
                 user {
                   id
                   email

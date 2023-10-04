@@ -839,6 +839,7 @@ const TargetSettingsPage_UpdateTargetNameMutation = graphql(`
 
 const TargetSettingsPage_TargetFragment = graphql(`
   fragment TargetSettingsPage_TargetFragment on Target {
+    id
     name
     baseSchema
   }
@@ -903,6 +904,7 @@ const TargetSettingsPageQuery = graphql(`
     }
     organization(selector: { organization: $organizationId }) {
       organization {
+        id
         cleanId
         ...TargetLayout_CurrentOrganizationFragment
         ...TargetSettingsPage_OrganizationFragment
@@ -912,10 +914,12 @@ const TargetSettingsPageQuery = graphql(`
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
+      id
       cleanId
       ...TargetLayout_CurrentProjectFragment
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
+      id
       cleanId
       name
       graphqlEndpointUrl

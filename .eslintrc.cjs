@@ -4,6 +4,13 @@ const guildConfig = require('@theguild/eslint-config/base');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { REACT_RESTRICTED_SYNTAX, RESTRICTED_SYNTAX } = require('@theguild/eslint-config/constants');
 
+const SCHEMA_PATH = './packages/services/api/src/modules/*/module.graphql.ts';
+const OPERATIONS_PATHS = [
+  './packages/web/app/**/*.ts',
+  './packages/web/app/**/*.tsx',
+  './packages/web/app/**/*.graphql',
+];
+
 const rulesToExtends = Object.fromEntries(
   Object.entries(guildConfig.rules).filter(([key]) =>
     [
@@ -32,7 +39,6 @@ const HIVE_RESTRICTED_SYNTAX = [
 ];
 
 module.exports = {
-  reportUnusedDisableDirectives: true,
   ignorePatterns: [
     'scripts',
     'rules',
@@ -47,52 +53,86 @@ module.exports = {
     'codegen.cjs',
     'tsup',
   ],
-  parserOptions: {
-    ecmaVersion: 2020,
-    sourceType: 'module',
-    project: ['./tsconfig.eslint.json'],
-  },
-  parser: '@typescript-eslint/parser',
-  plugins: [...guildConfig.plugins, 'hive'],
-  extends: guildConfig.extends,
-  rules: {
-    'no-process-env': 'error',
-    'no-empty': ['error', { allowEmptyCatch: true }],
-    'import/no-absolute-path': 'error',
-    'import/no-self-import': 'error',
-    'import/no-extraneous-dependencies': [
-      'error',
-      {
-        devDependencies: [
-          'packages/services/storage/tools/*.js',
-          'packages/services/**',
-          'packages/migrations/**',
-        ],
-        optionalDependencies: false,
-      },
-    ],
-    'hive/enforce-deps-in-dev': [
-      'error',
-      {
-        scopes: ['@hive', '@graphql-hive'],
-        ignored: ['packages/libraries/**', 'packages/web/**'],
-      },
-    ],
-    '@typescript-eslint/no-floating-promises': 'error',
-    '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-    ...rulesToExtends,
-    'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...RESTRICTED_SYNTAX],
-
-    // 🚨 The following rules needs to be fixed and was temporarily disabled to avoid printing warning
-    '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-non-null-assertion': 'off',
-    '@typescript-eslint/no-namespace': 'off',
-    '@typescript-eslint/no-empty-function': 'off',
-    '@typescript-eslint/ban-types': 'off',
-    '@typescript-eslint/triple-slash-reference': 'off',
-  },
+  // parserOptions: {
+  //   ecmaVersion: 2020,
+  //   sourceType: 'module',
+  //   project: ['./tsconfig.eslint.json'],
+  // },
+  // parser: '@typescript-eslint/parser',
+  // plugins: [...guildConfig.plugins, 'hive'],
+  // extends: guildConfig.extends,
   overrides: [
+    {
+      // Setup GraphQL Parser
+      files: '*.{graphql,gql}',
+      parser: '@graphql-eslint/eslint-plugin',
+      plugins: ['@graphql-eslint'],
+      parserOptions: {
+        schema: SCHEMA_PATH,
+        operations: OPERATIONS_PATHS,
+      },
+    },
+    {
+      // Setup processor for operations/fragments definitions on code-files
+      files: ['packages/web/app/**/*.tsx', 'packages/web/app/**/*.ts'],
+      processor: '@graphql-eslint/graphql',
+    },
+    {
+      files: ['packages/web/app/**/*.graphql'],
+      plugins: ['@graphql-eslint'],
+      rules: {
+        '@graphql-eslint/require-id-when-available': 'error',
+      },
+    },
+    {
+      files: ['packages/**/*.ts', 'packages/**/*.tsx', 'cypress/**/*.ts', 'cypress/**/*.tsx'],
+      reportUnusedDisableDirectives: true,
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module',
+        project: ['./tsconfig.eslint.json'],
+      },
+      parser: '@typescript-eslint/parser',
+      plugins: [...guildConfig.plugins, 'hive'],
+      extends: guildConfig.extends,
+      rules: {
+        'no-process-env': 'error',
+        'no-empty': ['error', { allowEmptyCatch: true }],
+        'import/no-absolute-path': 'error',
+        'import/no-self-import': 'error',
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            devDependencies: [
+              'packages/services/storage/tools/*.js',
+              'packages/services/**',
+              'packages/migrations/**',
+            ],
+            optionalDependencies: false,
+          },
+        ],
+        'hive/enforce-deps-in-dev': [
+          'error',
+          {
+            scopes: ['@hive', '@graphql-hive'],
+            ignored: ['packages/libraries/**', 'packages/web/**'],
+          },
+        ],
+        '@typescript-eslint/no-floating-promises': 'error',
+        '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+        ...rulesToExtends,
+        'no-restricted-syntax': ['error', ...HIVE_RESTRICTED_SYNTAX, ...RESTRICTED_SYNTAX],
+
+        // 🚨 The following rules needs to be fixed and was temporarily disabled to avoid printing warning
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/explicit-module-boundary-types': 'off',
+        '@typescript-eslint/no-non-null-assertion': 'off',
+        '@typescript-eslint/no-namespace': 'off',
+        '@typescript-eslint/no-empty-function': 'off',
+        '@typescript-eslint/ban-types': 'off',
+        '@typescript-eslint/triple-slash-reference': 'off',
+      },
+    },
     {
       files: ['packages/web/**'],
       extends: [
