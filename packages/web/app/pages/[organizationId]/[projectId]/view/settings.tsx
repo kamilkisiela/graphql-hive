@@ -148,7 +148,7 @@ function GitHubIntegration(props: {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {props.isProjectNameInGitHubCheckEnabled ? null : (
+          {!!githubIntegration && !props.isProjectNameInGitHubCheckEnabled ? (
             <div className="flex flex-row justify-between items-center rounded-sm p-4 mb-4 gap-x-4 text-sm bg-gray-500/10 text-gray-500">
               <div className="space-y-2">
                 <div>
@@ -182,7 +182,6 @@ function GitHubIntegration(props: {
                   </div>
                 </div>
                 <div>
-                  {/* <ArrowBigDownIcon className="w-6 h-6" /> */}
                   <ArrowBigDownDashIcon className="w-6 h-6" />
                 </div>
                 <div>
@@ -227,7 +226,7 @@ function GitHubIntegration(props: {
                 </Button>
               </div>
             </div>
-          )}
+          ) : null}
 
           {githubIntegration ? (
             <>
@@ -416,8 +415,6 @@ function ProjectSettingsContent() {
     return <QueryError error={query.error} />;
   }
 
-  console.log(project, organization);
-
   return (
     <ProjectLayout
       currentOrganization={currentOrganization ?? null}
@@ -484,14 +481,14 @@ function ProjectSettingsContent() {
                 </Card>
               </form>
 
-              {/* {query.data?.isGitHubIntegrationFeatureEnabled ? ( */}
-              <GitHubIntegration
-                gitRepository={project.gitRepository ?? null}
-                organizationName={organization.name}
-                projectName={project.name}
-                isProjectNameInGitHubCheckEnabled={project.isProjectNameInGitHubCheckEnabled}
-              />
-              {/* ) : null} */}
+              {query.data?.isGitHubIntegrationFeatureEnabled ? (
+                <GitHubIntegration
+                  gitRepository={project.gitRepository ?? null}
+                  organizationName={organization.name}
+                  projectName={project.name}
+                  isProjectNameInGitHubCheckEnabled={project.isProjectNameInGitHubCheckEnabled}
+                />
+              ) : null}
 
               {project.type === ProjectType.Federation ? (
                 <ExternalCompositionSettings project={project} organization={organization} />
