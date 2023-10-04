@@ -1,5 +1,7 @@
 import { ReactElement } from 'react';
+import NextLink from 'next/link';
 import { useFormik } from 'formik';
+import { ArrowBigDownDashIcon, CheckIcon } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
@@ -17,11 +19,13 @@ import {
 } from '@/components/ui/card';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
-import { DocsLink, Input, Link, MetaTitle, Select, Tag } from '@/components/v2';
+import { DocsLink, Input, MetaTitle, Select, Tag } from '@/components/v2';
+import { HiveLogo } from '@/components/v2/icon';
 import { DeleteProjectModal } from '@/components/v2/modals';
 import { graphql, useFragment } from '@/gql';
 import { ProjectType } from '@/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
+import { getDocsUrl } from '@/lib/docs-url';
 import { useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
@@ -61,8 +65,24 @@ const GithubIntegration_GithubIntegrationDetailsQuery = graphql(`
   }
 `);
 
-function GitHubIntegration(props: { gitRepository: string | null }): ReactElement | null {
+export const GithubIntegration_EnableProjectNameInGitHubCheckMutation = graphql(`
+  mutation GithubIntegration_EnableProjectNameInGitHubCheckMutation($input: ProjectSelectorInput!) {
+    enableProjectNameInGithubCheck(input: $input) {
+      id
+      cleanId
+      isProjectNameInGitHubCheckEnabled
+    }
+  }
+`);
+
+function GitHubIntegration(props: {
+  gitRepository: string | null;
+  isProjectNameInGitHubCheckEnabled: boolean;
+  organizationName: string;
+  projectName: string;
+}): ReactElement | null {
   const router = useRouteSelector();
+  const docksLink = getDocsUrl('integrations/ci-cd#github-workflow-for-ci');
   const [integrationQuery] = useQuery({
     query: GithubIntegration_GithubIntegrationDetailsQuery,
     variables: {
@@ -76,6 +96,9 @@ function GitHubIntegration(props: { gitRepository: string | null }): ReactElemen
   const notify = useNotifications();
 
   const [mutation, mutate] = useMutation(ProjectSettingsPage_UpdateProjectGitRepositoryMutation);
+  const [ghCheckMutation, ghCheckMutate] = useMutation(
+    GithubIntegration_EnableProjectNameInGitHubCheckMutation,
+  );
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
     useFormik({
       enableReinitialize: true,
@@ -125,6 +148,86 @@ function GitHubIntegration(props: { gitRepository: string | null }): ReactElemen
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {!!githubIntegration && !props.isProjectNameInGitHubCheckEnabled ? (
+            <div className="flex flex-row justify-between items-center rounded-sm p-4 mb-4 gap-x-4 text-sm bg-gray-500/10 text-gray-500">
+              <div className="space-y-2">
+                <div>
+                  <div className="text-gray-300 font-bold">Use project's name in GitHub Check</div>
+                  <div>
+                    Prevents GitHub Check name collisions when running{' '}
+                    {docksLink ? (
+                      <NextLink href={docksLink}>
+                        <span className="mx-1 text-orange-700 hover:underline hover:underline-offset-4">
+                          $ hive schema:check --github
+                        </span>
+                      </NextLink>
+                    ) : (
+                      <span className="mx-1 text-orange-700">$ hive schema:check --github</span>
+                    )}
+                    for more than one project.
+                  </div>
+                </div>
+                <div>
+                  <div className="mt-4 mb-2">Here's how it will look like in your CI pipeline:</div>
+                  <div className="flex items-center gap-x-2 pl-1">
+                    <CheckIcon className="w-4 h-4 text-emerald-500" />
+                    <div className="bg-white w-6 h-6 flex items-center justify-center rounded-sm">
+                      <HiveLogo className="w-[80%] h-[80%]" />
+                    </div>
+
+                    <div className="font-semibold text-[#adbac7]">
+                      {props.organizationName} &gt; schema:check &gt; staging
+                    </div>
+                    <div className="text-gray-500">— No changes</div>
+                  </div>
+                </div>
+                <div>
+                  <ArrowBigDownDashIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-x-2 pl-1">
+                    <CheckIcon className="w-4 h-4 text-emerald-500" />
+                    <div className="bg-white w-6 h-6 flex items-center justify-center rounded-sm">
+                      <HiveLogo className="w-[80%] h-[80%]" />
+                    </div>
+
+                    <div className="font-semibold text-[#adbac7]">
+                      {props.organizationName} &gt; schema:check &gt; {props.projectName} &gt;
+                      staging
+                    </div>
+                    <div className="text-gray-500">— No changes</div>
+                  </div>
+                </div>
+              </div>
+              <div className="pr-6">
+                <Button
+                  disabled={ghCheckMutation.fetching}
+                  onClick={() => {
+                    void ghCheckMutate({
+                      input: {
+                        organization: router.organizationId,
+                        project: router.projectId,
+                      },
+                    }).then(
+                      result => {
+                        if (result.error) {
+                          notify('Failed to enable', 'error');
+                        } else {
+                          notify('Migration completed', 'success');
+                        }
+                      },
+                      _ => {
+                        notify('Failed to enable', 'error');
+                      },
+                    );
+                  }}
+                >
+                  I want to migrate
+                </Button>
+              </div>
+            </div>
+          ) : null}
+
           {githubIntegration ? (
             <>
               <Select
@@ -154,20 +257,23 @@ function GitHubIntegration(props: { gitRepository: string | null }): ReactElemen
               )}
             </>
           ) : (
-            <Tag className="!p-4">
-              The organization is not connected to our GitHub Application.
-              <Link
-                variant="primary"
-                href={{
-                  pathname: '/[organizationId]/view/settings',
-                  query: {
-                    organizationId: router.organizationId,
-                  },
-                }}
-              >
-                Visit settings
-              </Link>
-              to configure it.
+            <Tag className="!p-4 block">
+              <p>The organization is not connected to our GitHub Application.</p>
+              <p>
+                <Button asChild className="p-0 mr-1" variant="link">
+                  <NextLink
+                    href={{
+                      pathname: '/[organizationId]/view/settings',
+                      query: {
+                        organizationId: router.organizationId,
+                      },
+                    }}
+                  >
+                    Visit organization settings
+                  </NextLink>
+                </Button>
+                to configure it.
+              </p>
             </Tag>
           )}
         </CardContent>
@@ -225,6 +331,7 @@ const ProjectSettingsPage_ProjectFragment = graphql(`
     name
     gitRepository
     type
+    isProjectNameInGitHubCheckEnabled
     ...ModelMigrationSettings_ProjectFragment
     ...ExternalCompositionSettings_ProjectFragment
   }
@@ -375,7 +482,12 @@ function ProjectSettingsContent() {
               </form>
 
               {query.data?.isGitHubIntegrationFeatureEnabled ? (
-                <GitHubIntegration gitRepository={project.gitRepository ?? null} />
+                <GitHubIntegration
+                  gitRepository={project.gitRepository ?? null}
+                  organizationName={organization.name}
+                  projectName={project.name}
+                  isProjectNameInGitHubCheckEnabled={project.isProjectNameInGitHubCheckEnabled}
+                />
               ) : null}
 
               {project.type === ProjectType.Federation ? (

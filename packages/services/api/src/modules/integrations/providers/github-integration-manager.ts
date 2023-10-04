@@ -5,8 +5,9 @@ import type { IntegrationsModule } from '../__generated__/types';
 import { HiveError } from '../../../shared/errors';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
+import { ProjectAccessScope } from '../../auth/providers/scopes';
 import { Logger } from '../../shared/providers/logger';
-import { OrganizationSelector, Storage } from '../../shared/providers/storage';
+import { OrganizationSelector, ProjectSelector, Storage } from '../../shared/providers/storage';
 
 export interface GitHubApplicationConfig {
   appId: number;
@@ -297,6 +298,21 @@ export class GitHubIntegrationManager {
         reason: 'Failed to update check-run on GitHub. Please try again later.',
       };
     }
+  }
+
+  async enableProjectNameInGithubCheck(input: ProjectSelector) {
+    await this.authManager.ensureProjectAccess({
+      ...input,
+      scope: ProjectAccessScope.SETTINGS,
+    });
+
+    const project = await this.storage.getProject(input);
+
+    if (project.useProjectNameInGithubCheck) {
+      return project;
+    }
+
+    return this.storage.enableProjectNameInGithubCheck(input);
   }
 }
 

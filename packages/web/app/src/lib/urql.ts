@@ -1,5 +1,6 @@
 import { createClient, errorExchange, fetchExchange } from 'urql';
 import { env } from '@/env/frontend';
+import schema from '@/gql/schema';
 import { cacheExchange } from '@urql/exchange-graphcache';
 import { persistedExchange } from '@urql/exchange-persisted';
 import { Mutation } from './urql-cache';
@@ -15,6 +16,7 @@ export const urqlClient = createClient({
   url: SERVER_BASE_PATH,
   exchanges: [
     cacheExchange({
+      schema,
       updates: {
         Mutation,
       },

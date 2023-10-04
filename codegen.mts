@@ -168,6 +168,13 @@ const config: CodegenConfig = {
       plugins: [],
       documentTransforms: [addTypenameDocumentTransform],
     },
+    './packages/web/app/src/gql/schema.ts': {
+      plugins: ['urql-introspection'],
+      config: {
+        useTypeImports: true,
+        module: 'es2015',
+      },
+    },
     // CLI
     './packages/libraries/cli/src/gql/': {
       documents: ['./packages/libraries/cli/src/commands/**/*.ts'],

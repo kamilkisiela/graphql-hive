@@ -1308,6 +1308,16 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `),
       );
     },
+    async enableProjectNameInGithubCheck({ project }) {
+      return transformProject(
+        await pool.one<projects>(sql`
+          UPDATE public.projects
+          SET github_check_with_project_name = true
+          WHERE id = ${project}
+          RETURNING *
+        `),
+      );
+    },
     async updateProjectRegistryModel({ project, model }) {
       const isLegacyModel = model === 'LEGACY';
 
