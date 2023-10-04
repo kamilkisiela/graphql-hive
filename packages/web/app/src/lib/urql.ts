@@ -1,7 +1,6 @@
 import { createClient, errorExchange, fetchExchange } from 'urql';
 import { env } from '@/env/frontend';
 import schema from '@/gql/schema';
-import { devtoolsExchange } from '@urql/devtools';
 import { cacheExchange } from '@urql/exchange-graphcache';
 import { persistedExchange } from '@urql/exchange-persisted';
 import { Mutation } from './urql-cache';
@@ -16,7 +15,6 @@ const isSome = <T>(value: T | null | undefined): value is T => value != null;
 export const urqlClient = createClient({
   url: SERVER_BASE_PATH,
   exchanges: [
-    devtoolsExchange,
     cacheExchange({
       schema,
       updates: {
@@ -54,7 +52,7 @@ export const urqlClient = createClient({
       },
       globalIDs: ['SuccessfulSchemaCheck', 'FailedSchemaCheck'],
     }),
-    // networkStatusExchange,
+    networkStatusExchange,
     errorExchange({
       onError(error) {
         if (error.response?.status === 401) {
