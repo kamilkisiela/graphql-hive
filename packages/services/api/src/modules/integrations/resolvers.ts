@@ -72,6 +72,17 @@ export const resolvers: IntegrationsModule.Resolvers = {
       });
       return { organization };
     },
+    async enableProjectNameInGithubCheck(_, { input }, { injector }) {
+      const translator = injector.get(IdTranslator);
+      const [organization, project] = await Promise.all([
+        translator.translateOrganizationId(input),
+        translator.translateProjectId(input),
+      ]);
+      return injector.get(GitHubIntegrationManager).enableProjectNameInGithubCheck({
+        organization,
+        project,
+      });
+    },
   },
   Query: {
     isGitHubIntegrationFeatureEnabled(_, __, { injector }) {
@@ -106,6 +117,11 @@ export const resolvers: IntegrationsModule.Resolvers = {
       return {
         repositories,
       };
+    },
+  },
+  Project: {
+    isProjectNameInGitHubCheckEnabled(project) {
+      return project.useProjectNameInGithubCheck;
     },
   },
 };

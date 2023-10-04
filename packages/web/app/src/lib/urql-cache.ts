@@ -25,6 +25,7 @@ import {
   TokensDocument,
   type DeleteTokensDocument,
 } from '../../pages/[organizationId]/[projectId]/[targetId]/settings';
+import type { GithubIntegration_EnableProjectNameInGitHubCheckMutation } from '../../pages/[organizationId]/[projectId]/view/settings';
 
 const TargetsDocument = graphql(`
   query targets($selector: ProjectSelectorInput!) {
@@ -360,6 +361,19 @@ const createOperationInDocumentCollection: TypedDocumentNodeUpdateResolver<
   );
 };
 
+const enableProjectNameInGitHubCheck: TypedDocumentNodeUpdateResolver<
+  typeof GithubIntegration_EnableProjectNameInGitHubCheckMutation
+> = (mutation, args, cache) => {
+  console.log('mutation!');
+  console.log(
+    'new isProjectNameInGitHubCheckEnabled',
+    cache.resolve(
+      { __typename: 'Project', id: mutation.enableProjectNameInGithubCheck.id },
+      'isProjectNameInGitHubCheckEnabled',
+    ),
+  );
+};
+
 // UpdateResolver
 export const Mutation = {
   createOrganization,
@@ -377,4 +391,5 @@ export const Mutation = {
   deleteDocumentCollection,
   deleteOperationInDocumentCollection,
   createOperationInDocumentCollection,
+  // enableProjectNameInGitHubCheck,
 };

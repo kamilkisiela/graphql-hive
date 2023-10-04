@@ -6,6 +6,7 @@ export default gql`
     deleteSlackIntegration(input: OrganizationSelectorInput!): DeleteSlackIntegrationResult!
     addGitHubIntegration(input: AddGitHubIntegrationInput!): Boolean!
     deleteGitHubIntegration(input: OrganizationSelectorInput!): DeleteGitHubIntegrationResult!
+    enableProjectNameInGithubCheck(input: ProjectSelectorInput!): Project!
   }
 
   type DeleteSlackIntegrationResult {
@@ -47,5 +48,6 @@ export default gql`
 
   extend type Project {
     gitRepository: String
+    isProjectNameInGitHubCheckEnabled: Boolean!
   }
 `;
