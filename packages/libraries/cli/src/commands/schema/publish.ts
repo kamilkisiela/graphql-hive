@@ -277,6 +277,8 @@ export default class SchemaPublish extends Command {
         usesGitHubApp: !!gitHub,
       });
 
+      console.log(JSON.stringify(result, null, 2));
+
       if (result.schemaPublish.__typename === 'SchemaPublishSuccess') {
         const changes = result.schemaPublish.changes;
 
