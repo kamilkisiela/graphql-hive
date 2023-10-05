@@ -151,25 +151,25 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
       const finish = measureDuration();
 
       return function complete(args, result) {
+        const duration = finish();
+        let providedOperationName: string | undefined = undefined;
         try {
           if (isAbortAction(result)) {
             logger.info(result.reason);
-            finish();
             return;
           }
 
           if (isAsyncIterableIterator(result) || isAsyncIterable(result)) {
             logger.info('@stream @defer is not supported');
-            finish();
             return;
           }
 
-          const rootOperation = args.document.definitions.find(
+          const document = args.document;
+          const rootOperation = document.definitions.find(
             o => o.kind === Kind.OPERATION_DEFINITION,
           ) as OperationDefinitionNode;
-          const document = args.document;
-          const operationName = args.operationName || rootOperation.name?.value || 'anonymous';
-          const duration = finish();
+          providedOperationName = args.operationName || rootOperation.name?.value;
+          const operationName = providedOperationName || 'anonymous';
 
           if (!excludeSet.has(operationName) && shouldInclude()) {
             const errors =
@@ -206,7 +206,8 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
             });
           }
         } catch (error) {
-          logger.error(`Failed to collect operation`, error);
+          const details = providedOperationName ? ` (name: "${providedOperationName}")` : '';
+          logger.error(`Failed to collect operation${details}`, error);
         }
       };
     },
