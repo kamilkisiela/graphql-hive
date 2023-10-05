@@ -1922,8 +1922,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const query = sql`
       SELECT 
         ${schemaVersionSQLFields(sql`sv.`)}
-        sl.author,
-        lower(sl.service_name) as "service_name"
+        , sl.author as "author"
+        , lower(sl.service_name) as "service_name"
       FROM public.schema_versions as sv
       LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
       LEFT JOIN public.targets as t ON (t.id = sv.target_id)
@@ -2139,16 +2139,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           WHERE
             id = ${version}
           RETURNING
-            id,
-            is_composable,
-            to_json(created_at) as "created_at",
-            action_id,
-            base_schema,
-            has_persisted_schema_changes,
-            previous_schema_version_id,
-            composite_schema_sdl,
-            supergraph_sdl,
-            schema_composition_errors
+          ${schemaVersionSQLFields()}
         `),
       );
     },
