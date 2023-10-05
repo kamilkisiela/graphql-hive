@@ -1,5 +1,6 @@
 import {
   ArgumentNode,
+  ASTNode,
   DocumentNode,
   getNamedType,
   GraphQLInputType,
@@ -13,6 +14,7 @@ import {
   isInputObjectType,
   isScalarType,
   Kind,
+  NameNode,
   ObjectFieldNode,
   OperationDefinitionNode,
   TypeInfo,
@@ -355,14 +357,34 @@ export function createCollector({
     visit(
       doc,
       visitWithTypeInfo(typeInfo, {
-        Field() {
-          const parent = typeInfo.getParentType()!;
-          const field = typeInfo.getFieldDef()!;
+        Field(node, _key, _parent, path, ancestors) {
+          const parent = typeInfo.getParentType();
+          const field = typeInfo.getFieldDef();
+
+          if (!parent) {
+            throw new Error(
+              `Could not find a parent type of a field at ${printPath(path, ancestors, node.name)}`,
+            );
+          }
+
+          if (!field) {
+            throw new Error(
+              `Could not find a field definition of a field at ${printPath(
+                path,
+                ancestors,
+                node.name,
+              )}`,
+            );
+          }
 
           markAsUsed(makeId(parent.name, field.name));
         },
         VariableDefinition(node) {
-          const inputType = typeInfo.getInputType()!;
+          const inputType = typeInfo.getInputType();
+
+          if (!inputType) {
+            throw new Error(`Could not find an input type of a variable $${node.variable.name}`);
+          }
 
           if (shouldAnalyzeVariableValues) {
             // Granular collection of variable values is enabled
@@ -382,16 +404,53 @@ export function createCollector({
             arguments: [],
           };
         },
-        Argument(node) {
-          const parent = typeInfo.getParentType()!;
-          const field = typeInfo.getFieldDef()!;
-          const arg = typeInfo.getArgument()!;
+        Argument(node, _key, _parent, path, ancestors) {
+          const parent = typeInfo.getParentType();
+          const field = typeInfo.getFieldDef();
+          const arg = typeInfo.getArgument();
+
+          if (!parent) {
+            throw new Error(
+              `Could not find a parent type of an argument at ${printPath(
+                path,
+                ancestors,
+                node.name,
+              )}`,
+            );
+          }
+
+          if (!field) {
+            throw new Error(
+              `Could not find a field definition of an argument at ${printPath(
+                path,
+                ancestors,
+                node.name,
+              )}`,
+            );
+          }
+
+          if (!arg) {
+            throw new Error(
+              `Could not find an argument definition of an argument at ${printPath(
+                path,
+                ancestors,
+                node.name,
+              )}`,
+            );
+          }
 
           markAsUsed(makeId(parent.name, field.name, arg.name));
           collectNode(node);
         },
-        ListValue(node) {
-          const inputType = typeInfo.getInputType()!;
+        ListValue(node, _key, _parent, path, ancestors) {
+          const inputType = typeInfo.getInputType();
+
+          if (!inputType) {
+            throw new Error(
+              `Could not find an input type of a list value at ${printPath(path, ancestors)}`,
+            );
+          }
+
           const inputTypeName = resolveTypeName(inputType);
 
           node.values.forEach(value => {
@@ -401,8 +460,19 @@ export function createCollector({
             }
           });
         },
-        ObjectField(node) {
-          const parentInputType = typeInfo.getParentInputType()!;
+        ObjectField(node, _key, _parent, path, ancestors) {
+          const parentInputType = typeInfo.getParentInputType();
+
+          if (!parentInputType) {
+            throw new Error(
+              `Could not find an input type of an object field at ${printPath(
+                path,
+                ancestors,
+                node.name,
+              )}`,
+            );
+          }
+
           const parentInputTypeName = resolveTypeName(parentInputType);
 
           collectNode(node);
@@ -444,6 +514,34 @@ export function createCollector({
 
 function resolveTypeName(inputType: GraphQLType): string {
   return getNamedType(inputType).name;
+}
+
+function printPath(
+  path: readonly (string | number)[],
+  ancestors: readonly (ASTNode | readonly ASTNode[])[],
+  leafNameNode?: NameNode,
+): string {
+  const result: string[] = [];
+  for (let i = 0; i < path.length; i++) {
+    const key = path[i];
+    const ancestor = ancestors[i];
+
+    if (!ancestor) {
+      break;
+    }
+
+    if (key === 'selectionSet') {
+      if ('name' in ancestor && ancestor.name?.value) {
+        result.push(ancestor.name.value);
+      }
+    }
+  }
+
+  if (leafNameNode) {
+    result.push(leafNameNode.value);
+  }
+
+  return result.join('.');
 }
 
 type GraphQLNamedInputType = Exclude<
