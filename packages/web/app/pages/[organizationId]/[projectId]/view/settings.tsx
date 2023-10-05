@@ -100,7 +100,7 @@ function GitHubIntegration(props: {
       <CardContent>
         {githubIntegration ? (
           <>
-            {!props.isProjectNameInGitHubCheckEnabled ? (
+            {props.isProjectNameInGitHubCheckEnabled ? null : (
               <div className="flex flex-row justify-between items-center rounded-sm p-4 mb-4 gap-x-4 text-sm bg-gray-500/10 text-gray-500">
                 <div className="space-y-2">
                   <div>
@@ -182,7 +182,7 @@ function GitHubIntegration(props: {
                   </Button>
                 </div>
               </div>
-            ) : null}
+            )}
             <p>
               This project can access and update check-runs of the following GitHub repositories.
             </p>
