@@ -1025,6 +1025,7 @@ export const resolvers: SchemaModule.Resolvers = {
     githubMetadata(version, _, { injector }) {
       return injector.get(SchemaManager).getGitHubMetadata(version);
     },
+    valid: version => version.isComposable,
   },
   SchemaCompareError: {
     __isTypeOf(source: unknown) {
