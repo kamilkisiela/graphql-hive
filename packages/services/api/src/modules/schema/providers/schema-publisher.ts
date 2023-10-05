@@ -1239,6 +1239,8 @@ export class SchemaPublisher {
     project: {
       orgId: string;
       cleanId: string;
+      name: string;
+      useProjectNameInGithubCheck: boolean;
     };
     target: Target;
     organization: Organization;
@@ -1291,10 +1293,10 @@ export class SchemaPublisher {
 
       const checkRun = await this.gitHubIntegrationManager.createCheckRun({
         name: buildGitHubActionCheckName({
-          projectName: project.name,
+          projectName: args.project.name,
           targetName: target.name,
           serviceName,
-          includeProjectName: project.useProjectNameInGithubCheck,
+          includeProjectName: args.project.useProjectNameInGithubCheck,
         }),
         conclusion: conclusion === SchemaCheckConclusion.Success ? 'success' : 'failure',
         sha: args.github.sha,
