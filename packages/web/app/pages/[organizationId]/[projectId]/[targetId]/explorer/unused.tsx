@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import { memo, ReactElement } from 'react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
@@ -28,7 +28,7 @@ const UnusedSchemaView_UnusedSchemaExplorerFragment = graphql(`
   }
 `);
 
-function UnusedSchemaView(props: {
+const UnusedSchemaView = memo(function _UnusedSchemaView(props: {
   explorer: FragmentType<typeof UnusedSchemaView_UnusedSchemaExplorerFragment>;
   totalRequests: number;
   organizationCleanId: string;
@@ -62,7 +62,7 @@ function UnusedSchemaView(props: {
       })}
     </div>
   );
-}
+});
 
 const UnusedSchemaExplorer_UnusedSchemaQuery = graphql(`
   query UnusedSchemaExplorer_UnusedSchemaQuery(

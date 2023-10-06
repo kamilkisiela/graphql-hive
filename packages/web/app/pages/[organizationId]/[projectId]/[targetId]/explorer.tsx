@@ -185,7 +185,7 @@ function ExplorerPageContent() {
             target={{ cleanId: router.targetId }}
             period={period}
           >
-            <Button variant="outline" asChild>
+            <Button variant="secondary" asChild>
               <Link
                 href={{
                   pathname: '/[organizationId]/[projectId]/[targetId]/explorer/unused',
