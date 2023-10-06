@@ -909,6 +909,25 @@ export class OperationsManager {
     return Array.from((await loader.load(args.coordinate)) ?? []);
   }
 
+  async getReportedSchemaCoordinates(args: {
+    targetId: string;
+    projectId: string;
+    organizationId: string;
+    period: DateRange;
+  }): Promise<Set<string>> {
+    await this.authManager.ensureTargetAccess({
+      organization: args.organizationId,
+      project: args.projectId,
+      target: args.targetId,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    return this.reader.getReportedSchemaCoordinates({
+      target: args.targetId,
+      period: args.period,
+    });
+  }
+
   async hasOperationsForOrganization(selector: OrganizationSelector): Promise<boolean> {
     this.logger.info(
       'Checking existence of collected operations (organization=%s)',

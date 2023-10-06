@@ -1,16 +1,4 @@
-import type {
-  GraphQLArgument,
-  GraphQLEnumType,
-  GraphQLEnumValue,
-  GraphQLField,
-  GraphQLInputField,
-  GraphQLInputObjectType,
-  GraphQLInterfaceType,
-  GraphQLObjectType,
-  GraphQLScalarType,
-  GraphQLSchema,
-  GraphQLUnionType,
-} from 'graphql';
+import type { DocumentNode, GraphQLSchema } from 'graphql';
 import type {
   ClientStatsValues,
   OperationStatsValues,
@@ -78,9 +66,26 @@ export type SchemaExplorerMapper = {
   supergraph: null | SuperGraphInformation;
 };
 
+export type UnusedSchemaExplorerMapper = {
+  sdl: DocumentNode;
+  usage: {
+    period: DateRange;
+    organization: string;
+    project: string;
+    target: string;
+  };
+  supergraph: null | SuperGraphInformation;
+};
+
 export type GraphQLFieldMapper = WithSchemaCoordinatesUsage<
   WithGraphQLParentInfo<{
-    entity: GraphQLField<any, any, any>;
+    entity: {
+      name: string;
+      description?: string | null;
+      deprecationReason?: string | null;
+      type: string;
+      args: Array<GraphQLArgumentMapper['entity']>;
+    };
     supergraph: null | {
       ownedByServiceNames: Array<string> | null;
     };
@@ -88,7 +93,13 @@ export type GraphQLFieldMapper = WithSchemaCoordinatesUsage<
 >;
 export type GraphQLInputFieldMapper = WithSchemaCoordinatesUsage<
   WithGraphQLParentInfo<{
-    entity: GraphQLInputField;
+    entity: {
+      name: string;
+      description?: string | null;
+      deprecationReason?: string | null;
+      defaultValue?: unknown;
+      type: string;
+    };
     supergraph: null | {
       ownedByServiceNames: Array<string> | null;
     };
@@ -96,18 +107,41 @@ export type GraphQLInputFieldMapper = WithSchemaCoordinatesUsage<
 >;
 export type GraphQLEnumValueMapper = WithSchemaCoordinatesUsage<
   WithGraphQLParentInfo<{
-    entity: GraphQLEnumValue;
+    entity: {
+      name: string;
+      description?: string | null;
+      deprecationReason?: string | null;
+    };
     supergraph: null | {
       ownedByServiceNames: Array<string> | null;
     };
   }>
 >;
 export type GraphQLArgumentMapper = WithSchemaCoordinatesUsage<
-  WithGraphQLParentInfo<{ entity: GraphQLArgument }>
+  WithGraphQLParentInfo<{
+    entity: {
+      name: string;
+      description?: string | null;
+      deprecationReason?: string | null;
+      defaultValue?: unknown;
+      type: string;
+    };
+  }>
 >;
+
+export type GraphQLNamedTypeMapper =
+  | GraphQLUnionTypeMapper
+  | GraphQLObjectTypeMapper
+  | GraphQLInterfaceTypeMapper
+  | GraphQLScalarTypeMapper
+  | GraphQLEnumTypeMapper
+  | GraphQLInputObjectTypeMapper;
+
 export type GraphQLUnionTypeMemberMapper = WithSchemaCoordinatesUsage<
   WithGraphQLParentInfo<{
-    entity: GraphQLObjectType;
+    entity: {
+      name: string;
+    };
     supergraph: null | {
       ownedByServiceNames: Array<string> | null;
     };
@@ -115,42 +149,73 @@ export type GraphQLUnionTypeMemberMapper = WithSchemaCoordinatesUsage<
 >;
 
 export type GraphQLObjectTypeMapper = WithSchemaCoordinatesUsage<{
-  entity: GraphQLObjectType;
+  entity: {
+    kind: 'object';
+    name: string;
+    description?: string | null;
+    fields: Array<GraphQLFieldMapper['entity']>;
+    interfaces: string[];
+  };
   supergraph: null | {
     ownedByServiceNames: Array<string> | null;
     getFieldOwnedByServices: (fieldName: string) => Array<string> | null;
   };
 }>;
 export type GraphQLInterfaceTypeMapper = WithSchemaCoordinatesUsage<{
-  entity: GraphQLInterfaceType;
+  entity: {
+    kind: 'interface';
+    name: string;
+    description?: string | null;
+    fields: Array<GraphQLFieldMapper['entity']>;
+    interfaces: string[];
+  };
   supergraph: null | {
     ownedByServiceNames: Array<string> | null;
     getFieldOwnedByServices: (fieldName: string) => Array<string> | null;
   };
 }>;
 export type GraphQLUnionTypeMapper = WithSchemaCoordinatesUsage<{
-  entity: GraphQLUnionType;
+  entity: {
+    kind: 'union';
+    name: string;
+    description?: string | null;
+    members: Array<GraphQLUnionTypeMemberMapper['entity']>;
+  };
   supergraph: null | {
     ownedByServiceNames: Array<string> | null;
     getUnionMemberOwnedByServices: (unionMemberName: string) => Array<string> | null;
   };
 }>;
 export type GraphQLEnumTypeMapper = WithSchemaCoordinatesUsage<{
-  entity: GraphQLEnumType;
+  entity: {
+    kind: 'enum';
+    name: string;
+    description?: string | null;
+    values: Array<GraphQLEnumValueMapper['entity']>;
+  };
   supergraph: null | {
     ownedByServiceNames: Array<string> | null;
     getEnumValueOwnedByServices: (fieldName: string) => Array<string> | null;
   };
 }>;
 export type GraphQLInputObjectTypeMapper = WithSchemaCoordinatesUsage<{
-  entity: GraphQLInputObjectType;
+  entity: {
+    kind: 'input-object';
+    name: string;
+    description?: string | null;
+    fields: Array<GraphQLInputFieldMapper['entity']>;
+  };
   supergraph: null | {
     ownedByServiceNames: Array<string> | null;
     getInputFieldOwnedByServices: (inputFieldName: string) => Array<string> | null;
   };
 }>;
 export type GraphQLScalarTypeMapper = WithSchemaCoordinatesUsage<{
-  entity: GraphQLScalarType;
+  entity: {
+    kind: 'scalar';
+    name: string;
+    description?: string | null;
+  };
   supergraph: null | {
     ownedByServiceNames: Array<string> | null;
   };

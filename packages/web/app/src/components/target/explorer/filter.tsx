@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { ReactNode, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import { useQuery } from 'urql';
 import { Autocomplete, RadixSelect, SelectOption, Switch } from '@/components/v2';
@@ -53,8 +53,10 @@ export function SchemaExplorerFilter({
   target,
   period,
   typename,
+  children,
 }: {
   typename?: string;
+  children?: ReactNode;
   organization: { cleanId: string };
   project: { cleanId: string };
   target: { cleanId: string };
@@ -109,6 +111,7 @@ export function SchemaExplorerFilter({
           <p className="text-xs text-gray-500">List of arguments is collapsed by default</p>
         </div>
       </div>
+      {children}
     </div>
   );
 }

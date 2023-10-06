@@ -1,4 +1,5 @@
 import { ReactElement } from 'react';
+import Link from 'next/link';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
@@ -8,6 +9,7 @@ import {
   SchemaExplorerProvider,
   useSchemaExplorerContext,
 } from '@/components/target/explorer/provider';
+import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { MetaTitle } from '@/components/v2';
@@ -182,7 +184,22 @@ function ExplorerPageContent() {
             project={{ cleanId: router.projectId }}
             target={{ cleanId: router.targetId }}
             period={period}
-          />
+          >
+            <Button variant="outline" asChild>
+              <Link
+                href={{
+                  pathname: '/[organizationId]/[projectId]/[targetId]/explorer/unused',
+                  query: {
+                    organizationId: router.organizationId,
+                    projectId: router.projectId,
+                    targetId: router.targetId,
+                  },
+                }}
+              >
+                Show unused
+              </Link>
+            </Button>
+          </SchemaExplorerFilter>
         ) : null}
       </div>
       {query.fetching ? null : latestSchemaVersion && explorer ? (

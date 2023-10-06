@@ -493,6 +493,7 @@ export default gql`
     Experimental: This field is not stable and may change in the future.
     """
     explorer(usage: SchemaExplorerUsageInput): SchemaExplorer!
+    unusedSchema(usage: UnusedSchemaExplorerUsageInput): UnusedSchemaExplorer!
     errors: SchemaErrorConnection!
     """
     GitHub metadata associated with the schema version.
@@ -514,12 +515,20 @@ export default gql`
     period: DateRangeInput!
   }
 
+  input UnusedSchemaExplorerUsageInput {
+    period: DateRangeInput!
+  }
+
   type SchemaExplorer {
     types: [GraphQLNamedType!]!
     type(name: String!): GraphQLNamedType
     query: GraphQLObjectType
     mutation: GraphQLObjectType
     subscription: GraphQLObjectType
+  }
+
+  type UnusedSchemaExplorer {
+    types: [GraphQLNamedType!]!
   }
 
   type SchemaCoordinateUsage {

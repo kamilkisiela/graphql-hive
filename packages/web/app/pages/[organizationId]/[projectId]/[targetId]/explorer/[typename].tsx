@@ -20,7 +20,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const TypeRenderFragment = graphql(`
+export const TypeRenderFragment = graphql(`
   fragment TypeRenderFragment on GraphQLNamedType {
     __typename
     ...GraphQLObjectTypeComponent_TypeFragment
@@ -32,7 +32,7 @@ const TypeRenderFragment = graphql(`
   }
 `);
 
-function TypeRenderer(props: {
+export function TypeRenderer(props: {
   type: FragmentType<typeof TypeRenderFragment>;
   totalRequests: number;
   organizationCleanId: string;
