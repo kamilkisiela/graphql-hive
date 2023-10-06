@@ -183,16 +183,9 @@ function GitHubIntegration(props: {
                 </div>
               </div>
             )}
-            <p>
+            <p className="text-gray-300">
               This project can access and update check-runs of the following GitHub repositories.
             </p>
-            <ul>
-              $
-              {githubIntegration.repositories.map(repository => (
-                <li key={repository.nameWithOwner}>{repository.nameWithOwner}</li>
-              ))}
-            </ul>
-
             <Tag className="!p-4">
               The list of repositories can be adjusted in the organization settings.
               <Link
@@ -207,9 +200,14 @@ function GitHubIntegration(props: {
                 Visit settings
               </Link>
             </Tag>
+            <ul className="text-gray-300 mt-2">
+              {githubIntegration.repositories.map(repository => (
+                <li key={repository.nameWithOwner}>{repository.nameWithOwner}</li>
+              ))}
+            </ul>
           </>
         ) : (
-          <Tag className="!p-4">
+          <Tag className="!p-4 mt-2">
             The organization is not connected to our GitHub Application.
             <Link
               variant="primary"
