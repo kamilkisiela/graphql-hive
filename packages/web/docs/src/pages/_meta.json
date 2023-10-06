@@ -25,5 +25,15 @@
     "theme": {
       "toc": true
     }
+  },
+  "changelog": {
+    "type": "page",
+    "title": "Changelog",
+    "theme": {
+      "sidebar": false,
+      "toc": true,
+      "breadcrumb": false,
+      "typesetting": "article"
+    }
   }
 }

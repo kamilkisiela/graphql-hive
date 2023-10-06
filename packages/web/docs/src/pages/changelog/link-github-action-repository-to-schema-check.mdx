@@ -1,0 +1,23 @@
+---
+title: Link GitHub action repository to schema check
+description: A schema check within a project can now be linked to any GitHub action repository.
+date: 2023-10-05
+authors: [laurin]
+---
+
+It is now possible to link more than one GitHub repository to individual schema checks and schema
+versions. This allows you to connect multiple GitHub repositories to a single target, which is
+mandatory for Federated GraphQL schemas, where subgraphs are distributed across multiple
+repositories.
+
+## How to link a GitHub action repository to a schema check
+
+In order to leverage this new feature you need to upgrade the Hive CLI to the latest version, no
+further changes are required.
+
+## My project was already linked to a GitHub repository, what do I need to do?
+
+Previously, we linked a single GitHub repository to a target within GraphQL Hive. This is no longer
+the case, and you can now link multiple GitHub repositories to a single target. All you need to do
+is grant access to the GitHub repositories within the organization settings. Then, within the target
+settings, you will see a list of repositories that can be linked.

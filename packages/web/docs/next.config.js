@@ -1,4 +1,7 @@
 /* eslint-disable no-process-env */
+
+import fs from 'fs';
+import path from 'path';
 import { withGuildDocs } from '@theguild/components/next.config';
 
 export default withGuildDocs({
@@ -74,4 +77,27 @@ export default withGuildDocs({
     },
   ],
   swcMinify: true,
+  transformPageOpts(pageOpts) {
+    const changelogItems = pageOpts.pageMap.find(item => item.name === 'changelog').children;
+
+    fs.writeFileSync(
+      path.join('.', 'public', 'changelog.json'),
+      JSON.stringify(
+        changelogItems
+          .filter(
+            item =>
+              item.kind === 'MdxPage' && item.frontMatter.title && item.frontMatter.description,
+          )
+          .map(item => ({
+            route: item.route,
+            title: item.frontMatter.title,
+            description: item.frontMatter.description,
+          })),
+        null,
+        2,
+      ),
+    );
+
+    return pageOpts;
+  },
 });
