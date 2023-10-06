@@ -956,8 +956,8 @@ importers:
         specifier: 7.69.0
         version: 7.69.0
       '@theguild/federation-composition':
-        specifier: 0.1.1
-        version: 0.1.1(graphql@16.8.1)
+        specifier: 0.1.3
+        version: 0.1.3(graphql@16.8.1)
       '@trpc/server':
         specifier: 10.38.4
         version: 10.38.4
@@ -13195,8 +13195,8 @@ packages:
       - typescript
     dev: true
 
-  /@theguild/federation-composition@0.1.1(graphql@16.8.1):
-    resolution: {integrity: sha512-FRi2B+ULK9VG1a92wCaG5a8YMrn8yv7wKj72hoACpnIiAaZtCMrp8YiB9H61pq+rGeAbeS36WCBm/qsMJ5VI2g==}
+  /@theguild/federation-composition@0.1.3(graphql@16.8.1):
+    resolution: {integrity: sha512-H3mtVhpI0CeX1Yyv2HfUM7qc3bxCS8oPxPzJXaDckt4nWUecKIZXCI5FaiUV3feu2UN4j6iMVCQOWPok8jwX7Q==}
     engines: {node: '>=18'}
     peerDependencies:
       graphql: ^16.0.0
@@ -22431,18 +22431,11 @@ packages:
       remove-trailing-spaces: 1.0.8
     dev: true
 
-  /json5@1.0.1:
-    resolution: {integrity: sha512-aKS4WQjPenRxiQsC93MNfjx+nbF4PAdYzmd/1JIj8HYzqfbu86beTuNgXDzPknWk0n0uARlyewZo4s++ES36Ow==}
-    hasBin: true
-    dependencies:
-      minimist: 1.2.8
-
   /json5@1.0.2:
     resolution: {integrity: sha512-g1MWMLBiz8FKi1e4w0UyVL3w+iJceWAFBAaBnnGKOpNa5f8TLktkbre1+s6oICydWAm+HRUGTmI+//xv2hvXYA==}
     hasBin: true
     dependencies:
       minimist: 1.2.8
-    dev: false
 
   /json5@2.2.3:
     resolution: {integrity: sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==}
@@ -22894,7 +22887,7 @@ packages:
     dependencies:
       big.js: 5.2.2
       emojis-list: 3.0.0
-      json5: 1.0.1
+      json5: 1.0.2
     dev: false
 
   /loader-utils@1.4.2:
@@ -30578,7 +30571,7 @@ packages:
     resolution: {integrity: sha512-fxDhWnFSLt3VuTwtvJt5fpwxBHg5AdKWMsgcPOOIilyjymcYVZoCQF8fvFRezCNfblEXmi+PcM1eYHeOAgXCOQ==}
     dependencies:
       '@types/json5': 0.0.29
-      json5: 1.0.1
+      json5: 1.0.2
       minimist: 1.2.8
       strip-bom: 3.0.0
     dev: true
