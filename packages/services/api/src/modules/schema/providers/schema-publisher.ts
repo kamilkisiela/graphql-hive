@@ -990,19 +990,6 @@ export class SchemaPublisher {
         conclusion: 'ignored',
       });
 
-      if (github) {
-        return this.createPublishCheckRun({
-          force: false,
-          initial: false,
-          valid: true,
-          changes: [],
-          errors: [],
-
-          organizationId: organization.id,
-          github,
-        });
-      }
-
       const linkToWebsite =
         typeof this.schemaModuleConfig.schemaPublishLink === 'function'
           ? this.schemaModuleConfig.schemaPublishLink({
@@ -1019,8 +1006,22 @@ export class SchemaPublisher {
             })
           : null;
 
+      if (github) {
+        return this.createPublishCheckRun({
+          force: false,
+          initial: false,
+          valid: true,
+          changes: [],
+          errors: [],
+
+          organizationId: organization.id,
+          github,
+          detailsUrl: linkToWebsite,
+        });
+      }
+
       return {
-        __typename: 'SchemaPublishSuccess' as const,
+        __typename: 'SchemaPublishSuccess',
         initial: false,
         valid: true,
         changes: [],
@@ -1211,6 +1212,7 @@ export class SchemaPublisher {
         messages: publishResult.state.messages ?? [],
         organizationId: organization.id,
         github,
+        detailsUrl: linkToWebsite,
       });
     }
 
@@ -1500,6 +1502,7 @@ export class SchemaPublisher {
     messages,
     organizationId,
     github,
+    detailsUrl,
   }: {
     initial: boolean;
     force?: boolean | null;
@@ -1513,6 +1516,7 @@ export class SchemaPublisher {
       repository: string;
       sha: string;
     };
+    detailsUrl: string | null;
   }) {
     const [repositoryOwner, repositoryName] = github.repository.split('/');
 
@@ -1560,7 +1564,7 @@ export class SchemaPublisher {
           title,
           summary,
         },
-        detailsUrl: null,
+        detailsUrl,
       });
       return {
         __typename: 'GitHubSchemaPublishSuccess',
