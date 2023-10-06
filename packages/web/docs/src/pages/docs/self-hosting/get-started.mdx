@@ -235,7 +235,16 @@ guide it's `development`) then go to the settings tab, if you scroll donw a bit 
 the `Tokens` section, click the `Generate New Token` button, give it a name then we'll have to set
 some permissions for that token, so expand the `All targets` section then give the `Registry` a
 `Read & Write` access. Click the `Generate Token` button, then copy the token value. Head back to
-the `hive.json` config file then add a new key `token` and paste the value from your clipboard.
+the `hive.json` config file then add the following contents, while replacing the
+`<your-access-token>` with the token value you just copied.
+
+```json filename="hive.json"
+{
+  "registry": {
+    "accessToken": "<your-access-token>"
+  }
+}
+```
 
 Now we're all setup to use the GraphQL Hive CLI against our Setup!
 

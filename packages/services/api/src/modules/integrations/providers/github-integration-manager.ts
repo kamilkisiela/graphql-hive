@@ -136,6 +136,22 @@ export class GitHubIntegrationManager {
       });
   }
 
+  /**
+   * Check whether the given organization has access to a given GitHub repository.
+   */
+  async hasAccessToGitHubRepository(props: {
+    selector: OrganizationSelector;
+    repositoryName: `${string}/${string}`;
+  }): Promise<boolean> {
+    const repositories = await this.getRepositories(props.selector);
+
+    if (!repositories) {
+      return false;
+    }
+
+    return repositories.some(repo => repo.nameWithOwner === props.repositoryName);
+  }
+
   async getOrganization(selector: { installation: string }) {
     const organization = await this.storage.getOrganizationByGitHubInstallationId({
       installationId: selector.installation,

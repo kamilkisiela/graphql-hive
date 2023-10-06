@@ -204,7 +204,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       type: project.type as ProjectType,
       buildUrl: project.build_url,
       validationUrl: project.validation_url,
-      gitRepository: project.git_repository,
+      gitRepository: project.git_repository as `${string}/${string}` | null,
       legacyRegistryModel: project.legacy_registry_model,
       useProjectNameInGithubCheck: project.github_check_with_project_name === true,
       externalComposition: {
@@ -1272,16 +1272,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `),
       );
     },
-    async updateProjectGitRepository({ gitRepository, organization, project }) {
-      return transformProject(
-        await pool.one<Slonik<projects>>(sql`
-          UPDATE public.projects
-          SET git_repository = ${gitRepository ?? null}
-          WHERE id = ${project} AND org_id = ${organization}
-          RETURNING *
-        `),
-      );
-    },
     async enableExternalSchemaComposition({ project, endpoint, encryptedSecret }) {
       return transformProject(
         await pool.one<Slonik<projects>>(sql`
@@ -1710,16 +1700,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const version = await pool.maybeOne<unknown>(
         sql`
           SELECT
-            sv.id,
-            sv.is_composable,
-            to_json(sv.created_at) as "created_at",
-            sv.action_id,
-            sv.base_schema,
-            sv.has_persisted_schema_changes,
-            sv.previous_schema_version_id,
-            sv.composite_schema_sdl,
-            sv.supergraph_sdl,
-            sv.schema_composition_errors
+            ${schemaVersionSQLFields(sql`sv.`)}
           FROM public.schema_versions as sv
           WHERE sv.target_id = ${target} AND sv.is_composable IS TRUE
           ORDER BY sv.created_at DESC
@@ -1737,16 +1718,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const version = await pool.maybeOne<unknown>(
         sql`
           SELECT
-            sv.id,
-            sv.is_composable,
-            to_json(sv.created_at) as "created_at",
-            sv.action_id,
-            sv.base_schema,
-            sv.has_persisted_schema_changes,
-            sv.previous_schema_version_id,
-            sv.composite_schema_sdl,
-            sv.supergraph_sdl,
-            sv.schema_composition_errors
+            ${schemaVersionSQLFields(sql`sv.`)}
           FROM public.schema_versions as sv
           WHERE sv.target_id = ${target} AND sv.is_composable IS TRUE
           ORDER BY sv.created_at DESC
@@ -1760,16 +1732,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const version = await pool.maybeOne<unknown>(
         sql`
           SELECT
-            sv.id,
-            sv.is_composable,
-            to_json(sv.created_at) as "created_at",
-            sv.action_id,
-            sv.base_schema,
-            sv.has_persisted_schema_changes,
-            sv.previous_schema_version_id,
-            sv.composite_schema_sdl,
-            sv.supergraph_sdl,
-            sv.schema_composition_errors
+            ${schemaVersionSQLFields(sql`sv.`)}
           FROM public.schema_versions as sv
           LEFT JOIN public.targets as t ON (t.id = sv.target_id)
           WHERE sv.target_id = ${target} AND t.project_id = ${project}
@@ -1785,16 +1748,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const version = await pool.maybeOne<unknown>(
         sql`
           SELECT
-            sv.id,
-            sv.is_composable,
-            to_json(sv.created_at) as "created_at",
-            sv.action_id,
-            sv.base_schema,
-            sv.has_persisted_schema_changes,
-            sv.previous_schema_version_id,
-            sv.composite_schema_sdl,
-            sv.supergraph_sdl,
-            sv.schema_composition_errors
+            ${schemaVersionSQLFields(sql`sv.`)}
           FROM public.schema_versions as sv
           LEFT JOIN public.targets as t ON (t.id = sv.target_id)
           WHERE sv.target_id = ${target} AND t.project_id = ${project}
@@ -1950,16 +1904,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async getVersion({ project, target, version }) {
       const result = await pool.one(sql`
         SELECT 
-          sv.id,
-          sv.is_composable,
-          to_json(sv.created_at) as "created_at",
-          sv.base_schema,
-          sv.action_id,
-          sv.has_persisted_schema_changes,
-          sv.previous_schema_version_id,
-          sv.composite_schema_sdl,
-          sv.supergraph_sdl,
-          sv.schema_composition_errors
+          ${schemaVersionSQLFields(sql`sv.`)}
         FROM public.schema_versions as sv
         LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
         LEFT JOIN public.targets as t ON (t.id = sv.target_id)
@@ -1976,18 +1921,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async getVersions({ project, target, after, limit }) {
       const query = sql`
       SELECT 
-        sv.id,
-        sv.is_composable,
-        to_json(sv.created_at) as "created_at",
-        sv.base_schema,
-        sv.action_id,
-        sv.has_persisted_schema_changes,
-        sv.previous_schema_version_id,
-        sv.composite_schema_sdl,
-        sv.supergraph_sdl,
-        sv.schema_composition_errors,
-        sl.author,
-        lower(sl.service_name) as "service_name"
+        ${schemaVersionSQLFields(sql`sv.`)}
+        , sl.author as "author"
+        , lower(sl.service_name) as "service_name"
       FROM public.schema_versions as sv
       LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
       LEFT JOIN public.targets as t ON (t.id = sv.target_id)
@@ -2058,6 +1994,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           compositeSchemaSDL: args.compositeSchemaSDL,
           supergraphSDL: args.supergraphSDL,
           schemaCompositionErrors: args.schemaCompositionErrors,
+          // Deleting a schema is done via CLI and not associated to a commit or a pull request.
+          github: null,
         });
 
         // Move all the schema_version_to_log entries of the previous version to the new version
@@ -2139,6 +2077,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           compositeSchemaSDL: input.compositeSchemaSDL,
           supergraphSDL: input.supergraphSDL,
           schemaCompositionErrors: input.schemaCompositionErrors,
+          github: input.github,
         });
 
         await Promise.all(
@@ -2200,16 +2139,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           WHERE
             id = ${version}
           RETURNING
-            id,
-            is_composable,
-            to_json(created_at) as "created_at",
-            action_id,
-            base_schema,
-            has_persisted_schema_changes,
-            previous_schema_version_id,
-            composite_schema_sdl,
-            supergraph_sdl,
-            schema_composition_errors
+          ${schemaVersionSQLFields()}
         `),
       );
     },
@@ -3524,6 +3454,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "is_manually_approved"
           , "manual_approval_user_id"
           , "github_check_run_id"
+          , "github_repository"
+          , "github_sha"
           , "expires_at"
         )
         VALUES (
@@ -3543,6 +3475,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , ${args.isManuallyApproved}
           , ${args.manualApprovalUserId}
           , ${args.githubCheckRunId}
+          , ${args.githubRepository}
+          , ${args.githubSha}
           , ${args.expiresAt?.toISOString() ?? null}
         )
         RETURNING
@@ -3944,33 +3878,39 @@ function decodeFeatureFlags(column: unknown) {
   return FeatureFlagsModel.parse(column);
 }
 
-const SchemaVersionModel = zod
-  .object({
+const SchemaVersionModel = zod.intersection(
+  zod.object({
     id: zod.string(),
-    is_composable: zod.boolean(),
-    created_at: zod.string(),
-    base_schema: zod.nullable(zod.string()),
-    action_id: zod.string(),
-    has_persisted_schema_changes: zod.nullable(zod.boolean()),
-    previous_schema_version_id: zod.nullable(zod.string()),
-    composite_schema_sdl: zod.nullable(zod.string()),
-    supergraph_sdl: zod.nullable(zod.string()),
-    schema_composition_errors: zod.nullable(zod.array(SchemaCompositionErrorModel)),
-  })
-  .transform(value => ({
-    id: value.id,
-    /** @deprecated Use isComposable instead. */
-    valid: value.is_composable,
-    isComposable: value.is_composable,
-    createdAt: value.created_at,
-    baseSchema: value.base_schema,
-    commit: value.action_id,
-    hasPersistedSchemaChanges: value.has_persisted_schema_changes ?? false,
-    previousSchemaVersionId: value.previous_schema_version_id,
-    compositeSchemaSDL: value.composite_schema_sdl,
-    supergraphSDL: value.supergraph_sdl,
-    schemaCompositionErrors: value.schema_composition_errors,
-  }));
+    isComposable: zod.boolean(),
+    createdAt: zod.string(),
+    baseSchema: zod.nullable(zod.string()),
+    actionId: zod.string(),
+    hasPersistedSchemaChanges: zod.nullable(zod.boolean()).transform(val => val ?? false),
+    previousSchemaVersionId: zod.nullable(zod.string()),
+    compositeSchemaSDL: zod.nullable(zod.string()),
+    supergraphSDL: zod.nullable(zod.string()),
+    schemaCompositionErrors: zod.nullable(zod.array(SchemaCompositionErrorModel)),
+  }),
+  zod
+    .union([
+      zod.object({
+        githubRepository: zod.string(),
+        githubSha: zod.string(),
+      }),
+      zod.object({
+        githubRepository: zod.null(),
+        githubSha: zod.null(),
+      }),
+    ])
+    .transform(val => ({
+      github: val.githubRepository
+        ? {
+            repository: val.githubRepository,
+            sha: val.githubSha,
+          }
+        : null,
+    })),
+);
 
 const DocumentCollectionModel = zod.object({
   id: zod.string(),
@@ -4046,6 +3986,10 @@ async function insertSchemaVersion(
     compositeSchemaSDL: string | null;
     supergraphSDL: string | null;
     schemaCompositionErrors: Array<SchemaCompositionError> | null;
+    github: null | {
+      sha: string;
+      repository: string;
+    };
   },
 ) {
   const query = sql`
@@ -4059,7 +4003,9 @@ async function insertSchemaVersion(
         previous_schema_version_id,
         composite_schema_sdl,
         supergraph_sdl,
-        schema_composition_errors
+        schema_composition_errors,
+        github_repository,
+        github_sha
       )
     VALUES
       (
@@ -4075,19 +4021,12 @@ async function insertSchemaVersion(
           args.schemaCompositionErrors
             ? sql`${JSON.stringify(args.schemaCompositionErrors)}::jsonb`
             : sql`${null}`
-        }
+        },
+        ${args.github?.repository ?? null},
+        ${args.github?.sha ?? null}
       )
     RETURNING
-      id,
-      is_composable,
-      to_json(created_at) as "created_at",
-      action_id,
-      base_schema,
-      has_persisted_schema_changes,
-      previous_schema_version_id,
-      composite_schema_sdl,
-      supergraph_sdl,
-      schema_composition_errors
+      ${schemaVersionSQLFields()}
   `;
 
   return await trx.one(query).then(SchemaVersionModel.parse);
@@ -4140,8 +4079,25 @@ const schemaCheckSQLFields = sql`
   , "composite_schema_sdl" as "compositeSchemaSDL"
   , "supergraph_sdl" as "supergraphSDL"
   , "github_check_run_id" as "githubCheckRunId"
+  , "github_repository" as "githubRepository"
+  , "github_sha" as "githubSha"
   , coalesce("is_manually_approved", false) as "isManuallyApproved"
   , "manual_approval_user_id" as "manualApprovalUserId"
+`;
+
+const schemaVersionSQLFields = (t = sql``) => sql`
+  ${t}"id"
+  , ${t}"is_composable" as "isComposable"
+  , to_json(${t}"created_at") as "createdAt"
+  , ${t}"action_id" as "actionId"
+  , ${t}"base_schema" as "baseSchema"
+  , ${t}"has_persisted_schema_changes" as "hasPersistedSchemaChanges"
+  , ${t}"previous_schema_version_id" as "previousSchemaVersionId"
+  , ${t}"composite_schema_sdl" as "compositeSchemaSDL"
+  , ${t}"supergraph_sdl" as "supergraphSDL"
+  , ${t}"schema_composition_errors" as "schemaCompositionErrors"
+  , ${t}"github_repository" as "githubRepository"
+  , ${t}"github_sha" as "githubSha"
 `;
 
 const targetSQLFields = sql`

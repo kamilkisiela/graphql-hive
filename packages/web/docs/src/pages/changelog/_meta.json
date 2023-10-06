@@ -1,0 +1,12 @@
+{
+  "index": {
+    "theme": {
+      "sidebar": false,
+      "toc": false,
+      "breadcrumb": false,
+      "typesetting": "article"
+    },
+    "display": "hidden"
+  },
+  "link-github-action-repository-to-schema-check": "Link GitHub action repository to schema check"
+}

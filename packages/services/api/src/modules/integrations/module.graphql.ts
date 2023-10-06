@@ -47,7 +47,6 @@ export default gql`
   }
 
   extend type Project {
-    gitRepository: String
     isProjectNameInGitHubCheckEnabled: Boolean!
   }
 `;

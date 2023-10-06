@@ -86,7 +86,7 @@ Run the following command in your terminal, to publish your `schema.graphql` to 
 (replace `YOUR_TOKEN_HERE` with the token you have just created):
 
 ```bash
-hive schema:publish schema.graphql --token YOUR_TOKEN_HERE
+hive schema:publish schema.graphql --registry.accessToken YOUR_TOKEN_HERE
 ```
 
 <Callout type="info">
@@ -146,7 +146,7 @@ enum UserRole {
 Now, run the Hive CLI with the `schema:check` command and your modified `schema.graphql` file:
 
 ```bash
-hive schema:check schema.graphql --token YOUR_TOKEN_HERE
+hive schema:check schema.graphql --registry.accessToken YOUR_TOKEN_HERE
 ```
 
 You should see that Hive successfully detect the change you made, and exists with a `0` exit code,
@@ -190,7 +190,7 @@ enum UserRole {
 Now, run the Hive CLI with the `schema:check` command and your modified `schema.graphql` file:
 
 ```bash
-hive schema:check schema.graphql --token YOUR_TOKEN_HERE
+hive schema:check schema.graphql --registry.accessToken YOUR_TOKEN_HERE
 ```
 
 Now, you should see that Hive detected a breaking change, and exists with a `1` exit code, meaning
@@ -229,7 +229,7 @@ To publish your latest schema with breaking changes, use the `schema:publish` co
 Let's publish the schema we previously modified:
 
 ```bash
-hive schema:publish schema.graphql --token YOUR_TOKEN_HERE
+hive schema:publish schema.graphql --registry.accessToken YOUR_TOKEN_HERE
 ```
 
 You should see now that Hive accepted your published schema and updated the registry:

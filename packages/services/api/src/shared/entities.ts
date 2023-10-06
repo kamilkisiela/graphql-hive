@@ -78,15 +78,19 @@ export interface DateRange {
 
 export interface SchemaVersion {
   id: string;
-  valid: boolean;
   createdAt: string;
-  commit: string;
+  isComposable: boolean;
+  actionId: string;
   baseSchema: string | null;
   hasPersistedSchemaChanges: boolean;
   previousSchemaVersionId: null | string;
   compositeSchemaSDL: null | string;
   supergraphSDL: null | string;
   schemaCompositionErrors: Array<SchemaCompositionError> | null;
+  github: null | {
+    repository: string;
+    sha: string;
+  };
 }
 
 export interface SchemaObject {
@@ -261,7 +265,11 @@ export interface Project {
   type: ProjectType;
   buildUrl?: string | null;
   validationUrl?: string | null;
-  gitRepository?: string | null;
+  /**
+   * @deprecated A project is no longer linked to a single git repository as a project can be composed of multiple git repositories.
+   * TODO: All code referencing this field should be removed at some point.
+   */
+  gitRepository?: `${string}/${string}` | null;
   legacyRegistryModel: boolean;
   useProjectNameInGithubCheck: boolean;
   externalComposition: {

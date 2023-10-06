@@ -9,6 +9,7 @@ import type { Span } from '@sentry/types';
 import * as Types from '../../../__generated__/types';
 import { Organization, Project, ProjectType, Schema, Target } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
+import { isGitHubRepositoryString } from '../../../shared/is-github-repository-string';
 import { bolderize } from '../../../shared/markdown';
 import { sentry } from '../../../shared/sentry';
 import { AlertsManager } from '../../alerts/providers/alerts-manager';
@@ -208,6 +209,56 @@ export class SchemaPublisher {
       projectType: project.type,
     });
 
+    let github: null | {
+      repository: `${string}/${string}`;
+      sha: string;
+    } = null;
+
+    if (input.github) {
+      if (input.github.repository) {
+        if (!isGitHubRepositoryString(input.github.repository)) {
+          return {
+            __typename: 'GitHubSchemaCheckError' as const,
+            message: 'Invalid github repository name provided.',
+          };
+        }
+        github = {
+          repository: input.github.repository,
+          sha: input.github.commit,
+        };
+      } else if (project.gitRepository == null) {
+        return {
+          __typename: 'GitHubSchemaCheckError' as const,
+          message: 'Git repository is not configured for this project',
+        };
+      } else {
+        github = {
+          repository: project.gitRepository,
+          sha: input.github.commit,
+        };
+      }
+    }
+
+    if (github != null) {
+      // Verify that the GitHub repository can be accessed by the user
+      const hasAccessToGitHubRepository =
+        await this.gitHubIntegrationManager.hasAccessToGitHubRepository({
+          selector: {
+            organization: organization.id,
+          },
+          repositoryName: github.repository,
+        });
+
+      if (!hasAccessToGitHubRepository) {
+        return {
+          __typename: 'GitHubSchemaCheckError' as const,
+          message:
+            `Missing permissions for updating check-runs on GitHub repository '${github.repository}'. ` +
+            'Please make sure that the GitHub App has access on the repository.',
+        };
+      }
+    }
+
     await this.schemaManager.completeGetStartedCheck({
       organization: project.orgId,
       step: 'checkingSchema',
@@ -331,6 +382,8 @@ export class SchemaPublisher {
         isManuallyApproved: false,
         manualApprovalUserId: null,
         githubCheckRunId: null,
+        githubRepository: github?.repository ?? null,
+        githubSha: github?.sha ?? null,
         expiresAt,
       });
     }
@@ -395,20 +448,21 @@ export class SchemaPublisher {
         isManuallyApproved: false,
         manualApprovalUserId: null,
         githubCheckRunId: null,
+        githubRepository: github?.repository ?? null,
+        githubSha: github?.sha ?? null,
         expiresAt,
       });
     }
 
-    if (input.github) {
-      let result: Awaited<ReturnType<SchemaPublisher['githubCheck']>>;
+    if (github) {
+      let result: Awaited<ReturnType<SchemaPublisher['githubSchemaCheck']>>;
 
       if (checkResult.conclusion === SchemaCheckConclusion.Success) {
-        result = await this.githubCheck({
+        result = await this.githubSchemaCheck({
           project,
           target,
           organization,
           serviceName: input.service ?? null,
-          sha: input.github.commit,
           conclusion: checkResult.conclusion,
           changes: checkResult.state?.schemaChanges ?? null,
           warnings: checkResult.state?.schemaPolicyWarnings ?? null,
@@ -416,14 +470,14 @@ export class SchemaPublisher {
           compositionErrors: null,
           errors: null,
           schemaCheckId: schemaCheck?.id ?? null,
+          github,
         });
       } else {
-        result = await this.githubCheck({
+        result = await this.githubSchemaCheck({
           project,
           target,
           organization,
           serviceName: input.service ?? null,
-          sha: input.github.commit,
           conclusion: checkResult.conclusion,
           changes: [
             ...(checkResult.state.schemaChanges?.breaking ?? []),
@@ -434,6 +488,7 @@ export class SchemaPublisher {
           warnings: checkResult.state.schemaPolicy?.warnings ?? [],
           errors: checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? [],
           schemaCheckId: schemaCheck?.id ?? null,
+          github,
         });
       }
 
@@ -517,7 +572,7 @@ export class SchemaPublisher {
   public async updateVersionStatus(input: TargetSelector & { version: string; valid: boolean }) {
     const updateResult = await this.schemaManager.updateSchemaVersionStatus(input);
 
-    if (updateResult.valid === true) {
+    if (updateResult.isComposable === true) {
       // Now, when fetching the latest valid version, we should be able to detect
       // if it's the version we just updated or not.
       // Why?
@@ -810,6 +865,52 @@ export class SchemaPublisher {
       projectType: project.type,
     });
 
+    let github: null | {
+      repository: `${string}/${string}`;
+      sha: string;
+    } = null;
+
+    if (input.gitHub != null) {
+      if (!isGitHubRepositoryString(input.gitHub.repository)) {
+        return {
+          __typename: 'GitHubSchemaPublishError' as const,
+          message: 'Invalid github repository name provided.',
+        } as const;
+      }
+      const hasAccessToGitHubRepository =
+        await this.gitHubIntegrationManager.hasAccessToGitHubRepository({
+          selector: {
+            organization: organization.id,
+          },
+          repositoryName: input.gitHub.repository,
+        });
+
+      if (!hasAccessToGitHubRepository) {
+        return {
+          __typename: 'GitHubSchemaPublishError',
+          message:
+            `Missing permissions for updating check-runs on GitHub repository '${input.gitHub.repository}'. ` +
+            'Please make sure that the GitHub App has access on the repository.',
+        } as const;
+      }
+
+      github = {
+        repository: input.gitHub.repository,
+        sha: input.gitHub.commit,
+      };
+    } else if (input.github != null) {
+      if (!project.gitRepository) {
+        return {
+          __typename: 'GitHubSchemaPublishError',
+          message: 'Git repository is not configured for this project.',
+        } as const;
+      }
+      github = {
+        repository: project.gitRepository,
+        sha: input.commit,
+      };
+    }
+
     await this.schemaManager.completeGetStartedCheck({
       organization: project.orgId,
       step: 'publishingSchema',
@@ -889,18 +990,6 @@ export class SchemaPublisher {
         conclusion: 'ignored',
       });
 
-      if (input.github) {
-        return this.createPublishCheckRun({
-          force: false,
-          initial: false,
-          input,
-          project,
-          valid: true,
-          changes: [],
-          errors: [],
-        });
-      }
-
       const linkToWebsite =
         typeof this.schemaModuleConfig.schemaPublishLink === 'function'
           ? this.schemaModuleConfig.schemaPublishLink({
@@ -917,8 +1006,22 @@ export class SchemaPublisher {
             })
           : null;
 
+      if (github) {
+        return this.createPublishCheckRun({
+          force: false,
+          initial: false,
+          valid: true,
+          changes: [],
+          errors: [],
+
+          organizationId: organization.id,
+          github,
+          detailsUrl: linkToWebsite,
+        });
+      }
+
       return {
-        __typename: 'SchemaPublishSuccess' as const,
+        __typename: 'SchemaPublishSuccess',
         initial: false,
         valid: true,
         changes: [],
@@ -1028,6 +1131,7 @@ export class SchemaPublisher {
       base_schema: baseSchema,
       metadata: input.metadata ?? null,
       projectType: project.type,
+      github,
       actionFn: async () => {
         if (composable && fullSchemaSdl) {
           await this.publishToCDN({
@@ -1063,7 +1167,11 @@ export class SchemaPublisher {
           organization,
           project,
           target,
-          schema: schemaVersion,
+          schema: {
+            id: schemaVersion.id,
+            commit: schemaVersion.actionId,
+            valid: schemaVersion.isComposable,
+          },
           changes,
           messages,
           errors,
@@ -1094,16 +1202,17 @@ export class SchemaPublisher {
           })
         : null;
 
-    if (input.github) {
+    if (github) {
       return this.createPublishCheckRun({
         force: false,
         initial: publishResult.state.initial,
-        input,
-        project,
         valid: publishResult.state.composable,
         changes: publishResult.state.changes ?? [],
         errors,
         messages: publishResult.state.messages ?? [],
+        organizationId: organization.id,
+        github,
+        detailsUrl: linkToWebsite,
       });
     }
 
@@ -1117,12 +1226,9 @@ export class SchemaPublisher {
     };
   }
 
-  private async githubCheck({
-    project,
+  private async githubSchemaCheck({
     target,
-    organization,
     serviceName,
-    sha,
     conclusion,
     changes,
     breakingChanges,
@@ -1130,12 +1236,17 @@ export class SchemaPublisher {
     errors,
     warnings,
     schemaCheckId,
+    ...args
   }: {
-    project: Project;
+    project: {
+      orgId: string;
+      cleanId: string;
+      name: string;
+      useProjectNameInGithubCheck: boolean;
+    };
     target: Target;
     organization: Organization;
     serviceName: string | null;
-    sha: string;
     conclusion: SchemaCheckConclusion;
     warnings: SchemaCheckWarning[] | null;
     changes: Array<Change> | null;
@@ -1147,14 +1258,12 @@ export class SchemaPublisher {
       message: string;
     }> | null;
     schemaCheckId: string | null;
+    github: {
+      repository: `${string}/${string}`;
+      sha: string;
+    };
   }) {
-    if (!project.gitRepository) {
-      return {
-        __typename: 'GitHubSchemaCheckError' as const,
-        message: 'Git repository is not configured for this project',
-      };
-    }
-    const [repositoryOwner, repositoryName] = project.gitRepository.split('/');
+    const [repositoryOwner, repositoryName] = args.github.repository.split('/');
 
     try {
       let title: string;
@@ -1186,14 +1295,14 @@ export class SchemaPublisher {
 
       const checkRun = await this.gitHubIntegrationManager.createCheckRun({
         name: buildGitHubActionCheckName({
-          projectName: project.name,
+          projectName: args.project.name,
           targetName: target.name,
           serviceName,
-          includeProjectName: project.useProjectNameInGithubCheck,
+          includeProjectName: args.project.useProjectNameInGithubCheck,
         }),
         conclusion: conclusion === SchemaCheckConclusion.Success ? 'success' : 'failure',
-        sha,
-        organization: project.orgId,
+        sha: args.github.sha,
+        organization: args.project.orgId,
         repositoryOwner,
         repositoryName,
         output: {
@@ -1203,9 +1312,9 @@ export class SchemaPublisher {
         detailsUrl:
           (schemaCheckId &&
             this.schemaModuleConfig.schemaCheckLink?.({
-              project,
+              project: args.project,
               target,
-              organization,
+              organization: args.organization,
               schemaCheckId,
             })) ||
           null,
@@ -1387,29 +1496,29 @@ export class SchemaPublisher {
   private async createPublishCheckRun({
     initial,
     force,
-    input,
-    project,
     valid,
     changes,
     errors,
     messages,
+    organizationId,
+    github,
+    detailsUrl,
   }: {
     initial: boolean;
     force?: boolean | null;
-    input: PublishInput;
-    project: Project;
     valid: boolean;
     changes: Array<Change>;
     errors: readonly Types.SchemaError[];
     messages?: string[];
+
+    organizationId: string;
+    github: {
+      repository: string;
+      sha: string;
+    };
+    detailsUrl: string | null;
   }) {
-    if (!project.gitRepository) {
-      return {
-        __typename: 'GitHubSchemaPublishError' as const,
-        message: 'Git repository is not configured for this project',
-      };
-    }
-    const [repositoryOwner, repositoryName] = project.gitRepository.split('/');
+    const [repositoryOwner, repositoryName] = github.repository.split('/');
 
     try {
       let title: string;
@@ -1447,26 +1556,26 @@ export class SchemaPublisher {
       await this.gitHubIntegrationManager.createCheckRun({
         name: 'GraphQL Hive - schema:publish',
         conclusion: valid ? 'success' : force ? 'neutral' : 'failure',
-        sha: input.commit,
-        organization: input.organization,
+        sha: github.sha,
+        organization: organizationId,
         repositoryOwner,
         repositoryName,
         output: {
           title,
           summary,
         },
-        detailsUrl: null,
+        detailsUrl,
       });
       return {
-        __typename: 'GitHubSchemaPublishSuccess' as const,
+        __typename: 'GitHubSchemaPublishSuccess',
         message: title,
-      };
-    } catch (error: any) {
+      } as const;
+    } catch (error: unknown) {
       Sentry.captureException(error);
       return {
-        __typename: 'GitHubSchemaPublishError' as const,
+        __typename: 'GitHubSchemaPublishError',
         message: `Failed to create the check-run`,
-      };
+      } as const;
     }
   }
 

@@ -9,10 +9,6 @@ import { ProjectManager } from './providers/project-manager';
 
 const ProjectNameModel = z.string().min(2).max(40);
 const URLModel = z.string().url().max(500);
-const RepoOwnerWithNameModel = z
-  .string()
-  .regex(/^[^/]+\/[^/]+$/, 'Expected owner/name format')
-  .max(200);
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 
 export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
@@ -152,41 +148,6 @@ export const resolvers: ProjectModule.Resolvers & { ProjectType: any } = {
             project: project.cleanId,
           },
           updatedProject: project,
-        },
-      };
-    },
-    async updateProjectGitRepository(_, { input }, { injector }) {
-      const UpdateProjectGitRepositoryModel = z.object({
-        gitRepository: MaybeModel(RepoOwnerWithNameModel),
-      });
-
-      const result = UpdateProjectGitRepositoryModel.safeParse(input);
-
-      if (!result.success) {
-        return {
-          error: {
-            message:
-              result.error.formErrors.fieldErrors.gitRepository?.[0] ?? 'Please check your input.',
-          },
-        };
-      }
-
-      const [organization, project] = await Promise.all([
-        injector.get(IdTranslator).translateOrganizationId(input),
-        injector.get(IdTranslator).translateProjectId(input),
-      ]);
-
-      return {
-        ok: {
-          selector: {
-            organization: input.organization,
-            project: input.project,
-          },
-          updatedProject: await injector.get(ProjectManager).updateGitRepository({
-            project,
-            organization,
-            gitRepository: input.gitRepository,
-          }),
         },
       };
     },

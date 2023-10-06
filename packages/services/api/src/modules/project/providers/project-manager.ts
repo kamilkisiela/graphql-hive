@@ -171,23 +171,4 @@ export class ProjectManager {
 
     return result;
   }
-
-  async updateGitRepository(
-    input: {
-      gitRepository?: string | null;
-    } & ProjectSelector,
-  ): Promise<Project> {
-    const { gitRepository, organization, project } = input;
-    this.logger.info('Updating a project git repository (input=%o)', input);
-    await this.authManager.ensureProjectAccess({
-      ...input,
-      scope: ProjectAccessScope.SETTINGS,
-    });
-
-    return this.storage.updateProjectGitRepository({
-      gitRepository: gitRepository?.trim() === '' ? null : gitRepository,
-      organization,
-      project,
-    });
-  }
 }

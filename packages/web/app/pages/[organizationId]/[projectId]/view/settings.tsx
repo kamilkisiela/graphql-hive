@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/card';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
-import { DocsLink, Input, MetaTitle, Select, Tag } from '@/components/v2';
+import { DocsLink, Input, Link, MetaTitle, Tag } from '@/components/v2';
 import { HiveLogo } from '@/components/v2/icon';
 import { DeleteProjectModal } from '@/components/v2/modals';
 import { graphql, useFragment } from '@/gql';
@@ -28,27 +28,6 @@ import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/ac
 import { getDocsUrl } from '@/lib/docs-url';
 import { useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-
-const ProjectSettingsPage_UpdateProjectGitRepositoryMutation = graphql(`
-  mutation ProjectSettingsPage_UpdateProjectGitRepository(
-    $input: UpdateProjectGitRepositoryInput!
-  ) {
-    updateProjectGitRepository(input: $input) {
-      ok {
-        selector {
-          organization
-          project
-        }
-        updatedProject {
-          ...ProjectFields
-        }
-      }
-      error {
-        message
-      }
-    }
-  }
-`);
 
 const GithubIntegration_GithubIntegrationDetailsQuery = graphql(`
   query getGitHubIntegrationDetails($selector: OrganizationSelectorInput!) {
@@ -76,13 +55,13 @@ export const GithubIntegration_EnableProjectNameInGitHubCheckMutation = graphql(
 `);
 
 function GitHubIntegration(props: {
-  gitRepository: string | null;
   isProjectNameInGitHubCheckEnabled: boolean;
   organizationName: string;
   projectName: string;
 }): ReactElement | null {
   const router = useRouteSelector();
   const docksLink = getDocsUrl('integrations/ci-cd#github-workflow-for-ci');
+  const notify = useNotifications();
   const [integrationQuery] = useQuery({
     query: GithubIntegration_GithubIntegrationDetailsQuery,
     variables: {
@@ -91,38 +70,10 @@ function GitHubIntegration(props: {
       },
     },
   });
-  const gitRepository = props.gitRepository ?? '';
 
-  const notify = useNotifications();
-
-  const [mutation, mutate] = useMutation(ProjectSettingsPage_UpdateProjectGitRepositoryMutation);
   const [ghCheckMutation, ghCheckMutate] = useMutation(
     GithubIntegration_EnableProjectNameInGitHubCheckMutation,
   );
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
-    useFormik({
-      enableReinitialize: true,
-      initialValues: {
-        gitRepository,
-      },
-      validationSchema: Yup.object().shape({
-        gitRepository: Yup.string(),
-      }),
-      onSubmit: values =>
-        mutate({
-          input: {
-            organization: router.organizationId,
-            project: router.projectId,
-            gitRepository: values.gitRepository === '' ? null : values.gitRepository,
-          },
-        }).then(result => {
-          if (result.data?.updateProjectGitRepository.ok) {
-            notify('Updated Git repository', 'success');
-          } else {
-            notify('Failed to update Git repository', 'error');
-          }
-        }),
-    });
 
   if (integrationQuery.fetching) {
     return null;
@@ -131,165 +82,149 @@ function GitHubIntegration(props: {
   const githubIntegration = integrationQuery.data?.organization?.organization.gitHubIntegration;
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Card>
-        <CardHeader>
-          <CardTitle>Git Repository</CardTitle>
-          <CardDescription>
-            Associate your project with a Git repository to enable commit linking and to allow CI
-            integration.
-            <br />
-            <DocsLink
-              className="text-muted-foreground text-sm"
-              href="/management/projects#github-repository"
-            >
-              Learn more about GitHub integration
-            </DocsLink>
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!!githubIntegration && !props.isProjectNameInGitHubCheckEnabled ? (
-            <div className="flex flex-row justify-between items-center rounded-sm p-4 mb-4 gap-x-4 text-sm bg-gray-500/10 text-gray-500">
-              <div className="space-y-2">
-                <div>
-                  <div className="text-gray-300 font-bold">Use project's name in GitHub Check</div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Git Repository</CardTitle>
+        <CardDescription>
+          Associate your project with a Git repository to enable commit linking and to allow CI
+          integration.
+          <br />
+          <DocsLink
+            className="text-muted-foreground text-sm"
+            href="/management/projects#github-repository"
+          >
+            Learn more about GitHub integration
+          </DocsLink>
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {githubIntegration ? (
+          <>
+            {props.isProjectNameInGitHubCheckEnabled ? null : (
+              <div className="flex flex-row justify-between items-center rounded-sm p-4 mb-4 gap-x-4 text-sm bg-gray-500/10 text-gray-500">
+                <div className="space-y-2">
                   <div>
-                    Prevents GitHub Check name collisions when running{' '}
-                    {docksLink ? (
-                      <NextLink href={docksLink}>
-                        <span className="mx-1 text-orange-700 hover:underline hover:underline-offset-4">
-                          $ hive schema:check --github
-                        </span>
-                      </NextLink>
-                    ) : (
-                      <span className="mx-1 text-orange-700">$ hive schema:check --github</span>
-                    )}
-                    for more than one project.
-                  </div>
-                </div>
-                <div>
-                  <div className="mt-4 mb-2">Here's how it will look like in your CI pipeline:</div>
-                  <div className="flex items-center gap-x-2 pl-1">
-                    <CheckIcon className="w-4 h-4 text-emerald-500" />
-                    <div className="bg-white w-6 h-6 flex items-center justify-center rounded-sm">
-                      <HiveLogo className="w-[80%] h-[80%]" />
+                    <div className="text-gray-300 font-bold">
+                      Use project's name in GitHub Check
                     </div>
+                    <div>
+                      Prevents GitHub Check name collisions when running{' '}
+                      {docksLink ? (
+                        <NextLink href={docksLink}>
+                          <span className="mx-1 text-orange-700 hover:underline hover:underline-offset-4">
+                            $ hive schema:check --github
+                          </span>
+                        </NextLink>
+                      ) : (
+                        <span className="mx-1 text-orange-700">$ hive schema:check --github</span>
+                      )}
+                      for more than one project.
+                    </div>
+                  </div>
+                  <div>
+                    <div className="mt-4 mb-2">
+                      Here's how it will look like in your CI pipeline:
+                    </div>
+                    <div className="flex items-center gap-x-2 pl-1">
+                      <CheckIcon className="w-4 h-4 text-emerald-500" />
+                      <div className="bg-white w-6 h-6 flex items-center justify-center rounded-sm">
+                        <HiveLogo className="w-[80%] h-[80%]" />
+                      </div>
 
-                    <div className="font-semibold text-[#adbac7]">
-                      {props.organizationName} &gt; schema:check &gt; staging
+                      <div className="font-semibold text-[#adbac7]">
+                        {props.organizationName} &gt; schema:check &gt; staging
+                      </div>
+                      <div className="text-gray-500">— No changes</div>
                     </div>
-                    <div className="text-gray-500">— No changes</div>
                   </div>
-                </div>
-                <div>
-                  <ArrowBigDownDashIcon className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-x-2 pl-1">
-                    <CheckIcon className="w-4 h-4 text-emerald-500" />
-                    <div className="bg-white w-6 h-6 flex items-center justify-center rounded-sm">
-                      <HiveLogo className="w-[80%] h-[80%]" />
-                    </div>
+                  <div>
+                    <ArrowBigDownDashIcon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-x-2 pl-1">
+                      <CheckIcon className="w-4 h-4 text-emerald-500" />
+                      <div className="bg-white w-6 h-6 flex items-center justify-center rounded-sm">
+                        <HiveLogo className="w-[80%] h-[80%]" />
+                      </div>
 
-                    <div className="font-semibold text-[#adbac7]">
-                      {props.organizationName} &gt; schema:check &gt; {props.projectName} &gt;
-                      staging
+                      <div className="font-semibold text-[#adbac7]">
+                        {props.organizationName} &gt; schema:check &gt; {props.projectName} &gt;
+                        staging
+                      </div>
+                      <div className="text-gray-500">— No changes</div>
                     </div>
-                    <div className="text-gray-500">— No changes</div>
                   </div>
                 </div>
-              </div>
-              <div className="pr-6">
-                <Button
-                  disabled={ghCheckMutation.fetching}
-                  onClick={() => {
-                    void ghCheckMutate({
-                      input: {
-                        organization: router.organizationId,
-                        project: router.projectId,
-                      },
-                    }).then(
-                      result => {
-                        if (result.error) {
+                <div className="pr-6">
+                  <Button
+                    disabled={ghCheckMutation.fetching}
+                    onClick={() => {
+                      void ghCheckMutate({
+                        input: {
+                          organization: router.organizationId,
+                          project: router.projectId,
+                        },
+                      }).then(
+                        result => {
+                          if (result.error) {
+                            notify('Failed to enable', 'error');
+                          } else {
+                            notify('Migration completed', 'success');
+                          }
+                        },
+                        _ => {
                           notify('Failed to enable', 'error');
-                        } else {
-                          notify('Migration completed', 'success');
-                        }
-                      },
-                      _ => {
-                        notify('Failed to enable', 'error');
-                      },
-                    );
-                  }}
-                >
-                  I want to migrate
-                </Button>
-              </div>
-            </div>
-          ) : null}
-
-          {githubIntegration ? (
-            <>
-              <Select
-                name="gitRepository"
-                placeholder="None"
-                className="w-96"
-                options={githubIntegration.repositories.map(repo => ({
-                  name: repo.nameWithOwner,
-                  value: repo.nameWithOwner,
-                }))}
-                value={values.gitRepository ?? undefined}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                isInvalid={!!(touched.gitRepository && errors.gitRepository)}
-              />
-              {touched.gitRepository && (errors.gitRepository || mutation.error) && (
-                <div className="mt-2 text-red-500">
-                  {errors.gitRepository ??
-                    mutation.error?.graphQLErrors[0]?.message ??
-                    mutation.error?.message}
-                </div>
-              )}
-              {mutation.data?.updateProjectGitRepository.error && (
-                <div className="mt-2 text-red-500">
-                  {mutation.data.updateProjectGitRepository.error.message}
-                </div>
-              )}
-            </>
-          ) : (
-            <Tag className="!p-4 block">
-              <p>The organization is not connected to our GitHub Application.</p>
-              <p>
-                <Button asChild className="p-0 mr-1" variant="link">
-                  <NextLink
-                    href={{
-                      pathname: '/[organizationId]/view/settings',
-                      query: {
-                        organizationId: router.organizationId,
-                      },
+                        },
+                      );
                     }}
                   >
-                    Visit organization settings
-                  </NextLink>
-                </Button>
-                to configure it.
-              </p>
+                    I want to migrate
+                  </Button>
+                </div>
+              </div>
+            )}
+            <p className="text-gray-300">
+              This project can access and update check-runs of the following GitHub repositories.
+            </p>
+            <Tag className="!p-4">
+              The list of repositories can be adjusted in the organization settings.
+              <Link
+                variant="primary"
+                href={{
+                  pathname: '/[organizationId]/view/settings',
+                  query: {
+                    organizationId: router.organizationId,
+                  },
+                }}
+              >
+                Visit settings
+              </Link>
             </Tag>
-          )}
-        </CardContent>
-        {githubIntegration ? (
-          <CardFooter>
-            <Button
-              type="submit"
-              className="px-10"
-              disabled={isSubmitting || gitRepository === values.gitRepository}
+            <ul className="text-gray-300 mt-2">
+              {githubIntegration.repositories.map(repository => (
+                <li key={repository.nameWithOwner}>{repository.nameWithOwner}</li>
+              ))}
+            </ul>
+          </>
+        ) : (
+          <Tag className="!p-4 mt-2">
+            The organization is not connected to our GitHub Application.
+            <Link
+              variant="primary"
+              href={{
+                pathname: '/[organizationId]/view/settings',
+                query: {
+                  organizationId: router.organizationId,
+                },
+              }}
             >
-              Save
-            </Button>
-          </CardFooter>
-        ) : null}
-      </Card>
-    </form>
+              Visit settings
+            </Link>
+            to configure it.
+          </Tag>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -329,7 +264,6 @@ const ProjectSettingsPage_OrganizationFragment = graphql(`
 const ProjectSettingsPage_ProjectFragment = graphql(`
   fragment ProjectSettingsPage_ProjectFragment on Project {
     name
-    gitRepository
     type
     isProjectNameInGitHubCheckEnabled
     ...ModelMigrationSettings_ProjectFragment
@@ -483,7 +417,6 @@ function ProjectSettingsContent() {
 
               {query.data?.isGitHubIntegrationFeatureEnabled ? (
                 <GitHubIntegration
-                  gitRepository={project.gitRepository ?? null}
                   organizationName={organization.name}
                   projectName={project.name}
                   isProjectNameInGitHubCheckEnabled={project.isProjectNameInGitHubCheckEnabled}

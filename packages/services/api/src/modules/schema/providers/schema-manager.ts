@@ -330,6 +330,10 @@ export class SchemaManager {
       actionFn(): Promise<void>;
       changes: Array<Change>;
       previousSchemaVersion: string | null;
+      github: null | {
+        repository: string;
+        sha: string;
+      };
     } & TargetSelector) &
       (
         | {
@@ -740,13 +744,14 @@ export class SchemaManager {
         organization: args.organizationId,
         project: args.projectId,
       });
-      if (!project.gitRepository) {
+      const gitRepository = schemaCheck.githubRepository ?? project.gitRepository;
+      if (!gitRepository) {
         this.logger.debug(
-          'Skip updating GitHub schema check. Project has no git repository connected. (args=%o).',
+          'Skip updating GitHub schema check. Schema check has no git repository or project has no git repository connected. (args=%o).',
           args,
         );
       } else {
-        const [owner, repository] = project.gitRepository.split('/');
+        const [owner, repository] = gitRepository.split('/');
         const result = await this.githubIntegrationManager.updateCheckRunToSuccess({
           organizationId: args.organizationId,
           checkRun: {
@@ -866,6 +871,41 @@ export class SchemaManager {
       input.project.id,
     );
     return true;
+  }
+
+  async getGitHubMetadata(schemaVersion: SchemaVersion): Promise<null | {
+    repository: `${string}/${string}`;
+    commit: string;
+  }> {
+    if (schemaVersion.github) {
+      return {
+        repository: schemaVersion.github.repository as `${string}/${string}`,
+        commit: schemaVersion.github.sha,
+      };
+    }
+
+    const log = await this.getSchemaLog({
+      commit: schemaVersion.actionId,
+      organization: schemaVersion.organization,
+      project: schemaVersion.project,
+      target: schemaVersion.target,
+    });
+
+    if ('commit' in log && log.commit) {
+      const project = await this.storage.getProject({
+        organization: schemaVersion.organization,
+        project: schemaVersion.project,
+      });
+
+      if (project.gitRepository) {
+        return {
+          repository: project.gitRepository,
+          commit: log.commit,
+        };
+      }
+    }
+
+    return null;
   }
 }
 

@@ -206,6 +206,11 @@ export default class SchemaPublish extends Command {
         env: 'HIVE_AUTHOR',
       });
 
+      let gitHub: null | {
+        repository: string;
+        commit: string;
+      } = null;
+
       if (!commit || !author) {
         const git = await gitInfo(() => {
           this.warn(`No git information found. Couldn't resolve author and commit.`);
@@ -226,6 +231,18 @@ export default class SchemaPublish extends Command {
 
       if (!commit) {
         throw new Errors.CLIError(`Missing "commit"`);
+      }
+
+      if (usesGitHubApp) {
+        // eslint-disable-next-line no-process-env
+        const repository = process.env['GITHUB_REPOSITORY'] ?? null;
+        if (!repository) {
+          throw new Errors.CLIError(`Missing "GITHUB_REPOSITORY" environment variable.`);
+        }
+        gitHub = {
+          repository,
+          commit,
+        };
       }
 
       let sdl: string;
@@ -255,9 +272,9 @@ export default class SchemaPublish extends Command {
           force,
           experimental_acceptBreakingChanges: experimental_acceptBreakingChanges === true,
           metadata,
-          github: usesGitHubApp,
+          gitHub,
         },
-        usesGitHubApp,
+        usesGitHubApp: !!gitHub,
       });
 
       if (result.schemaPublish.__typename === 'SchemaPublishSuccess') {

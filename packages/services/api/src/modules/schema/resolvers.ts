@@ -116,7 +116,7 @@ export const resolvers: SchemaModule.Resolvers = {
         target,
       });
 
-      if ('changes' in result) {
+      if ('changes' in result && result.changes) {
         return {
           ...result,
           changes: result.changes.map(toGraphQLSchemaChange),
@@ -753,7 +753,7 @@ export const resolvers: SchemaModule.Resolvers = {
   SchemaVersion: {
     async log(version, _, { injector }) {
       const log = await injector.get(SchemaManager).getSchemaLog({
-        commit: version.commit,
+        commit: version.actionId,
         organization: version.organization,
         project: version.project,
         target: version.target,
@@ -1022,6 +1022,10 @@ export const resolvers: SchemaModule.Resolvers = {
       };
     },
     date: version => version.createdAt,
+    githubMetadata(version, _, { injector }) {
+      return injector.get(SchemaManager).getGitHubMetadata(version);
+    },
+    valid: version => version.isComposable,
   },
   SchemaCompareError: {
     __isTypeOf(source: unknown) {

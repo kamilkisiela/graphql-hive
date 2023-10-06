@@ -236,9 +236,11 @@ For more information please refer to the
 ### CLI and GitHub Integration
 
 If [GitHub Integration](/docs/management/organizations#github) is enabled for your organization, and
-a [GitHub repository is linked to the Hive project](/docs/management/projects#github-repository) is
-active, you may specify an additional `--github` flag to report the results back to GitHub as Check
-Suite (for `schema:check` and `schema:publish` commands):
+the
+[GitHub integration has access to the GitHub repository](/docs/management/projects#github-repository),
+you may specify an additional `--github` flag to report the results back to GitHub as Check Suite
+(for `schema:check` and `schema:publish` commands) when running the Hive CLI from within a GitHub
+action:
 
 ```bash
 hive schema:publish schema.graphql --github
