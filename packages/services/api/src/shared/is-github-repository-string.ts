@@ -9,5 +9,5 @@ export function isGitHubRepositoryString(repository: string): repository is `${s
 
 /** @source https://stackoverflow.com/a/59082561 */
 function isLegitGitHubName(str: string) {
-  return /^[\w-\.]+$/i.test(str);
+  return /^[\w-.]+$/i.test(str);
 }
