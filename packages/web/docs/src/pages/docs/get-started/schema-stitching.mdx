@@ -148,7 +148,7 @@ Run the following command in your terminal, to publish your `subschemas/users.gr
 registry (replace `YOUR_TOKEN_HERE` with the token you have just created):
 
 ```bash
-hive schema:publish --token YOUR_TOKEN_HERE \
+hive schema:publish --registry.accessToken YOUR_TOKEN_HERE \
   --service="users" --url="http://fake.com/users/graphql" --author "Me" --commit "First" subschemas/users.graphql
 ```
 
@@ -180,7 +180,7 @@ new schema you just published 🎉
 Now, let's publish the **Posts** service schema to Hive:
 
 ```bash
-hive schema:publish --token YOUR_TOKEN_HERE \
+hive schema:publish --registry.accessToken YOUR_TOKEN_HERE \
   --service="posts" --url="http://fake.com/posts/graphql" --author "Me" --commit "Second" subschemas/posts.graphql
 ```
 
@@ -234,7 +234,7 @@ Now, run the Hive CLI with the `schema:check` command and your modified `subsche
 file:
 
 ```bash
-hive schema:check --service="users" subschemas/users.graphql --token YOUR_TOKEN_HERE
+hive schema:check --service="users" subschemas/users.graphql --registry.accessToken YOUR_TOKEN_HERE
 ```
 
 You should see that Hive successfully detect the change you made, and exists with a `0` exit code,
@@ -275,7 +275,7 @@ Now, run the Hive CLI with the `schema:check` command again and the modified
 `subschemas/users.graphql` file:
 
 ```bash
-hive schema:check --service="users" subschemas/users.graphql --token YOUR_TOKEN_HERE
+hive schema:check --service="users" subschemas/users.graphql --registry.accessToken YOUR_TOKEN_HERE
 ```
 
 In that case, you'll notice that Hive CLI exists with a `1` exit code, meaning that the schema has
@@ -325,7 +325,7 @@ Run the Hive CLI with the `schema:check` command again and the modified `subsche
 file:
 
 ```bash
-hive schema:check --service="users" subschemas/users.graphql --token YOUR_TOKEN_HERE
+hive schema:check --service="users" subschemas/users.graphql --registry.accessToken YOUR_TOKEN_HERE
 ```
 
 And now you can see that the schema check process has failed, due to conflicts and inconsistencies
@@ -371,7 +371,7 @@ type Query {
 And publish it to Hive:
 
 ```bash
-hive schema:publish --token YOUR_TOKEN_HERE \
+hive schema:publish --registry.accessToken YOUR_TOKEN_HERE \
   --service="users" --url="http://fake.com/users/graphql" --author "Me" --commit "Third" subschemas/users.graphql
 ```
 
