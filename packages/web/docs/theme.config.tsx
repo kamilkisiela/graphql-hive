@@ -23,10 +23,15 @@ export default defineConfig({
       />
     ),
   },
+
   main({ children }) {
     const { resolvedTheme } = useTheme();
     const { route } = useRouter();
     const config = useConfig();
+
+    if (route === '/changelog') {
+      return <>{children}</>;
+    }
 
     if (route.startsWith('/changelog')) {
       children = (

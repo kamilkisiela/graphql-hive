@@ -86,12 +86,16 @@ export default withGuildDocs({
         changelogItems
           .filter(
             item =>
-              item.kind === 'MdxPage' && item.frontMatter.title && item.frontMatter.description,
+              item.kind === 'MdxPage' &&
+              item.frontMatter.title &&
+              item.frontMatter.description &&
+              item.frontMatter.date,
           )
           .map(item => ({
             route: item.route,
             title: item.frontMatter.title,
             description: item.frontMatter.description,
+            date: item.frontMatter.date,
           })),
         null,
         2,

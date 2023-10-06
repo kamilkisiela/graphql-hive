@@ -26,6 +26,11 @@
       "toc": true
     }
   },
+  "changelogLink": {
+    "title": "Changelog",
+    "type": "page",
+    "href": "/changelog"
+  },
   "changelog": {
     "type": "page",
     "title": "Changelog",
@@ -34,6 +39,7 @@
       "toc": true,
       "breadcrumb": false,
       "typesetting": "article"
-    }
+    },
+    "display": "hidden"
   }
 }
