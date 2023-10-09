@@ -1,9 +1,11 @@
 import { ChangeEventHandler, ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { MarkAsValid } from '@/components/target/history/MarkAsValid';
+import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { Accordion, GraphQLBlock, Input, MetaTitle, noSchema } from '@/components/v2';
@@ -314,9 +316,27 @@ function TargetSchemaPage() {
       organizations={organizationConnection ?? null}
       isCDNEnabled={isCDNEnabled ?? null}
     >
-      <div className="py-6">
-        <Title>Schema</Title>
-        <Subtitle>The latest published schema.</Subtitle>
+      <div className="py-6 flex flex-row items-center justify-between">
+        <div>
+          <Title>Schema</Title>
+          <Subtitle>The latest published schema.</Subtitle>
+        </div>
+        <div>
+          <Button variant="outline" asChild>
+            <Link
+              href={{
+                pathname: '/[organizationId]/[projectId]/[targetId]/explorer/unused',
+                query: {
+                  organizationId: router.organizationId,
+                  projectId: router.projectId,
+                  targetId: router.targetId,
+                },
+              }}
+            >
+              Show unused schema
+            </Link>
+          </Button>
+        </div>
       </div>
       <div>
         {query.fetching ? null : currentOrganization && currentProject && target ? (

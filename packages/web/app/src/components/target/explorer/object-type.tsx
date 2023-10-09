@@ -20,7 +20,7 @@ export const GraphQLObjectTypeComponent_TypeFragment = graphql(`
 
 export function GraphQLObjectTypeComponent(props: {
   type: FragmentType<typeof GraphQLObjectTypeComponent_TypeFragment>;
-  totalRequests: number;
+  totalRequests?: number;
   collapsed?: boolean;
   organizationCleanId: string;
   projectCleanId: string;

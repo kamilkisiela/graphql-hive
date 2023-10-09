@@ -27,7 +27,7 @@ export const GraphQLUnionTypeComponent_TypeFragment = graphql(`
 
 export function GraphQLUnionTypeComponent(props: {
   type: FragmentType<typeof GraphQLUnionTypeComponent_TypeFragment>;
-  totalRequests: number;
+  totalRequests?: number;
   organizationCleanId: string;
   projectCleanId: string;
   targetCleanId: string;
@@ -45,15 +45,17 @@ export function GraphQLUnionTypeComponent(props: {
     >
       <div className="flex flex-col">
         {ttype.members.map((member, i) => (
-          <GraphQLTypeCardListItem index={i}>
+          <GraphQLTypeCardListItem key={member.name} index={i}>
             <div>{member.name}</div>
-            <SchemaExplorerUsageStats
-              totalRequests={props.totalRequests}
-              usage={member.usage}
-              targetCleanId={props.targetCleanId}
-              projectCleanId={props.projectCleanId}
-              organizationCleanId={props.organizationCleanId}
-            />
+            {typeof props.totalRequests === 'number' ? (
+              <SchemaExplorerUsageStats
+                totalRequests={props.totalRequests}
+                usage={member.usage}
+                targetCleanId={props.targetCleanId}
+                projectCleanId={props.projectCleanId}
+                organizationCleanId={props.organizationCleanId}
+              />
+            ) : null}
             {member.supergraphMetadata ? (
               <SupergraphMetadataList supergraphMetadata={member.supergraphMetadata} />
             ) : null}

@@ -1,13 +1,14 @@
 import { ChangeEvent, ComponentType, ReactElement, useCallback, useState } from 'react';
+import { FilterIcon } from 'lucide-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
-import { Button, Checkbox, Drawer, Input, Spinner } from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import { Checkbox, Drawer, Input, Button as LegacyButton, Spinner } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { DateRangeInput } from '@/graphql';
 import { useFormattedNumber, useRouteSelector, useToggle } from '@/lib/hooks';
-import { ChevronUpIcon } from '@radix-ui/react-icons';
 
 const OperationsFilter_OperationStatsValuesConnectionFragment = graphql(`
   fragment OperationsFilter_OperationStatsValuesConnectionFragment on OperationStatsValuesConnection {
@@ -128,16 +129,16 @@ function OperationsFilter({
           }}
         />
         <div className="flex gap-2 items-center w-full">
-          <Button variant="link" onClick={selectAll}>
+          <LegacyButton variant="link" onClick={selectAll}>
             All
-          </Button>
-          <Button variant="link" onClick={selectNone}>
+          </LegacyButton>
+          <LegacyButton variant="link" onClick={selectNone}>
             None
-          </Button>
-          <Button className="ml-auto" onClick={selectAll}>
+          </LegacyButton>
+          <LegacyButton className="ml-auto" onClick={selectAll}>
             Reset
-          </Button>
-          <Button
+          </LegacyButton>
+          <LegacyButton
             variant="primary"
             disabled={selectedItems.length === 0}
             onClick={() => {
@@ -146,7 +147,7 @@ function OperationsFilter({
             }}
           >
             Save
-          </Button>
+          </LegacyButton>
         </div>
         <div className="pl-1 grow">
           <AutoSizer>
@@ -287,8 +288,9 @@ export function OperationsFilterTrigger({
 
   return (
     <>
-      <Button variant="secondary" className="gap-2 rounded-md" onClick={toggle}>
-        Operations ({selected?.length || 'all'})<ChevronUpIcon className="rotate-180" />
+      <Button variant="outline" className="bg-accent" onClick={toggle}>
+        <span>Operations ({selected?.length || 'all'})</span>
+        <FilterIcon className="ml-2 w-4 h-4" />
       </Button>
       <OperationsFilterContainer
         isOpen={isOpen}
@@ -450,16 +452,16 @@ function ClientsFilter({
           }}
         />
         <div className="flex gap-2 items-center w-full">
-          <Button variant="link" onClick={selectAll}>
+          <LegacyButton variant="link" onClick={selectAll}>
             All
-          </Button>
-          <Button variant="link" onClick={selectNone}>
+          </LegacyButton>
+          <LegacyButton variant="link" onClick={selectNone}>
             None
-          </Button>
-          <Button className="ml-auto" onClick={selectAll}>
+          </LegacyButton>
+          <LegacyButton className="ml-auto" onClick={selectAll}>
             Reset
-          </Button>
-          <Button
+          </LegacyButton>
+          <LegacyButton
             variant="primary"
             disabled={selectedItems.length === 0}
             onClick={() => {
@@ -468,7 +470,7 @@ function ClientsFilter({
             }}
           >
             Save
-          </Button>
+          </LegacyButton>
         </div>
         <div className="pl-1 grow">
           <AutoSizer>
@@ -570,8 +572,9 @@ export function ClientsFilterTrigger({
 
   return (
     <>
-      <Button variant="secondary" className="gap-2 rounded-md" onClick={toggle}>
-        Clients ({selected?.length || 'all'})<ChevronUpIcon className="rotate-180" />
+      <Button variant="outline" className="bg-accent" onClick={toggle}>
+        <span>Clients ({selected?.length || 'all'})</span>
+        <FilterIcon className="ml-2 w-4 h-4" />
       </Button>
       <ClientsFilterContainer
         isOpen={isOpen}

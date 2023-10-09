@@ -20,7 +20,7 @@ export const GraphQLInterfaceTypeComponent_TypeFragment = graphql(`
 
 export function GraphQLInterfaceTypeComponent(props: {
   type: FragmentType<typeof GraphQLInterfaceTypeComponent_TypeFragment>;
-  totalRequests: number;
+  totalRequests?: number;
   organizationCleanId: string;
   projectCleanId: string;
   targetCleanId: string;

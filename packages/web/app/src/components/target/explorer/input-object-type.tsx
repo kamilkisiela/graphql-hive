@@ -19,7 +19,7 @@ export const GraphQLInputObjectTypeComponent_TypeFragment = graphql(`
 
 export function GraphQLInputObjectTypeComponent(props: {
   type: FragmentType<typeof GraphQLInputObjectTypeComponent_TypeFragment>;
-  totalRequests: number;
+  totalRequests?: number;
   organizationCleanId: string;
   projectCleanId: string;
   targetCleanId: string;

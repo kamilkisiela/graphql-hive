@@ -36,6 +36,7 @@ export const urqlClient = createClient({
         GitHubIntegration: noKey,
         GitHubRepository: noKey,
         SchemaExplorer: noKey,
+        UnusedSchemaExplorer: noKey,
         OrganizationGetStarted: noKey,
         GraphQLObjectType: noKey,
         GraphQLInterfaceType: noKey,

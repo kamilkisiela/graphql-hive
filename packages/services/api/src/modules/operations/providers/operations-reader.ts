@@ -799,6 +799,35 @@ export class OperationsReader {
     return result.data.length ? result.data[0].body : null;
   }
 
+  @sentry('OperationsReader.getReportedSchemaCoordinates')
+  async getReportedSchemaCoordinates({
+    target,
+    period,
+  }: {
+    target: string;
+    period: DateRange;
+  }): Promise<Set<string>> {
+    const result = await this.clickHouse.query<{
+      coordinate: string;
+    }>({
+      query: sql`
+        SELECT 
+          coordinate
+        FROM coordinates_daily
+          ${this.createFilter({
+            target,
+            period,
+          })}
+        WHERE coordinate NOT ILIKE '%.__typename'
+        GROUP BY coordinate
+      `,
+      queryId: 'reported_schema_coordinates',
+      timeout: 10_000,
+    });
+
+    return new Set(result.data.map(row => row.coordinate));
+  }
+
   @sentry('OperationsReader.countUniqueClients')
   async countUniqueClients(
     {

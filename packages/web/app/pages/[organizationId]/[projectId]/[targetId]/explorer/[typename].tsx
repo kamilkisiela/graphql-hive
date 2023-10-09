@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
@@ -20,7 +21,7 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const TypeRenderFragment = graphql(`
+export const TypeRenderFragment = graphql(`
   fragment TypeRenderFragment on GraphQLNamedType {
     __typename
     ...GraphQLObjectTypeComponent_TypeFragment
@@ -32,9 +33,9 @@ const TypeRenderFragment = graphql(`
   }
 `);
 
-function TypeRenderer(props: {
+export function TypeRenderer(props: {
   type: FragmentType<typeof TypeRenderFragment>;
-  totalRequests: number;
+  totalRequests?: number;
   organizationCleanId: string;
   projectCleanId: string;
   targetCleanId: string;
@@ -175,23 +176,26 @@ function TypeExplorerPageContent({ typename }: { typename: string }) {
     },
   });
 
+  const currentOrganization = query.data?.organization?.organization;
+  const retentionInDays = currentOrganization?.rateLimit.retentionInDays;
+
+  useEffect(() => {
+    if (typeof retentionInDays === 'number' && dataRetentionInDays !== retentionInDays) {
+      setDataRetentionInDays(retentionInDays);
+    }
+  }, [setDataRetentionInDays, retentionInDays]);
+
   if (query.error) {
     return <QueryError error={query.error} />;
   }
 
   const me = query.data?.me;
-  const currentOrganization = query.data?.organization?.organization;
   const currentProject = query.data?.project;
   const currentTarget = query.data?.target;
   const organizationConnection = query.data?.organizations;
   const isCDNEnabled = query.data;
   const type = currentTarget?.latestSchemaVersion?.explorer.type;
   const latestSchemaVersion = currentTarget?.latestSchemaVersion;
-
-  const retentionInDays = currentOrganization?.rateLimit.retentionInDays;
-  if (typeof retentionInDays === 'number' && dataRetentionInDays !== retentionInDays) {
-    setDataRetentionInDays(retentionInDays);
-  }
 
   return (
     <TargetLayout

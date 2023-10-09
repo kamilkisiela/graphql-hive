@@ -1,11 +1,13 @@
 import React, { ReactElement, ReactNode, useMemo } from 'react';
+import NextLink from 'next/link';
 import { clsx } from 'clsx';
+import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip } from '@/components/v2';
 import { PulseIcon, UsersIcon } from '@/components/v2/icon';
-import { Link } from '@/components/v2/link';
 import { Markdown } from '@/components/v2/markdown';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { formatNumber, toDecimal, useRouteSelector } from '@/lib/hooks';
+import { cn } from '@/lib/utils';
 import { ChatBubbleIcon } from '@radix-ui/react-icons';
 import * as P from '@radix-ui/react-popover';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
@@ -79,7 +81,7 @@ export function SchemaExplorerUsageStats(props: {
           </div>
           <div
             title={`${toDecimal(percentage)}% of all requests`}
-            className="relative mt-1 w-full overflow-hidden rounded z-0 bg-orange-500/20"
+            className="relative mt-1 w-full overflow-hidden rounded z-0 bg-orange-500/20 min-w-[25px]"
             style={{ width: 50, height: 5 }}
           >
             <div className="h-full bg-orange-500 z-0" style={{ width: `${percentage}%` }} />
@@ -117,7 +119,7 @@ export function SchemaExplorerUsageStats(props: {
                           {usage.topOperations.map(op => (
                             <tr key={op.hash}>
                               <td className="text-left px-2 pl-0">
-                                <Link
+                                <NextLink
                                   className="text-orange-500 hover:underline hover:underline-offset-2 hover:text-orange-500"
                                   href={{
                                     pathname:
@@ -132,7 +134,7 @@ export function SchemaExplorerUsageStats(props: {
                                   }}
                                 >
                                   {op.hash.substring(0, 4)}_{op.name}
-                                </Link>
+                                </NextLink>
                               </td>
                               <td className="font-bold text-center px-2">
                                 {formatNumber(op.count)}
@@ -167,7 +169,7 @@ export function SchemaExplorerUsageStats(props: {
                   <ul>
                     {usage.usedByClients.map(clientName => (
                       <li key={clientName} className="font-bold">
-                        <Link
+                        <NextLink
                           className="text-orange-500 hover:underline hover:underline-offset-2 hover:text-orange-500"
                           href={{
                             pathname:
@@ -181,7 +183,7 @@ export function SchemaExplorerUsageStats(props: {
                           }}
                         >
                           {clientName}
-                        </Link>
+                        </NextLink>
                       </li>
                     ))}
                   </ul>
@@ -278,7 +280,9 @@ export function GraphQLTypeCard(props: {
         <div>
           <div className="flex flex-row items-center gap-2">
             <div className="font-normal text-gray-500">{props.kind}</div>
-            <div className="font-semibold">{props.name}</div>
+            <div className="font-semibold">
+              <GraphQLTypeAsLink type={props.name} />
+            </div>
             {props.description ? <Description description={props.description} /> : null}
           </div>
         </div>
@@ -326,9 +330,9 @@ function GraphQLArguments(props: {
 
   if (showAll) {
     return (
-      <span className="ml-1">
-        <span className="text-gray-400">(</span>
-        <div className="pl-4">
+      <span className="ml-1 text-gray-500">
+        <span>(</span>
+        <div className="pl-4 text-gray-500">
           {args.map(arg => {
             const coordinate = `${props.parentCoordinate}.${arg.name}`;
             return (
@@ -341,14 +345,14 @@ function GraphQLArguments(props: {
             );
           })}
         </div>
-        <span className="text-gray-400">)</span>
+        <span>)</span>
       </span>
     );
   }
 
   return (
-    <span className="ml-1">
-      <span className="text-gray-400">(</span>
+    <span className="ml-1 text-gray-500">
+      <span>(</span>
       <span className="space-x-2">
         {args.slice(0, 2).map(arg => {
           const coordinate = `${props.parentCoordinate}.${arg.name}`;
@@ -369,7 +373,7 @@ function GraphQLArguments(props: {
           </span>
         ) : null}
       </span>
-      <span className="text-gray-400">)</span>
+      <span>)</span>
     </span>
   );
 }
@@ -397,7 +401,7 @@ export function GraphQLTypeCardListItem(props: {
 export function GraphQLFields(props: {
   typeName: string;
   fields: Array<FragmentType<typeof GraphQLFields_FieldFragment>>;
-  totalRequests: number;
+  totalRequests?: number;
   collapsed?: boolean;
   targetCleanId: string;
   projectCleanId: string;
@@ -423,12 +427,14 @@ export function GraphQLFields(props: {
         return (
           <GraphQLTypeCardListItem key={field.name} index={i}>
             <div>
-              <LinkToCoordinatePage coordinate={coordinate}>{field.name}</LinkToCoordinatePage>
+              <LinkToCoordinatePage coordinate={coordinate} className="font-semibold">
+                {field.name}
+              </LinkToCoordinatePage>
               {field.args.length > 0 ? (
                 <GraphQLArguments parentCoordinate={coordinate} args={field.args} />
               ) : null}
               <span className="mr-1">:</span>
-              <GraphQLTypeAsLink type={field.type} />
+              <GraphQLTypeAsLink className="text-gray-400 font-semibold" type={field.type} />
             </div>
             <div className="flex flex-row items-center">
               {field.supergraphMetadata ? (
@@ -436,13 +442,15 @@ export function GraphQLFields(props: {
                   <SupergraphMetadataList supergraphMetadata={field.supergraphMetadata} />
                 </div>
               ) : null}
-              <SchemaExplorerUsageStats
-                totalRequests={totalRequests}
-                usage={field.usage}
-                targetCleanId={props.targetCleanId}
-                projectCleanId={props.projectCleanId}
-                organizationCleanId={props.organizationCleanId}
-              />
+              {typeof totalRequests === 'number' ? (
+                <SchemaExplorerUsageStats
+                  totalRequests={totalRequests}
+                  usage={field.usage}
+                  targetCleanId={props.targetCleanId}
+                  projectCleanId={props.projectCleanId}
+                  organizationCleanId={props.organizationCleanId}
+                />
+              ) : null}
             </div>
           </GraphQLTypeCardListItem>
         );
@@ -463,7 +471,7 @@ export function GraphQLFields(props: {
 export function GraphQLInputFields(props: {
   typeName: string;
   fields: FragmentType<typeof GraphQLInputFields_InputFieldFragment>[];
-  totalRequests: number;
+  totalRequests?: number;
   targetCleanId: string;
   projectCleanId: string;
   organizationCleanId: string;
@@ -475,18 +483,22 @@ export function GraphQLInputFields(props: {
         const coordinate = `${props.typeName}.${field.name}`;
         return (
           <GraphQLTypeCardListItem key={field.name} index={i}>
-            <div>
-              <LinkToCoordinatePage coordinate={coordinate}>{field.name}</LinkToCoordinatePage>
+            <div className="text-gray-400">
+              <LinkToCoordinatePage coordinate={coordinate} className="text-white font-semibold">
+                {field.name}
+              </LinkToCoordinatePage>
               <span className="mr-1">:</span>
-              <GraphQLTypeAsLink type={field.type} />
+              <GraphQLTypeAsLink className="font-semibold" type={field.type} />
             </div>
-            <SchemaExplorerUsageStats
-              totalRequests={props.totalRequests}
-              usage={field.usage}
-              targetCleanId={props.targetCleanId}
-              projectCleanId={props.projectCleanId}
-              organizationCleanId={props.organizationCleanId}
-            />
+            {typeof props.totalRequests === 'number' ? (
+              <SchemaExplorerUsageStats
+                totalRequests={props.totalRequests}
+                usage={field.usage}
+                targetCleanId={props.targetCleanId}
+                projectCleanId={props.projectCleanId}
+                organizationCleanId={props.organizationCleanId}
+              />
+            ) : null}
           </GraphQLTypeCardListItem>
         );
       })}
@@ -494,37 +506,71 @@ export function GraphQLInputFields(props: {
   );
 }
 
-function GraphQLTypeAsLink(props: { type: string }): ReactElement {
+function GraphQLTypeAsLink(props: { type: string; className?: string }): ReactElement {
   const router = useRouteSelector();
   const typename = props.type.replace(/[[\]!]+/g, '');
 
   return (
-    <Link
-      className="text-orange-500"
-      href={{
-        pathname: '/[organizationId]/[projectId]/[targetId]/explorer/[typename]',
-        query: {
-          organizationId: router.organizationId,
-          projectId: router.projectId,
-          targetId: router.targetId,
-          typename,
-        },
-      }}
-    >
-      {props.type}
-    </Link>
+    <Popover>
+      <PopoverTrigger className={cn('hover:underline-offset-4 hover:underline', props.className)}>
+        {props.type}
+      </PopoverTrigger>
+      <PopoverContent side="right">
+        <div className="flex flex-col gap-y-2">
+          <p>
+            <NextLink
+              className="hover:underline hover:underline-offset-2 font-normal text-sm"
+              href={{
+                pathname: '/[organizationId]/[projectId]/[targetId]/explorer/[typename]',
+                query: {
+                  organizationId: router.organizationId,
+                  projectId: router.projectId,
+                  targetId: router.targetId,
+                  typename,
+                  ...(router.query.period ? { period: router.query.period } : {}),
+                },
+              }}
+            >
+              Visit in <span className="font-bold">Explorer</span>
+            </NextLink>
+            <span className="text-gray-500 text-xs"> - displays a full type</span>
+          </p>
+          <p>
+            <NextLink
+              className="hover:underline hover:underline-offset-2 font-normal text-sm"
+              href={{
+                pathname:
+                  '/[organizationId]/[projectId]/[targetId]/insights/schema-coordinate/[typename]',
+                query: {
+                  organizationId: router.organizationId,
+                  projectId: router.projectId,
+                  targetId: router.targetId,
+                  typename,
+                  ...(router.query.period ? { period: router.query.period } : {}),
+                },
+              }}
+            >
+              Visit in <span className="font-bold">Insights</span>
+            </NextLink>
+            <span className="text-gray-500 text-xs"> - usage insights</span>
+          </p>
+        </div>
+        <PopoverArrow />
+      </PopoverContent>
+    </Popover>
   );
 }
 
 export function LinkToCoordinatePage(props: {
   coordinate: string;
   children: ReactNode;
+  className?: string;
 }): ReactElement {
   const router = useRouteSelector();
 
   return (
-    <Link
-      className="text-orange-500"
+    <NextLink
+      className={cn('hover:underline hover:underline-offset-2', props.className)}
       href={{
         pathname:
           '/[organizationId]/[projectId]/[targetId]/insights/schema-coordinate/[coordinate]',
@@ -533,10 +579,11 @@ export function LinkToCoordinatePage(props: {
           projectId: router.projectId,
           targetId: router.targetId,
           coordinate: props.coordinate,
+          ...(router.query.period ? { period: router.query.period } : {}),
         },
       }}
     >
       {props.children}
-    </Link>
+    </NextLink>
   );
 }

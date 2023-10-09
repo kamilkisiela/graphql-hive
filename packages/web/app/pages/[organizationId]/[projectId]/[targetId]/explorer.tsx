@@ -1,4 +1,5 @@
-import { ReactElement } from 'react';
+import { ReactElement, useEffect } from 'react';
+import Link from 'next/link';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
@@ -8,6 +9,7 @@ import {
   SchemaExplorerProvider,
   useSchemaExplorerContext,
 } from '@/components/target/explorer/provider';
+import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { MetaTitle } from '@/components/v2';
@@ -144,23 +146,26 @@ function ExplorerPageContent() {
     },
   });
 
+  const currentOrganization = query.data?.organization?.organization;
+  const retentionInDays = currentOrganization?.rateLimit.retentionInDays;
+
+  useEffect(() => {
+    if (typeof retentionInDays === 'number' && dataRetentionInDays !== retentionInDays) {
+      setDataRetentionInDays(retentionInDays);
+    }
+  }, [setDataRetentionInDays, retentionInDays]);
+
   if (query.error) {
     return <QueryError error={query.error} />;
   }
 
   const me = query.data?.me;
-  const currentOrganization = query.data?.organization?.organization;
   const currentProject = query.data?.project;
   const currentTarget = query.data?.target;
   const organizationConnection = query.data?.organizations;
   const isCDNEnabled = query.data;
   const explorer = currentTarget?.latestSchemaVersion?.explorer;
   const latestSchemaVersion = currentTarget?.latestSchemaVersion;
-
-  const retentionInDays = currentOrganization?.rateLimit.retentionInDays;
-  if (typeof retentionInDays === 'number' && dataRetentionInDays !== retentionInDays) {
-    setDataRetentionInDays(retentionInDays);
-  }
 
   return (
     <TargetLayout
@@ -182,7 +187,22 @@ function ExplorerPageContent() {
             project={{ cleanId: router.projectId }}
             target={{ cleanId: router.targetId }}
             period={period}
-          />
+          >
+            <Button variant="outline" asChild>
+              <Link
+                href={{
+                  pathname: '/[organizationId]/[projectId]/[targetId]/explorer/unused',
+                  query: {
+                    organizationId: router.organizationId,
+                    projectId: router.projectId,
+                    targetId: router.targetId,
+                  },
+                }}
+              >
+                Only unused
+              </Link>
+            </Button>
+          </SchemaExplorerFilter>
         ) : null}
       </div>
       {query.fetching ? null : latestSchemaVersion && explorer ? (
