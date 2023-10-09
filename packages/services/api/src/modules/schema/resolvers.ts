@@ -1661,7 +1661,7 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   UnusedSchemaExplorer: {
-    types({ sdl, supergraph }, _, { injector }) {
+    types({ sdl, supergraph }) {
       const types: Array<
         | GraphQLObjectTypeMapper
         | GraphQLInterfaceTypeMapper

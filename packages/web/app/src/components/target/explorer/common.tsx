@@ -330,7 +330,7 @@ function GraphQLArguments(props: {
 
   if (showAll) {
     return (
-      <span className="ml-1c text-gray-500">
+      <span className="ml-1 text-gray-500">
         <span>(</span>
         <div className="pl-4 text-gray-500">
           {args.map(arg => {
