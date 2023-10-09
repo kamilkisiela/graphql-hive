@@ -10,7 +10,14 @@ import { OperationsList } from '@/components/target/insights/List';
 import { OperationsStats } from '@/components/target/insights/Stats';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
-import { EmptyList, MetaTitle, RadixSelect } from '@/components/v2';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { EmptyList, MetaTitle } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
 import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
@@ -47,7 +54,7 @@ function OperationsView({
           <Title>Insights</Title>
           <Subtitle>Observe GraphQL requests and see how the API is consumed.</Subtitle>
         </div>
-        <div className="flex justify-end gap-x-2">
+        <div className="flex justify-end gap-x-4">
           <OperationsFilterTrigger
             period={dateRange}
             selected={selectedOperations}
@@ -58,14 +65,18 @@ function OperationsView({
             selected={selectedClients}
             onFilter={setSelectedClients}
           />
-          <RadixSelect
-            onChange={updateDateRangeByKey}
-            defaultValue={dateRangeKey}
-            options={availableDateRangeOptions.map(key => ({
-              value: key,
-              label: displayDateRangeLabel(key),
-            }))}
-          />
+          <Select onValueChange={updateDateRangeByKey} defaultValue={dateRangeKey}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder={displayDateRangeLabel(dateRangeKey)} />
+            </SelectTrigger>
+            <SelectContent>
+              {availableDateRangeOptions.map(key => (
+                <SelectItem key={key} value={key}>
+                  {displayDateRangeLabel(key)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
       <OperationsStats
