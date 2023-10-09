@@ -1661,7 +1661,7 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   UnusedSchemaExplorer: {
-    types({ sdl, usage, supergraph }, _, { injector }) {
+    types({ sdl, supergraph }, _, { injector }) {
       const types: Array<
         | GraphQLObjectTypeMapper
         | GraphQLInterfaceTypeMapper
@@ -1670,7 +1670,6 @@ export const resolvers: SchemaModule.Resolvers = {
         | GraphQLInputObjectTypeMapper
         | GraphQLScalarTypeMapper
       > = [];
-      const operationsManager = injector.get(OperationsManager);
       const unused = {
         isUsed: false,
       } as const;
