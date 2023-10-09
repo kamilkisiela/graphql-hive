@@ -278,7 +278,9 @@ export function GraphQLTypeCard(props: {
         <div>
           <div className="flex flex-row items-center gap-2">
             <div className="font-normal text-gray-500">{props.kind}</div>
-            <div className="font-semibold">{props.name}</div>
+            <div className="font-semibold">
+              <GraphQLTypeAsLink type={props.name} />
+            </div>
             {props.description ? <Description description={props.description} /> : null}
           </div>
         </div>
@@ -397,7 +399,7 @@ export function GraphQLTypeCardListItem(props: {
 export function GraphQLFields(props: {
   typeName: string;
   fields: Array<FragmentType<typeof GraphQLFields_FieldFragment>>;
-  totalRequests: number;
+  totalRequests?: number;
   collapsed?: boolean;
   targetCleanId: string;
   projectCleanId: string;
@@ -436,13 +438,15 @@ export function GraphQLFields(props: {
                   <SupergraphMetadataList supergraphMetadata={field.supergraphMetadata} />
                 </div>
               ) : null}
-              <SchemaExplorerUsageStats
-                totalRequests={totalRequests}
-                usage={field.usage}
-                targetCleanId={props.targetCleanId}
-                projectCleanId={props.projectCleanId}
-                organizationCleanId={props.organizationCleanId}
-              />
+              {typeof totalRequests === 'number' ? (
+                <SchemaExplorerUsageStats
+                  totalRequests={totalRequests}
+                  usage={field.usage}
+                  targetCleanId={props.targetCleanId}
+                  projectCleanId={props.projectCleanId}
+                  organizationCleanId={props.organizationCleanId}
+                />
+              ) : null}
             </div>
           </GraphQLTypeCardListItem>
         );
@@ -463,7 +467,7 @@ export function GraphQLFields(props: {
 export function GraphQLInputFields(props: {
   typeName: string;
   fields: FragmentType<typeof GraphQLInputFields_InputFieldFragment>[];
-  totalRequests: number;
+  totalRequests?: number;
   targetCleanId: string;
   projectCleanId: string;
   organizationCleanId: string;
@@ -480,13 +484,15 @@ export function GraphQLInputFields(props: {
               <span className="mr-1">:</span>
               <GraphQLTypeAsLink type={field.type} />
             </div>
-            <SchemaExplorerUsageStats
-              totalRequests={props.totalRequests}
-              usage={field.usage}
-              targetCleanId={props.targetCleanId}
-              projectCleanId={props.projectCleanId}
-              organizationCleanId={props.organizationCleanId}
-            />
+            {typeof props.totalRequests === 'number' ? (
+              <SchemaExplorerUsageStats
+                totalRequests={props.totalRequests}
+                usage={field.usage}
+                targetCleanId={props.targetCleanId}
+                projectCleanId={props.projectCleanId}
+                organizationCleanId={props.organizationCleanId}
+              />
+            ) : null}
           </GraphQLTypeCardListItem>
         );
       })}
@@ -508,6 +514,7 @@ function GraphQLTypeAsLink(props: { type: string }): ReactElement {
           projectId: router.projectId,
           targetId: router.targetId,
           typename,
+          ...(router.query.period ? { period: router.query.period } : {}),
         },
       }}
     >
@@ -533,6 +540,7 @@ export function LinkToCoordinatePage(props: {
           projectId: router.projectId,
           targetId: router.targetId,
           coordinate: props.coordinate,
+          ...(router.query.period ? { period: router.query.period } : {}),
         },
       }}
     >

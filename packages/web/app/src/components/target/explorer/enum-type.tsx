@@ -34,7 +34,7 @@ export const GraphQLEnumTypeComponent_TypeFragment = graphql(`
 
 export function GraphQLEnumTypeComponent(props: {
   type: FragmentType<typeof GraphQLEnumTypeComponent_TypeFragment>;
-  totalRequests: number;
+  totalRequests?: number;
   organizationCleanId: string;
   projectCleanId: string;
   targetCleanId: string;
@@ -52,7 +52,7 @@ export function GraphQLEnumTypeComponent(props: {
     >
       <div className="flex flex-col">
         {ttype.values.map((value, i) => (
-          <GraphQLTypeCardListItem index={i}>
+          <GraphQLTypeCardListItem key={value.name} index={i}>
             <div>
               <LinkToCoordinatePage coordinate={`${ttype.name}.${value.name}`}>
                 {value.name}
@@ -61,13 +61,15 @@ export function GraphQLEnumTypeComponent(props: {
             {value.supergraphMetadata ? (
               <SupergraphMetadataList supergraphMetadata={value.supergraphMetadata} />
             ) : null}
-            <SchemaExplorerUsageStats
-              totalRequests={props.totalRequests}
-              usage={value.usage}
-              targetCleanId={props.targetCleanId}
-              projectCleanId={props.projectCleanId}
-              organizationCleanId={props.organizationCleanId}
-            />
+            {typeof props.totalRequests === 'number' ? (
+              <SchemaExplorerUsageStats
+                totalRequests={props.totalRequests}
+                usage={value.usage}
+                targetCleanId={props.targetCleanId}
+                projectCleanId={props.projectCleanId}
+                organizationCleanId={props.organizationCleanId}
+              />
+            ) : null}
           </GraphQLTypeCardListItem>
         ))}
       </div>

@@ -17,7 +17,7 @@ export const GraphQLScalarTypeComponent_TypeFragment = graphql(`
 
 export function GraphQLScalarTypeComponent(props: {
   type: FragmentType<typeof GraphQLScalarTypeComponent_TypeFragment>;
-  totalRequests: number;
+  totalRequests?: number;
   organizationCleanId: string;
   projectCleanId: string;
   targetCleanId: string;
@@ -36,13 +36,15 @@ export function GraphQLScalarTypeComponent(props: {
         <div className="grow text-sm">
           {typeof ttype.description === 'string' ? <Markdown content={ttype.description} /> : null}
         </div>
-        <SchemaExplorerUsageStats
-          totalRequests={props.totalRequests}
-          usage={ttype.usage}
-          targetCleanId={props.targetCleanId}
-          projectCleanId={props.projectCleanId}
-          organizationCleanId={props.organizationCleanId}
-        />
+        {typeof props.totalRequests === 'number' ? (
+          <SchemaExplorerUsageStats
+            totalRequests={props.totalRequests}
+            usage={ttype.usage}
+            targetCleanId={props.targetCleanId}
+            projectCleanId={props.projectCleanId}
+            organizationCleanId={props.organizationCleanId}
+          />
+        ) : null}
       </div>
     </GraphQLTypeCard>
   );

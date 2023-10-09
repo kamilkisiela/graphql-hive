@@ -82,6 +82,15 @@ async function usage(
 ): Promise<SchemaCoordinateUsageTypeMapper> {
   const coordinate =
     'parent' in source ? `${source.parent.coordinate}.${source.entity.name}` : source.entity.name;
+
+  if ('isUsed' in source.usage) {
+    return {
+      total: 0,
+      isUsed: false,
+      usedByClients: null,
+    };
+  }
+
   const usage = (await source.usage)[coordinate];
 
   return usage && usage.total > 0
@@ -1662,22 +1671,9 @@ export const resolvers: SchemaModule.Resolvers = {
         | GraphQLScalarTypeMapper
       > = [];
       const operationsManager = injector.get(OperationsManager);
-
-      async function getStats(typename: string) {
-        const stats = await operationsManager.countCoordinatesOfTarget({
-          target: usage.target,
-          organization: usage.organization,
-          project: usage.project,
-          period: usage.period,
-        });
-
-        return withUsedByClients(stats, {
-          selector: usage,
-          period: usage.period,
-          operationsManager,
-          typename,
-        });
-      }
+      const unused = {
+        isUsed: false,
+      } as const;
 
       for (const typeDefinition of sdl.definitions) {
         if (typeDefinition.kind === Kind.OBJECT_TYPE_DEFINITION) {
@@ -1700,9 +1696,7 @@ export const resolvers: SchemaModule.Resolvers = {
                     })) ?? [],
                 })) ?? [],
             },
-            get usage() {
-              return getStats(typeDefinition.name.value);
-            },
+            usage: unused,
             supergraph: supergraph
               ? {
                   ownedByServiceNames:
@@ -1735,9 +1729,7 @@ export const resolvers: SchemaModule.Resolvers = {
                     })) ?? [],
                 })) ?? [],
             },
-            get usage() {
-              return getStats(typeDefinition.name.value);
-            },
+            usage: unused,
             supergraph: supergraph
               ? {
                   ownedByServiceNames:
@@ -1762,9 +1754,7 @@ export const resolvers: SchemaModule.Resolvers = {
                   description: value.description?.value,
                 })) ?? [],
             },
-            get usage() {
-              return getStats(typeDefinition.name.value);
-            },
+            usage: unused,
             supergraph: supergraph
               ? {
                   ownedByServiceNames:
@@ -1788,9 +1778,7 @@ export const resolvers: SchemaModule.Resolvers = {
                   name: t.name.value,
                 })) ?? [],
             },
-            get usage() {
-              return getStats(typeDefinition.name.value);
-            },
+            usage: unused,
             supergraph: supergraph
               ? {
                   ownedByServiceNames:
@@ -1815,9 +1803,7 @@ export const resolvers: SchemaModule.Resolvers = {
                   type: print(f.type),
                 })) ?? [],
             },
-            get usage() {
-              return getStats(typeDefinition.name.value);
-            },
+            usage: unused,
             supergraph: supergraph
               ? {
                   ownedByServiceNames:
@@ -1837,9 +1823,7 @@ export const resolvers: SchemaModule.Resolvers = {
               name: typeDefinition.name.value,
               description: typeDefinition.description?.value,
             },
-            get usage() {
-              return getStats(typeDefinition.name.value);
-            },
+            usage: unused,
             supergraph: supergraph
               ? {
                   ownedByServiceNames:

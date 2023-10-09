@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
@@ -34,7 +35,7 @@ export const TypeRenderFragment = graphql(`
 
 export function TypeRenderer(props: {
   type: FragmentType<typeof TypeRenderFragment>;
-  totalRequests: number;
+  totalRequests?: number;
   organizationCleanId: string;
   projectCleanId: string;
   targetCleanId: string;
@@ -189,9 +190,12 @@ function TypeExplorerPageContent({ typename }: { typename: string }) {
   const latestSchemaVersion = currentTarget?.latestSchemaVersion;
 
   const retentionInDays = currentOrganization?.rateLimit.retentionInDays;
-  if (typeof retentionInDays === 'number' && dataRetentionInDays !== retentionInDays) {
-    setDataRetentionInDays(retentionInDays);
-  }
+
+  useEffect(() => {
+    if (typeof retentionInDays === 'number' && dataRetentionInDays !== retentionInDays) {
+      setDataRetentionInDays(retentionInDays);
+    }
+  }, [setDataRetentionInDays, retentionInDays]);
 
   return (
     <TargetLayout

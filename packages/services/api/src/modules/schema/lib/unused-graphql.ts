@@ -5,8 +5,6 @@ export function stripUsedSchemaCoordinatesFromDocumentNode(
   doc: DocumentNode,
   usedCoordinates: Set<string>,
 ): DocumentNode {
-  // TODO: look unions members, enum values
-
   const typeNodeInfo = new TypeNodeInfo();
   return visit(
     doc,
@@ -96,6 +94,36 @@ export function stripUsedSchemaCoordinatesFromDocumentNode(
       InputObjectTypeExtension: {
         leave(node) {
           if (!node.fields?.length) {
+            return null;
+          }
+        },
+      },
+
+      EnumTypeDefinition: {
+        enter(node) {
+          if (usedCoordinates.has(node.name.value)) {
+            return null;
+          }
+        },
+      },
+      EnumTypeExtension: {
+        enter(node) {
+          if (usedCoordinates.has(node.name.value)) {
+            return null;
+          }
+        },
+      },
+
+      UnionTypeDefinition: {
+        enter(node) {
+          if (usedCoordinates.has(node.name.value)) {
+            return null;
+          }
+        },
+      },
+      UnionTypeExtension: {
+        enter(node) {
+          if (usedCoordinates.has(node.name.value)) {
             return null;
           }
         },

@@ -142,5 +142,8 @@ export function usePeriodSelector() {
     })),
     onChange: setPeriodOption,
     value: periodOption,
+    displayLabel(key: PeriodOption) {
+      return periodLabelMap[key];
+    },
   };
 }

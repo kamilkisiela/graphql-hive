@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import { ReactElement, useEffect } from 'react';
 import Link from 'next/link';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
@@ -160,9 +160,12 @@ function ExplorerPageContent() {
   const latestSchemaVersion = currentTarget?.latestSchemaVersion;
 
   const retentionInDays = currentOrganization?.rateLimit.retentionInDays;
-  if (typeof retentionInDays === 'number' && dataRetentionInDays !== retentionInDays) {
-    setDataRetentionInDays(retentionInDays);
-  }
+
+  useEffect(() => {
+    if (typeof retentionInDays === 'number' && dataRetentionInDays !== retentionInDays) {
+      setDataRetentionInDays(retentionInDays);
+    }
+  }, [setDataRetentionInDays, retentionInDays]);
 
   return (
     <TargetLayout
@@ -185,7 +188,7 @@ function ExplorerPageContent() {
             target={{ cleanId: router.targetId }}
             period={period}
           >
-            <Button variant="secondary" asChild>
+            <Button variant="outline" asChild>
               <Link
                 href={{
                   pathname: '/[organizationId]/[projectId]/[targetId]/explorer/unused',
@@ -196,7 +199,7 @@ function ExplorerPageContent() {
                   },
                 }}
               >
-                Show unused
+                Only unused
               </Link>
             </Button>
           </SchemaExplorerFilter>

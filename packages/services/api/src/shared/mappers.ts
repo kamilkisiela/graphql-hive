@@ -42,17 +42,21 @@ export type WithGraphQLParentInfo<T> = T & {
 };
 
 export type WithSchemaCoordinatesUsage<T> = T & {
-  usage: Promise<{
-    [coordinate: string]: {
-      total: number;
-      usedByClients: PromiseOrValue<Array<string> | null>;
-      period: DateRange;
-      organization: string;
-      project: string;
-      target: string;
-      typename: string;
-    };
-  }>;
+  usage:
+    | Promise<{
+        [coordinate: string]: {
+          total: number;
+          usedByClients: PromiseOrValue<Array<string> | null>;
+          period: DateRange;
+          organization: string;
+          project: string;
+          target: string;
+          typename: string;
+        };
+      }>
+    | {
+        isUsed: false;
+      };
 };
 
 export type SchemaExplorerMapper = {

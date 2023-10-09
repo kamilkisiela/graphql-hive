@@ -1,7 +1,8 @@
-import { memo, ReactElement } from 'react';
+import { memo, ReactElement, useEffect, useMemo, useState } from 'react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
+import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import {
@@ -11,18 +12,38 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MetaTitle } from '@/components/v2';
 import { EmptyList, noSchemaVersion } from '@/components/v2/empty-list';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
 import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
 import { withSessionProtection } from '@/lib/supertokens/guard';
-import { TypeRenderer } from './[typename]';
+import { cn } from '@/lib/utils';
+import { TypeRenderer, TypeRenderFragment } from './[typename]';
 
 const UnusedSchemaView_UnusedSchemaExplorerFragment = graphql(`
   fragment UnusedSchemaView_UnusedSchemaExplorerFragment on UnusedSchemaExplorer {
     types {
       __typename
+      ... on GraphQLObjectType {
+        name
+      }
+      ... on GraphQLInterfaceType {
+        name
+      }
+      ... on GraphQLUnionType {
+        name
+      }
+      ... on GraphQLEnumType {
+        name
+      }
+      ... on GraphQLInputObjectType {
+        name
+      }
+      ... on GraphQLScalarType {
+        name
+      }
       ...TypeRenderFragment
     }
   }
@@ -35,7 +56,32 @@ const UnusedSchemaView = memo(function _UnusedSchemaView(props: {
   projectCleanId: string;
   targetCleanId: string;
 }) {
+  const [selectedLetter, setSelectedLetter] = useState<string>();
   const { types } = useFragment(UnusedSchemaView_UnusedSchemaExplorerFragment, props.explorer);
+
+  const typesGroupedByFirstLetter = useMemo(() => {
+    const grouped = new Map<string, FragmentType<typeof TypeRenderFragment>[]>([]);
+
+    for (const type of types) {
+      const letter = type.name[0].toLocaleUpperCase();
+      const existingNameGroup = grouped.get(letter);
+
+      if (existingNameGroup) {
+        existingNameGroup.push(type);
+      } else {
+        grouped.set(letter, [type]);
+      }
+    }
+    return grouped;
+  }, [types]);
+
+  const letters = Array.from(typesGroupedByFirstLetter.keys()).sort();
+
+  useEffect(() => {
+    if (!selectedLetter) {
+      setSelectedLetter(letters[0]);
+    }
+  }, [selectedLetter, setSelectedLetter]);
 
   if (types.length === 0) {
     return (
@@ -46,20 +92,52 @@ const UnusedSchemaView = memo(function _UnusedSchemaView(props: {
     );
   }
 
+  if (!selectedLetter) {
+    return null;
+  }
+
   return (
-    <div className="flex flex-col gap-4">
-      {types.map((type, i) => {
-        return (
-          <TypeRenderer
-            key={i}
-            totalRequests={props.totalRequests}
-            type={type}
-            organizationCleanId={props.organizationCleanId}
-            projectCleanId={props.projectCleanId}
-            targetCleanId={props.targetCleanId}
-          />
-        );
-      })}
+    <div className="space-y-6">
+      <div>
+        <TooltipProvider>
+          {letters.map(letter => (
+            <Tooltip key={letter} delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => setSelectedLetter(letter)}
+                  variant={letter === selectedLetter ? 'secondary' : 'ghost'}
+                  size="sm"
+                  className={cn(
+                    'rounded-none px-2 py-1',
+                    letter === selectedLetter
+                      ? 'text-orange-500'
+                      : 'hover:text-orange-500 text-gray-500',
+                  )}
+                  key={letter}
+                >
+                  {letter}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {typesGroupedByFirstLetter.get(letter)?.length ?? 0} types
+              </TooltipContent>
+            </Tooltip>
+          ))}
+        </TooltipProvider>
+      </div>
+      <div className="flex flex-col gap-4">
+        {(typesGroupedByFirstLetter.get(selectedLetter) ?? []).map((type, i) => {
+          return (
+            <TypeRenderer
+              key={i}
+              type={type}
+              organizationCleanId={props.organizationCleanId}
+              projectCleanId={props.projectCleanId}
+              targetCleanId={props.targetCleanId}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 });

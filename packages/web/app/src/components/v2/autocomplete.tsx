@@ -1,6 +1,14 @@
 import { ComponentPropsWithRef, ReactElement } from 'react';
+import { ChevronDown } from 'lucide-react';
 import Highlighter from 'react-highlight-words';
-import Select, { components, createFilter, Props as SelectProps, StylesConfig } from 'react-select';
+import Select, {
+  components,
+  createFilter,
+  DropdownIndicatorProps,
+  IndicatorSeparatorProps,
+  Props as SelectProps,
+  StylesConfig,
+} from 'react-select';
 import { FixedSizeList } from 'react-window';
 import { SelectOption } from './radix-select';
 
@@ -24,33 +32,58 @@ function MenuList(props: any): ReactElement {
   );
 }
 
+const DropdownIndicator = (props: DropdownIndicatorProps) => {
+  return (
+    <components.DropdownIndicator {...props}>
+      <ChevronDown className="h-4 w-4 opacity-50" />
+    </components.DropdownIndicator>
+  );
+};
+
+const IndicatorSeparator = (_: IndicatorSeparatorProps<unknown, boolean>) => {
+  return null;
+};
+
 const styles: StylesConfig = {
   input: styles => ({
     ...styles,
     color: '#fff',
+    fontSize: '14px',
+  }),
+  placeholder: styles => ({
+    ...styles,
+    fontSize: '14px',
   }),
   control: styles => ({
     ...styles,
-    backgroundColor: '#24272e',
+    backgroundColor: '#121217',
     borderWidth: 1,
-    borderColor: '#5f6169',
+    borderColor: '#282524',
+    paddingTop: 1,
+    paddingBottom: 1,
+    borderRadius: 6,
+    ':hover': {
+      cursor: 'pointer',
+      borderColor: '#282524',
+    },
   }),
   singleValue: styles => ({
     ...styles,
     color: '#fff',
+    fontSize: '14px',
   }),
   option: styles => ({
     ...styles,
     color: '#fff',
     fontSize: '14px',
-    backgroundColor: '#24272e',
+    backgroundColor: '#121217',
     ':hover': {
-      backgroundColor: '#5f6169',
+      backgroundColor: '#282524',
     },
   }),
   menu: styles => ({
     ...styles,
-    backgroundColor: '#24272e',
+    backgroundColor: '#121217',
   }),
 };
 
@@ -94,7 +127,7 @@ export function Autocomplete(props: {
       isDisabled={props.disabled}
       isLoading={props.loading}
       placeholder={props.placeholder}
-      components={{ MenuList, Option }}
+      components={{ MenuList, Option, DropdownIndicator, IndicatorSeparator }}
       className={props.className}
     />
   );
