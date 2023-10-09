@@ -157,7 +157,9 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
         let providedOperationName: string | undefined = undefined;
         try {
           if (isAbortAction(result)) {
-            logger.info(result.reason);
+            if (result.logging) {
+              logger.info(result.reason);
+            }
             return;
           }
 
