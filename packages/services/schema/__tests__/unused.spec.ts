@@ -206,8 +206,6 @@ function stripUsedSchemaCoordinatesFromDocumentNode(
   doc: DocumentNode,
   usedCoordinates: Set<string>,
 ): DocumentNode {
-  // TODO: look for interfaces and unions members
-
   const typeNodeInfo = new TypeNodeInfo();
   return visit(
     doc,
