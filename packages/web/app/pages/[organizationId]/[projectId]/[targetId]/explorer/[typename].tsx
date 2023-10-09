@@ -176,19 +176,7 @@ function TypeExplorerPageContent({ typename }: { typename: string }) {
     },
   });
 
-  if (query.error) {
-    return <QueryError error={query.error} />;
-  }
-
-  const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
-  const currentProject = query.data?.project;
-  const currentTarget = query.data?.target;
-  const organizationConnection = query.data?.organizations;
-  const isCDNEnabled = query.data;
-  const type = currentTarget?.latestSchemaVersion?.explorer.type;
-  const latestSchemaVersion = currentTarget?.latestSchemaVersion;
-
   const retentionInDays = currentOrganization?.rateLimit.retentionInDays;
 
   useEffect(() => {
@@ -196,6 +184,18 @@ function TypeExplorerPageContent({ typename }: { typename: string }) {
       setDataRetentionInDays(retentionInDays);
     }
   }, [setDataRetentionInDays, retentionInDays]);
+
+  if (query.error) {
+    return <QueryError error={query.error} />;
+  }
+
+  const me = query.data?.me;
+  const currentProject = query.data?.project;
+  const currentTarget = query.data?.target;
+  const organizationConnection = query.data?.organizations;
+  const isCDNEnabled = query.data;
+  const type = currentTarget?.latestSchemaVersion?.explorer.type;
+  const latestSchemaVersion = currentTarget?.latestSchemaVersion;
 
   return (
     <TargetLayout
