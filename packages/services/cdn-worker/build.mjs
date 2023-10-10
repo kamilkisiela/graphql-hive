@@ -14,7 +14,7 @@ await Promise.all([
     entryPoints: [`${__dirname}/src/dev.ts`],
     bundle: true,
     platform: 'node',
-    target: 'node20',
+    target: 'node18',
     minify: false,
     outfile: nodeOutputPath,
     treeShaking: true,
