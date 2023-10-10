@@ -239,26 +239,6 @@ export class SchemaPublisher {
       }
     }
 
-    if (github != null) {
-      // Verify that the GitHub repository can be accessed by the user
-      const hasAccessToGitHubRepository =
-        await this.gitHubIntegrationManager.hasAccessToGitHubRepository({
-          selector: {
-            organization: organization.id,
-          },
-          repositoryName: github.repository,
-        });
-
-      if (!hasAccessToGitHubRepository) {
-        return {
-          __typename: 'GitHubSchemaCheckError' as const,
-          message:
-            `Missing permissions for updating check-runs on GitHub repository '${github.repository}'. ` +
-            'Please make sure that the GitHub App has access on the repository.',
-        };
-      }
-    }
-
     await this.schemaManager.completeGetStartedCheck({
       organization: project.orgId,
       step: 'checkingSchema',
@@ -875,22 +855,6 @@ export class SchemaPublisher {
         return {
           __typename: 'GitHubSchemaPublishError' as const,
           message: 'Invalid github repository name provided.',
-        } as const;
-      }
-      const hasAccessToGitHubRepository =
-        await this.gitHubIntegrationManager.hasAccessToGitHubRepository({
-          selector: {
-            organization: organization.id,
-          },
-          repositoryName: input.gitHub.repository,
-        });
-
-      if (!hasAccessToGitHubRepository) {
-        return {
-          __typename: 'GitHubSchemaPublishError',
-          message:
-            `Missing permissions for updating check-runs on GitHub repository '${input.gitHub.repository}'. ` +
-            'Please make sure that the GitHub App has access on the repository.',
         } as const;
       }
 
