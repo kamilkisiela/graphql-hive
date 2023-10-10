@@ -131,6 +131,7 @@ export default gql`
     externalSchemaComposition: ExternalSchemaComposition
     registryModel: RegistryModel!
     schemaVersionsCount(period: DateRangeInput): Int!
+    isNativeFederationEnabled: Boolean!
   }
 
   extend type Target {

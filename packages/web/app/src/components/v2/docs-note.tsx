@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
-import { Book } from 'lucide-react';
+import { Book, Newspaper } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { getDocsUrl } from '@/lib/docs-url';
+import { getDocsUrl, getProductUpdatesUrl } from '@/lib/docs-url';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import { Link } from './link';
@@ -36,12 +36,38 @@ export const DocsLink = ({
 }) => {
   const fullUrl = href.startsWith('http')
     ? href
-    : getDocsUrl(href) || 'https://docs.graphql-hive.com/';
+    : getDocsUrl(href) || 'https://the-guild.dev/graphql/hive/docs/';
 
   return (
     <Button variant="link" className={cn('p-0 text-orange-500', className)} asChild>
       <Link href={fullUrl} target="_blank" rel="noreferrer">
         {icon ?? <Book className="mr-2 w-4 h-4" />}
+        {children}
+        <ExternalLinkIcon className="inline pl-1" />
+      </Link>
+    </Button>
+  );
+};
+
+export const ProductUpdatesLink = ({
+  href,
+  children,
+  icon,
+  className,
+}: {
+  href: string;
+  icon?: ReactElement;
+  children?: React.ReactNode;
+  className?: string;
+}) => {
+  const fullUrl = href.startsWith('http')
+    ? href
+    : getProductUpdatesUrl(href) || 'https://the-guild.dev/graphql/hive/product-updates/';
+
+  return (
+    <Button variant="link" className={cn('p-0 text-blue-500', className)} asChild>
+      <Link href={fullUrl} target="_blank" rel="noreferrer">
+        {icon ?? <Newspaper className="mr-2 w-4 h-4" />}
         {children}
         <ExternalLinkIcon className="inline pl-1" />
       </Link>

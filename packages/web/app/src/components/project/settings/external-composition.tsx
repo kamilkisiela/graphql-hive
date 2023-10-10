@@ -13,7 +13,9 @@ import {
   Switch,
   Tooltip,
 } from '@/components/v2';
+import { ProductUpdatesLink } from '@/components/v2/docs-note';
 import { FragmentType, graphql, useFragment } from '@/gql';
+import { getProductUpdatesUrl } from '@/lib/docs-url';
 import { useNotifications } from '@/lib/hooks';
 import { CheckIcon, Cross2Icon, UpdateIcon } from '@radix-ui/react-icons';
 
@@ -270,6 +272,7 @@ const ExternalCompositionSettings_OrganizationFragment = graphql(`
 const ExternalCompositionSettings_ProjectFragment = graphql(`
   fragment ExternalCompositionSettings_ProjectFragment on Project {
     cleanId
+    isNativeFederationEnabled
     ...ExternalCompositionForm_ProjectFragment
   }
 `);
@@ -319,6 +322,10 @@ export const ExternalCompositionSettings = (props: {
     [disableComposition, setEnabled, notify],
   );
 
+  if (project.isNativeFederationEnabled) {
+    return null;
+  }
+
   const externalCompositionConfig = projectQuery.data?.project?.externalSchemaComposition;
   const initialEnabled = !!externalCompositionConfig;
   const isEnabled = typeof enabled === 'boolean' ? enabled : initialEnabled;
@@ -342,6 +349,11 @@ export const ExternalCompositionSettings = (props: {
           )}
         </div>
       </Heading>
+
+      <ProductUpdatesLink href="2023-10-10-native-federation-2">
+        We're rolling out native Apollo Federation support in Hive!
+      </ProductUpdatesLink>
+
       <DocsNote>
         External Schema Composition is required for using Apollo Federation 2 with Hive.
         <br />
@@ -349,6 +361,7 @@ export const ExternalCompositionSettings = (props: {
           Learn more about Apollo Federation 2 support
         </DocsLink>
       </DocsNote>
+
       {isFormVisible ? (
         <ExternalCompositionForm
           project={project}
