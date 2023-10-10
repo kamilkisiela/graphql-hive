@@ -39,7 +39,7 @@ export const ProductUpdates = ({
   return (
     <>
       <div className="pb-12">
-        <h1 className="!text-left !m-0">Changelog</h1>
+        <h1 className="!text-left !m-0">Product Updates</h1>
         <p>The most recent developments from GraphQL Hive.</p>
       </div>
       <ol className="relative border-l border-gray-200 dark:border-gray-700">
