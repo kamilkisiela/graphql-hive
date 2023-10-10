@@ -63,7 +63,7 @@ const Authors = ({ meta }: { meta: Meta }): ReactElement => {
   );
 };
 
-export const ChangelogBlogPostHeader = ({ meta }: { meta: Meta }): ReactElement => {
+export const ProductUpdateBlogPostHeader = ({ meta }: { meta: Meta }): ReactElement => {
   return (
     <>
       <h1>{meta.title}</h1>

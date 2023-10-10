@@ -1,7 +1,5 @@
 /* eslint-disable no-process-env */
 
-import fs from 'node:fs';
-import path from 'node:path';
 import { withGuildDocs } from '@theguild/components/next.config';
 
 export default withGuildDocs({
@@ -77,33 +75,20 @@ export default withGuildDocs({
     },
   ],
   swcMinify: true,
-  transformPageOpts(pageOpts) {
-    const changelogItems = pageOpts.pageMap.find(item => item.name === 'changelog').children;
+  webpack: (config, { webpack }) => {
+    config.externals['node:fs'] = 'commonjs node:fs';
+    config.externals['node:path'] = 'commonjs node:path';
 
-    fs.writeFileSync(
-      path.join('.', 'public', 'changelog.json'),
-      JSON.stringify(
-        changelogItems
-          .filter(
-            item =>
-              item.kind === 'MdxPage' &&
-              item.frontMatter.title &&
-              item.frontMatter.description &&
-              item.frontMatter.date,
-          )
-          .map(item => ({
-            route: item.route,
-            title: item.frontMatter.title,
-            description: item.frontMatter.description,
-            date: item.frontMatter.date,
-          }))
-          // order by date DESC
-          .sort((a, b) => new Date(b.date) - new Date(a.date)),
-        null,
-        2,
-      ),
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+    };
+    config.plugins.push(
+      new webpack.NormalModuleReplacementPlugin(/^node:/, resource => {
+        resource.request = resource.request.replace(/^node:/, '');
+      }),
     );
 
-    return pageOpts;
+    return config;
   },
 });
