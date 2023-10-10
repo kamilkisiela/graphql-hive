@@ -153,6 +153,7 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
       const isLegacyV3 = 'context' in context;
 
       let doc: DocumentNode;
+      let didResolveSource = false;
       const complete = hive.collectUsage();
       const args = {
         schema: context.schema,
@@ -166,7 +167,18 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
 
       if (isLegacyV0) {
         return {
+          didResolveSource() {
+            didResolveSource = true;
+          },
           willSendResponse(ctx: any) {
+            if (!didResolveSource) {
+              complete(args, {
+                action: 'abort',
+                reason: 'Did not resolve source',
+                logging: false,
+              });
+              return;
+            }
             doc = ctx.document;
             complete(args, ctx.response);
           },
@@ -175,12 +187,25 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
 
       if (isLegacyV3) {
         return Promise.resolve({
+          didResolveSource() {
+            didResolveSource = true;
+          },
           async willSendResponse(ctx) {
+            if (!didResolveSource) {
+              complete(args, {
+                action: 'abort',
+                reason: 'Did not resolve source',
+                logging: false,
+              });
+              return;
+            }
+
             if (!ctx.document) {
               const details = ctx.operationName ? `operationName: ${ctx.operationName}` : '';
               complete(args, {
                 action: 'abort',
                 reason: 'Document is not available' + (details ? ` (${details})` : ''),
+                logging: true,
               });
               return;
             }
@@ -193,12 +218,25 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
 
       // v4
       return Promise.resolve({
+        didResolveSource() {
+          didResolveSource = true;
+        },
         async willSendResponse(ctx) {
+          if (!didResolveSource) {
+            complete(args, {
+              action: 'abort',
+              reason: 'Did not resolve source',
+              logging: false,
+            });
+            return;
+          }
+
           if (!ctx.document) {
             const details = ctx.operationName ? `operationName: ${ctx.operationName}` : '';
             complete(args, {
               action: 'abort',
               reason: 'Document is not available' + (details ? ` (${details})` : ''),
+              logging: true,
             });
             return;
           }
@@ -208,6 +246,7 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
             complete(args, {
               action: 'abort',
               reason: '@defer and @stream is not supported by Hive',
+              logging: true,
             });
           } else {
             complete(args, ctx.response.body.singleResult);

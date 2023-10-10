@@ -19,6 +19,7 @@ export type AsyncIterableOrValue<T> = AsyncIterable<T> | T;
 export type AbortAction = {
   action: 'abort';
   reason: string;
+  logging: boolean;
 };
 
 export type CollectUsageCallback = (
