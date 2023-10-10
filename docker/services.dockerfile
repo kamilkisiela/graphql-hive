@@ -1,4 +1,4 @@
-FROM node:20.8.0-slim
+FROM node:18.17.1-slim
 
 RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 
