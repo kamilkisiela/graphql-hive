@@ -1,0 +1,23 @@
+---
+title: Github check-run includes now project's name
+description:
+  A subtle but important change for Github users. In newly created projects, a check-runs name
+  includes the name of the project.
+date: 2023-09-26
+authors: [kamil]
+---
+
+A subtle but important change for Github users. In newly created projects, a check-runs name
+includes the name of the project. We added it, to prevent naming collisions when checking against
+multiple projects with the same target name.
+
+**Before**
+![Github check-run without project name](/changelog/2023-09-26-github-check-run-includes-project-name/before.png)
+
+**After**
+![Github check-run with project name](/changelog/2023-09-26-github-check-run-includes-project-name/after.png)
+
+To avoid introducing a breaking change, Hive adds the project name only to newly created projects,
+the existing projects can be migrated with a click of a button.
+
+**Go to project's settings, find a section with Github and click "I want to migrate".**
