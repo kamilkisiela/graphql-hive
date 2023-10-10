@@ -26,9 +26,9 @@
       "toc": true
     }
   },
-  "changelog": {
+  "product-updates": {
     "type": "page",
-    "title": "Changelog",
+    "title": "Product Updates",
     "theme": {
       "sidebar": false,
       "toc": true,

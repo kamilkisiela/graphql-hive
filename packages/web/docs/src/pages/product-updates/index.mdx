@@ -3,12 +3,12 @@ title: Changelog
 ---
 
 import changelogs from '../../../public/changelog.json'
-import { Changelog } from '../../components/changelog'
+import { ProductUpdates } from '../../components/product-updates'
 
 export function getStaticProps() {
   return { props: { changelogs } }
 }
 
 export default function Foo({ changelogs }) {
-  return <Changelog changelogs={changelogs} />
+  return <ProductUpdates changelogs={changelogs} />
 }

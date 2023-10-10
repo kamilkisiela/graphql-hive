@@ -78,7 +78,7 @@ export default withGuildDocs({
   ],
   swcMinify: true,
   transformPageOpts(pageOpts) {
-    const changelogItems = pageOpts.pageMap.find(item => item.name === 'changelog').children;
+    const changelogItems = pageOpts.pageMap.find(item => item.name === 'product-updates').children;
 
     fs.writeFileSync(
       path.join('.', 'public', 'changelog.json'),

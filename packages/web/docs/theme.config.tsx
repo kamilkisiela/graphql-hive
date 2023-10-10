@@ -1,7 +1,7 @@
 /* eslint sort-keys: error */
 import { useRouter } from 'next/router';
 import { defineConfig, FooterExtended, Giscus, useConfig, useTheme } from '@theguild/components';
-import { ChangelogBlogPostHeader } from './src/components/changelog-blog-post-header';
+import { ProductUpdateBlogPostHeader } from './src/components/product-update-blog-post-header';
 
 export default defineConfig({
   docsRepositoryBase: 'https://github.com/kamilkisiela/graphql-hive/tree/main/packages/web/docs',
@@ -29,14 +29,14 @@ export default defineConfig({
     const { route } = useRouter();
     const config = useConfig();
 
-    if (route === '/changelog') {
+    if (route === '/product-updates') {
       return <>{children}</>;
     }
 
-    if (route.startsWith('/changelog')) {
+    if (route.startsWith('/product-updates')) {
       children = (
         <>
-          <ChangelogBlogPostHeader meta={config.frontMatter as any} />
+          <ProductUpdateBlogPostHeader meta={config.frontMatter as any} />
           {children}
         </>
       );
