@@ -1,7 +1,7 @@
 /* eslint-disable no-process-env */
 
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { withGuildDocs } from '@theguild/components/next.config';
 
 export default withGuildDocs({
@@ -96,7 +96,9 @@ export default withGuildDocs({
             title: item.frontMatter.title,
             description: item.frontMatter.description,
             date: item.frontMatter.date,
-          })),
+          }))
+          // order by date DESC
+          .sort((a, b) => new Date(b.date) - new Date(a.date)),
         null,
         2,
       ),
