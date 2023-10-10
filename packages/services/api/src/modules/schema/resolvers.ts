@@ -1266,6 +1266,9 @@ export const resolvers: SchemaModule.Resolvers = {
         period: period ? parseDateRangeInput(period) : null,
       });
     },
+    isNativeFederationEnabled(project) {
+      return project.nativeFederation === true;
+    },
   },
   SchemaCoordinateUsage: {
     async topOperations(source, { limit }, { injector }) {
