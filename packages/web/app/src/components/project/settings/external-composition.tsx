@@ -15,7 +15,6 @@ import {
 } from '@/components/v2';
 import { ProductUpdatesLink } from '@/components/v2/docs-note';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { getProductUpdatesUrl } from '@/lib/docs-url';
 import { useNotifications } from '@/lib/hooks';
 import { CheckIcon, Cross2Icon, UpdateIcon } from '@radix-ui/react-icons';
 
