@@ -898,7 +898,7 @@ export class SchemaPublisher {
         repository: input.gitHub.repository,
         sha: input.gitHub.commit,
       };
-    } else if (input.github != null) {
+    } else if (input.github === true) {
       if (!project.gitRepository) {
         return {
           __typename: 'GitHubSchemaPublishError',
