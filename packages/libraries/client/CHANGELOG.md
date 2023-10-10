@@ -1,5 +1,28 @@
 # @graphql-hive/client
 
+## 0.24.3
+
+### Patch Changes
+
+- [#3017](https://github.com/kamilkisiela/graphql-hive/pull/3017)
+  [`6023be2`](https://github.com/kamilkisiela/graphql-hive/commit/6023be2a0bcd18c59d85c819ad6604b89484a6fc)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Do not collect usage when Apollo Server
+  did not resolve source
+
+- [#3007](https://github.com/kamilkisiela/graphql-hive/pull/3007)
+  [`024f68ad`](https://github.com/kamilkisiela/graphql-hive/commit/024f68ad9dbeb10eaa5c17ad1f62f8c725f1d6d7)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Finish measuring duration on error
+
+- [#3007](https://github.com/kamilkisiela/graphql-hive/pull/3007)
+  [`024f68ad`](https://github.com/kamilkisiela/graphql-hive/commit/024f68ad9dbeb10eaa5c17ad1f62f8c725f1d6d7)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Include operation's name in error
+  message
+
+- [#3007](https://github.com/kamilkisiela/graphql-hive/pull/3007)
+  [`024f68ad`](https://github.com/kamilkisiela/graphql-hive/commit/024f68ad9dbeb10eaa5c17ad1f62f8c725f1d6d7)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Detect unavailable definition and throw
+  errors with paths pointing to relevant ASTNodes
+
 ## 0.24.2
 
 ### Patch Changes
