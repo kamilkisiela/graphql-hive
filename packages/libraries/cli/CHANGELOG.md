@@ -1,5 +1,17 @@
 # @graphql-hive/cli
 
+## 0.30.0
+
+### Minor Changes
+
+- [#2701](https://github.com/kamilkisiela/graphql-hive/pull/2701)
+  [`fdf71a1c`](https://github.com/kamilkisiela/graphql-hive/commit/fdf71a1c8cd100434960fb044264465db4704efd)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Support forwarding GitHub repository information
+  for schema checks and schema publishes when using the `--github` flag.
+
+  Please upgrade if you want to correctly forward the information for (federated) subgraphs to the
+  Hive registry.
+
 ## 0.29.0
 
 ### Minor Changes
