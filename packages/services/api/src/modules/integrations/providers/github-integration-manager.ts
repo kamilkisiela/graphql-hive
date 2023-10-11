@@ -87,15 +87,40 @@ export class GitHubIntegrationManager {
       organization: selector.organization,
     });
 
-    return typeof installationId === 'string';
+    return installationId !== null;
   }
 
-  async getInstallationId(selector: OrganizationSelector): Promise<string | null | undefined> {
+  async getInstallationId(selector: OrganizationSelector): Promise<number | null> {
     this.logger.debug('Fetching GitHub integration token (organization=%s)', selector.organization);
 
-    return this.storage.getGitHubIntegrationInstallationId({
+    const rawInstallationId = await this.storage.getGitHubIntegrationInstallationId({
       organization: selector.organization,
     });
+
+    if (!rawInstallationId) {
+      this.logger.debug('No installation found. (organization=%s)', selector.organization);
+
+      return null;
+    }
+
+    this.logger.debug(
+      'GitHub installation found. (organization=%s, installationId=%s)',
+      selector.organization,
+      rawInstallationId,
+    );
+
+    const installationId = parseInt(rawInstallationId, 10);
+
+    if (Number.isNaN(installationId)) {
+      this.logger.error(
+        "GitHub installation ID can't be parsed. (organization=%s, installationId=%s)",
+        selector.organization,
+        rawInstallationId,
+      );
+      throw new Error("GitHub installation ID can't be parsed.");
+    }
+
+    return installationId;
   }
 
   /**
@@ -118,7 +143,7 @@ export class GitHubIntegrationManager {
       throw new Error('GitHub Integration not found. Please provide GITHUB_APP_CONFIG.');
     }
 
-    const octokit = await this.app.getInstallationOctokit(parseInt(installationId, 10));
+    const octokit = await this.app.getInstallationOctokit(installationId);
 
     return octokit
       .request('GET /installation/repositories')
@@ -143,13 +168,47 @@ export class GitHubIntegrationManager {
     selector: OrganizationSelector;
     repositoryName: `${string}/${string}`;
   }): Promise<boolean> {
-    const repositories = await this.getRepositories(props.selector);
+    this.logger.debug('Checking GitHub repository access. (repository=%s)', props.repositoryName);
 
-    if (!repositories) {
+    if (!this.app) {
+      throw new Error('GitHub Integration not found. Please provide GITHUB_APP_CONFIG.');
+    }
+
+    const installationId = await this.getInstallationId(props.selector);
+
+    if (installationId === null) {
+      this.logger.debug(
+        'GitHub repository access check failed due to missing installation. (repository=%s)',
+        props.repositoryName,
+      );
+
       return false;
     }
 
-    return repositories.some(repo => repo.nameWithOwner === props.repositoryName);
+    const octokit = await this.app.getInstallationOctokit(installationId);
+
+    const hasAccess = await octokit
+      .request('GET /repos/{owner}/{repo}', {
+        owner: props.repositoryName.split('/')[0],
+        repo: props.repositoryName.split('/')[1],
+      })
+      .then(() => {
+        this.logger.debug(
+          'GitHub repository access check succeeded. (repository=%s)',
+          props.repositoryName,
+        );
+        return true;
+      })
+      .catch(error => {
+        this.logger.debug(
+          'GitHub repository access check failed. (repository=%s)',
+          props.repositoryName,
+        );
+        this.logger.error(error);
+        return false;
+      });
+
+    return hasAccess;
   }
 
   async getOrganization(selector: { installation: string }) {
@@ -205,7 +264,7 @@ export class GitHubIntegrationManager {
       throw new Error('GitHub Integration not found. Please provide GITHUB_APP_CONFIG.');
     }
 
-    const octokit = await this.app.getInstallationOctokit(parseInt(installationId, 10));
+    const octokit = await this.app.getInstallationOctokit(installationId);
 
     try {
       const result = await octokit.request('POST /repos/{owner}/{repo}/check-runs', {
@@ -275,7 +334,7 @@ export class GitHubIntegrationManager {
       return;
     }
 
-    const octokit = await this.app.getInstallationOctokit(parseInt(installationId, 10));
+    const octokit = await this.app.getInstallationOctokit(installationId);
 
     try {
       const result = await octokit.request(
