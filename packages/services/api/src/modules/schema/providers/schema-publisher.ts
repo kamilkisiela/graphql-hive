@@ -16,7 +16,10 @@ import { AlertsManager } from '../../alerts/providers/alerts-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 import { CdnProvider } from '../../cdn/providers/cdn.provider';
-import { GitHubIntegrationManager } from '../../integrations/providers/github-integration-manager';
+import {
+  GitHubIntegrationManager,
+  type GitHubCheckRun,
+} from '../../integrations/providers/github-integration-manager';
 import { OrganizationManager } from '../../organization/providers/organization-manager';
 import { ProjectManager } from '../../project/providers/project-manager';
 import { RateLimitProvider } from '../../rate-limit/providers/rate-limit.provider';
@@ -263,7 +266,7 @@ export class SchemaPublisher {
       }
 
       if (github != null) {
-        githubCheckRun = await this.createGithubCheckRunStartForSchemaCheck({
+        const result = await this.createGithubCheckRunStartForSchemaCheck({
           organization,
           project,
           target,
@@ -275,14 +278,14 @@ export class SchemaPublisher {
           },
         });
 
-        if (githubCheckRun === null) {
+        if (result.success === false) {
           return {
             __typename: 'GitHubSchemaCheckError' as const,
-            message:
-              `Missing permissions for updating check-runs on GitHub repository '${github.repository}'. ` +
-              'Please make sure that the GitHub App has access on the repository.',
+            message: result.error,
           };
         }
+
+        githubCheckRun = result.data;
       }
     }
 
@@ -903,7 +906,7 @@ export class SchemaPublisher {
     let githubCheckRun: GitHubCheckRun | null = null;
 
     if (github) {
-      githubCheckRun = await this.createGithubCheckRunForSchemaPublish({
+      const result = await this.createGithubCheckRunForSchemaPublish({
         organizationId: organization.id,
         github: {
           owner: github.repository.split('/')[0],
@@ -912,14 +915,14 @@ export class SchemaPublisher {
         },
       });
 
-      if (githubCheckRun === null) {
+      if (result.success === false) {
         return {
           __typename: 'GitHubSchemaPublishError',
-          message:
-            `Missing permissions for updating check-runs on GitHub repository '${github.repository}'. ` +
-            'Please make sure that the GitHub App has access on the repository.',
+          message: result.error,
         } as const;
       }
+
+      githubCheckRun = result.data;
     }
 
     await this.schemaManager.completeGetStartedCheck({
@@ -1256,31 +1259,24 @@ export class SchemaPublisher {
       repository: string;
       sha: string;
     };
-  }): Promise<GitHubCheckRun | null> {
-    try {
-      return await this.gitHubIntegrationManager.createCheckRun({
-        name: buildGitHubActionCheckName({
-          projectName: args.project.name,
-          targetName: args.target.name,
-          serviceName: args.serviceName,
-          includeProjectName: args.project.useProjectNameInGithubCheck,
-        }),
-        sha: args.github.sha,
-        organization: args.project.orgId,
-        repositoryOwner: args.github.owner,
-        repositoryName: args.github.repository,
-        output: {
-          title: 'Started schema check',
-          summary: 'The schema check is on progress. Please wait until the result is reported.',
-        },
-        detailsUrl: null,
-      });
-    } catch (err) {
-      if (err instanceof HiveError) {
-        throw err;
-      }
-      return null;
-    }
+  }) {
+    return await this.gitHubIntegrationManager.createCheckRun({
+      name: buildGitHubActionCheckName({
+        projectName: args.project.name,
+        targetName: args.target.name,
+        serviceName: args.serviceName,
+        includeProjectName: args.project.useProjectNameInGithubCheck,
+      }),
+      sha: args.github.sha,
+      organization: args.project.orgId,
+      repositoryOwner: args.github.owner,
+      repositoryName: args.github.repository,
+      output: {
+        title: 'Started schema check',
+        summary: 'The schema check is on progress. Please wait until the result is reported.',
+      },
+      detailsUrl: null,
+    });
   }
 
   private async updateGithubCheckRunForSchemaCheck({
@@ -1546,25 +1542,18 @@ export class SchemaPublisher {
       sha: string;
     };
   }) {
-    try {
-      return await this.gitHubIntegrationManager.createCheckRun({
-        name: 'GraphQL Hive - schema:publish',
-        sha: args.github.sha,
-        organization: args.organizationId,
-        repositoryOwner: args.github.owner,
-        repositoryName: args.github.repository,
-        output: {
-          title: 'Started schema check',
-          summary: 'The schema check is on progress. Please wait until the result is reported.',
-        },
-        detailsUrl: null,
-      });
-    } catch (err) {
-      if (err instanceof HiveError) {
-        throw err;
-      }
-      return null;
-    }
+    return await this.gitHubIntegrationManager.createCheckRun({
+      name: 'GraphQL Hive - schema:publish',
+      sha: args.github.sha,
+      organization: args.organizationId,
+      repositoryOwner: args.github.owner,
+      repositoryName: args.github.repository,
+      output: {
+        title: 'Started schema check',
+        summary: 'The schema check is on progress. Please wait until the result is reported.',
+      },
+      detailsUrl: null,
+    });
   }
 
   private async updateGithubCheckRunForSchemaPublish({
@@ -1733,16 +1722,3 @@ function tryPrettifySDL(sdl: string): string {
 }
 
 const millisecondsPerDay = 60 * 60 * 24 * 1000;
-
-type GitHubCheckRun = {
-  /** ID of the GitHub check-run */
-  id: number;
-  /** Owner of the GitHub repository the GitHub check-run is on. */
-  owner: string;
-  /** GitHub repository the GitHub check-run is on. */
-  repository: string;
-  /** Commit SHA, with which the GitHub check-run is connected. */
-  commit: string;
-  /** URL for viewing the check-run on GitHub. */
-  url: string;
-};

@@ -200,7 +200,16 @@ export class GitHubIntegrationManager {
         summary: string;
       };
     },
-  ) {
+  ): Promise<
+    | {
+        success: true;
+        data: GitHubCheckRun;
+      }
+    | {
+        success: false;
+        error: string;
+      }
+  > {
     this.logger.debug(
       'Creating check-run (owner=%s, name=%s, sha=%s)',
       input.repositoryOwner,
@@ -230,11 +239,14 @@ export class GitHubIntegrationManager {
       this.logger.debug('Check-run created (link=%s)', result.data.url);
 
       return {
-        id: result.data.id,
-        url: result.data.url,
-        repository: input.repositoryName,
-        owner: input.repositoryOwner,
-        commit: input.sha,
+        success: true,
+        data: {
+          id: result.data.id,
+          url: result.data.url,
+          repository: input.repositoryName,
+          owner: input.repositoryOwner,
+          commit: input.sha,
+        },
       };
     } catch (error) {
       this.logger.error('Failed to create check-run', error);
@@ -247,10 +259,18 @@ export class GitHubIntegrationManager {
         );
 
         if (error.message.includes('No commit found for SHA:')) {
-          throw new HiveError(
-            `Commit ${input.sha} not found in repository ${input.repositoryOwner}/${input.repositoryName}`,
-          );
+          return {
+            success: false,
+            error: `Commit ${input.sha} not found in repository '${input.repositoryOwner}/${input.repositoryName}'.`,
+          };
         }
+
+        return {
+          success: false,
+          error:
+            `Missing permissions for updating check-runs on GitHub repository '${input.repositoryOwner}/${input.repositoryName}'. ` +
+            'Please make sure that the GitHub App has access on the repository.',
+        };
       }
 
       throw error;
@@ -393,3 +413,16 @@ export class GitHubIntegrationManager {
 function isOctokitRequestError(error: unknown): error is RequestError {
   return error instanceof RequestError;
 }
+
+export type GitHubCheckRun = {
+  /** ID of the GitHub check-run */
+  id: number;
+  /** Owner of the GitHub repository the GitHub check-run is on. */
+  owner: string;
+  /** GitHub repository the GitHub check-run is on. */
+  repository: string;
+  /** Commit SHA, with which the GitHub check-run is connected. */
+  commit: string;
+  /** URL for viewing the check-run on GitHub. */
+  url: string;
+};
