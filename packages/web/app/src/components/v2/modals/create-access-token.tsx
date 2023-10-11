@@ -1,26 +1,12 @@
-import { PropsWithoutRef, ReactElement, useMemo, useState } from 'react';
-import clsx from 'clsx';
+import { ReactElement, useState } from 'react';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-import {
-  PermissionScopeItem,
-  PermissionsSpace,
-  usePermissionsManager,
-} from '@/components/organization/Permissions';
-import {
-  Accordion,
-  Button,
-  CopyValue,
-  Heading,
-  Input,
-  Modal,
-  RadixSelect,
-  Tag,
-} from '@/components/v2';
+import { PermissionScopeItem, usePermissionsManager } from '@/components/organization/Permissions';
+import { Accordion, Button, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@/graphql';
-import { RegistryAccessScope, scopes } from '@/lib/access/common';
+import { TargetAccessScope } from '@/graphql';
+import { RegistryAccessScope } from '@/lib/access/common';
 import { useRouteSelector } from '@/lib/hooks';
 
 export const CreateAccessToken_CreateTokenMutation = graphql(`
@@ -99,116 +85,6 @@ const CreateAccessTokenModalContent_OrganizationFragment = graphql(`
     }
   }
 `);
-
-type TokenPreset = {
-  name: string;
-  description: string | ReactElement;
-  permissions: {
-    target: Set<TargetAccessScope>;
-    project: Set<ProjectAccessScope>;
-    organization: Set<OrganizationAccessScope>;
-  };
-};
-
-const TOKEN_SIMPLE_PRESETS: TokenPreset[] = [
-  {
-    name: 'Schema Check & Push',
-    description:
-      'This set of permissions allows the token to check new schemas, push schemas, and report GraphQL operations usage.',
-    permissions: {
-      target: new Set([
-        TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ]),
-      project: new Set(),
-      organization: new Set(),
-    },
-  },
-  {
-    name: 'Schema Check Only',
-    description:
-      'This set of permissions allows the token to check new schemas. You can use this kind of token as part if your continuous integration pipeline.',
-    permissions: {
-      target: new Set([
-        TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryRead,
-      ]),
-      project: new Set(),
-      organization: new Set(),
-    },
-  },
-  {
-    name: 'GraphQL Operations Reporting',
-    description:
-      'This set of permissions allows the token to check new schemas, push schemas, and report GraphQL operations usage.',
-    permissions: {
-      target: new Set([
-        TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ]),
-      project: new Set(),
-      organization: new Set(),
-    },
-  },
-  {
-    name: 'Full Access',
-    description: 'A token with all permissions. Use with caution.',
-    permissions: {
-      target: new Set([
-        TargetAccessScope.Delete,
-        TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-        TargetAccessScope.Settings,
-        TargetAccessScope.TokensRead,
-        TargetAccessScope.TokensWrite,
-      ]),
-      project: new Set([
-        ProjectAccessScope.OperationsStoreWrite,
-        ProjectAccessScope.OperationsStoreRead,
-        ProjectAccessScope.Settings,
-        ProjectAccessScope.Alerts,
-        ProjectAccessScope.Delete,
-        ProjectAccessScope.Read,
-      ]),
-      organization: new Set([
-        OrganizationAccessScope.Integrations,
-        OrganizationAccessScope.Settings,
-        OrganizationAccessScope.Members,
-        OrganizationAccessScope.Delete,
-        OrganizationAccessScope.Read,
-      ]),
-    },
-  },
-];
-
-const TokenPresetSelect = (
-  props: PropsWithoutRef<{
-    setSelectedPreset: (preset: string) => void;
-    activePreset: TokenPreset | null;
-  }>,
-): ReactElement => {
-  return (
-    <div className="mt-3">
-      <RadixSelect
-        placeholder="Select a preset"
-        name="preset-select"
-        position="popper"
-        value={props.activePreset?.name}
-        options={TOKEN_SIMPLE_PRESETS.map(preset => ({ value: preset.name, label: preset.name }))}
-        onChange={value => {
-          props.setSelectedPreset(value);
-        }}
-      />
-      {props.activePreset ? (
-        <p className="mt-4 text-sm text-gray-500">{props.activePreset.description}</p>
-      ) : null}
-    </div>
-  );
-};
 
 function ModalContent(props: {
   organization: FragmentType<typeof CreateAccessTokenModalContent_OrganizationFragment>;
