@@ -198,14 +198,12 @@ export function UserMenu(props: {
                 Profile settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              {docsUrl ? (
-                <DropdownMenuItem asChild>
-                  <a href={docsUrl} target="_blank" rel="noreferrer">
-                    <FileTextIcon className="mr-2 h-4 w-4" />
-                    Documentation
-                  </a>
-                </DropdownMenuItem>
-              ) : null}
+              <DropdownMenuItem asChild>
+                <a href={docsUrl} target="_blank" rel="noreferrer">
+                  <FileTextIcon className="mr-2 h-4 w-4" />
+                  Documentation
+                </a>
+              </DropdownMenuItem>
               {currentOrganization && env.zendeskSupport ? (
                 <NextLink
                   href={{

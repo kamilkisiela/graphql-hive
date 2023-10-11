@@ -109,15 +109,11 @@ function GitHubIntegration(props: {
                     </div>
                     <div>
                       Prevents GitHub Check name collisions when running{' '}
-                      {docksLink ? (
-                        <NextLink href={docksLink}>
-                          <span className="mx-1 text-orange-700 hover:underline hover:underline-offset-4">
-                            $ hive schema:check --github
-                          </span>
-                        </NextLink>
-                      ) : (
-                        <span className="mx-1 text-orange-700">$ hive schema:check --github</span>
-                      )}
+                      <NextLink href={docksLink}>
+                        <span className="mx-1 text-orange-700 hover:underline hover:underline-offset-4">
+                          $ hive schema:check --github
+                        </span>
+                      </NextLink>
                       for more than one project.
                     </div>
                   </div>
