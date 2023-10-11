@@ -169,6 +169,12 @@ services:
     ports:
       - '8083:8083'
     command: caddy reverse-proxy --from :8083 --to s3:9000 --change-host-header
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:8083/minio/health/live']
+      interval: 5s
+      timeout: 10s
+      retries: 6
+      start_period: 5s
 
   migrations:
     image: '${DOCKER_REGISTRY}storage${DOCKER_TAG}'
