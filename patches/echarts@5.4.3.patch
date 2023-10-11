@@ -1,0 +1,39 @@
+diff --git a/dist/echarts.js b/dist/echarts.js
+index c9e0f20eb06e277454d43716801f4ad93f18de83..a361e7b4af141fc370cad5244580edd67f9af624 100644
+--- a/dist/echarts.js
++++ b/dist/echarts.js
+@@ -120,18 +120,24 @@
+             browser.weChat = true;
+         }
+         env.svgSupported = typeof SVGRect !== 'undefined';
+-        env.touchEventsSupported = 'ontouchstart' in window && !browser.ie && !browser.edge;
+-        env.pointerEventsSupported = 'onpointerdown' in window
++        env.touchEventsSupported = typeof window !== 'undefined' && 'ontouchstart' in window && !browser.ie && !browser.edge;
++        env.pointerEventsSupported = typeof window !== 'undefined' && 'onpointerdown' in window
+             && (browser.edge || (browser.ie && +browser.version >= 11));
+         env.domSupported = typeof document !== 'undefined';
+-        var style = document.documentElement.style;
+-        env.transform3dSupported = ((browser.ie && 'transition' in style)
+-            || browser.edge
+-            || (('WebKitCSSMatrix' in window) && ('m11' in new WebKitCSSMatrix()))
+-            || 'MozPerspective' in style)
+-            && !('OTransition' in style);
+-        env.transformSupported = env.transform3dSupported
+-            || (browser.ie && +browser.version >= 9);
++
++        if (typeof document !== 'undefined') {
++            var style = document.documentElement.style;
++            env.transform3dSupported = ((browser.ie && 'transition' in style)
++                || browser.edge
++                || ((typeof window !== 'undefined'  && 'WebKitCSSMatrix' in window) && ('m11' in new WebKitCSSMatrix()))
++                || 'MozPerspective' in style)
++                && !('OTransition' in style);
++            env.transformSupported = env.transform3dSupported
++                || (browser.ie && +browser.version >= 9);
++        } else {
++            env.transform3dSupported = false;
++            env.transformSupported = false;
++        }
+     }
+ 
+     var DEFAULT_FONT_SIZE = 12;
