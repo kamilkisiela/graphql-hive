@@ -1,5 +1,6 @@
 import { Inject, Injectable, InjectionToken, Scope } from 'graphql-modules';
 import { App } from '@octokit/app';
+import type { Octokit } from '@octokit/core';
 import { RequestError } from '@octokit/request-error';
 import type { IntegrationsModule } from '../__generated__/types';
 import { HiveError } from '../../../shared/errors';
@@ -90,7 +91,7 @@ export class GitHubIntegrationManager {
     return installationId !== null;
   }
 
-  async getInstallationId(selector: OrganizationSelector): Promise<number | null> {
+  private async getInstallationId(selector: OrganizationSelector): Promise<number | null> {
     this.logger.debug('Fetching GitHub integration token (organization=%s)', selector.organization);
 
     const rawInstallationId = await this.storage.getGitHubIntegrationInstallationId({
@@ -123,6 +124,19 @@ export class GitHubIntegrationManager {
     return installationId;
   }
 
+  private async getOctokitForOrganization(selector: OrganizationSelector): Promise<Octokit | null> {
+    const installationId = await this.getInstallationId(selector);
+
+    if (!installationId) {
+      return null;
+    }
+
+    if (!this.app) {
+      throw new Error('GitHub Integration not found. Please provide GITHUB_APP_CONFIG.');
+    }
+    return await this.app.getInstallationOctokit(installationId);
+  }
+
   /**
    * Fetches repositories for the given organization.
    * Returns null in case no integration is found.
@@ -132,18 +146,12 @@ export class GitHubIntegrationManager {
   async getRepositories(
     selector: OrganizationSelector,
   ): Promise<IntegrationsModule.GitHubIntegration['repositories'] | null> {
-    const installationId = await this.getInstallationId(selector);
     this.logger.debug('Fetching repositories');
+    const octokit = await this.getOctokitForOrganization(selector);
 
-    if (!installationId) {
+    if (!octokit) {
       return null;
     }
-
-    if (!this.app) {
-      throw new Error('GitHub Integration not found. Please provide GITHUB_APP_CONFIG.');
-    }
-
-    const octokit = await this.app.getInstallationOctokit(installationId);
 
     return octokit
       .request('GET /installation/repositories')
@@ -159,56 +167,6 @@ export class GitHubIntegrationManager {
         this.logger.error(e);
         return Promise.resolve([]);
       });
-  }
-
-  /**
-   * Check whether the given organization has access to a given GitHub repository.
-   */
-  async hasAccessToGitHubRepository(props: {
-    selector: OrganizationSelector;
-    repositoryName: `${string}/${string}`;
-  }): Promise<boolean> {
-    this.logger.debug('Checking GitHub repository access. (repository=%s)', props.repositoryName);
-
-    if (!this.app) {
-      throw new Error('GitHub Integration not found. Please provide GITHUB_APP_CONFIG.');
-    }
-
-    const installationId = await this.getInstallationId(props.selector);
-
-    if (installationId === null) {
-      this.logger.debug(
-        'GitHub repository access check failed due to missing installation. (repository=%s)',
-        props.repositoryName,
-      );
-
-      return false;
-    }
-
-    const octokit = await this.app.getInstallationOctokit(installationId);
-
-    const hasAccess = await octokit
-      .request('GET /repos/{owner}/{repo}', {
-        owner: props.repositoryName.split('/')[0],
-        repo: props.repositoryName.split('/')[1],
-      })
-      .then(() => {
-        this.logger.debug(
-          'GitHub repository access check succeeded. (repository=%s)',
-          props.repositoryName,
-        );
-        return true;
-      })
-      .catch(error => {
-        this.logger.debug(
-          'GitHub repository access check failed. (repository=%s)',
-          props.repositoryName,
-        );
-        this.logger.error(error);
-        return false;
-      });
-
-    return hasAccess;
   }
 
   async getOrganization(selector: { installation: string }) {
@@ -234,7 +192,6 @@ export class GitHubIntegrationManager {
       repositoryOwner: string;
       name: string;
       sha: string;
-      conclusion: 'success' | 'neutral' | 'failure';
       detailsUrl: string | null;
       output?: {
         /** The title of the check run. */
@@ -250,21 +207,14 @@ export class GitHubIntegrationManager {
       input.repositoryName,
       input.sha,
     );
-    const installationId = await this.getInstallationId({
-      organization: input.organization,
-    });
 
-    if (!installationId) {
+    const octokit = await this.getOctokitForOrganization(input);
+
+    if (!octokit) {
       throw new HiveError(
         'GitHub Integration not found. Please install our GraphQL Hive GitHub Application.',
       );
     }
-
-    if (!this.app) {
-      throw new Error('GitHub Integration not found. Please provide GITHUB_APP_CONFIG.');
-    }
-
-    const octokit = await this.app.getInstallationOctokit(installationId);
 
     try {
       const result = await octokit.request('POST /repos/{owner}/{repo}/check-runs', {
@@ -272,7 +222,7 @@ export class GitHubIntegrationManager {
         repo: input.repositoryName,
         name: input.name,
         head_sha: input.sha,
-        conclusion: input.conclusion,
+        status: 'in_progress',
         output: input.output,
         details_url: input.detailsUrl ?? undefined,
       });
@@ -282,6 +232,9 @@ export class GitHubIntegrationManager {
       return {
         id: result.data.id,
         url: result.data.url,
+        repository: input.repositoryName,
+        owner: input.repositoryOwner,
+        commit: input.sha,
       };
     } catch (error) {
       this.logger.error('Failed to create check-run', error);
@@ -304,6 +257,54 @@ export class GitHubIntegrationManager {
     }
   }
 
+  async updateCheckRun(args: {
+    organizationId: string;
+    githubCheckRun: {
+      id: number;
+      repository: string;
+      owner: string;
+    };
+    conclusion: 'success' | 'failure' | 'neutral';
+    output: {
+      /** The title of the check run. */
+      title: string;
+      /** The summary of the check run. This parameter supports Markdown. */
+      summary: string;
+    };
+    detailsUrl: string | null;
+  }) {
+    this.logger.debug(
+      'Update check-run (owner=%s, name=%s, githubCheckRunId=%s)',
+      args.githubCheckRun.repository,
+      args.githubCheckRun.owner,
+      args.githubCheckRun.id,
+    );
+
+    const octokit = await this.getOctokitForOrganization({ organization: args.organizationId });
+
+    if (!octokit) {
+      throw new HiveError(
+        'GitHub Integration not found. Please install our GraphQL Hive GitHub Application.',
+      );
+    }
+
+    const result = await octokit.request('PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}', {
+      owner: args.githubCheckRun.owner,
+      repo: args.githubCheckRun.repository,
+      check_run_id: args.githubCheckRun.id,
+      conclusion: args.conclusion,
+      output: args.output,
+      detailsUrl: args.detailsUrl ?? undefined,
+    });
+
+    this.logger.debug('Check-run updated (link=%s)', result.data.url);
+
+    return {
+      id: result.data.id,
+      url: result.data.url,
+    };
+  }
+
   async updateCheckRunToSuccess(args: {
     organizationId: string;
     checkRun: {
@@ -319,11 +320,11 @@ export class GitHubIntegrationManager {
       args.checkRun.repository,
       args.checkRun.checkRunId,
     );
-    const installationId = await this.getInstallationId({
+    const octokit = await this.getOctokitForOrganization({
       organization: args.organizationId,
     });
 
-    if (!this.app || !installationId) {
+    if (!octokit) {
       this.logger.warn(
         'Attempting to update GitHub check-run without GitHub App. Please provide GITHUB_APP_CONFIG. Skipping this step. (organizationId=%s, checkRun.owner=%s, checkRun.repository=%s, checkRun.id=%s)',
         args.organizationId,
@@ -333,8 +334,6 @@ export class GitHubIntegrationManager {
       );
       return;
     }
-
-    const octokit = await this.app.getInstallationOctokit(installationId);
 
     try {
       const result = await octokit.request(
