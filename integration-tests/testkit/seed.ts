@@ -533,6 +533,10 @@ export function initSeed() {
                       service?: string;
                       url?: string;
                       metadata?: string;
+                      /**
+                       * @deprecated
+                       */
+                      github?: boolean | null;
                     }) {
                       return await publishSchema(
                         {
@@ -545,6 +549,7 @@ export function initSeed() {
                           metadata: options.metadata,
                           experimental_acceptBreakingChanges:
                             options.experimental_acceptBreakingChanges,
+                          github: options.github,
                         },
                         secret,
                         options.headerName || 'authorization',
