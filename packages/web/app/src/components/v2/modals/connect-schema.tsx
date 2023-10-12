@@ -147,7 +147,7 @@ export const ConnectSchemaModal = ({
                 variant="primary"
                 target="_blank"
                 rel="noreferrer"
-                href={getDocsUrl('/integrations/apollo-gateway#supergraph-sdl-from-the-cdn') ?? ''}
+                href={getDocsUrl('/integrations/apollo-gateway#supergraph-sdl-from-the-cdn')}
               >
                 Using the Registry with a Apollo Gateway
               </Link>{' '}
