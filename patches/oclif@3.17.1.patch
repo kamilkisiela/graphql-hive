@@ -1,8 +1,8 @@
 diff --git a/lib/tarballs/bin.js b/lib/tarballs/bin.js
-index 8301c7be4c3101de9caf1c1b127cf1f940a1706c..a552e0e2c9ffea8ec16c3baf509aa2c0f8bd700c 100644
+index 8301c7be4c3101de9caf1c1b127cf1f940a1706c..402c146592628c6181576d01988e2f4e3bb654db 100644
 --- a/lib/tarballs/bin.js
 +++ b/lib/tarballs/bin.js
-@@ -7,85 +7,63 @@ const node_child_process_1 = require("node:child_process");
+@@ -7,85 +7,65 @@ const node_child_process_1 = require("node:child_process");
  const node_util_1 = require("node:util");
  const exec = (0, node_util_1.promisify)(node_child_process_1.exec);
  async function writeBinScripts({ config, baseWorkspace, nodeVersion }) {
@@ -59,7 +59,9 @@ index 8301c7be4c3101de9caf1c1b127cf1f940a1706c..a552e0e2c9ffea8ec16c3baf509aa2c0
      SOURCE="\$( readlink "\$SOURCE" )"
      # If \$SOURCE was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
 -    [[ \$SOURCE != /* ]] && SOURCE="\$DIR/\$SOURCE"
-+    \$SOURCE != /* && SOURCE="\$DIR/\$SOURCE"
++    if [ "\$SOURCE" != /* ]; then
++        SOURCE="\$DIR/\$SOURCE"
++    fi
    done
    DIR="\$( cd -P "\$( dirname "\$SOURCE" )" && pwd )"
    echo "\$DIR"
@@ -131,10 +133,10 @@ index 8301c7be4c3101de9caf1c1b127cf1f940a1706c..a552e0e2c9ffea8ec16c3baf509aa2c0
  }
  exports.writeBinScripts = writeBinScripts;
 diff --git a/lib/tarballs/build.js b/lib/tarballs/build.js
-index 6dc6c060ccb11346ba9e9d38346521e2fd0b9e77..2bae82a35ec28d306d791ac19897cf85a4c9b3e0 100644
+index 384ea4be6bb7179c0622436ce41142b59b226771..943a2516bcc2079107023b9da8f27592a656a7a2 100644
 --- a/lib/tarballs/build.js
 +++ b/lib/tarballs/build.js
-@@ -56,9 +56,10 @@ async function build(c, options = {}) {
+@@ -73,9 +73,10 @@ async function build(c, options = {}) {
          }
          else {
              const lockpath = fs.existsSync(path.join(c.root, 'package-lock.json')) ?
