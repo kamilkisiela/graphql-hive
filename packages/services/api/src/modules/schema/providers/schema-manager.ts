@@ -485,12 +485,20 @@ export class SchemaManager {
     return this.storage.countSchemaVersionsOfTarget(selector);
   }
 
-  completeGetStartedCheck(
+  async completeGetStartedCheck(
     selector: OrganizationSelector & {
       step: 'publishingSchema' | 'checkingSchema';
     },
-  ): Promise<void> {
-    return this.storage.completeGetStartedStep(selector);
+  ) {
+    try {
+      await this.storage.completeGetStartedStep(selector);
+    } catch (error) {
+      this.logger.error(
+        'Failed to complete get started check (selector=%o, error=%s)',
+        selector,
+        error,
+      );
+    }
   }
 
   async disableExternalSchemaComposition(input: ProjectSelector) {

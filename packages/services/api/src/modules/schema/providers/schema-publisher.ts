@@ -54,7 +54,7 @@ import { inflateSchemaCheck, SchemaManager } from './schema-manager';
 const schemaCheckCount = new promClient.Counter({
   name: 'registry_check_count',
   help: 'Number of schema checks',
-  labelNames: ['model', 'projectType'],
+  labelNames: ['model', 'projectType', 'conclusion'],
 });
 
 const schemaPublishCount = new promClient.Counter({
@@ -207,18 +207,22 @@ export class SchemaPublisher {
       }),
     ]);
 
-    schemaCheckCount.inc({
-      model: project.legacyRegistryModel ? 'legacy' : 'modern',
-      projectType: project.type,
-    });
-
     const projectModelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
+
+    function increaseSchemaCheckCountMetric(conclusion: 'rejected' | 'accepted') {
+      schemaCheckCount.inc({
+        model: projectModelVersion,
+        projectType: project.type,
+        conclusion,
+      });
+    }
 
     if (
       (project.type === ProjectType.FEDERATION || project.type === ProjectType.STITCHING) &&
       input.service == null
     ) {
       this.logger.debug('No service name provided (type=%s)', project.type, projectModelVersion);
+      increaseSchemaCheckCountMetric('rejected');
       return {
         __typename: 'SchemaCheckError',
         valid: false,
@@ -243,6 +247,11 @@ export class SchemaPublisher {
       if (input.github) {
         if (input.github.repository) {
           if (!isGitHubRepositoryString(input.github.repository)) {
+            this.logger.debug(
+              'Invalid github repository name provided (repository=%s)',
+              input.github.repository,
+            );
+            increaseSchemaCheckCountMetric('rejected');
             return {
               __typename: 'GitHubSchemaCheckError' as const,
               message: 'Invalid github repository name provided.',
@@ -253,6 +262,11 @@ export class SchemaPublisher {
             sha: input.github.commit,
           };
         } else if (project.gitRepository == null) {
+          this.logger.debug(
+            'Git repository is not configured for this project (project=%s)',
+            project.id,
+          );
+          increaseSchemaCheckCountMetric('rejected');
           return {
             __typename: 'GitHubSchemaCheckError' as const,
             message: 'Git repository is not configured for this project.',
@@ -279,6 +293,7 @@ export class SchemaPublisher {
         });
 
         if (result.success === false) {
+          increaseSchemaCheckCountMetric('rejected');
           return {
             __typename: 'GitHubSchemaCheckError' as const,
             message: result.error,
@@ -342,7 +357,7 @@ export class SchemaPublisher {
         );
 
         if (!input.service) {
-          throw new Error('Guard for TypeScript limitations on infering types. :)');
+          throw new Error('Guard for TypeScript limitations on inferring types. :)');
         }
 
         checkResult = await this.models[project.type][projectModelVersion].check({
@@ -369,6 +384,7 @@ export class SchemaPublisher {
         });
         break;
       default:
+        this.logger.debug('Unsupported project type (type=%s)', project.type);
         throw new HiveError(`${project.type} project (${projectModelVersion}) not supported`);
     }
 
@@ -477,6 +493,7 @@ export class SchemaPublisher {
 
     if (githubCheckRun) {
       if (checkResult.conclusion === SchemaCheckConclusion.Success) {
+        increaseSchemaCheckCountMetric('accepted');
         return await this.updateGithubCheckRunForSchemaCheck({
           project,
           target,
@@ -492,6 +509,7 @@ export class SchemaPublisher {
         });
       }
 
+      increaseSchemaCheckCountMetric('rejected');
       return await this.updateGithubCheckRunForSchemaCheck({
         project,
         target,
@@ -520,6 +538,7 @@ export class SchemaPublisher {
     };
 
     if (checkResult.conclusion === SchemaCheckConclusion.Success) {
+      increaseSchemaCheckCountMetric('accepted');
       return {
         __typename: 'SchemaCheckSuccess',
         valid: true,
@@ -529,6 +548,8 @@ export class SchemaPublisher {
         schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, inflateSchemaCheck(schemaCheck)),
       } as const;
     }
+
+    increaseSchemaCheckCountMetric('rejected');
 
     return {
       __typename: 'SchemaCheckError',
@@ -868,10 +889,15 @@ export class SchemaPublisher {
         }),
       ]);
 
-    schemaPublishCount.inc({
-      model: project.legacyRegistryModel ? 'legacy' : 'modern',
-      projectType: project.type,
-    });
+    const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
+
+    function increaseSchemaPublishCountMetric(conclusion: 'rejected' | 'accepted' | 'ignored') {
+      schemaPublishCount.inc({
+        model: modelVersion,
+        projectType: project.type,
+        conclusion,
+      });
+    }
 
     let github: null | {
       repository: `${string}/${string}`;
@@ -880,6 +906,11 @@ export class SchemaPublisher {
 
     if (input.gitHub != null) {
       if (!isGitHubRepositoryString(input.gitHub.repository)) {
+        this.logger.debug(
+          'Invalid github repository name provided (repository=%s)',
+          input.gitHub.repository,
+        );
+        increaseSchemaPublishCountMetric('rejected');
         return {
           __typename: 'GitHubSchemaPublishError' as const,
           message: 'Invalid github repository name provided.',
@@ -892,6 +923,11 @@ export class SchemaPublisher {
       };
     } else if (input.github === true) {
       if (!project.gitRepository) {
+        this.logger.debug(
+          'Git repository is not configured for this project (project=%s)',
+          project.id,
+        );
+        increaseSchemaPublishCountMetric('rejected');
         return {
           __typename: 'GitHubSchemaPublishError',
           message: 'Git repository is not configured for this project.',
@@ -916,6 +952,7 @@ export class SchemaPublisher {
       });
 
       if (result.success === false) {
+        increaseSchemaPublishCountMetric('rejected');
         return {
           __typename: 'GitHubSchemaPublishError',
           message: result.error,
@@ -931,8 +968,6 @@ export class SchemaPublisher {
     });
 
     this.logger.debug(`Found ${latestVersion?.schemas.length ?? 0} most recent schemas`);
-
-    const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
 
     let publishResult: SchemaPublishResult;
 
@@ -991,18 +1026,16 @@ export class SchemaPublisher {
           baseSchema,
         });
         break;
-      default:
+      default: {
+        this.logger.debug('Unsupported project type (type=%s)', project.type);
         throw new HiveError(`${project.type} project (${modelVersion}) not supported`);
+      }
     }
 
     if (publishResult.conclusion === SchemaPublishConclusion.Ignore) {
       this.logger.debug('Publish ignored (reasons=%s)', publishResult.reason);
 
-      schemaPublishCount.inc({
-        model: modelVersion,
-        projectType: project.type,
-        conclusion: 'ignored',
-      });
+      increaseSchemaPublishCountMetric('ignored');
 
       const linkToWebsite =
         typeof this.schemaModuleConfig.schemaPublishLink === 'function'
@@ -1049,11 +1082,7 @@ export class SchemaPublisher {
         publishResult.reasons.map(r => r.code).join(', '),
       );
 
-      schemaPublishCount.inc({
-        model: modelVersion,
-        projectType: project.type,
-        conclusion: 'rejected',
-      });
+      increaseSchemaPublishCountMetric('rejected');
 
       if (getReasonByCode(publishResult.reasons, PublishFailureReasonCode.MissingServiceName)) {
         return {
@@ -1106,18 +1135,14 @@ export class SchemaPublisher {
 
     this.logger.debug('Publishing new version');
 
-    schemaPublishCount.inc({
-      model: modelVersion,
-      projectType: project.type,
-      conclusion: 'accepted',
-    });
-
     const composable = publishResult.state.composable;
     const fullSchemaSdl = publishResult.state.fullSchemaSdl;
 
     if (composable && !fullSchemaSdl) {
       throw new Error('Version is composable but the full schema SDL is missing');
     }
+
+    increaseSchemaPublishCountMetric('accepted');
 
     const changes = publishResult.state.changes ?? [];
     const messages = publishResult.state.messages ?? [];

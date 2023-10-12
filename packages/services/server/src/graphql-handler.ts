@@ -292,6 +292,7 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
       abortControllerCache.set(req.socket, controller);
 
       req.raw.socket.once('close', () => {
+        // TODO: Do not execute it after a request is completed
         req.log.debug('Aborted request (id=%s)', requestId);
         controller.abort();
         abortControllerCache.delete(req.socket);

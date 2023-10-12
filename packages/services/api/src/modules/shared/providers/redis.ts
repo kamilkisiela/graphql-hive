@@ -25,7 +25,7 @@ export const RedisProvider: FactoryProvider<RedisInstance> = {
         return Math.min(times * 500, 2000);
       },
       reconnectOnError(error) {
-        logger.warn('Redis reconnectOnError', error);
+        logger.warn('Redis reconnectOnError (error=%s)', error);
         return 1;
       },
       db: 0,
@@ -34,7 +34,7 @@ export const RedisProvider: FactoryProvider<RedisInstance> = {
     });
 
     redis.on('error', err => {
-      logger.error('Redis connection error', err);
+      logger.error('Redis connection error (error=%s)', err);
     });
 
     redis.on('connect', () => {

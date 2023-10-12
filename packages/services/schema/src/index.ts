@@ -71,7 +71,7 @@ async function main() {
       return Math.min(times * 500, 2000);
     },
     reconnectOnError(error) {
-      server.log.warn('Redis reconnectOnError', error);
+      server.log.warn('Redis reconnectOnError (error=%s)', error);
       return 1;
     },
     db: 0,
