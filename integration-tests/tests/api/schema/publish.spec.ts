@@ -3562,3 +3562,30 @@ test.concurrent(
     }
   },
 );
+
+test.concurrent(
+  'publishing schema with a deprecated "github: false" should be successful',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createToken } = await createProject(ProjectType.Single);
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
+
+    const result = await readWriteToken
+      .publishSchema({
+        sdl: /* GraphQL */ `
+          type Query {
+            ping: String
+          }
+        `,
+        github: false,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(result.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  },
+);
