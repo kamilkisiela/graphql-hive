@@ -20,5 +20,5 @@ export function getProductUpdatesUrl(path = '') {
   const { docsUrl = remoteDocsUrl } = env;
   const productUpdatesUrl = docsUrl.replace('/docs', '/product-updates');
 
-  resolveUrl(productUpdatesUrl, path);
+  return resolveUrl(productUpdatesUrl, path);
 }
