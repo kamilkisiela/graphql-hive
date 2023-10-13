@@ -1,4 +1,3 @@
-import { fetch } from '@whatwg-node/fetch';
 import { getServiceHost } from './utils';
 
 export interface Email {

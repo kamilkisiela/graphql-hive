@@ -2,7 +2,6 @@ import { createHmac } from 'crypto';
 import bcryptjs from 'bcryptjs';
 import pLimit from 'p-limit';
 import * as zod from 'zod';
-import { crypto, fetch, Headers, Request, TextEncoder } from '@whatwg-node/fetch';
 import { type MigrationExecutor } from '../pg-migrator';
 
 // treat an empty string (`''`) as undefined
