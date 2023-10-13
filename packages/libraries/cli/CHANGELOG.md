@@ -1,5 +1,13 @@
 # @graphql-hive/cli
 
+## 0.30.1
+
+### Patch Changes
+
+- [#3042](https://github.com/kamilkisiela/graphql-hive/pull/3042)
+  [`eeaec3fb`](https://github.com/kamilkisiela/graphql-hive/commit/eeaec3fb0fc9b7e86ed44437726481a8b61d688d)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Fix command != not found
+
 ## 0.30.0
 
 ### Minor Changes
