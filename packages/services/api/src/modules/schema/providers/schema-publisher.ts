@@ -1119,16 +1119,15 @@ export class SchemaPublisher {
           : [],
       );
 
-      if (github) {
-        return this.createPublishCheckRun({
+      if (githubCheckRun) {
+        return this.updateGithubCheckRunForSchemaPublish({
+          githubCheckRun,
           force: false,
           initial: false,
           valid: false,
           changes,
           errors,
-
           organizationId: organization.id,
-          github,
           detailsUrl: null,
         });
       }
