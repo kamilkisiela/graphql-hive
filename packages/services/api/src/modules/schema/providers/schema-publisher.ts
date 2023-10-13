@@ -1098,29 +1098,46 @@ export class SchemaPublisher {
         } as const;
       }
 
+      const changes =
+        getReasonByCode(publishResult.reasons, PublishFailureReasonCode.BreakingChanges)?.changes ??
+        [];
+      const errors = (
+        [] as Array<{
+          message: string;
+        }>
+      ).concat(
+        getReasonByCode(publishResult.reasons, PublishFailureReasonCode.BreakingChanges)?.changes ??
+          [],
+        getReasonByCode(publishResult.reasons, PublishFailureReasonCode.CompositionFailure)
+          ?.compositionErrors ?? [],
+        getReasonByCode(publishResult.reasons, PublishFailureReasonCode.MetadataParsingFailure)
+          ? [
+              {
+                message: 'Failed to parse metadata',
+              },
+            ]
+          : [],
+      );
+
+      if (github) {
+        return this.createPublishCheckRun({
+          force: false,
+          initial: false,
+          valid: false,
+          changes,
+          errors,
+
+          organizationId: organization.id,
+          github,
+          detailsUrl: null,
+        });
+      }
+
       return {
         __typename: 'SchemaPublishError' as const,
         valid: false,
-        changes:
-          getReasonByCode(publishResult.reasons, PublishFailureReasonCode.BreakingChanges)
-            ?.changes ?? [],
-        errors: (
-          [] as Array<{
-            message: string;
-          }>
-        ).concat(
-          getReasonByCode(publishResult.reasons, PublishFailureReasonCode.BreakingChanges)
-            ?.changes ?? [],
-          getReasonByCode(publishResult.reasons, PublishFailureReasonCode.CompositionFailure)
-            ?.compositionErrors ?? [],
-          getReasonByCode(publishResult.reasons, PublishFailureReasonCode.MetadataParsingFailure)
-            ? [
-                {
-                  message: 'Failed to parse metadata',
-                },
-              ]
-            : [],
-        ),
+        changes,
+        errors,
       };
     }
 
