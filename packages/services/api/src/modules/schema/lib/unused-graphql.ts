@@ -28,6 +28,11 @@ export function stripUsedSchemaCoordinatesFromDocumentNode(
             throw new Error('Expected type name');
           }
 
+          const coordinate = `${typeName}.${fieldName}`;
+          if (usedCoordinates.has(coordinate)) {
+            return null;
+          }
+
           // if a field is used but some of it's arguments is not used, we cannot remove the field
           // we can simply check if some of the arguments are used, if not we can remove the field
           if (!node.arguments?.length && usedCoordinates.has(`${typeName}.${fieldName}`)) {
