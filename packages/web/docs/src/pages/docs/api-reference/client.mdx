@@ -80,7 +80,7 @@ const config: HivePluginOptions = {
 
 #### Custom Integration
 
-If your GraphQL server is not listed above, you maybe implement a custom integration. Start by
+If your GraphQL server is not listed above, you may be able to implement a custom integration. Start by
 importing and creating a Hive instance using the `createHive` function.
 
 ```ts
@@ -102,7 +102,7 @@ const hive = createHive({
 Then, you can use the `reportSchema` to publish your runtime schema to Hive:
 
 ```ts
-// Once you server starts and the GraphQL schema becomes
+// Once your server starts and the GraphQL schema becomes
 // available, call "reportSchema" with your schema
 hive.reportSchema({ schema: yourSchema })
 ```
