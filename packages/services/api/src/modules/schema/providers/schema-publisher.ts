@@ -419,7 +419,9 @@ export class SchemaPublisher {
         isManuallyApproved: false,
         manualApprovalUserId: null,
         githubCheckRunId: githubCheckRun?.id ?? null,
-        githubRepository: githubCheckRun?.repository ?? null,
+        githubRepository: githubCheckRun
+          ? githubCheckRun.owner + '/' + githubCheckRun.repository
+          : null,
         githubSha: githubCheckRun?.commit ?? null,
         expiresAt,
       });
@@ -485,7 +487,9 @@ export class SchemaPublisher {
         isManuallyApproved: false,
         manualApprovalUserId: null,
         githubCheckRunId: githubCheckRun?.id ?? null,
-        githubRepository: githubCheckRun?.repository ?? null,
+        githubRepository: githubCheckRun
+          ? githubCheckRun.owner + '/' + githubCheckRun.repository
+          : null,
         githubSha: githubCheckRun?.commit ?? null,
         expiresAt,
       });
