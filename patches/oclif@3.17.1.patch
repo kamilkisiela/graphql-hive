@@ -1,5 +1,5 @@
 diff --git a/lib/tarballs/bin.js b/lib/tarballs/bin.js
-index 8301c7be4c3101de9caf1c1b127cf1f940a1706c..402c146592628c6181576d01988e2f4e3bb654db 100644
+index 8301c7be4c3101de9caf1c1b127cf1f940a1706c..e7d955d29ce3d002a260ef7f4a1355fcdc95e018 100644
 --- a/lib/tarballs/bin.js
 +++ b/lib/tarballs/bin.js
 @@ -7,85 +7,65 @@ const node_child_process_1 = require("node:child_process");
@@ -59,8 +59,8 @@ index 8301c7be4c3101de9caf1c1b127cf1f940a1706c..402c146592628c6181576d01988e2f4e
      SOURCE="\$( readlink "\$SOURCE" )"
      # If \$SOURCE was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
 -    [[ \$SOURCE != /* ]] && SOURCE="\$DIR/\$SOURCE"
-+    if [ "\$SOURCE" != /* ]; then
-+        SOURCE="\$DIR/\$SOURCE"
++    if echo "\$SOURCE" | grep -q '^/*\$'; then
++      SOURCE="\$DIR/\$SOURCE"
 +    fi
    done
    DIR="\$( cd -P "\$( dirname "\$SOURCE" )" && pwd )"
