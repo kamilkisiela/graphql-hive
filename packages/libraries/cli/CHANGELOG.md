@@ -1,5 +1,14 @@
 # @graphql-hive/cli
 
+## 0.30.2
+
+### Patch Changes
+
+- [#3045](https://github.com/kamilkisiela/graphql-hive/pull/3045)
+  [`925b943e`](https://github.com/kamilkisiela/graphql-hive/commit/925b943e4ae2ca79cde45acc8c723cb9b51caa7a)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Fix [: /bin: unexpected operator on
+  POSIX
+
 ## 0.30.1
 
 ### Patch Changes
