@@ -487,7 +487,7 @@ function ManageSubscriptionPageContent() {
             <Button asChild>
               <NextLink
                 href={{
-                  pathname: '/organizations/[organizationId]/view/subscription',
+                  pathname: '/[organizationId]/view/subscription',
                   query: {
                     organizationId: currentOrganization.cleanId,
                   },
