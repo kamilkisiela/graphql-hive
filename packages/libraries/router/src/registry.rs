@@ -210,6 +210,11 @@ impl HiveRegistry {
         match self.fetch_supergraph(self.etag.clone()) {
             Ok(new_supergraph) => {
                 if let Some(new_supergraph) = new_supergraph {
+                    let parse_result = graphql_parser::parse_schema::<&str>(&new_supergraph);
+                    if let Err(parse_err) = parse_result {
+                        self.logger.error(&format!("Unable to update supergraph schema: {}", parse_err));
+                        return;
+                    }
                     let current_file = std::fs::read_to_string(self.file_name.clone())
                         .expect("Could not read file");
                     let current_supergraph_hash = hash(current_file.as_bytes());
