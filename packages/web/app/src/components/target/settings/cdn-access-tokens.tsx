@@ -1,11 +1,12 @@
 import { ReactElement, useEffect, useMemo, useState } from 'react';
+import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Button,
-  Card,
   DocsLink,
   Heading,
   Input,
@@ -111,16 +112,11 @@ function CreateCDNAccessTokenModal(props: {
       </div>
 
       <div className="mt-auto flex w-full gap-2 self-end">
-        <Button size="large" className="ml-auto" onClick={props.onClose}>
+        <Button variant="secondary" className="ml-auto" onClick={props.onClose}>
           Cancel
         </Button>
 
-        <Button
-          type="submit"
-          variant="primary"
-          size="large"
-          disabled={createCdnAccessToken.fetching}
-        >
+        <Button type="submit" disabled={createCdnAccessToken.fetching}>
           Create
         </Button>
       </div>
@@ -146,7 +142,7 @@ function CreateCDNAccessTokenModal(props: {
         <InlineCode content={createCdnAccessToken.data.createCdnAccessToken.ok.secretAccessToken} />
 
         <div className="mt-auto flex w-full gap-2 self-end">
-          <Button variant="primary" size="large" className="ml-auto" onClick={props.onClose}>
+          <Button className="ml-auto" onClick={props.onClose}>
             Close
           </Button>
         </div>
@@ -166,7 +162,7 @@ function CreateCDNAccessTokenModal(props: {
           {createCdnAccessToken.data?.createCdnAccessToken.error.message}
         </Tag>
 
-        <Button variant="primary" size="large" className="ml-auto" onClick={props.onClose}>
+        <Button className="ml-auto" onClick={props.onClose}>
           Close
         </Button>
       </div>
@@ -224,14 +220,12 @@ function DeleteCDNAccessTokenModal(props: {
       <p>Are you sure you want to delete the CDN Access Token?</p>
 
       <div className="mt-auto flex w-full gap-2 self-end">
-        <Button variant="primary" size="large" className="ml-auto" onClick={onClose}>
+        <Button className="ml-auto" onClick={onClose}>
           Cancel
         </Button>
         <Button
           disabled={deleteCdnAccessToken.fetching}
-          danger
-          variant="primary"
-          size="large"
+          variant="destructive"
           onClick={() =>
             mutate({
               input: {
@@ -265,7 +259,7 @@ function DeleteCDNAccessTokenModal(props: {
           It can take up to 5 minutes before the changes are propagated across the CDN.
         </Tag>
         <div className="mt-auto flex w-full gap-2 self-end">
-          <Button variant="primary" size="large" className="ml-auto" onClick={onClose}>
+          <Button className="ml-auto" onClick={onClose}>
             Close
           </Button>
         </div>
@@ -285,7 +279,7 @@ function DeleteCDNAccessTokenModal(props: {
           {deleteCdnAccessToken.data?.deleteCdnAccessToken.error.message}
         </Tag>
         <div className="mt-auto flex w-full gap-2 self-end">
-          <Button variant="primary" size="large" className="ml-auto" onClick={onClose}>
+          <Button className="ml-auto" onClick={onClose}>
             Close
           </Button>
         </div>
@@ -378,102 +372,97 @@ export function CDNAccessTokens(props: {
 
   return (
     <Card>
-      <Heading id="cdn-access-tokens" className="mb-2">
-        CDN Access Token
-      </Heading>
-      <div className="text-sm text-gray-400 cursor-default">
-        CDN Access Tokens are used to access to Hive High-Availability CDN and read your schema
-        artifacts.
-        <br />
-        <DocsLink href="/management/targets#cdn-access-tokens">
-          Learn more about CDN Access Tokens
-        </DocsLink>
-      </div>
-      {canManage && (
-        <div className="my-3.5 flex justify-between">
-          <Button
-            as="a"
-            href={openCreateCDNAccessTokensModalLink}
-            variant="primary"
-            onClick={ev => {
-              ev.preventDefault();
-              void router.push(openCreateCDNAccessTokensModalLink);
-            }}
-            size="large"
-            className="px-5"
+      <CardHeader>
+        <CardTitle id="cdn-access-tokens">CDN Access Token</CardTitle>
+        <CardDescription>
+          CDN Access Tokens are used to access to Hive High-Availability CDN and read your schema
+          artifacts.
+        </CardDescription>
+        <CardDescription>
+          <DocsLink
+            href="/management/targets#cdn-access-tokens"
+            className="text-gray-500 hover:text-gray-300"
           >
-            Create new CDN token
-          </Button>
+            Learn more about CDN Access Tokens
+          </DocsLink>
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {canManage && (
+          <div className="my-3.5 flex justify-between">
+            <Button asChild>
+              <NextLink href={openCreateCDNAccessTokensModalLink}>Create new CDN token</NextLink>
+            </Button>
+          </div>
+        )}
+        <Table>
+          <TBody>
+            {target?.data?.target?.cdnAccessTokens.edges?.map(edge => {
+              const node = useFragment(CDNAccessTokeRowFragment, edge.node);
+
+              return (
+                <Tr key={node.id}>
+                  <Td>
+                    {node.firstCharacters + new Array(10).fill('•').join('') + node.lastCharacters}
+                  </Td>
+                  <Td>{node.alias}</Td>
+                  <Td align="right">
+                    created <TimeAgo date={node.createdAt} />
+                  </Td>
+                  <Td align="right">
+                    <Button
+                      className="hover:text-red-500"
+                      variant="ghost"
+                      onClick={() => {
+                        void router.push(
+                          `${router.asPath}#delete-cdn-access-token?id=${edge.node.id}`,
+                        );
+                      }}
+                    >
+                      <TrashIcon />
+                    </Button>
+                  </Td>
+                </Tr>
+              );
+            })}
+          </TBody>
+        </Table>
+
+        <div className="my-3.5 flex justify-end">
+          {target.data?.target?.cdnAccessTokens.pageInfo.hasPreviousPage ? (
+            <Button
+              variant="secondary"
+              className="mr-2 px-5"
+              onClick={() => {
+                setEndCursors(cursors => {
+                  if (cursors.length === 0) {
+                    return cursors;
+                  }
+                  return cursors.slice(0, cursors.length - 1);
+                });
+              }}
+            >
+              Previous Page
+            </Button>
+          ) : null}
+          {target.data?.target?.cdnAccessTokens.pageInfo.hasNextPage ? (
+            <Button
+              variant="secondary"
+              className="px-5"
+              onClick={() => {
+                setEndCursors(cursors => {
+                  if (!target.data?.target?.cdnAccessTokens.pageInfo.endCursor) {
+                    return cursors;
+                  }
+                  return [...cursors, target.data?.target?.cdnAccessTokens.pageInfo.endCursor];
+                });
+              }}
+            >
+              Next Page
+            </Button>
+          ) : null}
         </div>
-      )}
-      <Table>
-        <TBody>
-          {target?.data?.target?.cdnAccessTokens.edges?.map(edge => {
-            const node = useFragment(CDNAccessTokeRowFragment, edge.node);
-
-            return (
-              <Tr key={node.id}>
-                <Td>
-                  {node.firstCharacters + new Array(10).fill('•').join('') + node.lastCharacters}
-                </Td>
-                <Td>{node.alias}</Td>
-                <Td align="right">
-                  created <TimeAgo date={node.createdAt} />
-                </Td>
-                <Td align="right">
-                  <Button
-                    className="hover:text-red-500"
-                    onClick={() => {
-                      void router.push(
-                        `${router.asPath}#delete-cdn-access-token?id=${edge.node.id}`,
-                      );
-                    }}
-                  >
-                    <TrashIcon />
-                  </Button>
-                </Td>
-              </Tr>
-            );
-          })}
-        </TBody>
-      </Table>
-
-      <div className="my-3.5 flex justify-end">
-        {target.data?.target?.cdnAccessTokens.pageInfo.hasPreviousPage ? (
-          <Button
-            variant="secondary"
-            size="large"
-            className="mr-2 px-5"
-            onClick={() => {
-              setEndCursors(cursors => {
-                if (cursors.length === 0) {
-                  return cursors;
-                }
-                return cursors.slice(0, cursors.length - 1);
-              });
-            }}
-          >
-            Previous Page
-          </Button>
-        ) : null}
-        {target.data?.target?.cdnAccessTokens.pageInfo.hasNextPage ? (
-          <Button
-            variant="secondary"
-            size="large"
-            className="px-5"
-            onClick={() => {
-              setEndCursors(cursors => {
-                if (!target.data?.target?.cdnAccessTokens.pageInfo.endCursor) {
-                  return cursors;
-                }
-                return [...cursors, target.data?.target?.cdnAccessTokens.pageInfo.endCursor];
-              });
-            }}
-          >
-            Next Page
-          </Button>
-        ) : null}
-      </div>
+      </CardContent>
       {isCreateCDNAccessTokensModalOpen ? (
         <CreateCDNAccessTokenModal
           onCreateCDNAccessToken={() => {

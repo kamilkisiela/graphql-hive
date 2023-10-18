@@ -9,14 +9,20 @@ import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { SchemaEditor } from '@/components/schema-editor';
 import { CDNAccessTokens } from '@/components/target/settings/cdn-access-tokens';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import {
-  Button,
-  Card,
-  Checkbox,
   DocsLink,
-  Heading,
   Input,
   MetaTitle,
   Spinner,
@@ -119,61 +125,66 @@ function RegistryAccessTokens(props: {
 
   return (
     <Card>
-      <Heading className="mb-2">Registry Access Tokens</Heading>
-      <div className="text-sm text-gray-400 cursor-default">
-        Registry Access Tokens are used to access to Hive Registry and perform actions on your
-        targets/projects. In most cases, this token is used from the Hive CLI.
-      </div>
-      <p>
-        <DocsLink href="/management/targets#registry-access-tokens">
-          Learn more about Registry Access Tokens
-        </DocsLink>
-      </p>
-      {canManage && (
-        <div className="my-3.5 flex justify-between">
-          <Button variant="primary" onClick={toggleModalOpen} size="large" className="px-5">
-            Create new registry token
-          </Button>
-          {checked.length === 0 ? null : (
-            <Button size="large" danger disabled={deleting} className="px-9" onClick={deleteTokens}>
-              Delete {checked.length || null}
-            </Button>
-          )}
-        </div>
-      )}
-      <Table>
-        <TBody>
-          {tokens?.map(token => (
-            <Tr key={token.id}>
-              <Td width="1">
-                <Checkbox
-                  onCheckedChange={isChecked =>
-                    setChecked(
-                      isChecked ? [...checked, token.id] : checked.filter(k => k !== token.id),
-                    )
-                  }
-                  checked={checked.includes(token.id)}
-                  disabled={!canManage}
-                />
-              </Td>
-              <Td>{token.alias}</Td>
-              <Td>{token.name}</Td>
-              <Td align="right">
-                {token.lastUsedAt ? (
-                  <>
-                    last used <TimeAgo date={token.lastUsedAt} />
-                  </>
-                ) : (
-                  'not used yet'
-                )}
-              </Td>
-              <Td align="right">
-                created <TimeAgo date={token.date} />
-              </Td>
-            </Tr>
-          ))}
-        </TBody>
-      </Table>
+      <CardHeader>
+        <CardTitle>Registry Access Tokens</CardTitle>
+        <CardDescription>
+          Registry Access Tokens are used to access to Hive Registry and perform actions on your
+          targets/projects. In most cases, this token is used from the Hive CLI.
+        </CardDescription>
+        <CardDescription>
+          <DocsLink
+            href="/management/targets#registry-access-tokens"
+            className="text-gray-500 hover:text-gray-300"
+          >
+            Learn more about Registry Access Tokens
+          </DocsLink>
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {canManage && (
+          <div className="my-3.5 flex justify-between">
+            <Button onClick={toggleModalOpen}>Create new registry token</Button>
+            {checked.length === 0 ? null : (
+              <Button variant="destructive" disabled={deleting} onClick={deleteTokens}>
+                Delete ({checked.length || null})
+              </Button>
+            )}
+          </div>
+        )}
+        <Table>
+          <TBody>
+            {tokens?.map(token => (
+              <Tr key={token.id}>
+                <Td width="1">
+                  <Checkbox
+                    onCheckedChange={isChecked =>
+                      setChecked(
+                        isChecked ? [...checked, token.id] : checked.filter(k => k !== token.id),
+                      )
+                    }
+                    checked={checked.includes(token.id)}
+                    disabled={!canManage}
+                  />
+                </Td>
+                <Td>{token.alias}</Td>
+                <Td>{token.name}</Td>
+                <Td align="right">
+                  {token.lastUsedAt ? (
+                    <>
+                      last used <TimeAgo date={token.lastUsedAt} />
+                    </>
+                  ) : (
+                    'not used yet'
+                  )}
+                </Td>
+                <Td align="right">
+                  created <TimeAgo date={token.date} />
+                </Td>
+              </Tr>
+            ))}
+          </TBody>
+        </Table>
+      </CardContent>
       {isModalOpen && (
         <CreateAccessTokenModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
       )}
@@ -205,34 +216,40 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
 
   return (
     <Card>
-      <Heading className="mb-2">Extend Your Schema</Heading>
-      <div className="text-sm text-gray-400 cursor-default">
-        Schema Extensions is pre-defined GraphQL schema that is automatically merged with your
-        published schemas, before being checked and validated.
-        <br />
-        <DocsLink href="/management/targets#schema-extensions">
-          You can find more details and examples in the documentation
-        </DocsLink>
-      </div>
-      <SchemaEditor
-        theme="vs-dark"
-        options={{ readOnly: mutation.fetching }}
-        value={baseSchema}
-        height={300}
-        onChange={value => setBaseSchema(value ?? '')}
-      />
-      {mutation.data?.updateBaseSchema.error && (
-        <div className="text-red-500">{mutation.data.updateBaseSchema.error.message}</div>
-      )}
-      {mutation.error && (
-        <div className="text-red-500">
-          {mutation.error?.graphQLErrors[0]?.message ?? mutation.error.message}
-        </div>
-      )}
-      <div className="mt-3 flex items-center gap-x-3">
+      <CardHeader>
+        <CardTitle>Extend Your Schema</CardTitle>
+        <CardDescription>
+          Schema Extensions is pre-defined GraphQL schema that is automatically merged with your
+          published schemas, before being checked and validated.
+        </CardDescription>
+        <CardDescription>
+          <DocsLink
+            href="/management/targets#schema-extensions"
+            className="text-gray-500 hover:text-gray-300"
+          >
+            You can find more details and examples in the documentation
+          </DocsLink>
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <SchemaEditor
+          theme="vs-dark"
+          options={{ readOnly: mutation.fetching }}
+          value={baseSchema}
+          height={300}
+          onChange={value => setBaseSchema(value ?? '')}
+        />
+        {mutation.data?.updateBaseSchema.error && (
+          <div className="text-red-500">{mutation.data.updateBaseSchema.error.message}</div>
+        )}
+        {mutation.error && (
+          <div className="text-red-500">
+            {mutation.error?.graphQLErrors[0]?.message ?? mutation.error.message}
+          </div>
+        )}
+      </CardContent>
+      <CardFooter className="flex items-center gap-x-3">
         <Button
-          size="large"
-          variant="primary"
           className="px-5"
           disabled={mutation.fetching}
           onClick={async () => {
@@ -249,15 +266,14 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
           Save
         </Button>
         <Button
-          size="large"
           variant="secondary"
           className="px-5"
           onClick={() => setBaseSchema(props.baseSchema)}
         >
           Reset
         </Button>
-        {isUnsaved && <span className="text-green-500">Unsaved changes!</span>}
-      </div>
+        {isUnsaved && <span className="text-green-500 text-sm">Unsaved changes!</span>}
+      </CardFooter>
     </Card>
   );
 };
@@ -309,6 +325,7 @@ function ClientExclusion(
   return (
     <Combobox
       name={props.name}
+      placeholder="Select..."
       value={props.value.map(name => ({ label: name, value: name }))}
       options={
         allClientNames.map(name => ({
@@ -455,43 +472,49 @@ const ConditionalBreakingChanges = (): ReactElement => {
   });
 
   return (
-    <Card>
-      <form onSubmit={handleSubmit}>
-        <Heading className="mb-2 flex items-center justify-between gap-5">
-          Conditional Breaking Changes
-          {targetSettings.fetching ? (
-            <Spinner />
-          ) : (
-            <Switch
-              className="shrink-0"
-              checked={isEnabled}
-              onCheckedChange={async enabled => {
-                await setValidation({
-                  input: {
-                    target: router.targetId,
-                    project: router.projectId,
-                    organization: router.organizationId,
-                    enabled,
-                  },
-                });
-              }}
-              disabled={targetValidation.fetching}
-            />
-          )}
-        </Heading>
-        <div className="text-sm text-gray-400 cursor-default">
-          Conditional Breaking Changes can change the behavior of schema checks, based on real
-          traffic data sent to Hive.{' '}
-          <DocsLink href="/management/targets#conditional-breaking-changes">Learn more</DocsLink>
-        </div>
-        <div
-          className={clsx(
-            'mb-3 mt-4 flex flex-col items-start gap-3 font-light text-gray-300',
-            !isEnabled && 'pointer-events-none opacity-25',
-          )}
+    <form onSubmit={handleSubmit}>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between gap-x-5">
+            <div>Conditional Breaking Changes</div>
+            {targetSettings.fetching ? (
+              <Spinner />
+            ) : (
+              <Switch
+                className="shrink-0"
+                checked={isEnabled}
+                onCheckedChange={async enabled => {
+                  await setValidation({
+                    input: {
+                      target: router.targetId,
+                      project: router.projectId,
+                      organization: router.organizationId,
+                      enabled,
+                    },
+                  });
+                }}
+                disabled={targetValidation.fetching}
+              />
+            )}
+          </CardTitle>
+          <CardDescription>
+            Conditional Breaking Changes can change the behavior of schema checks, based on real
+            traffic data sent to Hive.
+          </CardDescription>
+          <CardDescription>
+            <DocsLink
+              href="/management/targets#conditional-breaking-changes"
+              className="text-gray-500 hover:text-gray-300"
+            >
+              Learn more
+            </DocsLink>
+          </CardDescription>
+        </CardHeader>
+        <CardContent
+          className={clsx('text-gray-300', !isEnabled && 'pointer-events-none opacity-25')}
         >
           <div>
-            A schema change is considered as breaking only if affects more than
+            A schema change is considered as breaking only if it affects more than
             <Input
               name="percentage"
               onChange={handleChange}
@@ -505,7 +528,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
               max="100"
               className="mx-2 !inline-flex !w-16"
             />
-            % of traffic in past
+            % of traffic in the past
             <Input
               name="period"
               onChange={handleChange}
@@ -519,110 +542,123 @@ const ConditionalBreakingChanges = (): ReactElement => {
               max="30"
               className="mx-2 !inline-flex !w-16"
             />
-            days
+            days.
           </div>
-          {touched.percentage && errors.percentage && (
-            <div className="text-red-500">{errors.percentage}</div>
-          )}
-          {mutation.data?.updateTargetValidationSettings.error?.inputErrors.percentage && (
-            <div className="text-red-500">
-              {mutation.data.updateTargetValidationSettings.error.inputErrors.percentage}
-            </div>
-          )}
-          {touched.period && errors.period && <div className="text-red-500">{errors.period}</div>}
-          {mutation.data?.updateTargetValidationSettings.error?.inputErrors.period && (
-            <div className="text-red-500">
-              {mutation.data.updateTargetValidationSettings.error.inputErrors.period}
-            </div>
-          )}
-          <div className="my-4 flex flex-col gap-2">
-            <div>
-              <div>Exclude these clients:</div>
-              <div className="text-xs">
-                Marks a breaking change as safe when it only affects the following clients.
+          <div className="mt-3">
+            {touched.percentage && errors.percentage && (
+              <div className="text-red-500">{errors.percentage}</div>
+            )}
+            {mutation.data?.updateTargetValidationSettings.error?.inputErrors.percentage && (
+              <div className="text-red-500">
+                {mutation.data.updateTargetValidationSettings.error.inputErrors.percentage}
               </div>
-            </div>
-            <div>
-              {values.targets.length > 0 ? (
-                <ClientExclusion
-                  organizationId={router.organizationId}
-                  projectId={router.projectId}
-                  selectedTargets={values.targets}
-                  clientsFromSettings={settings?.excludedClients ?? []}
-                  name="excludedClients"
-                  value={values.excludedClients}
-                  onBlur={() => setFieldTouched('excludedClients')}
-                  onChange={async options => {
-                    await setFieldValue(
-                      'excludedClients',
-                      options.map(o => o.value),
-                    );
-                  }}
-                  disabled={isSubmitting}
-                />
-              ) : (
-                <div className="text-gray-500">Select targets first</div>
-              )}
-            </div>
-            {touched.excludedClients && errors.excludedClients && (
-              <div className="text-red-500">{errors.excludedClients}</div>
+            )}
+            {touched.period && errors.period && <div className="text-red-500">{errors.period}</div>}
+            {mutation.data?.updateTargetValidationSettings.error?.inputErrors.period && (
+              <div className="text-red-500">
+                {mutation.data.updateTargetValidationSettings.error.inputErrors.period}
+              </div>
             )}
           </div>
-          Check collected usage data from these targets:
-          {possibleTargets?.map(pt => (
-            <div key={pt.id} className="flex items-center gap-2 pl-5">
-              <Checkbox
-                checked={values.targets.includes(pt.id)}
-                onCheckedChange={async isChecked => {
-                  await setFieldValue(
-                    'targets',
-                    isChecked
-                      ? [...values.targets, pt.id]
-                      : values.targets.filter(value => value !== pt.id),
-                  );
-                }}
-                onBlur={() => setFieldTouched('targets', true)}
-              />{' '}
-              {pt.name}
+          <div className="space-y-6">
+            <div>
+              <div className="space-y-2">
+                <div>
+                  <div className="font-semibold">Allow breaking change for these clients:</div>
+                  <div className="text-xs text-gray-400">
+                    Marks a breaking change as safe when it only affects the following clients.
+                  </div>
+                </div>
+                <div className="max-w-[420px]">
+                  {values.targets.length > 0 ? (
+                    <ClientExclusion
+                      organizationId={router.organizationId}
+                      projectId={router.projectId}
+                      selectedTargets={values.targets}
+                      clientsFromSettings={settings?.excludedClients ?? []}
+                      name="excludedClients"
+                      value={values.excludedClients}
+                      onBlur={() => setFieldTouched('excludedClients')}
+                      onChange={async options => {
+                        await setFieldValue(
+                          'excludedClients',
+                          options.map(o => o.value),
+                        );
+                      }}
+                      disabled={isSubmitting}
+                    />
+                  ) : (
+                    <div className="text-gray-500">Select targets first</div>
+                  )}
+                </div>
+                {touched.excludedClients && errors.excludedClients && (
+                  <div className="text-red-500">{errors.excludedClients}</div>
+                )}
+              </div>
             </div>
-          ))}
+            <div className="space-y-2">
+              <div>
+                <div className="font-semibold">Schema usage data from these targets:</div>
+                <div className="text-xs text-gray-400">
+                  Marks a breaking change as safe when it was not requested in the targets clients.
+                </div>
+              </div>
+              <div className="pl-2">
+                {possibleTargets?.map(pt => (
+                  <div key={pt.id} className="flex items-center gap-x-2">
+                    <Checkbox
+                      checked={values.targets.includes(pt.id)}
+                      onCheckedChange={async isChecked => {
+                        await setFieldValue(
+                          'targets',
+                          isChecked
+                            ? [...values.targets, pt.id]
+                            : values.targets.filter(value => value !== pt.id),
+                        );
+                      }}
+                      onBlur={() => setFieldTouched('targets', true)}
+                    />{' '}
+                    {pt.name}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
           {touched.targets && errors.targets && (
             <div className="text-red-500">{errors.targets}</div>
           )}
-          <Tag className="mt-5 flex-col !items-start gap-1">
-            Example settings: Removal of a field is considered breaking if
+          <div className="mt-5 pl-5 py-2 space-y-2 border-l-2 border-l-gray-800 bg-gray-600/10 rounded text-gray-400">
             <div>
+              <div className="font-semibold">Example settings</div>
+              <div className="text-sm">Removal of a field is considered breaking if</div>
+            </div>
+
+            <div className="text-sm">
               <Tag color="yellow" className="py-0">
                 0%
               </Tag>{' '}
               - the field was used at least once in past 30 days
             </div>
-            <div>
+            <div className="text-sm">
               <Tag color="yellow" className="py-0">
                 10%
               </Tag>{' '}
               - the field was requested by more than 10% of all GraphQL operations in recent 30 days
             </div>
-          </Tag>
-          <div>
-            <Button
-              type="submit"
-              className="px-5"
-              variant="primary"
-              size="large"
-              disabled={isSubmitting}
-            >
-              Save
-            </Button>
-            {mutation.error && (
-              <span className="ml-2 text-red-500">
-                {mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}
-              </span>
-            )}
           </div>
-        </div>
-      </form>
-    </Card>
+        </CardContent>
+        <CardFooter>
+          <Button type="submit" disabled={isSubmitting}>
+            Save
+          </Button>
+          {mutation.error && (
+            <span className="ml-2 text-red-500">
+              {mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}
+            </span>
+          )}
+        </CardFooter>
+      </Card>
+    </form>
   );
 };
 
@@ -664,46 +700,51 @@ function TargetName(props: {
 
   return (
     <Card>
-      <Heading className="mb-2">Target Name</Heading>
-      <div className="text-sm text-gray-400 cursor-default">
-        Changing the name of your target will also change the slug of your target URL, and will
-        invalidate any existing links to your target.
-        <br />
-        <DocsLink href="/management/targets#rename-a-target">
-          You can read more about it in the documentation
-        </DocsLink>
-      </div>
-      <form onSubmit={handleSubmit} className="flex gap-x-2">
-        <Input
-          placeholder="Target name"
-          name="name"
-          value={values.name}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          disabled={isSubmitting}
-          isInvalid={touched.name && !!errors.name}
-          className="w-96"
-        />
-        <Button
-          type="submit"
-          variant="primary"
-          size="large"
-          disabled={isSubmitting}
-          className="px-10"
-        >
-          Save
-        </Button>
+      <CardHeader>
+        <CardTitle>Target Name</CardTitle>
+        <CardDescription>
+          Changing the name of your target will also change the slug of your target URL, and will
+          invalidate any existing links to your target.
+        </CardDescription>
+        <CardDescription>
+          <DocsLink
+            href="/management/targets#rename-a-target"
+            className="text-gray-500 hover:text-gray-300"
+          >
+            You can read more about it in the documentation
+          </DocsLink>
+        </CardDescription>
+      </CardHeader>
+      <form onSubmit={handleSubmit}>
+        <CardContent>
+          <div className="flex flex-row items-center gap-x-2">
+            <Input
+              placeholder="Target name"
+              name="name"
+              value={values.name}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              disabled={isSubmitting}
+              isInvalid={touched.name && !!errors.name}
+              className="w-96"
+            />
+            <Button type="submit" disabled={isSubmitting}>
+              Save
+            </Button>
+          </div>
+
+          {touched.name && (errors.name || mutation.error) && (
+            <div className="mt-2 text-red-500">
+              {errors.name ?? mutation.error?.graphQLErrors[0]?.message ?? mutation.error?.message}
+            </div>
+          )}
+          {mutation.data?.updateTargetName.error?.inputErrors?.name && (
+            <div className="mt-2 text-red-500">
+              {mutation.data.updateTargetName.error.inputErrors.name}
+            </div>
+          )}
+        </CardContent>
       </form>
-      {touched.name && (errors.name || mutation.error) && (
-        <div className="mt-2 text-red-500">
-          {errors.name ?? mutation.error?.graphQLErrors[0]?.message ?? mutation.error?.message}
-        </div>
-      )}
-      {mutation.data?.updateTargetName.error?.inputErrors?.name && (
-        <div className="mt-2 text-red-500">
-          {mutation.data.updateTargetName.error.inputErrors.name}
-        </div>
-      )}
     </Card>
   );
 }
@@ -759,56 +800,56 @@ function GraphQLEndpointUrl(props: {
 
   return (
     <Card>
-      <Heading className="mb-2">GraphQL Endpoint URL</Heading>
-      <div className="text-sm text-gray-400 cursor-default">
-        The endpoint url will be used for querying the target from the{' '}
-        <NextLink
-          href={{
-            pathname: '/[organizationId]/[projectId]/[targetId]/laboratory',
-            query: {
-              organizationId: router.organizationId,
-              projectId: router.projectId,
-              targetId: router.targetId,
-            },
-          }}
-        >
-          Hive Laboratory
-        </NextLink>
-        .
-      </div>
-      <form onSubmit={handleSubmit} className="flex gap-x-2 mt-2">
-        <Input
-          placeholder="Endpoint Url"
-          name="graphqlEndpointUrl"
-          value={values.graphqlEndpointUrl}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          disabled={isSubmitting}
-          isInvalid={touched.graphqlEndpointUrl && !!errors.graphqlEndpointUrl}
-          className="w-96"
-        />
-        <Button
-          type="submit"
-          variant="primary"
-          size="large"
-          disabled={isSubmitting}
-          className="px-10"
-        >
-          Save
-        </Button>
+      <CardHeader>
+        <CardTitle>GraphQL Endpoint URL</CardTitle>
+        <CardDescription>
+          The endpoint url will be used for querying the target from the{' '}
+          <NextLink
+            href={{
+              pathname: '/[organizationId]/[projectId]/[targetId]/laboratory',
+              query: {
+                organizationId: router.organizationId,
+                projectId: router.projectId,
+                targetId: router.targetId,
+              },
+            }}
+          >
+            Hive Laboratory
+          </NextLink>
+          .
+        </CardDescription>
+      </CardHeader>
+      <form onSubmit={handleSubmit}>
+        <CardContent>
+          <div className="flex flex-row items-center gap-x-2">
+            <Input
+              placeholder="Endpoint Url"
+              name="graphqlEndpointUrl"
+              value={values.graphqlEndpointUrl}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              disabled={isSubmitting}
+              isInvalid={touched.graphqlEndpointUrl && !!errors.graphqlEndpointUrl}
+              className="w-96"
+            />
+            <Button type="submit" disabled={isSubmitting}>
+              Save
+            </Button>
+          </div>
+          {touched.graphqlEndpointUrl && (errors.graphqlEndpointUrl || mutation.error) && (
+            <div className="mt-2 text-red-500">
+              {errors.graphqlEndpointUrl ??
+                mutation.error?.graphQLErrors[0]?.message ??
+                mutation.error?.message}
+            </div>
+          )}
+          {mutation.data?.updateTargetGraphQLEndpointUrl.error && (
+            <div className="mt-2 text-red-500">
+              {mutation.data.updateTargetGraphQLEndpointUrl.error.message}
+            </div>
+          )}
+        </CardContent>
       </form>
-      {touched.graphqlEndpointUrl && (errors.graphqlEndpointUrl || mutation.error) && (
-        <div className="mt-2 text-red-500">
-          {errors.graphqlEndpointUrl ??
-            mutation.error?.graphQLErrors[0]?.message ??
-            mutation.error?.message}
-        </div>
-      )}
-      {mutation.data?.updateTargetGraphQLEndpointUrl.error && (
-        <div className="mt-2 text-red-500">
-          {mutation.data.updateTargetGraphQLEndpointUrl.error.message}
-        </div>
-      )}
     </Card>
   );
 }
@@ -861,30 +902,26 @@ function TargetDelete(props: { organizationId: string; projectId: string; target
   return (
     <>
       <Card className="mb-10">
-        <div className="flex items-center justify-between">
-          <div>
-            <Heading className="mb-2">Delete Target</Heading>
-            <div className="text-sm text-gray-400 cursor-default">
-              Deleting an project also delete all schemas and data associated with it.
-              <br />
-              <DocsLink href="/management/targets#delete-a-target">
-                <strong>This action is not reversible!</strong> You can find more information about
-                this process in the documentation
-              </DocsLink>
-            </div>
-          </div>
-          <div className="flex items-center gap-x-2">
-            <Button
-              variant="primary"
-              size="large"
-              danger
-              onClick={toggleModalOpen}
-              className="px-5"
+        <CardHeader>
+          <CardTitle>Delete Target</CardTitle>
+          <CardDescription>
+            Deleting an project also delete all schemas and data associated with it.
+          </CardDescription>
+          <CardDescription>
+            <DocsLink
+              href="/management/targets#delete-a-target"
+              className="text-gray-500 hover:text-gray-300"
             >
-              Delete Target
-            </Button>
-          </div>
-        </div>
+              <strong>This action is not reversible!</strong> You can find more information about
+              this process in the documentation
+            </DocsLink>
+          </CardDescription>
+        </CardHeader>
+        <CardFooter>
+          <Button variant="destructive" onClick={toggleModalOpen}>
+            Delete Target
+          </Button>
+        </CardFooter>
       </Card>
       <DeleteTargetModal
         organizationId={props.organizationId}

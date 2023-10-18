@@ -40,7 +40,8 @@ export const PolicyMultiSelect = (props: {
       }
     >
       <Combobox
-        name="Select Options"
+        name="options"
+        placeholder="Select Options"
         className="w-full"
         onBlur={() => {}}
         onChange={newValue => {
