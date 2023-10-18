@@ -73,9 +73,11 @@ export class ClickHouse {
     });
     const startedAt = Date.now();
     const endpoint = `${this.config.protocol ?? 'https'}://${this.config.host}:${this.config.port}`;
+    const executionId = queryId + '-' + Math.random().toString(16).substring(2);
 
     this.logger.debug(
-      `Executing ClickHouse Query: %s`,
+      `Executing ClickHouse Query (executionId: %s): %s`,
+      executionId,
       printWithValues(query).replace(/\n/g, ' ').replace(/\s+/g, ' '),
     );
 
@@ -95,6 +97,7 @@ export class ClickHouse {
             default_format: 'JSON',
             // Max execution time in seconds
             max_execution_time: timeout / 1000,
+            query_id: executionId,
             ...toQueryParams(query),
           },
           username: this.config.username,
@@ -115,18 +118,20 @@ export class ClickHouse {
 
               const delayBy = info.attemptCount * 250;
               this.logger.error(
-                `Failed to run ClickHouse query, code: %s , error name: %s, message: %s`,
+                `Failed to run ClickHouse query, executionId: %s, code: %s , error name: %s, message: %s`,
+                executionId,
                 info.error.code,
                 info.error.name,
                 info.error.message,
               );
 
               this.logger.debug(
-                `Retry (delay=%s, attempt=%s, reason=%s, queryId=%s)`,
+                `Retry (delay=%s, attempt=%s, reason=%s, queryId=%s, executionId=%s)`,
                 delayBy,
                 info.attemptCount,
                 info.error.message,
                 queryId,
+                executionId,
               );
 
               return delayBy;
@@ -141,6 +146,16 @@ export class ClickHouse {
 
         span,
       )
+      .catch(error => {
+        this.logger.error(
+          `Failed to run ClickHouse query, executionId: %s, code: %s , error name: %s, message: %s`,
+          executionId,
+          error.code,
+          error.name,
+          error.message,
+        );
+        return Promise.reject(error);
+      })
       .finally(() => {
         span?.finish();
       });
