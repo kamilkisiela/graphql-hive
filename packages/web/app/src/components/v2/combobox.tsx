@@ -12,6 +12,7 @@ interface Option {
 export function Combobox(
   props: React.PropsWithoutRef<{
     name: string;
+    placeholder: string;
     options: readonly Option[];
     value?: readonly Option[];
     onChange: (value: readonly Option[]) => void;
@@ -64,7 +65,7 @@ export function Combobox(
       value={props.value}
       isMulti
       options={props.options}
-      placeholder={props.name}
+      placeholder={props.placeholder}
       onChange={props.onChange as any}
       isDisabled={props.disabled}
       onBlur={props.onBlur}

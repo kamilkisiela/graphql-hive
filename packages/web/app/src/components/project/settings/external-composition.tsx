@@ -2,17 +2,9 @@ import { useCallback, useState } from 'react';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-import {
-  Button,
-  Card,
-  DocsLink,
-  DocsNote,
-  Heading,
-  Input,
-  Spinner,
-  Switch,
-  Tooltip,
-} from '@/components/v2';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DocsLink, DocsNote, Input, Spinner, Switch, Tooltip } from '@/components/v2';
 import { ProductUpdatesLink } from '@/components/v2/docs-note';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useNotifications } from '@/lib/hooks';
@@ -220,13 +212,7 @@ const ExternalCompositionForm = ({
           <div className="mt-2 text-xs text-red-500">{mutation.error.message}</div>
         )}
         <div>
-          <Button
-            type="submit"
-            variant="primary"
-            size="large"
-            className="px-10"
-            disabled={isSubmitting}
-          >
+          <Button type="submit" disabled={isSubmitting}>
             Save
           </Button>
         </div>
@@ -333,41 +319,45 @@ export const ExternalCompositionSettings = (props: {
 
   return (
     <Card>
-      <Heading className="mb-2 flex items-center justify-between gap-5">
-        <span className="shrink-0">External Composition</span>
-        <div>
-          {isLoading ? (
-            <Spinner />
-          ) : (
-            <Switch
-              className="shrink-0"
-              checked={isEnabled}
-              onCheckedChange={handleSwitch}
-              disabled={mutation.fetching}
-            />
-          )}
-        </div>
-      </Heading>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <div>External Composition</div>
+          <div>
+            {isLoading ? (
+              <Spinner />
+            ) : (
+              <Switch
+                className="shrink-0"
+                checked={isEnabled}
+                onCheckedChange={handleSwitch}
+                disabled={mutation.fetching}
+              />
+            )}
+          </div>
+        </CardTitle>
+      </CardHeader>
 
-      <ProductUpdatesLink href="2023-10-10-native-federation-2">
-        We're rolling out native Apollo Federation support in Hive!
-      </ProductUpdatesLink>
+      <CardContent>
+        <ProductUpdatesLink href="2023-10-10-native-federation-2">
+          We're rolling out native Apollo Federation support in Hive!
+        </ProductUpdatesLink>
 
-      <DocsNote>
-        External Schema Composition is required for using Apollo Federation 2 with Hive.
-        <br />
-        <DocsLink href="/management/external-schema-composition">
-          Learn more about Apollo Federation 2 support
-        </DocsLink>
-      </DocsNote>
+        <DocsNote>
+          External Schema Composition is required for using Apollo Federation 2 with Hive.
+          <br />
+          <DocsLink href="/management/external-schema-composition">
+            Learn more about Apollo Federation 2 support
+          </DocsLink>
+        </DocsNote>
 
-      {isFormVisible ? (
-        <ExternalCompositionForm
-          project={project}
-          organization={organization}
-          endpoint={externalCompositionConfig?.endpoint}
-        />
-      ) : null}
+        {isFormVisible ? (
+          <ExternalCompositionForm
+            project={project}
+            organization={organization}
+            endpoint={externalCompositionConfig?.endpoint}
+          />
+        ) : null}
+      </CardContent>
     </Card>
   );
 };
