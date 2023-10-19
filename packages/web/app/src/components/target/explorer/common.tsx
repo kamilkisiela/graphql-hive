@@ -426,11 +426,12 @@ export function GraphQLFields(props: {
           const coordinate = `${props.typeName}.${field.name}`;
           const isUsed = field.usage.total > 0;
           const hasUnusedArguments = field.args.length > 0;
+          const showsUnusedSchema = typeof totalRequests !== 'number';
 
           return (
             <GraphQLTypeCardListItem key={field.name} index={i}>
               <div>
-                {isUsed && hasUnusedArguments ? (
+                {isUsed && hasUnusedArguments && showsUnusedSchema ? (
                   <Tooltip>
                     <TooltipContent>
                       This field is used but the presented arguments are not.

@@ -11,7 +11,7 @@ export default gql`
   }
 
   type Mutation {
-    noop: Boolean
+    noop(noop: String): Boolean
   }
 
   type PageInfo {
