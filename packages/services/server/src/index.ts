@@ -112,14 +112,15 @@ export async function main() {
   registerShutdown({
     logger: server.log,
     async onShutdown() {
-      if (expiredSchemaCheckPurgeTaskRunner) {
-        server.log.info('Stopping expired schema check purge task...');
-        await expiredSchemaCheckPurgeTaskRunner.stop();
-      }
       server.log.info('Stopping HTTP server listener...');
       await server.close();
       server.log.info('Stopping Storage handler...');
       await storage.destroy();
+      if (expiredSchemaCheckPurgeTaskRunner) {
+        server.log.info('Stopping expired schema check purge task...');
+        await expiredSchemaCheckPurgeTaskRunner.stop();
+      }
+      server.log.info('Shutdown complete.');
     },
   });
 
