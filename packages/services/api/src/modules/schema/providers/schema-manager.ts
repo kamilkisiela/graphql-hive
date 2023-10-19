@@ -350,7 +350,14 @@ export class SchemaManager {
   ) {
     this.logger.info(
       'Creating a new version (input=%o)',
-      lodash.omit(input, ['schema', 'actionFn']),
+      lodash.omit(input, [
+        'schema',
+        'actionFn',
+        'changes',
+        'compositeSchemaSDL',
+        'supergraphSDL',
+        'schemaCompositionErrors',
+      ]),
     );
 
     await this.authManager.ensureTargetAccess({

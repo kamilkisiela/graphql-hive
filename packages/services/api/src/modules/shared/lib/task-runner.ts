@@ -12,7 +12,7 @@ export const createTaskRunner = (args: {
   let isStarted = false;
   let isStopped = false;
 
-  async function loop() {
+  function loop() {
     task = scheduleTask({
       runInMilliSeconds: args.interval,
       run: args.run,
@@ -21,7 +21,6 @@ export const createTaskRunner = (args: {
     });
     task.done.finally(() => {
       if (!isStopped) {
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         loop();
       }
     });
@@ -33,7 +32,6 @@ export const createTaskRunner = (args: {
         return;
       }
       isStarted = true;
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
       loop();
     },
     async stop() {
@@ -72,7 +70,6 @@ const scheduleTask = (args: {
     cancel: () => {
       if (timeout) {
         clearTimeout(timeout);
-        return;
       }
       deferred.resolve();
     },
