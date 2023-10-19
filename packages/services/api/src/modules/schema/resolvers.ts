@@ -84,6 +84,20 @@ async function usage(
     'parent' in source ? `${source.parent.coordinate}.${source.entity.name}` : source.entity.name;
 
   if ('isUsed' in source.usage) {
+    if (source.usage.usedCoordinates.has(coordinate)) {
+      return {
+        // TODO: This is a hack to mark the field as used but without passing exact number as we don't need the exact number in "Unused schema view".
+        total: 1,
+        isUsed: true,
+        usedByClients: null,
+        period: source.usage.period,
+        organization: source.usage.organization,
+        project: source.usage.project,
+        target: source.usage.target,
+        coordinate: coordinate,
+      };
+    }
+
     return {
       total: 0,
       isUsed: false,
@@ -1136,6 +1150,7 @@ export const resolvers: SchemaModule.Resolvers = {
           organization: version.organization,
           project: version.project,
           target: version.target,
+          usedCoordinates,
         },
         supergraph,
       };
@@ -1664,7 +1679,7 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   UnusedSchemaExplorer: {
-    types({ sdl, supergraph }) {
+    types({ sdl, supergraph, usage }) {
       const types: Array<
         | GraphQLObjectTypeMapper
         | GraphQLInterfaceTypeMapper
@@ -1675,6 +1690,11 @@ export const resolvers: SchemaModule.Resolvers = {
       > = [];
       const unused = {
         isUsed: false,
+        usedCoordinates: usage.usedCoordinates,
+        period: usage.period,
+        organization: usage.organization,
+        project: usage.project,
+        target: usage.target,
       } as const;
 
       for (const typeDefinition of sdl.definitions) {

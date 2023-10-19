@@ -56,6 +56,11 @@ export type WithSchemaCoordinatesUsage<T> = T & {
       }>
     | {
         isUsed: false;
+        usedCoordinates: Set<string>;
+        period: DateRange;
+        organization: string;
+        project: string;
+        target: string;
       };
 };
 
@@ -77,6 +82,7 @@ export type UnusedSchemaExplorerMapper = {
     organization: string;
     project: string;
     target: string;
+    usedCoordinates: Set<string>;
   };
   supergraph: null | SuperGraphInformation;
 };

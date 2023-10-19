@@ -2,15 +2,13 @@ import React, { ReactElement, ReactNode, useMemo } from 'react';
 import NextLink from 'next/link';
 import { clsx } from 'clsx';
 import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Tooltip } from '@/components/v2';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PulseIcon, UsersIcon } from '@/components/v2/icon';
 import { Markdown } from '@/components/v2/markdown';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { formatNumber, toDecimal, useRouteSelector } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { ChatBubbleIcon } from '@radix-ui/react-icons';
-import * as P from '@radix-ui/react-popover';
-import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { useArgumentListToggle } from './provider';
 import { SupergraphMetadataList } from './super-graph-metadata';
 
@@ -31,21 +29,21 @@ function useCollapsibleList<T>(list: ReadonlyArray<T>, max: number, defaultValue
 
 function Description(props: { description: string }) {
   return (
-    <P.Root>
-      <P.Trigger asChild>
+    <Popover>
+      <PopoverTrigger asChild>
         <button title="Description is available" className="text-gray-500 hover:text-white">
           <ChatBubbleIcon className="h-5 w-auto" />
         </button>
-      </P.Trigger>
-      <P.Content
-        className="max-w-screen-sm rounded-md bg-gray-800 p-4 text-sm shadow-md"
+      </PopoverTrigger>
+      <PopoverContent
+        className="max-w-screen-sm rounded-md p-4 text-sm shadow-md"
         side="right"
         sideOffset={5}
       >
-        <P.Arrow className="fill-current text-gray-800" />
+        <PopoverArrow />
         <Markdown content={props.description} />
-      </P.Content>
-    </P.Root>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -87,8 +85,8 @@ export function SchemaExplorerUsageStats(props: {
             <div className="h-full bg-orange-500 z-0" style={{ width: `${percentage}%` }} />
           </div>
         </div>
-        <Tooltip
-          content={
+        <Tooltip>
+          <TooltipContent>
             <div className="z-10">
               <div className="font-bold mb-1 text-lg">Field Usage</div>
               {usage.isUsed === false ? (
@@ -151,15 +149,16 @@ export function SchemaExplorerUsageStats(props: {
                 </div>
               )}
             </div>
-          }
-        >
-          <div className="text-xl cursor-help">
-            <PulseIcon className="h-6 w-auto" />
-          </div>
+          </TooltipContent>
+          <TooltipTrigger>
+            <div className="text-xl cursor-help">
+              <PulseIcon className="h-6 w-auto" />
+            </div>
+          </TooltipTrigger>
         </Tooltip>
 
-        <Tooltip
-          content={
+        <Tooltip>
+          <TooltipContent>
             <>
               <div className="font-bold mb-1 text-lg">Client Usage</div>
 
@@ -192,11 +191,12 @@ export function SchemaExplorerUsageStats(props: {
                 <div>This field is not used by any client.</div>
               )}
             </>
-          }
-        >
-          <div className="text-xl p-1 cursor-help">
-            <UsersIcon size={16} className="h-6 w-auto" />
-          </div>
+          </TooltipContent>
+          <TooltipTrigger>
+            <div className="text-xl p-1 cursor-help">
+              <UsersIcon size={16} className="h-6 w-auto" />
+            </div>
+          </TooltipTrigger>
         </Tooltip>
       </div>
     </TooltipProvider>
@@ -287,7 +287,7 @@ export function GraphQLTypeCard(props: {
           </div>
         </div>
         {Array.isArray(props.implements) && props.implements.length > 0 ? (
-          <div className="flex flex-row text-sm text-gray-500">
+          <div className="flex flex-row items-center text-sm text-gray-500">
             <div className="mr-2">implements</div>
             <div className="flex flex-row gap-2">
               {props.implements.map(t => (
@@ -420,51 +420,65 @@ export function GraphQLFields(props: {
   const [fields, collapsed, expand] = useCollapsibleList(sortedFields, 5, props.collapsed ?? false);
 
   return (
-    <div className="flex flex-col">
-      {fields.map((field, i) => {
-        const coordinate = `${props.typeName}.${field.name}`;
+    <TooltipProvider delayDuration={0}>
+      <div className="flex flex-col">
+        {fields.map((field, i) => {
+          const coordinate = `${props.typeName}.${field.name}`;
+          const isUsed = field.usage.total > 0;
+          const hasUnusedArguments = field.args.length > 0;
 
-        return (
-          <GraphQLTypeCardListItem key={field.name} index={i}>
-            <div>
-              <LinkToCoordinatePage coordinate={coordinate} className="font-semibold">
-                {field.name}
-              </LinkToCoordinatePage>
-              {field.args.length > 0 ? (
-                <GraphQLArguments parentCoordinate={coordinate} args={field.args} />
-              ) : null}
-              <span className="mr-1">:</span>
-              <GraphQLTypeAsLink className="text-gray-400 font-semibold" type={field.type} />
-            </div>
-            <div className="flex flex-row items-center">
-              {field.supergraphMetadata ? (
-                <div className="ml-1">
-                  <SupergraphMetadataList supergraphMetadata={field.supergraphMetadata} />
-                </div>
-              ) : null}
-              {typeof totalRequests === 'number' ? (
-                <SchemaExplorerUsageStats
-                  totalRequests={totalRequests}
-                  usage={field.usage}
-                  targetCleanId={props.targetCleanId}
-                  projectCleanId={props.projectCleanId}
-                  organizationCleanId={props.organizationCleanId}
-                />
-              ) : null}
-            </div>
+          return (
+            <GraphQLTypeCardListItem key={field.name} index={i}>
+              <div>
+                {isUsed && hasUnusedArguments ? (
+                  <Tooltip>
+                    <TooltipContent>
+                      This field is used but the presented arguments are not.
+                    </TooltipContent>
+                    <TooltipTrigger>
+                      <span className="mr-1 text-sm text-orange-500">*</span>
+                    </TooltipTrigger>
+                  </Tooltip>
+                ) : null}
+                <LinkToCoordinatePage coordinate={coordinate} className="font-semibold">
+                  {field.name}
+                </LinkToCoordinatePage>
+                {field.args.length > 0 ? (
+                  <GraphQLArguments parentCoordinate={coordinate} args={field.args} />
+                ) : null}
+                <span className="mr-1">:</span>
+                <GraphQLTypeAsLink className="text-gray-400 font-semibold" type={field.type} />
+              </div>
+              <div className="flex flex-row items-center">
+                {field.supergraphMetadata ? (
+                  <div className="ml-1">
+                    <SupergraphMetadataList supergraphMetadata={field.supergraphMetadata} />
+                  </div>
+                ) : null}
+                {typeof totalRequests === 'number' ? (
+                  <SchemaExplorerUsageStats
+                    totalRequests={totalRequests}
+                    usage={field.usage}
+                    targetCleanId={props.targetCleanId}
+                    projectCleanId={props.projectCleanId}
+                    organizationCleanId={props.organizationCleanId}
+                  />
+                ) : null}
+              </div>
+            </GraphQLTypeCardListItem>
+          );
+        })}
+        {collapsed ? (
+          <GraphQLTypeCardListItem
+            index={fields.length}
+            className="cursor-pointer font-semibold hover:bg-gray-800"
+            onClick={expand}
+          >
+            Show {props.fields.length - fields.length} more fields
           </GraphQLTypeCardListItem>
-        );
-      })}
-      {collapsed ? (
-        <GraphQLTypeCardListItem
-          index={fields.length}
-          className="cursor-pointer font-semibold hover:bg-gray-800"
-          onClick={expand}
-        >
-          Show {props.fields.length - fields.length} more fields
-        </GraphQLTypeCardListItem>
-      ) : null}
-    </div>
+        ) : null}
+      </div>
+    </TooltipProvider>
   );
 }
 
@@ -477,6 +491,7 @@ export function GraphQLInputFields(props: {
   organizationCleanId: string;
 }): ReactElement {
   const fields = useFragment(GraphQLInputFields_InputFieldFragment, props.fields);
+
   return (
     <div className="flex flex-col">
       {fields.map((field, i) => {
