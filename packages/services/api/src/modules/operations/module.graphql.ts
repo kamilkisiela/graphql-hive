@@ -195,9 +195,11 @@ export default gql`
 
   extend type Target {
     requestsOverTime(resolution: Int!, period: DateRangeInput!): [RequestsOverTime!]!
+    totalRequests(period: DateRangeInput!): SafeInt!
   }
 
   extend type Project {
     requestsOverTime(resolution: Int!, period: DateRangeInput!): [RequestsOverTime!]!
+    totalRequests(period: DateRangeInput!): SafeInt!
   }
 `;

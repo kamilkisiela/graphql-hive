@@ -288,10 +288,14 @@ const ProjectsPageContent = () => {
             ) : (
               targets
                 .sort((a, b) => {
-                  const diff = b.schemaVersionsCount - a.schemaVersionsCount;
+                  const diffOperations = b.totalRequests - a.totalRequests;
+                  if (diffOperations !== 0) {
+                    return diffOperations;
+                  }
 
-                  if (diff !== 0) {
-                    return diff;
+                  const diffVersions = b.schemaVersionsCount - a.schemaVersionsCount;
+                  if (diffVersions !== 0) {
+                    return diffVersions;
                   }
 
                   return a.name.localeCompare(b.name);
@@ -354,6 +358,7 @@ const ProjectOverviewPageQuery = graphql(`
         id
         name
         ...TargetCard_TargetFragment
+        totalRequests(period: $period)
         requestsOverTime(resolution: $chartResolution, period: $period) {
           date
           value
