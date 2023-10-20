@@ -410,7 +410,7 @@ function HistoryPageContent() {
               <Subtitle>Recently published schemas.</Subtitle>
             </div>
             <div className="flex flex-col gap-5">
-              <div className="flex min-w-[420px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
+              <div className="flex min-w-[420px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 bg-gray-900/50 p-2.5">
                 {pageVariables.map((variables, i) => (
                   <ListPage
                     key={variables.after || 'initial'}

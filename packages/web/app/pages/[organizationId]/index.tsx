@@ -97,7 +97,7 @@ const ProjectCard = (props: {
             }
           : '#'
       }
-      className="h-full pt-4 px-0 self-start hover:bg-gray-800/40 hover:shadow-md hover:shadow-gray-800/50"
+      className="h-full pt-4 px-0 self-start hover:bg-gray-800/40 hover:shadow-md hover:shadow-gray-800/50 bg-gray-900/50"
     >
       <TooltipProvider>
         <div className="flex items-start gap-x-2">
