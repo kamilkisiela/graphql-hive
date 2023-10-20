@@ -252,6 +252,7 @@ const OrganizationProjectsPageQuery = graphql(`
         id
         name
         ...ProjectCard_ProjectFragment
+        totalRequests(period: $period)
         requestsOverTime(resolution: $chartResolution, period: $period) {
           date
           value
@@ -343,10 +344,14 @@ function OrganizationPageContent() {
               <div className="grid grid-cols-2 gap-5 items-stretch">
                 {projects.nodes
                   .sort((a, b) => {
-                    const diff = b.schemaVersionsCount - a.schemaVersionsCount;
+                    const diffOperations = b.totalRequests - a.totalRequests;
+                    if (diffOperations !== 0) {
+                      return diffOperations;
+                    }
 
-                    if (diff !== 0) {
-                      return diff;
+                    const diffVersions = b.schemaVersionsCount - a.schemaVersionsCount;
+                    if (diffVersions !== 0) {
+                      return diffVersions;
                     }
 
                     return a.name.localeCompare(b.name);

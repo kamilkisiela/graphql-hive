@@ -189,7 +189,7 @@ export class OperationsManager {
     });
 
     return this.reader
-      .countOperations({
+      .countRequests({
         target,
         period,
         schemaCoordinate,
@@ -197,7 +197,7 @@ export class OperationsManager {
       .then(r => r.total);
   }
 
-  async countRequests({
+  async countRequestsAndFailures({
     organization,
     project,
     target,
@@ -209,7 +209,7 @@ export class OperationsManager {
     operations?: readonly string[];
     clients?: readonly string[];
   } & Listify<TargetSelector, 'target'>) {
-    this.logger.info('Counting requests (period=%s, target=%s)', period, target);
+    this.logger.info('Counting requests and failures (period=%s, target=%s)', period, target);
     await this.authManager.ensureTargetAccess({
       organization,
       project,
@@ -218,13 +218,55 @@ export class OperationsManager {
     });
 
     return this.reader
-      .countOperations({
+      .countRequests({
         target,
         period,
         operations,
         clients,
       })
       .then(r => r.total);
+  }
+
+  async countRequests({
+    organization,
+    project,
+    target,
+    period,
+  }: {
+    period: DateRange;
+  } & Listify<TargetSelector, 'target'>): Promise<number> {
+    this.logger.info('Counting requests (period=%s, target=%s)', period, target);
+    await this.authManager.ensureTargetAccess({
+      organization,
+      project,
+      target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    return this.reader.countOperationsWithoutDetails({
+      target,
+      period,
+    });
+  }
+
+  async countRequestsOfProject({
+    organization,
+    project,
+    period,
+  }: {
+    period: DateRange;
+  } & ProjectSelector): Promise<number> {
+    this.logger.info('Counting requests of project (period=%s, project=%s)', period, project);
+    const targets = await this.storage.getTargetIdsOfProject({
+      organization,
+      project,
+    });
+    return this.countRequests({
+      organization,
+      project,
+      target: targets,
+      period,
+    });
   }
 
   async countFailures({

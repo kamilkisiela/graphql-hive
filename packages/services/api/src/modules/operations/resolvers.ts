@@ -232,7 +232,7 @@ export const resolvers: OperationsModule.Resolvers = {
   },
   ClientStats: {
     totalRequests({ organization, project, target, period, clientName }, _, { injector }) {
-      return injector.get(OperationsManager).countRequests({
+      return injector.get(OperationsManager).countRequestsAndFailures({
         organization,
         project,
         target,
@@ -350,7 +350,7 @@ export const resolvers: OperationsModule.Resolvers = {
         .sort((a, b) => b.count - a.count);
     },
     totalRequests({ organization, project, target, period, operations, clients }, _, { injector }) {
-      return injector.get(OperationsManager).countRequests({
+      return injector.get(OperationsManager).countRequestsAndFailures({
         organization,
         project,
         target,
@@ -488,6 +488,13 @@ export const resolvers: OperationsModule.Resolvers = {
     },
   },
   Project: {
+    totalRequests(project, { period }, { injector }) {
+      return injector.get(OperationsManager).countRequestsOfProject({
+        project: project.id,
+        organization: project.orgId,
+        period: parseDateRangeInput(period),
+      });
+    },
     async requestsOverTime(project, { resolution, period }, { injector }) {
       return injector.get(OperationsManager).readRequestsOverTimeOfProject({
         project: project.id,
@@ -498,6 +505,14 @@ export const resolvers: OperationsModule.Resolvers = {
     },
   },
   Target: {
+    totalRequests(target, { period }, { injector }) {
+      return injector.get(OperationsManager).countRequests({
+        target: target.id,
+        project: target.projectId,
+        organization: target.orgId,
+        period: parseDateRangeInput(period),
+      });
+    },
     async requestsOverTime(target, { resolution, period }, { injector }) {
       const result = await injector.get(OperationsManager).readRequestsOverTimeOfTargets({
         project: target.projectId,

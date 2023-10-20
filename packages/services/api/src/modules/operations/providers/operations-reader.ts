@@ -342,7 +342,7 @@ export class OperationsReader {
     const query = this.pickQueryByPeriod(
       {
         daily: {
-          query: sql`SELECT sum(total) as total FROM clients_daily ${this.createFilter({
+          query: sql`SELECT sum(total) as total FROM operations_daily ${this.createFilter({
             target,
             period,
           })}`,
@@ -381,8 +381,8 @@ export class OperationsReader {
     return total;
   }
 
-  @sentry('OperationsReader.countOperations')
-  async countOperations(
+  @sentry('OperationsReader.countRequests')
+  async countRequests(
     {
       target,
       period,
@@ -501,7 +501,7 @@ export class OperationsReader {
     operations?: readonly string[];
     clients?: readonly string[];
   }): Promise<number> {
-    return this.countOperations({ target, period, operations, clients }).then(r => r.notOk);
+    return this.countRequests({ target, period, operations, clients }).then(r => r.notOk);
   }
 
   @sentry('OperationsReader.countUniqueDocuments')
