@@ -182,7 +182,21 @@ impl HiveRegistry {
             return Ok(None);
         }
 
-        Ok(Some(resp.text().map_err(|e| e.to_string())?))
+        if resp.status().is_success() {
+            let supergraph = resp.text().map_err(|e| e.to_string())?;
+
+            if supergraph.contains("join__graph") {
+                return Ok(Some(supergraph));
+            }
+
+            return Err("Fetched invalid supergraph".to_string());
+        }
+
+        Err(format!(
+            "Failed to fetch supergraph (status={}, reason={})",
+            resp.status().as_u16(),
+            resp.text().map_err(|e| e.to_string())?
+        ))
     }
 
     fn initial_supergraph(&mut self) -> Result<(), String> {
