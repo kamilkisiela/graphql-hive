@@ -124,8 +124,8 @@ fn non_empty_string(value: Option<String>) -> Option<String> {
 
 #[derive(Error, Debug)]
 pub enum AgentError {
-    #[error("unable to acquire lock for {0} in {1}, reason {2}")]
-    Lock(String, String, String),
+    #[error("unable to acquire lock: {0}")]
+    Lock(String),
     #[error("unable to send report: token is missing")]
     Unauthorized,
     #[error("unable to send report: no access")]
@@ -199,8 +199,6 @@ impl UsageAgent {
                 .lock()
                 .map_err(|e| {
                     AgentError::Lock(
-                        "OperationProcessor".to_string(),
-                        "produce_report".to_string(),
                         e.to_string(),
                     )
                 })?
@@ -211,8 +209,6 @@ impl UsageAgent {
                         .lock()
                         .map_err(|e| {
                             AgentError::Lock(
-                                "State".to_string(),
-                                "produce_report".to_string(),
                                 e.to_string(),
                             )
                         })?
@@ -277,7 +273,7 @@ impl UsageAgent {
             .state
             .lock()
             .map_err(|e| {
-                AgentError::Lock("State".to_string(), "add_report".to_string(), e.to_string())
+                AgentError::Lock(e.to_string())
             })?
             .push(execution_report);
 
