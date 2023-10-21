@@ -180,19 +180,19 @@ impl Plugin for UsagePlugin {
         let buffer_size = user_config
             .buffer_size
             .or(default_config.buffer_size)
-            .expect("buffer_size has default value");
+            .expect("buffer_size has no default value");
         let accept_invalid_certs = user_config
             .accept_invalid_certs
             .or(default_config.accept_invalid_certs)
-            .expect("accept_invalid_certs has default value");
+            .expect("accept_invalid_certs has no default value");
         let connect_timeout = user_config
             .connect_timeout
             .or(default_config.connect_timeout)
-            .expect("connect_timeout has default value");
+            .expect("connect_timeout has no default value");
         let request_timeout = user_config
             .request_timeout
             .or(default_config.request_timeout)
-            .expect("request_timeout has default value");
+            .expect("request_timeout has no default value");
 
         if enabled {
             tracing::info!("Starting GraphQL Hive Usage plugin");
@@ -203,16 +203,16 @@ impl Plugin for UsagePlugin {
                 sample_rate: user_config
                     .sample_rate
                     .or(default_config.sample_rate)
-                    .expect("sample_rate has default value"),
+                    .expect("sample_rate has no default value"),
                 exclude: user_config.exclude.or(default_config.exclude),
                 client_name_header: user_config
                     .client_name_header
                     .or(default_config.client_name_header)
-                    .expect("client_name_header has default value"),
+                    .expect("client_name_header has no default value"),
                 client_version_header: user_config
                     .client_version_header
                     .or(default_config.client_version_header)
-                    .expect("client_version_header has default value"),
+                    .expect("client_version_header has no default value"),
             },
             agent: match enabled {
                 true => Some(Arc::new(Mutex::new(UsageAgent::new(
@@ -343,11 +343,7 @@ fn try_add_report(agent: Arc<Mutex<UsageAgent>>, execution_report: ExecutionRepo
     agent
         .lock()
         .map_err(|e| {
-            AgentError::Lock(
-                "Agent".to_string(),
-                "supergraph_service".to_string(),
-                e.to_string(),
-            )
+AgentError::Lock(e.to_string())
         })
         .and_then(|a| a.add_report(execution_report))
         .unwrap_or_else(|e| {
