@@ -139,6 +139,28 @@ export interface organizations_billing {
   organization_id: string;
 }
 
+export interface persisted_document_deployments {
+  client_name: string;
+  client_version: string;
+  created_at: Date;
+  id: string;
+  status: string;
+  target_id: string;
+}
+
+export interface persisted_documents {
+  created_at: Date;
+  document_s3_location: string;
+  hash: string;
+  id: string;
+  is_active: boolean;
+  operation_document: string;
+  operation_names: Array<string>;
+  persisted_document_deployment_id: string | null;
+  schema_coordinates: Array<string>;
+  target_id: string;
+}
+
 export interface projects {
   build_url: string | null;
   clean_id: string;
@@ -309,6 +331,8 @@ export interface DBTables {
   organization_member: organization_member;
   organizations: organizations;
   organizations_billing: organizations_billing;
+  persisted_document_deployments: persisted_document_deployments;
+  persisted_documents: persisted_documents;
   projects: projects;
   schema_checks: schema_checks;
   schema_log: schema_log;

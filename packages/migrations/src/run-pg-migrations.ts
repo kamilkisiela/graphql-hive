@@ -55,6 +55,7 @@ import migration_2023_09_25T15_23_00_github_check_with_project_name from './acti
 import migration_2023_09_28T14_14_14_native_fed_v2 from './actions/2023.09.28T14.14.14.native-fed-v2';
 import migration_2023_10_05T11_44_36_schema_checks_github_repository from './actions/2023.10.05T11.44.36.schema-checks-github-repository';
 import migration_2023_10_30T00_00_00_drop_persisted_operations from './actions/2023.10.30T00-00-00.drop-persisted-operations';
+import migration_2023_11_01T11_00_00_persisted_documents from './actions/2023.11.01T11.00.00.persisted-documents';
 import { runMigrations } from './pg-migrator';
 
 export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) =>
@@ -118,5 +119,6 @@ export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) 
       migration_2023_09_28T14_14_14_native_fed_v2,
       migration_2023_10_05T11_44_36_schema_checks_github_repository,
       migration_2023_10_30T00_00_00_drop_persisted_operations,
+      migration_2023_11_01T11_00_00_persisted_documents,
     ],
   });
