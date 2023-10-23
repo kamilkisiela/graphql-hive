@@ -18,9 +18,9 @@ export function useConfigurationHelper() {
           const actualProp = property === '' ? '' : `.${property}`;
 
           if (value && Array.isArray(value) && value.length === 0) {
-            formik.setFieldValue(`rules.${id}.config${actualProp}`, undefined, true);
+            void formik.setFieldValue(`rules.${id}.config${actualProp}`, undefined, true);
           } else {
-            formik.setFieldValue(`rules.${id}.config${actualProp}`, value, true);
+            void formik.setFieldValue(`rules.${id}.config${actualProp}`, value, true);
           }
         },
         getConfigValue<T>(property: string): T | undefined {
@@ -39,13 +39,17 @@ export function useConfigurationHelper() {
           return obj as any as T;
         },
         setSeverity(severity: RuleInstanceSeverityLevel) {
-          formik.setFieldValue(`rules.${id}.severity`, severity, true);
+          void formik.setFieldValue(`rules.${id}.severity`, severity, true);
         },
         toggleRuleState(newValue: boolean) {
-          formik.setFieldValue(`rules.${id}.enabled`, newValue, true);
+          void formik.setFieldValue(`rules.${id}.enabled`, newValue, true);
 
           if (newValue && !formik.values.rules[id]?.severity) {
-            formik.setFieldValue(`rules.${id}.severity`, RuleInstanceSeverityLevel.Warning, true);
+            void formik.setFieldValue(
+              `rules.${id}.severity`,
+              RuleInstanceSeverityLevel.Warning,
+              true,
+            );
           }
         },
       };
