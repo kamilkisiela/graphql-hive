@@ -34,7 +34,7 @@
     "@types/ioredis-mock": "8.2.2",
     "@types/lodash": "4.14.200",
     "@types/ms": "0.7.33",
-    "@types/object-hash": "3.0.4",
+    "@types/object-hash": "3.0.5",
     "@whatwg-node/fetch": "0.9.13",
     "agentkeepalive": "4.5.0",
     "bcryptjs": "2.4.3",
