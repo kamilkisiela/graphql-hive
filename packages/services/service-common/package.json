@@ -19,6 +19,6 @@
     "fastify-plugin": "4.5.1",
     "p-retry": "6.0.0",
     "prom-client": "14.2.0",
-    "zod": "3.22.3"
+    "zod": "3.22.4"
   }
 }
