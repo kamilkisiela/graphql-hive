@@ -806,8 +806,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 10.2.0
-        version: 10.2.0
+        specifier: 10.2.3
+        version: 10.2.3
       sendmail:
         specifier: 1.6.1
         version: 1.6.1
@@ -878,8 +878,8 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       pino-pretty:
-        specifier: 10.2.0
-        version: 10.2.0
+        specifier: 10.2.3
+        version: 10.2.3
       zod:
         specifier: 3.22.3
         version: 3.22.3
@@ -920,8 +920,8 @@ importers:
         specifier: 12.6.1
         version: 12.6.1
       pino-pretty:
-        specifier: 10.2.0
-        version: 10.2.0
+        specifier: 10.2.3
+        version: 10.2.3
       reflect-metadata:
         specifier: 0.1.13
         version: 0.1.13
@@ -992,8 +992,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 10.2.0
-        version: 10.2.0
+        specifier: 10.2.3
+        version: 10.2.3
       zod:
         specifier: 3.22.3
         version: 3.22.3
@@ -1085,8 +1085,8 @@ importers:
         specifier: 3.1.1
         version: 3.1.1
       pino-pretty:
-        specifier: 10.2.0
-        version: 10.2.0
+        specifier: 10.2.3
+        version: 10.2.3
       prom-client:
         specifier: 14.2.0
         version: 14.2.0
@@ -1218,8 +1218,8 @@ importers:
         specifier: 12.6.1
         version: 12.6.1
       pino-pretty:
-        specifier: 10.2.0
-        version: 10.2.0
+        specifier: 10.2.3
+        version: 10.2.3
       reflect-metadata:
         specifier: 0.1.13
         version: 0.1.13
@@ -1263,8 +1263,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 10.2.0
-        version: 10.2.0
+        specifier: 10.2.3
+        version: 10.2.3
       reflect-metadata:
         specifier: 0.1.13
         version: 0.1.13
@@ -1317,8 +1317,8 @@ importers:
         specifier: 2.2.4
         version: 2.2.4
       pino-pretty:
-        specifier: 10.2.0
-        version: 10.2.0
+        specifier: 10.2.3
+        version: 10.2.3
       tiny-lru:
         specifier: 8.0.2
         version: 8.0.2
@@ -1356,8 +1356,8 @@ importers:
         specifier: 12.6.1
         version: 12.6.1
       pino-pretty:
-        specifier: 10.2.0
-        version: 10.2.0
+        specifier: 10.2.3
+        version: 10.2.3
       reflect-metadata:
         specifier: 0.1.13
         version: 0.1.13
@@ -1401,8 +1401,8 @@ importers:
         specifier: 2.2.4
         version: 2.2.4
       pino-pretty:
-        specifier: 10.2.0
-        version: 10.2.0
+        specifier: 10.2.3
+        version: 10.2.3
       tiny-lru:
         specifier: 8.0.2
         version: 8.0.2
@@ -1443,8 +1443,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 10.2.0
-        version: 10.2.0
+        specifier: 10.2.3
+        version: 10.2.3
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -1768,8 +1768,8 @@ importers:
         specifier: 10.4.15
         version: 10.4.15(postcss@8.4.31)
       pino-pretty:
-        specifier: 10.2.0
-        version: 10.2.0
+        specifier: 10.2.3
+        version: 10.2.3
       postcss:
         specifier: 8.4.31
         version: 8.4.31
@@ -16342,10 +16342,6 @@ packages:
     resolution: {integrity: sha512-jeC1axXpnb0/2nn/Y1LPuLdgXBLH7aDcHu4KEKfqw3CUhX7ZpfBSlPKyqXE6btIgEzfWtrX3/tyBCaCvXvMkOw==}
     dev: true
 
-  /colorette@2.0.19:
-    resolution: {integrity: sha512-3tlv/dIP7FWvj3BsbHrGLJ6l/oKh1O3TcgBqMn+yyCagOxc23fyzDS6HypQbgxWbkpDnf52p1LuR4eWDQ/K9WQ==}
-    dev: true
-
   /colorette@2.0.20:
     resolution: {integrity: sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==}
     dev: true
@@ -26325,19 +26321,11 @@ packages:
     resolution: {integrity: sha512-uB80kBFb/tfd68bVleG9T5GGsGPjJrLAUpR5PZIrhBnIaRTQRjqdJSsIKkOP6OAIFbj7GOrcudc5pNjZ+geV2g==}
     engines: {node: '>=6'}
 
-  /pino-abstract-transport@1.0.0:
-    resolution: {integrity: sha512-c7vo5OpW4wIS42hUVcT5REsL8ZljsUfBjqV/e2sFxmFEFZiq1XLUp5EYLtuDH6PEHq9W1egWqRbnLUP5FuZmOA==}
-    dependencies:
-      readable-stream: 4.4.0
-      split2: 4.1.0
-    dev: true
-
   /pino-abstract-transport@1.1.0:
     resolution: {integrity: sha512-lsleG3/2a/JIWUtf9Q5gUNErBqwIu1tUKTT3dUzaf5DySw9ra1wcqKjJjLX1VTY64Wk1eEOYsVGSaGfCK85ekA==}
     dependencies:
       readable-stream: 4.4.0
       split2: 4.1.0
-    dev: false
 
   /pino-http@8.5.0:
     resolution: {integrity: sha512-kLGKNLyfWfdmrG1Ug0YdYpCTGbNcuD/YGC3g+elRU/Cm44UTs+tj/dZTxDN3bYauekxFxdLZhJuZdKKl0cml9w==}
@@ -26348,11 +26336,11 @@ packages:
       process-warning: 2.2.0
     dev: false
 
-  /pino-pretty@10.2.0:
-    resolution: {integrity: sha512-tRvpyEmGtc2D+Lr3FulIZ+R1baggQ4S3xD2Ar93KixFEDx6SEAUP3W5aYuEw1C73d6ROrNcB2IXLteW8itlwhA==}
+  /pino-pretty@10.2.3:
+    resolution: {integrity: sha512-4jfIUc8TC1GPUfDyMSlW1STeORqkoxec71yhxIpLDQapUu8WOuoz2TTCoidrIssyz78LZC69whBMPIKCMbi3cw==}
     hasBin: true
     dependencies:
-      colorette: 2.0.19
+      colorette: 2.0.20
       dateformat: 4.6.3
       fast-copy: 3.0.0
       fast-safe-stringify: 2.1.1
@@ -26360,7 +26348,7 @@ packages:
       joycon: 3.1.1
       minimist: 1.2.8
       on-exit-leak-free: 2.1.0
-      pino-abstract-transport: 1.0.0
+      pino-abstract-transport: 1.1.0
       pump: 3.0.0
       readable-stream: 4.4.0
       secure-json-parse: 2.5.0

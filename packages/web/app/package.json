@@ -120,7 +120,7 @@
     "@types/react-virtualized-auto-sizer": "1.0.1",
     "@types/react-window": "1.8.5",
     "autoprefixer": "10.4.15",
-    "pino-pretty": "10.2.0",
+    "pino-pretty": "10.2.3",
     "postcss": "8.4.31",
     "postcss-loader": "7.3.3",
     "rimraf": "4.4.1",

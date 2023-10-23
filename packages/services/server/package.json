@@ -38,7 +38,7 @@
     "graphql": "16.8.1",
     "graphql-yoga": "4.0.4",
     "hyperid": "3.1.1",
-    "pino-pretty": "10.2.0",
+    "pino-pretty": "10.2.3",
     "prom-client": "14.2.0",
     "reflect-metadata": "0.1.13",
     "tslib": "2.6.2",
