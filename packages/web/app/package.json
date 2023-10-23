@@ -57,7 +57,7 @@
     "dompurify": "3.0.5",
     "echarts": "5.4.3",
     "echarts-for-react": "3.0.2",
-    "formik": "2.2.9",
+    "formik": "2.4.5",
     "graphiql": "3.0.0-alpha.0",
     "graphql": "16.8.1",
     "hyperid": "3.1.1",
