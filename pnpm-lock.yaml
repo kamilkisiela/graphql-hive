@@ -435,8 +435,8 @@ importers:
         specifier: 2.5.5
         version: 2.5.5(graphql@16.8.1)
       '@types/async-retry':
-        specifier: 1.4.5
-        version: 1.4.5
+        specifier: 1.4.7
+        version: 1.4.7
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -959,8 +959,8 @@ importers:
         specifier: 10.38.4
         version: 10.38.4
       '@types/async-retry':
-        specifier: 1.4.5
-        version: 1.4.5
+        specifier: 1.4.7
+        version: 1.4.7
       '@types/ioredis-mock':
         specifier: 8.2.2
         version: 8.2.2
@@ -13123,8 +13123,8 @@ packages:
     dependencies:
       '@types/estree': 1.0.2
 
-  /@types/async-retry@1.4.5:
-    resolution: {integrity: sha512-YrdjSD+yQv7h6d5Ip+PMxh3H6ZxKyQk0Ts+PvaNRInxneG9PFVZjFg77ILAN+N6qYf7g4giSJ1l+ZjQ1zeegvA==}
+  /@types/async-retry@1.4.7:
+    resolution: {integrity: sha512-4NH5wuf9x7LZWD23/knI6RBywD1qCmLm7wNaqq0riy7hdDrCGGfkPOUvx0Cb78lVrFrEnCvocoL8+UcvSQlBDw==}
     dependencies:
       '@types/retry': 0.12.2
     dev: true
