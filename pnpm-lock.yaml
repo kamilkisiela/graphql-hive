@@ -599,8 +599,8 @@ importers:
         specifier: 2.4.5
         version: 2.4.5
       '@types/ioredis-mock':
-        specifier: 8.2.2
-        version: 8.2.2
+        specifier: 8.2.4
+        version: 8.2.4
       '@types/lodash':
         specifier: 4.14.200
         version: 4.14.200
@@ -650,8 +650,8 @@ importers:
         specifier: 5.3.2
         version: 5.3.2
       ioredis-mock:
-        specifier: 8.8.3
-        version: 8.8.3(@types/ioredis-mock@8.2.2)(ioredis@5.3.2)
+        specifier: 8.9.0
+        version: 8.9.0(@types/ioredis-mock@8.2.4)(ioredis@5.3.2)
       lodash:
         specifier: 4.17.21
         version: 4.17.21
@@ -962,8 +962,8 @@ importers:
         specifier: 1.4.7
         version: 1.4.7
       '@types/ioredis-mock':
-        specifier: 8.2.2
-        version: 8.2.2
+        specifier: 8.2.4
+        version: 8.2.4
       '@whatwg-node/fetch':
         specifier: 0.9.13
         version: 0.9.13
@@ -986,8 +986,8 @@ importers:
         specifier: 5.3.2
         version: 5.3.2
       ioredis-mock:
-        specifier: 8.8.3
-        version: 8.8.3(@types/ioredis-mock@8.2.2)(ioredis@5.3.2)
+        specifier: 8.9.0
+        version: 8.9.0(@types/ioredis-mock@8.2.4)(ioredis@5.3.2)
       p-timeout:
         specifier: 6.1.2
         version: 6.1.2
@@ -13354,9 +13354,10 @@ packages:
     resolution: {integrity: sha512-SZs7ekbP8CN0txVG2xVRH6EgKmEm31BOxA07vkFaETzZz1xh+cbt8BcI0slpymvwhx5dlFnQG2rTlPVQn+iRPQ==}
     dev: true
 
-  /@types/ioredis-mock@8.2.2:
-    resolution: {integrity: sha512-bnbPHOjxy4TUDjRh61MMoK2QvDNZqrMDXJYrEDZP/HPFvBubR24CQ0DBi5lgWhLxG4lvVsXPRDXtZ03+JgonoQ==}
+  /@types/ioredis-mock@8.2.4:
+    resolution: {integrity: sha512-vlCUPiU51KBO6mhmjZZICBUaYASu//KWGhBp5aPbPT+oGa3Rw3IoPr5rbimiiG6MNWeCZj3ZcmKtX7KGMeXRYQ==}
     dependencies:
+      '@types/node': 18.18.6
       ioredis: 5.3.2
     transitivePeerDependencies:
       - supports-color
@@ -21278,8 +21279,8 @@ packages:
     dependencies:
       loose-envify: 1.4.0
 
-  /ioredis-mock@8.8.3(@types/ioredis-mock@8.2.2)(ioredis@5.3.2):
-    resolution: {integrity: sha512-LkF17WIyYkPfUhvp0fjIZ+HKhILEoq1J2b71vv+9EOW054UlkySVEvgQ2RolXM+eI759MteHtXQvv0oRn0lkUg==}
+  /ioredis-mock@8.9.0(@types/ioredis-mock@8.2.4)(ioredis@5.3.2):
+    resolution: {integrity: sha512-yIglcCkI1lvhwJVoMsR51fotZVsPsSk07ecTCgRTRlicG0Vq3lke6aAaHklyjmRNRsdYAgswqC2A0bPtQK4LSw==}
     engines: {node: '>=12.22'}
     peerDependencies:
       '@types/ioredis-mock': ^8
@@ -21287,7 +21288,7 @@ packages:
     dependencies:
       '@ioredis/as-callback': 3.0.0
       '@ioredis/commands': 1.2.0
-      '@types/ioredis-mock': 8.2.2
+      '@types/ioredis-mock': 8.2.4
       fengari: 0.1.4
       fengari-interop: 0.1.3(fengari@0.1.4)
       ioredis: 5.3.2
