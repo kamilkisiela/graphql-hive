@@ -39,11 +39,11 @@ const ParamsModel = zod.object({
 const authHeaderName = 'x-hive-cdn-key' as const;
 
 export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
-  const router = itty.Router<itty.Request & Request>();
+  const router = itty.Router<itty.IRequest & Request>();
   const analytics = deps.analytics ?? createAnalytics();
 
   const authenticate = async (
-    request: itty.Request & Request,
+    request: itty.IRequest & Request,
     targetId: string,
   ): Promise<Response | null> => {
     const headerKey = request.headers.get(authHeaderName);
@@ -62,7 +62,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
 
   router.get(
     '/artifacts/v1/:targetId/:artifactType',
-    async (request: itty.Request & Request, captureException?: (error: unknown) => void) => {
+    async (request: itty.IRequest & Request, captureException?: (error: unknown) => void) => {
       const parseResult = ParamsModel.safeParse(request.params);
 
       if (parseResult.success === false) {

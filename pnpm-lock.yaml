@@ -752,8 +752,8 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       itty-router:
-        specifier: 2.6.6
-        version: 2.6.6
+        specifier: 4.0.23
+        version: 4.0.23
       itty-router-extras:
         specifier: 0.4.5
         version: 0.4.5
@@ -21967,10 +21967,6 @@ packages:
 
   /itty-router-extras@0.4.5:
     resolution: {integrity: sha512-flxFhFZgPqiscrHTV3mBbRBk8plgOGdg5tZMyv7hE629PO+XEfXh2uHs78ndH6axRG50fIHfjrrqAlb3Pguemw==}
-    dev: true
-
-  /itty-router@2.6.6:
-    resolution: {integrity: sha512-hIPHtXGymCX7Lzb2I4G6JgZFE4QEEQwst9GORK7sMYUpJvLfy4yZJr95r04e8DzoAnj6HcxM2m4TbK+juu+18g==}
     dev: true
 
   /itty-router@4.0.23:
