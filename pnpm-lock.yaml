@@ -605,8 +605,8 @@ importers:
         specifier: 4.14.198
         version: 4.14.198
       '@types/ms':
-        specifier: 0.7.31
-        version: 0.7.31
+        specifier: 0.7.33
+        version: 0.7.33
       '@types/object-hash':
         specifier: 3.0.4
         version: 3.0.4
@@ -1245,8 +1245,8 @@ importers:
         specifier: 10.38.4
         version: 10.38.4
       '@types/ms':
-        specifier: 0.7.31
-        version: 0.7.31
+        specifier: 0.7.33
+        version: 0.7.33
       dotenv:
         specifier: 16.3.1
         version: 16.3.1
@@ -13233,7 +13233,7 @@ packages:
   /@types/debug@4.1.7:
     resolution: {integrity: sha512-9AonUzyTjXXhEOa0DnqpzZi6VHlqKMswga9EXjpXnnqxwLtdvPPtlO8evrI5D9S6asFRCQ6v+wpiUKbw+vKqyg==}
     dependencies:
-      '@types/ms': 0.7.31
+      '@types/ms': 0.7.33
 
   /@types/detect-port@1.3.2:
     resolution: {integrity: sha512-xxgAGA2SAU4111QefXPSp5eGbDm/hW6zhvYl9IeEPZEry9F4d66QAHm5qpUXjb6IsevZV/7emAEx5MhP6O192g==}
@@ -13532,8 +13532,8 @@ packages:
       '@types/node': 18.18.6
     dev: true
 
-  /@types/ms@0.7.31:
-    resolution: {integrity: sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==}
+  /@types/ms@0.7.33:
+    resolution: {integrity: sha512-AuHIyzR5Hea7ij0P9q7vx7xu4z0C28ucwjAZC0ja7JhINyCnOw8/DnvAPQQ9TfOlCtZAmCERKQX9+o1mgQhuOQ==}
 
   /@types/node-fetch@2.6.4:
     resolution: {integrity: sha512-1ZX9fcN4Rvkvgv4E6PAY5WXUFWFcRWxZa3EW83UjycOB9ljJCedb2CupIP4RZMEwF/M3eTcCihbBRgwtGbg5Rg==}
