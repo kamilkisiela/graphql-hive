@@ -689,8 +689,8 @@ importers:
   packages/services/broker-worker:
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: 4.20230914.0
-        version: 4.20230914.0
+        specifier: 4.20231016.0
+        version: 4.20231016.0
       '@types/service-worker-mock':
         specifier: 2.0.1
         version: 2.0.1
@@ -722,8 +722,8 @@ importers:
   packages/services/cdn-worker:
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: 4.20230914.0
-        version: 4.20230914.0
+        specifier: 4.20231016.0
+        version: 4.20231016.0
       '@types/service-worker-mock':
         specifier: 2.0.1
         version: 2.0.1
@@ -5273,8 +5273,8 @@ packages:
       prettier: 2.8.8
     dev: true
 
-  /@cloudflare/workers-types@4.20230914.0:
-    resolution: {integrity: sha512-OVeN4lFVu1O0PJGZ2d0FwpK8lelFcr33qYOgCh77ErEYmEBO4adwnIxcIsdQbFbhF0ffN6joiVcljD4zakdaeQ==}
+  /@cloudflare/workers-types@4.20231016.0:
+    resolution: {integrity: sha512-eGB0cRVyoJpeyGJx2re5sbd9R316a61sY73xwnqm4cwGpb+OxCK2gc651RxGiN7H4w6LY1RpysUgeGLmj5B3+g==}
     dev: true
 
   /@codemirror/language@6.0.0:
