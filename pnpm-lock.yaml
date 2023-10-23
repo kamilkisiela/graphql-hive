@@ -1224,8 +1224,8 @@ importers:
         specifier: 0.1.13
         version: 0.1.13
       stripe:
-        specifier: 13.7.0
-        version: 13.7.0
+        specifier: 14.1.0
+        version: 14.1.0
       zod:
         specifier: 3.22.3
         version: 3.22.3
@@ -29613,12 +29613,12 @@ packages:
       acorn: 8.10.0
     dev: true
 
-  /stripe@13.7.0:
-    resolution: {integrity: sha512-0cbUNl5aDwt5rIZeE/WgyTxZN/PtwyeA5KcVJrHj260tjN4IOo2BZikN+dxhKoeBfI4aSRAd3E5vHRKmjjaSbA==}
+  /stripe@14.1.0:
+    resolution: {integrity: sha512-hpI8OT7jbaVTGOm9bqeCbdVGwM/55Hetn+WpPGFSq7FmlnqLPB7CSZy2eNYU6ko+4tdur6ZMrDKS6wh1CCx8bw==}
     engines: {node: '>=12.*'}
     dependencies:
       '@types/node': 18.17.17
-      qs: 6.11.0
+      qs: 6.11.2
     dev: true
 
   /strnum@1.0.5:
