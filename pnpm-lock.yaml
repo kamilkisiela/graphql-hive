@@ -779,8 +779,8 @@ importers:
         specifier: 6.4.13
         version: 6.4.13
       '@types/sendmail':
-        specifier: 1.4.4
-        version: 1.4.4
+        specifier: 1.4.6
+        version: 1.4.6
       '@whatwg-node/fetch':
         specifier: 0.9.13
         version: 0.9.13
@@ -13640,8 +13640,8 @@ packages:
     resolution: {integrity: sha512-G8hZ6XJiHnuhQKR7ZmysCeJWE08o8T0AXtk5darsCaTVsYZhhgUrq53jizaR2FvsoeCwJhlmwTjkXBY5Pn/ZHw==}
     dev: true
 
-  /@types/sendmail@1.4.4:
-    resolution: {integrity: sha512-tSr6Y2LFKTp4TD6p/B6sSIXBf8RaIjuQhRpXFy8GxwihC0P1lfzf26C4Pvb6dCdVZu12YVOCeHG3wEx15da/Rg==}
+  /@types/sendmail@1.4.6:
+    resolution: {integrity: sha512-HvGGlZKHrYt8ioKpLph1L8x7Y7Lg/p6NI8GDEXzTAXwy60gwOC8w8ODX8PhlHfz19CSv5Dg73gUTG6TqA37z8w==}
     dev: true
 
   /@types/serve-static@1.15.0:
