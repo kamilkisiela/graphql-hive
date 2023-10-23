@@ -24,7 +24,7 @@ export function createStripeBilling(config: {
   //   fetch,
   // });
   const stripeApi = new Stripe(config.stripe.token, {
-    apiVersion: '2023-08-16',
+    apiVersion: '2023-10-16',
     typescript: true,
   });
   const loadStripeData$ = ensureStripeProducts();
