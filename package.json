@@ -118,7 +118,7 @@
       "mjml-core@4.14.0": "patches/mjml-core@4.14.0.patch",
       "oclif@3.17.1": "patches/oclif@3.17.1.patch",
       "@apollo/federation@0.38.1": "patches/@apollo__federation@0.38.1.patch",
-      "bullmq@4.11.4": "patches/bullmq@4.11.4.patch",
+      "bullmq@4.12.5": "patches/bullmq@4.12.5.patch",
       "@theguild/editor@1.2.5": "patches/@theguild__editor@1.2.5.patch",
       "eslint@8.50.0": "patches/eslint@8.50.0.patch",
       "@oclif/core@2.8.5": "patches/@oclif__core@2.8.5.patch",
