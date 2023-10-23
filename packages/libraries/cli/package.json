@@ -71,7 +71,7 @@
     "@types/env-ci": "3.1.1",
     "@types/mkdirp": "1.0.2",
     "graphql": "16.8.1",
-    "oclif": "3.17.1",
+    "oclif": "4.0.3",
     "rimraf": "4.4.1",
     "ts-node": "10.9.1"
   },
