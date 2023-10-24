@@ -668,8 +668,8 @@ importers:
         specifier: 3.0.4
         version: 3.0.4
       prom-client:
-        specifier: 14.2.0
-        version: 14.2.0
+        specifier: 15.0.0
+        version: 15.0.0
       redlock:
         specifier: 5.0.0-beta.2
         version: 5.0.0-beta.2
@@ -1088,8 +1088,8 @@ importers:
         specifier: 10.2.3
         version: 10.2.3
       prom-client:
-        specifier: 14.2.0
-        version: 14.2.0
+        specifier: 15.0.0
+        version: 15.0.0
       reflect-metadata:
         specifier: 0.1.13
         version: 0.1.13
@@ -1131,8 +1131,8 @@ importers:
         specifier: 6.1.0
         version: 6.1.0
       prom-client:
-        specifier: 14.2.0
-        version: 14.2.0
+        specifier: 15.0.0
+        version: 15.0.0
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -9293,6 +9293,11 @@ packages:
   /@opentelemetry/api@1.2.0:
     resolution: {integrity: sha512-0nBr+VZNKm9tvNDZFstI3Pq1fCTEDK5OZTnVKNvBNAKgd0yIvmwsP4m61rEv7ZP+tOUjWJhROpxK5MsnlF911g==}
     engines: {node: '>=8.0.0'}
+
+  /@opentelemetry/api@1.6.0:
+    resolution: {integrity: sha512-OWlrQAnWn9577PhVgqjUvMr1pg57Bc4jv0iL4w0PRuOSRvq67rvHW9Ie/dZVMvCzhSCB+UxhcY/PmCmFj33Q+g==}
+    engines: {node: '>=8.0.0'}
+    dev: true
 
   /@opentelemetry/context-async-hooks@1.7.0(@opentelemetry/api@1.2.0):
     resolution: {integrity: sha512-g4bMzyVW5dVBeMkyadaf3NRFpmNrdD4Pp9OJsrP29HwIam/zVMNfIWQpT5IBzjtTSMhl/ED5YQYR+UOSjVq3sQ==}
@@ -27077,10 +27082,11 @@ packages:
     resolution: {integrity: sha512-7PiHtLll5LdnKIMw100I+8xJXR5gW2QwWYkT6iJva0bXitZKa/XMrSbdmg3r2Xnaidz9Qumd0VPaMrZlF9V9sA==}
     engines: {node: '>=0.4.0'}
 
-  /prom-client@14.2.0:
-    resolution: {integrity: sha512-sF308EhTenb/pDRPakm+WgiN+VdM/T1RaHj1x+MvAuT8UiQP8JmOEbxVqtkbfR4LrvOg5n7ic01kRBDGXjYikA==}
-    engines: {node: '>=10'}
+  /prom-client@15.0.0:
+    resolution: {integrity: sha512-UocpgIrKyA2TKLVZDSfm8rGkL13C19YrQBAiG3xo3aDFWcHedxRxI3z+cIcucoxpSO0h5lff5iv/SXoxyeopeA==}
+    engines: {node: ^16 || ^18 || >=20}
     dependencies:
+      '@opentelemetry/api': 1.6.0
       tdigest: 0.1.2
     dev: true
 
