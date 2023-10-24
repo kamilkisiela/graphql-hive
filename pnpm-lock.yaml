@@ -1575,8 +1575,8 @@ importers:
         specifier: 2.30.0
         version: 2.30.0
       dompurify:
-        specifier: 3.0.5
-        version: 3.0.5
+        specifier: 3.0.6
+        version: 3.0.6
       echarts:
         specifier: 5.4.3
         version: 5.4.3
@@ -1744,8 +1744,8 @@ importers:
         specifier: 0.7.9
         version: 0.7.9
       '@types/dompurify':
-        specifier: 3.0.2
-        version: 3.0.2
+        specifier: 3.0.4
+        version: 3.0.4
       '@types/js-cookie':
         specifier: 3.0.5
         version: 3.0.5
@@ -13239,8 +13239,8 @@ packages:
     resolution: {integrity: sha512-w5jZ0ee+HaPOaX25X2/2oGR/7rgAQSYII7X7pp0m9KgBfMP7uKfMfTvcpl5Dj+eDBbpxKGiqE+flqDr6XTd2RA==}
     dev: true
 
-  /@types/dompurify@3.0.2:
-    resolution: {integrity: sha512-YBL4ziFebbbfQfH5mlC+QTJsvh0oJUrWbmxKMyEdL7emlHJqGR2Qb34TEFKj+VCayBvjKy3xczMFNhugThUsfQ==}
+  /@types/dompurify@3.0.4:
+    resolution: {integrity: sha512-1Jk8S/IRzNSbwQRbuGuLFHviwxQ8pX81ZEW3INY9432Cwb4VedkBYan8gSIXVLOLHBtimOmUTEYphjRVmo+30g==}
     dependencies:
       '@types/trusted-types': 2.0.2
     dev: true
@@ -17693,8 +17693,8 @@ packages:
     resolution: {integrity: sha512-axQ9zieHLnAnHh0sfAamKYiqXMJAVwu+LM/alQ7WDagoWessyWvMSFyW65CqF3owufNu8HBcE4cM2Vflu7YWcQ==}
     dev: false
 
-  /dompurify@3.0.5:
-    resolution: {integrity: sha512-F9e6wPGtY+8KNMRAVfxeCOHU0/NPWMSENNq4pQctuXRqqdEPW7q3CrLbR5Nse044WwacyjHGOMlvNsBe1y6z9A==}
+  /dompurify@3.0.6:
+    resolution: {integrity: sha512-ilkD8YEnnGh1zJ240uJsW7AzE+2qpbOUYjacomn3AvJ6J4JhKGSZ2nh4wUIXPZrEPppaCLx5jFe8T89Rk8tQ7w==}
     dev: false
 
   /domutils@2.8.0:
