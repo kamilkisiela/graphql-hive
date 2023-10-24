@@ -23,7 +23,7 @@
     "graphql": "16.8.1",
     "pino-pretty": "10.2.3",
     "zod": "3.22.4",
-    "zod-validation-error": "1.5.0"
+    "zod-validation-error": "2.0.0"
   },
   "buildOptions": {
     "runify": true,
