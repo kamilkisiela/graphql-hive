@@ -18,7 +18,7 @@
     "fastify-cors": "6.0.3",
     "fastify-plugin": "4.5.1",
     "p-retry": "6.1.0",
-    "prom-client": "14.2.0",
+    "prom-client": "15.0.0",
     "zod": "3.22.4"
   }
 }
