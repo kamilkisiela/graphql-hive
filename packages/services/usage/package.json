@@ -13,7 +13,7 @@
     "@hive/service-common": "workspace:*",
     "@hive/tokens": "workspace:*",
     "@hive/usage-common": "workspace:*",
-    "@sentry/node": "7.69.0",
+    "@sentry/node": "7.74.1",
     "@trpc/client": "10.41.0",
     "@trpc/server": "10.41.0",
     "@whatwg-node/fetch": "0.9.13",
