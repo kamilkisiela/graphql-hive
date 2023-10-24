@@ -444,8 +444,8 @@ importers:
         specifier: 4.0.4
         version: 4.0.4(graphql@16.8.1)
       nock:
-        specifier: 13.3.3
-        version: 13.3.3
+        specifier: 13.3.6
+        version: 13.3.6
       vitest:
         specifier: 0.34.6
         version: 0.34.6
@@ -707,8 +707,8 @@ importers:
         specifier: 4.0.23
         version: 4.0.23
       nock:
-        specifier: 13.3.3
-        version: 13.3.3
+        specifier: 13.3.6
+        version: 13.3.6
       toucan-js:
         specifier: 3.3.0
         version: 3.3.0
@@ -24916,13 +24916,12 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /nock@13.3.3:
-    resolution: {integrity: sha512-z+KUlILy9SK/RjpeXDiDUEAq4T94ADPHE3qaRkf66mpEhzc/ytOMm3Bwdrbq6k1tMWkbdujiKim3G2tfQARuJw==}
+  /nock@13.3.6:
+    resolution: {integrity: sha512-lT6YuktKroUFM+27mubf2uqQZVy2Jf+pfGzuh9N6VwdHlFoZqvi4zyxFTVR1w/ChPqGY6yxGehHp6C3wqCASCw==}
     engines: {node: '>= 10.13'}
     dependencies:
       debug: 4.3.4(supports-color@8.1.1)
       json-stringify-safe: 5.0.1
-      lodash: 4.17.21
       propagate: 2.0.1
     transitivePeerDependencies:
       - supports-color
