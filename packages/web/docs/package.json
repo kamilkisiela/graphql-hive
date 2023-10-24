@@ -10,7 +10,7 @@
   "dependencies": {
     "@next/env": "13.5.4",
     "@radix-ui/react-tooltip": "1.0.6",
-    "@theguild/components": "5.2.4",
+    "@theguild/components": "5.2.6",
     "clsx": "2.0.0",
     "date-fns": "2.30.0",
     "gray-matter": "4.0.3",
