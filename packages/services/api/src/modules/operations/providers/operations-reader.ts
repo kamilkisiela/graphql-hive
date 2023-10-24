@@ -1198,15 +1198,14 @@ export class OperationsReader {
           FROM (
             SELECT
               sum(cdi.total) as total, cdi.hash as hash, cdi.coordinate as coordinate
-            FROM coordinates_daily as cd
+            FROM coordinates_daily as cdi
               ${this.createFilter({
                 target: args.targetId,
                 period: args.period,
-                // extra: [sql`(${sql.join(ORs, ' OR ')})`],
                 extra: [sql`cdi.coordinate NOT LIKE '%.%.%'`],
                 namespace: 'cdi',
               })}
-            GROUP BY cdi.hash, cdi.coordinate ORDER by total DESC, cdi.hash ASC DESC LIMIT ${sql.raw(
+            GROUP BY cdi.hash, cdi.coordinate ORDER by total DESC, cdi.hash ASC LIMIT ${sql.raw(
               String(args.limit),
             )} by cdi.coordinate
           ) as cd
