@@ -28,6 +28,6 @@ http = "0.2"
 # Until they release https://github.com/graphql-rust/graphql-parser/commit/0d93ac9310c2894a029d0eb912c3463875a535f9
 graphql-parser = { git = "https://github.com/graphql-rust/graphql-parser.git", rev = "8d76425d83c40670570cc325f57c730262f07456" }
 graphql-tools = { git = "https://github.com/dotansimha/graphql-tools-rs.git", rev = "59d083108c63fb24a525f987ac4299d108c6e2d1" } # branch = "kamil-minifier-without-fork"
-lru = "0.11.0"
+lru = "0.12.0"
 md5 = "0.7.0"
 rand = "0.8.5"
