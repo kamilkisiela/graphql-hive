@@ -1623,8 +1623,8 @@ importers:
         specifier: 2.1.2
         version: 2.1.2(next@13.5.4)
       pino:
-        specifier: 8.16.0
-        version: 8.16.0
+        specifier: 8.16.1
+        version: 8.16.1
       pino-http:
         specifier: 8.5.0
         version: 8.5.0
@@ -26270,7 +26270,7 @@ packages:
     resolution: {integrity: sha512-kLGKNLyfWfdmrG1Ug0YdYpCTGbNcuD/YGC3g+elRU/Cm44UTs+tj/dZTxDN3bYauekxFxdLZhJuZdKKl0cml9w==}
     dependencies:
       get-caller-file: 2.0.5
-      pino: 8.16.0
+      pino: 8.16.1
       pino-std-serializers: 6.2.2
       process-warning: 2.2.0
     dev: false
@@ -26316,8 +26316,8 @@ packages:
       sonic-boom: 1.4.1
     dev: true
 
-  /pino@8.16.0:
-    resolution: {integrity: sha512-UUmvQ/7KTZt/vHjhRrnyS7h+J7qPBQnpG80V56xmIC+o9IqYmQOw/UIny9S9zYDfRBR0ClouCr464EkBMIT7Fw==}
+  /pino@8.16.1:
+    resolution: {integrity: sha512-3bKsVhBmgPjGV9pyn4fO/8RtoVDR8ssW1ev819FsRXlRNgW8gR/9Kx+gCK4UPWd4JjrRDLWpzd/pb1AyWm3MGA==}
     hasBin: true
     dependencies:
       atomic-sleep: 1.0.0
