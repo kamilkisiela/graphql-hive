@@ -388,8 +388,8 @@ importers:
         version: 3.22.4
     devDependencies:
       '@types/env-ci':
-        specifier: 3.1.1
-        version: 3.1.1
+        specifier: 3.1.3
+        version: 3.1.3
       '@types/mkdirp':
         specifier: 1.0.2
         version: 1.0.2
@@ -13253,8 +13253,8 @@ packages:
     resolution: {integrity: sha512-Rk0HKcMXFUuqT32k1kXHZWgxiMvsyYsmlnjp0rLKa0MMoqXLE3T9dogDBTRfuc3SAsXu97KD3k4SKR1lHqd57w==}
     dev: true
 
-  /@types/env-ci@3.1.1:
-    resolution: {integrity: sha512-JuX+LHsvhktApmZxmBrG458kfSvPAvs2Kqhyrow3IKtDsbcRco7NFgpsNthjp8EQxKA6PMw3DrY/IH8ZAuTYlQ==}
+  /@types/env-ci@3.1.3:
+    resolution: {integrity: sha512-jm/ZfZWY2jBkmCzl0XmCevyXYzdvINHVP9SR94IoD3Nt71I+XkrvFQmTIYUAhsWoA05yFhOKt/5X7TePWMXgcQ==}
     dev: true
 
   /@types/escodegen@0.0.6:
