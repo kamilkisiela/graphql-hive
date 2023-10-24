@@ -683,8 +683,8 @@ importers:
         specifier: 3.22.4
         version: 3.22.4
       zod-validation-error:
-        specifier: 1.5.0
-        version: 1.5.0(zod@3.22.4)
+        specifier: 2.0.0
+        version: 2.0.0(zod@3.22.4)
 
   packages/services/broker-worker:
     devDependencies:
@@ -884,8 +884,8 @@ importers:
         specifier: 3.22.4
         version: 3.22.4
       zod-validation-error:
-        specifier: 1.5.0
-        version: 1.5.0(zod@3.22.4)
+        specifier: 2.0.0
+        version: 2.0.0(zod@3.22.4)
 
   packages/services/rate-limit:
     devDependencies:
@@ -32188,9 +32188,9 @@ packages:
     resolution: {integrity: sha512-PQ2PC7R9rslx84ndNBZB/Dkv8V8fZEpk83RLgXtYd0fwUgEjseMn1Dgajh2x6S8QbZAFa9p2qVCEuYZNgve0dQ==}
     dev: false
 
-  /zod-validation-error@1.5.0(zod@3.22.4):
-    resolution: {integrity: sha512-/7eFkAI4qV0tcxMBB/3+d2c1P6jzzZYdYSlBuAklzMuCrJu5bzJfHS0yVAS87dRHVlhftd6RFJDIvv03JgkSbw==}
-    engines: {node: '>=16.0.0'}
+  /zod-validation-error@2.0.0(zod@3.22.4):
+    resolution: {integrity: sha512-YTZXzeJW1JuHANATyLSdKyQUEXmM5fU0Yzop5odR4rZGtfL6I9HCvJDvBCizu1rPUNiKDEgd5riDxGVNAAPKxg==}
+    engines: {node: '>=18.0.0'}
     peerDependencies:
       zod: ^3.18.0
     dependencies:
