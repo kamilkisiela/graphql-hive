@@ -1182,10 +1182,7 @@ export class OperationsReader {
     >
   > {
     const ORs = args.typeNames.map(
-      typeName =>
-        sql`( cd.coordinate = ${typeName} OR (cd.coordinate LIKE ${
-          typeName + '.%'
-        } AND cd.coordinate NOT LIKE ${typeName + '.%.%'}) )`,
+      typeName => sql`( cd.coordinate = ${typeName} OR cd.coordinate LIKE ${typeName + '.%'} )`,
     );
 
     const result = await this.clickHouse.query<{
@@ -1197,18 +1194,23 @@ export class OperationsReader {
       queryId: 'get_top_operations_for_types',
       query: sql`
         WITH coordinates as (
-          SELECT
-              sum(cd.total) as total, cd.hash as hash, cd.coordinate as coordinate
-          FROM coordinates_daily as cd
-            ${this.createFilter({
-              target: args.targetId,
-              period: args.period,
-              extra: [sql`(${sql.join(ORs, ' OR ')})`],
-              namespace: 'cd',
-            })}
-          GROUP BY cd.hash, cd.coordinate ORDER by total DESC LIMIT ${sql.raw(
-            String(args.limit),
-          )} by cd.coordinate
+          SELECT cd.total, cd.hash, cd.coordinate
+          FROM (
+            SELECT
+              sum(cdi.total) as total, cdi.hash as hash, cdi.coordinate as coordinate
+            FROM coordinates_daily as cd
+              ${this.createFilter({
+                target: args.targetId,
+                period: args.period,
+                // extra: [sql`(${sql.join(ORs, ' OR ')})`],
+                extra: [sql`cdi.coordinate NOT LIKE '%.%.%'`],
+                namespace: 'cdi',
+              })}
+            GROUP BY cdi.hash, cdi.coordinate ORDER by total DESC, cdi.hash ASC DESC LIMIT ${sql.raw(
+              String(args.limit),
+            )} by cdi.coordinate
+          ) as cd
+          WHERE ${sql.join(ORs, ' OR ')}
         )
         SELECT total, hash, coordinate, ocd.name
         FROM coordinates as c LEFT JOIN (
