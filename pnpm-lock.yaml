@@ -1762,8 +1762,8 @@ importers:
         specifier: 1.0.1
         version: 1.0.1
       '@types/react-window':
-        specifier: 1.8.5
-        version: 1.8.5
+        specifier: 1.8.7
+        version: 1.8.7
       autoprefixer:
         specifier: 10.4.16
         version: 10.4.16(postcss@8.4.31)
@@ -13603,8 +13603,8 @@ packages:
       '@types/react': 18.2.31
     dev: true
 
-  /@types/react-window@1.8.5:
-    resolution: {integrity: sha512-V9q3CvhC9Jk9bWBOysPGaWy/Z0lxYcTXLtLipkt2cnRj1JOSFNF7wqGpkScSXMgBwC+fnVRg/7shwgddBG5ICw==}
+  /@types/react-window@1.8.7:
+    resolution: {integrity: sha512-FpPHEhmGVOBKomuR4LD2nvua1Ajcw6PfnfbDysuCwwPae3JNulcq3+uZIpQNbDN2AI1z+Y4tKj2xQ4ELiQ4QDw==}
     dependencies:
       '@types/react': 18.2.31
     dev: true
