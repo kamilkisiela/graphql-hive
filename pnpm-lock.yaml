@@ -692,8 +692,8 @@ importers:
         specifier: 4.20231016.0
         version: 4.20231016.0
       '@types/service-worker-mock':
-        specifier: 2.0.1
-        version: 2.0.1
+        specifier: 2.0.3
+        version: 2.0.3
       '@whatwg-node/fetch':
         specifier: 0.9.13
         version: 0.9.13
@@ -725,8 +725,8 @@ importers:
         specifier: 4.20231016.0
         version: 4.20231016.0
       '@types/service-worker-mock':
-        specifier: 2.0.1
-        version: 2.0.1
+        specifier: 2.0.3
+        version: 2.0.3
       '@whatwg-node/fetch':
         specifier: 0.9.13
         version: 0.9.13
@@ -13647,8 +13647,8 @@ packages:
       '@types/mime': 3.0.1
       '@types/node': 18.18.6
 
-  /@types/service-worker-mock@2.0.1:
-    resolution: {integrity: sha512-LqaP0QmgppRF7YEaqx4amoazHNXaX5bIFDAu62LnWIc5ku0HbgqlPKroQstAu8WsdmWIqEfI9VGlP8Skkq+m5A==}
+  /@types/service-worker-mock@2.0.3:
+    resolution: {integrity: sha512-eLVZIuYyASo/NVidC1t4YrkWCqFBK6VCF/wGUuzuiVUhVuq7pK8WCWNBjWfjTsdoRIxd+Zq7c+Dy8lXN+KTDbw==}
     dev: true
 
   /@types/sinonjs__fake-timers@8.1.1:

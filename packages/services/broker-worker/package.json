@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "4.20231016.0",
-    "@types/service-worker-mock": "2.0.1",
+    "@types/service-worker-mock": "2.0.3",
     "@whatwg-node/fetch": "0.9.13",
     "@whatwg-node/server": "0.9.10",
     "esbuild": "0.18.20",
