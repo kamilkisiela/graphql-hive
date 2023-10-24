@@ -116,7 +116,7 @@
     "patchedDependencies": {
       "@theguild/buddy@0.1.0": "patches/@theguild__buddy@0.1.0.patch",
       "mjml-core@4.14.0": "patches/mjml-core@4.14.0.patch",
-      "oclif@3.17.1": "patches/oclif@3.17.1.patch",
+      "oclif@3.17.2": "patches/oclif@3.17.2.patch",
       "@apollo/federation@0.38.1": "patches/@apollo__federation@0.38.1.patch",
       "bullmq@4.12.5": "patches/bullmq@4.12.5.patch",
       "@theguild/editor@1.2.5": "patches/@theguild__editor@1.2.5.patch",
