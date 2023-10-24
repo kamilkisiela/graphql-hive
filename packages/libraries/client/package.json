@@ -63,7 +63,7 @@
     "@envelop/types": "4.0.1",
     "@types/async-retry": "1.4.7",
     "graphql": "16.8.1",
-    "graphql-yoga": "4.0.4",
+    "graphql-yoga": "4.0.5",
     "nock": "13.3.6",
     "vitest": "0.34.6"
   },
