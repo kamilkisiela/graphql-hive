@@ -1759,8 +1759,8 @@ importers:
         specifier: 0.16.4
         version: 0.16.4
       '@types/react-virtualized-auto-sizer':
-        specifier: 1.0.1
-        version: 1.0.1
+        specifier: 1.0.2
+        version: 1.0.2
       '@types/react-window':
         specifier: 1.8.7
         version: 1.8.7
@@ -13597,8 +13597,8 @@ packages:
       '@types/react': 18.2.31
     dev: false
 
-  /@types/react-virtualized-auto-sizer@1.0.1:
-    resolution: {integrity: sha512-GH8sAnBEM5GV9LTeiz56r4ZhMOUSrP43tAQNSRVxNexDjcNKLCEtnxusAItg1owFUFE6k0NslV26gqVClVvong==}
+  /@types/react-virtualized-auto-sizer@1.0.2:
+    resolution: {integrity: sha512-UKIhAsnn1GknB0ewLXmwiGPVhU9m58gq56HcS1+G9L+TUtwgLMJoCREH0k303t3ZdDhNWt8TyxWE9iLYzWSnew==}
     dependencies:
       '@types/react': 18.2.31
     dev: true
