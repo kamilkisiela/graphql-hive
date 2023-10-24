@@ -1756,8 +1756,8 @@ importers:
         specifier: 18.2.14
         version: 18.2.14
       '@types/react-highlight-words':
-        specifier: 0.16.4
-        version: 0.16.4
+        specifier: 0.16.6
+        version: 0.16.6
       '@types/react-virtualized-auto-sizer':
         specifier: 1.0.2
         version: 1.0.2
@@ -13603,8 +13603,8 @@ packages:
     dependencies:
       '@types/react': 18.2.31
 
-  /@types/react-highlight-words@0.16.4:
-    resolution: {integrity: sha512-KITBX3xzheQLu2s3bUgLmRE7ekmhc52zRjRTwkKayQARh30L4fjEGzGm7ULK9TuX2LgxWWavZqyQGDGjAHbL3w==}
+  /@types/react-highlight-words@0.16.6:
+    resolution: {integrity: sha512-iGgne7Sf/vWfuOOWKURqj2LQwC8zBTZvNaw/uh9ZjwQfG40zfZKdkaE6387eWaDYjGdXQYPjUAhxjlaQhg4VYg==}
     dependencies:
       '@types/react': 18.2.31
     dev: true
