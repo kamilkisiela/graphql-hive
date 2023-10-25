@@ -6,6 +6,7 @@ import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { SchemaEditor } from '@/components/schema-editor';
 import { ChangesBlock, labelize } from '@/components/target/history/errors-and-changes';
+import { Label } from '@/components/ui/label';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import {
@@ -17,6 +18,7 @@ import {
   Heading,
   MetaTitle,
   Modal,
+  Switch,
   TimeAgo,
   Tooltip,
 } from '@/components/v2';
@@ -49,6 +51,12 @@ const SchemaChecks_NavigationQuery = graphql(`
               commit
               author
             }
+            breakingSchemaChanges {
+              total
+            }
+            safeSchemaChanges {
+              total
+            }
           }
         }
         pageInfo {
@@ -61,11 +69,17 @@ const SchemaChecks_NavigationQuery = graphql(`
   }
 `);
 
+interface SchemaCheckFilters {
+  showOnlyFailed?: boolean;
+  showOnlyChanged?: boolean;
+}
+
 const Navigation = (props: {
   after: string | null;
   isLastPage: boolean;
   onLoadMore: (cursor: string) => void;
-}): React.ReactElement => {
+  filters?: SchemaCheckFilters;
+}) => {
   const router = useRouteSelector();
   const [query] = useQuery({
     query: SchemaChecks_NavigationQuery,
@@ -77,68 +91,81 @@ const Navigation = (props: {
     },
   });
 
+  if (query.fetching || !query.data?.target?.schemaChecks) {
+    return null;
+  }
+
   return (
     <>
-      {query.fetching || !query.data?.target?.schemaChecks ? null : (
-        <>
-          {query.data.target.schemaChecks.edges.map(edge => (
-            <div
-              className={cn(
-                'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
-                edge.node.id === router.schemaCheckId ? 'bg-gray-800/40' : null,
-              )}
+      {query.data.target.schemaChecks.edges.map(edge => {
+        if (edge.node.__typename !== 'FailedSchemaCheck' && props.filters?.showOnlyFailed) {
+          return null;
+        }
+        if (
+          props.filters?.showOnlyChanged &&
+          !edge.node.breakingSchemaChanges?.total &&
+          !edge.node.safeSchemaChanges?.total
+        ) {
+          return null;
+        }
+
+        return (
+          <div
+            className={cn(
+              'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
+              edge.node.id === router.schemaCheckId ? 'bg-gray-800/40' : null,
+            )}
+          >
+            <NextLink
+              key={edge.node.id}
+              href={{
+                pathname: '/[organizationId]/[projectId]/[targetId]/checks/[checkId]',
+                query: {
+                  organizationId: router.organizationId,
+                  projectId: router.projectId,
+                  targetId: router.targetId,
+                  checkId: edge.node.id,
+                },
+              }}
+              scroll={false} // disable the scroll to top on page
             >
-              <NextLink
-                key={edge.node.id}
-                href={{
-                  pathname: '/[organizationId]/[projectId]/[targetId]/checks/[checkId]',
-                  query: {
-                    organizationId: router.organizationId,
-                    projectId: router.projectId,
-                    targetId: router.targetId,
-                    checkId: edge.node.id,
-                  },
-                }}
-                scroll={false} // disable the scroll to top on page
-              >
-                <h3 className="truncate font-semibold text-sm">
-                  {edge.node.meta?.commit ?? edge.node.id}
-                </h3>
-                {edge.node.meta?.author ? (
-                  <div className="truncate text-xs font-medium text-gray-500">
-                    <span className="overflow-hidden truncate">{edge.node.meta.author}</span>
+              <h3 className="truncate font-semibold text-sm">
+                {edge.node.meta?.commit ?? edge.node.id}
+              </h3>
+              {edge.node.meta?.author ? (
+                <div className="truncate text-xs font-medium text-gray-500">
+                  <span className="overflow-hidden truncate">{edge.node.meta.author}</span>
+                </div>
+              ) : null}
+              <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
+                <div
+                  className={cn(
+                    edge.node.__typename === 'FailedSchemaCheck' ? 'text-red-500' : null,
+                  )}
+                >
+                  <Badge color={edge.node.__typename === 'FailedSchemaCheck' ? 'red' : 'green'} />{' '}
+                  <TimeAgo date={edge.node.createdAt} />
+                </div>
+
+                {edge.node.serviceName ? (
+                  <div className="ml-auto mr-0 w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-right font-bold">
+                    {edge.node.serviceName}
                   </div>
                 ) : null}
-                <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
-                  <div
-                    className={cn(
-                      edge.node.__typename === 'FailedSchemaCheck' ? 'text-red-500' : null,
-                    )}
-                  >
-                    <Badge color={edge.node.__typename === 'FailedSchemaCheck' ? 'red' : 'green'} />{' '}
-                    <TimeAgo date={edge.node.createdAt} />
-                  </div>
-
-                  {edge.node.serviceName ? (
-                    <div className="ml-auto mr-0 w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-right font-bold">
-                      {edge.node.serviceName}
-                    </div>
-                  ) : null}
-                </div>
-              </NextLink>
-            </div>
-          ))}
-          {props.isLastPage && query.data.target.schemaChecks.pageInfo.hasNextPage && (
-            <Button
-              variant="link"
-              onClick={() => {
-                props.onLoadMore(query.data?.target?.schemaChecks.pageInfo.endCursor ?? '');
-              }}
-            >
-              Load more
-            </Button>
-          )}
-        </>
+              </div>
+            </NextLink>
+          </div>
+        );
+      })}
+      {props.isLastPage && query.data.target.schemaChecks.pageInfo.hasNextPage && (
+        <Button
+          variant="link"
+          onClick={() => {
+            props.onLoadMore(query.data?.target?.schemaChecks.pageInfo.endCursor ?? '');
+          }}
+        >
+          Load more
+        </Button>
       )}
     </>
   );
@@ -739,6 +766,7 @@ function ChecksPageContent() {
   const [paginationVariables, setPaginationVariables] = useState<Array<string | null>>(() => [
     null,
   ]);
+  const [filters, setFilters] = useState<SchemaCheckFilters>({});
 
   const router = useRouteSelector();
   const [query] = useQuery({
@@ -787,6 +815,44 @@ function ChecksPageContent() {
             </div>
             {query.fetching ? null : hasSchemaChecks ? (
               <div className="flex flex-col gap-5">
+                <div>
+                  <div className="flex flex-row items-center justify-between h-9">
+                    <Label
+                      htmlFor="filter-toggle-has-changes"
+                      className="text-sm text-gray-100 font-normal"
+                    >
+                      Show only changed schemas
+                    </Label>
+                    <Switch
+                      checked={filters.showOnlyChanged ?? false}
+                      onCheckedChange={() =>
+                        setFilters(filters => ({
+                          ...filters,
+                          showOnlyChanged: !filters.showOnlyChanged,
+                        }))
+                      }
+                      id="filter-toggle-has-changes"
+                    />
+                  </div>
+                  <div className="flex flex-row items-center justify-between h-9">
+                    <Label
+                      htmlFor="filter-toggle-status-failed"
+                      className="text-sm text-gray-100 font-normal"
+                    >
+                      Show only failed checks
+                    </Label>
+                    <Switch
+                      checked={filters.showOnlyFailed ?? false}
+                      onCheckedChange={() =>
+                        setFilters(filters => ({
+                          ...filters,
+                          showOnlyFailed: !filters.showOnlyFailed,
+                        }))
+                      }
+                      id="filter-toggle-status-failed"
+                    />
+                  </div>
+                </div>
                 <div className="flex w-[300px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
                   {paginationVariables.map((cursor, index) => (
                     <Navigation
@@ -794,6 +860,7 @@ function ChecksPageContent() {
                       isLastPage={index + 1 === paginationVariables.length}
                       onLoadMore={cursor => setPaginationVariables(cursors => [...cursors, cursor])}
                       key={cursor ?? 'first'}
+                      filters={filters}
                     />
                   ))}
                 </div>
