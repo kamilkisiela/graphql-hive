@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 41,
+  "id": 51,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -52,6 +52,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -65,6 +66,103 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 22,
+      "options": {
+        "legend": {
+          "calcs": ["mean"],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "sum by (conclusion) (rate(registry_publish_count[$__rate_interval]))",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Conclusion over time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -101,7 +199,7 @@
         "h": 8,
         "w": 17,
         "x": 0,
-        "y": 1
+        "y": 8
       },
       "id": 1,
       "options": {
@@ -161,7 +259,7 @@
         "h": 8,
         "w": 7,
         "x": 17,
-        "y": 1
+        "y": 8
       },
       "id": 5,
       "options": {
@@ -211,6 +309,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -224,6 +323,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -260,7 +360,7 @@
         "h": 7,
         "w": 10,
         "x": 0,
-        "y": 9
+        "y": 16
       },
       "id": 2,
       "options": {
@@ -320,7 +420,7 @@
         "h": 7,
         "w": 7,
         "x": 10,
-        "y": 9
+        "y": 16
       },
       "id": 13,
       "options": {
@@ -387,7 +487,7 @@
         "h": 7,
         "w": 7,
         "x": 17,
-        "y": 9
+        "y": 16
       },
       "id": 6,
       "options": {
@@ -432,7 +532,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 23
       },
       "id": 4,
       "panels": [],
@@ -450,6 +550,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -463,6 +564,103 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 23,
+      "options": {
+        "legend": {
+          "calcs": ["mean"],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "grafanacloud-prom"
+          },
+          "editorMode": "code",
+          "expr": "sum by (conclusion) (rate(registry_check_count[$__rate_interval]))",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Conclusion over time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -499,7 +697,7 @@
         "h": 8,
         "w": 17,
         "x": 0,
-        "y": 17
+        "y": 31
       },
       "id": 9,
       "options": {
@@ -559,7 +757,7 @@
         "h": 8,
         "w": 7,
         "x": 17,
-        "y": 17
+        "y": 31
       },
       "id": 10,
       "options": {
@@ -609,6 +807,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -622,6 +821,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -658,7 +858,7 @@
         "h": 7,
         "w": 10,
         "x": 0,
-        "y": 25
+        "y": 39
       },
       "id": 11,
       "options": {
@@ -718,7 +918,7 @@
         "h": 7,
         "w": 7,
         "x": 10,
-        "y": 25
+        "y": 39
       },
       "id": 14,
       "options": {
@@ -785,7 +985,7 @@
         "h": 7,
         "w": 7,
         "x": 17,
-        "y": 25
+        "y": 39
       },
       "id": 12,
       "options": {
@@ -830,7 +1030,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 46
       },
       "id": 16,
       "panels": [],
@@ -848,6 +1048,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -861,6 +1062,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -884,7 +1086,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -896,7 +1099,7 @@
         "h": 8,
         "w": 17,
         "x": 0,
-        "y": 33
+        "y": 47
       },
       "id": 17,
       "options": {
@@ -956,7 +1159,7 @@
         "h": 8,
         "w": 7,
         "x": 17,
-        "y": 33
+        "y": 47
       },
       "id": 18,
       "options": {
@@ -1054,7 +1257,7 @@
         "h": 7,
         "w": 10,
         "x": 0,
-        "y": 41
+        "y": 55
       },
       "id": 21,
       "options": {
@@ -1114,7 +1317,7 @@
         "h": 7,
         "w": 7,
         "x": 10,
-        "y": 41
+        "y": 55
       },
       "id": 20,
       "options": {
@@ -1181,7 +1384,7 @@
         "h": 7,
         "w": 7,
         "x": 17,
-        "y": 41
+        "y": 55
       },
       "id": 19,
       "options": {
@@ -1224,7 +1427,6 @@
   "refresh": "30s",
   "revision": 1,
   "schemaVersion": 38,
-  "style": "dark",
   "tags": ["hive", "schema-registry"],
   "templating": {
     "list": []
@@ -1236,7 +1438,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "Schema Registry",
-  "uid": "HM9cU8AVk",
-  "version": 4,
+  "uid": "YB9KHA-Vk",
+  "version": 2,
   "weekStart": ""
 }
