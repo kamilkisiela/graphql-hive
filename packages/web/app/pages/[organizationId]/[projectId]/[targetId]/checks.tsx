@@ -50,6 +50,7 @@ const SchemaChecks_NavigationQuery = graphql(`
               author
             }
             schemaVersion {
+              id
               githubMetadata {
                 repository
                 commit
