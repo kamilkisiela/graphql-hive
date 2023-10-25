@@ -1,5 +1,5 @@
-import { waitFor } from 'testkit/flow';
-import { ProjectType } from '@app/gql/graphql';
+import { readTokenInfo, waitFor } from 'testkit/flow';
+import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import { initSeed } from '../../testkit/seed';
 
 test.concurrent('deleting a token should clear the cache', async () => {
@@ -53,4 +53,46 @@ test.concurrent('deleting a token should clear the cache', async () => {
   // To make sure the cache is cleared, we need to wait for at least 5 seconds
   await waitFor(5500);
   await expect(fetchTokenInfo()).rejects.toThrow();
+});
+
+test.concurrent('invalid token yields correct error message', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { inviteAndJoinMember, createProject } = await createOrg();
+  await inviteAndJoinMember();
+  const { createToken } = await createProject(ProjectType.Single);
+  const { secret } = await createToken({
+    targetScopes: [],
+    projectScopes: [],
+    organizationScopes: [],
+  });
+
+  const token = new Array(secret.split('').length).fill('x').join('');
+  const result = await readTokenInfo(token).then(res => res.expectGraphQLErrors());
+  const error = result[0];
+  expect(error.message).toEqual('Invalid token provided');
+});
+
+test.concurrent('cdn token yields correct error message when used for registry', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { inviteAndJoinMember, createProject } = await createOrg();
+  await inviteAndJoinMember();
+  const { createToken } = await createProject(ProjectType.Single);
+  const token = await createToken({
+    targetScopes: [
+      TargetAccessScope.Delete,
+      TargetAccessScope.Read,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+      TargetAccessScope.TokensRead,
+      TargetAccessScope.TokensWrite,
+    ],
+  });
+  const cdnAccessToken = await token.createCdnAccess();
+
+  const result = await readTokenInfo(cdnAccessToken.secretAccessToken).then(res =>
+    res.expectGraphQLErrors(),
+  );
+  const error = result[0];
+  expect(error.message).toEqual('Invalid token provided');
 });

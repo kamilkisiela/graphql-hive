@@ -43,6 +43,9 @@ export async function main() {
     dsn: env.sentry?.dsn,
     enableTracing: true,
     tracesSampleRate: 1,
+    ignoreTransactions: [
+      'POST /graphql', // Transaction created for a cached response (@graphql-yoga/plugin-response-cache)
+    ],
     release: env.release,
     integrations: [
       new Integrations.Http({ tracing: true }),
