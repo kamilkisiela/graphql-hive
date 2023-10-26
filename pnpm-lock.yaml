@@ -1016,8 +1016,8 @@ importers:
         specifier: 5.0.0
         version: 5.0.0
       '@escape.tech/graphql-armor-max-aliases':
-        specifier: 2.1.0
-        version: 2.1.0
+        specifier: 2.2.0
+        version: 2.2.0
       '@escape.tech/graphql-armor-max-depth':
         specifier: 2.2.0
         version: 2.2.0
@@ -5891,8 +5891,8 @@ packages:
     requiresBuild: true
     optional: true
 
-  /@escape.tech/graphql-armor-max-aliases@2.1.0:
-    resolution: {integrity: sha512-jaqB8YWIpfDSNrbiGEt301MQqSH7cLu+ZYZjEQ/irL5rqbSN1c9zE+nqEP1cXxB8jB6D+vp8jU30rrZWS9goAQ==}
+  /@escape.tech/graphql-armor-max-aliases@2.2.0:
+    resolution: {integrity: sha512-DzQfMtzwW9SZehj+yUsQe1r7psr7E32W/JuPs+tKAlc4zejCaEuVTsPesD5HwfcNPvInkPNmAVWiMOk2bmLp8A==}
     engines: {node: '>=16.0.0'}
     dependencies:
       graphql: 16.8.1
