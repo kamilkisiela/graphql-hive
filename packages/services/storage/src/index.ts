@@ -1,71 +1,16 @@
 import { SerializableChange } from 'packages/services/api/src/modules/schema/schema-change-from-meta';
-import {
-  DatabasePool,
-  DatabaseTransactionConnection,
-  sql,
-  TaggedTemplateLiteralInvocation,
-  UniqueIntegrityConstraintViolationError,
-} from 'slonik';
+import { DatabasePool, DatabaseTransactionConnection, sql, TaggedTemplateLiteralInvocation, UniqueIntegrityConstraintViolationError } from 'slonik';
 import { update } from 'slonik-utilities';
 import zod from 'zod';
 import type { Change } from '@graphql-inspector/core';
-import type {
-  ActivityObject,
-  Alert,
-  AlertChannel,
-  AuthProvider,
-  Member,
-  Organization,
-  OrganizationAccessScope,
-  OrganizationBilling,
-  OrganizationInvitation,
-  PersistedOperation,
-  Project,
-  ProjectAccessScope,
-  Schema,
-  Storage,
-  TargetAccessScope,
-  TargetSettings,
-  User,
-} from '@hive/api';
+import type { ActivityObject, Alert, AlertChannel, AuthProvider, Member, Organization, OrganizationAccessScope, OrganizationBilling, OrganizationInvitation, PersistedOperation, Project, ProjectAccessScope, Schema, Storage, TargetAccessScope, TargetSettings, User } from '@hive/api';
 import { batch } from '@theguild/buddy';
 import { ProjectType } from '../../api/src';
-import {
-  type CDNAccessToken,
-  type OIDCIntegration,
-  type SchemaLog,
-  type SchemaPolicy,
-} from '../../api/src/shared/entities';
-import {
-  activities,
-  alert_channels,
-  alerts,
-  getPool,
-  objectToParams,
-  organization_invitations,
-  organization_member,
-  organizations,
-  organizations_billing,
-  persisted_operations,
-  projects,
-  schema_log as schema_log_in_db,
-  schema_policy_config,
-  schema_version_to_log,
-  schema_versions,
-  target_validation,
-  targets,
-  tokens,
-  users,
-} from './db';
-import {
-  SchemaChangeModel,
-  SchemaCheckModel,
-  SchemaCompositionError,
-  SchemaCompositionErrorModel,
-  SchemaPolicyWarningModel,
-  TargetBreadcrumbModel,
-} from './schema-change-model';
+import { type CDNAccessToken, type OIDCIntegration, type SchemaLog, type SchemaPolicy } from '../../api/src/shared/entities';
+import { activities, alert_channels, alerts, getPool, objectToParams, organization_invitations, organization_member, organizations, organizations_billing, persisted_operations, projects, schema_log as schema_log_in_db, schema_policy_config, schema_version_to_log, schema_versions, target_validation, targets, tokens, users } from './db';
+import { SchemaChangeModel, SchemaCheckModel, SchemaCompositionError, SchemaCompositionErrorModel, SchemaPolicyWarningModel, TargetBreadcrumbModel } from './schema-change-model';
 import type { Slonik } from './shared';
+
 
 export { ConnectionError } from 'slonik';
 export { createConnectionString } from './db/utils';
@@ -3589,8 +3534,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             changed
               ? sql`
                 AND (
-                  "breaking_schema_changes" IS NOT NULL
-                  OR "safe_schema_changes" IS NOT NULL
+                  jsonb_typeof("safe_schema_changes") = 'array'
+                  OR jsonb_typeof("breaking_schema_changes") = 'array'
                 )
               `
               : sql``
