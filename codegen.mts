@@ -1,5 +1,5 @@
 import { type CodegenConfig } from '@graphql-codegen/cli';
-import { addTypenameDocumentTransform } from './configs/graphql-code-generator/add-typename-document-transform.mjs';
+import { addTypenameSelectionDocumentTransform } from '@graphql-codegen/client-preset';
 
 const config: CodegenConfig = {
   schema: './packages/services/api/src/modules/*/module.graphql.ts',
@@ -167,7 +167,7 @@ const config: CodegenConfig = {
         persistedDocuments: true,
       },
       plugins: [],
-      documentTransforms: [addTypenameDocumentTransform],
+      documentTransforms: [addTypenameSelectionDocumentTransform],
     },
     './packages/web/app/src/gql/schema.ts': {
       plugins: ['urql-introspection'],
