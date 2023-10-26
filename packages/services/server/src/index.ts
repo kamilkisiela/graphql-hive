@@ -90,26 +90,25 @@ export async function main() {
 
   const storage = await createPostgreSQLStorage(createConnectionString(env.postgres), 10);
 
-  let expiredSchemaCheckPurgeTaskRunner: null | ReturnType<typeof createTaskRunner> = null;
+  let dbPureTaskRunner: null | ReturnType<typeof createTaskRunner> = null;
 
   if (!env.hiveServices.usageEstimator) {
-    server.log.debug(
-      'Usage estimation is disabled. Skip scheduling purge tasks for expired schema checks.',
-    );
+    server.log.debug('Usage estimation is disabled. Skip scheduling purge tasks.');
   } else {
     server.log.debug(
-      `Usage estimation is enabled. Start scheduling purge tasks for expired schema checks every ${env.hiveServices.usageEstimator.dateRetentionPurgeIntervalMinutes} minutes.`,
+      `Usage estimation is enabled. Start scheduling purge tasks every ${env.hiveServices.usageEstimator.dateRetentionPurgeIntervalMinutes} minutes.`,
     );
-    expiredSchemaCheckPurgeTaskRunner = createTaskRunner({
+    dbPureTaskRunner = createTaskRunner({
       async run() {
         await storage.purgeExpiredSchemaChecks({
           expiresAt: new Date(),
         });
+        await storage.purgeUnusedSchemasInStore();
       },
       interval: env.hiveServices.usageEstimator.dateRetentionPurgeIntervalMinutes * 60 * 1000,
       logger: server.log,
     });
-    expiredSchemaCheckPurgeTaskRunner.start();
+    dbPureTaskRunner.start();
   }
 
   registerShutdown({
@@ -119,9 +118,9 @@ export async function main() {
       await server.close();
       server.log.info('Stopping Storage handler...');
       await storage.destroy();
-      if (expiredSchemaCheckPurgeTaskRunner) {
+      if (dbPureTaskRunner) {
         server.log.info('Stopping expired schema check purge task...');
-        await expiredSchemaCheckPurgeTaskRunner.stop();
+        await dbPureTaskRunner.stop();
       }
       server.log.info('Shutdown complete.');
     },

@@ -3697,6 +3697,25 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return 0;
     },
 
+    async purgeUnusedSchemasInStore() {
+      await pool.query(sql`
+        DELETE FROM "public"."sdl_store"
+        WHERE id NOT IN (
+            SELECT DISTINCT schema_sdl_store_id
+            FROM "public"."schema_checks"
+            WHERE schema_sdl_store_id IS NOT NULL
+          UNION
+            SELECT DISTINCT supergraph_sdl_store_id
+            FROM "public"."schema_checks"
+            WHERE supergraph_sdl_store_id IS NOT NULL
+          UNION
+            SELECT DISTINCT composite_schema_sdl_store_id
+            FROM "public"."schema_checks"
+            WHERE composite_schema_sdl_store_id IS NOT NULL
+        )
+      `);
+    },
+
     async getSchemaVersionByActionId(args) {
       const record = await pool.maybeOne<unknown>(sql`
         SELECT
