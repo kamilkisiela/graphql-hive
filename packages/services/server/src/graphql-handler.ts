@@ -52,6 +52,13 @@ const SuperTokenAccessTokenModel = zod.object({
   email: zod.string(),
 });
 
+const SuperTokenSessionVerifyModel = zod.object({
+  status: zod.literal('OK'),
+  session: zod.object({
+    userDataInJWT: SuperTokenAccessTokenModel,
+  }),
+});
+
 export interface GraphQLHandlerOptions {
   graphiqlEndpoint: string;
   registry: Registry;
@@ -367,15 +374,20 @@ async function verifySuperTokensSession(
     console.error(
       `SuperTokens session verification failed with status ${response.status}.\n` + body,
     );
-    throw new HiveError(`Invalid token.`);
+    throw new Error(`SuperTokens instance returned an unexpected error.`);
   }
 
-  const result = JSON.parse(body);
-  const sessionInfo = SuperTokenAccessTokenModel.parse(result.session.userDataInJWT);
+  const result = SuperTokenSessionVerifyModel.safeParse(JSON.parse(body));
+
+  if (result.success === false) {
+    console.error(`SuperTokens session verification failed.\n` + body);
+    throw new HiveError(`Invalid token provided`);
+  }
+
   // ensure externalUserId is a string or null
   return {
-    ...sessionInfo,
-    externalUserId: sessionInfo.externalUserId ?? null,
+    ...result.data.session.userDataInJWT,
+    externalUserId: result.data.session.userDataInJWT.externalUserId ?? null,
   };
 }
 
