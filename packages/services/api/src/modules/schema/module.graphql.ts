@@ -175,7 +175,12 @@ export default gql`
     """
     Get a list of paginated schema checks for a target.
     """
-    schemaChecks(first: Int, after: String): SchemaCheckConnection!
+    schemaChecks(first: Int, after: String, filters: SchemaChecksFilter): SchemaCheckConnection!
+  }
+
+  input SchemaChecksFilter {
+    failed: Boolean
+    changed: Boolean
   }
 
   type SchemaConnection {

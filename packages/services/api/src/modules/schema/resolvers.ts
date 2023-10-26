@@ -765,6 +765,7 @@ export const resolvers: SchemaModule.Resolvers = {
         organizationId: target.orgId,
         first: args.first ?? null,
         cursor: args.after ?? null,
+        filters: args.filters ?? null,
         transformNode: toGraphQLSchemaCheckCurry({
           organizationId: target.orgId,
           projectId: target.projectId,

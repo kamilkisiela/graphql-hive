@@ -4,7 +4,7 @@ import lodash from 'lodash';
 import { z } from 'zod';
 import { Change } from '@graphql-inspector/core';
 import type { SchemaCheck, SchemaCompositionError } from '@hive/storage';
-import { RegistryModel } from '../../../__generated__/types';
+import { RegistryModel, SchemaChecksFilter } from '../../../__generated__/types';
 import {
   DateRange,
   Orchestrator,
@@ -596,6 +596,7 @@ export class SchemaManager {
     first: number | null;
     cursor: string | null;
     transformNode: (check: InflatedSchemaCheck) => TransformedSchemaCheck;
+    filters: SchemaChecksFilter | null;
   }) {
     await this.authManager.ensureTargetAccess({
       organization: args.organizationId,
@@ -609,6 +610,7 @@ export class SchemaManager {
       first: args.first,
       cursor: args.cursor,
       transformNode: node => args.transformNode(inflateSchemaCheck(node)),
+      filters: args.filters,
     });
 
     return paginatedResult;
