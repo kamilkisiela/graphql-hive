@@ -96,76 +96,68 @@ const Navigation = (props: {
     },
   });
 
-  if (query.fetching || !query.data?.target?.schemaChecks) {
-    return null;
-  }
-
   return (
     <>
       {query.fetching || !query.data?.target?.schemaChecks ? null : (
         <>
-          {query.data.target.schemaChecks.edges.map(edge => {
-            return (
-              <div
-                className={cn(
-                  'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
-                  edge.node.id === router.schemaCheckId ? 'bg-gray-800/40' : null,
-                )}
+          {query.data.target.schemaChecks.edges.map(edge => (
+            <div
+              className={cn(
+                'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
+                edge.node.id === router.schemaCheckId ? 'bg-gray-800/40' : null,
+              )}
+            >
+              <NextLink
+                key={edge.node.id}
+                href={{
+                  pathname: '/[organizationId]/[projectId]/[targetId]/checks/[checkId]',
+                  query: {
+                    organizationId: router.organizationId,
+                    projectId: router.projectId,
+                    targetId: router.targetId,
+                    checkId: edge.node.id,
+                  },
+                }}
+                scroll={false} // disable the scroll to top on page
               >
-                <NextLink
-                  key={edge.node.id}
-                  href={{
-                    pathname: '/[organizationId]/[projectId]/[targetId]/checks/[checkId]',
-                    query: {
-                      organizationId: router.organizationId,
-                      projectId: router.projectId,
-                      targetId: router.targetId,
-                      checkId: edge.node.id,
-                    },
-                  }}
-                  scroll={false} // disable the scroll to top on page
-                >
-                  <h3 className="truncate font-semibold text-sm">
-                    {edge.node.meta?.commit ?? edge.node.id}
-                  </h3>
-                  {edge.node.meta?.author ? (
-                    <div className="truncate text-xs font-medium text-gray-500">
-                      <span className="overflow-hidden truncate">{edge.node.meta.author}</span>
+                <h3 className="truncate font-semibold text-sm">
+                  {edge.node.meta?.commit ?? edge.node.id}
+                </h3>
+                {edge.node.meta?.author ? (
+                  <div className="truncate text-xs font-medium text-gray-500">
+                    <span className="overflow-hidden truncate">{edge.node.meta.author}</span>
+                  </div>
+                ) : null}
+                <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
+                  <div
+                    className={cn(
+                      edge.node.__typename === 'FailedSchemaCheck' ? 'text-red-500' : null,
+                    )}
+                  >
+                    <Badge color={edge.node.__typename === 'FailedSchemaCheck' ? 'red' : 'green'} />{' '}
+                    <TimeAgo date={edge.node.createdAt} />
+                  </div>
+
+                  {edge.node.serviceName ? (
+                    <div className="ml-auto mr-0 w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-right font-bold">
+                      {edge.node.serviceName}
                     </div>
                   ) : null}
-                  <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
-                    <div
-                      className={cn(
-                        edge.node.__typename === 'FailedSchemaCheck' ? 'text-red-500' : null,
-                      )}
-                    >
-                      <Badge
-                        color={edge.node.__typename === 'FailedSchemaCheck' ? 'red' : 'green'}
-                      />{' '}
-                      <TimeAgo date={edge.node.createdAt} />
-                    </div>
-
-                    {edge.node.serviceName ? (
-                      <div className="ml-auto mr-0 w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-right font-bold">
-                        {edge.node.serviceName}
-                      </div>
-                    ) : null}
-                  </div>
-                </NextLink>
-              </div>
-            );
-          })}
+                </div>
+              </NextLink>
+            </div>
+          ))}
+          {props.isLastPage && query.data.target.schemaChecks.pageInfo.hasNextPage && (
+            <Button
+              variant="link"
+              onClick={() => {
+                props.onLoadMore(query.data?.target?.schemaChecks.pageInfo.endCursor ?? '');
+              }}
+            >
+              Load more
+            </Button>
+          )}
         </>
-      )}
-      {props.isLastPage && query.data.target.schemaChecks.pageInfo.hasNextPage && (
-        <Button
-          variant="link"
-          onClick={() => {
-            props.onLoadMore(query.data?.target?.schemaChecks.pageInfo.endCursor ?? '');
-          }}
-        >
-          Load more
-        </Button>
       )}
     </>
   );
