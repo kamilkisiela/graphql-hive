@@ -724,7 +724,7 @@ export interface Storage {
      */
     transformNode?: (check: SchemaCheck) => TransformedSchemaCheck;
     /**
-     * Optional filters config for filtering failed and/or changed the schema checks.
+     * Optional filters config for filtering failed and/or changed schema checks.
      */
     filters?: SchemaChecksFilter | null;
   }): Promise<
