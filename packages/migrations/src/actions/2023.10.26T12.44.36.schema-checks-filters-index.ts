@@ -1,8 +1,7 @@
 import { type MigrationExecutor } from '../pg-migrator';
 
-
 export default {
-  name: '2023.10.26T12.44.36.schema-checks-changes-index.ts',
+  name: '2023.10.26T12.44.36.schema-checks-filters-index.ts',
   run: ({ sql }) => sql`
 CREATE INDEX "schema_checks_connection_pagination_with_changes" ON "schema_checks" (
   "target_id" ASC
