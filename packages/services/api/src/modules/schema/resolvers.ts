@@ -39,6 +39,7 @@ import type {
   WithSchemaCoordinatesUsage,
 } from '../../shared/mappers';
 import { buildSchema, createConnection, createDummyConnection } from '../../shared/schema';
+import { sentryFunction } from '../../shared/sentry';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { OperationsManager } from '../operations/providers/operations-manager';
 import { OrganizationManager } from '../organization/providers/organization-manager';
@@ -64,7 +65,7 @@ import { toGraphQLSchemaCheck, toGraphQLSchemaCheckCurry } from './to-graphql-sc
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 const GraphQLSchemaStringModel = z.string().max(5_000_000).min(0);
 
-async function usage(
+function usage(
   source:
     | WithSchemaCoordinatesUsage<{
         entity: {
@@ -85,7 +86,7 @@ async function usage(
 
   if ('isUsed' in source.usage) {
     if (source.usage.usedCoordinates.has(coordinate)) {
-      return {
+      return Promise.resolve({
         // TODO: This is a hack to mark the field as used but without passing exact number as we don't need the exact number in "Unused schema view".
         total: 1,
         isUsed: true,
@@ -95,36 +96,38 @@ async function usage(
         project: source.usage.project,
         target: source.usage.target,
         coordinate: coordinate,
-      };
+      });
     }
 
-    return {
+    return Promise.resolve({
       total: 0,
       isUsed: false,
       usedByClients: null,
-    };
+    });
   }
 
-  const usage = (await source.usage)[coordinate];
+  return source.usage.then(usage => {
+    const coordinateUsage = usage[coordinate];
 
-  return usage && usage.total > 0
-    ? {
-        total: usage.total,
-        isUsed: true,
-        get usedByClients() {
-          return usage.usedByClients;
-        },
-        period: usage.period,
-        organization: usage.organization,
-        project: usage.project,
-        target: usage.target,
-        coordinate: coordinate,
-      }
-    : {
-        total: 0,
-        isUsed: false,
-        usedByClients: null,
-      };
+    return coordinateUsage && coordinateUsage.total > 0
+      ? {
+          total: coordinateUsage.total,
+          isUsed: true,
+          get usedByClients() {
+            return coordinateUsage.usedByClients;
+          },
+          period: coordinateUsage.period,
+          organization: coordinateUsage.organization,
+          project: coordinateUsage.project,
+          target: coordinateUsage.target,
+          coordinate: coordinate,
+        }
+      : {
+          total: 0,
+          isUsed: false,
+          usedByClients: null,
+        };
+  });
 }
 
 function __isTypeOf<
@@ -979,11 +982,18 @@ export const resolvers: SchemaModule.Resolvers = {
       const helper = injector.get(SchemaHelper);
 
       let supergraph: SuperGraphInformation | null = null;
-
       if (project.type === ProjectType.FEDERATION) {
         let supergraphDocument: DocumentNode | null = null;
         if (version.supergraphSDL) {
-          supergraphDocument = parse(version.supergraphSDL);
+          supergraphDocument = sentryFunction(
+            () =>
+              parse(version.supergraphSDL!, {
+                noLocation: true,
+              }),
+            {
+              op: 'parse supergraphSDL in explorer',
+            },
+          );
         } else {
           // Legacy Fallback
           const schemas = await injector.get(SchemaManager).getSchemasOfVersion({
@@ -1010,13 +1020,23 @@ export const resolvers: SchemaModule.Resolvers = {
         }
 
         if (supergraphDocument) {
-          supergraph = extractSuperGraphInformation(supergraphDocument);
+          supergraph = sentryFunction(() => extractSuperGraphInformation(supergraphDocument!), {
+            op: 'extractSuperGraphInformation in explorer',
+          });
         }
       }
 
       let schemaAST: DocumentNode;
       if (version.compositeSchemaSDL) {
-        schemaAST = parse(version.compositeSchemaSDL);
+        schemaAST = sentryFunction(
+          () =>
+            parse(version.compositeSchemaSDL!, {
+              noLocation: true,
+            }),
+          {
+            op: 'parse compositeSchemaSDL in explorer',
+          },
+        );
       } else {
         // Legacy Fallback
         const schemas = await injector.get(SchemaManager).getSchemasOfVersion({
@@ -1043,10 +1063,16 @@ export const resolvers: SchemaModule.Resolvers = {
       }
 
       return {
-        schema: buildASTSchema(schemaAST, {
-          assumeValidSDL: true,
-          assumeValid: true,
-        }),
+        schema: sentryFunction(
+          () =>
+            buildASTSchema(schemaAST, {
+              assumeValidSDL: true,
+              assumeValid: true,
+            }),
+          {
+            op: 'buildASTSchema in explorer',
+          },
+        ),
         usage: {
           period: usage?.period ? parseDateRangeInput(usage.period) : createPeriod('30d'),
           organization: version.organization,
@@ -1286,24 +1312,28 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   SchemaCoordinateUsage: {
-    async topOperations(source, { limit }, { injector }) {
+    topOperations(source, { limit }, { injector }) {
       if (!source.isUsed) {
         return [];
       }
-      const operations = await injector.get(OperationsManager).getTopOperationForCoordinate({
-        organizationId: source.organization,
-        projectId: source.project,
-        targetId: source.target,
-        coordinate: source.coordinate,
-        period: source.period,
-        limit,
-      });
 
-      return operations.map(op => ({
-        name: op.operationName,
-        hash: op.operationHash,
-        count: op.count,
-      }));
+      return injector
+        .get(OperationsManager)
+        .getTopOperationForCoordinate({
+          organizationId: source.organization,
+          projectId: source.project,
+          targetId: source.target,
+          coordinate: source.coordinate,
+          period: source.period,
+          limit,
+        })
+        .then(operations =>
+          operations.map(op => ({
+            name: op.operationName,
+            hash: op.operationHash,
+            count: op.count,
+          })),
+        );
     },
   },
   SchemaExplorer: {
