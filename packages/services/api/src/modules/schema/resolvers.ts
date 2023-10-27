@@ -1062,6 +1062,8 @@ export const resolvers: SchemaModule.Resolvers = {
         schemaAST = schema.document;
       }
 
+      console.log('resolved explorer', Date.now());
+
       return {
         schema: sentryFunction(
           () =>
@@ -1467,12 +1469,14 @@ export const resolvers: SchemaModule.Resolvers = {
       const operationsManager = injector.get(OperationsManager);
 
       async function getStats(typename: string) {
+        console.log('counting coordinates', Date.now());
         const stats = await operationsManager.countCoordinatesOfTarget({
           target: usage.target,
           organization: usage.organization,
           project: usage.project,
           period: usage.period,
         });
+        console.log('counted coordinates', Date.now());
 
         return withUsedByClients(stats, {
           selector: usage,
@@ -1597,7 +1601,9 @@ export const resolvers: SchemaModule.Resolvers = {
         return null;
       }
 
-      return {
+      console.log('visited query', Date.now());
+
+      const result = {
         entity: transformGraphQLObjectType(entity),
         get usage() {
           return operationsManager
@@ -1627,6 +1633,10 @@ export const resolvers: SchemaModule.Resolvers = {
             }
           : null,
       };
+
+      console.log('resolved query', Date.now());
+
+      return result;
     },
     async mutation({ schema, usage, supergraph }, _, { injector }) {
       const operationsManager = injector.get(OperationsManager);
@@ -1635,6 +1645,8 @@ export const resolvers: SchemaModule.Resolvers = {
       if (!entity) {
         return null;
       }
+
+      console.log('resolved mutation', Date.now());
 
       return {
         entity: transformGraphQLObjectType(entity),
@@ -1675,6 +1687,8 @@ export const resolvers: SchemaModule.Resolvers = {
       if (!entity) {
         return null;
       }
+
+      console.log('resolved mutation', Date.now());
 
       return {
         entity: transformGraphQLObjectType(entity),
@@ -2076,7 +2090,10 @@ export const resolvers: SchemaModule.Resolvers = {
         : null,
   },
   GraphQLArgument: {
-    name: a => a.entity.name,
+    name: a => {
+      console.log('resolved GraphQLArgument.name', Date.now());
+      return a.entity.name;
+    },
     description: a => a.entity.description ?? null,
     type: a => a.entity.type,
     defaultValue: a => stringifyDefaultValue(a.entity.defaultValue),
@@ -2219,39 +2236,32 @@ function withUsedByClients<
     typename: string;
   }
 > {
-  return sentryFunction(
-    () => {
-      return Object.fromEntries(
-        Object.entries(input).map(([schemaCoordinate, record]) => [
-          schemaCoordinate,
-          {
-            selector: deps.selector,
+  return Object.fromEntries(
+    Object.entries(input).map(([schemaCoordinate, record]) => [
+      schemaCoordinate,
+      {
+        selector: deps.selector,
+        period: deps.period,
+        typename: deps.typename,
+        organization: deps.selector.organization,
+        project: deps.selector.project,
+        target: deps.selector.target,
+        ...record,
+        get usedByClients() {
+          if (record.isUsed === false) {
+            return null;
+          }
+
+          // It's using DataLoader under the hood so it's safe to call it multiple times for different coordinates
+          return deps.operationsManager.getClientNamesPerCoordinateOfType({
+            ...deps.selector,
             period: deps.period,
             typename: deps.typename,
-            organization: deps.selector.organization,
-            project: deps.selector.project,
-            target: deps.selector.target,
-            ...record,
-            get usedByClients() {
-              if (record.isUsed === false) {
-                return null;
-              }
-
-              // It's using DataLoader under the hood so it's safe to call it multiple times for different coordinates
-              return deps.operationsManager.getClientNamesPerCoordinateOfType({
-                ...deps.selector,
-                period: deps.period,
-                typename: deps.typename,
-                schemaCoordinate,
-              });
-            },
-          },
-        ]),
-      );
-    },
-    {
-      op: 'withUsedByClients',
-    },
+            schemaCoordinate,
+          });
+        },
+      },
+    ]),
   );
 }
 
