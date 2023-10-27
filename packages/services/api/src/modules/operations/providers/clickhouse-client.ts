@@ -167,6 +167,7 @@ export class ClickHouse {
           Date.now() - startedAt,
         );
         span?.finish();
+        scope?.setSpan(parentSpan);
       });
     const endedAt = (Date.now() - startedAt) / 1000;
 

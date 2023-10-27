@@ -29,7 +29,8 @@ export function sentry(
         };
       }
 
-      const parentSpan = passedSpan ?? Sentry.getCurrentHub().getScope()?.getSpan();
+      const scope = Sentry.getCurrentHub().getScope();
+      const parentSpan = passedSpan ?? scope?.getSpan();
       const span = parentSpan?.startChild(
         typeof context === 'string'
           ? {
@@ -42,56 +43,69 @@ export function sentry(
         return (originalMethod as any).apply(this, args);
       }
 
+      scope?.setSpan(span);
+
       const argsWithoutSpan = passedSpan ? args.slice(0, args.length - 1) : args;
 
-      return (
-        (originalMethod as any).apply(this, argsWithoutSpan.concat(span)) as Promise<any>
-      ).then(
-        result => {
+      return ((originalMethod as any).apply(this, argsWithoutSpan.concat(span)) as Promise<any>)
+        .then(
+          result => {
+            return Promise.resolve(result);
+          },
+          error => {
+            if (!(error instanceof GraphQLError)) {
+              Sentry.captureException(error);
+            }
+            span.setStatus('internal_error');
+            return Promise.reject(error);
+          },
+        )
+        .finally(() => {
           span.finish();
-          return Promise.resolve(result);
-        },
-        error => {
-          if (!(error instanceof GraphQLError)) {
-            Sentry.captureException(error);
-          }
-          span.setStatus('internal_error');
-          span.finish();
-          return Promise.reject(error);
-        },
-      );
+          scope?.setSpan(parentSpan);
+        });
     } as any;
   };
 }
 
 export function sentryPromise<T>(promise: Promise<T>, context: SentryContext): Promise<T> {
-  const parentSpan = Sentry.getCurrentHub().getScope()?.getSpan();
+  const scope = Sentry.getCurrentHub().getScope();
+  const parentSpan = scope?.getSpan();
   const span = parentSpan?.startChild(context);
 
   if (!span) {
     return promise;
   }
 
-  return promise.then(
-    result => {
-      span.finish();
-      return Promise.resolve(result);
-    },
-    error => {
-      span.setStatus('internal_error');
-      span.finish();
-      return Promise.reject(error);
-    },
-  );
+  scope.setSpan(span);
+
+  return promise
+    .then(
+      result => {
+        span.finish();
+        return Promise.resolve(result);
+      },
+      error => {
+        span.setStatus('internal_error');
+        span.finish();
+        return Promise.reject(error);
+      },
+    )
+    .finally(() => {
+      scope.setSpan(parentSpan);
+    });
 }
 
 export function sentryFunction<T>(fn: () => T, context: SentryContext): T {
-  const parentSpan = Sentry.getCurrentHub().getScope()?.getSpan();
+  const scope = Sentry.getCurrentHub().getScope();
+  const parentSpan = scope?.getSpan();
   const span = parentSpan?.startChild(context);
 
   if (!span) {
     return fn();
   }
+
+  scope.setSpan(span);
 
   try {
     const result = fn();
@@ -101,6 +115,8 @@ export function sentryFunction<T>(fn: () => T, context: SentryContext): T {
     span.setStatus('internal_error');
     span.finish();
     throw error;
+  } finally {
+    scope.setSpan(parentSpan);
   }
 }
 
