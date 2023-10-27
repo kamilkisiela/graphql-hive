@@ -41,9 +41,18 @@ export type WithGraphQLParentInfo<T> = T & {
   };
 };
 
+export type SchemaCoordinateUsageForUnusedExplorer = {
+  isUsed: false;
+  usedCoordinates: Set<string>;
+  period: DateRange;
+  organization: string;
+  project: string;
+  target: string;
+};
+
 export type WithSchemaCoordinatesUsage<T> = T & {
-  usage:
-    | Promise<{
+  usage: // explorer
+  | PromiseOrValue<{
         [coordinate: string]: {
           total: number;
           usedByClients: PromiseOrValue<Array<string> | null>;
@@ -54,14 +63,7 @@ export type WithSchemaCoordinatesUsage<T> = T & {
           typename: string;
         };
       }>
-    | {
-        isUsed: false;
-        usedCoordinates: Set<string>;
-        period: DateRange;
-        organization: string;
-        project: string;
-        target: string;
-      };
+    | SchemaCoordinateUsageForUnusedExplorer;
 };
 
 export type SchemaExplorerMapper = {

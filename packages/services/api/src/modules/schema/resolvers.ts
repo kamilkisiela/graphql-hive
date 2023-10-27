@@ -34,6 +34,7 @@ import type {
   GraphQLUnionTypeMapper,
   SchemaCompareError,
   SchemaCompareResult,
+  SchemaCoordinateUsageForUnusedExplorer,
   SchemaCoordinateUsageTypeMapper,
   WithGraphQLParentInfo,
   WithSchemaCoordinatesUsage,
@@ -65,6 +66,12 @@ import { toGraphQLSchemaCheck, toGraphQLSchemaCheckCurry } from './to-graphql-sc
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 const GraphQLSchemaStringModel = z.string().max(5_000_000).min(0);
 
+function isSchemaCoordinateUsageForUnusedExplorer(
+  value: unknown,
+): value is SchemaCoordinateUsageForUnusedExplorer {
+  return 'isUsed' in (value as any);
+}
+
 function usage(
   source:
     | WithSchemaCoordinatesUsage<{
@@ -80,33 +87,35 @@ function usage(
         }>
       >,
   _: unknown,
-): Promise<SchemaCoordinateUsageTypeMapper> {
+): Promise<SchemaCoordinateUsageTypeMapper> | SchemaCoordinateUsageTypeMapper {
   const coordinate =
     'parent' in source ? `${source.parent.coordinate}.${source.entity.name}` : source.entity.name;
 
-  if ('isUsed' in source.usage) {
-    if (source.usage.usedCoordinates.has(coordinate)) {
-      return Promise.resolve({
+  const usage = source.usage;
+
+  if (isSchemaCoordinateUsageForUnusedExplorer(usage)) {
+    if (usage.usedCoordinates.has(coordinate)) {
+      return {
         // TODO: This is a hack to mark the field as used but without passing exact number as we don't need the exact number in "Unused schema view".
         total: 1,
         isUsed: true,
         usedByClients: null,
-        period: source.usage.period,
-        organization: source.usage.organization,
-        project: source.usage.project,
-        target: source.usage.target,
+        period: usage.period,
+        organization: usage.organization,
+        project: usage.project,
+        target: usage.target,
         coordinate: coordinate,
-      });
+      };
     }
 
-    return Promise.resolve({
+    return {
       total: 0,
       isUsed: false,
       usedByClients: null,
-    });
+    };
   }
 
-  return source.usage.then(usage => {
+  return Promise.resolve(usage).then(usage => {
     const coordinateUsage = usage[coordinate];
 
     return coordinateUsage && coordinateUsage.total > 0
@@ -1593,36 +1602,18 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return types;
     },
-    async query({ schema, usage, supergraph }, _, { injector }) {
-      const operationsManager = injector.get(OperationsManager);
+    async query({ schema, supergraph }) {
       const entity = schema.getQueryType();
 
       if (!entity) {
         return null;
       }
 
-      console.log('visited query', Date.now());
+      console.log('resolved query', Date.now());
 
-      const result = {
+      return {
         entity: transformGraphQLObjectType(entity),
-        get usage() {
-          return operationsManager
-            .countCoordinatesOfType({
-              typename: entity.name,
-              organization: usage.organization,
-              project: usage.project,
-              target: usage.target,
-              period: usage.period,
-            })
-            .then(stats =>
-              withUsedByClients(stats, {
-                selector: usage,
-                period: usage.period,
-                operationsManager,
-                typename: entity.name,
-              }),
-            );
-        },
+        usage: {},
         supergraph: supergraph
           ? {
               ownedByServiceNames:
@@ -1633,13 +1624,8 @@ export const resolvers: SchemaModule.Resolvers = {
             }
           : null,
       };
-
-      console.log('resolved query', Date.now());
-
-      return result;
     },
-    async mutation({ schema, usage, supergraph }, _, { injector }) {
-      const operationsManager = injector.get(OperationsManager);
+    async mutation({ schema, supergraph }) {
       const entity = schema.getMutationType();
 
       if (!entity) {
@@ -1650,24 +1636,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return {
         entity: transformGraphQLObjectType(entity),
-        get usage() {
-          return operationsManager
-            .countCoordinatesOfType({
-              typename: entity.name,
-              organization: usage.organization,
-              project: usage.project,
-              target: usage.target,
-              period: usage.period,
-            })
-            .then(stats =>
-              withUsedByClients(stats, {
-                selector: usage,
-                period: usage.period,
-                operationsManager,
-                typename: entity.name,
-              }),
-            );
-        },
+        usage: {},
         supergraph: supergraph
           ? {
               ownedByServiceNames:
@@ -1680,8 +1649,7 @@ export const resolvers: SchemaModule.Resolvers = {
       };
     },
 
-    async subscription({ schema, usage, supergraph }, _, { injector }) {
-      const operationsManager = injector.get(OperationsManager);
+    async subscription({ schema, supergraph }) {
       const entity = schema.getSubscriptionType();
 
       if (!entity) {
@@ -1692,24 +1660,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return {
         entity: transformGraphQLObjectType(entity),
-        get usage() {
-          return operationsManager
-            .countCoordinatesOfType({
-              typename: entity.name,
-              organization: usage.organization,
-              project: usage.project,
-              target: usage.target,
-              period: usage.period,
-            })
-            .then(stats =>
-              withUsedByClients(stats, {
-                selector: usage,
-                period: usage.period,
-                operationsManager,
-                typename: entity.name,
-              }),
-            );
-        },
+        usage: {},
         supergraph: supergraph
           ? {
               ownedByServiceNames:
@@ -2090,10 +2041,7 @@ export const resolvers: SchemaModule.Resolvers = {
         : null,
   },
   GraphQLArgument: {
-    name: a => {
-      console.log('resolved GraphQLArgument.name', Date.now());
-      return a.entity.name;
-    },
+    name: a => a.entity.name,
     description: a => a.entity.description ?? null,
     type: a => a.entity.type,
     defaultValue: a => stringifyDefaultValue(a.entity.defaultValue),
