@@ -725,7 +725,12 @@ const SchemaPolicyEditor = (props: {
 };
 
 const ChecksPageQuery = graphql(`
-  query ChecksPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+  query ChecksPageQuery(
+    $organizationId: ID!
+    $projectId: ID!
+    $targetId: ID!
+    $filters: SchemaChecksFilter
+  ) {
     organizations {
       ...TargetLayout_OrganizationConnectionFragment
     }
@@ -740,6 +745,13 @@ const ChecksPageQuery = graphql(`
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
       schemaChecks(first: 1) {
+        edges {
+          node {
+            id
+          }
+        }
+      }
+      filteredSchemaChecks: schemaChecks(first: 1, filters: $filters) {
         edges {
           node {
             id
@@ -767,6 +779,10 @@ function ChecksPageContent() {
       organizationId: router.organizationId,
       projectId: router.projectId,
       targetId: router.targetId,
+      filters: {
+        changed: filters.showOnlyChanged ?? false,
+        failed: filters.showOnlyFailed ?? false,
+      },
     },
   });
 
@@ -781,6 +797,7 @@ function ChecksPageContent() {
   const isCDNEnabled = query.data;
   const { schemaCheckId } = router;
   const hasSchemaChecks = !!query.data?.target?.schemaChecks?.edges?.length;
+  const hasFilteredSchemaChecks = !!query.data?.target?.filteredSchemaChecks?.edges?.length;
   const hasActiveSchemaCheck = !!schemaCheckId;
 
   return (
@@ -805,7 +822,7 @@ function ChecksPageContent() {
               <Title>Schema Checks</Title>
               <Subtitle>Recently checked schemas.</Subtitle>
             </div>
-            {query.fetching ? null : hasSchemaChecks ? (
+            {query.fetching || query.stale ? null : hasSchemaChecks ? (
               <div className="flex flex-col gap-5">
                 <div>
                   <div className="flex flex-row items-center justify-between h-9">
@@ -845,17 +862,25 @@ function ChecksPageContent() {
                     />
                   </div>
                 </div>
-                <div className="flex w-[300px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
-                  {paginationVariables.map((cursor, index) => (
-                    <Navigation
-                      after={cursor}
-                      isLastPage={index + 1 === paginationVariables.length}
-                      onLoadMore={cursor => setPaginationVariables(cursors => [...cursors, cursor])}
-                      key={cursor ?? 'first'}
-                      filters={filters}
-                    />
-                  ))}
-                </div>
+                {hasFilteredSchemaChecks ? (
+                  <div className="flex w-[300px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
+                    {paginationVariables.map((cursor, index) => (
+                      <Navigation
+                        after={cursor}
+                        isLastPage={index + 1 === paginationVariables.length}
+                        onLoadMore={cursor =>
+                          setPaginationVariables(cursors => [...cursors, cursor])
+                        }
+                        key={cursor ?? 'first'}
+                        filters={filters}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm cursor-default">
+                    No schema checks found with the current filters
+                  </div>
+                )}
               </div>
             ) : (
               <div>
