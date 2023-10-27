@@ -65,7 +65,7 @@ import { toGraphQLSchemaCheck, toGraphQLSchemaCheckCurry } from './to-graphql-sc
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 const GraphQLSchemaStringModel = z.string().max(5_000_000).min(0);
 
-async function usage(
+function usage(
   source:
     | WithSchemaCoordinatesUsage<{
         entity: {
@@ -86,7 +86,7 @@ async function usage(
 
   if ('isUsed' in source.usage) {
     if (source.usage.usedCoordinates.has(coordinate)) {
-      return {
+      return Promise.resolve({
         // TODO: This is a hack to mark the field as used but without passing exact number as we don't need the exact number in "Unused schema view".
         total: 1,
         isUsed: true,
@@ -96,14 +96,14 @@ async function usage(
         project: source.usage.project,
         target: source.usage.target,
         coordinate: coordinate,
-      };
+      });
     }
 
-    return {
+    return Promise.resolve({
       total: 0,
       isUsed: false,
       usedByClients: null,
-    };
+    });
   }
 
   return source.usage.then(usage => {
