@@ -43,27 +43,24 @@ export function sentry(
         return (originalMethod as any).apply(this, args);
       }
 
-      scope?.setSpan(span);
-
       const argsWithoutSpan = passedSpan ? args.slice(0, args.length - 1) : args;
 
-      return ((originalMethod as any).apply(this, argsWithoutSpan.concat(span)) as Promise<any>)
-        .then(
-          result => {
-            return Promise.resolve(result);
-          },
-          error => {
-            if (!(error instanceof GraphQLError)) {
-              Sentry.captureException(error);
-            }
-            span.setStatus('internal_error');
-            return Promise.reject(error);
-          },
-        )
-        .finally(() => {
+      return (
+        (originalMethod as any).apply(this, argsWithoutSpan.concat(span)) as Promise<any>
+      ).then(
+        result => {
           span.finish();
-          scope?.setSpan(parentSpan);
-        });
+          return Promise.resolve(result);
+        },
+        error => {
+          if (!(error instanceof GraphQLError)) {
+            Sentry.captureException(error);
+          }
+          span.setStatus('internal_error');
+          span.finish();
+          return Promise.reject(error);
+        },
+      );
     } as any;
   };
 }
@@ -77,23 +74,17 @@ export function sentryPromise<T>(promise: Promise<T>, context: SentryContext): P
     return promise;
   }
 
-  scope.setSpan(span);
-
-  return promise
-    .then(
-      result => {
-        span.finish();
-        return Promise.resolve(result);
-      },
-      error => {
-        span.setStatus('internal_error');
-        span.finish();
-        return Promise.reject(error);
-      },
-    )
-    .finally(() => {
-      scope.setSpan(parentSpan);
-    });
+  return promise.then(
+    result => {
+      span.finish();
+      return Promise.resolve(result);
+    },
+    error => {
+      span.setStatus('internal_error');
+      span.finish();
+      return Promise.reject(error);
+    },
+  );
 }
 
 export function sentryFunction<T>(fn: () => T, context: SentryContext): T {
@@ -105,8 +96,6 @@ export function sentryFunction<T>(fn: () => T, context: SentryContext): T {
     return fn();
   }
 
-  scope.setSpan(span);
-
   try {
     const result = fn();
     span.finish();
@@ -115,8 +104,6 @@ export function sentryFunction<T>(fn: () => T, context: SentryContext): T {
     span.setStatus('internal_error');
     span.finish();
     throw error;
-  } finally {
-    scope.setSpan(parentSpan);
   }
 }
 

@@ -73,7 +73,6 @@ export class ClickHouse {
       op: queryId,
       origin: 'auto.clickhouse',
     });
-    scope?.setSpan(span);
     const startedAt = Date.now();
     const endpoint = `${this.config.protocol ?? 'https'}://${this.config.host}:${this.config.port}`;
     const executionId = queryId + '-' + Math.random().toString(16).substring(2);
@@ -85,70 +84,65 @@ export class ClickHouse {
     );
 
     const response = await this.httpClient
-      .post<QueryResponse<T>>(
-        endpoint,
-        {
-          context: {
-            description: `ClickHouse - ${queryId}`,
-          },
-          body: query.sql,
-          headers: {
-            'Accept-Encoding': 'gzip',
-            Accept: 'application/json',
-          },
-          searchParams: {
-            default_format: 'JSON',
-            // Max execution time in seconds
-            max_execution_time: timeout / 1000,
-            query_id: executionId,
-            ...toQueryParams(query),
-          },
-          username: this.config.username,
-          password: this.config.password,
-          decompress: true,
-          timeout: {
-            lookup: 1000,
-            connect: 1000,
-            secureConnect: 1000,
-            request: timeout,
-          },
-          retry: {
-            calculateDelay: info => {
-              if (info.attemptCount >= 6) {
-                // After 5 retries, stop.
-                return 0;
-              }
+      .post<QueryResponse<T>>(endpoint, {
+        context: {
+          description: `ClickHouse - ${queryId}`,
+        },
+        body: query.sql,
+        headers: {
+          'Accept-Encoding': 'gzip',
+          Accept: 'application/json',
+        },
+        searchParams: {
+          default_format: 'JSON',
+          // Max execution time in seconds
+          max_execution_time: timeout / 1000,
+          query_id: executionId,
+          ...toQueryParams(query),
+        },
+        username: this.config.username,
+        password: this.config.password,
+        decompress: true,
+        timeout: {
+          lookup: 1000,
+          connect: 1000,
+          secureConnect: 1000,
+          request: timeout,
+        },
+        retry: {
+          calculateDelay: info => {
+            if (info.attemptCount >= 6) {
+              // After 5 retries, stop.
+              return 0;
+            }
 
-              const delayBy = info.attemptCount * 250;
-              this.logger.error(
-                `Failed to run ClickHouse query, executionId: %s, code: %s , error name: %s, message: %s`,
-                executionId,
-                info.error.code,
-                info.error.name,
-                info.error.message,
-              );
+            const delayBy = info.attemptCount * 250;
+            this.logger.error(
+              `Failed to run ClickHouse query, executionId: %s, code: %s , error name: %s, message: %s`,
+              executionId,
+              info.error.code,
+              info.error.name,
+              info.error.message,
+            );
 
-              this.logger.debug(
-                `Retry (delay=%s, attempt=%s, reason=%s, queryId=%s, executionId=%s)`,
-                delayBy,
-                info.attemptCount,
-                info.error.message,
-                queryId,
-                executionId,
-              );
+            this.logger.debug(
+              `Retry (delay=%s, attempt=%s, reason=%s, queryId=%s, executionId=%s)`,
+              delayBy,
+              info.attemptCount,
+              info.error.message,
+              queryId,
+              executionId,
+            );
 
-              return delayBy;
-            },
-          },
-          responseType: 'json',
-          agent: {
-            http: httpAgent,
-            https: httpsAgent,
+            return delayBy;
           },
         },
-
-        span,
-      )
+        responseType: 'json',
+        agent: {
+          http: httpAgent,
+          https: httpsAgent,
+        },
+      })
       .catch(error => {
         this.logger.error(
           `Failed to run ClickHouse query, executionId: %s, code: %s , error name: %s, message: %s`,
@@ -167,7 +161,6 @@ export class ClickHouse {
           Date.now() - startedAt,
         );
         span?.finish();
-        scope?.setSpan(parentSpan);
       });
     const endedAt = (Date.now() - startedAt) / 1000;
 

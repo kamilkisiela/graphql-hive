@@ -49,8 +49,6 @@ export class HttpClient {
       return request.then(response => response.body);
     }
 
-    scope?.setSpan(span);
-
     return request
       .then(
         response => {
@@ -59,8 +57,6 @@ export class HttpClient {
           if (typeof response.headers['x-cache'] !== 'undefined') {
             span.setTag('cache', response.headers['x-cache'] as string);
           }
-
-          span.finish();
           return Promise.resolve(response.body);
         },
         error => {
@@ -90,13 +86,11 @@ export class HttpClient {
               details,
             },
           });
-
-          span.finish();
           return Promise.reject(error);
         },
       )
       .finally(() => {
-        scope?.setSpan(parentSpan);
+        span.finish();
       });
   }
 }
