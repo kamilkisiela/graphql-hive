@@ -136,9 +136,10 @@ function sentryAsyncResolver(
   name: string,
   resolver: (...args: any[]) => Promise<any>,
 ): (...args: any[]) => Promise<any> {
-  return async function tracedAsyncResolver(...args: any[]) {
-    return sentryPromise(resolver.apply({}, args), {
-      op: name,
-    });
-  };
+  return resolver;
+  // return async function tracedAsyncResolver(...args: any[]) {
+  //   return sentryPromise(resolver.apply({}, args), {
+  //     op: name,
+  //   });
+  // };
 }

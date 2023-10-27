@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import Agent from 'agentkeepalive';
 import { Inject, Injectable } from 'graphql-modules';
-import type { Span } from '@sentry/types';
+import * as Sentry from '@sentry/node';
 import { atomic } from '../../../shared/helpers';
 import { HttpClient } from '../../shared/providers/http-client';
 import { Logger } from '../../shared/providers/logger';
@@ -61,16 +61,19 @@ export class ClickHouse {
     query,
     queryId,
     timeout,
-    span: parentSpan,
   }: {
     query: SqlStatement;
     queryId: string;
     timeout: number;
-    span?: Span;
   }): Promise<QueryResponse<T>> {
+    const scope = Sentry.getCurrentHub().getScope();
+    const parentSpan = scope.getSpan();
+
     const span = parentSpan?.startChild({
       op: queryId,
+      origin: 'auto.clickhouse',
     });
+    scope?.setSpan(span);
     const startedAt = Date.now();
     const endpoint = `${this.config.protocol ?? 'https'}://${this.config.host}:${this.config.port}`;
     const executionId = queryId + '-' + Math.random().toString(16).substring(2);
@@ -154,6 +157,7 @@ export class ClickHouse {
           error.name,
           error.message,
         );
+        span?.setStatus('internal_error');
         return Promise.reject(error);
       })
       .finally(() => {
