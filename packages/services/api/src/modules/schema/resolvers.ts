@@ -2219,32 +2219,39 @@ function withUsedByClients<
     typename: string;
   }
 > {
-  return Object.fromEntries(
-    Object.entries(input).map(([schemaCoordinate, record]) => [
-      schemaCoordinate,
-      {
-        selector: deps.selector,
-        period: deps.period,
-        typename: deps.typename,
-        organization: deps.selector.organization,
-        project: deps.selector.project,
-        target: deps.selector.target,
-        ...record,
-        get usedByClients() {
-          if (record.isUsed === false) {
-            return null;
-          }
-
-          // It's using DataLoader under the hood so it's safe to call it multiple times for different coordinates
-          return deps.operationsManager.getClientNamesPerCoordinateOfType({
-            ...deps.selector,
+  return sentryFunction(
+    () => {
+      return Object.fromEntries(
+        Object.entries(input).map(([schemaCoordinate, record]) => [
+          schemaCoordinate,
+          {
+            selector: deps.selector,
             period: deps.period,
             typename: deps.typename,
-            schemaCoordinate,
-          });
-        },
-      },
-    ]),
+            organization: deps.selector.organization,
+            project: deps.selector.project,
+            target: deps.selector.target,
+            ...record,
+            get usedByClients() {
+              if (record.isUsed === false) {
+                return null;
+              }
+
+              // It's using DataLoader under the hood so it's safe to call it multiple times for different coordinates
+              return deps.operationsManager.getClientNamesPerCoordinateOfType({
+                ...deps.selector,
+                period: deps.period,
+                typename: deps.typename,
+                schemaCoordinate,
+              });
+            },
+          },
+        ]),
+      );
+    },
+    {
+      op: 'withUsedByClients',
+    },
   );
 }
 
