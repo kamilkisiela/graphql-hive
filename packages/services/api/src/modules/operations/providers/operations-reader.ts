@@ -10,10 +10,8 @@ import {
 } from 'date-fns';
 import { Injectable } from 'graphql-modules';
 import * as z from 'zod';
-import type { Span } from '@sentry/types';
 import { batch } from '@theguild/buddy';
 import type { DateRange } from '../../../shared/entities';
-import { sentry } from '../../../shared/sentry';
 import { Logger } from '../../shared/providers/logger';
 import { ClickHouse, RowOf, sql } from './clickhouse-client';
 import { calculateTimeWindow } from './helpers';
@@ -75,19 +73,16 @@ export class OperationsReader {
         query: SqlValue;
         queryId: string;
         timeout: number;
-        span?: Span | undefined;
       };
       daily: {
         query: SqlValue;
         queryId: string;
         timeout: number;
-        span?: Span | undefined;
       };
       minutely: {
         query: SqlValue;
         queryId: string;
         timeout: number;
-        span?: Span | undefined;
       };
     },
     period: DateRange | null,
@@ -205,7 +200,6 @@ export class OperationsReader {
     };
   }
 
-  @sentry('OperationsReader.countField')
   async countField({
     type,
     field,
@@ -226,27 +220,23 @@ export class OperationsReader {
     }).then(r => r[this.makeId({ type, field, argument })]);
   }
 
-  @sentry('OperationsReader.countFields')
-  async countFields(
-    {
-      fields,
-      target,
-      period,
-      operations,
-      excludedClients,
-    }: {
-      fields: ReadonlyArray<{
-        type: string;
-        field?: string | null;
-        argument?: string | null;
-      }>;
-      target: string | readonly string[];
-      period: DateRange;
-      operations?: readonly string[];
-      excludedClients?: readonly string[];
-    },
-    span?: Span,
-  ): Promise<Record<string, number>> {
+  async countFields({
+    fields,
+    target,
+    period,
+    operations,
+    excludedClients,
+  }: {
+    fields: ReadonlyArray<{
+      type: string;
+      field?: string | null;
+      argument?: string | null;
+    }>;
+    target: string | readonly string[];
+    period: DateRange;
+    operations?: readonly string[];
+    excludedClients?: readonly string[];
+  }): Promise<Record<string, number>> {
     const coordinates = fields.map(selector => this.makeId(selector));
     const conditions = [sql`(coordinate IN (${sql.array(coordinates, 'String')}))`];
 
@@ -284,7 +274,6 @@ export class OperationsReader {
           `,
       queryId: 'count_fields_v2',
       timeout: 30_000,
-      span,
     });
 
     const stats: Record<string, number> = {};
@@ -303,15 +292,11 @@ export class OperationsReader {
     return stats;
   }
 
-  @sentry('OperationsReader.hasCollectedOperations')
-  async hasCollectedOperations(
-    {
-      target,
-    }: {
-      target: string | readonly string[];
-    },
-    span?: Span,
-  ): Promise<boolean> {
+  async hasCollectedOperations({
+    target,
+  }: {
+    target: string | readonly string[];
+  }): Promise<boolean> {
     const result = await this.clickHouse.query<{
       exists: number;
     }>({
@@ -322,23 +307,18 @@ export class OperationsReader {
       `,
       queryId: 'has_collected_operations',
       timeout: 10_000,
-      span,
     });
 
     return result.rows > 0;
   }
 
-  @sentry('OperationsReader.countOperationsWithoutDetails')
-  async countOperationsWithoutDetails(
-    {
-      target,
-      period,
-    }: {
-      target: string | readonly string[];
-      period: DateRange;
-    },
-    span?: Span,
-  ): Promise<number> {
+  async countOperationsWithoutDetails({
+    target,
+    period,
+  }: {
+    target: string | readonly string[];
+    period: DateRange;
+  }): Promise<number> {
     const query = this.pickQueryByPeriod(
       {
         daily: {
@@ -348,7 +328,6 @@ export class OperationsReader {
           })}`,
           queryId: 'count_operations_daily',
           timeout: 10_000,
-          span,
         },
         hourly: {
           query: sql`SELECT sum(total) as total FROM operations_hourly ${this.createFilter({
@@ -357,7 +336,6 @@ export class OperationsReader {
           })}`,
           queryId: 'count_operations_hourly',
           timeout: 15_000,
-          span,
         },
         minutely: {
           query: sql`SELECT sum(total) as total FROM operations_minutely ${this.createFilter({
@@ -366,7 +344,6 @@ export class OperationsReader {
           })}`,
           queryId: 'count_operations_regular',
           timeout: 30_000,
-          span,
         },
       },
       period ?? null,
@@ -381,23 +358,19 @@ export class OperationsReader {
     return total;
   }
 
-  @sentry('OperationsReader.countRequests')
-  async countRequests(
-    {
-      target,
-      period,
-      operations,
-      clients,
-      schemaCoordinate,
-    }: {
-      target: string | readonly string[];
-      period: DateRange;
-      operations?: readonly string[];
-      clients?: readonly string[];
-      schemaCoordinate?: string;
-    },
-    span?: Span,
-  ): Promise<{
+  async countRequests({
+    target,
+    period,
+    operations,
+    clients,
+    schemaCoordinate,
+  }: {
+    target: string | readonly string[];
+    period: DateRange;
+    operations?: readonly string[];
+    clients?: readonly string[];
+    schemaCoordinate?: string;
+  }): Promise<{
     total: number;
     ok: number;
     notOk: number;
@@ -424,7 +397,6 @@ export class OperationsReader {
           )}`,
           queryId: 'count_operations_daily',
           timeout: 10_000,
-          span,
         },
         hourly: {
           query: sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_hourly ${this.createFilter(
@@ -446,7 +418,6 @@ export class OperationsReader {
           )}`,
           queryId: 'count_operations_hourly',
           timeout: 15_000,
-          span,
         },
         minutely: {
           query: sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_minutely ${this.createFilter(
@@ -468,7 +439,6 @@ export class OperationsReader {
           )}`,
           queryId: 'count_operations_regular',
           timeout: 30_000,
-          span,
         },
       },
       period ?? null,
@@ -489,7 +459,6 @@ export class OperationsReader {
     };
   }
 
-  @sentry('OperationsReader.countFailures')
   async countFailures({
     target,
     period,
@@ -504,21 +473,17 @@ export class OperationsReader {
     return this.countRequests({ target, period, operations, clients }).then(r => r.notOk);
   }
 
-  @sentry('OperationsReader.countUniqueDocuments')
-  async countUniqueDocuments(
-    {
-      target,
-      period,
-      operations,
-      clients,
-    }: {
-      target: string;
-      period: DateRange;
-      operations?: readonly string[];
-      clients?: readonly string[];
-    },
-    span?: Span,
-  ): Promise<number> {
+  async countUniqueDocuments({
+    target,
+    period,
+    operations,
+    clients,
+  }: {
+    target: string;
+    period: DateRange;
+    operations?: readonly string[];
+    clients?: readonly string[];
+  }): Promise<number> {
     const query = this.pickQueryByPeriod(
       {
         daily: {
@@ -534,7 +499,6 @@ export class OperationsReader {
           `,
           queryId: 'count_unique_documents_daily',
           timeout: 10_000,
-          span,
         },
         hourly: {
           query: sql`
@@ -549,7 +513,6 @@ export class OperationsReader {
           `,
           queryId: 'count_unique_documents_hourly',
           timeout: 15_000,
-          span,
         },
         minutely: {
           query: sql`
@@ -564,7 +527,6 @@ export class OperationsReader {
           `,
           queryId: 'count_unique_documents',
           timeout: 15_000,
-          span,
         },
       },
       period,
@@ -577,23 +539,19 @@ export class OperationsReader {
     return result.data.length ? parseInt(result.data[0].total, 10) : 0;
   }
 
-  @sentry('OperationsReader.readUniqueDocuments')
-  async readUniqueDocuments(
-    {
-      target,
-      period,
-      operations,
-      clients,
-      schemaCoordinate,
-    }: {
-      target: string;
-      period: DateRange;
-      operations?: readonly string[];
-      clients?: readonly string[];
-      schemaCoordinate?: string;
-    },
-    span?: Span,
-  ): Promise<
+  async readUniqueDocuments({
+    target,
+    period,
+    operations,
+    clients,
+    schemaCoordinate,
+  }: {
+    target: string;
+    period: DateRange;
+    operations?: readonly string[];
+    clients?: readonly string[];
+    schemaCoordinate?: string;
+  }): Promise<
     Array<{
       operationHash: string;
       operationName: string;
@@ -628,7 +586,6 @@ export class OperationsReader {
           `,
           queryId: 'read_unique_documents_daily',
           timeout: 10_000,
-          span,
         },
         hourly: {
           query: sql`
@@ -656,7 +613,6 @@ export class OperationsReader {
           `,
           queryId: 'read_unique_documents_hourly',
           timeout: 15_000,
-          span,
         },
         minutely: {
           query: sql`
@@ -681,7 +637,6 @@ export class OperationsReader {
           `,
           queryId: 'read_unique_documents',
           timeout: 15_000,
-          span,
         },
       },
       period,
@@ -734,7 +689,6 @@ export class OperationsReader {
         `,
         queryId: 'operations_registry',
         timeout: 15_000,
-        span,
       }),
     ]);
 
@@ -766,17 +720,7 @@ export class OperationsReader {
     });
   }
 
-  @sentry('OperationsReader.readOperationBody')
-  async readOperationBody(
-    {
-      target,
-      hash,
-    }: {
-      target: string;
-      hash: string;
-    },
-    span?: Span,
-  ) {
+  async readOperationBody({ target, hash }: { target: string; hash: string }) {
     const result = await this.clickHouse.query<{
       body: string;
     }>({
@@ -793,13 +737,11 @@ export class OperationsReader {
       `,
       queryId: 'read_body',
       timeout: 10_000,
-      span,
     });
 
     return result.data.length ? result.data[0].body : null;
   }
 
-  @sentry('OperationsReader.getReportedSchemaCoordinates')
   async getReportedSchemaCoordinates({
     target,
     period,
@@ -828,21 +770,17 @@ export class OperationsReader {
     return new Set(result.data.map(row => row.coordinate));
   }
 
-  @sentry('OperationsReader.countUniqueClients')
-  async countUniqueClients(
-    {
-      target,
-      period,
-      operations,
-      schemaCoordinate,
-    }: {
-      target: string;
-      period: DateRange;
-      operations?: readonly string[];
-      schemaCoordinate?: string;
-    },
-    span?: Span,
-  ): Promise<
+  async countUniqueClients({
+    target,
+    period,
+    operations,
+    schemaCoordinate,
+  }: {
+    target: string;
+    period: DateRange;
+    operations?: readonly string[];
+    schemaCoordinate?: string;
+  }): Promise<
     Array<{
       name: string;
       count: number;
@@ -887,7 +825,6 @@ export class OperationsReader {
             `,
             queryId: 'count_clients_daily',
             timeout: 10_000,
-            span,
           },
           hourly: {
             query: sql`
@@ -915,7 +852,6 @@ export class OperationsReader {
             `,
             queryId: 'count_clients_hourly',
             timeout: 10_000,
-            span,
           },
           minutely: {
             query: sql`
@@ -943,7 +879,6 @@ export class OperationsReader {
             `,
             queryId: 'count_clients_regular',
             timeout: 10_000,
-            span,
           },
         },
         period,
@@ -999,21 +934,17 @@ export class OperationsReader {
     });
   }
 
-  @sentry('OperationsReader.readClientVersions')
-  async readClientVersions(
-    {
-      target,
-      period,
-      clientName,
-      limit,
-    }: {
-      target: string;
-      period: DateRange;
-      clientName: string;
-      limit: number;
-    },
-    span?: Span,
-  ): Promise<{ version: string; count: number; percentage: number }[]> {
+  async readClientVersions({
+    target,
+    period,
+    clientName,
+    limit,
+  }: {
+    target: string;
+    period: DateRange;
+    clientName: string;
+    limit: number;
+  }): Promise<{ version: string; count: number; percentage: number }[]> {
     const result = await this.clickHouse.query<{
       total: string;
       client_version: string;
@@ -1037,7 +968,6 @@ export class OperationsReader {
             `,
             queryId: 'read_client_versions_daily',
             timeout: 10_000,
-            span,
           },
           hourly: {
             query: sql`
@@ -1056,7 +986,6 @@ export class OperationsReader {
             `,
             queryId: 'read_client_versions_hourly',
             timeout: 10_000,
-            span,
           },
           minutely: {
             query: sql`
@@ -1075,7 +1004,6 @@ export class OperationsReader {
             `,
             queryId: 'read_client_versions_regular',
             timeout: 10_000,
-            span,
           },
         },
         period,
@@ -1094,19 +1022,15 @@ export class OperationsReader {
     });
   }
 
-  @sentry('OperationsReader.readClientVersions')
-  async countClientVersions(
-    {
-      target,
-      period,
-      clientName,
-    }: {
-      target: string;
-      period: DateRange;
-      clientName: string;
-    },
-    span?: Span,
-  ): Promise<number> {
+  async countClientVersions({
+    target,
+    period,
+    clientName,
+  }: {
+    target: string;
+    period: DateRange;
+    clientName: string;
+  }): Promise<number> {
     const result = await this.clickHouse.query<{
       total: string;
     }>(
@@ -1125,7 +1049,6 @@ export class OperationsReader {
             `,
             queryId: 'count_client_versions_daily',
             timeout: 10_000,
-            span,
           },
           hourly: {
             query: sql`
@@ -1140,7 +1063,6 @@ export class OperationsReader {
             `,
             queryId: 'count_client_versions_hourly',
             timeout: 10_000,
-            span,
           },
           minutely: {
             query: sql`
@@ -1155,7 +1077,6 @@ export class OperationsReader {
             `,
             queryId: 'count_client_versions_regular',
             timeout: 10_000,
-            span,
           },
         },
         period,
@@ -1165,7 +1086,6 @@ export class OperationsReader {
     return result.data.length > 0 ? ensureNumber(result.data[0].total) : 0;
   }
 
-  @sentry('OperationsReader.getTopOperationsForTypes')
   async getTopOperationsForTypes(args: {
     targetId: string;
     period: DateRange;
@@ -1248,7 +1168,6 @@ export class OperationsReader {
     return coordinateToTopOperations;
   }
 
-  @sentry('OperationsReader.getClientNamesPerCoordinateOfType')
   async getClientNamesPerCoordinateOfType(args: {
     targetId: string;
     period: DateRange;
@@ -1332,19 +1251,15 @@ export class OperationsReader {
     );
   }
 
-  @sentry('OperationsReader.readUniqueClientNames')
-  async readUniqueClientNames(
-    {
-      target,
-      period,
-      operations,
-    }: {
-      target: string | readonly string[];
-      period: DateRange;
-      operations?: readonly string[];
-    },
-    span?: Span,
-  ): Promise<
+  async readUniqueClientNames({
+    target,
+    period,
+    operations,
+  }: {
+    target: string | readonly string[];
+    period: DateRange;
+    operations?: readonly string[];
+  }): Promise<
     Array<{
       name: string;
       count: number;
@@ -1369,7 +1284,6 @@ export class OperationsReader {
       `,
       queryId: 'count_client_names',
       timeout: 10_000,
-      span,
     });
 
     return result.data.map(row => {
@@ -1380,7 +1294,6 @@ export class OperationsReader {
     });
   }
 
-  @sentry('OperationsReader.requestsOverTimeOfTargets')
   async requestsOverTimeOfTargets(
     selectors: ReadonlyArray<{
       targets: readonly string[];
@@ -1562,7 +1475,6 @@ export class OperationsReader {
     );
   }
 
-  @sentry('OperationsReader.requestsOverTime')
   async requestsOverTime({
     target,
     period,
@@ -1593,7 +1505,6 @@ export class OperationsReader {
     }));
   }
 
-  @sentry('OperationsReader.failuresOverTime')
   async failuresOverTime({
     target,
     period,
@@ -1621,7 +1532,6 @@ export class OperationsReader {
     }));
   }
 
-  @sentry('OperationsReader.durationOverTime')
   async durationOverTime({
     target,
     period,
@@ -1649,21 +1559,17 @@ export class OperationsReader {
     });
   }
 
-  @sentry('OperationsReader.generalDurationPercentiles')
-  async generalDurationPercentiles(
-    {
-      target,
-      period,
-      operations,
-      clients,
-    }: {
-      target: string;
-      period: DateRange;
-      operations?: readonly string[];
-      clients?: readonly string[];
-    },
-    span?: Span,
-  ): Promise<Percentiles> {
+  async generalDurationPercentiles({
+    target,
+    period,
+    operations,
+    clients,
+  }: {
+    target: string;
+    period: DateRange;
+    operations?: readonly string[];
+    clients?: readonly string[];
+  }): Promise<Percentiles> {
     const result = await this.clickHouse.query<{
       percentiles: [number, number, number, number];
     }>(
@@ -1678,7 +1584,6 @@ export class OperationsReader {
             `,
             queryId: 'general_duration_percentiles_daily',
             timeout: 15_000,
-            span,
           },
           hourly: {
             query: sql`
@@ -1689,7 +1594,6 @@ export class OperationsReader {
             `,
             queryId: 'general_duration_percentiles_hourly',
             timeout: 15_000,
-            span,
           },
           minutely: {
             query: sql`
@@ -1700,7 +1604,6 @@ export class OperationsReader {
             `,
             queryId: 'general_duration_percentiles_regular',
             timeout: 15_000,
-            span,
           },
         },
         period,
@@ -1710,23 +1613,19 @@ export class OperationsReader {
     return toPercentiles(result.data[0].percentiles);
   }
 
-  @sentry('OperationsReader.durationPercentiles')
-  async durationPercentiles(
-    {
-      target,
-      period,
-      operations,
-      clients,
-      schemaCoordinate,
-    }: {
-      target: string;
-      period: DateRange;
-      operations?: readonly string[];
-      clients?: readonly string[];
-      schemaCoordinate?: string;
-    },
-    span?: Span,
-  ) {
+  async durationPercentiles({
+    target,
+    period,
+    operations,
+    clients,
+    schemaCoordinate,
+  }: {
+    target: string;
+    period: DateRange;
+    operations?: readonly string[];
+    clients?: readonly string[];
+    schemaCoordinate?: string;
+  }) {
     const result = await this.clickHouse.query<{
       hash: string;
       percentiles: [number, number, number, number];
@@ -1758,7 +1657,6 @@ export class OperationsReader {
             `,
             queryId: 'duration_percentiles_daily',
             timeout: 15_000,
-            span,
           },
           hourly: {
             query: sql`
@@ -1785,7 +1683,6 @@ export class OperationsReader {
             `,
             queryId: 'duration_percentiles_hourly',
             timeout: 15_000,
-            span,
           },
           minutely: {
             query: sql`
@@ -1812,7 +1709,6 @@ export class OperationsReader {
             `,
             queryId: 'duration_percentiles_regular',
             timeout: 15_000,
-            span,
           },
         },
         period,
@@ -1849,25 +1745,21 @@ export class OperationsReader {
     return result.data.map(row => row.client_name);
   }
 
-  @sentry('OperationsReader.getDurationAndCountOverTime')
-  private async getDurationAndCountOverTime(
-    {
-      target,
-      period,
-      resolution,
-      operations,
-      clients,
-      schemaCoordinate,
-    }: {
-      target: string;
-      period: DateRange;
-      resolution: number;
-      operations?: readonly string[];
-      clients?: readonly string[];
-      schemaCoordinate?: string;
-    },
-    span?: Span,
-  ) {
+  private async getDurationAndCountOverTime({
+    target,
+    period,
+    resolution,
+    operations,
+    clients,
+    schemaCoordinate,
+  }: {
+    target: string;
+    period: DateRange;
+    resolution: number;
+    operations?: readonly string[];
+    clients?: readonly string[];
+    schemaCoordinate?: string;
+  }) {
     const createSQLQuery = (tableName: string, isAggregation: boolean) => {
       const startDateTimeFormatted = formatDate(period.from);
       const endDateTimeFormatted = formatDate(period.to);
@@ -1937,19 +1829,16 @@ export class OperationsReader {
           query: createSQLQuery('operations_daily', true),
           queryId: 'duration_and_count_over_time_daily',
           timeout: 15_000,
-          span,
         },
         hourly: {
           query: createSQLQuery('operations_hourly', true),
           queryId: 'duration_and_count_over_time_hourly',
           timeout: 15_000,
-          span,
         },
         minutely: {
           query: createSQLQuery('operations_minutely', true),
           queryId: 'duration_and_count_over_time_regular',
           timeout: 15_000,
-          span,
         },
       },
       period,
