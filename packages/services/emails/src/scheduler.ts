@@ -226,7 +226,7 @@ export function createScheduler(config: {
         return false;
       }
 
-      return queue !== null && redisConnection !== null && redisConnection?.status === 'ready';
+      return queue !== null && redisConnection?.status === 'ready';
     },
   };
 }
