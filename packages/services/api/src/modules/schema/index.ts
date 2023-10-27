@@ -1,4 +1,5 @@
 import { createModule } from 'graphql-modules';
+import { traceAsyncFunctionResolvers } from '../../shared/sentry';
 import { Inspector } from './providers/inspector';
 import { models } from './providers/models';
 import { orchestrators } from './providers/orchestrators';
@@ -13,7 +14,7 @@ export const schemaModule = createModule({
   id: 'schema',
   dirname: __dirname,
   typeDefs,
-  resolvers,
+  resolvers: traceAsyncFunctionResolvers(resolvers),
   providers: [
     SchemaManager,
     SchemaPublisher,

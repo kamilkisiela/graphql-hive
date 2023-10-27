@@ -1,4 +1,5 @@
 import { GraphQLError } from 'graphql';
+import type { Resolvers } from 'graphql-modules';
 import * as Sentry from '@sentry/node';
 import type { Span } from '@sentry/types';
 
@@ -60,5 +61,84 @@ export function sentry(
         },
       );
     } as any;
+  };
+}
+
+export function sentryPromise<T>(promise: Promise<T>, context: SentryContext): Promise<T> {
+  const parentSpan = Sentry.getCurrentHub().getScope()?.getSpan();
+  const span = parentSpan?.startChild(context);
+
+  if (!span) {
+    return promise;
+  }
+
+  return promise.then(
+    result => {
+      span.finish();
+      return Promise.resolve(result);
+    },
+    error => {
+      span.setStatus('internal_error');
+      span.finish();
+      return Promise.reject(error);
+    },
+  );
+}
+
+export function sentryFunction<T>(fn: () => T, context: SentryContext): T {
+  const parentSpan = Sentry.getCurrentHub().getScope()?.getSpan();
+  const span = parentSpan?.startChild(context);
+
+  if (!span) {
+    return fn();
+  }
+
+  try {
+    const result = fn();
+    span.finish();
+    return result;
+  } catch (error) {
+    span.setStatus('internal_error');
+    span.finish();
+    throw error;
+  }
+}
+
+export function traceAsyncFunctionResolvers(resolvers: Resolvers): Resolvers {
+  if (Array.isArray(resolvers)) {
+    return resolvers.map(traceAsyncFunctionResolvers);
+  }
+
+  for (const typeName in resolvers) {
+    const fieldResolvers = resolvers[typeName];
+
+    if (typeof fieldResolvers === 'object') {
+      for (const fieldName in fieldResolvers) {
+        const fieldResolver = fieldResolvers[fieldName];
+
+        if (
+          typeof fieldResolver === 'function' &&
+          fieldResolver.constructor.name === 'AsyncFunction'
+        ) {
+          fieldResolvers[fieldName] = sentryAsyncResolver(
+            `graphql.resolver:${typeName}.${fieldName}`,
+            fieldResolver,
+          );
+        }
+      }
+    }
+  }
+
+  return resolvers;
+}
+
+function sentryAsyncResolver(
+  name: string,
+  resolver: (...args: any[]) => Promise<any>,
+): (...args: any[]) => Promise<any> {
+  return async function tracedAsyncResolver(...args: any[]) {
+    return sentryPromise(resolver.apply({}, args), {
+      op: name,
+    });
   };
 }
