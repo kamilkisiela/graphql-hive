@@ -16,8 +16,8 @@
     "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts"
   },
   "devDependencies": {
-    "@sentry/node": "7.75.1",
-    "@sentry/types": "7.75.1",
+    "@sentry/node": "7.76.0",
+    "@sentry/types": "7.76.0",
     "@tgriesser/schemats": "9.0.1",
     "@theguild/buddy": "0.1.0",
     "@types/node": "18.18.7",
