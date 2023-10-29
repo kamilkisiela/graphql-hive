@@ -710,8 +710,8 @@ importers:
         specifier: 13.3.6
         version: 13.3.6
       toucan-js:
-        specifier: 3.3.0
-        version: 3.3.0
+        specifier: 3.3.1
+        version: 3.3.1
       workers-loki-logger:
         specifier: 0.1.15
         version: 0.1.15
@@ -755,8 +755,8 @@ importers:
         specifier: 0.4.5
         version: 0.4.5
       toucan-js:
-        specifier: 3.3.0
-        version: 3.3.0
+        specifier: 3.3.1
+        version: 3.3.1
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -10661,15 +10661,6 @@ packages:
       - supports-color
     dev: true
 
-  /@sentry/core@7.70.0:
-    resolution: {integrity: sha512-voUsGVM+jwRp99AQYFnRvr7sVd2tUhIMj1L6F42LtD3vp7t5ZnKp3NpXagtFW2vWzXESfyJUBhM0qI/bFvn7ZA==}
-    engines: {node: '>=8'}
-    dependencies:
-      '@sentry/types': 7.70.0
-      '@sentry/utils': 7.70.0
-      tslib: 2.6.2
-    dev: true
-
   /@sentry/core@7.75.1:
     resolution: {integrity: sha512-Kw4KyKBxbxbh8OKO0S11Tm0gWP+6AaXXYrsq3hp8H338l/wOmIzyckmCbUrc/XJeoRqaFLJbdcCrcUEDZUvsVQ==}
     engines: {node: '>=8'}
@@ -10677,14 +10668,12 @@ packages:
       '@sentry/types': 7.75.1
       '@sentry/utils': 7.75.1
 
-  /@sentry/integrations@7.70.0:
-    resolution: {integrity: sha512-ffIEuiElROzl4IpYX0O7vtPaadXVycPtyjq86YTHjd2TUFcYuQTPBm5UjEVE0/sSNNCdfWYxNThU/fVyq93l1g==}
+  /@sentry/core@7.76.0:
+    resolution: {integrity: sha512-M+ptkCTeCNf6fn7p2MmEb1Wd9/JXUWxIT/0QEc+t11DNR4FYy1ZP2O9Zb3Zp2XacO7ORrlL3Yc+VIfl5JTgjfw==}
     engines: {node: '>=8'}
     dependencies:
-      '@sentry/types': 7.70.0
-      '@sentry/utils': 7.70.0
-      localforage: 1.10.0
-      tslib: 2.6.2
+      '@sentry/types': 7.76.0
+      '@sentry/utils': 7.76.0
     dev: true
 
   /@sentry/integrations@7.75.1:
@@ -10695,6 +10684,16 @@ packages:
       '@sentry/types': 7.75.1
       '@sentry/utils': 7.75.1
       localforage: 1.10.0
+
+  /@sentry/integrations@7.76.0:
+    resolution: {integrity: sha512-4ea0PNZrGN9wKuE/8bBCRrxxw4Cq5T710y8rhdKHAlSUpbLqr/atRF53h8qH3Fi+ec0m38PB+MivKem9zUwlwA==}
+    engines: {node: '>=8'}
+    dependencies:
+      '@sentry/core': 7.76.0
+      '@sentry/types': 7.76.0
+      '@sentry/utils': 7.76.0
+      localforage: 1.10.0
+    dev: true
 
   /@sentry/nextjs@7.75.1(next@13.5.6)(react@18.2.0)(webpack@5.88.2):
     resolution: {integrity: sha512-5DEW6Ksjuox8idf3O0NclF/rHSS0Z1VCIoFHW6d28FHFKU+/RkFwJTB13KfpQMBj1fiA9qSNJdy/2QlGUWVRmA==}
@@ -10770,21 +10769,13 @@ packages:
       '@sentry-internal/tracing': 7.75.1
     dev: true
 
-  /@sentry/types@7.70.0:
-    resolution: {integrity: sha512-rY4DqpiDBtXSk4MDNBH3dwWqfPbNBI/9GA7Y5WJSIcObBtfBKp0fzYliHJZD0pgM7d4DPFrDn42K9Iiumgymkw==}
-    engines: {node: '>=8'}
-    dev: true
-
   /@sentry/types@7.75.1:
     resolution: {integrity: sha512-km+ygqgMDaFfTrbQwdhrptFqx0Oq15jZABqIoIpbaOCkCAMm+tyCqrFS8dTfaq5wpCktqWOy2qU/DOpppO99Cg==}
     engines: {node: '>=8'}
 
-  /@sentry/utils@7.70.0:
-    resolution: {integrity: sha512-0cChMH0lsGp+5I3D4wOHWwjFN19HVrGUs7iWTLTO5St3EaVbdeLbI1vFXHxMxvopbwgpeZafbreHw/loIdZKpw==}
+  /@sentry/types@7.76.0:
+    resolution: {integrity: sha512-vj6z+EAbVrKAXmJPxSv/clpwS9QjPqzkraMFk2hIdE/kii8s8kwnkBwTSpIrNc8GnzV3qYC4r3qD+BXDxAGPaw==}
     engines: {node: '>=8'}
-    dependencies:
-      '@sentry/types': 7.70.0
-      tslib: 2.6.2
     dev: true
 
   /@sentry/utils@7.75.1:
@@ -10792,6 +10783,13 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       '@sentry/types': 7.75.1
+
+  /@sentry/utils@7.76.0:
+    resolution: {integrity: sha512-40jFD+yfQaKpFYINghdhovzec4IEpB7aAuyH/GtE7E0gLpcqnC72r55krEIVILfqIR2Mlr5OKUzyeoCyWAU/yw==}
+    engines: {node: '>=8'}
+    dependencies:
+      '@sentry/types': 7.76.0
+    dev: true
 
   /@sentry/vercel-edge@7.75.1:
     resolution: {integrity: sha512-TCiObqegXdWkObf0YUDTvAPgGS5rOpRtZKQmjJ03ZahwrSMZTWESvlKo1V/5JhgfZSRWJTvDnJAtomteopT5/A==}
@@ -30039,13 +30037,13 @@ packages:
     resolution: {integrity: sha512-gduQwd1rOdDMGxFG1gEvhV88Oirdo2p+KjoYFU7k2g+i7n6AFFbDQ5kMPUsW0pNbfQsB/cwXvT1i4Bue0s9g5g==}
     engines: {node: '>=6'}
 
-  /toucan-js@3.3.0:
-    resolution: {integrity: sha512-G3RZpX0SiLXq62UkQQyKuZKkB6yKrnp73Y97lh+cBt/fQLoj9YXJJ5IZ8YZ1Dq5nxGpSale+xpuGfUd4QLKcXA==}
+  /toucan-js@3.3.1:
+    resolution: {integrity: sha512-9BpkHb/Pzsrtl1ItNq9OEQPnuUHwzce0nV2uG+DYFiQ4fPyiA6mKTBcDwQzcvNkfSER038U+8TzvdkCev+Maww==}
     dependencies:
-      '@sentry/core': 7.70.0
-      '@sentry/integrations': 7.70.0
-      '@sentry/types': 7.70.0
-      '@sentry/utils': 7.70.0
+      '@sentry/core': 7.76.0
+      '@sentry/integrations': 7.76.0
+      '@sentry/types': 7.76.0
+      '@sentry/utils': 7.76.0
     dev: true
 
   /tough-cookie@4.1.3:
