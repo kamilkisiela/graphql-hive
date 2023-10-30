@@ -842,6 +842,51 @@ importers:
         specifier: 3.22.4
         version: 3.22.4
 
+  packages/services/persisted-documents:
+    devDependencies:
+      '@hive/cdn-script':
+        specifier: workspace:*
+        version: link:../cdn-worker
+      '@hive/service-common':
+        specifier: workspace:*
+        version: link:../service-common
+      '@sentry/node':
+        specifier: 7.76.0
+        version: 7.76.0
+      '@sinclair/typebox':
+        specifier: 0.31.18
+        version: 0.31.18
+      '@whatwg-node/fetch':
+        specifier: 0.9.13
+        version: 0.9.13
+      bullmq:
+        specifier: 4.12.7
+        version: 4.12.7(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
+      copyfiles:
+        specifier: 2.4.1
+        version: 2.4.1
+      dotenv:
+        specifier: 16.3.1
+        version: 16.3.1
+      ioredis:
+        specifier: 5.3.2
+        version: 5.3.2
+      p-timeout:
+        specifier: 6.1.2
+        version: 6.1.2
+      pino-pretty:
+        specifier: 10.2.3
+        version: 10.2.3
+      slonik:
+        specifier: 30.4.4
+        version: 30.4.4
+      tslib:
+        specifier: 2.6.2
+        version: 2.6.2
+      zod:
+        specifier: 3.22.4
+        version: 3.22.4
+
   packages/services/policy:
     devDependencies:
       '@graphql-eslint/eslint-plugin':
@@ -10788,6 +10833,10 @@ packages:
 
   /@sinclair/typebox@0.27.8:
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
+    dev: true
+
+  /@sinclair/typebox@0.31.18:
+    resolution: {integrity: sha512-p2JGz+SciGJVl1zokCIK15f7LYDrI2ZsxItcLhkAyx50hEYEj/Qdy7z30qRYiakzdIu8dV4DfBi+e6xEZuugiQ==}
     dev: true
 
   /@sindresorhus/is@4.6.0:
