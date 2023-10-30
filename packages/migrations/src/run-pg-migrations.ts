@@ -57,7 +57,6 @@ import migration_2023_10_05T11_44_36_schema_checks_github_repository from './act
 import migration_2023_10_26T12_44_36_schema_checks_filters_index from './actions/2023.10.26T12.44.36.schema-checks-filters-index';
 import { runMigrations } from './pg-migrator';
 
-
 export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) =>
   runMigrations({
     slonik: args.slonik,
@@ -121,4 +120,3 @@ export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) 
       migration_2023_10_26T12_44_36_schema_checks_filters_index,
     ],
   });
-  
