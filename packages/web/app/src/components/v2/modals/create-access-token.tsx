@@ -86,6 +86,19 @@ const CreateAccessTokenModalContent_OrganizationFragment = graphql(`
   }
 `);
 
+function getFinalTargetAccessScopes(
+  selectedScope: 'no-access' | TargetAccessScope,
+): Array<TargetAccessScope> {
+  if (selectedScope === 'no-access') {
+    return [];
+  }
+  /** When RegistryWrite got selected, we also need to provide RegistryRead.  */
+  if (selectedScope === TargetAccessScope.RegistryWrite) {
+    return [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite];
+  }
+  return [TargetAccessScope.RegistryRead];
+}
+
 function ModalContent(props: {
   organization: FragmentType<typeof CreateAccessTokenModalContent_OrganizationFragment>;
   organizationId: string;
@@ -124,12 +137,7 @@ function ModalContent(props: {
             name: values.name,
             organizationScopes: [],
             projectScopes: [],
-            targetScopes:
-              selectedScope === 'no-access'
-                ? []
-                : selectedScope === TargetAccessScope.RegistryWrite
-                ? [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite]
-                : [selectedScope],
+            targetScopes: getFinalTargetAccessScopes(selectedScope),
           },
         });
       },
