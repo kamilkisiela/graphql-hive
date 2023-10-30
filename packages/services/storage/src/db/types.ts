@@ -9,7 +9,6 @@
 
 export type alert_channel_type = "SLACK" | "WEBHOOK";
 export type alert_type = "SCHEMA_CHANGE_NOTIFICATIONS";
-export type operation_kind = "mutation" | "query" | "subscription";
 export type schema_policy_resource = "ORGANIZATION" | "PROJECT";
 export type user_role = "ADMIN" | "MEMBER";
 
@@ -138,16 +137,6 @@ export interface organizations_billing {
   billing_email_address: string | null;
   external_billing_reference_id: string;
   organization_id: string;
-}
-
-export interface persisted_operations {
-  content: string;
-  created_at: Date;
-  id: string;
-  operation_hash: string;
-  operation_kind: operation_kind;
-  operation_name: string;
-  project_id: string;
 }
 
 export interface projects {
@@ -320,7 +309,6 @@ export interface DBTables {
   organization_member: organization_member;
   organizations: organizations;
   organizations_billing: organizations_billing;
-  persisted_operations: persisted_operations;
   projects: projects;
   schema_checks: schema_checks;
   schema_log: schema_log;
