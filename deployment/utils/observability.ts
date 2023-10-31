@@ -210,7 +210,7 @@ export class Observability {
       'vector-logging',
       {
         // prettier-ignore
-        ...helmChart('https://helm.vector.dev', 'vector', '0.26.0'),
+        ...helmChart('https://helm.vector.dev', 'vector', '0.27.0'),
         namespace: ns.metadata.name,
         // https://vector.dev/docs/reference/configuration/
         values: {
