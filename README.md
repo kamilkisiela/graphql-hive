@@ -15,7 +15,7 @@ GraphQL Hive has been built with 3 main objectives in mind:
 - **Help GraphQL developers to get to know their GraphQL APIs** a little more with our Schema
   Registry, Performance Monitoring, Alerts, and Integrations.
 - **Support all kinds of GraphQL APIs**, from Federation, and Stitching, to standalone APIs.
-- **Open Source at the heart**: 100% open-source and build in public with the community.
+- **Open Source at the heart**: 100% open-source and built in public with the community.
 - **A plug and play Cloud solution**: to give access to Hive to most people with a generous free
   "Hobby plan"
 
@@ -45,7 +45,7 @@ your own infrastructure.
 GraphQL Hive helps you get a global overview of the usage of your GraphQL API with:
 
 - Error rates and repartition
-- Global and queries performances (latency, RPM…)
+- Global and query performances (latency, RPM…)
 - Operations count
 - Active GraphQL clients
 
@@ -57,7 +57,7 @@ as smoothly as possible!
 GraphQL Hive can notify your team when schema changes occur, either via Slack or a custom webhook.
 
 Also, the Hive CLI allows integration of the schema checks mechanism to all CI/CD systems (GitHub,
-BitBucket, Azure, and others). The same applies for schema publishing and operations checks.
+BitBucket, Azure, and others). The same applies to schema publishing and operations checks.
 
 If you are using GitHub, you can directly benefit from the **GraphQL Hive app that will
 automatically add status checks to your PRs**!
