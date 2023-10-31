@@ -1,16 +1,16 @@
 import type { ExecutionArgs } from 'graphql';
+import type { hiveClientSymbol } from '../client.js';
 import type { AgentOptions } from './agent.js';
-import type { OperationsStore } from './operations-store.js';
 import type { SchemaReporter } from './reporting.js';
 
 export interface HiveClient {
+  [hiveClientSymbol]: true;
   info(): Promise<void>;
   reportSchema: SchemaReporter['report'];
   collectUsage(): CollectUsageCallback;
   /**
    * @deprecated https://github.com/kamilkisiela/graphql-hive/issues/659
    */
-  operationsStore: OperationsStore;
   dispose(): Promise<void>;
 }
 
@@ -52,10 +52,6 @@ export interface HiveUsagePluginOptions {
    * Extract client info from GraphQL Context
    */
   clientInfo?(context: any): null | undefined | ClientInfo;
-  /**
-   * Generate hash of an operation (useful for persisted operations)
-   */
-  operationHash?(args: ExecutionArgs): string | null | undefined;
   /**
    * Hive uses LRU cache to store info about operations.
    * This option represents the maximum size of the cache.
@@ -115,15 +111,6 @@ export interface HiveReportingPluginOptions {
    * Name of the service (use only for distributed schemas)
    */
   serviceName?: string;
-}
-
-export interface HiveOperationsStorePluginOptions {
-  /**
-   * Custom endpoint to fetch stored operations
-   *
-   * Points to Hive by default
-   */
-  endpoint?: string;
 }
 
 export interface HiveSelfHostingOptions {
@@ -188,10 +175,6 @@ export type HivePluginOptions = OptionalWhenFalse<
      * Disabled by default
      */
     reporting?: HiveReportingPluginOptions | false;
-    /**
-     * Operations Store
-     */
-    operationsStore?: HiveOperationsStorePluginOptions;
   },
   'enabled',
   'token'

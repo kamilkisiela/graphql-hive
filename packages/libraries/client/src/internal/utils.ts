@@ -1,4 +1,5 @@
 import { createHash } from 'crypto';
+import { hiveClientSymbol } from '../client.js';
 import type {
   AsyncIterableIteratorOrValue,
   AsyncIterableOrValue,
@@ -135,7 +136,7 @@ export function addProperty<T, K extends string, V>(
 export function isHiveClient(
   clientOrOptions: HiveClient | HivePluginOptions,
 ): clientOrOptions is HiveClient {
-  return 'operationsStore' in clientOrOptions;
+  return hiveClientSymbol in clientOrOptions;
 }
 
 export function logIf(condition: boolean, message: string, logFn: (message: string) => void) {

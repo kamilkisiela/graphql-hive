@@ -14,7 +14,6 @@ import type {
   OrganizationMemberAccessInput,
   OrganizationSelectorInput,
   OrganizationTransferRequestSelector,
-  PublishPersistedOperationInput,
   RateLimitInput,
   RequestOrganizationTransferInput,
   SchemaCheckInput,
@@ -962,32 +961,6 @@ export function compareToPreviousVersion(selector: SchemaCompareToPreviousInput,
     token,
     variables: {
       selector,
-    },
-  });
-}
-
-export function publishPersistedOperations(input: PublishPersistedOperationInput[], token: string) {
-  return execute({
-    document: graphql(`
-      mutation publishPersistedOperations($input: [PublishPersistedOperationInput!]!) {
-        publishPersistedOperations(input: $input) {
-          summary {
-            total
-            unchanged
-          }
-          operations {
-            id
-            operationHash
-            content
-            name
-            kind
-          }
-        }
-      }
-    `),
-    token,
-    variables: {
-      input,
     },
   });
 }

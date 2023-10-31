@@ -19,7 +19,6 @@ import type {
   OrganizationAccessScope,
   OrganizationBilling,
   OrganizationInvitation,
-  PersistedOperation,
   Project,
   ProjectAccessScope,
   Schema,
@@ -46,7 +45,6 @@ import {
   organization_member,
   organizations,
   organizations_billing,
-  persisted_operations,
   projects,
   schema_log as schema_log_in_db,
   schema_policy_config,
@@ -368,18 +366,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           ? row.validation_excluded_clients.filter(isDefined)
           : [],
       },
-    };
-  }
-
-  function transformPersistedOperation(operation: persisted_operations): PersistedOperation {
-    return {
-      id: operation.id,
-      operationHash: operation.operation_hash,
-      name: operation.operation_name,
-      kind: operation.operation_kind as any,
-      project: operation.project_id,
-      content: operation.content,
-      date: operation.created_at as any,
     };
   }
 
@@ -1151,17 +1137,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           LEFT JOIN public.projects AS p ON (p.id = t.project_id)
           LEFT JOIN public.organizations AS o ON (o.id = p.org_id)
           WHERE t.clean_id = ${target} AND p.clean_id = ${project} AND o.clean_id = ${organization} AND p.type != 'CUSTOM'
-          LIMIT 1`,
-      );
-
-      return result.id;
-    },
-    async getPersistedOperationId({ project, operation }) {
-      const result = await pool.one<Pick<persisted_operations, 'id'>>(
-        sql`
-          SELECT po.id FROM public.persisted_operations as po
-          LEFT JOIN public.projects AS p ON (p.id = po.project_id)
-          WHERE po.operation_hash = ${operation} AND p.clean_id = ${project} AND p.type != 'CUSTOM'
           LIMIT 1`,
       );
 
@@ -2283,69 +2258,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       >(query);
 
       return result.rows.map(transformActivity);
-    },
-    async insertPersistedOperation({ operationHash, project, name, kind, content }) {
-      return transformPersistedOperation(
-        await pool.one<Slonik<persisted_operations>>(sql`
-          INSERT INTO public.persisted_operations
-            (operation_hash, operation_name, operation_kind, content, project_id)
-          VALUES
-            (${operationHash}, ${name}, ${kind}, ${content}, ${project})
-          RETURNING *
-        `),
-      );
-    },
-    async getPersistedOperations({ project }) {
-      const results = await pool.query<Slonik<persisted_operations>>(
-        sql`
-          SELECT * FROM public.persisted_operations
-          WHERE project_id = ${project}
-          ORDER BY created_at DESC`,
-      );
-
-      return results.rows.map(transformPersistedOperation);
-    },
-    async getSelectedPersistedOperations({ project, hashes }) {
-      const results = await pool.query<Slonik<persisted_operations>>(
-        sql`
-          SELECT * FROM public.persisted_operations
-          WHERE project_id = ${project} AND operation_hash IN (${sql.join(hashes, sql`, `)})
-          ORDER BY created_at DESC`,
-      );
-
-      return results.rows.map(transformPersistedOperation);
-    },
-    async getPersistedOperation({ operation, project }) {
-      return transformPersistedOperation(
-        await pool.one<Slonik<persisted_operations>>(
-          sql`
-            SELECT c.* FROM public.persisted_operations as c
-            WHERE c.id = ${operation} AND project_id = ${project}`,
-        ),
-      );
-    },
-    async comparePersistedOperations({ project, hashes }) {
-      const results = await pool.query<Pick<persisted_operations, 'operation_hash'>>(
-        sql`
-          SELECT operation_hash FROM public.persisted_operations
-          WHERE project_id = ${project} AND operation_hash IN (${sql.join(hashes, sql`, `)})
-          ORDER BY created_at DESC`,
-      );
-
-      return hashes.filter(hash => !results.rows.some(row => row.operation_hash === hash));
-    },
-    async deletePersistedOperation({ project, operation }) {
-      const result = transformPersistedOperation(
-        await pool.one<Slonik<persisted_operations>>(
-          sql`
-            DELETE FROM public.persisted_operations
-            WHERE id = ${operation} AND project_id = ${project}
-            RETURNING *
-          `,
-        ),
-      );
-
-      return result;
     },
     async addSlackIntegration({ organization, token }) {
       await pool.query<Slonik<organizations>>(
