@@ -1602,18 +1602,36 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return types;
     },
-    async query({ schema, supergraph }) {
+    async query({ schema, supergraph, usage }, _, { injector }) {
       const entity = schema.getQueryType();
 
       if (!entity) {
         return null;
       }
 
+      const operationsManager = injector.get(OperationsManager);
       console.log('resolved query', Date.now());
 
       return {
         entity: transformGraphQLObjectType(entity),
-        usage: {},
+        get usage() {
+          return operationsManager
+            .countCoordinatesOfType({
+              typename: entity.name,
+              organization: usage.organization,
+              project: usage.project,
+              target: usage.target,
+              period: usage.period,
+            })
+            .then(stats =>
+              withUsedByClients(stats, {
+                selector: usage,
+                period: usage.period,
+                operationsManager,
+                typename: entity.name,
+              }),
+            );
+        },
         supergraph: supergraph
           ? {
               ownedByServiceNames:
@@ -1625,18 +1643,36 @@ export const resolvers: SchemaModule.Resolvers = {
           : null,
       };
     },
-    async mutation({ schema, supergraph }) {
+    async mutation({ schema, supergraph, usage }, _, { injector }) {
       const entity = schema.getMutationType();
 
       if (!entity) {
         return null;
       }
 
+      const operationsManager = injector.get(OperationsManager);
       console.log('resolved mutation', Date.now());
 
       return {
         entity: transformGraphQLObjectType(entity),
-        usage: {},
+        get usage() {
+          return operationsManager
+            .countCoordinatesOfType({
+              typename: entity.name,
+              organization: usage.organization,
+              project: usage.project,
+              target: usage.target,
+              period: usage.period,
+            })
+            .then(stats =>
+              withUsedByClients(stats, {
+                selector: usage,
+                period: usage.period,
+                operationsManager,
+                typename: entity.name,
+              }),
+            );
+        },
         supergraph: supergraph
           ? {
               ownedByServiceNames:
@@ -1649,18 +1685,36 @@ export const resolvers: SchemaModule.Resolvers = {
       };
     },
 
-    async subscription({ schema, supergraph }) {
+    async subscription({ schema, supergraph, usage }, _, { injector }) {
       const entity = schema.getSubscriptionType();
 
       if (!entity) {
         return null;
       }
 
+      const operationsManager = injector.get(OperationsManager);
       console.log('resolved mutation', Date.now());
 
       return {
         entity: transformGraphQLObjectType(entity),
-        usage: {},
+        get usage() {
+          return operationsManager
+            .countCoordinatesOfType({
+              typename: entity.name,
+              organization: usage.organization,
+              project: usage.project,
+              target: usage.target,
+              period: usage.period,
+            })
+            .then(stats =>
+              withUsedByClients(stats, {
+                selector: usage,
+                period: usage.period,
+                operationsManager,
+                typename: entity.name,
+              }),
+            );
+        },
         supergraph: supergraph
           ? {
               ownedByServiceNames:
