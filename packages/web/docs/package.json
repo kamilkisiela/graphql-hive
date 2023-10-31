@@ -21,7 +21,7 @@
     "react-countup": "6.4.2",
     "react-dom": "18.2.0",
     "react-icons": "4.11.0",
-    "tailwind-merge": "1.14.0"
+    "tailwind-merge": "2.0.0"
   },
   "devDependencies": {
     "@theguild/tailwind-config": "0.3.0",
