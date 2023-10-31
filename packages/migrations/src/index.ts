@@ -7,7 +7,10 @@ import { createConnectionString } from './connection-string';
 import { env } from './environment';
 import { runPGMigrations } from './run-pg-migrations';
 
-const slonik = await createPool(createConnectionString(env.postgres));
+const slonik = await createPool(createConnectionString(env.postgres), {
+  // 10 minute timeout per statement
+  statementTimeout: 10 * 60 * 1000,
+});
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const actionsDirectory = __dirname + path.sep + 'actions';
