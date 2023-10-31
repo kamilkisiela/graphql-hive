@@ -112,12 +112,9 @@ function convertMsToTime(milliseconds: number) {
   if (milliseconds < 1000) {
     return `${milliseconds}ms`;
   }
-  let seconds = Math.floor(milliseconds / 1000);
-  let minutes = Math.floor(seconds / 60);
-  let hours = Math.floor(minutes / 60);
-
-  seconds = seconds % 60;
-  minutes = minutes % 60;
+  const seconds = Math.floor(milliseconds / 1000) % 60;
+  const minutes = Math.floor(seconds / 60) % 60;
+  const hours = Math.floor(minutes / 60);
 
   if (hours === 0) {
     if (minutes === 0) {
