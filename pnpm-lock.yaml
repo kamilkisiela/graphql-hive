@@ -1034,8 +1034,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0(@graphql-tools/utils@10.0.3)(graphql-yoga@5.0.0)(graphql@16.8.1)
       '@graphql-yoga/plugin-response-cache':
-        specifier: 3.0.0
-        version: 3.0.0(@envelop/core@5.0.0)(graphql-yoga@5.0.0)(graphql@16.8.1)
+        specifier: 3.1.0
+        version: 3.1.0(@envelop/core@5.0.0)(graphql-yoga@5.0.0)(graphql@16.8.1)
       '@hive/api':
         specifier: workspace:*
         version: link:../api
@@ -5077,8 +5077,8 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /@envelop/response-cache@6.0.1(@envelop/core@5.0.0)(graphql@16.8.1):
-    resolution: {integrity: sha512-rdopXknGIz8BTtP/bWzJxXxGh9YqbfSTCaVk5b+ERHrmkOIzreMezrqw41ghbpzOBo3Yxb6RF+2lEp88FUIyrA==}
+  /@envelop/response-cache@6.1.0(@envelop/core@5.0.0)(graphql@16.8.1):
+    resolution: {integrity: sha512-yE1H85jju/OGlbFTFfUx0dXAScewWES2UBe8UhFrMMRFTVsNwnOHFaVWQw7mwnMZjQOzahRiXPlG2Z0dxBQ6GQ==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@envelop/core': ^5.0.0
@@ -7636,14 +7636,14 @@ packages:
       graphql-yoga: 5.0.0(graphql@16.8.1)
     dev: true
 
-  /@graphql-yoga/plugin-response-cache@3.0.0(@envelop/core@5.0.0)(graphql-yoga@5.0.0)(graphql@16.8.1):
-    resolution: {integrity: sha512-SIh4EkjHWKecaMDVBZGbyNAi038waDVg3NPk2C6aU1E8rjOKMNeL50uzyIbkTvsUBP10Gmej0uspLvrrcV3ZBA==}
+  /@graphql-yoga/plugin-response-cache@3.1.0(@envelop/core@5.0.0)(graphql-yoga@5.0.0)(graphql@16.8.1):
+    resolution: {integrity: sha512-//7FiKuCjPQeIeFCH8kAnPk+UCP2M4hz1qIaCN8sfdMjr2xlyo3B2goEt6VTyeh/BHnY47qRuZ5t7PYJo50j5g==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
       graphql-yoga: ^5.0.0
     dependencies:
-      '@envelop/response-cache': 6.0.1(@envelop/core@5.0.0)(graphql@16.8.1)
+      '@envelop/response-cache': 6.1.0(@envelop/core@5.0.0)(graphql@16.8.1)
       graphql: 16.8.1
       graphql-yoga: 5.0.0(graphql@16.8.1)
     transitivePeerDependencies:
