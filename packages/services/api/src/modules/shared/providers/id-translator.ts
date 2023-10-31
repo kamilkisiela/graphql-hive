@@ -1,12 +1,7 @@
 import { Injectable, Scope } from 'graphql-modules';
 import { cache, filterSelector } from '../../../shared/helpers';
 import { Logger } from './logger';
-import type {
-  OrganizationSelector,
-  PersistedOperationSelector,
-  ProjectSelector,
-  TargetSelector,
-} from './storage';
+import type { OrganizationSelector, ProjectSelector, TargetSelector } from './storage';
 import { Storage } from './storage';
 
 @Injectable({
@@ -53,16 +48,5 @@ export class IdTranslator {
       filterSelector('target', selector),
     );
     return this.storage.getTargetId(selector);
-  }
-
-  @cache<PersistedOperationSelector>(selector =>
-    [selector.organization, selector.project, selector.operation].join(','),
-  )
-  translatePersistedOperationHash(selector: PersistedOperationSelector) {
-    this.logger.debug(
-      'Translating Persisted Operation Hash (selector=%o)',
-      filterSelector('persistedOperation', selector),
-    );
-    return this.storage.getPersistedOperationId(selector);
   }
 }

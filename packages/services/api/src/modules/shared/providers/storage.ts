@@ -28,7 +28,6 @@ import type {
   OrganizationInvitation,
   PaginatedDocumentCollectionOperations,
   PaginatedDocumentCollections,
-  PersistedOperation,
   Project,
   Schema,
   SchemaLog,
@@ -58,10 +57,6 @@ export interface ProjectSelector extends OrganizationSelector {
 
 export interface TargetSelector extends ProjectSelector {
   target: string;
-}
-
-export interface PersistedOperationSelector extends ProjectSelector {
-  operation: string;
 }
 
 export interface Storage {
@@ -201,8 +196,6 @@ export interface Storage {
       scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
     },
   ): Promise<void>;
-
-  getPersistedOperationId(_: PersistedOperationSelector): Promise<string | never>;
 
   getProject(_: ProjectSelector): Promise<Project | never>;
 
@@ -453,31 +446,6 @@ export interface Storage {
       limit: number;
     },
   ): Promise<readonly ActivityObject[]>;
-
-  getPersistedOperations(_: ProjectSelector): Promise<readonly PersistedOperation[]>;
-
-  getSelectedPersistedOperations(
-    _: ProjectSelector & { hashes: readonly string[] },
-  ): Promise<readonly PersistedOperation[]>;
-
-  comparePersistedOperations(
-    _: ProjectSelector & {
-      hashes: readonly string[];
-    },
-  ): Promise<readonly string[]>;
-
-  getPersistedOperation(_: PersistedOperationSelector): Promise<PersistedOperation | never>;
-
-  insertPersistedOperation(
-    _: {
-      operationHash: string;
-      name: string;
-      kind: string;
-      content: string;
-    } & ProjectSelector,
-  ): Promise<PersistedOperation | never>;
-
-  deletePersistedOperation(_: PersistedOperationSelector): Promise<PersistedOperation | never>;
 
   addSlackIntegration(_: OrganizationSelector & { token: string }): Promise<void>;
 

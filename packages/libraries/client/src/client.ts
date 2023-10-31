@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { ExecutionResult, GraphQLSchema } from 'graphql';
-import { createOperationsStore } from './internal/operations-store.js';
 import { createReporting } from './internal/reporting.js';
 import type { HiveClient, HivePluginOptions } from './internal/types.js';
 import { createUsage } from './internal/usage.js';
@@ -24,7 +23,6 @@ export function createHive(options: HivePluginOptions): HiveClient {
 
   const usage = createUsage(mergedOptions);
   const schemaReporter = createReporting(mergedOptions);
-  const operationsStore = createOperationsStore(mergedOptions);
 
   function reportSchema({ schema }: { schema: GraphQLSchema }) {
     schemaReporter.report({ schema });
@@ -170,13 +168,15 @@ export function createHive(options: HivePluginOptions): HiveClient {
   }
 
   return {
+    [hiveClientSymbol]: true,
     info,
     reportSchema,
     collectUsage,
-    operationsStore,
     dispose,
   };
 }
+
+export const hiveClientSymbol: unique symbol = Symbol('hive-client');
 
 function createPrinter(values: string[]) {
   const maxLen = Math.max(...values.map(v => v.length)) + 4;

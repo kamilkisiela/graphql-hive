@@ -4,7 +4,6 @@ import ms from 'ms';
 import type {
   DateRangeInput,
   OrganizationSelector,
-  PersistedOperationSelector,
   ProjectSelector,
   TargetSelector,
 } from '../__generated__/types';
@@ -41,14 +40,7 @@ export function filterSelector(
 ): OrganizationSelector;
 export function filterSelector(kind: 'project', selector: ProjectSelector): ProjectSelector;
 export function filterSelector(kind: 'target', selector: TargetSelector): TargetSelector;
-export function filterSelector(
-  kind: 'persistedOperation',
-  selector: PersistedOperationSelector,
-): PersistedOperationSelector;
-export function filterSelector(
-  kind: 'organization' | 'project' | 'target' | 'persistedOperation',
-  selector: any,
-): any {
+export function filterSelector(kind: 'organization' | 'project' | 'target', selector: any): any {
   switch (kind) {
     case 'organization':
       return {
@@ -64,12 +56,6 @@ export function filterSelector(
         organization: selector.organization,
         project: selector.project,
         target: selector.target,
-      };
-    case 'persistedOperation':
-      return {
-        organization: selector.organization,
-        project: selector.project,
-        operationHash: selector.operationHash, // TODO: use translator
       };
   }
 }
