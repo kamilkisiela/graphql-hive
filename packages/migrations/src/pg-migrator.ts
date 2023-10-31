@@ -16,11 +16,15 @@ export type MigrationExecutor = {
   noTransaction?: true;
   /**
    * You can either return a SQL query to run or instead use the connection within the function to run custom logic.
+   * You can also return an array of named steps so you can see the progress in the logs.
    */
-  run: (args: {
-    connection: CommonQueryMethods;
-    sql: SqlTaggedTemplate;
-  }) => Promise<void> | TaggedTemplateLiteralInvocation;
+  run: (args: { connection: CommonQueryMethods; sql: SqlTaggedTemplate }) =>
+    | Promise<void>
+    | TaggedTemplateLiteralInvocation
+    | Array<{
+        name: string;
+        query: TaggedTemplateLiteralInvocation;
+      }>;
 };
 
 const seedMigrationsIfNotExists = async (args: { connection: DatabaseTransactionConnection }) => {
@@ -51,7 +55,16 @@ async function runMigration(connection: CommonQueryMethods, migration: Migration
   console.log(`Running migration: ${migration.name}`);
 
   const result = await migration.run({ connection, sql });
-  if (result) {
+  if (Array.isArray(result)) {
+    for (const item of result) {
+      console.log(`  Starting step ${item.name}`);
+      const startTime = Date.now();
+      await connection.query(item.query);
+      const finishTime = Date.now();
+      const delta = finishTime - startTime;
+      console.log(`  Finished in ${convertMsToTime(delta)}`);
+    }
+  } else if (result) {
     await connection.query(result);
   }
 
