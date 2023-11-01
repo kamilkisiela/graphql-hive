@@ -73,7 +73,14 @@ We recommend the following flow if you are having issues with running Hive local
 3. Create a token from that target
 4. Go to `packages/libraries/cli` and run `pnpm build`
 5. Inside `packages/libraries/cli`, run:
-   `pnpm start schema:publish --registry.accessToken "YOUR_TOKEN_HERE" --registry.endpoint "http://localhost:4000/graphql" examples/single.graphql`
+
+   ```sh
+   pnpm start schema:publish --registry.accessToken "YOUR_TOKEN_HERE" --registry.endpoint "http://localhost:3001/graphql" examples/single.graphql
+   ```
+
+   The registry endpoint is the GraphQL endpoint of your local `server` service. You can also edit
+   the `hive.json` file in the `cli` package to avoid passing the `accessToken` and `endpoint` every
+   time.
 
 ### Setting up Slack App for developing
 

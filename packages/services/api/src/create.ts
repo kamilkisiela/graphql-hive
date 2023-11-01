@@ -23,7 +23,6 @@ import { OIDC_INTEGRATIONS_ENABLED } from './modules/oidc-integrations/providers
 import { operationsModule } from './modules/operations';
 import { CLICKHOUSE_CONFIG, ClickHouseConfig } from './modules/operations/providers/tokens';
 import { organizationModule } from './modules/organization';
-import { persistedOperationModule } from './modules/persisted-operations';
 import { schemaPolicyModule } from './modules/policy';
 import {
   SCHEMA_POLICY_SERVICE_CONFIG,
@@ -75,7 +74,6 @@ const modules = [
   activityModule,
   operationsModule,
   tokenModule,
-  persistedOperationModule,
   labModule,
   integrationsModule,
   alertsModule,

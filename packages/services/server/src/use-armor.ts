@@ -40,6 +40,7 @@ export function useArmor<
       ctx.addValidationRule(
         maxAliasesRule({
           n: 20,
+          allowList: ['__responseCacheTypeName', '__responseCacheId'],
           onReject: [
             (_, error) => {
               rejectedRequests.inc({

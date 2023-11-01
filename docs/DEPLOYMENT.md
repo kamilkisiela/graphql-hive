@@ -1,7 +1,7 @@
 ## Deployment
 
 Deployment is based on NPM packages. That means we are bundling (as much as possible) each service
-or package, and publish it to the private GitHub Packages artifactory.
+or package, and publish it to the private GitHub Packages Artifactory.
 
 Doing that allows us to have a simple, super fast deployments, because we don't need to deal with
 Docker images (which are heavy).
@@ -19,5 +19,5 @@ pricing, cold start and so on).
 We are using Pulumi (infrastructure as code) to describe and run our deployment. It's managed as
 GitHub Actions that runs on every bump release by Changesets.
 
-So changes are aggregated in a Changesets PR, and when merge, it updated the deployment manifest
-`package.json`, leading to a deployment of only the updated packages to production.
+So changes are aggregated in a Changesets PR, and when merged, it updates the deployment manifest
+`package.json`, leading to deployment of only the updated packages to production.

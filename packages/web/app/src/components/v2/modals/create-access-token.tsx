@@ -1,23 +1,12 @@
-import { PropsWithoutRef, ReactElement, useMemo, useState } from 'react';
-import clsx from 'clsx';
+import { ReactElement, useState } from 'react';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
-import { PermissionsSpace, usePermissionsManager } from '@/components/organization/Permissions';
-import {
-  Accordion,
-  Button,
-  CopyValue,
-  Heading,
-  Input,
-  Modal,
-  RadixSelect,
-  Tabs,
-  Tag,
-} from '@/components/v2';
+import { PermissionScopeItem, usePermissionsManager } from '@/components/organization/Permissions';
+import { Accordion, Button, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@/graphql';
-import { scopes } from '@/lib/access/common';
+import { TargetAccessScope } from '@/graphql';
+import { RegistryAccessScope } from '@/lib/access/common';
 import { useRouteSelector } from '@/lib/hooks';
 
 export const CreateAccessToken_CreateTokenMutation = graphql(`
@@ -97,197 +86,18 @@ const CreateAccessTokenModalContent_OrganizationFragment = graphql(`
   }
 `);
 
-type TokenPreset = {
-  name: string;
-  description: string | ReactElement;
-  permissions: {
-    target: Set<TargetAccessScope>;
-    project: Set<ProjectAccessScope>;
-    organization: Set<OrganizationAccessScope>;
-  };
-};
-
-const TOKEN_SIMPLE_PRESETS: TokenPreset[] = [
-  {
-    name: 'Schema Check & Push',
-    description:
-      'This set of permissions allows the token to check new schemas, push schemas, and report GraphQL operations usage.',
-    permissions: {
-      target: new Set([
-        TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ]),
-      project: new Set(),
-      organization: new Set(),
-    },
-  },
-  {
-    name: 'Schema Check Only',
-    description:
-      'This set of permissions allows the token to check new schemas. You can use this kind of token as part if your continuous integration pipeline.',
-    permissions: {
-      target: new Set([
-        TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryRead,
-      ]),
-      project: new Set(),
-      organization: new Set(),
-    },
-  },
-  {
-    name: 'GraphQL Operations Reporting',
-    description:
-      'This set of permissions allows the token to check new schemas, push schemas, and report GraphQL operations usage.',
-    permissions: {
-      target: new Set([
-        TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-      ]),
-      project: new Set(),
-      organization: new Set(),
-    },
-  },
-  {
-    name: 'Full Access',
-    description: 'A token with all permissions. Use with caution.',
-    permissions: {
-      target: new Set([
-        TargetAccessScope.Delete,
-        TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-        TargetAccessScope.Settings,
-        TargetAccessScope.TokensRead,
-        TargetAccessScope.TokensWrite,
-      ]),
-      project: new Set([
-        ProjectAccessScope.OperationsStoreWrite,
-        ProjectAccessScope.OperationsStoreRead,
-        ProjectAccessScope.Settings,
-        ProjectAccessScope.Alerts,
-        ProjectAccessScope.Delete,
-        ProjectAccessScope.Read,
-      ]),
-      organization: new Set([
-        OrganizationAccessScope.Integrations,
-        OrganizationAccessScope.Settings,
-        OrganizationAccessScope.Members,
-        OrganizationAccessScope.Delete,
-        OrganizationAccessScope.Read,
-      ]),
-    },
-  },
-];
-
-const TokenPresetSelect = (
-  props: PropsWithoutRef<{
-    setSelectedPreset: (preset: string) => void;
-    activePreset: TokenPreset | null;
-  }>,
-): ReactElement => {
-  return (
-    <div className="mt-3">
-      <RadixSelect
-        placeholder="Select a preset"
-        name="preset-select"
-        position="popper"
-        value={props.activePreset?.name}
-        options={TOKEN_SIMPLE_PRESETS.map(preset => ({ value: preset.name, label: preset.name }))}
-        onChange={value => {
-          props.setSelectedPreset(value);
-        }}
-      />
-      {props.activePreset ? (
-        <p className="mt-4 text-sm text-gray-500">{props.activePreset.description}</p>
-      ) : null}
-    </div>
-  );
-};
-
-const PresetTabContent = (props: { manager: ReturnType<typeof usePermissionsManager> }) => {
-  const [selectedPreset, setSelectedPreset] = useState<string | undefined>(undefined);
-  const activePreset =
-    (selectedPreset && TOKEN_SIMPLE_PRESETS.find(v => v.name === selectedPreset)) || null;
-
-  const isPermissionMismatch = useMemo(() => {
-    if (activePreset == null) {
-      return false;
-    }
-    return (
-      !props.manager.targetScopes.every(scope => props.manager.canAccessTarget(scope)) ||
-      !props.manager.projectScopes.every(scope => props.manager.canAccessProject(scope)) ||
-      !props.manager.organizationScopes.every(scope => props.manager.canAccessOrganization(scope))
-    );
-  }, [props.manager]);
-
-  return (
-    <>
-      <div className="px-4 pb-2 text-sm">
-        <p className="text-gray-500">
-          With simple mode, you can choose the flow you want to implement and the wizard will help
-          you with the permissions required.
-        </p>
-        <TokenPresetSelect
-          activePreset={activePreset}
-          setSelectedPreset={presetName => {
-            const preset = TOKEN_SIMPLE_PRESETS.find(v => v.name === presetName) ?? null;
-            if (preset == null) {
-              return;
-            }
-
-            props.manager.setTargetScopes(Array.from(preset.permissions.target));
-            props.manager.setProjectScopes(Array.from(preset.permissions.project));
-            props.manager.setOrganizationScopes(Array.from(preset.permissions.organization));
-            setSelectedPreset(preset.name);
-          }}
-        />
-        {isPermissionMismatch ? (
-          <div
-            className={clsx(
-              'mt-6 flex items-center rounded-lg border py-2 px-4 gap-4',
-              'border-red-200 bg-red-100 text-red-900 dark:border-red-200/30 dark:bg-red-900/30 dark:text-red-200',
-            )}
-          >
-            <div className="w-full min-w-0">
-              Your user account does not satisfy all the selected permissions included in this
-              preset. You can still create an access token preset, but the permissions will be
-              omitted. Check the list below for more information.
-            </div>
-          </div>
-        ) : null}
-      </div>
-      <Accordion type="multiple" defaultValue={['Organization', 'Project', 'Target']}>
-        <PermissionsSpace
-          title="Organization"
-          scopes={scopes.organization}
-          initialScopes={props.manager.organizationScopes}
-          onChange={props.manager.setOrganizationScopes}
-          checkAccess={props.manager.canAccessOrganization}
-          isReadOnly
-        />
-        <PermissionsSpace
-          title="Project"
-          scopes={scopes.project}
-          initialScopes={props.manager.projectScopes}
-          onChange={props.manager.setProjectScopes}
-          checkAccess={props.manager.canAccessProject}
-          isReadOnly
-        />
-        <PermissionsSpace
-          title="Target"
-          scopes={scopes.target}
-          initialScopes={props.manager.targetScopes}
-          onChange={props.manager.setTargetScopes}
-          checkAccess={props.manager.canAccessTarget}
-          isReadOnly
-        />
-      </Accordion>
-    </>
-  );
-};
+function getFinalTargetAccessScopes(
+  selectedScope: 'no-access' | TargetAccessScope,
+): Array<TargetAccessScope> {
+  if (selectedScope === 'no-access') {
+    return [];
+  }
+  /** When RegistryWrite got selected, we also need to provide RegistryRead.  */
+  if (selectedScope === TargetAccessScope.RegistryWrite) {
+    return [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite];
+  }
+  return [TargetAccessScope.RegistryRead];
+}
 
 function ModalContent(props: {
   organization: FragmentType<typeof CreateAccessTokenModalContent_OrganizationFragment>;
@@ -300,7 +110,10 @@ function ModalContent(props: {
     CreateAccessTokenModalContent_OrganizationFragment,
     props.organization,
   );
-  const [mutation, mutate] = useMutation(CreateAccessToken_CreateTokenMutation);
+  const [selectedScope, setSelectedScope] = useState(
+    'no-access' as TargetAccessScope | 'no-access',
+  );
+
   const manager = usePermissionsManager({
     onSuccess() {},
     organization,
@@ -308,14 +121,7 @@ function ModalContent(props: {
     passMemberScopes: false,
   });
 
-  const filteredDownPermissions = useMemo(() => {
-    return {
-      organizationScopes: manager.organizationScopes.filter(manager.canAccessOrganization),
-      projectScopes: manager.projectScopes.filter(manager.canAccessProject),
-      targetScopes: manager.targetScopes.filter(manager.canAccessTarget),
-    };
-  }, [manager]);
-
+  const [mutation, mutate] = useMutation(CreateAccessToken_CreateTokenMutation);
   const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
     useFormik({
       initialValues: { name: '' },
@@ -329,18 +135,15 @@ function ModalContent(props: {
             project: props.projectId,
             target: props.targetId,
             name: values.name,
-            organizationScopes: filteredDownPermissions.organizationScopes,
-            projectScopes: filteredDownPermissions.projectScopes,
-            targetScopes: filteredDownPermissions.targetScopes,
+            organizationScopes: [],
+            projectScopes: [],
+            targetScopes: getFinalTargetAccessScopes(selectedScope),
           },
         });
       },
     });
 
-  const noPermissionsSelected =
-    filteredDownPermissions.organizationScopes.length === 0 &&
-    filteredDownPermissions.projectScopes.length === 0 &&
-    filteredDownPermissions.targetScopes.length === 0;
+  const noPermissionsSelected = selectedScope === 'no-access';
 
   return (
     <>
@@ -392,73 +195,31 @@ function ModalContent(props: {
             )}
           </div>
           <div className="flex flex-col flex-1 overflow-hidden">
-            <Tabs
-              defaultValue="simple"
-              className="flex flex-col overflow-hidden"
-              onValueChange={value => {
-                if (value === 'simple') {
-                  manager.setOrganizationScopes([]);
-                  manager.setProjectScopes([]);
-                  manager.setTargetScopes([]);
-                }
-                if (value === 'advanced') {
-                  manager.setOrganizationScopes(scopes =>
-                    scopes.filter(manager.canAccessOrganization),
-                  );
-                  manager.setProjectScopes(scopes => scopes.filter(manager.canAccessProject));
-                  manager.setTargetScopes(scopes => scopes.filter(manager.canAccessTarget));
-                }
-              }}
-            >
-              <Tabs.List>
-                <Tabs.Trigger value="simple" asChild>
-                  <div>Simple</div>
-                </Tabs.Trigger>
-                <Tabs.Trigger value="advanced" asChild>
-                  <div>Advanced</div>
-                </Tabs.Trigger>
-              </Tabs.List>
-              <Tabs.Content value="simple" className="flex py-2 overflow-hidden relative" noPadding>
-                <div
-                  className="overflow-y-scroll py-7 w-full"
-                  style={{ height: 'calc(100% - 1px)' }}
-                >
-                  <PresetTabContent manager={manager} />
-                </div>
-                <ScrollableTabShadow />
-              </Tabs.Content>
-              <Tabs.Content value="advanced" noPadding className="flex overflow-hidden relative">
-                <div
-                  className="overflow-y-scroll py-7 w-full"
-                  style={{ height: 'calc(100% - 1px)' }}
-                >
-                  <Accordion type="multiple" defaultValue={['Organization', 'Project', 'Target']}>
-                    <PermissionsSpace
-                      title="Organization"
-                      scopes={scopes.organization}
-                      initialScopes={manager.organizationScopes}
-                      onChange={manager.setOrganizationScopes}
-                      checkAccess={manager.canAccessOrganization}
-                    />
-                    <PermissionsSpace
-                      title="Project"
-                      scopes={scopes.project}
-                      initialScopes={manager.projectScopes}
-                      onChange={manager.setProjectScopes}
-                      checkAccess={manager.canAccessProject}
-                    />
-                    <PermissionsSpace
-                      title="Target"
-                      scopes={scopes.target}
-                      initialScopes={manager.targetScopes}
-                      onChange={manager.setTargetScopes}
-                      checkAccess={manager.canAccessTarget}
-                    />
-                  </Accordion>
-                </div>
-                <ScrollableTabShadow />
-              </Tabs.Content>
-            </Tabs>
+            <Accordion defaultValue="Permissions">
+              <Accordion.Item value="Permissions">
+                <Accordion.Header>Registry & Usage</Accordion.Header>
+                <Accordion.Content>
+                  <PermissionScopeItem
+                    scope={RegistryAccessScope}
+                    canManageScope={
+                      manager.canAccessTarget(RegistryAccessScope.mapping['read-only']) ||
+                      manager.canAccessTarget(RegistryAccessScope.mapping['read-write'])
+                    }
+                    checkAccess={manager.canAccessTarget}
+                    isReadOnly={false}
+                    onChange={value => {
+                      if (value === 'no-access') {
+                        setSelectedScope('no-access');
+                        return;
+                      }
+                      setSelectedScope(value);
+                    }}
+                    possibleScope={Object.values(RegistryAccessScope.mapping)}
+                    selectedScope={selectedScope}
+                  />
+                </Accordion.Content>
+              </Accordion.Item>
+            </Accordion>
           </div>
           <div className="shrink-0">
             {mutation.error && <div className="text-sm text-red-500">{mutation.error.message}</div>}
@@ -483,19 +244,3 @@ function ModalContent(props: {
     </>
   );
 }
-
-const shadowColor = 'rgb(14, 11, 15)';
-
-const ScrollableTabShadow = () => (
-  <div
-    style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      pointerEvents: 'none',
-      boxShadow: `inset 0px 20px 20px -10px ${shadowColor}, inset 0px -20px 20px -10px ${shadowColor}`,
-    }}
-  />
-);
