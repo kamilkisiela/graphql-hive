@@ -755,6 +755,10 @@ export default gql`
     The URL of the schema check on the Hive Web App.
     """
     webUrl: String
+    """
+    The GitHub repository associated with the schema check.
+    """
+    githubRepository: String
 
     breakingSchemaChanges: SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
@@ -789,6 +793,10 @@ export default gql`
     The URL of the schema check on the Hive Web App.
     """
     webUrl: String
+    """
+    The GitHub repository associated with the schema check.
+    """
+    githubRepository: String
 
     """
     Breaking changes can exist in an successful schema check if the check was manually approved.
@@ -840,6 +848,10 @@ export default gql`
     The URL of the schema check on the Hive Web App.
     """
     webUrl: String
+    """
+    The GitHub repository associated with the schema check.
+    """
+    githubRepository: String
 
     compositionErrors: SchemaErrorConnection
 

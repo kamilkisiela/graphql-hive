@@ -49,13 +49,7 @@ const SchemaChecks_NavigationQuery = graphql(`
               commit
               author
             }
-            schemaVersion {
-              id
-              githubMetadata {
-                repository
-                commit
-              }
-            }
+            githubRepository
           }
         }
         pageInfo {
@@ -133,12 +127,12 @@ const Navigation = (props: {
                   ) : null}
                 </div>
               </NextLink>
-              {edge.node.schemaVersion?.githubMetadata ? (
+              {edge.node.githubRepository && edge.node.meta ? (
                 <a
                   className="text-xs font-medium text-gray-500 hover:text-gray-400 ml-[-1px]"
                   target="_blank"
                   rel="noreferrer"
-                  href={`https://github.com/${edge.node.schemaVersion.githubMetadata.repository}/commit/${edge.node.schemaVersion.githubMetadata.commit}`}
+                  href={`https://github.com/${edge.node.githubRepository}/commit/${edge.node.meta.commit}`}
                 >
                   <ExternalLinkIcon className="inline" /> associated with Git commit
                 </a>
