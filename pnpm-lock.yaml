@@ -243,8 +243,8 @@ importers:
         specifier: 4.9.5
         version: 4.9.5(graphql@16.8.1)
       '@aws-sdk/client-s3':
-        specifier: 3.438.0
-        version: 3.438.0
+        specifier: 3.440.0
+        version: 3.440.0
       '@esm2cjs/execa':
         specifier: 6.1.1-cjs.1
         version: 6.1.1-cjs.1
@@ -542,11 +542,11 @@ importers:
         version: 0.1.13
     devDependencies:
       '@aws-sdk/client-s3':
-        specifier: 3.438.0
-        version: 3.438.0
+        specifier: 3.440.0
+        version: 3.440.0
       '@aws-sdk/s3-request-presigner':
-        specifier: 3.438.0
-        version: 3.438.0
+        specifier: 3.440.0
+        version: 3.440.0
       '@graphql-hive/core':
         specifier: 0.2.3
         version: link:../../libraries/core/dist
@@ -2542,8 +2542,8 @@ packages:
       tslib: 1.14.1
     dev: true
 
-  /@aws-sdk/client-s3@3.438.0:
-    resolution: {integrity: sha512-5VxdfyZ9oovbK5qzIYW4ZeJ1waD6VqfclSDQLHmgulekM2JYo/goEQJSjWnI4VMWuMsopzvqyeA+L9xq9uXLBQ==}
+  /@aws-sdk/client-s3@3.440.0:
+    resolution: {integrity: sha512-BIALZvf7BNfiY68YwNhQv2OPHER6q+AMTXrpKNXUAL5xJid86FqXiLDB0JmJXjZM4DOf+QUYuT6Ee60LVQgmaQ==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@aws-crypto/sha1-browser': 3.0.0
@@ -2559,7 +2559,7 @@ packages:
       '@aws-sdk/middleware-location-constraint': 3.433.0
       '@aws-sdk/middleware-logger': 3.433.0
       '@aws-sdk/middleware-recursion-detection': 3.433.0
-      '@aws-sdk/middleware-sdk-s3': 3.433.0
+      '@aws-sdk/middleware-sdk-s3': 3.440.0
       '@aws-sdk/middleware-signing': 3.433.0
       '@aws-sdk/middleware-ssec': 3.433.0
       '@aws-sdk/middleware-user-agent': 3.438.0
@@ -2864,8 +2864,8 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /@aws-sdk/middleware-sdk-s3@3.433.0:
-    resolution: {integrity: sha512-mkn3DiSuMVh4NTLsduC42Av+ApcOor52LMoQY0Wc6M5Mx7Xd05U+G1j8sjI9n/1bs5cZ/PoeRYJ/9bL1Xxznnw==}
+  /@aws-sdk/middleware-sdk-s3@3.440.0:
+    resolution: {integrity: sha512-DVTSr+82Z8jR9xTwDN3YHzxX7qvi0n96V92OfxvSRDq2BldCEx/KEL1orUZjw97SAXhINOlUWjRR7j4HpwWQtQ==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@aws-sdk/types': 3.433.0
@@ -2930,8 +2930,8 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /@aws-sdk/s3-request-presigner@3.438.0:
-    resolution: {integrity: sha512-fVJIeNuSZsVX0eiF+cvcPPn1jpbGY54xignn3mDcYDiAw1+qkkYEDHjnR4e4JPlx3zkR3hsTT3b1GzgjQ+1sSQ==}
+  /@aws-sdk/s3-request-presigner@3.440.0:
+    resolution: {integrity: sha512-DajqR67+YaOXbYE5dOtlNDAXMtF6NCX13dBs5J2o0UyqfMKtuc0DG8xqQBLiti/hUkFQc6eUkh5sbJYMVfJwZw==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@aws-sdk/signature-v4-multi-region': 3.437.0
