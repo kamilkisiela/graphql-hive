@@ -27,7 +27,6 @@ const myTokenInfoQuery = graphql(/* GraphQL */ `
         }
         canPublishSchema: hasTargetScope(scope: REGISTRY_WRITE)
         canCheckSchema: hasTargetScope(scope: REGISTRY_READ)
-        canPublishOperations: hasProjectScope(scope: OPERATIONS_STORE_WRITE)
       }
       ... on TokenNotFoundError {
         message
@@ -108,7 +107,6 @@ export default class WhoAmI extends Command {
         '  ': [''],
         'Access to schema:publish': [tokenInfo.canPublishSchema ? access.yes : access.not],
         'Access to schema:check': [tokenInfo.canCheckSchema ? access.yes : access.not],
-        'Access to operation:publish': [tokenInfo.canPublishOperations ? access.yes : access.not],
       });
 
       this.log(print());
