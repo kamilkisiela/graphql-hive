@@ -31,7 +31,8 @@ export class HttpClient {
   }
 
   private request<T>(url: string, opts: HttpClientOptions, upstreamSpan?: Span) {
-    const parentSpan = upstreamSpan ?? Sentry.getCurrentHub().getScope()?.getSpan();
+    const scope = Sentry.getCurrentHub().getScope();
+    const parentSpan = upstreamSpan ?? scope?.getSpan();
     const span = parentSpan?.startChild({
       op: 'HttpClient',
       description: opts?.context?.description ?? `${opts.method} ${url}`,
@@ -48,48 +49,48 @@ export class HttpClient {
       return request.then(response => response.body);
     }
 
-    return request.then(
-      response => {
-        span.setHttpStatus(response.statusCode);
+    return request
+      .then(
+        response => {
+          span.setHttpStatus(response.statusCode);
 
-        if (typeof response.headers['x-cache'] !== 'undefined') {
-          span.setTag('cache', response.headers['x-cache'] as string);
-        }
-
-        span.finish();
-        return Promise.resolve(response.body);
-      },
-      error => {
-        if (opts.context?.description) {
-          span.setTag('contextDescription', opts.context.description);
-          logger.debug('Request context description %s', opts.context.description);
-        }
-
-        let details: string | null = null;
-
-        if (error instanceof HTTPError) {
-          span.setHttpStatus(error.response.statusCode);
-
-          if (typeof error.response.body === 'string') {
-            details = error.response.body;
-            logger.error(details);
-          } else if (typeof error.response.body === 'object') {
-            details = JSON.stringify(error.response.body);
-            logger.error(details);
+          if (typeof response.headers['x-cache'] !== 'undefined') {
+            span.setTag('cache', response.headers['x-cache'] as string);
           }
-        }
-        span.setStatus(error instanceof TimeoutError ? 'deadline_exceeded' : 'internal_error');
+          return Promise.resolve(response.body);
+        },
+        error => {
+          if (opts.context?.description) {
+            span.setTag('contextDescription', opts.context.description);
+            logger.debug('Request context description %s', opts.context.description);
+          }
 
-        logger.error(error);
-        Sentry.captureException(error, {
-          extra: {
-            details,
-          },
-        });
+          let details: string | null = null;
 
+          if (error instanceof HTTPError) {
+            span.setHttpStatus(error.response.statusCode);
+
+            if (typeof error.response.body === 'string') {
+              details = error.response.body;
+              logger.error(details);
+            } else if (typeof error.response.body === 'object') {
+              details = JSON.stringify(error.response.body);
+              logger.error(details);
+            }
+          }
+          span.setStatus(error instanceof TimeoutError ? 'deadline_exceeded' : 'internal_error');
+
+          logger.error(error);
+          Sentry.captureException(error, {
+            extra: {
+              details,
+            },
+          });
+          return Promise.reject(error);
+        },
+      )
+      .finally(() => {
         span.finish();
-        return Promise.reject(error);
-      },
-    );
+      });
   }
 }

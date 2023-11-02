@@ -28,7 +28,8 @@ export function sentry(
         };
       }
 
-      const parentSpan = passedSpan ?? Sentry.getCurrentHub().getScope()?.getSpan();
+      const scope = Sentry.getCurrentHub().getScope();
+      const parentSpan = passedSpan ?? scope?.getSpan();
       const span = parentSpan?.startChild(
         typeof context === 'string'
           ? {
@@ -61,4 +62,46 @@ export function sentry(
       );
     } as any;
   };
+}
+
+export function sentryPromise<T>(promise: Promise<T>, context: SentryContext): Promise<T> {
+  const scope = Sentry.getCurrentHub().getScope();
+  const parentSpan = scope?.getSpan();
+  const span = parentSpan?.startChild(context);
+
+  if (!span) {
+    return promise;
+  }
+
+  return promise.then(
+    result => {
+      span.finish();
+      return Promise.resolve(result);
+    },
+    error => {
+      span.setStatus('internal_error');
+      span.finish();
+      return Promise.reject(error);
+    },
+  );
+}
+
+export function sentryFunction<T>(fn: () => T, context: SentryContext): T {
+  const scope = Sentry.getCurrentHub().getScope();
+  const parentSpan = scope?.getSpan();
+  const span = parentSpan?.startChild(context);
+
+  if (!span) {
+    return fn();
+  }
+
+  try {
+    const result = fn();
+    span.finish();
+    return result;
+  } catch (error) {
+    span.setStatus('internal_error');
+    span.finish();
+    throw error;
+  }
 }

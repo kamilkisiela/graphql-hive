@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { parse, print } from 'graphql';
+import { print } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import objectHash from 'object-hash';
 import type {
@@ -12,7 +12,7 @@ import type {
 } from '../../../shared/entities';
 import { createSchemaObject } from '../../../shared/entities';
 import { cache } from '../../../shared/helpers';
-import { sortDocumentNode } from '../../../shared/schema';
+import { parseGraphQLSource, sortDocumentNode } from '../../../shared/schema';
 import { SchemaBuildError } from './orchestrators/errors';
 
 export function isSingleSchema(schema: Schema): schema is SingleSchema {
@@ -129,7 +129,7 @@ export async function ensureSDL(
 
   try {
     return {
-      document: parse(composeAndValidationResult.sdl),
+      document: parseGraphQLSource(composeAndValidationResult.sdl, 'parse in ensureSDL'),
       raw: composeAndValidationResult.sdl,
     };
   } catch (error) {

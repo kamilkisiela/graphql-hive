@@ -1,7 +1,6 @@
 import { createHash } from 'crypto';
 import stringify from 'fast-json-stable-stringify';
 import {
-  buildASTSchema,
   GraphQLEnumType,
   GraphQLError,
   GraphQLInputObjectType,
@@ -34,11 +33,19 @@ import type {
   GraphQLUnionTypeMapper,
   SchemaCompareError,
   SchemaCompareResult,
+  SchemaCoordinateUsageForUnusedExplorer,
   SchemaCoordinateUsageTypeMapper,
   WithGraphQLParentInfo,
   WithSchemaCoordinatesUsage,
 } from '../../shared/mappers';
-import { buildSchema, createConnection, createDummyConnection } from '../../shared/schema';
+import {
+  buildASTSchema,
+  buildSortedSchemaFromSchemaObject,
+  createConnection,
+  createDummyConnection,
+  parseGraphQLSource,
+} from '../../shared/schema';
+import { sentryFunction } from '../../shared/sentry';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { OperationsManager } from '../operations/providers/operations-manager';
 import { OrganizationManager } from '../organization/providers/organization-manager';
@@ -64,7 +71,13 @@ import { toGraphQLSchemaCheck, toGraphQLSchemaCheckCurry } from './to-graphql-sc
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 const GraphQLSchemaStringModel = z.string().max(5_000_000).min(0);
 
-async function usage(
+function isSchemaCoordinateUsageForUnusedExplorer(
+  value: unknown,
+): value is SchemaCoordinateUsageForUnusedExplorer {
+  return 'isUsed' in (value as any);
+}
+
+function usage(
   source:
     | WithSchemaCoordinatesUsage<{
         entity: {
@@ -79,21 +92,23 @@ async function usage(
         }>
       >,
   _: unknown,
-): Promise<SchemaCoordinateUsageTypeMapper> {
+): Promise<SchemaCoordinateUsageTypeMapper> | SchemaCoordinateUsageTypeMapper {
   const coordinate =
     'parent' in source ? `${source.parent.coordinate}.${source.entity.name}` : source.entity.name;
 
-  if ('isUsed' in source.usage) {
-    if (source.usage.usedCoordinates.has(coordinate)) {
+  const usage = source.usage;
+
+  if (isSchemaCoordinateUsageForUnusedExplorer(usage)) {
+    if (usage.usedCoordinates.has(coordinate)) {
       return {
         // TODO: This is a hack to mark the field as used but without passing exact number as we don't need the exact number in "Unused schema view".
         total: 1,
         isUsed: true,
         usedByClients: null,
-        period: source.usage.period,
-        organization: source.usage.organization,
-        project: source.usage.project,
-        target: source.usage.target,
+        period: usage.period,
+        organization: usage.organization,
+        project: usage.project,
+        target: usage.target,
         coordinate: coordinate,
       };
     }
@@ -105,26 +120,28 @@ async function usage(
     };
   }
 
-  const usage = (await source.usage)[coordinate];
+  return Promise.resolve(usage).then(usage => {
+    const coordinateUsage = usage[coordinate];
 
-  return usage && usage.total > 0
-    ? {
-        total: usage.total,
-        isUsed: true,
-        get usedByClients() {
-          return usage.usedByClients;
-        },
-        period: usage.period,
-        organization: usage.organization,
-        project: usage.project,
-        target: usage.target,
-        coordinate: coordinate,
-      }
-    : {
-        total: 0,
-        isUsed: false,
-        usedByClients: null,
-      };
+    return coordinateUsage && coordinateUsage.total > 0
+      ? {
+          total: coordinateUsage.total,
+          isUsed: true,
+          get usedByClients() {
+            return coordinateUsage.usedByClients;
+          },
+          period: coordinateUsage.period,
+          organization: coordinateUsage.organization,
+          project: coordinateUsage.project,
+          target: coordinateUsage.target,
+          coordinate: coordinate,
+        }
+      : {
+          total: 0,
+          isUsed: false,
+          usedByClients: null,
+        };
+  });
 }
 
 function __isTypeOf<
@@ -574,7 +591,7 @@ export const resolvers: SchemaModule.Resolvers = {
           let changes: SerializableChange[] = [];
 
           if (before) {
-            const previousSchema = buildSchema(
+            const previousSchema = buildSortedSchemaFromSchemaObject(
               before,
               error =>
                 new GraphQLError(
@@ -583,7 +600,7 @@ export const resolvers: SchemaModule.Resolvers = {
                   }`,
                 ),
             );
-            const currentSchema = buildSchema(
+            const currentSchema = buildSortedSchemaFromSchemaObject(
               after,
               error =>
                 new GraphQLError(
@@ -980,11 +997,13 @@ export const resolvers: SchemaModule.Resolvers = {
       const helper = injector.get(SchemaHelper);
 
       let supergraph: SuperGraphInformation | null = null;
-
       if (project.type === ProjectType.FEDERATION) {
         let supergraphDocument: DocumentNode | null = null;
         if (version.supergraphSDL) {
-          supergraphDocument = parse(version.supergraphSDL);
+          supergraphDocument = parseGraphQLSource(
+            version.supergraphSDL,
+            'parse supergraphSDL in SchemaVersion.explorer',
+          );
         } else {
           // Legacy Fallback
           const schemas = await injector.get(SchemaManager).getSchemasOfVersion({
@@ -1011,13 +1030,18 @@ export const resolvers: SchemaModule.Resolvers = {
         }
 
         if (supergraphDocument) {
-          supergraph = extractSuperGraphInformation(supergraphDocument);
+          supergraph = sentryFunction(() => extractSuperGraphInformation(supergraphDocument!), {
+            op: 'extractSuperGraphInformation in explorer',
+          });
         }
       }
 
       let schemaAST: DocumentNode;
       if (version.compositeSchemaSDL) {
-        schemaAST = parse(version.compositeSchemaSDL);
+        schemaAST = parseGraphQLSource(
+          version.compositeSchemaSDL,
+          'parse compositeSchemaSDL in SchemaVersion.explorer',
+        );
       } else {
         // Legacy Fallback
         const schemas = await injector.get(SchemaManager).getSchemasOfVersion({
@@ -1044,10 +1068,7 @@ export const resolvers: SchemaModule.Resolvers = {
       }
 
       return {
-        schema: buildASTSchema(schemaAST, {
-          assumeValidSDL: true,
-          assumeValid: true,
-        }),
+        schema: buildASTSchema(schemaAST),
         usage: {
           period: usage?.period ? parseDateRangeInput(usage.period) : createPeriod('30d'),
           organization: version.organization,
@@ -1078,7 +1099,10 @@ export const resolvers: SchemaModule.Resolvers = {
       if (project.type === ProjectType.FEDERATION) {
         let supergraphDocument: DocumentNode | null = null;
         if (version.supergraphSDL) {
-          supergraphDocument = parse(version.supergraphSDL);
+          supergraphDocument = parseGraphQLSource(
+            version.supergraphSDL,
+            'parse supergraphSDL in SchemaVersion.unusedSchema',
+          );
         } else {
           // Legacy Fallback
           const schemas = await injector.get(SchemaManager).getSchemasOfVersion({
@@ -1111,7 +1135,10 @@ export const resolvers: SchemaModule.Resolvers = {
 
       let schemaAST: DocumentNode;
       if (version.compositeSchemaSDL) {
-        schemaAST = parse(version.compositeSchemaSDL);
+        schemaAST = parseGraphQLSource(
+          version.compositeSchemaSDL,
+          'parse compositeSchemaSDL in SchemaVersion.unusedSchema',
+        );
       } else {
         // Legacy Fallback
         const schemas = await injector.get(SchemaManager).getSchemasOfVersion({
@@ -1287,24 +1314,28 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   SchemaCoordinateUsage: {
-    async topOperations(source, { limit }, { injector }) {
+    topOperations(source, { limit }, { injector }) {
       if (!source.isUsed) {
         return [];
       }
-      const operations = await injector.get(OperationsManager).getTopOperationForCoordinate({
-        organizationId: source.organization,
-        projectId: source.project,
-        targetId: source.target,
-        coordinate: source.coordinate,
-        period: source.period,
-        limit,
-      });
 
-      return operations.map(op => ({
-        name: op.operationName,
-        hash: op.operationHash,
-        count: op.count,
-      }));
+      return injector
+        .get(OperationsManager)
+        .getTopOperationForCoordinate({
+          organizationId: source.organization,
+          projectId: source.project,
+          targetId: source.target,
+          coordinate: source.coordinate,
+          period: source.period,
+          limit,
+        })
+        .then(operations =>
+          operations.map(op => ({
+            name: op.operationName,
+            hash: op.operationHash,
+            count: op.count,
+          })),
+        );
     },
   },
   SchemaExplorer: {
@@ -1560,14 +1591,15 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return types;
     },
-    async query({ schema, usage, supergraph }, _, { injector }) {
-      const operationsManager = injector.get(OperationsManager);
+    async query({ schema, supergraph, usage }, _, { injector }) {
       const entity = schema.getQueryType();
 
       if (!entity) {
         return null;
       }
 
+      const operationsManager = injector.get(OperationsManager);
+
       return {
         entity: transformGraphQLObjectType(entity),
         get usage() {
@@ -1599,14 +1631,15 @@ export const resolvers: SchemaModule.Resolvers = {
           : null,
       };
     },
-    async mutation({ schema, usage, supergraph }, _, { injector }) {
-      const operationsManager = injector.get(OperationsManager);
+    async mutation({ schema, supergraph, usage }, _, { injector }) {
       const entity = schema.getMutationType();
 
       if (!entity) {
         return null;
       }
 
+      const operationsManager = injector.get(OperationsManager);
+
       return {
         entity: transformGraphQLObjectType(entity),
         get usage() {
@@ -1639,13 +1672,14 @@ export const resolvers: SchemaModule.Resolvers = {
       };
     },
 
-    async subscription({ schema, usage, supergraph }, _, { injector }) {
-      const operationsManager = injector.get(OperationsManager);
+    async subscription({ schema, supergraph, usage }, _, { injector }) {
       const entity = schema.getSubscriptionType();
 
       if (!entity) {
         return null;
       }
+
+      const operationsManager = injector.get(OperationsManager);
 
       return {
         entity: transformGraphQLObjectType(entity),

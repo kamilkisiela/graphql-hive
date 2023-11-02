@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import Agent from 'agentkeepalive';
 import { Inject, Injectable } from 'graphql-modules';
-import type { Span } from '@sentry/types';
+import * as Sentry from '@sentry/node';
 import { atomic } from '../../../shared/helpers';
 import { HttpClient } from '../../shared/providers/http-client';
 import { Logger } from '../../shared/providers/logger';
@@ -61,15 +61,17 @@ export class ClickHouse {
     query,
     queryId,
     timeout,
-    span: parentSpan,
   }: {
     query: SqlStatement;
     queryId: string;
     timeout: number;
-    span?: Span;
   }): Promise<QueryResponse<T>> {
+    const scope = Sentry.getCurrentHub().getScope();
+    const parentSpan = scope.getSpan();
+
     const span = parentSpan?.startChild({
       op: queryId,
+      origin: 'auto.clickhouse',
     });
     const startedAt = Date.now();
     const endpoint = `${this.config.protocol ?? 'https'}://${this.config.host}:${this.config.port}`;
@@ -82,70 +84,65 @@ export class ClickHouse {
     );
 
     const response = await this.httpClient
-      .post<QueryResponse<T>>(
-        endpoint,
-        {
-          context: {
-            description: `ClickHouse - ${queryId}`,
-          },
-          body: query.sql,
-          headers: {
-            'Accept-Encoding': 'gzip',
-            Accept: 'application/json',
-          },
-          searchParams: {
-            default_format: 'JSON',
-            // Max execution time in seconds
-            max_execution_time: timeout / 1000,
-            query_id: executionId,
-            ...toQueryParams(query),
-          },
-          username: this.config.username,
-          password: this.config.password,
-          decompress: true,
-          timeout: {
-            lookup: 1000,
-            connect: 1000,
-            secureConnect: 1000,
-            request: timeout,
-          },
-          retry: {
-            calculateDelay: info => {
-              if (info.attemptCount >= 6) {
-                // After 5 retries, stop.
-                return 0;
-              }
+      .post<QueryResponse<T>>(endpoint, {
+        context: {
+          description: `ClickHouse - ${queryId}`,
+        },
+        body: query.sql,
+        headers: {
+          'Accept-Encoding': 'gzip',
+          Accept: 'application/json',
+        },
+        searchParams: {
+          default_format: 'JSON',
+          // Max execution time in seconds
+          max_execution_time: timeout / 1000,
+          query_id: executionId,
+          ...toQueryParams(query),
+        },
+        username: this.config.username,
+        password: this.config.password,
+        decompress: true,
+        timeout: {
+          lookup: 1000,
+          connect: 1000,
+          secureConnect: 1000,
+          request: timeout,
+        },
+        retry: {
+          calculateDelay: info => {
+            if (info.attemptCount >= 6) {
+              // After 5 retries, stop.
+              return 0;
+            }
 
-              const delayBy = info.attemptCount * 250;
-              this.logger.error(
-                `Failed to run ClickHouse query, executionId: %s, code: %s , error name: %s, message: %s`,
-                executionId,
-                info.error.code,
-                info.error.name,
-                info.error.message,
-              );
+            const delayBy = info.attemptCount * 250;
+            this.logger.error(
+              `Failed to run ClickHouse query, executionId: %s, code: %s , error name: %s, message: %s`,
+              executionId,
+              info.error.code,
+              info.error.name,
+              info.error.message,
+            );
 
-              this.logger.debug(
-                `Retry (delay=%s, attempt=%s, reason=%s, queryId=%s, executionId=%s)`,
-                delayBy,
-                info.attemptCount,
-                info.error.message,
-                queryId,
-                executionId,
-              );
+            this.logger.debug(
+              `Retry (delay=%s, attempt=%s, reason=%s, queryId=%s, executionId=%s)`,
+              delayBy,
+              info.attemptCount,
+              info.error.message,
+              queryId,
+              executionId,
+            );
 
-              return delayBy;
-            },
-          },
-          responseType: 'json',
-          agent: {
-            http: httpAgent,
-            https: httpsAgent,
+            return delayBy;
           },
         },
-
-        span,
-      )
+        responseType: 'json',
+        agent: {
+          http: httpAgent,
+          https: httpsAgent,
+        },
+      })
       .catch(error => {
         this.logger.error(
           `Failed to run ClickHouse query, executionId: %s, code: %s , error name: %s, message: %s`,
@@ -154,6 +151,7 @@ export class ClickHouse {
           error.name,
           error.message,
         );
+        span?.setStatus('internal_error');
         return Promise.reject(error);
       })
       .finally(() => {

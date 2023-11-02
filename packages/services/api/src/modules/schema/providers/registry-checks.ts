@@ -6,7 +6,7 @@ import { CriticalityLevel, type Change } from '@graphql-inspector/core';
 import type { CheckPolicyResponse } from '@hive/policy';
 import type { CompositionFailureError } from '@hive/schema';
 import { ProjectType, Schema } from '../../../shared/entities';
-import { buildSchema } from '../../../shared/schema';
+import { buildSortedSchemaFromSchemaObject } from '../../../shared/schema';
 import { SchemaPolicyProvider } from '../../policy/providers/schema-policy.provider';
 import {
   RegistryServiceUrlChangeSerializableChange,
@@ -279,13 +279,13 @@ export class RegistryChecks {
     let incomingSchema: GraphQLSchema;
 
     try {
-      existingSchema = buildSchema(
+      existingSchema = buildSortedSchemaFromSchemaObject(
         this.helper.createSchemaObject({
           sdl: existingSchemaResult.sdl,
         }),
       );
 
-      incomingSchema = buildSchema(
+      incomingSchema = buildSortedSchemaFromSchemaObject(
         this.helper.createSchemaObject({
           sdl: incomingSchemaResult.sdl,
         }),

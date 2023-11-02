@@ -477,7 +477,7 @@ export const resolvers: OperationsModule.Resolvers = {
   OperationStatsValuesConnection: createConnection(),
   ClientStatsValuesConnection: createConnection(),
   OrganizationGetStarted: {
-    reportingOperations(organization, _, { injector }) {
+    async reportingOperations(organization, _, { injector }) {
       if (organization.reportingOperations === true) {
         return organization.reportingOperations;
       }
@@ -495,7 +495,7 @@ export const resolvers: OperationsModule.Resolvers = {
         period: parseDateRangeInput(period),
       });
     },
-    async requestsOverTime(project, { resolution, period }, { injector }) {
+    requestsOverTime(project, { resolution, period }, { injector }) {
       return injector.get(OperationsManager).readRequestsOverTimeOfProject({
         project: project.id,
         organization: project.orgId,
