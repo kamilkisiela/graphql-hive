@@ -103,7 +103,7 @@ export async function main() {
         await storage.purgeExpiredSchemaChecks({
           expiresAt: new Date(),
         });
-        await storage.purgeUnusedSchemasInStore();
+        // TODO: activate await storage.purgeUnusedSchemasInStore();
       },
       interval: env.hiveServices.usageEstimator.dateRetentionPurgeIntervalMinutes * 60 * 1000,
       logger: server.log,
