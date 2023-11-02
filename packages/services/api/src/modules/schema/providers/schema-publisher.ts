@@ -1467,21 +1467,11 @@ export class SchemaPublisher {
         }
       }
       if (metadata.length > 0) {
-        await Promise.all([
-          this.artifactStorageWriter.writeArtifact({
-            targetId: target.id,
-            artifact: metadata,
-            artifactType: 'metadata',
-          }),
-          this.cdn.publish(
-            {
-              targetId: target.id,
-              resourceType: 'metadata',
-              value: JSON.stringify(metadata.length === 1 ? metadata[0] : metadata),
-            },
-            span,
-          ),
-        ]);
+        await this.artifactStorageWriter.writeArtifact({
+          targetId: target.id,
+          artifact: metadata,
+          artifactType: 'metadata',
+        });
       }
     };
 
@@ -1489,7 +1479,7 @@ export class SchemaPublisher {
       const compositeSchema = ensureCompositeSchemas(schemas);
 
       await Promise.all([
-        this.artifactStorageWriter.writeArtifact({
+        await this.artifactStorageWriter.writeArtifact({
           targetId: target.id,
           artifactType: 'services',
           artifact: compositeSchema.map(s => ({
@@ -1503,50 +1493,15 @@ export class SchemaPublisher {
           artifactType: 'sdl',
           artifact: fullSchemaSdl,
         }),
-        this.cdn.publish(
-          {
-            targetId: target.id,
-            resourceType: 'schema',
-            value: JSON.stringify(
-              schemas.length > 1
-                ? compositeSchema.map(s => ({
-                    sdl: s.sdl,
-                    url: s.service_url,
-                    name: s.service_name,
-                    date: s.date,
-                  }))
-                : {
-                    sdl: compositeSchema[0].sdl,
-                    url: compositeSchema[0].service_url,
-                    name: compositeSchema[0].service_name,
-                    date: compositeSchema[0].date,
-                  },
-            ),
-          },
-          span,
-        ),
       ]);
     };
 
     const publishSingleSchema = async () => {
-      await Promise.all([
-        this.artifactStorageWriter.writeArtifact({
-          targetId: target.id,
-          artifactType: 'sdl',
-          artifact: fullSchemaSdl,
-        }),
-        this.cdn.publish(
-          {
-            targetId: target.id,
-            resourceType: 'schema',
-            value: JSON.stringify({
-              sdl: schemas[0].sdl,
-              date: schemas[0].date,
-            }),
-          },
-          span,
-        ),
-      ]);
+      await this.artifactStorageWriter.writeArtifact({
+        targetId: target.id,
+        artifactType: 'sdl',
+        artifact: fullSchemaSdl,
+      });
     };
 
     const actions = [
@@ -1559,14 +1514,6 @@ export class SchemaPublisher {
         this.logger.debug('Publishing supergraph to CDN');
 
         actions.push(
-          this.cdn.publish(
-            {
-              targetId: target.id,
-              resourceType: 'supergraph',
-              value: supergraph,
-            },
-            span,
-          ),
           this.artifactStorageWriter.writeArtifact({
             targetId: target.id,
             artifactType: 'supergraph',
