@@ -28,7 +28,7 @@ import { CriticalityLevel } from '@/gql/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { cn } from '@/lib/utils';
-import { ListBulletIcon } from '@radix-ui/react-icons';
+import { ExternalLinkIcon, ListBulletIcon } from '@radix-ui/react-icons';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 
 const SchemaChecks_NavigationQuery = graphql(`
@@ -58,6 +58,7 @@ const SchemaChecks_NavigationQuery = graphql(`
             safeSchemaChanges {
               total
             }
+            githubRepository
           }
         }
         pageInfo {
@@ -145,6 +146,16 @@ const Navigation = (props: {
                   ) : null}
                 </div>
               </NextLink>
+              {edge.node.githubRepository && edge.node.meta ? (
+                <a
+                  className="text-xs font-medium text-gray-500 hover:text-gray-400 ml-[-1px]"
+                  target="_blank"
+                  rel="noreferrer"
+                  href={`https://github.com/${edge.node.githubRepository}/commit/${edge.node.meta.commit}`}
+                >
+                  <ExternalLinkIcon className="inline" /> associated with Git commit
+                </a>
+              ) : null}
             </div>
           ))}
           {props.isLastPage && query.data.target.schemaChecks.pageInfo.hasNextPage && (

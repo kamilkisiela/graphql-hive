@@ -1,5 +1,25 @@
 # @graphql-hive/client
 
+## 0.25.0
+
+### Minor Changes
+
+- [#3215](https://github.com/kamilkisiela/graphql-hive/pull/3215)
+  [`c8ec151e`](https://github.com/kamilkisiela/graphql-hive/commit/c8ec151e5dc2f7c262a5fac9119561c5ca8c63d7)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Remove unused persisted operations feature.
+
+### Patch Changes
+
+- [#3237](https://github.com/kamilkisiela/graphql-hive/pull/3237)
+  [`e632cd1`](https://github.com/kamilkisiela/graphql-hive/commit/e632cd1529db194899c14eca70e3c8de929f2215)
+  Thanks [@dotansimha](https://github.com/dotansimha)! - Update `axios` range to address security
+  issues (https://security.snyk.io/vuln/SNYK-JS-AXIOS-6032459)
+
+- [#3160](https://github.com/kamilkisiela/graphql-hive/pull/3160)
+  [`2c16c211`](https://github.com/kamilkisiela/graphql-hive/commit/2c16c2114782b06001e99f6ec68b1ec4856a4973)
+  Thanks [@renovate](https://github.com/apps/renovate)! - Bump @envelop/types dependency version
+  (v5)
+
 ## 0.24.3
 
 ### Patch Changes
