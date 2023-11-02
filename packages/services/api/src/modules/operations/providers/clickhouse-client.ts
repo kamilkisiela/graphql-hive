@@ -157,6 +157,11 @@ export class ClickHouse {
         return Promise.reject(error);
       })
       .finally(() => {
+        this.logger.debug(
+          `Finished ClickHouse Query (executionId: %s, duration=%sms)`,
+          executionId,
+          Date.now() - startedAt,
+        );
         span?.finish();
       });
     const endedAt = (Date.now() - startedAt) / 1000;
