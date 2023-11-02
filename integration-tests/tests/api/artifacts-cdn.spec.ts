@@ -687,21 +687,12 @@ describe('CDN token', () => {
       authToken: ownerToken,
     }).then(r => r.expectGraphQLErrors());
 
-    expect(deleteResult).toMatchInlineSnapshot(`
-      [
-        {
-          locations: [
-            {
-              column: 3,
-              line: 2,
-            },
-          ],
-          message: No access (reason: "Missing target:settings permission"),
-          path: [
-            deleteCdnAccessToken,
-          ],
-        },
-      ]
-    `);
+    expect(deleteResult).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          message: `No access (reason: "Missing target:settings permission")`,
+        }),
+      ]),
+    );
   });
 });

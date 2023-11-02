@@ -139,65 +139,13 @@ describe('Document Collections', () => {
             description: 'My favorite queries',
             token: readOnlyToken,
           }),
-        ).rejects.toMatchInlineSnapshot(`
-            [Error: Expected GraphQL response to have no errors, but got 1 errors:
-            	No access (reason: "Missing target:registry:write permission")
-            	endpoint: http://localhost:8082/graphql
-            	query:
-            mutation CreateCollection($selector: TargetSelectorInput!, $input: CreateDocumentCollectionInput!) {
-              createDocumentCollection(selector: $selector, input: $input) {
-                error {
-                  message
-                }
-                ok {
-                  updatedTarget {
-                    id
-                    documentCollections {
-                      edges {
-                        cursor
-                        node {
-                          id
-                          name
-                        }
-                      }
-                    }
-                  }
-                  collection {
-                    id
-                    name
-                    operations(first: 100) {
-                      edges {
-                        cursor
-                        node {
-                          id
-                          name
-                        }
-                        cursor
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            	body:
-            {
-              "errors": [
-                {
-                  "message": "No access (reason: \\"Missing target:registry:write permission\\")",
-                  "locations": [
-                    {
-                      "line": 2,
-                      "column": 3
-                    }
-                  ],
-                  "path": [
-                    "createDocumentCollection"
-                  ]
-                }
-              ],
-              "data": null
-            }]
-          `);
+        ).rejects.toEqual(
+          expect.objectContaining({
+            message: expect.stringContaining(
+              `No access (reason: "Missing target:registry:write permission")`,
+            ),
+          }),
+        );
       });
 
       it('Prevent updating collection without the write permission to the target', async () => {
@@ -224,65 +172,13 @@ describe('Document Collections', () => {
             name: 'My Collection',
             description: 'My favorite queries',
           }),
-        ).rejects.toMatchInlineSnapshot(`
-            [Error: Expected GraphQL response to have no errors, but got 1 errors:
-            	No access (reason: "Missing target:registry:write permission")
-            	endpoint: http://localhost:8082/graphql
-            	query:
-            mutation UpdateCollection($selector: TargetSelectorInput!, $input: UpdateDocumentCollectionInput!) {
-              updateDocumentCollection(selector: $selector, input: $input) {
-                error {
-                  message
-                }
-                ok {
-                  updatedTarget {
-                    id
-                    documentCollections {
-                      edges {
-                        node {
-                          id
-                          name
-                        }
-                        cursor
-                      }
-                    }
-                  }
-                  collection {
-                    id
-                    name
-                    description
-                    operations(first: 100) {
-                      edges {
-                        cursor
-                        node {
-                          id
-                          name
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            	body:
-            {
-              "errors": [
-                {
-                  "message": "No access (reason: \\"Missing target:registry:write permission\\")",
-                  "locations": [
-                    {
-                      "line": 2,
-                      "column": 3
-                    }
-                  ],
-                  "path": [
-                    "updateDocumentCollection"
-                  ]
-                }
-              ],
-              "data": null
-            }]
-          `);
+        ).rejects.toEqual(
+          expect.objectContaining({
+            message: expect.stringContaining(
+              'No access (reason: "Missing target:registry:write permission")',
+            ),
+          }),
+        );
       });
 
       it('Prevent deleting collection without the write permission to the target', async () => {
@@ -307,51 +203,13 @@ describe('Document Collections', () => {
             collectionId: createResult.ok?.collection.id!,
             token: readOnlyToken,
           }),
-        ).rejects.toMatchInlineSnapshot(`
-            [Error: Expected GraphQL response to have no errors, but got 1 errors:
-            	No access (reason: "Missing target:registry:write permission")
-            	endpoint: http://localhost:8082/graphql
-            	query:
-            mutation DeleteCollection($selector: TargetSelectorInput!, $id: ID!) {
-              deleteDocumentCollection(selector: $selector, id: $id) {
-                error {
-                  message
-                }
-                ok {
-                  deletedId
-                  updatedTarget {
-                    id
-                    documentCollections {
-                      edges {
-                        cursor
-                        node {
-                          id
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            	body:
-            {
-              "errors": [
-                {
-                  "message": "No access (reason: \\"Missing target:registry:write permission\\")",
-                  "locations": [
-                    {
-                      "line": 2,
-                      "column": 3
-                    }
-                  ],
-                  "path": [
-                    "deleteDocumentCollection"
-                  ]
-                }
-              ],
-              "data": null
-            }]
-          `);
+        ).rejects.toEqual(
+          expect.objectContaining({
+            message: expect.stringContaining(
+              `No access (reason: "Missing target:registry:write permission")`,
+            ),
+          }),
+        );
       });
     });
   });

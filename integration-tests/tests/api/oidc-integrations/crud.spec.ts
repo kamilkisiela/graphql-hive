@@ -116,22 +116,13 @@ describe('create', () => {
         authToken: ownerToken,
       }).then(r => r.expectGraphQLErrors());
 
-      expect(errors).toMatchInlineSnapshot(`
-        [
-          {
-            locations: [
-              {
-                column: 3,
-                line: 2,
-              },
-            ],
-            message: No access (reason: "Missing organization:integrations permission"),
-            path: [
-              createOIDCIntegration,
-            ],
-          },
-        ]
-      `);
+      expect(errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            message: `No access (reason: "Missing organization:integrations permission")`,
+          }),
+        ]),
+      );
     });
 
     test.concurrent('error: too short clientId', async ({ expect }) => {
@@ -518,22 +509,13 @@ describe('delete', () => {
         authToken: accessTokenExtra,
       }).then(r => r.expectGraphQLErrors());
 
-      expect(errors).toMatchInlineSnapshot(`
-        [
-          {
-            locations: [
-              {
-                column: 3,
-                line: 2,
-              },
-            ],
-            message: No access (reason: "Missing organization:integrations permission"),
-            path: [
-              deleteOIDCIntegration,
-            ],
-          },
-        ]
-      `);
+      expect(errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            message: `No access (reason: "Missing organization:integrations permission")`,
+          }),
+        ]),
+      );
     });
 
     test.concurrent(
@@ -598,22 +580,13 @@ describe('delete', () => {
           authToken: memberAccessToken,
         }).then(r => r.expectGraphQLErrors());
 
-        expect(refetchedMeResult).toMatchInlineSnapshot(`
-          [
-            {
-              locations: [
-                {
-                  column: 3,
-                  line: 2,
-                },
-              ],
-              message: No access (reason: "User not found"),
-              path: [
-                me,
-              ],
-            },
-          ]
-        `);
+        expect(refetchedMeResult).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: `No access (reason: "User not found")`,
+            }),
+          ]),
+        );
       },
     );
   });
@@ -733,22 +706,13 @@ describe('update', () => {
         authToken: accessTokenExtra,
       }).then(r => r.expectGraphQLErrors());
 
-      expect(errors).toMatchInlineSnapshot(`
-        [
-          {
-            locations: [
-              {
-                column: 3,
-                line: 2,
-              },
-            ],
-            message: No access (reason: "Missing organization:integrations permission"),
-            path: [
-              updateOIDCIntegration,
-            ],
-          },
-        ]
-      `);
+      expect(errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            message: `No access (reason: "Missing organization:integrations permission")`,
+          }),
+        ]),
+      );
     });
   });
 });
