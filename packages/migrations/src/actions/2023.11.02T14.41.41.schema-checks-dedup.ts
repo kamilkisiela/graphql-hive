@@ -2,6 +2,7 @@ import { type MigrationExecutor } from '../pg-migrator';
 
 export default {
   name: '2023.10.25T14.41.41.schema-checks-dedup.ts',
+  noTransaction: true,
   run: ({ sql }) => [
     {
       name: 'create sdl_store and alter schema_checks',
