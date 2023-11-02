@@ -6,7 +6,7 @@ import * as pulumi from '@pulumi/pulumi';
 const dashboardDirectory = join(__dirname, '../grafana-dashboards/');
 
 export function deployGrafana(envName: string) {
-  const availableFiles = readdirSync(dashboardDirectory).filter(f => f.endsWith('.json'));
+  const availableFiles = readdirSync(dashboardDirectory).filter(f => f.endsWith('.json')).filter(v => !v.includes('ClickHouse-Latency.json'));
   const folder = new Folder('grafana-hive-folder', {
     title: `Hive Monitoring (${envName})`,
   });
