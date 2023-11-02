@@ -194,8 +194,8 @@ importers:
   deployment:
     dependencies:
       '@lbrlabs/pulumi-grafana':
-        specifier: 0.2.0
-        version: 0.2.0
+        specifier: 0.1.0
+        version: 0.1.0
       '@manypkg/get-packages':
         specifier: 2.2.0
         version: 2.2.0
@@ -228,8 +228,8 @@ importers:
         specifier: 2.1.3
         version: 2.1.3
       '@types/node':
-        specifier: 18.18.8
-        version: 18.18.8
+        specifier: 18.18.6
+        version: 18.18.6
       typescript:
         specifier: 5.2.2
         version: 5.2.2
@@ -7911,8 +7911,8 @@ packages:
     resolution: {integrity: sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==}
     dev: true
 
-  /@lbrlabs/pulumi-grafana@0.2.0:
-    resolution: {integrity: sha512-gIGXNz0K1RuIXqvlciSVCkFhzCXDvFk/DN4uSFd7TgDTcakuvIA1IxW3xV6oRXu0a5CiFmGIZJX8GgPAu96rew==}
+  /@lbrlabs/pulumi-grafana@0.1.0:
+    resolution: {integrity: sha512-REc/LQOy17O9jbZnBNm4tLjLJKxOfLaWPIB2CFiAtM1VzwU3FzZQFs0K+XGkuZwWdB+tl2/VHdHv+FqsUrit2w==}
     requiresBuild: true
     dependencies:
       '@pulumi/pulumi': 3.91.1
@@ -13420,6 +13420,10 @@ packages:
 
   /@types/node@16.18.12:
     resolution: {integrity: sha512-vzLe5NaNMjIE3mcddFVGlAXN1LEWueUsMsOJWaT6wWMJGyljHAWHznqfnKUQWGzu7TLPrGvWdNAsvQYW+C0xtw==}
+    dev: true
+
+  /@types/node@18.18.6:
+    resolution: {integrity: sha512-wf3Vz+jCmOQ2HV1YUJuCWdL64adYxumkrxtc+H1VUQlnQI04+5HtH+qZCOE21lBE7gIrt+CwX2Wv8Acrw5Ak6w==}
     dev: true
 
   /@types/node@18.18.8:
