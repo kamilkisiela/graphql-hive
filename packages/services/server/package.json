@@ -12,6 +12,7 @@
   "devDependencies": {
     "@envelop/core": "5.0.0",
     "@envelop/generic-auth": "7.0.0",
+    "@envelop/graphql-jit": "8.0.1",
     "@envelop/graphql-modules": "6.0.0",
     "@envelop/sentry": "7.0.0",
     "@envelop/types": "5.0.0",
