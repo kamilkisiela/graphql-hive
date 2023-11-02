@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import {
-  buildASTSchema,
+  buildASTSchema as buildASTSchemaGraphQL,
   ConstDirectiveNode,
   DefinitionNode,
   DocumentNode,
@@ -12,10 +12,13 @@ import {
   lexicographicSortSchema,
   NamedTypeNode,
   OperationTypeDefinitionNode,
+  parse,
+  Source,
   visit,
 } from 'graphql';
 import lodash from 'lodash';
 import type { SchemaObject } from './entities';
+import { sentryFunction } from './sentry';
 
 export function hashSchema(schema: SchemaObject): string {
   return createHash('md5')
@@ -26,22 +29,60 @@ export function hashSchema(schema: SchemaObject): string {
 }
 
 /**
- * Builds GraphQLSchema without validation of SDL
+ * Builds GraphQLSchema without validation of SDL and sorts it
  */
-export function buildSchema(
+export function buildSortedSchemaFromSchemaObject(
   schema: Pick<SchemaObject, 'document'>,
   transformError = (error: unknown) => error,
 ): GraphQLSchema {
   try {
-    return lexicographicSortSchema(
-      buildASTSchema(schema.document, {
-        assumeValid: true,
-        assumeValidSDL: true,
-      }),
+    return sentryFunction(() => lexicographicSortSchema(buildASTSchema(schema.document)), {
+      op: 'buildSortedSchema',
+    });
+  } catch (error) {
+    throw transformError(error);
+  }
+}
+
+/**
+ * Builds GraphQLSchema without validation of SDL
+ */
+export function buildASTSchema(
+  schema: DocumentNode,
+  transformError = (error: unknown) => error,
+): GraphQLSchema {
+  try {
+    return sentryFunction(
+      () =>
+        buildASTSchemaGraphQL(schema, {
+          assumeValid: true,
+          assumeValidSDL: true,
+        }),
+      {
+        op: 'buildASTSchema',
+      },
     );
   } catch (error) {
     throw transformError(error);
   }
+}
+
+/**
+ * It's a wrapper around `graphql.parse` that adds Sentry span to current transaction. It helps us measure performance.
+ * @param source GraphQL source
+ * @param context Context of the operation, e.g. `parse supergraphSDL in Query.explorer`
+ * @returns
+ */
+export function parseGraphQLSource(source: string | Source, context: string) {
+  return sentryFunction(
+    () =>
+      parse(source, {
+        noLocation: true,
+      }),
+    {
+      op: context,
+    },
+  );
 }
 
 export function minifySchema(schema: string): string {

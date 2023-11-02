@@ -1,7 +1,6 @@
 import { createHash } from 'crypto';
 import stringify from 'fast-json-stable-stringify';
 import {
-  buildASTSchema,
   GraphQLEnumType,
   GraphQLError,
   GraphQLInputObjectType,
@@ -39,7 +38,13 @@ import type {
   WithGraphQLParentInfo,
   WithSchemaCoordinatesUsage,
 } from '../../shared/mappers';
-import { buildSchema, createConnection, createDummyConnection } from '../../shared/schema';
+import {
+  buildASTSchema,
+  buildSortedSchemaFromSchemaObject,
+  createConnection,
+  createDummyConnection,
+  parseGraphQLSource,
+} from '../../shared/schema';
 import { sentryFunction } from '../../shared/sentry';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { OperationsManager } from '../operations/providers/operations-manager';
@@ -586,7 +591,7 @@ export const resolvers: SchemaModule.Resolvers = {
           let changes: SerializableChange[] = [];
 
           if (before) {
-            const previousSchema = buildSchema(
+            const previousSchema = buildSortedSchemaFromSchemaObject(
               before,
               error =>
                 new GraphQLError(
@@ -595,7 +600,7 @@ export const resolvers: SchemaModule.Resolvers = {
                   }`,
                 ),
             );
-            const currentSchema = buildSchema(
+            const currentSchema = buildSortedSchemaFromSchemaObject(
               after,
               error =>
                 new GraphQLError(
@@ -994,14 +999,9 @@ export const resolvers: SchemaModule.Resolvers = {
       if (project.type === ProjectType.FEDERATION) {
         let supergraphDocument: DocumentNode | null = null;
         if (version.supergraphSDL) {
-          supergraphDocument = sentryFunction(
-            () =>
-              parse(version.supergraphSDL!, {
-                noLocation: true,
-              }),
-            {
-              op: 'parse supergraphSDL in explorer',
-            },
+          supergraphDocument = parseGraphQLSource(
+            version.supergraphSDL,
+            'parse supergraphSDL in SchemaVersion.explorer',
           );
         } else {
           // Legacy Fallback
@@ -1037,14 +1037,9 @@ export const resolvers: SchemaModule.Resolvers = {
 
       let schemaAST: DocumentNode;
       if (version.compositeSchemaSDL) {
-        schemaAST = sentryFunction(
-          () =>
-            parse(version.compositeSchemaSDL!, {
-              noLocation: true,
-            }),
-          {
-            op: 'parse compositeSchemaSDL in explorer',
-          },
+        schemaAST = parseGraphQLSource(
+          version.compositeSchemaSDL,
+          'parse compositeSchemaSDL in SchemaVersion.explorer',
         );
       } else {
         // Legacy Fallback
@@ -1072,16 +1067,7 @@ export const resolvers: SchemaModule.Resolvers = {
       }
 
       return {
-        schema: sentryFunction(
-          () =>
-            buildASTSchema(schemaAST, {
-              assumeValidSDL: true,
-              assumeValid: true,
-            }),
-          {
-            op: 'buildASTSchema in explorer',
-          },
-        ),
+        schema: buildASTSchema(schemaAST),
         usage: {
           period: usage?.period ? parseDateRangeInput(usage.period) : createPeriod('30d'),
           organization: version.organization,
@@ -1112,7 +1098,10 @@ export const resolvers: SchemaModule.Resolvers = {
       if (project.type === ProjectType.FEDERATION) {
         let supergraphDocument: DocumentNode | null = null;
         if (version.supergraphSDL) {
-          supergraphDocument = parse(version.supergraphSDL);
+          supergraphDocument = parseGraphQLSource(
+            version.supergraphSDL,
+            'parse supergraphSDL in SchemaVersion.unusedSchema',
+          );
         } else {
           // Legacy Fallback
           const schemas = await injector.get(SchemaManager).getSchemasOfVersion({
@@ -1145,7 +1134,10 @@ export const resolvers: SchemaModule.Resolvers = {
 
       let schemaAST: DocumentNode;
       if (version.compositeSchemaSDL) {
-        schemaAST = parse(version.compositeSchemaSDL);
+        schemaAST = parseGraphQLSource(
+          version.compositeSchemaSDL,
+          'parse compositeSchemaSDL in SchemaVersion.unusedSchema',
+        );
       } else {
         // Legacy Fallback
         const schemas = await injector.get(SchemaManager).getSchemasOfVersion({

@@ -1,4 +1,4 @@
-import { DocumentNode, GraphQLError, parse, SourceLocation } from 'graphql';
+import { DocumentNode, GraphQLError, SourceLocation } from 'graphql';
 import { z } from 'zod';
 import type { AvailableRulesResponse, PolicyConfigurationObject } from '@hive/policy';
 import type { CompositionFailureError } from '@hive/schema';
@@ -11,6 +11,7 @@ import type {
   ProjectAccessScope,
   TargetAccessScope,
 } from '../__generated__/types';
+import { parseGraphQLSource } from './schema';
 
 export const SingleSchemaModel = z
   .object({
@@ -127,7 +128,7 @@ export function createSchemaObject(
   let document: DocumentNode;
 
   try {
-    document = parse(schema.sdl);
+    document = parseGraphQLSource(schema.sdl, 'parse in createSchemaObject');
   } catch (err) {
     if (err instanceof GraphQLError) {
       throw new GraphQLDocumentStringInvalidError(err.message, err.locations?.[0]);
