@@ -151,6 +151,11 @@ await describe('migration: schema-checks-dedup', async () => {
       // Run the additional remaining migrations
       await complete();
 
+      const newSchemaCheckHashes = {
+        schemaSDLHash: 'schemaSDLHash', // serve exact same schema from different hash to make sure it's allowed
+        compositeSchemaSDLHash: 'compositeSchemaSDLHash',
+        supergraphSDLHash: 'supergraphSDLHash',
+      };
       const newSchemaCheck: {
         id: string;
       } = await storage.createSchemaCheck({
@@ -159,11 +164,11 @@ await describe('migration: schema-checks-dedup', async () => {
         isSuccess: true,
         isManuallyApproved: false,
         schemaSDL,
-        schemaSDLHash: 'schemaSDLHash', // serve exact same schema from different hash to make sure it's allowed
+        schemaSDLHash: newSchemaCheckHashes.schemaSDLHash, // serve exact same schema from different hash to make sure it's allowed
         compositeSchemaSDL,
-        compositeSchemaSDLHash: 'compositeSchemaSDLHash',
+        compositeSchemaSDLHash: newSchemaCheckHashes.compositeSchemaSDLHash,
         supergraphSDL,
-        supergraphSDLHash: 'supergraphSDLHash',
+        supergraphSDLHash: newSchemaCheckHashes.supergraphSDLHash,
         serviceName: null,
         manualApprovalUserId: null,
         githubCheckRunId: null,
@@ -224,11 +229,32 @@ await describe('migration: schema-checks-dedup', async () => {
         'only the new schema check should have nulls instead of SDLs',
       );
 
-      const countSdlStore = await db.oneFirst<number>(sql`SELECT count(*) as total FROM sdl_store`);
+      let countSdlStore = await db.oneFirst<number>(sql`SELECT count(*) as total FROM sdl_store`);
       assert.strictEqual(
         countSdlStore,
         3 /* 3 unique SDLs, only those from the newly created schema check */,
       );
+
+      // Drop the newSchemaCheck
+      let countSchemaChecks = await db.oneFirst<number>(
+        sql`SELECT count(*) as total FROM schema_checks`,
+      );
+      assert.strictEqual(countSchemaChecks, 4);
+      await db.query(sql`DELETE FROM schema_checks WHERE id = ${newSchemaCheck.id}`);
+      countSchemaChecks = await db.oneFirst<number>(
+        sql`SELECT count(*) as total FROM schema_checks`,
+      );
+      assert.strictEqual(countSchemaChecks, 3);
+      // Purge unused SDLs from sdl_store
+      await storage.purgeUnusedSchemasInStore();
+
+      countSdlStore = await db.oneFirst<number>(sql`
+        SELECT count(*) as total FROM sdl_store WHERE
+             id = ${newSchemaCheckHashes.schemaSDLHash}
+          OR id = ${newSchemaCheckHashes.compositeSchemaSDLHash}
+          OR id = ${newSchemaCheckHashes.supergraphSDLHash}
+      `);
+      assert.strictEqual(countSdlStore, 0, 'all SDLs from the new schema check should be purged');
     } finally {
       await done();
       await storage.destroy();
