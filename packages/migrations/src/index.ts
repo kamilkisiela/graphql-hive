@@ -1,17 +1,14 @@
 #!/usr/bin/env node
-import path from 'node:path';
-import url from 'node:url';
 import { createPool } from 'slonik';
 import { migrateClickHouse } from './clickhouse';
 import { createConnectionString } from './connection-string';
 import { env } from './environment';
 import { runPGMigrations } from './run-pg-migrations';
 
-const slonik = await createPool(createConnectionString(env.postgres));
-
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const actionsDirectory = __dirname + path.sep + 'actions';
-console.log('Actions in:', actionsDirectory);
+const slonik = await createPool(createConnectionString(env.postgres), {
+  // 10 minute timeout per statement
+  statementTimeout: 10 * 60 * 1000,
+});
 
 // This is used by production build of this package.
 // We are building a "cli" out of the package, so we need a workaround to pass the command to run.
