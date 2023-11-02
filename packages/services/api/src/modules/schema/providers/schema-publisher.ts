@@ -5,7 +5,6 @@ import promClient from 'prom-client';
 import { Change, CriticalityLevel } from '@graphql-inspector/core';
 import { SchemaCheck } from '@hive/storage';
 import * as Sentry from '@sentry/node';
-import type { Span } from '@sentry/types';
 import * as Types from '../../../__generated__/types';
 import { Organization, Project, ProjectType, Schema, Target } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
@@ -1443,22 +1442,19 @@ export class SchemaPublisher {
     });
   }
 
-  private async updateCDN(
-    {
-      target,
-      project,
-      supergraph,
-      schemas,
-      fullSchemaSdl,
-    }: {
-      target: Target;
-      project: Project;
-      schemas: readonly Schema[];
-      supergraph?: string | null;
-      fullSchemaSdl: string;
-    },
-    span?: Span,
-  ) {
+  private async updateCDN({
+    target,
+    project,
+    supergraph,
+    schemas,
+    fullSchemaSdl,
+  }: {
+    target: Target;
+    project: Project;
+    schemas: readonly Schema[];
+    supergraph?: string | null;
+    fullSchemaSdl: string;
+  }) {
     const publishMetadata = async () => {
       const metadata: Array<Record<string, any>> = [];
       for (const schema of schemas) {
