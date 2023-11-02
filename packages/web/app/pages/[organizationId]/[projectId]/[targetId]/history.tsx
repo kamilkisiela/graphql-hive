@@ -133,7 +133,7 @@ function ListPage({
           </NextLink>
           {version.githubMetadata ? (
             <a
-              className="text-xs font-medium text-gray-500 hover:text-gray-400"
+              className="text-xs font-medium text-gray-500 hover:text-gray-400 ml-[-1px]"
               target="_blank"
               rel="noreferrer"
               href={`https://github.com/${version.githubMetadata.repository}/commit/${version.githubMetadata.commit}`}
