@@ -112,17 +112,18 @@ function convertMsToTime(milliseconds: number) {
   if (milliseconds < 1000) {
     return `${milliseconds}ms`;
   }
+  const ms = milliseconds % 1000;
   const seconds = Math.floor(milliseconds / 1000) % 60;
   const minutes = Math.floor(seconds / 60) % 60;
   const hours = Math.floor(minutes / 60);
 
   if (hours === 0) {
     if (minutes === 0) {
-      return `${padTo2Digits(seconds)}s`;
+      return `${seconds}.${ms}s`;
     }
 
-    return `${padTo2Digits(minutes)}:${padTo2Digits(seconds)}min`;
+    return `${minutes}:${padTo2Digits(seconds)}.${ms}min`;
   }
 
-  return `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}h`;
+  return `${hours}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}.${ms}h`;
 }
