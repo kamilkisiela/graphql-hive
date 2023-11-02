@@ -6,6 +6,7 @@ import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { SchemaEditor } from '@/components/schema-editor';
 import { ChangesBlock, labelize } from '@/components/target/history/errors-and-changes';
+import { Label } from '@/components/ui/label';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import {
@@ -17,6 +18,7 @@ import {
   Heading,
   MetaTitle,
   Modal,
+  Switch,
   TimeAgo,
   Tooltip,
 } from '@/components/v2';
@@ -35,10 +37,11 @@ const SchemaChecks_NavigationQuery = graphql(`
     $projectId: ID!
     $targetId: ID!
     $after: String
+    $filters: SchemaChecksFilter
   ) {
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
       id
-      schemaChecks(first: 20, after: $after) {
+      schemaChecks(first: 20, after: $after, filters: $filters) {
         edges {
           node {
             __typename
@@ -48,6 +51,12 @@ const SchemaChecks_NavigationQuery = graphql(`
             meta {
               commit
               author
+            }
+            breakingSchemaChanges {
+              total
+            }
+            safeSchemaChanges {
+              total
             }
             githubRepository
           }
@@ -62,11 +71,17 @@ const SchemaChecks_NavigationQuery = graphql(`
   }
 `);
 
+interface SchemaCheckFilters {
+  showOnlyFailed?: boolean;
+  showOnlyChanged?: boolean;
+}
+
 const Navigation = (props: {
   after: string | null;
   isLastPage: boolean;
   onLoadMore: (cursor: string) => void;
-}): React.ReactElement => {
+  filters?: SchemaCheckFilters;
+}) => {
   const router = useRouteSelector();
   const [query] = useQuery({
     query: SchemaChecks_NavigationQuery,
@@ -75,6 +90,10 @@ const Navigation = (props: {
       projectId: router.projectId,
       targetId: router.targetId,
       after: props.after,
+      filters: {
+        changed: props.filters?.showOnlyChanged ?? false,
+        failed: props.filters?.showOnlyFailed ?? false,
+      },
     },
   });
 
@@ -717,7 +736,12 @@ const SchemaPolicyEditor = (props: {
 };
 
 const ChecksPageQuery = graphql(`
-  query ChecksPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+  query ChecksPageQuery(
+    $organizationId: ID!
+    $projectId: ID!
+    $targetId: ID!
+    $filters: SchemaChecksFilter
+  ) {
     organizations {
       ...TargetLayout_OrganizationConnectionFragment
     }
@@ -738,6 +762,13 @@ const ChecksPageQuery = graphql(`
           }
         }
       }
+      filteredSchemaChecks: schemaChecks(first: 1, filters: $filters) {
+        edges {
+          node {
+            id
+          }
+        }
+      }
     }
     me {
       ...TargetLayout_MeFragment
@@ -750,6 +781,7 @@ function ChecksPageContent() {
   const [paginationVariables, setPaginationVariables] = useState<Array<string | null>>(() => [
     null,
   ]);
+  const [filters, setFilters] = useState<SchemaCheckFilters>({});
 
   const router = useRouteSelector();
   const [query] = useQuery({
@@ -758,6 +790,10 @@ function ChecksPageContent() {
       organizationId: router.organizationId,
       projectId: router.projectId,
       targetId: router.targetId,
+      filters: {
+        changed: filters.showOnlyChanged ?? false,
+        failed: filters.showOnlyFailed ?? false,
+      },
     },
   });
 
@@ -772,6 +808,7 @@ function ChecksPageContent() {
   const isCDNEnabled = query.data;
   const { schemaCheckId } = router;
   const hasSchemaChecks = !!query.data?.target?.schemaChecks?.edges?.length;
+  const hasFilteredSchemaChecks = !!query.data?.target?.filteredSchemaChecks?.edges?.length;
   const hasActiveSchemaCheck = !!schemaCheckId;
 
   return (
@@ -796,18 +833,65 @@ function ChecksPageContent() {
               <Title>Schema Checks</Title>
               <Subtitle>Recently checked schemas.</Subtitle>
             </div>
-            {query.fetching ? null : hasSchemaChecks ? (
+            {query.fetching || query.stale ? null : hasSchemaChecks ? (
               <div className="flex flex-col gap-5">
-                <div className="flex w-[300px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
-                  {paginationVariables.map((cursor, index) => (
-                    <Navigation
-                      after={cursor}
-                      isLastPage={index + 1 === paginationVariables.length}
-                      onLoadMore={cursor => setPaginationVariables(cursors => [...cursors, cursor])}
-                      key={cursor ?? 'first'}
+                <div>
+                  <div className="flex flex-row items-center justify-between h-9">
+                    <Label
+                      htmlFor="filter-toggle-has-changes"
+                      className="text-sm text-gray-100 font-normal"
+                    >
+                      Show only changed schemas
+                    </Label>
+                    <Switch
+                      checked={filters.showOnlyChanged ?? false}
+                      onCheckedChange={() =>
+                        setFilters(filters => ({
+                          ...filters,
+                          showOnlyChanged: !filters.showOnlyChanged,
+                        }))
+                      }
+                      id="filter-toggle-has-changes"
                     />
-                  ))}
+                  </div>
+                  <div className="flex flex-row items-center justify-between h-9">
+                    <Label
+                      htmlFor="filter-toggle-status-failed"
+                      className="text-sm text-gray-100 font-normal"
+                    >
+                      Show only failed checks
+                    </Label>
+                    <Switch
+                      checked={filters.showOnlyFailed ?? false}
+                      onCheckedChange={() =>
+                        setFilters(filters => ({
+                          ...filters,
+                          showOnlyFailed: !filters.showOnlyFailed,
+                        }))
+                      }
+                      id="filter-toggle-status-failed"
+                    />
+                  </div>
                 </div>
+                {hasFilteredSchemaChecks ? (
+                  <div className="flex w-[300px] grow flex-col gap-2.5 overflow-y-auto rounded-md border border-gray-800/50 p-2.5">
+                    {paginationVariables.map((cursor, index) => (
+                      <Navigation
+                        after={cursor}
+                        isLastPage={index + 1 === paginationVariables.length}
+                        onLoadMore={cursor =>
+                          setPaginationVariables(cursors => [...cursors, cursor])
+                        }
+                        key={cursor ?? 'first'}
+                        filters={filters}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm cursor-default">
+                    No schema checks found with the current filters
+                  </div>
+                )}
               </div>
             ) : (
               <div>

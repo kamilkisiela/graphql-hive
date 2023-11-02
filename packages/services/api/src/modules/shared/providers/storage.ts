@@ -11,6 +11,7 @@ import type {
   AddAlertChannelInput,
   AddAlertInput,
   RegistryModel,
+  SchemaChecksFilter,
 } from '../../../__generated__/types';
 import type {
   ActivityObject,
@@ -690,6 +691,10 @@ export interface Storage {
      * Optional mapper for transforming the raw schema check loaded from the database.
      */
     transformNode?: (check: SchemaCheck) => TransformedSchemaCheck;
+    /**
+     * Optional filters config for filtering failed and/or changed schema checks.
+     */
+    filters?: SchemaChecksFilter | null;
   }): Promise<
     Readonly<{
       items: ReadonlyArray<{

@@ -3462,6 +3462,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       const limit = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
 
+      const { failed, changed } = args.filters ?? {};
+
       if (args.cursor) {
         cursor = decodeCreatedAtAndUUIDIdBasedCursor(args.cursor);
       }
@@ -3482,6 +3484,25 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                     AND "id" < ${cursor.id}
                   )
                   OR "created_at" < ${cursor.createdAt}
+                )
+              `
+              : sql``
+          }
+          ${
+            failed
+              ? sql`
+                AND (
+                  "is_success" = false
+                )
+              `
+              : sql``
+          }
+          ${
+            changed
+              ? sql`
+                AND (
+                  jsonb_typeof("safe_schema_changes") = 'array'
+                  OR jsonb_typeof("breaking_schema_changes") = 'array'
                 )
               `
               : sql``
