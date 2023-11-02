@@ -1071,8 +1071,6 @@ export const resolvers: SchemaModule.Resolvers = {
         schemaAST = schema.document;
       }
 
-      console.log('resolved explorer', Date.now());
-
       return {
         schema: sentryFunction(
           () =>
@@ -1478,14 +1476,12 @@ export const resolvers: SchemaModule.Resolvers = {
       const operationsManager = injector.get(OperationsManager);
 
       async function getStats(typename: string) {
-        console.log('counting coordinates', Date.now());
         const stats = await operationsManager.countCoordinatesOfTarget({
           target: usage.target,
           organization: usage.organization,
           project: usage.project,
           period: usage.period,
         });
-        console.log('counted coordinates', Date.now());
 
         return withUsedByClients(stats, {
           selector: usage,
@@ -1610,7 +1606,6 @@ export const resolvers: SchemaModule.Resolvers = {
       }
 
       const operationsManager = injector.get(OperationsManager);
-      console.log('resolved query', Date.now());
 
       return {
         entity: transformGraphQLObjectType(entity),
@@ -1651,7 +1646,6 @@ export const resolvers: SchemaModule.Resolvers = {
       }
 
       const operationsManager = injector.get(OperationsManager);
-      console.log('resolved mutation', Date.now());
 
       return {
         entity: transformGraphQLObjectType(entity),
@@ -1693,7 +1687,6 @@ export const resolvers: SchemaModule.Resolvers = {
       }
 
       const operationsManager = injector.get(OperationsManager);
-      console.log('resolved mutation', Date.now());
 
       return {
         entity: transformGraphQLObjectType(entity),
