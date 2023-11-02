@@ -356,8 +356,8 @@ export const TargetLayout = ({
         </div>
       </div>
       <div className="container pb-7 h-full">
-        <div className={cn('flex justify-between gap-12', className)}>
-          <div className="grow">{children}</div>
+        <div className={cn('flex justify-between gap-12 h-full', className)}>
+          <div className="grow flex flex-col">{children}</div>
         </div>
       </div>
     </>
