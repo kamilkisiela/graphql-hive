@@ -17,8 +17,6 @@ export const GraphQLEnumTypeComponent_TypeFragment = graphql(`
     values {
       name
       description
-      isDeprecated
-      deprecationReason
       usage {
         ...SchemaExplorerUsageStats_UsageFragment
       }

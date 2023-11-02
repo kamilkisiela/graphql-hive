@@ -208,8 +208,6 @@ const GraphQLFields_FieldFragment = graphql(`
     name
     description
     type
-    isDeprecated
-    deprecationReason
     usage {
       total
       ...SchemaExplorerUsageStats_UsageFragment
@@ -228,12 +226,6 @@ const GraphQLArguments_ArgumentFragment = graphql(`
     name
     description
     type
-    isDeprecated
-    deprecationReason
-    usage {
-      total
-      ...SchemaExplorerUsageStats_UsageFragment
-    }
   }
 `);
 
@@ -242,8 +234,6 @@ const GraphQLInputFields_InputFieldFragment = graphql(`
     name
     description
     type
-    isDeprecated
-    deprecationReason
     usage {
       total
       ...SchemaExplorerUsageStats_UsageFragment
