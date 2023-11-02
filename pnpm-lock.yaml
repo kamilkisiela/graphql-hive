@@ -635,8 +635,8 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       graphql-modules:
-        specifier: 2.2.0
-        version: 2.2.0(graphql@16.8.1)
+        specifier: 2.2.1-alpha-20231102135230-f3e07504
+        version: 2.2.1-alpha-20231102135230-f3e07504(graphql@16.8.1)
       graphql-parse-resolve-info:
         specifier: 4.13.0
         version: 4.13.0(graphql@16.8.1)
@@ -20168,6 +20168,18 @@ packages:
 
   /graphql-modules@2.2.0(graphql@16.8.1):
     resolution: {integrity: sha512-iWFyqP+jZqlwPkM4zVI0A/GDgQErxCTZeiz/jVv0MNzKut+ZEV6Dx8TlLhHd6VLqrqHZmib4NybG5Me8E03jDg==}
+    peerDependencies:
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
+    dependencies:
+      '@graphql-tools/schema': 10.0.0(graphql@16.8.1)
+      '@graphql-tools/wrap': 10.0.0(graphql@16.8.1)
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.8.1)
+      graphql: 16.8.1
+      ramda: 0.29.0
+    dev: true
+
+  /graphql-modules@2.2.1-alpha-20231102135230-f3e07504(graphql@16.8.1):
+    resolution: {integrity: sha512-SUaMsmsUMIRTos2Bo1rXMnTpqPtjjn8EDhHgyYxZICV4KFGcmN+uRz415R6TRclgWFgNZg099eZKM2cwAQtPzQ==}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
