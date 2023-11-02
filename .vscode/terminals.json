@@ -85,6 +85,13 @@
       "open": true,
       "cwd": "packages/services/usage-ingestor",
       "command": "pnpm dev"
+    },
+    {
+      "name": "persisted-documents:dev",
+      "description": "Run Persisted Documents Worker",
+      "open": true,
+      "cwd": "packages/services/persisted-documents",
+      "command": "pnpm dev"
     }
   ]
 }
