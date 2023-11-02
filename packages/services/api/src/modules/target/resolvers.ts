@@ -258,7 +258,7 @@ export const resolvers: TargetModule.Resolvers = {
 
       return {
         ok: {
-          target: targetManager.getTarget({
+          target: await targetManager.getTarget({
             organization,
             project,
             target,

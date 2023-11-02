@@ -54,7 +54,7 @@ export async function execute<TResult, TVariables>(
     body,
     null,
     2,
-  )}`;
+  )}\n\trequest-id: ${response.headers.get('x-request-id')}\n`;
 
   return {
     rawBody: body,

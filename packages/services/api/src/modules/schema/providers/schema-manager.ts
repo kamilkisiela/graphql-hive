@@ -583,7 +583,7 @@ export class SchemaManager {
     });
 
     return {
-      ok: this.storage.updateProjectRegistryModel(input),
+      ok: await this.storage.updateProjectRegistryModel(input),
     };
   }
 
