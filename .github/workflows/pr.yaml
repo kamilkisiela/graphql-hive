@@ -35,7 +35,7 @@ jobs:
   # Run db migrations tests
   db-migration-tests:
     name: test
-    uses: ./.github/workflows/migrations-test.yaml
+    uses: ./.github/workflows/tests-db-migrations.yaml
 
   # Unit tests using Vitest
   unit-tests:
