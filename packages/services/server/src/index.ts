@@ -117,9 +117,9 @@ export async function main() {
           transaction.setMeasurement(
             'deletedSchemaCheckCount',
             result.deletedSchemaCheckCount,
-            'rows',
+            '',
           );
-          transaction.setMeasurement('deletedSdlStoreCount', result.deletedSdlStoreCount, 'rows');
+          transaction.setMeasurement('deletedSdlStoreCount', result.deletedSdlStoreCount, '');
           transaction.finish();
         } catch (error) {
           captureException(error);
