@@ -282,16 +282,15 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
       useGraphQlJit(
         {},
         {
-          enableIf(/*args*/) {
-            // if (hasFastifyRequest(args.contextValue)) {
-            //   // Enable JIT only for Hive App
-            //   const name = args.contextValue.req.headers['graphql-client-name'] as string;
+          enableIf(args) {
+            if (hasFastifyRequest(args.contextValue)) {
+              // Enable JIT only for Hive App
+              const name = args.contextValue.req.headers['graphql-client-name'] as string;
 
-            //   return name === 'Hive App';
-            // }
+              return name === 'Hive App';
+            }
 
-            // return false;
-            return true;
+            return false;
           },
           onError(r) {
             options.logger.error(r);
