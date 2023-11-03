@@ -1,7 +1,13 @@
 import type { FastifyInstance, FastifyPluginAsync, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 import * as Sentry from '@sentry/node';
-import type { ExtractedNodeRequestData, TraceparentData, Transaction } from '@sentry/types';
+import type {
+  CustomSamplingContext,
+  ExtractedNodeRequestData,
+  TraceparentData,
+  Transaction,
+  TransactionContext,
+} from '@sentry/types';
 import { extractTraceparentData, normalize } from '@sentry/utils';
 import { cleanRequestId } from './helpers';
 
@@ -43,7 +49,7 @@ const plugin: FastifyPluginAsync = async server => {
 
     const extractedRequestData = extractRequestData(request);
 
-    const transaction = Sentry.startTransaction(
+    const transaction = startSentryTransaction(
       {
         op: 'http.server',
         name: `${request.method} ${request.url}`,
@@ -52,9 +58,6 @@ const plugin: FastifyPluginAsync = async server => {
       { request: extractedRequestData },
     );
     (reply as any).sentryTransaction = transaction;
-    transaction.sampled = true;
-
-    Sentry.configureScope(scope => scope.setSpan(transaction));
 
     return;
   });
@@ -209,4 +212,16 @@ function replaceAuthorization(value?: string | string[]): string | string[] {
   }
 
   return '<missing>';
+}
+
+export function startSentryTransaction(
+  context: TransactionContext,
+  customSamplingContext?: CustomSamplingContext,
+) {
+  const transaction = Sentry.startTransaction(context, customSamplingContext);
+  transaction.sampled = true;
+
+  Sentry.configureScope(scope => scope.setSpan(transaction));
+
+  return transaction;
 }

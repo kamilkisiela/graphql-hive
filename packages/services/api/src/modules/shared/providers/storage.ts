@@ -675,11 +675,10 @@ export interface Storage {
   /**
    * Delete the expired schema checks from the database.
    */
-  purgeExpiredSchemaChecks(_: { expiresAt: Date }): Promise<number>;
-  /**
-   * Delete rows from sdl_store that are not referenced by any schema check.
-   */
-  purgeUnusedSchemasInStore(): Promise<void>;
+  purgeExpiredSchemaChecks(_: { expiresAt: Date }): Promise<{
+    deletedSchemaCheckCount: number;
+    deletedSdlStoreCount: number;
+  }>;
   /**
    * Find schema check for a given ID and target.
    */

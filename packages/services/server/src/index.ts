@@ -15,6 +15,7 @@ import {
   registerTRPC,
   reportReadiness,
   startMetrics,
+  startSentryTransaction,
 } from '@hive/service-common';
 import { createConnectionString, createStorage as createPostgreSQLStorage } from '@hive/storage';
 import { Dedupe, ExtraErrorData } from '@sentry/integrations';
@@ -90,7 +91,7 @@ export async function main() {
 
   const storage = await createPostgreSQLStorage(createConnectionString(env.postgres), 10);
 
-  let dbPureTaskRunner: null | ReturnType<typeof createTaskRunner> = null;
+  let dbPurgeTaskRunner: null | ReturnType<typeof createTaskRunner> = null;
 
   if (!env.hiveServices.usageEstimator) {
     server.log.debug('Usage estimation is disabled. Skip scheduling purge tasks.');
@@ -98,17 +99,35 @@ export async function main() {
     server.log.debug(
       `Usage estimation is enabled. Start scheduling purge tasks every ${env.hiveServices.usageEstimator.dateRetentionPurgeIntervalMinutes} minutes.`,
     );
-    dbPureTaskRunner = createTaskRunner({
+    dbPurgeTaskRunner = createTaskRunner({
       async run() {
-        await storage.purgeExpiredSchemaChecks({
-          expiresAt: new Date(),
+        const transaction = startSentryTransaction({
+          op: 'db.purgeTaskRunner',
+          name: 'Purge Task',
         });
-        // TODO: activate await storage.purgeUnusedSchemasInStore();
+        try {
+          const result = await storage.purgeExpiredSchemaChecks({
+            expiresAt: new Date(),
+          });
+          server.log.debug(
+            'Finished running schema check purge task. (deletedSchemaCheckCount=%s deletedSdlStoreCount=%s)',
+            result.deletedSchemaCheckCount,
+            result.deletedSdlStoreCount,
+          );
+          transaction.setMeasurement('deletedSchemaCheckCount', result.deletedSchemaCheckCount, '');
+          transaction.setMeasurement('deletedSdlStoreCount', result.deletedSdlStoreCount, '');
+          transaction.finish();
+        } catch (error) {
+          captureException(error);
+          transaction.setStatus('internal_error');
+          transaction.finish();
+          throw error;
+        }
       },
       interval: env.hiveServices.usageEstimator.dateRetentionPurgeIntervalMinutes * 60 * 1000,
       logger: server.log,
     });
-    dbPureTaskRunner.start();
+    dbPurgeTaskRunner.start();
   }
 
   registerShutdown({
@@ -118,9 +137,9 @@ export async function main() {
       await server.close();
       server.log.info('Stopping Storage handler...');
       await storage.destroy();
-      if (dbPureTaskRunner) {
+      if (dbPurgeTaskRunner) {
         server.log.info('Stopping expired schema check purge task...');
-        await dbPureTaskRunner.stop();
+        await dbPurgeTaskRunner.stop();
       }
       server.log.info('Shutdown complete.');
     },

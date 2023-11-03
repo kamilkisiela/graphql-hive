@@ -3687,34 +3687,61 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     async purgeExpiredSchemaChecks(args) {
-      await pool.query(sql`
-        DELETE
-        FROM
-          "public"."schema_checks"
-        WHERE
-          "expires_at" <= ${args.expiresAt.toISOString()}
-      `);
+      return await pool.transaction(async pool => {
+        const result = await pool.any<unknown>(sql`
+          DELETE
+          FROM "public"."schema_checks"
+          WHERE 
+            "id" = ANY(
+              SELECT
+                "id"
+              FROM
+                "public"."schema_checks"
+              WHERE
+                "expires_at" <= ${args.expiresAt.toISOString()}
+              LIMIT
+                1000
+            )
+          RETURNING
+            "schema_sdl_store_id" as "id1",
+            "supergraph_sdl_store_id" as "id2",
+            "composite_schema_sdl_store_id" as "id3"
+        `);
+        const ids = PurgeExpiredSchemaChecksIDModel.parse(result);
 
-      return 0;
-    },
+        if (ids.size === 0) {
+          return {
+            deletedSchemaCheckCount: result.length,
+            deletedSdlStoreCount: 0,
+          };
+        }
+        const deletedRecords = await pool.any<unknown>(sql`
+          DELETE
+          FROM
+            "sdl_store"
+          WHERE
+            "id" = ANY(
+              ${sql.array(Array.from(ids), 'text')}
+            )
+            AND NOT EXISTS (
+              SELECT
+                1
+              FROM
+                "schema_checks"
+              WHERE
+                "schema_checks"."schema_sdl_store_id" = "sdl_store"."id"
+                OR "schema_checks"."composite_schema_sdl_store_id" = "sdl_store"."id"
+                OR "schema_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
+            )
+          RETURNING
+            true as "d"
+        `);
 
-    async purgeUnusedSchemasInStore() {
-      await pool.query(sql`
-        DELETE FROM "public"."sdl_store"
-        WHERE id NOT IN (
-            SELECT DISTINCT schema_sdl_store_id
-            FROM "public"."schema_checks"
-            WHERE schema_sdl_store_id IS NOT NULL
-          UNION
-            SELECT DISTINCT supergraph_sdl_store_id
-            FROM "public"."schema_checks"
-            WHERE supergraph_sdl_store_id IS NOT NULL
-          UNION
-            SELECT DISTINCT composite_schema_sdl_store_id
-            FROM "public"."schema_checks"
-            WHERE composite_schema_sdl_store_id IS NOT NULL
-        )
-      `);
+        return {
+          deletedSchemaCheckCount: result.length,
+          deletedSdlStoreCount: deletedRecords.length,
+        };
+      });
     },
 
     async getSchemaVersionByActionId(args) {
@@ -4144,5 +4171,23 @@ const TargetModel = zod.object({
   projectId: zod.string(),
   graphqlEndpointUrl: zod.string().nullable(),
 });
+
+const PurgeExpiredSchemaChecksIDModel = zod
+  .array(
+    zod.object({
+      id1: zod.string().nullable(),
+      id2: zod.string().nullable(),
+      id3: zod.string().nullable(),
+    }),
+  )
+  .transform(items => {
+    const ids = new Set<string>();
+    for (const row of items) {
+      row.id1 && ids.add(row.id1);
+      row.id2 && ids.add(row.id2);
+      row.id3 && ids.add(row.id3);
+    }
+    return ids;
+  });
 
 export * from './schema-change-model';
