@@ -35,6 +35,7 @@ export const backendConfig = (): TypeInput => {
       ThirdPartyEmailPasswordNode.Github({
         clientId: env.auth.github.clientId,
         clientSecret: env.auth.github.clientSecret,
+        scope: ['read:user', 'user:email'],
       }),
     );
   }
@@ -43,6 +44,11 @@ export const backendConfig = (): TypeInput => {
       ThirdPartyEmailPasswordNode.Google({
         clientId: env.auth.google.clientId,
         clientSecret: env.auth.google.clientSecret,
+        scope: [
+          'https://www.googleapis.com/auth/userinfo.email',
+          'https://www.googleapis.com/auth/userinfo.profile',
+          'openid',
+        ],
       }),
     );
   }
