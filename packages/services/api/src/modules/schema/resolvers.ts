@@ -104,7 +104,7 @@ function usage(
         // TODO: This is a hack to mark the field as used but without passing exact number as we don't need the exact number in "Unused schema view".
         total: 1,
         isUsed: true,
-        usedByClients: null,
+        usedByClients: [],
         period: usage.period,
         organization: usage.organization,
         project: usage.project,
@@ -116,7 +116,7 @@ function usage(
     return {
       total: 0,
       isUsed: false,
-      usedByClients: null,
+      usedByClients: [],
     };
   }
 
@@ -139,7 +139,7 @@ function usage(
       : {
           total: 0,
           isUsed: false,
-          usedByClients: null,
+          usedByClients: [],
         };
   });
 }
@@ -2216,7 +2216,7 @@ function withUsedByClients<
 ): Record<
   string,
   T & {
-    usedByClients: PromiseOrValue<Array<string> | null>;
+    usedByClients: PromiseOrValue<Array<string>>;
     period: DateRange;
     organization: string;
     project: string;
@@ -2237,7 +2237,7 @@ function withUsedByClients<
         ...record,
         get usedByClients() {
           if (record.isUsed === false) {
-            return null;
+            return [];
           }
 
           // It's using DataLoader under the hood so it's safe to call it multiple times for different coordinates
