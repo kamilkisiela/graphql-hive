@@ -42,6 +42,14 @@ export interface AgentOptions {
    * Custom logger (defaults to console)
    */
   logger?: Logger;
+  /**
+   * Define a custom http agent to be used when performing http requests
+   */
+  httpAgent?: any;
+  /**
+   * Define a custom https agent to be used when performing https requests
+   */
+  httpsAgent?: any;
 }
 
 export function createAgent<TEvent, TResult = void>(
@@ -72,6 +80,8 @@ export function createAgent<TEvent, TResult = void>(
     maxSize: 25,
     logger: console,
     name: 'hive-client',
+    httpAgent: undefined,
+    httpsAgent: undefined,
     ...pluginOptions,
   };
 
@@ -168,6 +178,8 @@ export function createAgent<TEvent, TResult = void>(
             },
             responseType: 'json',
             timeout: options.timeout,
+            httpAgent: options.httpAgent,
+            httpsAgent: options.httpsAgent,
           })
           .catch(error => {
             debugLog(`Attempt ${attempt} failed: ${error.message}`);
