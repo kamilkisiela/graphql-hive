@@ -1,5 +1,13 @@
 # @graphql-hive/client
 
+## 0.26.0
+
+### Minor Changes
+
+- [#3263](https://github.com/kamilkisiela/graphql-hive/pull/3263)
+  [`7924ddcd`](https://github.com/kamilkisiela/graphql-hive/commit/7924ddcd3012916d85c5f7c543b7aa80ed5ca21b)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Allow to pass http and https agents
+
 ## 0.25.0
 
 ### Minor Changes

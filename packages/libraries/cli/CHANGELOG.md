@@ -1,5 +1,14 @@
 # @graphql-hive/cli
 
+## 0.30.3
+
+### Patch Changes
+
+- [#3240](https://github.com/kamilkisiela/graphql-hive/pull/3240)
+  [`6b7aef8b`](https://github.com/kamilkisiela/graphql-hive/commit/6b7aef8b708690c5b5944c567b25210672325678)
+  Thanks [@dotansimha](https://github.com/dotansimha)! - Remove `Access to operation:publish`
+  information from CLI command "whoami" (unused)
+
 ## 0.30.2
 
 ### Patch Changes
