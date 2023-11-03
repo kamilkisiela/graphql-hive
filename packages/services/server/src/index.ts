@@ -19,7 +19,7 @@ import {
 } from '@hive/service-common';
 import { createConnectionString, createStorage as createPostgreSQLStorage } from '@hive/storage';
 import { Dedupe, ExtraErrorData } from '@sentry/integrations';
-import { captureException, init, Integrations, SeverityLevel, startSpan } from '@sentry/node';
+import { captureException, init, Integrations, SeverityLevel } from '@sentry/node';
 import { createServerAdapter } from '@whatwg-node/server';
 import { createContext, internalApiRouter } from './api';
 import { asyncStorage } from './async-storage';
@@ -114,11 +114,7 @@ export async function main() {
             result.deletedSchemaCheckCount,
             result.deletedSdlStoreCount,
           );
-          transaction.setMeasurement(
-            'deletedSchemaCheckCount',
-            result.deletedSchemaCheckCount,
-            '',
-          );
+          transaction.setMeasurement('deletedSchemaCheckCount', result.deletedSchemaCheckCount, '');
           transaction.setMeasurement('deletedSdlStoreCount', result.deletedSdlStoreCount, '');
           transaction.finish();
         } catch (error) {
