@@ -3,7 +3,13 @@ import zod from 'zod';
 import { type Request } from '@whatwg-node/fetch';
 import { createAnalytics, type Analytics } from './analytics';
 import { type ArtifactsType } from './artifact-storage-reader';
-import { InvalidAuthKeyResponse, MissingAuthKeyResponse, UnexpectedError } from './errors';
+import {
+  CDNArtifactNotFound,
+  InvalidArtifactTypeResponse,
+  InvalidAuthKeyResponse,
+  MissingAuthKeyResponse,
+  UnexpectedError,
+} from './errors';
 import type { KeyValidator } from './key-validation';
 import { createResponse } from './tracked-response';
 
@@ -27,10 +33,6 @@ type ArtifactRequestHandler = {
   getArtifactAction: GetArtifactActionFn;
   isKeyValid: KeyValidator;
   analytics?: Analytics;
-  fallback?: (
-    request: Request,
-    params: { targetId: string; artifactType: string },
-  ) => Promise<Response | undefined>;
 };
 
 const ParamsModel = zod.object({
@@ -78,15 +80,8 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         { type: 'error', value: ['invalid-params'] },
         request.params?.targetId ?? 'unknown',
       );
-      return createResponse(
-        analytics,
-        'Not found.',
-        {
-          status: 404,
-        },
-        request.params?.targetId ?? 'unknown',
-        request,
-      );
+
+      return new InvalidArtifactTypeResponse(request.params.artifactType, analytics, request);
     }
 
     const params = parseResult.data;
@@ -113,10 +108,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
       return maybeResponse;
     }
 
-    analytics.track(
-      { type: 'artifact', value: params.artifactType, version: 'v1' },
-      params.targetId,
-    );
+    analytics.track({ type: 'artifact', value: params.artifactType }, params.targetId);
 
     const eTag = request.headers.get('if-none-match');
 
@@ -135,7 +127,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
     }
 
     if (result.type === 'notFound') {
-      return createResponse(analytics, 'Not found.', { status: 404 }, params.targetId, request);
+      return new CDNArtifactNotFound(params.artifactType, params.targetId, analytics, request);
     }
 
     if (result.type === 'redirect') {
@@ -200,5 +192,5 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
   });
 
   return (request: Request, captureException?: (error: unknown) => void) =>
-    router.handle(request, captureException);
+    router.handle(request, captureException) as Promise<Response>;
 };

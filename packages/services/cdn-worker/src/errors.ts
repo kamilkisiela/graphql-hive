@@ -3,34 +3,6 @@ import { Analytics } from './analytics';
 
 const description = `Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage`;
 
-export class MissingTargetIDErrorResponse extends Response {
-  constructor(analytics: Analytics, request: Request) {
-    super(
-      JSON.stringify({
-        code: 'MISSING_TARGET_ID',
-        error: `Missing Hive target ID in request params.`,
-        description,
-      }),
-      {
-        status: 400,
-        headers: {
-          'content-type': 'application/json',
-        },
-      },
-    );
-
-    analytics.track({ type: 'error', value: ['missing_target_id'] }, 'unknown');
-    analytics.track(
-      {
-        type: 'response',
-        statusCode: 400,
-        requestPath: request.url,
-      },
-      'unknown',
-    );
-  }
-}
-
 export class InvalidArtifactTypeResponse extends Response {
   constructor(artifactType: string, analytics: Analytics, request: Request) {
     super(
@@ -132,33 +104,6 @@ export class CDNArtifactNotFound extends Response {
       {
         type: 'response',
         statusCode: 404,
-        requestPath: request.url,
-      },
-      targetId,
-    );
-  }
-}
-
-export class InvalidArtifactMatch extends Response {
-  constructor(artifactType: string, targetId: string, analytics: Analytics, request: Request) {
-    super(
-      JSON.stringify({
-        code: 'INVALID_ARTIFACT_MATCH',
-        error: `Target "${targetId}" does not support the artifact type "${artifactType}"`,
-        description,
-      }),
-      {
-        status: 400,
-        headers: {
-          'content-type': 'application/json',
-        },
-      },
-    );
-    analytics.track({ type: 'error', value: ['invalid_artifact_match', artifactType] }, targetId);
-    analytics.track(
-      {
-        type: 'response',
-        statusCode: 400,
         requestPath: request.url,
       },
       targetId,

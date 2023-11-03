@@ -1,12 +1,10 @@
 import * as itty from 'itty-router';
 import { Toucan } from 'toucan-js';
-import { fetch } from '@whatwg-node/fetch';
 import { AnalyticsEngine, createAnalytics } from './analytics';
 import { createArtifactRequestHandler } from './artifact-handler';
 import { ArtifactStorageReader } from './artifact-storage-reader';
 import { AwsClient } from './aws';
 import { UnexpectedError } from './errors';
-import { createRequestHandler } from './handler';
 import { createIsKeyValid } from './key-validation';
 import { createResponse } from './tracked-response';
 
@@ -65,23 +63,6 @@ const handler: ExportedHandler<Env> = {
       analytics,
     });
 
-    const handleRequest = createRequestHandler({
-      async getArtifactAction(targetId, artifactType, eTag) {
-        return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
-      },
-      isKeyValid,
-      analytics,
-      async fetchText(url) {
-        const r = await fetch(url);
-
-        if (r.ok) {
-          return r.text();
-        }
-
-        throw new Error(`Failed to fetch ${url}, status: ${r.status}`);
-      },
-    });
-
     const handleArtifactRequest = createArtifactRequestHandler({
       isKeyValid,
       analytics,
@@ -99,9 +80,7 @@ const handler: ExportedHandler<Env> = {
             status: 200,
           }),
       )
-      .get('*', handleArtifactRequest)
-      // Legacy CDN Handlers
-      .get('*', handleRequest);
+      .get('*', handleArtifactRequest);
 
     const sentry = new Toucan({
       dsn: env.SENTRY_DSN,
