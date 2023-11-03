@@ -96,7 +96,7 @@ function usage(
   const coordinate =
     'parent' in source ? `${source.parent.coordinate}.${source.entity.name}` : source.entity.name;
 
-  const usage = source.usage;
+  const usage = source.usage();
 
   if (isSchemaCoordinateUsageForUnusedExplorer(usage)) {
     if (usage.usedCoordinates.has(coordinate)) {
@@ -104,7 +104,7 @@ function usage(
         // TODO: This is a hack to mark the field as used but without passing exact number as we don't need the exact number in "Unused schema view".
         total: 1,
         isUsed: true,
-        usedByClients: null,
+        usedByClients: () => [],
         period: usage.period,
         organization: usage.organization,
         project: usage.project,
@@ -116,7 +116,7 @@ function usage(
     return {
       total: 0,
       isUsed: false,
-      usedByClients: null,
+      usedByClients: () => [],
     };
   }
 
@@ -127,9 +127,7 @@ function usage(
       ? {
           total: coordinateUsage.total,
           isUsed: true,
-          get usedByClients() {
-            return coordinateUsage.usedByClients;
-          },
+          usedByClients: coordinateUsage.usedByClients,
           period: coordinateUsage.period,
           organization: coordinateUsage.organization,
           project: coordinateUsage.project,
@@ -139,7 +137,7 @@ function usage(
       : {
           total: 0,
           isUsed: false,
-          usedByClients: null,
+          usedByClients: () => [],
         };
   });
 }
@@ -1337,6 +1335,11 @@ export const resolvers: SchemaModule.Resolvers = {
           })),
         );
     },
+    // Why? GraphQL-JIT goes crazy without this (Expected Iterable, but did not find one for field SchemaCoordinateUsage.usedByClients).
+    // That's why we switched from a getter to a function.
+    usedByClients(parent) {
+      return parent.usedByClients();
+    },
   },
   SchemaExplorer: {
     async type(source, { name }, { injector }) {
@@ -1348,23 +1351,24 @@ export const resolvers: SchemaModule.Resolvers = {
       }
 
       const { supergraph } = source;
-      const usage = injector
-        .get(OperationsManager)
-        .countCoordinatesOfType({
-          typename: entity.name,
-          organization: source.usage.organization,
-          project: source.usage.project,
-          target: source.usage.target,
-          period: source.usage.period,
-        })
-        .then(usage =>
-          withUsedByClients(usage, {
-            selector: source.usage,
-            period: source.usage.period,
-            operationsManager,
+      const usage = () =>
+        injector
+          .get(OperationsManager)
+          .countCoordinatesOfType({
             typename: entity.name,
-          }),
-        );
+            organization: source.usage.organization,
+            project: source.usage.project,
+            target: source.usage.target,
+            period: source.usage.period,
+          })
+          .then(usage =>
+            withUsedByClients(usage, {
+              selector: source.usage,
+              period: source.usage.period,
+              operationsManager,
+              typename: entity.name,
+            }),
+          );
 
       if (isObjectType(entity)) {
         return {
@@ -1494,7 +1498,7 @@ export const resolvers: SchemaModule.Resolvers = {
         if (isObjectType(entity)) {
           types.push({
             entity: transformGraphQLObjectType(entity),
-            get usage() {
+            usage() {
               return getStats(entity.name);
             },
             supergraph: supergraph
@@ -1510,7 +1514,7 @@ export const resolvers: SchemaModule.Resolvers = {
         } else if (isInterfaceType(entity)) {
           types.push({
             entity: transformGraphQLInterfaceType(entity),
-            get usage() {
+            usage() {
               return getStats(entity.name);
             },
             supergraph: supergraph
@@ -1526,7 +1530,7 @@ export const resolvers: SchemaModule.Resolvers = {
         } else if (isEnumType(entity)) {
           types.push({
             entity: transformGraphQLEnumType(entity),
-            get usage() {
+            usage() {
               return getStats(entity.name);
             },
             supergraph: supergraph
@@ -1542,7 +1546,7 @@ export const resolvers: SchemaModule.Resolvers = {
         } else if (isUnionType(entity)) {
           types.push({
             entity: transformGraphQLUnionType(entity),
-            get usage() {
+            usage() {
               return getStats(entity.name);
             },
             supergraph: supergraph
@@ -1557,7 +1561,7 @@ export const resolvers: SchemaModule.Resolvers = {
         } else if (isInputObjectType(entity)) {
           types.push({
             entity: transformGraphQLInputObjectType(entity),
-            get usage() {
+            usage() {
               return getStats(entity.name);
             },
             supergraph: supergraph
@@ -1574,7 +1578,7 @@ export const resolvers: SchemaModule.Resolvers = {
         } else if (isScalarType(entity)) {
           types.push({
             entity: transformGraphQLScalarType(entity),
-            get usage() {
+            usage() {
               return getStats(entity.name);
             },
             supergraph: supergraph
@@ -1602,7 +1606,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return {
         entity: transformGraphQLObjectType(entity),
-        get usage() {
+        usage() {
           return operationsManager
             .countCoordinatesOfType({
               typename: entity.name,
@@ -1642,7 +1646,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return {
         entity: transformGraphQLObjectType(entity),
-        get usage() {
+        usage() {
           return operationsManager
             .countCoordinatesOfType({
               typename: entity.name,
@@ -1683,7 +1687,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return {
         entity: transformGraphQLObjectType(entity),
-        get usage() {
+        usage() {
           return operationsManager
             .countCoordinatesOfType({
               typename: entity.name,
@@ -1723,14 +1727,15 @@ export const resolvers: SchemaModule.Resolvers = {
         | GraphQLInputObjectTypeMapper
         | GraphQLScalarTypeMapper
       > = [];
-      const unused = {
-        isUsed: false,
-        usedCoordinates: usage.usedCoordinates,
-        period: usage.period,
-        organization: usage.organization,
-        project: usage.project,
-        target: usage.target,
-      } as const;
+      const unused = () =>
+        ({
+          isUsed: false,
+          usedCoordinates: usage.usedCoordinates,
+          period: usage.period,
+          organization: usage.organization,
+          project: usage.project,
+          target: usage.target,
+        } as const);
 
       for (const typeDefinition of sdl.definitions) {
         if (typeDefinition.kind === Kind.OBJECT_TYPE_DEFINITION) {
@@ -2216,7 +2221,7 @@ function withUsedByClients<
 ): Record<
   string,
   T & {
-    usedByClients: PromiseOrValue<Array<string> | null>;
+    usedByClients: () => PromiseOrValue<Array<string>>;
     period: DateRange;
     organization: string;
     project: string;
@@ -2235,9 +2240,9 @@ function withUsedByClients<
         project: deps.selector.project,
         target: deps.selector.target,
         ...record,
-        get usedByClients() {
+        usedByClients() {
           if (record.isUsed === false) {
-            return null;
+            return [];
           }
 
           // It's using DataLoader under the hood so it's safe to call it multiple times for different coordinates

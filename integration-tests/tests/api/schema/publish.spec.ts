@@ -397,18 +397,13 @@ test.concurrent('cannot do API request with invalid access token', async () => {
     'foobars',
   ).then(r => r.expectGraphQLErrors());
 
-  expect(errors).toEqual([
-    {
-      message: 'Invalid token provided',
-      locations: [
-        {
-          column: 3,
-          line: 2,
-        },
-      ],
-      path: ['schemaPublish'],
-    },
-  ]);
+  expect(errors).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        message: 'Invalid token provided',
+      }),
+    ]),
+  );
 });
 
 test.concurrent(

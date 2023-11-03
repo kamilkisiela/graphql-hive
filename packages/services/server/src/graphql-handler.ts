@@ -20,6 +20,7 @@ import hyperid from 'hyperid';
 import zod from 'zod';
 import { isGraphQLError } from '@envelop/core';
 import { useGenericAuth } from '@envelop/generic-auth';
+import { useGraphQlJit } from '@envelop/graphql-jit';
 import { useGraphQLModules } from '@envelop/graphql-modules';
 import { useSentry } from '@envelop/sentry';
 import { useYogaHive } from '@graphql-hive/client';
@@ -278,6 +279,24 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         signature: options.signature,
         isNonProductionEnvironment: options.isProduction === false,
       }),
+      useGraphQlJit(
+        {},
+        {
+          enableIf(args) {
+            if (hasFastifyRequest(args.contextValue)) {
+              // Enable JIT only for Hive App
+              const name = args.contextValue.req.headers['graphql-client-name'] as string;
+
+              return name === 'Hive App';
+            }
+
+            return false;
+          },
+          onError(r) {
+            options.logger.error(r);
+          },
+        },
+      ),
     ],
     /*
     graphiql: request =>
