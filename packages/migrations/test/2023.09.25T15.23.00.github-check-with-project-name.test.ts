@@ -3,7 +3,7 @@ import { describe, test } from 'node:test';
 import { sql } from 'slonik';
 import { initMigrationTestingEnvironment } from './utils/testkit';
 
-await describe('migration: github-check-with-project-name', async () => {
+await describe('github-check-with-project-name', async () => {
   await test('should use FALSE for existing projects and TRUE for new', async () => {
     const { db, runTo, complete, done, seed } = await initMigrationTestingEnvironment();
 

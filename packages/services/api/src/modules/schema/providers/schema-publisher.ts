@@ -7,7 +7,14 @@ import { SchemaCheck } from '@hive/storage';
 import * as Sentry from '@sentry/node';
 import type { Span } from '@sentry/types';
 import * as Types from '../../../__generated__/types';
-import { Organization, Project, ProjectType, Schema, Target } from '../../../shared/entities';
+import {
+  hashSDL,
+  Organization,
+  Project,
+  ProjectType,
+  Schema,
+  Target,
+} from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { isGitHubRepositoryString } from '../../../shared/is-github-repository-string';
 import { bolderize } from '../../../shared/markdown';
@@ -396,6 +403,11 @@ export class SchemaPublisher {
     if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
       schemaCheck = await this.storage.createSchemaCheck({
         schemaSDL: sdl,
+        schemaSDLHash: hashSDL(
+          parse(sdl, {
+            noLocation: true,
+          }),
+        ),
         serviceName: input.service ?? null,
         meta: input.meta ?? null,
         targetId: target.id,
@@ -409,12 +421,26 @@ export class SchemaPublisher {
           ? {
               schemaCompositionErrors: checkResult.state.composition.errors,
               compositeSchemaSDL: null,
+              compositeSchemaSDLHash: null,
               supergraphSDL: null,
+              supergraphSDLHash: null,
             }
           : {
               schemaCompositionErrors: null,
               compositeSchemaSDL: checkResult.state.composition.compositeSchemaSDL,
+              compositeSchemaSDLHash: hashSDL(
+                parse(checkResult.state.composition.compositeSchemaSDL, {
+                  noLocation: true,
+                }),
+              ),
               supergraphSDL: checkResult.state.composition.supergraphSDL,
+              supergraphSDLHash: checkResult.state.composition.supergraphSDL
+                ? hashSDL(
+                    parse(checkResult.state.composition.supergraphSDL, {
+                      noLocation: true,
+                    }),
+                  )
+                : null,
             }),
         isManuallyApproved: false,
         manualApprovalUserId: null,
@@ -472,6 +498,11 @@ export class SchemaPublisher {
 
       schemaCheck = await this.storage.createSchemaCheck({
         schemaSDL: sdl,
+        schemaSDLHash: hashSDL(
+          parse(sdl, {
+            noLocation: true,
+          }),
+        ),
         serviceName: input.service ?? null,
         meta: input.meta ?? null,
         targetId: target.id,
@@ -483,7 +514,19 @@ export class SchemaPublisher {
         schemaPolicyErrors: null,
         schemaCompositionErrors: null,
         compositeSchemaSDL: composition.compositeSchemaSDL,
+        compositeSchemaSDLHash: hashSDL(
+          parse(composition.compositeSchemaSDL, {
+            noLocation: true,
+          }),
+        ),
         supergraphSDL: composition.supergraphSDL,
+        supergraphSDLHash: composition.supergraphSDL
+          ? hashSDL(
+              parse(composition.supergraphSDL, {
+                noLocation: true,
+              }),
+            )
+          : null,
         isManuallyApproved: false,
         manualApprovalUserId: null,
         githubCheckRunId: githubCheckRun?.id ?? null,

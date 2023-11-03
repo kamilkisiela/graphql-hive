@@ -3,7 +3,7 @@ import { describe, test } from 'node:test';
 import { sql } from 'slonik';
 import { initMigrationTestingEnvironment } from './utils/testkit';
 
-await describe('migration: drop-personal-org', async () => {
+await describe('drop-personal-org', async () => {
   await test('should remove all existing personal orgs that does not have projects', async () => {
     const { db, runTo, complete, done, seed } = await initMigrationTestingEnvironment();
 
