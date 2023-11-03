@@ -41,6 +41,11 @@ export class ProjectManager {
     this.logger.info('Creating a project (input=%o)', input);
     let cleanId = paramCase(name);
 
+    await this.authManager.ensureOrganizationAccess({
+      organization: input.organization,
+      scope: OrganizationAccessScope.READ,
+    });
+
     if (
       // packages/web/app uses the "view" prefix, let's avoid the collision
       name.toLowerCase() === 'view' ||
