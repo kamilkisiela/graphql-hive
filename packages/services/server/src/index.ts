@@ -18,7 +18,7 @@ import {
 } from '@hive/service-common';
 import { createConnectionString, createStorage as createPostgreSQLStorage } from '@hive/storage';
 import { Dedupe, ExtraErrorData } from '@sentry/integrations';
-import { captureException, init, Integrations, SeverityLevel } from '@sentry/node';
+import { captureException, init, Integrations, SeverityLevel, startSpan } from '@sentry/node';
 import { createServerAdapter } from '@whatwg-node/server';
 import { createContext, internalApiRouter } from './api';
 import { asyncStorage } from './async-storage';
@@ -99,16 +99,23 @@ export async function main() {
       `Usage estimation is enabled. Start scheduling purge tasks every ${env.hiveServices.usageEstimator.dateRetentionPurgeIntervalMinutes} minutes.`,
     );
     dbPureTaskRunner = createTaskRunner({
-      async run() {
-        const result = await storage.purgeExpiredSchemaChecks({
-          expiresAt: new Date(),
-        });
-        server.log.debug(
-          'Finished running schema check purge task. (deletedSchemaCheckCount=%s deletedSdlStoreCount=%s)',
-          result.deletedSchemaCheckCount,
-          result.deletedSdlStoreCount,
-        );
-      },
+      run: () =>
+        startSpan(
+          {
+            name: 'purgeExpiredSchemaChecks',
+          },
+          async function run(span) {
+            const result = await storage.purgeExpiredSchemaChecks({
+              expiresAt: new Date(),
+            });
+            server.log.debug(
+              'Finished running schema check purge task. (deletedSchemaCheckCount=%s deletedSdlStoreCount=%s)',
+              result.deletedSchemaCheckCount,
+              result.deletedSdlStoreCount,
+            );
+            span?.setData('result', result);
+          },
+        ),
       interval: env.hiveServices.usageEstimator.dateRetentionPurgeIntervalMinutes * 60 * 1000,
       logger: server.log,
     });
