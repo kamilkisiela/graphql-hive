@@ -122,9 +122,23 @@ export class CdnProvider {
     targetId: string;
     alias: string;
   }) {
+    this.logger.debug(
+      'Creating CDN Access Token. (targetId=%s, projectId=%s, targetId=%s)',
+      args.targetId,
+      args.projectId,
+      args.targetId,
+    );
+
     const alias = AliasStringModel.safeParse(args.alias);
 
     if (alias.success === false) {
+      this.logger.debug(
+        'Failed creating CDN Access Token. Validation failed. (targetId=%s, projectId=%s, targetId=%s)',
+        args.targetId,
+        args.projectId,
+        args.targetId,
+      );
+
       return {
         type: 'failure',
         reason: alias.error.issues[0].message,
@@ -145,6 +159,14 @@ export class CdnProvider {
     const privateKeyHash = await bcryptjs.hash(privateKey, await bcryptjs.genSalt());
     const cdnAccessToken = encodeCdnToken({ keyId, privateKey });
 
+    this.logger.debug(
+      'Check CDN access token key availability on S3. (targetId=%s, projectId=%s, targetId=%s, key=%s)',
+      args.targetId,
+      args.projectId,
+      args.targetId,
+      s3Key,
+    );
+
     // Check if key already exists
     const headResponse = await this.s3Config.client.fetch(
       [this.s3Config.endpoint, this.s3Config.bucket, s3Key].join('/'),
@@ -154,11 +176,28 @@ export class CdnProvider {
     );
 
     if (headResponse.status !== 404) {
+      this.logger.debug(
+        'Failed creating CDN access token. Head request on S3 returned unexpected status while checking token availability. ( targetId=%s, projectId=%s, targetId=%s, status=%s)',
+        args.targetId,
+        args.projectId,
+        args.targetId,
+        headResponse.status,
+      );
+      this.logger.debug(await headResponse.text());
+
       return {
         type: 'failure',
         reason: 'Failed to generate key. Please try again later.',
       } as const;
     }
+
+    this.logger.debug(
+      'Store CDN access token on S3. (targetId=%s, projectId=%s, targetId=%s, key=%s)',
+      args.targetId,
+      args.projectId,
+      args.targetId,
+      s3Key,
+    );
 
     // put key onto s3 bucket
     const putResponse = await this.s3Config.client.fetch(
@@ -170,11 +209,36 @@ export class CdnProvider {
     );
 
     if (putResponse.status !== 200) {
+      this.logger.debug(
+        'Failed creating CDN Access Token. Head request on S3 returned unexpected status while creating token. ( targetId=%s, projectId=%s, targetId=%s, status=%s)',
+        args.targetId,
+        args.projectId,
+        args.targetId,
+        headResponse.status,
+      );
+      this.logger.error(await putResponse.text());
+
       return {
         type: 'failure',
         reason: 'Failed to generate key. Please try again later. 2',
       } as const;
     }
+
+    this.logger.debug(
+      'Successfully stored CDN access token on S3. (targetId=%s, projectId=%s, targetId=%s, key=%s)',
+      args.targetId,
+      args.projectId,
+      args.targetId,
+      s3Key,
+    );
+
+    this.logger.debug(
+      'Insert CDN access token into PG. (targetId=%s, projectId=%s, targetId=%s, key=%s)',
+      args.targetId,
+      args.projectId,
+      args.targetId,
+      s3Key,
+    );
 
     const cdnAccessTokenRecord = await this.storage.createCDNAccessToken({
       id: keyId,
@@ -191,6 +255,14 @@ export class CdnProvider {
         reason: 'Failed to generate key. Please try again later.',
       } as const;
     }
+
+    this.logger.debug(
+      'Successfully created CDN access token. (targetId=%s, projectId=%s, targetId=%s, key=%s)',
+      args.targetId,
+      args.projectId,
+      args.targetId,
+      s3Key,
+    );
 
     return {
       type: 'success',
