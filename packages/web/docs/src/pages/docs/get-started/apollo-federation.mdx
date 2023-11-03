@@ -175,8 +175,13 @@ Run the following command in your terminal, to publish your `subgraphs/products.
 registry (replace `YOUR_TOKEN_HERE` with the token you have just created):
 
 ```bash
-hive schema:publish --registry.accessToken YOUR_TOKEN_HERE \
-  --service="products" --url="http://fake.com/products/graphql" --author "Me" --commit "First" subgraphs/products.graphql
+hive schema:publish \
+  --registry.accessToken YOUR_TOKEN_HERE \
+  --service="products" \
+  --url="http://fake.com/products/graphql" \
+  --author "Me" \
+  --commit "First" \
+  subgraphs/products.graphql
 ```
 
 <Callout type="info">
@@ -207,8 +212,13 @@ new schema you just published 🎉
 Now, let's publish the **Reviews** subgraph schema to Hive:
 
 ```bash
-hive schema:publish --registry.accessToken YOUR_TOKEN_HERE \
-  --service="reviews" --url="http://fake.com/reviews/graphql" --author "Me" --commit "Second" subgraphs/reviews.graphql
+hive schema:publish \
+  --registry.accessToken YOUR_TOKEN_HERE \
+  --service="reviews" \
+  --url="http://fake.com/reviews/graphql" \
+  --author "Me" \
+  --commit "Second" \
+  subgraphs/reviews.graphql
 ```
 
 If everything goes well, you should see the following output:
@@ -258,7 +268,10 @@ Now, run the Hive CLI with the `schema:check` command and your modified `subgrap
 file:
 
 ```bash
-hive schema:check --service="reviews" subgraphs/reviews.graphql --registry.accessToken YOUR_TOKEN_HERE
+hive schema:check \
+  --registry.accessToken YOUR_TOKEN_HERE \
+  --service="reviews" \
+  subgraphs/reviews.graphql
 ```
 
 You should see that Hive successfully detect the change you made, and exists with a `0` exit code,
@@ -293,7 +306,10 @@ type ReviewSummary {
 ```
 
 ```bash
-hive schema:check --service="reviews" subgraphs/reviews.graphql --registry.accessToken YOUR_TOKEN_HERE
+hive schema:check \
+  --registry.accessToken YOUR_TOKEN_HERE \
+  --service="reviews" \
+  subgraphs/reviews.graphql
 ```
 
 In that case, you'll notice that Hive CLI exists with a `1` exit code, meaning that the schema has
@@ -341,7 +357,10 @@ Run the Hive CLI with the `schema:check` command again and the modified `subgrap
 file:
 
 ```bash
-hive schema:check --service="reviews" subgraphs/reviews.graphql --registry.accessToken YOUR_TOKEN_HERE
+hive schema:check \
+  --registry.accessToken YOUR_TOKEN_HERE \
+  --service="reviews" \
+  subgraphs/reviews.graphql
 ```
 
 And now you can see that the schema check process has failed, due to conflicts and inconsistencies
@@ -388,8 +407,13 @@ type ReviewSummary {
 And publish it to Hive:
 
 ```bash
-hive schema:publish --registry.accessToken YOUR_TOKEN_HERE \
-  --service="reviews" --url="http://fake.com/reviews/graphql" --author "Me" --commit "Third" subgraphs/reviews.graphql
+hive schema:publish \
+  --registry.accessToken YOUR_TOKEN_HERE \
+  --service="reviews" \
+  --url="http://fake.com/reviews/graphql" \
+  --author "Me" \
+  --commit "Third" \
+  subgraphs/reviews.graphql
 ```
 
 You should see now that Hive accepted your published schema and updated the registry:
