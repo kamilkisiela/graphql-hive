@@ -6,7 +6,6 @@ settings:
 
 overrides:
   '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.cd77847.0
-  graphql-modules: 2.3.0-alpha-20231102181739-05c82e21
 
 patchedDependencies:
   '@apollo/federation@0.38.1':
@@ -636,8 +635,8 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       graphql-modules:
-        specifier: 2.3.0-alpha-20231102181739-05c82e21
-        version: 2.3.0-alpha-20231102181739-05c82e21(graphql@16.8.1)
+        specifier: 2.3.0
+        version: 2.3.0(graphql@16.8.1)
       graphql-parse-resolve-info:
         specifier: 4.13.0
         version: 4.13.0(graphql@16.8.1)
@@ -1012,7 +1011,7 @@ importers:
         version: 8.0.1(@envelop/core@5.0.0)(graphql@16.8.1)
       '@envelop/graphql-modules':
         specifier: 6.0.0
-        version: 6.0.0(@envelop/core@5.0.0)(graphql-modules@2.3.0-alpha-20231102181739-05c82e21)(graphql@16.8.1)
+        version: 6.0.0(@envelop/core@5.0.0)(graphql-modules@2.3.0)(graphql@16.8.1)
       '@envelop/sentry':
         specifier: 7.0.0
         version: 7.0.0(@envelop/core@5.0.0)(@sentry/node@7.77.0)(graphql@16.8.1)
@@ -5081,17 +5080,17 @@ packages:
       value-or-promise: 1.0.12
     dev: true
 
-  /@envelop/graphql-modules@6.0.0(@envelop/core@5.0.0)(graphql-modules@2.3.0-alpha-20231102181739-05c82e21)(graphql@16.8.1):
+  /@envelop/graphql-modules@6.0.0(@envelop/core@5.0.0)(graphql-modules@2.3.0)(graphql@16.8.1):
     resolution: {integrity: sha512-U6LoSMFd/eVt/vcI+6cj3OWciPnCTCIz+7Frc+oJ3Bg2utDIba3ngepzQPYb9t2da+AjCw+O2NmBwoUHWH0mAQ==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@envelop/core': ^5.0.0
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
-      graphql-modules: 2.3.0-alpha-20231102181739-05c82e21
+      graphql-modules: ^1 || ^2.0.0
     dependencies:
       '@envelop/core': 5.0.0
       graphql: 16.8.1
-      graphql-modules: 2.3.0-alpha-20231102181739-05c82e21(graphql@16.8.1)
+      graphql-modules: 2.3.0(graphql@16.8.1)
       tslib: 2.6.2
     dev: true
 
@@ -20213,8 +20212,8 @@ packages:
       vscode-languageserver-types: 3.17.2
     dev: false
 
-  /graphql-modules@2.3.0-alpha-20231102181739-05c82e21(graphql@16.8.1):
-    resolution: {integrity: sha512-maSmuW2+RcQV9VT1ulCk6p/iRPbtC4ZYF2WGHtOGc0Un1KMbiczqyqL+MhLrnw9n/FpMafUNis9EEQOfmKIpNA==}
+  /graphql-modules@2.3.0(graphql@16.8.1):
+    resolution: {integrity: sha512-CcrjUjMYHy3zelnffldhR3h6t4ndCVJEzdqBAv/mp4ZGEA/izirOKZB2lnRwpXNqOtVwIz2O/E1Cg/UH8dFNaQ==}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
