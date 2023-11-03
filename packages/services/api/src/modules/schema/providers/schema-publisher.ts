@@ -820,7 +820,7 @@ export class SchemaPublisher {
         if (deleteResult.conclusion === SchemaDeleteConclusion.Accept) {
           this.logger.debug('Delete accepted');
           if (input.dryRun !== true) {
-            await this.storage.deleteSchema({
+            const schemaVersion = await this.storage.deleteSchema({
               organization: input.organization,
               project: input.project,
               target: input.target.id,
@@ -850,6 +850,37 @@ export class SchemaPublisher {
                 }
               },
             });
+
+            const changes = deleteResult.state.changes ?? [];
+            const errors = [
+              ...(deleteResult.state.compositionErrors ?? []),
+              ...(deleteResult.state.breakingChanges ?? []).map(change => ({
+                message: change.message,
+                // triggerSchemaChangeNotifications.errors accepts only path as array
+                path: change.path ? [change.path] : undefined,
+              })),
+            ];
+
+            if ((Array.isArray(changes) && changes.length > 0) || errors.length > 0) {
+              void this.alertsManager
+                .triggerSchemaChangeNotifications({
+                  organization,
+                  project,
+                  target: input.target,
+                  schema: {
+                    id: schemaVersion.versionId,
+                    commit: schemaVersion.id,
+                    valid: deleteResult.state.composable,
+                  },
+                  changes,
+                  messages: [],
+                  errors,
+                  initial: false,
+                })
+                .catch(err => {
+                  this.logger.error('Failed to trigger schema change notifications', err);
+                });
+            }
           }
 
           return {
