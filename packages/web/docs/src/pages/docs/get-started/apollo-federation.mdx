@@ -478,8 +478,33 @@ You should see that Hive CDN returns the complete Supergraph as an output for th
 
 ### GraphQL Gateway
 
-To set up the Apollo gateway, you may use **Apollo Gateway** (JS) or **Apollo Router** (Rust). You
-can use the following guides to deploy a gateway based on your technical preference:
+The next step is to use real subgraphs and a GraphQL gateway that routes GraphQL requests to your
+subgraphs.
+
+```mermaid
+
+flowchart LR
+    A["Federation Gateway"] -. Poll supergraph .-> C
+    subgraph hive [Hive]
+      direction TB
+      B[Registry] -. Publish supergraph .-> C["HA CDN
+        (on Cloudflare)"]
+    end
+    A --> X1[GraphQL subgraph]
+    A --> X2[GraphQL subgraph]
+    A --> X3[GraphQL subgraph]
+    X1 -.- D([Hive CLI])
+    X2 -.- D
+    X3 -.- D
+    subgraph ci [CI/CD]
+      D -- Publish schemas --> B
+    end
+
+```
+
+For an Apollo Federation gateway you may use **Apollo Gateway** (JS) or **Apollo Router** (Rust)
+depending on your needs. You can use the following guides to deploy a gateway based on your
+technical preference:
 
 <Cards>
   <Card arrow title="Apollo Gateway (JS)" href="/docs/integrations/apollo-gateway" />
