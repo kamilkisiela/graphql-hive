@@ -8,10 +8,43 @@ Federation runtime.
 Hive ships a custom build of Apollo Gateway,
 [because that's how native extensions works](https://www.apollographql.com/docs/router/customizations/native).
 
-## Installation and Supergraph from CDN
+With the custom build, Apollo Gateway will poll the supergraph from the high availability CDN to
+ensure production deployments without interruptions.
 
-Once you have all services schemas pushed to Hive, and available in the CDN, you can
-[create a CDN Access Token and gain access to the CDN endpoint](/docs/features/high-availability-cdn#cdn-access-tokens).
+```mermaid
+
+flowchart LR
+    A["Apollo Router
+      (with Hive plugin)"] -. Poll supergraph .-> C
+    subgraph hive [Hive]
+      direction TB
+      B[Registry] -. Publish supergraph .-> C["HA CDN
+        (on Cloudflare)"]
+    end
+    A -. Report usage data .-> B
+
+    A --> X1[GraphQL subgraph]
+    A --> X2[GraphQL subgraph]
+    A --> X3[GraphQL subgraph]
+    X1 -.- D([Hive CLI])
+    X2 -.- D
+    X3 -.- D
+    subgraph ci [CI/CD]
+      D -- Publish schemas --> B
+    end
+
+```
+
+## Installation
+
+Make sure you have
+[published all your subgraph schemas to your Federation target](/docs/get-started/apollo-federation#publish-your-schemas)
+on the Hive registry. Once you have all subgraph schemas published and the subgraphs can be
+composed, the latest valid supergraph is always available via the CDN.
+
+You also need to
+[create a CDN Access Token](/docs/features/high-availability-cdn#cdn-access-tokens), that will be
+used for authenticating the supergraph polling from the CDN.
 
 <Tabs items={['Binary', 'Docker', 'Custom']}>
   <Tab>
@@ -24,7 +57,9 @@ Once you have all services schemas pushed to Hive, and available in the CDN, you
     Start the router:
 
     ```bash
-    HIVE_CDN_ENDPOINT="..." HIVE_CDN_KEY="..." ./router
+    HIVE_CDN_ENDPOINT="..." \ # The endpoint of your CDN access token
+    HIVE_CDN_KEY="..." \ # The CDN access token
+      ./router
     ```
 
   </Tab>
@@ -33,8 +68,8 @@ Once you have all services schemas pushed to Hive, and available in the CDN, you
 
       ```bash
       docker run -p 4000:4000 \
-        --env HIVE_CDN_ENDPOINT="..." \
-        --env HIVE_CDN_KEY="..." \
+        --env HIVE_CDN_ENDPOINT="..." \ # The endpoint of your CDN access token
+        --env HIVE_CDN_KEY="..." \ # The CDN access token
         --rm \
         ghcr.io/kamilkisiela/graphql-hive/apollo-router:latest
       ```
@@ -43,8 +78,8 @@ Once you have all services schemas pushed to Hive, and available in the CDN, you
 
       ```bash
       docker run -p 4000:4000 \
-        --env HIVE_CDN_ENDPOINT="..." \
-        --env HIVE_CDN_KEY="..." \
+        --env HIVE_CDN_ENDPOINT="..." \ # The endpoint of your CDN access token
+        --env HIVE_CDN_KEY="..." \ # The CDN access token
         --rm \
         ghcr.io/kamilkisiela/graphql-hive/apollo-router:latest --log debug
       ```
@@ -117,7 +152,10 @@ You can send usage reporting to Hive registry by enabling `hive.usage` plugin in
     Start the router:
 
     ```bash
-    HIVE_TOKEN="..." HIVE_CDN_ENDPOINT="..." HIVE_CDN_KEY="..." ./router --config router.yaml
+    HIVE_TOKEN="..." \
+    HIVE_CDN_ENDPOINT="..." \
+    HIVE_CDN_KEY="..." \
+      ./router --config router.yaml
     ```
 
   </Tab>
