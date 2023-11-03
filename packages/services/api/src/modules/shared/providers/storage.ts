@@ -381,7 +381,7 @@ export interface Storage {
             schemaCompositionErrors: null;
           }
       ),
-  ): Promise<DeletedCompositeSchema>;
+  ): Promise<DeletedCompositeSchema & { versionId: string }>;
 
   createVersion(
     _: ({

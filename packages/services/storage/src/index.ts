@@ -2002,6 +2002,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         return {
           kind: 'composite',
           id: deleteActionResult.id,
+          versionId: deleteActionResult.id,
           date: deleteActionResult.created_at as any,
           service_name: deleteActionResult.service_name!,
           target: deleteActionResult.target_id,
