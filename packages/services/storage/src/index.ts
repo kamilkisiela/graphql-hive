@@ -3686,13 +3686,41 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     async purgeExpiredSchemaChecks(args) {
-      await pool.query(sql`
-        DELETE
-        FROM
-          "public"."schema_checks"
-        WHERE
-          "expires_at" <= ${args.expiresAt.toISOString()}
-      `);
+      await pool.transaction(async pool => {
+        const result = await pool.any<unknown>(sql`
+          DELETE
+          FROM
+            "public"."schema_checks"
+          WHERE
+            "expires_at" <= ${args.expiresAt.toISOString()}
+          LIMIT
+            1000
+          RETURNING
+            "schema_sdl_store_id" as "id1",
+            "schema_sdl_store_id" as "id2",
+            "composite_schema_sdl_store_id" as "id3"
+        `);
+        const ids = PurgeExpiredSchemaChecksIDModel.parse(result);
+
+        await pool.query(sql`
+          DELETE
+          FROM
+            "schema_sdl_store"
+          WHERE
+            "id" = ANY(
+              ${sql.array(Array.from(ids), 'uuid')}
+            )
+            AND NOT EXISTS (
+              SELECT 1
+              FROM
+                "schema_checks"
+              WHERE
+                "schema_checks"."schema_sdl_store_id" = "sdl_store"."id"
+                OR "schema_checks"."composite_schema_sdl_store_id" = "sdl_store"."id"
+                OR "schema_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
+            )
+        `);
+      });
 
       return 0;
     },
@@ -4143,5 +4171,23 @@ const TargetModel = zod.object({
   projectId: zod.string(),
   graphqlEndpointUrl: zod.string().nullable(),
 });
+
+const PurgeExpiredSchemaChecksIDModel = zod
+  .array(
+    zod.object({
+      id1: zod.string().nullable(),
+      id2: zod.string().nullable(),
+      id3: zod.string().nullable(),
+    }),
+  )
+  .transform(items => {
+    const ids = new Set<string>();
+    for (const row of items) {
+      row.id1 && ids.add(row.id1);
+      row.id2 && ids.add(row.id2);
+      row.id3 && ids.add(row.id3);
+    }
+    return ids;
+  });
 
 export * from './schema-change-model';
