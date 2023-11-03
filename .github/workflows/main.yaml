@@ -28,7 +28,7 @@ jobs:
           curl --request POST \
             --url 'https://api.github.com/repos/${{ secrets.PRIVATE_REPO_OWNER }}/${{ secrets.PRIVATE_REPO_NAME }}/dispatches' \
             --header 'Accept: application/vnd.github+json' \
-            --header 'Authorization: token ${{ secrets.GH_PAT }}' \
+            --header 'Authorization: Bearer ${{ secrets.GH_PAT }}' \
             --header 'X-GitHub-Api-Version: 2022-11-28' \
             --header 'Content-Type: application/json' \
             --data '{

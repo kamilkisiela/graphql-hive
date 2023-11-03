@@ -9,8 +9,6 @@ import type * as DbTypes from '../../../services/storage/src/db/types';
 import { createConnectionString } from '../../src/connection-string';
 import { runPGMigrations } from '../../src/run-pg-migrations'
 
-export { DbTypes };
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 config({
@@ -21,21 +19,21 @@ import { env } from '../../src/environment';
 
 export async function initMigrationTestingEnvironment() {
   const pgp = pgpFactory();
-  const db = pgp(
-    createConnectionString({
-      ...env.postgres,
-      db: 'postgres',
-    }),
-  );
-
-  const dbName = 'migration_test_' + Date.now();
+  const db = pgp(createConnectionString({
+    ...env.postgres,
+    db: 'postgres',
+  }));
+  
+  const dbName = 'migration_test_' + Date.now() + Math.random().toString(16).substring(2);
+  console.log('db name:', dbName)
   await db.query(`CREATE DATABASE ${dbName};`);
-
+  
+  const connectionString = createConnectionString({
+    ...env.postgres,
+    db: dbName,
+  });
   const slonik = await createPool(
-    createConnectionString({
-      ...env.postgres,
-      db: dbName,
-    }),
+    connectionString
   );
 
   const actionsDirectory = resolve(__dirname + '/../../src/actions/');
@@ -44,6 +42,7 @@ export async function initMigrationTestingEnvironment() {
 
 
   return {
+    connectionString,
     db: slonik,
     async runTo(name: string) {
       await runPGMigrations({ slonik, runTo: name });

@@ -1,4 +1,5 @@
-import { DocumentNode, GraphQLError, SourceLocation } from 'graphql';
+import { createHash } from 'node:crypto';
+import { DocumentNode, GraphQLError, print, SourceLocation } from 'graphql';
 import { z } from 'zod';
 import type { AvailableRulesResponse, PolicyConfigurationObject } from '@hive/policy';
 import type { CompositionFailureError } from '@hive/schema';
@@ -11,7 +12,7 @@ import type {
   ProjectAccessScope,
   TargetAccessScope,
 } from '../__generated__/types';
-import { parseGraphQLSource } from './schema';
+import { parseGraphQLSource, sortDocumentNode } from './schema';
 
 export const SingleSchemaModel = z
   .object({
@@ -118,6 +119,12 @@ export class GraphQLDocumentStringInvalidError extends Error {
     const locationString = location ? ` at line ${location.line}, column ${location.column}` : '';
     super(`The provided SDL is not valid${locationString}\n: ${message}`);
   }
+}
+
+export function hashSDL(sdl: DocumentNode): string {
+  const hasher = createHash('md5');
+  hasher.update(print(sortDocumentNode(sdl)));
+  return hasher.digest('hex');
 }
 
 export function createSchemaObject(
