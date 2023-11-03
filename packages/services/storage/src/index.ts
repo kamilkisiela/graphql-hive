@@ -3687,7 +3687,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
     async purgeExpiredSchemaChecks(args) {
       return await pool.transaction(async pool => {
-        const result = await pool.any<unknown>(sql`
+        const result = await pool.query<unknown>(sql`
           DELETE
           FROM "public"."schema_checks"
           WHERE 
@@ -3706,15 +3706,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             "supergraph_sdl_store_id" as "id2",
             "composite_schema_sdl_store_id" as "id3"
         `);
-        const ids = PurgeExpiredSchemaChecksIDModel.parse(result);
+        const ids = PurgeExpiredSchemaChecksIDModel.parse(result.rows);
 
         if (ids.size === 0) {
           return {
-            deletedSchemaCheckCount: result.length,
+            deletedSchemaCheckCount: result.rowCount,
             deletedSdlStoreCount: 0,
           };
         }
-        const deletedRecords = await pool.any<unknown>(sql`
+        const deletedRecords = await pool.query<unknown>(sql`
           DELETE
           FROM
             "sdl_store"
@@ -3737,8 +3737,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `);
 
         return {
-          deletedSchemaCheckCount: result.length,
-          deletedSdlStoreCount: deletedRecords.length,
+          deletedSchemaCheckCount: result.rowCount,
+          deletedSdlStoreCount: deletedRecords.rowCount,
         };
       });
     },
