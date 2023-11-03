@@ -3686,32 +3686,45 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     async purgeExpiredSchemaChecks(args) {
-      await pool.transaction(async pool => {
+      return await pool.transaction(async pool => {
         const result = await pool.any<unknown>(sql`
           DELETE
-          FROM
-            "public"."schema_checks"
-          WHERE
-            "expires_at" <= ${args.expiresAt.toISOString()}
-          LIMIT
-            1000
+          FROM "public"."schema_checks"
+          WHERE 
+            "id" = ANY(
+              SELECT
+                "id"
+              FROM
+                "public"."schema_checks"
+              WHERE
+                "expires_at" <= ${args.expiresAt.toISOString()}
+              LIMIT
+                1000
+            )
           RETURNING
             "schema_sdl_store_id" as "id1",
-            "schema_sdl_store_id" as "id2",
+            "supergraph_sdl_store_id" as "id2",
             "composite_schema_sdl_store_id" as "id3"
         `);
         const ids = PurgeExpiredSchemaChecksIDModel.parse(result);
 
-        await pool.query(sql`
+        if (ids.size === 0) {
+          return {
+            deletedSchemaCheckCount: result.length,
+            deletedSdlStoreCount: 0,
+          };
+        }
+        const deletedRecords = await pool.any<unknown>(sql`
           DELETE
           FROM
-            "schema_sdl_store"
+            "sdl_store"
           WHERE
             "id" = ANY(
-              ${sql.array(Array.from(ids), 'uuid')}
+              ${sql.array(Array.from(ids), 'text')}
             )
             AND NOT EXISTS (
-              SELECT 1
+              SELECT
+                1
               FROM
                 "schema_checks"
               WHERE
@@ -3719,29 +3732,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 OR "schema_checks"."composite_schema_sdl_store_id" = "sdl_store"."id"
                 OR "schema_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
             )
+          RETURNING
+            true as "d"
         `);
+
+        return {
+          deletedSchemaCheckCount: result.length,
+          deletedSdlStoreCount: deletedRecords.length,
+        };
       });
-
-      return 0;
-    },
-
-    async purgeUnusedSchemasInStore() {
-      await pool.query(sql`
-        DELETE FROM "public"."sdl_store"
-        WHERE id NOT IN (
-            SELECT DISTINCT schema_sdl_store_id
-            FROM "public"."schema_checks"
-            WHERE schema_sdl_store_id IS NOT NULL
-          UNION
-            SELECT DISTINCT supergraph_sdl_store_id
-            FROM "public"."schema_checks"
-            WHERE supergraph_sdl_store_id IS NOT NULL
-          UNION
-            SELECT DISTINCT composite_schema_sdl_store_id
-            FROM "public"."schema_checks"
-            WHERE composite_schema_sdl_store_id IS NOT NULL
-        )
-      `);
     },
 
     async getSchemaVersionByActionId(args) {

@@ -100,10 +100,14 @@ export async function main() {
     );
     dbPureTaskRunner = createTaskRunner({
       async run() {
-        await storage.purgeExpiredSchemaChecks({
+        const result = await storage.purgeExpiredSchemaChecks({
           expiresAt: new Date(),
         });
-        // TODO: activate await storage.purgeUnusedSchemasInStore();
+        server.log.debug(
+          'Finished running schema check purge task. (deletedSchemaCheckCount=%s deletedSdlStoreCount=%s)',
+          result.deletedSchemaCheckCount,
+          result.deletedSdlStoreCount,
+        );
       },
       interval: env.hiveServices.usageEstimator.dateRetentionPurgeIntervalMinutes * 60 * 1000,
       logger: server.log,

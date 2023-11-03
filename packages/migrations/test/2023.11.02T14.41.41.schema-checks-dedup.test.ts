@@ -240,13 +240,28 @@ await describe('migration: schema-checks-dedup', async () => {
         sql`SELECT count(*) as total FROM schema_checks`,
       );
       assert.strictEqual(countSchemaChecks, 4);
-      await db.query(sql`DELETE FROM schema_checks WHERE id = ${newSchemaCheck.id}`);
+      const expiresAt = new Date();
+      await db.query(sql`
+        UPDATE
+          schema_checks
+        SET
+          expires_at = ${expiresAt.toISOString()}
+        WHERE
+          id = ${newSchemaCheck.id}
+      `);
+
+      // Purge unused SDLs from sdl_store
+      const result = await storage.purgeExpiredSchemaChecks({
+        expiresAt,
+      });
+
+      assert.strictEqual(result.deletedSchemaCheckCount, 1);
+      assert.strictEqual(result.deletedSdlStoreCount, 3);
+
       countSchemaChecks = await db.oneFirst<number>(
         sql`SELECT count(*) as total FROM schema_checks`,
       );
       assert.strictEqual(countSchemaChecks, 3);
-      // Purge unused SDLs from sdl_store
-      await storage.purgeUnusedSchemasInStore();
 
       countSdlStore = await db.oneFirst<number>(sql`
         SELECT count(*) as total FROM sdl_store WHERE
