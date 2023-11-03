@@ -2,6 +2,14 @@ import { Callout } from '@theguild/components'
 
 # Apollo-Server
 
+You can send usage reports to the Hive registry from your Apollo-Server instance using the
+`@graphql-hive/client` package.
+
+<Callout type="warning">
+  In case you want to use Apollo-Server as a Federation gateway, please refer to the [Apollo Gateway
+  integration guide](./apollo-gateway.mdx).
+</Callout>
+
 ## Installation
 
 ```sh npm2yarn
@@ -10,7 +18,7 @@ npm i @graphql-hive/client
 
 <Callout type="info">
   We recommend installing Hive Client package as a direct dependency of your project, because it
-  includes a runtime to send usage reports and schemas to Hive registry.
+  includes a runtime to send usage reports to the Hive registry.
 </Callout>
 
 The `@graphql-hive/client` package exports a
