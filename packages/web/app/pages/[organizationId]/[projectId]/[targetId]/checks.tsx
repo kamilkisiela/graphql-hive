@@ -140,7 +140,7 @@ const Navigation = (props: {
                   </div>
 
                   {edge.node.serviceName ? (
-                    <div className="ml-auto mr-0 w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-right font-bold">
+                    <div className="ml-auto mr-0 w-1/2 truncate text-right font-bold">
                       {edge.node.serviceName}
                     </div>
                   ) : null}
