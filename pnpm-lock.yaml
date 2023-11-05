@@ -418,8 +418,8 @@ importers:
         specifier: ^1.6.0
         version: 1.6.0
       tiny-lru:
-        specifier: 8.0.2
-        version: 8.0.2
+        specifier: 11.2.5
+        version: 11.2.5
     optionalDependencies:
       '@apollo/server':
         specifier: ^4.0.0
@@ -1272,8 +1272,8 @@ importers:
         specifier: 0.1.13
         version: 0.1.13
       tiny-lru:
-        specifier: 8.0.2
-        version: 8.0.2
+        specifier: 11.2.5
+        version: 11.2.5
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -1323,8 +1323,8 @@ importers:
         specifier: 10.2.3
         version: 10.2.3
       tiny-lru:
-        specifier: 8.0.2
-        version: 8.0.2
+        specifier: 11.2.5
+        version: 11.2.5
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -1407,8 +1407,8 @@ importers:
         specifier: 10.2.3
         version: 10.2.3
       tiny-lru:
-        specifier: 8.0.2
-        version: 8.0.2
+        specifier: 11.2.5
+        version: 11.2.5
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -29967,9 +29967,14 @@ packages:
     resolution: {integrity: sha512-AD5ih2NlSssTCwsMznbvwMZpJ1cbhkGd2uueNxzv2jDlEeZdU04JQfRnggJQ8DrcVBGjAsCKwFBbDlVNtEMlzw==}
     dev: true
 
+  /tiny-lru@11.2.5:
+    resolution: {integrity: sha512-JpqM0K33lG6iQGKiigcwuURAKZlq6rHXfrgeL4/I8/REoyJTGU+tEMszvT/oTRVHG2OiylhGDjqPp1jWMlr3bw==}
+    engines: {node: '>=12'}
+
   /tiny-lru@8.0.2:
     resolution: {integrity: sha512-ApGvZ6vVvTNdsmt676grvCkUCGwzG9IqXma5Z07xJgiC5L7akUMof5U8G2JTI9Rz/ovtVhJBlY6mNhEvtjzOIg==}
     engines: {node: '>=6'}
+    dev: true
 
   /tiny-warning@1.0.3:
     resolution: {integrity: sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==}
