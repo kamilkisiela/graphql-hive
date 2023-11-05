@@ -18,7 +18,7 @@
     "@whatwg-node/fetch": "0.9.13",
     "ajv": "8.12.0",
     "dotenv": "16.3.1",
-    "eslint": "8.52.0",
+    "eslint": "8.53.0",
     "fastify": "3.29.5",
     "graphql": "16.8.1",
     "pino-pretty": "10.2.3",
