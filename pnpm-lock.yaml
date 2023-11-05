@@ -1692,8 +1692,8 @@ importers:
         specifier: 9.0.4
         version: 9.0.4(react@18.2.0)
       valtio:
-        specifier: 1.11.3
-        version: 1.11.3(@types/react@18.2.34)(react@18.2.0)
+        specifier: 1.12.0
+        version: 1.12.0(@types/react@18.2.34)(react@18.2.0)
       wonka:
         specifier: 6.3.4
         version: 6.3.4
@@ -17378,6 +17378,14 @@ packages:
     resolution: {integrity: sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==}
     engines: {node: '>=6'}
 
+  /derive-valtio@0.1.0(valtio@1.12.0):
+    resolution: {integrity: sha512-OCg2UsLbXK7GmmpzMXhYkdO64vhJ1ROUUGaTFyHjVwEdMEcTTRj7W1TxLbSBxdY8QLBPCcp66MTyaSy0RpO17A==}
+    peerDependencies:
+      valtio: '*'
+    dependencies:
+      valtio: 1.12.0(@types/react@18.2.34)(react@18.2.0)
+    dev: false
+
   /des.js@1.0.1:
     resolution: {integrity: sha512-Q0I4pfFrv2VPd34/vfLrFOoRmlYj3OV50i7fskps1jZWK1kApMWWT9G6RRUeYedLcBDIhnSDaUvJMb3AhUlaEA==}
     dependencies:
@@ -31150,8 +31158,8 @@ packages:
       builtins: 5.0.1
     dev: true
 
-  /valtio@1.11.3(@types/react@18.2.34)(react@18.2.0):
-    resolution: {integrity: sha512-HL50LlM6YrYfai5H9QKSU0HJYOkghyGvZeRMCJSI6q79DWSng0PdCzT3S3M2UAcvtqBSteThqmhh6jHYyxPUTg==}
+  /valtio@1.12.0(@types/react@18.2.34)(react@18.2.0):
+    resolution: {integrity: sha512-co8NkCHeY0NsL0XsL/cSICt5VhTjwZlYT8mi50dYY5thx3r3w1D15A04Lvs9WL/y/Rf98vUKY5PAAJCTLHvkJw==}
     engines: {node: '>=12.20.0'}
     peerDependencies:
       '@types/react': '>=16.8'
@@ -31163,6 +31171,7 @@ packages:
         optional: true
     dependencies:
       '@types/react': 18.2.34
+      derive-valtio: 0.1.0(valtio@1.12.0)
       proxy-compare: 2.5.1
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
