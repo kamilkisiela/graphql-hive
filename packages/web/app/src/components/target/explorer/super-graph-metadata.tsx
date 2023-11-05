@@ -31,10 +31,10 @@ function SubgraphChip(props: { text: string; tooltip: boolean }): React.ReactEle
         hash: `service-${props.text}`,
       }}
       style={{ backgroundColor: stringToHslColor(props.text) }}
-      className="drop-shadow-md my-[2px] ml-[6px] h-[22px] cursor-pointer items-center justify-between rounded-[16px] pr-[6px] pl-[8px] py-0 text-[10px] font-normal normal-case leading-loose text-[#4f4f4f] inline-block max-w-[100px] truncate"
+      className="my-[2px] ml-[6px] inline-block h-[22px] max-w-[100px] cursor-pointer items-center justify-between truncate rounded-[16px] py-0 pl-[8px] pr-[6px] text-[10px] font-normal normal-case leading-loose text-[#4f4f4f] drop-shadow-md"
     >
       {props.text}
-      <PackageIcon size={10} className="inline-block ml-1" />
+      <PackageIcon size={10} className="ml-1 inline-block" />
     </Link>
   );
 
@@ -106,19 +106,19 @@ export function SupergraphMetadataList(props: {
 
   return (
     <TooltipProvider>
-      <div className="w-full flex justify-end">
+      <div className="flex w-full justify-end">
         {previewItems}{' '}
         {allItems ? (
           <Tooltip
             content={
               <>
-                <div className="font-bold mb-2">All Subgraphs</div>
-                <div className="relative w-[250px] h-[250px]">
-                  <div className="inset-0 absolute w-[250px] h-[250px] overflow-y-scroll py-2">
+                <div className="mb-2 font-bold">All Subgraphs</div>
+                <div className="relative h-[250px] w-[250px]">
+                  <div className="absolute inset-0 h-[250px] w-[250px] overflow-y-scroll py-2">
                     {allItems}
                   </div>
                   <div
-                    className="inset-0 absolute pointer-events-none"
+                    className="pointer-events-none absolute inset-0"
                     style={{
                       boxShadow: `inset 0px 11px 8px -10px ${tooltipColor}, inset 0px -11px 8px -10px ${tooltipColor}`,
                     }}
@@ -128,7 +128,7 @@ export function SupergraphMetadataList(props: {
             }
             contentProps={{ className: 'z-10' }}
           >
-            <span className="pl-1 font-bold text-xs flex items-center cursor-pointer text-white ">
+            <span className="flex cursor-pointer items-center pl-1 text-xs font-bold text-white ">
               + {allItems.length - previewItems.length} more
             </span>
           </Tooltip>

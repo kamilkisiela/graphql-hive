@@ -49,8 +49,8 @@ export const DiffEditor = ({
   }
 
   return (
-    <div className="w-full h-full">
-      <div className="p-5 flex items-center justify-between">
+    <div className="h-full w-full">
+      <div className="flex items-center justify-between p-5">
         <div className="font-semibold">{title}</div>
         <div className="flex items-center">
           <div className="mr-2 text-xs font-normal">Navigate changes</div>

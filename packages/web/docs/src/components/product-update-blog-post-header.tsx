@@ -23,7 +23,7 @@ const Authors = ({ meta }: { meta: Meta }): ReactElement => {
           <SocialAvatar author={author} />
         </Anchor>
         <div className="ml-2.5 flex flex-col">
-          <Anchor href={author.link} title={author.name} className="text-[#777] font-semibold">
+          <Anchor href={author.link} title={author.name} className="font-semibold text-[#777]">
             {author.name}
           </Anchor>
           <time
@@ -51,7 +51,7 @@ const Authors = ({ meta }: { meta: Meta }): ReactElement => {
           const author = authors[authorId];
           return (
             <div key={authorId}>
-              <Anchor href={author.link} title={author.name} className="text-[#777] font-semibold">
+              <Anchor href={author.link} title={author.name} className="font-semibold text-[#777]">
                 <SocialAvatar author={author} />
                 <span className="ml-2.5 text-sm">{author.name}</span>
               </Anchor>

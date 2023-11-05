@@ -43,7 +43,10 @@ export class TargetAccess {
   private tokenAccess: Dataloader<TargetTokenAccessSelector, boolean, string>;
   private scopes: Dataloader<TargetUserScopesSelector, readonly TargetAccessScope[], string>;
 
-  constructor(logger: Logger, private organizationAccess: OrganizationAccess) {
+  constructor(
+    logger: Logger,
+    private organizationAccess: OrganizationAccess,
+  ) {
     this.logger = logger.child({
       source: 'TargetAccess',
     });

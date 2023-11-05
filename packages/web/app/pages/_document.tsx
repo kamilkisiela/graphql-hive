@@ -6,7 +6,7 @@ import '@/config/frontend-env';
 export default class MyDocument extends Document<{
   ids: Array<string>;
   css: string;
-  frontendEnv: typeof import('@/config/frontend-env')['env'];
+  frontendEnv: (typeof import('@/config/frontend-env'))['env'];
 }> {
   static async getInitialProps(ctx: DocumentContext) {
     if (globalThis.process.env.BUILD !== '1') {

@@ -47,7 +47,7 @@ export function GetStartedProgress(props: {
           {remaining} remaining task{remaining > 1 ? 's' : ''}
         </div>
         <div>
-          <div className="relative mt-1 w-full overflow-hidden rounded bg-gray-800 h-[5px]">
+          <div className="relative mt-1 h-[5px] w-full overflow-hidden rounded bg-gray-800">
             <div
               className="h-full bg-orange-500"
               style={{ width: `${(completed / total) * 100}%` }}
@@ -136,7 +136,7 @@ function Task({
         className={clsx('h-5 w-auto', completed ? 'text-green-500' : 'text-gray-500')}
       />
 
-      <span className={completed ? 'opacity-50 line-through' : 'hover:opacity-80'}>{children}</span>
+      <span className={completed ? 'line-through opacity-50' : 'hover:opacity-80'}>{children}</span>
     </a>
   );
 }

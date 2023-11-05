@@ -12,11 +12,11 @@ function CreateOrgPage(): ReactElement {
   return (
     <>
       <MetaTitle title="Create Organization" />
-      <div className="h-full grow flex items-center">
+      <div className="flex h-full grow items-center">
         <Button
           variant="outline"
           onClick={() => router.push('/logout')}
-          className="absolute top-6 right-6"
+          className="absolute right-6 top-6"
         >
           <LogOutIcon className="mr-2 h-4 w-4" /> Sign out
         </Button>

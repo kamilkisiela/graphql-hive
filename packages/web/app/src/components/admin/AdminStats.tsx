@@ -348,7 +348,7 @@ function OrganizationTable({ data }: { data: Organization[] }) {
         </TBody>
       </Table>
 
-      <div className="py-3 flex flex-row items-center justify-center gap-4">
+      <div className="flex flex-row items-center justify-center gap-4 py-3">
         <Button
           variant="secondary"
           onClick={firstPage}
@@ -362,9 +362,9 @@ function OrganizationTable({ data }: { data: Organization[] }) {
           onClick={tableInstance.previousPage}
           disabled={!tableInstance.getCanPreviousPage()}
         >
-          <ChevronUpIcon className="-rotate-90 h-5 w-auto" />
+          <ChevronUpIcon className="h-5 w-auto -rotate-90" />
         </Button>
-        <span className="font-bold whitespace-nowrap text-sm">
+        <span className="whitespace-nowrap text-sm font-bold">
           {tableInstance.getState().pagination.pageIndex + 1} / {tableInstance.getPageCount()}
         </span>
         <Button
@@ -373,7 +373,7 @@ function OrganizationTable({ data }: { data: Organization[] }) {
           onClick={tableInstance.nextPage}
           disabled={!tableInstance.getCanNextPage()}
         >
-          <ChevronUpIcon className="rotate-90 h-5 w-auto" />
+          <ChevronUpIcon className="h-5 w-auto rotate-90" />
         </Button>
         <Button variant="secondary" onClick={lastPage} disabled={!tableInstance.getCanNextPage()}>
           Last
@@ -444,7 +444,7 @@ export function AdminStats({
     <DataWrapper query={query}>
       {({ data }) => (
         <div className="flex flex-col gap-6">
-          <div className="flex rounded-md p-5 border border-gray-800 bg-gray-900/50 justify-between">
+          <div className="flex justify-between rounded-md border border-gray-800 bg-gray-900/50 p-5">
             <OverallStat label="Users" value={overall.users} />
             <OverallStat label="Organizations" value={overall.organizations} />
             <OverallStat label="Projects" value={overall.projects} />

@@ -18,8 +18,7 @@ export function QueryError({
   const requestId =
     error &&
     'response' in error &&
-    error?.response?.headers &&
-    error.response.headers.get('x-request-id')?.split(',')[0].trim();
+    error?.response?.headers?.get('x-request-id')?.split(',')[0].trim();
 
   cookies.remove(LAST_VISITED_ORG_KEY);
 
@@ -31,19 +30,19 @@ export function QueryError({
     typeof router.query.organizationId === 'string' ? router.query.organizationId : null;
 
   return (
-    <div className="h-full w-full flex items-center justify-center">
+    <div className="flex h-full w-full items-center justify-center">
       <Button
         variant="outline"
         onClick={() => router.push('/logout')}
-        className="absolute top-6 right-6"
+        className="absolute right-6 top-6"
       >
         <LogOutIcon className="mr-2 h-4 w-4" /> Sign out
       </Button>
-      <div className="flex sm:flex-row flex-col items-center gap-x-6 max-w-[960px]">
+      <div className="flex max-w-[960px] flex-col items-center gap-x-6 sm:flex-row">
         <img
           src="/images/figures/connection.svg"
           alt="Ghost"
-          className="block w-[200px] h-[200px]"
+          className="block h-[200px] w-[200px]"
         />
         <div className="grow text-center sm:text-left">
           <h1 className="text-xl font-semibold">Oops, something went wrong.</h1>
@@ -79,8 +78,8 @@ export function QueryError({
             {requestId ? (
               <div className="mt-6 text-xs">
                 <div className="inline-flex items-center text-gray-300">
-                  <div className="p-2 bg-yellow-500/10 rounded-l-sm">Error ID</div>
-                  <div className="p-2 bg-yellow-500/5 rounded-r-sm">{requestId}</div>
+                  <div className="rounded-l-sm bg-yellow-500/10 p-2">Error ID</div>
+                  <div className="rounded-r-sm bg-yellow-500/5 p-2">{requestId}</div>
                 </div>
               </div>
             ) : null}

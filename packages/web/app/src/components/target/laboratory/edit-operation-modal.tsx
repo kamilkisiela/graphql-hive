@@ -82,7 +82,7 @@ export const EditOperationModal = (props: {
   return (
     <Modal open onOpenChange={props.close} className="flex flex-col items-center gap-5">
       {!updateOperationNameState.fetching && (
-        <form className="flex flex-col gap-8 w-full" onSubmit={handleSubmit}>
+        <form className="flex w-full flex-col gap-8" onSubmit={handleSubmit}>
           <Heading className="text-center">Edit Operation</Heading>
 
           <div className="flex flex-col gap-4">

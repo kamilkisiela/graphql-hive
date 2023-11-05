@@ -37,7 +37,7 @@ export function ChannelsTable(props: {
               />
             </Td>
             <Td>{channel.name}</Td>
-            <Td className="text-xs truncate text-gray-400">
+            <Td className="truncate text-xs text-gray-400">
               {channel.__typename === 'AlertSlackChannel'
                 ? channel.channel
                 : channel.__typename === 'AlertWebhookChannel'

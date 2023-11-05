@@ -9,7 +9,10 @@ import { Storage } from './storage';
 })
 export class IdTranslator {
   private logger: Logger;
-  constructor(private storage: Storage, logger: Logger) {
+  constructor(
+    private storage: Storage,
+    logger: Logger,
+  ) {
     this.logger = logger.child({ service: 'IdTranslator' });
   }
 

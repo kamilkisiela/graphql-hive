@@ -141,7 +141,7 @@ function PolicyPageContent() {
                       </>
                     ))}
                   </p>
-                  <p className="py-2 text-muted-foreground font-semibold underline">
+                  <p className="text-muted-foreground py-2 font-semibold underline">
                     Policy feature is only available for projects that are using the new registry
                     model.
                   </p>
@@ -184,7 +184,7 @@ function PolicyPageContent() {
                     />
                     <label
                       htmlFor="allowOverrides"
-                      className="inline-block ml-2 text-sm text-gray-300"
+                      className="ml-2 inline-block text-sm text-gray-300"
                     >
                       Allow projects to override or disable rules
                     </label>

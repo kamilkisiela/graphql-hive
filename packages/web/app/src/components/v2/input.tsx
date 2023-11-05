@@ -37,17 +37,17 @@ export const Input = forwardRef<
         items-center
         gap-4
         rounded-sm
+        border
+        border-gray-700
         bg-gray-800
         text-sm
         font-medium
-        border
-        border-gray-700
         focus-within:ring`,
           isInvalid ? 'text-red-500 caret-white ring-red-500' : 'text-white',
           {
-            large: 'h-[50px] py-[18px] px-4',
-            medium: 'py-2.5 px-4',
-            small: 'py-[5px] px-3',
+            large: 'h-[50px] px-4 py-[18px]',
+            medium: 'px-4 py-2.5',
+            small: 'px-3 py-[5px]',
           }[size],
           onClear && 'pr-1',
           className,
@@ -69,7 +69,7 @@ export const Input = forwardRef<
           <button
             aria-label="Reset"
             onClick={onClear}
-            className="hover:bg-gray-700/50 p-0.5 rounded transition-colors"
+            className="rounded p-0.5 transition-colors hover:bg-gray-700/50"
           >
             <svg
               stroke="currentColor"

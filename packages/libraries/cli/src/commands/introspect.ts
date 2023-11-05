@@ -30,14 +30,17 @@ export default class Introspect extends Command {
 
   async run() {
     const { flags, args } = await this.parse(Introspect);
-    const headers = flags.header?.reduce((acc, header) => {
-      const [key, ...values] = header.split(':');
+    const headers = flags.header?.reduce(
+      (acc, header) => {
+        const [key, ...values] = header.split(':');
 
-      return {
-        ...acc,
-        [key]: values.join(':'),
-      };
-    }, {} as Record<string, string>);
+        return {
+          ...acc,
+          [key]: values.join(':'),
+        };
+      },
+      {} as Record<string, string>,
+    );
 
     const schema = await loadSchema(args.location, {
       headers,

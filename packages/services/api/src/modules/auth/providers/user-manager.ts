@@ -22,7 +22,10 @@ export const fullNameLengthBoundaries = {
 export class UserManager {
   private logger: Logger;
 
-  constructor(logger: Logger, private storage: Storage) {
+  constructor(
+    logger: Logger,
+    private storage: Storage,
+  ) {
     this.logger = logger.child({
       source: 'UserManager',
     });

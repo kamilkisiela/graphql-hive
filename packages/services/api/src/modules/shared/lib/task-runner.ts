@@ -19,7 +19,7 @@ export const createTaskRunner = (args: {
       logger: args.logger,
       name: 'schema-purge',
     });
-    task.done.finally(() => {
+    void task.done.finally(() => {
       if (!isStopped) {
         loop();
       }

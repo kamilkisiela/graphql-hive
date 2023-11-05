@@ -25,9 +25,9 @@ export function Sortable({
       <button className="flex items-center justify-center" onClick={onClick}>
         <div>{children}</div>
 
-        {sortOrder === 'asc' ? <TriangleUpIcon className="text-orange-500 ml-2" /> : null}
+        {sortOrder === 'asc' ? <TriangleUpIcon className="ml-2 text-orange-500" /> : null}
         {sortOrder === 'desc' ? (
-          <TriangleUpIcon className="rotate-180 text-orange-500 ml-2" />
+          <TriangleUpIcon className="ml-2 rotate-180 text-orange-500" />
         ) : null}
       </button>
     </Tooltip>

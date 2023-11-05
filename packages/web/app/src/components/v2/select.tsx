@@ -34,7 +34,7 @@ export function Select({
           active:bg-gray-900
         `,
           isInvalid
-            ? 'text-red-500 border-red-500'
+            ? 'border-red-500 text-red-500'
             : ['border-transparent', value ? 'text-white' : 'text-gray-500'],
         )}
         {...props}

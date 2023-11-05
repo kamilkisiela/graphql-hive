@@ -23,7 +23,11 @@ interface PaginationSelector {
 export class ActivityManager {
   private logger: Logger;
 
-  constructor(logger: Logger, private authManager: AuthManager, private storage: Storage) {
+  constructor(
+    logger: Logger,
+    private authManager: AuthManager,
+    private storage: Storage,
+  ) {
     this.logger = logger.child({
       source: 'ActivityManager',
     });

@@ -9,7 +9,7 @@ export function StatsItem(props: {
 }) {
   return (
     <div>
-      <div className="font-bold text-5xl text-center text-black">
+      <div className="text-center text-5xl font-bold text-black">
         <CountUp
           start={0}
           end={props.value}
@@ -22,14 +22,14 @@ export function StatsItem(props: {
         />
         {props.suffix}+
       </div>
-      <div className="text-gray-600 uppercase font-semibold text-center">{props.label}</div>
+      <div className="text-center font-semibold uppercase text-gray-600">{props.label}</div>
     </div>
   );
 }
 
 export function StatsList(props: { children: ReactNode }) {
   return (
-    <div className="container mx-auto box-border grid grid-cols-2 lg:grid-cols-4 gap-8 px-6 py-12">
+    <div className="container mx-auto box-border grid grid-cols-2 gap-8 px-6 py-12 lg:grid-cols-4">
       {props.children}
     </div>
   );

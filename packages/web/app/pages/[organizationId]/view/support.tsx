@@ -142,10 +142,10 @@ function NewTicketForm(props: {
         }
       }}
     >
-      <SheetContent className="h-full flex grow flex-col w-1/3 sm:w-1/2 md:w-1/3 max-w-none sm:max-w-none md:max-w-[500px]">
+      <SheetContent className="flex h-full w-1/3 max-w-none grow flex-col sm:w-1/2 sm:max-w-none md:w-1/3 md:max-w-[500px]">
         <Form {...form}>
           <form
-            className="h-full flex justify-between grow flex-col gap-y-4"
+            className="flex h-full grow flex-col justify-between gap-y-4"
             onSubmit={form.handleSubmit(onSubmit)}
           >
             <SheetHeader>
@@ -156,7 +156,7 @@ function NewTicketForm(props: {
             </SheetHeader>
 
             <div className="flex flex-1">
-              <div className="overflow-y-auto text-sm text-ellipsis w-full px-2 space-y-6">
+              <div className="w-full space-y-6 overflow-y-auto text-ellipsis px-2 text-sm">
                 <FormField
                   control={form.control}
                   name="priority"
@@ -235,7 +235,7 @@ function NewTicketForm(props: {
               </div>
             </div>
 
-            <SheetFooter className="flex flex-col sm:flex-col gap-y-2">
+            <SheetFooter className="flex flex-col gap-y-2 sm:flex-col">
               <Button type="submit">Submit</Button>
             </SheetFooter>
           </form>
@@ -268,7 +268,7 @@ function SupportTicketRow(props: {
       <TableCell>
         <Button
           variant="link"
-          className={cn(isSolved ? 'text-gray-500' : '', 'p-0 h-auto text-left')}
+          className={cn(isSolved ? 'text-gray-500' : '', 'h-auto p-0 text-left')}
           asChild
         >
           <NextLink
@@ -290,7 +290,7 @@ function SupportTicketRow(props: {
       <TableCell className="w-[150px] text-center">
         <Priority level={ticket.priority} />
       </TableCell>
-      <TableCell className="text-right w-[200px] text-xs">
+      <TableCell className="w-[200px] text-right text-xs">
         <TimeAgo date={ticket.updatedAt} className="text-gray-500" />
       </TableCell>
     </TableRow>
@@ -347,14 +347,14 @@ function Support(props: {
   return (
     <TooltipProvider>
       <div>
-        <div className="py-6 flex flex-row justify-between items-center">
+        <div className="flex flex-row items-center justify-between py-6">
           <div>
             <Title>Support</Title>
             <Subtitle>A list of support requests</Subtitle>
           </div>
           <div>
             <Button variant="outline" onClick={toggle}>
-              <PencilIcon className="w-4 h-4 mr-2" />
+              <PencilIcon className="mr-2 h-4 w-4" />
               New ticket
             </Button>
             <NewTicketForm

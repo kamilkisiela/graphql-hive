@@ -99,7 +99,7 @@ export function OrganizationLayout({
       <header>
         <div className="container flex h-[84px] items-center justify-between">
           <div className="flex flex-row items-center gap-4">
-            <HiveLink className="w-8 h-8" />
+            <HiveLink className="h-8 w-8" />
             {currentOrganization && organizations ? (
               <Select
                 defaultValue={currentOrganization.cleanId}
@@ -123,7 +123,7 @@ export function OrganizationLayout({
                 </SelectContent>
               </Select>
             ) : (
-              <div className="w-48 h-5 bg-gray-800 rounded-full animate-pulse" />
+              <div className="h-5 w-48 animate-pulse rounded-full bg-gray-800" />
             )}
           </div>
           <div>
@@ -136,7 +136,7 @@ export function OrganizationLayout({
         </div>
       </header>
       <div className="relative border-b border-gray-800">
-        <div className="container flex justify-between items-center">
+        <div className="container flex items-center justify-between">
           {currentOrganization && meInCurrentOrg ? (
             <Tabs value={page}>
               <Tabs.List>
@@ -230,10 +230,10 @@ export function OrganizationLayout({
               </Tabs.List>
             </Tabs>
           ) : (
-            <div className="flex flex-row gap-x-8 px-4 py-3 border-b-[2px] border-b-transparent">
-              <div className="w-12 h-5 bg-gray-800 rounded-full animate-pulse" />
-              <div className="w-12 h-5 bg-gray-800 rounded-full animate-pulse" />
-              <div className="w-12 h-5 bg-gray-800 rounded-full animate-pulse" />
+            <div className="flex flex-row gap-x-8 border-b-[2px] border-b-transparent px-4 py-3">
+              <div className="h-5 w-12 animate-pulse rounded-full bg-gray-800" />
+              <div className="h-5 w-12 animate-pulse rounded-full bg-gray-800" />
+              <div className="h-5 w-12 animate-pulse rounded-full bg-gray-800" />
             </div>
           )}
           {currentOrganization ? (

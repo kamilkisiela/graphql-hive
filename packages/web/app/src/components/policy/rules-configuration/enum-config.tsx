@@ -28,7 +28,7 @@ export const PolicyEnumSelect = (props: {
   return (
     <PolicyConfigBox
       title={
-        <div className="items-center flex">
+        <div className="flex items-center">
           <div>{props.title}</div>
           {props.tooltip ? (
             <Tooltip content={props.tooltip}>
@@ -55,7 +55,7 @@ export const PolicyEnumSelect = (props: {
             value={option.value}
             title={option.label}
             className={clsx(
-              'hover:text-white text-xs',
+              'text-xs hover:text-white',
               currentValue === option.value && 'bg-gray-800 text-white',
             )}
           >

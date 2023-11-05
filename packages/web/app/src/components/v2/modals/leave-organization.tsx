@@ -47,7 +47,7 @@ export function LeaveOrganizationModal({
         Are you sure you want to leave this organization? You will lose access to{' '}
         <span className="font-semibold">{organizationName}</span>. This action is irreversible!
       </p>
-      <div className="flex w-full gap-x-2 items-center justify-end">
+      <div className="flex w-full items-center justify-end gap-x-2">
         <Button type="button" variant="ghost" onClick={toggleModalOpen}>
           Cancel
         </Button>

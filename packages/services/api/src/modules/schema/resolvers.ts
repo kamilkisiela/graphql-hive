@@ -1735,7 +1735,7 @@ export const resolvers: SchemaModule.Resolvers = {
           organization: usage.organization,
           project: usage.project,
           target: usage.target,
-        } as const);
+        }) as const;
 
       for (const typeDefinition of sdl.definitions) {
         if (typeDefinition.kind === Kind.OBJECT_TYPE_DEFINITION) {

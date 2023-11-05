@@ -42,7 +42,7 @@ export function Combobox(
         ),
         NoOptionsMessage: compProps => (
           <components.NoOptionsMessage {...compProps}>
-            <div className="text-gray-500 text-xs">
+            <div className="text-xs text-gray-500">
               {props.creatable ? 'Start typing to add values' : 'No options'}
             </div>
           </components.NoOptionsMessage>

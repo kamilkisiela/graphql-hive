@@ -10,7 +10,7 @@ export function HeroTitle(props: { children: ReactNode }) {
 
 export function HeroSubtitle(props: { children: ReactNode }) {
   return (
-    <p className="mx-auto mt-6 max-w-screen-sm text-center text-lg text-gray-700 font-light">
+    <p className="mx-auto mt-6 max-w-screen-sm text-center text-lg font-light text-gray-700">
       {props.children}
     </p>
   );
@@ -27,8 +27,8 @@ export function HeroLinks(props: { children: ReactNode }) {
 export function HereTrustedBy(props: { children: ReactNode }) {
   return (
     <div className="mt-24 lg:mt-36">
-      <div className="mx-auto lg:max-w-screen-lg max-w-[80%] text-center">
-        <p className="text-gray-700 text-sm">
+      <div className="mx-auto max-w-[80%] text-center lg:max-w-screen-lg">
+        <p className="text-sm text-gray-700">
           Trusted by global enterprises and fast-moving startups.
         </p>
         <div className="mt-10 flex flex-row flex-wrap items-center justify-center gap-x-12 gap-y-6 text-gray-700">
@@ -41,9 +41,9 @@ export function HereTrustedBy(props: { children: ReactNode }) {
 
 export function Hero(props: { children: ReactNode }) {
   return (
-    <div className="w-full relative overflow-hidden bg-white">
-      <div className="my-6 py-20 px-2 sm:py-24 lg:py-32">
-        <div className="z-10 relative">{props.children}</div>
+    <div className="relative w-full overflow-hidden bg-white">
+      <div className="my-6 px-2 py-20 sm:py-24 lg:py-32">
+        <div className="relative z-10">{props.children}</div>
       </div>
     </div>
   );

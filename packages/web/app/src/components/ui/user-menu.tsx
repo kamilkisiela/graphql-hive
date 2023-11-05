@@ -108,7 +108,7 @@ export function UserMenu(props: {
           organizationName={currentOrganization.name}
         />
       ) : null}
-      <div className="flex flex-row gap-8 items-center">
+      <div className="flex flex-row items-center gap-8">
         {currentOrganization ? <GetStartedProgress tasks={currentOrganization.getStarted} /> : null}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -125,10 +125,10 @@ export function UserMenu(props: {
               <DropdownMenuLabel>
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col space-y-1">
-                    <div className="text-sm font-medium leading-none truncate">
+                    <div className="truncate text-sm font-medium leading-none">
                       {me?.displayName}
                     </div>
-                    <div className="text-xs font-normal leading-none text-muted-foreground truncate">
+                    <div className="text-muted-foreground truncate text-xs font-normal leading-none">
                       {me?.email}
                     </div>
                   </div>

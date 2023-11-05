@@ -21,7 +21,7 @@ export const PolicyMultiSelect = (props: {
   const currentValues = getConfigValue<string[]>(props.propertyName);
 
   useEffect(() => {
-    if (!config && typeof props.defaultValues !== undefined) {
+    if (!config && typeof props.defaultValues !== 'undefined') {
       setConfig(props.propertyName, props.defaultValues);
     }
   }, []);
@@ -29,7 +29,7 @@ export const PolicyMultiSelect = (props: {
   return (
     <PolicyConfigBox
       title={
-        <div className="items-center flex">
+        <div className="flex items-center">
           <div>{props.title}</div>
           {props.tooltip ? (
             <Tooltip content={props.tooltip}>

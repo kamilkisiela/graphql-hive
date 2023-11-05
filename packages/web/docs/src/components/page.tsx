@@ -15,7 +15,7 @@ const CookiesConsent = (): ReactElement => {
   }
 
   return (
-    <div className="fixed bottom-0 flex w-full flex-wrap items-center justify-center gap-4 text-black bg-gray-100 px-5 py-7 text-center lg:flex-nowrap lg:justify-between lg:text-left z-50">
+    <div className="fixed bottom-0 z-50 flex w-full flex-wrap items-center justify-center gap-4 bg-gray-100 px-5 py-7 text-center text-black lg:flex-nowrap lg:justify-between lg:text-left">
       <div className="w-full text-sm">
         <p>This website uses cookies to analyze site usage and improve your experience.</p>
         <p>If you continue to use our services, you are agreeing to the use of such cookies.</p>
@@ -47,7 +47,7 @@ export function Page(props: { children: ReactNode }) {
         <link rel="preconnect" href="https://rsms.me/" />
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
       </Head>
-      <div className="flex h-full flex-col font-display">{props.children}</div>
+      <div className="font-display flex h-full flex-col">{props.children}</div>
       {mounted && <CookiesConsent />}
     </>
   );

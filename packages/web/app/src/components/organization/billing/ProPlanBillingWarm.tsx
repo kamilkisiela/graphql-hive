@@ -16,7 +16,7 @@ export function ProPlanBilling(props: {
   const organization = useFragment(ProPlanBilling_OrganizationFragment, props.organization);
   if (organization?.billingConfiguration?.hasPaymentIssues) {
     return (
-      <Callout type="warning" className="w-full mb-2">
+      <Callout type="warning" className="mb-2 w-full">
         <b>Your organization has a rejected payment!</b>
         <br />
         Please review your recent invoices and update your payment method.

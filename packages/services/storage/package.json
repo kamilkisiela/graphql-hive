@@ -13,7 +13,7 @@
   },
   "scripts": {
     "build": "tsx ../../../scripts/runify.ts",
-    "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts"
+    "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts && prettier --write src/db/types.ts"
   },
   "devDependencies": {
     "@sentry/node": "7.77.0",

@@ -154,7 +154,7 @@ const CollectionItem = (props: {
   const copyToClipboard = useClipboard();
 
   return (
-    <div key={props.node.id} className="flex justify-between items-center">
+    <div key={props.node.id} className="flex items-center justify-between">
       <Link
         href={{
           pathname: '/[organizationId]/[projectId]/[targetId]/laboratory/[operationId]',
@@ -166,7 +166,7 @@ const CollectionItem = (props: {
           },
         }}
         className={cn(
-          'hover:bg-gray-100/10 w-full rounded p-2 !text-gray-300',
+          'w-full rounded p-2 !text-gray-300 hover:bg-gray-100/10',
           router.query.operation === props.node.id && 'bg-gray-100/10 text-white',
         )}
         onClick={ev => {
@@ -195,7 +195,7 @@ const CollectionItem = (props: {
         modal={false}
       >
         <GraphiQLDropdownMenu.Button
-          className="graphiql-toolbar-button opacity-0 [div:hover>&]:opacity-100 transition [div:hover>&]:bg-transparent"
+          className="graphiql-toolbar-button opacity-0 transition [div:hover>&]:bg-transparent [div:hover>&]:opacity-100"
           aria-label="More"
           data-cy="operation-3-dots"
         >
@@ -245,7 +245,7 @@ const AddCollectionItemButton = (props: { collectionId: string }): ReactElement 
   return (
     <Button
       variant="link"
-      className="py-0 px-2 text-gray-500 hover:text-white hover:no-underline"
+      className="px-2 py-0 text-gray-500 hover:text-white hover:no-underline"
       onClick={async () => {
         const result = await createOperation({
           input: {
@@ -403,15 +403,15 @@ function useOperationCollectionsPlugin({
           )?.id;
 
         return (
-          <div className="h-full flex flex-col">
+          <div className="flex h-full flex-col">
             <div className="flex justify-between">
               <Title>Collections</Title>
             </div>
             {loading ? (
-              <div className="flex justify-center h-fit flex-1 items-center">
-                <div className="flex items-center flex-col">
+              <div className="flex h-fit flex-1 items-center justify-center">
+                <div className="flex flex-col items-center">
                   <Spinner />
-                  <div className="text-xs mt-2">Loading collections</div>
+                  <div className="mt-2 text-xs">Loading collections</div>
                 </div>
               </div>
             ) : collections?.length ? (
@@ -480,10 +480,10 @@ function useOperationCollectionsPlugin({
                 ))}
               </Accordion>
             ) : (
-              <div className="flex justify-center h-fit flex-1 items-center">
-                <div className="flex items-center flex-col">
+              <div className="flex h-fit flex-1 items-center justify-center">
+                <div className="flex flex-col items-center">
                   <BookmarkIcon width={30} height={30} />
-                  <div className="text-xs mt-2">There are no collections available.</div>
+                  <div className="mt-2 text-xs">There are no collections available.</div>
                   {canEdit ? (
                     <Button
                       onClick={() => {
@@ -584,7 +584,7 @@ function Save(): ReactElement {
         <GraphiQLDropdownMenu.Content>
           <GraphiQLDropdownMenu.Item
             disabled={isSame}
-            className={cx(isSame && 'cursor-default hover:bg-transparent text-gray-400')}
+            className={cx(isSame && 'cursor-default text-gray-400 hover:bg-transparent')}
             onClick={async () => {
               if (!currentOperation || isSame) {
                 return;
@@ -760,7 +760,7 @@ function LaboratoryPageContent() {
       organizations={organizationConnection ?? null}
       isCDNEnabled={isCDNEnabled ?? null}
     >
-      <div className="py-6 flex">
+      <div className="flex py-6">
         <div className="flex-1">
           <Title>Laboratory</Title>
           <Subtitle>Explore your GraphQL schema and run queries against your GraphQL API.</Subtitle>
@@ -793,7 +793,7 @@ function LaboratoryPageContent() {
             </Button>
           </div>
           <div className="self-end pt-2">
-            <span className="text-xs font-bold mr-2">Query</span>
+            <span className="mr-2 text-xs font-bold">Query</span>
             <ToggleGroup
               defaultValue="list"
               onValueChange={newValue => {
@@ -808,7 +808,7 @@ function LaboratoryPageContent() {
                 value="mockApi"
                 title="Use Mock Schema"
                 className={clsx(
-                  'hover:text-white text-xs',
+                  'text-xs hover:text-white',
                   !query.fetching &&
                     actualSelectedApiEndpoint === 'mockApi' &&
                     'bg-gray-800 text-white',
@@ -822,7 +822,7 @@ function LaboratoryPageContent() {
                 value="linkedApi"
                 title="Use API endpoint"
                 className={clsx(
-                  'hover:text-white text-xs',
+                  'text-xs hover:text-white',
                   !query.fetching &&
                     actualSelectedApiEndpoint === 'linkedApi' &&
                     'bg-gray-800 text-white',
@@ -888,7 +888,7 @@ function LaboratoryPageContent() {
                 )
               }
             >
-              <span className="text-xs font-normal pr-2 cursor-help">
+              <span className="cursor-help pr-2 text-xs font-normal">
                 {actualSelectedApiEndpoint === 'linkedApi'
                   ? 'Querying GraphQL API'
                   : 'Querying Mock API'}

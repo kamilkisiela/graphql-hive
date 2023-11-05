@@ -97,7 +97,7 @@ const ProjectCard = (props: {
             }
           : '#'
       }
-      className="h-full pt-4 px-0 self-start hover:bg-gray-800/40 hover:shadow-md hover:shadow-gray-800/50 bg-gray-900/50"
+      className="h-full self-start bg-gray-900/50 px-0 pt-4 hover:bg-gray-800/40 hover:shadow-md hover:shadow-gray-800/50"
     >
       <TooltipProvider>
         <div className="flex items-start gap-x-2">
@@ -174,16 +174,16 @@ const ProjectCard = (props: {
                 )}
               </AutoSizer>
             </div>
-            <div className="flex flex-row gap-y-3 px-4 pt-4 justify-between items-center">
+            <div className="flex flex-row items-center justify-between gap-y-3 px-4 pt-4">
               {project ? (
                 <div>
                   <h4 className="line-clamp-2 text-lg font-bold">{project.name}</h4>
-                  <p className="text-gray-300 text-xs">{projectTypeFullNames[project.type]}</p>
+                  <p className="text-xs text-gray-300">{projectTypeFullNames[project.type]}</p>
                 </div>
               ) : (
                 <div>
-                  <div className="w-48 h-4 mb-4 py-2 bg-gray-800 rounded-full animate-pulse" />
-                  <div className="w-24 h-2 bg-gray-800 rounded-full animate-pulse" />
+                  <div className="mb-4 h-4 w-48 animate-pulse rounded-full bg-gray-800 py-2" />
+                  <div className="h-2 w-24 animate-pulse rounded-full bg-gray-800" />
                 </div>
               )}
               <div className="flex flex-col gap-y-2 py-1">
@@ -191,8 +191,8 @@ const ProjectCard = (props: {
                   <>
                     <Tooltip>
                       <TooltipTrigger>
-                        <div className="flex flex-row gap-x-2 items-center">
-                          <Globe className="w-4 h-4 text-gray-500" />
+                        <div className="flex flex-row items-center gap-x-2">
+                          <Globe className="h-4 w-4 text-gray-500" />
                           <div className="text-xs">
                             {requestsInDateRange}{' '}
                             {pluralize(totalNumberOfRequests, 'request', 'requests')}
@@ -205,8 +205,8 @@ const ProjectCard = (props: {
                     </Tooltip>
                     <Tooltip>
                       <TooltipTrigger>
-                        <div className="flex flex-row gap-x-2 items-center">
-                          <History className="w-4 h-4 text-gray-500" />
+                        <div className="flex flex-row items-center gap-x-2">
+                          <History className="h-4 w-4 text-gray-500" />
                           <div className="text-xs">
                             {schemaVersionsInDateRange}{' '}
                             {pluralize(totalNumberOfVersions, 'commit', 'commits')}
@@ -220,8 +220,8 @@ const ProjectCard = (props: {
                   </>
                 ) : (
                   <>
-                    <div className="w-16 h-2 my-1 bg-gray-800 rounded-full animate-pulse" />
-                    <div className="w-16 h-2 my-1 bg-gray-800 rounded-full animate-pulse" />
+                    <div className="my-1 h-2 w-16 animate-pulse rounded-full bg-gray-800" />
+                    <div className="my-1 h-2 w-16 animate-pulse rounded-full bg-gray-800" />
                   </>
                 )}
               </div>
@@ -341,7 +341,7 @@ function OrganizationPageContent() {
                 docsUrl="/management/projects#create-a-new-project"
               />
             ) : (
-              <div className="grid grid-cols-2 gap-5 items-stretch">
+              <div className="grid grid-cols-2 items-stretch gap-5">
                 {projects.nodes
                   .sort((a, b) => {
                     const diffOperations = b.totalRequests - a.totalRequests;
@@ -371,7 +371,7 @@ function OrganizationPageContent() {
               </div>
             )
           ) : (
-            <div className="grid grid-cols-2 gap-5 items-stretch">
+            <div className="grid grid-cols-2 items-stretch gap-5">
               {Array.from({ length: 4 }).map((_, index) => (
                 <ProjectCard
                   key={index}

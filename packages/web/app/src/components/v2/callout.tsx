@@ -42,7 +42,7 @@ export function Callout({
   return (
     <div
       className={clsx(
-        'mt-6 flex items-center rounded-lg border py-2 px-4 gap-4',
+        'mt-6 flex items-center gap-4 rounded-lg border px-4 py-2',
         classes[type],
         className,
       )}

@@ -22,8 +22,10 @@ const NotFoundPage = () => {
 
         <style jsx global>{`
           html {
-            background: url(/images/bg-top-shine.svg) no-repeat left top,
-              url(/images/bg-bottom-shine.svg) no-repeat right bottom, #0b0d11;
+            background:
+              url(/images/bg-top-shine.svg) no-repeat left top,
+              url(/images/bg-bottom-shine.svg) no-repeat right bottom,
+              #0b0d11;
           }
 
           body {

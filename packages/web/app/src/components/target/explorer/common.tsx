@@ -72,23 +72,23 @@ export function SchemaExplorerUsageStats(props: {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="flex flex-row items-center gap-2 text-xs ml-3">
+      <div className="ml-3 flex flex-row items-center gap-2 text-xs">
         <div className="grow">
           <div className="text-center" title={`${usage.total} requests`}>
             {formatNumber(usage.total)}
           </div>
           <div
             title={`${toDecimal(percentage)}% of all requests`}
-            className="relative mt-1 w-full overflow-hidden rounded z-0 bg-orange-500/20 min-w-[25px]"
+            className="relative z-0 mt-1 w-full min-w-[25px] overflow-hidden rounded bg-orange-500/20"
             style={{ width: 50, height: 5 }}
           >
-            <div className="h-full bg-orange-500 z-0" style={{ width: `${percentage}%` }} />
+            <div className="z-0 h-full bg-orange-500" style={{ width: `${percentage}%` }} />
           </div>
         </div>
         <Tooltip>
           <TooltipContent>
             <div className="z-10">
-              <div className="font-bold mb-1 text-lg">Field Usage</div>
+              <div className="mb-1 text-lg font-bold">Field Usage</div>
               {usage.isUsed === false ? (
                 <div>This field is currently not in use.</div>
               ) : (
@@ -108,17 +108,17 @@ export function SchemaExplorerUsageStats(props: {
                       <table className="mt-4 table-auto">
                         <thead>
                           <tr>
-                            <th className="text-left p-2 pl-0">Top 5 Operations</th>
-                            <th className="text-center p-2">Reqs</th>
-                            <th className="text-center p-2">Of total</th>
+                            <th className="p-2 pl-0 text-left">Top 5 Operations</th>
+                            <th className="p-2 text-center">Reqs</th>
+                            <th className="p-2 text-center">Of total</th>
                           </tr>
                         </thead>
                         <tbody>
                           {usage.topOperations.map(op => (
                             <tr key={op.hash}>
-                              <td className="text-left px-2 pl-0">
+                              <td className="px-2 pl-0 text-left">
                                 <NextLink
-                                  className="text-orange-500 hover:underline hover:underline-offset-2 hover:text-orange-500"
+                                  className="text-orange-500 hover:text-orange-500 hover:underline hover:underline-offset-2"
                                   href={{
                                     pathname:
                                       '/[organizationId]/[projectId]/[targetId]/insights/[operationName]/[operationHash]',
@@ -134,10 +134,10 @@ export function SchemaExplorerUsageStats(props: {
                                   {op.hash.substring(0, 4)}_{op.name}
                                 </NextLink>
                               </td>
-                              <td className="font-bold text-center px-2">
+                              <td className="px-2 text-center font-bold">
                                 {formatNumber(op.count)}
                               </td>
-                              <td className="font-bold text-center px-2">
+                              <td className="px-2 text-center font-bold">
                                 {toDecimal((op.count / props.totalRequests) * 100)}%
                               </td>
                             </tr>
@@ -151,7 +151,7 @@ export function SchemaExplorerUsageStats(props: {
             </div>
           </TooltipContent>
           <TooltipTrigger>
-            <div className="text-xl cursor-help">
+            <div className="cursor-help text-xl">
               <PulseIcon className="h-6 w-auto" />
             </div>
           </TooltipTrigger>
@@ -160,7 +160,7 @@ export function SchemaExplorerUsageStats(props: {
         <Tooltip>
           <TooltipContent>
             <>
-              <div className="font-bold mb-1 text-lg">Client Usage</div>
+              <div className="mb-1 text-lg font-bold">Client Usage</div>
 
               {Array.isArray(usage.usedByClients) ? (
                 <>
@@ -169,7 +169,7 @@ export function SchemaExplorerUsageStats(props: {
                     {usage.usedByClients.map(clientName => (
                       <li key={clientName} className="font-bold">
                         <NextLink
-                          className="text-orange-500 hover:underline hover:underline-offset-2 hover:text-orange-500"
+                          className="text-orange-500 hover:text-orange-500 hover:underline hover:underline-offset-2"
                           href={{
                             pathname:
                               '/[organizationId]/[projectId]/[targetId]/insights/client/[name]',
@@ -193,7 +193,7 @@ export function SchemaExplorerUsageStats(props: {
             </>
           </TooltipContent>
           <TooltipTrigger>
-            <div className="text-xl p-1 cursor-help">
+            <div className="cursor-help p-1 text-xl">
               <UsersIcon size={16} className="h-6 w-auto" />
             </div>
           </TooltipTrigger>
@@ -438,7 +438,7 @@ export function GraphQLFields(props: {
                   <GraphQLArguments parentCoordinate={coordinate} args={field.args} />
                 ) : null}
                 <span className="mr-1">:</span>
-                <GraphQLTypeAsLink className="text-gray-400 font-semibold" type={field.type} />
+                <GraphQLTypeAsLink className="font-semibold text-gray-400" type={field.type} />
               </div>
               <div className="flex flex-row items-center">
                 {field.supergraphMetadata ? (
@@ -490,7 +490,7 @@ export function GraphQLInputFields(props: {
         return (
           <GraphQLTypeCardListItem key={field.name} index={i}>
             <div className="text-gray-400">
-              <LinkToCoordinatePage coordinate={coordinate} className="text-white font-semibold">
+              <LinkToCoordinatePage coordinate={coordinate} className="font-semibold text-white">
                 {field.name}
               </LinkToCoordinatePage>
               <span className="mr-1">:</span>
@@ -518,14 +518,14 @@ function GraphQLTypeAsLink(props: { type: string; className?: string }): ReactEl
 
   return (
     <Popover>
-      <PopoverTrigger className={cn('hover:underline-offset-4 hover:underline', props.className)}>
+      <PopoverTrigger className={cn('hover:underline hover:underline-offset-4', props.className)}>
         {props.type}
       </PopoverTrigger>
       <PopoverContent side="right">
         <div className="flex flex-col gap-y-2">
           <p>
             <NextLink
-              className="hover:underline hover:underline-offset-2 font-normal text-sm"
+              className="text-sm font-normal hover:underline hover:underline-offset-2"
               href={{
                 pathname: '/[organizationId]/[projectId]/[targetId]/explorer/[typename]',
                 query: {
@@ -539,11 +539,11 @@ function GraphQLTypeAsLink(props: { type: string; className?: string }): ReactEl
             >
               Visit in <span className="font-bold">Explorer</span>
             </NextLink>
-            <span className="text-gray-500 text-xs"> - displays a full type</span>
+            <span className="text-xs text-gray-500"> - displays a full type</span>
           </p>
           <p>
             <NextLink
-              className="hover:underline hover:underline-offset-2 font-normal text-sm"
+              className="text-sm font-normal hover:underline hover:underline-offset-2"
               href={{
                 pathname:
                   '/[organizationId]/[projectId]/[targetId]/insights/schema-coordinate/[typename]',
@@ -558,7 +558,7 @@ function GraphQLTypeAsLink(props: { type: string; className?: string }): ReactEl
             >
               Visit in <span className="font-bold">Insights</span>
             </NextLink>
-            <span className="text-gray-500 text-xs"> - usage insights</span>
+            <span className="text-xs text-gray-500"> - usage insights</span>
           </p>
         </div>
         <PopoverArrow />

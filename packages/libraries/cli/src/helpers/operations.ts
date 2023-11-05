@@ -10,11 +10,10 @@ export async function loadOperations(
   file: string,
   options?: {
     normalize?: boolean;
-    pluckModules?:
-      | {
-          name: string;
-          identifier?: string;
-        }[];
+    pluckModules?: {
+      name: string;
+      identifier?: string;
+    }[];
     pluckGlobalGqlIdentifierName?: string[];
   },
 ): Promise<

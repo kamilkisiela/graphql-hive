@@ -81,16 +81,19 @@ function PolicySettingsListForm({
     return {
       allowOverrides: currentState?.allowOverrides ?? true,
       rules:
-        currentState?.rules.reduce((acc, ruleInstance) => {
-          return {
-            ...acc,
-            [ruleInstance.rule.id]: {
-              enabled: true,
-              severity: ruleInstance.severity,
-              config: ruleInstance.configuration,
-            },
-          };
-        }, {} as PolicyFormValues['rules']) ?? {},
+        currentState?.rules.reduce(
+          (acc, ruleInstance) => {
+            return {
+              ...acc,
+              [ruleInstance.rule.id]: {
+                enabled: true,
+                severity: ruleInstance.severity,
+                config: ruleInstance.configuration,
+              },
+            };
+          },
+          {} as PolicyFormValues['rules'],
+        ) ?? {},
     };
   }, [currentState]);
 
@@ -104,7 +107,7 @@ function PolicySettingsListForm({
       {props => (
         <>
           {children ? children(props) : null}
-          <div className="justify-end flex items-center">
+          <div className="flex items-center justify-end">
             {props.dirty ? <p className="pr-2 text-sm text-gray-500">Unsaved changes</p> : null}
             <Button
               disabled={!props.dirty || saving}
@@ -116,7 +119,7 @@ function PolicySettingsListForm({
             </Button>
           </div>
           {error ? (
-            <Callout type="error" className="w-2/3 mx-auto">
+            <Callout type="error" className="mx-auto w-2/3">
               <b>Oops, something went wrong.</b>
               <br />
               {error}

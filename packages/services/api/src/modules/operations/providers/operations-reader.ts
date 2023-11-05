@@ -65,7 +65,10 @@ function ensureNumber(value: number | string): number {
   global: true,
 })
 export class OperationsReader {
-  constructor(private clickHouse: ClickHouse, private logger: Logger) {}
+  constructor(
+    private clickHouse: ClickHouse,
+    private logger: Logger,
+  ) {}
 
   private pickQueryByPeriod(
     queryMap: {

@@ -7,10 +7,10 @@
  *
  */
 
-export type alert_channel_type = "SLACK" | "WEBHOOK";
-export type alert_type = "SCHEMA_CHANGE_NOTIFICATIONS";
-export type schema_policy_resource = "ORGANIZATION" | "PROJECT";
-export type user_role = "ADMIN" | "MEMBER";
+export type alert_channel_type = 'SLACK' | 'WEBHOOK';
+export type alert_type = 'SCHEMA_CHANGE_NOTIFICATIONS';
+export type schema_policy_resource = 'ORGANIZATION' | 'PROJECT';
+export type user_role = 'ADMIN' | 'MEMBER';
 
 export interface activities {
   activity_metadata: any;

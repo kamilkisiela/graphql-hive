@@ -91,7 +91,7 @@ function OperationView({
 
   return (
     <>
-      <div className="py-6 flex flex-row items-center justify-between">
+      <div className="flex flex-row items-center justify-between py-6">
         <div>
           <Title>{operationName}</Title>
           <Subtitle>Insights of individual GraphQL operation</Subtitle>
@@ -127,7 +127,7 @@ function OperationView({
         resolution={resolution}
         mode="operation-page"
       />
-      <div className="w-full rounded-md bg-gray-900/50 p-5 border border-gray-800 mt-12">
+      <div className="mt-12 w-full rounded-md border border-gray-800 bg-gray-900/50 p-5">
         <Section.Title>Operation body</Section.Title>
         <GraphQLOperationBody
           organization={organizationCleanId}

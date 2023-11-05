@@ -64,7 +64,7 @@ const renderFeatures = ({
       {documentationLink ? (
         <Link
           href={documentationLink}
-          className="group inline-flex text-sm items-center transition hover:underline underline-offset-8 gap-x-2 mt-2"
+          className="group mt-2 inline-flex items-center gap-x-2 text-sm underline-offset-8 transition hover:underline"
         >
           <div>
             <BookIcon size={16} />
@@ -96,7 +96,7 @@ function Highlight(
     <div
       className={cn(
         classes.root,
-        'lg:p-8 p-2 relative transition',
+        'relative p-2 transition lg:p-8',
         'onClick' in props ? 'cursor-pointer' : '',
       )}
       onClick={'onClick' in props ? () => props.onClick(props.index) : () => {}}
@@ -104,7 +104,7 @@ function Highlight(
       {props.documentationLink ? null : (
         <div
           className={cn(
-            'absolute inset-0 lg:border-l-4 lg:border-b-0 border-b-2',
+            'absolute inset-0 border-b-2 lg:border-b-0 lg:border-l-4',
             'active' in props && props.active ? 'opacity-100' : 'opacity-0 hover:opacity-50',
           )}
           style={{
@@ -115,14 +115,14 @@ function Highlight(
       <div
         className={cn(
           classes.content,
-          'lg:w-auto w-full',
+          'w-full lg:w-auto',
           'onClick' in props ? 'gap-y-2' : 'gap-y-4',
         )}
       >
         <h3
           className={cn(
             classes.title,
-            'lg:text-lg text-base',
+            'text-base lg:text-lg',
             'onClick' in props ? 'text-center lg:text-left' : '',
           )}
         >
@@ -132,7 +132,7 @@ function Highlight(
           className={cn(
             classes.description,
             'text-sm',
-            'onClick' in props ? 'lg:block hidden' : '',
+            'onClick' in props ? 'hidden lg:block' : '',
           )}
         >
           {props.description}
@@ -140,7 +140,7 @@ function Highlight(
         {props.documentationLink ? (
           <Link
             href={props.documentationLink}
-            className="group inline-flex text-sm items-center transition hover:underline underline-offset-8 gap-x-2 mt-2"
+            className="group mt-2 inline-flex items-center gap-x-2 text-sm underline-offset-8 transition hover:underline"
           >
             <div>
               <BookIcon size={16} />
@@ -186,29 +186,29 @@ function Feature(props: {
       <div className={cn(classes.feature, 'relative overflow-hidden')}>
         <div>
           <div
-            className="w-full absolute h-[1px] top-0 opacity-25"
+            className="absolute top-0 h-[1px] w-full opacity-25"
             style={{
               backgroundImage: `linear-gradient(90deg, ${end}, ${start})`,
             }}
           />
           <div
-            className="absolute opacity-[0.15] w-[60vw] h-[255px] left-[-200px] top-[-200px] blur-3xl"
+            className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-[0.15] blur-3xl"
             style={{
               backgroundImage: `linear-gradient(180deg, ${end}, ${start})`,
             }}
           />
           <div
-            className="absolute opacity-[0.15] w-[60vw] h-[255px] right-[-200px] top-[-200px] blur-3xl"
+            className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-[0.15] blur-3xl"
             style={{
               backgroundImage: `linear-gradient(180deg, ${start}, ${end})`,
             }}
           />
         </div>
         <div className="pb-28 pt-20 sm:py-32">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
+          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl md:mx-auto md:text-center xl:max-w-none">
               <h2
-                className="text-4xl font-semibold leading-normal tracking-tight bg-clip-text text-transparent"
+                className="bg-clip-text text-4xl font-semibold leading-normal tracking-tight text-transparent"
                 style={{ backgroundImage: `linear-gradient(-70deg, ${end}, ${start})` }}
               >
                 {title}
@@ -218,7 +218,7 @@ function Feature(props: {
                 <div className="pt-12">
                   <Link
                     href={documentationLink}
-                    className="group inline-flex font-semibold items-center transition hover:underline underline-offset-8 gap-x-2"
+                    className="group inline-flex items-center gap-x-2 font-semibold underline-offset-8 transition hover:underline"
                     style={{
                       color: start,
                     }}
@@ -232,7 +232,7 @@ function Feature(props: {
               ) : null}
             </div>
             {imagelessHighlights ? (
-              <div className="flex flex-col lg:flex-row justify-center mt-16 pt-10 sm:gap-y-6 md:mt-20 lg:pt-0">
+              <div className="mt-16 flex flex-col justify-center pt-10 sm:gap-y-6 md:mt-20 lg:flex-row lg:pt-0">
                 {imagelessHighlights.map(highlight => (
                   <Highlight
                     {...highlight}
@@ -244,10 +244,10 @@ function Feature(props: {
               </div>
             ) : null}
             {highlights ? (
-              <div className="mt-0 lg:mt-16 grid grid-cols-1 items-center gap-y-2 pt-10 sm:gap-y-6 md:mt-20 lg:grid-cols-12 lg:pt-0">
-                <div className="w-full lg:w-auto flex overflow-x-auto pb-4 sm:mx-0 sm:overflow-visible sm:pb-0 lg:col-span-5">
+              <div className="mt-0 grid grid-cols-1 items-center gap-y-2 pt-10 sm:gap-y-6 md:mt-20 lg:mt-16 lg:grid-cols-12 lg:pt-0">
+                <div className="flex w-full overflow-x-auto pb-4 sm:mx-0 sm:overflow-visible sm:pb-0 lg:col-span-5 lg:w-auto">
                   <div className="w-full">
-                    <div className="flex lg:flex-col lg:gap-y-12 gap-x-0 flex-row justify-evenly">
+                    <div className="flex flex-row justify-evenly gap-x-0 lg:flex-col lg:gap-y-12">
                       {highlights.map((highlight, i) => (
                         <Highlight
                           {...highlight}
@@ -267,16 +267,16 @@ function Feature(props: {
                   {highlights.map((highlight, i) => (
                     <div key={i} className={cn(activeHighlight === i ? 'block' : 'hidden')}>
                       <div className="relative sm:px-6 lg:hidden">
-                        <p className="relative mx-auto max-w-2xl text-black text-base sm:text-center">
+                        <p className="relative mx-auto max-w-2xl text-base text-black sm:text-center">
                           {highlight.description}
                         </p>
                       </div>
                       <div
-                        className="mt-10 w-[45rem] sm:w-auto lg:mt-0 lg:w-[67.8125rem] rounded-lg"
+                        className="mt-10 w-[45rem] rounded-lg sm:w-auto lg:mt-0 lg:w-[67.8125rem]"
                         style={{ backgroundImage: `linear-gradient(-70deg, ${end}, ${start})` }}
                       >
-                        <div className="lg:p-12 p-4">
-                          <div className="rounded-xl overflow-hidden">
+                        <div className="p-4 lg:p-12">
+                          <div className="overflow-hidden rounded-xl">
                             <Image
                               {...highlight.image}
                               className="w-full"
@@ -332,30 +332,30 @@ export function IndexPage(): ReactElement {
           </HeroLinks>
           <HereTrustedBy>
             <MeetupLogo
-              className="opacity-50 hover:opacity-100 transition-opacity duration-300 ease-in-out"
+              className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
               height={32}
             />
             <LinktreeLogo
-              className="opacity-50 hover:opacity-100 transition-opacity duration-300 ease-in-out"
+              className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
               height={22}
             />
             <KarrotLogo
               height={28}
-              className="opacity-50 hover:opacity-100 transition-opacity duration-300 ease-in-out"
+              className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
             />
             <AligentLogo
-              className="opacity-50 hover:opacity-100 transition-opacity duration-300 ease-in-out"
+              className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
               height={32}
             />
             <SoundYXZLogo
-              className="opacity-50 hover:opacity-100 transition-opacity duration-300 ease-in-out"
+              className="opacity-50 transition-opacity duration-300 ease-in-out hover:opacity-100"
               height={32}
             />
           </HereTrustedBy>
         </Hero>
-        <div className="even:bg-gray-50 relative">
+        <div className="relative even:bg-gray-50">
           <div>
-            <div className="w-full absolute h-[1px] top-0 opacity-25 bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300" />
+            <div className="absolute top-0 h-[1px] w-full bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 opacity-25" />
           </div>
           <StatsList>
             <StatsItem label="Happy users" value={3.0} suffix="K" decimal />
@@ -398,12 +398,12 @@ export function IndexPage(): ReactElement {
           />
           <div className={cn(classes.feature, 'relative overflow-hidden')}>
             <div>
-              <div className="w-full absolute h-[1px] top-0 opacity-25 bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300" />
-              <div className="absolute opacity-[0.15] w-[60vw] h-[255px] left-[-200px] top-[-200px] blur-3xl bg-gradient-to-b from-gray-50 to-gray-300" />
-              <div className="absolute opacity-[0.15] w-[60vw] h-[255px] right-[-200px] top-[-200px] blur-3xl bg-gradient-to-b from-gray-300 to-gray-50" />
+              <div className="absolute top-0 h-[1px] w-full bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 opacity-25" />
+              <div className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-50 to-gray-300 opacity-[0.15] blur-3xl" />
+              <div className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-300 to-gray-50 opacity-[0.15] blur-3xl" />
             </div>
             <div className="py-24">
-              <h2 className="base:mr-1 ml-1 text-3xl font-semibold leading-normal tracking-tight text-center mb-12 text-black">
+              <h2 className="base:mr-1 mb-12 ml-1 text-center text-3xl font-semibold leading-normal tracking-tight text-black">
                 Perfect fit for your GraphQL Gateway
               </h2>
               <Highlights
@@ -508,7 +508,7 @@ export function IndexPage(): ReactElement {
             }}
           >
             <div>
-              <div className="w-full absolute h-[1px] top-0 opacity-25 bg-blue-900" />
+              <div className="absolute top-0 h-[1px] w-full bg-blue-900 opacity-25" />
             </div>
             <div className="py-24">
               <div className="mx-auto max-w-lg text-center text-white">
@@ -522,7 +522,7 @@ export function IndexPage(): ReactElement {
                 <a
                   href="https://app.graphql-hive.com"
                   className={cn(
-                    'text-sm rounded-md px-6 py-3 mt-12 font-medium text-black shadow-sm',
+                    'mt-12 rounded-md px-6 py-3 text-sm font-medium text-black shadow-sm',
                     'bg-white hover:bg-blue-50',
                     'inline-flex flex-row items-center gap-2',
                   )}
@@ -534,12 +534,12 @@ export function IndexPage(): ReactElement {
           </div>
           <div className={cn(classes.feature, 'relative overflow-hidden')}>
             <div>
-              <div className="w-full absolute h-[1px] top-0 opacity-25 bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300" />
-              <div className="absolute opacity-[0.15] w-[60vw] h-[255px] left-[-200px] top-[-200px] blur-3xl bg-gradient-to-b from-gray-600 to-gray-900" />
-              <div className="absolute opacity-[0.15] w-[60vw] h-[255px] right-[-200px] top-[-200px] blur-3xl bg-gradient-to-b from-gray-900 to-gray-600" />
+              <div className="absolute top-0 h-[1px] w-full bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 opacity-25" />
+              <div className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-600 to-gray-900 opacity-[0.15] blur-3xl" />
+              <div className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-900 to-gray-600 opacity-[0.15] blur-3xl" />
             </div>
             <div className="py-24">
-              <h2 className="text-3xl font-semibold leading-normal tracking-tight text-center mb-12 text-black">
+              <h2 className="mb-12 text-center text-3xl font-semibold leading-normal tracking-tight text-black">
                 Fits your infrastructure
               </h2>
               <Highlights
@@ -570,19 +570,19 @@ export function IndexPage(): ReactElement {
           <div className={cn(classes.feature, 'relative overflow-hidden')}>
             <div>
               <div
-                className="w-full absolute h-[1px] top-0 opacity-25"
+                className="absolute top-0 h-[1px] w-full opacity-25"
                 style={{
                   backgroundImage: `linear-gradient(90deg, ${gradients[3][1]}, ${gradients[3][0]})`,
                 }}
               />
               <div
-                className="absolute opacity-[0.15] w-[60vw] h-[255px] left-[-200px] top-[-200px] blur-3xl"
+                className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-[0.15] blur-3xl"
                 style={{
                   backgroundImage: `linear-gradient(180deg, ${gradients[3][0]}, ${gradients[3][1]})`,
                 }}
               />
               <div
-                className="absolute opacity-[0.15] w-[60vw] h-[255px] right-[-200px] top-[-200px] blur-3xl"
+                className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-[0.15] blur-3xl"
                 style={{
                   backgroundImage: `linear-gradient(180deg, ${gradients[3][1]}, ${gradients[3][0]})`,
                 }}

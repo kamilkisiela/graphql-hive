@@ -42,7 +42,7 @@ export const SeverityLevelToggle = (props: { rule: string; canTurnOff: boolean }
   }
 
   return (
-    <PolicyConfigBox title="severity" className="first:pl-0 row-start-1 row-end-6">
+    <PolicyConfigBox title="severity" className="row-start-1 row-end-6 first:pl-0">
       <ToggleGroup
         defaultValue="list"
         onValueChange={newValue => {

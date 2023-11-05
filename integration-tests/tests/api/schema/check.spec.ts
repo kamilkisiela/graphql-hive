@@ -43,28 +43,24 @@ test.concurrent('can check a schema with target:registry:read access', async () 
 
   // Check schema with no read and write rights
   const checkResultErrors = await noAccessToken
-    .checkSchema(
-      /* GraphQL */ `
-        type Query {
-          ping: String
-          foo: String
-        }
-      `,
-    )
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        ping: String
+        foo: String
+      }
+    `)
     .then(r => r.expectGraphQLErrors());
   expect(checkResultErrors).toHaveLength(1);
   expect(checkResultErrors[0].message).toMatch('target:registry:read');
 
   // Check schema with read rights
   const checkResultValid = await readToken
-    .checkSchema(
-      /* GraphQL */ `
-        type Query {
-          ping: String
-          foo: String
-        }
-      `,
-    )
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        ping: String
+        foo: String
+      }
+    `)
     .then(r => r.expectNoGraphQLErrors());
   expect(checkResultValid.schemaCheck.__typename).toBe('SchemaCheckSuccess');
 });
@@ -107,18 +103,16 @@ test.concurrent('should match indentation of previous description', async () => 
 
   // Check schema with read rights
   const checkResult = await readToken
-    .checkSchema(
-      /* GraphQL */ `
-        type Query {
-          """
-          ping-ping
-          """
-          ping: String
-          " pong-pong "
-          pong: String
-        }
-      `,
-    )
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        """
+        ping-ping
+        """
+        ping: String
+        " pong-pong "
+        pong: String
+      }
+    `)
     .then(r => r.expectNoGraphQLErrors());
   const check = checkResult.schemaCheck;
 
@@ -272,14 +266,12 @@ test.concurrent('successful check without previously published schema is persist
 
   // Check schema with read rights
   const checkResult = await readToken
-    .checkSchema(
-      /* GraphQL */ `
-        type Query {
-          ping: String
-          pong: String
-        }
-      `,
-    )
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        ping: String
+        pong: String
+      }
+    `)
     .then(r => r.expectNoGraphQLErrors());
   const check = checkResult.schemaCheck;
 
@@ -358,14 +350,12 @@ test.concurrent('successful check with previously published schema is persisted'
 
   // Check schema with read rights
   const checkResult = await readToken
-    .checkSchema(
-      /* GraphQL */ `
-        type Query {
-          ping: String
-          pong: String
-        }
-      `,
-    )
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        ping: String
+        pong: String
+      }
+    `)
     .then(r => r.expectNoGraphQLErrors());
   const check = checkResult.schemaCheck;
 
@@ -421,13 +411,11 @@ test.concurrent('failed check due to graphql validation is persisted', async () 
 
   // Check schema with read rights
   const checkResult = await readToken
-    .checkSchema(
-      /* GraphQL */ `
-        type Query {
-          ping: Str
-        }
-      `,
-    )
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        ping: Str
+      }
+    `)
     .then(r => r.expectNoGraphQLErrors());
   const check = checkResult.schemaCheck;
 
@@ -512,13 +500,11 @@ test.concurrent('failed check due to breaking change is persisted', async () => 
 
   // Check schema with read rights
   const checkResult = await readToken
-    .checkSchema(
-      /* GraphQL */ `
-        type Query {
-          ping: Float
-        }
-      `,
-    )
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        ping: Float
+      }
+    `)
     .then(r => r.expectNoGraphQLErrors());
   const check = checkResult.schemaCheck;
 
@@ -610,14 +596,12 @@ test.concurrent('failed check due to policy error is persisted', async () => {
 
   // Check schema with read rights
   const checkResult = await readToken
-    .checkSchema(
-      /* GraphQL */ `
-        type Query {
-          ping: String
-          foo: String
-        }
-      `,
-    )
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        ping: String
+        foo: String
+      }
+    `)
     .then(r => r.expectNoGraphQLErrors());
   const check = checkResult.schemaCheck;
 
@@ -661,13 +645,13 @@ test.concurrent('failed check due to policy error is persisted', async () => {
             {
               node: {
                 end: {
-                  column: 19,
+                  column: 17,
                   line: 2,
                 },
                 message: 'Description is required for type "Query"',
                 ruleId: 'require-description',
                 start: {
-                  column: 14,
+                  column: 12,
                   line: 2,
                 },
               },
@@ -721,14 +705,12 @@ test.concurrent('successful check with warnings and safe changes is persisted', 
 
   // Check schema with read rights
   const checkResult = await readToken
-    .checkSchema(
-      /* GraphQL */ `
-        type Query {
-          ping: String
-          foo: String
-        }
-      `,
-    )
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        ping: String
+        foo: String
+      }
+    `)
     .then(r => r.expectNoGraphQLErrors());
   const check = checkResult.schemaCheck;
 
@@ -770,13 +752,13 @@ test.concurrent('successful check with warnings and safe changes is persisted', 
             {
               node: {
                 end: {
-                  column: 19,
+                  column: 17,
                   line: 2,
                 },
                 message: 'Description is required for type "Query"',
                 ruleId: 'require-description',
                 start: {
-                  column: 14,
+                  column: 12,
                   line: 2,
                 },
               },
@@ -810,14 +792,12 @@ test.concurrent(
 
     // Check schema with read rights
     const checkResult = await readToken
-      .checkSchema(
-        /* GraphQL */ `
-          type Query {
-            ping: String
-            foo: String
-          }
-        `,
-      )
+      .checkSchema(/* GraphQL */ `
+        type Query {
+          ping: String
+          foo: String
+        }
+      `)
       .then(r => r.expectNoGraphQLErrors());
     const check = checkResult.schemaCheck;
 
@@ -937,13 +917,11 @@ test('approve failed schema check that has breaking changes succeeds', async () 
 
   // Check schema with read rights
   const checkResult = await readToken
-    .checkSchema(
-      /* GraphQL */ `
-        type Query {
-          ping: Float
-        }
-      `,
-    )
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        ping: Float
+      }
+    `)
     .then(r => r.expectNoGraphQLErrors());
   const check = checkResult.schemaCheck;
 

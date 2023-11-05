@@ -44,7 +44,7 @@ export function OrganizationUsageEstimationView(props: {
   });
 
   return (
-    <div className="top-7 right-4">
+    <div className="right-4 top-7">
       <DataWrapper query={query}>
         {result => (
           <Table>

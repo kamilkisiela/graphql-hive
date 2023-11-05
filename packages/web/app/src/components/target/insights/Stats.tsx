@@ -74,11 +74,11 @@ function RequestsStats({
     <Card className="bg-gray-900/50">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Requests</CardTitle>
-        <GlobeIcon className="h-4 w-4 text-muted-foreground" />
+        <GlobeIcon className="text-muted-foreground h-4 w-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
-        <p className="text-xs text-muted-foreground">Total requests served</p>
+        <p className="text-muted-foreground text-xs">Total requests served</p>
       </CardContent>
     </Card>
   );
@@ -97,11 +97,11 @@ function UniqueOperationsStats({
     <Card className="bg-gray-900/50">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Operations</CardTitle>
-        <BookIcon className="h-4 w-4 text-muted-foreground" />
+        <BookIcon className="text-muted-foreground h-4 w-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           Distinct GraphQL operations in {dateRangeText}
         </p>
       </CardContent>
@@ -125,11 +125,11 @@ function OperationRelativeFrequency({
     <Card className="bg-gray-900/50">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Relative Request Frequency</CardTitle>
-        <PercentIcon className="h-4 w-4 text-muted-foreground" />
+        <PercentIcon className="text-muted-foreground h-4 w-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{rate}</div>
-        <p className="text-xs text-muted-foreground">The impact on the overall API traffic</p>
+        <p className="text-muted-foreground text-xs">The impact on the overall API traffic</p>
       </CardContent>
     </Card>
   );
@@ -150,11 +150,11 @@ function PercentileStats({
     <Card className="bg-gray-900/50">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">p{percentile}</CardTitle>
-        <GaugeIcon className="h-4 w-4 text-muted-foreground" />
+        <GaugeIcon className="text-muted-foreground h-4 w-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{formatted}</div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           Latency p{percentile} in {dateRangeText}
         </p>
       </CardContent>
@@ -183,11 +183,11 @@ function RPM({
     <Card className="bg-gray-900/50">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Requests per minute</CardTitle>
-        <ActivityIcon className="h-4 w-4 text-muted-foreground" />
+        <ActivityIcon className="text-muted-foreground h-4 w-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{throughput}</div>
-        <p className="text-xs text-muted-foreground">Throughput in {dateRangeText}</p>
+        <p className="text-muted-foreground text-xs">Throughput in {dateRangeText}</p>
       </CardContent>
     </Card>
   );
@@ -213,11 +213,11 @@ function SuccessRateStats({
         <CardTitle className="text-sm font-medium text-emerald-500 dark:text-emerald-500">
           Success rate
         </CardTitle>
-        <SmileIcon className="h-4 w-4 text-muted-foreground" />
+        <SmileIcon className="text-muted-foreground h-4 w-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{rate}</div>
-        <p className="text-xs text-muted-foreground">Successful requests in {dateRangeText}</p>
+        <p className="text-muted-foreground text-xs">Successful requests in {dateRangeText}</p>
       </CardContent>
     </Card>
   );
@@ -240,11 +240,11 @@ function FailureRateStats({
         <CardTitle className="text-sm font-medium text-red-500 dark:text-red-500">
           Failure rate
         </CardTitle>
-        <FrownIcon className="h-4 w-4 text-muted-foreground" />
+        <FrownIcon className="text-muted-foreground h-4 w-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{rate}</div>
-        <p className="text-xs text-muted-foreground">Failed requests in {dateRangeText}</p>
+        <p className="text-muted-foreground text-xs">Failed requests in {dateRangeText}</p>
       </CardContent>
     </Card>
   );
@@ -294,7 +294,7 @@ function OverTimeStats({
   }, [failuresOverTime, interval, period]);
 
   return (
-    <div className="rounded-md bg-gray-900/50 p-5 border border-gray-800">
+    <div className="rounded-md border border-gray-800 bg-gray-900/50 p-5">
       <Section.Title>Operations over time</Section.Title>
       <Section.Subtitle>Timeline of GraphQL requests and failures</Section.Subtitle>
       <AutoSizer disableHeight>
@@ -577,10 +577,10 @@ function ClientsStats(props: {
   );
 
   return (
-    <div className="w-full rounded-md bg-gray-900/50 p-5 border border-gray-800">
+    <div className="w-full rounded-md border border-gray-800 bg-gray-900/50 p-5">
       <Section.Title>Clients</Section.Title>
       <Section.Subtitle>Top 5 - GraphQL API consumers</Section.Subtitle>
-      <AutoSizer disableHeight className="mt-5 w-full flex flex-row gap-x-4">
+      <AutoSizer disableHeight className="mt-5 flex w-full flex-row gap-x-4">
         {size => {
           if (!size.width) {
             return <></>;
@@ -748,7 +748,7 @@ function ClientsStats(props: {
           }}
         </AutoSizer>
       ) : null}
-      <div className="w-full mt-5 text-center">
+      <div className="mt-5 w-full text-center">
         <Button variant="outline" onClick={() => setIsOpen(value => !value)}>
           {isOpen ? (
             <>
@@ -843,7 +843,7 @@ function LatencyOverTimeStats({
   ];
 
   return (
-    <div className="rounded-md bg-gray-900/50 p-5 border border-gray-800">
+    <div className="rounded-md border border-gray-800 bg-gray-900/50 p-5">
       <Section.Title>Latency over time</Section.Title>
       <Section.Subtitle>Timeline of latency of GraphQL requests</Section.Subtitle>
       <AutoSizer disableHeight>
@@ -940,7 +940,7 @@ function RpmOverTimeStats({
   }, [requests, interval, period, windowInM]);
 
   return (
-    <div className="rounded-md bg-gray-900/50 p-5 border border-gray-800">
+    <div className="rounded-md border border-gray-800 bg-gray-900/50 p-5">
       <Section.Title>RPM over time</Section.Title>
       <Section.Subtitle>Requests per minute</Section.Subtitle>
       <AutoSizer disableHeight>
@@ -1073,7 +1073,7 @@ export function OperationsStats({
   dateRangeText = dateRangeText.toLowerCase();
 
   return (
-    <section className="text-gray-600 dark:text-gray-400 space-y-12 transition-opacity ease-in-out duration-700">
+    <section className="space-y-12 text-gray-600 transition-opacity duration-700 ease-in-out dark:text-gray-400">
       <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <RequestsStats requests={operationsStats?.totalRequests} dateRangeText={dateRangeText} />

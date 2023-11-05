@@ -238,12 +238,12 @@ export const Activities = (): ReactElement => {
           ? new Array(3).fill(null).map((_, index) => (
               <ActivityContainer key={index}>
                 <div className="grow">
-                  <div className="flex justify-between items-center">
-                    <div className="w-24 h-2 bg-gray-800 rounded-full animate-pulse" />
-                    <div className="w-8 h-2 bg-gray-800 rounded-full animate-pulse" />
+                  <div className="flex items-center justify-between">
+                    <div className="h-2 w-24 animate-pulse rounded-full bg-gray-800" />
+                    <div className="h-2 w-8 animate-pulse rounded-full bg-gray-800" />
                   </div>
                   <div>
-                    <div className="w-32 h-3 mt-4 bg-gray-800 rounded-full animate-pulse" />
+                    <div className="mt-4 h-3 w-32 animate-pulse rounded-full bg-gray-800" />
                   </div>
                 </div>
               </ActivityContainer>
@@ -256,12 +256,12 @@ export const Activities = (): ReactElement => {
                   <>
                     <div className="grow">
                       {'project' in activity && !!activity.project && (
-                        <div className="flex justify-between items-center">
+                        <div className="flex items-center justify-between">
                           <h3 className="mb-1 flex items-center font-medium">
                             <span className="line-clamp-1">{activity.project.name}</span>
                             {'target' in activity && !!activity.target && (
                               <>
-                                <span className="italic mx-2">/</span>
+                                <span className="mx-2 italic">/</span>
                                 <span className="line-clamp-1">{activity.target.name}</span>
                               </>
                             )}
@@ -286,6 +286,7 @@ const ActivityContainer = (props: { children: ReactNode }) => (
   <li
     className="
     flex
+    cursor-default
     items-center
     gap-2.5
     border-b
@@ -297,7 +298,6 @@ const ActivityContainer = (props: { children: ReactNode }) => (
     last:border-b-0
     last:pb-0
     first-of-type:mt-0
-    cursor-default
   "
   >
     {props.children}

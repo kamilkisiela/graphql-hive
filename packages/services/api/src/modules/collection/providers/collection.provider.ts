@@ -11,7 +11,11 @@ import type { CollectionModule } from './../__generated__/types';
 export class CollectionProvider {
   private logger: Logger;
 
-  constructor(logger: Logger, private storage: Storage, private authManager: AuthManager) {
+  constructor(
+    logger: Logger,
+    private storage: Storage,
+    private authManager: AuthManager,
+  ) {
     this.logger = logger.child({ source: 'CollectionProvider' });
   }
 
