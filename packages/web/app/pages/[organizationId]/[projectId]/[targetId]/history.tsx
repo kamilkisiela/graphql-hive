@@ -125,7 +125,7 @@ function ListPage({
               </div>
 
               {'service' in version.log && version.log.service ? (
-                <div className="ml-auto mr-0 w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-right font-bold">
+                <div className="ml-auto mr-0 w-1/2 truncate text-right font-bold">
                   {version.log.service}
                 </div>
               ) : null}
