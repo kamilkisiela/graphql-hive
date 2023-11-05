@@ -656,8 +656,8 @@ importers:
         specifier: 4.17.21
         version: 4.17.21
       lru-cache:
-        specifier: 7.18.3
-        version: 7.18.3
+        specifier: 10.0.1
+        version: 10.0.1
       ms:
         specifier: 2.1.3
         version: 2.1.3
@@ -836,8 +836,8 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       lru-cache:
-        specifier: ^7.17.0
-        version: 7.17.0
+        specifier: ^10.0.0
+        version: 10.0.1
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -5106,7 +5106,7 @@ packages:
       '@whatwg-node/fetch': 0.9.13
       fast-json-stable-stringify: 2.1.0
       graphql: 16.8.1
-      lru-cache: 10.0.0
+      lru-cache: 10.0.1
       tslib: 2.6.2
     dev: true
 
@@ -8829,7 +8829,7 @@ packages:
       '@octokit/request-error': 5.0.1
       '@octokit/types': 12.0.0
       deprecation: 2.3.1
-      lru-cache: 10.0.0
+      lru-cache: 10.0.1
       universal-github-app-jwt: 1.1.1
       universal-user-agent: 6.0.0
     dev: true
@@ -20304,7 +20304,7 @@ packages:
       '@whatwg-node/server': 0.9.10
       dset: 3.1.2
       graphql: 16.8.1
-      lru-cache: 10.0.0
+      lru-cache: 10.0.1
       tslib: 2.6.2
     dev: true
 
@@ -22822,6 +22822,11 @@ packages:
     engines: {node: 14 || >=16.14}
     dev: true
 
+  /lru-cache@10.0.1:
+    resolution: {integrity: sha512-IJ4uwUTi2qCccrioU6g9g/5rvvVl13bsdczUUcqbciD9iLr095yj8DQKdObriEvuNSx325N1rV1O0sJFszx75g==}
+    engines: {node: 14 || >=16.14}
+    dev: true
+
   /lru-cache@4.1.5:
     resolution: {integrity: sha512-sWZlbEP2OsHNkXrMl5GYk/jKk70MBng6UU4YI/qGDYbgf6YbP4EvmqISbXCoJiRKs+1bSpFHVgQxvJ17F2li5g==}
     dependencies:
@@ -22838,11 +22843,6 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       yallist: 4.0.0
-
-  /lru-cache@7.17.0:
-    resolution: {integrity: sha512-zSxlVVwOabhVyTi6E8gYv2cr6bXK+8ifYz5/uyJb9feXX6NACVDwY4p5Ut3WC3Ivo/QhpARHU3iujx2xGAYHbQ==}
-    engines: {node: '>=12'}
-    dev: true
 
   /lru-cache@7.18.3:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
