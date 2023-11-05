@@ -35,7 +35,7 @@
     "@whatwg-node/server": "0.9.10",
     "dotenv": "16.3.1",
     "fastify": "3.29.5",
-    "got": "12.6.1",
+    "got": "13.0.0",
     "graphql": "16.8.1",
     "graphql-yoga": "5.0.0",
     "hyperid": "3.1.1",

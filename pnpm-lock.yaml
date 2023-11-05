@@ -508,8 +508,8 @@ importers:
         specifier: 16.3.1
         version: 16.3.1
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 13.0.0
+        version: 13.0.0
       p-limit:
         specifier: 4.0.0
         version: 4.0.0
@@ -626,8 +626,8 @@ importers:
         specifier: 2.1.0
         version: 2.1.0
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 13.0.0
+        version: 13.0.0
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -914,8 +914,8 @@ importers:
         specifier: 16.3.1
         version: 16.3.1
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 13.0.0
+        version: 13.0.0
       pino-pretty:
         specifier: 10.2.3
         version: 10.2.3
@@ -974,8 +974,8 @@ importers:
         specifier: 3.29.5
         version: 3.29.5
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 13.0.0
+        version: 13.0.0
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -1073,8 +1073,8 @@ importers:
         specifier: 3.29.5
         version: 3.29.5
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 13.0.0
+        version: 13.0.0
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -1161,8 +1161,8 @@ importers:
         specifier: 16.3.1
         version: 16.3.1
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 13.0.0
+        version: 13.0.0
       param-case:
         specifier: 3.0.4
         version: 3.0.4
@@ -1215,8 +1215,8 @@ importers:
         specifier: 16.3.1
         version: 16.3.1
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 13.0.0
+        version: 13.0.0
       pino-pretty:
         specifier: 10.2.3
         version: 10.2.3
@@ -1308,8 +1308,8 @@ importers:
         specifier: 16.3.1
         version: 16.3.1
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 13.0.0
+        version: 13.0.0
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -1353,8 +1353,8 @@ importers:
         specifier: 16.3.1
         version: 16.3.1
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 13.0.0
+        version: 13.0.0
       pino-pretty:
         specifier: 10.2.3
         version: 10.2.3
@@ -1392,8 +1392,8 @@ importers:
         specifier: 16.3.1
         version: 16.3.1
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 13.0.0
+        version: 13.0.0
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -1434,8 +1434,8 @@ importers:
         specifier: 16.3.1
         version: 16.3.1
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 13.0.0
+        version: 13.0.0
       ioredis:
         specifier: 5.3.2
         version: 5.3.2
@@ -19948,9 +19948,9 @@ packages:
       responselike: 2.0.1
     dev: true
 
-  /got@12.6.1:
-    resolution: {integrity: sha512-mThBblvlAF1d4O5oqyvN+ZxLAYwIJK7bpMxgYqPD9okW0C3qm5FFn7k811QrcuEBwaogR3ngOFoCfs6mRv7teQ==}
-    engines: {node: '>=14.16'}
+  /got@13.0.0:
+    resolution: {integrity: sha512-XfBk1CxOOScDcMr9O1yKkNaQyy865NbYs+F7dr4H0LZMVgCj2Le59k6PqbNHoL5ToeaEQUYh6c6yMfVcc6SJxA==}
+    engines: {node: '>=16'}
     dependencies:
       '@sindresorhus/is': 5.3.0
       '@szmarczak/http-timer': 5.0.1
