@@ -4,7 +4,6 @@ import { GetArtifactActionFn } from './artifact-handler';
 import { ArtifactsType as ModernArtifactsType } from './artifact-storage-reader';
 import {
   CDNArtifactNotFound,
-  InvalidArtifactMatch,
   InvalidArtifactTypeResponse,
   InvalidAuthKeyResponse,
   MissingAuthKeyResponse,
@@ -20,13 +19,6 @@ async function createETag(value: string) {
 
   return `"${hashArray.map(b => b.toString(16).padStart(2, '0')).join('')}"`;
 }
-
-type SchemaArtifact = {
-  sdl: string;
-  url?: string;
-  name?: string;
-  date?: string;
-};
 
 type ArtifactType = 'schema' | 'supergraph' | 'sdl' | 'metadata' | 'introspection';
 const artifactTypes = ['schema', 'supergraph', 'sdl', 'metadata', 'introspection'] as const;
@@ -224,7 +216,7 @@ export const createRequestHandler = (deps: RequestHandlerDependencies) => {
         .fetchText(rawValueAction.location)
         .catch(() => deps.fetchText(rawValueAction.location));
 
-      const etag = await createETag(`${kvStorageKey}|${rawValueAction}`);
+      const etag = await createETag(`${kvStorageKey}|${rawValue}`);
       const ifNoneMatch = request.headers.get('if-none-match');
 
       if (ifNoneMatch && ifNoneMatch === etag) {
