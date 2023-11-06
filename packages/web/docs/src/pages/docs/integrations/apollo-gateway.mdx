@@ -2,11 +2,35 @@ import { Callout } from '@theguild/components'
 
 ## Apollo Gateway
 
-[Apollo-Gateway](https://www.apollographql.com/docs/federation/v1/gateway/) is the JavaScript
-implementation of the Apollo Federation gateway runtime.
+[Apollo-Gateway](https://www.apollographql.com/docs/federation/v1/gateway/) is the JavaScript Apollo
+Federation gateway runtime.
 
 Hive integrates with Apollo Gateway to provide the Supergraph schema information required for
 running a federated graph gateway, once all schemas are published.
+
+```mermaid
+
+flowchart LR
+    A["Apollo Gateway
+      (with Hive client)"] -. Poll supergraph .-> C
+    subgraph hive [Hive]
+      direction TB
+      B[Registry] -. Publish supergraph .-> C["HA CDN
+        (on Cloudflare)"]
+    end
+    A -. Report usage data .-> B
+
+    A --> X1[GraphQL subgraph]
+    A --> X2[GraphQL subgraph]
+    A --> X3[GraphQL subgraph]
+    X1 -.- D([Hive CLI])
+    X2 -.- D
+    X3 -.- D
+    subgraph ci [CI/CD]
+      D -- Publish schemas --> B
+    end
+
+```
 
 ## Installation
 

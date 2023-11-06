@@ -5,6 +5,8 @@ description:
   vendor lock-in.
 ---
 
+# Open Source Apollo Studio Alternative
+
 GraphQL Hive stands as a **compelling alternative to Apollo Studio** (Apollo GraphOS). With a
 various of features and benefits, GraphQL Hive has proven itself as an exceptional choice for both
 individual developers and teams seeking a powerful GraphQL development environment.
@@ -17,6 +19,28 @@ It harmoniously works alongside the [Apollo Router](/docs/integrations/apollo-ro
 users. This integration extends to supporting
 [Apollo Federation v1 and v2](/docs/get-started/apollo-federarion), allowing you to leverage the
 advantages of federated architectures while benefiting from GraphQL Hive's capabilities.
+
+```mermaid
+
+flowchart LR
+    A["Apollo Router
+      (with Hive plugin)"] -. Poll supergraph .-> C
+    subgraph hive [Hive]
+      direction TB
+      B[Registry] -. Publish supergraph .-> C["HA CDN
+        (on Cloudflare)"]
+    end
+    A --> X1[GraphQL subgraph]
+    A --> X2[GraphQL subgraph]
+    A --> X3[GraphQL subgraph]
+    X1 -.- D([Hive CLI])
+    X2 -.- D
+    X3 -.- D
+    subgraph ci [CI/CD]
+      D -- Publish schemas --> B
+    end
+
+```
 
 ## Familiar Interface and Transition
 

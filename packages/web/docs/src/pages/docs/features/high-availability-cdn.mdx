@@ -8,8 +8,18 @@ The Hive Cloud service leverages the
 [CloudFlare Global Network](https://www.cloudflare.com/network/) to deliver your GraphQL schema and
 schema metadata. This means that your schema will be available from the nearest location to your
 GraphQL gateway, with [amazing uptime](https://www.cloudflare.com/business-sla/), regardless of
-Hive's status. This ensures that everything required for your GraphQL API is always available, and
-reduces the risk of depending on Hive as a single point of failure.
+Hive's status. This ensures that everything required for your GraphQL API and tooling around it is
+always available, and reduces the risk of depending on Hive as a single point of failure.
+
+```mermaid
+
+flowchart LR
+    A["GraphQL gateway"] -.-> C["Highly available GraphQL schema
+      on Cloudflare"]
+    B["Frontend tooling
+        (e.g. GraphQL code generator)"] -.-> C
+
+```
 
 <Callout type="info">
   The High-Availability CDN is available only in Hive Cloud, and not available for the self-hosted
