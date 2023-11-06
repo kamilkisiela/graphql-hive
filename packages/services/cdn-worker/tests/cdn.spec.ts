@@ -27,7 +27,7 @@ describe('CDN Worker', () => {
     const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
-    map.set(`target:${targetId}:sdl`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+    map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
     const token = createToken(SECRET, targetId);
 
     const handleRequest = createRequestHandler({
@@ -46,19 +46,7 @@ describe('CDN Worker', () => {
           },
         },
       }),
-      async getArtifactAction(targetId, artifactType) {
-        return map.has(`target:${targetId}:${artifactType}`)
-          ? {
-              type: 'redirect',
-              location: `target:${targetId}:${artifactType}`,
-            }
-          : {
-              type: 'notFound',
-            };
-      },
-      async fetchText(url) {
-        return map.get(url);
-      },
+      getRawStoreValue: async (key: string) => map.get(key),
     });
 
     const schemaRequest = new Request(`https://fake-worker.com/${targetId}/schema`, {
@@ -86,7 +74,7 @@ describe('CDN Worker', () => {
     const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
-    map.set(`target:${targetId}:sdl`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+    map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
     const handleRequest = createRequestHandler({
       isKeyValid: createIsKeyValid({
@@ -104,19 +92,7 @@ describe('CDN Worker', () => {
           },
         },
       }),
-      async getArtifactAction(targetId, artifactType) {
-        return map.has(`target:${targetId}:${artifactType}`)
-          ? {
-              type: 'redirect',
-              location: `target:${targetId}:${artifactType}`,
-            }
-          : {
-              type: 'notFound',
-            };
-      },
-      async fetchText(url) {
-        return map.get(url);
-      },
+      getRawStoreValue: async (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -184,19 +160,7 @@ describe('CDN Worker', () => {
           },
         },
       }),
-      async getArtifactAction(targetId, artifactType) {
-        return map.has(`target:${targetId}:${artifactType}`)
-          ? {
-              type: 'redirect',
-              location: `target:${targetId}:${artifactType}`,
-            }
-          : {
-              type: 'notFound',
-            };
-      },
-      async fetchText(url) {
-        return map.get(url);
-      },
+      getRawStoreValue: async (key: string) => map.get(key),
     });
 
     const firstRequest = new Request(`https://fake-worker.com/${targetId}/supergraph`, {
@@ -257,19 +221,7 @@ describe('CDN Worker', () => {
           },
         },
       }),
-      async getArtifactAction(targetId, artifactType) {
-        return map.has(`target:${targetId}:${artifactType}`)
-          ? {
-              type: 'redirect',
-              location: `target:${targetId}:${artifactType}`,
-            }
-          : {
-              type: 'notFound',
-            };
-      },
-      async fetchText(url) {
-        return map.get(url);
-      },
+      getRawStoreValue: async (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -314,7 +266,7 @@ describe('CDN Worker', () => {
     const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
-    map.set(`target:${targetId}:sdl`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+    map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
     const handleRequest = createRequestHandler({
       isKeyValid: createIsKeyValid({
@@ -332,19 +284,7 @@ describe('CDN Worker', () => {
           },
         },
       }),
-      async getArtifactAction(targetId, artifactType) {
-        return map.has(`target:${targetId}:${artifactType}`)
-          ? {
-              type: 'redirect',
-              location: `target:${targetId}:${artifactType}`,
-            }
-          : {
-              type: 'notFound',
-            };
-      },
-      async fetchText(url) {
-        return map.get(url);
-      },
+      getRawStoreValue: async (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -390,7 +330,7 @@ describe('CDN Worker', () => {
     const targetId = 'fake-target-id';
     const map = new Map();
     map.set(
-      `target:${targetId}:sdl`,
+      `target:${targetId}:schema`,
       JSON.stringify({
         sdl: `type Query { dummy: String }`,
       }),
@@ -412,19 +352,7 @@ describe('CDN Worker', () => {
           },
         },
       }),
-      async getArtifactAction(targetId, artifactType) {
-        return map.has(`target:${targetId}:${artifactType}`)
-          ? {
-              type: 'redirect',
-              location: `target:${targetId}:${artifactType}`,
-            }
-          : {
-              type: 'notFound',
-            };
-      },
-      async fetchText(url) {
-        return map.get(url);
-      },
+      getRawStoreValue: async (key: string) => map.get(key),
     });
 
     const token = createToken(SECRET, targetId);
@@ -469,14 +397,7 @@ describe('CDN Worker', () => {
     it('Should throw when target id is missing', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysTrue,
-        async getArtifactAction() {
-          return {
-            type: 'notFound',
-          };
-        },
-        async fetchText() {
-          throw new Error('Should not be called');
-        },
+        getRawStoreValue: async (_key: string) => Promise.resolve(null),
       });
 
       const request = new Request('https://fake-worker.com/', {});
@@ -489,14 +410,7 @@ describe('CDN Worker', () => {
     it('Should throw when requested resource is not valid', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysTrue,
-        async getArtifactAction() {
-          return {
-            type: 'notFound',
-          };
-        },
-        async fetchText() {
-          throw new Error('Should not be called');
-        },
+        getRawStoreValue: async (_key: string) => Promise.resolve(null),
       });
 
       const request = new Request('https://fake-worker.com/fake-target-id/error', {});
@@ -509,14 +423,7 @@ describe('CDN Worker', () => {
     it('Should throw when auth key is missing', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysTrue,
-        async getArtifactAction() {
-          return {
-            type: 'notFound',
-          };
-        },
-        async fetchText() {
-          throw new Error('Should not be called');
-        },
+        getRawStoreValue: async (_key: string) => Promise.resolve(null),
       });
 
       const request = new Request('https://fake-worker.com/fake-target-id/sdl', {});
@@ -529,14 +436,7 @@ describe('CDN Worker', () => {
     it('Should throw when key validation function fails', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysFalse,
-        async getArtifactAction() {
-          return {
-            type: 'notFound',
-          };
-        },
-        async fetchText() {
-          throw new Error('Should not be called');
-        },
+        getRawStoreValue: async (_key: string) => Promise.resolve(null),
       });
 
       const request = new Request('https://fake-worker.com/fake-target-id/sdl', {
@@ -556,7 +456,7 @@ describe('CDN Worker', () => {
       const SECRET = '123456';
       const targetId = 'fake-target-id';
       const map = new Map();
-      map.set(`target:${targetId}:sdl`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+      map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
 
       const handleRequest = createRequestHandler({
         isKeyValid: createIsKeyValid({
@@ -574,19 +474,7 @@ describe('CDN Worker', () => {
             },
           },
         }),
-        async getArtifactAction(targetId, artifactType) {
-          return map.has(`target:${targetId}:${artifactType}`)
-            ? {
-                type: 'redirect',
-                location: `target:${targetId}:${artifactType}`,
-              }
-            : {
-                type: 'notFound',
-              };
-        },
-        async fetchText(url) {
-          return map.get(url);
-        },
+        getRawStoreValue: async (key: string) => map.get(key),
       });
 
       const token = createToken(SECRET, targetId);
@@ -621,19 +509,7 @@ describe('CDN Worker', () => {
             },
           },
         }),
-        async getArtifactAction(targetId, artifactType) {
-          return map.has(`target:${targetId}:${artifactType}`)
-            ? {
-                type: 'redirect',
-                location: `target:${targetId}:${artifactType}`,
-              }
-            : {
-                type: 'notFound',
-              };
-        },
-        async fetchText(url) {
-          return map.get(url);
-        },
+        getRawStoreValue: async (key: string) => map.get(key),
       });
 
       const token = createToken(SECRET, 'fake-target-id');
@@ -666,14 +542,7 @@ describe('CDN Worker', () => {
             },
           },
         }),
-        async getArtifactAction() {
-          return {
-            type: 'notFound',
-          };
-        },
-        async fetchText() {
-          throw new Error('Should not be called');
-        },
+        getRawStoreValue: async (key: string) => new Map().get(key),
       });
 
       const request = new Request(`https://fake-worker.com/some-target/sdl`, {

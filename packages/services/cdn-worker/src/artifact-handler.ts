@@ -7,16 +7,14 @@ import { InvalidAuthKeyResponse, MissingAuthKeyResponse } from './errors';
 import type { KeyValidator } from './key-validation';
 import { createResponse } from './tracked-response';
 
-export type GetArtifactActionFn = (
-  targetId: string,
-  artifactType: ArtifactsType,
-  eTag: string | null,
-) => Promise<
-  { type: 'notModified' } | { type: 'notFound' } | { type: 'redirect'; location: string }
->;
-
 type ArtifactRequestHandler = {
-  getArtifactAction: GetArtifactActionFn;
+  getArtifactAction: (
+    targetId: string,
+    artifactType: ArtifactsType,
+    eTag: string | null,
+  ) => Promise<
+    { type: 'notModified' } | { type: 'notFound' } | { type: 'redirect'; location: string }
+  >;
   isKeyValid: KeyValidator;
   analytics?: Analytics;
   fallback?: (
@@ -62,78 +60,106 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
     return new InvalidAuthKeyResponse(analytics);
   };
 
-  router.get('/artifacts/v1/:targetId/:artifactType', async (request: itty.IRequest & Request) => {
-    const parseResult = ParamsModel.safeParse(request.params);
+  router.get(
+    '/artifacts/v1/:targetId/:artifactType',
+    async (request: itty.IRequest & Request, captureException?: (error: unknown) => void) => {
+      const parseResult = ParamsModel.safeParse(request.params);
 
-    if (parseResult.success === false) {
-      analytics.track(
-        { type: 'error', value: ['invalid-params'] },
-        request.params?.targetId ?? 'unknown',
-      );
-      return createResponse(
-        analytics,
-        'Not found.',
-        {
-          status: 404,
-        },
-        request.params?.targetId ?? 'unknown',
-      );
-    }
-
-    const params = parseResult.data;
-
-    /** Legacy handling for old client SDK versions. */
-    if (params.artifactType === 'schema') {
-      return createResponse(
-        analytics,
-        'Found.',
-        {
-          status: 301,
-          headers: {
-            Location: request.url.replace('/schema', '/services'),
+      if (parseResult.success === false) {
+        analytics.track(
+          { type: 'error', value: ['invalid-params'] },
+          request.params?.targetId ?? 'unknown',
+        );
+        return createResponse(
+          analytics,
+          'Not found.',
+          {
+            status: 404,
           },
-        },
+          request.params?.targetId ?? 'unknown',
+        );
+      }
+
+      const params = parseResult.data;
+
+      /** Legacy handling for old client SDK versions. */
+      if (params.artifactType === 'schema') {
+        return createResponse(
+          analytics,
+          'Found.',
+          {
+            status: 301,
+            headers: {
+              Location: request.url.replace('/schema', '/services'),
+            },
+          },
+          params.targetId,
+        );
+      }
+
+      const maybeResponse = await authenticate(request, params.targetId);
+
+      if (maybeResponse !== null) {
+        return maybeResponse;
+      }
+
+      analytics.track(
+        { type: 'artifact', value: params.artifactType, version: 'v1' },
         params.targetId,
       );
-    }
 
-    const maybeResponse = await authenticate(request, params.targetId);
+      const eTag = request.headers.get('if-none-match');
 
-    if (maybeResponse !== null) {
-      return maybeResponse;
-    }
+      const result = await deps
+        .getArtifactAction(params.targetId, params.artifactType, eTag)
+        .catch(error => {
+          if (deps.fallback) {
+            if (captureException) {
+              captureException(error);
+            } else {
+              console.error(error);
+            }
+            return null;
+          }
 
-    analytics.track(
-      { type: 'artifact', value: params.artifactType, version: 'v1' },
-      params.targetId,
-    );
+          return Promise.reject(error);
+        });
 
-    const eTag = request.headers.get('if-none-match');
+      if (!result) {
+        return (
+          deps.fallback?.(request, params) ??
+          createResponse(
+            analytics,
+            'Something went wrong, really wrong.',
+            { status: 500 },
+            params.targetId,
+          )
+        );
+      }
 
-    const result = await deps.getArtifactAction(params.targetId, params.artifactType, eTag);
-
-    if (result.type === 'notModified') {
-      return createResponse(
-        analytics,
-        '',
-        {
-          status: 304,
-        },
-        params.targetId,
-      );
-    }
-    if (result.type === 'notFound') {
-      return createResponse(analytics, 'Not found.', { status: 404 }, params.targetId);
-    }
-    if (result.type === 'redirect') {
-      return createResponse(
-        analytics,
-        'Found.',
-        { status: 302, headers: { Location: result.location } },
-        params.targetId,
-      );
-    }
-  });
+      if (result.type === 'notModified') {
+        return createResponse(
+          analytics,
+          '',
+          {
+            status: 304,
+          },
+          params.targetId,
+        );
+      }
+      if (result.type === 'notFound') {
+        return createResponse(analytics, 'Not found.', { status: 404 }, params.targetId);
+      }
+      if (result.type === 'redirect') {
+        return createResponse(
+          analytics,
+          'Found.',
+          { status: 302, headers: { Location: result.location } },
+          params.targetId,
+        );
+      }
+    },
+  );
 
   return (request: Request, captureException?: (error: unknown) => void) =>
     router.handle(request, captureException);

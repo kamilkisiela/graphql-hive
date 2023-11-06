@@ -337,6 +337,10 @@ export const env = {
       cloudflare:
         cdnCf.CDN_CF === '1'
           ? {
+              basePath: cdnCf.CDN_CF_BASE_PATH,
+              accountId: cdnCf.CDN_CF_ACCOUNT_ID,
+              authToken: cdnCf.CDN_CF_AUTH_TOKEN,
+              namespaceId: cdnCf.CDN_CF_NAMESPACE_ID,
               baseUrl: cdnCf.CDN_CF_BASE_URL,
             }
           : null,

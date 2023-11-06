@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { crypto, fetch, Headers, ReadableStream, Request, Response } from '@whatwg-node/fetch';
+import { crypto, Headers, ReadableStream, Request, Response } from '@whatwg-node/fetch';
 import type { Env } from './env';
 
 if (!globalThis.Response) {
@@ -18,9 +18,10 @@ if (!globalThis.crypto) {
   globalThis.crypto = crypto;
 }
 
-export { fetch };
+export const devStorage = new Map<string, string>();
 
 export const env: Env = {
+  HIVE_DATA: devStorage,
   // eslint-disable-next-line no-process-env
   S3_ENDPOINT: process.env.S3_ENDPOINT || '',
   // eslint-disable-next-line no-process-env

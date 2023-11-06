@@ -5,6 +5,7 @@ import promClient from 'prom-client';
 import { Change, CriticalityLevel } from '@graphql-inspector/core';
 import { SchemaCheck } from '@hive/storage';
 import * as Sentry from '@sentry/node';
+import type { Span } from '@sentry/types';
 import * as Types from '../../../__generated__/types';
 import {
   hashSDL,
@@ -1516,19 +1517,22 @@ export class SchemaPublisher {
     });
   }
 
-  private async updateCDN({
-    target,
-    project,
-    supergraph,
-    schemas,
-    fullSchemaSdl,
-  }: {
-    target: Target;
-    project: Project;
-    schemas: readonly Schema[];
-    supergraph?: string | null;
-    fullSchemaSdl: string;
-  }) {
+  private async updateCDN(
+    {
+      target,
+      project,
+      supergraph,
+      schemas,
+      fullSchemaSdl,
+    }: {
+      target: Target;
+      project: Project;
+      schemas: readonly Schema[];
+      supergraph?: string | null;
+      fullSchemaSdl: string;
+    },
+    span?: Span,
+  ) {
     const publishMetadata = async () => {
       const metadata: Array<Record<string, any>> = [];
       for (const schema of schemas) {
@@ -1537,11 +1541,21 @@ export class SchemaPublisher {
         }
       }
       if (metadata.length > 0) {
-        await this.artifactStorageWriter.writeArtifact({
-          targetId: target.id,
-          artifact: metadata,
-          artifactType: 'metadata',
-        });
+        await Promise.all([
+          this.artifactStorageWriter.writeArtifact({
+            targetId: target.id,
+            artifact: metadata,
+            artifactType: 'metadata',
+          }),
+          this.cdn.publish(
+            {
+              targetId: target.id,
+              resourceType: 'metadata',
+              value: JSON.stringify(metadata.length === 1 ? metadata[0] : metadata),
+            },
+            span,
+          ),
+        ]);
       }
     };
 
@@ -1549,7 +1563,7 @@ export class SchemaPublisher {
       const compositeSchema = ensureCompositeSchemas(schemas);
 
       await Promise.all([
-        await this.artifactStorageWriter.writeArtifact({
+        this.artifactStorageWriter.writeArtifact({
           targetId: target.id,
           artifactType: 'services',
           artifact: compositeSchema.map(s => ({
@@ -1563,15 +1577,50 @@ export class SchemaPublisher {
           artifactType: 'sdl',
           artifact: fullSchemaSdl,
         }),
+        this.cdn.publish(
+          {
+            targetId: target.id,
+            resourceType: 'schema',
+            value: JSON.stringify(
+              schemas.length > 1
+                ? compositeSchema.map(s => ({
+                    sdl: s.sdl,
+                    url: s.service_url,
+                    name: s.service_name,
+                    date: s.date,
+                  }))
+                : {
+                    sdl: compositeSchema[0].sdl,
+                    url: compositeSchema[0].service_url,
+                    name: compositeSchema[0].service_name,
+                    date: compositeSchema[0].date,
+                  },
+            ),
+          },
+          span,
+        ),
       ]);
     };
 
     const publishSingleSchema = async () => {
-      await this.artifactStorageWriter.writeArtifact({
-        targetId: target.id,
-        artifactType: 'sdl',
-        artifact: fullSchemaSdl,
-      });
+      await Promise.all([
+        this.artifactStorageWriter.writeArtifact({
+          targetId: target.id,
+          artifactType: 'sdl',
+          artifact: fullSchemaSdl,
+        }),
+        this.cdn.publish(
+          {
+            targetId: target.id,
+            resourceType: 'schema',
+            value: JSON.stringify({
+              sdl: schemas[0].sdl,
+              date: schemas[0].date,
+            }),
+          },
+          span,
+        ),
+      ]);
     };
 
     const actions = [
@@ -1584,6 +1633,14 @@ export class SchemaPublisher {
         this.logger.debug('Publishing supergraph to CDN');
 
         actions.push(
+          this.cdn.publish(
+            {
+              targetId: target.id,
+              resourceType: 'supergraph',
+              value: supergraph,
+            },
+            span,
+          ),
           this.artifactStorageWriter.writeArtifact({
             targetId: target.id,
             artifactType: 'supergraph',

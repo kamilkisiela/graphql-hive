@@ -1,11 +1,12 @@
 import { createServer } from 'http';
 import * as itty from 'itty-router';
+import { json, withParams } from 'itty-router-extras';
 import { createServerAdapter } from '@whatwg-node/server';
 import { createArtifactRequestHandler } from './artifact-handler';
 import { ArtifactStorageReader } from './artifact-storage-reader';
 import { AwsClient } from './aws';
 import './dev-polyfill';
-import { env, fetch } from './dev-polyfill';
+import { devStorage, env } from './dev-polyfill';
 import { createRequestHandler } from './handler';
 import { createIsKeyValid } from './key-validation';
 
@@ -22,23 +23,12 @@ const s3 = {
 // eslint-disable-next-line no-process-env
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4010;
 
-const artifactStorageReader = new ArtifactStorageReader(s3, env.S3_PUBLIC_URL, null);
-
 const handleRequest = createRequestHandler({
+  getRawStoreValue: value => env.HIVE_DATA.get(value),
   isKeyValid: createIsKeyValid({ s3, getCache: null, waitUntil: null, analytics: null }),
-  async getArtifactAction(targetId, artifactType, eTag) {
-    return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
-  },
-  async fetchText(url) {
-    const r = await fetch(url);
-
-    if (r.ok) {
-      return r.text();
-    }
-
-    throw new Error(`Failed to fetch ${url}, status: ${r.status}`);
-  },
 });
+
+const artifactStorageReader = new ArtifactStorageReader(s3, env.S3_PUBLIC_URL, null);
 
 const handleArtifactRequest = createArtifactRequestHandler({
   isKeyValid: createIsKeyValid({ s3, getCache: null, waitUntil: null, analytics: null }),
@@ -49,6 +39,40 @@ const handleArtifactRequest = createArtifactRequestHandler({
 
 function main() {
   const app = createServerAdapter(itty.Router());
+
+  app.put(
+    '/:accountId/storage/kv/namespaces/:namespaceId/values/:key',
+    withParams,
+    async (
+      request: Request & {
+        params: {
+          accountId: string;
+          namespaceId: string;
+          key: string;
+        };
+      },
+    ) => {
+      if (!request.params.key) {
+        throw new Error(`Missing key`);
+      }
+
+      const textBody = await request.text();
+
+      if (!textBody) {
+        throw new Error(`Missing body value`);
+      }
+
+      console.log(`Writing to ephermal storage: ${request.params.key}, value: ${request.body}`);
+
+      devStorage.set(request.params.key, textBody);
+
+      return json({
+        success: true,
+      });
+    },
+  );
+
+  app.get('/dump', () => json(Object.fromEntries(devStorage.entries())));
 
   app.get(
     '/_readiness',
