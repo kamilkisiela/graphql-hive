@@ -27,7 +27,7 @@ describe('CDN Worker', () => {
     const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
-    map.set(`target:${targetId}:sdl`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+    map.set(`target:${targetId}:sdl`, `type Query { dummy: String }`);
     const token = createToken(SECRET, targetId);
 
     const handleRequest = createRequestHandler({
@@ -86,7 +86,7 @@ describe('CDN Worker', () => {
     const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
-    map.set(`target:${targetId}:sdl`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+    map.set(`target:${targetId}:sdl`, `type Query { dummy: String }`);
 
     const handleRequest = createRequestHandler({
       isKeyValid: createIsKeyValid({
@@ -161,10 +161,7 @@ describe('CDN Worker', () => {
     const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
-    map.set(
-      `target:${targetId}:supergraph`,
-      JSON.stringify({ sdl: `type Query { dummy: String }` }),
-    );
+    map.set(`target:${targetId}:supergraph`, `type Query { dummy: String }`);
 
     const token = createToken(SECRET, targetId);
 
@@ -314,7 +311,7 @@ describe('CDN Worker', () => {
     const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
-    map.set(`target:${targetId}:sdl`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+    map.set(`target:${targetId}:sdl`, `type Query { dummy: String }`);
 
     const handleRequest = createRequestHandler({
       isKeyValid: createIsKeyValid({
@@ -389,12 +386,7 @@ describe('CDN Worker', () => {
     const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
-    map.set(
-      `target:${targetId}:sdl`,
-      JSON.stringify({
-        sdl: `type Query { dummy: String }`,
-      }),
-    );
+    map.set(`target:${targetId}:sdl`, `type Query { dummy: String }`);
 
     const handleRequest = createRequestHandler({
       isKeyValid: createIsKeyValid({
@@ -556,7 +548,7 @@ describe('CDN Worker', () => {
       const SECRET = '123456';
       const targetId = 'fake-target-id';
       const map = new Map();
-      map.set(`target:${targetId}:sdl`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+      map.set(`target:${targetId}:sdl`, `type Query { dummy: String }`);
 
       const handleRequest = createRequestHandler({
         isKeyValid: createIsKeyValid({
