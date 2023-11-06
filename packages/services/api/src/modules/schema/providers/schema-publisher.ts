@@ -1539,7 +1539,7 @@ export class SchemaPublisher {
       if (metadata.length > 0) {
         await this.artifactStorageWriter.writeArtifact({
           targetId: target.id,
-          artifact: metadata,
+          artifact: metadata.length === 1 ? metadata[0] : metadata,
           artifactType: 'metadata',
         });
       }

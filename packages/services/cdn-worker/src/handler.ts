@@ -232,8 +232,30 @@ export const createRequestHandler = (deps: RequestHandlerDependencies) => {
           return artifactTypesHandlers.sdl(targetId, artifactType, rawValue, etag);
         case 'introspection':
           return artifactTypesHandlers.introspection(targetId, artifactType, rawValue, etag);
-        case 'metadata':
+        case 'metadata': {
+          // Mesh's Metadata always defines _schema
+          const isMeshArtifact = rawValue.includes(`"#/definitions/_schema"`);
+
+          if (isMeshArtifact) {
+            // Mesh's Metadata is stored as a string, so we need to trim it first
+            const rawValueTrimmed = rawValue.trim();
+            // Mesh's Metadata shared by Mesh is always an object and remove the top-level array brackets
+            // The top-level array was caused #3291 and fixed by #3296, but we still need to handle the old data.
+            const hasTopLevelArray =
+              rawValueTrimmed.startsWith('[') && rawValueTrimmed.endsWith(']');
+
+            if (hasTopLevelArray) {
+              return artifactTypesHandlers.metadata(
+                targetId,
+                artifactType,
+                rawValueTrimmed.substring(1, rawValueTrimmed.length - 1),
+                etag,
+              );
+            }
+          }
+
           return artifactTypesHandlers.metadata(targetId, artifactType, rawValue, etag);
+        }
         default:
           return createResponse(
             analytics,
