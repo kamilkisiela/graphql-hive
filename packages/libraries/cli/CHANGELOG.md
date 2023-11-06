@@ -1,5 +1,13 @@
 # @graphql-hive/cli
 
+## 0.30.4
+
+### Patch Changes
+
+- [#1716](https://github.com/kamilkisiela/graphql-hive/pull/1716)
+  [`f79fcf2`](https://github.com/kamilkisiela/graphql-hive/commit/f79fcf27d624350a52de6599677d46adb52ea835)
+  Thanks [@dimaMachina](https://github.com/dimaMachina)! - Drop `graphql-request` dependency
+
 ## 0.30.3
 
 ### Patch Changes
