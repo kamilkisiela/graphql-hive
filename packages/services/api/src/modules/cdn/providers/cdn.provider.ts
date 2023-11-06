@@ -123,8 +123,8 @@ export class CdnProvider {
     alias: string;
   }) {
     this.logger.debug(
-      'Creating CDN Access Token. (targetId=%s, projectId=%s, targetId=%s)',
-      args.targetId,
+      'Creating CDN Access Token. (organizationId=%s, projectId=%s, targetId=%s)',
+      args.organizationId,
       args.projectId,
       args.targetId,
     );
@@ -133,8 +133,8 @@ export class CdnProvider {
 
     if (alias.success === false) {
       this.logger.debug(
-        'Failed creating CDN Access Token. Validation failed. (targetId=%s, projectId=%s, targetId=%s)',
-        args.targetId,
+        'Failed creating CDN Access Token. Validation failed. (organizationId=%s, projectId=%s, targetId=%s)',
+        args.organizationId,
         args.projectId,
         args.targetId,
       );
@@ -160,8 +160,8 @@ export class CdnProvider {
     const cdnAccessToken = encodeCdnToken({ keyId, privateKey });
 
     this.logger.debug(
-      'Check CDN access token key availability on S3. (targetId=%s, projectId=%s, targetId=%s, key=%s)',
-      args.targetId,
+      'Check CDN access token key availability on S3. (organizationId=%s, projectId=%s, targetId=%s, key=%s)',
+      args.organizationId,
       args.projectId,
       args.targetId,
       s3Key,
@@ -177,8 +177,8 @@ export class CdnProvider {
 
     if (headResponse.status !== 404) {
       this.logger.debug(
-        'Failed creating CDN access token. Head request on S3 returned unexpected status while checking token availability. ( targetId=%s, projectId=%s, targetId=%s, status=%s)',
-        args.targetId,
+        'Failed creating CDN access token. Head request on S3 returned unexpected status while checking token availability. (organizationId=%s, projectId=%s, targetId=%s, status=%s)',
+        args.organizationId,
         args.projectId,
         args.targetId,
         headResponse.status,
@@ -192,8 +192,8 @@ export class CdnProvider {
     }
 
     this.logger.debug(
-      'Store CDN access token on S3. (targetId=%s, projectId=%s, targetId=%s, key=%s)',
-      args.targetId,
+      'Store CDN access token on S3. (organizationId=%s, projectId=%s, targetId=%s, key=%s)',
+      args.organizationId,
       args.projectId,
       args.targetId,
       s3Key,
@@ -210,8 +210,8 @@ export class CdnProvider {
 
     if (putResponse.status !== 200) {
       this.logger.debug(
-        'Failed creating CDN Access Token. Head request on S3 returned unexpected status while creating token. ( targetId=%s, projectId=%s, targetId=%s, status=%s)',
-        args.targetId,
+        'Failed creating CDN Access Token. Head request on S3 returned unexpected status while creating token. (organizationId=%s, projectId=%s, targetId=%s, status=%s)',
+        args.organizationId,
         args.projectId,
         args.targetId,
         headResponse.status,
@@ -225,16 +225,16 @@ export class CdnProvider {
     }
 
     this.logger.debug(
-      'Successfully stored CDN access token on S3. (targetId=%s, projectId=%s, targetId=%s, key=%s)',
-      args.targetId,
+      'Successfully stored CDN access token on S3. (organizationId=%s, projectId=%s, targetId=%s, key=%s)',
+      args.organizationId,
       args.projectId,
       args.targetId,
       s3Key,
     );
 
     this.logger.debug(
-      'Insert CDN access token into PG. (targetId=%s, projectId=%s, targetId=%s, key=%s)',
-      args.targetId,
+      'Insert CDN access token into PG. (organizationId=%s, projectId=%s, targetId=%s, key=%s)',
+      args.organizationId,
       args.projectId,
       args.targetId,
       s3Key,
@@ -250,6 +250,14 @@ export class CdnProvider {
     });
 
     if (cdnAccessTokenRecord === null) {
+      this.logger.error(
+        'Failed inserting CDN access token in PG. (organizationId=%s, projectId=%s, targetId=%s, key=%s)',
+        args.organizationId,
+        args.projectId,
+        args.targetId,
+        s3Key,
+      );
+
       return {
         type: 'failure',
         reason: 'Failed to generate key. Please try again later.',
@@ -257,11 +265,12 @@ export class CdnProvider {
     }
 
     this.logger.debug(
-      'Successfully created CDN access token. (targetId=%s, projectId=%s, targetId=%s, key=%s)',
-      args.targetId,
+      'Successfully created CDN access token. (organizationId=%s, projectId=%s, targetId=%s, key=%s, cdnAccessTokenId=%s)',
+      args.organizationId,
       args.projectId,
       args.targetId,
       s3Key,
+      cdnAccessTokenRecord.id,
     );
 
     return {
@@ -277,6 +286,14 @@ export class CdnProvider {
     targetId: string;
     cdnAccessTokenId: string;
   }) {
+    this.logger.debug(
+      'Delete CDN access token. (organizationId=%s, projectId=%s, targetId=%s, cdnAccessTokenId=%s)',
+      args.organizationId,
+      args.projectId,
+      args.targetId,
+      args.cdnAccessTokenId,
+    );
+
     await this.authManager.ensureTargetAccess({
       organization: args.organizationId,
       project: args.projectId,
@@ -285,6 +302,14 @@ export class CdnProvider {
     });
 
     if (isUUID(args.cdnAccessTokenId) === false) {
+      this.logger.debug(
+        'Delete CDN access token error. Non UUID provided. (organizationId=%s, projectId=%s, targetId=%s, cdnAccessTokenId=%s)',
+        args.organizationId,
+        args.projectId,
+        args.targetId,
+        args.cdnAccessTokenId,
+      );
+
       return {
         type: 'failure',
         reason: 'The CDN Access Token does not exist.',
@@ -297,6 +322,13 @@ export class CdnProvider {
     });
 
     if (record === null || record.targetId !== args.targetId) {
+      this.logger.debug(
+        'Delete CDN access token error. Access Token not found in database. (organizationId=%s, projectId=%s, targetId=%s, cdnAccessTokenId=%s)',
+        args.organizationId,
+        args.projectId,
+        args.targetId,
+        args.cdnAccessTokenId,
+      );
       return {
         type: 'failure',
         reason: 'The CDN Access Token does not exist.',
@@ -311,6 +343,14 @@ export class CdnProvider {
     );
 
     if (headResponse.status !== 204) {
+      this.logger.debug(
+        'Delete CDN access token error. Head request on S3 failed. (organizationId=%s, projectId=%s, targetId=%s, cdnAccessTokenId=%s)',
+        args.organizationId,
+        args.projectId,
+        args.targetId,
+        args.cdnAccessTokenId,
+      );
+
       return {
         type: 'failure',
         reason: 'Failed deleting CDN Access Token. Please try again later.',
@@ -320,13 +360,6 @@ export class CdnProvider {
     await this.storage.deleteCDNAccessToken({
       cdnAccessTokenId: args.cdnAccessTokenId,
     });
-
-    if (record === null) {
-      return {
-        type: 'failure',
-        reason: 'The CDN Access Token. Does not exist.',
-      } as const;
-    }
 
     return {
       type: 'success',
