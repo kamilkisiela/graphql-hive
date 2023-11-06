@@ -104,10 +104,6 @@ const CdnCFModel = zod.union([
   zod.object({
     CDN_CF: zod.literal('1'),
     CDN_CF_BASE_URL: zod.string(),
-    CDN_CF_BASE_PATH: zod.string(),
-    CDN_CF_ACCOUNT_ID: zod.string(),
-    CDN_CF_AUTH_TOKEN: zod.string(),
-    CDN_CF_NAMESPACE_ID: zod.string(),
   }),
 ]);
 
