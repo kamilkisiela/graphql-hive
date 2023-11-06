@@ -469,12 +469,12 @@ describe('CDN Worker', () => {
     it('Should throw when target id is missing', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysTrue,
-        async getArtifactAction(targetId, artifactType) {
+        async getArtifactAction() {
           return {
             type: 'notFound',
           };
         },
-        async fetchText(url) {
+        async fetchText() {
           throw new Error('Should not be called');
         },
       });
@@ -489,12 +489,12 @@ describe('CDN Worker', () => {
     it('Should throw when requested resource is not valid', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysTrue,
-        async getArtifactAction(targetId, artifactType) {
+        async getArtifactAction() {
           return {
             type: 'notFound',
           };
         },
-        async fetchText(url) {
+        async fetchText() {
           throw new Error('Should not be called');
         },
       });
@@ -509,12 +509,12 @@ describe('CDN Worker', () => {
     it('Should throw when auth key is missing', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysTrue,
-        async getArtifactAction(targetId, artifactType) {
+        async getArtifactAction() {
           return {
             type: 'notFound',
           };
         },
-        async fetchText(url) {
+        async fetchText() {
           throw new Error('Should not be called');
         },
       });
@@ -529,12 +529,12 @@ describe('CDN Worker', () => {
     it('Should throw when key validation function fails', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysFalse,
-        async getArtifactAction(targetId, artifactType) {
+        async getArtifactAction() {
           return {
             type: 'notFound',
           };
         },
-        async fetchText(url) {
+        async fetchText() {
           throw new Error('Should not be called');
         },
       });
@@ -666,12 +666,12 @@ describe('CDN Worker', () => {
             },
           },
         }),
-        async getArtifactAction(targetId, artifactType) {
+        async getArtifactAction() {
           return {
             type: 'notFound',
           };
         },
-        async fetchText(url) {
+        async fetchText() {
           throw new Error('Should not be called');
         },
       });
