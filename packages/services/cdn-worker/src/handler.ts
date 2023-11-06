@@ -110,6 +110,9 @@ function createArtifactTypesHandlers(analytics: Analytics) {
       rawValue: string,
       etag: string,
     ) {
+      if (rawValue.startsWith('[')) {
+        rawValue = rawValue.slice(1, -1);
+      }
       return createResponse(
         analytics,
         rawValue,
