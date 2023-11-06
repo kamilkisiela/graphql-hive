@@ -2,20 +2,15 @@ import bcryptjs from 'bcryptjs';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import { z } from 'zod';
 import { encodeCdnToken, generatePrivateKey } from '@hive/cdn-script/cdn-token';
-import type { Span } from '@sentry/types';
 import { crypto } from '@whatwg-node/fetch';
 import { HiveError } from '../../../shared/errors';
 import { isUUID } from '../../../shared/is-uuid';
-import { sentry } from '../../../shared/sentry';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/scopes';
-import { HttpClient } from '../../shared/providers/http-client';
 import { Logger } from '../../shared/providers/logger';
 import { S3_CONFIG, type S3Config } from '../../shared/providers/s3-config';
 import { Storage } from '../../shared/providers/storage';
 import { CDN_CONFIG, type CDNConfig } from './tokens';
-
-type CdnResourceType = 'schema' | 'supergraph' | 'metadata';
 
 const s3KeyPrefix = 'cdn-keys';
 
@@ -28,7 +23,6 @@ export class CdnProvider {
 
   constructor(
     logger: Logger,
-    private httpClient: HttpClient,
     @Inject(AuthManager) private authManager: AuthManager,
     @Inject(CDN_CONFIG) private config: CDNConfig,
     @Inject(S3_CONFIG) private s3Config: S3Config,
@@ -50,70 +44,6 @@ export class CdnProvider {
     }
 
     throw new HiveError(`CDN is not configured, cannot resolve CDN target url.`);
-  }
-
-  async pushToCloudflareCDN(url: string, body: string, span?: Span): Promise<{ success: boolean }> {
-    if (this.config.providers.cloudflare === null) {
-      this.logger.info(`Trying to push to the CDN, but CDN is not configured, skipping`);
-      return { success: false };
-    }
-
-    return this.httpClient.put<{ success: boolean }>(
-      url,
-      {
-        headers: {
-          'content-type': 'text/plain',
-          authorization: `Bearer ${this.config.providers.cloudflare.authToken}`,
-        },
-        body,
-        responseType: 'json',
-        retry: {
-          limit: 3,
-        },
-        timeout: {
-          request: 10_000,
-        },
-      },
-      span,
-    );
-  }
-
-  @sentry('CdnProvider.publish')
-  async publish(
-    {
-      targetId,
-      resourceType,
-      value,
-    }: {
-      targetId: string;
-      resourceType: CdnResourceType;
-      value: string;
-    },
-    span?: Span,
-  ): Promise<void> {
-    if (this.config.providers.cloudflare === null) {
-      this.logger.info(`Trying to publish to the CDN, but CDN is not configured, skipping`);
-      return;
-    }
-
-    const target = `target:${targetId}`;
-    this.logger.info(
-      `Publishing data to CDN based on target: "${target}", resourceType is: ${resourceType} ...`,
-    );
-    const CDN_SOURCE = `${this.config.providers.cloudflare.basePath}/${this.config.providers.cloudflare.accountId}/storage/kv/namespaces/${this.config.providers.cloudflare.namespaceId}/values/${target}`;
-
-    const result = await this.pushToCloudflareCDN(`${CDN_SOURCE}:${resourceType}`, value, span);
-
-    if (!result.success) {
-      return Promise.reject(
-        new HiveError(`Failed to publish to CDN, response: ${JSON.stringify(result)}`),
-      );
-    }
-
-    this.logger.info(
-      `Published to CDN based on target: "${target}", resourceType is: ${resourceType} is done, response: %o`,
-      result,
-    );
   }
 
   async createCDNAccessToken(args: {
