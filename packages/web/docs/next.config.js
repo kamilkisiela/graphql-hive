@@ -73,6 +73,11 @@ export default withGuildDocs({
       destination: '/docs/management/external-schema-composition',
       permanent: true,
     },
+    {
+      source: '/docs/specs/schema-reports',
+      destination: '/docs/api-reference/cli#publish-a-schema',
+      permanent: true,
+    },
   ],
   swcMinify: true,
   webpack: (config, { webpack }) => {
