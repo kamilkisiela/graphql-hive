@@ -80,7 +80,7 @@ export default class WhoAmI extends Command {
     });
 
     const result = await this.registryApi(registry, token)
-      .request(myTokenInfoQuery, {})
+      .request(myTokenInfoQuery)
       .catch(error => {
         this.handleFetchError(error);
       });
