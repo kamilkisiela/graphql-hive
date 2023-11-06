@@ -10,7 +10,6 @@ export type Env = {
   /**
    * KV Storage for the CDN
    */
-  HIVE_DATA: KVNamespace;
   SENTRY_DSN: string;
   /**
    * Name of the environment, e.g. staging, production
