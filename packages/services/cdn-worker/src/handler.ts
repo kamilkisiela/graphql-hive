@@ -69,15 +69,9 @@ const createArtifactTypesHandlers = (
       targetId,
     ),
   sdl: (targetId: string, artifactType: string, rawValue: string, etag: string) => {
-    if (rawValue.startsWith('[')) {
-      return new InvalidArtifactMatch(artifactType, targetId, analytics);
-    }
-
-    const parsed = JSON.parse(rawValue) as SchemaArtifact;
-
     return createResponse(
       analytics,
-      parsed.sdl,
+      rawValue,
       {
         status: 200,
         headers: {
@@ -104,13 +98,7 @@ const createArtifactTypesHandlers = (
       targetId,
     ),
   introspection: (targetId: string, artifactType: string, rawValue: string, etag: string) => {
-    if (rawValue.startsWith('[')) {
-      return new InvalidArtifactMatch(artifactType, targetId, analytics);
-    }
-
-    const parsed = JSON.parse(rawValue) as SchemaArtifact;
-    const rawSdl = parsed.sdl;
-    const schema = buildSchema(rawSdl);
+    const schema = buildSchema(rawValue);
     const introspection = introspectionFromSchema(schema);
 
     return createResponse(
