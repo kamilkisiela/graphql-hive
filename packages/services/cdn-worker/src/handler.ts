@@ -1,7 +1,5 @@
 import { buildSchema, introspectionFromSchema } from 'graphql';
 import { Analytics, createAnalytics } from './analytics';
-import { GetArtifactActionFn } from './artifact-handler';
-import { ArtifactsType as ModernArtifactsType } from './artifact-storage-reader';
 import {
   CDNArtifactNotFound,
   InvalidArtifactMatch,
@@ -140,7 +138,7 @@ async function parseIncomingRequest(
   | {
       targetId: string;
       artifactType: ArtifactType;
-      storageKeyType: 'schema' | 'supergraph' | 'metadata';
+      storageKeyType: string;
     }
 > {
   const params = new URL(request.url).pathname.replace(/^\/+/, '/').split('/').filter(Boolean);
@@ -194,11 +192,15 @@ async function parseIncomingRequest(
  */
 type IsKeyValid = (targetId: string, headerKey: string) => Promise<boolean>;
 
+/**
+ * Read a raw value from the store.
+ */
+type GetRawStoreValue = (targetId: string) => Promise<string | null>;
+
 interface RequestHandlerDependencies {
   isKeyValid: IsKeyValid;
-  getArtifactAction: GetArtifactActionFn;
+  getRawStoreValue: GetRawStoreValue;
   analytics?: Analytics;
-  fetchText: (url: string) => Promise<string>;
 }
 
 export const createRequestHandler = (deps: RequestHandlerDependencies) => {
@@ -216,27 +218,16 @@ export const createRequestHandler = (deps: RequestHandlerDependencies) => {
 
     analytics.track({ type: 'artifact', value: artifactType, version: 'v0' }, targetId);
 
-    // We need to map a non-existing legacy storage key to a modern one
-    // to be able to read the value from the R2 storage.
-    const artifactKeyToFetch: ModernArtifactsType =
-      storageKeyType === 'schema' ? 'sdl' : storageKeyType;
-
     const kvStorageKey = `target:${targetId}:${storageKeyType}`;
-    const rawValueAction = await deps
-      .getArtifactAction(targetId, artifactKeyToFetch, null)
-      .catch(() => {
-        // Do an extra attempt to read the value from the store.
-        // If we see that a single retry does not help, we should do a proper retry logic here.
-        // Why not now? Because we do have a new implementation that is based on R2 storage and this change is simple enough.
-        return deps.getArtifactAction(targetId, artifactKeyToFetch, null);
-      });
+    const rawValue = await deps.getRawStoreValue(kvStorageKey).catch(() => {
+      // Do an extra attempt to read the value from the store.
+      // If we see that a single retry does not help, we should do a proper retry logic here.
+      // Why not now? Because we do have a new implementation that is based on R2 storage and this change is simple enough.
+      return deps.getRawStoreValue(kvStorageKey);
+    });
 
-    if (rawValueAction.type === 'redirect') {
-      const rawValue = await deps
-        .fetchText(rawValueAction.location)
-        .catch(() => deps.fetchText(rawValueAction.location));
-
-      const etag = await createETag(`${kvStorageKey}|${rawValueAction}`);
+    if (rawValue) {
+      const etag = await createETag(`${kvStorageKey}|${rawValue}`);
       const ifNoneMatch = request.headers.get('if-none-match');
 
       if (ifNoneMatch && ifNoneMatch === etag) {
@@ -266,7 +257,7 @@ export const createRequestHandler = (deps: RequestHandlerDependencies) => {
       }
     } else {
       console.log(
-        `CDN Artifact not found for targetId=${targetId}, artifactType=${artifactType}, storageKeyType=${storageKeyType}, modernStorageKeyType=${artifactKeyToFetch}`,
+        `CDN Artifact not found for targetId=${targetId}, artifactType=${artifactType}, storageKeyType=${storageKeyType}`,
       );
       return new CDNArtifactNotFound(artifactType, targetId, analytics);
     }
