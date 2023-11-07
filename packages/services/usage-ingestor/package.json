@@ -14,6 +14,7 @@
     "@hive/service-common": "workspace:*",
     "@hive/usage-common": "workspace:*",
     "@sentry/node": "7.77.0",
+    "@types/got": "9.6.12",
     "agentkeepalive": "4.5.0",
     "date-fns": "2.30.0",
     "dotenv": "16.3.1",

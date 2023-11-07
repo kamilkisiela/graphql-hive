@@ -15,6 +15,7 @@
     "@hive/service-common": "workspace:*",
     "@sentry/node": "7.77.0",
     "@trpc/server": "10.43.1",
+    "@types/got": "9.6.12",
     "@whatwg-node/fetch": "0.9.13",
     "dotenv": "16.3.1",
     "got": "13.0.0",

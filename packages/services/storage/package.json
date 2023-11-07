@@ -20,6 +20,7 @@
     "@sentry/types": "7.77.0",
     "@tgriesser/schemats": "9.0.1",
     "@theguild/buddy": "0.1.0",
+    "@types/got": "9.6.12",
     "@types/node": "18.18.8",
     "@types/pg": "8.10.7",
     "dotenv": "16.3.1",

@@ -489,6 +489,9 @@ importers:
       '@types/bcryptjs':
         specifier: 2.4.5
         version: 2.4.5
+      '@types/got':
+        specifier: 9.6.12
+        version: 9.6.12
       '@types/node':
         specifier: 18.18.8
         version: 18.18.8
@@ -595,6 +598,9 @@ importers:
       '@types/bcryptjs':
         specifier: 2.4.5
         version: 2.4.5
+      '@types/got':
+        specifier: 9.6.12
+        version: 9.6.12
       '@types/ioredis-mock':
         specifier: 8.2.4
         version: 8.2.4
@@ -904,6 +910,9 @@ importers:
       '@trpc/server':
         specifier: 10.43.1
         version: 10.43.1
+      '@types/got':
+        specifier: 9.6.12
+        version: 9.6.12
       '@whatwg-node/fetch':
         specifier: 0.9.13
         version: 0.9.13
@@ -958,6 +967,9 @@ importers:
       '@types/async-retry':
         specifier: 1.4.7
         version: 1.4.7
+      '@types/got':
+        specifier: 9.6.12
+        version: 9.6.12
       '@types/ioredis-mock':
         specifier: 8.2.4
         version: 8.2.4
@@ -1060,6 +1072,9 @@ importers:
       '@trpc/server':
         specifier: 10.43.1
         version: 10.43.1
+      '@types/got':
+        specifier: 9.6.12
+        version: 9.6.12
       '@whatwg-node/fetch':
         specifier: 0.9.13
         version: 0.9.13
@@ -1151,6 +1166,9 @@ importers:
       '@theguild/buddy':
         specifier: 0.1.0
         version: 0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)
+      '@types/got':
+        specifier: 9.6.12
+        version: 9.6.12
       '@types/node':
         specifier: 18.18.8
         version: 18.18.8
@@ -1205,6 +1223,9 @@ importers:
       '@trpc/server':
         specifier: 10.43.1
         version: 10.43.1
+      '@types/got':
+        specifier: 9.6.12
+        version: 9.6.12
       '@whatwg-node/fetch':
         specifier: 0.9.13
         version: 0.9.13
@@ -1298,6 +1319,9 @@ importers:
       '@trpc/server':
         specifier: 10.43.1
         version: 10.43.1
+      '@types/got':
+        specifier: 9.6.12
+        version: 9.6.12
       '@whatwg-node/fetch':
         specifier: 0.9.13
         version: 0.9.13
@@ -1346,6 +1370,9 @@ importers:
       '@trpc/server':
         specifier: 10.43.1
         version: 10.43.1
+      '@types/got':
+        specifier: 9.6.12
+        version: 9.6.12
       '@whatwg-node/fetch':
         specifier: 0.9.13
         version: 0.9.13
@@ -1382,6 +1409,9 @@ importers:
       '@sentry/node':
         specifier: 7.77.0
         version: 7.77.0
+      '@types/got':
+        specifier: 9.6.12
+        version: 9.6.12
       agentkeepalive:
         specifier: 4.5.0
         version: 4.5.0
@@ -1424,6 +1454,9 @@ importers:
       '@trpc/server':
         specifier: 10.43.1
         version: 10.43.1
+      '@types/got':
+        specifier: 9.6.12
+        version: 9.6.12
       bullmq:
         specifier: 4.13.0
         version: 4.13.0(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
@@ -13222,6 +13255,14 @@ packages:
       '@types/node': 18.18.8
     dev: true
 
+  /@types/got@9.6.12:
+    resolution: {integrity: sha512-X4pj/HGHbXVLqTpKjA2ahI4rV/nNBc9mGO2I/0CgAra+F2dKgMXnENv2SRpemScBzBAI4vMelIVYViQxlSE6xA==}
+    dependencies:
+      '@types/node': 18.18.8
+      '@types/tough-cookie': 4.0.4
+      form-data: 2.5.1
+    dev: true
+
   /@types/graceful-fs@4.1.6:
     resolution: {integrity: sha512-Sig0SNORX9fdW+bQuTEovKj3uHcUL6LQKbCrrqb1X7J6/ReAbhCXRAhc+SMejhLELFj2QcyuxmUooZ4bt5ReSw==}
     dependencies:
@@ -13571,6 +13612,10 @@ packages:
   /@types/tmp@0.0.33:
     resolution: {integrity: sha512-gVC1InwyVrO326wbBZw+AO3u2vRXz/iRWq9jYhpG4W8LXyIgDv3ZmcLQ5Q4Gs+gFMyqx+viFoFT+l3p61QFCmQ==}
     dev: false
+
+  /@types/tough-cookie@4.0.4:
+    resolution: {integrity: sha512-95Sfz4nvMAb0Nl9DTxN3j64adfwfbBPEYq14VN7zT5J5O2M9V6iZMIIQU1U+pJyl9agHYHNCqhCXgyEtIRRa5A==}
+    dev: true
 
   /@types/trusted-types@2.0.2:
     resolution: {integrity: sha512-F5DIZ36YVLE+PN+Zwws4kJogq47hNgX3Nx6WyDJ3kcplxyke3XIzB8uK5n/Lpm1HBsbGzd6nmGehL8cPekP+Tg==}
