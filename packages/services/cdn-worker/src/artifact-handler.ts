@@ -48,7 +48,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
   ): Promise<Response | null> => {
     const headerKey = request.headers.get(authHeaderName);
     if (headerKey === null) {
-      return new MissingAuthKeyResponse(analytics);
+      return new MissingAuthKeyResponse(analytics, request);
     }
 
     const isValid = await deps.isKeyValid(targetId, headerKey);
@@ -57,7 +57,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
       return null;
     }
 
-    return new InvalidAuthKeyResponse(analytics);
+    return new InvalidAuthKeyResponse(analytics, request);
   };
 
   router.get(
@@ -77,6 +77,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
             status: 404,
           },
           request.params?.targetId ?? 'unknown',
+          request,
         );
       }
 
@@ -94,6 +95,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
             },
           },
           params.targetId,
+          request,
         );
       }
 
@@ -133,6 +135,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
             'Something went wrong, really wrong.',
             { status: 500 },
             params.targetId,
+            request,
           )
         );
       }
@@ -145,10 +148,11 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
             status: 304,
           },
           params.targetId,
+          request,
         );
       }
       if (result.type === 'notFound') {
-        return createResponse(analytics, 'Not found.', { status: 404 }, params.targetId);
+        return createResponse(analytics, 'Not found.', { status: 404 }, params.targetId, request);
       }
       if (result.type === 'redirect') {
         return createResponse(
@@ -156,6 +160,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
           'Found.',
           { status: 302, headers: { Location: result.location } },
           params.targetId,
+          request,
         );
       }
     },

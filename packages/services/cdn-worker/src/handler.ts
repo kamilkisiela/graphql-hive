@@ -29,102 +29,140 @@ type SchemaArtifact = {
 type ArtifactType = 'schema' | 'supergraph' | 'sdl' | 'metadata' | 'introspection';
 const artifactTypes = ['schema', 'supergraph', 'sdl', 'metadata', 'introspection'] as const;
 
-const createArtifactTypesHandlers = (
-  analytics: Analytics,
-): Record<
-  ArtifactType,
-  (targetId: string, artifactType: string, rawValue: string, etag: string) => Response
-> => ({
-  /**
-   * Returns SchemaArtifact or SchemaArtifact[], same way as it's stored in the storage
-   */
-  schema: (targetId: string, artifactType: string, rawValue: string, etag: string) =>
-    createResponse(
-      analytics,
-      rawValue,
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          etag,
+function createArtifactTypesHandlers(analytics: Analytics) {
+  return {
+    /**
+     * Returns SchemaArtifact or SchemaArtifact[], same way as it's stored in the storage
+     */
+    schema(
+      request: Request,
+      targetId: string,
+      artifactType: string,
+      rawValue: string,
+      etag: string,
+    ) {
+      return createResponse(
+        analytics,
+        rawValue,
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            etag,
+          },
         },
-      },
-      targetId,
-    ),
-  /**
-   * Returns Federation Supergraph, we store it as-is.
-   */
-  supergraph: (targetId: string, artifactType: string, rawValue: string, etag: string) =>
-    createResponse(
-      analytics,
-      rawValue,
-      {
-        status: 200,
-        headers: {
-          etag,
+        targetId,
+        request,
+      );
+    },
+    /**
+     * Returns Federation Supergraph, we store it as-is.
+     */
+    supergraph(
+      request: Request,
+      targetId: string,
+      artifactType: string,
+      rawValue: string,
+      etag: string,
+    ) {
+      return createResponse(
+        analytics,
+        rawValue,
+        {
+          status: 200,
+          headers: {
+            etag,
+          },
         },
-      },
-      targetId,
-    ),
-  sdl: (targetId: string, artifactType: string, rawValue: string, etag: string) => {
-    if (rawValue.startsWith('[')) {
-      return new InvalidArtifactMatch(artifactType, targetId, analytics);
-    }
+        targetId,
+        request,
+      );
+    },
+    sdl(request: Request, targetId: string, artifactType: string, rawValue: string, etag: string) {
+      if (rawValue.startsWith('[')) {
+        return new InvalidArtifactMatch(artifactType, targetId, analytics, request);
+      }
 
-    const parsed = JSON.parse(rawValue) as SchemaArtifact;
+      const parsed = JSON.parse(rawValue) as SchemaArtifact;
 
-    return createResponse(
-      analytics,
-      parsed.sdl,
-      {
-        status: 200,
-        headers: {
-          etag,
+      return createResponse(
+        analytics,
+        parsed.sdl,
+        {
+          status: 200,
+          headers: {
+            etag,
+          },
         },
-      },
-      targetId,
-    );
-  },
-  /**
-   * Returns Metadata same way as it's stored in the storage
-   */
-  metadata: (targetId: string, artifactType: string, rawValue: string, etag: string) =>
-    createResponse(
-      analytics,
-      rawValue,
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          etag,
+        targetId,
+        request,
+      );
+    },
+    /**
+     * Returns Metadata same way as it's stored in the storage
+     */
+    metadata(
+      request: Request,
+      targetId: string,
+      artifactType: string,
+      rawValue: string,
+      etag: string,
+    ) {
+      return createResponse(
+        analytics,
+        rawValue,
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            etag,
+          },
         },
-      },
-      targetId,
-    ),
-  introspection: (targetId: string, artifactType: string, rawValue: string, etag: string) => {
-    if (rawValue.startsWith('[')) {
-      return new InvalidArtifactMatch(artifactType, targetId, analytics);
-    }
+        targetId,
+        request,
+      );
+    },
+    introspection(
+      request: Request,
+      targetId: string,
+      artifactType: string,
+      rawValue: string,
+      etag: string,
+    ) {
+      if (rawValue.startsWith('[')) {
+        return new InvalidArtifactMatch(artifactType, targetId, analytics, request);
+      }
 
-    const parsed = JSON.parse(rawValue) as SchemaArtifact;
-    const rawSdl = parsed.sdl;
-    const schema = buildSchema(rawSdl);
-    const introspection = introspectionFromSchema(schema);
+      const parsed = JSON.parse(rawValue) as SchemaArtifact;
+      const rawSdl = parsed.sdl;
+      const schema = buildSchema(rawSdl);
+      const introspection = introspectionFromSchema(schema);
 
-    return createResponse(
-      analytics,
-      JSON.stringify(introspection),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          etag,
+      return createResponse(
+        analytics,
+        JSON.stringify(introspection),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            etag,
+          },
         },
-      },
-      targetId,
-    );
-  },
-});
+        targetId,
+        request,
+      );
+    },
+  } satisfies Record<
+    ArtifactType,
+    (
+      request: Request,
+      targetId: string,
+      artifactType: string,
+      rawValue: string,
+      etag: string,
+    ) => Response
+  >;
+}
 
 const VALID_ARTIFACT_TYPES = artifactTypes;
 const AUTH_HEADER_NAME = 'x-hive-cdn-key';
@@ -146,20 +184,20 @@ async function parseIncomingRequest(
 
   if (!targetId) {
     return {
-      error: new MissingTargetIDErrorResponse(analytics),
+      error: new MissingTargetIDErrorResponse(analytics, request),
     };
   }
 
   const artifactType = (params[1] || 'schema') as ArtifactType;
 
   if (!VALID_ARTIFACT_TYPES.includes(artifactType)) {
-    return { error: new InvalidArtifactTypeResponse(artifactType, analytics) };
+    return { error: new InvalidArtifactTypeResponse(artifactType, analytics, request) };
   }
 
   const headerKey = request.headers.get(AUTH_HEADER_NAME);
 
   if (!headerKey) {
-    return { error: new MissingAuthKeyResponse(analytics) };
+    return { error: new MissingAuthKeyResponse(analytics, request) };
   }
 
   try {
@@ -167,7 +205,7 @@ async function parseIncomingRequest(
 
     if (!keyValid) {
       return {
-        error: new InvalidAuthKeyResponse(analytics),
+        error: new InvalidAuthKeyResponse(analytics, request),
       };
     }
 
@@ -182,7 +220,7 @@ async function parseIncomingRequest(
   } catch (e) {
     console.warn(`Failed to validate key for ${targetId}, error:`, e);
     return {
-      error: new InvalidAuthKeyResponse(analytics),
+      error: new InvalidAuthKeyResponse(analytics, request),
     };
   }
 }
@@ -231,20 +269,26 @@ export const createRequestHandler = (deps: RequestHandlerDependencies) => {
       const ifNoneMatch = request.headers.get('if-none-match');
 
       if (ifNoneMatch && ifNoneMatch === etag) {
-        return createResponse(analytics, null, { status: 304 }, targetId);
+        return createResponse(analytics, null, { status: 304 }, targetId, request);
       }
 
       switch (artifactType) {
         case 'schema':
-          return artifactTypesHandlers.schema(targetId, artifactType, rawValue, etag);
+          return artifactTypesHandlers.schema(request, targetId, artifactType, rawValue, etag);
         case 'supergraph':
-          return artifactTypesHandlers.supergraph(targetId, artifactType, rawValue, etag);
+          return artifactTypesHandlers.supergraph(request, targetId, artifactType, rawValue, etag);
         case 'sdl':
-          return artifactTypesHandlers.sdl(targetId, artifactType, rawValue, etag);
+          return artifactTypesHandlers.sdl(request, targetId, artifactType, rawValue, etag);
         case 'introspection':
-          return artifactTypesHandlers.introspection(targetId, artifactType, rawValue, etag);
+          return artifactTypesHandlers.introspection(
+            request,
+            targetId,
+            artifactType,
+            rawValue,
+            etag,
+          );
         case 'metadata':
-          return artifactTypesHandlers.metadata(targetId, artifactType, rawValue, etag);
+          return artifactTypesHandlers.metadata(request, targetId, artifactType, rawValue, etag);
         default:
           return createResponse(
             analytics,
@@ -253,13 +297,14 @@ export const createRequestHandler = (deps: RequestHandlerDependencies) => {
               status: 500,
             },
             targetId,
+            request,
           );
       }
     } else {
       console.log(
         `CDN Artifact not found for targetId=${targetId}, artifactType=${artifactType}, storageKeyType=${storageKeyType}`,
       );
-      return new CDNArtifactNotFound(artifactType, targetId, analytics);
+      return new CDNArtifactNotFound(artifactType, targetId, analytics, request);
     }
   };
 };
