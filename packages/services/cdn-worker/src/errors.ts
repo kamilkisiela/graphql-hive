@@ -4,7 +4,7 @@ import { Analytics } from './analytics';
 const description = `Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage`;
 
 export class MissingTargetIDErrorResponse extends Response {
-  constructor(analytics: Analytics) {
+  constructor(analytics: Analytics, request: Request) {
     super(
       JSON.stringify({
         code: 'MISSING_TARGET_ID',
@@ -24,6 +24,7 @@ export class MissingTargetIDErrorResponse extends Response {
       {
         type: 'response',
         statusCode: 400,
+        requestPath: request.url,
       },
       'unknown',
     );
@@ -31,7 +32,7 @@ export class MissingTargetIDErrorResponse extends Response {
 }
 
 export class InvalidArtifactTypeResponse extends Response {
-  constructor(artifactType: string, analytics: Analytics) {
+  constructor(artifactType: string, analytics: Analytics, request: Request) {
     super(
       JSON.stringify({
         code: 'INVALID_ARTIFACT_TYPE',
@@ -50,6 +51,7 @@ export class InvalidArtifactTypeResponse extends Response {
       {
         type: 'response',
         statusCode: 400,
+        requestPath: request.url,
       },
       'unknown',
     );
@@ -57,7 +59,7 @@ export class InvalidArtifactTypeResponse extends Response {
 }
 
 export class MissingAuthKeyResponse extends Response {
-  constructor(analytics: Analytics) {
+  constructor(analytics: Analytics, request: Request) {
     super(
       JSON.stringify({
         code: 'MISSING_AUTH_KEY',
@@ -76,6 +78,7 @@ export class MissingAuthKeyResponse extends Response {
       {
         type: 'response',
         statusCode: 400,
+        requestPath: request.url,
       },
       'unknown',
     );
@@ -83,7 +86,7 @@ export class MissingAuthKeyResponse extends Response {
 }
 
 export class InvalidAuthKeyResponse extends Response {
-  constructor(analytics: Analytics) {
+  constructor(analytics: Analytics, request: Request) {
     super(
       JSON.stringify({
         code: 'INVALID_AUTH_KEY',
@@ -102,6 +105,7 @@ export class InvalidAuthKeyResponse extends Response {
       {
         type: 'response',
         statusCode: 403,
+        requestPath: request.url,
       },
       'unknown',
     );
@@ -109,7 +113,7 @@ export class InvalidAuthKeyResponse extends Response {
 }
 
 export class CDNArtifactNotFound extends Response {
-  constructor(artifactType: string, targetId: string, analytics: Analytics) {
+  constructor(artifactType: string, targetId: string, analytics: Analytics, request: Request) {
     super(
       JSON.stringify({
         code: 'NOT_FOUND',
@@ -128,6 +132,7 @@ export class CDNArtifactNotFound extends Response {
       {
         type: 'response',
         statusCode: 404,
+        requestPath: request.url,
       },
       targetId,
     );
@@ -135,7 +140,7 @@ export class CDNArtifactNotFound extends Response {
 }
 
 export class InvalidArtifactMatch extends Response {
-  constructor(artifactType: string, targetId: string, analytics: Analytics) {
+  constructor(artifactType: string, targetId: string, analytics: Analytics, request: Request) {
     super(
       JSON.stringify({
         code: 'INVALID_ARTIFACT_MATCH',
@@ -154,6 +159,7 @@ export class InvalidArtifactMatch extends Response {
       {
         type: 'response',
         statusCode: 400,
+        requestPath: request.url,
       },
       targetId,
     );
@@ -161,7 +167,7 @@ export class InvalidArtifactMatch extends Response {
 }
 
 export class UnexpectedError extends Response {
-  constructor(analytics: Analytics) {
+  constructor(analytics: Analytics, request: Request) {
     super(
       JSON.stringify({
         code: 'UNEXPECTED_ERROR',
@@ -180,6 +186,7 @@ export class UnexpectedError extends Response {
       {
         type: 'response',
         statusCode: 500,
+        requestPath: request.url,
       },
       'unknown',
     );

@@ -58,6 +58,7 @@ type Event =
   | {
       type: 'response';
       statusCode: number;
+      requestPath: string;
     };
 
 export function createAnalytics(
@@ -92,7 +93,7 @@ export function createAnalytics(
           });
         case 'response':
           return engines.response.writeDataPoint({
-            blobs: [event.statusCode.toString(), targetId],
+            blobs: [event.statusCode.toString(), event.requestPath, targetId],
             indexes: [targetId.substring(0, 32)],
           });
         case 'key-validation':

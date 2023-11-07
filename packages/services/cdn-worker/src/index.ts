@@ -135,12 +135,12 @@ const handler: ExportedHandler<Env> = {
         if (response) {
           return response;
         }
-        return createResponse(analytics, 'Not found', { status: 404 }, 'unknown');
+        return createResponse(analytics, 'Not found', { status: 404 }, 'unknown', request);
       });
     } catch (error) {
       console.error(error);
       sentry.captureException(error);
-      return new UnexpectedError(analytics);
+      return new UnexpectedError(analytics, request);
     }
   },
 };
