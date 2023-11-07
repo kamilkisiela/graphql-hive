@@ -87,12 +87,12 @@ export function createAnalytics(
           });
         case 'r2':
           return engines.r2.writeDataPoint({
-            blobs: [event.action, event.statusCode.toString()],
+            blobs: [event.action, event.statusCode.toString(), targetId],
             indexes: [targetId.substring(0, 32)],
           });
         case 'response':
           return engines.response.writeDataPoint({
-            blobs: [event.statusCode.toString()],
+            blobs: [event.statusCode.toString(), targetId],
             indexes: [targetId.substring(0, 32)],
           });
         case 'key-validation':
