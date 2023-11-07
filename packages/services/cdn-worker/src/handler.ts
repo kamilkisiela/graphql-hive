@@ -4,7 +4,6 @@ import { GetArtifactActionFn } from './artifact-handler';
 import { ArtifactsType as ModernArtifactsType } from './artifact-storage-reader';
 import {
   CDNArtifactNotFound,
-  InvalidArtifactMatch,
   InvalidArtifactTypeResponse,
   InvalidAuthKeyResponse,
   MissingAuthKeyResponse,
@@ -20,13 +19,6 @@ async function createETag(value: string) {
 
   return `"${hashArray.map(b => b.toString(16).padStart(2, '0')).join('')}"`;
 }
-
-type SchemaArtifact = {
-  sdl: string;
-  url?: string;
-  name?: string;
-  date?: string;
-};
 
 type ArtifactType = 'schema' | 'supergraph' | 'sdl' | 'metadata' | 'introspection';
 const artifactTypes = ['schema', 'supergraph', 'sdl', 'metadata', 'introspection'] as const;
@@ -81,15 +73,9 @@ function createArtifactTypesHandlers(analytics: Analytics) {
       );
     },
     sdl(request: Request, targetId: string, artifactType: string, rawValue: string, etag: string) {
-      if (rawValue.startsWith('[')) {
-        return new InvalidArtifactMatch(artifactType, targetId, analytics, request);
-      }
-
-      const parsed = JSON.parse(rawValue) as SchemaArtifact;
-
       return createResponse(
         analytics,
-        parsed.sdl,
+        rawValue,
         {
           status: 200,
           headers: {
@@ -110,9 +96,33 @@ function createArtifactTypesHandlers(analytics: Analytics) {
       rawValue: string,
       etag: string,
     ) {
-      if (rawValue.startsWith('[')) {
-        rawValue = rawValue.slice(1, -1);
+      // Mesh's Metadata always defines _schema
+      const isMeshArtifact = rawValue.includes(`"#/definitions/_schema"`);
+
+      if (isMeshArtifact) {
+        // Mesh's Metadata is stored as a string, so we need to trim it first
+        const rawValueTrimmed = rawValue.trim();
+        // Mesh's Metadata shared by Mesh is always an object and remove the top-level array brackets
+        // The top-level array was caused #3291 and fixed by #3296, but we still need to handle the old data.
+        const hasTopLevelArray = rawValueTrimmed.startsWith('[') && rawValueTrimmed.endsWith(']');
+
+        if (hasTopLevelArray) {
+          return createResponse(
+            analytics,
+            rawValueTrimmed.substring(1, rawValueTrimmed.length - 1),
+            {
+              status: 200,
+              headers: {
+                'Content-Type': 'application/json',
+                etag,
+              },
+            },
+            targetId,
+            request,
+          );
+        }
       }
+
       return createResponse(
         analytics,
         rawValue,
@@ -134,12 +144,7 @@ function createArtifactTypesHandlers(analytics: Analytics) {
       rawValue: string,
       etag: string,
     ) {
-      if (rawValue.startsWith('[')) {
-        return new InvalidArtifactMatch(artifactType, targetId, analytics, request);
-      }
-
-      const parsed = JSON.parse(rawValue) as SchemaArtifact;
-      const rawSdl = parsed.sdl;
+      const rawSdl = rawValue;
       const schema = buildSchema(rawSdl);
       const introspection = introspectionFromSchema(schema);
 
@@ -172,6 +177,17 @@ function createArtifactTypesHandlers(analytics: Analytics) {
 const VALID_ARTIFACT_TYPES = artifactTypes;
 const AUTH_HEADER_NAME = 'x-hive-cdn-key';
 
+const legacyToModernArtifactTypeMap: Record<
+  ArtifactType,
+  Extract<ModernArtifactsType, 'sdl' | 'services' | 'metadata' | 'supergraph'>
+> = {
+  schema: 'services',
+  supergraph: 'supergraph',
+  sdl: 'sdl',
+  metadata: 'metadata',
+  introspection: 'sdl',
+};
+
 async function parseIncomingRequest(
   request: Request,
   keyValidator: KeyValidator,
@@ -181,7 +197,7 @@ async function parseIncomingRequest(
   | {
       targetId: string;
       artifactType: ArtifactType;
-      storageKeyType: 'schema' | 'supergraph' | 'metadata';
+      storageKeyType: Extract<ModernArtifactsType, 'sdl' | 'services' | 'metadata' | 'supergraph'>;
     }
 > {
   const params = new URL(request.url).pathname.replace(/^\/+/, '/').split('/').filter(Boolean);
@@ -218,9 +234,9 @@ async function parseIncomingRequest(
       targetId,
       artifactType,
       storageKeyType:
-        artifactType === 'sdl' || artifactType === 'introspection' || artifactType === 'schema'
-          ? 'schema'
-          : artifactType,
+        // We need to map a non-existing legacy storage key to a modern one
+        // to be able to read the value from the R2 storage.
+        legacyToModernArtifactTypeMap[artifactType],
     };
   } catch (e) {
     console.warn(`Failed to validate key for ${targetId}, error:`, e);
@@ -242,7 +258,7 @@ interface RequestHandlerDependencies {
   fetchText: (url: string) => Promise<string>;
 }
 
-export const createRequestHandler = (deps: RequestHandlerDependencies) => {
+export function createRequestHandler(deps: RequestHandlerDependencies) {
   const analytics = deps.analytics ?? createAnalytics();
   const artifactTypesHandlers = createArtifactTypesHandlers(analytics);
 
@@ -257,19 +273,14 @@ export const createRequestHandler = (deps: RequestHandlerDependencies) => {
 
     analytics.track({ type: 'artifact', value: artifactType, version: 'v0' }, targetId);
 
-    // We need to map a non-existing legacy storage key to a modern one
-    // to be able to read the value from the R2 storage.
-    const artifactKeyToFetch: ModernArtifactsType =
-      storageKeyType === 'schema' ? 'sdl' : storageKeyType;
-
     const kvStorageKey = `target:${targetId}:${storageKeyType}`;
     const rawValueAction = await deps
-      .getArtifactAction(targetId, artifactKeyToFetch, null)
+      .getArtifactAction(targetId, storageKeyType, null)
       .catch(() => {
         // Do an extra attempt to read the value from the store.
         // If we see that a single retry does not help, we should do a proper retry logic here.
         // Why not now? Because we do have a new implementation that is based on R2 storage and this change is simple enough.
-        return deps.getArtifactAction(targetId, artifactKeyToFetch, null);
+        return deps.getArtifactAction(targetId, storageKeyType, null);
       });
 
     if (rawValueAction.type === 'redirect') {
@@ -277,7 +288,7 @@ export const createRequestHandler = (deps: RequestHandlerDependencies) => {
         .fetchText(rawValueAction.location)
         .catch(() => deps.fetchText(rawValueAction.location));
 
-      const etag = await createETag(`${kvStorageKey}|${rawValueAction}`);
+      const etag = await createETag(`${kvStorageKey}|${rawValue}`);
       const ifNoneMatch = request.headers.get('if-none-match');
 
       if (ifNoneMatch && ifNoneMatch === etag) {
@@ -314,9 +325,9 @@ export const createRequestHandler = (deps: RequestHandlerDependencies) => {
       }
     } else {
       console.log(
-        `CDN Artifact not found for targetId=${targetId}, artifactType=${artifactType}, storageKeyType=${storageKeyType}, modernStorageKeyType=${artifactKeyToFetch}`,
+        `CDN Artifact not found for targetId=${targetId}, artifactType=${artifactType}, storageKeyType=${storageKeyType}`,
       );
       return new CDNArtifactNotFound(artifactType, targetId, analytics, request);
     }
   };
-};
+}
