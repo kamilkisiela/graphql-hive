@@ -263,10 +263,6 @@ export class CompositeModel {
         ? this.federationOrchestrator
         : this.stitchingOrchestrator;
 
-    const metadataCheck = this.supportsMetadata(project)
-      ? await this.checks.metadata(incoming, previousService ?? null)
-      : null;
-
     const [compositionCheck, diffCheck] = await Promise.all([
       this.checks.composition({
         orchestrator,
@@ -290,30 +286,13 @@ export class CompositeModel {
       }),
     ]);
 
-    if (metadataCheck?.status === 'failed') {
-      return {
-        conclusion: SchemaPublishConclusion.Reject,
-        reasons: [
-          {
-            code: PublishFailureReasonCode.MetadataParsingFailure,
-          },
-        ],
-      };
-    }
-
     const hasNewUrl =
       serviceUrlCheck.status === 'completed' && serviceUrlCheck.result.status === 'modified';
-    const hasNewMetadata =
-      metadataCheck?.status === 'completed' && metadataCheck.result.status === 'modified';
 
     const messages: string[] = [];
 
     if (hasNewUrl) {
       messages.push(serviceUrlCheck.result.message!);
-    }
-
-    if (hasNewMetadata) {
-      messages.push('Metadata has been updated');
     }
 
     if (
@@ -344,6 +323,7 @@ export class CompositeModel {
         compositionErrors: compositionCheck.reason?.errors ?? null,
         schema: incoming,
         schemas,
+        metadata: null,
         supergraph: compositionCheck.result?.supergraph ?? null,
         fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       },

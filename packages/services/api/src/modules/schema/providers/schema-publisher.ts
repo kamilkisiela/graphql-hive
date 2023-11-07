@@ -690,14 +690,17 @@ export class SchemaPublisher {
           }),
         });
 
+        const metadata = schemas.find(s => s.id === updateResult.actionId)?.metadata ?? null;
+
         this.logger.info(
           'Deploying version to CDN (reason="status_change" version=%s)',
           latestVersion.id,
         );
 
-        await this.updateCDN({
+        await this.publishToCDN({
           target,
           project,
+          metadata,
           supergraph: compositionResult.supergraph,
           schemas,
           fullSchemaSdl: compositionResult.sdl!,
@@ -842,6 +845,7 @@ export class SchemaPublisher {
                   await this.publishToCDN({
                     target: input.target,
                     project,
+                    metadata: null,
                     supergraph: deleteResult.state.supergraph,
                     fullSchemaSdl: deleteResult.state.fullSchemaSdl,
                     schemas,
@@ -1272,6 +1276,7 @@ export class SchemaPublisher {
             supergraph,
             fullSchemaSdl,
             schemas,
+            metadata: input.metadata ?? null,
           });
         }
       },
@@ -1497,54 +1502,20 @@ export class SchemaPublisher {
   private async publishToCDN({
     target,
     project,
+    metadata,
     supergraph,
     fullSchemaSdl,
     schemas,
   }: {
     target: Target;
     project: Project;
+    metadata: string | null;
     supergraph: string | null;
     fullSchemaSdl: string;
     schemas: readonly Schema[];
   }) {
-    await this.updateCDN({
-      target,
-      project,
-      schemas,
-      supergraph,
-      fullSchemaSdl,
-    });
-  }
-
-  private async updateCDN({
-    target,
-    project,
-    supergraph,
-    schemas,
-    fullSchemaSdl,
-  }: {
-    target: Target;
-    project: Project;
-    schemas: readonly Schema[];
-    supergraph?: string | null;
-    fullSchemaSdl: string;
-  }) {
-    const publishMetadata = async () => {
-      const metadata: Array<Record<string, any>> = [];
-      for (const schema of schemas) {
-        if (typeof schema.metadata === 'string') {
-          metadata.push(JSON.parse(schema.metadata));
-        }
-      }
-      if (metadata.length > 0) {
-        await this.artifactStorageWriter.writeArtifact({
-          targetId: target.id,
-          artifact: metadata,
-          artifactType: 'metadata',
-        });
-      }
-    };
-
+    // TODO: limit metadata to SINGLE project
+    // TODO: check if metadata is used by non-SINGLE projects today
     const publishCompositeSchema = async () => {
       const compositeSchema = ensureCompositeSchemas(schemas);
 
@@ -1576,8 +1547,17 @@ export class SchemaPublisher {
 
     const actions = [
       project.type === ProjectType.SINGLE ? publishSingleSchema() : publishCompositeSchema(),
-      publishMetadata(),
     ];
+
+    if (project.type === ProjectType.SINGLE && !!metadata) {
+      actions.push(
+        this.artifactStorageWriter.writeArtifact({
+          targetId: target.id,
+          artifactType: 'metadata',
+          artifact: JSON.parse(metadata),
+        }),
+      );
+    }
 
     if (project.type === ProjectType.FEDERATION) {
       if (supergraph) {

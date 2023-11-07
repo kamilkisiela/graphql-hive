@@ -1,9 +1,9 @@
 import * as itty from 'itty-router';
 import zod from 'zod';
-import { type Request } from '@whatwg-node/fetch';
+import { fetch, type Request } from '@whatwg-node/fetch';
 import { createAnalytics, type Analytics } from './analytics';
 import { type ArtifactsType } from './artifact-storage-reader';
-import { InvalidAuthKeyResponse, MissingAuthKeyResponse } from './errors';
+import { InvalidAuthKeyResponse, MissingAuthKeyResponse, UnexpectedError } from './errors';
 import type { KeyValidator } from './key-validation';
 import { createResponse } from './tracked-response';
 
@@ -129,6 +129,58 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
       return createResponse(analytics, 'Not found.', { status: 404 }, params.targetId, request);
     }
     if (result.type === 'redirect') {
+      if (params.artifactType === 'metadata') {
+        // To not change a lot of logic and still reuse the etag bits, we
+        // fetch metadata using the redirect location.
+        // Once we get rid of legacy metadata (an array instead of an object),
+        // we can remove this and continue serving a redirect.
+        // In case of metadata, we need to fetch the artifact and transform it
+        const metadataResponse = await fetch(result.location);
+
+        if (!metadataResponse.ok) {
+          console.error(
+            'Failed to fetch metadata',
+            metadataResponse.status,
+            metadataResponse.statusText,
+          );
+
+          return new UnexpectedError(analytics, request);
+        }
+
+        const body = await metadataResponse.text();
+
+        // Mesh's Metadata always defines _schema
+        const isMeshArtifact = body.includes(`"#/definitions/_schema"`);
+        const hasTopLevelArray = body.startsWith('[') && body.endsWith(']');
+
+        analytics.track(
+          {
+            type: 'metadata',
+            value: hasTopLevelArray ? 'array' : 'object',
+          },
+          params.targetId,
+        );
+
+        // Mesh's Metadata shared by Mesh is always an object and remove the top-level array brackets
+        // The top-level array was caused #3291 and fixed now, but we still need to handle the old data.
+        if (isMeshArtifact && hasTopLevelArray) {
+          const etag = metadataResponse.headers.get('etag');
+          return createResponse(
+            analytics,
+            body.substring(1, body.length - 1),
+            {
+              status: 200,
+              headers: {
+                'Content-Type': 'application/json',
+                ...(etag ? { etag } : {}),
+              },
+            },
+            params.targetId,
+            request,
+          );
+        }
+      }
+
       return createResponse(
         analytics,
         'Found.',

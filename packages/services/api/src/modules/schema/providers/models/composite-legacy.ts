@@ -233,7 +233,7 @@ export class CompositeLegacyModel {
       };
     }
 
-    const [compositionCheck, diffCheck, metadataCheck] = await Promise.all([
+    const [compositionCheck, diffCheck] = await Promise.all([
       this.checks.composition({
         orchestrator,
         project,
@@ -254,11 +254,6 @@ export class CompositeLegacyModel {
         version: latestVersion,
         includeUrlChanges: true,
       }),
-      isFederation
-        ? {
-            status: 'skipped' as const,
-          }
-        : this.checks.metadata(incoming, previousService ?? null),
     ]);
 
     const compositionErrors =
@@ -271,8 +266,6 @@ export class CompositeLegacyModel {
 
     const hasNewUrl =
       serviceUrlCheck.status === 'completed' && serviceUrlCheck.result.status === 'modified';
-    const hasNewMetadata =
-      metadataCheck.status === 'completed' && metadataCheck.result.status === 'modified';
     const hasCompositionErrors = compositionErrors && compositionErrors.length > 0;
     const hasBreakingChanges = breakingChanges && breakingChanges.length > 0;
     const hasErrors = hasCompositionErrors || hasBreakingChanges;
@@ -282,8 +275,6 @@ export class CompositeLegacyModel {
       !hasErrors ||
       // If there is a new url, we should publish
       hasNewUrl ||
-      // If there is new metadata, we should publish
-      hasNewMetadata ||
       // If there are composition errors or breaking changes, we should publish if we're forcing
       ((hasCompositionErrors || hasBreakingChanges) && forced) ||
       // If there are breaking changes, we should publish if we're accepting breaking changes
@@ -294,10 +285,6 @@ export class CompositeLegacyModel {
 
       if (hasNewUrl) {
         messages.push(serviceUrlCheck.result.message!);
-      }
-
-      if (hasNewMetadata) {
-        messages.push('Metadata has been updated');
       }
 
       return {
@@ -311,6 +298,7 @@ export class CompositeLegacyModel {
           compositionErrors,
           schema: incoming,
           schemas,
+          metadata: null,
           supergraph: compositionCheck.result?.supergraph ?? null,
           fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
         },
@@ -331,12 +319,6 @@ export class CompositeLegacyModel {
         code: PublishFailureReasonCode.BreakingChanges,
         changes: diffCheck.reason.changes ?? [],
         breakingChanges: diffCheck.reason.breakingChanges ?? [],
-      });
-    }
-
-    if (metadataCheck.status === 'failed') {
-      reasons.push({
-        code: PublishFailureReasonCode.MetadataParsingFailure,
       });
     }
 

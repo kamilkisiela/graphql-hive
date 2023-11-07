@@ -51,6 +51,10 @@ type Event =
       value: [string, string] | [string];
     }
   | {
+      type: 'metadata';
+      value: 'array' | 'object';
+    }
+  | {
       type: 'r2';
       action: 'HEAD artifact' | 'GET cdn-legacy-keys' | 'GET cdn-access-token';
       statusCode: number;
@@ -65,6 +69,7 @@ export function createAnalytics(
   engines: {
     usage: AnalyticsEngine;
     error: AnalyticsEngine;
+    metadata: AnalyticsEngine;
     keyValidation: AnalyticsEngine;
     r2: AnalyticsEngine;
     response: AnalyticsEngine;
@@ -80,6 +85,11 @@ export function createAnalytics(
         case 'artifact':
           return engines.usage.writeDataPoint({
             blobs: [event.version, event.value, targetId],
+            indexes: [targetId.substring(0, 32)],
+          });
+        case 'metadata':
+          return engines.metadata.writeDataPoint({
+            blobs: [event.value, targetId],
             indexes: [targetId.substring(0, 32)],
           });
         case 'error':

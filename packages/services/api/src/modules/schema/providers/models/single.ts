@@ -269,6 +269,7 @@ export class SingleModel {
         compositionErrors: compositionCheck.reason?.errors ?? null,
         schema: incoming,
         schemas,
+        metadata: metadataCheck.result.metadata,
         supergraph: null,
         fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       },

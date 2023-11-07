@@ -173,6 +173,7 @@ type SchemaPublishSuccess = {
     compositionErrors: Array<SchemaCompositionError> | null;
     schema: SingleSchema | PushedCompositeSchema;
     schemas: [SingleSchema] | PushedCompositeSchema[];
+    metadata: string | null;
     supergraph: string | null;
     fullSchemaSdl: string | null;
   };

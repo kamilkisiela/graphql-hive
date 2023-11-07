@@ -31,15 +31,6 @@ export const env: Env = {
   S3_BUCKET_NAME: process.env.S3_BUCKET_NAME || '',
   // eslint-disable-next-line no-process-env
   S3_PUBLIC_URL: process.env.S3_PUBLIC_URL || '',
-  USAGE_ANALYTICS: {
-    writeDataPoint(_input: any) {},
-  },
-  ERROR_ANALYTICS: {
-    writeDataPoint(_input: any) {},
-  },
-  KEY_VALIDATION_ANALYTICS: {
-    writeDataPoint(_input: any) {},
-  },
   SENTRY_DSN: '',
   SENTRY_ENVIRONMENT: '',
   SENTRY_RELEASE: '',

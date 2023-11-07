@@ -436,6 +436,7 @@ export class RegistryChecks {
         status: 'completed',
         result: {
           status: modified ? ('modified' as const) : ('unchanged' as const),
+          metadata: service.metadata ?? null,
         },
       } satisfies CheckResult;
     } catch (e) {
