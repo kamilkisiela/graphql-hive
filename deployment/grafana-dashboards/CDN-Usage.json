@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 50,
+  "id": 47,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -39,11 +39,11 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "axisShow": false,
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 0,
@@ -204,11 +204,107 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "axisShow": false,
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "id": 16,
+      "options": {
+        "legend": {
+          "calcs": ["mean"],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "uid": "$Subscription"
+          },
+          "dateTimeColDataType": "timestamp",
+          "dateTimeType": "DATETIME",
+          "datetimeLoading": false,
+          "extrapolate": true,
+          "format": "time_series",
+          "formattedQuery": "SELECT $timeSeries as t, count() FROM $table WHERE $timeFilter GROUP BY t ORDER BY t",
+          "intervalFactor": 1,
+          "query": "SELECT\n    $timeSeries AS t,\n    blob1 AS statusCode,\n    blob2 as requestPath,\n    COUNT() as total\nFROM hive_ha_cdn_response_ENV_NAME\n\nWHERE $timeFilter\n\nGROUP BY\n    statusCode,\n    requestPath,\n    t\nORDER BY t\n",
+          "rawQuery": "SELECT\n    (intDiv(toUInt32(timestamp), 1) * 1) * 1000 AS t,\n    blob1 AS statusCode,\n    blob2 as requestPath,\n    COUNT() as total\nFROM hive_ha_cdn_response_ENV_NAME\n\nWHERE timestamp >= toDateTime(1699350434) AND timestamp <= toDateTime(1699350734)\n\nGROUP BY\n    statusCode,\n    requestPath,\n    t\nORDER BY t",
+          "refId": "A",
+          "round": "0s",
+          "skip_comments": true
+        }
+      ],
+      "title": "Requests by path and status code",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "vertamedia-clickhouse-datasource",
+        "uid": "$Subscription"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 0,
@@ -252,7 +348,7 @@
         "h": 7,
         "w": 17,
         "x": 0,
-        "y": 7
+        "y": 14
       },
       "id": 14,
       "options": {
@@ -315,7 +411,7 @@
         "h": 7,
         "w": 7,
         "x": 17,
-        "y": 7
+        "y": 14
       },
       "id": 15,
       "options": {
@@ -368,11 +464,11 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "axisShow": false,
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 0,
@@ -416,7 +512,7 @@
         "h": 7,
         "w": 17,
         "x": 0,
-        "y": 14
+        "y": 21
       },
       "id": 2,
       "options": {
@@ -478,7 +574,7 @@
         "h": 7,
         "w": 7,
         "x": 17,
-        "y": 14
+        "y": 21
       },
       "id": 13,
       "options": {
@@ -568,8 +664,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               }
             ]
           }
@@ -580,7 +675,7 @@
         "h": 6,
         "w": 17,
         "x": 0,
-        "y": 21
+        "y": 28
       },
       "id": 3,
       "options": {
@@ -642,7 +737,7 @@
         "h": 6,
         "w": 7,
         "x": 17,
-        "y": 21
+        "y": 28
       },
       "id": 5,
       "options": {
@@ -734,8 +829,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "orange",
@@ -754,7 +848,7 @@
         "h": 6,
         "w": 14,
         "x": 0,
-        "y": 27
+        "y": 34
       },
       "id": 6,
       "options": {
@@ -816,7 +910,7 @@
         "h": 6,
         "w": 8,
         "x": 14,
-        "y": 27
+        "y": 34
       },
       "id": 7,
       "options": {
@@ -875,8 +969,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "#EAB839",
@@ -895,7 +988,7 @@
         "h": 6,
         "w": 2,
         "x": 22,
-        "y": 27
+        "y": 34
       },
       "id": 8,
       "options": {
@@ -979,8 +1072,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -995,7 +1087,7 @@
         "h": 7,
         "w": 17,
         "x": 0,
-        "y": 33
+        "y": 40
       },
       "id": 10,
       "options": {
@@ -1057,7 +1149,7 @@
         "h": 7,
         "w": 7,
         "x": 17,
-        "y": 33
+        "y": 40
       },
       "id": 4,
       "options": {
@@ -1103,7 +1195,7 @@
   ],
   "refresh": "5s",
   "revision": 1,
-  "schemaVersion": 38,
+  "schemaVersion": 39,
   "tags": ["hive", "cdn"],
   "templating": {
     "list": [
@@ -1111,7 +1203,7 @@
         "current": {
           "selected": false,
           "text": "CDN",
-          "value": "ZTe-Py5Vz"
+          "value": "E4rnkso4z"
         },
         "hide": 0,
         "includeAll": false,
@@ -1133,7 +1225,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "CDN Usage",
-  "uid": "0xuKHA-Vk",
+  "uid": "iHmRSA-Vz",
   "version": 2,
   "weekStart": ""
 }
