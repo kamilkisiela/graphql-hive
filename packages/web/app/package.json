@@ -114,7 +114,7 @@
     "@types/cookies": "0.7.10",
     "@types/dompurify": "3.0.4",
     "@types/js-cookie": "3.0.5",
-    "@types/react": "18.2.35",
+    "@types/react": "18.2.36",
     "@types/react-dom": "18.2.14",
     "@types/react-highlight-words": "0.16.6",
     "@types/react-virtualized-auto-sizer": "1.0.2",
