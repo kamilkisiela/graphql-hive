@@ -1,6 +1,7 @@
 import { createHmac } from 'crypto';
 import * as bcrypt from 'bcryptjs';
 import '../src/dev-polyfill';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { describe, expect, test } from 'vitest';
 import {
   InvalidArtifactTypeResponse,
