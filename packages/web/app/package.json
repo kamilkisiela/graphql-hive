@@ -113,7 +113,7 @@
     "@storybook/react": "7.5.3",
     "@types/cookies": "0.7.10",
     "@types/dompurify": "3.0.5",
-    "@types/js-cookie": "3.0.5",
+    "@types/js-cookie": "3.0.6",
     "@types/react": "18.2.36",
     "@types/react-dom": "18.2.14",
     "@types/react-highlight-words": "0.16.6",
