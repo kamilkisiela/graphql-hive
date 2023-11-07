@@ -20,7 +20,7 @@
     "@hive/storage": "workspace:*",
     "@trpc/client": "10.43.1",
     "@trpc/server": "10.43.1",
-    "@types/dockerode": "3.3.22",
+    "@types/dockerode": "3.3.23",
     "@types/ioredis": "4.28.10",
     "@whatwg-node/fetch": "0.9.13",
     "bcryptjs": "2.4.3",
