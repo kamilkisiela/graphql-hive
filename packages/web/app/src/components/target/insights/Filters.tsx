@@ -117,7 +117,7 @@ function OperationsFilter({
     <Drawer open={isOpen} onOpenChange={onClose} width={500}>
       <Drawer.Title>Filter by operation</Drawer.Title>
 
-      <div className="flex flex-col h-full space-y-3">
+      <div className="flex h-full flex-col space-y-3">
         <Input
           size="medium"
           placeholder="Search for operation..."
@@ -128,7 +128,7 @@ function OperationsFilter({
             setVisibleOperations(operations.nodes);
           }}
         />
-        <div className="flex gap-2 items-center w-full">
+        <div className="flex w-full items-center gap-2">
           <LegacyButton variant="link" onClick={selectAll}>
             All
           </LegacyButton>
@@ -149,7 +149,7 @@ function OperationsFilter({
             Save
           </LegacyButton>
         </div>
-        <div className="pl-1 grow">
+        <div className="grow pl-1">
           <AutoSizer>
             {({ height, width }) =>
               !height || !width ? (
@@ -266,9 +266,9 @@ function OperationRow({
       <Checkbox checked={selected} onCheckedChange={change} id={hash} />
       <label
         htmlFor={hash}
-        className="flex items-center justify-between overflow-hidden gap-4 w-full cursor-pointer"
+        className="flex w-full cursor-pointer items-center justify-between gap-4 overflow-hidden"
       >
-        <span className="grow text-ellipsis overflow-hidden">{operation.name}</span>
+        <span className="grow overflow-hidden text-ellipsis">{operation.name}</span>
         <div className="shrink-0 text-right text-gray-500">{requests}</div>
       </label>
     </div>
@@ -290,7 +290,7 @@ export function OperationsFilterTrigger({
     <>
       <Button variant="outline" className="bg-accent" onClick={toggle}>
         <span>Operations ({selected?.length || 'all'})</span>
-        <FilterIcon className="ml-2 w-4 h-4" />
+        <FilterIcon className="ml-2 h-4 w-4" />
       </Button>
       <OperationsFilterContainer
         isOpen={isOpen}
@@ -335,9 +335,9 @@ function ClientRow({
       <Checkbox checked={selected} onCheckedChange={change} id={hash} />
       <label
         htmlFor={hash}
-        className="flex items-center justify-between overflow-hidden gap-4 w-full cursor-pointer"
+        className="flex w-full cursor-pointer items-center justify-between gap-4 overflow-hidden"
       >
-        <span className="grow text-ellipsis overflow-hidden">{client.name}</span>
+        <span className="grow overflow-hidden text-ellipsis">{client.name}</span>
         <div className="shrink-0 text-right text-gray-500">{requests}</div>
       </label>
     </div>
@@ -440,7 +440,7 @@ function ClientsFilter({
     <Drawer open={isOpen} onOpenChange={onClose} width={500}>
       <Drawer.Title>Filter by client</Drawer.Title>
 
-      <div className="flex flex-col h-full space-y-3">
+      <div className="flex h-full flex-col space-y-3">
         <Input
           size="medium"
           placeholder="Search for operation..."
@@ -451,7 +451,7 @@ function ClientsFilter({
             setVisibleOperations(clientConnection.nodes);
           }}
         />
-        <div className="flex gap-2 items-center w-full">
+        <div className="flex w-full items-center gap-2">
           <LegacyButton variant="link" onClick={selectAll}>
             All
           </LegacyButton>
@@ -472,7 +472,7 @@ function ClientsFilter({
             Save
           </LegacyButton>
         </div>
-        <div className="pl-1 grow">
+        <div className="grow pl-1">
           <AutoSizer>
             {({ height, width }) =>
               !height || !width ? (
@@ -574,7 +574,7 @@ export function ClientsFilterTrigger({
     <>
       <Button variant="outline" className="bg-accent" onClick={toggle}>
         <span>Clients ({selected?.length || 'all'})</span>
-        <FilterIcon className="ml-2 w-4 h-4" />
+        <FilterIcon className="ml-2 h-4 w-4" />
       </Button>
       <ClientsFilterContainer
         isOpen={isOpen}

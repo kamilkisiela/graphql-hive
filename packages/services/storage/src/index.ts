@@ -1604,9 +1604,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           return trx.one(sql`
             UPDATE public.targets as t
             SET validation_percentage = ${percentage}, validation_period = ${period}, validation_excluded_clients = ${sql.array(
-            excludedClients,
-            'text',
-          )}
+              excludedClients,
+              'text',
+            )}
             FROM (
               SELECT
                 it.id,
@@ -1745,8 +1745,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         LEFT JOIN public.targets as t ON (t.id = sv.target_id)
         LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
         WHERE t.id = ${target} AND t.project_id = ${project} AND ${
-        onlyComposable ? sql`sv.is_composable IS TRUE` : true
-      }
+          onlyComposable ? sql`sv.is_composable IS TRUE` : true
+        }
         ORDER BY sv.created_at DESC
         LIMIT 1
       `);
@@ -1829,8 +1829,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             SELECT sv.id FROM public.schema_versions as sv WHERE sv.created_at < (
               SELECT svi.created_at FROM public.schema_versions as svi WHERE svi.id = ${version}
             ) AND sv.target_id = ${target} AND ${
-          onlyComposable ? sql`sv.is_composable IS TRUE` : true
-        } ORDER BY sv.created_at DESC LIMIT 1
+              onlyComposable ? sql`sv.is_composable IS TRUE` : true
+            } ORDER BY sv.created_at DESC LIMIT 1
           ) AND sl.action = 'PUSH'
           ORDER BY sl.created_at DESC
         `,
@@ -2333,8 +2333,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
               ("name", "type", "project_id", "slack_channel", "webhook_endpoint")
             VALUES
               (${name}, ${type}, ${project}, ${slack?.channel ?? null}, ${
-            webhook?.endpoint ?? null
-          })
+                webhook?.endpoint ?? null
+              })
             RETURNING *
           `,
         ),
@@ -2930,8 +2930,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         INSERT INTO "public"."schema_policy_config"
         ("resource_type", "resource_id", "config", "allow_overriding")
           VALUES ('ORGANIZATION', ${input.organizationId}, ${sql.jsonb(input.policy)}, ${
-        input.allowOverrides
-      })
+            input.allowOverrides
+          })
         ON CONFLICT
           (resource_type, resource_id)
         DO UPDATE

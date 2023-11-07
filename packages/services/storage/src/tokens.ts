@@ -64,9 +64,9 @@ export async function createTokenStorage(connection: string, maximumPoolSize: nu
             (name, token, token_alias, target_id, project_id, organization_id, scopes)
           VALUES
             (${name}, ${token}, ${tokenAlias}, ${target}, ${project}, ${organization}, ${sql.array(
-          scopes,
-          'text',
-        )})
+              scopes,
+              'text',
+            )})
           RETURNING *
         `,
       );

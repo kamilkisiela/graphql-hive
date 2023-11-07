@@ -108,7 +108,7 @@ function SchemaCoordinateView(props: {
 
   return (
     <>
-      <div className="py-6 flex flex-row items-center justify-between">
+      <div className="flex flex-row items-center justify-between py-6">
         <div>
           <Title>{props.coordinate}</Title>
           <Subtitle>Schema coordinate insights</Subtitle>
@@ -139,13 +139,13 @@ function SchemaCoordinateView(props: {
               <Card className="bg-gray-900/50">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total calls</CardTitle>
-                  <GlobeIcon className="h-4 w-4 text-muted-foreground" />
+                  <GlobeIcon className="text-muted-foreground h-4 w-4" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
                     {isLoading ? '-' : formatNumber(totalRequests)}
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     Requests in {displayDateRangeLabel(dateRangeKey).toLowerCase()}
                   </p>
                 </CardContent>
@@ -153,7 +153,7 @@ function SchemaCoordinateView(props: {
               <Card className="bg-gray-900/50">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Requests per minute</CardTitle>
-                  <ActivityIcon className="h-4 w-4 text-muted-foreground" />
+                  <ActivityIcon className="text-muted-foreground h-4 w-4" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
@@ -167,7 +167,7 @@ function SchemaCoordinateView(props: {
                           ),
                         )}
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     RPM in {displayDateRangeLabel(dateRangeKey).toLowerCase()}
                   </p>
                 </CardContent>
@@ -175,11 +175,11 @@ function SchemaCoordinateView(props: {
               <Card className="bg-gray-900/50">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Operations</CardTitle>
-                  <BookIcon className="h-4 w-4 text-muted-foreground" />
+                  <BookIcon className="text-muted-foreground h-4 w-4" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{isLoading ? '-' : totalOperations}</div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     GraphQL documents with selected coordinate
                   </p>
                 </CardContent>
@@ -187,11 +187,11 @@ function SchemaCoordinateView(props: {
               <Card className="bg-gray-900/50">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Consumers</CardTitle>
-                  <TabletSmartphoneIcon className="h-4 w-4 text-muted-foreground" />
+                  <TabletSmartphoneIcon className="text-muted-foreground h-4 w-4" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{isLoading ? '-' : totalClients}</div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     GraphQL clients in {displayDateRangeLabel(dateRangeKey).toLowerCase()}
                   </p>
                 </CardContent>
@@ -199,14 +199,14 @@ function SchemaCoordinateView(props: {
             </div>
           </div>
           <div className="col-span-4">
-            <Card className="bg-gray-900/50 flex flex-col h-full">
+            <Card className="flex h-full flex-col bg-gray-900/50">
               <CardHeader>
                 <CardTitle>Activity</CardTitle>
                 <CardDescription>
                   GraphQL requests with {props.coordinate} over time
                 </CardDescription>
               </CardHeader>
-              <CardContent className="basis-0 grow min-h-[150px]">
+              <CardContent className="min-h-[150px] grow basis-0">
                 <AutoSizer>
                   {size => (
                     <ReactECharts
@@ -273,7 +273,7 @@ function SchemaCoordinateView(props: {
           </div>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-4 bg-gray-900/50 flex flex-col h-full">
+          <Card className="col-span-4 flex h-full flex-col bg-gray-900/50">
             <CardHeader>
               <CardTitle>Operations</CardTitle>
               <CardDescription>
@@ -282,15 +282,15 @@ function SchemaCoordinateView(props: {
                 {displayDateRangeLabel(dateRangeKey).toLowerCase()}
               </CardDescription>
             </CardHeader>
-            <CardContent className="basis-0 grow overflow-y-auto min-h-[120px]">
+            <CardContent className="min-h-[120px] grow basis-0 overflow-y-auto">
               <div className="space-y-2">
                 {isLoading
                   ? null
                   : query.data?.schemaCoordinateStats.operations.nodes.map(operation => (
                       <div key={operation.id} className="flex items-center">
-                        <p className="text-sm font-medium truncate">
+                        <p className="truncate text-sm font-medium">
                           <Link
-                            className="text-orange-500 hover:underline hover:underline-offset-2 hover:text-orange-500"
+                            className="text-orange-500 hover:text-orange-500 hover:underline hover:underline-offset-2"
                             href={{
                               pathname:
                                 '/[organizationId]/[projectId]/[targetId]/insights/[operationName]/[operationHash]',
@@ -306,7 +306,7 @@ function SchemaCoordinateView(props: {
                             {operation.name}
                           </Link>
                         </p>
-                        <div className="ml-auto font-light flex flex-row justify-end items-center text-sm min-w-[150px]">
+                        <div className="ml-auto flex min-w-[150px] flex-row items-center justify-end text-sm font-light">
                           <div>{formatNumber(operation.count)}</div>{' '}
                           <div className="min-w-[70px] text-right">
                             {toDecimal((operation.count * 100) / totalRequests)}%
@@ -318,7 +318,7 @@ function SchemaCoordinateView(props: {
             </CardContent>
           </Card>
 
-          <Card className="col-span-3 bg-gray-900/50 flex flex-col h-full">
+          <Card className="col-span-3 flex h-full flex-col bg-gray-900/50">
             <CardHeader>
               <CardTitle>Clients</CardTitle>
               <CardDescription>
@@ -327,15 +327,15 @@ function SchemaCoordinateView(props: {
                 {displayDateRangeLabel(dateRangeKey).toLowerCase()}.
               </CardDescription>
             </CardHeader>
-            <CardContent className="basis-0 grow overflow-y-auto min-h-[170px]">
+            <CardContent className="min-h-[170px] grow basis-0 overflow-y-auto">
               <div className="space-y-2">
                 {isLoading
                   ? null
                   : query.data?.schemaCoordinateStats.clients.nodes.map(client => (
                       <div key={client.name} className="flex items-center">
-                        <p className="text-sm font-medium truncate">
+                        <p className="truncate text-sm font-medium">
                           <Link
-                            className="text-orange-500 hover:underline hover:underline-offset-2 hover:text-orange-500"
+                            className="text-orange-500 hover:text-orange-500 hover:underline hover:underline-offset-2"
                             href={{
                               pathname:
                                 '/[organizationId]/[projectId]/[targetId]/insights/client/[name]',
@@ -350,7 +350,7 @@ function SchemaCoordinateView(props: {
                             {client.name}
                           </Link>
                         </p>
-                        <div className="ml-auto font-light flex flex-row justify-end items-center text-sm min-w-[150px]">
+                        <div className="ml-auto flex min-w-[150px] flex-row items-center justify-end text-sm font-light">
                           <div>{formatNumber(client.count)}</div>
                           <div className="min-w-[70px] text-right">
                             {toDecimal((client.count * 100) / totalRequests)}%

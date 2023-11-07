@@ -183,8 +183,8 @@ function ProjectPolicyContent() {
                   currentState={currentProject.schemaPolicy}
                 />
               ) : (
-                <div className="text-gray-400 pl-1 text-sm font-bold">
-                  <p className="text-orange-500 inline-block mr-4">!</p>
+                <div className="pl-1 text-sm font-bold text-gray-400">
+                  <p className="mr-4 inline-block text-orange-500">!</p>
                   Organization settings does not allow projects to override policy. Please consult
                   your organization administrator.
                 </div>

@@ -33,16 +33,16 @@ const Trigger = forwardRef<any, Omit<TabsTriggerProps, 'className'> & { hasBorde
       ref={forwardedRef}
       className={clsx(
         '!appearance-none', // unset button styles in Safari
-        'font-medium text-sm transition text-white',
+        'text-sm font-medium text-white transition',
         hasBorder
           ? `
             radix-state-active:border-b-orange-500
-            hover:border-b-orange-900
+            cursor-pointer
             border-b-[2px]
             border-b-transparent
             px-4
             py-3
-            cursor-pointer
+            hover:border-b-orange-900
           `
           : null,
       )}

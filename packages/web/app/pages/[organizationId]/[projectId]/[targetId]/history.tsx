@@ -108,7 +108,7 @@ function ListPage({
             }}
             scroll={false} // disable the scroll to top on page
           >
-            <h3 className="truncate font-semibold text-sm">
+            <h3 className="truncate text-sm font-semibold">
               {'commit' in version.log
                 ? version.log.commit
                 : `Deleted ${version.log.deletedService}`}
@@ -118,7 +118,7 @@ function ListPage({
                 <span className="overflow-hidden truncate">{version.log.author}</span>
               </div>
             ) : null}
-            <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
+            <div className="mb-1.5 mt-2.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
               <div className={cn(!version.valid && 'text-red-500')}>
                 <Badge color={version.valid ? 'green' : 'red'} /> Published{' '}
                 <TimeAgo date={version.date} />
@@ -133,7 +133,7 @@ function ListPage({
           </NextLink>
           {version.githubMetadata ? (
             <a
-              className="text-xs font-medium text-gray-500 hover:text-gray-400 ml-[-1px]"
+              className="ml-[-1px] text-xs font-medium text-gray-500 hover:text-gray-400"
               target="_blank"
               rel="noreferrer"
               href={`https://github.com/${version.githubMetadata.repository}/commit/${version.githubMetadata.commit}`}
@@ -233,7 +233,7 @@ function ComparisonView({ versionId }: { versionId: string }) {
 
   return (
     <>
-      <div className="flex flex-row justify-between items-center">
+      <div className="flex flex-row items-center justify-between">
         <div className="py-6">
           <Title>Details</Title>
           <Subtitle>Explore details of the selected version</Subtitle>
@@ -241,7 +241,7 @@ function ComparisonView({ versionId }: { versionId: string }) {
         {availableViews.length ? (
           <div className="flex items-center justify-between">
             <ToggleGroup.Root
-              className="flex space-x-1 rounded-md bg-gray-900/50 text-gray-500 p-0.5"
+              className="flex space-x-1 rounded-md bg-gray-900/50 p-0.5 text-gray-500"
               type="single"
               defaultValue={availableViews[0]?.value}
               onValueChange={onViewChange}
@@ -252,7 +252,7 @@ function ComparisonView({ versionId }: { versionId: string }) {
                   key={value}
                   value={value}
                   className={cn(
-                    'flex items-center rounded-md py-[0.4375rem] px-2 text-xs font-semibold hover:text-white',
+                    'flex items-center rounded-md px-2 py-[0.4375rem] text-xs font-semibold hover:text-white',
                     view === value && 'bg-gray-800 text-white',
                   )}
                   title={tooltip}
@@ -266,9 +266,9 @@ function ComparisonView({ versionId }: { versionId: string }) {
         ) : null}
       </div>
       <div className="flex h-full">
-        <div className="grow rounded-md overflow-y-auto">
+        <div className="grow overflow-y-auto rounded-md">
           {isLoading ? (
-            <div className="flex w-full h-full justify-center items-center">
+            <div className="flex h-full w-full items-center justify-center">
               <Spinner />
             </div>
           ) : error ? (
@@ -328,7 +328,7 @@ function ComparisonView({ versionId }: { versionId: string }) {
                   <CheckCircledIcon className="h-4 w-auto text-emerald-500" />
                   <h2 className="text-base font-medium text-white">First composable version</h2>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Congratulations! This is the first version of the schema that is composable.
                 </p>
               </div>
@@ -403,7 +403,7 @@ function HistoryPageContent() {
       isCDNEnabled={isCDNEnabled ?? null}
     >
       {versionId ? (
-        <div className="flex w-full h-full flex-row gap-x-6">
+        <div className="flex h-full w-full flex-row gap-x-6">
           <div>
             <div className="py-6">
               <Title>Versions</Title>

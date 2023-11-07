@@ -59,6 +59,7 @@ export interface TargetSelector extends ProjectSelector {
   target: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface Storage {
   destroy(): Promise<void>;
   isReady(): Promise<boolean>;
@@ -744,4 +745,5 @@ export interface Storage {
 }
 
 @Injectable()
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class Storage implements Storage {}

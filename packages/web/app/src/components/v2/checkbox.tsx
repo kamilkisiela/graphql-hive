@@ -17,13 +17,13 @@ export const Checkbox = (props: CheckboxProps): ReactElement => {
       border-orange-500
       bg-gray-800
       text-orange-500
+      hover:border-orange-700
       disabled:cursor-not-allowed
       disabled:border-gray-900
-      hover:border-orange-700
     "
       {...props}
     >
-      <Indicator className="h-full w-full bg-current items-center flex justify-center">
+      <Indicator className="flex h-full w-full items-center justify-center bg-current">
         <CheckIcon className="text-black" />
       </Indicator>
     </Root>

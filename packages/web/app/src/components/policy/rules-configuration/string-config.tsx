@@ -23,7 +23,7 @@ export const PolicyStringInputConfig = (props: {
   return (
     <PolicyConfigBox
       title={
-        <div className="items-center flex">
+        <div className="flex items-center">
           <div>{props.title}</div>
           {props.tooltip ? (
             <Tooltip content={props.tooltip}>

@@ -71,7 +71,7 @@ function OperationRow({
     <>
       <Tr>
         <Td className="font-medium">
-          <div className="flex gap-2 items-center">
+          <div className="flex items-center gap-2">
             <Link
               href={{
                 pathname:
@@ -87,7 +87,7 @@ function OperationRow({
               }}
               passHref
             >
-              <OldButton variant="link" as="a" className="block truncate max-w-[300px]">
+              <OldButton variant="link" as="a" className="block max-w-[300px] truncate">
                 {operation.name}
               </OldButton>
             </Link>
@@ -233,7 +233,7 @@ function OperationsTable({
   const { headers } = tableInstance.getHeaderGroups()[0];
 
   return (
-    <div className={clsx('rounded-md p-5 border border-gray-800 bg-gray-900/50', className)}>
+    <div className={clsx('rounded-md border border-gray-800 bg-gray-900/50 p-5', className)}>
       <Section.Title>Operations</Section.Title>
       <Section.Subtitle>List of all operations with their statistics</Section.Subtitle>
 
@@ -280,7 +280,7 @@ function OperationsTable({
             )}
         </TBody>
       </Table>
-      <div className="flex items-center gap-2 mt-6">
+      <div className="mt-6 flex items-center gap-2">
         <Button
           onClick={firstPage}
           variant="outline"
@@ -294,9 +294,9 @@ function OperationsTable({
           onClick={tableInstance.previousPage}
           disabled={!tableInstance.getCanPreviousPage()}
         >
-          <ChevronUpIcon className="-rotate-90 h-5 w-auto" />
+          <ChevronUpIcon className="h-5 w-auto -rotate-90" />
         </Button>
-        <span className="font-bold whitespace-nowrap text-sm">
+        <span className="whitespace-nowrap text-sm font-bold">
           {tableInstance.getState().pagination.pageIndex + 1} / {tableInstance.getPageCount()}
         </span>
         <Button
@@ -305,7 +305,7 @@ function OperationsTable({
           onClick={tableInstance.nextPage}
           disabled={!tableInstance.getCanNextPage()}
         >
-          <ChevronUpIcon className="rotate-90 h-5 w-auto" />
+          <ChevronUpIcon className="h-5 w-auto rotate-90" />
         </Button>
         <Button variant="outline" onClick={lastPage} disabled={!tableInstance.getCanNextPage()}>
           Last

@@ -99,14 +99,14 @@ function GitHubIntegration(props: {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-row justify-between items-center rounded-sm mb-4 gap-x-4 text-sm text-muted-foreground">
+        <div className="text-muted-foreground mb-4 flex flex-row items-center justify-between gap-x-4 rounded-sm text-sm">
           <div className="space-y-2">
             <div>
               <div className="mb-4">Here's how it will look like in your CI pipeline.</div>
               <div className="flex items-center gap-x-2 pl-1">
-                <CheckIcon className="w-4 h-4 text-emerald-500" />
-                <div className="bg-white w-6 h-6 flex items-center justify-center rounded-sm">
-                  <HiveLogo className="w-[80%] h-[80%]" />
+                <CheckIcon className="h-4 w-4 text-emerald-500" />
+                <div className="flex h-6 w-6 items-center justify-center rounded-sm bg-white">
+                  <HiveLogo className="h-[80%] w-[80%]" />
                 </div>
 
                 <div className="font-semibold text-[#adbac7]">
@@ -116,13 +116,13 @@ function GitHubIntegration(props: {
               </div>
             </div>
             <div>
-              <ArrowBigDownDashIcon className="w-6 h-6" />
+              <ArrowBigDownDashIcon className="h-6 w-6" />
             </div>
             <div>
               <div className="flex items-center gap-x-2 pl-1">
-                <CheckIcon className="w-4 h-4 text-emerald-500" />
-                <div className="bg-white w-6 h-6 flex items-center justify-center rounded-sm">
-                  <HiveLogo className="w-[80%] h-[80%]" />
+                <CheckIcon className="h-4 w-4 text-emerald-500" />
+                <div className="flex h-6 w-6 items-center justify-center rounded-sm bg-white">
+                  <HiveLogo className="h-[80%] w-[80%]" />
                 </div>
 
                 <div className="font-semibold text-[#adbac7]">

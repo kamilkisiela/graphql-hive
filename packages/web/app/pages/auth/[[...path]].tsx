@@ -111,7 +111,7 @@ export default function Auth(props: { oidcProviderId: string | null }): ReactEle
         color={{ main: '#fff', sub: '#fff' }}
       />
       {props.oidcProviderId ? (
-        <div className=" p-5 bg-white rounded-md max-w-md mx-auto text-center">
+        <div className=" mx-auto max-w-md rounded-md bg-white p-5 text-center">
           {error ? (
             <>
               <div className="text-red-500">{error}</div>
@@ -124,7 +124,7 @@ export default function Auth(props: { oidcProviderId: string | null }): ReactEle
             </>
           ) : (
             <>
-              <Spinner className="w-20 h-20 mx-auto" />
+              <Spinner className="mx-auto h-20 w-20" />
               <div className="mt-3">Starting OIDC Login Flow.</div>
             </>
           )}

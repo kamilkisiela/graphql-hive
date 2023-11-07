@@ -15,7 +15,10 @@ export type ObservabilityConfig = {
   };
 };
 export class Observability {
-  constructor(private envName: string, private config: ObservabilityConfig) {}
+  constructor(
+    private envName: string,
+    private config: ObservabilityConfig,
+  ) {}
 
   deploy() {
     const ns = new k8s.core.v1.Namespace('observability', {

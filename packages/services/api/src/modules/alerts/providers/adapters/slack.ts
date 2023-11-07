@@ -15,7 +15,10 @@ import {
 export class SlackCommunicationAdapter implements CommunicationAdapter {
   private logger: Logger;
 
-  constructor(logger: Logger, @Inject(WEB_APP_URL) private appBaseUrl: string) {
+  constructor(
+    logger: Logger,
+    @Inject(WEB_APP_URL) private appBaseUrl: string,
+  ) {
     this.logger = logger.child({ service: 'SlackCommunicationAdapter' });
   }
 

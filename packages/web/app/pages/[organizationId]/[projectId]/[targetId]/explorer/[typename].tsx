@@ -206,7 +206,7 @@ function TypeExplorerPageContent({ typename }: { typename: string }) {
       organizations={organizationConnection ?? null}
       isCDNEnabled={isCDNEnabled ?? null}
     >
-      <div className="py-6 flex flex-row items-center justify-between">
+      <div className="flex flex-row items-center justify-between py-6">
         <div>
           <Title>Explore</Title>
           <Subtitle>Insights from the latest version.</Subtitle>

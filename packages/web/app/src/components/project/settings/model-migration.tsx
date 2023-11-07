@@ -6,10 +6,10 @@ import { RegistryModel } from '@/graphql';
 import { useNotifications, useRouteSelector } from '@/lib/hooks';
 import { CheckIcon, Cross2Icon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 
-const divider = <div className="border-b border-gray-900 mt-4" />;
+const divider = <div className="mt-4 border-b border-gray-900" />;
 
 function Flag(props: { children: ReactNode }): ReactElement {
-  return <span className="rounded px-1 py-0.5 bg-gray-900/50 text-gray-300">{props.children}</span>;
+  return <span className="rounded bg-gray-900/50 px-1 py-0.5 text-gray-300">{props.children}</span>;
 }
 
 const noFlag = <span className="text-gray-300">(defaults)</span>;
@@ -23,12 +23,12 @@ function Row(props: {
 }) {
   return (
     <div className="flex">
-      <div className="p-2 grow shrink basis-0">{props.action ?? null}</div>
-      <div className="p-2 grow shrink basis-0 flex items-center text-xs">{props.flag ?? null}</div>
-      <div className="p-2 grow-0 shrink-0 w-40 flex items-center gap-2 justify-center">
+      <div className="shrink grow basis-0 p-2">{props.action ?? null}</div>
+      <div className="flex shrink grow basis-0 items-center p-2 text-xs">{props.flag ?? null}</div>
+      <div className="flex w-40 shrink-0 grow-0 items-center justify-center gap-2 p-2">
         {props.legacy ?? null}
       </div>
-      <div className="p-2 grow-0 shrink-0 w-40 flex items-center gap-2 justify-center">
+      <div className="flex w-40 shrink-0 grow-0 items-center justify-center gap-2 p-2">
         {props.modern ?? null}
       </div>
     </div>
@@ -167,7 +167,7 @@ export function ModelMigrationSettings(props: {
 
   return (
     <Card>
-      <div className="flex gap-12 items-center">
+      <div className="flex items-center gap-12">
         <div>
           <Heading className="mb-2 flex items-center justify-between gap-5">
             <span className="shrink-0">Upgrade Project</span>
@@ -201,12 +201,12 @@ export function ModelMigrationSettings(props: {
         </div>
       </div>
       <Tooltip.Provider delayDuration={200}>
-        <div className="text-sm pt-4">
+        <div className="pt-4 text-sm">
           <div className="flex border-b-2 border-gray-900 text-gray-500">
-            <div className="p-2 grow shrink basis-0">Action</div>
-            <div className="p-2 grow shrink basis-0">CLI Flag</div>
-            <div className="p-2 grow-0 shrink-0 w-40 text-center">Legacy</div>
-            <div className="p-2 grow-0 shrink-0 w-40 text-center">New</div>
+            <div className="shrink grow basis-0 p-2">Action</div>
+            <div className="shrink grow basis-0 p-2">CLI Flag</div>
+            <div className="w-40 shrink-0 grow-0 p-2 text-center">Legacy</div>
+            <div className="w-40 shrink-0 grow-0 p-2 text-center">New</div>
           </div>
           {isComposite ? (
             <>
@@ -321,9 +321,9 @@ export function ModelMigrationSettings(props: {
           </div>
         </div>
         <div className="mt-6">
-          <div className="flex items-center gap-4 bg-gray-900/50 p-4 rounded border-2 border-gray-900">
+          <div className="flex items-center gap-4 rounded border-2 border-gray-900 bg-gray-900/50 p-4">
             <QuestionMarkCircledIcon className="h-5 w-auto" />
-            <div className="font-light text-gray-300 text-sm">
+            <div className="text-sm font-light text-gray-300">
               If you're having difficulty comprehending the changes,{' '}
               <Button
                 variant="link"

@@ -145,7 +145,7 @@ export const TargetLayout = ({
       <header>
         <div className="container flex h-[84px] items-center justify-between">
           <div className="flex flex-row items-center gap-4">
-            <HiveLink className="w-8 h-8" />
+            <HiveLink className="h-8 w-8" />
             {currentOrganization ? (
               <NextLink
                 href={{
@@ -154,14 +154,14 @@ export const TargetLayout = ({
                     organizationId: currentOrganization.cleanId,
                   },
                 }}
-                className="shrink-0 font-medium truncate max-w-[200px]"
+                className="max-w-[200px] shrink-0 truncate font-medium"
               >
                 {currentOrganization.name}
               </NextLink>
             ) : (
-              <div className="w-48 max-w-[200px] h-5 bg-gray-800 rounded-full animate-pulse" />
+              <div className="h-5 w-48 max-w-[200px] animate-pulse rounded-full bg-gray-800" />
             )}
-            <div className="text-gray-500 italic">/</div>
+            <div className="italic text-gray-500">/</div>
             {currentOrganization && currentProject ? (
               <NextLink
                 href={{
@@ -171,14 +171,14 @@ export const TargetLayout = ({
                     projectId: currentProject.cleanId,
                   },
                 }}
-                className="shrink-0 font-medium truncate max-w-[200px]"
+                className="max-w-[200px] shrink-0 truncate font-medium"
               >
                 {currentProject.name}
               </NextLink>
             ) : (
-              <div className="w-48 max-w-[200px] h-5 bg-gray-800 rounded-full animate-pulse" />
+              <div className="h-5 w-48 max-w-[200px] animate-pulse rounded-full bg-gray-800" />
             )}
-            <div className="text-gray-500 italic">/</div>
+            <div className="italic text-gray-500">/</div>
             {targets?.length && currentOrganization && currentProject && currentTarget ? (
               <>
                 <Select
@@ -204,7 +204,7 @@ export const TargetLayout = ({
                 </Select>
               </>
             ) : (
-              <div className="w-48 max-w-[200px] h-5 bg-gray-800 rounded-full animate-pulse" />
+              <div className="h-5 w-48 max-w-[200px] animate-pulse rounded-full bg-gray-800" />
             )}
           </div>
           <div>
@@ -222,7 +222,7 @@ export const TargetLayout = ({
       ) : null}
 
       <div className="relative border-b border-gray-800">
-        <div className="container flex justify-between items-center">
+        <div className="container flex items-center justify-between">
           {currentOrganization && currentProject && currentTarget ? (
             <Tabs className="flex h-full grow flex-col" value={page}>
               <Tabs.List>
@@ -333,10 +333,10 @@ export const TargetLayout = ({
               </Tabs.List>
             </Tabs>
           ) : (
-            <div className="flex flex-row gap-x-8 px-4 py-3 border-b-[2px] border-b-transparent">
-              <div className="w-12 h-5 bg-gray-800 rounded-full animate-pulse" />
-              <div className="w-12 h-5 bg-gray-800 rounded-full animate-pulse" />
-              <div className="w-12 h-5 bg-gray-800 rounded-full animate-pulse" />
+            <div className="flex flex-row gap-x-8 border-b-[2px] border-b-transparent px-4 py-3">
+              <div className="h-5 w-12 animate-pulse rounded-full bg-gray-800" />
+              <div className="h-5 w-12 animate-pulse rounded-full bg-gray-800" />
+              <div className="h-5 w-12 animate-pulse rounded-full bg-gray-800" />
             </div>
           )}
           {currentTarget ? (
@@ -355,9 +355,9 @@ export const TargetLayout = ({
           ) : null}
         </div>
       </div>
-      <div className="container pb-7 h-full">
-        <div className={cn('flex justify-between gap-12 h-full', className)}>
-          <div className="grow flex flex-col">{children}</div>
+      <div className="container h-full pb-7">
+        <div className={cn('flex h-full justify-between gap-12', className)}>
+          <div className="flex grow flex-col">{children}</div>
         </div>
       </div>
     </>

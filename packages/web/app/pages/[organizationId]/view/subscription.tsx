@@ -124,7 +124,7 @@ function SubscriptionPageContent() {
       me={me}
     >
       <div className="grow">
-        <div className="py-6 flex flex-row justify-between items-center">
+        <div className="flex flex-row items-center justify-between py-6">
           <div>
             <Title>Your subscription</Title>
             <Subtitle>Explore your current plan and usage.</Subtitle>

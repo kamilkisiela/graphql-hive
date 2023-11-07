@@ -7,5 +7,5 @@ export const LoadingAPIIndicator = memo(() => {
 
   if (!isFetching) return null;
 
-  return <div className="hive-loading-indicator w-1/2 fixed h-1.5 will-change-transform" />;
+  return <div className="hive-loading-indicator fixed h-1.5 w-1/2 will-change-transform" />;
 });

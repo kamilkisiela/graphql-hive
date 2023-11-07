@@ -84,7 +84,7 @@ export const PermissionScopeItem = <
     <div
       key={props.scope.name}
       className={clsx(
-        'py-2 flex flex-row justify-between items-center',
+        'flex flex-row items-center justify-between py-2',
         props.canManageScope === false ? 'opacity-50' : null,
       )}
     >

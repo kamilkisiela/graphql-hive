@@ -102,7 +102,7 @@ export function SchemaExplorerFilter({
   return (
     <div className="flex flex-row items-center gap-x-4">
       <Autocomplete
-        className="grow min-w-[250px] cursor-text"
+        className="min-w-[250px] grow cursor-text"
         placeholder="Search for a type"
         defaultValue={typename ? { value: typename, label: typename } : null}
         options={types}
@@ -134,7 +134,7 @@ export function SchemaExplorerFilter({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger>
-            <div className="flex flex-row items-center gap-x-4 rounded-md border px-3 h-[40px] bg-secondary">
+            <div className="bg-secondary flex h-[40px] flex-row items-center gap-x-4 rounded-md border px-3">
               <div>
                 <Label htmlFor="filter-toggle-arguments" className="text-sm font-normal">
                   Display all arguments

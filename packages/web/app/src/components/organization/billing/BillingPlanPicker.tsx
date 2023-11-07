@@ -93,7 +93,7 @@ function Plan(plan: {
           {plan.features.map((feature, i) => (
             <div key={i}>
               <Section.Subtitle className="flex items-center gap-1">
-                <CheckIcon className="text-gray-500 h-5 w-auto" />
+                <CheckIcon className="h-5 w-auto text-gray-500" />
                 {feature}
               </Section.Subtitle>
             </div>

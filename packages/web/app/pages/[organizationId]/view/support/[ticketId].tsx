@@ -128,16 +128,16 @@ function Comment({ node }: { node: FragmentType<typeof Comment_SupportTicketComm
   return (
     <div
       className={cn(
-        'flex flex-row items-end space-x-2 w-full',
+        'flex w-full flex-row items-end space-x-2',
         isSupport ? 'justify-end' : 'justify-start',
       )}
     >
-      {isSupport ? null : <UserIcon className="w-6 h-6 text-orange-500" />}
+      {isSupport ? null : <UserIcon className="h-6 w-6 text-orange-500" />}
       <Tooltip>
         <TooltipTrigger asChild>
           <div
             className={cn(
-              'p-2 rounded-lg inline-block bg-gray-800 text-foreground text-left max-w-[70%]',
+              'text-foreground inline-block max-w-[70%] rounded-lg bg-gray-800 p-2 text-left',
               isSupport ? 'rounded-br-none' : 'rounded-bl-none',
             )}
           >
@@ -149,7 +149,7 @@ function Comment({ node }: { node: FragmentType<typeof Comment_SupportTicketComm
         </TooltipContent>
       </Tooltip>
       {isSupport ? (
-        <img className="block w-6 h-6" src="/just-logo.svg" alt="GraphQL Hive logo" />
+        <img className="block h-6 w-6" src="/just-logo.svg" alt="GraphQL Hive logo" />
       ) : null}
     </div>
   );
@@ -199,12 +199,12 @@ function SupportTicket(props: {
   return (
     <TooltipProvider>
       <div className="py-6">
-        <div className="flex flex-row justify-between items-start gap-x-6">
+        <div className="flex flex-row items-start justify-between gap-x-6">
           <div className="flex-1 border-r border-gray-800 pr-6">
-            <Title className="flex flex-row gap-x-2 items-center">
+            <Title className="flex flex-row items-center gap-x-2">
               <Button
                 variant="link"
-                className="p-0 h-auto text-lg font-semibold tracking-tight"
+                className="h-auto p-0 text-lg font-semibold tracking-tight"
                 asChild
               >
                 <NextLink
@@ -219,12 +219,12 @@ function SupportTicket(props: {
                 </NextLink>
               </Button>
               <span className="text-lg font-semibold tracking-tight text-gray-500">
-                <ChevronRightIcon className="w-4 h-4" />
+                <ChevronRightIcon className="h-4 w-4" />
               </span>
               <span>{ticket.subject}</span>
             </Title>
             <Subtitle>Support ticket detailed view</Subtitle>
-            <div className="py-12 space-y-6">
+            <div className="space-y-6 py-12">
               {comments.map(comment => (
                 <Comment key={comment.node.id} node={comment.node} />
               ))}
@@ -238,28 +238,28 @@ function SupportTicket(props: {
               </div>
             </div>
           </div>
-          <div className="text-sm shrink-0 w-1/3">
+          <div className="w-1/3 shrink-0 text-sm">
             <div className="flex flex-col gap-y-6 text-left">
               <div className="space-y-0">
-                <div className="text-white font-semibold">Support Ticket ID</div>
+                <div className="font-semibold text-white">Support Ticket ID</div>
                 <div className="text-muted-foreground">{ticket.id}</div>
               </div>
               <div className="space-y-0">
-                <div className="text-white font-semibold">Status</div>
+                <div className="font-semibold text-white">Status</div>
                 <div className="text-muted-foreground">
                   {ticket.status}
                   <div className="text-xs">{statusDescription[ticket.status]}</div>
                 </div>
               </div>
               <div className="space-y-0">
-                <div className="text-white font-semibold">Priority</div>
+                <div className="font-semibold text-white">Priority</div>
                 <div className="text-muted-foreground">
                   {ticket.priority}
                   <div className="text-xs">{priorityDescription[ticket.priority]}</div>
                 </div>
               </div>
               <div className="space-y-0">
-                <div className="text-white font-semibold">Last updated</div>
+                <div className="font-semibold text-white">Last updated</div>
                 <div>
                   <TimeAgo date={ticket.updatedAt} className="text-xs text-gray-500" />
                 </div>

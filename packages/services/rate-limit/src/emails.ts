@@ -68,15 +68,15 @@ export function createEmailScheduler(config?: { endpoint: string }) {
                       input.organization.name
                     }</strong> has reached over 100% of the operations limit quota.
                     Used ${numberFormatter.format(input.usage.current)} of ${numberFormatter.format(
-            input.usage.quota,
-          )}.
+                      input.usage.quota,
+                    )}.
                   </mj-text>.
                   <mj-text>
                     We recommend to increase the limit.
                   </mj-text>
                   <mj-button href="${env.hiveServices.webAppUrl}/${
-            input.organization.cleanId
-          }/view/subscription">
+                    input.organization.cleanId
+                  }/view/subscription">
                     Manage your subscription
                   </mj-button>
                 </mj-column>
@@ -132,15 +132,15 @@ export function createEmailScheduler(config?: { endpoint: string }) {
                       input.organization.name
                     }</strong> is approaching its operations limit quota.
                     Used ${numberFormatter.format(input.usage.current)} of ${numberFormatter.format(
-            input.usage.quota,
-          )}.
+                      input.usage.quota,
+                    )}.
                   </mj-text>.
                   <mj-text>
                     We recommend to increase the limit.
                   </mj-text>
                   <mj-button href="${env.hiveServices.webAppUrl}/${
-            input.organization.cleanId
-          }/view/subscription">
+                    input.organization.cleanId
+                  }/view/subscription">
                     Manage your subscription
                   </mj-button>
                 </mj-column>

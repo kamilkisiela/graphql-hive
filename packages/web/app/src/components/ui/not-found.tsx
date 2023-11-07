@@ -14,7 +14,7 @@ export const NotFound = ({
 }) => {
   return (
     <Card
-      className={cn('flex grow flex-col items-center gap-y-2 cursor-default', className)}
+      className={cn('flex grow cursor-default flex-col items-center gap-y-2', className)}
       data-cy="empty-list"
     >
       <Image src={ghost} alt="Ghost illustration" width="200" height="200" className="drag-none" />

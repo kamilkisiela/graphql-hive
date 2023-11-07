@@ -15,21 +15,21 @@ const IndexPage = (): ReactElement => {
           flex h-screen
           w-1/3
           flex-col
-          bg-gray-800/10 pt-[30px] pl-[30px] pb-[50px] pr-[50px]
+          bg-gray-800/10 pb-[50px] pl-[30px] pr-[50px] pt-[30px]
         "
       >
         <GuildLink textClassName="flex-col" />
         <div className="mt-[50px] grow rounded-[30px] bg-gray-800/30" />
-        <Heading size="2xl" className="mt-[22px] mb-[5px]">
+        <Heading size="2xl" className="mb-[5px] mt-[22px]">
           Hive
         </Heading>
         <p className="font-light text-gray-500">Open GraphQL Platform</p>
       </div>
 
-      <div className="grow px-9 pt-11 pb-9">
+      <div className="grow px-9 pb-9 pt-11">
         <div className="mx-auto flex w-[500px] flex-col">
           <HiveLink />
-          <h2 className="mt-20 mb-1 text-2xl font-light text-white">
+          <h2 className="mb-1 mt-20 text-2xl font-light text-white">
             {isLoginPage ? 'Log In' : 'Create an account'}
           </h2>
           <p className="font-light text-[#9b9b9b]">
@@ -60,18 +60,18 @@ const IndexPage = (): ReactElement => {
             <hr className="grow border-gray-800" />
           </div>
           <Input placeholder="Email" />
-          <Input placeholder="Password" type="password" className="mt-7 mb-1" />
+          <Input placeholder="Password" type="password" className="mb-1 mt-7" />
           <Link
             variant="primary"
             href="#"
-            className={clsx('ml-auto mb-11', !isLoginPage && 'invisible')}
+            className={clsx('mb-11 ml-auto', !isLoginPage && 'invisible')}
           >
             Forgot password?
           </Link>
           <Button size="large" variant="primary" block>
             {isLoginPage ? 'Log In' : 'Create Account'}
           </Button>
-          <GuildLink className="mx-auto mt-20 mb-6 opacity-10 transition hover:opacity-100" />
+          <GuildLink className="mx-auto mb-6 mt-20 opacity-10 transition hover:opacity-100" />
           <p className={clsx('mb-4 text-xs text-[#9b9b9b]', isLoginPage && 'invisible')}>
             Creating an account means you're okay with our{' '}
             <Link variant="primary" href="#">

@@ -48,7 +48,7 @@ function Item({
   className?: string;
 }): ReactElement {
   return (
-    <A.Item {...props} value={value} className={clsx('rounded-md w-full', className)}>
+    <A.Item {...props} value={value} className={clsx('w-full rounded-md', className)}>
       {children}
     </A.Item>
   );
@@ -94,7 +94,7 @@ function Content({
   className?: string;
 }): ReactElement {
   return (
-    <A.Content className={clsx('pt-1 w-full rounded-b-lg px-4 pb-3', className)}>
+    <A.Content className={clsx('w-full rounded-b-lg px-4 pb-3 pt-1', className)}>
       <div className="text-sm text-gray-700 dark:text-gray-400">{children}</div>
     </A.Content>
   );

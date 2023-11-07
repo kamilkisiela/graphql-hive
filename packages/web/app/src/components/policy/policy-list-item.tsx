@@ -46,7 +46,7 @@ export function PolicyListItem(props: {
 
   return (
     <Tooltip.Provider delayDuration={100}>
-      <div className="py-4 px-1">
+      <div className="px-1 py-4">
         <div className="flex gap-4">
           <div>
             <Checkbox
@@ -84,7 +84,7 @@ export function PolicyListItem(props: {
                 <div>
                   <SeverityLevelToggle canTurnOff={props.overridingParentRule} rule={ruleInfo.id} />
                 </div>
-                <div className="grow grid grid-cols-4 [&>*]:border-l-gray-800 [&>*]:border-l-[1px] align-middle [&>*]:min-h-[40px]">
+                <div className="grid grow grid-cols-4 align-middle [&>*]:min-h-[40px] [&>*]:border-l-[1px] [&>*]:border-l-gray-800">
                   {shouldShowRuleConfig && (
                     <PolicyRuleConfig
                       rule={ruleInfo.id}
@@ -96,8 +96,8 @@ export function PolicyListItem(props: {
               </div>
             ) : null}
             {props.overridingParentRule && enabled ? (
-              <div className="text-xs font-medium mt-4 text-gray-400">
-                <p className="text-orange-500 text-sm font-medium inline-block mr-2">!</p>
+              <div className="mt-4 text-xs font-medium text-gray-400">
+                <p className="mr-2 inline-block text-sm font-medium text-orange-500">!</p>
                 You are {severity === RuleInstanceSeverityLevel.Off ? 'disabling' : 'overriding'} a
                 rule configured at the organization level
               </div>

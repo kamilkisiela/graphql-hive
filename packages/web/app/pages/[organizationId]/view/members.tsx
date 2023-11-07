@@ -118,7 +118,7 @@ const MemberInvitationForm = ({
 
   return (
     <div>
-      <form onSubmit={handleSubmit} className="flex flex-row gap-2 items-center">
+      <form onSubmit={handleSubmit} className="flex flex-row items-center gap-2">
         <Input
           style={{
             minWidth: '200px',
@@ -344,7 +344,7 @@ function PageContent(props: {
           disabled={checked.length === 0}
         >
           Delete {checked.length || ''}
-          <TrashIcon className="ml-2 w-4 h-4" />
+          <TrashIcon className="ml-2 h-4 w-4" />
         </Button>
       </div>
       {members?.map(node => {

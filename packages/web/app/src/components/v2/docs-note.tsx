@@ -10,7 +10,7 @@ import { Link } from './link';
 export const DocsNote = ({ children, warn }: { warn?: boolean; children: React.ReactNode }) => {
   return (
     <div
-      className={cn('flex my-2 border-l-2 px-4 py-2', warn ? 'border-orange-500' : 'border-white')}
+      className={cn('my-2 flex border-l-2 px-4 py-2', warn ? 'border-orange-500' : 'border-white')}
     >
       {/* <div className="items-center align-middle pr-2 flex flex-row">
         {warn ? (
@@ -19,7 +19,7 @@ export const DocsNote = ({ children, warn }: { warn?: boolean; children: React.R
           <InfoCircledIcon className="text-current" />
         )}
       </div> */}
-      <div className="grow text-white text-sm align-middle">{children}</div>
+      <div className="grow align-middle text-sm text-white">{children}</div>
     </div>
   );
 };
@@ -40,7 +40,7 @@ export const DocsLink = ({
   return (
     <Button variant="link" className={cn('p-0 text-orange-500', className)} asChild>
       <Link href={fullUrl} target="_blank" rel="noreferrer">
-        {icon ?? <Book className="mr-2 w-4 h-4" />}
+        {icon ?? <Book className="mr-2 h-4 w-4" />}
         {children}
         <ExternalLinkIcon className="inline pl-1" />
       </Link>
@@ -69,7 +69,7 @@ export const ProductUpdatesLink = ({
         rel="noreferrer"
         className="font-medium transition-colors hover:underline"
       >
-        {icon ?? <Megaphone className="mr-2 w-4 h-4" />}
+        {icon ?? <Megaphone className="mr-2 h-4 w-4" />}
         {children}
         <ExternalLinkIcon className="inline pl-1" />
       </NextLink>

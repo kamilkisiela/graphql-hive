@@ -8,7 +8,6 @@ export interface RegistryContext {
 
 declare global {
   namespace GraphQLModules {
-    // eslint-disable-next-line @typescript-eslint/no-empty-interface
     interface GlobalContext extends RegistryContext {}
   }
 }

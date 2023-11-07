@@ -17,8 +17,8 @@ export const DropdownMenuTrigger = React.forwardRef<
         items-center
         gap-4
         rounded-md
-        py-2.5
         px-2
+        py-2.5
         transition
       `,
         className,
@@ -45,10 +45,10 @@ export const DropdownMenuContent = React.forwardRef<
           flex-col
           gap-1
           rounded-md
+          bg-[#0b0d11]
           p-[13px]
           text-sm
           font-normal
-          bg-[#0b0d11]
           text-gray-300
           shadow-lg
           shadow-black
@@ -79,8 +79,8 @@ export const DropdownMenuSubTrigger = React.forwardRef<
         items-center
         gap-4
         rounded-md
-        py-2.5
         px-2
+        py-2.5
         transition
         hover:bg-gray-800/50
         hover:text-white
@@ -110,10 +110,10 @@ export const DropdownMenuSubContent = React.forwardRef<
           flex-col
           gap-1
           rounded-md
+          bg-[#0b0d11]
           p-[13px]
           text-sm
           font-normal
-          bg-[#0b0d11]
           text-gray-300
           shadow-lg
           shadow-black
@@ -146,8 +146,8 @@ export const DropdownMenuItem = React.forwardRef<
         items-center
         gap-4
         rounded-md
-        py-2.5
         px-2
+        py-2.5
         transition
         hover:bg-gray-800/50
         hover:text-white

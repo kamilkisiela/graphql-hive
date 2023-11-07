@@ -61,7 +61,7 @@ export function CreateAccessTokenModal({
     <Modal
       open={isOpen}
       onOpenChange={toggleModalOpen}
-      className="w-[650px] h-5/6 flex overflow-hidden"
+      className="flex h-5/6 w-[650px] overflow-hidden"
     >
       {organization ? (
         <ModalContent
@@ -148,7 +148,7 @@ function ModalContent(props: {
   return (
     <>
       {mutation.data?.createToken.ok ? (
-        <div className="flex flex-col gap-5 grow">
+        <div className="flex grow flex-col gap-5">
           <Heading className="text-center">Token successfully created!</Heading>
           <CopyValue value={mutation.data.createToken.ok.secret} />
           <Tag color="green">
@@ -166,11 +166,11 @@ function ModalContent(props: {
           </Button>
         </div>
       ) : (
-        <form className="flex flex-col gap-5 grow" onSubmit={handleSubmit}>
+        <form className="flex grow flex-col gap-5" onSubmit={handleSubmit}>
           <div className="shrink-0">
             <div className="flex-none">
-              <Heading className="text-center mb-2">Create an access token</Heading>
-              <p className="text-sm text-gray-500 mb-2">
+              <Heading className="mb-2 text-center">Create an access token</Heading>
+              <p className="mb-2 text-sm text-gray-500">
                 To access GraphQL Hive, your application or tool needs an active API key.
               </p>
 
@@ -186,15 +186,15 @@ function ModalContent(props: {
               />
             </div>
             {touched.name && errors.name && (
-              <div className="text-sm text-red-500 mt-2">{errors.name}</div>
+              <div className="mt-2 text-sm text-red-500">{errors.name}</div>
             )}
             {mutation.data?.createToken.error && (
-              <div className="text-sm text-red-500 mt-2">
+              <div className="mt-2 text-sm text-red-500">
                 {mutation.data?.createToken.error.message}
               </div>
             )}
           </div>
-          <div className="flex flex-col flex-1 overflow-hidden">
+          <div className="flex flex-1 flex-col overflow-hidden">
             <Accordion defaultValue="Permissions">
               <Accordion.Item value="Permissions">
                 <Accordion.Header>Registry & Usage</Accordion.Header>

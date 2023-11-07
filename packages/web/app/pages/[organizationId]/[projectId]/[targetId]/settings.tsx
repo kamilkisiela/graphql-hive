@@ -272,7 +272,7 @@ const ExtendBaseSchema = (props: { baseSchema: string }): ReactElement => {
         >
           Reset
         </Button>
-        {isUnsaved && <span className="text-green-500 text-sm">Unsaved changes!</span>}
+        {isUnsaved && <span className="text-sm text-green-500">Unsaved changes!</span>}
       </CardFooter>
     </Card>
   );
@@ -627,7 +627,7 @@ const ConditionalBreakingChanges = (): ReactElement => {
           {touched.targets && errors.targets && (
             <div className="text-red-500">{errors.targets}</div>
           )}
-          <div className="mt-5 pl-5 py-2 space-y-2 border-l-2 border-l-gray-800 bg-gray-600/10 rounded text-gray-400">
+          <div className="mt-5 space-y-2 rounded border-l-2 border-l-gray-800 bg-gray-600/10 py-2 pl-5 text-gray-400">
             <div>
               <div className="font-semibold">Example settings</div>
               <div className="text-sm">Removal of a field is considered breaking if</div>

@@ -50,7 +50,7 @@ export function GraphQLBlock({
     <Card className={clsx(className)}>
       <Heading className="mb-4">
         {title ?? 'SDL'}
-        {url && <span className="text-sm italic ml-3">{url}</span>}
+        {url && <span className="ml-3 text-sm italic">{url}</span>}
       </Heading>
       <div className="pb-2">
         <GraphQLHighlight {...editorProps} code={sdl} />

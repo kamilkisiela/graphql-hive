@@ -82,7 +82,7 @@ const ExternalCompositionStatus = ({
     <Tooltip.Provider delayDuration={100}>
       {query.fetching ? (
         <Tooltip content="Connecting..." contentProps={{ side: 'right' }}>
-          <UpdateIcon className="animate-spin h-5 w-5 text-gray-500" />
+          <UpdateIcon className="h-5 w-5 animate-spin text-gray-500" />
         </Tooltip>
       ) : null}
       {error ? (
@@ -158,7 +158,7 @@ const ExternalCompositionForm = ({
         <div>
           <span>HTTP endpoint</span>
           <p className="pb-2 text-xs text-gray-300">A POST request will be sent to that endpoint</p>
-          <div className="flex gap-2 items-center">
+          <div className="flex items-center gap-2">
             <Input
               placeholder="Endpoint"
               name="endpoint"

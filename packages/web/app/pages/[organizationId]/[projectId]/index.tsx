@@ -76,7 +76,7 @@ const TargetCard = (props: {
     <Card
       as={NextLink}
       href={href}
-      className="h-full pt-4 px-0 self-start hover:bg-gray-800/40 hover:shadow-md hover:shadow-gray-800/50 bg-gray-900/50"
+      className="h-full self-start bg-gray-900/50 px-0 pt-4 hover:bg-gray-800/40 hover:shadow-md hover:shadow-gray-800/50"
     >
       <TooltipProvider>
         <div className="flex items-start gap-x-2">
@@ -153,12 +153,12 @@ const TargetCard = (props: {
                 )}
               </AutoSizer>
             </div>
-            <div className="flex flex-row gap-y-3 px-4 pt-4 justify-between items-center">
+            <div className="flex flex-row items-center justify-between gap-y-3 px-4 pt-4">
               <div>
                 {target ? (
                   <h4 className="line-clamp-2 text-lg font-bold">{target.name}</h4>
                 ) : (
-                  <div className="w-48 h-4 py-2 bg-gray-800 rounded-full animate-pulse" />
+                  <div className="h-4 w-48 animate-pulse rounded-full bg-gray-800 py-2" />
                 )}
               </div>
               <div className="flex flex-col gap-y-2 py-1">
@@ -166,8 +166,8 @@ const TargetCard = (props: {
                   <>
                     <Tooltip>
                       <TooltipTrigger>
-                        <div className="flex flex-row gap-x-2 items-center">
-                          <Globe className="w-4 h-4 text-gray-500" />
+                        <div className="flex flex-row items-center gap-x-2">
+                          <Globe className="h-4 w-4 text-gray-500" />
                           <div className="text-xs">
                             {requestsInDateRange}{' '}
                             {pluralize(totalNumberOfRequests, 'request', 'requests')}
@@ -180,8 +180,8 @@ const TargetCard = (props: {
                     </Tooltip>
                     <Tooltip>
                       <TooltipTrigger>
-                        <div className="flex flex-row gap-x-2 items-center">
-                          <History className="w-4 h-4 text-gray-500" />
+                        <div className="flex flex-row items-center gap-x-2">
+                          <History className="h-4 w-4 text-gray-500" />
                           <div className="text-xs">
                             {schemaVersionsInDateRange}{' '}
                             {pluralize(totalNumberOfVersions, 'commit', 'commits')}
@@ -195,8 +195,8 @@ const TargetCard = (props: {
                   </>
                 ) : (
                   <>
-                    <div className="w-16 h-2 my-1 bg-gray-800 rounded-full animate-pulse" />
-                    <div className="w-16 h-2 my-1 bg-gray-800 rounded-full animate-pulse" />
+                    <div className="my-1 h-2 w-16 animate-pulse rounded-full bg-gray-800" />
+                    <div className="my-1 h-2 w-16 animate-pulse rounded-full bg-gray-800" />
                   </>
                 )}
               </div>
@@ -275,7 +275,7 @@ const ProjectsPageContent = () => {
         <div
           className={cn(
             'grow',
-            targets?.length === 0 ? '' : 'grid grid-cols-2 gap-5 items-stretch',
+            targets?.length === 0 ? '' : 'grid grid-cols-2 items-stretch gap-5',
           )}
         >
           {targets ? (

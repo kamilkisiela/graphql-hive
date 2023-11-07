@@ -9,7 +9,10 @@ import { REDIS_INSTANCE } from '../../shared/providers/redis';
 })
 export class DistributedCache {
   private logger: Logger;
-  constructor(logger: Logger, @Inject(REDIS_INSTANCE) private redis: Redis) {
+  constructor(
+    logger: Logger,
+    @Inject(REDIS_INSTANCE) private redis: Redis,
+  ) {
     this.logger = logger.child({ service: 'DistributedCache' });
   }
 

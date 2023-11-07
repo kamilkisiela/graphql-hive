@@ -41,7 +41,10 @@ export class ProjectAccess {
   private tokenAccess: Dataloader<ProjectTokenAccessSelector, boolean, string>;
   private scopes: Dataloader<ProjectUserScopesSelector, readonly ProjectAccessScope[], string>;
 
-  constructor(logger: Logger, private organizationAccess: OrganizationAccess) {
+  constructor(
+    logger: Logger,
+    private organizationAccess: OrganizationAccess,
+  ) {
     this.logger = logger.child({
       source: 'ProjectAccess',
     });

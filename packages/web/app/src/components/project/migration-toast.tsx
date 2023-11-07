@@ -2,15 +2,15 @@ import { Button } from '@/components/v2';
 
 export function ProjectMigrationToast({ projectId, orgId }: { projectId: string; orgId: string }) {
   return (
-    <div className="fixed right-24 bottom-6 p-4 rounded-md bg-gray-900 flex flex-row justify-center gap-6 z-10">
+    <div className="fixed bottom-6 right-24 z-10 flex flex-row justify-center gap-6 rounded-md bg-gray-900 p-4">
       <div>
-        <div className="font-medium text-sm text-white mb-2">
+        <div className="mb-2 text-sm font-medium text-white">
           This project utilizes the outdated model of the registry
         </div>
-        <p className="text-gray-400 text-xs">
+        <p className="text-xs text-gray-400">
           For an optimized workflow, kindly switch to the modern model.
         </p>
-        <p className="text-gray-400 text-xs">
+        <p className="text-xs text-gray-400">
           The legacy model will cease to be accessible in a few months' time.
         </p>
       </div>

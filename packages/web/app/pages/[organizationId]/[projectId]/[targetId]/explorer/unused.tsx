@@ -111,7 +111,7 @@ const UnusedSchemaView = memo(function _UnusedSchemaView(props: {
                     'rounded-none px-2 py-1',
                     letter === selectedLetter
                       ? 'text-orange-500'
-                      : 'hover:text-orange-500 text-gray-500',
+                      : 'text-gray-500 hover:text-orange-500',
                   )}
                   key={letter}
                 >
@@ -210,7 +210,7 @@ function UnusedSchemaExplorer(props: {
 
   return (
     <>
-      <div className="py-6 flex flex-row items-center justify-between">
+      <div className="flex flex-row items-center justify-between py-6">
         <div>
           <Title>Unused Schema</Title>
           <Subtitle>

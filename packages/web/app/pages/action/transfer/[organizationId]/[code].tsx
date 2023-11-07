@@ -103,8 +103,8 @@ function OrganizationTransferPage() {
       <Title title="Organization Transfer" />
       <DataWrapper query={query}>
         {({ data }) => (
-          <div className="w-full h-full flex flex-row items-center justify-center">
-            <div className="flex flex-col text-center md:w-2/3 w-full">
+          <div className="flex h-full w-full flex-row items-center justify-center">
+            <div className="flex w-full flex-col text-center md:w-2/3">
               {data.organizationTransferRequest == null ? (
                 <>
                   <h1 className={classes.title}>Organization Transfer Error</h1>

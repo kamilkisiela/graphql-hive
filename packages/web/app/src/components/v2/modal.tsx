@@ -53,8 +53,8 @@ const Modal = ({
                   `
             hive-modal
             relative
-            top-1/2
             left-1/2
+            top-1/2
             max-h-[95%]
             max-w-[95%]
             overflow-auto
@@ -68,7 +68,7 @@ const Modal = ({
                 {children}
 
                 <Close asChild>
-                  <Button className="absolute top-5 right-5 text-gray-500 hover:border-gray-500 hover:text-orange-500">
+                  <Button className="absolute right-5 top-5 text-gray-500 hover:border-gray-500 hover:text-orange-500">
                     <XIcon />
                   </Button>
                 </Close>
