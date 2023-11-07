@@ -455,8 +455,8 @@ importers:
         version: 4.7.0
     devDependencies:
       '@types/lodash.sortby':
-        specifier: 4.7.8
-        version: 4.7.8
+        specifier: 4.7.9
+        version: 4.7.9
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -13293,8 +13293,8 @@ packages:
       '@types/node': 18.18.8
     dev: true
 
-  /@types/lodash.sortby@4.7.8:
-    resolution: {integrity: sha512-+JxRnAqZRZQ/lgvtOowq/iyAMtHjO06eyzSFkuGLos/n7RuJy1oqZg/ucxvraAQYb+DNnq3LToZxubJclTxhvA==}
+  /@types/lodash.sortby@4.7.9:
+    resolution: {integrity: sha512-PDmjHnOlndLS59GofH0pnxIs+n9i4CWeXGErSB5JyNFHu2cmvW6mQOaUKjG8EDPkni14IgF8NsRW8bKvFzTm9A==}
     dependencies:
       '@types/lodash': 4.14.200
     dev: true
