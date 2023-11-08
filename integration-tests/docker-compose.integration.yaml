@@ -4,7 +4,7 @@
 # Please refer to TESTING.md for more information.
 
 version: '3.8'
-name: hive
+name: 'hive-tests'
 
 networks:
   stack:

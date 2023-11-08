@@ -1,5 +1,5 @@
 version: '3.8'
-name: 'hive'
+name: 'hive-dev'
 services:
   db:
     image: postgres:14.9-alpine
