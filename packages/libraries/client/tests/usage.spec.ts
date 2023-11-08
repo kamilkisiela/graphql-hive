@@ -3,6 +3,7 @@ import { buildSchema, parse } from 'graphql';
 import nock from 'nock';
 import { createHive } from '../src/client';
 import type { Report } from '../src/internal/usage';
+import { atLeastOnceSampler } from '../src/samplers';
 import { version } from '../src/version';
 import { waitFor } from './test-utils';
 
@@ -75,6 +76,21 @@ const op = parse(/* GraphQL */ `
       deletedProject {
         ...ProjectFields
       }
+    }
+  }
+
+  fragment ProjectFields on Project {
+    id
+    cleanId
+    name
+    type
+  }
+`);
+
+const op2 = parse(/* GraphQL */ `
+  query getProject($selector: ProjectSelectorInput!) {
+    project(selector: $selector) {
+      ...ProjectFields
     }
   }
 
@@ -426,4 +442,111 @@ test('sendImmediately should not stop the schedule', async () => {
   await hive.dispose();
   await waitFor(1000);
   http.done();
+});
+
+test('should send data to Hive at least once when using atLeastOnceSampler', async () => {
+  const logger = {
+    error: vi.fn(),
+    info: vi.fn(),
+  };
+
+  const token = 'Token';
+
+  let report: Report = {
+    size: 0,
+    map: {},
+    operations: [],
+  };
+  const http = nock('http://localhost')
+    .post('/200')
+    .matchHeader('Authorization', `Bearer ${token}`)
+    .matchHeader('Content-Type', headers['Content-Type'])
+    .matchHeader('graphql-client-name', headers['graphql-client-name'])
+    .matchHeader('graphql-client-version', headers['graphql-client-version'])
+    .once()
+    .reply((_, _body) => {
+      report = _body as any;
+      return [200];
+    });
+
+  const hive = createHive({
+    enabled: true,
+    debug: true,
+    agent: {
+      timeout: 500,
+      maxRetries: 0,
+      logger,
+    },
+    token,
+    selfHosting: {
+      graphqlEndpoint: 'http://localhost/graphql',
+      applicationUrl: 'http://localhost/',
+      usageEndpoint: 'http://localhost/200',
+    },
+    usage: {
+      sampler: atLeastOnceSampler({
+        keyFn(ctx) {
+          return ctx.operationName;
+        },
+        sampler() {
+          // only
+          return 0;
+        },
+      }),
+    },
+  });
+
+  const collect = hive.collectUsage();
+
+  await waitFor(2000);
+  collect(
+    {
+      schema,
+      document: op,
+      operationName: 'deleteProject',
+    },
+    {},
+  );
+  // different query
+  collect(
+    {
+      schema,
+      document: op2,
+      operationName: 'getProject',
+    },
+    {},
+  );
+  // duplicated call
+  collect(
+    {
+      schema,
+      document: op,
+      operationName: 'deleteProject',
+    },
+    {},
+  );
+  await hive.dispose();
+  await waitFor(1000);
+  http.done();
+
+  expect(logger.error).not.toHaveBeenCalled();
+  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 2) (attempt 1)`);
+  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
+
+  // Map
+  expect(report.size).toEqual(2);
+  expect(Object.keys(report.map)).toHaveLength(2);
+
+  const foundRecords: string[] = [];
+  for (const key in report.map) {
+    const record = report.map[key];
+
+    foundRecords.push(record.operationName ?? 'anonymous');
+  }
+
+  expect(foundRecords).toContainEqual('deleteProject');
+  expect(foundRecords).toContainEqual('getProject');
+
+  const operations = report.operations;
+  expect(operations).toHaveLength(2); // two operations
 });
