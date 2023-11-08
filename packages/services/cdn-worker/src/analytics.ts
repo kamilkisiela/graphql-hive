@@ -56,6 +56,10 @@ type Event =
       statusCode: number;
     }
   | {
+      type: 'metadata';
+      value: 'array' | 'object';
+    }
+  | {
       type: 'response';
       statusCode: number;
       requestPath: string;
@@ -65,6 +69,7 @@ export function createAnalytics(
   engines: {
     usage: AnalyticsEngine;
     error: AnalyticsEngine;
+    metadata: AnalyticsEngine;
     keyValidation: AnalyticsEngine;
     r2: AnalyticsEngine;
     response: AnalyticsEngine;
@@ -85,6 +90,11 @@ export function createAnalytics(
         case 'error':
           return engines.error.writeDataPoint({
             blobs: event.value,
+          });
+        case 'metadata':
+          return engines.metadata.writeDataPoint({
+            blobs: [event.value, targetId],
+            indexes: [targetId.substring(0, 32)],
           });
         case 'r2':
           return engines.r2.writeDataPoint({

@@ -695,7 +695,7 @@ export class SchemaPublisher {
           latestVersion.id,
         );
 
-        await this.updateCDN({
+        await this.publishToCDN({
           target,
           project,
           supergraph: compositionResult.supergraph,
@@ -1507,28 +1507,6 @@ export class SchemaPublisher {
     fullSchemaSdl: string;
     schemas: readonly Schema[];
   }) {
-    await this.updateCDN({
-      target,
-      project,
-      schemas,
-      supergraph,
-      fullSchemaSdl,
-    });
-  }
-
-  private async updateCDN({
-    target,
-    project,
-    supergraph,
-    schemas,
-    fullSchemaSdl,
-  }: {
-    target: Target;
-    project: Project;
-    schemas: readonly Schema[];
-    supergraph?: string | null;
-    fullSchemaSdl: string;
-  }) {
     const publishMetadata = async () => {
       const metadata: Array<Record<string, any>> = [];
       for (const schema of schemas) {
@@ -1536,10 +1514,13 @@ export class SchemaPublisher {
           metadata.push(JSON.parse(schema.metadata));
         }
       }
+
       if (metadata.length > 0) {
         await this.artifactStorageWriter.writeArtifact({
           targetId: target.id,
-          artifact: metadata,
+          // SINGLE project can have only one metadata, we need to pass it as an object,
+          // COMPOSITE projects can have multiple metadata, we need to pass it as an array
+          artifact: project.type === ProjectType.SINGLE ? metadata[0] : metadata,
           artifactType: 'metadata',
         });
       }

@@ -37,10 +37,6 @@ export class CompositeModel {
     private checks: RegistryChecks,
   ) {}
 
-  private supportsMetadata(project: Project) {
-    return project.type === ProjectType.FEDERATION;
-  }
-
   async check({
     input,
     selector,
@@ -199,7 +195,7 @@ export class CompositeModel {
       service_name: input.service!,
       service_url: input.url!,
       action: 'PUSH',
-      metadata: this.supportsMetadata(project) ? input.metadata ?? null : null,
+      metadata: input.metadata ?? null,
     };
 
     const latestVersion = latest;
@@ -263,9 +259,7 @@ export class CompositeModel {
         ? this.federationOrchestrator
         : this.stitchingOrchestrator;
 
-    const metadataCheck = this.supportsMetadata(project)
-      ? await this.checks.metadata(incoming, previousService ?? null)
-      : null;
+    const metadataCheck = await this.checks.metadata(incoming, previousService ?? null);
 
     const [compositionCheck, diffCheck] = await Promise.all([
       this.checks.composition({

@@ -25,8 +25,12 @@ type Env = {
    * Id of the release
    */
   SENTRY_RELEASE: string;
+  /**
+   * Worker's Analytics Engines
+   */
   USAGE_ANALYTICS: AnalyticsEngine;
   ERROR_ANALYTICS: AnalyticsEngine;
+  METADATA_ANALYTICS: AnalyticsEngine;
   RESPONSE_ANALYTICS: AnalyticsEngine;
   R2_ANALYTICS: AnalyticsEngine;
   KEY_VALIDATION_ANALYTICS: AnalyticsEngine;
@@ -48,6 +52,7 @@ const handler: ExportedHandler<Env> = {
     const analytics = createAnalytics({
       usage: env.USAGE_ANALYTICS,
       error: env.ERROR_ANALYTICS,
+      metadata: env.METADATA_ANALYTICS,
       keyValidation: env.KEY_VALIDATION_ANALYTICS,
       response: env.RESPONSE_ANALYTICS,
       r2: env.R2_ANALYTICS,
