@@ -25,7 +25,7 @@ import LRU from 'tiny-lru';
 import { normalizeOperation } from '@graphql-hive/core';
 import { version } from '../version.js';
 import { createAgent } from './agent.js';
-import { randomSampling } from './sampling.js';
+import { dynamicSampling, randomSampling } from './sampling.js';
 import type {
   AbortAction,
   ClientInfo,
@@ -145,7 +145,10 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
     logger.error,
   );
 
-  const shouldInclude = randomSampling(options.sampleRate ?? 1.0);
+  const shouldInclude =
+    options.sampler && typeof options.sampler === 'function'
+      ? dynamicSampling(options.sampler)
+      : randomSampling(options.sampleRate ?? 1.0);
 
   return {
     dispose: agent.dispose,
@@ -175,7 +178,15 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
           providedOperationName = args.operationName || rootOperation.name?.value;
           const operationName = providedOperationName || 'anonymous';
 
-          if (!excludeSet.has(operationName) && shouldInclude()) {
+          if (
+            !excludeSet.has(operationName) &&
+            shouldInclude({
+              operationName,
+              document,
+              variableValues: args.variableValues,
+              contextValue: args.contextValue,
+            })
+          ) {
             const errors =
               result.errors?.map(error => ({
                 message: error.message,
