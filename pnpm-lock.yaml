@@ -1527,8 +1527,8 @@ importers:
         specifier: 1.0.7
         version: 1.0.7(@types/react-dom@18.2.14)(@types/react@18.2.36)(react-dom@18.2.0)(react@18.2.0)
       '@repeaterjs/repeater':
-        specifier: 3.0.4
-        version: 3.0.4
+        specifier: 3.0.5
+        version: 3.0.5
       '@sentry/nextjs':
         specifier: 7.77.0
         version: 7.77.0(next@13.5.6)(react@18.2.0)(webpack@5.88.2)
@@ -6961,7 +6961,7 @@ packages:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
       '@graphql-tools/utils': 9.2.1(graphql@16.8.1)
-      '@repeaterjs/repeater': 3.0.4
+      '@repeaterjs/repeater': 3.0.5
       '@whatwg-node/fetch': 0.8.8
       dset: 3.1.2
       extract-files: 11.0.0
@@ -6979,7 +6979,7 @@ packages:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
     dependencies:
       '@graphql-tools/utils': 10.0.3(graphql@16.8.1)
-      '@repeaterjs/repeater': 3.0.4
+      '@repeaterjs/repeater': 3.0.5
       '@whatwg-node/fetch': 0.9.13
       dset: 3.1.2
       extract-files: 11.0.0
@@ -7041,7 +7041,7 @@ packages:
     dependencies:
       '@graphql-tools/utils': 10.0.3(graphql@16.8.1)
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.8.1)
-      '@repeaterjs/repeater': 3.0.4
+      '@repeaterjs/repeater': 3.0.5
       graphql: 16.8.1
       tslib: 2.6.2
       value-or-promise: 1.0.12
@@ -7612,7 +7612,7 @@ packages:
     engines: {node: '>=16.0.0'}
     dependencies:
       '@graphql-yoga/typed-event-target': 2.0.0
-      '@repeaterjs/repeater': 3.0.4
+      '@repeaterjs/repeater': 3.0.5
       '@whatwg-node/events': 0.1.1
       tslib: 2.6.2
     dev: true
@@ -7622,7 +7622,7 @@ packages:
     engines: {node: '>=18.0.0'}
     dependencies:
       '@graphql-yoga/typed-event-target': 3.0.0
-      '@repeaterjs/repeater': 3.0.4
+      '@repeaterjs/repeater': 3.0.5
       '@whatwg-node/events': 0.1.1
       tslib: 2.6.2
     dev: true
@@ -7631,7 +7631,7 @@ packages:
     resolution: {integrity: sha512-oA/VGxGmaSDym1glOHrltw43qZsFwLLjBwvh57B79UKX/vo3+UQcRgOyE44c5RP7DCYjkrC2tuArZmb6jCzysw==}
     engines: {node: '>=16.0.0'}
     dependencies:
-      '@repeaterjs/repeater': 3.0.4
+      '@repeaterjs/repeater': 3.0.5
       tslib: 2.6.2
     dev: true
 
@@ -7639,7 +7639,7 @@ packages:
     resolution: {integrity: sha512-w+liuBySifrstuHbFrHoHAEyVnDFVib+073q8AeAJ/qqJfvFvAwUPLLtNohR/WDVRgSasfXtl3dcNuVJWN+rjg==}
     engines: {node: '>=18.0.0'}
     dependencies:
-      '@repeaterjs/repeater': 3.0.4
+      '@repeaterjs/repeater': 3.0.5
       tslib: 2.6.2
     dev: true
 
@@ -10561,6 +10561,9 @@ packages:
 
   /@repeaterjs/repeater@3.0.4:
     resolution: {integrity: sha512-AW8PKd6iX3vAZ0vA43nOUOnbq/X5ihgU+mSXXqunMkeQADGiqw/PY0JNeYtD5sr0PAy51YPgAPbDoeapv9r8WA==}
+
+  /@repeaterjs/repeater@3.0.5:
+    resolution: {integrity: sha512-l3YHBLAol6d/IKnB9LhpD0cEZWAoe3eFKUyTYWmFmCO2Q/WOckxLQAUyMZWwZV2M/m3+4vgRoaolFqaII82/TA==}
 
   /@rollup/plugin-commonjs@24.0.0(rollup@2.78.0):
     resolution: {integrity: sha512-0w0wyykzdyRRPHOb0cQt14mIBLujfAv6GgP6g8nvg/iBxEm112t3YPPq+Buqe2+imvElTka+bjNlJ/gB56TD8g==}
