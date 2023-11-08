@@ -14,7 +14,9 @@ const cases = [
 describe('publish', () => {
   describe.concurrent.each(cases)('%s', (caseName, ffs) => {
     test.concurrent('accepted: composable', async () => {
-      const { publish } = await prepare(ffs);
+      const {
+        cli: { publish },
+      } = await prepare(ffs);
       await publish({
         sdl: `type Query { topProductName: String }`,
         expect: 'latest-composable',
@@ -22,7 +24,9 @@ describe('publish', () => {
     });
 
     test.concurrent('accepted: composable, breaking changes', async () => {
-      const { publish } = await prepare(ffs);
+      const {
+        cli: { publish },
+      } = await prepare(ffs);
       await publish({
         sdl: /* GraphQL */ `
           type Query {
@@ -45,7 +49,9 @@ describe('publish', () => {
     test.concurrent(
       `${caseName === 'default' ? 'rejected' : 'accepted'}: not composable (graphql errors)`,
       async () => {
-        const { publish } = await prepare(ffs);
+        const {
+          cli: { publish },
+        } = await prepare(ffs);
 
         await publish({
           sdl: /* GraphQL */ `
@@ -59,7 +65,9 @@ describe('publish', () => {
     );
 
     test.concurrent('accepted: composable, no changes', async () => {
-      const { publish } = await prepare(ffs);
+      const {
+        cli: { publish },
+      } = await prepare(ffs);
 
       // composable
       await publish({
@@ -68,6 +76,7 @@ describe('publish', () => {
             topProduct: String
           }
         `,
+        metadata: { version: 'v1' },
         expect: 'latest-composable',
       });
 
@@ -78,12 +87,43 @@ describe('publish', () => {
             topProduct: String
           }
         `,
+        metadata: { version: 'v1' },
         expect: 'ignored',
       });
     });
 
+    test.concurrent('accepted: composable, no changes but modified metadata', async () => {
+      const {
+        cli: { publish },
+      } = await prepare(ffs);
+
+      // composable
+      await publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            topProduct: String
+          }
+        `,
+        metadata: { version: 'v1' },
+        expect: 'latest-composable',
+      });
+
+      // composable but no changes with modified metadata
+      await publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            topProduct: String
+          }
+        `,
+        metadata: { version: 'v2' },
+        expect: 'latest-composable',
+      });
+    });
+
     test.concurrent('CLI output', async ({ expect }) => {
-      const { publish } = await prepare(ffs);
+      const {
+        cli: { publish },
+      } = await prepare(ffs);
 
       let output = normalizeCliOutput(
         (await publish({
@@ -138,7 +178,9 @@ describe('publish', () => {
 describe('check', () => {
   describe.concurrent.each(cases)('%s', (_, ffs) => {
     test.concurrent('accepted: composable, no breaking changes', async () => {
-      const { publish, check } = await prepare(ffs);
+      const {
+        cli: { publish, check },
+      } = await prepare(ffs);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -163,7 +205,9 @@ describe('check', () => {
     });
 
     test.concurrent('accepted: no changes', async () => {
-      const { publish, check } = await prepare(ffs);
+      const {
+        cli: { publish, check },
+      } = await prepare(ffs);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -185,7 +229,9 @@ describe('check', () => {
     });
 
     test.concurrent('rejected: composable, breaking changes', async () => {
-      const { publish, check } = await prepare(ffs);
+      const {
+        cli: { publish, check },
+      } = await prepare(ffs);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -209,7 +255,9 @@ describe('check', () => {
     });
 
     test.concurrent('rejected: not composable, no breaking changes', async () => {
-      const { publish, check } = await prepare(ffs);
+      const {
+        cli: { publish, check },
+      } = await prepare(ffs);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -234,7 +282,9 @@ describe('check', () => {
     });
 
     test.concurrent('rejected: not composable, breaking changes', async () => {
-      const { publish, check } = await prepare(ffs);
+      const {
+        cli: { publish, check },
+      } = await prepare(ffs);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -272,7 +322,7 @@ describe('check', () => {
 describe('delete', () => {
   describe.concurrent.each(cases)('%s', (_, ffs) => {
     test.concurrent('not supported', async () => {
-      const cli = await prepare(ffs);
+      const { cli } = await prepare(ffs);
 
       await cli.delete({
         serviceName: 'test',
@@ -282,12 +332,58 @@ describe('delete', () => {
   });
 });
 
+describe('others', () => {
+  describe.concurrent.each(cases)('%s', (_, ffs) => {
+    test.concurrent('metadata should always be published as an array', async () => {
+      const { cli, cdn } = await prepare(ffs);
+
+      await cli.publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            topProduct: String
+          }
+        `,
+        metadata: { version: 'v1' },
+        expect: 'latest-composable',
+      });
+
+      await expect(cdn.fetchMetadata()).resolves.toEqual(
+        expect.objectContaining({
+          status: 200,
+          body: { version: 'v1' }, // not an array
+        }),
+      );
+
+      await cli.publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            topProduct: String
+            topProducts: [String]
+          }
+        `,
+        metadata: { version: 'v2' },
+        expect: 'latest-composable',
+      });
+
+      await expect(cdn.fetchMetadata()).resolves.toEqual(
+        expect.objectContaining({
+          status: 200,
+          body: { version: 'v2' }, // not an array
+        }),
+      );
+    });
+  });
+});
+
 async function prepare(featureFlags: Array<[string, boolean]> = []) {
-  const { tokens, setFeatureFlag } = await prepareProject(ProjectType.Single);
+  const { tokens, setFeatureFlag, cdn } = await prepareProject(ProjectType.Single);
 
   for await (const [name, enabled] of featureFlags) {
     await setFeatureFlag(name, enabled);
   }
 
-  return createCLI(tokens.registry);
+  return {
+    cli: createCLI(tokens.registry),
+    cdn,
+  };
 }

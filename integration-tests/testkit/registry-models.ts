@@ -14,7 +14,11 @@ export async function prepareProject(
     });
 
   // Create a token with write rights
-  const { secret: readwriteToken } = await createToken({
+  const {
+    secret: readwriteToken,
+    createCdnAccess,
+    fetchMetadataFromCDN,
+  } = await createToken({
     organizationScopes: [],
     projectScopes: [],
     targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
@@ -26,6 +30,9 @@ export async function prepareProject(
     projectScopes: [],
     targetScopes: [TargetAccessScope.RegistryRead],
   });
+
+  // Create CDN token
+  const { secretAccessToken: cdnToken, cdnUrl } = await createCdnAccess();
 
   return {
     organization,
@@ -41,6 +48,13 @@ export async function prepareProject(
       registry: {
         readwrite: readwriteToken,
         readonly: readonlyToken,
+      },
+    },
+    cdn: {
+      token: cdnToken,
+      url: cdnUrl,
+      fetchMetadata() {
+        return fetchMetadataFromCDN();
       },
     },
     setFeatureFlag,

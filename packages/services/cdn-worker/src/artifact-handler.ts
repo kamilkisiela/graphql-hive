@@ -1,6 +1,6 @@
 import * as itty from 'itty-router';
 import zod from 'zod';
-import { fetch, type Request } from '@whatwg-node/fetch';
+import { type Request } from '@whatwg-node/fetch';
 import { createAnalytics, type Analytics } from './analytics';
 import { type ArtifactsType } from './artifact-storage-reader';
 import { InvalidAuthKeyResponse, MissingAuthKeyResponse, UnexpectedError } from './errors';
@@ -12,7 +12,15 @@ export type GetArtifactActionFn = (
   artifactType: ArtifactsType,
   eTag: string | null,
 ) => Promise<
-  { type: 'notModified' } | { type: 'notFound' } | { type: 'redirect'; location: string }
+  | { type: 'notModified' }
+  | { type: 'notFound' }
+  | {
+      type: 'redirect';
+      location: {
+        public: string;
+        private: string;
+      };
+    }
 >;
 
 type ArtifactRequestHandler = {
@@ -136,8 +144,11 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         // fetch metadata using the redirect location.
         // Once we convert all the legacy metadata (SINGLE project passes an array instead of an object),
         // we can remove this and continue serving a redirect.
-        // In case of metadata, we need to fetch the artifact and transform it
-        const metadataResponse = await fetch(result.location);
+        // In case of metadata, we need to fetch the artifact and transform it.
+        // We're using here a private location, because the public S3 endpoint may differ from the internal S3 endpoint. E.g. within a docker network,
+        // and we're fetching the artifact from within the private network.
+        // If they are the same, private and public locations will be the same.
+        const metadataResponse = await fetch(result.location.private);
 
         if (!metadataResponse.ok) {
           console.error(
@@ -178,7 +189,10 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
       return createResponse(
         analytics,
         'Found.',
-        { status: 302, headers: { Location: result.location } },
+        // We're using here a public location, because we expose the Location to the end user and
+        // the public S3 endpoint may differ from the internal S3 endpoint. E.g. within a docker network.
+        // If they are the same, private and public locations will be the same.
+        { status: 302, headers: { Location: result.location.public } },
         params.targetId,
         request,
       );
