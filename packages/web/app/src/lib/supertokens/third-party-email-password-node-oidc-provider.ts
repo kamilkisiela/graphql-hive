@@ -1,31 +1,30 @@
 import type { ExpressRequest } from 'supertokens-node/lib/build/framework/express/framework';
 import type { ProviderInput } from 'supertokens-node/recipe/thirdparty/types';
+import type { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
 import zod from 'zod';
 import { getLogger } from '@/server-logger';
-// eslint-disable-next-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
-import { type InternalApi } from '@hive/server';
-import { CreateTRPCProxyClient } from '@trpc/client';
+import type { InternalApi } from '@hive/server';
+import type { CreateTRPCProxyClient } from '@trpc/client';
 
-const OIDCProfileInfoSchema = zod.object({
-  sub: zod.string(),
-  email: zod.string().email(),
+const couldNotResolveOidcIntegrationSymbol = Symbol('could_not_resolve_oidc_integration');
+
+export const getOIDCSuperTokensOverrides = (): ThirdPartEmailPasswordTypeInput['override'] => ({
+  apis(originalImplementation) {
+    return {
+      ...originalImplementation,
+      async authorisationUrlGET(input) {
+        if (input.userContext?.[couldNotResolveOidcIntegrationSymbol] === true) {
+          return {
+            status: 'GENERAL_ERROR',
+            message: 'Could not find OIDC integration.',
+          };
+        }
+
+        return originalImplementation.authorisationUrlGET!(input);
+      },
+    };
+  },
 });
-
-const OIDCTokenSchema = zod.object({ access_token: zod.string() });
-
-const getOIDCIdFromInput = (input: { userContext: any }): string => {
-  const expressRequest = input.userContext._default.request as ExpressRequest;
-  const originalUrl = 'http://localhost' + expressRequest.getOriginalURL();
-  const oidcId = new URL(originalUrl).searchParams.get('oidc_id');
-
-  if (typeof oidcId !== 'string') {
-    const logger = getLogger();
-    logger.error('Invalid OIDC ID sent from client: %s', oidcId);
-    throw new Error('Invalid OIDC ID sent from client.');
-  }
-
-  return oidcId;
-};
 
 export const createOIDCSuperTokensProvider = (args: {
   internalApi: CreateTRPCProxyClient<InternalApi>;
@@ -40,11 +39,19 @@ export const createOIDCSuperTokensProvider = (args: {
 
       async getConfigForClientType(input) {
         logger.info('resolve config for OIDC provider.');
-        const oidcId = getOIDCIdFromInput(input);
-        const config = await fetchOIDCConfig(args.internalApi, oidcId);
+        const config = await getOIDCConfigFromInput(args.internalApi, input);
         if (!config) {
-          logger.error('Could not find OIDC integration (oidcId: %s)', oidcId);
-          throw new Error('Could not find OIDC integration.');
+          // In the next step the override `authorisationUrlGET` from `getOIDCSuperTokensOverrides` is called.
+          // We use the user context to return a `GENERAL_ERROR` with a human readable message.
+          // We cannot return an error here (except an "Unexpected error"), so we also need to return fake dat
+          input.userContext[couldNotResolveOidcIntegrationSymbol] = true;
+
+          return {
+            thirdPartyId: 'oidc',
+            get clientId(): string {
+              throw new Error('Noop value accessed.');
+            },
+          };
         }
 
         return {
@@ -60,10 +67,11 @@ export const createOIDCSuperTokensProvider = (args: {
 
       async getAuthorisationRedirectURL(input) {
         logger.info('resolve config for OIDC provider.');
-        const oidcId = getOIDCIdFromInput(input);
-        const oidcConfig = await fetchOIDCConfig(args.internalApi, oidcId);
+        const oidcConfig = await getOIDCConfigFromInput(args.internalApi, input);
+
         if (!oidcConfig) {
-          logger.error('Could not find OIDC integration (oidcId: %s)', oidcId);
+          // This case should never be reached (guarded by getConfigForClientType).
+          // We still have it for security reasons.
           throw new Error('Could not find OIDC integration.');
         }
 
@@ -81,11 +89,10 @@ export const createOIDCSuperTokensProvider = (args: {
 
       async getUserInfo(input) {
         logger.info('retrieve profile info from OIDC provider');
-        const oidcId = getOIDCIdFromInput(input);
-        const config = await fetchOIDCConfig(args.internalApi, oidcId);
-
+        const config = await getOIDCConfigFromInput(args.internalApi, input);
         if (!config) {
-          logger.error('Could not find OIDC integration (oidcId: %s)', oidcId);
+          // This case should never be reached (guarded by getConfigForClientType).
+          // We still have it for security reasons.
           throw new Error('Could not find OIDC integration.');
         }
 
@@ -121,6 +128,60 @@ export const createOIDCSuperTokensProvider = (args: {
     };
   },
 });
+
+type OIDCCOnfig = {
+  id: string;
+  clientId: string;
+  clientSecret: string;
+  tokenEndpoint: string;
+  userinfoEndpoint: string;
+  authorizationEndpoint: string;
+};
+
+const OIDCProfileInfoSchema = zod.object({
+  sub: zod.string(),
+  email: zod.string().email(),
+});
+
+const OIDCTokenSchema = zod.object({ access_token: zod.string() });
+
+const getOIDCIdFromInput = (input: { userContext: any }): string => {
+  const expressRequest = input.userContext._default.request as ExpressRequest;
+  const originalUrl = 'http://localhost' + expressRequest.getOriginalURL();
+  const oidcId = new URL(originalUrl).searchParams.get('oidc_id');
+
+  if (typeof oidcId !== 'string') {
+    const logger = getLogger();
+    logger.error('Invalid OIDC ID sent from client: %s', oidcId);
+    throw new Error('Invalid OIDC ID sent from client.');
+  }
+
+  return oidcId;
+};
+
+const configCache = new WeakMap<ExpressRequest, OIDCCOnfig | null>();
+
+/**
+ * Get cached OIDC config from the supertokens input.
+ */
+async function getOIDCConfigFromInput(
+  internalApi: CreateTRPCProxyClient<InternalApi>,
+  input: { userContext: any },
+) {
+  const expressRequest = input.userContext._default.request as ExpressRequest;
+  if (configCache.has(expressRequest)) {
+    return configCache.get(expressRequest) ?? null;
+  }
+
+  const oidcId = getOIDCIdFromInput(input);
+  const config = await fetchOIDCConfig(internalApi, oidcId);
+  configCache.set(expressRequest, config);
+  if (!config) {
+    const logger = getLogger();
+    logger.error('Could not find OIDC integration (oidcId: %s)', oidcId);
+  }
+  return config;
+}
 
 const fetchOIDCConfig = async (
   internalApi: CreateTRPCProxyClient<InternalApi>,

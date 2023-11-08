@@ -9,7 +9,10 @@ import { TypeInput } from 'supertokens-node/types';
 import zod from 'zod';
 import { env } from '@/env/backend';
 import { appInfo } from '@/lib/supertokens/app-info';
-import { createOIDCSuperTokensProvider } from '@/lib/supertokens/third-party-email-password-node-oidc-provider';
+import {
+  createOIDCSuperTokensProvider,
+  getOIDCSuperTokensOverrides,
+} from '@/lib/supertokens/third-party-email-password-node-oidc-provider';
 // import { createThirdPartyEmailPasswordNodeOktaProvider } from '@/lib/supertokens/third-party-email-password-node-okta-provider';
 // eslint-disable-next-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
 import { EmailsApi } from '@hive/emails';
@@ -101,6 +104,7 @@ export const backendConfig = (): TypeInput => {
         },
         override: composeSuperTokensOverrides([
           getEnsureUserOverrides(internalApi),
+          env.auth.organizationOIDC ? getOIDCSuperTokensOverrides() : null,
           /**
            * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).
            */
