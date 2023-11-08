@@ -14,7 +14,7 @@ export const getOIDCOverrides = (): UserInput['override'] => ({
     ...originalImplementation,
     generateStateToSendToOAuthProvider(input) {
       const hash = originalImplementation.generateStateToSendToOAuthProvider(input);
-      const { oidcId } = input.userContext;
+      const oidcId = input?.userContext?.['oidcId'];
 
       if (typeof oidcId === 'string') {
         return `${hash}${delimiter}${oidcId}`;
@@ -71,8 +71,8 @@ export const getOIDCOverrides = (): UserInput['override'] => ({
 
 export const startAuthFlowForOIDCProvider = async (oidcId: string) => {
   const authUrl = await getAuthorisationURLWithQueryParamsAndSetState({
-    providerId: 'oidc',
-    authorisationURL: `${env.appBaseUrl}/auth/callback/oidc`,
+    thirdPartyId: 'oidc',
+    frontendRedirectURI: `${env.appBaseUrl}/auth/callback/oidc`,
     // The user context is very important - we store the OIDC ID so we can use it later on.
     userContext: {
       oidcId,
