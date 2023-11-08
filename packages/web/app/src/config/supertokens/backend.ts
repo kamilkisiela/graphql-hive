@@ -13,11 +13,9 @@ import {
   createOIDCSuperTokensProvider,
   getOIDCSuperTokensOverrides,
 } from '@/lib/supertokens/third-party-email-password-node-oidc-provider';
-// import { createThirdPartyEmailPasswordNodeOktaProvider } from '@/lib/supertokens/third-party-email-password-node-okta-provider';
-// eslint-disable-next-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
-import { EmailsApi } from '@hive/emails';
-// eslint-disable-next-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
-import { type InternalApi } from '@hive/server';
+import { createThirdPartyEmailPasswordNodeOktaProvider } from '@/lib/supertokens/third-party-email-password-node-okta-provider';
+import type { EmailsApi } from '@hive/emails';
+import type { InternalApi } from '@hive/server';
 import { createTRPCProxyClient, CreateTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
 
@@ -62,9 +60,9 @@ export const backendConfig = (): TypeInput => {
     });
   }
 
-  // if (env.auth.okta) {
-  //   providers.push(createThirdPartyEmailPasswordNodeOktaProvider(env.auth.okta));
-  // }
+  if (env.auth.okta) {
+    providers.push(createThirdPartyEmailPasswordNodeOktaProvider(env.auth.okta));
+  }
 
   if (env.auth.organizationOIDC) {
     providers.push(
@@ -218,10 +216,11 @@ const getEnsureUserOverrides = (
       }
 
       function extractOidcId(args: typeof input) {
-        if (input.provider.id === 'oidc' && 'redirectURIInfo' in args) {
-          const state: unknown = args.redirectURIInfo.redirectURIQueryParams?.['state'];
-          if (typeof state === 'string') {
-            return state.split('--')[1] ?? null;
+        if (input.provider.id === 'oidc') {
+          // eslint-disable-next-line prefer-destructuring
+          const oidcId: unknown = args.userContext['oidcId'];
+          if (typeof oidcId === 'string') {
+            return oidcId;
           }
         }
         return null;

@@ -96,6 +96,8 @@ export const createOIDCSuperTokensProvider = (args: {
           throw new Error('Could not find OIDC integration.');
         }
 
+        logger.info('fetch info for OIDC provider (oidcId=%s)', config.id);
+
         const tokenResponse = OIDCTokenSchema.parse(input.oAuthTokens);
         const rawData: unknown = await fetch(config.userinfoEndpoint, {
           headers: {
@@ -105,13 +107,12 @@ export const createOIDCSuperTokensProvider = (args: {
           },
         }).then(res => res.json());
 
-        logger.info(
-          `getProfileInfo: fetched OIDC (${config.userinfoEndpoint}) profile info: ${JSON.stringify(
-            rawData,
-          )}`,
-        );
+        logger.info('retrieved profile info for provider (oidcId=%s)', config.id);
 
         const data = OIDCProfileInfoSchema.parse(rawData);
+
+        // Set the oidcId to the user context so it can be used in `thirdPartySignInUpPOST` for linking the user account to the OIDC integration.
+        input.userContext.oidcId = config.id;
 
         return {
           thirdPartyUserId: `${config.id}-${data.sub}`,

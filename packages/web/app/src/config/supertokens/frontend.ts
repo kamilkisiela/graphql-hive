@@ -9,7 +9,6 @@ import {
   createThirdPartyEmailPasswordReactOIDCProvider,
   getOIDCOverrides,
 } from '@/lib/supertokens/third-party-email-password-react-oidc-provider';
-import { createThirdPartyEmailPasswordReactOktaProvider } from '@/lib/supertokens/third-party-email-password-react-okta-provider';
 
 export const frontendConfig = () => {
   const providers: Array<Provider | CustomProviderConfig> = [];
@@ -32,7 +31,7 @@ export const frontendConfig = () => {
         // Only show Okta via query parameter
         new URLSearchParams(globalThis.window?.location.search ?? '').get('show_okta') === '1'))
   ) {
-    providers.push(createThirdPartyEmailPasswordReactOktaProvider());
+    providers.push(ThirdPartyEmailPasswordReact.Okta.init());
   }
 
   const url = new URL(globalThis.window.location.toString());
