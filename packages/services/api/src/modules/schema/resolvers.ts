@@ -935,6 +935,12 @@ export const resolvers: SchemaModule.Resolvers = {
         .then(r => r.supergraph);
     },
     async sdl(version, _, { injector }) {
+      if (version.compositeSchemaSDL) {
+        return version.compositeSchemaSDL;
+      }
+
+      // Legacy Fallback
+
       const [project, organization] = await Promise.all([
         injector.get(ProjectManager).getProject({
           organization: version.organization,

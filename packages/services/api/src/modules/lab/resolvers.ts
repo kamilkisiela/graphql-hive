@@ -36,6 +36,15 @@ export const resolvers: LabModule.Resolvers = {
         return null;
       }
 
+      if (latestSchema.compositeSchemaSDL) {
+        return {
+          schema: latestSchema.compositeSchemaSDL,
+          mocks: {},
+        };
+      }
+
+      // Legacy Fallback
+
       const [
         schemas,
         { type, externalComposition, nativeFederation, legacyRegistryModel },
@@ -58,6 +67,8 @@ export const resolvers: LabModule.Resolvers = {
 
       const orchestrator = schemaManager.matchOrchestrator(type);
       const helper = injector.get(SchemaHelper);
+
+      // TODO: should we use compositeSchemaSDL here, instead of calling orchestrator.composeAndValidate?
 
       const schema = await ensureSDL(
         orchestrator.composeAndValidate(
