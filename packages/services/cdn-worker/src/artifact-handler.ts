@@ -155,14 +155,6 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         const isMeshArtifact = body.includes(`"#/definitions/_schema"`);
         const hasTopLevelArray = body.startsWith('[') && body.endsWith(']');
 
-        analytics.track(
-          {
-            type: 'metadata',
-            value: hasTopLevelArray ? 'array' : 'object',
-          },
-          params.targetId,
-        );
-
         // Mesh's Metadata shared by Mesh is always an object.
         // The top-level array was caused #3291 and fixed now, but we still need to handle the old data.
         if (isMeshArtifact && hasTopLevelArray) {
