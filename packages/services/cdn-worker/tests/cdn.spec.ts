@@ -64,7 +64,10 @@ describe('CDN Worker', () => {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'redirect',
-              location: `target:${targetId}:${artifactType}`,
+              location: {
+                public: `target:${targetId}:${artifactType}`,
+                private: `target:${targetId}:${artifactType}`,
+              },
             }
           : {
               type: 'notFound',
@@ -140,7 +143,10 @@ describe('CDN Worker', () => {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'redirect',
-              location: `target:${targetId}:${artifactType}`,
+              location: {
+                public: `target:${targetId}:${artifactType}`,
+                private: `target:${targetId}:${artifactType}`,
+              },
             }
           : {
               type: 'notFound',
@@ -232,7 +238,10 @@ describe('CDN Worker', () => {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'redirect',
-              location: `target:${targetId}:${artifactType}`,
+              location: {
+                public: `target:${targetId}:${artifactType}`,
+                private: `target:${targetId}:${artifactType}`,
+              },
             }
           : {
               type: 'notFound',
@@ -308,7 +317,10 @@ describe('CDN Worker', () => {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'redirect',
-              location: `target:${targetId}:${artifactType}`,
+              location: {
+                public: `target:${targetId}:${artifactType}`,
+                private: `target:${targetId}:${artifactType}`,
+              },
             }
           : {
               type: 'notFound',
@@ -390,7 +402,10 @@ describe('CDN Worker', () => {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'redirect',
-              location: `target:${targetId}:${artifactType}`,
+              location: {
+                public: `target:${targetId}:${artifactType}`,
+                private: `target:${targetId}:${artifactType}`,
+              },
             }
           : {
               type: 'notFound',
@@ -470,7 +485,10 @@ describe('CDN Worker', () => {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'redirect',
-              location: `target:${targetId}:${artifactType}`,
+              location: {
+                public: `target:${targetId}:${artifactType}`,
+                private: `target:${targetId}:${artifactType}`,
+              },
             }
           : {
               type: 'notFound',
@@ -635,7 +653,10 @@ describe('CDN Worker', () => {
           return map.has(`target:${targetId}:${artifactType}`)
             ? {
                 type: 'redirect',
-                location: `target:${targetId}:${artifactType}`,
+                location: {
+                  public: `target:${targetId}:${artifactType}`,
+                  private: `target:${targetId}:${artifactType}`,
+                },
               }
             : {
                 type: 'notFound',
@@ -683,7 +704,10 @@ describe('CDN Worker', () => {
           return map.has(`target:${targetId}:${artifactType}`)
             ? {
                 type: 'redirect',
-                location: `target:${targetId}:${artifactType}`,
+                location: {
+                  public: `target:${targetId}:${artifactType}`,
+                  private: `target:${targetId}:${artifactType}`,
+                },
               }
             : {
                 type: 'notFound',
