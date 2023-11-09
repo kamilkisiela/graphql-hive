@@ -68,7 +68,6 @@ export const resolvers: LabModule.Resolvers = {
       const orchestrator = schemaManager.matchOrchestrator(type);
       const helper = injector.get(SchemaHelper);
 
-
       const schema = await ensureSDL(
         orchestrator.composeAndValidate(
           schemas.map(s => helper.createSchemaObject(s)),
