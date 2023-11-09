@@ -9,7 +9,7 @@ await describe('drop-personal-org', async () => {
 
     try {
       // Run migrations all the way to the point before the one we are testing
-      await runTo('2023.02.21T14.32.24.supertokens-4.0.0.sql');
+      await runTo('2023.01.18T11.03.41.registry-v2.sql');
 
       // Seed the DB with orgs
       const user = await seed.user();
