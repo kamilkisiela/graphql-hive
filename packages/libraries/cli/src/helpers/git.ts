@@ -4,7 +4,11 @@ import ci from 'env-ci';
 
 interface CIRunner {
   detect(): boolean;
-  env(): { commit: string | undefined | null };
+  env(): {
+    commit: string | undefined | null;
+    pullRequestNumber: string | undefined | null;
+    repository: string | undefined | null;
+  };
 }
 
 const splitBy = '<##>';
@@ -67,6 +71,9 @@ function useGitHubAction(): CIRunner {
           if (event?.pull_request) {
             return {
               commit: event.pull_request.head.sha as string,
+              pullRequestNumber: String(event.pull_request.number),
+              // eslint-disable-next-line no-process-env
+              repository: process.env['GITHUB_REPOSITORY']!,
             };
           }
         } catch {
@@ -74,12 +81,14 @@ function useGitHubAction(): CIRunner {
         }
       }
 
-      return { commit: undefined };
+      return { commit: undefined, pullRequestNumber: undefined, repository: undefined };
     },
   };
 }
 
 export async function gitInfo(noGit: () => void) {
+  let repository: string | null = null;
+  let pullRequestNumber: string | null = null;
   let commit: string | null = null;
   let author: string | null = null;
 
@@ -88,7 +97,10 @@ export async function gitInfo(noGit: () => void) {
   const githubAction = useGitHubAction();
 
   if (githubAction.detect()) {
-    commit = githubAction.env().commit ?? null;
+    const env = githubAction.env();
+    repository = env.repository ?? null;
+    commit = env.commit ?? null;
+    pullRequestNumber = env.pullRequestNumber ?? null;
   }
 
   if (!commit) {
@@ -111,6 +123,8 @@ export async function gitInfo(noGit: () => void) {
   }
 
   return {
+    repository,
+    pullRequestNumber,
     commit,
     author,
   };
