@@ -161,8 +161,8 @@ importers:
         specifier: 3.0.3
         version: 3.0.3
       prettier-plugin-sql:
-        specifier: 0.15.1
-        version: 0.15.1(prettier@3.0.3)
+        specifier: 0.15.2
+        version: 0.15.2(prettier@3.0.3)
       prettier-plugin-tailwindcss:
         specifier: 0.5.6
         version: 0.5.6(prettier@3.0.3)
@@ -19624,6 +19624,11 @@ packages:
       source-map: 0.8.0-beta.0
     dev: true
 
+  /get-stdin@8.0.0:
+    resolution: {integrity: sha512-sY22aA6xchAzprjyqmSEQv4UbAAzRN0L2dQB0NlN5acTTK9Don6nhoc3eAbUnpZiCANAMfd/+40kVdKfFygohg==}
+    engines: {node: '>=10'}
+    dev: true
+
   /get-stream@3.0.0:
     resolution: {integrity: sha512-GlhdIUuVakc8SJ6kK0zAFbiGzRFzNnY4jUuEbV9UROo4Y+0Ny4fjvcZFVTeDA4odpFyOQzaw6hXukJSq/f28sQ==}
     engines: {node: '>=4'}
@@ -26729,15 +26734,15 @@ packages:
       sh-syntax: 0.4.1
     dev: true
 
-  /prettier-plugin-sql@0.15.1(prettier@3.0.3):
-    resolution: {integrity: sha512-CWYgo4dXDhjA6ofvC6yUjsEOSzb5qdLmaloK8V+mPiSjkvMbatWsSTKjkV2g4k17shtqYmnU+WWOaYpFNbNL1A==}
+  /prettier-plugin-sql@0.15.2(prettier@3.0.3):
+    resolution: {integrity: sha512-4h1s1u1sxi2RTdfMjubVTBJWiUsyc2/kolxqQbFp/aFoUEfMLH+t6/hFGr2FeTKTuc576wOXFtkQG2WXXvBrRA==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
-      prettier: ^3.0.0
+      prettier: ^3.0.3
     dependencies:
       node-sql-parser: 4.8.0
       prettier: 3.0.3
-      sql-formatter: 12.2.3
+      sql-formatter: 12.2.4
       tslib: 2.6.2
     dev: true
 
@@ -28998,11 +29003,12 @@ packages:
     resolution: {integrity: sha512-VE0SOVEHCk7Qc8ulkWw3ntAzXuqf7S2lvwQaDLRnUeIEaKNQJzV6BwmLKhOqT61aGhfUMrXeaBk+oDGCzvhcug==}
     dev: true
 
-  /sql-formatter@12.2.3:
-    resolution: {integrity: sha512-sVRjEBTKJ5to2kfn11eDHcfVswz1//AL6HdGbPVN8ROWQ/XTv7E3z7rjgRxEimaBq5yDBE55JCljgcJ8a3+s7Q==}
+  /sql-formatter@12.2.4:
+    resolution: {integrity: sha512-Qj45LEHSfgrdYDOrAtIkR8SdS10SWcqCIM2WZwQwMKF2v9sM0K2dlThWPS7eYCUrhttZIrU1WwuIwHk7MjsWOw==}
     hasBin: true
     dependencies:
       argparse: 2.0.1
+      get-stdin: 8.0.0
       nearley: 2.20.1
     dev: true
 
