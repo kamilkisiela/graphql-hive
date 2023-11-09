@@ -157,10 +157,20 @@ export interface projects {
   validation_url: string | null;
 }
 
+export interface schema_change_approvals {
+  context_id: string;
+  created_at: Date;
+  first_approved_in_schema_check_id: string | null;
+  schema_change: any;
+  schema_change_id: string;
+  target_id: string;
+}
+
 export interface schema_checks {
   breaking_schema_changes: any | null;
   composite_schema_sdl: string | null;
   composite_schema_sdl_store_id: string | null;
+  context_id: string | null;
   created_at: Date;
   expires_at: Date | null;
   github_check_run_id: string | null;
@@ -318,6 +328,7 @@ export interface DBTables {
   organizations: organizations;
   organizations_billing: organizations_billing;
   projects: projects;
+  schema_change_approvals: schema_change_approvals;
   schema_checks: schema_checks;
   schema_log: schema_log;
   schema_policy_config: schema_policy_config;
