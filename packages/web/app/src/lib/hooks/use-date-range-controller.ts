@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useRouter } from 'next/router';
-import { formatISO, subDays, subHours, subMinutes } from 'date-fns';
+import { formatISO, subHours, subMinutes } from 'date-fns';
+import { subDays } from '@/lib/date-time';
 
 function floorDate(date: Date): Date {
   const time = 1000 * 60;

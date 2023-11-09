@@ -1,10 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
-import { startOfMonth, subDays, subHours } from 'date-fns';
+import { startOfMonth, subHours } from 'date-fns';
 import { AdminStats, Filters } from '@/components/admin/AdminStats';
 import { authenticated } from '@/components/authenticated-container';
 import { Page } from '@/components/common';
 import { DATE_RANGE_OPTIONS, floorToMinute } from '@/components/common/TimeFilter';
 import { Checkbox as RadixCheckbox, RadixSelect, Tooltip } from '@/components/v2';
+import { subDays } from '@/lib/date-time';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
 type DateRangeOptions = Exclude<(typeof DATE_RANGE_OPTIONS)[number], { key: 'all' }>;

@@ -8,7 +8,8 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { formatISO, subDays } from 'date-fns';
+import { formatISO } from 'date-fns';
+import { subDays } from '@/lib/date-time';
 import { useLocalStorage } from '@/lib/hooks';
 
 type PeriodOption = '365d' | '180d' | '90d' | '30d' | '14d' | '7d';
