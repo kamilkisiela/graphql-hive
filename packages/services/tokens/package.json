@@ -13,7 +13,7 @@
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
     "@sentry/node": "7.79.0",
-    "@trpc/server": "10.43.1",
+    "@trpc/server": "10.43.2",
     "@types/ms": "0.7.34",
     "dotenv": "16.3.1",
     "fastify": "3.29.5",
