@@ -107,7 +107,8 @@ export class ClickHouse {
           lookup: 1000,
           connect: 1000,
           secureConnect: 1000,
-          request: timeout,
+          // override the provided timeout of a query with the globally configured timeout
+          request: this.config.requestTimeout ?? timeout,
         },
         retry: {
           calculateDelay: info => {

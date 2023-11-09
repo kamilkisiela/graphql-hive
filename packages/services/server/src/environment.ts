@@ -73,6 +73,7 @@ const ClickHouseModel = zod.object({
   CLICKHOUSE_PORT: NumberFromString,
   CLICKHOUSE_USERNAME: zod.string(),
   CLICKHOUSE_PASSWORD: zod.string(),
+  CLICKHOUSE_REQUEST_TIMEOUT: emptyString(NumberFromString.optional()),
 });
 
 const RedisModel = zod.object({
@@ -311,6 +312,7 @@ export const env = {
     port: clickhouse.CLICKHOUSE_PORT,
     username: clickhouse.CLICKHOUSE_USERNAME,
     password: clickhouse.CLICKHOUSE_PASSWORD,
+    requestTimeout: clickhouse.CLICKHOUSE_REQUEST_TIMEOUT,
   },
   redis: {
     host: redis.REDIS_HOST,
