@@ -29,7 +29,10 @@ export class ArtifactStorageReader {
     this.publicUrl = publicUrl ? new URL(publicUrl) : null;
   }
 
-  private async generatePresignedGetUrl(key: string): Promise<string> {
+  private async generatePresignedGetUrl(key: string): Promise<{
+    public: string;
+    private: string;
+  }> {
     const signedUrl = await this.s3.client.sign(
       [this.s3.endpoint, this.s3.bucketName, key].join('/'),
       {
@@ -42,7 +45,10 @@ export class ArtifactStorageReader {
     );
 
     if (!this.publicUrl) {
-      return signedUrl.url;
+      return {
+        public: signedUrl.url,
+        private: signedUrl.url,
+      };
     }
 
     const publicUrl = new URL(signedUrl.url);
@@ -50,7 +56,10 @@ export class ArtifactStorageReader {
     publicUrl.host = this.publicUrl.host;
     publicUrl.port = this.publicUrl.port;
 
-    return publicUrl.toString();
+    return {
+      public: publicUrl.toString(),
+      private: signedUrl.url,
+    };
   }
 
   /** Generate a pre-signed url for reading an artifact from a bucket for a limited time period. */
@@ -88,7 +97,10 @@ export class ArtifactStorageReader {
         return { type: 'notModified' } as const;
       }
 
-      return { type: 'redirect', location: await this.generatePresignedGetUrl(key) } as const;
+      return {
+        type: 'redirect',
+        location: await this.generatePresignedGetUrl(key),
+      } as const;
     }
     if (response.status === 404) {
       return { type: 'notFound' } as const;

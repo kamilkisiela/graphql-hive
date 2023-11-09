@@ -25,6 +25,9 @@ type Env = {
    * Id of the release
    */
   SENTRY_RELEASE: string;
+  /**
+   * Worker's Analytics Engines
+   */
   USAGE_ANALYTICS: AnalyticsEngine;
   ERROR_ANALYTICS: AnalyticsEngine;
   RESPONSE_ANALYTICS: AnalyticsEngine;

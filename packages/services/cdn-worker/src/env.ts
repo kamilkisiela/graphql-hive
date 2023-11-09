@@ -1,5 +1,3 @@
-import type { AnalyticsEngine } from './analytics';
-
 export type Env = {
   S3_ENDPOINT: string;
   S3_ACCESS_KEY_ID: string;
@@ -19,7 +17,4 @@ export type Env = {
    * Id of the release
    */
   SENTRY_RELEASE: string;
-  USAGE_ANALYTICS: AnalyticsEngine;
-  ERROR_ANALYTICS: AnalyticsEngine;
-  KEY_VALIDATION_ANALYTICS: AnalyticsEngine;
 };

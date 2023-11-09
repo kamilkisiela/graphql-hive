@@ -443,7 +443,7 @@ describe('other', () => {
 
       let cdnMetadataResult = await fetchMetadataFromCDN();
       expect(cdnMetadataResult.status).toEqual(200);
-      expect(cdnMetadataResult.body).toEqual([{ c0: 1 }]);
+      expect(cdnMetadataResult.body).toEqual({ c0: 1 });
 
       const versions = await fetchVersions(3);
 
@@ -458,7 +458,7 @@ describe('other', () => {
 
       cdnMetadataResult = await fetchMetadataFromCDN();
       expect(cdnMetadataResult.status).toEqual(200);
-      expect(cdnMetadataResult.body).toEqual([{ c2: 1 }]);
+      expect(cdnMetadataResult.body).toEqual({ c2: 1 });
 
       // marking the second (not the most recent) version as valid should NOT promote it to be the latest valid version
       await updateSchemaVersionStatus(versionId('c1'), true);
@@ -468,7 +468,7 @@ describe('other', () => {
 
       cdnMetadataResult = await fetchMetadataFromCDN();
       expect(cdnMetadataResult.status).toEqual(200);
-      expect(cdnMetadataResult.body).toEqual([{ c2: 1 }]);
+      expect(cdnMetadataResult.body).toEqual({ c2: 1 });
     },
   );
 });

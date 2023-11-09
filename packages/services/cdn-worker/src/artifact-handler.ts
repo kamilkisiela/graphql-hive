@@ -3,7 +3,7 @@ import zod from 'zod';
 import { type Request } from '@whatwg-node/fetch';
 import { createAnalytics, type Analytics } from './analytics';
 import { type ArtifactsType } from './artifact-storage-reader';
-import { InvalidAuthKeyResponse, MissingAuthKeyResponse } from './errors';
+import { InvalidAuthKeyResponse, MissingAuthKeyResponse, UnexpectedError } from './errors';
 import type { KeyValidator } from './key-validation';
 import { createResponse } from './tracked-response';
 
@@ -12,7 +12,15 @@ export type GetArtifactActionFn = (
   artifactType: ArtifactsType,
   eTag: string | null,
 ) => Promise<
-  { type: 'notModified' } | { type: 'notFound' } | { type: 'redirect'; location: string }
+  | { type: 'notModified' }
+  | { type: 'notFound' }
+  | {
+      type: 'redirect';
+      location: {
+        public: string;
+        private: string;
+      };
+    }
 >;
 
 type ArtifactRequestHandler = {
@@ -125,14 +133,66 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         request,
       );
     }
+
     if (result.type === 'notFound') {
       return createResponse(analytics, 'Not found.', { status: 404 }, params.targetId, request);
     }
+
     if (result.type === 'redirect') {
+      if (params.artifactType === 'metadata') {
+        // To not change a lot of logic and still reuse the etag bits, we
+        // fetch metadata using the redirect location.
+        // Once we convert all the legacy metadata (SINGLE project passes an array instead of an object),
+        // we can remove this and continue serving a redirect.
+        // In case of metadata, we need to fetch the artifact and transform it.
+        // We're using here a private location, because the public S3 endpoint may differ from the internal S3 endpoint. E.g. within a docker network,
+        // and we're fetching the artifact from within the private network.
+        // If they are the same, private and public locations will be the same.
+        const metadataResponse = await fetch(result.location.private);
+
+        if (!metadataResponse.ok) {
+          console.error(
+            'Failed to fetch metadata',
+            metadataResponse.status,
+            metadataResponse.statusText,
+          );
+
+          return new UnexpectedError(analytics, request);
+        }
+
+        const body = await metadataResponse.text();
+
+        // Metadata in SINGLE projects is only Mesh's Metadata, and it always defines _schema
+        const isMeshArtifact = body.includes(`"#/definitions/_schema"`);
+        const hasTopLevelArray = body.startsWith('[') && body.endsWith(']');
+
+        // Mesh's Metadata shared by Mesh is always an object.
+        // The top-level array was caused #3291 and fixed now, but we still need to handle the old data.
+        if (isMeshArtifact && hasTopLevelArray) {
+          const etag = metadataResponse.headers.get('etag');
+          return createResponse(
+            analytics,
+            body.substring(1, body.length - 1),
+            {
+              status: 200,
+              headers: {
+                'Content-Type': 'application/json',
+                ...(etag ? { etag } : {}),
+              },
+            },
+            params.targetId,
+            request,
+          );
+        }
+      }
+
       return createResponse(
         analytics,
         'Found.',
-        { status: 302, headers: { Location: result.location } },
+        // We're using here a public location, because we expose the Location to the end user and
+        // the public S3 endpoint may differ from the internal S3 endpoint. E.g. within a docker network.
+        // If they are the same, private and public locations will be the same.
+        { status: 302, headers: { Location: result.location.public } },
         params.targetId,
         request,
       );

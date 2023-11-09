@@ -1760,6 +1760,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         organization,
         project,
         target,
+        includeMetadata: true,
       });
 
       return {

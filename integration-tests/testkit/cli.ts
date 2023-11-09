@@ -77,7 +77,7 @@ export function createCLI(tokens: { readwrite: string; readonly: string }) {
     commit?: string;
     serviceName?: string;
     serviceUrl?: string;
-    metadata?: string;
+    metadata?: Record<string, any>;
     legacy_force?: boolean;
     legacy_acceptBreakingChanges?: boolean;
     expect: 'latest' | 'latest-composable' | 'ignored' | 'rejected';
@@ -94,7 +94,7 @@ export function createCLI(tokens: { readwrite: string; readonly: string }) {
       commit,
       ...(serviceName ? ['--service', serviceName] : []),
       ...(serviceUrl ? ['--url', serviceUrl] : []),
-      ...(metadata ? ['--metadata', metadata] : []),
+      ...(metadata ? ['--metadata', await generateTmpFile(JSON.stringify(metadata), 'json')] : []),
       ...(legacy_force ? ['--force'] : []),
       ...(legacy_acceptBreakingChanges ? ['--experimental_acceptBreakingChanges'] : []),
       await generateTmpFile(sdl, 'graphql'),

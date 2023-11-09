@@ -14,7 +14,9 @@ const cases = [
 describe('publish', () => {
   describe.concurrent.each(cases)('%s', (caseName, ffs) => {
     test.concurrent('accepted: composable', async () => {
-      const { publish } = await prepare(ffs);
+      const {
+        cli: { publish },
+      } = await prepare(ffs);
       await publish({
         sdl: `type Query { topProductName: String }`,
         serviceName: 'products',
@@ -24,7 +26,9 @@ describe('publish', () => {
     });
 
     test.concurrent('accepted: composable, breaking changes', async () => {
-      const { publish } = await prepare(ffs);
+      const {
+        cli: { publish },
+      } = await prepare(ffs);
       await publish({
         sdl: /* GraphQL */ `
           type Query {
@@ -51,7 +55,9 @@ describe('publish', () => {
     test.concurrent(
       `${caseName === 'default' ? 'rejected' : 'accepted'}: not composable (build errors)`,
       async () => {
-        const { publish } = await prepare(ffs);
+        const {
+          cli: { publish },
+        } = await prepare(ffs);
         await publish({
           sdl: /* GraphQL */ `
             type Query {
@@ -66,7 +72,9 @@ describe('publish', () => {
     );
 
     test.concurrent('accepted: composable, previous version was not', async () => {
-      const { publish } = await prepare(ffs);
+      const {
+        cli: { publish },
+      } = await prepare(ffs);
 
       // non-composable
       await publish({
@@ -104,7 +112,9 @@ describe('publish', () => {
     });
 
     test.concurrent('accepted: composable, no changes', async () => {
-      const { publish } = await prepare(ffs);
+      const {
+        cli: { publish },
+      } = await prepare(ffs);
 
       // composable
       await publish({
@@ -115,6 +125,7 @@ describe('publish', () => {
         `,
         serviceName: 'products',
         serviceUrl: 'http://products:3000/graphql',
+        metadata: { products: 3000 },
         expect: 'latest-composable',
       });
 
@@ -127,12 +138,15 @@ describe('publish', () => {
         `,
         serviceName: 'products',
         serviceUrl: 'http://products:3000/graphql',
+        metadata: { products: 3000 },
         expect: 'ignored',
       });
     });
 
     test.concurrent('accepted: composable, new url', async () => {
-      const { publish } = await prepare(ffs);
+      const {
+        cli: { publish },
+      } = await prepare(ffs);
 
       // composable
       await publish({
@@ -159,8 +173,42 @@ describe('publish', () => {
       });
     });
 
+    test.concurrent('accepted: composable, new metadata', async () => {
+      const {
+        cli: { publish },
+      } = await prepare(ffs);
+
+      // composable
+      await publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            topProduct: String
+          }
+        `,
+        serviceName: 'products',
+        serviceUrl: 'http://products:3000/graphql',
+        metadata: { version: 'v1' },
+        expect: 'latest-composable',
+      });
+
+      // composable, no changes, only metadata is different
+      await publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            topProduct: String
+          }
+        `,
+        serviceName: 'products',
+        serviceUrl: 'http://products:3000/graphql',
+        metadata: { version: 'v2' }, // new metadata
+        expect: 'latest-composable',
+      });
+    });
+
     test.concurrent('rejected: missing service name', async () => {
-      const { publish } = await prepare(ffs);
+      const {
+        cli: { publish },
+      } = await prepare(ffs);
 
       // composable
       await publish({
@@ -175,7 +223,9 @@ describe('publish', () => {
     });
 
     test.concurrent('rejected: missing service url', async () => {
-      const { publish } = await prepare(ffs);
+      const {
+        cli: { publish },
+      } = await prepare(ffs);
 
       // composable
       await publish({
@@ -190,7 +240,9 @@ describe('publish', () => {
     });
 
     test.concurrent('CLI output', async ({ expect }) => {
-      const { publish } = await prepare(ffs);
+      const {
+        cli: { publish },
+      } = await prepare(ffs);
 
       const service = {
         serviceName: 'products',
@@ -251,7 +303,9 @@ describe('publish', () => {
   describe('check', () => {
     describe.concurrent.each(cases)('%s', (caseName, ffs) => {
       test.concurrent('accepted: composable, no breaking changes', async () => {
-        const { publish, check } = await prepare(ffs);
+        const {
+          cli: { publish, check },
+        } = await prepare(ffs);
 
         await publish({
           sdl: /* GraphQL */ `
@@ -279,7 +333,9 @@ describe('publish', () => {
       });
 
       test.concurrent('accepted: composable, previous version was not', async () => {
-        const { publish, check } = await prepare(ffs);
+        const {
+          cli: { publish, check },
+        } = await prepare(ffs);
 
         await publish({
           sdl: /* GraphQL */ `
@@ -316,7 +372,9 @@ describe('publish', () => {
       });
 
       test.concurrent('accepted: no changes', async () => {
-        const { publish, check } = await prepare(ffs);
+        const {
+          cli: { publish, check },
+        } = await prepare(ffs);
 
         await publish({
           sdl: /* GraphQL */ `
@@ -341,7 +399,9 @@ describe('publish', () => {
       });
 
       test.concurrent('rejected: missing service name', async () => {
-        const { check } = await prepare(ffs);
+        const {
+          cli: { check },
+        } = await prepare(ffs);
 
         const message = await check({
           sdl: /* GraphQL */ `
@@ -356,7 +416,9 @@ describe('publish', () => {
       });
 
       test.concurrent('rejected: composable, breaking changes', async () => {
-        const { publish, check } = await prepare(ffs);
+        const {
+          cli: { publish, check },
+        } = await prepare(ffs);
 
         await publish({
           sdl: /* GraphQL */ `
@@ -383,7 +445,9 @@ describe('publish', () => {
       });
 
       test.concurrent('rejected: not composable, no breaking changes', async () => {
-        const { publish, check } = await prepare(ffs);
+        const {
+          cli: { publish, check },
+        } = await prepare(ffs);
 
         await publish({
           sdl: /* GraphQL */ `
@@ -411,7 +475,9 @@ describe('publish', () => {
       });
 
       test.concurrent('rejected: not composable, breaking changes', async () => {
-        const { publish, check } = await prepare(ffs);
+        const {
+          cli: { publish, check },
+        } = await prepare(ffs);
 
         await publish({
           sdl: /* GraphQL */ `
@@ -454,7 +520,7 @@ describe('publish', () => {
 describe('delete', () => {
   describe.concurrent.each(cases)('%s', (caseName, ffs) => {
     test.concurrent('accepted: composable before and after', async () => {
-      const cli = await prepare(ffs);
+      const { cli } = await prepare(ffs);
 
       await cli.publish({
         sdl: /* GraphQL */ `
@@ -497,7 +563,7 @@ describe('delete', () => {
     });
 
     test.concurrent('rejected: unknown service', async () => {
-      const cli = await prepare(ffs);
+      const { cli } = await prepare(ffs);
 
       await cli.publish({
         sdl: /* GraphQL */ `
@@ -590,7 +656,7 @@ describe('other', () => {
 
         // Make sure validation works by publishing a schema
         // with a stitching directive with incomplete selectionSet argument
-        await spec.publish({
+        await spec.cli.publish({
           sdl: /* GraphQL */ `
             type Query {
               topProduct: Product
@@ -607,7 +673,7 @@ describe('other', () => {
         });
 
         // Stitching directive with incomplete selectionSet argument but a definition of @key
-        await custom.publish({
+        await custom.cli.publish({
           sdl: /* GraphQL */ `
             directive @key(selectionSet: String) on OBJECT
 
@@ -626,15 +692,82 @@ describe('other', () => {
         });
       },
     );
+
+    test.concurrent('metadata should always be published as an array', async () => {
+      const { cli, cdn } = await prepare(ffs);
+
+      await cli.publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            topProduct: Product
+          }
+
+          type Product @key(selectionSet: "{ id }") {
+            id: ID!
+            name: String
+          }
+        `,
+        serviceName: 'products',
+        serviceUrl: 'http://products:3000/graphql',
+        metadata: { products: 'v1' },
+        expect: 'latest-composable',
+      });
+
+      await expect(cdn.fetchMetadata()).resolves.toEqual(
+        expect.objectContaining({
+          status: 200,
+          body: [{ products: 'v1' }], // array
+        }),
+      );
+
+      await cli.publish({
+        sdl: /* GraphQL */ `
+          type Query {
+            topReview: Review
+          }
+
+          type Review @key(selectionSet: "{ id }") {
+            id: ID!
+            title: String
+          }
+        `,
+        serviceName: 'reviews',
+        serviceUrl: 'http://reviews:3000/graphql',
+        metadata: { reviews: 'v1' },
+        expect: 'latest-composable',
+      });
+
+      await expect(cdn.fetchMetadata()).resolves.toEqual(
+        expect.objectContaining({
+          status: 200,
+          body: [{ products: 'v1' }, { reviews: 'v1' }], // array
+        }),
+      );
+
+      await cli.delete({
+        serviceName: 'reviews',
+        expect: 'latest-composable',
+      });
+
+      await expect(cdn.fetchMetadata()).resolves.toEqual(
+        expect.objectContaining({
+          status: 200,
+          body: [{ products: 'v1' }], // array
+        }),
+      );
+    });
   });
 });
 
 async function prepare(featureFlags: Array<[string, boolean]> = []) {
-  const { tokens, setFeatureFlag } = await prepareProject(ProjectType.Stitching);
+  const { tokens, setFeatureFlag, cdn } = await prepareProject(ProjectType.Stitching);
 
   for await (const [name, enabled] of featureFlags) {
     await setFeatureFlag(name, enabled);
   }
 
-  return createCLI(tokens.registry);
+  return {
+    cli: createCLI(tokens.registry),
+    cdn,
+  };
 }
