@@ -36,6 +36,15 @@ export const resolvers: LabModule.Resolvers = {
         return null;
       }
 
+      if (latestSchema.compositeSchemaSDL) {
+        return {
+          schema: latestSchema.compositeSchemaSDL,
+          mocks: {},
+        };
+      }
+
+      // Legacy Fallback
+
       const [
         schemas,
         { type, externalComposition, nativeFederation, legacyRegistryModel },
