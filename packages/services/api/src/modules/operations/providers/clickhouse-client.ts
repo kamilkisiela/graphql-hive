@@ -96,7 +96,7 @@ export class ClickHouse {
         searchParams: {
           default_format: 'JSON',
           // Max execution time in seconds
-          max_execution_time: timeout / 1000,
+          max_execution_time: (this.config.requestTimeout ?? timeout) / 1000,
           query_id: executionId,
           ...toQueryParams(query),
         },
