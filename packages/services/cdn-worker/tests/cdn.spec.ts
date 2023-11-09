@@ -1,6 +1,8 @@
 import { createHmac } from 'crypto';
 import * as bcrypt from 'bcryptjs';
 import '../src/dev-polyfill';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { describe, expect, test } from 'vitest';
 import {
   InvalidArtifactTypeResponse,
   InvalidAuthKeyResponse,
@@ -27,13 +29,25 @@ describe('CDN Worker', () => {
     const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
-    map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+    map.set(`target:${targetId}:sdl`, `type Query { dummy: String }`);
+    map.set(
+      `target:${targetId}:services`,
+      JSON.stringify([
+        {
+          sdl: `type Query { dummy: String }`,
+          name: 'service1',
+          url: 'http://localhost:4000',
+        },
+      ]),
+    );
+    map.set(`target:${targetId}:metadata`, JSON.stringify({ meta: true }));
     const token = createToken(SECRET, targetId);
 
     const handleRequest = createRequestHandler({
       isKeyValid: createIsKeyValid({
         getCache: null,
         waitUntil: null,
+        analytics: null,
         s3: {
           endpoint: 'http://localhost:1337',
           bucketName: 'artifacts',
@@ -43,10 +57,22 @@ describe('CDN Worker', () => {
                 status: 200,
               });
             },
-          },
+          } as any,
         },
       }),
-      getRawStoreValue: async (key: string) => map.get(key),
+      async getArtifactAction(targetId, artifactType) {
+        return map.has(`target:${targetId}:${artifactType}`)
+          ? {
+              type: 'redirect',
+              location: `target:${targetId}:${artifactType}`,
+            }
+          : {
+              type: 'notFound',
+            };
+      },
+      async fetchText(url) {
+        return map.get(url);
+      },
     });
 
     const schemaRequest = new Request(`https://fake-worker.com/${targetId}/schema`, {
@@ -58,8 +84,17 @@ describe('CDN Worker', () => {
     const schemaResponse = await handleRequest(schemaRequest);
     expect(schemaResponse.status).toBe(200);
     expect(schemaResponse.headers.get('content-type')).toBe('application/json');
+    await expect(schemaResponse.json()).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          sdl: `type Query { dummy: String }`,
+          name: 'service1',
+          url: 'http://localhost:4000',
+        }),
+      ]),
+    );
 
-    const metadataRequest = new Request(`https://fake-worker.com/${targetId}/schema`, {
+    const metadataRequest = new Request(`https://fake-worker.com/${targetId}/metadata`, {
       headers: {
         'x-hive-cdn-key': token,
       },
@@ -68,18 +103,27 @@ describe('CDN Worker', () => {
     const metadataResponse = await handleRequest(metadataRequest);
     expect(metadataResponse.status).toBe(200);
     expect(metadataResponse.headers.get('content-type')).toBe('application/json');
+    await expect(metadataResponse.json()).resolves.toEqual(
+      expect.objectContaining({
+        meta: true,
+      }),
+    );
   });
 
   test('etag + if-none-match for schema', async () => {
     const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
-    map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+    map.set(
+      `target:${targetId}:services`,
+      JSON.stringify([{ sdl: `type Query { dummy: String }` }]),
+    );
 
     const handleRequest = createRequestHandler({
       isKeyValid: createIsKeyValid({
         getCache: null,
         waitUntil: null,
+        analytics: null,
         s3: {
           endpoint: 'http://localhost:1337',
           bucketName: 'artifacts',
@@ -89,10 +133,22 @@ describe('CDN Worker', () => {
                 status: 200,
               });
             },
-          },
+          } as any,
         },
       }),
-      getRawStoreValue: async (key: string) => map.get(key),
+      async getArtifactAction(targetId, artifactType) {
+        return map.has(`target:${targetId}:${artifactType}`)
+          ? {
+              type: 'redirect',
+              location: `target:${targetId}:${artifactType}`,
+            }
+          : {
+              type: 'notFound',
+            };
+      },
+      async fetchText(url) {
+        return map.get(url);
+      },
     });
 
     const token = createToken(SECRET, targetId);
@@ -109,6 +165,13 @@ describe('CDN Worker', () => {
     expect(firstResponse.body).toBeDefined();
     // Every request receives the etag
     expect(etag).toBeDefined();
+    await expect(firstResponse.json()).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          sdl: `type Query { dummy: String }`,
+        }),
+      ]),
+    );
 
     // Sending the etag in the if-none-match header should result in a 304
     const secondRequest = new Request(`https://fake-worker.com/${targetId}/schema`, {
@@ -131,16 +194,20 @@ describe('CDN Worker', () => {
     const wrongEtagResponse = await handleRequest(wrongEtagRequest);
     expect(wrongEtagResponse.status).toBe(200);
     expect(wrongEtagResponse.body).toBeDefined();
+    await expect(wrongEtagResponse.json()).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          sdl: `type Query { dummy: String }`,
+        }),
+      ]),
+    );
   });
 
   test('etag + if-none-match for supergraph', async () => {
     const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
-    map.set(
-      `target:${targetId}:supergraph`,
-      JSON.stringify({ sdl: `type Query { dummy: String }` }),
-    );
+    map.set(`target:${targetId}:supergraph`, `type Query { dummy: String }`);
 
     const token = createToken(SECRET, targetId);
 
@@ -148,6 +215,7 @@ describe('CDN Worker', () => {
       isKeyValid: createIsKeyValid({
         getCache: null,
         waitUntil: null,
+        analytics: null,
         s3: {
           endpoint: 'http://localhost:1337',
           bucketName: 'artifacts',
@@ -157,10 +225,22 @@ describe('CDN Worker', () => {
                 status: 200,
               });
             },
-          },
+          } as any,
         },
       }),
-      getRawStoreValue: async (key: string) => map.get(key),
+      async getArtifactAction(targetId, artifactType) {
+        return map.has(`target:${targetId}:${artifactType}`)
+          ? {
+              type: 'redirect',
+              location: `target:${targetId}:${artifactType}`,
+            }
+          : {
+              type: 'notFound',
+            };
+      },
+      async fetchText(url) {
+        return map.get(url);
+      },
     });
 
     const firstRequest = new Request(`https://fake-worker.com/${targetId}/supergraph`, {
@@ -175,6 +255,7 @@ describe('CDN Worker', () => {
     expect(firstResponse.body).toBeDefined();
     // Every request receives the etag
     expect(etag).toBeDefined();
+    await expect(firstResponse.text()).resolves.toEqual(`type Query { dummy: String }`);
 
     // Sending the etag in the if-none-match header should result in a 304
     const secondRequest = new Request(`https://fake-worker.com/${targetId}/supergraph`, {
@@ -197,18 +278,20 @@ describe('CDN Worker', () => {
     const wrongEtagResponse = await handleRequest(wrongEtagRequest);
     expect(wrongEtagResponse.status).toBe(200);
     expect(wrongEtagResponse.body).toBeDefined();
+    await expect(wrongEtagResponse.text()).resolves.toBe(`type Query { dummy: String }`);
   });
 
   test('etag + if-none-match for metadata', async () => {
     const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
-    map.set(`target:${targetId}:metadata`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+    map.set(`target:${targetId}:metadata`, JSON.stringify({ meta: true }));
 
     const handleRequest = createRequestHandler({
       isKeyValid: createIsKeyValid({
         getCache: null,
         waitUntil: null,
+        analytics: null,
         s3: {
           endpoint: 'http://localhost:1337',
           bucketName: 'artifacts',
@@ -218,10 +301,22 @@ describe('CDN Worker', () => {
                 status: 200,
               });
             },
-          },
+          } as any,
         },
       }),
-      getRawStoreValue: async (key: string) => map.get(key),
+      async getArtifactAction(targetId, artifactType) {
+        return map.has(`target:${targetId}:${artifactType}`)
+          ? {
+              type: 'redirect',
+              location: `target:${targetId}:${artifactType}`,
+            }
+          : {
+              type: 'notFound',
+            };
+      },
+      async fetchText(url) {
+        return map.get(url);
+      },
     });
 
     const token = createToken(SECRET, targetId);
@@ -238,6 +333,9 @@ describe('CDN Worker', () => {
     expect(firstResponse.body).toBeDefined();
     // Every request receives the etag
     expect(etag).toBeDefined();
+    await expect(firstResponse.json()).resolves.toEqual({
+      meta: true,
+    });
 
     // Sending the etag in the if-none-match header should result in a 304
     const secondRequest = new Request(`https://fake-worker.com/${targetId}/metadata`, {
@@ -260,18 +358,22 @@ describe('CDN Worker', () => {
     const wrongEtagResponse = await handleRequest(wrongEtagRequest);
     expect(wrongEtagResponse.status).toBe(200);
     expect(wrongEtagResponse.body).toBeDefined();
+    await expect(wrongEtagResponse.json()).resolves.toEqual({
+      meta: true,
+    });
   });
 
   test('etag + if-none-match for introspection', async () => {
     const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
-    map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+    map.set(`target:${targetId}:sdl`, `type Query { dummy: String }`);
 
     const handleRequest = createRequestHandler({
       isKeyValid: createIsKeyValid({
         getCache: null,
         waitUntil: null,
+        analytics: null,
         s3: {
           endpoint: 'http://localhost:1337',
           bucketName: 'artifacts',
@@ -281,10 +383,22 @@ describe('CDN Worker', () => {
                 status: 200,
               });
             },
-          },
+          } as any,
         },
       }),
-      getRawStoreValue: async (key: string) => map.get(key),
+      async getArtifactAction(targetId, artifactType) {
+        return map.has(`target:${targetId}:${artifactType}`)
+          ? {
+              type: 'redirect',
+              location: `target:${targetId}:${artifactType}`,
+            }
+          : {
+              type: 'notFound',
+            };
+      },
+      async fetchText(url) {
+        return map.get(url);
+      },
     });
 
     const token = createToken(SECRET, targetId);
@@ -301,6 +415,8 @@ describe('CDN Worker', () => {
     expect(firstResponse.body).toBeDefined();
     // Every request receives the etag
     expect(etag).toBeDefined();
+    // Make sure it's JSON
+    await expect(firstResponse.json()).resolves.toEqual(expect.objectContaining({}));
 
     // Sending the etag in the if-none-match header should result in a 304
     const secondRequest = new Request(`https://fake-worker.com/${targetId}/introspection`, {
@@ -323,23 +439,21 @@ describe('CDN Worker', () => {
     const wrongEtagResponse = await handleRequest(wrongEtagRequest);
     expect(wrongEtagResponse.status).toBe(200);
     expect(wrongEtagResponse.body).toBeDefined();
+    // Make sure it's JSON
+    await expect(wrongEtagResponse.json()).resolves.toEqual(expect.objectContaining({}));
   });
 
   test('etag + if-none-match for sdl', async () => {
     const SECRET = '123456';
     const targetId = 'fake-target-id';
     const map = new Map();
-    map.set(
-      `target:${targetId}:schema`,
-      JSON.stringify({
-        sdl: `type Query { dummy: String }`,
-      }),
-    );
+    map.set(`target:${targetId}:sdl`, `type Query { dummy: String }`);
 
     const handleRequest = createRequestHandler({
       isKeyValid: createIsKeyValid({
         getCache: null,
         waitUntil: null,
+        analytics: null,
         s3: {
           endpoint: 'http://localhost:1337',
           bucketName: 'artifacts',
@@ -349,10 +463,22 @@ describe('CDN Worker', () => {
                 status: 200,
               });
             },
-          },
+          } as any,
         },
       }),
-      getRawStoreValue: async (key: string) => map.get(key),
+      async getArtifactAction(targetId, artifactType) {
+        return map.has(`target:${targetId}:${artifactType}`)
+          ? {
+              type: 'redirect',
+              location: `target:${targetId}:${artifactType}`,
+            }
+          : {
+              type: 'notFound',
+            };
+      },
+      async fetchText(url) {
+        return map.get(url);
+      },
     });
 
     const token = createToken(SECRET, targetId);
@@ -369,6 +495,7 @@ describe('CDN Worker', () => {
     expect(firstResponse.body).toBeDefined();
     // Every request receives the etag
     expect(etag).toBeDefined();
+    await expect(firstResponse.text()).resolves.toEqual(`type Query { dummy: String }`);
 
     // Sending the etag in the if-none-match header should result in a 304
     const secondRequest = new Request(`https://fake-worker.com/${targetId}/sdl`, {
@@ -391,13 +518,21 @@ describe('CDN Worker', () => {
     const wrongEtagResponse = await handleRequest(wrongEtagRequest);
     expect(wrongEtagResponse.status).toBe(200);
     expect(wrongEtagResponse.body).toBeDefined();
+    await expect(wrongEtagResponse.text()).resolves.toEqual(`type Query { dummy: String }`);
   });
 
   describe('Basic parsing errors', () => {
-    it('Should throw when target id is missing', async () => {
+    test('Should throw when target id is missing', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysTrue,
-        getRawStoreValue: async (_key: string) => Promise.resolve(null),
+        async getArtifactAction() {
+          return {
+            type: 'notFound',
+          };
+        },
+        async fetchText() {
+          throw new Error('Should not be called');
+        },
       });
 
       const request = new Request('https://fake-worker.com/', {});
@@ -407,10 +542,17 @@ describe('CDN Worker', () => {
       expect(response.status).toBe(400);
     });
 
-    it('Should throw when requested resource is not valid', async () => {
+    test('Should throw when requested resource is not valid', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysTrue,
-        getRawStoreValue: async (_key: string) => Promise.resolve(null),
+        async getArtifactAction() {
+          return {
+            type: 'notFound',
+          };
+        },
+        async fetchText() {
+          throw new Error('Should not be called');
+        },
       });
 
       const request = new Request('https://fake-worker.com/fake-target-id/error', {});
@@ -420,10 +562,17 @@ describe('CDN Worker', () => {
       expect(response.status).toBe(400);
     });
 
-    it('Should throw when auth key is missing', async () => {
+    test('Should throw when auth key is missing', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysTrue,
-        getRawStoreValue: async (_key: string) => Promise.resolve(null),
+        async getArtifactAction() {
+          return {
+            type: 'notFound',
+          };
+        },
+        async fetchText() {
+          throw new Error('Should not be called');
+        },
       });
 
       const request = new Request('https://fake-worker.com/fake-target-id/sdl', {});
@@ -433,10 +582,17 @@ describe('CDN Worker', () => {
       expect(response.status).toBe(400);
     });
 
-    it('Should throw when key validation function fails', async () => {
+    test('Should throw when key validation function fails', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: KeyValidators.AlwaysFalse,
-        getRawStoreValue: async (_key: string) => Promise.resolve(null),
+        async getArtifactAction() {
+          return {
+            type: 'notFound',
+          };
+        },
+        async fetchText() {
+          throw new Error('Should not be called');
+        },
       });
 
       const request = new Request('https://fake-worker.com/fake-target-id/sdl', {
@@ -452,16 +608,17 @@ describe('CDN Worker', () => {
   });
 
   describe('Authentication', () => {
-    it('Should accept valid auth token', async () => {
+    test('Should accept valid auth token', async () => {
       const SECRET = '123456';
       const targetId = 'fake-target-id';
       const map = new Map();
-      map.set(`target:${targetId}:schema`, JSON.stringify({ sdl: `type Query { dummy: String }` }));
+      map.set(`target:${targetId}:sdl`, `type Query { dummy: String }`);
 
       const handleRequest = createRequestHandler({
         isKeyValid: createIsKeyValid({
           getCache: null,
           waitUntil: null,
+          analytics: null,
           s3: {
             endpoint: 'http://localhost:1337',
             bucketName: 'artifacts',
@@ -471,10 +628,22 @@ describe('CDN Worker', () => {
                   status: 200,
                 });
               },
-            },
+            } as any,
           },
         }),
-        getRawStoreValue: async (key: string) => map.get(key),
+        async getArtifactAction(targetId, artifactType) {
+          return map.has(`target:${targetId}:${artifactType}`)
+            ? {
+                type: 'redirect',
+                location: `target:${targetId}:${artifactType}`,
+              }
+            : {
+                type: 'notFound',
+              };
+        },
+        async fetchText(url) {
+          return map.get(url);
+        },
       });
 
       const token = createToken(SECRET, targetId);
@@ -489,7 +658,7 @@ describe('CDN Worker', () => {
       expect(response.status).toBe(200);
     });
 
-    it('Should throw on mismatch of token target and actual target', async () => {
+    test('Should throw on mismatch of token target and actual target', async () => {
       const SECRET = '123456';
       const map = new Map();
 
@@ -497,6 +666,7 @@ describe('CDN Worker', () => {
         isKeyValid: createIsKeyValid({
           getCache: null,
           waitUntil: null,
+          analytics: null,
           s3: {
             endpoint: 'http://localhost:1337',
             bucketName: 'artifacts',
@@ -506,10 +676,22 @@ describe('CDN Worker', () => {
                   status: 404,
                 });
               },
-            },
+            } as any,
           },
         }),
-        getRawStoreValue: async (key: string) => map.get(key),
+        async getArtifactAction(targetId, artifactType) {
+          return map.has(`target:${targetId}:${artifactType}`)
+            ? {
+                type: 'redirect',
+                location: `target:${targetId}:${artifactType}`,
+              }
+            : {
+                type: 'notFound',
+              };
+        },
+        async fetchText(url) {
+          return map.get(url);
+        },
       });
 
       const token = createToken(SECRET, 'fake-target-id');
@@ -525,11 +707,12 @@ describe('CDN Worker', () => {
       expect(response.status).toBe(403);
     });
 
-    it('Should throw on invalid token hash', async () => {
+    test('Should throw on invalid token hash', async () => {
       const handleRequest = createRequestHandler({
         isKeyValid: createIsKeyValid({
           getCache: null,
           waitUntil: null,
+          analytics: null,
           s3: {
             endpoint: 'http://localhost:1337',
             bucketName: 'artifacts',
@@ -539,10 +722,17 @@ describe('CDN Worker', () => {
                   status: 200,
                 });
               },
-            },
+            } as any,
           },
         }),
-        getRawStoreValue: async (key: string) => new Map().get(key),
+        async getArtifactAction() {
+          return {
+            type: 'notFound',
+          };
+        },
+        async fetchText() {
+          throw new Error('Should not be called');
+        },
       });
 
       const request = new Request(`https://fake-worker.com/some-target/sdl`, {

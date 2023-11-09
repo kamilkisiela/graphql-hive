@@ -1,5 +1,6 @@
 import * as itty from 'itty-router';
 import { Toucan } from 'toucan-js';
+import { fetch } from '@whatwg-node/fetch';
 import { AnalyticsEngine, createAnalytics } from './analytics';
 import { createArtifactRequestHandler } from './artifact-handler';
 import { ArtifactStorageReader } from './artifact-storage-reader';
@@ -15,10 +16,6 @@ type Env = {
   S3_SECRET_ACCESS_KEY: string;
   S3_BUCKET_NAME: string;
   S3_SESSION_TOKEN?: string;
-  /**
-   * KV Storage for the CDN
-   */
-  HIVE_DATA: KVNamespace;
   SENTRY_DSN: string;
   /**
    * Name of the environment, e.g. staging, production
@@ -66,9 +63,20 @@ const handler: ExportedHandler<Env> = {
     });
 
     const handleRequest = createRequestHandler({
-      getRawStoreValue: value => env.HIVE_DATA.get(value),
+      async getArtifactAction(targetId, artifactType, eTag) {
+        return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
+      },
       isKeyValid,
       analytics,
+      async fetchText(url) {
+        const r = await fetch(url);
+
+        if (r.ok) {
+          return r.text();
+        }
+
+        throw new Error(`Failed to fetch ${url}, status: ${r.status}`);
+      },
     });
 
     const handleArtifactRequest = createArtifactRequestHandler({
@@ -76,26 +84,6 @@ const handler: ExportedHandler<Env> = {
       analytics,
       async getArtifactAction(targetId, artifactType, eTag) {
         return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
-      },
-      async fallback(request: Request, params: { targetId: string; artifactType: string }) {
-        const artifactTypeMap: Record<string, string> = {
-          metadata: 'metadata',
-          sdl: 'sdl',
-          services: 'schema',
-          supergraph: 'supergraph',
-        };
-        const artifactType = artifactTypeMap[params.artifactType];
-
-        if (artifactType) {
-          const url = request.url.replace(
-            `/artifacts/v1/${params.targetId}/${params.artifactType}`,
-            `/${params.targetId}/${artifactType}`,
-          );
-
-          return handleRequest(new Request(url, request));
-        }
-
-        return;
       },
     });
 
