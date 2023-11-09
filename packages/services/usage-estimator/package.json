@@ -13,7 +13,7 @@
   "devDependencies": {
     "@hive/api": "workspace:*",
     "@hive/service-common": "workspace:*",
-    "@sentry/node": "7.77.0",
+    "@sentry/node": "7.79.0",
     "@trpc/server": "10.43.1",
     "@whatwg-node/fetch": "0.9.13",
     "dotenv": "16.3.1",
