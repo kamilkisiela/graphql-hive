@@ -1,7 +1,7 @@
 import React, { ReactElement, useCallback, useState } from 'react';
 import NextLink from 'next/link';
 import clsx from 'clsx';
-import { formatISO, subDays } from 'date-fns';
+import { formatISO } from 'date-fns';
 import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
@@ -38,6 +38,7 @@ import { Combobox } from '@/components/v2/combobox';
 import { CreateAccessTokenModal, DeleteTargetModal } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
+import { subDays } from '@/lib/date-time';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 

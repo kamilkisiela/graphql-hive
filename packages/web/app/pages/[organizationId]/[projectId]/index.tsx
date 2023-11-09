@@ -1,6 +1,6 @@
 import { ReactElement, useMemo, useRef } from 'react';
 import NextLink from 'next/link';
-import { formatISO, subDays } from 'date-fns';
+import { formatISO } from 'date-fns';
 import * as echarts from 'echarts';
 import ReactECharts from 'echarts-for-react';
 import { Globe, History } from 'lucide-react';
@@ -18,6 +18,7 @@ import { QueryError } from '@/components/ui/query-error';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Activities, Card, EmptyList, MetaTitle } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
+import { subDays } from '@/lib/date-time';
 import { useFormattedNumber } from '@/lib/hooks';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
