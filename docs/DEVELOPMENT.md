@@ -99,10 +99,56 @@ We recommend the following flow if you are having issues with running Hive local
 
 ### Setting up GitHub App for developing
 
-1. Follow the steps above for Slack App
-2. Update `Setup URL` in
-   [GraphQL Hive Development](https://github.com/organizations/the-guild-org/settings/apps/graphql-hive-development)
-   app and set it to `https://hive-<your-name>.loophole.site/api/github/setup-callback`
+#### Starting a proxy for GitHub App
+
+1. Follow first two steps from `Setting up Slack App for developing` (download loophole and log in).
+2. Start web app proxy: `$ loophole http 3000 --hostname hive-<your-name>`
+3. Start server proxy: `$ loophole http 3001 --hostname hive-<your-name>`
+
+#### Creating a GitHub App
+
+1. Go to `Settings` -> `Developer settings` -> `GitHub Apps`, and click on the `New GitHub App`
+   button.
+2. Provide a name for your app, and set the `Homepage URL` to
+   `https://hive-<your-name>.loophole.site`. Then set the callback URL to
+   `https://hive-<your-name>.loophole.site/api/github/callback`, and post installation's callback
+   URL to `https://hive-<your-name>.loophole.site/api/github/setup-callback`.
+3. Click on `Create GitHub App`.
+
+#### Setting up env variables
+
+1. Server: Set the following env variables in `packages/services/server/.env`:
+
+   ```
+   INTEGRATION_GITHUB=1
+   INTEGRATION_GITHUB_GITHUB_APP_ID=<your-github-app-id>
+   INTEGRATION_GITHUB_GITHUB_APP_PRIVATE_KEY=<your-github-app-private-key>
+   ```
+
+   You'll find the GitHub App ID and private key in the `General` tab of your GitHub App.
+
+2. Web App: Set the following in `packages/web/app/.env`:
+   ```
+   INTEGRATION_GITHUB_APP_NAME=<your-github-app-name>
+   ```
+
+#### Installing the GitHub App
+
+Open Hive UI and go to your organization's settings page. Find `Integrations` section and click on
+`Connect GitHub`. You should be redirected to GitHub where you can grant repository access. After
+installing the app, you should be redirected back to Hive.
+
+#### Testing
+
+1. Create a project and a target.
+2. Create a token from that target.
+3. Setup a GitHub repo with CI/CD actions like this one:
+   https://github.com/n1ru4l/hive-federation-subgraph/.
+4. Add the token to the repo's secrets as `HIVE_TOKEN`.
+5. Add Hive endpoint to the repo's secrets as `HIVE_ENDPOINT`
+   (`https://hive-<your-name>.loophole.site/graphql`).
+6. Make sure your GitHub app is installed on that repo.
+7. Push a commit to the repo and check if the CI/CD action is triggered.
 
 ### Local OIDC Testing
 
