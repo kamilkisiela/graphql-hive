@@ -55,8 +55,8 @@ import {
   users,
 } from './db';
 import {
-  createSchemaChangeId,
   HiveSchemaChangeModel,
+  SchemaChangeType,
   SchemaCheckModel,
   SchemaCompositionError,
   SchemaCompositionErrorModel,
@@ -4067,23 +4067,14 @@ function jsonify<T>(obj: T | null | undefined) {
 /**
  * Utility function for stripping a schema change of its computable properties for efficient storage in the database.
  */
-function toSerializableSchemaChange(change: {
-  type: string;
-  criticality?: {
-    isSafeBasedOnUsage?: boolean;
-  };
-  meta: Record<string, unknown>;
-}): {
+function toSerializableSchemaChange(change: SchemaChangeType): {
   id: string;
   type: string;
   meta: unknown;
   isSafeBasedOnUsage: boolean;
 } {
   return {
-    id: createSchemaChangeId({
-      type: change.type,
-      meta: change.meta,
-    }),
+    id: change.id,
     type: change.type,
     meta: change.meta,
     isSafeBasedOnUsage: change.criticality?.isSafeBasedOnUsage ?? false,

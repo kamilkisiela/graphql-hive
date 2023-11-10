@@ -804,10 +804,7 @@ export const SchemaPolicyWarningModel = z.object({
   endColumn: z.number().nullable(),
 });
 
-export function createSchemaChangeId(change: {
-  type: string;
-  meta: Record<string, unknown>;
-}): string {
+function createSchemaChangeId(change: { type: string; meta: Record<string, unknown> }): string {
   const hash = crypto.createHash('md5');
   hash.update(stableJSONStringify(change.meta));
   return hash.digest('hex');
