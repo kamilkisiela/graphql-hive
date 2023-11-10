@@ -34,6 +34,7 @@ export const backendConfig = (): TypeInput => {
         thirdPartyId: 'github',
         clients: [
           {
+            scope: ['read:user', 'user:email'],
             clientId: env.auth.github.clientId,
             clientSecret: env.auth.github.clientSecret,
           },
