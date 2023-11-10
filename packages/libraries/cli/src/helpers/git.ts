@@ -86,7 +86,14 @@ function useGitHubAction(): CIRunner {
   };
 }
 
-export async function gitInfo(noGit: () => void) {
+export type GitInfo = {
+  repository: string | null;
+  pullRequestNumber: string | null;
+  commit: string | null;
+  author: string | null;
+};
+
+export async function gitInfo(noGit: () => void): Promise<GitInfo> {
   let repository: string | null = null;
   let pullRequestNumber: string | null = null;
   let commit: string | null = null;

@@ -172,21 +172,28 @@ export default class SchemaCheck extends Command {
       let github: null | {
         commit: string;
         repository: string | null;
+        pullRequestNumber: string | null;
       } = null;
 
       if (usesGitHubApp) {
         if (!commit) {
           throw new Errors.CLIError(`Couldn't resolve commit sha required for GitHub Application`);
         }
-        // eslint-disable-next-line no-process-env
-        const repository = process.env['GITHUB_REPOSITORY'] ?? null;
-        if (!repository) {
-          throw new Errors.CLIError(`Missing "GITHUB_REPOSITORY" environment variable.`);
+        if (!git.repository) {
+          throw new Errors.CLIError(
+            `Couldn't resolve git repository required for GitHub Application`,
+          );
+        }
+        if (!git.pullRequestNumber) {
+          throw new Errors.CLIError(
+            `Couldn't resolve pull request number required for GitHub Application`,
+          );
         }
 
         github = {
           commit: commit,
-          repository,
+          repository: git.repository,
+          pullRequestNumber: git.pullRequestNumber,
         };
       }
 
