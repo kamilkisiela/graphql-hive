@@ -841,7 +841,7 @@ function ChecksPageContent() {
       showOnlyFailed: !filters.showOnlyFailed,
     }));
   };
-  
+
   return (
     <>
       <TargetLayout
