@@ -181,6 +181,13 @@ export function deployApp({
           name: 'AUTH_ORGANIZATION_OIDC',
           value: '1',
         },
+        //
+        // Migrations
+        //
+        {
+          name: 'MEMBER_ROLES_DEADLINE',
+          value: '2024-01-01', // TODO: move it to the config file
+        },
       ],
       port: 3000,
     },

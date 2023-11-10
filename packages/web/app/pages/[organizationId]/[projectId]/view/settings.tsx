@@ -249,7 +249,7 @@ function ProjectSettingsContent() {
 
   const organization = useFragment(ProjectSettingsPage_OrganizationFragment, currentOrganization);
   const project = useFragment(ProjectSettingsPage_ProjectFragment, currentProject);
-  useProjectAccess({
+  const hasAccess = useProjectAccess({
     scope: ProjectAccessScope.Settings,
     member: organization?.me ?? null,
     redirect: true,
@@ -299,98 +299,100 @@ function ProjectSettingsContent() {
           <Title>Settings</Title>
           <Subtitle>Manage your project settings</Subtitle>
         </div>
-        <div className="flex flex-col gap-y-4">
-          {project && organization ? (
-            <>
-              <ModelMigrationSettings project={project} organizationId={organization.cleanId} />
-              <form onSubmit={handleSubmit}>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Project Name</CardTitle>
-                    <CardDescription>
-                      Changing the name of your project will also change the slug of your project
-                      URL, and will invalidate any existing links to your project.
-                      <br />
-                      <DocsLink
-                        className="text-muted-foreground text-sm"
-                        href="/management/projects#rename-a-project"
-                      >
-                        You can read more about it in the documentation
-                      </DocsLink>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Input
-                      placeholder="Project name"
-                      name="name"
-                      value={values.name}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      disabled={isSubmitting}
-                      isInvalid={touched.name && !!errors.name}
-                      className="w-96"
-                    />
-                    {touched.name && (errors.name || mutation.error) && (
-                      <div className="mt-2 text-red-500">
-                        {errors.name ??
-                          mutation.error?.graphQLErrors[0]?.message ??
-                          mutation.error?.message}
-                      </div>
-                    )}
-                    {mutation.data?.updateProjectName.error && (
-                      <div className="mt-2 text-red-500">
-                        {mutation.data.updateProjectName.error.message}
-                      </div>
-                    )}
-                  </CardContent>
-                  <CardFooter>
-                    <Button type="submit" disabled={isSubmitting}>
-                      Save
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </form>
+        {hasAccess ? (
+          <div className="flex flex-col gap-y-4">
+            {project && organization ? (
+              <>
+                <ModelMigrationSettings project={project} organizationId={organization.cleanId} />
+                <form onSubmit={handleSubmit}>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Project Name</CardTitle>
+                      <CardDescription>
+                        Changing the name of your project will also change the slug of your project
+                        URL, and will invalidate any existing links to your project.
+                        <br />
+                        <DocsLink
+                          className="text-muted-foreground text-sm"
+                          href="/management/projects#rename-a-project"
+                        >
+                          You can read more about it in the documentation
+                        </DocsLink>
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Input
+                        placeholder="Project name"
+                        name="name"
+                        value={values.name}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        disabled={isSubmitting}
+                        isInvalid={touched.name && !!errors.name}
+                        className="w-96"
+                      />
+                      {touched.name && (errors.name || mutation.error) && (
+                        <div className="mt-2 text-red-500">
+                          {errors.name ??
+                            mutation.error?.graphQLErrors[0]?.message ??
+                            mutation.error?.message}
+                        </div>
+                      )}
+                      {mutation.data?.updateProjectName.error && (
+                        <div className="mt-2 text-red-500">
+                          {mutation.data.updateProjectName.error.message}
+                        </div>
+                      )}
+                    </CardContent>
+                    <CardFooter>
+                      <Button type="submit" disabled={isSubmitting}>
+                        Save
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </form>
 
-              {query.data?.isGitHubIntegrationFeatureEnabled &&
-              !project.isProjectNameInGitHubCheckEnabled ? (
-                <GitHubIntegration
-                  organizationName={organization.name}
-                  projectName={project.name}
-                />
-              ) : null}
+                {query.data?.isGitHubIntegrationFeatureEnabled &&
+                !project.isProjectNameInGitHubCheckEnabled ? (
+                  <GitHubIntegration
+                    organizationName={organization.name}
+                    projectName={project.name}
+                  />
+                ) : null}
 
-              {project.type === ProjectType.Federation ? (
-                <ExternalCompositionSettings project={project} organization={organization} />
-              ) : null}
+                {project.type === ProjectType.Federation ? (
+                  <ExternalCompositionSettings project={project} organization={organization} />
+                ) : null}
 
-              {canAccessProject(ProjectAccessScope.Delete, organization.me) && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Delete Project</CardTitle>
-                    <CardDescription>
-                      Deleting an project will delete all the targets, schemas and data associated
-                      with it.
-                      <br />
-                      <DocsLink
-                        className="text-muted-foreground text-sm"
-                        href="/management/projects#delete-a-project"
-                      >
-                        <strong>This action is not reversible!</strong> You can find more
-                        information about this process in the documentation
-                      </DocsLink>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardFooter>
-                    <Button variant="destructive" onClick={toggleModalOpen}>
-                      Delete Project
-                    </Button>
-                  </CardFooter>
-                </Card>
-              )}
-              <DeleteProjectModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
-            </>
-          ) : null}
-        </div>
+                {canAccessProject(ProjectAccessScope.Delete, organization.me) && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Delete Project</CardTitle>
+                      <CardDescription>
+                        Deleting an project will delete all the targets, schemas and data associated
+                        with it.
+                        <br />
+                        <DocsLink
+                          className="text-muted-foreground text-sm"
+                          href="/management/projects#delete-a-project"
+                        >
+                          <strong>This action is not reversible!</strong> You can find more
+                          information about this process in the documentation
+                        </DocsLink>
+                      </CardDescription>
+                    </CardHeader>
+                    <CardFooter>
+                      <Button variant="destructive" onClick={toggleModalOpen}>
+                        Delete Project
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                )}
+                <DeleteProjectModal isOpen={isModalOpen} toggleModalOpen={toggleModalOpen} />
+              </>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </ProjectLayout>
   );

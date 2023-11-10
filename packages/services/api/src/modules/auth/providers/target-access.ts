@@ -30,7 +30,7 @@ interface TargetTokenAccessSelector {
 
 const targetAccessScopeValues = Object.values(TargetAccessScope);
 
-function isTargetScope(scope: any): scope is TargetAccessScope {
+export function isTargetScope(scope: any): scope is TargetAccessScope {
   return targetAccessScopeValues.includes(scope);
 }
 

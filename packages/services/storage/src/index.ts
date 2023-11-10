@@ -15,19 +15,17 @@ import type {
   AuthProvider,
   Member,
   Organization,
-  OrganizationAccessScope,
   OrganizationBilling,
   OrganizationInvitation,
   Project,
-  ProjectAccessScope,
   Schema,
   Storage,
-  TargetAccessScope,
   TargetSettings,
   User,
 } from '@hive/api';
 import { batch } from '@theguild/buddy';
 import {
+  OrganizationMemberRoleModel,
   ProjectType,
   type CDNAccessToken,
   type OIDCIntegration,
@@ -42,6 +40,7 @@ import {
   objectToParams,
   organization_invitations,
   organization_member,
+  organization_member_roles,
   organizations,
   organizations_billing,
   projects,
@@ -99,27 +98,66 @@ function ensureDefined<T>(value: T | null | undefined, propertyName: string): T 
   return value;
 }
 
-function getProviderBasedOnExternalId(externalId: string): AuthProvider {
-  if (externalId.startsWith('github')) {
-    return 'GITHUB';
+function resolveAuthProviderOfUser(
+  user: users & {
+    provider: string | null | undefined;
+  },
+): AuthProvider {
+  // TODO: remove this once we have migrated all users
+  if (user.external_auth_user_id) {
+    if (user.external_auth_user_id.startsWith('github')) {
+      return 'GITHUB';
+    }
+
+    if (user.external_auth_user_id.startsWith('google')) {
+      return 'GOOGLE';
+    }
+
+    return 'USERNAME_PASSWORD';
   }
 
-  if (externalId.startsWith('google')) {
+  if (user.provider === 'oidc') {
+    return 'OIDC';
+  }
+  if (user.provider === 'google') {
     return 'GOOGLE';
+  }
+  if (user.provider === 'github') {
+    return 'GITHUB';
   }
 
   return 'USERNAME_PASSWORD';
 }
 
+type MemberRoleColumns =
+  | {
+      role_id: organization_member_roles['id'];
+      role_name: organization_member_roles['name'];
+      role_description: organization_member_roles['description'];
+      role_locked: organization_member_roles['locked'];
+      role_scopes: organization_member_roles['scopes'];
+    }
+  | {
+      role_id: null;
+      role_name: null;
+      role_description: null;
+      role_locked: null;
+      role_scopes: null;
+    };
+
 export async function createStorage(connection: string, maximumPoolSize: number): Promise<Storage> {
   const pool = await getPool(connection, maximumPoolSize);
 
-  function transformUser(user: users): User {
+  function transformUser(
+    user: users & {
+      provider: string | null | undefined;
+    },
+  ): User {
     return {
       id: user.id,
       email: user.email,
       superTokensUserId: user.supertoken_user_id,
-      provider: getProviderBasedOnExternalId(user.external_auth_user_id ?? ''),
+      provider: resolveAuthProviderOfUser(user),
       fullName: user.full_name,
       displayName: user.display_name,
       isAdmin: user.is_admin ?? false,
@@ -145,16 +183,30 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     user: users &
       Pick<organization_member, 'scopes' | 'organization_id' | 'connected_to_zendesk'> & {
         is_owner: boolean;
+      } & MemberRoleColumns & {
+        provider: string | null;
       },
   ): Member {
     return {
       id: user.id,
       isOwner: user.is_owner,
       user: transformUser(user),
+      // This allows us to have a fallback for users that don't have a role, remove this once we all users have a role
       scopes: (user.scopes as Member['scopes']) || [],
       organization: user.organization_id,
       oidcIntegrationId: user.oidc_integration_id ?? null,
       connectedToZendesk: user.connected_to_zendesk ?? false,
+      role: user.role_id
+        ? {
+            id: user.role_id,
+            name: user.role_name,
+            locked: user.role_locked,
+            description: user.role_description,
+            scopes: user.role_scopes as Member['scopes'],
+            organizationId: user.organization_id,
+            membersCount: undefined, // if it's not defined, the resolver will fetch it
+          }
+        : null,
     };
   }
 
@@ -183,7 +235,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
   }
 
   function transformOrganizationInvitation(
-    invitation: organization_invitations,
+    invitation: organization_invitations & {
+      role: organization_member_roles;
+    },
   ): OrganizationInvitation {
     return {
       email: invitation.email,
@@ -191,6 +245,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       code: invitation.code,
       created_at: invitation.created_at as any,
       expires_at: invitation.expires_at as any,
+      role: OrganizationMemberRoleModel.parse(invitation.role),
     };
   }
 
@@ -342,7 +397,12 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         : undefined,
       project: project ? transformProject(project) : undefined,
       organization: transformOrganization(organization),
-      user: user ? transformUser(user) : undefined,
+      user: user
+        ? transformUser({
+            ...user,
+            provider: null, // we don't need this for activities
+          })
+        : undefined,
     };
   }
 
@@ -407,13 +467,19 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       { superTokensUserId }: { superTokensUserId: string },
       connection: Connection,
     ) {
-      const user = await connection.maybeOne<Slonik<users>>(sql`
+      const user = await connection.maybeOne<
+        users & {
+          provider: string | null;
+        }
+      >(sql`
         SELECT
-          *
+          u.*,
+          stu.third_party_id as provider
         FROM
-          public."users"
+          public.users as u
+        LEFT JOIN supertokens_thirdparty_users as stu ON (stu.user_id = u.supertoken_user_id)
         WHERE
-          "supertoken_user_id" = ${superTokensUserId}
+          u.supertoken_user_id = ${superTokensUserId}
         LIMIT 1
       `);
 
@@ -441,17 +507,24 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       },
       connection: Connection,
     ) {
-      return transformUser(
-        await connection.one<Slonik<users>>(
-          sql`
-            INSERT INTO public.users
-              ("email", "supertoken_user_id", "full_name", "display_name", "external_auth_user_id", "oidc_integration_id")
-            VALUES
-              (${email}, ${superTokensUserId}, ${fullName}, ${displayName}, ${externalAuthUserId}, ${oidcIntegrationId})
-            RETURNING *
-          `,
-        ),
+      const user = await connection.one<users>(
+        sql`
+          INSERT INTO public.users
+            ("email", "supertoken_user_id", "full_name", "display_name", "external_auth_user_id", "oidc_integration_id")
+          VALUES
+            (${email}, ${superTokensUserId}, ${fullName}, ${displayName}, ${externalAuthUserId}, ${oidcIntegrationId})
+          RETURNING *
+        `,
       );
+
+      const provider = await connection.maybeOneFirst<string>(sql`
+        SELECT third_party_id FROM supertokens_thirdparty_users WHERE user_id = ${superTokensUserId} LIMIT 1
+      `);
+
+      return transformUser({
+        ...user,
+        provider,
+      });
     },
     async getOrganization(userId: string, connection: Connection) {
       const org = await connection.maybeOne<Slonik<organizations>>(
@@ -465,7 +538,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         name,
         user,
         cleanId,
-        scopes,
+        adminScopes,
+        viewerScopes,
         reservedNames,
       }: Parameters<Storage['createOrganization']>[0] & {
         reservedNames: string[];
@@ -503,12 +577,45 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `,
       );
 
+      // Create default roles for the organization
+      const roles = await connection.query<Pick<organization_member_roles, 'id' | 'name'>>(sql`
+        INSERT INTO organization_member_roles
+        (
+          organization_id,
+          name,
+          description,
+          scopes,
+          locked
+        )
+        VALUES (
+          ${org.id},
+          'Admin',
+          'Full access to all organization resources',
+          ${sql.array(adminScopes, 'text')},
+          true
+        ), (
+          ${org.id},
+          'Viewer',
+          'Read-only access to all organization resources',
+          ${sql.array(viewerScopes, 'text')},
+          true
+        )
+        RETURNING id, name
+      `);
+
+      const adminRole = roles.rows.find(role => role.name === 'Admin');
+
+      if (!adminRole) {
+        throw new Error('Admin role not found');
+      }
+
+      // Assign the admin role to the user
       await connection.query<Slonik<organization_member>>(
         sql`
           INSERT INTO public.organization_member
-            ("organization_id", "user_id", "scopes")
+            ("organization_id", "user_id", "role_id")
           VALUES
-            (${org.id}, ${user}, ${sql.array(scopes, 'text')})
+            (${org.id}, ${user}, ${adminRole.id})
         `,
       );
 
@@ -518,33 +625,54 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       args: {
         oidcIntegrationId: string;
         userId: string;
-        defaultScopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
       },
       connection: Connection,
     ) {
       const linkedOrganizationId = await connection.maybeOneFirst<string>(sql`
-          SELECT
-            "linked_organization_id"
-          FROM
-            "public"."oidc_integrations"
-          WHERE
-            "id" = ${args.oidcIntegrationId}
-        `);
+        SELECT
+          "linked_organization_id"
+        FROM
+          "public"."oidc_integrations"
+        WHERE
+          "id" = ${args.oidcIntegrationId}
+      `);
 
       if (linkedOrganizationId === null) {
         return;
       }
 
+      const viewerRole = await shared.getOrganizationMemberRoleByName(
+        { organizationId: linkedOrganizationId, roleName: 'Viewer' },
+        connection,
+      );
+      // TODO: turn it into a default role and let the admin choose the default role
       await connection.query(
         sql`
           INSERT INTO public.organization_member
-            (organization_id, user_id, scopes)
+            (organization_id, user_id, role_id)
           VALUES
-            (${linkedOrganizationId}, ${args.userId}, ${sql.array(args.defaultScopes, 'text')})
+            (${linkedOrganizationId}, ${args.userId}, ${viewerRole.id})
           ON CONFLICT DO NOTHING
           RETURNING *
         `,
       );
+    },
+    async getOrganizationMemberRoleByName(
+      args: {
+        organizationId: string;
+        roleName: string;
+      },
+      connection: Connection,
+    ) {
+      const result = await connection.one(sql`
+        SELECT
+          id, name, description, scopes, locked, organization_id
+        FROM public.organization_member_roles
+        WHERE organization_id = ${args.organizationId} AND name = ${args.roleName}
+        LIMIT 1
+      `);
+
+      return OrganizationMemberRoleModel.parse(result);
     },
   };
 
@@ -590,7 +718,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       email: string;
       oidcIntegration: null | {
         id: string;
-        defaultScopes: Array<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
       };
     }) {
       return pool.transaction(async t => {
@@ -616,7 +743,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             {
               oidcIntegrationId: oidcIntegration.id,
               userId: internalUser.id,
-              defaultScopes: oidcIntegration.defaultScopes,
+              // TODO: pass a default role here
             },
             t,
           );
@@ -630,16 +757,27 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
     getUserById: batch(async input => {
       const userIds = input.map(i => i.id);
-      const users = await pool.any<Slonik<users>>(sql`
+      const users = await pool.any<
+        users & {
+          provider: string | null;
+        }
+      >(sql`
         SELECT
-          *
+          u.*, stu.third_party_id as provider
         FROM
-          public.users
+          public.users as u
+        LEFT JOIN
+          supertokens_thirdparty_users as stu ON (stu.user_id = u.supertoken_user_id)
         WHERE
-          id = ANY(${sql.array(userIds, 'uuid')})
+          u.id = ANY(${sql.array(userIds, 'uuid')})
       `);
 
-      const mappings = new Map<string, Slonik<users>>();
+      const mappings = new Map<
+        string,
+        users & {
+          provider: string | null;
+        }
+      >();
       for (const user of users) {
         mappings.set(user.id, user);
       }
@@ -650,14 +788,21 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       });
     }),
     async updateUser({ id, displayName, fullName }) {
-      return transformUser(
-        await pool.one<Slonik<users>>(sql`
-          UPDATE public.users
-          SET display_name = ${displayName}, full_name = ${fullName}
-          WHERE id = ${id}
-          RETURNING *
-        `),
-      );
+      const user = await pool.one<users>(sql`
+        UPDATE public.users
+        SET display_name = ${displayName}, full_name = ${fullName}
+        WHERE id = ${id}
+        RETURNING *
+      `);
+
+      const provider = await pool.maybeOneFirst<string>(sql`
+        SELECT provider FROM supertokens_thirdparty_users WHERE user_id = ${user.supertoken_user_id} LIMIT 1
+      `);
+
+      return transformUser({
+        ...user,
+        provider,
+      });
     },
     createOrganization(input) {
       return pool.transaction(t => shared.createOrganization(input, t));
@@ -728,14 +873,29 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     getOrganizationOwner: batch(async selectors => {
       const organizations = selectors.map(s => s.organization);
       const owners = await pool.query<
-        Slonik<
-          users & Pick<organization_member, 'scopes' | 'organization_id' | 'connected_to_zendesk'>
-        >
+        users &
+          Pick<organization_member, 'scopes' | 'organization_id' | 'connected_to_zendesk'> &
+          MemberRoleColumns & {
+            provider: string | null;
+          }
       >(
         sql`
-        SELECT u.*, om.scopes, om.organization_id, om.connected_to_zendesk FROM public.organizations as o
+        SELECT
+          u.*,
+          COALESCE(omr.scopes, om.scopes) as scopes,
+          om.organization_id,
+          om.connected_to_zendesk,
+          omr.id as role_id,
+          omr.name as role_name,
+          omr.locked as role_locked,
+          omr.scopes as role_scopes,
+          omr.description as role_description,
+          stu.third_party_id as provider
+        FROM public.organizations as o
         LEFT JOIN public.users as u ON (u.id = o.user_id)
         LEFT JOIN public.organization_member as om ON (om.user_id = u.id AND om.organization_id = o.id)
+        LEFT JOIN public.organization_member_roles as omr ON (omr.organization_id = o.id AND omr.id = om.role_id)
+        LEFT JOIN supertokens_thirdparty_users as stu ON (stu.user_id = u.supertoken_user_id)
         WHERE o.id IN (${sql.join(organizations, sql`, `)})`,
       );
 
@@ -764,23 +924,31 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     getOrganizationMembers: batch(async selectors => {
       const organizations = selectors.map(s => s.organization);
       const allMembers = await pool.query<
-        Slonik<
-          users &
-            Pick<organization_member, 'scopes' | 'organization_id' | 'connected_to_zendesk'> & {
-              is_owner: boolean;
-            }
-        >
+        users &
+          Pick<organization_member, 'scopes' | 'organization_id' | 'connected_to_zendesk'> & {
+            is_owner: boolean;
+          } & MemberRoleColumns & {
+            provider: string | null;
+          }
       >(
         sql`
         SELECT
           u.*,
-          om.scopes,
+          COALESCE(omr.scopes, om.scopes) as scopes,
           om.organization_id,
           om.connected_to_zendesk,
-          CASE WHEN o.user_id = om.user_id THEN true ELSE false END AS is_owner
+          CASE WHEN o.user_id = om.user_id THEN true ELSE false END AS is_owner,
+          omr.id as role_id,
+          omr.name as role_name,
+          omr.locked as role_locked,
+          omr.scopes as role_scopes,
+          omr.description as role_description,
+          stu.third_party_id as provider
         FROM public.organization_member as om
         LEFT JOIN public.organizations as o ON (o.id = om.organization_id)
         LEFT JOIN public.users as u ON (u.id = om.user_id)
+        LEFT JOIN public.organization_member_roles as omr ON (omr.organization_id = o.id AND omr.id = om.role_id)
+        LEFT JOIN supertokens_thirdparty_users as stu ON (stu.user_id = u.supertoken_user_id)
         WHERE om.organization_id IN (${sql.join(
           organizations,
           sql`, `,
@@ -797,43 +965,134 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         return Promise.reject(new Error(`Members not found (organization=${organization})`));
       });
     }),
-    async getOrganizationMember({ organization, user }) {
-      const member = await pool.maybeOne<
-        Slonik<
-          users &
-            Pick<organization_member, 'organization_id' | 'scopes' | 'connected_to_zendesk'> & {
-              is_owner: boolean;
-            }
-        >
+    getOrganizationMember: batch(async selectors => {
+      const membersResult = await pool.query<
+        users &
+          Pick<organization_member, 'organization_id' | 'scopes' | 'connected_to_zendesk'> & {
+            is_owner: boolean;
+          } & MemberRoleColumns & {
+            provider: string | null;
+          }
       >(
         sql`
           SELECT
             u.*,
-            om.scopes,
+            COALESCE(omr.scopes, om.scopes) as scopes,
             om.organization_id,
             om.connected_to_zendesk,
-            CASE WHEN o.user_id = om.user_id THEN true ELSE false END AS is_owner
+            CASE WHEN o.user_id = om.user_id THEN true ELSE false END AS is_owner,
+            omr.id as role_id,
+            omr.name as role_name,
+            omr.locked as role_locked,
+            omr.scopes as role_scopes,
+            omr.description as role_description,
+            stu.third_party_id as provider
           FROM public.organization_member as om
           LEFT JOIN public.organizations as o ON (o.id = om.organization_id)
           LEFT JOIN public.users as u ON (u.id = om.user_id)
-          WHERE om.organization_id = ${organization} AND om.user_id = ${user} ORDER BY u.created_at DESC LIMIT 1`,
+          LEFT JOIN public.organization_member_roles as omr ON (omr.organization_id = o.id AND omr.id = om.role_id)
+          LEFT JOIN supertokens_thirdparty_users as stu ON (stu.user_id = u.supertoken_user_id)
+          WHERE (om.organization_id, om.user_id) IN ((${sql.join(
+            selectors.map(s => sql`${s.organization}, ${s.user}`),
+            sql`), (`,
+          )}))
+          ORDER BY u.created_at DESC
+        `,
       );
 
-      if (!member) {
+      return selectors.map(selector => {
+        const member = membersResult.rows.find(
+          row => row.organization_id === selector.organization && row.id === selector.user,
+        );
+
+        if (member) {
+          return Promise.resolve(transformMember(member));
+        }
+
+        return Promise.resolve(null);
+      });
+    }),
+    getAdminOrganizationMemberRole({ organizationId }) {
+      return shared.getOrganizationMemberRoleByName(
+        {
+          organizationId,
+          roleName: 'Admin',
+        },
+        pool,
+      );
+    },
+    getViewerOrganizationMemberRole({ organizationId }) {
+      return shared.getOrganizationMemberRoleByName(
+        {
+          organizationId,
+          roleName: 'Viewer',
+        },
+        pool,
+      );
+    },
+    async getOrganizationMemberRoles(selector) {
+      const results = await pool.many(sql`
+        SELECT
+          id, name, description, scopes, locked, organization_id
+        FROM public.organization_member_roles
+        WHERE organization_id = ${selector.organizationId}
+        ORDER BY array_length(scopes, 1) DESC, name ASC
+      `);
+
+      return results.map(role => OrganizationMemberRoleModel.parse(role));
+    },
+    async getOrganizationMemberRole(selector) {
+      const result = await pool.maybeOne<{
+        members_count: number;
+      }>(sql`
+        SELECT
+          id, name, description, scopes, locked, organization_id,
+          (
+            SELECT count(*)
+            FROM organization_member
+            WHERE role_id = ${selector.roleId} AND organization_id = ${selector.organizationId}
+          ) AS members_count
+        FROM public.organization_member_roles
+        WHERE organization_id = ${selector.organizationId} AND id = ${selector.roleId}
+        LIMIT 1
+      `);
+
+      if (!result) {
         return null;
       }
 
-      return transformMember(member);
+      return {
+        ...OrganizationMemberRoleModel.parse(result),
+        membersCount: result.members_count,
+      };
+    },
+    hasOrganizationMemberRoleName({ organizationId, roleName, excludeRoleId }) {
+      return pool.exists(sql`
+        SELECT 1
+        FROM public.organization_member_roles
+        WHERE
+          organization_id = ${organizationId}
+          AND
+          name = ${roleName}
+          ${excludeRoleId ? sql`AND id != ${excludeRoleId}` : sql``}
+        LIMIT 1
+      `);
     },
     getOrganizationInvitations: batch(async selectors => {
       const organizations = selectors.map(s => s.organization);
-      const allInvitations = await pool.query<Slonik<organization_invitations>>(
+      const allInvitations = await pool.query<
+        organization_invitations & {
+          role: organization_member_roles;
+        }
+      >(
         sql`
-          SELECT * FROM public.organization_invitations
-          WHERE organization_id IN (${sql.join(
+          SELECT oi.*, to_jsonb(omr.*) as role
+          FROM public.organization_invitations as oi
+          LEFT JOIN public.organization_member_roles as omr ON (omr.organization_id = oi.organization_id AND omr.id = oi.role_id)
+          WHERE oi.organization_id IN (${sql.join(
             organizations,
             sql`, `,
-          )}) AND expires_at > NOW() ORDER BY created_at DESC
+          )}) AND oi.expires_at > NOW() ORDER BY oi.created_at DESC
         `,
       );
 
@@ -845,14 +1104,76 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         );
       });
     }),
+    async deleteOrganizationMemberRole({ organizationId, roleId }) {
+      await pool.transaction(async t => {
+        const viewerRoleId = await t.oneFirst(sql`
+          SELECT id FROM public.organization_member_roles
+          WHERE organization_id = ${organizationId} AND locked = true AND name = 'Viewer'
+          LIMIT 1
+        `);
+
+        // move all invitations to the viewer role
+        await t.query(sql`
+          UPDATE public.organization_invitations
+          SET role_id = ${viewerRoleId}
+          WHERE role_id = ${roleId} AND organization_id = ${organizationId}
+        `);
+
+        await t.query(sql`
+          DELETE FROM public.organization_member_roles
+          WHERE
+            organization_id = ${organizationId}
+            AND id = ${roleId}
+            AND locked = false 
+            AND (
+              SELECT count(*)
+              FROM organization_member
+              WHERE role_id = ${roleId} AND organization_id = ${organizationId}
+              ) = 0
+        `);
+      });
+    },
+    async getMembersWithoutRole({ organizationId }) {
+      const result = await pool.query<
+        users &
+          Pick<organization_member, 'scopes' | 'organization_id' | 'connected_to_zendesk'> & {
+            is_owner: boolean;
+          } & MemberRoleColumns & {
+            provider: string | null;
+          }
+      >(
+        sql`
+        SELECT
+          u.*,
+          COALESCE(omr.scopes, om.scopes) as scopes,
+          om.organization_id,
+          om.connected_to_zendesk,
+          CASE WHEN o.user_id = om.user_id THEN true ELSE false END AS is_owner,
+          omr.id as role_id,
+          omr.name as role_name,
+          omr.locked as role_locked,
+          omr.scopes as role_scopes,
+          omr.description as role_description,
+          stu.third_party_id as provider
+        FROM public.organization_member as om
+        LEFT JOIN public.organizations as o ON (o.id = om.organization_id)
+        LEFT JOIN public.users as u ON (u.id = om.user_id)
+        LEFT JOIN public.organization_member_roles as omr ON (omr.organization_id = o.id AND omr.id = om.role_id)
+        LEFT JOIN supertokens_thirdparty_users as stu ON (stu.user_id = u.supertoken_user_id)
+        WHERE om.organization_id = ${organizationId} AND om.role_id IS NULL`,
+      );
+
+      return result.rows.map(transformMember);
+    },
     async getOrganizationMemberAccessPairs(pairs) {
       const results = await pool.query<
         Slonik<Pick<organization_member, 'organization_id' | 'user_id' | 'scopes'>>
       >(
         sql`
-          SELECT organization_id, user_id, scopes
-          FROM public.organization_member
-          WHERE (organization_id, user_id) IN ((${sql.join(
+          SELECT om.organization_id, om.user_id, COALESCE(omr.scopes, om.scopes) as scopes
+          FROM public.organization_member as om
+          LEFT JOIN public.organization_member_roles as omr ON (omr.organization_id = om.organization_id AND omr.id = om.role_id)
+          WHERE (om.organization_id, om.user_id) IN ((${sql.join(
             pairs.map(p => sql`${p.organization}, ${p.user}`),
             sql`), (`,
           )}))
@@ -933,37 +1254,68 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `),
       );
     },
-    async createOrganizationInvitation({ organization, email }) {
+    async createOrganizationInvitation({ organization, email, roleId }) {
       return transformOrganizationInvitation(
-        await pool.one<Slonik<organization_invitations>>(sql`
-          INSERT INTO public.organization_invitations (organization_id, email)
-          VALUES (${organization}, ${email})
+        await pool.transaction(async trx => {
+          const invitation = await trx.one<organization_invitations>(sql`
+          INSERT INTO public.organization_invitations (organization_id, email, role_id)
+          VALUES (${organization}, ${email}, ${roleId})
           RETURNING *
-        `),
+        `);
+
+          const role = await trx.one<organization_member_roles>(sql`
+          SELECT * FROM public.organization_member_roles WHERE id = ${roleId} LIMIT 1
+        `);
+
+          return {
+            ...invitation,
+            role,
+          };
+        }),
       );
     },
     async deleteOrganizationInvitationByEmail({ organization, email }) {
-      const deleted = await pool.maybeOne<Slonik<organization_invitations>>(sql`
+      const result = await pool.transaction(async trx => {
+        const deleted = await trx.maybeOne<organization_invitations>(sql`
         DELETE FROM public.organization_invitations
         WHERE organization_id = ${organization} AND email = ${email}
         RETURNING *
       `);
-      return deleted ? transformOrganizationInvitation(deleted) : null;
-    },
-    async addOrganizationMemberViaInvitationCode({ code, user, organization, scopes }) {
-      await pool.transaction(async trx => {
-        await trx.query(sql`
-          DELETE FROM public.organization_invitations
-          WHERE organization_id = ${organization} AND code = ${code}
+
+        if (!deleted) {
+          return null;
+        }
+
+        const role = await trx.one<organization_member_roles>(sql`
+          SELECT * FROM public.organization_member_roles WHERE id = ${deleted.role_id} LIMIT 1
         `);
 
-        await pool.one<Slonik<organization_member>>(
+        return {
+          ...deleted,
+          role,
+        };
+      });
+
+      if (!result) {
+        return null;
+      }
+
+      return transformOrganizationInvitation(result);
+    },
+    async addOrganizationMemberViaInvitationCode({ code, user, organization }) {
+      await pool.transaction(async trx => {
+        const roleId = await trx.oneFirst<string>(sql`
+          DELETE FROM public.organization_invitations
+          WHERE organization_id = ${organization} AND code = ${code}
+          RETURNING role_id
+        `);
+
+        await trx.query(
           sql`
             INSERT INTO public.organization_member
-              (organization_id, user_id, scopes)
+              (organization_id, user_id, role_id)
             VALUES
-              (${organization}, ${user}, ${sql.array(scopes, 'text')})
-            RETURNING *
+              (${organization}, ${user}, ${roleId})
           `,
         );
       });
@@ -998,13 +1350,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           AND ownership_transfer_expires_at > NOW()
       `);
     },
-    async answerOrganizationTransferRequest({
-      organization,
-      user,
-      code,
-      accept,
-      oldAdminAccessScopes,
-    }) {
+    async answerOrganizationTransferRequest({ organization, user, code, accept }) {
       await pool.transaction(async tsx => {
         const owner = await tsx.maybeOne<Slonik<Pick<organizations, 'user_id'>>>(sql`
           SELECT user_id
@@ -1035,26 +1381,20 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           return;
         }
 
-        // copy access scopes from the new owner
+        const adminRole = await shared.getOrganizationMemberRoleByName(
+          {
+            organizationId: organization,
+            roleName: 'Admin',
+          },
+          tsx,
+        );
+
+        // set admin role
         await tsx.query(sql`
           UPDATE public.organization_member
-          SET scopes = (
-            SELECT scopes
-            FROM public.organization_member
-            WHERE organization_id = ${organization} AND user_id = ${owner.user_id}
-            LIMIT 1
-          )
+          SET role_id = ${adminRole.id}
           WHERE organization_id = ${organization} AND user_id = ${user}
         `);
-
-        // assign new access scopes to the old owner
-        await pool.query<Slonik<organization_member>>(
-          sql`
-            UPDATE public.organization_member
-            SET scopes = ${sql.array(oldAdminAccessScopes, 'text')}
-            WHERE organization_id = ${organization} AND user_id = ${owner.user_id}
-          `,
-        );
 
         // NULL out the transfer request
         // assign the new owner
@@ -1069,11 +1409,11 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `);
       });
     },
-    async deleteOrganizationMembers({ users, organization }) {
-      await pool.query<Slonik<organization_member>>(
+    async deleteOrganizationMember({ user, organization }) {
+      await pool.query<organization_member>(
         sql`
           DELETE FROM public.organization_member
-          WHERE organization_id = ${organization} AND user_id IN (${sql.join(users, sql`, `)})
+          WHERE organization_id = ${organization} AND user_id = ${user}
         `,
       );
     },
@@ -1082,7 +1422,53 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         sql`
           UPDATE public.organization_member
           SET scopes = ${sql.array(scopes, 'text')}
-          WHERE organization_id = ${organization} AND user_id = ${user}
+          WHERE organization_id = ${organization} AND user_id = ${user} AND role_id IS NULL
+        `,
+      );
+    },
+    async createOrganizationMemberRole({ organizationId, name, scopes, description }) {
+      const role = await pool.one(
+        sql`
+          INSERT INTO public.organization_member_roles
+          (organization_id, name, description, scopes)
+          VALUES
+          (${organizationId}, ${name}, ${description}, ${sql.array(scopes, 'text')})
+          RETURNING *
+        `,
+      );
+
+      return OrganizationMemberRoleModel.parse(role);
+    },
+    async updateOrganizationMemberRole({ organizationId, roleId, name, scopes, description }) {
+      const role = await pool.one(
+        sql`
+          UPDATE public.organization_member_roles
+          SET
+            name = ${name},
+            description = ${description},
+            scopes = ${sql.array(scopes, 'text')}
+          WHERE organization_id = ${organizationId} AND id = ${roleId}
+          RETURNING *
+        `,
+      );
+
+      return OrganizationMemberRoleModel.parse(role);
+    },
+    async assignOrganizationMemberRole({ userId, organizationId, roleId }) {
+      await pool.query(
+        sql`
+          UPDATE public.organization_member
+          SET role_id = ${roleId}
+          WHERE organization_id = ${organizationId} AND user_id = ${userId}
+        `,
+      );
+    },
+    async assignOrganizationMemberRoleToMany({ userIds, organizationId, roleId }) {
+      await pool.query(
+        sql`
+          UPDATE public.organization_member
+          SET role_id = ${roleId}
+          WHERE organization_id = ${organizationId} AND user_id = ANY(${sql.array(userIds, 'uuid')})
         `,
       );
     },
@@ -3668,12 +4054,17 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     async getOrganizationUser(args) {
-      const result = await pool.maybeOne<users>(sql`
+      const result = await pool.maybeOne<
+        users & {
+          provider: string | null;
+        }
+      >(sql`
         SELECT
-          "u".*
+          "u".*, "stu"."third_party_id" as provider
         FROM "organization_member" as "om"
           LEFT JOIN "organizations" as "o" ON ("o"."id" = "om"."organization_id")
           LEFT JOIN "users" as "u" ON ("u"."id" = "om"."user_id")
+          LEFT JOIN "supertokens_thirdparty_users" as "stu" ON ("stu"."user_id" = "u"."supertoken_user_id")
         WHERE
           "u"."id" = ${args.userId}
           AND "o"."id" = ${args.organizationId}

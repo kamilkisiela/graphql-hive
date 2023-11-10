@@ -12,7 +12,12 @@ await describe('drop-personal-org', async () => {
       await runTo('2023.01.18T11.03.41.registry-v2.sql');
 
       // Seed the DB with orgs
-      const user = await seed.user();
+      const user = await seed.user({
+        user: {
+          name: 'test',
+          email: 'test@test.com',
+        },
+      });
       const emptyOrgs = await Promise.all([
         db.one(
           sql`INSERT INTO public.organizations (clean_id, name, user_id, type) VALUES ('personal-empty', 'personal-empty', ${user.id}, 'PERSONAL') RETURNING *;`,

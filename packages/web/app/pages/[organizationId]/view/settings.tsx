@@ -230,7 +230,7 @@ const SettingsPageRenderer = (props: {
   organization: FragmentType<typeof SettingsPageRenderer_OrganizationFragment>;
 }) => {
   const organization = useFragment(SettingsPageRenderer_OrganizationFragment, props.organization);
-  useOrganizationAccess({
+  const hasAccess = useOrganizationAccess({
     scope: OrganizationAccessScope.Settings,
     member: organization.me,
     redirect: true,
@@ -272,142 +272,149 @@ const SettingsPageRenderer = (props: {
         <Title>Organization Settings</Title>
         <Subtitle>Manage your organization settings and integrations.</Subtitle>
       </div>
-      <div className="flex flex-col gap-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Organization Name</CardTitle>
-            <CardDescription>
-              Changing the name of your organization will also change the slug of your organization
-              URL, and will invalidate any existing links to your organization.
-              <br />
-              <DocsLink
-                className="text-muted-foreground text-sm"
-                href="/management/organizations#rename-an-organization"
-              >
-                You can read more about it in the documentation
-              </DocsLink>
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <form onSubmit={handleSubmit} className="flex gap-x-2">
-              <Input
-                placeholder="Organization name"
-                name="name"
-                value={values.name}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                disabled={isSubmitting}
-                isInvalid={touched.name && !!errors.name}
-                className="w-96"
-              />
-            </form>
-            {touched.name && (errors.name || mutation.error) && (
-              <div className="mt-2 text-red-500">{errors.name || mutation.error?.message}</div>
-            )}
-            {mutation.data?.updateOrganizationName?.error && (
-              <div className="mt-2 text-red-500">
-                {mutation.data?.updateOrganizationName.error.message}
-              </div>
-            )}
-            {mutation.error && (
-              <div>{mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}</div>
-            )}
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button disabled={isSubmitting} className="px-10">
-              Save
-            </Button>
-          </CardFooter>
-        </Card>
 
-        {canAccessOrganization(OrganizationAccessScope.Integrations, organization.me) && (
+      {hasAccess ? (
+        <div className="flex flex-col gap-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Integrations</CardTitle>
+              <CardTitle>Organization Name</CardTitle>
               <CardDescription>
-                Authorize external services to make them available for your the projects under this
-                organization.
+                Changing the name of your organization will also change the slug of your
+                organization URL, and will invalidate any existing links to your organization.
                 <br />
                 <DocsLink
                   className="text-muted-foreground text-sm"
-                  href="/management/organizations#integrations"
+                  href="/management/organizations#rename-an-organization"
                 >
-                  You can find here instructions and full documentation for the available
-                  integration
+                  You can read more about it in the documentation
                 </DocsLink>
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="flex flex-col gap-y-4 text-gray-500">
-                <Integrations />
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {organization.me.isOwner && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Transfer Ownership</CardTitle>
-              <CardDescription>
-                <strong>You are currently the owner of the organization.</strong> You can transfer
-                the organization to another member of the organization, or to an external user.
-                <br />
-                <DocsLink
-                  className="text-muted-foreground text-sm"
-                  href="/management/organizations#transfer-ownership"
-                >
-                  Learn more about the process
-                </DocsLink>
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div>
-                  <Button variant="destructive" onClick={toggleTransferModalOpen} className="px-5">
-                    Transfer Ownership
-                  </Button>
-                  <TransferOrganizationOwnershipModal
-                    isOpen={isTransferModalOpen}
-                    toggleModalOpen={toggleTransferModalOpen}
-                    organization={organization}
-                  />
+            <CardContent className="grid gap-4">
+              <form onSubmit={handleSubmit} className="flex gap-x-2">
+                <Input
+                  placeholder="Organization name"
+                  name="name"
+                  value={values.name}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  disabled={isSubmitting}
+                  isInvalid={touched.name && !!errors.name}
+                  className="w-96"
+                />
+              </form>
+              {touched.name && (errors.name || mutation.error) && (
+                <div className="mt-2 text-red-500">{errors.name || mutation.error?.message}</div>
+              )}
+              {mutation.data?.updateOrganizationName?.error && (
+                <div className="mt-2 text-red-500">
+                  {mutation.data?.updateOrganizationName.error.message}
                 </div>
-              </div>
+              )}
+              {mutation.error && (
+                <div>{mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}</div>
+              )}
             </CardContent>
-          </Card>
-        )}
-
-        {canAccessOrganization(OrganizationAccessScope.Delete, organization.me) && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Delete Organization</CardTitle>
-              <CardDescription>
-                Deleting an organization will delete all the projects, targets, schemas and data
-                associated with it.
-                <br />
-                <DocsLink
-                  className="text-muted-foreground text-sm"
-                  href="/management/organizations#delete-an-organization"
-                >
-                  <strong>This action is not reversible!</strong> You can find more information
-                  about this process in the documentation
-                </DocsLink>
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="destructive" onClick={toggleDeleteModalOpen} className="px-5">
-                Delete Organization
+            <CardFooter className="flex justify-between">
+              <Button disabled={isSubmitting} className="px-10">
+                Save
               </Button>
-              <DeleteOrganizationModal
-                isOpen={isDeleteModalOpen}
-                toggleModalOpen={toggleDeleteModalOpen}
-                organization={organization}
-              />
-            </CardContent>
+            </CardFooter>
           </Card>
-        )}
-      </div>
+
+          {canAccessOrganization(OrganizationAccessScope.Integrations, organization.me) && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Integrations</CardTitle>
+                <CardDescription>
+                  Authorize external services to make them available for your the projects under
+                  this organization.
+                  <br />
+                  <DocsLink
+                    className="text-muted-foreground text-sm"
+                    href="/management/organizations#integrations"
+                  >
+                    You can find here instructions and full documentation for the available
+                    integration
+                  </DocsLink>
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-y-4 text-gray-500">
+                  <Integrations />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {organization.me.isOwner && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Transfer Ownership</CardTitle>
+                <CardDescription>
+                  <strong>You are currently the owner of the organization.</strong> You can transfer
+                  the organization to another member of the organization, or to an external user.
+                  <br />
+                  <DocsLink
+                    className="text-muted-foreground text-sm"
+                    href="/management/organizations#transfer-ownership"
+                  >
+                    Learn more about the process
+                  </DocsLink>
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Button
+                      variant="destructive"
+                      onClick={toggleTransferModalOpen}
+                      className="px-5"
+                    >
+                      Transfer Ownership
+                    </Button>
+                    <TransferOrganizationOwnershipModal
+                      isOpen={isTransferModalOpen}
+                      toggleModalOpen={toggleTransferModalOpen}
+                      organization={organization}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {canAccessOrganization(OrganizationAccessScope.Delete, organization.me) && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Delete Organization</CardTitle>
+                <CardDescription>
+                  Deleting an organization will delete all the projects, targets, schemas and data
+                  associated with it.
+                  <br />
+                  <DocsLink
+                    className="text-muted-foreground text-sm"
+                    href="/management/organizations#delete-an-organization"
+                  >
+                    <strong>This action is not reversible!</strong> You can find more information
+                    about this process in the documentation
+                  </DocsLink>
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button variant="destructive" onClick={toggleDeleteModalOpen} className="px-5">
+                  Delete Organization
+                </Button>
+                <DeleteOrganizationModal
+                  isOpen={isDeleteModalOpen}
+                  toggleModalOpen={toggleDeleteModalOpen}
+                  organization={organization}
+                />
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 };
