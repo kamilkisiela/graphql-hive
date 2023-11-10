@@ -405,6 +405,10 @@ export default gql`
     The repository name of the schema check.
     """
     repository: String
+    """
+    The pull request number of the schema check.
+    """
+    pullRequestNumber: String
   }
 
   input SchemaCompareInput {
