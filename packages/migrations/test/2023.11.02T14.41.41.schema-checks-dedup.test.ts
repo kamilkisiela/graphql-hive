@@ -186,21 +186,18 @@ await describe('migration: schema-checks-dedup', async () => {
       // make sure SQL statements from Storage are capable of serving SDLs directly from schema_checks
       const firstCheckFromStorage = await storage.findSchemaCheck({
         schemaCheckId: firstSchemaCheck.id,
-        targetId: target.id,
       });
       assert.strictEqual(firstCheckFromStorage?.schemaSDL, schemaSDL);
       assert.strictEqual(firstCheckFromStorage?.compositeSchemaSDL, compositeSchemaSDL);
       assert.strictEqual(firstCheckFromStorage?.supergraphSDL, supergraphSDL);
       const secondCheckFromStorage = await storage.findSchemaCheck({
         schemaCheckId: secondSchemaCheck.id,
-        targetId: target.id,
       });
       assert.strictEqual(secondCheckFromStorage?.schemaSDL, secondSchemaSDL);
       assert.strictEqual(secondCheckFromStorage?.compositeSchemaSDL, secondCompositeSchemaSDL);
       assert.strictEqual(secondCheckFromStorage?.supergraphSDL, secondSupergraphSDL);
       const thirdCheckFromStorage = await storage.findSchemaCheck({
         schemaCheckId: thirdSchemaCheck.id,
-        targetId: target.id,
       });
       assert.strictEqual(thirdCheckFromStorage?.schemaSDL, schemaSDL);
       assert.strictEqual(thirdCheckFromStorage?.compositeSchemaSDL, compositeSchemaSDL);
@@ -209,7 +206,6 @@ await describe('migration: schema-checks-dedup', async () => {
       // make sure SQL statements from Storage are capable of serving SDLs from sdl_store
       const newCheckFromStorage = await storage.findSchemaCheck({
         schemaCheckId: newSchemaCheck.id,
-        targetId: target.id,
       });
       assert.strictEqual(newCheckFromStorage?.schemaSDL, schemaSDL);
       assert.strictEqual(newCheckFromStorage?.compositeSchemaSDL, compositeSchemaSDL);

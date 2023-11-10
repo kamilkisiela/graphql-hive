@@ -631,7 +631,6 @@ export class SchemaManager {
     });
 
     const schemaCheck = await this.storage.findSchemaCheck({
-      targetId: args.targetId,
       schemaCheckId: args.schemaCheckId,
     });
 
@@ -722,13 +721,12 @@ export class SchemaManager {
 
     let [schemaCheck, viewer] = await Promise.all([
       this.storage.findSchemaCheck({
-        targetId: args.targetId,
         schemaCheckId: args.schemaCheckId,
       }),
       this.authManager.getCurrentUser(),
     ]);
 
-    if (schemaCheck == null) {
+    if (schemaCheck == null || schemaCheck.targetId !== args.targetId) {
       this.logger.debug('Schema check not found (args=%o)', args);
       return {
         type: 'error',
