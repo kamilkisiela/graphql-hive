@@ -161,8 +161,8 @@ importers:
         specifier: 3.0.3
         version: 3.0.3
       prettier-plugin-sql:
-        specifier: 0.15.2
-        version: 0.15.2(prettier@3.0.3)
+        specifier: 0.16.0
+        version: 0.16.0(prettier@3.0.3)
       prettier-plugin-tailwindcss:
         specifier: 0.5.7
         version: 0.5.7(prettier@3.0.3)
@@ -22121,6 +22121,11 @@ packages:
       ms: 2.1.3
       semver: 7.5.4
 
+  /jsox@1.2.118:
+    resolution: {integrity: sha512-ubYWn4WOc7HA7icvcQuIni1I7Xx4bI4KbRXbXzlr5e48hvdizeAbflBx97B629ZNH5RZnQ657Z5Z8dFgxFVrSQ==}
+    hasBin: true
+    dev: true
+
   /jsprim@2.0.2:
     resolution: {integrity: sha512-gqXddjPqQ6G40VdnI6T6yObEC+pDNvyP95wdQhkWkg7crHH3km5qP1FsOXEkzEQwnz6gz5qGTn1c2Y52wP3OyQ==}
     engines: {'0': node >=0.6.0}
@@ -24887,8 +24892,8 @@ packages:
   /node-releases@2.0.13:
     resolution: {integrity: sha512-uYr7J37ae/ORWdZeQ1xxMJe3NtdmqMC/JZK+geofDrkLUApKRHPd18/TxtBOJ4A0/+uUIliorNrfYV6s1b02eQ==}
 
-  /node-sql-parser@4.8.0:
-    resolution: {integrity: sha512-z+PnREzzu8iv2mNAJvyGICUDRYCY69nOjuYHH8juqGy7zJQzUMJVrDfIUbB0OUVuxJhh3lYQ+1dZ6Bw4yCA1DA==}
+  /node-sql-parser@4.11.0:
+    resolution: {integrity: sha512-ElheoPibjc7IVyRdsORgkzJi0DWm3f0LYSsm/eJIeUt3M/csDLTblLDR4zl5Qi7jmVjJ1KpEkPKSbgVGEzU5Xw==}
     engines: {node: '>=8'}
     dependencies:
       big-integer: 1.6.51
@@ -26737,15 +26742,16 @@ packages:
       sh-syntax: 0.4.1
     dev: true
 
-  /prettier-plugin-sql@0.15.2(prettier@3.0.3):
-    resolution: {integrity: sha512-4h1s1u1sxi2RTdfMjubVTBJWiUsyc2/kolxqQbFp/aFoUEfMLH+t6/hFGr2FeTKTuc576wOXFtkQG2WXXvBrRA==}
+  /prettier-plugin-sql@0.16.0(prettier@3.0.3):
+    resolution: {integrity: sha512-ISKL8EpiW9VSaHxmezr/lYiBNgcJvCF5V4NR2SCGZcv4vawn1negBD5jVVf7VN/wqTLd56U/taJiQPhQdbrYdA==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
       prettier: ^3.0.3
     dependencies:
-      node-sql-parser: 4.8.0
+      jsox: 1.2.118
+      node-sql-parser: 4.11.0
       prettier: 3.0.3
-      sql-formatter: 12.2.4
+      sql-formatter: 13.1.0
       tslib: 2.6.2
     dev: true
 
@@ -28997,8 +29003,8 @@ packages:
     resolution: {integrity: sha512-VE0SOVEHCk7Qc8ulkWw3ntAzXuqf7S2lvwQaDLRnUeIEaKNQJzV6BwmLKhOqT61aGhfUMrXeaBk+oDGCzvhcug==}
     dev: true
 
-  /sql-formatter@12.2.4:
-    resolution: {integrity: sha512-Qj45LEHSfgrdYDOrAtIkR8SdS10SWcqCIM2WZwQwMKF2v9sM0K2dlThWPS7eYCUrhttZIrU1WwuIwHk7MjsWOw==}
+  /sql-formatter@13.1.0:
+    resolution: {integrity: sha512-/nZQXuN7KzipFNM20ko+dHY4kOr9rymSfZLUDED8rhx3m8OK5y74jcyN+y1L51ZqHqiB0kp40VdpZP99uWvQdA==}
     hasBin: true
     dependencies:
       argparse: 2.0.1
