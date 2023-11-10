@@ -2,8 +2,8 @@ import { parse, print } from 'graphql';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import promClient from 'prom-client';
-import { Change, CriticalityLevel } from '@graphql-inspector/core';
-import { SchemaCheck } from '@hive/storage';
+import { CriticalityLevel } from '@graphql-inspector/core';
+import { SchemaChangeType, SchemaCheck } from '@hive/storage';
 import * as Sentry from '@sentry/node';
 import * as Types from '../../../__generated__/types';
 import {
@@ -1423,8 +1423,8 @@ export class SchemaPublisher {
     };
     conclusion: SchemaCheckConclusion;
     warnings: SchemaCheckWarning[] | null;
-    changes: Array<Change> | null;
-    breakingChanges: Array<Change> | null;
+    changes: Array<SchemaChangeType> | null;
+    breakingChanges: Array<SchemaChangeType> | null;
     compositionErrors: Array<{
       message: string;
     }> | null;
@@ -1620,7 +1620,7 @@ export class SchemaPublisher {
     initial: boolean;
     force?: boolean | null;
     valid: boolean;
-    changes: Array<Change>;
+    changes: Array<SchemaChangeType>;
     errors: readonly Types.SchemaError[];
     messages?: string[];
     detailsUrl: string | null;
@@ -1698,7 +1698,7 @@ export class SchemaPublisher {
     ].join('\n');
   }
 
-  private changesToMarkdown(changes: ReadonlyArray<Change>): string {
+  private changesToMarkdown(changes: ReadonlyArray<SchemaChangeType>): string {
     const breakingChanges = changes.filter(filterChangesByLevel(CriticalityLevel.Breaking));
     const dangerousChanges = changes.filter(filterChangesByLevel(CriticalityLevel.Dangerous));
     const safeChanges = changes.filter(filterChangesByLevel(CriticalityLevel.NonBreaking));
@@ -1729,10 +1729,14 @@ export class SchemaPublisher {
 }
 
 function filterChangesByLevel(level: CriticalityLevel) {
-  return (change: Change) => change.criticality.level === level;
+  return (change: SchemaChangeType) => change.criticality.level === level;
 }
 
-function writeChanges(type: string, changes: ReadonlyArray<Change>, lines: string[]): void {
+function writeChanges(
+  type: string,
+  changes: ReadonlyArray<{ message: string }>,
+  lines: string[],
+): void {
   if (changes.length > 0) {
     lines.push(
       ...['', `### ${type} changes`].concat(

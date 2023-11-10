@@ -2,11 +2,11 @@ import { URL } from 'node:url';
 import type { GraphQLSchema } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import hashObject from 'object-hash';
-import { CriticalityLevel, type Change } from '@graphql-inspector/core';
+import { CriticalityLevel } from '@graphql-inspector/core';
 import type { CheckPolicyResponse } from '@hive/policy';
 import type { CompositionFailureError } from '@hive/schema';
 import {
-  buildRegistryServiceURLFromMeta,
+  HiveSchemaChangeModel,
   SchemaChangeType,
   type RegistryServiceUrlChangeSerializableChange,
 } from '@hive/storage';
@@ -298,16 +298,14 @@ export class RegistryChecks {
       } satisfies CheckResult;
     }
 
-    const changes = [
-      ...(await this.inspector.diff(existingSchema, incomingSchema, selector)),
-    ] as Array<SchemaChangeType>;
+    const changes = await this.inspector.diff(existingSchema, incomingSchema, selector);
 
     if (includeUrlChanges) {
       changes.push(...detectUrlChanges(version.schemas, schemas));
     }
 
-    const safeChanges: Array<Change> = [];
-    const breakingChanges: Array<Change> = [];
+    const safeChanges: Array<SchemaChangeType> = [];
+    const breakingChanges: Array<SchemaChangeType> = [];
     for (const change of changes) {
       if (change.criticality.level === CriticalityLevel.Breaking) {
         breakingChanges.push(change);
@@ -544,7 +542,13 @@ export function detectUrlChanges(
     }
   }
 
-  return changes.map(buildRegistryServiceURLFromMeta);
+  return changes.map(change =>
+    HiveSchemaChangeModel.parse({
+      type: change.type,
+      meta: change.meta,
+      isSafeBasedOnUsage: false,
+    }),
+  );
 }
 
 const toSchemaCheckWarning = (record: CheckPolicyResponse[number]): SchemaCheckWarning => ({

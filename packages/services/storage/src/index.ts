@@ -56,7 +56,7 @@ import {
 } from './db';
 import {
   createSchemaChangeId,
-  SchemaChangeModelWithIsSafeBreakingChange,
+  HiveSchemaChangeModel,
   SchemaCheckModel,
   SchemaCompositionError,
   SchemaCompositionErrorModel,
@@ -2102,7 +2102,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         return null;
       }
 
-      return changes.rows.map(row => SchemaChangeModelWithIsSafeBreakingChange.parse(row));
+      return changes.rows.map(row => HiveSchemaChangeModel.parse(row));
     },
 
     async updateVersionStatus({ version, valid }) {

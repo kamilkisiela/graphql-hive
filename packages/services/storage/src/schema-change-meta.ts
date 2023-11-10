@@ -225,5 +225,3 @@ export function buildRegistryServiceURLFromMeta(
     meta: change.meta,
   } as const;
 }
-
-export type InternalSchemaChange = Change | RegistryServiceUrlChangeChange;

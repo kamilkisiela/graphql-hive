@@ -1,6 +1,7 @@
 import type { GraphQLSchema } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import { Change, CriticalityLevel, diff, DiffRule } from '@graphql-inspector/core';
+import { HiveSchemaChangeModel, SchemaChangeType } from '@hive/storage';
 import type * as Types from '../../../__generated__/types';
 import type { TargetSettings } from '../../../shared/entities';
 import { createPeriod } from '../../../shared/helpers';
@@ -43,7 +44,7 @@ export class Inspector {
     existing: GraphQLSchema,
     incoming: GraphQLSchema,
     selector?: Types.TargetSelector,
-  ): Promise<Array<Change>> {
+  ): Promise<Array<SchemaChangeType>> {
     this.logger.debug('Comparing Schemas');
 
     const changes = await diff(existing, incoming, [DiffRule.considerUsage], {
@@ -103,7 +104,15 @@ export class Inspector {
       },
     });
 
-    return changes.sort((a, b) => a.criticality.level.localeCompare(b.criticality.level));
+    return changes
+      .map(change =>
+        HiveSchemaChangeModel.parse({
+          type: change.type,
+          meta: change.meta,
+          isSafeBasedOnUsage: change.criticality.isSafeBasedOnUsage,
+        }),
+      )
+      .sort((a, b) => a.criticality.level.localeCompare(b.criticality.level));
   }
 
   private async getSettings({ selector }: { selector: Types.TargetSelector }) {

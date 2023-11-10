@@ -4,6 +4,7 @@ import stableJSONStringify from 'fast-json-stable-stringify';
 import { z } from 'zod';
 import { CriticalityLevel } from '@graphql-inspector/core';
 import type {
+  Change as Changes,
   ChangeType,
   DirectiveAddedChange,
   DirectiveArgumentAddedChange,
@@ -60,7 +61,7 @@ import type {
   UnionMemberRemovedChange,
 } from '@graphql-inspector/core';
 import {
-  InternalSchemaChange,
+  RegistryServiceUrlChangeChange,
   RegistryServiceUrlChangeSerializableChange,
   schemaChangeFromSerializableChange,
 } from './schema-change-meta';
@@ -812,14 +813,22 @@ export function createSchemaChangeId(change: {
   return hash.digest('hex');
 }
 
-export const SchemaChangeModelWithIsSafeBreakingChange = z
-  .intersection(SchemaChangeModel, z.object({ isSafeBasedOnUsage: z.boolean().optional() }))
+export const HiveSchemaChangeModel = z
+  .intersection(
+    SchemaChangeModel,
+    z.object({
+      /** optional property for identifying whether a change is safe based on the usage data. */
+      isSafeBasedOnUsage: z.boolean().optional(),
+      /** Optional id that uniquely identifies a change. The ID is generated in case the input does not contain it. */
+      id: z.string().optional(),
+    }),
+  )
   // We inflate the schema check when reading it from the database
-  .transform((dbChange): InternalSchemaChange => {
-    const change = schemaChangeFromSerializableChange(dbChange as any);
+  .transform((rawChange): (Changes | RegistryServiceUrlChangeChange) & { id: string } => {
+    let change = schemaChangeFromSerializableChange(rawChange as any);
 
-    if (dbChange.isSafeBasedOnUsage) {
-      return {
+    if (rawChange.isSafeBasedOnUsage) {
+      change = {
         ...change,
         criticality: {
           ...change.criticality,
@@ -829,10 +838,15 @@ export const SchemaChangeModelWithIsSafeBreakingChange = z
       };
     }
 
-    return change;
+    return {
+      get id() {
+        return rawChange.id ?? createSchemaChangeId(change);
+      },
+      ...change,
+    };
   });
 
-export type SchemaChangeType = z.TypeOf<typeof SchemaChangeModelWithIsSafeBreakingChange>;
+export type SchemaChangeType = z.TypeOf<typeof HiveSchemaChangeModel>;
 
 // Schema Checks
 
@@ -866,8 +880,8 @@ const SchemaCheckSharedPolicyFields = {
 };
 
 const SchemaCheckSharedChangesFields = {
-  safeSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
-  breakingSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
+  safeSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
+  breakingSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
 };
 
 const ManuallyApprovedSchemaCheckFields = {
