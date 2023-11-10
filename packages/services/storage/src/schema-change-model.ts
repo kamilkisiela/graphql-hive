@@ -1,7 +1,6 @@
 /** These mirror DB models from  */
 import crypto from 'node:crypto';
 import stableJSONStringify from 'fast-json-stable-stringify';
-import type { RegistryServiceUrlChangeSerializableChange } from 'packages/services/api/src/modules/schema/schema-change-from-meta';
 import { z } from 'zod';
 import { CriticalityLevel } from '@graphql-inspector/core';
 import type {
