@@ -2,7 +2,7 @@ import * as crypto from 'node:crypto';
 import { OverrideableBuilder } from 'supertokens-js-override/lib/build';
 import EmailVerification from 'supertokens-node/recipe/emailverification';
 import SessionNode from 'supertokens-node/recipe/session';
-import { TypeProvider } from 'supertokens-node/recipe/thirdparty/types';
+import type { ProviderInput } from 'supertokens-node/recipe/thirdparty/types';
 import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemailpassword';
 import { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
 import { TypeInput } from 'supertokens-node/types';
@@ -10,14 +10,12 @@ import zod from 'zod';
 import { env } from '@/env/backend';
 import { appInfo } from '@/lib/supertokens/app-info';
 import {
-  createOIDCSuperTokensNoopProvider,
-  getOIDCThirdPartyEmailPasswordNodeOverrides,
+  createOIDCSuperTokensProvider,
+  getOIDCSuperTokensOverrides,
 } from '@/lib/supertokens/third-party-email-password-node-oidc-provider';
 import { createThirdPartyEmailPasswordNodeOktaProvider } from '@/lib/supertokens/third-party-email-password-node-okta-provider';
-// eslint-disable-next-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
-import { EmailsApi } from '@hive/emails';
-// eslint-disable-next-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
-import { type InternalApi } from '@hive/server';
+import type { EmailsApi } from '@hive/emails';
+import type { InternalApi } from '@hive/server';
 import { createTRPCProxyClient, CreateTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
 
@@ -28,29 +26,39 @@ export const backendConfig = (): TypeInput => {
   const internalApi = createTRPCProxyClient<InternalApi>({
     links: [httpLink({ url: `${env.serverEndpoint}/trpc` })],
   });
-  const providers: TypeProvider[] = [];
+  const providers: ProviderInput[] = [];
 
   if (env.auth.github) {
-    providers.push(
-      ThirdPartyEmailPasswordNode.Github({
-        clientId: env.auth.github.clientId,
-        clientSecret: env.auth.github.clientSecret,
-        scope: ['read:user', 'user:email'],
-      }),
-    );
+    providers.push({
+      config: {
+        thirdPartyId: 'github',
+        clients: [
+          {
+            scope: ['read:user', 'user:email'],
+            clientId: env.auth.github.clientId,
+            clientSecret: env.auth.github.clientSecret,
+          },
+        ],
+      },
+    });
   }
   if (env.auth.google) {
-    providers.push(
-      ThirdPartyEmailPasswordNode.Google({
-        clientId: env.auth.google.clientId,
-        clientSecret: env.auth.google.clientSecret,
-        scope: [
-          'https://www.googleapis.com/auth/userinfo.email',
-          'https://www.googleapis.com/auth/userinfo.profile',
-          'openid',
+    providers.push({
+      config: {
+        thirdPartyId: 'google',
+        clients: [
+          {
+            clientId: env.auth.google.clientId,
+            clientSecret: env.auth.google.clientSecret,
+            scope: [
+              'https://www.googleapis.com/auth/userinfo.email',
+              'https://www.googleapis.com/auth/userinfo.profile',
+              'openid',
+            ],
+          },
         ],
-      }),
-    );
+      },
+    });
   }
 
   if (env.auth.okta) {
@@ -58,7 +66,11 @@ export const backendConfig = (): TypeInput => {
   }
 
   if (env.auth.organizationOIDC) {
-    providers.push(createOIDCSuperTokensNoopProvider());
+    providers.push(
+      createOIDCSuperTokensProvider({
+        internalApi,
+      }),
+    );
   }
 
   return {
@@ -91,9 +103,7 @@ export const backendConfig = (): TypeInput => {
         },
         override: composeSuperTokensOverrides([
           getEnsureUserOverrides(internalApi),
-          env.auth.organizationOIDC
-            ? getOIDCThirdPartyEmailPasswordNodeOverrides({ internalApi })
-            : null,
+          env.auth.organizationOIDC ? getOIDCSuperTokensOverrides() : null,
           /**
            * These overrides are only relevant for the legacy Auth0 -> SuperTokens migration (period).
            */
@@ -206,14 +216,24 @@ const getEnsureUserOverrides = (
         throw Error('Should never come here');
       }
 
+      function extractOidcId(args: typeof input) {
+        if (input.provider.id === 'oidc') {
+          // eslint-disable-next-line prefer-destructuring
+          const oidcId: unknown = args.userContext['oidcId'];
+          if (typeof oidcId === 'string') {
+            return oidcId;
+          }
+        }
+        return null;
+      }
+
       const response = await originalImplementation.thirdPartySignInUpPOST(input);
 
       if (response.status === 'OK') {
         await internalApi.ensureUser.mutate({
           superTokensUserId: response.user.id,
           email: response.user.email,
-          // This is provided via `getOIDCThirdPartyEmailPasswordNodeOverrides` if it is enabled.
-          oidcIntegrationId: input.userContext['oidcIntegrationId'] ?? null,
+          oidcIntegrationId: extractOidcId(input),
         });
       }
 
@@ -295,7 +315,7 @@ const getAuth0Overrides = (config: Exclude<typeof env.auth.legacyAuth0, null>) =
 
         if (email) {
           // We first use the existing implementation for looking for users within supertokens.
-          const users = await ThirdPartyEmailPasswordNode.getUsersByEmail(email);
+          const users = await ThirdPartyEmailPasswordNode.getUsersByEmail('public', email);
 
           // If there is no email/password SuperTokens user yet, we need to check if there is an Auth0 user for this email.
           if (!users.some(user => user.thirdParty == null)) {
@@ -308,6 +328,7 @@ const getAuth0Overrides = (config: Exclude<typeof env.auth.legacyAuth0, null>) =
             if (dbUser) {
               // If we have this user within our database we create our new supertokens user
               const newUserResult = await ThirdPartyEmailPasswordNode.emailPasswordSignUp(
+                'public',
                 dbUser.email,
                 await generateRandomPassword(),
               );
@@ -337,6 +358,7 @@ const getAuth0Overrides = (config: Exclude<typeof env.auth.legacyAuth0, null>) =
         if (await doesUserExistInAuth0(config, input.email)) {
           // check if user exists in SuperTokens
           const superTokensUsers = await this.getUsersByEmail({
+            tenantId: 'public',
             email: input.email,
             userContext: input.userContext,
           });

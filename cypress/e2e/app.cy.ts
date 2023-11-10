@@ -1,5 +1,5 @@
 const getUser = () =>
-  ({ email: `${crypto.randomUUID()}@local.host`, password: 'Loc@l.h0st' } as const);
+  ({ email: `${crypto.randomUUID()}@local.host`, password: 'Loc@l.h0st' }) as const;
 
 Cypress.on('uncaught:exception', (_err, _runnable) => {
   return false;
@@ -81,4 +81,12 @@ it('oidc login for organization', () => {
 
       cy.get('[data-cy="organization-picker-current"]').contains('Bubatzbieber');
     });
+});
+
+it('oidc login for invalid url shows correct error message', () => {
+  cy.clearAllCookies();
+  cy.clearAllLocalStorage();
+  cy.clearAllSessionStorage();
+  cy.visit('/auth/oidc?id=invalid');
+  cy.get('div.text-red-500').contains('Could not find OIDC integration.');
 });

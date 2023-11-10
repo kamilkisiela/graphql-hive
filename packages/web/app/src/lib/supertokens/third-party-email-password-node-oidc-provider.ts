@@ -1,12 +1,143 @@
-import { ExpressRequest } from 'supertokens-node/lib/build/framework/express/framework';
-import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemailpassword';
-import { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
+import type { ExpressRequest } from 'supertokens-node/lib/build/framework/express/framework';
+import type { ProviderInput } from 'supertokens-node/recipe/thirdparty/types';
+import type { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
 import zod from 'zod';
-import { env } from '@/env/backend';
 import { getLogger } from '@/server-logger';
-// eslint-disable-next-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
-import { type InternalApi } from '@hive/server';
-import { CreateTRPCProxyClient } from '@trpc/client';
+import type { InternalApi } from '@hive/server';
+import type { CreateTRPCProxyClient } from '@trpc/client';
+
+const couldNotResolveOidcIntegrationSymbol = Symbol('could_not_resolve_oidc_integration');
+
+export const getOIDCSuperTokensOverrides = (): ThirdPartEmailPasswordTypeInput['override'] => ({
+  apis(originalImplementation) {
+    return {
+      ...originalImplementation,
+      async authorisationUrlGET(input) {
+        if (input.userContext?.[couldNotResolveOidcIntegrationSymbol] === true) {
+          return {
+            status: 'GENERAL_ERROR',
+            message: 'Could not find OIDC integration.',
+          };
+        }
+
+        return originalImplementation.authorisationUrlGET!(input);
+      },
+    };
+  },
+});
+
+export const createOIDCSuperTokensProvider = (args: {
+  internalApi: CreateTRPCProxyClient<InternalApi>;
+}): ProviderInput => ({
+  config: {
+    thirdPartyId: 'oidc',
+  },
+  override(originalImplementation) {
+    const logger = getLogger();
+    return {
+      ...originalImplementation,
+
+      async getConfigForClientType(input) {
+        logger.info('resolve config for OIDC provider.');
+        const config = await getOIDCConfigFromInput(args.internalApi, input);
+        if (!config) {
+          // In the next step the override `authorisationUrlGET` from `getOIDCSuperTokensOverrides` is called.
+          // We use the user context to return a `GENERAL_ERROR` with a human readable message.
+          // We cannot return an error here (except an "Unexpected error"), so we also need to return fake dat
+          input.userContext[couldNotResolveOidcIntegrationSymbol] = true;
+
+          return {
+            thirdPartyId: 'oidc',
+            get clientId(): string {
+              throw new Error('Noop value accessed.');
+            },
+          };
+        }
+
+        return {
+          thirdPartyId: 'oidc',
+          clientId: config.clientId,
+          clientSecret: config.clientSecret,
+          authorizationEndpoint: config.authorizationEndpoint,
+          userInfoEndpoint: config.userinfoEndpoint,
+          tokenEndpoint: config.tokenEndpoint,
+          scope: ['openid', 'email'],
+        };
+      },
+
+      async getAuthorisationRedirectURL(input) {
+        logger.info('resolve config for OIDC provider.');
+        const oidcConfig = await getOIDCConfigFromInput(args.internalApi, input);
+
+        if (!oidcConfig) {
+          // This case should never be reached (guarded by getConfigForClientType).
+          // We still have it for security reasons.
+          throw new Error('Could not find OIDC integration.');
+        }
+
+        const authorizationRedirectUrl =
+          await originalImplementation.getAuthorisationRedirectURL(input);
+
+        const url = new URL(authorizationRedirectUrl.urlWithQueryParams);
+        url.searchParams.set('state', oidcConfig.id);
+
+        return {
+          ...authorizationRedirectUrl,
+          urlWithQueryParams: url.toString(),
+        };
+      },
+
+      async getUserInfo(input) {
+        logger.info('retrieve profile info from OIDC provider');
+        const config = await getOIDCConfigFromInput(args.internalApi, input);
+        if (!config) {
+          // This case should never be reached (guarded by getConfigForClientType).
+          // We still have it for security reasons.
+          throw new Error('Could not find OIDC integration.');
+        }
+
+        logger.info('fetch info for OIDC provider (oidcId=%s)', config.id);
+
+        const tokenResponse = OIDCTokenSchema.parse(input.oAuthTokens);
+        const rawData: unknown = await fetch(config.userinfoEndpoint, {
+          headers: {
+            authorization: `Bearer ${tokenResponse.access_token}`,
+            accept: 'application/json',
+            'content-type': 'application/json',
+          },
+        }).then(res => res.json());
+
+        logger.info('retrieved profile info for provider (oidcId=%s)', config.id);
+
+        const data = OIDCProfileInfoSchema.parse(rawData);
+
+        // Set the oidcId to the user context so it can be used in `thirdPartySignInUpPOST` for linking the user account to the OIDC integration.
+        input.userContext.oidcId = config.id;
+
+        return {
+          thirdPartyUserId: `${config.id}-${data.sub}`,
+          email: {
+            id: data.email,
+            isVerified: true,
+          },
+          rawUserInfoFromProvider: {
+            fromIdTokenPayload: undefined,
+            fromUserInfoAPI: undefined,
+          },
+        };
+      },
+    };
+  },
+});
+
+type OIDCCOnfig = {
+  id: string;
+  clientId: string;
+  clientSecret: string;
+  tokenEndpoint: string;
+  userinfoEndpoint: string;
+  authorizationEndpoint: string;
+};
 
 const OIDCProfileInfoSchema = zod.object({
   sub: zod.string(),
@@ -14,69 +145,6 @@ const OIDCProfileInfoSchema = zod.object({
 });
 
 const OIDCTokenSchema = zod.object({ access_token: zod.string() });
-
-const createOIDCSuperTokensProvider = (oidcConfig: {
-  id: string;
-  clientId: string;
-  clientSecret: string;
-  tokenEndpoint: string;
-  userinfoEndpoint: string;
-  authorizationEndpoint: string;
-}): ThirdPartyEmailPasswordNode.TypeProvider => ({
-  id: 'oidc',
-  get: (redirectURI, authCodeFromRequest) => ({
-    getClientId: () => oidcConfig.clientId,
-    getProfileInfo: async (rawTokenAPIResponse: unknown) => {
-      const tokenResponse = OIDCTokenSchema.parse(rawTokenAPIResponse);
-      const rawData: unknown = await fetch(oidcConfig.userinfoEndpoint, {
-        headers: {
-          authorization: `Bearer ${tokenResponse.access_token}`,
-          accept: 'application/json',
-          'content-type': 'application/json',
-        },
-      }).then(res => res.json());
-
-      const logger = getLogger();
-      logger.info(
-        `getProfileInfo: fetched OIDC (${
-          oidcConfig.userinfoEndpoint
-        }) profile info: ${JSON.stringify(rawData)}`,
-      );
-
-      const data = OIDCProfileInfoSchema.parse(rawData);
-
-      return {
-        // We scope the user id to the oidc config id to avoid potential collisions
-        id: `${oidcConfig.id}-${data.sub}`,
-        email: {
-          id: data.email,
-          isVerified: true,
-        },
-      };
-    },
-    accessTokenAPI: {
-      url: oidcConfig.tokenEndpoint,
-      params: {
-        client_id: oidcConfig.clientId,
-        client_secret: oidcConfig.clientSecret,
-        grant_type: 'authorization_code',
-        redirect_uri: redirectURI ?? '',
-        code: authCodeFromRequest ?? '',
-      },
-    },
-    authorisationRedirect: {
-      // this contains info about forming the authorisation redirect URL without the state params and without the redirect_uri param
-      url: oidcConfig.authorizationEndpoint,
-      params: {
-        client_id: oidcConfig.clientId,
-        scope: 'openid email',
-        response_type: 'code',
-        redirect_uri: `${env.appBaseUrl}/auth/callback/oidc`,
-        state: oidcConfig.id,
-      },
-    },
-  }),
-});
 
 const getOIDCIdFromInput = (input: { userContext: any }): string => {
   const expressRequest = input.userContext._default.request as ExpressRequest;
@@ -92,68 +160,29 @@ const getOIDCIdFromInput = (input: { userContext: any }): string => {
   return oidcId;
 };
 
-export const getOIDCThirdPartyEmailPasswordNodeOverrides = (args: {
-  internalApi: CreateTRPCProxyClient<InternalApi>;
-}): ThirdPartEmailPasswordTypeInput['override'] => ({
-  apis: originalImplementation => ({
-    ...originalImplementation,
-    thirdPartySignInUpPOST: async input => {
-      if (input.provider.id !== 'oidc') {
-        return originalImplementation.thirdPartySignInUpPOST!(input);
-      }
+const configCache = new WeakMap<ExpressRequest, OIDCCOnfig | null>();
 
-      const oidcId = getOIDCIdFromInput(input);
-      const config = await fetchOIDCConfig(args.internalApi, oidcId);
+/**
+ * Get cached OIDC config from the supertokens input.
+ */
+async function getOIDCConfigFromInput(
+  internalApi: CreateTRPCProxyClient<InternalApi>,
+  input: { userContext: any },
+) {
+  const expressRequest = input.userContext._default.request as ExpressRequest;
+  if (configCache.has(expressRequest)) {
+    return configCache.get(expressRequest) ?? null;
+  }
 
-      if (config === null) {
-        return {
-          status: 'GENERAL_ERROR',
-          message: 'Could not find OIDC integration.',
-        };
-      }
-
-      return originalImplementation.thirdPartySignInUpPOST!({
-        ...input,
-        provider: createOIDCSuperTokensProvider(config),
-        userContext: {
-          ...input.userContext,
-          oidcIntegrationId: oidcId,
-        },
-      });
-    },
-    authorisationUrlGET: async input => {
-      if (input.provider.id !== 'oidc') {
-        return originalImplementation.authorisationUrlGET!(input);
-      }
-
-      const oidcId = getOIDCIdFromInput(input);
-      const config = await fetchOIDCConfig(args.internalApi, oidcId);
-
-      if (config === null) {
-        return {
-          status: 'GENERAL_ERROR',
-          message: 'Could not find OIDC integration.',
-        };
-      }
-
-      const result = originalImplementation.authorisationUrlGET!({
-        ...input,
-        provider: createOIDCSuperTokensProvider(config),
-      });
-
-      return result;
-    },
-  }),
-});
-
-export const createOIDCSuperTokensNoopProvider = () => ({
-  id: 'oidc',
-  get() {
+  const oidcId = getOIDCIdFromInput(input);
+  const config = await fetchOIDCConfig(internalApi, oidcId);
+  configCache.set(expressRequest, config);
+  if (!config) {
     const logger = getLogger();
-    logger.error('OIDC provider implementation was not provided via overrides.');
-    throw new Error('Provider implementation was not provided via overrides.');
-  },
-});
+    logger.error('Could not find OIDC integration (oidcId: %s)', oidcId);
+  }
+  return config;
+}
 
 const fetchOIDCConfig = async (
   internalApi: CreateTRPCProxyClient<InternalApi>,
@@ -169,7 +198,7 @@ const fetchOIDCConfig = async (
   const result = await internalApi.getOIDCIntegrationById.query({ oidcIntegrationId });
   if (result === null) {
     const logger = getLogger();
-    logger.error('OIDC integration not found: %s', oidcIntegrationId);
+    logger.error('OIDC integration not found. (oidcId=%s)', oidcIntegrationId);
     return null;
   }
   return result;
