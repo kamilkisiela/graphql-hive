@@ -3463,37 +3463,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return SchemaCheckModel.parse(result);
     },
-    async setSchemaCheckGithubCheckRunId(args) {
-      const updateResult = await pool.maybeOne<{
-        id: string;
-      }>(sql`
-        UPDATE
-          "public"."schema_checks"
-        SET
-          "github_check_run_id" = ${args.githubCheckRunId}
-        WHERE
-          "id" = ${args.schemaCheckId}
-        RETURNING id
-      `);
-
-      if (updateResult == null) {
-        return null;
-      }
-
-      const result = await pool.maybeOne<unknown>(sql`
-        SELECT
-          ${schemaCheckSQLFields}
-        FROM
-          "public"."schema_checks" as c
-        LEFT JOIN "public"."sdl_store" as s_schema            ON s_schema."id" = c."schema_sdl_store_id"
-        LEFT JOIN "public"."sdl_store" as s_composite_schema  ON s_composite_schema."id" = c."composite_schema_sdl_store_id"
-        LEFT JOIN "public"."sdl_store" as s_supergraph        ON s_supergraph."id" = c."supergraph_sdl_store_id"
-        WHERE
-          c."id" = ${updateResult.id}
-      `);
-
-      return SchemaCheckModel.parse(result);
-    },
     async approveFailedSchemaCheck(args) {
       const updateResult = await pool.maybeOne<{
         id: string;
