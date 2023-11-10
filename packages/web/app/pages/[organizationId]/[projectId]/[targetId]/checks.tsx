@@ -781,9 +781,17 @@ function ChecksPageContent() {
   const [paginationVariables, setPaginationVariables] = useState<Array<string | null>>(() => [
     null,
   ]);
-  const [filters, setFilters] = useState<SchemaCheckFilters>({});
 
   const router = useRouteSelector();
+
+  const showOnlyChanged = router.query.filter_changed === 'true';
+  const showOnlyFailed = router.query.filter_failed === 'true';
+
+  const [filters, setFilters] = useState<SchemaCheckFilters>({
+    showOnlyChanged: showOnlyChanged ?? false,
+    showOnlyFailed: showOnlyFailed ?? false,
+  });
+
   const [query] = useQuery({
     query: ChecksPageQuery,
     variables: {
