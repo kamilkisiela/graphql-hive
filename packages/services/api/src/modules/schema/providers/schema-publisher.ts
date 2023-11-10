@@ -55,7 +55,7 @@ import {
 import { SingleModel } from './models/single';
 import { SingleLegacyModel } from './models/single-legacy';
 import { ensureCompositeSchemas, ensureSingleSchema, SchemaHelper } from './schema-helper';
-import { inflateSchemaCheck, SchemaManager } from './schema-manager';
+import { SchemaManager } from './schema-manager';
 
 const schemaCheckCount = new promClient.Counter({
   name: 'registry_check_count',
@@ -591,7 +591,7 @@ export class SchemaPublisher {
         changes: checkResult.state?.schemaChanges ?? [],
         warnings: checkResult.state?.schemaPolicyWarnings ?? [],
         initial: latestVersion == null,
-        schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, inflateSchemaCheck(schemaCheck)),
+        schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, schemaCheck),
       } as const;
     }
 
@@ -610,7 +610,7 @@ export class SchemaPublisher {
         ...(checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? []),
         ...(checkResult.state.composition.errors ?? []),
       ],
-      schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, inflateSchemaCheck(schemaCheck)),
+      schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, schemaCheck),
     } as const;
   }
 

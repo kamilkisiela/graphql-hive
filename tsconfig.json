@@ -18,8 +18,9 @@
     "emitDecoratorMetadata": true,
 
     "sourceMap": true,
-    "declaration": true,
-    "resolveJsonModule": true,
+    "declaration": false,
+    "declarationMap": false,
+    "resolveJsonModule": false,
 
     "moduleResolution": "node",
     "strict": true,

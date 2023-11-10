@@ -1,4 +1,3 @@
-import type { SerializableChange } from 'packages/services/api/src/modules/schema/schema-change-from-meta';
 import {
   DatabasePool,
   DatabaseTransactionConnection,
@@ -57,7 +56,7 @@ import {
 } from './db';
 import {
   createSchemaChangeId,
-  SchemaChangeModel,
+  SchemaChangeModelWithIsSafeBreakingChange,
   SchemaCheckModel,
   SchemaCompositionError,
   SchemaCompositionErrorModel,
@@ -2103,8 +2102,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         return null;
       }
 
-      // TODO: I don't like the cast...
-      return changes.rows.map(row => SchemaChangeModel.parse(row) as SerializableChange);
+      return changes.rows.map(row => SchemaChangeModelWithIsSafeBreakingChange.parse(row));
     },
 
     async updateVersionStatus({ version, valid }) {
@@ -4166,3 +4164,7 @@ const PurgeExpiredSchemaChecksIDModel = zod
   });
 
 export * from './schema-change-model';
+export {
+  buildRegistryServiceURLFromMeta,
+  type RegistryServiceUrlChangeSerializableChange,
+} from './schema-change-meta';

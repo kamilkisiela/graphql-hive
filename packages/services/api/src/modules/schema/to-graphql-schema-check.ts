@@ -1,6 +1,6 @@
 import lodash from 'lodash';
+import { SchemaCheck } from '@hive/storage';
 import type { FailedSchemaCheckMapper, SuccessfulSchemaCheckMapper } from '../../shared/mappers';
-import type { InflatedSchemaCheck } from './providers/schema-manager';
 
 const { curry } = lodash;
 /**
@@ -8,7 +8,7 @@ const { curry } = lodash;
  */
 export function toGraphQLSchemaCheck(
   selector: { organizationId: string; projectId: string },
-  schemaCheck: InflatedSchemaCheck,
+  schemaCheck: SchemaCheck,
 ): SuccessfulSchemaCheckMapper | FailedSchemaCheckMapper {
   if (schemaCheck.isSuccess) {
     return {

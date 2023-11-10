@@ -628,7 +628,10 @@ describe('schema publishing changes are persisted', () => {
     name: string;
     schemaBefore: string;
     schemaAfter: string;
-    equalsObject: object;
+    equalsObject: {
+      meta: unknown;
+      type: unknown;
+    };
     /** Only provide if you want to test a service url change */
     serviceUrlAfter?: string;
   }) {
@@ -685,7 +688,8 @@ describe('schema publishing changes are persisted', () => {
         versionId: latestVersion.id,
       });
 
-      expect(changes[0]).toEqual(args.equalsObject);
+      expect(changes[0]['meta']).toEqual(args.equalsObject['meta']);
+      expect(changes[0]['type']).toEqual(args.equalsObject['type']);
     });
   }
 
