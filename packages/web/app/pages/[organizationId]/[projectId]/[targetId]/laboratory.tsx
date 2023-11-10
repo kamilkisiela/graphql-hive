@@ -857,6 +857,10 @@ function LaboratoryPageContent() {
         .graphiql-container .cm-punctuation:hover {
           color: #ffffff;
         }
+
+        .graphiql-container .CodeMirror-hints {
+          background-color: #070d17;
+        }
       `}</style>
       {query.fetching ? null : (
         <GraphiQL
