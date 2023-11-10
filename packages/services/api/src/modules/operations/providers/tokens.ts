@@ -6,6 +6,10 @@ export interface ClickHouseConfig {
   protocol?: string;
   username?: string;
   password?: string;
+  /**
+   * In milliseconds
+   */
+  requestTimeout?: number;
   onReadEnd?: (
     label: string,
     timings: {

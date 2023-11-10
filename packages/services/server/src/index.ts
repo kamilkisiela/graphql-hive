@@ -252,6 +252,7 @@ export async function main() {
         port: env.clickhouse.port,
         username: env.clickhouse.username,
         password: env.clickhouse.password,
+        requestTimeout: env.clickhouse.requestTimeout,
         onReadEnd(query, timings) {
           clickHouseReadDuration.labels({ query }).observe(timings.totalSeconds);
           clickHouseElapsedDuration.labels({ query }).observe(timings.elapsedSeconds);
