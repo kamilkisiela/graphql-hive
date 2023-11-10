@@ -121,7 +121,7 @@ const Navigation = (props: {
                 }}
                 scroll={false} // disable the scroll to top on page
               >
-                <h3 className="truncate text-sm font-semibold">
+                <h3 className="truncate font-semibold text-sm">
                   {edge.node.meta?.commit ?? edge.node.id}
                 </h3>
                 {edge.node.meta?.author ? (
@@ -129,7 +129,7 @@ const Navigation = (props: {
                     <span className="overflow-hidden truncate">{edge.node.meta.author}</span>
                   </div>
                 ) : null}
-                <div className="mb-1.5 mt-2.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
+                <div className="mt-2.5 mb-1.5 flex align-middle text-xs font-medium text-[#c4c4c4]">
                   <div
                     className={cn(
                       edge.node.__typename === 'FailedSchemaCheck' ? 'text-red-500' : null,
@@ -140,7 +140,7 @@ const Navigation = (props: {
                   </div>
 
                   {edge.node.serviceName ? (
-                    <div className="ml-auto mr-0 w-1/2 truncate text-right font-bold">
+                    <div className="ml-auto mr-0 w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-right font-bold">
                       {edge.node.serviceName}
                     </div>
                   ) : null}
@@ -148,7 +148,7 @@ const Navigation = (props: {
               </NextLink>
               {edge.node.githubRepository && edge.node.meta ? (
                 <a
-                  className="ml-[-1px] text-xs font-medium text-gray-500 hover:text-gray-400"
+                  className="text-xs font-medium text-gray-500 hover:text-gray-400 ml-[-1px]"
                   target="_blank"
                   rel="noreferrer"
                   href={`https://github.com/${edge.node.githubRepository}/commit/${edge.node.meta.commit}`}
@@ -476,16 +476,16 @@ const ActiveSchemaCheck = ({
   }
 
   return (
-    <div className="flex h-full grow flex-col">
+    <div className="flex grow flex-col h-full">
       <div className="py-6">
         <Title>Check {schemaCheck.id}</Title>
         <Subtitle>Detailed view of the schema check</Subtitle>
       </div>
       <div>
-        <div className="flex flex-row items-center justify-between gap-x-4 rounded-md border border-gray-800 p-4 font-medium text-gray-400">
+        <div className="flex flex-row justify-between items-center font-medium gap-x-4 p-4 text-gray-400 rounded-md border-gray-800 border">
           <div>
             <div className="text-xs">Status</div>
-            <div className="text-sm font-semibold text-white">
+            <div className="text-white text-sm font-semibold">
               {schemaCheck.__typename === 'FailedSchemaCheck' ? <>Failed</> : <>Success</>}
             </div>
           </div>
@@ -493,7 +493,7 @@ const ActiveSchemaCheck = ({
             <div className="ml-4">
               <div className="text-xs">Service</div>
               <div>
-                <div className="text-sm font-semibold text-white">{schemaCheck.serviceName}</div>
+                <div className="text-white text-sm font-semibold">{schemaCheck.serviceName}</div>
               </div>
             </div>
           ) : null}
@@ -501,20 +501,20 @@ const ActiveSchemaCheck = ({
             <div className="text-xs">
               Triggered <TimeAgo date={schemaCheck.createdAt} />
             </div>
-            <div className="truncate text-sm text-white">
+            <div className="text-white text-sm truncate">
               by {schemaCheck.meta ? <>{schemaCheck.meta.author}</> : 'unknown'}
             </div>
           </div>
           <div>
             <div className="text-xs">Commit</div>
             <div>
-              <div className="truncate text-sm font-semibold text-white">
+              <div className="text-white text-sm font-semibold truncate">
                 {schemaCheck.meta?.commit ?? 'unknown'}
               </div>
             </div>
           </div>
           {schemaCheck.__typename === 'FailedSchemaCheck' && schemaCheck.canBeApproved ? (
-            <div className="ml-auto mr-0 pl-4">
+            <div className="mr-0 ml-auto pl-4">
               {schemaCheck.canBeApprovedByViewer ? (
                 <Button danger onClick={() => setIsApproveFailedSchemaCheckModalOpen(true)}>
                   Approve
@@ -530,7 +530,7 @@ const ActiveSchemaCheck = ({
             <div className="ml-4">
               <div className="text-xs">Approved by</div>
               <div>
-                <div className="text-sm font-bold text-white">
+                <div className="text-white text-sm font-bold">
                   {schemaCheck.approvedBy?.displayName ?? 'unknown'}
                 </div>
               </div>
@@ -539,7 +539,7 @@ const ActiveSchemaCheck = ({
         </div>
       </div>
 
-      <div className="pb-1 pt-6">
+      <div className="pt-6 pb-1">
         <ToggleGroup.Root
           className="flex space-x-1 rounded-md bg-gray-900/50 text-gray-500"
           type="single"
@@ -552,7 +552,7 @@ const ActiveSchemaCheck = ({
               key={item.value}
               value={item.value}
               className={cn(
-                'flex items-center rounded-md px-2 py-[0.4375rem] text-xs font-semibold hover:text-white',
+                'flex items-center rounded-md py-[0.4375rem] px-2 text-xs font-semibold hover:text-white',
                 view === item.value && 'bg-gray-800 text-white',
               )}
               title={item.tooltip}
@@ -781,9 +781,16 @@ function ChecksPageContent() {
   const [paginationVariables, setPaginationVariables] = useState<Array<string | null>>(() => [
     null,
   ]);
-  const [filters, setFilters] = useState<SchemaCheckFilters>({});
 
   const router = useRouteSelector();
+  const showOnlyChanged = router.query.filter_changed === 'true';
+  const showOnlyFailed = router.query.filter_failed === 'true';
+
+  const [filters, setFilters] = useState<SchemaCheckFilters>({
+    showOnlyChanged: showOnlyChanged ?? false,
+    showOnlyFailed: showOnlyFailed ?? false,
+  });
+
   const [query] = useQuery({
     query: ChecksPageQuery,
     variables: {
@@ -811,6 +818,36 @@ function ChecksPageContent() {
   const hasFilteredSchemaChecks = !!query.data?.target?.filteredSchemaChecks?.edges?.length;
   const hasActiveSchemaCheck = !!schemaCheckId;
 
+  const handleShowOnlyFilterChange = () => {
+    const updatedFilters = !filters.showOnlyChanged;
+
+    void router.push({
+      query: {
+        ...router.query,
+        filter_changed: updatedFilters,
+      },
+    });
+    setFilters(filters => ({
+      ...filters,
+      showOnlyChanged: !filters.showOnlyChanged,
+    }));
+  };
+
+  const handleShowOnlyFilterFailed = () => {
+    const updatedFilters = !filters.showOnlyFailed;
+
+    void router.push({
+      query: {
+        ...router.query,
+        filter_failed: updatedFilters,
+      },
+    });
+
+    setFilters(filters => ({
+      ...filters,
+      showOnlyFailed: !filters.showOnlyFailed,
+    }));
+  };
   return (
     <>
       <TargetLayout
@@ -824,7 +861,7 @@ function ChecksPageContent() {
       >
         <div
           className={cn(
-            'flex h-full w-full',
+            'flex w-full h-full',
             hasSchemaChecks || hasActiveSchemaCheck ? 'flex-row gap-x-6' : '',
           )}
         >
@@ -836,39 +873,29 @@ function ChecksPageContent() {
             {query.fetching || query.stale ? null : hasSchemaChecks ? (
               <div className="flex flex-col gap-5">
                 <div>
-                  <div className="flex h-9 flex-row items-center justify-between">
+                  <div className="flex flex-row items-center justify-between h-9">
                     <Label
                       htmlFor="filter-toggle-has-changes"
-                      className="text-sm font-normal text-gray-100"
+                      className="text-sm text-gray-100 font-normal"
                     >
                       Show only changed schemas
                     </Label>
                     <Switch
                       checked={filters.showOnlyChanged ?? false}
-                      onCheckedChange={() =>
-                        setFilters(filters => ({
-                          ...filters,
-                          showOnlyChanged: !filters.showOnlyChanged,
-                        }))
-                      }
+                      onCheckedChange={handleShowOnlyFilterChange}
                       id="filter-toggle-has-changes"
                     />
                   </div>
-                  <div className="flex h-9 flex-row items-center justify-between">
+                  <div className="flex flex-row items-center justify-between h-9">
                     <Label
                       htmlFor="filter-toggle-status-failed"
-                      className="text-sm font-normal text-gray-100"
+                      className="text-sm text-gray-100 font-normal"
                     >
                       Show only failed checks
                     </Label>
                     <Switch
                       checked={filters.showOnlyFailed ?? false}
-                      onCheckedChange={() =>
-                        setFilters(filters => ({
-                          ...filters,
-                          showOnlyFailed: !filters.showOnlyFailed,
-                        }))
-                      }
+                      onCheckedChange={handleShowOnlyFilterFailed}
                       id="filter-toggle-status-failed"
                     />
                   </div>
@@ -888,14 +915,14 @@ function ChecksPageContent() {
                     ))}
                   </div>
                 ) : (
-                  <div className="cursor-default text-sm">
+                  <div className="text-sm cursor-default">
                     No schema checks found with the current filters
                   </div>
                 )}
               </div>
             ) : (
               <div>
-                <div className="cursor-default text-sm">
+                <div className="text-sm cursor-default">
                   {hasActiveSchemaCheck ? 'List is empty' : 'Your schema check list is empty'}
                 </div>
                 <DocsLink href="/features/schema-registry#check-a-schema">
