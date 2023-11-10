@@ -386,11 +386,6 @@ function useOperationCollectionsPlugin({
             editorContext.queryEditor.setValue(currentOperation.query);
             editorContext.variableEditor.setValue(currentOperation.variables);
             editorContext.headerEditor.setValue(currentOperation.headers);
-          } else {
-            // Clear editors if operation not selected
-            editorContext.queryEditor.setValue('');
-            editorContext.variableEditor.setValue('');
-            editorContext.headerEditor.setValue('');
           }
         }, [hasAllEditors, queryParamsOperationId, currentOperation]);
 
@@ -869,7 +864,7 @@ function LaboratoryPageContent() {
               </>
             ),
           }}
-          showPersistHeadersSettings={false}
+          showPersistHeadersSettings
           shouldPersistHeaders={false}
           plugins={[operationCollectionsPlugin]}
           visiblePlugin={operationCollectionsPlugin}
