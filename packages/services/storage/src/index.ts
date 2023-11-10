@@ -3434,7 +3434,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       const check = await this.findSchemaCheck({
         schemaCheckId: result.id,
-        targetId: args.targetId,
       });
 
       if (!check) {
@@ -3454,7 +3453,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         LEFT JOIN "public"."sdl_store" as s_supergraph        ON s_supergraph."id" = c."supergraph_sdl_store_id"
         WHERE
           c."id" = ${args.schemaCheckId}
-          AND c."target_id" = ${args.targetId}
       `);
 
       if (result == null) {
@@ -3477,7 +3475,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           "id" = ${args.schemaCheckId}
           AND "is_success" = false
           AND "schema_composition_errors" IS NULL
-        RETURNING id
+        RETURNING 
+          "id"
       `);
 
       if (updateResult == null) {

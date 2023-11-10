@@ -683,7 +683,7 @@ export interface Storage {
   /**
    * Find schema check for a given ID and target.
    */
-  findSchemaCheck(input: { schemaCheckId: string; targetId: string }): Promise<SchemaCheck | null>;
+  findSchemaCheck(input: { schemaCheckId: string }): Promise<SchemaCheck | null>;
   /**
    * Retrieve paginated schema checks for a given target.
    */
