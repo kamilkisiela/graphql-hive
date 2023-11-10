@@ -23,6 +23,7 @@
     "@types/node": "18.18.9",
     "@types/pg": "8.10.9",
     "dotenv": "16.3.1",
+    "fast-json-stable-stringify": "2.1.0",
     "got": "12.6.1",
     "param-case": "3.0.4",
     "pg-promise": "11.5.4",

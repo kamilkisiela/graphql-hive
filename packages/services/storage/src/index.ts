@@ -56,6 +56,7 @@ import {
   users,
 } from './db';
 import {
+  createSchemaChangeId,
   SchemaChangeModel,
   SchemaCheckModel,
   SchemaCompositionError,
@@ -4073,13 +4074,18 @@ function toSerializableSchemaChange(change: {
   criticality?: {
     isSafeBasedOnUsage?: boolean;
   };
-  meta: unknown;
+  meta: Record<string, unknown>;
 }): {
+  id: string;
   type: string;
   meta: unknown;
   isSafeBasedOnUsage: boolean;
 } {
   return {
+    id: createSchemaChangeId({
+      type: change.type,
+      meta: change.meta,
+    }),
     type: change.type,
     meta: change.meta,
     isSafeBasedOnUsage: change.criticality?.isSafeBasedOnUsage ?? false,
