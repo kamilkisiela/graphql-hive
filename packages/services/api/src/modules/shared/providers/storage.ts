@@ -2,6 +2,7 @@ import { Injectable } from 'graphql-modules';
 import { Change } from '@graphql-inspector/core';
 import type { PolicyConfigurationObject } from '@hive/policy';
 import type {
+  SchemaChangeType,
   SchemaCheck,
   SchemaCheckInput,
   SchemaCompositionError,
@@ -40,7 +41,6 @@ import type {
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
-import { SerializableChange } from '../../schema/schema-change-from-meta';
 
 type Paginated<T> = T & {
   after?: string | null;
@@ -422,7 +422,7 @@ export interface Storage {
    * If it return `null` the schema version does not have any changes persisted.
    * This can happen if the schema version was created before we introduced persisting changes.
    */
-  getSchemaChangesForVersion(_: { versionId: string }): Promise<null | Array<SerializableChange>>;
+  getSchemaChangesForVersion(_: { versionId: string }): Promise<null | Array<SchemaChangeType>>;
 
   updateVersionStatus(
     _: {

@@ -5,13 +5,14 @@ import hashObject from 'object-hash';
 import { CriticalityLevel, type Change } from '@graphql-inspector/core';
 import type { CheckPolicyResponse } from '@hive/policy';
 import type { CompositionFailureError } from '@hive/schema';
+import {
+  buildRegistryServiceURLFromMeta,
+  SchemaChangeType,
+  type RegistryServiceUrlChangeSerializableChange,
+} from '@hive/storage';
 import { ProjectType, Schema } from '../../../shared/entities';
 import { buildSortedSchemaFromSchemaObject } from '../../../shared/schema';
 import { SchemaPolicyProvider } from '../../policy/providers/schema-policy.provider';
-import {
-  RegistryServiceUrlChangeSerializableChange,
-  schemaChangeFromMeta,
-} from '../schema-change-from-meta';
 import type {
   Orchestrator,
   Organization,
@@ -297,17 +298,12 @@ export class RegistryChecks {
       } satisfies CheckResult;
     }
 
-    const changes = [...(await this.inspector.diff(existingSchema, incomingSchema, selector))];
+    const changes = [
+      ...(await this.inspector.diff(existingSchema, incomingSchema, selector)),
+    ] as Array<SchemaChangeType>;
 
     if (includeUrlChanges) {
-      changes.push(
-        ...detectUrlChanges(version.schemas, schemas).map(change =>
-          schemaChangeFromMeta({
-            ...change,
-            isSafeBasedOnUsage: false,
-          }),
-        ),
-      );
+      changes.push(...detectUrlChanges(version.schemas, schemas));
     }
 
     const safeChanges: Array<Change> = [];
@@ -489,7 +485,7 @@ export class RegistryChecks {
 export function detectUrlChanges(
   schemasBefore: readonly Schema[],
   schemasAfter: readonly Schema[],
-): Array<RegistryServiceUrlChangeSerializableChange> {
+): Array<SchemaChangeType> {
   if (schemasBefore.length === 0) {
     return [];
   }
@@ -548,7 +544,7 @@ export function detectUrlChanges(
     }
   }
 
-  return changes;
+  return changes.map(buildRegistryServiceURLFromMeta);
 }
 
 const toSchemaCheckWarning = (record: CheckPolicyResponse[number]): SchemaCheckWarning => ({

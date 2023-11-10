@@ -1,4 +1,5 @@
 import type { DocumentNode, GraphQLSchema } from 'graphql';
+import { SchemaChangeType, SchemaCheck } from '@hive/storage';
 import type {
   ClientStatsValues,
   OperationStatsValues,
@@ -8,8 +9,6 @@ import type {
 import { type SuperGraphInformation } from '../modules/schema/lib/federation-super-graph';
 import { SchemaCheckWarning } from '../modules/schema/providers/models/shared';
 import { SchemaBuildError } from '../modules/schema/providers/orchestrators/errors';
-import { InflatedSchemaCheck } from '../modules/schema/providers/schema-manager';
-import { SerializableChange } from '../modules/schema/schema-change-from-meta';
 import type {
   ActivityObject,
   DateRange,
@@ -268,7 +267,7 @@ export type SchemaCompareResult = {
       before: string | null;
       current: string;
     };
-    changes: Array<SerializableChange>;
+    changes: Array<SchemaChangeType>;
     versionIds: {
       before: string | null;
       current: string;
@@ -355,13 +354,14 @@ export type FailedSchemaCheckMapper = {
     organizationId: string;
     projectId: string;
   };
-} & Extract<InflatedSchemaCheck, { isSuccess: false }>;
+} & Extract<SchemaCheck, { isSuccess: false }>;
+
 export type SuccessfulSchemaCheckMapper = {
   __typename: 'SuccessfulSchemaCheck';
   selector: {
     organizationId: string;
     projectId: string;
   };
-} & Extract<InflatedSchemaCheck, { isSuccess: true }>;
+} & Extract<SchemaCheck, { isSuccess: true }>;
 
 export type SchemaPolicyWarningConnectionMapper = ReadonlyArray<SchemaCheckWarning>;

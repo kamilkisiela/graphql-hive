@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import stableJSONStringify from 'fast-json-stable-stringify';
 import type { RegistryServiceUrlChangeSerializableChange } from 'packages/services/api/src/modules/schema/schema-change-from-meta';
 import { z } from 'zod';
+import { CriticalityLevel } from '@graphql-inspector/core';
 import type {
   ChangeType,
   DirectiveAddedChange,
@@ -59,6 +60,11 @@ import type {
   UnionMemberAddedChange,
   UnionMemberRemovedChange,
 } from '@graphql-inspector/core';
+import {
+  InternalSchemaChange,
+  RegistryServiceUrlChangeSerializableChange,
+  schemaChangeFromSerializableChange,
+} from './schema-change-meta';
 
 // prettier-ignore
 const FieldArgumentDescriptionChangedLiteral = z.literal("FIELD_ARGUMENT_DESCRIPTION_CHANGED" satisfies `${ChangeType.FieldArgumentDescriptionChanged}`)
@@ -807,10 +813,27 @@ export function createSchemaChangeId(change: {
   return hash.digest('hex');
 }
 
-const SchemaChangeModelWithIsSafeBreakingChange = z.intersection(
-  SchemaChangeModel,
-  z.object({ isSafeBasedOnUsage: z.boolean().optional() }),
-);
+export const SchemaChangeModelWithIsSafeBreakingChange = z
+  .intersection(SchemaChangeModel, z.object({ isSafeBasedOnUsage: z.boolean().optional() }))
+  // We inflate the schema check when reading it from the database
+  .transform((dbChange): InternalSchemaChange => {
+    const change = schemaChangeFromSerializableChange(dbChange as any);
+
+    if (dbChange.isSafeBasedOnUsage) {
+      return {
+        ...change,
+        criticality: {
+          ...change.criticality,
+          level: CriticalityLevel.Dangerous,
+        },
+        message: `${change.message} (non-breaking based on usage)`,
+      };
+    }
+
+    return change;
+  });
+
+export type SchemaChangeType = z.TypeOf<typeof SchemaChangeModelWithIsSafeBreakingChange>;
 
 // Schema Checks
 

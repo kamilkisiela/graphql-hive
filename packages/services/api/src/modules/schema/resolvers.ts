@@ -21,6 +21,7 @@ import {
 } from 'graphql';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
+import { SchemaChangeType } from '@hive/storage';
 import { ProjectType, type DateRange } from '../../shared/entities';
 import { createPeriod, parseDateRangeInput, PromiseOrValue } from '../../shared/helpers';
 import type {
@@ -65,7 +66,6 @@ import { detectUrlChanges } from './providers/registry-checks';
 import { ensureSDL, SchemaHelper } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
-import { schemaChangeFromMeta, SerializableChange } from './schema-change-from-meta';
 import { toGraphQLSchemaCheck, toGraphQLSchemaCheckCurry } from './to-graphql-schema-check';
 
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
@@ -586,7 +586,7 @@ export const resolvers: SchemaModule.Resolvers = {
         ),
       ])
         .then(async ([before, after]) => {
-          let changes: SerializableChange[] = [];
+          let changes: SchemaChangeType[] = [];
 
           if (before) {
             const previousSchema = buildSortedSchemaFromSchemaObject(
@@ -614,12 +614,7 @@ export const resolvers: SchemaModule.Resolvers = {
             }));
           }
 
-          changes.push(
-            ...detectUrlChanges(schemasBefore, schemasAfter).map(change => ({
-              ...change,
-              isSafeBasedOnUsage: false,
-            })),
-          );
+          changes.push(...detectUrlChanges(schemasBefore, schemasAfter));
 
           const result: SchemaCompareResult = {
             result: {
@@ -1212,9 +1207,7 @@ export const resolvers: SchemaModule.Resolvers = {
       return source.result.schemas.before === null;
     },
     async changes(source) {
-      return source.result.changes.map(change =>
-        toGraphQLSchemaChange(schemaChangeFromMeta(change)),
-      );
+      return source.result.changes.map(change => toGraphQLSchemaChange(change));
     },
     diff(source) {
       const { before, current } = source.result.schemas;

@@ -1139,6 +1139,9 @@ importers:
 
   packages/services/storage:
     devDependencies:
+      '@graphql-inspector/core':
+        specifier: 5.0.1
+        version: 5.0.1(graphql@16.8.1)
       '@sentry/node':
         specifier: 7.79.0
         version: 7.79.0
