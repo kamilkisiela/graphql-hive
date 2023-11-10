@@ -1,4 +1,6 @@
 /** These mirror DB models from  */
+import crypto from 'node:crypto';
+import stableJSONStringify from 'fast-json-stable-stringify';
 import type { RegistryServiceUrlChangeSerializableChange } from 'packages/services/api/src/modules/schema/schema-change-from-meta';
 import { z } from 'zod';
 import type {
@@ -795,6 +797,15 @@ export const SchemaPolicyWarningModel = z.object({
   endLine: z.number().nullable(),
   endColumn: z.number().nullable(),
 });
+
+export function createSchemaChangeId(change: {
+  type: string;
+  meta: Record<string, unknown>;
+}): string {
+  const hash = crypto.createHash('md5');
+  hash.update(stableJSONStringify(change.meta));
+  return hash.digest('hex');
+}
 
 const SchemaChangeModelWithIsSafeBreakingChange = z.intersection(
   SchemaChangeModel,
