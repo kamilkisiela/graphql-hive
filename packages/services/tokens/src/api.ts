@@ -52,7 +52,6 @@ export type Context = {
 };
 
 const t = initTRPC.context<Context>().create();
-const errorMiddleware = t.middleware(handleTRPCError);
 
 const prometheusMiddleware = t.middleware(async ({ next, path }) => {
   const stopTimer = httpRequestDuration.startTimer({ path });
@@ -64,7 +63,7 @@ const prometheusMiddleware = t.middleware(async ({ next, path }) => {
   }
 });
 
-const procedure = t.procedure.use(prometheusMiddleware).use(errorMiddleware);
+const procedure = t.procedure.use(prometheusMiddleware).use(handleTRPCError);
 
 export const tokensApiRouter = t.router({
   targetTokens: procedure

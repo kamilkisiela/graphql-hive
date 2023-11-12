@@ -45,8 +45,7 @@ const webhookInput = z
   .required();
 
 const t = initTRPC.context<Context>().create();
-const errorMiddleware = t.middleware(handleTRPCError);
-const procedure = t.procedure.use(errorMiddleware);
+const procedure = t.procedure.use(handleTRPCError);
 
 export const webhooksApiRouter = t.router({
   schedule: procedure.input(webhookInput).mutation(async ({ ctx, input }) => {
