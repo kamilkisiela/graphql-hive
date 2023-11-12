@@ -70,7 +70,6 @@ export function createScheduler(config: Config) {
     webhookQueue = new Queue(config.webhookQueueName, {
       prefix,
       connection: redisConnection,
-      sharedConnection: true,
     });
 
     // Wait for Queue to be ready
@@ -81,7 +80,6 @@ export function createScheduler(config: Config) {
     const webhookWorker = new Worker<WebhookInput>(config.webhookQueueName, webhookJob, {
       prefix,
       connection: redisConnection,
-      sharedConnection: true,
     });
 
     webhookWorker.on('error', onError('webhookWorker'));

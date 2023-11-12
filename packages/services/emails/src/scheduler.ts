@@ -61,7 +61,6 @@ export function createScheduler(config: {
     queue = new Queue(config.queueName, {
       prefix,
       connection: redisConnection,
-      sharedConnection: true,
     });
 
     // Wait for Queues to be ready
@@ -97,7 +96,6 @@ export function createScheduler(config: {
       {
         prefix,
         connection: redisConnection,
-        sharedConnection: true,
       },
     );
 
