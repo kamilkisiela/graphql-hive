@@ -123,6 +123,9 @@ export default class SchemaCheck extends Command {
     commit: Flags.string({
       description: 'Associated commit sha',
     }),
+    contextId: Flags.string({
+      description: 'Context ID for grouping the schema check.',
+    }),
   };
 
   static args = {
@@ -209,6 +212,7 @@ export default class SchemaCheck extends Command {
                   author,
                 }
               : null,
+          contextId: flags.contextId ?? undefined,
         },
         usesGitHubApp,
       });
