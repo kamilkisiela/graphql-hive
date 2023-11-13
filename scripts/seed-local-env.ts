@@ -12,15 +12,15 @@ const schemaReportingEndpoint =
   envName === 'staging'
     ? 'https://app.staging.graphql-hive.com/registry'
     : envName === 'dev'
-    ? 'https://app.dev.graphql-hive.com/registry'
-    : 'http://localhost:3001/graphql';
+      ? 'https://app.dev.graphql-hive.com/registry'
+      : 'http://localhost:3001/graphql';
 
 const usageReportingEndpoint =
   envName === 'staging'
     ? 'https://app.staging.graphql-hive.com/usage'
     : envName === 'dev'
-    ? 'https://app.dev.graphql-hive.com/usage'
-    : 'http://localhost:4001';
+      ? 'https://app.dev.graphql-hive.com/usage'
+      : 'http://localhost:4001';
 
 console.log(`
   Environment:                ${envName}

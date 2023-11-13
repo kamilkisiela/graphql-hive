@@ -290,27 +290,27 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           metadata: schema.metadata ?? null,
         }
       : schema.action === 'PUSH'
-      ? {
-          kind: 'composite',
-          id: schema.id,
-          author: schema.author,
-          sdl: ensureDefined(schema.sdl, 'sdl'),
-          commit: schema.commit,
-          date: schema.created_at as any,
-          service_name: schema.service_name!,
-          service_url: schema.service_url,
-          target: schema.target_id,
-          action: 'PUSH',
-          metadata: schema.metadata ?? null,
-        }
-      : {
-          kind: 'composite',
-          id: schema.id,
-          date: schema.created_at as any,
-          service_name: schema.service_name!,
-          target: schema.target_id,
-          action: 'DELETE',
-        };
+        ? {
+            kind: 'composite',
+            id: schema.id,
+            author: schema.author,
+            sdl: ensureDefined(schema.sdl, 'sdl'),
+            commit: schema.commit,
+            date: schema.created_at as any,
+            service_name: schema.service_name!,
+            service_url: schema.service_url,
+            target: schema.target_id,
+            action: 'PUSH',
+            metadata: schema.metadata ?? null,
+          }
+        : {
+            kind: 'composite',
+            id: schema.id,
+            date: schema.created_at as any,
+            service_name: schema.service_name!,
+            target: schema.target_id,
+            action: 'DELETE',
+          };
 
     return record;
   }

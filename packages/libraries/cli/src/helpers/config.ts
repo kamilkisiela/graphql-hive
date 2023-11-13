@@ -60,10 +60,10 @@ type GetConfigurationKeys<
       ? `${TKey}${TObjectPropertyType extends zod.ZodObject<any>
           ? BuildPropertyPath<TObjectPropertyType>
           : TObjectPropertyType extends zod.ZodOptional<infer TOptionalInnerObjectPropertyType>
-          ? TOptionalInnerObjectPropertyType extends zod.ZodObject<any>
-            ? BuildPropertyPath<TOptionalInnerObjectPropertyType>
-            : ''
-          : ''}`
+            ? TOptionalInnerObjectPropertyType extends zod.ZodObject<any>
+              ? BuildPropertyPath<TOptionalInnerObjectPropertyType>
+              : ''
+            : ''}`
       : never
     : never
   : never;
@@ -76,14 +76,14 @@ type GetZodValueType<
     ? InnerType[TKey] extends zod.ZodObject<any>
       ? GetZodValueType<TNextKey, InnerType[TKey]>
       : InnerType[TKey] extends zod.ZodOptional<infer OptionalInner>
-      ? OptionalInner extends zod.ZodObject<any>
-        ? GetZodValueType<TNextKey, OptionalInner>
+        ? OptionalInner extends zod.ZodObject<any>
+          ? GetZodValueType<TNextKey, OptionalInner>
+          : never
         : never
-      : never
     : never
   : ConfigurationModelType extends zod.ZodObject<infer InnerType>
-  ? zod.TypeOf<InnerType[TString]>
-  : never;
+    ? zod.TypeOf<InnerType[TString]>
+    : never;
 
 export type GetConfigurationValueType<TString extends string> = GetZodValueType<
   TString,

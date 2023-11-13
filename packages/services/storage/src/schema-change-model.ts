@@ -172,10 +172,10 @@ type Implements<Model> = {
       ? z.ZodNullableType<z.ZodOptionalType<z.ZodType<Model[key]>>>
       : z.ZodOptionalType<z.ZodType<Model[key]>>
     : null extends Model[key]
-    ? z.ZodNullableType<z.ZodType<Model[key]>>
-    : Model[key] extends ChangeType
-    ? z.ZodLiteral<`${Model[key]}`>
-    : z.ZodType<Model[key]>;
+      ? z.ZodNullableType<z.ZodType<Model[key]>>
+      : Model[key] extends ChangeType
+        ? z.ZodLiteral<`${Model[key]}`>
+        : z.ZodType<Model[key]>;
 };
 
 export function implement<Model = never>() {

@@ -60,18 +60,18 @@ export function createIngestor(config: {
             password: config.kafka.connection.sasl.password,
           }
         : config.kafka.connection.sasl?.mechanism === 'scram-sha-256'
-        ? {
-            mechanism: 'scram-sha-256',
-            username: config.kafka.connection.sasl.username,
-            password: config.kafka.connection.sasl.password,
-          }
-        : config.kafka.connection.sasl?.mechanism === 'scram-sha-512'
-        ? {
-            mechanism: 'scram-sha-512',
-            username: config.kafka.connection.sasl.username,
-            password: config.kafka.connection.sasl.password,
-          }
-        : undefined,
+          ? {
+              mechanism: 'scram-sha-256',
+              username: config.kafka.connection.sasl.username,
+              password: config.kafka.connection.sasl.password,
+            }
+          : config.kafka.connection.sasl?.mechanism === 'scram-sha-512'
+            ? {
+                mechanism: 'scram-sha-512',
+                username: config.kafka.connection.sasl.username,
+                password: config.kafka.connection.sasl.password,
+              }
+            : undefined,
     logLevel: logLevel.INFO,
     logCreator() {
       return entry => {

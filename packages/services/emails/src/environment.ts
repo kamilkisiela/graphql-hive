@@ -151,22 +151,22 @@ const emailProviderConfig =
         messageStream: email.EMAIL_PROVIDER_POSTMARK_MESSAGE_STREAM,
       } as const)
     : email.EMAIL_PROVIDER === 'smtp'
-    ? ({
-        provider: 'smtp' as const,
-        protocol: email.EMAIL_PROVIDER_SMTP_PROTOCOL ?? 'smtp',
-        host: email.EMAIL_PROVIDER_SMTP_HOST,
-        port: email.EMAIL_PROVIDER_SMTP_PORT,
-        auth: {
-          user: email.EMAIL_PROVIDER_SMTP_AUTH_USERNAME,
-          pass: email.EMAIL_PROVIDER_SMTP_AUTH_PASSWORD,
-        },
-        tls: {
-          rejectUnauthorized: !(email.EMAIL_PROVIDER_SMTP_REJECT_UNAUTHORIZED === '0'),
-        },
-      } as const)
-    : email.EMAIL_PROVIDER === 'sendmail'
-    ? ({ provider: 'sendmail' } as const)
-    : ({ provider: 'mock' } as const);
+      ? ({
+          provider: 'smtp' as const,
+          protocol: email.EMAIL_PROVIDER_SMTP_PROTOCOL ?? 'smtp',
+          host: email.EMAIL_PROVIDER_SMTP_HOST,
+          port: email.EMAIL_PROVIDER_SMTP_PORT,
+          auth: {
+            user: email.EMAIL_PROVIDER_SMTP_AUTH_USERNAME,
+            pass: email.EMAIL_PROVIDER_SMTP_AUTH_PASSWORD,
+          },
+          tls: {
+            rejectUnauthorized: !(email.EMAIL_PROVIDER_SMTP_REJECT_UNAUTHORIZED === '0'),
+          },
+        } as const)
+      : email.EMAIL_PROVIDER === 'sendmail'
+        ? ({ provider: 'sendmail' } as const)
+        : ({ provider: 'mock' } as const);
 
 export type EmailProviderConfig = typeof emailProviderConfig;
 export type PostmarkEmailProviderConfig = Extract<EmailProviderConfig, { provider: 'postmark' }>;
