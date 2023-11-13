@@ -41,8 +41,8 @@ export function ChannelsTable(props: {
               {channel.__typename === 'AlertSlackChannel'
                 ? channel.channel
                 : channel.__typename === 'AlertWebhookChannel'
-                ? channel.endpoint
-                : ''}
+                  ? channel.endpoint
+                  : ''}
             </Td>
             <Td>
               <Tag color={channel.type === AlertChannelType.Webhook ? 'green' : 'yellow'}>
