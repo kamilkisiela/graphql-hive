@@ -310,6 +310,16 @@ export class SchemaPublisher {
       }
     }
 
+    let contextId: string | null = input.contextId ?? null;
+
+    if (
+      input.contextId === undefined &&
+      input.github?.repository &&
+      input.github.pullRequestNumber
+    ) {
+      contextId = `${input.github.repository}#${input.github.pullRequestNumber}`;
+    }
+
     await this.schemaManager.completeGetStartedCheck({
       organization: project.orgId,
       step: 'checkingSchema',
@@ -330,6 +340,18 @@ export class SchemaPublisher {
     const sdl = tryPrettifySDL(input.sdl);
 
     let checkResult: SchemaCheckResult;
+
+    const approvedSchemaChanges = new Map<string, SchemaChangeType>();
+
+    if (contextId !== null) {
+      const changes = await this.storage.getApprovedSchemaChangesForContextId({
+        targetId: target.id,
+        contextId,
+      });
+      for (const change of changes) {
+        approvedSchemaChanges.set(change.id, change);
+      }
+    }
 
     switch (project.type) {
       case ProjectType.SINGLE:
@@ -352,6 +374,7 @@ export class SchemaPublisher {
           baseSchema,
           project,
           organization,
+          approvedChanges: approvedSchemaChanges,
         });
         break;
       case ProjectType.FEDERATION:
@@ -387,6 +410,7 @@ export class SchemaPublisher {
           baseSchema,
           project,
           organization,
+          approvedChanges: approvedSchemaChanges,
         });
         break;
       default:
@@ -449,6 +473,7 @@ export class SchemaPublisher {
           : null,
         githubSha: githubCheckRun?.commit ?? null,
         expiresAt,
+        contextId,
       });
     }
 
@@ -534,6 +559,7 @@ export class SchemaPublisher {
           : null,
         githubSha: githubCheckRun?.commit ?? null,
         expiresAt,
+        contextId,
       });
     }
 

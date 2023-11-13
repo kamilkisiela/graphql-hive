@@ -1,4 +1,5 @@
 import { Injectable, Scope } from 'graphql-modules';
+import { SchemaChangeType } from '@hive/storage';
 import { SingleOrchestrator } from '../orchestrators/single';
 import { RegistryChecks } from '../registry-checks';
 import type { PublishInput } from '../schema-publisher';
@@ -33,6 +34,7 @@ export class SingleModel {
     project,
     organization,
     baseSchema,
+    approvedChanges,
   }: {
     input: {
       sdl: string;
@@ -53,6 +55,7 @@ export class SingleModel {
     baseSchema: string | null;
     project: Project;
     organization: Organization;
+    approvedChanges: Map<string, SchemaChangeType>;
   }): Promise<SchemaCheckResult> {
     const incoming: SingleSchema = {
       kind: 'single',
@@ -99,6 +102,7 @@ export class SingleModel {
         selector,
         version: compareToLatest ? latest : latestComposable,
         includeUrlChanges: false,
+        approvedChanges,
       }),
       this.checks.policyCheck({
         orchestrator: this.orchestrator,
@@ -218,6 +222,7 @@ export class SingleModel {
         },
         version: compareToLatest ? latestVersion : latestComposable,
         includeUrlChanges: false,
+        approvedChanges: null,
       }),
     ]);
 

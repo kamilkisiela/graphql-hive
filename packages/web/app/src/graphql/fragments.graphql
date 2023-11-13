@@ -93,6 +93,14 @@ fragment SchemaChangeFields on SchemaChange {
   message
   criticality
   criticalityReason
+  approval {
+    approvedBy {
+      id
+      displayName
+    }
+    approvedAt
+    schemaCheckId
+  }
 }
 
 fragment SchemaCompareResultFields on SchemaCompareResult {

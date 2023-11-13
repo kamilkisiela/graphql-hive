@@ -919,4 +919,15 @@ export class SchemaManager {
 
     return null;
   }
+
+  async getUserForSchemaChangeById(input: { userId: string }) {
+    this.logger.info('Load user by id. (userId=%%)', input.userId);
+    const user = await this.storage.getUserById({ id: input.userId });
+    if (user) {
+      this.logger.info('User found. (userId=%s)', input.userId);
+      return user;
+    }
+    this.logger.info('User not found. (userId=%s)', input.userId);
+    return null;
+  }
 }

@@ -721,6 +721,14 @@ export interface Storage {
     userId: string;
   }): Promise<SchemaCheck | null>;
 
+  /**
+   * Retrieve approved schema changes for a given context.
+   */
+  getApprovedSchemaChangesForContextId(args: {
+    targetId: string;
+    contextId: string;
+  }): Promise<Array<SchemaChangeType>>;
+
   getTargetBreadcrumbForTargetId(_: { targetId: string }): Promise<TargetBreadcrumb | null>;
 
   /**

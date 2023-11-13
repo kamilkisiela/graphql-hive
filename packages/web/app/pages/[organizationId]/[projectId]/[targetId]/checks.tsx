@@ -196,6 +196,14 @@ const ActiveSchemaCheck_SchemaCheckFragment = graphql(`
         criticality
         criticalityReason
         path
+        approval {
+          approvedBy {
+            id
+            displayName
+          }
+          approvedAt
+          schemaCheckId
+        }
       }
     }
     safeSchemaChanges {
@@ -204,6 +212,14 @@ const ActiveSchemaCheck_SchemaCheckFragment = graphql(`
         criticality
         criticalityReason
         path
+        approval {
+          approvedBy {
+            id
+            displayName
+          }
+          approvedAt
+          schemaCheckId
+        }
       }
     }
     schemaPolicyWarnings {

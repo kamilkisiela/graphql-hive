@@ -232,6 +232,7 @@ export class RegistryChecks {
     version,
     selector,
     includeUrlChanges,
+    approvedChanges,
   }: {
     orchestrator: Orchestrator;
     project: Project;
@@ -244,6 +245,8 @@ export class RegistryChecks {
       target: string;
     };
     includeUrlChanges: boolean;
+    /** Lookup map of changes that are approved and thus safe. */
+    approvedChanges: null | Map<string, SchemaChangeType>;
   }) {
     if (!version || version.schemas.length === 0) {
       this.logger.debug('Skipping diff check, no existing version');
@@ -298,42 +301,55 @@ export class RegistryChecks {
       } satisfies CheckResult;
     }
 
-    const changes = await this.inspector.diff(existingSchema, incomingSchema, selector);
+    const inspectorChanges = await this.inspector.diff(existingSchema, incomingSchema, selector);
 
     if (includeUrlChanges) {
-      changes.push(...detectUrlChanges(version.schemas, schemas));
+      inspectorChanges.push(...detectUrlChanges(version.schemas, schemas));
     }
 
     const safeChanges: Array<SchemaChangeType> = [];
     const breakingChanges: Array<SchemaChangeType> = [];
-    for (const change of changes) {
+    for (const change of inspectorChanges) {
       if (change.criticality.level === CriticalityLevel.Breaking) {
+        // If this change is approved, we return the already approved on instead of the newly detected one,
+        // as it it contains the necessary metadata on when the change got first approved and by whom.
+        const approvedChange = approvedChanges?.get(change.id);
+        if (approvedChange) {
+          safeChanges.push(approvedChange);
+          continue;
+        }
         breakingChanges.push(change);
         continue;
       }
       safeChanges.push(change);
     }
 
-    if (breakingChanges.length > 0) {
+    if (breakingChanges.length) {
       this.logger.debug('Detected breaking changes');
       return {
         status: 'failed',
         reason: {
           breakingChanges,
           safeChanges: safeChanges.length ? safeChanges : null,
-          changes,
+          get changes() {
+            if (safeChanges.length || breakingChanges.length) {
+              return [...breakingChanges, ...safeChanges];
+            }
+            return null;
+          },
         },
       } satisfies CheckResult;
     }
 
-    if (changes.length) {
+    if (inspectorChanges.length) {
       this.logger.debug('Detected non-breaking changes');
     }
 
     return {
       status: 'completed',
       result: {
-        changes: changes.length ? changes : null,
+        safeChanges: safeChanges.length ? safeChanges : null,
+        changes: safeChanges.length ? safeChanges : null,
       },
     } satisfies CheckResult;
   }

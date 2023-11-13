@@ -298,6 +298,26 @@ export default gql`
     criticalityReason: String
     message: String!
     path: [String!]
+    """
+    Approval metadata for this schema change.
+    This field is populated in case the breaking change was manually approved.
+    """
+    approval: SchemaChangeApproval
+  }
+
+  type SchemaChangeApproval {
+    """
+    User that approved this schema change.
+    """
+    approvedBy: User
+    """
+    Date of the schema change approval.
+    """
+    approvedAt: DateTime!
+    """
+    ID of the schema check in which this change was first approved.
+    """
+    schemaCheckId: ID!
   }
 
   type SchemaError {

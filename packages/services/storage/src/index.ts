@@ -1,6 +1,7 @@
 import {
   DatabasePool,
   DatabaseTransactionConnection,
+  SerializableValue,
   sql,
   TaggedTemplateLiteralInvocation,
   UniqueIntegrityConstraintViolationError,
@@ -657,17 +658,27 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           "external_auth_user_id" = ${auth0UserId}
       `);
     },
-    async getUserById({ id }) {
-      const user = await pool.maybeOne<Slonik<users>>(
-        sql`SELECT * FROM public.users WHERE id = ${id} LIMIT 1`,
-      );
+    getUserById: batch(async input => {
+      const userIds = input.map(i => i.id);
+      const users = await pool.any<Slonik<users>>(sql`
+        SELECT
+          *
+        FROM
+          public.users
+        WHERE
+          id = ANY(${sql.array(userIds, 'uuid')})
+      `);
 
-      if (user) {
-        return transformUser(user);
+      const mappings = new Map<string, Slonik<users>>();
+      for (const user of users) {
+        mappings.set(user.id, user);
       }
 
-      return null;
-    },
+      return userIds.map(id => {
+        const user = mappings.get(id) ?? null;
+        return Promise.resolve(user ? transformUser(user) : null);
+      });
+    }),
     async updateUser({ id, displayName, fullName }) {
       return transformUser(
         await pool.one<Slonik<users>>(sql`
@@ -3385,49 +3396,52 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         await Promise.all(sdlStoreInserts);
 
         return trx.one<{ id: string }>(sql`
-        INSERT INTO "public"."schema_checks" (
-            "schema_sdl_store_id"
-          , "service_name"
-          , "meta"
-          , "target_id"
-          , "schema_version_id"
-          , "is_success"
-          , "schema_composition_errors"
-          , "breaking_schema_changes"
-          , "safe_schema_changes"
-          , "schema_policy_warnings"
-          , "schema_policy_errors"
-          , "composite_schema_sdl_store_id"
-          , "supergraph_sdl_store_id"
-          , "is_manually_approved"
-          , "manual_approval_user_id"
-          , "github_check_run_id"
-          , "github_repository"
-          , "github_sha"
-          , "expires_at"
-        )
-        VALUES (
-            ${args.schemaSDLHash}
-          , ${args.serviceName}
-          , ${jsonify(args.meta)}
-          , ${args.targetId}
-          , ${args.schemaVersionId}
-          , ${args.isSuccess}
-          , ${jsonify(args.schemaCompositionErrors)}
-          , ${jsonify(args.breakingSchemaChanges?.map(toSerializableSchemaChange))}
-          , ${jsonify(args.safeSchemaChanges?.map(toSerializableSchemaChange))}
-          , ${jsonify(args.schemaPolicyWarnings?.map(w => SchemaPolicyWarningModel.parse(w)))}
-          , ${jsonify(args.schemaPolicyErrors?.map(w => SchemaPolicyWarningModel.parse(w)))}
-          , ${args.compositeSchemaSDLHash}
-          , ${args.supergraphSDLHash}
-          , ${args.isManuallyApproved}
-          , ${args.manualApprovalUserId}
-          , ${args.githubCheckRunId}
-          , ${args.githubRepository}
-          , ${args.githubSha}
-          , ${args.expiresAt?.toISOString() ?? null}
-        )
-        RETURNING id
+          INSERT INTO "public"."schema_checks" (
+              "schema_sdl_store_id"
+            , "service_name"
+            , "meta"
+            , "target_id"
+            , "schema_version_id"
+            , "is_success"
+            , "schema_composition_errors"
+            , "breaking_schema_changes"
+            , "safe_schema_changes"
+            , "schema_policy_warnings"
+            , "schema_policy_errors"
+            , "composite_schema_sdl_store_id"
+            , "supergraph_sdl_store_id"
+            , "is_manually_approved"
+            , "manual_approval_user_id"
+            , "github_check_run_id"
+            , "github_repository"
+            , "github_sha"
+            , "expires_at"
+            , "context_id"
+          )
+          VALUES (
+              ${args.schemaSDLHash}
+            , ${args.serviceName}
+            , ${jsonify(args.meta)}
+            , ${args.targetId}
+            , ${args.schemaVersionId}
+            , ${args.isSuccess}
+            , ${jsonify(args.schemaCompositionErrors)}
+            , ${jsonify(args.breakingSchemaChanges?.map(toSerializableSchemaChange))}
+            , ${jsonify(args.safeSchemaChanges?.map(toSerializableSchemaChange))}
+            , ${jsonify(args.schemaPolicyWarnings?.map(w => SchemaPolicyWarningModel.parse(w)))}
+            , ${jsonify(args.schemaPolicyErrors?.map(w => SchemaPolicyWarningModel.parse(w)))}
+            , ${args.compositeSchemaSDLHash}
+            , ${args.supergraphSDLHash}
+            , ${args.isManuallyApproved}
+            , ${args.manualApprovalUserId}
+            , ${args.githubCheckRunId}
+            , ${args.githubRepository}
+            , ${args.githubSha}
+            , ${args.expiresAt?.toISOString() ?? null}
+            , ${args.contextId}
+          )
+          RETURNING
+            "id"
       `);
       });
 
@@ -3461,6 +3475,58 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return SchemaCheckModel.parse(result);
     },
     async approveFailedSchemaCheck(args) {
+      const schemaCheck = await this.findSchemaCheck({
+        schemaCheckId: args.schemaCheckId,
+      });
+
+      if (schemaCheck?.breakingSchemaChanges == null) {
+        return null;
+      }
+
+      if (schemaCheck.contextId !== null) {
+        // Try to approve and claim all the breaking schema changes for this context
+        await pool.query(sql`
+          INSERT INTO "public"."schema_change_approvals" (
+            "target_id"
+            , "context_id"
+            , "schema_change_id"
+            , "schema_change"
+            , "first_approved_in_schema_check_id"
+          )
+          VALUES ${sql.join(
+            schemaCheck.breakingSchemaChanges.map(
+              change =>
+                sql`(
+                  ${schemaCheck.targetId}
+                  , ${schemaCheck.contextId}
+                  , ${change.id}
+                  , ${sql.jsonb(
+                    toSerializableSchemaChange({
+                      ...change,
+                      // We enhance the approved schema changes with some metadata that can be displayed on the UI
+                      approvalMetadata: {
+                        userId: args.userId,
+                        date: new Date().toISOString(),
+                        schemaCheckId: schemaCheck.id,
+                      },
+                    }),
+                  )}
+                  , ${schemaCheck.id}
+              )`,
+            ),
+            sql`,`,
+          )}
+          ON CONFLICT ("target_id", "context_id", "schema_change_id") DO NOTHING
+        `);
+      }
+
+      // We enhance the approved schema checks with some metadata
+      const approvalMetadata = {
+        userId: args.userId,
+        date: new Date().toISOString(),
+        schemaCheckId: schemaCheck.id,
+      };
+
       const updateResult = await pool.maybeOne<{
         id: string;
       }>(sql`
@@ -3470,12 +3536,23 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           "is_success" = true
           , "is_manually_approved" = true
           , "manual_approval_user_id" = ${args.userId}
+          , "breaking_schema_changes" = (
+            SELECT json_agg(
+              CASE
+                WHEN COALESCE(jsonb_typeof("change"->'approvalMetadata'), 'null') = 'null'
+                  THEN jsonb_set("change", '{approvalMetadata}', ${sql.jsonb(approvalMetadata)})
+                ELSE "change"
+              END
+            )
+            FROM jsonb_array_elements("breaking_schema_changes") AS "change"
+          )
         WHERE
           "id" = ${args.schemaCheckId}
           AND "is_success" = false
           AND "schema_composition_errors" IS NULL
         RETURNING 
-          "id"
+          "id",
+          "breaking_schema_changes"
       `);
 
       if (updateResult == null) {
@@ -3495,6 +3572,19 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       `);
 
       return SchemaCheckModel.parse(result);
+    },
+    async getApprovedSchemaChangesForContextId(args) {
+      const result = await pool.anyFirst<unknown>(sql`
+        SELECT
+          "schema_change"
+        FROM
+          "public"."schema_change_approvals"
+        WHERE
+          "target_id" = ${args.targetId}
+          AND "context_id" = ${args.contextId}
+      `);
+
+      return result.map(record => HiveSchemaChangeModel.parse(record));
     },
     async getPaginatedSchemaChecksForTarget(args) {
       let cursor: null | {
@@ -4070,7 +4160,12 @@ function jsonify<T>(obj: T | null | undefined) {
 function toSerializableSchemaChange(change: SchemaChangeType): {
   id: string;
   type: string;
-  meta: unknown;
+  meta: Record<string, SerializableValue>;
+  approvalMetadata: null | {
+    userId: string;
+    date: string;
+    schemaCheckId: string;
+  };
   isSafeBasedOnUsage: boolean;
 } {
   return {
@@ -4078,6 +4173,7 @@ function toSerializableSchemaChange(change: SchemaChangeType): {
     type: change.type,
     meta: change.meta,
     isSafeBasedOnUsage: change.criticality?.isSafeBasedOnUsage ?? false,
+    approvalMetadata: change.approvalMetadata,
   };
 }
 
@@ -4103,6 +4199,7 @@ const schemaCheckSQLFields = sql`
   , c."github_sha" as "githubSha"
   , coalesce(c."is_manually_approved", false) as "isManuallyApproved"
   , c."manual_approval_user_id" as "manualApprovalUserId"
+  , c."context_id" as "contextId"
 `;
 
 const schemaVersionSQLFields = (t = sql``) => sql`

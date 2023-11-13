@@ -1,4 +1,5 @@
 import { Injectable, Scope } from 'graphql-modules';
+import { SchemaChangeType } from '@hive/storage';
 import { FederationOrchestrator } from '../orchestrators/federation';
 import { StitchingOrchestrator } from '../orchestrators/stitching';
 import { RegistryChecks } from '../registry-checks';
@@ -45,6 +46,7 @@ export class CompositeModel {
     project,
     organization,
     baseSchema,
+    approvedChanges,
   }: {
     input: {
       sdl: string;
@@ -66,6 +68,7 @@ export class CompositeModel {
     baseSchema: string | null;
     project: Project;
     organization: Organization;
+    approvedChanges: Map<string, SchemaChangeType>;
   }): Promise<SchemaCheckResult> {
     const incoming: PushedCompositeSchema = {
       kind: 'composite',
@@ -121,6 +124,7 @@ export class CompositeModel {
         selector,
         version: compareToLatest ? latest : latestComposable,
         includeUrlChanges: false,
+        approvedChanges,
       }),
       this.checks.policyCheck({
         orchestrator,
@@ -281,6 +285,7 @@ export class CompositeModel {
         },
         version: compareToLatest ? latest : latestComposable,
         includeUrlChanges: true,
+        approvedChanges: null,
       }),
     ]);
 
@@ -422,6 +427,7 @@ export class CompositeModel {
         selector,
         version: compareToLatest ? latestVersion : latestComposable,
         includeUrlChanges: true,
+        approvedChanges: null,
       }),
     ]);
 

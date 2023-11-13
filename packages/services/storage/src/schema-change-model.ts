@@ -1,11 +1,12 @@
 /** These mirror DB models from  */
 import crypto from 'node:crypto';
 import stableJSONStringify from 'fast-json-stable-stringify';
+import { SerializableValue } from 'slonik';
 import { z } from 'zod';
 import { CriticalityLevel } from '@graphql-inspector/core';
 import type {
-  Change as Changes,
   ChangeType,
+  Criticality,
   DirectiveAddedChange,
   DirectiveArgumentAddedChange,
   DirectiveArgumentDefaultValueChangedChange,
@@ -61,7 +62,6 @@ import type {
   UnionMemberRemovedChange,
 } from '@graphql-inspector/core';
 import {
-  RegistryServiceUrlChangeChange,
   RegistryServiceUrlChangeSerializableChange,
   schemaChangeFromSerializableChange,
 } from './schema-change-meta';
@@ -810,6 +810,14 @@ function createSchemaChangeId(change: { type: string; meta: Record<string, unkno
   return hash.digest('hex');
 }
 
+const ApprovalMetadataModel = z.object({
+  userId: z.string(),
+  schemaCheckId: z.string(),
+  date: z.string(),
+});
+
+export type SchemaCheckApprovalMetadata = z.TypeOf<typeof ApprovalMetadataModel>;
+
 export const HiveSchemaChangeModel = z
   .intersection(
     SchemaChangeModel,
@@ -818,30 +826,50 @@ export const HiveSchemaChangeModel = z
       isSafeBasedOnUsage: z.boolean().optional(),
       /** Optional id that uniquely identifies a change. The ID is generated in case the input does not contain it. */
       id: z.string().optional(),
+      approvalMetadata: ApprovalMetadataModel.nullable()
+        .optional()
+        .transform(value => value ?? null),
     }),
   )
   // We inflate the schema check when reading it from the database
-  .transform((rawChange): (Changes | RegistryServiceUrlChangeChange) & { id: string } => {
-    let change = schemaChangeFromSerializableChange(rawChange as any);
+  // In order to keep TypeScript compiler from blowing up we use our own internal
+  // type for the schema checks that is no exhaustive union.
+  // We only do exhaustive json validation when reading from the database
+  // to make sure there is no inconsistency between runtime types and database types.
+  .transform(
+    (
+      rawChange,
+    ): {
+      readonly id: string;
+      readonly type: string;
+      readonly meta: Record<string, SerializableValue>;
+      readonly criticality: Criticality;
+      readonly message: string;
+      readonly path?: string;
+      readonly approvalMetadata: SchemaCheckApprovalMetadata | null;
+    } => {
+      let change = schemaChangeFromSerializableChange(rawChange as any);
 
-    if (rawChange.isSafeBasedOnUsage) {
-      change = {
-        ...change,
-        criticality: {
-          ...change.criticality,
-          level: CriticalityLevel.Dangerous,
+      if (rawChange.isSafeBasedOnUsage) {
+        change = {
+          ...change,
+          criticality: {
+            ...change.criticality,
+            level: CriticalityLevel.Dangerous,
+          },
+          message: `${change.message} (non-breaking based on usage)`,
+        };
+      }
+
+      return {
+        get id() {
+          return rawChange.id ?? createSchemaChangeId(change);
         },
-        message: `${change.message} (non-breaking based on usage)`,
+        approvalMetadata: rawChange.approvalMetadata,
+        ...change,
       };
-    }
-
-    return {
-      get id() {
-        return rawChange.id ?? createSchemaChangeId(change);
-      },
-      ...change,
-    };
-  });
+    },
+  );
 
 export type SchemaChangeType = z.TypeOf<typeof HiveSchemaChangeModel>;
 
@@ -908,6 +936,7 @@ const SchemaCheckSharedOutputFields = {
   // we need to improve the model code to reflect that
   githubRepository: z.string().nullable(),
   githubSha: z.string().nullable(),
+  contextId: z.string().nullable(),
 };
 
 const SchemaCheckSharedInputFields = {
