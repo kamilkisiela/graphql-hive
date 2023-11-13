@@ -84,7 +84,7 @@
     "jest-snapshot-serializer-raw": "2.0.0",
     "lint-staged": "15.1.0",
     "pg": "8.11.3",
-    "prettier": "3.0.3",
+    "prettier": "3.1.0",
     "prettier-plugin-sql": "0.16.0",
     "prettier-plugin-tailwindcss": "0.5.7",
     "pretty-quick": "3.1.3",
