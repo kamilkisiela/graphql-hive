@@ -8,7 +8,6 @@ export default {
       "context_id" text NOT NULL,
       "schema_change_id" text NOT NULL,
       "schema_change" jsonb NOT NULL,
-      "first_approved_in_schema_check_id" UUID REFERENCES "schema_checks" ("id") ON DELETE CASCADE,
       "created_at" TIMESTAMPTZ NOT NULL DEFAULT now(),
       PRIMARY KEY ("target_id", "context_id", "schema_change_id")
     );

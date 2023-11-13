@@ -3491,7 +3491,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             , "context_id"
             , "schema_change_id"
             , "schema_change"
-            , "first_approved_in_schema_check_id"
           )
           VALUES ${sql.join(
             schemaCheck.breakingSchemaChanges.map(
@@ -3511,7 +3510,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                       },
                     }),
                   )}
-                  , ${schemaCheck.id}
               )`,
             ),
             sql`,`,

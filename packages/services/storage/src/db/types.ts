@@ -160,7 +160,6 @@ export interface projects {
 export interface schema_change_approvals {
   context_id: string;
   created_at: Date;
-  first_approved_in_schema_check_id: string | null;
   schema_change: any;
   schema_change_id: string;
   target_id: string;
