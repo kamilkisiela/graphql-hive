@@ -39,7 +39,6 @@ import migration_2023_01_04T17_00_23_hobby_7_by_default from './actions/2023.01.
 import migration_2023_01_12T17_00_23_cdn_tokens from './actions/2023.01.12T17.00.23.cdn-tokens';
 import migration_2023_01_17T10_46_28_import_legacy_s3_keys_to_database_mts from './actions/2023.01.17T10.46.28.import-legacy-s3-keys-to-database';
 import migration_2023_01_18T11_03_41_registry_v2 from './actions/2023.01.18T11.03.41.registry-v2';
-import migration_2023_02_21T14_32_24_supertokens_4_0_0 from './actions/2023.02.21T14.32.24.supertokens-4.0.0';
 import migration_2023_02_22T09_27_02_delete_personal_org from './actions/2023.02.22T09.27.02.delete-personal-org';
 import migration_2023_03_14T12_14_23_schema_policy from './actions/2023.03.14T12.14.23.schema-policy';
 import migration_2023_03_29T11_42_44_feature_flags from './actions/2023.03.29T11.42.44.feature-flags';
@@ -103,7 +102,6 @@ export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) 
       migration_2023_01_12T17_00_23_cdn_tokens,
       migration_2023_01_17T10_46_28_import_legacy_s3_keys_to_database_mts,
       migration_2023_01_18T11_03_41_registry_v2,
-      migration_2023_02_21T14_32_24_supertokens_4_0_0,
       migration_2023_02_22T09_27_02_delete_personal_org,
       migration_2023_03_14T12_14_23_schema_policy,
       migration_2023_03_29T11_42_44_feature_flags,
