@@ -379,7 +379,7 @@ async function verifySuperTokensSession(
       'content-type': 'application/json',
       'api-key': apiKey,
       rid: 'session',
-      'cdi-version': '3.0',
+      'cdi-version': '4.0',
     },
     body: JSON.stringify({
       accessToken,

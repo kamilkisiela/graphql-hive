@@ -9,10 +9,24 @@ const { fetch } = createFetch({
   useNodeFetch: true,
 });
 
-const SignUpSignInUserResponseModel = z.object({
-  status: z.literal('OK'),
-  user: z.object({ email: z.string(), id: z.string(), timeJoined: z.number() }),
-});
+const SignUpSignInUserResponseModel = z
+  .object({
+    status: z.literal('OK'),
+    user: z.object({
+      emails: z.array(z.string()),
+      id: z.string(),
+      timeJoined: z.number(),
+    }),
+  })
+  .refine(response => response.user.emails.length === 1)
+  .transform(response => ({
+    ...response,
+    user: {
+      id: response.user.id,
+      email: response.user.emails[0],
+      timeJoined: response.user.timeJoined,
+    },
+  }));
 
 const signUpUserViaEmail = async (
   email: string,
@@ -26,7 +40,7 @@ const signUpUserViaEmail = async (
         headers: {
           'content-type': 'application/json; charset=UTF-8',
           'api-key': ensureEnv('SUPERTOKENS_API_KEY'),
-          'cdi-version': '3.0',
+          'cdi-version': '4.0',
         },
         body: JSON.stringify({
           email,
@@ -103,7 +117,7 @@ const createSession = async (
           'content-type': 'application/json; charset=UTF-8',
           'api-key': ensureEnv('SUPERTOKENS_API_KEY'),
           rid: 'session',
-          'cdi-version': '3.0',
+          'cdi-version': '4.0',
         },
         body: JSON.stringify(payload),
       },
