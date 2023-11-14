@@ -14,7 +14,7 @@
     "@hive/emails": "workspace:*",
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
-    "@sentry/node": "7.80.0",
+    "@sentry/node": "7.80.1",
     "@trpc/client": "10.43.3",
     "@trpc/server": "10.43.3",
     "@whatwg-node/fetch": "0.9.13",
