@@ -222,6 +222,9 @@ FLAGS
   --require=<value>...
       [default: ] Loads specific require.extensions before running the command
 
+  --validateOptions=<value>...
+      [default: '{}'] validations options to be passed to graphql inspector validate library, as JSON
+
   --token=<value>
       api token
 

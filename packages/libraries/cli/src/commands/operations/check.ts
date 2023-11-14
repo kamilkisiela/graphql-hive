@@ -44,9 +44,9 @@ export default class OperationsCheck extends Command {
       default: [],
       multiple: true,
     }),
-    'validateOptions': Flags.string({
-      description: 'options for validations from graphql inspector core validate library',
-      default: {}
+    validateOptions: Flags.string({
+      description: 'validations options to be passed to graphql inspector validate library, as JSON',
+      default: '{}'
     }),
     graphqlTag: Flags.string({
       description: [
@@ -132,7 +132,7 @@ export default class OperationsCheck extends Command {
         assumeValid: true,
       });
 
-      const validateOptions = flags.validateOptions;
+      const validateOptions = JSON.parse(flags.validateOptions);
       const invalidOperations = validate(
         schema,
         operations.map(s => new Source(s.content, s.location)),
