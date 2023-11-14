@@ -19,8 +19,7 @@ export type Context = {
 export { Stripe as StripeTypes };
 
 const t = initTRPC.context<Context>().create();
-const errorMiddleware = t.middleware(handleTRPCError);
-const procedure = t.procedure.use(errorMiddleware);
+const procedure = t.procedure.use(handleTRPCError);
 
 export const stripeBillingApiRouter = t.router({
   availablePrices: procedure.query(async ({ ctx }) => {

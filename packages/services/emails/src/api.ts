@@ -8,7 +8,7 @@ import { renderEmailVerificationEmail } from './templates/email-verification';
 import { renderPasswordResetEmail } from './templates/password-reset';
 
 const t = initTRPC.context<Context>().create();
-const procedure = t.procedure.use(t.middleware(handleTRPCError));
+const procedure = t.procedure.use(handleTRPCError);
 
 export const emailsApiRouter = t.router({
   schedule: procedure.input(EmailInputShape).mutation(async ({ ctx, input }) => {

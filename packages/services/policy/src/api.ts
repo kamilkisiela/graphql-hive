@@ -31,8 +31,7 @@ const t = initTRPC.context<Context>().create({
     };
   },
 });
-const errorMiddleware = t.middleware(handleTRPCError);
-const procedure = t.procedure.use(errorMiddleware);
+const procedure = t.procedure.use(handleTRPCError);
 
 const CONFIG_VALIDATION_SCHEMA = createInputValidationSchema();
 const CONFIG_CHECK_INPUT_VALIDATION = z

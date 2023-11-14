@@ -22,8 +22,7 @@ export function createContext(estimator: Estimator, req: FastifyRequest) {
 }
 
 const t = initTRPC.context<ReturnType<typeof createContext>>().create();
-const errorMiddleware = t.middleware(handleTRPCError);
-const procedure = t.procedure.use(errorMiddleware);
+const procedure = t.procedure.use(handleTRPCError);
 
 export const usageEstimatorApiRouter = t.router({
   estimateOperationsForTarget: procedure
