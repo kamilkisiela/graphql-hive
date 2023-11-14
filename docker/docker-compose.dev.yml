@@ -2,7 +2,7 @@ version: '3.8'
 name: 'hive-dev'
 services:
   db:
-    image: postgres:14.9-alpine
+    image: postgres:14.10-alpine
     networks:
       - 'stack'
     healthcheck:
