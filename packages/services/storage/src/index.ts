@@ -56,12 +56,13 @@ import {
 } from './db';
 import {
   HiveSchemaChangeModel,
-  SchemaChangeType,
   SchemaCheckModel,
-  SchemaCompositionError,
   SchemaCompositionErrorModel,
   SchemaPolicyWarningModel,
   TargetBreadcrumbModel,
+  type SchemaChangeType,
+  type SchemaCheckApprovalMetadata,
+  type SchemaCompositionError,
 } from './schema-change-model';
 import type { Slonik } from './shared';
 
@@ -3482,6 +3483,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         return null;
       }
 
+      // We enhance the approved schema checks with some metadata
+      const approvalMetadata: SchemaCheckApprovalMetadata = {
+        userId: args.userId,
+        date: new Date().toISOString(),
+        schemaCheckId: schemaCheck.id,
+      };
+
       if (schemaCheck.contextId !== null) {
         // Try to approve and claim all the breaking schema changes for this context
         await pool.query(sql`
@@ -3502,11 +3510,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                     toSerializableSchemaChange({
                       ...change,
                       // We enhance the approved schema changes with some metadata that can be displayed on the UI
-                      approvalMetadata: {
-                        userId: args.userId,
-                        date: new Date().toISOString(),
-                        schemaCheckId: schemaCheck.id,
-                      },
+                      approvalMetadata,
                     }),
                   )}
               )`,
@@ -3516,13 +3520,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           ON CONFLICT ("target_id", "context_id", "schema_change_id") DO NOTHING
         `);
       }
-
-      // We enhance the approved schema checks with some metadata
-      const approvalMetadata = {
-        userId: args.userId,
-        date: new Date().toISOString(),
-        schemaCheckId: schemaCheck.id,
-      };
 
       const updateResult = await pool.maybeOne<{
         id: string;
@@ -3758,43 +3755,75 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 1000
             )
           RETURNING
-            "schema_sdl_store_id" as "id1",
-            "supergraph_sdl_store_id" as "id2",
-            "composite_schema_sdl_store_id" as "id3"
+            "schema_sdl_store_id" as "storeId1",
+            "supergraph_sdl_store_id" as "storeId2",
+            "composite_schema_sdl_store_id" as "storeId3",
+            "target_id" as "targetId",
+            "context_id" as "contextId"
         `);
-        const ids = PurgeExpiredSchemaChecksIDModel.parse(result);
 
-        if (ids.size === 0) {
-          return {
-            deletedSchemaCheckCount: result.length,
-            deletedSdlStoreCount: 0,
-          };
+        const { storeIds, targetIds, contextIds } = PurgeExpiredSchemaChecksIDModel.parse(result);
+
+        let deletedSdlStoreCount = 0;
+        let deletedSchemaChangeApprovalCount = 0;
+
+        if (storeIds.size !== 0) {
+          const deletedSdlStoreRecords = await pool.any<unknown>(sql`
+            DELETE
+            FROM
+              "sdl_store"
+            WHERE
+              "id" = ANY(
+                ${sql.array(Array.from(storeIds), 'text')}
+              )
+              AND NOT EXISTS (
+                SELECT
+                  1
+                FROM
+                  "schema_checks"
+                WHERE
+                  "schema_checks"."schema_sdl_store_id" = "sdl_store"."id"
+                  OR "schema_checks"."composite_schema_sdl_store_id" = "sdl_store"."id"
+                  OR "schema_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
+              )
+            RETURNING
+              true as "d"
+          `);
+
+          deletedSdlStoreCount = deletedSdlStoreRecords.length;
         }
-        const deletedRecords = await pool.any<unknown>(sql`
-          DELETE
-          FROM
-            "sdl_store"
-          WHERE
-            "id" = ANY(
-              ${sql.array(Array.from(ids), 'text')}
-            )
-            AND NOT EXISTS (
-              SELECT
-                1
-              FROM
-                "schema_checks"
-              WHERE
-                "schema_checks"."schema_sdl_store_id" = "sdl_store"."id"
-                OR "schema_checks"."composite_schema_sdl_store_id" = "sdl_store"."id"
-                OR "schema_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
-            )
-          RETURNING
-            true as "d"
-        `);
+
+        if (targetIds.size && contextIds.size) {
+          const deletedSchemaChangeApprovals = await pool.any<unknown>(sql`
+            DELETE
+            FROM
+              "schema_change_approvals"
+            WHERE
+              "target_id" = ANY(
+                ${sql.array(Array.from(targetIds), 'text')}
+              )
+              AND "context_id" = ANY(
+                ${sql.array(Array.from(contextIds), 'text')}
+              )
+              AND NOT EXISTS (
+                SELECT
+                  1
+                FROM "schema_checks"
+                WHERE
+                  "schema_checks"."target_id" = "schema_change_approvals"."target_id"
+                  AND "schema_checks"."context_id" = "schema_change_approvals"."context_id"
+              )
+            RETURNING
+              true as "d"
+          `);
+
+          deletedSchemaChangeApprovalCount = deletedSchemaChangeApprovals.length;
+        }
 
         return {
           deletedSchemaCheckCount: result.length,
-          deletedSdlStoreCount: deletedRecords.length,
+          deletedSdlStoreCount,
+          deletedSchemaChangeApprovalCount,
         };
       });
     },
@@ -4233,19 +4262,33 @@ const TargetModel = zod.object({
 const PurgeExpiredSchemaChecksIDModel = zod
   .array(
     zod.object({
-      id1: zod.string().nullable(),
-      id2: zod.string().nullable(),
-      id3: zod.string().nullable(),
+      storeId1: zod.string().nullable(),
+      storeId2: zod.string().nullable(),
+      storeId3: zod.string().nullable(),
+      targetId: zod.string(),
+      contextId: zod.string().nullable(),
     }),
   )
   .transform(items => {
-    const ids = new Set<string>();
+    const storeIds = new Set<string>();
+    const targetIds = new Set<string>();
+    const contextIds = new Set<string>();
+
     for (const row of items) {
-      row.id1 && ids.add(row.id1);
-      row.id2 && ids.add(row.id2);
-      row.id3 && ids.add(row.id3);
+      row.storeId1 && storeIds.add(row.storeId1);
+      row.storeId2 && storeIds.add(row.storeId2);
+      row.storeId3 && storeIds.add(row.storeId3);
+      if (row.contextId) {
+        targetIds.add(row.targetId);
+        contextIds.add(row.contextId);
+      }
     }
-    return ids;
+
+    return {
+      storeIds,
+      targetIds,
+      contextIds,
+    };
   });
 
 export * from './schema-change-model';

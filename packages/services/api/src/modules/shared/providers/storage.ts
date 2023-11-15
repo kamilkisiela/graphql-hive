@@ -678,6 +678,7 @@ export interface Storage {
   purgeExpiredSchemaChecks(_: { expiresAt: Date }): Promise<{
     deletedSchemaCheckCount: number;
     deletedSdlStoreCount: number;
+    deletedSchemaChangeApprovalCount: number;
   }>;
   /**
    * Find schema check for a given ID and target.
