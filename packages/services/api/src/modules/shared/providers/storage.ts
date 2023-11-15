@@ -1,5 +1,4 @@
 import { Injectable } from 'graphql-modules';
-import { Change } from '@graphql-inspector/core';
 import type { PolicyConfigurationObject } from '@hive/policy';
 import type {
   SchemaChangeType,
@@ -368,7 +367,7 @@ export interface Storage {
       serviceName: string;
       composable: boolean;
       actionFn(): Promise<void>;
-      changes: Array<Change> | null;
+      changes: Array<SchemaChangeType> | null;
     } & TargetSelector &
       (
         | {
@@ -396,7 +395,7 @@ export interface Storage {
       logIds: string[];
       base_schema: string | null;
       actionFn(): Promise<void>;
-      changes: Array<Change>;
+      changes: Array<SchemaChangeType>;
       previousSchemaVersion: null | string;
       github: null | {
         repository: string;

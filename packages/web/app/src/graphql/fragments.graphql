@@ -90,7 +90,7 @@ fragment SchemaVersionFields on SchemaVersion {
 
 fragment SchemaChangeFields on SchemaChange {
   path
-  message
+  message(withSafeBasedOnUsageNote: false)
   criticality
   criticalityReason
   approval {
@@ -101,6 +101,7 @@ fragment SchemaChangeFields on SchemaChange {
     approvedAt
     schemaCheckId
   }
+  isSafeBasedOnUsage
 }
 
 fragment SchemaCompareResultFields on SchemaCompareResult {

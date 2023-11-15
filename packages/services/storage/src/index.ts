@@ -8,7 +8,6 @@ import {
 } from 'slonik';
 import { update } from 'slonik-utilities';
 import zod from 'zod';
-import type { Change } from '@graphql-inspector/core';
 import type {
   ActivityObject,
   Alert,
@@ -4052,7 +4051,7 @@ const DocumentCollectionDocumentModel = zod.object({
 async function insertSchemaVersionChanges(
   trx: DatabaseTransactionConnection,
   args: {
-    changes: Array<Change>;
+    changes: Array<SchemaChangeType>;
     versionId: string;
   },
 ) {
@@ -4074,9 +4073,9 @@ async function insertSchemaVersionChanges(
           sql`(
             ${args.versionId},
             ${change.type},
-            ${change.criticality.level},
+            ${change.criticality},
             ${JSON.stringify(change.meta)}::jsonb,
-            ${change.criticality.isSafeBasedOnUsage ?? false}
+            ${change.isSafeBasedOnUsage ?? false}
           )`,
       ),
       sql`\n,`,
@@ -4170,7 +4169,7 @@ function toSerializableSchemaChange(change: SchemaChangeType): {
     id: change.id,
     type: change.type,
     meta: change.meta,
-    isSafeBasedOnUsage: change.criticality?.isSafeBasedOnUsage ?? false,
+    isSafeBasedOnUsage: change.isSafeBasedOnUsage,
     approvalMetadata: change.approvalMetadata,
   };
 }

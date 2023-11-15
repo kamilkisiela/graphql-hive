@@ -532,8 +532,8 @@ export class SchemaPublisher {
         targetId: target.id,
         schemaVersionId: latestVersion?.version ?? null,
         isSuccess: true,
-        breakingSchemaChanges: null,
-        safeSchemaChanges: checkResult.state?.schemaChanges ?? null,
+        breakingSchemaChanges: checkResult.state?.schemaChanges?.breaking ?? null,
+        safeSchemaChanges: checkResult.state?.schemaChanges?.safe ?? null,
         schemaPolicyWarnings: checkResult.state?.schemaPolicyWarnings ?? null,
         schemaPolicyErrors: null,
         schemaCompositionErrors: null,
@@ -571,9 +571,9 @@ export class SchemaPublisher {
           target,
           organization,
           conclusion: checkResult.conclusion,
-          changes: checkResult.state?.schemaChanges ?? null,
+          changes: checkResult.state?.schemaChanges?.all ?? null,
+          breakingChanges: checkResult.state?.schemaChanges?.breaking ?? null,
           warnings: checkResult.state?.schemaPolicyWarnings ?? null,
-          breakingChanges: null,
           compositionErrors: null,
           errors: null,
           schemaCheckId: schemaCheck?.id ?? null,
@@ -614,7 +614,7 @@ export class SchemaPublisher {
       return {
         __typename: 'SchemaCheckSuccess',
         valid: true,
-        changes: checkResult.state?.schemaChanges ?? [],
+        changes: checkResult.state?.schemaChanges?.all ?? [],
         warnings: checkResult.state?.schemaPolicyWarnings ?? [],
         initial: latestVersion == null,
         schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, schemaCheck),
@@ -626,13 +626,12 @@ export class SchemaPublisher {
     return {
       __typename: 'SchemaCheckError',
       valid: false,
-      changes: [
-        ...(checkResult.state.schemaChanges?.breaking ?? []),
-        ...(checkResult.state.schemaChanges?.safe ?? []),
-      ],
+      changes: checkResult.state.schemaChanges?.all ?? [],
       warnings: checkResult.state.schemaPolicy?.warnings ?? [],
       errors: [
-        ...(checkResult.state.schemaChanges?.breaking ?? []),
+        ...(checkResult.state.schemaChanges?.breaking?.filter(
+          breaking => breaking.approvalMetadata == null && breaking.isSafeBasedOnUsage === false,
+        ) ?? []),
         ...(checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? []),
         ...(checkResult.state.composition.errors ?? []),
       ],
@@ -1755,7 +1754,7 @@ export class SchemaPublisher {
 }
 
 function filterChangesByLevel(level: CriticalityLevel) {
-  return (change: SchemaChangeType) => change.criticality.level === level;
+  return (change: SchemaChangeType) => change.criticality === level;
 }
 
 function writeChanges(

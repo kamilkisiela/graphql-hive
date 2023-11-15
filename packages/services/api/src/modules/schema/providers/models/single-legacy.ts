@@ -112,7 +112,7 @@ export class SingleLegacyModel {
     return {
       conclusion: SchemaCheckConclusion.Success,
       state: {
-        schemaChanges: diffCheck.result?.changes ?? null,
+        schemaChanges: diffCheck.result ?? null,
         schemaPolicyWarnings: null,
         composition: {
           compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
@@ -205,10 +205,8 @@ export class SingleLegacyModel {
     const compositionErrors =
       compositionCheck.status === 'failed' ? compositionCheck.reason.errors : null;
     const breakingChanges =
-      diffCheck.status === 'failed' && !acceptBreakingChanges
-        ? diffCheck.reason.breakingChanges
-        : null;
-    const changes = diffCheck.result?.changes || diffCheck.reason?.changes || null;
+      diffCheck.status === 'failed' && !acceptBreakingChanges ? diffCheck.reason.breaking : null;
+    const changes = diffCheck.result?.all || diffCheck.reason?.all || null;
 
     const hasNewMetadata =
       metadataCheck.status === 'completed' && metadataCheck.result.status === 'modified';
@@ -269,8 +267,8 @@ export class SingleLegacyModel {
     if (diffCheck.status === 'failed' && !acceptBreakingChanges) {
       reasons.push({
         code: PublishFailureReasonCode.BreakingChanges,
-        changes: diffCheck.reason.changes ?? [],
-        breakingChanges: diffCheck.reason.breakingChanges ?? [],
+        changes: diffCheck.reason.all ?? [],
+        breakingChanges: diffCheck.reason.breaking ?? [],
       });
     }
 

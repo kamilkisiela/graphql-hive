@@ -1,6 +1,13 @@
-import { Change, CriticalityLevel } from '@graphql-inspector/core';
+import { CriticalityLevel } from '@graphql-inspector/core';
+import type { SchemaChangeType } from '@hive/storage';
 import type * as Types from '../../../../__generated__/types';
-import { Alert, AlertChannel, Organization, Project, Target } from '../../../../shared/entities';
+import type {
+  Alert,
+  AlertChannel,
+  Organization,
+  Project,
+  Target,
+} from '../../../../shared/entities';
 
 export interface SchemaChangeNotificationInput {
   event: {
@@ -12,7 +19,7 @@ export interface SchemaChangeNotificationInput {
       commit: string;
       valid: boolean;
     };
-    changes: Array<Change>;
+    changes: Array<SchemaChangeType>;
     messages: string[];
     errors: Types.SchemaError[];
     initial: boolean;
@@ -61,5 +68,5 @@ export function quotesTransformer(msg: string, symbols = '**') {
 }
 
 export function filterChangesByLevel(level: CriticalityLevel) {
-  return (change: Change) => change.criticality.level === level;
+  return (change: SchemaChangeType) => change.criticality === level;
 }
