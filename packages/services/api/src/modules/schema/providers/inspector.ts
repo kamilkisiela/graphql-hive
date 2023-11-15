@@ -97,7 +97,7 @@ export class Inspector {
           isSafeBasedOnUsage: change.criticality.isSafeBasedOnUsage,
         }),
       )
-      .sort((a, b) => a.criticality.level.localeCompare(b.criticality.level));
+      .sort((a, b) => a.criticality.localeCompare(b.criticality));
   }
 
   private async getSettings({ selector }: { selector: Types.TargetSelector }) {

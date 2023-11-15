@@ -6,18 +6,22 @@ const changes = [
   {
     message: 'Type "Foo" was removed',
     criticality: CriticalityLevel.Breaking,
+    isSafeBasedOnUsage: false,
   },
   {
     message: 'Input field "limit" was added to input object type "Filter"',
     criticality: CriticalityLevel.Breaking,
+    isSafeBasedOnUsage: false,
   },
   {
     message: 'Field "User.nickname" is no longer deprecated',
     criticality: CriticalityLevel.Dangerous,
+    isSafeBasedOnUsage: false,
   },
   {
     message: 'Field "type" was added to object type "User"',
     criticality: CriticalityLevel.Safe,
+    isSafeBasedOnUsage: false,
   },
 ];
 

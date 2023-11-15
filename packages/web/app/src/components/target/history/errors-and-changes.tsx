@@ -46,6 +46,12 @@ export function ChangesBlock(props: {
             <MaybeWrapTooltip tooltip={change.criticalityReason ?? null}>
               <span className="text-gray-600 dark:text-white">{labelize(change.message)}</span>
             </MaybeWrapTooltip>
+            {change.isSafeBasedOnUsage ? (
+              <span className="cursor-pointer text-yellow-500">
+                {' '}
+                <CheckIcon className="inline h-3 w-3" /> Safe based on usage data
+              </span>
+            ) : null}
             {change.approval ? <SchemaChangeApproval approval={change.approval} /> : null}
           </li>
         ))}
@@ -96,7 +102,7 @@ const SchemaChangeApproval = (props: {
           </>
         }
       >
-        <span className="cursor-pointer">
+        <span className="cursor-pointer text-green-500">
           {' '}
           <CheckIcon className="inline h-3 w-3" /> Approved by {approvalName}
         </span>

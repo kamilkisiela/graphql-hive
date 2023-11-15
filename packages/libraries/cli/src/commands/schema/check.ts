@@ -29,8 +29,9 @@ const schemaCheckMutation = graphql(/* GraphQL */ `
         }
         changes {
           nodes {
-            message
+            message(withSafeBasedOnUsageNote: false)
             criticality
+            isSafeBasedOnUsage
           }
           total
         }
@@ -42,8 +43,9 @@ const schemaCheckMutation = graphql(/* GraphQL */ `
         valid
         changes {
           nodes {
-            message
+            message(withSafeBasedOnUsageNote: false)
             criticality
+            isSafeBasedOnUsage
           }
           total
         }

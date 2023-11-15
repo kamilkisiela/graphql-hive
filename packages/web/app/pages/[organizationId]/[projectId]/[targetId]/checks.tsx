@@ -192,7 +192,7 @@ const ActiveSchemaCheck_SchemaCheckFragment = graphql(`
     }
     breakingSchemaChanges {
       nodes {
-        message
+        message(withSafeBasedOnUsageNote: false)
         criticality
         criticalityReason
         path
@@ -204,11 +204,12 @@ const ActiveSchemaCheck_SchemaCheckFragment = graphql(`
           approvedAt
           schemaCheckId
         }
+        isSafeBasedOnUsage
       }
     }
     safeSchemaChanges {
       nodes {
-        message
+        message(withSafeBasedOnUsageNote: false)
         criticality
         criticalityReason
         path
@@ -220,6 +221,7 @@ const ActiveSchemaCheck_SchemaCheckFragment = graphql(`
           approvedAt
           schemaCheckId
         }
+        isSafeBasedOnUsage
       }
     }
     schemaPolicyWarnings {

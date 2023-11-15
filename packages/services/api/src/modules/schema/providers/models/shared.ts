@@ -80,7 +80,11 @@ export type SchemaCheckSuccess = {
   conclusion: (typeof SchemaCheckConclusion)['Success'];
   // state is null in case the check got skipped.
   state: null | {
-    schemaChanges: Array<SchemaChangeType> | null;
+    schemaChanges: null | {
+      breaking: Array<SchemaChangeType> | null;
+      safe: Array<SchemaChangeType> | null;
+      all: Array<SchemaChangeType> | null;
+    };
     schemaPolicyWarnings: SchemaCheckWarning[] | null;
     composition: {
       compositeSchemaSDL: string;
@@ -109,6 +113,7 @@ export type SchemaCheckFailure = {
     schemaChanges: null | {
       breaking: Array<SchemaChangeType> | null;
       safe: Array<SchemaChangeType> | null;
+      all: Array<SchemaChangeType> | null;
     };
     /** Absence means the schema policy is disabled or wasn't done because composition failed. */
     schemaPolicy: null | {
@@ -261,10 +266,11 @@ export function buildSchemaCheckFailureState(args: {
   policyCheck: Awaited<ReturnType<RegistryChecks['policyCheck']>> | null;
 }): SchemaCheckFailure['state'] {
   const compositionErrors: Array<CompositionFailureError> = [];
-  let schemaChanges: null | {
+  const schemaChanges: null | {
     breaking: Array<SchemaChangeType> | null;
     safe: Array<SchemaChangeType> | null;
-  } = null;
+    all: Array<SchemaChangeType> | null;
+  } = args.diffCheck.reason ?? args.diffCheck.result ?? null;
   let schemaPolicy: null | {
     errors: SchemaCheckWarning[] | null;
     warnings: SchemaCheckWarning[] | null;
@@ -272,20 +278,6 @@ export function buildSchemaCheckFailureState(args: {
 
   if (args.compositionCheck.status === 'failed') {
     compositionErrors.push(...args.compositionCheck.reason.errors);
-  }
-
-  if (args.diffCheck.reason) {
-    schemaChanges = {
-      breaking: args.diffCheck.reason.breakingChanges,
-      safe: args.diffCheck.reason.safeChanges,
-    };
-  }
-
-  if (args.diffCheck.result) {
-    schemaChanges = {
-      breaking: null,
-      safe: args.diffCheck.result.changes,
-    };
   }
 
   if (args.policyCheck) {

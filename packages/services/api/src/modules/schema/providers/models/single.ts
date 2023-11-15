@@ -133,7 +133,7 @@ export class SingleModel {
     return {
       conclusion: SchemaCheckConclusion.Success,
       state: {
-        schemaChanges: diffCheck.result?.changes ?? null,
+        schemaChanges: diffCheck.result ?? null,
         schemaPolicyWarnings: policyCheck.result?.warnings ?? null,
         composition: {
           compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
@@ -268,7 +268,7 @@ export class SingleModel {
       state: {
         composable: compositionCheck.status === 'completed',
         initial: latestVersion === null,
-        changes: diffCheck.result?.changes ?? diffCheck.reason?.changes ?? null,
+        changes: diffCheck.result?.all ?? diffCheck.reason?.all ?? null,
         messages,
         breakingChanges: null,
         compositionErrors: compositionCheck.reason?.errors ?? null,

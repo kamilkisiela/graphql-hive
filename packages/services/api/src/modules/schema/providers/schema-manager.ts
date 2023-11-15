@@ -2,8 +2,7 @@ import { parse } from 'graphql';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import { z } from 'zod';
-import { Change } from '@graphql-inspector/core';
-import type { SchemaCheck, SchemaCompositionError } from '@hive/storage';
+import type { SchemaChangeType, SchemaCheck, SchemaCompositionError } from '@hive/storage';
 import { RegistryModel, SchemaChecksFilter } from '../../../__generated__/types';
 import {
   DateRange,
@@ -327,7 +326,7 @@ export class SchemaManager {
       metadata: string | null;
       projectType: ProjectType;
       actionFn(): Promise<void>;
-      changes: Array<Change>;
+      changes: Array<SchemaChangeType>;
       previousSchemaVersion: string | null;
       github: null | {
         repository: string;

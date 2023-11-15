@@ -588,7 +588,7 @@ export const resolvers: SchemaModule.Resolvers = {
         ),
       ])
         .then(async ([before, after]) => {
-          let changes: SchemaChangeType[] = [];
+          const changes: SchemaChangeType[] = [];
 
           if (before) {
             const previousSchema = buildSortedSchemaFromSchemaObject(
@@ -609,11 +609,7 @@ export const resolvers: SchemaModule.Resolvers = {
                   }`,
                 ),
             );
-            const diffChanges = await injector.get(Inspector).diff(previousSchema, currentSchema);
-            changes = diffChanges.map(change => ({
-              ...change,
-              isSafeBasedOnUsage: change.criticality.isSafeBasedOnUsage ?? false,
-            }));
+            changes.push(...(await injector.get(Inspector).diff(previousSchema, currentSchema)));
           }
 
           changes.push(...detectUrlChanges(schemasBefore, schemasAfter));
@@ -1277,11 +1273,16 @@ export const resolvers: SchemaModule.Resolvers = {
   },
   SchemaChangeConnection: createConnection(),
   SchemaChange: {
-    message: change => change.message,
+    message: (change, args) => {
+      return args.withSafeBasedOnUsageNote && change.isSafeBasedOnUsage === true
+        ? `${change.message} (non-breaking based on usage)`
+        : change.message;
+    },
     path: change => change.path?.split('.') ?? null,
-    criticality: change => criticalityMap[change.criticality.level],
-    criticalityReason: change => change.criticality.reason ?? null,
+    criticality: change => criticalityMap[change.criticality],
+    criticalityReason: change => change.reason,
     approval: change => change.approvalMetadata,
+    isSafeBasedOnUsage: change => change.isSafeBasedOnUsage,
   },
   SchemaChangeApproval: {
     approvedBy: (approval, _, { injector }) =>

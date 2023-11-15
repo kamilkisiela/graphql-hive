@@ -156,7 +156,7 @@ export class CompositeModel {
       conclusion: SchemaCheckConclusion.Success,
       state: {
         schemaPolicyWarnings: policyCheck.result?.warnings ?? null,
-        schemaChanges: diffCheck.result?.changes ?? null,
+        schemaChanges: diffCheck.result ?? null,
         composition: {
           compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
           supergraphSDL: compositionCheck.result.supergraph,
@@ -337,7 +337,7 @@ export class CompositeModel {
       state: {
         composable: compositionCheck.status === 'completed',
         initial: latestVersion === null,
-        changes: diffCheck.result?.changes ?? diffCheck.reason?.changes ?? null,
+        changes: diffCheck.result?.all ?? diffCheck.reason?.all ?? null,
         messages,
         breakingChanges: null,
         compositionErrors: compositionCheck.reason?.errors ?? null,
@@ -451,11 +451,11 @@ export class CompositeModel {
     const { changes, breakingChanges } =
       diffCheck.status === 'failed'
         ? {
-            changes: diffCheck.reason.changes ?? [],
-            breakingChanges: diffCheck.reason.breakingChanges ?? [],
+            changes: diffCheck.reason.all ?? [],
+            breakingChanges: diffCheck.reason.breaking ?? [],
           }
         : {
-            changes: diffCheck.result?.changes ?? [],
+            changes: diffCheck.result?.all ?? [],
             breakingChanges: [],
           };
 

@@ -222,11 +222,9 @@ test.concurrent(
       expect(changes[0]).toMatchInlineSnapshot(`
         {
           approvalMetadata: null,
-          criticality: {
-            level: BREAKING,
-            reason: Removing a field is a breaking change. It is preferable to deprecate the field before removing it.,
-          },
+          criticality: BREAKING,
           id: b3cb5845edf64492571c7b5c5857b7f9,
+          isSafeBasedOnUsage: false,
           message: Field 'bruv' was removed from object type 'Query',
           meta: {
             isRemovedFieldDeprecated: false,
@@ -235,6 +233,7 @@ test.concurrent(
             typeType: object type,
           },
           path: Query.bruv,
+          reason: Removing a field is a breaking change. It is preferable to deprecate the field before removing it.,
           type: FIELD_REMOVED,
         }
       `);

@@ -307,32 +307,37 @@ export class RegistryChecks {
       inspectorChanges.push(...detectUrlChanges(version.schemas, schemas));
     }
 
+    let isFailure = false;
     const safeChanges: Array<SchemaChangeType> = [];
     const breakingChanges: Array<SchemaChangeType> = [];
+
     for (const change of inspectorChanges) {
-      if (change.criticality.level === CriticalityLevel.Breaking) {
+      if (change.isSafeBasedOnUsage === true) {
+        breakingChanges.push(change);
+      } else if (change.criticality === CriticalityLevel.Breaking) {
         // If this change is approved, we return the already approved on instead of the newly detected one,
         // as it it contains the necessary metadata on when the change got first approved and by whom.
         const approvedChange = approvedChanges?.get(change.id);
         if (approvedChange) {
-          safeChanges.push(approvedChange);
+          breakingChanges.push(approvedChange);
           continue;
         }
+        isFailure = true;
         breakingChanges.push(change);
         continue;
       }
       safeChanges.push(change);
     }
 
-    if (breakingChanges.length) {
+    if (isFailure === true) {
       this.logger.debug('Detected breaking changes');
       return {
         status: 'failed',
         reason: {
-          breakingChanges,
-          safeChanges: safeChanges.length ? safeChanges : null,
-          get changes() {
-            if (safeChanges.length || breakingChanges.length) {
+          breaking: breakingChanges,
+          safe: safeChanges.length ? safeChanges : null,
+          get all() {
+            if (breakingChanges.length || safeChanges.length) {
               return [...breakingChanges, ...safeChanges];
             }
             return null;
@@ -348,8 +353,14 @@ export class RegistryChecks {
     return {
       status: 'completed',
       result: {
-        safeChanges: safeChanges.length ? safeChanges : null,
-        changes: safeChanges.length ? safeChanges : null,
+        breaking: breakingChanges.length ? breakingChanges : null,
+        safe: safeChanges.length ? safeChanges : null,
+        get all() {
+          if (breakingChanges.length || safeChanges.length) {
+            return [...breakingChanges, ...safeChanges];
+          }
+          return null;
+        },
       },
     } satisfies CheckResult;
   }

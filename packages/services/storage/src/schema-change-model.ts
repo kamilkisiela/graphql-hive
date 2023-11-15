@@ -6,7 +6,6 @@ import { z } from 'zod';
 import { CriticalityLevel } from '@graphql-inspector/core';
 import type {
   ChangeType,
-  Criticality,
   DirectiveAddedChange,
   DirectiveArgumentAddedChange,
   DirectiveArgumentDefaultValueChangedChange,
@@ -843,30 +842,27 @@ export const HiveSchemaChangeModel = z
       readonly id: string;
       readonly type: string;
       readonly meta: Record<string, SerializableValue>;
-      readonly criticality: Criticality;
+      readonly criticality: CriticalityLevel;
+      readonly reason: string | null;
       readonly message: string;
-      readonly path?: string;
+      readonly path: string | null;
       readonly approvalMetadata: SchemaCheckApprovalMetadata | null;
+      readonly isSafeBasedOnUsage: boolean;
     } => {
-      let change = schemaChangeFromSerializableChange(rawChange as any);
-
-      if (rawChange.isSafeBasedOnUsage) {
-        change = {
-          ...change,
-          criticality: {
-            ...change.criticality,
-            level: CriticalityLevel.Dangerous,
-          },
-          message: `${change.message} (non-breaking based on usage)`,
-        };
-      }
+      const change = schemaChangeFromSerializableChange(rawChange as any);
 
       return {
         get id() {
           return rawChange.id ?? createSchemaChangeId(change);
         },
+        type: change.type,
         approvalMetadata: rawChange.approvalMetadata,
-        ...change,
+        criticality: change.criticality.level,
+        message: change.message,
+        meta: change.meta,
+        path: change.path ?? null,
+        isSafeBasedOnUsage: rawChange.isSafeBasedOnUsage ?? false,
+        reason: change.criticality.reason ?? null,
       };
     },
   );
