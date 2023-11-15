@@ -121,7 +121,7 @@ services:
       - ./.hive-dev/broker/db:/var/lib/kafka/data
 
   supertokens:
-    image: registry.supertokens.io/supertokens/supertokens-postgresql:6.0
+    image: registry.supertokens.io/supertokens/supertokens-postgresql:7.0
     depends_on:
       db:
         condition: service_healthy
