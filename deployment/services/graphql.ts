@@ -142,7 +142,7 @@ export function deployGraphQL({
         WEBHOOKS_ENDPOINT: serviceLocalEndpoint(webhooks.service),
         SCHEMA_ENDPOINT: serviceLocalEndpoint(schema.service),
         SCHEMA_POLICY_ENDPOINT: serviceLocalEndpoint(schemaPolicy.service),
-        WEB_APP_URL: `https://${deploymentEnv.DEPLOYED_DNS}/`,
+        WEB_APP_URL: `https://${deploymentEnv.DEPLOYED_DNS}`,
         // CDN
         CDN_CF: '1',
         CDN_CF_BASE_URL: cdn.workerBaseUrl,
