@@ -131,9 +131,16 @@ Or, multiple files using a `glob` expression:
 hive schema:check "src/*.graphql"
 ```
 
+If you want to leverage from retaining approved breaking changes within the lifecyle of a pull/merge
+request or branch, you must provide the `--contextId` parameter. Using `--contextId` is optional
+when using GitHub repositories and actions with the `--github` flag.
+
+```bash
+hive schema:check --contextId "pr-123" "src/*.graphql"
+```
+
 Further reading:
 
-- [`schema:check` API Reference](/docs/api-reference/cli#check-a-schema)
 - [Publishing a schema to the Schema Registry](/docs/features/schema-registry#publish-a-schema)
 - [Conditional Breaking Changes](/docs/management/targets#conditional-breaking-changes)
 
