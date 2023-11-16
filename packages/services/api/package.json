@@ -22,7 +22,7 @@
     "@hive/storage": "workspace:*",
     "@hive/tokens": "workspace:*",
     "@hive/webhooks": "workspace:*",
-    "@octokit/app": "14.0.1",
+    "@octokit/app": "14.0.2",
     "@octokit/request-error": "5.0.1",
     "@sentry/node": "7.80.1",
     "@sentry/types": "7.80.1",
