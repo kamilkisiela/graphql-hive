@@ -2,6 +2,7 @@ import { parse, print } from 'graphql';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import promClient from 'prom-client';
+import { z } from 'zod';
 import { CriticalityLevel } from '@graphql-inspector/core';
 import { SchemaChangeType, SchemaCheck } from '@hive/storage';
 import * as Sentry from '@sentry/node';
@@ -310,13 +311,25 @@ export class SchemaPublisher {
       }
     }
 
-    let contextId: string | null = input.contextId ?? null;
+    let contextId: string | null = null;
 
-    if (
-      input.contextId === undefined &&
-      input.github?.repository &&
-      input.github.pullRequestNumber
-    ) {
+    if (input.contextId !== undefined) {
+      const result = SchemaCheckContextIdModel.safeParse(input.contextId);
+      if (!result.success) {
+        return {
+          __typename: 'SchemaCheckError',
+          valid: false,
+          changes: [],
+          warnings: [],
+          errors: [
+            {
+              message: result.error.errors[0].message,
+            },
+          ],
+        } as const;
+      }
+      contextId = result.data;
+    } else if (input.github?.repository && input.github.pullRequestNumber) {
       contextId = `${input.github.repository}#${input.github.pullRequestNumber}`;
     }
 
@@ -1795,3 +1808,12 @@ function tryPrettifySDL(sdl: string): string {
 }
 
 const millisecondsPerDay = 60 * 60 * 24 * 1000;
+
+const SchemaCheckContextIdModel = z
+  .string()
+  .min(1, {
+    message: 'Context ID must be at least 1 character long.',
+  })
+  .max(200, {
+    message: 'Context ID cannot exceed length of 200 characters.',
+  });

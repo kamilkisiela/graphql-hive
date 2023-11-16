@@ -1436,3 +1436,133 @@ test.concurrent(
     });
   },
 );
+
+test.concurrent('contextId that has more than 300 characters is not allowed', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject } = await createOrg();
+  const { createToken } = await createProject(ProjectType.Single);
+
+  // Create a token with write rights
+  const writeToken = await createToken({
+    targetScopes: [
+      TargetAccessScope.Read,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+    ],
+  });
+
+  // Publish schema with write rights
+  const publishResult = await writeToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        type Query {
+          ping: String
+          pong: String
+        }
+      `,
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  // Schema publish should be successful
+  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  // Create a token with read rights
+  const readToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead],
+    projectScopes: [],
+    organizationScopes: [],
+  });
+
+  const contextId = '';
+
+  // Check schema with read rights
+  const checkResult = await readToken
+    .checkSchema(
+      /* GraphQL */ `
+        type Query {
+          ping: Float
+        }
+      `,
+      undefined,
+      undefined,
+      contextId,
+    )
+    .then(r => r.expectNoGraphQLErrors());
+
+  expect(checkResult.schemaCheck).toMatchObject({
+    __typename: 'SchemaCheckError',
+    errors: {
+      nodes: [
+        {
+          message: 'Context ID must be at least 1 character long.',
+        },
+      ],
+    },
+  });
+});
+
+test.concurrent('contextId that has fewer than 1 characters is not allowed', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject } = await createOrg();
+  const { createToken } = await createProject(ProjectType.Single);
+
+  // Create a token with write rights
+  const writeToken = await createToken({
+    targetScopes: [
+      TargetAccessScope.Read,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+    ],
+  });
+
+  // Publish schema with write rights
+  const publishResult = await writeToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        type Query {
+          ping: String
+          pong: String
+        }
+      `,
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  // Schema publish should be successful
+  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  // Create a token with read rights
+  const readToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead],
+    projectScopes: [],
+    organizationScopes: [],
+  });
+
+  const contextId = new Array(201).fill('A').join('');
+
+  // Check schema with read rights
+  const checkResult = await readToken
+    .checkSchema(
+      /* GraphQL */ `
+        type Query {
+          ping: Float
+        }
+      `,
+      undefined,
+      undefined,
+      contextId,
+    )
+    .then(r => r.expectNoGraphQLErrors());
+
+  expect(checkResult.schemaCheck).toMatchObject({
+    __typename: 'SchemaCheckError',
+    errors: {
+      nodes: [
+        {
+          message: 'Context ID cannot exceed length of 200 characters.',
+        },
+      ],
+    },
+  });
+});
