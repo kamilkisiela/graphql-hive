@@ -122,10 +122,12 @@ We recommend the following flow if you are having issues with running Hive local
    ```
    INTEGRATION_GITHUB=1
    INTEGRATION_GITHUB_GITHUB_APP_ID=<your-github-app-id>
-   INTEGRATION_GITHUB_GITHUB_APP_PRIVATE_KEY=<your-github-app-private-key>
    ```
 
    You'll find the GitHub App ID and private key in the `General` tab of your GitHub App.
+
+   Store the Github private key next to the `.env` file with the name `github-app.pem`
+   (`packages/services/server/github-app.pem`)
 
 2. Web App: Set the following in `packages/web/app/.env`:
    ```
