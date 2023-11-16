@@ -1140,3 +1140,299 @@ test.concurrent(
     });
   },
 );
+
+test.concurrent(
+  'approving a schema check with contextId containing breaking changes does not allow the changes for subsequent checks with a different contextId',
+  async () => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { createToken, project, target } = await createProject(ProjectType.Single);
+
+    // Create a token with write rights
+    const writeToken = await createToken({
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.Settings,
+      ],
+    });
+
+    // Publish schema with write rights
+    const publishResult = await writeToken
+      .publishSchema({
+        sdl: /* GraphQL */ `
+          type Query {
+            ping: String
+          }
+        `,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    // Schema publish should be successful
+    expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    // Create a token with read rights
+    const readToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead],
+      projectScopes: [],
+      organizationScopes: [],
+    });
+
+    const contextId = 'pr-69420';
+
+    // Check schema with read rights
+    const checkResult = await readToken
+      .checkSchema(
+        /* GraphQL */ `
+          type Query {
+            ping: Float
+          }
+        `,
+        undefined,
+        undefined,
+        contextId,
+      )
+      .then(r => r.expectNoGraphQLErrors());
+    const check = checkResult.schemaCheck;
+
+    if (check.__typename !== 'SchemaCheckError') {
+      throw new Error(`Expected SchemaCheckError, got ${check.__typename}`);
+    }
+
+    const schemaCheckId = check.schemaCheck?.id;
+
+    if (schemaCheckId == null) {
+      throw new Error('Missing schema check id.');
+    }
+
+    const mutationResult = await execute({
+      document: ApproveFailedSchemaCheckMutation,
+      variables: {
+        input: {
+          organization: organization.cleanId,
+          project: project.cleanId,
+          target: target.cleanId,
+          schemaCheckId,
+        },
+      },
+      authToken: ownerToken,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(mutationResult).toEqual({
+      approveFailedSchemaCheck: {
+        ok: {
+          schemaCheck: {
+            __typename: 'SuccessfulSchemaCheck',
+            isApproved: true,
+            approvedBy: {
+              __typename: 'User',
+            },
+          },
+        },
+        error: null,
+      },
+    });
+
+    const secondCheckResult = await readToken
+      .checkSchema(
+        /* GraphQL */ `
+          type Query {
+            ping: Float
+          }
+        `,
+        undefined,
+        undefined,
+        contextId + '|' + contextId,
+      )
+      .then(r => r.expectNoGraphQLErrors());
+
+    if (secondCheckResult.schemaCheck.__typename !== 'SchemaCheckError') {
+      throw new Error(`Expected SchemaCheckSuccess, got ${check.__typename}`);
+    }
+
+    const newSchemaCheckId = secondCheckResult.schemaCheck.schemaCheck?.id;
+
+    if (newSchemaCheckId == null) {
+      throw new Error('Missing schema check id.');
+    }
+
+    const newSchemaCheck = await execute({
+      document: SchemaCheckQuery,
+      variables: {
+        selector: {
+          organization: organization.cleanId,
+          project: project.cleanId,
+          target: target.cleanId,
+        },
+        id: newSchemaCheckId,
+      },
+      authToken: readToken.secret,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(newSchemaCheck.target?.schemaCheck).toMatchObject({
+      id: newSchemaCheckId,
+      breakingSchemaChanges: {
+        nodes: [
+          {
+            approval: null,
+          },
+        ],
+      },
+    });
+  },
+);
+
+test.concurrent(
+  'subsequent schema check with shared contextId that contains new breaking changes that have not been approved fails',
+  async () => {
+    const { createOrg, ownerToken } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { createToken, project, target } = await createProject(ProjectType.Single);
+
+    // Create a token with write rights
+    const writeToken = await createToken({
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.Settings,
+      ],
+    });
+
+    // Publish schema with write rights
+    const publishResult = await writeToken
+      .publishSchema({
+        sdl: /* GraphQL */ `
+          type Query {
+            ping: String
+            pong: String
+          }
+        `,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    // Schema publish should be successful
+    expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    // Create a token with read rights
+    const readToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead],
+      projectScopes: [],
+      organizationScopes: [],
+    });
+
+    const contextId = 'pr-69420';
+
+    // Check schema with read rights
+    const checkResult = await readToken
+      .checkSchema(
+        /* GraphQL */ `
+          type Query {
+            ping: Float
+          }
+        `,
+        undefined,
+        undefined,
+        contextId,
+      )
+      .then(r => r.expectNoGraphQLErrors());
+    const check = checkResult.schemaCheck;
+
+    if (check.__typename !== 'SchemaCheckError') {
+      throw new Error(`Expected SchemaCheckError, got ${check.__typename}`);
+    }
+
+    const schemaCheckId = check.schemaCheck?.id;
+
+    if (schemaCheckId == null) {
+      throw new Error('Missing schema check id.');
+    }
+
+    const mutationResult = await execute({
+      document: ApproveFailedSchemaCheckMutation,
+      variables: {
+        input: {
+          organization: organization.cleanId,
+          project: project.cleanId,
+          target: target.cleanId,
+          schemaCheckId,
+        },
+      },
+      authToken: ownerToken,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(mutationResult).toEqual({
+      approveFailedSchemaCheck: {
+        ok: {
+          schemaCheck: {
+            __typename: 'SuccessfulSchemaCheck',
+            isApproved: true,
+            approvedBy: {
+              __typename: 'User',
+            },
+          },
+        },
+        error: null,
+      },
+    });
+
+    const secondCheckResult = await readToken
+      .checkSchema(
+        /* GraphQL */ `
+          type Query {
+            ping: Float
+            pong: Float
+          }
+        `,
+        undefined,
+        undefined,
+        contextId,
+      )
+      .then(r => r.expectNoGraphQLErrors());
+
+    if (secondCheckResult.schemaCheck.__typename !== 'SchemaCheckError') {
+      throw new Error(`Expected SchemaCheckSuccess, got ${check.__typename}`);
+    }
+
+    const newSchemaCheckId = secondCheckResult.schemaCheck.schemaCheck?.id;
+
+    if (newSchemaCheckId == null) {
+      throw new Error('Missing schema check id.');
+    }
+
+    const newSchemaCheck = await execute({
+      document: SchemaCheckQuery,
+      variables: {
+        selector: {
+          organization: organization.cleanId,
+          project: project.cleanId,
+          target: target.cleanId,
+        },
+        id: newSchemaCheckId,
+      },
+      authToken: readToken.secret,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(newSchemaCheck.target?.schemaCheck).toMatchObject({
+      id: newSchemaCheckId,
+      breakingSchemaChanges: {
+        nodes: [
+          {
+            approval: {
+              schemaCheckId,
+              approvedAt: expect.any(String),
+              approvedBy: {
+                id: expect.any(String),
+                displayName: expect.any(String),
+              },
+            },
+          },
+          {
+            approval: null,
+          },
+        ],
+      },
+    });
+  },
+);
