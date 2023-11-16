@@ -314,7 +314,7 @@ export class GitHubIntegrationManager {
       check_run_id: args.githubCheckRun.id,
       conclusion: args.conclusion,
       output: args.output,
-      detailsUrl: args.detailsUrl ?? undefined,
+      details_url: args.detailsUrl ?? undefined,
     });
 
     this.logger.debug('Check-run updated (link=%s)', result.data.url);
