@@ -116,6 +116,12 @@ export async function main() {
           );
           transaction.setMeasurement('deletedSchemaCheckCount', result.deletedSchemaCheckCount, '');
           transaction.setMeasurement('deletedSdlStoreCount', result.deletedSdlStoreCount, '');
+          transaction.setMeasurement(
+            'deletedSchemaChangeApprovals',
+            result.deletedSchemaChangeApprovalCount,
+            '',
+          );
+
           transaction.finish();
         } catch (error) {
           captureException(error);

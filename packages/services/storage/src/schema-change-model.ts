@@ -1,6 +1,9 @@
 /** These mirror DB models from  */
-import type { RegistryServiceUrlChangeSerializableChange } from 'packages/services/api/src/modules/schema/schema-change-from-meta';
+import crypto from 'node:crypto';
+import stableJSONStringify from 'fast-json-stable-stringify';
+import { SerializableValue } from 'slonik';
 import { z } from 'zod';
+import { CriticalityLevel } from '@graphql-inspector/core';
 import type {
   ChangeType,
   DirectiveAddedChange,
@@ -57,6 +60,10 @@ import type {
   UnionMemberAddedChange,
   UnionMemberRemovedChange,
 } from '@graphql-inspector/core';
+import {
+  RegistryServiceUrlChangeSerializableChange,
+  schemaChangeFromSerializableChange,
+} from './schema-change-meta';
 
 // prettier-ignore
 const FieldArgumentDescriptionChangedLiteral = z.literal("FIELD_ARGUMENT_DESCRIPTION_CHANGED" satisfies `${ChangeType.FieldArgumentDescriptionChanged}`)
@@ -796,10 +803,71 @@ export const SchemaPolicyWarningModel = z.object({
   endColumn: z.number().nullable(),
 });
 
-const SchemaChangeModelWithIsSafeBreakingChange = z.intersection(
-  SchemaChangeModel,
-  z.object({ isSafeBasedOnUsage: z.boolean().optional() }),
-);
+function createSchemaChangeId(change: { type: string; meta: Record<string, unknown> }): string {
+  const hash = crypto.createHash('md5');
+  hash.update(stableJSONStringify(change.meta));
+  return hash.digest('hex');
+}
+
+const ApprovalMetadataModel = z.object({
+  userId: z.string(),
+  schemaCheckId: z.string(),
+  date: z.string(),
+});
+
+export type SchemaCheckApprovalMetadata = z.TypeOf<typeof ApprovalMetadataModel>;
+
+export const HiveSchemaChangeModel = z
+  .intersection(
+    SchemaChangeModel,
+    z.object({
+      /** optional property for identifying whether a change is safe based on the usage data. */
+      isSafeBasedOnUsage: z.boolean().optional(),
+      /** Optional id that uniquely identifies a change. The ID is generated in case the input does not contain it. */
+      id: z.string().optional(),
+      approvalMetadata: ApprovalMetadataModel.nullable()
+        .optional()
+        .transform(value => value ?? null),
+    }),
+  )
+  // We inflate the schema check when reading it from the database
+  // In order to keep TypeScript compiler from blowing up we use our own internal
+  // type for the schema checks that is no exhaustive union.
+  // We only do exhaustive json validation when reading from the database
+  // to make sure there is no inconsistency between runtime types and database types.
+  .transform(
+    (
+      rawChange,
+    ): {
+      readonly id: string;
+      readonly type: string;
+      readonly meta: Record<string, SerializableValue>;
+      readonly criticality: CriticalityLevel;
+      readonly reason: string | null;
+      readonly message: string;
+      readonly path: string | null;
+      readonly approvalMetadata: SchemaCheckApprovalMetadata | null;
+      readonly isSafeBasedOnUsage: boolean;
+    } => {
+      const change = schemaChangeFromSerializableChange(rawChange as any);
+
+      return {
+        get id() {
+          return rawChange.id ?? createSchemaChangeId(change);
+        },
+        type: change.type,
+        approvalMetadata: rawChange.approvalMetadata,
+        criticality: change.criticality.level,
+        message: change.message,
+        meta: change.meta,
+        path: change.path ?? null,
+        isSafeBasedOnUsage: rawChange.isSafeBasedOnUsage ?? false,
+        reason: change.criticality.reason ?? null,
+      };
+    },
+  );
+
+export type SchemaChangeType = z.TypeOf<typeof HiveSchemaChangeModel>;
 
 // Schema Checks
 
@@ -833,8 +901,8 @@ const SchemaCheckSharedPolicyFields = {
 };
 
 const SchemaCheckSharedChangesFields = {
-  safeSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
-  breakingSchemaChanges: z.array(SchemaChangeModelWithIsSafeBreakingChange).nullable(),
+  safeSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
+  breakingSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
 };
 
 const ManuallyApprovedSchemaCheckFields = {
@@ -864,6 +932,7 @@ const SchemaCheckSharedOutputFields = {
   // we need to improve the model code to reflect that
   githubRepository: z.string().nullable(),
   githubSha: z.string().nullable(),
+  contextId: z.string().nullable(),
 };
 
 const SchemaCheckSharedInputFields = {

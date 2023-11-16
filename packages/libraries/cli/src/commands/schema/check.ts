@@ -29,8 +29,9 @@ const schemaCheckMutation = graphql(/* GraphQL */ `
         }
         changes {
           nodes {
-            message
+            message(withSafeBasedOnUsageNote: false)
             criticality
+            isSafeBasedOnUsage
           }
           total
         }
@@ -42,8 +43,9 @@ const schemaCheckMutation = graphql(/* GraphQL */ `
         valid
         changes {
           nodes {
-            message
+            message(withSafeBasedOnUsageNote: false)
             criticality
+            isSafeBasedOnUsage
           }
           total
         }
@@ -123,6 +125,9 @@ export default class SchemaCheck extends Command {
     commit: Flags.string({
       description: 'Associated commit sha',
     }),
+    contextId: Flags.string({
+      description: 'Context ID for grouping the schema check.',
+    }),
   };
 
   static args = {
@@ -172,21 +177,28 @@ export default class SchemaCheck extends Command {
       let github: null | {
         commit: string;
         repository: string | null;
+        pullRequestNumber: string | null;
       } = null;
 
       if (usesGitHubApp) {
         if (!commit) {
           throw new Errors.CLIError(`Couldn't resolve commit sha required for GitHub Application`);
         }
-        // eslint-disable-next-line no-process-env
-        const repository = process.env['GITHUB_REPOSITORY'] ?? null;
-        if (!repository) {
-          throw new Errors.CLIError(`Missing "GITHUB_REPOSITORY" environment variable.`);
+        if (!git.repository) {
+          throw new Errors.CLIError(
+            `Couldn't resolve git repository required for GitHub Application`,
+          );
+        }
+        if (!git.pullRequestNumber) {
+          throw new Errors.CLIError(
+            `Couldn't resolve pull request number required for GitHub Application`,
+          );
         }
 
         github = {
           commit: commit,
-          repository,
+          repository: git.repository,
+          pullRequestNumber: git.pullRequestNumber,
         };
       }
 
@@ -202,6 +214,7 @@ export default class SchemaCheck extends Command {
                   author,
                 }
               : null,
+          contextId: flags.contextId ?? undefined,
         },
         usesGitHubApp,
       });

@@ -296,8 +296,37 @@ export default gql`
   type SchemaChange {
     criticality: CriticalityLevel!
     criticalityReason: String
-    message: String!
+    message(
+      """
+      Whether to include a note about the safety of the change based on usage data within the message.
+      """
+      withSafeBasedOnUsageNote: Boolean = true
+    ): String!
     path: [String!]
+    """
+    Approval metadata for this schema change.
+    This field is populated in case the breaking change was manually approved.
+    """
+    approval: SchemaChangeApproval
+    """
+    Whether the breaking change is safe based on usage data.
+    """
+    isSafeBasedOnUsage: Boolean!
+  }
+
+  type SchemaChangeApproval {
+    """
+    User that approved this schema change.
+    """
+    approvedBy: User
+    """
+    Date of the schema change approval.
+    """
+    approvedAt: DateTime!
+    """
+    ID of the schema check in which this change was first approved.
+    """
+    schemaCheckId: ID!
   }
 
   type SchemaError {
@@ -392,6 +421,11 @@ export default gql`
     sdl: String!
     github: GitHubSchemaCheckInput
     meta: SchemaCheckMetaInput
+    """
+    Optional context ID to group schema checks together.
+    Manually approved breaking changes will be memorized for schema checks with the same context id.
+    """
+    contextId: String
   }
 
   input SchemaDeleteInput {
@@ -405,6 +439,10 @@ export default gql`
     The repository name of the schema check.
     """
     repository: String
+    """
+    The pull request number of the schema check.
+    """
+    pullRequestNumber: String
   }
 
   input SchemaCompareInput {

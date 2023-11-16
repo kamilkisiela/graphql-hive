@@ -192,18 +192,36 @@ const ActiveSchemaCheck_SchemaCheckFragment = graphql(`
     }
     breakingSchemaChanges {
       nodes {
-        message
+        message(withSafeBasedOnUsageNote: false)
         criticality
         criticalityReason
         path
+        approval {
+          approvedBy {
+            id
+            displayName
+          }
+          approvedAt
+          schemaCheckId
+        }
+        isSafeBasedOnUsage
       }
     }
     safeSchemaChanges {
       nodes {
-        message
+        message(withSafeBasedOnUsageNote: false)
         criticality
         criticalityReason
         path
+        approval {
+          approvedBy {
+            id
+            displayName
+          }
+          approvedAt
+          schemaCheckId
+        }
+        isSafeBasedOnUsage
       }
     }
     schemaPolicyWarnings {

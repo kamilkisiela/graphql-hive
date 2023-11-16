@@ -175,6 +175,18 @@ For additional reading:
 
 - [Checking a schema using Hive CLI](/docs/api-reference/cli#check-a-schema)
 
+### Approve breaking schema changes
+
+Sometimes, you want to allow a breaking change to be published to the registry. This can be done by
+manually approving a failed schema check on the Hive App.
+
+By approving a schema check. You confirm that you are aware of the breaking changes within the
+schema check, and want to retain that approval within the context of a pull/merge request or branch
+lifecycle.
+
+In order to retain the approval of the breaking changes, additional configuration is required. See
+[Checking a schema using Hive CLI](/docs/api-reference/cli#check-a-schema).
+
 ### Fetch a schema
 
 Sometimes it is useful to fetch a schema (SDL or Supergraph) from Hive, for example, to use it in a

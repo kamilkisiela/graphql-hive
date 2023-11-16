@@ -2,8 +2,9 @@ import { parse, print } from 'graphql';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import promClient from 'prom-client';
-import { Change, CriticalityLevel } from '@graphql-inspector/core';
-import { SchemaCheck } from '@hive/storage';
+import { z } from 'zod';
+import { CriticalityLevel } from '@graphql-inspector/core';
+import { SchemaChangeType, SchemaCheck } from '@hive/storage';
 import * as Sentry from '@sentry/node';
 import * as Types from '../../../__generated__/types';
 import {
@@ -55,7 +56,7 @@ import {
 import { SingleModel } from './models/single';
 import { SingleLegacyModel } from './models/single-legacy';
 import { ensureCompositeSchemas, ensureSingleSchema, SchemaHelper } from './schema-helper';
-import { inflateSchemaCheck, SchemaManager } from './schema-manager';
+import { SchemaManager } from './schema-manager';
 
 const schemaCheckCount = new promClient.Counter({
   name: 'registry_check_count',
@@ -310,6 +311,28 @@ export class SchemaPublisher {
       }
     }
 
+    let contextId: string | null = null;
+
+    if (input.contextId !== undefined) {
+      const result = SchemaCheckContextIdModel.safeParse(input.contextId);
+      if (!result.success) {
+        return {
+          __typename: 'SchemaCheckError',
+          valid: false,
+          changes: [],
+          warnings: [],
+          errors: [
+            {
+              message: result.error.errors[0].message,
+            },
+          ],
+        } as const;
+      }
+      contextId = result.data;
+    } else if (input.github?.repository && input.github.pullRequestNumber) {
+      contextId = `${input.github.repository}#${input.github.pullRequestNumber}`;
+    }
+
     await this.schemaManager.completeGetStartedCheck({
       organization: project.orgId,
       step: 'checkingSchema',
@@ -330,6 +353,18 @@ export class SchemaPublisher {
     const sdl = tryPrettifySDL(input.sdl);
 
     let checkResult: SchemaCheckResult;
+
+    const approvedSchemaChanges = new Map<string, SchemaChangeType>();
+
+    if (contextId !== null) {
+      const changes = await this.storage.getApprovedSchemaChangesForContextId({
+        targetId: target.id,
+        contextId,
+      });
+      for (const change of changes) {
+        approvedSchemaChanges.set(change.id, change);
+      }
+    }
 
     switch (project.type) {
       case ProjectType.SINGLE:
@@ -352,6 +387,7 @@ export class SchemaPublisher {
           baseSchema,
           project,
           organization,
+          approvedChanges: approvedSchemaChanges,
         });
         break;
       case ProjectType.FEDERATION:
@@ -387,6 +423,7 @@ export class SchemaPublisher {
           baseSchema,
           project,
           organization,
+          approvedChanges: approvedSchemaChanges,
         });
         break;
       default:
@@ -449,6 +486,7 @@ export class SchemaPublisher {
           : null,
         githubSha: githubCheckRun?.commit ?? null,
         expiresAt,
+        contextId,
       });
     }
 
@@ -507,8 +545,8 @@ export class SchemaPublisher {
         targetId: target.id,
         schemaVersionId: latestVersion?.version ?? null,
         isSuccess: true,
-        breakingSchemaChanges: null,
-        safeSchemaChanges: checkResult.state?.schemaChanges ?? null,
+        breakingSchemaChanges: checkResult.state?.schemaChanges?.breaking ?? null,
+        safeSchemaChanges: checkResult.state?.schemaChanges?.safe ?? null,
         schemaPolicyWarnings: checkResult.state?.schemaPolicyWarnings ?? null,
         schemaPolicyErrors: null,
         schemaCompositionErrors: null,
@@ -534,6 +572,7 @@ export class SchemaPublisher {
           : null,
         githubSha: githubCheckRun?.commit ?? null,
         expiresAt,
+        contextId,
       });
     }
 
@@ -545,9 +584,9 @@ export class SchemaPublisher {
           target,
           organization,
           conclusion: checkResult.conclusion,
-          changes: checkResult.state?.schemaChanges ?? null,
+          changes: checkResult.state?.schemaChanges?.all ?? null,
+          breakingChanges: checkResult.state?.schemaChanges?.breaking ?? null,
           warnings: checkResult.state?.schemaPolicyWarnings ?? null,
-          breakingChanges: null,
           compositionErrors: null,
           errors: null,
           schemaCheckId: schemaCheck?.id ?? null,
@@ -588,10 +627,10 @@ export class SchemaPublisher {
       return {
         __typename: 'SchemaCheckSuccess',
         valid: true,
-        changes: checkResult.state?.schemaChanges ?? [],
+        changes: checkResult.state?.schemaChanges?.all ?? [],
         warnings: checkResult.state?.schemaPolicyWarnings ?? [],
         initial: latestVersion == null,
-        schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, inflateSchemaCheck(schemaCheck)),
+        schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, schemaCheck),
       } as const;
     }
 
@@ -600,17 +639,16 @@ export class SchemaPublisher {
     return {
       __typename: 'SchemaCheckError',
       valid: false,
-      changes: [
-        ...(checkResult.state.schemaChanges?.breaking ?? []),
-        ...(checkResult.state.schemaChanges?.safe ?? []),
-      ],
+      changes: checkResult.state.schemaChanges?.all ?? [],
       warnings: checkResult.state.schemaPolicy?.warnings ?? [],
       errors: [
-        ...(checkResult.state.schemaChanges?.breaking ?? []),
+        ...(checkResult.state.schemaChanges?.breaking?.filter(
+          breaking => breaking.approvalMetadata == null && breaking.isSafeBasedOnUsage === false,
+        ) ?? []),
         ...(checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? []),
         ...(checkResult.state.composition.errors ?? []),
       ],
-      schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, inflateSchemaCheck(schemaCheck)),
+      schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, schemaCheck),
     } as const;
   }
 
@@ -1423,8 +1461,8 @@ export class SchemaPublisher {
     };
     conclusion: SchemaCheckConclusion;
     warnings: SchemaCheckWarning[] | null;
-    changes: Array<Change> | null;
-    breakingChanges: Array<Change> | null;
+    changes: Array<SchemaChangeType> | null;
+    breakingChanges: Array<SchemaChangeType> | null;
     compositionErrors: Array<{
       message: string;
     }> | null;
@@ -1620,7 +1658,7 @@ export class SchemaPublisher {
     initial: boolean;
     force?: boolean | null;
     valid: boolean;
-    changes: Array<Change>;
+    changes: Array<SchemaChangeType>;
     errors: readonly Types.SchemaError[];
     messages?: string[];
     detailsUrl: string | null;
@@ -1698,7 +1736,7 @@ export class SchemaPublisher {
     ].join('\n');
   }
 
-  private changesToMarkdown(changes: ReadonlyArray<Change>): string {
+  private changesToMarkdown(changes: ReadonlyArray<SchemaChangeType>): string {
     const breakingChanges = changes.filter(filterChangesByLevel(CriticalityLevel.Breaking));
     const dangerousChanges = changes.filter(filterChangesByLevel(CriticalityLevel.Dangerous));
     const safeChanges = changes.filter(filterChangesByLevel(CriticalityLevel.NonBreaking));
@@ -1729,10 +1767,14 @@ export class SchemaPublisher {
 }
 
 function filterChangesByLevel(level: CriticalityLevel) {
-  return (change: Change) => change.criticality.level === level;
+  return (change: SchemaChangeType) => change.criticality === level;
 }
 
-function writeChanges(type: string, changes: ReadonlyArray<Change>, lines: string[]): void {
+function writeChanges(
+  type: string,
+  changes: ReadonlyArray<{ message: string }>,
+  lines: string[],
+): void {
   if (changes.length > 0) {
     lines.push(
       ...['', `### ${type} changes`].concat(
@@ -1766,3 +1808,12 @@ function tryPrettifySDL(sdl: string): string {
 }
 
 const millisecondsPerDay = 60 * 60 * 24 * 1000;
+
+const SchemaCheckContextIdModel = z
+  .string()
+  .min(1, {
+    message: 'Context ID must be at least 1 character long.',
+  })
+  .max(200, {
+    message: 'Context ID cannot exceed length of 200 characters.',
+  });

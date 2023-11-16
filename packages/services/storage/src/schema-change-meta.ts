@@ -93,7 +93,9 @@ export type RegistryServiceUrlChangeChange = RegistryServiceUrlChangeSerializabl
 /**
  * Create the schema change from the persisted meta data.
  */
-function schemaChangeFromSerializableChange(change: SerializableChange): Change {
+export function schemaChangeFromSerializableChange(
+  change: SerializableChange,
+): Change | RegistryServiceUrlChangeChange {
   switch (change.type) {
     case ChangeType.FieldArgumentDescriptionChanged:
       return fieldArgumentDescriptionChangedFromMeta(change);
@@ -204,7 +206,7 @@ function schemaChangeFromSerializableChange(change: SerializableChange): Change 
   }
 }
 
-function buildRegistryServiceURLFromMeta(
+export function buildRegistryServiceURLFromMeta(
   change: RegistryServiceUrlChangeSerializableChange,
 ): RegistryServiceUrlChangeChange {
   return {
@@ -222,23 +224,4 @@ function buildRegistryServiceURLFromMeta(
     },
     meta: change.meta,
   } as const;
-}
-
-export function schemaChangeFromMeta(serializableChange: SerializableChange): Change {
-  const change = schemaChangeFromSerializableChange(serializableChange);
-
-  // see https://github.com/kamilkisiela/graphql-inspector/blob/3f5d7291d730119c926a05d165aa2f4a309e4fbd/packages/core/src/diff/rules/consider-usage.ts#L71-L78
-  if (serializableChange.isSafeBasedOnUsage) {
-    return {
-      ...change,
-      criticality: {
-        ...change.criticality,
-        level: CriticalityLevel.Dangerous,
-        isSafeBasedOnUsage: true,
-      },
-      message: `${change.message} (non-breaking based on usage)`,
-    };
-  }
-
-  return change;
 }

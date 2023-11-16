@@ -452,12 +452,14 @@ export function initSeed() {
                         author: string;
                         commit: string;
                       },
+                      contextId?: string,
                     ) {
                       return await checkSchema(
                         {
                           sdl,
                           service,
                           meta,
+                          contextId,
                         },
                         secret,
                       );

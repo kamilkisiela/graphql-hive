@@ -1,14 +1,13 @@
-import type { SerializableChange } from 'packages/services/api/src/modules/schema/schema-change-from-meta';
 import {
   DatabasePool,
   DatabaseTransactionConnection,
+  SerializableValue,
   sql,
   TaggedTemplateLiteralInvocation,
   UniqueIntegrityConstraintViolationError,
 } from 'slonik';
 import { update } from 'slonik-utilities';
 import zod from 'zod';
-import type { Change } from '@graphql-inspector/core';
 import type {
   ActivityObject,
   Alert,
@@ -56,12 +55,14 @@ import {
   users,
 } from './db';
 import {
-  SchemaChangeModel,
+  HiveSchemaChangeModel,
   SchemaCheckModel,
-  SchemaCompositionError,
   SchemaCompositionErrorModel,
   SchemaPolicyWarningModel,
   TargetBreadcrumbModel,
+  type SchemaChangeType,
+  type SchemaCheckApprovalMetadata,
+  type SchemaCompositionError,
 } from './schema-change-model';
 import type { Slonik } from './shared';
 
@@ -657,17 +658,27 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           "external_auth_user_id" = ${auth0UserId}
       `);
     },
-    async getUserById({ id }) {
-      const user = await pool.maybeOne<Slonik<users>>(
-        sql`SELECT * FROM public.users WHERE id = ${id} LIMIT 1`,
-      );
+    getUserById: batch(async input => {
+      const userIds = input.map(i => i.id);
+      const users = await pool.any<Slonik<users>>(sql`
+        SELECT
+          *
+        FROM
+          public.users
+        WHERE
+          id = ANY(${sql.array(userIds, 'uuid')})
+      `);
 
-      if (user) {
-        return transformUser(user);
+      const mappings = new Map<string, Slonik<users>>();
+      for (const user of users) {
+        mappings.set(user.id, user);
       }
 
-      return null;
-    },
+      return userIds.map(id => {
+        const user = mappings.get(id) ?? null;
+        return Promise.resolve(user ? transformUser(user) : null);
+      });
+    }),
     async updateUser({ id, displayName, fullName }) {
       return transformUser(
         await pool.one<Slonik<users>>(sql`
@@ -2102,8 +2113,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         return null;
       }
 
-      // TODO: I don't like the cast...
-      return changes.rows.map(row => SchemaChangeModel.parse(row) as SerializableChange);
+      return changes.rows.map(row => HiveSchemaChangeModel.parse(row));
     },
 
     async updateVersionStatus({ version, valid }) {
@@ -3386,55 +3396,57 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         await Promise.all(sdlStoreInserts);
 
         return trx.one<{ id: string }>(sql`
-        INSERT INTO "public"."schema_checks" (
-            "schema_sdl_store_id"
-          , "service_name"
-          , "meta"
-          , "target_id"
-          , "schema_version_id"
-          , "is_success"
-          , "schema_composition_errors"
-          , "breaking_schema_changes"
-          , "safe_schema_changes"
-          , "schema_policy_warnings"
-          , "schema_policy_errors"
-          , "composite_schema_sdl_store_id"
-          , "supergraph_sdl_store_id"
-          , "is_manually_approved"
-          , "manual_approval_user_id"
-          , "github_check_run_id"
-          , "github_repository"
-          , "github_sha"
-          , "expires_at"
-        )
-        VALUES (
-            ${args.schemaSDLHash}
-          , ${args.serviceName}
-          , ${jsonify(args.meta)}
-          , ${args.targetId}
-          , ${args.schemaVersionId}
-          , ${args.isSuccess}
-          , ${jsonify(args.schemaCompositionErrors)}
-          , ${jsonify(args.breakingSchemaChanges?.map(toSerializableSchemaChange))}
-          , ${jsonify(args.safeSchemaChanges?.map(toSerializableSchemaChange))}
-          , ${jsonify(args.schemaPolicyWarnings?.map(w => SchemaPolicyWarningModel.parse(w)))}
-          , ${jsonify(args.schemaPolicyErrors?.map(w => SchemaPolicyWarningModel.parse(w)))}
-          , ${args.compositeSchemaSDLHash}
-          , ${args.supergraphSDLHash}
-          , ${args.isManuallyApproved}
-          , ${args.manualApprovalUserId}
-          , ${args.githubCheckRunId}
-          , ${args.githubRepository}
-          , ${args.githubSha}
-          , ${args.expiresAt?.toISOString() ?? null}
-        )
-        RETURNING id
+          INSERT INTO "public"."schema_checks" (
+              "schema_sdl_store_id"
+            , "service_name"
+            , "meta"
+            , "target_id"
+            , "schema_version_id"
+            , "is_success"
+            , "schema_composition_errors"
+            , "breaking_schema_changes"
+            , "safe_schema_changes"
+            , "schema_policy_warnings"
+            , "schema_policy_errors"
+            , "composite_schema_sdl_store_id"
+            , "supergraph_sdl_store_id"
+            , "is_manually_approved"
+            , "manual_approval_user_id"
+            , "github_check_run_id"
+            , "github_repository"
+            , "github_sha"
+            , "expires_at"
+            , "context_id"
+          )
+          VALUES (
+              ${args.schemaSDLHash}
+            , ${args.serviceName}
+            , ${jsonify(args.meta)}
+            , ${args.targetId}
+            , ${args.schemaVersionId}
+            , ${args.isSuccess}
+            , ${jsonify(args.schemaCompositionErrors)}
+            , ${jsonify(args.breakingSchemaChanges?.map(toSerializableSchemaChange))}
+            , ${jsonify(args.safeSchemaChanges?.map(toSerializableSchemaChange))}
+            , ${jsonify(args.schemaPolicyWarnings?.map(w => SchemaPolicyWarningModel.parse(w)))}
+            , ${jsonify(args.schemaPolicyErrors?.map(w => SchemaPolicyWarningModel.parse(w)))}
+            , ${args.compositeSchemaSDLHash}
+            , ${args.supergraphSDLHash}
+            , ${args.isManuallyApproved}
+            , ${args.manualApprovalUserId}
+            , ${args.githubCheckRunId}
+            , ${args.githubRepository}
+            , ${args.githubSha}
+            , ${args.expiresAt?.toISOString() ?? null}
+            , ${args.contextId}
+          )
+          RETURNING
+            "id"
       `);
       });
 
       const check = await this.findSchemaCheck({
         schemaCheckId: result.id,
-        targetId: args.targetId,
       });
 
       if (!check) {
@@ -3454,7 +3466,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         LEFT JOIN "public"."sdl_store" as s_supergraph        ON s_supergraph."id" = c."supergraph_sdl_store_id"
         WHERE
           c."id" = ${args.schemaCheckId}
-          AND c."target_id" = ${args.targetId}
       `);
 
       if (result == null) {
@@ -3464,6 +3475,52 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return SchemaCheckModel.parse(result);
     },
     async approveFailedSchemaCheck(args) {
+      const schemaCheck = await this.findSchemaCheck({
+        schemaCheckId: args.schemaCheckId,
+      });
+
+      if (schemaCheck?.breakingSchemaChanges == null) {
+        return null;
+      }
+
+      // We enhance the approved schema checks with some metadata
+      const approvalMetadata: SchemaCheckApprovalMetadata = {
+        userId: args.userId,
+        date: new Date().toISOString(),
+        schemaCheckId: schemaCheck.id,
+      };
+
+      if (schemaCheck.contextId !== null) {
+        // Try to approve and claim all the breaking schema changes for this context
+        await pool.query(sql`
+          INSERT INTO "public"."schema_change_approvals" (
+            "target_id"
+            , "context_id"
+            , "schema_change_id"
+            , "schema_change"
+          )
+          VALUES ${sql.join(
+            schemaCheck.breakingSchemaChanges.map(
+              change =>
+                sql`(
+                  ${schemaCheck.targetId}
+                  , ${schemaCheck.contextId}
+                  , ${change.id}
+                  , ${sql.jsonb(
+                    toSerializableSchemaChange({
+                      ...change,
+                      // We enhance the approved schema changes with some metadata that can be displayed on the UI
+                      approvalMetadata,
+                    }),
+                  )}
+              )`,
+            ),
+            sql`,`,
+          )}
+          ON CONFLICT ("target_id", "context_id", "schema_change_id") DO NOTHING
+        `);
+      }
+
       const updateResult = await pool.maybeOne<{
         id: string;
       }>(sql`
@@ -3473,11 +3530,23 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           "is_success" = true
           , "is_manually_approved" = true
           , "manual_approval_user_id" = ${args.userId}
+          , "breaking_schema_changes" = (
+            SELECT json_agg(
+              CASE
+                WHEN COALESCE(jsonb_typeof("change"->'approvalMetadata'), 'null') = 'null'
+                  THEN jsonb_set("change", '{approvalMetadata}', ${sql.jsonb(approvalMetadata)})
+                ELSE "change"
+              END
+            )
+            FROM jsonb_array_elements("breaking_schema_changes") AS "change"
+          )
         WHERE
           "id" = ${args.schemaCheckId}
           AND "is_success" = false
           AND "schema_composition_errors" IS NULL
-        RETURNING id
+        RETURNING 
+          "id",
+          "breaking_schema_changes"
       `);
 
       if (updateResult == null) {
@@ -3497,6 +3566,19 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       `);
 
       return SchemaCheckModel.parse(result);
+    },
+    async getApprovedSchemaChangesForContextId(args) {
+      const result = await pool.anyFirst<unknown>(sql`
+        SELECT
+          "schema_change"
+        FROM
+          "public"."schema_change_approvals"
+        WHERE
+          "target_id" = ${args.targetId}
+          AND "context_id" = ${args.contextId}
+      `);
+
+      return result.map(record => HiveSchemaChangeModel.parse(record));
     },
     async getPaginatedSchemaChecksForTarget(args) {
       let cursor: null | {
@@ -3673,43 +3755,75 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 1000
             )
           RETURNING
-            "schema_sdl_store_id" as "id1",
-            "supergraph_sdl_store_id" as "id2",
-            "composite_schema_sdl_store_id" as "id3"
+            "schema_sdl_store_id" as "storeId1",
+            "supergraph_sdl_store_id" as "storeId2",
+            "composite_schema_sdl_store_id" as "storeId3",
+            "target_id" as "targetId",
+            "context_id" as "contextId"
         `);
-        const ids = PurgeExpiredSchemaChecksIDModel.parse(result);
 
-        if (ids.size === 0) {
-          return {
-            deletedSchemaCheckCount: result.length,
-            deletedSdlStoreCount: 0,
-          };
+        const { storeIds, targetIds, contextIds } = PurgeExpiredSchemaChecksIDModel.parse(result);
+
+        let deletedSdlStoreCount = 0;
+        let deletedSchemaChangeApprovalCount = 0;
+
+        if (storeIds.size !== 0) {
+          const deletedSdlStoreRecords = await pool.any<unknown>(sql`
+            DELETE
+            FROM
+              "sdl_store"
+            WHERE
+              "id" = ANY(
+                ${sql.array(Array.from(storeIds), 'text')}
+              )
+              AND NOT EXISTS (
+                SELECT
+                  1
+                FROM
+                  "schema_checks"
+                WHERE
+                  "schema_checks"."schema_sdl_store_id" = "sdl_store"."id"
+                  OR "schema_checks"."composite_schema_sdl_store_id" = "sdl_store"."id"
+                  OR "schema_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
+              )
+            RETURNING
+              true as "d"
+          `);
+
+          deletedSdlStoreCount = deletedSdlStoreRecords.length;
         }
-        const deletedRecords = await pool.any<unknown>(sql`
-          DELETE
-          FROM
-            "sdl_store"
-          WHERE
-            "id" = ANY(
-              ${sql.array(Array.from(ids), 'text')}
-            )
-            AND NOT EXISTS (
-              SELECT
-                1
-              FROM
-                "schema_checks"
-              WHERE
-                "schema_checks"."schema_sdl_store_id" = "sdl_store"."id"
-                OR "schema_checks"."composite_schema_sdl_store_id" = "sdl_store"."id"
-                OR "schema_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
-            )
-          RETURNING
-            true as "d"
-        `);
+
+        if (targetIds.size && contextIds.size) {
+          const deletedSchemaChangeApprovals = await pool.any<unknown>(sql`
+            DELETE
+            FROM
+              "schema_change_approvals"
+            WHERE
+              "target_id" = ANY(
+                ${sql.array(Array.from(targetIds), 'text')}
+              )
+              AND "context_id" = ANY(
+                ${sql.array(Array.from(contextIds), 'text')}
+              )
+              AND NOT EXISTS (
+                SELECT
+                  1
+                FROM "schema_checks"
+                WHERE
+                  "schema_checks"."target_id" = "schema_change_approvals"."target_id"
+                  AND "schema_checks"."context_id" = "schema_change_approvals"."context_id"
+              )
+            RETURNING
+              true as "d"
+          `);
+
+          deletedSchemaChangeApprovalCount = deletedSchemaChangeApprovals.length;
+        }
 
         return {
           deletedSchemaCheckCount: result.length,
-          deletedSdlStoreCount: deletedRecords.length,
+          deletedSdlStoreCount,
+          deletedSchemaChangeApprovalCount,
         };
       });
     },
@@ -3966,7 +4080,7 @@ const DocumentCollectionDocumentModel = zod.object({
 async function insertSchemaVersionChanges(
   trx: DatabaseTransactionConnection,
   args: {
-    changes: Array<Change>;
+    changes: Array<SchemaChangeType>;
     versionId: string;
   },
 ) {
@@ -3988,9 +4102,9 @@ async function insertSchemaVersionChanges(
           sql`(
             ${args.versionId},
             ${change.type},
-            ${change.criticality.level},
+            ${change.criticality},
             ${JSON.stringify(change.meta)}::jsonb,
-            ${change.criticality.isSafeBasedOnUsage ?? false}
+            ${change.isSafeBasedOnUsage ?? false}
           )`,
       ),
       sql`\n,`,
@@ -4069,21 +4183,23 @@ function jsonify<T>(obj: T | null | undefined) {
 /**
  * Utility function for stripping a schema change of its computable properties for efficient storage in the database.
  */
-function toSerializableSchemaChange(change: {
+function toSerializableSchemaChange(change: SchemaChangeType): {
+  id: string;
   type: string;
-  criticality?: {
-    isSafeBasedOnUsage?: boolean;
+  meta: Record<string, SerializableValue>;
+  approvalMetadata: null | {
+    userId: string;
+    date: string;
+    schemaCheckId: string;
   };
-  meta: unknown;
-}): {
-  type: string;
-  meta: unknown;
   isSafeBasedOnUsage: boolean;
 } {
   return {
+    id: change.id,
     type: change.type,
     meta: change.meta,
-    isSafeBasedOnUsage: change.criticality?.isSafeBasedOnUsage ?? false,
+    isSafeBasedOnUsage: change.isSafeBasedOnUsage,
+    approvalMetadata: change.approvalMetadata,
   };
 }
 
@@ -4109,6 +4225,7 @@ const schemaCheckSQLFields = sql`
   , c."github_sha" as "githubSha"
   , coalesce(c."is_manually_approved", false) as "isManuallyApproved"
   , c."manual_approval_user_id" as "manualApprovalUserId"
+  , c."context_id" as "contextId"
 `;
 
 const schemaVersionSQLFields = (t = sql``) => sql`
@@ -4145,19 +4262,37 @@ const TargetModel = zod.object({
 const PurgeExpiredSchemaChecksIDModel = zod
   .array(
     zod.object({
-      id1: zod.string().nullable(),
-      id2: zod.string().nullable(),
-      id3: zod.string().nullable(),
+      storeId1: zod.string().nullable(),
+      storeId2: zod.string().nullable(),
+      storeId3: zod.string().nullable(),
+      targetId: zod.string(),
+      contextId: zod.string().nullable(),
     }),
   )
   .transform(items => {
-    const ids = new Set<string>();
+    const storeIds = new Set<string>();
+    const targetIds = new Set<string>();
+    const contextIds = new Set<string>();
+
     for (const row of items) {
-      row.id1 && ids.add(row.id1);
-      row.id2 && ids.add(row.id2);
-      row.id3 && ids.add(row.id3);
+      row.storeId1 && storeIds.add(row.storeId1);
+      row.storeId2 && storeIds.add(row.storeId2);
+      row.storeId3 && storeIds.add(row.storeId3);
+      if (row.contextId) {
+        targetIds.add(row.targetId);
+        contextIds.add(row.contextId);
+      }
     }
-    return ids;
+
+    return {
+      storeIds,
+      targetIds,
+      contextIds,
+    };
   });
 
 export * from './schema-change-model';
+export {
+  buildRegistryServiceURLFromMeta,
+  type RegistryServiceUrlChangeSerializableChange,
+} from './schema-change-meta';

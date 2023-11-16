@@ -1139,6 +1139,9 @@ importers:
 
   packages/services/storage:
     devDependencies:
+      '@graphql-inspector/core':
+        specifier: 5.0.1
+        version: 5.0.1(graphql@16.8.1)
       '@sentry/node':
         specifier: 7.80.1
         version: 7.80.1
@@ -1160,6 +1163,9 @@ importers:
       dotenv:
         specifier: 16.3.1
         version: 16.3.1
+      fast-json-stable-stringify:
+        specifier: 2.1.0
+        version: 2.1.0
       got:
         specifier: 12.6.1
         version: 12.6.1

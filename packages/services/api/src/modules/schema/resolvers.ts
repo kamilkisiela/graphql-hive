@@ -21,6 +21,9 @@ import {
 } from 'graphql';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
+import { CriticalityLevel } from '@graphql-inspector/core';
+import { SchemaChangeType } from '@hive/storage';
+import type * as Types from '../../__generated__/types';
 import { ProjectType, type DateRange } from '../../shared/entities';
 import { createPeriod, parseDateRangeInput, PromiseOrValue } from '../../shared/helpers';
 import type {
@@ -59,13 +62,12 @@ import {
   type SuperGraphInformation,
 } from './lib/federation-super-graph';
 import { stripUsedSchemaCoordinatesFromDocumentNode } from './lib/unused-graphql';
-import { Inspector, toGraphQLSchemaChange } from './providers/inspector';
+import { Inspector } from './providers/inspector';
 import { SchemaBuildError } from './providers/orchestrators/errors';
 import { detectUrlChanges } from './providers/registry-checks';
 import { ensureSDL, SchemaHelper } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
-import { schemaChangeFromMeta, SerializableChange } from './schema-change-from-meta';
 import { toGraphQLSchemaCheck, toGraphQLSchemaCheckCurry } from './to-graphql-schema-check';
 
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
@@ -169,7 +171,7 @@ export const resolvers: SchemaModule.Resolvers = {
       if ('changes' in result && result.changes) {
         return {
           ...result,
-          changes: result.changes.map(toGraphQLSchemaChange),
+          changes: result.changes,
           errors:
             result.errors?.map(error => ({
               ...error,
@@ -257,7 +259,7 @@ export const resolvers: SchemaModule.Resolvers = {
       if ('changes' in result) {
         return {
           ...result,
-          changes: result.changes?.map(toGraphQLSchemaChange),
+          changes: result.changes,
         };
       }
 
@@ -296,7 +298,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return {
         ...result,
-        changes: result.changes?.map(toGraphQLSchemaChange),
+        changes: result.changes,
         errors: result.errors?.map(error => ({
           ...error,
           path: 'path' in error ? error.path?.split('.') : null,
@@ -586,7 +588,7 @@ export const resolvers: SchemaModule.Resolvers = {
         ),
       ])
         .then(async ([before, after]) => {
-          let changes: SerializableChange[] = [];
+          const changes: SchemaChangeType[] = [];
 
           if (before) {
             const previousSchema = buildSortedSchemaFromSchemaObject(
@@ -607,19 +609,10 @@ export const resolvers: SchemaModule.Resolvers = {
                   }`,
                 ),
             );
-            const diffChanges = await injector.get(Inspector).diff(previousSchema, currentSchema);
-            changes = diffChanges.map(change => ({
-              ...change,
-              isSafeBasedOnUsage: change.criticality.isSafeBasedOnUsage ?? false,
-            }));
+            changes.push(...(await injector.get(Inspector).diff(previousSchema, currentSchema)));
           }
 
-          changes.push(
-            ...detectUrlChanges(schemasBefore, schemasAfter).map(change => ({
-              ...change,
-              isSafeBasedOnUsage: false,
-            })),
-          );
+          changes.push(...detectUrlChanges(schemasBefore, schemasAfter));
 
           const result: SchemaCompareResult = {
             result: {
@@ -1212,9 +1205,7 @@ export const resolvers: SchemaModule.Resolvers = {
       return source.result.schemas.before === null;
     },
     async changes(source) {
-      return source.result.changes.map(change =>
-        toGraphQLSchemaChange(schemaChangeFromMeta(change)),
-      );
+      return source.result.changes;
     },
     diff(source) {
       const { before, current } = source.result.schemas;
@@ -1281,6 +1272,23 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   SchemaChangeConnection: createConnection(),
+  SchemaChange: {
+    message: (change, args) => {
+      return args.withSafeBasedOnUsageNote && change.isSafeBasedOnUsage === true
+        ? `${change.message} (non-breaking based on usage)`
+        : change.message;
+    },
+    path: change => change.path?.split('.') ?? null,
+    criticality: change => criticalityMap[change.criticality],
+    criticalityReason: change => change.reason,
+    approval: change => change.approvalMetadata,
+    isSafeBasedOnUsage: change => change.isSafeBasedOnUsage,
+  },
+  SchemaChangeApproval: {
+    approvedBy: (approval, _, { injector }) =>
+      injector.get(SchemaManager).getUserForSchemaChangeById({ userId: approval.userId }),
+    approvedAt: approval => approval.date,
+  },
   SchemaErrorConnection: createConnection(),
   SchemaWarningConnection: createConnection(),
   SchemaCheckSuccess: {
@@ -2117,14 +2125,14 @@ export const resolvers: SchemaModule.Resolvers = {
         return null;
       }
 
-      return schemaCheck.safeSchemaChanges.map(toGraphQLSchemaChange);
+      return schemaCheck.safeSchemaChanges;
     },
     breakingSchemaChanges(schemaCheck) {
       if (!schemaCheck.breakingSchemaChanges) {
         return null;
       }
 
-      return schemaCheck.breakingSchemaChanges.map(toGraphQLSchemaChange);
+      return schemaCheck.breakingSchemaChanges;
     },
     webUrl(schemaCheck, _, { injector }) {
       return injector.get(SchemaManager).getSchemaCheckWebUrl({
@@ -2159,14 +2167,14 @@ export const resolvers: SchemaModule.Resolvers = {
         return null;
       }
 
-      return schemaCheck.safeSchemaChanges.map(toGraphQLSchemaChange);
+      return schemaCheck.safeSchemaChanges;
     },
     breakingSchemaChanges(schemaCheck) {
       if (!schemaCheck.breakingSchemaChanges) {
         return null;
       }
 
-      return schemaCheck.breakingSchemaChanges.map(toGraphQLSchemaChange);
+      return schemaCheck.breakingSchemaChanges;
     },
     compositionErrors(schemaCheck) {
       return schemaCheck.schemaCompositionErrors;
@@ -2358,3 +2366,9 @@ function transformGraphQLScalarType(entity: GraphQLScalarType): GraphQLScalarTyp
     description: entity.description,
   };
 }
+
+const criticalityMap: Record<CriticalityLevel, Types.CriticalityLevel> = {
+  [CriticalityLevel.Breaking]: 'Breaking',
+  [CriticalityLevel.NonBreaking]: 'Safe',
+  [CriticalityLevel.Dangerous]: 'Dangerous',
+};
