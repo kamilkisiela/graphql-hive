@@ -155,6 +155,7 @@ const CollectionItem = (props: {
   canEdit: boolean;
   onDelete: (operationId: string) => void;
   onEdit: (operationId: string) => void;
+  isChanged?: boolean;
 }): ReactElement => {
   const router = useRouteSelector();
   const copyToClipboard = useClipboard();
@@ -172,7 +173,7 @@ const CollectionItem = (props: {
           },
         }}
         className={cn(
-          'w-full rounded p-2 !text-gray-300 hover:bg-gray-100/10',
+          'flex w-full items-center justify-between rounded p-2 !text-gray-300 hover:bg-gray-100/10',
           router.query.operation === props.node.id && 'bg-gray-100/10 text-white',
         )}
         onClick={ev => {
@@ -195,6 +196,9 @@ const CollectionItem = (props: {
         }}
       >
         {props.node.name}
+        {props.isChanged && (
+          <span className="h-1.5 w-1.5 rounded-full border border-orange-600 bg-orange-400" />
+        )}
       </Link>
       <GraphiQLDropdownMenu
         // https://github.com/radix-ui/primitives/issues/1241#issuecomment-1580887090
@@ -382,6 +386,12 @@ function useOperationCollectionsPlugin({
           editorContext.headerEditor
         );
 
+        const isSame =
+          !!currentOperation &&
+          currentOperation.query === editorContext.queryEditor?.getValue() &&
+          currentOperation.variables === editorContext.variableEditor?.getValue() &&
+          currentOperation.headers === editorContext.headerEditor?.getValue();
+
         const queryParamsOperationId = router.query.operation as string;
 
         useEffect(() => {
@@ -493,6 +503,7 @@ function useOperationCollectionsPlugin({
                               canEdit={canEdit}
                               onDelete={setOperationToDeleteId}
                               onEdit={setOperationToEditId}
+                              isChanged={!isSame && node.id === queryParamsOperationId}
                             />
                           ))
                         : null}
@@ -616,7 +627,7 @@ function Save(): ReactElement {
   const currentOperation = useCurrentOperation();
   const [, mutateUpdate] = useMutation(UpdateOperationMutation);
   const { queryEditor, variableEditor, headerEditor } = useEditorContext()!;
-  const { savedOperation, setSavedOperation, clearOperation } = useSyncOperationState();
+  const { setSavedOperation, clearOperation } = useSyncOperationState();
   const isSame =
     !!currentOperation &&
     currentOperation.query === queryEditor?.getValue() &&
@@ -950,16 +961,17 @@ function LaboratoryPageContent() {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding-top: 8px;
-          padding-left: 11px;
+        }
+
+        .graphiql-container .graphiql-session-header {
+          display: flex;
+          flex-direction: column-reverse;
+          align-items: flex-start;
+          height: auto;
         }
 
         .graphiql-container .graphiql-session-header-right {
           width: 100%;
-        }
-
-        .graphiql-container .graphiql-query-editor {
-          padding-top: 42px;
         }
       `}</style>
 
