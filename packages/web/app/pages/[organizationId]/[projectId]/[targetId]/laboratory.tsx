@@ -616,7 +616,7 @@ function Save(): ReactElement {
   const currentOperation = useCurrentOperation();
   const [, mutateUpdate] = useMutation(UpdateOperationMutation);
   const { queryEditor, variableEditor, headerEditor } = useEditorContext()!;
-  const { setSavedOperation, clearOperation } = useSyncOperationState();
+  const { savedOperation, setSavedOperation, clearOperation } = useSyncOperationState();
   const isSame =
     !!currentOperation &&
     currentOperation.query === queryEditor?.getValue() &&
@@ -652,6 +652,18 @@ function Save(): ReactElement {
           <SaveIcon className="graphiql-toolbar-icon !h-5 w-auto" />
         </GraphiQLDropdownMenu.Button>
         <GraphiQLDropdownMenu.Content>
+          {!isSame && currentOperation && (
+            <GraphiQLDropdownMenu.Item
+              disabled={isSame || !currentOperation}
+              className="mb-0 text-red-600"
+              onClick={async () => {
+                queryEditor.setValue(currentOperation.query);
+                clearOperation();
+              }}
+            >
+              Discard changes
+            </GraphiQLDropdownMenu.Item>
+          )}
           <GraphiQLDropdownMenu.Item
             disabled={isSame || !currentOperation}
             className={cx(isSame && 'cursor-default text-gray-400 hover:bg-transparent')}
