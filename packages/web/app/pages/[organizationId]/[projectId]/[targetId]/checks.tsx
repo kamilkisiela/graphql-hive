@@ -799,9 +799,17 @@ function ChecksPageContent() {
   const [paginationVariables, setPaginationVariables] = useState<Array<string | null>>(() => [
     null,
   ]);
-  const [filters, setFilters] = useState<SchemaCheckFilters>({});
 
   const router = useRouteSelector();
+
+  const showOnlyChanged = router.query.filter_changed === 'true';
+  const showOnlyFailed = router.query.filter_failed === 'true';
+
+  const [filters, setFilters] = useState<SchemaCheckFilters>({
+    showOnlyChanged: showOnlyChanged ?? false,
+    showOnlyFailed: showOnlyFailed ?? false,
+  });
+
   const [query] = useQuery({
     query: ChecksPageQuery,
     variables: {
@@ -828,6 +836,37 @@ function ChecksPageContent() {
   const hasSchemaChecks = !!query.data?.target?.schemaChecks?.edges?.length;
   const hasFilteredSchemaChecks = !!query.data?.target?.filteredSchemaChecks?.edges?.length;
   const hasActiveSchemaCheck = !!schemaCheckId;
+
+  const handleShowOnlyFilterChange = () => {
+    const updatedFilters = !filters.showOnlyChanged;
+
+    void router.push({
+      query: {
+        ...router.query,
+        filter_changed: updatedFilters,
+      },
+    });
+    setFilters(filters => ({
+      ...filters,
+      showOnlyChanged: !filters.showOnlyChanged,
+    }));
+  };
+
+  const handleShowOnlyFilterFailed = () => {
+    const updatedFilters = !filters.showOnlyFailed;
+
+    void router.push({
+      query: {
+        ...router.query,
+        filter_failed: updatedFilters,
+      },
+    });
+
+    setFilters(filters => ({
+      ...filters,
+      showOnlyFailed: !filters.showOnlyFailed,
+    }));
+  };
 
   return (
     <>
@@ -863,12 +902,7 @@ function ChecksPageContent() {
                     </Label>
                     <Switch
                       checked={filters.showOnlyChanged ?? false}
-                      onCheckedChange={() =>
-                        setFilters(filters => ({
-                          ...filters,
-                          showOnlyChanged: !filters.showOnlyChanged,
-                        }))
-                      }
+                      onCheckedChange={handleShowOnlyFilterChange}
                       id="filter-toggle-has-changes"
                     />
                   </div>
@@ -881,12 +915,7 @@ function ChecksPageContent() {
                     </Label>
                     <Switch
                       checked={filters.showOnlyFailed ?? false}
-                      onCheckedChange={() =>
-                        setFilters(filters => ({
-                          ...filters,
-                          showOnlyFailed: !filters.showOnlyFailed,
-                        }))
-                      }
+                      onCheckedChange={handleShowOnlyFilterFailed}
                       id="filter-toggle-status-failed"
                     />
                   </div>
