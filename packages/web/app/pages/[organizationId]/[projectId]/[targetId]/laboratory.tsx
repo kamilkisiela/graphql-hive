@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import { GraphiQL } from 'graphiql';
 import { buildSchema } from 'graphql';
 import { useMutation, useQuery } from 'urql';
-import { useDebouncedCallback } from 'use-debounce';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { ConnectLabModal } from '@/components/target/laboratory/connect-lab-modal';
@@ -15,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
 import {
   Accordion,
+  DiffEditor,
   DocsLink,
   Heading,
   Link,
@@ -374,7 +374,7 @@ function useOperationCollectionsPlugin({
         const [isDeleteCollectionModalOpen, toggleDeleteCollectionModalOpen] = useToggle();
         const [operationToDeleteId, setOperationToDeleteId] = useState<null | string>(null);
         const [operationToEditId, setOperationToEditId] = useState<null | string>(null);
-        const { clearOperation, savedOperation } = useSyncOperationState();
+        const { clearOperation, savedOperation, setSavedOperation } = useSyncOperationState();
         const router = useRouteSelector();
 
         const currentOperation = useCurrentOperation();
@@ -409,22 +409,41 @@ function useOperationCollectionsPlugin({
               return;
             }
 
-            const currentOperationUpdatedAt = new Date(currentOperation.updatedAt).getTime();
-
-            if (savedOperation.updatedAt < currentOperationUpdatedAt) {
+            const fifteenDays = 15 * 24 * 60 * 60 * 1000;
+            if (savedOperation.updatedAt + fifteenDays < Date.now()) {
               clearOperation();
-            } else if (
+              return;
+            }
+
+            const currentOperationUpdatedAt = new Date(currentOperation.updatedAt).getTime();
+            if (
               // Adding five seconds to updatedAt to account for race conditions
               savedOperation.updatedAt + 5000 >
               currentOperationUpdatedAt
             ) {
               editorContext.queryEditor.setValue(savedOperation.query);
               editorContext.variableEditor.setValue(savedOperation.variables);
-            } else if (savedOperation.updatedAt) {
+            } else {
               toggleDiffModal();
             }
           }
         }, [hasAllEditors, queryParamsOperationId, currentOperation]);
+
+        useEffect(() => {
+          if (!hasAllEditors) {
+            return;
+          }
+          if (
+            currentOperation?.query === editorContext.queryEditor?.getValue() ||
+            currentOperation?.variables === editorContext.variableEditor?.getValue()
+          ) {
+            return;
+          }
+          setSavedOperation({
+            query: editorContext.queryEditor?.getValue(),
+            variables: editorContext.variableEditor?.getValue(),
+          });
+        }, [editorContext.queryEditor?.getValue(), editorContext.variableEditor?.getValue()]);
 
         const shouldShowMenu = canEdit || canDelete;
 
@@ -599,6 +618,7 @@ function useSyncOperationState(): {
   const operation = savedOperationData ? JSON.parse(savedOperationData) : null;
 
   const setSavedOperation = (value: { query: string; variables: string }) => {
+    console.log('setSavedOperation', value);
     if (!storageKey) {
       return;
     }
@@ -627,24 +647,12 @@ function Save(): ReactElement {
   const currentOperation = useCurrentOperation();
   const [, mutateUpdate] = useMutation(UpdateOperationMutation);
   const { queryEditor, variableEditor, headerEditor } = useEditorContext()!;
-  const { setSavedOperation, clearOperation } = useSyncOperationState();
+  const { clearOperation } = useSyncOperationState();
   const isSame =
     !!currentOperation &&
     currentOperation.query === queryEditor?.getValue() &&
     currentOperation.variables === variableEditor?.getValue() &&
     currentOperation.headers === headerEditor?.getValue();
-
-  const debouncedOperationSync = useDebouncedCallback(() => {
-    setSavedOperation({
-      query: queryEditor?.getValue(),
-      variables: variableEditor?.getValue(),
-    });
-  }, 1000);
-
-  useEffect(() => {
-    if (isSame) return;
-    debouncedOperationSync();
-  }, [queryEditor?.getValue(), variableEditor?.getValue()]);
 
   return (
     <>
@@ -1119,34 +1127,27 @@ export const SyncOperationModal = ({ isOpen, close }: { isOpen: boolean; close: 
     }
   };
 
-  if (!savedOperation) {
+  if (!savedOperation || !currentOperation) {
     return null;
   }
 
   return (
-    <Modal open={isOpen} onOpenChange={close} className="flex flex-col items-center">
-      <form className="flex h-full w-full flex-col gap-4" onSubmit={onSubmit}>
+    <Modal
+      open={isOpen}
+      onOpenChange={close}
+      className="flex h-[600px] w-[600px] flex-col items-center overflow-y-auto"
+    >
+      <form className="flex h-full w-full flex-col" onSubmit={onSubmit}>
         <Heading className="text-center">Sync Changes</Heading>
-        <div className="text-sm">
+        <div className="my-4 text-sm">
           The operation has been updated in the database since your last edit. Do you want to
           overwrite it with your local version?
         </div>
-        <div className="text-xs">
-          Local version:
-          <pre className="relative mt-1 whitespace-pre-wrap rounded-lg bg-gray-800 p-3 text-xs text-white">
-            <button
-              type="button"
-              className="absolute right-2 top-2 h-4 w-4"
-              aria-label="Copy local version to clipboard"
-              onClick={() => {
-                void navigator.clipboard.writeText(savedOperation.query);
-              }}
-            >
-              <ClipboardCopyIcon className="text-gray-400 hover:text-white" />
-            </button>
-            {savedOperation.query}
-          </pre>
-        </div>
+        <DiffEditor
+          before={currentOperation.query}
+          after={savedOperation.query}
+          className="flex flex-col"
+        />
 
         <div className="flex w-full gap-2">
           <ButtonV2
