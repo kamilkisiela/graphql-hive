@@ -267,11 +267,11 @@ importers:
         specifier: workspace:*
         version: link:../packages/services/storage
       '@trpc/client':
-        specifier: 10.43.3
-        version: 10.43.3(@trpc/server@10.43.3)
+        specifier: 10.44.0
+        version: 10.44.0(@trpc/server@10.44.0)
       '@trpc/server':
-        specifier: 10.43.3
-        version: 10.43.3
+        specifier: 10.44.0
+        version: 10.44.0
       '@types/dockerode':
         specifier: 3.3.23
         version: 3.3.23
@@ -587,11 +587,11 @@ importers:
         specifier: 0.1.0
         version: 0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)
       '@trpc/client':
-        specifier: 10.43.3
-        version: 10.43.3(@trpc/server@10.43.3)
+        specifier: 10.44.0
+        version: 10.44.0(@trpc/server@10.44.0)
       '@trpc/server':
-        specifier: 10.43.3
-        version: 10.43.3
+        specifier: 10.44.0
+        version: 10.44.0
       '@types/bcryptjs':
         specifier: 2.4.6
         version: 2.4.6
@@ -767,8 +767,8 @@ importers:
         specifier: 7.80.1
         version: 7.80.1
       '@trpc/server':
-        specifier: 10.43.3
-        version: 10.43.3
+        specifier: 10.44.0
+        version: 10.44.0
       '@types/mjml':
         specifier: 4.7.1
         version: 4.7.1
@@ -854,8 +854,8 @@ importers:
         specifier: 7.80.1
         version: 7.80.1
       '@trpc/server':
-        specifier: 10.43.3
-        version: 10.43.3
+        specifier: 10.44.0
+        version: 10.44.0
       '@whatwg-node/fetch':
         specifier: 0.9.13
         version: 0.9.13
@@ -899,11 +899,11 @@ importers:
         specifier: 7.80.1
         version: 7.80.1
       '@trpc/client':
-        specifier: 10.43.3
-        version: 10.43.3(@trpc/server@10.43.3)
+        specifier: 10.44.0
+        version: 10.44.0(@trpc/server@10.44.0)
       '@trpc/server':
-        specifier: 10.43.3
-        version: 10.43.3
+        specifier: 10.44.0
+        version: 10.44.0
       '@whatwg-node/fetch':
         specifier: 0.9.13
         version: 0.9.13
@@ -953,8 +953,8 @@ importers:
         specifier: 0.1.3
         version: 0.1.3(graphql@16.8.1)
       '@trpc/server':
-        specifier: 10.43.3
-        version: 10.43.3
+        specifier: 10.44.0
+        version: 10.44.0
       '@types/async-retry':
         specifier: 1.4.8
         version: 1.4.8
@@ -1058,8 +1058,8 @@ importers:
         specifier: 1.3.96
         version: 1.3.96
       '@trpc/server':
-        specifier: 10.43.3
-        version: 10.43.3
+        specifier: 10.44.0
+        version: 10.44.0
       '@whatwg-node/fetch':
         specifier: 0.9.13
         version: 0.9.13
@@ -1103,8 +1103,8 @@ importers:
   packages/services/service-common:
     dependencies:
       '@trpc/server':
-        specifier: 10.43.3
-        version: 10.43.3
+        specifier: 10.44.0
+        version: 10.44.0
     devDependencies:
       '@sentry/node':
         specifier: 7.80.1
@@ -1206,11 +1206,11 @@ importers:
         specifier: 7.80.1
         version: 7.80.1
       '@trpc/client':
-        specifier: 10.43.3
-        version: 10.43.3(@trpc/server@10.43.3)
+        specifier: 10.44.0
+        version: 10.44.0(@trpc/server@10.44.0)
       '@trpc/server':
-        specifier: 10.43.3
-        version: 10.43.3
+        specifier: 10.44.0
+        version: 10.44.0
       '@whatwg-node/fetch':
         specifier: 0.9.13
         version: 0.9.13
@@ -1248,8 +1248,8 @@ importers:
         specifier: 7.80.1
         version: 7.80.1
       '@trpc/server':
-        specifier: 10.43.3
-        version: 10.43.3
+        specifier: 10.44.0
+        version: 10.44.0
       '@types/ms':
         specifier: 0.7.34
         version: 0.7.34
@@ -1299,11 +1299,11 @@ importers:
         specifier: 7.80.1
         version: 7.80.1
       '@trpc/client':
-        specifier: 10.43.3
-        version: 10.43.3(@trpc/server@10.43.3)
+        specifier: 10.44.0
+        version: 10.44.0(@trpc/server@10.44.0)
       '@trpc/server':
-        specifier: 10.43.3
-        version: 10.43.3
+        specifier: 10.44.0
+        version: 10.44.0
       '@whatwg-node/fetch':
         specifier: 0.9.13
         version: 0.9.13
@@ -1350,8 +1350,8 @@ importers:
         specifier: 7.80.1
         version: 7.80.1
       '@trpc/server':
-        specifier: 10.43.3
-        version: 10.43.3
+        specifier: 10.44.0
+        version: 10.44.0
       '@whatwg-node/fetch':
         specifier: 0.9.13
         version: 0.9.13
@@ -1428,8 +1428,8 @@ importers:
         specifier: 7.80.1
         version: 7.80.1
       '@trpc/server':
-        specifier: 10.43.3
-        version: 10.43.3
+        specifier: 10.44.0
+        version: 10.44.0
       bullmq:
         specifier: 4.13.2
         version: 4.13.2(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
@@ -1551,11 +1551,11 @@ importers:
         specifier: 1.2.5
         version: 1.2.5(patch_hash=pz2nlsfawfhpo6sw62ecmp2yum)(@monaco-editor/react@4.6.0)(@types/node@18.18.12)(graphql@16.8.1)(monaco-editor@0.43.0)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/client':
-        specifier: 10.43.3
-        version: 10.43.3(@trpc/server@10.43.3)
+        specifier: 10.44.0
+        version: 10.44.0(@trpc/server@10.44.0)
       '@trpc/server':
-        specifier: 10.43.3
-        version: 10.43.3
+        specifier: 10.44.0
+        version: 10.44.0
       '@urql/core':
         specifier: 4.1.4
         version: 4.1.4(graphql@16.8.1)
@@ -12919,15 +12919,15 @@ packages:
     engines: {node: '>= 10'}
     dev: true
 
-  /@trpc/client@10.43.3(@trpc/server@10.43.3):
-    resolution: {integrity: sha512-r/aE1l2iybJMlXCf+KWqSQpIloOqw/3jQhZD8F4VpvczWPI5fEQCmZZuPHAz2L/PiGE5K/ZwXQrJsT207ZQ2AQ==}
+  /@trpc/client@10.44.0(@trpc/server@10.44.0):
+    resolution: {integrity: sha512-6PAL5rXMGTMlsKKGW9aBsij8XFBbLUbOCJ7jNVX3IripGqiQG3b/VJyTsHRWkss/oaz/sZMOn62amhfev1UVfg==}
     peerDependencies:
-      '@trpc/server': 10.43.3
+      '@trpc/server': 10.44.0
     dependencies:
-      '@trpc/server': 10.43.3
+      '@trpc/server': 10.44.0
 
-  /@trpc/server@10.43.3:
-    resolution: {integrity: sha512-U7HsNtgjupNvPzH6ho4rPlIXZ2t5PctOH6pmFX4jv4YJi98RjGuOhHUNhiiVb8KUw6Kuh5EHTAv7cUV+igbMuQ==}
+  /@trpc/server@10.44.0:
+    resolution: {integrity: sha512-QBq/FnjyU6a7CAl9p2dv6kApn2i8MFuPt8uVLyGr0oa2aFv31rHaX0m+ibdsviE/3fOJIC8EUOfMYOJma5uK2w==}
     engines: {node: '>=18.0.0'}
 
   /@trysound/sax@0.2.0:
