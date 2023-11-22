@@ -9,6 +9,8 @@ import type * as DbTypes from '../../../services/storage/src/db/types';
 import { createConnectionString } from '../../src/connection-string';
 import { runPGMigrations } from '../../src/run-pg-migrations'
 
+export { type DbTypes }
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 config({
