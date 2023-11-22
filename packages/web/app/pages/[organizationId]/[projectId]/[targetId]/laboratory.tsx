@@ -14,12 +14,9 @@ import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
 import {
   Accordion,
-  DiffEditor,
   DocsLink,
-  Heading,
   Link,
   MetaTitle,
-  Modal,
   Spinner,
   ToggleGroup,
   ToggleGroupItem,
@@ -986,7 +983,7 @@ function LaboratoryPageContent() {
         >
           <GraphiQL.Logo>
             <EditorBreadcrumbs />
-            <div>
+            <div className="ml-auto">
               <Tooltip
                 content={
                   actualSelectedApiEndpoint === 'linkedApi' ? (
@@ -1060,10 +1057,13 @@ function useApiTabValueState(graphqlEndpointUrl: string | null) {
 }
 
 function EditorBreadcrumbs() {
+  const router = useRouteSelector();
+  const operationId = router.query.operation as string;
   const currentOperation = useCurrentOperation();
 
-  if (currentOperation === null) {
-    return <div />;
+  // Avoiding blinking `New Operation` when switching between operations
+  if (operationId && (!currentOperation || currentOperation.id !== operationId)) {
+    return null;
   }
 
   return (
