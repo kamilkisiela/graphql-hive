@@ -422,13 +422,7 @@ function useOperationCollectionsPlugin({
         }, [hasAllEditors, queryParamsOperationId, currentOperation]);
 
         useEffect(() => {
-          if (!hasAllEditors) {
-            return;
-          }
-          if (
-            currentOperation?.query === editorContext.queryEditor?.getValue() ||
-            currentOperation?.variables === editorContext.variableEditor?.getValue()
-          ) {
+          if (!hasAllEditors || !currentOperation || isSame) {
             return;
           }
           setSavedOperation({
@@ -609,7 +603,6 @@ function useSyncOperationState(): {
   const operation = savedOperationData ? JSON.parse(savedOperationData) : null;
 
   const setSavedOperation = (value: { query: string; variables: string }) => {
-    console.log('setSavedOperation', value);
     if (!storageKey) {
       return;
     }
