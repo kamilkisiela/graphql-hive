@@ -29,10 +29,6 @@ await describe('github-check-with-project-name', async () => {
         },
       });
 
-      // await db.one(
-      //   sql`INSERT INTO public.projects (clean_id, name, type, org_id) VALUES ('proj-1', 'proj-1', 'SINGLE', ${org.id}) RETURNING id;`,
-      // );
-
       // Run the additional remaining migrations
       await complete();
 

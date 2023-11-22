@@ -9,7 +9,7 @@ await describe('migration: no-auth0', async () => {
 
     try {
       // Run migrations all the way to the point before the one we are testing
-      await runTo('2023.10.05T11.44.36.schema-checks-github-repository.ts');
+      await runTo('2023.11.09T00.00.00.schema-check-approval.ts');
 
       // Seed the DB with orgs
       const notSuperUser = await seed.user({
@@ -23,6 +23,12 @@ await describe('migration: no-auth0', async () => {
         display_name: 'test2',
         full_name: 'test2',
         supertoken_user_id: '2',
+      });
+      const anotherUser = await seed.user({
+        email: 'test3@mail.com',
+        display_name: 'test3',
+        full_name: 'test3',
+        supertoken_user_id: '3',
       });
       const notSuperOrganization = await seed.organization({
         user: notSuperUser,
@@ -55,24 +61,33 @@ await describe('migration: no-auth0', async () => {
         },
       });
 
-      // Add non-supertokens user to organization
+      // TODO: check the last activity of organizations of non-supertokens owners
+      // TODO: delete organizations of non-supertokens accounts only if members are also non-supertokens
+
+      // organization -> user and non-supertokens user
+      // non-supertokens organization -> non-supertokens user and another user
       await db.query(
-        sql`INSERT INTO public.organization_member (user_id, organization_id, scopes) VALUES (${
-          notSuperUser.id
-        }, ${organization.id}, ${sql.array([], 'text')})`,
+        sql`
+          INSERT INTO public.organization_member (user_id, organization_id, scopes)
+          VALUES
+          (${user.id}, ${organization.id}, ${sql.array([], 'text')}),
+          (${notSuperUser.id}, ${organization.id}, ${sql.array([], 'text')}),
+          (${notSuperUser.id}, ${notSuperOrganization.id}, ${sql.array([], 'text')}),
+          (${anotherUser.id}, ${notSuperOrganization.id}, ${sql.array([], 'text')})
+        `,
       );
 
       // Run the additional remaining migrations
       await complete();
 
-      // Check that the organization (of non-supertokens user) is not deleted
+      // The organization of non-supertokens user is deleted
       assert.equal(
         await db.oneFirst(
           sql`SELECT count(*) as total FROM public.organizations WHERE id = ${notSuperOrganization.id}`,
         ),
         0,
       );
-      // Check that the organization (of supertokens user) is not deleted
+      // The organization of supertokens user is not deleted
       assert.equal(
         await db.oneFirst(
           sql`SELECT count(*) as total FROM public.organizations WHERE id = ${organization.id}`,
@@ -80,25 +95,39 @@ await describe('migration: no-auth0', async () => {
         1,
       );
 
-      // Check that the project (of non-supertokens user) is deleted
+      // The project of non-supertokens user is deleted
       assert.equal(
         await db.oneFirst(
-          sql`SELECT count() as total FROM public.projects WHERE id = ${notSuperProject.id}`,
+          sql`SELECT count(*) as total FROM public.projects WHERE id = ${notSuperProject.id}`,
         ),
         0,
       );
-      // Check that the project (of supertokens user) is not deleted
+      // The project of supertokens user is not deleted
       assert.equal(
         await db.oneFirst(
-          sql`SELECT count() as total FROM public.projects WHERE id = ${project.id}`,
+          sql`SELECT count(*) as total FROM public.projects WHERE id = ${project.id}`,
         ),
         1,
       );
 
-      // Check that the membership is deleted
+      // non-supertokens user is delete from supertokens organization
       assert.equal(
         await db.oneFirst(
-          sql`SELECT count() as total FROM public.organization_member WHERE organization_id = ${organization.id} AND user_id = ${notSuperUser.id}`,
+          sql`SELECT count(*) as total FROM public.organization_member WHERE organization_id = ${organization.id} AND user_id = ${notSuperUser.id}`,
+        ),
+        0,
+      );
+      // supertokens user is NOT delete from supertokens organization
+      assert.equal(
+        await db.oneFirst(
+          sql`SELECT count(*) as total FROM public.organization_member WHERE organization_id = ${organization.id} AND user_id = ${user.id}`,
+        ),
+        1,
+      );
+      // supertokens and non-supertokens users are delete from non-supertokens organization
+      assert.equal(
+        await db.oneFirst(
+          sql`SELECT count(*) as total FROM public.organization_member WHERE organization_id = ${notSuperOrganization.id}`,
         ),
         0,
       );
