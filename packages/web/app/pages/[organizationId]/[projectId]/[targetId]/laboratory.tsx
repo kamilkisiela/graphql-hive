@@ -666,7 +666,9 @@ function Save(): ReactElement {
           )}
           <GraphiQLDropdownMenu.Item
             disabled={isSame || !currentOperation}
-            className={cx(isSame && 'cursor-default text-gray-400 hover:bg-transparent')}
+            className={cx(
+              (isSame || !currentOperation) && 'cursor-default text-gray-400 hover:bg-transparent',
+            )}
             onClick={async () => {
               if (!currentOperation || isSame) {
                 return;
