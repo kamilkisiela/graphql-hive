@@ -52,7 +52,7 @@ jobs:
         run: pnpm --filter integration-tests prepare:env
 
       - name: patch compose file volumes
-        uses: mikefarah/yq@v4.35.2
+        uses: mikefarah/yq@v4.40.2
         with:
           cmd: yq -i 'del(.services.*.volumes)' docker/docker-compose.community.yml
 
