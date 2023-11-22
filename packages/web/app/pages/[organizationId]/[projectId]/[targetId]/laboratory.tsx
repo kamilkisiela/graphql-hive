@@ -25,7 +25,6 @@ import {
   ToggleGroupItem,
   Tooltip,
 } from '@/components/v2';
-import { Button as ButtonV2 } from '@/components/v2/button';
 import { HiveLogo, PlusIcon, SaveIcon, ShareIcon } from '@/components/v2/icon';
 import { graphql } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
@@ -41,7 +40,7 @@ import {
   useEditorContext,
 } from '@graphiql/react';
 import { createGraphiQLFetcher, Fetcher, isAsyncIterable } from '@graphiql/toolkit';
-import { BookmarkIcon, ClipboardCopyIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
+import { BookmarkIcon, DotsVerticalIcon } from '@radix-ui/react-icons';
 import 'graphiql/graphiql.css';
 import NextLink from 'next/link';
 import { cx } from 'class-variance-authority';
@@ -368,7 +367,6 @@ function useOperationCollectionsPlugin({
     content: useCallback(
       function Content() {
         const [isCollectionModalOpen, toggleCollectionModal] = useToggle();
-        const [isDiffModalOpen, toggleDiffModal] = useToggle();
         const { collections, fetching: loading } = useCollections();
         const [collectionId, setCollectionId] = useState('');
         const [isDeleteCollectionModalOpen, toggleDeleteCollectionModalOpen] = useToggle();
@@ -409,22 +407,16 @@ function useOperationCollectionsPlugin({
               return;
             }
 
-            const fifteenDays = 15 * 24 * 60 * 60 * 1000;
-            if (savedOperation.updatedAt + fifteenDays < Date.now()) {
+            const oneWeek = 7 * 24 * 60 * 60 * 1000;
+            if (savedOperation.updatedAt + oneWeek < Date.now()) {
               clearOperation();
               return;
             }
 
             const currentOperationUpdatedAt = new Date(currentOperation.updatedAt).getTime();
-            if (
-              // Adding five seconds to updatedAt to account for race conditions
-              savedOperation.updatedAt + 5000 >
-              currentOperationUpdatedAt
-            ) {
+            if (savedOperation.updatedAt > currentOperationUpdatedAt) {
               editorContext.queryEditor.setValue(savedOperation.query);
               editorContext.variableEditor.setValue(savedOperation.variables);
-            } else {
-              toggleDiffModal();
             }
           }
         }, [hasAllEditors, queryParamsOperationId, currentOperation]);
@@ -576,7 +568,6 @@ function useOperationCollectionsPlugin({
                 close={() => setOperationToEditId(null)}
               />
             )}
-            <SyncOperationModal isOpen={isDiffModalOpen} close={toggleDiffModal} />
           </div>
         );
       },
@@ -1090,82 +1081,3 @@ function EditorBreadcrumbs() {
     </div>
   );
 }
-
-export const SyncOperationModal = ({ isOpen, close }: { isOpen: boolean; close: () => void }) => {
-  const router = useRouteSelector();
-  const currentOperation = useCurrentOperation();
-  const { savedOperation, clearOperation } = useSyncOperationState();
-  const [_, mutate] = useMutation(UpdateOperationMutation);
-  const notify = useNotifications();
-
-  const onSubmit = async () => {
-    if (!currentOperation || !savedOperation) {
-      return;
-    }
-    const { error, data } = await mutate({
-      selector: {
-        project: router.projectId,
-        target: router.targetId,
-        organization: router.organizationId,
-      },
-      input: {
-        name: currentOperation.name,
-        collectionId: currentOperation.collection.id,
-        query: savedOperation.query,
-        variables: savedOperation.variables,
-        headers: currentOperation.headers,
-        operationId: currentOperation.id,
-      },
-    });
-    if (data) {
-      clearOperation();
-      close();
-      notify('Updated!', 'success');
-    }
-    if (error) {
-      notify(error.message, 'error');
-    }
-  };
-
-  if (!savedOperation || !currentOperation) {
-    return null;
-  }
-
-  return (
-    <Modal
-      open={isOpen}
-      onOpenChange={close}
-      className="flex h-[600px] w-[600px] flex-col items-center overflow-y-auto"
-    >
-      <form className="flex h-full w-full flex-col" onSubmit={onSubmit}>
-        <Heading className="text-center">Sync Changes</Heading>
-        <div className="my-4 text-sm">
-          The operation has been updated in the database since your last edit. Do you want to
-          overwrite it with your local version?
-        </div>
-        <DiffEditor
-          before={currentOperation.query}
-          after={savedOperation.query}
-          className="flex flex-col"
-        />
-
-        <div className="flex w-full gap-2">
-          <ButtonV2
-            type="button"
-            size="large"
-            block
-            onClick={() => {
-              clearOperation();
-              close();
-            }}
-          >
-            Discard Changes
-          </ButtonV2>
-          <ButtonV2 type="submit" size="large" block variant="primary" data-cy="confirm">
-            Override Operation
-          </ButtonV2>
-        </div>
-      </form>
-    </Modal>
-  );
-};
