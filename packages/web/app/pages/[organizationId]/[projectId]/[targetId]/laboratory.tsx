@@ -1061,7 +1061,7 @@ function EditorBreadcrumbs() {
   const operationId = router.query.operation as string;
   const currentOperation = useCurrentOperation();
 
-  // Avoiding blinking `New Operation` when switching between operations
+  // Avoiding blinking `New Operation` when switching between operations (when current operation data is not yet fetched)
   if (operationId && (!currentOperation || currentOperation.id !== operationId)) {
     return null;
   }
