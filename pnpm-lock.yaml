@@ -820,6 +820,9 @@ importers:
       '@apollo/composition':
         specifier: 2.5.7
         version: 2.5.7(graphql@16.8.1)
+      '@apollo/federation-internals':
+        specifier: 2.5.7
+        version: 2.5.7(graphql@16.8.1)
       '@graphql-hive/external-composition':
         specifier: workspace:*
         version: link:../../../libraries/external-composition/dist
