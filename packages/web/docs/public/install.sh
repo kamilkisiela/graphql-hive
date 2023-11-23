@@ -18,6 +18,7 @@
   #   curl -sSL https://cli.graphql-hive.com/install.sh | sh
   # 3.
   #   curl -sSL https://cli.graphql-hive.com/install.sh | sh -s 0.30.1
+  VERSION_FROM_FIRST_ARG="$1"
   REQUESTED_VERSION="VERSION=${VERSION:-$VERSION_FROM_FIRST_ARG}"
 
   echo $REQUESTED_VERSION
