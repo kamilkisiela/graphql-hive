@@ -62,7 +62,7 @@
         DOWNLOAD_DIR=$(mktemp -d)
 
         TARGET="\$OS-\$ARCH"
-        URL="https://graphql-hive-cli.s3.us-east-2.amazonaws.com/channels/stable/hive-\$TARGET.tar.gz"
+        URL="https://cli.graphql-hive.com/channels/stable/hive-\$TARGET.tar.gz"
         echo "Downloading \$URL"
 
         if ! curl --progress-bar --fail -L "\$URL" -o "\$DOWNLOAD_DIR/hive.tar.gz"; then
