@@ -3800,7 +3800,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
               "schema_change_approvals"
             WHERE
               "target_id" = ANY(
-                ${sql.array(Array.from(targetIds), 'text')}
+                ${sql.array(Array.from(targetIds), 'uuid')}
               )
               AND "context_id" = ANY(
                 ${sql.array(Array.from(contextIds), 'text')}
