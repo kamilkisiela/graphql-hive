@@ -43,6 +43,8 @@
         exit 1
       }
 
+      starts_with() { case \$2 in "\$1"*) true;; *) false;; esac; }
+
       set_download_path_base() {
         if [ -z "\${VERSION:-}" ]; then
           # no version set, install latest
@@ -72,7 +74,7 @@
           else
             ARCH=arm
           fi
-        elif [[ "\$ARCH" = aarch* ]]; then
+        elif starts_with "aarch" "\$ARCH"; then
           ARCH=arm
         else
          unsupported_arch "\$OS / \$ARCH"
