@@ -10,9 +10,9 @@
     "@trpc/server": "10.44.0"
   },
   "devDependencies": {
-    "@sentry/node": "7.80.1",
-    "@sentry/types": "7.80.1",
-    "@sentry/utils": "7.80.1",
+    "@sentry/node": "7.81.1",
+    "@sentry/types": "7.81.1",
+    "@sentry/utils": "7.81.1",
     "@whatwg-node/fetch": "0.9.13",
     "fastify": "3.29.5",
     "fastify-cors": "6.0.3",
