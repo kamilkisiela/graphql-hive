@@ -255,6 +255,8 @@ services:
       REQUEST_BROKER: '1'
       REQUEST_BROKER_SIGNATURE: 'secretSignature'
       REQUEST_BROKER_ENDPOINT: 'http://local_broker:3013'
+    ports:
+      - '3002:3002'
 
   #
   # Awkwardly, we need to override some services for different reasons
