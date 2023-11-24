@@ -5,7 +5,7 @@ import {
   getFederationTagDirectiveNameForSubgraphSDL,
   getTagDirectiveNameFromFederation2SupergraphSDL,
   type Federation2SubgraphDocumentNodeByTagsFilter,
-} from '../federation-tag-extraction';
+} from './federation-tag-extraction';
 
 describe('getFederationTagDirectiveNameForSubgraphSDL', () => {
   test('subgraph specification without link directive (Federation 1) -> "tag"', () => {
