@@ -1,3 +1,187 @@
+diff --git a/lib/commands/promote.js b/lib/commands/promote.js
+index eefb804e9fd520db694a52dd6b4f881b276096b9..6ecf874c5cc3744ff983fa17c7a1b9c0b3652a61 100644
+--- a/lib/commands/promote.js
++++ b/lib/commands/promote.js
+@@ -27,48 +27,51 @@ class Promote extends core_1.Command {
+             MetadataDirective: 'REPLACE',
+             CacheControl: indexDefaults.maxAge,
+         };
+-        const cloudBucketCommitKey = (shortKey) => path.join(s3Config.bucket, (0, upload_util_1.commitAWSDir)(flags.version, flags.sha, s3Config), shortKey);
++        const cloudBucketCommitKey = (shortKey) => path.join(s3Config.bucket, (0, upload_util_1.commitAWSDir)(flags.version, s3Config), shortKey);
+         const cloudChannelKey = (shortKey) => path.join((0, upload_util_1.channelAWSDir)(flags.channel, s3Config), shortKey);
+         // copy tarballs manifests
+         if (buildConfig.targets.length > 0)
+             this.log(`Promoting buildmanifests & unversioned tarballs to ${flags.channel}`);
+         const promoteManifest = async (target) => {
++            // replace the git sha from the file name
+             const manifest = (0, upload_util_1.templateShortKey)('manifest', {
+                 arch: target.arch,
+                 bin: config.bin,
+                 platform: target.platform,
+                 sha: flags.sha,
+                 version: flags.version,
+-            });
++            }).replace(`-${flags.sha}`, '');
+             // strip version & sha so update/scripts can point to a static channel manifest
+-            const unversionedManifest = manifest.replace(`-v${flags.version}-${flags.sha}`, '');
++            const unversionedManifest = manifest.replace(`-v${flags.version}`, '');
+             await aws_1.default.s3.copyObject(Object.assign(Object.assign({}, awsDefaults), { CopySource: cloudBucketCommitKey(manifest), Key: cloudChannelKey(unversionedManifest) }));
+         };
+         const promoteGzTarballs = async (target) => {
++            // replace the git sha from the file name
+             const versionedTarGzName = (0, upload_util_1.templateShortKey)('versioned', '.tar.gz', {
+                 arch: target.arch,
+                 bin: config.bin,
+                 platform: target.platform,
+                 sha: flags.sha,
+                 version: flags.version,
+-            });
++            }).replace(`-${flags.sha}`, '');
+             const versionedTarGzKey = cloudBucketCommitKey(versionedTarGzName);
+             // strip version & sha so update/scripts can point to a static channel tarball
+-            const unversionedTarGzName = versionedTarGzName.replace(`-v${flags.version}-${flags.sha}`, '');
++            const unversionedTarGzName = versionedTarGzName.replace(`-v${flags.version}`, '');
+             const unversionedTarGzKey = cloudChannelKey(unversionedTarGzName);
+             await Promise.all([aws_1.default.s3.copyObject(Object.assign(Object.assign({}, awsDefaults), { CopySource: versionedTarGzKey, Key: unversionedTarGzKey }))].concat(flags.indexes ? [(0, version_indexes_1.appendToIndex)(Object.assign(Object.assign({}, indexDefaults), { originalUrl: versionedTarGzKey, filename: unversionedTarGzName }))] : []));
+         };
+         const promoteXzTarballs = async (target) => {
++            // replace the git sha from the file name
+             const versionedTarXzName = (0, upload_util_1.templateShortKey)('versioned', '.tar.xz', {
+                 arch: target.arch,
+                 bin: config.bin,
+                 platform: target.platform,
+                 sha: flags.sha,
+                 version: flags.version,
+-            });
++            }).replace(`-${flags.sha}`, '');
+             const versionedTarXzKey = cloudBucketCommitKey(versionedTarXzName);
+             // strip version & sha so update/scripts can point to a static channel tarball
+-            const unversionedTarXzName = versionedTarXzName.replace(`-v${flags.version}-${flags.sha}`, '');
++            const unversionedTarXzName = versionedTarXzName.replace(`-v${flags.version}`, '');
+             const unversionedTarXzKey = cloudChannelKey(unversionedTarXzName);
+             await Promise.all([aws_1.default.s3.copyObject(Object.assign(Object.assign({}, awsDefaults), { CopySource: versionedTarXzKey, Key: unversionedTarXzKey }))].concat(flags.indexes ? [(0, version_indexes_1.appendToIndex)(Object.assign(Object.assign({}, indexDefaults), { originalUrl: versionedTarXzKey, filename: unversionedTarXzName }))] : []));
+         };
+@@ -76,10 +79,11 @@ class Promote extends core_1.Command {
+             this.log(`Promoting macos pkgs to ${flags.channel}`);
+             const arches = _.uniq(buildConfig.targets.filter(t => t.platform === 'darwin').map(t => t.arch));
+             await Promise.all(arches.map(async (arch) => {
+-                const darwinPkg = (0, upload_util_1.templateShortKey)('macos', { bin: config.bin, version: flags.version, sha: flags.sha, arch });
++                // replace the git sha from the file name
++                const darwinPkg = (0, upload_util_1.templateShortKey)('macos', { bin: config.bin, version: flags.version, sha: flags.sha, arch }).replace(`-${flags.sha}`, '');
+                 const darwinCopySource = cloudBucketCommitKey(darwinPkg);
+                 // strip version & sha so scripts can point to a static channel pkg
+-                const unversionedPkg = darwinPkg.replace(`-v${flags.version}-${flags.sha}`, '');
++                const unversionedPkg = darwinPkg.replace(`-v${flags.version}`, '');
+                 await Promise.all([aws_1.default.s3.copyObject(Object.assign(Object.assign({}, awsDefaults), { CopySource: darwinCopySource, Key: cloudChannelKey(unversionedPkg) }))].concat(flags.indexes ? [(0, version_indexes_1.appendToIndex)(Object.assign(Object.assign({}, indexDefaults), { originalUrl: darwinCopySource, filename: unversionedPkg }))] : []));
+             }));
+         };
+@@ -88,10 +92,11 @@ class Promote extends core_1.Command {
+             this.log(`Promoting windows exe to ${flags.channel}`);
+             const arches = buildConfig.targets.filter(t => t.platform === 'win32').map(t => t.arch);
+             await Promise.all(arches.map(async (arch) => {
+-                const winPkg = (0, upload_util_1.templateShortKey)('win32', { bin: config.bin, version: flags.version, sha: flags.sha, arch });
++                // replace the git sha from the file name
++                const winPkg = (0, upload_util_1.templateShortKey)('win32', { bin: config.bin, version: flags.version, sha: flags.sha, arch }).replace(`-${flags.sha}`, '');;
+                 const winCopySource = cloudBucketCommitKey(winPkg);
+                 // strip version & sha so scripts can point to a static channel exe
+-                const unversionedExe = winPkg.replace(`-v${flags.version}-${flags.sha}`, '');
++                const unversionedExe = winPkg.replace(`-v${flags.version}`, '');
+                 await Promise.all([aws_1.default.s3.copyObject(Object.assign(Object.assign({}, awsDefaults), { CopySource: winCopySource, Key: cloudChannelKey(unversionedExe) }))].concat(flags.indexes ? [(0, version_indexes_1.appendToIndex)(Object.assign(Object.assign({}, indexDefaults), { originalUrl: winCopySource, filename: unversionedExe }))] : []));
+                 core_1.ux.action.stop('successfully');
+             }));
+diff --git a/lib/commands/upload/deb.js b/lib/commands/upload/deb.js
+index a4657a5d1740faf03347b03b6304641dd278cc0f..492c978b0f629ffaf6425ef271074107436adba6 100644
+--- a/lib/commands/upload/deb.js
++++ b/lib/commands/upload/deb.js
+@@ -21,9 +21,10 @@ class UploadDeb extends core_1.Command {
+             this.error('Cannot find debian artifacts', {
+                 suggestions: ['Run "oclif pack deb" before uploading'],
+             });
+-        const cloudKeyBase = (0, upload_util_1.commitAWSDir)(config.pjson.version, buildConfig.gitSha, s3Config);
++        const cloudKeyBase = (0, upload_util_1.commitAWSDir)(config.pjson.version, s3Config);
+         const upload = (file) => {
+-            const cloudKey = `${cloudKeyBase}/apt/${file}`;
++            // remove the git sha from the file name
++            const cloudKey = `${cloudKeyBase}/apt/${file}`.replace(`-${buildConfig.gitSha}`, '');
+             return aws_1.default.s3.uploadFile(dist(file), Object.assign(Object.assign({}, S3Options), { CacheControl: 'max-age=86400', Key: cloudKey }));
+         };
+         // apt expects ../apt/dists/versionName/[artifacts] but oclif wants versions/sha/apt/[artifacts]
+@@ -31,7 +32,8 @@ class UploadDeb extends core_1.Command {
+         // this workaround puts the code in both places that the redirect was doing
+         // with this, the docs are correct. The copies are all done in parallel so it shouldn't be too costly.
+         const uploadWorkaround = (file) => {
+-            const cloudKey = `${cloudKeyBase}/apt/./${file}`;
++            // remove the git sha from the file name
++            const cloudKey = `${cloudKeyBase}/apt/./${file}`.replace(`-${buildConfig.gitSha}`, '');
+             return aws_1.default.s3.uploadFile(dist(file), Object.assign(Object.assign({}, S3Options), { CacheControl: 'max-age=86400', Key: cloudKey }));
+         };
+         const uploadDeb = async (arch) => {
+diff --git a/lib/commands/upload/macos.js b/lib/commands/upload/macos.js
+index 7c2971748829dcda52e7665ce1c7b3a03f4a3b51..b468920eebeebf3c0148e87a8f731e075a3fa259 100644
+--- a/lib/commands/upload/macos.js
++++ b/lib/commands/upload/macos.js
+@@ -17,10 +17,11 @@ class UploadMacos extends core_1.Command {
+             Bucket: s3Config.bucket,
+             ACL: s3Config.acl || 'public-read',
+         };
+-        const cloudKeyBase = (0, upload_util_1.commitAWSDir)(config.version, buildConfig.gitSha, s3Config);
++        const cloudKeyBase = (0, upload_util_1.commitAWSDir)(config.version, s3Config);
+         const upload = async (arch) => {
+             const templateKey = (0, upload_util_1.templateShortKey)('macos', { bin: config.bin, version: config.version, sha: buildConfig.gitSha, arch });
+-            const cloudKey = `${cloudKeyBase}/${templateKey}`;
++            // remove the git sha from the file name
++            const cloudKey = `${cloudKeyBase}/${templateKey}`.replace(`-${buildConfig.gitSha}`, '');
+             const localPkg = dist(`macos/${templateKey}`);
+             if (fs.existsSync(localPkg))
+                 await aws_1.default.s3.uploadFile(localPkg, Object.assign(Object.assign({}, S3Options), { CacheControl: 'max-age=86400', Key: cloudKey }));
+diff --git a/lib/commands/upload/tarballs.js b/lib/commands/upload/tarballs.js
+index 6b4577c16408ed1039ce19ef4f86d6810984ce26..d470941ee517d1a406cff582df297a439201214b 100644
+--- a/lib/commands/upload/tarballs.js
++++ b/lib/commands/upload/tarballs.js
+@@ -38,17 +38,21 @@ class UploadTarballs extends core_1.Command {
+             };
+             const releaseTarballs = async (ext) => {
+                 const localKey = (0, upload_util_1.templateShortKey)('versioned', ext, shortKeyInputs);
+-                const cloudKey = `${(0, upload_util_1.commitAWSDir)(config.version, buildConfig.gitSha, s3Config)}/${localKey}`;
++                // remove the git sha from the file name
++                const cloudKey = `${(0, upload_util_1.commitAWSDir)(config.version, s3Config)}/${localKey}`.replace(`-${buildConfig.gitSha}`, '');
++                (0, log_1.log)(`uploading targets ${localKey} to ${cloudKey}`)
+                 await aws_1.default.s3.uploadFile(dist(localKey), Object.assign(Object.assign({}, S3Options), { CacheControl: 'max-age=604800', ContentType: 'application/gzip', Key: cloudKey }));
+             };
+             const manifest = (0, upload_util_1.templateShortKey)('manifest', shortKeyInputs);
+-            const cloudKey = `${(0, upload_util_1.commitAWSDir)(config.version, buildConfig.gitSha, s3Config)}/${manifest}`;
++            // remove the git sha from the file name
++            const cloudKey = `${(0, upload_util_1.commitAWSDir)(config.version, s3Config)}/${manifest}`.replace(`-${buildConfig.gitSha}`, '');
++            (0, log_1.log)(`uploading targets ${manifest} to ${cloudKey}`)
+             await Promise.all([releaseTarballs('.tar.gz'), aws_1.default.s3.uploadFile(dist(manifest), Object.assign(Object.assign({}, S3Options), { CacheControl: 'max-age=86400', ContentType: 'application/json', Key: cloudKey }))].concat(xz ? [releaseTarballs('.tar.xz')] : []));
+         };
+         if (buildConfig.targets.length > 0)
+             (0, log_1.log)('uploading targets');
+         await Promise.all(buildConfig.targets.map(t => uploadTarball(t)));
+-        (0, log_1.log)(`done uploading tarballs & manifests for v${config.version}-${buildConfig.gitSha}`);
++        (0, log_1.log)(`done uploading tarballs & manifests for v${config.version}`);
+     }
+ }
+ exports.default = UploadTarballs;
+diff --git a/lib/commands/upload/win.js b/lib/commands/upload/win.js
+index 64bee4efe80de5dfa51810585ff22f027ecf6eb9..57eb39fe3fb89940d8939b9179fb72d4d8243620 100644
+--- a/lib/commands/upload/win.js
++++ b/lib/commands/upload/win.js
+@@ -25,11 +25,12 @@ class UploadWin extends core_1.Command {
+                     suggestions: ['Run "oclif pack win" before uploading'],
+                 });
+         }
+-        const cloudKeyBase = (0, upload_util_1.commitAWSDir)(config.pjson.version, buildConfig.gitSha, s3Config);
++        const cloudKeyBase = (0, upload_util_1.commitAWSDir)(config.pjson.version, s3Config);
+         const uploadWin = async (arch) => {
+             const templateKey = (0, upload_util_1.templateShortKey)('win32', { bin: config.bin, version: config.version, sha: buildConfig.gitSha, arch });
+             const localExe = dist(`win32/${templateKey}`);
+-            const cloudKey = `${cloudKeyBase}/${templateKey}`;
++            // remove the git sha from the file name
++            const cloudKey = `${cloudKeyBase}/${templateKey}`.replace(`-${buildConfig.gitSha}`, '');
+             if (fs.existsSync(localExe))
+                 await aws_1.default.s3.uploadFile(localExe, Object.assign(Object.assign({}, S3Options), { CacheControl: 'max-age=86400', Key: cloudKey }));
+         };
 diff --git a/lib/tarballs/bin.js b/lib/tarballs/bin.js
 index 8301c7be4c3101de9caf1c1b127cf1f940a1706c..e7d955d29ce3d002a260ef7f4a1355fcdc95e018 100644
 --- a/lib/tarballs/bin.js
@@ -133,7 +317,7 @@ index 8301c7be4c3101de9caf1c1b127cf1f940a1706c..e7d955d29ce3d002a260ef7f4a1355fc
  }
  exports.writeBinScripts = writeBinScripts;
 diff --git a/lib/tarballs/build.js b/lib/tarballs/build.js
-index 384ea4be6bb7179c0622436ce41142b59b226771..943a2516bcc2079107023b9da8f27592a656a7a2 100644
+index 384ea4be6bb7179c0622436ce41142b59b226771..f7714506b50472b9cb4c327055267cceda67efad 100644
 --- a/lib/tarballs/build.js
 +++ b/lib/tarballs/build.js
 @@ -73,9 +73,10 @@ async function build(c, options = {}) {
@@ -150,3 +334,32 @@ index 384ea4be6bb7179c0622436ce41142b59b226771..943a2516bcc2079107023b9da8f27592
              await exec('npm install --production', { cwd: c.workspace() });
          }
      };
+@@ -131,8 +132,8 @@ async function build(c, options = {}) {
+         if (!c.updateConfig.s3.host)
+             return;
+         const rollout = (typeof c.updateConfig.autoupdate === 'object' && c.updateConfig.autoupdate.rollout);
+-        const gzCloudKey = `${(0, upload_util_1.commitAWSDir)(config.version, c.gitSha, c.updateConfig.s3)}/${gzLocalKey}`;
+-        const xzCloudKey = `${(0, upload_util_1.commitAWSDir)(config.version, c.gitSha, c.updateConfig.s3)}/${xzLocalKey}`;
++        const gzCloudKey = `${(0, upload_util_1.commitAWSDir)(config.version, c.updateConfig.s3)}/${gzLocalKey}`;
++        const xzCloudKey = `${(0, upload_util_1.commitAWSDir)(config.version, c.updateConfig.s3)}/${xzLocalKey}`;
+         const [sha256gz, sha256xz] = await Promise.all([(0, util_1.hash)('sha256', c.dist(gzLocalKey))].concat(xz ? [(0, util_1.hash)('sha256', c.dist(xzLocalKey))] : []));
+         const manifest = {
+             rollout: rollout === false ? undefined : rollout,
+diff --git a/lib/upload-util.js b/lib/upload-util.js
+index 6963e4df0cbcc41cd924e0fa7a1790edfd297b96..aa506b97ccae547ab4bfdfc75f4dcf4a452f07fc 100644
+--- a/lib/upload-util.js
++++ b/lib/upload-util.js
+@@ -2,11 +2,11 @@
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.debVersion = exports.debArch = exports.templateShortKey = exports.channelAWSDir = exports.commitAWSDir = void 0;
+ const path = require("path");
+-function commitAWSDir(version, sha, s3Config) {
++function commitAWSDir(version, s3Config) {
+     let s3SubDir = s3Config.folder || '';
+     if (s3SubDir !== '' && s3SubDir.slice(-1) !== '/')
+         s3SubDir = `${s3SubDir}/`;
+-    return path.join(s3SubDir, 'versions', version, sha);
++    return path.join(s3SubDir, 'versions', version);
+ }
+ exports.commitAWSDir = commitAWSDir;
+ function channelAWSDir(channel, s3Config) {
