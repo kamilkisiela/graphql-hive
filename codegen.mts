@@ -40,6 +40,9 @@ const config: CodegenConfig = {
           ID: 'string',
         },
         mappers: {
+          SchemaChange: '../shared/mappers#SchemaChange as SchemaChangeMapper',
+          SchemaChangeApproval:
+            '../shared/mappers#SchemaChangeApproval as SchemaChangeApprovalMapper',
           SchemaChangeConnection:
             '../shared/mappers#SchemaChangeConnection as SchemaChangeConnectionMapper',
           SchemaErrorConnection:

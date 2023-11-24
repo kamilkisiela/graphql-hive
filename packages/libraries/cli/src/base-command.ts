@@ -101,8 +101,8 @@ export default abstract class extends Command {
       [TArgKey in keyof TArgs]: typeof Symbol.asyncIterator extends TArgs[TArgKey]
         ? never
         : string extends TArgs[TArgKey]
-        ? TArgKey
-        : never;
+          ? TArgKey
+          : never;
     }>;
 
     defaultValue?: TArgs[keyof TArgs] | null;

@@ -1,15 +1,9 @@
 import type { DocumentNode, GraphQLSchema } from 'graphql';
-import type {
-  ClientStatsValues,
-  OperationStatsValues,
-  SchemaChange,
-  SchemaError,
-} from '../__generated__/types';
-import { type SuperGraphInformation } from '../modules/schema/lib/federation-super-graph';
-import { SchemaCheckWarning } from '../modules/schema/providers/models/shared';
-import { SchemaBuildError } from '../modules/schema/providers/orchestrators/errors';
-import { InflatedSchemaCheck } from '../modules/schema/providers/schema-manager';
-import { SerializableChange } from '../modules/schema/schema-change-from-meta';
+import type { SchemaChangeType, SchemaCheck, SchemaCheckApprovalMetadata } from '@hive/storage';
+import type { ClientStatsValues, OperationStatsValues, SchemaError } from '../__generated__/types';
+import type { SuperGraphInformation } from '../modules/schema/lib/federation-super-graph';
+import type { SchemaCheckWarning } from '../modules/schema/providers/models/shared';
+import type { SchemaBuildError } from '../modules/schema/providers/orchestrators/errors';
 import type {
   ActivityObject,
   DateRange,
@@ -27,7 +21,7 @@ import type {
   Token,
   User,
 } from './entities';
-import { type PromiseOrValue } from './helpers';
+import type { PromiseOrValue } from './helpers';
 
 export interface SchemaVersion extends SchemaVersionEntity {
   project: string;
@@ -234,7 +228,9 @@ export type GraphQLScalarTypeMapper = WithSchemaCoordinatesUsage<{
   };
 }>;
 
-export type SchemaChangeConnection = ReadonlyArray<SchemaChange>;
+export type SchemaChangeConnection = ReadonlyArray<SchemaChangeType>;
+export type SchemaChange = SchemaChangeType;
+export type SchemaChangeApproval = SchemaCheckApprovalMetadata;
 export type SchemaErrorConnection = readonly SchemaError[];
 export type SchemaWarningConnection = readonly SchemaCheckWarning[];
 export type UserConnection = readonly User[];
@@ -268,7 +264,7 @@ export type SchemaCompareResult = {
       before: string | null;
       current: string;
     };
-    changes: Array<SerializableChange>;
+    changes: Array<SchemaChangeType>;
     versionIds: {
       before: string | null;
       current: string;
@@ -355,13 +351,14 @@ export type FailedSchemaCheckMapper = {
     organizationId: string;
     projectId: string;
   };
-} & Extract<InflatedSchemaCheck, { isSuccess: false }>;
+} & Extract<SchemaCheck, { isSuccess: false }>;
+
 export type SuccessfulSchemaCheckMapper = {
   __typename: 'SuccessfulSchemaCheck';
   selector: {
     organizationId: string;
     projectId: string;
   };
-} & Extract<InflatedSchemaCheck, { isSuccess: true }>;
+} & Extract<SchemaCheck, { isSuccess: true }>;
 
 export type SchemaPolicyWarningConnectionMapper = ReadonlyArray<SchemaCheckWarning>;

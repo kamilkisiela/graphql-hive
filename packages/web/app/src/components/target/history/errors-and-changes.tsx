@@ -1,9 +1,13 @@
-import { ReactElement } from 'react';
+import { ReactElement, useMemo } from 'react';
+import Link from 'next/link';
 import { clsx } from 'clsx';
+import { format } from 'date-fns';
+import { CheckIcon } from 'lucide-react';
 import reactStringReplace from 'react-string-replace';
 import { Label } from '@/components/common';
 import { Tooltip } from '@/components/v2';
 import { CriticalityLevel, SchemaChangeFieldsFragment } from '@/graphql';
+import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 
 export function labelize(message: string) {
   // Turn " into '
@@ -42,12 +46,70 @@ export function ChangesBlock(props: {
             <MaybeWrapTooltip tooltip={change.criticalityReason ?? null}>
               <span className="text-gray-600 dark:text-white">{labelize(change.message)}</span>
             </MaybeWrapTooltip>
+            {change.isSafeBasedOnUsage ? (
+              <span className="cursor-pointer text-yellow-500">
+                {' '}
+                <CheckIcon className="inline h-3 w-3" /> Safe based on usage data
+              </span>
+            ) : null}
+            {change.approval ? <SchemaChangeApproval approval={change.approval} /> : null}
           </li>
         ))}
       </ul>
     </div>
   );
 }
+
+const SchemaChangeApproval = (props: {
+  approval: Exclude<SchemaChangeFieldsFragment['approval'], null | undefined>;
+}) => {
+  const approvalName = props.approval.approvedBy?.displayName ?? '<unknown>';
+  const approvalDate = useMemo(
+    () => format(new Date(props.approval.approvedAt), 'do MMMM yyyy'),
+    [props.approval.approvedAt],
+  );
+  const route = useRouteSelector();
+  // eslint-disable-next-line no-restricted-syntax
+  const schemaCheckPath = useMemo(
+    () =>
+      '/' +
+      [
+        route.organizationId,
+        route.projectId,
+        route.targetId,
+        'checks',
+        props.approval.schemaCheckId,
+      ].join('/'),
+    [],
+  );
+
+  return (
+    <Tooltip.Provider delayDuration={200}>
+      <Tooltip
+        content={
+          <>
+            This breaking change was manually{' '}
+            {props.approval.schemaCheckId === route.schemaCheckId ? (
+              <>
+                {' '}
+                approved by {approvalName} in this check on {approvalDate}.
+              </>
+            ) : (
+              <Link href={schemaCheckPath} className="text-orange-500 hover:underline">
+                approved by {approvalName} on {approvalDate}.
+              </Link>
+            )}
+          </>
+        }
+      >
+        <span className="cursor-pointer text-green-500">
+          {' '}
+          <CheckIcon className="inline h-3 w-3" /> Approved by {approvalName}
+        </span>
+      </Tooltip>
+    </Tooltip.Provider>
+  );
+};
 
 function MaybeWrapTooltip(props: { children: React.ReactNode; tooltip: string | null }) {
   return props.tooltip ? (

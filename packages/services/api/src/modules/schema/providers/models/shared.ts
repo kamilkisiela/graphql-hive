@@ -1,8 +1,7 @@
 import { PushedCompositeSchema, SingleSchema } from 'packages/services/api/src/shared/entities';
-import { Change } from '@graphql-inspector/core';
 import type { CheckPolicyResponse } from '@hive/policy';
 import { CompositionFailureError } from '@hive/schema';
-import type { SchemaCompositionError } from '@hive/storage';
+import type { SchemaChangeType, SchemaCompositionError } from '@hive/storage';
 import { type RegistryChecks } from '../registry-checks';
 
 export const SchemaPublishConclusion = {
@@ -81,7 +80,11 @@ export type SchemaCheckSuccess = {
   conclusion: (typeof SchemaCheckConclusion)['Success'];
   // state is null in case the check got skipped.
   state: null | {
-    schemaChanges: Array<Change> | null;
+    schemaChanges: null | {
+      breaking: Array<SchemaChangeType> | null;
+      safe: Array<SchemaChangeType> | null;
+      all: Array<SchemaChangeType> | null;
+    };
     schemaPolicyWarnings: SchemaCheckWarning[] | null;
     composition: {
       compositeSchemaSDL: string;
@@ -108,8 +111,9 @@ export type SchemaCheckFailure = {
         };
     /** Absence means schema changes were skipped. */
     schemaChanges: null | {
-      breaking: Array<Change> | null;
-      safe: Array<Change> | null;
+      breaking: Array<SchemaChangeType> | null;
+      safe: Array<SchemaChangeType> | null;
+      all: Array<SchemaChangeType> | null;
     };
     /** Absence means the schema policy is disabled or wasn't done because composition failed. */
     schemaPolicy: null | {
@@ -156,8 +160,8 @@ export type SchemaPublishFailureReason =
     }
   | {
       code: (typeof PublishFailureReasonCode)['BreakingChanges'];
-      breakingChanges: Array<Change>;
-      changes: Array<Change>;
+      breakingChanges: Array<SchemaChangeType>;
+      changes: Array<SchemaChangeType>;
     };
 
 type SchemaPublishSuccess = {
@@ -165,7 +169,7 @@ type SchemaPublishSuccess = {
   state: {
     composable: boolean;
     initial: boolean;
-    changes: Array<Change> | null;
+    changes: Array<SchemaChangeType> | null;
     messages: string[] | null;
     breakingChanges: Array<{
       message: string;
@@ -213,8 +217,8 @@ export type SchemaDeleteFailureReason =
 export type SchemaDeleteSuccess = {
   conclusion: (typeof SchemaDeleteConclusion)['Accept'];
   state: {
-    changes: Array<Change> | null;
-    breakingChanges: Array<Change> | null;
+    changes: Array<SchemaChangeType> | null;
+    breakingChanges: Array<SchemaChangeType> | null;
     compositionErrors: Array<SchemaCompositionError> | null;
     supergraph: string | null;
   } & (
@@ -262,10 +266,11 @@ export function buildSchemaCheckFailureState(args: {
   policyCheck: Awaited<ReturnType<RegistryChecks['policyCheck']>> | null;
 }): SchemaCheckFailure['state'] {
   const compositionErrors: Array<CompositionFailureError> = [];
-  let schemaChanges: null | {
-    breaking: Array<Change> | null;
-    safe: Array<Change> | null;
-  } = null;
+  const schemaChanges: null | {
+    breaking: Array<SchemaChangeType> | null;
+    safe: Array<SchemaChangeType> | null;
+    all: Array<SchemaChangeType> | null;
+  } = args.diffCheck.reason ?? args.diffCheck.result ?? null;
   let schemaPolicy: null | {
     errors: SchemaCheckWarning[] | null;
     warnings: SchemaCheckWarning[] | null;
@@ -273,20 +278,6 @@ export function buildSchemaCheckFailureState(args: {
 
   if (args.compositionCheck.status === 'failed') {
     compositionErrors.push(...args.compositionCheck.reason.errors);
-  }
-
-  if (args.diffCheck.reason) {
-    schemaChanges = {
-      breaking: args.diffCheck.reason.breakingChanges,
-      safe: args.diffCheck.reason.safeChanges,
-    };
-  }
-
-  if (args.diffCheck.result) {
-    schemaChanges = {
-      breaking: null,
-      safe: args.diffCheck.result.changes,
-    };
   }
 
   if (args.policyCheck) {

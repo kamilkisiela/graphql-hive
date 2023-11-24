@@ -2,8 +2,7 @@ import { parse } from 'graphql';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import { z } from 'zod';
-import { Change } from '@graphql-inspector/core';
-import type { SchemaCheck, SchemaCompositionError } from '@hive/storage';
+import type { SchemaChangeType, SchemaCheck, SchemaCompositionError } from '@hive/storage';
 import { RegistryModel, SchemaChecksFilter } from '../../../__generated__/types';
 import {
   DateRange,
@@ -30,7 +29,6 @@ import {
   TargetSelector,
 } from '../../shared/providers/storage';
 import { TargetManager } from '../../target/providers/target-manager';
-import { schemaChangeFromMeta } from '../schema-change-from-meta';
 import { SCHEMA_MODULE_CONFIG, type SchemaModuleConfig } from './config';
 import { FederationOrchestrator } from './orchestrators/federation';
 import { SingleOrchestrator } from './orchestrators/single';
@@ -328,7 +326,7 @@ export class SchemaManager {
       metadata: string | null;
       projectType: ProjectType;
       actionFn(): Promise<void>;
-      changes: Array<Change>;
+      changes: Array<SchemaChangeType>;
       previousSchemaVersion: string | null;
       github: null | {
         repository: string;
@@ -587,15 +585,13 @@ export class SchemaManager {
     };
   }
 
-  async getPaginatedSchemaChecksForTarget<
-    TransformedSchemaCheck extends InflatedSchemaCheck,
-  >(args: {
+  async getPaginatedSchemaChecksForTarget<TransformedSchemaCheck extends SchemaCheck>(args: {
     organizationId: string;
     projectId: string;
     targetId: string;
     first: number | null;
     cursor: string | null;
-    transformNode: (check: InflatedSchemaCheck) => TransformedSchemaCheck;
+    transformNode: (check: SchemaCheck) => TransformedSchemaCheck;
     filters: SchemaChecksFilter | null;
   }) {
     await this.authManager.ensureTargetAccess({
@@ -609,7 +605,7 @@ export class SchemaManager {
       targetId: args.targetId,
       first: args.first,
       cursor: args.cursor,
-      transformNode: node => args.transformNode(inflateSchemaCheck(node)),
+      transformNode: node => args.transformNode(node),
       filters: args.filters,
     });
 
@@ -631,7 +627,6 @@ export class SchemaManager {
     });
 
     const schemaCheck = await this.storage.findSchemaCheck({
-      targetId: args.targetId,
       schemaCheckId: args.schemaCheckId,
     });
 
@@ -640,7 +635,7 @@ export class SchemaManager {
       return null;
     }
 
-    return inflateSchemaCheck(schemaCheck);
+    return schemaCheck;
   }
 
   async getSchemaCheckWebUrl(args: {
@@ -722,13 +717,12 @@ export class SchemaManager {
 
     let [schemaCheck, viewer] = await Promise.all([
       this.storage.findSchemaCheck({
-        targetId: args.targetId,
         schemaCheckId: args.schemaCheckId,
       }),
       this.authManager.getCurrentUser(),
     ]);
 
-    if (schemaCheck == null) {
+    if (schemaCheck == null || schemaCheck.targetId !== args.targetId) {
       this.logger.debug('Schema check not found (args=%o)', args);
       return {
         type: 'error',
@@ -804,7 +798,7 @@ export class SchemaManager {
 
     return {
       type: 'ok',
-      schemaCheck: inflateSchemaCheck(schemaCheck),
+      schemaCheck,
     } as const;
   }
 
@@ -924,36 +918,15 @@ export class SchemaManager {
 
     return null;
   }
-}
 
-/**
- * Takes a schema check as read from the database and inflates it to the proper business logic type.
- */
-export function inflateSchemaCheck(schemaCheck: SchemaCheck) {
-  if (schemaCheck.isSuccess) {
-    return {
-      ...schemaCheck,
-      safeSchemaChanges:
-        // TODO: fix any type
-        schemaCheck.safeSchemaChanges?.map((check: any) => schemaChangeFromMeta(check)) ?? null,
-      // TODO: fix any type
-      breakingSchemaChanges:
-        schemaCheck.breakingSchemaChanges?.map((check: any) => schemaChangeFromMeta(check)) ?? null,
-    };
+  async getUserForSchemaChangeById(input: { userId: string }) {
+    this.logger.info('Load user by id. (userId=%%)', input.userId);
+    const user = await this.storage.getUserById({ id: input.userId });
+    if (user) {
+      this.logger.info('User found. (userId=%s)', input.userId);
+      return user;
+    }
+    this.logger.info('User not found. (userId=%s)', input.userId);
+    return null;
   }
-
-  return {
-    ...schemaCheck,
-    safeSchemaChanges:
-      // TODO: fix any type
-      schemaCheck.safeSchemaChanges?.map((check: any) => schemaChangeFromMeta(check)) ?? null,
-    // TODO: fix any type
-    breakingSchemaChanges:
-      schemaCheck.breakingSchemaChanges?.map((check: any) => schemaChangeFromMeta(check)) ?? null,
-  };
 }
-
-/**
- * Schema check with all the fields inflated to their proper types.
- */
-export type InflatedSchemaCheck = ReturnType<typeof inflateSchemaCheck>;

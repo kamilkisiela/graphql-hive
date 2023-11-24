@@ -20,8 +20,9 @@ const schemaPublishMutation = graphql(/* GraphQL */ `
         linkToWebsite
         changes {
           nodes {
-            message
+            message(withSafeBasedOnUsageNote: false)
             criticality
+            isSafeBasedOnUsage
           }
           total
         }
@@ -31,8 +32,9 @@ const schemaPublishMutation = graphql(/* GraphQL */ `
         linkToWebsite
         changes {
           nodes {
-            message
+            message(withSafeBasedOnUsageNote: false)
             criticality
+            isSafeBasedOnUsage
           }
           total
         }

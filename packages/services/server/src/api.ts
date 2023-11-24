@@ -32,8 +32,7 @@ const oidcDefaultScopes = [
 ];
 
 const t = initTRPC.context<Context>().create();
-const errorMiddleware = t.middleware(handleTRPCError);
-const procedure = t.procedure.use(errorMiddleware);
+const procedure = t.procedure.use(handleTRPCError);
 
 export const internalApiRouter = t.router({
   ensureUser: procedure

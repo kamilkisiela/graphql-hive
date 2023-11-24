@@ -109,6 +109,7 @@ export class CompositeLegacyModel {
         selector,
         version: latestVersion,
         includeUrlChanges: false,
+        approvedChanges: null,
       }),
     ]);
 
@@ -126,7 +127,7 @@ export class CompositeLegacyModel {
     return {
       conclusion: SchemaCheckConclusion.Success,
       state: {
-        schemaChanges: diffCheck.result?.changes ?? null,
+        schemaChanges: diffCheck.result ?? null,
         schemaPolicyWarnings: null,
         composition: {
           compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
@@ -253,6 +254,7 @@ export class CompositeLegacyModel {
         schemas,
         version: latestVersion,
         includeUrlChanges: true,
+        approvedChanges: null,
       }),
       isFederation
         ? {
@@ -264,10 +266,8 @@ export class CompositeLegacyModel {
     const compositionErrors =
       compositionCheck.status === 'failed' ? compositionCheck.reason.errors : null;
     const breakingChanges =
-      diffCheck.status === 'failed' && !acceptBreakingChanges
-        ? diffCheck.reason.breakingChanges
-        : null;
-    const changes = diffCheck.result?.changes || diffCheck.reason?.changes || null;
+      diffCheck.status === 'failed' && !acceptBreakingChanges ? diffCheck.reason.breaking : null;
+    const changes = diffCheck.result?.all || diffCheck.reason?.all || null;
 
     const hasNewUrl =
       serviceUrlCheck.status === 'completed' && serviceUrlCheck.result.status === 'modified';
@@ -329,8 +329,8 @@ export class CompositeLegacyModel {
     if (diffCheck.status === 'failed' && !acceptBreakingChanges) {
       reasons.push({
         code: PublishFailureReasonCode.BreakingChanges,
-        changes: diffCheck.reason.changes ?? [],
-        breakingChanges: diffCheck.reason.breakingChanges ?? [],
+        changes: diffCheck.reason.all ?? [],
+        breakingChanges: diffCheck.reason.breaking ?? [],
       });
     }
 

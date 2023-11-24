@@ -7,8 +7,10 @@ jobs:
 
     env:
       HIVE_TOKEN: ${{ secrets.HIVE_TOKEN }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      # AWS_* are used by Oclif CLI
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_S3_ENDPOINT: https://6d5bc18cd8d13babe7ed321adba3d8ae.r2.cloudflarestorage.com
 
     outputs:
       publish: ${{ steps.cli.outputs.publish }}
@@ -76,9 +78,7 @@ jobs:
         working-directory: packages/libraries/cli
         env:
           VERSION: ${{ steps.cli.outputs.version }}
-        run:
-          pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION --win || pnpm oclif
-          promote --no-xz --sha ${GITHUB_SHA:0:8} --version $VERSION --win
+        run: pnpm oclif promote --no-xz --sha ${GITHUB_SHA:0:7} --version $VERSION --win
 
   publish_docker:
     needs: publish

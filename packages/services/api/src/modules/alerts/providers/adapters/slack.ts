@@ -1,5 +1,6 @@
 import { Inject, Injectable } from 'graphql-modules';
-import { Change, CriticalityLevel } from '@graphql-inspector/core';
+import { CriticalityLevel } from '@graphql-inspector/core';
+import { SchemaChangeType } from '@hive/storage';
 import { MessageAttachment, WebClient } from '@slack/web-api';
 import { Logger } from '../../../shared/providers/logger';
 import { WEB_APP_URL } from '../../../shared/providers/tokens';
@@ -125,7 +126,7 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
   }
 }
 
-function createAttachments(changes: readonly Change[], messages: readonly string[]) {
+function createAttachments(changes: readonly SchemaChangeType[], messages: readonly string[]) {
   const breakingChanges = changes.filter(filterChangesByLevel(CriticalityLevel.Breaking));
   const dangerousChanges = changes.filter(filterChangesByLevel(CriticalityLevel.Dangerous));
   const safeChanges = changes.filter(filterChangesByLevel(CriticalityLevel.NonBreaking));
@@ -183,9 +184,18 @@ function renderAttachments({
 }: {
   color: string;
   title: string;
-  changes: readonly Change[];
+  changes: readonly SchemaChangeType[];
 }): MessageAttachment {
-  const text = changes.map(change => slackCoderize(change.message)).join('\n');
+  const text = changes
+    .map(change => {
+      let text = change.message;
+      if (change.isSafeBasedOnUsage) {
+        text += ' (safe based on usage)';
+      }
+
+      return slackCoderize(text);
+    })
+    .join('\n');
 
   return {
     mrkdwn_in: ['text'],

@@ -2,7 +2,7 @@ version: '3.8'
 name: 'hive-dev'
 services:
   db:
-    image: postgres:14.9-alpine
+    image: postgres:14.10-alpine
     networks:
       - 'stack'
     healthcheck:
@@ -89,7 +89,7 @@ services:
       - 'stack'
 
   broker:
-    image: redpandadata/redpanda:v23.2.15
+    image: redpandadata/redpanda:v23.2.16
     container_name: broker
     hostname: broker
     networks:
@@ -121,7 +121,7 @@ services:
       - ./.hive-dev/broker/db:/var/lib/kafka/data
 
   supertokens:
-    image: registry.supertokens.io/supertokens/supertokens-postgresql:6.0
+    image: registry.supertokens.io/supertokens/supertokens-postgresql:7.0
     depends_on:
       db:
         condition: service_healthy

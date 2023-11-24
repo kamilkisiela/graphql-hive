@@ -90,16 +90,16 @@ export function useDateRangeController(options: {
     const sub = selectedDateRangeKey.endsWith('h')
       ? 'h'
       : selectedDateRangeKey.endsWith('m')
-      ? 'm'
-      : 'd';
+        ? 'm'
+        : 'd';
 
     const value = parseInt(selectedDateRangeKey.replace(sub, ''));
     const from = formatISO(
       sub === 'h'
         ? subHours(now, value)
         : sub === 'm'
-        ? subMinutes(now, value)
-        : subDays(now, value),
+          ? subMinutes(now, value)
+          : subDays(now, value),
     );
     const to = formatISO(now);
 

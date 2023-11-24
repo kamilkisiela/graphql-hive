@@ -2,16 +2,17 @@ import { URL } from 'node:url';
 import type { GraphQLSchema } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import hashObject from 'object-hash';
-import { CriticalityLevel, type Change } from '@graphql-inspector/core';
+import { CriticalityLevel } from '@graphql-inspector/core';
 import type { CheckPolicyResponse } from '@hive/policy';
 import type { CompositionFailureError } from '@hive/schema';
+import {
+  HiveSchemaChangeModel,
+  SchemaChangeType,
+  type RegistryServiceUrlChangeSerializableChange,
+} from '@hive/storage';
 import { ProjectType, Schema } from '../../../shared/entities';
 import { buildSortedSchemaFromSchemaObject } from '../../../shared/schema';
 import { SchemaPolicyProvider } from '../../policy/providers/schema-policy.provider';
-import {
-  RegistryServiceUrlChangeSerializableChange,
-  schemaChangeFromMeta,
-} from '../schema-change-from-meta';
 import type {
   Orchestrator,
   Organization,
@@ -231,6 +232,7 @@ export class RegistryChecks {
     version,
     selector,
     includeUrlChanges,
+    approvedChanges,
   }: {
     orchestrator: Orchestrator;
     project: Project;
@@ -243,6 +245,8 @@ export class RegistryChecks {
       target: string;
     };
     includeUrlChanges: boolean;
+    /** Lookup map of changes that are approved and thus safe. */
+    approvedChanges: null | Map<string, SchemaChangeType>;
   }) {
     if (!version || version.schemas.length === 0) {
       this.logger.debug('Skipping diff check, no existing version');
@@ -297,49 +301,66 @@ export class RegistryChecks {
       } satisfies CheckResult;
     }
 
-    const changes = [...(await this.inspector.diff(existingSchema, incomingSchema, selector))];
+    const inspectorChanges = await this.inspector.diff(existingSchema, incomingSchema, selector);
 
     if (includeUrlChanges) {
-      changes.push(
-        ...detectUrlChanges(version.schemas, schemas).map(change =>
-          schemaChangeFromMeta({
-            ...change,
-            isSafeBasedOnUsage: false,
-          }),
-        ),
-      );
+      inspectorChanges.push(...detectUrlChanges(version.schemas, schemas));
     }
 
-    const safeChanges: Array<Change> = [];
-    const breakingChanges: Array<Change> = [];
-    for (const change of changes) {
-      if (change.criticality.level === CriticalityLevel.Breaking) {
+    let isFailure = false;
+    const safeChanges: Array<SchemaChangeType> = [];
+    const breakingChanges: Array<SchemaChangeType> = [];
+
+    for (const change of inspectorChanges) {
+      if (change.isSafeBasedOnUsage === true) {
+        breakingChanges.push(change);
+      } else if (change.criticality === CriticalityLevel.Breaking) {
+        // If this change is approved, we return the already approved on instead of the newly detected one,
+        // as it it contains the necessary metadata on when the change got first approved and by whom.
+        const approvedChange = approvedChanges?.get(change.id);
+        if (approvedChange) {
+          breakingChanges.push(approvedChange);
+          continue;
+        }
+        isFailure = true;
         breakingChanges.push(change);
         continue;
       }
       safeChanges.push(change);
     }
 
-    if (breakingChanges.length > 0) {
+    if (isFailure === true) {
       this.logger.debug('Detected breaking changes');
       return {
         status: 'failed',
         reason: {
-          breakingChanges,
-          safeChanges: safeChanges.length ? safeChanges : null,
-          changes,
+          breaking: breakingChanges,
+          safe: safeChanges.length ? safeChanges : null,
+          get all() {
+            if (breakingChanges.length || safeChanges.length) {
+              return [...breakingChanges, ...safeChanges];
+            }
+            return null;
+          },
         },
       } satisfies CheckResult;
     }
 
-    if (changes.length) {
+    if (inspectorChanges.length) {
       this.logger.debug('Detected non-breaking changes');
     }
 
     return {
       status: 'completed',
       result: {
-        changes: changes.length ? changes : null,
+        breaking: breakingChanges.length ? breakingChanges : null,
+        safe: safeChanges.length ? safeChanges : null,
+        get all() {
+          if (breakingChanges.length || safeChanges.length) {
+            return [...breakingChanges, ...safeChanges];
+          }
+          return null;
+        },
       },
     } satisfies CheckResult;
   }
@@ -489,7 +510,7 @@ export class RegistryChecks {
 export function detectUrlChanges(
   schemasBefore: readonly Schema[],
   schemasAfter: readonly Schema[],
-): Array<RegistryServiceUrlChangeSerializableChange> {
+): Array<SchemaChangeType> {
   if (schemasBefore.length === 0) {
     return [];
   }
@@ -548,7 +569,13 @@ export function detectUrlChanges(
     }
   }
 
-  return changes;
+  return changes.map(change =>
+    HiveSchemaChangeModel.parse({
+      type: change.type,
+      meta: change.meta,
+      isSafeBasedOnUsage: false,
+    }),
+  );
 }
 
 const toSchemaCheckWarning = (record: CheckPolicyResponse[number]): SchemaCheckWarning => ({

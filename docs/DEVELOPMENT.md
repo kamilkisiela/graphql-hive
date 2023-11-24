@@ -90,9 +90,9 @@ We recommend the following flow if you are having issues with running Hive local
 3. Start the proxy by running `$ loophole http 3000 --hostname hive-<your-name>` (@kamilkisiela I
    use `hive-kamil`). It creates `https://hive-<your-name>.loophole.site` endpoint.
 4. Message @kamilkisiela and send him the url (He will update the list of accepted redirect urls in
-   both Auth0 and Slack App).
-5. Update `APP_BASE_URL` and `AUTH0_BASE_URL` in [`packages/web/app/.env`](./packages/web/app/.env)
-   to the proxy URL (e.g. `https://hive-<your-name>.loophole.site`)
+   Slack App).
+5. Update `APP_BASE_URL` in [`packages/web/app/.env`](./packages/web/app/.env) to the proxy URL
+   (e.g. `https://hive-<your-name>.loophole.site`)
 6. Run `packages/web/app` and open `https://hive-<your-name>.loophole.site`.
 
 > We have a special Slack channel called `#hive-tests` to not spam people :)
@@ -122,10 +122,12 @@ We recommend the following flow if you are having issues with running Hive local
    ```
    INTEGRATION_GITHUB=1
    INTEGRATION_GITHUB_GITHUB_APP_ID=<your-github-app-id>
-   INTEGRATION_GITHUB_GITHUB_APP_PRIVATE_KEY=<your-github-app-private-key>
    ```
 
    You'll find the GitHub App ID and private key in the `General` tab of your GitHub App.
+
+   Store the Github private key next to the `.env` file with the name `github-app.pem`
+   (`packages/services/server/github-app.pem`)
 
 2. Web App: Set the following in `packages/web/app/.env`:
    ```
@@ -190,50 +192,3 @@ password
    the verification link by visiting the email server's `/_history` endpoint -
    `http://localhost:6260/_history` by default.
    - Searching for `token` should help you find the link.
-
-### Legacy Auth0 Integration
-
-**Note:** If you are not working at The Guild or on the legacy Auth0 sign-up feature, you can safely
-ignore this section.
-
-Since we migrated from Auth0 to SuperTokens there is a compatibility layer for importing/migrating
-accounts from Auth0 to SuperTokens.
-
-By default, you don't need to set this up and can just use SuperTokens locally. However, if you need
-to test some stuff or fix the Auth0 -> SuperTokens migration flow you have to set up some stuff.
-
-1. Create your own Auth0 application
-   1. If you haven't already, create an account on [manage.auth0.com](https://manage.auth0.com)
-   2. Create a new application with the following settings:
-      1. Type: `Regular Web Application`
-      2. Allowed Callback URLs: `http://localhost:3000/api/callback`
-      3. Allowed Logout URLs: `http://localhost:3000/`
-   3. Create two Auth0 users
-      1. This can be done from the "User Management" page
-         - [`https://manage.auth0.com/dashboard/<REGION>/<DOMAIN>/users`](https://manage.auth0.com/dashboard/us/dev-azj17nyp/users)
-   4. Create a new "Rule" in your Auth0 Account
-      1. This can be done from the "Auth Pipeline -> Rules" section on the left navigation bar.
-         - [`https://manage.auth0.com/dashboard/<REGION>/<DOMAIN>/rules`](https://manage.auth0.com/dashboard/us/dev-azj17nyp/rules)
-      2. Enter the following code:
-         ```js
-         function (user, context, callback) {
-           const namespace = 'https://graphql-hive.com';
-           context.accessToken[namespace + '/metadata'] = user.user_metadata;
-           context.idToken[namespace + '/metadata'] = user.user_metadata;
-           context.accessToken[namespace + '/userinfo'] = {
-             user_id: user.user_id,
-             email: user.email,
-             username: user.username,
-             nickname: user.nickname
-           };
-           return callback(null, user, context);
-         }
-         ```
-2. Update the `.env` secrets used by your local hive instance that are found when viewing your new
-   application on Auth0:
-   - `AUTH_LEGACY_AUTH0` (set this to `1` for enabling the migration.)
-   - `AUTH_LEGACY_AUTH0_CLIENT_ID` (e.g. `rGSrExtM9sfilpF8kbMULkMNYI2SgXro`)
-   - `AUTH_LEGACY_AUTH0_CLIENT_SECRET` (e.g.
-     `gJjNQJsCaOC0nCKTgqWv2wvrh1XXXb-iqzVdn8pi2nSPq2TxxxJ9FIUYbNjheXxx`)
-   - `AUTH_LEGACY_AUTH0_ISSUER_BASE_URL`(e.g. `https://foo-bars.us.auth0.com`)
-   - `AUTH_LEGACY_AUTH0_AUDIENCE` (e.g. `https://foo-bars.us.auth0.com/api/v2/`)

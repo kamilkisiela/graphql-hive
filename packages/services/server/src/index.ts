@@ -3,7 +3,6 @@ import * as fs from 'fs';
 import got from 'got';
 import { DocumentNode, GraphQLError, stripIgnoredCharacters } from 'graphql';
 import 'reflect-metadata';
-import zod from 'zod';
 import { createRegistry, createTaskRunner, CryptoProvider, LogFn, Logger } from '@hive/api';
 import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
 import { ArtifactStorageReader } from '@hive/cdn-script/artifact-storage-reader';
@@ -26,15 +25,6 @@ import { asyncStorage } from './async-storage';
 import { env } from './environment';
 import { graphqlHandler } from './graphql-handler';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
-
-const LegacySetUserIdMappingPayloadModel = zod.object({
-  auth0UserId: zod.string(),
-  superTokensUserId: zod.string(),
-});
-
-const LegacyCheckAuth0EmailUserExistsPayloadModel = zod.object({
-  email: zod.string(),
-});
 
 export async function main() {
   init({
@@ -116,6 +106,12 @@ export async function main() {
           );
           transaction.setMeasurement('deletedSchemaCheckCount', result.deletedSchemaCheckCount, '');
           transaction.setMeasurement('deletedSdlStoreCount', result.deletedSdlStoreCount, '');
+          transaction.setMeasurement(
+            'deletedSchemaChangeApprovals',
+            result.deletedSchemaChangeApprovalCount,
+            '',
+          );
+
           transaction.finish();
         } catch (error) {
           captureException(error);
@@ -436,61 +432,6 @@ export async function main() {
 
           const textResponse = await response.text();
           void reply.send(textResponse);
-        },
-      });
-    }
-
-    if (env.legacyAuth0) {
-      const auth0Config = env.legacyAuth0;
-      server.route({
-        method: 'POST',
-        url: '/__legacy/update_user_id_mapping',
-        async handler(req, reply) {
-          if (req.headers['x-authorization'] !== auth0Config.apiKey) {
-            void reply
-              .status(401)
-              .send({ error: 'Invalid update user id mapping key.', code: 'ERR_INVALID_KEY' });
-            return;
-          }
-
-          const { auth0UserId, superTokensUserId } = LegacySetUserIdMappingPayloadModel.parse(
-            req.body,
-          );
-
-          await storage.setSuperTokensUserId({
-            auth0UserId: auth0UserId.replace('google|', 'google-oauth2|'),
-            superTokensUserId,
-            externalUserId: auth0UserId,
-          });
-          reply.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
-        },
-      });
-      server.route({
-        method: 'POST',
-        url: '/__legacy/check_auth0_email_user_without_associated_supertoken_id_exists',
-        async handler(req, reply) {
-          if (req.headers['x-authorization'] !== auth0Config.apiKey) {
-            void reply
-              .status(401)
-              .send({ error: 'Invalid update user id mapping key.', code: 'ERR_INVALID_KEY' });
-            return;
-          }
-
-          const { email } = LegacyCheckAuth0EmailUserExistsPayloadModel.parse(req.body);
-
-          const user = await storage.getUserWithoutAssociatedSuperTokenIdByAuth0Email({
-            email,
-          });
-
-          await reply.status(200).send({
-            user: user
-              ? {
-                  id: user.id,
-                  email: user?.email,
-                  auth0UserId: user.externalAuthUserId,
-                }
-              : null,
-          });
         },
       });
     }

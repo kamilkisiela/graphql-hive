@@ -1,0 +1,37 @@
+---
+title: Breaking change approval improvements
+description: Approved breaking changes are now remembered in the context of a pull request/branch.
+date: 2023-11-16
+authors: [laurin]
+---
+
+import { Callout } from 'nextra-theme-docs'
+
+Breaking change approvals are now retained in the context of a pull request/branch.
+
+In the schema check details, we now display the user that approved a breaking chang.
+
+![Approved by annotation](/changelog/2023-11-16-schema-check-breaking-change-approval-context/approved-by.png)
+
+Also, approvals and breaking changes that are safe based on usage data are now always shown within
+the breaking changes section instead of being moved to the safe changes section.
+
+<Callout>
+  Benefiting from this feature requires **upgrading to the `@graphql-hive/cli` version `0.31.0`**.
+</Callout>
+
+If you use GitHub repositories and GitHub actions via the `--github` flag, no further action is
+required, aside from upgrading the CLI.
+
+For other CI providers, you need to update your CI configuration to pass the `--contextId` option
+for the `hive schema:check` command. We recommend to use the pull/merge request number or branch
+name as the context ID.
+
+```bash
+hive schema:check --contextId "pull-request-21" ./my-schema.graphql
+```
+
+More Information:
+
+- [Approve breaking schema change](/docs/features/schema-registry#approve-breaking-schema-changes)
+- [Checking a schema using Hive CLI](/docs/api-reference/cli#check-a-schema)

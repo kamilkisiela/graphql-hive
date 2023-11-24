@@ -39,7 +39,6 @@ import migration_2023_01_04T17_00_23_hobby_7_by_default from './actions/2023.01.
 import migration_2023_01_12T17_00_23_cdn_tokens from './actions/2023.01.12T17.00.23.cdn-tokens';
 import migration_2023_01_17T10_46_28_import_legacy_s3_keys_to_database_mts from './actions/2023.01.17T10.46.28.import-legacy-s3-keys-to-database';
 import migration_2023_01_18T11_03_41_registry_v2 from './actions/2023.01.18T11.03.41.registry-v2';
-import migration_2023_02_21T14_32_24_supertokens_4_0_0 from './actions/2023.02.21T14.32.24.supertokens-4.0.0';
 import migration_2023_02_22T09_27_02_delete_personal_org from './actions/2023.02.22T09.27.02.delete-personal-org';
 import migration_2023_03_14T12_14_23_schema_policy from './actions/2023.03.14T12.14.23.schema-policy';
 import migration_2023_03_29T11_42_44_feature_flags from './actions/2023.03.29T11.42.44.feature-flags';
@@ -57,6 +56,7 @@ import migration_2023_10_05T11_44_36_schema_checks_github_repository from './act
 import migration_2023_10_26T12_44_36_schema_checks_filters_index from './actions/2023.10.26T12.44.36.schema-checks-filters-index';
 import migration_2023_10_30T00_00_00_drop_persisted_operations from './actions/2023.10.30T00-00-00.drop-persisted-operations';
 import migration_2023_11_02T14_41_41_schema_checks_dedup from './actions/2023.11.02T14.41.41.schema-checks-dedup';
+import migration_2023_11_09T00_00_00_schema_check_approval from './actions/2023.11.09T00.00.00.schema-check-approval';
 import { runMigrations } from './pg-migrator';
 
 export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) =>
@@ -103,7 +103,6 @@ export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) 
       migration_2023_01_12T17_00_23_cdn_tokens,
       migration_2023_01_17T10_46_28_import_legacy_s3_keys_to_database_mts,
       migration_2023_01_18T11_03_41_registry_v2,
-      migration_2023_02_21T14_32_24_supertokens_4_0_0,
       migration_2023_02_22T09_27_02_delete_personal_org,
       migration_2023_03_14T12_14_23_schema_policy,
       migration_2023_03_29T11_42_44_feature_flags,
@@ -122,5 +121,6 @@ export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) 
       migration_2023_10_26T12_44_36_schema_checks_filters_index,
       migration_2023_10_30T00_00_00_drop_persisted_operations,
       migration_2023_11_02T14_41_41_schema_checks_dedup,
+      migration_2023_11_09T00_00_00_schema_check_approval,
     ],
   });

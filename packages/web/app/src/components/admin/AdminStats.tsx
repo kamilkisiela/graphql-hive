@@ -338,8 +338,8 @@ function OrganizationTable({ data }: { data: Organization[] }) {
                     {isNumeric
                       ? formatNumber(cell.getValue() as number)
                       : isReact
-                      ? (cell.getValue() as ReactNode)
-                      : cell.renderCell()}
+                        ? (cell.getValue() as ReactNode)
+                        : cell.renderCell()}
                   </Td>
                 );
               })}

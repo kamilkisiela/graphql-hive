@@ -10,7 +10,9 @@
     "rootDir": "src",
 
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "declarationMap": true
   },
   "include": ["src"]
 }

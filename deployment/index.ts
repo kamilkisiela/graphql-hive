@@ -218,10 +218,6 @@ const supertokensApiKey = new random.RandomPassword('supertokens-api-key', {
   length: 31,
   special: false,
 });
-const auth0LegacyMigrationKey = new random.RandomPassword('auth0-legacy-migration-key', {
-  length: 69,
-  special: false,
-});
 
 const oauthConfig = new pulumi.Config('oauth');
 
@@ -266,9 +262,6 @@ const graphqlApi = deployGraphQL({
     apiKey: supertokensApiKey.result,
     endpoint: supertokens.localEndpoint,
   },
-  auth0Config: {
-    internalApiKey: auth0LegacyMigrationKey.result,
-  },
   s3Config,
   zendeskConfig: isProduction(deploymentEnv)
     ? {
@@ -289,9 +282,6 @@ const app = deployApp({
   supertokensConfig: {
     apiKey: supertokensApiKey.result,
     endpoint: supertokens.localEndpoint,
-  },
-  auth0Config: {
-    internalApiKey: auth0LegacyMigrationKey.result,
   },
   githubConfig,
   googleConfig,

@@ -1,7 +1,7 @@
 import { Injectable } from 'graphql-modules';
-import { Change } from '@graphql-inspector/core';
 import type { PolicyConfigurationObject } from '@hive/policy';
 import type {
+  SchemaChangeType,
   SchemaCheck,
   SchemaCheckInput,
   SchemaCompositionError,
@@ -40,7 +40,6 @@ import type {
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
-import { SerializableChange } from '../../schema/schema-change-from-meta';
 
 type Paginated<T> = T & {
   after?: string | null;
@@ -74,12 +73,6 @@ export interface Storage {
   }): Promise<'created' | 'no_action'>;
 
   getUserBySuperTokenId(_: { superTokensUserId: string }): Promise<User | null>;
-  setSuperTokensUserId(_: {
-    auth0UserId: string;
-    superTokensUserId: string;
-    externalUserId: string;
-  }): Promise<void>;
-  getUserWithoutAssociatedSuperTokenIdByAuth0Email(_: { email: string }): Promise<User | null>;
   getUserById(_: { id: string }): Promise<User | null>;
 
   updateUser(_: { id: string; fullName: string; displayName: string }): Promise<User | never>;
@@ -368,7 +361,7 @@ export interface Storage {
       serviceName: string;
       composable: boolean;
       actionFn(): Promise<void>;
-      changes: Array<Change> | null;
+      changes: Array<SchemaChangeType> | null;
     } & TargetSelector &
       (
         | {
@@ -396,7 +389,7 @@ export interface Storage {
       logIds: string[];
       base_schema: string | null;
       actionFn(): Promise<void>;
-      changes: Array<Change>;
+      changes: Array<SchemaChangeType>;
       previousSchemaVersion: null | string;
       github: null | {
         repository: string;
@@ -422,7 +415,7 @@ export interface Storage {
    * If it return `null` the schema version does not have any changes persisted.
    * This can happen if the schema version was created before we introduced persisting changes.
    */
-  getSchemaChangesForVersion(_: { versionId: string }): Promise<null | Array<SerializableChange>>;
+  getSchemaChangesForVersion(_: { versionId: string }): Promise<null | Array<SchemaChangeType>>;
 
   updateVersionStatus(
     _: {
@@ -679,11 +672,12 @@ export interface Storage {
   purgeExpiredSchemaChecks(_: { expiresAt: Date }): Promise<{
     deletedSchemaCheckCount: number;
     deletedSdlStoreCount: number;
+    deletedSchemaChangeApprovalCount: number;
   }>;
   /**
    * Find schema check for a given ID and target.
    */
-  findSchemaCheck(input: { schemaCheckId: string; targetId: string }): Promise<SchemaCheck | null>;
+  findSchemaCheck(input: { schemaCheckId: string }): Promise<SchemaCheck | null>;
   /**
    * Retrieve paginated schema checks for a given target.
    */
@@ -720,6 +714,14 @@ export interface Storage {
     schemaCheckId: string;
     userId: string;
   }): Promise<SchemaCheck | null>;
+
+  /**
+   * Retrieve approved schema changes for a given context.
+   */
+  getApprovedSchemaChangesForContextId(args: {
+    targetId: string;
+    contextId: string;
+  }): Promise<Array<SchemaChangeType>>;
 
   getTargetBreadcrumbForTargetId(_: { targetId: string }): Promise<TargetBreadcrumb | null>;
 

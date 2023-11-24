@@ -8,9 +8,9 @@
     "test:integration": "vitest"
   },
   "devDependencies": {
-    "@apollo/gateway": "2.5.6",
+    "@apollo/gateway": "2.5.7",
     "@apollo/server": "4.9.5",
-    "@aws-sdk/client-s3": "3.445.0",
+    "@aws-sdk/client-s3": "3.456.0",
     "@esm2cjs/execa": "6.1.1-cjs.1",
     "@graphql-hive/client": "workspace:*",
     "@graphql-hive/core": "workspace:*",
@@ -18,8 +18,8 @@
     "@hive/rate-limit": "workspace:*",
     "@hive/server": "workspace:*",
     "@hive/storage": "workspace:*",
-    "@trpc/client": "10.43.2",
-    "@trpc/server": "10.43.2",
+    "@trpc/client": "10.44.0",
+    "@trpc/server": "10.44.0",
     "@types/dockerode": "3.3.23",
     "@types/ioredis": "4.28.10",
     "@whatwg-node/fetch": "0.9.13",

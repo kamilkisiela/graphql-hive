@@ -10,7 +10,7 @@
     "@pulumi/cloudflare": "4.16.0",
     "@pulumi/kubernetes": "4.5.4",
     "@pulumi/kubernetesx": "0.1.6",
-    "@pulumi/pulumi": "3.92.0",
+    "@pulumi/pulumi": "3.94.2",
     "@pulumi/random": "4.14.0",
     "js-yaml": "4.1.0",
     "pg-connection-string": "2.6.2"
@@ -18,7 +18,7 @@
   "devDependencies": {
     "@types/js-yaml": "4.0.9",
     "@types/mime-types": "2.1.4",
-    "@types/node": "18.18.9",
+    "@types/node": "18.18.12",
     "typescript": "5.2.2"
   }
 }
