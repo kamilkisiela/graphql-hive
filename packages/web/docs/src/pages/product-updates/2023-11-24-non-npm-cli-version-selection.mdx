@@ -1,0 +1,40 @@
+---
+title: Install a specific version of CLI
+description:
+  Users who do not use NPM can now select and install the precise version of CLI that suits their
+  requirements.
+date: 2023-11-24
+authors: [kamil]
+---
+
+Good news, non-NPM users! We've just released a new version of GraphQL Hive which introduces the
+ability to install a specific version of the CLI!
+
+Now, you have the flexibility to choose and install the exact version you need for your projects.
+Whether you have specific compatibility requirements or simply prefer working with a particular
+release, we've got you covered.
+
+To install a specific version, use one of the following methods:
+
+1. Using the version as an argument:
+
+```bash
+curl -sSL https://graphql-hive.com/install.sh | sh -s "0.31.0"
+```
+
+2. Setting the `VERSION` environment variable:
+
+```bash
+curl -sSL https://graphql-hive.com/install.sh | VERSION="0.31.0" sh
+```
+
+or
+
+```bash
+export VERSION="0.31.0"
+curl -sSL https://graphql-hive.com/install.sh | sh
+```
+
+We believe that this enhancement will streamline your development workflow and provide you with the
+precision and control you need. As always, we appreciate your feedback, so feel free to share your
+thoughts and experiences with us.
