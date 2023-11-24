@@ -12,14 +12,14 @@
 
   # Supports these options of passing a version:
   # 1.
-  #   curl -sSL https://cli.graphql-hive.com/install.sh | VERSION=0.30.1 sh
+  #   curl -sSL https://cli.graphql-hive.com/install.sh | HIVE_CLI_VERSION=0.30.1 sh
   # 2.
-  #   export VERSION="0.30.1"
+  #   export HIVE_CLI_VERSION="0.30.1"
   #   curl -sSL https://cli.graphql-hive.com/install.sh | sh
   # 3.
   #   curl -sSL https://cli.graphql-hive.com/install.sh | sh -s 0.30.1
   VERSION_FROM_FIRST_ARG="$1"
-  REQUESTED_VERSION="VERSION=${VERSION:-$VERSION_FROM_FIRST_ARG}"
+  REQUESTED_VERSION="HIVE_CLI_VERSION=${HIVE_CLI_VERSION:-$VERSION_FROM_FIRST_ARG}"
 
   # run inside sudo
   $SUDO $REQUESTED_VERSION sh << SCRIPT
@@ -46,11 +46,11 @@
       starts_with() { case \$2 in "\$1"*) true;; *) false;; esac; }
 
       set_download_path_base() {
-        if [ -z "\${VERSION:-}" ]; then
+        if [ -z "\${HIVE_CLI_VERSION:-}" ]; then
           # no version set, install latest
           DOWNLOAD_PATH_BASE="https://cli.graphql-hive.com/channels/stable/hive-"
         else
-          DOWNLOAD_PATH_BASE="https://cli.graphql-hive.com/versions/\$VERSION/hive-v\$VERSION-"
+          DOWNLOAD_PATH_BASE="https://cli.graphql-hive.com/versions/\$HIVE_CLI_VERSION/hive-v\$HIVE_CLI_VERSION-"
         fi
       }
 
