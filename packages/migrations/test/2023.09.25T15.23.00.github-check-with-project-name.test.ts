@@ -13,21 +13,33 @@ await describe('github-check-with-project-name', async () => {
 
       // Seed the DB with orgs
       const user = await seed.user();
-      const org = await db.one<{
-        id: string;
-      }>(
-        sql`INSERT INTO public.organizations (clean_id, name, user_id) VALUES ('org-1', 'org-1', ${user.id}) RETURNING id;`,
-      );
-      const oldProject = await db.one(
-        sql`INSERT INTO public.projects (clean_id, name, type, org_id) VALUES ('proj-1', 'proj-1', 'SINGLE', ${org.id}) RETURNING id;`,
-      );
+      const org = await seed.organization({
+        user,
+        organization: {
+          name: 'org-1',
+          cleanId: 'org-1',
+        },
+      });
+      const oldProject = await seed.project({
+        organization: org,
+        project: {
+          name: 'proj-1',
+          cleanId: 'proj-1',
+          type: 'SINGLE',
+        },
+      });
 
       // Run the additional remaining migrations
       await complete();
 
-      const newProject = await db.one(
-        sql`INSERT INTO public.projects (clean_id, name, type, org_id) VALUES ('proj-2', 'proj-2', 'SINGLE', ${org.id}) RETURNING id;`,
-      );
+      const newProject = await seed.project({
+        organization: org,
+        project: {
+          name: 'proj-2',
+          cleanId: 'proj-2',
+          type: 'SINGLE',
+        },
+      });
 
       // Check that the old project has github_check_with_project_name = FALSE
       assert.equal(

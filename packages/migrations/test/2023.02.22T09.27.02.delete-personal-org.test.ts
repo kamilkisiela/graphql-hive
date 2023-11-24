@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { describe, test } from 'node:test';
 import { sql } from 'slonik';
-import { initMigrationTestingEnvironment } from './utils/testkit';
+import { DbTypes, initMigrationTestingEnvironment } from './utils/testkit';
 
 await describe('drop-personal-org', async () => {
   await test('should remove all existing personal orgs that does not have projects', async () => {
@@ -22,21 +22,31 @@ await describe('drop-personal-org', async () => {
         ),
       ]);
       const orgsWithProjects = await Promise.all([
-        await db.one(
+        await db.one<DbTypes.organizations>(
           sql`INSERT INTO public.organizations (clean_id, name, user_id, type) VALUES ('personal-project', 'personal-project', ${user.id}, 'PERSONAL') RETURNING *;`,
         ),
-        await db.one(
+        await db.one<DbTypes.organizations>(
           sql`INSERT INTO public.organizations (clean_id, name, user_id, type) VALUES ('regular-project', 'regular-project', ${user.id}, 'PERSONAL') RETURNING *;`,
         ),
       ]);
 
       // Seed with projects
-      await db.one(
-        sql`INSERT INTO public.projects (clean_id, name, type, org_id) VALUES ('proj-1', 'proj-1', 'SINGLE', ${orgsWithProjects[0].id}) RETURNING *;`,
-      );
-      await db.one(
-        sql`INSERT INTO public.projects (clean_id, name, type, org_id) VALUES ('proj-2', 'proj-2', 'SINGLE', ${orgsWithProjects[1].id}) RETURNING *;`,
-      );
+      await seed.project({
+        organization: orgsWithProjects[0],
+        project: {
+          name: 'proj-1',
+          cleanId: 'proj-1',
+          type: 'SINGLE',
+        },
+      });
+      await seed.project({
+        organization: orgsWithProjects[1],
+        project: {
+          name: 'proj-2',
+          cleanId: 'proj-2',
+          type: 'SINGLE',
+        },
+      });
 
       // Run the additional remaining migrations
       await complete();
