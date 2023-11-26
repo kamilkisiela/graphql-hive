@@ -12,7 +12,7 @@
   "devDependencies": {
     "@apollo/federation": "0.38.1",
     "@graphql-hive/external-composition": "workspace:*",
-    "@graphql-tools/stitch": "9.0.0",
+    "@graphql-tools/stitch": "9.0.3",
     "@graphql-tools/stitching-directives": "3.0.0",
     "@hive/service-common": "workspace:*",
     "@sentry/node": "7.81.1",
