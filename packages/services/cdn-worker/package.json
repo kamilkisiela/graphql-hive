@@ -17,7 +17,7 @@
     "graphql": "^16.0.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "4.20231025.0",
+    "@cloudflare/workers-types": "4.20231121.0",
     "@types/service-worker-mock": "2.0.4",
     "@whatwg-node/fetch": "0.9.13",
     "@whatwg-node/server": "0.9.10",
