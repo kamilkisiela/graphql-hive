@@ -23,7 +23,7 @@
     "@whatwg-node/server": "0.9.10",
     "bcryptjs": "2.4.3",
     "dotenv": "16.3.1",
-    "esbuild": "0.19.6",
+    "esbuild": "0.19.7",
     "fastify": "3.29.5",
     "graphql": "16.8.1",
     "itty-router": "4.0.23",
