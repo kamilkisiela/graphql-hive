@@ -820,6 +820,9 @@ importers:
       '@apollo/composition':
         specifier: 2.5.7
         version: 2.5.7(graphql@16.8.1)
+      '@apollo/federation-internals':
+        specifier: 2.5.7
+        version: 2.5.7(graphql@16.8.1)
       '@graphql-hive/external-composition':
         specifier: workspace:*
         version: link:../../../libraries/external-composition/dist
@@ -950,8 +953,8 @@ importers:
         specifier: 7.81.1
         version: 7.81.1
       '@theguild/federation-composition':
-        specifier: 0.1.4
-        version: 0.1.4(graphql@16.8.1)
+        specifier: 0.2.0
+        version: 0.2.0(graphql@16.8.1)
       '@trpc/server':
         specifier: 10.44.0
         version: 10.44.0
@@ -12924,8 +12927,8 @@ packages:
       - typescript
     dev: true
 
-  /@theguild/federation-composition@0.1.4(graphql@16.8.1):
-    resolution: {integrity: sha512-w1jCP98ZLuipZ8siXgFXsVWKscecXs8IM5x0VwDmWKBP1TR9zg5OGfrUh3GPgHMrlsB8yOh+oex/pEHyljLL4Q==}
+  /@theguild/federation-composition@0.2.0(graphql@16.8.1):
+    resolution: {integrity: sha512-xqTj1kV7CdmMFw3xaEoupuUYrwPeYsPG0PWMwXvh9eLwF+gr7UhMs4XurYPE/RgvYNMq4Hr6GkZSEFcn74HGtQ==}
     engines: {node: '>=18'}
     peerDependencies:
       graphql: ^16.0.0

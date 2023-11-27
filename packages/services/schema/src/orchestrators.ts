@@ -23,7 +23,7 @@ import type { FastifyLoggerInstance } from '@hive/service-common';
 import {
   composeServices as nativeComposeServices,
   compositionHasErrors as nativeCompositionHasErrors,
-  stripFederationFromSupergraph,
+  transformSupergraphToPublicSchema,
 } from '@theguild/federation-composition';
 import type { Cache } from './cache';
 import type {
@@ -361,7 +361,7 @@ function composeFederationV2(
     type: 'success',
     result: {
       supergraph: result.supergraphSdl,
-      sdl: print(stripFederationFromSupergraph(parse(result.supergraphSdl))),
+      sdl: print(transformSupergraphToPublicSchema(parse(result.supergraphSdl))),
     },
     includesNetworkError: false,
   };
@@ -458,7 +458,9 @@ const createFederation: (
             type: 'success',
             result: {
               supergraph: parseResult.data.result.supergraph,
-              sdl: parseResult.data.result.sdl,
+              sdl: print(
+                transformSupergraphToPublicSchema(parse(parseResult.data.result.supergraph)),
+              ),
             },
             includesNetworkError: false,
           };
