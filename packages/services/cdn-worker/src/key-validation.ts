@@ -244,6 +244,10 @@ async function handleCDNAccessToken(
     [deps.s3.endpoint, deps.s3.bucketName, ...s3KeyParts].join('/'),
     {
       method: 'GET',
+      aws: {
+        // This boolean makes Google Cloud Storage & AWS happy.
+        signQuery: true,
+      },
     },
   );
 
