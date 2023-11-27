@@ -12,17 +12,22 @@
 
   # Supports these options of passing a version:
   # 1.
-  #   curl -sSL https://cli.graphql-hive.com/install.sh | VERSION=0.30.1 sh
+  #   curl -sSL https://cli.graphql-hive.com/install.sh | HIVE_CLI_VERSION=0.30.1 sh
   # 2.
-  #   export VERSION="0.30.1"
+  #   export HIVE_CLI_VERSION="0.30.1"
   #   curl -sSL https://cli.graphql-hive.com/install.sh | sh
   # 3.
   #   curl -sSL https://cli.graphql-hive.com/install.sh | sh -s 0.30.1
   VERSION_FROM_FIRST_ARG="$1"
-  REQUESTED_VERSION="VERSION=${VERSION:-$VERSION_FROM_FIRST_ARG}"
+  # if HIVE_CLI_VERSION and VERSION_FROM_FIRST_ARG are empty, ignore the HIVE_CLI_VERSION
+  if [ -z "$VERSION_FROM_FIRST_ARG" ] && [ -z "$HIVE_CLI_VERSION" ]; then
+    REQUESTED_VERSION=""
+  else
+    REQUESTED_VERSION="${HIVE_CLI_VERSION:-$VERSION_FROM_FIRST_ARG}"
+  fi
 
   # run inside sudo
-  $SUDO $REQUESTED_VERSION sh << SCRIPT
+  $SUDO sh << SCRIPT
       set -e
       
       OS=""
@@ -43,12 +48,14 @@
         exit 1
       }
 
+      starts_with() { case \$2 in "\$1"*) true;; *) false;; esac; }
+
       set_download_path_base() {
-        if [ -z "\${VERSION:-}" ]; then
+        if [ -z "${REQUESTED_VERSION:-}" ]; then
           # no version set, install latest
           DOWNLOAD_PATH_BASE="https://cli.graphql-hive.com/channels/stable/hive-"
         else
-          DOWNLOAD_PATH_BASE="https://cli.graphql-hive.com/versions/\$VERSION/hive-v\$VERSION-"
+          DOWNLOAD_PATH_BASE="https://cli.graphql-hive.com/versions/$REQUESTED_VERSION/hive-v$REQUESTED_VERSION-"
         fi
       }
 
@@ -72,7 +79,7 @@
           else
             ARCH=arm
           fi
-        elif [[ "\$ARCH" = aarch* ]]; then
+        elif starts_with "aarch" "\$ARCH"; then
           ARCH=arm
         else
          unsupported_arch "\$OS / \$ARCH"
