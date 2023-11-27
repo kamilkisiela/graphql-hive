@@ -29,8 +29,10 @@ import type { ContractsInputType } from './api';
 import type { Cache } from './cache';
 import {
   applyTagFilterToInaccessibleTransformOnSubgraphSchema,
+  getInaccessibleDirectiveNameFromFederation2SupergraphSDL,
   type Federation2SubgraphDocumentNodeByTagsFilter,
 } from './lib/federation-tag-extraction';
+import { addDirectiveOnExcludedTypes, getReachableTypes } from './lib/reachable-type-filter';
 import type {
   ComposeAndValidateInput,
   ComposeAndValidateOutput,
@@ -552,6 +554,7 @@ const createFederation: (
       // Attempt to compose contracts
       const contractResults = await Promise.all(
         contracts.map(async contract => {
+          // Apply tag filter to subgraph schemas (transform to inaccessible)
           const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
             include: contract.filter.include ? new Set(contract.filter.include) : null,
             exclude: contract.filter.exclude ? new Set(contract.filter.exclude) : null,
@@ -565,9 +568,38 @@ const createFederation: (
             ),
           }));
 
+          // attempt to compose contract
+          const compositionResult = await compose(filteredSubgraphs);
+
+          // Remove unreachable types from public API schema
+          if (
+            contract.filter.removeUnreachableTypesFromPublicApiSchema === true &&
+            compositionResult.type === 'success'
+          ) {
+            let supergraphSDL = parse(compositionResult.result.supergraph);
+
+            const inaccessibleDirectiveName =
+              getInaccessibleDirectiveNameFromFederation2SupergraphSDL(supergraphSDL);
+
+            if (!inaccessibleDirectiveName) {
+              throw new Error('Could not resolve @inaccessible directive name.');
+            }
+
+            // we retrieve the list of reachable types from the public api sdl
+            const reachableTypeNames = getReachableTypes(parse(compositionResult.result.sdl));
+            // then we apply the filter to the supergraph SDL (which is the source for the public api sdl)
+            supergraphSDL = addDirectiveOnExcludedTypes(
+              supergraphSDL,
+              reachableTypeNames,
+              inaccessibleDirectiveName,
+            );
+            compositionResult.result.supergraph = print(supergraphSDL);
+            compositionResult.result.sdl = print(transformSupergraphToPublicSchema(supergraphSDL));
+          }
+
           return {
             id: contract.id,
-            result: await compose(filteredSubgraphs),
+            result: compositionResult,
           };
         }),
       );

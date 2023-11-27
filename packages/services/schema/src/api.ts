@@ -36,6 +36,7 @@ const ContractsInputModel = z.array(
     filter: z.object({
       include: z.array(z.string()).nullable(),
       exclude: z.array(z.string()).nullable(),
+      removeUnreachableTypesFromPublicApiSchema: z.boolean(),
     }),
   }),
 );

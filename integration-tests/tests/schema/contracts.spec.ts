@@ -54,16 +54,17 @@ describe('schema service can process contracts', () => {
           filter: {
             include: null,
             exclude: ['toyota'],
+            removeUnreachableTypesFromPublicApiSchema: false,
           },
         },
       ],
     });
 
     expect(result.contracts?.[0].sdl).toMatchInlineSnapshot(`
-    type Query {
-      bar: String
-      hello: String
-    }
+      type Query {
+        bar: String
+        hello: String
+      }
   `);
   });
 
@@ -108,6 +109,7 @@ describe('schema service can process contracts', () => {
           filter: {
             include: null,
             exclude: ['toyota'],
+            removeUnreachableTypesFromPublicApiSchema: false,
           },
         },
         {
@@ -115,22 +117,113 @@ describe('schema service can process contracts', () => {
           filter: {
             include: ['toyota'],
             exclude: null,
+            removeUnreachableTypesFromPublicApiSchema: false,
           },
         },
       ],
     });
 
     expect(result.contracts?.[0].sdl).toMatchInlineSnapshot(`
-    type Query {
-      bar: String
-      hello: String
-    }
-  `);
+      type Query {
+        bar: String
+        hello: String
+      }
+    `);
     expect(result.contracts?.[1].sdl).toMatchInlineSnapshot(`
-    type Query {
-      barHidden: String
-      helloHidden: String
-    }
-  `);
+      type Query {
+        barHidden: String
+        helloHidden: String
+      }
+    `);
+  });
+
+  test('remove unreachable types from public schema', async () => {
+    const result = await client.composeAndValidate.mutate({
+      type: 'federation',
+      native: true,
+      schemas: [
+        {
+          raw: /* GraphQL */ `
+            extend schema
+              @link(url: "https://specs.apollo.dev/link/v1.0")
+              @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+            type Query {
+              hello: String
+              helloHidden: Toyota @tag(name: "toyota")
+            }
+
+            type Toyota {
+              id: String!
+            }
+          `,
+          source: 'foo.graphql',
+          url: null,
+        },
+      ],
+      external: null,
+      contracts: [
+        {
+          id: 'foo',
+          filter: {
+            include: null,
+            exclude: ['toyota'],
+            removeUnreachableTypesFromPublicApiSchema: true,
+          },
+        },
+      ],
+    });
+
+    expect(result.contracts?.[0].sdl).toMatchInlineSnapshot(`
+      type Query {
+        hello: String
+      }
+    `);
+  });
+
+  test('keep unreachable types from public schema', async () => {
+    const result = await client.composeAndValidate.mutate({
+      type: 'federation',
+      native: true,
+      schemas: [
+        {
+          raw: /* GraphQL */ `
+            extend schema
+              @link(url: "https://specs.apollo.dev/link/v1.0")
+              @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+            type Query {
+              hello: String
+              helloHidden: Toyota @tag(name: "toyota")
+            }
+            type Toyota {
+              id: String!
+            }
+          `,
+          source: 'foo.graphql',
+          url: null,
+        },
+      ],
+      external: null,
+      contracts: [
+        {
+          id: 'foo',
+          filter: {
+            include: null,
+            exclude: ['toyota'],
+            removeUnreachableTypesFromPublicApiSchema: false,
+          },
+        },
+      ],
+    });
+
+    expect(result.contracts?.[0].sdl).toMatchInlineSnapshot(`
+      type Query {
+        hello: String
+      }
+
+      type Toyota {
+        id: String!
+      }
+    `);
   });
 });

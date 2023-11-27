@@ -331,8 +331,6 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
   return newDocument;
 }
 
-const tagDirectiveImportUrl = 'https://specs.apollo.dev/tag/';
-
 function createFederationDirectiveStrategy(directiveName: string): TagExtractionStrategy {
   return (directiveNode: DirectiveNode) => {
     if (
@@ -346,38 +344,55 @@ function createFederationDirectiveStrategy(directiveName: string): TagExtraction
   };
 }
 
-export function getTagDirectiveNameFromFederation2SupergraphSDL(
-  documentNode: DocumentNode,
-): string | null {
-  for (const definition of documentNode.definitions) {
-    if (
-      (definition.kind !== Kind.SCHEMA_DEFINITION && definition.kind !== Kind.SCHEMA_EXTENSION) ||
-      !definition.directives
-    ) {
-      continue;
-    }
-
-    for (const directive of definition.directives) {
-      // TODO: maybe not rely on argument order - but the order seems stable
+function createGetImportedDirectiveNameFromFederation2SupergraphSDL(
+  directiveImportUrlPrefix: string,
+  defaultName: string,
+) {
+  return function getDirectiveNameFromFederation2SupergraphSDL(
+    documentNode: DocumentNode,
+  ): string | null {
+    for (const definition of documentNode.definitions) {
       if (
-        directive.name.value === 'link' &&
-        directive.arguments?.[0].name.value === 'url' &&
-        directive.arguments[0].value.kind === Kind.STRING &&
-        directive.arguments[0].value.value.startsWith(tagDirectiveImportUrl)
+        (definition.kind !== Kind.SCHEMA_DEFINITION && definition.kind !== Kind.SCHEMA_EXTENSION) ||
+        !definition.directives
       ) {
-        if (
-          directive.arguments[1]?.name.value === 'as' &&
-          directive.arguments[1].value.kind === Kind.STRING
-        ) {
-          return directive.arguments[1].value.value;
-        }
-        return 'tag';
+        continue;
       }
+
+      for (const directive of definition.directives) {
+        // TODO: maybe not rely on argument order - but the order seems stable
+        if (
+          directive.name.value === 'link' &&
+          directive.arguments?.[0].name.value === 'url' &&
+          directive.arguments[0].value.kind === Kind.STRING &&
+          directive.arguments[0].value.value.startsWith(directiveImportUrlPrefix)
+        ) {
+          if (
+            directive.arguments[1]?.name.value === 'as' &&
+            directive.arguments[1].value.kind === Kind.STRING
+          ) {
+            return directive.arguments[1].value.value;
+          }
+          return defaultName;
+        }
+      }
+      return null;
     }
     return null;
-  }
-  return null;
+  };
 }
+
+export const getTagDirectiveNameFromFederation2SupergraphSDL =
+  createGetImportedDirectiveNameFromFederation2SupergraphSDL(
+    'https://specs.apollo.dev/tag/',
+    'tag',
+  );
+
+export const getInaccessibleDirectiveNameFromFederation2SupergraphSDL =
+  createGetImportedDirectiveNameFromFederation2SupergraphSDL(
+    'https://specs.apollo.dev/inaccessible/',
+    'inaccessible',
+  );
 
 /**
  * Extract all
@@ -412,7 +427,6 @@ export function extractTagsFromFederation2SupergraphSDL(documentNode: DocumentNo
 export type Federation2SubgraphDocumentNodeByTagsFilter = {
   include: Set<string> | null;
   exclude: Set<string> | null;
-  // pruneUnreachableTypes: boolean;
 };
 
 function buildGetTagsOnNode(directiveName: string) {
