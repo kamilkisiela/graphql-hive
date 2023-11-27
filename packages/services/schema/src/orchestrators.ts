@@ -29,6 +29,7 @@ import type { ContractsInputType } from './api';
 import type { Cache } from './cache';
 import {
   applyTagFilterToInaccessibleTransformOnSubgraphSchema,
+  extractTagsFromFederation2SupergraphSDL,
   getInaccessibleDirectiveNameFromFederation2SupergraphSDL,
   type Federation2SubgraphDocumentNodeByTagsFilter,
 } from './lib/federation-tag-extraction';
@@ -506,6 +507,7 @@ const createFederation: (
     },
     CompositionResult & {
       includesNetworkError: boolean;
+      tags: Array<string> | null;
     }
   >(
     'federation',
@@ -545,7 +547,30 @@ const createFederation: (
         compose = subgraphs => Promise.resolve(composeFederationV1(subgraphs));
       }
 
-      const result = await compose(subgraphs);
+      let result: CompositionResult & {
+        includesNetworkError: boolean;
+        tags: Array<string> | null;
+      };
+
+      {
+        const tempResult: CompositionResult & {
+          includesNetworkError: boolean;
+        } = await compose(subgraphs);
+
+        if (tempResult.type === 'success') {
+          const supergraphSDL = parse(tempResult.result.supergraph);
+          const tags = extractTagsFromFederation2SupergraphSDL(supergraphSDL);
+          result = {
+            ...tempResult,
+            tags,
+          };
+        } else {
+          result = {
+            ...tempResult,
+            tags: null,
+          };
+        }
+      }
 
       if (!contracts?.length || result.type === 'failure') {
         return result;
@@ -610,7 +635,10 @@ const createFederation: (
 
       // In case any of the contract composition fails, we will fail the whole composition.
       if (networkErrorContract) {
-        return networkErrorContract.result;
+        return {
+          ...networkErrorContract.result,
+          tags: null,
+        };
       }
 
       return {
@@ -649,6 +677,7 @@ const createFederation: (
                   supergraph: contract.result.result.supergraph ?? null,
                 }))
               : null,
+          tags: composed.tags ?? null,
         };
       } catch (error) {
         if (cache.isTimeoutError(error)) {
@@ -663,6 +692,7 @@ const createFederation: (
             supergraph: null,
             includesNetworkError: true,
             contracts: null,
+            tags: null,
           };
         }
 
@@ -683,6 +713,7 @@ function createSingle(): Orchestrator {
         sdl: print(trimDescriptions(parse(schema.raw))),
         supergraph: null,
         contracts: null,
+        tags: null,
       };
     },
   };
@@ -719,6 +750,7 @@ const createStitching: (cache: Cache) => Orchestrator = cache => {
         sdl,
         supergraph: null,
         contracts: null,
+        tags: null,
       };
     },
   };

@@ -227,3 +227,44 @@ describe('schema service can process contracts', () => {
     `);
   });
 });
+
+test('federation schema contains list of tags', async () => {
+  const result = await client.composeAndValidate.mutate({
+    type: 'federation',
+    native: true,
+    schemas: [
+      {
+        raw: /* GraphQL */ `
+          extend schema
+            @link(url: "https://specs.apollo.dev/link/v1.0")
+            @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+          type Query {
+            hello: String
+            helloHidden: String @tag(name: "toyota") @tag(name: "turtle")
+          }
+        `,
+        source: 'foo.graphql',
+        url: null,
+      },
+    ],
+    external: null,
+    contracts: [
+      {
+        id: 'foo',
+        filter: {
+          include: null,
+          exclude: ['toyota'],
+          removeUnreachableTypesFromPublicApiSchema: false,
+        },
+      },
+    ],
+  });
+
+  expect(result.tags).toMatchInlineSnapshot(`
+    [
+      toyota,
+      turtle,
+    ]
+  `);
+});
