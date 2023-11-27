@@ -7,7 +7,7 @@
   "peerDependencies": {
     "@sentry/node": "^7.0.0",
     "@sentry/utils": "^7.0.0",
-    "@trpc/server": "10.44.0"
+    "@trpc/server": "10.44.1"
   },
   "devDependencies": {
     "@sentry/node": "7.81.1",
