@@ -598,8 +598,8 @@ const ActiveSchemaCheck = ({
             ) : null}
             {schemaCheck.__typename === 'FailedSchemaCheck' &&
             schemaCheck.compositionErrors?.nodes.length ? (
-              <div className="mb-2">
-                <Heading>
+              <div className="mb-4 space-y-2">
+                <Heading className='flex items-center gap-x-2'>
                   <Badge color="red" /> Composition Errors
                 </Heading>
                 <ul>
