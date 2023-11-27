@@ -78,8 +78,10 @@ const OperationQuery = graphql(`
         query
         headers
         variables
+        updatedAt
         collection {
           id
+          name
         }
       }
     }
@@ -149,6 +151,7 @@ const CollectionItem = (props: {
   canEdit: boolean;
   onDelete: (operationId: string) => void;
   onEdit: (operationId: string) => void;
+  isChanged?: boolean;
 }): ReactElement => {
   const router = useRouteSelector();
   const copyToClipboard = useClipboard();
@@ -166,7 +169,7 @@ const CollectionItem = (props: {
           },
         }}
         className={cn(
-          'w-full rounded p-2 !text-gray-300 hover:bg-gray-100/10',
+          'flex w-full items-center justify-between rounded p-2 !text-gray-300 hover:bg-gray-100/10',
           router.query.operation === props.node.id && 'bg-gray-100/10 text-white',
         )}
         onClick={ev => {
@@ -189,6 +192,9 @@ const CollectionItem = (props: {
         }}
       >
         {props.node.name}
+        {props.isChanged && (
+          <span className="h-1.5 w-1.5 rounded-full border border-orange-600 bg-orange-400" />
+        )}
       </Link>
       <GraphiQLDropdownMenu
         // https://github.com/radix-ui/primitives/issues/1241#issuecomment-1580887090
@@ -363,6 +369,7 @@ function useOperationCollectionsPlugin({
         const [isDeleteCollectionModalOpen, toggleDeleteCollectionModalOpen] = useToggle();
         const [operationToDeleteId, setOperationToDeleteId] = useState<null | string>(null);
         const [operationToEditId, setOperationToEditId] = useState<null | string>(null);
+        const { clearOperation, savedOperation, setSavedOperation } = useSyncOperationState();
         const router = useRouteSelector();
 
         const currentOperation = useCurrentOperation();
@@ -374,25 +381,52 @@ function useOperationCollectionsPlugin({
           editorContext.headerEditor
         );
 
+        const isSame =
+          !!currentOperation &&
+          currentOperation.query === editorContext.queryEditor?.getValue() &&
+          currentOperation.variables === editorContext.variableEditor?.getValue() &&
+          currentOperation.headers === editorContext.headerEditor?.getValue();
+
         const queryParamsOperationId = router.query.operation as string;
 
         useEffect(() => {
-          if (!hasAllEditors) {
+          if (!hasAllEditors || !currentOperation) {
             return;
           }
 
-          if (queryParamsOperationId && currentOperation) {
+          if (queryParamsOperationId) {
             // Set selected operation in editors
             editorContext.queryEditor.setValue(currentOperation.query);
             editorContext.variableEditor.setValue(currentOperation.variables);
             editorContext.headerEditor.setValue(currentOperation.headers);
-          } else {
-            // Clear editors if operation not selected
-            editorContext.queryEditor.setValue('');
-            editorContext.variableEditor.setValue('');
-            editorContext.headerEditor.setValue('');
+
+            if (!savedOperation) {
+              return;
+            }
+
+            const oneWeek = 7 * 24 * 60 * 60 * 1000;
+            if (savedOperation.updatedAt + oneWeek < Date.now()) {
+              clearOperation();
+              return;
+            }
+
+            const currentOperationUpdatedAt = new Date(currentOperation.updatedAt).getTime();
+            if (savedOperation.updatedAt > currentOperationUpdatedAt) {
+              editorContext.queryEditor.setValue(savedOperation.query);
+              editorContext.variableEditor.setValue(savedOperation.variables);
+            }
           }
         }, [hasAllEditors, queryParamsOperationId, currentOperation]);
+
+        useEffect(() => {
+          if (!hasAllEditors || !currentOperation || isSame) {
+            return;
+          }
+          setSavedOperation({
+            query: editorContext.queryEditor?.getValue(),
+            variables: editorContext.variableEditor?.getValue(),
+          });
+        }, [editorContext.queryEditor?.getValue(), editorContext.variableEditor?.getValue()]);
 
         const shouldShowMenu = canEdit || canDelete;
 
@@ -471,6 +505,7 @@ function useOperationCollectionsPlugin({
                               canEdit={canEdit}
                               onDelete={setOperationToDeleteId}
                               onEdit={setOperationToEditId}
+                              isChanged={!isSame && node.id === queryParamsOperationId}
                             />
                           ))
                         : null}
@@ -554,14 +589,46 @@ const UpdateOperationMutation = graphql(`
   }
 `);
 
+function useSyncOperationState(): {
+  savedOperation: { query: string; variables: string; updatedAt: number } | null;
+  setSavedOperation: (value: { query: string; variables: string }) => void;
+  clearOperation: () => void;
+} {
+  const currentOperation = useCurrentOperation();
+  const storageKey = currentOperation ? `hive:operation-${currentOperation?.id}` : null;
+  const savedOperationData = storageKey ? localStorage.getItem(storageKey) : null;
+  const operation = savedOperationData ? JSON.parse(savedOperationData) : null;
+
+  const setSavedOperation = (value: { query: string; variables: string }) => {
+    if (!storageKey) {
+      return;
+    }
+    localStorage.setItem(storageKey, JSON.stringify({ ...value, updatedAt: Date.now() }));
+  };
+
+  const clearOperation = () => {
+    if (!storageKey) {
+      return;
+    }
+    localStorage.removeItem(storageKey);
+  };
+
+  return {
+    savedOperation: operation,
+    setSavedOperation,
+    clearOperation,
+  };
+}
+
 function Save(): ReactElement {
-  const [isOpen, toggle] = useToggle();
+  const [operationModalOpen, toggleOperationModal] = useToggle();
   const { collections } = useCollections();
   const notify = useNotifications();
   const routeSelector = useRouteSelector();
   const currentOperation = useCurrentOperation();
   const [, mutateUpdate] = useMutation(UpdateOperationMutation);
   const { queryEditor, variableEditor, headerEditor } = useEditorContext()!;
+  const { clearOperation } = useSyncOperationState();
   const isSame =
     !!currentOperation &&
     currentOperation.query === queryEditor?.getValue() &&
@@ -575,16 +642,33 @@ function Save(): ReactElement {
         modal={false}
       >
         <GraphiQLDropdownMenu.Button
-          className="graphiql-toolbar-button"
+          className="graphiql-toolbar-button relative"
           aria-label="More"
           data-cy="save-operation"
         >
+          {!isSame && (
+            <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full border border-orange-600 bg-orange-400" />
+          )}
           <SaveIcon className="graphiql-toolbar-icon !h-5 w-auto" />
         </GraphiQLDropdownMenu.Button>
         <GraphiQLDropdownMenu.Content>
+          {!isSame && currentOperation && (
+            <GraphiQLDropdownMenu.Item
+              disabled={isSame || !currentOperation}
+              className="mb-0 text-red-600"
+              onClick={async () => {
+                queryEditor.setValue(currentOperation.query);
+                clearOperation();
+              }}
+            >
+              Discard changes
+            </GraphiQLDropdownMenu.Item>
+          )}
           <GraphiQLDropdownMenu.Item
-            disabled={isSame}
-            className={cx(isSame && 'cursor-default text-gray-400 hover:bg-transparent')}
+            disabled={isSame || !currentOperation}
+            className={cx(
+              (isSame || !currentOperation) && 'cursor-default text-gray-400 hover:bg-transparent',
+            )}
             onClick={async () => {
               if (!currentOperation || isSame) {
                 return;
@@ -605,6 +689,7 @@ function Save(): ReactElement {
                 },
               });
               if (data) {
+                clearOperation();
                 notify('Updated!', 'success');
               }
               if (error) {
@@ -620,14 +705,18 @@ function Save(): ReactElement {
                 notify('Please create a collection first.', 'error');
                 return;
               }
-              toggle();
+              toggleOperationModal();
             }}
           >
             Save as
           </GraphiQLDropdownMenu.Item>
         </GraphiQLDropdownMenu.Content>
       </GraphiQLDropdownMenu>
-      <CreateOperationModal isOpen={isOpen} close={toggle} />
+      <CreateOperationModal
+        isOpen={operationModalOpen}
+        close={toggleOperationModal}
+        onSaveSuccess={clearOperation}
+      />
     </>
   );
 }
@@ -858,10 +947,28 @@ function LaboratoryPageContent() {
           color: #ffffff;
         }
 
+        .graphiql-container .graphiql-logo {
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .graphiql-container .graphiql-session-header {
+          display: flex;
+          flex-direction: column-reverse;
+          align-items: flex-start;
+          height: auto;
+        }
+
+        .graphiql-container .graphiql-session-header-right {
+          width: 100%;
+
         .graphiql-container .CodeMirror-hints {
           background-color: #070d17;
         }
       `}</style>
+
       {query.fetching ? null : (
         <GraphiQL
           fetcher={fetcher}
@@ -880,25 +987,28 @@ function LaboratoryPageContent() {
           schema={schema}
         >
           <GraphiQL.Logo>
-            <Tooltip
-              content={
-                actualSelectedApiEndpoint === 'linkedApi' ? (
-                  <>
-                    Operations are executed against{' '}
-                    <span>{query.data?.target?.graphqlEndpointUrl}</span>.
-                  </>
-                ) : (
-                  <>Operations are executed against the mock endpoint.</>
-                )
-              }
-            >
-              <span className="cursor-help pr-2 text-xs font-normal">
-                {actualSelectedApiEndpoint === 'linkedApi'
-                  ? 'Querying GraphQL API'
-                  : 'Querying Mock API'}
-              </span>
-            </Tooltip>
-            <HiveLogo className="h-6 w-auto" />
+            <EditorBreadcrumbs />
+            <div className="ml-auto">
+              <Tooltip
+                content={
+                  actualSelectedApiEndpoint === 'linkedApi' ? (
+                    <>
+                      Operations are executed against{' '}
+                      <span>{query.data?.target?.graphqlEndpointUrl}</span>.
+                    </>
+                  ) : (
+                    <>Operations are executed against the mock endpoint.</>
+                  )
+                }
+              >
+                <span className="cursor-help pr-2 text-xs font-normal">
+                  {actualSelectedApiEndpoint === 'linkedApi'
+                    ? 'Querying GraphQL API'
+                    : 'Querying Mock API'}
+                </span>
+              </Tooltip>
+              <HiveLogo className="h-6 w-auto" />
+            </div>
           </GraphiQL.Logo>
         </GraphiQL>
       )}
@@ -949,4 +1059,23 @@ function useApiTabValueState(graphqlEndpointUrl: string | null) {
       [setState],
     ),
   ] as const;
+}
+
+function EditorBreadcrumbs() {
+  const router = useRouteSelector();
+  const operationId = router.query.operation as string;
+  const currentOperation = useCurrentOperation();
+
+  // Avoiding blinking `New Operation` when switching between operations (when current operation data is not yet fetched)
+  if (operationId && (!currentOperation || currentOperation.id !== operationId)) {
+    return null;
+  }
+
+  return (
+    <div className="text-xs font-normal italic">
+      {currentOperation?.id
+        ? `${currentOperation.collection.name} > ${currentOperation.name}`
+        : 'New Operation'}
+    </div>
+  );
 }
