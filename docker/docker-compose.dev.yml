@@ -89,7 +89,7 @@ services:
       - 'stack'
 
   broker:
-    image: redpandadata/redpanda:v23.2.16
+    image: redpandadata/redpanda:v23.2.17
     container_name: broker
     hostname: broker
     networks:
