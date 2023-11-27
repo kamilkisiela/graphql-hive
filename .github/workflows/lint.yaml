@@ -59,7 +59,7 @@ jobs:
           )
 
       - name: Generate Types
-        run: yarn graphql:generate
+        run: pnpm graphql:generate
 
       - name: Operation Check
         run: |

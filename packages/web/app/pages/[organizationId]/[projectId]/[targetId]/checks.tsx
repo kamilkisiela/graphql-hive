@@ -117,6 +117,8 @@ const Navigation = (props: {
                     projectId: router.projectId,
                     targetId: router.targetId,
                     schemaCheckId: edge.node.id,
+                    filter_changed: props.filters?.showOnlyChanged,
+                    filter_failed: props.filters?.showOnlyFailed,
                   },
                 }}
                 scroll={false} // disable the scroll to top on page

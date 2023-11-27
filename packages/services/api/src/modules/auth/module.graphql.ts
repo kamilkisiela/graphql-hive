@@ -74,10 +74,7 @@ export default gql`
   enum AuthProvider {
     GOOGLE
     GITHUB
-    """
-    Username-Password-Authentication
-    """
-    AUTH0
+    USERNAME_PASSWORD
   }
 
   enum OrganizationAccessScope {

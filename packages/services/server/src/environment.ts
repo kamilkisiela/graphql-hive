@@ -131,16 +131,6 @@ const HiveModel = zod.union([
   }),
 ]);
 
-const AuthLegacyAuth0Model = zod.union([
-  zod.object({
-    AUTH_LEGACY_AUTH0: emptyString(zod.literal('0').optional()),
-  }),
-  zod.object({
-    AUTH_LEGACY_AUTH0: zod.literal('1'),
-    AUTH_LEGACY_AUTH0_INTERNAL_API_KEY: zod.string(),
-  }),
-]);
-
 const PrometheusModel = zod.object({
   PROMETHEUS_METRICS: emptyString(zod.union([zod.literal('0'), zod.literal('1')]).optional()),
   PROMETHEUS_METRICS_LABEL_INSTANCE: emptyString(zod.string().optional()),
@@ -196,8 +186,6 @@ const configs = {
   // eslint-disable-next-line no-process-env
   prometheus: PrometheusModel.safeParse(process.env),
   // eslint-disable-next-line no-process-env
-  authLegacyAuth0: AuthLegacyAuth0Model.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
   hive: HiveModel.safeParse(process.env),
   // eslint-disable-next-line no-process-env
   s3: S3Model.safeParse(process.env),
@@ -239,7 +227,6 @@ const prometheus = extractConfig(configs.prometheus);
 const log = extractConfig(configs.log);
 const cdnCf = extractConfig(configs.cdnCf);
 const cdnApi = extractConfig(configs.cdnApi);
-const authLegacyAuth0 = extractConfig(configs.authLegacyAuth0);
 const hive = extractConfig(configs.hive);
 const s3 = extractConfig(configs.s3);
 const zendeskSupport = extractConfig(configs.zendeskSupport);
@@ -352,12 +339,6 @@ export const env = {
     },
   },
   organizationOIDC: base.AUTH_ORGANIZATION_OIDC === '1',
-  legacyAuth0:
-    authLegacyAuth0.AUTH_LEGACY_AUTH0 === '1'
-      ? {
-          apiKey: authLegacyAuth0.AUTH_LEGACY_AUTH0_INTERNAL_API_KEY,
-        }
-      : null,
   sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
   log: {
     level: log.LOG_LEVEL ?? 'info',

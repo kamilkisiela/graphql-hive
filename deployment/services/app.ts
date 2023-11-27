@@ -23,7 +23,6 @@ export function deployApp({
   release,
   image,
   supertokensConfig,
-  auth0Config,
   googleConfig,
   githubConfig,
   imagePullSecret,
@@ -39,9 +38,6 @@ export function deployApp({
   supertokensConfig: {
     endpoint: pulumi.Output<string>;
     apiKey: pulumi.Output<string>;
-  };
-  auth0Config: {
-    internalApiKey: pulumi.Output<string>;
   };
   googleConfig: {
     clientId: pulumi.Output<string>;
@@ -151,35 +147,6 @@ export function deployApp({
           value: emailsEndpoint,
         },
 
-        // Auth0 Legacy
-        {
-          name: 'AUTH_LEGACY_AUTH0',
-          value: '1',
-        },
-        {
-          name: 'AUTH_LEGACY_AUTH0_CLIENT_ID',
-          value: commonConfig.require('auth0ClientId'),
-        },
-        {
-          name: 'AUTH_LEGACY_AUTH0_CLIENT_SECRET',
-          value: commonConfig.requireSecret('auth0ClientSecret'),
-        },
-        {
-          name: 'AUTH_LEGACY_AUTH0_AUDIENCE',
-          value: `https://${commonConfig.require('auth0Domain')}/api/v2/`,
-        },
-        {
-          name: 'AUTH_LEGACY_AUTH0_ISSUER_BASE_URL',
-          value: `https://${commonConfig.require('auth0Domain')}`,
-        },
-        {
-          name: 'AUTH_LEGACY_AUTH0_INTERNAL_API_ENDPOINT',
-          value: serviceLocalEndpoint(graphql.service).apply(s => `${s}/__legacy`),
-        },
-        {
-          name: 'AUTH_LEGACY_AUTH0_INTERNAL_API_KEY',
-          value: auth0Config.internalApiKey,
-        },
         // GitHub
         {
           name: 'AUTH_GITHUB',

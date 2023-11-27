@@ -108,7 +108,7 @@ function getProviderBasedOnExternalId(externalId: string): AuthProvider {
     return 'GOOGLE';
   }
 
-  return 'AUTH0';
+  return 'USERNAME_PASSWORD';
 }
 
 export async function createStorage(connection: string, maximumPoolSize: number): Promise<Storage> {
@@ -627,36 +627,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
     async getUserBySuperTokenId({ superTokensUserId }) {
       return shared.getUserBySuperTokenId({ superTokensUserId }, pool);
-    },
-    async getUserWithoutAssociatedSuperTokenIdByAuth0Email({ email }) {
-      const user = await pool.maybeOne<Slonik<users>>(sql`
-        SELECT
-          *
-        FROM
-          public."users"
-        WHERE
-          "email" = ${email}
-          AND "supertoken_user_id" IS NULL
-          AND "external_auth_user_id" LIKE 'auth0|%'
-        LIMIT 1
-      `);
-
-      if (user) {
-        return transformUser(user);
-      }
-
-      return null;
-    },
-    async setSuperTokensUserId({ auth0UserId, superTokensUserId, externalUserId }) {
-      await pool.query(sql`
-        UPDATE
-          public."users"
-        SET
-          "supertoken_user_id" = ${superTokensUserId},
-          "external_auth_user_id" = ${externalUserId}
-        WHERE
-          "external_auth_user_id" = ${auth0UserId}
-      `);
     },
     getUserById: batch(async input => {
       const userIds = input.map(i => i.id);
@@ -3800,7 +3770,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
               "schema_change_approvals"
             WHERE
               "target_id" = ANY(
-                ${sql.array(Array.from(targetIds), 'text')}
+                ${sql.array(Array.from(targetIds), 'uuid')}
               )
               AND "context_id" = ANY(
                 ${sql.array(Array.from(contextIds), 'text')}

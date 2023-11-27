@@ -103,21 +103,6 @@ const SentryConfigSchema = zod.union([
   }),
 ]);
 
-const LegacyAuth0Config = zod.union([
-  zod.object({
-    AUTH_LEGACY_AUTH0: zod.union([zod.void(), zod.literal('0')]),
-  }),
-  zod.object({
-    AUTH_LEGACY_AUTH0: zod.literal('1'),
-    AUTH_LEGACY_AUTH0_AUDIENCE: zod.string(),
-    AUTH_LEGACY_AUTH0_ISSUER_BASE_URL: zod.string(),
-    AUTH_LEGACY_AUTH0_CLIENT_ID: zod.string(),
-    AUTH_LEGACY_AUTH0_CLIENT_SECRET: zod.string(),
-    AUTH_LEGACY_AUTH0_INTERNAL_API_ENDPOINT: zod.string(),
-    AUTH_LEGACY_AUTH0_INTERNAL_API_KEY: zod.string(),
-  }),
-]);
-
 const configs = {
   // eslint-disable-next-line no-process-env
   base: BaseSchema.safeParse(process.env),
@@ -133,8 +118,6 @@ const configs = {
   authOkta: AuthOktaConfigSchema.safeParse(process.env),
   // eslint-disable-next-line no-process-env
   authOktaMultiTenant: AuthOktaMultiTenantSchema.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  authLegacyAuth0: LegacyAuth0Config.safeParse(process.env),
 };
 
 const environmentErrors: Array<string> = [];
@@ -165,7 +148,6 @@ const authGithub = extractConfig(configs.authGithub);
 const authGoogle = extractConfig(configs.authGoogle);
 const authOkta = extractConfig(configs.authOkta);
 const authOktaMultiTenant = extractConfig(configs.authOktaMultiTenant);
-const auth0Legacy = extractConfig(configs.authLegacyAuth0);
 
 const config = {
   release: base.RELEASE ?? 'local',
@@ -216,19 +198,6 @@ const config = {
           }
         : null,
     organizationOIDC: authOktaMultiTenant.AUTH_ORGANIZATION_OIDC === '1',
-    legacyAuth0:
-      auth0Legacy.AUTH_LEGACY_AUTH0 === '1'
-        ? {
-            audience: auth0Legacy.AUTH_LEGACY_AUTH0_AUDIENCE,
-            issuerBaseUrl: auth0Legacy.AUTH_LEGACY_AUTH0_ISSUER_BASE_URL,
-            clientId: auth0Legacy.AUTH_LEGACY_AUTH0_CLIENT_ID,
-            clientSecret: auth0Legacy.AUTH_LEGACY_AUTH0_CLIENT_SECRET,
-            internalApi: {
-              endpoint: auth0Legacy.AUTH_LEGACY_AUTH0_INTERNAL_API_ENDPOINT,
-              apiKey: auth0Legacy.AUTH_LEGACY_AUTH0_INTERNAL_API_KEY,
-            },
-          }
-        : null,
     requireEmailVerification: base.AUTH_REQUIRE_EMAIL_VERIFICATION === '1',
   },
   sentry: sentry.SENTRY === '1' ? { dsn: sentry.SENTRY_DSN } : null,
