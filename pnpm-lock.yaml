@@ -176,8 +176,8 @@ importers:
         specifier: 10.9.1
         version: 10.9.1(@swc/core@1.3.99)(@types/node@18.18.13)(typescript@5.3.2)
       tsup:
-        specifier: 7.2.0
-        version: 7.2.0(@swc/core@1.3.99)(ts-node@10.9.1)(typescript@5.3.2)
+        specifier: 8.0.1
+        version: 8.0.1(@swc/core@1.3.99)(ts-node@10.9.1)(typescript@5.3.2)
       tsx:
         specifier: 4.5.0
         version: 4.5.0
@@ -10618,6 +10618,102 @@ packages:
       rollup: 2.78.0
     dev: false
 
+  /@rollup/rollup-android-arm-eabi@4.6.0:
+    resolution: {integrity: sha512-keHkkWAe7OtdALGoutLY3utvthkGF+Y17ws9LYT8pxMBYXaCoH/8dXS2uzo6e8+sEhY7y/zi5RFo22Dy2lFpDw==}
+    cpu: [arm]
+    os: [android]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /@rollup/rollup-android-arm64@4.6.0:
+    resolution: {integrity: sha512-y3Kt+34smKQNWilicPbBz/MXEY7QwDzMFNgwEWeYiOhUt9MTWKjHqe3EVkXwT2fR7izOvHpDWZ0o2IyD9SWX7A==}
+    cpu: [arm64]
+    os: [android]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /@rollup/rollup-darwin-arm64@4.6.0:
+    resolution: {integrity: sha512-oLzzxcUIHltHxOCmaXl+pkIlU+uhSxef5HfntW7RsLh1eHm+vJzjD9Oo4oUKso4YuP4PpbFJNlZjJuOrxo8dPg==}
+    cpu: [arm64]
+    os: [darwin]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /@rollup/rollup-darwin-x64@4.6.0:
+    resolution: {integrity: sha512-+ANnmjkcOBaV25n0+M0Bere3roeVAnwlKW65qagtuAfIxXF9YxUneRyAn/RDcIdRa7QrjRNJL3jR7T43ObGe8Q==}
+    cpu: [x64]
+    os: [darwin]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /@rollup/rollup-linux-arm-gnueabihf@4.6.0:
+    resolution: {integrity: sha512-tBTSIkjSVUyrekddpkAqKOosnj1Fc0ZY0rJL2bIEWPKqlEQk0paORL9pUIlt7lcGJi3LzMIlUGXvtNi1Z6MOCQ==}
+    cpu: [arm]
+    os: [linux]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /@rollup/rollup-linux-arm64-gnu@4.6.0:
+    resolution: {integrity: sha512-Ed8uJI3kM11de9S0j67wAV07JUNhbAqIrDYhQBrQW42jGopgheyk/cdcshgGO4fW5Wjq97COCY/BHogdGvKVNQ==}
+    cpu: [arm64]
+    os: [linux]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /@rollup/rollup-linux-arm64-musl@4.6.0:
+    resolution: {integrity: sha512-mZoNQ/qK4D7SSY8v6kEsAAyDgznzLLuSFCA3aBHZTmf3HP/dW4tNLTtWh9+LfyO0Z1aUn+ecpT7IQ3WtIg3ViQ==}
+    cpu: [arm64]
+    os: [linux]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /@rollup/rollup-linux-x64-gnu@4.6.0:
+    resolution: {integrity: sha512-rouezFHpwCqdEXsqAfNsTgSWO0FoZ5hKv5p+TGO5KFhyN/dvYXNMqMolOb8BkyKcPqjYRBeT+Z6V3aM26rPaYg==}
+    cpu: [x64]
+    os: [linux]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /@rollup/rollup-linux-x64-musl@4.6.0:
+    resolution: {integrity: sha512-Bbm+fyn3S6u51urfj3YnqBXg5vI2jQPncRRELaucmhBVyZkbWClQ1fEsRmdnCPpQOQfkpg9gZArvtMVkOMsh1w==}
+    cpu: [x64]
+    os: [linux]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /@rollup/rollup-win32-arm64-msvc@4.6.0:
+    resolution: {integrity: sha512-+MRMcyx9L2kTrTUzYmR61+XVsliMG4odFb5UmqtiT8xOfEicfYAGEuF/D1Pww1+uZkYhBqAHpvju7VN+GnC3ng==}
+    cpu: [arm64]
+    os: [win32]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /@rollup/rollup-win32-ia32-msvc@4.6.0:
+    resolution: {integrity: sha512-rxfeE6K6s/Xl2HGeK6cO8SiQq3k/3BYpw7cfhW5Bk2euXNEpuzi2cc7llxx1si1QgwfjNtdRNTGqdBzGlFZGFw==}
+    cpu: [ia32]
+    os: [win32]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /@rollup/rollup-win32-x64-msvc@4.6.0:
+    resolution: {integrity: sha512-QqmCsydHS172Y0Kc13bkMXvipbJSvzeglBncJG3LsYJSiPlxYACz7MmJBs4A8l1oU+jfhYEIC/+AUSlvjmiX/g==}
+    cpu: [x64]
+    os: [win32]
+    requiresBuild: true
+    dev: true
+    optional: true
+
   /@rushstack/eslint-patch@1.3.2:
     resolution: {integrity: sha512-V+MvGwaHH03hYhY+k6Ef/xKd6RYlc4q8WBx+2ANmipHJcKuktNcI/NgEsJgdSUF6Lw32njT6OnrRsKYCdgHjYw==}
     dev: true
@@ -15417,13 +15513,13 @@ packages:
     dev: true
     patched: true
 
-  /bundle-require@4.0.1(esbuild@0.18.20):
+  /bundle-require@4.0.1(esbuild@0.19.7):
     resolution: {integrity: sha512-9NQkRHlNdNpDBGmLpngF3EFDcwodhMUuLz9PaWYciVcQF9SE4LFjM2DB/xV1Li5JiuDMv7ZUWuC3rGbqR0MAXQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     peerDependencies:
       esbuild: '>=0.17'
     dependencies:
-      esbuild: 0.18.20
+      esbuild: 0.19.7
       load-tsconfig: 0.2.3
     dev: true
 
@@ -26389,7 +26485,7 @@ packages:
       lilconfig: 2.1.0
       postcss: 8.4.31
       ts-node: 10.9.1(@swc/core@1.3.99)(@types/node@18.18.13)(typescript@5.3.2)
-      yaml: 2.3.3
+      yaml: 2.3.4
     dev: true
 
   /postcss-loader@7.3.3(postcss@8.4.31)(webpack@5.88.2):
@@ -28228,6 +28324,26 @@ packages:
     engines: {node: '>=14.18.0', npm: '>=8.0.0'}
     hasBin: true
     optionalDependencies:
+      fsevents: 2.3.3
+    dev: true
+
+  /rollup@4.6.0:
+    resolution: {integrity: sha512-R8i5Her4oO1LiMQ3jKf7MUglYV/mhQ5g5OKeld5CnkmPdIGo79FDDQYqPhq/PCVuTQVuxsWgIbDy9F+zdHn80w==}
+    engines: {node: '>=18.0.0', npm: '>=8.0.0'}
+    hasBin: true
+    optionalDependencies:
+      '@rollup/rollup-android-arm-eabi': 4.6.0
+      '@rollup/rollup-android-arm64': 4.6.0
+      '@rollup/rollup-darwin-arm64': 4.6.0
+      '@rollup/rollup-darwin-x64': 4.6.0
+      '@rollup/rollup-linux-arm-gnueabihf': 4.6.0
+      '@rollup/rollup-linux-arm64-gnu': 4.6.0
+      '@rollup/rollup-linux-arm64-musl': 4.6.0
+      '@rollup/rollup-linux-x64-gnu': 4.6.0
+      '@rollup/rollup-linux-x64-musl': 4.6.0
+      '@rollup/rollup-win32-arm64-msvc': 4.6.0
+      '@rollup/rollup-win32-ia32-msvc': 4.6.0
+      '@rollup/rollup-win32-x64-msvc': 4.6.0
       fsevents: 2.3.3
     dev: true
 
@@ -30199,15 +30315,18 @@ packages:
     engines: {node: '>=0.6.x'}
     dev: false
 
-  /tsup@7.2.0(@swc/core@1.3.99)(ts-node@10.9.1)(typescript@5.3.2):
-    resolution: {integrity: sha512-vDHlczXbgUvY3rWvqFEbSqmC1L7woozbzngMqTtL2PGBODTtWlRwGDDawhvWzr5c1QjKe4OAKqJGfE1xeXUvtQ==}
-    engines: {node: '>=16.14'}
+  /tsup@8.0.1(@swc/core@1.3.99)(ts-node@10.9.1)(typescript@5.3.2):
+    resolution: {integrity: sha512-hvW7gUSG96j53ZTSlT4j/KL0q1Q2l6TqGBFc6/mu/L46IoNWqLLUzLRLP1R8Q7xrJTmkDxxDoojV5uCVs1sVOg==}
+    engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
+      '@microsoft/api-extractor': ^7.36.0
       '@swc/core': ^1
       postcss: ^8.4.12
-      typescript: '>=4.1.0'
+      typescript: '>=4.5.0'
     peerDependenciesMeta:
+      '@microsoft/api-extractor':
+        optional: true
       '@swc/core':
         optional: true
       postcss:
@@ -30216,17 +30335,17 @@ packages:
         optional: true
     dependencies:
       '@swc/core': 1.3.99
-      bundle-require: 4.0.1(esbuild@0.18.20)
+      bundle-require: 4.0.1(esbuild@0.19.7)
       cac: 6.7.14
       chokidar: 3.5.3
       debug: 4.3.4(supports-color@8.1.1)
-      esbuild: 0.18.20
+      esbuild: 0.19.7
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
       postcss-load-config: 4.0.1(postcss@8.4.31)(ts-node@10.9.1)
       resolve-from: 5.0.0
-      rollup: 3.15.0
+      rollup: 4.6.0
       source-map: 0.8.0-beta.0
       sucrase: 3.32.0
       tree-kill: 1.2.2
@@ -30534,7 +30653,7 @@ packages:
       vfile-message: 3.1.2
       vfile-reporter: 7.0.5
       vfile-statistics: 2.0.1
-      yaml: 2.3.3
+      yaml: 2.3.4
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -31806,7 +31925,7 @@ packages:
     dependencies:
       eslint-visitor-keys: 3.4.3
       lodash: 4.17.21
-      yaml: 2.3.3
+      yaml: 2.3.4
     dev: true
 
   /yaml@1.10.2:
@@ -31815,11 +31934,6 @@ packages:
 
   /yaml@2.3.2:
     resolution: {integrity: sha512-N/lyzTPaJasoDmfV7YTrYCI0G/3ivm/9wdG0aHuheKowWQwGTsK0Eoiw6utmzAnI6pkJa0DUVygvp3spqqEKXg==}
-    engines: {node: '>= 14'}
-    dev: true
-
-  /yaml@2.3.3:
-    resolution: {integrity: sha512-zw0VAJxgeZ6+++/su5AFoqBbZbrEakwu+X0M5HmcwUiBL7AzcuPKjj5we4xfQLp78LkEMpD0cOnUhmgOVy3KdQ==}
     engines: {node: '>= 14'}
     dev: true
 
