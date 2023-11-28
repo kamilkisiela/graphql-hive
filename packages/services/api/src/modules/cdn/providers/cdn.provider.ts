@@ -102,6 +102,10 @@ export class CdnProvider {
       [this.s3Config.endpoint, this.s3Config.bucket, s3Key].join('/'),
       {
         method: 'HEAD',
+        aws: {
+          // This boolean makes Google Cloud Storage & AWS happy.
+          signQuery: true,
+        },
       },
     );
 
@@ -135,6 +139,10 @@ export class CdnProvider {
       {
         method: 'PUT',
         body: privateKeyHash,
+        aws: {
+          // This boolean makes Google Cloud Storage & AWS happy.
+          signQuery: true,
+        },
       },
     );
 
@@ -269,6 +277,10 @@ export class CdnProvider {
       [this.s3Config.endpoint, this.s3Config.bucket, record.s3Key].join('/'),
       {
         method: 'DELETE',
+        aws: {
+          // This boolean makes Google Cloud Storage & AWS happy.
+          signQuery: true,
+        },
       },
     );
 

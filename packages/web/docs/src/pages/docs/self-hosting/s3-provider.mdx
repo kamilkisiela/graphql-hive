@@ -1,0 +1,53 @@
+import { Callout } from '@theguild/components'
+
+# S3 Storage Provider
+
+The docker compose stack uses Minio Object Storage as an S3 provider. However, for production usage
+we recommend using a cloud S3 compatible object storage provider such as AWS S3, Google Cloud
+Storage, or CloudFlare R2.
+
+The object storage is used to store composition artifacts, such as the compose schema, supergraph
+and additional metadata.
+
+In theory any S3 compatible object storage provider should work.
+
+## Cloudflare R2
+
+Set the corresponding environment variables of the `server` service in the docker compose stack.
+
+```
+S3_ENDPOINT=https://XXXXXXXXXXXXX.r2.cloudflarestorage.com
+S3_ACCESS_KEY_ID=111155951a1111c90e1111594d11111
+S3_SECRET_ACCESS_KEY=111111111bd3c11111eab2701111111111c311115c3d1111111d1113ac11111111
+S3_BUCKET_NAME=hive-artifacts
+```
+
+## AWS S3
+
+Set the corresponding environment variables of the `server` service in the docker compose stack.
+
+<Callout>
+  Make sure you are not including the bucket name within the `S3_ENDPOINT` variable. <br/>
+**✅ Correct**: `https://s3.{region}.amazonaws.com` <br/> **❌ Incorrect**:
+`https://s3.{region}.amazonaws.com/{bucket-name}` <br/> **❌ Incorrect**:
+`https://{bucket-name}.s3.{region}.amazonaws.com`
+
+</Callout>
+
+```
+S3_ENDPOINT=https://s3.{region}.amazonaws.com
+S3_ACCESS_KEY_ID=111155951a1111c90e1111594d11111
+S3_SECRET_ACCESS_KEY=111111111bd3c11111eab2701111111111c311115c3d1111111d1113ac11111111
+S3_BUCKET_NAME=hive-artifacts
+```
+
+## Google Cloud Storage
+
+Set the corresponding environment variables of the `server` service in the docker compose stack.
+
+```
+S3_ENDPOINT=https://storage.googleapis.com/
+S3_ACCESS_KEY_ID=111155951a1111c90e1111594d11111
+S3_SECRET_ACCESS_KEY=111111111bd3c11111eab2701111111111c311115c3d1111111d1113ac11111111
+S3_BUCKET_NAME=hive-artifacts
+```

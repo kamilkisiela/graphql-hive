@@ -42,7 +42,7 @@ export class ArtifactStorageWriter {
       },
       body: meta.preprocessor(args.artifact),
       aws: {
-        // This boolean makes Google Cloud Storage happy.
+        // This boolean makes Google Cloud Storage & AWS happy.
         signQuery: true,
       },
     });
