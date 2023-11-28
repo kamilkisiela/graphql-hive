@@ -34,6 +34,11 @@ Follow the [CI/CD instructions](./ci-cd.mdx) for automating the process.
 
 ### Usage Reporting
 
+<Callout>
+  For more configuration options, such as sampling, client name and version reporting, please refer
+  to the [Hive client configuration](/docs/api-reference/client#configuration) reference.
+</Callout>
+
 You can send usage reporting to Hive registry by using the `usage` section of the configuration:
 
 ```ts
@@ -47,8 +52,7 @@ const server = new ApolloServer({
     hiveApollo({
       enabled: true,
       token: 'YOUR-TOKEN',
-      reporting: { ... },
-      usage: true,  // add this one
+      usage: true // add this one
     })
   ]
 })

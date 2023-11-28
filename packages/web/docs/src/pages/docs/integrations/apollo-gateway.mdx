@@ -77,6 +77,11 @@ console.log(`🚀 Server ready at ${url}`)
 
 ### Usage Reporting
 
+<Callout>
+  For more configuration options, such as sampling, client name and version reporting, please refer
+  to the [Hive client configuration](/docs/api-reference/client#configuration) reference.
+</Callout>
+
 To enable Usage Reporting with your Apollo Gateway, you can use the Hive plugin for Apollo Server:
 
 ```ts
@@ -100,7 +105,6 @@ const server = new ApolloServer({
     hiveApollo({
       enabled: true,
       token: 'YOUR-TOKEN',
-      reporting: false, // no need to report the schema
       usage: true // add this one to report usage and operations
     })
   ]
