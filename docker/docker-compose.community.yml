@@ -193,6 +193,7 @@ services:
       CLICKHOUSE_USERNAME: '${CLICKHOUSE_USER}'
       CLICKHOUSE_PASSWORD: '${CLICKHOUSE_PASSWORD}'
       TS_NODE_TRANSPILE_ONLY: 'true'
+      LOG_LEVEL: '${LOG_LEVEL:-info}'
 
   server:
     image: '${DOCKER_REGISTRY}server${DOCKER_TAG}'
@@ -253,17 +254,16 @@ services:
       CDN_API: '1'
       CDN_API_BASE_URL: 'http://localhost:8082'
       AUTH_ORGANIZATION_OIDC: '1'
+      LOG_LEVEL: '${LOG_LEVEL:-info}'
 
   policy:
     image: '${DOCKER_REGISTRY}policy${DOCKER_TAG}'
     networks:
       - 'stack'
-    depends_on:
-      redis:
-        condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 3012
+      LOG_LEVEL: '${LOG_LEVEL:-info}'
 
   schema:
     image: '${DOCKER_REGISTRY}schema${DOCKER_TAG}'
@@ -279,6 +279,7 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: '${REDIS_PASSWORD}'
       ENCRYPTION_SECRET: '${HIVE_ENCRYPTION_SECRET}'
+      LOG_LEVEL: '${LOG_LEVEL:-info}'
 
   tokens:
     image: '${DOCKER_REGISTRY}tokens${DOCKER_TAG}'
@@ -298,6 +299,7 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: '${REDIS_PASSWORD}'
       PORT: 3003
+      LOG_LEVEL: '${LOG_LEVEL:-info}'
 
   webhooks:
     image: '${DOCKER_REGISTRY}webhooks${DOCKER_TAG}'
@@ -312,6 +314,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: '${REDIS_PASSWORD}'
+      LOG_LEVEL: '${LOG_LEVEL:-info}'
 
   emails:
     image: '${DOCKER_REGISTRY}emails${DOCKER_TAG}'
@@ -328,6 +331,7 @@ services:
       REDIS_PASSWORD: '${REDIS_PASSWORD}'
       EMAIL_FROM: no-reply@graphql-hive.com
       EMAIL_PROVIDER: sendmail
+      LOG_LEVEL: '${LOG_LEVEL:-info}'
 
   usage:
     image: '${DOCKER_REGISTRY}usage${DOCKER_TAG}'
@@ -350,6 +354,7 @@ services:
       KAFKA_BUFFER_INTERVAL: 1000
       KAFKA_BUFFER_DYNAMIC: '1'
       PORT: 3006
+      LOG_LEVEL: '${LOG_LEVEL:-info}'
 
   usage-ingestor:
     image: '${DOCKER_REGISTRY}usage-ingestor${DOCKER_TAG}'
@@ -373,6 +378,7 @@ services:
       CLICKHOUSE_USERNAME: '${CLICKHOUSE_USER}'
       CLICKHOUSE_PASSWORD: '${CLICKHOUSE_PASSWORD}'
       PORT: 3007
+      LOG_LEVEL: '${LOG_LEVEL:-info}'
 
   app:
     image: '${DOCKER_REGISTRY}app${DOCKER_TAG}'
@@ -391,3 +397,4 @@ services:
       SERVER_ENDPOINT: http://server:3001
       AUTH_REQUIRE_EMAIL_VERIFICATION: '0'
       AUTH_ORGANIZATION_OIDC: '1'
+      LOG_LEVEL: '${LOG_LEVEL:-info}'
