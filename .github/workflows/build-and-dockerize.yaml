@@ -119,8 +119,8 @@ jobs:
           echo "set<<$EOF" >> "$GITHUB_ENV"
           for target in $targets
           do
-              echo "$target.cache-from=type=gha,scope=$GITHUB_REF-$target" >> "$GITHUB_ENV"
-              echo "$target.cache-to=type=gha,mode=max,scope=$GITHUB_REF-$target" >> "$GITHUB_ENV"
+              echo "$target.cache-from=type=gha,ignore-error=true,scope=$GITHUB_REF-$target" >> "$GITHUB_ENV"
+              echo "$target.cache-to=type=gha,ignore-error=true,mode=max,scope=$GITHUB_REF-$target" >> "$GITHUB_ENV"
           done
           echo "$EOF" >> "$GITHUB_ENV"
 
