@@ -26,6 +26,11 @@ Follow the [CI/CD instructions](./ci-cd.mdx) for automating the process.
 
 ### Usage Reporting
 
+<Callout>
+  For more configuration options, such as sampling, client name and version reporting, please refer
+  to the [Hive client configuration](/docs/api-reference/client#configuration) reference.
+</Callout>
+
 You can send usage reporting to Hive registry by using the `usage` section of the configuration:
 
 ```ts
@@ -40,11 +45,6 @@ const yoga = createYoga({
     useYogaHive({
       enabled: true, // Enable/Disable Hive Client
       token: 'YOUR-TOKEN',
-      reporting: {
-        // feel free to set dummy values here, or real runtime values if you have them
-        author: 'Author of the schema version',
-        commit: 'git sha or any identifier'
-      },
       // Collects and send usage reporting based on executed operations
       usage: true
     })
