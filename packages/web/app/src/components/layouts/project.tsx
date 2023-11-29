@@ -195,11 +195,10 @@ export function ProjectLayout({
                   <Tabs.Trigger value={Page.Alerts} asChild>
                     <NextLink
                       href={{
-                        pathname: '/[organizationId]/[projectId]/view/[tab]',
+                        pathname: `/[organizationId]/[projectId]/view/${Page.Alerts}`,
                         query: {
                           organizationId: currentOrganization.cleanId,
                           projectId: currentProject.cleanId,
-                          tab: Page.Alerts,
                         },
                       }}
                     >
@@ -212,11 +211,10 @@ export function ProjectLayout({
                     <Tabs.Trigger value={Page.Policy} asChild>
                       <NextLink
                         href={{
-                          pathname: '/[organizationId]/[projectId]/view/[tab]',
+                          pathname: `/[organizationId]/[projectId]/view/${Page.Policy}`,
                           query: {
                             organizationId: currentOrganization.cleanId,
                             projectId: currentProject.cleanId,
-                            tab: Page.Policy,
                           },
                         }}
                       >
@@ -226,11 +224,10 @@ export function ProjectLayout({
                     <Tabs.Trigger value={Page.Settings} asChild>
                       <NextLink
                         href={{
-                          pathname: '/[organizationId]/[projectId]/view/[tab]',
+                          pathname: `/[organizationId]/[projectId]/view/${Page.Settings}`,
                           query: {
                             organizationId: currentOrganization.cleanId,
                             projectId: currentProject.cleanId,
-                            tab: Page.Settings,
                           },
                         }}
                       >
