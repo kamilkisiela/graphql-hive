@@ -102,6 +102,11 @@ fragment SchemaChangeFields on SchemaChange {
     schemaCheckId
   }
   isSafeBasedOnUsage
+  affectedOperations {
+    name
+    hash
+    count
+  }
 }
 
 fragment SchemaCompareResultFields on SchemaCompareResult {
