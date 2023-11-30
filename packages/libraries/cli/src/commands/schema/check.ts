@@ -190,8 +190,9 @@ export default class SchemaCheck extends Command {
           );
         }
         if (!git.pullRequestNumber) {
-          throw new Errors.CLIError(
-            `Couldn't resolve pull request number required for GitHub Application`,
+          this.warn(
+            "Could not resolve pull request number. Are you running this command on a 'pull_request' event?\n" +
+              'See https://the-guild.dev/graphql/hive/docs/integrations/ci-cd#github-workflow-for-ci',
           );
         }
 
