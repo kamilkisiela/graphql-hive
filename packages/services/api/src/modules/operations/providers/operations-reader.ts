@@ -251,9 +251,10 @@ export class OperationsReader {
         hash NOT IN (
           SELECT hash FROM clients_daily ${this.createFilter({
             target,
-            period,
-            extra: [sql`client_name IN (${sql.array(excludedClients, 'String')})`],
-          })} GROUP BY hash
+            period
+          })}
+          GROUP BY hash
+          HAVING COUNT(CASE WHEN `client` NOT IN (${sql.array(excludedClients, 'String')}) THEN 1 END) > 0
         )
       `);
     }
