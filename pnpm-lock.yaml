@@ -243,8 +243,8 @@ importers:
         specifier: 4.9.5
         version: 4.9.5(graphql@16.8.1)
       '@aws-sdk/client-s3':
-        specifier: 3.461.0
-        version: 3.461.0
+        specifier: 3.462.0
+        version: 3.462.0
       '@esm2cjs/execa':
         specifier: 6.1.1-cjs.1
         version: 6.1.1-cjs.1
@@ -539,11 +539,11 @@ importers:
         version: 0.1.13
     devDependencies:
       '@aws-sdk/client-s3':
-        specifier: 3.461.0
-        version: 3.461.0
+        specifier: 3.462.0
+        version: 3.462.0
       '@aws-sdk/s3-request-presigner':
-        specifier: 3.461.0
-        version: 3.461.0
+        specifier: 3.462.0
+        version: 3.462.0
       '@graphql-hive/core':
         specifier: 0.2.3
         version: link:../../libraries/core/dist
@@ -2551,14 +2551,14 @@ packages:
       tslib: 1.14.1
     dev: true
 
-  /@aws-sdk/client-s3@3.461.0:
-    resolution: {integrity: sha512-pvEWMb2djn3bjD9lelYQhyG8KKKrUMm5MlSaSPwqVTL97iKm/Zbk+Ord6n8qMyPl5JHGmNdfg0tZFxC1qXeHTw==}
+  /@aws-sdk/client-s3@3.462.0:
+    resolution: {integrity: sha512-nyBmsS45b5/YI926dtJp6OA8Fx7yItcdK8lqJq5bgfbskyEqycFCXzykog1AkIBETOeUn3Saztw7HCGZKRad0g==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@aws-crypto/sha1-browser': 3.0.0
       '@aws-crypto/sha256-browser': 3.0.0
       '@aws-crypto/sha256-js': 3.0.0
-      '@aws-sdk/client-sts': 3.461.0
+      '@aws-sdk/client-sts': 3.462.0
       '@aws-sdk/core': 3.451.0
       '@aws-sdk/credential-provider-node': 3.460.0
       '@aws-sdk/middleware-bucket-endpoint': 3.460.0
@@ -2660,8 +2660,8 @@ packages:
       - aws-crt
     dev: true
 
-  /@aws-sdk/client-sts@3.461.0:
-    resolution: {integrity: sha512-1u+t31m23vuc9zkiUk51L4QbwuRQEuBeMArHK/thmq4V+A0VmjoAr/x2D0eQ0deOuBqG5YC62oaqUfIhj03SIw==}
+  /@aws-sdk/client-sts@3.462.0:
+    resolution: {integrity: sha512-oO6SVGB9kR0dwc4T/M3++TcioBVv26cEpxZGS4BcKMDxSjkCLqJ/jE37aCNNPGTlCAhnuOAwqGjFqYrsehsI1Q==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@aws-crypto/sha256-browser': 3.0.0
@@ -2943,8 +2943,8 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /@aws-sdk/s3-request-presigner@3.461.0:
-    resolution: {integrity: sha512-EffKSCd8tbBw32+AZyxTAIzpicqPu9A+97q7p/9tJo5175j1HTHwf68zmiR/C60kdJNHu+A4YNdQ9pLeg47CFA==}
+  /@aws-sdk/s3-request-presigner@3.462.0:
+    resolution: {integrity: sha512-yZbO45lJdJ8P8Q+ODWZeg84ORaCy+ZzAZouTsNcBfwxnhatrk4E6sP1xsUCF4knL/vC53frM4LnY858E9Z/NVg==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@aws-sdk/signature-v4-multi-region': 3.461.0
