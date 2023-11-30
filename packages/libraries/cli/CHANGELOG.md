@@ -1,5 +1,13 @@
 # @graphql-hive/cli
 
+## 0.32.0
+
+### Minor Changes
+
+- [`00520b9`](https://github.com/kamilkisiela/graphql-hive/commit/00520b9c3eaa028241bee8b3202ebc07a82cdf5f)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Print warning when pull request number can not be
+  resolved.
+
 ## 0.31.0
 
 ### Minor Changes
