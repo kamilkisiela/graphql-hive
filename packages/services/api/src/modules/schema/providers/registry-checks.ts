@@ -329,6 +329,22 @@ export class RegistryChecks {
       safeChanges.push(change);
     }
 
+    await Promise.all(
+      breakingChanges.map(async change => {
+        if (!change.path) return change;
+
+        const affectedOperations = await this.inspector.getUsageForCoordinate(
+          change.path,
+          selector,
+        );
+
+        if (affectedOperations) {
+          change.affectedOperations = affectedOperations;
+        }
+        return change;
+      }),
+    );
+
     if (isFailure === true) {
       this.logger.debug('Detected breaking changes');
       return {

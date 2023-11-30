@@ -1283,6 +1283,12 @@ export const resolvers: SchemaModule.Resolvers = {
     criticalityReason: change => change.reason,
     approval: change => change.approvalMetadata,
     isSafeBasedOnUsage: change => change.isSafeBasedOnUsage,
+    affectedOperations: change =>
+      change.affectedOperations?.map(op => ({
+        name: op.operationName,
+        hash: op.operationHash,
+        count: op.count,
+      })) ?? null,
   },
   SchemaChangeApproval: {
     approvedBy: (approval, _, { injector }) =>

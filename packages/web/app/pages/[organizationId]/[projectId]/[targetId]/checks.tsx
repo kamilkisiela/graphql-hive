@@ -207,6 +207,11 @@ const ActiveSchemaCheck_SchemaCheckFragment = graphql(`
           schemaCheckId
         }
         isSafeBasedOnUsage
+        affectedOperations {
+          name
+          hash
+          count
+        }
       }
     }
     safeSchemaChanges {
@@ -599,7 +604,7 @@ const ActiveSchemaCheck = ({
             {schemaCheck.__typename === 'FailedSchemaCheck' &&
             schemaCheck.compositionErrors?.nodes.length ? (
               <div className="mb-4 space-y-2">
-                <Heading className='flex items-center gap-x-2'>
+                <Heading className="flex items-center gap-x-2">
                   <Badge color="red" /> Composition Errors
                 </Heading>
                 <ul>

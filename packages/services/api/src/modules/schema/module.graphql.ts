@@ -312,6 +312,10 @@ export default gql`
     Whether the breaking change is safe based on usage data.
     """
     isSafeBasedOnUsage: Boolean!
+    """
+    List of operations that are affected by this schema change.
+    """
+    affectedOperations: [SchemaCoordinateUsageOperation!]
   }
 
   type SchemaChangeApproval {

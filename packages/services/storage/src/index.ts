@@ -4163,6 +4163,11 @@ function toSerializableSchemaChange(change: SchemaChangeType): {
     schemaCheckId: string;
   };
   isSafeBasedOnUsage: boolean;
+  affectedOperations: null | Array<{
+    operationName: string;
+    operationHash: string;
+    count: number;
+  }>;
 } {
   return {
     id: change.id,
@@ -4170,6 +4175,7 @@ function toSerializableSchemaChange(change: SchemaChangeType): {
     meta: change.meta,
     isSafeBasedOnUsage: change.isSafeBasedOnUsage,
     approvalMetadata: change.approvalMetadata,
+    affectedOperations: change.affectedOperations,
   };
 }
 

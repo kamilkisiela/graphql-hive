@@ -100,6 +100,18 @@ export class Inspector {
       .sort((a, b) => a.criticality.localeCompare(b.criticality));
   }
 
+  @sentry('Inspector.getUsageForCoordinate')
+  async getUsageForCoordinate(coordinate: string, selector: Types.TargetSelector) {
+    return this.operationsManager.getTopOperationForCoordinate({
+      coordinate,
+      period: createPeriod('7d'),
+      limit: 10,
+      organizationId: selector.organization,
+      projectId: selector.project,
+      targetId: selector.target,
+    });
+  }
+
   private async getSettings({ selector }: { selector: Types.TargetSelector }) {
     try {
       const settings = await this.targetManager.getTargetSettings({
