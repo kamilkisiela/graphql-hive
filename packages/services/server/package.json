@@ -29,7 +29,7 @@
     "@hive/storage": "workspace:*",
     "@sentry/integrations": "7.83.0",
     "@sentry/node": "7.83.0",
-    "@swc/core": "1.3.99",
+    "@swc/core": "1.3.100",
     "@trpc/server": "10.44.1",
     "@whatwg-node/fetch": "0.9.13",
     "@whatwg-node/server": "0.9.10",
