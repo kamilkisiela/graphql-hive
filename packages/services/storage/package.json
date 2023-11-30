@@ -16,7 +16,7 @@
     "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts && prettier --write src/db/types.ts"
   },
   "devDependencies": {
-    "@graphql-inspector/core": "5.0.1",
+    "@graphql-inspector/core": "5.0.2",
     "@sentry/node": "7.83.0",
     "@sentry/types": "7.83.0",
     "@tgriesser/schemats": "9.0.1",
