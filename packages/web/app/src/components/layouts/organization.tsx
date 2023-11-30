@@ -170,10 +170,9 @@ export function OrganizationLayout({
                     <Tabs.Trigger value={Page.Policy} asChild>
                       <NextLink
                         href={{
-                          pathname: '/[organizationId]/view/[tab]',
+                          pathname: `/[organizationId]/view/${Page.Policy}`,
                           query: {
                             organizationId: currentOrganization.cleanId,
-                            tab: Page.Policy,
                           },
                         }}
                       >
@@ -183,10 +182,9 @@ export function OrganizationLayout({
                     <Tabs.Trigger value={Page.Settings} asChild>
                       <NextLink
                         href={{
-                          pathname: '/[organizationId]/view/[tab]',
+                          pathname: `/[organizationId]/view/${Page.Settings}`,
                           query: {
                             organizationId: currentOrganization.cleanId,
-                            tab: Page.Settings,
                           },
                         }}
                       >
@@ -200,10 +198,9 @@ export function OrganizationLayout({
                     <Tabs.Trigger value={Page.Support} asChild>
                       <NextLink
                         href={{
-                          pathname: '/[organizationId]/view/[tab]',
+                          pathname: `/[organizationId]/view/${Page.Support}`,
                           query: {
                             organizationId: currentOrganization.cleanId,
-                            tab: Page.Support,
                           },
                         }}
                       >
@@ -216,10 +213,9 @@ export function OrganizationLayout({
                     <Tabs.Trigger value={Page.Subscription} asChild>
                       <NextLink
                         href={{
-                          pathname: '/[organizationId]/view/[tab]',
+                          pathname: `/[organizationId]/view/${Page.Subscription}`,
                           query: {
                             organizationId: currentOrganization.cleanId,
-                            tab: Page.Subscription,
                           },
                         }}
                       >

@@ -1,4 +1,4 @@
-import { Callout, Card, Cards } from '@theguild/components'
+import { Card, Cards } from '@theguild/components'
 
 # Hive Client
 
@@ -13,7 +13,8 @@ import { Callout, Card, Cards } from '@theguild/components'
 [`@graphql-hive/client`](https://npmjs.com/package/@graphql-hive/client) is the official library for
 interacting with Hive's **Schema Registry** and **Usage Reporting**.
 
-You can refer to the following guides for integration with your project:
+You can refer to the following guides for getting started within your project, then revisit this
+page for configuring the client to your needs.
 
 <Cards>
   <Card arrow title="GraphQL Yoga" href="/docs/integrations/graphql-yoga" />
@@ -89,26 +90,9 @@ import { createHive } from '@graphql-hive/client'
 const hive = createHive({
   enabled: true,
   debug: true, // or, false
-  token: 'YOUR-TOKEN',
-  reporting: {
-    // feel free to set dummy values here, or use actual
-    // environment information that you have
-    author: 'Author of the schema version',
-    commit: 'git sha or any identifier'
-  }
+  token: 'YOUR-TOKEN'
 })
 ```
-
-Then, you can use the `reportSchema` to publish your runtime schema to Hive:
-
-```ts
-// Once your server starts and the GraphQL schema becomes
-// available, call "reportSchema" with your schema
-hive.reportSchema({ schema: yourSchema })
-```
-
-You can also implement a custom implementation for the Usage Reporting feature, and send usage
-reports to Hive.
 
 Call `collectUsage` as soon as a GraphQL operation execution starts, and use the return value
 callback when the operation ends. You may also wrap and replace the `execute` function with the

@@ -301,10 +301,15 @@ export class RegistryChecks {
       } satisfies CheckResult;
     }
 
-    const inspectorChanges = await this.inspector.diff(existingSchema, incomingSchema, selector);
+    let inspectorChanges = await this.inspector.diff(existingSchema, incomingSchema, selector);
 
     if (includeUrlChanges) {
       inspectorChanges.push(...detectUrlChanges(version.schemas, schemas));
+    }
+
+    // Filter out federation specific changes as they are not relevant for the schema diff and were in previous schema versions by accident.
+    if ('type' in orchestrator && orchestrator.type === ProjectType.FEDERATION) {
+      inspectorChanges = inspectorChanges.filter(change => !isFederationRelatedChange(change));
     }
 
     let isFailure = false;
@@ -603,3 +608,22 @@ const toSchemaCheckWarning = (record: CheckPolicyResponse[number]): SchemaCheckW
   endColumn: record.endColumn ?? null,
   endLine: record.endLine ?? null,
 });
+
+const federationTypes = new Set(['join__FieldSet', 'join__Graph', 'link__Import', 'link__Purpose']);
+const federationDirectives = new Set([
+  '@join__enumValue',
+  '@join__field',
+  '@join__graph',
+  '@join__implements',
+  '@join__type',
+  '@join__unionMember',
+  '@link',
+  '@federation__inaccessible',
+  '@inaccessible',
+  '@tag',
+  '@federation__tag',
+]);
+
+function isFederationRelatedChange(change: SchemaChangeType) {
+  return change.path && (federationTypes.has(change.path) || federationDirectives.has(change.path));
+}

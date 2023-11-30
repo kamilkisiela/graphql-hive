@@ -1,4 +1,5 @@
 import { ReactElement, useRef } from 'react';
+import { cx } from 'class-variance-authority';
 import { MonacoDiffEditor } from '@/components/schema-editor';
 import { Button, Spinner, Tooltip } from '@/components/v2';
 import { usePrettify } from '@/lib/hooks';
@@ -9,10 +10,12 @@ export const DiffEditor = ({
   title,
   before,
   after,
+  className = '',
 }: {
   before: string;
   after: string;
-  title: string;
+  title?: string;
+  className?: string;
 }): ReactElement => {
   const sdlBefore = usePrettify(before);
   const sdlAfter = usePrettify(after);
@@ -49,9 +52,9 @@ export const DiffEditor = ({
   }
 
   return (
-    <div className="h-full w-full">
+    <div className={cx('h-full w-full', className)}>
       <div className="flex items-center justify-between p-5">
-        <div className="font-semibold">{title}</div>
+        {title && <div className="font-semibold">{title}</div>}
         <div className="flex items-center">
           <div className="mr-2 text-xs font-normal">Navigate changes</div>
           <Tooltip content="Previous change">

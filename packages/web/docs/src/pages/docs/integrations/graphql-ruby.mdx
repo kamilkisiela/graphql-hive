@@ -30,6 +30,7 @@ class Schema < GraphQL::Schema
         token: '<YOUR_TOKEN>',
         # add this one for usage reporting
         collect_usage: true,
+        # This option will be removed in a future release. Please report schemas using the Hive CLI.
         report_schema: false,
         # for clients reporting
         client_info: Proc.new { |context| { name: context.client_name, version: context.client_version } },

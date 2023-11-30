@@ -51,9 +51,11 @@ export type CreateOperationMutationType = typeof CreateOperationMutation;
 export function CreateOperationModal({
   isOpen,
   close,
+  onSaveSuccess,
 }: {
   isOpen: boolean;
   close: () => void;
+  onSaveSuccess?: () => void;
 }): ReactElement {
   const router = useRouteSelector();
   const [mutationCreate, mutateCreate] = useMutation(CreateOperationMutation);
@@ -113,6 +115,7 @@ export function CreateOperationModal({
           });
         }
 
+        onSaveSuccess?.();
         resetForm();
         close();
       }

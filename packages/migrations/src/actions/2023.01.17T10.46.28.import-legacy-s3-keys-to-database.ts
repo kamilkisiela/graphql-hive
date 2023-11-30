@@ -110,6 +110,10 @@ const run: MigrationExecutor['run'] = async ({ connection, sql }) => {
     const response = await s3Client.fetch([env.S3_ENDPOINT, env.S3_BUCKET_NAME, s3Key].join('/'), {
       method: 'PUT',
       body: accessKeyHash,
+      aws: {
+        // This boolean makes Google Cloud Storage & AWS happy.
+        signQuery: true,
+      },
     });
 
     if (response.status !== 200) {

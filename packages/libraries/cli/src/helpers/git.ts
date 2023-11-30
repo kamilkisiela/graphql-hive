@@ -54,6 +54,11 @@ function useGitHubAction(): CIRunner {
       return !!process.env.GITHUB_ACTIONS;
     },
     env() {
+      // eslint-disable-next-line no-process-env
+      const repository = process.env['GITHUB_REPOSITORY'] ?? null;
+      let pullRequestNumber: string | null = null;
+      let commit: string | null = null;
+
       const isPr =
         // eslint-disable-next-line no-process-env
         process.env.GITHUB_EVENT_NAME === 'pull_request' ||
@@ -69,19 +74,15 @@ function useGitHubAction(): CIRunner {
             : undefined;
 
           if (event?.pull_request) {
-            return {
-              commit: event.pull_request.head.sha as string,
-              pullRequestNumber: String(event.pull_request.number),
-              // eslint-disable-next-line no-process-env
-              repository: process.env['GITHUB_REPOSITORY']!,
-            };
+            commit = event.pull_request.head.sha as string;
+            pullRequestNumber = String(event.pull_request.number);
           }
         } catch {
           // Noop
         }
       }
 
-      return { commit: undefined, pullRequestNumber: undefined, repository: undefined };
+      return { commit, pullRequestNumber, repository };
     },
   };
 }
