@@ -5,12 +5,12 @@ export default {
   run: ({ sql }) => sql`
 --slack-integration (up)
 ALTER TABLE
-  public.organizations
+  organizations
 ADD COLUMN
   github_app_installation_id TEXT;
 
 ALTER TABLE
-  public.projects
+  projects
 ADD COLUMN
   git_repository TEXT;
 `,

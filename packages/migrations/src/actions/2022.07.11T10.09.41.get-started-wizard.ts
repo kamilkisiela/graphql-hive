@@ -5,7 +5,7 @@ export default {
   run: ({ sql }) => sql`
 -- Tracks feature discovery progress
 ALTER TABLE
-  public.organizations
+  organizations
 ADD COLUMN
   get_started_creating_project BOOLEAN NOT NULL DEFAULT FALSE,
 ADD COLUMN
@@ -20,7 +20,7 @@ ADD COLUMN
   get_started_usage_breaking BOOLEAN NOT NULL DEFAULT FALSE;
 
 UPDATE
-  public.organizations
+  organizations
 SET
   get_started_creating_project = TRUE
 WHERE
@@ -28,13 +28,13 @@ WHERE
     SELECT
       org_id
     FROM
-      public.projects
+      projects
     GROUP BY
       org_id
   );
 
 UPDATE
-  public.organizations
+  organizations
 SET
   get_started_publishing_schema = TRUE
 WHERE
@@ -42,14 +42,14 @@ WHERE
     SELECT
       p.org_id
     FROM
-      public.commits AS c
-      INNER JOIN public.projects AS p ON p.id = c.project_id
+      commits AS c
+      INNER JOIN projects AS p ON p.id = c.project_id
     GROUP BY
       p.org_id
   );
 
 UPDATE
-  public.organizations
+  organizations
 SET
   get_started_inviting_members = TRUE
 WHERE
@@ -57,7 +57,7 @@ WHERE
     SELECT
       organization_id
     FROM
-      public.organization_member
+      organization_member
     GROUP BY
       organization_id
     HAVING
@@ -65,7 +65,7 @@ WHERE
   );
 
 UPDATE
-  public.organizations
+  organizations
 SET
   get_started_usage_breaking = TRUE
 WHERE
@@ -73,8 +73,8 @@ WHERE
     SELECT
       p.org_id
     FROM
-      public.targets AS t
-      INNER JOIN public.projects AS p ON p.id = t.project_id
+      targets AS t
+      INNER JOIN projects AS p ON p.id = t.project_id
     WHERE
       t.validation_enabled IS TRUE
   );

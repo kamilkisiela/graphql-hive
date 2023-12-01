@@ -5,21 +5,21 @@ export default {
   run: ({ sql }) => sql`
 --urls (up)
 ALTER TABLE
-  public.version_commit
+  version_commit
 ALTER COLUMN
   url
 TYPE
   TEXT;
 
 ALTER TABLE
-  public.projects
+  projects
 ALTER COLUMN
   build_url
 TYPE
   TEXT;
 
 ALTER TABLE
-  public.projects
+  projects
 ALTER COLUMN
   validation_url
 TYPE

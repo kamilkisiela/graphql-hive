@@ -411,7 +411,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         SELECT
           *
         FROM
-          public."users"
+          "users"
         WHERE
           "supertoken_user_id" = ${superTokensUserId}
         LIMIT 1
@@ -444,7 +444,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return transformUser(
         await connection.one<Slonik<users>>(
           sql`
-            INSERT INTO public.users
+            INSERT INTO users
               ("email", "supertoken_user_id", "full_name", "display_name", "external_auth_user_id", "oidc_integration_id")
             VALUES
               (${email}, ${superTokensUserId}, ${fullName}, ${displayName}, ${externalAuthUserId}, ${oidcIntegrationId})
@@ -455,7 +455,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
     async getOrganization(userId: string, connection: Connection) {
       const org = await connection.maybeOne<Slonik<organizations>>(
-        sql`SELECT * FROM public.organizations WHERE user_id = ${userId} AND type = ${'PERSONAL'} LIMIT 1`,
+        sql`SELECT * FROM organizations WHERE user_id = ${userId} AND type = ${'PERSONAL'} LIMIT 1`,
       );
 
       return org ? transformOrganization(org) : null;
@@ -482,7 +482,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         }
 
         const orgCleanIdExists = await connection.exists(
-          sql`SELECT 1 FROM public.organizations WHERE clean_id = ${id} LIMIT 1`,
+          sql`SELECT 1 FROM organizations WHERE clean_id = ${id} LIMIT 1`,
         );
 
         if (orgCleanIdExists) {
@@ -495,7 +495,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       const org = await connection.one<Slonik<organizations>>(
         sql`
-          INSERT INTO public.organizations
+          INSERT INTO organizations
             ("name", "clean_id", "user_id")
           VALUES
             (${name}, ${availableCleanId}, ${user})
@@ -505,7 +505,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       await connection.query<Slonik<organization_member>>(
         sql`
-          INSERT INTO public.organization_member
+          INSERT INTO organization_member
             ("organization_id", "user_id", "scopes")
           VALUES
             (${org.id}, ${user}, ${sql.array(scopes, 'text')})
@@ -537,7 +537,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       await connection.query(
         sql`
-          INSERT INTO public.organization_member
+          INSERT INTO organization_member
             (organization_id, user_id, scopes)
           VALUES
             (${linkedOrganizationId}, ${args.userId}, ${sql.array(args.defaultScopes, 'text')})
@@ -634,7 +634,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         SELECT
           *
         FROM
-          public.users
+          users
         WHERE
           id = ANY(${sql.array(userIds, 'uuid')})
       `);
@@ -652,7 +652,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async updateUser({ id, displayName, fullName }) {
       return transformUser(
         await pool.one<Slonik<users>>(sql`
-          UPDATE public.users
+          UPDATE users
           SET display_name = ${displayName}, full_name = ${fullName}
           WHERE id = ${id}
           RETURNING *
@@ -665,13 +665,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async deleteOrganization({ organization }) {
       const result = await pool.transaction(async t => {
         const tokensResult = await t.query<Pick<tokens, 'token'>>(sql`
-          SELECT token FROM public.tokens WHERE organization_id = ${organization} AND deleted_at IS NULL
+          SELECT token FROM tokens WHERE organization_id = ${organization} AND deleted_at IS NULL
         `);
 
         return {
           organization: await t.one<organizations>(
             sql`
-              DELETE FROM public.organizations
+              DELETE FROM organizations
               WHERE id = ${organization}
               RETURNING *
             `,
@@ -689,7 +689,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return transformProject(
         await pool.one<Slonik<projects>>(
           sql`
-            INSERT INTO public.projects
+            INSERT INTO projects
               ("name", "clean_id", "type", "org_id")
             VALUES
               (${name}, ${cleanId}, ${type}, ${organization})
@@ -701,7 +701,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async getOrganizationId({ organization }) {
       // Based on clean_id, resolve id
       const result = await pool.one<Pick<organizations, 'id'>>(
-        sql`SELECT id FROM public.organizations WHERE clean_id = ${organization} LIMIT 1`,
+        sql`SELECT id FROM organizations WHERE clean_id = ${organization} LIMIT 1`,
       );
 
       return result.id;
@@ -711,7 +711,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const owners = await pool.query<Slonik<Pick<organizations, 'user_id' | 'id'>>>(
         sql`
         SELECT id, user_id
-        FROM public.organizations
+        FROM organizations
         WHERE id IN (${sql.join(organizations, sql`, `)})`,
       );
 
@@ -733,9 +733,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         >
       >(
         sql`
-        SELECT u.*, om.scopes, om.organization_id, om.connected_to_zendesk FROM public.organizations as o
-        LEFT JOIN public.users as u ON (u.id = o.user_id)
-        LEFT JOIN public.organization_member as om ON (om.user_id = u.id AND om.organization_id = o.id)
+        SELECT u.*, om.scopes, om.organization_id, om.connected_to_zendesk FROM organizations as o
+        LEFT JOIN users as u ON (u.id = o.user_id)
+        LEFT JOIN organization_member as om ON (om.user_id = u.id AND om.organization_id = o.id)
         WHERE o.id IN (${sql.join(organizations, sql`, `)})`,
       );
 
@@ -756,7 +756,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     }),
     async countOrganizationMembers({ organization }) {
       const { total } = await pool.one<{ total: number }>(
-        sql`SELECT COUNT(*) as total FROM public.organization_member WHERE organization_id = ${organization}`,
+        sql`SELECT COUNT(*) as total FROM organization_member WHERE organization_id = ${organization}`,
       );
 
       return total;
@@ -778,9 +778,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           om.organization_id,
           om.connected_to_zendesk,
           CASE WHEN o.user_id = om.user_id THEN true ELSE false END AS is_owner
-        FROM public.organization_member as om
-        LEFT JOIN public.organizations as o ON (o.id = om.organization_id)
-        LEFT JOIN public.users as u ON (u.id = om.user_id)
+        FROM organization_member as om
+        LEFT JOIN organizations as o ON (o.id = om.organization_id)
+        LEFT JOIN users as u ON (u.id = om.user_id)
         WHERE om.organization_id IN (${sql.join(
           organizations,
           sql`, `,
@@ -813,9 +813,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             om.organization_id,
             om.connected_to_zendesk,
             CASE WHEN o.user_id = om.user_id THEN true ELSE false END AS is_owner
-          FROM public.organization_member as om
-          LEFT JOIN public.organizations as o ON (o.id = om.organization_id)
-          LEFT JOIN public.users as u ON (u.id = om.user_id)
+          FROM organization_member as om
+          LEFT JOIN organizations as o ON (o.id = om.organization_id)
+          LEFT JOIN users as u ON (u.id = om.user_id)
           WHERE om.organization_id = ${organization} AND om.user_id = ${user} ORDER BY u.created_at DESC LIMIT 1`,
       );
 
@@ -829,7 +829,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const organizations = selectors.map(s => s.organization);
       const allInvitations = await pool.query<Slonik<organization_invitations>>(
         sql`
-          SELECT * FROM public.organization_invitations
+          SELECT * FROM organization_invitations
           WHERE organization_id IN (${sql.join(
             organizations,
             sql`, `,
@@ -851,7 +851,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       >(
         sql`
           SELECT organization_id, user_id, scopes
-          FROM public.organization_member
+          FROM organization_member
           WHERE (organization_id, user_id) IN ((${sql.join(
             pairs.map(p => sql`${p.organization}, ${p.user}`),
             sql`), (`,
@@ -869,7 +869,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const results = await pool.query<Slonik<organization_member>>(
         sql`
           SELECT organization_id, user_id
-          FROM public.organization_member
+          FROM organization_member
           WHERE (organization_id, user_id) IN ((${sql.join(
             pairs.map(p => sql`${p.organization}, ${p.user}`),
             sql`), (`,
@@ -885,8 +885,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const results = await pool.query<Slonik<organization_member & { project_id: string }>>(
         sql`
           SELECT om.organization_id, om.user_id, p.id AS project_id
-          FROM public.projects as p
-          LEFT JOIN public.organization_member as om ON (p.org_id = om.organization_id)
+          FROM projects as p
+          LEFT JOIN organization_member as om ON (p.org_id = om.organization_id)
           WHERE (om.organization_id, om.user_id, p.id) IN ((${sql.join(
             pairs.map(p => sql`${p.organization}, ${p.user}, ${p.project}`),
             sql`), (`,
@@ -906,7 +906,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async updateOrganizationName({ name, cleanId, organization }) {
       return transformOrganization(
         await pool.one<Slonik<organizations>>(sql`
-          UPDATE public.organizations
+          UPDATE organizations
           SET name = ${name}, clean_id = ${cleanId}
           WHERE id = ${organization}
           RETURNING *
@@ -916,7 +916,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async updateOrganizationPlan({ billingPlan, organization }) {
       return transformOrganization(
         await pool.one<Slonik<organizations>>(sql`
-          UPDATE public.organizations
+          UPDATE organizations
           SET plan_name = ${billingPlan}
           WHERE id = ${organization}
           RETURNING *
@@ -926,7 +926,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async updateOrganizationRateLimits({ monthlyRateLimit, organization }) {
       return transformOrganization(
         await pool.one<Slonik<organizations>>(sql`
-          UPDATE public.organizations
+          UPDATE organizations
           SET limit_operations_monthly = ${monthlyRateLimit.operations}, limit_retention_days = ${monthlyRateLimit.retentionInDays}
           WHERE id = ${organization}
           RETURNING *
@@ -936,7 +936,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async createOrganizationInvitation({ organization, email }) {
       return transformOrganizationInvitation(
         await pool.one<Slonik<organization_invitations>>(sql`
-          INSERT INTO public.organization_invitations (organization_id, email)
+          INSERT INTO organization_invitations (organization_id, email)
           VALUES (${organization}, ${email})
           RETURNING *
         `),
@@ -944,7 +944,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
     async deleteOrganizationInvitationByEmail({ organization, email }) {
       const deleted = await pool.maybeOne<Slonik<organization_invitations>>(sql`
-        DELETE FROM public.organization_invitations
+        DELETE FROM organization_invitations
         WHERE organization_id = ${organization} AND email = ${email}
         RETURNING *
       `);
@@ -953,13 +953,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async addOrganizationMemberViaInvitationCode({ code, user, organization, scopes }) {
       await pool.transaction(async trx => {
         await trx.query(sql`
-          DELETE FROM public.organization_invitations
+          DELETE FROM organization_invitations
           WHERE organization_id = ${organization} AND code = ${code}
         `);
 
         await pool.one<Slonik<organization_member>>(
           sql`
-            INSERT INTO public.organization_member
+            INSERT INTO organization_member
               (organization_id, user_id, scopes)
             VALUES
               (${organization}, ${user}, ${sql.array(scopes, 'text')})
@@ -973,7 +973,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       await pool.query<Slonik<Pick<organizations, 'ownership_transfer_code'>>>(
         sql`
-          UPDATE public.organizations
+          UPDATE organizations
           SET
             ownership_transfer_user_id = ${user},
             ownership_transfer_code = ${code},
@@ -990,7 +990,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return pool.maybeOne<{
         code: string;
       }>(sql`
-        SELECT ownership_transfer_code as code FROM public.organizations
+        SELECT ownership_transfer_code as code FROM organizations
         WHERE
           ownership_transfer_user_id = ${user}
           AND id = ${organization}
@@ -1008,7 +1008,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       await pool.transaction(async tsx => {
         const owner = await tsx.maybeOne<Slonik<Pick<organizations, 'user_id'>>>(sql`
           SELECT user_id
-          FROM public.organizations
+          FROM organizations
           WHERE
             id = ${organization}
             AND ownership_transfer_user_id = ${user}
@@ -1023,7 +1023,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         if (!accept) {
           // NULL out the transfer request
           await tsx.query(sql`
-            UPDATE public.organizations
+            UPDATE organizations
             SET
               ownership_transfer_user_id = NULL,
               ownership_transfer_code = NULL,
@@ -1037,10 +1037,10 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
         // copy access scopes from the new owner
         await tsx.query(sql`
-          UPDATE public.organization_member
+          UPDATE organization_member
           SET scopes = (
             SELECT scopes
-            FROM public.organization_member
+            FROM organization_member
             WHERE organization_id = ${organization} AND user_id = ${owner.user_id}
             LIMIT 1
           )
@@ -1050,7 +1050,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         // assign new access scopes to the old owner
         await pool.query<Slonik<organization_member>>(
           sql`
-            UPDATE public.organization_member
+            UPDATE organization_member
             SET scopes = ${sql.array(oldAdminAccessScopes, 'text')}
             WHERE organization_id = ${organization} AND user_id = ${owner.user_id}
           `,
@@ -1059,7 +1059,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         // NULL out the transfer request
         // assign the new owner
         await tsx.query(sql`
-          UPDATE public.organizations
+          UPDATE organizations
           SET
             ownership_transfer_user_id = NULL,
             ownership_transfer_code = NULL,
@@ -1072,7 +1072,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async deleteOrganizationMembers({ users, organization }) {
       await pool.query<Slonik<organization_member>>(
         sql`
-          DELETE FROM public.organization_member
+          DELETE FROM organization_member
           WHERE organization_id = ${organization} AND user_id IN (${sql.join(users, sql`, `)})
         `,
       );
@@ -1080,7 +1080,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async updateOrganizationMemberAccess({ user, organization, scopes }) {
       await pool.query<Slonik<organization_member>>(
         sql`
-          UPDATE public.organization_member
+          UPDATE organization_member
           SET scopes = ${sql.array(scopes, 'text')}
           WHERE organization_id = ${organization} AND user_id = ${user}
         `,
@@ -1090,8 +1090,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       // Based on project's clean_id and organization's clean_id, resolve the actual uuid of the project
       const result = await pool.one<Pick<projects, 'id'>>(
         sql`SELECT p.id as id
-        FROM public.projects as p
-        LEFT JOIN public.organizations as org ON (p.org_id = org.id)
+        FROM projects as p
+        LEFT JOIN organizations as org ON (p.org_id = org.id)
         WHERE p.clean_id = ${project} AND org.clean_id = ${organization} AND p.type != 'CUSTOM' LIMIT 1`,
       );
 
@@ -1101,9 +1101,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       if (useIds) {
         const result = await pool.one<Pick<targets, 'id'>>(
           sql`
-          SELECT t.id FROM public.targets as t
-          LEFT JOIN public.projects AS p ON (p.id = t.project_id)
-          LEFT JOIN public.organizations AS o ON (o.id = p.org_id)
+          SELECT t.id FROM targets as t
+          LEFT JOIN projects AS p ON (p.id = t.project_id)
+          LEFT JOIN organizations AS o ON (o.id = p.org_id)
           WHERE t.clean_id = ${target} AND p.id = ${project} AND o.id = ${organization} AND p.type != 'CUSTOM'
           LIMIT 1`,
         );
@@ -1114,9 +1114,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       // Based on clean_id, resolve id
       const result = await pool.one<Pick<targets, 'id'>>(
         sql`
-          SELECT t.id FROM public.targets as t
-          LEFT JOIN public.projects AS p ON (p.id = t.project_id)
-          LEFT JOIN public.organizations AS o ON (o.id = p.org_id)
+          SELECT t.id FROM targets as t
+          LEFT JOIN projects AS p ON (p.id = t.project_id)
+          LEFT JOIN organizations AS o ON (o.id = p.org_id)
           WHERE t.clean_id = ${target} AND p.clean_id = ${project} AND o.clean_id = ${organization} AND p.type != 'CUSTOM'
           LIMIT 1`,
       );
@@ -1126,13 +1126,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async getOrganization({ organization }) {
       return transformOrganization(
         await pool.one<Slonik<organizations>>(
-          sql`SELECT * FROM public.organizations WHERE id = ${organization} LIMIT 1`,
+          sql`SELECT * FROM organizations WHERE id = ${organization} LIMIT 1`,
         ),
       );
     },
     async getMyOrganization({ user }) {
       const org = await pool.maybeOne<Slonik<organizations>>(
-        sql`SELECT * FROM public.organizations WHERE user_id = ${user} AND type = ${'PERSONAL'} LIMIT 1`,
+        sql`SELECT * FROM organizations WHERE user_id = ${user} AND type = ${'PERSONAL'} LIMIT 1`,
       );
 
       return org ? transformOrganization(org) : null;
@@ -1141,8 +1141,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const results = await pool.query<Slonik<organizations>>(
         sql`
           SELECT o.*
-          FROM public.organizations as o
-          LEFT JOIN public.organization_member as om ON (om.organization_id = o.id)
+          FROM organizations as o
+          LEFT JOIN organization_member as om ON (om.organization_id = o.id)
           WHERE om.user_id = ${user}
           ORDER BY o.created_at DESC
         `,
@@ -1153,8 +1153,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async getOrganizationByInviteCode({ inviteCode }) {
       const result = await pool.maybeOne<Slonik<organizations>>(
         sql`
-          SELECT o.* FROM public.organizations as o
-          LEFT JOIN public.organization_invitations as i ON (i.organization_id = o.id)
+          SELECT o.* FROM organizations as o
+          LEFT JOIN organization_invitations as i ON (i.organization_id = o.id)
           WHERE i.code = ${inviteCode} AND i.expires_at > NOW()
           GROUP BY o.id
           LIMIT 1
@@ -1169,7 +1169,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
     async getOrganizationByCleanId({ cleanId }) {
       const result = await pool.maybeOne<Slonik<organizations>>(
-        sql`SELECT * FROM public.organizations WHERE clean_id = ${cleanId} LIMIT 1`,
+        sql`SELECT * FROM organizations WHERE clean_id = ${cleanId} LIMIT 1`,
       );
 
       if (!result) {
@@ -1181,7 +1181,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async getOrganizationByGitHubInstallationId({ installationId }) {
       const result = await pool.maybeOne<Slonik<organizations>>(
         sql`
-          SELECT * FROM public.organizations
+          SELECT * FROM organizations
           WHERE github_app_installation_id = ${installationId}
           LIMIT 1
         `,
@@ -1196,13 +1196,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async getProject({ project }) {
       return transformProject(
         await pool.one<Slonik<projects>>(
-          sql`SELECT * FROM public.projects WHERE id = ${project} AND type != 'CUSTOM' LIMIT 1`,
+          sql`SELECT * FROM projects WHERE id = ${project} AND type != 'CUSTOM' LIMIT 1`,
         ),
       );
     },
     async getProjectByCleanId({ cleanId, organization }) {
       const result = await pool.maybeOne<Slonik<projects>>(
-        sql`SELECT * FROM public.projects WHERE clean_id = ${cleanId} AND org_id = ${organization} AND type != 'CUSTOM' LIMIT 1`,
+        sql`SELECT * FROM projects WHERE clean_id = ${cleanId} AND org_id = ${organization} AND type != 'CUSTOM' LIMIT 1`,
       );
 
       if (!result) {
@@ -1213,7 +1213,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
     async getProjects({ organization }) {
       const result = await pool.query<Slonik<projects>>(
-        sql`SELECT * FROM public.projects WHERE org_id = ${organization} AND type != 'CUSTOM' ORDER BY created_at DESC`,
+        sql`SELECT * FROM projects WHERE org_id = ${organization} AND type != 'CUSTOM' ORDER BY created_at DESC`,
       );
 
       return result.rows.map(transformProject);
@@ -1221,7 +1221,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async updateProjectName({ name, cleanId, organization, project }) {
       return transformProject(
         await pool.one<Slonik<projects>>(sql`
-          UPDATE public.projects
+          UPDATE projects
           SET name = ${name}, clean_id = ${cleanId}
           WHERE id = ${project} AND org_id = ${organization}
           RETURNING *
@@ -1231,7 +1231,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async enableExternalSchemaComposition({ project, endpoint, encryptedSecret }) {
       return transformProject(
         await pool.one<Slonik<projects>>(sql`
-          UPDATE public.projects
+          UPDATE projects
           SET
             external_composition_enabled = TRUE,
             external_composition_endpoint = ${endpoint},
@@ -1244,7 +1244,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async disableExternalSchemaComposition({ project }) {
       return transformProject(
         await pool.one<Slonik<projects>>(sql`
-          UPDATE public.projects
+          UPDATE projects
           SET
             external_composition_enabled = FALSE,
             external_composition_endpoint = NULL,
@@ -1257,7 +1257,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async enableProjectNameInGithubCheck({ project }) {
       return transformProject(
         await pool.one<projects>(sql`
-          UPDATE public.projects
+          UPDATE projects
           SET github_check_with_project_name = true
           WHERE id = ${project}
           RETURNING *
@@ -1269,7 +1269,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return transformProject(
         await pool.one<projects>(sql`
-          UPDATE public.projects
+          UPDATE projects
           SET legacy_registry_model = ${isLegacyModel}
           WHERE id = ${project}
           RETURNING *
@@ -1280,13 +1280,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async deleteProject({ organization, project }) {
       const result = await pool.transaction(async t => {
         const tokensResult = await t.query<Pick<tokens, 'token'>>(sql`
-          SELECT token FROM public.tokens WHERE project_id = ${project} AND deleted_at IS NULL
+          SELECT token FROM tokens WHERE project_id = ${project} AND deleted_at IS NULL
         `);
 
         return {
           project: await t.one<projects>(
             sql`
-              DELETE FROM public.projects
+              DELETE FROM projects
               WHERE id = ${project} AND org_id = ${organization}
               RETURNING *
             `,
@@ -1302,7 +1302,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
     async createTarget({ organization, project, name, cleanId }) {
       const result = await pool.maybeOne<unknown>(sql`
-        INSERT INTO public.targets
+        INSERT INTO targets
           (name, clean_id, project_id)
         VALUES
           (${name}, ${cleanId}, ${project})
@@ -1318,7 +1318,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async updateTargetName({ organization, project, target, name, cleanId }) {
       const result = await pool.one<Record<string, unknown>>(sql`
         UPDATE
-          public.targets
+          targets
         SET
           "name" = ${name},
           "clean_id" = ${cleanId}
@@ -1337,19 +1337,19 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async deleteTarget({ organization, target }) {
       const result = await pool.transaction(async t => {
         const tokensResult = await t.query<Pick<tokens, 'token'>>(sql`
-          SELECT token FROM public.tokens WHERE target_id = ${target} AND deleted_at IS NULL
+          SELECT token FROM tokens WHERE target_id = ${target} AND deleted_at IS NULL
         `);
 
         const targetResult = await t.one<targets>(
           sql`
-            DELETE FROM public.targets
+            DELETE FROM targets
             WHERE id = ${target}
             RETURNING
               ${targetSQLFields}
           `,
         );
 
-        await t.query(sql`DELETE FROM public.schema_versions WHERE target_id = ${target}`);
+        await t.query(sql`DELETE FROM schema_versions WHERE target_id = ${target}`);
 
         return {
           target: targetResult,
@@ -1391,7 +1391,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
               SELECT
                 ${targetSQLFields}
               FROM
-                public.targets
+                targets
               WHERE
                 (id, project_id) IN (
                   (${sql.join(
@@ -1428,7 +1428,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         SELECT
           ${targetSQLFields}
         FROM
-          public.targets
+          targets
         WHERE
           clean_id = ${cleanId}
           AND project_id = ${project}
@@ -1449,7 +1449,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         SELECT
           ${targetSQLFields}
         FROM
-          public.targets
+          targets
         WHERE
           project_id = ${project}
         ORDER BY
@@ -1464,8 +1464,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async getTargetIdsOfOrganization({ organization }) {
       const results = await pool.query<Slonik<Pick<targets, 'id'>>>(
         sql`
-          SELECT t.id as id FROM public.targets as t
-          LEFT JOIN public.projects as p ON (p.id = t.project_id)
+          SELECT t.id as id FROM targets as t
+          LEFT JOIN projects as p ON (p.id = t.project_id)
           WHERE p.org_id = ${organization}
           GROUP BY t.id
         `,
@@ -1476,7 +1476,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async getTargetIdsOfProject({ project }) {
       const results = await pool.query<Slonik<Pick<targets, 'id'>>>(
         sql`
-          SELECT id FROM public.targets WHERE project_id = ${project}
+          SELECT id FROM targets WHERE project_id = ${project}
         `,
       );
 
@@ -1500,8 +1500,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           t.validation_period,
           t.validation_excluded_clients,
           array_agg(tv.destination_target_id) as targets
-        FROM public.targets AS t
-        LEFT JOIN public.target_validation AS tv ON (tv.target_id = t.id)
+        FROM targets AS t
+        LEFT JOIN target_validation AS tv ON (tv.target_id = t.id)
         WHERE t.id = ${target} AND t.project_id = ${project}
         GROUP BY t.id
         LIMIT 1
@@ -1533,15 +1533,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
               targets: target_validation['destination_target_id'][];
             }
           >(sql`
-          UPDATE public.targets as t
+          UPDATE targets as t
           SET validation_enabled = ${enabled}
           FROM
             (
               SELECT
                   it.id,
                   array_agg(tv.destination_target_id) as targets
-              FROM public.targets AS it
-              LEFT JOIN public.target_validation AS tv ON (tv.target_id = it.id)
+              FROM targets AS it
+              LEFT JOIN target_validation AS tv ON (tv.target_id = it.id)
               WHERE it.id = ${target} AND it.project_id = ${project}
               GROUP BY it.id
               LIMIT 1
@@ -1564,13 +1564,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         await pool.transaction(async trx => {
           await trx.query(sql`
             DELETE
-            FROM public.target_validation
+            FROM target_validation
             WHERE destination_target_id NOT IN (${sql.join(targets, sql`, `)})
               AND target_id = ${target}
           `);
 
           await trx.query(sql`
-            INSERT INTO public.target_validation
+            INSERT INTO target_validation
               (target_id, destination_target_id)
             VALUES
             (
@@ -1583,7 +1583,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           `);
 
           return trx.one(sql`
-            UPDATE public.targets as t
+            UPDATE targets as t
             SET validation_percentage = ${percentage}, validation_period = ${period}, validation_excluded_clients = ${sql.array(
               excludedClients,
               'text',
@@ -1592,8 +1592,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
               SELECT
                 it.id,
                 array_agg(tv.destination_target_id) as targets
-              FROM public.targets AS it
-              LEFT JOIN public.target_validation AS tv ON (tv.target_id = it.id)
+              FROM targets AS it
+              LEFT JOIN target_validation AS tv ON (tv.target_id = it.id)
               WHERE it.id = ${target} AND it.project_id = ${project}
               GROUP BY it.id
               LIMIT 1
@@ -1608,8 +1608,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async countSchemaVersionsOfProject({ project, period }) {
       if (period) {
         const result = await pool.maybeOne<{ total: number }>(sql`
-          SELECT COUNT(*) as total FROM public.schema_versions as sv
-          LEFT JOIN public.targets as t ON (t.id = sv.target_id)
+          SELECT COUNT(*) as total FROM schema_versions as sv
+          LEFT JOIN targets as t ON (t.id = sv.target_id)
           WHERE 
             t.project_id = ${project}
             AND sv.created_at >= ${period.from.toISOString()}
@@ -1619,8 +1619,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       }
 
       const result = await pool.maybeOne<{ total: number }>(sql`
-        SELECT COUNT(*) as total FROM public.schema_versions as sv
-        LEFT JOIN public.targets as t ON (t.id = sv.target_id)
+        SELECT COUNT(*) as total FROM schema_versions as sv
+        LEFT JOIN targets as t ON (t.id = sv.target_id)
         WHERE t.project_id = ${project}
       `);
 
@@ -1629,7 +1629,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async countSchemaVersionsOfTarget({ target, period }) {
       if (period) {
         const result = await pool.maybeOne<{ total: number }>(sql`
-          SELECT COUNT(*) as total FROM public.schema_versions
+          SELECT COUNT(*) as total FROM schema_versions
           WHERE 
             target_id = ${target}
             AND created_at >= ${period.from.toISOString()}
@@ -1639,7 +1639,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       }
 
       const result = await pool.maybeOne<{ total: number }>(sql`
-        SELECT COUNT(*) as total FROM public.schema_versions WHERE target_id = ${target}
+        SELECT COUNT(*) as total FROM schema_versions WHERE target_id = ${target}
       `);
 
       return result?.total ?? 0;
@@ -1648,7 +1648,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async hasSchema({ target }) {
       return pool.exists(
         sql`
-          SELECT 1 FROM public.schema_versions as v WHERE v.target_id = ${target} LIMIT 1
+          SELECT 1 FROM schema_versions as v WHERE v.target_id = ${target} LIMIT 1
         `,
       );
     },
@@ -1657,7 +1657,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         sql`
           SELECT
             ${schemaVersionSQLFields(sql`sv.`)}
-          FROM public.schema_versions as sv
+          FROM schema_versions as sv
           WHERE sv.target_id = ${target} AND sv.is_composable IS TRUE
           ORDER BY sv.created_at DESC
           LIMIT 1
@@ -1675,7 +1675,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         sql`
           SELECT
             ${schemaVersionSQLFields(sql`sv.`)}
-          FROM public.schema_versions as sv
+          FROM schema_versions as sv
           WHERE sv.target_id = ${target} AND sv.is_composable IS TRUE
           ORDER BY sv.created_at DESC
           LIMIT 1
@@ -1689,8 +1689,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         sql`
           SELECT
             ${schemaVersionSQLFields(sql`sv.`)}
-          FROM public.schema_versions as sv
-          LEFT JOIN public.targets as t ON (t.id = sv.target_id)
+          FROM schema_versions as sv
+          LEFT JOIN targets as t ON (t.id = sv.target_id)
           WHERE sv.target_id = ${target} AND t.project_id = ${project}
           ORDER BY sv.created_at DESC
           LIMIT 1
@@ -1705,8 +1705,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         sql`
           SELECT
             ${schemaVersionSQLFields(sql`sv.`)}
-          FROM public.schema_versions as sv
-          LEFT JOIN public.targets as t ON (t.id = sv.target_id)
+          FROM schema_versions as sv
+          LEFT JOIN targets as t ON (t.id = sv.target_id)
           WHERE sv.target_id = ${target} AND t.project_id = ${project}
           ORDER BY sv.created_at DESC
           LIMIT 1
@@ -1722,9 +1722,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async getLatestSchemas({ organization, project, target, onlyComposable }) {
       const latest = await pool.maybeOne<Pick<schema_versions, 'id' | 'is_composable'>>(sql`
         SELECT sv.id, sv.is_composable
-        FROM public.schema_versions as sv
-        LEFT JOIN public.targets as t ON (t.id = sv.target_id)
-        LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
+        FROM schema_versions as sv
+        LEFT JOIN targets as t ON (t.id = sv.target_id)
+        LEFT JOIN schema_log as sl ON (sl.id = sv.action_id)
         WHERE t.id = ${target} AND t.project_id = ${project} AND ${
           onlyComposable ? sql`sv.is_composable IS TRUE` : true
         }
@@ -1782,9 +1782,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             ${includeMetadata ? sql`sl.metadata,` : sql``}
             sl.target_id,
             p.type
-          FROM public.schema_version_to_log AS svl
-          LEFT JOIN public.schema_log AS sl ON (sl.id = svl.action_id)
-          LEFT JOIN public.projects as p ON (p.id = sl.project_id)
+          FROM schema_version_to_log AS svl
+          LEFT JOIN schema_log AS sl ON (sl.id = svl.action_id)
+          LEFT JOIN projects as p ON (p.id = sl.project_id)
           WHERE
             svl.version_id = ${version}
             AND sl.action = 'PUSH'
@@ -1804,12 +1804,12 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       >(
         sql`
           SELECT sl.*, lower(sl.service_name) as service_name, p.type, svl.version_id as version_id
-          FROM public.schema_version_to_log as svl
-          LEFT JOIN public.schema_log as sl ON (sl.id = svl.action_id)
-          LEFT JOIN public.projects as p ON (p.id = sl.project_id)
+          FROM schema_version_to_log as svl
+          LEFT JOIN schema_log as sl ON (sl.id = svl.action_id)
+          LEFT JOIN projects as p ON (p.id = sl.project_id)
           WHERE svl.version_id = (
-            SELECT sv.id FROM public.schema_versions as sv WHERE sv.created_at < (
-              SELECT svi.created_at FROM public.schema_versions as svi WHERE svi.id = ${version}
+            SELECT sv.id FROM schema_versions as sv WHERE sv.created_at < (
+              SELECT svi.created_at FROM schema_versions as svi WHERE svi.id = ${version}
             ) AND sv.target_id = ${target} AND ${
               onlyComposable ? sql`sv.is_composable IS TRUE` : true
             } ORDER BY sv.created_at DESC LIMIT 1
@@ -1862,9 +1862,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.one(sql`
         SELECT 
           ${schemaVersionSQLFields(sql`sv.`)}
-        FROM public.schema_versions as sv
-        LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
-        LEFT JOIN public.targets as t ON (t.id = sv.target_id)
+        FROM schema_versions as sv
+        LEFT JOIN schema_log as sl ON (sl.id = sv.action_id)
+        LEFT JOIN targets as t ON (t.id = sv.target_id)
         WHERE
           sv.target_id = ${target}
           AND t.project_id = ${project}
@@ -1881,12 +1881,12 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         ${schemaVersionSQLFields(sql`sv.`)}
         , sl.author as "author"
         , lower(sl.service_name) as "service_name"
-      FROM public.schema_versions as sv
-      LEFT JOIN public.schema_log as sl ON (sl.id = sv.action_id)
-      LEFT JOIN public.targets as t ON (t.id = sv.target_id)
+      FROM schema_versions as sv
+      LEFT JOIN schema_log as sl ON (sl.id = sv.action_id)
+      LEFT JOIN targets as t ON (t.id = sv.target_id)
       WHERE sv.target_id = ${target} AND t.project_id = ${project} AND sv.created_at < ${
         after
-          ? sql`(SELECT svi.created_at FROM public.schema_versions as svi WHERE svi.id = ${after})`
+          ? sql`(SELECT svi.created_at FROM schema_versions as svi WHERE svi.id = ${after})`
           : sql`NOW()`
       }
       ORDER BY sv.created_at DESC
@@ -1911,7 +1911,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         const latestVersion = await trx.one<Pick<schema_versions, 'id' | 'base_schema'>>(
           sql`
           SELECT sv.id, sv.base_schema
-          FROM public.schema_versions as sv
+          FROM schema_versions as sv
           WHERE sv.target_id = ${args.target}
           ORDER BY sv.created_at DESC
           LIMIT 1
@@ -1920,7 +1920,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
         // create a new action
         const deleteActionResult = await trx.one<schema_log>(sql`
-          INSERT INTO public.schema_log
+          INSERT INTO schema_log
             (
               author,
               commit,
@@ -1957,16 +1957,16 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
         // Move all the schema_version_to_log entries of the previous version to the new version
         await trx.query(sql`
-          INSERT INTO public.schema_version_to_log
+          INSERT INTO schema_version_to_log
             (version_id, action_id)
           SELECT ${newVersion.id}::uuid as version_id, svl.action_id
-          FROM public.schema_version_to_log svl
-          LEFT JOIN public.schema_log sl ON (sl.id = svl.action_id)
+          FROM schema_version_to_log svl
+          LEFT JOIN schema_log sl ON (sl.id = svl.action_id)
           WHERE svl.version_id = ${latestVersion.id} AND sl.action = 'PUSH' AND lower(sl.service_name) != lower(${args.serviceName})
         `);
 
         await trx.query(sql`
-          INSERT INTO public.schema_version_to_log
+          INSERT INTO schema_version_to_log
             (version_id, action_id)
           VALUES
             (${newVersion.id}, ${deleteActionResult.id})
@@ -1998,7 +1998,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       const output = await pool.transaction(async trx => {
         const log = await pool.one<Pick<schema_log, 'id'>>(sql`
-          INSERT INTO public.schema_log
+          INSERT INTO schema_log
             (
               author,
               service_name,
@@ -2041,7 +2041,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         await Promise.all(
           input.logIds.concat(log.id).map(async lid => {
             await trx.query(sql`
-              INSERT INTO public.schema_version_to_log
+              INSERT INTO schema_version_to_log
                 (version_id, action_id)
               VALUES
               (${version.id}, ${lid})
@@ -2090,7 +2090,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return SchemaVersionModel.parse(
         await pool.maybeOne<unknown>(sql`
           UPDATE
-            public.schema_versions
+            schema_versions
           SET
             is_composable = ${valid}
           WHERE
@@ -2105,8 +2105,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const rows = await pool.many<schema_log & Pick<projects, 'type'>>(
         sql`
             SELECT sl.*, lower(sl.service_name) as service_name, p.type
-            FROM public.schema_log as sl
-            LEFT JOIN public.projects as p ON (p.id = sl.project_id)
+            FROM schema_log as sl
+            LEFT JOIN projects as p ON (p.id = sl.project_id)
             WHERE (sl.id, sl.target_id) IN ((${sql.join(
               selectors.map(s => sql`${s.commit}, ${s.target}`),
               sql`), (`,
@@ -2140,7 +2140,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       });
 
       await pool.query<Slonik<activities>>(
-        sql`INSERT INTO public.activities (${identifiers}) VALUES (${values}) RETURNING *;`,
+        sql`INSERT INTO activities (${identifiers}) VALUES (${values}) RETURNING *;`,
       );
     },
     async getActivities(selector) {
@@ -2161,11 +2161,11 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             jsonb_agg(p.*) as project,
             jsonb_agg(o.*) as organization,
             jsonb_agg(u.*) as user
-          FROM public.activities as a
-          LEFT JOIN public.targets as t ON (t.id = a.target_id)
-          LEFT JOIN public.projects as p ON (p.id = a.project_id)
-          LEFT JOIN public.organizations as o ON (o.id = a.organization_id)
-          LEFT JOIN public.users as u ON (u.id = a.user_id)
+          FROM activities as a
+          LEFT JOIN targets as t ON (t.id = a.target_id)
+          LEFT JOIN projects as p ON (p.id = a.project_id)
+          LEFT JOIN organizations as o ON (o.id = a.organization_id)
+          LEFT JOIN users as u ON (u.id = a.user_id)
           WHERE
             a.target_id = ${selector.target}
             AND a.project_id = ${selector.project}
@@ -2190,11 +2190,11 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             jsonb_agg(p.*) as project,
             jsonb_agg(o.*) as organization,
             jsonb_agg(u.*) as user
-          FROM public.activities as a
-          LEFT JOIN public.targets as t ON (t.id = a.target_id)
-          LEFT JOIN public.projects as p ON (p.id = a.project_id)
-          LEFT JOIN public.organizations as o ON (o.id = a.organization_id)
-          LEFT JOIN public.users as u ON (u.id = a.user_id)
+          FROM activities as a
+          LEFT JOIN targets as t ON (t.id = a.target_id)
+          LEFT JOIN projects as p ON (p.id = a.project_id)
+          LEFT JOIN organizations as o ON (o.id = a.organization_id)
+          LEFT JOIN users as u ON (u.id = a.user_id)
           WHERE
             a.project_id = ${selector.project}
             AND a.organization_id = ${selector.organization}
@@ -2218,11 +2218,11 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             jsonb_agg(p.*) as project,
             jsonb_agg(o.*) as organization,
             jsonb_agg(u.*) as user
-          FROM public.activities as a
-          LEFT JOIN public.targets as t ON (t.id = a.target_id)
-          LEFT JOIN public.projects as p ON (p.id = a.project_id)
-          LEFT JOIN public.organizations as o ON (o.id = a.organization_id)
-          LEFT JOIN public.users as u ON (u.id = a.user_id)
+          FROM activities as a
+          LEFT JOIN targets as t ON (t.id = a.target_id)
+          LEFT JOIN projects as p ON (p.id = a.project_id)
+          LEFT JOIN organizations as o ON (o.id = a.organization_id)
+          LEFT JOIN users as u ON (u.id = a.user_id)
           WHERE a.organization_id = ${selector.organization} AND p.type != 'CUSTOM'
           GROUP BY a.created_at
           ORDER BY a.created_at DESC LIMIT ${selector.limit}
@@ -2244,7 +2244,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async addSlackIntegration({ organization, token }) {
       await pool.query<Slonik<organizations>>(
         sql`
-          UPDATE public.organizations
+          UPDATE organizations
           SET slack_token = ${token}
           WHERE id = ${organization}
         `,
@@ -2253,7 +2253,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async deleteSlackIntegration({ organization }) {
       await pool.query<Slonik<organizations>>(
         sql`
-          UPDATE public.organizations
+          UPDATE organizations
           SET slack_token = NULL
           WHERE id = ${organization}
         `,
@@ -2263,7 +2263,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.maybeOne<Pick<organizations, 'slack_token'>>(
         sql`
           SELECT slack_token
-          FROM public.organizations
+          FROM organizations
           WHERE id = ${organization}
         `,
       );
@@ -2273,7 +2273,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async addGitHubIntegration({ organization, installationId }) {
       await pool.query<Slonik<organizations>>(
         sql`
-          UPDATE public.organizations
+          UPDATE organizations
           SET github_app_installation_id = ${installationId}
           WHERE id = ${organization}
         `,
@@ -2282,14 +2282,14 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async deleteGitHubIntegration({ organization }) {
       await pool.query<Slonik<organizations>>(
         sql`
-          UPDATE public.organizations
+          UPDATE organizations
           SET github_app_installation_id = NULL
           WHERE id = ${organization}
         `,
       );
       await pool.query<Slonik<projects>>(
         sql`
-          UPDATE public.projects
+          UPDATE projects
           SET git_repository = NULL
           WHERE org_id = ${organization}
         `,
@@ -2299,7 +2299,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.maybeOne<Pick<organizations, 'github_app_installation_id'>>(
         sql`
           SELECT github_app_installation_id
-          FROM public.organizations
+          FROM organizations
           WHERE id = ${organization}
         `,
       );
@@ -2310,7 +2310,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return transformAlertChannel(
         await pool.one<Slonik<alert_channels>>(
           sql`
-            INSERT INTO public.alert_channels
+            INSERT INTO alert_channels
               ("name", "type", "project_id", "slack_channel", "webhook_endpoint")
             VALUES
               (${name}, ${type}, ${project}, ${slack?.channel ?? null}, ${
@@ -2324,7 +2324,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async deleteAlertChannels({ project, channels }) {
       const result = await pool.query<Slonik<alert_channels>>(
         sql`
-          DELETE FROM public.alert_channels
+          DELETE FROM alert_channels
           WHERE
             project_id = ${project} AND
             id IN (${sql.join(channels, sql`, `)})
@@ -2336,7 +2336,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
     async getAlertChannels({ project }) {
       const result = await pool.query<Slonik<alert_channels>>(
-        sql`SELECT * FROM public.alert_channels WHERE project_id = ${project} ORDER BY created_at DESC`,
+        sql`SELECT * FROM alert_channels WHERE project_id = ${project} ORDER BY created_at DESC`,
       );
 
       return result.rows.map(transformAlertChannel);
@@ -2346,7 +2346,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return transformAlert(
         await pool.one<Slonik<alerts>>(
           sql`
-            INSERT INTO public.alerts
+            INSERT INTO alerts
               ("type", "alert_channel_id", "target_id", "project_id")
             VALUES
               (${type}, ${channel}, ${target}, ${project})
@@ -2359,7 +2359,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async deleteAlerts({ organization, project, alerts }) {
       const result = await pool.query<Slonik<alerts>>(
         sql`
-          DELETE FROM public.alerts
+          DELETE FROM alerts
           WHERE
             project_id = ${project} AND
             id IN (${sql.join(alerts, sql`, `)})
@@ -2371,7 +2371,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
     async getAlerts({ organization, project }) {
       const result = await pool.query<Slonik<alerts>>(
-        sql`SELECT * FROM public.alerts WHERE project_id = ${project} ORDER BY created_at DESC`,
+        sql`SELECT * FROM alerts WHERE project_id = ${project} ORDER BY created_at DESC`,
       );
 
       return result.rows.map(row => transformAlert(row, organization));
@@ -2387,9 +2387,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           SELECT
             o.id as organization,
             t.id as target
-          FROM public.targets AS t
-          LEFT JOIN public.projects AS p ON (p.id = t.project_id)
-          LEFT JOIN public.organizations AS o ON (o.id = p.org_id)
+          FROM targets AS t
+          LEFT JOIN projects AS p ON (p.id = t.project_id)
+          LEFT JOIN organizations AS o ON (o.id = p.org_id)
         `,
       );
       return results.rows;
@@ -2417,10 +2417,10 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             o.plan_name as org_plan_name,
             t.id as target,
             u.email as owner_email
-          FROM public.targets AS t
-          LEFT JOIN public.projects AS p ON (p.id = t.project_id)
-          LEFT JOIN public.organizations AS o ON (o.id = p.org_id)
-          LEFT JOIN public.users AS u ON (u.id = o.user_id)
+          FROM targets AS t
+          LEFT JOIN projects AS p ON (p.id = t.project_id)
+          LEFT JOIN organizations AS o ON (o.id = p.org_id)
+          LEFT JOIN users AS u ON (u.id = o.user_id)
         `,
       );
       return results.rows;
@@ -2548,31 +2548,31 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
     async getBaseSchema({ project, target }) {
       const data = await pool.maybeOne<Record<string, string>>(
-        sql`SELECT base_schema FROM public.targets WHERE id=${target} AND project_id=${project}`,
+        sql`SELECT base_schema FROM targets WHERE id=${target} AND project_id=${project}`,
       );
       return data?.base_schema ?? null;
     },
     async updateBaseSchema({ project, target }, base) {
       if (base) {
         await pool.query(
-          sql`UPDATE public.targets SET base_schema = ${base} WHERE id = ${target} AND project_id = ${project}`,
+          sql`UPDATE targets SET base_schema = ${base} WHERE id = ${target} AND project_id = ${project}`,
         );
       } else {
         await pool.query(
-          sql`UPDATE public.targets SET base_schema = null WHERE id = ${target} AND project_id = ${project}`,
+          sql`UPDATE targets SET base_schema = null WHERE id = ${target} AND project_id = ${project}`,
         );
       }
     },
     async getBillingParticipants() {
       const results = await pool.query<Slonik<organizations_billing>>(
-        sql`SELECT * FROM public.organizations_billing`,
+        sql`SELECT * FROM organizations_billing`,
       );
 
       return results.rows.map(transformOrganizationBilling);
     },
     async getOrganizationBilling(selector) {
       const results = await pool.query<Slonik<organizations_billing>>(
-        sql`SELECT * FROM public.organizations_billing WHERE organization_id = ${selector.organization}`,
+        sql`SELECT * FROM organizations_billing WHERE organization_id = ${selector.organization}`,
       );
 
       const mapped = results.rows.map(transformOrganizationBilling);
@@ -2581,7 +2581,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
     async deleteOrganizationBilling(selector) {
       await pool.query<Slonik<organizations_billing>>(
-        sql`DELETE FROM public.organizations_billing
+        sql`DELETE FROM organizations_billing
         WHERE organization_id = ${selector.organization}`,
       );
     },
@@ -2593,7 +2593,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return transformOrganizationBilling(
         await pool.one<Slonik<organizations_billing>>(
           sql`
-            INSERT INTO public.organizations_billing
+            INSERT INTO organizations_billing
               ("organization_id", "external_billing_reference_id", "billing_email_address")
             VALUES
               (${organizationId}, ${externalBillingReference}, ${billingEmailAddress || null})
@@ -4059,7 +4059,7 @@ async function insertSchemaVersionChanges(
   }
 
   await trx.query(sql`
-    INSERT INTO public.schema_version_changes (
+    INSERT INTO schema_version_changes (
       "schema_version_id",
       "change_type",
       "severity_level",
@@ -4103,7 +4103,7 @@ async function insertSchemaVersion(
   },
 ) {
   const query = sql`
-    INSERT INTO public.schema_versions
+    INSERT INTO schema_versions
       (
         is_composable,
         target_id,

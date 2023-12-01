@@ -5,13 +5,13 @@ export default {
   run: ({ sql }) => sql`
 --token-per-target (up)
 ALTER TABLE
-  public.tokens
+  tokens
 ADD COLUMN
-  target_id UUID NOT NULL REFERENCES public.targets (id) ON DELETE CASCADE;
+  target_id UUID NOT NULL REFERENCES targets (id) ON DELETE CASCADE;
 
 ALTER TABLE
-  public.tokens
+  tokens
 ADD COLUMN
-  organization_id UUID NOT NULL REFERENCES public.organizations (id) ON DELETE CASCADE;
+  organization_id UUID NOT NULL REFERENCES organizations (id) ON DELETE CASCADE;
 `,
 } satisfies MigrationExecutor;

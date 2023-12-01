@@ -15,18 +15,18 @@ await describe('drop-personal-org', async () => {
       const user = await seed.user();
       const emptyOrgs = await Promise.all([
         db.one(
-          sql`INSERT INTO public.organizations (clean_id, name, user_id, type) VALUES ('personal-empty', 'personal-empty', ${user.id}, 'PERSONAL') RETURNING *;`,
+          sql`INSERT INTO organizations (clean_id, name, user_id, type) VALUES ('personal-empty', 'personal-empty', ${user.id}, 'PERSONAL') RETURNING *;`,
         ),
         db.one(
-          sql`INSERT INTO public.organizations (clean_id, name, user_id, type) VALUES ('regular-empty', 'regular-empty', ${user.id}, 'REGULAR') RETURNING *;`,
+          sql`INSERT INTO organizations (clean_id, name, user_id, type) VALUES ('regular-empty', 'regular-empty', ${user.id}, 'REGULAR') RETURNING *;`,
         ),
       ]);
       const orgsWithProjects = await Promise.all([
         await db.one<DbTypes.organizations>(
-          sql`INSERT INTO public.organizations (clean_id, name, user_id, type) VALUES ('personal-project', 'personal-project', ${user.id}, 'PERSONAL') RETURNING *;`,
+          sql`INSERT INTO organizations (clean_id, name, user_id, type) VALUES ('personal-project', 'personal-project', ${user.id}, 'PERSONAL') RETURNING *;`,
         ),
         await db.one<DbTypes.organizations>(
-          sql`INSERT INTO public.organizations (clean_id, name, user_id, type) VALUES ('regular-project', 'regular-project', ${user.id}, 'PERSONAL') RETURNING *;`,
+          sql`INSERT INTO organizations (clean_id, name, user_id, type) VALUES ('regular-project', 'regular-project', ${user.id}, 'PERSONAL') RETURNING *;`,
         ),
       ]);
 
@@ -53,22 +53,22 @@ await describe('drop-personal-org', async () => {
 
       // Only this one should be deleted, the rest should still exists
       assert.equal(
-        await db.maybeOne(sql`SELECT * FROM public.organizations WHERE id = ${emptyOrgs[0].id}`),
+        await db.maybeOne(sql`SELECT * FROM organizations WHERE id = ${emptyOrgs[0].id}`),
         null,
       );
       assert.notEqual(
-        await db.maybeOne(sql`SELECT * FROM public.organizations WHERE id = ${emptyOrgs[1].id}`),
+        await db.maybeOne(sql`SELECT * FROM organizations WHERE id = ${emptyOrgs[1].id}`),
         null,
       );
       assert.notEqual(
         await db.maybeOne(
-          sql`SELECT * FROM public.organizations WHERE id = ${orgsWithProjects[0].id}`,
+          sql`SELECT * FROM organizations WHERE id = ${orgsWithProjects[0].id}`,
         ),
         null,
       );
       assert.notEqual(
         await db.maybeOne(
-          sql`SELECT * FROM public.organizations WHERE id = ${orgsWithProjects[1].id}`,
+          sql`SELECT * FROM organizations WHERE id = ${orgsWithProjects[1].id}`,
         ),
         null,
       );

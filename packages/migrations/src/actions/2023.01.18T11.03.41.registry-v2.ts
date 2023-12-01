@@ -10,17 +10,17 @@ CREATE INDEX
 -- Holds the actions that were performed on the registry.
 -- Every time a schema is pushed or deleted, a new entry is created.
 ALTER TABLE
-  public.commits
+  commits
 RENAME COLUMN
   service TO service_name;
 
 ALTER TABLE
-  public.commits
+  commits
 RENAME COLUMN
   CONTENT TO sdl;
 
 ALTER TABLE
-  public.commits
+  commits
 ADD COLUMN
   service_url TEXT,
 ADD COLUMN
@@ -30,7 +30,7 @@ ALTER COLUMN
 DROP NOT NULL;
 
 ALTER TABLE
-  public.commits
+  commits
 RENAME TO
   schema_log;
 
@@ -40,36 +40,36 @@ RENAME TO
 -- The last version that is composable is the current state of the schema available to the gateways.
 -- Every time a schema is pushed or deleted, a new version is created, that holds a reference to the actions performed in the previous version.
 CREATE TABLE
-  public.schema_versions (
+  schema_versions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     is_composable BOOLEAN NOT NULL,
     base_schema TEXT,
-    target_id UUID NOT NULL REFERENCES public.targets (id) ON DELETE CASCADE,
-    action_id UUID NOT NULL REFERENCES public.schema_log (id) ON DELETE CASCADE
+    target_id UUID NOT NULL REFERENCES targets (id) ON DELETE CASCADE,
+    action_id UUID NOT NULL REFERENCES schema_log (id) ON DELETE CASCADE
   );
 
 -- Describes the relationship between a schema version and the actions that were performed previously but are related to the matching schema version.
 CREATE TABLE
-  public.schema_version_to_log (
-    version_id UUID NOT NULL REFERENCES public.schema_versions (id) ON DELETE CASCADE,
-    action_id UUID NOT NULL REFERENCES public.schema_log (id) ON DELETE CASCADE,
+  schema_version_to_log (
+    version_id UUID NOT NULL REFERENCES schema_versions (id) ON DELETE CASCADE,
+    action_id UUID NOT NULL REFERENCES schema_log (id) ON DELETE CASCADE,
     PRIMARY KEY (version_id, action_id)
   );
 
 -- This is used to determine if the project is using the new registry model or the old one.
 ALTER TABLE
-  public.projects
+  projects
 ADD COLUMN
   legacy_registry_model BOOLEAN;
 
 UPDATE
-  public.projects
+  projects
 SET
   legacy_registry_model = TRUE;
 
 ALTER TABLE
-  public.projects
+  projects
 ALTER COLUMN
   legacy_registry_model
 SET NOT NULL
@@ -84,14 +84,14 @@ SET DEFAULT
 --
 --- Update 'schema_log.service_url' to use a real value (take it from 'version_commit.url')
 UPDATE
-  public.schema_log
+  schema_log
 SET
   service_url = (
     SELECT
       vc.url
     FROM
-      public.version_commit vc
-      LEFT JOIN public.versions v ON v.id = vc.version_id
+      version_commit vc
+      LEFT JOIN versions v ON v.id = vc.version_id
     WHERE
       vc.commit_id = schema_log.id
     ORDER BY
@@ -102,7 +102,7 @@ SET
 
 -- 2. Copy 'versions' to 'schema_versions'
 INSERT INTO
-  public.schema_versions (
+  schema_versions (
     id,
     created_at,
     is_composable,
@@ -118,15 +118,15 @@ SELECT
   target_id,
   commit_id AS action_id
 FROM
-  public.versions;
+  versions;
 
 -- 3. Copy 'version_commit' to 'schema_version_to_log'
 INSERT INTO
-  public.schema_version_to_log (version_id, action_id)
+  schema_version_to_log (version_id, action_id)
 SELECT
   version_id,
   commit_id AS action_id
 FROM
-  public.version_commit;
+  version_commit;
   `,
 } satisfies MigrationExecutor;

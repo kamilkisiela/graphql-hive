@@ -66,7 +66,7 @@ export async function initMigrationTestingEnvironment() {
         }
 
         return await slonik.one<DbTypes.users>(
-          sql`INSERT INTO public.users (email, display_name, full_name, supertoken_user_id) VALUES (${user.email}, ${user.display_name} , ${user.full_name}, ${user.supertoken_user_id ?? null}) RETURNING *;`,
+          sql`INSERT INTO users (email, display_name, full_name, supertoken_user_id) VALUES (${user.email}, ${user.display_name} , ${user.full_name}, ${user.supertoken_user_id ?? null}) RETURNING *;`,
         );
       },
       async organization({ user, organization }: {
@@ -77,7 +77,7 @@ export async function initMigrationTestingEnvironment() {
         }
       }) {
         return await slonik.one<DbTypes.organizations>(
-          sql`INSERT INTO public.organizations (clean_id, name, user_id) VALUES (${organization.cleanId}, ${organization.name}, ${user.id}) RETURNING *`,
+          sql`INSERT INTO organizations (clean_id, name, user_id) VALUES (${organization.cleanId}, ${organization.name}, ${user.id}) RETURNING *`,
         );
       },
       async project({ organization, project }: {
@@ -89,7 +89,7 @@ export async function initMigrationTestingEnvironment() {
         }
       }) {
         return await slonik.one<DbTypes.projects>(
-          sql`INSERT INTO public.projects (clean_id, name, type, org_id) VALUES (${project.cleanId}, ${project.name}, ${project.type}, ${organization.id}) RETURNING *`,
+          sql`INSERT INTO projects (clean_id, name, type, org_id) VALUES (${project.cleanId}, ${project.name}, ${project.type}, ${organization.id}) RETURNING *`,
         );
       },
       async target({ project, target }: {
@@ -100,7 +100,7 @@ export async function initMigrationTestingEnvironment() {
         }
       }) {
         return await slonik.one<DbTypes.targets>(
-          sql`INSERT INTO public.targets (name, clean_id, project_id) VALUES (${target.name}, ${target.cleanId}, ${project.id}) RETURNING *`,
+          sql`INSERT INTO targets (name, clean_id, project_id) VALUES (${target.name}, ${target.cleanId}, ${project.id}) RETURNING *`,
         );
       }
     },
