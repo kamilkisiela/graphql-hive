@@ -1,0 +1,2921 @@
+interface Activity {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+}
+
+type Query {
+  organizationActivities(selector: OrganizationActivitiesSelector!): ActivityConnection!
+  projectActivities(selector: ProjectActivitiesSelector!): ActivityConnection!
+  targetActivities(selector: TargetActivitiesSelector!): ActivityConnection!
+  admin: AdminQuery!
+  me: User!
+  billingPlans: [BillingPlan!]!
+
+  """
+  Whether the CDN integration in Hive is enabled.
+  """
+  isCDNEnabled: Boolean!
+  organizationByGitHubInstallationId(installation: ID!): Organization
+  isGitHubIntegrationFeatureEnabled: Boolean!
+  lab(selector: TargetSelectorInput!): Lab
+  fieldStats(selector: FieldStatsInput!): FieldStatsValues!
+  fieldListStats(selector: FieldListStatsInput!): [FieldStatsValues!]!
+  operationsStats(selector: OperationsStatsSelectorInput!): OperationsStats!
+  schemaCoordinateStats(selector: SchemaCoordinateStatsInput!): SchemaCoordinateStats!
+  clientStats(selector: ClientStatsInput!): ClientStats!
+  hasCollectedOperations(selector: TargetSelectorInput!): Boolean!
+  clientStatsByTargets(selector: ClientStatsByTargetsInput!): ClientStatsValuesConnection!
+  operationBodyByHash(selector: OperationBodyByHashInput!): String
+  organization(selector: OrganizationSelectorInput!): OrganizationPayload
+  organizationByInviteCode(code: String!): OrganizationByInviteCodePayload
+  organizations: OrganizationConnection!
+  organizationTransferRequest(selector: OrganizationTransferRequestSelector!): OrganizationTransfer
+  schemaPolicyRules: [SchemaPolicyRule!]!
+  project(selector: ProjectSelectorInput!): Project
+  projects(selector: OrganizationSelectorInput!): ProjectConnection!
+  schemaCompareToPrevious(
+    selector: SchemaCompareToPreviousInput!
+    unstable_forceLegacyComparison: Boolean
+  ): SchemaComparePayload!
+  schemaVersions(selector: SchemaVersionsInput!, after: ID, limit: Int!): SchemaVersionConnection!
+  schemaVersion(selector: SchemaVersionInput!): SchemaVersion!
+
+  """
+  Requires API Token
+  """
+  schemaVersionForActionId(actionId: ID!): SchemaVersion
+
+  """
+  Requires API Token
+  """
+  latestVersion: SchemaVersion
+
+  """
+  Requires API Token
+  """
+  latestValidVersion: SchemaVersion
+  testExternalSchemaComposition(
+    selector: TestExternalSchemaCompositionInput!
+  ): TestExternalSchemaCompositionResult!
+  noop: Boolean
+  target(selector: TargetSelectorInput!): Target
+  targets(selector: ProjectSelectorInput!): TargetConnection!
+  tokens(selector: TargetSelectorInput!): TokenConnection!
+  tokenInfo: TokenInfoPayload!
+  usageEstimation(range: DateRangeInput!): UsageEstimationScope!
+}
+
+input OrganizationActivitiesSelector {
+  organization: ID!
+  limit: Int!
+}
+
+input ProjectActivitiesSelector {
+  organization: ID!
+  project: ID!
+  limit: Int!
+}
+
+input TargetActivitiesSelector {
+  organization: ID!
+  project: ID!
+  target: ID!
+  limit: Int!
+}
+
+type ActivityConnection {
+  nodes: [Activity!]!
+  total: Int!
+}
+
+type OrganizationCreatedActivity implements Activity {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  organization: Organization!
+  user: User!
+}
+
+type OrganizationPlanChangeActivity implements Activity {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  organization: Organization!
+  user: User!
+  newPlan: BillingPlanType!
+  previousPlan: BillingPlanType!
+}
+
+type OrganizationNameUpdatedActivity implements Activity {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  organization: Organization!
+  user: User!
+  value: String!
+}
+
+type OrganizationIdUpdatedActivity implements Activity {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  organization: Organization!
+  user: User!
+  value: String!
+}
+
+type MemberAddedActivity implements Activity {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  organization: Organization!
+  user: User!
+}
+
+type MemberDeletedActivity implements Activity {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  organization: Organization!
+  user: User!
+  email: String!
+}
+
+type MemberLeftActivity implements Activity {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  organization: Organization!
+  email: String!
+}
+
+type ProjectCreatedActivity implements Activity {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  organization: Organization!
+  user: User!
+  project: Project!
+}
+
+type ProjectDeletedActivity implements Activity {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  organization: Organization!
+  user: User!
+  name: String!
+  cleanId: String!
+}
+
+type ProjectNameUpdatedActivity implements Activity {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  organization: Organization!
+  user: User!
+  project: Project!
+  value: String!
+}
+
+type ProjectIdUpdatedActivity implements Activity {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  organization: Organization!
+  user: User!
+  project: Project!
+  value: String!
+}
+
+type TargetCreatedActivity implements Activity {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  organization: Organization!
+  user: User!
+  project: Project!
+  target: Target!
+}
+
+type TargetDeletedActivity implements Activity {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  organization: Organization!
+  user: User!
+  project: Project!
+  name: String!
+  cleanId: String!
+}
+
+type TargetNameUpdatedActivity implements Activity {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  organization: Organization!
+  user: User!
+  project: Project!
+  target: Target!
+  value: String!
+}
+
+type TargetIdUpdatedActivity implements Activity {
+  id: ID!
+  type: String!
+  createdAt: DateTime!
+  organization: Organization!
+  user: User!
+  project: Project!
+  target: Target!
+  value: String!
+}
+
+type AdminQuery {
+  stats(period: DateRangeInput!): AdminStats!
+}
+
+type AdminStats {
+  organizations: [AdminOrganizationStats!]!
+  general: AdminGeneralStats!
+}
+
+type AdminOrganizationStats {
+  organization: Organization!
+  versions: Int!
+  users: Int!
+  projects: Int!
+  targets: Int!
+  persistedOperations: Int!
+  operations: SafeInt!
+}
+
+type AdminGeneralStats {
+  operationsOverTime: [AdminOperationPoint!]!
+}
+
+type AdminOperationPoint {
+  date: DateTime!
+  count: SafeInt!
+}
+
+type Mutation {
+  addAlertChannel(input: AddAlertChannelInput!): AddAlertChannelResult!
+  deleteAlertChannels(input: DeleteAlertChannelsInput!): DeleteAlertChannelsResult!
+  addAlert(input: AddAlertInput!): AddAlertResult!
+  deleteAlerts(input: DeleteAlertsInput!): DeleteAlertsResult!
+  updateMe(input: UpdateMeInput!): UpdateMeResult!
+  generateStripePortalLink(selector: OrganizationSelectorInput!): String!
+  upgradeToPro(input: UpgradeToProInput!): ChangePlanResult!
+  downgradeToHobby(input: DowngradeToHobbyInput!): ChangePlanResult!
+  updateOrgRateLimit(
+    selector: OrganizationSelectorInput!
+    monthlyLimits: RateLimitInput!
+  ): Organization!
+  createCdnAccessToken(input: CreateCdnAccessTokenInput!): CdnAccessTokenCreateResult!
+  deleteCdnAccessToken(input: DeleteCdnAccessTokenInput!): DeleteCdnAccessTokenResult!
+  createOperationInDocumentCollection(
+    selector: TargetSelectorInput!
+    input: CreateDocumentCollectionOperationInput!
+  ): ModifyDocumentCollectionOperationResult!
+  updateOperationInDocumentCollection(
+    selector: TargetSelectorInput!
+    input: UpdateDocumentCollectionOperationInput!
+  ): ModifyDocumentCollectionOperationResult!
+  deleteOperationInDocumentCollection(
+    selector: TargetSelectorInput!
+    id: ID!
+  ): DeleteDocumentCollectionOperationResult!
+  createDocumentCollection(
+    selector: TargetSelectorInput!
+    input: CreateDocumentCollectionInput!
+  ): ModifyDocumentCollectionResult!
+  updateDocumentCollection(
+    selector: TargetSelectorInput!
+    input: UpdateDocumentCollectionInput!
+  ): ModifyDocumentCollectionResult!
+  deleteDocumentCollection(selector: TargetSelectorInput!, id: ID!): DeleteDocumentCollectionResult!
+  sendFeedback(feedback: String!): Boolean!
+  addSlackIntegration(input: AddSlackIntegrationInput!): Boolean!
+  deleteSlackIntegration(input: OrganizationSelectorInput!): DeleteSlackIntegrationResult!
+  addGitHubIntegration(input: AddGitHubIntegrationInput!): Boolean!
+  deleteGitHubIntegration(input: OrganizationSelectorInput!): DeleteGitHubIntegrationResult!
+  enableProjectNameInGithubCheck(input: ProjectSelectorInput!): Project!
+  createOIDCIntegration(input: CreateOIDCIntegrationInput!): CreateOIDCIntegrationResult!
+  updateOIDCIntegration(input: UpdateOIDCIntegrationInput!): UpdateOIDCIntegrationResult!
+  deleteOIDCIntegration(input: DeleteOIDCIntegrationInput!): DeleteOIDCIntegrationResult!
+  createOrganization(input: CreateOrganizationInput!): CreateOrganizationResult!
+  deleteOrganization(selector: OrganizationSelectorInput!): OrganizationPayload!
+  deleteOrganizationMembers(selector: OrganizationMembersSelectorInput!): OrganizationPayload!
+  joinOrganization(code: String!): JoinOrganizationPayload!
+  leaveOrganization(input: OrganizationSelectorInput!): LeaveOrganizationResult!
+  inviteToOrganizationByEmail(
+    input: InviteToOrganizationByEmailInput!
+  ): InviteToOrganizationByEmailResult!
+  deleteOrganizationInvitation(
+    input: DeleteOrganizationInvitationInput!
+  ): DeleteOrganizationInvitationResult!
+  updateOrganizationName(input: UpdateOrganizationNameInput!): UpdateOrganizationNameResult!
+  updateOrganizationMemberAccess(input: OrganizationMemberAccessInput!): OrganizationPayload!
+  requestOrganizationTransfer(
+    input: RequestOrganizationTransferInput!
+  ): RequestOrganizationTransferResult!
+  answerOrganizationTransferRequest(
+    input: AnswerOrganizationTransferRequestInput!
+  ): AnswerOrganizationTransferRequestResult!
+  updateSchemaPolicyForOrganization(
+    selector: OrganizationSelectorInput!
+    policy: SchemaPolicyInput!
+    allowOverrides: Boolean!
+  ): UpdateSchemaPolicyResult!
+  updateSchemaPolicyForProject(
+    selector: ProjectSelectorInput!
+    policy: SchemaPolicyInput!
+  ): UpdateSchemaPolicyResult!
+  createProject(input: CreateProjectInput!): CreateProjectResult!
+  updateProjectName(input: UpdateProjectNameInput!): UpdateProjectNameResult!
+  deleteProject(selector: ProjectSelectorInput!): DeleteProjectPayload!
+
+  """
+  Requires API Token
+  """
+  schemaPublish(input: SchemaPublishInput!): SchemaPublishPayload!
+
+  """
+  Requires API Token
+  """
+  schemaCheck(input: SchemaCheckInput!): SchemaCheckPayload!
+
+  """
+  Requires API Token
+  """
+  schemaDelete(input: SchemaDeleteInput!): SchemaDeleteResult!
+  updateSchemaVersionStatus(input: SchemaVersionUpdateInput!): SchemaVersion!
+  updateBaseSchema(input: UpdateBaseSchemaInput!): UpdateBaseSchemaResult!
+  enableExternalSchemaComposition(
+    input: EnableExternalSchemaCompositionInput!
+  ): EnableExternalSchemaCompositionResult!
+  disableExternalSchemaComposition(
+    input: DisableExternalSchemaCompositionInput!
+  ): DisableExternalSchemaCompositionResult!
+  updateProjectRegistryModel(
+    input: UpdateProjectRegistryModelInput!
+  ): UpdateProjectRegistryModelResult!
+
+  """
+  Approve a failed schema check with breaking changes.
+  """
+  approveFailedSchemaCheck(input: ApproveFailedSchemaCheckInput!): ApproveFailedSchemaCheckResult!
+  noop(noop: String): Boolean
+  supportTicketCreate(input: SupportTicketCreateInput!): SupportTicketCreateResult!
+  supportTicketReply(input: SupportTicketReplyInput!): SupportTicketReplyResult!
+  createTarget(input: CreateTargetInput!): CreateTargetResult!
+  updateTargetName(input: UpdateTargetNameInput!): UpdateTargetNameResult!
+  deleteTarget(selector: TargetSelectorInput!): DeleteTargetPayload!
+  updateTargetValidationSettings(
+    input: UpdateTargetValidationSettingsInput!
+  ): UpdateTargetValidationSettingsResult!
+  setTargetValidation(input: SetTargetValidationInput!): Target!
+
+  """
+  "
+  Updates the target's explorer endpoint url.
+  """
+  updateTargetGraphQLEndpointUrl(
+    input: UpdateTargetGraphQLEndpointUrlInput!
+  ): UpdateTargetGraphQLEndpointUrlResult!
+  createToken(input: CreateTokenInput!): CreateTokenResult!
+  deleteTokens(input: DeleteTokensInput!): DeleteTokensPayload!
+}
+
+type Project {
+  alertChannels: [AlertChannel!]!
+  alerts: [Alert!]!
+  isProjectNameInGitHubCheckEnabled: Boolean!
+  requestsOverTime(resolution: Int!, period: DateRangeInput!): [RequestsOverTime!]!
+  totalRequests(period: DateRangeInput!): SafeInt!
+  schemaPolicy: SchemaPolicy
+  id: ID!
+  cleanId: ID!
+  name: String!
+  type: ProjectType!
+  buildUrl: String
+  validationUrl: String
+  externalSchemaComposition: ExternalSchemaComposition
+  registryModel: RegistryModel!
+  schemaVersionsCount(period: DateRangeInput): Int!
+  isNativeFederationEnabled: Boolean!
+  targets: TargetConnection!
+}
+
+enum AlertChannelType {
+  SLACK
+  WEBHOOK
+}
+
+enum AlertType {
+  SCHEMA_CHANGE_NOTIFICATIONS
+}
+
+type DeleteAlertChannelsResult {
+  ok: DeleteAlertChannelsOk
+  error: DeleteAlertChannelsError
+}
+
+type DeleteAlertChannelsOk {
+  updatedProject: Project!
+}
+
+type DeleteAlertChannelsError implements Error {
+  message: String!
+}
+
+type AddAlertResult {
+  ok: AddAlertOk
+  error: AddAlertError
+}
+
+type AddAlertOk {
+  updatedProject: Project!
+  addedAlert: Alert!
+}
+
+type AddAlertError implements Error {
+  message: String!
+}
+
+type DeleteAlertsResult {
+  ok: DeleteAlertsOk
+  error: DeleteAlertsError
+}
+
+type DeleteAlertsOk {
+  updatedProject: Project!
+}
+
+type DeleteAlertsError implements Error {
+  message: String!
+}
+
+type AddAlertChannelResult {
+  ok: AddAlertChannelOk
+  error: AddAlertChannelError
+}
+
+type AddAlertChannelOk {
+  updatedProject: Project!
+  addedAlertChannel: AlertChannel!
+}
+
+type AddAlertChannelError implements Error {
+  message: String!
+  inputErrors: AddAlertChannelInputErrors!
+}
+
+type AddAlertChannelInputErrors {
+  name: String
+  webhookEndpoint: String
+  slackChannel: String
+}
+
+input AddAlertChannelInput {
+  organization: ID!
+  project: ID!
+  name: String!
+  type: AlertChannelType!
+  slack: SlackChannelInput
+  webhook: WebhookChannelInput
+}
+
+input SlackChannelInput {
+  channel: String!
+}
+
+input WebhookChannelInput {
+  endpoint: String!
+}
+
+input DeleteAlertChannelsInput {
+  organization: ID!
+  project: ID!
+  channels: [ID!]!
+}
+
+input AddAlertInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+  channel: ID!
+  type: AlertType!
+}
+
+input DeleteAlertsInput {
+  organization: ID!
+  project: ID!
+  alerts: [ID!]!
+}
+
+interface AlertChannel {
+  id: ID!
+  name: String!
+  type: AlertChannelType!
+}
+
+type AlertSlackChannel implements AlertChannel {
+  id: ID!
+  name: String!
+  type: AlertChannelType!
+  channel: String!
+}
+
+type AlertWebhookChannel implements AlertChannel {
+  id: ID!
+  name: String!
+  type: AlertChannelType!
+  endpoint: String!
+}
+
+type Alert {
+  id: ID!
+  type: AlertType!
+  channel: AlertChannel!
+  target: Target!
+}
+
+interface Error {
+  message: String!
+}
+
+input UpdateMeInput {
+  fullName: String!
+  displayName: String!
+}
+
+type UpdateMeOk {
+  updatedUser: User!
+}
+
+type UpdateMeInputErrors {
+  fullName: String
+  displayName: String
+}
+
+type UpdateMeError implements Error {
+  message: String!
+
+  """
+  The detailed validation error messages for the input fields.
+  """
+  inputErrors: UpdateMeInputErrors!
+}
+
+"""
+@oneOf
+"""
+type UpdateMeResult {
+  ok: UpdateMeOk
+  error: UpdateMeError
+}
+
+type User {
+  id: ID!
+  email: String!
+  fullName: String!
+  displayName: String!
+  provider: AuthProvider!
+  isAdmin: Boolean!
+  canSwitchOrganization: Boolean!
+}
+
+type UserConnection {
+  nodes: [User!]!
+  total: Int!
+}
+
+type Member {
+  id: ID!
+  user: User!
+  isOwner: Boolean!
+  organizationAccessScopes: [OrganizationAccessScope!]!
+  projectAccessScopes: [ProjectAccessScope!]!
+  targetAccessScopes: [TargetAccessScope!]!
+  canLeaveOrganization: Boolean!
+}
+
+type MemberConnection {
+  nodes: [Member!]!
+  total: Int!
+}
+
+enum AuthProvider {
+  GOOGLE
+  GITHUB
+  USERNAME_PASSWORD
+}
+
+enum OrganizationAccessScope {
+  READ
+  DELETE
+  SETTINGS
+  INTEGRATIONS
+  MEMBERS
+}
+
+enum ProjectAccessScope {
+  READ
+  DELETE
+  SETTINGS
+  ALERTS
+  OPERATIONS_STORE_READ
+  OPERATIONS_STORE_WRITE
+}
+
+enum TargetAccessScope {
+  READ
+  DELETE
+  SETTINGS
+  REGISTRY_READ
+  REGISTRY_WRITE
+  TOKENS_READ
+  TOKENS_WRITE
+}
+
+type Organization {
+  plan: BillingPlanType!
+  billingConfiguration: BillingConfiguration!
+  hasSlackIntegration: Boolean!
+  hasGitHubIntegration: Boolean!
+  gitHubIntegration: GitHubIntegration
+  viewerCanManageOIDCIntegration: Boolean!
+  oidcIntegration: OIDCIntegration
+  id: ID!
+  cleanId: ID!
+  name: String!
+  owner: Member!
+  me: Member!
+  members: MemberConnection!
+  invitations: OrganizationInvitationConnection!
+  getStarted: OrganizationGetStarted!
+  schemaPolicy: SchemaPolicy
+  projects: ProjectConnection!
+  rateLimit: RateLimit!
+  supportTickets(first: Int, after: String): SupportTicketConnection
+  supportTicket(id: ID!): SupportTicket
+}
+
+type BillingConfiguration {
+  hasActiveSubscription: Boolean!
+  hasPaymentIssues: Boolean!
+  paymentMethod: BillingPaymentMethod
+  billingAddress: BillingDetails
+  invoices: [BillingInvoice!]
+  upcomingInvoice: BillingInvoice
+}
+
+type BillingInvoice {
+  id: ID!
+  amount: Float!
+  date: DateTime!
+  periodStart: DateTime!
+  periodEnd: DateTime!
+  pdfLink: String
+  status: BillingInvoiceStatus!
+}
+
+enum BillingInvoiceStatus {
+  DRAFT
+  OPEN
+  PAID
+  VOID
+  UNCOLLECTIBLE
+}
+
+type BillingPaymentMethod {
+  brand: String!
+  last4: String!
+  expMonth: Int!
+  expYear: Int!
+}
+
+type BillingDetails {
+  city: String
+  country: String
+  line1: String
+  line2: String
+  postalCode: String
+  state: String
+}
+
+type BillingPlan {
+  id: ID!
+  planType: BillingPlanType!
+  name: String!
+  description: String
+  basePrice: Float
+  includedOperationsLimit: SafeInt
+  pricePerOperationsUnit: Float
+  rateLimit: UsageRateLimitType!
+  retentionInDays: Int!
+}
+
+enum UsageRateLimitType {
+  MONTHLY_QUOTA
+  MONTHLY_LIMITED
+  UNLIMITED
+}
+
+enum BillingPlanType {
+  HOBBY
+  PRO
+  ENTERPRISE
+}
+
+input DowngradeToHobbyInput {
+  organization: OrganizationSelectorInput!
+}
+
+input UpgradeToProInput {
+  organization: OrganizationSelectorInput!
+  paymentMethodId: String
+  couponCode: String
+  monthlyLimits: RateLimitInput!
+}
+
+type ChangePlanResult {
+  previousPlan: BillingPlanType!
+  newPlan: BillingPlanType!
+  organization: Organization!
+}
+
+type CdnTokenResult {
+  token: String!
+  url: String!
+}
+
+type Target {
+  """
+  The URL for accessing this target's artifacts via the CDN.
+  """
+  cdnUrl: String!
+
+  """
+  A paginated connection of CDN tokens for accessing this target's artifacts.
+  """
+  cdnAccessTokens(first: Int, after: String): TargetCdnAccessTokenConnection!
+  documentCollection(id: ID!): DocumentCollection
+  documentCollections(first: Int = 100, after: String = null): DocumentCollectionConnection!
+  documentCollectionOperation(id: ID!): DocumentCollectionOperation
+  requestsOverTime(resolution: Int!, period: DateRangeInput!): [RequestsOverTime!]!
+  totalRequests(period: DateRangeInput!): SafeInt!
+
+  """
+  A merged representation of the schema policy, as inherited from the organization and project.
+  """
+  schemaPolicy: TargetSchemaPolicy
+  schemaVersionsCount(period: DateRangeInput): Int!
+  latestSchemaVersion: SchemaVersion
+  baseSchema: String
+  hasSchema: Boolean!
+
+  """
+  Get a schema check for the target by ID.
+  """
+  schemaCheck(id: ID!): SchemaCheck
+
+  """
+  Get a list of paginated schema checks for a target.
+  """
+  schemaChecks(first: Int, after: String, filters: SchemaChecksFilter): SchemaCheckConnection!
+  id: ID!
+  cleanId: ID!
+  name: String!
+  project: Project!
+
+  """
+  The endpoint url of the target's explorer instance.
+  """
+  graphqlEndpointUrl: String
+  validationSettings: TargetValidationSettings!
+  tokens: TokenConnection!
+}
+
+type CdnAccessToken {
+  id: ID!
+  alias: String!
+  firstCharacters: String!
+  lastCharacters: String!
+  createdAt: DateTime!
+}
+
+type TargetCdnAccessTokenConnection {
+  edges: [TargetCdnAccessTokenEdge!]!
+  pageInfo: PageInfo!
+}
+
+type TargetCdnAccessTokenEdge {
+  node: CdnAccessToken!
+  cursor: String!
+}
+
+input DeleteCdnAccessTokenInput {
+  selector: TargetSelectorInput!
+  cdnAccessTokenId: ID!
+}
+
+"""
+@oneOf
+"""
+type DeleteCdnAccessTokenResult {
+  ok: DeleteCdnAccessTokenOk
+  error: DeleteCdnAccessTokenError
+}
+
+type DeleteCdnAccessTokenOk {
+  deletedCdnAccessTokenId: ID!
+}
+
+type DeleteCdnAccessTokenError implements Error {
+  message: String!
+}
+
+input CreateCdnAccessTokenInput {
+  selector: TargetSelectorInput!
+  alias: String!
+}
+
+"""
+@oneOf
+"""
+type CdnAccessTokenCreateResult {
+  ok: CdnAccessTokenCreateOk
+  error: CdnAccessTokenCreateError
+}
+
+type CdnAccessTokenCreateOk {
+  createdCdnAccessToken: CdnAccessToken!
+  secretAccessToken: String!
+  cdnUrl: String!
+}
+
+type CdnAccessTokenCreateError implements Error {
+  message: String!
+}
+
+type DocumentCollection {
+  id: ID!
+  name: String!
+  description: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  createdBy: User!
+  operations(first: Int = 100, after: String = null): DocumentCollectionOperationsConnection!
+}
+
+type DocumentCollectionEdge {
+  node: DocumentCollection!
+  cursor: String!
+}
+
+type DocumentCollectionConnection {
+  edges: [DocumentCollectionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type DocumentCollectionOperationsConnection {
+  edges: [DocumentCollectionOperationEdge!]!
+  pageInfo: PageInfo!
+}
+
+type DocumentCollectionOperation {
+  id: ID!
+  name: String!
+  query: String!
+  variables: String
+  headers: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  collection: DocumentCollection!
+}
+
+type DocumentCollectionOperationEdge {
+  node: DocumentCollectionOperation!
+  cursor: String!
+}
+
+input CreateDocumentCollectionInput {
+  name: String!
+  description: String
+}
+
+input UpdateDocumentCollectionInput {
+  collectionId: ID!
+  name: String!
+  description: String
+}
+
+input CreateDocumentCollectionOperationInput {
+  collectionId: ID!
+  name: String!
+  query: String!
+  variables: String
+  headers: String
+}
+
+input UpdateDocumentCollectionOperationInput {
+  operationId: ID!
+  collectionId: ID!
+  name: String
+  query: String
+  variables: String
+  headers: String
+}
+
+type ModifyDocumentCollectionError implements Error {
+  message: String!
+}
+
+"""
+@oneOf
+"""
+type DeleteDocumentCollectionResult {
+  ok: DeleteDocumentCollectionOkPayload
+  error: ModifyDocumentCollectionError
+}
+
+type DeleteDocumentCollectionOkPayload {
+  updatedTarget: Target!
+  deletedId: ID!
+}
+
+"""
+@oneOf
+"""
+type DeleteDocumentCollectionOperationResult {
+  ok: DeleteDocumentCollectionOperationOkPayload
+  error: ModifyDocumentCollectionError
+}
+
+type DeleteDocumentCollectionOperationOkPayload {
+  updatedTarget: Target!
+  updatedCollection: DocumentCollection!
+  deletedId: ID!
+}
+
+"""
+@oneOf
+"""
+type ModifyDocumentCollectionResult {
+  ok: ModifyDocumentCollectionOkPayload
+  error: ModifyDocumentCollectionError
+}
+
+type ModifyDocumentCollectionOkPayload {
+  collection: DocumentCollection!
+  updatedTarget: Target!
+}
+
+"""
+@oneOf
+"""
+type ModifyDocumentCollectionOperationResult {
+  ok: ModifyDocumentCollectionOperationOkPayload
+  error: ModifyDocumentCollectionError
+}
+
+type ModifyDocumentCollectionOperationOkPayload {
+  operation: DocumentCollectionOperation!
+  collection: DocumentCollection!
+  updatedTarget: Target!
+}
+
+type DeleteSlackIntegrationResult {
+  organization: Organization!
+}
+
+type DeleteGitHubIntegrationResult {
+  organization: Organization!
+}
+
+input AddSlackIntegrationInput {
+  organization: ID!
+  token: String!
+}
+
+input AddGitHubIntegrationInput {
+  organization: ID!
+  installationId: ID!
+}
+
+type GitHubIntegration {
+  repositories: [GitHubRepository!]!
+}
+
+type GitHubRepository {
+  nameWithOwner: String!
+}
+
+type Lab {
+  schema: String!
+  mocks: JSON
+}
+
+type OIDCIntegration {
+  id: ID!
+  clientId: ID!
+  clientSecretPreview: String!
+  tokenEndpoint: String!
+  userinfoEndpoint: String!
+  authorizationEndpoint: String!
+  organization: Organization!
+}
+
+input CreateOIDCIntegrationInput {
+  organizationId: ID!
+  clientId: ID!
+  clientSecret: String!
+  tokenEndpoint: String!
+  userinfoEndpoint: String!
+  authorizationEndpoint: String!
+}
+
+type CreateOIDCIntegrationResult {
+  ok: CreateOIDCIntegrationOk
+  error: CreateOIDCIntegrationError
+}
+
+type CreateOIDCIntegrationOk {
+  createdOIDCIntegration: OIDCIntegration!
+  organization: Organization!
+}
+
+type CreateOIDCIntegrationErrorDetails {
+  clientId: String
+  clientSecret: String
+  tokenEndpoint: String
+  userinfoEndpoint: String
+  authorizationEndpoint: String
+}
+
+type CreateOIDCIntegrationError implements Error {
+  message: String!
+  details: CreateOIDCIntegrationErrorDetails!
+}
+
+input UpdateOIDCIntegrationInput {
+  oidcIntegrationId: ID!
+  clientId: ID
+  clientSecret: String
+  tokenEndpoint: String
+  userinfoEndpoint: String
+  authorizationEndpoint: String
+}
+
+type UpdateOIDCIntegrationResult {
+  ok: UpdateOIDCIntegrationOk
+  error: UpdateOIDCIntegrationError
+}
+
+type UpdateOIDCIntegrationOk {
+  updatedOIDCIntegration: OIDCIntegration!
+}
+
+type UpdateOIDCIntegrationErrorDetails {
+  clientId: String
+  clientSecret: String
+  tokenEndpoint: String
+  userinfoEndpoint: String
+  authorizationEndpoint: String
+}
+
+type UpdateOIDCIntegrationError implements Error {
+  message: String!
+  details: UpdateOIDCIntegrationErrorDetails!
+}
+
+input DeleteOIDCIntegrationInput {
+  oidcIntegrationId: ID!
+}
+
+type DeleteOIDCIntegrationResult {
+  ok: DeleteOIDCIntegrationOk
+  error: DeleteOIDCIntegrationError
+}
+
+type DeleteOIDCIntegrationOk {
+  organization: Organization!
+}
+
+type DeleteOIDCIntegrationError implements Error {
+  message: String!
+}
+
+input OperationsStatsSelectorInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+  period: DateRangeInput!
+  operations: [ID!]
+  clientNames: [String!]
+}
+
+input OperationBodyByHashInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+  hash: String!
+}
+
+input ClientStatsInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+  period: DateRangeInput!
+  client: String!
+}
+
+input SchemaCoordinateStatsInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+  period: DateRangeInput!
+  schemaCoordinate: String!
+}
+
+input ClientStatsByTargetsInput {
+  organization: ID!
+  project: ID!
+  targetIds: [ID!]!
+  period: DateRangeInput!
+}
+
+input DateRangeInput {
+  from: DateTime!
+  to: DateTime!
+}
+
+type DateRange {
+  from: DateTime!
+  to: DateTime!
+}
+
+input FieldStatsInput {
+  target: String!
+  project: String!
+  organization: String!
+  type: String!
+  field: String!
+  argument: String
+  period: DateRangeInput!
+  operationHash: String
+}
+
+input FieldListStatsInput {
+  target: String!
+  project: String!
+  organization: String!
+  period: DateRangeInput!
+  fields: [FieldTypePairInput!]!
+  operationHash: String
+}
+
+input FieldTypePairInput {
+  type: String!
+  field: String!
+  argument: String
+}
+
+type FieldStatsValues {
+  type: String!
+  field: String!
+  argument: String
+  count: SafeInt!
+  percentage: Float!
+}
+
+type ClientStats {
+  requestsOverTime(resolution: Int!): [RequestsOverTime!]!
+  totalRequests: SafeInt!
+  totalVersions: SafeInt!
+  operations: OperationStatsValuesConnection!
+  versions(limit: Int!): [ClientVersionStatsValues!]!
+}
+
+type SchemaCoordinateStats {
+  requestsOverTime(resolution: Int!): [RequestsOverTime!]!
+  totalRequests: SafeInt!
+  operations: OperationStatsValuesConnection!
+  clients: ClientStatsValuesConnection!
+}
+
+type OperationsStats {
+  requestsOverTime(resolution: Int!): [RequestsOverTime!]!
+  failuresOverTime(resolution: Int!): [FailuresOverTime!]!
+  durationOverTime(resolution: Int!): [DurationOverTime!]!
+  totalRequests: SafeInt!
+  totalFailures: SafeInt!
+  totalOperations: Int!
+  duration: DurationValues!
+  operations: OperationStatsValuesConnection!
+  clients: ClientStatsValuesConnection!
+}
+
+type OperationStatsValuesConnection {
+  nodes: [OperationStatsValues!]!
+  total: Int!
+}
+
+type ClientStatsValuesConnection {
+  nodes: [ClientStatsValues!]!
+  total: Int!
+}
+
+type DurationValues {
+  p75: Int!
+  p90: Int!
+  p95: Int!
+  p99: Int!
+}
+
+type OperationStatsValues {
+  id: ID!
+  operationHash: String
+  kind: String!
+  name: String!
+
+  """
+  Total number of requests
+  """
+  count: SafeInt!
+
+  """
+  Number of requests that succeeded
+  """
+  countOk: SafeInt!
+  percentage: Float!
+  duration: DurationValues!
+}
+
+type ClientStatsValues {
+  name: String!
+  versions: [ClientVersionStatsValues!]!
+  count: Float!
+  percentage: Float!
+}
+
+type ClientVersionStatsValues {
+  version: String!
+  count: Float!
+  percentage: Float!
+}
+
+type ClientNameStatsValues {
+  name: String!
+  count: Float!
+}
+
+type RequestsOverTime {
+  date: DateTime!
+  value: SafeInt!
+}
+
+type FailuresOverTime {
+  date: DateTime!
+  value: SafeInt!
+}
+
+type DurationOverTime {
+  date: DateTime!
+  duration: DurationValues!
+}
+
+type OrganizationGetStarted {
+  reportingOperations: Boolean!
+  creatingProject: Boolean!
+  publishingSchema: Boolean!
+  checkingSchema: Boolean!
+  invitingMembers: Boolean!
+  enablingUsageBasedBreakingChanges: Boolean!
+}
+
+type UpdateOrganizationNameResult {
+  ok: UpdateOrganizationNameOk
+  error: UpdateOrganizationNameError
+}
+
+type UpdateOrganizationNameOk {
+  updatedOrganizationPayload: OrganizationPayload!
+}
+
+type UpdateOrganizationNameError implements Error {
+  message: String!
+}
+
+type CreateOrganizationOk {
+  createdOrganizationPayload: OrganizationPayload!
+}
+
+type CreateOrganizationInputErrors {
+  name: String
+}
+
+type CreateOrganizationError implements Error {
+  message: String!
+  inputErrors: CreateOrganizationInputErrors!
+}
+
+"""
+@oneOf
+"""
+type LeaveOrganizationResult {
+  ok: LeaveOrganizationOk
+  error: LeaveOrganizationError
+}
+
+type LeaveOrganizationOk {
+  organizationId: ID!
+}
+
+type LeaveOrganizationError implements Error {
+  message: String!
+}
+
+input OrganizationTransferRequestSelector {
+  organization: ID!
+  code: String!
+}
+
+input AnswerOrganizationTransferRequestInput {
+  organization: ID!
+  accept: Boolean!
+  code: String!
+}
+
+"""
+@oneOf
+"""
+type AnswerOrganizationTransferRequestResult {
+  ok: AnswerOrganizationTransferRequestOk
+  error: AnswerOrganizationTransferRequestError
+}
+
+type AnswerOrganizationTransferRequestOk {
+  accepted: Boolean!
+}
+
+type AnswerOrganizationTransferRequestError implements Error {
+  message: String!
+}
+
+"""
+@oneOf
+"""
+type RequestOrganizationTransferResult {
+  ok: RequestOrganizationTransferOk
+  error: RequestOrganizationTransferError
+}
+
+type RequestOrganizationTransferOk {
+  email: String!
+  code: String!
+}
+
+type RequestOrganizationTransferError implements Error {
+  message: String!
+}
+
+"""
+@oneOf
+"""
+type CreateOrganizationResult {
+  ok: CreateOrganizationOk
+  error: CreateOrganizationError
+}
+
+input OrganizationSelectorInput {
+  organization: ID!
+}
+
+type OrganizationSelector {
+  organization: ID!
+}
+
+input OrganizationMembersSelectorInput {
+  organization: ID!
+  users: [ID!]!
+}
+
+input OrganizationMemberAccessInput {
+  organization: ID!
+  user: ID!
+  organizationScopes: [OrganizationAccessScope!]!
+  projectScopes: [ProjectAccessScope!]!
+  targetScopes: [TargetAccessScope!]!
+}
+
+input RequestOrganizationTransferInput {
+  organization: ID!
+  user: ID!
+}
+
+input CreateOrganizationInput {
+  name: String!
+}
+
+input UpdateOrganizationNameInput {
+  organization: ID!
+  name: String!
+}
+
+input InviteToOrganizationByEmailInput {
+  organization: ID!
+  email: String!
+}
+
+input DeleteOrganizationInvitationInput {
+  organization: ID!
+  email: String!
+}
+
+type InviteToOrganizationByEmailError implements Error {
+  message: String!
+
+  """
+  The detailed validation error messages for the input fields.
+  """
+  inputErrors: InviteToOrganizationByEmailInputErrors!
+}
+
+type InviteToOrganizationByEmailInputErrors {
+  email: String
+}
+
+"""
+@oneOf
+"""
+type InviteToOrganizationByEmailResult {
+  ok: OrganizationInvitation
+  error: InviteToOrganizationByEmailError
+}
+
+type OrganizationTransfer {
+  organization: Organization!
+}
+
+type OrganizationConnection {
+  nodes: [Organization!]!
+  total: Int!
+}
+
+type OrganizationInvitationConnection {
+  nodes: [OrganizationInvitation!]!
+  total: Int!
+}
+
+type OrganizationInvitation {
+  id: ID!
+  createdAt: DateTime!
+  expiresAt: DateTime!
+  email: String!
+  code: String!
+}
+
+type OrganizationInvitationError {
+  message: String!
+}
+
+type OrganizationInvitationPayload {
+  name: String!
+}
+
+union JoinOrganizationPayload = OrganizationInvitationError | OrganizationPayload
+
+union OrganizationByInviteCodePayload = OrganizationInvitationError | OrganizationInvitationPayload
+
+type OrganizationPayload {
+  selector: OrganizationSelector!
+  organization: Organization!
+}
+
+"""
+@oneOf
+"""
+type DeleteOrganizationInvitationResult {
+  ok: OrganizationInvitation
+  error: DeleteOrganizationInvitationError
+}
+
+type DeleteOrganizationInvitationError implements Error {
+  message: String!
+}
+
+enum SchemaPolicyLevel {
+  ORGANIZATION
+  PROJECT
+}
+
+enum RuleInstanceSeverityLevel {
+  OFF
+  WARNING
+  ERROR
+}
+
+type SchemaPolicy {
+  id: ID!
+  rules: [SchemaPolicyRuleInstance!]!
+  updatedAt: DateTime!
+  allowOverrides: Boolean!
+}
+
+type SchemaPolicyRuleInstance {
+  rule: SchemaPolicyRule!
+  severity: RuleInstanceSeverityLevel!
+  configuration: JSON
+}
+
+type SchemaPolicyRule {
+  id: ID!
+  description: String!
+  recommended: Boolean!
+  configJsonSchema: JSONSchemaObject
+  documentationUrl: String
+}
+
+type UpdateSchemaPolicyResultError implements Error {
+  message: String!
+  code: String
+}
+
+type UpdateSchemaPolicyResultOk {
+  updatedPolicy: SchemaPolicy!
+  organization: Organization
+  project: Project
+}
+
+type UpdateSchemaPolicyResult {
+  ok: UpdateSchemaPolicyResultOk
+  error: Error
+}
+
+input SchemaPolicyInput {
+  rules: [SchemaPolicyRuleInstanceInput!]!
+}
+
+input SchemaPolicyRuleInstanceInput {
+  ruleId: String!
+  severity: RuleInstanceSeverityLevel!
+  configuration: JSON
+}
+
+type TargetSchemaPolicy {
+  organizationPolicy: SchemaPolicy
+  projectPolicy: SchemaPolicy
+  mergedRules: [SchemaPolicyRuleInstance!]!
+}
+
+type UpdateProjectGitRepositoryResult {
+  ok: UpdateProjectGitRepositoryOk
+  error: UpdateProjectGitRepositoryError
+}
+
+type UpdateProjectGitRepositoryError implements Error {
+  message: String!
+}
+
+type UpdateProjectGitRepositoryOk {
+  selector: ProjectSelector!
+  updatedProject: Project!
+}
+
+type UpdateProjectNameResult {
+  ok: UpdateProjectNameOk
+  error: UpdateProjectNameError
+}
+
+type UpdateProjectNameOk {
+  selector: ProjectSelector!
+  updatedProject: Project!
+}
+
+type UpdateProjectNameError implements Error {
+  message: String!
+}
+
+type CreateProjectResult {
+  ok: CreateProjectOk
+  error: CreateProjectError
+}
+
+type CreateProjectOk {
+  createdProject: Project!
+  createdTargets: [Target!]!
+  updatedOrganization: Organization!
+}
+
+type CreateProjectInputErrors {
+  name: String
+  buildUrl: String
+  validationUrl: String
+}
+
+type CreateProjectError implements Error {
+  message: String!
+  inputErrors: CreateProjectInputErrors!
+}
+
+input ProjectSelectorInput {
+  organization: ID!
+  project: ID!
+}
+
+type ProjectSelector {
+  organization: ID!
+  project: ID!
+}
+
+enum ProjectType {
+  FEDERATION
+  STITCHING
+  SINGLE
+}
+
+type ProjectConnection {
+  nodes: [Project!]!
+  total: Int!
+}
+
+input CreateProjectInput {
+  name: String!
+  type: ProjectType!
+  organization: ID!
+  buildUrl: String
+  validationUrl: String
+}
+
+input UpdateProjectNameInput {
+  name: String!
+  organization: ID!
+  project: ID!
+}
+
+input UpdateProjectGitRepositoryInput {
+  gitRepository: String
+  organization: ID!
+  project: ID!
+}
+
+type UpdateProjectPayload {
+  selector: ProjectSelector!
+  updatedProject: Project!
+}
+
+type DeleteProjectPayload {
+  selector: ProjectSelector!
+  deletedProject: Project!
+}
+
+type RateLimit {
+  limitedForOperations: Boolean!
+  operations: SafeInt!
+  retentionInDays: Int!
+}
+
+input RateLimitInput {
+  operations: SafeInt!
+}
+
+input DisableExternalSchemaCompositionInput {
+  organization: ID!
+  project: ID!
+}
+
+"""
+@oneOf
+"""
+type DisableExternalSchemaCompositionResult {
+  ok: Project
+  error: String
+}
+
+input EnableExternalSchemaCompositionInput {
+  organization: ID!
+  project: ID!
+  endpoint: String!
+  secret: String!
+}
+
+"""
+@oneOf
+"""
+type EnableExternalSchemaCompositionResult {
+  ok: Project
+  error: EnableExternalSchemaCompositionError
+}
+
+type ExternalSchemaComposition {
+  endpoint: String!
+}
+
+input TestExternalSchemaCompositionInput {
+  organization: ID!
+  project: ID!
+}
+
+"""
+@oneOf
+"""
+type TestExternalSchemaCompositionResult {
+  ok: Project
+  error: TestExternalSchemaCompositionError
+}
+
+type TestExternalSchemaCompositionError implements Error {
+  message: String!
+}
+
+input UpdateProjectRegistryModelInput {
+  organization: ID!
+  project: ID!
+  model: RegistryModel!
+}
+
+enum RegistryModel {
+  LEGACY
+  MODERN
+}
+
+"""
+@oneOf
+"""
+type UpdateProjectRegistryModelResult {
+  ok: Project
+  error: UpdateProjectRegistryModelError
+}
+
+type UpdateProjectRegistryModelError implements Error {
+  message: String!
+}
+
+type EnableExternalSchemaCompositionError implements Error {
+  message: String!
+
+  """
+  The detailed validation error messages for the input fields.
+  """
+  inputErrors: EnableExternalSchemaCompositionInputErrors!
+}
+
+type EnableExternalSchemaCompositionInputErrors {
+  endpoint: String
+  secret: String
+}
+
+type UpdateBaseSchemaResult {
+  ok: UpdateBaseSchemaOk
+  error: UpdateBaseSchemaError
+}
+
+type UpdateBaseSchemaOk {
+  updatedTarget: Target!
+}
+
+type UpdateBaseSchemaError implements Error {
+  message: String!
+}
+
+input SchemaChecksFilter {
+  failed: Boolean
+  changed: Boolean
+}
+
+type SchemaConnection {
+  nodes: [Schema!]!
+  total: Int!
+}
+
+union RegistryLog = PushedSchemaLog | DeletedSchemaLog
+
+type PushedSchemaLog {
+  id: ID!
+  author: String!
+  date: DateTime!
+  commit: ID!
+  service: String
+}
+
+type DeletedSchemaLog {
+  id: ID!
+  date: DateTime!
+  deletedService: String!
+}
+
+union Schema = SingleSchema | CompositeSchema
+
+type SingleSchema {
+  id: ID!
+  author: String!
+  source: String!
+  date: DateTime!
+  commit: ID!
+  metadata: String
+}
+
+type CompositeSchema {
+  id: ID!
+  author: String!
+  source: String!
+  date: DateTime!
+  commit: ID!
+  url: String
+  service: String
+  metadata: String
+}
+
+union SchemaPublishPayload =
+    SchemaPublishSuccess
+  | SchemaPublishError
+  | SchemaPublishMissingServiceError
+  | SchemaPublishMissingUrlError
+  | GitHubSchemaPublishSuccess
+  | GitHubSchemaPublishError
+
+input SchemaPublishGitHubInput {
+  """
+  The repository name.
+  """
+  repository: String!
+
+  """
+  The commit sha.
+  """
+  commit: String!
+}
+
+input SchemaPublishInput {
+  service: ID
+  url: String
+  sdl: String!
+  author: String!
+  commit: String!
+  force: Boolean @deprecated(reason: "Enabled by default for newly created projects")
+
+  """
+  Accept breaking changes and mark schema as valid (if composable)
+  """
+  experimental_acceptBreakingChanges: Boolean
+    @deprecated(reason: "Enabled by default for newly created projects")
+  metadata: String
+
+  """
+  Talk to GitHub Application and create a check-run
+  """
+  github: Boolean @deprecated(reason: "Use SchemaPublishInput.gitHub instead.")
+
+  """
+  Link GitHub version to a GitHub commit on a repository.
+  """
+  gitHub: SchemaPublishGitHubInput
+}
+
+union SchemaCheckPayload =
+    SchemaCheckSuccess
+  | SchemaCheckError
+  | GitHubSchemaCheckSuccess
+  | GitHubSchemaCheckError
+
+union SchemaDeleteResult = SchemaDeleteSuccess | SchemaDeleteError
+
+type SchemaDeleteSuccess {
+  valid: Boolean!
+  changes: SchemaChangeConnection
+  errors: SchemaErrorConnection!
+}
+
+type SchemaDeleteError {
+  valid: Boolean!
+  errors: SchemaErrorConnection!
+}
+
+enum CriticalityLevel {
+  Breaking
+  Dangerous
+  Safe
+}
+
+type SchemaChange {
+  criticality: CriticalityLevel!
+  criticalityReason: String
+  message(
+    """
+    Whether to include a note about the safety of the change based on usage data within the message.
+    """
+    withSafeBasedOnUsageNote: Boolean = true
+  ): String!
+  path: [String!]
+
+  """
+  Approval metadata for this schema change.
+  This field is populated in case the breaking change was manually approved.
+  """
+  approval: SchemaChangeApproval
+
+  """
+  Whether the breaking change is safe based on usage data.
+  """
+  isSafeBasedOnUsage: Boolean!
+}
+
+type SchemaChangeApproval {
+  """
+  User that approved this schema change.
+  """
+  approvedBy: User
+
+  """
+  Date of the schema change approval.
+  """
+  approvedAt: DateTime!
+
+  """
+  ID of the schema check in which this change was first approved.
+  """
+  schemaCheckId: ID!
+}
+
+type SchemaError {
+  message: String!
+  path: [String!]
+}
+
+type SchemaChangeConnection {
+  nodes: [SchemaChange!]!
+  total: Int!
+}
+
+type SchemaErrorConnection {
+  nodes: [SchemaError!]!
+  total: Int!
+}
+
+type SchemaWarningConnection {
+  nodes: [SchemaCheckWarning!]!
+  total: Int!
+}
+
+type SchemaCheckSuccess {
+  valid: Boolean!
+  initial: Boolean!
+  changes: SchemaChangeConnection
+  warnings: SchemaWarningConnection
+  schemaCheck: SchemaCheck
+}
+
+type SchemaCheckWarning {
+  message: String!
+  source: String
+  line: Int
+  column: Int
+}
+
+type SchemaCheckError {
+  valid: Boolean!
+  changes: SchemaChangeConnection
+  errors: SchemaErrorConnection!
+  warnings: SchemaWarningConnection
+  schemaCheck: SchemaCheck
+}
+
+type GitHubSchemaCheckSuccess {
+  message: String!
+}
+
+type GitHubSchemaCheckError {
+  message: String!
+}
+
+type GitHubSchemaPublishSuccess {
+  message: String!
+}
+
+type GitHubSchemaPublishError {
+  message: String!
+}
+
+type SchemaPublishSuccess {
+  initial: Boolean!
+  valid: Boolean!
+  linkToWebsite: String
+  message: String
+  changes: SchemaChangeConnection
+}
+
+type SchemaPublishError {
+  valid: Boolean!
+  linkToWebsite: String
+  changes: SchemaChangeConnection
+  errors: SchemaErrorConnection!
+}
+
+type SchemaPublishMissingServiceError {
+  message: String!
+}
+
+type SchemaPublishMissingUrlError {
+  message: String!
+}
+
+input SchemaCheckMetaInput {
+  author: String!
+  commit: String!
+}
+
+input SchemaCheckInput {
+  service: ID
+  sdl: String!
+  github: GitHubSchemaCheckInput
+  meta: SchemaCheckMetaInput
+
+  """
+  Optional context ID to group schema checks together.
+  Manually approved breaking changes will be memorized for schema checks with the same context id.
+  """
+  contextId: String
+}
+
+input SchemaDeleteInput {
+  serviceName: ID!
+  dryRun: Boolean
+}
+
+input GitHubSchemaCheckInput {
+  commit: String!
+
+  """
+  The repository name of the schema check.
+  """
+  repository: String
+
+  """
+  The pull request number of the schema check.
+  """
+  pullRequestNumber: String
+}
+
+input SchemaCompareInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+  after: ID!
+  before: ID!
+}
+
+input SchemaCompareToPreviousInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+  version: ID!
+}
+
+input SchemaVersionUpdateInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+  version: ID!
+  valid: Boolean!
+}
+
+type SchemaCompareResult {
+  changes: SchemaChangeConnection!
+  diff: SchemaDiff!
+  service: ServiceSchemaDiff
+  initial: Boolean!
+}
+
+enum SchemaCompareErrorDetailType {
+  graphql
+  composition
+  policy
+}
+
+type SchemaCompareErrorDetail {
+  message: String!
+  type: SchemaCompareErrorDetailType!
+}
+
+type SchemaCompareError {
+  message: String! @deprecated(reason: "Use details instead.")
+  details: [SchemaCompareErrorDetail!]
+}
+
+union SchemaComparePayload = SchemaCompareResult | SchemaCompareError
+
+type SchemaDiff {
+  after: String!
+  before: String
+}
+
+type ServiceSchemaDiff {
+  name: String!
+  after: String
+  before: String
+}
+
+input SchemaVersionsInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+}
+
+input SchemaVersionInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+  version: ID!
+}
+
+input UpdateBaseSchemaInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+  newBase: String
+}
+
+type SchemaVersion {
+  id: ID!
+  valid: Boolean!
+  date: DateTime!
+  log: RegistryLog!
+  baseSchema: String
+  schemas: SchemaConnection!
+  supergraph: String
+  sdl: String
+
+  """
+  Experimental: This field is not stable and may change in the future.
+  """
+  explorer(usage: SchemaExplorerUsageInput): SchemaExplorer!
+  unusedSchema(usage: UnusedSchemaExplorerUsageInput): UnusedSchemaExplorer!
+  errors: SchemaErrorConnection!
+
+  """
+  GitHub metadata associated with the schema version.
+  """
+  githubMetadata: SchemaVersionGithubMetadata
+}
+
+type SchemaVersionGithubMetadata {
+  repository: String!
+  commit: String!
+}
+
+type SchemaVersionConnection {
+  nodes: [SchemaVersion!]!
+  pageInfo: PageInfo!
+}
+
+input SchemaExplorerUsageInput {
+  period: DateRangeInput!
+}
+
+input UnusedSchemaExplorerUsageInput {
+  period: DateRangeInput!
+}
+
+type SchemaExplorer {
+  types: [GraphQLNamedType!]!
+  type(name: String!): GraphQLNamedType
+  query: GraphQLObjectType
+  mutation: GraphQLObjectType
+  subscription: GraphQLObjectType
+}
+
+type UnusedSchemaExplorer {
+  types: [GraphQLNamedType!]!
+}
+
+type SchemaCoordinateUsage {
+  total: Float!
+  isUsed: Boolean!
+
+  """
+  A list of clients that use this schema coordinate within GraphQL operation documents.
+  Is null if used by none clients.
+  """
+  usedByClients: [String!]
+  topOperations(limit: Int!): [SchemaCoordinateUsageOperation!]!
+}
+
+type SchemaCoordinateUsageOperation {
+  name: String!
+  hash: String!
+
+  """
+  The number of times the operation was called.
+  """
+  count: Float!
+}
+
+type SupergraphMetadata {
+  """
+  List of service names that own the field/type.
+  Resolves to null if the entity (field, type, scalar) does not belong to any service.
+  """
+  ownedByServiceNames: [String!]
+}
+
+union GraphQLNamedType =
+    GraphQLObjectType
+  | GraphQLInterfaceType
+  | GraphQLUnionType
+  | GraphQLEnumType
+  | GraphQLInputObjectType
+  | GraphQLScalarType
+
+type GraphQLObjectType {
+  name: String!
+  description: String
+  fields: [GraphQLField!]!
+  interfaces: [String!]!
+  usage: SchemaCoordinateUsage!
+
+  """
+  Metadata specific to Apollo Federation Projects.
+  Is null if no meta information is available (e.g. this is not an apollo federation project).
+  """
+  supergraphMetadata: SupergraphMetadata
+}
+
+type GraphQLInterfaceType {
+  name: String!
+  description: String
+  fields: [GraphQLField!]!
+  interfaces: [String!]!
+  usage: SchemaCoordinateUsage!
+
+  """
+  Metadata specific to Apollo Federation Projects.
+  Is null if no meta information is available.
+  """
+  supergraphMetadata: SupergraphMetadata
+}
+
+type GraphQLUnionType {
+  name: String!
+  description: String
+  members: [GraphQLUnionTypeMember!]!
+  usage: SchemaCoordinateUsage!
+
+  """
+  Metadata specific to Apollo Federation Projects.
+  Is null if no meta information is available (e.g. this is not an apollo federation project).
+  """
+  supergraphMetadata: SupergraphMetadata
+}
+
+type GraphQLUnionTypeMember {
+  name: String!
+  usage: SchemaCoordinateUsage!
+
+  """
+  Metadata specific to Apollo Federation Projects.
+  Is null if no meta information is available (e.g. this is not an apollo federation project).
+  """
+  supergraphMetadata: SupergraphMetadata
+}
+
+type GraphQLEnumType {
+  name: String!
+  description: String
+  values: [GraphQLEnumValue!]!
+  usage: SchemaCoordinateUsage!
+
+  """
+  Metadata specific to Apollo Federation Projects.
+  Is null if no meta information is available.
+  """
+  supergraphMetadata: SupergraphMetadata
+}
+
+type GraphQLInputObjectType {
+  name: String!
+  description: String
+  fields: [GraphQLInputField!]!
+  usage: SchemaCoordinateUsage!
+
+  """
+  Metadata specific to Apollo Federation Projects.
+  Is null if no meta information is available (e.g. this is not an apollo federation project).
+  """
+  supergraphMetadata: SupergraphMetadata
+}
+
+type GraphQLScalarType {
+  name: String!
+  description: String
+  usage: SchemaCoordinateUsage!
+
+  """
+  Metadata specific to Apollo Federation Projects.
+  Is null if no meta information is available (e.g. this is not an apollo federation project).
+  """
+  supergraphMetadata: SupergraphMetadata
+}
+
+type GraphQLField {
+  name: String!
+  description: String
+  type: String!
+  args: [GraphQLArgument!]!
+  isDeprecated: Boolean!
+  deprecationReason: String
+  usage: SchemaCoordinateUsage!
+
+  """
+  Metadata specific to Apollo Federation Projects.
+  Is null if no meta information is available.
+  """
+  supergraphMetadata: SupergraphMetadata
+}
+
+type GraphQLInputField {
+  name: String!
+  description: String
+  type: String!
+  defaultValue: String
+  isDeprecated: Boolean!
+  deprecationReason: String
+  usage: SchemaCoordinateUsage!
+
+  """
+  Metadata specific to Apollo Federation Projects.
+  Is null if no meta information is available (e.g. this is not an apollo federation project).
+  """
+  supergraphMetadata: SupergraphMetadata
+}
+
+type GraphQLArgument {
+  name: String!
+  description: String
+  type: String!
+  defaultValue: String
+  isDeprecated: Boolean!
+  deprecationReason: String
+  usage: SchemaCoordinateUsage!
+}
+
+type GraphQLEnumValue {
+  name: String!
+  description: String
+  isDeprecated: Boolean!
+  deprecationReason: String
+  usage: SchemaCoordinateUsage!
+
+  """
+  Metadata specific to Apollo Federation Projects.
+  Is null if no meta information is available.
+  """
+  supergraphMetadata: SupergraphMetadata
+}
+
+type CodePosition {
+  line: Int!
+  column: Int!
+}
+
+type SchemaPolicyWarning {
+  message: String!
+  ruleId: String!
+  start: CodePosition!
+  end: CodePosition
+}
+
+type SchemaPolicyWarningEdge {
+  node: SchemaPolicyWarning!
+  cursor: String!
+}
+
+type SchemaPolicyWarningConnection {
+  edges: [SchemaPolicyWarningEdge!]!
+  pageInfo: PageInfo!
+}
+
+type SchemaCheckMeta {
+  author: String!
+  commit: String!
+}
+
+interface SchemaCheck {
+  id: ID!
+  createdAt: String!
+
+  """
+  The SDL of the schema that was checked.
+  """
+  schemaSDL: String!
+
+  """
+  The name of the service that owns the schema. Is null for non composite project types.
+  """
+  serviceName: String
+
+  """
+  Meta information about the schema check.
+  """
+  meta: SchemaCheckMeta
+
+  """
+  The schema version against this check was performed.
+  Is null if there is no schema version published yet.
+  """
+  schemaVersion: SchemaVersion
+
+  """
+  The URL of the schema check on the Hive Web App.
+  """
+  webUrl: String
+
+  """
+  The GitHub repository associated with the schema check.
+  """
+  githubRepository: String
+  breakingSchemaChanges: SchemaChangeConnection
+  safeSchemaChanges: SchemaChangeConnection
+  schemaPolicyWarnings: SchemaPolicyWarningConnection
+  schemaPolicyErrors: SchemaPolicyWarningConnection
+}
+
+"""
+A successful schema check.
+"""
+type SuccessfulSchemaCheck implements SchemaCheck {
+  id: ID!
+  createdAt: String!
+
+  """
+  The SDL of the schema that was checked.
+  """
+  schemaSDL: String!
+
+  """
+  The name of the service that owns the schema. Is null for non composite project types.
+  """
+  serviceName: String
+
+  """
+  Meta information about the schema check.
+  """
+  meta: SchemaCheckMeta
+
+  """
+  The schema version against this check was performed.
+  Is null if there is no schema version published yet.
+  """
+  schemaVersion: SchemaVersion
+
+  """
+  The URL of the schema check on the Hive Web App.
+  """
+  webUrl: String
+
+  """
+  The GitHub repository associated with the schema check.
+  """
+  githubRepository: String
+
+  """
+  Breaking changes can exist in an successful schema check if the check was manually approved.
+  """
+  breakingSchemaChanges: SchemaChangeConnection
+  safeSchemaChanges: SchemaChangeConnection
+  schemaPolicyWarnings: SchemaPolicyWarningConnection
+
+  """
+  Schema policy errors can exist in an successful schema check if the check was manually approved.
+  """
+  schemaPolicyErrors: SchemaPolicyWarningConnection
+  compositeSchemaSDL: String
+  supergraphSDL: String
+
+  """
+  Whether the schema check was manually approved.
+  """
+  isApproved: Boolean!
+
+  """
+  The user that approved the schema check.
+  """
+  approvedBy: User
+}
+
+"""
+A failed schema check.
+"""
+type FailedSchemaCheck implements SchemaCheck {
+  id: ID!
+  createdAt: String!
+
+  """
+  The SDL of the schema that was checked.
+  """
+  schemaSDL: String!
+
+  """
+  The name of the service that owns the schema. Is null for non composite project types.
+  """
+  serviceName: String
+
+  """
+  Meta information about the schema check.
+  """
+  meta: SchemaCheckMeta
+
+  """
+  The schema version against this check was performed.
+  Is null if there is no schema version published yet.
+  """
+  schemaVersion: SchemaVersion
+
+  """
+  The URL of the schema check on the Hive Web App.
+  """
+  webUrl: String
+
+  """
+  The GitHub repository associated with the schema check.
+  """
+  githubRepository: String
+  compositionErrors: SchemaErrorConnection
+  breakingSchemaChanges: SchemaChangeConnection
+  safeSchemaChanges: SchemaChangeConnection
+  schemaPolicyWarnings: SchemaPolicyWarningConnection
+  schemaPolicyErrors: SchemaPolicyWarningConnection
+  compositeSchemaSDL: String
+  supergraphSDL: String
+
+  """
+  Whether this schema check can be approved manually.
+  """
+  canBeApproved: Boolean!
+
+  """
+  Whether this schema check can be approved by the viewer.
+  """
+  canBeApprovedByViewer: Boolean!
+}
+
+type SchemaCheckEdge {
+  node: SchemaCheck!
+  cursor: String!
+}
+
+type SchemaCheckConnection {
+  edges: [SchemaCheckEdge!]!
+  pageInfo: PageInfo!
+}
+
+input ApproveFailedSchemaCheckInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+  schemaCheckId: ID!
+}
+
+type ApproveFailedSchemaCheckResult {
+  ok: ApproveFailedSchemaCheckOk
+  error: ApproveFailedSchemaCheckError
+}
+
+type ApproveFailedSchemaCheckOk {
+  schemaCheck: SchemaCheck!
+}
+
+type ApproveFailedSchemaCheckError {
+  message: String!
+}
+
+scalar DateTime
+
+scalar JSON
+
+scalar JSONSchemaObject
+
+scalar SafeInt
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String!
+  endCursor: String!
+}
+
+"""
+@oneOf
+"""
+type SupportTicketCreateResult {
+  ok: SupportTicketCreateResultOk
+  error: SupportTicketCreateResultError
+}
+
+type SupportTicketCreateResultOk {
+  supportTicketId: ID!
+}
+
+type SupportTicketCreateResultError implements Error {
+  message: String!
+}
+
+input SupportTicketCreateInput {
+  organization: String!
+  subject: String!
+  description: String!
+  priority: SupportTicketPriority!
+}
+
+"""
+@oneOf
+"""
+type SupportTicketReplyResult {
+  ok: SupportTicketReplyResultOk
+  error: SupportTicketReplyResultError
+}
+
+type SupportTicketReplyResultOk {
+  supportTicketId: ID!
+}
+
+type SupportTicketReplyResultError implements Error {
+  message: String!
+}
+
+input SupportTicketReplyInput {
+  organization: String!
+  ticketId: String!
+  body: String!
+}
+
+type SupportTicketConnection {
+  edges: [SupportTicketEdge!]!
+  pageInfo: PageInfo!
+}
+
+type SupportTicketEdge {
+  node: SupportTicket!
+  cursor: String!
+}
+
+type SupportTicket {
+  id: ID!
+  status: SupportTicketStatus!
+  priority: SupportTicketPriority!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  subject: String!
+  description: String!
+  comments: SupportTicketCommentConnection
+}
+
+type SupportTicketCommentConnection {
+  edges: [SupportTicketCommentEdge!]!
+  pageInfo: PageInfo!
+}
+
+type SupportTicketCommentEdge {
+  node: SupportTicketComment!
+  cursor: String!
+}
+
+type SupportTicketComment {
+  id: ID!
+  createdAt: DateTime!
+  body: String!
+  fromSupport: Boolean!
+}
+
+enum SupportTicketPriority {
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum SupportTicketStatus {
+  OPEN
+  SOLVED
+}
+
+input UpdateTargetGraphQLEndpointUrlInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+  graphqlEndpointUrl: String
+}
+
+type UpdateTargetGraphQLEndpointUrlOk {
+  target: Target!
+}
+
+type UpdateTargetGraphQLEndpointUrlError {
+  message: String!
+}
+
+type UpdateTargetGraphQLEndpointUrlResult {
+  ok: UpdateTargetGraphQLEndpointUrlOk
+  error: UpdateTargetGraphQLEndpointUrlError
+}
+
+type UpdateTargetNameResult {
+  ok: UpdateTargetNameOk
+  error: UpdateTargetNameError
+}
+
+type UpdateTargetNameOk {
+  selector: TargetSelector!
+  updatedTarget: Target!
+}
+
+type UpdateTargetNameInputErrors {
+  name: String
+}
+
+type UpdateTargetNameError implements Error {
+  message: String!
+  inputErrors: UpdateTargetNameInputErrors!
+}
+
+type CreateTargetResult {
+  ok: CreateTargetOk
+  error: CreateTargetError
+}
+
+type CreateTargetInputErrors {
+  name: String
+}
+
+type CreateTargetError implements Error {
+  message: String!
+  inputErrors: CreateTargetInputErrors!
+}
+
+type CreateTargetOk {
+  selector: TargetSelector!
+  createdTarget: Target!
+}
+
+input TargetSelectorInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+}
+
+input UpdateTargetValidationSettingsInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+  period: Int!
+  percentage: Float!
+  targets: [ID!]!
+  excludedClients: [String!]
+}
+
+type UpdateTargetValidationSettingsResult {
+  ok: UpdateTargetValidationSettingsOk
+  error: UpdateTargetValidationSettingsError
+}
+
+type UpdateTargetValidationSettingsInputErrors {
+  percentage: String
+  period: String
+}
+
+type UpdateTargetValidationSettingsError implements Error {
+  message: String!
+  inputErrors: UpdateTargetValidationSettingsInputErrors!
+}
+
+type UpdateTargetValidationSettingsOk {
+  target: Target!
+}
+
+input SetTargetValidationInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+  enabled: Boolean!
+}
+
+type TargetSelector {
+  organization: ID!
+  project: ID!
+  target: ID!
+}
+
+type TargetConnection {
+  nodes: [Target!]!
+  total: Int!
+}
+
+type TargetValidationSettings {
+  enabled: Boolean!
+  period: Int!
+  percentage: Float!
+  targets: [Target!]!
+  excludedClients: [String!]!
+}
+
+input CreateTargetInput {
+  organization: ID!
+  project: ID!
+  name: String!
+}
+
+input UpdateTargetNameInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+  name: String!
+}
+
+type DeleteTargetPayload {
+  selector: TargetSelector!
+  deletedTarget: Target!
+}
+
+type CreateTokenResult {
+  ok: CreateTokenOk
+  error: CreateTokenError
+}
+
+type CreateTokenOk {
+  selector: TargetSelector!
+  createdToken: Token!
+  secret: String!
+}
+
+type CreateTokenError implements Error {
+  message: String!
+}
+
+type TokenConnection {
+  nodes: [Token!]!
+  total: Int!
+}
+
+type Token {
+  id: ID!
+  name: String!
+  alias: String!
+  date: DateTime!
+  lastUsedAt: DateTime
+}
+
+union TokenInfoPayload = TokenInfo | TokenNotFoundError
+
+type TokenInfo {
+  token: Token!
+  organization: Organization!
+  project: Project!
+  target: Target!
+  hasTargetScope(scope: TargetAccessScope!): Boolean!
+  hasProjectScope(scope: ProjectAccessScope!): Boolean!
+  hasOrganizationScope(scope: OrganizationAccessScope!): Boolean!
+}
+
+type TokenNotFoundError {
+  message: String!
+}
+
+input CreateTokenInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+  name: String!
+  organizationScopes: [OrganizationAccessScope!]!
+  projectScopes: [ProjectAccessScope!]!
+  targetScopes: [TargetAccessScope!]!
+}
+
+input DeleteTokensInput {
+  organization: ID!
+  project: ID!
+  target: ID!
+  tokens: [ID!]!
+}
+
+type DeleteTokensPayload {
+  selector: TargetSelector!
+  deletedTokens: [ID!]!
+}
+
+type CreateTokenPayload {
+  selector: TargetSelector!
+  createdToken: Token!
+  secret: String!
+}
+
+type UsageEstimationScope {
+  target(selector: TargetSelectorInput!): UsageEstimation!
+  org(selector: OrganizationSelectorInput!): UsageEstimation!
+}
+
+type UsageEstimation {
+  operations: SafeInt!
+}
