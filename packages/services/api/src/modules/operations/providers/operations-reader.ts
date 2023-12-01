@@ -254,7 +254,7 @@ export class OperationsReader {
             period
           })}
           GROUP BY hash
-          HAVING COUNT(CASE WHEN `client` NOT IN (${sql.array(excludedClients, 'String')}) THEN 1 END) > 0
+          HAVING COUNT(CASE WHEN client NOT IN (${sql.array(excludedClients, 'String')}) THEN 1 END) > 0
         )
       `);
     }
