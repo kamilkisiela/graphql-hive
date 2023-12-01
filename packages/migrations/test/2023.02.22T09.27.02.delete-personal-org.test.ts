@@ -61,15 +61,11 @@ await describe('drop-personal-org', async () => {
         null,
       );
       assert.notEqual(
-        await db.maybeOne(
-          sql`SELECT * FROM organizations WHERE id = ${orgsWithProjects[0].id}`,
-        ),
+        await db.maybeOne(sql`SELECT * FROM organizations WHERE id = ${orgsWithProjects[0].id}`),
         null,
       );
       assert.notEqual(
-        await db.maybeOne(
-          sql`SELECT * FROM organizations WHERE id = ${orgsWithProjects[1].id}`,
-        ),
+        await db.maybeOne(sql`SELECT * FROM organizations WHERE id = ${orgsWithProjects[1].id}`),
         null,
       );
     } finally {
