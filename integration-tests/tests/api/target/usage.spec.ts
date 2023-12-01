@@ -556,7 +556,7 @@ test.concurrent('check usage not from excluded client names', async () => {
   expect(unusedCheckResult.schemaCheck.__typename).toEqual('SchemaCheckError');
 
   // Exclude app from the check (tests partial, incomplete exclusion)
-  const updateValidationResult = await updateTargetValidationSettings(
+  let updateValidationResult = await updateTargetValidationSettings(
     {
       organization: organization.cleanId,
       project: project.cleanId,
@@ -591,7 +591,7 @@ test.concurrent('check usage not from excluded client names', async () => {
   expect(unusedCheckResult2.schemaCheck.__typename).toEqual('SchemaCheckError');
 
   // Exclude BOTH 'app' and 'cli' (tests multi client covering exclusion)
-  const updateValidationResult = await updateTargetValidationSettings(
+  updateValidationResult = await updateTargetValidationSettings(
     {
       organization: organization.cleanId,
       project: project.cleanId,
@@ -605,6 +605,14 @@ test.concurrent('check usage not from excluded client names', async () => {
       authToken: ownerToken,
     },
   ).then(r => r.expectNoGraphQLErrors());
+  expect(
+    updateValidationResult.updateTargetValidationSettings.ok!.target.validationSettings
+      .excludedClients,
+  ).toContainEqual('app');
+  expect(
+    updateValidationResult.updateTargetValidationSettings.ok!.target.validationSettings
+      .excludedClients,
+  ).toContainEqual('cli');
 
   // should be safe because the field was not used by the non-excluded clients (app never requested `Query.ping`, but cli did)
   const usedCheckResult = await (
