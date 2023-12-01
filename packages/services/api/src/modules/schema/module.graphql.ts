@@ -513,6 +513,11 @@ export default gql`
     supergraph: String
     sdl: String
     """
+    List of tags in the schema version. E.g. when using Federation.
+    Tags can be used for filtering the schema via contracts.
+    """
+    tags: [String!]
+    """
     Experimental: This field is not stable and may change in the future.
     """
     explorer(usage: SchemaExplorerUsageInput): SchemaExplorer

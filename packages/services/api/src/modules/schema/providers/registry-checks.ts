@@ -159,6 +159,7 @@ export class RegistryChecks {
       result: {
         fullSchemaSdl: result.sdl,
         supergraph: result.supergraph,
+        tags: result.tags ?? null,
       },
     } satisfies CheckResult;
   }

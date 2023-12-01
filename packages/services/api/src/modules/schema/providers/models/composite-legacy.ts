@@ -329,6 +329,7 @@ export class CompositeLegacyModel {
           schemas,
           supergraph: compositionCheck.result?.supergraph ?? null,
           fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+          tags: null,
         },
       };
     }

@@ -179,6 +179,7 @@ type SchemaPublishSuccess = {
     schemas: [SingleSchema] | PushedCompositeSchema[];
     supergraph: string | null;
     fullSchemaSdl: string | null;
+    tags: null | Array<string>;
   };
 };
 
@@ -221,6 +222,7 @@ export type SchemaDeleteSuccess = {
     breakingChanges: Array<SchemaChangeType> | null;
     compositionErrors: Array<SchemaCompositionError> | null;
     supergraph: string | null;
+    tags: null | Array<string>;
   } & (
     | {
         composable: true;

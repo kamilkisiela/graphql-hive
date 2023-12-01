@@ -288,6 +288,7 @@ export class SingleModel {
         schemas,
         supergraph: null,
         fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+        tags: compositionCheck.result?.tags ?? null,
       },
     };
   }
