@@ -263,6 +263,7 @@ export class SingleLegacyModel {
           schemas,
           supergraph: null,
           fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+          tags: null,
         },
       };
     }

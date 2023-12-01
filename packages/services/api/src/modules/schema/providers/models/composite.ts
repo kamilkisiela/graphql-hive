@@ -361,6 +361,7 @@ export class CompositeModel {
         schemas,
         supergraph: compositionCheck.result?.supergraph ?? null,
         fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+        tags: compositionCheck.result?.tags ?? null,
       },
     };
   }
@@ -519,6 +520,7 @@ export class CompositeModel {
         breakingChanges,
         compositionErrors: compositionCheck.reason?.errors ?? [],
         supergraph: compositionCheck.result?.supergraph ?? null,
+        tags: compositionCheck.result?.tags ?? null,
       },
     };
   }

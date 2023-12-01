@@ -2475,6 +2475,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           schemaCompositionErrors: args.schemaCompositionErrors,
           // Deleting a schema is done via CLI and not associated to a commit or a pull request.
           github: null,
+          tags: args.tags,
         });
 
         // Move all the schema_version_to_log entries of the previous version to the new version
@@ -2559,6 +2560,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           supergraphSDL: input.supergraphSDL,
           schemaCompositionErrors: input.schemaCompositionErrors,
           github: input.github,
+          tags: input.tags,
         });
 
         await Promise.all(
@@ -4526,6 +4528,7 @@ const SchemaVersionModel = zod.intersection(
     supergraphSDL: zod.nullable(zod.string()),
     schemaCompositionErrors: zod.nullable(zod.array(SchemaCompositionErrorModel)),
     recordVersion: zod.nullable(SchemaVersionRecordVersionModel),
+    tags: zod.nullable(zod.array(zod.string())),
   }),
   zod
     .union([
@@ -4626,6 +4629,7 @@ async function insertSchemaVersion(
     compositeSchemaSDL: string | null;
     supergraphSDL: string | null;
     schemaCompositionErrors: Array<SchemaCompositionError> | null;
+    tags: Array<string> | null;
     github: null | {
       sha: string;
       repository: string;
@@ -4647,7 +4651,8 @@ async function insertSchemaVersion(
         supergraph_sdl,
         schema_composition_errors,
         github_repository,
-        github_sha
+        github_sha,
+        tags
       )
     VALUES
       (
@@ -4667,7 +4672,8 @@ async function insertSchemaVersion(
             : sql`${null}`
         },
         ${args.github?.repository ?? null},
-        ${args.github?.sha ?? null}
+        ${args.github?.sha ?? null},
+        ${Array.isArray(args.tags) ? sql.array(args.tags, 'text') : null}
       )
     RETURNING
       ${schemaVersionSQLFields()}
@@ -4747,6 +4753,7 @@ const schemaVersionSQLFields = (t = sql``) => sql`
   , ${t}"github_sha" as "githubSha"
   , ${t}"diff_schema_version_id" as "diffSchemaVersionId"
   , ${t}"record_version" as "recordVersion"
+  , ${t}"tags"
 `;
 
 const targetSQLFields = sql`

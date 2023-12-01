@@ -336,6 +336,13 @@ export interface ComposeAndValidateResult {
   supergraph: string | null;
   errors: CompositionFailureError[];
   sdl: string | null;
+  contracts: Array<{
+    id: string;
+    errors: Array<CompositionFailureError>;
+    sdl: string | null;
+    supergraph: string | null;
+  }> | null;
+  tags: Array<string> | null;
 }
 
 export interface Orchestrator {
