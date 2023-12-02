@@ -65,10 +65,7 @@ function ensureNumber(value: number | string): number {
   global: true,
 })
 export class OperationsReader {
-  constructor(
-    private clickHouse: ClickHouse,
-    private logger: Logger,
-  ) {}
+  constructor(private clickHouse: ClickHouse, private logger: Logger) {}
 
   private pickQueryByPeriod(
     queryMap: {
@@ -251,10 +248,13 @@ export class OperationsReader {
         hash NOT IN (
           SELECT hash FROM clients_daily ${this.createFilter({
             target,
-            period
+            period,
           })}
           GROUP BY hash
-          HAVING COUNT(CASE WHEN client NOT IN (${sql.array(excludedClients, 'String')}) THEN 1 END) > 0
+          HAVING COUNT(CASE WHEN client NOT IN (${sql.array(
+            excludedClients,
+            'String',
+          )}) THEN 1 END) > 0
         )
       `);
     }
