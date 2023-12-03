@@ -156,6 +156,7 @@ export const stripeBillingApiRouter = t.router({
             if (item.plan.id === stripePrices.operationsPrice.id) {
               await ctx.stripe.subscriptionItems.update(item.id, {
                 quantity: input.reserved.operations,
+                proration_behavior: 'always_invoice'
               });
             }
           }
