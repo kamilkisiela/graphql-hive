@@ -358,7 +358,7 @@ function Inner(props: {
                   limited.
                 </p>
                 <p className="text-sm text-gray-500">
-                  Don't worry, you can always adjust it later.
+                  Don't worry, you can always adjust it later and you'll only pay for the relative time on each quota.
                 </p>
                 <div className="mt-5 pl-2.5">
                   <Slider
@@ -375,6 +375,9 @@ function Inner(props: {
                     <span>300M</span>
                   </div>
                 </div>
+                <p className="text-sm mt-4 font-bold">
+                  Need more than 300M? <a href="emailto:contact@graphql-hive.com">Contact Us</a>
+                </p>
               </div>
             )}
 

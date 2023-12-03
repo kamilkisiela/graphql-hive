@@ -94,8 +94,10 @@ export const BillingPaymentMethod = ({
           </Section.Subtitle>
         </div>
         <div>
+          <p className="text-sm">
           To manage or change your payment method, billing settings, billing email, Tax ID, you can
           use the Stripe customer dashboard:
+          </p>
           <br />
           <Button
             variant="primary"
@@ -115,7 +117,7 @@ export const BillingPaymentMethod = ({
               'Loading...'
             ) : (
               <>
-                <ExternalLinkIcon /> Stripe Billing Dashboard
+                <ExternalLinkIcon className='mr-2' /> Stripe Billing Dashboard
               </>
             )}
           </Button>
