@@ -122,7 +122,7 @@
     "autoprefixer": "10.4.16",
     "esbuild": "0.19.8",
     "pino-pretty": "10.2.3",
-    "postcss": "8.4.31",
+    "postcss": "8.4.32",
     "postcss-loader": "7.3.3",
     "rimraf": "4.4.1",
     "storybook": "7.6.0",
