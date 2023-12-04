@@ -449,6 +449,10 @@ export const resolvers: OrganizationModule.Resolvers = {
         organizationId: organization.id,
       });
 
+      if (members.length === 0) {
+        return [];
+      }
+
       const groupedByAccessScope: {
         [accessHash: string]: {
           organizationScopes: OrganizationAccessScope[];

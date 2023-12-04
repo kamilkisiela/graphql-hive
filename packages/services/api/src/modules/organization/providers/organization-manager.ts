@@ -1218,14 +1218,19 @@ export class OrganizationManager {
   }
 
   async getMembersWithoutRole(selector: { organizationId: string }) {
-    await this.authManager.ensureOrganizationAccess({
-      organization: selector.organizationId,
-      scope: OrganizationAccessScope.MEMBERS,
-    });
+    if (
+      await this.authManager.checkOrganizationAccess({
+        organization: selector.organizationId,
+        scope: OrganizationAccessScope.MEMBERS,
+      })
+    ) {
+      return this.storage.getMembersWithoutRole({
+        organizationId: selector.organizationId,
+      });
+    }
 
-    return this.storage.getMembersWithoutRole({
-      organizationId: selector.organizationId,
-    });
+    // if user doesn't have access to members, return empty list
+    return [];
   }
 
   async getMemberRoles(selector: { organizationId: string }) {
