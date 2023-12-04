@@ -549,7 +549,7 @@ test.concurrent('check usage not from excluded client names', async () => {
   await waitFor(5000);
 
   // should be breaking because the field is used
-  // Query.me is used
+  // Query.me would be removed, but was requested by cli and app
   const unusedCheckResult = await token
     .checkSchema(`type Query { ping: String }`)
     .then(r => r.expectNoGraphQLErrors());
@@ -585,6 +585,7 @@ test.concurrent('check usage not from excluded client names', async () => {
   ).toContainEqual('app');
 
   // should be unsafe because though we excluded 'app', 'cli' still uses this
+  // Query.me would be removed, but was requested by cli and app
   const unusedCheckResult2 = await token
     .checkSchema(`type Query { ping: String }`)
     .then(r => r.expectNoGraphQLErrors());
@@ -614,7 +615,8 @@ test.concurrent('check usage not from excluded client names', async () => {
       .excludedClients,
   ).toContainEqual('cli');
 
-  // should be safe because the field was not used by the non-excluded clients (app never requested `Query.ping`, but cli did)
+  // should be safe because the field was not used by the non-excluded clients
+  // Query.me would be removed, but was requested by cli and app
   const usedCheckResult = await (
     await token.checkSchema(`type Query { ping: String }`)
   ).expectNoGraphQLErrors();

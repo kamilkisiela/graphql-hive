@@ -65,7 +65,10 @@ function ensureNumber(value: number | string): number {
   global: true,
 })
 export class OperationsReader {
-  constructor(private clickHouse: ClickHouse, private logger: Logger) {}
+  constructor(
+    private clickHouse: ClickHouse,
+    private logger: Logger,
+  ) {}
 
   private pickQueryByPeriod(
     queryMap: {
@@ -244,17 +247,25 @@ export class OperationsReader {
       // Eliminate coordinates fetched by excluded clients.
       // We can connect a coordinate to a client by using the hash column.
       // The hash column is basically a unique identifier of a GraphQL operation.
+      // In the following query we fetch all hashes that were used only by the excluded clients.
+      //
+      // The part after GROUP BY is a bit tricky to understand.
+      // We aggregate all client names into an array and then we filter out the excluded clients.
+      // If the array is empty, it means that the operation was used only by the excluded clients.
+      // If the array is not empty, it means that the operation was used by at least one non-excluded client,
+      // meaning we should not filter it out from excluded hashes.
       conditions.push(sql`
         hash NOT IN (
-          SELECT hash FROM clients_daily ${this.createFilter({
+          SELECT hash
+          FROM clients_daily ${this.createFilter({
             target,
             period,
           })}
           GROUP BY hash
-          HAVING COUNT(CASE WHEN client NOT IN (${sql.array(
+          HAVING length(arrayFilter(x -> x NOT IN (${sql.array(
             excludedClients,
             'String',
-          )}) THEN 1 END) > 0
+          )}), groupUniqArray(client_name))) = 0
         )
       `);
     }
