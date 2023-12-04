@@ -239,9 +239,6 @@ function SimilarRoles(props: {
             <div key={role.id} className="flex flex-row items-center justify-between">
               <div className="w-auto flex-none">
                 <div>{role.name}</div>
-                {/* <div className="max-w-[150px] truncate whitespace-nowrap break-words text-xs text-gray-400">
-                  {role.description}
-                </div> */}
               </div>
               <div className="flex w-[50px] shrink-0 flex-row items-center justify-end gap-x-2">
                 {upgradeCount > 0 ? (
@@ -293,17 +290,17 @@ function SimilarRoles(props: {
                         <div className="space-y-2 divide-y-[1px] divide-gray-500/20">
                           <SimilarRoleScopes
                             definitions={scopes.organization}
-                            scopes={upgrade.organization}
+                            scopes={downgrade.organization}
                             prefix="Organization"
                           />
                           <SimilarRoleScopes
                             definitions={scopes.project}
-                            scopes={upgrade.project}
+                            scopes={downgrade.project}
                             prefix="Projects"
                           />
                           <SimilarRoleScopes
                             definitions={scopes.target}
-                            scopes={upgrade.target}
+                            scopes={downgrade.target}
                             prefix="Targets"
                           />
                         </div>
@@ -636,7 +633,7 @@ function OrganizationMemberRolesMigrationGroup(props: {
               </FormItem>
             )}
           />
-          {isRoleSelected ? null : <div>/</div>}
+          {isRoleSelected ? null : <div>or</div>}
           {isRoleSelected ? null : (
             <Dialog
               open={customAccessModalOpen}

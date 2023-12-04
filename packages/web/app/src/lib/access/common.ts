@@ -67,7 +67,7 @@ export const scopes: {
     },
     {
       name: 'Settings',
-      description: "Manage organization's settings (change its name, etc.)",
+      description: 'Manage project settings (change its name, etc.)',
       mapping: {
         'read-write': ProjectAccessScope.Settings,
       },
@@ -99,7 +99,7 @@ export const scopes: {
     RegistryAccessScope,
     {
       name: 'Settings',
-      description: "Manage organization's settings (change its name, etc.)",
+      description: 'Manage target settings (change its name, etc.)',
       mapping: {
         'read-write': TargetAccessScope.Settings,
       },

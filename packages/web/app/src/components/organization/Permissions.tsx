@@ -108,26 +108,8 @@ export const PermissionScopeItem = <
       )}
     >
       <div>
-        <div
-          className={clsx(
-            'font-semibold text-white',
-            props.selectedScope !== 'no-access' && props.canManageScope === false
-              ? 'text-red-600'
-              : null,
-          )}
-        >
-          {props.scope.name}
-        </div>
-        <div
-          className={clsx(
-            'text-xs text-gray-400',
-            props.selectedScope !== 'no-access' && props.canManageScope === false
-              ? 'text-red-600'
-              : null,
-          )}
-        >
-          {props.scope.description}
-        </div>
+        <div className="font-semibold text-white">{props.scope.name}</div>
+        <div className="text-xs text-gray-400">{props.scope.description}</div>
       </div>
       <Select
         disabled={!props.canManageScope}
@@ -165,14 +147,14 @@ export const PermissionScopeItem = <
                   : false;
 
               return (
-                <SelectItem
-                  key={item.value}
-                  value={item.value}
-                  disabled={isDisabled}
-                  title={isDisabled ? 'Cannot downgrade members' : undefined}
-                >
-                  {item.label}
-                </SelectItem>
+                <>
+                  <SelectItem key={item.value} value={item.value} disabled={isDisabled}>
+                    {item.label}
+                    {isDisabled ? (
+                      <span className="block text-xs italic">Can't downgrade</span>
+                    ) : null}
+                  </SelectItem>
+                </>
               );
             })}
         </SelectContent>

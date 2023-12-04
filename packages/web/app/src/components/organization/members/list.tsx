@@ -234,7 +234,8 @@ function OrganizationMemberRoleSwitcher(props: {
           if (!newRoleHasMoreOrEqualAccess) {
             return {
               active: false,
-              reason: 'This role misses some permissions that the member has',
+              reason:
+                'The member will experience a downgrade as this role lacks certain permissions they currently possess.',
             };
           }
 

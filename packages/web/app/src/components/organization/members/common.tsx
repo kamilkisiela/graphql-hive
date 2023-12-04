@@ -90,7 +90,6 @@ export function RoleSelector<T>(props: {
                     <Tooltip delayDuration={200} {...(isActive ? { open: false } : {})}>
                       <TooltipTrigger className="w-full text-left">
                         <CommandItem
-                          title={reason}
                           onSelect={() => {
                             setPhase('busy');
                             setOpen(false);

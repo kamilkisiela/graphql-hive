@@ -245,12 +245,18 @@ function OrganizationMemberRoleEditor(props: {
           <DialogHeader>
             <DialogTitle>Member Role Editor</DialogTitle>
             <DialogDescription>
-              {isAdmin
-                ? 'As an admin, you can add or remove permissions from the role.'
-                : hasMembers
-                  ? // TODO: set existing scopes as isReadOnly(true)
-                    'You can only add permissions to the role, you cannot downgrade its members.'
-                  : 'You can add or remove permissions from the role as it has no members.'}
+              {isAdmin ? (
+                'As an admin, you can add or remove permissions from the role.'
+              ) : hasMembers ? (
+                <>
+                  This role is assigned to at least one member.
+                  <br />
+                  You can only add permissions to the role,{' '}
+                  <span className="font-bold">you cannot downgrade its members.</span>
+                </>
+              ) : (
+                'You can add or remove permissions from the role as it has no members.'
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-row space-x-6">
