@@ -102,8 +102,6 @@ export const TargetLayout = ({
   const router = useRouteSelector();
   const [isModalOpen, toggleModalOpen] = useToggle();
 
-  const { organizationId: orgId, projectId } = router;
-
   const currentOrganization = useFragment(
     TargetLayout_CurrentOrganizationFragment,
     props.currentOrganization,
