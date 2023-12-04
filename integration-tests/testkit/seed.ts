@@ -3,7 +3,6 @@ import {
   OrganizationAccessScope,
   ProjectAccessScope,
   ProjectType,
-  RegistryModel,
   SchemaPolicyInput,
   TargetAccessScope,
 } from '@app/gql/graphql';
@@ -43,8 +42,6 @@ import {
   setTargetValidation,
   updateBaseSchema,
   updateMemberAccess,
-  updateRegistryModel,
-  updateSchemaVersionStatus,
 } from './flow';
 import { execute } from './graphql';
 import { UpdateSchemaPolicyForOrganization, UpdateSchemaPolicyForProject } from './schema-policy';
@@ -149,13 +146,7 @@ export function initSeed() {
 
               return members;
             },
-            async createProject(
-              projectType: ProjectType,
-              options?: {
-                useLegacyRegistryModels?: boolean;
-              },
-            ) {
-              const useLegacyRegistryModels = options?.useLegacyRegistryModels === true;
+            async createProject(projectType: ProjectType) {
               const projectResult = await createProject(
                 {
                   organization: organization.cleanId,
@@ -168,17 +159,6 @@ export function initSeed() {
               const targets = projectResult.createProject.ok!.createdTargets;
               const target = targets[0];
               const project = projectResult.createProject.ok!.createdProject;
-
-              if (useLegacyRegistryModels) {
-                await updateRegistryModel(
-                  {
-                    organization: organization.cleanId,
-                    project: projectResult.createProject.ok!.createdProject.cleanId,
-                    model: RegistryModel.Legacy,
-                  },
-                  ownerToken,
-                ).then(r => r.expectNoGraphQLErrors());
-              }
 
               return {
                 project,
@@ -489,18 +469,7 @@ export function initSeed() {
                         secret,
                       );
                     },
-                    async updateSchemaVersionStatus(version: string, valid: boolean) {
-                      return await updateSchemaVersionStatus(
-                        {
-                          organization: organization.cleanId,
-                          project: project.cleanId,
-                          target: target.cleanId,
-                          valid,
-                          version,
-                        },
-                        secret,
-                      ).then(r => r.expectNoGraphQLErrors());
-                    },
+
                     async fetchSchemaFromCDN() {
                       return fetchSchemaFromCDN(
                         {

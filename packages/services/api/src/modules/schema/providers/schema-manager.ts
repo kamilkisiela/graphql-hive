@@ -3,7 +3,7 @@ import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import { z } from 'zod';
 import type { SchemaChangeType, SchemaCheck, SchemaCompositionError } from '@hive/storage';
-import { RegistryModel, SchemaChecksFilter } from '../../../__generated__/types';
+import { SchemaChecksFilter } from '../../../__generated__/types';
 import {
   DateRange,
   Orchestrator,
@@ -275,32 +275,6 @@ export class SchemaManager {
     };
   }
 
-  async updateSchemaVersionStatus(
-    input: TargetSelector & { version: string; valid: boolean },
-  ): Promise<SchemaVersion> {
-    this.logger.debug('Updating schema version status (input=%o)', input);
-    await this.authManager.ensureTargetAccess({
-      ...input,
-      scope: TargetAccessScope.REGISTRY_WRITE,
-    });
-
-    const project = await this.storage.getProject({
-      organization: input.organization,
-      project: input.project,
-    });
-
-    if (project.legacyRegistryModel) {
-      return {
-        ...(await this.storage.updateVersionStatus(input)),
-        organization: input.organization,
-        project: input.project,
-        target: input.target,
-      };
-    }
-
-    throw new HiveError(`Updating the status is supported only by legacy projects`);
-  }
-
   async getSchemaLog(selector: { commit: string } & TargetSelector) {
     this.logger.debug('Fetching schema log (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
@@ -566,22 +540,6 @@ export class SchemaManager {
         organization: input.organization,
         project: input.project,
       }),
-    };
-  }
-
-  async updateRegistryModel(
-    input: ProjectSelector & {
-      model: RegistryModel;
-    },
-  ) {
-    this.logger.debug('Updating registry model (input=%o)', input);
-    await this.authManager.ensureProjectAccess({
-      ...input,
-      scope: ProjectAccessScope.SETTINGS,
-    });
-
-    return {
-      ok: await this.storage.updateProjectRegistryModel(input),
     };
   }
 
@@ -851,19 +809,10 @@ export class SchemaManager {
   }
 
   checkProjectNativeFederationSupport(input: {
-    project: Pick<Project, 'id' | 'legacyRegistryModel' | 'nativeFederation'>;
+    project: Pick<Project, 'id' | 'nativeFederation'>;
     organization: Pick<Organization, 'id' | 'featureFlags'>;
   }) {
     if (input.project.nativeFederation === false) {
-      return false;
-    }
-
-    if (input.project.legacyRegistryModel === true) {
-      this.logger.warn(
-        'Project is using legacy registry model, ignoring native Federation support (organization=%s, project=%s)',
-        input.organization.id,
-        input.project.id,
-      );
       return false;
     }
 

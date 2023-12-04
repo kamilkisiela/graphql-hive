@@ -10,7 +10,6 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { canAccessTarget, TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
-import { ProjectMigrationToast } from '../project/migration-toast';
 
 export enum Page {
   Schema = 'schema',
@@ -61,7 +60,6 @@ const TargetLayout_CurrentProjectFragment = graphql(`
     id
     cleanId
     name
-    registryModel
     targets {
       ...TargetLayout_TargetConnectionFragment
     }
@@ -216,10 +214,6 @@ export const TargetLayout = ({
           </div>
         </div>
       </header>
-
-      {currentProject?.registryModel === 'LEGACY' ? (
-        <ProjectMigrationToast orgId={orgId} projectId={projectId} />
-      ) : null}
 
       <div className="relative border-b border-gray-800">
         <div className="container flex items-center justify-between">

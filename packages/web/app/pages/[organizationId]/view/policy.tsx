@@ -7,9 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
-import { DocsLink, DocsNote, MetaTitle } from '@/components/v2';
+import { DocsLink, MetaTitle } from '@/components/v2';
 import { graphql } from '@/gql';
-import { RegistryModel } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
@@ -23,7 +22,6 @@ const OrganizationPolicyPageQuery = graphql(`
           nodes {
             id
             cleanId
-            registryModel
           }
         }
         schemaPolicy {
@@ -92,10 +90,6 @@ function PolicyPageContent() {
   const currentOrganization = query.data?.organization?.organization;
   const organizationConnection = query.data?.organizations;
 
-  const legacyProjects = currentOrganization?.projects.nodes.filter(
-    p => p.registryModel === RegistryModel.Legacy,
-  );
-
   return (
     <OrganizationLayout
       page={Page.Policy}
@@ -127,35 +121,6 @@ function PolicyPageContent() {
                 </DocsLink>
               </CardDescription>
             </CardHeader>
-            {legacyProjects && legacyProjects.length > 0 ? (
-              <div className="p-6">
-                <DocsNote warn>
-                  <p>Some of your projects are using the legacy model of the schema registry.</p>
-                  <p className="text-muted-foreground">
-                    {legacyProjects.map((p, i, all) => (
-                      <>
-                        <code className="italic" key={p.cleanId}>
-                          {p.cleanId}
-                        </code>
-                        {all.length === i - 1 ? ' ' : ', '}
-                      </>
-                    ))}
-                  </p>
-                  <p className="text-muted-foreground py-2 font-semibold underline">
-                    Policy feature is only available for projects that are using the new registry
-                    model.
-                  </p>
-                  <p>
-                    <DocsLink
-                      className="text-muted-foreground"
-                      href="https://the-guild.dev/blog/graphql-hive-improvements-in-schema-registry"
-                    >
-                      Learn more
-                    </DocsLink>
-                  </p>
-                </DocsNote>
-              </div>
-            ) : null}
             <CardContent>
               <PolicySettings
                 saving={mutation.fetching}

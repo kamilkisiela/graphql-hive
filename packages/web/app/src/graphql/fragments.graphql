@@ -25,7 +25,6 @@ fragment ProjectFields on Project {
   cleanId
   name
   type
-  registryModel
 }
 
 fragment ProjectEssentials on Project {

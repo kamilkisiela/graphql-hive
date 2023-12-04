@@ -45,25 +45,22 @@ export const resolvers: LabModule.Resolvers = {
 
       // Legacy Fallback
 
-      const [
-        schemas,
-        { type, externalComposition, nativeFederation, legacyRegistryModel },
-        { featureFlags },
-      ] = await Promise.all([
-        schemaManager.getSchemasOfVersion({
-          organization,
-          project,
-          target,
-          version: latestSchema.id,
-        }),
-        injector.get(ProjectManager).getProject({
-          organization,
-          project,
-        }),
-        injector.get(OrganizationManager).getOrganization({
-          organization,
-        }),
-      ]);
+      const [schemas, { type, externalComposition, nativeFederation }, { featureFlags }] =
+        await Promise.all([
+          schemaManager.getSchemasOfVersion({
+            organization,
+            project,
+            target,
+            version: latestSchema.id,
+          }),
+          injector.get(ProjectManager).getProject({
+            organization,
+            project,
+          }),
+          injector.get(OrganizationManager).getOrganization({
+            organization,
+          }),
+        ]);
 
       const orchestrator = schemaManager.matchOrchestrator(type);
       const helper = injector.get(SchemaHelper);
@@ -77,7 +74,6 @@ export const resolvers: LabModule.Resolvers = {
               project: {
                 id: project,
                 nativeFederation,
-                legacyRegistryModel,
               },
               organization: {
                 id: organization,

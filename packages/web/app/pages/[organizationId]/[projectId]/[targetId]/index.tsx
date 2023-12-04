@@ -4,7 +4,6 @@ import { useQuery } from 'urql';
 import { useDebouncedCallback } from 'use-debounce';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
-import { MarkAsValid } from '@/components/target/history/MarkAsValid';
 import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
@@ -12,7 +11,7 @@ import { Accordion, GraphQLBlock, Input, MetaTitle, noSchema } from '@/component
 import { noSchemaVersion } from '@/components/v2/empty-list';
 import { GraphQLHighlight } from '@/components/v2/graphql-block';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
-import { ProjectType, RegistryModel } from '@/graphql';
+import { ProjectType } from '@/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { useRouteSelector } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
@@ -140,7 +139,6 @@ const SchemaView_ProjectFragment = graphql(`
   fragment SchemaView_ProjectFragment on Project {
     cleanId
     type
-    registryModel
     ...Schemas_ProjectFragment
   }
 `);
@@ -176,7 +174,6 @@ const SchemaView_TargetFragment = graphql(`
           ...SchemaView_SchemaFragment
         }
       }
-      ...MarkAsValid_SchemaVersionFragment
     }
   }
 `);
@@ -225,7 +222,6 @@ function SchemaView(props: {
     return noSchema;
   }
 
-  const canMarkAsValid = project.registryModel === RegistryModel.Legacy;
   const showExtra = canManage;
 
   return (
@@ -242,11 +238,6 @@ function SchemaView(props: {
                 size="small"
               />
             )}
-            {canMarkAsValid ? (
-              <>
-                <MarkAsValid version={latestSchemaVersion} />{' '}
-              </>
-            ) : null}
           </div>
         </div>
       ) : null}

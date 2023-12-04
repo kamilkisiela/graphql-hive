@@ -278,7 +278,6 @@ export interface Project {
    * TODO: All code referencing this field should be removed at some point.
    */
   gitRepository?: `${string}/${string}` | null;
-  legacyRegistryModel: boolean;
   useProjectNameInGithubCheck: boolean;
   externalComposition: {
     enabled: boolean;

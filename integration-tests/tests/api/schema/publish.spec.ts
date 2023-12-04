@@ -135,137 +135,122 @@ test.concurrent('base schema should not affect the output schema persisted in db
   );
 });
 
-test.concurrent.each(['legacy', 'modern'])(
-  'directives should not be removed (federation %s)',
-  async mode => {
-    const { createOrg } = await initSeed().createOwner();
-    const { createProject } = await createOrg();
-    const { createToken } = await createProject(ProjectType.Federation, {
-      useLegacyRegistryModels: mode === 'legacy',
-    });
-    const readWriteToken = await createToken({
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      projectScopes: [],
-      organizationScopes: [],
-    });
+test.concurrent('directives should not be removed (federation)', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject } = await createOrg();
+  const { createToken } = await createProject(ProjectType.Federation);
+  const readWriteToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+  });
 
-    // Publish schema with write rights
-    const publishResult = await readWriteToken
-      .publishSchema({
-        commit: 'abc123',
-        service: 'users',
-        url: 'https://api.com/users',
-        sdl: `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`,
-      })
-      .then(r => r.expectNoGraphQLErrors());
+  // Publish schema with write rights
+  const publishResult = await readWriteToken
+    .publishSchema({
+      commit: 'abc123',
+      service: 'users',
+      url: 'https://api.com/users',
+      sdl: `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`,
+    })
+    .then(r => r.expectNoGraphQLErrors());
 
-    // Schema publish should be successful
-    expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
-    const versionsResult = await readWriteToken.fetchVersions(5);
-    expect(versionsResult).toHaveLength(1);
+  // Schema publish should be successful
+  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  const versionsResult = await readWriteToken.fetchVersions(5);
+  expect(versionsResult).toHaveLength(1);
 
-    const latestResult = await readWriteToken.latestSchema();
-    expect(latestResult.latestVersion?.schemas.total).toBe(1);
+  const latestResult = await readWriteToken.latestSchema();
+  expect(latestResult.latestVersion?.schemas.total).toBe(1);
 
-    expect(latestResult.latestVersion?.schemas.nodes[0]).toEqual(
-      expect.objectContaining({
-        commit: 'abc123',
-        source: expect.stringContaining(
-          `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`,
-        ),
-      }),
-    );
-  },
-);
+  expect(latestResult.latestVersion?.schemas.nodes[0]).toEqual(
+    expect.objectContaining({
+      commit: 'abc123',
+      source: expect.stringContaining(
+        `type Query { me: User } type User @key(fields: "id") { id: ID! name: String }`,
+      ),
+    }),
+  );
+});
 
-test.concurrent.each(['legacy', 'modern'])(
-  'directives should not be removed (stitching %s)',
-  async mode => {
-    const { createOrg } = await initSeed().createOwner();
-    const { createProject } = await createOrg();
-    const { createToken } = await createProject(ProjectType.Stitching, {
-      useLegacyRegistryModels: mode === 'legacy',
-    });
-    const readWriteToken = await createToken({
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      projectScopes: [],
-      organizationScopes: [],
-    });
+test.concurrent('directives should not be removed (stitching)', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject } = await createOrg();
+  const { createToken } = await createProject(ProjectType.Stitching);
+  const readWriteToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+  });
 
-    // Publish schema with write rights
-    const publishResult = await readWriteToken
-      .publishSchema({
-        author: 'Kamil',
-        sdl: `type Query { me: User } type User @key(selectionSet: "{ id }") { id: ID! name: String }`,
-        service: 'test',
-        url: 'https://api.com/users',
-        commit: 'abc123',
-      })
-      .then(r => r.expectNoGraphQLErrors());
+  // Publish schema with write rights
+  const publishResult = await readWriteToken
+    .publishSchema({
+      author: 'Kamil',
+      sdl: `type Query { me: User } type User @key(selectionSet: "{ id }") { id: ID! name: String }`,
+      service: 'test',
+      url: 'https://api.com/users',
+      commit: 'abc123',
+    })
+    .then(r => r.expectNoGraphQLErrors());
 
-    // Schema publish should be successful
-    expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  // Schema publish should be successful
+  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
-    const versionsResult = await readWriteToken.fetchVersions(5);
-    expect(versionsResult).toHaveLength(1);
+  const versionsResult = await readWriteToken.fetchVersions(5);
+  expect(versionsResult).toHaveLength(1);
 
-    const latestResult = await readWriteToken.latestSchema();
-    expect(latestResult.latestVersion?.schemas.total).toBe(1);
+  const latestResult = await readWriteToken.latestSchema();
+  expect(latestResult.latestVersion?.schemas.total).toBe(1);
 
-    expect(latestResult.latestVersion?.schemas.nodes[0]).toEqual(
-      expect.objectContaining({
-        commit: 'abc123',
-        source: expect.stringContaining(
-          `type Query { me: User } type User @key(selectionSet: "{ id }") { id: ID! name: String }`,
-        ),
-      }),
-    );
-  },
-);
+  expect(latestResult.latestVersion?.schemas.nodes[0]).toEqual(
+    expect.objectContaining({
+      commit: 'abc123',
+      source: expect.stringContaining(
+        `type Query { me: User } type User @key(selectionSet: "{ id }") { id: ID! name: String }`,
+      ),
+    }),
+  );
+});
 
-test.concurrent.each(['legacy', 'modern'])(
-  'directives should not be removed (single %s)',
-  async mode => {
-    const { createOrg } = await initSeed().createOwner();
-    const { createProject } = await createOrg();
-    const { createToken } = await createProject(ProjectType.Single, {
-      useLegacyRegistryModels: mode === 'legacy',
-    });
-    const readWriteToken = await createToken({
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      projectScopes: [],
-      organizationScopes: [],
-    });
-    // Publish schema with write rights
-    const publishResult = await readWriteToken
-      .publishSchema({
-        author: 'Kamil',
-        commit: 'abc123',
-        sdl: `directive @auth on FIELD_DEFINITION type Query { me: User @auth } type User { id: ID! name: String }`,
-        service: 'test',
-        url: 'https://api.com/users',
-      })
-      .then(r => r.expectNoGraphQLErrors());
+test.concurrent('directives should not be removed (single)', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject } = await createOrg();
+  const { createToken } = await createProject(ProjectType.Single);
+  const readWriteToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+  });
+  // Publish schema with write rights
+  const publishResult = await readWriteToken
+    .publishSchema({
+      author: 'Kamil',
+      commit: 'abc123',
+      sdl: `directive @auth on FIELD_DEFINITION type Query { me: User @auth } type User { id: ID! name: String }`,
+      service: 'test',
+      url: 'https://api.com/users',
+    })
+    .then(r => r.expectNoGraphQLErrors());
 
-    // Schema publish should be successful
-    expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  // Schema publish should be successful
+  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
-    const versionsResult = await readWriteToken.fetchVersions(5);
-    expect(versionsResult).toHaveLength(1);
+  const versionsResult = await readWriteToken.fetchVersions(5);
+  expect(versionsResult).toHaveLength(1);
 
-    const latestResult = await readWriteToken.latestSchema();
-    expect(latestResult.latestVersion?.schemas.total).toBe(1);
+  const latestResult = await readWriteToken.latestSchema();
+  expect(latestResult.latestVersion?.schemas.total).toBe(1);
 
-    expect(latestResult.latestVersion?.schemas.nodes[0]).toEqual(
-      expect.objectContaining({
-        commit: 'abc123',
-        source: expect.stringContaining(
-          `directive @auth on FIELD_DEFINITION type Query { me: User @auth } type User { id: ID! name: String }`,
-        ),
-      }),
-    );
-  },
-);
+  expect(latestResult.latestVersion?.schemas.nodes[0]).toEqual(
+    expect.objectContaining({
+      commit: 'abc123',
+      source: expect.stringContaining(
+        `directive @auth on FIELD_DEFINITION type Query { me: User @auth } type User { id: ID! name: String }`,
+      ),
+    }),
+  );
+});
 
 test.concurrent('share publication of schema using redis', async () => {
   const { createOrg } = await initSeed().createOwner();
@@ -439,76 +424,138 @@ test.concurrent(
   },
 );
 
-type EachParams = { projectType: ProjectType; model: 'modern' | 'legacy' };
+describe.each([ProjectType.Stitching, ProjectType.Federation, ProjectType.Single])(
+  '$projectType',
+  projectType => {
+    const serviceName =
+      projectType === ProjectType.Single
+        ? {}
+        : {
+            service: 'test',
+          };
+    const serviceUrl = projectType === ProjectType.Single ? {} : { url: 'http://localhost:4000' };
 
-describe.each`
-  projectType               | model
-  ${ProjectType.Single}     | ${'modern'}
-  ${ProjectType.Stitching}  | ${'modern'}
-  ${ProjectType.Federation} | ${'modern'}
-  ${ProjectType.Single}     | ${'legacy'}
-  ${ProjectType.Stitching}  | ${'legacy'}
-  ${ProjectType.Federation} | ${'legacy'}
-`('$projectType ($model)', ({ projectType, model }: EachParams) => {
-  const serviceName =
-    projectType === ProjectType.Single
-      ? {}
-      : {
-          service: 'test',
-        };
-  const serviceUrl = projectType === ProjectType.Single ? {} : { url: 'http://localhost:4000' };
+    test.concurrent(
+      'linkToWebsite should be available when publishing initial schema',
+      async () => {
+        const { createOrg } = await initSeed().createOwner();
+        const { createProject, organization } = await createOrg();
+        const { project, target, createToken } = await createProject(projectType);
+        const readWriteToken = await createToken({
+          targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+          projectScopes: [],
+          organizationScopes: [],
+        });
 
-  test.concurrent('linkToWebsite should be available when publishing initial schema', async () => {
-    const { createOrg } = await initSeed().createOwner();
-    const { createProject, organization } = await createOrg();
-    const { project, target, createToken } = await createProject(projectType, {
-      useLegacyRegistryModels: model === 'legacy',
-    });
-    const readWriteToken = await createToken({
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      projectScopes: [],
-      organizationScopes: [],
-    });
+        const result = await readWriteToken
+          .publishSchema({
+            author: 'Kamil',
+            commit: 'abc123',
+            sdl: `type Query { ping: String }`,
+            ...serviceName,
+            ...serviceUrl,
+          })
+          .then(r => r.expectNoGraphQLErrors());
 
-    const result = await readWriteToken
-      .publishSchema({
-        author: 'Kamil',
-        commit: 'abc123',
-        sdl: `type Query { ping: String }`,
-        ...serviceName,
-        ...serviceUrl,
-      })
-      .then(r => r.expectNoGraphQLErrors());
+        expect(result.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
-    expect(result.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+        const linkToWebsite =
+          result.schemaPublish.__typename === 'SchemaPublishSuccess'
+            ? result.schemaPublish.linkToWebsite
+            : null;
 
-    const linkToWebsite =
-      result.schemaPublish.__typename === 'SchemaPublishSuccess'
-        ? result.schemaPublish.linkToWebsite
-        : null;
-
-    expect(linkToWebsite).toEqual(
-      `${process.env.HIVE_APP_BASE_URL}/${organization.cleanId}/${project.cleanId}/${target.cleanId}`,
+        expect(linkToWebsite).toEqual(
+          `${process.env.HIVE_APP_BASE_URL}/${organization.cleanId}/${project.cleanId}/${target.cleanId}`,
+        );
+      },
     );
-  });
 
-  test.concurrent(
-    'linkToWebsite should be available when publishing non-initial schema',
-    async () => {
-      const { createOrg } = await initSeed().createOwner();
-      const { createProject, organization } = await createOrg();
-      const { createToken, project, target } = await createProject(projectType, {
-        useLegacyRegistryModels: model === 'legacy',
-      });
+    test.concurrent(
+      'linkToWebsite should be available when publishing non-initial schema',
+      async () => {
+        const { createOrg } = await initSeed().createOwner();
+        const { createProject, organization } = await createOrg();
+        const { createToken, project, target } = await createProject(projectType);
+        const readWriteToken = await createToken({
+          targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+          projectScopes: [],
+          organizationScopes: [],
+        });
+
+        let result = await readWriteToken
+          .publishSchema({
+            author: 'Kamil',
+            commit: 'abc123',
+            sdl: `type Query { ping: String }`,
+            ...serviceName,
+            ...serviceUrl,
+          })
+          .then(r => r.expectNoGraphQLErrors());
+
+        expect(result.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+        result = await readWriteToken
+          .publishSchema({
+            author: 'Kamil',
+            commit: 'abc123',
+            sdl: `type Query { ping: String }`,
+            ...serviceName,
+            ...serviceUrl,
+            force: true,
+            experimental_acceptBreakingChanges: true,
+          })
+          .then(r => r.expectNoGraphQLErrors());
+
+        expect(result.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+        const linkToWebsite =
+          result.schemaPublish.__typename === 'SchemaPublishSuccess'
+            ? result.schemaPublish.linkToWebsite
+            : null;
+
+        expect(linkToWebsite).toMatch(
+          `${process.env.HIVE_APP_BASE_URL}/${organization.cleanId}/${project.cleanId}/${target.cleanId}/history/`,
+        );
+        expect(linkToWebsite).toMatch(/history\/[a-z0-9-]+$/);
+      },
+    );
+
+    test("Two targets with the same commit id shouldn't return an error", async () => {
+      const { createOrg, ownerToken } = await initSeed().createOwner();
+      const { organization, createProject } = await createOrg();
+      const { project, createToken } = await createProject(projectType);
       const readWriteToken = await createToken({
         targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
         projectScopes: [],
         organizationScopes: [],
       });
 
-      let result = await readWriteToken
+      const publishResult = await readWriteToken
         .publishSchema({
-          author: 'Kamil',
+          author: 'gilad',
+          commit: 'abc123',
+          sdl: `type Query { ping: String }`,
+          ...serviceName,
+          ...serviceUrl,
+        })
+        .then(r => r.expectNoGraphQLErrors());
+      const createTargetResult = await createTarget(
+        {
+          organization: organization.cleanId,
+          project: project.cleanId,
+          name: 'target2',
+        },
+        ownerToken,
+      ).then(r => r.expectNoGraphQLErrors());
+      const target2 = createTargetResult.createTarget.ok!.createdTarget;
+      const writeTokenResult2 = await createToken({
+        targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+        projectScopes: [],
+        organizationScopes: [],
+        targetId: target2.cleanId,
+      });
+      const publishResult2 = await writeTokenResult2
+        .publishSchema({
+          author: 'gilad',
           commit: 'abc123',
           sdl: `type Query { ping: String }`,
           ...serviceName,
@@ -516,84 +563,12 @@ describe.each`
         })
         .then(r => r.expectNoGraphQLErrors());
 
-      expect(result.schemaPublish.__typename).toBe('SchemaPublishSuccess');
-
-      result = await readWriteToken
-        .publishSchema({
-          author: 'Kamil',
-          commit: 'abc123',
-          sdl: `type Query { ping: String }`,
-          ...serviceName,
-          ...serviceUrl,
-          force: true,
-          experimental_acceptBreakingChanges: true,
-        })
-        .then(r => r.expectNoGraphQLErrors());
-
-      expect(result.schemaPublish.__typename).toBe('SchemaPublishSuccess');
-      const linkToWebsite =
-        result.schemaPublish.__typename === 'SchemaPublishSuccess'
-          ? result.schemaPublish.linkToWebsite
-          : null;
-
-      expect(linkToWebsite).toMatch(
-        `${process.env.HIVE_APP_BASE_URL}/${organization.cleanId}/${project.cleanId}/${target.cleanId}/history/`,
-      );
-      expect(linkToWebsite).toMatch(/history\/[a-z0-9-]+$/);
-    },
-  );
-
-  test("Two targets with the same commit id shouldn't return an error", async () => {
-    const { createOrg, ownerToken } = await initSeed().createOwner();
-    const { organization, createProject } = await createOrg();
-    const { project, createToken } = await createProject(projectType, {
-      useLegacyRegistryModels: model === 'legacy',
+      // Schema publish should be successful
+      expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+      expect(publishResult2.schemaPublish.__typename).toBe('SchemaPublishSuccess');
     });
-    const readWriteToken = await createToken({
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      projectScopes: [],
-      organizationScopes: [],
-    });
-
-    const publishResult = await readWriteToken
-      .publishSchema({
-        author: 'gilad',
-        commit: 'abc123',
-        sdl: `type Query { ping: String }`,
-        ...serviceName,
-        ...serviceUrl,
-      })
-      .then(r => r.expectNoGraphQLErrors());
-    const createTargetResult = await createTarget(
-      {
-        organization: organization.cleanId,
-        project: project.cleanId,
-        name: 'target2',
-      },
-      ownerToken,
-    ).then(r => r.expectNoGraphQLErrors());
-    const target2 = createTargetResult.createTarget.ok!.createdTarget;
-    const writeTokenResult2 = await createToken({
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      projectScopes: [],
-      organizationScopes: [],
-      targetId: target2.cleanId,
-    });
-    const publishResult2 = await writeTokenResult2
-      .publishSchema({
-        author: 'gilad',
-        commit: 'abc123',
-        sdl: `type Query { ping: String }`,
-        ...serviceName,
-        ...serviceUrl,
-      })
-      .then(r => r.expectNoGraphQLErrors());
-
-    // Schema publish should be successful
-    expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
-    expect(publishResult2.schemaPublish.__typename).toBe('SchemaPublishSuccess');
-  });
-});
+  },
+);
 
 function connectionString() {
   const {
@@ -644,7 +619,7 @@ describe('schema publishing changes are persisted', () => {
 
       const { createOrg } = await initSeed().createOwner();
       const { createProject, organization } = await createOrg();
-      const { createToken, target, project } = await createProject(ProjectType.Federation, {});
+      const { createToken, target, project } = await createProject(ProjectType.Federation);
       const readWriteToken = await createToken({
         targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
         projectScopes: [],
@@ -2700,7 +2675,7 @@ test('Query.schemaCompareToPrevious: result is read from the database', async ()
 
     const { createOrg, ownerToken } = await initSeed().createOwner();
     const { createProject, organization } = await createOrg();
-    const { createToken, target, project } = await createProject(ProjectType.Federation, {});
+    const { createToken, target, project } = await createProject(ProjectType.Federation);
     const readWriteToken = await createToken({
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
       projectScopes: [],
@@ -2818,7 +2793,7 @@ test('Composition Error (Federation 2) can be served from the database', async (
 
     const { createOrg, ownerToken } = await initSeed().createOwner();
     const { createProject, organization } = await createOrg();
-    const { createToken, target, project } = await createProject(ProjectType.Federation, {});
+    const { createToken, target, project } = await createProject(ProjectType.Federation);
     const readWriteToken = await createToken({
       targetScopes: [
         TargetAccessScope.RegistryRead,
@@ -2948,7 +2923,7 @@ test('Composition Network Failure (Federation 2)', async () => {
 
     const { createOrg, ownerToken } = await initSeed().createOwner();
     const { createProject, organization } = await createOrg();
-    const { createToken, target, project } = await createProject(ProjectType.Federation, {});
+    const { createToken, target, project } = await createProject(ProjectType.Federation);
     const readWriteToken = await createToken({
       targetScopes: [
         TargetAccessScope.RegistryRead,
@@ -3361,70 +3336,6 @@ test.concurrent(
     } finally {
       await pool?.end();
     }
-  },
-);
-
-test.concurrent(
-  'legacy stitching project service without url results in correct change when an url is added',
-  async ({ expect }) => {
-    const { createOrg } = await initSeed().createOwner();
-    const { createProject } = await createOrg();
-    const { /* project, target,*/ createToken } = await createProject(ProjectType.Stitching, {
-      useLegacyRegistryModels: true,
-    });
-
-    const writeToken = await createToken({
-      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
-      projectScopes: [ProjectAccessScope.Settings, ProjectAccessScope.Read],
-      organizationScopes: [],
-    });
-
-    let result = await writeToken
-      .publishSchema({
-        sdl: 'type Query { ping: String! }',
-        author: 'Laurin',
-        commit: '123',
-        service: 'foo1',
-      })
-      .then(r => r.expectNoGraphQLErrors());
-
-    expect(result.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
-
-    result = await writeToken
-      .publishSchema({
-        sdl: 'type Query { ping: String! }',
-        author: 'Laurin',
-        commit: '123',
-        service: 'foo1',
-        url: 'https://api.com/foo1',
-      })
-      .then(r => r.expectNoGraphQLErrors());
-
-    expect(result.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
-
-    const newVersionId = (await writeToken.fetchLatestValidSchema())?.latestValidVersion?.id;
-
-    if (typeof newVersionId !== 'string') {
-      throw new Error('newVersionId is not a string');
-    }
-
-    const compareResult = await writeToken.compareToPreviousVersion(newVersionId);
-    expect(compareResult).toMatchInlineSnapshot(`
-    {
-      schemaCompareToPrevious: {
-        changes: {
-          nodes: [
-            {
-              criticality: Dangerous,
-              message: [foo1] New service url: 'https://api.com/foo1' (previously: 'none'),
-            },
-          ],
-          total: 1,
-        },
-        initial: false,
-      },
-    }
-    `);
   },
 );
 

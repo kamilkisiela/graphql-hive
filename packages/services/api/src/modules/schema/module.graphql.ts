@@ -14,7 +14,6 @@ export default gql`
     Requires API Token
     """
     schemaDelete(input: SchemaDeleteInput!): SchemaDeleteResult!
-    updateSchemaVersionStatus(input: SchemaVersionUpdateInput!): SchemaVersion!
     updateBaseSchema(input: UpdateBaseSchemaInput!): UpdateBaseSchemaResult!
     enableExternalSchemaComposition(
       input: EnableExternalSchemaCompositionInput!
@@ -22,9 +21,6 @@ export default gql`
     disableExternalSchemaComposition(
       input: DisableExternalSchemaCompositionInput!
     ): DisableExternalSchemaCompositionResult!
-    updateProjectRegistryModel(
-      input: UpdateProjectRegistryModelInput!
-    ): UpdateProjectRegistryModelResult!
     """
     Approve a failed schema check with breaking changes.
     """
@@ -104,32 +100,8 @@ export default gql`
     message: String!
   }
 
-  input UpdateProjectRegistryModelInput {
-    organization: ID!
-    project: ID!
-    model: RegistryModel!
-  }
-
-  enum RegistryModel {
-    LEGACY
-    MODERN
-  }
-
-  """
-  @oneOf
-  """
-  type UpdateProjectRegistryModelResult {
-    ok: Project
-    error: UpdateProjectRegistryModelError
-  }
-
-  type UpdateProjectRegistryModelError implements Error {
-    message: String!
-  }
-
   extend type Project {
     externalSchemaComposition: ExternalSchemaComposition
-    registryModel: RegistryModel!
     schemaVersionsCount(period: DateRangeInput): Int!
     isNativeFederationEnabled: Boolean!
   }

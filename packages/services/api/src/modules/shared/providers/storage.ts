@@ -10,7 +10,6 @@ import type {
 import type {
   AddAlertChannelInput,
   AddAlertInput,
-  RegistryModel,
   SchemaChecksFilter,
 } from '../../../__generated__/types';
 import type {
@@ -225,12 +224,6 @@ export interface Storage {
 
   enableProjectNameInGithubCheck(_: ProjectSelector): Promise<Project>;
 
-  updateProjectRegistryModel(
-    _: ProjectSelector & {
-      model: RegistryModel;
-    },
-  ): Promise<Project>;
-
   getTargetId(_: TargetSelector & { useIds?: boolean }): Promise<string | never>;
 
   getTargetByCleanId(
@@ -416,13 +409,6 @@ export interface Storage {
    * This can happen if the schema version was created before we introduced persisting changes.
    */
   getSchemaChangesForVersion(_: { versionId: string }): Promise<null | Array<SchemaChangeType>>;
-
-  updateVersionStatus(
-    _: {
-      valid: boolean;
-      version: string;
-    } & TargetSelector,
-  ): Promise<SchemaVersion | never>;
 
   getSchemaLog(_: { commit: string; target: string }): Promise<SchemaLog>;
 

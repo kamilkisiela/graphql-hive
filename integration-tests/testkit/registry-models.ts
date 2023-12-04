@@ -1,17 +1,12 @@
-import { ProjectType, RegistryModel, TargetAccessScope } from '@app/gql/graphql';
+import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import { initSeed } from './seed';
 
-export async function prepareProject(
-  projectType: ProjectType,
-  model: RegistryModel = RegistryModel.Modern,
-) {
+export async function prepareProject(projectType: ProjectType) {
   const { createOrg } = await initSeed().createOwner();
   const { organization, createProject, setFeatureFlag, setOrganizationSchemaPolicy } =
     await createOrg();
   const { project, createToken, target, targets, setProjectSchemaPolicy, setNativeFederation } =
-    await createProject(projectType, {
-      useLegacyRegistryModels: model === RegistryModel.Legacy,
-    });
+    await createProject(projectType);
 
   // Create a token with write rights
   const {

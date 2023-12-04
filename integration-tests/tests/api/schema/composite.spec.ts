@@ -1,19 +1,11 @@
 import { ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import { initSeed } from '../../../testkit/seed';
 
-describe.each`
-  projectType               | model
-  ${ProjectType.Stitching}  | ${'modern'}
-  ${ProjectType.Federation} | ${'modern'}
-  ${ProjectType.Stitching}  | ${'legacy'}
-  ${ProjectType.Federation} | ${'legacy'}
-`('$projectType ($model)', ({ projectType, model }) => {
+describe.each([ProjectType.Stitching, ProjectType.Federation])('$projectType', projectType => {
   test.concurrent('should insert lowercase service name to DB', async () => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject } = await createOrg();
-    const { createToken } = await createProject(projectType, {
-      useLegacyRegistryModels: model === 'legacy',
-    });
+    const { createToken } = await createProject(projectType);
     const { publishSchema, checkSchema, deleteSchema, fetchVersions } = await createToken({
       targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
       projectScopes: [],
@@ -105,11 +97,6 @@ describe.each`
       ]),
     );
 
-    if (model === 'legacy') {
-      // Ignore the rest of the test for legacy models
-      return;
-    }
-
     await expect(
       deleteSchema(
         'myOtherService', // camelCase
@@ -134,11 +121,7 @@ describe.each`
   });
 });
 
-describe.each`
-  projectType
-  ${ProjectType.Stitching}
-  ${ProjectType.Federation}
-`('$projectType', ({ projectType }) => {
+describe.each([ProjectType.Stitching, ProjectType.Federation])('$projectType', projectType => {
   test.concurrent(
     'should publish A, publish B, delete B, publish A and have A and B at the end',
     async () => {

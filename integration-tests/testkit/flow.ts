@@ -21,13 +21,11 @@ import type {
   SchemaDeleteInput,
   SchemaPublishInput,
   SchemaVersionsInput,
-  SchemaVersionUpdateInput,
   SetTargetValidationInput,
   TargetSelectorInput,
   UpdateBaseSchemaInput,
   UpdateOrganizationNameInput,
   UpdateProjectNameInput,
-  UpdateProjectRegistryModelInput,
   UpdateTargetNameInput,
   UpdateTargetValidationSettingsInput,
 } from './gql/graphql';
@@ -327,29 +325,6 @@ export function renameProject(input: UpdateProjectNameInput, authToken: string) 
               cleanId
               name
             }
-          }
-          error {
-            message
-          }
-        }
-      }
-    `),
-    authToken,
-    variables: {
-      input,
-    },
-  });
-}
-
-export function updateRegistryModel(input: UpdateProjectRegistryModelInput, authToken: string) {
-  return execute({
-    document: graphql(`
-      mutation updateRegistryModel($input: UpdateProjectRegistryModelInput!) {
-        updateProjectRegistryModel(input: $input) {
-          ok {
-            id
-            cleanId
-            name
           }
           error {
             message
@@ -961,35 +936,6 @@ export function compareToPreviousVersion(selector: SchemaCompareToPreviousInput,
     token,
     variables: {
       selector,
-    },
-  });
-}
-
-export function updateSchemaVersionStatus(input: SchemaVersionUpdateInput, token: string) {
-  return execute({
-    document: graphql(`
-      mutation updateSchemaVersionStatus($input: SchemaVersionUpdateInput!) {
-        updateSchemaVersionStatus(input: $input) {
-          id
-          date
-          valid
-          log {
-            ... on PushedSchemaLog {
-              __typename
-              commit
-              service
-            }
-            ... on DeletedSchemaLog {
-              __typename
-              deletedService
-            }
-          }
-        }
-      }
-    `),
-    token,
-    variables: {
-      input,
     },
   });
 }
