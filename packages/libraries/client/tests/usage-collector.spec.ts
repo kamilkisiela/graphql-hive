@@ -171,6 +171,34 @@ test('collect enums and scalars as inputs', async () => {
   `);
 });
 
+test('collect scalars as hard-coded inputs', async () => {
+  const collect = createCollector({
+    schema,
+    max: 1,
+  });
+  const info = collect(
+    parse(/* GraphQL */ `
+      {
+        projects(filter: { pagination: { limit: 20 } }) {
+          id
+        }
+      }
+    `),
+    {},
+  ).value;
+
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Query.projects,
+      Query.projects.filter,
+      Project.id,
+      FilterInput.pagination,
+      Int,
+      PaginationInput.limit,
+    ]
+  `);
+});
+
 test('collect enum values from object fields', async () => {
   const collect = createCollector({
     schema,
