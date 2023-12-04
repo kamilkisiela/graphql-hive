@@ -99,11 +99,14 @@ export function ChangesBlock(props: {
                           <Link
                             className="text-orange-500 hover:text-orange-500 hover:underline hover:underline-offset-2"
                             href={{
-                              pathname: '/[organizationId]/[projectId]/[targetId]/insights',
+                              pathname:
+                                '/[organizationId]/[projectId]/[targetId]/insights/schema-coordinate/[coordinate]',
                               query: {
                                 organizationId: router.organizationId,
                                 projectId: router.projectId,
                                 targetId: router.targetId,
+                                coordinate: change.path?.join('.'),
+                                period: '7d',
                               },
                             }}
                           >
