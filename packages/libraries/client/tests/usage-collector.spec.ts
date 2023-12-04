@@ -93,8 +93,23 @@ test('collect fields', async () => {
   });
   const info = collect(op, {}).value;
 
-  expect(info.fields).toContain(`Mutation.deleteProject`);
-  expect(info.fields).toContain(`Project.id`);
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Mutation.deleteProject,
+      Mutation.deleteProject.selector,
+      DeleteProjectPayload.selector,
+      ProjectSelector.organization,
+      ProjectSelector.project,
+      DeleteProjectPayload.deletedProject,
+      Project.id,
+      Project.cleanId,
+      Project.name,
+      Project.type,
+      ProjectSelectorInput.organization,
+      ID,
+      ProjectSelectorInput.project,
+    ]
+  `);
 });
 
 test('collect input object types', async () => {
@@ -104,8 +119,23 @@ test('collect input object types', async () => {
   });
   const info = collect(op, {}).value;
 
-  expect(info.fields).toContain(`ProjectSelectorInput.organization`);
-  expect(info.fields).toContain(`ProjectSelectorInput.project`);
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Mutation.deleteProject,
+      Mutation.deleteProject.selector,
+      DeleteProjectPayload.selector,
+      ProjectSelector.organization,
+      ProjectSelector.project,
+      DeleteProjectPayload.deletedProject,
+      Project.id,
+      Project.cleanId,
+      Project.name,
+      Project.type,
+      ProjectSelectorInput.organization,
+      ID,
+      ProjectSelectorInput.project,
+    ]
+  `);
 });
 
 test('collect enums and scalars as inputs', async () => {
@@ -124,11 +154,21 @@ test('collect enums and scalars as inputs', async () => {
     {},
   ).value;
 
-  expect(info.fields).toContain(`Int`);
-  expect(info.fields).toContain(`ProjectType.FEDERATION`);
-  expect(info.fields).toContain(`ProjectType.STITCHING`);
-  expect(info.fields).toContain(`ProjectType.SINGLE`);
-  expect(info.fields).toContain(`ProjectType.CUSTOM`);
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Query.projects,
+      Query.projects.filter,
+      Project.id,
+      Int,
+      ProjectType.FEDERATION,
+      ProjectType.STITCHING,
+      ProjectType.SINGLE,
+      ProjectType.CUSTOM,
+      FilterInput.pagination,
+      FilterInput.type,
+      PaginationInput.limit,
+    ]
+  `);
 });
 
 test('collect enum values from object fields', async () => {
@@ -147,11 +187,18 @@ test('collect enum values from object fields', async () => {
     {},
   ).value;
 
-  expect(info.fields).toContain(`Int`);
-  expect(info.fields).toContain(`ProjectType.FEDERATION`);
-  expect(info.fields).not.toContain(`ProjectType.STITCHING`);
-  expect(info.fields).not.toContain(`ProjectType.SINGLE`);
-  expect(info.fields).not.toContain(`ProjectType.CUSTOM`);
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Query.projects,
+      Query.projects.filter,
+      Project.id,
+      Int,
+      FilterInput.pagination,
+      FilterInput.type,
+      PaginationInput.limit,
+      ProjectType.FEDERATION,
+    ]
+  `);
 });
 
 test('collect enum values from arguments', async () => {
@@ -170,10 +217,14 @@ test('collect enum values from arguments', async () => {
     {},
   ).value;
 
-  expect(info.fields).toContain(`ProjectType.FEDERATION`);
-  expect(info.fields).not.toContain(`ProjectType.STITCHING`);
-  expect(info.fields).not.toContain(`ProjectType.SINGLE`);
-  expect(info.fields).not.toContain(`ProjectType.CUSTOM`);
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Query.projectsByType,
+      Query.projectsByType.type,
+      Project.id,
+      ProjectType.FEDERATION,
+    ]
+  `);
 });
 
 test('collect arguments', async () => {
@@ -192,7 +243,21 @@ test('collect arguments', async () => {
     {},
   ).value;
 
-  expect(info.fields).toContain(`Query.projects.filter`);
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Query.projects,
+      Query.projects.filter,
+      Project.id,
+      Int,
+      ProjectType.FEDERATION,
+      ProjectType.STITCHING,
+      ProjectType.SINGLE,
+      ProjectType.CUSTOM,
+      FilterInput.pagination,
+      FilterInput.type,
+      PaginationInput.limit,
+    ]
+  `);
 });
 
 test('skips argument directives', async () => {
@@ -220,7 +285,23 @@ test('skips argument directives', async () => {
     {},
   ).value;
 
-  expect(info.fields).toContain(`Query.projects.filter`);
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Query.projects,
+      Query.projects.filter,
+      Project.id,
+      Project.name,
+      Int,
+      ProjectType.FEDERATION,
+      ProjectType.STITCHING,
+      ProjectType.SINGLE,
+      ProjectType.CUSTOM,
+      Boolean,
+      FilterInput.pagination,
+      FilterInput.type,
+      PaginationInput.limit,
+    ]
+  `);
 });
 
 test('collect used-only input fields', async () => {
@@ -239,10 +320,21 @@ test('collect used-only input fields', async () => {
     {},
   ).value;
 
-  expect(info.fields).toContain(`FilterInput.pagination`);
-  expect(info.fields).toContain(`FilterInput.type`);
-  expect(info.fields).toContain(`PaginationInput.limit`);
-  expect(info.fields).not.toContain(`PaginationInput.offset`);
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Query.projects,
+      Query.projects.filter,
+      Project.id,
+      Int,
+      ProjectType.FEDERATION,
+      ProjectType.STITCHING,
+      ProjectType.SINGLE,
+      ProjectType.CUSTOM,
+      FilterInput.pagination,
+      FilterInput.type,
+      PaginationInput.limit,
+    ]
+  `);
 });
 
 test('collect all input fields when `processVariables` has not been passed and input is passed as a variable', async () => {
@@ -261,10 +353,22 @@ test('collect all input fields when `processVariables` has not been passed and i
     {},
   ).value;
 
-  expect(info.fields).toContain(`FilterInput.pagination`);
-  expect(info.fields).toContain(`FilterInput.type`);
-  expect(info.fields).toContain(`PaginationInput.limit`);
-  expect(info.fields).toContain(`PaginationInput.offset`);
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Query.projects,
+      Query.projects.filter,
+      Project.id,
+      PaginationInput.limit,
+      Int,
+      PaginationInput.offset,
+      ProjectType.FEDERATION,
+      ProjectType.STITCHING,
+      ProjectType.SINGLE,
+      ProjectType.CUSTOM,
+      FilterInput.pagination,
+      FilterInput.type,
+    ]
+  `);
 });
 
 test('should get a cache hit when document is the same but variables are different (by default)', async () => {
@@ -358,10 +462,21 @@ test('(processVariables: true) collect used-only input fields', async () => {
     },
   ).value;
 
-  expect(info.fields).toContain(`FilterInput.pagination`);
-  expect(info.fields).toContain(`FilterInput.type`);
-  expect(info.fields).toContain(`PaginationInput.limit`);
-  expect(info.fields).not.toContain(`PaginationInput.offset`);
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Query.projects,
+      Query.projects.filter,
+      Project.id,
+      PaginationInput.limit,
+      Int,
+      ProjectType.FEDERATION,
+      ProjectType.STITCHING,
+      ProjectType.SINGLE,
+      ProjectType.CUSTOM,
+      FilterInput.pagination,
+      FilterInput.type,
+    ]
+  `);
 });
 
 test('(processVariables: true) should collect input object without fields when corresponding variable is not provided', async () => {
@@ -383,11 +498,20 @@ test('(processVariables: true) should collect input object without fields when c
     },
   ).value;
 
-  expect(info.fields).toContain(`FilterInput.type`);
-  expect(info.fields).toContain(`FilterInput.pagination`);
-  expect(info.fields).toContain(`PaginationInput`);
-  expect(info.fields).not.toContain(`PaginationInput.limit`);
-  expect(info.fields).not.toContain(`PaginationInput.offset`);
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      PaginationInput,
+      Query.projects,
+      Query.projects.filter,
+      Project.id,
+      ProjectType.FEDERATION,
+      ProjectType.STITCHING,
+      ProjectType.SINGLE,
+      ProjectType.CUSTOM,
+      FilterInput.pagination,
+      FilterInput.type,
+    ]
+  `);
 });
 
 test('(processVariables: true) collect used-only input type fields from an array', async () => {
@@ -422,11 +546,20 @@ test('(processVariables: true) collect used-only input type fields from an array
     },
   ).value;
 
-  expect(info.fields).toContain(`FilterInput.pagination`);
-  expect(info.fields).toContain(`PaginationInput.limit`);
-  expect(info.fields).toContain(`FilterInput.order`);
-  expect(info.fields).toContain(`ProjectOrderByInput.field`);
-  expect(info.fields).toContain(`ProjectOrderByInput.direction`);
-  expect(info.fields).not.toContain(`FilterInput.type`);
-  expect(info.fields).not.toContain(`PaginationInput.offset`);
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Query.projects,
+      Query.projects.filter,
+      Project.id,
+      FilterInput.order,
+      FilterInput.pagination,
+      ProjectOrderByInput.field,
+      ProjectOrderByInput.direction,
+      String,
+      OrderDirection.ASC,
+      OrderDirection.DESC,
+      PaginationInput.limit,
+      Int,
+    ]
+  `);
 });
