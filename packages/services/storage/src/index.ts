@@ -4386,6 +4386,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           AND "user_id" = ${userId}
       `);
     },
+    pool,
   };
 
   return storage;

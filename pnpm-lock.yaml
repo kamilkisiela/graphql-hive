@@ -679,6 +679,9 @@ importers:
       redlock:
         specifier: 5.0.0-beta.2
         version: 5.0.0-beta.2
+      slonik:
+        specifier: 30.4.4
+        version: 30.4.4
       supertokens-node:
         specifier: 15.2.1
         version: 15.2.1

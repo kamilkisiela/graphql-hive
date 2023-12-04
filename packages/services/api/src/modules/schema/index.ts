@@ -1,4 +1,6 @@
 import { createModule } from 'graphql-modules';
+import { Contracts } from './providers/contracts';
+import { ContractsManager } from './providers/contracts-manager';
 import { Inspector } from './providers/inspector';
 import { models } from './providers/models';
 import { orchestrators } from './providers/orchestrators';
@@ -22,6 +24,8 @@ export const schemaModule = createModule({
     SchemaHelper,
     RegistryChecks,
     SchemaVersionHelper,
+    Contracts,
+    ContractsManager,
     ...orchestrators,
     ...models,
   ],
