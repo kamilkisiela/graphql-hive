@@ -44,6 +44,7 @@ interface Props<T> {
   onChange: (scopes: T[]) => void;
   checkAccess: (scope: T) => boolean;
   noDowngrade?: boolean;
+  disabled?: boolean;
 }
 
 function isLowerThen<T>(targetScope: T, sourceScope: T, scopesInLowerToHigherOrder: readonly T[]) {
@@ -88,6 +89,7 @@ function isDefined<T>(value: T | null | undefined): value is T {
 export const PermissionScopeItem = <
   T extends OrganizationAccessScope | ProjectAccessScope | TargetAccessScope,
 >(props: {
+  disabled?: boolean;
   scope: Scope<T>;
   checkAccess: (scope: T) => boolean;
   initialScope: typeof NoAccess | T | undefined;
@@ -112,7 +114,7 @@ export const PermissionScopeItem = <
         <div className="text-xs text-gray-400">{props.scope.description}</div>
       </div>
       <Select
-        disabled={!props.canManageScope}
+        disabled={!props.canManageScope || props.disabled}
         value={props.selectedScope}
         onValueChange={value => {
           props.onChange(value as T | typeof NoAccess);
@@ -180,7 +182,7 @@ function PermissionsSpaceInner(props: Props<TargetAccessScope>): ReactElement<an
 function PermissionsSpaceInner<
   T extends OrganizationAccessScope | ProjectAccessScope | TargetAccessScope,
 >(props: Props<T>) {
-  const { title, scopes, initialScopes, selectedScopes, onChange, checkAccess } = props;
+  const { title, scopes, initialScopes, selectedScopes, onChange, checkAccess, disabled } = props;
 
   return (
     <TabsContent value={title}>
@@ -193,6 +195,7 @@ function PermissionsSpaceInner<
 
         return (
           <PermissionScopeItem<T>
+            disabled={disabled}
             scope={scope}
             key={scope.name}
             initialScope={matchScope(

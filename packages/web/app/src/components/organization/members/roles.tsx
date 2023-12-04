@@ -111,6 +111,7 @@ const OrganizationMemberRoleEditor_MeFragment = graphql(`
 `);
 
 function OrganizationMemberRoleEditor(props: {
+  mode?: 'edit' | 'read-only';
   close(): void;
   organizationCleanId: string;
   me: FragmentType<typeof OrganizationMemberRoleEditor_MeFragment>;
@@ -122,6 +123,7 @@ function OrganizationMemberRoleEditor(props: {
     OrganizationMemberRoleEditor_UpdateMemberRoleMutation,
   );
   const { toast } = useToast();
+  const isDisabled = props.mode === 'read-only' || updateMemberRoleState.fetching;
   const form = useForm<RoleFormValues>({
     resolver: zodResolver(roleFormSchema),
     mode: 'onChange',
@@ -132,7 +134,7 @@ function OrganizationMemberRoleEditor(props: {
       projectScopes: [...role.projectAccessScopes],
       targetScopes: [...role.targetAccessScopes],
     },
-    disabled: updateMemberRoleState.fetching,
+    disabled: isDisabled,
   });
 
   const initialScopes = {
@@ -243,7 +245,7 @@ function OrganizationMemberRoleEditor(props: {
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <DialogContent className="max-w-[960px]">
           <DialogHeader>
-            <DialogTitle>Member Role Editor</DialogTitle>
+            <DialogTitle>Member Role{props.mode === 'read-only' ? '' : ' Editor'}</DialogTitle>
             <DialogDescription>
               {isAdmin ? (
                 'As an admin, you can add or remove permissions from the role.'
@@ -298,6 +300,7 @@ function OrganizationMemberRoleEditor(props: {
                     <TabsTrigger value="Targets">Targets</TabsTrigger>
                   </TabsList>
                   <PermissionsSpace
+                    disabled={isDisabled}
                     title="Organization"
                     scopes={scopes.organization}
                     initialScopes={initialScopes.organization}
@@ -307,6 +310,7 @@ function OrganizationMemberRoleEditor(props: {
                     noDowngrade={noDowngrade}
                   />
                   <PermissionsSpace
+                    disabled={isDisabled}
                     title="Projects"
                     scopes={scopes.project}
                     initialScopes={initialScopes.project}
@@ -316,6 +320,7 @@ function OrganizationMemberRoleEditor(props: {
                     noDowngrade={noDowngrade}
                   />
                   <PermissionsSpace
+                    disabled={isDisabled}
                     title="Targets"
                     scopes={scopes.target}
                     initialScopes={initialScopes.target}
@@ -328,24 +333,26 @@ function OrganizationMemberRoleEditor(props: {
               </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={props.close}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              onClick={form.handleSubmit(onSubmit)}
-              disabled={
-                !form.formState.isValid || form.formState.isSubmitting || form.formState.disabled
-              }
-            >
-              {form.formState.isSubmitting
-                ? 'Creating...'
-                : targetScopes.length + projectScopes.length + organizationScopes.length === 0
-                  ? 'Submit a read-only role'
-                  : 'Submit'}
-            </Button>
-          </DialogFooter>
+          {props.mode === 'read-only' ? null : (
+            <DialogFooter>
+              <Button variant="ghost" onClick={props.close}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                onClick={form.handleSubmit(onSubmit)}
+                disabled={
+                  !form.formState.isValid || form.formState.isSubmitting || form.formState.disabled
+                }
+              >
+                {form.formState.isSubmitting
+                  ? 'Creating...'
+                  : targetScopes.length + projectScopes.length + organizationScopes.length === 0
+                    ? 'Submit a read-only role'
+                    : 'Submit'}
+              </Button>
+            </DialogFooter>
+          )}
         </DialogContent>
       </form>
     </Form>
@@ -634,6 +641,7 @@ function OrganizationMemberRoleRow(props: {
   role: FragmentType<typeof OrganizationMemberRoleRow_MemberRoleFragment>;
   onEdit(role: FragmentType<typeof OrganizationMemberRoleRow_MemberRoleFragment>): void;
   onDelete(role: FragmentType<typeof OrganizationMemberRoleRow_MemberRoleFragment>): void;
+  onShow(role: FragmentType<typeof OrganizationMemberRoleRow_MemberRoleFragment>): void;
 }) {
   const role = useFragment(OrganizationMemberRoleRow_MemberRoleFragment, props.role);
   return (
@@ -671,16 +679,13 @@ function OrganizationMemberRoleRow(props: {
       <td className="py-3 text-right text-sm">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              disabled={!role.canUpdate && !role.canDelete}
-              variant="ghost"
-              className="data-[state=open]:bg-muted flex h-8 w-8 p-0"
-            >
+            <Button variant="ghost" className="data-[state=open]:bg-muted flex h-8 w-8 p-0">
               <MoreHorizontalIcon className="h-4 w-4" />
               <span className="sr-only">Open menu</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[160px]">
+            <DropdownMenuItem onClick={() => props.onShow(props.role)}>Show</DropdownMenuItem>
             <TooltipProvider>
               <Tooltip delayDuration={200} {...(role.canUpdate ? { open: false } : {})}>
                 <TooltipTrigger className="block w-full">
@@ -784,6 +789,9 @@ export function OrganizationMemberRoles(props: {
   const [roleToEdit, setRoleToEdit] = useState<(typeof organization.memberRoles)[number] | null>(
     null,
   );
+  const [roleToShow, setRoleToShow] = useState<(typeof organization.memberRoles)[number] | null>(
+    null,
+  );
   const [roleToDelete, setRoleToDelete] = useState<
     (typeof organization.memberRoles)[number] | null
   >(null);
@@ -804,6 +812,24 @@ export function OrganizationMemberRoles(props: {
             me={organization.me}
             role={roleToEdit}
             close={() => setRoleToEdit(null)}
+          />
+        ) : null}
+      </Dialog>
+      <Dialog
+        open={!!roleToShow}
+        onOpenChange={isOpen => {
+          if (!isOpen) {
+            setRoleToShow(null);
+          }
+        }}
+      >
+        {roleToShow ? (
+          <OrganizationMemberRoleEditor
+            mode="read-only"
+            organizationCleanId={organization.cleanId}
+            me={organization.me}
+            role={roleToShow}
+            close={() => setRoleToShow(null)}
           />
         ) : null}
       </Dialog>
@@ -899,6 +925,7 @@ export function OrganizationMemberRoles(props: {
                 role={role}
                 onEdit={() => setRoleToEdit(role)}
                 onDelete={() => setRoleToDelete(role)}
+                onShow={() => setRoleToShow(role)}
               />
             ))}
           </tbody>
