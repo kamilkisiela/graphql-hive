@@ -527,6 +527,23 @@ test.concurrent('check usage not from excluded client names', async () => {
         },
       },
     },
+    {
+      timestamp: Date.now(),
+      operation: 'query me { me }',
+      operationName: 'me',
+      fields: ['Query', 'Query.me'],
+      execution: {
+        ok: true,
+        duration: 200_000_000,
+        errorsTotal: 0,
+      },
+      metadata: {
+        client: {
+          name: 'cli',
+          version: '2.0.0',
+        },
+      },
+    },
   ]);
   expect(collectResult.status).toEqual(200);
   await waitFor(5000);
@@ -538,8 +555,8 @@ test.concurrent('check usage not from excluded client names', async () => {
     .then(r => r.expectNoGraphQLErrors());
   expect(unusedCheckResult.schemaCheck.__typename).toEqual('SchemaCheckError');
 
-  // Exclude app from the check
-  const updateValidationResult = await updateTargetValidationSettings(
+  // Exclude app from the check (tests partial, incomplete exclusion)
+  let updateValidationResult = await updateTargetValidationSettings(
     {
       organization: organization.cleanId,
       project: project.cleanId,
@@ -567,7 +584,37 @@ test.concurrent('check usage not from excluded client names', async () => {
       .excludedClients,
   ).toContainEqual('app');
 
-  // should be safe because the field was not used by the non-excluded clients (cli never requested `Query.me`, but app did)
+  // should be unsafe because though we excluded 'app', 'cli' still uses this
+  const unusedCheckResult2 = await token
+    .checkSchema(`type Query { ping: String }`)
+    .then(r => r.expectNoGraphQLErrors());
+  expect(unusedCheckResult2.schemaCheck.__typename).toEqual('SchemaCheckError');
+
+  // Exclude BOTH 'app' and 'cli' (tests multi client covering exclusion)
+  updateValidationResult = await updateTargetValidationSettings(
+    {
+      organization: organization.cleanId,
+      project: project.cleanId,
+      target: target.cleanId,
+      percentage: 0,
+      period: 2,
+      targets: [target.id],
+      excludedClients: ['app', 'cli'],
+    },
+    {
+      authToken: ownerToken,
+    },
+  ).then(r => r.expectNoGraphQLErrors());
+  expect(
+    updateValidationResult.updateTargetValidationSettings.ok!.target.validationSettings
+      .excludedClients,
+  ).toContainEqual('app');
+  expect(
+    updateValidationResult.updateTargetValidationSettings.ok!.target.validationSettings
+      .excludedClients,
+  ).toContainEqual('cli');
+
+  // should be safe because the field was not used by the non-excluded clients (app never requested `Query.ping`, but cli did)
   const usedCheckResult = await (
     await token.checkSchema(`type Query { ping: String }`)
   ).expectNoGraphQLErrors();
