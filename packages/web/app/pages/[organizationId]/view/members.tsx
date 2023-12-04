@@ -127,7 +127,7 @@ function PageContent(props: {
         <nav className="flex w-48 flex-col space-x-0 space-y-1">
           {subPages.map(subPage => {
             // hide migration page from non-admins
-            if (subPage.key === 'migration' && (!me || !me.isAdmin)) {
+            if (subPage.key === 'migration' && !me?.isAdmin) {
               return null;
             }
 

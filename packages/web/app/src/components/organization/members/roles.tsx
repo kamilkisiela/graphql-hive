@@ -688,7 +688,7 @@ function OrganizationMemberRoleRow(props: {
                 <TooltipContent>
                   {role.canUpdate
                     ? null
-                    : `You cannot edit this role as you don't have enough permissions.`}
+                    : "You cannot edit this role as you don't have enough permissions."}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -708,7 +708,7 @@ function OrganizationMemberRoleRow(props: {
                     : `You cannot delete this role as ${
                         role.membersCount > 0
                           ? 'it has members.'
-                          : `you don't have enough permissions.`
+                          : "you don't have enough permissions."
                       }`}
                 </TooltipContent>
               </Tooltip>

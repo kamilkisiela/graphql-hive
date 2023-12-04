@@ -40,7 +40,6 @@ await describe('drop-personal-org', async () => {
         organization: orgsWithProjects[0],
         project: {
           name: 'proj-1',
-          cleanId: 'proj-1',
           type: 'SINGLE',
         },
       });
@@ -48,7 +47,6 @@ await describe('drop-personal-org', async () => {
         organization: orgsWithProjects[1],
         project: {
           name: 'proj-2',
-          cleanId: 'proj-2',
           type: 'SINGLE',
         },
       });
