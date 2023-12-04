@@ -17,8 +17,8 @@
   },
   "devDependencies": {
     "@graphql-inspector/core": "5.0.2",
-    "@sentry/node": "7.83.0",
-    "@sentry/types": "7.83.0",
+    "@sentry/node": "7.84.0",
+    "@sentry/types": "7.84.0",
     "@tgriesser/schemats": "9.0.1",
     "@theguild/buddy": "0.1.0",
     "@types/node": "18.18.13",
