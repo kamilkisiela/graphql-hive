@@ -247,13 +247,22 @@ export class OperationsReader {
       // Eliminate coordinates fetched by excluded clients.
       // We can connect a coordinate to a client by using the hash column.
       // The hash column is basically a unique identifier of a GraphQL operation.
+      // In the following query we fetch all hashes that were used only by the excluded clients.
       conditions.push(sql`
         hash NOT IN (
-          SELECT hash FROM clients_daily ${this.createFilter({
-            target,
-            period,
-            extra: [sql`client_name IN (${sql.array(excludedClients, 'String')})`],
-          })} GROUP BY hash
+          SELECT hash FROM (
+            SELECT
+              hash,
+              countIf(client_name NOT IN (${sql.array(
+                excludedClients,
+                'String',
+              )})) as non_excluded_clients_total
+            FROM clients_daily ${this.createFilter({
+              target,
+              period,
+            })}
+            GROUP BY hash
+          ) WHERE non_excluded_clients_total = 0
         )
       `);
     }
