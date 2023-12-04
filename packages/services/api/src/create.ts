@@ -49,6 +49,7 @@ import { HttpClient } from './modules/shared/providers/http-client';
 import { IdTranslator } from './modules/shared/providers/id-translator';
 import { Logger } from './modules/shared/providers/logger';
 import { Mutex } from './modules/shared/providers/mutex';
+import { PG_POOL_CONFIG } from './modules/shared/providers/pg-pool';
 import { REDIS_CONFIG, RedisConfig, RedisProvider } from './modules/shared/providers/redis';
 import { S3_CONFIG, type S3Config } from './modules/shared/providers/s3-config';
 import { Storage } from './modules/shared/providers/storage';
@@ -258,6 +259,11 @@ export function createRegistry({
       provide: WEB_APP_URL,
       useValue: app?.baseUrl.replace(/\/$/, '') ?? 'http://localhost:3000',
       scope: Scope.Singleton,
+    },
+    {
+      provide: PG_POOL_CONFIG,
+      scope: Scope.Singleton,
+      useValue: storage.pool,
     },
     encryptionSecretProvider(encryptionSecret),
     provideSchemaModuleConfig(schemaConfig),

@@ -47,6 +47,7 @@ import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import { extractSuperGraphInformation } from './lib/federation-super-graph';
 import { stripUsedSchemaCoordinatesFromDocumentNode } from './lib/unused-graphql';
+import { ContractsManager } from './providers/contracts-manager';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
 import { SchemaVersionHelper } from './providers/schema-version-helper';
@@ -394,6 +395,33 @@ export const resolvers: SchemaModule.Resolvers = {
           organization,
           model: input.model,
         }),
+      };
+    },
+    async createContract(_, args, context) {
+      const result = await context.injector.get(ContractsManager).createContract({
+        contract: {
+          targetId: args.input.targetId,
+          userSpecifiedContractId: args.input.userSpecifiedContractId,
+          excludeTags: (args.input.excludeTags as Array<string> | null) ?? null,
+          includeTags: (args.input.includeTags as Array<string> | null) ?? null,
+          removeUnreachableTypesFromPublicApiSchema:
+            args.input.removeUnreachableTypesFromPublicApiSchema,
+        },
+      });
+
+      if (result.type === 'success') {
+        return {
+          ok: {
+            createdContract: result.contract,
+          },
+        };
+      }
+
+      return {
+        error: {
+          message: 'Something went wrong.',
+          details: result.errors,
+        },
       };
     },
   },
@@ -1660,6 +1688,13 @@ export const resolvers: SchemaModule.Resolvers = {
           }
         : null,
   })),
+  Contract: {
+    target(contract, _, context) {
+      return context.injector.get(TargetManager).getTargetById({
+        targetId: contract.targetId,
+      });
+    },
+  },
 };
 
 function stringifyDefaultValue(value: unknown): string | null {

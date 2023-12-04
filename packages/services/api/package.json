@@ -57,6 +57,7 @@
     "param-case": "3.0.4",
     "prom-client": "15.1.0",
     "redlock": "5.0.0-beta.2",
+    "slonik": "30.4.4",
     "supertokens-node": "15.2.1",
     "tslib": "2.6.2",
     "zod": "3.22.4",

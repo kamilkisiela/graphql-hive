@@ -30,6 +30,10 @@ export default gql`
     Approve a failed schema check with breaking changes.
     """
     approveFailedSchemaCheck(input: ApproveFailedSchemaCheckInput!): ApproveFailedSchemaCheckResult!
+    """
+    Create a contract for a given target.
+    """
+    createContract(input: CreateContractInput!): CreateContractResult!
   }
 
   extend type Query {
@@ -946,5 +950,44 @@ export default gql`
 
   type ApproveFailedSchemaCheckError {
     message: String!
+  }
+
+  input CreateContractInput {
+    targetId: ID!
+    userSpecifiedContractId: String!
+    includeTags: [String!]
+    excludeTags: [String!]
+    removeUnreachableTypesFromPublicApiSchema: Boolean!
+  }
+
+  type CreateContractResult {
+    ok: CreateContractResultOk
+    error: CreateContractResultError
+  }
+
+  type CreateContractResultOk {
+    createdContract: Contract!
+  }
+
+  type CreateContractResultError implements Error {
+    message: String!
+    details: CreateContractInputErrors!
+  }
+
+  type CreateContractInputErrors {
+    targetId: String
+    userSpecifiedContractId: String
+    includeTags: String
+    excludeTags: String
+  }
+
+  type Contract {
+    id: ID!
+    target: Target!
+    userSpecifiedContractId: String!
+    includeTags: [String!]
+    excludeTags: [String!]
+    removeUnreachableTypesFromPublicApiSchema: Boolean!
+    createdAt: DateTime!
   }
 `;

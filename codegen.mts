@@ -132,6 +132,7 @@ const config: CodegenConfig = {
           FailedSchemaCheck: '../shared/mappers#FailedSchemaCheckMapper',
           SuccessfulSchemaCheck: '../shared/mappers#SuccessfulSchemaCheckMapper',
           SchemaPolicyWarningConnection: '../shared/mappers#SchemaPolicyWarningConnectionMapper',
+          Contract: '../shared/mappers#Contract as ContractMapper',
         },
       },
     },
