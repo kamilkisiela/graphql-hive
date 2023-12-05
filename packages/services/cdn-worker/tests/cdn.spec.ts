@@ -10,7 +10,7 @@ import {
   InvalidAuthKeyResponse,
   MissingAuthKeyResponse,
 } from '../src/errors';
-import { createIsKeyValid, KeyValidator } from '../src/key-validation';
+import { createIsKeyValid } from '../src/key-validation';
 
 function createGetArtifactAction(map: Map<string, string>): GetArtifactActionFn {
   return async function getArtifactAction(
@@ -98,11 +98,6 @@ async function followRedirects(responsePromise: Promise<Response>, map: Map<stri
 }
 
 describe('CDN Worker', () => {
-  const KeyValidators: Record<string, KeyValidator> = {
-    AlwaysTrue: () => Promise.resolve(true),
-    AlwaysFalse: () => Promise.resolve(false),
-  };
-
   function createToken(secret: string, targetId: string): string {
     const encoder = new TextEncoder();
     const secretKeyData = encoder.encode(secret);
