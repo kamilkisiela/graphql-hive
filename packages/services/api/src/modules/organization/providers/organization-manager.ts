@@ -1,9 +1,9 @@
 import { createHash } from 'crypto';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import { paramCase } from 'param-case';
-import { Organization, OrganizationInvitation } from '../../../shared/entities';
+import { Organization, OrganizationMemberRole } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
-import { cache, diffArrays, pushIfMissing, share, uuid } from '../../../shared/helpers';
+import { cache, diffArrays, share, uuid } from '../../../shared/helpers';
 import { ActivityManager } from '../../activity/providers/activity-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { OrganizationAccessScope } from '../../auth/providers/organization-access';
@@ -16,7 +16,34 @@ import type { OrganizationSelector } from '../../shared/providers/storage';
 import { Storage } from '../../shared/providers/storage';
 import { WEB_APP_URL } from '../../shared/providers/tokens';
 import { TokenStorage } from '../../token/providers/token-storage';
-import { organizationAdminScopes, reservedOrganizationNames } from './organization-config';
+import {
+  organizationAdminScopes,
+  organizationViewerScopes,
+  reservedOrganizationNames,
+} from './organization-config';
+
+function ensureReadAccess(
+  scopes: readonly (OrganizationAccessScope | ProjectAccessScope | TargetAccessScope)[],
+) {
+  const newScopes: (OrganizationAccessScope | ProjectAccessScope | TargetAccessScope)[] = [
+    ...scopes,
+  ];
+
+  if (!scopes.includes(OrganizationAccessScope.READ)) {
+    newScopes.push(OrganizationAccessScope.READ);
+  }
+
+  if (!scopes.includes(ProjectAccessScope.READ)) {
+    newScopes.push(ProjectAccessScope.READ);
+  }
+
+  if (!scopes.includes(TargetAccessScope.READ)) {
+    newScopes.push(TargetAccessScope.READ);
+  }
+
+  // Remove duplicates
+  return newScopes.filter((scope, i, all) => all.indexOf(scope) === i);
+}
 
 /**
  * Responsible for auth checks.
@@ -157,8 +184,8 @@ export class OrganizationManager {
       };
     }
 
-    await this.storage.deleteOrganizationMembers({
-      users: [user.id],
+    await this.storage.deleteOrganizationMember({
+      user: user.id,
       organization: organizationId,
     });
 
@@ -266,7 +293,8 @@ export class OrganizationManager {
       name,
       cleanId: paramCase(name),
       user: user.id,
-      scopes: organizationAdminScopes,
+      adminScopes: organizationAdminScopes,
+      viewerScopes: organizationViewerScopes,
       reservedNames: reservedOrganizationNames,
     });
 
@@ -420,10 +448,7 @@ export class OrganizationManager {
     return this.storage.deleteOrganizationInvitationByEmail(input);
   }
 
-  async inviteByEmail(input: {
-    email: string;
-    organization: string;
-  }): Promise<OrganizationInvitation> {
+  async inviteByEmail(input: { email: string; organization: string; role?: string | null }) {
     await this.authManager.ensureOrganizationAccess({
       scope: OrganizationAccessScope.MEMBERS,
       organization: input.organization,
@@ -431,19 +456,55 @@ export class OrganizationManager {
 
     const { email } = input;
     this.logger.info(
-      'Inviting to the organization (email=%s, organization=%s)',
+      'Inviting to the organization (email=%s, organization=%s, role=%s)',
       email,
       input.organization,
+      input.role,
     );
     const organization = await this.getOrganization({
       organization: input.organization,
     });
 
-    const members = await this.getOrganizationMembers({ organization: input.organization });
+    const [members, currentUserAccessScopes] = await Promise.all([
+      this.getOrganizationMembers({ organization: input.organization }),
+      this.authManager.getCurrentUserAccessScopes(organization.id),
+    ]);
     const existingMember = members.find(member => member.user.email === email);
 
     if (existingMember) {
-      throw new HiveError(`User ${email} is already a member of the organization`);
+      return {
+        error: {
+          message: `User ${email} is already a member of the organization`,
+          inputErrors: {},
+        },
+      };
+    }
+
+    const role = input.role
+      ? await this.storage.getOrganizationMemberRole({
+          organizationId: organization.id,
+          roleId: input.role,
+        })
+      : await this.storage.getViewerOrganizationMemberRole({
+          organizationId: organization.id,
+        });
+    if (!role) {
+      throw new HiveError(`Role not found`);
+    }
+
+    // Ensure user has access to all scopes in the role
+    const currentUserMissingScopes = role.scopes.filter(
+      scope => !currentUserAccessScopes.includes(scope),
+    );
+
+    if (currentUserMissingScopes.length > 0) {
+      this.logger.debug(`Logged user scopes: %s`, currentUserAccessScopes.join(','));
+      return {
+        error: {
+          message: `Not enough access to invite a member with this role`,
+          inputErrors: {},
+        },
+      };
     }
 
     // Delete existing invitation
@@ -456,6 +517,7 @@ export class OrganizationManager {
     const invitation = await this.storage.createOrganizationInvitation({
       organization: organization.id,
       email,
+      roleId: role.id,
     });
 
     await Promise.all([
@@ -494,7 +556,9 @@ export class OrganizationManager {
       }),
     ]);
 
-    return invitation;
+    return {
+      ok: invitation,
+    };
   }
 
   async joinOrganization({ code }: { code: string }): Promise<Organization | { message: string }> {
@@ -516,17 +580,12 @@ export class OrganizationManager {
       return organization;
     }
 
+    this.logger.debug('Adding member (organization=%s, code=%s)', organization.id, code);
+
     await this.storage.addOrganizationMemberViaInvitationCode({
       code,
       user: user.id,
       organization: organization.id,
-      scopes: [
-        OrganizationAccessScope.READ,
-        ProjectAccessScope.READ,
-        ProjectAccessScope.OPERATIONS_STORE_READ,
-        TargetAccessScope.READ,
-        TargetAccessScope.REGISTRY_READ,
-      ],
     });
 
     // Because we checked the access before, it's stale by now
@@ -654,22 +713,12 @@ export class OrganizationManager {
       code: input.code,
       user: currentUser.id,
       accept: input.accept,
-      oldAdminAccessScopes:
-        // pass every scope except *.DELETE
-        organizationAdminScopes.filter(
-          scope =>
-            [
-              OrganizationAccessScope.DELETE,
-              ProjectAccessScope.DELETE,
-              TargetAccessScope.DELETE,
-            ].includes(scope) === false,
-        ),
     });
   }
 
-  async deleteMembers(
+  async deleteMember(
     selector: {
-      users: readonly string[];
+      user: string;
     } & OrganizationSelector,
   ): Promise<Organization> {
     this.logger.info('Deleting a member from an organization (selector=%o)', selector);
@@ -678,38 +727,60 @@ export class OrganizationManager {
       scope: OrganizationAccessScope.MEMBERS,
     });
     const owner = await this.getOrganizationOwner(selector);
-    const { users, organization } = selector;
+    const { user, organization } = selector;
 
-    if (users.includes(owner.id)) {
+    if (user === owner.id) {
       throw new HiveError(`Cannot remove the owner from the organization`);
     }
 
-    const members = await this.storage.getOrganizationMembers({
-      organization,
-    });
+    const currentUser = await this.authManager.getCurrentUser();
 
-    await this.storage.deleteOrganizationMembers({
-      users,
-      organization,
-    });
-
-    await Promise.all(
-      users.map(user => {
-        const member = members.find(m => m.id === user);
-
-        if (member) {
-          return this.activityManager.create({
-            type: 'MEMBER_DELETED',
-            selector: {
-              organization,
-            },
-            meta: {
-              email: member.user.email,
-            },
-          });
-        }
+    const [currentUserAsMember, member] = await Promise.all([
+      this.storage.getOrganizationMember({
+        organization,
+        user: currentUser.id,
       }),
+      this.storage.getOrganizationMember({
+        organization,
+        user,
+      }),
+    ]);
+
+    if (!member) {
+      throw new HiveError(`Member not found`);
+    }
+
+    if (!currentUserAsMember) {
+      throw new Error(`Logged user is not a member of the organization`);
+    }
+
+    // Ensure current user has access to all scopes of the member.
+    // User with less access scopes cannot remove a member with more access scopes.
+    const currentUserMissingScopes = member.scopes.filter(
+      scope => !currentUserAsMember.scopes.includes(scope),
     );
+
+    if (currentUserMissingScopes.length > 0) {
+      this.logger.debug(`Logged user scopes: %o`, currentUserAsMember.scopes);
+      throw new HiveError(`Not enough access to remove the member`);
+    }
+
+    await this.storage.deleteOrganizationMember({
+      user,
+      organization,
+    });
+
+    if (member) {
+      await this.activityManager.create({
+        type: 'MEMBER_DELETED',
+        selector: {
+          organization,
+        },
+        meta: {
+          email: member.user.email,
+        },
+      });
+    }
 
     // Because we checked the access before, it's stale by now
     this.authManager.resetAccessCache();
@@ -746,7 +817,15 @@ export class OrganizationManager {
       }),
     ]);
 
-    const newScopes = [...input.organizationScopes, ...input.projectScopes, ...input.targetScopes];
+    if (member.role?.id) {
+      throw new HiveError(`Cannot update access for a member with a role.`);
+    }
+
+    const newScopes = ensureReadAccess([
+      ...input.organizationScopes,
+      ...input.projectScopes,
+      ...input.targetScopes,
+    ]);
 
     // See what scopes were removed or added
     const modifiedScopes = diffArrays(member.scopes, newScopes);
@@ -762,11 +841,6 @@ export class OrganizationManager {
       throw new HiveError(`No access to modify the scopes: ${currentUserMissingScopes.join(', ')}`);
     }
 
-    // Ensure user still has read-only access
-    pushIfMissing(newScopes, TargetAccessScope.READ);
-    pushIfMissing(newScopes, ProjectAccessScope.READ);
-    pushIfMissing(newScopes, OrganizationAccessScope.READ);
-
     // Update the scopes
     await this.storage.updateOrganizationMemberAccess({
       organization: input.organization,
@@ -780,5 +854,653 @@ export class OrganizationManager {
     return this.storage.getOrganization({
       organization: input.organization,
     });
+  }
+
+  async createMemberRole(input: {
+    organizationId: string;
+    name: string;
+    description: string;
+    organizationAccessScopes: readonly OrganizationAccessScope[];
+    projectAccessScopes: readonly ProjectAccessScope[];
+    targetAccessScopes: readonly TargetAccessScope[];
+  }) {
+    await this.authManager.ensureOrganizationAccess({
+      organization: input.organizationId,
+      scope: OrganizationAccessScope.MEMBERS,
+    });
+
+    const scopes = ensureReadAccess([
+      ...input.organizationAccessScopes,
+      ...input.projectAccessScopes,
+      ...input.targetAccessScopes,
+    ]);
+
+    const currentUser = await this.authManager.getCurrentUser();
+    const currentUserAsMember = await this.getOrganizationMember({
+      organization: input.organizationId,
+      user: currentUser.id,
+    });
+
+    // Ensure user has access to all scopes in the role
+    const currentMemberMissingScopes = scopes.filter(
+      scope => !currentUserAsMember.scopes.includes(scope),
+    );
+
+    if (currentMemberMissingScopes.length > 0) {
+      this.logger.debug(`Logged user scopes: %s`, currentUserAsMember.scopes.join(', '));
+      this.logger.debug(`Missing scopes: %s`, currentMemberMissingScopes.join(', '));
+      return {
+        error: {
+          message: `Missing access to some of the selected scopes`,
+        },
+      };
+    }
+
+    const roleName = input.name.trim();
+
+    const nameExists = await this.storage.hasOrganizationMemberRoleName({
+      organizationId: input.organizationId,
+      roleName,
+    });
+
+    // Ensure name is unique in the organization
+    if (nameExists) {
+      const msg = 'Role name already exists. Please choose a different name.';
+
+      return {
+        error: {
+          message: msg,
+          inputErrors: {
+            name: msg,
+          },
+        },
+      };
+    }
+
+    const role = await this.storage.createOrganizationMemberRole({
+      organizationId: input.organizationId,
+      name: roleName,
+      description: input.description,
+      scopes,
+    });
+
+    return {
+      ok: {
+        updatedOrganization: await this.storage.getOrganization({
+          organization: input.organizationId,
+        }),
+        createdRole: role,
+      },
+    };
+  }
+
+  async deleteMemberRole(input: { organizationId: string; roleId: string }) {
+    await this.authManager.ensureOrganizationAccess({
+      organization: input.organizationId,
+      scope: OrganizationAccessScope.MEMBERS,
+    });
+
+    const role = await this.storage.getOrganizationMemberRole({
+      organizationId: input.organizationId,
+      roleId: input.roleId,
+    });
+
+    if (!role) {
+      return {
+        error: {
+          message: 'Role not found',
+        },
+      };
+    }
+
+    const currentUser = await this.authManager.getCurrentUser();
+    const currentUserAsMember = await this.getOrganizationMember({
+      organization: input.organizationId,
+      user: currentUser.id,
+    });
+
+    const accessCheckResult = await this.canDeleteRole(role, currentUserAsMember.scopes);
+
+    if (!accessCheckResult.ok) {
+      return {
+        error: {
+          message: accessCheckResult.message,
+        },
+      };
+    }
+
+    // delete the role
+    await this.storage.deleteOrganizationMemberRole({
+      organizationId: input.organizationId,
+      roleId: input.roleId,
+    });
+
+    return {
+      ok: {
+        updatedOrganization: await this.storage.getOrganization({
+          organization: input.organizationId,
+        }),
+      },
+    };
+  }
+
+  async assignMemberRole(input: { organizationId: string; memberId: string; roleId: string }) {
+    await this.authManager.ensureOrganizationAccess({
+      organization: input.organizationId,
+      scope: OrganizationAccessScope.MEMBERS,
+    });
+
+    // Ensure selected member is part of the organization
+    const member = await this.storage.getOrganizationMember({
+      organization: input.organizationId,
+      user: input.memberId,
+    });
+
+    if (!member) {
+      throw new Error(`Member is not part of the organization`);
+    }
+
+    const currentUser = await this.authManager.getCurrentUser();
+    const [currentUserAsMember, newRole] = await Promise.all([
+      this.getOrganizationMember({
+        organization: input.organizationId,
+        user: currentUser.id,
+      }),
+      this.storage.getOrganizationMemberRole({
+        organizationId: input.organizationId,
+        roleId: input.roleId,
+      }),
+    ]);
+
+    if (!newRole) {
+      return {
+        error: {
+          message: 'Role not found',
+        },
+      };
+    }
+
+    // Ensure user has access to all scopes in the new role
+    const currentUserMissingScopesInNewRole = newRole.scopes.filter(
+      scope => !currentUserAsMember.scopes.includes(scope),
+    );
+    if (currentUserMissingScopesInNewRole.length > 0) {
+      this.logger.debug(`Logged user scopes: %s`, currentUserAsMember.scopes.join(', '));
+      this.logger.debug(`No access to scopes: %s`, currentUserMissingScopesInNewRole.join(', '));
+
+      return {
+        error: {
+          message: `Missing access to some of the scopes of the new role`,
+        },
+      };
+    }
+
+    // Ensure user has access to all scopes in the old role
+    const currentUserMissingScopesInOldRole = member.scopes.filter(
+      scope => !currentUserAsMember.scopes.includes(scope),
+    );
+
+    if (currentUserMissingScopesInOldRole.length > 0) {
+      this.logger.debug(`Logged user scopes: %s`, currentUserAsMember.scopes.join(', '));
+      this.logger.debug(`No access to scopes: %s`, currentUserMissingScopesInOldRole.join(', '));
+
+      return {
+        error: {
+          message: `Missing access to some of the scopes of the existing role`,
+        },
+      };
+    }
+
+    const memberMissingScopesInNewRole = member.scopes.filter(
+      scope => !newRole.scopes.includes(scope),
+    );
+
+    // Ensure new role has at least the same access scopes as the old role, to avoid downgrading members
+    if (memberMissingScopesInNewRole.length > 0) {
+      // Admin role is an exception, admin can downgrade members
+      if (!this.isAdminRole(currentUserAsMember.role)) {
+        this.logger.debug(`New role scopes: %s`, newRole.scopes.join(', '));
+        this.logger.debug(`Old role scopes: %s`, member.scopes.join(', '));
+        return {
+          error: {
+            message: `Cannot downgrade member to a role with less access scopes`,
+          },
+        };
+      }
+    }
+
+    // Assign the role to the member
+    await this.storage.assignOrganizationMemberRole({
+      organizationId: input.organizationId,
+      userId: input.memberId,
+      roleId: input.roleId,
+    });
+
+    // Access cache is stale by now
+    this.authManager.resetAccessCache();
+
+    return {
+      ok: {
+        updatedMember: await this.getOrganizationMember({
+          organization: input.organizationId,
+          user: input.memberId,
+        }),
+        previousMemberRole: member.role,
+      },
+    };
+  }
+
+  async updateMemberRole(input: {
+    organizationId: string;
+    roleId: string;
+    name: string;
+    description: string;
+    organizationAccessScopes: readonly OrganizationAccessScope[];
+    projectAccessScopes: readonly ProjectAccessScope[];
+    targetAccessScopes: readonly TargetAccessScope[];
+  }) {
+    await this.authManager.ensureOrganizationAccess({
+      organization: input.organizationId,
+      scope: OrganizationAccessScope.MEMBERS,
+    });
+
+    const currentUser = await this.authManager.getCurrentUser();
+    const [role, currentUserAsMember] = await Promise.all([
+      this.storage.getOrganizationMemberRole({
+        organizationId: input.organizationId,
+        roleId: input.roleId,
+      }),
+      this.getOrganizationMember({
+        organization: input.organizationId,
+        user: currentUser.id,
+      }),
+    ]);
+
+    if (!role) {
+      return {
+        error: {
+          message: 'Role not found',
+        },
+      };
+    }
+
+    const newScopes = ensureReadAccess([
+      ...input.organizationAccessScopes,
+      ...input.projectAccessScopes,
+      ...input.targetAccessScopes,
+    ]);
+
+    const accessCheckResult = this.canUpdateRole(role, currentUserAsMember.scopes);
+
+    if (!accessCheckResult.ok) {
+      return {
+        error: {
+          message: accessCheckResult.message,
+        },
+      };
+    }
+
+    // Ensure name is unique in the organization
+    const roleName = input.name.trim();
+    const nameExists = await this.storage.hasOrganizationMemberRoleName({
+      organizationId: input.organizationId,
+      roleName,
+      excludeRoleId: input.roleId,
+    });
+
+    if (nameExists) {
+      const msg = 'Role name already exists. Please choose a different name.';
+
+      return {
+        error: {
+          message: msg,
+          inputErrors: {
+            name: msg,
+          },
+        },
+      };
+    }
+
+    const existingRoleScopes = role.scopes;
+    const hasAssignedMembers = role.membersCount > 0;
+
+    // Ensure user has access to all new scopes in the role
+    const currentUserMissingAccessInNewRole = newScopes.filter(
+      scope => !currentUserAsMember.scopes.includes(scope),
+    );
+
+    if (currentUserMissingAccessInNewRole.length > 0) {
+      this.logger.debug(`Logged user scopes: %s`, currentUserAsMember.scopes.join(', '));
+      this.logger.debug(`No access to scopes: %s`, currentUserMissingAccessInNewRole.join(', '));
+
+      return {
+        error: {
+          message: `Missing access to some of the selected scopes`,
+        },
+      };
+    }
+
+    const missingOldRoleScopesInNewRole = existingRoleScopes.filter(
+      scope => !newScopes.includes(scope),
+    );
+
+    // Ensure new role has at least the same access scopes as the old role, to avoid downgrading members
+    if (hasAssignedMembers && missingOldRoleScopesInNewRole.length > 0) {
+      // Admin role is an exception, admin can downgrade members
+      if (!this.isAdminRole(currentUserAsMember.role)) {
+        this.logger.debug(`New role scopes: %s`, newScopes.join(', '));
+        this.logger.debug(`Old role scopes: %s`, existingRoleScopes.join(', '));
+        return {
+          error: {
+            message: `Cannot downgrade member to a role with less access scopes`,
+          },
+        };
+      }
+    }
+
+    // Update the role
+    const updatedRole = await this.storage.updateOrganizationMemberRole({
+      organizationId: input.organizationId,
+      roleId: input.roleId,
+      name: roleName,
+      description: input.description,
+      scopes: newScopes,
+    });
+
+    // Access cache is stale by now
+    this.authManager.resetAccessCache();
+
+    return {
+      ok: {
+        updatedRole,
+      },
+    };
+  }
+
+  async getMembersWithoutRole(selector: { organizationId: string }) {
+    if (
+      await this.authManager.checkOrganizationAccess({
+        organization: selector.organizationId,
+        scope: OrganizationAccessScope.MEMBERS,
+      })
+    ) {
+      return this.storage.getMembersWithoutRole({
+        organizationId: selector.organizationId,
+      });
+    }
+
+    // if user doesn't have access to members, return empty list
+    return [];
+  }
+
+  async getMemberRoles(selector: { organizationId: string }) {
+    await this.authManager.ensureOrganizationAccess({
+      organization: selector.organizationId,
+      scope: OrganizationAccessScope.MEMBERS,
+    });
+
+    return this.storage.getOrganizationMemberRoles({
+      organizationId: selector.organizationId,
+    });
+  }
+
+  async getMemberRole(selector: { organizationId: string; roleId: string }) {
+    await this.authManager.ensureOrganizationAccess({
+      organization: selector.organizationId,
+      scope: OrganizationAccessScope.MEMBERS,
+    });
+
+    return this.storage.getOrganizationMemberRole({
+      organizationId: selector.organizationId,
+      roleId: selector.roleId,
+    });
+  }
+
+  async canDeleteRole(
+    role: OrganizationMemberRole,
+    currentUserScopes: readonly (
+      | OrganizationAccessScope
+      | ProjectAccessScope
+      | TargetAccessScope
+    )[],
+  ): Promise<
+    | {
+        ok: false;
+        message: string;
+      }
+    | {
+        ok: true;
+      }
+  > {
+    // Ensure role is not locked (can't be deleted)
+    if (role.locked) {
+      return {
+        ok: false,
+        message: `Cannot delete a built-in role`,
+      };
+    }
+    // Ensure role has no members
+    let membersCount: number | undefined = role.membersCount;
+
+    if (typeof membersCount !== 'number') {
+      const freshRole = await this.storage.getOrganizationMemberRole({
+        organizationId: role.organizationId,
+        roleId: role.id,
+      });
+
+      if (!freshRole) {
+        throw new Error('Role not found');
+      }
+
+      membersCount = freshRole.membersCount;
+    }
+
+    if (membersCount > 0) {
+      return {
+        ok: false,
+        message: `Cannot delete a role with members`,
+      };
+    }
+
+    // Ensure user has access to all scopes in the role
+    const currentUserMissingScopes = role.scopes.filter(
+      scope => !currentUserScopes.includes(scope),
+    );
+
+    if (currentUserMissingScopes.length > 0) {
+      this.logger.debug(`Logged user scopes: %s`, currentUserScopes.join(', '));
+      this.logger.debug(`No access to scopes: %s`, currentUserMissingScopes.join(', '));
+
+      return {
+        ok: false,
+        message: `Missing access to some of the scopes of the role`,
+      };
+    }
+
+    return {
+      ok: true,
+    };
+  }
+
+  canUpdateRole(
+    role: OrganizationMemberRole,
+    currentUserScopes: readonly (
+      | OrganizationAccessScope
+      | ProjectAccessScope
+      | TargetAccessScope
+    )[],
+  ):
+    | {
+        ok: false;
+        message: string;
+      }
+    | {
+        ok: true;
+      } {
+    // Ensure role is not locked (can't be updated)
+    if (role.locked) {
+      return {
+        ok: false,
+        message: `Cannot update a built-in role`,
+      };
+    }
+
+    // Ensure user has access to all scopes in the role
+    const currentUserMissingScopes = role.scopes.filter(
+      scope => !currentUserScopes.includes(scope),
+    );
+
+    if (currentUserMissingScopes.length > 0) {
+      this.logger.debug(`Logged user scopes: %s`, currentUserScopes.join(', '));
+      this.logger.debug(`No access to scopes: %s`, currentUserMissingScopes.join(', '));
+
+      return {
+        ok: false,
+        message: `Missing access to some of the scopes of the role`,
+      };
+    }
+
+    return {
+      ok: true,
+    };
+  }
+
+  canInviteRole(
+    role: OrganizationMemberRole,
+    currentUserScopes: readonly (
+      | OrganizationAccessScope
+      | ProjectAccessScope
+      | TargetAccessScope
+    )[],
+  ):
+    | {
+        ok: false;
+        message: string;
+      }
+    | {
+        ok: true;
+      } {
+    // Ensure user has access to all scopes in the role
+    const currentUserMissingScopes = role.scopes.filter(
+      scope => !currentUserScopes.includes(scope),
+    );
+
+    if (currentUserMissingScopes.length > 0) {
+      this.logger.debug(`Logged user scopes: %s`, currentUserScopes.join(', '));
+      this.logger.debug(`No access to scopes: %s`, currentUserMissingScopes.join(', '));
+
+      return {
+        ok: false,
+        message: `Missing access to some of the scopes of the role`,
+      };
+    }
+
+    return {
+      ok: true,
+    };
+  }
+
+  async migrateUnassignedMembers({
+    organizationId,
+    assignRole,
+    createRole,
+  }: {
+    organizationId: string;
+    assignRole?: {
+      role: string;
+      members: readonly string[];
+    } | null;
+    createRole?: {
+      name: string;
+      description: string;
+      organizationScopes: readonly OrganizationAccessScope[];
+      projectScopes: readonly ProjectAccessScope[];
+      targetScopes: readonly TargetAccessScope[];
+      members: readonly string[];
+    } | null;
+  }) {
+    const currentUser = await this.authManager.getCurrentUser();
+    const currentUserAsMember = await this.getOrganizationMember({
+      organization: organizationId,
+      user: currentUser.id,
+    });
+
+    if (!this.isAdminRole(currentUserAsMember.role)) {
+      return {
+        error: {
+          message: `Only admins can migrate members`,
+        },
+      };
+    }
+
+    if (assignRole) {
+      return this.assignRoleToMembersMigration({
+        organizationId,
+        roleId: assignRole.role,
+        members: assignRole.members,
+      });
+    }
+
+    if (createRole) {
+      return this.createRoleWithMembersMigration({
+        organizationId,
+        ...createRole,
+      });
+    }
+
+    throw new Error(`Both assignRole and createRole are missing.`);
+  }
+
+  private async createRoleWithMembersMigration(input: {
+    organizationId: string;
+    name: string;
+    description: string;
+    organizationScopes: readonly OrganizationAccessScope[];
+    projectScopes: readonly ProjectAccessScope[];
+    targetScopes: readonly TargetAccessScope[];
+    members: readonly string[];
+  }) {
+    const result = await this.createMemberRole({
+      organizationId: input.organizationId,
+      name: input.name,
+      description: input.description,
+      organizationAccessScopes: input.organizationScopes,
+      projectAccessScopes: input.projectScopes,
+      targetAccessScopes: input.targetScopes,
+    });
+
+    if (result.ok) {
+      return this.assignRoleToMembersMigration({
+        roleId: result.ok.createdRole.id,
+        organizationId: input.organizationId,
+        members: input.members,
+      });
+    }
+
+    return result;
+  }
+
+  private async assignRoleToMembersMigration(input: {
+    organizationId: string;
+    roleId: string;
+    members: readonly string[];
+  }) {
+    await this.storage.assignOrganizationMemberRoleToMany({
+      organizationId: input.organizationId,
+      roleId: input.roleId,
+      userIds: input.members,
+    });
+
+    return {
+      ok: {
+        updatedOrganization: await this.storage.getOrganization({
+          organization: input.organizationId,
+        }),
+      },
+    };
+  }
+
+  isAdminRole(role: { name: string; locked: boolean } | null) {
+    return role?.name === 'Admin' && role.locked === true;
   }
 }

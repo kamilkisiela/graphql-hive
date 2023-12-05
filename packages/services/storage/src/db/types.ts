@@ -99,14 +99,25 @@ export interface organization_invitations {
   email: string;
   expires_at: Date;
   organization_id: string;
+  role_id: string;
 }
 
 export interface organization_member {
   connected_to_zendesk: boolean;
   organization_id: string;
   role: user_role;
+  role_id: string | null;
   scopes: Array<string> | null;
   user_id: string;
+}
+
+export interface organization_member_roles {
+  description: string;
+  id: string;
+  locked: boolean;
+  name: string;
+  organization_id: string;
+  scopes: Array<string>;
 }
 
 export interface organizations {
@@ -324,6 +335,7 @@ export interface DBTables {
   oidc_integrations: oidc_integrations;
   organization_invitations: organization_invitations;
   organization_member: organization_member;
+  organization_member_roles: organization_member_roles;
   organizations: organizations;
   organizations_billing: organizations_billing;
   projects: projects;

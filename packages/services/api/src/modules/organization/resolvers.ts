@@ -1,12 +1,41 @@
+import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import { createConnection } from '../../shared/schema';
 import { AuthManager } from '../auth/providers/auth-manager';
+import {
+  isOrganizationScope,
+  OrganizationAccessScope,
+} from '../auth/providers/organization-access';
+import { isProjectScope, ProjectAccessScope } from '../auth/providers/project-access';
+import { isTargetScope, TargetAccessScope } from '../auth/providers/target-access';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { Logger } from '../shared/providers/logger';
 import type { OrganizationModule } from './__generated__/types';
 import { OrganizationManager } from './providers/organization-manager';
 
 const OrganizationNameModel = z.string().min(2).max(50);
+
+const createOrUpdateMemberRoleInputSchema = z.object({
+  name: z
+    .string({
+      required_error: 'Please enter role name',
+    })
+    .trim()
+    .min(2, 'Role name must be at least 2 characters long')
+    .max(64, 'Role name must be at most 64 characters long')
+    .refine(
+      val => typeof val === 'string' && val.length > 0 && val[0] === val[0].toUpperCase(),
+      'Must start with a capital letter',
+    )
+    .refine(val => val !== 'Viewer' && val !== 'Admin', 'Viewer and Admin are reserved'),
+  description: z
+    .string({
+      required_error: 'Please enter role description',
+    })
+    .trim()
+    .min(2, 'Role description must be at least 2 characters long')
+    .max(256, 'Role description must be at most 256 characters long'),
+});
 
 export const resolvers: OrganizationModule.Resolvers = {
   Query: {
@@ -180,14 +209,14 @@ export const resolvers: OrganizationModule.Resolvers = {
         organization,
       };
     },
-    async deleteOrganizationMembers(_, { selector }, { injector }) {
-      const organizationId = await injector.get(IdTranslator).translateOrganizationId(selector);
+    async deleteOrganizationMember(_, { input }, { injector }) {
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
       const organization = await injector
         .get(OrganizationManager)
-        .deleteMembers({ organization: organizationId, users: selector.users });
+        .deleteMember({ organization: organizationId, user: input.user });
 
       return {
-        selector,
+        selector: input,
         organization,
       };
     },
@@ -227,7 +256,7 @@ export const resolvers: OrganizationModule.Resolvers = {
     },
     async inviteToOrganizationByEmail(_, { input }, { injector }) {
       const InputModel = z.object({
-        email: z.string().email(),
+        email: z.string().email().max(128, 'Email must be at most 128 characters long'),
       });
       const result = InputModel.safeParse(input);
 
@@ -242,14 +271,11 @@ export const resolvers: OrganizationModule.Resolvers = {
         };
       }
       const organization = await injector.get(IdTranslator).translateOrganizationId(input);
-      const invitation = await injector.get(OrganizationManager).inviteByEmail({
+      return await injector.get(OrganizationManager).inviteByEmail({
         organization,
         email: input.email,
+        role: input.role,
       });
-
-      return {
-        ok: invitation,
-      };
     },
     async requestOrganizationTransfer(_, { input }, { injector }) {
       const organization = await injector.get(IdTranslator).translateOrganizationId(input);
@@ -283,6 +309,103 @@ export const resolvers: OrganizationModule.Resolvers = {
         };
       }
     },
+    async createMemberRole(_, { input }, { injector }) {
+      const inputValidation = createOrUpdateMemberRoleInputSchema.safeParse({
+        name: input.name,
+        description: input.description,
+      });
+
+      if (!inputValidation.success) {
+        return {
+          error: {
+            message: 'Please check your input.',
+            inputErrors: {
+              name: inputValidation.error.formErrors.fieldErrors.name?.[0],
+              description: inputValidation.error.formErrors.fieldErrors.description?.[0],
+            },
+          },
+        };
+      }
+
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
+
+      return injector.get(OrganizationManager).createMemberRole({
+        organizationId,
+        name: inputValidation.data.name,
+        description: inputValidation.data.description,
+        organizationAccessScopes: input.organizationAccessScopes,
+        projectAccessScopes: input.projectAccessScopes,
+        targetAccessScopes: input.targetAccessScopes,
+      });
+    },
+    async updateMemberRole(_, { input }, { injector }) {
+      const inputValidation = createOrUpdateMemberRoleInputSchema.safeParse({
+        name: input.name,
+        description: input.description,
+      });
+
+      if (!inputValidation.success) {
+        return {
+          error: {
+            message: 'Please check your input.',
+            inputErrors: {
+              name: inputValidation.error.formErrors.fieldErrors.name?.[0],
+              description: inputValidation.error.formErrors.fieldErrors.description?.[0],
+            },
+          },
+        };
+      }
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
+
+      return injector.get(OrganizationManager).updateMemberRole({
+        organizationId,
+        roleId: input.role,
+        name: inputValidation.data.name,
+        description: inputValidation.data.description,
+        organizationAccessScopes: input.organizationAccessScopes,
+        projectAccessScopes: input.projectAccessScopes,
+        targetAccessScopes: input.targetAccessScopes,
+      });
+    },
+    async deleteMemberRole(_, { input }, { injector }) {
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
+
+      return injector.get(OrganizationManager).deleteMemberRole({
+        organizationId,
+        roleId: input.role,
+      });
+    },
+    async assignMemberRole(_, { input }, { injector }) {
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId(input);
+
+      return injector.get(OrganizationManager).assignMemberRole({
+        organizationId,
+        memberId: input.member,
+        roleId: input.role,
+      });
+    },
+    async migrateUnassignedMembers(_, { input }, { injector }) {
+      const organizationIdFromInput =
+        input.assignRole?.organization ?? input.createRole?.organization;
+
+      if (!organizationIdFromInput) {
+        return {
+          error: {
+            message: 'Assign a role or create a new one',
+          },
+        };
+      }
+
+      const organizationId = await injector.get(IdTranslator).translateOrganizationId({
+        organization: organizationIdFromInput,
+      });
+
+      return injector.get(OrganizationManager).migrateUnassignedMembers({
+        organizationId,
+        assignRole: input.assignRole,
+        createRole: input.createRole,
+      });
+    },
   },
   Organization: {
     __isTypeOf(organization) {
@@ -315,6 +438,59 @@ export const resolvers: OrganizationModule.Resolvers = {
         total: invitations.length,
         nodes: invitations,
       };
+    },
+    memberRoles(organization, _, { injector }) {
+      return injector.get(OrganizationManager).getMemberRoles({
+        organizationId: organization.id,
+      });
+    },
+    async unassignedMembersToMigrate(organization, _, { injector }) {
+      const members = await injector.get(OrganizationManager).getMembersWithoutRole({
+        organizationId: organization.id,
+      });
+
+      if (members.length === 0) {
+        return [];
+      }
+
+      const groupedByAccessScope: {
+        [accessHash: string]: {
+          organizationScopes: OrganizationAccessScope[];
+          projectScopes: ProjectAccessScope[];
+          targetScopes: TargetAccessScope[];
+          members: Array<(typeof members)[number]>;
+        };
+      } = {};
+
+      for (const member of members) {
+        const hasher = createHash('md5');
+        hasher.update([...member.scopes].sort().join(','));
+        const accessHash = hasher.digest('hex');
+
+        if (!groupedByAccessScope[accessHash]) {
+          groupedByAccessScope[accessHash] = {
+            organizationScopes: member.scopes.filter(isOrganizationScope),
+            projectScopes: member.scopes.filter(isProjectScope),
+            targetScopes: member.scopes.filter(isTargetScope),
+            members: [],
+          };
+        }
+
+        groupedByAccessScope[accessHash].members.push(member);
+      }
+
+      return (
+        Object.entries(groupedByAccessScope)
+          .map(([accessHash, group]) => ({
+            id: accessHash,
+            organizationScopes: group.organizationScopes,
+            projectScopes: group.projectScopes,
+            targetScopes: group.targetScopes,
+            members: group.members,
+          }))
+          // Sort by the number of members in the group in descending order
+          .sort((a, b) => b.members.length - a.members.length)
+      );
     },
   },
   OrganizationInvitation: {
@@ -351,6 +527,79 @@ export const resolvers: OrganizationModule.Resolvers = {
       });
 
       return result;
+    },
+    isAdmin(member, _, { injector }) {
+      return member.isOwner || injector.get(OrganizationManager).isAdminRole(member.role);
+    },
+  },
+  MemberRole: {
+    organizationAccessScopes(role) {
+      return role.scopes.filter(isOrganizationScope);
+    },
+    projectAccessScopes(role) {
+      return role.scopes.filter(isProjectScope);
+    },
+    targetAccessScopes(role) {
+      return role.scopes.filter(isTargetScope);
+    },
+    async membersCount(role, _, { injector }) {
+      if (role.membersCount) {
+        return role.membersCount;
+      }
+
+      return injector
+        .get(OrganizationManager)
+        .getMemberRole({
+          organizationId: role.organizationId,
+          roleId: role.id,
+        })
+        .then(r => r?.membersCount ?? 0);
+    },
+    async canDelete(role, _, { injector }) {
+      if (role.locked) {
+        return false;
+      }
+
+      const currentUser = await injector.get(AuthManager).getCurrentUser();
+      const currentUserAsMember = await injector.get(OrganizationManager).getOrganizationMember({
+        organization: role.organizationId,
+        user: currentUser.id,
+      });
+
+      const result = await injector
+        .get(OrganizationManager)
+        .canDeleteRole(role, currentUserAsMember.scopes);
+
+      return result.ok;
+    },
+    async canUpdate(role, _, { injector }) {
+      if (role.locked) {
+        return false;
+      }
+      const currentUser = await injector.get(AuthManager).getCurrentUser();
+      const currentUserAsMember = await injector.get(OrganizationManager).getOrganizationMember({
+        organization: role.organizationId,
+        user: currentUser.id,
+      });
+
+      const result = injector
+        .get(OrganizationManager)
+        .canUpdateRole(role, currentUserAsMember.scopes);
+
+      return result.ok;
+    },
+    async canInvite(role, _, { injector }) {
+      const currentUser = await injector.get(AuthManager).getCurrentUser();
+      const currentUserAsMember = await injector.get(OrganizationManager).getOrganizationMember({
+        organization: role.organizationId,
+        user: currentUser.id,
+      });
+
+      const result = injector
+        .get(OrganizationManager)
+        .canInviteRole(role, currentUserAsMember.scopes);
+
+      return result.ok;
     },
   },
   OrganizationConnection: createConnection(),

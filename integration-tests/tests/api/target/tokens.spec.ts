@@ -47,21 +47,9 @@ test.concurrent('cannot set a scope on a token if user has no access to that sco
   const { createOrg } = await initSeed().createOwner();
   const { createProject, inviteAndJoinMember } = await createOrg();
   const { createToken, target } = await createProject(ProjectType.Single);
-  const { memberToken, updateMemberAccess } = await inviteAndJoinMember();
+  const { memberToken } = await inviteAndJoinMember();
 
-  // Give access to tokens
-  await updateMemberAccess(
-    [
-      TargetAccessScope.Read,
-      TargetAccessScope.RegistryRead,
-      TargetAccessScope.TokensRead,
-      TargetAccessScope.TokensWrite,
-    ],
-    [],
-    [],
-  );
-
-  // member should not have access to target:registry:write
+  // member should not have access to target:registry:write (as it's only a Viewer)
   const tokenResult = createToken({
     targetScopes: [TargetAccessScope.RegistryWrite],
     projectScopes: [],
@@ -70,5 +58,7 @@ test.concurrent('cannot set a scope on a token if user has no access to that sco
     actorToken: memberToken,
   });
 
-  await expect(tokenResult).rejects.toThrowError('target:registry:write');
+  await expect(tokenResult).rejects.toThrowError(
+    'No access (reason: "Missing target:tokens:write permission")',
+  );
 });

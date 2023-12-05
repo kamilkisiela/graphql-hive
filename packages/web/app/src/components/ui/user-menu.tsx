@@ -32,6 +32,7 @@ import { getDocsUrl } from '@/lib/docs-url';
 import { useToggle } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { GetStartedProgress } from '../get-started/wizard';
+import { MemberRoleMigrationStickyNote } from '../organization/members/migration';
 import { UserSettingsModal } from '../user/settings';
 
 export const UserMenu_CurrentOrganizationFragment = graphql(`
@@ -45,6 +46,7 @@ export const UserMenu_CurrentOrganizationFragment = graphql(`
     me {
       ...UserMenu_MemberFragment
     }
+    ...MemberRoleMigrationStickyNote_OrganizationFragment
   }
 `);
 
@@ -109,6 +111,7 @@ export function UserMenu(props: {
         />
       ) : null}
       <div className="flex flex-row items-center gap-8">
+        <MemberRoleMigrationStickyNote organization={currentOrganization} />
         {currentOrganization ? <GetStartedProgress tasks={currentOrganization.getStarted} /> : null}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

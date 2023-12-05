@@ -47,7 +47,12 @@ await describe('migration: schema-checks-dedup', async () => {
       await runTo('2023.08.03T11.44.36.schema-checks-github-repository.ts');
 
       // Seed the database with some data (schema_sdl, supergraph_sdl, composite_schema_sdl)
-      const user = await seed.user();
+      const user = await seed.user({
+        user: {
+          name: 'test',
+          email: 'test@test.com',
+        },
+      });
       const organization = await db.one<{
         id: string;
       }>(

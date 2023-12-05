@@ -3,7 +3,6 @@ export { ConnectSchemaModal } from './connect-schema';
 export { CreateAccessTokenModal } from './create-access-token';
 export { CreateProjectModal } from './create-project';
 export { CreateTargetModal } from './create-target';
-export { DeleteMembersModal } from './delete-members';
 export { DeleteOrganizationModal } from './delete-organization';
 export { DeleteProjectModal } from './delete-project';
 export { DeleteTargetModal } from './delete-target';

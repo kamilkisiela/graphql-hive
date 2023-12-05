@@ -55,3 +55,11 @@ export const organizationAdminScopes = [
   ...Object.values(ProjectAccessScope),
   ...Object.values(TargetAccessScope),
 ];
+
+export const organizationViewerScopes = [
+  OrganizationAccessScope.READ,
+  ProjectAccessScope.READ,
+  ProjectAccessScope.OPERATIONS_STORE_READ,
+  TargetAccessScope.READ,
+  TargetAccessScope.REGISTRY_READ,
+];
