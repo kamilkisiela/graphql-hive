@@ -44,6 +44,7 @@ import { PermissionsSpace } from '../Permissions';
 import { RoleSelector } from './common';
 import { authProviderToIconAndTextMap } from './list';
 import { roleFormSchema } from './roles';
+import { ProductUpdatesLink } from '@/components/v2/docs-note';
 
 const MemberRoleMigrationStickyNote_OrganizationFragment = graphql(`
   fragment MemberRoleMigrationStickyNote_OrganizationFragment on Organization {
@@ -853,6 +854,7 @@ export function OrganizationMemberRolesMigration(props: {
           <br /> You can choose to migrate all members from each group to a new role or assign them
           to an existing role.
         </CardDescription>
+        <ProductUpdatesLink href="2023-12-05-member-roles">Read "Introducing Member Roles" product update to learn more.</ProductUpdatesLink>
       </div>
       {organization.unassignedMembersToMigrate.length > 0 ? (
         <table className="w-full table-auto divide-y-[1px] divide-gray-500/20">
