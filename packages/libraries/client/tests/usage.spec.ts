@@ -166,20 +166,23 @@ test('should send data to Hive', async () => {
   expect(record.operation).toMatch('mutation deleteProject');
   expect(record.operationName).toMatch('deleteProject');
   // fields
-  expect(record.fields).toHaveLength(13);
-  expect(record.fields).toContainEqual('Mutation.deleteProject');
-  expect(record.fields).toContainEqual('Mutation.deleteProject.selector');
-  expect(record.fields).toContainEqual('DeleteProjectPayload.selector');
-  expect(record.fields).toContainEqual('ProjectSelector.organization');
-  expect(record.fields).toContainEqual('ProjectSelector.project');
-  expect(record.fields).toContainEqual('DeleteProjectPayload.deletedProject');
-  expect(record.fields).toContainEqual('Project.id');
-  expect(record.fields).toContainEqual('Project.cleanId');
-  expect(record.fields).toContainEqual('Project.name');
-  expect(record.fields).toContainEqual('Project.type');
-  expect(record.fields).toContainEqual('ProjectSelectorInput.organization');
-  expect(record.fields).toContainEqual('ID');
-  expect(record.fields).toContainEqual('ProjectSelectorInput.project');
+  expect(record.fields).toMatchInlineSnapshot(`
+    [
+      Mutation.deleteProject,
+      Mutation.deleteProject.selector,
+      DeleteProjectPayload.selector,
+      ProjectSelector.organization,
+      ProjectSelector.project,
+      DeleteProjectPayload.deletedProject,
+      Project.id,
+      Project.cleanId,
+      Project.name,
+      Project.type,
+      ProjectSelectorInput.organization,
+      ID,
+      ProjectSelectorInput.project,
+    ]
+  `);
 
   // Operations
   const operations = report.operations;
@@ -265,20 +268,23 @@ test('should send data to Hive (deprecated endpoint)', async () => {
   expect(record.operation).toMatch('mutation deleteProject');
   expect(record.operationName).toMatch('deleteProject');
   // fields
-  expect(record.fields).toHaveLength(13);
-  expect(record.fields).toContainEqual('Mutation.deleteProject');
-  expect(record.fields).toContainEqual('Mutation.deleteProject.selector');
-  expect(record.fields).toContainEqual('DeleteProjectPayload.selector');
-  expect(record.fields).toContainEqual('ProjectSelector.organization');
-  expect(record.fields).toContainEqual('ProjectSelector.project');
-  expect(record.fields).toContainEqual('DeleteProjectPayload.deletedProject');
-  expect(record.fields).toContainEqual('Project.id');
-  expect(record.fields).toContainEqual('Project.cleanId');
-  expect(record.fields).toContainEqual('Project.name');
-  expect(record.fields).toContainEqual('Project.type');
-  expect(record.fields).toContainEqual('ProjectSelectorInput.organization');
-  expect(record.fields).toContainEqual('ID');
-  expect(record.fields).toContainEqual('ProjectSelectorInput.project');
+  expect(record.fields).toMatchInlineSnapshot(`
+    [
+      Mutation.deleteProject,
+      Mutation.deleteProject.selector,
+      DeleteProjectPayload.selector,
+      ProjectSelector.organization,
+      ProjectSelector.project,
+      DeleteProjectPayload.deletedProject,
+      Project.id,
+      Project.cleanId,
+      Project.name,
+      Project.type,
+      ProjectSelectorInput.organization,
+      ID,
+      ProjectSelectorInput.project,
+    ]
+  `);
 
   // Operations
   const operations = report.operations;
