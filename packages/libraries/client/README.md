@@ -319,6 +319,89 @@ const server = new ApolloServer({
 })
 ```
 
+### Sampling
+
+#### Basic sampling
+
+With `sampleRate` option, you're able to control the sampling rate of the usage reporting. Setting
+it to `0.5` will result in 50% of the operations being sent to Hive. There is no guarantee that
+every operation will be reported at least once (see `atLeastOnceSampler`).
+
+Default: `1` (100%)
+
+```typescript
+useHive({
+  /* ... other options ... */,
+  usage: {
+    sampleRate: 0.6 // 60% of the operations will be sent to Hive
+  }
+})
+```
+
+#### Dynamic sampling
+
+GraphQL Hive client accepts a function that returns a number between 0 and 1. This allows you to
+implement dynamic sampling based on the operation's context.
+
+If `sampler` is defined, `sampleRate` is ignored.
+
+A sample rate between 0 and 1.
+
+- `0.0` = 0% chance of being sent
+- `1.0` = 100% chance of being sent.
+- `true` = 100%
+- `false` = 0%
+
+```typescript
+useHive({
+  /* ... other options ... */,
+  usage: {
+    sampler(samplingContext) {
+      if (samplingContext.operationName === 'GetUser') {
+        return 0.5 // 50% of GetUser operations will be sent to Hive
+      }
+
+      return 0.7; // 70% of the other operations will be sent to Hive
+    }
+  }
+})
+```
+
+#### At-least-once sampling
+
+If you want to make sure that every operation is reported at least once, you can use the
+`atLeastOnceSampler`. Every operation is reported at least once, but every next occurrence is
+decided by the sampler.
+
+```typescript
+import { useHive, atLeastOnceSampler} from '@graphql-hive/client';
+
+useHive({
+  /* ... other options ... */,
+  usage: {
+    sampler: atLeastOnceSampler({
+      // Produces a unique key for a given GraphQL request.
+      // This key is used to determine the uniqueness of a GraphQL operation.
+      keyFn(samplingContext) {
+        // Operation name is a good candidate for a key, but not perfect,
+        // as not all operations have names
+        // and some operations may have the same name but different body.
+        return samplingContext.operationName;
+      },
+      sampler(_samplingContext) {
+        const hour = new Date().getHours();
+
+        if (hour >= 9 && hour <= 17) {
+          return 0.3;
+        }
+
+        return 0.8;
+      }
+    })
+  }
+})
+```
+
 ## Self-Hosting
 
 To align the client with your own instance of GraphQL Hive, you should use `selfHosting` options in
