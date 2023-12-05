@@ -305,22 +305,6 @@ export const resolvers: SchemaModule.Resolvers = {
         })),
       };
     },
-    async updateSchemaVersionStatus(_, { input }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project, target] = await Promise.all([
-        translator.translateOrganizationId(input),
-        translator.translateProjectId(input),
-        translator.translateTargetId(input),
-      ]);
-
-      return injector.get(SchemaPublisher).updateVersionStatus({
-        version: input.version,
-        valid: input.valid,
-        organization,
-        project,
-        target,
-      });
-    },
     async updateBaseSchema(_, { input }, { injector }) {
       const UpdateBaseSchemaModel = z.object({
         newBase: MaybeModel(GraphQLSchemaStringModel),
@@ -384,19 +368,6 @@ export const resolvers: SchemaModule.Resolvers = {
         secret: input.secret,
       });
     },
-    async updateProjectRegistryModel(_, { input }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project] = await Promise.all([
-        translator.translateOrganizationId(input),
-        translator.translateProjectId(input),
-      ]);
-
-      return injector.get(SchemaManager).updateRegistryModel({
-        project,
-        organization,
-        model: input.model,
-      });
-    },
   },
   Query: {
     async schemaCompareToPrevious(_, { selector, unstable_forceLegacyComparison }, { injector }) {
@@ -423,9 +394,8 @@ export const resolvers: SchemaModule.Resolvers = {
       ]);
 
       const useLegacy = unstable_forceLegacyComparison ?? false;
-      const isCompositeModernProject =
-        project.legacyRegistryModel === false &&
-        (project.type === ProjectType.FEDERATION || project.type === ProjectType.STITCHING);
+      const isCompositeProject =
+        project.type === ProjectType.FEDERATION || project.type === ProjectType.STITCHING;
 
       // Lord forgive me for my sins
       if (useLegacy === false) {
@@ -462,7 +432,7 @@ export const resolvers: SchemaModule.Resolvers = {
                 current: currentVersion.compositeSchemaSDL,
               },
               changes: [],
-              versionIds: isCompositeModernProject
+              versionIds: isCompositeProject
                 ? {
                     before: null,
                     current: currentVersion.id,
@@ -520,7 +490,7 @@ export const resolvers: SchemaModule.Resolvers = {
                 current: currentVersion.compositeSchemaSDL,
               },
               changes: changes ?? [],
-              versionIds: isCompositeModernProject
+              versionIds: isCompositeProject
                 ? {
                     before: previousVersion?.id ?? null,
                     current: currentVersion.id,
@@ -621,7 +591,7 @@ export const resolvers: SchemaModule.Resolvers = {
                 current: after.raw,
               },
               changes,
-              versionIds: isCompositeModernProject
+              versionIds: isCompositeProject
                 ? {
                     before: previousVersionId ?? null,
                     current: selector.version,
@@ -1310,9 +1280,6 @@ export const resolvers: SchemaModule.Resolvers = {
       }
 
       return null;
-    },
-    registryModel(project) {
-      return project.legacyRegistryModel ? 'LEGACY' : 'MODERN';
     },
     schemaVersionsCount(project, { period }, { injector }) {
       return injector.get(SchemaManager).countSchemaVersionsOfProject({

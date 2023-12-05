@@ -7,7 +7,6 @@ import * as Yup from 'yup';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, ProjectLayout } from '@/components/layouts/project';
 import { ExternalCompositionSettings } from '@/components/project/settings/external-composition';
-import { ModelMigrationSettings } from '@/components/project/settings/model-migration';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -202,7 +201,6 @@ const ProjectSettingsPage_ProjectFragment = graphql(`
     name
     type
     isProjectNameInGitHubCheckEnabled
-    ...ModelMigrationSettings_ProjectFragment
     ...ExternalCompositionSettings_ProjectFragment
   }
 `);
@@ -302,7 +300,6 @@ function ProjectSettingsContent() {
         <div className="flex flex-col gap-y-4">
           {project && organization ? (
             <>
-              <ModelMigrationSettings project={project} organizationId={organization.cleanId} />
               <form onSubmit={handleSubmit}>
                 <Card>
                   <CardHeader>

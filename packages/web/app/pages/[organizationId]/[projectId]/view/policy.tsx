@@ -9,7 +9,6 @@ import { QueryError } from '@/components/ui/query-error';
 import { DocsLink, MetaTitle } from '@/components/v2';
 import { graphql } from '@/gql';
 import { ProjectAccessScope } from '@/gql/graphql';
-import { RegistryModel } from '@/graphql';
 import { useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
@@ -39,7 +38,6 @@ const ProjectPolicyPageQuery = graphql(`
     project(selector: { organization: $organizationId, project: $projectId }) {
       id
       ...ProjectLayout_CurrentProjectFragment
-      registryModel
       schemaPolicy {
         id
         updatedAt
@@ -107,8 +105,6 @@ function ProjectPolicyContent() {
     return <QueryError error={query.error} />;
   }
 
-  const isLegacyProject = currentProject?.registryModel === RegistryModel.Legacy;
-
   return (
     <ProjectLayout
       currentOrganization={currentOrganization ?? null}
@@ -130,36 +126,14 @@ function ProjectPolicyContent() {
           <Card>
             <CardHeader>
               <CardTitle>Rules</CardTitle>
-              {currentProject && isLegacyProject ? (
-                <CardDescription>
-                  <strong>
-                    Policy feature is only available for projects that are using the new registry
-                    model.
-                    <br />
-                    Please upgrade your project to use the new registry model if you wish to use the
-                    policy feature.
-                  </strong>
-                  <br />
-                  <DocsLink
-                    className="text-muted-foreground text-sm"
-                    href="https://the-guild.dev/blog/graphql-hive-improvements-in-schema-registry"
-                  >
-                    Learn more
-                  </DocsLink>
-                </CardDescription>
-              ) : (
-                <CardDescription>
-                  At the project level, policies can be defined to affect all targets, and override
-                  policy configuration defined at the organization level.
-                  <br />
-                  <DocsLink
-                    href="/features/schema-policy"
-                    className="text-muted-foreground text-sm"
-                  >
-                    Learn more
-                  </DocsLink>
-                </CardDescription>
-              )}
+              <CardDescription>
+                At the project level, policies can be defined to affect all targets, and override
+                policy configuration defined at the organization level.
+                <br />
+                <DocsLink href="/features/schema-policy" className="text-muted-foreground text-sm">
+                  Learn more
+                </DocsLink>
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {currentOrganization.schemaPolicy === null ||

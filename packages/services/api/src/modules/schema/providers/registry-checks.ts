@@ -485,15 +485,6 @@ export class RegistryChecks {
       return false;
     }
 
-    if (project.legacyRegistryModel === true) {
-      this.logger.warn(
-        'Project is using legacy registry model, ignoring native Federation support (organization=%s, project=%s)',
-        organization.id,
-        project.id,
-      );
-      return false;
-    }
-
     if (organization.featureFlags.compareToPreviousComposableVersion === false) {
       this.logger.warn(
         'Organization has compareToPreviousComposableVersion FF disabled, ignoring native Federation support (organization=%s, project=%s)',

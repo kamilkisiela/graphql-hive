@@ -9,7 +9,6 @@ import { CreateTargetModal } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
-import { ProjectMigrationToast } from '../project/migration-toast';
 
 export enum Page {
   Targets = 'targets',
@@ -56,7 +55,6 @@ const ProjectLayout_CurrentProjectFragment = graphql(`
     id
     cleanId
     name
-    registryModel
   }
 `);
 
@@ -168,10 +166,6 @@ export function ProjectLayout({
           </div>
         </div>
       </header>
-
-      {page === Page.Settings || currentProject?.registryModel !== 'LEGACY' ? null : (
-        <ProjectMigrationToast orgId={orgId} projectId={currentProject.cleanId} />
-      )}
 
       <div className="relative border-b border-gray-800">
         <div className="container flex items-center justify-between">

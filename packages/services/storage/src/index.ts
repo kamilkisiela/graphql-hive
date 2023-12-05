@@ -204,7 +204,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       buildUrl: project.build_url,
       validationUrl: project.validation_url,
       gitRepository: project.git_repository as `${string}/${string}` | null,
-      legacyRegistryModel: project.legacy_registry_model,
       useProjectNameInGithubCheck: project.github_check_with_project_name === true,
       externalComposition: {
         enabled: project.external_composition_enabled,
@@ -1264,18 +1263,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `),
       );
     },
-    async updateProjectRegistryModel({ project, model }) {
-      const isLegacyModel = model === 'LEGACY';
-
-      return transformProject(
-        await pool.one<projects>(sql`
-          UPDATE public.projects
-          SET legacy_registry_model = ${isLegacyModel}
-          WHERE id = ${project}
-          RETURNING *
-        `),
-      );
-    },
 
     async deleteProject({ organization, project }) {
       const result = await pool.transaction(async t => {
@@ -2084,21 +2071,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       }
 
       return changes.rows.map(row => HiveSchemaChangeModel.parse(row));
-    },
-
-    async updateVersionStatus({ version, valid }) {
-      return SchemaVersionModel.parse(
-        await pool.maybeOne<unknown>(sql`
-          UPDATE
-            public.schema_versions
-          SET
-            is_composable = ${valid}
-          WHERE
-            id = ${version}
-          RETURNING
-          ${schemaVersionSQLFields()}
-        `),
-      );
     },
 
     getSchemaLog: batch(async selectors => {
