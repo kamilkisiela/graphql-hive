@@ -186,7 +186,7 @@ export function deployApp({
         //
         {
           name: 'MEMBER_ROLES_DEADLINE',
-          value: '2024-01-01', // TODO: move it to the config file
+          value: appEnv.MEMBER_ROLES_DEADLINE,
         },
       ],
       port: 3000,
