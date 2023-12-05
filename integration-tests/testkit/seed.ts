@@ -1,3 +1,4 @@
+import { humanId } from 'human-id';
 import { createPool, sql } from 'slonik';
 import {
   OrganizationAccessScope,
@@ -18,12 +19,15 @@ import {
 } from './collections';
 import { ensureEnv } from './env';
 import {
+  assignMemberRole,
   checkSchema,
   compareToPreviousVersion,
   createCdnAccess,
+  createMemberRole,
   createOrganization,
   createProject,
   createToken,
+  deleteMemberRole,
   deleteSchema,
   deleteTokens,
   fetchLatestSchema,
@@ -42,7 +46,7 @@ import {
   readTokenInfo,
   setTargetValidation,
   updateBaseSchema,
-  updateMemberAccess,
+  updateMemberRole,
   updateRegistryModel,
   updateSchemaVersionStatus,
 } from './flow';
@@ -121,13 +125,18 @@ export function initSeed() {
 
               return result.organization!.organization;
             },
-            async inviteMember(email = 'some@email.com') {
+            async inviteMember(
+              email = 'some@email.com',
+              inviteToken = ownerToken,
+              roleId?: string,
+            ) {
               const inviteResult = await inviteToOrganization(
                 {
                   email,
                   organization: organization.cleanId,
+                  role: roleId,
                 },
-                ownerToken,
+                inviteToken,
               ).then(r => r.expectNoGraphQLErrors());
 
               return inviteResult.inviteToOrganizationByEmail;
@@ -640,7 +649,7 @@ export function initSeed() {
                 },
               };
             },
-            async inviteAndJoinMember() {
+            async inviteAndJoinMember(inviteToken: string = ownerToken) {
               const memberEmail = userEmail(generateUnique());
               const memberToken = await authenticate(memberEmail).then(r => r.access_token);
 
@@ -649,7 +658,7 @@ export function initSeed() {
                   organization: organization.cleanId,
                   email: memberEmail,
                 },
-                ownerToken,
+                inviteToken,
               ).then(r => r.expectNoGraphQLErrors());
 
               const code = invitationResult.inviteToOrganizationByEmail.ok?.code;
@@ -676,26 +685,158 @@ export function initSeed() {
                 member,
                 memberEmail,
                 memberToken,
-                async updateMemberAccess(
-                  targetScopes: TargetAccessScope[] = [],
-                  projectScopes: ProjectAccessScope[] = [],
-                  organizationScopes: OrganizationAccessScope[] = [],
+                async assignMemberRole(
+                  input: {
+                    roleId: string;
+                    memberId: string;
+                  },
                   options: { useMemberToken?: boolean } = {
                     useMemberToken: false,
                   },
                 ) {
-                  const updateResult = await updateMemberAccess(
+                  const memberRoleAssignmentResult = await assignMemberRole(
                     {
                       organization: organization.cleanId,
-                      organizationScopes: organizationScopes,
-                      projectScopes: projectScopes,
-                      targetScopes: targetScopes,
-                      user: member.id,
+                      member: input.memberId,
+                      role: input.roleId,
                     },
                     options.useMemberToken ? memberToken : ownerToken,
                   ).then(r => r.expectNoGraphQLErrors());
 
-                  return updateResult.updateOrganizationMemberAccess.organization;
+                  if (memberRoleAssignmentResult.assignMemberRole.error) {
+                    throw new Error(memberRoleAssignmentResult.assignMemberRole.error.message);
+                  }
+
+                  return memberRoleAssignmentResult.assignMemberRole.ok?.updatedMember;
+                },
+                async deleteMemberRole(
+                  roleId: string,
+                  options: { useMemberToken?: boolean } = {
+                    useMemberToken: false,
+                  },
+                ) {
+                  const memberRoleDeletionResult = await deleteMemberRole(
+                    {
+                      organization: organization.cleanId,
+                      role: roleId,
+                    },
+                    options.useMemberToken ? memberToken : ownerToken,
+                  ).then(r => r.expectNoGraphQLErrors());
+
+                  if (memberRoleDeletionResult.deleteMemberRole.error) {
+                    throw new Error(memberRoleDeletionResult.deleteMemberRole.error.message);
+                  }
+
+                  return memberRoleDeletionResult.deleteMemberRole.ok?.updatedOrganization;
+                },
+                async createMemberRole(
+                  scopes: {
+                    organization: OrganizationAccessScope[];
+                    project: ProjectAccessScope[];
+                    target: TargetAccessScope[];
+                  },
+                  options: { useMemberToken?: boolean } = {
+                    useMemberToken: false,
+                  },
+                ) {
+                  const name = humanId({
+                    separator: '',
+                    adjectiveCount: 1,
+                    addAdverb: true,
+                    capitalize: true,
+                  });
+                  const memberRoleCreationResult = await createMemberRole(
+                    {
+                      organization: organization.cleanId,
+                      name,
+                      description: 'some description',
+                      organizationAccessScopes: scopes.organization,
+                      projectAccessScopes: scopes.project,
+                      targetAccessScopes: scopes.target,
+                    },
+                    options.useMemberToken ? memberToken : ownerToken,
+                  ).then(r => r.expectNoGraphQLErrors());
+
+                  if (memberRoleCreationResult.createMemberRole.error) {
+                    if (memberRoleCreationResult.createMemberRole.error.inputErrors?.name) {
+                      throw new Error(
+                        memberRoleCreationResult.createMemberRole.error.inputErrors.name,
+                      );
+                    }
+                    if (memberRoleCreationResult.createMemberRole.error.inputErrors?.description) {
+                      throw new Error(
+                        memberRoleCreationResult.createMemberRole.error.inputErrors.description,
+                      );
+                    }
+
+                    throw new Error(memberRoleCreationResult.createMemberRole.error.message);
+                  }
+
+                  const createdRole =
+                    memberRoleCreationResult.createMemberRole.ok?.updatedOrganization.memberRoles.find(
+                      r => r.name === name,
+                    );
+
+                  if (!createdRole) {
+                    throw new Error(
+                      `Could not find created member role for org ${organization.cleanId}`,
+                    );
+                  }
+
+                  return createdRole;
+                },
+                async updateMemberRole(
+                  role: {
+                    id: string;
+                    name: string;
+                    description: string;
+                  },
+                  scopes: {
+                    organization: OrganizationAccessScope[];
+                    project: ProjectAccessScope[];
+                    target: TargetAccessScope[];
+                  },
+                  options: { useMemberToken?: boolean } = {
+                    useMemberToken: false,
+                  },
+                ) {
+                  const memberRoleUpdateResult = await updateMemberRole(
+                    {
+                      organization: organization.cleanId,
+                      role: role.id,
+                      name: role.name,
+                      description: role.description,
+                      organizationAccessScopes: scopes.organization,
+                      projectAccessScopes: scopes.project,
+                      targetAccessScopes: scopes.target,
+                    },
+                    options.useMemberToken ? memberToken : ownerToken,
+                  ).then(r => r.expectNoGraphQLErrors());
+
+                  if (memberRoleUpdateResult.updateMemberRole.error) {
+                    if (memberRoleUpdateResult.updateMemberRole.error.inputErrors?.name) {
+                      throw new Error(
+                        memberRoleUpdateResult.updateMemberRole.error.inputErrors.name,
+                      );
+                    }
+                    if (memberRoleUpdateResult.updateMemberRole.error.inputErrors?.description) {
+                      throw new Error(
+                        memberRoleUpdateResult.updateMemberRole.error.inputErrors.description,
+                      );
+                    }
+
+                    throw new Error(memberRoleUpdateResult.updateMemberRole.error.message);
+                  }
+
+                  const updatedRole = memberRoleUpdateResult.updateMemberRole.ok?.updatedRole;
+
+                  if (!updatedRole) {
+                    throw new Error(
+                      `Could not find the updated member role for org ${organization.cleanId}`,
+                    );
+                  }
+
+                  return updatedRole;
                 },
               };
             },

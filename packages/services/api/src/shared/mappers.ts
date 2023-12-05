@@ -12,6 +12,7 @@ import type {
   DocumentCollectionOperation,
   Member,
   Organization,
+  OrganizationMemberRole,
   PersistedOperation,
   Project,
   PushedCompositeSchema as PushedCompositeSchemaEntity,
@@ -362,3 +363,5 @@ export type SuccessfulSchemaCheckMapper = {
 } & Extract<SchemaCheck, { isSuccess: true }>;
 
 export type SchemaPolicyWarningConnectionMapper = ReadonlyArray<SchemaCheckWarning>;
+
+export type MemberRoleMapper = OrganizationMemberRole;

@@ -97,7 +97,7 @@ function ProjectPolicyContent() {
   const currentProject = query.data?.project;
   const organizationConnection = query.data?.organizations;
 
-  useProjectAccess({
+  const hasAccess = useProjectAccess({
     scope: ProjectAccessScope.Settings,
     member: currentOrganization?.me ?? null,
     redirect: true,
@@ -126,7 +126,7 @@ function ProjectPolicyContent() {
             schema.
           </Subtitle>
         </div>
-        {currentProject && currentOrganization ? (
+        {currentProject && currentOrganization && hasAccess ? (
           <Card>
             <CardHeader>
               <CardTitle>Rules</CardTitle>

@@ -15,8 +15,7 @@ export const NoAccess = 'no-access';
 
 export const RegistryAccessScope = {
   name: 'Registry',
-  description:
-    'Manage schema registry (publish new schemas, run schema checks, report usage, etc.)',
+  description: 'Manage registry (publish schemas, run checks, report usage)',
   mapping: {
     'read-only': TargetAccessScope.RegistryRead,
     'read-write': TargetAccessScope.RegistryWrite,
@@ -68,7 +67,7 @@ export const scopes: {
     },
     {
       name: 'Settings',
-      description: "Manage organization's settings (change its name, etc.)",
+      description: 'Manage project settings (change its name, etc.)',
       mapping: {
         'read-write': ProjectAccessScope.Settings,
       },
@@ -100,7 +99,7 @@ export const scopes: {
     RegistryAccessScope,
     {
       name: 'Settings',
-      description: "Manage organization's settings (change its name, etc.)",
+      description: 'Manage target settings (change its name, etc.)',
       mapping: {
         'read-write': TargetAccessScope.Settings,
       },

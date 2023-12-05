@@ -26,6 +26,7 @@ import type {
   Organization,
   OrganizationBilling,
   OrganizationInvitation,
+  OrganizationMemberRole,
   PaginatedDocumentCollectionOperations,
   PaginatedDocumentCollections,
   Project,
@@ -89,7 +90,8 @@ export interface Storage {
   createOrganization(
     _: Pick<Organization, 'cleanId' | 'name'> & {
       user: string;
-      scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
+      adminScopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
+      viewerScopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
       reservedNames: string[];
     },
   ): Promise<Organization | never>;
@@ -114,7 +116,7 @@ export interface Storage {
   ): Promise<Organization | never>;
 
   createOrganizationInvitation(
-    _: OrganizationSelector & { email: string },
+    _: OrganizationSelector & { email: string; roleId: string },
   ): Promise<OrganizationInvitation | never>;
 
   deleteOrganizationInvitationByEmail(
@@ -143,9 +145,6 @@ export interface Storage {
       code: string;
       user: string;
       accept: boolean;
-      oldAdminAccessScopes: ReadonlyArray<
-        OrganizationAccessScope | ProjectAccessScope | TargetAccessScope
-      >;
     },
   ): Promise<void>;
 
@@ -178,11 +177,10 @@ export interface Storage {
     _: OrganizationSelector & {
       code: string;
       user: string;
-      scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
     },
   ): Promise<void>;
 
-  deleteOrganizationMembers(_: OrganizationSelector & { users: readonly string[] }): Promise<void>;
+  deleteOrganizationMember(_: OrganizationSelector & { user: string }): Promise<void>;
 
   updateOrganizationMemberAccess(
     _: OrganizationSelector & {
@@ -190,6 +188,51 @@ export interface Storage {
       scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
     },
   ): Promise<void>;
+
+  hasOrganizationMemberRoleName(_: {
+    organizationId: string;
+    roleName: string;
+    excludeRoleId?: string;
+  }): Promise<boolean>;
+  getOrganizationMemberRoles(_: {
+    organizationId: string;
+  }): Promise<ReadonlyArray<OrganizationMemberRole>>;
+  getViewerOrganizationMemberRole(_: { organizationId: string }): Promise<OrganizationMemberRole>;
+  getAdminOrganizationMemberRole(_: { organizationId: string }): Promise<OrganizationMemberRole>;
+  getOrganizationMemberRole(_: { organizationId: string; roleId: string }): Promise<
+    | (OrganizationMemberRole & {
+        membersCount: number;
+      })
+    | null
+  >;
+  createOrganizationMemberRole(_: {
+    organizationId: string;
+    name: string;
+    description: string;
+    scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
+  }): Promise<OrganizationMemberRole>;
+  updateOrganizationMemberRole(_: {
+    organizationId: string;
+    roleId: string;
+    name: string;
+    description: string;
+    scopes: ReadonlyArray<OrganizationAccessScope | ProjectAccessScope | TargetAccessScope>;
+  }): Promise<OrganizationMemberRole>;
+  assignOrganizationMemberRole(_: {
+    organizationId: string;
+    roleId: string;
+    userId: string;
+  }): Promise<void>;
+  /**
+   * Remove it after all users have been migrated to the new role system.
+   */
+  assignOrganizationMemberRoleToMany(_: {
+    organizationId: string;
+    roleId: string;
+    userIds: readonly string[];
+  }): Promise<void>;
+  deleteOrganizationMemberRole(_: { organizationId: string; roleId: string }): Promise<void>;
+  getMembersWithoutRole(_: { organizationId: string }): Promise<readonly Member[]>;
 
   getProject(_: ProjectSelector): Promise<Project | never>;
 

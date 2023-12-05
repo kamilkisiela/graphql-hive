@@ -181,6 +181,13 @@ export function deployApp({
           name: 'AUTH_ORGANIZATION_OIDC',
           value: '1',
         },
+        //
+        // Migrations
+        //
+        {
+          name: 'MEMBER_ROLES_DEADLINE',
+          value: appEnv.MEMBER_ROLES_DEADLINE,
+        },
       ],
       port: 3000,
     },

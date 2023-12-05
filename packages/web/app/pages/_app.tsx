@@ -16,6 +16,7 @@ import { urqlClient } from '@/lib/urql';
 import { configureScope, init } from '@sentry/nextjs';
 import '../public/styles.css';
 import 'react-toastify/dist/ReactToastify.css';
+import { Toaster } from '@/components/ui/toaster';
 
 function identifyOnSentry(userId: string, email: string): void {
   configureScope(scope => {
@@ -90,7 +91,7 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
           <Component {...pageProps} />
         </UrqlProvider>
       </SuperTokensWrapper>
-
+      <Toaster />
       <ToastContainer hideProgressBar />
     </>
   );

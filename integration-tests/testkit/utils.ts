@@ -59,7 +59,7 @@ export async function getServiceHost(serviceName: string, servicePort: number): 
 export function generateUnique() {
   return humanId({
     separator: '',
-    adjectiveCount: 2,
+    adjectiveCount: 1,
     addAdverb: true,
     capitalize: false,
   });

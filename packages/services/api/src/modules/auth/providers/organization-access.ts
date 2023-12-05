@@ -36,7 +36,7 @@ interface OrganizationTokenAccessSelector {
 
 const organizationAccessScopeValues = Object.values(OrganizationAccessScope);
 
-function isOrganizationScope(scope: any): scope is OrganizationAccessScope {
+export function isOrganizationScope(scope: any): scope is OrganizationAccessScope {
   return organizationAccessScopeValues.includes(scope);
 }
 

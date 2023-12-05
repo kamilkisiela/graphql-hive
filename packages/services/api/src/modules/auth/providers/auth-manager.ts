@@ -202,6 +202,31 @@ export class AuthManager {
     return user;
   });
 
+  async getCurrentUserAccessScopes(organizationId: string) {
+    const user = await this.getCurrentUser();
+
+    if (!user) {
+      throw new AccessError('User not found');
+    }
+
+    const [organizationScopes, projectScopes, targetScopes] = await Promise.all([
+      this.getMemberOrganizationScopes({
+        organization: organizationId,
+        user: user.id,
+      }),
+      this.getMemberProjectScopes({
+        organization: organizationId,
+        user: user.id,
+      }),
+      this.getMemberTargetScopes({
+        organization: organizationId,
+        user: user.id,
+      }),
+    ]);
+
+    return [...organizationScopes, ...projectScopes, ...targetScopes];
+  }
+
   async updateCurrentUser(input: { displayName: string; fullName: string }): Promise<User> {
     const user = await this.getCurrentUser();
     return this.userManager.updateUser({

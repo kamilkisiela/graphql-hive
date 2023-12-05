@@ -79,11 +79,28 @@ export interface HiveUsagePluginOptions {
    */
   sampleRate?: number;
   /**
+   * Compute sample rate dynamically.
+   *
+   * If `sampler` is defined, `sampleRate` is ignored.
+   *
+   * @returns A sample rate between 0 and 1.
+   * 0.0 = 0% chance of being sent
+   * 1.0 = 100% chance of being sent.
+   * true = 100%
+   * false = 0%
+   */
+  sampler?: (context: SamplingContext) => number | boolean;
+  /**
    * (Experimental) Enables collecting Input fields usage based on the variables passed to the operation.
    *
    * Default: false
    */
   processVariables?: boolean;
+}
+
+export interface SamplingContext
+  extends Pick<ExecutionArgs, 'document' | 'contextValue' | 'variableValues'> {
+  operationName: string;
 }
 
 export interface HiveReportingPluginOptions {

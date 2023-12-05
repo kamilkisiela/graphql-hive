@@ -4,8 +4,8 @@ export default defineConfig({
   test: {
     globals: true,
     alias: {
-      '@app/gql/graphql': 'testkit/gql/graphql.ts',
-      '@app/gql': 'testkit/gql/index.ts',
+      '@app/gql/graphql': new URL('./testkit/gql/graphql.ts', import.meta.url).pathname,
+      '@app/gql': new URL('./testkit/gql/index.ts', import.meta.url).pathname,
     },
     setupFiles: ['dotenv/config', '../scripts/serializer.ts'],
     testTimeout: 90_000,

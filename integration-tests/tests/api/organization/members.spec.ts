@@ -19,7 +19,7 @@ test.concurrent('owner of an organization should have all scopes', async () => {
   });
 });
 
-test.concurrent('regular member of an organization should have basic scopes', async () => {
+test.concurrent('invited member should have basic scopes (Viewer role)', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { inviteAndJoinMember } = await createOrg();
   const { member } = await inviteAndJoinMember();
@@ -41,19 +41,76 @@ test.concurrent('regular member of an organization should have basic scopes', as
 });
 
 test.concurrent(
+  'cannot create a role with an access scope that user has no access to',
+  async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { inviteAndJoinMember, organization } = await createOrg();
+    const { createMemberRole, assignMemberRole, member } = await inviteAndJoinMember();
+
+    // Create a role with organization:members access, so we could perform the test.
+    // To create a role, user must have access to organization:members first.
+    const membersManagerRole = await createMemberRole({
+      organization: [OrganizationAccessScope.Members],
+      project: [],
+      target: [],
+    });
+    await assignMemberRole({
+      roleId: membersManagerRole.id,
+      memberId: member.id,
+    });
+
+    await expect(
+      createMemberRole(
+        {
+          organization: [OrganizationAccessScope.Settings], // <-- this scope is not part of the membersManagerRole, so it should fail
+          project: [],
+          target: [],
+        },
+        {
+          useMemberToken: true,
+        },
+      ),
+    ).rejects.toThrowError('Missing access');
+  },
+);
+
+test.concurrent(
   'cannot grant an access scope to another user if user has no access to that scope',
   async () => {
     const { createOrg } = await initSeed().createOwner();
-    const { inviteAndJoinMember } = await createOrg();
-    const { updateMemberAccess } = await inviteAndJoinMember();
+    const { inviteAndJoinMember, organization } = await createOrg();
+    const { createMemberRole, assignMemberRole, member } = await inviteAndJoinMember();
+    const { member: viewerRoleMember } = await inviteAndJoinMember();
 
-    // Grant organization: members access
-    await updateMemberAccess([], [], [OrganizationAccessScope.Members]);
+    // Create a role with organization:members access, so we could perform the test.
+    // To create a role, user must have access to organization:members first.
+    const membersManagerRole = await createMemberRole({
+      organization: [OrganizationAccessScope.Members],
+      project: [],
+      target: [],
+    });
+    await assignMemberRole({
+      roleId: membersManagerRole.id,
+      memberId: member.id,
+    });
 
-    // Grant access to target:tokens:write
+    const adminRoleId = organization.memberRoles.find(r => r.name === 'Admin')?.id;
+
+    if (!adminRoleId) {
+      throw new Error('Admin role not found');
+    }
+
     await expect(
-      updateMemberAccess([TargetAccessScope.TokensWrite], [], [], { useMemberToken: true }),
-    ).rejects.toThrowError('target:tokens:write');
+      assignMemberRole(
+        {
+          roleId: adminRoleId,
+          memberId: viewerRoleMember.id,
+        },
+        {
+          useMemberToken: true,
+        },
+      ),
+    ).rejects.toThrowError('Missing access');
   },
 );
 
@@ -62,18 +119,216 @@ test.concurrent(
   async () => {
     const { createOrg } = await initSeed().createOwner();
     const { inviteAndJoinMember } = await createOrg();
-    const { member, updateMemberAccess } = await inviteAndJoinMember();
+    const { createMemberRole } = await inviteAndJoinMember();
 
-    const accessResult = await updateMemberAccess([], [], []);
-    const memberWithAccess = accessResult.members.nodes.find(m => m.id === member.id);
-    expect(memberWithAccess?.organizationAccessScopes).toHaveLength(1);
-    expect(memberWithAccess?.organizationAccessScopes).toContainEqual(OrganizationAccessScope.Read);
-    expect(memberWithAccess?.projectAccessScopes).toHaveLength(1);
-    expect(memberWithAccess?.projectAccessScopes).toContainEqual(ProjectAccessScope.Read);
-    expect(memberWithAccess?.targetAccessScopes).toHaveLength(1);
-    expect(memberWithAccess?.targetAccessScopes).toContainEqual(TargetAccessScope.Read);
+    const readOnlyRole = await createMemberRole({
+      organization: [],
+      project: [],
+      target: [],
+    });
+    expect(readOnlyRole?.organizationAccessScopes).toHaveLength(1);
+    expect(readOnlyRole?.organizationAccessScopes).toContainEqual(OrganizationAccessScope.Read);
+    expect(readOnlyRole?.projectAccessScopes).toHaveLength(1);
+    expect(readOnlyRole?.projectAccessScopes).toContainEqual(ProjectAccessScope.Read);
+    expect(readOnlyRole?.targetAccessScopes).toHaveLength(1);
+    expect(readOnlyRole?.targetAccessScopes).toContainEqual(TargetAccessScope.Read);
   },
 );
+
+test.concurrent('cannot downgrade a member when assigning a new role', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { inviteAndJoinMember } = await createOrg();
+  const { createMemberRole, assignMemberRole, member } = await inviteAndJoinMember();
+  const { member: viewerRoleMember } = await inviteAndJoinMember();
+
+  const managerRole = await createMemberRole({
+    organization: [OrganizationAccessScope.Members],
+    project: [ProjectAccessScope.Settings],
+    target: [
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+    ],
+  });
+  const originalRole = await createMemberRole({
+    organization: [],
+    project: [],
+    target: [
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+    ],
+  });
+  const roleWithLessAccess = await createMemberRole({
+    organization: [],
+    project: [],
+    target: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+  });
+  await assignMemberRole({
+    roleId: managerRole.id,
+    memberId: member.id,
+  });
+  await assignMemberRole({
+    roleId: originalRole.id,
+    memberId: viewerRoleMember.id,
+  });
+
+  // non-admin member cannot downgrade another member
+  await expect(
+    assignMemberRole(
+      {
+        roleId: roleWithLessAccess.id,
+        memberId: viewerRoleMember.id,
+      },
+      {
+        useMemberToken: true,
+      },
+    ),
+  ).rejects.toThrowError('Cannot downgrade member');
+  // admin can downgrade another member
+  await assignMemberRole({
+    roleId: roleWithLessAccess.id,
+    memberId: viewerRoleMember.id,
+  });
+});
+
+test.concurrent('cannot downgrade a member when modifying a role', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { inviteAndJoinMember } = await createOrg();
+  const { createMemberRole, assignMemberRole, member, updateMemberRole } =
+    await inviteAndJoinMember();
+  const { member: viewerRoleMember } = await inviteAndJoinMember();
+
+  const managerRole = await createMemberRole({
+    organization: [OrganizationAccessScope.Members],
+    project: [ProjectAccessScope.Settings],
+    target: [
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+    ],
+  });
+  const roleToBeUpdated = await createMemberRole({
+    organization: [],
+    project: [],
+    target: [
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+    ],
+  });
+  await assignMemberRole({
+    roleId: managerRole.id,
+    memberId: member.id,
+  });
+  await assignMemberRole({
+    roleId: roleToBeUpdated.id,
+    memberId: viewerRoleMember.id,
+  });
+
+  // non-admin member cannot downgrade another member
+  await expect(
+    updateMemberRole(
+      roleToBeUpdated,
+      {
+        organization: [],
+        project: [],
+        target: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite], // <-- downgrade (missing: TargetAccessScope.Settings)
+      },
+      {
+        useMemberToken: true,
+      },
+    ),
+  ).rejects.toThrowError('Cannot downgrade member');
+  // admin can downgrade another member
+  await updateMemberRole(roleToBeUpdated, {
+    organization: [],
+    project: [],
+    target: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite], // <-- downgrade (missing: TargetAccessScope.Settings)
+  });
+});
+
+test.concurrent('cannot delete a role with members', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { inviteAndJoinMember } = await createOrg();
+  const { createMemberRole, deleteMemberRole, assignMemberRole, member } =
+    await inviteAndJoinMember();
+  const { member: viewerRoleMember } = await inviteAndJoinMember();
+
+  const membersManagerRole = await createMemberRole({
+    organization: [OrganizationAccessScope.Members],
+    project: [],
+    target: [],
+  });
+  const readOnlyRole = await createMemberRole({
+    organization: [],
+    project: [],
+    target: [],
+  });
+  await assignMemberRole({
+    roleId: membersManagerRole.id,
+    memberId: member.id,
+  });
+  await assignMemberRole({
+    roleId: readOnlyRole.id,
+    memberId: viewerRoleMember.id,
+  });
+
+  // delete the role as the owner
+  await expect(deleteMemberRole(readOnlyRole.id)).rejects.toThrowError(
+    'Cannot delete a role with members',
+  );
+  // delete the role as a member with enough access to delete the role
+  await expect(
+    deleteMemberRole(readOnlyRole.id, {
+      useMemberToken: true,
+    }),
+  ).rejects.toThrowError('Cannot delete a role with members');
+});
+
+test.concurrent('cannot invite a member with more access than the inviter', async () => {
+  const seed = initSeed();
+  const { createOrg } = await seed.createOwner();
+  const { inviteMember, inviteAndJoinMember, organization } = await createOrg();
+  const {
+    member: invitingMember,
+    memberToken: invitingMemberToken,
+    createMemberRole,
+    assignMemberRole,
+  } = await inviteAndJoinMember();
+
+  const adminRoleId = organization.memberRoles.find(r => r.name === 'Admin')?.id;
+  if (!adminRoleId) {
+    throw new Error('Admin role not found');
+  }
+
+  const membersManagerRole = await createMemberRole({
+    organization: [OrganizationAccessScope.Members],
+    project: [],
+    target: [],
+  });
+  const readOnlyRole = await createMemberRole({
+    organization: [],
+    project: [],
+    target: [],
+  });
+
+  // give the inviting member a role with enough access to invite other members
+  await assignMemberRole({
+    roleId: membersManagerRole.id,
+    memberId: invitingMember.id,
+  });
+
+  const inviteEmail = seed.generateEmail();
+  const failedInvitationResult = await inviteMember(inviteEmail, invitingMemberToken, adminRoleId);
+  expect(failedInvitationResult.error?.message).toEqual(
+    expect.stringContaining('Not enough access to invite a member'),
+  );
+
+  const invitationResult = await inviteMember(inviteEmail, invitingMemberToken, readOnlyRole.id);
+  const inviteCode = invitationResult.ok?.code;
+  expect(inviteCode).toBeDefined();
+});
 
 test.concurrent('email invitation', async () => {
   const seed = initSeed();
