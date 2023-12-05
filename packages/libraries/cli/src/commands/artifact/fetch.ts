@@ -1,6 +1,5 @@
 import { Flags } from '@oclif/core';
 import { URL } from 'url';
-import fetch from 'node-fetch';
 import Command from '../../base-command';
 
 export default class ArtifactsFetch extends Command {
@@ -41,6 +40,7 @@ export default class ArtifactsFetch extends Command {
 
     const url = new URL(`${cdnEndpoint}/${artifactType}`);
 
+    const fetch = await import('node-fetch').then(m => m.default);
     const response = await fetch(url.toString(), {
       headers: {
         'x-hive-cdn-key': token,
