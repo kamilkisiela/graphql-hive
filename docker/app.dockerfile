@@ -1,4 +1,4 @@
-FROM node:18.18.2-slim
+FROM node:18.19.0-slim
 
 RUN apt-get update && apt-get install -y ca-certificates
 
