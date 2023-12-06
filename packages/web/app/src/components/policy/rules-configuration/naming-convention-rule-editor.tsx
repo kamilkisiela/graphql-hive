@@ -1,6 +1,7 @@
 import { ReactElement, useEffect } from 'react';
 import type { JSONSchema } from 'json-schema-typed';
 import { Spinner } from '@/components/v2';
+import { cn } from '@/lib/utils';
 import MonacoEditor, { type Monaco } from '@monaco-editor/react';
 import { useConfigurationHelper } from '../form-helper';
 
@@ -28,7 +29,7 @@ const DEFAULT_VALUE = {
 export function NamingConventionConfigEditor(props: {
   configJsonSchema: JSONSchema | null;
 }): ReactElement {
-  const { config, setConfig, getConfigValue, setConfigAsInvalid } =
+  const { config, setConfig, getConfigValue, setConfigAsInvalid, getValidationStatus } =
     useConfigurationHelper().ruleConfig('naming-convention');
   const currentValue = getConfigValue<string | undefined>('');
 
@@ -57,6 +58,8 @@ export function NamingConventionConfigEditor(props: {
     });
   }
 
+  const validationErrorMessage = getValidationStatus('').message;
+
   return (
     <div className="col-span-4">
       <MonacoEditor
@@ -64,6 +67,10 @@ export function NamingConventionConfigEditor(props: {
         loading={<Spinner />}
         height="40vh"
         beforeMount={handleEditorWillMount}
+        className={cn(
+          'rounded-md border border-transparent',
+          validationErrorMessage ? 'border-red-500' : '',
+        )}
         width="100%"
         language="json"
         onChange={value => {

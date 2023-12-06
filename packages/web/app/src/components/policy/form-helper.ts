@@ -56,7 +56,20 @@ export function useConfigurationHelper() {
             );
           }
         },
-        // TODO: add validation status here with an error message
+        getValidationStatus(property: string) {
+          const actualProp = property === '' ? '' : `.${property}`;
+          const { error } = formik.getFieldMeta(`rules.${id}.config${actualProp}`);
+
+          return error
+            ? {
+                status: 'error' as const,
+                message: error,
+              }
+            : {
+                status: 'success' as const,
+                message: null,
+              };
+        },
       };
     },
   };

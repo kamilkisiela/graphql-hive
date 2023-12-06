@@ -1,6 +1,6 @@
 import { ReactElement, useEffect } from 'react';
 import clsx from 'clsx';
-import { InfoCircledIcon } from '@radix-ui/react-icons';
+import { InfoIcon } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem, Tooltip } from '../../v2';
 import { useConfigurationHelper } from '../form-helper';
 import { PolicyConfigBox } from '../policy-config-box';
@@ -32,7 +32,7 @@ export const PolicyEnumSelect = (props: {
           <div>{props.title}</div>
           {props.tooltip ? (
             <Tooltip content={props.tooltip}>
-              <InfoCircledIcon className="ml-2 text-orange-500" />
+              <InfoIcon className="ml-2 h-4 w-4 text-orange-500" />
             </Tooltip>
           ) : null}
         </div>
