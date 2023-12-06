@@ -109,8 +109,9 @@ function PolicySettingsListForm({
           {children ? children(props) : null}
           <div className="flex items-center justify-end">
             {props.dirty ? <p className="pr-2 text-sm text-gray-500">Unsaved changes</p> : null}
+
             <Button
-              disabled={!props.dirty || saving}
+              disabled={!props.dirty || saving || !props.isValid}
               type="submit"
               variant="default"
               onClick={() => props.submitForm()}
