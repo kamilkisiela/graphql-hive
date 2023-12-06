@@ -181,7 +181,7 @@ export default abstract class extends Command {
               .join('\n')}`,
             {
               errors: jsonData.errors,
-              headers: response.headers as any,
+              headers: response.headers,
             },
           );
         }
