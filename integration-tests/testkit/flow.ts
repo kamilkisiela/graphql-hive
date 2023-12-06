@@ -1,4 +1,3 @@
-import { fetch } from '@whatwg-node/fetch';
 import { graphql } from './gql';
 import type {
   AnswerOrganizationTransferRequestInput,

@@ -264,8 +264,24 @@ services:
   app:
     image: node:21.3.0-alpine3.17
     command: ['npx', 'http-server']
+    environment:
+      PORT: 2182
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:2182']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s
 
   # Redpand is used for integration tests, instead of Kafka. Zookeeper is no longer needed
   zookeeper:
     image: node:21.3.0-alpine3.17
     command: ['npx', 'http-server']
+    environment:
+      PORT: 2181
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:2181']
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 5s

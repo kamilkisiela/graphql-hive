@@ -1,6 +1,7 @@
 import { Flags } from '@oclif/core';
-import { fetch, URL } from '@whatwg-node/fetch';
+import { URL } from 'url';
 import Command from '../../base-command';
+import { fetch } from '@whatwg-node/node-fetch';
 
 export default class ArtifactsFetch extends Command {
   static description = 'fetch artifacts from the CDN';

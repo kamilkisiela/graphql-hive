@@ -183,10 +183,10 @@ index 64bee4efe80de5dfa51810585ff22f027ecf6eb9..57eb39fe3fb89940d8939b9179fb72d4
                  await aws_1.default.s3.uploadFile(localExe, Object.assign(Object.assign({}, S3Options), { CacheControl: 'max-age=86400', Key: cloudKey }));
          };
 diff --git a/lib/tarballs/bin.js b/lib/tarballs/bin.js
-index 8301c7be4c3101de9caf1c1b127cf1f940a1706c..e7d955d29ce3d002a260ef7f4a1355fcdc95e018 100644
+index 8301c7be4c3101de9caf1c1b127cf1f940a1706c..a5244ed11aa4a72b76390ee659fec186043a56b6 100644
 --- a/lib/tarballs/bin.js
 +++ b/lib/tarballs/bin.js
-@@ -7,85 +7,65 @@ const node_child_process_1 = require("node:child_process");
+@@ -7,85 +7,66 @@ const node_child_process_1 = require("node:child_process");
  const node_util_1 = require("node:util");
  const exec = (0, node_util_1.promisify)(node_child_process_1.exec);
  async function writeBinScripts({ config, baseWorkspace, nodeVersion }) {
@@ -293,7 +293,8 @@ index 8301c7be4c3101de9caf1c1b127cf1f940a1706c..e7d955d29ce3d002a260ef7f4a1355fc
 -            exec(`ln -sf ${config.bin} ${alias}`, { cwd: path.join(baseWorkspace, 'bin') }))) !== null && _b !== void 0 ? _b : [],
 -    ]);
 +
-+"\$NODE" "\$DIR/run" "\$@"
++
++"\$NODE" "--no-deprecation" "\$DIR/run" "\$@"
 +`,
 +      { mode: 0o755 }
 +    );

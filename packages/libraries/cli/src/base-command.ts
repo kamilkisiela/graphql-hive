@@ -4,8 +4,8 @@ import type { ExecutionResult } from 'graphql';
 import symbols from 'log-symbols';
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
 import { Command, Errors, Config as OclifConfig } from '@oclif/core';
-import { fetch } from '@whatwg-node/fetch';
 import { Config, GetConfigurationValueType, ValidConfigurationKeys } from './helpers/config';
+import { fetch } from '@whatwg-node/node-fetch';
 
 type OmitNever<T> = { [K in keyof T as T[K] extends never ? never : K]: T[K] };
 
@@ -181,7 +181,7 @@ export default abstract class extends Command {
               .join('\n')}`,
             {
               errors: jsonData.errors,
-              headers: response.headers,
+              headers: response.headers as any,
             },
           );
         }

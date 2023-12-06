@@ -1,6 +1,5 @@
 import type { EmailsApi } from '@hive/emails';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
-import { fetch } from '@whatwg-node/fetch';
 import { env } from './environment';
 
 export function createEmailScheduler(config?: { endpoint: string }) {
