@@ -28,7 +28,7 @@ const DEFAULT_VALUE = {
 export function NamingConventionConfigEditor(props: {
   configJsonSchema: JSONSchema | null;
 }): ReactElement {
-  const { config, setConfig, getConfigValue } =
+  const { config, setConfig, getConfigValue, setConfigAsInvalid } =
     useConfigurationHelper().ruleConfig('naming-convention');
   const currentValue = getConfigValue<string | undefined>('');
 
@@ -67,7 +67,16 @@ export function NamingConventionConfigEditor(props: {
         width="100%"
         language="json"
         onChange={value => {
-          setConfig('', JSON.parse(value as string));
+          let parsed: unknown;
+          try {
+            parsed = JSON.parse(value as string);
+          } catch (error) {
+            setConfigAsInvalid('', error instanceof Error ? error.message : String(error));
+          }
+
+          if (typeof parsed !== 'undefined') {
+            setConfig('', parsed);
+          }
         }}
         options={{
           lineNumbers: 'off',

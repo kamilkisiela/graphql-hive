@@ -44,6 +44,8 @@ export function PolicyListItem(props: {
     !props.overridingParentRule ||
     (props.overridingParentRule && severity !== RuleInstanceSeverityLevel.Off);
 
+  // TODO: add validation status indicator here with a message, as we don't have a way to show errors...
+
   return (
     <Tooltip.Provider delayDuration={100}>
       <div className="px-1 py-4">

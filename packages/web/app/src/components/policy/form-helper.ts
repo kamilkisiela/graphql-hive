@@ -23,6 +23,10 @@ export function useConfigurationHelper() {
             void formik.setFieldValue(`rules.${id}.config${actualProp}`, value, true);
           }
         },
+        setConfigAsInvalid(property: string, errorMessage: string) {
+          const actualProp = property === '' ? '' : `.${property}`;
+          formik.setFieldError(`rules.${id}.config${actualProp}`, errorMessage);
+        },
         getConfigValue<T>(property: string): T | undefined {
           const levels = property.split('.');
           let propName: string | undefined;
@@ -52,6 +56,7 @@ export function useConfigurationHelper() {
             );
           }
         },
+        // TODO: add validation status here with an error message
       };
     },
   };
