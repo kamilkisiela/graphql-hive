@@ -20,6 +20,7 @@ const OrganizationMembersPage_OrganizationFragment = graphql(`
   fragment OrganizationMembersPage_OrganizationFragment on Organization {
     me {
       id
+      isAdmin
       ...CanAccessOrganization_MemberFragment
       ...OrganizationMemberRoleSwitcher_MemberFragment
     }
@@ -28,15 +29,6 @@ const OrganizationMembersPage_OrganizationFragment = graphql(`
     ...OrganizationMemberRoles_OrganizationFragment
     ...OrganizationMembers_OrganizationFragment
     ...OrganizationMemberRolesMigration_OrganizationFragment
-  }
-`);
-
-const OrganizationMembersPage_MeFragment = graphql(`
-  fragment OrganizationMembersPage_MeFragment on User {
-    id
-    fullName
-    displayName
-    isAdmin
   }
 `);
 
@@ -63,14 +55,13 @@ type SubPage = (typeof subPages)[number]['key'];
 
 function PageContent(props: {
   organization: FragmentType<typeof OrganizationMembersPage_OrganizationFragment>;
-  me?: FragmentType<typeof OrganizationMembersPage_MeFragment>;
+
   refetchQuery(): void;
 }) {
   const organization = useFragment(
     OrganizationMembersPage_OrganizationFragment,
     props.organization,
   );
-  const me = useFragment(OrganizationMembersPage_MeFragment, props.me);
 
   const router = useRouter();
   const pageFromUrl =
@@ -127,7 +118,7 @@ function PageContent(props: {
         <nav className="flex w-48 flex-col space-x-0 space-y-1">
           {subPages.map(subPage => {
             // hide migration page from non-admins
-            if (subPage.key === 'migration' && !me?.isAdmin) {
+            if (subPage.key === 'migration' && !organization.me.isAdmin) {
               return null;
             }
 
@@ -159,7 +150,7 @@ function PageContent(props: {
               organization={organization}
             />
           ) : null}
-          {page === 'migration' && me?.isAdmin ? (
+          {page === 'migration' && organization.me.isAdmin ? (
             <OrganizationMemberRolesMigration organization={organization} />
           ) : null}
         </div>
@@ -182,7 +173,6 @@ const OrganizationMembersPageQuery = graphql(`
     me {
       id
       ...OrganizationLayout_MeFragment
-      ...OrganizationMembersPage_MeFragment
     }
   }
 `);
@@ -220,7 +210,6 @@ function OrganizationMembersPageContent() {
             refetch({ requestPolicy: 'network-only' });
           }}
           organization={currentOrganization}
-          me={me}
         />
       ) : null}
     </OrganizationLayout>
