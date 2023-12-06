@@ -1,6 +1,7 @@
 import { Flags } from '@oclif/core';
 import { URL } from 'url';
 import Command from '../../base-command';
+import { fetch } from '@whatwg-node/node-fetch';
 
 export default class ArtifactsFetch extends Command {
   static description = 'fetch artifacts from the CDN';
@@ -40,7 +41,6 @@ export default class ArtifactsFetch extends Command {
 
     const url = new URL(`${cdnEndpoint}/${artifactType}`);
 
-    const fetch = await import('node-fetch').then(m => m.default);
     const response = await fetch(url.toString(), {
       headers: {
         'x-hive-cdn-key': token,

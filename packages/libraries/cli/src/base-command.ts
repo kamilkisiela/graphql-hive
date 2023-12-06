@@ -5,6 +5,7 @@ import symbols from 'log-symbols';
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
 import { Command, Errors, Config as OclifConfig } from '@oclif/core';
 import { Config, GetConfigurationValueType, ValidConfigurationKeys } from './helpers/config';
+import { fetch } from '@whatwg-node/node-fetch';
 
 type OmitNever<T> = { [K in keyof T as T[K] extends never ? never : K]: T[K] };
 
@@ -158,7 +159,6 @@ export default abstract class extends Command {
         operation: TypedDocumentNode<TResult, TVariables>,
         ...[variables]: TVariables extends Record<string, never> ? [] : [TVariables]
       ): Promise<TResult> {
-        const fetch = await import('node-fetch').then(m => m.default);
         const response = await fetch(registry, {
           headers: requestHeaders,
           method: 'POST',

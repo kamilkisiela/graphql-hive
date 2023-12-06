@@ -51,7 +51,7 @@ patchedDependencies:
     hash: hxh4emx3aynf2jzsz5rahc4b4y
     path: patches/nextra@2.12.3.patch
   oclif@3.17.2:
-    hash: p4jeiorqjhwzipwrwepbyei4ba
+    hash: 6wsfogmtwtxtr5stv4pzgb472e
     path: patches/oclif@3.17.2.patch
 
 importers:
@@ -356,6 +356,9 @@ importers:
       '@oclif/plugin-update':
         specifier: 3.2.4
         version: 3.2.4(@swc/core@1.3.100)(@types/node@20.10.3)(typescript@5.3.2)
+      '@whatwg-node/node-fetch':
+        specifier: 0.5.1
+        version: 0.5.1
       colors:
         specifier: 1.4.0
         version: 1.4.0
@@ -374,9 +377,6 @@ importers:
       mkdirp:
         specifier: 2.1.6
         version: 2.1.6
-      node-fetch:
-        specifier: 3.3.2
-        version: 3.3.2
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -392,7 +392,7 @@ importers:
         version: 1.0.2
       oclif:
         specifier: 3.17.2
-        version: 3.17.2(patch_hash=p4jeiorqjhwzipwrwepbyei4ba)(@swc/core@1.3.100)(@types/node@20.10.3)(typescript@5.3.2)
+        version: 3.17.2(patch_hash=6wsfogmtwtxtr5stv4pzgb472e)(@swc/core@1.3.100)(@types/node@20.10.3)(typescript@5.3.2)
       rimraf:
         specifier: 4.4.1
         version: 4.4.1
@@ -686,8 +686,8 @@ importers:
         specifier: 2.0.4
         version: 2.0.4
       '@whatwg-node/server':
-        specifier: 0.9.10
-        version: 0.9.10
+        specifier: 0.9.18
+        version: 0.9.18
       esbuild:
         specifier: 0.19.8
         version: 0.19.8
@@ -719,8 +719,8 @@ importers:
         specifier: 2.0.4
         version: 2.0.4
       '@whatwg-node/server':
-        specifier: 0.9.10
-        version: 0.9.10
+        specifier: 0.9.18
+        version: 0.9.18
       bcryptjs:
         specifier: 2.4.3
         version: 2.4.3
@@ -815,8 +815,8 @@ importers:
         specifier: workspace:*
         version: link:../../../libraries/external-composition/dist
       '@whatwg-node/server':
-        specifier: 0.9.10
-        version: 0.9.10
+        specifier: 0.9.18
+        version: 0.9.18
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -1040,8 +1040,8 @@ importers:
         specifier: 10.44.1
         version: 10.44.1
       '@whatwg-node/server':
-        specifier: 0.9.10
-        version: 0.9.10
+        specifier: 0.9.18
+        version: 0.9.18
       dotenv:
         specifier: 16.3.1
         version: 16.3.1
@@ -14784,8 +14784,27 @@ packages:
       fast-url-parser: 1.1.3
       tslib: 2.6.2
 
+  /@whatwg-node/node-fetch@0.5.1:
+    resolution: {integrity: sha512-sQz/s3NyyzIZxQ7PHxDFUMM1k4kQQbi2jU8ILdTbt5+S59ME8aI7XF30O9qohRIIYdSrUvm/OwKQmVP1y6e2WQ==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@whatwg-node/events': 0.1.1
+      busboy: 1.6.0
+      fast-querystring: 1.1.1
+      fast-url-parser: 1.1.3
+      tslib: 2.6.2
+    dev: false
+
   /@whatwg-node/server@0.9.10:
     resolution: {integrity: sha512-CoFEflKASUL+gCDF21TwRmQ8kUIYcE++09h3D20XuWP+dsjiA4FBBGFNjIafKM5MNqiK6ncX0YBpRqeAwIFlbw==}
+    engines: {node: '>=16.0.0'}
+    dependencies:
+      '@whatwg-node/fetch': 0.9.13
+      tslib: 2.6.2
+    dev: true
+
+  /@whatwg-node/server@0.9.18:
+    resolution: {integrity: sha512-rfI2ZhKWakfkhyVA4v95cnkMF5k5B4k57yLH4bYkEORnLJj+SL7sger0q4hyA47bdp1KOY1raeIBIBEXSpwTvw==}
     engines: {node: '>=16.0.0'}
     dependencies:
       '@whatwg-node/fetch': 0.9.13
@@ -17813,11 +17832,6 @@ packages:
       assert-plus: 1.0.0
     dev: true
 
-  /data-uri-to-buffer@4.0.1:
-    resolution: {integrity: sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A==}
-    engines: {node: '>= 12'}
-    dev: false
-
   /dataloader@1.4.0:
     resolution: {integrity: sha512-68s5jYdlvasItOJnCuI2Q9s4q98g0pCyL3HrcKJu8KNugUl8ahgmZYg38ysLTgQjjXX3H8CJLkAvWrclWfcalw==}
     dev: true
@@ -19730,14 +19744,6 @@ packages:
       tmp: 0.0.33
     dev: true
 
-  /fetch-blob@3.2.0:
-    resolution: {integrity: sha512-7yAQpD2UMJzLi1Dqv7qFYnPbaPx7ZfFK6PiIxQ4PfkGPyNyl2Ugx+a/umUonmKqjhM4DnfbMvdX6otXq83soQQ==}
-    engines: {node: ^12.20 || >= 14.13}
-    dependencies:
-      node-domexception: 1.0.0
-      web-streams-polyfill: 3.2.1
-    dev: false
-
   /fetch-retry@5.0.4:
     resolution: {integrity: sha512-LXcdgpdcVedccGg0AZqg+S8lX/FCdwXD92WNZ5k5qsb0irRhSFsBOpcJt7oevyqT2/C2nEE0zSFNdBEpj3YOSw==}
     dev: true
@@ -20076,13 +20082,6 @@ packages:
     resolution: {integrity: sha512-wzsgA6WOq+09wrU1tsJ09udeR/YZRaeArL9e1wPbFg3GG2yDnC2ldKpxs4xunpFF9DgqCqOIra3bc1HWrJ37Ww==}
     engines: {node: '>=0.4.x'}
     dev: true
-
-  /formdata-polyfill@4.0.10:
-    resolution: {integrity: sha512-buewHzMvYL29jdeQTVILecSaZKnt/RJWjoZCF5OW60Z67/GmSLBkOFM7qh1PI3zFNtJbaZL5eQu1vLfazOwj4g==}
-    engines: {node: '>=12.20.0'}
-    dependencies:
-      fetch-blob: 3.2.0
-    dev: false
 
   /formik@2.4.5(react@18.2.0):
     resolution: {integrity: sha512-Gxlht0TD3vVdzMDHwkiNZqJ7Mvg77xQNfmBRrNtvzcHZs72TJppSTDKHpImCMJZwcWPBJ8jSQQ95GJzXFf1nAQ==}
@@ -20977,7 +20976,7 @@ packages:
       '@graphql-yoga/logger': 1.0.0
       '@graphql-yoga/subscription': 4.0.0
       '@whatwg-node/fetch': 0.9.13
-      '@whatwg-node/server': 0.9.10
+      '@whatwg-node/server': 0.9.18
       dset: 3.1.2
       graphql: 16.8.1
       lru-cache: 10.0.0
@@ -25535,11 +25534,6 @@ packages:
       minimatch: 3.1.2
     dev: true
 
-  /node-domexception@1.0.0:
-    resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
-    engines: {node: '>=10.5.0'}
-    dev: false
-
   /node-fetch-native@1.0.2:
     resolution: {integrity: sha512-KIkvH1jl6b3O7es/0ShyCgWLcfXxlBrLBbP3rOr23WArC66IMcU4DeZEeYEOwnopYhawLTn7/y+YtmASe8DFVQ==}
     dev: true
@@ -25554,15 +25548,6 @@ packages:
         optional: true
     dependencies:
       whatwg-url: 5.0.0
-
-  /node-fetch@3.3.2:
-    resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-    dependencies:
-      data-uri-to-buffer: 4.0.1
-      fetch-blob: 3.2.0
-      formdata-polyfill: 4.0.10
-    dev: false
 
   /node-gyp-build-optional-packages@5.0.3:
     resolution: {integrity: sha512-k75jcVzk5wnnc/FMxsf4udAoTEUv2jY3ycfdSd3yWu6Cnd1oee6/CfZJApyscA4FJOmdoixWwiwOyf16RzD5JA==}
@@ -26080,7 +26065,7 @@ packages:
     resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
     dev: true
 
-  /oclif@3.17.2(patch_hash=p4jeiorqjhwzipwrwepbyei4ba)(@swc/core@1.3.100)(@types/node@20.10.3)(typescript@5.3.2):
+  /oclif@3.17.2(patch_hash=6wsfogmtwtxtr5stv4pzgb472e)(@swc/core@1.3.100)(@types/node@20.10.3)(typescript@5.3.2):
     resolution: {integrity: sha512-+vFXxgmR7dGGz+g6YiqSZu2LXVkBMaS9/rhtsLGkYw45e53CW/3kBgPRnOvxcTDM3Td9JPeBD2JWxXnPKGQW3A==}
     engines: {node: '>=12.0.0'}
     hasBin: true
