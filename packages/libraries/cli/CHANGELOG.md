@@ -1,5 +1,14 @@
 # @graphql-hive/cli
 
+## 0.32.1
+
+### Patch Changes
+
+- [#3529](https://github.com/kamilkisiela/graphql-hive/pull/3529)
+  [`1615ad4`](https://github.com/kamilkisiela/graphql-hive/commit/1615ad4fb681e617d1ac217a3e96484c4f4ca89f)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - fix: use Hive Cloud as a default value
+  for registry.endpoint
+
 ## 0.32.0
 
 ### Minor Changes
