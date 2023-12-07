@@ -1,3 +1,9 @@
+/**
+ * This is a copy of https://github.com/mhart/aws4fetch which is licensed MIT
+ * See https://github.com/mhart/aws4fetch/issues/22
+ */
+import { crypto, fetch, Headers, Request, TextEncoder } from '@whatwg-node/fetch';
+
 const encoder = new TextEncoder();
 
 const HOST_SERVICES: Record<string, string | void> = {

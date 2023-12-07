@@ -2,6 +2,7 @@ import LRU from 'tiny-lru';
 import type { RateLimitApi, RateLimitApiInput, RateLimitApiOutput } from '@hive/rate-limit';
 import { FastifyLoggerInstance } from '@hive/service-common';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import { fetch } from '@whatwg-node/fetch';
 
 export function createUsageRateLimit(config: {
   endpoint: string | null;

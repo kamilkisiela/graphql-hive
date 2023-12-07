@@ -1,7 +1,24 @@
 import 'dotenv/config';
+import { crypto, fetch, Headers, ReadableStream, Request, Response } from '@whatwg-node/fetch';
 import type { Env } from './env';
 
-export const devStorage = new Map<string, string>();
+if (!globalThis.Response) {
+  globalThis.Response = Response;
+}
+if (!globalThis.Request) {
+  globalThis.Request = Request;
+}
+if (!globalThis.Headers) {
+  globalThis.Headers = Headers;
+}
+if (!globalThis.ReadableStream) {
+  globalThis.ReadableStream = ReadableStream;
+}
+if (!globalThis.crypto) {
+  globalThis.crypto = crypto;
+}
+
+export { fetch };
 
 export const env: Env = {
   // eslint-disable-next-line no-process-env

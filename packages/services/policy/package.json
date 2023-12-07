@@ -15,6 +15,7 @@
     "@sentry/node": "7.86.0",
     "@sentry/tracing": "7.86.0",
     "@trpc/server": "10.44.1",
+    "@whatwg-node/fetch": "0.9.13",
     "ajv": "8.12.0",
     "dotenv": "16.3.1",
     "eslint": "8.55.0",

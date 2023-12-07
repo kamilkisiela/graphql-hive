@@ -1,5 +1,6 @@
 import { buildSchema, parse } from 'graphql';
 import { createHive } from '@graphql-hive/client';
+import { fetch } from '@whatwg-node/fetch';
 
 const isFederation = process.env.FEDERATION === '1';
 const isSchemaReportingEnabled = process.env.SCHEMA_REPORTING !== '0';
