@@ -199,6 +199,8 @@ export function initSeed() {
                   await pool.query(sql`
                     UPDATE projects SET native_federation = ${enabled} WHERE id = ${project.id}
                   `);
+
+                  await pool.end();
                 },
                 async setProjectSchemaPolicy(policy: SchemaPolicyInput) {
                   const result = await execute({
