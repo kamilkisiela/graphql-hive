@@ -316,7 +316,7 @@ const SettingsPageRenderer = (props: {
               )}
             </CardContent>
             <CardFooter className="flex justify-between">
-              <Button disabled={isSubmitting} className="px-10">
+              <Button disabled={isSubmitting} className="px-10" onClick={handleSubmit}>
                 Save
               </Button>
             </CardFooter>
