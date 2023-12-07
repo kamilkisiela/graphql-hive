@@ -2,7 +2,6 @@ import bcryptjs from 'bcryptjs';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import { z } from 'zod';
 import { encodeCdnToken, generatePrivateKey } from '@hive/cdn-script/cdn-token';
-import { crypto } from '@whatwg-node/fetch';
 import { HiveError } from '../../../shared/errors';
 import { isUUID } from '../../../shared/is-uuid';
 import { AuthManager } from '../../auth/providers/auth-manager';

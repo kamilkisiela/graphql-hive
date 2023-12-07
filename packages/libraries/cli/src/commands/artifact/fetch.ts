@@ -1,5 +1,6 @@
+import { URL } from 'url';
 import { Flags } from '@oclif/core';
-import { fetch, URL } from '@whatwg-node/fetch';
+import { fetch } from '@whatwg-node/node-fetch';
 import Command from '../../base-command';
 
 export default class ArtifactsFetch extends Command {

@@ -4,7 +4,7 @@ import type { ExecutionResult } from 'graphql';
 import symbols from 'log-symbols';
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
 import { Command, Errors, Config as OclifConfig } from '@oclif/core';
-import { fetch } from '@whatwg-node/fetch';
+import { fetch } from '@whatwg-node/node-fetch';
 import { Config, GetConfigurationValueType, ValidConfigurationKeys } from './helpers/config';
 
 type OmitNever<T> = { [K in keyof T as T[K] extends never ? never : K]: T[K] };

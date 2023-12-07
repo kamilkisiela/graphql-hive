@@ -1,5 +1,4 @@
 /* eslint-disable no-process-env */
-import { fetch } from '@whatwg-node/fetch';
 import { ensureEnv } from './env';
 import { getServiceHost } from './utils';
 

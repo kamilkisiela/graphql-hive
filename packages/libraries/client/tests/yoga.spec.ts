@@ -151,12 +151,11 @@ it('reports usage with response cache', async () => {
       usageCount++;
       expect(body.map).toMatchInlineSnapshot(`
         {
-          a34a5dbc613e150fe56a725d23879557: {
+          0063ba7bf2695b896c464057aef29cdc: {
             fields: [
-              Query.__typename,
               Query.hi,
             ],
-            operation: {__typename hi},
+            operation: {hi},
             operationName: anonymous,
           },
         }

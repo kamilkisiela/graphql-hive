@@ -23,6 +23,9 @@ async function exec(cmd: string) {
   const outout = await execaCommand(`${binPath} ${cmd}`, {
     shell: true,
     env: {
+      // Disable deprecation warnings for the tests
+      // Node v21 gives deprecation warning about the punycode usage in some of our dependencies.
+      NODE_OPTIONS: '--no-deprecation',
       OCLIF_CLI_CUSTOM_PATH: cliDir,
     },
   });

@@ -1,8 +1,18 @@
-import nock from 'nock';
+import { afterAll, afterEach, beforeEach, expect, test } from 'vitest';
 import { createSignatureValidator } from '../src/auth';
 import '../src/dev-polyfill';
+import { MockAgent, MockPool, setGlobalDispatcher } from 'undici';
 import { InvalidRequestFormat, InvalidSignature, MissingSignature } from '../src/errors';
 import { handleRequest } from '../src/handler';
+
+const mockAgent = new MockAgent({
+  keepAliveTimeout: 10, // milliseconds
+  keepAliveMaxTimeout: 10, // milliseconds,
+  connections: 1,
+  pipelining: 0,
+});
+let mockPool: MockPool;
+setGlobalDispatcher(mockAgent);
 
 const SignatureValidators = {
   AlwaysTrue: () => true,
@@ -23,8 +33,16 @@ const logger = {
   error: () => {},
 };
 
+beforeEach(() => {
+  mockPool = mockAgent.get('http://localhost:3000');
+});
 afterEach(clearWorkerEnv);
-afterEach(nock.cleanAll);
+afterEach(async () => {
+  await mockPool?.close();
+  mockAgent.assertNoPendingInterceptors();
+});
+
+afterAll(() => mockAgent.close());
 
 test('401 on missing signature', async () => {
   const SIGNATURE = '123456';
@@ -110,11 +128,15 @@ test('400 on invalid request format', async () => {
 });
 
 test('GET text/plain', async () => {
-  nock('http://localhost')
-    .get('/webhook')
-    .once()
-    .matchHeader('X-Key', 'key')
-    .matchHeader('accept', 'text/plain')
+  mockPool!
+    .intercept({
+      path: '/webhook',
+      method: 'GET',
+      headers: {
+        'X-Key': 'key',
+        accept: 'text/plain',
+      },
+    })
     .reply(200, 'OK');
 
   const SIGNATURE = '123456';
@@ -125,7 +147,7 @@ test('GET text/plain', async () => {
       'x-hive-signature': SIGNATURE,
     },
     body: JSON.stringify({
-      url: 'http://localhost/webhook',
+      url: 'http://localhost:3000/webhook',
       method: 'GET',
       headers: {
         'X-Key': 'key',
@@ -145,14 +167,16 @@ test('GET text/plain', async () => {
 });
 
 test('GET application/json', async () => {
-  nock('http://localhost')
-    .get('/webhook')
-    .once()
-    .matchHeader('X-Key', 'key')
-    .matchHeader('accept', 'application/json')
-    .reply(200, {
-      message: 'OK',
-    });
+  mockPool!
+    .intercept({
+      path: '/webhook',
+      method: 'GET',
+      headers: {
+        'X-Key': 'key',
+        accept: 'application/json',
+      },
+    })
+    .reply(200, { message: 'OK' });
 
   const SIGNATURE = '123456';
 
@@ -162,7 +186,7 @@ test('GET application/json', async () => {
       'x-hive-signature': SIGNATURE,
     },
     body: JSON.stringify({
-      url: 'http://localhost/webhook',
+      url: 'http://localhost:3000/webhook',
       method: 'GET',
       headers: {
         'X-Key': 'key',
@@ -186,11 +210,15 @@ test('GET application/json', async () => {
 });
 
 test('POST text/plain', async () => {
-  nock('http://localhost')
-    .post('/webhook')
-    .once()
-    .matchHeader('X-Key', 'key')
-    .matchHeader('accept', 'text/plain')
+  mockPool!
+    .intercept({
+      path: '/webhook',
+      method: 'POST',
+      headers: {
+        'X-Key': 'key',
+        accept: 'text/plain',
+      },
+    })
     .reply(200, 'OK');
 
   const SIGNATURE = '123456';
@@ -201,7 +229,7 @@ test('POST text/plain', async () => {
       'x-hive-signature': SIGNATURE,
     },
     body: JSON.stringify({
-      url: 'http://localhost/webhook',
+      url: 'http://localhost:3000/webhook',
       method: 'POST',
       headers: {
         'X-Key': 'key',
@@ -221,14 +249,16 @@ test('POST text/plain', async () => {
 });
 
 test('POST application/json', async () => {
-  nock('http://localhost')
-    .post('/webhook')
-    .once()
-    .matchHeader('X-Key', 'key')
-    .matchHeader('accept', 'application/json')
-    .reply(200, {
-      message: 'OK',
-    });
+  mockPool!
+    .intercept({
+      path: '/webhook',
+      method: 'POST',
+      headers: {
+        'X-Key': 'key',
+        accept: 'application/json',
+      },
+    })
+    .reply(200, { message: 'OK' });
 
   const SIGNATURE = '123456';
 
@@ -238,7 +268,7 @@ test('POST application/json', async () => {
       'x-hive-signature': SIGNATURE,
     },
     body: JSON.stringify({
-      url: 'http://localhost/webhook',
+      url: 'http://localhost:3000/webhook',
       method: 'POST',
       headers: {
         'X-Key': 'key',
@@ -262,17 +292,23 @@ test('POST application/json', async () => {
 });
 
 test('POST application/json + body', async () => {
-  nock('http://localhost')
-    .post('/webhook')
-    .once()
-    .matchHeader('X-Key', 'key')
-    .matchHeader('accept', 'application/json')
-    .reply((_, requestBody) => [
-      200,
-      {
-        receivedBody: requestBody,
+  mockPool!
+    .intercept({
+      path: '/webhook',
+      method: 'POST',
+      headers: {
+        'X-Key': 'key',
+        accept: 'application/json',
       },
-    ]);
+    })
+    .reply(opts => {
+      return {
+        statusCode: 200,
+        data: {
+          receivedBody: opts.body ?? '',
+        },
+      };
+    });
 
   const SIGNATURE = '123456';
 
@@ -282,7 +318,7 @@ test('POST application/json + body', async () => {
       'x-hive-signature': SIGNATURE,
     },
     body: JSON.stringify({
-      url: 'http://localhost/webhook',
+      url: 'http://localhost:3000/webhook',
       method: 'POST',
       headers: {
         'X-Key': 'key',
@@ -311,17 +347,21 @@ test('POST application/json + body', async () => {
 });
 
 test('POST application/json + body (without resolving body)', async () => {
-  nock('http://localhost')
-    .post('/webhook')
-    .once()
-    .matchHeader('X-Key', 'key')
-    .matchHeader('accept', 'application/json')
-    .reply((_, requestBody) => [
-      200,
-      {
-        receivedBody: requestBody,
+  mockPool!
+    .intercept({
+      path: '/webhook',
+      method: 'POST',
+      headers: {
+        'X-Key': 'key',
+        accept: 'application/json',
       },
-    ]);
+    })
+    .reply(opts => {
+      return {
+        statusCode: 200,
+        data: opts.body ?? '',
+      };
+    });
 
   const SIGNATURE = '123456';
 
@@ -331,7 +371,7 @@ test('POST application/json + body (without resolving body)', async () => {
       'x-hive-signature': SIGNATURE,
     },
     body: JSON.stringify({
-      url: 'http://localhost/webhook',
+      url: 'http://localhost:3000/webhook',
       method: 'POST',
       headers: {
         'X-Key': 'key',
@@ -356,7 +396,12 @@ test('POST application/json + body (without resolving body)', async () => {
 });
 
 test('passthrough errors', async () => {
-  nock('http://localhost').get('/error').once().reply(500, 'Internal Server Error');
+  mockPool!
+    .intercept({
+      path: '/error',
+      method: 'GET',
+    })
+    .reply(500, 'Internal Server Error');
 
   const SIGNATURE = '123456';
 
@@ -366,7 +411,7 @@ test('passthrough errors', async () => {
       'x-hive-signature': SIGNATURE,
     },
     body: JSON.stringify({
-      url: 'http://localhost/error',
+      url: 'http://localhost:3000/error',
       method: 'GET',
       headers: {
         'X-Key': 'key',

@@ -1,7 +1,6 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import type { AvailableRulesResponse, SchemaPolicyApi, SchemaPolicyApiInput } from '@hive/policy';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
-import { fetch } from '@whatwg-node/fetch';
 import { sentry } from '../../../shared/sentry';
 import { Logger } from '../../shared/providers/logger';
 import type { SchemaPolicyServiceConfig } from './tokens';

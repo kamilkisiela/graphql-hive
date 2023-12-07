@@ -1,6 +1,5 @@
 import * as itty from 'itty-router';
 import zod from 'zod';
-import { type Request } from '@whatwg-node/fetch';
 import { createAnalytics, type Analytics } from './analytics';
 import { type ArtifactsType } from './artifact-storage-reader';
 import { InvalidAuthKeyResponse, MissingAuthKeyResponse, UnexpectedError } from './errors';
@@ -125,7 +124,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
     if (result.type === 'notModified') {
       return createResponse(
         analytics,
-        '',
+        null,
         {
           status: 304,
         },
