@@ -8,39 +8,39 @@ DROP INDEX
   email_idx;
 
 ALTER TABLE
-  public.users
+  users
 DROP
   CONSTRAINT users_email_key;
 
 ALTER TABLE
-  public.users
+  users
 ADD
   CONSTRAINT users_external_email_key UNIQUE (email, external_auth_user_id);
 
 ALTER TABLE
-  public.users
+  users
 ADD
   display_name VARCHAR(300);
 
 ALTER TABLE
-  public.users
+  users
 ADD
   full_name VARCHAR(300);
 
 UPDATE
-  public.users
+  users
 SET
   display_name = SPLIT_PART(email, '@', 1),
   full_name = SPLIT_PART(email, '@', 1);
 
 ALTER TABLE
-  public.users
+  users
 ALTER COLUMN
   display_name
 SET NOT NULL;
 
 ALTER TABLE
-  public.users
+  users
 ALTER COLUMN
   full_name
 SET NOT NULL;

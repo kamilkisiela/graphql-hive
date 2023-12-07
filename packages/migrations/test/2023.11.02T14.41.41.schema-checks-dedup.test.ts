@@ -56,17 +56,17 @@ await describe('migration: schema-checks-dedup', async () => {
       const organization = await db.one<{
         id: string;
       }>(
-        sql`INSERT INTO public.organizations (clean_id, name, user_id) VALUES ('org-1', 'org-1', ${user.id}) RETURNING id;`,
+        sql`INSERT INTO organizations (clean_id, name, user_id) VALUES ('org-1', 'org-1', ${user.id}) RETURNING id;`,
       );
       const project = await db.one<{
         id: string;
       }>(
-        sql`INSERT INTO public.projects (clean_id, name, type, org_id) VALUES ('proj-1', 'proj-1', 'SINGLE', ${organization.id}) RETURNING id;`,
+        sql`INSERT INTO projects (clean_id, name, type, org_id) VALUES ('proj-1', 'proj-1', 'SINGLE', ${organization.id}) RETURNING id;`,
       );
       const target = await db.one<{
         id: string;
       }>(
-        sql`INSERT INTO public.targets (clean_id, name, project_id) VALUES ('proj-1', 'proj-1', ${project.id}) RETURNING id;`,
+        sql`INSERT INTO targets (clean_id, name, project_id) VALUES ('proj-1', 'proj-1', ${project.id}) RETURNING id;`,
       );
 
       const compositeSchemaSDL = `composite schema 1`;
@@ -81,7 +81,7 @@ await describe('migration: schema-checks-dedup', async () => {
         id: string;
       }>(
         sql`
-          INSERT INTO public.schema_log
+          INSERT INTO schema_log
               (
                 author,
                 commit,
@@ -107,7 +107,7 @@ await describe('migration: schema-checks-dedup', async () => {
         id: string;
       }>(
         sql`
-        INSERT INTO public.schema_versions
+        INSERT INTO schema_versions
         (
           is_composable,
           target_id,

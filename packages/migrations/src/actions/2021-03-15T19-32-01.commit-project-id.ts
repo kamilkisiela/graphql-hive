@@ -5,23 +5,23 @@ export default {
   run: ({ sql }) => sql`
 --commit-project-id (up)
 ALTER TABLE
-  public.commits
+  commits
 ADD COLUMN
-  project_id UUID REFERENCES public.projects (id) ON DELETE CASCADE;
+  project_id UUID REFERENCES projects (id) ON DELETE CASCADE;
 
 UPDATE
-  public.commits AS c
+  commits AS c
 SET
   project_id = t.project_id
 FROM
-  public.versions AS v,
-  public.targets AS t
+  versions AS v,
+  targets AS t
 WHERE
   v.commit_id = c.id
   AND t.id = v.target_id;
 
 ALTER TABLE
-  public.commits
+  commits
 ALTER COLUMN
   project_id
 SET NOT NULL;
