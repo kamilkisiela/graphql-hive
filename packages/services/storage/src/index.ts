@@ -796,7 +796,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       `);
 
       const provider = await pool.maybeOneFirst<string>(sql`
-        SELECT provider FROM supertokens_thirdparty_users WHERE user_id = ${user.supertoken_user_id} LIMIT 1
+        SELECT third_party_id FROM supertokens_thirdparty_users WHERE user_id = ${user.supertoken_user_id} LIMIT 1
       `);
 
       return transformUser({
