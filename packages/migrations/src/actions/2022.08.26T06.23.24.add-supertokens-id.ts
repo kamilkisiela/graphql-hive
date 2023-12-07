@@ -4,7 +4,7 @@ export default {
   name: '2022.08.26T06.23.24.add-supertokens-id.sql',
   run: ({ sql }) => sql`
 ALTER TABLE
-  public.users
+  users
 ADD COLUMN
   supertoken_user_id VARCHAR(50),
 ADD

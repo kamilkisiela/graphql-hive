@@ -7,7 +7,7 @@ CREATE TYPE
   schema_policy_resource AS ENUM('ORGANIZATION', 'PROJECT');
 
 CREATE TABLE
-  public.schema_policy_config (
+  schema_policy_config (
     resource_type schema_policy_resource NOT NULL,
     resource_id UUID NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),

@@ -4,7 +4,7 @@ export default {
   name: '2022.12.20T09.20.36.oidc-columns.sql',
   run: ({ sql }) => sql`
 ALTER TABLE
-  "public"."oidc_integrations"
+  "oidc_integrations"
 ADD COLUMN
   "token_endpoint" TEXT,
 ADD COLUMN

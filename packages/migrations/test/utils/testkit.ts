@@ -59,7 +59,7 @@ export async function initMigrationTestingEnvironment() {
         }
       }) {
         return await slonik.one<DbTypes.users>(
-          sql`INSERT INTO public.users (email, display_name, full_name, supertoken_user_id) VALUES (${user.email}, ${user.name} , ${user.name}, ${superTokenUserIdCounter++}) RETURNING *;`,
+          sql`INSERT INTO users (email, display_name, full_name, supertoken_user_id) VALUES (${user.email}, ${user.name} , ${user.name}, ${superTokenUserIdCounter++}) RETURNING *;`,
         );
       },
       async organization({
@@ -74,7 +74,7 @@ export async function initMigrationTestingEnvironment() {
         }
       }) {
         return await slonik.one<DbTypes.organizations>(
-          sql`INSERT INTO public.organizations (clean_id, name, user_id) VALUES (${organization.name}, ${organization.name}, ${user.id}) RETURNING *;`,
+          sql`INSERT INTO organizations (clean_id, name, user_id) VALUES (${organization.name}, ${organization.name}, ${user.id}) RETURNING *;`,
         );
       },
       async project({
@@ -90,7 +90,7 @@ export async function initMigrationTestingEnvironment() {
         }
       }) {
         return await slonik.one<DbTypes.projects>(
-          sql`INSERT INTO public.projects (clean_id, name, type, org_id) VALUES (${project.name}, ${project.name}, ${project.type}, ${organization.id}) RETURNING *;`,
+          sql`INSERT INTO projects (clean_id, name, type, org_id) VALUES (${project.name}, ${project.name}, ${project.type}, ${organization.id}) RETURNING *;`,
         )
       },
       async target({
@@ -105,7 +105,7 @@ export async function initMigrationTestingEnvironment() {
         }
       }) {
         return await slonik.one<DbTypes.targets>(
-          sql`INSERT INTO public.targets (clean_id, name, project_id) VALUES (${target.name}, ${target.name}, ${project.id}) RETURNING *;`,
+          sql`INSERT INTO targets (clean_id, name, project_id) VALUES (${target.name}, ${target.name}, ${project.id}) RETURNING *;`,
         )
       },
     },

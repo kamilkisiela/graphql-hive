@@ -46,7 +46,7 @@ await describe('github-check-with-project-name', async () => {
       // Check that the old project has github_check_with_project_name = FALSE
       assert.equal(
         await db.oneFirst(
-          sql`SELECT github_check_with_project_name FROM public.projects WHERE id = ${oldProject.id}`,
+          sql`SELECT github_check_with_project_name FROM projects WHERE id = ${oldProject.id}`,
         ),
         false,
       );
@@ -54,7 +54,7 @@ await describe('github-check-with-project-name', async () => {
       // Check that the new project has github_check_with_project_name = TRUE
       assert.equal(
         await db.oneFirst(
-          sql`SELECT github_check_with_project_name FROM public.projects WHERE id = ${newProject.id}`,
+          sql`SELECT github_check_with_project_name FROM projects WHERE id = ${newProject.id}`,
         ),
         true,
       );

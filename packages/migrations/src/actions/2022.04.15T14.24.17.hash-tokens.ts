@@ -4,19 +4,19 @@ export default {
   name: '2022.04.15T14.24.17.hash-tokens.sql',
   run: ({ sql }) => sql`
 ALTER TABLE
-  public.tokens
+  tokens
 ADD COLUMN
   token_alias VARCHAR(64) NOT NULL DEFAULT REPEAT('*', 64);
 
 ALTER TABLE
-  public.tokens
+  tokens
 ALTER COLUMN
   token
 TYPE
   VARCHAR(64);
 
 UPDATE
-  public.tokens
+  tokens
 SET
   token_alias = CONCAT(
     SUBSTRING(

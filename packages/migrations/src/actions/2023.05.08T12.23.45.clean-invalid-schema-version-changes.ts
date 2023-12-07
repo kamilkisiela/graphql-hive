@@ -5,7 +5,7 @@ export default {
   run: ({ sql }) => sql`
 DELETE 
 FROM
-  "public"."schema_version_changes" "svc"
+  "schema_version_changes" "svc"
 WHERE 
   "svc"."change_type" = 'REGISTRY_SERVICE_URL_CHANGED'
   AND (

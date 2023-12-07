@@ -28,7 +28,7 @@ COMMENT
 
 --- Tables
 CREATE TABLE
-  public.users (
+  users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
     email VARCHAR(320) NOT NULL UNIQUE,
     external_auth_user_id VARCHAR(50) NOT NULL UNIQUE,
@@ -36,19 +36,19 @@ CREATE TABLE
   );
 
 CREATE TABLE
-  public.organizations (
+  organizations (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
     clean_id slug NOT NULL,
     NAME TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     invite_code VARCHAR(10) NOT NULL UNIQUE DEFAULT SUBSTR(MD5(RANDOM()::TEXT), 0, 10),
-    user_id UUID NOT NULL REFERENCES public.users (id),
+    user_id UUID NOT NULL REFERENCES users (id),
     TYPE
       organization_type NOT NULL
   );
 
 CREATE TABLE
-  public.projects (
+  projects (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
     clean_id slug NOT NULL,
     NAME VARCHAR(200) NOT NULL,
@@ -57,20 +57,20 @@ CREATE TABLE
       created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
       build_url url,
       validation_url url,
-      org_id UUID NOT NULL REFERENCES public.organizations (id) ON DELETE CASCADE
+      org_id UUID NOT NULL REFERENCES organizations (id) ON DELETE CASCADE
   );
 
 CREATE TABLE
-  public.targets (
+  targets (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
     clean_id slug NOT NULL,
     NAME TEXT NOT NULL,
-    project_id UUID NOT NULL REFERENCES public.projects (id) ON DELETE CASCADE,
+    project_id UUID NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
   );
 
 CREATE TABLE
-  public.commits (
+  commits (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
     author TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
@@ -81,44 +81,44 @@ CREATE TABLE
   );
 
 CREATE TABLE
-  public.versions (
+  versions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     VALID BOOLEAN NOT NULL,
-    target_id UUID NOT NULL REFERENCES public.targets (id) ON DELETE CASCADE,
-    commit_id UUID NOT NULL REFERENCES public.commits (id) ON DELETE CASCADE
+    target_id UUID NOT NULL REFERENCES targets (id) ON DELETE CASCADE,
+    commit_id UUID NOT NULL REFERENCES commits (id) ON DELETE CASCADE
   );
 
 CREATE TABLE
-  public.version_commit (
-    version_id UUID NOT NULL REFERENCES public.versions (id) ON DELETE CASCADE,
-    commit_id UUID NOT NULL REFERENCES public.commits (id) ON DELETE CASCADE,
+  version_commit (
+    version_id UUID NOT NULL REFERENCES versions (id) ON DELETE CASCADE,
+    commit_id UUID NOT NULL REFERENCES commits (id) ON DELETE CASCADE,
     url url,
     PRIMARY KEY (version_id, commit_id)
   );
 
 CREATE TABLE
-  public.tokens (
+  tokens (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
     token VARCHAR(32) NOT NULL DEFAULT MD5(RANDOM()::TEXT),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    project_id UUID NOT NULL REFERENCES public.projects (id) ON DELETE CASCADE,
+    project_id UUID NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
     NAME TEXT NOT NULL,
     last_used_at TIMESTAMP WITH TIME ZONE
   );
 
 CREATE TABLE
-  public.organization_member (
-    organization_id UUID NOT NULL REFERENCES public.organizations (id) ON DELETE CASCADE,
-    user_id UUID NOT NULL REFERENCES public.users (id) ON DELETE CASCADE,
+  organization_member (
+    organization_id UUID NOT NULL REFERENCES organizations (id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     PRIMARY KEY (organization_id, user_id)
   );
 
 --- Indices
 CREATE INDEX
-  email_idx ON public.users USING btree (email);
+  email_idx ON users USING btree (email);
 
 CREATE INDEX
-  external_auth_user_id_idx ON public.users USING btree (external_auth_user_id);
+  external_auth_user_id_idx ON users USING btree (external_auth_user_id);
 `,
 } satisfies MigrationExecutor;

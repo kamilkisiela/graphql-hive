@@ -5,14 +5,14 @@ export default {
   run: ({ sql }) => sql`
 -- Find and delete all organizations of type PERSONAL that have no projects
 DELETE FROM
-  public.organizations AS o
+  organizations AS o
 WHERE
   o.type = 'PERSONAL'
   AND NOT EXISTS (
     SELECT
       id
     FROM
-      public.projects AS p
+      projects AS p
     WHERE
       p.org_id = o.id
     LIMIT
@@ -21,7 +21,7 @@ WHERE
 
 -- Delete the "type" column from organizations
 ALTER TABLE
-  public.organizations
+  organizations
 DROP COLUMN
 TYPE;
 

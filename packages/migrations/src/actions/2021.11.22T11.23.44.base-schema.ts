@@ -5,12 +5,12 @@ export default {
   run: ({ sql }) => sql`
 -- Adds a base schema column in target table and versions table
 ALTER TABLE
-  public.targets
+  targets
 ADD
   base_schema TEXT;
 
 ALTER TABLE
-  public.versions
+  versions
 ADD
   base_schema TEXT;
 `,

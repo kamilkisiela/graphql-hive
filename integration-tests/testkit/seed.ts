@@ -95,7 +95,7 @@ export function initSeed() {
               const pool = await createConnectionPool();
 
               await pool.query(sql`
-                UPDATE public.organizations SET feature_flags = ${sql.jsonb({
+                UPDATE organizations SET feature_flags = ${sql.jsonb({
                   [name]: enabled,
                 })}
                 WHERE id = ${organization.id}
@@ -197,7 +197,7 @@ export function initSeed() {
                   const pool = await createConnectionPool();
 
                   await pool.query(sql`
-                    UPDATE public.projects SET native_federation = ${enabled} WHERE id = ${project.id}
+                    UPDATE projects SET native_federation = ${enabled} WHERE id = ${project.id}
                   `);
                 },
                 async setProjectSchemaPolicy(policy: SchemaPolicyInput) {

@@ -4,9 +4,9 @@ export default {
   name: '2022.12.03T09.12.28.organization-transfer.sql',
   run: ({ sql }) => sql`
 ALTER TABLE
-  public.organizations
+  organizations
 ADD COLUMN
-  ownership_transfer_user_id UUID REFERENCES public.users (id),
+  ownership_transfer_user_id UUID REFERENCES users (id),
 ADD COLUMN
   ownership_transfer_code VARCHAR(10),
 ADD COLUMN
