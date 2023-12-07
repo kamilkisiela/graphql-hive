@@ -628,6 +628,96 @@ test.concurrent('check usage not from excluded client names', async () => {
   expect(usedCheckResult.schemaCheck.valid).toEqual(true);
 });
 
+test.concurrent('schema:check on non-nullable input field of used input object', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject } = await createOrg();
+  const { target, createToken } = await createProject(ProjectType.Single);
+
+  const productionToken = await createToken({
+    targetScopes: [
+      TargetAccessScope.Read,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+    ],
+    projectScopes: [ProjectAccessScope.Read],
+    organizationScopes: [OrganizationAccessScope.Read],
+    targetId: target.cleanId,
+  });
+
+  const schemaPublishResult = await productionToken
+    .publishSchema({
+      author: 'Kamil',
+      commit: 'initial',
+      sdl: /* GraphQL */ `
+        type Query {
+          users(filter: Filter): [String]
+        }
+
+        input Filter {
+          limit: Int
+        }
+      `,
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  expect((schemaPublishResult.schemaPublish as any).valid).toEqual(true);
+
+  const firstSchemaCheck = await productionToken
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        users(filter: Filter): [String]
+      }
+
+      input Filter {
+        limit: Int
+        first: Int!
+      }
+    `)
+    .then(r => r.expectNoGraphQLErrors());
+
+  // should be breaking because the input object type with new non-nullable field
+  expect(firstSchemaCheck.schemaCheck.__typename).toBe('SchemaCheckError');
+
+  const targetValidationResult = await productionToken.toggleTargetValidation(true);
+  expect(targetValidationResult.setTargetValidation.validationSettings.enabled).toEqual(true);
+  expect(targetValidationResult.setTargetValidation.validationSettings.percentage).toEqual(0);
+  expect(targetValidationResult.setTargetValidation.validationSettings.period).toEqual(30);
+
+  const collectResult = await productionToken.collectOperations([
+    {
+      timestamp: Date.now(),
+      operation: 'query users { users(filter: { limit: 5 }) }',
+      operationName: 'users',
+      fields: ['Query', 'Query.users', 'Filter', 'Filter.limit'],
+      execution: {
+        ok: true,
+        duration: 200_000_000,
+        errorsTotal: 0,
+      },
+      metadata: {},
+    },
+  ]);
+
+  expect(collectResult.status).toEqual(200);
+  await waitFor(5000);
+
+  // should be breaking because the input object type is unused
+  const unusedCheckResult = await productionToken
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        users(filter: Filter): [String]
+      }
+
+      input Filter {
+        limit: Int
+        first: Int!
+      }
+    `)
+    .then(r => r.expectNoGraphQLErrors());
+  expect(unusedCheckResult.schemaCheck.__typename).toEqual('SchemaCheckError');
+});
+
 test.concurrent('number of produced and collected operations should match', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
