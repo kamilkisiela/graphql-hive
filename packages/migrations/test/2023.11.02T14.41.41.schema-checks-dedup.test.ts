@@ -15,7 +15,7 @@ async function insertSchemaCheck(
   },
 ) {
   return pool.one<{ id: string }>(sql`
-    INSERT INTO "public"."schema_checks" (
+    INSERT INTO "schema_checks" (
         "schema_sdl"
       , "target_id"
       , "schema_version_id"

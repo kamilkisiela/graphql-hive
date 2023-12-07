@@ -19,7 +19,7 @@ export default {
           PRIMARY KEY (id, organization_id)
         );
 
-        CREATE INDEX "organization_member_roles_locked" ON "public"."organization_member_roles" ("locked" ASC);
+        CREATE INDEX "organization_member_roles_locked" ON "organization_member_roles" ("locked" ASC);
 
         ALTER TABLE organization_member ADD COLUMN "role_id" uuid REFERENCES "organization_member_roles" ("id");
       `,
@@ -151,9 +151,9 @@ export default {
     {
       name: 'Migrate organization_invitations table to use Viewer role',
       query: sql`
-        ALTER TABLE public.organization_invitations ADD COLUMN "role_id" uuid REFERENCES "organization_member_roles" ("id");
+        ALTER TABLE organization_invitations ADD COLUMN "role_id" uuid REFERENCES "organization_member_roles" ("id");
 
-        UPDATE public.organization_invitations
+        UPDATE organization_invitations
         SET role_id = (
             SELECT id
             FROM organization_member_roles
@@ -167,7 +167,7 @@ export default {
         )
         WHERE role_id IS NULL;
 
-        ALTER TABLE public.organization_invitations ALTER COLUMN "role_id" SET NOT NULL;
+        ALTER TABLE organization_invitations ALTER COLUMN "role_id" SET NOT NULL;
       `,
     },
   ],

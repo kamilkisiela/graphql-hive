@@ -1114,13 +1114,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
         // move all invitations to the viewer role
         await t.query(sql`
-          UPDATE public.organization_invitations
+          UPDATE organization_invitations
           SET role_id = ${viewerRoleId}
           WHERE role_id = ${roleId} AND organization_id = ${organizationId}
         `);
 
         await t.query(sql`
-          DELETE FROM public.organization_member_roles
+          DELETE FROM organization_member_roles
           WHERE
             organization_id = ${organizationId}
             AND id = ${roleId}
@@ -1287,7 +1287,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         }
 
         const role = await trx.one<organization_member_roles>(sql`
-          SELECT * FROM public.organization_member_roles WHERE id = ${deleted.role_id} LIMIT 1
+          SELECT * FROM organization_member_roles WHERE id = ${deleted.role_id} LIMIT 1
         `);
 
         return {
@@ -2460,7 +2460,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           "severity_level" as "severityLevel",
           "is_safe_based_on_usage" as "isSafeBasedOnUsage"
         FROM
-          "public"."schema_version_changes"
+          "schema_version_changes"
         WHERE
           "schema_version_id" = ${args.versionId}
       `);
@@ -3013,7 +3013,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "userinfo_endpoint"
           , "authorization_endpoint"
         FROM
-          "public"."oidc_integrations"
+          "oidc_integrations"
         WHERE
           "id" = ${integrationId}
         LIMIT 1
@@ -3038,7 +3038,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "userinfo_endpoint"
           , "authorization_endpoint"
         FROM
-          "public"."oidc_integrations"
+          "oidc_integrations"
         WHERE
           "linked_organization_id" = ${organizationId}
         LIMIT 1
@@ -3054,7 +3054,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async createOIDCIntegrationForOrganization(args) {
       try {
         const result = await pool.maybeOne<unknown>(sql`
-          INSERT INTO "public"."oidc_integrations" (
+          INSERT INTO "oidc_integrations" (
             "linked_organization_id",
             "client_id",
             "client_secret",
@@ -3101,7 +3101,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
     async updateOIDCIntegration(args) {
       const result = await pool.maybeOne<unknown>(sql`
-        UPDATE "public"."oidc_integrations"
+        UPDATE "oidc_integrations"
         SET
           "client_id" = ${args.clientId ?? sql`"client_id"`}
           , "client_secret" = ${args.encryptedClientSecret ?? sql`"client_secret"`}
@@ -3139,7 +3139,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
     async deleteOIDCIntegration(args) {
       await pool.query<unknown>(sql`
-        DELETE FROM "public"."oidc_integrations"
+        DELETE FROM "oidc_integrations"
         WHERE
           "id" = ${args.oidcIntegrationId}
       `);
@@ -3147,7 +3147,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
     async createCDNAccessToken(args) {
       const result = await pool.maybeOne(sql`
-        INSERT INTO "public"."cdn_access_tokens" (
+        INSERT INTO "cdn_access_tokens" (
           "id"
           , "target_id"
           , "s3_key"
@@ -3192,7 +3192,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "alias"
           , to_json("created_at") as "created_at"
         FROM
-          "public"."cdn_access_tokens"
+          "cdn_access_tokens"
         WHERE
           "id" = ${args.cdnAccessTokenId}
       `);
@@ -3207,7 +3207,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.maybeOne(sql`
         DELETE
         FROM
-          "public"."cdn_access_tokens"
+          "cdn_access_tokens"
         WHERE
           "id" = ${args.cdnAccessTokenId}
         RETURNING
@@ -3239,7 +3239,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , "alias"
           , to_json("created_at") as "created_at"
         FROM
-          "public"."cdn_access_tokens"
+          "cdn_access_tokens"
         WHERE
           "target_id" = ${args.targetId}
           ${
@@ -3294,7 +3294,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
     async setSchemaPolicyForOrganization(input): Promise<SchemaPolicy> {
       const result = await pool.one<schema_policy_config>(sql`
-        INSERT INTO "public"."schema_policy_config"
+        INSERT INTO "schema_policy_config"
         ("resource_type", "resource_id", "config", "allow_overriding")
           VALUES ('ORGANIZATION', ${input.organizationId}, ${sql.jsonb(input.policy)}, ${
             input.allowOverrides
@@ -3312,7 +3312,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
     async setSchemaPolicyForProject(input): Promise<SchemaPolicy> {
       const result = await pool.one<schema_policy_config>(sql`
-      INSERT INTO "public"."schema_policy_config"
+      INSERT INTO "schema_policy_config"
       ("resource_type", "resource_id", "config")
         VALUES ('PROJECT', ${input.projectId}, ${sql.jsonb(input.policy)})
       ON CONFLICT
@@ -3331,7 +3331,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.any<schema_policy_config>(sql`
         SELECT *
         FROM
-          "public"."schema_policy_config"
+          "schema_policy_config"
         WHERE
           ("resource_type" = 'ORGANIZATION' AND "resource_id" = ${organization})
           OR ("resource_type" = 'PROJECT' AND "resource_id" = ${project});
@@ -3343,7 +3343,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.maybeOne<schema_policy_config>(sql`
         SELECT *
         FROM
-          "public"."schema_policy_config"
+          "schema_policy_config"
         WHERE
           "resource_type" = 'ORGANIZATION'
           AND "resource_id" = ${organizationId};
@@ -3355,7 +3355,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.maybeOne<schema_policy_config>(sql`
       SELECT *
       FROM
-        "public"."schema_policy_config"
+        "schema_policy_config"
       WHERE
         "resource_type" = 'PROJECT'
         AND "resource_id" = ${projectId};
@@ -3385,7 +3385,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , to_json("created_at") as "createdAt"
           , to_json("updated_at") as "updatedAt"
         FROM
-          "public"."document_collections"
+          "document_collections"
         WHERE
           "target_id" = ${args.targetId}
           ${
@@ -3440,7 +3440,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
     async createDocumentCollection(args) {
       const result = await pool.maybeOne(sql`
-        INSERT INTO "public"."document_collections" (
+        INSERT INTO "document_collections" (
           "title"
           , "description"
           , "target_id"
@@ -3468,7 +3468,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.maybeOneFirst(sql`
         DELETE
         FROM
-          "public"."document_collections"
+          "document_collections"
         WHERE
           "id" = ${args.documentCollectionId}
         RETURNING
@@ -3485,7 +3485,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async updateDocumentCollection(args) {
       const result = await pool.maybeOne(sql`
         UPDATE
-          "public"."document_collections"
+          "document_collections"
         SET
           "title" = COALESCE(${args.title}, "title")
           , "description" = COALESCE(${args.description}, "description")
@@ -3533,7 +3533,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , to_json("created_at") as "createdAt"
           , to_json("updated_at") as "updatedAt"
         FROM
-          "public"."document_collection_documents"
+          "document_collection_documents"
         WHERE
           "document_collection_id" = ${args.documentCollectionId}
           ${
@@ -3588,7 +3588,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
     async createDocumentCollectionDocument(args) {
       const result = await pool.one(sql`
-        INSERT INTO "public"."document_collection_documents" (
+        INSERT INTO "document_collection_documents" (
           "title"
           , "contents"
           , "variables"
@@ -3623,7 +3623,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.maybeOneFirst(sql`
         DELETE
         FROM
-          "public"."document_collection_documents"
+          "document_collection_documents"
         WHERE
           "id" = ${args.documentCollectionDocumentId}
         RETURNING
@@ -3650,7 +3650,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , to_json("created_at") as "createdAt"
           , to_json("updated_at") as "updatedAt"
         FROM
-          "public"."document_collection_documents"
+          "document_collection_documents"
         WHERE
           "id" = ${args.id}
       `);
@@ -3673,7 +3673,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           , to_json("created_at") as "createdAt"
           , to_json("updated_at") as "updatedAt"
         FROM
-          "public"."document_collections"
+          "document_collections"
         WHERE
           "id" = ${args.id}
       `);
@@ -3688,7 +3688,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async updateDocumentCollectionDocument(args) {
       const result = await pool.maybeOne(sql`
         UPDATE
-          "public"."document_collection_documents"
+          "document_collection_documents"
         SET
           "title" = COALESCE(${args.title}, "title")
           , "contents" = COALESCE(${args.contents}, "contents")
@@ -3719,7 +3719,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       const result = await pool.transaction(async trx => {
         const sdlStoreInserts: Array<Promise<unknown>> = [
           trx.query<unknown>(sql`
-            INSERT INTO "public"."sdl_store" (id, sdl)
+            INSERT INTO "sdl_store" (id, sdl)
             VALUES (${args.schemaSDLHash}, ${args.schemaSDL})
             ON CONFLICT (id) DO NOTHING;
           `),
@@ -3728,7 +3728,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         if (args.compositeSchemaSDLHash) {
           sdlStoreInserts.push(
             trx.query<unknown>(sql`
-                INSERT INTO "public"."sdl_store" (id, sdl)
+                INSERT INTO "sdl_store" (id, sdl)
                 VALUES (${args.compositeSchemaSDLHash}, ${args.compositeSchemaSDL})
                 ON CONFLICT (id) DO NOTHING;
             `),
@@ -3742,7 +3742,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
           sdlStoreInserts.push(
             trx.query<unknown>(sql`
-                INSERT INTO "public"."sdl_store" (id, sdl)
+                INSERT INTO "sdl_store" (id, sdl)
                 VALUES (${args.supergraphSDLHash}, ${args.supergraphSDL})
                 ON CONFLICT (id) DO NOTHING;
             `),
@@ -3752,7 +3752,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         await Promise.all(sdlStoreInserts);
 
         return trx.one<{ id: string }>(sql`
-          INSERT INTO "public"."schema_checks" (
+          INSERT INTO "schema_checks" (
               "schema_sdl_store_id"
             , "service_name"
             , "meta"
@@ -3816,10 +3816,10 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         SELECT
           ${schemaCheckSQLFields}
         FROM
-          "public"."schema_checks" as c
-        LEFT JOIN "public"."sdl_store" as s_schema            ON s_schema."id" = c."schema_sdl_store_id"
-        LEFT JOIN "public"."sdl_store" as s_composite_schema  ON s_composite_schema."id" = c."composite_schema_sdl_store_id"
-        LEFT JOIN "public"."sdl_store" as s_supergraph        ON s_supergraph."id" = c."supergraph_sdl_store_id"
+          "schema_checks" as c
+        LEFT JOIN "sdl_store" as s_schema            ON s_schema."id" = c."schema_sdl_store_id"
+        LEFT JOIN "sdl_store" as s_composite_schema  ON s_composite_schema."id" = c."composite_schema_sdl_store_id"
+        LEFT JOIN "sdl_store" as s_supergraph        ON s_supergraph."id" = c."supergraph_sdl_store_id"
         WHERE
           c."id" = ${args.schemaCheckId}
       `);
@@ -3849,7 +3849,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       if (schemaCheck.contextId !== null) {
         // Try to approve and claim all the breaking schema changes for this context
         await pool.query(sql`
-          INSERT INTO "public"."schema_change_approvals" (
+          INSERT INTO "schema_change_approvals" (
             "target_id"
             , "context_id"
             , "schema_change_id"
@@ -3881,7 +3881,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         id: string;
       }>(sql`
         UPDATE
-          "public"."schema_checks"
+          "schema_checks"
         SET
           "is_success" = true
           , "is_manually_approved" = true
@@ -3913,10 +3913,10 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         SELECT
           ${schemaCheckSQLFields}
         FROM
-          "public"."schema_checks" as c
-        LEFT JOIN "public"."sdl_store" as s_schema            ON s_schema."id" = c."schema_sdl_store_id"
-        LEFT JOIN "public"."sdl_store" as s_composite_schema  ON s_composite_schema."id" = c."composite_schema_sdl_store_id"
-        LEFT JOIN "public"."sdl_store" as s_supergraph        ON s_supergraph."id" = c."supergraph_sdl_store_id"
+          "schema_checks" as c
+        LEFT JOIN "sdl_store" as s_schema            ON s_schema."id" = c."schema_sdl_store_id"
+        LEFT JOIN "sdl_store" as s_composite_schema  ON s_composite_schema."id" = c."composite_schema_sdl_store_id"
+        LEFT JOIN "sdl_store" as s_supergraph        ON s_supergraph."id" = c."supergraph_sdl_store_id"
         WHERE
           c."id" = ${updateResult.id}
       `);
@@ -3928,7 +3928,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         SELECT
           "schema_change"
         FROM
-          "public"."schema_change_approvals"
+          "schema_change_approvals"
         WHERE
           "target_id" = ${args.targetId}
           AND "context_id" = ${args.contextId}
@@ -3954,10 +3954,10 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         SELECT
           ${schemaCheckSQLFields}
         FROM
-          "public"."schema_checks" as c
-        LEFT JOIN "public"."sdl_store" as s_schema            ON s_schema."id" = c."schema_sdl_store_id"
-        LEFT JOIN "public"."sdl_store" as s_composite_schema  ON s_composite_schema."id" = c."composite_schema_sdl_store_id"
-        LEFT JOIN "public"."sdl_store" as s_supergraph        ON s_supergraph."id" = c."supergraph_sdl_store_id"
+          "schema_checks" as c
+        LEFT JOIN "sdl_store" as s_schema            ON s_schema."id" = c."schema_sdl_store_id"
+        LEFT JOIN "sdl_store" as s_composite_schema  ON s_composite_schema."id" = c."composite_schema_sdl_store_id"
+        LEFT JOIN "sdl_store" as s_supergraph        ON s_supergraph."id" = c."supergraph_sdl_store_id"
         WHERE
           c."target_id" = ${args.targetId}
           ${
@@ -4080,7 +4080,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async updateTargetGraphQLEndpointUrl(args) {
       const result = await pool.maybeOne<unknown>(sql`
         UPDATE
-          "public"."targets"
+          "targets"
         SET
           "graphql_endpoint_url" = ${args.graphqlEndpointUrl}
         WHERE
@@ -4103,13 +4103,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return await pool.transaction(async pool => {
         const result = await pool.any<unknown>(sql`
           DELETE
-          FROM "public"."schema_checks"
+          FROM "schema_checks"
           WHERE 
             "id" = ANY(
               SELECT
                 "id"
               FROM
-                "public"."schema_checks"
+                "schema_checks"
               WHERE
                 "expires_at" <= ${args.expiresAt.toISOString()}
               LIMIT
@@ -4219,7 +4219,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async setZendeskOrganizationId({ organizationId, zendeskId }) {
       await pool.query(sql`
         UPDATE
-          "public"."organizations"
+          "organizations"
         SET
           "zendesk_organization_id" = ${zendeskId}
         WHERE
@@ -4229,7 +4229,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async setZendeskUserId({ userId, zendeskId }) {
       await pool.query(sql`
         UPDATE
-          "public"."users"
+          "users"
         SET
           "zendesk_user_id" = ${zendeskId}
         WHERE
@@ -4239,7 +4239,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async setZendeskOrganizationUserConnection({ organizationId, userId }) {
       await pool.query(sql`
         UPDATE
-          "public"."organization_member"
+          "organization_member"
         SET
           "connected_to_zendesk" = true
         WHERE
