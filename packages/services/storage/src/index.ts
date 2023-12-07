@@ -4192,16 +4192,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     async getSchemaVersionByActionId(args) {
       const record = await pool.maybeOne<unknown>(sql`
         SELECT
-          "id",
-          "is_composable",
-          to_json("schema_versions"."created_at") as "created_at",
-          "action_id",
-          "base_schema",
-          "has_persisted_schema_changes",
-          "previous_schema_version_id",
-          "composite_schema_sdl",
-          "supergraph_sdl",
-          "schema_composition_errors"
+          ${schemaVersionSQLFields()}
         FROM
           "schema_versions"
         WHERE
