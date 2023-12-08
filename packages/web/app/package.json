@@ -53,6 +53,7 @@
     "@urql/core": "4.1.4",
     "@urql/exchange-graphcache": "6.3.3",
     "@urql/exchange-persisted": "4.1.0",
+    "@whatwg-node/fetch": "0.9.13",
     "class-variance-authority": "0.7.0",
     "clsx": "2.0.0",
     "cmdk": "0.2.0",
