@@ -628,43 +628,99 @@ test.concurrent('check usage not from excluded client names', async () => {
   expect(usedCheckResult.schemaCheck.valid).toEqual(true);
 });
 
-test.concurrent('schema:check on non-nullable input field of used input object', async () => {
-  const { createOrg } = await initSeed().createOwner();
-  const { createProject } = await createOrg();
-  const { target, createToken } = await createProject(ProjectType.Single);
+describe('changes with usage data', () => {
+  function testChangesWithUsageData(input: {
+    title: string;
+    publishSdl: string;
+    checkSdl: string;
+    reportOperation: {
+      operation: string;
+      operationName: string;
+      fields: string[];
+    };
+    expectedSchemaCheckTypename: {
+      beforeReportedOperation: 'SchemaCheckSuccess' | 'SchemaCheckError';
+      afterReportedOperation: 'SchemaCheckSuccess' | 'SchemaCheckError';
+    };
+  }) {
+    test.concurrent(input.title, async () => {
+      const { createOrg } = await initSeed().createOwner();
+      const { createProject } = await createOrg();
+      const { target, createToken } = await createProject(ProjectType.Single);
 
-  const productionToken = await createToken({
-    targetScopes: [
-      TargetAccessScope.Read,
-      TargetAccessScope.RegistryRead,
-      TargetAccessScope.RegistryWrite,
-      TargetAccessScope.Settings,
-    ],
-    projectScopes: [ProjectAccessScope.Read],
-    organizationScopes: [OrganizationAccessScope.Read],
-    targetId: target.cleanId,
-  });
+      const token = await createToken({
+        targetScopes: [
+          TargetAccessScope.Read,
+          TargetAccessScope.RegistryRead,
+          TargetAccessScope.RegistryWrite,
+          TargetAccessScope.Settings,
+        ],
+        projectScopes: [ProjectAccessScope.Read],
+        organizationScopes: [OrganizationAccessScope.Read],
+        targetId: target.cleanId,
+      });
 
-  const schemaPublishResult = await productionToken
-    .publishSchema({
-      author: 'Kamil',
-      commit: 'initial',
-      sdl: /* GraphQL */ `
-        type Query {
-          users(filter: Filter): [String]
-        }
+      const schemaPublishResult = await token
+        .publishSchema({
+          author: 'Kamil',
+          commit: 'initial',
+          sdl: input.publishSdl,
+        })
+        .then(r => r.expectNoGraphQLErrors());
 
-        input Filter {
-          limit: Int
-        }
-      `,
-    })
-    .then(r => r.expectNoGraphQLErrors());
+      expect((schemaPublishResult.schemaPublish as any).valid).toEqual(true);
 
-  expect((schemaPublishResult.schemaPublish as any).valid).toEqual(true);
+      await expect(
+        token
+          .checkSchema(input.checkSdl)
+          .then(r => r.expectNoGraphQLErrors())
+          .then(r => r.schemaCheck.__typename),
+      ).resolves.toBe(input.expectedSchemaCheckTypename.beforeReportedOperation);
 
-  const firstSchemaCheck = await productionToken
-    .checkSchema(/* GraphQL */ `
+      const targetValidationResult = await token.toggleTargetValidation(true);
+      expect(targetValidationResult.setTargetValidation.validationSettings.enabled).toEqual(true);
+      expect(targetValidationResult.setTargetValidation.validationSettings.percentage).toEqual(0);
+      expect(targetValidationResult.setTargetValidation.validationSettings.period).toEqual(30);
+
+      const collectResult = await token.collectOperations([
+        {
+          timestamp: Date.now(),
+          operation: input.reportOperation.operation,
+          operationName: input.reportOperation.operationName,
+          fields: input.reportOperation.fields,
+          execution: {
+            ok: true,
+            duration: 200_000_000,
+            errorsTotal: 0,
+          },
+          metadata: {},
+        },
+      ]);
+
+      expect(collectResult.status).toEqual(200);
+      await waitFor(5000);
+
+      await expect(
+        token
+          .checkSchema(input.checkSdl)
+          .then(r => r.expectNoGraphQLErrors())
+          .then(r => r.schemaCheck.__typename),
+      ).resolves.toEqual(input.expectedSchemaCheckTypename.afterReportedOperation);
+    });
+  }
+
+  testChangesWithUsageData({
+    title: 'add non-nullable input field to used input object',
+    publishSdl: /* GraphQL */ `
+      type Query {
+        users(filter: Filter): [String]
+      }
+
+      input Filter {
+        limit: Int
+      }
+    `,
+    checkSdl: /* GraphQL */ `
       type Query {
         users(filter: Filter): [String]
       }
@@ -673,49 +729,190 @@ test.concurrent('schema:check on non-nullable input field of used input object',
         limit: Int
         first: Int!
       }
-    `)
-    .then(r => r.expectNoGraphQLErrors());
-
-  // should be breaking because the input object type with new non-nullable field
-  expect(firstSchemaCheck.schemaCheck.__typename).toBe('SchemaCheckError');
-
-  const targetValidationResult = await productionToken.toggleTargetValidation(true);
-  expect(targetValidationResult.setTargetValidation.validationSettings.enabled).toEqual(true);
-  expect(targetValidationResult.setTargetValidation.validationSettings.percentage).toEqual(0);
-  expect(targetValidationResult.setTargetValidation.validationSettings.period).toEqual(30);
-
-  const collectResult = await productionToken.collectOperations([
-    {
-      timestamp: Date.now(),
+    `,
+    reportOperation: {
       operation: 'query users { users(filter: { limit: 5 }) }',
       operationName: 'users',
       fields: ['Query', 'Query.users', 'Filter', 'Filter.limit'],
-      execution: {
-        ok: true,
-        duration: 200_000_000,
-        errorsTotal: 0,
-      },
-      metadata: {},
     },
-  ]);
+    expectedSchemaCheckTypename: {
+      // should be breaking because the input object type with new non-nullable field
+      beforeReportedOperation: 'SchemaCheckError',
+      // should be breaking because the input object type is used
+      afterReportedOperation: 'SchemaCheckError',
+    },
+  });
 
-  expect(collectResult.status).toEqual(200);
-  await waitFor(5000);
-
-  // should be breaking because the input object type is unused
-  const unusedCheckResult = await productionToken
-    .checkSchema(/* GraphQL */ `
+  testChangesWithUsageData({
+    title: 'add nullable input field to used input object',
+    publishSdl: /* GraphQL */ `
       type Query {
         users(filter: Filter): [String]
       }
 
       input Filter {
         limit: Int
-        first: Int!
       }
-    `)
-    .then(r => r.expectNoGraphQLErrors());
-  expect(unusedCheckResult.schemaCheck.__typename).toEqual('SchemaCheckError');
+    `,
+    checkSdl: /* GraphQL */ `
+      type Query {
+        users(filter: Filter): [String]
+      }
+
+      input Filter {
+        limit: Int
+        first: Int
+      }
+    `,
+    expectedSchemaCheckTypename: {
+      // should be safe, because it's nullable field and does not require user to provide it
+      beforeReportedOperation: 'SchemaCheckSuccess',
+      // should be safe, for the same reason
+      afterReportedOperation: 'SchemaCheckSuccess',
+    },
+    reportOperation: {
+      operation: 'query users { users(filter: { limit: 5 }) }',
+      operationName: 'users',
+      fields: ['Query', 'Query.users', 'Filter', 'Filter.limit'],
+    },
+  });
+
+  testChangesWithUsageData({
+    title: 'make nullable input field non-nullable of an used input object',
+    publishSdl: /* GraphQL */ `
+      type Query {
+        users(filter: Filter): [String]
+      }
+
+      input Filter {
+        limit: Int
+      }
+    `,
+    checkSdl: /* GraphQL */ `
+      type Query {
+        users(filter: Filter): [String]
+      }
+
+      input Filter {
+        limit: Int!
+      }
+    `,
+    expectedSchemaCheckTypename: {
+      // should be breaking, because it requires an action from user
+      beforeReportedOperation: 'SchemaCheckError',
+      // should be breaking, because it requires an action from user
+      afterReportedOperation: 'SchemaCheckError',
+    },
+    reportOperation: {
+      operation: 'query users { users(filter: { limit: 5 }) }',
+      operationName: 'users',
+      fields: ['Query', 'Query.users', 'Filter', 'Filter.limit'],
+    },
+  });
+
+  testChangesWithUsageData({
+    title: 'make non-nullable input nullable of an used input object',
+    publishSdl: /* GraphQL */ `
+      type Query {
+        users(filter: Filter): [String]
+      }
+
+      input Filter {
+        limit: Int!
+      }
+    `,
+    checkSdl: /* GraphQL */ `
+      type Query {
+        users(filter: Filter): [String]
+      }
+
+      input Filter {
+        limit: Int
+      }
+    `,
+    expectedSchemaCheckTypename: {
+      // should be safe, as it does not require any action from user
+      beforeReportedOperation: 'SchemaCheckSuccess',
+      // should be safe, as it does not require any action from user
+      afterReportedOperation: 'SchemaCheckSuccess',
+    },
+    reportOperation: {
+      operation: 'query users { users(filter: { limit: 5 }) }',
+      operationName: 'users',
+      fields: ['Query', 'Query.users', 'Filter', 'Filter.limit'],
+    },
+  });
+
+  testChangesWithUsageData({
+    title: 'modify type of a non-nullable input field of an used input object',
+    publishSdl: /* GraphQL */ `
+      type Query {
+        users(filter: Filter): [String]
+      }
+
+      input Filter {
+        limit: Int
+        skip: Int!
+      }
+    `,
+    checkSdl: /* GraphQL */ `
+      type Query {
+        users(filter: Filter): [String]
+      }
+
+      input Filter {
+        limit: Int
+        skip: String!
+      }
+    `,
+    expectedSchemaCheckTypename: {
+      // should be breaking, because it's non-nullable field
+      beforeReportedOperation: 'SchemaCheckError',
+      // should be safe. Even though it's non-nullable field and the input object type is used
+      // BUT the field was NOT reported yet!
+      afterReportedOperation: 'SchemaCheckSuccess',
+    },
+    reportOperation: {
+      operation: 'query users { users(filter: { limit: 5 }) }',
+      operationName: 'users',
+      fields: ['Query', 'Query.users', 'Filter', 'Filter.limit'],
+    },
+  });
+
+  testChangesWithUsageData({
+    title: 'modify type of a nullable input field of an used input object',
+    publishSdl: /* GraphQL */ `
+      type Query {
+        users(filter: Filter): [String]
+      }
+
+      input Filter {
+        limit: Int
+        skip: Int
+      }
+    `,
+    checkSdl: /* GraphQL */ `
+      type Query {
+        users(filter: Filter): [String]
+      }
+
+      input Filter {
+        limit: Int
+        skip: String
+      }
+    `,
+    expectedSchemaCheckTypename: {
+      // should be breaking, because it changes the type of the field
+      beforeReportedOperation: 'SchemaCheckError',
+      // should be safe, because Filter.skip is not used and it's nullable
+      afterReportedOperation: 'SchemaCheckSuccess',
+    },
+    reportOperation: {
+      operation: 'query users { users(filter: { limit: 5 }) }',
+      operationName: 'users',
+      fields: ['Query', 'Query.users', 'Filter', 'Filter.limit'],
+    },
+  });
 });
 
 test.concurrent('number of produced and collected operations should match', async () => {
