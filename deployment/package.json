@@ -19,6 +19,6 @@
     "@types/js-yaml": "4.0.9",
     "@types/mime-types": "2.1.4",
     "@types/node": "20.10.4",
-    "typescript": "5.3.2"
+    "typescript": "5.3.3"
   }
 }
