@@ -12,7 +12,7 @@
     "@cloudflare/workers-types": "4.20231121.0",
     "@types/service-worker-mock": "2.0.4",
     "@whatwg-node/server": "0.9.10",
-    "esbuild": "0.19.8",
+    "esbuild": "0.19.9",
     "itty-router": "4.0.23",
     "toucan-js": "3.3.1",
     "undici": "5.26.3",
