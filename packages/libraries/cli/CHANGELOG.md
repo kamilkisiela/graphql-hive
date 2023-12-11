@@ -1,5 +1,31 @@
 # @graphql-hive/cli
 
+## 0.33.0
+
+### Minor Changes
+
+- [#3543](https://github.com/kamilkisiela/graphql-hive/pull/3543)
+  [`6895ee3`](https://github.com/kamilkisiela/graphql-hive/commit/6895ee3ebf6a18c246b2f974f2cbb338887c97e7)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Support Apollo Client directives in
+  operations:check command (pass --apolloClient flag)
+
+## 0.32.1
+
+### Patch Changes
+
+- [#3529](https://github.com/kamilkisiela/graphql-hive/pull/3529)
+  [`1615ad4`](https://github.com/kamilkisiela/graphql-hive/commit/1615ad4fb681e617d1ac217a3e96484c4f4ca89f)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - fix: use Hive Cloud as a default value
+  for registry.endpoint
+
+## 0.32.0
+
+### Minor Changes
+
+- [`00520b9`](https://github.com/kamilkisiela/graphql-hive/commit/00520b9c3eaa028241bee8b3202ebc07a82cdf5f)
+  Thanks [@n1ru4l](https://github.com/n1ru4l)! - Print warning when pull request number can not be
+  resolved.
+
 ## 0.31.0
 
 ### Minor Changes

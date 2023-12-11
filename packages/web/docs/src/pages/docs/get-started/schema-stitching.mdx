@@ -126,7 +126,7 @@ access token a name and select **Schema Check & Push** from the list of token pr
 <NextImage
   alt="Create Registry Token Form"
   src={tokenImage}
-  className="mt-10 max-w-md drop-shadow-md"
+  className="mt-10 max-w-md rounded-lg drop-shadow-md"
 />
 
 Click on **Generate Token** button and you should get your CLI token created, with permissions to
@@ -174,7 +174,7 @@ new schema you just published 🎉
 <NextImage
   alt="Stitching SDL"
   src={stitchingUserSchemaImage}
-  className="mt-10 max-w-2xl drop-shadow-md"
+  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
 />
 
 <Callout type="info">
@@ -205,7 +205,7 @@ On your target's **Explorer** page now, you'll be able to see the schema of both
 <NextImage
   alt="Schema Explorer"
   src={stitchingExplorerImage}
-  className="mt-10 max-w-2xl drop-shadow-md"
+  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
 />
 
 ### Schema Checks
@@ -411,7 +411,7 @@ schema is published now, and you can see the changes you made:
 <NextImage
   alt="Schema History"
   src={stitchingHistoryImage}
-  className="mt-10 max-w-2xl drop-shadow-md"
+  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
 />
 
 ### Fetch your schema
@@ -448,7 +448,11 @@ To use your access token, go to your target's page on Hive's dashboard and click
 CDN** button. You will see a screen with instructions on how to obtain different types of artifacts
 from the CDN. For this guide, you can pick the **GraphQL SDL** artifact.
 
-<NextImage alt="CDN Token Form" src={cdnTokenImage} className="mt-10 max-w-2xl drop-shadow-md" />
+<NextImage
+  alt="CDN Token Form"
+  src={cdnTokenImage}
+  className="mt-10 max-w-2xl rounded-lg drop-shadow-md"
+/>
 
 Copy the URL and let's try to fetch your schema using `curl` (replace `YOUR_HIVE_CDN_TOKEN` with
 your CDN token, and `CDN_ENDPOINT_HERE` with the endpoint you copied from Hive's dashboard):

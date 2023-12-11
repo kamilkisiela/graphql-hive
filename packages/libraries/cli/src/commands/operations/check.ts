@@ -62,6 +62,10 @@ export default class OperationsCheck extends Command {
       ].join('\n'),
       multiple: true,
     }),
+    apolloClient: Flags.boolean({
+      description: 'Supports Apollo Client specific directives',
+      default: false,
+    }),
   };
 
   static args = {
@@ -128,9 +132,24 @@ export default class OperationsCheck extends Command {
         assumeValid: true,
       });
 
+      if (!flags.apolloClient) {
+        const detectedApolloDirectives = operations.some(
+          s => s.content.includes('@client') || s.content.includes('@connection'),
+        );
+
+        if (detectedApolloDirectives) {
+          this.warn(
+            'Apollo Client specific directives detected (@client, @connection). Please use the --apolloClient flag to enable support.',
+          );
+        }
+      }
+
       const invalidOperations = validate(
         schema,
         operations.map(s => new Source(s.content, s.location)),
+        {
+          apollo: flags.apolloClient === true,
+        },
       );
 
       const operationsWithErrors = invalidOperations.filter(o => o.errors.length > 0);

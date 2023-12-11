@@ -3,7 +3,7 @@ import hyperid from 'hyperid';
 import { env } from '@/env/backend';
 import { extractAccessTokenFromRequest } from '@/lib/api/extract-access-token-from-request';
 import { getLogger } from '@/server-logger';
-import { captureException, getCurrentHub, wrapApiHandlerWithSentry } from '@sentry/nextjs';
+import { captureException } from '@sentry/nextjs';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 async function graphql(req: NextApiRequest, res: NextApiResponse) {
@@ -34,27 +34,6 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
     return res.send(await response.text());
   }
 
-  const scope = getCurrentHub().getScope();
-  const rootSpan = scope?.getSpan();
-
-  const body: {
-    operationName?: string;
-    query: string;
-    variables?: Record<string, any>;
-  } = {
-    operationName: req.body.operationName,
-    query: req.body.query,
-    variables: req.body.variables,
-  };
-
-  scope.setTransactionName(`proxy.${body?.operationName || 'unknown'}`);
-  scope.setTag('graphql_client_name', 'Hive App');
-  scope.setTag('graphql_client_version', env.release);
-
-  const accessSpan = rootSpan?.startChild({
-    op: 'app.accessToken',
-  });
-
   let accessToken: string | undefined;
 
   try {
@@ -71,17 +50,9 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
   }
 
   if (!accessToken) {
-    accessSpan?.setHttpStatus(401);
-    accessSpan?.finish();
     res.status(401).json({});
     return;
   }
-
-  rootSpan?.setHttpStatus(200);
-
-  const graphqlSpan = rootSpan?.startChild({
-    op: 'graphql',
-  });
 
   try {
     const response = await fetch(url, {
@@ -105,16 +76,10 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
     }
     const parsedData = await response.json();
 
-    graphqlSpan?.setHttpStatus(200);
-    graphqlSpan?.finish();
-
     res.status(200).json(parsedData);
   } catch (error) {
     captureException(error);
     logger.error(error);
-
-    graphqlSpan?.setHttpStatus(500);
-    graphqlSpan?.finish();
 
     // TODO: better type narrowing of the error
     const status = (error as Record<string, number | undefined>)?.['status'] ?? 500;
@@ -129,7 +94,7 @@ async function graphql(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default wrapApiHandlerWithSentry(graphql, 'api/proxy');
+export default graphql;
 
 export const config = {
   api: {

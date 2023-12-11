@@ -28,7 +28,7 @@ interface ProjectTokenAccessSelector {
 
 const projectAccessScopeValues = Object.values(ProjectAccessScope);
 
-function isProjectScope(scope: any): scope is ProjectAccessScope {
+export function isProjectScope(scope: any): scope is ProjectAccessScope {
   return projectAccessScopeValues.includes(scope);
 }
 

@@ -2,9 +2,12 @@ import NextImage from 'next/image'
 import { Callout } from '@theguild/components'
 import orgImage from '../../../../public/docs/pages/first-steps/org.png'
 import newOrgImage from '../../../../public/docs/pages/management/create-an-organization-button.png'
+import orgCustomRoleImage from '../../../../public/docs/pages/management/org-custom-role.png'
 import githubIntegrationImage from '../../../../public/docs/pages/management/org-github-integration.png'
 import orgInviteLinkImage from '../../../../public/docs/pages/management/org-invite-link.png'
 import orgInviteMemberImage from '../../../../public/docs/pages/management/org-invite-member.png'
+import orgMembersImage from '../../../../public/docs/pages/management/org-members.png'
+import orgRolesImage from '../../../../public/docs/pages/management/org-roles.png'
 import slackIntegrationImage from '../../../../public/docs/pages/management/org-slack-integration.png'
 
 # Organization Management
@@ -23,12 +26,16 @@ Alternatively, you can create a new Hive organization by clicking on your user p
 <NextImage
   alt="Creating an organization"
   src={newOrgImage}
-  className="mt-8 max-w-sm drop-shadow-md"
+  className="mt-8 max-w-sm rounded-lg drop-shadow-md"
 />
 
 Follow the instructions and choose a name for your organization:
 
-<NextImage alt="Create Organization Form" src={orgImage} className="mt-8 max-w-lg drop-shadow-md" />
+<NextImage
+  alt="Create Organization Form"
+  src={orgImage}
+  className="mt-8 max-w-lg rounded-lg drop-shadow-md"
+/>
 
 ## Manage existing organization
 
@@ -37,13 +44,19 @@ Follow the instructions and choose a name for your organization:
 Under your organization's **Settings** page, you can manage, add, and remove members from your Hive
 organization.
 
+<NextImage
+  alt="Members of an Organization"
+  src={orgMembersImage}
+  className="mt-8 rounded-lg drop-shadow-md"
+/>
+
 To invite others to your organization, go to **Members** tab under your oganization. To invite a new
 member to your organization, write their email address and click on **Send an invite** button.
 
 <NextImage
   alt="Invite Member to Organization"
   src={orgInviteMemberImage}
-  className="mt-8 max-w-lg drop-shadow-md"
+  className="mt-8 rounded-lg drop-shadow-md"
 />
 
 The new member will receive an email inviting them to join Hive as a user, and this will add them as
@@ -55,7 +68,26 @@ using your preferred method:
 <NextImage
   alt="Copy Invite Link"
   src={orgInviteLinkImage}
-  className="mt-8 max-w-lg drop-shadow-md"
+  className="mx-auto mt-8 max-w-lg rounded-lg drop-shadow-md"
+/>
+
+#### Roles
+
+There are two types of system roles in organizations: **Admin** and **Viewer**, but you can also
+define **custom roles**.
+
+<NextImage
+  alt="List of Roles"
+  src={orgRolesImage}
+  className="mx-auto mt-8 rounded-lg drop-shadow-md"
+/>
+
+Custom roles can be created to provide more granular access to your organization's resources.
+
+<NextImage
+  alt="Custom role creator"
+  src={orgCustomRoleImage}
+  className="mx-auto mt-8 rounded-lg drop-shadow-md"
 />
 
 ### Integrations
@@ -76,7 +108,7 @@ as you can share information and updates in real-time, ensuring that everyone is
 <NextImage
   alt="Hive and Slack Integration"
   src={slackIntegrationImage}
-  className="mt-8 max-w-2xl drop-shadow-md"
+  className="mt-8 max-w-2xl rounded-lg drop-shadow-md"
 />
 
 To activate this feature in your organization, go to the **Integrations** section of your
@@ -101,7 +133,7 @@ with Hive.
 <NextImage
   alt="Hive and GitHub Integration"
   src={githubIntegrationImage}
-  className="mt-8 max-w-2xl drop-shadow-md"
+  className="mt-8 max-w-2xl rounded-lg drop-shadow-md"
 />
 
 To activate this feature in your organization, go to the **Integrations** section of your

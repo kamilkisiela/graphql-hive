@@ -5,7 +5,7 @@ export default {
   run: ({ sql }) => sql`
 --tokens (up)
 ALTER TABLE
-  public.tokens
+  tokens
 DROP COLUMN
   last_used_at;
 `,

@@ -5,7 +5,7 @@ export default {
   run: ({ sql }) => sql`
 --slack-integration (up)
 ALTER TABLE
-  public.organizations
+  organizations
 ADD COLUMN
   slack_token TEXT;
 `,

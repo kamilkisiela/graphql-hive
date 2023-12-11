@@ -113,7 +113,7 @@ admin view.
 <NextImage
   alt="Okta Admin Button"
   src={oktaAdminButtonImage}
-  className="mt-8 max-w-3xl drop-shadow-md"
+  className="mt-8 max-w-3xl rounded-lg drop-shadow-md"
 />
 
 After you're redirected click on the **Applications** tab in the sidebar then click on the **Create
@@ -122,7 +122,7 @@ App Integration** button:
 <NextImage
   alt="Okta Create App"
   src={oktaCreateAppImage}
-  className="mt-8 max-w-3xl drop-shadow-md"
+  className="mt-8 max-w-3xl rounded-lg drop-shadow-md"
 />
 
 Choose **OIDC - OpenID Connect** as for the Sign-in method and **Web Application** for the
@@ -131,7 +131,7 @@ Choose **OIDC - OpenID Connect** as for the Sign-in method and **Web Application
 <NextImage
   alt="Okta App Integration"
   src={oktaAppIntegrationImage}
-  className="mt-8 max-w-3xl drop-shadow-md"
+  className="mt-8 max-w-3xl rounded-lg drop-shadow-md"
 />
 
 Next you're gonna be able to customize your app's name and logo if you want to, then choose the
@@ -141,7 +141,7 @@ a guide, after you're done click "Save".
 <NextImage
   alt="Okta Controlled Access"
   src={oktaControlledImage}
-  className="mt-8 max-w-3xl drop-shadow-md"
+  className="mt-8 max-w-3xl rounded-lg drop-shadow-md"
 />
 
 From the Okta dashboard, grab and store the **Client ID** and **Client Secret**:
@@ -149,13 +149,13 @@ From the Okta dashboard, grab and store the **Client ID** and **Client Secret**:
 <NextImage
   alt="Okta Client ID"
   src={oktaAppConfigClientIdImage}
-  className="mt-8 max-w-3xl drop-shadow-md"
+  className="mt-8 max-w-3xl rounded-lg drop-shadow-md"
 />
 
 <NextImage
   alt="Okta Client Secret"
   src={oktaAppConfigClientSecretImage}
-  className="mt-8 max-w-3xl drop-shadow-md"
+  className="mt-8 max-w-3xl rounded-lg drop-shadow-md"
 />
 
 And now you're almost good to go with Okta's configuration, now head to your Hive organization
@@ -164,7 +164,7 @@ settings tab and hit the **Connect Open ID Connect Provider** button
 <NextImage
   alt="OIDC Provider in Hive"
   src={hiveOidcImage}
-  className="mt-8 max-w-xl drop-shadow-md"
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
 />
 
 And now you'd have to fill in a couple of inputs to connect your OpenID Okta's provider as the
@@ -173,7 +173,7 @@ following:
 <NextImage
   alt="OIDC Modal in Hive"
   src={hiveOidcModalImage}
-  className="mt-8 max-w-xl drop-shadow-md"
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
 />
 
 - **Token Endpoint**: `https://YOUR_OKTA_DOMAIN_HERE/oauth2/v1/token`
@@ -195,20 +195,24 @@ you're done.
 <NextImage
   alt="Manage OIDC in Hive"
   src={hiveManageOidcImage}
-  className="mt-8 max-w-xl drop-shadow-md"
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
 />
 
 <NextImage
   alt="Okta General Settings"
   src={oktaAppGeneralSettingsImage}
-  className="mt-8 max-w-xl drop-shadow-md"
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
 />
 
 And congrats, you now have Okta connected! 🥳🎉
 
 You can use the link provided in the modal right section to let your users login via Okta.
 
-<NextImage alt="Hive Login URL" src={hiveLoginUrlImage} className="mt-8 max-w-xl drop-shadow-md" />
+<NextImage
+  alt="Hive Login URL"
+  src={hiveLoginUrlImage}
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
+/>
 
 ### Azure AD
 
@@ -219,7 +223,7 @@ section:
 <NextImage
   alt="Azure AD"
   src={azureAdEnterpriseApplication}
-  className="mt-8 max-w-xl drop-shadow-md"
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
 />
 
 Then click on the **New Application** button and then click on the **Create your own application**
@@ -227,28 +231,40 @@ button afterwards, you're gonna see the panel on the right where you should prov
 select "**Register an application to integrate with Azure AD (App you're developing)**" as for the
 application purpose, then hit the **Create** button.
 
-<NextImage alt="Azure AD" src={azureAdNewApp} className="mt-8 max-w-xl drop-shadow-md" />
+<NextImage alt="Azure AD" src={azureAdNewApp} className="mt-8 max-w-xl rounded-lg drop-shadow-md" />
 
-<NextImage alt="Azure AD" src={azureAdCreateApp} className="mt-8 max-w-xl drop-shadow-md" />
+<NextImage
+  alt="Azure AD"
+  src={azureAdCreateApp}
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
+/>
 
 And now the last step to register your app is to define "**Who can use this application or access
 this API?**" according to your needs, then choose **Web** as for the selecting the platform and
 input `https://app.graphql-hive.com/auth/callback/oidc` in the input next to it, and finally click
 **Register**.
 
-<NextImage alt="Azure AD" src={azureAdAppRegister} className="mt-8 max-w-xl drop-shadow-md" />
+<NextImage
+  alt="Azure AD"
+  src={azureAdAppRegister}
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
+/>
 
 Once you see the successfully created application popup, go back to your enterprise applications by
 navigating through the history structure from the top, then navigate to the **App registrations**
 tab from the right sidebar, and now you're gonna see your app in the applications list, so click on
 your app.
 
-<NextImage alt="Azure AD" src={azureAdAppAfterRegister} className="mt-8 max-w-xl drop-shadow-md" />
+<NextImage
+  alt="Azure AD"
+  src={azureAdAppAfterRegister}
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
+/>
 
 <NextImage
   alt="Azure AD"
   src={azureAdAppAfterRegisterSidebar}
-  className="mt-8 max-w-xl drop-shadow-md"
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
 />
 
 And from here, we now have most of the configuration details needed by Hive for SSO connection, so
@@ -258,7 +274,7 @@ button:
 <NextImage
   alt="OIDC Provider in Hive"
   src={hiveOidcImage}
-  className="mt-8 max-w-xl drop-shadow-md"
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
 />
 
 And now you'd have to fill in a couple of inputs to connect your OpenID Azure AD's provider.
@@ -266,24 +282,28 @@ And now you'd have to fill in a couple of inputs to connect your OpenID Azure AD
 <NextImage
   alt="OIDC Provider in Hive"
   src={hiveOidcModalImage}
-  className="mt-8 max-w-xl drop-shadow-md"
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
 />
 
 Now, reate a new client secret for your app by navigating as the screenshot illustrates then on the
 right panel add a description for your secret and configure your expiration configuration or leave
 it as the default recommended value which is `6 months`, then click **Add**:
 
-<NextImage src={azureAdAppSecret} className="mt-8 max-w-xl drop-shadow-md" />
+<NextImage src={azureAdAppSecret} className="mt-8 max-w-xl rounded-lg drop-shadow-md" />
 
 Copy and store your client secret value. Make sure to copy the value immediately, as you're not
 gonna be able to see it again after navigating.
 
-<NextImage src={azureAdAppSecretValue} className="mt-8 max-w-xl drop-shadow-md" />
+<NextImage src={azureAdAppSecretValue} className="mt-8 max-w-xl rounded-lg drop-shadow-md" />
 
 Use the pointers in the screenshot to help you find your credentials to be able to fill Hive's
 connection inputs:
 
-<NextImage alt="Azure AD" src={azureAddAppCreds} className="mt-8 max-w-xl drop-shadow-md" />
+<NextImage
+  alt="Azure AD"
+  src={azureAddAppCreds}
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
+/>
 
 - **Token Endpoint**: From the screenshot above
 - **User Info Endpoint**: `https://graph.microsoft.com/oidc/userinfo`
@@ -297,7 +317,11 @@ And we're almost done, go to the "**Authentication**" tab and scroll done to the
 logout URL**" section, and fill in the input with the following URL:
 `https://app.graphql-hive.com/logout`, then click **Save**.
 
-<NextImage alt="Azure AD" src={azureAdLogoutUrl} className="mt-8 max-w-xl drop-shadow-md" />
+<NextImage
+  alt="Azure AD"
+  src={azureAdLogoutUrl}
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
+/>
 
 And for the last step, we need to add the permissions for Azure AD to be able to access the user
 info after authentication, so use the "**API permissions** section on AD portal, then click the
@@ -312,11 +336,23 @@ bar and checking the checkboxes:
 
 After you're done, click the **Add permissions** button.
 
-<NextImage alt="Azure AD" src={azureAdPermissions1} className="mt-8 max-w-xl drop-shadow-md" />
+<NextImage
+  alt="Azure AD"
+  src={azureAdPermissions1}
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
+/>
 
-<NextImage alt="Azure AD" src={azureAdPermissions2} className="mt-8 max-w-xl drop-shadow-md" />
+<NextImage
+  alt="Azure AD"
+  src={azureAdPermissions2}
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
+/>
 
-<NextImage alt="Azure AD" src={azureAdPermissions3} className="mt-8 max-w-xl drop-shadow-md" />
+<NextImage
+  alt="Azure AD"
+  src={azureAdPermissions3}
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
+/>
 
 <Callout type="info">
   **Azure AD and `email` field access**
@@ -325,10 +361,10 @@ After you're done, click the **Add permissions** button.
   
   If your Azure AD members does not have the `email` field set, the login will fail. You can follow the steps in the screenshots below to be able to add an `email` for an existing user record.
 
-<NextImage alt="Azure AD" src={azureAdEmail1} className="mt-8 max-w-sm drop-shadow-md" />
-<NextImage alt="Azure AD" src={azureAdEmail2} className="mt-8 max-w-xl drop-shadow-md" />
-<NextImage alt="Azure AD" src={azureAdEmail3} className="mt-8 max-w-xl drop-shadow-md" />
-<NextImage alt="Azure AD" src={azureAdEmail4} className="mt-8 max-w-xl drop-shadow-md" />
+<NextImage alt="Azure AD" src={azureAdEmail1} className="mt-8 max-w-sm rounded-lg drop-shadow-md" />
+<NextImage alt="Azure AD" src={azureAdEmail2} className="mt-8 max-w-xl rounded-lg drop-shadow-md" />
+<NextImage alt="Azure AD" src={azureAdEmail3} className="mt-8 max-w-xl rounded-lg drop-shadow-md" />
+<NextImage alt="Azure AD" src={azureAdEmail4} className="mt-8 max-w-xl rounded-lg drop-shadow-md" />
 
 </Callout>
 
@@ -336,4 +372,8 @@ And congrats, you now have Azure AD connected! 🎉
 
 You can use the link provided in the modal right section to let your users login via Azure AD.
 
-<NextImage alt="Hive Login URL" src={hiveLoginUrlImage} className="mt-8 max-w-xl drop-shadow-md" />
+<NextImage
+  alt="Hive Login URL"
+  src={hiveLoginUrlImage}
+  className="mt-8 max-w-xl rounded-lg drop-shadow-md"
+/>

@@ -963,6 +963,7 @@ function LaboratoryPageContent() {
 
         .graphiql-container .graphiql-session-header-right {
           width: 100%;
+        }
 
         .graphiql-container .CodeMirror-hints {
           background-color: #070d17;

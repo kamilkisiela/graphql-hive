@@ -1,6 +1,6 @@
 {
   "name": "@graphql-hive/cli",
-  "version": "0.31.0",
+  "version": "0.33.0",
   "description": "A CLI util to manage and control your GraphQL Hive",
   "repository": {
     "type": "git",
@@ -45,7 +45,7 @@
   },
   "dependencies": {
     "@graphql-hive/core": "0.2.3",
-    "@graphql-inspector/core": "5.0.1",
+    "@graphql-inspector/core": "5.0.2",
     "@graphql-tools/code-file-loader": "~8.0.0",
     "@graphql-tools/graphql-file-loader": "~8.0.0",
     "@graphql-tools/json-file-loader": "~8.0.0",
@@ -72,7 +72,7 @@
     "graphql": "16.8.1",
     "oclif": "3.17.2",
     "rimraf": "4.4.1",
-    "ts-node": "10.9.1"
+    "ts-node": "10.9.2"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",

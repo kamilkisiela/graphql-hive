@@ -12,19 +12,22 @@ await describe('github-check-with-project-name', async () => {
       await runTo('2023.09.01T09.54.00.zendesk-support.ts');
 
       // Seed the DB with orgs
-      const user = await seed.user();
+      const user = await seed.user({
+        user: {
+          name: 'user-1',
+          email: 'user-1@test.com',
+        },
+      });
       const org = await seed.organization({
         user,
         organization: {
           name: 'org-1',
-          cleanId: 'org-1',
         },
       });
       const oldProject = await seed.project({
         organization: org,
         project: {
           name: 'proj-1',
-          cleanId: 'proj-1',
           type: 'SINGLE',
         },
       });
@@ -36,7 +39,6 @@ await describe('github-check-with-project-name', async () => {
         organization: org,
         project: {
           name: 'proj-2',
-          cleanId: 'proj-2',
           type: 'SINGLE',
         },
       });
@@ -44,7 +46,7 @@ await describe('github-check-with-project-name', async () => {
       // Check that the old project has github_check_with_project_name = FALSE
       assert.equal(
         await db.oneFirst(
-          sql`SELECT github_check_with_project_name FROM public.projects WHERE id = ${oldProject.id}`,
+          sql`SELECT github_check_with_project_name FROM projects WHERE id = ${oldProject.id}`,
         ),
         false,
       );
@@ -52,7 +54,7 @@ await describe('github-check-with-project-name', async () => {
       // Check that the new project has github_check_with_project_name = TRUE
       assert.equal(
         await db.oneFirst(
-          sql`SELECT github_check_with_project_name FROM public.projects WHERE id = ${newProject.id}`,
+          sql`SELECT github_check_with_project_name FROM projects WHERE id = ${newProject.id}`,
         ),
         true,
       );

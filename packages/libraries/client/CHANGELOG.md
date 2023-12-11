@@ -1,5 +1,17 @@
 # @graphql-hive/client
 
+## 0.27.0
+
+### Minor Changes
+
+- [#3331](https://github.com/kamilkisiela/graphql-hive/pull/3331)
+  [`dad9206`](https://github.com/kamilkisiela/graphql-hive/commit/dad92067ff3d15818dd43671609bcda54c38f913)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Add atLeastOnceSampler
+
+- [#3331](https://github.com/kamilkisiela/graphql-hive/pull/3331)
+  [`dad9206`](https://github.com/kamilkisiela/graphql-hive/commit/dad92067ff3d15818dd43671609bcda54c38f913)
+  Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Introduce sampler for dynamic sampling
+
 ## 0.26.0
 
 ### Minor Changes

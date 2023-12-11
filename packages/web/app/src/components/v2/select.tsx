@@ -10,6 +10,7 @@ export function Select({
   ...props
 }: ComponentProps<'select'> & {
   options?: { name: string; value: string }[];
+  placeholder?: string;
   isInvalid?: boolean;
 }): ReactElement {
   return (

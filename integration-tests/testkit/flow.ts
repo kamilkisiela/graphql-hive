@@ -2,16 +2,18 @@ import { fetch } from '@whatwg-node/fetch';
 import { graphql } from './gql';
 import type {
   AnswerOrganizationTransferRequestInput,
+  AssignMemberRoleInput,
+  CreateMemberRoleInput,
   CreateOrganizationInput,
   CreateProjectInput,
   CreateTargetInput,
   CreateTokenInput,
+  DeleteMemberRoleInput,
   DeleteTokensInput,
   EnableExternalSchemaCompositionInput,
   InviteToOrganizationByEmailInput,
   OperationBodyByHashInput,
   OperationsStatsSelectorInput,
-  OrganizationMemberAccessInput,
   OrganizationSelectorInput,
   OrganizationTransferRequestSelector,
   RateLimitInput,
@@ -25,6 +27,7 @@ import type {
   SetTargetValidationInput,
   TargetSelectorInput,
   UpdateBaseSchemaInput,
+  UpdateMemberRoleInput,
   UpdateOrganizationNameInput,
   UpdateProjectNameInput,
   UpdateProjectRegistryModelInput,
@@ -53,6 +56,11 @@ export function createOrganization(input: CreateOrganizationInput, authToken: st
                   organizationAccessScopes
                   projectAccessScopes
                   targetAccessScopes
+                }
+                memberRoles {
+                  id
+                  name
+                  locked
                 }
               }
             }
@@ -198,7 +206,12 @@ export function getOrganizationMembers(selector: OrganizationSelectorInput, auth
               nodes {
                 id
                 user {
+                  id
                   email
+                }
+                role {
+                  id
+                  name
                 }
                 organizationAccessScopes
                 projectAccessScopes
@@ -491,23 +504,120 @@ export function readTokenInfo(token: string) {
   });
 }
 
-export function updateMemberAccess(input: OrganizationMemberAccessInput, authToken: string) {
+export function createMemberRole(input: CreateMemberRoleInput, authToken: string) {
   return execute({
     document: graphql(`
-      mutation updateOrganizationMemberAccess($input: OrganizationMemberAccessInput!) {
-        updateOrganizationMemberAccess(input: $input) {
-          organization {
-            cleanId
-            members {
-              nodes {
+      mutation createMemberRole($input: CreateMemberRoleInput!) {
+        createMemberRole(input: $input) {
+          ok {
+            updatedOrganization {
+              id
+              cleanId
+              memberRoles {
                 id
+                name
+                description
+                locked
                 organizationAccessScopes
                 projectAccessScopes
                 targetAccessScopes
               }
             }
-            me {
+          }
+          error {
+            message
+            inputErrors {
+              name
+              description
+            }
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      input,
+    },
+  });
+}
+
+export function assignMemberRole(input: AssignMemberRoleInput, authToken: string) {
+  return execute({
+    document: graphql(`
+      mutation assignMemberRole($input: AssignMemberRoleInput!) {
+        assignMemberRole(input: $input) {
+          ok {
+            updatedMember {
               id
+            }
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      input,
+    },
+  });
+}
+
+export function deleteMemberRole(input: DeleteMemberRoleInput, authToken: string) {
+  return execute({
+    document: graphql(`
+      mutation deleteMemberRole($input: DeleteMemberRoleInput!) {
+        deleteMemberRole(input: $input) {
+          ok {
+            updatedOrganization {
+              id
+              cleanId
+              memberRoles {
+                id
+                name
+                description
+                locked
+                organizationAccessScopes
+                projectAccessScopes
+                targetAccessScopes
+              }
+            }
+          }
+          error {
+            message
+          }
+        }
+      }
+    `),
+    authToken,
+    variables: {
+      input,
+    },
+  });
+}
+
+export function updateMemberRole(input: UpdateMemberRoleInput, authToken: string) {
+  return execute({
+    document: graphql(`
+      mutation updateMemberRole($input: UpdateMemberRoleInput!) {
+        updateMemberRole(input: $input) {
+          ok {
+            updatedRole {
+              id
+              name
+              description
+              locked
+              organizationAccessScopes
+              projectAccessScopes
+              targetAccessScopes
+            }
+          }
+          error {
+            message
+            inputErrors {
+              name
+              description
             }
           }
         }

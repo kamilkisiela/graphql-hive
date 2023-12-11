@@ -21,7 +21,7 @@ export async function createTokenStorage(connection: string, maximumPoolSize: nu
       const result = await pool.query<Slonik<tokens>>(
         sql`
           SELECT *
-          FROM public.tokens
+          FROM tokens
           WHERE
             target_id = ${target}
             AND deleted_at IS NULL
@@ -35,7 +35,7 @@ export async function createTokenStorage(connection: string, maximumPoolSize: nu
       return pool.maybeOne<Slonik<tokens>>(
         sql`
           SELECT *
-          FROM public.tokens
+          FROM tokens
           WHERE token = ${token} AND deleted_at IS NULL
           LIMIT 1
         `,
@@ -60,7 +60,7 @@ export async function createTokenStorage(connection: string, maximumPoolSize: nu
     }) {
       return pool.one<Slonik<tokens>>(
         sql`
-          INSERT INTO public.tokens
+          INSERT INTO tokens
             (name, token, token_alias, target_id, project_id, organization_id, scopes)
           VALUES
             (${name}, ${token}, ${tokenAlias}, ${target}, ${project}, ${organization}, ${sql.array(
@@ -74,13 +74,13 @@ export async function createTokenStorage(connection: string, maximumPoolSize: nu
     async deleteToken({ token }: { token: string }) {
       await pool.query(
         sql`
-          UPDATE public.tokens SET deleted_at = NOW() WHERE token = ${token}
+          UPDATE tokens SET deleted_at = NOW() WHERE token = ${token}
         `,
       );
     },
     async touchTokens({ tokens }: { tokens: Array<{ token: string; date: Date }> }) {
       await pool.query(sql`
-        UPDATE public.tokens as t
+        UPDATE tokens as t
         SET last_used_at = c.last_used_at
         FROM (
             VALUES

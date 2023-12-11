@@ -16,9 +16,9 @@
     "db:generate": "schemats generate --config schemats.cjs -o src/db/types.ts && prettier --write src/db/types.ts"
   },
   "devDependencies": {
-    "@graphql-inspector/core": "5.0.1",
-    "@sentry/node": "7.83.0",
-    "@sentry/types": "7.83.0",
+    "@graphql-inspector/core": "5.0.2",
+    "@sentry/node": "7.86.0",
+    "@sentry/types": "7.86.0",
     "@tgriesser/schemats": "9.0.1",
     "@theguild/buddy": "0.1.0",
     "@types/node": "18.18.13",
@@ -32,7 +32,7 @@
     "slonik-interceptor-query-logging": "1.4.7",
     "slonik-utilities": "1.9.4",
     "tslib": "2.6.2",
-    "typescript": "5.3.2",
+    "typescript": "5.3.3",
     "zod": "3.22.4"
   },
   "buildOptions": {

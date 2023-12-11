@@ -5,19 +5,19 @@ export default {
   run: ({ sql }) => sql`
 -- Adds scopes to tokens
 ALTER TABLE
-  public.tokens
+  tokens
 ADD COLUMN
   scopes TEXT[] DEFAULT NULL;
 
 -- Adds scopes to organization_member
 ALTER TABLE
-  public.organization_member
+  organization_member
 ADD COLUMN
   scopes TEXT[] DEFAULT NULL;
 
 -- Adds scopes to existing regular members
 UPDATE
-  public.organization_member
+  organization_member
 SET
   scopes = ARRAY[
     'organization:read',
@@ -31,7 +31,7 @@ WHERE
 
 -- Adds scopes to existing admin members
 UPDATE
-  public.organization_member
+  organization_member
 SET
   scopes = ARRAY[
     'organization:read',
@@ -58,7 +58,7 @@ WHERE
 
 -- Adds scopes to existing tokens
 UPDATE
-  public.tokens
+  tokens
 SET
   scopes = ARRAY[
     'organization:read',

@@ -11,7 +11,7 @@ CREATE TYPE
   alert_type AS ENUM('SCHEMA_CHANGE_NOTIFICATIONS');
 
 CREATE TABLE
-  public.alert_channels (
+  alert_channels (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
     TYPE
       alert_channel_type NOT NULL,
@@ -19,18 +19,18 @@ CREATE TABLE
       NAME TEXT NOT NULL,
       slack_channel TEXT,
       webhook_endpoint TEXT,
-      project_id UUID NOT NULL REFERENCES public.projects (id) ON DELETE CASCADE
+      project_id UUID NOT NULL REFERENCES projects (id) ON DELETE CASCADE
   );
 
 CREATE TABLE
-  public.alerts (
+  alerts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4 (),
     TYPE
       alert_type NOT NULL,
       created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-      alert_channel_id UUID NOT NULL REFERENCES public.alert_channels (id) ON DELETE CASCADE,
-      project_id UUID NOT NULL REFERENCES public.projects (id) ON DELETE CASCADE,
-      target_id UUID NOT NULL REFERENCES public.targets (id) ON DELETE CASCADE
+      alert_channel_id UUID NOT NULL REFERENCES alert_channels (id) ON DELETE CASCADE,
+      project_id UUID NOT NULL REFERENCES projects (id) ON DELETE CASCADE,
+      target_id UUID NOT NULL REFERENCES targets (id) ON DELETE CASCADE
   );
 `,
 } satisfies MigrationExecutor;

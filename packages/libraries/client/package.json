@@ -1,6 +1,6 @@
 {
   "name": "@graphql-hive/client",
-  "version": "0.26.0",
+  "version": "0.27.0",
   "type": "module",
   "description": "A NodeJS client for GraphQL Hive",
   "repository": {
@@ -63,9 +63,9 @@
     "@envelop/types": "5.0.0",
     "@types/async-retry": "1.4.8",
     "graphql": "16.8.1",
-    "graphql-yoga": "5.0.0",
+    "graphql-yoga": "5.0.2",
     "nock": "13.4.0",
-    "vitest": "0.34.6"
+    "vitest": "1.0.4"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org",

@@ -4,7 +4,7 @@ export default {
   name: '2022.11.07T09.30.47.user-table-varchar-to-text.sql',
   run: ({ sql }) => sql`
 ALTER TABLE
-  "public"."users"
+  "users"
 ALTER COLUMN
   "supertoken_user_id"
 TYPE
