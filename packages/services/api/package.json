@@ -35,7 +35,7 @@
     "@types/lodash": "4.14.202",
     "@types/ms": "0.7.34",
     "@types/object-hash": "3.0.6",
-    "@whatwg-node/fetch": "0.9.13",
+    "@whatwg-node/fetch": "0.9.14",
     "agentkeepalive": "4.5.0",
     "bcryptjs": "2.4.3",
     "dataloader": "2.2.2",
