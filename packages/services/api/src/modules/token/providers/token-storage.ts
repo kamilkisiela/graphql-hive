@@ -1,6 +1,7 @@
 import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
 import type { TokensApi } from '@hive/tokens';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import { fetch } from '@whatwg-node/fetch';
 import type { Token } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { atomic } from '../../../shared/helpers';

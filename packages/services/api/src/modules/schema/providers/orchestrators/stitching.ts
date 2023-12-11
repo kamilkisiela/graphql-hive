@@ -1,6 +1,7 @@
 import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
 import type { SchemaBuilderApi } from '@hive/schema';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import { fetch } from '@whatwg-node/fetch';
 import { Orchestrator, ProjectType, SchemaObject } from '../../../../shared/entities';
 import { sentry } from '../../../../shared/sentry';
 import { Logger } from '../../../shared/providers/logger';
