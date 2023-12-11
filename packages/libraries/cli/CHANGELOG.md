@@ -1,5 +1,11 @@
 # @graphql-hive/cli
 
+## 0.33.0
+
+### Minor Changes
+
+- [#3543](https://github.com/kamilkisiela/graphql-hive/pull/3543) [`6895ee3`](https://github.com/kamilkisiela/graphql-hive/commit/6895ee3ebf6a18c246b2f974f2cbb338887c97e7) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Support Apollo Client directives in operations:check command (pass --apolloClient flag)
+
 ## 0.32.1
 
 ### Patch Changes
