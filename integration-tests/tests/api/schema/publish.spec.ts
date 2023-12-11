@@ -6,6 +6,7 @@ import { execute } from 'testkit/graphql';
 import { ProjectAccessScope, ProjectType, TargetAccessScope } from '@app/gql/graphql';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { createStorage } from '@hive/storage';
+import { fetch } from '@whatwg-node/fetch';
 import {
   createTarget,
   enableExternalSchemaComposition,

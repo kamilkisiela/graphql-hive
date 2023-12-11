@@ -11,5 +11,5 @@ name = "compress"
 path = "src/main.rs"
 
 [dependencies]
-flate2 = "1.0.24"
+flate2 = "1.0.28"
 tar = "0.4"

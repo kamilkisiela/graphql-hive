@@ -1,5 +1,6 @@
 import * as itty from 'itty-router';
 import { Toucan } from 'toucan-js';
+import { fetch } from '@whatwg-node/fetch';
 import { AnalyticsEngine, createAnalytics } from './analytics';
 import { createArtifactRequestHandler } from './artifact-handler';
 import { ArtifactStorageReader } from './artifact-storage-reader';

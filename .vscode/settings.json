@@ -11,7 +11,7 @@
     "*.env.template": "dotenv"
   },
   "editor.codeActionsOnSave": {
-    "source.organizeImports": false
+    "source.organizeImports": "never"
   },
   "eslint.format.enable": true,
   "editor.formatOnSave": true,

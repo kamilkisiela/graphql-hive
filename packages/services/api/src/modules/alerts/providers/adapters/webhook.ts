@@ -1,6 +1,7 @@
 import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
 import type { WebhooksApi } from '@hive/webhooks';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import { fetch } from '@whatwg-node/fetch';
 import { HttpClient } from '../../../shared/providers/http-client';
 import { Logger } from '../../../shared/providers/logger';
 import type { WebhooksConfig } from '../tokens';

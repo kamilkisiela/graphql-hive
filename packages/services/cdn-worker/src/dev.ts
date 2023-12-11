@@ -5,7 +5,7 @@ import { createArtifactRequestHandler } from './artifact-handler';
 import { ArtifactStorageReader } from './artifact-storage-reader';
 import { AwsClient } from './aws';
 import './dev-polyfill';
-import { env } from './dev-polyfill';
+import { env, fetch } from './dev-polyfill';
 import { createRequestHandler } from './handler';
 import { createIsKeyValid } from './key-validation';
 

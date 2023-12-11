@@ -1,3 +1,4 @@
+import { fetch } from '@whatwg-node/fetch';
 import { getServiceHost } from './utils';
 
 export const serviceName = 'external_composition';

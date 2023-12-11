@@ -99,7 +99,7 @@ jobs:
       npmTag: rc
       restoreDeletedChangesets: true
       buildScript: build:libraries
-      nodeVersion: 21
+      nodeVersion: 18
       packageManager: pnpm
     secrets:
       githubToken: ${{ secrets.GITHUB_TOKEN }}
