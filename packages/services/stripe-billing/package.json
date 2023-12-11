@@ -13,7 +13,7 @@
   "devDependencies": {
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
-    "@sentry/node": "7.85.0",
+    "@sentry/node": "7.86.0",
     "@trpc/client": "10.44.1",
     "@trpc/server": "10.44.1",
     "date-fns": "2.30.0",
