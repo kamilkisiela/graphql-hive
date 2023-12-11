@@ -404,8 +404,10 @@ const ApproveFailedSchemaCheckModal = (props: {
 
 const ActiveSchemaCheck = ({
   schemaCheckId,
+  retentionInDays,
 }: {
   schemaCheckId: string | null;
+  retentionInDays: number | undefined;
 }): React.ReactElement | null => {
   const router = useRouteSelector();
   const [query] = useQuery({
@@ -619,6 +621,7 @@ const ActiveSchemaCheck = ({
                 <ChangesBlock
                   criticality={CriticalityLevel.Breaking}
                   changes={schemaCheck.breakingSchemaChanges.nodes}
+                  retentionInDays={retentionInDays}
                 />
               </div>
             ) : null}
@@ -773,6 +776,9 @@ const ChecksPageQuery = graphql(`
     organization(selector: { organization: $organizationId }) {
       organization {
         ...TargetLayout_CurrentOrganizationFragment
+        rateLimit {
+          retentionInDays
+        }
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
@@ -843,6 +849,7 @@ function ChecksPageContent() {
   const hasSchemaChecks = !!query.data?.target?.schemaChecks?.edges?.length;
   const hasFilteredSchemaChecks = !!query.data?.target?.filteredSchemaChecks?.edges?.length;
   const hasActiveSchemaCheck = !!schemaCheckId;
+  const retentionInDays = query.data?.organization?.organization?.rateLimit?.retentionInDays;
 
   const handleShowOnlyFilterChange = () => {
     const updatedFilters = !filters.showOnlyChanged;
@@ -963,7 +970,11 @@ function ChecksPageContent() {
           {hasActiveSchemaCheck ? (
             <div className="grow">
               {schemaCheckId ? (
-                <ActiveSchemaCheck schemaCheckId={schemaCheckId} key={schemaCheckId} />
+                <ActiveSchemaCheck
+                  schemaCheckId={schemaCheckId}
+                  key={schemaCheckId}
+                  retentionInDays={retentionInDays}
+                />
               ) : null}
             </div>
           ) : hasSchemaChecks ? (

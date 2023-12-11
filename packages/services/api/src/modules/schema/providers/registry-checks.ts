@@ -339,8 +339,8 @@ export class RegistryChecks {
         if (!change.path) return change;
 
         const affectedOperations = await this.inspector.getUsageForCoordinate(
-          change.path,
           selector,
+          change.path,
         );
 
         if (affectedOperations) {

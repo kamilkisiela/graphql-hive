@@ -33,6 +33,7 @@ const criticalityLevelMapping = {
 export function ChangesBlock(props: {
   changes: SchemaChangeFieldsFragment[];
   criticality: CriticalityLevel;
+  retentionInDays?: number;
 }): ReactElement | null {
   const router = useRouteSelector();
 
@@ -81,7 +82,7 @@ export function ChangesBlock(props: {
                                       targetId: router.targetId,
                                       operationName: `${hash.substring(0, 4)}_${name}`,
                                       operationHash: hash,
-                                      period: '7d',
+                                      period: `${props.retentionInDays || 7}d`,
                                     },
                                   }}
                                 >
@@ -106,7 +107,7 @@ export function ChangesBlock(props: {
                                 projectId: router.projectId,
                                 targetId: router.targetId,
                                 coordinate: change.path?.join('.'),
-                                period: '7d',
+                                period: `${props.retentionInDays || 7}d`,
                               },
                             }}
                           >
