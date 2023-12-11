@@ -19,6 +19,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "4.20231121.0",
     "@types/service-worker-mock": "2.0.4",
+    "@whatwg-node/fetch": "0.9.13",
     "@whatwg-node/server": "0.9.10",
     "bcryptjs": "2.4.3",
     "dotenv": "16.3.1",

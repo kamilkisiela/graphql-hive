@@ -2,6 +2,7 @@
  * Note: This file needs to run both on Node.js and Cloudflare Workers.
  */
 import * as bc from 'bcryptjs';
+import { crypto } from '@whatwg-node/fetch';
 
 export interface CDNToken {
   keyId: string;

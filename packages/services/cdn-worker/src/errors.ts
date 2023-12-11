@@ -1,3 +1,4 @@
+import { Response } from '@whatwg-node/fetch';
 import { Analytics } from './analytics';
 
 const description = `Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage`;

@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import { Request, Response } from '@whatwg-node/fetch';
 import { Analytics } from './analytics';
 import { type AwsClient } from './aws';
 import { decodeCdnAccessTokenSafe, isCDNAccessToken } from './cdn-token';

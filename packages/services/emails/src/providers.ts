@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import sm from 'sendmail';
+import { fetch } from '@whatwg-node/fetch';
 import type {
   EmailProviderConfig,
   MockEmailProviderConfig,
