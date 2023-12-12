@@ -217,7 +217,7 @@ function AlertsPageContent() {
     currentOrganization,
   );
 
-  useProjectAccess({
+  const hasAccess = useProjectAccess({
     scope: ProjectAccessScope.Alerts,
     member: organizationForAlerts?.me ?? null,
     redirect: true,
@@ -245,7 +245,7 @@ function AlertsPageContent() {
           <Title>Alerts and Notifications</Title>
           <Subtitle>Configure alerts and notifications for your project.</Subtitle>
         </div>
-        {currentProject && currentOrganization ? (
+        {currentProject && currentOrganization && hasAccess ? (
           <div className="flex flex-col gap-y-4">
             <Channels channels={channels} />
             <Alerts alerts={alerts} channels={channels} targets={targets} />

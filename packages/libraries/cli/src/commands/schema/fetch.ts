@@ -3,6 +3,7 @@ import { extname, resolve } from 'node:path';
 import { Args, Flags } from '@oclif/core';
 import Command from '../../base-command';
 import { graphql } from '../../gql';
+import { graphqlEndpoint } from '../../helpers/config';
 
 const SchemaVersionForActionIdQuery = graphql(/* GraphQL */ `
   query SchemaVersionForActionId(
@@ -73,11 +74,14 @@ export default class SchemaFetch extends Command {
       key: 'registry.endpoint',
       args: flags,
       env: 'HIVE_REGISTRY',
+      legacyFlagName: 'registry',
+      defaultValue: graphqlEndpoint,
     });
 
     const accessToken = this.ensure({
       key: 'registry.accessToken',
       args: flags,
+      legacyFlagName: 'token',
       env: 'HIVE_TOKEN',
     });
 

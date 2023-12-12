@@ -3241,7 +3241,7 @@ const insertLegacyVersion = async (
   },
 ) => {
   const logId = await pool.oneFirst<string>(sql`
-        INSERT INTO public.schema_log
+        INSERT INTO schema_log
           (
             author,
             service_name,
@@ -3269,7 +3269,7 @@ const insertLegacyVersion = async (
       `);
 
   const versionId = await pool.oneFirst<string>(sql`
-        INSERT INTO public.schema_versions
+        INSERT INTO schema_versions
           (
             is_composable,
             target_id,
@@ -3286,7 +3286,7 @@ const insertLegacyVersion = async (
 
   await pool.query(sql`
         INSERT INTO
-          public.schema_version_to_log
+          schema_version_to_log
           (version_id, action_id)
         VALUES
           (${versionId}, ${logId})

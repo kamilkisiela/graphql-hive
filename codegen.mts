@@ -83,6 +83,7 @@ const config: CodegenConfig = {
           Project: '../shared/entities#Project as ProjectMapper',
           Target: '../shared/entities#Target as TargetMapper',
           Member: '../shared/entities#Member as MemberMapper',
+          MemberRole: '../shared/mappers#MemberRoleMapper as MemberRoleMapper',
           Token: '../shared/entities#Token as TokenMapper',
           TokenInfo: '../shared/entities#Token as TokenInfoMapper',
           Activity: '../shared/entities#ActivityObject as ActivityMapper',

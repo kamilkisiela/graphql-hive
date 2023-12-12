@@ -5,7 +5,7 @@ export default {
   run: ({ sql }) => sql`
 -- Update Hobby with 3d to 7d
 UPDATE
-  public.organizations
+  organizations
 SET
   limit_retention_days = 7
 WHERE
@@ -14,7 +14,7 @@ WHERE
 
 -- Update Pro with 180d to 90d
 UPDATE
-  public.organizations
+  organizations
 SET
   limit_retention_days = 90
 WHERE

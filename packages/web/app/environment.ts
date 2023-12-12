@@ -103,6 +103,16 @@ const SentryConfigSchema = zod.union([
   }),
 ]);
 
+const MigrationsSchema = zod.object({
+  MEMBER_ROLES_DEADLINE: emptyString(
+    zod
+      .date({
+        coerce: true,
+      })
+      .optional(),
+  ),
+});
+
 const configs = {
   // eslint-disable-next-line no-process-env
   base: BaseSchema.safeParse(process.env),
@@ -118,6 +128,8 @@ const configs = {
   authOkta: AuthOktaConfigSchema.safeParse(process.env),
   // eslint-disable-next-line no-process-env
   authOktaMultiTenant: AuthOktaMultiTenantSchema.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
+  migrations: MigrationsSchema.safeParse(process.env),
 };
 
 const environmentErrors: Array<string> = [];
@@ -148,6 +160,7 @@ const authGithub = extractConfig(configs.authGithub);
 const authGoogle = extractConfig(configs.authGoogle);
 const authOkta = extractConfig(configs.authOkta);
 const authOktaMultiTenant = extractConfig(configs.authOktaMultiTenant);
+const migrations = extractConfig(configs.migrations);
 
 const config = {
   release: base.RELEASE ?? 'local',
@@ -206,6 +219,9 @@ const config = {
     persistedOperations: base.GRAPHQL_PERSISTED_OPERATIONS === '1',
   },
   zendeskSupport: base.ZENDESK_SUPPORT === '1',
+  migrations: {
+    member_roles_deadline: migrations.MEMBER_ROLES_DEADLINE ?? null,
+  },
 } as const;
 
 declare global {

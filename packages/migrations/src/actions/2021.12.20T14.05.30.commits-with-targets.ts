@@ -3,23 +3,23 @@ import { type MigrationExecutor } from '../pg-migrator';
 export default {
   name: '2021.12.20T14.05.30.commits-with-targets.sql',
   run: ({ sql }) => sql`
---creates and fills a target_id column on public.commits
+--creates and fills a target_id column on commits
 ALTER TABLE
-  public.commits
+  commits
 ADD COLUMN
-  target_id UUID REFERENCES public.targets (id) ON DELETE CASCADE;
+  target_id UUID REFERENCES targets (id) ON DELETE CASCADE;
 
 UPDATE
-  public.commits AS c
+  commits AS c
 SET
   target_id = v.target_id
 FROM
-  public.versions AS v
+  versions AS v
 WHERE
   v.commit_id = c.id;
 
 ALTER TABLE
-  public.commits
+  commits
 ALTER COLUMN
   target_id
 SET NOT NULL;

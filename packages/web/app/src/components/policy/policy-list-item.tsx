@@ -1,5 +1,6 @@
 import { ReactElement } from 'react';
 import type { JSONSchema } from 'json-schema-typed';
+import { InfoIcon } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Markdown } from '@/components/v2/markdown';
 import { FragmentType, graphql, useFragment } from '@/gql';
@@ -47,8 +48,8 @@ export function PolicyListItem(props: {
   return (
     <Tooltip.Provider delayDuration={100}>
       <div className="px-1 py-4">
-        <div className="flex gap-4">
-          <div>
+        <div className="flex gap-x-4">
+          <div className="pt-[2px]">
             <Checkbox
               id={ruleInfo.id}
               value={ruleInfo.id}
@@ -58,26 +59,27 @@ export function PolicyListItem(props: {
           </div>
           <div className="w-full">
             <div className="mb-2">
-              <Tooltip
-                contentProps={{
-                  className: 'block max-w-[500px]',
-                  side: 'top',
-                  align: 'start',
-                }}
-                content={
-                  <>
-                    <Markdown content={ruleInfo.description} className="text-sm" />
-                    <br />
-                    {ruleInfo.documentationUrl ? (
-                      <DocsLink href={ruleInfo.documentationUrl}>read more</DocsLink>
-                    ) : null}
-                  </>
-                }
-              >
-                <label htmlFor={ruleInfo.id} className="font-mono text-sm font-medium">
-                  {ruleInfo.id}
-                </label>
-              </Tooltip>
+              <label htmlFor={ruleInfo.id} className="font-mono text-sm font-medium">
+                {ruleInfo.id}
+                <Tooltip
+                  contentProps={{
+                    className: 'block max-w-[500px]',
+                    side: 'top',
+                    align: 'start',
+                  }}
+                  content={
+                    <>
+                      <Markdown content={ruleInfo.description} className="text-sm" />
+                      <br />
+                      {ruleInfo.documentationUrl ? (
+                        <DocsLink href={ruleInfo.documentationUrl}>read more</DocsLink>
+                      ) : null}
+                    </>
+                  }
+                >
+                  <InfoIcon className="ml-2 inline-block h-4 w-4 text-orange-500" />
+                </Tooltip>
+              </label>
             </div>
             {enabled ? (
               <div className="flex w-full">

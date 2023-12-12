@@ -5,7 +5,7 @@ export default {
   run: ({ sql }) => sql`
 --urls (up)
 ALTER TABLE
-  public.projects
+  projects
 ALTER COLUMN
   build_url
 TYPE

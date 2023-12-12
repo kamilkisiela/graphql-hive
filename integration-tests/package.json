@@ -8,9 +8,9 @@
     "test:integration": "vitest"
   },
   "devDependencies": {
-    "@apollo/gateway": "2.6.1",
+    "@apollo/gateway": "2.6.2",
     "@apollo/server": "4.9.5",
-    "@aws-sdk/client-s3": "3.462.0",
+    "@aws-sdk/client-s3": "3.470.0",
     "@esm2cjs/execa": "6.1.1-cjs.1",
     "@graphql-hive/client": "workspace:*",
     "@graphql-hive/core": "workspace:*",
@@ -22,7 +22,7 @@
     "@trpc/server": "10.44.1",
     "@types/dockerode": "3.3.23",
     "@types/ioredis": "4.28.10",
-    "@whatwg-node/fetch": "0.9.13",
+    "@whatwg-node/fetch": "0.9.14",
     "bcryptjs": "2.4.3",
     "date-fns": "2.30.0",
     "dockerode": "4.0.0",
@@ -33,7 +33,7 @@
     "slonik": "30.4.4",
     "strip-ansi": "7.1.0",
     "tslib": "2.6.2",
-    "vitest": "0.34.6",
+    "vitest": "1.0.4",
     "zod": "3.22.4"
   }
 }

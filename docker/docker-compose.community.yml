@@ -160,7 +160,7 @@ services:
       myminio/artifacts; exit 0"
 
   s3_reverse_proxy:
-    image: caddy:2.7.5-alpine
+    image: caddy:2.7.6-alpine
     depends_on:
       s3:
         condition: service_healthy

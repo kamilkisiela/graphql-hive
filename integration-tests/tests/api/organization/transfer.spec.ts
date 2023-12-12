@@ -345,7 +345,7 @@ test.concurrent(
 );
 
 test.concurrent(
-  'previous owner should lose only "delete" rights, new owner should get all access',
+  'previous owner should have an Admin role, new owner should get an Admin role as well',
   async () => {
     const { createOrg, ownerToken, ownerEmail } = await initSeed().createOwner();
     const { organization, inviteAndJoinMember, members } = await createOrg();
@@ -383,35 +383,11 @@ test.concurrent(
       throw new Error('Could not get members');
     }
 
-    // previous owner should lose only "delete" rights
-    const owner = orgMembers.find(m => m.user.email === ownerEmail)!;
-    expect(orgMembers.find(m => m.id === owner.id)).toEqual(
-      expect.objectContaining({
-        organizationAccessScopes: owner.organizationAccessScopes.filter(
-          s => s !== OrganizationAccessScope.Delete,
-        ),
-        projectAccessScopes: owner.projectAccessScopes.filter(s => s !== ProjectAccessScope.Delete),
-        targetAccessScopes: owner.targetAccessScopes.filter(s => s !== TargetAccessScope.Delete),
-      }),
-    );
+    const previousOwner = orgMembers.find(m => m.user.email === ownerEmail)!;
+    const owner = orgMembers.find(m => m.id === member.id)!;
 
-    // new owner should get all access
-    expect(orgMembers.find(m => m.id === member.id)).toEqual(
-      expect.objectContaining({
-        organizationAccessScopes: expect.arrayContaining([
-          ...owner.organizationAccessScopes,
-          OrganizationAccessScope.Delete,
-        ]),
-        projectAccessScopes: expect.arrayContaining([
-          ...owner.projectAccessScopes,
-          ProjectAccessScope.Delete,
-        ]),
-        targetAccessScopes: expect.arrayContaining([
-          ...owner.targetAccessScopes,
-          TargetAccessScope.Delete,
-        ]),
-      }),
-    );
+    expect(owner.role?.name).toBe('Admin');
+    expect(previousOwner.role?.name).toBe('Admin');
 
     // other members should not be affected
     expect(orgMembers.find(m => m.id === lonelyMember.id)).toEqual(

@@ -206,7 +206,6 @@ function ModalContent(props: {
                       manager.canAccessTarget(RegistryAccessScope.mapping['read-write'])
                     }
                     checkAccess={manager.canAccessTarget}
-                    isReadOnly={false}
                     onChange={value => {
                       if (value === 'no-access') {
                         setSelectedScope('no-access');
@@ -215,6 +214,7 @@ function ModalContent(props: {
                       setSelectedScope(value);
                     }}
                     possibleScope={Object.values(RegistryAccessScope.mapping)}
+                    initialScope={selectedScope}
                     selectedScope={selectedScope}
                   />
                 </Accordion.Content>

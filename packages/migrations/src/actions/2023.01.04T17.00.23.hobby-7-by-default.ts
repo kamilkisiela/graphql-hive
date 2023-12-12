@@ -5,7 +5,7 @@ export default {
   run: ({ sql }) => sql`
 -- Update Hobby with 3d to 7d - personal orgs were created with the default value of 3d
 UPDATE
-  public.organizations
+  organizations
 SET
   limit_retention_days = 7
 WHERE
@@ -14,7 +14,7 @@ WHERE
 
 -- Update limit_retention_days default value to 7
 ALTER TABLE
-  public.organizations
+  organizations
 ALTER COLUMN
   limit_retention_days
 SET DEFAULT
