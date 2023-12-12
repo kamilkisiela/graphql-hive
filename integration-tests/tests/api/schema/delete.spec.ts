@@ -221,6 +221,7 @@ test.concurrent(
 
       expect(changes[0]).toMatchInlineSnapshot(`
         {
+          affectedClients: null,
           affectedOperations: null,
           approvalMetadata: null,
           criticality: BREAKING,

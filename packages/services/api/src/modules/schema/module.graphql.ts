@@ -316,6 +316,10 @@ export default gql`
     List of operations that are affected by this schema change.
     """
     affectedOperations: [SchemaCoordinateUsageOperation!]
+    """
+    List of clients that are affected by this schema change.
+    """
+    affectedClients: [String!]
   }
 
   type SchemaChangeApproval {

@@ -2,7 +2,7 @@ import { ReactElement, useMemo } from 'react';
 import Link from 'next/link';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
-import { CheckIcon } from 'lucide-react';
+import { CheckIcon, UsersIcon } from 'lucide-react';
 import reactStringReplace from 'react-string-replace';
 import { Label } from '@/components/common';
 import { Tooltip } from '@/components/v2';
@@ -36,6 +36,8 @@ export function ChangesBlock(props: {
   retentionInDays?: number;
 }): ReactElement | null {
   const router = useRouteSelector();
+
+  console.log({ changes: props.changes });
 
   return (
     <div>
@@ -124,6 +126,46 @@ export function ChangesBlock(props: {
                     <span className="text-xs">
                       {change.affectedOperations.length}{' '}
                       {change.affectedOperations.length === 1 ? 'operation' : 'operations'} affected
+                    </span>
+                  </span>
+                </Tooltip>
+              </Tooltip.Provider>
+            ) : null}
+            {change.affectedClients?.length ? (
+              <Tooltip.Provider delayDuration={0}>
+                <Tooltip
+                  content={
+                    <>
+                      <div className="mb-2 text-lg font-bold">Client Usage</div>
+                      <ul>
+                        {change.affectedClients.map(clientName => (
+                          <li key={clientName} className="font-bold">
+                            <Link
+                              className="text-orange-500 hover:text-orange-500 hover:underline hover:underline-offset-2"
+                              href={{
+                                pathname:
+                                  '/[organizationId]/[projectId]/[targetId]/insights/client/[name]',
+                                query: {
+                                  organizationId: router.organizationId,
+                                  projectId: router.projectId,
+                                  targetId: router.targetId,
+                                  name: clientName,
+                                },
+                              }}
+                            >
+                              {clientName}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  }
+                >
+                  <span className="flex cursor-help items-center space-x-1 rounded-sm bg-gray-800 px-2 font-bold">
+                    <UsersIcon className="h-4" />
+                    <span className="text-xs">
+                      {change.affectedClients.length}{' '}
+                      {change.affectedClients.length === 1 ? 'client' : 'clients'} affected
                     </span>
                   </span>
                 </Tooltip>

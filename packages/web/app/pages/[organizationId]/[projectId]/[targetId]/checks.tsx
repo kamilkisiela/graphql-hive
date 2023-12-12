@@ -212,6 +212,7 @@ const ActiveSchemaCheck_SchemaCheckFragment = graphql(`
           hash
           count
         }
+        affectedClients
       }
     }
     safeSchemaChanges {

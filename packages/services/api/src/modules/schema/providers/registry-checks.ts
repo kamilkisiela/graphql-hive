@@ -346,6 +346,16 @@ export class RegistryChecks {
         if (affectedOperations) {
           change.affectedOperations = affectedOperations;
         }
+
+        const affectedClients = await this.inspector.getClientUsageForCoordinate(
+          selector,
+          change.path,
+          change.meta.typeName?.toString() || '',
+        );
+
+        if (affectedClients) {
+          change.affectedClients = affectedClients;
+        }
         return change;
       }),
     );

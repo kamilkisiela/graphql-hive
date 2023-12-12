@@ -107,6 +107,7 @@ fragment SchemaChangeFields on SchemaChange {
     hash
     count
   }
+  affectedClients
 }
 
 fragment SchemaCompareResultFields on SchemaCompareResult {

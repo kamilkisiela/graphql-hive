@@ -1289,6 +1289,7 @@ export const resolvers: SchemaModule.Resolvers = {
         hash: op.operationHash,
         count: op.count,
       })) ?? null,
+    affectedClients: change => change.affectedClients ?? null,
   },
   SchemaChangeApproval: {
     approvedBy: (approval, _, { injector }) =>

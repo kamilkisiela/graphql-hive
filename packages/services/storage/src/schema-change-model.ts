@@ -838,6 +838,7 @@ export const HiveSchemaChangeModel = z
         )
         .nullable()
         .optional(),
+      affectedClients: z.array(z.string()).nullable().optional(),
     }),
   )
   // We inflate the schema check when reading it from the database
@@ -859,6 +860,7 @@ export const HiveSchemaChangeModel = z
       readonly approvalMetadata: SchemaCheckApprovalMetadata | null;
       readonly isSafeBasedOnUsage: boolean;
       affectedOperations: { operationName: string; operationHash: string; count: number }[] | null;
+      affectedClients: string[] | null;
     } => {
       const change = schemaChangeFromSerializableChange(rawChange as any);
 
@@ -875,6 +877,7 @@ export const HiveSchemaChangeModel = z
         isSafeBasedOnUsage: rawChange.isSafeBasedOnUsage ?? false,
         reason: change.criticality.reason ?? null,
         affectedOperations: rawChange.affectedOperations ?? null,
+        affectedClients: rawChange.affectedClients ?? null,
       };
     },
   );
