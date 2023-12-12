@@ -14,7 +14,7 @@
     "@envelop/generic-auth": "7.0.0",
     "@envelop/graphql-jit": "8.0.1",
     "@envelop/graphql-modules": "6.0.0",
-    "@envelop/sentry": "7.0.0",
+    "@envelop/sentry": "7.1.1",
     "@envelop/types": "5.0.0",
     "@escape.tech/graphql-armor-max-aliases": "2.2.0",
     "@escape.tech/graphql-armor-max-depth": "2.2.0",
