@@ -102,11 +102,11 @@ export class Inspector {
 
   @sentry('Inspector.getUsageForCoordinate')
   async getUsageForCoordinate(selector: Types.TargetSelector, coordinate: string) {
-    const settings = await this.getSettings({ selector });
+    // const settings = await this.getSettings({ selector });
 
     return this.operationsManager.getTopOperationForCoordinate({
       coordinate,
-      period: createPeriod(`${settings?.validation.period ?? 7}d`),
+      period: createPeriod('7d'), // createPeriod(`${settings?.validation.period ?? 7}d`),
       limit: 10,
       organizationId: selector.organization,
       projectId: selector.project,
