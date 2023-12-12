@@ -1,6 +1,6 @@
-import { isInputObjectType, isNonNullType, type GraphQLSchema } from 'graphql';
+import type { GraphQLSchema } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
-import { Change, ChangeType, diff, DiffRule } from '@graphql-inspector/core';
+import { diff, DiffRule } from '@graphql-inspector/core';
 import { HiveSchemaChangeModel, SchemaChangeType } from '@hive/storage';
 import type * as Types from '../../../__generated__/types';
 import type { TargetSettings } from '../../../shared/entities';
@@ -52,39 +52,10 @@ export class Inspector {
 
         this.logger.debug('Usage validation enabled');
 
-        const fixedFields = fields.map(({ type, field, argument, meta }) => {
-          if (type && field) {
-            const typeDefinition = incoming.getType(type) || existing.getType(type);
-            const change: Change<ChangeType> = meta.change;
-
-            if (typeDefinition && isInputObjectType(typeDefinition)) {
-              const typeBefore = existing.getType(type);
-              const typeAfter = incoming.getType(type);
-
-              if (isInputObjectType(typeBefore) && isInputObjectType(typeAfter)) {
-                const fieldAfter = typeAfter.getFields()[field];
-                // Adding a non-nullable input field to a used input object type is a breaking change.
-                // That's why we need to check if the input type is used, not the field itself (as it's new)
-                if (change.type === ChangeType.InputFieldAdded && isNonNullType(fieldAfter.type)) {
-                  return {
-                    type,
-                  };
-                }
-              }
-            }
-          }
-
-          return {
-            type,
-            field,
-            argument,
-          };
-        });
-
         const statsList = await this.getStats({
           selector,
           settings,
-          fields: fixedFields,
+          fields,
         });
 
         if (!statsList) {
@@ -114,7 +85,7 @@ export class Inspector {
           return aboveThreshold ? BREAKING : NOT_BREAKING;
         }
 
-        return fixedFields.map(useStats);
+        return fields.map(useStats);
       },
     });
 
@@ -131,11 +102,11 @@ export class Inspector {
 
   @sentry('Inspector.getUsageForCoordinate')
   async getUsageForCoordinate(selector: Types.TargetSelector, coordinate: string) {
-    // const settings = await this.getSettings({ selector });
+    const settings = await this.getSettings({ selector });
 
     return this.operationsManager.getTopOperationForCoordinate({
       coordinate,
-      period: createPeriod('7d'), // createPeriod(`${settings?.validation.period ?? 7}d`),
+      period: createPeriod(`${settings?.validation.period ?? 7}d`),
       limit: 10,
       organizationId: selector.organization,
       projectId: selector.project,
