@@ -17,7 +17,7 @@
     "@sentry/node": "7.86.0",
     "@trpc/client": "10.44.1",
     "@trpc/server": "10.44.1",
-    "@whatwg-node/fetch": "0.9.13",
+    "@whatwg-node/fetch": "0.9.14",
     "date-fns": "2.30.0",
     "dotenv": "16.3.1",
     "got": "12.6.1",
