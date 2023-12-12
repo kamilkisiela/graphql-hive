@@ -20,7 +20,7 @@
     "@trpc/server": "10.44.1",
     "@types/async-retry": "1.4.8",
     "@types/ioredis-mock": "8.2.5",
-    "@whatwg-node/fetch": "0.9.13",
+    "@whatwg-node/fetch": "0.9.14",
     "dotenv": "16.3.1",
     "fast-json-stable-stringify": "2.1.0",
     "fastify": "3.29.5",
