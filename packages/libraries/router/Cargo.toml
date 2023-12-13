@@ -19,7 +19,7 @@ sha2 = { version = "0.10.8", features = ["std"] }
 anyhow = "1"
 tracing = "0.1"
 async-trait = "0.1.74"
-futures = { version = "0.3.27", features = ["thread-pool"] }
+futures = { version = "0.3.29", features = ["thread-pool"] }
 schemars = { version = "0.8", features = ["url"] }
 serde = "1"
 serde_json = "1"
