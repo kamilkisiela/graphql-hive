@@ -274,7 +274,7 @@ export class AlertsManager {
 
       await this.slack.sendChannelConfirmation({
         event: {
-          kind: 'created',
+          kind: input.kind,
           organization: {
             id: organization.id,
             cleanId: organization.cleanId,

@@ -959,8 +959,8 @@ importers:
         specifier: 7.86.0
         version: 7.86.0
       '@theguild/federation-composition':
-        specifier: 0.2.0
-        version: 0.2.0(graphql@16.8.1)
+        specifier: 0.4.0
+        version: 0.4.0(graphql@16.8.1)
       '@trpc/server':
         specifier: 10.44.1
         version: 10.44.1
@@ -13530,8 +13530,8 @@ packages:
       - typescript
     dev: true
 
-  /@theguild/federation-composition@0.2.0(graphql@16.8.1):
-    resolution: {integrity: sha512-xqTj1kV7CdmMFw3xaEoupuUYrwPeYsPG0PWMwXvh9eLwF+gr7UhMs4XurYPE/RgvYNMq4Hr6GkZSEFcn74HGtQ==}
+  /@theguild/federation-composition@0.4.0(graphql@16.8.1):
+    resolution: {integrity: sha512-TKB0NxxwEaisnplZH9JIjUUDP97ejvXeZi66rOVEaXSQvE9rHTJm02qLQSlZhaRCi6aYnHYYyMHONn3XyD6syQ==}
     engines: {node: '>=18'}
     peerDependencies:
       graphql: ^16.0.0
@@ -13539,6 +13539,7 @@ packages:
       constant-case: 3.0.4
       graphql: 16.8.1
       json5: 2.2.3
+      lodash.sortby: 4.7.0
     dev: true
 
   /@theguild/prettier-config@2.0.2(prettier@3.1.1):
