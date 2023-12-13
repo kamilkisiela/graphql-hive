@@ -1,6 +1,7 @@
 import { ReactNode, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import { useQuery } from 'urql';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -101,8 +102,32 @@ export function SchemaExplorerFilter({
 
   return (
     <div className="flex flex-row items-center gap-x-4">
+      <Input
+        className="w-[200px] grow cursor-text"
+        placeholder="Search for a field"
+        onChange={e => {
+          if (e.target.value === '') {
+            const routerQuery = router.query;
+            delete routerQuery.search;
+            void router.push({ query: routerQuery }, undefined, { shallow: true });
+            return;
+          }
+
+          void router.push(
+            {
+              query: {
+                ...router.query,
+                search: e.target.value === '' ? undefined : e.target.value,
+              },
+            },
+            undefined,
+            { shallow: true },
+          );
+        }}
+        value={typeof router.query.search === 'string' ? router.query.search : ''}
+      />
       <Autocomplete
-        className="min-w-[250px] grow cursor-text"
+        className="min-w-[200px] grow cursor-text"
         placeholder="Search for a type"
         defaultValue={typename ? { value: typename, label: typename } : null}
         options={types}

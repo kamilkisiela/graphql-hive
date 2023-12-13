@@ -396,18 +396,25 @@ export function GraphQLFields(props: {
   targetCleanId: string;
   projectCleanId: string;
   organizationCleanId: string;
+  filterValue?: string;
 }) {
-  const { totalRequests } = props;
+  const { totalRequests, filterValue } = props;
   const fieldsFromFragment = useFragment(GraphQLFields_FieldFragment, props.fields);
-  const sortedFields = useMemo(
+  const sortedAndFilteredFields = useMemo(
     () =>
-      [...fieldsFromFragment].sort(
-        // Sort by usage DESC, name ASC
-        (a, b) => b.usage.total - a.usage.total || a.name.localeCompare(b.name),
-      ),
-    [fieldsFromFragment],
+      [...fieldsFromFragment]
+        .filter(field => (filterValue ? field.name.includes(filterValue) : true))
+        .sort(
+          // Sort by usage DESC, name ASC
+          (a, b) => b.usage.total - a.usage.total || a.name.localeCompare(b.name),
+        ),
+    [fieldsFromFragment, filterValue],
   );
-  const [fields, collapsed, expand] = useCollapsibleList(sortedFields, 5, props.collapsed ?? false);
+  const [fields, collapsed, expand] = useCollapsibleList(
+    sortedAndFilteredFields,
+    5,
+    props.collapsed ?? false,
+  );
 
   return (
     <TooltipProvider delayDuration={0}>
