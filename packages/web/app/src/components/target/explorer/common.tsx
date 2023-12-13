@@ -208,6 +208,7 @@ const GraphQLFields_FieldFragment = graphql(`
     name
     description
     type
+    isDeprecated
     usage {
       total
       ...SchemaExplorerUsageStats_UsageFragment
@@ -396,18 +397,25 @@ export function GraphQLFields(props: {
   targetCleanId: string;
   projectCleanId: string;
   organizationCleanId: string;
+  filterDeprecated?: boolean;
 }) {
-  const { totalRequests } = props;
+  const { totalRequests, filterDeprecated } = props;
   const fieldsFromFragment = useFragment(GraphQLFields_FieldFragment, props.fields);
-  const sortedFields = useMemo(
+  const sortedAndFilteredFields = useMemo(
     () =>
-      [...fieldsFromFragment].sort(
-        // Sort by usage DESC, name ASC
-        (a, b) => b.usage.total - a.usage.total || a.name.localeCompare(b.name),
-      ),
-    [fieldsFromFragment],
+      [...fieldsFromFragment]
+        .filter(field => (filterDeprecated ? field.isDeprecated === true : true))
+        .sort(
+          // Sort by usage DESC, name ASC
+          (a, b) => b.usage.total - a.usage.total || a.name.localeCompare(b.name),
+        ),
+    [fieldsFromFragment, filterDeprecated],
   );
-  const [fields, collapsed, expand] = useCollapsibleList(sortedFields, 5, props.collapsed ?? false);
+  const [fields, collapsed, expand] = useCollapsibleList(
+    sortedAndFilteredFields,
+    5,
+    props.collapsed ?? false,
+  );
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -439,6 +447,9 @@ export function GraphQLFields(props: {
                 ) : null}
                 <span className="mr-1">:</span>
                 <GraphQLTypeAsLink className="font-semibold text-gray-400" type={field.type} />
+                {field.isDeprecated ? (
+                  <span className="ml-2 text-xs font-semibold text-gray-400">@deprecated</span>
+                ) : null}
               </div>
               <div className="flex flex-row items-center">
                 {field.supergraphMetadata ? (

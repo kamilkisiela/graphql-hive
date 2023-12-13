@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { GraphQLFields, GraphQLTypeCard } from './common';
 
@@ -26,6 +27,7 @@ export function GraphQLObjectTypeComponent(props: {
   projectCleanId: string;
   targetCleanId: string;
 }) {
+  const router = useRouter();
   const ttype = useFragment(GraphQLObjectTypeComponent_TypeFragment, props.type);
   return (
     <GraphQLTypeCard
@@ -46,6 +48,7 @@ export function GraphQLObjectTypeComponent(props: {
         targetCleanId={props.targetCleanId}
         projectCleanId={props.projectCleanId}
         organizationCleanId={props.organizationCleanId}
+        filterDeprecated={router.query.deprecated === 'true'}
       />
     </GraphQLTypeCard>
   );
