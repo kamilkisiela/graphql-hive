@@ -3855,23 +3855,20 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             , "schema_change_id"
             , "schema_change"
           )
-          VALUES ${sql.join(
-            schemaCheck.breakingSchemaChanges.map(
-              change =>
-                sql`(
-                  ${schemaCheck.targetId}
-                  , ${schemaCheck.contextId}
-                  , ${change.id}
-                  , ${sql.jsonb(
-                    toSerializableSchemaChange({
-                      ...change,
-                      // We enhance the approved schema changes with some metadata that can be displayed on the UI
-                      approvalMetadata,
-                    }),
-                  )}
-              )`,
-            ),
-            sql`,`,
+          SELECT * FROM ${sql.unnest(
+            schemaCheck.breakingSchemaChanges.map(change => [
+              schemaCheck.targetId,
+              schemaCheck.contextId ?? null,
+              change.id,
+              JSON.stringify(
+                toSerializableSchemaChange({
+                  ...change,
+                  // We enhance the approved schema changes with some metadata that can be displayed on the UI
+                  approvalMetadata,
+                }),
+              ),
+            ]),
+            ['uuid', 'text', 'text', 'jsonb'],
           )}
           ON CONFLICT ("target_id", "context_id", "schema_change_id") DO NOTHING
         `);
@@ -4447,19 +4444,20 @@ async function insertSchemaVersionChanges(
       "severity_level",
       "meta",
       "is_safe_based_on_usage"
-    ) VALUES ${sql.join(
-      args.changes.map(
-        change =>
-          // Note: change.criticality.level is actually a computed value from meta
-          sql`(
-            ${args.versionId},
-            ${change.type},
-            ${change.criticality},
-            ${JSON.stringify(change.meta)}::jsonb,
-            ${change.isSafeBasedOnUsage ?? false}
-          )`,
+    )
+    SELECT * FROM
+    ${sql.unnest(
+      args.changes.map(change =>
+        // Note: change.criticality.level is actually a computed value from meta
+        [
+          args.versionId,
+          change.type,
+          change.criticality,
+          JSON.stringify(change.meta),
+          change.isSafeBasedOnUsage ?? false,
+        ],
       ),
-      sql`\n,`,
+      ['uuid', 'text', 'text', 'jsonb', 'bool'],
     )}
   `);
 }

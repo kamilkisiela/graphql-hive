@@ -1,4 +1,6 @@
+import NextImage from 'next/image'
 import { Callout } from '@theguild/components'
+import diagram from '../../../../public/docs/pages/self-hosting/diagram.png'
 
 # Self-Hosting Hive
 
@@ -11,7 +13,7 @@ and open-source. You can find the full
 
 The following features are currently unavailable when self-hosting:
 
-- CDN (high-availability)
+- High-Availability CDN (a replacement is available)
 - Billing (payment integration)
 - Usage rate-limiting and usage-estimation
 
@@ -27,6 +29,91 @@ All the services required for running GraphQL Hive are published to the GitHub c
 
 Please make sure to install the Docker daemon as well as `docker-compose` on your machine before
 proceeding.
+
+## Self-Hosting Architecture
+
+When self-hosting GraphQL Hive, you are responsible for running and maintaining the following
+components:
+
+- [PostgreSQL database](https://www.postgresql.org/)
+- [Kafka](https://kafka.apache.org/) (or any other Kafka-compatible solution, like
+  [Azure Event Hubs](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-about))
+- [ClickHouse database](https://clickhouse.com/)
+- [Redis](https://redis.io/)
+- [SuperTokens instance](https://supertokens.com/)
+- [S3 storage](https://aws.amazon.com/s3/) (or any other S3-compatible solution, like
+  [minio](https://min.io/) or [CloudFlare R2](https://www.cloudflare.com/developer-platform/r2/))
+- Hive microservices
+
+<Callout type="info">
+The defualt configuration of the self-hosted environment comes with a single instance of each database.
+
+For production environments, we recommend replacing the in-cluster databases (PostgreSQL, Kafka and
+ClickHouse) and storage (S3) with managed database/storage (Cloud-based or in-house).
+
+[Avoid running databases in a containerized environment](https://patrobinson.github.io/2016/11/07/thou-shalt-not-run-a-database-inside-a-container/).
+
+</Callout>
+
+### Architecture Diagram
+
+The following diagram shows the architecture of a self-hosted GraphQL Hive instance:
+
+<NextImage
+  alt="Self-hosting diagram"
+  src={diagram}
+  className="mt-10 w-full rounded-lg drop-shadow-md"
+/>
+
+### Services Overview
+
+> The dependencies between the different services are described in the
+> [`docker-compose.community.yml`](https://github.com/kamilkisiela/graphql-hive/blob/main/docker/docker-compose.community.yml)
+> file.
+
+#### Databases / Storage
+
+- **PostgreSQL database**: stores all core data, including: users, GraphQL schemas, schema checks,
+  projects, targets, organizations and configurations.
+- **Redis**: deployed as in-cluster, used for mainly for short-term caching.
+- **ClickHouse database**: stores all GraphQL operations usage data.
+- **Kafka**: high-throughput message queue, used for sending usage data to the usage-ingestor
+  service.
+- **S3 storage**: used for storing GraphQL schema artifacts (e.g. GraphQL SDL / Supergraph SDL and
+  CDN access tokens).
+
+#### Microservices
+
+- **SuperTokens**: an open-source project used for authentication and authorization.
+- `webapp`: the main GraphQL Hive web application.
+- `server`: the main GraphQL Hive server, responsible for serving the GraphQL API and orchestrating
+  calls to other services.
+- **CDN**: a custom CDN service, responsible for serving the GraphQL schema artifacts. In
+  self-hosted architecture, the CDN is provided as part of the `server`.
+- `schema`: the GraphQL Hive schema service, responsible for validating, composing and building
+  GraphQL schemas.
+- `tokens`: the GraphQL Hive tokens service, responsible for generating and validating tokens.
+- `usage`: the GraphQL Hive usage service, responsible for receiving usage data from a running
+  GraphQL server, and prepare them for processing.
+- `usage-ingestor`: the GraphQL Hive usage-ingestor service, responsible for processing usage data
+  and storing them in ClickHouse.
+- `emails`: the GraphQL Hive emails service, responsible for sending emails.
+- `webhooks`: the GraphQL Hive webhooks service, responsible for sending webhooks to external
+  services.
+- `policy`: the GraphQL Hive policy service, responsible for validating and enforcing schema
+  policies.
+
+#### Utility services
+
+In addition to the core services and databases, the default self-hosted architecture comes with the
+following utility services:
+
+- `zookeeper`: a centralized service and is used to maintain naming and configuration data for
+  Kafka.
+- `s3_provision_buckets`: a utility container that is used to provision the required S3 buckets.
+- `s3_reverse_proxy`: a utility container that is used to proxy requests to the S3 storage.
+- `migrations`: a utility container that is used to run database migrations for Hive's application
+  (both PostgreSQL and Clickhouse).
 
 ## Quick Start Video
 

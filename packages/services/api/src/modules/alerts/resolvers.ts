@@ -42,11 +42,11 @@ export const resolvers: AlertsModule.Resolvers = {
 
       return {
         ok: {
-          updatedProject: injector.get(ProjectManager).getProject({
+          updatedProject: await injector.get(ProjectManager).getProject({
             organization: organizationId,
             project: projectId,
           }),
-          addedAlertChannel: injector.get(AlertsManager).addChannel({
+          addedAlertChannel: await injector.get(AlertsManager).addChannel({
             organization: organizationId,
             project: projectId,
             name: input.name,

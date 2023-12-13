@@ -85,9 +85,10 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
 
   async sendChannelConfirmation(input: ChannelConfirmationInput) {
     this.logger.debug(
-      `Sending Channel Confirmation over Slack (organization=%s, project=%s)`,
+      `Sending Channel Confirmation over Slack (organization=%s, project=%s, channel=%s)`,
       input.event.organization.id,
       input.event.project.id,
+      input.channel.slackChannel,
     );
 
     const token = input.integrations.slack.token;
