@@ -177,9 +177,14 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
           ) as OperationDefinitionNode;
           providedOperationName = args.operationName || rootOperation.name?.value;
           const operationName = providedOperationName || 'anonymous';
-
+          // Check if operationName is a match with any string or regex in excludeSet
+          const isMatch = Array.from(excludeSet).some(excludingValue =>
+            excludingValue instanceof RegExp
+              ? excludingValue.test(operationName)
+              : operationName === excludingValue,
+          );
           if (
-            !excludeSet.has(operationName) &&
+            !isMatch &&
             shouldInclude({
               operationName,
               document,
