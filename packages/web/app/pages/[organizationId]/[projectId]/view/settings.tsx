@@ -8,6 +8,7 @@ import { authenticated } from '@/components/authenticated-container';
 import { Page, ProjectLayout } from '@/components/layouts/project';
 import { ExternalCompositionSettings } from '@/components/project/settings/external-composition';
 import { ModelMigrationSettings } from '@/components/project/settings/model-migration';
+import { NativeCompositionSettings } from '@/components/project/settings/native-composition';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -194,6 +195,7 @@ const ProjectSettingsPage_OrganizationFragment = graphql(`
       ...CanAccessProject_MemberFragment
     }
     ...ExternalCompositionSettings_OrganizationFragment
+    ...NativeCompositionSettings_OrganizationFragment
   }
 `);
 
@@ -204,6 +206,7 @@ const ProjectSettingsPage_ProjectFragment = graphql(`
     isProjectNameInGitHubCheckEnabled
     ...ModelMigrationSettings_ProjectFragment
     ...ExternalCompositionSettings_ProjectFragment
+    ...NativeCompositionSettings_ProjectFragment
   }
 `);
 
@@ -362,6 +365,10 @@ function ProjectSettingsContent() {
 
                 {project.type === ProjectType.Federation ? (
                   <ExternalCompositionSettings project={project} organization={organization} />
+                ) : null}
+
+                {project.type === ProjectType.Federation ? (
+                  <NativeCompositionSettings project={project} organization={organization} />
                 ) : null}
 
                 {canAccessProject(ProjectAccessScope.Delete, organization.me) && (

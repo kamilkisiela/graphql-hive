@@ -3,7 +3,7 @@ import { useFormik } from 'formik';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DocsLink, DocsNote, Input, Spinner, Switch, Tooltip } from '@/components/v2';
 import { ProductUpdatesLink } from '@/components/v2/docs-note';
 import { FragmentType, graphql, useFragment } from '@/gql';
@@ -307,10 +307,6 @@ export const ExternalCompositionSettings = (props: {
     [disableComposition, setEnabled, notify],
   );
 
-  if (project.isNativeFederationEnabled) {
-    return null;
-  }
-
   const externalCompositionConfig = projectQuery.data?.project?.externalSchemaComposition;
   const initialEnabled = !!externalCompositionConfig;
   const isEnabled = typeof enabled === 'boolean' ? enabled : initialEnabled;
@@ -335,13 +331,14 @@ export const ExternalCompositionSettings = (props: {
             )}
           </div>
         </CardTitle>
+        <CardDescription>
+          <ProductUpdatesLink href="#native-composition">
+            You can enable native Apollo Federation v2 support in Hive
+          </ProductUpdatesLink>
+        </CardDescription>
       </CardHeader>
 
       <CardContent>
-        <ProductUpdatesLink href="2023-10-10-native-federation-2">
-          We're rolling out native Apollo Federation support in Hive!
-        </ProductUpdatesLink>
-
         <DocsNote>
           External Schema Composition is required for using Apollo Federation 2 with Hive.
           <br />

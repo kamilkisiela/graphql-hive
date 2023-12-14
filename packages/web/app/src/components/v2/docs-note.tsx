@@ -59,19 +59,26 @@ export const ProductUpdatesLink = ({
   children?: React.ReactNode;
   className?: string;
 }) => {
-  const fullUrl = href.startsWith('http') ? href : getProductUpdatesUrl(href);
+  const fullUrl = href.startsWith('http')
+    ? href
+    : href.startsWith('#')
+      ? href
+      : getProductUpdatesUrl(href);
+
+  const isExternal = !href.startsWith('#');
 
   return (
     <Button variant="link" className={cn('p-0 text-blue-500', className)} asChild>
       <NextLink
         href={fullUrl}
-        target="_blank"
+        target={isExternal ? '_blank' : undefined}
         rel="noreferrer"
         className="font-medium transition-colors hover:underline"
+        scroll={false}
       >
         {icon ?? <Megaphone className="mr-2 h-4 w-4" />}
         {children}
-        <ExternalLinkIcon className="inline pl-1" />
+        {isExternal ? <ExternalLinkIcon className="inline pl-1" /> : null}
       </NextLink>
     </Button>
   );

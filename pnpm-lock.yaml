@@ -586,6 +586,9 @@ importers:
       '@theguild/buddy':
         specifier: 0.1.0
         version: 0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)
+      '@theguild/federation-composition':
+        specifier: 0.4.0
+        version: 0.4.0(graphql@16.8.1)
       '@trpc/client':
         specifier: 10.44.1
         version: 10.44.1(@trpc/server@10.44.1)
