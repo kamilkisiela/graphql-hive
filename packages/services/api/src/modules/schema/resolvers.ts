@@ -160,17 +160,32 @@ export const resolvers: SchemaModule.Resolvers = {
         injector.get(TargetManager).getTargetIdByToken(),
       ]);
 
-      const result = await injector.get(SchemaPublisher).check({
-        ...input,
-        service: input.service?.toLowerCase(),
-        organization,
-        project,
-        target,
-      });
+      const [result, settings, isCollectingOperations] = await Promise.all([
+        injector.get(SchemaPublisher).check({
+          ...input,
+          service: input.service?.toLowerCase(),
+          organization,
+          project,
+          target,
+        }),
+        injector.get(TargetManager).getTargetSettings({
+          organization,
+          project,
+          target,
+          unsafe__itIsMeInspector: true,
+        }),
+        injector.get(OperationsManager).hasCollectedOperations({
+          organization,
+          project,
+          target,
+        }),
+      ]);
 
       if ('changes' in result && result.changes) {
         return {
           ...result,
+          isCollectingOperations,
+          isConditionalBreakingChangesEnabled: settings.validation.enabled === true,
           changes: result.changes,
           errors:
             result.errors?.map(error => ({
