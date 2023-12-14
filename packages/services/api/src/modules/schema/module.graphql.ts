@@ -382,6 +382,8 @@ export default gql`
     changes: SchemaChangeConnection
     warnings: SchemaWarningConnection
     schemaCheck: SchemaCheck
+    isCollectingOperations: Boolean!
+    isConditionalBreakingChangesEnabled: Boolean!
   }
 
   type SchemaCheckWarning {
@@ -397,6 +399,8 @@ export default gql`
     errors: SchemaErrorConnection!
     warnings: SchemaWarningConnection
     schemaCheck: SchemaCheck
+    isCollectingOperations: Boolean!
+    isConditionalBreakingChangesEnabled: Boolean!
   }
 
   type GitHubSchemaCheckSuccess {

@@ -18,6 +18,8 @@ const schemaCheckMutation = graphql(/* GraphQL */ `
       ... on SchemaCheckSuccess @skip(if: $usesGitHubApp) {
         valid
         initial
+        isCollectingOperations
+        isConditionalBreakingChangesEnabled
         warnings {
           nodes {
             message
@@ -41,6 +43,8 @@ const schemaCheckMutation = graphql(/* GraphQL */ `
       }
       ... on SchemaCheckError @skip(if: $usesGitHubApp) {
         valid
+        isCollectingOperations
+        isConditionalBreakingChangesEnabled
         changes {
           nodes {
             message(withSafeBasedOnUsageNote: false)
@@ -240,6 +244,19 @@ export default class SchemaCheck extends Command {
         if (result.schemaCheck.schemaCheck?.webUrl) {
           this.log(`View full report:\n${result.schemaCheck.schemaCheck.webUrl}`);
         }
+
+        if (
+          result.schemaCheck.isCollectingOperations &&
+          !result.schemaCheck.isConditionalBreakingChangesEnabled
+        ) {
+          this.log('');
+          this.info(
+            'Improve the detection of breaking changes as described in the following link:',
+          );
+          this.log(
+            'https://the-guild.dev/graphql/hive/docs/management/targets#conditional-breaking-changes',
+          );
+        }
       } else if (result.schemaCheck.__typename === 'SchemaCheckError') {
         const changes = result.schemaCheck.changes;
         const errors = result.schemaCheck.errors;
@@ -259,6 +276,19 @@ export default class SchemaCheck extends Command {
         if (result.schemaCheck.schemaCheck?.webUrl) {
           this.log('');
           this.log(`View full report:\n${result.schemaCheck.schemaCheck.webUrl}`);
+        }
+
+        if (
+          result.schemaCheck.isCollectingOperations &&
+          !result.schemaCheck.isConditionalBreakingChangesEnabled
+        ) {
+          this.log('');
+          this.info(
+            'Improve the detection of breaking changes as described in the following link:',
+          );
+          this.log(
+            'https://the-guild.dev/graphql/hive/docs/management/targets#conditional-breaking-changes',
+          );
         }
 
         this.log('');
