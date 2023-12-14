@@ -16,6 +16,7 @@ export default gql`
     schemaDelete(input: SchemaDeleteInput!): SchemaDeleteResult!
     updateSchemaVersionStatus(input: SchemaVersionUpdateInput!): SchemaVersion!
     updateBaseSchema(input: UpdateBaseSchemaInput!): UpdateBaseSchemaResult!
+    updateNativeFederation(input: UpdateNativeFederationInput!): UpdateNativeFederationResult!
     enableExternalSchemaComposition(
       input: EnableExternalSchemaCompositionInput!
     ): EnableExternalSchemaCompositionResult!
@@ -53,6 +54,24 @@ export default gql`
     testExternalSchemaComposition(
       selector: TestExternalSchemaCompositionInput!
     ): TestExternalSchemaCompositionResult!
+  }
+
+  input UpdateNativeFederationInput {
+    organization: ID!
+    project: ID!
+    enabled: Boolean!
+  }
+
+  """
+  @oneOf
+  """
+  type UpdateNativeFederationResult {
+    ok: Project
+    error: UpdateNativeFederationError
+  }
+
+  type UpdateNativeFederationError implements Error {
+    message: String!
   }
 
   input DisableExternalSchemaCompositionInput {
@@ -132,10 +151,18 @@ export default gql`
     registryModel: RegistryModel!
     schemaVersionsCount(period: DateRangeInput): Int!
     isNativeFederationEnabled: Boolean!
+    nativeFederationCompatibility: NativeFederationCompatibilityStatus!
   }
 
   extend type Target {
     schemaVersionsCount(period: DateRangeInput): Int!
+  }
+
+  enum NativeFederationCompatibilityStatus {
+    COMPATIBLE
+    INCOMPATIBLE
+    UNKNOWN
+    NOT_APPLICABLE
   }
 
   type EnableExternalSchemaCompositionError implements Error {

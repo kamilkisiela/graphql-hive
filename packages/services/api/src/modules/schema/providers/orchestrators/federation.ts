@@ -67,7 +67,10 @@ export class FederationOrchestrator implements Orchestrator {
       native: boolean;
     },
   ) {
-    this.logger.debug('Composing and Validating Federated Schemas');
+    this.logger.debug(
+      'Composing and Validating Federated Schemas (method=%s)',
+      config.native ? 'native' : config.external.enabled ? 'external' : 'v1',
+    );
     const result = await this.schemaService.composeAndValidate.mutate({
       type: 'federation',
       schemas: schemas.map(s => ({

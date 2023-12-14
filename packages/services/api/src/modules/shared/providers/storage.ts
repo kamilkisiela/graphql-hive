@@ -257,6 +257,12 @@ export interface Storage {
     _: ProjectSelector & Pick<Project, 'name' | 'cleanId'> & { user: string },
   ): Promise<Project | never>;
 
+  updateNativeSchemaComposition(
+    _: ProjectSelector & {
+      enabled: boolean;
+    },
+  ): Promise<Project>;
+
   enableExternalSchemaComposition(
     _: ProjectSelector & {
       endpoint: string;

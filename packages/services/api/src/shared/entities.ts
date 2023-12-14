@@ -157,6 +157,13 @@ export enum ProjectType {
   SINGLE = 'SINGLE',
 }
 
+export enum NativeFederationCompatibilityStatus {
+  COMPATIBLE = 'COMPATIBLE',
+  INCOMPATIBLE = 'INCOMPATIBLE',
+  UNKNOWN = 'UNKNOWN',
+  NOT_APPLICABLE = 'NOT_APPLICABLE',
+}
+
 export interface OrganizationGetStarted {
   id: string;
   creatingProject: boolean;

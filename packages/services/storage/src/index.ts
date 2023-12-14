@@ -1614,6 +1614,29 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `),
       );
     },
+    async updateNativeSchemaComposition({ organization, project, enabled }) {
+      return transformProject(
+        await pool.transaction(async t => {
+          await t.one(sql`
+            UPDATE organizations
+            SET
+              feature_flags = ${sql.jsonb({
+                compareToPreviousComposableVersion: true,
+              })}
+            WHERE id = ${organization}
+            RETURNING id
+          `);
+
+          return await t.one<projects>(sql`
+            UPDATE projects
+            SET
+              native_federation = ${enabled}
+            WHERE id = ${project}
+            RETURNING *
+          `);
+        }),
+      );
+    },
     async enableExternalSchemaComposition({ project, endpoint, encryptedSecret }) {
       return transformProject(
         await pool.one<Slonik<projects>>(sql`
