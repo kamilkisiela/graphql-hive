@@ -812,8 +812,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 10.2.3
-        version: 10.2.3
+        specifier: 10.3.0
+        version: 10.3.0
       sendmail:
         specifier: 1.6.1
         version: 1.6.1
@@ -887,8 +887,8 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       pino-pretty:
-        specifier: 10.2.3
-        version: 10.2.3
+        specifier: 10.3.0
+        version: 10.3.0
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -929,8 +929,8 @@ importers:
         specifier: 12.6.1
         version: 12.6.1
       pino-pretty:
-        specifier: 10.2.3
-        version: 10.2.3
+        specifier: 10.3.0
+        version: 10.3.0
       reflect-metadata:
         specifier: 0.1.14
         version: 0.1.14
@@ -1001,8 +1001,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 10.2.3
-        version: 10.2.3
+        specifier: 10.3.0
+        version: 10.3.0
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -1097,8 +1097,8 @@ importers:
         specifier: 3.1.1
         version: 3.1.1
       pino-pretty:
-        specifier: 10.2.3
-        version: 10.2.3
+        specifier: 10.3.0
+        version: 10.3.0
       prom-client:
         specifier: 15.0.0
         version: 15.0.0
@@ -1236,8 +1236,8 @@ importers:
         specifier: 12.6.1
         version: 12.6.1
       pino-pretty:
-        specifier: 10.2.3
-        version: 10.2.3
+        specifier: 10.3.0
+        version: 10.3.0
       reflect-metadata:
         specifier: 0.1.14
         version: 0.1.14
@@ -1281,8 +1281,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 10.2.3
-        version: 10.2.3
+        specifier: 10.3.0
+        version: 10.3.0
       reflect-metadata:
         specifier: 0.1.14
         version: 0.1.14
@@ -1335,8 +1335,8 @@ importers:
         specifier: 2.2.4
         version: 2.2.4
       pino-pretty:
-        specifier: 10.2.3
-        version: 10.2.3
+        specifier: 10.3.0
+        version: 10.3.0
       tiny-lru:
         specifier: 8.0.2
         version: 8.0.2
@@ -1374,8 +1374,8 @@ importers:
         specifier: 12.6.1
         version: 12.6.1
       pino-pretty:
-        specifier: 10.2.3
-        version: 10.2.3
+        specifier: 10.3.0
+        version: 10.3.0
       reflect-metadata:
         specifier: 0.1.14
         version: 0.1.14
@@ -1419,8 +1419,8 @@ importers:
         specifier: 2.2.4
         version: 2.2.4
       pino-pretty:
-        specifier: 10.2.3
-        version: 10.2.3
+        specifier: 10.3.0
+        version: 10.3.0
       tiny-lru:
         specifier: 8.0.2
         version: 8.0.2
@@ -1461,8 +1461,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 10.2.3
-        version: 10.2.3
+        specifier: 10.3.0
+        version: 10.3.0
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -1804,8 +1804,8 @@ importers:
         specifier: 0.19.9
         version: 0.19.9
       pino-pretty:
-        specifier: 10.2.3
-        version: 10.2.3
+        specifier: 10.3.0
+        version: 10.3.0
       postcss:
         specifier: 8.4.32
         version: 8.4.32
@@ -21335,11 +21335,8 @@ packages:
     resolution: {integrity: sha512-2bsegYkkHO+h/9MGbn6KWcE45cHZgPANo5LXF7EvWdT0yT2EguSVO1nDgU5c8+ZOPwp2vMNa7YFsJhVcDR9Sdg==}
     dev: false
 
-  /help-me@4.2.0:
-    resolution: {integrity: sha512-TAOnTB8Tz5Dw8penUuzHVrKNKlCIbwwbHnXraNJxPwf8LRtE2HlM84RYuezMFcwOJmoYOCWVDyJ8TQGxn9PgxA==}
-    dependencies:
-      glob: 8.1.0
-      readable-stream: 3.6.0
+  /help-me@5.0.0:
+    resolution: {integrity: sha512-7xgomUX6ADmcYzFik0HzAxh/73YlKR9bmFzf51CZwR+b6YtzU2m0u49hQCqV6SvlqIqsaxovfwdvbnsw3b/zpg==}
     dev: true
 
   /hey-listen@1.0.8:
@@ -26841,15 +26838,15 @@ packages:
       process-warning: 2.2.0
     dev: false
 
-  /pino-pretty@10.2.3:
-    resolution: {integrity: sha512-4jfIUc8TC1GPUfDyMSlW1STeORqkoxec71yhxIpLDQapUu8WOuoz2TTCoidrIssyz78LZC69whBMPIKCMbi3cw==}
+  /pino-pretty@10.3.0:
+    resolution: {integrity: sha512-JthvQW289q3454mhM3/38wFYGWPiBMR28T3CpDNABzoTQOje9UKS7XCJQSnjWF9LQGQkGd8D7h0oq+qwiM3jFA==}
     hasBin: true
     dependencies:
       colorette: 2.0.20
       dateformat: 4.6.3
       fast-copy: 3.0.0
       fast-safe-stringify: 2.1.1
-      help-me: 4.2.0
+      help-me: 5.0.0
       joycon: 3.1.1
       minimist: 1.2.8
       on-exit-leak-free: 2.1.0
@@ -26857,7 +26854,7 @@ packages:
       pump: 3.0.0
       readable-stream: 4.4.0
       secure-json-parse: 2.5.0
-      sonic-boom: 3.2.1
+      sonic-boom: 3.7.0
       strip-json-comments: 3.1.1
     dev: true
 
@@ -28394,17 +28391,6 @@ packages:
       string_decoder: 0.10.31
     dev: true
 
-  /readable-stream@2.3.7:
-    resolution: {integrity: sha512-Ebho8K4jIbHAxnuxi7o42OrZgF/ZTNcsZj6nRKyUmkhLFq8CHItp/fy6hQZuZmP/n3yZ9VBUbp4zz/mX8hmYPw==}
-    dependencies:
-      core-util-is: 1.0.3
-      inherits: 2.0.4
-      isarray: 1.0.0
-      process-nextick-args: 2.0.1
-      safe-buffer: 5.1.2
-      string_decoder: 1.1.1
-      util-deprecate: 1.0.2
-
   /readable-stream@2.3.8:
     resolution: {integrity: sha512-8p0AUk4XODgIewSi0l8Epjs+EVnWiK7NoDIEGU0HhE7+ZyY8D1IMY7odu5lRrFXGg71L15KG8QrPmum45RTtdA==}
     dependencies:
@@ -29716,17 +29702,10 @@ packages:
       flatstr: 1.0.12
     dev: true
 
-  /sonic-boom@3.2.1:
-    resolution: {integrity: sha512-iITeTHxy3B9FGu8aVdiDXUVAcHMF9Ss0cCsAOo2HfCrmVGT3/DT5oYaeu0M/YKZDlKTvChEyPq0zI9Hf33EX6A==}
-    dependencies:
-      atomic-sleep: 1.0.0
-    dev: true
-
   /sonic-boom@3.7.0:
     resolution: {integrity: sha512-IudtNvSqA/ObjN97tfgNmOKyDOs4dNcg4cUUsHDebqsgb8wGBBwb31LIgShNO8fye0dFI52X1+tFoKKI6Rq1Gg==}
     dependencies:
       atomic-sleep: 1.0.0
-    dev: false
 
   /sort-keys@4.2.0:
     resolution: {integrity: sha512-aUYIEU/UviqPgc8mHR6IW1EGxkAXpeRETYcrzg8cLAvUPZcpAlleSXHV2mY7G12GphSH6Gzv+4MMVSSkbdteHg==}
@@ -30763,7 +30742,7 @@ packages:
   /through2@2.0.5:
     resolution: {integrity: sha512-/mrRod8xqpA+IHSLyGCQ2s8SPHiCDEeQJSep1jqLYeEUClOFG2Qsh+4FU6G9VeqpZnGW/Su8LQGc4YKni5rYSQ==}
     dependencies:
-      readable-stream: 2.3.7
+      readable-stream: 2.3.8
       xtend: 4.0.2
 
   /through2@3.0.2:
