@@ -185,6 +185,8 @@ export function NativeCompositionSettings(props: {
                       Open Source composition library
                     </Link>{' '}
                     is not yet compatible with subgraphs of your project. We're working on it!
+                    <br />
+                    Please reach out to us to explore solutions for addressing this issue.
                   </>
                 ) : null}
                 {project.nativeFederationCompatibility ===
