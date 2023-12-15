@@ -126,7 +126,7 @@
     "@types/react-window": "1.8.8",
     "autoprefixer": "10.4.16",
     "esbuild": "0.19.9",
-    "pino-pretty": "10.2.3",
+    "pino-pretty": "10.3.0",
     "postcss": "8.4.32",
     "postcss-loader": "7.3.3",
     "rimraf": "4.4.1",
