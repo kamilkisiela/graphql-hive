@@ -8,6 +8,10 @@
       "enabled": false
     },
     {
+      "groupName": "graphiql",
+      "matchPackageNames": ["@graphiql/react", "@graphiql/toolkit", "graphiql"]
+    },
+    {
       "groupName": "graphql-armor",
       "matchPackagePrefixes": ["@escape.tech/graphql-armor-"]
     },
@@ -39,7 +43,13 @@
     },
     {
       "groupName": "supertokens",
-      "matchPackagePrefixes": ["supertokens"]
+      "matchPackageNames": [
+        "supertokens",
+        "supertokens-node",
+        "supertokens-react",
+        "supertokens-auth-react",
+        "registry.supertokens.io/supertokens/supertokens-postgresql"
+      ]
     },
     {
       "groupName": "apollo-router",
