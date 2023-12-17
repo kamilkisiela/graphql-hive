@@ -89,19 +89,19 @@ jobs:
     steps:
       - name: Pull artifact for macos
         if: matrix.os == 'macos-latest'
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: hive-cli-darwin-x64
 
       - name: Pull artifact for ubuntu
         if: matrix.os == 'ubuntu-latest'
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: hive-cli-linux-x64
 
       - name: Pull artifact for windows
         if: matrix.os == 'windows-latest'
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: hive-cli-windows-x64
 
