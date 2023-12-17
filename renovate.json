@@ -12,6 +12,10 @@
       "matchPackageNames": ["@graphiql/react", "@graphiql/toolkit", "graphiql"]
     },
     {
+      "groupName": "gh-actions/artifact",
+      "matchPackageNames": ["actions/download-artifact", "actions/upload-artifact"]
+    },
+    {
       "groupName": "graphql-armor",
       "matchPackagePrefixes": ["@escape.tech/graphql-armor-"]
     },
