@@ -66,109 +66,109 @@ import {
 } from './schema-change-meta';
 
 // prettier-ignore
-const FieldArgumentDescriptionChangedLiteral = z.literal("FIELD_ARGUMENT_DESCRIPTION_CHANGED" satisfies `${ChangeType.FieldArgumentDescriptionChanged}`)
+const FieldArgumentDescriptionChangedLiteral = z.literal("FIELD_ARGUMENT_DESCRIPTION_CHANGED" satisfies `${ typeof ChangeType.FieldArgumentDescriptionChanged}`)
 // prettier-ignore
-const FieldArgumentDefaultChangedLiteral =  z.literal("FIELD_ARGUMENT_DEFAULT_CHANGED" satisfies `${ChangeType.FieldArgumentDefaultChanged}`)
+const FieldArgumentDefaultChangedLiteral =  z.literal("FIELD_ARGUMENT_DEFAULT_CHANGED" satisfies `${typeof ChangeType.FieldArgumentDefaultChanged}`)
 // prettier-ignore
-const FieldArgumentTypeChangedLiteral =  z.literal("FIELD_ARGUMENT_TYPE_CHANGED" satisfies `${ChangeType.FieldArgumentTypeChanged}`)
+const FieldArgumentTypeChangedLiteral =  z.literal("FIELD_ARGUMENT_TYPE_CHANGED" satisfies `${typeof ChangeType.FieldArgumentTypeChanged}`)
 // prettier-ignore
-const DirectiveRemovedLiteral =  z.literal("DIRECTIVE_REMOVED" satisfies `${ChangeType.DirectiveRemoved}`)
+const DirectiveRemovedLiteral =  z.literal("DIRECTIVE_REMOVED" satisfies `${typeof ChangeType.DirectiveRemoved}`)
 // prettier-ignore
-const DirectiveAddedLiteral =  z.literal("DIRECTIVE_ADDED" satisfies `${ChangeType.DirectiveAdded}`)
+const DirectiveAddedLiteral =  z.literal("DIRECTIVE_ADDED" satisfies `${typeof ChangeType.DirectiveAdded}`)
 // prettier-ignore
-const DirectiveDescriptionChangedLiteral =  z.literal("DIRECTIVE_DESCRIPTION_CHANGED" satisfies `${ChangeType.DirectiveDescriptionChanged}`)
+const DirectiveDescriptionChangedLiteral =  z.literal("DIRECTIVE_DESCRIPTION_CHANGED" satisfies `${typeof ChangeType.DirectiveDescriptionChanged}`)
 // prettier-ignore
-const DirectiveLocationAddedLiteral =  z.literal("DIRECTIVE_LOCATION_ADDED" satisfies `${ChangeType.DirectiveLocationAdded}`)
+const DirectiveLocationAddedLiteral =  z.literal("DIRECTIVE_LOCATION_ADDED" satisfies `${typeof ChangeType.DirectiveLocationAdded}`)
 // prettier-ignore
-const DirectiveLocationRemovedLiteral =  z.literal("DIRECTIVE_LOCATION_REMOVED" satisfies `${ChangeType.DirectiveLocationRemoved}`)
+const DirectiveLocationRemovedLiteral =  z.literal("DIRECTIVE_LOCATION_REMOVED" satisfies `${typeof ChangeType.DirectiveLocationRemoved}`)
 // prettier-ignore
-const DirectiveArgumentAddedLiteral =  z.literal("DIRECTIVE_ARGUMENT_ADDED" satisfies `${ChangeType.DirectiveArgumentAdded}`)
+const DirectiveArgumentAddedLiteral =  z.literal("DIRECTIVE_ARGUMENT_ADDED" satisfies `${typeof ChangeType.DirectiveArgumentAdded}`)
 // prettier-ignore
-const DirectiveArgumentRemovedLiteral =  z.literal("DIRECTIVE_ARGUMENT_REMOVED" satisfies `${ChangeType.DirectiveArgumentRemoved}`)
+const DirectiveArgumentRemovedLiteral =  z.literal("DIRECTIVE_ARGUMENT_REMOVED" satisfies `${typeof ChangeType.DirectiveArgumentRemoved}`)
 // prettier-ignore
-const DirectiveArgumentDescriptionChangedLiteral =  z.literal("DIRECTIVE_ARGUMENT_DESCRIPTION_CHANGED" satisfies `${ChangeType.DirectiveArgumentDescriptionChanged}`)
+const DirectiveArgumentDescriptionChangedLiteral =  z.literal("DIRECTIVE_ARGUMENT_DESCRIPTION_CHANGED" satisfies `${typeof ChangeType.DirectiveArgumentDescriptionChanged}`)
 // prettier-ignore
-const DirectiveArgumentDefaultValueChangedLiteral =  z.literal("DIRECTIVE_ARGUMENT_DEFAULT_VALUE_CHANGED" satisfies `${ChangeType.DirectiveArgumentDefaultValueChanged}`)
+const DirectiveArgumentDefaultValueChangedLiteral =  z.literal("DIRECTIVE_ARGUMENT_DEFAULT_VALUE_CHANGED" satisfies `${typeof ChangeType.DirectiveArgumentDefaultValueChanged}`)
 // prettier-ignore
-const DirectiveArgumentTypeChangedLiteral =  z.literal("DIRECTIVE_ARGUMENT_TYPE_CHANGED" satisfies `${ChangeType.DirectiveArgumentTypeChanged}`)
+const DirectiveArgumentTypeChangedLiteral =  z.literal("DIRECTIVE_ARGUMENT_TYPE_CHANGED" satisfies `${typeof ChangeType.DirectiveArgumentTypeChanged}`)
 // prettier-ignore
-const EnumValueRemovedLiteral =  z.literal("ENUM_VALUE_REMOVED" satisfies `${ChangeType.EnumValueRemoved}`)
+const EnumValueRemovedLiteral =  z.literal("ENUM_VALUE_REMOVED" satisfies `${typeof ChangeType.EnumValueRemoved}`)
 // prettier-ignore
-const EnumValueAddedLiteral =  z.literal("ENUM_VALUE_ADDED" satisfies `${ChangeType.EnumValueAdded}`)
+const EnumValueAddedLiteral =  z.literal("ENUM_VALUE_ADDED" satisfies `${typeof ChangeType.EnumValueAdded}`)
 // prettier-ignore
-const EnumValueDescriptionChangedLiteral =  z.literal("ENUM_VALUE_DESCRIPTION_CHANGED" satisfies `${ChangeType.EnumValueDescriptionChanged}`)
+const EnumValueDescriptionChangedLiteral =  z.literal("ENUM_VALUE_DESCRIPTION_CHANGED" satisfies `${typeof ChangeType.EnumValueDescriptionChanged}`)
 // prettier-ignore
-const EnumValueDeprecationReasonChangedLiteral =  z.literal("ENUM_VALUE_DEPRECATION_REASON_CHANGED" satisfies `${ChangeType.EnumValueDeprecationReasonChanged}`)
+const EnumValueDeprecationReasonChangedLiteral =  z.literal("ENUM_VALUE_DEPRECATION_REASON_CHANGED" satisfies `${typeof ChangeType.EnumValueDeprecationReasonChanged}`)
 // prettier-ignore
-const EnumValueDeprecationReasonAddedLiteral =  z.literal("ENUM_VALUE_DEPRECATION_REASON_ADDED" satisfies `${ChangeType.EnumValueDeprecationReasonAdded}`)
+const EnumValueDeprecationReasonAddedLiteral =  z.literal("ENUM_VALUE_DEPRECATION_REASON_ADDED" satisfies `${typeof ChangeType.EnumValueDeprecationReasonAdded}`)
 // prettier-ignore
-const EnumValueDeprecationReasonRemovedLiteral =  z.literal("ENUM_VALUE_DEPRECATION_REASON_REMOVED" satisfies `${ChangeType.EnumValueDeprecationReasonRemoved}`)
+const EnumValueDeprecationReasonRemovedLiteral =  z.literal("ENUM_VALUE_DEPRECATION_REASON_REMOVED" satisfies `${typeof ChangeType.EnumValueDeprecationReasonRemoved}`)
 // prettier-ignore
-const FieldRemovedLiteral =  z.literal("FIELD_REMOVED" satisfies `${ChangeType.FieldRemoved}`)
+const FieldRemovedLiteral =  z.literal("FIELD_REMOVED" satisfies `${typeof ChangeType.FieldRemoved}`)
 // prettier-ignore
-const FieldAddedLiteral =  z.literal("FIELD_ADDED" satisfies `${ChangeType.FieldAdded}`)
+const FieldAddedLiteral =  z.literal("FIELD_ADDED" satisfies `${typeof ChangeType.FieldAdded}`)
 // prettier-ignore
-const FieldDescriptionChangedLiteral =  z.literal("FIELD_DESCRIPTION_CHANGED" satisfies `${ChangeType.FieldDescriptionChanged}`)
+const FieldDescriptionChangedLiteral =  z.literal("FIELD_DESCRIPTION_CHANGED" satisfies `${typeof ChangeType.FieldDescriptionChanged}`)
 // prettier-ignore
-const FieldDescriptionAddedLiteral =  z.literal("FIELD_DESCRIPTION_ADDED" satisfies `${ChangeType.FieldDescriptionAdded}`)
+const FieldDescriptionAddedLiteral =  z.literal("FIELD_DESCRIPTION_ADDED" satisfies `${typeof ChangeType.FieldDescriptionAdded}`)
 // prettier-ignore
-const FieldDescriptionRemovedLiteral =  z.literal("FIELD_DESCRIPTION_REMOVED" satisfies `${ChangeType.FieldDescriptionRemoved}`)
+const FieldDescriptionRemovedLiteral =  z.literal("FIELD_DESCRIPTION_REMOVED" satisfies `${typeof ChangeType.FieldDescriptionRemoved}`)
 // prettier-ignore
-const FieldDeprecationAddedLiteral =  z.literal("FIELD_DEPRECATION_ADDED" satisfies `${ChangeType.FieldDeprecationAdded}`)
+const FieldDeprecationAddedLiteral =  z.literal("FIELD_DEPRECATION_ADDED" satisfies `${typeof ChangeType.FieldDeprecationAdded}`)
 // prettier-ignore
-const FieldDeprecationRemovedLiteral =  z.literal("FIELD_DEPRECATION_REMOVED" satisfies `${ChangeType.FieldDeprecationRemoved}`)
+const FieldDeprecationRemovedLiteral =  z.literal("FIELD_DEPRECATION_REMOVED" satisfies `${typeof ChangeType.FieldDeprecationRemoved}`)
 // prettier-ignore
-const FieldDeprecationReasonChangedLiteral =  z.literal("FIELD_DEPRECATION_REASON_CHANGED" satisfies `${ChangeType.FieldDeprecationReasonChanged}`)
+const FieldDeprecationReasonChangedLiteral =  z.literal("FIELD_DEPRECATION_REASON_CHANGED" satisfies `${typeof ChangeType.FieldDeprecationReasonChanged}`)
 // prettier-ignore
-const FieldDeprecationReasonAddedLiteral =  z.literal("FIELD_DEPRECATION_REASON_ADDED" satisfies `${ChangeType.FieldDeprecationReasonAdded}`)
+const FieldDeprecationReasonAddedLiteral =  z.literal("FIELD_DEPRECATION_REASON_ADDED" satisfies `${typeof ChangeType.FieldDeprecationReasonAdded}`)
 // prettier-ignore
-const FieldDeprecationReasonRemovedLiteral =  z.literal("FIELD_DEPRECATION_REASON_REMOVED" satisfies `${ChangeType.FieldDeprecationReasonRemoved}`)
+const FieldDeprecationReasonRemovedLiteral =  z.literal("FIELD_DEPRECATION_REASON_REMOVED" satisfies `${typeof ChangeType.FieldDeprecationReasonRemoved}`)
 // prettier-ignore
-const FieldTypeChangedLiteral =  z.literal("FIELD_TYPE_CHANGED" satisfies `${ChangeType.FieldTypeChanged}`)
+const FieldTypeChangedLiteral =  z.literal("FIELD_TYPE_CHANGED" satisfies `${typeof ChangeType.FieldTypeChanged}`)
 // prettier-ignore
-const FieldArgumentAddedLiteral =  z.literal("FIELD_ARGUMENT_ADDED" satisfies `${ChangeType.FieldArgumentAdded}`)
+const FieldArgumentAddedLiteral =  z.literal("FIELD_ARGUMENT_ADDED" satisfies `${typeof ChangeType.FieldArgumentAdded}`)
 // prettier-ignore
-const FieldArgumentRemovedLiteral =  z.literal("FIELD_ARGUMENT_REMOVED" satisfies `${ChangeType.FieldArgumentRemoved}`)
+const FieldArgumentRemovedLiteral =  z.literal("FIELD_ARGUMENT_REMOVED" satisfies `${typeof ChangeType.FieldArgumentRemoved}`)
 // prettier-ignore
-const InputFieldRemovedLiteral =  z.literal("INPUT_FIELD_REMOVED" satisfies `${ChangeType.InputFieldRemoved}`)
+const InputFieldRemovedLiteral =  z.literal("INPUT_FIELD_REMOVED" satisfies `${typeof ChangeType.InputFieldRemoved}`)
 // prettier-ignore
-const InputFieldAddedLiteral =  z.literal("INPUT_FIELD_ADDED" satisfies `${ChangeType.InputFieldAdded}`)
+const InputFieldAddedLiteral =  z.literal("INPUT_FIELD_ADDED" satisfies `${typeof ChangeType.InputFieldAdded}`)
 // prettier-ignore
-const InputFieldDescriptionAddedLiteral =  z.literal("INPUT_FIELD_DESCRIPTION_ADDED" satisfies `${ChangeType.InputFieldDescriptionAdded}`)
+const InputFieldDescriptionAddedLiteral =  z.literal("INPUT_FIELD_DESCRIPTION_ADDED" satisfies `${typeof ChangeType.InputFieldDescriptionAdded}`)
 // prettier-ignore
-const InputFieldDescriptionRemovedLiteral =  z.literal("INPUT_FIELD_DESCRIPTION_REMOVED" satisfies `${ChangeType.InputFieldDescriptionRemoved}`)
+const InputFieldDescriptionRemovedLiteral =  z.literal("INPUT_FIELD_DESCRIPTION_REMOVED" satisfies `${typeof ChangeType.InputFieldDescriptionRemoved}`)
 // prettier-ignore
-const InputFieldDescriptionChangedLiteral =  z.literal("INPUT_FIELD_DESCRIPTION_CHANGED" satisfies `${ChangeType.InputFieldDescriptionChanged}`)
+const InputFieldDescriptionChangedLiteral =  z.literal("INPUT_FIELD_DESCRIPTION_CHANGED" satisfies `${typeof ChangeType.InputFieldDescriptionChanged}`)
 // prettier-ignore
-const InputFieldDefaultValueChangedLiteral =  z.literal("INPUT_FIELD_DEFAULT_VALUE_CHANGED" satisfies `${ChangeType.InputFieldDefaultValueChanged}`)
+const InputFieldDefaultValueChangedLiteral =  z.literal("INPUT_FIELD_DEFAULT_VALUE_CHANGED" satisfies `${typeof ChangeType.InputFieldDefaultValueChanged}`)
 // prettier-ignore
-const InputFieldTypeChangedLiteral =  z.literal("INPUT_FIELD_TYPE_CHANGED" satisfies `${ChangeType.InputFieldTypeChanged}`)
+const InputFieldTypeChangedLiteral =  z.literal("INPUT_FIELD_TYPE_CHANGED" satisfies `${typeof ChangeType.InputFieldTypeChanged}`)
 // prettier-ignore
-const ObjectTypeInterfaceAddedLiteral =  z.literal("OBJECT_TYPE_INTERFACE_ADDED" satisfies `${ChangeType.ObjectTypeInterfaceAdded}`)
+const ObjectTypeInterfaceAddedLiteral =  z.literal("OBJECT_TYPE_INTERFACE_ADDED" satisfies `${typeof ChangeType.ObjectTypeInterfaceAdded}`)
 // prettier-ignore
-const ObjectTypeInterfaceRemovedLiteral =  z.literal("OBJECT_TYPE_INTERFACE_REMOVED" satisfies `${ChangeType.ObjectTypeInterfaceRemoved}`)
+const ObjectTypeInterfaceRemovedLiteral =  z.literal("OBJECT_TYPE_INTERFACE_REMOVED" satisfies `${typeof ChangeType.ObjectTypeInterfaceRemoved}`)
 // prettier-ignore
-const SchemaQueryTypeChangedLiteral =  z.literal("SCHEMA_QUERY_TYPE_CHANGED" satisfies `${ChangeType.SchemaQueryTypeChanged}`)
+const SchemaQueryTypeChangedLiteral =  z.literal("SCHEMA_QUERY_TYPE_CHANGED" satisfies `${typeof ChangeType.SchemaQueryTypeChanged}`)
 // prettier-ignore
-const SchemaMutationTypeChangedLiteral =  z.literal("SCHEMA_MUTATION_TYPE_CHANGED" satisfies `${ChangeType.SchemaMutationTypeChanged}`)
+const SchemaMutationTypeChangedLiteral =  z.literal("SCHEMA_MUTATION_TYPE_CHANGED" satisfies `${typeof ChangeType.SchemaMutationTypeChanged}`)
 // prettier-ignore
-const SchemaSubscriptionTypeChangedLiteral =  z.literal("SCHEMA_SUBSCRIPTION_TYPE_CHANGED" satisfies `${ChangeType.SchemaSubscriptionTypeChanged}`)
+const SchemaSubscriptionTypeChangedLiteral =  z.literal("SCHEMA_SUBSCRIPTION_TYPE_CHANGED" satisfies `${typeof ChangeType.SchemaSubscriptionTypeChanged}`)
 // prettier-ignore
-const TypeRemovedLiteral =  z.literal("TYPE_REMOVED" satisfies `${ChangeType.TypeRemoved}`)
+const TypeRemovedLiteral =  z.literal("TYPE_REMOVED" satisfies `${typeof ChangeType.TypeRemoved}`)
 // prettier-ignore
-const TypeAddedLiteral =  z.literal("TYPE_ADDED" satisfies `${ChangeType.TypeAdded}`)
+const TypeAddedLiteral =  z.literal("TYPE_ADDED" satisfies `${typeof ChangeType.TypeAdded}`)
 // prettier-ignore
-const TypeKindChangedLiteral =  z.literal("TYPE_KIND_CHANGED" satisfies `${ChangeType.TypeKindChanged}`)
+const TypeKindChangedLiteral =  z.literal("TYPE_KIND_CHANGED" satisfies `${typeof ChangeType.TypeKindChanged}`)
 // prettier-ignore
-const TypeDescriptionChangedLiteral =  z.literal("TYPE_DESCRIPTION_CHANGED" satisfies `${ChangeType.TypeDescriptionChanged}`)
+const TypeDescriptionChangedLiteral =  z.literal("TYPE_DESCRIPTION_CHANGED" satisfies `${typeof ChangeType.TypeDescriptionChanged}`)
 // prettier-ignore
-const TypeDescriptionRemovedLiteral =  z.literal("TYPE_DESCRIPTION_REMOVED" satisfies `${ChangeType.TypeDescriptionRemoved}`)
+const TypeDescriptionRemovedLiteral =  z.literal("TYPE_DESCRIPTION_REMOVED" satisfies `${typeof ChangeType.TypeDescriptionRemoved}`)
 // prettier-ignore
-const TypeDescriptionAddedLiteral =  z.literal("TYPE_DESCRIPTION_ADDED" satisfies `${ChangeType.TypeDescriptionAdded}`)
+const TypeDescriptionAddedLiteral =  z.literal("TYPE_DESCRIPTION_ADDED" satisfies `${typeof ChangeType.TypeDescriptionAdded}`)
 // prettier-ignore
-const UnionMemberRemovedLiteral =  z.literal("UNION_MEMBER_REMOVED" satisfies `${ChangeType.UnionMemberRemoved}`)
+const UnionMemberRemovedLiteral =  z.literal("UNION_MEMBER_REMOVED" satisfies `${typeof ChangeType.UnionMemberRemoved}`)
 // prettier-ignore
-const UnionMemberAddedLiteral =  z.literal("UNION_MEMBER_ADDED" satisfies `${ChangeType.UnionMemberAdded}`)
+const UnionMemberAddedLiteral =  z.literal("UNION_MEMBER_ADDED" satisfies `${typeof ChangeType.UnionMemberAdded}`)
 
 /**
  * @source https://github.com/colinhacks/zod/issues/372#issuecomment-1280054492
