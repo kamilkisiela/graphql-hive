@@ -86,14 +86,14 @@ target "cli-base" {
 target "target-dev" {}
 
 target "target-ci" {
-  cache-from = ["type=gha"]
-  cache-to = ["type=gha,mode=max"]
+  cache-from = ["type=gha,ignore-error=true"]
+  cache-to = ["type=gha,mode=max,ignore-error=true"]
 }
 
 target "target-publish" {
   platforms = ["linux/amd64", "linux/arm64"]
-  cache-from = ["type=gha"]
-  cache-to = ["type=gha,mode=max"]
+  cache-from = ["type=gha,ignore-error=true"]
+  cache-to = ["type=gha,mode=max,ignore-error=true"]
 }
 
 target "emails" {
