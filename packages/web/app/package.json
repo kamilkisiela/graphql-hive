@@ -14,7 +14,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@graphiql/react": "0.18.0-alpha.0",
+    "@graphiql/react": "0.20.2",
     "@graphiql/toolkit": "0.9.1",
     "@graphql-tools/mock": "9.0.0",
     "@headlessui/react": "1.7.17",
