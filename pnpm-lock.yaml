@@ -668,8 +668,8 @@ importers:
         specifier: 3.0.4
         version: 3.0.4
       prom-client:
-        specifier: 15.0.0
-        version: 15.0.0
+        specifier: 15.1.0
+        version: 15.1.0
       redlock:
         specifier: 5.0.0-beta.2
         version: 5.0.0-beta.2
@@ -1100,8 +1100,8 @@ importers:
         specifier: 10.3.0
         version: 10.3.0
       prom-client:
-        specifier: 15.0.0
-        version: 15.0.0
+        specifier: 15.1.0
+        version: 15.1.0
       reflect-metadata:
         specifier: 0.1.14
         version: 0.1.14
@@ -1143,8 +1143,8 @@ importers:
         specifier: 6.1.0
         version: 6.1.0
       prom-client:
-        specifier: 15.0.0
-        version: 15.0.0
+        specifier: 15.1.0
+        version: 15.1.0
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -27661,8 +27661,8 @@ packages:
     resolution: {integrity: sha512-7PiHtLll5LdnKIMw100I+8xJXR5gW2QwWYkT6iJva0bXitZKa/XMrSbdmg3r2Xnaidz9Qumd0VPaMrZlF9V9sA==}
     engines: {node: '>=0.4.0'}
 
-  /prom-client@15.0.0:
-    resolution: {integrity: sha512-UocpgIrKyA2TKLVZDSfm8rGkL13C19YrQBAiG3xo3aDFWcHedxRxI3z+cIcucoxpSO0h5lff5iv/SXoxyeopeA==}
+  /prom-client@15.1.0:
+    resolution: {integrity: sha512-cCD7jLTqyPdjEPBo/Xk4Iu8jxjuZgZJ3e/oET3L+ZwOuap/7Cw3dH/TJSsZKs1TQLZ2IHpIlRAKw82ef06kmMw==}
     engines: {node: ^16 || ^18 || >=20}
     dependencies:
       '@opentelemetry/api': 1.7.0
