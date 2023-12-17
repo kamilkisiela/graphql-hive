@@ -535,8 +535,8 @@ importers:
   packages/services/api:
     dependencies:
       reflect-metadata:
-        specifier: ^0.1.0
-        version: 0.1.13
+        specifier: ^0.2.0
+        version: 0.2.1
     devDependencies:
       '@aws-sdk/client-s3':
         specifier: 3.474.0
@@ -932,8 +932,8 @@ importers:
         specifier: 10.3.0
         version: 10.3.0
       reflect-metadata:
-        specifier: 0.1.14
-        version: 0.1.14
+        specifier: 0.2.1
+        version: 0.2.1
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -1103,8 +1103,8 @@ importers:
         specifier: 15.1.0
         version: 15.1.0
       reflect-metadata:
-        specifier: 0.1.14
-        version: 0.1.14
+        specifier: 0.2.1
+        version: 0.2.1
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -1239,8 +1239,8 @@ importers:
         specifier: 10.3.0
         version: 10.3.0
       reflect-metadata:
-        specifier: 0.1.14
-        version: 0.1.14
+        specifier: 0.2.1
+        version: 0.2.1
       stripe:
         specifier: 14.8.0
         version: 14.8.0
@@ -1284,8 +1284,8 @@ importers:
         specifier: 10.3.0
         version: 10.3.0
       reflect-metadata:
-        specifier: 0.1.14
-        version: 0.1.14
+        specifier: 0.2.1
+        version: 0.2.1
       tiny-lru:
         specifier: 8.0.2
         version: 8.0.2
@@ -1377,8 +1377,8 @@ importers:
         specifier: 10.3.0
         version: 10.3.0
       reflect-metadata:
-        specifier: 0.1.14
-        version: 0.1.14
+        specifier: 0.2.1
+        version: 0.2.1
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -28035,13 +28035,8 @@ packages:
       node-abort-controller: 3.1.1
     dev: true
 
-  /reflect-metadata@0.1.13:
-    resolution: {integrity: sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==}
-    dev: false
-
-  /reflect-metadata@0.1.14:
-    resolution: {integrity: sha512-ZhYeb6nRaXCfhnndflDK8qI6ZQ/YcWZCISRAWICW9XYqMUwjZM9Z0DveWX/ABN01oxSHwVxKQmxeYZSsm0jh5A==}
-    dev: true
+  /reflect-metadata@0.2.1:
+    resolution: {integrity: sha512-i5lLI6iw9AU3Uu4szRNPPEkomnkjRTaVt9hy/bn5g/oSzekBSMeLZblcjP74AW0vBabqERLLIrz+gR8QYR54Tw==}
 
   /regenerate-unicode-properties@10.1.0:
     resolution: {integrity: sha512-d1VudCLoIGitcU/hEg2QqvyGZQmdC0Lf8BqdOMXGFSvJP4bNV1+XqbPQeHHLD51Jh4QJJ225dlIFvY4Ly6MXmQ==}
