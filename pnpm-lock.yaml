@@ -1659,8 +1659,8 @@ importers:
         specifier: 8.17.1
         version: 8.17.1
       pino-http:
-        specifier: 8.5.1
-        version: 8.5.1
+        specifier: 8.6.0
+        version: 8.6.0
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -26340,8 +26340,8 @@ packages:
       readable-stream: 4.4.0
       split2: 4.1.0
 
-  /pino-http@8.5.1:
-    resolution: {integrity: sha512-T/3d9YHKBYpv/QHjNy73P5BNYYkRrC2/D6CxKMecG4fKFLN+B2iC6LsKYzGRTRV+Ld3fjxFC1ca4TUGbPdzk+Q==}
+  /pino-http@8.6.0:
+    resolution: {integrity: sha512-SMkt0R7nzoX76BhTlmCWg0s2F0UYKGeln8y+thL2OUcCxZbbPB1AqgrEMuHAjHyc7oBefext3Af3ZT3k9ieETw==}
     dependencies:
       get-caller-file: 2.0.5
       pino: 8.17.1
