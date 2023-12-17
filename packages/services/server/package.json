@@ -40,7 +40,7 @@
     "graphql-yoga": "5.0.2",
     "hyperid": "3.1.1",
     "pino-pretty": "10.3.0",
-    "prom-client": "15.0.0",
+    "prom-client": "15.1.0",
     "reflect-metadata": "0.1.14",
     "tslib": "2.6.2",
     "zod": "3.22.4"
