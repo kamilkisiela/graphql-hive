@@ -52,10 +52,10 @@ export class Inspector {
 
         this.logger.debug('Usage validation enabled');
 
-        const fixedFields = fields.map(({ type, field, argument, meta }) => {
+        const fixedFields = fields.map(({type,  field, argument}) => {
           if (type && field) {
             const typeDefinition = incoming.getType(type) || existing.getType(type);
-            const change: Change<ChangeType> = meta.change;
+            
 
             if (typeDefinition && isInputObjectType(typeDefinition)) {
               const typeBefore = existing.getType(type);
@@ -65,7 +65,7 @@ export class Inspector {
                 const fieldAfter = typeAfter.getFields()[field];
                 // Adding a non-nullable input field to a used input object type is a breaking change.
                 // That's why we need to check if the input type is used, not the field itself (as it's new)
-                if (change.type === ChangeType.InputFieldAdded && isNonNullType(fieldAfter.type)) {
+                if (type === ChangeType.InputFieldAdded && isNonNullType(fieldAfter.type)) {
                   return {
                     type,
                   };
