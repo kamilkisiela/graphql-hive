@@ -1,6 +1,6 @@
 import { isInputObjectType, isNonNullType, type GraphQLSchema } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
-import { Change, ChangeType, diff, DiffRule } from '@graphql-inspector/core';
+import { ChangeType, diff, DiffRule } from '@graphql-inspector/core';
 import { HiveSchemaChangeModel, SchemaChangeType } from '@hive/storage';
 import type * as Types from '../../../__generated__/types';
 import type { TargetSettings } from '../../../shared/entities';
