@@ -52,10 +52,9 @@ export class Inspector {
 
         this.logger.debug('Usage validation enabled');
 
-        const fixedFields = fields.map(({type,  field, argument}) => {
+        const fixedFields = fields.map(({ type, field, argument }) => {
           if (type && field) {
             const typeDefinition = incoming.getType(type) || existing.getType(type);
-            
 
             if (typeDefinition && isInputObjectType(typeDefinition)) {
               const typeBefore = existing.getType(type);
