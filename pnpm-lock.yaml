@@ -548,8 +548,8 @@ importers:
         specifier: 0.2.3
         version: link:../../libraries/core/dist
       '@graphql-inspector/core':
-        specifier: 5.1.0-alpha-20231208113249-34700c8a
-        version: 5.1.0-alpha-20231208113249-34700c8a(graphql@16.8.1)
+        specifier: 5.1.0-alpha-20231218152512-4af958f4
+        version: 5.1.0-alpha-20231218152512-4af958f4(graphql@16.8.1)
       '@hive/cdn-script':
         specifier: workspace:*
         version: link:../cdn-worker
@@ -6828,8 +6828,8 @@ packages:
       object-inspect: 1.12.3
       tslib: 2.6.2
 
-  /@graphql-inspector/core@5.1.0-alpha-20231208113249-34700c8a(graphql@16.8.1):
-    resolution: {integrity: sha512-vzJEhQsZz+suo8T32o9dJNOa42IcLHfvmBm3EqRuMKQ0PU8KintUdRG1kFd6NFvNnpPHOVWFc+PYgFKCm7mPoA==}
+  /@graphql-inspector/core@5.1.0-alpha-20231218152512-4af958f4(graphql@16.8.1):
+    resolution: {integrity: sha512-Fn7NbOF3qwdgxbDAp8xWLmaK4uD1kZvd2mQqNTqlIR77ik0tKTLo0oe+7HBEAH2606o06uZ3Hjg1dlRkkwbdxA==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
