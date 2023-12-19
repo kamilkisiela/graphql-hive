@@ -108,14 +108,15 @@ export class CompositeModel {
         ? this.federationOrchestrator
         : this.stitchingOrchestrator;
 
-    const [compositionCheck, diffCheck, policyCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        baseSchema,
-      }),
+    const compositionCheck = await this.checks.composition({
+      orchestrator,
+      project,
+      organization,
+      schemas,
+      baseSchema,
+    });
+
+    const [diffCheck, policyCheck] = await Promise.all([
       this.checks.diff({
         orchestrator,
         project,
@@ -125,15 +126,13 @@ export class CompositeModel {
         version: compareToLatest ? latest : latestComposable,
         includeUrlChanges: false,
         approvedChanges,
+        incomingSdl:
+          compositionCheck.result?.fullSchemaSdl ?? compositionCheck.reason?.fullSchemaSdl ?? null,
       }),
       this.checks.policyCheck({
-        orchestrator,
-        project,
-        organization,
         selector,
-        schemas,
+        incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
         modifiedSdl: incoming.sdl,
-        baseSchema,
       }),
     ]);
 
@@ -265,29 +264,29 @@ export class CompositeModel {
 
     const metadataCheck = await this.checks.metadata(incoming, previousService ?? null);
 
-    const [compositionCheck, diffCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        baseSchema,
-      }),
-      this.checks.diff({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        selector: {
-          target: target.id,
-          project: project.id,
-          organization: project.orgId,
-        },
-        version: compareToLatest ? latest : latestComposable,
-        includeUrlChanges: true,
-        approvedChanges: null,
-      }),
-    ]);
+    const compositionCheck = await this.checks.composition({
+      orchestrator,
+      project,
+      organization,
+      schemas,
+      baseSchema,
+    });
+
+    const diffCheck = await this.checks.diff({
+      orchestrator,
+      project,
+      organization,
+      schemas,
+      selector: {
+        target: target.id,
+        project: project.id,
+        organization: project.orgId,
+      },
+      version: compareToLatest ? latest : latestComposable,
+      includeUrlChanges: true,
+      approvedChanges: null,
+      incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+    });
 
     if (metadataCheck?.status === 'failed') {
       return {
@@ -411,25 +410,25 @@ export class CompositeModel {
         : this.stitchingOrchestrator;
     const schemas = latestVersion.schemas.filter(s => s.service_name !== input.serviceName);
 
-    const [compositionCheck, diffCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        baseSchema,
-      }),
-      this.checks.diff({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        selector,
-        version: compareToLatest ? latestVersion : latestComposable,
-        includeUrlChanges: true,
-        approvedChanges: null,
-      }),
-    ]);
+    const compositionCheck = await this.checks.composition({
+      orchestrator,
+      project,
+      organization,
+      schemas,
+      baseSchema,
+    });
+
+    const diffCheck = await this.checks.diff({
+      orchestrator,
+      project,
+      organization,
+      schemas,
+      selector,
+      version: compareToLatest ? latestVersion : latestComposable,
+      includeUrlChanges: true,
+      approvedChanges: null,
+      incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+    });
 
     if (
       compositionCheck.status === 'failed' &&

@@ -93,25 +93,26 @@ export class CompositeLegacyModel {
       };
     }
 
-    const [compositionCheck, diffCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        baseSchema,
-      }),
-      this.checks.diff({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        selector,
-        version: latestVersion,
-        includeUrlChanges: false,
-        approvedChanges: null,
-      }),
-    ]);
+    const compositionCheck = await this.checks.composition({
+      orchestrator,
+      project,
+      organization,
+      schemas,
+      baseSchema,
+    });
+
+    const diffCheck = await this.checks.diff({
+      orchestrator,
+      project,
+      organization,
+      schemas,
+      selector,
+      version: latestVersion,
+      includeUrlChanges: false,
+      approvedChanges: null,
+      incomingSdl:
+        compositionCheck.result?.fullSchemaSdl ?? compositionCheck.reason?.fullSchemaSdl ?? null,
+    });
 
     if (compositionCheck.status === 'failed' || diffCheck.status === 'failed') {
       return {
@@ -234,14 +235,15 @@ export class CompositeLegacyModel {
       };
     }
 
-    const [compositionCheck, diffCheck, metadataCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        baseSchema,
-      }),
+    const compositionCheck = await this.checks.composition({
+      orchestrator,
+      project,
+      organization,
+      schemas,
+      baseSchema,
+    });
+
+    const [diffCheck, metadataCheck] = await Promise.all([
       this.checks.diff({
         orchestrator,
         selector: {
@@ -255,6 +257,7 @@ export class CompositeLegacyModel {
         version: latestVersion,
         includeUrlChanges: true,
         approvedChanges: null,
+        incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       }),
       isFederation
         ? {

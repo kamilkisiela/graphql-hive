@@ -10,7 +10,7 @@ import {
   SchemaChangeType,
   type RegistryServiceUrlChangeSerializableChange,
 } from '@hive/storage';
-import { ProjectType, Schema } from '../../../shared/entities';
+import { ProjectType } from '../../../shared/entities';
 import { buildSortedSchemaFromSchemaObject } from '../../../shared/schema';
 import { SchemaPolicyProvider } from '../../policy/providers/schema-policy.provider';
 import type {
@@ -142,6 +142,8 @@ export class RegistryChecks {
             graphql: validationErrors.filter(isGraphQLValidationError),
             composition: validationErrors.filter(isCompositionValidationError),
           },
+          // Federation 1 apparently has SDL and validation errors at the same time.
+          fullSchemaSdl: result.sdl,
         },
       } satisfies CheckResult;
     }
@@ -162,42 +164,26 @@ export class RegistryChecks {
   }
 
   async policyCheck({
-    orchestrator,
-    project,
-    organization,
-    schemas,
     selector,
     modifiedSdl,
-    baseSchema,
+    incomingSdl,
   }: {
-    orchestrator: Orchestrator;
-    schemas: [SingleSchema] | PushedCompositeSchema[];
-    project: Project;
-    organization: Organization;
     modifiedSdl: string;
+    incomingSdl: string | null;
     selector: {
       organization: string;
       project: string;
       target: string;
     };
-    baseSchema: string | null;
   }) {
-    const result = await orchestrator.composeAndValidate(
-      extendWithBase(schemas, baseSchema).map(s => this.helper.createSchemaObject(s)),
-      {
-        external: project.externalComposition,
-        native: this.checkProjectNativeFederationSupport(project, organization),
-      },
-    );
-
-    if (result.sdl == null) {
+    if (incomingSdl == null) {
       this.logger.debug('Skip policy check due to no SDL being composed.');
       return {
         status: 'skipped',
       };
     }
 
-    const policyResult = await this.policy.checkPolicy(result.sdl, modifiedSdl, selector);
+    const policyResult = await this.policy.checkPolicy(incomingSdl, modifiedSdl, selector);
     const warnings = policyResult?.warnings?.map<SchemaCheckWarning>(toSchemaCheckWarning) ?? null;
 
     if (policyResult === null) {
@@ -228,15 +214,17 @@ export class RegistryChecks {
     orchestrator,
     project,
     organization,
-    schemas,
     version,
     selector,
     includeUrlChanges,
     approvedChanges,
+    incomingSdl,
+    schemas,
   }: {
     orchestrator: Orchestrator;
     project: Project;
     organization: Organization;
+    incomingSdl: string | null;
     schemas: [SingleSchema] | PushedCompositeSchema[];
     version: LatestVersion;
     selector: {
@@ -255,24 +243,15 @@ export class RegistryChecks {
       } satisfies CheckResult;
     }
 
-    const [existingSchemaResult, incomingSchemaResult] = await Promise.all([
-      orchestrator.composeAndValidate(
-        version.schemas.map(s => this.helper.createSchemaObject(s)),
-        {
-          external: project.externalComposition,
-          native: this.checkProjectNativeFederationSupport(project, organization),
-        },
-      ),
-      orchestrator.composeAndValidate(
-        schemas.map(s => this.helper.createSchemaObject(s)),
-        {
-          external: project.externalComposition,
-          native: this.checkProjectNativeFederationSupport(project, organization),
-        },
-      ),
-    ]);
+    const existingSchemaResult = await orchestrator.composeAndValidate(
+      version.schemas.map(s => this.helper.createSchemaObject(s)),
+      {
+        external: project.externalComposition,
+        native: this.checkProjectNativeFederationSupport(project, organization),
+      },
+    );
 
-    if (existingSchemaResult.sdl == null || incomingSchemaResult.sdl == null) {
+    if (existingSchemaResult.sdl == null || incomingSdl == null) {
       this.logger.debug('Skip policy check due to no SDL being composed.');
       return {
         status: 'skipped',
@@ -291,7 +270,7 @@ export class RegistryChecks {
 
       incomingSchema = buildSortedSchemaFromSchemaObject(
         this.helper.createSchemaObject({
-          sdl: incomingSchemaResult.sdl,
+          sdl: incomingSdl,
         }),
       );
     } catch (error) {
@@ -304,7 +283,12 @@ export class RegistryChecks {
     let inspectorChanges = await this.inspector.diff(existingSchema, incomingSchema, selector);
 
     if (includeUrlChanges) {
-      inspectorChanges.push(...detectUrlChanges(version.schemas, schemas));
+      inspectorChanges.push(
+        ...detectUrlChanges(
+          version.schemas.filter(isCompositeSchema),
+          schemas.filter(isCompositeSchema),
+        ),
+      );
     }
 
     // Filter out federation specific changes as they are not relevant for the schema diff and were in previous schema versions by accident.
@@ -512,26 +496,27 @@ export class RegistryChecks {
   }
 }
 
+type SubgraphDefinition = {
+  service_name: string;
+  service_url: string | null;
+};
+
 export function detectUrlChanges(
-  schemasBefore: readonly Schema[],
-  schemasAfter: readonly Schema[],
+  subgraphsBefore: readonly SubgraphDefinition[],
+  subgraphsAfter: readonly SubgraphDefinition[],
 ): Array<SchemaChangeType> {
-  if (schemasBefore.length === 0) {
+  if (subgraphsBefore.length === 0) {
     return [];
   }
 
-  const compositeSchemasBefore = schemasBefore.filter(isCompositeSchema);
-
-  if (compositeSchemasBefore.length === 0) {
+  if (subgraphsBefore.length === 0) {
     return [];
   }
 
-  const compositeSchemasAfter = schemasAfter.filter(isCompositeSchema);
-  const nameToCompositeSchemaMap = new Map(compositeSchemasBefore.map(s => [s.service_name, s]));
-
+  const nameToCompositeSchemaMap = new Map(subgraphsBefore.map(s => [s.service_name, s]));
   const changes: Array<RegistryServiceUrlChangeSerializableChange> = [];
 
-  for (const schema of compositeSchemasAfter) {
+  for (const schema of subgraphsAfter) {
     const before = nameToCompositeSchemaMap.get(schema.service_name);
 
     if (before && before.service_url !== schema.service_url) {
