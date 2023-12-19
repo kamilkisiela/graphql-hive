@@ -138,7 +138,7 @@ importers:
         version: file:rules
       eslint-plugin-tailwindcss:
         specifier: 3.13.0
-        version: 3.13.0(tailwindcss@3.3.6)
+        version: 3.13.0(tailwindcss@3.3.7)
       fs-extra:
         specifier: 11.2.0
         version: 11.2.0
@@ -1819,11 +1819,11 @@ importers:
         specifier: 7.6.5
         version: 7.6.5
       tailwindcss:
-        specifier: 3.3.6
-        version: 3.3.6(ts-node@10.9.2)
+        specifier: 3.3.7
+        version: 3.3.7(ts-node@10.9.2)
       tailwindcss-animate:
         specifier: 1.0.7
-        version: 1.0.7(tailwindcss@3.3.6)
+        version: 1.0.7(tailwindcss@3.3.7)
       tailwindcss-radix:
         specifier: 2.8.0
         version: 2.8.0
@@ -1886,8 +1886,8 @@ importers:
         specifier: 8.4.32
         version: 8.4.32
       tailwindcss:
-        specifier: 3.3.6
-        version: 3.3.6(ts-node@10.9.2)
+        specifier: 3.3.7
+        version: 3.3.7(ts-node@10.9.2)
 
   scripts:
     devDependencies:
@@ -2146,7 +2146,7 @@ packages:
     engines: {node: '>=6.0.0'}
     dependencies:
       '@jridgewell/gen-mapping': 0.1.1
-      '@jridgewell/trace-mapping': 0.3.19
+      '@jridgewell/trace-mapping': 0.3.20
     dev: true
 
   /@ampproject/remapping@2.2.1:
@@ -3224,7 +3224,7 @@ packages:
     dependencies:
       '@babel/types': 7.23.0
       '@jridgewell/gen-mapping': 0.3.3
-      '@jridgewell/trace-mapping': 0.3.19
+      '@jridgewell/trace-mapping': 0.3.20
       jsesc: 2.5.2
     dev: true
 
@@ -3234,7 +3234,7 @@ packages:
     dependencies:
       '@babel/types': 7.23.0
       '@jridgewell/gen-mapping': 0.3.3
-      '@jridgewell/trace-mapping': 0.3.19
+      '@jridgewell/trace-mapping': 0.3.20
       jsesc: 2.5.2
 
   /@babel/generator@7.23.6:
@@ -8148,7 +8148,7 @@ packages:
     dependencies:
       '@jridgewell/set-array': 1.1.2
       '@jridgewell/sourcemap-codec': 1.4.15
-      '@jridgewell/trace-mapping': 0.3.19
+      '@jridgewell/trace-mapping': 0.3.20
 
   /@jridgewell/resolve-uri@3.1.1:
     resolution: {integrity: sha512-dSYZh7HhCDtCKm4QakX0xFpsRDqjjtZf/kjI/v3T3Nwt5r8/qz/M19F9ySyOqU94SXBmeG9ttTul+YnR4LOxFA==}
@@ -8166,12 +8166,6 @@ packages:
 
   /@jridgewell/sourcemap-codec@1.4.15:
     resolution: {integrity: sha512-eF2rxCRulEKXHTRiDrDy6erMYWqNw4LPdQ8UQA4huuxaQsVeRPFl2oM8oDGxMFhJUWZf9McpLtJasDDZb/Bpeg==}
-
-  /@jridgewell/trace-mapping@0.3.19:
-    resolution: {integrity: sha512-kf37QtfW+Hwx/buWGMPcR60iF9ziHa6r/CZJIHbmcm4+0qrXiVdxegAH0F6yddEVQ7zdkjcGCgCzUu+BcbhQxw==}
-    dependencies:
-      '@jridgewell/resolve-uri': 3.1.1
-      '@jridgewell/sourcemap-codec': 1.4.15
 
   /@jridgewell/trace-mapping@0.3.20:
     resolution: {integrity: sha512-R8LcPeWZol2zR8mmH3JeKQ6QRCFb7XgUhV9ZlGhHLGyg4wpPiPZNQOOWhFZhxKw8u//yTbNGI42Bx/3paXEQ+Q==}
@@ -13509,7 +13503,7 @@ packages:
       cssnano: 6.0.1(postcss@8.4.32)
       postcss: 8.4.32
       postcss-import: 15.1.0(postcss@8.4.32)
-      tailwindcss: 3.3.6(ts-node@10.9.2)
+      tailwindcss: 3.3.7(ts-node@10.9.2)
     transitivePeerDependencies:
       - ts-node
     dev: true
@@ -19132,7 +19126,7 @@ packages:
       eslint: 8.56.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
     dev: true
 
-  /eslint-plugin-tailwindcss@3.13.0(tailwindcss@3.3.6):
+  /eslint-plugin-tailwindcss@3.13.0(tailwindcss@3.3.7):
     resolution: {integrity: sha512-Fcep4KDRLWaK3KmkQbdyKHG0P4GdXFmXdDaweTIPcgOP60OOuWFbh1++dufRT28Q4zpKTKaHwTsXPJ4O/EjU2Q==}
     engines: {node: '>=12.13.0'}
     peerDependencies:
@@ -19140,7 +19134,7 @@ packages:
     dependencies:
       fast-glob: 3.3.1
       postcss: 8.4.32
-      tailwindcss: 3.3.6(ts-node@10.9.2)
+      tailwindcss: 3.3.7(ts-node@10.9.2)
     dev: true
 
   /eslint-plugin-unicorn@49.0.0(eslint@8.56.0):
@@ -20833,7 +20827,7 @@ packages:
       '@graphql-tools/utils': 10.0.11(graphql@16.8.1)
       cosmiconfig: 8.2.0
       graphql: 16.8.1
-      jiti: 1.18.2
+      jiti: 1.21.0
       minimatch: 4.2.3
       string-env-interpolation: 1.0.1
       tslib: 2.6.2
@@ -29440,15 +29434,6 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /resolve@1.22.2:
-    resolution: {integrity: sha512-Sb+mjNHOULsBv818T40qSPeRiuWLyaGMa5ewydRLFimneixmVy2zdivRl+AF6jaYPC8ERxGDmFSiqui6SfPd+g==}
-    hasBin: true
-    dependencies:
-      is-core-module: 2.13.1
-      path-parse: 1.0.7
-      supports-preserve-symlinks-flag: 1.0.0
-    dev: true
-
   /resolve@1.22.8:
     resolution: {integrity: sha512-oKWePCxqpd6FlLvGV1VU0x7bkPmmCNolxzjMf4NczoDnQcIWrAF+cPtZn5i6n+RfD2d9i0tzpKnG6Yk168yIyw==}
     hasBin: true
@@ -31097,20 +31082,20 @@ packages:
       '@babel/runtime': 7.23.5
     dev: false
 
-  /tailwindcss-animate@1.0.7(tailwindcss@3.3.6):
+  /tailwindcss-animate@1.0.7(tailwindcss@3.3.7):
     resolution: {integrity: sha512-bl6mpH3T7I3UFxuvDEXLxy/VuFxBk5bbzplh7tXI68mwMokNYd1t9qPBHlnyTwfa4JGC4zP516I1hYYtQ/vspA==}
     peerDependencies:
       tailwindcss: '>=3.0.0 || insiders'
     dependencies:
-      tailwindcss: 3.3.6(ts-node@10.9.2)
+      tailwindcss: 3.3.7(ts-node@10.9.2)
     dev: true
 
   /tailwindcss-radix@2.8.0:
     resolution: {integrity: sha512-1k1UfoIYgVyBl13FKwwoKavjnJ5VEaUClCTAsgz3VLquN4ay/lyaMPzkbqD71sACDs2fRGImytAUlMb4TzOt1A==}
     dev: true
 
-  /tailwindcss@3.3.6(ts-node@10.9.2):
-    resolution: {integrity: sha512-AKjF7qbbLvLaPieoKeTjG1+FyNZT6KaJMJPFeQyLfIp7l82ggH1fbHJSsYIvnbTFQOlkh+gBYpyby5GT1LIdLw==}
+  /tailwindcss@3.3.7(ts-node@10.9.2):
+    resolution: {integrity: sha512-pjgQxDZPvyS/nG3ZYkyCvsbONJl7GdOejfm24iMt2ElYQQw8Jc4p0m8RdMp7mznPD0kUhfzwV3zAwa80qI0zmQ==}
     engines: {node: '>=14.0.0'}
     hasBin: true
     dependencies:
@@ -31134,7 +31119,7 @@ packages:
       postcss-load-config: 4.0.1(postcss@8.4.32)(ts-node@10.9.2)
       postcss-nested: 6.0.1(postcss@8.4.32)
       postcss-selector-parser: 6.0.11
-      resolve: 1.22.2
+      resolve: 1.22.8
       sucrase: 3.32.0
     transitivePeerDependencies:
       - ts-node
