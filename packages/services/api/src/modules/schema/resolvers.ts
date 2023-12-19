@@ -65,7 +65,7 @@ import { stripUsedSchemaCoordinatesFromDocumentNode } from './lib/unused-graphql
 import { Inspector } from './providers/inspector';
 import { SchemaBuildError } from './providers/orchestrators/errors';
 import { detectUrlChanges } from './providers/registry-checks';
-import { ensureSDL, SchemaHelper } from './providers/schema-helper';
+import { ensureSDL, isCompositeSchema, SchemaHelper } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
 import { toGraphQLSchemaCheck, toGraphQLSchemaCheckCurry } from './to-graphql-schema-check';
@@ -629,7 +629,12 @@ export const resolvers: SchemaModule.Resolvers = {
             changes.push(...(await injector.get(Inspector).diff(previousSchema, currentSchema)));
           }
 
-          changes.push(...detectUrlChanges(schemasBefore, schemasAfter));
+          changes.push(
+            ...detectUrlChanges(
+              schemasBefore.filter(isCompositeSchema),
+              schemasAfter.filter(isCompositeSchema),
+            ),
+          );
 
           const result: SchemaCompareResult = {
             result: {

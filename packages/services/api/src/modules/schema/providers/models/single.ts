@@ -86,14 +86,15 @@ export class SingleModel {
       };
     }
 
-    const [compositionCheck, diffCheck, policyCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator: this.orchestrator,
-        project,
-        organization,
-        schemas,
-        baseSchema,
-      }),
+    const compositionCheck = await this.checks.composition({
+      orchestrator: this.orchestrator,
+      project,
+      organization,
+      schemas,
+      baseSchema,
+    });
+
+    const [diffCheck, policyCheck] = await Promise.all([
       this.checks.diff({
         orchestrator: this.orchestrator,
         project,
@@ -103,15 +104,12 @@ export class SingleModel {
         version: compareToLatest ? latest : latestComposable,
         includeUrlChanges: false,
         approvedChanges,
+        incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       }),
       this.checks.policyCheck({
-        orchestrator: this.orchestrator,
-        project,
-        organization,
         selector,
-        schemas,
         modifiedSdl: input.sdl,
-        baseSchema,
+        incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       }),
     ]);
 
@@ -194,21 +192,22 @@ export class SingleModel {
       };
     }
 
-    const [compositionCheck, metadataCheck, diffCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator: this.orchestrator,
-        project,
-        organization,
-        baseSchema,
-        schemas: [
-          baseSchema
-            ? {
-                ...incoming,
-                sdl: baseSchema + ' ' + incoming.sdl,
-              }
-            : incoming,
-        ],
-      }),
+    const compositionCheck = await this.checks.composition({
+      orchestrator: this.orchestrator,
+      project,
+      organization,
+      baseSchema,
+      schemas: [
+        baseSchema
+          ? {
+              ...incoming,
+              sdl: baseSchema + ' ' + incoming.sdl,
+            }
+          : incoming,
+      ],
+    });
+
+    const [metadataCheck, diffCheck] = await Promise.all([
       this.checks.metadata(incoming, latestVersion ? latestVersion.schemas[0] : null),
       this.checks.diff({
         orchestrator: this.orchestrator,
@@ -223,6 +222,7 @@ export class SingleModel {
         version: compareToLatest ? latestVersion : latestComposable,
         includeUrlChanges: false,
         approvedChanges: null,
+        incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       }),
     ]);
 
