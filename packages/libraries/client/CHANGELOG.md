@@ -1,5 +1,11 @@
 # @graphql-hive/client
 
+## 0.28.0
+
+### Minor Changes
+
+- [#3608](https://github.com/kamilkisiela/graphql-hive/pull/3608) [`daf9eaa`](https://github.com/kamilkisiela/graphql-hive/commit/daf9eaa4b26a247930ec88593fc64e1d7753fae1) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Changed `exclude` argument type to accept RegEX
+
 ## 0.27.0
 
 ### Minor Changes

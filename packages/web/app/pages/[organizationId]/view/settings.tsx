@@ -275,52 +275,54 @@ const SettingsPageRenderer = (props: {
 
       {hasAccess ? (
         <div className="flex flex-col gap-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Organization Name</CardTitle>
-              <CardDescription>
-                Changing the name of your organization will also change the slug of your
-                organization URL, and will invalidate any existing links to your organization.
-                <br />
-                <DocsLink
-                  className="text-muted-foreground text-sm"
-                  href="/management/organizations#rename-an-organization"
-                >
-                  You can read more about it in the documentation
-                </DocsLink>
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4">
-              <form onSubmit={handleSubmit} className="flex gap-x-2">
-                <Input
-                  placeholder="Organization name"
-                  name="name"
-                  value={values.name}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  disabled={isSubmitting}
-                  isInvalid={touched.name && !!errors.name}
-                  className="w-96"
-                />
-              </form>
-              {touched.name && (errors.name || mutation.error) && (
-                <div className="mt-2 text-red-500">{errors.name || mutation.error?.message}</div>
-              )}
-              {mutation.data?.updateOrganizationName?.error && (
-                <div className="mt-2 text-red-500">
-                  {mutation.data?.updateOrganizationName.error.message}
+          <form onSubmit={handleSubmit}>
+            <Card>
+              <CardHeader>
+                <CardTitle>Organization Name</CardTitle>
+                <CardDescription>
+                  Changing the name of your organization will also change the slug of your
+                  organization URL, and will invalidate any existing links to your organization.
+                  <br />
+                  <DocsLink
+                    className="text-muted-foreground text-sm"
+                    href="/management/organizations#rename-an-organization"
+                  >
+                    You can read more about it in the documentation
+                  </DocsLink>
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-4">
+                <div className="flex gap-x-2">
+                  <Input
+                    placeholder="Organization name"
+                    name="name"
+                    value={values.name}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    disabled={isSubmitting}
+                    isInvalid={touched.name && !!errors.name}
+                    className="w-96"
+                  />
                 </div>
-              )}
-              {mutation.error && (
-                <div>{mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}</div>
-              )}
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button disabled={isSubmitting} className="px-10">
-                Save
-              </Button>
-            </CardFooter>
-          </Card>
+                {touched.name && (errors.name || mutation.error) && (
+                  <div className="mt-2 text-red-500">{errors.name || mutation.error?.message}</div>
+                )}
+                {mutation.data?.updateOrganizationName?.error && (
+                  <div className="mt-2 text-red-500">
+                    {mutation.data?.updateOrganizationName.error.message}
+                  </div>
+                )}
+                {mutation.error && (
+                  <div>{mutation.error.graphQLErrors[0]?.message ?? mutation.error.message}</div>
+                )}
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Button disabled={isSubmitting} className="px-10" type="submit">
+                  Save
+                </Button>
+              </CardFooter>
+            </Card>
+          </form>
 
           {canAccessOrganization(OrganizationAccessScope.Integrations, organization.me) && (
             <Card>

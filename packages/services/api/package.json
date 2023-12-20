@@ -9,11 +9,11 @@
   },
   "peerDependencies": {
     "graphql": "^16.0.0",
-    "reflect-metadata": "^0.1.0"
+    "reflect-metadata": "^0.2.0"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "3.470.0",
-    "@aws-sdk/s3-request-presigner": "3.470.0",
+    "@aws-sdk/client-s3": "3.476.0",
+    "@aws-sdk/s3-request-presigner": "3.476.0",
     "@graphql-hive/core": "0.2.3",
     "@graphql-inspector/core": "5.1.0-alpha-20231208113249-34700c8a",
     "@hive/cdn-script": "workspace:*",
@@ -24,10 +24,11 @@
     "@hive/webhooks": "workspace:*",
     "@octokit/app": "14.0.2",
     "@octokit/request-error": "5.0.1",
-    "@sentry/node": "7.86.0",
-    "@sentry/types": "7.86.0",
+    "@sentry/node": "7.88.0",
+    "@sentry/types": "7.88.0",
     "@slack/web-api": "6.10.0",
     "@theguild/buddy": "0.1.0",
+    "@theguild/federation-composition": "0.6.1",
     "@trpc/client": "10.44.1",
     "@trpc/server": "10.44.1",
     "@types/bcryptjs": "2.4.6",
@@ -54,7 +55,7 @@
     "ms": "2.1.3",
     "object-hash": "3.0.0",
     "param-case": "3.0.4",
-    "prom-client": "15.0.0",
+    "prom-client": "15.1.0",
     "redlock": "5.0.0-beta.2",
     "supertokens-node": "15.2.1",
     "tslib": "2.6.2",
