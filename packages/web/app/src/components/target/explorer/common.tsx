@@ -472,7 +472,7 @@ export function GraphQLFields(props: {
             className="cursor-pointer font-semibold hover:bg-gray-800"
             onClick={expand}
           >
-            Show {props.fields.length - fields.length} more fields
+            Show {sortedAndFilteredFields.length - fields.length} more fields
           </GraphQLTypeCardListItem>
         ) : null}
       </div>
