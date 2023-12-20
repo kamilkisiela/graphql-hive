@@ -183,6 +183,7 @@ export class SchemaPublisher {
       latestVersion,
       latestComposableVersion,
       latestSchemaVersion,
+      latestComposableSchemaVersion,
     ] = await Promise.all([
       this.targetManager.getTarget({
         organization: input.organization,
@@ -208,6 +209,11 @@ export class SchemaPublisher {
         onlyComposable: true,
       }),
       this.schemaManager.getMaybeLatestVersion({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+      }),
+      this.schemaManager.getMaybeLatestValidVersion({
         organization: input.organization,
         project: input.project,
         target: input.target,
@@ -375,12 +381,14 @@ export class SchemaPublisher {
           latest: latestVersion
             ? {
                 isComposable: latestVersion.valid,
+                sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: [ensureSingleSchema(latestVersion.schemas)],
               }
             : null,
           latestComposable: latestComposableVersion
             ? {
                 isComposable: latestComposableVersion.valid,
+                sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: [ensureSingleSchema(latestComposableVersion.schemas)],
               }
             : null,
@@ -411,12 +419,14 @@ export class SchemaPublisher {
           latest: latestVersion
             ? {
                 isComposable: latestVersion.valid,
+                sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: ensureCompositeSchemas(latestVersion.schemas),
               }
             : null,
           latestComposable: latestComposableVersion
             ? {
                 isComposable: latestComposableVersion.valid,
+                sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
               }
             : null,
@@ -762,32 +772,49 @@ export class SchemaPublisher {
           target: input.target.id,
           scope: TargetAccessScope.REGISTRY_WRITE,
         });
-        const [project, organization, latestVersion, latestComposableVersion, baseSchema] =
-          await Promise.all([
-            this.projectManager.getProject({
-              organization: input.organization,
-              project: input.project,
-            }),
-            this.organizationManager.getOrganization({
-              organization: input.organization,
-            }),
-            this.schemaManager.getLatestSchemas({
-              organization: input.organization,
-              project: input.project,
-              target: input.target.id,
-            }),
-            this.schemaManager.getLatestSchemas({
-              organization: input.organization,
-              project: input.project,
-              target: input.target.id,
-              onlyComposable: true,
-            }),
-            this.schemaManager.getBaseSchema({
-              organization: input.organization,
-              project: input.project,
-              target: input.target.id,
-            }),
-          ]);
+        const [
+          project,
+          organization,
+          latestVersion,
+          latestComposableVersion,
+          baseSchema,
+          latestSchemaVersion,
+          latestComposableSchemaVersion,
+        ] = await Promise.all([
+          this.projectManager.getProject({
+            organization: input.organization,
+            project: input.project,
+          }),
+          this.organizationManager.getOrganization({
+            organization: input.organization,
+          }),
+          this.schemaManager.getLatestSchemas({
+            organization: input.organization,
+            project: input.project,
+            target: input.target.id,
+          }),
+          this.schemaManager.getLatestSchemas({
+            organization: input.organization,
+            project: input.project,
+            target: input.target.id,
+            onlyComposable: true,
+          }),
+          this.schemaManager.getBaseSchema({
+            organization: input.organization,
+            project: input.project,
+            target: input.target.id,
+          }),
+          this.schemaManager.getMaybeLatestVersion({
+            organization: input.organization,
+            project: input.project,
+            target: input.target.id,
+          }),
+          this.schemaManager.getMaybeLatestValidVersion({
+            organization: input.organization,
+            project: input.project,
+            target: input.target.id,
+          }),
+        ]);
 
         const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
 
@@ -836,11 +863,13 @@ export class SchemaPublisher {
           },
           latest: {
             isComposable: latestVersion.valid,
+            sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
             schemas,
           },
           latestComposable: latestComposableVersion
             ? {
                 isComposable: latestComposableVersion.valid,
+                sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
               }
             : null,
@@ -973,37 +1002,55 @@ export class SchemaPublisher {
       metadata: !!input.metadata,
     });
 
-    const [organization, project, target, latestVersion, latestComposable, baseSchema] =
-      await Promise.all([
-        this.organizationManager.getOrganization({
-          organization: organizationId,
-        }),
-        this.projectManager.getProject({
-          organization: organizationId,
-          project: projectId,
-        }),
-        this.targetManager.getTarget({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-        }),
-        this.schemaManager.getLatestSchemas({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-        }),
-        this.schemaManager.getLatestSchemas({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-          onlyComposable: true,
-        }),
-        this.schemaManager.getBaseSchema({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-        }),
-      ]);
+    const [
+      organization,
+      project,
+      target,
+      latestVersion,
+      latestComposable,
+      baseSchema,
+      latestSchemaVersion,
+      latestComposableSchemaVersion,
+    ] = await Promise.all([
+      this.organizationManager.getOrganization({
+        organization: organizationId,
+      }),
+      this.projectManager.getProject({
+        organization: organizationId,
+        project: projectId,
+      }),
+      this.targetManager.getTarget({
+        organization: organizationId,
+        project: projectId,
+        target: targetId,
+      }),
+      this.schemaManager.getLatestSchemas({
+        organization: organizationId,
+        project: projectId,
+        target: targetId,
+      }),
+      this.schemaManager.getLatestSchemas({
+        organization: organizationId,
+        project: projectId,
+        target: targetId,
+        onlyComposable: true,
+      }),
+      this.schemaManager.getBaseSchema({
+        organization: organizationId,
+        project: projectId,
+        target: targetId,
+      }),
+      this.schemaManager.getMaybeLatestVersion({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+      }),
+      this.schemaManager.getMaybeLatestValidVersion({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+      }),
+    ]);
 
     const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
 
@@ -1099,12 +1146,14 @@ export class SchemaPublisher {
           latest: latestVersion
             ? {
                 isComposable: latestVersion.valid,
+                sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: [ensureSingleSchema(latestVersion.schemas)],
               }
             : null,
           latestComposable: latestComposable
             ? {
                 isComposable: latestComposable.valid,
+                sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: [ensureSingleSchema(latestComposable.schemas)],
               }
             : null,
@@ -1127,12 +1176,14 @@ export class SchemaPublisher {
           latest: latestVersion
             ? {
                 isComposable: latestVersion.valid,
+                sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: ensureCompositeSchemas(latestVersion.schemas),
               }
             : null,
           latestComposable: latestComposable
             ? {
                 isComposable: latestComposable.valid,
+                sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: ensureCompositeSchemas(latestComposable.schemas),
               }
             : null,

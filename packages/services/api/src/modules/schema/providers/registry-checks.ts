@@ -163,6 +163,49 @@ export class RegistryChecks {
     } satisfies CheckResult;
   }
 
+  /**
+   * Retrieve the SDL of the previous schema version.
+   * Either by using pre-computed sdl or composing on the fly.
+   */
+  async retrievePreviousVersionSdl(args: {
+    version: {
+      isComposable: boolean;
+      sdl: string | null;
+      schemas: Schemas;
+    } | null;
+    orchestrator: Orchestrator;
+    organization: Organization;
+    project: Project;
+  }): Promise<string | null> {
+    this.logger.debug('Retrieve previous version SDL.');
+    if (!args.version) {
+      this.logger.debug('No previous version available, skip.');
+      return null;
+    }
+
+    if (args.version.sdl) {
+      this.logger.debug('Return pre-computed SDL.');
+      return args.version.sdl;
+    }
+
+    if (args.version.isComposable === false) {
+      this.logger.debug('Skip composition due to non-composable version.');
+      return null;
+    }
+
+    this.logger.debug('Compose on the fly.');
+
+    const existingSchemaResult = await args.orchestrator.composeAndValidate(
+      args.version.schemas.map(s => this.helper.createSchemaObject(s)),
+      {
+        external: args.project.externalComposition,
+        native: this.checkProjectNativeFederationSupport(args.project, args.organization),
+      },
+    );
+
+    return existingSchemaResult.sdl ?? null;
+  }
+
   async policyCheck({
     selector,
     modifiedSdl,
@@ -210,48 +253,33 @@ export class RegistryChecks {
     } satisfies CheckResult;
   }
 
-  async diff({
-    orchestrator,
-    project,
-    organization,
-    version,
-    selector,
-    includeUrlChanges,
-    approvedChanges,
-    incomingSdl,
-    schemas,
-  }: {
-    orchestrator: Orchestrator;
-    project: Project;
-    organization: Organization;
+  /**
+   * Diff incoming and existing SDL and generate a list of changes.
+   * Uses usage stats to determine whether a change is safe or not (if available).
+   */
+  async diff(args: {
+    /** The existing SDL */
+    existingSdl: string | null;
+    /** The incoming SDL */
     incomingSdl: string | null;
-    schemas: [SingleSchema] | PushedCompositeSchema[];
-    version: LatestVersion;
-    selector: {
+    includeUrlChanges:
+      | false
+      | {
+          schemasBefore: [SingleSchema] | PushedCompositeSchema[];
+          schemasAfter: [SingleSchema] | PushedCompositeSchema[];
+        };
+    /** Whether Federation directive related changes should be filtered out from the list of changes. These would only show up due to an internal bug. */
+    filterOutFederationChanges: boolean;
+    /** Lookup map of changes that are approved and thus safe. */
+    approvedChanges: null | Map<string, SchemaChangeType>;
+    /** Selector for fetching conditional breaking changes. */
+    usageDataSelector: {
       organization: string;
       project: string;
       target: string;
     };
-    includeUrlChanges: boolean;
-    /** Lookup map of changes that are approved and thus safe. */
-    approvedChanges: null | Map<string, SchemaChangeType>;
   }) {
-    if (!version || version.schemas.length === 0) {
-      this.logger.debug('Skipping diff check, no existing version');
-      return {
-        status: 'skipped',
-      } satisfies CheckResult;
-    }
-
-    const existingSchemaResult = await orchestrator.composeAndValidate(
-      version.schemas.map(s => this.helper.createSchemaObject(s)),
-      {
-        external: project.externalComposition,
-        native: this.checkProjectNativeFederationSupport(project, organization),
-      },
-    );
-
-    if (existingSchemaResult.sdl == null || incomingSdl == null) {
+    if (args.existingSdl == null || args.incomingSdl == null) {
       this.logger.debug('Skip policy check due to no SDL being composed.');
       return {
         status: 'skipped',
@@ -264,13 +292,13 @@ export class RegistryChecks {
     try {
       existingSchema = buildSortedSchemaFromSchemaObject(
         this.helper.createSchemaObject({
-          sdl: existingSchemaResult.sdl,
+          sdl: args.existingSdl,
         }),
       );
 
       incomingSchema = buildSortedSchemaFromSchemaObject(
         this.helper.createSchemaObject({
-          sdl: incomingSdl,
+          sdl: args.incomingSdl,
         }),
       );
     } catch (error) {
@@ -280,19 +308,23 @@ export class RegistryChecks {
       } satisfies CheckResult;
     }
 
-    let inspectorChanges = await this.inspector.diff(existingSchema, incomingSchema, selector);
+    let inspectorChanges = await this.inspector.diff(
+      existingSchema,
+      incomingSchema,
+      args.usageDataSelector,
+    );
 
-    if (includeUrlChanges) {
+    if (args.includeUrlChanges) {
       inspectorChanges.push(
         ...detectUrlChanges(
-          version.schemas.filter(isCompositeSchema),
-          schemas.filter(isCompositeSchema),
+          args.includeUrlChanges.schemasBefore.filter(isCompositeSchema),
+          args.includeUrlChanges.schemasAfter.filter(isCompositeSchema),
         ),
       );
     }
 
     // Filter out federation specific changes as they are not relevant for the schema diff and were in previous schema versions by accident.
-    if ('type' in orchestrator && orchestrator.type === ProjectType.FEDERATION) {
+    if (args.filterOutFederationChanges === true) {
       inspectorChanges = inspectorChanges.filter(change => !isFederationRelatedChange(change));
     }
 
@@ -306,7 +338,7 @@ export class RegistryChecks {
       } else if (change.criticality === CriticalityLevel.Breaking) {
         // If this change is approved, we return the already approved on instead of the newly detected one,
         // as it it contains the necessary metadata on when the change got first approved and by whom.
-        const approvedChange = approvedChanges?.get(change.id);
+        const approvedChange = args.approvedChanges?.get(change.id);
         if (approvedChange) {
           breakingChanges.push(approvedChange);
           continue;
