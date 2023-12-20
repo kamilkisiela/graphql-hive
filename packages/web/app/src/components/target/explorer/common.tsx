@@ -466,7 +466,7 @@ export function GraphQLFields(props: {
             </GraphQLTypeCardListItem>
           );
         })}
-        {collapsed ? (
+        {collapsed && sortedAndFilteredFields.length > fields.length ? (
           <GraphQLTypeCardListItem
             index={fields.length}
             className="cursor-pointer font-semibold hover:bg-gray-800"
