@@ -54,6 +54,7 @@ export class CompositeLegacyModel {
     };
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
     baseSchema: string | null;
@@ -101,15 +102,19 @@ export class CompositeLegacyModel {
       baseSchema,
     });
 
-    const diffCheck = await this.checks.diff({
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
       orchestrator,
-      project,
+      version: latest,
       organization,
-      schemas,
-      selector,
-      version: latestVersion,
+      project,
+    });
+
+    const diffCheck = await this.checks.diff({
+      usageDataSelector: selector,
       includeUrlChanges: false,
+      filterOutFederationChanges: project.type === ProjectType.FEDERATION,
       approvedChanges: null,
+      existingSdl: previousVersionSdl,
       incomingSdl:
         compositionCheck.result?.fullSchemaSdl ?? compositionCheck.reason?.fullSchemaSdl ?? null,
     });
@@ -152,6 +157,7 @@ export class CompositeLegacyModel {
     target: Target;
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
     baseSchema: string | null;
@@ -243,20 +249,27 @@ export class CompositeLegacyModel {
       baseSchema,
     });
 
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
+      orchestrator,
+      version: latestVersion,
+      organization,
+      project,
+    });
+
     const [diffCheck, metadataCheck] = await Promise.all([
       this.checks.diff({
-        orchestrator,
-        selector: {
+        usageDataSelector: {
           target: target.id,
           project: project.id,
           organization: project.orgId,
         },
-        project,
-        organization,
-        schemas,
-        version: latestVersion,
-        includeUrlChanges: true,
+        includeUrlChanges: {
+          schemasBefore: latestVersion?.schemas ?? [],
+          schemasAfter: schemas,
+        },
+        filterOutFederationChanges: isFederation,
         approvedChanges: null,
+        existingSdl: previousVersionSdl,
         incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       }),
       isFederation

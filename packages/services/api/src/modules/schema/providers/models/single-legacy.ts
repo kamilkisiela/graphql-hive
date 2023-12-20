@@ -44,6 +44,7 @@ export class SingleLegacyModel {
     };
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: [SingleSchema];
     } | null;
     baseSchema: string | null;
@@ -86,15 +87,19 @@ export class SingleLegacyModel {
       baseSchema,
     });
 
-    const diffCheck = await this.checks.diff({
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
       orchestrator: this.orchestrator,
-      project,
-      organization,
-      schemas,
-      selector,
       version: latestVersion,
+      organization,
+      project,
+    });
+
+    const diffCheck = await this.checks.diff({
+      usageDataSelector: selector,
       includeUrlChanges: false,
+      filterOutFederationChanges: false,
       approvedChanges: null,
+      existingSdl: previousVersionSdl,
       incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
     });
 
@@ -136,6 +141,7 @@ export class SingleLegacyModel {
     target: Target;
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: [SingleSchema];
     } | null;
     baseSchema: string | null;
@@ -185,20 +191,24 @@ export class SingleLegacyModel {
       ],
     });
 
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
+      orchestrator: this.orchestrator,
+      version: latestVersion,
+      organization,
+      project,
+    });
+
     const [diffCheck, metadataCheck] = await Promise.all([
       this.checks.diff({
-        orchestrator: this.orchestrator,
-        selector: {
+        usageDataSelector: {
           target: target.id,
           project: project.id,
           organization: project.orgId,
         },
-        project,
-        organization,
-        schemas,
-        version: latestVersion,
         includeUrlChanges: false,
+        filterOutFederationChanges: false,
         approvedChanges: null,
+        existingSdl: previousVersionSdl,
         incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       }),
       this.checks.metadata(incoming, latestVersion ? latestVersion.schemas[0] : null),

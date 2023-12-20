@@ -46,10 +46,12 @@ export class SingleModel {
     };
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: [SingleSchema];
     } | null;
     latestComposable: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: [SingleSchema];
     } | null;
     baseSchema: string | null;
@@ -94,16 +96,20 @@ export class SingleModel {
       baseSchema,
     });
 
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
+      orchestrator: this.orchestrator,
+      version: compareToLatest ? latest : latestComposable,
+      organization,
+      project,
+    });
+
     const [diffCheck, policyCheck] = await Promise.all([
       this.checks.diff({
-        orchestrator: this.orchestrator,
-        project,
-        organization,
-        schemas,
-        selector,
-        version: compareToLatest ? latest : latestComposable,
+        usageDataSelector: selector,
         includeUrlChanges: false,
+        filterOutFederationChanges: false,
         approvedChanges,
+        existingSdl: previousVersionSdl,
         incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       }),
       this.checks.policyCheck({
@@ -156,10 +162,12 @@ export class SingleModel {
     target: Target;
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: [SingleSchema];
     } | null;
     latestComposable: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: [SingleSchema];
     } | null;
     baseSchema: string | null;
@@ -207,21 +215,25 @@ export class SingleModel {
       ],
     });
 
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
+      orchestrator: this.orchestrator,
+      version: compareToLatest ? latest : latestComposable,
+      organization,
+      project,
+    });
+
     const [metadataCheck, diffCheck] = await Promise.all([
       this.checks.metadata(incoming, latestVersion ? latestVersion.schemas[0] : null),
       this.checks.diff({
-        orchestrator: this.orchestrator,
-        project,
-        organization,
-        schemas,
-        selector: {
+        usageDataSelector: {
           target: target.id,
           project: project.id,
           organization: project.orgId,
         },
-        version: compareToLatest ? latestVersion : latestComposable,
+        filterOutFederationChanges: false,
         includeUrlChanges: false,
         approvedChanges: null,
+        existingSdl: previousVersionSdl,
         incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       }),
     ]);

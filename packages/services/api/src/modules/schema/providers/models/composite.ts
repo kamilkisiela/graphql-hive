@@ -59,10 +59,12 @@ export class CompositeModel {
     };
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
     latestComposable: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
     baseSchema: string | null;
@@ -116,16 +118,20 @@ export class CompositeModel {
       baseSchema,
     });
 
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
+      orchestrator,
+      version: compareToLatest ? latest : latestComposable,
+      organization,
+      project,
+    });
+
     const [diffCheck, policyCheck] = await Promise.all([
       this.checks.diff({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        selector,
-        version: compareToLatest ? latest : latestComposable,
+        usageDataSelector: selector,
         includeUrlChanges: false,
+        filterOutFederationChanges: project.type === ProjectType.FEDERATION,
         approvedChanges,
+        existingSdl: previousVersionSdl,
         incomingSdl:
           compositionCheck.result?.fullSchemaSdl ?? compositionCheck.reason?.fullSchemaSdl ?? null,
       }),
@@ -179,10 +185,12 @@ export class CompositeModel {
     target: Target;
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
     latestComposable: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
     baseSchema: string | null;
@@ -272,19 +280,28 @@ export class CompositeModel {
       baseSchema,
     });
 
-    const diffCheck = await this.checks.diff({
+    const schemaVersionToCompareAgainst = compareToLatest ? latest : latestComposable;
+
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
       orchestrator,
-      project,
+      version: schemaVersionToCompareAgainst,
       organization,
-      schemas,
-      selector: {
+      project,
+    });
+
+    const diffCheck = await this.checks.diff({
+      usageDataSelector: {
         target: target.id,
         project: project.id,
         organization: project.orgId,
       },
-      version: compareToLatest ? latest : latestComposable,
-      includeUrlChanges: true,
+      includeUrlChanges: {
+        schemasBefore: schemaVersionToCompareAgainst?.schemas ?? [],
+        schemasAfter: schemas,
+      },
+      filterOutFederationChanges: project.type === ProjectType.FEDERATION,
       approvedChanges: null,
+      existingSdl: previousVersionSdl,
       incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
     });
 
@@ -370,10 +387,12 @@ export class CompositeModel {
     baseSchema: string | null;
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     };
     latestComposable: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
   }): Promise<SchemaDeleteResult> {
@@ -418,15 +437,22 @@ export class CompositeModel {
       baseSchema,
     });
 
-    const diffCheck = await this.checks.diff({
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
       orchestrator,
-      project,
+      version: compareToLatest ? latest : latestComposable,
       organization,
-      schemas,
-      selector,
-      version: compareToLatest ? latestVersion : latestComposable,
-      includeUrlChanges: true,
+      project,
+    });
+
+    const diffCheck = await this.checks.diff({
+      usageDataSelector: selector,
+      includeUrlChanges: {
+        schemasBefore: latestVersion.schemas,
+        schemasAfter: schemas,
+      },
+      filterOutFederationChanges: project.type === ProjectType.FEDERATION,
       approvedChanges: null,
+      existingSdl: previousVersionSdl,
       incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
     });
 
