@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode, useMemo } from 'react';
+import React, { ReactElement, ReactNode, use, useMemo } from 'react';
 import NextLink from 'next/link';
 import { clsx } from 'clsx';
 import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -417,66 +417,80 @@ export function GraphQLFields(props: {
     props.collapsed ?? false,
   );
 
+  const hasNoDeprecatedFields = useMemo(
+    () =>
+      sortedAndFilteredFields.every(field => !field.isDeprecated) &&
+      props.filterDeprecated &&
+      props.fields.length > 0,
+    [sortedAndFilteredFields, props.filterDeprecated, props.fields.length],
+  );
+
   return (
     <TooltipProvider delayDuration={0}>
       <div className="flex flex-col">
-        {fields.map((field, i) => {
-          const coordinate = `${props.typeName}.${field.name}`;
-          const isUsed = field.usage.total > 0;
-          const hasUnusedArguments = field.args.length > 0;
-          const showsUnusedSchema = typeof totalRequests !== 'number';
+        {fields.length === 0 && hasNoDeprecatedFields ? (
+          <div className="p-4 text-gray-500">No deprecated fields found in this type.</div>
+        ) : (
+          fields.map((field, i) => {
+            const coordinate = `${props.typeName}.${field.name}`;
+            const isUsed = field.usage.total > 0;
+            const hasUnusedArguments = field.args.length > 0;
+            const showsUnusedSchema = typeof totalRequests !== 'number';
 
-          return (
-            <GraphQLTypeCardListItem key={field.name} index={i}>
-              <div>
-                {isUsed && hasUnusedArguments && showsUnusedSchema ? (
-                  <Tooltip>
-                    <TooltipContent>
-                      This field is used but the presented arguments are not.
-                    </TooltipContent>
-                    <TooltipTrigger>
-                      <span className="mr-1 text-sm text-orange-500">*</span>
-                    </TooltipTrigger>
-                  </Tooltip>
-                ) : null}
-                <LinkToCoordinatePage coordinate={coordinate} className="font-semibold">
-                  {field.name}
-                </LinkToCoordinatePage>
-                {field.args.length > 0 ? (
-                  <GraphQLArguments parentCoordinate={coordinate} args={field.args} />
-                ) : null}
-                <span className="mr-1">:</span>
-                <GraphQLTypeAsLink className="font-semibold text-gray-400" type={field.type} />
-                {field.isDeprecated ? (
-                  <span className="ml-2 text-xs font-semibold text-gray-400">@deprecated</span>
-                ) : null}
-              </div>
-              <div className="flex flex-row items-center">
-                {field.supergraphMetadata ? (
-                  <div className="ml-1">
-                    <SupergraphMetadataList supergraphMetadata={field.supergraphMetadata} />
-                  </div>
-                ) : null}
-                {typeof totalRequests === 'number' ? (
-                  <SchemaExplorerUsageStats
-                    totalRequests={totalRequests}
-                    usage={field.usage}
-                    targetCleanId={props.targetCleanId}
-                    projectCleanId={props.projectCleanId}
-                    organizationCleanId={props.organizationCleanId}
-                  />
-                ) : null}
-              </div>
-            </GraphQLTypeCardListItem>
-          );
-        })}
-        {collapsed ? (
+            return (
+              <GraphQLTypeCardListItem key={field.name} index={i}>
+                <div>
+                  {isUsed && hasUnusedArguments && showsUnusedSchema ? (
+                    <Tooltip>
+                      <TooltipContent>
+                        This field is used but the presented arguments are not.
+                      </TooltipContent>
+                      <TooltipTrigger>
+                        <span className="mr-1 text-sm text-orange-500">*</span>
+                      </TooltipTrigger>
+                    </Tooltip>
+                  ) : null}
+                  <LinkToCoordinatePage coordinate={coordinate} className="font-semibold">
+                    {field.name}
+                  </LinkToCoordinatePage>
+                  {field.args.length > 0 ? (
+                    <GraphQLArguments parentCoordinate={coordinate} args={field.args} />
+                  ) : null}
+                  <span className="mr-1">:</span>
+                  <GraphQLTypeAsLink className="font-semibold text-gray-400" type={field.type} />
+                  {field.isDeprecated ? (
+                    <span className="ml-2 text-center text-xs font-semibold text-gray-300">
+                      @deprecated
+                    </span>
+                  ) : null}
+                </div>
+                <div className="flex flex-row items-center">
+                  {field.supergraphMetadata ? (
+                    <div className="ml-1">
+                      <SupergraphMetadataList supergraphMetadata={field.supergraphMetadata} />
+                    </div>
+                  ) : null}
+                  {typeof totalRequests === 'number' ? (
+                    <SchemaExplorerUsageStats
+                      totalRequests={totalRequests}
+                      usage={field.usage}
+                      targetCleanId={props.targetCleanId}
+                      projectCleanId={props.projectCleanId}
+                      organizationCleanId={props.organizationCleanId}
+                    />
+                  ) : null}
+                </div>
+              </GraphQLTypeCardListItem>
+            );
+          })
+        )}
+        {collapsed && sortedAndFilteredFields.length > fields.length ? (
           <GraphQLTypeCardListItem
             index={fields.length}
             className="cursor-pointer font-semibold hover:bg-gray-800"
             onClick={expand}
           >
-            Show {props.fields.length - fields.length} more fields
+            Show {sortedAndFilteredFields.length - fields.length} more fields
           </GraphQLTypeCardListItem>
         ) : null}
       </div>
