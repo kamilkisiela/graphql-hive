@@ -13,7 +13,7 @@
     "@hive/service-common": "workspace:*",
     "@hive/tokens": "workspace:*",
     "@hive/usage-common": "workspace:*",
-    "@sentry/node": "7.86.0",
+    "@sentry/node": "7.88.0",
     "@trpc/client": "10.44.1",
     "@trpc/server": "10.44.1",
     "@whatwg-node/fetch": "0.9.14",
@@ -22,7 +22,7 @@
     "got": "12.6.1",
     "graphql": "16.8.1",
     "kafkajs": "2.2.4",
-    "pino-pretty": "10.2.3",
+    "pino-pretty": "10.3.0",
     "tiny-lru": "8.0.2",
     "zod": "3.22.4"
   }

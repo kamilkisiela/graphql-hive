@@ -65,7 +65,7 @@ import { stripUsedSchemaCoordinatesFromDocumentNode } from './lib/unused-graphql
 import { Inspector } from './providers/inspector';
 import { SchemaBuildError } from './providers/orchestrators/errors';
 import { detectUrlChanges } from './providers/registry-checks';
-import { ensureSDL, SchemaHelper } from './providers/schema-helper';
+import { ensureSDL, isCompositeSchema, SchemaHelper } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
 import { toGraphQLSchemaCheck, toGraphQLSchemaCheckCurry } from './to-graphql-schema-check';
@@ -384,6 +384,21 @@ export const resolvers: SchemaModule.Resolvers = {
         secret: input.secret,
       });
     },
+    async updateNativeFederation(_, { input }, { injector }) {
+      const translator = injector.get(IdTranslator);
+      const [organization, project] = await Promise.all([
+        translator.translateOrganizationId(input),
+        translator.translateProjectId(input),
+      ]);
+
+      return {
+        ok: await injector.get(SchemaManager).updateNativeSchemaComposition({
+          project,
+          organization,
+          enabled: input.enabled,
+        }),
+      };
+    },
     async updateProjectRegistryModel(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organization, project] = await Promise.all([
@@ -391,11 +406,13 @@ export const resolvers: SchemaModule.Resolvers = {
         translator.translateProjectId(input),
       ]);
 
-      return injector.get(SchemaManager).updateRegistryModel({
-        project,
-        organization,
-        model: input.model,
-      });
+      return {
+        ok: await injector.get(SchemaManager).updateRegistryModel({
+          project,
+          organization,
+          model: input.model,
+        }),
+      };
     },
   },
   Query: {
@@ -612,7 +629,12 @@ export const resolvers: SchemaModule.Resolvers = {
             changes.push(...(await injector.get(Inspector).diff(previousSchema, currentSchema)));
           }
 
-          changes.push(...detectUrlChanges(schemasBefore, schemasAfter));
+          changes.push(
+            ...detectUrlChanges(
+              schemasBefore.filter(isCompositeSchema),
+              schemasAfter.filter(isCompositeSchema),
+            ),
+          );
 
           const result: SchemaCompareResult = {
             result: {
@@ -1323,6 +1345,9 @@ export const resolvers: SchemaModule.Resolvers = {
     },
     isNativeFederationEnabled(project) {
       return project.nativeFederation === true;
+    },
+    nativeFederationCompatibility(project, _, { injector }) {
+      return injector.get(SchemaManager).getNativeFederationCompatibilityStatus(project);
     },
   },
   SchemaCoordinateUsage: {

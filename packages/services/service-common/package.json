@@ -10,15 +10,15 @@
     "@trpc/server": "10.44.1"
   },
   "devDependencies": {
-    "@sentry/node": "7.86.0",
-    "@sentry/types": "7.86.0",
-    "@sentry/utils": "7.86.0",
+    "@sentry/node": "7.88.0",
+    "@sentry/types": "7.88.0",
+    "@sentry/utils": "7.88.0",
     "@whatwg-node/fetch": "0.9.14",
     "fastify": "3.29.5",
     "fastify-cors": "6.0.3",
     "fastify-plugin": "4.5.1",
     "p-retry": "6.1.0",
-    "prom-client": "15.0.0",
+    "prom-client": "15.1.0",
     "zod": "3.22.4"
   }
 }

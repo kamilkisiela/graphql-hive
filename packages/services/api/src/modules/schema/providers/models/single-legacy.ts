@@ -44,6 +44,7 @@ export class SingleLegacyModel {
     };
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: [SingleSchema];
     } | null;
     baseSchema: string | null;
@@ -78,25 +79,29 @@ export class SingleLegacyModel {
       };
     }
 
-    const [compositionCheck, diffCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator: this.orchestrator,
-        project,
-        organization,
-        schemas,
-        baseSchema,
-      }),
-      this.checks.diff({
-        orchestrator: this.orchestrator,
-        project,
-        organization,
-        schemas,
-        selector,
-        version: latestVersion,
-        includeUrlChanges: false,
-        approvedChanges: null,
-      }),
-    ]);
+    const compositionCheck = await this.checks.composition({
+      orchestrator: this.orchestrator,
+      project,
+      organization,
+      schemas,
+      baseSchema,
+    });
+
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
+      orchestrator: this.orchestrator,
+      version: latestVersion,
+      organization,
+      project,
+    });
+
+    const diffCheck = await this.checks.diff({
+      usageDataSelector: selector,
+      includeUrlChanges: false,
+      filterOutFederationChanges: false,
+      approvedChanges: null,
+      existingSdl: previousVersionSdl,
+      incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+    });
 
     if (compositionCheck.status === 'failed' || diffCheck.status === 'failed') {
       return {
@@ -136,6 +141,7 @@ export class SingleLegacyModel {
     target: Target;
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: [SingleSchema];
     } | null;
     baseSchema: string | null;
@@ -170,34 +176,40 @@ export class SingleLegacyModel {
       };
     }
 
-    const [compositionCheck, diffCheck, metadataCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator: this.orchestrator,
-        project,
-        organization,
-        baseSchema,
-        schemas: [
-          baseSchema
-            ? {
-                ...incoming,
-                sdl: baseSchema + ' ' + incoming.sdl,
-              }
-            : incoming,
-        ],
-      }),
+    const compositionCheck = await this.checks.composition({
+      orchestrator: this.orchestrator,
+      project,
+      organization,
+      baseSchema,
+      schemas: [
+        baseSchema
+          ? {
+              ...incoming,
+              sdl: baseSchema + ' ' + incoming.sdl,
+            }
+          : incoming,
+      ],
+    });
+
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
+      orchestrator: this.orchestrator,
+      version: latestVersion,
+      organization,
+      project,
+    });
+
+    const [diffCheck, metadataCheck] = await Promise.all([
       this.checks.diff({
-        orchestrator: this.orchestrator,
-        selector: {
+        usageDataSelector: {
           target: target.id,
           project: project.id,
           organization: project.orgId,
         },
-        project,
-        organization,
-        schemas,
-        version: latestVersion,
         includeUrlChanges: false,
+        filterOutFederationChanges: false,
         approvedChanges: null,
+        existingSdl: previousVersionSdl,
+        incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       }),
       this.checks.metadata(incoming, latestVersion ? latestVersion.schemas[0] : null),
     ]);

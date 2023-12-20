@@ -67,9 +67,9 @@ export interface HiveUsagePluginOptions {
    */
   ttl?: number;
   /**
-   * A list of operations (by name) to be ignored by Hive.
+   * A list of operations (by name or regular expression) that should be excluded from reporting.
    */
-  exclude?: string[];
+  exclude?: Array<string | RegExp>;
   /**
    * Sample rate to determine sampling.
    * 0.0 = 0% chance of being sent
