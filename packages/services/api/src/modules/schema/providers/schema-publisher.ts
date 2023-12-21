@@ -39,6 +39,7 @@ import { toGraphQLSchemaCheck } from '../to-graphql-schema-check';
 import { ArtifactStorageWriter } from './artifact-storage-writer';
 import type { SchemaModuleConfig } from './config';
 import { SCHEMA_MODULE_CONFIG } from './config';
+import { Contracts } from './contracts';
 import { CompositeModel } from './models/composite';
 import { CompositeLegacyModel } from './models/composite-legacy';
 import {
@@ -142,6 +143,7 @@ export class SchemaPublisher {
     private artifactStorageWriter: ArtifactStorageWriter,
     private mutex: Mutex,
     private rateLimit: RateLimitProvider,
+    private contracts: Contracts,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
     singleModel: SingleModel,
     compositeModel: CompositeModel,
@@ -372,6 +374,13 @@ export class SchemaPublisher {
       }
     }
 
+    const contracts =
+      project.type === ProjectType.FEDERATION
+        ? await this.contracts.loadContractsWithLatestValidContractVersionsByTargetId({
+            targetId: target.id,
+          })
+        : null;
+
     switch (project.type) {
       case ProjectType.SINGLE:
         this.logger.debug('Using SINGLE registry model (version=%s)', projectModelVersion);
@@ -434,6 +443,7 @@ export class SchemaPublisher {
           project,
           organization,
           approvedChanges: approvedSchemaChanges,
+          contracts,
         });
         break;
       default:
@@ -502,7 +512,6 @@ export class SchemaPublisher {
 
     if (checkResult.conclusion === SchemaCheckConclusion.Success) {
       let composition = checkResult.state?.composition ?? null;
-
       // in case of a skip this is null
       if (composition === null) {
         if (latestVersion == null || latestSchemaVersion == null) {
@@ -529,6 +538,7 @@ export class SchemaPublisher {
                 project,
                 organization,
               }),
+              contracts: null,
             },
           );
 
@@ -736,6 +746,7 @@ export class SchemaPublisher {
             project,
             organization,
           }),
+          contracts: null,
         });
 
         this.logger.info(

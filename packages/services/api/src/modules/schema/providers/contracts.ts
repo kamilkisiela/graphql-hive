@@ -97,7 +97,9 @@ export class Contracts {
     };
   }
 
-  async getContractsByTargetId(args: { targetId: string }): Promise<null | Array<Contract>> {
+  private async getContractsByTargetId(args: {
+    targetId: string;
+  }): Promise<null | Array<Contract>> {
     this.logger.debug('Load contracts for target. (targetId=%s)', args.targetId);
     const result = await this.pool.any<unknown>(sql`
       SELECT
@@ -123,7 +125,7 @@ export class Contracts {
   /**
    * Load all the latest valid contract versions for the list of contract ids.
    */
-  async loadLatestValidContractVersionsByTargetId(args: {
+  private async loadLatestValidContractVersionsByTargetId(args: {
     targetId: string;
     contractIds: Array<string>;
   }) {
@@ -140,7 +142,7 @@ export class Contracts {
         "contract_versions"
       WHERE
         "target_id" = ${args.targetId}
-        AND "contract_id" = ANY(${sql.array(args.contractIds, 'text')})
+        AND "contract_id" = ANY(${sql.array(args.contractIds, 'uuid')})
         AND "valid" = true
       ORDER BY
         "contract_id"
@@ -161,7 +163,23 @@ export class Contracts {
       args.contractIds.join(','),
     );
 
-    return args.contractIds.map(contractId => records.get(contractId) ?? null);
+    return records;
+  }
+
+  public async loadContractsWithLatestValidContractVersionsByTargetId(args: { targetId: string }) {
+    const contracts = await this.getContractsByTargetId(args);
+    if (contracts === null) {
+      return null;
+    }
+    const latestValidContractVersions = await this.loadLatestValidContractVersionsByTargetId({
+      targetId: args.targetId,
+      contractIds: contracts.map(c => c.id),
+    });
+
+    return contracts.map(contract => ({
+      contract,
+      latestValidVersion: latestValidContractVersions.get(contract.id) ?? null,
+    }));
   }
 }
 
@@ -260,3 +278,5 @@ const ValidSchemaVersionContractsModel = z.object({
   supergraphSdl: z.string(),
   createdAt: z.string(),
 });
+
+export type ValidSchemaVersionContract = z.TypeOf<typeof ValidSchemaVersionContractsModel>;
