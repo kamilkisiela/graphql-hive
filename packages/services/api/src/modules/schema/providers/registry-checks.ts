@@ -4,7 +4,7 @@ import { Injectable, Scope } from 'graphql-modules';
 import hashObject from 'object-hash';
 import { CriticalityLevel } from '@graphql-inspector/core';
 import type { CheckPolicyResponse } from '@hive/policy';
-import type { CompositionFailureError } from '@hive/schema';
+import type { CompositionFailureError, ContractsInputType } from '@hive/schema';
 import {
   HiveSchemaChangeModel,
   SchemaChangeType,
@@ -47,19 +47,78 @@ type LatestVersion = {
   schemas: Schemas;
 } | null;
 
-function isCompositionValidationError(error: CompositionFailureError): error is {
+type CompositionValidationError = {
   message: string;
   source: 'composition';
-} {
+};
+
+type CompositionGraphQLValidationError = {
+  message: string;
+  source: 'graphql';
+};
+
+function isCompositionValidationError(
+  error: CompositionFailureError,
+): error is CompositionValidationError {
   return error.source === 'composition';
 }
 
-function isGraphQLValidationError(error: CompositionFailureError): error is {
-  message: string;
-  source: 'graphql';
-} {
+function isGraphQLValidationError(
+  error: CompositionFailureError,
+): error is CompositionGraphQLValidationError {
   return !isCompositionValidationError(error);
 }
+
+type ContractCompositionFailure = {
+  status: 'failed';
+  reason: {
+    errors: CompositionFailureError[];
+    errorsBySource: {
+      graphql: CompositionGraphQLValidationError[];
+      composition: CompositionValidationError[];
+    };
+    // Federation 1 apparently has SDL and validation errors at the same time.
+    fullSchemaSdl: string | null;
+  };
+};
+
+export type ContractCompositionSuccess = {
+  status: 'completed';
+  result: {
+    fullSchemaSdl: string;
+    supergraph: string | null;
+  };
+};
+
+export type ContractCompositionResult = ContractCompositionFailure | ContractCompositionSuccess;
+
+type SchemaDiffFailure = {
+  status: 'failed';
+  reason: {
+    breaking: Array<SchemaChangeType> | null;
+    safe: Array<SchemaChangeType> | null;
+    all: Array<SchemaChangeType> | null;
+  };
+  result?: never;
+};
+
+export type SchemaDiffSuccess = {
+  status: 'completed';
+  result: {
+    breaking: Array<SchemaChangeType> | null;
+    safe: Array<SchemaChangeType> | null;
+    all: Array<SchemaChangeType> | null;
+  };
+  reason?: never;
+};
+
+export type SchemaDiffSkip = {
+  status: 'skipped';
+  result?: never;
+  reason?: never;
+};
+
+export type SchemaDiffResult = SchemaDiffFailure | SchemaDiffSuccess | SchemaDiffSkip;
 
 @Injectable({
   scope: Scope.Operation,
@@ -114,18 +173,21 @@ export class RegistryChecks {
     organization,
     schemas,
     baseSchema,
+    contracts,
   }: {
     orchestrator: Orchestrator;
     project: Project;
     organization: Organization;
     schemas: Schemas;
     baseSchema: string | null;
+    contracts: null | ContractsInputType;
   }) {
     const result = await orchestrator.composeAndValidate(
       extendWithBase(schemas, baseSchema).map(s => this.helper.createSchemaObject(s)),
       {
         external: project.externalComposition,
         native: this.checkProjectNativeFederationSupport(project, organization),
+        contracts,
       },
     );
 
@@ -160,6 +222,35 @@ export class RegistryChecks {
         fullSchemaSdl: result.sdl,
         supergraph: result.supergraph,
         tags: result.tags ?? null,
+        contracts:
+          result.contracts?.map(contract => {
+            if (Array.isArray(contract.errors) && contract.errors.length) {
+              return {
+                status: 'failed',
+                reason: {
+                  errors: contract.errors,
+                  errorsBySource: {
+                    graphql: contract.errors.filter(isGraphQLValidationError),
+                    composition: contract.errors.filter(isCompositionValidationError),
+                  },
+                  // Federation 1 apparently has SDL and validation errors at the same time.
+                  fullSchemaSdl: result.sdl,
+                },
+              } satisfies ContractCompositionFailure;
+            }
+
+            if (!result.sdl) {
+              throw new Error('No SDL, but no errors either');
+            }
+
+            return {
+              status: 'completed',
+              result: {
+                fullSchemaSdl: result.sdl,
+                supergraph: result.supergraph,
+              },
+            } satisfies ContractCompositionSuccess;
+          }) ?? null,
       },
     } satisfies CheckResult;
   }
@@ -201,6 +292,7 @@ export class RegistryChecks {
       {
         external: args.project.externalComposition,
         native: this.checkProjectNativeFederationSupport(args.project, args.organization),
+        contracts: null,
       },
     );
 
@@ -365,7 +457,7 @@ export class RegistryChecks {
             return null;
           },
         },
-      } satisfies CheckResult;
+      } satisfies SchemaDiffFailure;
     }
 
     if (inspectorChanges.length) {
@@ -384,7 +476,7 @@ export class RegistryChecks {
           return null;
         },
       },
-    } satisfies CheckResult;
+    } satisfies SchemaDiffSuccess;
   }
 
   async serviceName(service: { name: string | null }) {
@@ -490,7 +582,7 @@ export class RegistryChecks {
     }
   }
 
-  private checkProjectNativeFederationSupport(
+  public checkProjectNativeFederationSupport(
     project: Project,
     organization: Organization,
   ): boolean {

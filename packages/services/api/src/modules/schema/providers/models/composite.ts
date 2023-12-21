@@ -15,7 +15,10 @@ import type {
 import { ProjectType } from './../../../../shared/entities';
 import {
   buildSchemaCheckFailureState,
+  ContractCheckInput,
+  ContractInput,
   DeleteFailureReasonCode,
+  isContractChecksSuccessful,
   PublishFailureReasonCode,
   PublishIgnoreReasonCode /* Check */,
   SchemaCheckConclusion,
@@ -47,6 +50,7 @@ export class CompositeModel {
     organization,
     baseSchema,
     approvedChanges,
+    contracts,
   }: {
     input: {
       sdl: string;
@@ -71,6 +75,7 @@ export class CompositeModel {
     project: Project;
     organization: Organization;
     approvedChanges: Map<string, SchemaChangeType>;
+    contracts: Array<ContractInput> | null;
   }): Promise<SchemaCheckResult> {
     const incoming: PushedCompositeSchema = {
       kind: 'composite',
@@ -116,6 +121,16 @@ export class CompositeModel {
       organization,
       schemas,
       baseSchema,
+      contracts:
+        contracts?.map(({ contract }) => ({
+          id: contract.userSpecifiedContractId,
+          filter: {
+            exclude: contract.excludeTags,
+            include: contract.includeTags,
+            removeUnreachableTypesFromPublicApiSchema:
+              contract.removeUnreachableTypesFromPublicApiSchema,
+          },
+        })) ?? null,
     });
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
@@ -124,6 +139,34 @@ export class CompositeModel {
       organization,
       project,
     });
+
+    let contractChecks: Array<ContractCheckInput> | null = null;
+
+    if (contracts?.length && compositionCheck.result?.contracts?.length) {
+      const contractResults = compositionCheck.result.contracts;
+      contractChecks = await Promise.all(
+        contracts.map(async (contract, contractIndex) => {
+          const contractCompositionResult = contractResults[contractIndex];
+          if (!contractCompositionResult) {
+            throw new Error("Contract result doesn't exist. Inconsistency detected.");
+          }
+
+          return {
+            contractId: contract.contract.userSpecifiedContractId,
+            compositionCheck: contractCompositionResult,
+            diffCheck: await this.checks.diff({
+              usageDataSelector: selector,
+              includeUrlChanges: false,
+              // contracts were introduced after this, so we do not need to filter out federation.
+              filterOutFederationChanges: false,
+              approvedChanges,
+              existingSdl: contract.latestValidVersion?.compositeSchemaSdl ?? null,
+              incomingSdl: contractCompositionResult?.result?.fullSchemaSdl ?? null,
+            }),
+          };
+        }),
+      );
+    }
 
     const [diffCheck, policyCheck] = await Promise.all([
       this.checks.diff({
@@ -145,7 +188,9 @@ export class CompositeModel {
     if (
       compositionCheck.status === 'failed' ||
       diffCheck.status === 'failed' ||
-      policyCheck.status === 'failed'
+      policyCheck.status === 'failed' ||
+      // if any of the contract compositions failed, the schema check failed.
+      (contractChecks?.length && !contractChecks.some(isContractChecksSuccessful))
     ) {
       return {
         conclusion: SchemaCheckConclusion.Failure,
@@ -153,6 +198,7 @@ export class CompositeModel {
           compositionCheck,
           diffCheck,
           policyCheck,
+          contractChecks,
         }),
       };
     }
@@ -166,6 +212,22 @@ export class CompositeModel {
           compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
           supergraphSDL: compositionCheck.result.supergraph,
         },
+        contracts:
+          contractChecks?.map(contractCheck => {
+            if (!isContractChecksSuccessful(contractCheck)) {
+              throw new Error('This should not happen.');
+            }
+
+            return {
+              contractId: contractCheck.contractId,
+              isSuccessful: true,
+              composition: {
+                compositeSchemaSDL: contractCheck.compositionCheck.result.fullSchemaSdl,
+                supergraphSDL: contractCheck.compositionCheck.result.supergraph ?? null,
+              },
+              schemaChanges: contractCheck.diffCheck.result ?? null,
+            };
+          }) ?? null,
       },
     };
   }
@@ -278,6 +340,7 @@ export class CompositeModel {
       organization,
       schemas,
       baseSchema,
+      contracts: null,
     });
 
     const schemaVersionToCompareAgainst = compareToLatest ? latest : latestComposable;
@@ -436,6 +499,7 @@ export class CompositeModel {
       organization,
       schemas,
       baseSchema,
+      contracts: null,
     });
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
