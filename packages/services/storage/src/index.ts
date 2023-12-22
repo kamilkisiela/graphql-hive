@@ -3859,22 +3859,22 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
     async createSchemaCheck(args) {
       const result = await pool.transaction(async trx => {
-        const sdlStoreInserts: Array<Promise<unknown>> = [
-          trx.query<unknown>(sql`
-            INSERT INTO "sdl_store" (id, sdl)
-            VALUES (${args.schemaSDLHash}, ${args.schemaSDL})
-            ON CONFLICT (id) DO NOTHING;
-          `),
-        ];
+        const sdlStoreInserts: Array<Promise<unknown>> = [];
 
-        if (args.compositeSchemaSDLHash) {
+        function insertSdl(hash: string, sdl: string) {
           sdlStoreInserts.push(
             trx.query<unknown>(sql`
-                INSERT INTO "sdl_store" (id, sdl)
-                VALUES (${args.compositeSchemaSDLHash}, ${args.compositeSchemaSDL})
-                ON CONFLICT (id) DO NOTHING;
+              INSERT INTO "sdl_store" (id, sdl)
+              VALUES (${hash}, ${sdl})
+              ON CONFLICT (id) DO NOTHING;
             `),
           );
+        }
+
+        insertSdl(args.schemaSDLHash, args.schemaSDL);
+
+        if (args.compositeSchemaSDLHash) {
+          insertSdl(args.compositeSchemaSDLHash, args.compositeSchemaSDL);
         }
 
         if (args.supergraphSDLHash) {
@@ -3882,18 +3882,24 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             throw new Error('supergraphSDLHash provided without supergraphSDL');
           }
 
-          sdlStoreInserts.push(
-            trx.query<unknown>(sql`
-                INSERT INTO "sdl_store" (id, sdl)
-                VALUES (${args.supergraphSDLHash}, ${args.supergraphSDL})
-                ON CONFLICT (id) DO NOTHING;
-            `),
-          );
+          insertSdl(args.supergraphSDLHash, args.supergraphSDL);
+        }
+
+        if (args.contracts?.length) {
+          for (const contract of args.contracts) {
+            if (contract.supergraphSchemaSdl && contract.supergraphSchemaSdlHash) {
+              insertSdl(contract.supergraphSchemaSdlHash, contract.supergraphSchemaSdl);
+            }
+
+            if (contract.compositeSchemaSdl && contract.compositeSchemaSdlHash) {
+              insertSdl(contract.compositeSchemaSdlHash, contract.compositeSchemaSdl);
+            }
+          }
         }
 
         await Promise.all(sdlStoreInserts);
 
-        return trx.one<{ id: string }>(sql`
+        const schemaCheck = await trx.one<{ id: string }>(sql`
           INSERT INTO "schema_checks" (
               "schema_sdl_store_id"
             , "service_name"
@@ -3940,7 +3946,36 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           )
           RETURNING
             "id"
-      `);
+        `);
+
+        if (args.contracts?.length) {
+          for (const contract of args.contracts) {
+            await trx.query(sql`
+              INSERT INTO "schema_check_contracts" (
+                "schema_check_id"
+                , "is_success"
+                , "user_specified_contract_id"
+                , "composite_schema_sdl_store_id"
+                , "supergraph_sdl_store_id"
+                , "schema_composition_errors"
+                , "breaking_schema_changes"
+                , "safe_schema_changes"
+              )
+              VALUES (
+                ${schemaCheck.id}
+                , ${contract.isSuccess}
+                , ${contract.contractId}
+                , ${contract.compositeSchemaSdlHash}
+                , ${contract.supergraphSchemaSdlHash}
+                , ${jsonify(contract.schemaCompositionErrors)}
+                , ${jsonify(contract.breakingSchemaChanges?.map(toSerializableSchemaChange))}
+                , ${jsonify(contract.safeSchemaChanges?.map(toSerializableSchemaChange))}
+              )
+            `);
+          }
+        }
+
+        return schemaCheck;
       });
 
       const check = await this.findSchemaCheck({

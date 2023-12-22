@@ -44,5 +44,22 @@ export default {
       "meta" jsonb NOT NULL,
       "is_safe_based_on_usage" BOOLEAN NOT NULL
     );
+
+    CREATE TABLE "schema_check_contracts" (
+      "id" UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
+      "schema_check_id" UUID NOT NULL REFERENCES "schema_checks" ("id") ON DELETE CASCADE,
+      "is_success" boolean NOT NULL,
+      "user_specified_contract_id" text NOT NULL,
+      "composite_schema_sdl_store_id" text,
+      "supergraph_sdl_store_id" text,
+      "schema_composition_errors" jsonb,
+      "breaking_schema_changes" jsonb,
+      "safe_schema_changes" jsonb
+    );
+
+    CREATE INDEX "schema_check_contracts_pagination" ON "schema_check_contracts" (
+      "schema_check_id" ASC,
+      "user_specified_contract_id" ASC
+    );
   `,
 } satisfies MigrationExecutor;

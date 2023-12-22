@@ -139,11 +139,10 @@ export class Contracts {
       SELECT DISTINCT ON ("contract_id")
         ${schemaVersionContractsFields}
       FROM
-        "contract_versions"
+        "schema_version_contracts"
       WHERE
-        "target_id" = ${args.targetId}
-        AND "contract_id" = ANY(${sql.array(args.contractIds, 'uuid')})
-        AND "valid" = true
+        "contract_id" = ANY(${sql.array(args.contractIds, 'uuid')})
+        AND "is_composable" = true
       ORDER BY
         "contract_id"
         , "created_at" DESC
