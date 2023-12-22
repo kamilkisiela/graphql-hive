@@ -459,11 +459,7 @@ export class SchemaPublisher {
     if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
       schemaCheck = await this.storage.createSchemaCheck({
         schemaSDL: sdl,
-        schemaSDLHash: hashSDL(
-          parse(sdl, {
-            noLocation: true,
-          }),
-        ),
+        schemaSDLHash: createSDLHash(sdl),
         serviceName: input.service ?? null,
         meta: input.meta ?? null,
         targetId: target.id,
@@ -484,18 +480,12 @@ export class SchemaPublisher {
           : {
               schemaCompositionErrors: null,
               compositeSchemaSDL: checkResult.state.composition.compositeSchemaSDL,
-              compositeSchemaSDLHash: hashSDL(
-                parse(checkResult.state.composition.compositeSchemaSDL, {
-                  noLocation: true,
-                }),
+              compositeSchemaSDLHash: createSDLHash(
+                checkResult.state.composition.compositeSchemaSDL,
               ),
               supergraphSDL: checkResult.state.composition.supergraphSDL,
               supergraphSDLHash: checkResult.state.composition.supergraphSDL
-                ? hashSDL(
-                    parse(checkResult.state.composition.supergraphSDL, {
-                      noLocation: true,
-                    }),
-                  )
+                ? createSDLHash(checkResult.state.composition.supergraphSDL)
                 : null,
             }),
         isManuallyApproved: false,
@@ -507,6 +497,22 @@ export class SchemaPublisher {
         githubSha: githubCheckRun?.commit ?? null,
         expiresAt,
         contextId,
+        contracts:
+          checkResult.state.contracts?.map(contract => ({
+            contractId: contract.contractId,
+            isSuccess: contract.isSuccessful,
+            compositeSchemaSdl: contract.composition.compositeSchemaSDL,
+            compositeSchemaSdlHash: contract.composition.compositeSchemaSDL
+              ? createSDLHash(contract.composition.compositeSchemaSDL)
+              : null,
+            supergraphSchemaSdl: contract.composition.supergraphSDL,
+            supergraphSchemaSdlHash: contract.composition.supergraphSDL
+              ? createSDLHash(contract.composition.supergraphSDL)
+              : null,
+            schemaCompositionErrors: contract.composition.errors ?? null,
+            breakingSchemaChanges: contract.schemaChanges?.breaking ?? null,
+            safeSchemaChanges: contract.schemaChanges?.safe ?? null,
+          })) ?? null,
       });
     }
 
@@ -555,11 +561,7 @@ export class SchemaPublisher {
 
       schemaCheck = await this.storage.createSchemaCheck({
         schemaSDL: sdl,
-        schemaSDLHash: hashSDL(
-          parse(sdl, {
-            noLocation: true,
-          }),
-        ),
+        schemaSDLHash: createSDLHash(sdl),
         serviceName: input.service ?? null,
         meta: input.meta ?? null,
         targetId: target.id,
@@ -571,18 +573,10 @@ export class SchemaPublisher {
         schemaPolicyErrors: null,
         schemaCompositionErrors: null,
         compositeSchemaSDL: composition.compositeSchemaSDL,
-        compositeSchemaSDLHash: hashSDL(
-          parse(composition.compositeSchemaSDL, {
-            noLocation: true,
-          }),
-        ),
+        compositeSchemaSDLHash: createSDLHash(composition.compositeSchemaSDL),
         supergraphSDL: composition.supergraphSDL,
         supergraphSDLHash: composition.supergraphSDL
-          ? hashSDL(
-              parse(composition.supergraphSDL, {
-                noLocation: true,
-              }),
-            )
+          ? createSDLHash(composition.supergraphSDL)
           : null,
         isManuallyApproved: false,
         manualApprovalUserId: null,
@@ -593,6 +587,22 @@ export class SchemaPublisher {
         githubSha: githubCheckRun?.commit ?? null,
         expiresAt,
         contextId,
+        contracts:
+          checkResult.state?.contracts?.map(contract => ({
+            contractId: contract.contractId,
+            isSuccess: contract.isSuccessful,
+            compositeSchemaSdl: contract.composition.compositeSchemaSDL,
+            compositeSchemaSdlHash: contract.composition.compositeSchemaSDL
+              ? createSDLHash(contract.composition.compositeSchemaSDL)
+              : null,
+            supergraphSchemaSdl: contract.composition.supergraphSDL,
+            supergraphSchemaSdlHash: contract.composition.supergraphSDL
+              ? createSDLHash(contract.composition.supergraphSDL)
+              : null,
+            schemaCompositionErrors: null,
+            breakingSchemaChanges: contract.schemaChanges?.breaking ?? null,
+            safeSchemaChanges: contract.schemaChanges?.safe ?? null,
+          })) ?? null,
       });
     }
 
@@ -667,6 +677,12 @@ export class SchemaPublisher {
         ) ?? []),
         ...(checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? []),
         ...(checkResult.state.composition.errors ?? []),
+        ...(checkResult.state.contracts?.flatMap(contract => [
+          ...(contract.composition.errors?.map(error => ({
+            message: `[${contract.contractId}] ${error.message}`,
+            source: error.source,
+          })) ?? []),
+        ]) ?? []),
       ],
       schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, schemaCheck),
     } as const;
@@ -1909,3 +1925,11 @@ const SchemaCheckContextIdModel = z
   .max(200, {
     message: 'Context ID cannot exceed length of 200 characters.',
   });
+
+function createSDLHash(sdl: string): string {
+  return hashSDL(
+    parse(sdl, {
+      noLocation: true,
+    }),
+  );
+}
