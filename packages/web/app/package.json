@@ -58,7 +58,7 @@
     "clsx": "2.0.0",
     "cmdk": "0.2.0",
     "cookies": "0.8.0",
-    "date-fns": "2.30.0",
+    "date-fns": "3.0.6",
     "dompurify": "3.0.6",
     "echarts": "5.4.3",
     "echarts-for-react": "3.0.2",

@@ -285,8 +285,8 @@ importers:
         specifier: 2.4.3
         version: 2.4.3
       date-fns:
-        specifier: 2.30.0
-        version: 2.30.0
+        specifier: 3.0.6
+        version: 3.0.6
       dockerode:
         specifier: 4.0.1
         version: 4.0.1
@@ -623,8 +623,8 @@ importers:
         specifier: 2.2.2
         version: 2.2.2
       date-fns:
-        specifier: 2.30.0
-        version: 2.30.0
+        specifier: 3.0.6
+        version: 3.0.6
       fast-json-stable-stringify:
         specifier: 2.1.0
         version: 2.1.0
@@ -920,8 +920,8 @@ importers:
         specifier: 0.9.14
         version: 0.9.14
       date-fns:
-        specifier: 2.30.0
-        version: 2.30.0
+        specifier: 3.0.6
+        version: 3.0.6
       dotenv:
         specifier: 16.3.1
         version: 16.3.1
@@ -1227,8 +1227,8 @@ importers:
         specifier: 0.9.14
         version: 0.9.14
       date-fns:
-        specifier: 2.30.0
-        version: 2.30.0
+        specifier: 3.0.6
+        version: 3.0.6
       dotenv:
         specifier: 16.3.1
         version: 16.3.1
@@ -1404,8 +1404,8 @@ importers:
         specifier: 4.5.0
         version: 4.5.0
       date-fns:
-        specifier: 2.30.0
-        version: 2.30.0
+        specifier: 3.0.6
+        version: 3.0.6
       dotenv:
         specifier: 16.3.1
         version: 16.3.1
@@ -1605,8 +1605,8 @@ importers:
         specifier: 0.8.0
         version: 0.8.0
       date-fns:
-        specifier: 2.30.0
-        version: 2.30.0
+        specifier: 3.0.6
+        version: 3.0.6
       dompurify:
         specifier: 3.0.6
         version: 3.0.6
@@ -1843,8 +1843,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       date-fns:
-        specifier: 2.30.0
-        version: 2.30.0
+        specifier: 3.0.6
+        version: 3.0.6
       gray-matter:
         specifier: 4.0.3
         version: 4.0.3
@@ -17369,6 +17369,10 @@ packages:
     engines: {node: '>=0.11'}
     dependencies:
       '@babel/runtime': 7.21.0
+    dev: true
+
+  /date-fns@3.0.6:
+    resolution: {integrity: sha512-W+G99rycpKMMF2/YD064b2lE7jJGUe+EjOES7Q8BIGY8sbNdbgcs9XFTZwvzc9Jx1f3k7LB7gZaZa7f8Agzljg==}
 
   /dateformat@4.6.3:
     resolution: {integrity: sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==}
