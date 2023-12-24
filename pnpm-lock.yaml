@@ -1710,8 +1710,8 @@ importers:
         specifier: 0.8.0
         version: 0.8.0
       tailwind-merge:
-        specifier: 2.1.0
-        version: 2.1.0
+        specifier: 2.2.0
+        version: 2.2.0
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -1870,8 +1870,8 @@ importers:
         specifier: 4.12.0
         version: 4.12.0(react@18.2.0)
       tailwind-merge:
-        specifier: 2.1.0
-        version: 2.1.0
+        specifier: 2.2.0
+        version: 2.2.0
     devDependencies:
       '@theguild/tailwind-config':
         specifier: 0.3.0
@@ -4542,13 +4542,6 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       regenerator-runtime: 0.14.1
-
-  /@babel/runtime@7.23.5:
-    resolution: {integrity: sha512-NdUTHcPe4C99WxPub+K9l9tK5/lV4UXIoaHSYgzco9BCyjKAAwzdBI+wWtYqHt7LJdbo74ZjRPJgzVweq1sz0w==}
-    engines: {node: '>=6.9.0'}
-    dependencies:
-      regenerator-runtime: 0.14.1
-    dev: false
 
   /@babel/runtime@7.23.6:
     resolution: {integrity: sha512-zHd0eUrf5GZoOWVCXp6koAKQTfZV07eit6bGPmJgnZdnSAvvZee6zniW2XMF7Cmc4ISOOnPy3QaSiIJGJkVEDQ==}
@@ -24784,7 +24777,7 @@ packages:
     resolution: {integrity: sha512-Y4xdX6vQuxkeHFD4zBx1Xmct5WCCSym5/w9qp+e4f9ueqcZnDw+p39zJ3xWZDrFYbowf/4TrorbnliMx0NqBtw==}
     hasBin: true
     dependencies:
-      '@babel/runtime': 7.23.1
+      '@babel/runtime': 7.23.6
       chokidar: 3.5.3
       glob: 7.2.3
       html-minifier: 4.0.0
@@ -24812,7 +24805,7 @@ packages:
   /mjml-core@4.14.0(patch_hash=zxxsxbqejjmcwuzpigutzzq6wa):
     resolution: {integrity: sha512-LUEVmwz8t5PaPrJKSIWQrBSfhyTphrW7+lapc7/2Nj7G1zy7u6TpX7qwa5gymoEEQLTv6a9wiKQpRumN8y9N4A==}
     dependencies:
-      '@babel/runtime': 7.23.1
+      '@babel/runtime': 7.23.6
       cheerio: 1.0.0-rc.10
       detect-node: 2.0.4
       html-minifier: 4.0.0
@@ -24951,7 +24944,7 @@ packages:
     resolution: {integrity: sha512-7Rg0HPcOlYWVrL+STiASPAiT/rnaYlybmcnWQg26wSrnpabDhQxs0djFvWqGTY2Fa+cfhoywmQU7xzW0eQ6BNg==}
     hasBin: true
     dependencies:
-      '@babel/runtime': 7.23.1
+      '@babel/runtime': 7.23.6
       js-beautify: 1.14.6
       lodash: 4.17.21
       mjml-core: 4.14.0(patch_hash=zxxsxbqejjmcwuzpigutzzq6wa)
@@ -24983,7 +24976,7 @@ packages:
   /mjml-preset-core@4.14.0:
     resolution: {integrity: sha512-YGsKeodJ51mdhn77oQzZnq/C0jQXzGIszgIWL3W5NjMGZM+xyndP514efpJ2jVkQc/WDGQ5JGSUhsnaG61WVRw==}
     dependencies:
-      '@babel/runtime': 7.23.1
+      '@babel/runtime': 7.23.6
       mjml-accordion: 4.14.0
       mjml-body: 4.14.0
       mjml-button: 4.14.0
@@ -25076,7 +25069,7 @@ packages:
   /mjml-validator@4.13.0:
     resolution: {integrity: sha512-uURYfyQYtHJ6Qz/1A7/+E9ezfcoISoLZhYK3olsxKRViwaA2Mm8gy/J3yggZXnsUXWUns7Qymycm5LglLEIiQg==}
     dependencies:
-      '@babel/runtime': 7.23.1
+      '@babel/runtime': 7.23.6
     dev: true
 
   /mjml-wrapper@4.14.0:
@@ -30590,10 +30583,10 @@ packages:
     resolution: {integrity: sha512-Cat63mxsVJlzYvN51JmVXIgNoUokrIaT2zLclCXjRd8boZ0004U4KCs/sToJ75C6sdlByWxpYnb5Boif1VSFew==}
     dev: false
 
-  /tailwind-merge@2.1.0:
-    resolution: {integrity: sha512-l11VvI4nSwW7MtLSLYT4ldidDEUwQAMWuSHk7l4zcXZDgnCRa0V3OdCwFfM7DCzakVXMNRwAeje9maFFXT71dQ==}
+  /tailwind-merge@2.2.0:
+    resolution: {integrity: sha512-SqqhhaL0T06SW59+JVNfAqKdqLs0497esifRrZ7jOaefP3o64fdFNDMrAQWZFMxTLJPiHVjRLUywT8uFz1xNWQ==}
     dependencies:
-      '@babel/runtime': 7.23.5
+      '@babel/runtime': 7.23.6
     dev: false
 
   /tailwindcss-animate@1.0.7(tailwindcss@3.3.7):
