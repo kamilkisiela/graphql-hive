@@ -138,7 +138,7 @@ importers:
         version: file:rules
       eslint-plugin-tailwindcss:
         specifier: 3.13.0
-        version: 3.13.0(tailwindcss@3.3.7)
+        version: 3.13.0(tailwindcss@3.4.0)
       fs-extra:
         specifier: 11.2.0
         version: 11.2.0
@@ -1819,11 +1819,11 @@ importers:
         specifier: 7.6.6
         version: 7.6.6
       tailwindcss:
-        specifier: 3.3.7
-        version: 3.3.7(ts-node@10.9.2)
+        specifier: 3.4.0
+        version: 3.4.0(ts-node@10.9.2)
       tailwindcss-animate:
         specifier: 1.0.7
-        version: 1.0.7(tailwindcss@3.3.7)
+        version: 1.0.7(tailwindcss@3.4.0)
       tailwindcss-radix:
         specifier: 2.8.0
         version: 2.8.0
@@ -1886,8 +1886,8 @@ importers:
         specifier: 8.4.32
         version: 8.4.32
       tailwindcss:
-        specifier: 3.3.7
-        version: 3.3.7(ts-node@10.9.2)
+        specifier: 3.4.0
+        version: 3.4.0(ts-node@10.9.2)
 
   scripts:
     devDependencies:
@@ -13121,7 +13121,7 @@ packages:
       cssnano: 6.0.1(postcss@8.4.32)
       postcss: 8.4.32
       postcss-import: 15.1.0(postcss@8.4.32)
-      tailwindcss: 3.3.7(ts-node@10.9.2)
+      tailwindcss: 3.4.0(ts-node@10.9.2)
     transitivePeerDependencies:
       - ts-node
     dev: true
@@ -18703,7 +18703,7 @@ packages:
       eslint: 8.56.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
     dev: true
 
-  /eslint-plugin-tailwindcss@3.13.0(tailwindcss@3.3.7):
+  /eslint-plugin-tailwindcss@3.13.0(tailwindcss@3.4.0):
     resolution: {integrity: sha512-Fcep4KDRLWaK3KmkQbdyKHG0P4GdXFmXdDaweTIPcgOP60OOuWFbh1++dufRT28Q4zpKTKaHwTsXPJ4O/EjU2Q==}
     engines: {node: '>=12.13.0'}
     peerDependencies:
@@ -18711,7 +18711,7 @@ packages:
     dependencies:
       fast-glob: 3.3.1
       postcss: 8.4.32
-      tailwindcss: 3.3.7(ts-node@10.9.2)
+      tailwindcss: 3.4.0(ts-node@10.9.2)
     dev: true
 
   /eslint-plugin-unicorn@49.0.0(eslint@8.56.0):
@@ -30596,20 +30596,20 @@ packages:
       '@babel/runtime': 7.23.5
     dev: false
 
-  /tailwindcss-animate@1.0.7(tailwindcss@3.3.7):
+  /tailwindcss-animate@1.0.7(tailwindcss@3.4.0):
     resolution: {integrity: sha512-bl6mpH3T7I3UFxuvDEXLxy/VuFxBk5bbzplh7tXI68mwMokNYd1t9qPBHlnyTwfa4JGC4zP516I1hYYtQ/vspA==}
     peerDependencies:
       tailwindcss: '>=3.0.0 || insiders'
     dependencies:
-      tailwindcss: 3.3.7(ts-node@10.9.2)
+      tailwindcss: 3.4.0(ts-node@10.9.2)
     dev: true
 
   /tailwindcss-radix@2.8.0:
     resolution: {integrity: sha512-1k1UfoIYgVyBl13FKwwoKavjnJ5VEaUClCTAsgz3VLquN4ay/lyaMPzkbqD71sACDs2fRGImytAUlMb4TzOt1A==}
     dev: true
 
-  /tailwindcss@3.3.7(ts-node@10.9.2):
-    resolution: {integrity: sha512-pjgQxDZPvyS/nG3ZYkyCvsbONJl7GdOejfm24iMt2ElYQQw8Jc4p0m8RdMp7mznPD0kUhfzwV3zAwa80qI0zmQ==}
+  /tailwindcss@3.4.0(ts-node@10.9.2):
+    resolution: {integrity: sha512-VigzymniH77knD1dryXbyxR+ePHihHociZbXnLZHUyzf2MMs2ZVqlUrZ3FvpXP8pno9JzmILt1sZPD19M3IxtA==}
     engines: {node: '>=14.0.0'}
     hasBin: true
     dependencies:
