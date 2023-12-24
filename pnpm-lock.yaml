@@ -1140,8 +1140,8 @@ importers:
         specifier: 4.5.1
         version: 4.5.1
       p-retry:
-        specifier: 6.1.0
-        version: 6.1.0
+        specifier: 6.2.0
+        version: 6.2.0
       prom-client:
         specifier: 15.1.0
         version: 15.1.0
@@ -26356,8 +26356,8 @@ packages:
       retry: 0.13.1
     dev: true
 
-  /p-retry@6.1.0:
-    resolution: {integrity: sha512-fJLEQ2KqYBJRuaA/8cKMnqhulqNM+bpcjYtXNex2t3mOXKRYPitAJt9NacSf8XAFzcYahSAbKpobiWDSqHSh2g==}
+  /p-retry@6.2.0:
+    resolution: {integrity: sha512-JA6nkq6hKyWLLasXQXUrO4z8BUZGUt/LjlJxx8Gb2+2ntodU/SS63YZ8b0LUTbQ8ZB9iwOfhEPhg4ykKnn2KsA==}
     engines: {node: '>=16.17'}
     dependencies:
       '@types/retry': 0.12.2
