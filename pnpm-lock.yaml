@@ -1656,8 +1656,8 @@ importers:
         specifier: 2.2.0
         version: 2.2.0(next@13.5.6)
       pino:
-        specifier: 8.17.1
-        version: 8.17.1
+        specifier: 8.17.2
+        version: 8.17.2
       pino-http:
         specifier: 8.6.0
         version: 8.6.0
@@ -26930,7 +26930,7 @@ packages:
     resolution: {integrity: sha512-SMkt0R7nzoX76BhTlmCWg0s2F0UYKGeln8y+thL2OUcCxZbbPB1AqgrEMuHAjHyc7oBefext3Af3ZT3k9ieETw==}
     dependencies:
       get-caller-file: 2.0.5
-      pino: 8.17.1
+      pino: 8.17.2
       pino-std-serializers: 6.2.2
       process-warning: 2.2.0
     dev: false
@@ -26976,8 +26976,8 @@ packages:
       sonic-boom: 1.4.1
     dev: true
 
-  /pino@8.17.1:
-    resolution: {integrity: sha512-YoN7/NJgnsJ+fkADZqjhRt96iepWBndQHeClmSBH0sQWCb8zGD74t00SK4eOtKFi/f8TUmQnfmgglEhd2kI1RQ==}
+  /pino@8.17.2:
+    resolution: {integrity: sha512-LA6qKgeDMLr2ux2y/YiUt47EfgQ+S9LznBWOJdN3q1dx2sv0ziDLUBeVpyVv17TEcGCBuWf0zNtg3M5m1NhhWQ==}
     hasBin: true
     dependencies:
       atomic-sleep: 1.0.0
@@ -26985,7 +26985,7 @@ packages:
       on-exit-leak-free: 2.1.0
       pino-abstract-transport: 1.1.0
       pino-std-serializers: 6.2.2
-      process-warning: 2.2.0
+      process-warning: 3.0.0
       quick-format-unescaped: 4.0.4
       real-require: 0.2.0
       safe-stable-stringify: 2.4.2
@@ -27744,6 +27744,10 @@ packages:
 
   /process-warning@2.2.0:
     resolution: {integrity: sha512-/1WZ8+VQjR6avWOgHeEPd7SDQmFQ1B5mC1eRXsCm5TarlNmx/wCsa5GEaxGm05BORRtyG/Ex/3xq3TuRvq57qg==}
+    dev: false
+
+  /process-warning@3.0.0:
+    resolution: {integrity: sha512-mqn0kFRl0EoqhnL0GQ0veqFHyIN1yig9RHh/InzORTUiZHFRAur+aMtRkELNwGs9aNwKS6tg/An4NYBPGwvtzQ==}
     dev: false
 
   /process@0.11.10:

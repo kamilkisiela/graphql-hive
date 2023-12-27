@@ -75,7 +75,7 @@
     "monaco-themes": "0.4.4",
     "next": "13.5.6",
     "nextjs-cors": "2.2.0",
-    "pino": "8.17.1",
+    "pino": "8.17.2",
     "pino-http": "8.6.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
