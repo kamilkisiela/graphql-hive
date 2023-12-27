@@ -607,7 +607,11 @@ const createFederation: (
               getInaccessibleDirectiveNameFromFederation2SupergraphSDL(supergraphSDL);
 
             if (!inaccessibleDirectiveName) {
-              throw new Error('Could not resolve @inaccessible directive name.');
+              // In case there is no inaccessible directive, we can't remove types from the public api schema as everything is reachable.
+              return {
+                id: contract.id,
+                result: compositionResult,
+              };
             }
 
             // we retrieve the list of reachable types from the public api sdl

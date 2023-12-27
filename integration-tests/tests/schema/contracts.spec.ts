@@ -268,3 +268,38 @@ test('federation schema contains list of tags', async () => {
     ]
   `);
 });
+
+test('nothing is removed from schema as everything is included yields no errors', async () => {
+  await client.composeAndValidate.mutate({
+    type: 'federation',
+    native: true,
+    schemas: [
+      {
+        raw: /* GraphQL */ `
+          extend schema
+            @link(url: "https://specs.apollo.dev/link/v1.0")
+            @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+          type Query {
+            hello: String @tag(name: "toyota")
+            helloHidden: String @tag(name: "toyota")
+            foo: String @tag(name: "toyota")
+          }
+        `,
+        source: 'foo.graphql',
+        url: null,
+      },
+    ],
+    external: null,
+    contracts: [
+      {
+        id: 'foo',
+        filter: {
+          include: ['toyota'],
+          exclude: null,
+          removeUnreachableTypesFromPublicApiSchema: true,
+        },
+      },
+    ],
+  });
+});
