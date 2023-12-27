@@ -18,7 +18,7 @@
     "@graphiql/toolkit": "0.9.1",
     "@graphql-tools/mock": "9.0.0",
     "@headlessui/react": "1.7.17",
-    "@hookform/resolvers": "3.3.2",
+    "@hookform/resolvers": "3.3.3",
     "@monaco-editor/react": "4.6.0",
     "@n1ru4l/react-time-ago": "1.1.0",
     "@radix-ui/react-accordion": "1.1.2",
