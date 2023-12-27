@@ -1659,8 +1659,8 @@ importers:
         specifier: 8.17.2
         version: 8.17.2
       pino-http:
-        specifier: 8.6.0
-        version: 8.6.0
+        specifier: 8.6.1
+        version: 8.6.1
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -26901,13 +26901,13 @@ packages:
       readable-stream: 4.4.0
       split2: 4.1.0
 
-  /pino-http@8.6.0:
-    resolution: {integrity: sha512-SMkt0R7nzoX76BhTlmCWg0s2F0UYKGeln8y+thL2OUcCxZbbPB1AqgrEMuHAjHyc7oBefext3Af3ZT3k9ieETw==}
+  /pino-http@8.6.1:
+    resolution: {integrity: sha512-J0hiJgUExtBXP2BjrK4VB305tHXS31sCmWJ9XJo2wPkLHa1NFPuW4V9wjG27PAc2fmBCigiNhQKpvrx+kntBPA==}
     dependencies:
       get-caller-file: 2.0.5
       pino: 8.17.2
       pino-std-serializers: 6.2.2
-      process-warning: 2.2.0
+      process-warning: 3.0.0
     dev: false
 
   /pino-pretty@10.3.0:
@@ -27716,10 +27716,6 @@ packages:
   /process-warning@1.0.0:
     resolution: {integrity: sha512-du4wfLyj4yCZq1VupnVSZmRsPJsNuxoDQFdCFHLaYiEbFBD7QE0a+I4D7hOxrVnh78QE/YipFAj9lXHiXocV+Q==}
     dev: true
-
-  /process-warning@2.2.0:
-    resolution: {integrity: sha512-/1WZ8+VQjR6avWOgHeEPd7SDQmFQ1B5mC1eRXsCm5TarlNmx/wCsa5GEaxGm05BORRtyG/Ex/3xq3TuRvq57qg==}
-    dev: false
 
   /process-warning@3.0.0:
     resolution: {integrity: sha512-mqn0kFRl0EoqhnL0GQ0veqFHyIN1yig9RHh/InzORTUiZHFRAur+aMtRkELNwGs9aNwKS6tg/An4NYBPGwvtzQ==}
