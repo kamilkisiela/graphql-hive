@@ -21,7 +21,7 @@ const CreateContractMutation = graphql(`
         message
         details {
           targetId
-          userSpecifiedContractId
+          contractName
           includeTags
           excludeTags
         }
@@ -72,7 +72,7 @@ test.concurrent('schema check with successful contract checks', async ({ expect 
     variables: {
       input: {
         targetId: target.id,
-        userSpecifiedContractId: 'my-contract',
+        contractName: 'my-contract',
         removeUnreachableTypesFromPublicApiSchema: true,
         excludeTags: ['toyota'],
       },
@@ -143,7 +143,7 @@ test.concurrent('schema check with failing contract composition', async ({ expec
     variables: {
       input: {
         targetId: target.id,
-        userSpecifiedContractId: 'my-contract',
+        contractName: 'my-contract',
         removeUnreachableTypesFromPublicApiSchema: true,
         excludeTags: ['toyota'],
       },
@@ -230,7 +230,7 @@ test.concurrent(
       variables: {
         input: {
           targetId: target.id,
-          userSpecifiedContractId: 'my-contract',
+          contractName: 'my-contract',
           removeUnreachableTypesFromPublicApiSchema: true,
           excludeTags: ['toyota'],
         },
@@ -245,7 +245,7 @@ test.concurrent(
       variables: {
         input: {
           targetId: target.id,
-          userSpecifiedContractId: 'my-other-contract',
+          contractName: 'my-other-contract',
           removeUnreachableTypesFromPublicApiSchema: true,
           includeTags: ['fiat'],
         },

@@ -344,12 +344,22 @@ export class SchemaManager {
             supergraphSDL: null;
             schemaCompositionErrors: Array<SchemaCompositionError>;
             tags: null;
+            contracts: null;
           }
         | {
             compositeSchemaSDL: string;
             supergraphSDL: string | null;
             schemaCompositionErrors: null;
             tags: Array<string> | null;
+            contracts: null | Array<{
+              contractId: string;
+              lastContractVersionId: string | null;
+              contractName: string;
+              compositeSchemaSDL: string | null;
+              supergraphSDL: string | null;
+              schemaCompositionErrors: Array<SchemaCompositionError> | null;
+              changes: null | Array<SchemaChangeType>;
+            }>;
           }
       ),
   ) {

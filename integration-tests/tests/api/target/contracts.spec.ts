@@ -21,7 +21,7 @@ const CreateContractMutation = graphql(`
         message
         details {
           targetId
-          userSpecifiedContractId
+          contractName
           includeTags
           excludeTags
         }
@@ -47,7 +47,7 @@ test.concurrent('create contract for Federation project', async ({ expect }) => 
     variables: {
       input: {
         targetId: target.id,
-        userSpecifiedContractId: 'toyota',
+        contractName: 'toyota',
         includeTags: ['foo'],
         excludeTags: ['bar'],
         removeUnreachableTypesFromPublicApiSchema: true,
@@ -93,7 +93,7 @@ test.concurrent(
       variables: {
         input: {
           targetId: target.id,
-          userSpecifiedContractId: 'toyota',
+          contractName: 'toyota',
           includeTags: ['foo'],
           excludeTags: ['foo'],
           removeUnreachableTypesFromPublicApiSchema: true,
@@ -107,10 +107,10 @@ test.concurrent(
       createContract: {
         error: {
           details: {
+            contractName: null,
             excludeTags: null,
             includeTags: Included and exclude tags must not intersect,
             targetId: null,
-            userSpecifiedContractId: null,
           },
           message: Something went wrong.,
         },
@@ -138,7 +138,7 @@ test.concurrent('tags can not be empty', async ({ expect }) => {
     variables: {
       input: {
         targetId: target.id,
-        userSpecifiedContractId: 'toyota',
+        contractName: 'toyota',
         includeTags: [],
         excludeTags: [],
         removeUnreachableTypesFromPublicApiSchema: true,
@@ -152,10 +152,10 @@ test.concurrent('tags can not be empty', async ({ expect }) => {
       createContract: {
         error: {
           details: {
+            contractName: null,
             excludeTags: null,
             includeTags: Provide at least one value for each,
             targetId: null,
-            userSpecifiedContractId: null,
           },
           message: Something went wrong.,
         },
@@ -182,7 +182,7 @@ test.concurrent('includeTags only', async ({ expect }) => {
     variables: {
       input: {
         targetId: target.id,
-        userSpecifiedContractId: 'toyota',
+        contractName: 'toyota',
         includeTags: ['foo'],
         removeUnreachableTypesFromPublicApiSchema: true,
       },
@@ -225,7 +225,7 @@ test.concurrent('exclude tags only', async ({ expect }) => {
     variables: {
       input: {
         targetId: target.id,
-        userSpecifiedContractId: 'toyota',
+        contractName: 'toyota',
         excludeTags: ['foo'],
         removeUnreachableTypesFromPublicApiSchema: true,
       },
@@ -251,7 +251,7 @@ test.concurrent('exclude tags only', async ({ expect }) => {
   });
 });
 
-test.concurrent('conflicting userSpecifiedContractId results in error', async ({ expect }) => {
+test.concurrent('conflicting contractName results in error', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject } = await createOrg();
   const { createToken, target } = await createProject(ProjectType.Federation);
@@ -268,7 +268,7 @@ test.concurrent('conflicting userSpecifiedContractId results in error', async ({
     variables: {
       input: {
         targetId: target.id,
-        userSpecifiedContractId: 'toyota',
+        contractName: 'toyota',
         includeTags: ['foo'],
         removeUnreachableTypesFromPublicApiSchema: true,
       },
@@ -281,7 +281,7 @@ test.concurrent('conflicting userSpecifiedContractId results in error', async ({
     variables: {
       input: {
         targetId: target.id,
-        userSpecifiedContractId: 'toyota',
+        contractName: 'toyota',
         includeTags: ['foo'],
         removeUnreachableTypesFromPublicApiSchema: true,
       },
@@ -294,10 +294,10 @@ test.concurrent('conflicting userSpecifiedContractId results in error', async ({
       createContract: {
         error: {
           details: {
+            contractName: Must be unique across all target contracts.,
             excludeTags: null,
             includeTags: null,
             targetId: null,
-            userSpecifiedContractId: Must be unique across all target contracts.,
           },
           message: Something went wrong.,
         },
@@ -307,41 +307,39 @@ test.concurrent('conflicting userSpecifiedContractId results in error', async ({
   `);
 });
 
-test.concurrent(
-  'userSpecifiedContractId must be at least 2 characters long',
-  async ({ expect }) => {
-    const { createOrg } = await initSeed().createOwner();
-    const { createProject } = await createOrg();
-    const { createToken, target } = await createProject(ProjectType.Federation);
-    const token = await createToken({
-      targetScopes: [
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-        TargetAccessScope.Settings,
-      ],
-    });
+test.concurrent('contractName must be at least 2 characters long', async ({ expect }) => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject } = await createOrg();
+  const { createToken, target } = await createProject(ProjectType.Federation);
+  const token = await createToken({
+    targetScopes: [
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+    ],
+  });
 
-    const result = await execute({
-      document: CreateContractMutation,
-      variables: {
-        input: {
-          targetId: target.id,
-          userSpecifiedContractId: 't',
-          includeTags: ['foo'],
-          removeUnreachableTypesFromPublicApiSchema: true,
-        },
+  const result = await execute({
+    document: CreateContractMutation,
+    variables: {
+      input: {
+        targetId: target.id,
+        contractName: 't',
+        includeTags: ['foo'],
+        removeUnreachableTypesFromPublicApiSchema: true,
       },
-      authToken: token.secret,
-    }).then(r => r.expectNoGraphQLErrors());
-    expect(result).toMatchInlineSnapshot(`
+    },
+    authToken: token.secret,
+  }).then(r => r.expectNoGraphQLErrors());
+  expect(result).toMatchInlineSnapshot(`
       {
         createContract: {
           error: {
             details: {
+              contractName: String must contain at least 2 character(s),
               excludeTags: null,
               includeTags: null,
               targetId: null,
-              userSpecifiedContractId: String must contain at least 2 character(s),
             },
             message: Something went wrong.,
           },
@@ -349,44 +347,41 @@ test.concurrent(
         },
       }
     `);
-  },
-);
+});
 
-test.concurrent(
-  'userSpecifiedContractId must be at most 64 characters long',
-  async ({ expect }) => {
-    const { createOrg } = await initSeed().createOwner();
-    const { createProject } = await createOrg();
-    const { createToken, target } = await createProject(ProjectType.Federation);
-    const token = await createToken({
-      targetScopes: [
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-        TargetAccessScope.Settings,
-      ],
-    });
+test.concurrent('contractName must be at most 64 characters long', async ({ expect }) => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject } = await createOrg();
+  const { createToken, target } = await createProject(ProjectType.Federation);
+  const token = await createToken({
+    targetScopes: [
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+    ],
+  });
 
-    const result = await execute({
-      document: CreateContractMutation,
-      variables: {
-        input: {
-          targetId: target.id,
-          userSpecifiedContractId: new Array(64 + 1).fill('a').join(''),
-          includeTags: ['foo'],
-          removeUnreachableTypesFromPublicApiSchema: true,
-        },
+  const result = await execute({
+    document: CreateContractMutation,
+    variables: {
+      input: {
+        targetId: target.id,
+        contractName: new Array(64 + 1).fill('a').join(''),
+        includeTags: ['foo'],
+        removeUnreachableTypesFromPublicApiSchema: true,
       },
-      authToken: token.secret,
-    }).then(r => r.expectNoGraphQLErrors());
-    expect(result).toMatchInlineSnapshot(`
+    },
+    authToken: token.secret,
+  }).then(r => r.expectNoGraphQLErrors());
+  expect(result).toMatchInlineSnapshot(`
       {
         createContract: {
           error: {
             details: {
+              contractName: String must contain at most 64 character(s),
               excludeTags: null,
               includeTags: null,
               targetId: null,
-              userSpecifiedContractId: String must contain at most 64 character(s),
             },
             message: Something went wrong.,
           },
@@ -394,5 +389,4 @@ test.concurrent(
         },
       }
     `);
-  },
-);
+});

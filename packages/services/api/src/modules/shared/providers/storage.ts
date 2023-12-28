@@ -463,12 +463,22 @@ export interface Storage {
             supergraphSDL: null;
             schemaCompositionErrors: Array<SchemaCompositionError>;
             tags: null;
+            contracts: null;
           }
         | {
             compositeSchemaSDL: string;
             supergraphSDL: string | null;
             schemaCompositionErrors: null;
             tags: null | Array<string>;
+            contracts: null | Array<{
+              contractId: string;
+              lastContractVersionId: string | null;
+              contractName: string;
+              compositeSchemaSDL: string | null;
+              supergraphSDL: string | null;
+              schemaCompositionErrors: Array<SchemaCompositionError> | null;
+              changes: null | Array<SchemaChangeType>;
+            }>;
           }
       ),
   ): Promise<SchemaVersion | never>;

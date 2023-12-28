@@ -80,6 +80,7 @@ type ContractCompositionFailure = {
     // Federation 1 apparently has SDL and validation errors at the same time.
     fullSchemaSdl: string | null;
   };
+  result?: never;
 };
 
 export type ContractCompositionSuccess = {
@@ -88,6 +89,7 @@ export type ContractCompositionSuccess = {
     fullSchemaSdl: string;
     supergraph: string | null;
   };
+  reason?: never;
 };
 
 export type ContractCompositionResult = ContractCompositionFailure | ContractCompositionSuccess;
@@ -234,20 +236,20 @@ export class RegistryChecks {
                     composition: contract.errors.filter(isCompositionValidationError),
                   },
                   // Federation 1 apparently has SDL and validation errors at the same time.
-                  fullSchemaSdl: result.sdl,
+                  fullSchemaSdl: contract.sdl,
                 },
               } satisfies ContractCompositionFailure;
             }
 
-            if (!result.sdl) {
+            if (!contract.sdl) {
               throw new Error('No SDL, but no errors either');
             }
 
             return {
               status: 'completed',
               result: {
-                fullSchemaSdl: result.sdl,
-                supergraph: result.supergraph,
+                fullSchemaSdl: contract.sdl,
+                supergraph: contract.supergraph,
               },
             } satisfies ContractCompositionSuccess;
           }) ?? null,
@@ -373,7 +375,7 @@ export class RegistryChecks {
     };
   }) {
     if (args.existingSdl == null || args.incomingSdl == null) {
-      this.logger.debug('Skip policy check due to no SDL being composed.');
+      this.logger.debug('Skip diff check due to either existing or incoming SDL being absent.');
       return {
         status: 'skipped',
       } satisfies CheckResult;

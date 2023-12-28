@@ -100,6 +100,7 @@ export type SchemaCheckSuccess = {
     };
     contracts: null | Array<{
       contractId: string;
+      contractName: string;
       isSuccessful: true;
       composition: {
         compositeSchemaSDL: string;
@@ -133,8 +134,8 @@ export type SchemaCheckFailure = {
     // we could express this with the type-system in a stricter way.
     composition: SchemaCheckCompositionState;
     contracts: null | Array<{
-      /** the user specified contract id */
       contractId: string;
+      contractName: string;
       /** Whether the contract is successful (has no composition errors and schema changes are safe.) */
       isSuccessful: boolean;
       composition: SchemaCheckCompositionState;
@@ -215,6 +216,14 @@ type SchemaPublishSuccess = {
     supergraph: string | null;
     fullSchemaSdl: string | null;
     tags: null | Array<string>;
+    contracts: null | Array<{
+      contractId: string;
+      contractName: string;
+      compositionErrors: Array<SchemaCompositionError> | null;
+      supergraph: string | null;
+      fullSchemaSdl: string | null;
+      changes: Array<SchemaChangeType> | null;
+    }>;
   };
 };
 
@@ -296,6 +305,7 @@ export function formatPolicyError(record: CheckPolicyResultRecord): { message: s
 
 export type ContractCheckInput = {
   contractId: string;
+  contractName: string;
   compositionCheck: ContractCompositionResult;
   diffCheck: SchemaDiffResult;
 };
@@ -346,6 +356,7 @@ export function buildSchemaCheckFailureState(args: {
     contracts:
       args.contractChecks?.map(contractCheck => ({
         contractId: contractCheck.contractId,
+        contractName: contractCheck.contractName,
         isSuccessful: isContractChecksSuccessful(contractCheck),
         composition:
           contractCheck.compositionCheck.status === 'failed'
@@ -371,6 +382,7 @@ export type ContractInput = {
 
 export function isContractChecksSuccessful(input: ContractCheckInput): input is {
   contractId: string;
+  contractName: string;
   compositionCheck: ContractCompositionSuccess;
   diffCheck: SchemaDiffSuccess | SchemaDiffSkip;
 } {

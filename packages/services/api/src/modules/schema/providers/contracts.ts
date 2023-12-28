@@ -24,17 +24,17 @@ export class Contracts {
 
   async createContract(args: { contract: CreateContractInput }) {
     this.logger.debug(
-      'Create contract (targetId=%s, userSpecifiedContractId=%s)',
+      'Create contract (targetId=%s, contractName=%s)',
       args.contract.targetId,
-      args.contract.userSpecifiedContractId,
+      args.contract.contractName,
     );
 
     const validatedContract = CreateContractInputModel.safeParse(args.contract);
     if (!validatedContract.success) {
       this.logger.debug(
-        'Create contract failed due to validation errors. (targetId=%s, userSpecifiedContractId=%s)',
+        'Create contract failed due to validation errors. (targetId=%s, contractName=%s)',
         args.contract.targetId,
-        args.contract.userSpecifiedContractId,
+        args.contract.contractName,
       );
 
       const allErrors = validatedContract.error.flatten().fieldErrors;
@@ -42,7 +42,7 @@ export class Contracts {
         type: 'error' as const,
         errors: {
           targetId: allErrors.targetId?.[0],
-          userSpecifiedContractId: allErrors.userSpecifiedContractId?.[0],
+          contractName: allErrors.contractName?.[0],
           includeTags: allErrors.includeTags?.[0],
           excludeTags: allErrors.excludeTags?.[0],
         },
@@ -54,13 +54,13 @@ export class Contracts {
       result = await this.pool.maybeOne<unknown>(sql`
         INSERT INTO "contracts" (
           "target_id"
-          , "user_specified_contract_id"
+          , "contract_name"
           , "include_tags"
           , "exclude_tags"
           , "remove_unreachable_types_from_public_api_schema"
         ) VALUES (
           ${validatedContract.data.targetId}
-          , ${validatedContract.data.userSpecifiedContractId}
+          , ${validatedContract.data.contractName}
           , ${toNullableTextArray(validatedContract.data.includeTags)}
           , ${toNullableTextArray(validatedContract.data.excludeTags)}
           , ${validatedContract.data.removeUnreachableTypesFromPublicApiSchema}
@@ -70,12 +70,12 @@ export class Contracts {
     } catch (err: unknown) {
       if (
         err instanceof UniqueIntegrityConstraintViolationError &&
-        err.constraint === 'contracts_target_id_user_specified_contract_id_key'
+        err.constraint === 'contracts_target_id_contract_name_key'
       ) {
         return {
           type: 'error' as const,
           errors: {
-            userSpecifiedContractId: 'Must be unique across all target contracts.',
+            contractName: 'Must be unique across all target contracts.',
           },
         };
       }
@@ -85,10 +85,10 @@ export class Contracts {
     const contract = ContractModel.parse(result);
 
     this.logger.debug(
-      'Created contract successfully. (targetId=%s, contractId=%s, userSpecifiedContractId=%s)',
+      'Created contract successfully. (targetId=%s, contractId=%s, contractName=%s)',
       args.contract.targetId,
       contract.id,
-      contract.userSpecifiedContractId,
+      contract.contractName,
     );
 
     return {
@@ -115,7 +115,7 @@ export class Contracts {
       return null;
     }
     this.logger.debug(
-      '%n contract(s) found for target. (targetId=%s)',
+      '%s contract(s) found for target. (targetId=%s)',
       result.length,
       args.targetId,
     );
@@ -142,9 +142,9 @@ export class Contracts {
         "schema_version_contracts"
       WHERE
         "contract_id" = ANY(${sql.array(args.contractIds, 'uuid')})
-        AND "is_composable" = true
+        AND "schema_composition_errors" IS NULL
       ORDER BY
-        "contract_id"
+        "contract_id" ASC
         , "created_at" DESC
     `);
 
@@ -193,7 +193,7 @@ function toNullableTextArray<T extends PrimitiveValueExpression>(value: T[] | nu
 const contractFields = sql`
   "id"
   , "target_id" as "targetId"
-  , "user_specified_contract_id" as "userSpecifiedContractId"
+  , "contract_name" as "contractName"
   , "include_tags" as "includeTags"
   , "exclude_tags" as "excludeTags"
   , "remove_unreachable_types_from_public_api_schema" as "removeUnreachableTypesFromPublicApiSchema"
@@ -203,7 +203,7 @@ const contractFields = sql`
 const ContractModel = z.object({
   id: z.string().uuid(),
   targetId: z.string().uuid(),
-  userSpecifiedContractId: z.string(),
+  contractName: z.string(),
   includeTags: z.array(z.string()).nullable(),
   excludeTags: z.array(z.string()).nullable(),
   removeUnreachableTypesFromPublicApiSchema: z.boolean(),
@@ -215,7 +215,7 @@ export type Contract = z.TypeOf<typeof ContractModel>;
 const CreateContractInputModel = z
   .object({
     targetId: z.string().uuid(),
-    userSpecifiedContractId: z.string().max(64).min(2),
+    contractName: z.string().max(64).min(2),
     includeTags: z.array(z.string()).nullable(),
     excludeTags: z.array(z.string()).nullable(),
     removeUnreachableTypesFromPublicApiSchema: z.boolean(),
@@ -259,7 +259,6 @@ const schemaVersionContractsFields = sql`
   , "schema_version_id" as "schemaVersionId"
   , "last_schema_version_contract_id" as "lastSchemaVersionContractId"
   , "contract_id" as "contractId"
-  , "is_composable" as "isComposable"
   , "schema_composition_errors" as "schemaCompositionErrors"
   , "composite_schema_sdl" as "compositeSchemaSdl"
   , "supergraph_sdl" as "supergraphSdl"
@@ -271,7 +270,6 @@ const ValidSchemaVersionContractsModel = z.object({
   schemaVersionId: z.string().uuid(),
   lastSchemaVersionContractId: z.string().uuid().nullable(),
   contractId: z.string(),
-  isComposable: z.literal(true),
   schemaCompositionErrors: z.null(),
   compositeSchemaSdl: z.string().nullable(),
   supergraphSdl: z.string(),
