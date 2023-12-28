@@ -13,5 +13,5 @@
       "@hive/schema": ["../packages/services/schema/src/api.ts"]
     }
   },
-  "include": ["testkit", "tests"]
+  "include": ["testkit", "tests", "./expect.ts"]
 }
