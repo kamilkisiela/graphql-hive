@@ -324,3 +324,304 @@ test.concurrent('schema publish with failing contract composition', async ({ exp
 
   expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 });
+
+test.concurrent(
+  'schema delete with successful initial contract composition',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject, setFeatureFlag } = await createOrg();
+    const { createToken, target, setNativeFederation } = await createProject(
+      ProjectType.Federation,
+    );
+    await setFeatureFlag('compareToPreviousComposableVersion', true);
+    await setNativeFederation(true);
+
+    // Create a token with write rights
+    const writeToken = await createToken({
+      targetScopes: [
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.Settings,
+      ],
+    });
+
+    // Publish schema with write rights
+    let publishResult = await writeToken
+      .publishSchema({
+        sdl: /* GraphQL */ `
+          extend schema
+            @link(url: "https://specs.apollo.dev/link/v1.0")
+            @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+          type Query {
+            hello: String
+          }
+        `,
+        service: 'hello',
+        url: 'http://hello.com',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    publishResult = await writeToken
+      .publishSchema({
+        sdl: /* GraphQL */ `
+          extend schema
+            @link(url: "https://specs.apollo.dev/link/v1.0")
+            @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+          type Query {
+            hi: String
+          }
+        `,
+        service: 'hi',
+        url: 'http://hi.com',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    const createContractResult = await execute({
+      document: CreateContractMutation,
+      variables: {
+        input: {
+          targetId: target.id,
+          contractName: 'my-contract',
+          removeUnreachableTypesFromPublicApiSchema: true,
+          excludeTags: ['toyota'],
+        },
+      },
+      authToken: writeToken.secret,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(createContractResult.createContract.error).toBeNull();
+
+    const deleteServiceResult = await writeToken
+      .deleteSchema('hi')
+      .then(r => r.expectNoGraphQLErrors());
+    expect(deleteServiceResult.schemaDelete.__typename).toBe('SchemaDeleteSuccess');
+  },
+);
+
+test.concurrent('schema delete with failing initial contract composition', async ({ expect }) => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, setFeatureFlag } = await createOrg();
+  const { createToken, target, setNativeFederation } = await createProject(ProjectType.Federation);
+  await setFeatureFlag('compareToPreviousComposableVersion', true);
+  await setNativeFederation(true);
+
+  // Create a token with write rights
+  const writeToken = await createToken({
+    targetScopes: [
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+    ],
+  });
+
+  // Publish schema with write rights
+  let publishResult = await writeToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        extend schema
+          @link(url: "https://specs.apollo.dev/link/v1.0")
+          @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+        type Query {
+          hello: String
+        }
+      `,
+      service: 'hello',
+      url: 'http://hello.com',
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  publishResult = await writeToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        extend schema
+          @link(url: "https://specs.apollo.dev/link/v1.0")
+          @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+        type Query {
+          hi: String
+        }
+      `,
+      service: 'hi',
+      url: 'http://hi.com',
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  const createContractResult = await execute({
+    document: CreateContractMutation,
+    variables: {
+      input: {
+        targetId: target.id,
+        contractName: 'my-contract',
+        removeUnreachableTypesFromPublicApiSchema: true,
+        includeTags: ['toyota'],
+      },
+    },
+    authToken: writeToken.secret,
+  }).then(r => r.expectNoGraphQLErrors());
+
+  expect(createContractResult.createContract.error).toBeNull();
+
+  const deleteServiceResult = await writeToken
+    .deleteSchema('hi')
+    .then(r => r.expectNoGraphQLErrors());
+  expect(deleteServiceResult.schemaDelete.__typename).toBe('SchemaDeleteSuccess');
+});
+
+test.concurrent('schema delete with succeeding contract composition', async ({ expect }) => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, setFeatureFlag } = await createOrg();
+  const { createToken, target, setNativeFederation } = await createProject(ProjectType.Federation);
+  await setFeatureFlag('compareToPreviousComposableVersion', true);
+  await setNativeFederation(true);
+
+  // Create a token with write rights
+  const writeToken = await createToken({
+    targetScopes: [
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+    ],
+  });
+
+  // Publish schema with write rights
+  let publishResult = await writeToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        extend schema
+          @link(url: "https://specs.apollo.dev/link/v1.0")
+          @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+        type Query {
+          hello: String
+        }
+      `,
+      service: 'hello',
+      url: 'http://hello.com',
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  const createContractResult = await execute({
+    document: CreateContractMutation,
+    variables: {
+      input: {
+        targetId: target.id,
+        contractName: 'my-contract',
+        removeUnreachableTypesFromPublicApiSchema: true,
+        excludeTags: ['toyota'],
+      },
+    },
+    authToken: writeToken.secret,
+  }).then(r => r.expectNoGraphQLErrors());
+
+  expect(createContractResult.createContract.error).toBeNull();
+
+  publishResult = await writeToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        extend schema
+          @link(url: "https://specs.apollo.dev/link/v1.0")
+          @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+        type Query {
+          hi: String
+        }
+      `,
+      service: 'hi',
+      url: 'http://hi.com',
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  const deleteServiceResult = await writeToken
+    .deleteSchema('hi')
+    .then(r => r.expectNoGraphQLErrors());
+  expect(deleteServiceResult.schemaDelete.__typename).toBe('SchemaDeleteSuccess');
+});
+
+test.concurrent('schema delete with failing contract composition', async ({ expect }) => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, setFeatureFlag } = await createOrg();
+  const { createToken, target, setNativeFederation } = await createProject(ProjectType.Federation);
+  await setFeatureFlag('compareToPreviousComposableVersion', true);
+  await setNativeFederation(true);
+
+  // Create a token with write rights
+  const writeToken = await createToken({
+    targetScopes: [
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+    ],
+  });
+
+  // Publish schema with write rights
+  let publishResult = await writeToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        extend schema
+          @link(url: "https://specs.apollo.dev/link/v1.0")
+          @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+        type Query {
+          hello: String
+        }
+      `,
+      service: 'hello',
+      url: 'http://hello.com',
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  const createContractResult = await execute({
+    document: CreateContractMutation,
+    variables: {
+      input: {
+        targetId: target.id,
+        contractName: 'my-contract',
+        removeUnreachableTypesFromPublicApiSchema: true,
+        includeTags: ['toyota'],
+      },
+    },
+    authToken: writeToken.secret,
+  }).then(r => r.expectNoGraphQLErrors());
+
+  expect(createContractResult.createContract.error).toBeNull();
+
+  publishResult = await writeToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        extend schema
+          @link(url: "https://specs.apollo.dev/link/v1.0")
+          @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+        type Query {
+          hi: String
+        }
+      `,
+      service: 'hi',
+      url: 'http://hi.com',
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  const deleteServiceResult = await writeToken
+    .deleteSchema('hi')
+    .then(r => r.expectNoGraphQLErrors());
+  expect(deleteServiceResult.schemaDelete.__typename).toBe('SchemaDeleteSuccess');
+});

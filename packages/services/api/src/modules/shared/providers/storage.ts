@@ -56,6 +56,16 @@ export interface TargetSelector extends ProjectSelector {
   target: string;
 }
 
+type CreateContractVersionInput = {
+  contractId: string;
+  lastContractVersionId: string | null;
+  contractName: string;
+  compositeSchemaSDL: string | null;
+  supergraphSDL: string | null;
+  schemaCompositionErrors: Array<SchemaCompositionError> | null;
+  changes: null | Array<SchemaChangeType>;
+};
+
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface Storage {
   pool: DatabasePool;
@@ -425,14 +435,16 @@ export interface Storage {
         | {
             compositeSchemaSDL: null;
             supergraphSDL: null;
-            tags: null;
             schemaCompositionErrors: Array<SchemaCompositionError>;
+            tags: null;
+            contracts: null;
           }
         | {
             compositeSchemaSDL: string;
             supergraphSDL: string | null;
             schemaCompositionErrors: null;
             tags: null | Array<string>;
+            contracts: null | Array<CreateContractVersionInput>;
           }
       ),
   ): Promise<DeletedCompositeSchema & { versionId: string }>;
@@ -470,15 +482,7 @@ export interface Storage {
             supergraphSDL: string | null;
             schemaCompositionErrors: null;
             tags: null | Array<string>;
-            contracts: null | Array<{
-              contractId: string;
-              lastContractVersionId: string | null;
-              contractName: string;
-              compositeSchemaSDL: string | null;
-              supergraphSDL: string | null;
-              schemaCompositionErrors: Array<SchemaCompositionError> | null;
-              changes: null | Array<SchemaChangeType>;
-            }>;
+            contracts: null | Array<CreateContractVersionInput>;
           }
       ),
   ): Promise<SchemaVersion | never>;

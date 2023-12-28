@@ -200,6 +200,15 @@ export type SchemaPublishFailureReason =
       changes: Array<SchemaChangeType>;
     };
 
+type ContractResult = {
+  contractId: string;
+  contractName: string;
+  compositionErrors: Array<SchemaCompositionError> | null;
+  supergraph: string | null;
+  fullSchemaSdl: string | null;
+  changes: Array<SchemaChangeType> | null;
+};
+
 type SchemaPublishSuccess = {
   conclusion: (typeof SchemaPublishConclusion)['Publish'];
   state: {
@@ -216,14 +225,7 @@ type SchemaPublishSuccess = {
     supergraph: string | null;
     fullSchemaSdl: string | null;
     tags: null | Array<string>;
-    contracts: null | Array<{
-      contractId: string;
-      contractName: string;
-      compositionErrors: Array<SchemaCompositionError> | null;
-      supergraph: string | null;
-      fullSchemaSdl: string | null;
-      changes: Array<SchemaChangeType> | null;
-    }>;
+    contracts: null | Array<ContractResult>;
   };
 };
 
@@ -267,6 +269,7 @@ export type SchemaDeleteSuccess = {
     compositionErrors: Array<SchemaCompositionError> | null;
     supergraph: string | null;
     tags: null | Array<string>;
+    contracts: null | Array<ContractResult>;
   } & (
     | {
         composable: true;

@@ -886,6 +886,21 @@ export class SchemaPublisher {
           } as const;
         }
 
+        const contracts =
+          project.type === ProjectType.FEDERATION
+            ? await this.contracts.loadContractsWithLatestValidContractVersionsByTargetId({
+                targetId: input.target.id,
+              })
+            : null;
+
+        const contractIdToLatestValidContractVersionId = new Map<string, string | null>();
+        for (const contract of contracts ?? []) {
+          contractIdToLatestValidContractVersionId.set(
+            contract.contract.id,
+            contract.latestValidVersion?.id ?? null,
+          );
+        }
+
         const deleteResult = await this.models[project.type][modelVersion].delete({
           input: {
             serviceName: input.serviceName,
@@ -910,6 +925,7 @@ export class SchemaPublisher {
             project: input.project,
             organization: input.organization,
           },
+          contracts,
         });
 
         let diffSchemaVersionId: string | null = null;
@@ -941,12 +957,24 @@ export class SchemaPublisher {
                     supergraphSDL: deleteResult.state.supergraph,
                     schemaCompositionErrors: null,
                     tags: deleteResult.state.tags,
+                    contracts:
+                      deleteResult.state.contracts?.map(contract => ({
+                        contractId: contract.contractId,
+                        contractName: contract.contractName,
+                        lastContractVersionId:
+                          contractIdToLatestValidContractVersionId.get(contract.contractId) ?? null,
+                        compositeSchemaSDL: contract.fullSchemaSdl,
+                        supergraphSDL: contract.supergraph,
+                        schemaCompositionErrors: contract.compositionErrors,
+                        changes: contract.changes,
+                      })) ?? null,
                   }
                 : {
                     compositeSchemaSDL: null,
                     supergraphSDL: null,
                     schemaCompositionErrors: deleteResult.state.compositionErrors ?? [],
                     tags: null,
+                    contracts: null,
                   }),
               actionFn: async () => {
                 if (deleteResult.state.composable) {

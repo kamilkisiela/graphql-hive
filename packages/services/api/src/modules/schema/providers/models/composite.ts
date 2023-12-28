@@ -494,6 +494,7 @@ export class CompositeModel {
     project,
     selector,
     baseSchema,
+    contracts,
   }: {
     input: {
       serviceName: string;
@@ -516,6 +517,7 @@ export class CompositeModel {
       sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
+    contracts: Array<ContractInput> | null;
   }): Promise<SchemaDeleteResult> {
     const incoming: DeletedCompositeSchema = {
       kind: 'composite',
@@ -556,7 +558,16 @@ export class CompositeModel {
       organization,
       schemas,
       baseSchema,
-      contracts: null,
+      contracts:
+        contracts?.map(({ contract }) => ({
+          id: contract.id,
+          filter: {
+            exclude: contract.excludeTags,
+            include: contract.includeTags,
+            removeUnreachableTypesFromPublicApiSchema:
+              contract.removeUnreachableTypesFromPublicApiSchema,
+          },
+        })) ?? null,
     });
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
@@ -576,6 +587,13 @@ export class CompositeModel {
       approvedChanges: null,
       existingSdl: previousVersionSdl,
       incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+    });
+
+    const contractChecks = await this.getContractChecks({
+      contracts,
+      compositionCheck,
+      usageDataSelector: selector,
+      approvedChanges: null,
     });
 
     if (
@@ -642,6 +660,20 @@ export class CompositeModel {
         compositionErrors: compositionCheck.reason?.errors ?? [],
         supergraph: compositionCheck.result?.supergraph ?? null,
         tags: compositionCheck.result?.tags ?? null,
+        contracts:
+          contractChecks?.map(contractCheck => ({
+            contractId: contractCheck.contractId,
+            contractName: contractCheck.contractName,
+            isComposable: contractCheck.compositionCheck.status === 'completed',
+            compositionErrors: contractCheck.compositionCheck.reason?.errors ?? null,
+            supergraph: contractCheck.compositionCheck?.result?.supergraph ?? null,
+            fullSchemaSdl:
+              contractCheck.compositionCheck?.result?.fullSchemaSdl ??
+              contractCheck.compositionCheck?.reason?.fullSchemaSdl ??
+              null,
+            changes:
+              (contractCheck.diffCheck.result ?? contractCheck.diffCheck.reason)?.all ?? null,
+          })) ?? null,
       },
     };
   }
