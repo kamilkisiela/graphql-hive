@@ -21,7 +21,7 @@
     "eslint": "8.56.0",
     "fastify": "3.29.5",
     "graphql": "16.8.1",
-    "pino-pretty": "10.3.0",
+    "pino-pretty": "10.3.1",
     "zod": "3.22.4",
     "zod-validation-error": "2.1.0"
   },
