@@ -2579,6 +2579,22 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           changes: input.changes,
         });
 
+        for (const contract of input.contracts ?? []) {
+          const schemaVersionContractId = await insertSchemaVersionContract(trx, {
+            schemaVersionId: version.id,
+            lastSchemaVersionContractId: contract.lastContractVersionId,
+            contractId: contract.contractId,
+            contractName: contract.contractName,
+            schemaCompositionErrors: contract.schemaCompositionErrors,
+            compositeSchemaSDL: contract.compositeSchemaSDL,
+            supergraphSDL: contract.supergraphSDL,
+          });
+          await insertSchemaVersionContractChanges(trx, {
+            schemaVersionContractId,
+            changes: input.changes,
+          });
+        }
+
         await input.actionFn();
 
         return {
@@ -3954,7 +3970,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
               INSERT INTO "schema_check_contracts" (
                 "schema_check_id"
                 , "is_success"
-                , "user_specified_contract_id"
+                , "contract_name"
                 , "composite_schema_sdl_store_id"
                 , "supergraph_sdl_store_id"
                 , "schema_composition_errors"
@@ -3964,7 +3980,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
               VALUES (
                 ${schemaCheck.id}
                 , ${contract.isSuccess}
-                , ${contract.contractId}
+                , ${contract.contractName}
                 , ${contract.compositeSchemaSdlHash}
                 , ${contract.supergraphSchemaSdlHash}
                 , ${jsonify(contract.schemaCompositionErrors)}
@@ -4614,6 +4630,45 @@ const DocumentCollectionDocumentModel = zod.object({
 /**
  * Insert a schema version changes into the database.
  */
+async function insertSchemaVersionContractChanges(
+  trx: DatabaseTransactionConnection,
+  args: {
+    changes: Array<SchemaChangeType>;
+    schemaVersionContractId: string;
+  },
+) {
+  if (args.changes.length === 0) {
+    return;
+  }
+
+  await trx.query(sql`
+    INSERT INTO "schema_version_contract_changes" (
+      "schema_version_contract_id",
+      "change_type",
+      "severity_level",
+      "meta",
+      "is_safe_based_on_usage"
+    )
+    SELECT * FROM
+    ${sql.unnest(
+      args.changes.map(change =>
+        // Note: change.criticality.level is actually a computed value from meta
+        [
+          args.schemaVersionContractId,
+          change.type,
+          change.criticality,
+          JSON.stringify(change.meta),
+          change.isSafeBasedOnUsage ?? false,
+        ],
+      ),
+      ['uuid', 'text', 'text', 'jsonb', 'bool'],
+    )}
+  `);
+}
+
+/**
+ * Insert a schema version changes into the database.
+ */
 async function insertSchemaVersionChanges(
   trx: DatabaseTransactionConnection,
   args: {
@@ -4716,6 +4771,44 @@ async function insertSchemaVersion(
   `;
 
   return await trx.one(query).then(SchemaVersionModel.parse);
+}
+
+async function insertSchemaVersionContract(
+  trx: DatabaseTransactionConnection,
+  args: {
+    schemaVersionId: string;
+    lastSchemaVersionContractId: string | null;
+    contractId: string;
+    contractName: string;
+    compositeSchemaSDL: string | null;
+    supergraphSDL: string | null;
+    schemaCompositionErrors: Array<SchemaCompositionError> | null;
+  },
+): Promise<string> {
+  const id = await trx.oneFirst(sql`
+    INSERT INTO "schema_version_contracts" (
+      "schema_version_id"
+      , "last_schema_version_contract_id"
+      , "contract_id"
+      , "contract_name"
+      , "schema_composition_errors"
+      , "composite_schema_sdl"
+      , "supergraph_sdl"
+    )
+    VALUES (
+      ${args.schemaVersionId}
+      , ${args.lastSchemaVersionContractId}
+      , ${args.contractId}
+      , ${args.contractName}
+      , ${jsonify(args.schemaCompositionErrors)}
+      , ${args.compositeSchemaSDL}
+      , ${args.supergraphSDL}
+    )
+    RETURNING
+      "id"
+  `);
+
+  return zod.string().parse(id);
 }
 
 /**

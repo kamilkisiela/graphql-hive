@@ -293,6 +293,7 @@ export class SingleModel {
         supergraph: null,
         fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
         tags: compositionCheck.result?.tags ?? null,
+        contracts: null,
       },
     };
   }

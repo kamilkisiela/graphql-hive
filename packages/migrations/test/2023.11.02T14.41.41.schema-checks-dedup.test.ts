@@ -187,6 +187,7 @@ await describe('migration: schema-checks-dedup', async () => {
         schemaPolicyErrors: null,
         expiresAt: null,
         contextId: null,
+        contracts: null,
       });
 
       // make sure SQL statements from Storage are capable of serving SDLs directly from schema_checks

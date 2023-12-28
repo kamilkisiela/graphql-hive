@@ -334,6 +334,7 @@ export class CompositeLegacyModel {
           supergraph: compositionCheck.result?.supergraph ?? null,
           fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
           tags: null,
+          contracts: null,
         },
       };
     }

@@ -401,7 +401,7 @@ export const resolvers: SchemaModule.Resolvers = {
       const result = await context.injector.get(ContractsManager).createContract({
         contract: {
           targetId: args.input.targetId,
-          userSpecifiedContractId: args.input.userSpecifiedContractId,
+          contractName: args.input.contractName,
           excludeTags: (args.input.excludeTags as Array<string> | null) ?? null,
           includeTags: (args.input.includeTags as Array<string> | null) ?? null,
           removeUnreachableTypesFromPublicApiSchema:

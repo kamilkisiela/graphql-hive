@@ -941,7 +941,7 @@ const SchemaCheckSharedInputFields = {
 };
 
 const SchemaCheckContractInput = z.object({
-  contractId: z.string(),
+  contractName: z.string(),
   isSuccess: z.boolean(),
   compositeSchemaSdl: z.string().nullable(),
   compositeSchemaSdlHash: z.string().nullable(),

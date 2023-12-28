@@ -41,6 +41,46 @@ export class CompositeModel {
     private checks: RegistryChecks,
   ) {}
 
+  private async getContractChecks(args: {
+    contracts: Array<ContractInput> | null;
+    compositionCheck: Awaited<ReturnType<RegistryChecks['composition']>>;
+    usageDataSelector: {
+      organization: string;
+      project: string;
+      target: string;
+    };
+    approvedChanges: Map<string, SchemaChangeType> | null;
+  }): Promise<Array<ContractCheckInput> | null> {
+    if (!args.contracts?.length || !args.compositionCheck.result?.contracts?.length) {
+      return null;
+    }
+
+    const contractResults = args.compositionCheck.result.contracts;
+    return await Promise.all(
+      args.contracts.map(async (contract, contractIndex) => {
+        const contractCompositionResult = contractResults[contractIndex];
+        if (!contractCompositionResult) {
+          throw new Error("Contract result doesn't exist. Inconsistency detected.");
+        }
+
+        return {
+          contractId: contract.contract.id,
+          contractName: contract.contract.contractName,
+          compositionCheck: contractCompositionResult,
+          diffCheck: await this.checks.diff({
+            usageDataSelector: args.usageDataSelector,
+            includeUrlChanges: false,
+            // contracts were introduced after this, so we do not need to filter out federation.
+            filterOutFederationChanges: false,
+            approvedChanges: args.approvedChanges,
+            existingSdl: contract.latestValidVersion?.compositeSchemaSdl ?? null,
+            incomingSdl: contractCompositionResult?.result?.fullSchemaSdl ?? null,
+          }),
+        };
+      }),
+    );
+  }
+
   async check({
     input,
     selector,
@@ -123,7 +163,7 @@ export class CompositeModel {
       baseSchema,
       contracts:
         contracts?.map(({ contract }) => ({
-          id: contract.userSpecifiedContractId,
+          id: contract.id,
           filter: {
             exclude: contract.excludeTags,
             include: contract.includeTags,
@@ -140,33 +180,12 @@ export class CompositeModel {
       project,
     });
 
-    let contractChecks: Array<ContractCheckInput> | null = null;
-
-    if (contracts?.length && compositionCheck.result?.contracts?.length) {
-      const contractResults = compositionCheck.result.contracts;
-      contractChecks = await Promise.all(
-        contracts.map(async (contract, contractIndex) => {
-          const contractCompositionResult = contractResults[contractIndex];
-          if (!contractCompositionResult) {
-            throw new Error("Contract result doesn't exist. Inconsistency detected.");
-          }
-
-          return {
-            contractId: contract.contract.userSpecifiedContractId,
-            compositionCheck: contractCompositionResult,
-            diffCheck: await this.checks.diff({
-              usageDataSelector: selector,
-              includeUrlChanges: false,
-              // contracts were introduced after this, so we do not need to filter out federation.
-              filterOutFederationChanges: false,
-              approvedChanges,
-              existingSdl: contract.latestValidVersion?.compositeSchemaSdl ?? null,
-              incomingSdl: contractCompositionResult?.result?.fullSchemaSdl ?? null,
-            }),
-          };
-        }),
-      );
-    }
+    const contractChecks = await this.getContractChecks({
+      contracts,
+      compositionCheck,
+      usageDataSelector: selector,
+      approvedChanges,
+    });
 
     const [diffCheck, policyCheck] = await Promise.all([
       this.checks.diff({
@@ -220,6 +239,7 @@ export class CompositeModel {
 
             return {
               contractId: contractCheck.contractId,
+              contractName: contractCheck.contractName,
               isSuccessful: true,
               composition: {
                 compositeSchemaSDL: contractCheck.compositionCheck.result.fullSchemaSdl,
@@ -240,6 +260,7 @@ export class CompositeModel {
     latest,
     latestComposable,
     baseSchema,
+    contracts,
   }: {
     input: PublishInput;
     project: Project;
@@ -256,6 +277,7 @@ export class CompositeModel {
       schemas: PushedCompositeSchema[];
     } | null;
     baseSchema: string | null;
+    contracts: Array<ContractInput> | null;
   }): Promise<SchemaPublishResult> {
     const incoming: PushedCompositeSchema = {
       kind: 'composite',
@@ -340,7 +362,29 @@ export class CompositeModel {
       organization,
       schemas,
       baseSchema,
-      contracts: null,
+      contracts:
+        contracts?.map(({ contract }) => ({
+          id: contract.id,
+          filter: {
+            exclude: contract.excludeTags,
+            include: contract.includeTags,
+            removeUnreachableTypesFromPublicApiSchema:
+              contract.removeUnreachableTypesFromPublicApiSchema,
+          },
+        })) ?? null,
+    });
+
+    const usageDataSelector = {
+      target: target.id,
+      project: project.id,
+      organization: project.orgId,
+    };
+
+    const contractChecks = await this.getContractChecks({
+      contracts,
+      compositionCheck,
+      usageDataSelector,
+      approvedChanges: null,
     });
 
     const schemaVersionToCompareAgainst = compareToLatest ? latest : latestComposable;
@@ -396,19 +440,18 @@ export class CompositeModel {
 
     if (
       compositionCheck.status === 'failed' &&
-      compositionCheck.reason.errorsBySource.graphql.length > 0
+      compositionCheck.reason.errorsBySource.graphql.length > 0 &&
+      compareToLatest
     ) {
-      if (compareToLatest) {
-        return {
-          conclusion: SchemaPublishConclusion.Reject,
-          reasons: [
-            {
-              code: PublishFailureReasonCode.CompositionFailure,
-              compositionErrors: compositionCheck.reason.errorsBySource.graphql,
-            },
-          ],
-        };
-      }
+      return {
+        conclusion: SchemaPublishConclusion.Reject,
+        reasons: [
+          {
+            code: PublishFailureReasonCode.CompositionFailure,
+            compositionErrors: compositionCheck.reason.errorsBySource.graphql,
+          },
+        ],
+      };
     }
 
     return {
@@ -425,6 +468,20 @@ export class CompositeModel {
         supergraph: compositionCheck.result?.supergraph ?? null,
         fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
         tags: compositionCheck.result?.tags ?? null,
+        contracts:
+          contractChecks?.map(contractCheck => ({
+            contractId: contractCheck.contractId,
+            contractName: contractCheck.contractName,
+            isComposable: contractCheck.compositionCheck.status === 'completed',
+            compositionErrors: contractCheck.compositionCheck.reason?.errors ?? null,
+            supergraph: contractCheck.compositionCheck?.result?.supergraph ?? null,
+            fullSchemaSdl:
+              contractCheck.compositionCheck?.result?.fullSchemaSdl ??
+              contractCheck.compositionCheck?.reason?.fullSchemaSdl ??
+              null,
+            changes:
+              (contractCheck.diffCheck.result ?? contractCheck.diffCheck.reason)?.all ?? null,
+          })) ?? null,
       },
     };
   }
