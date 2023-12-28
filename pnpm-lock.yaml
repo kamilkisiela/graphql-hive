@@ -812,8 +812,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 10.3.0
-        version: 10.3.0
+        specifier: 10.3.1
+        version: 10.3.1
       sendmail:
         specifier: 1.6.1
         version: 1.6.1
@@ -887,8 +887,8 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       pino-pretty:
-        specifier: 10.3.0
-        version: 10.3.0
+        specifier: 10.3.1
+        version: 10.3.1
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -929,8 +929,8 @@ importers:
         specifier: 12.6.1
         version: 12.6.1
       pino-pretty:
-        specifier: 10.3.0
-        version: 10.3.0
+        specifier: 10.3.1
+        version: 10.3.1
       reflect-metadata:
         specifier: 0.2.1
         version: 0.2.1
@@ -1001,8 +1001,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 10.3.0
-        version: 10.3.0
+        specifier: 10.3.1
+        version: 10.3.1
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -1097,8 +1097,8 @@ importers:
         specifier: 3.1.1
         version: 3.1.1
       pino-pretty:
-        specifier: 10.3.0
-        version: 10.3.0
+        specifier: 10.3.1
+        version: 10.3.1
       prom-client:
         specifier: 15.1.0
         version: 15.1.0
@@ -1236,8 +1236,8 @@ importers:
         specifier: 12.6.1
         version: 12.6.1
       pino-pretty:
-        specifier: 10.3.0
-        version: 10.3.0
+        specifier: 10.3.1
+        version: 10.3.1
       reflect-metadata:
         specifier: 0.2.1
         version: 0.2.1
@@ -1281,8 +1281,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 10.3.0
-        version: 10.3.0
+        specifier: 10.3.1
+        version: 10.3.1
       reflect-metadata:
         specifier: 0.2.1
         version: 0.2.1
@@ -1335,8 +1335,8 @@ importers:
         specifier: 2.2.4
         version: 2.2.4
       pino-pretty:
-        specifier: 10.3.0
-        version: 10.3.0
+        specifier: 10.3.1
+        version: 10.3.1
       tiny-lru:
         specifier: 8.0.2
         version: 8.0.2
@@ -1374,8 +1374,8 @@ importers:
         specifier: 12.6.1
         version: 12.6.1
       pino-pretty:
-        specifier: 10.3.0
-        version: 10.3.0
+        specifier: 10.3.1
+        version: 10.3.1
       reflect-metadata:
         specifier: 0.2.1
         version: 0.2.1
@@ -1419,8 +1419,8 @@ importers:
         specifier: 2.2.4
         version: 2.2.4
       pino-pretty:
-        specifier: 10.3.0
-        version: 10.3.0
+        specifier: 10.3.1
+        version: 10.3.1
       tiny-lru:
         specifier: 8.0.2
         version: 8.0.2
@@ -1461,8 +1461,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 10.3.0
-        version: 10.3.0
+        specifier: 10.3.1
+        version: 10.3.1
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -1804,8 +1804,8 @@ importers:
         specifier: 0.19.10
         version: 0.19.10
       pino-pretty:
-        specifier: 10.3.0
-        version: 10.3.0
+        specifier: 10.3.1
+        version: 10.3.1
       postcss:
         specifier: 8.4.32
         version: 8.4.32
@@ -26918,8 +26918,8 @@ packages:
       process-warning: 3.0.0
     dev: false
 
-  /pino-pretty@10.3.0:
-    resolution: {integrity: sha512-JthvQW289q3454mhM3/38wFYGWPiBMR28T3CpDNABzoTQOje9UKS7XCJQSnjWF9LQGQkGd8D7h0oq+qwiM3jFA==}
+  /pino-pretty@10.3.1:
+    resolution: {integrity: sha512-az8JbIYeN/1iLj2t0jR9DV48/LQ3RC6hZPpapKPkb84Q+yTidMCpgWxIT3N0flnBDilyBQ1luWNpOeJptjdp/g==}
     hasBin: true
     dependencies:
       colorette: 2.0.20
