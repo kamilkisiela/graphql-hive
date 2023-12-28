@@ -778,6 +778,7 @@ export class SchemaPublisher {
           supergraph: compositionResult.supergraph,
           schemas,
           fullSchemaSdl: compositionResult.sdl!,
+          contracts: null,
         });
       }
     }
@@ -978,6 +979,17 @@ export class SchemaPublisher {
                   }),
               actionFn: async () => {
                 if (deleteResult.state.composable) {
+                  const contracts: Array<{ name: string; sdl: string; supergraph: string }> = [];
+                  for (const contract of deleteResult.state.contracts ?? []) {
+                    if (contract.fullSchemaSdl && contract.supergraph) {
+                      contracts.push({
+                        name: contract.contractName,
+                        sdl: contract.fullSchemaSdl,
+                        supergraph: contract.supergraph,
+                      });
+                    }
+                  }
+
                   await this.publishToCDN({
                     target: input.target,
                     project,
@@ -985,6 +997,7 @@ export class SchemaPublisher {
                     fullSchemaSdl: deleteResult.state.fullSchemaSdl,
                     // pass all schemas except the one we are deleting
                     schemas: schemas.filter(s => s.service_name !== input.serviceName),
+                    contracts,
                   });
                 }
               },
@@ -1408,6 +1421,7 @@ export class SchemaPublisher {
 
     const composable = publishResult.state.composable;
     const fullSchemaSdl = publishResult.state.fullSchemaSdl;
+    const publishState = publishResult.state;
 
     if (composable && !fullSchemaSdl) {
       throw new Error('Version is composable but the full schema SDL is missing');
@@ -1457,12 +1471,24 @@ export class SchemaPublisher {
       github,
       actionFn: async () => {
         if (composable && fullSchemaSdl) {
+          const contracts: Array<{ name: string; sdl: string; supergraph: string }> = [];
+          for (const contract of publishState.contracts ?? []) {
+            if (contract.fullSchemaSdl && contract.supergraph) {
+              contracts.push({
+                name: contract.contractName,
+                sdl: contract.fullSchemaSdl,
+                supergraph: contract.supergraph,
+              });
+            }
+          }
+
           await this.publishToCDN({
             target,
             project,
             supergraph,
             fullSchemaSdl,
             schemas,
+            contracts,
           });
         }
       },
@@ -1706,12 +1732,14 @@ export class SchemaPublisher {
     supergraph,
     fullSchemaSdl,
     schemas,
+    contracts,
   }: {
     target: Target;
     project: Project;
     supergraph: string | null;
     fullSchemaSdl: string;
     schemas: readonly Schema[];
+    contracts: null | Array<{ name: string; supergraph: string; sdl: string }>;
   }) {
     const publishMetadata = async () => {
       const metadata: Array<Record<string, any>> = [];
@@ -1728,6 +1756,7 @@ export class SchemaPublisher {
           // COMPOSITE projects can have multiple metadata, we need to pass it as an array
           artifact: project.type === ProjectType.SINGLE ? metadata[0] : metadata,
           artifactType: 'metadata',
+          contractName: null,
         });
       }
     };
@@ -1744,11 +1773,13 @@ export class SchemaPublisher {
             sdl: s.sdl,
             url: s.service_url,
           })),
+          contractName: null,
         }),
         this.artifactStorageWriter.writeArtifact({
           targetId: target.id,
           artifactType: 'sdl',
           artifact: fullSchemaSdl,
+          contractName: null,
         }),
       ]);
     };
@@ -1758,6 +1789,7 @@ export class SchemaPublisher {
         targetId: target.id,
         artifactType: 'sdl',
         artifact: fullSchemaSdl,
+        contractName: null,
       });
     };
 
@@ -1775,8 +1807,30 @@ export class SchemaPublisher {
             targetId: target.id,
             artifactType: 'supergraph',
             artifact: supergraph,
+            contractName: null,
           }),
         );
+      }
+      if (contracts) {
+        this.logger.debug('Publishing contracts to CDN');
+
+        for (const contract of contracts) {
+          this.logger.debug('Publishing contract to CDN (contractName=%s)', contract.name);
+          actions.push(
+            this.artifactStorageWriter.writeArtifact({
+              targetId: target.id,
+              artifactType: 'sdl',
+              artifact: contract.sdl,
+              contractName: contract.name,
+            }),
+            this.artifactStorageWriter.writeArtifact({
+              targetId: target.id,
+              artifactType: 'supergraph',
+              artifact: contract.supergraph,
+              contractName: contract.name,
+            }),
+          );
+        }
       }
     }
 

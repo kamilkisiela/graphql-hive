@@ -31,8 +31,9 @@ export class ArtifactStorageWriter {
     targetId: string;
     artifactType: keyof typeof artifactMeta;
     artifact: unknown;
+    contractName: null | string;
   }) {
-    const key = buildArtifactStorageKey(args.targetId, args.artifactType);
+    const key = buildArtifactStorageKey(args.targetId, args.artifactType, args.contractName);
     const meta = artifactMeta[args.artifactType];
 
     const result = await this.s3.client.fetch([this.s3.endpoint, this.s3.bucket, key].join('/'), {

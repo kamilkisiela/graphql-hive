@@ -60,7 +60,7 @@ describe('CDN Worker', () => {
           } as any,
         },
       }),
-      async getArtifactAction(targetId, artifactType) {
+      async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'redirect',
@@ -139,7 +139,7 @@ describe('CDN Worker', () => {
           } as any,
         },
       }),
-      async getArtifactAction(targetId, artifactType) {
+      async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'redirect',
@@ -234,7 +234,7 @@ describe('CDN Worker', () => {
           } as any,
         },
       }),
-      async getArtifactAction(targetId, artifactType) {
+      async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'redirect',
@@ -313,7 +313,7 @@ describe('CDN Worker', () => {
           } as any,
         },
       }),
-      async getArtifactAction(targetId, artifactType) {
+      async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'redirect',
@@ -398,7 +398,7 @@ describe('CDN Worker', () => {
           } as any,
         },
       }),
-      async getArtifactAction(targetId, artifactType) {
+      async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'redirect',
@@ -481,7 +481,7 @@ describe('CDN Worker', () => {
           } as any,
         },
       }),
-      async getArtifactAction(targetId, artifactType) {
+      async getArtifactAction(targetId, _, artifactType) {
         return map.has(`target:${targetId}:${artifactType}`)
           ? {
               type: 'redirect',
@@ -649,7 +649,7 @@ describe('CDN Worker', () => {
             } as any,
           },
         }),
-        async getArtifactAction(targetId, artifactType) {
+        async getArtifactAction(targetId, _, artifactType) {
           return map.has(`target:${targetId}:${artifactType}`)
             ? {
                 type: 'redirect',
@@ -700,7 +700,7 @@ describe('CDN Worker', () => {
             } as any,
           },
         }),
-        async getArtifactAction(targetId, artifactType) {
+        async getArtifactAction(targetId, _, artifactType) {
           return map.has(`target:${targetId}:${artifactType}`)
             ? {
                 type: 'redirect',

@@ -3,8 +3,18 @@ import { AwsClient } from './aws';
 
 const presignedUrlExpirationSeconds = 60;
 
-export const buildArtifactStorageKey = (targetId: string, artifactType: string) =>
-  `artifact/${targetId}/${artifactType}`;
+export function buildArtifactStorageKey(
+  targetId: string,
+  artifactType: string,
+  contractName: null | string,
+) {
+  const parts = ['artifact', targetId];
+  if (contractName) {
+    parts.push('contracts', contractName);
+  }
+  parts.push(artifactType);
+  return parts.join('/');
+}
 
 type SDLArtifactTypes = `sdl${'.graphql' | '.graphqls' | ''}`;
 
@@ -65,6 +75,7 @@ export class ArtifactStorageReader {
   /** Generate a pre-signed url for reading an artifact from a bucket for a limited time period. */
   async generateArtifactReadUrl(
     targetId: string,
+    contractName: string | null,
     artifactType: ArtifactsType,
     etagValue: string | null,
   ) {
@@ -72,7 +83,7 @@ export class ArtifactStorageReader {
       artifactType = 'sdl';
     }
 
-    const key = buildArtifactStorageKey(targetId, artifactType);
+    const key = buildArtifactStorageKey(targetId, artifactType, contractName);
 
     const response = await this.s3.client.fetch(
       [this.s3.endpoint, this.s3.bucketName, key].join('/'),
