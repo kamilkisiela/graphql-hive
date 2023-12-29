@@ -349,12 +349,23 @@ export class CompositeModel {
       };
     }
 
+    const metadataCheck = await this.checks.metadata(incoming, previousService ?? null);
+
+    if (metadataCheck?.status === 'failed') {
+      return {
+        conclusion: SchemaPublishConclusion.Reject,
+        reasons: [
+          {
+            code: PublishFailureReasonCode.MetadataParsingFailure,
+          },
+        ],
+      };
+    }
+
     const orchestrator =
       project.type === ProjectType.FEDERATION
         ? this.federationOrchestrator
         : this.stitchingOrchestrator;
-
-    const metadataCheck = await this.checks.metadata(incoming, previousService ?? null);
 
     const compositionCheck = await this.checks.composition({
       orchestrator,
@@ -374,18 +385,21 @@ export class CompositeModel {
         })) ?? null,
     });
 
-    const usageDataSelector = {
-      target: target.id,
-      project: project.id,
-      organization: project.orgId,
-    };
-
-    const contractChecks = await this.getContractChecks({
-      contracts,
-      compositionCheck,
-      usageDataSelector,
-      approvedChanges: null,
-    });
+    if (
+      compositionCheck.status === 'failed' &&
+      compositionCheck.reason.errorsBySource.graphql.length > 0 &&
+      compareToLatest
+    ) {
+      return {
+        conclusion: SchemaPublishConclusion.Reject,
+        reasons: [
+          {
+            code: PublishFailureReasonCode.CompositionFailure,
+            compositionErrors: compositionCheck.reason.errorsBySource.graphql,
+          },
+        ],
+      };
+    }
 
     const schemaVersionToCompareAgainst = compareToLatest ? latest : latestComposable;
 
@@ -412,16 +426,18 @@ export class CompositeModel {
       incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
     });
 
-    if (metadataCheck?.status === 'failed') {
-      return {
-        conclusion: SchemaPublishConclusion.Reject,
-        reasons: [
-          {
-            code: PublishFailureReasonCode.MetadataParsingFailure,
-          },
-        ],
-      };
-    }
+    const usageDataSelector = {
+      target: target.id,
+      project: project.id,
+      organization: project.orgId,
+    };
+
+    const contractChecks = await this.getContractChecks({
+      contracts,
+      compositionCheck,
+      usageDataSelector,
+      approvedChanges: null,
+    });
 
     const hasNewUrl =
       serviceUrlCheck.status === 'completed' && serviceUrlCheck.result.status === 'modified';
@@ -436,22 +452,6 @@ export class CompositeModel {
 
     if (hasNewMetadata) {
       messages.push('Metadata has been updated');
-    }
-
-    if (
-      compositionCheck.status === 'failed' &&
-      compositionCheck.reason.errorsBySource.graphql.length > 0 &&
-      compareToLatest
-    ) {
-      return {
-        conclusion: SchemaPublishConclusion.Reject,
-        reasons: [
-          {
-            code: PublishFailureReasonCode.CompositionFailure,
-            compositionErrors: compositionCheck.reason.errorsBySource.graphql,
-          },
-        ],
-      };
     }
 
     return {
