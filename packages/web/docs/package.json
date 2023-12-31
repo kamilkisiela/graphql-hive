@@ -11,7 +11,7 @@
     "@next/env": "13.5.6",
     "@radix-ui/react-tooltip": "1.0.7",
     "@theguild/components": "5.2.4",
-    "clsx": "2.0.0",
+    "clsx": "2.1.0",
     "date-fns": "3.0.6",
     "gray-matter": "4.0.3",
     "next": "13.5.6",
