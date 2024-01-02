@@ -207,6 +207,10 @@ export default gql`
     schemaChecks(first: Int, after: String, filters: SchemaChecksFilter): SchemaCheckConnection!
     schemaVersions(first: Int, after: String): SchemaVersionConnection!
     schemaVersion(id: ID!): SchemaVersion
+    """
+    Get a list of paginated schema contracts for the target.
+    """
+    contracts(first: Int, after: String): ContractConnection!
   }
 
   input SchemaChecksFilter {
@@ -933,6 +937,16 @@ export default gql`
 
   type SchemaCheckConnection {
     edges: [SchemaCheckEdge!]!
+    pageInfo: PageInfo!
+  }
+
+  type ContractEdge {
+    node: Contract!
+    cursor: String!
+  }
+
+  type ContractConnection {
+    edges: [ContractEdge!]!
     pageInfo: PageInfo!
   }
 

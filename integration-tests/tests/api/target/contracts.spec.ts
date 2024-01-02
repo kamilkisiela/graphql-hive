@@ -154,7 +154,7 @@ test.concurrent('tags can not be empty', async ({ expect }) => {
           details: {
             contractName: null,
             excludeTags: null,
-            includeTags: Provide at least one value for each,
+            includeTags: Provide at least one value for either included tags or excluded tags,
             targetId: null,
           },
           message: Something went wrong.,

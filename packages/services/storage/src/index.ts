@@ -4459,11 +4459,11 @@ export async function createStorage(connection: string, maximumPoolSize: number)
   return storage;
 }
 
-function encodeCreatedAtAndUUIDIdBasedCursor(cursor: { createdAt: string; id: string }) {
+export function encodeCreatedAtAndUUIDIdBasedCursor(cursor: { createdAt: string; id: string }) {
   return Buffer.from(`${cursor.createdAt}|${cursor.id}`).toString('base64');
 }
 
-function decodeCreatedAtAndUUIDIdBasedCursor(cursor: string) {
+export function decodeCreatedAtAndUUIDIdBasedCursor(cursor: string) {
   const [createdAt, id] = Buffer.from(cursor, 'base64').toString('utf8').split('|');
   if (
     Number.isNaN(Date.parse(createdAt)) ||

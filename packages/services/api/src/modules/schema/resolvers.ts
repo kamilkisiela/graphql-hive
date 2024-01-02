@@ -580,6 +580,13 @@ export const resolvers: SchemaModule.Resolvers = {
         period: period ? parseDateRangeInput(period) : null,
       });
     },
+    async contracts(target, args, { injector }) {
+      return await injector.get(ContractsManager).getPaginatedContractsForTarget({
+        targetId: target.id,
+        cursor: args.after ?? null,
+        first: args.first ?? null,
+      });
+    },
   },
   SchemaVersion: {
     async log(version, _, { injector }) {
