@@ -4,7 +4,7 @@ import { TargetAccessScope } from '../../auth/providers/scopes';
 import { IdTranslator } from '../../shared/providers/id-translator';
 import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
-import { Contracts, type CreateContractInput } from './contracts';
+import { Contracts, GetPaginatedContractsByTargetId, type CreateContractInput } from './contracts';
 
 @Injectable({
   scope: Scope.Operation,
@@ -48,5 +48,10 @@ export class ContractsManager {
     });
 
     return await this.contracts.createContract(args);
+  }
+
+  public async getPaginatedContractsForTarget(args: GetPaginatedContractsByTargetId) {
+    // TODO: access checks :)
+    return this.contracts.getPaginatedContractsByTargetId(args);
   }
 }

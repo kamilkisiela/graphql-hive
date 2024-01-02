@@ -6,6 +6,10 @@ import {
   type PrimitiveValueExpression,
 } from 'slonik';
 import { z } from 'zod';
+import {
+  decodeCreatedAtAndUUIDIdBasedCursor,
+  encodeCreatedAtAndUUIDIdBasedCursor,
+} from '@hive/storage';
 import { Logger } from '../../shared/providers/logger';
 import { PG_POOL_CONFIG } from '../../shared/providers/pg-pool';
 
@@ -180,6 +184,81 @@ export class Contracts {
       latestValidVersion: latestValidContractVersions.get(contract.id) ?? null,
     }));
   }
+
+  public async getPaginatedContractsByTargetId(args: {
+    targetId: string;
+    first: null | number;
+    cursor: null | string;
+  }): Promise<PaginatedContractConnection> {
+    this.logger.debug('Load paginated contracts for target. (targetId=%s)', args.targetId);
+
+    let cursor: null | {
+      createdAt: string;
+      id: string;
+    } = null;
+
+    const limit = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
+
+    if (args.cursor) {
+      cursor = decodeCreatedAtAndUUIDIdBasedCursor(args.cursor);
+    }
+
+    const result = await this.pool.any<unknown>(sql`
+      SELECT
+        ${contractFields}
+      FROM
+        "contracts"
+      WHERE
+        "target_id" = ${args.targetId}
+        ${
+          cursor
+            ? sql`
+                AND (
+                  (
+                    c."created_at" = ${cursor.createdAt}
+                    AND c."id" < ${cursor.id}
+                  )
+                  OR c."created_at" < ${cursor.createdAt}
+                )
+              `
+            : sql``
+        }
+      ORDER BY
+        "target_id" ASC,
+        "created_at" DESC,
+        "id" DESC
+      LIMIT ${limit + 1}
+  `);
+
+    let edges = result.map(row => {
+      const node = ContractModel.parse(row);
+
+      return {
+        node,
+        get cursor() {
+          return encodeCreatedAtAndUUIDIdBasedCursor(node);
+        },
+      };
+    });
+
+    const hasNextPage = edges.length > limit;
+
+    edges = edges.slice(0, limit);
+
+    return {
+      edges,
+      pageInfo: {
+        hasNextPage,
+        hasPreviousPage: cursor !== null,
+        get endCursor() {
+          return edges[edges.length - 1]?.cursor ?? '';
+        },
+        get startCursor() {
+          return edges[0]?.cursor ?? '';
+        },
+      },
+    };
+  }
 }
 
 function toNullableTextArray<T extends PrimitiveValueExpression>(value: T[] | null) {
@@ -204,8 +283,14 @@ const ContractModel = z.object({
   id: z.string().uuid(),
   targetId: z.string().uuid(),
   contractName: z.string(),
-  includeTags: z.array(z.string()).nullable(),
-  excludeTags: z.array(z.string()).nullable(),
+  includeTags: z
+    .array(z.string())
+    .nullable()
+    .transform(tags => (tags?.length === 0 ? null : tags)),
+  excludeTags: z
+    .array(z.string())
+    .nullable()
+    .transform(tags => (tags?.length === 0 ? null : tags)),
   removeUnreachableTypesFromPublicApiSchema: z.boolean(),
   createdAt: z.string(),
 });
@@ -230,7 +315,7 @@ const CreateContractInputModel = z
       return true;
     },
     {
-      message: 'Provide at least one value for each',
+      message: 'Provide at least one value for either included tags or excluded tags',
       path: ['includeTags', 'excludeTags'],
     },
   )
@@ -277,3 +362,22 @@ const ValidSchemaVersionContractsModel = z.object({
 });
 
 export type ValidSchemaVersionContract = z.TypeOf<typeof ValidSchemaVersionContractsModel>;
+
+export type PaginatedContractConnection = Readonly<{
+  edges: ReadonlyArray<{
+    node: Contract;
+    cursor: string;
+  }>;
+  pageInfo: Readonly<{
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    startCursor: string;
+    endCursor: string;
+  }>;
+}>;
+
+export type GetPaginatedContractsByTargetId = {
+  targetId: string;
+  first: null | number;
+  cursor: null | string;
+};

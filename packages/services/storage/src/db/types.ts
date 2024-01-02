@@ -186,18 +186,6 @@ export interface schema_change_approvals {
   target_id: string;
 }
 
-export interface schema_check_contracts {
-  breaking_schema_changes: any | null;
-  composite_schema_sdl_store_id: string | null;
-  contract_name: string;
-  id: string;
-  is_success: boolean;
-  safe_schema_changes: any | null;
-  schema_check_id: string;
-  schema_composition_errors: any | null;
-  supergraph_sdl_store_id: string | null;
-}
-
 export interface schema_checks {
   breaking_schema_changes: any | null;
   composite_schema_sdl: string | null;
@@ -271,9 +259,9 @@ export interface schema_version_contract_changes {
 export interface schema_version_contracts {
   composite_schema_sdl: string | null;
   contract_id: string;
-  contract_name: string;
   created_at: Date;
   id: string;
+  is_composable: boolean;
   last_schema_version_contract_id: string | null;
   schema_composition_errors: any | null;
   schema_version_id: string;
@@ -387,7 +375,6 @@ export interface DBTables {
   organizations_billing: organizations_billing;
   projects: projects;
   schema_change_approvals: schema_change_approvals;
-  schema_check_contracts: schema_check_contracts;
   schema_checks: schema_checks;
   schema_log: schema_log;
   schema_policy_config: schema_policy_config;
