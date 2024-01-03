@@ -7,16 +7,7 @@ export type Analytics = ReturnType<typeof createAnalytics>;
 type Event =
   | {
       type: 'artifact';
-      version: 'v0' | 'v1';
-      value:
-        | 'schema'
-        | 'supergraph'
-        | 'sdl'
-        | 'metadata'
-        | 'introspection'
-        | 'services'
-        | 'sdl.graphql'
-        | 'sdl.graphqls';
+      value: 'supergraph' | 'sdl' | 'metadata' | 'services' | 'sdl.graphql' | 'sdl.graphqls';
     }
   | {
       type: 'key-validation';
@@ -79,7 +70,7 @@ export function createAnalytics(
       switch (event.type) {
         case 'artifact':
           return engines.usage.writeDataPoint({
-            blobs: [event.version, event.value, targetId],
+            blobs: ['v1', event.value, targetId],
             indexes: [targetId.substring(0, 32)],
           });
         case 'error':
