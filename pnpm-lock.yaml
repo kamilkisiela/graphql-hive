@@ -260,6 +260,9 @@ importers:
       '@hive/rate-limit':
         specifier: workspace:*
         version: link:../packages/services/rate-limit
+      '@hive/schema':
+        specifier: workspace:*
+        version: link:../packages/services/schema
       '@hive/server':
         specifier: workspace:*
         version: link:../packages/services/server

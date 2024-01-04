@@ -9,7 +9,8 @@
       "@hive/storage": ["../packages/services/storage/src/index.ts"],
       "@hive/rate-limit": ["../packages/services/rate-limit/src/api.ts"],
       "@app/gql/graphql": ["./testkit/gql/graphql.ts"],
-      "@app/gql": ["./testkit/gql/index.ts"]
+      "@app/gql": ["./testkit/gql/index.ts"],
+      "@hive/schema": ["../packages/services/schema/src/api.ts"]
     }
   },
   "include": ["testkit", "tests"]

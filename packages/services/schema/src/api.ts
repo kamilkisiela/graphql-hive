@@ -30,6 +30,19 @@ const EXTERNAL_VALIDATION = z
   })
   .nullable();
 
+const ContractsInputModel = z.array(
+  z.object({
+    id: z.string(),
+    filter: z.object({
+      include: z.array(z.string()).nullable(),
+      exclude: z.array(z.string()).nullable(),
+      removeUnreachableTypesFromPublicApiSchema: z.boolean(),
+    }),
+  }),
+);
+
+export type ContractsInputType = z.TypeOf<typeof ContractsInputModel>;
+
 export const schemaBuilderApiRouter = t.router({
   composeAndValidate: procedure
     .input(
@@ -56,6 +69,7 @@ export const schemaBuilderApiRouter = t.router({
           ),
           external: EXTERNAL_VALIDATION,
           native: z.boolean().optional(),
+          contracts: ContractsInputModel.nullable().optional(),
         }),
         z.object({
           type: z.literal('stitching'),
@@ -80,6 +94,7 @@ export const schemaBuilderApiRouter = t.router({
             }
           : null,
         'native' in input && input.native ? true : false,
+        'contracts' in input && input.contracts ? input.contracts : undefined,
       );
     }),
 });
