@@ -1488,8 +1488,8 @@ importers:
         specifier: 1.7.17
         version: 1.7.17(react-dom@18.2.0)(react@18.2.0)
       '@hookform/resolvers':
-        specifier: 3.3.3
-        version: 3.3.3(react-hook-form@7.49.2)
+        specifier: 3.3.4
+        version: 3.3.4(react-hook-form@7.49.2)
       '@monaco-editor/react':
         specifier: 4.6.0
         version: 4.6.0(monaco-editor@0.43.0)(react-dom@18.2.0)(react@18.2.0)
@@ -7580,8 +7580,8 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@hookform/resolvers@3.3.3(react-hook-form@7.49.2):
-    resolution: {integrity: sha512-bOMxKkSD3zWcS11TKoUQ8O0ZqKslFohvUsPKSrdCHiuEuMjRo/u3cq9YRJD/+xtNGYup++XD2LkjhegP5XENiw==}
+  /@hookform/resolvers@3.3.4(react-hook-form@7.49.2):
+    resolution: {integrity: sha512-o5cgpGOuJYrd+iMKvkttOclgwRW86EsWJZZRC23prf0uU2i48Htq4PuT73AVb9ionFyZrwYEITuOFGF+BydEtQ==}
     peerDependencies:
       react-hook-form: ^7.0.0
     dependencies:
