@@ -1,5 +1,9 @@
 import {
+  EnumTypeExtensionNode,
+  InputObjectTypeExtensionNode,
+  InterfaceTypeExtensionNode,
   Kind,
+  ObjectTypeExtensionNode,
   visit,
   type ArgumentNode,
   type ConstDirectiveNode,
@@ -60,6 +64,17 @@ function hasIntersection<T>(a: Set<T>, b: Set<T>): boolean {
     }
   }
   return false;
+}
+
+function setDifference(set1: Set<string>, set2: Set<string>): Set<string> {
+  const difference = new Set(set1);
+  set1.forEach(value => {
+    if (set2.has(value)) {
+      difference.delete(value);
+    }
+  });
+
+  return difference;
 }
 
 /**
@@ -183,11 +198,16 @@ const getFederationInaccessibleDirectiveNameForSubgraphSDL =
 
 /**
  * Takes a subgraph document node and a set of tag filters and transforms the document node to contain `@inaccessible` directives on all fields not included by the applied filter.
+ * Note: you probably want to use `filterSubgraphs` instead, as it also applies the correct post step required after applying this.
  */
 export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
   documentNode: DocumentNode,
   filter: Federation2SubgraphDocumentNodeByTagsFilter,
-): DocumentNode {
+): {
+  typeDefs: DocumentNode;
+  typesWhereAllFieldsAreInaccessible: Set<string>;
+  transformTagDirectives: ReturnType<typeof createTransformTagDirectives>;
+} {
   const tagDirectiveName = getFederationTagDirectiveNameForSubgraphSDL(documentNode);
   const inaccessibleDirectiveName =
     getFederationInaccessibleDirectiveNameForSubgraphSDL(documentNode);
@@ -196,6 +216,13 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
     tagDirectiveName,
     inaccessibleDirectiveName,
   );
+
+  // keep track of all types where all fields are inaccessible
+  const typesWhereAllFieldsAreInaccessible = new Set<string>();
+  // keep track of all types where not all fields are inaccessible
+  // since graphql allows extending types, a type can occur multiple times
+  // this if a type ever occurs without all types being accessible, we need to remove it from "typesWhereAllFieldsAreInaccessible" later.
+  const typesWhereNotAllFieldsAreAccessible = new Set<string>();
 
   function fieldArgumentHandler(node: InputValueDefinitionNode) {
     const tagsOnNode = getTagsOnNode(node);
@@ -216,9 +243,17 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
   }
 
   function fieldLikeObjectHandler(
-    node: ObjectTypeDefinitionNode | InterfaceTypeDefinitionNode | InputObjectTypeDefinitionNode,
+    node:
+      | ObjectTypeExtensionNode
+      | ObjectTypeDefinitionNode
+      | InterfaceTypeDefinitionNode
+      | InterfaceTypeExtensionNode
+      | InputObjectTypeDefinitionNode
+      | InputObjectTypeExtensionNode,
   ) {
     const tagsOnNode = getTagsOnNode(node);
+
+    let isAllFieldsInaccessible = true;
 
     const newNode = {
       ...node,
@@ -242,6 +277,8 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
           };
         }
 
+        isAllFieldsInaccessible = false;
+
         return {
           ...node,
           directives: transformTagDirectives(node),
@@ -256,14 +293,22 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
       };
     }
 
+    if (isAllFieldsInaccessible) {
+      typesWhereAllFieldsAreInaccessible.add(node.name.value);
+    } else {
+      typesWhereNotAllFieldsAreAccessible.add(node.name.value);
+    }
+
     return {
       ...newNode,
       directives: transformTagDirectives(node),
     };
   }
 
-  function enumHandler(node: EnumTypeDefinitionNode) {
+  function enumHandler(node: EnumTypeDefinitionNode | EnumTypeExtensionNode) {
     const tagsOnNode = getTagsOnNode(node);
+
+    let isAllFieldsInaccessible = true;
 
     const newNode = {
       ...node,
@@ -280,6 +325,8 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
           };
         }
 
+        isAllFieldsInaccessible = false;
+
         return {
           ...node,
           directives: transformTagDirectives(node),
@@ -292,6 +339,12 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
         ...newNode,
         directives: transformTagDirectives(node, true),
       };
+    }
+
+    if (isAllFieldsInaccessible) {
+      typesWhereAllFieldsAreInaccessible.add(node.name.value);
+    } else {
+      typesWhereNotAllFieldsAreAccessible.add(node.name.value);
     }
 
     return {
@@ -319,16 +372,123 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
     };
   }
 
-  const newDocument = visit(documentNode, {
+  const typeDefs = visit(documentNode, {
     [Kind.OBJECT_TYPE_DEFINITION]: fieldLikeObjectHandler,
+    [Kind.OBJECT_TYPE_EXTENSION]: fieldLikeObjectHandler,
     [Kind.INTERFACE_TYPE_DEFINITION]: fieldLikeObjectHandler,
+    [Kind.INTERFACE_TYPE_EXTENSION]: fieldLikeObjectHandler,
     [Kind.INPUT_OBJECT_TYPE_DEFINITION]: fieldLikeObjectHandler,
+    [Kind.INPUT_OBJECT_TYPE_EXTENSION]: fieldLikeObjectHandler,
     [Kind.ENUM_TYPE_DEFINITION]: enumHandler,
+    [Kind.ENUM_TYPE_EXTENSION]: enumHandler,
     [Kind.SCALAR_TYPE_DEFINITION]: scalarAndUnionHandler,
     [Kind.UNION_TYPE_DEFINITION]: scalarAndUnionHandler,
   });
 
-  return newDocument;
+  return {
+    typeDefs,
+    typesWhereAllFieldsAreInaccessible: setDifference(
+      typesWhereAllFieldsAreInaccessible,
+      typesWhereNotAllFieldsAreAccessible,
+    ),
+    transformTagDirectives,
+  };
+}
+
+function intersectSets(sets: Set<string>[]): Set<string> {
+  if (sets.length === 0) {
+    // If the input array is empty, return an empty set
+    return new Set();
+  }
+
+  // Create a copy of the first set to modify
+  const result = new Set(sets[0]);
+
+  // Iterate through the rest of the sets
+  for (let i = 1; i < sets.length; i++) {
+    // Filter the current set and keep only elements present in the result set
+    result.forEach(value => {
+      if (!sets[i].has(value)) {
+        result.delete(value);
+      }
+    });
+
+    // If the result set becomes empty, no need to continue
+    if (result.size === 0) {
+      break;
+    }
+  }
+
+  return result;
+}
+
+function makeTypesFromSetInaccessible(
+  documentNode: DocumentNode,
+  types: Set<string>,
+  transformTagDirectives: ReturnType<typeof createTransformTagDirectives>,
+) {
+  function typeHandler(
+    node:
+      | ObjectTypeExtensionNode
+      | ObjectTypeDefinitionNode
+      | InterfaceTypeDefinitionNode
+      | InterfaceTypeExtensionNode
+      | InputObjectTypeDefinitionNode
+      | InputObjectTypeExtensionNode
+      | EnumTypeDefinitionNode
+      | EnumTypeExtensionNode,
+  ) {
+    if (types.has(node.name.value) === false) {
+      return;
+    }
+    return {
+      ...node,
+      directives: transformTagDirectives(node, true),
+    };
+  }
+
+  return visit(documentNode, {
+    [Kind.OBJECT_TYPE_DEFINITION]: typeHandler,
+    [Kind.OBJECT_TYPE_EXTENSION]: typeHandler,
+    [Kind.INTERFACE_TYPE_DEFINITION]: typeHandler,
+    [Kind.INTERFACE_TYPE_EXTENSION]: typeHandler,
+    [Kind.INPUT_OBJECT_TYPE_DEFINITION]: typeHandler,
+    [Kind.INPUT_OBJECT_TYPE_EXTENSION]: typeHandler,
+    [Kind.ENUM_TYPE_DEFINITION]: typeHandler,
+    [Kind.ENUM_TYPE_EXTENSION]: typeHandler,
+  });
+}
+
+/**
+ * Apply a tag filter to a set of subgraphs.
+ */
+export function applyTagFilterOnSubgraphs<
+  TType extends {
+    typeDefs: DocumentNode;
+    name: string;
+  },
+>(subgraphs: Array<TType>, filter: Federation2SubgraphDocumentNodeByTagsFilter): Array<TType> {
+  const filteredSubgraphs = subgraphs.map(subgraph => ({
+    ...subgraph,
+    ...applyTagFilterToInaccessibleTransformOnSubgraphSchema(subgraph.typeDefs, filter),
+  }));
+
+  const intersectionOfTypesWhereAllFieldsAreInaccessible = intersectSets(
+    filteredSubgraphs.map(subgraph => subgraph.typesWhereAllFieldsAreInaccessible),
+  );
+
+  if (!intersectionOfTypesWhereAllFieldsAreInaccessible.size) {
+    filteredSubgraphs;
+  }
+
+  return filteredSubgraphs.map(subgraph => ({
+    ...subgraph,
+    typeDefs: makeTypesFromSetInaccessible(
+      subgraph.typeDefs,
+      intersectionOfTypesWhereAllFieldsAreInaccessible,
+      subgraph.transformTagDirectives,
+    ),
+  }));
 }
 
 function createFederationDirectiveStrategy(directiveName: string): TagExtractionStrategy {
