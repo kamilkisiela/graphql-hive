@@ -1611,8 +1611,8 @@ importers:
         specifier: 3.0.6
         version: 3.0.6
       dompurify:
-        specifier: 3.0.6
-        version: 3.0.6
+        specifier: 3.0.8
+        version: 3.0.8
       echarts:
         specifier: 5.4.3
         version: 5.4.3
@@ -17861,8 +17861,8 @@ packages:
     resolution: {integrity: sha512-axQ9zieHLnAnHh0sfAamKYiqXMJAVwu+LM/alQ7WDagoWessyWvMSFyW65CqF3owufNu8HBcE4cM2Vflu7YWcQ==}
     dev: false
 
-  /dompurify@3.0.6:
-    resolution: {integrity: sha512-ilkD8YEnnGh1zJ240uJsW7AzE+2qpbOUYjacomn3AvJ6J4JhKGSZ2nh4wUIXPZrEPppaCLx5jFe8T89Rk8tQ7w==}
+  /dompurify@3.0.8:
+    resolution: {integrity: sha512-b7uwreMYL2eZhrSCRC4ahLTeZcPZxSmYfmcQGXGkXiZSNW1X85v+SDM5KsWcpivIiUBH47Ji7NtyUdpLeF5JZQ==}
     dev: false
 
   /domutils@2.8.0:
