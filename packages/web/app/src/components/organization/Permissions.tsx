@@ -8,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { TabsContent } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@/graphql';
@@ -37,7 +36,6 @@ const OrganizationPermissions_UpdateMemberAccessMutation = graphql(`
 `);
 
 interface Props<T> {
-  title: string;
   scopes: readonly Scope<T>[];
   initialScopes: readonly T[];
   selectedScopes: readonly T[];
@@ -167,7 +165,7 @@ export const PermissionScopeItem = <
   return props.canManageScope ? (
     inner
   ) : (
-    <TooltipProvider>
+    <TooltipProvider key={props.scope.name}>
       <Tooltip delayDuration={100}>
         <TooltipTrigger asChild>{inner}</TooltipTrigger>
         <TooltipContent>Your user account does not have these permissions.</TooltipContent>
@@ -182,10 +180,10 @@ function PermissionsSpaceInner(props: Props<TargetAccessScope>): ReactElement<an
 function PermissionsSpaceInner<
   T extends OrganizationAccessScope | ProjectAccessScope | TargetAccessScope,
 >(props: Props<T>) {
-  const { title, scopes, initialScopes, selectedScopes, onChange, checkAccess, disabled } = props;
+  const { scopes, initialScopes, selectedScopes, onChange, checkAccess, disabled } = props;
 
   return (
-    <TabsContent value={title}>
+    <>
       {scopes.map(scope => {
         const possibleScope = [scope.mapping['read-only'], scope.mapping['read-write']].filter(
           isDefined,
@@ -242,7 +240,7 @@ function PermissionsSpaceInner<
           />
         );
       })}
-    </TabsContent>
+    </>
   );
 }
 

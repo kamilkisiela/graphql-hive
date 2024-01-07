@@ -62,4 +62,5 @@ export const organizationViewerScopes = [
   ProjectAccessScope.OPERATIONS_STORE_READ,
   TargetAccessScope.READ,
   TargetAccessScope.REGISTRY_READ,
+  TargetAccessScope.USAGE_READ,
 ];

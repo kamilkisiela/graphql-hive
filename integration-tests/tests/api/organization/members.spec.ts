@@ -36,8 +36,9 @@ test.concurrent('invited member should have basic scopes (Viewer role)', async (
   // Should have only target:read and target:registry:read access
   expect(member.targetAccessScopes).toContainEqual(TargetAccessScope.Read);
   expect(member.targetAccessScopes).toContainEqual(TargetAccessScope.RegistryRead);
+  expect(member.targetAccessScopes).toContainEqual(TargetAccessScope.UsageRead);
   // Nothing more
-  expect(member.targetAccessScopes).toHaveLength(2);
+  expect(member.targetAccessScopes).toHaveLength(3);
 });
 
 test.concurrent(

@@ -15,10 +15,19 @@ export const NoAccess = 'no-access';
 
 export const RegistryAccessScope = {
   name: 'Registry',
-  description: 'Manage registry (publish schemas, run checks, report usage)',
+  description: 'Manage registry (publish schemas, run checks)',
   mapping: {
     'read-only': TargetAccessScope.RegistryRead,
     'read-write': TargetAccessScope.RegistryWrite,
+  },
+};
+
+export const UsageAccessScope = {
+  name: 'Usage reporting',
+  description: 'Read and report GraphQL requests',
+  mapping: {
+    'read-only': TargetAccessScope.UsageRead,
+    'read-write': TargetAccessScope.UsageWrite,
   },
 };
 
@@ -97,6 +106,7 @@ export const scopes: {
       },
     },
     RegistryAccessScope,
+    UsageAccessScope,
     {
       name: 'Settings',
       description: 'Manage target settings (change its name, etc.)',

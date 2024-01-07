@@ -386,7 +386,12 @@ export function initSeed() {
                   return result.updateOperationInDocumentCollection;
                 },
                 async createToken({
-                  targetScopes = [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+                  targetScopes = [
+                    TargetAccessScope.RegistryRead,
+                    TargetAccessScope.RegistryWrite,
+                    TargetAccessScope.UsageRead,
+                    TargetAccessScope.UsageWrite,
+                  ],
                   projectScopes = [],
                   organizationScopes = [],
                   targetId = target.cleanId,

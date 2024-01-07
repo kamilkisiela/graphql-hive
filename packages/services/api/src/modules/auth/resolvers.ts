@@ -72,6 +72,8 @@ export const resolvers: AuthModule.Resolvers & {
     READ: TargetAccessScope.READ,
     REGISTRY_READ: TargetAccessScope.REGISTRY_READ,
     REGISTRY_WRITE: TargetAccessScope.REGISTRY_WRITE,
+    USAGE_READ: TargetAccessScope.USAGE_READ,
+    USAGE_WRITE: TargetAccessScope.USAGE_WRITE,
     DELETE: TargetAccessScope.DELETE,
     SETTINGS: TargetAccessScope.SETTINGS,
     TOKENS_READ: TargetAccessScope.TOKENS_READ,

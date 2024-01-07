@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
 import { PermissionsSpace, usePermissionsManager } from '@/components/organization/Permissions';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button, Heading, Modal } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { scopes } from '@/lib/access/common';
@@ -52,30 +52,33 @@ export function ChangePermissionsModal({
             <TabsTrigger value="Projects">Projects</TabsTrigger>
             <TabsTrigger value="Targets">Targets</TabsTrigger>
           </TabsList>
-          <PermissionsSpace
-            title="Organization"
-            scopes={scopes.organization}
-            initialScopes={initialScopes.organization}
-            selectedScopes={manager.organizationScopes}
-            onChange={manager.setOrganizationScopes}
-            checkAccess={manager.canAccessOrganization}
-          />
-          <PermissionsSpace
-            title="Projects"
-            scopes={scopes.project}
-            initialScopes={initialScopes.project}
-            selectedScopes={manager.projectScopes}
-            onChange={manager.setProjectScopes}
-            checkAccess={manager.canAccessProject}
-          />
-          <PermissionsSpace
-            title="Targets"
-            scopes={scopes.target}
-            initialScopes={initialScopes.target}
-            selectedScopes={manager.targetScopes}
-            onChange={manager.setTargetScopes}
-            checkAccess={manager.canAccessTarget}
-          />
+          <TabsContent value="Organization">
+            <PermissionsSpace
+              scopes={scopes.organization}
+              initialScopes={initialScopes.organization}
+              selectedScopes={manager.organizationScopes}
+              onChange={manager.setOrganizationScopes}
+              checkAccess={manager.canAccessOrganization}
+            />
+          </TabsContent>
+          <TabsContent value="Projects">
+            <PermissionsSpace
+              scopes={scopes.project}
+              initialScopes={initialScopes.project}
+              selectedScopes={manager.projectScopes}
+              onChange={manager.setProjectScopes}
+              checkAccess={manager.canAccessProject}
+            />
+          </TabsContent>
+          <TabsContent value="Targets">
+            <PermissionsSpace
+              scopes={scopes.target}
+              initialScopes={initialScopes.target}
+              selectedScopes={manager.targetScopes}
+              onChange={manager.setTargetScopes}
+              checkAccess={manager.canAccessTarget}
+            />
+          </TabsContent>
         </Tabs>
         <div className="flex w-full gap-2">
           <Button type="button" size="large" block onClick={toggleModalOpen}>

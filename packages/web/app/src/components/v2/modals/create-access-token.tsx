@@ -1,13 +1,50 @@
-import { ReactElement, useState } from 'react';
-import { useFormik } from 'formik';
+import { ReactElement, useCallback, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useMutation, useQuery } from 'urql';
-import * as Yup from 'yup';
-import { PermissionScopeItem, usePermissionsManager } from '@/components/organization/Permissions';
-import { Accordion, Button, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
+import * as z from 'zod';
+import { PermissionsSpace, usePermissionsManager } from '@/components/organization/Permissions';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/components/ui/use-toast';
+import { CopyValue, Tag } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { TargetAccessScope } from '@/graphql';
-import { RegistryAccessScope } from '@/lib/access/common';
+import { RegistryAccessScope, UsageAccessScope } from '@/lib/access/common';
 import { useRouteSelector } from '@/lib/hooks';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+const formSchema = z.object({
+  name: z
+    .string({
+      required_error: 'Required',
+    })
+    .trim()
+    .min(2, {
+      message: 'At least 2 characters.',
+    })
+    .max(128, {
+      message: 'At most 128 characters.',
+    }),
+  scopes: z.array(z.string()).min(1, {
+    message: 'Select at least one scope.',
+  }),
+});
 
 export const CreateAccessToken_CreateTokenMutation = graphql(`
   mutation CreateAccessToken_CreateToken($input: CreateTokenInput!) {
@@ -58,12 +95,8 @@ export function CreateAccessTokenModal({
   const organization = organizationQuery.data?.organization?.organization;
 
   return (
-    <Modal
-      open={isOpen}
-      onOpenChange={toggleModalOpen}
-      className="flex h-5/6 w-[650px] overflow-hidden"
-    >
-      {organization ? (
+    <Dialog open={isOpen} onOpenChange={toggleModalOpen}>
+      {organization && isOpen ? (
         <ModalContent
           organization={organization}
           organizationId={router.organizationId}
@@ -72,7 +105,7 @@ export function CreateAccessTokenModal({
           toggleModalOpen={toggleModalOpen}
         />
       ) : null}
-    </Modal>
+    </Dialog>
   );
 }
 
@@ -86,19 +119,6 @@ const CreateAccessTokenModalContent_OrganizationFragment = graphql(`
   }
 `);
 
-function getFinalTargetAccessScopes(
-  selectedScope: 'no-access' | TargetAccessScope,
-): Array<TargetAccessScope> {
-  if (selectedScope === 'no-access') {
-    return [];
-  }
-  /** When RegistryWrite got selected, we also need to provide RegistryRead.  */
-  if (selectedScope === TargetAccessScope.RegistryWrite) {
-    return [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite];
-  }
-  return [TargetAccessScope.RegistryRead];
-}
-
 function ModalContent(props: {
   organization: FragmentType<typeof CreateAccessTokenModalContent_OrganizationFragment>;
   organizationId: string;
@@ -110,10 +130,7 @@ function ModalContent(props: {
     CreateAccessTokenModalContent_OrganizationFragment,
     props.organization,
   );
-  const [selectedScope, setSelectedScope] = useState(
-    'no-access' as TargetAccessScope | 'no-access',
-  );
-
+  const [selectedScopes, setSelectedScopes] = useState<TargetAccessScope[]>([]);
   const manager = usePermissionsManager({
     onSuccess() {},
     organization,
@@ -122,125 +139,136 @@ function ModalContent(props: {
   });
 
   const [mutation, mutate] = useMutation(CreateAccessToken_CreateTokenMutation);
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
-    useFormik({
-      initialValues: { name: '' },
-      validationSchema: Yup.object().shape({
-        name: Yup.string().required('Must enter description'),
-      }),
-      async onSubmit(values) {
-        await mutate({
-          input: {
-            organization: props.organizationId,
-            project: props.projectId,
-            target: props.targetId,
-            name: values.name,
-            organizationScopes: [],
-            projectScopes: [],
-            targetScopes: getFinalTargetAccessScopes(selectedScope),
-          },
-        });
-      },
-    });
+  const { toast } = useToast();
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    mode: 'onChange',
+    defaultValues: {
+      name: '',
+      scopes: [],
+    },
+    disabled: mutation.fetching,
+  });
+  const updateScopes = useCallback(
+    (scopes: TargetAccessScope[]) => {
+      form.setValue('scopes', [...scopes]);
+      void form.trigger('scopes');
+      setSelectedScopes(scopes);
+    },
+    [selectedScopes, setSelectedScopes, form],
+  );
 
-  const noPermissionsSelected = selectedScope === 'no-access';
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const result = await mutate({
+        input: {
+          organization: props.organizationId,
+          project: props.projectId,
+          target: props.targetId,
+          name: values.name,
+          organizationScopes: [],
+          projectScopes: [],
+          targetScopes: selectedScopes,
+        },
+      });
+
+      if (result.error) {
+        toast({
+          variant: 'destructive',
+          title: 'Failed to create token',
+          description: result.error.message,
+        });
+      } else if (result.data?.createToken.error) {
+        toast({
+          variant: 'destructive',
+          title: 'Failed to create token',
+          description: result.data.createToken.error.message,
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Failed to create token',
+        description: String(error),
+      });
+    }
+  }
 
   return (
-    <>
+    <DialogContent>
       {mutation.data?.createToken.ok ? (
-        <div className="flex grow flex-col gap-5">
-          <Heading className="text-center">Token successfully created!</Heading>
-          <CopyValue value={mutation.data.createToken.ok.secret} />
-          <Tag color="green">
-            This is your unique API key and it is non-recoverable. If you lose this key, you will
-            need to create a new one.
-          </Tag>
-          <div className="grow" />
-          <Button
-            variant="primary"
-            size="large"
-            className="ml-auto"
-            onClick={props.toggleModalOpen}
-          >
-            Ok, got it!
-          </Button>
-        </div>
+        <>
+          <DialogHeader>
+            <DialogTitle>Token successfully created!</DialogTitle>
+          </DialogHeader>
+          <div className="flex grow flex-col gap-5">
+            <CopyValue value={mutation.data.createToken.ok.secret} />
+            <Tag color="green">
+              This is your unique API key and it is non-recoverable. If you lose this key, you will
+              need to create a new one.
+            </Tag>
+          </div>
+          <DialogFooter>
+            <Button className="ml-auto" onClick={props.toggleModalOpen}>
+              Ok, got it!
+            </Button>
+          </DialogFooter>
+        </>
       ) : (
-        <form className="flex grow flex-col gap-5" onSubmit={handleSubmit}>
-          <div className="shrink-0">
-            <div className="flex-none">
-              <Heading className="mb-2 text-center">Create an access token</Heading>
-              <p className="mb-2 text-sm text-gray-500">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <DialogHeader>
+              <DialogTitle>Create an access token</DialogTitle>
+              <DialogDescription>
                 To access GraphQL Hive, your application or tool needs an active API key.
-              </p>
-
-              <Input
-                placeholder="Token description"
-                name="name"
-                value={values.name}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                disabled={isSubmitting}
-                isInvalid={touched.name && !!errors.name}
-                className="w-full"
-              />
-            </div>
-            {touched.name && errors.name && (
-              <div className="mt-2 text-sm text-red-500">{errors.name}</div>
-            )}
-            {mutation.data?.createToken.error && (
-              <div className="mt-2 text-sm text-red-500">
-                {mutation.data?.createToken.error.message}
-              </div>
-            )}
-          </div>
-          <div className="flex flex-1 flex-col overflow-hidden">
-            <Accordion defaultValue="Permissions">
-              <Accordion.Item value="Permissions">
-                <Accordion.Header>Registry & Usage</Accordion.Header>
-                <Accordion.Content>
-                  <PermissionScopeItem
-                    scope={RegistryAccessScope}
-                    canManageScope={
-                      manager.canAccessTarget(RegistryAccessScope.mapping['read-only']) ||
-                      manager.canAccessTarget(RegistryAccessScope.mapping['read-write'])
-                    }
-                    checkAccess={manager.canAccessTarget}
-                    onChange={value => {
-                      if (value === 'no-access') {
-                        setSelectedScope('no-access');
-                        return;
-                      }
-                      setSelectedScope(value);
-                    }}
-                    possibleScope={Object.values(RegistryAccessScope.mapping)}
-                    initialScope={selectedScope}
-                    selectedScope={selectedScope}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex grow flex-col gap-5 py-4">
+              <div className="shrink-0">
+                <div className="flex-none">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} autoComplete="off" />
+                        </FormControl>
+                        <FormDescription>
+                          Give token a name so you can easily recognize it later.
+                        </FormDescription>
+                      </FormItem>
+                    )}
                   />
-                </Accordion.Content>
-              </Accordion.Item>
-            </Accordion>
-          </div>
-          <div className="shrink-0">
-            {mutation.error && <div className="text-sm text-red-500">{mutation.error.message}</div>}
-
-            <div className="flex w-full gap-2">
-              <Button type="button" size="large" block onClick={props.toggleModalOpen}>
+                </div>
+              </div>
+              <div>
+                <PermissionsSpace
+                  scopes={[RegistryAccessScope, UsageAccessScope]}
+                  initialScopes={[]}
+                  selectedScopes={selectedScopes}
+                  onChange={updateScopes}
+                  checkAccess={manager.canAccessTarget}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="secondary" onClick={props.toggleModalOpen}>
                 Cancel
               </Button>
               <Button
                 type="submit"
-                size="large"
-                block
-                variant="primary"
-                disabled={isSubmitting || noPermissionsSelected}
+                disabled={
+                  !form.formState.isValid || form.formState.isSubmitting || form.formState.disabled
+                }
               >
                 Generate Token
               </Button>
-            </div>
-          </div>
-        </form>
+            </DialogFooter>
+          </form>
+        </Form>
       )}
-    </>
+    </DialogContent>
   );
 }

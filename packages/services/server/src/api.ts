@@ -29,6 +29,7 @@ const oidcDefaultScopes = [
   ProjectAccessScope.READ,
   TargetAccessScope.READ,
   TargetAccessScope.REGISTRY_READ,
+  TargetAccessScope.USAGE_READ,
 ];
 
 const t = initTRPC.context<Context>().create();

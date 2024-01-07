@@ -40,7 +40,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
@@ -299,36 +299,39 @@ function OrganizationMemberRoleEditor(props: {
                     <TabsTrigger value="Projects">Projects</TabsTrigger>
                     <TabsTrigger value="Targets">Targets</TabsTrigger>
                   </TabsList>
-                  <PermissionsSpace
-                    disabled={isDisabled}
-                    title="Organization"
-                    scopes={scopes.organization}
-                    initialScopes={initialScopes.organization}
-                    selectedScopes={organizationScopes}
-                    onChange={updateOrganizationScopes}
-                    checkAccess={scope => canAccessScope(scope, me.organizationAccessScopes)}
-                    noDowngrade={noDowngrade}
-                  />
-                  <PermissionsSpace
-                    disabled={isDisabled}
-                    title="Projects"
-                    scopes={scopes.project}
-                    initialScopes={initialScopes.project}
-                    selectedScopes={projectScopes}
-                    onChange={updateProjectScopes}
-                    checkAccess={scope => canAccessScope(scope, me.projectAccessScopes)}
-                    noDowngrade={noDowngrade}
-                  />
-                  <PermissionsSpace
-                    disabled={isDisabled}
-                    title="Targets"
-                    scopes={scopes.target}
-                    initialScopes={initialScopes.target}
-                    selectedScopes={targetScopes}
-                    onChange={updateTargetScopes}
-                    checkAccess={scope => canAccessScope(scope, me.targetAccessScopes)}
-                    noDowngrade={noDowngrade}
-                  />
+                  <TabsContent value="Organization">
+                    <PermissionsSpace
+                      disabled={isDisabled}
+                      scopes={scopes.organization}
+                      initialScopes={initialScopes.organization}
+                      selectedScopes={organizationScopes}
+                      onChange={updateOrganizationScopes}
+                      checkAccess={scope => canAccessScope(scope, me.organizationAccessScopes)}
+                      noDowngrade={noDowngrade}
+                    />
+                  </TabsContent>
+                  <TabsContent value="Projects">
+                    <PermissionsSpace
+                      disabled={isDisabled}
+                      scopes={scopes.project}
+                      initialScopes={initialScopes.project}
+                      selectedScopes={projectScopes}
+                      onChange={updateProjectScopes}
+                      checkAccess={scope => canAccessScope(scope, me.projectAccessScopes)}
+                      noDowngrade={noDowngrade}
+                    />
+                  </TabsContent>
+                  <TabsContent value="Targets">
+                    <PermissionsSpace
+                      disabled={isDisabled}
+                      scopes={scopes.target}
+                      initialScopes={initialScopes.target}
+                      selectedScopes={targetScopes}
+                      onChange={updateTargetScopes}
+                      checkAccess={scope => canAccessScope(scope, me.targetAccessScopes)}
+                      noDowngrade={noDowngrade}
+                    />
+                  </TabsContent>
                 </Tabs>
               </div>
             </div>
@@ -548,30 +551,33 @@ function OrganizationMemberRoleCreator(props: {
                     <TabsTrigger value="Projects">Projects</TabsTrigger>
                     <TabsTrigger value="Targets">Targets</TabsTrigger>
                   </TabsList>
-                  <PermissionsSpace
-                    title="Organization"
-                    scopes={scopes.organization}
-                    initialScopes={[]}
-                    selectedScopes={organizationScopes}
-                    onChange={updateOrganizationScopes}
-                    checkAccess={scope => canAccessScope(scope, me.organizationAccessScopes)}
-                  />
-                  <PermissionsSpace
-                    title="Projects"
-                    scopes={scopes.project}
-                    initialScopes={[]}
-                    selectedScopes={projectScopes}
-                    onChange={updateProjectScopes}
-                    checkAccess={scope => canAccessScope(scope, me.projectAccessScopes)}
-                  />
-                  <PermissionsSpace
-                    title="Targets"
-                    scopes={scopes.target}
-                    initialScopes={[]}
-                    selectedScopes={targetScopes}
-                    onChange={updateTargetScopes}
-                    checkAccess={scope => canAccessScope(scope, me.targetAccessScopes)}
-                  />
+                  <TabsContent value="Organization">
+                    <PermissionsSpace
+                      scopes={scopes.organization}
+                      initialScopes={[]}
+                      selectedScopes={organizationScopes}
+                      onChange={updateOrganizationScopes}
+                      checkAccess={scope => canAccessScope(scope, me.organizationAccessScopes)}
+                    />
+                  </TabsContent>
+                  <TabsContent value="Projects">
+                    <PermissionsSpace
+                      scopes={scopes.project}
+                      initialScopes={[]}
+                      selectedScopes={projectScopes}
+                      onChange={updateProjectScopes}
+                      checkAccess={scope => canAccessScope(scope, me.projectAccessScopes)}
+                    />
+                  </TabsContent>
+                  <TabsContent value="Targets">
+                    <PermissionsSpace
+                      scopes={scopes.target}
+                      initialScopes={[]}
+                      selectedScopes={targetScopes}
+                      onChange={updateTargetScopes}
+                      checkAccess={scope => canAccessScope(scope, me.targetAccessScopes)}
+                    />
+                  </TabsContent>
                 </Tabs>
               </div>
             </div>

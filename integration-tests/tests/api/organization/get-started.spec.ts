@@ -43,6 +43,8 @@ test.concurrent('completing each step should result in updated Get Started progr
         TargetAccessScope.Read,
         TargetAccessScope.RegistryRead,
         TargetAccessScope.RegistryWrite,
+        TargetAccessScope.UsageRead,
+        TargetAccessScope.UsageWrite,
         TargetAccessScope.Settings,
       ],
       projectScopes: [ProjectAccessScope.Read],

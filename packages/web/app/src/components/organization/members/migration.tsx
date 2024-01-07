@@ -32,7 +32,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from '@/component
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
@@ -681,45 +681,48 @@ function OrganizationMemberRolesMigrationGroup(props: {
                     <TabsTrigger value="Projects">Projects</TabsTrigger>
                     <TabsTrigger value="Targets">Targets</TabsTrigger>
                   </TabsList>
-                  <PermissionsSpace
-                    title="Organization"
-                    scopes={scopes.organization}
-                    initialScopes={temporaryScopes.organization}
-                    selectedScopes={temporaryScopes.organization}
-                    onChange={scopes => {
-                      setTemporaryScopes(prev => ({
-                        ...prev,
-                        organization: scopes,
-                      }));
-                    }}
-                    checkAccess={() => true /* Yes, as only admins can perform migration */}
-                  />
-                  <PermissionsSpace
-                    title="Projects"
-                    scopes={scopes.project}
-                    initialScopes={temporaryScopes.project}
-                    selectedScopes={temporaryScopes.project}
-                    onChange={scopes => {
-                      setTemporaryScopes(prev => ({
-                        ...prev,
-                        project: scopes,
-                      }));
-                    }}
-                    checkAccess={() => true}
-                  />
-                  <PermissionsSpace
-                    title="Targets"
-                    scopes={scopes.target}
-                    initialScopes={temporaryScopes.target}
-                    selectedScopes={temporaryScopes.target}
-                    onChange={scopes => {
-                      setTemporaryScopes(prev => ({
-                        ...prev,
-                        target: scopes,
-                      }));
-                    }}
-                    checkAccess={() => true}
-                  />
+                  <TabsContent value="Organization">
+                    <PermissionsSpace
+                      scopes={scopes.organization}
+                      initialScopes={temporaryScopes.organization}
+                      selectedScopes={temporaryScopes.organization}
+                      onChange={scopes => {
+                        setTemporaryScopes(prev => ({
+                          ...prev,
+                          organization: scopes,
+                        }));
+                      }}
+                      checkAccess={() => true /* Yes, as only admins can perform migration */}
+                    />
+                  </TabsContent>
+                  <TabsContent value="Projects">
+                    <PermissionsSpace
+                      scopes={scopes.project}
+                      initialScopes={temporaryScopes.project}
+                      selectedScopes={temporaryScopes.project}
+                      onChange={scopes => {
+                        setTemporaryScopes(prev => ({
+                          ...prev,
+                          project: scopes,
+                        }));
+                      }}
+                      checkAccess={() => true}
+                    />
+                  </TabsContent>
+                  <TabsContent value="Targets">
+                    <PermissionsSpace
+                      scopes={scopes.target}
+                      initialScopes={temporaryScopes.target}
+                      selectedScopes={temporaryScopes.target}
+                      onChange={scopes => {
+                        setTemporaryScopes(prev => ({
+                          ...prev,
+                          target: scopes,
+                        }));
+                      }}
+                      checkAccess={() => true}
+                    />
+                  </TabsContent>
                 </Tabs>
                 <DialogFooter>
                   <Button

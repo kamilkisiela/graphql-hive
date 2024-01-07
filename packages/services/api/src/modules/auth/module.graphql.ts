@@ -107,6 +107,8 @@ export default gql`
     SETTINGS
     REGISTRY_READ
     REGISTRY_WRITE
+    USAGE_READ
+    USAGE_WRITE
     TOKENS_READ
     TOKENS_WRITE
   }

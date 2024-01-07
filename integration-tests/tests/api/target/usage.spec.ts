@@ -38,7 +38,7 @@ test.concurrent(
       organizationScopes: [OrganizationAccessScope.Read],
     });
 
-    const writeToken = await createToken({
+    const registryWriteToken = await createToken({
       targetScopes: [
         TargetAccessScope.Read,
         TargetAccessScope.RegistryRead,
@@ -47,14 +47,28 @@ test.concurrent(
       projectScopes: [ProjectAccessScope.Read],
       organizationScopes: [OrganizationAccessScope.Read],
     });
-
-    const readToken = await createToken({
-      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead],
+    const usageWriteToken = await createToken({
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.UsageRead,
+        TargetAccessScope.UsageWrite,
+      ],
       projectScopes: [ProjectAccessScope.Read],
       organizationScopes: [OrganizationAccessScope.Read],
     });
 
-    const schemaPublishResult = await writeToken
+    const registryReadToken = await createToken({
+      targetScopes: [TargetAccessScope.Read, TargetAccessScope.RegistryRead],
+      projectScopes: [ProjectAccessScope.Read],
+      organizationScopes: [OrganizationAccessScope.Read],
+    });
+    const usageReadToken = await createToken({
+      targetScopes: [TargetAccessScope.Read, TargetAccessScope.UsageRead],
+      projectScopes: [ProjectAccessScope.Read],
+      organizationScopes: [OrganizationAccessScope.Read],
+    });
+
+    const schemaPublishResult = await registryWriteToken
       .publishSchema({
         author: 'Kamil',
         commit: 'abc123',
@@ -70,12 +84,12 @@ test.concurrent(
     expect(targetValidationResult.setTargetValidation.validationSettings.period).toEqual(30);
 
     // should not be breaking because the field is unused
-    const unusedCheckResult = await readToken
+    const unusedCheckResult = await registryReadToken
       .checkSchema(`type Query { me: String }`)
       .then(r => r.expectNoGraphQLErrors());
     expect(unusedCheckResult.schemaCheck.__typename).toEqual('SchemaCheckSuccess');
 
-    const collectResult = await writeToken.collectOperations([
+    const collectResult = await usageWriteToken.collectOperations([
       {
         operation: 'query ping { ping }',
         operationName: 'ping',
@@ -91,7 +105,7 @@ test.concurrent(
     await waitFor(5000);
 
     // should be breaking because the field is used now
-    const usedCheckResult = await readToken
+    const usedCheckResult = await registryReadToken
       .checkSchema(`type Query { me: String }`)
       .then(r => r.expectNoGraphQLErrors());
 
@@ -103,13 +117,13 @@ test.concurrent(
 
     const from = formatISO(subHours(Date.now(), 6));
     const to = formatISO(Date.now());
-    const operationsStats = await readToken.readOperationsStats(from, to);
+    const operationsStats = await usageReadToken.readOperationsStats(from, to);
     expect(operationsStats.operations.nodes).toHaveLength(1);
 
     const op = operationsStats.operations.nodes[0];
 
     expect(op.count).toEqual(1);
-    await expect(writeToken.readOperationBody(op.operationHash!)).resolves.toEqual(
+    await expect(usageReadToken.readOperationBody(op.operationHash!)).resolves.toEqual(
       'query ping{ping}',
     );
     expect(op.operationHash).toBeDefined();
@@ -132,6 +146,8 @@ test.concurrent('normalize and collect operation without breaking its syntax', a
       TargetAccessScope.Read,
       TargetAccessScope.RegistryRead,
       TargetAccessScope.RegistryWrite,
+      TargetAccessScope.UsageRead,
+      TargetAccessScope.UsageWrite,
     ],
     projectScopes: [ProjectAccessScope.Read],
     organizationScopes: [OrganizationAccessScope.Read],
@@ -254,8 +270,8 @@ test.concurrent(
     const writeToken = await createToken({
       targetScopes: [
         TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.UsageRead,
+        TargetAccessScope.UsageWrite,
       ],
       projectScopes: [ProjectAccessScope.Read],
       organizationScopes: [OrganizationAccessScope.Read],
@@ -326,6 +342,8 @@ test.concurrent('check usage from two selected targets', async () => {
       TargetAccessScope.Read,
       TargetAccessScope.RegistryRead,
       TargetAccessScope.RegistryWrite,
+      TargetAccessScope.UsageRead,
+      TargetAccessScope.UsageWrite,
       TargetAccessScope.Settings,
     ],
     projectScopes: [ProjectAccessScope.Read],
@@ -337,6 +355,8 @@ test.concurrent('check usage from two selected targets', async () => {
       TargetAccessScope.Read,
       TargetAccessScope.RegistryRead,
       TargetAccessScope.RegistryWrite,
+      TargetAccessScope.UsageRead,
+      TargetAccessScope.UsageWrite,
     ],
     projectScopes: [ProjectAccessScope.Read],
     organizationScopes: [OrganizationAccessScope.Read],
@@ -455,6 +475,8 @@ test.concurrent('check usage not from excluded client names', async () => {
       TargetAccessScope.Read,
       TargetAccessScope.RegistryRead,
       TargetAccessScope.RegistryWrite,
+      TargetAccessScope.UsageRead,
+      TargetAccessScope.UsageWrite,
       TargetAccessScope.Settings,
     ],
     projectScopes: [ProjectAccessScope.Read],
@@ -653,6 +675,8 @@ describe('changes with usage data', () => {
           TargetAccessScope.Read,
           TargetAccessScope.RegistryRead,
           TargetAccessScope.RegistryWrite,
+          TargetAccessScope.UsageRead,
+          TargetAccessScope.UsageWrite,
           TargetAccessScope.Settings,
         ],
         projectScopes: [ProjectAccessScope.Read],
@@ -922,8 +946,8 @@ test.concurrent('number of produced and collected operations should match', asyn
   const writeToken = await createToken({
     targetScopes: [
       TargetAccessScope.Read,
-      TargetAccessScope.RegistryRead,
-      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.UsageRead,
+      TargetAccessScope.UsageWrite,
     ],
     projectScopes: [ProjectAccessScope.Read],
     organizationScopes: [OrganizationAccessScope.Read],
@@ -1013,8 +1037,8 @@ test.concurrent(
     const writeToken = await createToken({
       targetScopes: [
         TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.UsageRead,
+        TargetAccessScope.UsageWrite,
       ],
       projectScopes: [ProjectAccessScope.Read],
       organizationScopes: [OrganizationAccessScope.Read],
@@ -1076,8 +1100,8 @@ test.concurrent(
     const writeToken = await createToken({
       targetScopes: [
         TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.UsageRead,
+        TargetAccessScope.UsageWrite,
       ],
       projectScopes: [ProjectAccessScope.Read],
       organizationScopes: [OrganizationAccessScope.Read],
@@ -1143,8 +1167,8 @@ test.concurrent(
     const writeToken = await createToken({
       targetScopes: [
         TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.UsageRead,
+        TargetAccessScope.UsageWrite,
       ],
       projectScopes: [ProjectAccessScope.Read],
       organizationScopes: [OrganizationAccessScope.Read],
@@ -1204,8 +1228,8 @@ test.concurrent('ignore operations with syntax errors', async () => {
   const writeToken = await createToken({
     targetScopes: [
       TargetAccessScope.Read,
-      TargetAccessScope.RegistryRead,
-      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.UsageRead,
+      TargetAccessScope.UsageWrite,
     ],
     projectScopes: [ProjectAccessScope.Read],
     organizationScopes: [OrganizationAccessScope.Read],
@@ -1272,8 +1296,8 @@ test.concurrent('ensure correct data', async () => {
   const writeToken = await createToken({
     targetScopes: [
       TargetAccessScope.Read,
-      TargetAccessScope.RegistryRead,
-      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.UsageRead,
+      TargetAccessScope.UsageWrite,
     ],
     projectScopes: [ProjectAccessScope.Read],
     organizationScopes: [OrganizationAccessScope.Read],
