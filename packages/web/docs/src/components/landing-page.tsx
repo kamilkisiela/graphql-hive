@@ -2,7 +2,7 @@ import { ReactElement, ReactNode, useState } from 'react';
 import Head from 'next/head';
 import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
-import { FiGithub, FiGlobe, FiLogIn, FiPackage, FiServer, FiTruck } from 'react-icons/fi';
+import { FiGithub, FiGlobe, FiLogIn, FiPackage, FiPhone, FiServer, FiTruck } from 'react-icons/fi';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { cn } from '../lib';
 import { BookIcon } from './book-icon';
@@ -327,6 +327,15 @@ export function IndexPage(): ReactElement {
                 href="https://github.com/kamilkisiela/graphql-hive"
               >
                 <FiGithub /> Star on GitHub
+              </a>
+              <a
+                className={cn(classes.link, 'flex flex-row items-center gap-2')}
+                href="#"
+                onClick={() => {
+                  (window as any).$crisp?.push(['do', 'chat:open']);
+                }}
+              >
+                <FiPhone /> Talk to us
               </a>
             </>
           </HeroLinks>
