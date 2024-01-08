@@ -913,6 +913,85 @@ describe('changes with usage data', () => {
       fields: ['Query', 'Query.users', 'Filter', 'Filter.limit'],
     },
   });
+
+  testChangesWithUsageData({
+    title: 'removing a used union member',
+    publishSdl: /* GraphQL */ `
+      type Query {
+        items: [Item]
+      }
+
+      union Item = Book | Movie
+
+      type Book {
+        title: String
+      }
+
+      type Movie {
+        title: String
+      }
+    `,
+    checkSdl: /* GraphQL */ `
+      type Query {
+        items: [Item]
+      }
+
+      union Item = Book
+
+      type Book {
+        title: String
+      }
+    `,
+    expectedSchemaCheckTypename: {
+      beforeReportedOperation: 'SchemaCheckError',
+      // removing a union member that was not used
+      afterReportedOperation: 'SchemaCheckSuccess',
+    },
+    reportOperation: {
+      operation: 'query items { items { ... on Book { title } } }',
+      operationName: 'items',
+      fields: ['Query', 'Query.items', 'Book', 'Book.title'],
+    },
+  });
+
+  testChangesWithUsageData({
+    title: 'removing a union member when none of the union members were specified by a fragment',
+    publishSdl: /* GraphQL */ `
+      type Query {
+        items: [Item]
+      }
+
+      union Item = Book | Movie
+
+      type Book {
+        title: String
+      }
+
+      type Movie {
+        title: String
+      }
+    `,
+    checkSdl: /* GraphQL */ `
+      type Query {
+        items: [Item]
+      }
+
+      union Item = Book
+
+      type Book {
+        title: String
+      }
+    `,
+    expectedSchemaCheckTypename: {
+      beforeReportedOperation: 'SchemaCheckError',
+      afterReportedOperation: 'SchemaCheckError',
+    },
+    reportOperation: {
+      operation: 'query items { items { __typename } }',
+      operationName: 'items',
+      fields: ['Query', 'Query.items', 'Item.__typename'],
+    },
+  });
 });
 
 test.concurrent('number of produced and collected operations should match', async () => {

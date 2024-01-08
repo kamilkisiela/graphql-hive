@@ -55,6 +55,7 @@ const schema = buildSchema(/* GraphQL */ `
     type: ProjectType!
     buildUrl: String
     validationUrl: String
+    owner: User!
   }
 
   enum ProjectType {
@@ -62,6 +63,19 @@ const schema = buildSchema(/* GraphQL */ `
     STITCHING
     SINGLE
     CUSTOM
+  }
+
+  union User = Admin | Member
+
+  type Admin {
+    id: ID!
+    name: String!
+    isSuperAdmin: Boolean!
+  }
+
+  type Member {
+    id: ID!
+    name: String!
   }
 `);
 
@@ -108,6 +122,66 @@ test('collect fields', async () => {
       ProjectSelectorInput.organization,
       ID,
       ProjectSelectorInput.project,
+    ]
+  `);
+});
+
+test('union with __typename only', async () => {
+  const collect = createCollector({
+    schema,
+    max: 1,
+  });
+  const info = collect(
+    parse(/* GraphQL */ `
+      {
+        projects {
+          id
+          owner {
+            __typename
+          }
+        }
+      }
+    `),
+    {},
+  ).value;
+
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Query.projects,
+      Project.id,
+      Project.owner,
+      User.__typename,
+    ]
+  `);
+});
+
+test('union with single member', async () => {
+  const collect = createCollector({
+    schema,
+    max: 1,
+  });
+  const info = collect(
+    parse(/* GraphQL */ `
+      {
+        projects {
+          id
+          owner {
+            ... on Admin {
+              id
+            }
+          }
+        }
+      }
+    `),
+    {},
+  ).value;
+
+  expect(info.fields).toMatchInlineSnapshot(`
+    [
+      Query.projects,
+      Project.id,
+      Project.owner,
+      Admin.id,
     ]
   `);
 });
