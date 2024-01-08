@@ -563,9 +563,10 @@ export default gql`
     """
     Experimental: This field is not stable and may change in the future.
     """
-    explorer(usage: SchemaExplorerUsageInput): SchemaExplorer!
-    unusedSchema(usage: UnusedSchemaExplorerUsageInput): UnusedSchemaExplorer!
-    errors: SchemaErrorConnection!
+    explorer(usage: SchemaExplorerUsageInput): SchemaExplorer
+    unusedSchema(usage: UnusedSchemaExplorerUsageInput): UnusedSchemaExplorer
+    errors: SchemaErrorConnection
+
     """
     GitHub metadata associated with the schema version.
     """

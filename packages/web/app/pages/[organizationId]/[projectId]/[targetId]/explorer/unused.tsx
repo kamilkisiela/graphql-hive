@@ -206,7 +206,6 @@ function UnusedSchemaExplorer(props: {
   }
 
   const latestSchemaVersion = query.data?.target?.latestSchemaVersion;
-  const explorer = latestSchemaVersion?.unusedSchema;
 
   return (
     <>
@@ -236,10 +235,10 @@ function UnusedSchemaExplorer(props: {
           </Select>
         </div>
       </div>
-      {query.fetching ? null : latestSchemaVersion && explorer ? (
+      {query.fetching ? null : latestSchemaVersion?.unusedSchema ? (
         <UnusedSchemaView
           totalRequests={query.data?.operationsStats.totalRequests ?? 0}
-          explorer={explorer}
+          explorer={latestSchemaVersion.unusedSchema}
           organizationCleanId={props.organizationCleanId}
           projectCleanId={props.projectCleanId}
           targetCleanId={props.targetCleanId}

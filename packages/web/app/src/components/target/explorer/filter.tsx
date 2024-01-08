@@ -89,7 +89,7 @@ export function SchemaExplorerFilter({
   });
   const periodSelector = usePeriodSelector();
 
-  const allNamedTypes = query.data?.target?.latestSchemaVersion?.explorer.types;
+  const allNamedTypes = query.data?.target?.latestSchemaVersion?.explorer?.types;
   const types = useMemo(
     () =>
       allNamedTypes?.map(t => ({

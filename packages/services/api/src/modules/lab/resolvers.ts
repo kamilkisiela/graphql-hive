@@ -1,9 +1,7 @@
 import { AuthManager } from '../auth/providers/auth-manager';
 import { TargetAccessScope } from '../auth/providers/target-access';
-import { OrganizationManager } from '../organization/providers/organization-manager';
-import { ProjectManager } from '../project/providers/project-manager';
-import { ensureSDL, SchemaHelper } from '../schema/providers/schema-helper';
 import { SchemaManager } from '../schema/providers/schema-manager';
+import { SchemaVersionHelper } from '../schema/providers/schema-version-helper';
 import { IdTranslator } from '../shared/providers/id-translator';
 import type { LabModule } from './__generated__/types';
 
@@ -36,60 +34,14 @@ export const resolvers: LabModule.Resolvers = {
         return null;
       }
 
-      if (latestSchema.compositeSchemaSDL) {
-        return {
-          schema: latestSchema.compositeSchemaSDL,
-          mocks: {},
-        };
+      const sdl = await injector.get(SchemaVersionHelper).getCompositeSchemaSdl(latestSchema);
+
+      if (!sdl) {
+        throw new Error('This cannot happen.');
       }
 
-      // Legacy Fallback
-
-      const [
-        schemas,
-        { type, externalComposition, nativeFederation, legacyRegistryModel },
-        { featureFlags },
-      ] = await Promise.all([
-        schemaManager.getSchemasOfVersion({
-          organization,
-          project,
-          target,
-          version: latestSchema.id,
-        }),
-        injector.get(ProjectManager).getProject({
-          organization,
-          project,
-        }),
-        injector.get(OrganizationManager).getOrganization({
-          organization,
-        }),
-      ]);
-
-      const orchestrator = schemaManager.matchOrchestrator(type);
-      const helper = injector.get(SchemaHelper);
-
-      const schema = await ensureSDL(
-        orchestrator.composeAndValidate(
-          schemas.map(s => helper.createSchemaObject(s)),
-          {
-            external: externalComposition,
-            native: schemaManager.checkProjectNativeFederationSupport({
-              project: {
-                id: project,
-                nativeFederation,
-                legacyRegistryModel,
-              },
-              organization: {
-                id: organization,
-                featureFlags,
-              },
-            }),
-          },
-        ),
-      );
-
       return {
-        schema: schema.raw,
+        schema: sdl,
         mocks: {},
       };
     },

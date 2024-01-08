@@ -6,6 +6,7 @@ import { RegistryChecks } from './providers/registry-checks';
 import { SchemaHelper } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
+import { SchemaVersionHelper } from './providers/schema-version-helper';
 import { resolvers } from './resolvers';
 import typeDefs from './module.graphql';
 
@@ -20,6 +21,7 @@ export const schemaModule = createModule({
     Inspector,
     SchemaHelper,
     RegistryChecks,
+    SchemaVersionHelper,
     ...orchestrators,
     ...models,
   ],
