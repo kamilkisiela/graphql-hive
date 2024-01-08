@@ -42,6 +42,7 @@
     "prettier": "prettier --cache --write --list-different --ignore-unknown \"**/*\"",
     "release": "pnpm build:libraries && changeset publish",
     "seed": "tsx scripts/seed-local-env.ts",
+    "start": "pnpm run local:setup",
     "test": "vitest",
     "test:e2e": "CYPRESS_BASE_URL=$HIVE_APP_BASE_URL cypress run",
     "test:integration": "cd integration-tests && pnpm test:integration",

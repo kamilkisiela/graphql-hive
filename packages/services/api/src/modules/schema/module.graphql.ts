@@ -817,6 +817,52 @@ export default gql`
     safeSchemaChanges: SchemaChangeConnection
     schemaPolicyWarnings: SchemaPolicyWarningConnection
     schemaPolicyErrors: SchemaPolicyWarningConnection
+
+    """
+    Results of the contracts
+    """
+    contractChecks: ContractCheckConnection
+  }
+
+  """
+  Schema check result for contracts
+  """
+  type ContractCheck {
+    id: ID!
+    contractName: String!
+
+    schemaCompositionErrors: SchemaErrorConnection
+
+    breakingSchemaChanges: SchemaChangeConnection
+    safeSchemaChanges: SchemaChangeConnection
+
+    compositeSchemaSDL: String
+    supergraphSDL: String
+
+    isSuccess: Boolean!
+
+    """
+    The contract version against this check was performed.
+    """
+    contractVersion: ContractVersion
+  }
+
+  type ContractCheckEdge {
+    cursor: String!
+    node: ContractCheck!
+  }
+
+  type ContractCheckConnection {
+    edges: [ContractCheckEdge!]!
+    pageInfo: PageInfo!
+  }
+
+  type ContractVersion {
+    id: ID!
+    createdAt: String!
+    contractName: String!
+    supergraphSDL: String
+    compositeSchemaSDL: String
   }
 
   """
@@ -864,6 +910,11 @@ export default gql`
 
     compositeSchemaSDL: String
     supergraphSDL: String
+    """
+    Results of the contracts
+    """
+    contractChecks: ContractCheckConnection
+
     """
     Whether the schema check was manually approved.
     """
@@ -915,6 +966,10 @@ export default gql`
 
     compositeSchemaSDL: String
     supergraphSDL: String
+    """
+    Results of the contracts
+    """
+    contractChecks: ContractCheckConnection
 
     """
     Whether this schema check can be approved manually.

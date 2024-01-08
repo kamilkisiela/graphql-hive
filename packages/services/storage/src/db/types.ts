@@ -52,6 +52,40 @@ export interface cdn_access_tokens {
   target_id: string;
 }
 
+export interface contract_checks {
+  breaking_schema_changes: any | null;
+  compared_contract_version_id: string | null;
+  composite_schema_sdl_store_id: string | null;
+  contract_name: string;
+  id: string;
+  is_success: boolean;
+  safe_schema_changes: any | null;
+  schema_check_id: string;
+  schema_composition_errors: any | null;
+  supergraph_sdl_store_id: string | null;
+}
+
+export interface contract_version_changes {
+  change_type: string;
+  id: string;
+  is_safe_based_on_usage: boolean;
+  meta: any;
+  schema_version_contract_id: string;
+  severity_level: string;
+}
+
+export interface contract_versions {
+  composite_schema_sdl: string | null;
+  contract_id: string;
+  contract_name: string;
+  created_at: Date;
+  id: string;
+  last_schema_version_contract_id: string | null;
+  schema_composition_errors: any | null;
+  schema_version_id: string;
+  supergraph_sdl: string | null;
+}
+
 export interface contracts {
   contract_name: string;
   created_at: Date;
@@ -247,27 +281,6 @@ export interface schema_version_changes {
   severity_level: string;
 }
 
-export interface schema_version_contract_changes {
-  change_type: string;
-  id: string;
-  is_safe_based_on_usage: boolean;
-  meta: any;
-  schema_version_contract_id: string;
-  severity_level: string;
-}
-
-export interface schema_version_contracts {
-  composite_schema_sdl: string | null;
-  contract_id: string;
-  created_at: Date;
-  id: string;
-  is_composable: boolean;
-  last_schema_version_contract_id: string | null;
-  schema_composition_errors: any | null;
-  schema_version_id: string;
-  supergraph_sdl: string | null;
-}
-
 export interface schema_version_to_log {
   action_id: string;
   version_id: string;
@@ -363,6 +376,9 @@ export interface DBTables {
   alert_channels: alert_channels;
   alerts: alerts;
   cdn_access_tokens: cdn_access_tokens;
+  contract_checks: contract_checks;
+  contract_version_changes: contract_version_changes;
+  contract_versions: contract_versions;
   contracts: contracts;
   document_collection_documents: document_collection_documents;
   document_collections: document_collections;
@@ -379,8 +395,6 @@ export interface DBTables {
   schema_log: schema_log;
   schema_policy_config: schema_policy_config;
   schema_version_changes: schema_version_changes;
-  schema_version_contract_changes: schema_version_contract_changes;
-  schema_version_contracts: schema_version_contracts;
   schema_version_to_log: schema_version_to_log;
   schema_versions: schema_versions;
   sdl_store: sdl_store;

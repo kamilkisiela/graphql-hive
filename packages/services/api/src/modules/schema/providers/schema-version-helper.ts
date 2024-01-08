@@ -72,6 +72,7 @@ export class SchemaVersionHelper {
           project,
           organization,
         }),
+        contracts: null,
       },
     );
 

@@ -3983,8 +3983,9 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         if (args.contracts?.length) {
           for (const contract of args.contracts) {
             await trx.query(sql`
-              INSERT INTO "schema_check_contracts" (
+              INSERT INTO "contract_checks" (
                 "schema_check_id"
+                , "compared_contract_version_id"
                 , "is_success"
                 , "contract_name"
                 , "composite_schema_sdl_store_id"
@@ -3995,6 +3996,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
               )
               VALUES (
                 ${schemaCheck.id}
+                , ${contract.comparedContractVersionId}
                 , ${contract.isSuccess}
                 , ${contract.contractName}
                 , ${contract.compositeSchemaSdlHash}
@@ -4658,7 +4660,7 @@ async function insertSchemaVersionContractChanges(
   }
 
   await trx.query(sql`
-    INSERT INTO "schema_version_contract_changes" (
+    INSERT INTO "contract_version_changes" (
       "schema_version_contract_id",
       "change_type",
       "severity_level",
@@ -4802,7 +4804,7 @@ async function insertSchemaVersionContract(
   },
 ): Promise<string> {
   const id = await trx.oneFirst(sql`
-    INSERT INTO "schema_version_contracts" (
+    INSERT INTO "contract_versions" (
       "schema_version_id"
       , "last_schema_version_contract_id"
       , "contract_id"

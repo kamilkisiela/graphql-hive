@@ -134,6 +134,8 @@ const config: CodegenConfig = {
           SchemaPolicyWarningConnection: '../shared/mappers#SchemaPolicyWarningConnectionMapper',
           Contract: '../shared/mappers#Contract as ContractMapper',
           ContractConnection: '../modules/schema/providers/contracts#PaginatedContractConnection',
+          ContractCheck:
+            '../modules/schema/providers/contracts#ContractCheck as ContractCheckMapper',
         },
       },
     },

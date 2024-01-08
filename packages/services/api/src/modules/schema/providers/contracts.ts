@@ -9,6 +9,8 @@ import { z } from 'zod';
 import {
   decodeCreatedAtAndUUIDIdBasedCursor,
   encodeCreatedAtAndUUIDIdBasedCursor,
+  HiveSchemaChangeModel,
+  SchemaCompositionErrorModel,
 } from '@hive/storage';
 import { Logger } from '../../shared/providers/logger';
 import { PG_POOL_CONFIG } from '../../shared/providers/pg-pool';
@@ -141,9 +143,9 @@ export class Contracts {
 
     const result = await this.pool.any<unknown>(sql`
       SELECT DISTINCT ON ("contract_id")
-        ${schemaVersionContractsFields}
+        ${contractVersionsFields}
       FROM
-        "schema_version_contracts"
+        "contract_versions"
       WHERE
         "contract_id" = ANY(${sql.array(args.contractIds, 'uuid')})
         AND "schema_composition_errors" IS NULL
@@ -154,7 +156,7 @@ export class Contracts {
 
     const records = new Map(
       result.map(raw => {
-        const record = ValidSchemaVersionContractsModel.parse(raw);
+        const record = ValidContractVersionModel.parse(raw);
         return [record.contractId, record];
       }),
     );
@@ -259,6 +261,108 @@ export class Contracts {
       },
     };
   }
+
+  public async getContractChecksBySchemaCheckId(args: {
+    schemaCheckId: string;
+  }): Promise<null | PaginatedContractCheckConnection> {
+    this.logger.debug(
+      'Load schema checks contracts for schema check. (schemaCheckId=%s)',
+      args.schemaCheckId,
+    );
+
+    const result = await this.pool.any<unknown>(sql`
+      SELECT
+        "contract_checks"."id"
+        , "contract_checks"."schema_check_id" as "schemaCheckId"
+        , "contract_checks"."schema_check_id" as "schemaCheckId"
+        , "contract_checks"."compared_contract_version_id" as "comparedContractVersionId"
+        , "contract_checks"."is_success" as "isSuccess"
+        , "contract_checks"."contract_name" as "contractName"
+        , "contract_checks"."schema_composition_errors" as "schemaCompositionErrors"
+        , "contract_checks"."breaking_schema_changes" as "breakingSchemaChanges"
+        , "contract_checks"."safe_schema_changes" as "safeSchemaChanges"
+        , "s_composite"."sdl" as "compositeSchemaSdl"
+        , "s_supergraph"."sdl" as "supergraphSdl"
+      FROM
+        "contract_checks"
+      LEFT JOIN
+        "sdl_store" as "s_composite" ON "s_composite"."id" = "contract_checks"."composite_schema_sdl_store_id"
+      LEFT JOIN
+        "sdl_store" as "s_supergraph" ON "s_supergraph"."id" = "contract_checks"."supergraph_sdl_store_id"
+      WHERE
+        "schema_check_id" = ${args.schemaCheckId}
+      ORDER BY
+        "schema_check_id" ASC
+       , "contract_name" ASC
+    `);
+
+    if (result.length === 0) {
+      this.logger.debug(
+        'No schema checks found for schema check. (schemaCheckId=%s)',
+        args.schemaCheckId,
+      );
+      return null;
+    }
+
+    this.logger.debug(
+      '%s schema checks found for schema check. (schemaCheckId=%s)',
+      result.length,
+      args.schemaCheckId,
+    );
+
+    const edges = result.map(row => {
+      const node = ContractCheckModel.parse(row);
+      return {
+        node,
+        get cursor() {
+          return node.id;
+        },
+      };
+    });
+
+    return {
+      edges,
+      pageInfo: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        get endCursor() {
+          return edges[edges.length - 1]?.cursor ?? '';
+        },
+        get startCursor() {
+          return edges[0]?.cursor ?? '';
+        },
+      },
+    };
+  }
+
+  public async getContractVersionById(args: { contractVersionId: string | null }) {
+    if (args.contractVersionId === null) {
+      return null;
+    }
+
+    this.logger.debug(
+      'Load contract version by id. (contractVersionId=%s)',
+      args.contractVersionId,
+    );
+
+    const result = await this.pool.maybeOne<unknown>(sql`
+      SELECT
+        ${contractVersionsFields}
+      FROM
+        "contract_versions"
+      WHERE
+        "id" = ${args.contractVersionId}
+    `);
+
+    if (result === null) {
+      this.logger.debug('No contract version found by id. (id=%s)', args.contractVersionId);
+      return null;
+    }
+
+    this.logger.debug('Contract version found by id. (id=%s)', args.contractVersionId);
+
+    return ContractVersionModel.parse(result);
+  }
 }
 
 function toNullableTextArray<T extends PrimitiveValueExpression>(value: T[] | null) {
@@ -339,29 +443,47 @@ function hasIntersection<T>(a: Set<T>, b: Set<T>): boolean {
   return false;
 }
 
-const schemaVersionContractsFields = sql`
+const contractVersionsFields = sql`
   "id"
   , "schema_version_id" as "schemaVersionId"
   , "last_schema_version_contract_id" as "lastSchemaVersionContractId"
   , "contract_id" as "contractId"
+  , "contract_name" as "contractName"
   , "schema_composition_errors" as "schemaCompositionErrors"
   , "composite_schema_sdl" as "compositeSchemaSdl"
   , "supergraph_sdl" as "supergraphSdl"
   , to_json("created_at") as "createdAt"
 `;
 
-const ValidSchemaVersionContractsModel = z.object({
+const ValidContractVersionModel = z.object({
   id: z.string().uuid(),
   schemaVersionId: z.string().uuid(),
   lastSchemaVersionContractId: z.string().uuid().nullable(),
-  contractId: z.string(),
+  contractId: z.string().nullable(),
+  contractName: z.string(),
   schemaCompositionErrors: z.null(),
   compositeSchemaSdl: z.string().nullable(),
   supergraphSdl: z.string(),
   createdAt: z.string(),
 });
 
-export type ValidSchemaVersionContract = z.TypeOf<typeof ValidSchemaVersionContractsModel>;
+const InvalidContractVersionModel = z.object({
+  id: z.string().uuid(),
+  schemaVersionId: z.string().uuid(),
+  lastSchemaVersionContractId: z.string().uuid().nullable(),
+  contractId: z.string().nullable(),
+  contractName: z.string(),
+  schemaCompositionErrors: z.array(SchemaCompositionErrorModel).nullable(),
+  compositeSchemaSdl: z.string().nullable(),
+  supergraphSdl: z.string().nullable(),
+  createdAt: z.string(),
+});
+
+const ContractVersionModel = z.union([ValidContractVersionModel, InvalidContractVersionModel]);
+
+export type ContractVersion = z.TypeOf<typeof ContractVersionModel>;
+
+export type ValidSchemaVersionContract = z.TypeOf<typeof ValidContractVersionModel>;
 
 export type PaginatedContractConnection = Readonly<{
   edges: ReadonlyArray<{
@@ -381,3 +503,34 @@ export type GetPaginatedContractsByTargetId = {
   first: null | number;
   cursor: null | string;
 };
+
+const ContractCheckModel = z.object({
+  id: z.string().uuid(),
+  schemaCheckId: z.string().uuid(),
+  /** The contract version against this check was performed */
+  comparedContractVersionId: z.string().uuid().nullable(),
+
+  isSuccess: z.boolean(),
+  contractName: z.string(),
+
+  schemaCompositionErrors: z.array(SchemaCompositionErrorModel).nullable(),
+  compositeSchemaSdl: z.string().nullable(),
+  supergraphSdl: z.string().nullable(),
+  breakingSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
+  safeSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
+});
+
+export type ContractCheck = z.TypeOf<typeof ContractCheckModel>;
+
+export type PaginatedContractCheckConnection = Readonly<{
+  edges: ReadonlyArray<{
+    node: z.infer<typeof ContractCheckModel>;
+    cursor: string;
+  }>;
+  pageInfo: Readonly<{
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    startCursor: string;
+    endCursor: string;
+  }>;
+}>;
