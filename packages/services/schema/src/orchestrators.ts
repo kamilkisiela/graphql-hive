@@ -28,7 +28,7 @@ import {
 import type { ContractsInputType } from './api';
 import type { Cache } from './cache';
 import {
-  applyTagFilterToInaccessibleTransformOnSubgraphSchema,
+  applyTagFilterOnSubgraphs,
   extractTagsFromFederation2SupergraphSDL,
   getInaccessibleDirectiveNameFromFederation2SupergraphSDL,
   type Federation2SubgraphDocumentNodeByTagsFilter,
@@ -585,13 +585,7 @@ const createFederation: (
             exclude: contract.filter.exclude ? new Set(contract.filter.exclude) : null,
           };
 
-          const filteredSubgraphs = subgraphs.map(subgraph => ({
-            ...subgraph,
-            typeDefs: applyTagFilterToInaccessibleTransformOnSubgraphSchema(
-              subgraph.typeDefs,
-              filter,
-            ),
-          }));
+          const filteredSubgraphs = applyTagFilterOnSubgraphs(subgraphs, filter);
 
           // attempt to compose contract
           const compositionResult = await compose(filteredSubgraphs);
