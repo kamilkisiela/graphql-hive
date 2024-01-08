@@ -940,8 +940,9 @@ const SchemaCheckSharedInputFields = {
   schemaSDLHash: z.string(),
 };
 
-const SchemaCheckContractInput = z.object({
+const ContractCheckInput = z.object({
   contractName: z.string(),
+  comparedContractVersionId: z.string().uuid().nullable(),
   isSuccess: z.boolean(),
   compositeSchemaSdl: z.string().nullable(),
   compositeSchemaSdlHash: z.string().nullable(),
@@ -960,7 +961,7 @@ const SchemaCheckInputModel = z.union([
       ...SchemaCheckSharedChangesFields,
       ...NotManuallyApprovedSchemaCheckFields,
       ...SchemaCheckSharedInputFields,
-      contracts: z.array(SchemaCheckContractInput).nullable(),
+      contracts: z.array(ContractCheckInput).nullable(),
     }),
     z.union([
       z.object(FailedSchemaCompositionInputFields),
@@ -974,7 +975,7 @@ const SchemaCheckInputModel = z.union([
       ...SchemaCheckSharedChangesFields,
       ...SuccessfulSchemaCompositionInputFields,
       ...SchemaCheckSharedInputFields,
-      contracts: z.array(SchemaCheckContractInput).nullable(),
+      contracts: z.array(ContractCheckInput).nullable(),
     }),
     z.union([
       z.object({ ...ManuallyApprovedSchemaCheckFields }),

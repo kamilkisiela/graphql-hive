@@ -381,6 +381,17 @@ export class SchemaPublisher {
           })
         : null;
 
+    const contractVersionIdByContractName = new Map<string, string>();
+    contracts?.forEach(contract => {
+      if (!contract.latestValidVersion) {
+        return;
+      }
+      contractVersionIdByContractName.set(
+        contract.latestValidVersion.contractName,
+        contract.latestValidVersion.id,
+      );
+    });
+
     switch (project.type) {
       case ProjectType.SINGLE:
         this.logger.debug('Using SINGLE registry model (version=%s)', projectModelVersion);
@@ -501,6 +512,8 @@ export class SchemaPublisher {
           checkResult.state.contracts?.map(contract => ({
             contractId: contract.contractId,
             contractName: contract.contractName,
+            comparedContractVersionId:
+              contractVersionIdByContractName.get(contract.contractName) ?? null,
             isSuccess: contract.isSuccessful,
             compositeSchemaSdl: contract.composition.compositeSchemaSDL,
             compositeSchemaSdlHash: contract.composition.compositeSchemaSDL
@@ -592,6 +605,8 @@ export class SchemaPublisher {
           checkResult.state?.contracts?.map(contract => ({
             contractId: contract.contractId,
             contractName: contract.contractName,
+            comparedContractVersionId:
+              contractVersionIdByContractName.get(contract.contractName) ?? null,
             isSuccess: contract.isSuccessful,
             compositeSchemaSdl: contract.composition.compositeSchemaSDL,
             compositeSchemaSdlHash: contract.composition.compositeSchemaSDL

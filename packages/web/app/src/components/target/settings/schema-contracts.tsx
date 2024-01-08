@@ -233,7 +233,7 @@ export function CreateContractDialogContent(props: {
     <>
       {mutation.data?.createContract.ok ? (
         <div className="flex grow flex-col gap-5">
-          <Heading className="text-center">Target successfully created!</Heading>
+          <Heading className="text-center">Contract successfully created!</Heading>
           <div>
             The first contract version will be published upon the next schema version is published.
           </div>

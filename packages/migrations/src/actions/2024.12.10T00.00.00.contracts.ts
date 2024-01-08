@@ -24,10 +24,10 @@ export default {
       "id" DESC
     );
 
-    CREATE TABLE "schema_version_contracts" (
+    CREATE TABLE "contract_versions" (
       "id" UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
       "schema_version_id" UUID NOT NULL REFERENCES "schema_versions" ("id") ON DELETE CASCADE,
-      "last_schema_version_contract_id" UUID REFERENCES "schema_version_contracts" ("id"),
+      "last_schema_version_contract_id" UUID REFERENCES "contract_versions" ("id"),
       "contract_id" UUID NOT NULL REFERENCES "contracts" ("id") ON DELETE SET NULL,
       "contract_name" text NOT NULL,
       "schema_composition_errors" jsonb,
@@ -36,7 +36,7 @@ export default {
       "created_at" timestamptz NOT NULL DEFAULT now()
     );
 
-    CREATE INDEX "schema_version_contracts_find_latest_valid_version" ON "schema_version_contracts" (
+    CREATE INDEX "contract_versions_find_latest_valid_version" ON "contract_versions" (
       "contract_id" ASC,
       "created_at" DESC
     )
@@ -44,18 +44,19 @@ export default {
       "schema_composition_errors" IS NULL
     ;
 
-    CREATE TABLE "schema_version_contract_changes" (
+    CREATE TABLE "contract_version_changes" (
       "id" UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-      "schema_version_contract_id" UUID NOT NULL REFERENCES "schema_version_contracts" ("id"),
+      "schema_version_contract_id" UUID NOT NULL REFERENCES "contract_versions" ("id"),
       "change_type" TEXT NOT NULL,
       "severity_level" TEXT NOT NULL,
       "meta" jsonb NOT NULL,
       "is_safe_based_on_usage" BOOLEAN NOT NULL
     );
 
-    CREATE TABLE "schema_check_contracts" (
+    CREATE TABLE "contract_checks" (
       "id" UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
       "schema_check_id" UUID NOT NULL REFERENCES "schema_checks" ("id") ON DELETE CASCADE,
+      "compared_contract_version_id" UUID REFERENCES "contract_versions" ("id") ON DELETE CASCADE,
       "is_success" boolean NOT NULL,
       "contract_name" text NOT NULL,
       "composite_schema_sdl_store_id" text,
@@ -65,7 +66,7 @@ export default {
       "safe_schema_changes" jsonb
     );
 
-    CREATE INDEX "schema_check_contracts_pagination" ON "schema_check_contracts" (
+    CREATE INDEX "contract_checks_pagination" ON "contract_checks" (
       "schema_check_id" ASC,
       "contract_name" ASC
     );

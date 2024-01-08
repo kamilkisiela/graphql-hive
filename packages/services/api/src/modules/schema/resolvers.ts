@@ -47,6 +47,7 @@ import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import { extractSuperGraphInformation } from './lib/federation-super-graph';
 import { stripUsedSchemaCoordinatesFromDocumentNode } from './lib/unused-graphql';
+import { Contracts } from './providers/contracts';
 import { ContractsManager } from './providers/contracts-manager';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
@@ -1640,6 +1641,11 @@ export const resolvers: SchemaModule.Resolvers = {
         userId: schemaCheck.manualApprovalUserId,
       });
     },
+    contractChecks(schemaCheck, _, { injector }) {
+      return injector.get(Contracts).getContractChecksBySchemaCheckId({
+        schemaCheckId: schemaCheck.id,
+      });
+    },
   },
   FailedSchemaCheck: {
     schemaVersion(schemaCheck, _, { injector }) {
@@ -1687,6 +1693,11 @@ export const resolvers: SchemaModule.Resolvers = {
         schemaCompositionErrors: schemaCheck.schemaCompositionErrors,
       });
     },
+    contractChecks(schemaCheck, _, { injector }) {
+      return injector.get(Contracts).getContractChecksBySchemaCheckId({
+        schemaCheckId: schemaCheck.id,
+      });
+    },
   },
   SchemaPolicyWarningConnection: createDummyConnection(warning => ({
     ...warning,
@@ -1708,6 +1719,15 @@ export const resolvers: SchemaModule.Resolvers = {
         targetId: contract.targetId,
       });
     },
+  },
+  ContractCheck: {
+    contractVersion(schemaCheckContract, _, context) {
+      return context.injector.get(Contracts).getContractVersionById({
+        contractVersionId: schemaCheckContract.comparedContractVersionId ?? null,
+      });
+    },
+    compositeSchemaSDL: schemaCheckContract => schemaCheckContract.compositeSchemaSdl,
+    supergraphSDL: schemaCheckContract => schemaCheckContract.supergraphSdl,
   },
 };
 
