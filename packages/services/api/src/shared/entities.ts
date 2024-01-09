@@ -86,6 +86,7 @@ export interface SchemaVersion {
   baseSchema: string | null;
   hasPersistedSchemaChanges: boolean;
   previousSchemaVersionId: null | string;
+  diffSchemaVersionId: null | string;
   compositeSchemaSDL: null | string;
   supergraphSDL: null | string;
   schemaCompositionErrors: Array<SchemaCompositionError> | null;

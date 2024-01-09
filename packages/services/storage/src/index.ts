@@ -2128,6 +2128,34 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return SchemaVersionModel.parse(version);
     },
+    async getVersionBeforeVersionId(args) {
+      const version = await pool.maybeOne<unknown>(
+        sql`
+          SELECT
+            ${schemaVersionSQLFields()}
+          FROM "schema_versions"
+          WHERE
+            "target_id" = ${args.target}
+            AND (
+              (
+                "created_at" = ${args.beforeVersionCreatedAt}
+                AND "id" < ${args.beforeVersionId}
+              )
+              OR "created_at" < ${args.beforeVersionCreatedAt}
+            )
+            AND ${args.onlyComposable ? sql`AND "is_composable" = TRUE` : sql``}
+          ORDER BY
+            "created_at" DESC
+          LIMIT 1
+        `,
+      );
+
+      if (!version) {
+        return null;
+      }
+
+      return SchemaVersionModel.parse(version);
+    },
     async getLatestSchemas({ organization, project, target, onlyComposable }) {
       const latest = await pool.maybeOne<Pick<schema_versions, 'id' | 'is_composable'>>(sql`
         SELECT sv.id, sv.is_composable
@@ -2357,6 +2385,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           actionId: deleteActionResult.id,
           baseSchema: latestVersion.base_schema,
           previousSchemaVersion: latestVersion.id,
+          diffSchemaVersionId: args.diffSchemaVersionId,
           compositeSchemaSDL: args.compositeSchemaSDL,
           supergraphSDL: args.supergraphSDL,
           schemaCompositionErrors: args.schemaCompositionErrors,
@@ -2441,6 +2470,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           actionId: log.id,
           baseSchema: input.base_schema,
           previousSchemaVersion: input.previousSchemaVersion,
+          diffSchemaVersionId: input.diffSchemaVersionId,
           compositeSchemaSDL: input.compositeSchemaSDL,
           supergraphSDL: input.supergraphSDL,
           schemaCompositionErrors: input.schemaCompositionErrors,
@@ -4399,6 +4429,7 @@ const SchemaVersionModel = zod.intersection(
     actionId: zod.string(),
     hasPersistedSchemaChanges: zod.nullable(zod.boolean()).transform(val => val ?? false),
     previousSchemaVersionId: zod.nullable(zod.string()),
+    diffSchemaVersionId: zod.nullable(zod.string()),
     compositeSchemaSDL: zod.nullable(zod.string()),
     supergraphSDL: zod.nullable(zod.string()),
     schemaCompositionErrors: zod.nullable(zod.array(SchemaCompositionErrorModel)),
@@ -4496,6 +4527,7 @@ async function insertSchemaVersion(
     actionId: string;
     baseSchema: string | null;
     previousSchemaVersion: string | null;
+    diffSchemaVersionId: string | null;
     compositeSchemaSDL: string | null;
     supergraphSDL: string | null;
     schemaCompositionErrors: Array<SchemaCompositionError> | null;
@@ -4514,6 +4546,7 @@ async function insertSchemaVersion(
         base_schema,
         has_persisted_schema_changes,
         previous_schema_version_id,
+        diff_schema_version_id,
         composite_schema_sdl,
         supergraph_sdl,
         schema_composition_errors,
@@ -4528,6 +4561,7 @@ async function insertSchemaVersion(
         ${args.baseSchema},
         ${true},
         ${args.previousSchemaVersion},
+        ${args.diffSchemaVersionId},
         ${args.compositeSchemaSDL},
         ${args.supergraphSDL},
         ${
@@ -4614,6 +4648,7 @@ const schemaVersionSQLFields = (t = sql``) => sql`
   , ${t}"schema_composition_errors" as "schemaCompositionErrors"
   , ${t}"github_repository" as "githubRepository"
   , ${t}"github_sha" as "githubSha"
+  , ${t}"diff_schema_version_id" as "diffSchemaVersionId"
 `;
 
 const targetSQLFields = sql`

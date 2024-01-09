@@ -247,6 +247,7 @@ export interface schema_versions {
   base_schema: string | null;
   composite_schema_sdl: string | null;
   created_at: Date;
+  diff_schema_version_id: string | null;
   github_repository: string | null;
   github_sha: string | null;
   has_persisted_schema_changes: boolean | null;

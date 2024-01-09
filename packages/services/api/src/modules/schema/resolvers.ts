@@ -938,6 +938,9 @@ export const resolvers: SchemaModule.Resolvers = {
       return injector.get(SchemaManager).getGitHubMetadata(version);
     },
     valid: version => version.isComposable,
+    async previousDiffableSchemaVersion(version, _, { injector }) {
+      return injector.get(SchemaVersionHelper).getPreviousDiffableSchemaVersion(version);
+    },
   },
   SchemaCompareError: {
     __isTypeOf(source: unknown) {

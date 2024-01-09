@@ -571,6 +571,10 @@ export default gql`
     GitHub metadata associated with the schema version.
     """
     githubMetadata: SchemaVersionGithubMetadata
+    """
+    The schema version against which this schema version was compared to in order to determine schema changes.
+    """
+    previousDiffableSchemaVersion: SchemaVersion
   }
 
   type SchemaVersionGithubMetadata {

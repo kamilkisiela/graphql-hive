@@ -333,6 +333,7 @@ export class SchemaManager {
       actionFn(): Promise<void>;
       changes: Array<SchemaChangeType>;
       previousSchemaVersion: string | null;
+      diffSchemaVersionId: string | null;
       github: null | {
         repository: string;
         sha: string;
@@ -877,6 +878,40 @@ export class SchemaManager {
       project: target.projectId,
       target: target.id,
       organization: organization.id,
+    };
+  }
+
+  async getVersionBeforeVersionId(args: {
+    organization: string;
+    project: string;
+    target: string;
+    beforeVersionId: string;
+    beforeVersionCreatedAt: string;
+  }) {
+    this.logger.debug('Fetch version before version id. (args=%o)', args);
+
+    const organization = await this.organizationManager.getOrganization({
+      organization: args.organization,
+    });
+
+    const schemaVersion = await this.storage.getVersionBeforeVersionId({
+      organization: args.organization,
+      project: args.project,
+      target: args.target,
+      beforeVersionId: args.beforeVersionId,
+      beforeVersionCreatedAt: args.beforeVersionCreatedAt,
+      onlyComposable: organization.featureFlags.compareToPreviousComposableVersion,
+    });
+
+    if (!schemaVersion) {
+      return null;
+    }
+
+    return {
+      ...schemaVersion,
+      organization: args.organization,
+      project: args.project,
+      target: args.target,
     };
   }
 

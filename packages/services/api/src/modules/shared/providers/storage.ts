@@ -360,6 +360,15 @@ export interface Storage {
 
   getMaybeLatestVersion(_: TargetSelector): Promise<SchemaVersion | null>;
 
+  /** Find the version before a schema version */
+  getVersionBeforeVersionId(
+    _: TargetSelector & {
+      beforeVersionId: string;
+      beforeVersionCreatedAt: string;
+      onlyComposable: boolean;
+    },
+  ): Promise<SchemaVersion | null>;
+
   /**
    * Find a specific schema version via it's action id.
    * The action id is the id of the action that created the schema version, it is user provided.
@@ -411,6 +420,7 @@ export interface Storage {
       composable: boolean;
       actionFn(): Promise<void>;
       changes: Array<SchemaChangeType> | null;
+      diffSchemaVersionId: string | null;
     } & TargetSelector &
       (
         | {
@@ -440,6 +450,7 @@ export interface Storage {
       actionFn(): Promise<void>;
       changes: Array<SchemaChangeType>;
       previousSchemaVersion: null | string;
+      diffSchemaVersionId: null | string;
       github: null | {
         repository: string;
         sha: string;

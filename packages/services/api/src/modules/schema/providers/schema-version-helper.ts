@@ -18,9 +18,9 @@ import { SchemaManager } from './schema-manager';
  * we sometimes have to compute them on the fly when someone is accessing older schema versions.
  */
 export class SchemaVersionHelper {
-  compositionCache = new Map<string, Promise<null | ComposeAndValidateResult>>();
-  compositeSchemaAstCache = new Map<string, null | DocumentNode>();
-  supergraphAstCache = new Map<string, null | DocumentNode>();
+  compositionCache = new WeakMap<SchemaVersion, Promise<null | ComposeAndValidateResult>>();
+  compositeSchemaAstCache = new WeakMap<SchemaVersion, null | DocumentNode>();
+  supergraphAstCache = new WeakMap<SchemaVersion, null | DocumentNode>();
 
   constructor(
     private schemaManager: SchemaManager,
@@ -66,10 +66,10 @@ export class SchemaVersionHelper {
   }
 
   private getOrComposeSchemaVersion(schemaVersion: SchemaVersion) {
-    let promise = this.compositionCache.get(schemaVersion.id)!;
+    let promise = this.compositionCache.get(schemaVersion);
     if (!promise) {
       promise = this.composeSchemaVersion(schemaVersion);
-      this.compositionCache.set(schemaVersion.id, promise);
+      this.compositionCache.set(schemaVersion, promise);
     }
 
     return promise;
@@ -120,13 +120,13 @@ export class SchemaVersionHelper {
       return null;
     }
 
-    let compositeSchemaAst = this.compositeSchemaAstCache.get(schemaVersion.id);
+    let compositeSchemaAst = this.compositeSchemaAstCache.get(schemaVersion);
     if (compositeSchemaAst === undefined) {
       compositeSchemaAst = parseGraphQLSource(
         compositeSchemaSdl,
         'parse composite schema sdl in SchemaVersionHelper.getCompositeSchemaAst',
       );
-      this.compositeSchemaAstCache.set(schemaVersion.id, compositeSchemaAst);
+      this.compositeSchemaAstCache.set(schemaVersion, compositeSchemaAst);
     }
 
     return compositeSchemaAst;
@@ -138,15 +138,37 @@ export class SchemaVersionHelper {
       return null;
     }
 
-    let compositeSchemaAst = this.supergraphAstCache.get(schemaVersion.id);
+    let compositeSchemaAst = this.supergraphAstCache.get(schemaVersion);
     if (compositeSchemaAst === undefined) {
       compositeSchemaAst = parseGraphQLSource(
         compositeSchemaSdl,
         'parse supergraph sdl in SchemaVersionHelper.getSupergraphAst',
       );
-      this.supergraphAstCache.set(schemaVersion.id, compositeSchemaAst);
+      this.supergraphAstCache.set(schemaVersion, compositeSchemaAst);
     }
 
     return compositeSchemaAst;
+  }
+
+  async getPreviousDiffableSchemaVersion(
+    schemaVersion: SchemaVersion,
+  ): Promise<SchemaVersion | null> {
+    // TODO: Maybe we can hard-encode a date here so new versions will only ever pass this check and avoid the other "more expensive" logic.
+    if (schemaVersion.diffSchemaVersionId) {
+      return await this.schemaManager.getSchemaVersion({
+        organization: schemaVersion.organization,
+        project: schemaVersion.project,
+        target: schemaVersion.target,
+        version: schemaVersion.diffSchemaVersionId,
+      });
+    }
+
+    return await this.schemaManager.getVersionBeforeVersionId({
+      organization: schemaVersion.organization,
+      project: schemaVersion.project,
+      target: schemaVersion.target,
+      beforeVersionId: schemaVersion.id,
+      beforeVersionCreatedAt: schemaVersion.createdAt,
+    });
   }
 }
