@@ -942,6 +942,8 @@ export class SchemaManager {
 
     const versions = possibleVersions.filter((v): v is SchemaVersion => !!v);
 
+    this.logger.debug('Found %s targets and %s versions', targets.length, versions.length);
+
     // If there are no composable versions available, we can't determine the compatibility status.
     if (
       versions.length === 0 ||
@@ -949,6 +951,7 @@ export class SchemaManager {
         version => version && version.isComposable && typeof version.supergraphSDL === 'string',
       )
     ) {
+      this.logger.debug('No composable versions available (status: unknown)');
       return NativeFederationCompatibilityStatus.UNKNOWN;
     }
 
@@ -965,9 +968,12 @@ export class SchemaManager {
 
     const orchestrator = this.matchOrchestrator(ProjectType.FEDERATION);
 
+    this.logger.debug('Checking compatibility of %s versions', versions.length);
+
     const compatibilityResults = await Promise.all(
       versions.map(async (version, i) => {
         if (schemasPerVersion[i].length === 0) {
+          this.logger.debug('No schemas (version=%s)', version.id);
           return NativeFederationCompatibilityStatus.UNKNOWN;
         }
 
@@ -1006,6 +1012,10 @@ export class SchemaManager {
           if (sortedNativeSupergraph === sortedExistingSupergraph) {
             return NativeFederationCompatibilityStatus.COMPATIBLE;
           }
+
+          this.logger.debug('Produced different supergraph (version=%s)', version.id);
+        } else {
+          this.logger.debug('Failed to produce supergraph (version=%s)', version.id);
         }
 
         return NativeFederationCompatibilityStatus.INCOMPATIBLE;
@@ -1013,13 +1023,16 @@ export class SchemaManager {
     );
 
     if (compatibilityResults.includes(NativeFederationCompatibilityStatus.UNKNOWN)) {
+      this.logger.debug('One of the versions seems empty (status: unknown)');
       return NativeFederationCompatibilityStatus.UNKNOWN;
     }
 
     if (compatibilityResults.every(r => r === NativeFederationCompatibilityStatus.COMPATIBLE)) {
+      this.logger.debug('All versions are compatible (status: compatible)');
       return NativeFederationCompatibilityStatus.COMPATIBLE;
     }
 
+    this.logger.debug('Some versions are incompatible (status: incompatible)');
     return NativeFederationCompatibilityStatus.INCOMPATIBLE;
   }
 
