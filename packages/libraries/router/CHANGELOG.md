@@ -1,3 +1,7 @@
+# 09.01.2024
+
+- Introduce `HIVE_CDN_SCHEMA_FILE_PATH` environment variable to specify where to download the supergraph schema (default is `./supergraph-schema.graphql`)
+
 # 11.07.2023
 
 - Use debug level when logging dropped operations
