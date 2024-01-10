@@ -194,39 +194,39 @@ function dropTrimmedDescriptionChangedChange(change: Change<ChangeType>): boolea
   return (
     matchChange(change, {
       [ChangeType.DirectiveArgumentDescriptionChanged]: change =>
-        shouldDropDescriptionChangedChange(
+        shouldKeepDescriptionChangedChange(
           change,
           'newDirectiveArgumentDescription',
           'oldDirectiveArgumentDescription',
         ),
       [ChangeType.DirectiveDescriptionChanged]: change => {
-        return shouldDropDescriptionChangedChange(
+        return shouldKeepDescriptionChangedChange(
           change,
           'oldDirectiveDescription',
           'newDirectiveDescription',
         );
       },
       [ChangeType.EnumValueDescriptionChanged]: change =>
-        shouldDropDescriptionChangedChange(
+        shouldKeepDescriptionChangedChange(
           change,
           'oldEnumValueDescription',
           'newEnumValueDescription',
         ),
       [ChangeType.FieldArgumentDescriptionChanged]: change => {
-        return shouldDropDescriptionChangedChange(change, 'newDescription', 'oldDescription');
+        return shouldKeepDescriptionChangedChange(change, 'newDescription', 'oldDescription');
       },
       [ChangeType.FieldDescriptionChanged]: change => {
-        return shouldDropDescriptionChangedChange(change, 'newDescription', 'oldDescription');
+        return shouldKeepDescriptionChangedChange(change, 'newDescription', 'oldDescription');
       },
       [ChangeType.InputFieldDescriptionChanged]: change => {
-        return shouldDropDescriptionChangedChange(
+        return shouldKeepDescriptionChangedChange(
           change,
           'newInputFieldDescription',
           'oldInputFieldDescription',
         );
       },
       [ChangeType.TypeDescriptionChanged]: change => {
-        return shouldDropDescriptionChangedChange(
+        return shouldKeepDescriptionChangedChange(
           change,
           'newTypeDescription',
           'oldTypeDescription',
@@ -247,7 +247,7 @@ function trimDescription(description: unknown): string {
 // Limits the name of properties to only those that ends with Description
 type PropEndsWith<T, E extends string> = T extends `${any}${E}` ? T : never;
 
-function shouldDropDescriptionChangedChange<
+function shouldKeepDescriptionChangedChange<
   T extends ChangeType,
   TO extends PropEndsWith<keyof Change<T>['meta'], 'Description'>,
   // Prevents comparing values of the same key (e.g. newDescription, newDescription will result in TS error)
