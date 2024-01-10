@@ -119,7 +119,7 @@ export class Inspector {
     });
 
     return changes
-      .filter(dropNormalizedDescriptionChangedChange)
+      .filter(dropTrimmedDescriptionChangedChange)
       .map(change =>
         HiveSchemaChangeModel.parse({
           type: change.type,
@@ -190,7 +190,7 @@ export class Inspector {
  * If they are equal, it means that the change is no longer relevant and can be dropped.
  * All other changes are kept.
  */
-function dropNormalizedDescriptionChangedChange(change: Change<ChangeType>): boolean {
+function dropTrimmedDescriptionChangedChange(change: Change<ChangeType>): boolean {
   return (
     matchChange(change, {
       [ChangeType.DirectiveArgumentDescriptionChanged]: change =>
@@ -236,12 +236,12 @@ function dropNormalizedDescriptionChangedChange(change: Change<ChangeType>): boo
   );
 }
 
-function normalizeDescription(description: unknown): string {
+function trimDescription(description: unknown): string {
   if (typeof description !== 'string') {
     return '';
   }
 
-  return description.trim().replace(/\s+/g, ' ');
+  return description.trim();
 }
 
 // Limits the name of properties to only those that ends with Description
@@ -253,7 +253,7 @@ function shouldDropDescriptionChangedChange<
   // Prevents comparing values of the same key (e.g. newDescription, newDescription will result in TS error)
   TN extends Exclude<PropEndsWith<keyof Change<T>['meta'], 'Description'>, TO>,
 >(change: Change<T>, oldKey: TO, newKey: TN) {
-  return normalizeDescription(change.meta[oldKey]) !== normalizeDescription(change.meta[newKey]);
+  return trimDescription(change.meta[oldKey]) !== trimDescription(change.meta[newKey]);
 }
 
 function matchChange<R, T extends ChangeType>(
