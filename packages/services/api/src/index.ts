@@ -11,7 +11,6 @@ export type {
   Project,
   Schema,
   SchemaObject,
-  SchemaVersion,
   Target,
   TargetSettings,
   Token,

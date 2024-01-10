@@ -8,14 +8,15 @@ export default {
       name: 'add diff_schema_version_id column',
       query: sql`
         ALTER TABLE "schema_versions"
-          ADD COLUMN "diff_schema_version_id" uuid REFERENCES "schema_versions" ("id")
+          ADD COLUMN IF NOT EXISTS "diff_schema_version_id" uuid REFERENCES "schema_versions" ("id")
+          , ADD COLUMN IF NOT EXISTS "record_version" text
         ;
       `,
     },
     {
       name: 'create schema_versions_cursor_pagination index',
       query: sql`
-        CREATE INDEX CONCURRENTLY "schema_versions_cursor_pagination" ON "schema_versions" (
+        CREATE INDEX CONCURRENTLY IF NOT EXISTS "schema_versions_cursor_pagination" ON "schema_versions" (
           "target_id" ASC
           , "created_at" DESC
           , "id" DESC
@@ -25,7 +26,7 @@ export default {
     {
       name: 'create schema_versions_cursor_pagination index',
       query: sql`
-        CREATE INDEX CONCURRENTLY "schema_versions_cursor_pagination_composable" ON "schema_versions" (
+        CREATE INDEX CONCURRENTLY IF NOT EXISTS "schema_versions_cursor_pagination_composable" ON "schema_versions" (
             "target_id" ASC
             , "created_at" DESC
             , "id" DESC

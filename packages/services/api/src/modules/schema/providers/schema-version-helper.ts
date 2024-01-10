@@ -153,14 +153,16 @@ export class SchemaVersionHelper {
   async getPreviousDiffableSchemaVersion(
     schemaVersion: SchemaVersion,
   ): Promise<SchemaVersion | null> {
-    // TODO: Maybe we can hard-encode a date here so new versions will only ever pass this check and avoid the other "more expensive" logic.
-    if (schemaVersion.diffSchemaVersionId) {
-      return await this.schemaManager.getSchemaVersion({
-        organization: schemaVersion.organization,
-        project: schemaVersion.project,
-        target: schemaVersion.target,
-        version: schemaVersion.diffSchemaVersionId,
-      });
+    if (schemaVersion.recordVersion === '2024-01-10') {
+      if (schemaVersion.diffSchemaVersionId) {
+        return await this.schemaManager.getSchemaVersion({
+          organization: schemaVersion.organization,
+          project: schemaVersion.project,
+          target: schemaVersion.target,
+          version: schemaVersion.diffSchemaVersionId,
+        });
+      }
+      return null;
     }
 
     return await this.schemaManager.getVersionBeforeVersionId({

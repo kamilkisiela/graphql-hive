@@ -1,5 +1,10 @@
 import type { DocumentNode, GraphQLSchema } from 'graphql';
-import type { SchemaChangeType, SchemaCheck, SchemaCheckApprovalMetadata } from '@hive/storage';
+import type {
+  SchemaChangeType,
+  SchemaCheck,
+  SchemaCheckApprovalMetadata,
+  SchemaVersion as SchemaVersionEntity,
+} from '@hive/storage';
 import type { ClientStatsValues, OperationStatsValues, SchemaError } from '../__generated__/types';
 import type { SuperGraphInformation } from '../modules/schema/lib/federation-super-graph';
 import type { SchemaCheckWarning } from '../modules/schema/providers/models/shared';
@@ -16,7 +21,6 @@ import type {
   PersistedOperation,
   Project,
   PushedCompositeSchema as PushedCompositeSchemaEntity,
-  SchemaVersion as SchemaVersionEntity,
   SingleSchema as SingleSchemaEntity,
   Target,
   Token,

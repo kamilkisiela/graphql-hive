@@ -5,6 +5,7 @@ import type {
   SchemaCheck,
   SchemaCheckInput,
   SchemaCompositionError,
+  SchemaVersion,
   TargetBreadcrumb,
 } from '@hive/storage';
 import type {
@@ -33,7 +34,6 @@ import type {
   Schema,
   SchemaLog,
   SchemaPolicy,
-  SchemaVersion,
   Target,
   TargetSettings,
   User,

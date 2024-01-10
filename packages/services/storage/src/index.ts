@@ -4420,6 +4420,11 @@ function decodeFeatureFlags(column: unknown) {
   return FeatureFlagsModel.parse(column);
 }
 
+/**  This version introduced the "diffSchemaVersionId" column. */
+const SchemaVersionRecordVersion_2024_01_10_Model = zod.literal('2024-01-10');
+
+const SchemaVersionRecordVersionModel = SchemaVersionRecordVersion_2024_01_10_Model;
+
 const SchemaVersionModel = zod.intersection(
   zod.object({
     id: zod.string(),
@@ -4433,6 +4438,7 @@ const SchemaVersionModel = zod.intersection(
     compositeSchemaSDL: zod.nullable(zod.string()),
     supergraphSDL: zod.nullable(zod.string()),
     schemaCompositionErrors: zod.nullable(zod.array(SchemaCompositionErrorModel)),
+    recordVersion: zod.nullable(SchemaVersionRecordVersionModel),
   }),
   zod
     .union([
@@ -4454,6 +4460,8 @@ const SchemaVersionModel = zod.intersection(
         : null,
     })),
 );
+
+export type SchemaVersion = zod.infer<typeof SchemaVersionModel>;
 
 const DocumentCollectionModel = zod.object({
   id: zod.string(),
@@ -4540,6 +4548,7 @@ async function insertSchemaVersion(
   const query = sql`
     INSERT INTO schema_versions
       (
+        record_version,
         is_composable,
         target_id,
         action_id,
@@ -4555,6 +4564,7 @@ async function insertSchemaVersion(
       )
     VALUES
       (
+        '2024-01-10',
         ${args.isComposable},
         ${args.targetId},
         ${args.actionId},
@@ -4649,6 +4659,7 @@ const schemaVersionSQLFields = (t = sql``) => sql`
   , ${t}"github_repository" as "githubRepository"
   , ${t}"github_sha" as "githubSha"
   , ${t}"diff_schema_version_id" as "diffSchemaVersionId"
+  , ${t}"record_version" as "recordVersion"
 `;
 
 const targetSQLFields = sql`
