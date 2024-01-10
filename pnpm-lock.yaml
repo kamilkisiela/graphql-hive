@@ -707,8 +707,8 @@ importers:
         specifier: 0.19.11
         version: 0.19.11
       itty-router:
-        specifier: 4.0.26
-        version: 4.0.26
+        specifier: 4.0.27
+        version: 4.0.27
       nock:
         specifier: 13.4.0
         version: 13.4.0
@@ -758,8 +758,8 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       itty-router:
-        specifier: 4.0.26
-        version: 4.0.26
+        specifier: 4.0.27
+        version: 4.0.27
       itty-router-extras:
         specifier: 0.4.5
         version: 0.4.5
@@ -22223,8 +22223,8 @@ packages:
     resolution: {integrity: sha512-flxFhFZgPqiscrHTV3mBbRBk8plgOGdg5tZMyv7hE629PO+XEfXh2uHs78ndH6axRG50fIHfjrrqAlb3Pguemw==}
     dev: true
 
-  /itty-router@4.0.26:
-    resolution: {integrity: sha512-GBcmhxQRvIQ7fuzXPlvfeQcN6O7VGhctzdG9WHIcEcaRYH4FvDpMxuSWRIAxQrIM+nxtfxK0/bR78ATvb4LC5Q==}
+  /itty-router@4.0.27:
+    resolution: {integrity: sha512-Q3/GOE2EJvyu3hhxGN3WDWh3QNg4v7h1KFx/jSLcIOOkpSI1jUFTgGefEESXon4j5YwqCIf0DEemjiVAFSBiUw==}
     dev: true
 
   /jackspeak@2.2.1:
