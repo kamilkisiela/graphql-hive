@@ -40,7 +40,7 @@
     "agentkeepalive": "4.5.0",
     "bcryptjs": "2.4.3",
     "dataloader": "2.2.2",
-    "date-fns": "3.1.0",
+    "date-fns": "3.2.0",
     "fast-json-stable-stringify": "2.1.0",
     "got": "12.6.1",
     "graphql": "16.8.1",
