@@ -119,6 +119,7 @@ export class Inspector {
     });
 
     return changes
+      .filter(dropNormalizedDescriptionChangedChange)
       .map(change =>
         HiveSchemaChangeModel.parse({
           type: change.type,
@@ -181,5 +182,87 @@ export class Inspector {
     } catch (error: any) {
       this.logger.error(`Failed to read stats`, error);
     }
+  }
+}
+
+/**
+ * In case of <any>DescriptionChanged change, it normalizes the before and after descriptions and compares them.
+ * If they are equal, it means that the change is no longer relevant and can be dropped.
+ * All other changes are kept.
+ */
+function dropNormalizedDescriptionChangedChange(change: Change<ChangeType>): boolean {
+  return (
+    matchChange(change, {
+      [ChangeType.DirectiveArgumentDescriptionChanged]: change =>
+        shouldDropDescriptionChangedChange(
+          change,
+          'newDirectiveArgumentDescription',
+          'oldDirectiveArgumentDescription',
+        ),
+      [ChangeType.DirectiveDescriptionChanged]: change => {
+        return shouldDropDescriptionChangedChange(
+          change,
+          'oldDirectiveDescription',
+          'newDirectiveDescription',
+        );
+      },
+      [ChangeType.EnumValueDescriptionChanged]: change =>
+        shouldDropDescriptionChangedChange(
+          change,
+          'oldEnumValueDescription',
+          'newEnumValueDescription',
+        ),
+      [ChangeType.FieldArgumentDescriptionChanged]: change => {
+        return shouldDropDescriptionChangedChange(change, 'newDescription', 'oldDescription');
+      },
+      [ChangeType.FieldDescriptionChanged]: change => {
+        return shouldDropDescriptionChangedChange(change, 'newDescription', 'oldDescription');
+      },
+      [ChangeType.InputFieldDescriptionChanged]: change => {
+        return shouldDropDescriptionChangedChange(
+          change,
+          'newInputFieldDescription',
+          'oldInputFieldDescription',
+        );
+      },
+      [ChangeType.TypeDescriptionChanged]: change => {
+        return shouldDropDescriptionChangedChange(
+          change,
+          'newTypeDescription',
+          'oldTypeDescription',
+        );
+      },
+    }) ?? true
+  );
+}
+
+function normalizeDescription(description: unknown): string {
+  if (typeof description !== 'string') {
+    return '';
+  }
+
+  return description.trim().replace(/\s+/g, ' ');
+}
+
+// Limits the name of properties to only those that ends with Description
+type PropEndsWith<T, E extends string> = T extends `${any}${E}` ? T : never;
+
+function shouldDropDescriptionChangedChange<
+  T extends ChangeType,
+  TO extends PropEndsWith<keyof Change<T>['meta'], 'Description'>,
+  // Prevents comparing values of the same key (e.g. newDescription, newDescription will result in TS error)
+  TN extends Exclude<PropEndsWith<keyof Change<T>['meta'], 'Description'>, TO>,
+>(change: Change<T>, oldKey: TO, newKey: TN) {
+  return normalizeDescription(change.meta[oldKey]) !== normalizeDescription(change.meta[newKey]);
+}
+
+function matchChange<R, T extends ChangeType>(
+  change: Change<T>,
+  pattern: {
+    [K in T]?: (change: Change<K>) => R;
+  },
+) {
+  if (change.type in pattern) {
+    return pattern[change.type]?.(change);
   }
 }
