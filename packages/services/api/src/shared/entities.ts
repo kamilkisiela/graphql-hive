@@ -85,16 +85,6 @@ export interface SchemaObject {
   raw: string;
 }
 
-export interface PersistedOperation {
-  id: string;
-  operationHash: string;
-  name: string;
-  kind: string;
-  project: string;
-  content: string;
-  date: string;
-}
-
 export const emptySource = '*';
 
 export class GraphQLDocumentStringInvalidError extends Error {

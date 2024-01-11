@@ -7,7 +7,6 @@ export type {
   ActivityObject,
   Member,
   Organization,
-  PersistedOperation,
   Project,
   Schema,
   SchemaObject,

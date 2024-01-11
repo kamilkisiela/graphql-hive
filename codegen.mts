@@ -74,13 +74,11 @@ const config: CodegenConfig = {
           SchemaCompareResult: '../shared/mappers#SchemaCompareResult as SchemaCompareResultMapper',
           SchemaCompareError: '../shared/mappers#SchemaCompareError as SchemaCompareErrorMapper',
           SchemaVersionConnection:
-            '../shared/mappers#SchemaVersionConnection as SchemaVersionConnectionMapper',
+            '../modules/shared/providers/storage#PaginatedSchemaVersionConnection as SchemaVersionConnectionMapper',
           SchemaVersion: '../shared/mappers#SchemaVersion as SchemaVersionMapper',
           Schema: '../shared/mappers#Schema as SchemaMapper',
           SingleSchema: '../shared/mappers#SingleSchema as SingleSchemaMapper',
           CompositeSchema: '../shared/mappers#PushedCompositeSchema as PushedCompositeSchemaMapper',
-          PersistedOperationConnection:
-            '../shared/mappers#PersistedOperationConnection as PersistedOperationMapper',
           Organization: '../shared/entities#Organization as OrganizationMapper',
           Project: '../shared/entities#Project as ProjectMapper',
           Target: '../shared/entities#Target as TargetMapper',

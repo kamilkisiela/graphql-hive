@@ -1,6 +1,7 @@
 import { Injectable } from 'graphql-modules';
 import type { PolicyConfigurationObject } from '@hive/policy';
 import type {
+  PaginatedSchemaVersionConnection,
   SchemaChangeType,
   SchemaCheck,
   SchemaCheckInput,
@@ -41,11 +42,6 @@ import type {
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
-
-type Paginated<T> = T & {
-  after?: string | null;
-  limit: number;
-};
 
 export interface OrganizationSelector {
   organization: string;
@@ -405,14 +401,15 @@ export interface Storage {
       }
     | never
   >;
-  getVersions(_: Paginated<TargetSelector>): Promise<
-    | {
-        versions: readonly SchemaVersion[];
-        hasMore: boolean;
-      }
-    | never
-  >;
-
+  getServiceSchemaOfVersion(args: {
+    schemaVersionId: string;
+    serviceName: string;
+  }): Promise<Schema | null>;
+  getPaginatedSchemaVersionsForTargetId(args: {
+    targetId: string;
+    first: number | null;
+    cursor: null | string;
+  }): Promise<PaginatedSchemaVersionConnection>;
   getVersion(_: TargetSelector & { version: string }): Promise<SchemaVersion | never>;
   deleteSchema(
     _: {
@@ -802,3 +799,4 @@ export interface Storage {
 @Injectable()
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class Storage implements Storage {}
+export type { PaginatedSchemaVersionConnection };

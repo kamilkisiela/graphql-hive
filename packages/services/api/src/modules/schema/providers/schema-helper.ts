@@ -3,7 +3,6 @@ import { print } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import objectHash from 'object-hash';
 import type {
-  ComposeAndValidateResult,
   CompositeSchema,
   PushedCompositeSchema,
   Schema,
@@ -12,8 +11,7 @@ import type {
 } from '../../../shared/entities';
 import { createSchemaObject } from '../../../shared/entities';
 import { cache } from '../../../shared/helpers';
-import { parseGraphQLSource, sortDocumentNode } from '../../../shared/schema';
-import { SchemaBuildError } from './orchestrators/errors';
+import { sortDocumentNode } from '../../../shared/schema';
 
 export function isSingleSchema(schema: Schema): schema is SingleSchema {
   return schema.kind === 'single';
@@ -95,52 +93,6 @@ export function extendWithBase(
 }
 
 type CreateSchemaObjectInput = Parameters<typeof createSchemaObject>[0];
-
-/**
- * @deprecated Please don't throw random errors. Handle them gracefully instead. 😇
- */
-export async function ensureSDL(
-  composeAndValidationResultPromise: Promise<ComposeAndValidateResult>,
-  strategy: 'reject-on-graphql-errors' | 'ignore-errors' = 'ignore-errors',
-) {
-  const composeAndValidationResult = await composeAndValidationResultPromise;
-
-  if (strategy === 'reject-on-graphql-errors') {
-    if (composeAndValidationResult.errors.length) {
-      throw new SchemaBuildError(
-        `Composition errors: \n` +
-          composeAndValidationResult.errors.map(err => ` - ${err.message}`).join('\n'),
-        composeAndValidationResult.errors,
-      );
-    }
-  }
-
-  if (!composeAndValidationResult.sdl) {
-    if (composeAndValidationResult.errors.length) {
-      throw new SchemaBuildError(
-        `Composition errors: \n` +
-          composeAndValidationResult.errors.map(err => ` - ${err.message}`).join('\n'),
-        composeAndValidationResult.errors,
-      );
-    }
-
-    throw new Error('Expected to find SDL');
-  }
-
-  try {
-    return {
-      document: parseGraphQLSource(composeAndValidationResult.sdl, 'parse in ensureSDL'),
-      raw: composeAndValidationResult.sdl,
-    };
-  } catch (error) {
-    throw new SchemaBuildError(`Failed to parse schema: ${String(error)}`, [
-      {
-        message: String(error),
-        source: 'graphql',
-      },
-    ]);
-  }
-}
 
 @Injectable({
   scope: Scope.Operation,

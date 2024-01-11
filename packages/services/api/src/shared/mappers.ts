@@ -18,7 +18,6 @@ import type {
   Member,
   Organization,
   OrganizationMemberRole,
-  PersistedOperation,
   Project,
   PushedCompositeSchema as PushedCompositeSchemaEntity,
   SingleSchema as SingleSchemaEntity,
@@ -244,17 +243,12 @@ export type ActivityConnection = readonly ActivityObject[];
 export type OrganizationConnection = readonly Organization[];
 export type ProjectConnection = readonly Project[];
 export type TargetConnection = readonly Target[];
-export type PersistedOperationConnection = readonly PersistedOperation[];
 export type SchemaConnection = readonly Schema[];
 export type TokenConnection = readonly Token[];
 export type OperationStatsValuesConnection = ReadonlyArray<
   Omit<OperationStatsValues, 'duration'> & { duration: DurationValues }
 >;
 export type ClientStatsValuesConnection = readonly ClientStatsValues[];
-export type SchemaVersionConnection = {
-  nodes: readonly SchemaVersion[];
-  hasMore: boolean;
-};
 export type SchemaComparePayload = SchemaCompareResult | SchemaCompareError;
 
 export type SchemaCompareError = {
