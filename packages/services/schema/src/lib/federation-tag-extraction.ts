@@ -66,17 +66,6 @@ function hasIntersection<T>(a: Set<T>, b: Set<T>): boolean {
   return false;
 }
 
-function setDifference(set1: Set<string>, set2: Set<string>): Set<string> {
-  const difference = new Set(set1);
-  set1.forEach(value => {
-    if (set2.has(value)) {
-      difference.delete(value);
-    }
-  });
-
-  return difference;
-}
-
 /**
  * Retrieve both the url and import argument from an `@link` directive AST node.
  * @link https://specs.apollo.dev/link/v1.0/#@link
@@ -248,12 +237,18 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
   );
   const rootTypeNames = getRootTypeNamesFromDocumentNode(documentNode);
 
-  // keep track of all types where all fields are inaccessible
-  const typesWhereAllFieldsAreInaccessible = new Set<string>();
-  // keep track of all types where not all fields are inaccessible
-  // since graphql allows extending types, a type can occur multiple times
-  // this if a type ever occurs without all types being accessible, we need to remove it from "typesWhereAllFieldsAreInaccessible" later.
-  const typesWhereNotAllFieldsAreInaccessible = new Set(rootTypeNames);
+  const typesWithAllFieldsInaccessibleTracker = new Map<string, boolean>();
+
+  function onAllFieldsInaccessible(name: string) {
+    const current = typesWithAllFieldsInaccessibleTracker.get(name);
+    if (current === undefined) {
+      typesWithAllFieldsInaccessibleTracker.set(name, true);
+    }
+  }
+
+  function onSomeFieldsAccessible(name: string) {
+    typesWithAllFieldsInaccessibleTracker.set(name, false);
+  }
 
   function fieldArgumentHandler(node: InputValueDefinitionNode) {
     const tagsOnNode = getTagsOnNode(node);
@@ -329,9 +324,9 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
     }
 
     if (isAllFieldsInaccessible) {
-      typesWhereAllFieldsAreInaccessible.add(node.name.value);
+      onAllFieldsInaccessible(node.name.value);
     } else {
-      typesWhereNotAllFieldsAreInaccessible.add(node.name.value);
+      onSomeFieldsAccessible(node.name.value);
     }
 
     return {
@@ -377,9 +372,9 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
     }
 
     if (isAllFieldsInaccessible) {
-      typesWhereAllFieldsAreInaccessible.add(node.name.value);
+      onAllFieldsInaccessible(node.name.value);
     } else {
-      typesWhereNotAllFieldsAreInaccessible.add(node.name.value);
+      onSomeFieldsAccessible(node.name.value);
     }
 
     return {
@@ -420,12 +415,20 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
     [Kind.UNION_TYPE_DEFINITION]: scalarAndUnionHandler,
   });
 
+  for (const rootTypeName of rootTypeNames) {
+    typesWithAllFieldsInaccessibleTracker.delete(rootTypeName);
+  }
+
+  const typesWhereAllFieldsAreInaccessible = new Set(
+    Array.from(typesWithAllFieldsInaccessibleTracker).map(([typeName, isAllFieldsInaccessible]) =>
+      isAllFieldsInaccessible ? typeName : null,
+    ),
+  );
+  typesWhereAllFieldsAreInaccessible.delete(null);
+
   return {
     typeDefs,
-    typesWhereAllFieldsAreInaccessible: setDifference(
-      typesWhereAllFieldsAreInaccessible,
-      typesWhereNotAllFieldsAreInaccessible,
-    ),
+    typesWhereAllFieldsAreInaccessible: typesWhereAllFieldsAreInaccessible as Set<string>,
     transformTagDirectives,
   };
 }
