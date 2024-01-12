@@ -189,6 +189,36 @@ function createGetFederationDirectiveNameForSubgraphSDL(directiveName: string) {
   };
 }
 
+function getRootTypeNamesFromDocumentNode(document: DocumentNode) {
+  let queryName: string | null = 'Query';
+  let mutationName: string | null = 'Mutation';
+  let subscriptionName: string | null = 'Subscription';
+
+  for (const definition of document.definitions) {
+    if (definition.kind === Kind.SCHEMA_DEFINITION || definition.kind === Kind.SCHEMA_EXTENSION) {
+      for (const operationTypeDefinition of definition.operationTypes ?? []) {
+        if (operationTypeDefinition.operation === 'query') {
+          queryName = operationTypeDefinition.type.name.value;
+        }
+        if (operationTypeDefinition.operation === 'mutation') {
+          mutationName = operationTypeDefinition.type.name.value;
+        }
+        if (operationTypeDefinition.operation === 'subscription') {
+          subscriptionName = operationTypeDefinition.type.name.value;
+        }
+      }
+    }
+  }
+
+  const names = new Set<string>();
+
+  names.add(queryName);
+  names.add(mutationName);
+  names.add(subscriptionName);
+
+  return names;
+}
+
 /** Retrieve the actual `@tag` directive name from a given subgraph */
 export const getFederationTagDirectiveNameForSubgraphSDL =
   createGetFederationDirectiveNameForSubgraphSDL('tag');
@@ -216,13 +246,14 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
     tagDirectiveName,
     inaccessibleDirectiveName,
   );
+  const rootTypeNames = getRootTypeNamesFromDocumentNode(documentNode);
 
   // keep track of all types where all fields are inaccessible
   const typesWhereAllFieldsAreInaccessible = new Set<string>();
   // keep track of all types where not all fields are inaccessible
   // since graphql allows extending types, a type can occur multiple times
   // this if a type ever occurs without all types being accessible, we need to remove it from "typesWhereAllFieldsAreInaccessible" later.
-  const typesWhereNotAllFieldsAreAccessible = new Set<string>();
+  const typesWhereNotAllFieldsAreInaccessible = new Set(rootTypeNames);
 
   function fieldArgumentHandler(node: InputValueDefinitionNode) {
     const tagsOnNode = getTagsOnNode(node);
@@ -286,7 +317,11 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
       }),
     };
 
-    if (filter.exclude && hasIntersection(tagsOnNode, filter.exclude)) {
+    if (
+      !rootTypeNames.has(node.name.value) &&
+      filter.exclude &&
+      hasIntersection(tagsOnNode, filter.exclude)
+    ) {
       return {
         ...newNode,
         directives: transformTagDirectives(node, true),
@@ -296,7 +331,7 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
     if (isAllFieldsInaccessible) {
       typesWhereAllFieldsAreInaccessible.add(node.name.value);
     } else {
-      typesWhereNotAllFieldsAreAccessible.add(node.name.value);
+      typesWhereNotAllFieldsAreInaccessible.add(node.name.value);
     }
 
     return {
@@ -344,7 +379,7 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
     if (isAllFieldsInaccessible) {
       typesWhereAllFieldsAreInaccessible.add(node.name.value);
     } else {
-      typesWhereNotAllFieldsAreAccessible.add(node.name.value);
+      typesWhereNotAllFieldsAreInaccessible.add(node.name.value);
     }
 
     return {
@@ -389,7 +424,7 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
     typeDefs,
     typesWhereAllFieldsAreInaccessible: setDifference(
       typesWhereAllFieldsAreInaccessible,
-      typesWhereNotAllFieldsAreAccessible,
+      typesWhereNotAllFieldsAreInaccessible,
     ),
     transformTagDirectives,
   };
