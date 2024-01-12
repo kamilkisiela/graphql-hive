@@ -8,6 +8,7 @@ import { UrlLoader } from '@graphql-tools/url-loader';
 import baseCommand from '../base-command';
 import {
   CriticalityLevel,
+  SchemaChange,
   SchemaChangeConnection,
   SchemaErrorConnection,
   SchemaWarningConnection,
@@ -31,8 +32,36 @@ export function renderErrors(this: baseCommand, errors: SchemaErrorConnection) {
 }
 
 export function renderChanges(this: baseCommand, changes: SchemaChangeConnection) {
+  const filterChangesByLevel = (level: CriticalityLevel) => {
+    return (change: SchemaChange) => change.criticality === level;
+  };
+  const writeChanges = (changes: SchemaChangeConnection) => {
+    changes.nodes.forEach(change => {
+      this.log(indent + criticalityMap[change.criticality] + this.bolderize(change.message));
+    });
+  };
+
   this.info(`Detected ${changes.total} change${changes.total > 1 ? 's' : ''}`);
   this.log('');
+
+  const breakingChanges = changes.nodes.filter(filterChangesByLevel(CriticalityLevel.Breaking));
+  const dangerousChanges = changes.nodes.filter(filterChangesByLevel(CriticalityLevel.Dangerous));
+  const safeChanges = changes.nodes.filter(filterChangesByLevel(CriticalityLevel.Safe));
+
+  if (breakingChanges.length) {
+    this.log(`Breaking: ${breakingChanges.length}`);
+    writeChanges(changes);
+  }
+
+  if (dangerousChanges.length) {
+    this.log(`Dangerous: ${dangerousChanges.length}`);
+    writeChanges(changes);
+  }
+
+  if (safeChanges.length) {
+    this.log(`Safe: ${safeChanges.length}`);
+    writeChanges(changes);
+  }
 
   changes.nodes.forEach(change => {
     this.log(indent, criticalityMap[change.criticality], this.bolderize(change.message));
