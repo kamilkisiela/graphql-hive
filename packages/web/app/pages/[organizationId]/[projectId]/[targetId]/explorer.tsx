@@ -164,7 +164,6 @@ function ExplorerPageContent() {
   const currentTarget = query.data?.target;
   const organizationConnection = query.data?.organizations;
   const isCDNEnabled = query.data;
-  const explorer = currentTarget?.latestSchemaVersion?.explorer;
   const latestSchemaVersion = currentTarget?.latestSchemaVersion;
 
   return (
@@ -205,10 +204,10 @@ function ExplorerPageContent() {
           </SchemaExplorerFilter>
         ) : null}
       </div>
-      {query.fetching ? null : latestSchemaVersion && explorer ? (
+      {query.fetching ? null : latestSchemaVersion?.explorer ? (
         <SchemaView
           totalRequests={query.data?.operationsStats.totalRequests ?? 0}
-          explorer={explorer}
+          explorer={latestSchemaVersion.explorer}
           organizationCleanId={router.organizationId}
           projectCleanId={router.projectId}
           targetCleanId={router.targetId}

@@ -3,7 +3,7 @@ import { DocumentNode, GraphQLError, print, SourceLocation } from 'graphql';
 import { z } from 'zod';
 import type { AvailableRulesResponse, PolicyConfigurationObject } from '@hive/policy';
 import type { CompositionFailureError } from '@hive/schema';
-import type { schema_policy_resource, SchemaCompositionError } from '@hive/storage';
+import type { schema_policy_resource } from '@hive/storage';
 import type {
   AlertChannelType,
   AlertType,
@@ -78,38 +78,11 @@ export interface DateRange {
   to: Date;
 }
 
-export interface SchemaVersion {
-  id: string;
-  createdAt: string;
-  isComposable: boolean;
-  actionId: string;
-  baseSchema: string | null;
-  hasPersistedSchemaChanges: boolean;
-  previousSchemaVersionId: null | string;
-  compositeSchemaSDL: null | string;
-  supergraphSDL: null | string;
-  schemaCompositionErrors: Array<SchemaCompositionError> | null;
-  github: null | {
-    repository: string;
-    sha: string;
-  };
-}
-
 export interface SchemaObject {
   document: DocumentNode;
   source: string;
   url?: string | null;
   raw: string;
-}
-
-export interface PersistedOperation {
-  id: string;
-  operationHash: string;
-  name: string;
-  kind: string;
-  project: string;
-  content: string;
-  date: string;
 }
 
 export const emptySource = '*';

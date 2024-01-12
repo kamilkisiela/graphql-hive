@@ -273,7 +273,7 @@ export class RegistryChecks {
     /** Lookup map of changes that are approved and thus safe. */
     approvedChanges: null | Map<string, SchemaChangeType>;
     /** Selector for fetching conditional breaking changes. */
-    usageDataSelector: {
+    usageDataSelector: null | {
       organization: string;
       project: string;
       target: string;
@@ -311,7 +311,7 @@ export class RegistryChecks {
     let inspectorChanges = await this.inspector.diff(
       existingSchema,
       incomingSchema,
-      args.usageDataSelector,
+      args.usageDataSelector ?? undefined,
     );
 
     if (args.includeUrlChanges) {

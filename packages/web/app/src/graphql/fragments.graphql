@@ -104,29 +104,6 @@ fragment SchemaChangeFields on SchemaChange {
   isSafeBasedOnUsage
 }
 
-fragment SchemaCompareResultFields on SchemaCompareResult {
-  initial
-  changes {
-    total
-    nodes {
-      ...SchemaChangeFields
-    }
-  }
-  diff {
-    before
-    after
-  }
-  service {
-    name
-    after
-    before
-  }
-}
-
-fragment SchemaCompareErrorFields on SchemaCompareError {
-  message
-}
-
 fragment TokenFields on Token {
   id
   name

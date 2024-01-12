@@ -2128,6 +2128,34 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return SchemaVersionModel.parse(version);
     },
+    async getVersionBeforeVersionId(args) {
+      const version = await pool.maybeOne<unknown>(
+        sql`
+          SELECT
+            ${schemaVersionSQLFields()}
+          FROM "schema_versions"
+          WHERE
+            "target_id" = ${args.target}
+            AND (
+              (
+                "created_at" = ${args.beforeVersionCreatedAt}
+                AND "id" < ${args.beforeVersionId}
+              )
+              OR "created_at" < ${args.beforeVersionCreatedAt}
+            )
+            ${args.onlyComposable ? sql`AND "is_composable" = TRUE` : sql``}
+          ORDER BY
+            "created_at" DESC
+          LIMIT 1
+        `,
+      );
+
+      if (!version) {
+        return null;
+      }
+
+      return SchemaVersionModel.parse(version);
+    },
     async getLatestSchemas({ organization, project, target, onlyComposable }) {
       const latest = await pool.maybeOne<Pick<schema_versions, 'id' | 'is_composable'>>(sql`
         SELECT sv.id, sv.is_composable
@@ -2239,6 +2267,53 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       };
     },
 
+    async getServiceSchemaOfVersion(args) {
+      const result = await pool.maybeOne<
+        Pick<
+          OverrideProp<schema_log, 'action', 'PUSH'>,
+          | 'id'
+          | 'commit'
+          | 'action'
+          | 'author'
+          | 'sdl'
+          | 'created_at'
+          | 'project_id'
+          | 'service_name'
+          | 'service_url'
+          | 'target_id'
+          | 'metadata'
+        > &
+          Pick<projects, 'type'>
+      >(sql`
+        SELECT
+            sl.id,
+            sl.commit,
+            sl.author,
+            sl.action,
+            sl.sdl,
+            sl.created_at,
+            sl.project_id,
+            lower(sl.service_name) as service_name,
+            sl.service_url,
+            sl.target_id,
+            p.type
+          FROM schema_version_to_log AS svl
+          LEFT JOIN schema_log AS sl ON (sl.id = svl.action_id)
+          LEFT JOIN projects as p ON (p.id = sl.project_id)
+          WHERE
+            svl.version_id = ${args.schemaVersionId}
+            AND sl.action = 'PUSH'
+            AND p.type != 'CUSTOM'
+            AND lower(sl.service_name) = lower(${args.serviceName})
+      `);
+
+      if (!result) {
+        return null;
+      }
+
+      return transformSchema(result);
+    },
+
     async getMatchingServiceSchemaOfVersions(versions) {
       const after = await pool.one<{
         sdl: string;
@@ -2283,35 +2358,72 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return SchemaVersionModel.parse(result);
     },
+    async getPaginatedSchemaVersionsForTargetId(args) {
+      let cursor: null | {
+        createdAt: string;
+        id: string;
+      } = null;
 
-    async getVersions({ project, target, after, limit }) {
-      const query = sql`
-      SELECT 
-        ${schemaVersionSQLFields(sql`sv.`)}
-        , sl.author as "author"
-        , lower(sl.service_name) as "service_name"
-      FROM schema_versions as sv
-      LEFT JOIN schema_log as sl ON (sl.id = sv.action_id)
-      LEFT JOIN targets as t ON (t.id = sv.target_id)
-      WHERE sv.target_id = ${target} AND t.project_id = ${project} AND sv.created_at < ${
-        after
-          ? sql`(SELECT svi.created_at FROM schema_versions as svi WHERE svi.id = ${after})`
-          : sql`NOW()`
+      const limit = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
+
+      if (args.cursor) {
+        cursor = decodeCreatedAtAndUUIDIdBasedCursor(args.cursor);
       }
-      ORDER BY sv.created_at DESC
-      LIMIT ${limit + 1}
-    `;
-      const result = await pool.query(query);
 
-      const hasMore = result.rows.length > limit;
+      const query = sql`
+        SELECT 
+          ${schemaVersionSQLFields()}
+        FROM
+          "schema_versions"
+        WHERE
+          "target_id" = ${args.targetId}
+          ${
+            cursor
+              ? sql`
+                AND (
+                  (
+                    "created_at" = ${cursor.createdAt}
+                    AND "id" < ${cursor.id}
+                  )
+                  OR "created_at" < ${cursor.createdAt}
+                )
+              `
+              : sql``
+          }
+        ORDER BY
+          "created_at" DESC
+          , "id" DESC
+        LIMIT ${limit + 1}
+      `;
 
-      const versions = result.rows
-        .slice(0, limit)
-        .map(version => SchemaVersionModel.parse(version));
+      const result = await pool.any<unknown>(query);
+
+      let edges = result.map(row => {
+        const node = SchemaVersionModel.parse(row);
+
+        return {
+          node,
+          get cursor() {
+            return encodeCreatedAtAndUUIDIdBasedCursor(node);
+          },
+        };
+      });
+
+      const hasNextPage = edges.length > limit;
+      edges = edges.slice(0, limit);
 
       return {
-        versions,
-        hasMore,
+        edges,
+        pageInfo: {
+          hasNextPage,
+          hasPreviousPage: cursor !== null,
+          get endCursor() {
+            return edges[edges.length - 1]?.cursor ?? '';
+          },
+          get startCursor() {
+            return edges[0]?.cursor ?? '';
+          },
+        },
       };
     },
     async deleteSchema(args) {
@@ -2357,6 +2469,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           actionId: deleteActionResult.id,
           baseSchema: latestVersion.base_schema,
           previousSchemaVersion: latestVersion.id,
+          diffSchemaVersionId: args.diffSchemaVersionId,
           compositeSchemaSDL: args.compositeSchemaSDL,
           supergraphSDL: args.supergraphSDL,
           schemaCompositionErrors: args.schemaCompositionErrors,
@@ -2441,6 +2554,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           actionId: log.id,
           baseSchema: input.base_schema,
           previousSchemaVersion: input.previousSchemaVersion,
+          diffSchemaVersionId: input.diffSchemaVersionId,
           compositeSchemaSDL: input.compositeSchemaSDL,
           supergraphSDL: input.supergraphSDL,
           schemaCompositionErrors: input.schemaCompositionErrors,
@@ -4390,6 +4504,11 @@ function decodeFeatureFlags(column: unknown) {
   return FeatureFlagsModel.parse(column);
 }
 
+/**  This version introduced the "diffSchemaVersionId" column. */
+const SchemaVersionRecordVersion_2024_01_10_Model = zod.literal('2024-01-10');
+
+const SchemaVersionRecordVersionModel = SchemaVersionRecordVersion_2024_01_10_Model;
+
 const SchemaVersionModel = zod.intersection(
   zod.object({
     id: zod.string(),
@@ -4399,9 +4518,11 @@ const SchemaVersionModel = zod.intersection(
     actionId: zod.string(),
     hasPersistedSchemaChanges: zod.nullable(zod.boolean()).transform(val => val ?? false),
     previousSchemaVersionId: zod.nullable(zod.string()),
+    diffSchemaVersionId: zod.nullable(zod.string()),
     compositeSchemaSDL: zod.nullable(zod.string()),
     supergraphSDL: zod.nullable(zod.string()),
     schemaCompositionErrors: zod.nullable(zod.array(SchemaCompositionErrorModel)),
+    recordVersion: zod.nullable(SchemaVersionRecordVersionModel),
   }),
   zod
     .union([
@@ -4423,6 +4544,8 @@ const SchemaVersionModel = zod.intersection(
         : null,
     })),
 );
+
+export type SchemaVersion = zod.infer<typeof SchemaVersionModel>;
 
 const DocumentCollectionModel = zod.object({
   id: zod.string(),
@@ -4496,6 +4619,7 @@ async function insertSchemaVersion(
     actionId: string;
     baseSchema: string | null;
     previousSchemaVersion: string | null;
+    diffSchemaVersionId: string | null;
     compositeSchemaSDL: string | null;
     supergraphSDL: string | null;
     schemaCompositionErrors: Array<SchemaCompositionError> | null;
@@ -4508,12 +4632,14 @@ async function insertSchemaVersion(
   const query = sql`
     INSERT INTO schema_versions
       (
+        record_version,
         is_composable,
         target_id,
         action_id,
         base_schema,
         has_persisted_schema_changes,
         previous_schema_version_id,
+        diff_schema_version_id,
         composite_schema_sdl,
         supergraph_sdl,
         schema_composition_errors,
@@ -4522,12 +4648,14 @@ async function insertSchemaVersion(
       )
     VALUES
       (
+        '2024-01-10',
         ${args.isComposable},
         ${args.targetId},
         ${args.actionId},
         ${args.baseSchema},
         ${true},
         ${args.previousSchemaVersion},
+        ${args.diffSchemaVersionId},
         ${args.compositeSchemaSDL},
         ${args.supergraphSDL},
         ${
@@ -4614,6 +4742,8 @@ const schemaVersionSQLFields = (t = sql``) => sql`
   , ${t}"schema_composition_errors" as "schemaCompositionErrors"
   , ${t}"github_repository" as "githubRepository"
   , ${t}"github_sha" as "githubSha"
+  , ${t}"diff_schema_version_id" as "diffSchemaVersionId"
+  , ${t}"record_version" as "recordVersion"
 `;
 
 const targetSQLFields = sql`
@@ -4669,3 +4799,16 @@ export {
   buildRegistryServiceURLFromMeta,
   type RegistryServiceUrlChangeSerializableChange,
 } from './schema-change-meta';
+
+export type PaginatedSchemaVersionConnection = Readonly<{
+  edges: ReadonlyArray<{
+    cursor: string;
+    node: SchemaVersion;
+  }>;
+  pageInfo: Readonly<{
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    startCursor: string;
+    endCursor: string;
+  }>;
+}>;

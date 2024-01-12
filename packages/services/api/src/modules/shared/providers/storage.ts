@@ -1,10 +1,12 @@
 import { Injectable } from 'graphql-modules';
 import type { PolicyConfigurationObject } from '@hive/policy';
 import type {
+  PaginatedSchemaVersionConnection,
   SchemaChangeType,
   SchemaCheck,
   SchemaCheckInput,
   SchemaCompositionError,
+  SchemaVersion,
   TargetBreadcrumb,
 } from '@hive/storage';
 import type {
@@ -33,7 +35,6 @@ import type {
   Schema,
   SchemaLog,
   SchemaPolicy,
-  SchemaVersion,
   Target,
   TargetSettings,
   User,
@@ -41,11 +42,6 @@ import type {
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
-
-type Paginated<T> = T & {
-  after?: string | null;
-  limit: number;
-};
 
 export interface OrganizationSelector {
   organization: string;
@@ -360,6 +356,15 @@ export interface Storage {
 
   getMaybeLatestVersion(_: TargetSelector): Promise<SchemaVersion | null>;
 
+  /** Find the version before a schema version */
+  getVersionBeforeVersionId(
+    _: TargetSelector & {
+      beforeVersionId: string;
+      beforeVersionCreatedAt: string;
+      onlyComposable: boolean;
+    },
+  ): Promise<SchemaVersion | null>;
+
   /**
    * Find a specific schema version via it's action id.
    * The action id is the id of the action that created the schema version, it is user provided.
@@ -396,14 +401,15 @@ export interface Storage {
       }
     | never
   >;
-  getVersions(_: Paginated<TargetSelector>): Promise<
-    | {
-        versions: readonly SchemaVersion[];
-        hasMore: boolean;
-      }
-    | never
-  >;
-
+  getServiceSchemaOfVersion(args: {
+    schemaVersionId: string;
+    serviceName: string;
+  }): Promise<Schema | null>;
+  getPaginatedSchemaVersionsForTargetId(args: {
+    targetId: string;
+    first: number | null;
+    cursor: null | string;
+  }): Promise<PaginatedSchemaVersionConnection>;
   getVersion(_: TargetSelector & { version: string }): Promise<SchemaVersion | never>;
   deleteSchema(
     _: {
@@ -411,6 +417,7 @@ export interface Storage {
       composable: boolean;
       actionFn(): Promise<void>;
       changes: Array<SchemaChangeType> | null;
+      diffSchemaVersionId: string | null;
     } & TargetSelector &
       (
         | {
@@ -440,6 +447,7 @@ export interface Storage {
       actionFn(): Promise<void>;
       changes: Array<SchemaChangeType>;
       previousSchemaVersion: null | string;
+      diffSchemaVersionId: null | string;
       github: null | {
         repository: string;
         sha: string;
@@ -791,3 +799,4 @@ export interface Storage {
 @Injectable()
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class Storage implements Storage {}
+export type { PaginatedSchemaVersionConnection };

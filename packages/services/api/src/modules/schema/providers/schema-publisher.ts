@@ -883,6 +883,18 @@ export class SchemaPublisher {
           },
         });
 
+        let diffSchemaVersionId: string | null = null;
+        if (
+          organization.featureFlags.compareToPreviousComposableVersion &&
+          latestComposableSchemaVersion
+        ) {
+          diffSchemaVersionId = latestComposableSchemaVersion.id;
+        }
+
+        if (!organization.featureFlags.compareToPreviousComposableVersion && latestSchemaVersion) {
+          diffSchemaVersionId = latestSchemaVersion.id;
+        }
+
         if (deleteResult.conclusion === SchemaDeleteConclusion.Accept) {
           this.logger.debug('Delete accepted');
           if (input.dryRun !== true) {
@@ -892,6 +904,7 @@ export class SchemaPublisher {
               target: input.target.id,
               serviceName: input.serviceName,
               composable: deleteResult.state.composable,
+              diffSchemaVersionId,
               changes: deleteResult.state.changes,
               ...(deleteResult.state.fullSchemaSdl
                 ? {
@@ -1338,6 +1351,18 @@ export class SchemaPublisher {
 
     const supergraph = publishResult.state.supergraph ?? null;
 
+    let diffSchemaVersionId: string | null = null;
+    if (
+      organization.featureFlags.compareToPreviousComposableVersion &&
+      latestComposableSchemaVersion
+    ) {
+      diffSchemaVersionId = latestComposableSchemaVersion.id;
+    }
+
+    if (!organization.featureFlags.compareToPreviousComposableVersion && latestSchemaVersion) {
+      diffSchemaVersionId = latestSchemaVersion.id;
+    }
+
     this.logger.debug(`Assigning ${schemaLogIds.length} schemas to new version`);
     const schemaVersion = await this.schemaManager.createVersion({
       valid: composable,
@@ -1366,6 +1391,7 @@ export class SchemaPublisher {
         }
       },
       changes,
+      diffSchemaVersionId,
       previousSchemaVersion: latestVersion?.version ?? null,
       ...(fullSchemaSdl
         ? {

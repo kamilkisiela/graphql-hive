@@ -33,12 +33,6 @@ export default gql`
   }
 
   extend type Query {
-    schemaCompareToPrevious(
-      selector: SchemaCompareToPreviousInput!
-      unstable_forceLegacyComparison: Boolean = False
-    ): SchemaComparePayload!
-    schemaVersions(selector: SchemaVersionsInput!, after: ID, limit: Int!): SchemaVersionConnection!
-    schemaVersion(selector: SchemaVersionInput!): SchemaVersion!
     """
     Requires API Token
     """
@@ -203,6 +197,8 @@ export default gql`
     Get a list of paginated schema checks for a target.
     """
     schemaChecks(first: Int, after: String, filters: SchemaChecksFilter): SchemaCheckConnection!
+    schemaVersions(first: Int, after: String): SchemaVersionConnection!
+    schemaVersion(id: ID!): SchemaVersion
   }
 
   input SchemaChecksFilter {
@@ -223,12 +219,24 @@ export default gql`
     date: DateTime!
     commit: ID!
     service: String
+    """
+    The serviceSDL of the pushed schema. Is null for single schema projects.
+    """
+    serviceSdl: String
+    """
+    The previous SDL of the pushed schema. Is null for single schema projects.
+    """
+    previousServiceSdl: String
   }
 
   type DeletedSchemaLog {
     id: ID!
     date: DateTime!
     deletedService: String!
+    """
+    The previous SDL of the full schema or subgraph.
+    """
+    previousServiceSdl: String
   }
 
   union Schema = SingleSchema | CompositeSchema
@@ -480,68 +488,12 @@ export default gql`
     before: ID!
   }
 
-  input SchemaCompareToPreviousInput {
-    organization: ID!
-    project: ID!
-    target: ID!
-    version: ID!
-  }
-
   input SchemaVersionUpdateInput {
     organization: ID!
     project: ID!
     target: ID!
     version: ID!
     valid: Boolean!
-  }
-
-  type SchemaCompareResult {
-    changes: SchemaChangeConnection!
-    diff: SchemaDiff!
-    service: ServiceSchemaDiff
-    initial: Boolean!
-  }
-
-  enum SchemaCompareErrorDetailType {
-    graphql
-    composition
-    policy
-  }
-
-  type SchemaCompareErrorDetail {
-    message: String!
-    type: SchemaCompareErrorDetailType!
-  }
-
-  type SchemaCompareError {
-    message: String! @deprecated(reason: "Use details instead.")
-    details: [SchemaCompareErrorDetail!]
-  }
-
-  union SchemaComparePayload = SchemaCompareResult | SchemaCompareError
-
-  type SchemaDiff {
-    after: String!
-    before: String
-  }
-
-  type ServiceSchemaDiff {
-    name: String!
-    after: String
-    before: String
-  }
-
-  input SchemaVersionsInput {
-    organization: ID!
-    project: ID!
-    target: ID!
-  }
-
-  input SchemaVersionInput {
-    organization: ID!
-    project: ID!
-    target: ID!
-    version: ID!
   }
 
   input UpdateBaseSchemaInput {
@@ -563,13 +515,26 @@ export default gql`
     """
     Experimental: This field is not stable and may change in the future.
     """
-    explorer(usage: SchemaExplorerUsageInput): SchemaExplorer!
-    unusedSchema(usage: UnusedSchemaExplorerUsageInput): UnusedSchemaExplorer!
-    errors: SchemaErrorConnection!
+    explorer(usage: SchemaExplorerUsageInput): SchemaExplorer
+    unusedSchema(usage: UnusedSchemaExplorerUsageInput): UnusedSchemaExplorer
+
+    schemaCompositionErrors: SchemaErrorConnection
+
+    breakingSchemaChanges: SchemaChangeConnection
+    safeSchemaChanges: SchemaChangeConnection
+
     """
     GitHub metadata associated with the schema version.
     """
     githubMetadata: SchemaVersionGithubMetadata
+    """
+    The schema version against which this schema version was compared to in order to determine schema changes.
+    """
+    previousDiffableSchemaVersion: SchemaVersion
+    """
+    Whether this is the first composable schema version.
+    """
+    isFirstComposableVersion: Boolean!
   }
 
   type SchemaVersionGithubMetadata {
@@ -577,8 +542,13 @@ export default gql`
     commit: String!
   }
 
+  type SchemaVersionEdge {
+    node: SchemaVersion!
+    cursor: String!
+  }
+
   type SchemaVersionConnection {
-    nodes: [SchemaVersion!]!
+    edges: [SchemaVersionEdge!]!
     pageInfo: PageInfo!
   }
 

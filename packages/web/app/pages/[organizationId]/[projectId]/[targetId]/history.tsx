@@ -3,14 +3,19 @@ import NextLink from 'next/link';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
-import { VersionErrorsAndChanges } from '@/components/target/history/errors-and-changes';
+import {
+  ChangesBlock,
+  CompositionErrorsSection,
+} from '@/components/target/history/errors-and-changes';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge, Button, DiffEditor, MetaTitle, Spinner, TimeAgo } from '@/components/v2';
 import { noSchemaVersion } from '@/components/v2/empty-list';
 import { DiffIcon } from '@/components/v2/icon';
 import { graphql } from '@/gql';
-import { CompareDocument } from '@/graphql';
+import { CriticalityLevel } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { cn } from '@/lib/utils';
@@ -21,35 +26,46 @@ import {
   ExternalLinkIcon,
   ListBulletIcon,
 } from '@radix-ui/react-icons';
-import * as ToggleGroup from '@radix-ui/react-toggle-group';
 
 const HistoryPage_VersionsPageQuery = graphql(`
-  query HistoryPage_VersionsPageQuery($selector: SchemaVersionsInput!, $limit: Int!, $after: ID) {
-    schemaVersions(selector: $selector, after: $after, limit: $limit) {
-      nodes {
-        id
-        date
-        valid
-        log {
-          ... on PushedSchemaLog {
+  query HistoryPage_VersionsPageQuery(
+    $organization: ID!
+    $project: ID!
+    $target: ID!
+    $first: Int!
+    $after: String
+  ) {
+    target(selector: { organization: $organization, project: $project, target: $target }) {
+      id
+      schemaVersions(first: $first, after: $after) {
+        edges {
+          node {
             id
-            author
-            service
-            commit
-          }
-          ... on DeletedSchemaLog {
-            id
-            deletedService
+            date
+            valid
+            log {
+              ... on PushedSchemaLog {
+                id
+                author
+                service
+                commit
+              }
+              ... on DeletedSchemaLog {
+                id
+                deletedService
+              }
+            }
+            baseSchema
+            githubMetadata {
+              repository
+              commit
+            }
           }
         }
-        baseSchema
-        githubMetadata {
-          repository
-          commit
+        pageInfo {
+          hasNextPage
+          endCursor
         }
-      }
-      pageInfo {
-        hasNextPage
       }
     }
   }
@@ -63,7 +79,7 @@ function ListPage({
   onLoadMore,
   versionId,
 }: {
-  variables: { after: string; limit: number };
+  variables: { after: string | null; first: number };
   isLastPage: boolean;
   onLoadMore: (after: string) => void;
   versionId: string;
@@ -73,22 +89,20 @@ function ListPage({
   const [versionsQuery] = useQuery({
     query: HistoryPage_VersionsPageQuery,
     variables: {
-      selector: {
-        organization: router.organizationId,
-        project: router.projectId,
-        target: router.targetId,
-      },
+      organization: router.organizationId,
+      project: router.projectId,
+      target: router.targetId,
       ...variables,
     },
     requestPolicy: 'cache-and-network',
   });
 
-  const versions = versionsQuery.data?.schemaVersions;
-  const hasMore = versions?.pageInfo.hasNextPage;
+  const edges = versionsQuery.data?.target?.schemaVersions.edges;
+  const hasMore = versionsQuery.data?.target?.schemaVersions?.pageInfo?.hasNextPage ?? false;
 
   return (
     <>
-      {versions?.nodes.map(version => (
+      {edges?.map(({ node: version }) => (
         <div
           className={cn(
             'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
@@ -147,9 +161,9 @@ function ListPage({
         <Button
           variant="link"
           onClick={() => {
-            const id = versions.nodes.at(-1)?.id;
-            if (id) {
-              onLoadMore(id);
+            const endCursor = versionsQuery.data?.target?.schemaVersions?.pageInfo?.endCursor;
+            if (endCursor) {
+              onLoadMore(endCursor);
             }
           }}
         >
@@ -162,74 +176,145 @@ function ListPage({
 
 type View = 'full-schema' | 'list' | 'service-schema';
 
+const ComparisonView_SchemaVersionQuery = graphql(`
+  query ComparisonView_SchemaVersionQuery(
+    $organization: ID!
+    $project: ID!
+    $target: ID!
+    $versionId: ID!
+  ) {
+    target(selector: { organization: $organization, project: $project, target: $target }) {
+      id
+      schemaVersion(id: $versionId) {
+        id
+        log {
+          ... on PushedSchemaLog {
+            id
+            author
+            service
+            commit
+            serviceSdl
+            previousServiceSdl
+          }
+          ... on DeletedSchemaLog {
+            id
+            deletedService
+            previousServiceSdl
+          }
+        }
+        supergraph
+        sdl
+        schemaCompositionErrors {
+          ...CompositionErrorsSection_SchemaErrorConnection
+        }
+        isFirstComposableVersion
+        breakingSchemaChanges {
+          nodes {
+            message(withSafeBasedOnUsageNote: false)
+            criticality
+            criticalityReason
+            path
+            approval {
+              approvedBy {
+                id
+                displayName
+              }
+              approvedAt
+              schemaCheckId
+            }
+            isSafeBasedOnUsage
+          }
+        }
+        safeSchemaChanges {
+          nodes {
+            message(withSafeBasedOnUsageNote: false)
+            criticality
+            criticalityReason
+            path
+            approval {
+              approvedBy {
+                id
+                displayName
+              }
+              approvedAt
+              schemaCheckId
+            }
+            isSafeBasedOnUsage
+          }
+        }
+        previousDiffableSchemaVersion {
+          id
+          supergraph
+          sdl
+        }
+      }
+    }
+  }
+`);
+
 function ComparisonView({ versionId }: { versionId: string }) {
   const router = useRouteSelector();
   const [view, setView] = useState<View>('list');
   const onViewChange = useCallback((view: View) => {
     setView(view);
   }, []);
-  const [compareQuery] = useQuery({
-    query: CompareDocument,
+
+  const [query] = useQuery({
+    query: ComparisonView_SchemaVersionQuery,
     variables: {
       organization: router.organizationId,
       project: router.projectId,
       target: router.targetId,
-      version: versionId,
-      unstable_forceLegacyComparison: router.query['force-legacy-comparison'] === '1',
+      versionId,
     },
   });
 
-  const comparison = compareQuery.data?.schemaCompareToPrevious;
-  const compositionErrors = compareQuery.data?.schemaVersion?.errors;
-  const { error } = compareQuery;
+  const { error } = query;
 
-  const isComparisonSuccessful = comparison?.__typename === 'SchemaCompareResult';
-  const hasSchemaChanges = isComparisonSuccessful && comparison.changes.total > 0;
-  const hasCompositionErrors = !!compositionErrors && compositionErrors.total > 0;
+  const isLoading = query.fetching;
+  const schemaVersion = query?.data?.target?.schemaVersion;
 
-  const isListViewAvailable = hasSchemaChanges || hasCompositionErrors;
-  const isFullSchemaDiffAvailable = isComparisonSuccessful && hasSchemaChanges;
-  const isServiceSchemaAvailable = isComparisonSuccessful && comparison.service != null;
+  const availableViews: Array<{
+    value: View;
+    label: string;
+    tooltip: string;
+    icon: ReactElement;
+    disabledReason: null | string;
+  }> = [
+    {
+      value: 'list',
+      icon: <ListBulletIcon className="h-5 w-auto  flex-none" />,
+      label: 'Detail',
+      tooltip: 'Show changes and composition errors',
+      disabledReason: null,
+    },
 
-  const showFullSchemaDiff = isFullSchemaDiffAvailable && view === 'full-schema';
-  const showServiceSchemaDiff = isServiceSchemaAvailable && view === 'service-schema';
-  const showListView = isListViewAvailable && view === 'list';
+    {
+      value: 'full-schema',
+      icon: <DiffIcon className="h-5 w-auto flex-none" />,
+      label: 'Schema Diff',
+      tooltip: 'Show diff of a full schema',
+      disabledReason:
+        schemaVersion?.sdl && schemaVersion?.previousDiffableSchemaVersion?.sdl
+          ? null
+          : 'Composition failed.',
+    },
+  ];
 
-  const isLoading = compareQuery.fetching;
-
-  const availableViews = (
-    [
-      isListViewAvailable
-        ? {
-            value: 'list',
-            icon: <ListBulletIcon className="h-5 w-auto  flex-none" />,
-            label: 'Changes',
-            tooltip: 'Show changes and composition errors',
-          }
-        : null,
-      isFullSchemaDiffAvailable
-        ? {
-            value: 'full-schema',
-            icon: <DiffIcon className="h-5 w-auto flex-none" />,
-            label: 'Full Diff',
-            tooltip: 'Show diff of a full schema',
-          }
-        : null,
-      isServiceSchemaAvailable
-        ? {
-            value: 'service-schema',
-            icon: <CubeIcon className="h-5 w-auto flex-none" />,
-            label: 'Service Diff',
-            tooltip: 'Show diff of a service schema',
-          }
-        : null,
-    ] satisfies Array<{
-      value: View;
-      label: string;
-      tooltip: string;
-      icon: ReactElement;
-    } | null>
-  ).filter(isDefined);
+  if (schemaVersion && ('service' in schemaVersion.log || 'deletedService' in schemaVersion.log)) {
+    availableViews.push({
+      value: 'service-schema',
+      icon: <CubeIcon className="h-5 w-auto flex-none" />,
+      label: 'Service Diff',
+      tooltip: 'Show diff of a service schema',
+      disabledReason:
+        schemaVersion?.log.previousServiceSdl &&
+        'serviceSdl' in schemaVersion.log &&
+        schemaVersion.log.serviceSdl
+          ? null
+          : 'No service schema changes',
+    });
+  }
 
   return (
     <>
@@ -239,35 +324,47 @@ function ComparisonView({ versionId }: { versionId: string }) {
           <Subtitle>Explore details of the selected version</Subtitle>
         </div>
         {availableViews.length ? (
-          <div className="flex items-center justify-between">
-            <ToggleGroup.Root
-              className="flex space-x-1 rounded-md bg-gray-900/50 p-0.5 text-gray-500"
-              type="single"
-              defaultValue={availableViews[0]?.value}
-              onValueChange={onViewChange}
-              orientation="vertical"
-            >
-              {availableViews.map(({ value, icon, label, tooltip }) => (
-                <ToggleGroup.Item
-                  key={value}
-                  value={value}
-                  className={cn(
-                    'flex items-center rounded-md px-2 py-[0.4375rem] text-xs font-semibold hover:text-white',
-                    view === value && 'bg-gray-800 text-white',
-                  )}
-                  title={tooltip}
-                >
-                  {icon}
-                  <span className="ml-2">{label}</span>
-                </ToggleGroup.Item>
-              ))}
-            </ToggleGroup.Root>
-          </div>
+          <TooltipProvider>
+            <div className="flex items-center justify-between">
+              <Tabs
+                // className="flex space-x-1 rounded-md bg-gray-900/50 p-0.5 text-gray-500"
+                defaultValue={availableViews[0]?.value}
+                onValueChange={value => onViewChange(value as View)}
+              >
+                <TabsList>
+                  {availableViews.map(({ value, icon, label, tooltip, disabledReason }) => (
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <TabsTrigger
+                          key={value}
+                          value={value}
+                          className={cn(
+                            'hover:text-white disabled:hover:text-gray-500',
+                            view === value && 'bg-gray-800 text-white',
+                          )}
+                          title={tooltip}
+                          disabled={!!disabledReason}
+                        >
+                          {icon}
+                          <span className="ml-2">{label}</span>
+                        </TabsTrigger>
+                      </TooltipTrigger>
+                      {disabledReason && (
+                        <TooltipContent className="max-w-md p-4 font-normal">
+                          {disabledReason}
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
+          </TooltipProvider>
         ) : null}
       </div>
       <div className="flex h-full">
         <div className="grow overflow-y-auto rounded-md">
-          {isLoading ? (
+          {isLoading || !schemaVersion ? (
             <div className="flex h-full w-full items-center justify-center">
               <Spinner />
             </div>
@@ -284,55 +381,65 @@ function ComparisonView({ versionId }: { versionId: string }) {
                 {error.graphQLErrors?.[0]?.message ?? error.networkError?.message}
               </pre>
             </div>
-          ) : showFullSchemaDiff ? (
-            <DiffEditor
-              title="Full schema"
-              before={comparison.diff.before ?? ''}
-              after={comparison.diff.after}
-            />
-          ) : showServiceSchemaDiff ? (
-            <DiffEditor
-              title={comparison.service?.name ?? ''}
-              before={comparison.service?.before ?? ''}
-              after={comparison.service?.after ?? ''}
-            />
-          ) : showListView ? (
-            <VersionErrorsAndChanges
-              changes={
-                hasSchemaChanges
-                  ? comparison.changes
-                  : {
-                      nodes: [],
-                      total: 0,
-                    }
-              }
-              errors={
-                hasCompositionErrors
-                  ? compositionErrors
-                  : {
-                      nodes: [],
-                      total: 0,
-                    }
-              }
-            />
-          ) : isServiceSchemaAvailable ? (
-            <DiffEditor
-              title={comparison.service?.name ?? ''}
-              before={comparison.service?.before ?? ''}
-              after={comparison.service?.after ?? ''}
-            />
-          ) : (
-            <div className="cursor-default">
-              <div className="m-3 p-4">
-                <div className="mb-3 flex items-center gap-3">
-                  <CheckCircledIcon className="h-4 w-auto text-emerald-500" />
-                  <h2 className="text-base font-medium text-white">First composable version</h2>
+          ) : null}
+          {schemaVersion && (
+            <>
+              {view === 'list' && schemaVersion && (
+                <div>
+                  {schemaVersion.isFirstComposableVersion && (
+                    <div className="cursor-default">
+                      <div className="m-3 p-4">
+                        <div className="mb-3 flex items-center gap-3">
+                          <CheckCircledIcon className="h-4 w-auto text-emerald-500" />
+                          <h2 className="text-base font-medium text-white">
+                            First composable version
+                          </h2>
+                        </div>
+                        <p className="text-muted-foreground text-xs">
+                          Congratulations! This is the first version of the schema that is
+                          composable.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {schemaVersion.schemaCompositionErrors && (
+                    <CompositionErrorsSection
+                      compositionErrors={schemaVersion.schemaCompositionErrors}
+                    />
+                  )}
+                  {schemaVersion.breakingSchemaChanges?.nodes.length && (
+                    <div className="mb-2">
+                      <ChangesBlock
+                        criticality={CriticalityLevel.Breaking}
+                        changes={schemaVersion.breakingSchemaChanges.nodes}
+                      />
+                    </div>
+                  )}
+                  {schemaVersion.safeSchemaChanges?.nodes?.length && (
+                    <div className="mb-2">
+                      <ChangesBlock
+                        criticality={CriticalityLevel.Safe}
+                        changes={schemaVersion.safeSchemaChanges.nodes}
+                      />
+                    </div>
+                  )}
                 </div>
-                <p className="text-muted-foreground text-xs">
-                  Congratulations! This is the first version of the schema that is composable.
-                </p>
-              </div>
-            </div>
+              )}
+              {view === 'full-schema' && (
+                <DiffEditor
+                  title="Full schema"
+                  before={schemaVersion?.previousDiffableSchemaVersion?.sdl ?? ''}
+                  after={schemaVersion?.sdl ?? ''}
+                />
+              )}
+              {view === 'service-schema' && (
+                <DiffEditor
+                  title="Published service diff"
+                  before={schemaVersion?.log?.previousServiceSdl ?? ''}
+                  after={('serviceSdl' in schemaVersion.log && schemaVersion.log.serviceSdl) || ''}
+                />
+              )}
+            </>
           )}
         </div>
       </div>
@@ -347,10 +454,12 @@ const TargetHistoryPageQuery = graphql(`
     }
     organization(selector: { organization: $organizationId }) {
       organization {
+        id
         ...TargetLayout_CurrentOrganizationFragment
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {
+      id
       ...TargetLayout_CurrentProjectFragment
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
@@ -377,7 +486,7 @@ function HistoryPageContent() {
       targetId: router.targetId,
     },
   });
-  const [pageVariables, setPageVariables] = useState([{ limit: 10, after: '' }]);
+  const [pageVariables, setPageVariables] = useState([{ first: 10, after: null as string | null }]);
 
   if (query.error) {
     return <QueryError error={query.error} />;
@@ -390,7 +499,7 @@ function HistoryPageContent() {
   const organizationConnection = query.data?.organizations;
   const isCDNEnabled = query.data;
 
-  const versionId = router.versionId ?? currentTarget?.latestSchemaVersion?.id;
+  const versionId = router.versionId || currentTarget?.latestSchemaVersion?.id;
 
   return (
     <TargetLayout
@@ -417,7 +526,7 @@ function HistoryPageContent() {
                     variables={variables}
                     isLastPage={i === pageVariables.length - 1}
                     onLoadMore={after => {
-                      setPageVariables([...pageVariables, { after, limit: 10 }]);
+                      setPageVariables([...pageVariables, { after, first: 10 }]);
                     }}
                     versionId={versionId}
                   />
@@ -426,7 +535,7 @@ function HistoryPageContent() {
             </div>
           </div>
           <div className="grow">
-            <ComparisonView versionId={versionId} />
+            <ComparisonView versionId={versionId} key={versionId} />
           </div>
         </div>
       ) : (
@@ -449,10 +558,6 @@ function HistoryPage(): ReactElement {
       <HistoryPageContent />
     </>
   );
-}
-
-function isDefined<T>(value: T | undefined | null): value is T {
-  return value !== undefined && value !== null;
 }
 
 export const getServerSideProps = withSessionProtection();

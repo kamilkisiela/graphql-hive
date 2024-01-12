@@ -4,10 +4,15 @@ import { clsx } from 'clsx';
 import { format } from 'date-fns';
 import { CheckIcon } from 'lucide-react';
 import reactStringReplace from 'react-string-replace';
-import { Label } from '@/components/common';
-import { Tooltip } from '@/components/v2';
+import { Label, Label as LegacyLabel } from '@/components/common';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Heading } from '@/components/v2';
+import { Tooltip as LegacyTooltip } from '@/components/v2/tooltip';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel, SchemaChangeFieldsFragment } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
+import { InfoCircledIcon } from '@radix-ui/react-icons';
 
 export function labelize(message: string) {
   // Turn " into '
@@ -84,8 +89,8 @@ const SchemaChangeApproval = (props: {
   );
 
   return (
-    <Tooltip.Provider delayDuration={200}>
-      <Tooltip
+    <LegacyTooltip.Provider delayDuration={200}>
+      <LegacyTooltip
         content={
           <>
             This breaking change was manually{' '}
@@ -106,16 +111,16 @@ const SchemaChangeApproval = (props: {
           {' '}
           <CheckIcon className="inline h-3 w-3" /> Approved by {approvalName}
         </span>
-      </Tooltip>
-    </Tooltip.Provider>
+      </LegacyTooltip>
+    </LegacyTooltip.Provider>
   );
 };
 
 function MaybeWrapTooltip(props: { children: React.ReactNode; tooltip: string | null }) {
   return props.tooltip ? (
-    <Tooltip.Provider delayDuration={200}>
-      <Tooltip content={props.tooltip}>{props.children}</Tooltip>
-    </Tooltip.Provider>
+    <LegacyTooltip.Provider delayDuration={200}>
+      <LegacyTooltip content={props.tooltip}>{props.children}</LegacyTooltip>
+    </LegacyTooltip.Provider>
   ) : (
     <>{props.children}</>
   );
@@ -232,5 +237,78 @@ export function VersionErrorsAndChanges(props: {
         ) : null}
       </div>
     </div>
+  );
+}
+
+const CompositionErrorsSection_SchemaErrorConnection = graphql(`
+  fragment CompositionErrorsSection_SchemaErrorConnection on SchemaErrorConnection {
+    nodes {
+      message
+    }
+  }
+`);
+
+export function CompositionErrorsSection(props: {
+  compositionErrors: FragmentType<typeof CompositionErrorsSection_SchemaErrorConnection>;
+}) {
+  const compositionErrors = useFragment(
+    CompositionErrorsSection_SchemaErrorConnection,
+    props.compositionErrors,
+  );
+
+  return (
+    <div className="mb-2 px-2">
+      <TooltipProvider>
+        <Heading className="my-2">
+          Composition Errors
+          <Tooltip>
+            <TooltipTrigger>
+              <Button variant="ghost" size="icon-sm" className="ml-2">
+                <InfoCircledIcon className="h-3 w-3" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-md p-4 font-normal">
+              <p>
+                If composition errors occur it is impossible to generate a supergraph and public API
+                schema.
+              </p>
+              <p className="mt-1">
+                Composition errors can be caused by changes to the underlying schemas that causes
+                conflicts with other subgraphs.
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </Heading>
+      </TooltipProvider>
+      <ul>
+        {compositionErrors?.nodes.map((change, index) => (
+          <li key={index} className="mb-1 ml-[1.25em] list-[square] pl-0 marker:pl-1">
+            <CompositionError message={change.message} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function CompositionError(props: { message: string }) {
+  return reactStringReplace(
+    reactStringReplace(
+      reactStringReplace(props.message, /"([^"]+)"/g, (match, index) => {
+        return <LegacyLabel key={match + index}>{match}</LegacyLabel>;
+      }),
+      /(@[^. ]+)/g,
+      (match, index) => {
+        return <LegacyLabel key={match + index}>{match}</LegacyLabel>;
+      },
+    ),
+    /Unknown type ([A-Za-z_0-9]+)/g,
+    (match, index) => {
+      return (
+        <span key={match + index}>
+          Unknown type <LegacyLabel>{match}</LegacyLabel>
+        </span>
+      );
+    },
   );
 }

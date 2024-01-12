@@ -43,11 +43,6 @@ const ENABLE_EXTERNAL_COMPOSITION_SCHEMA = z.object({
   secret: z.string().nonempty(),
 });
 
-type Paginated<T> = T & {
-  after?: string | null;
-  limit: number;
-};
-
 const externalSchemaCompositionTestSdl = /* GraphQL */ `
   type Query {
     test: String
@@ -261,22 +256,26 @@ export class SchemaManager {
     return await this.storage.getSchemaChangesForVersion({ versionId: selector.version });
   }
 
-  async getSchemaVersions(selector: Paginated<TargetSelector>) {
-    this.logger.debug('Fetching published schemas (selector=%o)', selector);
-    await this.authManager.ensureTargetAccess({
-      ...selector,
-      scope: TargetAccessScope.REGISTRY_READ,
-    });
-    const result = await this.storage.getVersions(selector);
+  async getPaginatedSchemaVersionsForTargetId(args: {
+    targetId: string;
+    organizationId: string;
+    projectId: string;
+    first: number | null;
+    cursor: null | string;
+  }) {
+    const connection = await this.storage.getPaginatedSchemaVersionsForTargetId(args);
 
     return {
-      nodes: result.versions.map(r => ({
-        ...r,
-        project: selector.project,
-        target: selector.target,
-        organization: selector.organization,
+      ...connection,
+      edges: connection.edges.map(edge => ({
+        ...edge,
+        node: {
+          ...edge.node,
+          organization: args.organizationId,
+          project: args.projectId,
+          target: args.targetId,
+        },
       })),
-      hasMore: result.hasMore,
     };
   }
 
@@ -333,6 +332,7 @@ export class SchemaManager {
       actionFn(): Promise<void>;
       changes: Array<SchemaChangeType>;
       previousSchemaVersion: string | null;
+      diffSchemaVersionId: string | null;
       github: null | {
         repository: string;
         sha: string;
@@ -877,6 +877,68 @@ export class SchemaManager {
       project: target.projectId,
       target: target.id,
       organization: organization.id,
+    };
+  }
+
+  async getVersionBeforeVersionId(args: {
+    organization: string;
+    project: string;
+    target: string;
+    beforeVersionId: string;
+    beforeVersionCreatedAt: string;
+  }) {
+    this.logger.debug('Fetch version before version id. (args=%o)', args);
+
+    const organization = await this.organizationManager.getOrganization({
+      organization: args.organization,
+    });
+
+    const schemaVersion = await this.storage.getVersionBeforeVersionId({
+      organization: args.organization,
+      project: args.project,
+      target: args.target,
+      beforeVersionId: args.beforeVersionId,
+      beforeVersionCreatedAt: args.beforeVersionCreatedAt,
+      onlyComposable: organization.featureFlags.compareToPreviousComposableVersion,
+    });
+
+    if (!schemaVersion) {
+      return null;
+    }
+
+    return {
+      ...schemaVersion,
+      organization: args.organization,
+      project: args.project,
+      target: args.target,
+    };
+  }
+
+  async getFirstComposableSchemaVersionBeforeVersionId(args: {
+    organization: string;
+    project: string;
+    target: string;
+    beforeVersionId: string;
+    beforeVersionCreatedAt: string;
+  }) {
+    const schemaVersion = await this.storage.getVersionBeforeVersionId({
+      organization: args.organization,
+      project: args.project,
+      target: args.target,
+      beforeVersionId: args.beforeVersionId,
+      beforeVersionCreatedAt: args.beforeVersionCreatedAt,
+      onlyComposable: true,
+    });
+
+    if (!schemaVersion) {
+      return null;
+    }
+
+    return {
+      ...schemaVersion,
+      organization: args.organization,
+      project: args.project,
+      target: args.target,
     };
   }
 
