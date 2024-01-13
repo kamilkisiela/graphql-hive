@@ -515,6 +515,16 @@ export default gql`
     newBase: String
   }
 
+  type ContractVersionEdge {
+    node: ContractVersion!
+    cursor: String!
+  }
+
+  type ContractVersionConnection {
+    edges: [ContractVersionEdge!]!
+    pageInfo: PageInfo!
+  }
+
   type SchemaVersion {
     id: ID!
     valid: Boolean!
@@ -552,6 +562,10 @@ export default gql`
     Whether this is the first composable schema version.
     """
     isFirstComposableVersion: Boolean!
+    """
+    Contract versions of this schema version.
+    """
+    contractVersions: ContractVersionConnection
   }
 
   type SchemaVersionGithubMetadata {
@@ -865,8 +879,17 @@ export default gql`
     id: ID!
     createdAt: String!
     contractName: String!
+
+    schemaCompositionErrors: SchemaErrorConnection
+
     supergraphSDL: String
     compositeSchemaSDL: String
+
+    breakingSchemaChanges: SchemaChangeConnection
+    safeSchemaChanges: SchemaChangeConnection
+
+    # previousContractVersion: ContractVersion
+    # previousDiffableContractVersion: ContractVersion
   }
 
   """

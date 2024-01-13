@@ -136,6 +136,8 @@ const config: CodegenConfig = {
           ContractConnection: '../modules/schema/providers/contracts#PaginatedContractConnection',
           ContractCheck:
             '../modules/schema/providers/contracts#ContractCheck as ContractCheckMapper',
+          ContractVersion:
+            '../modules/schema/providers/contracts#ContractVersion as ContractVersionMapper',
         },
       },
     },
