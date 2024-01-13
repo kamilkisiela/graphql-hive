@@ -293,7 +293,7 @@ export class Contracts {
         "schema_check_id" = ${args.schemaCheckId}
       ORDER BY
         "schema_check_id" ASC
-       , "contract_name" ASC
+        , "contract_name" ASC
     `);
 
     if (result.length === 0) {
@@ -362,6 +362,93 @@ export class Contracts {
     this.logger.debug('Contract version found by id. (id=%s)', args.contractVersionId);
 
     return ContractVersionModel.parse(result);
+  }
+
+  public async getContractVersionsForSchemaVersion(args: { schemaVersionId: string }) {
+    this.logger.debug(
+      'Load contract versions for schema version. (schemaVersionId=%s)',
+      args.schemaVersionId,
+    );
+
+    const result = await this.pool.any<unknown>(sql`
+      SELECT
+        ${contractVersionsFields}
+      FROM
+        "contract_versions"
+      WHERE
+        "schema_version_id" = ${args.schemaVersionId}
+      ORDER BY
+        "created_at" DESC
+        , "contract_name" ASC
+    `);
+
+    if (result.length === null) {
+      return null;
+    }
+
+    const edges = result.map(row => {
+      const node = ContractVersionModel.parse(row);
+      return {
+        node,
+        get cursor() {
+          return node.id;
+        },
+      };
+    });
+
+    return {
+      edges,
+      pageInfo: {
+        hasNextPage: false,
+        hasPreviousPage: false,
+        get endCursor() {
+          return edges[edges.length - 1]?.cursor ?? '';
+        },
+        get startCursor() {
+          return edges[0]?.cursor ?? '';
+        },
+      },
+    };
+  }
+
+  public async getBreakingChangesForContractVersion(args: { contractVersionId: string }) {
+    const changes = await this.pool.query<unknown>(sql`
+      SELECT
+        "change_type" as "type",
+        "meta",
+        "is_safe_based_on_usage" as "isSafeBasedOnUsage"
+      FROM
+        "contract_version_changes"
+      WHERE
+        "schema_version_id" = ${args.contractVersionId}
+        AND "severity_level" <> 'BREAKING' 
+    `);
+
+    if (changes.rows.length === 0) {
+      return null;
+    }
+
+    return changes.rows.map(row => HiveSchemaChangeModel.parse(row));
+  }
+
+  public async getSafeChangesForContractVersion(args: { contractVersionId: string }) {
+    const changes = await this.pool.query<unknown>(sql`
+      SELECT
+        "change_type" as "type",
+        "meta",
+        "is_safe_based_on_usage" as "isSafeBasedOnUsage"
+      FROM
+        "contract_version_changes"
+      WHERE
+        "schema_version_id" = ${args.contractVersionId}
+        AND "severity_level" = 'BREAKING' 
+    `);
+
+    if (changes.rows.length === 0) {
+      return null;
+    }
+
+    return changes.rows.map(row => HiveSchemaChangeModel.parse(row));
   }
 }
 

@@ -729,6 +729,11 @@ export const resolvers: SchemaModule.Resolvers = {
     isFirstComposableVersion(version, _, { injector }) {
       return injector.get(SchemaVersionHelper).getIsFirstComposableVersion(version);
     },
+    contractVersions(version, _, { injector }) {
+      return injector.get(Contracts).getContractVersionsForSchemaVersion({
+        schemaVersionId: version.id,
+      });
+    },
   },
   SingleSchema: {
     __isTypeOf(obj) {
@@ -1721,6 +1726,18 @@ export const resolvers: SchemaModule.Resolvers = {
     },
     compositeSchemaSDL: schemaCheckContract => schemaCheckContract.compositeSchemaSdl,
     supergraphSDL: schemaCheckContract => schemaCheckContract.supergraphSdl,
+  },
+  ContractVersion: {
+    breakingSchemaChanges(contractVersion, _, context) {
+      return context.injector.get(Contracts).getBreakingChangesForContractVersion({
+        contractVersionId: contractVersion.id,
+      });
+    },
+    safeSchemaChanges(contractVersion, _, context) {
+      return context.injector.get(Contracts).getSafeChangesForContractVersion({
+        contractVersionId: contractVersion.id,
+      });
+    },
   },
 };
 
