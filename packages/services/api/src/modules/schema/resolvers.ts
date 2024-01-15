@@ -1738,6 +1738,8 @@ export const resolvers: SchemaModule.Resolvers = {
         contractVersionId: contractVersion.id,
       });
     },
+    compositeSchemaSDL: contractVersion => contractVersion.compositeSchemaSdl,
+    supergraphSDL: contractVersion => contractVersion.supergraphSdl,
   },
 };
 
