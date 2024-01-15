@@ -64,7 +64,7 @@
     "@types/async-retry": "1.4.8",
     "graphql": "16.8.1",
     "graphql-yoga": "5.1.1",
-    "nock": "13.4.0",
+    "nock": "13.5.0",
     "vitest": "1.2.0"
   },
   "publishConfig": {
