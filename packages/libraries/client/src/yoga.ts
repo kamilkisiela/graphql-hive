@@ -72,6 +72,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
         return;
       }
 
+      // Report if execution happened (aka executionArgs have been set within onExecute)
       if (record.executionArgs) {
         record.callback(
           {
@@ -83,27 +84,30 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
         return;
       }
 
-      if (!record.paramsArgs.query || !latestSchema) {
-        return;
-      }
-
-      try {
-        let document = parsedDocumentCache.get(record.paramsArgs.query);
-        if (document === undefined) {
-          document = parse(record.paramsArgs.query);
-          parsedDocumentCache.set(record.paramsArgs.query, document);
+      // Report if execution was skipped due to response cache ( Symbol.for('servedFromResponseCache') in context.result)
+      if (
+        record.paramsArgs.query &&
+        latestSchema &&
+        Symbol.for('servedFromResponseCache') in context.result
+      ) {
+        try {
+          let document = parsedDocumentCache.get(record.paramsArgs.query);
+          if (document === undefined) {
+            document = parse(record.paramsArgs.query);
+            parsedDocumentCache.set(record.paramsArgs.query, document);
+          }
+          record.callback(
+            {
+              document,
+              schema: latestSchema,
+              variableValues: record.paramsArgs.variables,
+              operationName: record.paramsArgs.operationName,
+            },
+            context.result,
+          );
+        } catch (err) {
+          console.error(err);
         }
-        record.callback(
-          {
-            document,
-            schema: latestSchema,
-            variableValues: record.paramsArgs.variables,
-            operationName: record.paramsArgs.operationName,
-          },
-          context.result,
-        );
-      } catch {
-        // ignore
       }
     },
   };

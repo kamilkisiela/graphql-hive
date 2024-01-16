@@ -434,6 +434,9 @@ importers:
       '@apollo/subgraph':
         specifier: 2.6.3
         version: 2.6.3(graphql@16.8.1)
+      '@graphql-yoga/plugin-disable-introspection':
+        specifier: 2.1.1
+        version: 2.1.1(graphql-yoga@5.1.1)(graphql@16.8.1)
       '@types/async-retry':
         specifier: 1.4.8
         version: 1.4.8
@@ -1049,8 +1052,8 @@ importers:
         specifier: 3.1.1
         version: 3.1.1(@graphql-tools/utils@10.0.12)(graphql-yoga@5.1.1)(graphql@16.8.1)
       '@graphql-yoga/plugin-response-cache':
-        specifier: 3.2.1
-        version: 3.2.1(@envelop/core@5.0.0)(graphql-yoga@5.1.1)(graphql@16.8.1)
+        specifier: 3.3.0-alpha-20240116103344-655e7299
+        version: 3.3.0-alpha-20240116103344-655e7299(@envelop/core@5.0.0)(graphql-yoga@5.1.1)(graphql@16.8.1)
       '@hive/api':
         specifier: workspace:*
         version: link:../api
@@ -7454,6 +7457,17 @@ packages:
       tslib: 2.6.2
     dev: true
 
+  /@graphql-yoga/plugin-disable-introspection@2.1.1(graphql-yoga@5.1.1)(graphql@16.8.1):
+    resolution: {integrity: sha512-vFeYDegjeCMa4agvKE/+1waINUBmckBTozpmRLSvElDlb18e18CWj1jm18hTDl6jV9R5GS4y5VMdpbFTukyh/w==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      graphql: ^15.2.0 || ^16.0.0
+      graphql-yoga: ^5.1.1
+    dependencies:
+      graphql: 16.8.1
+      graphql-yoga: 5.1.1(graphql@16.8.1)
+    dev: true
+
   /@graphql-yoga/plugin-persisted-operations@3.1.1(@graphql-tools/utils@10.0.12)(graphql-yoga@5.1.1)(graphql@16.8.1):
     resolution: {integrity: sha512-cD7+V19ipICnCZsUtLgOyZV9jcwtTiSFJOGYIZnUG25egUIzXfMmg+EWUZD1uGLKZBKbGWULn9ayc7UW52GSLg==}
     engines: {node: '>=18.0.0'}
@@ -7467,11 +7481,11 @@ packages:
       graphql-yoga: 5.1.1(graphql@16.8.1)
     dev: true
 
-  /@graphql-yoga/plugin-response-cache@3.2.1(@envelop/core@5.0.0)(graphql-yoga@5.1.1)(graphql@16.8.1):
-    resolution: {integrity: sha512-GBalsZzJxp3pTllLx/cdTyVFu3zR/YevfntC3bFJifQcBuBxnAXqsyrbHp87gc/boBiZP11u6NhG++Ta9mvxew==}
+  /@graphql-yoga/plugin-response-cache@3.3.0-alpha-20240116103344-655e7299(@envelop/core@5.0.0)(graphql-yoga@5.1.1)(graphql@16.8.1):
+    resolution: {integrity: sha512-MNaYFY5VMoPpP9H63FF2Q2Z2d8xLcuLgzRGSH5nuX4vM6tD+nvBThpYDEgP9XfM4qSncT/99PnExtcZxHB+D1A==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      graphql: ^15.2.0 || ^16.0.0
+      graphql: 16.6.0
       graphql-yoga: ^5.1.1
     dependencies:
       '@envelop/response-cache': 6.1.2(@envelop/core@5.0.0)(graphql@16.8.1)

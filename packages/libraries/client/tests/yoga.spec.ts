@@ -4,6 +4,8 @@ import { createSchema, createYoga } from 'graphql-yoga';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import nock from 'nock';
 // eslint-disable-next-line import/no-extraneous-dependencies
+import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { useHive } from '../src/yoga.js';
 
@@ -221,6 +223,107 @@ it('reports usage with response cache', async () => {
     setTimeout(() => {
       graphqlScope.done();
       expect(usageCount).toEqual(3);
+      resolve();
+    }, 1000);
+  });
+});
+
+it('does not report usage for operation that does not pass validation', async () => {
+  const callback = vi.fn();
+  const graphqlScope = nock('http://localhost')
+    .post('/graphql')
+    .reply(200, {
+      data: {
+        __typename: 'Query',
+        tokenInfo: {
+          __typename: 'TokenInfo',
+          token: {
+            name: 'brrrt',
+          },
+          organization: {
+            name: 'mom',
+            cleanId: 'ur-mom',
+          },
+          project: {
+            name: 'projecto',
+            type: 'FEDERATION',
+            cleanId: 'projecto',
+          },
+          target: {
+            name: 'projecto',
+            cleanId: 'projecto',
+          },
+          canReportSchema: true,
+          canCollectUsage: true,
+          canReadOperations: true,
+        },
+      },
+    });
+
+  const yoga = createYoga({
+    schema: createSchema({
+      typeDefs: /* GraphQL */ `
+        type Query {
+          hi: String
+        }
+      `,
+    }),
+    plugins: [
+      useDisableIntrospection(),
+      useHive({
+        enabled: true,
+        debug: true,
+        token: 'brrrt',
+        selfHosting: {
+          applicationUrl: 'http://localhost/foo',
+          graphqlEndpoint: 'http://localhost/graphql',
+          usageEndpoint: 'http://localhost/usage',
+        },
+        usage: {
+          endpoint: 'http://localhost/usage',
+          clientInfo() {
+            return {
+              name: 'brrr',
+              version: '1',
+            };
+          },
+        },
+        agent: {
+          maxSize: 1,
+        },
+      }),
+    ],
+  });
+
+  // eslint-disable-next-line no-async-promise-executor
+  await new Promise<void>(async (resolve, reject) => {
+    nock.emitter.once('no match', (req: any) => {
+      reject(new Error(`Unexpected request was sent to ${req.path}`));
+    });
+
+    const res = await yoga.fetch('http://localhost/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: /* GraphQL */ `
+          {
+            __schema {
+              types {
+                name
+              }
+            }
+          }
+        `,
+      }),
+    });
+    expect(res.status).toBe(200);
+    expect(await res.text()).toContain('GraphQL introspection has been disabled');
+
+    setTimeout(() => {
+      graphqlScope.done();
+      expect(callback).not.toHaveBeenCalled();
       resolve();
     }, 1000);
   });
