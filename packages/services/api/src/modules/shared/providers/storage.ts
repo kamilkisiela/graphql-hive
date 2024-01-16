@@ -58,7 +58,8 @@ export interface TargetSelector extends ProjectSelector {
 
 type CreateContractVersionInput = {
   contractId: string;
-  lastContractVersionId: string | null;
+  previousContractVersionId: string | null;
+  diffContractVersionId: string | null;
   contractName: string;
   compositeSchemaSDL: string | null;
   supergraphSDL: string | null;

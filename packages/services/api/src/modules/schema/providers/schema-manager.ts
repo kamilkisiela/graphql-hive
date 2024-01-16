@@ -353,7 +353,8 @@ export class SchemaManager {
             tags: Array<string> | null;
             contracts: null | Array<{
               contractId: string;
-              lastContractVersionId: string | null;
+              previousContractVersionId: string | null;
+              diffContractVersionId: string | null;
               contractName: string;
               compositeSchemaSDL: string | null;
               supergraphSDL: string | null;

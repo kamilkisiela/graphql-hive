@@ -680,7 +680,6 @@ function DefaultSchemaView(props: {
   schemaCheck: FragmentType<typeof DefaultSchemaView_SchemaCheckFragment>;
 }) {
   const schemaCheck = useFragment(DefaultSchemaView_SchemaCheckFragment, props.schemaCheck);
-
   const [selectedView, setSelectedView] = useState<string>('details');
 
   const items = [

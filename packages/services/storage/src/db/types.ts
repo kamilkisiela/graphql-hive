@@ -67,10 +67,10 @@ export interface contract_checks {
 
 export interface contract_version_changes {
   change_type: string;
+  contract_version_id: string;
   id: string;
   is_safe_based_on_usage: boolean;
   meta: any;
-  schema_version_contract_id: string;
   severity_level: string;
 }
 
@@ -79,8 +79,9 @@ export interface contract_versions {
   contract_id: string;
   contract_name: string;
   created_at: Date;
+  diff_contract_version_id: string | null;
   id: string;
-  last_schema_version_contract_id: string | null;
+  previous_contract_version_id: string | null;
   schema_composition_errors: any | null;
   schema_version_id: string;
   supergraph_sdl: string | null;

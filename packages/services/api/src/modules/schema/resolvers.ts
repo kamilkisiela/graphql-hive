@@ -1740,6 +1740,18 @@ export const resolvers: SchemaModule.Resolvers = {
     },
     compositeSchemaSDL: contractVersion => contractVersion.compositeSchemaSdl,
     supergraphSDL: contractVersion => contractVersion.supergraphSdl,
+    previousContractVersion: (contractVersion, _, context) =>
+      contractVersion.previousContractVersionId
+        ? context.injector.get(Contracts).getContractVersionById({
+            contractVersionId: contractVersion.previousContractVersionId,
+          })
+        : null,
+    previousDiffableContractVersion: (contractVersion, _, context) =>
+      contractVersion.previousContractVersionId
+        ? context.injector.get(Contracts).getContractVersionById({
+            contractVersionId: contractVersion.diffContractVersionId,
+          })
+        : null,
   },
 };
 

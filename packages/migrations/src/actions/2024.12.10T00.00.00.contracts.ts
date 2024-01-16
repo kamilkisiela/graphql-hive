@@ -27,7 +27,8 @@ export default {
     CREATE TABLE "contract_versions" (
       "id" UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
       "schema_version_id" UUID NOT NULL REFERENCES "schema_versions" ("id") ON DELETE CASCADE,
-      "last_schema_version_contract_id" UUID REFERENCES "contract_versions" ("id"),
+      "previous_contract_version_id" UUID REFERENCES "contract_versions" ("id"),
+      "diff_contract_version_id" UUID REFERENCES "contract_versions" ("id"),
       "contract_id" UUID NOT NULL REFERENCES "contracts" ("id") ON DELETE SET NULL,
       "contract_name" text NOT NULL,
       "schema_composition_errors" jsonb,
@@ -46,7 +47,7 @@ export default {
 
     CREATE TABLE "contract_version_changes" (
       "id" UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-      "schema_version_contract_id" UUID NOT NULL REFERENCES "contract_versions" ("id"),
+      "contract_version_id" UUID NOT NULL REFERENCES "contract_versions" ("id"),
       "change_type" TEXT NOT NULL,
       "severity_level" TEXT NOT NULL,
       "meta" jsonb NOT NULL,

@@ -2505,7 +2505,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         for (const contract of args.contracts ?? []) {
           const schemaVersionContractId = await insertSchemaVersionContract(trx, {
             schemaVersionId: newVersion.id,
-            lastSchemaVersionContractId: contract.lastContractVersionId,
+            previousContractVersionId: contract.previousContractVersionId,
+            diffContractVersionId: contract.diffContractVersionId,
             contractId: contract.contractId,
             contractName: contract.contractName,
             schemaCompositionErrors: contract.schemaCompositionErrors,
@@ -2598,7 +2599,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         for (const contract of input.contracts ?? []) {
           const schemaVersionContractId = await insertSchemaVersionContract(trx, {
             schemaVersionId: version.id,
-            lastSchemaVersionContractId: contract.lastContractVersionId,
+            previousContractVersionId: contract.previousContractVersionId,
+            diffContractVersionId: contract.diffContractVersionId,
             contractId: contract.contractId,
             contractName: contract.contractName,
             schemaCompositionErrors: contract.schemaCompositionErrors,
@@ -4661,7 +4663,7 @@ async function insertSchemaVersionContractChanges(
 
   await trx.query(sql`
     INSERT INTO "contract_version_changes" (
-      "schema_version_contract_id",
+      "contract_version_id",
       "change_type",
       "severity_level",
       "meta",
@@ -4795,7 +4797,8 @@ async function insertSchemaVersionContract(
   trx: DatabaseTransactionConnection,
   args: {
     schemaVersionId: string;
-    lastSchemaVersionContractId: string | null;
+    previousContractVersionId: string | null;
+    diffContractVersionId: string | null;
     contractId: string;
     contractName: string;
     compositeSchemaSDL: string | null;
@@ -4806,7 +4809,8 @@ async function insertSchemaVersionContract(
   const id = await trx.oneFirst(sql`
     INSERT INTO "contract_versions" (
       "schema_version_id"
-      , "last_schema_version_contract_id"
+      , "previous_contract_version_id"
+      , "diff_contract_version_id"
       , "contract_id"
       , "contract_name"
       , "schema_composition_errors"
@@ -4815,7 +4819,8 @@ async function insertSchemaVersionContract(
     )
     VALUES (
       ${args.schemaVersionId}
-      , ${args.lastSchemaVersionContractId}
+      , ${args.previousContractVersionId}
+      , ${args.diffContractVersionId}
       , ${args.contractId}
       , ${args.contractName}
       , ${jsonify(args.schemaCompositionErrors)}
