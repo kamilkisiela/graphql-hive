@@ -888,8 +888,8 @@ export default gql`
     breakingSchemaChanges: SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
 
-    # previousContractVersion: ContractVersion
-    # previousDiffableContractVersion: ContractVersion
+    previousContractVersion: ContractVersion
+    previousDiffableContractVersion: ContractVersion
   }
 
   """

@@ -171,19 +171,68 @@ export class Contracts {
     return records;
   }
 
+  private async loadLatestContractVersionsByTargetId(args: {
+    targetId: string;
+    contractIds: Array<string>;
+  }) {
+    this.logger.debug(
+      'Load latest contract versions for contracts. (targetId=%s, contractIds=%s)',
+      args.targetId,
+      args.contractIds.join(','),
+    );
+
+    const result = await this.pool.any<unknown>(sql`
+      SELECT DISTINCT ON ("contract_id")
+        ${contractVersionsFields}
+      FROM
+        "contract_versions"
+      WHERE
+        "contract_id" = ANY(${sql.array(args.contractIds, 'uuid')})
+      ORDER BY
+        "contract_id" ASC
+        , "created_at" DESC
+    `);
+
+    const records = new Map(
+      result.map(raw => {
+        const record = ContractVersionModel.parse(raw);
+        return [record.contractId, record];
+      }),
+    );
+
+    this.logger.debug(
+      '%n contract version(s) found for contracts. (targetId=%s, contractIds=%s)',
+      records.size,
+      args.targetId,
+      args.contractIds.join(','),
+    );
+
+    return records;
+  }
+
   public async loadContractsWithLatestValidContractVersionsByTargetId(args: { targetId: string }) {
     const contracts = await this.getContractsByTargetId(args);
     if (contracts === null) {
       return null;
     }
-    const latestValidContractVersions = await this.loadLatestValidContractVersionsByTargetId({
-      targetId: args.targetId,
-      contractIds: contracts.map(c => c.id),
-    });
+
+    const contractIds = contracts.map(c => c.id);
+
+    const [latestValidContractVersions, latestContractVersions] = await Promise.all([
+      this.loadLatestValidContractVersionsByTargetId({
+        targetId: args.targetId,
+        contractIds,
+      }),
+      this.loadLatestContractVersionsByTargetId({
+        targetId: args.targetId,
+        contractIds,
+      }),
+    ]);
 
     return contracts.map(contract => ({
       contract,
       latestValidVersion: latestValidContractVersions.get(contract.id) ?? null,
+      latestVersion: latestContractVersions.get(contract.id) ?? null,
     }));
   }
 
@@ -420,7 +469,7 @@ export class Contracts {
       FROM
         "contract_version_changes"
       WHERE
-        "schema_version_id" = ${args.contractVersionId}
+        "contract_version_id" = ${args.contractVersionId}
         AND "severity_level" <> 'BREAKING' 
     `);
 
@@ -440,7 +489,7 @@ export class Contracts {
       FROM
         "contract_version_changes"
       WHERE
-        "schema_version_id" = ${args.contractVersionId}
+        "contract_version_id" = ${args.contractVersionId}
         AND "severity_level" = 'BREAKING' 
     `);
 
@@ -533,7 +582,8 @@ function hasIntersection<T>(a: Set<T>, b: Set<T>): boolean {
 const contractVersionsFields = sql`
   "id"
   , "schema_version_id" as "schemaVersionId"
-  , "last_schema_version_contract_id" as "lastSchemaVersionContractId"
+  , "previous_contract_version_id" as "previousContractVersionId"
+  , "diff_contract_version_id" as "diffContractVersionId"
   , "contract_id" as "contractId"
   , "contract_name" as "contractName"
   , "schema_composition_errors" as "schemaCompositionErrors"
@@ -545,7 +595,8 @@ const contractVersionsFields = sql`
 const ValidContractVersionModel = z.object({
   id: z.string().uuid(),
   schemaVersionId: z.string().uuid(),
-  lastSchemaVersionContractId: z.string().uuid().nullable(),
+  previousContractVersionId: z.string().uuid().nullable(),
+  diffContractVersionId: z.string().uuid().nullable(),
   contractId: z.string().nullable(),
   contractName: z.string(),
   schemaCompositionErrors: z.null(),
@@ -557,7 +608,8 @@ const ValidContractVersionModel = z.object({
 const InvalidContractVersionModel = z.object({
   id: z.string().uuid(),
   schemaVersionId: z.string().uuid(),
-  lastSchemaVersionContractId: z.string().uuid().nullable(),
+  previousContractVersionId: z.string().uuid().nullable(),
+  diffContractVersionId: z.string().uuid().nullable(),
   contractId: z.string().nullable(),
   contractName: z.string(),
   schemaCompositionErrors: z.array(SchemaCompositionErrorModel).nullable(),
@@ -570,7 +622,7 @@ const ContractVersionModel = z.union([ValidContractVersionModel, InvalidContract
 
 export type ContractVersion = z.TypeOf<typeof ContractVersionModel>;
 
-export type ValidSchemaVersionContract = z.TypeOf<typeof ValidContractVersionModel>;
+export type ValidContractVersion = z.TypeOf<typeof ValidContractVersionModel>;
 
 export type PaginatedContractConnection = Readonly<{
   edges: ReadonlyArray<{
