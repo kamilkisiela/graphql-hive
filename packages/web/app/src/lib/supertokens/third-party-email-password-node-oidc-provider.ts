@@ -109,15 +109,25 @@ export const createOIDCSuperTokensProvider = (args: {
 
         logger.info('retrieved profile info for provider (oidcId=%s)', config.id);
 
-        const data = OIDCProfileInfoSchema.parse(rawData);
+        const dataParseResult = OIDCProfileInfoSchema.safeParse(rawData);
+
+        if (!dataParseResult.success) {
+          logger.error('Could not parse profile info for OIDC provider (oidcId=%s)', config.id);
+          for (const issue of dataParseResult.error.issues) {
+            logger.debug('Profile parse issue: %s', JSON.stringify(issue.message));
+          }
+          throw new Error('Could not parse profile info.');
+        }
+
+        const profile = dataParseResult.data;
 
         // Set the oidcId to the user context so it can be used in `thirdPartySignInUpPOST` for linking the user account to the OIDC integration.
         input.userContext.oidcId = config.id;
 
         return {
-          thirdPartyUserId: `${config.id}-${data.sub}`,
+          thirdPartyUserId: `${config.id}-${profile.sub}`,
           email: {
-            id: data.email,
+            id: profile.email,
             isVerified: true,
           },
           rawUserInfoFromProvider: {
