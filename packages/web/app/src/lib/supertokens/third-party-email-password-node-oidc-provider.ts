@@ -113,8 +113,10 @@ export const createOIDCSuperTokensProvider = (args: {
 
         if (!dataParseResult.success) {
           logger.error('Could not parse profile info for OIDC provider (oidcId=%s)', config.id);
+          logger.error('Raw data: %s', JSON.stringify(rawData));
+          logger.error('Error: %s', JSON.stringify(dataParseResult.error));
           for (const issue of dataParseResult.error.issues) {
-            logger.debug('Profile parse issue: %s', JSON.stringify(issue));
+            logger.debug('Issue: %s', JSON.stringify(issue));
           }
           throw new Error('Could not parse profile info.');
         }
