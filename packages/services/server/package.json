@@ -22,7 +22,7 @@
     "@escape.tech/graphql-armor-max-tokens": "2.3.0",
     "@graphql-hive/client": "workspace:*",
     "@graphql-yoga/plugin-persisted-operations": "3.1.1",
-    "@graphql-yoga/plugin-response-cache": "3.2.1",
+    "@graphql-yoga/plugin-response-cache": "3.3.0",
     "@hive/api": "workspace:*",
     "@hive/cdn-script": "workspace:*",
     "@hive/service-common": "workspace:*",
