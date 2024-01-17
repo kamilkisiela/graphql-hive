@@ -3652,7 +3652,10 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         id: string;
       } = null;
 
-      const limit = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
+      // hard-coded max to prevent abuse (just in case, it's part of persisted operations anyway)
+      const max = 200;
+      const first = args.first && args.first > 0 ? args.first : max;
+      const limit = Math.min(first, max);
 
       if (args.cursor) {
         cursor = decodeCreatedAtAndUUIDIdBasedCursor(args.cursor);
