@@ -3985,7 +3985,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 "schema_check_id"
                 , "compared_contract_version_id"
                 , "is_success"
-                , "contract_name"
+                , "contract_id"
                 , "composite_schema_sdl_store_id"
                 , "supergraph_sdl_store_id"
                 , "schema_composition_errors"
@@ -3996,7 +3996,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 ${schemaCheck.id}
                 , ${contract.comparedContractVersionId}
                 , ${contract.isSuccess}
-                , ${contract.contractName}
+                , ${contract.contractId}
                 , ${contract.compositeSchemaSdlHash}
                 , ${contract.supergraphSchemaSdlHash}
                 , ${jsonify(contract.schemaCompositionErrors)}
@@ -4044,7 +4044,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         schemaCheckId: args.schemaCheckId,
       });
 
-      if (schemaCheck?.breakingSchemaChanges == null) {
+      if (!schemaCheck) {
         return null;
       }
 
@@ -4055,7 +4055,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         schemaCheckId: schemaCheck.id,
       };
 
-      if (schemaCheck.contextId !== null) {
+      if (schemaCheck.contextId !== null && !!schemaCheck.breakingSchemaChanges) {
         // Try to approve and claim all the breaking schema changes for this context
         await pool.query(sql`
           INSERT INTO "schema_change_approvals" (
@@ -4067,7 +4067,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           SELECT * FROM ${sql.unnest(
             schemaCheck.breakingSchemaChanges.map(change => [
               schemaCheck.targetId,
-              schemaCheck.contextId ?? null,
+              schemaCheck.contextId,
               change.id,
               JSON.stringify(
                 toSerializableSchemaChange({
@@ -4083,33 +4083,61 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `);
       }
 
-      const updateResult = await pool.maybeOne<{
+      const didUpdateContractChecks = await args.contracts.approveContractChecksForSchemaCheckId({
+        schemaCheckId: schemaCheck.id,
+        approvalMetadata,
+        contextId: schemaCheck.contextId,
+      });
+
+      let updateResult: {
         id: string;
-      }>(sql`
-        UPDATE
-          "schema_checks"
-        SET
-          "is_success" = true
-          , "is_manually_approved" = true
-          , "manual_approval_user_id" = ${args.userId}
-          , "breaking_schema_changes" = (
-            SELECT json_agg(
-              CASE
-                WHEN COALESCE(jsonb_typeof("change"->'approvalMetadata'), 'null') = 'null'
-                  THEN jsonb_set("change", '{approvalMetadata}', ${sql.jsonb(approvalMetadata)})
-                ELSE "change"
-              END
+      } | null = null;
+
+      if (schemaCheck.breakingSchemaChanges) {
+        updateResult = await pool.maybeOne<{
+          id: string;
+        }>(sql`
+          UPDATE
+            "schema_checks"
+          SET
+            "is_success" = true
+            , "is_manually_approved" = true
+            , "manual_approval_user_id" = ${args.userId}
+            , "breaking_schema_changes" = (
+              SELECT json_agg(
+                CASE
+                  WHEN COALESCE(jsonb_typeof("change"->'approvalMetadata'), 'null') = 'null'
+                    THEN jsonb_set("change", '{approvalMetadata}', ${sql.jsonb(approvalMetadata)})
+                  ELSE "change"
+                END
+              )
+              FROM jsonb_array_elements("breaking_schema_changes") AS "change"
             )
-            FROM jsonb_array_elements("breaking_schema_changes") AS "change"
-          )
-        WHERE
-          "id" = ${args.schemaCheckId}
-          AND "is_success" = false
-          AND "schema_composition_errors" IS NULL
-        RETURNING 
-          "id",
-          "breaking_schema_changes"
-      `);
+          WHERE
+            "id" = ${args.schemaCheckId}
+            AND "is_success" = false
+            AND "schema_composition_errors" IS NULL
+          RETURNING 
+            "id"
+        `);
+      } else if (didUpdateContractChecks) {
+        updateResult = await pool.maybeOne<{
+          id: string;
+        }>(sql`
+          UPDATE
+            "schema_checks"
+          SET
+            "is_success" = true
+            , "is_manually_approved" = true
+            , "manual_approval_user_id" = ${args.userId}
+          WHERE
+            "id" = ${args.schemaCheckId}
+            AND "is_success" = false
+            AND "schema_composition_errors" IS NULL
+          RETURNING 
+            "id"
+        `);
+      }
 
       if (updateResult == null) {
         return null;
@@ -4835,7 +4863,7 @@ function jsonify<T>(obj: T | null | undefined) {
 /**
  * Utility function for stripping a schema change of its computable properties for efficient storage in the database.
  */
-function toSerializableSchemaChange(change: SchemaChangeType): {
+export function toSerializableSchemaChange(change: SchemaChangeType): {
   id: string;
   type: string;
   meta: Record<string, SerializableValue>;

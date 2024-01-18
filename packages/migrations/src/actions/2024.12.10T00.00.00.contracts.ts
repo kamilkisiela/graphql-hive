@@ -15,6 +15,7 @@ export default {
       "exclude_tags" text[],
       "remove_unreachable_types_from_public_api_schema" boolean NOT NULL,
       "created_at" timestamptz NOT NULL DEFAULT now(),
+      "is_disabled" boolean NOT NULL DEFAULT false,
       UNIQUE ("target_id", "contract_name")
     );
 
@@ -69,8 +70,8 @@ export default {
       "id" UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
       "schema_check_id" UUID NOT NULL REFERENCES "schema_checks" ("id") ON DELETE CASCADE,
       "compared_contract_version_id" UUID REFERENCES "contract_versions" ("id") ON DELETE CASCADE,
+      "contract_id" UUID NOT NULL REFERENCES "contracts" ("id") ON DELETE CASCADE,
       "is_success" boolean NOT NULL,
-      "contract_name" text NOT NULL,
       "composite_schema_sdl_store_id" text,
       "supergraph_sdl_store_id" text,
       "schema_composition_errors" jsonb,
@@ -79,8 +80,16 @@ export default {
     );
 
     CREATE INDEX "contract_checks_pagination" ON "contract_checks" (
-      "schema_check_id" ASC,
-      "contract_name" ASC
+      "schema_check_id" ASC
+    );
+
+    CREATE TABLE "contract_schema_change_approvals" (
+      "contract_id" UUID NOT NULL REFERENCES "contracts" ("id") ON DELETE CASCADE,
+      "context_id" text NOT NULL,
+      "schema_change_id" text NOT NULL,
+      "schema_change" jsonb NOT NULL,
+      "created_at" TIMESTAMPTZ NOT NULL DEFAULT now(),
+      PRIMARY KEY ("contract_id", "context_id", "schema_change_id")
     );
   `,
 } satisfies MigrationExecutor;

@@ -43,6 +43,7 @@ import type {
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
+import type { Contracts } from '../../schema/providers/contracts';
 
 export interface OrganizationSelector {
   organization: string;
@@ -787,6 +788,8 @@ export interface Storage {
    * Overwrite and approve a schema check.
    */
   approveFailedSchemaCheck(input: {
+    /** We inject this here as a dirty way to avoid chicken egg issues :) */
+    contracts: Contracts;
     schemaCheckId: string;
     userId: string;
   }): Promise<SchemaCheck | null>;

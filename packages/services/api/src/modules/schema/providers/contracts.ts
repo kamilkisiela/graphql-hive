@@ -11,6 +11,9 @@ import {
   encodeCreatedAtAndUUIDIdBasedCursor,
   HiveSchemaChangeModel,
   SchemaCompositionErrorModel,
+  toSerializableSchemaChange,
+  type SchemaChangeType,
+  type SchemaCheckApprovalMetadata,
 } from '@hive/storage';
 import { Logger } from '../../shared/providers/logger';
 import { PG_POOL_CONFIG } from '../../shared/providers/pg-pool';
@@ -267,7 +270,8 @@ export class Contracts {
 
   public async getContractChecksBySchemaCheckId(args: {
     schemaCheckId: string;
-  }): Promise<null | PaginatedContractCheckConnection> {
+    onlyFailedWithBreakingChanges: boolean;
+  }) {
     this.logger.debug(
       'Load schema checks contracts for schema check. (schemaCheckId=%s)',
       args.schemaCheckId,
@@ -277,10 +281,10 @@ export class Contracts {
       SELECT
         "contract_checks"."id"
         , "contract_checks"."schema_check_id" as "schemaCheckId"
-        , "contract_checks"."schema_check_id" as "schemaCheckId"
         , "contract_checks"."compared_contract_version_id" as "comparedContractVersionId"
         , "contract_checks"."is_success" as "isSuccess"
-        , "contract_checks"."contract_name" as "contractName"
+        , "contract_checks"."contract_id" as "contractId"
+        , "contracts"."contract_name" as "contractName"
         , "contract_checks"."schema_composition_errors" as "schemaCompositionErrors"
         , "contract_checks"."breaking_schema_changes" as "breakingSchemaChanges"
         , "contract_checks"."safe_schema_changes" as "safeSchemaChanges"
@@ -289,14 +293,27 @@ export class Contracts {
       FROM
         "contract_checks"
       LEFT JOIN
+        "contracts" ON "contracts"."id" = "contract_checks"."contract_id"
+      LEFT JOIN
         "sdl_store" as "s_composite" ON "s_composite"."id" = "contract_checks"."composite_schema_sdl_store_id"
       LEFT JOIN
         "sdl_store" as "s_supergraph" ON "s_supergraph"."id" = "contract_checks"."supergraph_sdl_store_id"
       WHERE
-        "schema_check_id" = ${args.schemaCheckId}
+        "contract_checks"."schema_check_id" = ${args.schemaCheckId}
+        ${
+          args.onlyFailedWithBreakingChanges
+            ? sql`
+                AND (
+                  "contract_checks"."is_success" = FALSE
+                  AND "contract_checks"."schema_composition_errors" IS NULL
+                  AND "contract_checks"."breaking_schema_changes" IS NOT NULL
+                
+              )`
+            : sql``
+        }
       ORDER BY
-        "schema_check_id" ASC
-        , "contract_name" ASC
+        "contract_checks"."schema_check_id" ASC
+        , "contract_checks"."contract_id" ASC
     `);
 
     if (result.length === 0) {
@@ -313,8 +330,153 @@ export class Contracts {
       args.schemaCheckId,
     );
 
-    const edges = result.map(row => {
-      const node = ContractCheckModel.parse(row);
+    return result.map(contractCheck => ContractCheckModel.parse(contractCheck));
+  }
+
+  /**
+   * Returns true if any contracts were updated, returns false if no contracts were updated.
+   */
+  public async approveContractChecksForSchemaCheckId(args: {
+    contextId: string | null;
+    schemaCheckId: string;
+    approvalMetadata: SchemaCheckApprovalMetadata;
+  }) {
+    this.logger.debug(
+      'approve contract checks for schema check. (schemaCheckId=%s, contextId=%s)',
+      args.schemaCheckId,
+      args.contextId,
+    );
+
+    const contractChecks = await this.getContractChecksBySchemaCheckId({
+      schemaCheckId: args.schemaCheckId,
+      onlyFailedWithBreakingChanges: true,
+    });
+
+    if (!contractChecks) {
+      this.logger.debug(
+        'No contract checks found for schema check. (schemaCheckId=%s)',
+        args.schemaCheckId,
+      );
+      return false;
+    }
+
+    const breakingChangeApprovalInserts: Array<
+      [contractId: string, contextId: string, changeId: string, change: string]
+    > = [];
+
+    for (const contractCheck of contractChecks) {
+      await this.pool.maybeOne(sql`
+        UPDATE
+          "contract_checks"
+        SET
+          "is_success" = true
+          , "breaking_schema_changes" = (
+            SELECT json_agg(
+              CASE
+                WHEN COALESCE(jsonb_typeof("change"->'approvalMetadata'), 'null') = 'null'
+                  THEN jsonb_set("change", '{approvalMetadata}', ${sql.jsonb(
+                    args.approvalMetadata,
+                  )})
+                ELSE "change"
+              END
+            )
+            FROM jsonb_array_elements("breaking_schema_changes") AS "change"
+          )
+        WHERE
+          "id" = ${contractCheck.id}
+          AND "is_success" = FALSE
+          AND "schema_composition_errors" IS NULL
+          AND "breaking_schema_changes" IS NOT NULL
+        RETURNING 
+          "id"
+      `);
+
+      if (args.contextId !== null) {
+        for (const change of contractCheck.breakingSchemaChanges ?? []) {
+          breakingChangeApprovalInserts.push([
+            contractCheck.contractId,
+            args.contextId,
+            change.id,
+            JSON.stringify(
+              toSerializableSchemaChange({
+                ...change,
+                approvalMetadata: args.approvalMetadata,
+              }),
+            ),
+          ]);
+        }
+      }
+    }
+
+    if (breakingChangeApprovalInserts.length) {
+      this.logger.debug(
+        'insert breaking change approvals for contract checks. (schemaCheckId=%s, contextId=%s)',
+        args.schemaCheckId,
+        args.contextId,
+      );
+      // Try to approve and claim all the breaking schema changes for this context
+      await this.pool.query(sql`
+        INSERT INTO "contract_schema_change_approvals" (
+          "contract_id"
+          , "context_id"
+          , "schema_change_id"
+          , "schema_change"
+        )
+        SELECT * FROM ${sql.unnest(breakingChangeApprovalInserts, [
+          'uuid',
+          'text',
+          'text',
+          'jsonb',
+        ])}
+        ON CONFLICT ("contract_id", "context_id", "schema_change_id") DO NOTHING
+      `);
+    }
+
+    return true;
+  }
+
+  public async getApprovedSchemaChangesForContracts(args: {
+    contractIds: Array<string>;
+    contextId: string;
+  }) {
+    const records = await this.pool.any<unknown>(sql`
+      SELECT
+        "contract_id" as "contractId",
+        "schema_change" as "schemaChange"
+      FROM
+        "contract_schema_change_approvals"
+      WHERE
+        "contract_id" = ANY(${sql.array(args.contractIds, 'uuid')})
+        AND "context_id" = ${args.contextId}
+    `);
+
+    const schemaChangesByContractId = new Map<string, Map<string, SchemaChangeType>>();
+    for (const record of records) {
+      const { contractId, schemaChange } = SchemaChangeApprovalsForContractModel.parse(record);
+      let schemaChangesForContract = schemaChangesByContractId.get(contractId);
+      if (schemaChangesForContract === undefined) {
+        schemaChangesForContract = new Map();
+        schemaChangesByContractId.set(contractId, schemaChangesForContract);
+      }
+      schemaChangesForContract.set(schemaChange.id, schemaChange);
+    }
+
+    return schemaChangesByContractId;
+  }
+
+  public async getPaginatedContractChecksBySchemaCheckId(args: {
+    schemaCheckId: string;
+  }): Promise<null | PaginatedContractCheckConnection> {
+    const contractChecks = await this.getContractChecksBySchemaCheckId({
+      schemaCheckId: args.schemaCheckId,
+      onlyFailedWithBreakingChanges: false,
+    });
+
+    if (!contractChecks) {
+      return null;
+    }
+
+    const edges = contractChecks.map(node => {
       return {
         node,
         get cursor() {
@@ -655,6 +817,7 @@ const ContractCheckModel = z.object({
   comparedContractVersionId: z.string().uuid().nullable(),
 
   isSuccess: z.boolean(),
+  contractId: z.string().uuid(),
   contractName: z.string(),
 
   schemaCompositionErrors: z.array(SchemaCompositionErrorModel).nullable(),
@@ -662,6 +825,11 @@ const ContractCheckModel = z.object({
   supergraphSdl: z.string().nullable(),
   breakingSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
   safeSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
+});
+
+const SchemaChangeApprovalsForContractModel = z.object({
+  contractId: z.string().uuid(),
+  schemaChange: HiveSchemaChangeModel,
 });
 
 export type ContractCheck = z.TypeOf<typeof ContractCheckModel>;
