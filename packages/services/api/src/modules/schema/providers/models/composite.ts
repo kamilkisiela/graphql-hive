@@ -50,7 +50,6 @@ export class CompositeModel {
       target: string;
     };
     approvedChanges: Map<string, SchemaChangeType> | null;
-    compareToPreviousComposableVersion: boolean;
   }): Promise<Array<ContractCheckInput> | null> {
     if (!args.contracts?.length || !args.compositionCheck.result?.contracts?.length) {
       return null;
@@ -74,10 +73,7 @@ export class CompositeModel {
             // contracts were introduced after this, so we do not need to filter out federation.
             filterOutFederationChanges: false,
             approvedChanges: args.approvedChanges,
-            existingSdl:
-              (args.compareToPreviousComposableVersion
-                ? contract.latestValidVersion?.compositeSchemaSdl
-                : contract.latestVersion?.compositeSchemaSdl) ?? null,
+            existingSdl: contract.latestValidVersion?.compositeSchemaSdl ?? null,
             incomingSdl: contractCompositionResult?.result?.fullSchemaSdl ?? null,
           }),
         };
@@ -189,8 +185,6 @@ export class CompositeModel {
       compositionCheck,
       usageDataSelector: selector,
       approvedChanges,
-      compareToPreviousComposableVersion:
-        organization.featureFlags.compareToPreviousComposableVersion,
     });
 
     const [diffCheck, policyCheck] = await Promise.all([
@@ -443,8 +437,6 @@ export class CompositeModel {
       compositionCheck,
       usageDataSelector,
       approvedChanges: null,
-      compareToPreviousComposableVersion:
-        organization.featureFlags.compareToPreviousComposableVersion,
     });
 
     const hasNewUrl =
@@ -602,8 +594,6 @@ export class CompositeModel {
       compositionCheck,
       usageDataSelector: selector,
       approvedChanges: null,
-      compareToPreviousComposableVersion:
-        organization.featureFlags.compareToPreviousComposableVersion,
     });
 
     if (
