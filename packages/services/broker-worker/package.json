@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "4.20231218.0",
+    "@cloudflare/workers-types": "4.20240117.0",
     "@types/service-worker-mock": "2.0.4",
     "@whatwg-node/fetch": "0.9.15",
     "@whatwg-node/server": "0.9.23",
