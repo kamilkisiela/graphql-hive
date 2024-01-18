@@ -56,13 +56,21 @@ export interface contract_checks {
   breaking_schema_changes: any | null;
   compared_contract_version_id: string | null;
   composite_schema_sdl_store_id: string | null;
-  contract_name: string;
+  contract_id: string;
   id: string;
   is_success: boolean;
   safe_schema_changes: any | null;
   schema_check_id: string;
   schema_composition_errors: any | null;
   supergraph_sdl_store_id: string | null;
+}
+
+export interface contract_schema_change_approvals {
+  context_id: string;
+  contract_id: string;
+  created_at: Date;
+  schema_change: any;
+  schema_change_id: string;
 }
 
 export interface contract_version_changes {
@@ -91,6 +99,7 @@ export interface contracts {
   exclude_tags: Array<string> | null;
   id: string;
   include_tags: Array<string> | null;
+  is_disabled: boolean;
   remove_unreachable_types_from_public_api_schema: boolean;
   target_id: string;
 }
@@ -376,6 +385,7 @@ export interface DBTables {
   alerts: alerts;
   cdn_access_tokens: cdn_access_tokens;
   contract_checks: contract_checks;
+  contract_schema_change_approvals: contract_schema_change_approvals;
   contract_version_changes: contract_version_changes;
   contract_versions: contract_versions;
   contracts: contracts;

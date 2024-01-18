@@ -1676,15 +1676,10 @@ export const resolvers: SchemaModule.Resolvers = {
       });
     },
     async canBeApproved(schemaCheck, _, { injector }) {
-      return injector.get(SchemaManager).getFailedSchemaCheckCanBeApproved({
-        schemaCompositionErrors: schemaCheck.schemaCompositionErrors,
-      });
+      return injector.get(SchemaManager).getFailedSchemaCheckCanBeApproved(schemaCheck);
     },
     async canBeApprovedByViewer(schemaCheck, _, { injector }) {
-      return injector.get(SchemaManager).getFailedSchemaCheckCanBeApprovedByViewer({
-        organizationId: schemaCheck.selector.organizationId,
-        schemaCompositionErrors: schemaCheck.schemaCompositionErrors,
-      });
+      return injector.get(SchemaManager).getFailedSchemaCheckCanBeApprovedByViewer(schemaCheck);
     },
     contractChecks(schemaCheck, _, { injector }) {
       return injector.get(ContractsManager).getContractsChecksForSchemaCheck(schemaCheck);

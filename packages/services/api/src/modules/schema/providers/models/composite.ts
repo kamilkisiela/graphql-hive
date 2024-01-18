@@ -42,14 +42,17 @@ export class CompositeModel {
   ) {}
 
   private async getContractChecks(args: {
-    contracts: Array<ContractInput> | null;
+    contracts: Array<
+      ContractInput & {
+        approvedChanges?: Map<string, SchemaChangeType> | null;
+      }
+    > | null;
     compositionCheck: Awaited<ReturnType<RegistryChecks['composition']>>;
     usageDataSelector: {
       organization: string;
       project: string;
       target: string;
     };
-    approvedChanges: Map<string, SchemaChangeType> | null;
   }): Promise<Array<ContractCheckInput> | null> {
     if (!args.contracts?.length || !args.compositionCheck.result?.contracts?.length) {
       return null;
@@ -72,7 +75,7 @@ export class CompositeModel {
             includeUrlChanges: false,
             // contracts were introduced after this, so we do not need to filter out federation.
             filterOutFederationChanges: false,
-            approvedChanges: args.approvedChanges,
+            approvedChanges: contract.approvedChanges ?? null,
             existingSdl: contract.latestValidVersion?.compositeSchemaSdl ?? null,
             incomingSdl: contractCompositionResult?.result?.fullSchemaSdl ?? null,
           }),
@@ -115,7 +118,11 @@ export class CompositeModel {
     project: Project;
     organization: Organization;
     approvedChanges: Map<string, SchemaChangeType>;
-    contracts: Array<ContractInput> | null;
+    contracts: Array<
+      ContractInput & {
+        approvedChanges: Map<string, SchemaChangeType> | null;
+      }
+    > | null;
   }): Promise<SchemaCheckResult> {
     const incoming: PushedCompositeSchema = {
       kind: 'composite',
@@ -184,7 +191,6 @@ export class CompositeModel {
       contracts,
       compositionCheck,
       usageDataSelector: selector,
-      approvedChanges,
     });
 
     const [diffCheck, policyCheck] = await Promise.all([
@@ -436,7 +442,6 @@ export class CompositeModel {
       contracts,
       compositionCheck,
       usageDataSelector,
-      approvedChanges: null,
     });
 
     const hasNewUrl =
@@ -593,7 +598,6 @@ export class CompositeModel {
       contracts,
       compositionCheck,
       usageDataSelector: selector,
-      approvedChanges: null,
     });
 
     if (

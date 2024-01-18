@@ -360,8 +360,16 @@ export class SchemaPublisher {
 
     const sdl = tryPrettifySDL(input.sdl);
 
+    const contracts =
+      project.type === ProjectType.FEDERATION
+        ? await this.contracts.loadContractsWithLatestValidContractVersionsByTargetId({
+            targetId: target.id,
+          })
+        : null;
+
     let checkResult: SchemaCheckResult;
 
+    let approvedContractChanges: Map<string, Map<string, SchemaChangeType>> | null = null;
     const approvedSchemaChanges = new Map<string, SchemaChangeType>();
 
     if (contextId !== null) {
@@ -372,14 +380,14 @@ export class SchemaPublisher {
       for (const change of changes) {
         approvedSchemaChanges.set(change.id, change);
       }
-    }
 
-    const contracts =
-      project.type === ProjectType.FEDERATION
-        ? await this.contracts.loadContractsWithLatestValidContractVersionsByTargetId({
-            targetId: target.id,
-          })
-        : null;
+      if (contracts?.length) {
+        approvedContractChanges = await this.contracts.getApprovedSchemaChangesForContracts({
+          contextId,
+          contractIds: contracts.map(contract => contract.contract.id),
+        });
+      }
+    }
 
     const contractVersionIdByContractName = new Map<string, string>();
     contracts?.forEach(contract => {
@@ -454,7 +462,11 @@ export class SchemaPublisher {
           project,
           organization,
           approvedChanges: approvedSchemaChanges,
-          contracts,
+          contracts:
+            contracts?.map(contract => ({
+              ...contract,
+              approvedChanges: approvedContractChanges?.get(contract.contract.id) ?? null,
+            })) ?? null,
         });
         break;
       default:

@@ -7,7 +7,12 @@ import { TargetAccessScope } from '../../auth/providers/scopes';
 import { IdTranslator } from '../../shared/providers/id-translator';
 import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
-import { ContractCheck, Contracts, ContractVersion, type CreateContractInput } from './contracts';
+import {
+  Contracts,
+  type ContractCheck,
+  type ContractVersion,
+  type CreateContractInput,
+} from './contracts';
 
 @Injectable({
   scope: Scope.Operation,
@@ -121,7 +126,7 @@ export class ContractsManager {
   }
 
   public async getContractsChecksForSchemaCheck(schemaCheck: SchemaCheck) {
-    return this.contracts.getContractChecksBySchemaCheckId({
+    return this.contracts.getPaginatedContractChecksBySchemaCheckId({
       schemaCheckId: schemaCheck.id,
     });
   }
