@@ -79,9 +79,7 @@ export interface contract_versions {
   contract_id: string;
   contract_name: string;
   created_at: Date;
-  diff_contract_version_id: string | null;
   id: string;
-  previous_contract_version_id: string | null;
   schema_composition_errors: any | null;
   schema_version_id: string;
   supergraph_sdl: string | null;

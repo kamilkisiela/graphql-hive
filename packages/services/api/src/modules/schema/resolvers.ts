@@ -47,7 +47,6 @@ import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import { extractSuperGraphInformation } from './lib/federation-super-graph';
 import { stripUsedSchemaCoordinatesFromDocumentNode } from './lib/unused-graphql';
-import { Contracts } from './providers/contracts';
 import { ContractsManager } from './providers/contracts-manager';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
@@ -576,7 +575,7 @@ export const resolvers: SchemaModule.Resolvers = {
     },
     async contracts(target, args, { injector }) {
       return await injector.get(ContractsManager).getPaginatedContractsForTarget({
-        targetId: target.id,
+        target,
         cursor: args.after ?? null,
         first: args.first ?? null,
       });
@@ -723,16 +722,14 @@ export const resolvers: SchemaModule.Resolvers = {
       return injector.get(SchemaManager).getGitHubMetadata(version);
     },
     valid: version => version.isComposable,
-    async previousDiffableSchemaVersion(version, _, { injector }) {
+    previousDiffableSchemaVersion(version, _, { injector }) {
       return injector.get(SchemaVersionHelper).getPreviousDiffableSchemaVersion(version);
     },
     isFirstComposableVersion(version, _, { injector }) {
       return injector.get(SchemaVersionHelper).getIsFirstComposableVersion(version);
     },
     contractVersions(version, _, { injector }) {
-      return injector.get(Contracts).getContractVersionsForSchemaVersion({
-        schemaVersionId: version.id,
-      });
+      return injector.get(ContractsManager).getContractVersionsForSchemaVersion(version);
     },
   },
   SingleSchema: {
@@ -1640,9 +1637,7 @@ export const resolvers: SchemaModule.Resolvers = {
       });
     },
     contractChecks(schemaCheck, _, { injector }) {
-      return injector.get(Contracts).getContractChecksBySchemaCheckId({
-        schemaCheckId: schemaCheck.id,
-      });
+      return injector.get(ContractsManager).getContractsChecksForSchemaCheck(schemaCheck);
     },
   },
   FailedSchemaCheck: {
@@ -1692,9 +1687,7 @@ export const resolvers: SchemaModule.Resolvers = {
       });
     },
     contractChecks(schemaCheck, _, { injector }) {
-      return injector.get(Contracts).getContractChecksBySchemaCheckId({
-        schemaCheckId: schemaCheck.id,
-      });
+      return injector.get(ContractsManager).getContractsChecksForSchemaCheck(schemaCheck);
     },
   },
   SchemaPolicyWarningConnection: createDummyConnection(warning => ({
@@ -1719,39 +1712,35 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   ContractCheck: {
-    contractVersion(schemaCheckContract, _, context) {
-      return context.injector.get(Contracts).getContractVersionById({
-        contractVersionId: schemaCheckContract.comparedContractVersionId ?? null,
-      });
+    contractVersion(contractCheck, _, context) {
+      return context.injector
+        .get(ContractsManager)
+        .getContractVersionForContractCheck(contractCheck);
     },
-    compositeSchemaSDL: schemaCheckContract => schemaCheckContract.compositeSchemaSdl,
-    supergraphSDL: schemaCheckContract => schemaCheckContract.supergraphSdl,
+    compositeSchemaSDL: contractCheck => contractCheck.compositeSchemaSdl,
+    supergraphSDL: contractCheck => contractCheck.supergraphSdl,
   },
   ContractVersion: {
     breakingSchemaChanges(contractVersion, _, context) {
-      return context.injector.get(Contracts).getBreakingChangesForContractVersion({
-        contractVersionId: contractVersion.id,
-      });
+      return context.injector
+        .get(ContractsManager)
+        .getBreakingChangesForContractVersion(contractVersion);
     },
     safeSchemaChanges(contractVersion, _, context) {
-      return context.injector.get(Contracts).getSafeChangesForContractVersion({
-        contractVersionId: contractVersion.id,
-      });
+      return context.injector
+        .get(ContractsManager)
+        .getSafeChangesForContractVersion(contractVersion);
     },
     compositeSchemaSDL: contractVersion => contractVersion.compositeSchemaSdl,
     supergraphSDL: contractVersion => contractVersion.supergraphSdl,
     previousContractVersion: (contractVersion, _, context) =>
-      contractVersion.previousContractVersionId
-        ? context.injector.get(Contracts).getContractVersionById({
-            contractVersionId: contractVersion.previousContractVersionId,
-          })
-        : null,
+      context.injector
+        .get(ContractsManager)
+        .getPreviousContractVersionForContractVersion(contractVersion),
     previousDiffableContractVersion: (contractVersion, _, context) =>
-      contractVersion.previousContractVersionId
-        ? context.injector.get(Contracts).getContractVersionById({
-            contractVersionId: contractVersion.diffContractVersionId,
-          })
-        : null,
+      context.injector
+        .get(ContractsManager)
+        .getDiffableContractVersionForContractVersion(contractVersion),
   },
 };
 

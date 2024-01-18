@@ -2,7 +2,7 @@ import { PushedCompositeSchema, SingleSchema } from 'packages/services/api/src/s
 import type { CheckPolicyResponse } from '@hive/policy';
 import { CompositionFailureError } from '@hive/schema';
 import type { SchemaChangeType, SchemaCompositionError } from '@hive/storage';
-import { ContractVersion, type Contract, type ValidContractVersion } from '../contracts';
+import { type Contract, type ValidContractVersion } from '../contracts';
 import {
   ContractCompositionResult,
   ContractCompositionSuccess,
@@ -384,7 +384,6 @@ export function buildSchemaCheckFailureState(args: {
 export type ContractInput = {
   contract: Contract;
   latestValidVersion: ValidContractVersion | null;
-  latestVersion: ContractVersion | null;
 };
 
 export function isContractChecksSuccessful(input: ContractCheckInput): input is {

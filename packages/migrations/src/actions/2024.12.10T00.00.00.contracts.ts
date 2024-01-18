@@ -27,8 +27,6 @@ export default {
     CREATE TABLE "contract_versions" (
       "id" UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
       "schema_version_id" UUID NOT NULL REFERENCES "schema_versions" ("id") ON DELETE CASCADE,
-      "previous_contract_version_id" UUID REFERENCES "contract_versions" ("id"),
-      "diff_contract_version_id" UUID REFERENCES "contract_versions" ("id"),
       "contract_id" UUID NOT NULL REFERENCES "contracts" ("id") ON DELETE SET NULL,
       "contract_name" text NOT NULL,
       "schema_composition_errors" jsonb,
@@ -37,7 +35,20 @@ export default {
       "created_at" timestamptz NOT NULL DEFAULT now()
     );
 
-    CREATE INDEX "contract_versions_find_latest_valid_version" ON "contract_versions" (
+    CREATE INDEX "contract_versions_find_latest_version_by_cursor" ON "contract_versions" (
+      "created_at" DESC,
+      "id" DESC
+    );
+
+    CREATE INDEX "contract_versions_find_latest_valid_version_by_cursor" ON "contract_versions" (
+      "created_at" DESC,
+      "id" DESC
+    )
+    WHERE
+      "schema_composition_errors" IS NULL
+    ;
+
+    CREATE INDEX "contract_versions_find_latest_valid_version_by_contract_id" ON "contract_versions" (
       "contract_id" ASC,
       "created_at" DESC
     )

@@ -910,15 +910,10 @@ export class SchemaPublisher {
             : null;
 
         const contractIdToLatestValidContractVersionId = new Map<string, string | null>();
-        const contractIdToLatestContractVersionId = new Map<string, string | null>();
         for (const contract of contracts ?? []) {
           contractIdToLatestValidContractVersionId.set(
             contract.contract.id,
             contract.latestValidVersion?.id ?? null,
-          );
-          contractIdToLatestContractVersionId.set(
-            contract.contract.id,
-            contract.latestVersion?.id ?? null,
           );
         }
 
@@ -982,12 +977,6 @@ export class SchemaPublisher {
                       deleteResult.state.contracts?.map(contract => ({
                         contractId: contract.contractId,
                         contractName: contract.contractName,
-                        previousContractVersionId:
-                          contractIdToLatestValidContractVersionId.get(contract.contractId) ?? null,
-                        diffContractVersionId:
-                          (organization.featureFlags.compareToPreviousComposableVersion
-                            ? contractIdToLatestValidContractVersionId.get(contract.contractId)
-                            : contractIdToLatestContractVersionId.get(contract.contractId)) ?? null,
                         compositeSchemaSDL: contract.fullSchemaSdl,
                         supergraphSDL: contract.supergraph,
                         schemaCompositionErrors: contract.compositionErrors,
@@ -1249,15 +1238,10 @@ export class SchemaPublisher {
         : null;
 
     const contractIdToLatestValidContractVersionId = new Map<string, string | null>();
-    const contractIdToLatestContractVersionId = new Map<string, string | null>();
     for (const contract of contracts ?? []) {
       contractIdToLatestValidContractVersionId.set(
         contract.contract.id,
         contract.latestValidVersion?.id ?? null,
-      );
-      contractIdToLatestContractVersionId.set(
-        contract.contract.id,
-        contract.latestVersion?.id ?? null,
       );
     }
 
@@ -1534,12 +1518,6 @@ export class SchemaPublisher {
               publishResult.state.contracts?.map(contract => ({
                 contractId: contract.contractId,
                 contractName: contract.contractName,
-                previousContractVersionId:
-                  contractIdToLatestValidContractVersionId.get(contract.contractId) ?? null,
-                diffContractVersionId:
-                  (organization.featureFlags.compareToPreviousComposableVersion
-                    ? contractIdToLatestValidContractVersionId.get(contract.contractId)
-                    : contractIdToLatestContractVersionId.get(contract.contractId)) ?? null,
                 compositeSchemaSDL: contract.fullSchemaSdl,
                 supergraphSDL: contract.supergraph,
                 schemaCompositionErrors: contract.compositionErrors,

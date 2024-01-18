@@ -171,45 +171,6 @@ export class Contracts {
     return records;
   }
 
-  private async loadLatestContractVersionsByTargetId(args: {
-    targetId: string;
-    contractIds: Array<string>;
-  }) {
-    this.logger.debug(
-      'Load latest contract versions for contracts. (targetId=%s, contractIds=%s)',
-      args.targetId,
-      args.contractIds.join(','),
-    );
-
-    const result = await this.pool.any<unknown>(sql`
-      SELECT DISTINCT ON ("contract_id")
-        ${contractVersionsFields}
-      FROM
-        "contract_versions"
-      WHERE
-        "contract_id" = ANY(${sql.array(args.contractIds, 'uuid')})
-      ORDER BY
-        "contract_id" ASC
-        , "created_at" DESC
-    `);
-
-    const records = new Map(
-      result.map(raw => {
-        const record = ContractVersionModel.parse(raw);
-        return [record.contractId, record];
-      }),
-    );
-
-    this.logger.debug(
-      '%n contract version(s) found for contracts. (targetId=%s, contractIds=%s)',
-      records.size,
-      args.targetId,
-      args.contractIds.join(','),
-    );
-
-    return records;
-  }
-
   public async loadContractsWithLatestValidContractVersionsByTargetId(args: { targetId: string }) {
     const contracts = await this.getContractsByTargetId(args);
     if (contracts === null) {
@@ -218,21 +179,14 @@ export class Contracts {
 
     const contractIds = contracts.map(c => c.id);
 
-    const [latestValidContractVersions, latestContractVersions] = await Promise.all([
-      this.loadLatestValidContractVersionsByTargetId({
-        targetId: args.targetId,
-        contractIds,
-      }),
-      this.loadLatestContractVersionsByTargetId({
-        targetId: args.targetId,
-        contractIds,
-      }),
-    ]);
+    const latestValidContractVersions = await this.loadLatestValidContractVersionsByTargetId({
+      targetId: args.targetId,
+      contractIds,
+    });
 
     return contracts.map(contract => ({
       contract,
       latestValidVersion: latestValidContractVersions.get(contract.id) ?? null,
-      latestVersion: latestContractVersions.get(contract.id) ?? null,
     }));
   }
 
@@ -384,7 +338,7 @@ export class Contracts {
     };
   }
 
-  public async getContractVersionById(args: { contractVersionId: string | null }) {
+  public async getContractVersionById(args: { contractVersionId: string }) {
     if (args.contractVersionId === null) {
       return null;
     }
@@ -411,6 +365,63 @@ export class Contracts {
     this.logger.debug('Contract version found by id. (id=%s)', args.contractVersionId);
 
     return ContractVersionModel.parse(result);
+  }
+
+  public async getPreviousContractVersionForContractVersion(args: {
+    contractVersion: ContractVersion;
+  }) {
+    const result = await this.pool.maybeOne<unknown>(sql`
+      SELECT
+        ${contractVersionsFields}
+      FROM
+        "contract_versions"
+      WHERE
+        (
+          "created_at" = ${args.contractVersion.createdAt}
+          AND "id" < ${args.contractVersion.id}
+        )
+        OR "created_at" < ${args.contractVersion.createdAt}
+      ORDER BY
+        "contract_id" ASC
+        , "created_at" DESC
+      LIMIT 1
+    `);
+
+    if (!result) {
+      return null;
+    }
+
+    return ContractVersionModel.parse(result);
+  }
+
+  public async getDiffableContractVersionForContractVersion(args: {
+    contractVersion: ContractVersion;
+  }) {
+    const result = await this.pool.maybeOne<unknown>(sql`
+      SELECT
+        ${contractVersionsFields}
+      FROM
+        "contract_versions"
+      WHERE
+        "schema_composition_errors" IS NULL
+        AND (
+          (
+            "created_at" = ${args.contractVersion.createdAt}
+            AND "id" < ${args.contractVersion.id}
+          )
+          OR "created_at" < ${args.contractVersion.createdAt}
+        )
+      ORDER BY
+        "contract_id" ASC
+        , "created_at" DESC
+      LIMIT 1
+    `);
+
+    if (!result) {
+      return null;
+    }
+
+    return ValidContractVersionModel.parse(result);
   }
 
   public async getContractVersionsForSchemaVersion(args: { schemaVersionId: string }) {
@@ -582,8 +593,6 @@ function hasIntersection<T>(a: Set<T>, b: Set<T>): boolean {
 const contractVersionsFields = sql`
   "id"
   , "schema_version_id" as "schemaVersionId"
-  , "previous_contract_version_id" as "previousContractVersionId"
-  , "diff_contract_version_id" as "diffContractVersionId"
   , "contract_id" as "contractId"
   , "contract_name" as "contractName"
   , "schema_composition_errors" as "schemaCompositionErrors"
@@ -595,8 +604,6 @@ const contractVersionsFields = sql`
 const ValidContractVersionModel = z.object({
   id: z.string().uuid(),
   schemaVersionId: z.string().uuid(),
-  previousContractVersionId: z.string().uuid().nullable(),
-  diffContractVersionId: z.string().uuid().nullable(),
   contractId: z.string().nullable(),
   contractName: z.string(),
   schemaCompositionErrors: z.null(),
@@ -608,8 +615,6 @@ const ValidContractVersionModel = z.object({
 const InvalidContractVersionModel = z.object({
   id: z.string().uuid(),
   schemaVersionId: z.string().uuid(),
-  previousContractVersionId: z.string().uuid().nullable(),
-  diffContractVersionId: z.string().uuid().nullable(),
   contractId: z.string().nullable(),
   contractName: z.string(),
   schemaCompositionErrors: z.array(SchemaCompositionErrorModel).nullable(),
