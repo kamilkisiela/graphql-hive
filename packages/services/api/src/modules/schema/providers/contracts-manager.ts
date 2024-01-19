@@ -9,6 +9,7 @@ import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
 import {
   Contracts,
+  type Contract,
   type ContractCheck,
   type ContractVersion,
   type CreateContractInput,
@@ -56,6 +57,72 @@ export class ContractsManager {
     });
 
     return await this.contracts.createContract(args);
+  }
+
+  public async disableContract(args: { contractId: string }) {
+    const contract = await this.contracts.getContractById({ contractId: args.contractId });
+    if (contract === null) {
+      return {
+        type: 'error' as const,
+        message: 'Contract not found.',
+      };
+    }
+
+    const breadcrumb = await this.storage.getTargetBreadcrumbForTargetId({
+      targetId: contract.targetId,
+    });
+    if (!breadcrumb) {
+      return {
+        type: 'error' as const,
+        message: 'Contract not found.',
+      };
+    }
+
+    const [organizationId, projectId, targetId] = await Promise.all([
+      this.idTranslator.translateOrganizationId(breadcrumb),
+      this.idTranslator.translateProjectId(breadcrumb),
+      this.idTranslator.translateTargetId(breadcrumb),
+    ]);
+
+    await this.authManager.ensureTargetAccess({
+      organization: organizationId,
+      project: projectId,
+      target: targetId,
+      scope: TargetAccessScope.SETTINGS,
+    });
+
+    return await this.contracts.disableContract({
+      contract,
+    });
+  }
+
+  async getViewerCanDisableContractForContract(contract: Contract) {
+    if (contract.isDisabled) {
+      return false;
+    }
+
+    const breadcrumb = await this.storage.getTargetBreadcrumbForTargetId({
+      targetId: contract.targetId,
+    });
+    if (!breadcrumb) {
+      return false;
+    }
+
+    const [organizationId, projectId, targetId] = await Promise.all([
+      this.idTranslator.translateOrganizationId(breadcrumb),
+      this.idTranslator.translateProjectId(breadcrumb),
+      this.idTranslator.translateTargetId(breadcrumb),
+    ]);
+
+    return await this.authManager
+      .ensureTargetAccess({
+        organization: organizationId,
+        project: projectId,
+        target: targetId,
+        scope: TargetAccessScope.SETTINGS,
+      })
+      .then(() => true)
+      .catch(() => false);
   }
 
   public async getPaginatedContractsForTarget(args: {

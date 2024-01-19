@@ -1,5 +1,6 @@
 import { Inject } from 'graphql-modules';
 import { buildArtifactStorageKey } from '@hive/cdn-script/artifact-storage-reader';
+import { Logger } from '../../shared/providers/logger';
 import { S3_CONFIG, type S3Config } from '../../shared/providers/s3-config';
 
 const artifactMeta = {
@@ -25,7 +26,14 @@ const artifactMeta = {
  * Write an Artifact to an S3 bucket.
  */
 export class ArtifactStorageWriter {
-  constructor(@Inject(S3_CONFIG) private s3: S3Config) {}
+  private logger: Logger;
+
+  constructor(
+    @Inject(S3_CONFIG) private s3: S3Config,
+    logger: Logger,
+  ) {
+    this.logger = logger.child({ service: 'f' });
+  }
 
   async writeArtifact(args: {
     targetId: string;
@@ -51,5 +59,45 @@ export class ArtifactStorageWriter {
     if (result.status !== 200) {
       throw new Error(`Unexpected status code ${result.status} when writing artifact.`);
     }
+  }
+
+  async deleteArtifact(args: {
+    targetId: string;
+    artifactType: keyof typeof artifactMeta;
+    contractName: null | string;
+  }) {
+    this.logger.debug(
+      'Attempt deleting artifact. (targetId=%s, contractName=%s, artifactType=%s)',
+      args.targetId,
+      args.artifactType,
+      args.contractName,
+    );
+    const key = buildArtifactStorageKey(args.targetId, args.artifactType, args.contractName);
+
+    const result = await this.s3.client.fetch([this.s3.endpoint, this.s3.bucket, key].join('/'), {
+      method: 'DELETE',
+      aws: {
+        // This boolean makes Google Cloud Storage & AWS happy.
+        signQuery: true,
+      },
+    });
+
+    if (result.status !== 204) {
+      this.logger.debug(
+        'Failed deleting artifact, S3 compatible storage returned unexpected status code. (targetId=%s, contractName=%s, artifactType=%s, statusCode=%s)',
+        args.targetId,
+        args.artifactType,
+        args.contractName,
+        result.status,
+      );
+      throw new Error(`Unexpected status code ${result.status} when deleting artifact.`);
+    }
+
+    this.logger.debug(
+      'Successfully deleted artifact. (targetId=%s, contractName=%s, artifactType=%s)',
+      args.targetId,
+      args.artifactType,
+      args.contractName,
+    );
   }
 }

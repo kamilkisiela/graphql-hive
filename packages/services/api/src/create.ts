@@ -156,7 +156,7 @@ export function createRegistry({
     endpoint: s3.endpoint,
   };
 
-  const artifactStorageWriter = new ArtifactStorageWriter(s3Config);
+  const artifactStorageWriter = new ArtifactStorageWriter(s3Config, logger);
 
   const providers = [
     HttpClient,

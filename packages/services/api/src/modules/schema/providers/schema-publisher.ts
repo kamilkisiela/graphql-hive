@@ -362,7 +362,7 @@ export class SchemaPublisher {
 
     const contracts =
       project.type === ProjectType.FEDERATION
-        ? await this.contracts.loadContractsWithLatestValidContractVersionsByTargetId({
+        ? await this.contracts.loadActiveContractsWithLatestValidContractVersionsByTargetId({
             targetId: target.id,
           })
         : null;
@@ -916,7 +916,7 @@ export class SchemaPublisher {
 
         const contracts =
           project.type === ProjectType.FEDERATION
-            ? await this.contracts.loadContractsWithLatestValidContractVersionsByTargetId({
+            ? await this.contracts.loadActiveContractsWithLatestValidContractVersionsByTargetId({
                 targetId: input.target.id,
               })
             : null;
@@ -1244,7 +1244,7 @@ export class SchemaPublisher {
 
     const contracts =
       project.type === ProjectType.FEDERATION
-        ? await this.contracts.loadContractsWithLatestValidContractVersionsByTargetId({
+        ? await this.contracts.loadActiveContractsWithLatestValidContractVersionsByTargetId({
             targetId: target.id,
           })
         : null;
