@@ -34,6 +34,10 @@ export default gql`
     Create a contract for a given target.
     """
     createContract(input: CreateContractInput!): CreateContractResult!
+    """
+    Disable a contract.
+    """
+    disableContract(input: DisableContractInput!): DisableContractResult!
   }
 
   extend type Query {
@@ -1077,6 +1081,23 @@ export default gql`
     excludeTags: String
   }
 
+  input DisableContractInput {
+    contractId: ID!
+  }
+
+  type DisableContractResult {
+    ok: DisableContractResultOk
+    error: DisableContractResultError
+  }
+
+  type DisableContractResultOk {
+    disabledContract: Contract!
+  }
+
+  type DisableContractResultError implements Error {
+    message: String!
+  }
+
   type Contract {
     id: ID!
     target: Target!
@@ -1085,5 +1106,7 @@ export default gql`
     excludeTags: [String!]
     removeUnreachableTypesFromPublicApiSchema: Boolean!
     createdAt: DateTime!
+    isDisabled: Boolean!
+    viewerCanDisableContract: Boolean!
   }
 `;

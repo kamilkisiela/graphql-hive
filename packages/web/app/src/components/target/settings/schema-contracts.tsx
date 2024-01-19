@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
 import { useFormik } from 'formik';
-import { Check, X } from 'lucide-react';
+import { Check, MoreHorizontal, X } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,13 @@ import {
   DialogFooter,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -26,10 +33,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { TimeAgo } from '@/components/ui/time-ago';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DocsLink, Heading } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
+import { InfoCircledIcon } from '@radix-ui/react-icons';
 
 const SchemaContractsQuery = graphql(`
   query SchemaContractsQuery($selector: TargetSelectorInput!, $after: String) {
@@ -45,6 +54,8 @@ const SchemaContractsQuery = graphql(`
             excludeTags
             removeUnreachableTypesFromPublicApiSchema
             createdAt
+            isDisabled
+            viewerCanDisableContract
           }
         }
         pageInfo {
@@ -71,6 +82,10 @@ export function SchemaContracts() {
   });
 
   const contracts = schemaContractsQuery.data?.target?.contracts.edges;
+
+  function onDisable(node: unknown) {
+    // TODO implement :)
+  }
 
   return (
     <Card>
@@ -100,48 +115,126 @@ export function SchemaContracts() {
             </DialogContent>
           </Dialog>
         </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Contract Name</TableHead>
-              <TableHead>Included Tags</TableHead>
-              <TableHead>Excluded Tags</TableHead>
-              <TableHead>Remove unreachable API Types</TableHead>
-              <TableHead className="text-right">Created at</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {contracts?.map(({ node }) => (
-              <TableRow key={node.id}>
-                <TableCell>{node.contractName}</TableCell>
-                <TableCell>
-                  {node.includeTags?.map(tag => (
-                    <Badge className="mr-1" key={tag}>
-                      {tag}
-                    </Badge>
-                  )) ?? 'None'}
-                </TableCell>
-                <TableCell>
-                  {node.excludeTags?.map(tag => (
-                    <Badge className="mr-1" key={tag}>
-                      {tag}
-                    </Badge>
-                  )) ?? 'None'}
-                </TableCell>
-                <TableCell className="text-center">
-                  {node.removeUnreachableTypesFromPublicApiSchema ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <X className="h-4 w-4" />
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
-                  <TimeAgo date={node.createdAt} />
-                </TableCell>
+        {!!contracts?.length && (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Contract Name</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Included Tags</TableHead>
+                <TableHead>Excluded Tags</TableHead>
+                <TableHead>Remove unreachable API Types</TableHead>
+                <TableHead className="text-right">Created at</TableHead>
+                <TableHead className="text-right" />
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {contracts.map(({ node }) => (
+                <TableRow key={node.id}>
+                  <TableCell className={cn(node.isDisabled && 'opacity-30')}>
+                    {node.contractName}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      {node.isDisabled ? (
+                        <>
+                          <span className="text-yellow-500">Inactive</span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Button
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  className="ml-2 text-yellow-500"
+                                >
+                                  <InfoCircledIcon className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-md p-4 font-normal">
+                                <p>
+                                  This Contract is no longer active and no more contract versions or
+                                  contract checks will be published for it.
+                                </p>
+                                <p className="mt-1">
+                                  It is not possible to enable a contract again. Please create a new
+                                  contract instead.
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </>
+                      ) : (
+                        <>
+                          <span>Active</span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Button variant="ghost" size="icon-sm" className="ml-2">
+                                  <InfoCircledIcon className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-md p-4 font-normal">
+                                <p>
+                                  This Contract is active. Schema publishes and checks will attempt
+                                  to also build the contract schema.
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className={cn(node.isDisabled && 'opacity-30')}>
+                    {node.includeTags?.map(tag => (
+                      <Badge className="mr-1" key={tag}>
+                        {tag}
+                      </Badge>
+                    )) ?? 'None'}
+                  </TableCell>
+                  <TableCell className={cn(node.isDisabled && 'opacity-30')}>
+                    {node.excludeTags?.map(tag => (
+                      <Badge className="mr-1" key={tag}>
+                        {tag}
+                      </Badge>
+                    )) ?? 'None'}
+                  </TableCell>
+                  <TableCell className={cn('text-center', node.isDisabled && 'opacity-30')}>
+                    {node.removeUnreachableTypesFromPublicApiSchema ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <X className="h-4 w-4" />
+                    )}
+                  </TableCell>
+                  <TableCell className={cn('text-right', node.isDisabled && 'opacity-30')}>
+                    <TimeAgo date={node.createdAt} />
+                  </TableCell>
+                  <TableCell className="text-end">
+                    {node.viewerCanDisableContract && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem
+                            className="text-red-500"
+                            onClick={() => onDisable(node)}
+                          >
+                            Disable
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </CardContent>
     </Card>
   );

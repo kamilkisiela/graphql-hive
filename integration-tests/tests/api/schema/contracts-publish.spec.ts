@@ -935,3 +935,243 @@ test.concurrent(
     expect(response.status).toBe(404);
   },
 );
+
+const DisabledContractMutation = graphql(`
+  mutation DisableContractMutation($input: DisableContractInput!) {
+    disableContract(input: $input) {
+      ok {
+        disabledContract {
+          id
+          isDisabled
+        }
+      }
+      error {
+        message
+      }
+    }
+  }
+`);
+
+test.concurrent('disable contract results in CDN artifacts being removed', async ({ expect }) => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject, setFeatureFlag } = await createOrg();
+  const { createToken, target, setNativeFederation } = await createProject(ProjectType.Federation);
+  await setFeatureFlag('compareToPreviousComposableVersion', true);
+  await setNativeFederation(true);
+
+  // Create a token with write rights
+  const writeToken = await createToken({
+    targetScopes: [
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+    ],
+  });
+
+  const createContractResult = await execute({
+    document: CreateContractMutation,
+    variables: {
+      input: {
+        targetId: target.id,
+        contractName: 'my-contract',
+        removeUnreachableTypesFromPublicApiSchema: true,
+        excludeTags: ['toyota'],
+      },
+    },
+    authToken: writeToken.secret,
+  }).then(r => r.expectNoGraphQLErrors());
+
+  expect(createContractResult.createContract.error).toBeNull();
+
+  const contractId = createContractResult.createContract.ok?.createdContract.id;
+
+  if (!contractId) {
+    throw new Error('Missing contract id.');
+  }
+
+  const cdnAccessToken = await writeToken.createCdnAccess();
+
+  // Publish schema with write rights
+  let publishResult = await writeToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        extend schema
+          @link(url: "https://specs.apollo.dev/link/v1.0")
+          @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+        type Query {
+          hello: String
+        }
+      `,
+      service: 'hello',
+      url: 'http://hello.com',
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  let response = await fetch(cdnAccessToken.cdnUrl + '/contracts/my-contract/sdl', {
+    method: 'GET',
+    headers: {
+      'x-hive-cdn-key': cdnAccessToken.secretAccessToken,
+    },
+  });
+  expect(response.status).toBe(200);
+  const body = await response.text();
+  expect(body).toIncludeSubstringWithoutWhitespace(/* GraphQL */ `
+    type Query {
+      hello: String
+    }
+  `);
+
+  const result = await execute({
+    document: DisabledContractMutation,
+    variables: {
+      input: {
+        contractId,
+      },
+    },
+    authToken: writeToken.secret,
+  }).then(r => r.expectNoGraphQLErrors());
+
+  expect(result?.disableContract.ok?.disabledContract.isDisabled).toEqual(true);
+
+  response = await fetch(cdnAccessToken.cdnUrl + '/contracts/my-contract/sdl', {
+    method: 'GET',
+    headers: {
+      'x-hive-cdn-key': cdnAccessToken.secretAccessToken,
+    },
+  });
+  expect(response.status).toBe(404);
+});
+
+test.concurrent(
+  'disable contract delete succeeds if no version/CDN artifacts have been published yet',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject, setFeatureFlag } = await createOrg();
+    const { createToken, target, setNativeFederation } = await createProject(
+      ProjectType.Federation,
+    );
+    await setFeatureFlag('compareToPreviousComposableVersion', true);
+    await setNativeFederation(true);
+
+    // Create a token with write rights
+    const writeToken = await createToken({
+      targetScopes: [
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.Settings,
+      ],
+    });
+
+    const createContractResult = await execute({
+      document: CreateContractMutation,
+      variables: {
+        input: {
+          targetId: target.id,
+          contractName: 'my-contract',
+          removeUnreachableTypesFromPublicApiSchema: true,
+          excludeTags: ['toyota'],
+        },
+      },
+      authToken: writeToken.secret,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(createContractResult.createContract.error).toBeNull();
+
+    const contractId = createContractResult.createContract.ok?.createdContract.id;
+
+    if (!contractId) {
+      throw new Error('Missing contract id.');
+    }
+
+    const cdnAccessToken = await writeToken.createCdnAccess();
+
+    const result = await execute({
+      document: DisabledContractMutation,
+      variables: {
+        input: {
+          contractId,
+        },
+      },
+      authToken: writeToken.secret,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(result?.disableContract.ok?.disabledContract.isDisabled).toEqual(true);
+
+    const response = await fetch(cdnAccessToken.cdnUrl + '/contracts/my-contract/sdl', {
+      method: 'GET',
+      headers: {
+        'x-hive-cdn-key': cdnAccessToken.secretAccessToken,
+      },
+    });
+    expect(response.status).toBe(404);
+  },
+);
+
+test.concurrent(
+  'disable contract delete succeeds if no version/CDN artifacts have been published yet',
+  async ({ expect }) => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject, setFeatureFlag } = await createOrg();
+    const { createToken, target, setNativeFederation } = await createProject(
+      ProjectType.Federation,
+    );
+    await setFeatureFlag('compareToPreviousComposableVersion', true);
+    await setNativeFederation(true);
+
+    // Create a token with write rights
+    const writeToken = await createToken({
+      targetScopes: [
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.Settings,
+      ],
+    });
+
+    const createContractResult = await execute({
+      document: CreateContractMutation,
+      variables: {
+        input: {
+          targetId: target.id,
+          contractName: 'my-contract',
+          removeUnreachableTypesFromPublicApiSchema: true,
+          excludeTags: ['toyota'],
+        },
+      },
+      authToken: writeToken.secret,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(createContractResult.createContract.error).toBeNull();
+
+    const contractId = createContractResult.createContract.ok?.createdContract.id;
+
+    if (!contractId) {
+      throw new Error('Missing contract id.');
+    }
+
+    let result = await execute({
+      document: DisabledContractMutation,
+      variables: {
+        input: {
+          contractId,
+        },
+      },
+      authToken: writeToken.secret,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(result?.disableContract.ok?.disabledContract.isDisabled).toEqual(true);
+
+    result = await execute({
+      document: DisabledContractMutation,
+      variables: {
+        input: {
+          contractId,
+        },
+      },
+      authToken: writeToken.secret,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    expect(result?.disableContract.error?.message).toEqual('Contract already disabled found.');
+  },
+);

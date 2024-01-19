@@ -15,8 +15,10 @@ import {
   type SchemaChangeType,
   type SchemaCheckApprovalMetadata,
 } from '@hive/storage';
+import { isUUID } from '../../../shared/is-uuid';
 import { Logger } from '../../shared/providers/logger';
 import { PG_POOL_CONFIG } from '../../shared/providers/pg-pool';
+import { ArtifactStorageWriter } from './artifact-storage-writer';
 
 @Injectable({
   scope: Scope.Singleton,
@@ -27,6 +29,7 @@ export class Contracts {
   constructor(
     logger: Logger,
     @Inject(PG_POOL_CONFIG) private pool: DatabasePool,
+    private artifactStorageWriter: ArtifactStorageWriter,
   ) {
     this.logger = logger.child({ source: 'Contracts' });
   }
@@ -74,7 +77,8 @@ export class Contracts {
           , ${toNullableTextArray(validatedContract.data.excludeTags)}
           , ${validatedContract.data.removeUnreachableTypesFromPublicApiSchema}
         )
-        RETURNING ${contractFields}
+        RETURNING
+          ${contractFields}
     `);
     } catch (err: unknown) {
       if (
@@ -106,10 +110,96 @@ export class Contracts {
     };
   }
 
-  private async getContractsByTargetId(args: {
+  async getContractById(args: { contractId: string }) {
+    this.logger.debug(
+      'Contract can not be disabled as it was nto found. (contractId=%s)',
+      args.contractId,
+    );
+
+    if (!isUUID(args.contractId)) {
+      this.logger.debug('Invalid id provided, must be UUID. (contractId=%s)', args.contractId);
+      return null;
+    }
+
+    const record = await this.pool.maybeOne<unknown>(sql`
+      SELECT
+        ${contractFields}
+      FROM
+        "contracts"
+      WHERE
+        "id" = ${args.contractId}
+    `);
+
+    if (!record) {
+      return null;
+    }
+
+    return ContractModel.parse(record);
+  }
+
+  async disableContract(args: { contract: Contract }) {
+    this.logger.debug('Disable contract (contractId=%s)', args.contract.id);
+
+    if (args.contract.isDisabled) {
+      this.logger.debug('Contract is already disabled. (contractId=%s)', args.contract.id);
+      return {
+        type: 'error' as const,
+        message: 'Contract already disabled found.',
+      };
+    }
+
+    const record = await this.pool.maybeOne<unknown>(sql`
+      UPDATE
+        "contracts"
+      SET
+        "is_disabled" = true
+      WHERE
+        "id" = ${args.contract.id}
+      RETURNING
+        ${contractFields}
+    `);
+
+    if (!record) {
+      this.logger.debug(
+        'Contract can not be disabled as it was not found. (contractId=%s)',
+        args.contract.id,
+      );
+      return {
+        type: 'error' as const,
+        message: 'Contract not found.',
+      };
+    }
+
+    this.logger.debug('Updated contract. (contractId=%s)', args.contract.id);
+
+    this.logger.debug(
+      'Delete contract artifacts sdl and supergraph from CDN. (contractId=%s)',
+      args.contract.id,
+    );
+
+    await Promise.all([
+      this.artifactStorageWriter.deleteArtifact({
+        targetId: args.contract.targetId,
+        artifactType: 'sdl',
+        contractName: args.contract.contractName,
+      }),
+      this.artifactStorageWriter.deleteArtifact({
+        targetId: args.contract.targetId,
+        artifactType: 'supergraph',
+        contractName: args.contract.contractName,
+      }),
+    ]);
+
+    return {
+      type: 'success' as const,
+      contract: ContractModel.parse(record),
+    };
+  }
+
+  private async getActiveContractsByTargetId(args: {
     targetId: string;
   }): Promise<null | Array<Contract>> {
-    this.logger.debug('Load contracts for target. (targetId=%s)', args.targetId);
+    this.logger.debug('Load active contracts for target. (targetId=%s)', args.targetId);
     const result = await this.pool.any<unknown>(sql`
       SELECT
         ${contractFields}
@@ -117,14 +207,15 @@ export class Contracts {
         "contracts"
       WHERE
         "target_id" = ${args.targetId}
+        AND "is_disabled" = false
     `);
 
     if (result.length === 0) {
-      this.logger.debug('No contracts found for target. (targetId=%s)', args.targetId);
+      this.logger.debug('No active contracts found for target. (targetId=%s)', args.targetId);
       return null;
     }
     this.logger.debug(
-      '%s contract(s) found for target. (targetId=%s)',
+      '%s active contract(s) found for target. (targetId=%s)',
       result.length,
       args.targetId,
     );
@@ -174,8 +265,10 @@ export class Contracts {
     return records;
   }
 
-  public async loadContractsWithLatestValidContractVersionsByTargetId(args: { targetId: string }) {
-    const contracts = await this.getContractsByTargetId(args);
+  public async loadActiveContractsWithLatestValidContractVersionsByTargetId(args: {
+    targetId: string;
+  }) {
+    const contracts = await this.getActiveContractsByTargetId(args);
     if (contracts === null) {
       return null;
     }
@@ -689,6 +782,7 @@ const contractFields = sql`
   , "include_tags" as "includeTags"
   , "exclude_tags" as "excludeTags"
   , "remove_unreachable_types_from_public_api_schema" as "removeUnreachableTypesFromPublicApiSchema"
+  , "is_disabled" as "isDisabled"
   , to_json("created_at") as "createdAt"
 `;
 
@@ -705,6 +799,7 @@ const ContractModel = z.object({
     .nullable()
     .transform(tags => (tags?.length === 0 ? null : tags)),
   removeUnreachableTypesFromPublicApiSchema: z.boolean(),
+  isDisabled: z.boolean(),
   createdAt: z.string(),
 });
 

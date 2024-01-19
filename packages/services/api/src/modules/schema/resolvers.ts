@@ -424,6 +424,25 @@ export const resolvers: SchemaModule.Resolvers = {
         },
       };
     },
+    async disableContract(_, args, context) {
+      const result = await context.injector.get(ContractsManager).disableContract({
+        contractId: args.input.contractId,
+      });
+
+      if (result.type === 'success') {
+        return {
+          ok: {
+            disabledContract: result.contract,
+          },
+        };
+      }
+
+      return {
+        error: {
+          message: result.message,
+        },
+      };
+    },
   },
   Query: {
     async latestVersion(_, __, { injector }) {
@@ -1711,6 +1730,11 @@ export const resolvers: SchemaModule.Resolvers = {
       return context.injector.get(TargetManager).getTargetById({
         targetId: contract.targetId,
       });
+    },
+    viewerCanDisableContract(contract, _, context) {
+      return context.injector
+        .get(ContractsManager)
+        .getViewerCanDisableContractForContract(contract);
     },
   },
   ContractCheck: {
