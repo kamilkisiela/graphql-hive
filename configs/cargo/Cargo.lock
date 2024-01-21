@@ -178,9 +178,9 @@ dependencies = [
 
 [[package]]
 name = "apollo-router"
-version = "1.37.0"
+version = "1.38.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c222d2d6f5ecaa8bd376100f02b100b2e39401dfd3bf8e39059d65cb36955f8f"
+checksum = "8f5e1c606732d7a0c10e647c42e3ac14f245e65bf418bb070a842de028e48502"
 dependencies = [
  "access-json",
  "anyhow",
@@ -4298,9 +4298,9 @@ dependencies = [
 
 [[package]]
 name = "router-bridge"
-version = "0.5.13+v2.6.2"
+version = "0.5.14+v2.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aa10abe3baa710fd7b151c0b886e74f9fc73c63d23c0c91f3ab5fe87ce2674ed"
+checksum = "6e9a7b9f24a33123d8cab236ac916c07aeefe9f1ce422b0e7f49fc0019d3ac71"
 dependencies = [
  "anyhow",
  "async-channel",
