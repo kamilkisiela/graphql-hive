@@ -87,7 +87,7 @@
     "prettier": "3.1.1",
     "prettier-plugin-sql": "0.18.0",
     "prettier-plugin-tailwindcss": "0.5.11",
-    "pretty-quick": "3.3.1",
+    "pretty-quick": "4.0.0",
     "rimraf": "4.4.1",
     "ts-node": "10.9.2",
     "tsup": "8.0.1",

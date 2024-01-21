@@ -167,8 +167,8 @@ importers:
         specifier: 0.5.11
         version: 0.5.11(prettier@3.1.1)
       pretty-quick:
-        specifier: 3.3.1
-        version: 3.3.1(prettier@3.1.1)
+        specifier: 4.0.0
+        version: 4.0.0(prettier@3.1.1)
       rimraf:
         specifier: 4.4.1
         version: 4.4.1
@@ -5780,7 +5780,7 @@ packages:
       debug: 4.3.4(supports-color@8.1.1)
       espree: 9.6.1
       globals: 13.22.0
-      ignore: 5.2.4
+      ignore: 5.3.0
       import-fresh: 3.3.0
       js-yaml: 4.1.0
       minimatch: 3.1.2
@@ -20169,7 +20169,7 @@ packages:
       array-union: 2.1.0
       dir-glob: 3.0.1
       fast-glob: 3.3.1
-      ignore: 5.2.4
+      ignore: 5.3.0
       merge2: 1.4.1
       slash: 3.0.0
 
@@ -21257,11 +21257,11 @@ packages:
   /ignore@5.2.4:
     resolution: {integrity: sha512-MAb38BcSbH0eHNBxn7ql2NH/kX33OkB3lZ1BNdh7ENeRChHTYsTvWrMubiIAMNS2llXEEgZ1MUOBtXChP3kaFQ==}
     engines: {node: '>= 4'}
+    dev: true
 
   /ignore@5.3.0:
     resolution: {integrity: sha512-g7dmpshy+gD7mh88OC9NwSGTKoc3kyLAZQRU1mt53Aw/vnvfXnbC+F/7F7QoYVKbV+KNvJx8wArewKy1vXMtlg==}
     engines: {node: '>= 4'}
-    dev: true
 
   /image-size@0.5.5:
     resolution: {integrity: sha512-6TDAlDPZxUFCv+fuOkIoXT/V/f3Qbq8e37p+YOiYrUv3v9cc3/6x78VdfPgFVaB9dZYeLUfKgHRebpkm/oP2VQ==}
@@ -27593,15 +27593,15 @@ packages:
       parse-ms: 2.1.0
     dev: true
 
-  /pretty-quick@3.3.1(prettier@3.1.1):
-    resolution: {integrity: sha512-3b36UXfYQ+IXXqex6mCca89jC8u0mYLqFAN5eTQKoXO6oCQYcIVYZEB/5AlBHI7JPYygReM2Vv6Vom/Gln7fBg==}
-    engines: {node: '>=10.13'}
+  /pretty-quick@4.0.0(prettier@3.1.1):
+    resolution: {integrity: sha512-M+2MmeufXb/M7Xw3Afh1gxcYpj+sK0AxEfnfF958ktFeAyi5MsKY5brymVURQLgPLV1QaF5P4pb2oFJ54H3yzQ==}
+    engines: {node: '>=14'}
     hasBin: true
     peerDependencies:
-      prettier: ^2.0.0
+      prettier: ^3.0.0
     dependencies:
-      execa: 4.1.0
-      find-up: 4.1.0
+      execa: 5.1.1
+      find-up: 5.0.0
       ignore: 5.3.0
       mri: 1.2.0
       picocolors: 1.0.0
