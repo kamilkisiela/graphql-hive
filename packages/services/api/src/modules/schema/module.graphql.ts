@@ -846,6 +846,19 @@ export default gql`
     """
     githubRepository: String
 
+    """
+    Whether this schema check has any composition errors.
+    """
+    hasSchemaCompositionErrors: Boolean!
+    """
+    Whether this schema check has any breaking changes.
+    """
+    hasUnapprovedBreakingChanges: Boolean!
+    """
+    Whether this schema check has any schema changes.
+    """
+    hasSchemaChanges: Boolean!
+
     breakingSchemaChanges: SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
     schemaPolicyWarnings: SchemaPolicyWarningConnection
@@ -863,6 +876,19 @@ export default gql`
   type ContractCheck {
     id: ID!
     contractName: String!
+
+    """
+    Whether this schema check has any composition errors.
+    """
+    hasSchemaCompositionErrors: Boolean!
+    """
+    Whether this schema check has any breaking changes.
+    """
+    hasUnapprovedBreakingChanges: Boolean!
+    """
+    Whether this schema check has any schema changes.
+    """
+    hasSchemaChanges: Boolean!
 
     schemaCompositionErrors: SchemaErrorConnection
 
@@ -955,6 +981,19 @@ export default gql`
     githubRepository: String
 
     """
+    Whether this schema check has any composition errors.
+    """
+    hasSchemaCompositionErrors: Boolean!
+    """
+    Whether this schema check has any breaking changes.
+    """
+    hasUnapprovedBreakingChanges: Boolean!
+    """
+    Whether this schema check has any schema changes.
+    """
+    hasSchemaChanges: Boolean!
+
+    """
     Breaking changes can exist in an successful schema check if the check was manually approved.
     """
     breakingSchemaChanges: SchemaChangeConnection
@@ -1015,6 +1054,19 @@ export default gql`
     githubRepository: String
 
     compositionErrors: SchemaErrorConnection
+
+    """
+    Whether this schema check has any composition errors.
+    """
+    hasSchemaCompositionErrors: Boolean!
+    """
+    Whether this schema check has any breaking changes.
+    """
+    hasUnapprovedBreakingChanges: Boolean!
+    """
+    Whether this schema check has any schema changes.
+    """
+    hasSchemaChanges: Boolean!
 
     breakingSchemaChanges: SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection

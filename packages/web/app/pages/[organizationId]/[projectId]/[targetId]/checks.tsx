@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import NextLink from 'next/link';
 import clsx from 'clsx';
+import { GitCompareIcon } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
@@ -9,6 +10,7 @@ import {
   ChangesBlock,
   CompositionErrorsSection,
   labelize,
+  NoGraphChanges,
 } from '@/components/target/history/errors-and-changes';
 import { Label } from '@/components/ui/label';
 import { Subtitle, Title } from '@/components/ui/page';
@@ -520,12 +522,17 @@ const SchemaPolicyEditor = (props: {
 const SchemaChecksView_SchemaCheckFragment = graphql(`
   fragment SchemaCheckView_SchemaCheckFragment on SchemaCheck {
     id
+    hasSchemaCompositionErrors
+    hasSchemaChanges
+    hasUnapprovedBreakingChanges
     contractChecks {
       edges {
         node {
           id
           contractName
-          isSuccess
+          hasSchemaCompositionErrors
+          hasUnapprovedBreakingChanges
+          hasSchemaChanges
           ...ContractCheckView_ContractCheckFragment
         }
       }
@@ -548,41 +555,93 @@ function SchemaChecksView(props: {
 
   return (
     <>
-      {schemaCheck.contractChecks?.edges && (
-        <Tabs
-          defaultValue="default"
-          className="mt-3"
-          value={selectedItem}
-          onValueChange={value => setSelectedItem(value)}
-        >
-          <TabsList className="w-full justify-start rounded-b-none px-2 py-0">
-            <TabsTrigger value="default" className="mt-1 py-2 data-[state=active]:rounded-b-none">
-              <span>Default Graph</span>
-            </TabsTrigger>
-            {schemaCheck.contractChecks.edges.map(edge => (
-              <TabsTrigger
-                value={edge.node.id}
-                key={edge.node.id}
-                className="mt-1 py-2 data-[state=active]:rounded-b-none"
-              >
-                {edge.node.contractName}
-                {edge.node.isSuccess ? (
-                  <CheckIcon className="pl-1" />
+      <Tabs
+        defaultValue="default"
+        className="mt-3"
+        value={selectedItem}
+        onValueChange={value => setSelectedItem(value)}
+      >
+        <TabsList className="w-full justify-start rounded-b-none px-2 py-0">
+          <TabsTrigger value="default" className="mt-1 py-2 data-[state=active]:rounded-b-none">
+            <span>Default Graph</span>
+            <TooltipProvider>
+              <Tooltip>
+                {schemaCheck.hasSchemaCompositionErrors ? (
+                  <>
+                    <TooltipTrigger>
+                      <ExclamationTriangleIcon className="h-4 w-4 pl-1 text-yellow-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>Composition failed.</TooltipContent>
+                  </>
+                ) : schemaCheck.hasUnapprovedBreakingChanges ? (
+                  <>
+                    <TooltipTrigger>
+                      <ExclamationTriangleIcon className="h-4 w-4 pl-1 text-yellow-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>Unapproved breaking changes!</TooltipContent>
+                  </>
+                ) : schemaCheck.hasSchemaChanges ? (
+                  <>
+                    <TooltipTrigger>
+                      <GitCompareIcon className="h-4 w-4 pl-1" />
+                    </TooltipTrigger>
+                    <TooltipContent>Contract schema changed</TooltipContent>
+                  </>
                 ) : (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <ExclamationTriangleIcon className="pl-1 text-yellow-500" />
-                      </TooltipTrigger>
-                      <TooltipContent>The check failed for this contract.</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <>
+                    <TooltipTrigger>
+                      <CheckIcon className="h-4 w-4 pl-1" />
+                    </TooltipTrigger>
+                    <TooltipContent>Composition succeeded.</TooltipContent>
+                  </>
                 )}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-      )}
+              </Tooltip>
+            </TooltipProvider>
+          </TabsTrigger>
+          {schemaCheck.contractChecks?.edges.map(edge => (
+            <TabsTrigger
+              value={edge.node.id}
+              key={edge.node.id}
+              className="mt-1 py-2 data-[state=active]:rounded-b-none"
+            >
+              {edge.node.contractName}
+              <TooltipProvider>
+                <Tooltip>
+                  {edge.node.hasSchemaCompositionErrors ? (
+                    <>
+                      <TooltipTrigger>
+                        <ExclamationTriangleIcon className="h-4 w-4 pl-1 text-yellow-500" />
+                      </TooltipTrigger>
+                      <TooltipContent>Composition failed.</TooltipContent>
+                    </>
+                  ) : edge.node.hasUnapprovedBreakingChanges ? (
+                    <>
+                      <TooltipTrigger>
+                        <ExclamationTriangleIcon className="h-4 w-4 pl-1 text-yellow-500" />
+                      </TooltipTrigger>
+                      <TooltipContent>Unapproved breaking changes!</TooltipContent>
+                    </>
+                  ) : edge.node.hasSchemaChanges ? (
+                    <>
+                      <TooltipTrigger>
+                        <GitCompareIcon className="h-4 w-4 pl-1" />
+                      </TooltipTrigger>
+                      <TooltipContent>Main graph schema changed</TooltipContent>
+                    </>
+                  ) : (
+                    <>
+                      <TooltipTrigger>
+                        <CheckIcon className="h-4 w-4 pl-1" />
+                      </TooltipTrigger>
+                      <TooltipContent>Composition succeeded.</TooltipContent>
+                    </>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
       {selectedContractCheckNode ? (
         <ContractCheckView contractCheck={selectedContractCheckNode} />
       ) : (
@@ -596,12 +655,13 @@ const DefaultSchemaView_SchemaCheckFragment = graphql(`
   fragment DefaultSchemaView_SchemaCheckFragment on SchemaCheck {
     id
     schemaSDL
+    serviceName
+    hasSchemaCompositionErrors
     schemaVersion {
       id
       supergraph
       sdl
     }
-
     ... on SuccessfulSchemaCheck {
       compositeSchemaSDL
       supergraphSDL
@@ -613,7 +673,6 @@ const DefaultSchemaView_SchemaCheckFragment = graphql(`
         ...CompositionErrorsSection_SchemaErrorConnection
       }
     }
-
     breakingSchemaChanges {
       nodes {
         message(withSafeBasedOnUsageNote: false)
@@ -664,7 +723,6 @@ const DefaultSchemaView_SchemaCheckFragment = graphql(`
         }
       }
     }
-
     contractChecks {
       edges {
         node {
@@ -690,18 +748,22 @@ function DefaultSchemaView(props: {
       tooltip: 'Details',
       isDisabled: false,
     },
-    {
-      value: 'schemaDiff',
-      icon: <DiffIcon className="h-5 w-auto flex-none" />,
-      label: 'Diff',
-      tooltip: 'Schema Diff',
-      isDisabled: false,
-    },
+    ...(schemaCheck.serviceName
+      ? [
+          {
+            value: 'service',
+            icon: <DiffIcon className="h-5 w-auto flex-none" />,
+            label: 'Service',
+            tooltip: 'Service',
+            isDisabled: false,
+          },
+        ]
+      : []),
     {
       value: 'schema',
       icon: <DiffIcon className="h-5 w-auto flex-none" />,
       label: 'Schema',
-      tooltip: 'Schema',
+      tooltip: 'Schema Diff',
       isDisabled: !schemaCheck.compositeSchemaSDL,
     },
     {
@@ -725,9 +787,6 @@ function DefaultSchemaView(props: {
     },
   ];
 
-  const isAllContractsSuccessful =
-    schemaCheck.contractChecks?.edges?.every(edge => edge.node.isSuccess) ?? false;
-
   return (
     <>
       <Tabs value={selectedView} onValueChange={value => setSelectedView(value)}>
@@ -744,21 +803,14 @@ function DefaultSchemaView(props: {
         {selectedView === 'details' && (
           <>
             {!schemaCheck.schemaPolicyWarnings?.edges?.length &&
-            !schemaCheck.safeSchemaChanges?.nodes?.length &&
-            !schemaCheck.breakingSchemaChanges?.nodes?.length &&
-            !schemaCheck.schemaPolicyErrors?.edges?.length ? (
-              <div className="my-2 px-2">
-                <Heading>Details</Heading>
-                <div className="mt-1">
-                  No changes or policy warnings detected for the main graph.
+              !schemaCheck.safeSchemaChanges?.nodes?.length &&
+              !schemaCheck.breakingSchemaChanges?.nodes?.length &&
+              !schemaCheck.schemaPolicyErrors?.edges?.length &&
+              !schemaCheck.hasSchemaCompositionErrors && (
+                <div className="my-2 px-2">
+                  <NoGraphChanges />
                 </div>
-                {isAllContractsSuccessful === false && (
-                  <div className="mt-1">
-                    One or more contracts yielded errors. Check the contract tabs for more insights.
-                  </div>
-                )}
-              </div>
-            ) : null}
+              )}
             {schemaCheck.__typename === 'FailedSchemaCheck' && schemaCheck.compositionErrors && (
               <CompositionErrorsSection compositionErrors={schemaCheck.compositionErrors} />
             )}
@@ -798,21 +850,10 @@ function DefaultSchemaView(props: {
             ) : null}
           </>
         )}
-        {selectedView === 'schemaDiff' && (
+        {selectedView === 'service' && (
           <>
             <div className="my-2 px-2">
-              <Heading>Schema Diff</Heading>
-            </div>
-            <DiffEditor
-              before={schemaCheck.schemaVersion?.sdl ?? ''}
-              after={schemaCheck.compositeSchemaSDL ?? ''}
-            />
-          </>
-        )}
-        {selectedView === 'schema' && (
-          <>
-            <div className="my-2 px-2">
-              <Heading>Public API Schema</Heading>
+              <Heading>Service Schema</Heading>
             </div>
             <SchemaEditor
               theme="vs-dark"
@@ -822,7 +863,18 @@ function DefaultSchemaView(props: {
                 lineNumbers: 'off',
                 renderValidationDecorations: 'on',
               }}
-              schema={schemaCheck.compositeSchemaSDL ?? ''}
+              schema={schemaCheck.schemaSDL ?? ''}
+            />
+          </>
+        )}
+        {selectedView === 'schema' && (
+          <>
+            <div className="my-2 px-2">
+              <Heading>Public API Schema</Heading>
+            </div>
+            <DiffEditor
+              before={schemaCheck.schemaVersion?.sdl ?? ''}
+              after={schemaCheck.compositeSchemaSDL ?? ''}
             />
           </>
         )}

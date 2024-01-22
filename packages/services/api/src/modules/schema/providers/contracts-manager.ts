@@ -221,4 +221,22 @@ export class ContractsManager {
 
     return !!(safeChanges?.length || breakingChanges?.length);
   }
+
+  public async getHasSchemaCompositionErrorsForContractCheck(contractCheck: ContractCheck) {
+    return contractCheck.schemaCompositionErrors !== null;
+  }
+
+  public async getHasUnapprovedBreakingChangesForContractCheck(contractCheck: ContractCheck) {
+    return (
+      contractCheck.breakingSchemaChanges?.some(
+        change => change.approvalMetadata === null && !change.isSafeBasedOnUsage,
+      ) ?? false
+    );
+  }
+
+  public async getHasSchemaChangesForContractCheck(contractCheck: ContractCheck) {
+    return !!(
+      contractCheck.breakingSchemaChanges?.length || contractCheck.safeSchemaChanges?.length
+    );
+  }
 }
