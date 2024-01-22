@@ -7,6 +7,7 @@ import { Page, TargetLayout } from '@/components/layouts/target';
 import {
   ChangesBlock,
   CompositionErrorsSection,
+  NoGraphChanges,
 } from '@/components/target/history/errors-and-changes';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
@@ -28,20 +29,6 @@ import {
   ExternalLinkIcon,
   ListBulletIcon,
 } from '@radix-ui/react-icons';
-
-function NoGraphChanges() {
-  return (
-    <div className="cursor-default">
-      <div className="mb-3 flex items-center gap-3">
-        <CheckCircledIcon className="h-4 w-auto text-emerald-500" />
-        <h2 className="text-base font-medium text-white">No Graph Changes</h2>
-      </div>
-      <p className="text-muted-foreground text-xs">
-        There are no changes in this graph for this schema version.
-      </p>
-    </div>
-  );
-}
 
 function FirstComposableVersion() {
   return (

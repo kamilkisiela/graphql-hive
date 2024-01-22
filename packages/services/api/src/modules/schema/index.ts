@@ -5,6 +5,7 @@ import { Inspector } from './providers/inspector';
 import { models } from './providers/models';
 import { orchestrators } from './providers/orchestrators';
 import { RegistryChecks } from './providers/registry-checks';
+import { SchemaCheckManager } from './providers/schema-check-manager';
 import { SchemaHelper } from './providers/schema-helper';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
@@ -26,6 +27,7 @@ export const schemaModule = createModule({
     SchemaVersionHelper,
     Contracts,
     ContractsManager,
+    SchemaCheckManager,
     ...orchestrators,
     ...models,
   ],

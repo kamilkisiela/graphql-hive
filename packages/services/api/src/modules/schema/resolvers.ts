@@ -48,6 +48,7 @@ import type { SchemaModule } from './__generated__/types';
 import { extractSuperGraphInformation } from './lib/federation-super-graph';
 import { stripUsedSchemaCoordinatesFromDocumentNode } from './lib/unused-graphql';
 import { ContractsManager } from './providers/contracts-manager';
+import { SchemaCheckManager } from './providers/schema-check-manager';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
 import { SchemaVersionHelper } from './providers/schema-version-helper';
@@ -1624,29 +1625,22 @@ export const resolvers: SchemaModule.Resolvers = {
   },
   SuccessfulSchemaCheck: {
     schemaVersion(schemaCheck, _, { injector }) {
-      if (schemaCheck.schemaVersionId === null) {
-        return null;
-      }
-      return injector.get(SchemaManager).getSchemaVersion({
-        organization: schemaCheck.selector.organizationId,
-        project: schemaCheck.selector.projectId,
-        target: schemaCheck.targetId,
-        version: schemaCheck.schemaVersionId,
-      });
+      return injector.get(SchemaCheckManager).getSchemaVersion(schemaCheck);
     },
-    safeSchemaChanges(schemaCheck) {
-      if (!schemaCheck.safeSchemaChanges) {
-        return null;
-      }
-
-      return schemaCheck.safeSchemaChanges;
+    safeSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getSafeSchemaChanges(schemaCheck);
     },
-    breakingSchemaChanges(schemaCheck) {
-      if (!schemaCheck.breakingSchemaChanges) {
-        return null;
-      }
-
-      return schemaCheck.breakingSchemaChanges;
+    breakingSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getBreakingSchemaChanges(schemaCheck);
+    },
+    hasSchemaCompositionErrors(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getHasSchemaCompositionErrors(schemaCheck);
+    },
+    hasSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getHasSchemaChanges(schemaCheck);
+    },
+    hasUnapprovedBreakingChanges() {
+      return false;
     },
     webUrl(schemaCheck, _, { injector }) {
       return injector.get(SchemaManager).getSchemaCheckWebUrl({
@@ -1669,32 +1663,25 @@ export const resolvers: SchemaModule.Resolvers = {
   },
   FailedSchemaCheck: {
     schemaVersion(schemaCheck, _, { injector }) {
-      if (schemaCheck.schemaVersionId === null) {
-        return null;
-      }
-      return injector.get(SchemaManager).getSchemaVersion({
-        organization: schemaCheck.selector.organizationId,
-        project: schemaCheck.selector.projectId,
-        target: schemaCheck.targetId,
-        version: schemaCheck.schemaVersionId,
-      });
+      return injector.get(SchemaCheckManager).getSchemaVersion(schemaCheck);
     },
-    safeSchemaChanges(schemaCheck) {
-      if (!schemaCheck.safeSchemaChanges) {
-        return null;
-      }
-
-      return schemaCheck.safeSchemaChanges;
+    safeSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getSafeSchemaChanges(schemaCheck);
     },
-    breakingSchemaChanges(schemaCheck) {
-      if (!schemaCheck.breakingSchemaChanges) {
-        return null;
-      }
-
-      return schemaCheck.breakingSchemaChanges;
+    breakingSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getBreakingSchemaChanges(schemaCheck);
     },
     compositionErrors(schemaCheck) {
       return schemaCheck.schemaCompositionErrors;
+    },
+    hasSchemaCompositionErrors(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getHasSchemaCompositionErrors(schemaCheck);
+    },
+    hasSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getHasSchemaChanges(schemaCheck);
+    },
+    hasUnapprovedBreakingChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getHasUnapprovedBreakingChanges(schemaCheck);
     },
     webUrl(schemaCheck, _, { injector }) {
       return injector.get(SchemaManager).getSchemaCheckWebUrl({
@@ -1746,6 +1733,19 @@ export const resolvers: SchemaModule.Resolvers = {
     },
     compositeSchemaSDL: contractCheck => contractCheck.compositeSchemaSdl,
     supergraphSDL: contractCheck => contractCheck.supergraphSdl,
+    hasSchemaCompositionErrors(contractCheck, _, { injector }) {
+      return injector
+        .get(ContractsManager)
+        .getHasSchemaCompositionErrorsForContractCheck(contractCheck);
+    },
+    hasUnapprovedBreakingChanges(contractCheck, _, { injector }) {
+      return injector
+        .get(ContractsManager)
+        .getHasUnapprovedBreakingChangesForContractCheck(contractCheck);
+    },
+    hasSchemaChanges(contractCheck, _, { injector }) {
+      return injector.get(ContractsManager).getHasSchemaChangesForContractCheck(contractCheck);
+    },
   },
   ContractVersion: {
     isComposable(contractVersion) {
