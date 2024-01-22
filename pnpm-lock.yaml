@@ -288,8 +288,8 @@ importers:
         specifier: 2.4.3
         version: 2.4.3
       date-fns:
-        specifier: 3.2.0
-        version: 3.2.0
+        specifier: 3.3.1
+        version: 3.3.1
       dockerode:
         specifier: 4.0.1
         version: 4.0.1
@@ -629,8 +629,8 @@ importers:
         specifier: 2.2.2
         version: 2.2.2
       date-fns:
-        specifier: 3.2.0
-        version: 3.2.0
+        specifier: 3.3.1
+        version: 3.3.1
       fast-json-stable-stringify:
         specifier: 2.1.0
         version: 2.1.0
@@ -926,8 +926,8 @@ importers:
         specifier: 0.9.15
         version: 0.9.15
       date-fns:
-        specifier: 3.2.0
-        version: 3.2.0
+        specifier: 3.3.1
+        version: 3.3.1
       dotenv:
         specifier: 16.3.2
         version: 16.3.2
@@ -1233,8 +1233,8 @@ importers:
         specifier: 0.9.15
         version: 0.9.15
       date-fns:
-        specifier: 3.2.0
-        version: 3.2.0
+        specifier: 3.3.1
+        version: 3.3.1
       dotenv:
         specifier: 16.3.2
         version: 16.3.2
@@ -1410,8 +1410,8 @@ importers:
         specifier: 4.5.0
         version: 4.5.0
       date-fns:
-        specifier: 3.2.0
-        version: 3.2.0
+        specifier: 3.3.1
+        version: 3.3.1
       dotenv:
         specifier: 16.3.2
         version: 16.3.2
@@ -1611,8 +1611,8 @@ importers:
         specifier: 0.9.1
         version: 0.9.1
       date-fns:
-        specifier: 3.2.0
-        version: 3.2.0
+        specifier: 3.3.1
+        version: 3.3.1
       dompurify:
         specifier: 3.0.8
         version: 3.0.8
@@ -1849,8 +1849,8 @@ importers:
         specifier: 2.1.0
         version: 2.1.0
       date-fns:
-        specifier: 3.2.0
-        version: 3.2.0
+        specifier: 3.3.1
+        version: 3.3.1
       gray-matter:
         specifier: 4.0.3
         version: 4.0.3
@@ -17327,8 +17327,8 @@ packages:
       '@babel/runtime': 7.23.6
     dev: true
 
-  /date-fns@3.2.0:
-    resolution: {integrity: sha512-E4KWKavANzeuusPi0jUjpuI22SURAznGkx7eZV+4i6x2A+IZxAMcajgkvuDAU1bg40+xuhW1zRdVIIM/4khuIg==}
+  /date-fns@3.3.1:
+    resolution: {integrity: sha512-y8e109LYGgoQDveiEBD3DYXKba1jWf5BA8YU1FL5Tvm0BTdEfy54WLCwnuYWZNnzzvALy/QQ4Hov+Q9RVRv+Zw==}
 
   /dateformat@4.6.3:
     resolution: {integrity: sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==}
