@@ -174,6 +174,12 @@ export class ContractsManager {
     });
   }
 
+  public async getIsFirstComposableVersionForContractVersion(contractVersion: ContractVersion) {
+    const diffableContractVersion =
+      await this.getDiffableContractVersionForContractVersion(contractVersion);
+    return !diffableContractVersion;
+  }
+
   public async getBreakingChangesForContractVersion(contractVersion: ContractVersion) {
     return await this.contracts.getBreakingChangesForContractVersion({
       contractVersionId: contractVersion.id,
@@ -205,5 +211,14 @@ export class ContractsManager {
       await this.getDiffableContractVersionForContractVersion(contractVersion);
 
     return !!previousContractVersion;
+  }
+
+  public async getHasSchemaChangesForContractVersion(contractVersion: ContractVersion) {
+    const [safeChanges, breakingChanges] = await Promise.all([
+      this.getSafeChangesForContractVersion(contractVersion),
+      this.getBreakingChangesForContractVersion(contractVersion),
+    ]);
+
+    return !!(safeChanges?.length || breakingChanges?.length);
   }
 }

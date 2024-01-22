@@ -5,6 +5,7 @@ export default {
   run: ({ sql }) => sql`
     ALTER TABLE "schema_versions"
       ADD COLUMN "tags" text[]
+      , ADD COLUMN "has_contract_composition_errors" boolean
     ;
 
     CREATE TABLE "contracts" (

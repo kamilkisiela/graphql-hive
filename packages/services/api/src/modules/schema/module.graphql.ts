@@ -527,7 +527,18 @@ export default gql`
 
   type SchemaVersion {
     id: ID!
+    """
+    A schema version is valid if the composition and contract compositions are successful.
+    """
     valid: Boolean!
+    """
+    Whether this schema version is composable.
+    """
+    isComposable: Boolean!
+    """
+    Whether this schema version has schema changes.
+    """
+    hasSchemaChanges: Boolean!
     date: DateTime!
     log: RegistryLog!
     baseSchema: String
@@ -880,16 +891,31 @@ export default gql`
     createdAt: String!
     contractName: String!
 
+    """
+    Whether this contract version is composable.
+    """
+    isComposable: Boolean!
     schemaCompositionErrors: SchemaErrorConnection
 
     supergraphSDL: String
     compositeSchemaSDL: String
-
+    """
+    Whether this contract versions has schema changes.
+    """
+    hasSchemaChanges: Boolean!
+    """
+    Breaking schema changes for this contract version.
+    """
     breakingSchemaChanges: SchemaChangeConnection
+    """
+    Safe schema changes for this contract version.
+    """
     safeSchemaChanges: SchemaChangeConnection
 
     previousContractVersion: ContractVersion
     previousDiffableContractVersion: ContractVersion
+
+    isFirstComposableVersion: Boolean!
   }
 
   """

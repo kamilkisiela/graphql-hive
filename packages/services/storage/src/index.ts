@@ -2476,6 +2476,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           // Deleting a schema is done via CLI and not associated to a commit or a pull request.
           github: null,
           tags: args.tags,
+          hasContractCompositionErrors:
+            args.contracts?.some(c => c.schemaCompositionErrors != null) ?? false,
         });
 
         // Move all the schema_version_to_log entries of the previous version to the new version
@@ -2576,6 +2578,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           schemaCompositionErrors: input.schemaCompositionErrors,
           github: input.github,
           tags: input.tags,
+          hasContractCompositionErrors:
+            input.contracts?.some(c => c.schemaCompositionErrors != null) ?? false,
         });
 
         await Promise.all(
@@ -4625,6 +4629,10 @@ const SchemaVersionModel = zod.intersection(
     schemaCompositionErrors: zod.nullable(zod.array(SchemaCompositionErrorModel)),
     recordVersion: zod.nullable(SchemaVersionRecordVersionModel),
     tags: zod.nullable(zod.array(zod.string())),
+    hasContractCompositionErrors: zod
+      .boolean()
+      .nullable()
+      .transform(val => val ?? false),
   }),
   zod
     .union([
@@ -4765,6 +4773,7 @@ async function insertSchemaVersion(
     supergraphSDL: string | null;
     schemaCompositionErrors: Array<SchemaCompositionError> | null;
     tags: Array<string> | null;
+    hasContractCompositionErrors: boolean;
     github: null | {
       sha: string;
       repository: string;
@@ -4787,7 +4796,8 @@ async function insertSchemaVersion(
         schema_composition_errors,
         github_repository,
         github_sha,
-        tags
+        tags,
+        has_contract_composition_errors
       )
     VALUES
       (
@@ -4808,7 +4818,8 @@ async function insertSchemaVersion(
         },
         ${args.github?.repository ?? null},
         ${args.github?.sha ?? null},
-        ${Array.isArray(args.tags) ? sql.array(args.tags, 'text') : null}
+        ${Array.isArray(args.tags) ? sql.array(args.tags, 'text') : null},
+        ${args.hasContractCompositionErrors}
       )
     RETURNING
       ${schemaVersionSQLFields()}
@@ -4924,6 +4935,7 @@ const schemaVersionSQLFields = (t = sql``) => sql`
   , ${t}"diff_schema_version_id" as "diffSchemaVersionId"
   , ${t}"record_version" as "recordVersion"
   , ${t}"tags"
+  , ${t}"has_contract_composition_errors" as "hasContractCompositionErrors"
 `;
 
 const targetSQLFields = sql`

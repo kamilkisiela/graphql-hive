@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import { ReactElement, useState } from 'react';
 import { useFormik } from 'formik';
 import { Check, MoreHorizontal, X } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
@@ -12,7 +12,10 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
@@ -67,8 +70,77 @@ const SchemaContractsQuery = graphql(`
   }
 `);
 
+const DisableContractDialog_DisableContractMutation = graphql(`
+  mutation DisableContractDialog_DisableContractMutation($input: DisableContractInput!) {
+    disableContract(input: $input) {
+      ok {
+        disabledContract {
+          id
+          isDisabled
+          viewerCanDisableContract
+        }
+      }
+      error {
+        message
+      }
+    }
+  }
+`);
+
+function DisableContractDialog(props: { contractId: string; onClose: () => void }) {
+  const [state, mutate] = useMutation(DisableContractDialog_DisableContractMutation);
+
+  function submit() {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    mutate({
+      input: {
+        contractId: props.contractId,
+      },
+    });
+  }
+
+  return (
+    <Dialog open onOpenChange={open => open === false && props.onClose()}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Disable Contract</DialogTitle>
+          <DialogDescription>
+            <p>A disabled contract is retired and can not be activated again.</p>
+            <p>
+              When disabling a contract the corresponding CDN artifacts (schema, supergraph) will be
+              irreversibly deleted.
+            </p>
+          </DialogDescription>
+        </DialogHeader>
+        {state?.data?.disableContract?.ok && (
+          <div className="py-2">The Contract was successfully disabled.</div>
+        )}
+        {state?.data?.disableContract?.error && (
+          <div className="py-2">{state.data.disableContract.error.message}</div>
+        )}
+        <DialogFooter>
+          <Button onClick={props.onClose}>
+            {state?.data?.disableContract?.ok ? 'Ok' : 'Close'}
+          </Button>
+          {!state?.data?.disableContract?.ok && (
+            <Button
+              type="submit"
+              variant="destructive"
+              disabled={state.fetching || !!state.data?.disableContract?.ok}
+              onClick={submit}
+            >
+              Disable Contract
+            </Button>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function SchemaContracts() {
   const router = useRouteSelector();
+  const [disableContractId, setDisabledContractId] = useState(null as string | null);
 
   const [schemaContractsQuery, reexecuteQuery] = useQuery({
     query: SchemaContractsQuery,
@@ -83,160 +155,174 @@ export function SchemaContracts() {
 
   const contracts = schemaContractsQuery.data?.target?.contracts.edges;
 
-  function onDisable(node: unknown) {
-    // TODO implement :)
+  function onDisable(nodeId: string) {
+    setDisabledContractId(nodeId);
+  }
+
+  function refetchQuery() {
+    reexecuteQuery({ requestPolicy: 'network-only' });
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Schema Contracts</CardTitle>
-        <CardDescription>
-          Schema Contracts allow you to have separate public graphs that are a subset of the main
-          graph.
-        </CardDescription>
-        <CardDescription>
-          <DocsLink href="/todo" className="text-gray-500 hover:text-gray-300">
-            Learn more about Schema Contracts
-          </DocsLink>
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="my-3.5 flex justify-between">
-          <Dialog>
-            <DialogTrigger>
-              <Button>Create new contract</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <CreateContractDialogContent
-                target={schemaContractsQuery.data?.target ?? null}
-                onCreateContract={() => reexecuteQuery({ requestPolicy: 'network-only' })}
-              />
-            </DialogContent>
-          </Dialog>
-        </div>
-        {!!contracts?.length && (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Contract Name</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Included Tags</TableHead>
-                <TableHead>Excluded Tags</TableHead>
-                <TableHead>Remove unreachable API Types</TableHead>
-                <TableHead className="text-right">Created at</TableHead>
-                <TableHead className="text-right" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {contracts.map(({ node }) => (
-                <TableRow key={node.id}>
-                  <TableCell className={cn(node.isDisabled && 'opacity-30')}>
-                    {node.contractName}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center">
-                      {node.isDisabled ? (
-                        <>
-                          <span className="text-yellow-500">Inactive</span>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <Button
-                                  variant="ghost"
-                                  size="icon-sm"
-                                  className="ml-2 text-yellow-500"
-                                >
-                                  <InfoCircledIcon className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent className="max-w-md p-4 font-normal">
-                                <p>
-                                  This Contract is no longer active and no more contract versions or
-                                  contract checks will be published for it.
-                                </p>
-                                <p className="mt-1">
-                                  It is not possible to enable a contract again. Please create a new
-                                  contract instead.
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </>
-                      ) : (
-                        <>
-                          <span>Active</span>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <Button variant="ghost" size="icon-sm" className="ml-2">
-                                  <InfoCircledIcon className="h-4 w-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent className="max-w-md p-4 font-normal">
-                                <p>
-                                  This Contract is active. Schema publishes and checks will attempt
-                                  to also build the contract schema.
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className={cn(node.isDisabled && 'opacity-30')}>
-                    {node.includeTags?.map(tag => (
-                      <Badge className="mr-1" key={tag}>
-                        {tag}
-                      </Badge>
-                    )) ?? 'None'}
-                  </TableCell>
-                  <TableCell className={cn(node.isDisabled && 'opacity-30')}>
-                    {node.excludeTags?.map(tag => (
-                      <Badge className="mr-1" key={tag}>
-                        {tag}
-                      </Badge>
-                    )) ?? 'None'}
-                  </TableCell>
-                  <TableCell className={cn('text-center', node.isDisabled && 'opacity-30')}>
-                    {node.removeUnreachableTypesFromPublicApiSchema ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <X className="h-4 w-4" />
-                    )}
-                  </TableCell>
-                  <TableCell className={cn('text-right', node.isDisabled && 'opacity-30')}>
-                    <TimeAgo date={node.createdAt} />
-                  </TableCell>
-                  <TableCell className="text-end">
-                    {node.viewerCanDisableContract && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem
-                            className="text-red-500"
-                            onClick={() => onDisable(node)}
-                          >
-                            Disable
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                  </TableCell>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Schema Contracts</CardTitle>
+          <CardDescription>
+            Schema Contracts allow you to have separate public graphs that are a subset of the main
+            graph.
+          </CardDescription>
+          <CardDescription>
+            <DocsLink href="/todo" className="text-gray-500 hover:text-gray-300">
+              Learn more about Schema Contracts
+            </DocsLink>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="my-3.5 flex justify-between">
+            <Dialog>
+              <DialogTrigger>
+                <Button>Create new contract</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <CreateContractDialogContent
+                  target={schemaContractsQuery.data?.target ?? null}
+                  onCreateContract={refetchQuery}
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
+          {!!contracts?.length && (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Contract Name</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Included Tags</TableHead>
+                  <TableHead>Excluded Tags</TableHead>
+                  <TableHead>Remove unreachable API Types</TableHead>
+                  <TableHead className="text-right">Created at</TableHead>
+                  <TableHead className="text-right" />
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </CardContent>
-    </Card>
+              </TableHeader>
+              <TableBody>
+                {contracts.map(({ node }) => (
+                  <TableRow key={node.id}>
+                    <TableCell className={cn(node.isDisabled && 'opacity-30')}>
+                      {node.contractName}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        {node.isDisabled ? (
+                          <>
+                            <span className="text-yellow-500">Inactive</span>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    className="ml-2 text-yellow-500"
+                                  >
+                                    <InfoCircledIcon className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-md p-4 font-normal">
+                                  <p>
+                                    This Contract is no longer active and no more contract versions
+                                    or contract checks will be published for it.
+                                  </p>
+                                  <p className="mt-1">
+                                    It is not possible to enable a contract again. Please create a
+                                    new contract instead.
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </>
+                        ) : (
+                          <>
+                            <span>Active</span>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <Button variant="ghost" size="icon-sm" className="ml-2">
+                                    <InfoCircledIcon className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-md p-4 font-normal">
+                                  <p>
+                                    This Contract is active. Schema publishes and checks will
+                                    attempt to also build the contract schema.
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className={cn(node.isDisabled && 'opacity-30')}>
+                      {node.includeTags?.map(tag => (
+                        <Badge className="mr-1" key={tag}>
+                          {tag}
+                        </Badge>
+                      )) ?? 'None'}
+                    </TableCell>
+                    <TableCell className={cn(node.isDisabled && 'opacity-30')}>
+                      {node.excludeTags?.map(tag => (
+                        <Badge className="mr-1" key={tag}>
+                          {tag}
+                        </Badge>
+                      )) ?? 'None'}
+                    </TableCell>
+                    <TableCell className={cn('text-center', node.isDisabled && 'opacity-30')}>
+                      {node.removeUnreachableTypesFromPublicApiSchema ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <X className="h-4 w-4" />
+                      )}
+                    </TableCell>
+                    <TableCell className={cn('text-right', node.isDisabled && 'opacity-30')}>
+                      <TimeAgo date={node.createdAt} />
+                    </TableCell>
+                    <TableCell className="text-end">
+                      {node.viewerCanDisableContract && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem
+                              className="text-red-500"
+                              onClick={() => onDisable(node.id)}
+                            >
+                              Disable
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+      {disableContractId && (
+        <DisableContractDialog
+          contractId={disableContractId}
+          onClose={() => {
+            setDisabledContractId(null);
+          }}
+        />
+      )}
+    </>
   );
 }
 

@@ -736,7 +736,7 @@ export class Contracts {
         "contract_version_changes"
       WHERE
         "contract_version_id" = ${args.contractVersionId}
-        AND "severity_level" <> 'BREAKING' 
+        AND "severity_level" = 'BREAKING' 
     `);
 
     if (changes.rows.length === 0) {
@@ -756,7 +756,7 @@ export class Contracts {
         "contract_version_changes"
       WHERE
         "contract_version_id" = ${args.contractVersionId}
-        AND "severity_level" = 'BREAKING' 
+        AND "severity_level" <> 'BREAKING' 
     `);
 
     if (changes.rows.length === 0) {
