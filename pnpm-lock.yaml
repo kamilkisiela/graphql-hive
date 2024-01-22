@@ -1100,8 +1100,8 @@ importers:
         specifier: 5.1.1
         version: 5.1.1(graphql@16.8.1)
       hyperid:
-        specifier: 3.1.1
-        version: 3.1.1
+        specifier: 3.2.0
+        version: 3.2.0
       pino-pretty:
         specifier: 10.3.1
         version: 10.3.1
@@ -1632,8 +1632,8 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       hyperid:
-        specifier: 3.1.1
-        version: 3.1.1
+        specifier: 3.2.0
+        version: 3.2.0
       immer:
         specifier: 10.0.3
         version: 10.0.3
@@ -21188,9 +21188,10 @@ packages:
       uuid-parse: 1.1.0
     dev: true
 
-  /hyperid@3.1.1:
-    resolution: {integrity: sha512-RveV33kIksycSf7HLkq1sHB5wW0OwuX8ot8MYnY++gaaPXGFfKpBncHrAWxdpuEeRlazUMGWefwP1w6o6GaumA==}
+  /hyperid@3.2.0:
+    resolution: {integrity: sha512-PdTtDo+Rmza9nEhTunaDSUKwbC69TIzLEpZUwiB6f+0oqmY0UPfhyHCPt6K1NQ4WFv5yJBTG5vELztVWP+nEVQ==}
     dependencies:
+      buffer: 5.7.1
       uuid: 8.3.2
       uuid-parse: 1.1.0
 
