@@ -1,13 +1,14 @@
 import { Injectable, Scope } from 'graphql-modules';
-import { DocumentNode } from 'graphql/language/ast';
 import { CriticalityLevel } from '@graphql-inspector/core';
 import type { SchemaChangeType } from '@hive/storage';
-import { ProjectType, type ComposeAndValidateResult } from '../../../shared/entities';
-import { SchemaVersion } from '../../../shared/mappers';
+import { ProjectType } from '../../../shared/entities';
+import { cache } from '../../../shared/helpers';
+import type { SchemaVersion } from '../../../shared/mappers';
 import { parseGraphQLSource } from '../../../shared/schema';
 import { OrganizationManager } from '../../organization/providers/organization-manager';
 import { ProjectManager } from '../../project/providers/project-manager';
 import { Storage } from '../../shared/providers/storage';
+import { ContractsManager } from './contracts-manager';
 import { RegistryChecks } from './registry-checks';
 import { ensureCompositeSchemas, SchemaHelper } from './schema-helper';
 import { SchemaManager } from './schema-manager';
@@ -22,17 +23,6 @@ import { SchemaManager } from './schema-manager';
  * we sometimes have to compute them on the fly when someone is accessing older schema versions.
  */
 export class SchemaVersionHelper {
-  compositionCache = new WeakMap<SchemaVersion, Promise<null | ComposeAndValidateResult>>();
-  compositeSchemaAstCache = new WeakMap<SchemaVersion, null | DocumentNode>();
-  supergraphAstCache = new WeakMap<SchemaVersion, null | DocumentNode>();
-  schemaChangesCache = new WeakMap<
-    SchemaVersion,
-    Promise<null | {
-      safe: Array<SchemaChangeType> | null;
-      breaking: Array<SchemaChangeType> | null;
-    }>
-  >();
-
   constructor(
     private schemaManager: SchemaManager,
     private schemaHelper: SchemaHelper,
@@ -40,8 +30,10 @@ export class SchemaVersionHelper {
     private organizationManager: OrganizationManager,
     private registryChecks: RegistryChecks,
     private storage: Storage,
+    private contractsManager: ContractsManager,
   ) {}
 
+  @cache<SchemaVersion>(version => version.id)
   private async composeSchemaVersion(schemaVersion: SchemaVersion) {
     const [schemas, project, organization] = await Promise.all([
       this.schemaManager.getMaybeSchemasOfVersion({
@@ -79,22 +71,12 @@ export class SchemaVersionHelper {
     return validation;
   }
 
-  private getOrComposeSchemaVersion(schemaVersion: SchemaVersion) {
-    let promise = this.compositionCache.get(schemaVersion);
-    if (!promise) {
-      promise = this.composeSchemaVersion(schemaVersion);
-      this.compositionCache.set(schemaVersion, promise);
-    }
-
-    return promise;
-  }
-
   async getSchemaCompositionErrors(schemaVersion: SchemaVersion) {
     if (schemaVersion.hasPersistedSchemaChanges) {
       return schemaVersion.schemaCompositionErrors;
     }
 
-    const composition = await this.getOrComposeSchemaVersion(schemaVersion);
+    const composition = await this.composeSchemaVersion(schemaVersion);
     if (composition === null) {
       return null;
     }
@@ -107,7 +89,7 @@ export class SchemaVersionHelper {
       return schemaVersion.compositeSchemaSDL;
     }
 
-    const composition = await this.getOrComposeSchemaVersion(schemaVersion);
+    const composition = await this.composeSchemaVersion(schemaVersion);
     if (composition === null) {
       return null;
     }
@@ -120,7 +102,7 @@ export class SchemaVersionHelper {
       return schemaVersion.supergraphSDL;
     }
 
-    const composition = await this.getOrComposeSchemaVersion(schemaVersion);
+    const composition = await this.composeSchemaVersion(schemaVersion);
     if (composition === null) {
       return null;
     }
@@ -128,43 +110,38 @@ export class SchemaVersionHelper {
     return composition.supergraph ?? null;
   }
 
+  @cache<SchemaVersion>(version => version.id)
   async getCompositeSchemaAst(schemaVersion: SchemaVersion) {
     const compositeSchemaSdl = await this.getCompositeSchemaSdl(schemaVersion);
     if (compositeSchemaSdl === null) {
       return null;
     }
 
-    let compositeSchemaAst = this.compositeSchemaAstCache.get(schemaVersion);
-    if (compositeSchemaAst === undefined) {
-      compositeSchemaAst = parseGraphQLSource(
-        compositeSchemaSdl,
-        'parse composite schema sdl in SchemaVersionHelper.getCompositeSchemaAst',
-      );
-      this.compositeSchemaAstCache.set(schemaVersion, compositeSchemaAst);
-    }
+    const compositeSchemaAst = parseGraphQLSource(
+      compositeSchemaSdl,
+      'parse composite schema sdl in SchemaVersionHelper.getCompositeSchemaAst',
+    );
 
     return compositeSchemaAst;
   }
 
+  @cache<SchemaVersion>(version => version.id)
   async getSupergraphAst(schemaVersion: SchemaVersion) {
     const compositeSchemaSdl = await this.getSupergraphSdl(schemaVersion);
     if (compositeSchemaSdl === null) {
       return null;
     }
 
-    let compositeSchemaAst = this.supergraphAstCache.get(schemaVersion);
-    if (compositeSchemaAst === undefined) {
-      compositeSchemaAst = parseGraphQLSource(
-        compositeSchemaSdl,
-        'parse supergraph sdl in SchemaVersionHelper.getSupergraphAst',
-      );
-      this.supergraphAstCache.set(schemaVersion, compositeSchemaAst);
-    }
+    const supergraphAst = parseGraphQLSource(
+      compositeSchemaSdl,
+      'parse supergraph sdl in SchemaVersionHelper.getSupergraphAst',
+    );
 
-    return compositeSchemaAst;
+    return supergraphAst;
   }
 
-  private async computeSchemaChanges(schemaVersion: SchemaVersion) {
+  @cache<SchemaVersion>(version => version.id)
+  private async getSchemaChanges(schemaVersion: SchemaVersion) {
     if (!schemaVersion.isComposable) {
       return null;
     }
@@ -247,16 +224,6 @@ export class SchemaVersionHelper {
     return diffCheck.reason ?? diffCheck.result;
   }
 
-  private async getOrComputeSchemaChanges(schemaVersion: SchemaVersion) {
-    let promise = this.schemaChangesCache.get(schemaVersion);
-    if (!promise) {
-      promise = this.computeSchemaChanges(schemaVersion);
-      this.schemaChangesCache.set(schemaVersion, promise);
-    }
-
-    return promise;
-  }
-
   async getPreviousDiffableSchemaVersion(
     schemaVersion: SchemaVersion,
   ): Promise<SchemaVersion | null> {
@@ -282,13 +249,18 @@ export class SchemaVersionHelper {
   }
 
   async getBreakingSchemaChanges(schemaVersion: SchemaVersion) {
-    const changes = await this.getOrComputeSchemaChanges(schemaVersion);
+    const changes = await this.getSchemaChanges(schemaVersion);
     return changes?.breaking ?? null;
   }
 
   async getSafeSchemaChanges(schemaVersion: SchemaVersion) {
-    const changes = await this.getOrComputeSchemaChanges(schemaVersion);
+    const changes = await this.getSchemaChanges(schemaVersion);
     return changes?.safe ?? null;
+  }
+
+  async getHasSchemaChanges(schemaVersion: SchemaVersion) {
+    const changes = await this.getSchemaChanges(schemaVersion);
+    return !!changes?.breaking?.length || !!changes?.safe?.length;
   }
 
   async getIsFirstComposableVersion(schemaVersion: SchemaVersion) {
@@ -327,5 +299,9 @@ export class SchemaVersionHelper {
     });
 
     return schemaLog?.sdl ?? null;
+  }
+
+  async getIsValid(schemaVersion: SchemaVersion) {
+    return schemaVersion.isComposable && schemaVersion.hasContractCompositionErrors === false;
   }
 }

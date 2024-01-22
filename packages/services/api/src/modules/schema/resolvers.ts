@@ -608,6 +608,12 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   SchemaVersion: {
+    isComposable(version) {
+      return version.schemaCompositionErrors === null;
+    },
+    hasSchemaChanges(version, _, { injector }) {
+      return injector.get(SchemaVersionHelper).getHasSchemaChanges(version);
+    },
     async log(version, _, { injector }) {
       const log = await injector.get(SchemaManager).getSchemaLog({
         commit: version.actionId,
@@ -747,7 +753,9 @@ export const resolvers: SchemaModule.Resolvers = {
     githubMetadata(version, _, { injector }) {
       return injector.get(SchemaManager).getGitHubMetadata(version);
     },
-    valid: version => version.isComposable,
+    valid(version, _, { injector }) {
+      return injector.get(SchemaVersionHelper).getIsValid(version);
+    },
     previousDiffableSchemaVersion(version, _, { injector }) {
       return injector.get(SchemaVersionHelper).getPreviousDiffableSchemaVersion(version);
     },
@@ -1747,6 +1755,14 @@ export const resolvers: SchemaModule.Resolvers = {
     supergraphSDL: contractCheck => contractCheck.supergraphSdl,
   },
   ContractVersion: {
+    isComposable(contractVersion) {
+      return contractVersion.schemaCompositionErrors === null;
+    },
+    hasSchemaChanges(contractVersion, _, context) {
+      return context.injector
+        .get(ContractsManager)
+        .getHasSchemaChangesForContractVersion(contractVersion);
+    },
     breakingSchemaChanges(contractVersion, _, context) {
       return context.injector
         .get(ContractsManager)
@@ -1767,6 +1783,10 @@ export const resolvers: SchemaModule.Resolvers = {
       context.injector
         .get(ContractsManager)
         .getDiffableContractVersionForContractVersion(contractVersion),
+    isFirstComposableVersion: (contractVersion, _, context) =>
+      context.injector
+        .get(ContractsManager)
+        .getIsFirstComposableVersionForContractVersion(contractVersion),
   },
 };
 

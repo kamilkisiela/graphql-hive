@@ -1,6 +1,6 @@
 import { ReactElement, useMemo, useState } from 'react';
 import NextLink from 'next/link';
-// import { CheckIcon } from 'lucide-react';
+import { CheckIcon, GitCompareIcon } from 'lucide-react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
@@ -24,10 +24,38 @@ import {
   CheckCircledIcon,
   CrossCircledIcon,
   CubeIcon,
-  // ExclamationTriangleIcon,
+  ExclamationTriangleIcon,
   ExternalLinkIcon,
   ListBulletIcon,
 } from '@radix-ui/react-icons';
+
+function NoGraphChanges() {
+  return (
+    <div className="cursor-default">
+      <div className="mb-3 flex items-center gap-3">
+        <CheckCircledIcon className="h-4 w-auto text-emerald-500" />
+        <h2 className="text-base font-medium text-white">No Graph Changes</h2>
+      </div>
+      <p className="text-muted-foreground text-xs">
+        There are no changes in this graph for this schema version.
+      </p>
+    </div>
+  );
+}
+
+function FirstComposableVersion() {
+  return (
+    <div className="cursor-default">
+      <div className="mb-3 flex items-center gap-3">
+        <CheckCircledIcon className="h-4 w-auto text-emerald-500" />
+        <h2 className="text-base font-medium text-white">First composable version</h2>
+      </div>
+      <p className="text-muted-foreground text-xs">
+        Congratulations! This is the first version of the schema that is composable.
+      </p>
+    </div>
+  );
+}
 
 const HistoryPage_VersionsPageQuery = graphql(`
   query HistoryPage_VersionsPageQuery(
@@ -180,11 +208,15 @@ const SchemaVersionView_SchemaVersionFragment = graphql(`
   fragment SchemaVersionView_SchemaVersionFragment on SchemaVersion {
     id
     ...DefaultSchemaVersionView_SchemaVersionFragment
+    hasSchemaChanges
+    isComposable
     contractVersions {
       edges {
         node {
           id
           contractName
+          hasSchemaChanges
+          isComposable
           ...ContractVersionView_ContractVersionFragment
         }
       }
@@ -221,6 +253,32 @@ function SchemaVersionView(props: {
           <TabsList className="w-full justify-start rounded-b-none px-2 py-0">
             <TabsTrigger value="default" className="mt-1 py-2 data-[state=active]:rounded-b-none">
               <span>Default Graph</span>
+              <TooltipProvider>
+                <Tooltip>
+                  {schemaVersion.hasSchemaChanges ? (
+                    <>
+                      <TooltipTrigger>
+                        <GitCompareIcon className="h-4 w-4 pl-1" />
+                      </TooltipTrigger>
+                      <TooltipContent>Main graph schema changed</TooltipContent>
+                    </>
+                  ) : schemaVersion.isComposable ? (
+                    <>
+                      <TooltipTrigger>
+                        <CheckIcon className="h-4 w-4 pl-1" />
+                      </TooltipTrigger>
+                      <TooltipContent>Composition succeeded.</TooltipContent>
+                    </>
+                  ) : (
+                    <>
+                      <TooltipTrigger>
+                        <ExclamationTriangleIcon className="h-4 w-4 pl-1 text-yellow-500" />
+                      </TooltipTrigger>
+                      <TooltipContent>Contract composition failed.</TooltipContent>
+                    </>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
             </TabsTrigger>
             {schemaVersion.contractVersions?.edges.map(edge => (
               <TabsTrigger
@@ -229,18 +287,32 @@ function SchemaVersionView(props: {
                 className="mt-1 py-2 data-[state=active]:rounded-b-none"
               >
                 {edge.node.contractName}
-                {/* {edge.node.isSuccess ? (
-                  <CheckIcon className="pl-1" />
-                ) : (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <ExclamationTriangleIcon className="pl-1 text-yellow-500" />
-                      </TooltipTrigger>
-                      <TooltipContent>The check failed for this contract.</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )} */}
+                <TooltipProvider>
+                  <Tooltip>
+                    {edge.node.hasSchemaChanges ? (
+                      <>
+                        <TooltipTrigger>
+                          <GitCompareIcon className="h-4 w-4 pl-1" />
+                        </TooltipTrigger>
+                        <TooltipContent>Contract schema changed</TooltipContent>
+                      </>
+                    ) : edge.node.isComposable ? (
+                      <>
+                        <TooltipTrigger>
+                          <CheckIcon className="h-4 w-4 pl-1" />
+                        </TooltipTrigger>
+                        <TooltipContent>Contract composition succeeded.</TooltipContent>
+                      </>
+                    ) : (
+                      <>
+                        <TooltipTrigger>
+                          <ExclamationTriangleIcon className="h-4 w-4 pl-1 text-yellow-500" />
+                        </TooltipTrigger>
+                        <TooltipContent>Contract composition failed.</TooltipContent>
+                      </>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -332,7 +404,7 @@ function DefaultSchemaVersionView(props: {
 
   const availableViews: Array<{
     value: string;
-    label: string;
+    label: string | ReactElement;
     tooltip: string;
     icon: ReactElement;
     disabledReason: null | string;
@@ -344,16 +416,23 @@ function DefaultSchemaVersionView(props: {
       tooltip: 'Show changes and composition errors',
       disabledReason: null,
     },
-
     {
       value: 'full-schema',
       icon: <DiffIcon className="h-5 w-auto flex-none" />,
-      label: 'Schema Diff',
-      tooltip: 'Show diff of a full schema',
-      disabledReason:
-        schemaVersion?.sdl && schemaVersion?.previousDiffableSchemaVersion?.sdl
+      label: 'Schema',
+      tooltip: 'Show diff of the schema',
+      disabledReason: schemaVersion?.schemaCompositionErrors ? 'Composition failed.' : null,
+    },
+    {
+      value: 'supergraph',
+      icon: <DiffIcon className="h-5 w-auto flex-none" />,
+      label: 'Supergraph',
+      tooltip: 'Show diff of the supergraph',
+      disabledReason: schemaVersion?.schemaCompositionErrors
+        ? 'Composition failed.'
+        : schemaVersion?.supergraph
           ? null
-          : 'Composition failed.',
+          : 'No supergraph.',
     },
   ];
 
@@ -361,14 +440,9 @@ function DefaultSchemaVersionView(props: {
     availableViews.push({
       value: 'service-schema',
       icon: <CubeIcon className="h-5 w-auto flex-none" />,
-      label: 'Service Diff',
+      label: 'Service',
       tooltip: 'Show diff of a service schema',
-      disabledReason:
-        schemaVersion?.log.previousServiceSdl &&
-        'serviceSdl' in schemaVersion.log &&
-        schemaVersion.log.serviceSdl
-          ? null
-          : 'No service schema changes',
+      disabledReason: null,
     });
   }
 
@@ -398,19 +472,13 @@ function DefaultSchemaVersionView(props: {
       <div className="border-muted h-96 rounded-md rounded-t-none border border-t-0 p-2">
         {selectedView === 'details' && (
           <div className="my-2 px-2">
-            {schemaVersion.isFirstComposableVersion && (
-              <div className="cursor-default">
-                <div className="m-3 p-4">
-                  <div className="mb-3 flex items-center gap-3">
-                    <CheckCircledIcon className="h-4 w-auto text-emerald-500" />
-                    <h2 className="text-base font-medium text-white">First composable version</h2>
-                  </div>
-                  <p className="text-muted-foreground text-xs">
-                    Congratulations! This is the first version of the schema that is composable.
-                  </p>
-                </div>
-              </div>
-            )}
+            {schemaVersion.isFirstComposableVersion ? (
+              <FirstComposableVersion />
+            ) : !schemaVersion.schemaCompositionErrors &&
+              !schemaVersion.breakingSchemaChanges &&
+              !schemaVersion.safeSchemaChanges ? (
+              <NoGraphChanges />
+            ) : null}
             {schemaVersion.schemaCompositionErrors && (
               <CompositionErrorsSection compositionErrors={schemaVersion.schemaCompositionErrors} />
             )}
@@ -434,9 +502,16 @@ function DefaultSchemaVersionView(props: {
         )}
         {selectedView === 'full-schema' && (
           <DiffEditor
-            title="Full schema"
+            title="Schema"
             before={schemaVersion?.previousDiffableSchemaVersion?.sdl ?? ''}
             after={schemaVersion?.sdl ?? ''}
+          />
+        )}
+        {selectedView === 'supergraph' && (
+          <DiffEditor
+            title="Supergraph"
+            before={schemaVersion?.previousDiffableSchemaVersion?.supergraph ?? ''}
+            after={schemaVersion?.supergraph ?? ''}
           />
         )}
         {selectedView === 'service-schema' && (
@@ -455,6 +530,9 @@ const ContractVersionView_ContractVersionFragment = graphql(`
   fragment ContractVersionView_ContractVersionFragment on ContractVersion {
     id
     contractName
+    isComposable
+    hasSchemaChanges
+    isFirstComposableVersion
     supergraphSDL
     compositeSchemaSDL
     schemaCompositionErrors {
@@ -494,6 +572,11 @@ const ContractVersionView_ContractVersionFragment = graphql(`
         isSafeBasedOnUsage
       }
     }
+    previousDiffableContractVersion {
+      id
+      compositeSchemaSDL
+      supergraphSDL
+    }
   }
 `);
 
@@ -523,12 +606,20 @@ function ContractVersionView(props: {
     {
       value: 'full-schema',
       icon: <DiffIcon className="h-5 w-auto flex-none" />,
-      label: 'Schema Diff',
-      tooltip: 'Show diff of a full schema',
-      disabledReason:
-        contractVersion?.compositeSchemaSDL && contractVersion?.supergraphSDL
+      label: 'Schema',
+      tooltip: 'Show diff of the schema',
+      disabledReason: contractVersion?.schemaCompositionErrors ? 'Composition failed.' : null,
+    },
+    {
+      value: 'supergraph',
+      icon: <DiffIcon className="h-5 w-auto flex-none" />,
+      label: 'Supergraph',
+      tooltip: 'Show diff of the supergraph',
+      disabledReason: contractVersion?.schemaCompositionErrors
+        ? 'Composition failed.'
+        : contractVersion?.supergraphSDL
           ? null
-          : 'Composition failed.',
+          : 'No supergraph.',
     },
   ];
 
@@ -558,19 +649,13 @@ function ContractVersionView(props: {
       <div className="border-muted h-96 rounded-md rounded-t-none border border-t-0 p-2">
         {selectedView === 'details' && (
           <div className="my-2 px-2">
-            {/* {contractVersion.isFirstComposableVersion && (
-              <div className="cursor-default">
-                <div className="m-3 p-4">
-                  <div className="mb-3 flex items-center gap-3">
-                    <CheckCircledIcon className="h-4 w-auto text-emerald-500" />
-                    <h2 className="text-base font-medium text-white">First composable version</h2>
-                  </div>
-                  <p className="text-muted-foreground text-xs">
-                    Congratulations! This is the first version of the schema that is composable.
-                  </p>
-                </div>
-              </div>
-            )} */}
+            {contractVersion.isFirstComposableVersion ? (
+              <FirstComposableVersion />
+            ) : !contractVersion.schemaCompositionErrors &&
+              !contractVersion.breakingSchemaChanges &&
+              !contractVersion.safeSchemaChanges ? (
+              <NoGraphChanges />
+            ) : null}
             {contractVersion.schemaCompositionErrors && (
               <CompositionErrorsSection
                 compositionErrors={contractVersion.schemaCompositionErrors}
@@ -594,14 +679,20 @@ function ContractVersionView(props: {
             )}
           </div>
         )}
-        {
-          selectedView === 'full-schema' && false
-          //  <DiffEditor
-          //   title="Full schema"
-          //   before={contractVersion?.previousDiffableSchemaVersion?.sdl ?? ''}
-          //   after={contractVersion?.sdl ?? ''}
-          // />
-        }
+        {selectedView === 'full-schema' && (
+          <DiffEditor
+            title="Full schema"
+            before={contractVersion?.previousDiffableContractVersion?.compositeSchemaSDL ?? ''}
+            after={contractVersion?.compositeSchemaSDL ?? ''}
+          />
+        )}
+        {selectedView === 'supergraph' && (
+          <DiffEditor
+            title="Supergraph"
+            before={contractVersion?.previousDiffableContractVersion?.supergraphSDL ?? ''}
+            after={contractVersion?.supergraphSDL ?? ''}
+          />
+        )}
       </div>
     </>
   );
