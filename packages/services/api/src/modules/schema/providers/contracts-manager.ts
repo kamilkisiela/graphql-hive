@@ -141,6 +141,27 @@ export class ContractsManager {
       targetId: args.target.id,
       cursor: args.cursor,
       first: args.first,
+      onlyActive: false,
+    });
+  }
+
+  public async getPaginatedActiveContractsForTarget(args: {
+    target: Target;
+    cursor: string | null;
+    first: number | null;
+  }) {
+    await this.authManager.ensureTargetAccess({
+      organization: args.target.orgId,
+      project: args.target.projectId,
+      target: args.target.id,
+      scope: TargetAccessScope.READ,
+    });
+
+    return this.contracts.getPaginatedContractsByTargetId({
+      targetId: args.target.id,
+      cursor: args.cursor,
+      first: args.first,
+      onlyActive: false,
     });
   }
 

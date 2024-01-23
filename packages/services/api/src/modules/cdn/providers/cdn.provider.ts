@@ -7,6 +7,7 @@ import { HiveError } from '../../../shared/errors';
 import { isUUID } from '../../../shared/is-uuid';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/scopes';
+import type { Contract } from '../../schema/providers/contracts';
 import { Logger } from '../../shared/providers/logger';
 import { S3_CONFIG, type S3Config } from '../../shared/providers/s3-config';
 import { Storage } from '../../shared/providers/storage';
@@ -44,6 +45,17 @@ export class CdnProvider {
     }
 
     throw new HiveError(`CDN is not configured, cannot resolve CDN target url.`);
+  }
+
+  getCdnUrlForContract(contract: Contract): string {
+    if (this.config.providers.cloudflare) {
+      return `${this.config.providers.cloudflare.baseUrl}/artifacts/v1/${contract.targetId}/contracts/${contract.contractName}`;
+    }
+    if (this.config.providers.api) {
+      return `${this.config.providers.api.baseUrl}/artifacts/v1/${contract.targetId}/contracts/${contract.contractName}`;
+    }
+
+    throw new HiveError(`CDN is not configured, cannot resolve CDN contract url.`);
   }
 
   async createCDNAccessToken(args: {

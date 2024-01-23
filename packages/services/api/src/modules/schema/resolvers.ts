@@ -607,6 +607,13 @@ export const resolvers: SchemaModule.Resolvers = {
         first: args.first ?? null,
       });
     },
+    async activeContracts(target, args, { injector }) {
+      return await injector.get(ContractsManager).getPaginatedActiveContractsForTarget({
+        target,
+        cursor: args.after ?? null,
+        first: args.first ?? null,
+      });
+    },
   },
   SchemaVersion: {
     isComposable(version) {
