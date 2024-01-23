@@ -140,7 +140,7 @@ function DisableContractDialog(props: { contractId: string; onClose: () => void 
 
 export function SchemaContracts() {
   const router = useRouteSelector();
-  const [disableContractId, setDisabledContractId] = useState(null as string | null);
+  const [disabledContractId, setDisabledContractId] = useState<string | null>(null);
 
   const [schemaContractsQuery, reexecuteQuery] = useQuery({
     query: SchemaContractsQuery,
@@ -314,9 +314,9 @@ export function SchemaContracts() {
           )}
         </CardContent>
       </Card>
-      {disableContractId && (
+      {disabledContractId && (
         <DisableContractDialog
-          contractId={disableContractId}
+          contractId={disabledContractId}
           onClose={() => {
             setDisabledContractId(null);
           }}

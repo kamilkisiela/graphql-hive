@@ -85,6 +85,7 @@ const EXTERNAL_COMPOSITION_RESULT = z.union([
       supergraph: z.string(),
       sdl: z.string(),
     }),
+    includesNetworkError: z.boolean().optional().default(false),
   }),
   z.object({
     type: z.literal('failure'),
@@ -105,9 +106,7 @@ const EXTERNAL_COMPOSITION_RESULT = z.union([
   }),
 ]);
 
-type ComposerMethodResult = z.TypeOf<typeof EXTERNAL_COMPOSITION_RESULT> & {
-  includesNetworkError: boolean;
-};
+type ComposerMethodResult = z.TypeOf<typeof EXTERNAL_COMPOSITION_RESULT>;
 
 type CompositionErrorType = {
   message: string;
@@ -149,6 +148,7 @@ type CompositionResultFailure = {
     supergraph?: string;
     sdl?: string;
     errors: Array<CompositionErrorType>;
+    contracts?: Array<ContractResultType>;
   };
 };
 
@@ -572,8 +572,31 @@ const createFederation: (
         }
       }
 
-      if (!contracts?.length || result.type === 'failure') {
+      if (!contracts?.length) {
         return result;
+      }
+
+      if (result.type === 'failure') {
+        return {
+          ...result,
+          result: {
+            ...result.result,
+            contracts: contracts.map(contract => ({
+              id: contract.id,
+              result: {
+                type: 'failure',
+                result: {
+                  errors: [
+                    {
+                      message: 'Skipped contract composition, as default graph composition failed.',
+                      source: 'composition',
+                    },
+                  ],
+                },
+              },
+            })),
+          },
+        };
       }
 
       // Attempt to compose contracts
@@ -659,7 +682,6 @@ const createFederation: (
     async composeAndValidate(schemas, external, native, contracts) {
       try {
         const composed = await compose({ schemas, external, native, contracts });
-
         return {
           errors: composed.type === 'failure' ? composed.result.errors : [],
           sdl: composed.result.sdl ?? null,
@@ -667,14 +689,12 @@ const createFederation: (
           includesNetworkError:
             composed.type === 'failure' && composed.includesNetworkError === true,
           contracts:
-            composed.type === 'success' && composed.result.contracts
-              ? composed.result.contracts.map(contract => ({
-                  id: contract.id,
-                  errors: 'errors' in contract.result.result ? contract.result.result.errors : [],
-                  sdl: contract.result.result.sdl ?? null,
-                  supergraph: contract.result.result.supergraph ?? null,
-                }))
-              : null,
+            composed.result.contracts?.map(contract => ({
+              id: contract.id,
+              errors: 'errors' in contract.result.result ? contract.result.result.errors : [],
+              sdl: contract.result.result.sdl ?? null,
+              supergraph: contract.result.result.supergraph ?? null,
+            })) ?? null,
           tags: composed.tags ?? null,
         };
       } catch (error) {

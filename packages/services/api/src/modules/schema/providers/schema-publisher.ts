@@ -979,28 +979,27 @@ export class SchemaPublisher {
               composable: deleteResult.state.composable,
               diffSchemaVersionId,
               changes: deleteResult.state.changes,
+              contracts:
+                deleteResult.state.contracts?.map(contract => ({
+                  contractId: contract.contractId,
+                  contractName: contract.contractName,
+                  compositeSchemaSDL: contract.fullSchemaSdl,
+                  supergraphSDL: contract.supergraph,
+                  schemaCompositionErrors: contract.compositionErrors,
+                  changes: contract.changes,
+                })) ?? null,
               ...(deleteResult.state.fullSchemaSdl
                 ? {
                     compositeSchemaSDL: deleteResult.state.fullSchemaSdl,
                     supergraphSDL: deleteResult.state.supergraph,
                     schemaCompositionErrors: null,
                     tags: deleteResult.state.tags,
-                    contracts:
-                      deleteResult.state.contracts?.map(contract => ({
-                        contractId: contract.contractId,
-                        contractName: contract.contractName,
-                        compositeSchemaSDL: contract.fullSchemaSdl,
-                        supergraphSDL: contract.supergraph,
-                        schemaCompositionErrors: contract.compositionErrors,
-                        changes: contract.changes,
-                      })) ?? null,
                   }
                 : {
                     compositeSchemaSDL: null,
                     supergraphSDL: null,
                     schemaCompositionErrors: deleteResult.state.compositionErrors ?? [],
                     tags: null,
-                    contracts: null,
                   }),
               actionFn: async () => {
                 if (deleteResult.state.composable) {
@@ -1520,21 +1519,21 @@ export class SchemaPublisher {
       changes,
       diffSchemaVersionId,
       previousSchemaVersion: latestVersion?.version ?? null,
+      contracts:
+        publishResult.state.contracts?.map(contract => ({
+          contractId: contract.contractId,
+          contractName: contract.contractName,
+          compositeSchemaSDL: contract.fullSchemaSdl,
+          supergraphSDL: contract.supergraph,
+          schemaCompositionErrors: contract.compositionErrors,
+          changes: contract.changes,
+        })) ?? null,
       ...(fullSchemaSdl
         ? {
             compositeSchemaSDL: fullSchemaSdl,
             supergraphSDL: supergraph,
             schemaCompositionErrors: null,
             tags: publishResult.state?.tags ?? null,
-            contracts:
-              publishResult.state.contracts?.map(contract => ({
-                contractId: contract.contractId,
-                contractName: contract.contractName,
-                compositeSchemaSDL: contract.fullSchemaSdl,
-                supergraphSDL: contract.supergraph,
-                schemaCompositionErrors: contract.compositionErrors,
-                changes: contract.changes,
-              })) ?? null,
           }
         : {
             compositeSchemaSDL: null,
@@ -1544,7 +1543,6 @@ export class SchemaPublisher {
               "Can't be null",
             ),
             tags: null,
-            contracts: null,
           }),
     });
 

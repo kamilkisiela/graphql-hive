@@ -54,11 +54,13 @@ export class CompositeModel {
       target: string;
     };
   }): Promise<Array<ContractCheckInput> | null> {
-    if (!args.contracts?.length || !args.compositionCheck.result?.contracts?.length) {
+    const contractResults = (args.compositionCheck.result ?? args.compositionCheck.reason)
+      ?.contracts;
+
+    if (!args.contracts?.length || !contractResults?.length) {
       return null;
     }
 
-    const contractResults = args.compositionCheck.result.contracts;
     return await Promise.all(
       args.contracts.map(async (contract, contractIndex) => {
         const contractCompositionResult = contractResults[contractIndex];

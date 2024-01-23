@@ -302,6 +302,7 @@ export interface schema_versions {
   diff_schema_version_id: string | null;
   github_repository: string | null;
   github_sha: string | null;
+  has_contract_composition_errors: boolean | null;
   has_persisted_schema_changes: boolean | null;
   id: string;
   is_composable: boolean;
