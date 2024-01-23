@@ -636,6 +636,9 @@ export class SchemaPublisher {
     }
 
     if (githubCheckRun) {
+      const failedContractCompositionCount =
+        checkResult?.state?.contracts?.filter(c => !c.isSuccessful).length ?? 0;
+
       if (checkResult.conclusion === SchemaCheckConclusion.Success) {
         increaseSchemaCheckCountMetric('accepted');
         return await this.updateGithubCheckRunForSchemaCheck({
@@ -650,6 +653,7 @@ export class SchemaPublisher {
           errors: null,
           schemaCheckId: schemaCheck?.id ?? null,
           githubCheckRun: githubCheckRun,
+          failedContractCompositionCount,
         });
       }
 
@@ -669,6 +673,7 @@ export class SchemaPublisher {
         errors: checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? [],
         schemaCheckId: schemaCheck?.id ?? null,
         githubCheckRun: githubCheckRun,
+        failedContractCompositionCount,
       });
     }
 
@@ -1684,6 +1689,7 @@ export class SchemaPublisher {
       message: string;
     }> | null;
     schemaCheckId: string | null;
+    failedContractCompositionCount: number;
   }) {
     try {
       let title: string;
@@ -1704,6 +1710,9 @@ export class SchemaPublisher {
         title = `Detected ${total} error${total === 1 ? '' : 's'}`;
         summary = [
           errors ? this.errorsToMarkdown(errors) : null,
+          args.failedContractCompositionCount > 0
+            ? `- ${args.failedContractCompositionCount} contract check(s) failed. (Click view more details on GraphQL Hive button below)`
+            : null,
           warnings ? this.warningsToMarkdown(warnings) : null,
           compositionErrors ? this.errorsToMarkdown(compositionErrors) : null,
           breakingChanges ? this.errorsToMarkdown(breakingChanges) : null,
