@@ -14,6 +14,7 @@ import { ProjectType } from '../../../shared/entities';
 import { buildSortedSchemaFromSchemaObject } from '../../../shared/schema';
 import { SchemaPolicyProvider } from '../../policy/providers/schema-policy.provider';
 import type {
+  ComposeAndValidateResult,
   Orchestrator,
   Organization,
   Project,
@@ -67,6 +68,35 @@ function isGraphQLValidationError(
   error: CompositionFailureError,
 ): error is CompositionGraphQLValidationError {
   return !isCompositionValidationError(error);
+}
+
+function mapContract(contract: Exclude<ComposeAndValidateResult['contracts'], null>[number]) {
+  if (Array.isArray(contract.errors) && contract.errors.length) {
+    return {
+      status: 'failed',
+      reason: {
+        errors: contract.errors,
+        errorsBySource: {
+          graphql: contract.errors.filter(isGraphQLValidationError),
+          composition: contract.errors.filter(isCompositionValidationError),
+        },
+        // Federation 1 apparently has SDL and validation errors at the same time.
+        fullSchemaSdl: contract.sdl,
+      },
+    } satisfies ContractCompositionFailure;
+  }
+
+  if (!contract.sdl) {
+    throw new Error('No SDL, but no errors either');
+  }
+
+  return {
+    status: 'completed',
+    result: {
+      fullSchemaSdl: contract.sdl,
+      supergraph: contract.supergraph,
+    },
+  } satisfies ContractCompositionSuccess;
 }
 
 type ContractCompositionFailure = {
@@ -208,6 +238,7 @@ export class RegistryChecks {
           },
           // Federation 1 apparently has SDL and validation errors at the same time.
           fullSchemaSdl: result.sdl,
+          contracts: result.contracts?.map(mapContract) ?? null,
         },
       } satisfies CheckResult;
     }
@@ -224,35 +255,7 @@ export class RegistryChecks {
         fullSchemaSdl: result.sdl,
         supergraph: result.supergraph,
         tags: result.tags ?? null,
-        contracts:
-          result.contracts?.map(contract => {
-            if (Array.isArray(contract.errors) && contract.errors.length) {
-              return {
-                status: 'failed',
-                reason: {
-                  errors: contract.errors,
-                  errorsBySource: {
-                    graphql: contract.errors.filter(isGraphQLValidationError),
-                    composition: contract.errors.filter(isCompositionValidationError),
-                  },
-                  // Federation 1 apparently has SDL and validation errors at the same time.
-                  fullSchemaSdl: contract.sdl,
-                },
-              } satisfies ContractCompositionFailure;
-            }
-
-            if (!contract.sdl) {
-              throw new Error('No SDL, but no errors either');
-            }
-
-            return {
-              status: 'completed',
-              result: {
-                fullSchemaSdl: contract.sdl,
-                supergraph: contract.supergraph,
-              },
-            } satisfies ContractCompositionSuccess;
-          }) ?? null,
+        contracts: result.contracts?.map(mapContract) ?? null,
       },
     } satisfies CheckResult;
   }

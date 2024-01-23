@@ -430,6 +430,7 @@ export interface Storage {
       actionFn(): Promise<void>;
       changes: Array<SchemaChangeType> | null;
       diffSchemaVersionId: string | null;
+      contracts: null | Array<CreateContractVersionInput>;
     } & TargetSelector &
       (
         | {
@@ -437,14 +438,12 @@ export interface Storage {
             supergraphSDL: null;
             schemaCompositionErrors: Array<SchemaCompositionError>;
             tags: null;
-            contracts: null;
           }
         | {
             compositeSchemaSDL: string;
             supergraphSDL: string | null;
             schemaCompositionErrors: null;
             tags: null | Array<string>;
-            contracts: null | Array<CreateContractVersionInput>;
           }
       ),
   ): Promise<DeletedCompositeSchema & { versionId: string }>;
@@ -468,6 +467,7 @@ export interface Storage {
         repository: string;
         sha: string;
       };
+      contracts: null | Array<CreateContractVersionInput>;
     } & TargetSelector) &
       (
         | {
@@ -475,14 +475,12 @@ export interface Storage {
             supergraphSDL: null;
             schemaCompositionErrors: Array<SchemaCompositionError>;
             tags: null;
-            contracts: null;
           }
         | {
             compositeSchemaSDL: string;
             supergraphSDL: string | null;
             schemaCompositionErrors: null;
             tags: null | Array<string>;
-            contracts: null | Array<CreateContractVersionInput>;
           }
       ),
   ): Promise<SchemaVersion | never>;
