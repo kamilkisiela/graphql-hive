@@ -290,6 +290,7 @@ export class Contracts {
     targetId: string;
     first: null | number;
     cursor: null | string;
+    onlyActive: boolean;
   }): Promise<PaginatedContractConnection> {
     this.logger.debug('Load paginated contracts for target. (targetId=%s)', args.targetId);
 
@@ -311,6 +312,7 @@ export class Contracts {
         "contracts"
       WHERE
         "target_id" = ${args.targetId}
+        ${args.onlyActive ? sql`AND "is_disabled" = false` : sql``}
         ${
           cursor
             ? sql`
@@ -329,7 +331,7 @@ export class Contracts {
         "created_at" DESC,
         "id" DESC
       LIMIT ${limit + 1}
-  `);
+    `);
 
     let edges = result.map(row => {
       const node = ContractModel.parse(row);
