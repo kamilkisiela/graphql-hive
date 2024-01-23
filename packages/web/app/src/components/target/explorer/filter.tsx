@@ -100,61 +100,95 @@ export function SchemaExplorerFilter({
   );
 
   return (
-    <div className="flex flex-row items-center gap-x-4">
-      <Autocomplete
-        className="min-w-[250px] grow cursor-text"
-        placeholder="Search for a type"
-        defaultValue={typename ? { value: typename, label: typename } : null}
-        options={types}
-        onChange={option => {
-          void router.push(
-            `/${organization.cleanId}/${project.cleanId}/${target.cleanId}/explorer/${option.value}`,
-          );
-        }}
-        loading={query.fetching}
-      />
-      <div>
-        <Select
-          onValueChange={periodSelector.onChange}
-          defaultValue={periodSelector.value}
-          disabled={query.fetching}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder={periodSelector.displayLabel(periodSelector.value)} />
-          </SelectTrigger>
-          <SelectContent>
-            {periodSelector.options.map(option => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-x-4">
+        <Autocomplete
+          className="min-w-[250px] grow cursor-text"
+          placeholder="Search for a type"
+          defaultValue={typename ? { value: typename, label: typename } : null}
+          options={types}
+          onChange={option => {
+            void router.push(
+              `/${organization.cleanId}/${project.cleanId}/${target.cleanId}/explorer/${option.value}`,
+            );
+          }}
+          loading={query.fetching}
+        />
+        <div>
+          <Select
+            onValueChange={periodSelector.onChange}
+            defaultValue={periodSelector.value}
+            disabled={query.fetching}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder={periodSelector.displayLabel(periodSelector.value)} />
+            </SelectTrigger>
+            <SelectContent>
+              {periodSelector.options.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        {children}
       </div>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger>
-            <div className="bg-secondary flex h-[40px] flex-row items-center gap-x-4 rounded-md border px-3">
-              <div>
-                <Label htmlFor="filter-toggle-arguments" className="text-sm font-normal">
-                  Display all arguments
-                </Label>
-                {/* <div className="text-xs text-gray-500">Collapsed by default</div> */}
+      <div className="ml-auto flex">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <div className="bg-secondary flex h-[40px] flex-row items-center gap-x-4 rounded-md border px-3">
+                <div>
+                  <Label htmlFor="filter-toggle-arguments" className="text-sm font-normal">
+                    Display all arguments
+                  </Label>
+                  {/* <div className="text-xs text-gray-500">Collapsed by default</div> */}
+                </div>
+                <Switch
+                  checked={!collapsed}
+                  onCheckedChange={toggleCollapsed}
+                  id="filter-toggle-arguments"
+                />
               </div>
-              <Switch
-                checked={!collapsed}
-                onCheckedChange={toggleCollapsed}
-                id="filter-toggle-arguments"
-              />
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            List of arguments is collapsed by default. You can toggle this setting to display all
-            arguments.
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-      {children}
+            </TooltipTrigger>
+            <TooltipContent>
+              List of arguments is collapsed by default. You can toggle this setting to display all
+              arguments.
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <div className="bg-secondary flex h-[40px] flex-row items-center gap-x-4 rounded-md border px-3">
+          <div>
+            <Label htmlFor="filter-toggle-arguments" className="text-sm font-normal">
+              Only deprecated
+            </Label>
+          </div>
+          <Switch
+            checked={router.query.deprecated === 'true'}
+            onCheckedChange={() => {
+              const current = router.query.deprecated;
+              if (current === 'true') {
+                const routerQuery = router.query;
+                delete routerQuery.deprecated;
+                void router.push({ query: routerQuery }, undefined, { shallow: true });
+                return;
+              }
+              void router.push(
+                {
+                  query: {
+                    ...router.query,
+                    deprecated: 'true',
+                  },
+                },
+                undefined,
+                { shallow: true },
+              );
+            }}
+            id="filter-toggle-arguments"
+          />
+        </div>
+      </div>
     </div>
   );
 }
