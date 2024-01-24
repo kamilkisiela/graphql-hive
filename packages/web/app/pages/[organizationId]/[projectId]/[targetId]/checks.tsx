@@ -1054,8 +1054,7 @@ function ContractCheckView(props: {
               !contractCheck.safeSchemaChanges &&
               !contractCheck.schemaCompositionErrors && (
                 <div className="my-2 px-2">
-                  <Heading>Details</Heading>
-                  <div className="mt-1">No changes detected.</div>
+                  <NoGraphChanges />
                 </div>
               )}
           </>
