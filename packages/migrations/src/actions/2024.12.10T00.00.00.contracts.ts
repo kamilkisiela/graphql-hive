@@ -38,11 +38,13 @@ export default {
     );
 
     CREATE INDEX "contract_versions_find_latest_version_by_cursor" ON "contract_versions" (
+      "contract_id" DESC,
       "created_at" DESC,
       "id" DESC
     );
 
     CREATE INDEX "contract_versions_find_latest_valid_version_by_cursor" ON "contract_versions" (
+      "contract_id" DESC,
       "created_at" DESC,
       "id" DESC
     )
@@ -60,7 +62,7 @@ export default {
 
     CREATE TABLE "contract_version_changes" (
       "id" UUID PRIMARY KEY NOT NULL DEFAULT uuid_generate_v4(),
-      "contract_version_id" UUID NOT NULL REFERENCES "contract_versions" ("id"),
+      "contract_version_id" UUID NOT NULL REFERENCES "contract_versions" ("id") ON DELETE CASCADE,
       "change_type" TEXT NOT NULL,
       "severity_level" TEXT NOT NULL,
       "meta" jsonb NOT NULL,

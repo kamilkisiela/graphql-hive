@@ -633,11 +633,14 @@ export class Contracts {
       FROM
         "contract_versions"
       WHERE
-        (
-          "created_at" = ${args.contractVersion.createdAt}
-          AND "id" < ${args.contractVersion.id}
+        "contract_id" = ${args.contractVersion.contractId}
+        AND (
+          (
+            "created_at" = ${args.contractVersion.createdAt}
+            AND "id" < ${args.contractVersion.id}
+          )
+          OR "created_at" < ${args.contractVersion.createdAt}
         )
-        OR "created_at" < ${args.contractVersion.createdAt}
       ORDER BY
         "contract_id" ASC
         , "created_at" DESC
@@ -660,7 +663,8 @@ export class Contracts {
       FROM
         "contract_versions"
       WHERE
-        "schema_composition_errors" IS NULL
+        "contract_id" = ${args.contractVersion.contractId}
+        AND "schema_composition_errors" IS NULL
         AND (
           (
             "created_at" = ${args.contractVersion.createdAt}
@@ -863,7 +867,7 @@ const contractVersionsFields = sql`
 const ValidContractVersionModel = z.object({
   id: z.string().uuid(),
   schemaVersionId: z.string().uuid(),
-  contractId: z.string().nullable(),
+  contractId: z.string(),
   contractName: z.string(),
   schemaCompositionErrors: z.null(),
   compositeSchemaSdl: z.string().nullable(),
@@ -874,7 +878,7 @@ const ValidContractVersionModel = z.object({
 const InvalidContractVersionModel = z.object({
   id: z.string().uuid(),
   schemaVersionId: z.string().uuid(),
-  contractId: z.string().nullable(),
+  contractId: z.string(),
   contractName: z.string(),
   schemaCompositionErrors: z.array(SchemaCompositionErrorModel).nullable(),
   compositeSchemaSdl: z.string().nullable(),
