@@ -321,7 +321,7 @@ export function NoGraphChanges() {
         <h2 className="text-base font-medium text-white">No Graph Changes</h2>
       </div>
       <p className="text-muted-foreground text-xs">
-        There are no changes in this graph for this schema version.
+        There are no changes in this graph for this graph.
       </p>
     </div>
   );
