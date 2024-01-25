@@ -2156,7 +2156,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return SchemaVersionModel.parse(version);
     },
-    async getLatestSchemas({ organization, project, target, onlyComposable }) {
+    async getLatestSchemas({ project, target, onlyComposable }) {
       const latest = await pool.maybeOne<Pick<schema_versions, 'id' | 'is_composable'>>(sql`
         SELECT sv.id, sv.is_composable
         FROM schema_versions as sv
@@ -2175,9 +2175,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       const schemas = await storage.getSchemasOfVersion({
         version: latest.id,
-        organization,
-        project,
-        target,
         includeMetadata: true,
       });
 
@@ -2186,6 +2183,56 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         valid: latest.is_composable,
         schemas,
       };
+    },
+    async getSchemaByNameOfVersion(args) {
+      const result = await pool.maybeOne<
+        Pick<
+          OverrideProp<schema_log, 'action', 'PUSH'>,
+          | 'id'
+          | 'commit'
+          | 'action'
+          | 'author'
+          | 'sdl'
+          | 'created_at'
+          | 'project_id'
+          | 'service_name'
+          | 'service_url'
+          | 'target_id'
+          | 'metadata'
+        > &
+          Pick<projects, 'type'>
+      >(
+        sql`
+          SELECT
+            sl.id,
+            sl.commit,
+            sl.author,
+            sl.action,
+            sl.sdl,
+            sl.created_at,
+            sl.project_id,
+            lower(sl.service_name) as service_name,
+            sl.service_url,
+            sl.target_id,
+            p.type
+          FROM schema_version_to_log AS svl
+          LEFT JOIN schema_log AS sl ON (sl.id = svl.action_id)
+          LEFT JOIN projects as p ON (p.id = sl.project_id)
+          WHERE
+            svl.version_id = ${args.versionId}
+            AND sl.action = 'PUSH'
+            AND p.type != 'CUSTOM'
+            AND lower(sl.service_name) = lower(${args.serviceName})
+          ORDER BY
+            sl.created_at DESC
+        `,
+      );
+
+      if (!result) {
+        return null;
+      }
+
+      return transformSchema(result);
     },
     async getSchemasOfVersion({ version, includeMetadata = false }) {
       const result = await pool.query<

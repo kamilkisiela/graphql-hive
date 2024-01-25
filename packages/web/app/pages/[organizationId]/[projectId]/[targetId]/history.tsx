@@ -456,9 +456,9 @@ function DefaultSchemaVersionView(props: {
           </TabsList>
         </Tabs>
       </TooltipProvider>
-      <div className="border-muted h-96 rounded-md rounded-t-none border border-t-0 p-2">
+      <div className="border-muted min-h-[850px] rounded-md rounded-t-none border border-t-0">
         {selectedView === 'details' && (
-          <div className="my-2 px-2">
+          <div className="my-4 px-4">
             {schemaVersion.isFirstComposableVersion ? (
               <FirstComposableVersion />
             ) : !schemaVersion.schemaCompositionErrors &&
@@ -489,23 +489,23 @@ function DefaultSchemaVersionView(props: {
         )}
         {selectedView === 'full-schema' && (
           <DiffEditor
-            title="Schema"
-            before={schemaVersion?.previousDiffableSchemaVersion?.sdl ?? ''}
-            after={schemaVersion?.sdl ?? ''}
+            before={schemaVersion?.previousDiffableSchemaVersion?.sdl ?? null}
+            after={schemaVersion?.sdl ?? null}
+            downloadFileName="schema.graphql"
           />
         )}
         {selectedView === 'supergraph' && (
           <DiffEditor
-            title="Supergraph"
-            before={schemaVersion?.previousDiffableSchemaVersion?.supergraph ?? ''}
-            after={schemaVersion?.supergraph ?? ''}
+            before={schemaVersion?.previousDiffableSchemaVersion?.supergraph ?? null}
+            after={schemaVersion?.supergraph ?? null}
+            downloadFileName="supergraph.graphqls"
           />
         )}
         {selectedView === 'service-schema' && (
           <DiffEditor
-            title="Published service diff"
-            before={schemaVersion?.log?.previousServiceSdl ?? ''}
-            after={('serviceSdl' in schemaVersion.log && schemaVersion.log.serviceSdl) || ''}
+            before={schemaVersion?.log?.previousServiceSdl ?? null}
+            after={('serviceSdl' in schemaVersion.log && schemaVersion.log.serviceSdl) || null}
+            downloadFileName="service.graphql"
           />
         )}
       </div>
@@ -633,9 +633,9 @@ function ContractVersionView(props: {
           </TabsList>
         </Tabs>
       </TooltipProvider>
-      <div className="border-muted h-96 rounded-md rounded-t-none border border-t-0 p-2">
+      <div className="border-muted min-h-[850px] rounded-md rounded-t-none border border-t-0">
         {selectedView === 'details' && (
-          <div className="my-2 px-2">
+          <div className="my-4 px-4">
             {contractVersion.isFirstComposableVersion ? (
               <FirstComposableVersion />
             ) : !contractVersion.schemaCompositionErrors &&
@@ -668,16 +668,16 @@ function ContractVersionView(props: {
         )}
         {selectedView === 'full-schema' && (
           <DiffEditor
-            title="Full schema"
-            before={contractVersion?.previousDiffableContractVersion?.compositeSchemaSDL ?? ''}
-            after={contractVersion?.compositeSchemaSDL ?? ''}
+            before={contractVersion?.previousDiffableContractVersion?.compositeSchemaSDL ?? null}
+            after={contractVersion?.compositeSchemaSDL ?? null}
+            downloadFileName="schema.graphqls"
           />
         )}
         {selectedView === 'supergraph' && (
           <DiffEditor
-            title="Supergraph"
-            before={contractVersion?.previousDiffableContractVersion?.supergraphSDL ?? ''}
-            after={contractVersion?.supergraphSDL ?? ''}
+            before={contractVersion?.previousDiffableContractVersion?.supergraphSDL ?? null}
+            after={contractVersion?.supergraphSDL ?? null}
+            downloadFileName="supergraph.graphqls"
           />
         )}
       </div>

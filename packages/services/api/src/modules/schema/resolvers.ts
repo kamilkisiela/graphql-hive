@@ -1674,6 +1674,9 @@ export const resolvers: SchemaModule.Resolvers = {
     contractChecks(schemaCheck, _, { injector }) {
       return injector.get(ContractsManager).getContractsChecksForSchemaCheck(schemaCheck);
     },
+    previousSchemaSDL(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getPreviousSchemaSDL(schemaCheck);
+    },
   },
   FailedSchemaCheck: {
     schemaVersion(schemaCheck, _, { injector }) {
@@ -1711,6 +1714,9 @@ export const resolvers: SchemaModule.Resolvers = {
     },
     contractChecks(schemaCheck, _, { injector }) {
       return injector.get(ContractsManager).getContractsChecksForSchemaCheck(schemaCheck);
+    },
+    previousSchemaSDL(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getPreviousSchemaSDL(schemaCheck);
     },
   },
   SchemaPolicyWarningConnection: createDummyConnection(warning => ({
