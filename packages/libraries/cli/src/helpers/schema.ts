@@ -35,9 +35,9 @@ export function renderChanges(this: baseCommand, changes: SchemaChangeConnection
   const filterChangesByLevel = (level: CriticalityLevel) => {
     return (change: SchemaChange) => change.criticality === level;
   };
-  const writeChanges = (changes: SchemaChangeConnection) => {
-    changes.nodes.forEach(change => {
-      this.log(indent + criticalityMap[change.criticality] + this.bolderize(change.message));
+  const writeChanges = (changes: SchemaChange[]) => {
+    changes.forEach(change => {
+      this.log(String(indent), criticalityMap[change.criticality], this.bolderize(change.message));
     });
   };
 
@@ -49,23 +49,19 @@ export function renderChanges(this: baseCommand, changes: SchemaChangeConnection
   const safeChanges = changes.nodes.filter(filterChangesByLevel(CriticalityLevel.Safe));
 
   if (breakingChanges.length) {
-    this.log(`Breaking: ${breakingChanges.length}`);
-    writeChanges(changes);
+    this.log(String(indent), `Breaking changes:`);
+    writeChanges(breakingChanges);
   }
 
   if (dangerousChanges.length) {
-    this.log(`Dangerous: ${dangerousChanges.length}`);
-    writeChanges(changes);
+    this.log(String(indent), `Dangerous changes:`);
+    writeChanges(dangerousChanges);
   }
 
   if (safeChanges.length) {
-    this.log(`Safe: ${safeChanges.length}`);
-    writeChanges(changes);
+    this.log(String(indent), `Safe changes:`);
+    writeChanges(safeChanges);
   }
-
-  changes.nodes.forEach(change => {
-    this.log(indent, criticalityMap[change.criticality], this.bolderize(change.message));
-  });
 }
 
 export function renderWarnings(this: baseCommand, warnings: SchemaWarningConnection) {
