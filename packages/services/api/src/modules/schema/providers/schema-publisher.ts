@@ -691,7 +691,15 @@ export class SchemaPublisher {
       return {
         __typename: 'SchemaCheckSuccess',
         valid: true,
-        changes: checkResult.state?.schemaChanges?.all ?? [],
+        changes: [
+          ...(checkResult.state?.schemaChanges?.all ?? []),
+          ...(checkResult.state?.contracts?.flatMap(contract => [
+            ...(contract.schemaChanges?.all?.map(change => ({
+              ...change,
+              message: `[${contract.contractName}] ${change.message}`,
+            })) ?? []),
+          ]) ?? []),
+        ],
         warnings: checkResult.state?.schemaPolicyWarnings ?? [],
         initial: latestVersion == null,
         schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, schemaCheck),
@@ -703,7 +711,15 @@ export class SchemaPublisher {
     return {
       __typename: 'SchemaCheckError',
       valid: false,
-      changes: checkResult.state.schemaChanges?.all ?? [],
+      changes: [
+        ...(checkResult.state.schemaChanges?.all ?? []),
+        ...(checkResult.state.contracts?.flatMap(contract => [
+          ...(contract.schemaChanges?.all?.map(change => ({
+            ...change,
+            message: `[${contract.contractName}] ${change.message}`,
+          })) ?? []),
+        ]) ?? []),
+      ],
       warnings: checkResult.state.schemaPolicy?.warnings ?? [],
       errors: [
         ...(checkResult.state.schemaChanges?.breaking?.filter(
@@ -716,6 +732,17 @@ export class SchemaPublisher {
             message: `[${contract.contractName}] ${error.message}`,
             source: error.source,
           })) ?? []),
+        ]) ?? []),
+        ...(checkResult.state.contracts?.flatMap(contract => [
+          ...(contract.schemaChanges?.breaking
+            ?.filter(
+              breaking =>
+                breaking.approvalMetadata == null && breaking.isSafeBasedOnUsage === false,
+            )
+            .map(change => ({
+              ...change,
+              message: `[${contract.contractName}] ${change.message}`,
+            })) ?? []),
         ]) ?? []),
       ],
       schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, schemaCheck),
