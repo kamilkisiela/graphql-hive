@@ -173,7 +173,7 @@ export function SchemaContracts() {
             graph.
           </CardDescription>
           <CardDescription>
-            <DocsLink href="/todo" className="text-gray-500 hover:text-gray-300">
+            <DocsLink href="/management/contracts" className="text-gray-500 hover:text-gray-300">
               Learn more about Schema Contracts
             </DocsLink>
           </CardDescription>
