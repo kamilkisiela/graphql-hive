@@ -22,7 +22,7 @@ jobs:
         run: pnpm lint:env-template
 
       - name: Cache ESLint and Prettier
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             .eslintcache
