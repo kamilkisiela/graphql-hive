@@ -126,6 +126,8 @@ export class CompositeModel {
       }
     > | null;
   }): Promise<SchemaCheckResult> {
+    const latestVersion = latest;
+
     const incoming: PushedCompositeSchema = {
       kind: 'composite',
       id: temp,
@@ -135,12 +137,13 @@ export class CompositeModel {
       date: Date.now() as any,
       sdl: input.sdl,
       service_name: input.serviceName,
-      service_url: temp,
+      service_url:
+        latestVersion?.schemas?.find(s => s.service_name === input.serviceName)?.service_url ??
+        'temp',
       action: 'PUSH',
       metadata: null,
     };
 
-    const latestVersion = latest;
     const schemas = latestVersion
       ? swapServices(latestVersion.schemas, incoming).schemas
       : [incoming];

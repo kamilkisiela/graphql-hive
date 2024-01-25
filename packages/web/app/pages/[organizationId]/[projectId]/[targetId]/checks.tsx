@@ -626,7 +626,7 @@ function SchemaChecksView(props: {
                       <TooltipTrigger>
                         <GitCompareIcon className="h-4 w-4 pl-1" />
                       </TooltipTrigger>
-                      <TooltipContent>Main graph schema changed</TooltipContent>
+                      <TooltipContent>Contract schema changed</TooltipContent>
                     </>
                   ) : (
                     <>
@@ -655,6 +655,7 @@ const DefaultSchemaView_SchemaCheckFragment = graphql(`
   fragment DefaultSchemaView_SchemaCheckFragment on SchemaCheck {
     id
     schemaSDL
+    previousSchemaSDL
     serviceName
     hasSchemaCompositionErrors
     schemaVersion {
@@ -799,18 +800,14 @@ function DefaultSchemaView(props: {
           ))}
         </TabsList>
       </Tabs>
-      <div className="border-muted h-96 rounded-md rounded-t-none border border-t-0 p-2">
+      <div className="border-muted min-h-[850px] rounded-md rounded-t-none border border-t-0">
         {selectedView === 'details' && (
-          <>
+          <div className="my-4 px-4">
             {!schemaCheck.schemaPolicyWarnings?.edges?.length &&
               !schemaCheck.safeSchemaChanges?.nodes?.length &&
               !schemaCheck.breakingSchemaChanges?.nodes?.length &&
               !schemaCheck.schemaPolicyErrors?.edges?.length &&
-              !schemaCheck.hasSchemaCompositionErrors && (
-                <div className="my-2 px-2">
-                  <NoGraphChanges />
-                </div>
-              )}
+              !schemaCheck.hasSchemaCompositionErrors && <NoGraphChanges />}
             {schemaCheck.__typename === 'FailedSchemaCheck' && schemaCheck.compositionErrors && (
               <CompositionErrorsSection compositionErrors={schemaCheck.compositionErrors} />
             )}
@@ -848,52 +845,28 @@ function DefaultSchemaView(props: {
                 />
               </div>
             ) : null}
-          </>
+          </div>
         )}
         {selectedView === 'service' && (
-          <>
-            <div className="my-2 px-2">
-              <Heading>Service Schema</Heading>
-            </div>
-            <SchemaEditor
-              theme="vs-dark"
-              options={{
-                renderLineHighlightOnlyWhenFocus: true,
-                readOnly: true,
-                lineNumbers: 'off',
-                renderValidationDecorations: 'on',
-              }}
-              schema={schemaCheck.schemaSDL ?? ''}
-            />
-          </>
+          <DiffEditor
+            before={schemaCheck.previousSchemaSDL ?? null}
+            after={schemaCheck.schemaSDL}
+            downloadFileName="service.graphqls"
+          />
         )}
         {selectedView === 'schema' && (
-          <>
-            <div className="my-2 px-2">
-              <Heading>Public API Schema</Heading>
-            </div>
-            <DiffEditor
-              before={schemaCheck.schemaVersion?.sdl ?? ''}
-              after={schemaCheck.compositeSchemaSDL ?? ''}
-            />
-          </>
+          <DiffEditor
+            before={schemaCheck.schemaVersion?.sdl ?? null}
+            after={schemaCheck.compositeSchemaSDL ?? null}
+            downloadFileName="schema.graphqls"
+          />
         )}
         {selectedView === 'supergraph' && (
-          <>
-            <div className="my-2 px-2">
-              <Heading>Supergraph</Heading>
-            </div>
-            <SchemaEditor
-              theme="vs-dark"
-              options={{
-                renderLineHighlightOnlyWhenFocus: true,
-                readOnly: true,
-                lineNumbers: 'off',
-                renderValidationDecorations: 'on',
-              }}
-              schema={schemaCheck.supergraphSDL ?? ''}
-            />
-          </>
+          <DiffEditor
+            before={schemaCheck?.schemaVersion?.supergraph ?? null}
+            after={schemaCheck?.supergraphSDL ?? null}
+            downloadFileName="supergraph.graphqls"
+          />
         )}
         {selectedView === 'policy' && (
           <>
@@ -959,6 +932,7 @@ const ContractCheckView_ContractCheckFragment = graphql(`
     contractVersion {
       id
       compositeSchemaSDL
+      supergraphSDL
     }
   }
 `);
@@ -977,15 +951,6 @@ function ContractCheckView(props: {
       label: 'Details',
       tooltip: 'Details',
       disabledReason: false,
-    },
-    {
-      value: 'schemaDiff',
-      icon: <DiffIcon className="h-5 w-auto flex-none" />,
-      label: 'Diff',
-      tooltip: 'Schema Diff',
-      disabledReason: !contractCheck.compositeSchemaSDL && (
-        <>Composition did not succeed. No schema diff available.</>
-      ),
     },
     {
       value: 'schema',
@@ -1028,9 +993,9 @@ function ContractCheckView(props: {
           ))}
         </TabsList>
       </Tabs>
-      <div className="border-muted h-96 rounded-md rounded-t-none border border-t-0 p-2">
+      <div className="border-muted min-h-[850px] rounded-md rounded-t-none border border-t-0">
         {selectedView === 'details' && (
-          <>
+          <div className="my-4 px-4">
             {contractCheck.schemaCompositionErrors && (
               <CompositionErrorsSection compositionErrors={contractCheck.schemaCompositionErrors} />
             )}
@@ -1052,57 +1017,22 @@ function ContractCheckView(props: {
             )}
             {!contractCheck.breakingSchemaChanges &&
               !contractCheck.safeSchemaChanges &&
-              !contractCheck.schemaCompositionErrors && (
-                <div className="my-2 px-2">
-                  <NoGraphChanges />
-                </div>
-              )}
-          </>
-        )}
-        {selectedView === 'schemaDiff' && (
-          <>
-            <div className="my-2 px-2">
-              <Heading>Schema Diff</Heading>
-            </div>
-            <DiffEditor
-              before={contractCheck?.contractVersion?.compositeSchemaSDL ?? ''}
-              after={contractCheck?.compositeSchemaSDL ?? ''}
-            />
-          </>
+              !contractCheck.schemaCompositionErrors && <NoGraphChanges />}
+          </div>
         )}
         {selectedView === 'schema' && (
-          <>
-            <div className="my-2 px-2">
-              <Heading>Public API Schema</Heading>
-            </div>
-            <SchemaEditor
-              theme="vs-dark"
-              options={{
-                renderLineHighlightOnlyWhenFocus: true,
-                readOnly: true,
-                lineNumbers: 'off',
-                renderValidationDecorations: 'on',
-              }}
-              schema={contractCheck.compositeSchemaSDL ?? ''}
-            />
-          </>
+          <DiffEditor
+            before={contractCheck?.contractVersion?.compositeSchemaSDL ?? null}
+            after={contractCheck.compositeSchemaSDL ?? null}
+            downloadFileName="schema.graphqls"
+          />
         )}
         {selectedView === 'supergraph' && (
-          <>
-            <div className="my-2 px-2">
-              <Heading>Supergraph</Heading>
-            </div>
-            <SchemaEditor
-              theme="vs-dark"
-              options={{
-                renderLineHighlightOnlyWhenFocus: true,
-                readOnly: true,
-                lineNumbers: 'off',
-                renderValidationDecorations: 'on',
-              }}
-              schema={contractCheck.supergraphSDL ?? ''}
-            />
-          </>
+          <DiffEditor
+            before={contractCheck?.contractVersion?.supergraphSDL ?? null}
+            after={contractCheck?.supergraphSDL ?? null}
+            downloadFileName="supergraph.graphqls"
+          />
         )}
       </div>
     </TooltipProvider>
@@ -1310,11 +1240,9 @@ function ChecksPageContent() {
             )}
           </div>
           {hasActiveSchemaCheck ? (
-            <div className="grow">
-              {schemaCheckId ? (
-                <ActiveSchemaCheck schemaCheckId={schemaCheckId} key={schemaCheckId} />
-              ) : null}
-            </div>
+            schemaCheckId ? (
+              <ActiveSchemaCheck schemaCheckId={schemaCheckId} key={schemaCheckId} />
+            ) : null
           ) : hasSchemaChecks ? (
             <EmptyList
               className="border-0 pt-6"

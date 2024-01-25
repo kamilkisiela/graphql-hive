@@ -27,7 +27,7 @@ export function GraphQLHighlight({
         }}
         height="60vh"
         {...props}
-        schema={pretty}
+        schema={pretty ?? ''}
       />
     </div>
   );

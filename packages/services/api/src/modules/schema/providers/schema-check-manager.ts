@@ -1,5 +1,6 @@
 import { Injectable, Scope } from 'graphql-modules';
 import { FailedSchemaCheckMapper, SuccessfulSchemaCheckMapper } from '../../../shared/mappers';
+import { Storage } from '../../shared/providers/storage';
 import { SchemaManager } from './schema-manager';
 
 type SchemaCheck = FailedSchemaCheckMapper | SuccessfulSchemaCheckMapper;
@@ -9,7 +10,10 @@ type SchemaCheck = FailedSchemaCheckMapper | SuccessfulSchemaCheckMapper;
   global: true,
 })
 export class SchemaCheckManager {
-  constructor(private schemaManager: SchemaManager) {}
+  constructor(
+    private schemaManager: SchemaManager,
+    private storage: Storage,
+  ) {}
 
   getHasSchemaCompositionErrors(schemaCheck: SchemaCheck) {
     return schemaCheck.schemaCompositionErrors !== null;
@@ -53,5 +57,18 @@ export class SchemaCheckManager {
       target: schemaCheck.targetId,
       version: schemaCheck.schemaVersionId,
     });
+  }
+
+  async getPreviousSchemaSDL(schemaCheck: SchemaCheck) {
+    if (schemaCheck.serviceName === null || schemaCheck.schemaVersionId === null) {
+      return null;
+    }
+
+    const service = await this.storage.getSchemaByNameOfVersion({
+      versionId: schemaCheck.schemaVersionId,
+      serviceName: schemaCheck.serviceName,
+    });
+
+    return service?.sdl ?? null;
   }
 }

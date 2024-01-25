@@ -825,6 +825,10 @@ export default gql`
     """
     schemaSDL: String!
     """
+    The previous schema SDL. For composite schemas this is the service.
+    """
+    previousSchemaSDL: String
+    """
     The name of the service that owns the schema. Is null for non composite project types.
     """
     serviceName: String
@@ -959,6 +963,10 @@ export default gql`
     """
     schemaSDL: String!
     """
+    The previous schema SDL. For composite schemas this is the service.
+    """
+    previousSchemaSDL: String
+    """
     The name of the service that owns the schema. Is null for non composite project types.
     """
     serviceName: String
@@ -1031,6 +1039,10 @@ export default gql`
     The SDL of the schema that was checked.
     """
     schemaSDL: String!
+    """
+    The previous schema SDL. For composite schemas this is the service.
+    """
+    previousSchemaSDL: String
     """
     The name of the service that owns the schema. Is null for non composite project types.
     """

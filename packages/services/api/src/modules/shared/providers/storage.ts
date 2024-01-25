@@ -395,12 +395,8 @@ export interface Storage {
     before: string | null;
     after: string | null;
   }>;
-  getSchemasOfVersion(
-    _: {
-      version: string;
-      includeMetadata?: boolean;
-    } & TargetSelector,
-  ): Promise<Schema[]>;
+  getSchemasOfVersion(_: { version: string; includeMetadata?: boolean }): Promise<Schema[]>;
+  getSchemaByNameOfVersion(_: { versionId: string; serviceName: string }): Promise<Schema | null>;
   getSchemasOfPreviousVersion(
     _: {
       version: string;
