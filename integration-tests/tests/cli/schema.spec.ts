@@ -19,7 +19,7 @@ describe.each`
   const serviceName = projectType === ProjectType.Single ? undefined : 'test';
   const serviceUrl = projectType === ProjectType.Single ? undefined : 'http://localhost:4000';
 
-  test.only.concurrent('can publish a schema with breaking, warning and safe changes', async () => {
+  test.concurrent('can publish a schema with breaking, warning and safe changes', async () => {
     const { createOrg } = await initSeed().createOwner();
     const { inviteAndJoinMember, createProject } = await createOrg();
     await inviteAndJoinMember();
