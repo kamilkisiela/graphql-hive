@@ -39,13 +39,13 @@ describe.each`
       ...serviceUrlArgs,
       'fixtures/init-schema.graphql',
     ]);
-    await schemaCheck([
+    await expect(schemaCheck([
         ...serviceNameArgs,
         '--registry.accessToken',
         secret,
         'fixtures/breaking-schema-detailed.graphql',
-      ]);
-  })
+        ])).rejects.toMatch(/breaking changes:|safe changes:/i);
+      })
 
   test.concurrent('can publish and check a schema with target:registry:read access', async () => {
     const { createOrg } = await initSeed().createOwner();
