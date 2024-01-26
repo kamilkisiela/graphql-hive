@@ -4002,6 +4002,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             , "github_sha"
             , "expires_at"
             , "context_id"
+            , "has_contract_schema_changes"
           )
           VALUES (
               ${args.schemaSDLHash}
@@ -4024,6 +4025,11 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             , ${args.githubSha}
             , ${args.expiresAt?.toISOString() ?? null}
             , ${args.contextId}
+            , ${
+              args.contracts?.some(
+                c => c.breakingSchemaChanges?.length || c.safeSchemaChanges?.length,
+              ) ?? false
+            }
           )
           RETURNING
             "id"
@@ -4273,6 +4279,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 AND (
                   jsonb_typeof("safe_schema_changes") = 'array'
                   OR jsonb_typeof("breaking_schema_changes") = 'array'
+                  OR "has_contract_schema_changes" = true
                 )
               `
               : sql``
