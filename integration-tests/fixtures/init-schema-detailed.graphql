@@ -5,13 +5,11 @@ type Query {
 enum UserRole {
  ADMIN
  EDITOR
- VIEWER
 }
 
 type User {
   id: ID!
   name: String!
-  address: String
-  role: UserRole!
+  email: String!
+  role: UserRole
 }
-
