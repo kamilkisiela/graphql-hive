@@ -20,6 +20,7 @@ import type { ErrorCode } from '@graphql-hive/external-composition';
 import { stitchSchemas } from '@graphql-tools/stitch';
 import { stitchingDirectives } from '@graphql-tools/stitching-directives';
 import type { FastifyLoggerInstance } from '@hive/service-common';
+import * as Sentry from '@sentry/node';
 import {
   composeServices as nativeComposeServices,
   compositionHasErrors as nativeCompositionHasErrors,
@@ -395,28 +396,50 @@ type SubgraphInput = {
   url: string | undefined;
 };
 
-function composeFederationV2(subgraphs: Array<SubgraphInput>): ComposerMethodResult {
-  const result = nativeComposeServices(subgraphs);
+function composeFederationV2(
+  subgraphs: Array<SubgraphInput>,
+  logger: FastifyLoggerInstance,
+): ComposerMethodResult {
+  try {
+    const result = nativeComposeServices(subgraphs);
 
-  if (nativeCompositionHasErrors(result)) {
+    if (nativeCompositionHasErrors(result)) {
+      return {
+        type: 'failure',
+        result: {
+          errors: result.errors.map(errorWithPossibleCode),
+          sdl: undefined,
+        },
+        includesNetworkError: false,
+      } as const;
+    }
+
+    return {
+      type: 'success',
+      result: {
+        supergraph: result.supergraphSdl,
+        sdl: print(transformSupergraphToPublicSchema(parse(result.supergraphSdl))),
+      },
+      includesNetworkError: false,
+    } as const;
+  } catch (error) {
+    logger.error(error);
+    Sentry.captureException(error);
+
     return {
       type: 'failure',
       result: {
-        errors: result.errors.map(errorWithPossibleCode),
+        errors: [
+          {
+            message: 'Unexpected composition error.',
+            source: 'composition',
+          },
+        ],
         sdl: undefined,
       },
       includesNetworkError: false,
     } as const;
   }
-
-  return {
-    type: 'success',
-    result: {
-      supergraph: result.supergraphSdl,
-      sdl: print(transformSupergraphToPublicSchema(parse(result.supergraphSdl))),
-    },
-    includesNetworkError: false,
-  } as const;
 }
 
 async function composeExternalFederation(args: {
@@ -528,7 +551,7 @@ const createFederation: (
           'Using built-in Federation v2 composition service (schemas=%s)',
           schemas.length,
         );
-        compose = subgraphs => Promise.resolve(composeFederationV2(subgraphs));
+        compose = subgraphs => Promise.resolve(composeFederationV2(subgraphs, logger));
       } else if (external) {
         compose = subgraphs =>
           composeExternalFederation({
