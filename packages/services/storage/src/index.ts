@@ -4402,49 +4402,46 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       return await pool.transaction(async pool => {
         const date = args.expiresAt.toISOString();
         const rawData = await pool.maybeOne<unknown>(sql`
+          WITH "filtered_schema_checks" AS (
+            SELECT *
+            FROM "schema_checks"
+            WHERE "expires_at" <= ${date}
+          )
           SELECT
+            ARRAY(SELECT "filtered_schema_checks"."id" FROM "filtered_schema_checks") AS "schemaCheckIds",
+            ARRAY(SELECT DISTINCT "filtered_schema_checks"."target_id" FROM "filtered_schema_checks") AS "targetIds",
             ARRAY(
-              SELECT
-                "schema_checks"."id"
-              FROM
-                "schema_checks"
-              WHERE
-                "expires_at" <= ${date}
-            ) as "schemaCheckIds",
-            ARRAY(
-              SELECT
-                "schema_checks"."target_id"
-              FROM
-                "schema_checks"
-              WHERE
-                "expires_at" <= ${date}
-            ) as "targetIds",
-            ARRAY (
-              SELECT
-                DISTINCT "schema_sdl_store_id"
-              FROM
-                "schema_checks"
-              WHERE
-                "expires_at" <= ${date}
-              UNION SELECT DISTINCT "composite_schema_sdl_store_id" FROM "schema_checks" WHERE "expires_at"  <= ${date} AND "composite_schema_sdl_store_id" <> NULL
-              UNION SELECT DISTINCT "supergraph_sdl_store_id" FROM "schema_checks" WHERE "expires_at"  <= ${date} AND "supergraph_sdl_store_id" <> NULL
-              UNION SELECT DISTINCT "contract_checks"."composite_schema_sdl_store_id" FROM "contract_checks" INNER JOIN "schema_checks" ON "contract_checks"."schema_check_id" = "schema_checks"."id" WHERE "expires_at" <= ${date} AND "contract_checks"."composite_schema_sdl_store_id" <> null
-              UNION SELECT DISTINCT "contract_checks"."supergraph_sdl_store_id" FROM "schema_checks"  JOIN "contract_checks" ON "contract_checks"."schema_check_id" = "schema_checks"."id" WHERE "expires_at" <= ${date} AND "contract_checks"."supergraph_sdl_store_id" <>  NULL
+              SELECT DISTINCT "filtered_schema_checks"."schema_sdl_store_id"
+              FROM "filtered_schema_checks"
+              WHERE "filtered_schema_checks"."schema_sdl_store_id" IS NOT NULL
+
+              UNION SELECT DISTINCT "filtered_schema_checks"."composite_schema_sdl_store_id"
+              FROM "filtered_schema_checks"
+              WHERE "filtered_schema_checks"."composite_schema_sdl_store_id" IS NOT NULL
+
+              UNION SELECT DISTINCT "filtered_schema_checks"."supergraph_sdl_store_id"
+              FROM "filtered_schema_checks"
+              WHERE "filtered_schema_checks"."supergraph_sdl_store_id" IS NOT NULL
+
+              UNION SELECT DISTINCT "contract_checks"."composite_schema_sdl_store_id"
+              FROM "contract_checks"
+                INNER JOIN "filtered_schema_checks" ON "contract_checks"."schema_check_id" = "filtered_schema_checks"."id"
+              WHERE "contract_checks"."composite_schema_sdl_store_id" IS NOT NULL
+
+              UNION SELECT DISTINCT "contract_checks"."supergraph_sdl_store_id" FROM "filtered_schema_checks"
+                INNER JOIN "contract_checks" ON "contract_checks"."schema_check_id" = "filtered_schema_checks"."id"
+                WHERE "contract_checks"."supergraph_sdl_store_id" IS NOT NULL
             ) AS "sdlStoreIds",
-            ARRAY (
-              SELECT
-                DISTINCT "context_id"
-              FROM
-                "schema_checks"
-              WHERE
-                "expires_at" <= ${date}
-                AND "context_id" <> NULL
-            ) as "contextIds",
-            ARRAY (
-              SELECT
-                DISTINCT "contract_id"
-              FROM "contract_checks" INNER JOIN "schema_checks" ON "contract_checks"."schema_check_id" = "schema_checks"."id" WHERE "contract_checks"."expires_at" <= ${date}
-            ) as "contractIds"
+            ARRAY(
+              SELECT DISTINCT "filtered_schema_checks"."context_id"
+              FROM "filtered_schema_checks"
+              WHERE "filtered_schema_checks"."context_id" IS NOT NULL
+            ) AS "contextIds",
+            ARRAY(
+              SELECT DISTINCT "contract_checks"."contract_id"
+              FROM "contract_checks"
+                INNER JOIN "filtered_schema_checks" ON "contract_checks"."schema_check_id" = "filtered_schema_checks"."id"
+            ) AS "contractIds"
         `);
 
         const data = SchemaCheckModel.parse(rawData);
@@ -4496,7 +4493,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                     "contract_checks"
                   WHERE
                    "contract_checks"."composite_schema_sdl_store_id" = "sdl_store"."id"
-                   OR "schema_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
+                   OR "contract_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
                 )
               RETURNING
                 "id"
