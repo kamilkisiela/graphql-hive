@@ -14,7 +14,7 @@
     "@hive/service-common": "workspace:*",
     "@sentry/node": "7.99.0",
     "@trpc/server": "10.45.0",
-    "bullmq": "5.1.0",
+    "bullmq": "5.1.6",
     "copyfiles": "2.4.1",
     "dotenv": "16.3.2",
     "got": "12.6.1",
