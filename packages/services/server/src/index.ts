@@ -111,6 +111,11 @@ export async function main() {
             result.deletedSchemaChangeApprovalCount,
             '',
           );
+          transaction.setMeasurement(
+            'deletedContractSchemaChangeApprovals',
+            result.deletedContractSchemaChangeApprovalCount,
+            '',
+          );
 
           transaction.finish();
         } catch (error) {

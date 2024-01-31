@@ -4392,91 +4392,177 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     async purgeExpiredSchemaChecks(args) {
+      const SchemaCheckModel = zod.object({
+        schemaCheckIds: zod.array(zod.string()),
+        sdlStoreIds: zod.array(zod.string()),
+        contextIds: zod.array(zod.string()),
+        targetIds: zod.array(zod.string()),
+        contractIds: zod.array(zod.string()),
+      });
       return await pool.transaction(async pool => {
-        const result = await pool.any<unknown>(sql`
-          DELETE
-          FROM "schema_checks"
-          WHERE 
-            "id" = ANY(
+        const date = args.expiresAt.toISOString();
+        const rawData = await pool.maybeOne<unknown>(sql`
+          SELECT
+            ARRAY(
               SELECT
-                "id"
+                "schema_checks"."id"
               FROM
                 "schema_checks"
               WHERE
-                "expires_at" <= ${args.expiresAt.toISOString()}
-              LIMIT
-                1000
-            )
-          RETURNING
-            "schema_sdl_store_id" as "storeId1",
-            "supergraph_sdl_store_id" as "storeId2",
-            "composite_schema_sdl_store_id" as "storeId3",
-            "target_id" as "targetId",
-            "context_id" as "contextId"
+                "expires_at" <= ${date}
+            ) as "schemaCheckIds",
+            ARRAY(
+              SELECT
+                "schema_checks"."target_id"
+              FROM
+                "schema_checks"
+              WHERE
+                "expires_at" <= ${date}
+            ) as "targetIds",
+            ARRAY (
+              SELECT
+                DISTINCT "schema_sdl_store_id"
+              FROM
+                "schema_checks"
+              WHERE
+                "expires_at" <= ${date}
+              UNION SELECT DISTINCT "composite_schema_sdl_store_id" FROM "schema_checks" WHERE "expires_at"  <= ${date} AND "composite_schema_sdl_store_id" <> NULL
+              UNION SELECT DISTINCT "supergraph_sdl_store_id" FROM "schema_checks" WHERE "expires_at"  <= ${date} AND "supergraph_sdl_store_id" <> NULL
+              UNION SELECT DISTINCT "contract_checks"."composite_schema_sdl_store_id" FROM "contract_checks" INNER JOIN "schema_checks" ON "contract_checks"."schema_check_id" = "schema_checks"."id" WHERE "expires_at" <= ${date} AND "contract_checks"."composite_schema_sdl_store_id" <> null
+              UNION SELECT DISTINCT "contract_checks"."supergraph_sdl_store_id" FROM "schema_checks"  JOIN "contract_checks" ON "contract_checks"."schema_check_id" = "schema_checks"."id" WHERE "expires_at" <= ${date} AND "contract_checks"."supergraph_sdl_store_id" <>  NULL
+            ) AS "sdlStoreIds",
+            ARRAY (
+              SELECT
+                DISTINCT "context_id"
+              FROM
+                "schema_checks"
+              WHERE
+                "expires_at" <= ${date}
+                AND "context_id" <> NULL
+            ) as "contextIds",
+            ARRAY (
+              SELECT
+                DISTINCT "contract_id"
+              FROM "contract_checks" INNER JOIN "schema_checks" ON "contract_checks"."schema_check_id" = "schema_checks"."id" WHERE "contract_checks"."expires_at" <= ${date}
+            ) as "contractIds"
         `);
 
-        const { storeIds, targetIds, contextIds } = PurgeExpiredSchemaChecksIDModel.parse(result);
+        const data = SchemaCheckModel.parse(rawData);
+
+        if (!data.schemaCheckIds.length) {
+          return {
+            deletedSchemaCheckCount: 0,
+            deletedSdlStoreCount: 0,
+            deletedSchemaChangeApprovalCount: 0,
+            deletedContractSchemaChangeApprovalCount: 0,
+          };
+        }
 
         let deletedSdlStoreCount = 0;
         let deletedSchemaChangeApprovalCount = 0;
+        let deletedContractSchemaChangeApprovalCount = 0;
 
-        if (storeIds.size !== 0) {
-          const deletedSdlStoreRecords = await pool.any<unknown>(sql`
-            DELETE
-            FROM
-              "sdl_store"
-            WHERE
-              "id" = ANY(
-                ${sql.array(Array.from(storeIds), 'text')}
-              )
-              AND NOT EXISTS (
-                SELECT
-                  1
-                FROM
-                  "schema_checks"
-                WHERE
-                  "schema_checks"."schema_sdl_store_id" = "sdl_store"."id"
-                  OR "schema_checks"."composite_schema_sdl_store_id" = "sdl_store"."id"
-                  OR "schema_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
-              )
-            RETURNING
-              true as "d"
+        await pool.any<unknown>(sql`
+          DELETE
+          FROM "schema_checks"
+          WHERE
+            "id" = ANY(${sql.array(data.schemaCheckIds, 'uuid')})
+        `);
+
+        if (data.sdlStoreIds.length) {
+          deletedSdlStoreCount = await pool.oneFirst<number>(sql`
+            WITH "deleted" AS (
+              DELETE
+              FROM
+                "sdl_store"
+              WHERE
+                "id" = ANY(
+                  ${sql.array(data.sdlStoreIds, 'text')}
+                )
+                AND NOT EXISTS (
+                  SELECT
+                    1
+                  FROM
+                    "schema_checks"
+                  WHERE
+                    "schema_checks"."schema_sdl_store_id" = "sdl_store"."id"
+                    OR "schema_checks"."composite_schema_sdl_store_id" = "sdl_store"."id"
+                    OR "schema_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
+                )
+                AND NOT EXISTS (
+                  SELECT
+                    1
+                  FROM
+                    "contract_checks"
+                  WHERE
+                   "contract_checks"."composite_schema_sdl_store_id" = "sdl_store"."id"
+                   OR "schema_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
+                )
+              RETURNING
+                "id"
+            ) SELECT COUNT(*) FROM "deleted"
           `);
-
-          deletedSdlStoreCount = deletedSdlStoreRecords.length;
         }
 
-        if (targetIds.size && contextIds.size) {
-          const deletedSchemaChangeApprovals = await pool.any<unknown>(sql`
-            DELETE
-            FROM
-              "schema_change_approvals"
-            WHERE
-              "target_id" = ANY(
-                ${sql.array(Array.from(targetIds), 'uuid')}
-              )
-              AND "context_id" = ANY(
-                ${sql.array(Array.from(contextIds), 'text')}
-              )
-              AND NOT EXISTS (
-                SELECT
-                  1
-                FROM "schema_checks"
-                WHERE
-                  "schema_checks"."target_id" = "schema_change_approvals"."target_id"
-                  AND "schema_checks"."context_id" = "schema_change_approvals"."context_id"
-              )
-            RETURNING
-              true as "d"
+        if (data.targetIds.length && data.contextIds.length) {
+          deletedSchemaChangeApprovalCount = await pool.oneFirst<number>(sql`
+            WITH "deleted" AS (
+              DELETE
+              FROM
+                "schema_change_approvals"
+              WHERE
+                "target_id" = ANY(
+                  ${sql.array(data.targetIds, 'uuid')}
+                )
+                AND "context_id" = ANY(
+                  ${sql.array(data.contextIds, 'text')}
+                )
+                AND NOT EXISTS (
+                  SELECT
+                    1
+                  FROM "schema_checks"
+                  WHERE
+                    "schema_checks"."target_id" = "schema_change_approvals"."target_id"
+                    AND "schema_checks"."context_id" = "schema_change_approvals"."context_id"
+                )
+              RETURNING
+                "id"
+            ) SELECT COUNT(*) FROM "deleted"
           `);
+        }
 
-          deletedSchemaChangeApprovalCount = deletedSchemaChangeApprovals.length;
+        if (data.contractIds.length && data.contextIds.length) {
+          deletedContractSchemaChangeApprovalCount = await pool.oneFirst<number>(sql`
+            WITH "deleted" AS (
+              DELETE
+              FROM
+                "contract_schema_change_approvals"
+              WHERE
+                "contract_id" = ANY(
+                  ${sql.array(data.contractIds, 'uuid')}
+                )
+                AND "context_id" = ANY(
+                  ${sql.array(data.contextIds, 'text')}
+                )
+                AND NOT EXISTS (
+                  SELECT
+                    1
+                  FROM "contract_checks"
+                  WHERE
+                    "contract_checks"."contract_id" = "contract_schema_change_approvals"."contract_id"
+                    AND "contract_checks"."context_id" = "contract_schema_change_approvals"."context_id"
+                )
+              RETURNING
+                "id"
+            ) SELECT COUNT(*) FROM "deleted"
+          `);
         }
 
         return {
-          deletedSchemaCheckCount: result.length,
+          deletedSchemaCheckCount: data.schemaCheckIds.length,
           deletedSdlStoreCount,
           deletedSchemaChangeApprovalCount,
+          deletedContractSchemaChangeApprovalCount,
         };
       });
     },
@@ -5007,38 +5093,6 @@ const TargetModel = zod.object({
   projectId: zod.string(),
   graphqlEndpointUrl: zod.string().nullable(),
 });
-
-const PurgeExpiredSchemaChecksIDModel = zod
-  .array(
-    zod.object({
-      storeId1: zod.string().nullable(),
-      storeId2: zod.string().nullable(),
-      storeId3: zod.string().nullable(),
-      targetId: zod.string(),
-      contextId: zod.string().nullable(),
-    }),
-  )
-  .transform(items => {
-    const storeIds = new Set<string>();
-    const targetIds = new Set<string>();
-    const contextIds = new Set<string>();
-
-    for (const row of items) {
-      row.storeId1 && storeIds.add(row.storeId1);
-      row.storeId2 && storeIds.add(row.storeId2);
-      row.storeId3 && storeIds.add(row.storeId3);
-      if (row.contextId) {
-        targetIds.add(row.targetId);
-        contextIds.add(row.contextId);
-      }
-    }
-
-    return {
-      storeIds,
-      targetIds,
-      contextIds,
-    };
-  });
 
 export * from './schema-change-model';
 export {
