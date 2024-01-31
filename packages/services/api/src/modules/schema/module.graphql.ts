@@ -262,7 +262,7 @@ export default gql`
   }
 
   union SchemaPublishPayload =
-      SchemaPublishSuccess
+    | SchemaPublishSuccess
     | SchemaPublishError
     | SchemaPublishMissingServiceError
     | SchemaPublishMissingUrlError
@@ -304,7 +304,7 @@ export default gql`
   }
 
   union SchemaCheckPayload =
-      SchemaCheckSuccess
+    | SchemaCheckSuccess
     | SchemaCheckError
     | GitHubSchemaCheckSuccess
     | GitHubSchemaCheckError
@@ -601,7 +601,7 @@ export default gql`
   }
 
   union GraphQLNamedType =
-      GraphQLObjectType
+    | GraphQLObjectType
     | GraphQLInterfaceType
     | GraphQLUnionType
     | GraphQLEnumType

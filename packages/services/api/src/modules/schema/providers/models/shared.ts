@@ -237,11 +237,8 @@ export type SchemaDeleteFailure = {
 
 export type SchemaDeleteResult = SchemaDeleteFailure | SchemaDeleteSuccess;
 
-type ReasonOf<T extends { code: string }[], R extends T[number]['code']> = T extends Array<infer U>
-  ? U extends { code: R }
-    ? U
-    : never
-  : never;
+type ReasonOf<T extends { code: string }[], R extends T[number]['code']> =
+  T extends Array<infer U> ? (U extends { code: R } ? U : never) : never;
 
 export function getReasonByCode<T extends { code: string }[], R extends T[number]['code']>(
   reasons: T,

@@ -184,7 +184,7 @@ const federation2SDL = parse(/* GraphQL */ `
     @join__type(graph: PANDAS)
     @join__unionMember(graph: PRODUCTS, member: "User")
     @join__unionMember(graph: B, member: "Panda") =
-      Movie
+    | Movie
     | Book
 
   input UserInput @join__type(graph: PRODUCTS) @join__type(graph: PANDAS) {

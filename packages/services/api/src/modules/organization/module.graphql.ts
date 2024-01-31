@@ -251,7 +251,7 @@ export default gql`
   union JoinOrganizationPayload = OrganizationInvitationError | OrganizationPayload
 
   union OrganizationByInviteCodePayload =
-      OrganizationInvitationError
+    | OrganizationInvitationError
     | OrganizationInvitationPayload
 
   type OrganizationPayload {
