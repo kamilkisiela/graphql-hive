@@ -54,19 +54,20 @@ type GetConfigurationKeys<
   T extends zod.ZodObject<{
     [key: string]: zod.ZodType<any, any>;
   }>,
-> = T extends zod.ZodObject<infer TObjectShape>
-  ? TObjectShape extends Record<infer TKey, infer TObjectPropertyType>
-    ? TKey extends string
-      ? `${TKey}${TObjectPropertyType extends zod.ZodObject<any>
-          ? BuildPropertyPath<TObjectPropertyType>
-          : TObjectPropertyType extends zod.ZodOptional<infer TOptionalInnerObjectPropertyType>
-            ? TOptionalInnerObjectPropertyType extends zod.ZodObject<any>
-              ? BuildPropertyPath<TOptionalInnerObjectPropertyType>
-              : ''
-            : ''}`
+> =
+  T extends zod.ZodObject<infer TObjectShape>
+    ? TObjectShape extends Record<infer TKey, infer TObjectPropertyType>
+      ? TKey extends string
+        ? `${TKey}${TObjectPropertyType extends zod.ZodObject<any>
+            ? BuildPropertyPath<TObjectPropertyType>
+            : TObjectPropertyType extends zod.ZodOptional<infer TOptionalInnerObjectPropertyType>
+              ? TOptionalInnerObjectPropertyType extends zod.ZodObject<any>
+                ? BuildPropertyPath<TOptionalInnerObjectPropertyType>
+                : ''
+              : ''}`
+        : never
       : never
-    : never
-  : never;
+    : never;
 
 type GetZodValueType<
   TString extends string,

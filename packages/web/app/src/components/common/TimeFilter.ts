@@ -43,11 +43,12 @@ export const DATE_RANGE_OPTIONS = [
   },
 ];
 
-type KeyOf<T> = T extends Array<{
-  key: infer K;
-}>
-  ? K
-  : never;
+type KeyOf<T> =
+  T extends Array<{
+    key: infer K;
+  }>
+    ? K
+    : never;
 
 type PeriodKey = KeyOf<typeof DATE_RANGE_OPTIONS>;
 
