@@ -125,8 +125,8 @@ importers:
         specifier: 13.6.4
         version: 13.6.4
       dotenv:
-        specifier: 16.3.2
-        version: 16.3.2
+        specifier: 16.4.1
+        version: 16.4.1
       eslint:
         specifier: 8.56.0
         version: 8.56.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
@@ -294,8 +294,8 @@ importers:
         specifier: 4.0.1
         version: 4.0.1
       dotenv:
-        specifier: 16.3.2
-        version: 16.3.2
+        specifier: 16.4.1
+        version: 16.4.1
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -511,8 +511,8 @@ importers:
         specifier: 2.4.1
         version: 2.4.1
       dotenv:
-        specifier: 16.3.2
-        version: 16.3.2
+        specifier: 16.4.1
+        version: 16.4.1
       got:
         specifier: 12.6.1
         version: 12.6.1
@@ -749,8 +749,8 @@ importers:
         specifier: 2.4.3
         version: 2.4.3
       dotenv:
-        specifier: 16.3.2
-        version: 16.3.2
+        specifier: 16.4.1
+        version: 16.4.1
       esbuild:
         specifier: 0.19.11
         version: 0.19.11
@@ -803,8 +803,8 @@ importers:
         specifier: 2.4.1
         version: 2.4.1
       dotenv:
-        specifier: 16.3.2
-        version: 16.3.2
+        specifier: 16.4.1
+        version: 16.4.1
       ioredis:
         specifier: 5.3.2
         version: 5.3.2
@@ -881,8 +881,8 @@ importers:
         specifier: 8.12.0
         version: 8.12.0
       dotenv:
-        specifier: 16.3.2
-        version: 16.3.2
+        specifier: 16.4.1
+        version: 16.4.1
       eslint:
         specifier: 8.56.0
         version: 8.56.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
@@ -929,8 +929,8 @@ importers:
         specifier: 3.3.1
         version: 3.3.1
       dotenv:
-        specifier: 16.3.2
-        version: 16.3.2
+        specifier: 16.4.1
+        version: 16.4.1
       got:
         specifier: 12.6.1
         version: 12.6.1
@@ -983,8 +983,8 @@ importers:
         specifier: 0.9.15
         version: 0.9.15
       dotenv:
-        specifier: 16.3.2
-        version: 16.3.2
+        specifier: 16.4.1
+        version: 16.4.1
       fast-json-stable-stringify:
         specifier: 2.1.0
         version: 2.1.0
@@ -1085,8 +1085,8 @@ importers:
         specifier: 0.9.23
         version: 0.9.23
       dotenv:
-        specifier: 16.3.2
-        version: 16.3.2
+        specifier: 16.4.1
+        version: 16.4.1
       fastify:
         specifier: 3.29.5
         version: 3.29.5
@@ -1179,8 +1179,8 @@ importers:
         specifier: 8.11.0
         version: 8.11.0
       dotenv:
-        specifier: 16.3.2
-        version: 16.3.2
+        specifier: 16.4.1
+        version: 16.4.1
       fast-json-stable-stringify:
         specifier: 2.1.0
         version: 2.1.0
@@ -1236,8 +1236,8 @@ importers:
         specifier: 3.3.1
         version: 3.3.1
       dotenv:
-        specifier: 16.3.2
-        version: 16.3.2
+        specifier: 16.4.1
+        version: 16.4.1
       got:
         specifier: 12.6.1
         version: 12.6.1
@@ -1272,8 +1272,8 @@ importers:
         specifier: 0.7.34
         version: 0.7.34
       dotenv:
-        specifier: 16.3.2
-        version: 16.3.2
+        specifier: 16.4.1
+        version: 16.4.1
       fastify:
         specifier: 3.29.5
         version: 3.29.5
@@ -1329,8 +1329,8 @@ importers:
         specifier: 8.12.0
         version: 8.12.0
       dotenv:
-        specifier: 16.3.2
-        version: 16.3.2
+        specifier: 16.4.1
+        version: 16.4.1
       got:
         specifier: 12.6.1
         version: 12.6.1
@@ -1374,8 +1374,8 @@ importers:
         specifier: 0.9.15
         version: 0.9.15
       dotenv:
-        specifier: 16.3.2
-        version: 16.3.2
+        specifier: 16.4.1
+        version: 16.4.1
       got:
         specifier: 12.6.1
         version: 12.6.1
@@ -1413,8 +1413,8 @@ importers:
         specifier: 3.3.1
         version: 3.3.1
       dotenv:
-        specifier: 16.3.2
-        version: 16.3.2
+        specifier: 16.4.1
+        version: 16.4.1
       got:
         specifier: 12.6.1
         version: 12.6.1
@@ -1455,8 +1455,8 @@ importers:
         specifier: 2.4.1
         version: 2.4.1
       dotenv:
-        specifier: 16.3.2
-        version: 16.3.2
+        specifier: 16.4.1
+        version: 16.4.1
       got:
         specifier: 12.6.1
         version: 12.6.1
@@ -7239,7 +7239,7 @@ packages:
       '@whatwg-node/fetch': 0.9.15
       chalk: 4.1.2
       debug: 4.3.4(supports-color@8.1.1)
-      dotenv: 16.3.2
+      dotenv: 16.4.1
       graphql: 16.8.1
       graphql-request: 6.1.0(graphql@16.8.1)
       http-proxy-agent: 7.0.0
@@ -17848,8 +17848,8 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
-  /dotenv@16.3.2:
-    resolution: {integrity: sha512-HTlk5nmhkm8F6JcdXvHIzaorzCoziNQT9mGxLPVXW8wJF1TiGSL60ZGB4gHWabHOaMmWmhvk2/lPHfnBiT78AQ==}
+  /dotenv@16.4.1:
+    resolution: {integrity: sha512-CjA3y+Dr3FyFDOAMnxZEGtnW9KBR2M0JvvUtXNW+dYJL5ROWxP9DUHCwgFqpMk0OXCc0ljhaNTr2w/kutYIcHQ==}
     engines: {node: '>=12'}
     dev: true
 
@@ -22593,7 +22593,7 @@ packages:
     engines: {node: '>=14.0.0'}
     dependencies:
       app-root-dir: 1.0.2
-      dotenv: 16.3.2
+      dotenv: 16.4.1
       dotenv-expand: 10.0.0
     dev: true
 
