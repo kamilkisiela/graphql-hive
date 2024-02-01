@@ -3,9 +3,9 @@ type Query {
 }
 
 enum UserRole {
- ADMIN
- EDITOR
- VIEWER
+  ADMIN
+  EDITOR
+  VIEWER
 }
 
 type User {
@@ -14,4 +14,3 @@ type User {
   address: String
   role: UserRole!
 }
-
