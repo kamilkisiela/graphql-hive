@@ -437,7 +437,7 @@ export async function main() {
     }
 
     if (env.prometheus) {
-      await startMetrics(env.prometheus.labels.instance);
+      await startMetrics(env.prometheus.labels.instance, env.prometheus.port);
     }
 
     await server.listen(port, '::');
