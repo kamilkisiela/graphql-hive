@@ -187,6 +187,10 @@ export default gql`
 
   extend type Target {
     latestSchemaVersion: SchemaVersion
+    """
+    The latest valid (composable) schema version.
+    """
+    latestValidSchemaVersion: SchemaVersion
     baseSchema: String
     hasSchema: Boolean!
     """

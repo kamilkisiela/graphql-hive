@@ -484,6 +484,13 @@ export const resolvers: SchemaModule.Resolvers = {
         organization: target.orgId,
       });
     },
+    async latestValidSchemaVersion(target, __, { injector }) {
+      return injector.get(SchemaManager).getMaybeLatestValidVersion({
+        organization: target.orgId,
+        project: target.projectId,
+        target: target.id,
+      });
+    },
     baseSchema(target, _, { injector }) {
       return injector.get(SchemaManager).getBaseSchema({
         target: target.id,
