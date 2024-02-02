@@ -1,7 +1,9 @@
 import { memo, ReactElement, useEffect, useMemo, useState } from 'react';
+import { AlertCircleIcon } from 'lucide-react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
@@ -13,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { MetaTitle } from '@/components/v2';
+import { Link, MetaTitle } from '@/components/v2';
 import { EmptyList, noSchemaVersion } from '@/components/v2/empty-list';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
@@ -153,6 +155,9 @@ const UnusedSchemaExplorer_UnusedSchemaQuery = graphql(`
       id
       cleanId
       latestSchemaVersion {
+        id
+      }
+      latestValidSchemaVersion {
         __typename
         id
         valid
@@ -206,6 +211,7 @@ function UnusedSchemaExplorer(props: {
   }
 
   const latestSchemaVersion = query.data?.target?.latestSchemaVersion;
+  const latestValidSchemaVersion = query.data?.target?.latestValidSchemaVersion;
 
   return (
     <>
@@ -233,18 +239,66 @@ function UnusedSchemaExplorer(props: {
               ))}
             </SelectContent>
           </Select>
+          <Button variant="outline" asChild>
+            <Link
+              href={{
+                pathname: '/[organizationId]/[projectId]/[targetId]/explorer',
+                query: {
+                  organizationId: props.organizationCleanId,
+                  projectId: props.projectCleanId,
+                  targetId: props.targetCleanId,
+                },
+              }}
+            >
+              Explore full schema
+            </Link>
+          </Button>
         </div>
       </div>
-      {query.fetching ? null : latestSchemaVersion?.unusedSchema ? (
-        <UnusedSchemaView
-          totalRequests={query.data?.operationsStats.totalRequests ?? 0}
-          explorer={latestSchemaVersion.unusedSchema}
-          organizationCleanId={props.organizationCleanId}
-          projectCleanId={props.projectCleanId}
-          targetCleanId={props.targetCleanId}
-        />
-      ) : (
-        noSchemaVersion
+      {!query.fetching && (
+        <>
+          {latestValidSchemaVersion?.unusedSchema && latestSchemaVersion ? (
+            <>
+              {latestSchemaVersion.id !== latestValidSchemaVersion.id && (
+                <Alert className="mb-3">
+                  <AlertCircleIcon className="h-4 w-4" />
+                  <AlertTitle>Outdated Schema</AlertTitle>
+                  <AlertDescription className="max-w-[600px]">
+                    The latest schema version is <span className="font-bold">not valid</span> , thus
+                    the explorer might not be accurate as it is showing the{' '}
+                    <span className="font-bold">latest valid</span> schema version. We recommend you
+                    to publish a new schema version that is composable before using this explorer
+                    for decision making.
+                    <br />
+                    <br />
+                    <Link
+                      href={{
+                        pathname: '/[organizationId]/[projectId]/[targetId]/history/[versionId]',
+                        query: {
+                          organizationId: props.organizationCleanId,
+                          projectId: props.projectCleanId,
+                          targetId: props.targetCleanId,
+                          versionId: latestSchemaVersion.id,
+                        },
+                      }}
+                    >
+                      <span className="font-bold"> See the invalid schema version</span>
+                    </Link>
+                  </AlertDescription>
+                </Alert>
+              )}
+              <UnusedSchemaView
+                totalRequests={query.data?.operationsStats.totalRequests ?? 0}
+                explorer={latestValidSchemaVersion.unusedSchema}
+                organizationCleanId={props.organizationCleanId}
+                projectCleanId={props.projectCleanId}
+                targetCleanId={props.targetCleanId}
+              />
+            </>
+          ) : (
+            noSchemaVersion
+          )}
+        </>
       )}
     </>
   );
