@@ -207,10 +207,10 @@ importers:
         version: 4.7.1
       '@pulumi/kubernetesx':
         specifier: 0.1.6
-        version: 0.1.6(@pulumi/kubernetes@4.7.1)(@pulumi/pulumi@3.103.1)
+        version: 0.1.6(@pulumi/kubernetes@4.7.1)(@pulumi/pulumi@3.104.2)
       '@pulumi/pulumi':
-        specifier: 3.103.1
-        version: 3.103.1
+        specifier: 3.104.2
+        version: 3.104.2
       '@pulumi/random':
         specifier: 4.14.0
         version: 4.14.0
@@ -7542,8 +7542,8 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /@grpc/grpc-js@1.9.6:
-    resolution: {integrity: sha512-yq3qTy23u++8zdvf+h4mz4ohDFi681JAkMZZPTKh8zmUVh0AKLisFlgxcn22FMNowXz15oJ6pqgwT7DJ+PdJvg==}
+  /@grpc/grpc-js@1.9.14:
+    resolution: {integrity: sha512-nOpuzZ2G3IuMFN+UPPpKrC6NsLmWsTqSsm66IRfnBt1D4pwTqE27lmbpcPM+l2Ua4gE7PfjRHI6uedAy7hoXUw==}
     engines: {node: ^8.13.0 || >=10.10.0}
     dependencies:
       '@grpc/proto-loader': 0.7.10
@@ -7765,7 +7765,7 @@ packages:
     resolution: {integrity: sha512-REc/LQOy17O9jbZnBNm4tLjLJKxOfLaWPIB2CFiAtM1VzwU3FzZQFs0K+XGkuZwWdB+tl2/VHdHv+FqsUrit2w==}
     requiresBuild: true
     dependencies:
-      '@pulumi/pulumi': 3.103.1
+      '@pulumi/pulumi': 3.104.2
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -9206,7 +9206,7 @@ packages:
     resolution: {integrity: sha512-cwdB70bLeKL/VNIqqOD5fpHQcocVmpHuiHH589eR+QUfbLa4f+M8yA/TTCcxx2AFFctTqO5wgVuC+faL8xZmWQ==}
     requiresBuild: true
     dependencies:
-      '@pulumi/pulumi': 3.103.1
+      '@pulumi/pulumi': 3.104.2
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -9215,7 +9215,7 @@ packages:
     resolution: {integrity: sha512-gIV6pLaHypb39/NL7s/BpvEOY2vawqREpdQeJbQUXSHe+gNgCwMuXWBp5Pl2cJpAd2UCYibdBM1S77QYJATwzA==}
     requiresBuild: true
     dependencies:
-      '@pulumi/pulumi': 3.103.1
+      '@pulumi/pulumi': 3.104.2
       '@types/glob': 5.0.37
       '@types/node-fetch': 2.6.4
       '@types/tmp': 0.0.33
@@ -9228,21 +9228,21 @@ packages:
       - supports-color
     dev: false
 
-  /@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.7.1)(@pulumi/pulumi@3.103.1):
+  /@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.7.1)(@pulumi/pulumi@3.104.2):
     resolution: {integrity: sha512-9VL4Yi4b4aLC/obBarJuNkm86kABByUZICYPSTdV396MGZtOc066o2brsB+kWVQcVfkYVXTPrpjIkAwBXXnzGw==}
     peerDependencies:
       '@pulumi/kubernetes': ^3.0.0
       '@pulumi/pulumi': ^3.0.0
     dependencies:
       '@pulumi/kubernetes': 4.7.1
-      '@pulumi/pulumi': 3.103.1
+      '@pulumi/pulumi': 3.104.2
     dev: false
 
-  /@pulumi/pulumi@3.103.1:
-    resolution: {integrity: sha512-bv87x4vcjHs09Yss8WWJkbWxf4sABVXPbLPrHn5SOhng4TaGtFejDaDzgTaevOHCchJJNyXpPqTYzKqc2WmeEQ==}
+  /@pulumi/pulumi@3.104.2:
+    resolution: {integrity: sha512-Ljl1JaMFjcfse4M4bFQDadU5FTM4R404DZwM7fegcE0KvWJY2RPZj0TzBazv1vbwSlhDvzmuxQhHN1+U9y+EvQ==}
     engines: {node: '>=8.13.0 || >=10.10.0'}
     dependencies:
-      '@grpc/grpc-js': 1.9.6
+      '@grpc/grpc-js': 1.9.14
       '@logdna/tail-file': 2.2.0
       '@opentelemetry/api': 1.7.0
       '@opentelemetry/exporter-zipkin': 1.7.0(@opentelemetry/api@1.7.0)
@@ -9283,7 +9283,7 @@ packages:
   /@pulumi/random@4.14.0:
     resolution: {integrity: sha512-R9GgDbX/PR53C3a9V55FrOHwS3k7YEUr6bDnPcXI3M9PEELFIprYQRnO0oafpE4je5NRxY5a0qQ+TJQLpkhSkA==}
     dependencies:
-      '@pulumi/pulumi': 3.103.1
+      '@pulumi/pulumi': 3.104.2
     transitivePeerDependencies:
       - supports-color
     dev: false
