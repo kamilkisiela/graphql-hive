@@ -125,7 +125,7 @@
     "@types/react-virtualized-auto-sizer": "1.0.4",
     "@types/react-window": "1.8.8",
     "autoprefixer": "10.4.17",
-    "esbuild": "0.19.11",
+    "esbuild": "0.20.0",
     "pino-pretty": "10.3.1",
     "postcss": "8.4.33",
     "postcss-loader": "7.3.4",
