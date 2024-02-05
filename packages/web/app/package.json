@@ -128,7 +128,7 @@
     "esbuild": "0.20.0",
     "pino-pretty": "10.3.1",
     "postcss": "8.4.33",
-    "postcss-loader": "7.3.4",
+    "postcss-loader": "8.1.0",
     "rimraf": "4.4.1",
     "storybook": "7.6.12",
     "tailwindcss": "3.4.1",
