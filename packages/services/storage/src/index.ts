@@ -25,6 +25,7 @@ import type {
 } from '@hive/api';
 import { batch } from '@theguild/buddy';
 import {
+  createSDLHash,
   OrganizationMemberRoleModel,
   ProjectType,
   type CDNAccessToken,
@@ -3943,39 +3944,27 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         const sdlStoreInserts: Array<Promise<unknown>> = [];
 
         function insertSdl(hash: string, sdl: string) {
-          sdlStoreInserts.push(
-            trx.query<unknown>(sql`
-              INSERT INTO "sdl_store" (id, sdl)
-              VALUES (${hash}, ${sdl})
-              ON CONFLICT (id) DO NOTHING;
-            `),
-          );
+          return trx.query<unknown>(sql`
+            INSERT INTO "sdl_store" (id, sdl)
+            VALUES (${hash}, ${sdl})
+            ON CONFLICT (id) DO NOTHING;
+          `);
         }
 
-        insertSdl(args.schemaSDLHash, args.schemaSDL);
+        const schemaSDLHash = createSDLHash(args.schemaSDL);
+        let compositeSchemaSDLHash: string | null = null;
+        let supergraphSDLHash: string | null = null;
 
-        if (args.compositeSchemaSDLHash) {
-          insertSdl(args.compositeSchemaSDLHash, args.compositeSchemaSDL);
+        sdlStoreInserts.push(insertSdl(schemaSDLHash, args.schemaSDL));
+
+        if (args.compositeSchemaSDL) {
+          compositeSchemaSDLHash = createSDLHash(args.compositeSchemaSDL);
+          sdlStoreInserts.push(insertSdl(compositeSchemaSDLHash, args.compositeSchemaSDL));
         }
 
-        if (args.supergraphSDLHash) {
-          if (!args.supergraphSDL) {
-            throw new Error('supergraphSDLHash provided without supergraphSDL');
-          }
-
-          insertSdl(args.supergraphSDLHash, args.supergraphSDL);
-        }
-
-        if (args.contracts?.length) {
-          for (const contract of args.contracts) {
-            if (contract.supergraphSchemaSdl && contract.supergraphSchemaSdlHash) {
-              insertSdl(contract.supergraphSchemaSdlHash, contract.supergraphSchemaSdl);
-            }
-
-            if (contract.compositeSchemaSdl && contract.compositeSchemaSdlHash) {
-              insertSdl(contract.compositeSchemaSdlHash, contract.compositeSchemaSdl);
-            }
-          }
+        if (args.supergraphSDL) {
+          supergraphSDLHash = createSDLHash(args.supergraphSDL);
+          sdlStoreInserts.push(insertSdl(supergraphSDLHash, args.supergraphSDL));
         }
 
         await Promise.all(sdlStoreInserts);
@@ -4005,7 +3994,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             , "has_contract_schema_changes"
           )
           VALUES (
-              ${args.schemaSDLHash}
+              ${schemaSDLHash}
             , ${args.serviceName}
             , ${jsonify(args.meta)}
             , ${args.targetId}
@@ -4016,8 +4005,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             , ${jsonify(args.safeSchemaChanges?.map(toSerializableSchemaChange))}
             , ${jsonify(args.schemaPolicyWarnings?.map(w => SchemaPolicyWarningModel.parse(w)))}
             , ${jsonify(args.schemaPolicyErrors?.map(w => SchemaPolicyWarningModel.parse(w)))}
-            , ${args.compositeSchemaSDLHash}
-            , ${args.supergraphSDLHash}
+            , ${compositeSchemaSDLHash}
+            , ${supergraphSDLHash}
             , ${args.isManuallyApproved}
             , ${args.manualApprovalUserId}
             , ${args.githubCheckRunId}
@@ -4037,6 +4026,19 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
         if (args.contracts?.length) {
           for (const contract of args.contracts) {
+            let supergraphSchemaSdlHash: string | null = null;
+            let compositeSchemaSdlHash: string | null = null;
+
+            if (contract.supergraphSchemaSdl) {
+              supergraphSchemaSdlHash = createSDLHash(contract.supergraphSchemaSdl);
+              await insertSdl(supergraphSchemaSdlHash, contract.supergraphSchemaSdl);
+            }
+
+            if (contract.compositeSchemaSdl) {
+              compositeSchemaSdlHash = createSDLHash(contract.compositeSchemaSdl);
+              await insertSdl(compositeSchemaSdlHash, contract.compositeSchemaSdl);
+            }
+
             await trx.query(sql`
               INSERT INTO "contract_checks" (
                 "schema_check_id"
@@ -4054,8 +4056,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 , ${contract.comparedContractVersionId}
                 , ${contract.isSuccess}
                 , ${contract.contractId}
-                , ${contract.compositeSchemaSdlHash}
-                , ${contract.supergraphSchemaSdlHash}
+                , ${compositeSchemaSdlHash}
+                , ${supergraphSchemaSdlHash}
                 , ${jsonify(contract.schemaCompositionErrors)}
                 , ${jsonify(contract.breakingSchemaChanges?.map(toSerializableSchemaChange))}
                 , ${jsonify(contract.safeSchemaChanges?.map(toSerializableSchemaChange))}
@@ -4523,7 +4525,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                     AND "schema_checks"."context_id" = "schema_change_approvals"."context_id"
                 )
               RETURNING
-                "id"
+                "target_id"
             ) SELECT COUNT(*) FROM "deleted"
           `);
         }
@@ -4550,7 +4552,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                     AND "contract_checks"."context_id" = "contract_schema_change_approvals"."context_id"
                 )
               RETURNING
-                "id"
+                "contract_id"
             ) SELECT COUNT(*) FROM "deleted"
           `);
         }

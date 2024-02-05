@@ -879,8 +879,6 @@ const FailedSchemaCompositionOutputFields = {
 
 const FailedSchemaCompositionInputFields = {
   ...FailedSchemaCompositionOutputFields,
-  compositeSchemaSDLHash: z.null(),
-  supergraphSDLHash: z.null(),
 };
 
 const SuccessfulSchemaCompositionOutputFields = {
@@ -891,8 +889,6 @@ const SuccessfulSchemaCompositionOutputFields = {
 
 const SuccessfulSchemaCompositionInputFields = {
   ...SuccessfulSchemaCompositionOutputFields,
-  compositeSchemaSDLHash: z.string(),
-  supergraphSDLHash: z.string().nullable(),
 };
 
 const SchemaCheckSharedPolicyFields = {
@@ -937,7 +933,6 @@ const SchemaCheckSharedOutputFields = {
 
 const SchemaCheckSharedInputFields = {
   ...SchemaCheckSharedOutputFields,
-  schemaSDLHash: z.string(),
 };
 
 const ContractCheckInput = z.object({
@@ -945,9 +940,7 @@ const ContractCheckInput = z.object({
   comparedContractVersionId: z.string().uuid().nullable(),
   isSuccess: z.boolean(),
   compositeSchemaSdl: z.string().nullable(),
-  compositeSchemaSdlHash: z.string().nullable(),
   supergraphSchemaSdl: z.string().nullable(),
-  supergraphSchemaSdlHash: z.string().nullable(),
   schemaCompositionErrors: z.array(SchemaCompositionErrorModel).nullable(),
   breakingSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
   safeSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
