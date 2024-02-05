@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { DocumentNode, GraphQLError, print, SourceLocation } from 'graphql';
+import { DocumentNode, GraphQLError, parse, print, SourceLocation } from 'graphql';
 import { z } from 'zod';
 import type { AvailableRulesResponse, PolicyConfigurationObject } from '@hive/policy';
 import type { CompositionFailureError, ContractsInputType } from '@hive/schema';
@@ -98,6 +98,14 @@ export function hashSDL(sdl: DocumentNode): string {
   const hasher = createHash('md5');
   hasher.update(print(sortDocumentNode(sdl)));
   return hasher.digest('hex');
+}
+
+export function createSDLHash(sdl: string): string {
+  return hashSDL(
+    parse(sdl, {
+      noLocation: true,
+    }),
+  );
 }
 
 export function createSchemaObject(

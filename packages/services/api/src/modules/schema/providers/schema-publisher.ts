@@ -7,14 +7,7 @@ import { CriticalityLevel } from '@graphql-inspector/core';
 import { SchemaChangeType, SchemaCheck } from '@hive/storage';
 import * as Sentry from '@sentry/node';
 import * as Types from '../../../__generated__/types';
-import {
-  hashSDL,
-  Organization,
-  Project,
-  ProjectType,
-  Schema,
-  Target,
-} from '../../../shared/entities';
+import { Organization, Project, ProjectType, Schema, Target } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { isGitHubRepositoryString } from '../../../shared/is-github-repository-string';
 import { bolderize } from '../../../shared/markdown';
@@ -482,7 +475,6 @@ export class SchemaPublisher {
     if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
       schemaCheck = await this.storage.createSchemaCheck({
         schemaSDL: sdl,
-        schemaSDLHash: createSDLHash(sdl),
         serviceName: input.service ?? null,
         meta: input.meta ?? null,
         targetId: target.id,
@@ -496,20 +488,12 @@ export class SchemaPublisher {
           ? {
               schemaCompositionErrors: checkResult.state.composition.errors,
               compositeSchemaSDL: null,
-              compositeSchemaSDLHash: null,
               supergraphSDL: null,
-              supergraphSDLHash: null,
             }
           : {
               schemaCompositionErrors: null,
               compositeSchemaSDL: checkResult.state.composition.compositeSchemaSDL,
-              compositeSchemaSDLHash: createSDLHash(
-                checkResult.state.composition.compositeSchemaSDL,
-              ),
               supergraphSDL: checkResult.state.composition.supergraphSDL,
-              supergraphSDLHash: checkResult.state.composition.supergraphSDL
-                ? createSDLHash(checkResult.state.composition.supergraphSDL)
-                : null,
             }),
         isManuallyApproved: false,
         manualApprovalUserId: null,
@@ -528,13 +512,7 @@ export class SchemaPublisher {
               contractVersionIdByContractName.get(contract.contractName) ?? null,
             isSuccess: contract.isSuccessful,
             compositeSchemaSdl: contract.composition.compositeSchemaSDL,
-            compositeSchemaSdlHash: contract.composition.compositeSchemaSDL
-              ? createSDLHash(contract.composition.compositeSchemaSDL)
-              : null,
             supergraphSchemaSdl: contract.composition.supergraphSDL,
-            supergraphSchemaSdlHash: contract.composition.supergraphSDL
-              ? createSDLHash(contract.composition.supergraphSDL)
-              : null,
             schemaCompositionErrors: contract.composition.errors ?? null,
             breakingSchemaChanges: contract.schemaChanges?.breaking ?? null,
             safeSchemaChanges: contract.schemaChanges?.safe ?? null,
@@ -587,7 +565,6 @@ export class SchemaPublisher {
 
       schemaCheck = await this.storage.createSchemaCheck({
         schemaSDL: sdl,
-        schemaSDLHash: createSDLHash(sdl),
         serviceName: input.service ?? null,
         meta: input.meta ?? null,
         targetId: target.id,
@@ -599,11 +576,7 @@ export class SchemaPublisher {
         schemaPolicyErrors: null,
         schemaCompositionErrors: null,
         compositeSchemaSDL: composition.compositeSchemaSDL,
-        compositeSchemaSDLHash: createSDLHash(composition.compositeSchemaSDL),
         supergraphSDL: composition.supergraphSDL,
-        supergraphSDLHash: composition.supergraphSDL
-          ? createSDLHash(composition.supergraphSDL)
-          : null,
         isManuallyApproved: false,
         manualApprovalUserId: null,
         githubCheckRunId: githubCheckRun?.id ?? null,
@@ -621,13 +594,7 @@ export class SchemaPublisher {
               contractVersionIdByContractName.get(contract.contractName) ?? null,
             isSuccess: contract.isSuccessful,
             compositeSchemaSdl: contract.composition.compositeSchemaSDL,
-            compositeSchemaSdlHash: contract.composition.compositeSchemaSDL
-              ? createSDLHash(contract.composition.compositeSchemaSDL)
-              : null,
             supergraphSchemaSdl: contract.composition.supergraphSDL,
-            supergraphSchemaSdlHash: contract.composition.supergraphSDL
-              ? createSDLHash(contract.composition.supergraphSDL)
-              : null,
             schemaCompositionErrors: null,
             breakingSchemaChanges: contract.schemaChanges?.breaking ?? null,
             safeSchemaChanges: contract.schemaChanges?.safe ?? null,
@@ -2095,11 +2062,3 @@ const SchemaCheckContextIdModel = z
   .max(200, {
     message: 'Context ID cannot exceed length of 200 characters.',
   });
-
-function createSDLHash(sdl: string): string {
-  return hashSDL(
-    parse(sdl, {
-      noLocation: true,
-    }),
-  );
-}

@@ -744,6 +744,7 @@ export interface Storage {
     deletedSchemaCheckCount: number;
     deletedSdlStoreCount: number;
     deletedSchemaChangeApprovalCount: number;
+    deletedContractSchemaChangeApprovalCount: number;
   }>;
   /**
    * Find schema check for a given ID and target.

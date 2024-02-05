@@ -238,6 +238,7 @@ export interface schema_checks {
   github_check_run_id: string | null;
   github_repository: string | null;
   github_sha: string | null;
+  has_contract_schema_changes: boolean | null;
   id: string;
   is_manually_approved: boolean | null;
   is_success: boolean;

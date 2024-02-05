@@ -5,7 +5,7 @@ export default {
   noTransaction: true,
   run: ({ sql }) => [
     {
-      name: 'create schema_checks_connection_pagination_with_changes_new',
+      name: 'create index schema_checks_connection_pagination_with_changes_new',
       query: sql`
         CREATE INDEX CONCURRENTLY IF NOT EXISTS "schema_checks_connection_pagination_with_changes_new" ON "schema_checks" (
           "target_id" ASC
@@ -20,7 +20,7 @@ export default {
       `,
     },
     {
-      name: 'create schema_checks_connection_pagination_with_no_success_and_changes_new',
+      name: 'create index schema_checks_connection_pagination_with_no_success_and_changes_new',
       query: sql`
         CREATE INDEX CONCURRENTLY IF NOT EXISTS  "schema_checks_connection_pagination_with_no_success_and_changes_new" ON "schema_checks" (
           "target_id" ASC
@@ -38,15 +38,31 @@ export default {
       `,
     },
     {
-      name: 'drop schema_checks_connection_pagination_with_changes',
+      name: 'drop index schema_checks_connection_pagination_with_changes',
       query: sql`
         DROP INDEX CONCURRENTLY IF EXISTS "schema_checks_connection_pagination_with_changes";
       `,
     },
     {
-      name: 'drop schema_checks_connection_pagination_with_no_success_and_changes',
+      name: 'drop index schema_checks_connection_pagination_with_no_success_and_changes',
       query: sql`
         DROP INDEX CONCURRENTLY IF EXISTS "schema_checks_connection_pagination_with_no_success_and_changes";
+      `,
+    },
+    {
+      name: 'create index contract_checks_supergraph_sdl_store_id index',
+      query: sql`
+        CREATE INDEX CONCURRENTLY "contract_checks_supergraph_sdl_store_id" ON "contract_checks" (
+          "supergraph_sdl_store_id" ASC
+        );
+      `,
+    },
+    {
+      name: 'create index contract_checks_composite_schema_sdl_store_id',
+      query: sql`
+        CREATE INDEX CONCURRENTLY "contract_checks_composite_schema_sdl_store_id" ON "contract_checks" (
+          "composite_schema_sdl_store_id" ASC
+        );
       `,
     },
   ],

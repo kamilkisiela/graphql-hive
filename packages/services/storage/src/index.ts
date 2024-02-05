@@ -25,6 +25,7 @@ import type {
 } from '@hive/api';
 import { batch } from '@theguild/buddy';
 import {
+  createSDLHash,
   OrganizationMemberRoleModel,
   ProjectType,
   type CDNAccessToken,
@@ -3943,39 +3944,27 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         const sdlStoreInserts: Array<Promise<unknown>> = [];
 
         function insertSdl(hash: string, sdl: string) {
-          sdlStoreInserts.push(
-            trx.query<unknown>(sql`
-              INSERT INTO "sdl_store" (id, sdl)
-              VALUES (${hash}, ${sdl})
-              ON CONFLICT (id) DO NOTHING;
-            `),
-          );
+          return trx.query<unknown>(sql`
+            INSERT INTO "sdl_store" (id, sdl)
+            VALUES (${hash}, ${sdl})
+            ON CONFLICT (id) DO NOTHING;
+          `);
         }
 
-        insertSdl(args.schemaSDLHash, args.schemaSDL);
+        const schemaSDLHash = createSDLHash(args.schemaSDL);
+        let compositeSchemaSDLHash: string | null = null;
+        let supergraphSDLHash: string | null = null;
 
-        if (args.compositeSchemaSDLHash) {
-          insertSdl(args.compositeSchemaSDLHash, args.compositeSchemaSDL);
+        sdlStoreInserts.push(insertSdl(schemaSDLHash, args.schemaSDL));
+
+        if (args.compositeSchemaSDL) {
+          compositeSchemaSDLHash = createSDLHash(args.compositeSchemaSDL);
+          sdlStoreInserts.push(insertSdl(compositeSchemaSDLHash, args.compositeSchemaSDL));
         }
 
-        if (args.supergraphSDLHash) {
-          if (!args.supergraphSDL) {
-            throw new Error('supergraphSDLHash provided without supergraphSDL');
-          }
-
-          insertSdl(args.supergraphSDLHash, args.supergraphSDL);
-        }
-
-        if (args.contracts?.length) {
-          for (const contract of args.contracts) {
-            if (contract.supergraphSchemaSdl && contract.supergraphSchemaSdlHash) {
-              insertSdl(contract.supergraphSchemaSdlHash, contract.supergraphSchemaSdl);
-            }
-
-            if (contract.compositeSchemaSdl && contract.compositeSchemaSdlHash) {
-              insertSdl(contract.compositeSchemaSdlHash, contract.compositeSchemaSdl);
-            }
-          }
+        if (args.supergraphSDL) {
+          supergraphSDLHash = createSDLHash(args.supergraphSDL);
+          sdlStoreInserts.push(insertSdl(supergraphSDLHash, args.supergraphSDL));
         }
 
         await Promise.all(sdlStoreInserts);
@@ -4005,7 +3994,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             , "has_contract_schema_changes"
           )
           VALUES (
-              ${args.schemaSDLHash}
+              ${schemaSDLHash}
             , ${args.serviceName}
             , ${jsonify(args.meta)}
             , ${args.targetId}
@@ -4016,8 +4005,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             , ${jsonify(args.safeSchemaChanges?.map(toSerializableSchemaChange))}
             , ${jsonify(args.schemaPolicyWarnings?.map(w => SchemaPolicyWarningModel.parse(w)))}
             , ${jsonify(args.schemaPolicyErrors?.map(w => SchemaPolicyWarningModel.parse(w)))}
-            , ${args.compositeSchemaSDLHash}
-            , ${args.supergraphSDLHash}
+            , ${compositeSchemaSDLHash}
+            , ${supergraphSDLHash}
             , ${args.isManuallyApproved}
             , ${args.manualApprovalUserId}
             , ${args.githubCheckRunId}
@@ -4037,6 +4026,19 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
         if (args.contracts?.length) {
           for (const contract of args.contracts) {
+            let supergraphSchemaSdlHash: string | null = null;
+            let compositeSchemaSdlHash: string | null = null;
+
+            if (contract.supergraphSchemaSdl) {
+              supergraphSchemaSdlHash = createSDLHash(contract.supergraphSchemaSdl);
+              await insertSdl(supergraphSchemaSdlHash, contract.supergraphSchemaSdl);
+            }
+
+            if (contract.compositeSchemaSdl) {
+              compositeSchemaSdlHash = createSDLHash(contract.compositeSchemaSdl);
+              await insertSdl(compositeSchemaSdlHash, contract.compositeSchemaSdl);
+            }
+
             await trx.query(sql`
               INSERT INTO "contract_checks" (
                 "schema_check_id"
@@ -4054,8 +4056,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 , ${contract.comparedContractVersionId}
                 , ${contract.isSuccess}
                 , ${contract.contractId}
-                , ${contract.compositeSchemaSdlHash}
-                , ${contract.supergraphSchemaSdlHash}
+                , ${compositeSchemaSdlHash}
+                , ${supergraphSchemaSdlHash}
                 , ${jsonify(contract.schemaCompositionErrors)}
                 , ${jsonify(contract.breakingSchemaChanges?.map(toSerializableSchemaChange))}
                 , ${jsonify(contract.safeSchemaChanges?.map(toSerializableSchemaChange))}
@@ -4392,91 +4394,177 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     async purgeExpiredSchemaChecks(args) {
+      const SchemaCheckModel = zod.object({
+        schemaCheckIds: zod.array(zod.string()),
+        sdlStoreIds: zod.array(zod.string()),
+        contextIds: zod.array(zod.string()),
+        targetIds: zod.array(zod.string()),
+        contractIds: zod.array(zod.string()),
+      });
       return await pool.transaction(async pool => {
-        const result = await pool.any<unknown>(sql`
-          DELETE
-          FROM "schema_checks"
-          WHERE 
-            "id" = ANY(
-              SELECT
-                "id"
-              FROM
-                "schema_checks"
-              WHERE
-                "expires_at" <= ${args.expiresAt.toISOString()}
-              LIMIT
-                1000
-            )
-          RETURNING
-            "schema_sdl_store_id" as "storeId1",
-            "supergraph_sdl_store_id" as "storeId2",
-            "composite_schema_sdl_store_id" as "storeId3",
-            "target_id" as "targetId",
-            "context_id" as "contextId"
+        const date = args.expiresAt.toISOString();
+        const rawData = await pool.maybeOne<unknown>(sql`
+          WITH "filtered_schema_checks" AS (
+            SELECT *
+            FROM "schema_checks"
+            WHERE "expires_at" <= ${date}
+          )
+          SELECT
+            ARRAY(SELECT "filtered_schema_checks"."id" FROM "filtered_schema_checks") AS "schemaCheckIds",
+            ARRAY(SELECT DISTINCT "filtered_schema_checks"."target_id" FROM "filtered_schema_checks") AS "targetIds",
+            ARRAY(
+              SELECT DISTINCT "filtered_schema_checks"."schema_sdl_store_id"
+              FROM "filtered_schema_checks"
+              WHERE "filtered_schema_checks"."schema_sdl_store_id" IS NOT NULL
+
+              UNION SELECT DISTINCT "filtered_schema_checks"."composite_schema_sdl_store_id"
+              FROM "filtered_schema_checks"
+              WHERE "filtered_schema_checks"."composite_schema_sdl_store_id" IS NOT NULL
+
+              UNION SELECT DISTINCT "filtered_schema_checks"."supergraph_sdl_store_id"
+              FROM "filtered_schema_checks"
+              WHERE "filtered_schema_checks"."supergraph_sdl_store_id" IS NOT NULL
+
+              UNION SELECT DISTINCT "contract_checks"."composite_schema_sdl_store_id"
+              FROM "contract_checks"
+                INNER JOIN "filtered_schema_checks" ON "contract_checks"."schema_check_id" = "filtered_schema_checks"."id"
+              WHERE "contract_checks"."composite_schema_sdl_store_id" IS NOT NULL
+
+              UNION SELECT DISTINCT "contract_checks"."supergraph_sdl_store_id" FROM "filtered_schema_checks"
+                INNER JOIN "contract_checks" ON "contract_checks"."schema_check_id" = "filtered_schema_checks"."id"
+                WHERE "contract_checks"."supergraph_sdl_store_id" IS NOT NULL
+            ) AS "sdlStoreIds",
+            ARRAY(
+              SELECT DISTINCT "filtered_schema_checks"."context_id"
+              FROM "filtered_schema_checks"
+              WHERE "filtered_schema_checks"."context_id" IS NOT NULL
+            ) AS "contextIds",
+            ARRAY(
+              SELECT DISTINCT "contract_checks"."contract_id"
+              FROM "contract_checks"
+                INNER JOIN "filtered_schema_checks" ON "contract_checks"."schema_check_id" = "filtered_schema_checks"."id"
+            ) AS "contractIds"
         `);
 
-        const { storeIds, targetIds, contextIds } = PurgeExpiredSchemaChecksIDModel.parse(result);
+        const data = SchemaCheckModel.parse(rawData);
+
+        if (!data.schemaCheckIds.length) {
+          return {
+            deletedSchemaCheckCount: 0,
+            deletedSdlStoreCount: 0,
+            deletedSchemaChangeApprovalCount: 0,
+            deletedContractSchemaChangeApprovalCount: 0,
+          };
+        }
 
         let deletedSdlStoreCount = 0;
         let deletedSchemaChangeApprovalCount = 0;
+        let deletedContractSchemaChangeApprovalCount = 0;
 
-        if (storeIds.size !== 0) {
-          const deletedSdlStoreRecords = await pool.any<unknown>(sql`
-            DELETE
-            FROM
-              "sdl_store"
-            WHERE
-              "id" = ANY(
-                ${sql.array(Array.from(storeIds), 'text')}
-              )
-              AND NOT EXISTS (
-                SELECT
-                  1
-                FROM
-                  "schema_checks"
-                WHERE
-                  "schema_checks"."schema_sdl_store_id" = "sdl_store"."id"
-                  OR "schema_checks"."composite_schema_sdl_store_id" = "sdl_store"."id"
-                  OR "schema_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
-              )
-            RETURNING
-              true as "d"
+        await pool.any<unknown>(sql`
+          DELETE
+          FROM "schema_checks"
+          WHERE
+            "id" = ANY(${sql.array(data.schemaCheckIds, 'uuid')})
+        `);
+
+        if (data.sdlStoreIds.length) {
+          deletedSdlStoreCount = await pool.oneFirst<number>(sql`
+            WITH "deleted" AS (
+              DELETE
+              FROM
+                "sdl_store"
+              WHERE
+                "id" = ANY(
+                  ${sql.array(data.sdlStoreIds, 'text')}
+                )
+                AND NOT EXISTS (
+                  SELECT
+                    1
+                  FROM
+                    "schema_checks"
+                  WHERE
+                    "schema_checks"."schema_sdl_store_id" = "sdl_store"."id"
+                    OR "schema_checks"."composite_schema_sdl_store_id" = "sdl_store"."id"
+                    OR "schema_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
+                )
+                AND NOT EXISTS (
+                  SELECT
+                    1
+                  FROM
+                    "contract_checks"
+                  WHERE
+                   "contract_checks"."composite_schema_sdl_store_id" = "sdl_store"."id"
+                   OR "contract_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
+                )
+              RETURNING
+                "id"
+            ) SELECT COUNT(*) FROM "deleted"
           `);
-
-          deletedSdlStoreCount = deletedSdlStoreRecords.length;
         }
 
-        if (targetIds.size && contextIds.size) {
-          const deletedSchemaChangeApprovals = await pool.any<unknown>(sql`
-            DELETE
-            FROM
-              "schema_change_approvals"
-            WHERE
-              "target_id" = ANY(
-                ${sql.array(Array.from(targetIds), 'uuid')}
-              )
-              AND "context_id" = ANY(
-                ${sql.array(Array.from(contextIds), 'text')}
-              )
-              AND NOT EXISTS (
-                SELECT
-                  1
-                FROM "schema_checks"
-                WHERE
-                  "schema_checks"."target_id" = "schema_change_approvals"."target_id"
-                  AND "schema_checks"."context_id" = "schema_change_approvals"."context_id"
-              )
-            RETURNING
-              true as "d"
+        if (data.targetIds.length && data.contextIds.length) {
+          deletedSchemaChangeApprovalCount = await pool.oneFirst<number>(sql`
+            WITH "deleted" AS (
+              DELETE
+              FROM
+                "schema_change_approvals"
+              WHERE
+                "target_id" = ANY(
+                  ${sql.array(data.targetIds, 'uuid')}
+                )
+                AND "context_id" = ANY(
+                  ${sql.array(data.contextIds, 'text')}
+                )
+                AND NOT EXISTS (
+                  SELECT
+                    1
+                  FROM "schema_checks"
+                  WHERE
+                    "schema_checks"."target_id" = "schema_change_approvals"."target_id"
+                    AND "schema_checks"."context_id" = "schema_change_approvals"."context_id"
+                )
+              RETURNING
+                "target_id"
+            ) SELECT COUNT(*) FROM "deleted"
           `);
+        }
 
-          deletedSchemaChangeApprovalCount = deletedSchemaChangeApprovals.length;
+        if (data.contractIds.length && data.contextIds.length) {
+          deletedContractSchemaChangeApprovalCount = await pool.oneFirst<number>(sql`
+            WITH "deleted" AS (
+              DELETE
+              FROM
+                "contract_schema_change_approvals"
+              WHERE
+                "contract_id" = ANY(
+                  ${sql.array(data.contractIds, 'uuid')}
+                )
+                AND "context_id" = ANY(
+                  ${sql.array(data.contextIds, 'text')}
+                )
+                AND NOT EXISTS (
+                  SELECT
+                    1
+                  FROM
+                    "schema_checks"
+                      INNER JOIN "contract_checks"
+                        ON "contract_checks"."schema_check_id" = "schema_checks"."id"
+                  WHERE
+                    "contract_checks"."contract_id" = "contract_schema_change_approvals"."contract_id"
+                    AND "schema_checks"."context_id" = "contract_schema_change_approvals"."context_id"
+                )
+              RETURNING
+                "contract_id"
+            ) SELECT COUNT(*) FROM "deleted"
+          `);
         }
 
         return {
-          deletedSchemaCheckCount: result.length,
+          deletedSchemaCheckCount: data.schemaCheckIds.length,
           deletedSdlStoreCount,
           deletedSchemaChangeApprovalCount,
+          deletedContractSchemaChangeApprovalCount,
         };
       });
     },
@@ -5007,38 +5095,6 @@ const TargetModel = zod.object({
   projectId: zod.string(),
   graphqlEndpointUrl: zod.string().nullable(),
 });
-
-const PurgeExpiredSchemaChecksIDModel = zod
-  .array(
-    zod.object({
-      storeId1: zod.string().nullable(),
-      storeId2: zod.string().nullable(),
-      storeId3: zod.string().nullable(),
-      targetId: zod.string(),
-      contextId: zod.string().nullable(),
-    }),
-  )
-  .transform(items => {
-    const storeIds = new Set<string>();
-    const targetIds = new Set<string>();
-    const contextIds = new Set<string>();
-
-    for (const row of items) {
-      row.storeId1 && storeIds.add(row.storeId1);
-      row.storeId2 && storeIds.add(row.storeId2);
-      row.storeId3 && storeIds.add(row.storeId3);
-      if (row.contextId) {
-        targetIds.add(row.targetId);
-        contextIds.add(row.contextId);
-      }
-    }
-
-    return {
-      storeIds,
-      targetIds,
-      contextIds,
-    };
-  });
 
 export * from './schema-change-model';
 export {
