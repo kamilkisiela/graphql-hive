@@ -4546,10 +4546,13 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 AND NOT EXISTS (
                   SELECT
                     1
-                  FROM "contract_checks"
+                  FROM
+                    "schema_checks"
+                      INNER JOIN "contract_checks"
+                        ON "contract_checks"."schema_check_id" = "schema_checks"."id"
                   WHERE
                     "contract_checks"."contract_id" = "contract_schema_change_approvals"."contract_id"
-                    AND "contract_checks"."context_id" = "contract_schema_change_approvals"."context_id"
+                    AND "schema_checks"."context_id" = "contract_schema_change_approvals"."context_id"
                 )
               RETURNING
                 "contract_id"
