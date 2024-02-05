@@ -144,6 +144,8 @@ export class CompositeModel {
     };
 
     const schemas = latest ? swapServices(latest.schemas, incoming).schemas : [incoming];
+    schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
+
     const comparedVersion =
       organization.featureFlags.compareToPreviousComposableVersion === false
         ? latest
