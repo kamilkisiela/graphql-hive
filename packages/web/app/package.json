@@ -93,7 +93,7 @@
     "supertokens-js-override": "0.0.4",
     "supertokens-node": "15.2.1",
     "supertokens-web-js": "0.8.0",
-    "tailwind-merge": "2.2.0",
+    "tailwind-merge": "2.2.1",
     "tslib": "2.6.2",
     "urql": "4.0.5",
     "use-debounce": "9.0.4",
