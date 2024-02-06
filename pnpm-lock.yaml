@@ -152,8 +152,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       lint-staged:
-        specifier: 15.2.1
-        version: 15.2.1
+        specifier: 15.2.2
+        version: 15.2.2
       pg:
         specifier: 8.11.3
         version: 8.11.3
@@ -1868,7 +1868,7 @@ importers:
         version: 18.2.0
       react-avatar:
         specifier: 5.0.3
-        version: 5.0.3(@babel/runtime@7.23.6)(core-js-pure@3.34.0)(prop-types@15.8.1)(react@18.2.0)
+        version: 5.0.3(@babel/runtime@7.23.9)(core-js-pure@3.34.0)(prop-types@15.8.1)(react@18.2.0)
       react-countup:
         specifier: 6.5.0
         version: 6.5.0(react@18.2.0)
@@ -22964,8 +22964,8 @@ packages:
       uc.micro: 1.0.6
     dev: false
 
-  /lint-staged@15.2.1:
-    resolution: {integrity: sha512-dhwAPnM85VdshybV9FWI/9ghTvMLoQLEXgVMx+ua2DN7mdfzd/tRfoU2yhMcBac0RHkofoxdnnJUokr8s4zKmQ==}
+  /lint-staged@15.2.2:
+    resolution: {integrity: sha512-TiTt93OPh1OZOsb5B7k96A/ATl2AjIZo+vnzFZ6oHK5FuTk63ByDtxGQpHm+kFETjEWqgkF95M8FRXKR/LEBcw==}
     engines: {node: '>=18.12.0'}
     hasBin: true
     dependencies:
@@ -28216,7 +28216,7 @@ packages:
       strip-json-comments: 2.0.1
     dev: true
 
-  /react-avatar@5.0.3(@babel/runtime@7.23.6)(core-js-pure@3.34.0)(prop-types@15.8.1)(react@18.2.0):
+  /react-avatar@5.0.3(@babel/runtime@7.23.9)(core-js-pure@3.34.0)(prop-types@15.8.1)(react@18.2.0):
     resolution: {integrity: sha512-DNc+qkWH9QehSEZqHBhqpXWsPY+rU9W7kD68QFHfu8Atfsvx/3ML0DzAePgTUd96nCXQQ3KZMcC3LKYT8FiBIg==}
     peerDependencies:
       '@babel/runtime': '>=7'
@@ -28224,7 +28224,7 @@ packages:
       prop-types: ^15.0.0 || ^16.0.0
       react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
     dependencies:
-      '@babel/runtime': 7.23.6
+      '@babel/runtime': 7.23.9
       core-js-pure: 3.34.0
       is-retina: 1.0.3
       md5: 2.3.0
