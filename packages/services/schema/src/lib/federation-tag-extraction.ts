@@ -224,7 +224,7 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
   filter: Federation2SubgraphDocumentNodeByTagsFilter,
 ): {
   typeDefs: DocumentNode;
-  typesWhereAllFieldsAreInaccessible: Set<string>;
+  typesWithAllFieldsInaccessible: Map<string, boolean>;
   transformTagDirectives: ReturnType<typeof createTransformTagDirectives>;
 } {
   const tagDirectiveName = getFederationTagDirectiveNameForSubgraphSDL(documentNode);
@@ -419,45 +419,11 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
     typesWithAllFieldsInaccessibleTracker.delete(rootTypeName);
   }
 
-  const typesWhereAllFieldsAreInaccessible = new Set(
-    Array.from(typesWithAllFieldsInaccessibleTracker).map(([typeName, isAllFieldsInaccessible]) =>
-      isAllFieldsInaccessible ? typeName : null,
-    ),
-  );
-  typesWhereAllFieldsAreInaccessible.delete(null);
-
   return {
     typeDefs,
-    typesWhereAllFieldsAreInaccessible: typesWhereAllFieldsAreInaccessible as Set<string>,
+    typesWithAllFieldsInaccessible: typesWithAllFieldsInaccessibleTracker,
     transformTagDirectives,
   };
-}
-
-function intersectSets(sets: Set<string>[]): Set<string> {
-  if (sets.length === 0) {
-    // If the input array is empty, return an empty set
-    return new Set();
-  }
-
-  // Create a copy of the first set to modify
-  const result = new Set(sets[0]);
-
-  // Iterate through the rest of the sets
-  for (let i = 1; i < sets.length; i++) {
-    // Filter the current set and keep only elements present in the result set
-    result.forEach(value => {
-      if (!sets[i].has(value)) {
-        result.delete(value);
-      }
-    });
-
-    // If the result set becomes empty, no need to continue
-    if (result.size === 0) {
-      break;
-    }
-  }
-
-  return result;
 }
 
 function makeTypesFromSetInaccessible(
@@ -511,9 +477,29 @@ export function applyTagFilterOnSubgraphs<
     ...applyTagFilterToInaccessibleTransformOnSubgraphSchema(subgraph.typeDefs, filter),
   }));
 
-  const intersectionOfTypesWhereAllFieldsAreInaccessible = intersectSets(
-    filteredSubgraphs.map(subgraph => subgraph.typesWhereAllFieldsAreInaccessible),
-  );
+  const intersectionOfTypesWhereAllFieldsAreInaccessible = new Set<string>();
+  // We need to traverse all subgraphs to find the intersection of types where all fields are inaccessible.
+  // If a type is not present in any other subgraph, we can safely mark it as inaccessible.
+  filteredSubgraphs.forEach(subgraph => {
+    const otherSubgraphs = filteredSubgraphs.filter(sub => sub !== subgraph);
+
+    for (const [type, allFieldsInaccessible] of subgraph.typesWithAllFieldsInaccessible) {
+      if (
+        allFieldsInaccessible &&
+        otherSubgraphs.every(
+          sub =>
+            !sub.typesWithAllFieldsInaccessible.has(type) ||
+            sub.typesWithAllFieldsInaccessible.get(type) === true,
+        )
+      ) {
+        intersectionOfTypesWhereAllFieldsAreInaccessible.add(type);
+      }
+      // let's not visit this type a second time...
+      otherSubgraphs.forEach(sub => {
+        sub.typesWithAllFieldsInaccessible.delete(type);
+      });
+    }
+  });
 
   if (!intersectionOfTypesWhereAllFieldsAreInaccessible.size) {
     filteredSubgraphs;
