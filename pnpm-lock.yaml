@@ -1495,7 +1495,7 @@ importers:
         version: 1.7.17(react-dom@18.2.0)(react@18.2.0)
       '@hookform/resolvers':
         specifier: 3.3.4
-        version: 3.3.4(react-hook-form@7.50.0)
+        version: 3.3.4(react-hook-form@7.50.1)
       '@monaco-editor/react':
         specifier: 4.6.0
         version: 4.6.0(monaco-editor@0.43.0)(react-dom@18.2.0)(react@18.2.0)
@@ -1680,8 +1680,8 @@ importers:
         specifier: 0.20.0
         version: 0.20.0(react@18.2.0)
       react-hook-form:
-        specifier: 7.50.0
-        version: 7.50.0(react@18.2.0)
+        specifier: 7.50.1
+        version: 7.50.1(react@18.2.0)
       react-icons:
         specifier: 5.0.1
         version: 5.0.1(react@18.2.0)
@@ -1868,7 +1868,7 @@ importers:
         version: 18.2.0
       react-avatar:
         specifier: 5.0.3
-        version: 5.0.3(@babel/runtime@7.23.6)(core-js-pure@3.34.0)(prop-types@15.8.1)(react@18.2.0)
+        version: 5.0.3(@babel/runtime@7.23.9)(core-js-pure@3.34.0)(prop-types@15.8.1)(react@18.2.0)
       react-countup:
         specifier: 6.5.0
         version: 6.5.0(react@18.2.0)
@@ -7790,12 +7790,12 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@hookform/resolvers@3.3.4(react-hook-form@7.50.0):
+  /@hookform/resolvers@3.3.4(react-hook-form@7.50.1):
     resolution: {integrity: sha512-o5cgpGOuJYrd+iMKvkttOclgwRW86EsWJZZRC23prf0uU2i48Htq4PuT73AVb9ionFyZrwYEITuOFGF+BydEtQ==}
     peerDependencies:
       react-hook-form: ^7.0.0
     dependencies:
-      react-hook-form: 7.50.0(react@18.2.0)
+      react-hook-form: 7.50.1(react@18.2.0)
     dev: false
 
   /@humanwhocodes/config-array@0.11.13:
@@ -28216,7 +28216,7 @@ packages:
       strip-json-comments: 2.0.1
     dev: true
 
-  /react-avatar@5.0.3(@babel/runtime@7.23.6)(core-js-pure@3.34.0)(prop-types@15.8.1)(react@18.2.0):
+  /react-avatar@5.0.3(@babel/runtime@7.23.9)(core-js-pure@3.34.0)(prop-types@15.8.1)(react@18.2.0):
     resolution: {integrity: sha512-DNc+qkWH9QehSEZqHBhqpXWsPY+rU9W7kD68QFHfu8Atfsvx/3ML0DzAePgTUd96nCXQQ3KZMcC3LKYT8FiBIg==}
     peerDependencies:
       '@babel/runtime': '>=7'
@@ -28224,7 +28224,7 @@ packages:
       prop-types: ^15.0.0 || ^16.0.0
       react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
     dependencies:
-      '@babel/runtime': 7.23.6
+      '@babel/runtime': 7.23.9
       core-js-pure: 3.34.0
       is-retina: 1.0.3
       md5: 2.3.0
@@ -28318,8 +28318,8 @@ packages:
       react: 18.2.0
     dev: false
 
-  /react-hook-form@7.50.0(react@18.2.0):
-    resolution: {integrity: sha512-AOhuzM3RdP09ZCnq+Z0yvKGHK25yiOX5phwxjV9L7U6HMla10ezkBnvQ+Pk4GTuDfsC5P2zza3k8mawFwFLVuQ==}
+  /react-hook-form@7.50.1(react@18.2.0):
+    resolution: {integrity: sha512-3PCY82oE0WgeOgUtIr3nYNNtNvqtJ7BZjsbxh6TnYNbXButaD5WpjOmTjdxZfheuHKR68qfeFnEDVYoSSFPMTQ==}
     engines: {node: '>=12.22.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18
