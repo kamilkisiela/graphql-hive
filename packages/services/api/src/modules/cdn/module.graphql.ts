@@ -29,6 +29,13 @@ export default gql`
     cdnAccessTokens(first: Int, after: String): TargetCdnAccessTokenConnection!
   }
 
+  extend type Contract {
+    """
+    The URL for accessing this contracts's artifacts via the CDN.
+    """
+    cdnUrl: String!
+  }
+
   type CdnAccessToken {
     id: ID!
     alias: String!

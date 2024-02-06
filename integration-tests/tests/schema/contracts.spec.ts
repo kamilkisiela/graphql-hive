@@ -303,3 +303,41 @@ test('nothing is removed from schema as everything is included yields no errors'
     ],
   });
 });
+
+test('failed contract composition has errors and no sdl and supergraph', async () => {
+  const result = await client.composeAndValidate.mutate({
+    type: 'federation',
+    native: true,
+    schemas: [
+      {
+        raw: /* GraphQL */ `
+          extend schema
+            @link(url: "https://specs.apollo.dev/link/v1.0")
+            @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+          type Query {
+            hello: String @tag(name: "toyota")
+            helloHidden: String @tag(name: "toyota")
+            bar: String @tag(name: "toyota")
+          }
+        `,
+        source: 'foo.graphql',
+        url: null,
+      },
+    ],
+    external: null,
+    contracts: [
+      {
+        id: 'foo',
+        filter: {
+          removeUnreachableTypesFromPublicApiSchema: true,
+          exclude: ['toyota'],
+          include: null,
+        },
+      },
+    ],
+  });
+  expect(result.contracts?.[0].sdl).toEqual(null);
+  expect(result.contracts?.[0].supergraph).toEqual(null);
+  expect(result.contracts?.[0].errors).toBeDefined();
+});

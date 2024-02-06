@@ -26,8 +26,13 @@ const artifactStorageReader = new ArtifactStorageReader(s3, env.S3_PUBLIC_URL, n
 
 const handleRequest = createRequestHandler({
   isKeyValid: createIsKeyValid({ s3, getCache: null, waitUntil: null, analytics: null }),
-  async getArtifactAction(targetId, artifactType, eTag) {
-    return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
+  async getArtifactAction(targetId, contractName, artifactType, eTag) {
+    return artifactStorageReader.generateArtifactReadUrl(
+      targetId,
+      contractName,
+      artifactType,
+      eTag,
+    );
   },
   async fetchText(url) {
     const r = await fetch(url);
@@ -42,8 +47,13 @@ const handleRequest = createRequestHandler({
 
 const handleArtifactRequest = createArtifactRequestHandler({
   isKeyValid: createIsKeyValid({ s3, getCache: null, waitUntil: null, analytics: null }),
-  async getArtifactAction(targetId, artifactType, eTag) {
-    return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
+  async getArtifactAction(targetId, contractName, artifactType, eTag) {
+    return artifactStorageReader.generateArtifactReadUrl(
+      targetId,
+      contractName,
+      artifactType,
+      eTag,
+    );
   },
 });
 

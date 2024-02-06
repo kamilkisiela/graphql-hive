@@ -66,8 +66,13 @@ const handler: ExportedHandler<Env> = {
     });
 
     const handleRequest = createRequestHandler({
-      async getArtifactAction(targetId, artifactType, eTag) {
-        return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
+      async getArtifactAction(targetId, contractName, artifactType, eTag) {
+        return artifactStorageReader.generateArtifactReadUrl(
+          targetId,
+          contractName,
+          artifactType,
+          eTag,
+        );
       },
       isKeyValid,
       analytics,
@@ -85,8 +90,13 @@ const handler: ExportedHandler<Env> = {
     const handleArtifactRequest = createArtifactRequestHandler({
       isKeyValid,
       analytics,
-      async getArtifactAction(targetId, artifactType, eTag) {
-        return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
+      async getArtifactAction(targetId, contractName, artifactType, eTag) {
+        return artifactStorageReader.generateArtifactReadUrl(
+          targetId,
+          contractName,
+          artifactType,
+          eTag,
+        );
       },
     });
 

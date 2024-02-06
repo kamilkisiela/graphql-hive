@@ -2,7 +2,15 @@ import { PushedCompositeSchema, SingleSchema } from 'packages/services/api/src/s
 import type { CheckPolicyResponse } from '@hive/policy';
 import { CompositionFailureError } from '@hive/schema';
 import type { SchemaChangeType, SchemaCompositionError } from '@hive/storage';
-import { type RegistryChecks } from '../registry-checks';
+import { type Contract, type ValidContractVersion } from '../contracts';
+import {
+  ContractCompositionResult,
+  ContractCompositionSuccess,
+  SchemaDiffResult,
+  SchemaDiffSkip,
+  SchemaDiffSuccess,
+  type RegistryChecks,
+} from '../registry-checks';
 
 export const SchemaPublishConclusion = {
   /**
@@ -90,25 +98,53 @@ export type SchemaCheckSuccess = {
       compositeSchemaSDL: string;
       supergraphSDL: string | null;
     };
+    contracts: null | Array<{
+      contractId: string;
+      contractName: string;
+      isSuccessful: true;
+      composition: {
+        compositeSchemaSDL: string;
+        supergraphSDL: string | null;
+      };
+      schemaChanges: null | {
+        breaking: Array<SchemaChangeType> | null;
+        safe: Array<SchemaChangeType> | null;
+        all: Array<SchemaChangeType> | null;
+      };
+    }>;
   };
 };
+
+type SchemaCheckCompositionState =
+  | {
+      errors: Array<SchemaCompositionError>;
+      compositeSchemaSDL: null | string;
+      supergraphSDL: null;
+    }
+  | {
+      errors: null;
+      compositeSchemaSDL: string;
+      supergraphSDL: null | string;
+    };
 
 export type SchemaCheckFailure = {
   conclusion: (typeof SchemaCheckConclusion)['Failure'];
   state: {
     // TODO: in theory if composition errors are present schema policy and schema changes would always be null
     // we could express this with the type-system in a stricter way.
-    composition:
-      | {
-          errors: Array<SchemaCompositionError>;
-          compositeSchemaSDL: null | string;
-          supergraphSDL: null;
-        }
-      | {
-          errors: null;
-          compositeSchemaSDL: string;
-          supergraphSDL: null | string;
-        };
+    composition: SchemaCheckCompositionState;
+    contracts: null | Array<{
+      contractId: string;
+      contractName: string;
+      /** Whether the contract is successful (has no composition errors and schema changes are safe.) */
+      isSuccessful: boolean;
+      composition: SchemaCheckCompositionState;
+      schemaChanges: null | {
+        breaking: Array<SchemaChangeType> | null;
+        safe: Array<SchemaChangeType> | null;
+        all: Array<SchemaChangeType> | null;
+      };
+    }>;
     /** Absence means schema changes were skipped. */
     schemaChanges: null | {
       breaking: Array<SchemaChangeType> | null;
@@ -164,6 +200,15 @@ export type SchemaPublishFailureReason =
       changes: Array<SchemaChangeType>;
     };
 
+type ContractResult = {
+  contractId: string;
+  contractName: string;
+  compositionErrors: Array<SchemaCompositionError> | null;
+  supergraph: string | null;
+  fullSchemaSdl: string | null;
+  changes: Array<SchemaChangeType> | null;
+};
+
 type SchemaPublishSuccess = {
   conclusion: (typeof SchemaPublishConclusion)['Publish'];
   state: {
@@ -179,6 +224,8 @@ type SchemaPublishSuccess = {
     schemas: [SingleSchema] | PushedCompositeSchema[];
     supergraph: string | null;
     fullSchemaSdl: string | null;
+    tags: null | Array<string>;
+    contracts: null | Array<ContractResult>;
   };
 };
 
@@ -221,6 +268,8 @@ export type SchemaDeleteSuccess = {
     breakingChanges: Array<SchemaChangeType> | null;
     compositionErrors: Array<SchemaCompositionError> | null;
     supergraph: string | null;
+    tags: null | Array<string>;
+    contracts: null | Array<ContractResult>;
   } & (
     | {
         composable: true;
@@ -257,10 +306,18 @@ export function formatPolicyError(record: CheckPolicyResultRecord): { message: s
   return { message: record.message };
 }
 
+export type ContractCheckInput = {
+  contractId: string;
+  contractName: string;
+  compositionCheck: ContractCompositionResult;
+  diffCheck: SchemaDiffResult;
+};
+
 export function buildSchemaCheckFailureState(args: {
   compositionCheck: Awaited<ReturnType<RegistryChecks['composition']>>;
   diffCheck: Awaited<ReturnType<RegistryChecks['diff']>>;
   policyCheck: Awaited<ReturnType<RegistryChecks['policyCheck']>> | null;
+  contractChecks: Array<ContractCheckInput> | null;
 }): SchemaCheckFailure['state'] {
   const compositionErrors: Array<CompositionFailureError> = [];
   const schemaChanges: null | {
@@ -299,5 +356,38 @@ export function buildSchemaCheckFailureState(args: {
             supergraphSDL: args.compositionCheck.result.supergraph ?? null,
           },
     schemaPolicy,
+    contracts:
+      args.contractChecks?.map(contractCheck => ({
+        contractId: contractCheck.contractId,
+        contractName: contractCheck.contractName,
+        isSuccessful: isContractChecksSuccessful(contractCheck),
+        composition:
+          contractCheck.compositionCheck.status === 'failed'
+            ? {
+                errors: contractCheck.compositionCheck.reason.errors,
+                compositeSchemaSDL: null,
+                supergraphSDL: null,
+              }
+            : {
+                errors: null,
+                compositeSchemaSDL: contractCheck.compositionCheck.result.fullSchemaSdl,
+                supergraphSDL: contractCheck.compositionCheck.result.supergraph ?? null,
+              },
+        schemaChanges: contractCheck.diffCheck.reason ?? contractCheck.diffCheck.result ?? null,
+      })) ?? null,
   };
+}
+
+export type ContractInput = {
+  contract: Contract;
+  latestValidVersion: ValidContractVersion | null;
+};
+
+export function isContractChecksSuccessful(input: ContractCheckInput): input is {
+  contractId: string;
+  contractName: string;
+  compositionCheck: ContractCompositionSuccess;
+  diffCheck: SchemaDiffSuccess | SchemaDiffSkip;
+} {
+  return input.compositionCheck.status === 'completed' && input.diffCheck.status !== 'failed';
 }

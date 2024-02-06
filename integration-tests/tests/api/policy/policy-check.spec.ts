@@ -17,13 +17,13 @@ export const createPolicy = (level: RuleInstanceSeverityLevel): SchemaPolicyInpu
 
 describe('Schema policy checks', () => {
   describe('model: composite', () => {
-    it('Fedearation project with policy with only warnings, should check only the part that was changed', async () => {
+    it('Federation project with policy with only warnings, should check only the part that was changed', async () => {
       const { tokens, policy } = await prepareProject(ProjectType.Federation);
       await policy.setOrganizationSchemaPolicy(
         createPolicy(RuleInstanceSeverityLevel.Warning),
         true,
       );
-      const cli = await createCLI(tokens.registry);
+      const cli = createCLI(tokens.registry);
 
       await cli.publish({
         sdl: /* GraphQL */ `
@@ -67,6 +67,7 @@ describe('Schema policy checks', () => {
 
           extend type Query {
             user(id: ID!): User
+            field: String!
           }
         `,
         serviceName: 'users',
@@ -75,7 +76,10 @@ describe('Schema policy checks', () => {
       const message = stripAnsi(rawMessage);
 
       expect(message.split('\n')).toEqual([
-        '✔ No changes',
+        'ℹ Detected 1 change',
+        '',
+        '   - Field field was added to object type Query',
+        '',
         '',
         '⚠ Detected 1 warning',
         '',
@@ -86,10 +90,10 @@ describe('Schema policy checks', () => {
       ]);
     });
 
-    it('Fedearation project with policy with , should check only the part that was changed', async () => {
+    it('Federation project with policy with , should check only the part that was changed', async () => {
       const { tokens, policy } = await prepareProject(ProjectType.Federation);
       await policy.setOrganizationSchemaPolicy(createPolicy(RuleInstanceSeverityLevel.Error), true);
-      const cli = await createCLI(tokens.registry);
+      const cli = createCLI(tokens.registry);
 
       await cli.publish({
         sdl: /* GraphQL */ `
@@ -133,6 +137,7 @@ describe('Schema policy checks', () => {
 
           extend type Query {
             user(id: ID!): User
+            field: String!
           }
         `,
         serviceName: 'users',
@@ -145,6 +150,10 @@ describe('Schema policy checks', () => {
         '✖ Detected 1 error',
         '',
         '   - Description is required for type User (source: policy-require-description)',
+        '',
+        'ℹ Detected 1 change',
+        '',
+        '   - Field field was added to object type Query',
         '',
         'View full report:',
         expect.any(String),

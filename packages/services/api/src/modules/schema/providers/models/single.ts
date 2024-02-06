@@ -94,6 +94,7 @@ export class SingleModel {
       organization,
       schemas,
       baseSchema,
+      contracts: null,
     });
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
@@ -130,6 +131,7 @@ export class SingleModel {
           compositionCheck,
           diffCheck,
           policyCheck,
+          contractChecks: null,
         }),
       };
     }
@@ -143,6 +145,7 @@ export class SingleModel {
           compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
           supergraphSDL: compositionCheck.result.supergraph,
         },
+        contracts: null,
       },
     };
   }
@@ -213,6 +216,7 @@ export class SingleModel {
             }
           : incoming,
       ],
+      contracts: null,
     });
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
@@ -288,6 +292,8 @@ export class SingleModel {
         schemas,
         supergraph: null,
         fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+        tags: compositionCheck.result?.tags ?? null,
+        contracts: null,
       },
     };
   }

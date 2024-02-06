@@ -199,7 +199,6 @@ services:
       - --advertise-rpc-addr redpanda-1:33145
     mem_limit: 300m
     mem_reservation: 100m
-    depends_on: []
     healthcheck:
       test: 'curl -f http://localhost:9644/public_metrics'
       interval: 3s

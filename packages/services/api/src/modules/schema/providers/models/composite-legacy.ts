@@ -100,6 +100,7 @@ export class CompositeLegacyModel {
       organization,
       schemas,
       baseSchema,
+      contracts: null,
     });
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
@@ -126,6 +127,7 @@ export class CompositeLegacyModel {
           compositionCheck,
           diffCheck,
           policyCheck: null,
+          contractChecks: null,
         }),
       };
     }
@@ -139,6 +141,7 @@ export class CompositeLegacyModel {
           compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
           supergraphSDL: compositionCheck.result.supergraph,
         },
+        contracts: null,
       },
     };
   }
@@ -247,6 +250,7 @@ export class CompositeLegacyModel {
       organization,
       schemas,
       baseSchema,
+      contracts: null,
     });
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
@@ -329,6 +333,8 @@ export class CompositeLegacyModel {
           schemas,
           supergraph: compositionCheck.result?.supergraph ?? null,
           fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+          tags: null,
+          contracts: null,
         },
       };
     }

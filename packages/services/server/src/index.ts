@@ -111,6 +111,11 @@ export async function main() {
             result.deletedSchemaChangeApprovalCount,
             '',
           );
+          transaction.setMeasurement(
+            'deletedContractSchemaChangeApprovals',
+            result.deletedContractSchemaChangeApprovalCount,
+            '',
+          );
 
           transaction.finish();
         } catch (error) {
@@ -403,8 +408,13 @@ export async function main() {
 
       const artifactHandler = createArtifactRequestHandler({
         isKeyValid: createIsKeyValid({ s3, analytics: null, getCache: null, waitUntil: null }),
-        async getArtifactAction(targetId, artifactType, eTag) {
-          return artifactStorageReader.generateArtifactReadUrl(targetId, artifactType, eTag);
+        async getArtifactAction(targetId, contractName, artifactType, eTag) {
+          return artifactStorageReader.generateArtifactReadUrl(
+            targetId,
+            contractName,
+            artifactType,
+            eTag,
+          );
         },
       });
       const artifactRouteHandler = createServerAdapter(

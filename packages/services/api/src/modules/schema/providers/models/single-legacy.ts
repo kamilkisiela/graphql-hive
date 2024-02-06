@@ -85,6 +85,7 @@ export class SingleLegacyModel {
       organization,
       schemas,
       baseSchema,
+      contracts: null,
     });
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
@@ -110,6 +111,7 @@ export class SingleLegacyModel {
           compositionCheck,
           diffCheck,
           policyCheck: null,
+          contractChecks: null,
         }),
       };
     }
@@ -123,6 +125,7 @@ export class SingleLegacyModel {
           compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
           supergraphSDL: compositionCheck.result.supergraph,
         },
+        contracts: null,
       },
     };
   }
@@ -189,6 +192,7 @@ export class SingleLegacyModel {
             }
           : incoming,
       ],
+      contracts: null,
     });
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
@@ -263,6 +267,8 @@ export class SingleLegacyModel {
           schemas,
           supergraph: null,
           fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+          tags: null,
+          contracts: null,
         },
       };
     }

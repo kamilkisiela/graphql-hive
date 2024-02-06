@@ -3549,3 +3549,40 @@ test.concurrent(
     expect(result.schemaPublish.__typename).toBe('SchemaPublishSuccess');
   },
 );
+
+test.concurrent(
+  'publishing Federation schema results in tags stored on the schema version',
+  async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject, setFeatureFlag } = await createOrg();
+    const { createToken, setNativeFederation } = await createProject(ProjectType.Federation);
+    await setNativeFederation(true);
+    await setFeatureFlag('compareToPreviousComposableVersion', true);
+
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
+
+    const result = await readWriteToken
+      .publishSchema({
+        sdl: /* GraphQL */ `
+          extend schema
+            @link(url: "https://specs.apollo.dev/link/v1.0")
+            @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+          type Query {
+            ping: String @tag(name: "atarashii")
+          }
+        `,
+        service: 'foo',
+        url: 'http://lol.de',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(result.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+    const latestValidSchema = await readWriteToken.fetchLatestValidSchema();
+    expect(latestValidSchema.latestValidVersion?.tags).toEqual(['atarashii']);
+  },
+);

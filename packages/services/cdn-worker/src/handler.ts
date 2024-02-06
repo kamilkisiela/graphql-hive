@@ -275,12 +275,12 @@ export function createRequestHandler(deps: RequestHandlerDependencies) {
 
     const kvStorageKey = `target:${targetId}:${storageKeyType}`;
     const rawValueAction = await deps
-      .getArtifactAction(targetId, storageKeyType, null)
+      .getArtifactAction(targetId, null, storageKeyType, null)
       .catch(() => {
         // Do an extra attempt to read the value from the store.
         // If we see that a single retry does not help, we should do a proper retry logic here.
         // Why not now? Because we do have a new implementation that is based on R2 storage and this change is simple enough.
-        return deps.getArtifactAction(targetId, storageKeyType, null);
+        return deps.getArtifactAction(targetId, null, storageKeyType, null);
       });
 
     if (rawValueAction.type === 'redirect') {

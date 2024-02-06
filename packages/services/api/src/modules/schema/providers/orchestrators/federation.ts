@@ -1,5 +1,5 @@
 import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
-import type { SchemaBuilderApi } from '@hive/schema';
+import type { ContractsInputType, SchemaBuilderApi } from '@hive/schema';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
 import { Orchestrator, Project, ProjectType, SchemaObject } from '../../../../shared/entities';
@@ -65,6 +65,7 @@ export class FederationOrchestrator implements Orchestrator {
     config: {
       external: Project['externalComposition'];
       native: boolean;
+      contracts: ContractsInputType | null;
     },
   ) {
     this.logger.debug(
@@ -80,6 +81,7 @@ export class FederationOrchestrator implements Orchestrator {
       })),
       external: this.createConfig(config.external),
       native: config.native,
+      contracts: config.contracts,
     });
 
     return result;
