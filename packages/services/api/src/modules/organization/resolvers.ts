@@ -14,7 +14,14 @@ import { Logger } from '../shared/providers/logger';
 import type { OrganizationModule } from './__generated__/types';
 import { OrganizationManager } from './providers/organization-manager';
 
-const OrganizationNameModel = z.string().min(2).max(50);
+const OrganizationNameModel = z
+  .string()
+  .min(2)
+  .max(50)
+  .regex(
+    /^([A-Za-z]|[0-9]|_| )+$/,
+    "Only characters 'A-Z', 'a-z', '0-9', '_', '-' and ' ' are allowed.",
+  );
 
 const createOrUpdateMemberRoleInputSchema = z.object({
   name: z
@@ -89,18 +96,13 @@ export const resolvers: OrganizationModule.Resolvers = {
   },
   Mutation: {
     async createOrganization(_, { input }, { injector }) {
-      const CreateOrganizationModel = z.object({
-        name: OrganizationNameModel,
-      });
-
-      const result = CreateOrganizationModel.safeParse(input);
-
-      if (!result.success) {
+      const organizationNameResult = OrganizationNameModel.safeParse(input.name.trim());
+      if (!organizationNameResult.success) {
         return {
           error: {
             message: 'Please check your input.',
             inputErrors: {
-              name: result.error.formErrors.fieldErrors.name?.[0],
+              name: organizationNameResult.error.formErrors.fieldErrors?.[0]?.[0] ?? null,
             },
           },
         };
@@ -161,17 +163,13 @@ export const resolvers: OrganizationModule.Resolvers = {
       };
     },
     async updateOrganizationName(_, { input }, { injector }) {
-      const UpdateOrganizationNameModel = z.object({
-        name: OrganizationNameModel,
-      });
-
-      const result = UpdateOrganizationNameModel.safeParse(input);
+      const result = OrganizationNameModel.safeParse(input.name?.trim());
 
       if (!result.success) {
         return {
           error: {
             message:
-              result.error.formErrors.fieldErrors.name?.[0] ??
+              result.error.formErrors.fieldErrors?.[0]?.[0] ??
               'Changing the organization name failed.',
           },
         };
