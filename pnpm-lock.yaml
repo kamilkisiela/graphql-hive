@@ -1650,8 +1650,8 @@ importers:
         specifier: 1.6.12
         version: 1.6.12
       lucide-react:
-        specifier: 0.321.0
-        version: 0.321.0(react@18.2.0)
+        specifier: 0.323.0
+        version: 0.323.0(react@18.2.0)
       monaco-editor:
         specifier: 0.43.0
         version: 0.43.0
@@ -1868,7 +1868,7 @@ importers:
         version: 18.2.0
       react-avatar:
         specifier: 5.0.3
-        version: 5.0.3(@babel/runtime@7.23.6)(core-js-pure@3.34.0)(prop-types@15.8.1)(react@18.2.0)
+        version: 5.0.3(@babel/runtime@7.23.9)(core-js-pure@3.34.0)(prop-types@15.8.1)(react@18.2.0)
       react-countup:
         specifier: 6.5.0
         version: 6.5.0(react@18.2.0)
@@ -23358,8 +23358,8 @@ packages:
     engines: {node: 14 || >=16.14}
     dev: true
 
-  /lucide-react@0.321.0(react@18.2.0):
-    resolution: {integrity: sha512-Fi9VahIna6642U+2nAGSjnXwUBV3WyfFFPQq4yi3w30jtqxDLfSyiYCtCYCYQZ2KWNZc1MDI+rcsa0t+ChdYpw==}
+  /lucide-react@0.323.0(react@18.2.0):
+    resolution: {integrity: sha512-rTXZFILl2Y4d1SG9p1Mdcf17AcPvPvpc/egFIzUrp7IUy60MUQo3Oi1mu8LGYXUVwuRZYsSMt3csHRW5mAovJg==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0
     dependencies:
@@ -28216,7 +28216,7 @@ packages:
       strip-json-comments: 2.0.1
     dev: true
 
-  /react-avatar@5.0.3(@babel/runtime@7.23.6)(core-js-pure@3.34.0)(prop-types@15.8.1)(react@18.2.0):
+  /react-avatar@5.0.3(@babel/runtime@7.23.9)(core-js-pure@3.34.0)(prop-types@15.8.1)(react@18.2.0):
     resolution: {integrity: sha512-DNc+qkWH9QehSEZqHBhqpXWsPY+rU9W7kD68QFHfu8Atfsvx/3ML0DzAePgTUd96nCXQQ3KZMcC3LKYT8FiBIg==}
     peerDependencies:
       '@babel/runtime': '>=7'
@@ -28224,7 +28224,7 @@ packages:
       prop-types: ^15.0.0 || ^16.0.0
       react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
     dependencies:
-      '@babel/runtime': 7.23.6
+      '@babel/runtime': 7.23.9
       core-js-pure: 3.34.0
       is-retina: 1.0.3
       md5: 2.3.0
