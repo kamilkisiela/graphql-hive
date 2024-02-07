@@ -606,22 +606,29 @@ export class SchemaPublisher {
         githubSha: githubCheckRun?.commit ?? null,
         expiresAt,
         contextId,
-        contracts:
-          contractVersions?.edges.map(edge => ({
-            contractId: edge.node.contractId,
-            contractName: edge.node.contractName,
-            // TODO: this is not correct, we should compare with the latest valid version...
-            comparedContractVersionId:
-              edge.node.schemaCompositionErrors === null
-                ? edge.node.id
-                : contractVersionIdByContractName.get(edge.node.contractName) ?? null,
-            isSuccess: !!edge.node.schemaCompositionErrors,
-            compositeSchemaSdl: edge.node.compositeSchemaSdl,
-            supergraphSchemaSdl: edge.node.supergraphSdl,
-            schemaCompositionErrors: edge.node.schemaCompositionErrors,
-            breakingSchemaChanges: null,
-            safeSchemaChanges: null,
-          })) ?? null,
+        contracts: contractVersions
+          ? await Promise.all(
+              contractVersions?.edges.map(async edge => ({
+                contractId: edge.node.contractId,
+                contractName: edge.node.contractName,
+                comparedContractVersionId:
+                  edge.node.schemaCompositionErrors === null
+                    ? edge.node.id
+                    : // if this version is not composable - we need to get the previous composable version
+                      await this.contracts
+                        .getDiffableContractVersionForContractVersion({
+                          contractVersion: edge.node,
+                        })
+                        .then(contractVersion => contractVersion?.id ?? null),
+                isSuccess: !!edge.node.schemaCompositionErrors,
+                compositeSchemaSdl: edge.node.compositeSchemaSdl,
+                supergraphSchemaSdl: edge.node.supergraphSdl,
+                schemaCompositionErrors: edge.node.schemaCompositionErrors,
+                breakingSchemaChanges: null,
+                safeSchemaChanges: null,
+              })),
+            )
+          : null,
       });
     }
 
