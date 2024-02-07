@@ -41,6 +41,10 @@ export const SchemaCheckConclusion = {
    * Schema is either not composable or has breaking changes
    */
   Failure: 'FAILURE',
+  /**
+   * Skipped as the schemas have not changed from the compared schema version
+   */
+  Skip: 'SKIP',
 } as const;
 
 export const SchemaDeleteConclusion = {
@@ -87,7 +91,7 @@ export type SchemaCheckWarning = {
 export type SchemaCheckSuccess = {
   conclusion: (typeof SchemaCheckConclusion)['Success'];
   // state is null in case the check got skipped.
-  state: null | {
+  state: {
     schemaChanges: null | {
       breaking: Array<SchemaChangeType> | null;
       safe: Array<SchemaChangeType> | null;
@@ -113,6 +117,11 @@ export type SchemaCheckSuccess = {
       };
     }>;
   };
+};
+
+export type SchemaCheckSkip = {
+  conclusion: (typeof SchemaCheckConclusion)['Skip'];
+  state?: never;
 };
 
 type SchemaCheckCompositionState =
@@ -159,7 +168,7 @@ export type SchemaCheckFailure = {
   };
 };
 
-export type SchemaCheckResult = SchemaCheckFailure | SchemaCheckSuccess;
+export type SchemaCheckResult = SchemaCheckFailure | SchemaCheckSuccess | SchemaCheckSkip;
 
 export const PublishIgnoreReasonCode = {
   NoChanges: 'NO_CHANGES',

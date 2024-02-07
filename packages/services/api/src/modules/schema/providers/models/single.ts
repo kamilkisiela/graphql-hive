@@ -70,21 +70,22 @@ export class SingleModel {
       metadata: null,
     };
 
-    const latestVersion = latest;
     const schemas = [incoming] as [SingleSchema];
-    const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
+    const comparedVersion =
+      organization.featureFlags.compareToPreviousComposableVersion === false
+        ? latest
+        : latestComposable;
 
     const checksumCheck = await this.checks.checksum({
       schemas,
-      latestVersion,
+      latestVersion: comparedVersion,
     });
 
     // Short-circuit if there are no changes
     if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
       this.logger.debug('No changes detected, skipping schema check');
       return {
-        conclusion: SchemaCheckConclusion.Success,
-        state: null,
+        conclusion: SchemaCheckConclusion.Skip,
       };
     }
 
@@ -99,7 +100,7 @@ export class SingleModel {
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
       orchestrator: this.orchestrator,
-      version: compareToLatest ? latest : latestComposable,
+      version: comparedVersion,
       organization,
       project,
     });

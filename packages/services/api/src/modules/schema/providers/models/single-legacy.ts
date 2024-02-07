@@ -74,8 +74,7 @@ export class SingleLegacyModel {
     if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
       this.logger.debug('No changes detected, skipping schema check');
       return {
-        conclusion: SchemaCheckConclusion.Success,
-        state: null,
+        conclusion: SchemaCheckConclusion.Skip,
       };
     }
 
