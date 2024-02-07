@@ -8,7 +8,6 @@ import { parseGraphQLSource } from '../../../shared/schema';
 import { OrganizationManager } from '../../organization/providers/organization-manager';
 import { ProjectManager } from '../../project/providers/project-manager';
 import { Storage } from '../../shared/providers/storage';
-import { ContractsManager } from './contracts-manager';
 import { RegistryChecks } from './registry-checks';
 import { ensureCompositeSchemas, SchemaHelper } from './schema-helper';
 import { SchemaManager } from './schema-manager';
@@ -30,7 +29,6 @@ export class SchemaVersionHelper {
     private organizationManager: OrganizationManager,
     private registryChecks: RegistryChecks,
     private storage: Storage,
-    private contractsManager: ContractsManager,
   ) {}
 
   @cache<SchemaVersion>(version => version.id)

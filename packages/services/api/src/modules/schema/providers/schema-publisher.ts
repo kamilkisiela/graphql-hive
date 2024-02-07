@@ -50,6 +50,7 @@ import { SingleModel } from './models/single';
 import { SingleLegacyModel } from './models/single-legacy';
 import { ensureCompositeSchemas, ensureSingleSchema, SchemaHelper } from './schema-helper';
 import { SchemaManager } from './schema-manager';
+import { SchemaVersionHelper } from './schema-version-helper';
 
 const schemaCheckCount = new promClient.Counter({
   name: 'registry_check_count',
@@ -135,6 +136,7 @@ export class SchemaPublisher {
     private mutex: Mutex,
     private rateLimit: RateLimitProvider,
     private contracts: Contracts,
+    private schemaVersionHelper: SchemaVersionHelper,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
     singleModel: SingleModel,
     compositeModel: CompositeModel,
@@ -572,6 +574,12 @@ export class SchemaPublisher {
         schemaVersionId: comparedSchemaVersion.id,
       });
 
+      const [compositeSchemaSdl, supergraphSdl, compositionErrors] = await Promise.all([
+        this.schemaVersionHelper.getCompositeSchemaSdl(comparedSchemaVersion),
+        this.schemaVersionHelper.getSupergraphSdl(comparedSchemaVersion),
+        this.schemaVersionHelper.getSchemaCompositionErrors(comparedSchemaVersion),
+      ]);
+
       schemaCheck = await this.storage.createSchemaCheck({
         schemaSDL: sdl,
         serviceName: input.service ?? null,
@@ -582,18 +590,19 @@ export class SchemaPublisher {
         safeSchemaChanges: null,
         schemaPolicyWarnings: null,
         schemaPolicyErrors: null,
-        ...(comparedSchemaVersion.isComposable
+        ...(compositeSchemaSdl
           ? {
               isSuccess: true,
               schemaCompositionErrors: null,
-              // TODO: dem types bruv
-              compositeSchemaSDL: comparedSchemaVersion.compositeSchemaSDL!,
-              supergraphSDL: comparedSchemaVersion.supergraphSDL,
+              compositeSchemaSDL: compositeSchemaSdl,
+              supergraphSDL: supergraphSdl,
             }
           : {
               isSuccess: false,
-              // TODO: dem types bruv
-              schemaCompositionErrors: comparedSchemaVersion.schemaCompositionErrors!,
+              schemaCompositionErrors: assertNonNull(
+                compositionErrors,
+                'Composite Schema SDL, but no composition errors.',
+              ),
               compositeSchemaSDL: null,
               supergraphSDL: null,
             }),
