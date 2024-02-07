@@ -171,6 +171,42 @@ export class SchemaPublisher {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
+    const target$ = this.targetManager.getTarget({
+      organization: input.organization,
+      project: input.project,
+      target: input.target,
+    });
+
+    const project$ = this.projectManager.getProject({
+      organization: input.organization,
+      project: input.project,
+    });
+    const organization$ = this.organizationManager.getOrganization({
+      organization: input.organization,
+    });
+    const latestVersion$ = this.schemaManager.getLatestSchemas({
+      organization: input.organization,
+      project: input.project,
+      target: input.target,
+    });
+    const latestComposableVersion$ = this.schemaManager.getLatestSchemas({
+      organization: input.organization,
+      project: input.project,
+      target: input.target,
+      onlyComposable: true,
+    });
+    const latestSchemaVersion$ = this.schemaManager.getMaybeLatestVersion({
+      organization: input.organization,
+      project: input.project,
+      target: input.target,
+    });
+    const latestComposableSchemaVersion$ = this.schemaManager.getMaybeLatestValidVersion({
+      organization: input.organization,
+      project: input.project,
+      target: input.target,
+    });
+
+    // Kamil: Promise.all(7 function calls) is a bit too hard to read and link a variable to a function call
     const [
       target,
       project,
@@ -180,39 +216,13 @@ export class SchemaPublisher {
       latestSchemaVersion,
       latestComposableSchemaVersion,
     ] = await Promise.all([
-      this.targetManager.getTarget({
-        organization: input.organization,
-        project: input.project,
-        target: input.target,
-      }),
-      this.projectManager.getProject({
-        organization: input.organization,
-        project: input.project,
-      }),
-      this.organizationManager.getOrganization({
-        organization: input.organization,
-      }),
-      this.schemaManager.getLatestSchemas({
-        organization: input.organization,
-        project: input.project,
-        target: input.target,
-      }),
-      this.schemaManager.getLatestSchemas({
-        organization: input.organization,
-        project: input.project,
-        target: input.target,
-        onlyComposable: true,
-      }),
-      this.schemaManager.getMaybeLatestVersion({
-        organization: input.organization,
-        project: input.project,
-        target: input.target,
-      }),
-      this.schemaManager.getMaybeLatestValidVersion({
-        organization: input.organization,
-        project: input.project,
-        target: input.target,
-      }),
+      target$,
+      project$,
+      organization$,
+      latestVersion$,
+      latestComposableVersion$,
+      latestSchemaVersion$,
+      latestComposableSchemaVersion$,
     ]);
 
     const projectModelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
