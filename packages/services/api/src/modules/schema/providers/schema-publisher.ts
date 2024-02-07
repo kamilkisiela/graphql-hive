@@ -530,10 +530,12 @@ export class SchemaPublisher {
           );
         }
 
-        if (latestSchemaVersion.compositeSchemaSDL) {
+        const schemaVersion = organization.featureFlags.compareToPreviousComposableVersion === true ? latestComposableSchemaVersion : latestSchemaVersion;
+
+        if (schemaVersion?.compositeSchemaSDL) {
           composition = {
-            compositeSchemaSDL: latestSchemaVersion.compositeSchemaSDL,
-            supergraphSDL: latestSchemaVersion.supergraphSDL,
+            compositeSchemaSDL: schemaVersion.compositeSchemaSDL,
+            supergraphSDL: schemaVersion.supergraphSDL,
           };
         } else {
           // LEGACY CASE if the schema version record has no sdl
