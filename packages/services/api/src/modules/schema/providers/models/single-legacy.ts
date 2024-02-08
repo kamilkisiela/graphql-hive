@@ -65,7 +65,7 @@ export class SingleLegacyModel {
     const latestVersion = latest;
     const schemas = [incoming] as [SingleSchema];
 
-    const checksumCheck = await this.checks.checksumNew({
+    const checksumCheck = await this.checks.checksum({
       existing: latestVersion
         ? {
             schemas: latestVersion.schemas,
@@ -172,7 +172,7 @@ export class SingleLegacyModel {
     const forced = input.force === true;
     const acceptBreakingChanges = input.experimental_acceptBreakingChanges === true;
 
-    const checksumCheck = await this.checks.checksumNew({
+    const checksumCheck = await this.checks.checksum({
       existing: latestVersion
         ? {
             schemas: latestVersion.schemas,

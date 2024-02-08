@@ -76,7 +76,7 @@ export class SingleModel {
         ? latest
         : latestComposable;
 
-    const checksumResult = await this.checks.checksumNew({
+    const checksumResult = await this.checks.checksum({
       existing: comparedVersion
         ? {
             schemas: comparedVersion.schemas,
@@ -201,7 +201,7 @@ export class SingleModel {
         ? latest
         : latestComposable;
 
-    const checksumCheck = await this.checks.checksumNew({
+    const checksumCheck = await this.checks.checksum({
       existing: comparedVersion
         ? {
             schemas: comparedVersion.schemas,

@@ -154,7 +154,7 @@ export class CompositeModel {
         ? latest
         : latestComposable;
 
-    const checksumCheck = await this.checks.checksumNew({
+    const checksumCheck = await this.checks.checksum({
       existing: latestVersion
         ? {
             schemas: latestVersion.schemas,
@@ -361,7 +361,7 @@ export class CompositeModel {
       };
     }
 
-    const checksumCheck = await this.checks.checksumNew({
+    const checksumCheck = await this.checks.checksum({
       existing: schemaVersionToCompareAgainst
         ? {
             schemas: schemaVersionToCompareAgainst.schemas,

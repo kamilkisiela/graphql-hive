@@ -81,7 +81,7 @@ export class CompositeLegacyModel {
       : [incoming];
     const orchestrator = project.type === ProjectType.FEDERATION ? this.federation : this.stitching;
 
-    const checksumCheck = await this.checks.checksumNew({
+    const checksumCheck = await this.checks.checksum({
       existing: latestVersion
         ? {
             schemas: latestVersion.schemas,
@@ -237,7 +237,7 @@ export class CompositeLegacyModel {
       };
     }
 
-    const checksumCheck = await this.checks.checksumNew({
+    const checksumCheck = await this.checks.checksum({
       existing: latestVersion
         ? {
             schemas: latestVersion.schemas,

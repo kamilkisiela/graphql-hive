@@ -43,11 +43,6 @@ export type CheckResult<C = unknown, F = unknown> =
 
 type Schemas = [SingleSchema] | PushedCompositeSchema[];
 
-type LatestVersion = {
-  isComposable: boolean;
-  schemas: Schemas;
-} | null;
-
 type CompositionValidationError = {
   message: string;
   source: 'composition';
@@ -163,7 +158,7 @@ export class RegistryChecks {
     private logger: Logger,
   ) {}
 
-  async checksumNew(args: {
+  async checksum(args: {
     incoming: {
       schemas: Schemas;
       contractNames: null | Array<string>;
@@ -220,42 +215,6 @@ export class RegistryChecks {
     this.logger.debug('Contracts have changed.');
 
     return 'modified' as const;
-  }
-
-  async checksum({ schemas, latestVersion }: { schemas: Schemas; latestVersion: LatestVersion }) {
-    this.logger.debug(
-      'Checksum check (before=%s, after=%s)',
-      latestVersion?.schemas.length ?? 0,
-      schemas.length,
-    );
-    const isInitial = latestVersion === null;
-
-    if (isInitial || latestVersion.schemas.length === 0) {
-      this.logger.debug('No exiting version');
-      return {
-        status: 'completed',
-        result: 'initial' as const,
-      } satisfies CheckResult;
-    }
-
-    const isSchemasModified =
-      this.helper.createChecksumFromSchemas(schemas) !==
-      this.helper.createChecksumFromSchemas(latestVersion.schemas);
-
-    if (isSchemasModified) {
-      this.logger.debug('Schema is modified');
-      return {
-        status: 'completed',
-        result: 'modified' as const,
-      } satisfies CheckResult;
-    }
-
-    this.logger.debug('Schema is unchanged');
-
-    return {
-      status: 'completed',
-      result: 'unchanged' as const,
-    } satisfies CheckResult;
   }
 
   async composition({
