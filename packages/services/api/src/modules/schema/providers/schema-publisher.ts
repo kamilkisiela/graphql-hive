@@ -15,7 +15,6 @@ import { sentry } from '../../../shared/sentry';
 import { AlertsManager } from '../../alerts/providers/alerts-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/target-access';
-import { CdnProvider } from '../../cdn/providers/cdn.provider';
 import {
   GitHubIntegrationManager,
   type GitHubCheckRun,
@@ -51,6 +50,7 @@ import { SingleModel } from './models/single';
 import { SingleLegacyModel } from './models/single-legacy';
 import { ensureCompositeSchemas, ensureSingleSchema, SchemaHelper } from './schema-helper';
 import { SchemaManager } from './schema-manager';
+import { SchemaVersionHelper } from './schema-version-helper';
 
 const schemaCheckCount = new promClient.Counter({
   name: 'registry_check_count',
@@ -129,7 +129,6 @@ export class SchemaPublisher {
     private projectManager: ProjectManager,
     private organizationManager: OrganizationManager,
     private alertsManager: AlertsManager,
-    private cdn: CdnProvider,
     private gitHubIntegrationManager: GitHubIntegrationManager,
     private distributedCache: DistributedCache,
     private helper: SchemaHelper,
@@ -137,6 +136,7 @@ export class SchemaPublisher {
     private mutex: Mutex,
     private rateLimit: RateLimitProvider,
     private contracts: Contracts,
+    private schemaVersionHelper: SchemaVersionHelper,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
     singleModel: SingleModel,
     compositeModel: CompositeModel,
@@ -362,17 +362,14 @@ export class SchemaPublisher {
 
     let checkResult: SchemaCheckResult;
 
+    let approvedSchemaChanges: Map<string, SchemaChangeType> | null = new Map();
     let approvedContractChanges: Map<string, Map<string, SchemaChangeType>> | null = null;
-    const approvedSchemaChanges = new Map<string, SchemaChangeType>();
 
     if (contextId !== null) {
-      const changes = await this.storage.getApprovedSchemaChangesForContextId({
+      approvedSchemaChanges = await this.storage.getApprovedSchemaChangesForContextId({
         targetId: target.id,
         contextId,
       });
-      for (const change of changes) {
-        approvedSchemaChanges.set(change.id, change);
-      }
 
       if (contracts?.length) {
         approvedContractChanges = await this.contracts.getApprovedSchemaChangesForContracts({
@@ -472,6 +469,15 @@ export class SchemaPublisher {
     const retention = await this.rateLimit.getRetention({ targetId: target.id });
     const expiresAt = retention ? new Date(Date.now() + retention * millisecondsPerDay) : null;
 
+    const comparedVersion =
+      organization.featureFlags.compareToPreviousComposableVersion === false
+        ? latestVersion
+        : latestComposableVersion;
+    const comparedSchemaVersion =
+      organization.featureFlags.compareToPreviousComposableVersion === false
+        ? latestSchemaVersion
+        : latestComposableSchemaVersion;
+
     if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
       schemaCheck = await this.storage.createSchemaCheck({
         schemaSDL: sdl,
@@ -518,51 +524,7 @@ export class SchemaPublisher {
             safeSchemaChanges: contract.schemaChanges?.safe ?? null,
           })) ?? null,
       });
-    }
-
-    if (checkResult.conclusion === SchemaCheckConclusion.Success) {
-      let composition = checkResult.state?.composition ?? null;
-      // in case of a skip this is null
-      if (composition === null) {
-        if (latestVersion == null || latestSchemaVersion == null) {
-          throw new Error(
-            'Composition yielded no composite schema SDL but there is no latest version to fall back to.',
-          );
-        }
-
-        if (latestSchemaVersion.compositeSchemaSDL) {
-          composition = {
-            compositeSchemaSDL: latestSchemaVersion.compositeSchemaSDL,
-            supergraphSDL: latestSchemaVersion.supergraphSDL,
-          };
-        } else {
-          // LEGACY CASE if the schema version record has no sdl
-          // -> we need to do manual composition
-          const orchestrator = this.schemaManager.matchOrchestrator(project.type);
-
-          const result = await orchestrator.composeAndValidate(
-            latestVersion.schemas.map(s => this.helper.createSchemaObject(s)),
-            {
-              external: project.externalComposition,
-              native: this.schemaManager.checkProjectNativeFederationSupport({
-                project,
-                organization,
-              }),
-              contracts: null,
-            },
-          );
-
-          if (result.sdl == null) {
-            throw new Error('Manual composition yielded no composite schema SDL.');
-          }
-
-          composition = {
-            compositeSchemaSDL: result.sdl,
-            supergraphSDL: result.supergraph,
-          };
-        }
-      }
-
+    } else if (checkResult.conclusion === SchemaCheckConclusion.Success) {
       schemaCheck = await this.storage.createSchemaCheck({
         schemaSDL: sdl,
         serviceName: input.service ?? null,
@@ -575,8 +537,8 @@ export class SchemaPublisher {
         schemaPolicyWarnings: checkResult.state?.schemaPolicyWarnings ?? null,
         schemaPolicyErrors: null,
         schemaCompositionErrors: null,
-        compositeSchemaSDL: composition.compositeSchemaSDL,
-        supergraphSDL: composition.supergraphSDL,
+        compositeSchemaSDL: checkResult.state.composition.compositeSchemaSDL,
+        supergraphSDL: checkResult.state.composition.supergraphSDL,
         isManuallyApproved: false,
         manualApprovalUserId: null,
         githubCheckRunId: githubCheckRun?.id ?? null,
@@ -600,13 +562,87 @@ export class SchemaPublisher {
             safeSchemaChanges: contract.schemaChanges?.safe ?? null,
           })) ?? null,
       });
+    } else if (checkResult.conclusion === SchemaCheckConclusion.Skip) {
+      if (!comparedVersion || !comparedSchemaVersion) {
+        throw new Error('This cannot happen :)');
+      }
+
+      const contractVersions = await this.contracts.getContractVersionsForSchemaVersion({
+        schemaVersionId: comparedSchemaVersion.id,
+      });
+
+      const [compositeSchemaSdl, supergraphSdl, compositionErrors] = await Promise.all([
+        this.schemaVersionHelper.getCompositeSchemaSdl(comparedSchemaVersion),
+        this.schemaVersionHelper.getSupergraphSdl(comparedSchemaVersion),
+        this.schemaVersionHelper.getSchemaCompositionErrors(comparedSchemaVersion),
+      ]);
+
+      schemaCheck = await this.storage.createSchemaCheck({
+        schemaSDL: sdl,
+        serviceName: input.service ?? null,
+        meta: input.meta ?? null,
+        targetId: target.id,
+        schemaVersionId: comparedVersion?.version ?? null,
+        breakingSchemaChanges: null,
+        safeSchemaChanges: null,
+        schemaPolicyWarnings: null,
+        schemaPolicyErrors: null,
+        ...(compositeSchemaSdl
+          ? {
+              isSuccess: true,
+              schemaCompositionErrors: null,
+              compositeSchemaSDL: compositeSchemaSdl,
+              supergraphSDL: supergraphSdl,
+            }
+          : {
+              isSuccess: false,
+              schemaCompositionErrors: assertNonNull(
+                compositionErrors,
+                'Composite Schema SDL, but no composition errors.',
+              ),
+              compositeSchemaSDL: null,
+              supergraphSDL: null,
+            }),
+        isManuallyApproved: false,
+        manualApprovalUserId: null,
+        githubCheckRunId: githubCheckRun?.id ?? null,
+        githubRepository: githubCheckRun
+          ? githubCheckRun.owner + '/' + githubCheckRun.repository
+          : null,
+        githubSha: githubCheckRun?.commit ?? null,
+        expiresAt,
+        contextId,
+        contracts: contractVersions
+          ? await Promise.all(
+              contractVersions?.edges.map(async edge => ({
+                contractId: edge.node.contractId,
+                contractName: edge.node.contractName,
+                comparedContractVersionId:
+                  edge.node.schemaCompositionErrors === null
+                    ? edge.node.id
+                    : // if this version is not composable - we need to get the previous composable version
+                      await this.contracts
+                        .getDiffableContractVersionForContractVersion({
+                          contractVersion: edge.node,
+                        })
+                        .then(contractVersion => contractVersion?.id ?? null),
+                isSuccess: !!edge.node.schemaCompositionErrors,
+                compositeSchemaSdl: edge.node.compositeSchemaSdl,
+                supergraphSchemaSdl: edge.node.supergraphSdl,
+                schemaCompositionErrors: edge.node.schemaCompositionErrors,
+                breakingSchemaChanges: null,
+                safeSchemaChanges: null,
+              })),
+            )
+          : null,
+      });
     }
 
     if (githubCheckRun) {
-      const failedContractCompositionCount =
-        checkResult?.state?.contracts?.filter(c => !c.isSuccessful).length ?? 0;
-
       if (checkResult.conclusion === SchemaCheckConclusion.Success) {
+        const failedContractCompositionCount =
+          checkResult.state.contracts?.filter(c => !c.isSuccessful).length ?? 0;
+
         increaseSchemaCheckCountMetric('accepted');
         return await this.updateGithubCheckRunForSchemaCheck({
           project,
@@ -624,23 +660,74 @@ export class SchemaPublisher {
         });
       }
 
+      if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
+        const failedContractCompositionCount =
+          checkResult.state.contracts?.filter(c => !c.isSuccessful).length ?? 0;
+
+        increaseSchemaCheckCountMetric('rejected');
+        return await this.updateGithubCheckRunForSchemaCheck({
+          project,
+          target,
+          organization,
+          conclusion: checkResult.conclusion,
+          changes: [
+            ...(checkResult.state.schemaChanges?.breaking ?? []),
+            ...(checkResult.state.schemaChanges?.safe ?? []),
+          ],
+          breakingChanges: checkResult.state.schemaChanges?.breaking ?? [],
+          compositionErrors: checkResult.state.composition.errors ?? [],
+          warnings: checkResult.state.schemaPolicy?.warnings ?? [],
+          errors: checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? [],
+          schemaCheckId: schemaCheck?.id ?? null,
+          githubCheckRun: githubCheckRun,
+          failedContractCompositionCount,
+        });
+      }
+
+      // SchemaCheckConclusion.Skip
+
+      if (!comparedVersion || !comparedSchemaVersion) {
+        throw new Error('This cannot happen :)');
+      }
+
+      if (comparedSchemaVersion.isComposable) {
+        increaseSchemaCheckCountMetric('accepted');
+        const contracts = await this.contracts.getContractVersionsForSchemaVersion({
+          schemaVersionId: comparedSchemaVersion.id,
+        });
+        const failedContractCompositionCount =
+          contracts?.edges.filter(edge => edge.node.schemaCompositionErrors !== null).length ?? 0;
+
+        return await this.updateGithubCheckRunForSchemaCheck({
+          project,
+          target,
+          organization,
+          conclusion: SchemaCheckConclusion.Success,
+          changes: null,
+          breakingChanges: null,
+          warnings: null,
+          compositionErrors: null,
+          errors: null,
+          schemaCheckId: schemaCheck?.id ?? null,
+          githubCheckRun: githubCheckRun,
+          failedContractCompositionCount,
+        });
+      }
+
       increaseSchemaCheckCountMetric('rejected');
       return await this.updateGithubCheckRunForSchemaCheck({
         project,
         target,
         organization,
-        conclusion: checkResult.conclusion,
-        changes: [
-          ...(checkResult.state.schemaChanges?.breaking ?? []),
-          ...(checkResult.state.schemaChanges?.safe ?? []),
-        ],
-        breakingChanges: checkResult.state.schemaChanges?.breaking ?? [],
-        compositionErrors: checkResult.state.composition.errors ?? [],
-        warnings: checkResult.state.schemaPolicy?.warnings ?? [],
-        errors: checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? [],
+        conclusion: SchemaCheckConclusion.Failure,
+        changes: null,
+        breakingChanges: null,
+        compositionErrors: comparedSchemaVersion.schemaCompositionErrors,
+        warnings: null,
+        errors: null,
         schemaCheckId: schemaCheck?.id ?? null,
         githubCheckRun: githubCheckRun,
-        failedContractCompositionCount,
+        failedContractCompositionCount: 0,
       });
     }
 
@@ -673,43 +760,91 @@ export class SchemaPublisher {
       } as const;
     }
 
-    increaseSchemaCheckCountMetric('rejected');
+    if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
+      increaseSchemaCheckCountMetric('rejected');
 
-    return {
-      __typename: 'SchemaCheckError',
-      valid: false,
-      changes: [
-        ...(checkResult.state.schemaChanges?.all ?? []),
-        ...(checkResult.state.contracts?.flatMap(contract => [
-          ...(contract.schemaChanges?.all?.map(change => ({
-            ...change,
-            message: `[${contract.contractName}] ${change.message}`,
-          })) ?? []),
-        ]) ?? []),
-      ],
-      warnings: checkResult.state.schemaPolicy?.warnings ?? [],
-      errors: [
-        ...(checkResult.state.schemaChanges?.breaking?.filter(
-          breaking => breaking.approvalMetadata == null && breaking.isSafeBasedOnUsage === false,
-        ) ?? []),
-        ...(checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? []),
-        ...(checkResult.state.composition.errors ?? []),
-        ...(checkResult.state.contracts?.flatMap(contract => [
-          ...(contract.composition.errors?.map(error => ({
-            message: `[${contract.contractName}] ${error.message}`,
-            source: error.source,
-          })) ?? []),
-        ]) ?? []),
-        ...(checkResult.state.contracts?.flatMap(contract => [
-          ...(contract.schemaChanges?.breaking
-            ?.filter(
-              breaking =>
-                breaking.approvalMetadata == null && breaking.isSafeBasedOnUsage === false,
-            )
-            .map(change => ({
+      return {
+        __typename: 'SchemaCheckError',
+        valid: false,
+        changes: [
+          ...(checkResult.state.schemaChanges?.all ?? []),
+          ...(checkResult.state.contracts?.flatMap(contract => [
+            ...(contract.schemaChanges?.all?.map(change => ({
               ...change,
               message: `[${contract.contractName}] ${change.message}`,
             })) ?? []),
+          ]) ?? []),
+        ],
+        warnings: checkResult.state.schemaPolicy?.warnings ?? [],
+        errors: [
+          ...(checkResult.state.schemaChanges?.breaking?.filter(
+            breaking => breaking.approvalMetadata == null && breaking.isSafeBasedOnUsage === false,
+          ) ?? []),
+          ...(checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? []),
+          ...(checkResult.state.composition.errors ?? []),
+          ...(checkResult.state.contracts?.flatMap(contract => [
+            ...(contract.composition.errors?.map(error => ({
+              message: `[${contract.contractName}] ${error.message}`,
+              source: error.source,
+            })) ?? []),
+          ]) ?? []),
+          ...(checkResult.state.contracts?.flatMap(contract => [
+            ...(contract.schemaChanges?.breaking
+              ?.filter(
+                breaking =>
+                  breaking.approvalMetadata == null && breaking.isSafeBasedOnUsage === false,
+              )
+              .map(change => ({
+                ...change,
+                message: `[${contract.contractName}] ${change.message}`,
+              })) ?? []),
+          ]) ?? []),
+        ],
+        schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, schemaCheck),
+      } as const;
+    }
+
+    // SchemaCheckConclusion.Skip
+
+    if (!comparedVersion || !comparedSchemaVersion) {
+      throw new Error('This cannot happen :)');
+    }
+
+    if (comparedSchemaVersion.isComposable) {
+      increaseSchemaCheckCountMetric('accepted');
+      return {
+        __typename: 'SchemaCheckSuccess',
+        valid: true,
+        changes: [],
+        warnings: [],
+        initial: false,
+        schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, schemaCheck),
+      } as const;
+    }
+
+    const contractVersions = await this.contracts.getContractVersionsForSchemaVersion({
+      schemaVersionId: comparedSchemaVersion.id,
+    });
+
+    increaseSchemaCheckCountMetric('rejected');
+    return {
+      __typename: 'SchemaCheckError',
+      valid: false,
+      changes: [],
+      warnings: [],
+      errors: [
+        ...(comparedSchemaVersion.schemaCompositionErrors?.map(error => ({
+          message: error.message,
+          source: error.source,
+        })) ?? []),
+        ...(contractVersions?.edges.flatMap(edge => [
+          ...(edge.node.schemaCompositionErrors?.map(
+            error =>
+              ({
+                message: `[${edge.node.contractName}] ${error.message}`,
+                source: error.source,
+              }) ?? [],
+          ) ?? []),
         ]) ?? []),
       ],
       schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, schemaCheck),

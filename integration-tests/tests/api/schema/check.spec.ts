@@ -1566,3 +1566,51 @@ test.concurrent('contextId that has fewer than 1 characters is not allowed', asy
     },
   });
 });
+
+test.concurrent(
+  'schema check composition skip due to unchanged input schemas when being compared to failed schema version',
+  async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject, setFeatureFlag } = await createOrg();
+    const { createToken, setNativeFederation } = await createProject(ProjectType.Federation);
+    await setFeatureFlag('compareToPreviousComposableVersion', true);
+    await setNativeFederation(true);
+
+    const token = await createToken({
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.Settings,
+      ],
+    });
+
+    // here we use @tag without an argument to trigger a validation/composition error
+    const sdl = /* GraphQL */ `
+      extend schema
+        @link(url: "https://specs.apollo.dev/link/v1.0")
+        @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+      type Query {
+        ping: String
+        pong: String
+        foo: User @tag
+      }
+
+      type User {
+        id: ID!
+      }
+    `;
+
+    // Publish schema with write rights
+    await token
+      .publishSchema({
+        sdl,
+        service: 'serviceA',
+        url: 'http://localhost:4000',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    await token.checkSchema(sdl, 'serviceA').then(r => r.expectNoGraphQLErrors());
+  },
+);

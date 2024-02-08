@@ -4227,7 +4227,12 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           AND "context_id" = ${args.contextId}
       `);
 
-      return result.map(record => HiveSchemaChangeModel.parse(record));
+      const approvedSchemaChanges = new Map<string, SchemaChangeType>();
+      for (const record of result) {
+        const change = HiveSchemaChangeModel.parse(record);
+        approvedSchemaChanges.set(change.id, change);
+      }
+      return approvedSchemaChanges;
     },
     async getPaginatedSchemaChecksForTarget(args) {
       let cursor: null | {

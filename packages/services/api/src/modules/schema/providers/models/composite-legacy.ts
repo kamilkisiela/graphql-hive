@@ -89,8 +89,7 @@ export class CompositeLegacyModel {
     // Short-circuit if there are no changes
     if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
       return {
-        conclusion: SchemaCheckConclusion.Success,
-        state: null,
+        conclusion: SchemaCheckConclusion.Skip,
       };
     }
 
