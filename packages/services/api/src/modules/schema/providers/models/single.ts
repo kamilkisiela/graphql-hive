@@ -76,13 +76,20 @@ export class SingleModel {
         ? latest
         : latestComposable;
 
-    const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion: comparedVersion,
+    const checksumResult = await this.checks.checksumNew({
+      existing: comparedVersion
+        ? {
+            schemas: comparedVersion.schemas,
+            contractNames: null,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumResult === 'unchanged') {
       this.logger.debug('No changes detected, skipping schema check');
       return {
         conclusion: SchemaCheckConclusion.Skip,

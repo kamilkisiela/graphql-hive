@@ -91,6 +91,7 @@ export class CompositeModel {
     selector,
     latest,
     latestComposable,
+    schemaVersionContractNames,
     project,
     organization,
     baseSchema,
@@ -116,6 +117,7 @@ export class CompositeModel {
       sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
+    schemaVersionContractNames: string[] | null;
     baseSchema: string | null;
     project: Project;
     organization: Organization;
@@ -152,13 +154,20 @@ export class CompositeModel {
         ? latest
         : latestComposable;
 
-    const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion: comparedVersion,
+    const checksumCheck = await this.checks.checksumNew({
+      existing: latestVersion
+        ? {
+            schemas: latestVersion.schemas,
+            contractNames: schemaVersionContractNames,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: contracts?.map(({ contract }) => contract.contractName) ?? null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumCheck === 'unchanged') {
       return {
         conclusion: SchemaCheckConclusion.Skip,
       };

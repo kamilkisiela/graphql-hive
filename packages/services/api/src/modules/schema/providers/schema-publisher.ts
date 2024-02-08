@@ -353,7 +353,7 @@ export class SchemaPublisher {
 
     const sdl = tryPrettifySDL(input.sdl);
 
-    const contracts =
+    const activeContracts =
       project.type === ProjectType.FEDERATION
         ? await this.contracts.loadActiveContractsWithLatestValidContractVersionsByTargetId({
             targetId: target.id,
@@ -371,16 +371,16 @@ export class SchemaPublisher {
         contextId,
       });
 
-      if (contracts?.length) {
+      if (activeContracts?.length) {
         approvedContractChanges = await this.contracts.getApprovedSchemaChangesForContracts({
           contextId,
-          contractIds: contracts.map(contract => contract.contract.id),
+          contractIds: activeContracts.map(contract => contract.contract.id),
         });
       }
     }
 
     const contractVersionIdByContractName = new Map<string, string>();
-    contracts?.forEach(contract => {
+    activeContracts?.forEach(contract => {
       if (!contract.latestValidVersion) {
         return;
       }
@@ -389,6 +389,21 @@ export class SchemaPublisher {
         contract.latestValidVersion.id,
       );
     });
+
+    const comparedVersion =
+      organization.featureFlags.compareToPreviousComposableVersion === false
+        ? latestVersion
+        : latestComposableVersion;
+    const comparedSchemaVersion =
+      organization.featureFlags.compareToPreviousComposableVersion === false
+        ? latestSchemaVersion
+        : latestComposableSchemaVersion;
+
+    const schemaVersionContracts = comparedSchemaVersion
+      ? await this.contracts.getContractVersionsForSchemaVersion({
+          schemaVersionId: comparedSchemaVersion.id,
+        })
+      : null;
 
     switch (project.type) {
       case ProjectType.SINGLE:
@@ -448,12 +463,14 @@ export class SchemaPublisher {
                 schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
               }
             : null,
+          schemaVersionContractNames:
+            schemaVersionContracts?.edges.map(edge => edge.node.contractName) ?? null,
           baseSchema,
           project,
           organization,
           approvedChanges: approvedSchemaChanges,
           contracts:
-            contracts?.map(contract => ({
+            activeContracts?.map(contract => ({
               ...contract,
               approvedChanges: approvedContractChanges?.get(contract.contract.id) ?? null,
             })) ?? null,
@@ -468,15 +485,6 @@ export class SchemaPublisher {
 
     const retention = await this.rateLimit.getRetention({ targetId: target.id });
     const expiresAt = retention ? new Date(Date.now() + retention * millisecondsPerDay) : null;
-
-    const comparedVersion =
-      organization.featureFlags.compareToPreviousComposableVersion === false
-        ? latestVersion
-        : latestComposableVersion;
-    const comparedSchemaVersion =
-      organization.featureFlags.compareToPreviousComposableVersion === false
-        ? latestSchemaVersion
-        : latestComposableSchemaVersion;
 
     if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
       schemaCheck = await this.storage.createSchemaCheck({
@@ -567,10 +575,6 @@ export class SchemaPublisher {
         throw new Error('This cannot happen :)');
       }
 
-      const contractVersions = await this.contracts.getContractVersionsForSchemaVersion({
-        schemaVersionId: comparedSchemaVersion.id,
-      });
-
       const [compositeSchemaSdl, supergraphSdl, compositionErrors] = await Promise.all([
         this.schemaVersionHelper.getCompositeSchemaSdl(comparedSchemaVersion),
         this.schemaVersionHelper.getSupergraphSdl(comparedSchemaVersion),
@@ -612,9 +616,9 @@ export class SchemaPublisher {
         githubSha: githubCheckRun?.commit ?? null,
         expiresAt,
         contextId,
-        contracts: contractVersions
+        contracts: schemaVersionContracts
           ? await Promise.all(
-              contractVersions?.edges.map(async edge => ({
+              schemaVersionContracts?.edges.map(async edge => ({
                 contractId: edge.node.contractId,
                 contractName: edge.node.contractName,
                 comparedContractVersionId:

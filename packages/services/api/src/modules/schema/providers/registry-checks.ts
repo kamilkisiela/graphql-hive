@@ -163,6 +163,65 @@ export class RegistryChecks {
     private logger: Logger,
   ) {}
 
+  async checksumNew(args: {
+    incoming: {
+      schemas: Schemas;
+      contractNames: null | Array<string>;
+    };
+    existing: null | {
+      schemas: Schemas;
+      contractNames: null | Array<string>;
+    };
+  }) {
+    this.logger.debug(
+      'Checksum check (existingSchemaCount=%s, existingContractCount=%s, incomingSchemaCount=%s, existingContractCount=%s)',
+      args.existing?.schemas.length ?? null,
+      args.existing?.contractNames?.length ?? null,
+      args.incoming.schemas.length,
+      args.incoming.contractNames?.length ?? null,
+    );
+
+    if (!args.existing) {
+      this.logger.debug('No exiting version');
+      return 'initial' as const;
+    }
+
+    const isSchemasModified =
+      this.helper.createChecksumFromSchemas(args.existing.schemas) !==
+      this.helper.createChecksumFromSchemas(args.incoming.schemas);
+
+    if (isSchemasModified) {
+      this.logger.debug('Schema is modified.');
+      return 'modified' as const;
+    }
+
+    const existingContracts = args.existing.contractNames;
+    const incomingContracts = args.incoming.contractNames;
+
+    if (existingContracts === null && incomingContracts === null) {
+      this.logger.debug('No contracts.');
+      return 'unchanged' as const;
+    }
+
+    if (
+      args.incoming.contractNames &&
+      args.existing.contractNames &&
+      args.incoming.contractNames.length === args.existing.contractNames.length
+    ) {
+      const existingContractNames = args.existing.contractNames.slice().sort(compareAlphaNumeric);
+      const incomingContractNames = args.incoming.contractNames.slice().sort(compareAlphaNumeric);
+
+      if (existingContractNames.every((name, index) => name === incomingContractNames[index])) {
+        this.logger.debug('Contracts have not changed.');
+        return 'unchanged' as const;
+      }
+    }
+
+    this.logger.debug('Contracts have changed.');
+
+    return 'modified' as const;
+  }
+
   async checksum({ schemas, latestVersion }: { schemas: Schemas; latestVersion: LatestVersion }) {
     this.logger.debug(
       'Checksum check (before=%s, after=%s)',
@@ -179,11 +238,11 @@ export class RegistryChecks {
       } satisfies CheckResult;
     }
 
-    const isModified =
+    const isSchemasModified =
       this.helper.createChecksumFromSchemas(schemas) !==
       this.helper.createChecksumFromSchemas(latestVersion.schemas);
 
-    if (isModified) {
+    if (isSchemasModified) {
       this.logger.debug('Schema is modified');
       return {
         status: 'completed',
@@ -725,4 +784,8 @@ const federationDirectives = new Set([
 
 function isFederationRelatedChange(change: SchemaChangeType) {
   return change.path && (federationTypes.has(change.path) || federationDirectives.has(change.path));
+}
+
+function compareAlphaNumeric(a: string, b: string) {
+  return a.localeCompare(b, 'en', { numeric: true });
 }
