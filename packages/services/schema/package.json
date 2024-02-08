@@ -17,7 +17,7 @@
     "@hive/service-common": "workspace:*",
     "@sentry/node": "7.100.1",
     "@theguild/federation-composition": "0.8.1",
-    "@trpc/server": "10.45.0",
+    "@trpc/server": "10.45.1",
     "@types/async-retry": "1.4.8",
     "@types/ioredis-mock": "8.2.5",
     "@whatwg-node/fetch": "0.9.15",

@@ -14,7 +14,7 @@
     "@hive/service-common": "workspace:*",
     "@sentry/node": "7.100.1",
     "@sentry/tracing": "7.100.1",
-    "@trpc/server": "10.45.0",
+    "@trpc/server": "10.45.1",
     "@whatwg-node/fetch": "0.9.15",
     "ajv": "8.12.0",
     "dotenv": "16.4.1",
