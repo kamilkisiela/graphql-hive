@@ -374,7 +374,7 @@ export class CompositeModel {
       },
     });
 
-    if (checksumCheck == 'unchanged') {
+    if (checksumCheck === 'unchanged') {
       return {
         conclusion: SchemaPublishConclusion.Ignore,
         reason: PublishIgnoreReasonCode.NoChanges,

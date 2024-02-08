@@ -199,8 +199,8 @@ export class RegistryChecks {
     }
 
     if (
-      args.incoming.contractNames &&
-      args.existing.contractNames &&
+      args.incoming.contractNames?.length &&
+      args.existing.contractNames?.length &&
       args.incoming.contractNames.length === args.existing.contractNames.length
     ) {
       const existingContractNames = args.existing.contractNames.slice().sort(compareAlphaNumeric);

@@ -705,9 +705,19 @@ export class Contracts {
         , "contract_name" ASC
     `);
 
-    if (result.length === null) {
+    if (result.length === 0) {
+      this.logger.debug(
+        'No contract versions found for schema version. (schemaVersionId=%s)',
+        args.schemaVersionId,
+      );
+
       return null;
     }
+
+    this.logger.debug(
+      'Found contract versions, returning connection. (schemaVersionId=%s)',
+      args.schemaVersionId,
+    );
 
     const edges = result.map(row => {
       const node = ContractVersionModel.parse(row);
