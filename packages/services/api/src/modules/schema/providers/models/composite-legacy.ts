@@ -54,6 +54,7 @@ export class CompositeLegacyModel {
     };
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
     baseSchema: string | null;
@@ -81,37 +82,49 @@ export class CompositeLegacyModel {
     const orchestrator = project.type === ProjectType.FEDERATION ? this.federation : this.stitching;
 
     const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion,
+      existing: latestVersion
+        ? {
+            schemas: latestVersion.schemas,
+            contractNames: null,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumCheck === 'unchanged') {
       return {
-        conclusion: SchemaCheckConclusion.Success,
-        state: null,
+        conclusion: SchemaCheckConclusion.Skip,
       };
     }
 
-    const [compositionCheck, diffCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        baseSchema,
-      }),
-      this.checks.diff({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        selector,
-        version: latestVersion,
-        includeUrlChanges: false,
-        approvedChanges: null,
-      }),
-    ]);
+    const compositionCheck = await this.checks.composition({
+      orchestrator,
+      project,
+      organization,
+      schemas,
+      baseSchema,
+      contracts: null,
+    });
+
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
+      orchestrator,
+      version: latest,
+      organization,
+      project,
+    });
+
+    const diffCheck = await this.checks.diff({
+      usageDataSelector: selector,
+      includeUrlChanges: false,
+      filterOutFederationChanges: project.type === ProjectType.FEDERATION,
+      approvedChanges: null,
+      existingSdl: previousVersionSdl,
+      incomingSdl:
+        compositionCheck.result?.fullSchemaSdl ?? compositionCheck.reason?.fullSchemaSdl ?? null,
+    });
 
     if (compositionCheck.status === 'failed' || diffCheck.status === 'failed') {
       return {
@@ -120,6 +133,7 @@ export class CompositeLegacyModel {
           compositionCheck,
           diffCheck,
           policyCheck: null,
+          contractChecks: null,
         }),
       };
     }
@@ -133,6 +147,7 @@ export class CompositeLegacyModel {
           compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
           supergraphSDL: compositionCheck.result.supergraph,
         },
+        contracts: null,
       },
     };
   }
@@ -151,6 +166,7 @@ export class CompositeLegacyModel {
     target: Target;
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
     baseSchema: string | null;
@@ -222,39 +238,56 @@ export class CompositeLegacyModel {
     }
 
     const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion,
+      existing: latestVersion
+        ? {
+            schemas: latestVersion.schemas,
+            contractNames: null,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumCheck === 'unchanged') {
       return {
         conclusion: SchemaPublishConclusion.Ignore,
         reason: PublishIgnoreReasonCode.NoChanges,
       };
     }
 
-    const [compositionCheck, diffCheck, metadataCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        baseSchema,
-      }),
+    const compositionCheck = await this.checks.composition({
+      orchestrator,
+      project,
+      organization,
+      schemas,
+      baseSchema,
+      contracts: null,
+    });
+
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
+      orchestrator,
+      version: latestVersion,
+      organization,
+      project,
+    });
+
+    const [diffCheck, metadataCheck] = await Promise.all([
       this.checks.diff({
-        orchestrator,
-        selector: {
+        usageDataSelector: {
           target: target.id,
           project: project.id,
           organization: project.orgId,
         },
-        project,
-        organization,
-        schemas,
-        version: latestVersion,
-        includeUrlChanges: true,
+        includeUrlChanges: {
+          schemasBefore: latestVersion?.schemas ?? [],
+          schemasAfter: schemas,
+        },
+        filterOutFederationChanges: isFederation,
         approvedChanges: null,
+        existingSdl: previousVersionSdl,
+        incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       }),
       isFederation
         ? {
@@ -313,6 +346,8 @@ export class CompositeLegacyModel {
           schemas,
           supergraph: compositionCheck.result?.supergraph ?? null,
           fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+          tags: null,
+          contracts: null,
         },
       };
     }

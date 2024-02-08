@@ -1,9 +1,9 @@
 import { createHash } from 'node:crypto';
-import { DocumentNode, GraphQLError, print, SourceLocation } from 'graphql';
+import { DocumentNode, GraphQLError, parse, print, SourceLocation } from 'graphql';
 import { z } from 'zod';
 import type { AvailableRulesResponse, PolicyConfigurationObject } from '@hive/policy';
-import type { CompositionFailureError } from '@hive/schema';
-import type { schema_policy_resource, SchemaCompositionError } from '@hive/storage';
+import type { CompositionFailureError, ContractsInputType } from '@hive/schema';
+import type { schema_policy_resource } from '@hive/storage';
 import type {
   AlertChannelType,
   AlertType,
@@ -78,38 +78,11 @@ export interface DateRange {
   to: Date;
 }
 
-export interface SchemaVersion {
-  id: string;
-  createdAt: string;
-  isComposable: boolean;
-  actionId: string;
-  baseSchema: string | null;
-  hasPersistedSchemaChanges: boolean;
-  previousSchemaVersionId: null | string;
-  compositeSchemaSDL: null | string;
-  supergraphSDL: null | string;
-  schemaCompositionErrors: Array<SchemaCompositionError> | null;
-  github: null | {
-    repository: string;
-    sha: string;
-  };
-}
-
 export interface SchemaObject {
   document: DocumentNode;
   source: string;
   url?: string | null;
   raw: string;
-}
-
-export interface PersistedOperation {
-  id: string;
-  operationHash: string;
-  name: string;
-  kind: string;
-  project: string;
-  content: string;
-  date: string;
 }
 
 export const emptySource = '*';
@@ -125,6 +98,14 @@ export function hashSDL(sdl: DocumentNode): string {
   const hasher = createHash('md5');
   hasher.update(print(sortDocumentNode(sdl)));
   return hasher.digest('hex');
+}
+
+export function createSDLHash(sdl: string): string {
+  return hashSDL(
+    parse(sdl, {
+      noLocation: true,
+    }),
+  );
 }
 
 export function createSchemaObject(
@@ -155,6 +136,13 @@ export enum ProjectType {
   FEDERATION = 'FEDERATION',
   STITCHING = 'STITCHING',
   SINGLE = 'SINGLE',
+}
+
+export enum NativeFederationCompatibilityStatus {
+  COMPATIBLE = 'COMPATIBLE',
+  INCOMPATIBLE = 'INCOMPATIBLE',
+  UNKNOWN = 'UNKNOWN',
+  NOT_APPLICABLE = 'NOT_APPLICABLE',
 }
 
 export interface OrganizationGetStarted {
@@ -356,6 +344,13 @@ export interface ComposeAndValidateResult {
   supergraph: string | null;
   errors: CompositionFailureError[];
   sdl: string | null;
+  contracts: Array<{
+    id: string;
+    errors: Array<CompositionFailureError>;
+    sdl: string | null;
+    supergraph: string | null;
+  }> | null;
+  tags: Array<string> | null;
 }
 
 export interface Orchestrator {
@@ -364,6 +359,7 @@ export interface Orchestrator {
     config: {
       external: Project['externalComposition'] | null;
       native: boolean;
+      contracts: ContractsInputType | null;
     },
   ): Promise<ComposeAndValidateResult>;
 }

@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import { useQuery } from 'urql';
 import {
   Button,
@@ -24,6 +24,15 @@ const ConnectSchemaModalQuery = graphql(`
         type
       }
       cdnUrl
+      activeContracts(first: 20) {
+        edges {
+          node {
+            id
+            contractName
+            cdnUrl
+          }
+        }
+      }
     }
   }
 `);
@@ -54,6 +63,7 @@ export const ConnectSchemaModal = ({
   isOpen: boolean;
   toggleModalOpen: () => void;
 }): ReactElement => {
+  const [selectedGraph, setSelectedGraph] = useState<string>('DEFAULT_GRAPH');
   const [selectedArtifact, setSelectedArtifact] = useState<CdnArtifactType>('sdl');
   const router = useRouteSelector();
   const [query] = useQuery({
@@ -69,6 +79,15 @@ export const ConnectSchemaModal = ({
     // we only need to fetch the data when the modal is open
     pause: !isOpen,
   });
+
+  const selectedContract = useMemo(() => {
+    if (selectedGraph === 'DEFAULT_GRAPH') {
+      return null;
+    }
+    return query.data?.target?.activeContracts.edges.find(
+      ({ node }) => node.contractName === selectedGraph,
+    )?.node;
+  }, [selectedGraph]);
 
   return (
     <Modal open={isOpen} onOpenChange={toggleModalOpen} className="flex w-[800px] flex-col gap-5">
@@ -96,6 +115,33 @@ export const ConnectSchemaModal = ({
           </p>
           <div>
             <RadixSelect
+              className="mr-2"
+              placeholder="Select Graph"
+              name="graph-variant-select"
+              position="popper"
+              value={selectedGraph}
+              options={[
+                {
+                  value: 'DEFAULT_GRAPH',
+                  label: 'Default Graph',
+                },
+                ...query.data.target.activeContracts.edges.map(({ node }) => ({
+                  value: node.contractName,
+                  label: node.contractName,
+                })),
+              ]}
+              onChange={value => {
+                if (
+                  value !== 'DEFAULT_GRAPH' &&
+                  selectedArtifact !== 'sdl' &&
+                  selectedArtifact !== 'supergraph'
+                ) {
+                  setSelectedArtifact('sdl');
+                }
+                setSelectedGraph(value);
+              }}
+            />
+            <RadixSelect
               placeholder="Select Artifact"
               name="artifact-select"
               position="popper"
@@ -103,6 +149,7 @@ export const ConnectSchemaModal = ({
               options={ArtifactToProjectTypeMapping[query.data.target.project.type].map(t => ({
                 value: t,
                 label: ArtifactTypeToDisplayName[t],
+                disabled: t !== 'supergraph' && t !== 'sdl' && selectedGraph !== 'DEFAULT_GRAPH',
               }))}
               onChange={setSelectedArtifact}
             />
@@ -110,7 +157,12 @@ export const ConnectSchemaModal = ({
           <span className="text-sm text-gray-500">
             To access your schema from Hive's CDN, use the following endpoint:
           </span>
-          <CopyValue value={composeEndpoint(query.data.target.cdnUrl, selectedArtifact)} />
+          <CopyValue
+            value={composeEndpoint(
+              selectedContract?.cdnUrl ?? query.data.target.cdnUrl,
+              selectedArtifact,
+            )}
+          />
           <span className="text-sm text-gray-500">
             To authenticate,{' '}
             <Link

@@ -27,6 +27,8 @@ const config: CodegenConfig = {
         contextType: 'GraphQLModules.ModuleContext',
         enumValues: {
           ProjectType: '../shared/entities#ProjectType',
+          NativeFederationCompatibilityStatus:
+            '../shared/entities#NativeFederationCompatibilityStatus',
           TargetAccessScope: '../modules/auth/providers/target-access#TargetAccessScope',
           ProjectAccessScope: '../modules/auth/providers/project-access#ProjectAccessScope',
           OrganizationAccessScope:
@@ -72,13 +74,11 @@ const config: CodegenConfig = {
           SchemaCompareResult: '../shared/mappers#SchemaCompareResult as SchemaCompareResultMapper',
           SchemaCompareError: '../shared/mappers#SchemaCompareError as SchemaCompareErrorMapper',
           SchemaVersionConnection:
-            '../shared/mappers#SchemaVersionConnection as SchemaVersionConnectionMapper',
+            '../modules/shared/providers/storage#PaginatedSchemaVersionConnection as SchemaVersionConnectionMapper',
           SchemaVersion: '../shared/mappers#SchemaVersion as SchemaVersionMapper',
           Schema: '../shared/mappers#Schema as SchemaMapper',
           SingleSchema: '../shared/mappers#SingleSchema as SingleSchemaMapper',
           CompositeSchema: '../shared/mappers#PushedCompositeSchema as PushedCompositeSchemaMapper',
-          PersistedOperationConnection:
-            '../shared/mappers#PersistedOperationConnection as PersistedOperationMapper',
           Organization: '../shared/entities#Organization as OrganizationMapper',
           Project: '../shared/entities#Project as ProjectMapper',
           Target: '../shared/entities#Target as TargetMapper',
@@ -132,6 +132,12 @@ const config: CodegenConfig = {
           FailedSchemaCheck: '../shared/mappers#FailedSchemaCheckMapper',
           SuccessfulSchemaCheck: '../shared/mappers#SuccessfulSchemaCheckMapper',
           SchemaPolicyWarningConnection: '../shared/mappers#SchemaPolicyWarningConnectionMapper',
+          Contract: '../shared/mappers#Contract as ContractMapper',
+          ContractConnection: '../modules/schema/providers/contracts#PaginatedContractConnection',
+          ContractCheck:
+            '../modules/schema/providers/contracts#ContractCheck as ContractCheckMapper',
+          ContractVersion:
+            '../modules/schema/providers/contracts#ContractVersion as ContractVersionMapper',
         },
       },
     },

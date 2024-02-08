@@ -199,7 +199,6 @@ services:
       - --advertise-rpc-addr redpanda-1:33145
     mem_limit: 300m
     mem_reservation: 100m
-    depends_on: []
     healthcheck:
       test: 'curl -f http://localhost:9644/public_metrics'
       interval: 3s
@@ -255,6 +254,8 @@ services:
       REQUEST_BROKER: '1'
       REQUEST_BROKER_SIGNATURE: 'secretSignature'
       REQUEST_BROKER_ENDPOINT: 'http://local_broker:3013'
+    ports:
+      - '3002:3002'
 
   #
   # Awkwardly, we need to override some services for different reasons

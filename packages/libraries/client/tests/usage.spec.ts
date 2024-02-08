@@ -556,3 +556,130 @@ test('should send data to Hive at least once when using atLeastOnceSampler', asy
   const operations = report.operations;
   expect(operations).toHaveLength(2); // two operations
 });
+
+test('should not send excluded operation name data to Hive', async () => {
+  const logger = {
+    error: vi.fn(),
+    info: vi.fn(),
+  };
+
+  const token = 'Token';
+
+  let report: Report = {
+    size: 0,
+    map: {},
+    operations: [],
+  };
+  const http = nock('http://localhost')
+    .post('/200')
+    .once()
+    .reply((_, _body) => {
+      report = _body as any;
+      return [200];
+    });
+
+  const hive = createHive({
+    enabled: true,
+    debug: true,
+    agent: {
+      timeout: 500,
+      maxRetries: 0,
+      logger,
+    },
+    token,
+    selfHosting: {
+      graphqlEndpoint: 'http://localhost/graphql',
+      applicationUrl: 'http://localhost/',
+      usageEndpoint: 'http://localhost/200',
+    },
+    usage: {
+      exclude: ['deleteProjectShouldntBeIncluded', new RegExp('ExcludeThis$')],
+    },
+  });
+
+  const collect = hive.collectUsage();
+
+  await waitFor(2000);
+  collect(
+    {
+      schema,
+      document: op,
+      operationName: 'deleteProjectExcludeThis',
+    },
+    {},
+  );
+  collect(
+    {
+      schema,
+      document: op,
+      operationName: 'deleteProjectShouldntBeIncluded',
+    },
+    {},
+  );
+  collect(
+    {
+      schema,
+      document: op,
+      operationName: 'deleteProject',
+    },
+    {},
+  );
+  collect(
+    {
+      schema,
+      document: op2,
+      operationName: 'getProject',
+    },
+    {},
+  );
+  await hive.dispose();
+  await waitFor(1000);
+  http.done();
+
+  expect(logger.error).not.toHaveBeenCalled();
+  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sending (queue 2) (attempt 1)`);
+  expect(logger.info).toHaveBeenCalledWith(`[hive][usage] Sent!`);
+
+  // Map
+  expect(report.size).toEqual(2);
+  expect(Object.keys(report.map)).toHaveLength(2);
+
+  const key = Object.keys(report.map)[0];
+  const record = report.map[key];
+
+  // operation
+  expect(record.operation).toMatch('mutation deleteProject');
+  expect(record.operationName).toMatch('deleteProject');
+  // fields
+  expect(record.fields).toMatchInlineSnapshot(`
+    [
+      Mutation.deleteProject,
+      Mutation.deleteProject.selector,
+      DeleteProjectPayload.selector,
+      ProjectSelector.organization,
+      ProjectSelector.project,
+      DeleteProjectPayload.deletedProject,
+      Project.id,
+      Project.cleanId,
+      Project.name,
+      Project.type,
+      ProjectSelectorInput.organization,
+      ID,
+      ProjectSelectorInput.project,
+    ]
+  `);
+
+  // Operations
+  const operations = report.operations;
+  expect(operations).toHaveLength(2); // two operations
+  const operation = operations[0];
+
+  expect(operation.operationMapKey).toEqual(key);
+  expect(operation.timestamp).toEqual(expect.any(Number));
+  // execution
+  expect(operation.execution.duration).toBeGreaterThanOrEqual(1500 * 1_000_000); // >=1500ms in microseconds
+  expect(operation.execution.duration).toBeLessThan(3000 * 1_000_000); // <3000ms
+  expect(operation.execution.errorsTotal).toBe(0);
+  expect(operation.execution.errors).toHaveLength(0);
+  expect(operation.execution.ok).toBe(true);
+});

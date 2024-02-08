@@ -4,16 +4,17 @@ import { Injectable, Scope } from 'graphql-modules';
 import hashObject from 'object-hash';
 import { CriticalityLevel } from '@graphql-inspector/core';
 import type { CheckPolicyResponse } from '@hive/policy';
-import type { CompositionFailureError } from '@hive/schema';
+import type { CompositionFailureError, ContractsInputType } from '@hive/schema';
 import {
   HiveSchemaChangeModel,
   SchemaChangeType,
   type RegistryServiceUrlChangeSerializableChange,
 } from '@hive/storage';
-import { ProjectType, Schema } from '../../../shared/entities';
+import { ProjectType } from '../../../shared/entities';
 import { buildSortedSchemaFromSchemaObject } from '../../../shared/schema';
 import { SchemaPolicyProvider } from '../../policy/providers/schema-policy.provider';
 import type {
+  ComposeAndValidateResult,
   Orchestrator,
   Organization,
   Project,
@@ -42,24 +43,109 @@ export type CheckResult<C = unknown, F = unknown> =
 
 type Schemas = [SingleSchema] | PushedCompositeSchema[];
 
-type LatestVersion = {
-  isComposable: boolean;
-  schemas: Schemas;
-} | null;
-
-function isCompositionValidationError(error: CompositionFailureError): error is {
+type CompositionValidationError = {
   message: string;
   source: 'composition';
-} {
+};
+
+type CompositionGraphQLValidationError = {
+  message: string;
+  source: 'graphql';
+};
+
+function isCompositionValidationError(
+  error: CompositionFailureError,
+): error is CompositionValidationError {
   return error.source === 'composition';
 }
 
-function isGraphQLValidationError(error: CompositionFailureError): error is {
-  message: string;
-  source: 'graphql';
-} {
+function isGraphQLValidationError(
+  error: CompositionFailureError,
+): error is CompositionGraphQLValidationError {
   return !isCompositionValidationError(error);
 }
+
+function mapContract(contract: Exclude<ComposeAndValidateResult['contracts'], null>[number]) {
+  if (Array.isArray(contract.errors) && contract.errors.length) {
+    return {
+      status: 'failed',
+      reason: {
+        errors: contract.errors,
+        errorsBySource: {
+          graphql: contract.errors.filter(isGraphQLValidationError),
+          composition: contract.errors.filter(isCompositionValidationError),
+        },
+        // Federation 1 apparently has SDL and validation errors at the same time.
+        fullSchemaSdl: contract.sdl,
+      },
+    } satisfies ContractCompositionFailure;
+  }
+
+  if (!contract.sdl) {
+    throw new Error('No SDL, but no errors either');
+  }
+
+  return {
+    status: 'completed',
+    result: {
+      fullSchemaSdl: contract.sdl,
+      supergraph: contract.supergraph,
+    },
+  } satisfies ContractCompositionSuccess;
+}
+
+type ContractCompositionFailure = {
+  status: 'failed';
+  reason: {
+    errors: CompositionFailureError[];
+    errorsBySource: {
+      graphql: CompositionGraphQLValidationError[];
+      composition: CompositionValidationError[];
+    };
+    // Federation 1 apparently has SDL and validation errors at the same time.
+    fullSchemaSdl: string | null;
+  };
+  result?: never;
+};
+
+export type ContractCompositionSuccess = {
+  status: 'completed';
+  result: {
+    fullSchemaSdl: string;
+    supergraph: string | null;
+  };
+  reason?: never;
+};
+
+export type ContractCompositionResult = ContractCompositionFailure | ContractCompositionSuccess;
+
+type SchemaDiffFailure = {
+  status: 'failed';
+  reason: {
+    breaking: Array<SchemaChangeType> | null;
+    safe: Array<SchemaChangeType> | null;
+    all: Array<SchemaChangeType> | null;
+  };
+  result?: never;
+};
+
+export type SchemaDiffSuccess = {
+  status: 'completed';
+  result: {
+    breaking: Array<SchemaChangeType> | null;
+    safe: Array<SchemaChangeType> | null;
+    all: Array<SchemaChangeType> | null;
+  };
+  reason?: never;
+};
+
+export type SchemaDiffSkip = {
+  status: 'skipped';
+  result?: never;
+  reason?: never;
+};
+
+export type SchemaDiffResult = SchemaDiffFailure | SchemaDiffSuccess | SchemaDiffSkip;
 
 @Injectable({
   scope: Scope.Operation,
@@ -72,40 +158,67 @@ export class RegistryChecks {
     private logger: Logger,
   ) {}
 
-  async checksum({ schemas, latestVersion }: { schemas: Schemas; latestVersion: LatestVersion }) {
+  async checksum(args: {
+    incoming: {
+      schemas: Schemas;
+      contractNames: null | Array<string>;
+    };
+    existing: null | {
+      schemas: Schemas;
+      contractNames: null | Array<string>;
+    };
+  }) {
     this.logger.debug(
-      'Checksum check (before=%s, after=%s)',
-      latestVersion?.schemas.length ?? 0,
-      schemas.length,
+      'Checksum check (existingSchemaCount=%s, existingContractCount=%s, incomingSchemaCount=%s, existingContractCount=%s)',
+      args.existing?.schemas.length ?? null,
+      args.existing?.contractNames?.length ?? null,
+      args.incoming.schemas.length,
+      args.incoming.contractNames?.length ?? null,
     );
-    const isInitial = latestVersion === null;
 
-    if (isInitial || latestVersion.schemas.length === 0) {
+    if (!args.existing) {
       this.logger.debug('No exiting version');
-      return {
-        status: 'completed',
-        result: 'initial' as const,
-      } satisfies CheckResult;
+      return 'initial' as const;
     }
 
-    const isModified =
-      this.helper.createChecksumFromSchemas(schemas) !==
-      this.helper.createChecksumFromSchemas(latestVersion.schemas);
+    const isSchemasModified =
+      this.helper.createChecksumFromSchemas(args.existing.schemas) !==
+      this.helper.createChecksumFromSchemas(args.incoming.schemas);
 
-    if (isModified) {
-      this.logger.debug('Schema is modified');
-      return {
-        status: 'completed',
-        result: 'modified' as const,
-      } satisfies CheckResult;
+    if (isSchemasModified) {
+      this.logger.debug('Schema is modified.');
+      return 'modified' as const;
     }
 
-    this.logger.debug('Schema is unchanged');
+    const existingContractNames = args.existing.contractNames;
+    const incomingContractNames = args.incoming.contractNames;
 
-    return {
-      status: 'completed',
-      result: 'unchanged' as const,
-    } satisfies CheckResult;
+    if (existingContractNames === null && incomingContractNames === null) {
+      this.logger.debug('No contracts.');
+      return 'unchanged' as const;
+    }
+
+    if (
+      existingContractNames?.length &&
+      incomingContractNames?.length &&
+      existingContractNames.length === incomingContractNames.length
+    ) {
+      const sortedExistingContractNames = existingContractNames.slice().sort(compareAlphaNumeric);
+      const sortedIncomingContractNames = incomingContractNames.slice().sort(compareAlphaNumeric);
+
+      if (
+        sortedExistingContractNames.every(
+          (name, index) => name === sortedIncomingContractNames[index],
+        )
+      ) {
+        this.logger.debug('Contracts have not changed.');
+        return 'unchanged' as const;
+      }
+    }
+
+    this.logger.debug('Contracts have changed.');
+
+    return 'modified' as const;
   }
 
   async composition({
@@ -114,18 +227,21 @@ export class RegistryChecks {
     organization,
     schemas,
     baseSchema,
+    contracts,
   }: {
     orchestrator: Orchestrator;
     project: Project;
     organization: Organization;
     schemas: Schemas;
     baseSchema: string | null;
+    contracts: null | ContractsInputType;
   }) {
     const result = await orchestrator.composeAndValidate(
       extendWithBase(schemas, baseSchema).map(s => this.helper.createSchemaObject(s)),
       {
         external: project.externalComposition,
         native: this.checkProjectNativeFederationSupport(project, organization),
+        contracts,
       },
     );
 
@@ -142,6 +258,9 @@ export class RegistryChecks {
             graphql: validationErrors.filter(isGraphQLValidationError),
             composition: validationErrors.filter(isCompositionValidationError),
           },
+          // Federation 1 apparently has SDL and validation errors at the same time.
+          fullSchemaSdl: result.sdl,
+          contracts: result.contracts?.map(mapContract) ?? null,
         },
       } satisfies CheckResult;
     }
@@ -157,47 +276,77 @@ export class RegistryChecks {
       result: {
         fullSchemaSdl: result.sdl,
         supergraph: result.supergraph,
+        tags: result.tags ?? null,
+        contracts: result.contracts?.map(mapContract) ?? null,
       },
     } satisfies CheckResult;
   }
 
+  /**
+   * Retrieve the SDL of the previous schema version.
+   * Either by using pre-computed sdl or composing on the fly.
+   */
+  async retrievePreviousVersionSdl(args: {
+    version: {
+      isComposable: boolean;
+      sdl: string | null;
+      schemas: Schemas;
+    } | null;
+    orchestrator: Orchestrator;
+    organization: Organization;
+    project: Project;
+  }): Promise<string | null> {
+    this.logger.debug('Retrieve previous version SDL.');
+    if (!args.version) {
+      this.logger.debug('No previous version available, skip.');
+      return null;
+    }
+
+    if (args.version.sdl) {
+      this.logger.debug('Return pre-computed SDL.');
+      return args.version.sdl;
+    }
+
+    if (args.version.isComposable === false) {
+      this.logger.debug('Skip composition due to non-composable version.');
+      return null;
+    }
+
+    this.logger.debug('Compose on the fly.');
+
+    const existingSchemaResult = await args.orchestrator.composeAndValidate(
+      args.version.schemas.map(s => this.helper.createSchemaObject(s)),
+      {
+        external: args.project.externalComposition,
+        native: this.checkProjectNativeFederationSupport(args.project, args.organization),
+        contracts: null,
+      },
+    );
+
+    return existingSchemaResult.sdl ?? null;
+  }
+
   async policyCheck({
-    orchestrator,
-    project,
-    organization,
-    schemas,
     selector,
     modifiedSdl,
-    baseSchema,
+    incomingSdl,
   }: {
-    orchestrator: Orchestrator;
-    schemas: [SingleSchema] | PushedCompositeSchema[];
-    project: Project;
-    organization: Organization;
     modifiedSdl: string;
+    incomingSdl: string | null;
     selector: {
       organization: string;
       project: string;
       target: string;
     };
-    baseSchema: string | null;
   }) {
-    const result = await orchestrator.composeAndValidate(
-      extendWithBase(schemas, baseSchema).map(s => this.helper.createSchemaObject(s)),
-      {
-        external: project.externalComposition,
-        native: this.checkProjectNativeFederationSupport(project, organization),
-      },
-    );
-
-    if (result.sdl == null) {
+    if (incomingSdl == null) {
       this.logger.debug('Skip policy check due to no SDL being composed.');
       return {
         status: 'skipped',
       };
     }
 
-    const policyResult = await this.policy.checkPolicy(result.sdl, modifiedSdl, selector);
+    const policyResult = await this.policy.checkPolicy(incomingSdl, modifiedSdl, selector);
     const warnings = policyResult?.warnings?.map<SchemaCheckWarning>(toSchemaCheckWarning) ?? null;
 
     if (policyResult === null) {
@@ -224,56 +373,34 @@ export class RegistryChecks {
     } satisfies CheckResult;
   }
 
-  async diff({
-    orchestrator,
-    project,
-    organization,
-    schemas,
-    version,
-    selector,
-    includeUrlChanges,
-    approvedChanges,
-  }: {
-    orchestrator: Orchestrator;
-    project: Project;
-    organization: Organization;
-    schemas: [SingleSchema] | PushedCompositeSchema[];
-    version: LatestVersion;
-    selector: {
+  /**
+   * Diff incoming and existing SDL and generate a list of changes.
+   * Uses usage stats to determine whether a change is safe or not (if available).
+   */
+  async diff(args: {
+    /** The existing SDL */
+    existingSdl: string | null;
+    /** The incoming SDL */
+    incomingSdl: string | null;
+    includeUrlChanges:
+      | false
+      | {
+          schemasBefore: [SingleSchema] | PushedCompositeSchema[];
+          schemasAfter: [SingleSchema] | PushedCompositeSchema[];
+        };
+    /** Whether Federation directive related changes should be filtered out from the list of changes. These would only show up due to an internal bug. */
+    filterOutFederationChanges: boolean;
+    /** Lookup map of changes that are approved and thus safe. */
+    approvedChanges: null | Map<string, SchemaChangeType>;
+    /** Selector for fetching conditional breaking changes. */
+    usageDataSelector: null | {
       organization: string;
       project: string;
       target: string;
     };
-    includeUrlChanges: boolean;
-    /** Lookup map of changes that are approved and thus safe. */
-    approvedChanges: null | Map<string, SchemaChangeType>;
   }) {
-    if (!version || version.schemas.length === 0) {
-      this.logger.debug('Skipping diff check, no existing version');
-      return {
-        status: 'skipped',
-      } satisfies CheckResult;
-    }
-
-    const [existingSchemaResult, incomingSchemaResult] = await Promise.all([
-      orchestrator.composeAndValidate(
-        version.schemas.map(s => this.helper.createSchemaObject(s)),
-        {
-          external: project.externalComposition,
-          native: this.checkProjectNativeFederationSupport(project, organization),
-        },
-      ),
-      orchestrator.composeAndValidate(
-        schemas.map(s => this.helper.createSchemaObject(s)),
-        {
-          external: project.externalComposition,
-          native: this.checkProjectNativeFederationSupport(project, organization),
-        },
-      ),
-    ]);
-
-    if (existingSchemaResult.sdl == null || incomingSchemaResult.sdl == null) {
-      this.logger.debug('Skip policy check due to no SDL being composed.');
+    if (args.existingSdl == null || args.incomingSdl == null) {
+      this.logger.debug('Skip diff check due to either existing or incoming SDL being absent.');
       return {
         status: 'skipped',
       } satisfies CheckResult;
@@ -285,13 +412,13 @@ export class RegistryChecks {
     try {
       existingSchema = buildSortedSchemaFromSchemaObject(
         this.helper.createSchemaObject({
-          sdl: existingSchemaResult.sdl,
+          sdl: args.existingSdl,
         }),
       );
 
       incomingSchema = buildSortedSchemaFromSchemaObject(
         this.helper.createSchemaObject({
-          sdl: incomingSchemaResult.sdl,
+          sdl: args.incomingSdl,
         }),
       );
     } catch (error) {
@@ -301,14 +428,23 @@ export class RegistryChecks {
       } satisfies CheckResult;
     }
 
-    let inspectorChanges = await this.inspector.diff(existingSchema, incomingSchema, selector);
+    let inspectorChanges = await this.inspector.diff(
+      existingSchema,
+      incomingSchema,
+      args.usageDataSelector ?? undefined,
+    );
 
-    if (includeUrlChanges) {
-      inspectorChanges.push(...detectUrlChanges(version.schemas, schemas));
+    if (args.includeUrlChanges) {
+      inspectorChanges.push(
+        ...detectUrlChanges(
+          args.includeUrlChanges.schemasBefore.filter(isCompositeSchema),
+          args.includeUrlChanges.schemasAfter.filter(isCompositeSchema),
+        ),
+      );
     }
 
     // Filter out federation specific changes as they are not relevant for the schema diff and were in previous schema versions by accident.
-    if ('type' in orchestrator && orchestrator.type === ProjectType.FEDERATION) {
+    if (args.filterOutFederationChanges === true) {
       inspectorChanges = inspectorChanges.filter(change => !isFederationRelatedChange(change));
     }
 
@@ -322,7 +458,7 @@ export class RegistryChecks {
       } else if (change.criticality === CriticalityLevel.Breaking) {
         // If this change is approved, we return the already approved on instead of the newly detected one,
         // as it it contains the necessary metadata on when the change got first approved and by whom.
-        const approvedChange = approvedChanges?.get(change.id);
+        const approvedChange = args.approvedChanges?.get(change.id);
         if (approvedChange) {
           breakingChanges.push(approvedChange);
           continue;
@@ -336,10 +472,10 @@ export class RegistryChecks {
 
     await Promise.all(
       breakingChanges.map(async change => {
-        if (!change.path) return change;
+        if (!change.path || !args.usageDataSelector) return change;
 
         const affectedOperations = await this.inspector.getUsageForCoordinate(
-          selector,
+          args.usageDataSelector,
           change.path,
         );
 
@@ -348,7 +484,7 @@ export class RegistryChecks {
         }
 
         const affectedClients = await this.inspector.getClientUsageForCoordinate(
-          selector,
+          args.usageDataSelector,
           change.path,
           change.meta.typeName?.toString() || '',
         );
@@ -374,7 +510,7 @@ export class RegistryChecks {
             return null;
           },
         },
-      } satisfies CheckResult;
+      } satisfies SchemaDiffFailure;
     }
 
     if (inspectorChanges.length) {
@@ -393,7 +529,7 @@ export class RegistryChecks {
           return null;
         },
       },
-    } satisfies CheckResult;
+    } satisfies SchemaDiffSuccess;
   }
 
   async serviceName(service: { name: string | null }) {
@@ -499,7 +635,7 @@ export class RegistryChecks {
     }
   }
 
-  private checkProjectNativeFederationSupport(
+  public checkProjectNativeFederationSupport(
     project: Project,
     organization: Organization,
   ): boolean {
@@ -538,26 +674,27 @@ export class RegistryChecks {
   }
 }
 
+type SubgraphDefinition = {
+  service_name: string;
+  service_url: string | null;
+};
+
 export function detectUrlChanges(
-  schemasBefore: readonly Schema[],
-  schemasAfter: readonly Schema[],
+  subgraphsBefore: readonly SubgraphDefinition[],
+  subgraphsAfter: readonly SubgraphDefinition[],
 ): Array<SchemaChangeType> {
-  if (schemasBefore.length === 0) {
+  if (subgraphsBefore.length === 0) {
     return [];
   }
 
-  const compositeSchemasBefore = schemasBefore.filter(isCompositeSchema);
-
-  if (compositeSchemasBefore.length === 0) {
+  if (subgraphsBefore.length === 0) {
     return [];
   }
 
-  const compositeSchemasAfter = schemasAfter.filter(isCompositeSchema);
-  const nameToCompositeSchemaMap = new Map(compositeSchemasBefore.map(s => [s.service_name, s]));
-
+  const nameToCompositeSchemaMap = new Map(subgraphsBefore.map(s => [s.service_name, s]));
   const changes: Array<RegistryServiceUrlChangeSerializableChange> = [];
 
-  for (const schema of compositeSchemasAfter) {
+  for (const schema of subgraphsAfter) {
     const before = nameToCompositeSchemaMap.get(schema.service_name);
 
     if (before && before.service_url !== schema.service_url) {
@@ -636,4 +773,8 @@ const federationDirectives = new Set([
 
 function isFederationRelatedChange(change: SchemaChangeType) {
   return change.path && (federationTypes.has(change.path) || federationDirectives.has(change.path));
+}
+
+function compareAlphaNumeric(a: string, b: string) {
+  return a.localeCompare(b, 'en', { numeric: true });
 }

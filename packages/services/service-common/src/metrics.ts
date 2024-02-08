@@ -13,7 +13,7 @@ export function reportReadiness(isReady: boolean) {
   readiness.set(isReady ? 1 : 0);
 }
 
-export async function startMetrics(instanceLabel: string | undefined) {
+export async function startMetrics(instanceLabel: string | undefined, port = 10_254) {
   promClient.collectDefaultMetrics({
     labels: { instance: instanceLabel },
   });
@@ -40,5 +40,5 @@ export async function startMetrics(instanceLabel: string | undefined) {
 
   await server.register(cors);
 
-  return server.listen(10_254, '::');
+  return server.listen(port, '::');
 }

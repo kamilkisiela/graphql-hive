@@ -1,5 +1,5 @@
 import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
-import type { SchemaBuilderApi } from '@hive/schema';
+import type { ContractsInputType, SchemaBuilderApi } from '@hive/schema';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { fetch } from '@whatwg-node/fetch';
 import { Orchestrator, Project, ProjectType, SchemaObject } from '../../../../shared/entities';
@@ -65,9 +65,13 @@ export class FederationOrchestrator implements Orchestrator {
     config: {
       external: Project['externalComposition'];
       native: boolean;
+      contracts: ContractsInputType | null;
     },
   ) {
-    this.logger.debug('Composing and Validating Federated Schemas');
+    this.logger.debug(
+      'Composing and Validating Federated Schemas (method=%s)',
+      config.native ? 'native' : config.external.enabled ? 'external' : 'v1',
+    );
     const result = await this.schemaService.composeAndValidate.mutate({
       type: 'federation',
       schemas: schemas.map(s => ({
@@ -77,6 +81,7 @@ export class FederationOrchestrator implements Orchestrator {
       })),
       external: this.createConfig(config.external),
       native: config.native,
+      contracts: config.contracts,
     });
 
     return result;

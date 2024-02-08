@@ -16,28 +16,30 @@ jobs:
       uploadJavaScriptArtifacts: true
     secrets: inherit
 
+  # Note: temporary disabled because staging env is freezed for testing.
+  #
   # Trigger deployment
-  deploy:
-    name: trigger staging deployment
-    needs:
-      - build
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Dispatch Deployment
-        run: |
-          curl --request POST \
-            --url 'https://api.github.com/repos/${{ secrets.PRIVATE_REPO_OWNER }}/${{ secrets.PRIVATE_REPO_NAME }}/dispatches' \
-            --header 'Accept: application/vnd.github+json' \
-            --header 'Authorization: Bearer ${{ secrets.GH_PAT }}' \
-            --header 'X-GitHub-Api-Version: 2022-11-28' \
-            --header 'Content-Type: application/json' \
-            --data '{
-            "event_type": "deploy-staging",
-            "client_payload": {
-              "actor": "${{ github.actor }}",
-              "ref": "${{ github.sha }}"
-            }
-          }'
+  # deploy:
+  #   name: trigger staging deployment
+  #   needs:
+  #     - build
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - name: Dispatch Deployment
+  #       run: |
+  #         curl --request POST \
+  #           --url 'https://api.github.com/repos/${{ secrets.PRIVATE_REPO_OWNER }}/${{ secrets.PRIVATE_REPO_NAME }}/dispatches' \
+  #           --header 'Accept: application/vnd.github+json' \
+  #           --header 'Authorization: Bearer ${{ secrets.GH_PAT }}' \
+  #           --header 'X-GitHub-Api-Version: 2022-11-28' \
+  #           --header 'Content-Type: application/json' \
+  #           --data '{
+  #           "event_type": "deploy-staging",
+  #           "client_payload": {
+  #             "actor": "${{ github.actor }}",
+  #             "ref": "${{ github.sha }}"
+  #           }
+  #         }'
 
   # ESLint and Prettier
   code-style:

@@ -40,7 +40,7 @@ services:
       - ./.hive/clickhouse/db:/var/lib/clickhouse
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.2
+    image: confluentinc/cp-zookeeper:7.5.3
     hostname: zookeeper
     networks:
       - 'stack'
@@ -55,7 +55,7 @@ services:
       - ./.hive/zookeeper/db:/var/lib/zookeeper/data
 
   broker:
-    image: confluentinc/cp-kafka:7.5.2
+    image: confluentinc/cp-kafka:7.5.3
     hostname: broker
     depends_on:
       zookeeper:
@@ -97,7 +97,7 @@ services:
       - ./.hive/broker/db:/var/lib/kafka/data
 
   redis:
-    image: bitnami/redis:7.2.3
+    image: bitnami/redis:7.2.4
     networks:
       - 'stack'
     healthcheck:

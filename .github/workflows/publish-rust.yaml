@@ -105,7 +105,7 @@ jobs:
           ./target/release/compress ./target/release/${{ env.RUST_TARGET_FILE }} ./router.tar.gz
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: router-${{ env.RUST_TARGET_OS }}
           path: router.tar.gz

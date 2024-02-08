@@ -19,10 +19,8 @@ import type {
   RateLimitInput,
   RequestOrganizationTransferInput,
   SchemaCheckInput,
-  SchemaCompareToPreviousInput,
   SchemaDeleteInput,
   SchemaPublishInput,
-  SchemaVersionsInput,
   SchemaVersionUpdateInput,
   SetTargetValidationInput,
   TargetSelectorInput,
@@ -945,7 +943,7 @@ export function fetchLatestSchema(token: string) {
             }
             total
           }
-          errors {
+          errors: schemaCompositionErrors {
             nodes {
               message
             }
@@ -976,6 +974,7 @@ export function fetchLatestValidSchema(token: string) {
               deletedService
             }
           }
+          tags
           schemas {
             nodes {
               ... on SingleSchema {
@@ -999,39 +998,43 @@ export function fetchLatestValidSchema(token: string) {
   });
 }
 
-export function fetchVersions(selector: SchemaVersionsInput, limit: number, token: string) {
+export function fetchVersions(selector: TargetSelectorInput, first: number, token: string) {
   return execute({
     document: graphql(`
-      query schemaVersions($limit: Int!, $selector: SchemaVersionsInput!) {
-        schemaVersions(selector: $selector, limit: $limit) {
-          nodes {
-            id
-            valid
-            date
-            log {
-              ... on PushedSchemaLog {
-                __typename
-                commit
-                service
-              }
-              ... on DeletedSchemaLog {
-                __typename
-                deletedService
-              }
-            }
-            baseSchema
-            schemas {
-              nodes {
-                ... on SingleSchema {
-                  __typename
-                  source
-                  commit
+      query schemaVersions($first: Int!, $selector: TargetSelectorInput!) {
+        target(selector: $selector) {
+          schemaVersions(first: $first) {
+            edges {
+              node {
+                id
+                valid
+                date
+                log {
+                  ... on PushedSchemaLog {
+                    __typename
+                    commit
+                    service
+                  }
+                  ... on DeletedSchemaLog {
+                    __typename
+                    deletedService
+                  }
                 }
-                ... on CompositeSchema {
-                  __typename
-                  source
-                  commit
-                  url
+                baseSchema
+                schemas {
+                  nodes {
+                    ... on SingleSchema {
+                      __typename
+                      source
+                      commit
+                    }
+                    ... on CompositeSchema {
+                      __typename
+                      source
+                      commit
+                      url
+                    }
+                  }
                 }
               }
             }
@@ -1042,35 +1045,101 @@ export function fetchVersions(selector: SchemaVersionsInput, limit: number, toke
     token,
     variables: {
       selector,
-      limit,
+      first,
     },
   });
 }
 
-export function compareToPreviousVersion(selector: SchemaCompareToPreviousInput, token: string) {
+export function compareToPreviousVersion(
+  selector: {
+    organization: string;
+    project: string;
+    target: string;
+    version: string;
+  },
+  token: string,
+) {
   return execute({
     document: graphql(`
-      query compareToPreviousVersion($selector: SchemaCompareToPreviousInput!) {
-        schemaCompareToPrevious(selector: $selector) {
-          ... on SchemaCompareResult {
-            changes {
+      query SchemaCompareToPreviousVersionQuery(
+        $organization: ID!
+        $project: ID!
+        $target: ID!
+        $version: ID!
+      ) {
+        target(selector: { organization: $organization, project: $project, target: $target }) {
+          id
+          schemaVersion(id: $version) {
+            id
+            sdl
+            supergraph
+            log {
+              ... on PushedSchemaLog {
+                id
+                author
+                service
+                commit
+                serviceSdl
+                previousServiceSdl
+              }
+              ... on DeletedSchemaLog {
+                id
+                deletedService
+                previousServiceSdl
+              }
+            }
+            schemaCompositionErrors {
               nodes {
-                criticality
                 message
               }
-              total
             }
-            initial
-          }
-          ... on SchemaCompareError {
-            message
+            isFirstComposableVersion
+            breakingSchemaChanges {
+              nodes {
+                message(withSafeBasedOnUsageNote: false)
+                criticality
+                criticalityReason
+                path
+                approval {
+                  approvedBy {
+                    id
+                    displayName
+                  }
+                  approvedAt
+                  schemaCheckId
+                }
+                isSafeBasedOnUsage
+              }
+            }
+            safeSchemaChanges {
+              nodes {
+                message(withSafeBasedOnUsageNote: false)
+                criticality
+                criticalityReason
+                path
+                approval {
+                  approvedBy {
+                    id
+                    displayName
+                  }
+                  approvedAt
+                  schemaCheckId
+                }
+                isSafeBasedOnUsage
+              }
+            }
+            previousDiffableSchemaVersion {
+              id
+              supergraph
+              sdl
+            }
           }
         }
       }
     `),
     token,
     variables: {
-      selector,
+      ...selector,
     },
   });
 }

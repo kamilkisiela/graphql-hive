@@ -17,7 +17,7 @@ export function GraphQLHighlight({
       }}
       height="100vh"
       {...props}
-      schema={pretty}
+      schema={pretty ?? ''}
     />
   );
 }

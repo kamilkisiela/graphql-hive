@@ -2,7 +2,7 @@ import { ReactElement, ReactNode, useState } from 'react';
 import Head from 'next/head';
 import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
-import { FiGithub, FiGlobe, FiLogIn, FiPackage, FiServer, FiTruck } from 'react-icons/fi';
+import { FiGithub, FiGlobe, FiLogIn, FiPackage, FiPhone, FiServer, FiTruck } from 'react-icons/fi';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { cn } from '../lib';
 import { BookIcon } from './book-icon';
@@ -328,6 +328,15 @@ export function IndexPage(): ReactElement {
               >
                 <FiGithub /> Star on GitHub
               </a>
+              <a
+                className={cn(classes.link, 'flex flex-row items-center gap-2')}
+                href="#"
+                onClick={() => {
+                  (window as any).$crisp?.push(['do', 'chat:open']);
+                }}
+              >
+                <FiPhone /> Talk to us
+              </a>
             </>
           </HeroLinks>
           <HereTrustedBy>
@@ -358,10 +367,10 @@ export function IndexPage(): ReactElement {
             <div className="absolute top-0 h-[1px] w-full bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 opacity-25" />
           </div>
           <StatsList>
-            <StatsItem label="Happy users" value={3.0} suffix="K" decimal />
+            <StatsItem label="Happy users" value={4.1} suffix="K" decimal />
             <StatsItem label="Registered Schemas" value={120} suffix="K" />
             <StatsItem label="Collected Operations" value={150} suffix="B" />
-            <StatsItem label="GitHub Commits" value={2.2} suffix="K" decimal />
+            <StatsItem label="GitHub Commits" value={4.6} suffix="K" decimal />
           </StatsList>
         </div>
         <div className="flex flex-col">

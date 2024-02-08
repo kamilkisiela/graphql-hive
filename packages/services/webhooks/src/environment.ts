@@ -54,6 +54,7 @@ const SentryModel = zod.union([
 const PrometheusModel = zod.object({
   PROMETHEUS_METRICS: emptyString(zod.union([zod.literal('0'), zod.literal('1')]).optional()),
   PROMETHEUS_METRICS_LABEL_INSTANCE: emptyString(zod.string().optional()),
+  PROMETHEUS_METRICS_PORT: emptyString(NumberFromString.optional()),
 });
 
 const LogModel = zod.object({
@@ -141,6 +142,7 @@ export const env = {
           labels: {
             instance: prometheus.PROMETHEUS_METRICS_LABEL_INSTANCE ?? 'usage-service',
           },
+          port: prometheus.PROMETHEUS_METRICS_PORT ?? 10_254,
         }
       : null,
   requestBroker:

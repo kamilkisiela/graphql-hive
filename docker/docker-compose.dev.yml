@@ -21,7 +21,7 @@ services:
       - '5432:5432'
 
   redis:
-    image: bitnami/redis:7.2.3
+    image: bitnami/redis:7.2.4
     networks:
       - 'stack'
     healthcheck:
@@ -89,7 +89,7 @@ services:
       - 'stack'
 
   broker:
-    image: redpandadata/redpanda:v23.2.17
+    image: redpandadata/redpanda:v23.3.4
     container_name: broker
     hostname: broker
     networks:

@@ -1,10 +1,13 @@
 import { Injectable } from 'graphql-modules';
+import type { DatabasePool } from 'slonik';
 import type { PolicyConfigurationObject } from '@hive/policy';
 import type {
+  PaginatedSchemaVersionConnection,
   SchemaChangeType,
   SchemaCheck,
   SchemaCheckInput,
   SchemaCompositionError,
+  SchemaVersion,
   TargetBreadcrumb,
 } from '@hive/storage';
 import type {
@@ -33,7 +36,6 @@ import type {
   Schema,
   SchemaLog,
   SchemaPolicy,
-  SchemaVersion,
   Target,
   TargetSettings,
   User,
@@ -41,11 +43,7 @@ import type {
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
-
-type Paginated<T> = T & {
-  after?: string | null;
-  limit: number;
-};
+import type { Contracts } from '../../schema/providers/contracts';
 
 export interface OrganizationSelector {
   organization: string;
@@ -59,8 +57,18 @@ export interface TargetSelector extends ProjectSelector {
   target: string;
 }
 
+type CreateContractVersionInput = {
+  contractId: string;
+  contractName: string;
+  compositeSchemaSDL: string | null;
+  supergraphSDL: string | null;
+  schemaCompositionErrors: Array<SchemaCompositionError> | null;
+  changes: null | Array<SchemaChangeType>;
+};
+
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface Storage {
+  pool: DatabasePool;
   destroy(): Promise<void>;
   isReady(): Promise<boolean>;
   ensureUserExists(_: {
@@ -257,6 +265,12 @@ export interface Storage {
     _: ProjectSelector & Pick<Project, 'name' | 'cleanId'> & { user: string },
   ): Promise<Project | never>;
 
+  updateNativeSchemaComposition(
+    _: ProjectSelector & {
+      enabled: boolean;
+    },
+  ): Promise<Project>;
+
   enableExternalSchemaComposition(
     _: ProjectSelector & {
       endpoint: string;
@@ -354,6 +368,15 @@ export interface Storage {
 
   getMaybeLatestVersion(_: TargetSelector): Promise<SchemaVersion | null>;
 
+  /** Find the version before a schema version */
+  getVersionBeforeVersionId(
+    _: TargetSelector & {
+      beforeVersionId: string;
+      beforeVersionCreatedAt: string;
+      onlyComposable: boolean;
+    },
+  ): Promise<SchemaVersion | null>;
+
   /**
    * Find a specific schema version via it's action id.
    * The action id is the id of the action that created the schema version, it is user provided.
@@ -372,12 +395,8 @@ export interface Storage {
     before: string | null;
     after: string | null;
   }>;
-  getSchemasOfVersion(
-    _: {
-      version: string;
-      includeMetadata?: boolean;
-    } & TargetSelector,
-  ): Promise<Schema[]>;
+  getSchemasOfVersion(_: { version: string; includeMetadata?: boolean }): Promise<Schema[]>;
+  getSchemaByNameOfVersion(_: { versionId: string; serviceName: string }): Promise<Schema | null>;
   getSchemasOfPreviousVersion(
     _: {
       version: string;
@@ -390,14 +409,15 @@ export interface Storage {
       }
     | never
   >;
-  getVersions(_: Paginated<TargetSelector>): Promise<
-    | {
-        versions: readonly SchemaVersion[];
-        hasMore: boolean;
-      }
-    | never
-  >;
-
+  getServiceSchemaOfVersion(args: {
+    schemaVersionId: string;
+    serviceName: string;
+  }): Promise<Schema | null>;
+  getPaginatedSchemaVersionsForTargetId(args: {
+    targetId: string;
+    first: number | null;
+    cursor: null | string;
+  }): Promise<PaginatedSchemaVersionConnection>;
   getVersion(_: TargetSelector & { version: string }): Promise<SchemaVersion | never>;
   deleteSchema(
     _: {
@@ -405,17 +425,21 @@ export interface Storage {
       composable: boolean;
       actionFn(): Promise<void>;
       changes: Array<SchemaChangeType> | null;
+      diffSchemaVersionId: string | null;
+      contracts: null | Array<CreateContractVersionInput>;
     } & TargetSelector &
       (
         | {
             compositeSchemaSDL: null;
             supergraphSDL: null;
             schemaCompositionErrors: Array<SchemaCompositionError>;
+            tags: null;
           }
         | {
             compositeSchemaSDL: string;
             supergraphSDL: string | null;
             schemaCompositionErrors: null;
+            tags: null | Array<string>;
           }
       ),
   ): Promise<DeletedCompositeSchema & { versionId: string }>;
@@ -434,21 +458,25 @@ export interface Storage {
       actionFn(): Promise<void>;
       changes: Array<SchemaChangeType>;
       previousSchemaVersion: null | string;
+      diffSchemaVersionId: null | string;
       github: null | {
         repository: string;
         sha: string;
       };
+      contracts: null | Array<CreateContractVersionInput>;
     } & TargetSelector) &
       (
         | {
             compositeSchemaSDL: null;
             supergraphSDL: null;
             schemaCompositionErrors: Array<SchemaCompositionError>;
+            tags: null;
           }
         | {
             compositeSchemaSDL: string;
             supergraphSDL: string | null;
             schemaCompositionErrors: null;
+            tags: null | Array<string>;
           }
       ),
   ): Promise<SchemaVersion | never>;
@@ -716,6 +744,7 @@ export interface Storage {
     deletedSchemaCheckCount: number;
     deletedSdlStoreCount: number;
     deletedSchemaChangeApprovalCount: number;
+    deletedContractSchemaChangeApprovalCount: number;
   }>;
   /**
    * Find schema check for a given ID and target.
@@ -754,6 +783,8 @@ export interface Storage {
    * Overwrite and approve a schema check.
    */
   approveFailedSchemaCheck(input: {
+    /** We inject this here as a dirty way to avoid chicken egg issues :) */
+    contracts: Contracts;
     schemaCheckId: string;
     userId: string;
   }): Promise<SchemaCheck | null>;
@@ -764,7 +795,7 @@ export interface Storage {
   getApprovedSchemaChangesForContextId(args: {
     targetId: string;
     contextId: string;
-  }): Promise<Array<SchemaChangeType>>;
+  }): Promise<Map<string, SchemaChangeType>>;
 
   getTargetBreadcrumbForTargetId(_: { targetId: string }): Promise<TargetBreadcrumb | null>;
 
@@ -785,3 +816,4 @@ export interface Storage {
 @Injectable()
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class Storage implements Storage {}
+export type { PaginatedSchemaVersionConnection };

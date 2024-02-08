@@ -99,4 +99,9 @@ export const resolvers: CdnModule.Resolvers = {
       return context.injector.get(CdnProvider).getCdnUrlForTarget(target.id);
     },
   },
+  Contract: {
+    cdnUrl(contract, _, context) {
+      return context.injector.get(CdnProvider).getCdnUrlForContract(contract);
+    },
+  },
 };

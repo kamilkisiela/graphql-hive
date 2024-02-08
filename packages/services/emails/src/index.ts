@@ -112,7 +112,7 @@ async function main() {
     await server.listen(env.http.port, '::');
 
     if (env.prometheus) {
-      await startMetrics(env.prometheus.labels.instance);
+      await startMetrics(env.prometheus.labels.instance, env.prometheus.port);
     }
 
     await start();

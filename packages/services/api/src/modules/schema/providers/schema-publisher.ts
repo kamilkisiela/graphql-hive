@@ -1,3 +1,5 @@
+import { createHash } from 'crypto';
+import stringify from 'fast-json-stable-stringify';
 import { parse, print } from 'graphql';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
@@ -7,14 +9,7 @@ import { CriticalityLevel } from '@graphql-inspector/core';
 import { SchemaChangeType, SchemaCheck } from '@hive/storage';
 import * as Sentry from '@sentry/node';
 import * as Types from '../../../__generated__/types';
-import {
-  hashSDL,
-  Organization,
-  Project,
-  ProjectType,
-  Schema,
-  Target,
-} from '../../../shared/entities';
+import { Organization, Project, ProjectType, Schema, Target } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { isGitHubRepositoryString } from '../../../shared/is-github-repository-string';
 import { bolderize } from '../../../shared/markdown';
@@ -22,7 +17,6 @@ import { sentry } from '../../../shared/sentry';
 import { AlertsManager } from '../../alerts/providers/alerts-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/target-access';
-import { CdnProvider } from '../../cdn/providers/cdn.provider';
 import {
   GitHubIntegrationManager,
   type GitHubCheckRun,
@@ -39,6 +33,7 @@ import { toGraphQLSchemaCheck } from '../to-graphql-schema-check';
 import { ArtifactStorageWriter } from './artifact-storage-writer';
 import type { SchemaModuleConfig } from './config';
 import { SCHEMA_MODULE_CONFIG } from './config';
+import { Contracts } from './contracts';
 import { CompositeModel } from './models/composite';
 import { CompositeLegacyModel } from './models/composite-legacy';
 import {
@@ -57,6 +52,7 @@ import { SingleModel } from './models/single';
 import { SingleLegacyModel } from './models/single-legacy';
 import { ensureCompositeSchemas, ensureSingleSchema, SchemaHelper } from './schema-helper';
 import { SchemaManager } from './schema-manager';
+import { SchemaVersionHelper } from './schema-version-helper';
 
 const schemaCheckCount = new promClient.Counter({
   name: 'registry_check_count',
@@ -87,7 +83,6 @@ export type DeleteInput = Omit<Types.SchemaDeleteInput, 'project' | 'organizatio
 
 export type PublishInput = Types.SchemaPublishInput &
   TargetSelector & {
-    checksum: string;
     isSchemaPublishMissingUrlErrorSelected: boolean;
   };
 
@@ -135,13 +130,14 @@ export class SchemaPublisher {
     private projectManager: ProjectManager,
     private organizationManager: OrganizationManager,
     private alertsManager: AlertsManager,
-    private cdn: CdnProvider,
     private gitHubIntegrationManager: GitHubIntegrationManager,
     private distributedCache: DistributedCache,
     private helper: SchemaHelper,
     private artifactStorageWriter: ArtifactStorageWriter,
     private mutex: Mutex,
     private rateLimit: RateLimitProvider,
+    private contracts: Contracts,
+    private schemaVersionHelper: SchemaVersionHelper,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
     singleModel: SingleModel,
     compositeModel: CompositeModel,
@@ -183,6 +179,7 @@ export class SchemaPublisher {
       latestVersion,
       latestComposableVersion,
       latestSchemaVersion,
+      latestComposableSchemaVersion,
     ] = await Promise.all([
       this.targetManager.getTarget({
         organization: input.organization,
@@ -208,6 +205,11 @@ export class SchemaPublisher {
         onlyComposable: true,
       }),
       this.schemaManager.getMaybeLatestVersion({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+      }),
+      this.schemaManager.getMaybeLatestValidVersion({
         organization: input.organization,
         project: input.project,
         target: input.target,
@@ -352,19 +354,57 @@ export class SchemaPublisher {
 
     const sdl = tryPrettifySDL(input.sdl);
 
+    const activeContracts =
+      project.type === ProjectType.FEDERATION
+        ? await this.contracts.loadActiveContractsWithLatestValidContractVersionsByTargetId({
+            targetId: target.id,
+          })
+        : null;
+
     let checkResult: SchemaCheckResult;
 
-    const approvedSchemaChanges = new Map<string, SchemaChangeType>();
+    let approvedSchemaChanges: Map<string, SchemaChangeType> | null = new Map();
+    let approvedContractChanges: Map<string, Map<string, SchemaChangeType>> | null = null;
 
     if (contextId !== null) {
-      const changes = await this.storage.getApprovedSchemaChangesForContextId({
+      approvedSchemaChanges = await this.storage.getApprovedSchemaChangesForContextId({
         targetId: target.id,
         contextId,
       });
-      for (const change of changes) {
-        approvedSchemaChanges.set(change.id, change);
+
+      if (activeContracts?.length) {
+        approvedContractChanges = await this.contracts.getApprovedSchemaChangesForContracts({
+          contextId,
+          contractIds: activeContracts.map(contract => contract.contract.id),
+        });
       }
     }
+
+    const contractVersionIdByContractName = new Map<string, string>();
+    activeContracts?.forEach(contract => {
+      if (!contract.latestValidVersion) {
+        return;
+      }
+      contractVersionIdByContractName.set(
+        contract.latestValidVersion.contractName,
+        contract.latestValidVersion.id,
+      );
+    });
+
+    const comparedVersion =
+      organization.featureFlags.compareToPreviousComposableVersion === false
+        ? latestVersion
+        : latestComposableVersion;
+    const comparedSchemaVersion =
+      organization.featureFlags.compareToPreviousComposableVersion === false
+        ? latestSchemaVersion
+        : latestComposableSchemaVersion;
+
+    const schemaVersionContracts = comparedSchemaVersion
+      ? await this.contracts.getContractVersionsForSchemaVersion({
+          schemaVersionId: comparedSchemaVersion.id,
+        })
+      : null;
 
     switch (project.type) {
       case ProjectType.SINGLE:
@@ -375,12 +415,14 @@ export class SchemaPublisher {
           latest: latestVersion
             ? {
                 isComposable: latestVersion.valid,
+                sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: [ensureSingleSchema(latestVersion.schemas)],
               }
             : null,
           latestComposable: latestComposableVersion
             ? {
                 isComposable: latestComposableVersion.valid,
+                sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: [ensureSingleSchema(latestComposableVersion.schemas)],
               }
             : null,
@@ -411,19 +453,28 @@ export class SchemaPublisher {
           latest: latestVersion
             ? {
                 isComposable: latestVersion.valid,
+                sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: ensureCompositeSchemas(latestVersion.schemas),
               }
             : null,
           latestComposable: latestComposableVersion
             ? {
                 isComposable: latestComposableVersion.valid,
+                sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
               }
             : null,
+          schemaVersionContractNames:
+            schemaVersionContracts?.edges.map(edge => edge.node.contractName) ?? null,
           baseSchema,
           project,
           organization,
           approvedChanges: approvedSchemaChanges,
+          contracts:
+            activeContracts?.map(contract => ({
+              ...contract,
+              approvedChanges: approvedContractChanges?.get(contract.contract.id) ?? null,
+            })) ?? null,
         });
         break;
       default:
@@ -439,11 +490,6 @@ export class SchemaPublisher {
     if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
       schemaCheck = await this.storage.createSchemaCheck({
         schemaSDL: sdl,
-        schemaSDLHash: hashSDL(
-          parse(sdl, {
-            noLocation: true,
-          }),
-        ),
         serviceName: input.service ?? null,
         meta: input.meta ?? null,
         targetId: target.id,
@@ -457,26 +503,12 @@ export class SchemaPublisher {
           ? {
               schemaCompositionErrors: checkResult.state.composition.errors,
               compositeSchemaSDL: null,
-              compositeSchemaSDLHash: null,
               supergraphSDL: null,
-              supergraphSDLHash: null,
             }
           : {
               schemaCompositionErrors: null,
               compositeSchemaSDL: checkResult.state.composition.compositeSchemaSDL,
-              compositeSchemaSDLHash: hashSDL(
-                parse(checkResult.state.composition.compositeSchemaSDL, {
-                  noLocation: true,
-                }),
-              ),
               supergraphSDL: checkResult.state.composition.supergraphSDL,
-              supergraphSDLHash: checkResult.state.composition.supergraphSDL
-                ? hashSDL(
-                    parse(checkResult.state.composition.supergraphSDL, {
-                      noLocation: true,
-                    }),
-                  )
-                : null,
             }),
         isManuallyApproved: false,
         manualApprovalUserId: null,
@@ -487,59 +519,23 @@ export class SchemaPublisher {
         githubSha: githubCheckRun?.commit ?? null,
         expiresAt,
         contextId,
+        contracts:
+          checkResult.state.contracts?.map(contract => ({
+            contractId: contract.contractId,
+            contractName: contract.contractName,
+            comparedContractVersionId:
+              contractVersionIdByContractName.get(contract.contractName) ?? null,
+            isSuccess: contract.isSuccessful,
+            compositeSchemaSdl: contract.composition.compositeSchemaSDL,
+            supergraphSchemaSdl: contract.composition.supergraphSDL,
+            schemaCompositionErrors: contract.composition.errors ?? null,
+            breakingSchemaChanges: contract.schemaChanges?.breaking ?? null,
+            safeSchemaChanges: contract.schemaChanges?.safe ?? null,
+          })) ?? null,
       });
-    }
-
-    if (checkResult.conclusion === SchemaCheckConclusion.Success) {
-      let composition = checkResult.state?.composition ?? null;
-
-      // in case of a skip this is null
-      if (composition === null) {
-        if (latestVersion == null || latestSchemaVersion == null) {
-          throw new Error(
-            'Composition yielded no composite schema SDL but there is no latest version to fall back to.',
-          );
-        }
-
-        if (latestSchemaVersion.compositeSchemaSDL) {
-          composition = {
-            compositeSchemaSDL: latestSchemaVersion.compositeSchemaSDL,
-            supergraphSDL: latestSchemaVersion.supergraphSDL,
-          };
-        } else {
-          // LEGACY CASE if the schema version record has no sdl
-          // -> we need to do manual composition
-          const orchestrator = this.schemaManager.matchOrchestrator(project.type);
-
-          const result = await orchestrator.composeAndValidate(
-            latestVersion.schemas.map(s => this.helper.createSchemaObject(s)),
-            {
-              external: project.externalComposition,
-              native: this.schemaManager.checkProjectNativeFederationSupport({
-                project,
-                organization,
-              }),
-            },
-          );
-
-          if (result.sdl == null) {
-            throw new Error('Manual composition yielded no composite schema SDL.');
-          }
-
-          composition = {
-            compositeSchemaSDL: result.sdl,
-            supergraphSDL: result.supergraph,
-          };
-        }
-      }
-
+    } else if (checkResult.conclusion === SchemaCheckConclusion.Success) {
       schemaCheck = await this.storage.createSchemaCheck({
         schemaSDL: sdl,
-        schemaSDLHash: hashSDL(
-          parse(sdl, {
-            noLocation: true,
-          }),
-        ),
         serviceName: input.service ?? null,
         meta: input.meta ?? null,
         targetId: target.id,
@@ -550,20 +546,8 @@ export class SchemaPublisher {
         schemaPolicyWarnings: checkResult.state?.schemaPolicyWarnings ?? null,
         schemaPolicyErrors: null,
         schemaCompositionErrors: null,
-        compositeSchemaSDL: composition.compositeSchemaSDL,
-        compositeSchemaSDLHash: hashSDL(
-          parse(composition.compositeSchemaSDL, {
-            noLocation: true,
-          }),
-        ),
-        supergraphSDL: composition.supergraphSDL,
-        supergraphSDLHash: composition.supergraphSDL
-          ? hashSDL(
-              parse(composition.supergraphSDL, {
-                noLocation: true,
-              }),
-            )
-          : null,
+        compositeSchemaSDL: checkResult.state.composition.compositeSchemaSDL,
+        supergraphSDL: checkResult.state.composition.supergraphSDL,
         isManuallyApproved: false,
         manualApprovalUserId: null,
         githubCheckRunId: githubCheckRun?.id ?? null,
@@ -573,11 +557,97 @@ export class SchemaPublisher {
         githubSha: githubCheckRun?.commit ?? null,
         expiresAt,
         contextId,
+        contracts:
+          checkResult.state?.contracts?.map(contract => ({
+            contractId: contract.contractId,
+            contractName: contract.contractName,
+            comparedContractVersionId:
+              contractVersionIdByContractName.get(contract.contractName) ?? null,
+            isSuccess: contract.isSuccessful,
+            compositeSchemaSdl: contract.composition.compositeSchemaSDL,
+            supergraphSchemaSdl: contract.composition.supergraphSDL,
+            schemaCompositionErrors: null,
+            breakingSchemaChanges: contract.schemaChanges?.breaking ?? null,
+            safeSchemaChanges: contract.schemaChanges?.safe ?? null,
+          })) ?? null,
+      });
+    } else if (checkResult.conclusion === SchemaCheckConclusion.Skip) {
+      if (!comparedVersion || !comparedSchemaVersion) {
+        throw new Error('This cannot happen 1 :)');
+      }
+
+      const [compositeSchemaSdl, supergraphSdl, compositionErrors] = await Promise.all([
+        this.schemaVersionHelper.getCompositeSchemaSdl(comparedSchemaVersion),
+        this.schemaVersionHelper.getSupergraphSdl(comparedSchemaVersion),
+        this.schemaVersionHelper.getSchemaCompositionErrors(comparedSchemaVersion),
+      ]);
+
+      schemaCheck = await this.storage.createSchemaCheck({
+        schemaSDL: sdl,
+        serviceName: input.service ?? null,
+        meta: input.meta ?? null,
+        targetId: target.id,
+        schemaVersionId: comparedVersion?.version ?? null,
+        breakingSchemaChanges: null,
+        safeSchemaChanges: null,
+        schemaPolicyWarnings: null,
+        schemaPolicyErrors: null,
+        ...(compositeSchemaSdl
+          ? {
+              isSuccess: true,
+              schemaCompositionErrors: null,
+              compositeSchemaSDL: compositeSchemaSdl,
+              supergraphSDL: supergraphSdl,
+            }
+          : {
+              isSuccess: false,
+              schemaCompositionErrors: assertNonNull(
+                compositionErrors,
+                'Composite Schema SDL, but no composition errors.',
+              ),
+              compositeSchemaSDL: null,
+              supergraphSDL: null,
+            }),
+        isManuallyApproved: false,
+        manualApprovalUserId: null,
+        githubCheckRunId: githubCheckRun?.id ?? null,
+        githubRepository: githubCheckRun
+          ? githubCheckRun.owner + '/' + githubCheckRun.repository
+          : null,
+        githubSha: githubCheckRun?.commit ?? null,
+        expiresAt,
+        contextId,
+        contracts: schemaVersionContracts
+          ? await Promise.all(
+              schemaVersionContracts?.edges.map(async edge => ({
+                contractId: edge.node.contractId,
+                contractName: edge.node.contractName,
+                comparedContractVersionId:
+                  edge.node.schemaCompositionErrors === null
+                    ? edge.node.id
+                    : // if this version is not composable - we need to get the previous composable version
+                      await this.contracts
+                        .getDiffableContractVersionForContractVersion({
+                          contractVersion: edge.node,
+                        })
+                        .then(contractVersion => contractVersion?.id ?? null),
+                isSuccess: !!edge.node.schemaCompositionErrors,
+                compositeSchemaSdl: edge.node.compositeSchemaSdl,
+                supergraphSchemaSdl: edge.node.supergraphSdl,
+                schemaCompositionErrors: edge.node.schemaCompositionErrors,
+                breakingSchemaChanges: null,
+                safeSchemaChanges: null,
+              })),
+            )
+          : null,
       });
     }
 
     if (githubCheckRun) {
       if (checkResult.conclusion === SchemaCheckConclusion.Success) {
+        const failedContractCompositionCount =
+          checkResult.state.contracts?.filter(c => !c.isSuccessful).length ?? 0;
+
         increaseSchemaCheckCountMetric('accepted');
         return await this.updateGithubCheckRunForSchemaCheck({
           project,
@@ -591,6 +661,61 @@ export class SchemaPublisher {
           errors: null,
           schemaCheckId: schemaCheck?.id ?? null,
           githubCheckRun: githubCheckRun,
+          failedContractCompositionCount,
+        });
+      }
+
+      if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
+        const failedContractCompositionCount =
+          checkResult.state.contracts?.filter(c => !c.isSuccessful).length ?? 0;
+
+        increaseSchemaCheckCountMetric('rejected');
+        return await this.updateGithubCheckRunForSchemaCheck({
+          project,
+          target,
+          organization,
+          conclusion: checkResult.conclusion,
+          changes: [
+            ...(checkResult.state.schemaChanges?.breaking ?? []),
+            ...(checkResult.state.schemaChanges?.safe ?? []),
+          ],
+          breakingChanges: checkResult.state.schemaChanges?.breaking ?? [],
+          compositionErrors: checkResult.state.composition.errors ?? [],
+          warnings: checkResult.state.schemaPolicy?.warnings ?? [],
+          errors: checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? [],
+          schemaCheckId: schemaCheck?.id ?? null,
+          githubCheckRun: githubCheckRun,
+          failedContractCompositionCount,
+        });
+      }
+
+      // SchemaCheckConclusion.Skip
+
+      if (!comparedVersion || !comparedSchemaVersion) {
+        throw new Error('This cannot happen 2 :)');
+      }
+
+      if (comparedSchemaVersion.isComposable) {
+        increaseSchemaCheckCountMetric('accepted');
+        const contracts = await this.contracts.getContractVersionsForSchemaVersion({
+          schemaVersionId: comparedSchemaVersion.id,
+        });
+        const failedContractCompositionCount =
+          contracts?.edges.filter(edge => edge.node.schemaCompositionErrors !== null).length ?? 0;
+
+        return await this.updateGithubCheckRunForSchemaCheck({
+          project,
+          target,
+          organization,
+          conclusion: SchemaCheckConclusion.Success,
+          changes: null,
+          breakingChanges: null,
+          warnings: null,
+          compositionErrors: null,
+          errors: null,
+          schemaCheckId: schemaCheck?.id ?? null,
+          githubCheckRun: githubCheckRun,
+          failedContractCompositionCount,
         });
       }
 
@@ -599,17 +724,15 @@ export class SchemaPublisher {
         project,
         target,
         organization,
-        conclusion: checkResult.conclusion,
-        changes: [
-          ...(checkResult.state.schemaChanges?.breaking ?? []),
-          ...(checkResult.state.schemaChanges?.safe ?? []),
-        ],
-        breakingChanges: checkResult.state.schemaChanges?.breaking ?? [],
-        compositionErrors: checkResult.state.composition.errors ?? [],
-        warnings: checkResult.state.schemaPolicy?.warnings ?? [],
-        errors: checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? [],
+        conclusion: SchemaCheckConclusion.Failure,
+        changes: null,
+        breakingChanges: null,
+        compositionErrors: comparedSchemaVersion.schemaCompositionErrors,
+        warnings: null,
+        errors: null,
         schemaCheckId: schemaCheck?.id ?? null,
         githubCheckRun: githubCheckRun,
+        failedContractCompositionCount: 0,
       });
     }
 
@@ -627,26 +750,107 @@ export class SchemaPublisher {
       return {
         __typename: 'SchemaCheckSuccess',
         valid: true,
-        changes: checkResult.state?.schemaChanges?.all ?? [],
+        changes: [
+          ...(checkResult.state?.schemaChanges?.all ?? []),
+          ...(checkResult.state?.contracts?.flatMap(contract => [
+            ...(contract.schemaChanges?.all?.map(change => ({
+              ...change,
+              message: `[${contract.contractName}] ${change.message}`,
+            })) ?? []),
+          ]) ?? []),
+        ],
         warnings: checkResult.state?.schemaPolicyWarnings ?? [],
         initial: latestVersion == null,
         schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, schemaCheck),
       } as const;
     }
 
-    increaseSchemaCheckCountMetric('rejected');
+    if (checkResult.conclusion === SchemaCheckConclusion.Failure) {
+      increaseSchemaCheckCountMetric('rejected');
 
+      return {
+        __typename: 'SchemaCheckError',
+        valid: false,
+        changes: [
+          ...(checkResult.state.schemaChanges?.all ?? []),
+          ...(checkResult.state.contracts?.flatMap(contract => [
+            ...(contract.schemaChanges?.all?.map(change => ({
+              ...change,
+              message: `[${contract.contractName}] ${change.message}`,
+            })) ?? []),
+          ]) ?? []),
+        ],
+        warnings: checkResult.state.schemaPolicy?.warnings ?? [],
+        errors: [
+          ...(checkResult.state.schemaChanges?.breaking?.filter(
+            breaking => breaking.approvalMetadata == null && breaking.isSafeBasedOnUsage === false,
+          ) ?? []),
+          ...(checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? []),
+          ...(checkResult.state.composition.errors ?? []),
+          ...(checkResult.state.contracts?.flatMap(contract => [
+            ...(contract.composition.errors?.map(error => ({
+              message: `[${contract.contractName}] ${error.message}`,
+              source: error.source,
+            })) ?? []),
+          ]) ?? []),
+          ...(checkResult.state.contracts?.flatMap(contract => [
+            ...(contract.schemaChanges?.breaking
+              ?.filter(
+                breaking =>
+                  breaking.approvalMetadata == null && breaking.isSafeBasedOnUsage === false,
+              )
+              .map(change => ({
+                ...change,
+                message: `[${contract.contractName}] ${change.message}`,
+              })) ?? []),
+          ]) ?? []),
+        ],
+        schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, schemaCheck),
+      } as const;
+    }
+
+    // SchemaCheckConclusion.Skip
+
+    if (!comparedVersion || !comparedSchemaVersion) {
+      throw new Error('This cannot happen 3 :)');
+    }
+
+    if (comparedSchemaVersion.isComposable) {
+      increaseSchemaCheckCountMetric('accepted');
+      return {
+        __typename: 'SchemaCheckSuccess',
+        valid: true,
+        changes: [],
+        warnings: [],
+        initial: false,
+        schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, schemaCheck),
+      } as const;
+    }
+
+    const contractVersions = await this.contracts.getContractVersionsForSchemaVersion({
+      schemaVersionId: comparedSchemaVersion.id,
+    });
+
+    increaseSchemaCheckCountMetric('rejected');
     return {
       __typename: 'SchemaCheckError',
       valid: false,
-      changes: checkResult.state.schemaChanges?.all ?? [],
-      warnings: checkResult.state.schemaPolicy?.warnings ?? [],
+      changes: [],
+      warnings: [],
       errors: [
-        ...(checkResult.state.schemaChanges?.breaking?.filter(
-          breaking => breaking.approvalMetadata == null && breaking.isSafeBasedOnUsage === false,
-        ) ?? []),
-        ...(checkResult.state.schemaPolicy?.errors?.map(formatPolicyError) ?? []),
-        ...(checkResult.state.composition.errors ?? []),
+        ...(comparedSchemaVersion.schemaCompositionErrors?.map(error => ({
+          message: error.message,
+          source: error.source,
+        })) ?? []),
+        ...(contractVersions?.edges.flatMap(edge => [
+          ...(edge.node.schemaCompositionErrors?.map(
+            error =>
+              ({
+                message: `[${edge.node.contractName}] ${error.message}`,
+                source: error.source,
+              }) ?? [],
+          ) ?? []),
+        ]) ?? []),
       ],
       schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, schemaCheck),
     } as const;
@@ -655,12 +859,46 @@ export class SchemaPublisher {
   @sentry('SchemaPublisher.publish')
   async publish(input: PublishInput, signal: AbortSignal): Promise<PublishResult> {
     this.logger.debug(
-      'Schema publication (checksum=%s, organization=%s, project=%s, target=%s)',
-      input.checksum,
+      'Schema publication (organization=%s, project=%s, target=%s)',
       input.organization,
       input.project,
       input.target,
     );
+
+    this.logger.debug(
+      'Compute hash (organization=%s, project=%s, target=%s)',
+      input.organization,
+      input.project,
+      input.target,
+    );
+
+    const token = this.authManager.ensureApiToken();
+    const contracts = await this.contracts.getActiveContractsByTargetId({ targetId: input.target });
+
+    const checksum = createHash('md5')
+      .update(
+        stringify({
+          ...input,
+          organization: input.organization,
+          project: input.project,
+          target: input.target,
+          service: input.service?.toLowerCase(),
+          contracts: contracts?.map(contract => ({
+            contractId: contract.id,
+            contractName: contract.contractName,
+          })),
+        }),
+      )
+      .update(token)
+      .digest('base64');
+
+    this.logger.debug(
+      'Hash computation finished (organization=%s, project=%s, target=%s, hash=%s)',
+      input.organization,
+      input.project,
+      input.target,
+    );
+
     return this.mutex.perform(
       registryLockId(input.target),
       {
@@ -674,9 +912,13 @@ export class SchemaPublisher {
           scope: TargetAccessScope.REGISTRY_WRITE,
         });
         return this.distributedCache.wrap({
-          key: `schema:publish:${input.checksum}`,
+          key: `schema:publish:${checksum}`,
           ttlSeconds: 15,
-          executor: () => this.internalPublish(input),
+          executor: () =>
+            this.internalPublish({
+              ...input,
+              checksum,
+            }),
         });
       },
     );
@@ -726,6 +968,7 @@ export class SchemaPublisher {
             project,
             organization,
           }),
+          contracts: null,
         });
 
         this.logger.info(
@@ -739,6 +982,7 @@ export class SchemaPublisher {
           supergraph: compositionResult.supergraph,
           schemas,
           fullSchemaSdl: compositionResult.sdl!,
+          contracts: null,
         });
       }
     }
@@ -762,32 +1006,49 @@ export class SchemaPublisher {
           target: input.target.id,
           scope: TargetAccessScope.REGISTRY_WRITE,
         });
-        const [project, organization, latestVersion, latestComposableVersion, baseSchema] =
-          await Promise.all([
-            this.projectManager.getProject({
-              organization: input.organization,
-              project: input.project,
-            }),
-            this.organizationManager.getOrganization({
-              organization: input.organization,
-            }),
-            this.schemaManager.getLatestSchemas({
-              organization: input.organization,
-              project: input.project,
-              target: input.target.id,
-            }),
-            this.schemaManager.getLatestSchemas({
-              organization: input.organization,
-              project: input.project,
-              target: input.target.id,
-              onlyComposable: true,
-            }),
-            this.schemaManager.getBaseSchema({
-              organization: input.organization,
-              project: input.project,
-              target: input.target.id,
-            }),
-          ]);
+        const [
+          project,
+          organization,
+          latestVersion,
+          latestComposableVersion,
+          baseSchema,
+          latestSchemaVersion,
+          latestComposableSchemaVersion,
+        ] = await Promise.all([
+          this.projectManager.getProject({
+            organization: input.organization,
+            project: input.project,
+          }),
+          this.organizationManager.getOrganization({
+            organization: input.organization,
+          }),
+          this.schemaManager.getLatestSchemas({
+            organization: input.organization,
+            project: input.project,
+            target: input.target.id,
+          }),
+          this.schemaManager.getLatestSchemas({
+            organization: input.organization,
+            project: input.project,
+            target: input.target.id,
+            onlyComposable: true,
+          }),
+          this.schemaManager.getBaseSchema({
+            organization: input.organization,
+            project: input.project,
+            target: input.target.id,
+          }),
+          this.schemaManager.getMaybeLatestVersion({
+            organization: input.organization,
+            project: input.project,
+            target: input.target.id,
+          }),
+          this.schemaManager.getMaybeLatestValidVersion({
+            organization: input.organization,
+            project: input.project,
+            target: input.target.id,
+          }),
+        ]);
 
         const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
 
@@ -830,17 +1091,34 @@ export class SchemaPublisher {
           } as const;
         }
 
+        const contracts =
+          project.type === ProjectType.FEDERATION
+            ? await this.contracts.loadActiveContractsWithLatestValidContractVersionsByTargetId({
+                targetId: input.target.id,
+              })
+            : null;
+
+        const contractIdToLatestValidContractVersionId = new Map<string, string | null>();
+        for (const contract of contracts ?? []) {
+          contractIdToLatestValidContractVersionId.set(
+            contract.contract.id,
+            contract.latestValidVersion?.id ?? null,
+          );
+        }
+
         const deleteResult = await this.models[project.type][modelVersion].delete({
           input: {
             serviceName: input.serviceName,
           },
           latest: {
             isComposable: latestVersion.valid,
+            sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
             schemas,
           },
           latestComposable: latestComposableVersion
             ? {
                 isComposable: latestComposableVersion.valid,
+                sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: ensureCompositeSchemas(latestComposableVersion.schemas),
               }
             : null,
@@ -852,7 +1130,20 @@ export class SchemaPublisher {
             project: input.project,
             organization: input.organization,
           },
+          contracts,
         });
+
+        let diffSchemaVersionId: string | null = null;
+        if (
+          organization.featureFlags.compareToPreviousComposableVersion &&
+          latestComposableSchemaVersion
+        ) {
+          diffSchemaVersionId = latestComposableSchemaVersion.id;
+        }
+
+        if (!organization.featureFlags.compareToPreviousComposableVersion && latestSchemaVersion) {
+          diffSchemaVersionId = latestSchemaVersion.id;
+        }
 
         if (deleteResult.conclusion === SchemaDeleteConclusion.Accept) {
           this.logger.debug('Delete accepted');
@@ -863,20 +1154,43 @@ export class SchemaPublisher {
               target: input.target.id,
               serviceName: input.serviceName,
               composable: deleteResult.state.composable,
+              diffSchemaVersionId,
               changes: deleteResult.state.changes,
+              contracts:
+                deleteResult.state.contracts?.map(contract => ({
+                  contractId: contract.contractId,
+                  contractName: contract.contractName,
+                  compositeSchemaSDL: contract.fullSchemaSdl,
+                  supergraphSDL: contract.supergraph,
+                  schemaCompositionErrors: contract.compositionErrors,
+                  changes: contract.changes,
+                })) ?? null,
               ...(deleteResult.state.fullSchemaSdl
                 ? {
                     compositeSchemaSDL: deleteResult.state.fullSchemaSdl,
                     supergraphSDL: deleteResult.state.supergraph,
                     schemaCompositionErrors: null,
+                    tags: deleteResult.state.tags,
                   }
                 : {
                     compositeSchemaSDL: null,
                     supergraphSDL: null,
                     schemaCompositionErrors: deleteResult.state.compositionErrors ?? [],
+                    tags: null,
                   }),
               actionFn: async () => {
                 if (deleteResult.state.composable) {
+                  const contracts: Array<{ name: string; sdl: string; supergraph: string }> = [];
+                  for (const contract of deleteResult.state.contracts ?? []) {
+                    if (contract.fullSchemaSdl && contract.supergraph) {
+                      contracts.push({
+                        name: contract.contractName,
+                        sdl: contract.fullSchemaSdl,
+                        supergraph: contract.supergraph,
+                      });
+                    }
+                  }
+
                   await this.publishToCDN({
                     target: input.target,
                     project,
@@ -884,6 +1198,7 @@ export class SchemaPublisher {
                     fullSchemaSdl: deleteResult.state.fullSchemaSdl,
                     // pass all schemas except the one we are deleting
                     schemas: schemas.filter(s => s.service_name !== input.serviceName),
+                    contracts,
                   });
                 }
               },
@@ -960,7 +1275,11 @@ export class SchemaPublisher {
     );
   }
 
-  private async internalPublish(input: PublishInput) {
+  private async internalPublish(
+    input: PublishInput & {
+      checksum: string;
+    },
+  ) {
     const [organizationId, projectId, targetId] = [input.organization, input.project, input.target];
     this.logger.info('Publishing schema (input=%o)', {
       ...lodash.omit(input, ['sdl', 'organization', 'project', 'target', 'metadata']),
@@ -973,37 +1292,55 @@ export class SchemaPublisher {
       metadata: !!input.metadata,
     });
 
-    const [organization, project, target, latestVersion, latestComposable, baseSchema] =
-      await Promise.all([
-        this.organizationManager.getOrganization({
-          organization: organizationId,
-        }),
-        this.projectManager.getProject({
-          organization: organizationId,
-          project: projectId,
-        }),
-        this.targetManager.getTarget({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-        }),
-        this.schemaManager.getLatestSchemas({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-        }),
-        this.schemaManager.getLatestSchemas({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-          onlyComposable: true,
-        }),
-        this.schemaManager.getBaseSchema({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-        }),
-      ]);
+    const [
+      organization,
+      project,
+      target,
+      latestVersion,
+      latestComposable,
+      baseSchema,
+      latestSchemaVersion,
+      latestComposableSchemaVersion,
+    ] = await Promise.all([
+      this.organizationManager.getOrganization({
+        organization: organizationId,
+      }),
+      this.projectManager.getProject({
+        organization: organizationId,
+        project: projectId,
+      }),
+      this.targetManager.getTarget({
+        organization: organizationId,
+        project: projectId,
+        target: targetId,
+      }),
+      this.schemaManager.getLatestSchemas({
+        organization: organizationId,
+        project: projectId,
+        target: targetId,
+      }),
+      this.schemaManager.getLatestSchemas({
+        organization: organizationId,
+        project: projectId,
+        target: targetId,
+        onlyComposable: true,
+      }),
+      this.schemaManager.getBaseSchema({
+        organization: organizationId,
+        project: projectId,
+        target: targetId,
+      }),
+      this.schemaManager.getMaybeLatestVersion({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+      }),
+      this.schemaManager.getMaybeLatestValidVersion({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+      }),
+    ]);
 
     const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
 
@@ -1085,6 +1422,31 @@ export class SchemaPublisher {
 
     this.logger.debug(`Found ${latestVersion?.schemas.length ?? 0} most recent schemas`);
 
+    const contracts =
+      project.type === ProjectType.FEDERATION
+        ? await this.contracts.loadActiveContractsWithLatestValidContractVersionsByTargetId({
+            targetId: target.id,
+          })
+        : null;
+
+    const contractIdToLatestValidContractVersionId = new Map<string, string | null>();
+    for (const contract of contracts ?? []) {
+      contractIdToLatestValidContractVersionId.set(
+        contract.contract.id,
+        contract.latestValidVersion?.id ?? null,
+      );
+    }
+
+    const comparedSchemaVersion =
+      organization.featureFlags.compareToPreviousComposableVersion === false
+        ? latestSchemaVersion
+        : latestComposableSchemaVersion;
+    const schemaVersionContracts = comparedSchemaVersion
+      ? await this.contracts.getContractVersionsForSchemaVersion({
+          schemaVersionId: comparedSchemaVersion.id,
+        })
+      : null;
+
     let publishResult: SchemaPublishResult;
 
     switch (project.type) {
@@ -1099,12 +1461,14 @@ export class SchemaPublisher {
           latest: latestVersion
             ? {
                 isComposable: latestVersion.valid,
+                sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: [ensureSingleSchema(latestVersion.schemas)],
               }
             : null,
           latestComposable: latestComposable
             ? {
                 isComposable: latestComposable.valid,
+                sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: [ensureSingleSchema(latestComposable.schemas)],
               }
             : null,
@@ -1127,19 +1491,24 @@ export class SchemaPublisher {
           latest: latestVersion
             ? {
                 isComposable: latestVersion.valid,
+                sdl: latestSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: ensureCompositeSchemas(latestVersion.schemas),
               }
             : null,
           latestComposable: latestComposable
             ? {
                 isComposable: latestComposable.valid,
+                sdl: latestComposableSchemaVersion?.compositeSchemaSDL ?? null,
                 schemas: ensureCompositeSchemas(latestComposable.schemas),
               }
             : null,
+          schemaVersionContractNames:
+            schemaVersionContracts?.edges.map(edge => edge.node.contractName) ?? null,
           organization,
           project,
           target,
           baseSchema,
+          contracts,
         });
         break;
       default: {
@@ -1269,6 +1638,7 @@ export class SchemaPublisher {
 
     const composable = publishResult.state.composable;
     const fullSchemaSdl = publishResult.state.fullSchemaSdl;
+    const publishState = publishResult.state;
 
     if (composable && !fullSchemaSdl) {
       throw new Error('Version is composable but the full schema SDL is missing');
@@ -1287,7 +1657,20 @@ export class SchemaPublisher {
 
     const supergraph = publishResult.state.supergraph ?? null;
 
+    let diffSchemaVersionId: string | null = null;
+    if (
+      organization.featureFlags.compareToPreviousComposableVersion &&
+      latestComposableSchemaVersion
+    ) {
+      diffSchemaVersionId = latestComposableSchemaVersion.id;
+    }
+
+    if (!organization.featureFlags.compareToPreviousComposableVersion && latestSchemaVersion) {
+      diffSchemaVersionId = latestSchemaVersion.id;
+    }
+
     this.logger.debug(`Assigning ${schemaLogIds.length} schemas to new version`);
+
     const schemaVersion = await this.schemaManager.createVersion({
       valid: composable,
       organization: organizationId,
@@ -1305,22 +1688,45 @@ export class SchemaPublisher {
       github,
       actionFn: async () => {
         if (composable && fullSchemaSdl) {
+          const contracts: Array<{ name: string; sdl: string; supergraph: string }> = [];
+          for (const contract of publishState.contracts ?? []) {
+            if (contract.fullSchemaSdl && contract.supergraph) {
+              contracts.push({
+                name: contract.contractName,
+                sdl: contract.fullSchemaSdl,
+                supergraph: contract.supergraph,
+              });
+            }
+          }
+
           await this.publishToCDN({
             target,
             project,
             supergraph,
             fullSchemaSdl,
             schemas,
+            contracts,
           });
         }
       },
       changes,
+      diffSchemaVersionId,
       previousSchemaVersion: latestVersion?.version ?? null,
+      contracts:
+        publishResult.state.contracts?.map(contract => ({
+          contractId: contract.contractId,
+          contractName: contract.contractName,
+          compositeSchemaSDL: contract.fullSchemaSdl,
+          supergraphSDL: contract.supergraph,
+          schemaCompositionErrors: contract.compositionErrors,
+          changes: contract.changes,
+        })) ?? null,
       ...(fullSchemaSdl
         ? {
             compositeSchemaSDL: fullSchemaSdl,
             supergraphSDL: supergraph,
             schemaCompositionErrors: null,
+            tags: publishResult.state?.tags ?? null,
           }
         : {
             compositeSchemaSDL: null,
@@ -1329,6 +1735,7 @@ export class SchemaPublisher {
               publishResult.state.compositionErrors,
               "Can't be null",
             ),
+            tags: null,
           }),
     });
 
@@ -1470,6 +1877,7 @@ export class SchemaPublisher {
       message: string;
     }> | null;
     schemaCheckId: string | null;
+    failedContractCompositionCount: number;
   }) {
     try {
       let title: string;
@@ -1490,6 +1898,9 @@ export class SchemaPublisher {
         title = `Detected ${total} error${total === 1 ? '' : 's'}`;
         summary = [
           errors ? this.errorsToMarkdown(errors) : null,
+          args.failedContractCompositionCount > 0
+            ? `- ${args.failedContractCompositionCount} contract check(s) failed. (Click view more details on GraphQL Hive button below)`
+            : null,
           warnings ? this.warningsToMarkdown(warnings) : null,
           compositionErrors ? this.errorsToMarkdown(compositionErrors) : null,
           breakingChanges ? this.errorsToMarkdown(breakingChanges) : null,
@@ -1539,12 +1950,14 @@ export class SchemaPublisher {
     supergraph,
     fullSchemaSdl,
     schemas,
+    contracts,
   }: {
     target: Target;
     project: Project;
     supergraph: string | null;
     fullSchemaSdl: string;
     schemas: readonly Schema[];
+    contracts: null | Array<{ name: string; supergraph: string; sdl: string }>;
   }) {
     const publishMetadata = async () => {
       const metadata: Array<Record<string, any>> = [];
@@ -1561,6 +1974,7 @@ export class SchemaPublisher {
           // COMPOSITE projects can have multiple metadata, we need to pass it as an array
           artifact: project.type === ProjectType.SINGLE ? metadata[0] : metadata,
           artifactType: 'metadata',
+          contractName: null,
         });
       }
     };
@@ -1577,11 +1991,13 @@ export class SchemaPublisher {
             sdl: s.sdl,
             url: s.service_url,
           })),
+          contractName: null,
         }),
         this.artifactStorageWriter.writeArtifact({
           targetId: target.id,
           artifactType: 'sdl',
           artifact: fullSchemaSdl,
+          contractName: null,
         }),
       ]);
     };
@@ -1591,6 +2007,7 @@ export class SchemaPublisher {
         targetId: target.id,
         artifactType: 'sdl',
         artifact: fullSchemaSdl,
+        contractName: null,
       });
     };
 
@@ -1608,8 +2025,30 @@ export class SchemaPublisher {
             targetId: target.id,
             artifactType: 'supergraph',
             artifact: supergraph,
+            contractName: null,
           }),
         );
+      }
+      if (contracts) {
+        this.logger.debug('Publishing contracts to CDN');
+
+        for (const contract of contracts) {
+          this.logger.debug('Publishing contract to CDN (contractName=%s)', contract.name);
+          actions.push(
+            this.artifactStorageWriter.writeArtifact({
+              targetId: target.id,
+              artifactType: 'sdl',
+              artifact: contract.sdl,
+              contractName: contract.name,
+            }),
+            this.artifactStorageWriter.writeArtifact({
+              targetId: target.id,
+              artifactType: 'supergraph',
+              artifact: contract.supergraph,
+              contractName: contract.name,
+            }),
+          );
+        }
       }
     }
 

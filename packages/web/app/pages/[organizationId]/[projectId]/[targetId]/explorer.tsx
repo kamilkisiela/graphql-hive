@@ -1,5 +1,6 @@
 import { ReactElement, useEffect } from 'react';
 import Link from 'next/link';
+import { AlertCircleIcon } from 'lucide-react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
@@ -9,11 +10,12 @@ import {
   SchemaExplorerProvider,
   useSchemaExplorerContext,
 } from '@/components/target/explorer/provider';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { MetaTitle } from '@/components/v2';
-import { noSchemaVersion } from '@/components/v2/empty-list';
+import { noSchemaVersion, noValidSchemaVersion } from '@/components/v2/empty-list';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
@@ -108,6 +110,9 @@ const TargetExplorerPageQuery = graphql(`
       id
       cleanId
       latestSchemaVersion {
+        id
+      }
+      latestValidSchemaVersion {
         __typename
         id
         valid
@@ -164,8 +169,8 @@ function ExplorerPageContent() {
   const currentTarget = query.data?.target;
   const organizationConnection = query.data?.organizations;
   const isCDNEnabled = query.data;
-  const explorer = currentTarget?.latestSchemaVersion?.explorer;
   const latestSchemaVersion = currentTarget?.latestSchemaVersion;
+  const latestValidSchemaVersion = currentTarget?.latestValidSchemaVersion;
 
   return (
     <TargetLayout
@@ -181,7 +186,7 @@ function ExplorerPageContent() {
           <Title>Explore</Title>
           <Subtitle>Insights from the latest version.</Subtitle>
         </div>
-        {latestSchemaVersion ? (
+        {!query.fetching && latestValidSchemaVersion?.explorer && (
           <SchemaExplorerFilter
             organization={{ cleanId: router.organizationId }}
             project={{ cleanId: router.projectId }}
@@ -203,18 +208,54 @@ function ExplorerPageContent() {
               </Link>
             </Button>
           </SchemaExplorerFilter>
-        ) : null}
+        )}
       </div>
-      {query.fetching ? null : latestSchemaVersion && explorer ? (
-        <SchemaView
-          totalRequests={query.data?.operationsStats.totalRequests ?? 0}
-          explorer={explorer}
-          organizationCleanId={router.organizationId}
-          projectCleanId={router.projectId}
-          targetCleanId={router.targetId}
-        />
-      ) : (
-        noSchemaVersion
+      {!query.fetching && (
+        <>
+          {latestValidSchemaVersion?.explorer && latestSchemaVersion ? (
+            <>
+              {latestSchemaVersion.id !== latestValidSchemaVersion.id && (
+                <Alert className="mb-3">
+                  <AlertCircleIcon className="h-4 w-4" />
+                  <AlertTitle>Outdated Schema</AlertTitle>
+                  <AlertDescription>
+                    The latest schema version is <span className="font-bold">not valid</span> , thus
+                    the explorer might not be accurate as it is showing the{' '}
+                    <span className="font-bold">latest valid</span> schema version. We recommend you
+                    to publish a new schema version that is composable before using this explorer
+                    for decision making.
+                    <br />
+                    <br />
+                    <Link
+                      href={{
+                        pathname: '/[organizationId]/[projectId]/[targetId]/history/[versionId]',
+                        query: {
+                          organizationId: router.organizationId,
+                          projectId: router.projectId,
+                          targetId: router.targetId,
+                          versionId: latestSchemaVersion.id,
+                        },
+                      }}
+                    >
+                      <span className="font-bold"> See the invalid schema version</span>
+                    </Link>
+                  </AlertDescription>
+                </Alert>
+              )}
+              <SchemaView
+                totalRequests={query.data?.operationsStats.totalRequests ?? 0}
+                explorer={latestValidSchemaVersion.explorer}
+                organizationCleanId={router.organizationId}
+                projectCleanId={router.projectId}
+                targetCleanId={router.targetId}
+              />
+            </>
+          ) : latestSchemaVersion ? (
+            noValidSchemaVersion
+          ) : (
+            noSchemaVersion
+          )}
+        </>
       )}
     </TargetLayout>
   );

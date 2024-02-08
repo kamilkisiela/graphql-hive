@@ -235,15 +235,16 @@ describe.each`
 
       expect(await compareToPreviousVersion(versionWithNewServiceUrl.id)).toEqual(
         expect.objectContaining({
-          schemaCompareToPrevious: expect.objectContaining({
-            changes: expect.objectContaining({
-              nodes: expect.arrayContaining([
-                {
-                  criticality: 'Dangerous',
-                  message: `[${serviceName}] New service url: '${newServiceUrl}' (previously: '${serviceUrl}')`,
-                },
-              ]),
-              total: 1,
+          target: expect.objectContaining({
+            schemaVersion: expect.objectContaining({
+              safeSchemaChanges: expect.objectContaining({
+                nodes: expect.arrayContaining([
+                  expect.objectContaining({
+                    criticality: 'Dangerous',
+                    message: `[${serviceName}] New service url: '${newServiceUrl}' (previously: '${serviceUrl}')`,
+                  }),
+                ]),
+              }),
             }),
           }),
         }),

@@ -14,7 +14,12 @@
     "declaration": true,
     "resolveJsonModule": true,
     "moduleResolution": "node",
-    "strict": true
+    "strict": true,
+    "paths": {
+      "@hive/cdn-script/artifact-storage-reader": [
+        "../services/cdn-worker/src/artifact-storage-reader.ts"
+      ]
+    }
   },
   "include": ["src"]
 }
