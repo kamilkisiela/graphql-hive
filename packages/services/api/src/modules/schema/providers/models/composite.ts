@@ -281,6 +281,7 @@ export class CompositeModel {
     organization,
     latest,
     latestComposable,
+    schemaVersionContractNames,
     baseSchema,
     contracts,
   }: {
@@ -298,6 +299,7 @@ export class CompositeModel {
       sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
+    schemaVersionContractNames: string[] | null;
     baseSchema: string | null;
     contracts: Array<ContractInput> | null;
   }): Promise<SchemaPublishResult> {
@@ -320,6 +322,7 @@ export class CompositeModel {
     const previousService = swap?.existing;
     const schemas = swap?.schemas ?? [incoming];
     const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
+    const schemaVersionToCompareAgainst = compareToLatest ? latest : latestComposable;
 
     const [serviceNameCheck, serviceUrlCheck] = await Promise.all([
       this.checks.serviceName({
@@ -358,13 +361,20 @@ export class CompositeModel {
       };
     }
 
-    const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion,
+    const checksumCheck = await this.checks.checksumNew({
+      existing: schemaVersionToCompareAgainst
+        ? {
+            schemas: schemaVersionToCompareAgainst.schemas,
+            contractNames: schemaVersionContractNames,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: contracts?.map(contract => contract.contract.contractName) ?? null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumCheck == 'unchanged') {
       return {
         conclusion: SchemaPublishConclusion.Ignore,
         reason: PublishIgnoreReasonCode.NoChanges,
@@ -422,8 +432,6 @@ export class CompositeModel {
         ],
       };
     }
-
-    const schemaVersionToCompareAgainst = compareToLatest ? latest : latestComposable;
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
       orchestrator,

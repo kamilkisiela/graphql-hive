@@ -172,13 +172,20 @@ export class SingleLegacyModel {
     const forced = input.force === true;
     const acceptBreakingChanges = input.experimental_acceptBreakingChanges === true;
 
-    const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion,
+    const checksumCheck = await this.checks.checksumNew({
+      existing: latestVersion
+        ? {
+            schemas: latestVersion.schemas,
+            contractNames: null,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumCheck === 'unchanged') {
       return {
         conclusion: SchemaPublishConclusion.Ignore,
         reason: PublishIgnoreReasonCode.NoChanges,

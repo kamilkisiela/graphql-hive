@@ -1,3 +1,5 @@
+import { createHash } from 'crypto';
+import stringify from 'fast-json-stable-stringify';
 import { parse, print } from 'graphql';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
@@ -81,7 +83,6 @@ export type DeleteInput = Omit<Types.SchemaDeleteInput, 'project' | 'organizatio
 
 export type PublishInput = Types.SchemaPublishInput &
   TargetSelector & {
-    checksum: string;
     isSchemaPublishMissingUrlErrorSelected: boolean;
   };
 
@@ -858,12 +859,46 @@ export class SchemaPublisher {
   @sentry('SchemaPublisher.publish')
   async publish(input: PublishInput, signal: AbortSignal): Promise<PublishResult> {
     this.logger.debug(
-      'Schema publication (checksum=%s, organization=%s, project=%s, target=%s)',
-      input.checksum,
+      'Schema publication (organization=%s, project=%s, target=%s)',
       input.organization,
       input.project,
       input.target,
     );
+
+    this.logger.debug(
+      'Compute hash (organization=%s, project=%s, target=%s)',
+      input.organization,
+      input.project,
+      input.target,
+    );
+
+    const token = this.authManager.ensureApiToken();
+    const contracts = await this.contracts.getActiveContractsByTargetId({ targetId: input.target });
+
+    const checksum = createHash('md5')
+      .update(
+        stringify({
+          ...input,
+          organization: input.organization,
+          project: input.project,
+          target: input.target,
+          service: input.service?.toLowerCase(),
+          contracts: contracts?.map(contract => ({
+            contractId: contract.id,
+            contractName: contract.contractName,
+          })),
+        }),
+      )
+      .update(token)
+      .digest('base64');
+
+    this.logger.debug(
+      'Hash computation finished (organization=%s, project=%s, target=%s, hash=%s)',
+      input.organization,
+      input.project,
+      input.target,
+    );
+
     return this.mutex.perform(
       registryLockId(input.target),
       {
@@ -877,9 +912,13 @@ export class SchemaPublisher {
           scope: TargetAccessScope.REGISTRY_WRITE,
         });
         return this.distributedCache.wrap({
-          key: `schema:publish:${input.checksum}`,
+          key: `schema:publish:${checksum}`,
           ttlSeconds: 15,
-          executor: () => this.internalPublish(input),
+          executor: () =>
+            this.internalPublish({
+              ...input,
+              checksum,
+            }),
         });
       },
     );
@@ -1236,7 +1275,11 @@ export class SchemaPublisher {
     );
   }
 
-  private async internalPublish(input: PublishInput) {
+  private async internalPublish(
+    input: PublishInput & {
+      checksum: string;
+    },
+  ) {
     const [organizationId, projectId, targetId] = [input.organization, input.project, input.target];
     this.logger.info('Publishing schema (input=%o)', {
       ...lodash.omit(input, ['sdl', 'organization', 'project', 'target', 'metadata']),
@@ -1394,6 +1437,16 @@ export class SchemaPublisher {
       );
     }
 
+    const comparedSchemaVersion =
+      organization.featureFlags.compareToPreviousComposableVersion === false
+        ? latestSchemaVersion
+        : latestComposableSchemaVersion;
+    const schemaVersionContracts = comparedSchemaVersion
+      ? await this.contracts.getContractVersionsForSchemaVersion({
+          schemaVersionId: comparedSchemaVersion.id,
+        })
+      : null;
+
     let publishResult: SchemaPublishResult;
 
     switch (project.type) {
@@ -1449,6 +1502,8 @@ export class SchemaPublisher {
                 schemas: ensureCompositeSchemas(latestComposable.schemas),
               }
             : null,
+          schemaVersionContractNames:
+            schemaVersionContracts?.edges.map(edge => edge.node.contractName) ?? null,
           organization,
           project,
           target,

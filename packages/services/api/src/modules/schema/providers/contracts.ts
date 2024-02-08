@@ -196,7 +196,7 @@ export class Contracts {
     };
   }
 
-  private async getActiveContractsByTargetId(args: {
+  public async getActiveContractsByTargetId(args: {
     targetId: string;
   }): Promise<null | Array<Contract>> {
     this.logger.debug('Load active contracts for target. (targetId=%s)', args.targetId);
@@ -208,6 +208,8 @@ export class Contracts {
       WHERE
         "target_id" = ${args.targetId}
         AND "is_disabled" = false
+      ORDER BY
+        "created_at" ASC
     `);
 
     if (result.length === 0) {
