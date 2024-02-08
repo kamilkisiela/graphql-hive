@@ -795,7 +795,7 @@ export interface Storage {
   getApprovedSchemaChangesForContextId(args: {
     targetId: string;
     contextId: string;
-  }): Promise<Array<SchemaChangeType>>;
+  }): Promise<Map<string, SchemaChangeType>>;
 
   getTargetBreadcrumbForTargetId(_: { targetId: string }): Promise<TargetBreadcrumb | null>;
 

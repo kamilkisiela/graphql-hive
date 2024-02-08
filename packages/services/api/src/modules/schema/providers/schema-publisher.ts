@@ -362,17 +362,14 @@ export class SchemaPublisher {
 
     let checkResult: SchemaCheckResult;
 
+    let approvedSchemaChanges: Map<string, SchemaChangeType> | null = new Map();
     let approvedContractChanges: Map<string, Map<string, SchemaChangeType>> | null = null;
-    const approvedSchemaChanges = new Map<string, SchemaChangeType>();
 
     if (contextId !== null) {
-      const changes = await this.storage.getApprovedSchemaChangesForContextId({
+      approvedSchemaChanges = await this.storage.getApprovedSchemaChangesForContextId({
         targetId: target.id,
         contextId,
       });
-      for (const change of changes) {
-        approvedSchemaChanges.set(change.id, change);
-      }
 
       if (contracts?.length) {
         approvedContractChanges = await this.contracts.getApprovedSchemaChangesForContracts({
