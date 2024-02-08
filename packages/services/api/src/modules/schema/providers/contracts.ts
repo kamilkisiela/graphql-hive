@@ -196,7 +196,7 @@ export class Contracts {
     };
   }
 
-  private async getActiveContractsByTargetId(args: {
+  public async getActiveContractsByTargetId(args: {
     targetId: string;
   }): Promise<null | Array<Contract>> {
     this.logger.debug('Load active contracts for target. (targetId=%s)', args.targetId);
@@ -208,6 +208,8 @@ export class Contracts {
       WHERE
         "target_id" = ${args.targetId}
         AND "is_disabled" = false
+      ORDER BY
+        "created_at" ASC
     `);
 
     if (result.length === 0) {
@@ -703,9 +705,19 @@ export class Contracts {
         , "contract_name" ASC
     `);
 
-    if (result.length === null) {
+    if (result.length === 0) {
+      this.logger.debug(
+        'No contract versions found for schema version. (schemaVersionId=%s)',
+        args.schemaVersionId,
+      );
+
       return null;
     }
+
+    this.logger.debug(
+      'Found contract versions, returning connection. (schemaVersionId=%s)',
+      args.schemaVersionId,
+    );
 
     const edges = result.map(row => {
       const node = ContractVersionModel.parse(row);

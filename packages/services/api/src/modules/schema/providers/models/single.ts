@@ -76,13 +76,20 @@ export class SingleModel {
         ? latest
         : latestComposable;
 
-    const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion: comparedVersion,
+    const checksumResult = await this.checks.checksum({
+      existing: comparedVersion
+        ? {
+            schemas: comparedVersion.schemas,
+            contractNames: null,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumResult === 'unchanged') {
       this.logger.debug('No changes detected, skipping schema check');
       return {
         conclusion: SchemaCheckConclusion.Skip,
@@ -189,15 +196,25 @@ export class SingleModel {
 
     const latestVersion = latest;
     const schemas = [incoming] as [SingleSchema];
-    const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
+    const comparedVersion =
+      organization.featureFlags.compareToPreviousComposableVersion === false
+        ? latest
+        : latestComposable;
 
     const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion,
+      existing: comparedVersion
+        ? {
+            schemas: comparedVersion.schemas,
+            contractNames: null,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumCheck === 'unchanged') {
       return {
         conclusion: SchemaPublishConclusion.Ignore,
         reason: PublishIgnoreReasonCode.NoChanges,
@@ -222,7 +239,7 @@ export class SingleModel {
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
       orchestrator: this.orchestrator,
-      version: compareToLatest ? latest : latestComposable,
+      version: comparedVersion,
       organization,
       project,
     });
@@ -267,7 +284,7 @@ export class SingleModel {
       compositionCheck.status === 'failed' &&
       compositionCheck.reason.errorsBySource.graphql.length > 0
     ) {
-      if (compareToLatest) {
+      if (organization.featureFlags.compareToPreviousComposableVersion === false) {
         return {
           conclusion: SchemaPublishConclusion.Reject,
           reasons: [

@@ -82,12 +82,19 @@ export class CompositeLegacyModel {
     const orchestrator = project.type === ProjectType.FEDERATION ? this.federation : this.stitching;
 
     const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion,
+      existing: latestVersion
+        ? {
+            schemas: latestVersion.schemas,
+            contractNames: null,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumCheck === 'unchanged') {
       return {
         conclusion: SchemaCheckConclusion.Skip,
       };
@@ -231,12 +238,19 @@ export class CompositeLegacyModel {
     }
 
     const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion,
+      existing: latestVersion
+        ? {
+            schemas: latestVersion.schemas,
+            contractNames: null,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumCheck === 'unchanged') {
       return {
         conclusion: SchemaPublishConclusion.Ignore,
         reason: PublishIgnoreReasonCode.NoChanges,

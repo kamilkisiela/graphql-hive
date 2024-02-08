@@ -206,20 +206,6 @@ export const resolvers: SchemaModule.Resolvers = {
         injector.get(ProjectManager).getProjectIdByToken(),
         injector.get(TargetManager).getTargetIdByToken(),
       ]);
-      const token = injector.get(AuthManager).ensureApiToken();
-
-      const checksum = createHash('md5')
-        .update(
-          stringify({
-            ...input,
-            organization,
-            project,
-            target,
-            service: input.service?.toLowerCase(),
-          }),
-        )
-        .update(token)
-        .digest('base64');
 
       // We only want to resolve to SchemaPublishMissingUrlError if it is selected by the operation.
       // NOTE: This should be removed once the usage of cli versions that don't request on 'SchemaPublishMissingUrlError' is becomes pretty low.
@@ -231,7 +217,6 @@ export const resolvers: SchemaModule.Resolvers = {
         {
           ...input,
           service: input.service?.toLowerCase(),
-          checksum,
           organization,
           project,
           target,

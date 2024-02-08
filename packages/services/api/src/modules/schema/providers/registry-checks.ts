@@ -43,11 +43,6 @@ export type CheckResult<C = unknown, F = unknown> =
 
 type Schemas = [SingleSchema] | PushedCompositeSchema[];
 
-type LatestVersion = {
-  isComposable: boolean;
-  schemas: Schemas;
-} | null;
-
 type CompositionValidationError = {
   message: string;
   source: 'composition';
@@ -163,40 +158,67 @@ export class RegistryChecks {
     private logger: Logger,
   ) {}
 
-  async checksum({ schemas, latestVersion }: { schemas: Schemas; latestVersion: LatestVersion }) {
+  async checksum(args: {
+    incoming: {
+      schemas: Schemas;
+      contractNames: null | Array<string>;
+    };
+    existing: null | {
+      schemas: Schemas;
+      contractNames: null | Array<string>;
+    };
+  }) {
     this.logger.debug(
-      'Checksum check (before=%s, after=%s)',
-      latestVersion?.schemas.length ?? 0,
-      schemas.length,
+      'Checksum check (existingSchemaCount=%s, existingContractCount=%s, incomingSchemaCount=%s, existingContractCount=%s)',
+      args.existing?.schemas.length ?? null,
+      args.existing?.contractNames?.length ?? null,
+      args.incoming.schemas.length,
+      args.incoming.contractNames?.length ?? null,
     );
-    const isInitial = latestVersion === null;
 
-    if (isInitial || latestVersion.schemas.length === 0) {
+    if (!args.existing) {
       this.logger.debug('No exiting version');
-      return {
-        status: 'completed',
-        result: 'initial' as const,
-      } satisfies CheckResult;
+      return 'initial' as const;
     }
 
-    const isModified =
-      this.helper.createChecksumFromSchemas(schemas) !==
-      this.helper.createChecksumFromSchemas(latestVersion.schemas);
+    const isSchemasModified =
+      this.helper.createChecksumFromSchemas(args.existing.schemas) !==
+      this.helper.createChecksumFromSchemas(args.incoming.schemas);
 
-    if (isModified) {
-      this.logger.debug('Schema is modified');
-      return {
-        status: 'completed',
-        result: 'modified' as const,
-      } satisfies CheckResult;
+    if (isSchemasModified) {
+      this.logger.debug('Schema is modified.');
+      return 'modified' as const;
     }
 
-    this.logger.debug('Schema is unchanged');
+    const existingContractNames = args.existing.contractNames;
+    const incomingContractNames = args.incoming.contractNames;
 
-    return {
-      status: 'completed',
-      result: 'unchanged' as const,
-    } satisfies CheckResult;
+    if (existingContractNames === null && incomingContractNames === null) {
+      this.logger.debug('No contracts.');
+      return 'unchanged' as const;
+    }
+
+    if (
+      existingContractNames?.length &&
+      incomingContractNames?.length &&
+      existingContractNames.length === incomingContractNames.length
+    ) {
+      const sortedExistingContractNames = existingContractNames.slice().sort(compareAlphaNumeric);
+      const sortedIncomingContractNames = incomingContractNames.slice().sort(compareAlphaNumeric);
+
+      if (
+        sortedExistingContractNames.every(
+          (name, index) => name === sortedIncomingContractNames[index],
+        )
+      ) {
+        this.logger.debug('Contracts have not changed.');
+        return 'unchanged' as const;
+      }
+    }
+
+    this.logger.debug('Contracts have changed.');
+
+    return 'modified' as const;
   }
 
   async composition({
@@ -725,4 +747,8 @@ const federationDirectives = new Set([
 
 function isFederationRelatedChange(change: SchemaChangeType) {
   return change.path && (federationTypes.has(change.path) || federationDirectives.has(change.path));
+}
+
+function compareAlphaNumeric(a: string, b: string) {
+  return a.localeCompare(b, 'en', { numeric: true });
 }

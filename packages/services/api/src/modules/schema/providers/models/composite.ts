@@ -91,6 +91,7 @@ export class CompositeModel {
     selector,
     latest,
     latestComposable,
+    schemaVersionContractNames,
     project,
     organization,
     baseSchema,
@@ -116,6 +117,7 @@ export class CompositeModel {
       sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
+    schemaVersionContractNames: string[] | null;
     baseSchema: string | null;
     project: Project;
     organization: Organization;
@@ -126,8 +128,6 @@ export class CompositeModel {
       }
     > | null;
   }): Promise<SchemaCheckResult> {
-    const latestVersion = latest;
-
     const incoming: PushedCompositeSchema = {
       kind: 'composite',
       id: temp,
@@ -138,27 +138,31 @@ export class CompositeModel {
       sdl: input.sdl,
       service_name: input.serviceName,
       service_url:
-        latestVersion?.schemas?.find(s => s.service_name === input.serviceName)?.service_url ??
-        'temp',
+        latest?.schemas?.find(s => s.service_name === input.serviceName)?.service_url ?? 'temp',
       action: 'PUSH',
       metadata: null,
     };
 
-    const schemas = latestVersion
-      ? swapServices(latestVersion.schemas, incoming).schemas
-      : [incoming];
+    const schemas = latest ? swapServices(latest.schemas, incoming).schemas : [incoming];
     const comparedVersion =
       organization.featureFlags.compareToPreviousComposableVersion === false
         ? latest
         : latestComposable;
 
     const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion: comparedVersion,
+      existing: comparedVersion
+        ? {
+            schemas: comparedVersion.schemas,
+            contractNames: schemaVersionContractNames,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: contracts?.map(({ contract }) => contract.contractName) ?? null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumCheck === 'unchanged') {
       return {
         conclusion: SchemaCheckConclusion.Skip,
       };
@@ -272,6 +276,7 @@ export class CompositeModel {
     organization,
     latest,
     latestComposable,
+    schemaVersionContractNames,
     baseSchema,
     contracts,
   }: {
@@ -289,6 +294,7 @@ export class CompositeModel {
       sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
+    schemaVersionContractNames: string[] | null;
     baseSchema: string | null;
     contracts: Array<ContractInput> | null;
   }): Promise<SchemaPublishResult> {
@@ -311,6 +317,7 @@ export class CompositeModel {
     const previousService = swap?.existing;
     const schemas = swap?.schemas ?? [incoming];
     const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
+    const schemaVersionToCompareAgainst = compareToLatest ? latest : latestComposable;
 
     const [serviceNameCheck, serviceUrlCheck] = await Promise.all([
       this.checks.serviceName({
@@ -350,12 +357,19 @@ export class CompositeModel {
     }
 
     const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion,
+      existing: schemaVersionToCompareAgainst
+        ? {
+            schemas: schemaVersionToCompareAgainst.schemas,
+            contractNames: schemaVersionContractNames,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: contracts?.map(contract => contract.contract.contractName) ?? null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumCheck === 'unchanged') {
       return {
         conclusion: SchemaPublishConclusion.Ignore,
         reason: PublishIgnoreReasonCode.NoChanges,
@@ -413,8 +427,6 @@ export class CompositeModel {
         ],
       };
     }
-
-    const schemaVersionToCompareAgainst = compareToLatest ? latest : latestComposable;
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
       orchestrator,
