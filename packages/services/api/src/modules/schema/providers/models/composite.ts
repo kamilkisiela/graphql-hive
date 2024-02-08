@@ -128,8 +128,6 @@ export class CompositeModel {
       }
     > | null;
   }): Promise<SchemaCheckResult> {
-    const latestVersion = latest;
-
     const incoming: PushedCompositeSchema = {
       kind: 'composite',
       id: temp,
@@ -140,24 +138,21 @@ export class CompositeModel {
       sdl: input.sdl,
       service_name: input.serviceName,
       service_url:
-        latestVersion?.schemas?.find(s => s.service_name === input.serviceName)?.service_url ??
-        'temp',
+        latest?.schemas?.find(s => s.service_name === input.serviceName)?.service_url ?? 'temp',
       action: 'PUSH',
       metadata: null,
     };
 
-    const schemas = latestVersion
-      ? swapServices(latestVersion.schemas, incoming).schemas
-      : [incoming];
+    const schemas = latest ? swapServices(latest.schemas, incoming).schemas : [incoming];
     const comparedVersion =
       organization.featureFlags.compareToPreviousComposableVersion === false
         ? latest
         : latestComposable;
 
     const checksumCheck = await this.checks.checksum({
-      existing: latestVersion
+      existing: comparedVersion
         ? {
-            schemas: latestVersion.schemas,
+            schemas: comparedVersion.schemas,
             contractNames: schemaVersionContractNames,
           }
         : null,

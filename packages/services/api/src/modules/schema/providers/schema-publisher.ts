@@ -573,7 +573,7 @@ export class SchemaPublisher {
       });
     } else if (checkResult.conclusion === SchemaCheckConclusion.Skip) {
       if (!comparedVersion || !comparedSchemaVersion) {
-        throw new Error('This cannot happen :)');
+        throw new Error('This cannot happen 1 :)');
       }
 
       const [compositeSchemaSdl, supergraphSdl, compositionErrors] = await Promise.all([
@@ -692,7 +692,7 @@ export class SchemaPublisher {
       // SchemaCheckConclusion.Skip
 
       if (!comparedVersion || !comparedSchemaVersion) {
-        throw new Error('This cannot happen :)');
+        throw new Error('This cannot happen 2 :)');
       }
 
       if (comparedSchemaVersion.isComposable) {
@@ -812,7 +812,7 @@ export class SchemaPublisher {
     // SchemaCheckConclusion.Skip
 
     if (!comparedVersion || !comparedSchemaVersion) {
-      throw new Error('This cannot happen :)');
+      throw new Error('This cannot happen 3 :)');
     }
 
     if (comparedSchemaVersion.isComposable) {

@@ -190,23 +190,27 @@ export class RegistryChecks {
       return 'modified' as const;
     }
 
-    const existingContracts = args.existing.contractNames;
-    const incomingContracts = args.incoming.contractNames;
+    const existingContractNames = args.existing.contractNames;
+    const incomingContractNames = args.incoming.contractNames;
 
-    if (existingContracts === null && incomingContracts === null) {
+    if (existingContractNames === null && incomingContractNames === null) {
       this.logger.debug('No contracts.');
       return 'unchanged' as const;
     }
 
     if (
-      args.incoming.contractNames?.length &&
-      args.existing.contractNames?.length &&
-      args.incoming.contractNames.length === args.existing.contractNames.length
+      existingContractNames?.length &&
+      incomingContractNames?.length &&
+      existingContractNames.length === incomingContractNames.length
     ) {
-      const existingContractNames = args.existing.contractNames.slice().sort(compareAlphaNumeric);
-      const incomingContractNames = args.incoming.contractNames.slice().sort(compareAlphaNumeric);
+      const sortedExistingContractNames = existingContractNames.slice().sort(compareAlphaNumeric);
+      const sortedIncomingContractNames = incomingContractNames.slice().sort(compareAlphaNumeric);
 
-      if (existingContractNames.every((name, index) => name === incomingContractNames[index])) {
+      if (
+        sortedExistingContractNames.every(
+          (name, index) => name === sortedIncomingContractNames[index],
+        )
+      ) {
         this.logger.debug('Contracts have not changed.');
         return 'unchanged' as const;
       }
