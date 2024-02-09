@@ -4124,18 +4124,20 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             , "schema_change"
           )
           SELECT * FROM ${sql.unnest(
-            schemaCheck.breakingSchemaChanges.map(change => [
-              schemaCheck.targetId,
-              schemaCheck.contextId,
-              change.id,
-              JSON.stringify(
-                toSerializableSchemaChange({
-                  ...change,
-                  // We enhance the approved schema changes with some metadata that can be displayed on the UI
-                  approvalMetadata,
-                }),
-              ),
-            ]),
+            schemaCheck.breakingSchemaChanges
+              .filter(change => !change.isSafeBasedOnUsage)
+              .map(change => [
+                schemaCheck.targetId,
+                schemaCheck.contextId,
+                change.id,
+                JSON.stringify(
+                  toSerializableSchemaChange({
+                    ...change,
+                    // We enhance the approved schema changes with some metadata that can be displayed on the UI
+                    approvalMetadata,
+                  }),
+                ),
+              ]),
             ['uuid', 'text', 'text', 'jsonb'],
           )}
           ON CONFLICT ("target_id", "context_id", "schema_change_id") DO NOTHING
@@ -4165,7 +4167,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             , "breaking_schema_changes" = (
               SELECT json_agg(
                 CASE
-                  WHEN COALESCE(jsonb_typeof("change"->'approvalMetadata'), 'null') = 'null'
+                  WHEN (COALESCE(jsonb_typeof("change"->'approvalMetadata'), 'null') = 'null' AND "change"->>'isSafeBasedOnUsage' = 'false')
                     THEN jsonb_set("change", '{approvalMetadata}', ${sql.jsonb(approvalMetadata)})
                   ELSE "change"
                 END

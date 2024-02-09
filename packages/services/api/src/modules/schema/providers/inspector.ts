@@ -1,6 +1,6 @@
 import { isInputObjectType, isNonNullType, type GraphQLSchema } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
-import { Change, ChangeType, CriticalityLevel, diff, DiffRule } from '@graphql-inspector/core';
+import { Change, ChangeType, diff, DiffRule } from '@graphql-inspector/core';
 import { HiveSchemaChangeModel, SchemaChangeType } from '@hive/storage';
 import type * as Types from '../../../__generated__/types';
 import type { TargetSettings } from '../../../shared/entities';
@@ -124,10 +124,7 @@ export class Inspector {
         HiveSchemaChangeModel.parse({
           type: change.type,
           meta: change.meta,
-          isSafeBasedOnUsage:
-            change.criticality.level === CriticalityLevel.Breaking
-              ? change.criticality.isSafeBasedOnUsage
-              : undefined,
+          isSafeBasedOnUsage: change.criticality.isSafeBasedOnUsage,
         }),
       )
       .sort((a, b) => a.criticality.localeCompare(b.criticality));

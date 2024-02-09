@@ -453,9 +453,12 @@ export class RegistryChecks {
     const breakingChanges: Array<SchemaChangeType> = [];
 
     for (const change of inspectorChanges) {
-      if (change.isSafeBasedOnUsage === true) {
-        breakingChanges.push(change);
-      } else if (change.criticality === CriticalityLevel.Breaking) {
+      if (change.criticality === CriticalityLevel.Breaking) {
+        if (change.isSafeBasedOnUsage === true) {
+          breakingChanges.push(change);
+          continue;
+        }
+
         // If this change is approved, we return the already approved on instead of the newly detected one,
         // as it it contains the necessary metadata on when the change got first approved and by whom.
         const approvedChange = args.approvedChanges?.get(change.id);

@@ -874,7 +874,11 @@ export const HiveSchemaChangeModel = z
         message: change.message,
         meta: change.meta,
         path: change.path ?? null,
-        isSafeBasedOnUsage: rawChange.isSafeBasedOnUsage ?? false,
+        isSafeBasedOnUsage:
+          // only breaking changes can be safe based on usage
+          (change.criticality.level === CriticalityLevel.Breaking &&
+            rawChange.isSafeBasedOnUsage) ||
+          false,
         reason: change.criticality.reason ?? null,
         affectedOperations: rawChange.affectedOperations ?? null,
         affectedClients: rawChange.affectedClients ?? null,
