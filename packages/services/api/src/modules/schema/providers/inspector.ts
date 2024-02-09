@@ -1,10 +1,10 @@
 import { isInputObjectType, isNonNullType, type GraphQLSchema } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
-import { Change, ChangeType, diff, DiffRule } from '@graphql-inspector/core';
+import { Change, ChangeType, CriticalityLevel, diff, DiffRule } from '@graphql-inspector/core';
 import { HiveSchemaChangeModel, SchemaChangeType } from '@hive/storage';
 import type * as Types from '../../../__generated__/types';
 import type { TargetSettings } from '../../../shared/entities';
-import { createPeriod } from '../../../shared/helpers';
+import { cache, createPeriod } from '../../../shared/helpers';
 import { sentry } from '../../../shared/sentry';
 import { OperationsManager } from '../../operations/providers/operations-manager';
 import { Logger } from '../../shared/providers/logger';
@@ -124,7 +124,10 @@ export class Inspector {
         HiveSchemaChangeModel.parse({
           type: change.type,
           meta: change.meta,
-          isSafeBasedOnUsage: change.criticality.isSafeBasedOnUsage,
+          isSafeBasedOnUsage:
+            change.criticality.level === CriticalityLevel.Breaking
+              ? change.criticality.isSafeBasedOnUsage
+              : undefined,
         }),
       )
       .sort((a, b) => a.criticality.localeCompare(b.criticality));
@@ -162,6 +165,10 @@ export class Inspector {
     });
   }
 
+  @cache(
+    ({ selector }: { selector: Types.TargetSelector }) =>
+      `${selector.organization}|${selector.project}|${selector.target}`,
+  )
   private async getSettings({ selector }: { selector: Types.TargetSelector }) {
     try {
       const settings = await this.targetManager.getTargetSettings({

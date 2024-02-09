@@ -472,7 +472,9 @@ export class RegistryChecks {
 
     await Promise.all(
       breakingChanges.map(async change => {
-        if (!change.path || !args.usageDataSelector) return change;
+        if (!change.path || !args.usageDataSelector || change.isSafeBasedOnUsage) {
+          return change;
+        }
 
         const affectedOperations = await this.inspector.getUsageForCoordinate(
           args.usageDataSelector,
