@@ -190,6 +190,7 @@ describe('Schema policy checks', () => {
       expect(message.split('\n')).toEqual([
         'ℹ Detected 2 changes',
         '',
+        '   Safe changes:',
         '   - Type User was added',
         '   - Field user was added to object type Query',
         '',
@@ -242,6 +243,7 @@ describe('Schema policy checks', () => {
         '',
         'ℹ Detected 2 changes',
         '',
+        '   Safe changes:',
         '   - Type User was added',
         '   - Field user was added to object type Query',
         '',
@@ -312,6 +314,7 @@ describe('Schema policy checks', () => {
         '',
         'ℹ Detected 3 changes',
         '',
+        '   Safe changes:',
         '   - Type User was added',
         '   - Field user was added to object type Query',
         '   - Field Query.foo is deprecated',
