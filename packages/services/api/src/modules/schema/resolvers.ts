@@ -47,6 +47,8 @@ import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import { extractSuperGraphInformation } from './lib/federation-super-graph';
 import { stripUsedSchemaCoordinatesFromDocumentNode } from './lib/unused-graphql';
+import { ContractsManager } from './providers/contracts-manager';
+import { SchemaCheckManager } from './providers/schema-check-manager';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
 import { SchemaVersionHelper } from './providers/schema-version-helper';
@@ -204,20 +206,6 @@ export const resolvers: SchemaModule.Resolvers = {
         injector.get(ProjectManager).getProjectIdByToken(),
         injector.get(TargetManager).getTargetIdByToken(),
       ]);
-      const token = injector.get(AuthManager).ensureApiToken();
-
-      const checksum = createHash('md5')
-        .update(
-          stringify({
-            ...input,
-            organization,
-            project,
-            target,
-            service: input.service?.toLowerCase(),
-          }),
-        )
-        .update(token)
-        .digest('base64');
 
       // We only want to resolve to SchemaPublishMissingUrlError if it is selected by the operation.
       // NOTE: This should be removed once the usage of cli versions that don't request on 'SchemaPublishMissingUrlError' is becomes pretty low.
@@ -229,7 +217,6 @@ export const resolvers: SchemaModule.Resolvers = {
         {
           ...input,
           service: input.service?.toLowerCase(),
-          checksum,
           organization,
           project,
           target,
@@ -396,6 +383,52 @@ export const resolvers: SchemaModule.Resolvers = {
         }),
       };
     },
+    async createContract(_, args, context) {
+      const result = await context.injector.get(ContractsManager).createContract({
+        contract: {
+          targetId: args.input.targetId,
+          contractName: args.input.contractName,
+          excludeTags: (args.input.excludeTags as Array<string> | null) ?? null,
+          includeTags: (args.input.includeTags as Array<string> | null) ?? null,
+          removeUnreachableTypesFromPublicApiSchema:
+            args.input.removeUnreachableTypesFromPublicApiSchema,
+        },
+      });
+
+      if (result.type === 'success') {
+        return {
+          ok: {
+            createdContract: result.contract,
+          },
+        };
+      }
+
+      return {
+        error: {
+          message: 'Something went wrong.',
+          details: result.errors,
+        },
+      };
+    },
+    async disableContract(_, args, context) {
+      const result = await context.injector.get(ContractsManager).disableContract({
+        contractId: args.input.contractId,
+      });
+
+      if (result.type === 'success') {
+        return {
+          ok: {
+            disabledContract: result.contract,
+          },
+        };
+      }
+
+      return {
+        error: {
+          message: result.message,
+        },
+      };
+    },
   },
   Query: {
     async latestVersion(_, __, { injector }) {
@@ -552,8 +585,28 @@ export const resolvers: SchemaModule.Resolvers = {
         period: period ? parseDateRangeInput(period) : null,
       });
     },
+    async contracts(target, args, { injector }) {
+      return await injector.get(ContractsManager).getPaginatedContractsForTarget({
+        target,
+        cursor: args.after ?? null,
+        first: args.first ?? null,
+      });
+    },
+    async activeContracts(target, args, { injector }) {
+      return await injector.get(ContractsManager).getPaginatedActiveContractsForTarget({
+        target,
+        cursor: args.after ?? null,
+        first: args.first ?? null,
+      });
+    },
   },
   SchemaVersion: {
+    isComposable(version) {
+      return version.schemaCompositionErrors === null;
+    },
+    hasSchemaChanges(version, _, { injector }) {
+      return injector.get(SchemaVersionHelper).getHasSchemaChanges(version);
+    },
     async log(version, _, { injector }) {
       const log = await injector.get(SchemaManager).getSchemaLog({
         commit: version.actionId,
@@ -693,12 +746,17 @@ export const resolvers: SchemaModule.Resolvers = {
     githubMetadata(version, _, { injector }) {
       return injector.get(SchemaManager).getGitHubMetadata(version);
     },
-    valid: version => version.isComposable,
-    async previousDiffableSchemaVersion(version, _, { injector }) {
+    valid(version, _, { injector }) {
+      return injector.get(SchemaVersionHelper).getIsValid(version);
+    },
+    previousDiffableSchemaVersion(version, _, { injector }) {
       return injector.get(SchemaVersionHelper).getPreviousDiffableSchemaVersion(version);
     },
     isFirstComposableVersion(version, _, { injector }) {
       return injector.get(SchemaVersionHelper).getIsFirstComposableVersion(version);
+    },
+    contractVersions(version, _, { injector }) {
+      return injector.get(ContractsManager).getContractVersionsForSchemaVersion(version);
     },
   },
   SingleSchema: {
@@ -1566,29 +1624,22 @@ export const resolvers: SchemaModule.Resolvers = {
   },
   SuccessfulSchemaCheck: {
     schemaVersion(schemaCheck, _, { injector }) {
-      if (schemaCheck.schemaVersionId === null) {
-        return null;
-      }
-      return injector.get(SchemaManager).getSchemaVersion({
-        organization: schemaCheck.selector.organizationId,
-        project: schemaCheck.selector.projectId,
-        target: schemaCheck.targetId,
-        version: schemaCheck.schemaVersionId,
-      });
+      return injector.get(SchemaCheckManager).getSchemaVersion(schemaCheck);
     },
-    safeSchemaChanges(schemaCheck) {
-      if (!schemaCheck.safeSchemaChanges) {
-        return null;
-      }
-
-      return schemaCheck.safeSchemaChanges;
+    safeSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getSafeSchemaChanges(schemaCheck);
     },
-    breakingSchemaChanges(schemaCheck) {
-      if (!schemaCheck.breakingSchemaChanges) {
-        return null;
-      }
-
-      return schemaCheck.breakingSchemaChanges;
+    breakingSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getBreakingSchemaChanges(schemaCheck);
+    },
+    hasSchemaCompositionErrors(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getHasSchemaCompositionErrors(schemaCheck);
+    },
+    hasSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getHasSchemaChanges(schemaCheck);
+    },
+    hasUnapprovedBreakingChanges() {
+      return false;
     },
     webUrl(schemaCheck, _, { injector }) {
       return injector.get(SchemaManager).getSchemaCheckWebUrl({
@@ -1605,35 +1656,34 @@ export const resolvers: SchemaModule.Resolvers = {
         userId: schemaCheck.manualApprovalUserId,
       });
     },
+    contractChecks(schemaCheck, _, { injector }) {
+      return injector.get(ContractsManager).getContractsChecksForSchemaCheck(schemaCheck);
+    },
+    previousSchemaSDL(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getPreviousSchemaSDL(schemaCheck);
+    },
   },
   FailedSchemaCheck: {
     schemaVersion(schemaCheck, _, { injector }) {
-      if (schemaCheck.schemaVersionId === null) {
-        return null;
-      }
-      return injector.get(SchemaManager).getSchemaVersion({
-        organization: schemaCheck.selector.organizationId,
-        project: schemaCheck.selector.projectId,
-        target: schemaCheck.targetId,
-        version: schemaCheck.schemaVersionId,
-      });
+      return injector.get(SchemaCheckManager).getSchemaVersion(schemaCheck);
     },
-    safeSchemaChanges(schemaCheck) {
-      if (!schemaCheck.safeSchemaChanges) {
-        return null;
-      }
-
-      return schemaCheck.safeSchemaChanges;
+    safeSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getSafeSchemaChanges(schemaCheck);
     },
-    breakingSchemaChanges(schemaCheck) {
-      if (!schemaCheck.breakingSchemaChanges) {
-        return null;
-      }
-
-      return schemaCheck.breakingSchemaChanges;
+    breakingSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getBreakingSchemaChanges(schemaCheck);
     },
     compositionErrors(schemaCheck) {
       return schemaCheck.schemaCompositionErrors;
+    },
+    hasSchemaCompositionErrors(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getHasSchemaCompositionErrors(schemaCheck);
+    },
+    hasSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getHasSchemaChanges(schemaCheck);
+    },
+    hasUnapprovedBreakingChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getHasUnapprovedBreakingChanges(schemaCheck);
     },
     webUrl(schemaCheck, _, { injector }) {
       return injector.get(SchemaManager).getSchemaCheckWebUrl({
@@ -1642,15 +1692,16 @@ export const resolvers: SchemaModule.Resolvers = {
       });
     },
     async canBeApproved(schemaCheck, _, { injector }) {
-      return injector.get(SchemaManager).getFailedSchemaCheckCanBeApproved({
-        schemaCompositionErrors: schemaCheck.schemaCompositionErrors,
-      });
+      return injector.get(SchemaManager).getFailedSchemaCheckCanBeApproved(schemaCheck);
     },
     async canBeApprovedByViewer(schemaCheck, _, { injector }) {
-      return injector.get(SchemaManager).getFailedSchemaCheckCanBeApprovedByViewer({
-        organizationId: schemaCheck.selector.organizationId,
-        schemaCompositionErrors: schemaCheck.schemaCompositionErrors,
-      });
+      return injector.get(SchemaManager).getFailedSchemaCheckCanBeApprovedByViewer(schemaCheck);
+    },
+    contractChecks(schemaCheck, _, { injector }) {
+      return injector.get(ContractsManager).getContractsChecksForSchemaCheck(schemaCheck);
+    },
+    previousSchemaSDL(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getPreviousSchemaSDL(schemaCheck);
     },
   },
   SchemaPolicyWarningConnection: createDummyConnection(warning => ({
@@ -1667,6 +1718,74 @@ export const resolvers: SchemaModule.Resolvers = {
           }
         : null,
   })),
+  Contract: {
+    target(contract, _, context) {
+      return context.injector.get(TargetManager).getTargetById({
+        targetId: contract.targetId,
+      });
+    },
+    viewerCanDisableContract(contract, _, context) {
+      return context.injector
+        .get(ContractsManager)
+        .getViewerCanDisableContractForContract(contract);
+    },
+  },
+  ContractCheck: {
+    contractVersion(contractCheck, _, context) {
+      return context.injector
+        .get(ContractsManager)
+        .getContractVersionForContractCheck(contractCheck);
+    },
+    compositeSchemaSDL: contractCheck => contractCheck.compositeSchemaSdl,
+    supergraphSDL: contractCheck => contractCheck.supergraphSdl,
+    hasSchemaCompositionErrors(contractCheck, _, { injector }) {
+      return injector
+        .get(ContractsManager)
+        .getHasSchemaCompositionErrorsForContractCheck(contractCheck);
+    },
+    hasUnapprovedBreakingChanges(contractCheck, _, { injector }) {
+      return injector
+        .get(ContractsManager)
+        .getHasUnapprovedBreakingChangesForContractCheck(contractCheck);
+    },
+    hasSchemaChanges(contractCheck, _, { injector }) {
+      return injector.get(ContractsManager).getHasSchemaChangesForContractCheck(contractCheck);
+    },
+  },
+  ContractVersion: {
+    isComposable(contractVersion) {
+      return contractVersion.schemaCompositionErrors === null;
+    },
+    hasSchemaChanges(contractVersion, _, context) {
+      return context.injector
+        .get(ContractsManager)
+        .getHasSchemaChangesForContractVersion(contractVersion);
+    },
+    breakingSchemaChanges(contractVersion, _, context) {
+      return context.injector
+        .get(ContractsManager)
+        .getBreakingChangesForContractVersion(contractVersion);
+    },
+    safeSchemaChanges(contractVersion, _, context) {
+      return context.injector
+        .get(ContractsManager)
+        .getSafeChangesForContractVersion(contractVersion);
+    },
+    compositeSchemaSDL: contractVersion => contractVersion.compositeSchemaSdl,
+    supergraphSDL: contractVersion => contractVersion.supergraphSdl,
+    previousContractVersion: (contractVersion, _, context) =>
+      context.injector
+        .get(ContractsManager)
+        .getPreviousContractVersionForContractVersion(contractVersion),
+    previousDiffableContractVersion: (contractVersion, _, context) =>
+      context.injector
+        .get(ContractsManager)
+        .getDiffableContractVersionForContractVersion(contractVersion),
+    isFirstComposableVersion: (contractVersion, _, context) =>
+      context.injector
+        .get(ContractsManager)
+        .getIsFirstComposableVersionForContractVersion(contractVersion),
+  },
 };
 
 function stringifyDefaultValue(value: unknown): string | null {

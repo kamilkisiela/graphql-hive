@@ -12,7 +12,7 @@ import { Tooltip as LegacyTooltip } from '@/components/v2/tooltip';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel, SchemaChangeFieldsFragment } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { InfoCircledIcon } from '@radix-ui/react-icons';
+import { CheckCircledIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 
 export function labelize(message: string) {
   // Turn " into '
@@ -310,5 +310,19 @@ function CompositionError(props: { message: string }) {
         </span>
       );
     },
+  );
+}
+
+export function NoGraphChanges() {
+  return (
+    <div className="cursor-default">
+      <div className="mb-3 flex items-center gap-3">
+        <CheckCircledIcon className="h-4 w-auto text-emerald-500" />
+        <h2 className="text-base font-medium text-white">No Graph Changes</h2>
+      </div>
+      <p className="text-muted-foreground text-xs">
+        There are no changes in this graph for this graph.
+      </p>
+    </div>
   );
 }

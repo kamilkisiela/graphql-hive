@@ -13,16 +13,16 @@
   "devDependencies": {
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
-    "@sentry/node": "7.99.0",
-    "@trpc/client": "10.45.0",
-    "@trpc/server": "10.45.0",
-    "@whatwg-node/fetch": "0.9.15",
+    "@sentry/node": "7.100.1",
+    "@trpc/client": "10.45.1",
+    "@trpc/server": "10.45.1",
+    "@whatwg-node/fetch": "0.9.16",
     "date-fns": "3.3.1",
-    "dotenv": "16.3.2",
+    "dotenv": "16.4.1",
     "got": "12.6.1",
     "pino-pretty": "10.3.1",
     "reflect-metadata": "0.2.1",
-    "stripe": "14.14.0",
+    "stripe": "14.15.0",
     "zod": "3.22.4"
   },
   "buildOptions": {

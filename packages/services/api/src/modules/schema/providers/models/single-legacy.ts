@@ -66,16 +66,22 @@ export class SingleLegacyModel {
     const schemas = [incoming] as [SingleSchema];
 
     const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion,
+      existing: latestVersion
+        ? {
+            schemas: latestVersion.schemas,
+            contractNames: null,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumCheck === 'unchanged') {
       this.logger.debug('No changes detected, skipping schema check');
       return {
-        conclusion: SchemaCheckConclusion.Success,
-        state: null,
+        conclusion: SchemaCheckConclusion.Skip,
       };
     }
 
@@ -85,6 +91,7 @@ export class SingleLegacyModel {
       organization,
       schemas,
       baseSchema,
+      contracts: null,
     });
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
@@ -110,6 +117,7 @@ export class SingleLegacyModel {
           compositionCheck,
           diffCheck,
           policyCheck: null,
+          contractChecks: null,
         }),
       };
     }
@@ -123,6 +131,7 @@ export class SingleLegacyModel {
           compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
           supergraphSDL: compositionCheck.result.supergraph,
         },
+        contracts: null,
       },
     };
   }
@@ -164,12 +173,19 @@ export class SingleLegacyModel {
     const acceptBreakingChanges = input.experimental_acceptBreakingChanges === true;
 
     const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion,
+      existing: latestVersion
+        ? {
+            schemas: latestVersion.schemas,
+            contractNames: null,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumCheck === 'unchanged') {
       return {
         conclusion: SchemaPublishConclusion.Ignore,
         reason: PublishIgnoreReasonCode.NoChanges,
@@ -189,6 +205,7 @@ export class SingleLegacyModel {
             }
           : incoming,
       ],
+      contracts: null,
     });
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
@@ -263,6 +280,8 @@ export class SingleLegacyModel {
           schemas,
           supergraph: null,
           fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+          tags: null,
+          contracts: null,
         },
       };
     }

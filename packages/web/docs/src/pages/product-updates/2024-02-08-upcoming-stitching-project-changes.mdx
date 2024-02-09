@@ -1,0 +1,33 @@
+---
+title: Upcoming changes to schema composition for Schema Stitching projects
+description:
+  Due to stitching limitations we need to slightly alter the schema composition behaviour for more
+  predictable results.
+date: 2024-02-08
+authors: [laurin]
+---
+
+Due to limitations within the stitching implementation powered by
+[graphql-tools](https://github.com/ardatan/graphql-tools), we are going to slightly alter the
+behaviour of the schema composition for better predictability of the schema composition result.
+
+Currently, composition for schema stitching projects can lead to unexpected (seemingly unpredictable
+schema changes) appearing when publishing a service schema or running a schema check.
+
+The reason for this is that the composite schema output from the stitching composition
+implementation is affected by the order of the input (subgraph) schemas. Today, the input
+schemas/subgraphs for the composition are ordered by their creation date (publish date). This means
+that each publish/check (unless they are strictly run in the same order), can result in a different
+output schema.
+
+Some of you reached out to us because of this confusion and unpredictability.
+
+Due to these limitations, we decided to make subtle changes to the sorting of the input subgraph
+schemas in order to make the output composite schema more predictable.
+
+Starting on **20.04.2024,** the subgraphs will always be sorted alphanumerically by their name to
+ensure a stable input order across schema publishes and schema checks.
+
+We also recommend everyone that uses the graphql-tools stitching implementation to sort their
+schemas alphanumerically by their name in their gateway implementation. The Hive CDN will also serve
+the service list in that given order.

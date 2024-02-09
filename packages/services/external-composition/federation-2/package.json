@@ -11,8 +11,8 @@
     "@apollo/composition": "2.6.3",
     "@apollo/federation-internals": "2.6.3",
     "@graphql-hive/external-composition": "workspace:*",
-    "@whatwg-node/fetch": "0.9.15",
-    "@whatwg-node/server": "0.9.23",
+    "@whatwg-node/fetch": "0.9.16",
+    "@whatwg-node/server": "0.9.25",
     "graphql": "16.8.1",
     "lru-cache": "^7.17.0",
     "zod": "3.22.4"

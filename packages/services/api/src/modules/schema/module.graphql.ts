@@ -30,6 +30,14 @@ export default gql`
     Approve a failed schema check with breaking changes.
     """
     approveFailedSchemaCheck(input: ApproveFailedSchemaCheckInput!): ApproveFailedSchemaCheckResult!
+    """
+    Create a contract for a given target.
+    """
+    createContract(input: CreateContractInput!): CreateContractResult!
+    """
+    Disable a contract.
+    """
+    disableContract(input: DisableContractInput!): DisableContractResult!
   }
 
   extend type Query {
@@ -203,6 +211,14 @@ export default gql`
     schemaChecks(first: Int, after: String, filters: SchemaChecksFilter): SchemaCheckConnection!
     schemaVersions(first: Int, after: String): SchemaVersionConnection!
     schemaVersion(id: ID!): SchemaVersion
+    """
+    Get a list of paginated schema contracts for the target.
+    """
+    contracts(first: Int, after: String): ContractConnection!
+    """
+    Get a list of paginated schema contracts that are active for the target.
+    """
+    activeContracts(first: Int, after: String): ContractConnection!
   }
 
   input SchemaChecksFilter {
@@ -507,15 +523,41 @@ export default gql`
     newBase: String
   }
 
+  type ContractVersionEdge {
+    node: ContractVersion!
+    cursor: String!
+  }
+
+  type ContractVersionConnection {
+    edges: [ContractVersionEdge!]!
+    pageInfo: PageInfo!
+  }
+
   type SchemaVersion {
     id: ID!
+    """
+    A schema version is valid if the composition and contract compositions are successful.
+    """
     valid: Boolean!
+    """
+    Whether this schema version is composable.
+    """
+    isComposable: Boolean!
+    """
+    Whether this schema version has schema changes.
+    """
+    hasSchemaChanges: Boolean!
     date: DateTime!
     log: RegistryLog!
     baseSchema: String
     schemas: SchemaConnection!
     supergraph: String
     sdl: String
+    """
+    List of tags in the schema version. E.g. when using Federation.
+    Tags can be used for filtering the schema via contracts.
+    """
+    tags: [String!]
     """
     Experimental: This field is not stable and may change in the future.
     """
@@ -539,6 +581,10 @@ export default gql`
     Whether this is the first composable schema version.
     """
     isFirstComposableVersion: Boolean!
+    """
+    Contract versions of this schema version.
+    """
+    contractVersions: ContractVersionConnection
   }
 
   type SchemaVersionGithubMetadata {
@@ -783,6 +829,10 @@ export default gql`
     """
     schemaSDL: String!
     """
+    The previous schema SDL. For composite schemas this is the service.
+    """
+    previousSchemaSDL: String
+    """
     The name of the service that owns the schema. Is null for non composite project types.
     """
     serviceName: String
@@ -804,10 +854,106 @@ export default gql`
     """
     githubRepository: String
 
+    """
+    Whether this schema check has any composition errors.
+    """
+    hasSchemaCompositionErrors: Boolean!
+    """
+    Whether this schema check has any breaking changes.
+    """
+    hasUnapprovedBreakingChanges: Boolean!
+    """
+    Whether this schema check has any schema changes.
+    """
+    hasSchemaChanges: Boolean!
+
     breakingSchemaChanges: SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
     schemaPolicyWarnings: SchemaPolicyWarningConnection
     schemaPolicyErrors: SchemaPolicyWarningConnection
+
+    """
+    Results of the contracts
+    """
+    contractChecks: ContractCheckConnection
+  }
+
+  """
+  Schema check result for contracts
+  """
+  type ContractCheck {
+    id: ID!
+    contractName: String!
+
+    """
+    Whether this schema check has any composition errors.
+    """
+    hasSchemaCompositionErrors: Boolean!
+    """
+    Whether this schema check has any breaking changes.
+    """
+    hasUnapprovedBreakingChanges: Boolean!
+    """
+    Whether this schema check has any schema changes.
+    """
+    hasSchemaChanges: Boolean!
+
+    schemaCompositionErrors: SchemaErrorConnection
+
+    breakingSchemaChanges: SchemaChangeConnection
+    safeSchemaChanges: SchemaChangeConnection
+
+    compositeSchemaSDL: String
+    supergraphSDL: String
+
+    isSuccess: Boolean!
+
+    """
+    The contract version against this check was performed.
+    """
+    contractVersion: ContractVersion
+  }
+
+  type ContractCheckEdge {
+    cursor: String!
+    node: ContractCheck!
+  }
+
+  type ContractCheckConnection {
+    edges: [ContractCheckEdge!]!
+    pageInfo: PageInfo!
+  }
+
+  type ContractVersion {
+    id: ID!
+    createdAt: String!
+    contractName: String!
+
+    """
+    Whether this contract version is composable.
+    """
+    isComposable: Boolean!
+    schemaCompositionErrors: SchemaErrorConnection
+
+    supergraphSDL: String
+    compositeSchemaSDL: String
+    """
+    Whether this contract versions has schema changes.
+    """
+    hasSchemaChanges: Boolean!
+    """
+    Breaking schema changes for this contract version.
+    """
+    breakingSchemaChanges: SchemaChangeConnection
+    """
+    Safe schema changes for this contract version.
+    """
+    safeSchemaChanges: SchemaChangeConnection
+
+    previousContractVersion: ContractVersion
+    previousDiffableContractVersion: ContractVersion
+
+    isFirstComposableVersion: Boolean!
   }
 
   """
@@ -821,6 +967,10 @@ export default gql`
     """
     schemaSDL: String!
     """
+    The previous schema SDL. For composite schemas this is the service.
+    """
+    previousSchemaSDL: String
+    """
     The name of the service that owns the schema. Is null for non composite project types.
     """
     serviceName: String
@@ -841,6 +991,19 @@ export default gql`
     The GitHub repository associated with the schema check.
     """
     githubRepository: String
+
+    """
+    Whether this schema check has any composition errors.
+    """
+    hasSchemaCompositionErrors: Boolean!
+    """
+    Whether this schema check has any breaking changes.
+    """
+    hasUnapprovedBreakingChanges: Boolean!
+    """
+    Whether this schema check has any schema changes.
+    """
+    hasSchemaChanges: Boolean!
 
     """
     Breaking changes can exist in an successful schema check if the check was manually approved.
@@ -855,6 +1018,11 @@ export default gql`
 
     compositeSchemaSDL: String
     supergraphSDL: String
+    """
+    Results of the contracts
+    """
+    contractChecks: ContractCheckConnection
+
     """
     Whether the schema check was manually approved.
     """
@@ -875,6 +1043,10 @@ export default gql`
     The SDL of the schema that was checked.
     """
     schemaSDL: String!
+    """
+    The previous schema SDL. For composite schemas this is the service.
+    """
+    previousSchemaSDL: String
     """
     The name of the service that owns the schema. Is null for non composite project types.
     """
@@ -899,6 +1071,19 @@ export default gql`
 
     compositionErrors: SchemaErrorConnection
 
+    """
+    Whether this schema check has any composition errors.
+    """
+    hasSchemaCompositionErrors: Boolean!
+    """
+    Whether this schema check has any breaking changes.
+    """
+    hasUnapprovedBreakingChanges: Boolean!
+    """
+    Whether this schema check has any schema changes.
+    """
+    hasSchemaChanges: Boolean!
+
     breakingSchemaChanges: SchemaChangeConnection
     safeSchemaChanges: SchemaChangeConnection
     schemaPolicyWarnings: SchemaPolicyWarningConnection
@@ -906,6 +1091,10 @@ export default gql`
 
     compositeSchemaSDL: String
     supergraphSDL: String
+    """
+    Results of the contracts
+    """
+    contractChecks: ContractCheckConnection
 
     """
     Whether this schema check can be approved manually.
@@ -927,6 +1116,16 @@ export default gql`
     pageInfo: PageInfo!
   }
 
+  type ContractEdge {
+    node: Contract!
+    cursor: String!
+  }
+
+  type ContractConnection {
+    edges: [ContractEdge!]!
+    pageInfo: PageInfo!
+  }
+
   input ApproveFailedSchemaCheckInput {
     organization: ID!
     project: ID!
@@ -945,5 +1144,63 @@ export default gql`
 
   type ApproveFailedSchemaCheckError {
     message: String!
+  }
+
+  input CreateContractInput {
+    targetId: ID!
+    contractName: String!
+    includeTags: [String!]
+    excludeTags: [String!]
+    removeUnreachableTypesFromPublicApiSchema: Boolean!
+  }
+
+  type CreateContractResult {
+    ok: CreateContractResultOk
+    error: CreateContractResultError
+  }
+
+  type CreateContractResultOk {
+    createdContract: Contract!
+  }
+
+  type CreateContractResultError implements Error {
+    message: String!
+    details: CreateContractInputErrors!
+  }
+
+  type CreateContractInputErrors {
+    targetId: String
+    contractName: String
+    includeTags: String
+    excludeTags: String
+  }
+
+  input DisableContractInput {
+    contractId: ID!
+  }
+
+  type DisableContractResult {
+    ok: DisableContractResultOk
+    error: DisableContractResultError
+  }
+
+  type DisableContractResultOk {
+    disabledContract: Contract!
+  }
+
+  type DisableContractResultError implements Error {
+    message: String!
+  }
+
+  type Contract {
+    id: ID!
+    target: Target!
+    contractName: String!
+    includeTags: [String!]
+    excludeTags: [String!]
+    removeUnreachableTypesFromPublicApiSchema: Boolean!
+    createdAt: DateTime!
+    isDisabled: Boolean!
+    viewerCanDisableContract: Boolean!
   }
 `;

@@ -62,7 +62,7 @@ jobs:
           command: pnpm test:e2e
           install: false
 
-      - uses: actions/upload-artifact@v4.2.0
+      - uses: actions/upload-artifact@v4.3.1
         if: ${{ failure() }}
         with:
           name: cypress

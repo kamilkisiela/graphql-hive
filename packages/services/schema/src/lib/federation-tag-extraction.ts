@@ -66,17 +66,6 @@ function hasIntersection<T>(a: Set<T>, b: Set<T>): boolean {
   return false;
 }
 
-function setDifference(set1: Set<string>, set2: Set<string>): Set<string> {
-  const difference = new Set(set1);
-  set1.forEach(value => {
-    if (set2.has(value)) {
-      difference.delete(value);
-    }
-  });
-
-  return difference;
-}
-
 /**
  * Retrieve both the url and import argument from an `@link` directive AST node.
  * @link https://specs.apollo.dev/link/v1.0/#@link
@@ -189,6 +178,36 @@ function createGetFederationDirectiveNameForSubgraphSDL(directiveName: string) {
   };
 }
 
+function getRootTypeNamesFromDocumentNode(document: DocumentNode) {
+  let queryName: string | null = 'Query';
+  let mutationName: string | null = 'Mutation';
+  let subscriptionName: string | null = 'Subscription';
+
+  for (const definition of document.definitions) {
+    if (definition.kind === Kind.SCHEMA_DEFINITION || definition.kind === Kind.SCHEMA_EXTENSION) {
+      for (const operationTypeDefinition of definition.operationTypes ?? []) {
+        if (operationTypeDefinition.operation === 'query') {
+          queryName = operationTypeDefinition.type.name.value;
+        }
+        if (operationTypeDefinition.operation === 'mutation') {
+          mutationName = operationTypeDefinition.type.name.value;
+        }
+        if (operationTypeDefinition.operation === 'subscription') {
+          subscriptionName = operationTypeDefinition.type.name.value;
+        }
+      }
+    }
+  }
+
+  const names = new Set<string>();
+
+  names.add(queryName);
+  names.add(mutationName);
+  names.add(subscriptionName);
+
+  return names;
+}
+
 /** Retrieve the actual `@tag` directive name from a given subgraph */
 export const getFederationTagDirectiveNameForSubgraphSDL =
   createGetFederationDirectiveNameForSubgraphSDL('tag');
@@ -205,7 +224,7 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
   filter: Federation2SubgraphDocumentNodeByTagsFilter,
 ): {
   typeDefs: DocumentNode;
-  typesWhereAllFieldsAreInaccessible: Set<string>;
+  typesWithAllFieldsInaccessible: Map<string, boolean>;
   transformTagDirectives: ReturnType<typeof createTransformTagDirectives>;
 } {
   const tagDirectiveName = getFederationTagDirectiveNameForSubgraphSDL(documentNode);
@@ -216,13 +235,20 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
     tagDirectiveName,
     inaccessibleDirectiveName,
   );
+  const rootTypeNames = getRootTypeNamesFromDocumentNode(documentNode);
 
-  // keep track of all types where all fields are inaccessible
-  const typesWhereAllFieldsAreInaccessible = new Set<string>();
-  // keep track of all types where not all fields are inaccessible
-  // since graphql allows extending types, a type can occur multiple times
-  // this if a type ever occurs without all types being accessible, we need to remove it from "typesWhereAllFieldsAreInaccessible" later.
-  const typesWhereNotAllFieldsAreAccessible = new Set<string>();
+  const typesWithAllFieldsInaccessibleTracker = new Map<string, boolean>();
+
+  function onAllFieldsInaccessible(name: string) {
+    const current = typesWithAllFieldsInaccessibleTracker.get(name);
+    if (current === undefined) {
+      typesWithAllFieldsInaccessibleTracker.set(name, true);
+    }
+  }
+
+  function onSomeFieldsAccessible(name: string) {
+    typesWithAllFieldsInaccessibleTracker.set(name, false);
+  }
 
   function fieldArgumentHandler(node: InputValueDefinitionNode) {
     const tagsOnNode = getTagsOnNode(node);
@@ -286,7 +312,11 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
       }),
     };
 
-    if (filter.exclude && hasIntersection(tagsOnNode, filter.exclude)) {
+    if (
+      !rootTypeNames.has(node.name.value) &&
+      filter.exclude &&
+      hasIntersection(tagsOnNode, filter.exclude)
+    ) {
       return {
         ...newNode,
         directives: transformTagDirectives(node, true),
@@ -294,9 +324,9 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
     }
 
     if (isAllFieldsInaccessible) {
-      typesWhereAllFieldsAreInaccessible.add(node.name.value);
+      onAllFieldsInaccessible(node.name.value);
     } else {
-      typesWhereNotAllFieldsAreAccessible.add(node.name.value);
+      onSomeFieldsAccessible(node.name.value);
     }
 
     return {
@@ -342,9 +372,9 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
     }
 
     if (isAllFieldsInaccessible) {
-      typesWhereAllFieldsAreInaccessible.add(node.name.value);
+      onAllFieldsInaccessible(node.name.value);
     } else {
-      typesWhereNotAllFieldsAreAccessible.add(node.name.value);
+      onSomeFieldsAccessible(node.name.value);
     }
 
     return {
@@ -385,41 +415,15 @@ export function applyTagFilterToInaccessibleTransformOnSubgraphSchema(
     [Kind.UNION_TYPE_DEFINITION]: scalarAndUnionHandler,
   });
 
+  for (const rootTypeName of rootTypeNames) {
+    typesWithAllFieldsInaccessibleTracker.delete(rootTypeName);
+  }
+
   return {
     typeDefs,
-    typesWhereAllFieldsAreInaccessible: setDifference(
-      typesWhereAllFieldsAreInaccessible,
-      typesWhereNotAllFieldsAreAccessible,
-    ),
+    typesWithAllFieldsInaccessible: typesWithAllFieldsInaccessibleTracker,
     transformTagDirectives,
   };
-}
-
-function intersectSets(sets: Set<string>[]): Set<string> {
-  if (sets.length === 0) {
-    // If the input array is empty, return an empty set
-    return new Set();
-  }
-
-  // Create a copy of the first set to modify
-  const result = new Set(sets[0]);
-
-  // Iterate through the rest of the sets
-  for (let i = 1; i < sets.length; i++) {
-    // Filter the current set and keep only elements present in the result set
-    result.forEach(value => {
-      if (!sets[i].has(value)) {
-        result.delete(value);
-      }
-    });
-
-    // If the result set becomes empty, no need to continue
-    if (result.size === 0) {
-      break;
-    }
-  }
-
-  return result;
 }
 
 function makeTypesFromSetInaccessible(
@@ -473,9 +477,29 @@ export function applyTagFilterOnSubgraphs<
     ...applyTagFilterToInaccessibleTransformOnSubgraphSchema(subgraph.typeDefs, filter),
   }));
 
-  const intersectionOfTypesWhereAllFieldsAreInaccessible = intersectSets(
-    filteredSubgraphs.map(subgraph => subgraph.typesWhereAllFieldsAreInaccessible),
-  );
+  const intersectionOfTypesWhereAllFieldsAreInaccessible = new Set<string>();
+  // We need to traverse all subgraphs to find the intersection of types where all fields are inaccessible.
+  // If a type is not present in any other subgraph, we can safely mark it as inaccessible.
+  filteredSubgraphs.forEach(subgraph => {
+    const otherSubgraphs = filteredSubgraphs.filter(sub => sub !== subgraph);
+
+    for (const [type, allFieldsInaccessible] of subgraph.typesWithAllFieldsInaccessible) {
+      if (
+        allFieldsInaccessible &&
+        otherSubgraphs.every(
+          sub =>
+            !sub.typesWithAllFieldsInaccessible.has(type) ||
+            sub.typesWithAllFieldsInaccessible.get(type) === true,
+        )
+      ) {
+        intersectionOfTypesWhereAllFieldsAreInaccessible.add(type);
+      }
+      // let's not visit this type a second time...
+      otherSubgraphs.forEach(sub => {
+        sub.typesWithAllFieldsInaccessible.delete(type);
+      });
+    }
+  });
 
   if (!intersectionOfTypesWhereAllFieldsAreInaccessible.size) {
     filteredSubgraphs;

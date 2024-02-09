@@ -7,6 +7,7 @@ import { ActivityManager } from '../../activity/providers/activity-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
+import { IdTranslator } from '../../shared/providers/id-translator';
 import { Logger } from '../../shared/providers/logger';
 import { ProjectSelector, Storage, TargetSelector } from '../../shared/providers/storage';
 import { TokenStorage } from '../../token/providers/token-storage';
@@ -29,6 +30,7 @@ export class TargetManager {
     private tokenStorage: TokenStorage,
     private authManager: AuthManager,
     private activityManager: ActivityManager,
+    private idTranslator: IdTranslator,
   ) {
     this.logger = logger.child({ source: 'TargetManager' });
   }
@@ -297,6 +299,27 @@ export class TargetManager {
       type: 'ok',
       target,
     } as const;
+  }
+
+  async getTargetById(args: { targetId: string }): Promise<Target> {
+    const breadcrumb = await this.storage.getTargetBreadcrumbForTargetId({
+      targetId: args.targetId,
+    });
+
+    if (!breadcrumb) {
+      throw new Error(`Target not found (targetId=${args.targetId})`);
+    }
+
+    const [organizationId, projectId] = await Promise.all([
+      this.idTranslator.translateOrganizationId(breadcrumb),
+      this.idTranslator.translateProjectId(breadcrumb),
+    ]);
+
+    return this.storage.getTarget({
+      organization: organizationId,
+      project: projectId,
+      target: args.targetId,
+    });
   }
 }
 

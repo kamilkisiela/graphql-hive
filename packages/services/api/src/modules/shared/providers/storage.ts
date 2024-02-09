@@ -1,4 +1,5 @@
 import { Injectable } from 'graphql-modules';
+import type { DatabasePool } from 'slonik';
 import type { PolicyConfigurationObject } from '@hive/policy';
 import type {
   PaginatedSchemaVersionConnection,
@@ -42,6 +43,7 @@ import type {
 import type { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import type { ProjectAccessScope } from '../../auth/providers/project-access';
 import type { TargetAccessScope } from '../../auth/providers/target-access';
+import type { Contracts } from '../../schema/providers/contracts';
 
 export interface OrganizationSelector {
   organization: string;
@@ -55,8 +57,18 @@ export interface TargetSelector extends ProjectSelector {
   target: string;
 }
 
+type CreateContractVersionInput = {
+  contractId: string;
+  contractName: string;
+  compositeSchemaSDL: string | null;
+  supergraphSDL: string | null;
+  schemaCompositionErrors: Array<SchemaCompositionError> | null;
+  changes: null | Array<SchemaChangeType>;
+};
+
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface Storage {
+  pool: DatabasePool;
   destroy(): Promise<void>;
   isReady(): Promise<boolean>;
   ensureUserExists(_: {
@@ -383,12 +395,8 @@ export interface Storage {
     before: string | null;
     after: string | null;
   }>;
-  getSchemasOfVersion(
-    _: {
-      version: string;
-      includeMetadata?: boolean;
-    } & TargetSelector,
-  ): Promise<Schema[]>;
+  getSchemasOfVersion(_: { version: string; includeMetadata?: boolean }): Promise<Schema[]>;
+  getSchemaByNameOfVersion(_: { versionId: string; serviceName: string }): Promise<Schema | null>;
   getSchemasOfPreviousVersion(
     _: {
       version: string;
@@ -418,17 +426,20 @@ export interface Storage {
       actionFn(): Promise<void>;
       changes: Array<SchemaChangeType> | null;
       diffSchemaVersionId: string | null;
+      contracts: null | Array<CreateContractVersionInput>;
     } & TargetSelector &
       (
         | {
             compositeSchemaSDL: null;
             supergraphSDL: null;
             schemaCompositionErrors: Array<SchemaCompositionError>;
+            tags: null;
           }
         | {
             compositeSchemaSDL: string;
             supergraphSDL: string | null;
             schemaCompositionErrors: null;
+            tags: null | Array<string>;
           }
       ),
   ): Promise<DeletedCompositeSchema & { versionId: string }>;
@@ -452,17 +463,20 @@ export interface Storage {
         repository: string;
         sha: string;
       };
+      contracts: null | Array<CreateContractVersionInput>;
     } & TargetSelector) &
       (
         | {
             compositeSchemaSDL: null;
             supergraphSDL: null;
             schemaCompositionErrors: Array<SchemaCompositionError>;
+            tags: null;
           }
         | {
             compositeSchemaSDL: string;
             supergraphSDL: string | null;
             schemaCompositionErrors: null;
+            tags: null | Array<string>;
           }
       ),
   ): Promise<SchemaVersion | never>;
@@ -730,6 +744,7 @@ export interface Storage {
     deletedSchemaCheckCount: number;
     deletedSdlStoreCount: number;
     deletedSchemaChangeApprovalCount: number;
+    deletedContractSchemaChangeApprovalCount: number;
   }>;
   /**
    * Find schema check for a given ID and target.
@@ -768,6 +783,8 @@ export interface Storage {
    * Overwrite and approve a schema check.
    */
   approveFailedSchemaCheck(input: {
+    /** We inject this here as a dirty way to avoid chicken egg issues :) */
+    contracts: Contracts;
     schemaCheckId: string;
     userId: string;
   }): Promise<SchemaCheck | null>;
@@ -778,7 +795,7 @@ export interface Storage {
   getApprovedSchemaChangesForContextId(args: {
     targetId: string;
     contextId: string;
-  }): Promise<Array<SchemaChangeType>>;
+  }): Promise<Map<string, SchemaChangeType>>;
 
   getTargetBreadcrumbForTargetId(_: { targetId: string }): Promise<TargetBreadcrumb | null>;
 

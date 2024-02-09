@@ -1,6 +1,7 @@
 {
   "name": "@hive/cdn-script",
   "version": "0.0.0",
+  "type": "module",
   "license": "MIT",
   "private": true,
   "exports": {
@@ -19,11 +20,11 @@
   "devDependencies": {
     "@cloudflare/workers-types": "4.20240129.0",
     "@types/service-worker-mock": "2.0.4",
-    "@whatwg-node/fetch": "0.9.15",
-    "@whatwg-node/server": "0.9.23",
+    "@whatwg-node/fetch": "0.9.16",
+    "@whatwg-node/server": "0.9.25",
     "bcryptjs": "2.4.3",
-    "dotenv": "16.3.2",
-    "esbuild": "0.19.11",
+    "dotenv": "16.4.1",
+    "esbuild": "0.20.0",
     "fastify": "3.29.5",
     "graphql": "16.8.1",
     "itty-router": "4.0.27",

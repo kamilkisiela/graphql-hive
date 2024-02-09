@@ -7,13 +7,13 @@
   "peerDependencies": {
     "@sentry/node": "^7.0.0",
     "@sentry/utils": "^7.0.0",
-    "@trpc/server": "10.45.0"
+    "@trpc/server": "10.45.1"
   },
   "devDependencies": {
-    "@sentry/node": "7.99.0",
-    "@sentry/types": "7.99.0",
-    "@sentry/utils": "7.99.0",
-    "@whatwg-node/fetch": "0.9.15",
+    "@sentry/node": "7.100.1",
+    "@sentry/types": "7.100.1",
+    "@sentry/utils": "7.100.1",
+    "@whatwg-node/fetch": "0.9.16",
     "fastify": "3.29.5",
     "fastify-cors": "6.0.3",
     "fastify-plugin": "4.5.1",

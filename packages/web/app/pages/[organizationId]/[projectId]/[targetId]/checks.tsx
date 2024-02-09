@@ -1,26 +1,33 @@
 import { useMemo, useState } from 'react';
 import NextLink from 'next/link';
 import clsx from 'clsx';
+import { GitCompareIcon } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { SchemaEditor } from '@/components/schema-editor';
-import { ChangesBlock, labelize } from '@/components/target/history/errors-and-changes';
+import {
+  ChangesBlock,
+  CompositionErrorsSection,
+  labelize,
+  NoGraphChanges,
+} from '@/components/target/history/errors-and-changes';
 import { Label } from '@/components/ui/label';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Badge,
-  Button,
   DiffEditor,
   DocsLink,
   EmptyList,
   Heading,
+  Button as LegacyButton,
   MetaTitle,
   Modal,
   Switch,
   TimeAgo,
-  Tooltip,
 } from '@/components/v2';
 import { AlertTriangleIcon, DiffIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
@@ -28,8 +35,12 @@ import { CriticalityLevel } from '@/gql/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { cn } from '@/lib/utils';
-import { ExternalLinkIcon, ListBulletIcon } from '@radix-ui/react-icons';
-import * as ToggleGroup from '@radix-ui/react-toggle-group';
+import {
+  CheckIcon,
+  ExclamationTriangleIcon,
+  ExternalLinkIcon,
+  ListBulletIcon,
+} from '@radix-ui/react-icons';
 
 const SchemaChecks_NavigationQuery = graphql(`
   query SchemaChecks_NavigationQuery(
@@ -161,14 +172,14 @@ const Navigation = (props: {
             </div>
           ))}
           {props.isLastPage && query.data.target.schemaChecks.pageInfo.hasNextPage && (
-            <Button
+            <LegacyButton
               variant="link"
               onClick={() => {
                 props.onLoadMore(query.data?.target?.schemaChecks.pageInfo.endCursor ?? '');
               }}
             >
               Load more
-            </Button>
+            </LegacyButton>
           )}
         </>
       )}
@@ -180,88 +191,33 @@ const ActiveSchemaCheck_SchemaCheckFragment = graphql(`
   fragment ActiveSchemaCheck_SchemaCheckFragment on SchemaCheck {
     __typename
     id
-    schemaSDL
-    schemaVersion {
-      id
-      supergraph
-      sdl
-    }
     serviceName
     createdAt
     meta {
       commit
       author
     }
-    breakingSchemaChanges {
-      nodes {
-        message(withSafeBasedOnUsageNote: false)
-        criticality
-        criticalityReason
-        path
-        approval {
-          approvedBy {
-            id
-            displayName
-          }
-          approvedAt
-          schemaCheckId
-        }
-        isSafeBasedOnUsage
-      }
-    }
-    safeSchemaChanges {
-      nodes {
-        message(withSafeBasedOnUsageNote: false)
-        criticality
-        criticalityReason
-        path
-        approval {
-          approvedBy {
-            id
-            displayName
-          }
-          approvedAt
-          schemaCheckId
-        }
-        isSafeBasedOnUsage
-      }
-    }
-    schemaPolicyWarnings {
-      ...SchemaPolicyEditor_PolicyWarningsFragment
-      edges {
-        node {
-          message
-        }
-      }
-    }
-    schemaPolicyErrors {
-      ...SchemaPolicyEditor_PolicyWarningsFragment
-      edges {
-        node {
-          message
-        }
-      }
-    }
     ... on FailedSchemaCheck {
-      compositeSchemaSDL
-      supergraphSDL
-      compositionErrors {
-        nodes {
-          message
-        }
-      }
       canBeApproved
       canBeApprovedByViewer
     }
     ... on SuccessfulSchemaCheck {
-      compositeSchemaSDL
-      supergraphSDL
       isApproved
       approvedBy {
         id
         displayName
       }
     }
+    contractChecks {
+      __typename
+      edges {
+        node {
+          id
+          isSuccess
+        }
+      }
+    }
+    ...SchemaCheckView_SchemaCheckFragment
   }
 `);
 
@@ -339,10 +295,10 @@ const ApproveFailedSchemaCheckModal = (props: {
           <>
             <p>Are you sure you want to approve this failed schema check?</p>
             <div className="flex w-full gap-2">
-              <Button type="button" size="large" block onClick={props.close}>
+              <LegacyButton type="button" size="large" block onClick={props.close}>
                 Close
-              </Button>
-              <Button
+              </LegacyButton>
+              <LegacyButton
                 type="submit"
                 size="large"
                 block
@@ -360,7 +316,7 @@ const ApproveFailedSchemaCheckModal = (props: {
                 }
               >
                 Approve failed schema check
-              </Button>
+              </LegacyButton>
             </div>
           </>
         ) : state.error ? (
@@ -368,27 +324,27 @@ const ApproveFailedSchemaCheckModal = (props: {
             <p>Oops. Something unexpected went wrong. Please try again later</p>
             <code>{state.error.message}</code>
             <div className="flex w-full gap-2">
-              <Button type="button" size="large" block onClick={props.close}>
+              <LegacyButton type="button" size="large" block onClick={props.close}>
                 Close
-              </Button>
+              </LegacyButton>
             </div>
           </>
         ) : state.data?.approveFailedSchemaCheck.error ? (
           <>
             <p>{state.data.approveFailedSchemaCheck.error.message}</p>
             <div className="flex w-full gap-2">
-              <Button type="button" size="large" block onClick={props.close}>
+              <LegacyButton type="button" size="large" block onClick={props.close}>
                 Close
-              </Button>
+              </LegacyButton>
             </div>
           </>
         ) : state.data?.approveFailedSchemaCheck.ok ? (
           <>
             <p>The schema check has been approved successfully!</p>
             <div className="flex w-full gap-2">
-              <Button type="button" size="large" block onClick={props.close}>
+              <LegacyButton type="button" size="large" block onClick={props.close}>
                 Close
-              </Button>
+              </LegacyButton>
             </div>
           </>
         ) : null}
@@ -413,7 +369,6 @@ const ActiveSchemaCheck = ({
     },
     pause: !schemaCheckId,
   });
-  const [view, setView] = useState<string>('details');
   const [isApproveFailedSchemaCheckModalOpen, setIsApproveFailedSchemaCheckModalOpen] =
     useState(false);
 
@@ -421,68 +376,6 @@ const ActiveSchemaCheck = ({
     ActiveSchemaCheck_SchemaCheckFragment,
     query.data?.target?.schemaCheck,
   );
-
-  const [toggleItems] = useMemo(() => {
-    const items: Array<{
-      value: string;
-      icon: JSX.Element;
-      label: string;
-      tooltip: string;
-    }> = [];
-
-    if (!schemaCheck) {
-      return [[]] as const;
-    }
-
-    items.push({
-      value: 'details',
-      icon: <ListBulletIcon className="h-5 w-auto flex-none" />,
-      label: 'Details',
-      tooltip: 'Details',
-    });
-
-    if (schemaCheck.compositeSchemaSDL && schemaCheck.compositeSchemaSDL) {
-      items.push({
-        value: 'schemaDiff',
-        icon: <DiffIcon className="h-5 w-auto flex-none" />,
-        label: 'Diff',
-        tooltip: 'Schema Diff',
-      });
-    }
-
-    if (
-      schemaCheck.schemaPolicyWarnings ||
-      (schemaCheck.__typename === 'FailedSchemaCheck' &&
-        schemaCheck.schemaPolicyErrors?.edges?.length)
-    ) {
-      items.push({
-        value: 'policy',
-        icon: <AlertTriangleIcon className="h-5 w-auto flex-none" />,
-        label: 'Policy',
-        tooltip: 'Schema Policy',
-      });
-    }
-
-    if (schemaCheck.compositeSchemaSDL) {
-      items.push({
-        value: 'schema',
-        icon: <DiffIcon className="h-5 w-auto flex-none" />,
-        label: schemaCheck.serviceName ? 'Composite Schema' : 'Schema',
-        tooltip: 'Schema',
-      });
-    }
-
-    if (schemaCheck.supergraphSDL) {
-      items.push({
-        value: 'supergraph',
-        icon: <DiffIcon className="h-5 w-auto flex-none" />,
-        label: 'Supergraph',
-        tooltip: 'Supergraph',
-      });
-    }
-
-    return [items] as const;
-  }, [schemaCheck]);
 
   if (!schemaCheck) {
     return (
@@ -536,14 +429,10 @@ const ActiveSchemaCheck = ({
           {schemaCheck.__typename === 'FailedSchemaCheck' && schemaCheck.canBeApproved ? (
             <div className="ml-auto mr-0 pl-4">
               {schemaCheck.canBeApprovedByViewer ? (
-                <Button danger onClick={() => setIsApproveFailedSchemaCheckModalOpen(true)}>
+                <LegacyButton danger onClick={() => setIsApproveFailedSchemaCheckModalOpen(true)}>
                   Approve
-                </Button>
-              ) : (
-                <Tooltip content={<>Missing permissions. Please contact the organization owner.</>}>
-                  <Button disabled>Approve</Button>
-                </Tooltip>
-              )}
+                </LegacyButton>
+              ) : null}
             </div>
           ) : null}
           {schemaCheck.__typename === 'SuccessfulSchemaCheck' && schemaCheck.isApproved ? (
@@ -558,132 +447,7 @@ const ActiveSchemaCheck = ({
           ) : null}
         </div>
       </div>
-
-      <div className="pb-1 pt-6">
-        <ToggleGroup.Root
-          className="flex space-x-1 rounded-md bg-gray-900/50 text-gray-500"
-          type="single"
-          defaultValue={view}
-          onValueChange={value => value && setView(value)}
-          orientation="vertical"
-        >
-          {toggleItems.map(item => (
-            <ToggleGroup.Item
-              key={item.value}
-              value={item.value}
-              className={cn(
-                'flex items-center rounded-md px-2 py-[0.4375rem] text-xs font-semibold hover:text-white',
-                view === item.value && 'bg-gray-800 text-white',
-              )}
-              title={item.tooltip}
-            >
-              {item.icon}
-              <span className="ml-2">{item.label}</span>
-            </ToggleGroup.Item>
-          ))}
-        </ToggleGroup.Root>
-      </div>
-      {view === 'details' ? (
-        <>
-          <div className="my-2">
-            {schemaCheck.__typename === 'SuccessfulSchemaCheck' &&
-            !schemaCheck.schemaPolicyWarnings?.edges?.length &&
-            !schemaCheck.safeSchemaChanges?.nodes?.length &&
-            !schemaCheck.breakingSchemaChanges?.nodes?.length &&
-            !schemaCheck.schemaPolicyErrors?.edges?.length ? (
-              <div className="my-2">
-                <Heading>Details</Heading>
-                <div className="mt-1">No changes or policy warnings detected.</div>
-              </div>
-            ) : null}
-            {schemaCheck.__typename === 'FailedSchemaCheck' &&
-            schemaCheck.compositionErrors?.nodes.length ? (
-              <div className="mb-2">
-                <Heading>
-                  <Badge color="red" /> Composition Errors
-                </Heading>
-                <ul>
-                  {schemaCheck.compositionErrors.nodes.map((change, index) => (
-                    <li key={index}>{change.message}</li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-            {schemaCheck.breakingSchemaChanges?.nodes.length ? (
-              <div className="mb-2">
-                <ChangesBlock
-                  criticality={CriticalityLevel.Breaking}
-                  changes={schemaCheck.breakingSchemaChanges.nodes}
-                />
-              </div>
-            ) : null}
-            {schemaCheck.safeSchemaChanges ? (
-              <div className="mb-2">
-                <ChangesBlock
-                  criticality={CriticalityLevel.Safe}
-                  changes={schemaCheck.safeSchemaChanges.nodes}
-                />
-              </div>
-            ) : null}
-            {schemaCheck.schemaPolicyErrors?.edges.length ? (
-              <div className="mb-2">
-                <PolicyBlock
-                  title="Schema Policy Errors"
-                  policies={schemaCheck.schemaPolicyErrors}
-                  type="error"
-                />
-              </div>
-            ) : null}
-            {schemaCheck.schemaPolicyWarnings ? (
-              <div className="mb-2">
-                <PolicyBlock
-                  title="Schema Policy Warnings"
-                  policies={schemaCheck.schemaPolicyWarnings}
-                  type="warning"
-                />
-              </div>
-            ) : null}
-          </div>
-        </>
-      ) : null}
-      {view === 'schema' ? (
-        <SchemaEditor
-          theme="vs-dark"
-          options={{
-            renderLineHighlightOnlyWhenFocus: true,
-            readOnly: true,
-            lineNumbers: 'off',
-            renderValidationDecorations: 'on',
-          }}
-          schema={schemaCheck.compositeSchemaSDL ?? ''}
-        />
-      ) : null}
-      {view === 'supergraph' ? (
-        <SchemaEditor
-          theme="vs-dark"
-          options={{
-            renderLineHighlightOnlyWhenFocus: true,
-            readOnly: true,
-            lineNumbers: 'off',
-            renderValidationDecorations: 'on',
-          }}
-          schema={schemaCheck.supergraphSDL ?? ''}
-        />
-      ) : null}
-      {view === 'schemaDiff' ? (
-        <DiffEditor
-          before={schemaCheck.schemaVersion?.sdl ?? ''}
-          after={schemaCheck.compositeSchemaSDL ?? ''}
-          title="Schema Diff"
-        />
-      ) : null}
-      {view === 'policy' && schemaCheck.compositeSchemaSDL ? (
-        <SchemaPolicyEditor
-          compositeSchemaSDL={schemaCheck.schemaSDL ?? ''}
-          warnings={schemaCheck.schemaPolicyWarnings ?? null}
-          errors={('schemaPolicyErrors' in schemaCheck && schemaCheck.schemaPolicyErrors) || null}
-        />
-      ) : null}
+      <SchemaChecksView schemaCheck={schemaCheck} />
       <ApproveFailedSchemaCheckModal
         organizationId={router.organizationId}
         projectId={router.projectId}
@@ -754,6 +518,526 @@ const SchemaPolicyEditor = (props: {
     />
   );
 };
+
+const SchemaChecksView_SchemaCheckFragment = graphql(`
+  fragment SchemaCheckView_SchemaCheckFragment on SchemaCheck {
+    id
+    hasSchemaCompositionErrors
+    hasSchemaChanges
+    hasUnapprovedBreakingChanges
+    contractChecks {
+      edges {
+        node {
+          id
+          contractName
+          hasSchemaCompositionErrors
+          hasUnapprovedBreakingChanges
+          hasSchemaChanges
+          ...ContractCheckView_ContractCheckFragment
+        }
+      }
+    }
+    ...DefaultSchemaView_SchemaCheckFragment
+  }
+`);
+
+function SchemaChecksView(props: {
+  schemaCheck: FragmentType<typeof SchemaChecksView_SchemaCheckFragment>;
+}) {
+  const schemaCheck = useFragment(SchemaChecksView_SchemaCheckFragment, props.schemaCheck);
+
+  const [selectedItem, setSelectedItem] = useState<string>('default');
+  const selectedContractCheckNode = useMemo(
+    () =>
+      schemaCheck.contractChecks?.edges?.find(edge => edge.node.id === selectedItem)?.node ?? null,
+    [selectedItem],
+  );
+
+  return (
+    <>
+      <Tabs
+        defaultValue="default"
+        className="mt-3"
+        value={selectedItem}
+        onValueChange={value => setSelectedItem(value)}
+      >
+        <TabsList className="w-full justify-start rounded-b-none px-2 py-0">
+          <TabsTrigger value="default" className="mt-1 py-2 data-[state=active]:rounded-b-none">
+            <span>Default Graph</span>
+            <TooltipProvider>
+              <Tooltip>
+                {schemaCheck.hasSchemaCompositionErrors ? (
+                  <>
+                    <TooltipTrigger>
+                      <ExclamationTriangleIcon className="h-4 w-4 pl-1 text-yellow-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>Composition failed.</TooltipContent>
+                  </>
+                ) : schemaCheck.hasUnapprovedBreakingChanges ? (
+                  <>
+                    <TooltipTrigger>
+                      <ExclamationTriangleIcon className="h-4 w-4 pl-1 text-yellow-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>Unapproved breaking changes!</TooltipContent>
+                  </>
+                ) : schemaCheck.hasSchemaChanges ? (
+                  <>
+                    <TooltipTrigger>
+                      <GitCompareIcon className="h-4 w-4 pl-1" />
+                    </TooltipTrigger>
+                    <TooltipContent>Contract schema changed</TooltipContent>
+                  </>
+                ) : (
+                  <>
+                    <TooltipTrigger>
+                      <CheckIcon className="h-4 w-4 pl-1" />
+                    </TooltipTrigger>
+                    <TooltipContent>Composition succeeded.</TooltipContent>
+                  </>
+                )}
+              </Tooltip>
+            </TooltipProvider>
+          </TabsTrigger>
+          {schemaCheck.contractChecks?.edges.map(edge => (
+            <TabsTrigger
+              value={edge.node.id}
+              key={edge.node.id}
+              className="mt-1 py-2 data-[state=active]:rounded-b-none"
+            >
+              {edge.node.contractName}
+              <TooltipProvider>
+                <Tooltip>
+                  {edge.node.hasSchemaCompositionErrors ? (
+                    <>
+                      <TooltipTrigger>
+                        <ExclamationTriangleIcon className="h-4 w-4 pl-1 text-yellow-500" />
+                      </TooltipTrigger>
+                      <TooltipContent>Composition failed.</TooltipContent>
+                    </>
+                  ) : edge.node.hasUnapprovedBreakingChanges ? (
+                    <>
+                      <TooltipTrigger>
+                        <ExclamationTriangleIcon className="h-4 w-4 pl-1 text-yellow-500" />
+                      </TooltipTrigger>
+                      <TooltipContent>Unapproved breaking changes!</TooltipContent>
+                    </>
+                  ) : edge.node.hasSchemaChanges ? (
+                    <>
+                      <TooltipTrigger>
+                        <GitCompareIcon className="h-4 w-4 pl-1" />
+                      </TooltipTrigger>
+                      <TooltipContent>Contract schema changed</TooltipContent>
+                    </>
+                  ) : (
+                    <>
+                      <TooltipTrigger>
+                        <CheckIcon className="h-4 w-4 pl-1" />
+                      </TooltipTrigger>
+                      <TooltipContent>Composition succeeded.</TooltipContent>
+                    </>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+      {selectedContractCheckNode ? (
+        <ContractCheckView contractCheck={selectedContractCheckNode} />
+      ) : (
+        <DefaultSchemaView schemaCheck={schemaCheck} />
+      )}
+    </>
+  );
+}
+
+const DefaultSchemaView_SchemaCheckFragment = graphql(`
+  fragment DefaultSchemaView_SchemaCheckFragment on SchemaCheck {
+    id
+    schemaSDL
+    previousSchemaSDL
+    serviceName
+    hasSchemaCompositionErrors
+    schemaVersion {
+      id
+      supergraph
+      sdl
+    }
+    ... on SuccessfulSchemaCheck {
+      compositeSchemaSDL
+      supergraphSDL
+    }
+    ... on FailedSchemaCheck {
+      compositeSchemaSDL
+      supergraphSDL
+      compositionErrors {
+        ...CompositionErrorsSection_SchemaErrorConnection
+      }
+    }
+    breakingSchemaChanges {
+      nodes {
+        message(withSafeBasedOnUsageNote: false)
+        criticality
+        criticalityReason
+        path
+        approval {
+          approvedBy {
+            id
+            displayName
+          }
+          approvedAt
+          schemaCheckId
+        }
+        isSafeBasedOnUsage
+      }
+    }
+    safeSchemaChanges {
+      nodes {
+        message(withSafeBasedOnUsageNote: false)
+        criticality
+        criticalityReason
+        path
+        approval {
+          approvedBy {
+            id
+            displayName
+          }
+          approvedAt
+          schemaCheckId
+        }
+        isSafeBasedOnUsage
+      }
+    }
+    schemaPolicyWarnings {
+      ...SchemaPolicyEditor_PolicyWarningsFragment
+      edges {
+        node {
+          message
+        }
+      }
+    }
+    schemaPolicyErrors {
+      ...SchemaPolicyEditor_PolicyWarningsFragment
+      edges {
+        node {
+          message
+        }
+      }
+    }
+    contractChecks {
+      edges {
+        node {
+          id
+          isSuccess
+        }
+      }
+    }
+  }
+`);
+
+function DefaultSchemaView(props: {
+  schemaCheck: FragmentType<typeof DefaultSchemaView_SchemaCheckFragment>;
+}) {
+  const schemaCheck = useFragment(DefaultSchemaView_SchemaCheckFragment, props.schemaCheck);
+  const [selectedView, setSelectedView] = useState<string>('details');
+
+  const items = [
+    {
+      value: 'details',
+      icon: <ListBulletIcon className="h-5 w-auto flex-none" />,
+      label: 'Details',
+      tooltip: 'Details',
+      isDisabled: false,
+    },
+    ...(schemaCheck.serviceName
+      ? [
+          {
+            value: 'service',
+            icon: <DiffIcon className="h-5 w-auto flex-none" />,
+            label: 'Service',
+            tooltip: 'Service',
+            isDisabled: false,
+          },
+        ]
+      : []),
+    {
+      value: 'schema',
+      icon: <DiffIcon className="h-5 w-auto flex-none" />,
+      label: 'Schema',
+      tooltip: 'Schema Diff',
+      isDisabled: !schemaCheck.compositeSchemaSDL,
+    },
+    {
+      value: 'supergraph',
+      icon: <DiffIcon className="h-5 w-auto flex-none" />,
+      label: 'Supergraph',
+      tooltip: 'Supergraph',
+      isDisabled: !schemaCheck.supergraphSDL,
+    },
+    {
+      value: 'policy',
+      icon: <AlertTriangleIcon className="h-5 w-auto flex-none" />,
+      label: 'Policy',
+      tooltip: 'Schema Policy',
+      isDisabled:
+        !schemaCheck.schemaPolicyWarnings &&
+        !(
+          schemaCheck.__typename === 'FailedSchemaCheck' &&
+          schemaCheck.schemaPolicyErrors?.edges?.length
+        ),
+    },
+  ];
+
+  return (
+    <>
+      <Tabs value={selectedView} onValueChange={value => setSelectedView(value)}>
+        <TabsList className="bg-background border-muted w-full justify-start rounded-none border-x border-b">
+          {items.map(item => (
+            <TabsTrigger value={item.value} disabled={item.isDisabled}>
+              {item.icon}
+              <span className="ml-2">{item.label}</span>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+      <div className="border-muted min-h-[850px] rounded-md rounded-t-none border border-t-0">
+        {selectedView === 'details' && (
+          <div className="my-4 px-4">
+            {!schemaCheck.schemaPolicyWarnings?.edges?.length &&
+              !schemaCheck.safeSchemaChanges?.nodes?.length &&
+              !schemaCheck.breakingSchemaChanges?.nodes?.length &&
+              !schemaCheck.schemaPolicyErrors?.edges?.length &&
+              !schemaCheck.hasSchemaCompositionErrors && <NoGraphChanges />}
+            {schemaCheck.__typename === 'FailedSchemaCheck' && schemaCheck.compositionErrors && (
+              <CompositionErrorsSection compositionErrors={schemaCheck.compositionErrors} />
+            )}
+            {schemaCheck.breakingSchemaChanges?.nodes.length ? (
+              <div className="mb-2">
+                <ChangesBlock
+                  criticality={CriticalityLevel.Breaking}
+                  changes={schemaCheck.breakingSchemaChanges.nodes}
+                />
+              </div>
+            ) : null}
+            {schemaCheck.safeSchemaChanges ? (
+              <div className="mb-2">
+                <ChangesBlock
+                  criticality={CriticalityLevel.Safe}
+                  changes={schemaCheck.safeSchemaChanges.nodes}
+                />
+              </div>
+            ) : null}
+            {schemaCheck.schemaPolicyErrors?.edges.length ? (
+              <div className="mb-2">
+                <PolicyBlock
+                  title="Schema Policy Errors"
+                  policies={schemaCheck.schemaPolicyErrors}
+                  type="error"
+                />
+              </div>
+            ) : null}
+            {schemaCheck.schemaPolicyWarnings ? (
+              <div className="mb-2">
+                <PolicyBlock
+                  title="Schema Policy Warnings"
+                  policies={schemaCheck.schemaPolicyWarnings}
+                  type="warning"
+                />
+              </div>
+            ) : null}
+          </div>
+        )}
+        {selectedView === 'service' && (
+          <DiffEditor
+            before={schemaCheck.previousSchemaSDL ?? null}
+            after={schemaCheck.schemaSDL}
+            downloadFileName="service.graphqls"
+          />
+        )}
+        {selectedView === 'schema' && (
+          <DiffEditor
+            before={schemaCheck.schemaVersion?.sdl ?? null}
+            after={schemaCheck.compositeSchemaSDL ?? null}
+            downloadFileName="schema.graphqls"
+          />
+        )}
+        {selectedView === 'supergraph' && (
+          <DiffEditor
+            before={schemaCheck?.schemaVersion?.supergraph ?? null}
+            after={schemaCheck?.supergraphSDL ?? null}
+            downloadFileName="supergraph.graphqls"
+          />
+        )}
+        {selectedView === 'policy' && (
+          <>
+            <div className="my-2 px-2">
+              <Heading>Schema Policy</Heading>
+            </div>
+            <SchemaPolicyEditor
+              compositeSchemaSDL={schemaCheck.schemaSDL ?? ''}
+              warnings={schemaCheck.schemaPolicyWarnings ?? null}
+              errors={
+                ('schemaPolicyErrors' in schemaCheck && schemaCheck.schemaPolicyErrors) || null
+              }
+            />
+          </>
+        )}
+      </div>
+    </>
+  );
+}
+
+const ContractCheckView_ContractCheckFragment = graphql(`
+  fragment ContractCheckView_ContractCheckFragment on ContractCheck {
+    id
+    schemaCompositionErrors {
+      ...CompositionErrorsSection_SchemaErrorConnection
+    }
+    breakingSchemaChanges {
+      nodes {
+        message(withSafeBasedOnUsageNote: false)
+        criticality
+        criticalityReason
+        path
+        approval {
+          approvedBy {
+            id
+            displayName
+          }
+          approvedAt
+          schemaCheckId
+        }
+        isSafeBasedOnUsage
+      }
+    }
+    safeSchemaChanges {
+      nodes {
+        message(withSafeBasedOnUsageNote: false)
+        criticality
+        criticalityReason
+        path
+        approval {
+          approvedBy {
+            id
+            displayName
+          }
+          approvedAt
+          schemaCheckId
+        }
+        isSafeBasedOnUsage
+      }
+    }
+    compositeSchemaSDL
+    supergraphSDL
+    contractVersion {
+      id
+      compositeSchemaSDL
+      supergraphSDL
+    }
+  }
+`);
+
+function ContractCheckView(props: {
+  contractCheck: FragmentType<typeof ContractCheckView_ContractCheckFragment>;
+}) {
+  const contractCheck = useFragment(ContractCheckView_ContractCheckFragment, props.contractCheck);
+
+  const [selectedView, setSelectedView] = useState<string>('details');
+
+  const items = [
+    {
+      value: 'details',
+      icon: <ListBulletIcon className="h-5 w-auto flex-none" />,
+      label: 'Details',
+      tooltip: 'Details',
+      disabledReason: false,
+    },
+    {
+      value: 'schema',
+      icon: <DiffIcon className="h-5 w-auto flex-none" />,
+      label: 'Schema',
+      tooltip: 'Schema',
+      disabledReason: !contractCheck.compositeSchemaSDL && (
+        <>Composition did not succeed. No public schema SDL available.</>
+      ),
+    },
+    {
+      value: 'supergraph',
+      icon: <DiffIcon className="h-5 w-auto flex-none" />,
+      label: 'Supergraph',
+      tooltip: 'Supergraph',
+      disabledReason: !contractCheck.supergraphSDL && (
+        <>Composition did not succeed. No Supergraph available.</>
+      ),
+    },
+  ];
+
+  return (
+    <TooltipProvider>
+      <Tabs value={selectedView} onValueChange={value => setSelectedView(value)}>
+        <TabsList className="bg-background border-muted w-full justify-start rounded-none border-x border-b">
+          {items.map(item => (
+            <Tooltip>
+              <TooltipTrigger>
+                <TabsTrigger value={item.value} disabled={!!item.disabledReason}>
+                  {item.icon}
+                  <span className="ml-2">{item.label}</span>
+                </TabsTrigger>
+              </TooltipTrigger>
+              {item.disabledReason && (
+                <TooltipContent className="max-w-md p-4 font-normal">
+                  {item.disabledReason}
+                </TooltipContent>
+              )}
+            </Tooltip>
+          ))}
+        </TabsList>
+      </Tabs>
+      <div className="border-muted min-h-[850px] rounded-md rounded-t-none border border-t-0">
+        {selectedView === 'details' && (
+          <div className="my-4 px-4">
+            {contractCheck.schemaCompositionErrors && (
+              <CompositionErrorsSection compositionErrors={contractCheck.schemaCompositionErrors} />
+            )}
+            {contractCheck.breakingSchemaChanges?.nodes.length && (
+              <div className="mb-2">
+                <ChangesBlock
+                  criticality={CriticalityLevel.Breaking}
+                  changes={contractCheck.breakingSchemaChanges.nodes}
+                />
+              </div>
+            )}
+            {contractCheck.safeSchemaChanges && (
+              <div className="mb-2">
+                <ChangesBlock
+                  criticality={CriticalityLevel.Safe}
+                  changes={contractCheck.safeSchemaChanges.nodes}
+                />
+              </div>
+            )}
+            {!contractCheck.breakingSchemaChanges &&
+              !contractCheck.safeSchemaChanges &&
+              !contractCheck.schemaCompositionErrors && <NoGraphChanges />}
+          </div>
+        )}
+        {selectedView === 'schema' && (
+          <DiffEditor
+            before={contractCheck?.contractVersion?.compositeSchemaSDL ?? null}
+            after={contractCheck.compositeSchemaSDL ?? null}
+            downloadFileName="schema.graphqls"
+          />
+        )}
+        {selectedView === 'supergraph' && (
+          <DiffEditor
+            before={contractCheck?.contractVersion?.supergraphSDL ?? null}
+            after={contractCheck?.supergraphSDL ?? null}
+            downloadFileName="supergraph.graphqls"
+          />
+        )}
+      </div>
+    </TooltipProvider>
+  );
+}
 
 const ChecksPageQuery = graphql(`
   query ChecksPageQuery(
@@ -956,11 +1240,9 @@ function ChecksPageContent() {
             )}
           </div>
           {hasActiveSchemaCheck ? (
-            <div className="grow">
-              {schemaCheckId ? (
-                <ActiveSchemaCheck schemaCheckId={schemaCheckId} key={schemaCheckId} />
-              ) : null}
-            </div>
+            schemaCheckId ? (
+              <ActiveSchemaCheck schemaCheckId={schemaCheckId} key={schemaCheckId} />
+            ) : null
           ) : hasSchemaChecks ? (
             <EmptyList
               className="border-0 pt-6"

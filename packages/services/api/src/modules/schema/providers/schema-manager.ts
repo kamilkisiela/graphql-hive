@@ -14,7 +14,7 @@ import {
   ProjectType,
 } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
-import { atomic, stringifySelector } from '../../../shared/helpers';
+import { atomic, cache, stringifySelector } from '../../../shared/helpers';
 import { SchemaVersion } from '../../../shared/mappers';
 import { parseGraphQLSource } from '../../../shared/schema';
 import { AuthManager } from '../../auth/providers/auth-manager';
@@ -33,6 +33,7 @@ import {
 } from '../../shared/providers/storage';
 import { TargetManager } from '../../target/providers/target-manager';
 import { SCHEMA_MODULE_CONFIG, type SchemaModuleConfig } from './config';
+import { Contracts } from './contracts';
 import { FederationOrchestrator } from './orchestrators/federation';
 import { SingleOrchestrator } from './orchestrators/single';
 import { StitchingOrchestrator } from './orchestrators/stitching';
@@ -74,6 +75,7 @@ export class SchemaManager {
     private targetManager: TargetManager,
     private organizationManager: OrganizationManager,
     private schemaHelper: SchemaHelper,
+    private contracts: Contracts,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
   ) {
     this.logger = logger.child({ source: 'SchemaManager' });
@@ -337,17 +339,27 @@ export class SchemaManager {
         repository: string;
         sha: string;
       };
+      contracts: null | Array<{
+        contractId: string;
+        contractName: string;
+        compositeSchemaSDL: string | null;
+        supergraphSDL: string | null;
+        schemaCompositionErrors: Array<SchemaCompositionError> | null;
+        changes: null | Array<SchemaChangeType>;
+      }>;
     } & TargetSelector) &
       (
         | {
             compositeSchemaSDL: null;
             supergraphSDL: null;
             schemaCompositionErrors: Array<SchemaCompositionError>;
+            tags: null;
           }
         | {
             compositeSchemaSDL: string;
             supergraphSDL: string | null;
             schemaCompositionErrors: null;
+            tags: Array<string> | null;
           }
       ),
   ) {
@@ -421,6 +433,7 @@ export class SchemaManager {
             project,
             organization,
           }),
+          contracts: null,
         },
       );
 
@@ -700,30 +713,84 @@ export class SchemaManager {
   /**
    * Whether a failed schema check can be approved manually.
    */
-  getFailedSchemaCheckCanBeApproved(args: { schemaCompositionErrors: Array<unknown> | null }) {
-    return !args.schemaCompositionErrors;
-  }
+  @cache<SchemaCheck>(schemaCheck => schemaCheck.id)
+  async getFailedSchemaCheckCanBeApproved(schemaCheck: SchemaCheck) {
+    this.logger.debug(
+      'Check if failed schema check can be approved. (schemaCheckId=%s)',
+      schemaCheck.id,
+    );
 
-  async getFailedSchemaCheckCanBeApprovedByViewer(args: {
-    organizationId: string;
-    schemaCompositionErrors: Array<unknown> | null;
-  }) {
-    if (!this.getFailedSchemaCheckCanBeApproved(args)) {
+    if (schemaCheck.schemaCompositionErrors !== null) {
+      this.logger.debug(
+        'Check can not be approved due to composition errors. (schemaCheckId=%s)',
+        schemaCheck.id,
+      );
       return false;
     }
 
+    this.logger.debug(
+      'Check if contracts have composition errors. (schemaCheckId=%s)',
+      schemaCheck.id,
+    );
+
+    const contracts = await this.contracts.getContractChecksBySchemaCheckId({
+      schemaCheckId: schemaCheck.id,
+      onlyFailedWithBreakingChanges: false,
+    });
+
+    if (contracts === null) {
+      this.logger.debug(
+        'No contracts found, schema check can be approved. (schemaCheckId=%s)',
+        schemaCheck.id,
+      );
+
+      return true;
+    }
+
+    this.logger.debug(
+      '%s contract(s) found, schema check can be approved. (schemaCheckId=%s)',
+      schemaCheck.id,
+      contracts.length,
+    );
+
+    for (const contract of contracts) {
+      if (contract.schemaCompositionErrors !== null) {
+        this.logger.debug(
+          'Contract has composition errors, schema check can not be approved. (schemaCheckId=%s, contractId=%s)',
+          schemaCheck.id,
+          contract.contractId,
+        );
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  async getFailedSchemaCheckCanBeApprovedByViewer(
+    schemaCheck: SchemaCheck & {
+      selector: {
+        organizationId: string;
+      };
+    },
+  ) {
     if (!this.authManager.isUser()) {
       // TODO: support approving a schema check via non web app user?
       return false;
     }
 
     const user = await this.authManager.getCurrentUser();
+
     const scopes = await this.authManager.getMemberTargetScopes({
       user: user.id,
-      organization: args.organizationId,
+      organization: schemaCheck.selector.organizationId,
     });
 
-    return scopes.includes(TargetAccessScope.REGISTRY_WRITE);
+    if (scopes.includes(TargetAccessScope.REGISTRY_WRITE)) {
+      return true;
+    }
+
+    return await this.getFailedSchemaCheckCanBeApproved(schemaCheck);
   }
 
   /**
@@ -768,11 +835,8 @@ export class SchemaManager {
       } as const;
     }
 
-    if (!this.getFailedSchemaCheckCanBeApproved(schemaCheck)) {
-      this.logger.debug(
-        'Schema check has composition errors or schema policy errors (args=%o).',
-        args,
-      );
+    if (!(await this.getFailedSchemaCheckCanBeApproved(schemaCheck))) {
+      this.logger.debug('Schema check can not be approved. (args=%o)', args);
       return {
         type: 'error',
         reason: 'Schema check has composition errors.',
@@ -815,6 +879,7 @@ export class SchemaManager {
     }
 
     schemaCheck = await this.storage.approveFailedSchemaCheck({
+      contracts: this.contracts,
       schemaCheckId: args.schemaCheckId,
       userId: viewer.id,
     });
@@ -1050,6 +1115,7 @@ export class SchemaManager {
           {
             native: true,
             external: null,
+            contracts: null,
           },
         );
 

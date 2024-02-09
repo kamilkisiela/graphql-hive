@@ -1731,13 +1731,66 @@ describe('applyTagFilterOnSubgraphs', () => {
     const result = applyTagFilterOnSubgraphs([{ typeDefs, name: 'subgraph1' }], filter);
 
     expect(print(result[0].typeDefs)).toMatchInlineSnapshot(`
-      type Query @inaccessible {
+      type Query {
         field1: String! @inaccessible
         field2: Type1! @inaccessible
       }
 
       type Type1 @inaccessible {
         field1: String! @inaccessible
+      }
+    `);
+  });
+
+  test('object type that is only defined in one subgraph is inaccessible', () => {
+    const filter: Federation2SubgraphDocumentNodeByTagsFilter = {
+      include: new Set(['tag1']),
+      exclude: null,
+    };
+    const typeDefs1 = parse(/* GraphQL */ `
+      extend schema @link(url: "https://specs.apollo.dev/federation/v2.3", import: ["@tag"])
+
+      type Query {
+        helloWorld: String @tag(name: "tag1")
+      }
+    `);
+
+    const typeDefs2 = parse(/* GraphQL */ `
+      extend schema @link(url: "https://specs.apollo.dev/federation/v2.3", import: ["@key"])
+
+      type Query {
+        users: [User]
+      }
+
+      type User @key(fields: "id") {
+        id: ID!
+      }
+    `);
+
+    const result = applyTagFilterOnSubgraphs(
+      [
+        { typeDefs: typeDefs1, name: 'subgraph1' },
+        { typeDefs: typeDefs2, name: 'subgraph2' },
+      ],
+      filter,
+    );
+
+    expect(print(result[0].typeDefs)).toMatchInlineSnapshot(`
+      extend schema @link(url: "https://specs.apollo.dev/federation/v2.3", import: ["@tag"])
+
+      type Query {
+        helloWorld: String
+      }
+    `);
+    expect(print(result[1].typeDefs)).toMatchInlineSnapshot(`
+      extend schema @link(url: "https://specs.apollo.dev/federation/v2.3", import: ["@key"])
+
+      type Query {
+        users: [User] @federation__inaccessible
+      }
+
+      type User @key(fields: "id") @federation__inaccessible {
+        id: ID! @federation__inaccessible
       }
     `);
   });
@@ -1778,7 +1831,7 @@ describe('applyTagFilterOnSubgraphs', () => {
         field2: Type1! @inaccessible
       }
 
-      type Type1 {
+      type Type1 @inaccessible {
         field1: String! @inaccessible
       }
     `);
@@ -1812,7 +1865,7 @@ describe('applyTagFilterOnSubgraphs', () => {
     const result = applyTagFilterOnSubgraphs([{ typeDefs: typeDefs1, name: 'subgraph1' }], filter);
 
     expect(print(result[0].typeDefs)).toMatchInlineSnapshot(`
-      type Query @inaccessible {
+      type Query {
         field1: String! @inaccessible
         field2: Type1! @inaccessible
       }
@@ -1850,7 +1903,7 @@ describe('applyTagFilterOnSubgraphs', () => {
     const result = applyTagFilterOnSubgraphs([{ typeDefs: typeDefs1, name: 'subgraph1' }], filter);
 
     expect(print(result[0].typeDefs)).toMatchInlineSnapshot(`
-      type Query @inaccessible {
+      type Query {
         field1: String! @inaccessible
         field2: Type1! @inaccessible
       }
@@ -1887,7 +1940,7 @@ describe('applyTagFilterOnSubgraphs', () => {
     const result = applyTagFilterOnSubgraphs([{ typeDefs, name: 'subgraph1' }], filter);
 
     expect(print(result[0].typeDefs)).toMatchInlineSnapshot(`
-      type Query @inaccessible {
+      type Query {
         field2: Interface1! @inaccessible
       }
 
@@ -1944,7 +1997,7 @@ describe('applyTagFilterOnSubgraphs', () => {
     );
 
     expect(print(result[0].typeDefs)).toMatchInlineSnapshot(`
-      type Query @inaccessible {
+      type Query {
         field2: Interface1! @inaccessible
       }
 
@@ -1957,7 +2010,7 @@ describe('applyTagFilterOnSubgraphs', () => {
       }
     `);
     expect(print(result[1].typeDefs)).toMatchInlineSnapshot(`
-      type Query @inaccessible {
+      type Query {
         field2: Interface1! @inaccessible
       }
 
@@ -1990,7 +2043,7 @@ describe('applyTagFilterOnSubgraphs', () => {
     const result = applyTagFilterOnSubgraphs([{ typeDefs, name: 'subgraph1' }], filter);
 
     expect(print(result[0].typeDefs)).toMatchInlineSnapshot(`
-      type Query @inaccessible {
+      type Query {
         field2: Input1! @inaccessible
       }
 
@@ -2034,7 +2087,7 @@ describe('applyTagFilterOnSubgraphs', () => {
     );
 
     expect(print(result[0].typeDefs)).toMatchInlineSnapshot(`
-      type Query @inaccessible {
+      type Query {
         field2: Input1! @inaccessible
       }
 
@@ -2043,7 +2096,7 @@ describe('applyTagFilterOnSubgraphs', () => {
       }
     `);
     expect(print(result[1].typeDefs)).toMatchInlineSnapshot(`
-      type Query @inaccessible {
+      type Query {
         field2: Input1! @inaccessible
       }
 
@@ -2071,7 +2124,7 @@ describe('applyTagFilterOnSubgraphs', () => {
     const result = applyTagFilterOnSubgraphs([{ typeDefs, name: 'subgraph1' }], filter);
 
     expect(print(result[0].typeDefs)).toMatchInlineSnapshot(`
-      type Query @inaccessible {
+      type Query {
         field2: Enum1! @inaccessible
       }
 
@@ -2115,7 +2168,7 @@ describe('applyTagFilterOnSubgraphs', () => {
     );
 
     expect(print(result[0].typeDefs)).toMatchInlineSnapshot(`
-      type Query @inaccessible {
+      type Query {
         field2: Enum1! @inaccessible
       }
 
@@ -2124,7 +2177,7 @@ describe('applyTagFilterOnSubgraphs', () => {
       }
     `);
     expect(print(result[1].typeDefs)).toMatchInlineSnapshot(`
-      type Query @inaccessible {
+      type Query {
         field2: Enum1! @inaccessible
       }
 
