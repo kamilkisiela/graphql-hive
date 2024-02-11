@@ -40,7 +40,7 @@ services:
       - ./.hive/clickhouse/db:/var/lib/clickhouse
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.3
+    image: confluentinc/cp-zookeeper:7.6.0
     hostname: zookeeper
     networks:
       - 'stack'
