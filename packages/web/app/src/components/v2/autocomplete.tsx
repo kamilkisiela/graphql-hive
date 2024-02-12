@@ -35,7 +35,7 @@ function MenuList(props: any): ReactElement {
 const DropdownIndicator = (props: DropdownIndicatorProps) => {
   return (
     <components.DropdownIndicator {...props}>
-      <ChevronDown className="h-4 w-4 opacity-50" />
+      <ChevronDown className="size-4 opacity-50" />
     </components.DropdownIndicator>
   );
 };

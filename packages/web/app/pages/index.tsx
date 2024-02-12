@@ -13,7 +13,6 @@ import { writeLastVisitedOrganization } from '@/lib/cookies';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { getLogger } from '@/server-logger';
-// eslint-disable-next-line import/no-extraneous-dependencies -- TODO: should we move to "dependencies"?
 import { type InternalApi } from '@hive/server';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 

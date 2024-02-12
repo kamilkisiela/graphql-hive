@@ -97,7 +97,7 @@ export function MemberRoleMigrationStickyNote(props: {
 
   return (
     <div className="flex flex-row items-center gap-x-2 rounded-md bg-orange-900/40 px-3 py-2">
-      <InfoIcon className="h-4 w-4" />
+      <InfoIcon className="size-4" />
       <span className="text-sm">
         {daysLeft.current} {daysLeft.current > 1 ? 'days' : 'day'} left to{' '}
         <Link
@@ -587,7 +587,7 @@ function OrganizationMemberRolesMigrationGroup(props: {
                             <Tooltip delayDuration={100}>
                               <TooltipTrigger asChild>
                                 <div>
-                                  <IconToUse className="mx-auto h-4 w-4" />
+                                  <IconToUse className="mx-auto size-4" />
                                 </div>
                               </TooltipTrigger>
                               <TooltipContent>
@@ -754,7 +754,7 @@ function OrganizationMemberRolesMigrationGroup(props: {
         <td className="py-4 text-center text-yellow-500">
           <HoverCard openDelay={200}>
             <HoverCardTrigger asChild>
-              <LightbulbIcon className="h-5 w-5 cursor-pointer" />
+              <LightbulbIcon className="size-5 cursor-pointer" />
             </HoverCardTrigger>
             <HoverCardContent side="left" className="min-w-[350px] text-left">
               <SimilarRoles
@@ -884,7 +884,7 @@ export function OrganizationMemberRolesMigration(props: {
       ) : (
         <div className="flex h-[250px] shrink-0 items-center justify-center rounded-md border border-dashed">
           <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-            <PartyPopperIcon className="h-10 w-10 text-emerald-500" />
+            <PartyPopperIcon className="size-10 text-emerald-500" />
 
             <h3 className="mt-4 text-lg font-semibold">Migration completed</h3>
             <p className="text-muted-foreground mb-4 mt-2 text-sm">

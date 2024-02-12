@@ -82,17 +82,17 @@ const ExternalCompositionStatus = ({
     <Tooltip.Provider delayDuration={100}>
       {query.fetching ? (
         <Tooltip content="Connecting..." contentProps={{ side: 'right' }}>
-          <UpdateIcon className="h-5 w-5 animate-spin text-gray-500" />
+          <UpdateIcon className="size-5 animate-spin text-gray-500" />
         </Tooltip>
       ) : null}
       {error ? (
         <Tooltip content={error} contentProps={{ side: 'right' }}>
-          <Cross2Icon className="h-5 w-5 text-red-500" />
+          <Cross2Icon className="size-5 text-red-500" />
         </Tooltip>
       ) : null}
       {query.data?.testExternalSchemaComposition?.ok?.externalSchemaComposition?.endpoint ? (
         <Tooltip content="Service is available" contentProps={{ side: 'right' }}>
-          <CheckIcon className="h-5 w-5 text-green-500" />
+          <CheckIcon className="size-5 text-green-500" />
         </Tooltip>
       ) : null}
     </Tooltip.Provider>

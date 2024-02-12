@@ -53,7 +53,7 @@ export function RoleSelector<T>(props: {
           }}
         >
           {props.defaultRole?.name ?? 'Select role'}
-          <ChevronDownIcon className="text-muted-foreground ml-2 h-4 w-4" />
+          <ChevronDownIcon className="text-muted-foreground ml-2 size-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0" align="end">

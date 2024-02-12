@@ -54,7 +54,7 @@ export function ChangesBlock(props: {
             {change.isSafeBasedOnUsage ? (
               <span className="cursor-pointer text-yellow-500">
                 {' '}
-                <CheckIcon className="inline h-3 w-3" /> Safe based on usage data
+                <CheckIcon className="inline size-3" /> Safe based on usage data
               </span>
             ) : null}
             {change.approval ? <SchemaChangeApproval approval={change.approval} /> : null}
@@ -109,7 +109,7 @@ const SchemaChangeApproval = (props: {
       >
         <span className="cursor-pointer text-green-500">
           {' '}
-          <CheckIcon className="inline h-3 w-3" /> Approved by {approvalName}
+          <CheckIcon className="inline size-3" /> Approved by {approvalName}
         </span>
       </LegacyTooltip>
     </LegacyTooltip.Provider>
@@ -264,7 +264,7 @@ export function CompositionErrorsSection(props: {
           <Tooltip>
             <TooltipTrigger>
               <Button variant="ghost" size="icon-sm" className="ml-2">
-                <InfoCircledIcon className="h-3 w-3" />
+                <InfoCircledIcon className="size-3" />
               </Button>
             </TooltipTrigger>
             <TooltipContent className="max-w-md p-4 font-normal">

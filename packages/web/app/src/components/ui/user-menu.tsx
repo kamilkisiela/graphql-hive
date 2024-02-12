@@ -150,7 +150,7 @@ export function UserMenu(props: {
               <DropdownMenuSub>
                 {me?.canSwitchOrganization ? (
                   <DropdownMenuSubTrigger>
-                    <GridIcon className="mr-2 h-4 w-4" />
+                    <GridIcon className="mr-2 size-4" />
                     Switch organization
                   </DropdownMenuSubTrigger>
                 ) : null}
@@ -176,7 +176,7 @@ export function UserMenu(props: {
                   <NextLink href="/org/new">
                     <DropdownMenuItem>
                       Create organization
-                      <PlusIcon className="ml-2 h-4 w-4" />
+                      <PlusIcon className="ml-2 size-4" />
                     </DropdownMenuItem>
                   </NextLink>
                 </DropdownMenuSubContent>
@@ -187,7 +187,7 @@ export function UserMenu(props: {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <CalendarIcon className="mr-2 size-4" />
                   Schedule a meeting
                 </a>
               </DropdownMenuItem>
@@ -197,13 +197,13 @@ export function UserMenu(props: {
                   toggleUserSettingsModalOpen();
                 }}
               >
-                <SettingsIcon className="mr-2 h-4 w-4" />
+                <SettingsIcon className="mr-2 size-4" />
                 Profile settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <a href={docsUrl} target="_blank" rel="noreferrer">
-                  <FileTextIcon className="mr-2 h-4 w-4" />
+                  <FileTextIcon className="mr-2 size-4" />
                   Documentation
                 </a>
               </DropdownMenuItem>
@@ -215,21 +215,21 @@ export function UserMenu(props: {
                   }}
                 >
                   <DropdownMenuItem>
-                    <LifeBuoyIcon className="mr-2 h-4 w-4" />
+                    <LifeBuoyIcon className="mr-2 size-4" />
                     Support
                   </DropdownMenuItem>
                 </NextLink>
               ) : null}
               <DropdownMenuItem asChild>
                 <a href="https://status.graphql-hive.com" target="_blank" rel="noreferrer">
-                  <AlertTriangleIcon className="mr-2 h-4 w-4" />
+                  <AlertTriangleIcon className="mr-2 size-4" />
                   Status page
                 </a>
               </DropdownMenuItem>
               {me.isAdmin === true && (
                 <NextLink href="/manage">
                   <DropdownMenuItem>
-                    <TrendingUpIcon className="mr-2 h-4 w-4" />
+                    <TrendingUpIcon className="mr-2 size-4" />
                     Manage Instance
                   </DropdownMenuItem>
                 </NextLink>
@@ -237,7 +237,7 @@ export function UserMenu(props: {
               {env.nodeEnv === 'development' && (
                 <NextLink href="/dev">
                   <DropdownMenuItem>
-                    <GraphQLIcon className="mr-2 h-4 w-4" />
+                    <GraphQLIcon className="mr-2 size-4" />
                     Dev GraphiQL
                   </DropdownMenuItem>
                 </NextLink>
@@ -249,13 +249,13 @@ export function UserMenu(props: {
                     toggleLeaveOrganizationModalOpen();
                   }}
                 >
-                  <FaUsersSlash className="mr-2 h-4 w-4" />
+                  <FaUsersSlash className="mr-2 size-4" />
                   Leave organization
                 </DropdownMenuItem>
               ) : null}
               <DropdownMenuItem asChild>
                 <a href="/logout" data-cy="user-menu-logout">
-                  <LogOutIcon className="mr-2 h-4 w-4" />
+                  <LogOutIcon className="mr-2 size-4" />
                   Log out
                 </a>
               </DropdownMenuItem>

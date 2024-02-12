@@ -134,15 +134,15 @@ export function NativeCompositionSettings(props: {
             <div>
               {project.nativeFederationCompatibility ===
               NativeFederationCompatibilityStatus.Compatible ? (
-                <PartyPopperIcon className="h-10 w-10 text-emerald-500" />
+                <PartyPopperIcon className="size-10 text-emerald-500" />
               ) : null}
               {project.nativeFederationCompatibility ===
               NativeFederationCompatibilityStatus.Incompatible ? (
-                <HeartCrackIcon className="h-10 w-10 text-red-500" />
+                <HeartCrackIcon className="size-10 text-red-500" />
               ) : null}
               {project.nativeFederationCompatibility ===
               NativeFederationCompatibilityStatus.Unknown ? (
-                <FlaskConicalIcon className="h-10 w-10 text-orange-500" />
+                <FlaskConicalIcon className="size-10 text-orange-500" />
               ) : null}
             </div>
             <div>
@@ -217,7 +217,7 @@ export function NativeCompositionSettings(props: {
           >
             {mutationState.fetching ? (
               <>
-                <RefreshCcwIcon className="mr-2 h-4 w-4 animate-spin" />
+                <RefreshCcwIcon className="mr-2 size-4 animate-spin" />
                 Please wait
               </>
             ) : project.isNativeFederationEnabled ? (

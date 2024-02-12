@@ -139,7 +139,7 @@ function SchemaCoordinateView(props: {
               <Card className="bg-gray-900/50">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total calls</CardTitle>
-                  <GlobeIcon className="text-muted-foreground h-4 w-4" />
+                  <GlobeIcon className="text-muted-foreground size-4" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
@@ -153,7 +153,7 @@ function SchemaCoordinateView(props: {
               <Card className="bg-gray-900/50">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Requests per minute</CardTitle>
-                  <ActivityIcon className="text-muted-foreground h-4 w-4" />
+                  <ActivityIcon className="text-muted-foreground size-4" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
@@ -175,7 +175,7 @@ function SchemaCoordinateView(props: {
               <Card className="bg-gray-900/50">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Operations</CardTitle>
-                  <BookIcon className="text-muted-foreground h-4 w-4" />
+                  <BookIcon className="text-muted-foreground size-4" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{isLoading ? '-' : totalOperations}</div>
@@ -187,7 +187,7 @@ function SchemaCoordinateView(props: {
               <Card className="bg-gray-900/50">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Consumers</CardTitle>
-                  <TabletSmartphoneIcon className="text-muted-foreground h-4 w-4" />
+                  <TabletSmartphoneIcon className="text-muted-foreground size-4" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{isLoading ? '-' : totalClients}</div>
