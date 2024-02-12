@@ -113,8 +113,8 @@ export function SupergraphMetadataList(props: {
             content={
               <>
                 <div className="mb-2 font-bold">All Subgraphs</div>
-                <div className="relative h-[250px] w-[250px]">
-                  <div className="absolute inset-0 h-[250px] w-[250px] overflow-y-scroll py-2">
+                <div className="relative size-[250px]">
+                  <div className="absolute inset-0 size-[250px] overflow-y-scroll py-2">
                     {allItems}
                   </div>
                   <div

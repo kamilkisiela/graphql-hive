@@ -81,7 +81,7 @@ export const CreateOrganizationForm = () => {
         <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
           {isSubmitting ? (
             <>
-              <Spinner className="h-6 w-6 text-white" />
+              <Spinner className="size-6 text-white" />
               <span className="ml-4">Creating...</span>
             </>
           ) : (

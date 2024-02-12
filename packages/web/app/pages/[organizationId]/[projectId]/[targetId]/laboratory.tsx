@@ -193,7 +193,7 @@ const CollectionItem = (props: {
       >
         {props.node.name}
         {props.isChanged && (
-          <span className="h-1.5 w-1.5 rounded-full border border-orange-600 bg-orange-400" />
+          <span className="size-1.5 rounded-full border border-orange-600 bg-orange-400" />
         )}
       </Link>
       <GraphiQLDropdownMenu
@@ -647,7 +647,7 @@ function Save(): ReactElement {
           data-cy="save-operation"
         >
           {!isSame && (
-            <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full border border-orange-600 bg-orange-400" />
+            <span className="absolute right-1 top-1 size-1.5 rounded-full border border-orange-600 bg-orange-400" />
           )}
           <SaveIcon className="graphiql-toolbar-icon !h-5 w-auto" />
         </GraphiQLDropdownMenu.Button>

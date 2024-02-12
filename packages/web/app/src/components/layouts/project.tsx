@@ -117,7 +117,7 @@ export function ProjectLayout({
       <header>
         <div className="container flex h-[84px] items-center justify-between">
           <div className="flex flex-row items-center gap-4">
-            <HiveLink className="h-8 w-8" />
+            <HiveLink className="size-8" />
             {currentOrganization ? (
               <NextLink
                 href={{

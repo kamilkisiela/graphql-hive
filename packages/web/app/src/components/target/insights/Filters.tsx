@@ -290,7 +290,7 @@ export function OperationsFilterTrigger({
     <>
       <Button variant="outline" className="bg-accent" onClick={toggle}>
         <span>Operations ({selected?.length || 'all'})</span>
-        <FilterIcon className="ml-2 h-4 w-4" />
+        <FilterIcon className="ml-2 size-4" />
       </Button>
       <OperationsFilterContainer
         isOpen={isOpen}
@@ -574,7 +574,7 @@ export function ClientsFilterTrigger({
     <>
       <Button variant="outline" className="bg-accent" onClick={toggle}>
         <span>Clients ({selected?.length || 'all'})</span>
-        <FilterIcon className="ml-2 h-4 w-4" />
+        <FilterIcon className="ml-2 size-4" />
       </Button>
       <ClientsFilterContainer
         isOpen={isOpen}

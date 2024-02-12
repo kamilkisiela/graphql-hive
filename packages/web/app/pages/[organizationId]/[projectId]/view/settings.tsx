@@ -105,9 +105,9 @@ function GitHubIntegration(props: {
             <div>
               <div className="mb-4">Here's how it will look like in your CI pipeline.</div>
               <div className="flex items-center gap-x-2 pl-1">
-                <CheckIcon className="h-4 w-4 text-emerald-500" />
-                <div className="flex h-6 w-6 items-center justify-center rounded-sm bg-white">
-                  <HiveLogo className="h-[80%] w-[80%]" />
+                <CheckIcon className="size-4 text-emerald-500" />
+                <div className="flex size-6 items-center justify-center rounded-sm bg-white">
+                  <HiveLogo className="size-[80%]" />
                 </div>
 
                 <div className="font-semibold text-[#adbac7]">
@@ -117,13 +117,13 @@ function GitHubIntegration(props: {
               </div>
             </div>
             <div>
-              <ArrowBigDownDashIcon className="h-6 w-6" />
+              <ArrowBigDownDashIcon className="size-6" />
             </div>
             <div>
               <div className="flex items-center gap-x-2 pl-1">
-                <CheckIcon className="h-4 w-4 text-emerald-500" />
-                <div className="flex h-6 w-6 items-center justify-center rounded-sm bg-white">
-                  <HiveLogo className="h-[80%] w-[80%]" />
+                <CheckIcon className="size-4 text-emerald-500" />
+                <div className="flex size-6 items-center justify-center rounded-sm bg-white">
+                  <HiveLogo className="size-[80%]" />
                 </div>
 
                 <div className="font-semibold text-[#adbac7]">

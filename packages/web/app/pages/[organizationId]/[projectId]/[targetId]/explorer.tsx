@@ -216,7 +216,7 @@ function ExplorerPageContent() {
             <>
               {latestSchemaVersion.id !== latestValidSchemaVersion.id && (
                 <Alert className="mb-3">
-                  <AlertCircleIcon className="h-4 w-4" />
+                  <AlertCircleIcon className="size-4" />
                   <AlertTitle>Outdated Schema</AlertTitle>
                   <AlertDescription>
                     The latest schema version is <span className="font-bold">not valid</span> , thus

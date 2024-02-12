@@ -387,8 +387,8 @@ function Invitation(props: {
         <td className="py-3 text-right text-sm">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="data-[state=open]:bg-muted flex h-8 w-8 p-0">
-                <MoreHorizontalIcon className="h-4 w-4" />
+              <Button variant="ghost" className="data-[state=open]:bg-muted flex size-8 p-0">
+                <MoreHorizontalIcon className="size-4" />
                 <span className="sr-only">Open menu</span>
               </Button>
             </DropdownMenuTrigger>
@@ -467,7 +467,7 @@ export function OrganizationInvitations(props: {
       ) : (
         <div className="flex h-[250px] shrink-0 items-center justify-center rounded-md border border-dashed">
           <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-            <MailQuestionIcon className="text-muted-foreground h-10 w-10" />
+            <MailQuestionIcon className="text-muted-foreground size-10" />
 
             <h3 className="mt-4 text-lg font-semibold">No invitations</h3>
             <p className="text-muted-foreground mb-4 mt-2 text-sm">

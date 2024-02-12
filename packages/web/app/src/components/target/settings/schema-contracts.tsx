@@ -224,7 +224,7 @@ export function SchemaContracts() {
                                     size="icon-sm"
                                     className="ml-2 text-yellow-500"
                                   >
-                                    <InfoCircledIcon className="h-4 w-4" />
+                                    <InfoCircledIcon className="size-4" />
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent className="max-w-md p-4 font-normal">
@@ -247,7 +247,7 @@ export function SchemaContracts() {
                               <Tooltip>
                                 <TooltipTrigger>
                                   <Button variant="ghost" size="icon-sm" className="ml-2">
-                                    <InfoCircledIcon className="h-4 w-4" />
+                                    <InfoCircledIcon className="size-4" />
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent className="max-w-md p-4 font-normal">
@@ -278,9 +278,9 @@ export function SchemaContracts() {
                     </TableCell>
                     <TableCell className={cn('text-center', node.isDisabled && 'opacity-30')}>
                       {node.removeUnreachableTypesFromPublicApiSchema ? (
-                        <Check className="h-4 w-4" />
+                        <Check className="size-4" />
                       ) : (
-                        <X className="h-4 w-4" />
+                        <X className="size-4" />
                       )}
                     </TableCell>
                     <TableCell className={cn('text-right', node.isDisabled && 'opacity-30')}>
@@ -290,9 +290,9 @@ export function SchemaContracts() {
                       {node.viewerCanDisableContract && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
+                            <Button variant="ghost" className="size-8 p-0">
                               <span className="sr-only">Open menu</span>
-                              <MoreHorizontal className="h-4 w-4" />
+                              <MoreHorizontal className="size-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">

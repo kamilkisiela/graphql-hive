@@ -132,7 +132,7 @@ function Comment({ node }: { node: FragmentType<typeof Comment_SupportTicketComm
         isSupport ? 'justify-end' : 'justify-start',
       )}
     >
-      {isSupport ? null : <UserIcon className="h-6 w-6 text-orange-500" />}
+      {isSupport ? null : <UserIcon className="size-6 text-orange-500" />}
       <Tooltip>
         <TooltipTrigger asChild>
           <div
@@ -149,7 +149,7 @@ function Comment({ node }: { node: FragmentType<typeof Comment_SupportTicketComm
         </TooltipContent>
       </Tooltip>
       {isSupport ? (
-        <img className="block h-6 w-6" src="/just-logo.svg" alt="GraphQL Hive logo" />
+        <img className="block size-6" src="/just-logo.svg" alt="GraphQL Hive logo" />
       ) : null}
     </div>
   );
@@ -219,7 +219,7 @@ function SupportTicket(props: {
                 </NextLink>
               </Button>
               <span className="text-lg font-semibold tracking-tight text-gray-500">
-                <ChevronRightIcon className="h-4 w-4" />
+                <ChevronRightIcon className="size-4" />
               </span>
               <span>{ticket.subject}</span>
             </Title>
