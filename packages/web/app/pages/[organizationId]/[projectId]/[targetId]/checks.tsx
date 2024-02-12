@@ -585,7 +585,7 @@ function SchemaChecksView(props: {
                     <TooltipTrigger>
                       <GitCompareIcon className="size-4 pl-1" />
                     </TooltipTrigger>
-                    <TooltipContent>Contract schema changed</TooltipContent>
+                    <TooltipContent>Schema changed</TooltipContent>
                   </>
                 ) : (
                   <>
