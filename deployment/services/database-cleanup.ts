@@ -39,7 +39,7 @@ END $$;
   const { job } = new ServiceDeployment(
     'db-cleanup',
     {
-      image: 'postgres:14.10',
+      image: 'postgres:14.11',
       env: {
         PG_CONNECTION_STRING: rawConnectionString,
         // to make sure we can run this over and over
