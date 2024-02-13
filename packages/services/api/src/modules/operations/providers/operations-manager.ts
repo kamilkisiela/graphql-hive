@@ -338,7 +338,6 @@ export class OperationsManager {
     organization,
     project,
     target,
-    unsafe__itIsMeInspector,
     excludedClients,
   }: {
     fields: ReadonlyArray<{
@@ -347,13 +346,6 @@ export class OperationsManager {
       argument?: string | null;
     }>;
     period: DateRange;
-    /**
-     * Skips the access check.
-     * A token created for one target can't access data from the other targets.
-     * This is a workaround for the inspector only.
-     * TODO: let's think how to solve it well, soon.
-     */
-    unsafe__itIsMeInspector?: boolean;
     excludedClients?: readonly string[];
   } & Listify<TargetSelector, 'target'>) {
     this.logger.info(
@@ -363,37 +355,18 @@ export class OperationsManager {
       excludedClients?.join(', ') ?? 'none',
     );
 
-    if (!unsafe__itIsMeInspector) {
-      await this.authManager.ensureTargetAccess({
-        organization,
-        project,
-        target,
-        scope: TargetAccessScope.REGISTRY_READ,
-      });
-    }
+    await this.authManager.ensureTargetAccess({
+      organization,
+      project,
+      target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
 
-    const [totalFields, total] = await Promise.all([
-      this.reader.countFields({
-        fields,
-        target,
-        period,
-        excludedClients,
-      }),
-      this.reader.countOperationsWithoutDetails({ target, period }),
-    ]);
-
-    return Object.keys(totalFields).map(id => {
-      const [type, field, argument] = id.split('.');
-      const totalField = totalFields[id] ?? 0;
-
-      return {
-        type,
-        field,
-        argument,
-        period,
-        count: totalField,
-        percentage: total === 0 ? 0 : (totalField / total) * 100,
-      };
+    return this.reader.readFieldListStats({
+      fields,
+      period,
+      targetIds: Array.isArray(target) ? target : [target],
+      excludedClients,
     });
   }
 
