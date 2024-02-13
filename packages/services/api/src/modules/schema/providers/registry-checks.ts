@@ -12,7 +12,9 @@ import {
 } from '@hive/storage';
 import { ProjectType } from '../../../shared/entities';
 import { buildSortedSchemaFromSchemaObject } from '../../../shared/schema';
+import { OperationsReader } from '../../operations/providers/operations-reader';
 import { SchemaPolicyProvider } from '../../policy/providers/schema-policy.provider';
+import { Storage } from '../../shared/providers/storage';
 import type {
   ComposeAndValidateResult,
   Orchestrator,
@@ -156,6 +158,8 @@ export class RegistryChecks {
     private policy: SchemaPolicyProvider,
     private inspector: Inspector,
     private logger: Logger,
+    private operationsReader: OperationsReader,
+    private storage: Storage,
   ) {}
 
   async checksum(args: {
@@ -373,6 +377,42 @@ export class RegistryChecks {
     } satisfies CheckResult;
   }
 
+  private async getConditionalBreakingChangeSettings({
+    selector,
+  }: {
+    selector: {
+      organization: string;
+      project: string;
+      target: string;
+    };
+  }) {
+    try {
+      const settings = await this.storage.getTargetSettings(selector);
+
+      if (!settings.validation.enabled) {
+        this.logger.debug('Usage validation disabled');
+        this.logger.debug('Mark all as used');
+        return null;
+      }
+
+      if (settings.validation.enabled && settings.validation.targets.length === 0) {
+        this.logger.debug('Usage validation enabled but no targets to check against');
+        this.logger.debug('Mark all as used');
+        return null;
+      }
+
+      return {
+        period: settings.validation.period,
+        percentage: settings.validation.percentage,
+        targets: settings.validation.targets,
+        excludedClients: settings.validation.excludedClients,
+      };
+    } catch (error: any) {
+      this.logger.error(`Failed to get settings`, error);
+      return null;
+    }
+  }
+
   /**
    * Diff incoming and existing SDL and generate a list of changes.
    * Uses usage stats to determine whether a change is safe or not (if available).
@@ -428,11 +468,13 @@ export class RegistryChecks {
       } satisfies CheckResult;
     }
 
-    let inspectorChanges = await this.inspector.diff(
-      existingSchema,
-      incomingSchema,
-      args.usageDataSelector ?? undefined,
-    );
+    const settings = args.usageDataSelector
+      ? await this.getConditionalBreakingChangeSettings({
+          selector: args.usageDataSelector,
+        })
+      : null;
+
+    let inspectorChanges = await this.inspector.diff(existingSchema, incomingSchema, settings);
 
     if (args.includeUrlChanges) {
       inspectorChanges.push(
@@ -473,33 +515,37 @@ export class RegistryChecks {
       safeChanges.push(change);
     }
 
-    await Promise.all(
-      breakingChanges.map(async change => {
-        if (!change.path || !args.usageDataSelector || change.isSafeBasedOnUsage) {
-          return change;
-        }
+    if (settings) {
+      await Promise.all(
+        breakingChanges.map(async change => {
+          if (!change.path || change.isSafeBasedOnUsage) {
+            return;
+          }
 
-        const affectedOperations = await this.inspector.getUsageForCoordinate(
-          args.usageDataSelector,
-          change.path,
-        );
+          const affectedOperations = null;
+          // await this.operationsReader.getTopOperationForCoordinate(
+          //   args.usageDataSelector,
+          //   change.path,
+          // );
 
-        if (affectedOperations) {
-          change.affectedOperations = affectedOperations;
-        }
+          if (affectedOperations) {
+            change.affectedOperations = affectedOperations;
+          }
 
-        const affectedClients = await this.inspector.getClientUsageForCoordinate(
-          args.usageDataSelector,
-          change.path,
-          change.meta.typeName?.toString() || '',
-        );
+          const affectedClients = null;
+          // await this.operationsReader.getClientUsageForCoordinate(
+          //   args.usageDataSelector,
+          //   change.path,
+          //   change.meta.typeName?.toString() || '',
+          // );
 
-        if (affectedClients) {
-          change.affectedClients = affectedClients;
-        }
-        return change;
-      }),
-    );
+          if (affectedClients) {
+            change.affectedClients = affectedClients;
+          }
+          return;
+        }),
+      );
+    }
 
     if (isFailure === true) {
       this.logger.debug('Detected breaking changes');

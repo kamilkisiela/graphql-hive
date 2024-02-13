@@ -654,7 +654,7 @@ function OrganizationMemberRoleRow(props: {
               <TooltipProvider>
                 <Tooltip delayDuration={100}>
                   <TooltipTrigger asChild>
-                    <LockIcon className="h-4 w-4" />
+                    <LockIcon className="size-4" />
                   </TooltipTrigger>
                   <TooltipContent side="right">
                     <div className="flex flex-col items-start gap-y-2 p-2">
@@ -679,8 +679,8 @@ function OrganizationMemberRoleRow(props: {
       <td className="py-3 text-right text-sm">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="data-[state=open]:bg-muted flex h-8 w-8 p-0">
-              <MoreHorizontalIcon className="h-4 w-4" />
+            <Button variant="ghost" className="data-[state=open]:bg-muted flex size-8 p-0">
+              <MoreHorizontalIcon className="size-4" />
               <span className="sr-only">Open menu</span>
             </Button>
           </DropdownMenuTrigger>

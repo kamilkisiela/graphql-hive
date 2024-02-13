@@ -124,7 +124,7 @@ export default function Auth(props: { oidcProviderId: string | null }): ReactEle
             </>
           ) : (
             <>
-              <Spinner className="mx-auto h-20 w-20" />
+              <Spinner className="mx-auto size-20" />
               <div className="mt-3">Starting OIDC Login Flow.</div>
             </>
           )}

@@ -436,20 +436,20 @@ export function IndexPage(): ReactElement {
                         and more.
                       </>
                     ),
-                    icon: <FiServer strokeWidth={1} className="h-full w-full" />,
+                    icon: <FiServer strokeWidth={1} className="size-full" />,
                     documentationLink: '/docs/get-started/apollo-federation',
                   },
                   {
                     title: 'Global Edge Network',
                     description: 'Access the registry from any place on earth within milliseconds.',
-                    icon: <FiGlobe strokeWidth={1} className="h-full w-full" />,
+                    icon: <FiGlobe strokeWidth={1} className="size-full" />,
                     documentationLink: '/docs/features/high-availability-cdn',
                   },
                   {
                     title: 'Apollo Studio alternative',
                     description:
                       'GraphQL Hive is a drop-in replacement for Apollo Studio (Apollo GraphOS).',
-                    icon: <FiPackage strokeWidth={1} className="h-full w-full" />,
+                    icon: <FiPackage strokeWidth={1} className="size-full" />,
                     documentationLink: '/docs/use-cases/apollo-studio',
                   },
                 ]}
@@ -556,20 +556,20 @@ export function IndexPage(): ReactElement {
                   {
                     title: 'GitHub Integration',
                     description: 'Our CLI integrates smoothly with GitHub Actions / repositories.',
-                    icon: <FiGithub strokeWidth={1} className="h-full w-full" />,
+                    icon: <FiGithub strokeWidth={1} className="size-full" />,
                     documentationLink: '/docs/integrations/ci-cd#github-check-suites',
                   },
                   {
                     title: 'Works with every CI/CD',
                     description: 'Connect GraphQL Hive CLI to CI/CD of your choice.',
-                    icon: <FiTruck strokeWidth={1} className="h-full w-full" />,
+                    icon: <FiTruck strokeWidth={1} className="size-full" />,
                     documentationLink: '/docs/integrations/ci-cd',
                   },
                   {
                     title: 'On-premise or Cloud',
                     description:
                       'GraphQL Hive is MIT licensed, you can host it on your own infrastructure.',
-                    icon: <FiServer strokeWidth={1} className="h-full w-full" />,
+                    icon: <FiServer strokeWidth={1} className="size-full" />,
                     documentationLink: '/docs/self-hosting/get-started',
                   },
                 ]}

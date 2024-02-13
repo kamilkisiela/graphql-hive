@@ -245,21 +245,21 @@ function SchemaVersionView(props: {
                   {schemaVersion.hasSchemaChanges ? (
                     <>
                       <TooltipTrigger>
-                        <GitCompareIcon className="h-4 w-4 pl-1" />
+                        <GitCompareIcon className="size-4 pl-1" />
                       </TooltipTrigger>
                       <TooltipContent>Main graph schema changed</TooltipContent>
                     </>
                   ) : schemaVersion.isComposable ? (
                     <>
                       <TooltipTrigger>
-                        <CheckIcon className="h-4 w-4 pl-1" />
+                        <CheckIcon className="size-4 pl-1" />
                       </TooltipTrigger>
                       <TooltipContent>Composition succeeded.</TooltipContent>
                     </>
                   ) : (
                     <>
                       <TooltipTrigger>
-                        <ExclamationTriangleIcon className="h-4 w-4 pl-1 text-yellow-500" />
+                        <ExclamationTriangleIcon className="size-4 pl-1 text-yellow-500" />
                       </TooltipTrigger>
                       <TooltipContent>Contract composition failed.</TooltipContent>
                     </>
@@ -279,21 +279,21 @@ function SchemaVersionView(props: {
                     {edge.node.hasSchemaChanges ? (
                       <>
                         <TooltipTrigger>
-                          <GitCompareIcon className="h-4 w-4 pl-1" />
+                          <GitCompareIcon className="size-4 pl-1" />
                         </TooltipTrigger>
                         <TooltipContent>Contract schema changed</TooltipContent>
                       </>
                     ) : edge.node.isComposable ? (
                       <>
                         <TooltipTrigger>
-                          <CheckIcon className="h-4 w-4 pl-1" />
+                          <CheckIcon className="size-4 pl-1" />
                         </TooltipTrigger>
                         <TooltipContent>Contract composition succeeded.</TooltipContent>
                       </>
                     ) : (
                       <>
                         <TooltipTrigger>
-                          <ExclamationTriangleIcon className="h-4 w-4 pl-1 text-yellow-500" />
+                          <ExclamationTriangleIcon className="size-4 pl-1 text-yellow-500" />
                         </TooltipTrigger>
                         <TooltipContent>Contract composition failed.</TooltipContent>
                       </>
@@ -722,7 +722,7 @@ function ActiveSchemaVersion({ versionId }: { versionId: string }) {
 
   if (isLoading || !schemaVersion) {
     return (
-      <div className="flex h-full w-full items-center justify-center">
+      <div className="flex size-full items-center justify-center">
         <Spinner />
       </div>
     );
@@ -813,7 +813,7 @@ function HistoryPageContent() {
       isCDNEnabled={isCDNEnabled ?? null}
     >
       {versionId ? (
-        <div className="flex h-full w-full flex-row gap-x-6">
+        <div className="flex size-full flex-row gap-x-6">
           <div>
             <div className="py-6">
               <Title>Versions</Title>

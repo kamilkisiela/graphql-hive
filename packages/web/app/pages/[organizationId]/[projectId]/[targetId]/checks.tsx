@@ -572,28 +572,28 @@ function SchemaChecksView(props: {
                 {schemaCheck.hasSchemaCompositionErrors ? (
                   <>
                     <TooltipTrigger>
-                      <ExclamationTriangleIcon className="h-4 w-4 pl-1 text-yellow-500" />
+                      <ExclamationTriangleIcon className="size-4 pl-1 text-yellow-500" />
                     </TooltipTrigger>
                     <TooltipContent>Composition failed.</TooltipContent>
                   </>
                 ) : schemaCheck.hasUnapprovedBreakingChanges ? (
                   <>
                     <TooltipTrigger>
-                      <ExclamationTriangleIcon className="h-4 w-4 pl-1 text-yellow-500" />
+                      <ExclamationTriangleIcon className="size-4 pl-1 text-yellow-500" />
                     </TooltipTrigger>
                     <TooltipContent>Unapproved breaking changes!</TooltipContent>
                   </>
                 ) : schemaCheck.hasSchemaChanges ? (
                   <>
                     <TooltipTrigger>
-                      <GitCompareIcon className="h-4 w-4 pl-1" />
+                      <GitCompareIcon className="size-4 pl-1" />
                     </TooltipTrigger>
-                    <TooltipContent>Contract schema changed</TooltipContent>
+                    <TooltipContent>Schema changed</TooltipContent>
                   </>
                 ) : (
                   <>
                     <TooltipTrigger>
-                      <CheckIcon className="h-4 w-4 pl-1" />
+                      <CheckIcon className="size-4 pl-1" />
                     </TooltipTrigger>
                     <TooltipContent>Composition succeeded.</TooltipContent>
                   </>
@@ -613,28 +613,28 @@ function SchemaChecksView(props: {
                   {edge.node.hasSchemaCompositionErrors ? (
                     <>
                       <TooltipTrigger>
-                        <ExclamationTriangleIcon className="h-4 w-4 pl-1 text-yellow-500" />
+                        <ExclamationTriangleIcon className="size-4 pl-1 text-yellow-500" />
                       </TooltipTrigger>
                       <TooltipContent>Composition failed.</TooltipContent>
                     </>
                   ) : edge.node.hasUnapprovedBreakingChanges ? (
                     <>
                       <TooltipTrigger>
-                        <ExclamationTriangleIcon className="h-4 w-4 pl-1 text-yellow-500" />
+                        <ExclamationTriangleIcon className="size-4 pl-1 text-yellow-500" />
                       </TooltipTrigger>
                       <TooltipContent>Unapproved breaking changes!</TooltipContent>
                     </>
                   ) : edge.node.hasSchemaChanges ? (
                     <>
                       <TooltipTrigger>
-                        <GitCompareIcon className="h-4 w-4 pl-1" />
+                        <GitCompareIcon className="size-4 pl-1" />
                       </TooltipTrigger>
                       <TooltipContent>Contract schema changed</TooltipContent>
                     </>
                   ) : (
                     <>
                       <TooltipTrigger>
-                        <CheckIcon className="h-4 w-4 pl-1" />
+                        <CheckIcon className="size-4 pl-1" />
                       </TooltipTrigger>
                       <TooltipContent>Composition succeeded.</TooltipContent>
                     </>

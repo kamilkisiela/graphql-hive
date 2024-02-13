@@ -16,7 +16,7 @@
     "@sentry/node": "7.100.1",
     "agentkeepalive": "4.5.0",
     "date-fns": "3.3.1",
-    "dotenv": "16.4.1",
+    "dotenv": "16.4.2",
     "got": "12.6.1",
     "graphql": "16.8.1",
     "kafkajs": "2.2.4",

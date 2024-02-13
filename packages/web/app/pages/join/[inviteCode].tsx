@@ -87,7 +87,7 @@ function JoinOrganizationPage() {
           const invitation = data.organizationByInviteCode;
 
           return (
-            <div className="flex h-full w-full flex-row items-center justify-center">
+            <div className="flex size-full flex-row items-center justify-center">
               <div className="flex w-full flex-col text-center md:w-2/3">
                 {invitation.__typename === 'OrganizationInvitationError' ? (
                   <>
