@@ -1070,6 +1070,115 @@ export class OperationsReader {
     });
   }
 
+  async getTopOperationsForSchemaCoordinate(args: {
+    organizationId: string;
+    projectId: string;
+    targetIds: readonly string[];
+    excludedClients: null | readonly string[];
+    period: DateRange;
+    schemaCoordinate: string;
+  }) {
+    const Model = z.array(
+      z.object({
+        operationName: z.string(),
+        operationHash: z.string(),
+        count: z.string().transform(ensureNumber),
+      }),
+    );
+    const result = await this.clickHouse.query<unknown>({
+      queryId: 'getTopOperationsForSchemaCoordinate',
+      query: sql`
+        SELECT
+          "hash" AS "operationHash"
+          , "name" AS "operationName"
+          , sum("total") AS "count"
+        FROM
+          "operations_daily"
+        LEFT JOIN "operation_collection_details" ON "operations_daily"."hash" = "operation_collection_details"."hash"
+        ${this.createFilter({
+          target: args.targetIds,
+          period: args.period,
+          extra: [
+            sql`
+              "hash" IN (
+                SELECT
+                  "hash"
+                FROM
+                  "coordinates_daily"
+                ${this.createFilter({
+                  target: args.targetIds,
+                  period: args.period,
+                  extra: [sql`"coordinate" = ${args.schemaCoordinate}`],
+                })}
+              )`,
+          ],
+        })}
+        GROUP BY "hash", "name"
+        LIMIT 10
+      `,
+      timeout: 30_000,
+    });
+    console.log(result.data);
+    if (!result.data.length) {
+      return null;
+    }
+
+    return Model.parse(result.data);
+  }
+
+  async getTopClientsForSchemaCoordinate(args: {
+    organizationId: string;
+    projectId: string;
+    targetIds: readonly string[];
+    excludedClients: null | readonly string[];
+    period: DateRange;
+    schemaCoordinate: string;
+  }) {
+    const Model = z.array(
+      z
+        .object({
+          clientName: z.string(),
+        })
+        .transform(data => data.clientName),
+    );
+
+    const result = await this.clickHouse.query<unknown>({
+      queryId: 'getTopOperationsForSchemaCoordinate',
+      query: sql`
+        SELECT DISTINCT
+          "client_name" as "clientName"
+        FROM
+          "clients_daily"
+        ${this.createFilter({
+          target: args.targetIds,
+          period: args.period,
+          extra: [
+            sql`
+              "hash" IN (
+                SELECT
+                  "hash"
+                FROM
+                  "coordinates_daily"
+                ${this.createFilter({
+                  target: args.targetIds,
+                  period: args.period,
+                  extra: [sql`"coordinate" = ${args.schemaCoordinate}`],
+                })}
+              )`,
+          ],
+        })}
+        LIMIT 10
+      `,
+      timeout: 30_000,
+    });
+
+    if (!result.data.length) {
+      return null;
+    }
+
+    return Model.parse(result.data);
+  }
+
   async countClientVersions({
     target,
     period,

@@ -11,6 +11,7 @@ import {
   type RegistryServiceUrlChangeSerializableChange,
 } from '@hive/storage';
 import { ProjectType } from '../../../shared/entities';
+import { createPeriod } from '../../../shared/helpers';
 import { buildSortedSchemaFromSchemaObject } from '../../../shared/schema';
 import { OperationsReader } from '../../operations/providers/operations-reader';
 import { SchemaPolicyProvider } from '../../policy/providers/schema-policy.provider';
@@ -515,34 +516,33 @@ export class RegistryChecks {
       safeChanges.push(change);
     }
 
-    if (settings) {
+    if (args.usageDataSelector && settings) {
+      const { usageDataSelector } = args;
+
       await Promise.all(
         breakingChanges.map(async change => {
           if (!change.path || change.isSafeBasedOnUsage) {
             return;
           }
 
-          const affectedOperations = null;
-          // await this.operationsReader.getTopOperationForCoordinate(
-          //   args.usageDataSelector,
-          //   change.path,
-          // );
+          change.affectedOperations =
+            await this.operationsReader.getTopOperationsForSchemaCoordinate({
+              organizationId: usageDataSelector.organization,
+              projectId: usageDataSelector.project,
+              targetIds: settings.targets,
+              excludedClients: settings.excludedClients,
+              period: createPeriod(`${settings.period}d`),
+              schemaCoordinate: change.path,
+            });
 
-          if (affectedOperations) {
-            change.affectedOperations = affectedOperations;
-          }
-
-          const affectedClients = null;
-          // await this.operationsReader.getClientUsageForCoordinate(
-          //   args.usageDataSelector,
-          //   change.path,
-          //   change.meta.typeName?.toString() || '',
-          // );
-
-          if (affectedClients) {
-            change.affectedClients = affectedClients;
-          }
-          return;
+          change.affectedClients = await this.operationsReader.getTopClientsForSchemaCoordinate({
+            organizationId: usageDataSelector.organization,
+            projectId: usageDataSelector.project,
+            targetIds: settings.targets,
+            excludedClients: settings.excludedClients,
+            period: createPeriod(`${settings.period}d`),
+            schemaCoordinate: change.path,
+          });
         }),
       );
     }
