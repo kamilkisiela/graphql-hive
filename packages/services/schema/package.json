@@ -21,7 +21,7 @@
     "@types/async-retry": "1.4.8",
     "@types/ioredis-mock": "8.2.5",
     "@whatwg-node/fetch": "0.9.16",
-    "dotenv": "16.4.3",
+    "dotenv": "16.4.4",
     "fast-json-stable-stringify": "2.1.0",
     "fastify": "3.29.5",
     "got": "12.6.1",
