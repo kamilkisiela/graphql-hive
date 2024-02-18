@@ -23,7 +23,7 @@
     "@whatwg-node/fetch": "0.9.16",
     "@whatwg-node/server": "0.9.25",
     "bcryptjs": "2.4.3",
-    "dotenv": "16.4.3",
+    "dotenv": "16.4.4",
     "esbuild": "0.20.0",
     "fastify": "3.29.5",
     "graphql": "16.8.1",
