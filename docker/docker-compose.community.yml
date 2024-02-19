@@ -7,7 +7,7 @@ networks:
 
 services:
   db:
-    image: postgres:14.10-alpine
+    image: postgres:14.11-alpine
     environment:
       POSTGRES_DB: '${POSTGRES_DB}'
       POSTGRES_USER: '${POSTGRES_USER}'
