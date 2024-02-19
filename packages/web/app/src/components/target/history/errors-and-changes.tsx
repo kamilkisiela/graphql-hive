@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -88,64 +89,73 @@ export function ChangesBlock(props: {
                     </span>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[150px]">Affected Operation</TableHead>
-                          <TableHead>Total Requests</TableHead>
-                          <TableHead className="text-right">% of traffic</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {change.usageStatistics.topAffectedOperations.map(
-                          ({ hash, name, count, percentage }) => (
-                            <TableRow key={hash}>
-                              <TableCell className="font-medium">
-                                <Link
-                                  className="text-orange-500 hover:text-orange-500 hover:underline hover:underline-offset-2"
-                                  href={{
-                                    pathname:
-                                      '/[organizationId]/[projectId]/[targetId]/insights/[operationName]/[operationHash]',
-                                    query: {
-                                      organizationId: router.organizationId,
-                                      projectId: router.projectId,
-                                      targetId: router.targetId,
-                                      operationName: `${hash.substring(0, 4)}_${name}`,
-                                      operationHash: hash,
-                                      period: `${props.retentionInDays || 7}d`,
-                                    },
-                                  }}
-                                >
-                                  {hash.substring(0, 4)}_{name}
-                                </Link>
-                              </TableCell>
-                              <TableCell className="text-right">{formatNumber(count)}</TableCell>
-                              <TableCell className="text-right">{percentage}</TableCell>
-                            </TableRow>
-                          ),
-                        )}
-                      </TableBody>
-                    </Table>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[150px]">Affected Client</TableHead>
-                          <TableHead>Total Requests</TableHead>
-                          <TableHead className="text-right">% of traffic</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {change.usageStatistics.topAffectedClients.map(
-                          ({ name, count, percentage }) => (
-                            <TableRow key={name}>
-                              <TableCell className="font-medium">{name}</TableCell>
-                              <TableCell className="text-right">{formatNumber(count)}</TableCell>
-                              <TableCell className="text-right font-bold">{percentage}</TableCell>
-                            </TableRow>
-                          ),
-                        )}
-                      </TableBody>
-                    </Table>
+                    <div className="mb-2 w-full text-base font-bold">
+                      Usage based on conditional breaking change configuration
+                    </div>
+                    <div className="flex space-x-4">
+                      <Table>
+                        <TableCaption>Top 10 affected operations.</TableCaption>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[150px]">Operation Name</TableHead>
+                            <TableHead>Total Requests</TableHead>
+                            <TableHead className="text-right">% of traffic</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {change.usageStatistics.topAffectedOperations.map(
+                            ({ hash, name, count, percentage }) => (
+                              <TableRow key={hash}>
+                                <TableCell className="font-medium">
+                                  <Link
+                                    className="text-orange-500 hover:text-orange-500 hover:underline hover:underline-offset-2"
+                                    href={{
+                                      pathname:
+                                        '/[organizationId]/[projectId]/[targetId]/insights/[operationName]/[operationHash]',
+                                      query: {
+                                        organizationId: router.organizationId,
+                                        projectId: router.projectId,
+                                        targetId: router.targetId,
+                                        operationName: `${hash.substring(0, 4)}_${name}`,
+                                        operationHash: hash,
+                                        period: `${props.retentionInDays || 7}d`,
+                                      },
+                                    }}
+                                  >
+                                    {hash.substring(0, 4)}_{name}
+                                  </Link>
+                                </TableCell>
+                                <TableCell className="text-right">{formatNumber(count)}</TableCell>
+                                <TableCell className="text-right">{percentage}%</TableCell>
+                              </TableRow>
+                            ),
+                          )}
+                        </TableBody>
+                      </Table>
+                      <Table>
+                        <TableCaption>Top 10 affected clients.</TableCaption>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[150px]">Client Name</TableHead>
+                            <TableHead>Total Requests</TableHead>
+                            <TableHead className="text-right">% of traffic</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {change.usageStatistics.topAffectedClients.map(
+                            ({ name, count, percentage }) => (
+                              <TableRow key={name}>
+                                <TableCell className="font-medium">{name}</TableCell>
+                                <TableCell className="text-right">{formatNumber(count)}</TableCell>
+                                <TableCell className="text-right font-bold">
+                                  {percentage}%
+                                </TableCell>
+                              </TableRow>
+                            ),
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
                     <div className="mt-4 border-t border-t-gray-700 pt-2 text-xs text-gray-100">
                       <span>
                         See{' '}
