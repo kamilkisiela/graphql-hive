@@ -327,8 +327,8 @@ importers:
         specifier: 0.2.3
         version: link:../core/dist
       '@graphql-inspector/core':
-        specifier: 5.0.2
-        version: 5.0.2(graphql@16.8.1)
+        specifier: 5.1.0-alpha-20231208113249-34700c8a
+        version: 5.1.0-alpha-20231208113249-34700c8a(graphql@16.8.1)
       '@graphql-tools/code-file-loader':
         specifier: ~8.1.0
         version: 8.1.0(graphql@16.8.1)
@@ -1161,8 +1161,8 @@ importers:
   packages/services/storage:
     devDependencies:
       '@graphql-inspector/core':
-        specifier: 5.0.2
-        version: 5.0.2(graphql@16.8.1)
+        specifier: 5.1.0-alpha-20231208113249-34700c8a
+        version: 5.1.0-alpha-20231208113249-34700c8a(graphql@16.8.1)
       '@sentry/node':
         specifier: 7.100.1
         version: 7.100.1
@@ -6590,6 +6590,7 @@ packages:
       graphql: 16.8.1
       object-inspect: 1.12.3
       tslib: 2.6.2
+    dev: true
 
   /@graphql-inspector/core@5.1.0-alpha-20231208113249-34700c8a(graphql@16.8.1):
     resolution: {integrity: sha512-vzJEhQsZz+suo8T32o9dJNOa42IcLHfvmBm3EqRuMKQ0PU8KintUdRG1kFd6NFvNnpPHOVWFc+PYgFKCm7mPoA==}
@@ -6601,7 +6602,6 @@ packages:
       graphql: 16.8.1
       object-inspect: 1.12.3
       tslib: 2.6.2
-    dev: true
 
   /@graphql-inspector/coverage-command@5.0.3(@graphql-inspector/config@4.0.2)(@graphql-inspector/loaders@4.0.3)(graphql@16.8.1)(yargs@17.7.2):
     resolution: {integrity: sha512-LeAsn9+LjyxCzRnDvcfnQT6I0cI8UWnjPIxDkHNlkJLB0YWUTD1Z73fpRdw+l2kbYgeoMLFOK8TmilJjFN1+qQ==}

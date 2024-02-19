@@ -794,13 +794,7 @@ export const resolvers: SchemaModule.Resolvers = {
     criticalityReason: change => change.reason,
     approval: change => change.approvalMetadata,
     isSafeBasedOnUsage: change => change.isSafeBasedOnUsage,
-    affectedOperations: change =>
-      change.affectedOperations?.map(op => ({
-        name: op.operationName,
-        hash: op.operationHash,
-        count: op.count,
-      })) ?? null,
-    affectedClients: change => change.affectedClients ?? null,
+    usageStatistics: change => change.usageStatistics,
   },
   SchemaChangeApproval: {
     approvedBy: (approval, _, { injector }) =>

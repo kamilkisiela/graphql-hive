@@ -5033,11 +5033,19 @@ export function toSerializableSchemaChange(change: SchemaChangeType): {
     schemaCheckId: string;
   };
   isSafeBasedOnUsage: boolean;
-  affectedOperations: null | Array<{
-    operationName: string;
-    operationHash: string;
-    count: number;
-  }>;
+  usageStatistics: null | {
+    topAffectedOperations: Array<{
+      name: string;
+      hash: string;
+      count: number;
+      percentage: number;
+    }>;
+    topAffectedClients: Array<{
+      name: string;
+      count: number;
+      percentage: number;
+    }>;
+  };
 } {
   return {
     id: change.id,
@@ -5045,7 +5053,7 @@ export function toSerializableSchemaChange(change: SchemaChangeType): {
     meta: change.meta,
     isSafeBasedOnUsage: change.isSafeBasedOnUsage,
     approvalMetadata: change.approvalMetadata,
-    affectedOperations: change.affectedOperations,
+    usageStatistics: change.usageStatistics,
   };
 }
 

@@ -406,7 +406,9 @@ export class RegistryChecks {
         period: settings.validation.period,
         percentage: settings.validation.percentage,
         targets: settings.validation.targets,
-        excludedClients: settings.validation.excludedClients,
+        excludedClients: settings.validation.excludedClients?.length
+          ? settings.validation.excludedClients
+          : null,
       };
     } catch (error: any) {
       this.logger.error(`Failed to get settings`, error);
@@ -475,7 +477,70 @@ export class RegistryChecks {
         })
       : null;
 
-    let inspectorChanges = await this.inspector.diff(existingSchema, incomingSchema, settings);
+    let inspectorChanges = await this.inspector.diff(existingSchema, incomingSchema);
+
+    // Filter out federation specific changes as they are not relevant for the schema diff and were in previous schema versions by accident.
+    if (args.filterOutFederationChanges === true) {
+      inspectorChanges = inspectorChanges.filter(change => !isFederationRelatedChange(change));
+    }
+
+    if (settings) {
+      this.logger.debug('Conditional breaking change settings available.');
+      const period = createPeriod(`${settings.period}d`);
+      const totalAmountOfRequests = await this.operationsReader.getTotalAmountOfRequests({
+        targetIds: settings.targets,
+        excludedClients: settings.excludedClients,
+        period,
+      });
+      this.logger.debug('Fetching affected operations and affected clients for breaking changes.');
+
+      await Promise.all(
+        inspectorChanges.map(async change => {
+          if (change.criticality !== CriticalityLevel.Breaking || !change.path) {
+            return;
+          }
+
+          // We need to run both the affected operations an affected clients query.
+          // Since the affected clients query is lighter it makes more sense to run it first and skip running the operations query if no clients are affected, as it will also yield zero results in that case.
+
+          const affectedClients = await this.operationsReader.getTopClientsForSchemaCoordinate({
+            targetIds: settings.targets,
+            excludedClients: settings.excludedClients,
+            period,
+            schemaCoordinate: change.path,
+          });
+
+          if (affectedClients) {
+            const affectedOperations =
+              await this.operationsReader.getTopOperationsForSchemaCoordinate({
+                targetIds: settings.targets,
+                excludedClients: settings.excludedClients,
+                period,
+                schemaCoordinate: change.path,
+              });
+
+            if (affectedOperations) {
+              change.usageStatistics = {
+                topAffectedOperations: affectedOperations.map(record => ({
+                  ...record,
+                  percentage: (record.count / totalAmountOfRequests) * 100,
+                })),
+                topAffectedClients: affectedClients.map(record => ({
+                  ...record,
+                  percentage: (record.count / totalAmountOfRequests) * 100,
+                })),
+              };
+            }
+          }
+
+          if (!change.usageStatistics) {
+            change.isSafeBasedOnUsage = true;
+          }
+        }),
+      );
+    } else {
+      this.logger.debug('No conditional breaking change settings available');
+    }
 
     if (args.includeUrlChanges) {
       inspectorChanges.push(
@@ -484,11 +549,6 @@ export class RegistryChecks {
           args.includeUrlChanges.schemasAfter.filter(isCompositeSchema),
         ),
       );
-    }
-
-    // Filter out federation specific changes as they are not relevant for the schema diff and were in previous schema versions by accident.
-    if (args.filterOutFederationChanges === true) {
-      inspectorChanges = inspectorChanges.filter(change => !isFederationRelatedChange(change));
     }
 
     let isFailure = false;
@@ -506,7 +566,11 @@ export class RegistryChecks {
         // as it it contains the necessary metadata on when the change got first approved and by whom.
         const approvedChange = args.approvedChanges?.get(change.id);
         if (approvedChange) {
-          breakingChanges.push(approvedChange);
+          breakingChanges.push({
+            ...approvedChange,
+            isSafeBasedOnUsage: change.isSafeBasedOnUsage,
+            usageStatistics: change.usageStatistics,
+          });
           continue;
         }
         isFailure = true;
@@ -514,37 +578,6 @@ export class RegistryChecks {
         continue;
       }
       safeChanges.push(change);
-    }
-
-    if (args.usageDataSelector && settings) {
-      const { usageDataSelector } = args;
-
-      await Promise.all(
-        breakingChanges.map(async change => {
-          if (!change.path || change.isSafeBasedOnUsage) {
-            return;
-          }
-
-          change.affectedOperations =
-            await this.operationsReader.getTopOperationsForSchemaCoordinate({
-              organizationId: usageDataSelector.organization,
-              projectId: usageDataSelector.project,
-              targetIds: settings.targets,
-              excludedClients: settings.excludedClients,
-              period: createPeriod(`${settings.period}d`),
-              schemaCoordinate: change.path,
-            });
-
-          change.affectedClients = await this.operationsReader.getTopClientsForSchemaCoordinate({
-            organizationId: usageDataSelector.organization,
-            projectId: usageDataSelector.project,
-            targetIds: settings.targets,
-            excludedClients: settings.excludedClients,
-            period: createPeriod(`${settings.period}d`),
-            schemaCoordinate: change.path,
-          });
-        }),
-      );
     }
 
     if (isFailure === true) {

@@ -828,17 +828,27 @@ export const HiveSchemaChangeModel = z
       approvalMetadata: ApprovalMetadataModel.nullable()
         .optional()
         .transform(value => value ?? null),
-      affectedOperations: z
-        .array(
-          z.object({
-            operationName: z.string(),
-            operationHash: z.string(),
-            count: z.number(),
-          }),
-        )
+      usageStatistics: z
+        .object({
+          topAffectedOperations: z.array(
+            z.object({
+              hash: z.string(),
+              name: z.string(),
+              count: z.number(),
+              percentage: z.number(),
+            }),
+          ),
+          topAffectedClients: z.array(
+            z.object({
+              name: z.string(),
+              count: z.number(),
+              percentage: z.number(),
+            }),
+          ),
+        })
         .nullable()
-        .optional(),
-      affectedClients: z.array(z.string()).nullable().optional(),
+        .optional()
+        .transform(value => value ?? null),
     }),
   )
   // We inflate the schema check when reading it from the database
@@ -858,9 +868,11 @@ export const HiveSchemaChangeModel = z
       readonly message: string;
       readonly path: string | null;
       readonly approvalMetadata: SchemaCheckApprovalMetadata | null;
-      readonly isSafeBasedOnUsage: boolean;
-      affectedOperations: { operationName: string; operationHash: string; count: number }[] | null;
-      affectedClients: string[] | null;
+      isSafeBasedOnUsage: boolean;
+      usageStatistics: {
+        topAffectedOperations: { hash: string; name: string; count: number; percentage: number }[];
+        topAffectedClients: { name: string; count: number; percentage: number }[];
+      } | null;
     } => {
       const change = schemaChangeFromSerializableChange(rawChange as any);
 
@@ -880,8 +892,7 @@ export const HiveSchemaChangeModel = z
             rawChange.isSafeBasedOnUsage) ||
           false,
         reason: change.criticality.reason ?? null,
-        affectedOperations: rawChange.affectedOperations ?? null,
-        affectedClients: rawChange.affectedClients ?? null,
+        usageStatistics: rawChange.usageStatistics ?? null,
       };
     },
   );

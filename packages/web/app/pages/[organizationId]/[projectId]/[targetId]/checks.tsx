@@ -12,6 +12,7 @@ import {
   labelize,
   NoGraphChanges,
 } from '@/components/target/history/errors-and-changes';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
@@ -39,6 +40,7 @@ import {
   CheckIcon,
   ExclamationTriangleIcon,
   ExternalLinkIcon,
+  InfoCircledIcon,
   ListBulletIcon,
 } from '@radix-ui/react-icons';
 
@@ -350,6 +352,37 @@ const ApproveFailedSchemaCheckModal = (props: {
         ) : null}
       </div>
     </Modal>
+  );
+};
+
+const BreakingChangesTitle = () => {
+  return (
+    <TooltipProvider>
+      Breaking Changes
+      <Tooltip>
+        <TooltipTrigger>
+          <Button variant="ghost" size="icon-sm" className="ml-1">
+            <InfoCircledIcon className="size-3" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent align="start">
+          <div className="mb-2 max-w-[500px] font-normal">
+            <h5 className="mb-1 text-lg font-bold">Breaking Changes</h5>
+            <p className="mb-2 text-sm">Schema changes that can potentially break clients.</p>
+            <h6 className="mb-1 font-bold">Breaking Change Approval</h6>
+            <p className="mb-2">
+              Approve this schema check for adding the changes to the list of allowed changes and
+              change the status of this schema check to successful.
+            </p>
+            <h6 className="mb-1 font-bold">Conditional Breaking Changes</h6>
+            <p>
+              Configure conditional breaking changes, to automatically mark breaking changes as safe
+              based on live usage data collected from your GraphQL Gateway.
+            </p>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
@@ -695,12 +728,19 @@ const DefaultSchemaView_SchemaCheckFragment = graphql(`
           schemaCheckId
         }
         isSafeBasedOnUsage
-        affectedOperations {
-          name
-          hash
-          count
+        usageStatistics {
+          topAffectedOperations {
+            hash
+            name
+            count
+            percentage
+          }
+          topAffectedClients {
+            name
+            count
+            percentage
+          }
         }
-        affectedClients
       }
     }
     safeSchemaChanges {
@@ -825,8 +865,9 @@ function DefaultSchemaView(props: {
               <CompositionErrorsSection compositionErrors={schemaCheck.compositionErrors} />
             )}
             {schemaCheck.breakingSchemaChanges?.nodes.length ? (
-              <div className="mb-2">
+              <div className="mb-5">
                 <ChangesBlock
+                  title={<BreakingChangesTitle />}
                   criticality={CriticalityLevel.Breaking}
                   changes={schemaCheck.breakingSchemaChanges.nodes}
                   retentionInDays={props.retentionInDays}
@@ -834,15 +875,16 @@ function DefaultSchemaView(props: {
               </div>
             ) : null}
             {schemaCheck.safeSchemaChanges ? (
-              <div className="mb-2">
+              <div className="mb-5">
                 <ChangesBlock
+                  title="Safe Changes"
                   criticality={CriticalityLevel.Safe}
                   changes={schemaCheck.safeSchemaChanges.nodes}
                 />
               </div>
             ) : null}
             {schemaCheck.schemaPolicyErrors?.edges.length ? (
-              <div className="mb-2">
+              <div className="mb-5">
                 <PolicyBlock
                   title="Schema Policy Errors"
                   policies={schemaCheck.schemaPolicyErrors}
@@ -851,7 +893,7 @@ function DefaultSchemaView(props: {
               </div>
             ) : null}
             {schemaCheck.schemaPolicyWarnings ? (
-              <div className="mb-2">
+              <div className="mb-5">
                 <PolicyBlock
                   title="Schema Policy Warnings"
                   policies={schemaCheck.schemaPolicyWarnings}
@@ -859,6 +901,16 @@ function DefaultSchemaView(props: {
                 />
               </div>
             ) : null}
+            <div className="mb-5 mt-10 text-sm text-gray-400">
+              <p>
+                The schema check is a snapshot at a specific point in time. Live usage data result
+                can change.
+              </p>
+              <p>
+                It is recommended to see if the schema check result is up to date, before making any
+                decisions based on it.
+              </p>
+            </div>
           </div>
         )}
         {selectedView === 'service' && (
@@ -922,12 +974,19 @@ const ContractCheckView_ContractCheckFragment = graphql(`
           schemaCheckId
         }
         isSafeBasedOnUsage
-        affectedOperations {
-          name
-          hash
-          count
+        usageStatistics {
+          topAffectedOperations {
+            hash
+            name
+            count
+            percentage
+          }
+          topAffectedClients {
+            name
+            count
+            percentage
+          }
         }
-        affectedClients
       }
     }
     safeSchemaChanges {
@@ -1023,6 +1082,7 @@ function ContractCheckView(props: {
             {contractCheck.breakingSchemaChanges?.nodes.length && (
               <div className="mb-2">
                 <ChangesBlock
+                  title={<BreakingChangesTitle />}
                   criticality={CriticalityLevel.Breaking}
                   changes={contractCheck.breakingSchemaChanges.nodes}
                   retentionInDays={props.retentionInDays}
@@ -1032,6 +1092,7 @@ function ContractCheckView(props: {
             {contractCheck.safeSchemaChanges && (
               <div className="mb-2">
                 <ChangesBlock
+                  title="Safe Changes"
                   criticality={CriticalityLevel.Safe}
                   changes={contractCheck.safeSchemaChanges.nodes}
                 />

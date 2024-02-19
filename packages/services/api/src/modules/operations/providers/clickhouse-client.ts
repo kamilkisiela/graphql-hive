@@ -21,6 +21,8 @@ export interface QueryResponse<T> {
   statistics: {
     elapsed: number;
   };
+
+  exception?: string;
 }
 
 export type RowOf<T extends QueryResponse<any>> = T extends QueryResponse<infer R> ? R : never;
@@ -144,6 +146,12 @@ export class ClickHouse {
           https: httpsAgent,
         },
       })
+      .then(response => {
+        if (response.exception) {
+          throw new Error(response.exception);
+        }
+        return response;
+      })
       .catch(error => {
         this.logger.error(
           `Failed to run ClickHouse query, executionId: %s, code: %s , error name: %s, message: %s`,
@@ -164,7 +172,6 @@ export class ClickHouse {
         span?.finish();
       });
     const endedAt = (Date.now() - startedAt) / 1000;
-
     this.config.onReadEnd?.(queryId, {
       totalSeconds: endedAt,
       elapsedSeconds: response.statistics.elapsed,

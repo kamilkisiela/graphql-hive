@@ -102,12 +102,19 @@ fragment SchemaChangeFields on SchemaChange {
     schemaCheckId
   }
   isSafeBasedOnUsage
-  affectedOperations {
-    name
-    hash
-    count
+  usageStatistics {
+    topAffectedOperations {
+      hash
+      name
+      count
+      percentage
+    }
+    topAffectedClients {
+      name
+      count
+      percentage
+    }
   }
-  affectedClients
 }
 
 fragment TokenFields on Token {
