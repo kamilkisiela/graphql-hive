@@ -366,7 +366,7 @@ export class OperationsManager {
       fields,
       period,
       targetIds: Array.isArray(target) ? target : [target],
-      excludedClients,
+      excludedClients: excludedClients ?? null,
     });
   }
 
