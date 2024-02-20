@@ -33,7 +33,7 @@
     "@trpc/server": "10.45.1",
     "@whatwg-node/fetch": "0.9.16",
     "@whatwg-node/server": "0.9.25",
-    "dotenv": "16.4.4",
+    "dotenv": "16.4.5",
     "fastify": "3.29.5",
     "got": "12.6.1",
     "graphql": "16.8.1",
