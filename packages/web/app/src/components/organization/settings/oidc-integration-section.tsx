@@ -607,7 +607,7 @@ function RemoveOIDCIntegrationModal(props: {
         ) : (
           <>
             <Tag color="yellow" className="px-4 py-2.5">
-              <AlertTriangleIcon className="h-5 w-5" />
+              <AlertTriangleIcon className="size-5" />
               <p className="ml-3">
                 This action is not reversible and <b>deletes all users</b> that have signed in with
                 this OIDC integration.

@@ -7,8 +7,7 @@ export const Checkbox = (props: CheckboxProps): ReactElement => {
     <Root
       className="
       flex
-      h-5
-      w-5
+      size-5
       shrink-0
       items-center
       justify-center
@@ -23,7 +22,7 @@ export const Checkbox = (props: CheckboxProps): ReactElement => {
     "
       {...props}
     >
-      <Indicator className="flex h-full w-full items-center justify-center bg-current">
+      <Indicator className="flex size-full items-center justify-center bg-current">
         <CheckIcon className="text-black" />
       </Indicator>
     </Root>

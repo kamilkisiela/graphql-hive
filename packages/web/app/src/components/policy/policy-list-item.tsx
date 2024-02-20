@@ -77,7 +77,7 @@ export function PolicyListItem(props: {
                     </>
                   }
                 >
-                  <InfoIcon className="ml-2 inline-block h-4 w-4 text-orange-500" />
+                  <InfoIcon className="ml-2 inline-block size-4 text-orange-500" />
                 </Tooltip>
               </label>
             </div>

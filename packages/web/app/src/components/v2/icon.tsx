@@ -139,7 +139,7 @@ export const MoreIcon = ({ className, ...props }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
-    className={clsx('h-6 w-6 stroke-current', className)}
+    className={clsx('size-6 stroke-current', className)}
     {...props}
   >
     <path
@@ -372,7 +372,7 @@ export const LinkIcon = ({ className, ...props }: IconProps): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
-    className={clsx('h-6 w-6 fill-none stroke-current', className)}
+    className={clsx('size-6 fill-none stroke-current', className)}
     {...props}
   >
     <path
@@ -417,7 +417,7 @@ export const LinkedInIcon = ({ className, ...props }: IconProps): ReactElement =
   <svg
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
-    className={clsx('h-6 w-6 fill-current', className)}
+    className={clsx('size-6 fill-current', className)}
     {...props}
   >
     <path d="M16 8C19.3137 8 22 10.6863 22 14V21H18V14C18 12.8954 17.1046 12 16 12C14.8954 12 14 12.8954 14 14V21H10V14C10 10.6863 12.6863 8 16 8Z" />

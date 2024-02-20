@@ -12,8 +12,8 @@
     "reflect-metadata": "^0.2.0"
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "3.509.0",
-    "@aws-sdk/s3-request-presigner": "3.509.0",
+    "@aws-sdk/client-s3": "3.515.0",
+    "@aws-sdk/s3-request-presigner": "3.515.0",
     "@graphql-hive/core": "0.2.3",
     "@graphql-inspector/core": "5.1.0-alpha-20231208113249-34700c8a",
     "@hive/cdn-script": "workspace:*",
@@ -24,9 +24,9 @@
     "@hive/webhooks": "workspace:*",
     "@octokit/app": "14.0.2",
     "@octokit/request-error": "5.0.1",
-    "@sentry/node": "7.100.1",
-    "@sentry/types": "7.100.1",
-    "@slack/web-api": "7.0.1",
+    "@sentry/node": "7.101.1",
+    "@sentry/types": "7.101.1",
+    "@slack/web-api": "7.0.2",
     "@theguild/buddy": "0.1.0",
     "@theguild/federation-composition": "0.8.1",
     "@trpc/client": "10.45.1",
@@ -61,6 +61,6 @@
     "supertokens-node": "15.2.1",
     "tslib": "2.6.2",
     "zod": "3.22.4",
-    "zod-validation-error": "3.0.0"
+    "zod-validation-error": "3.0.2"
   }
 }

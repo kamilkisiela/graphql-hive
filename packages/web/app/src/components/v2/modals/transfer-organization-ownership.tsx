@@ -193,7 +193,7 @@ export const TransferOrganizationOwnershipModal = ({
                 onBlur={handleBlur}
               />
               <Combobox.Button className="absolute inset-y-0 right-0 flex items-center px-6">
-                <ArrowDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                <ArrowDownIcon className="size-5 text-gray-400" aria-hidden="true" />
               </Combobox.Button>
             </div>
             <Transition

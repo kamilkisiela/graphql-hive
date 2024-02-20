@@ -18,7 +18,7 @@ function CreateOrgPage(): ReactElement {
           onClick={() => router.push('/logout')}
           className="absolute right-6 top-6"
         >
-          <LogOutIcon className="mr-2 h-4 w-4" /> Sign out
+          <LogOutIcon className="mr-2 size-4" /> Sign out
         </Button>
         <div className="container w-1/3">
           <CreateOrganizationForm />

@@ -25,7 +25,7 @@ export function Highlights(props: {
     <div className="container mx-auto box-border flex flex-col justify-between gap-12 px-6 py-12 md:flex-row">
       {props.items.map(({ title, description, icon, documentationLink }, i) => (
         <div className="flex flex-1 flex-row gap-6 md:flex-col lg:flex-row" key={i}>
-          <div className="h-12 w-12 shrink-0 text-yellow-500 lg:h-16 lg:w-16">{icon}</div>
+          <div className="size-12 shrink-0 text-yellow-500 lg:size-16">{icon}</div>
           <div className="flex flex-col gap-y-2 text-black">
             <h3 className="text-lg font-semibold lg:text-xl">{title}</h3>
             <p className="text-gray-600">{description}</p>

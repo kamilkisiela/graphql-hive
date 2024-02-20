@@ -7,7 +7,7 @@ networks:
 
 services:
   db:
-    image: postgres:14.10-alpine
+    image: postgres:14.11-alpine
     environment:
       POSTGRES_DB: '${POSTGRES_DB}'
       POSTGRES_USER: '${POSTGRES_USER}'
@@ -40,7 +40,7 @@ services:
       - ./.hive/clickhouse/db:/var/lib/clickhouse
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.3
+    image: confluentinc/cp-zookeeper:7.6.0
     hostname: zookeeper
     networks:
       - 'stack'
@@ -55,7 +55,7 @@ services:
       - ./.hive/zookeeper/db:/var/lib/zookeeper/data
 
   broker:
-    image: confluentinc/cp-kafka:7.5.3
+    image: confluentinc/cp-kafka:7.6.0
     hostname: broker
     depends_on:
       zookeeper:

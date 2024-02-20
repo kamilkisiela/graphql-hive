@@ -40,11 +40,7 @@ export const Avatar = ({
     >
       {src ? (
         <>
-          <Image
-            src={src ?? undefined}
-            alt={alt}
-            className="drag-none h-full w-full object-cover"
-          />
+          <Image src={src ?? undefined} alt={alt} className="drag-none size-full object-cover" />
         </>
       ) : (
         <PersonIcon />

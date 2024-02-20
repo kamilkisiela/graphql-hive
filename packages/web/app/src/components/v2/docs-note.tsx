@@ -40,7 +40,7 @@ export const DocsLink = ({
   return (
     <Button variant="link" className={cn('p-0 text-orange-500', className)} asChild>
       <Link href={fullUrl} target="_blank" rel="noreferrer">
-        {icon ?? <Book className="mr-2 h-4 w-4" />}
+        {icon ?? <Book className="mr-2 size-4" />}
         {children}
         <ExternalLinkIcon className="inline pl-1" />
       </Link>
@@ -76,7 +76,7 @@ export const ProductUpdatesLink = ({
         className="font-medium transition-colors hover:underline"
         scroll={false}
       >
-        {icon ?? <Megaphone className="mr-2 h-4 w-4" />}
+        {icon ?? <Megaphone className="mr-2 size-4" />}
         {children}
         {isExternal ? <ExternalLinkIcon className="inline pl-1" /> : null}
       </NextLink>

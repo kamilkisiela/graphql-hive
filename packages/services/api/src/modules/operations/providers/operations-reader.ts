@@ -223,7 +223,7 @@ export class OperationsReader {
     }).then(r => r[this.makeId({ type, field, argument })]);
   }
 
-  async countFields({
+  private async countFields({
     fields,
     target,
     period,
@@ -368,6 +368,42 @@ export class OperationsReader {
     const total = ensureNumber(result.data[0].total);
 
     return total;
+  }
+
+  /** Read the statistics of fields for a given list of targets in a period. */
+  async readFieldListStats(args: {
+    targetIds: readonly string[];
+    period: DateRange;
+    excludedClients?: readonly string[];
+    fields: readonly {
+      type: string;
+      field?: string | null;
+      argument?: string | null;
+    }[];
+  }) {
+    const [totalFields, total] = await Promise.all([
+      this.countFields({
+        fields: args.fields,
+        target: args.targetIds,
+        period: args.period,
+        excludedClients: args.excludedClients,
+      }),
+      this.countOperationsWithoutDetails({ target: args.targetIds, period: args.period }),
+    ]);
+
+    return Object.keys(totalFields).map(id => {
+      const [type, field, argument] = id.split('.');
+      const totalField = totalFields[id] ?? 0;
+
+      return {
+        type,
+        field,
+        argument,
+        period: args.period,
+        count: totalField,
+        percentage: total === 0 ? 0 : (totalField / total) * 100,
+      };
+    });
   }
 
   async countRequests({

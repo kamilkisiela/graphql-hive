@@ -255,7 +255,7 @@ function OrganizationMemberRoleSwitcher(props: {
                   disabled={!canAssignRole}
                   onClick={togglePermissionsModalOpen}
                 >
-                  <SettingsIcon className="h-4 w-4" />
+                  <SettingsIcon className="size-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Change permissions (legacy)</TooltipContent>
@@ -408,7 +408,7 @@ function OrganizationMemberRow(props: {
             <Tooltip delayDuration={100}>
               <TooltipTrigger asChild>
                 <div>
-                  <IconToUse className="mx-auto h-5 w-5" />
+                  <IconToUse className="mx-auto size-5" />
                 </div>
               </TooltipTrigger>
               <TooltipContent>User's authentication method: {authMethod}</TooltipContent>
@@ -431,8 +431,8 @@ function OrganizationMemberRow(props: {
         <td className="py-3 text-right text-sm">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="data-[state=open]:bg-muted flex h-8 w-8 p-0">
-                <MoreHorizontalIcon className="h-4 w-4" />
+              <Button variant="ghost" className="data-[state=open]:bg-muted flex size-8 p-0">
+                <MoreHorizontalIcon className="size-4" />
                 <span className="sr-only">Open menu</span>
               </Button>
             </DropdownMenuTrigger>
@@ -550,9 +550,9 @@ export function OrganizationMembers(props: {
               <span className="inline-block">
                 {sortByKey === 'name' ? (
                   orderDirection === 'asc' ? (
-                    <MoveUpIcon className="relative top-[3px] h-4 w-4" />
+                    <MoveUpIcon className="relative top-[3px] size-4" />
                   ) : orderDirection === 'desc' ? (
-                    <MoveDownIcon className="relative top-[3px] h-4 w-4" />
+                    <MoveDownIcon className="relative top-[3px] size-4" />
                   ) : null
                 ) : null}
               </span>
@@ -565,9 +565,9 @@ export function OrganizationMembers(props: {
               <span className="inline-block">
                 {sortByKey === 'role' ? (
                   orderDirection === 'asc' ? (
-                    <MoveUpIcon className="relative top-[3px] h-4 w-4" />
+                    <MoveUpIcon className="relative top-[3px] size-4" />
                   ) : orderDirection === 'desc' ? (
-                    <MoveDownIcon className="relative top-[3px] h-4 w-4" />
+                    <MoveDownIcon className="relative top-[3px] size-4" />
                   ) : null
                 ) : null}
               </span>
