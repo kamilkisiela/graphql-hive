@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { hostname } from 'os';
 import {
   createServer,
   registerShutdown,
@@ -13,7 +14,8 @@ import { createIngestor } from './ingestor';
 async function main() {
   if (env.sentry) {
     Sentry.init({
-      serverName: 'usage-ingestor',
+      serverName: hostname(),
+      dist: 'usage-ingestor',
       enabled: !!env.sentry,
       environment: env.environment,
       dsn: env.sentry.dsn,

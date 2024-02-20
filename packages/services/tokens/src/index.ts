@@ -2,6 +2,7 @@
 import Redis from 'ioredis';
 import ms from 'ms';
 import 'reflect-metadata';
+import { hostname } from 'os';
 import LRU from 'tiny-lru';
 import {
   createErrorHandler,
@@ -21,7 +22,8 @@ import { createStorage } from './storage';
 export async function main() {
   if (env.sentry) {
     Sentry.init({
-      serverName: 'tokens',
+      dist: 'tokens',
+      serverName: hostname(),
       enabled: true,
       environment: env.environment,
       dsn: env.sentry.dsn,

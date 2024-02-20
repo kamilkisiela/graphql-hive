@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import got from 'got';
 import { DocumentNode, GraphQLError, stripIgnoredCharacters } from 'graphql';
 import 'reflect-metadata';
+import { hostname } from 'os';
 import { createRegistry, createTaskRunner, CryptoProvider, LogFn, Logger } from '@hive/api';
 import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
 import { ArtifactStorageReader } from '@hive/cdn-script/artifact-storage-reader';
@@ -28,7 +29,8 @@ import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
 
 export async function main() {
   init({
-    serverName: 'api',
+    serverName: hostname(),
+    dist: 'server',
     enabled: !!env.sentry,
     environment: env.environment,
     dsn: env.sentry?.dsn,

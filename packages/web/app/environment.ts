@@ -234,6 +234,7 @@ globalThis['__backend_env'] = config;
 // TODO: I don't like this here, but it seems like it makes most sense here :)
 Sentry.init({
   serverName: 'app',
+  dist: 'app',
   enabled: !!config.sentry,
   enableTracing: false,
   tracesSampleRate: 1,
