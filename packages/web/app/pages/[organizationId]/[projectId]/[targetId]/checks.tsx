@@ -732,13 +732,13 @@ const DefaultSchemaView_SchemaCheckFragment = graphql(`
           topAffectedOperations {
             hash
             name
-            count
-            percentage
+            countFormatted
+            percentageFormatted
           }
           topAffectedClients {
             name
-            count
-            percentage
+            countFormatted
+            percentageFormatted
           }
         }
       }
@@ -978,13 +978,13 @@ const ContractCheckView_ContractCheckFragment = graphql(`
           topAffectedOperations {
             hash
             name
-            count
-            percentage
+            countFormatted
+            percentageFormatted
           }
           topAffectedClients {
             name
-            count
-            percentage
+            countFormatted
+            percentageFormatted
           }
         }
       }

@@ -400,9 +400,17 @@ export default gql`
     """
     count: Float!
     """
+    Human readable count value.
+    """
+    countFormatted: String!
+    """
     The percentage share of the operation of the total traffic.
     """
     percentage: Float!
+    """
+    Human readable percentage value.
+    """
+    percentageFormatted: String!
   }
 
   type SchemaChangeUsageStatisticsAffectedClient {
@@ -415,9 +423,17 @@ export default gql`
     """
     count: Float!
     """
+    Human readable count value.
+    """
+    countFormatted: String!
+    """
     The percentage share of the client of the total traffic.
     """
     percentage: Float!
+    """
+    Human readable percentage value.
+    """
+    percentageFormatted: String!
   }
 
   type SchemaChangeApproval {
@@ -453,6 +469,35 @@ export default gql`
   type SchemaWarningConnection {
     nodes: [SchemaCheckWarning!]!
     total: Int!
+  }
+
+  type BreakingChangeMetadataTarget {
+    name: String!
+    target: Target
+  }
+
+  type SchemaCheckConditionalBreakingChangeMetadataSettings {
+    retentionInDays: Int!
+    percentage: Float!
+    excludedClientNames: [String!]
+    targets: [BreakingChangeMetadataTarget!]!
+  }
+
+  type SchemaCheckConditionalBreakingChangeMetadataUsage {
+    """
+    Total amount of requests for the settings and period.
+    """
+    totalRequestCount: Float!
+    """
+    Total request count human readable.
+    """
+    totalRequestCountFormatted: String!
+  }
+
+  type SchemaCheckConditionalBreakingChangeMetadata {
+    period: DateRange!
+    settings: SchemaCheckConditionalBreakingChangeMetadataSettings!
+    usage: SchemaCheckConditionalBreakingChangeMetadataUsage!
   }
 
   type SchemaCheckSuccess {
@@ -922,11 +967,14 @@ export default gql`
     safeSchemaChanges: SchemaChangeConnection
     schemaPolicyWarnings: SchemaPolicyWarningConnection
     schemaPolicyErrors: SchemaPolicyWarningConnection
-
     """
     Results of the contracts
     """
     contractChecks: ContractCheckConnection
+    """
+    Conditional breaking change metadata.
+    """
+    conditionalBreakingChangeMetadata: SchemaCheckConditionalBreakingChangeMetadata
   }
 
   """
@@ -1073,6 +1121,10 @@ export default gql`
     Results of the contracts
     """
     contractChecks: ContractCheckConnection
+    """
+    Conditional breaking change metadata.
+    """
+    conditionalBreakingChangeMetadata: SchemaCheckConditionalBreakingChangeMetadata
 
     """
     Whether the schema check was manually approved.
@@ -1146,6 +1198,10 @@ export default gql`
     Results of the contracts
     """
     contractChecks: ContractCheckConnection
+    """
+    Conditional breaking change metadata.
+    """
+    conditionalBreakingChangeMetadata: SchemaCheckConditionalBreakingChangeMetadata
 
     """
     Whether this schema check can be approved manually.

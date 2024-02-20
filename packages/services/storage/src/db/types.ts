@@ -232,6 +232,7 @@ export interface schema_checks {
   breaking_schema_changes: any | null;
   composite_schema_sdl: string | null;
   composite_schema_sdl_store_id: string | null;
+  conditional_breaking_change_metadata: any | null;
   context_id: string | null;
   created_at: Date;
   expires_at: Date | null;
@@ -299,6 +300,7 @@ export interface schema_versions {
   action_id: string;
   base_schema: string | null;
   composite_schema_sdl: string | null;
+  conditional_breaking_change_metadata: any | null;
   created_at: Date;
   diff_schema_version_id: string | null;
   github_repository: string | null;

@@ -21,7 +21,6 @@ import { PulseIcon } from '@/components/v2/icon';
 import { Tooltip as LegacyTooltip } from '@/components/v2/tooltip';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel, SchemaChangeFieldsFragment } from '@/graphql';
-import { formatNumber } from '@/lib/hooks';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { CheckCircledIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 
@@ -104,7 +103,7 @@ export function ChangesBlock(props: {
                         </TableHeader>
                         <TableBody>
                           {change.usageStatistics.topAffectedOperations.map(
-                            ({ hash, name, count, percentage }) => (
+                            ({ hash, name, countFormatted, percentageFormatted }) => (
                               <TableRow key={hash}>
                                 <TableCell className="font-medium">
                                   <Link
@@ -125,8 +124,8 @@ export function ChangesBlock(props: {
                                     {hash.substring(0, 4)}_{name}
                                   </Link>
                                 </TableCell>
-                                <TableCell className="text-right">{formatNumber(count)}</TableCell>
-                                <TableCell className="text-right">{percentage}%</TableCell>
+                                <TableCell className="text-right">{countFormatted}</TableCell>
+                                <TableCell className="text-right">{percentageFormatted}</TableCell>
                               </TableRow>
                             ),
                           )}
@@ -143,13 +142,11 @@ export function ChangesBlock(props: {
                         </TableHeader>
                         <TableBody>
                           {change.usageStatistics.topAffectedClients.map(
-                            ({ name, count, percentage }) => (
+                            ({ name, countFormatted, percentageFormatted }) => (
                               <TableRow key={name}>
                                 <TableCell className="font-medium">{name}</TableCell>
-                                <TableCell className="text-right">{formatNumber(count)}</TableCell>
-                                <TableCell className="text-right font-bold">
-                                  {percentage}%
-                                </TableCell>
+                                <TableCell className="text-right">{countFormatted}</TableCell>
+                                <TableCell className="text-right">{percentageFormatted}</TableCell>
                               </TableRow>
                             ),
                           )}

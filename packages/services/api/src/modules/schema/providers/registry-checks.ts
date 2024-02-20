@@ -7,17 +7,16 @@ import type { CheckPolicyResponse } from '@hive/policy';
 import type { CompositionFailureError, ContractsInputType } from '@hive/schema';
 import {
   HiveSchemaChangeModel,
-  SchemaChangeType,
   type RegistryServiceUrlChangeSerializableChange,
+  type SchemaChangeType,
 } from '@hive/storage';
 import { ProjectType } from '../../../shared/entities';
-import { createPeriod } from '../../../shared/helpers';
 import { buildSortedSchemaFromSchemaObject } from '../../../shared/schema';
 import { OperationsReader } from '../../operations/providers/operations-reader';
 import { SchemaPolicyProvider } from '../../policy/providers/schema-policy.provider';
-import { Storage } from '../../shared/providers/storage';
 import type {
   ComposeAndValidateResult,
+  DateRange,
   Orchestrator,
   Organization,
   Project,
@@ -28,6 +27,13 @@ import { Logger } from './../../shared/providers/logger';
 import { Inspector } from './inspector';
 import { SchemaCheckWarning } from './models/shared';
 import { extendWithBase, isCompositeSchema, SchemaHelper } from './schema-helper';
+
+export type ConditionalBreakingChangeDiffConfig = {
+  period: DateRange;
+  requestCountThreshold: number;
+  targetIds: string[];
+  excludedClientNames: string[] | null;
+};
 
 // The reason why I'm using `result` and `reason` instead of just `data` for both:
 // https://bit.ly/hive-check-result-data
@@ -160,7 +166,6 @@ export class RegistryChecks {
     private inspector: Inspector,
     private logger: Logger,
     private operationsReader: OperationsReader,
-    private storage: Storage,
   ) {}
 
   async checksum(args: {
@@ -378,44 +383,6 @@ export class RegistryChecks {
     } satisfies CheckResult;
   }
 
-  private async getConditionalBreakingChangeSettings({
-    selector,
-  }: {
-    selector: {
-      organization: string;
-      project: string;
-      target: string;
-    };
-  }) {
-    try {
-      const settings = await this.storage.getTargetSettings(selector);
-
-      if (!settings.validation.enabled) {
-        this.logger.debug('Usage validation disabled');
-        this.logger.debug('Mark all as used');
-        return null;
-      }
-
-      if (settings.validation.enabled && settings.validation.targets.length === 0) {
-        this.logger.debug('Usage validation enabled but no targets to check against');
-        this.logger.debug('Mark all as used');
-        return null;
-      }
-
-      return {
-        period: settings.validation.period,
-        percentage: settings.validation.percentage,
-        targets: settings.validation.targets,
-        excludedClients: settings.validation.excludedClients?.length
-          ? settings.validation.excludedClients
-          : null,
-      };
-    } catch (error: any) {
-      this.logger.error(`Failed to get settings`, error);
-      return null;
-    }
-  }
-
   /**
    * Diff incoming and existing SDL and generate a list of changes.
    * Uses usage stats to determine whether a change is safe or not (if available).
@@ -435,12 +402,8 @@ export class RegistryChecks {
     filterOutFederationChanges: boolean;
     /** Lookup map of changes that are approved and thus safe. */
     approvedChanges: null | Map<string, SchemaChangeType>;
-    /** Selector for fetching conditional breaking changes. */
-    usageDataSelector: null | {
-      organization: string;
-      project: string;
-      target: string;
-    };
+    /** Settings for fetching conditional breaking changes. */
+    conditionalBreakingChangeConfig: null | ConditionalBreakingChangeDiffConfig;
   }) {
     if (args.existingSdl == null || args.incomingSdl == null) {
       this.logger.debug('Skip diff check due to either existing or incoming SDL being absent.');
@@ -471,12 +434,6 @@ export class RegistryChecks {
       } satisfies CheckResult;
     }
 
-    const settings = args.usageDataSelector
-      ? await this.getConditionalBreakingChangeSettings({
-          selector: args.usageDataSelector,
-        })
-      : null;
-
     let inspectorChanges = await this.inspector.diff(existingSchema, incomingSchema);
 
     // Filter out federation specific changes as they are not relevant for the schema diff and were in previous schema versions by accident.
@@ -484,58 +441,50 @@ export class RegistryChecks {
       inspectorChanges = inspectorChanges.filter(change => !isFederationRelatedChange(change));
     }
 
-    if (settings) {
+    if (args.conditionalBreakingChangeConfig) {
       this.logger.debug('Conditional breaking change settings available.');
-      const period = createPeriod(`${settings.period}d`);
-      const totalAmountOfRequests = await this.operationsReader.getTotalAmountOfRequests({
-        targetIds: settings.targets,
-        excludedClients: settings.excludedClients,
-        period,
-      });
+      const settings = args.conditionalBreakingChangeConfig;
+
       this.logger.debug('Fetching affected operations and affected clients for breaking changes.');
 
       await Promise.all(
         inspectorChanges.map(async change => {
-          if (change.criticality !== CriticalityLevel.Breaking || !change.path) {
+          if (
+            change.criticality !== CriticalityLevel.Breaking ||
+            !change.breakingChangeSchemaCoordinate
+          ) {
             return;
           }
 
           // We need to run both the affected operations an affected clients query.
           // Since the affected clients query is lighter it makes more sense to run it first and skip running the operations query if no clients are affected, as it will also yield zero results in that case.
 
-          const affectedClients = await this.operationsReader.getTopClientsForSchemaCoordinate({
-            targetIds: settings.targets,
-            excludedClients: settings.excludedClients,
-            period,
-            schemaCoordinate: change.path,
+          const topAffectedClients = await this.operationsReader.getTopClientsForSchemaCoordinate({
+            targetIds: settings.targetIds,
+            excludedClients: settings.excludedClientNames,
+            period: settings.period,
+            schemaCoordinate: change.breakingChangeSchemaCoordinate,
           });
 
-          if (affectedClients) {
-            const affectedOperations =
+          if (topAffectedClients) {
+            const topAffectedOperations =
               await this.operationsReader.getTopOperationsForSchemaCoordinate({
-                targetIds: settings.targets,
-                excludedClients: settings.excludedClients,
-                period,
-                schemaCoordinate: change.path,
+                targetIds: settings.targetIds,
+                excludedClients: settings.excludedClientNames,
+                period: settings.period,
+                requestCountThreshold: settings.requestCountThreshold,
+                schemaCoordinate: change.breakingChangeSchemaCoordinate,
               });
 
-            if (affectedOperations) {
+            if (topAffectedOperations) {
               change.usageStatistics = {
-                topAffectedOperations: affectedOperations.map(record => ({
-                  ...record,
-                  percentage: (record.count / totalAmountOfRequests) * 100,
-                })),
-                topAffectedClients: affectedClients.map(record => ({
-                  ...record,
-                  percentage: (record.count / totalAmountOfRequests) * 100,
-                })),
+                topAffectedOperations,
+                topAffectedClients,
               };
             }
           }
 
-          if (!change.usageStatistics) {
-            change.isSafeBasedOnUsage = true;
-          }
+          change.isSafeBasedOnUsage = change.usageStatistics === null;
         }),
       );
     } else {

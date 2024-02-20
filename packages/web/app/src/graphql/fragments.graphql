@@ -106,13 +106,13 @@ fragment SchemaChangeFields on SchemaChange {
     topAffectedOperations {
       hash
       name
-      count
-      percentage
+      countFormatted
+      percentageFormatted
     }
     topAffectedClients {
       name
-      count
-      percentage
+      countFormatted
+      percentageFormatted
     }
   }
 }

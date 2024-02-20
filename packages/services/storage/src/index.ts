@@ -55,7 +55,10 @@ import {
   users,
 } from './db';
 import {
+  ConditionalBreakingChangeMetadata,
+  ConditionalBreakingChangeMetadataModel,
   HiveSchemaChangeModel,
+  InsertConditionalBreakingChangeMetadataModel,
   SchemaCheckModel,
   SchemaCompositionErrorModel,
   SchemaPolicyWarningModel,
@@ -2526,6 +2529,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           tags: args.tags,
           hasContractCompositionErrors:
             args.contracts?.some(c => c.schemaCompositionErrors != null) ?? false,
+          conditionalBreakingChangeMetadata: args.conditionalBreakingChangeMetadata,
         });
 
         // Move all the schema_version_to_log entries of the previous version to the new version
@@ -2628,6 +2632,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           tags: input.tags,
           hasContractCompositionErrors:
             input.contracts?.some(c => c.schemaCompositionErrors != null) ?? false,
+          conditionalBreakingChangeMetadata: input.conditionalBreakingChangeMetadata,
         });
 
         await Promise.all(
@@ -3992,6 +3997,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             , "expires_at"
             , "context_id"
             , "has_contract_schema_changes"
+            , "conditional_breaking_change_metadata"
           )
           VALUES (
               ${schemaSDLHash}
@@ -4019,6 +4025,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 c => c.breakingSchemaChanges?.length || c.safeSchemaChanges?.length,
               ) ?? false
             }
+            , ${jsonify(InsertConditionalBreakingChangeMetadataModel.parse(args.conditionalBreakingChangeMetadata))}
           )
           RETURNING
             "id"
@@ -4782,6 +4789,7 @@ const SchemaVersionModel = zod.intersection(
       .boolean()
       .nullable()
       .transform(val => val ?? false),
+    conditionalBreakingChangeMetadata: ConditionalBreakingChangeMetadataModel.nullable(),
   }),
   zod
     .union([
@@ -4927,6 +4935,7 @@ async function insertSchemaVersion(
       sha: string;
       repository: string;
     };
+    conditionalBreakingChangeMetadata: null | ConditionalBreakingChangeMetadata;
   },
 ) {
   const query = sql`
@@ -4946,7 +4955,8 @@ async function insertSchemaVersion(
         github_repository,
         github_sha,
         tags,
-        has_contract_composition_errors
+        has_contract_composition_errors,
+        conditional_breaking_change_metadata
       )
     VALUES
       (
@@ -4968,7 +4978,8 @@ async function insertSchemaVersion(
         ${args.github?.repository ?? null},
         ${args.github?.sha ?? null},
         ${Array.isArray(args.tags) ? sql.array(args.tags, 'text') : null},
-        ${args.hasContractCompositionErrors}
+        ${args.hasContractCompositionErrors},
+        ${jsonify(InsertConditionalBreakingChangeMetadataModel.parse(args.conditionalBreakingChangeMetadata))}
       )
     RETURNING
       ${schemaVersionSQLFields()}
@@ -5038,12 +5049,10 @@ export function toSerializableSchemaChange(change: SchemaChangeType): {
       name: string;
       hash: string;
       count: number;
-      percentage: number;
     }>;
     topAffectedClients: Array<{
       name: string;
       count: number;
-      percentage: number;
     }>;
   };
 } {
@@ -5080,6 +5089,7 @@ const schemaCheckSQLFields = sql`
   , coalesce(c."is_manually_approved", false) as "isManuallyApproved"
   , c."manual_approval_user_id" as "manualApprovalUserId"
   , c."context_id" as "contextId"
+  , c."conditional_breaking_change_metadata" as "conditionalBreakingChangeMetadata"
 `;
 
 const schemaVersionSQLFields = (t = sql``) => sql`
@@ -5099,6 +5109,7 @@ const schemaVersionSQLFields = (t = sql``) => sql`
   , ${t}"record_version" as "recordVersion"
   , ${t}"tags"
   , ${t}"has_contract_composition_errors" as "hasContractCompositionErrors"
+  , ${t}"conditional_breaking_change_metadata" as "conditionalBreakingChangeMetadata"
 `;
 
 const targetSQLFields = sql`

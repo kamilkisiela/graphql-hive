@@ -252,8 +252,8 @@ export const resolvers: TargetModule.Resolvers = {
         target,
         project,
         organization,
-        targets: input.targets,
-        excludedClients: input.excludedClients ?? [],
+        targets: result.data.targets,
+        excludedClients: result.data.excludedClients ?? [],
       });
 
       return {

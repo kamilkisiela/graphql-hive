@@ -2,7 +2,12 @@ import { parse, print } from 'graphql';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import lodash from 'lodash';
 import { z } from 'zod';
-import type { SchemaChangeType, SchemaCheck, SchemaCompositionError } from '@hive/storage';
+import type {
+  ConditionalBreakingChangeMetadata,
+  SchemaChangeType,
+  SchemaCheck,
+  SchemaCompositionError,
+} from '@hive/storage';
 import { sortSDL } from '@theguild/federation-composition';
 import { RegistryModel, SchemaChecksFilter } from '../../../__generated__/types';
 import {
@@ -32,6 +37,7 @@ import {
   TargetSelector,
 } from '../../shared/providers/storage';
 import { TargetManager } from '../../target/providers/target-manager';
+import { BreakingSchemaChangeUsageHelper } from './breaking-schema-changes-helper';
 import { SCHEMA_MODULE_CONFIG, type SchemaModuleConfig } from './config';
 import { Contracts } from './contracts';
 import { FederationOrchestrator } from './orchestrators/federation';
@@ -76,6 +82,7 @@ export class SchemaManager {
     private organizationManager: OrganizationManager,
     private schemaHelper: SchemaHelper,
     private contracts: Contracts,
+    private breakingSchemaChangeUsageHelper: BreakingSchemaChangeUsageHelper,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
   ) {
     this.logger = logger.child({ source: 'SchemaManager' });
@@ -347,6 +354,7 @@ export class SchemaManager {
         schemaCompositionErrors: Array<SchemaCompositionError> | null;
         changes: null | Array<SchemaChangeType>;
       }>;
+      conditionalBreakingChangeMetadata: null | ConditionalBreakingChangeMetadata;
     } & TargetSelector) &
       (
         | {
@@ -676,6 +684,15 @@ export class SchemaManager {
     if (schemaCheck == null) {
       this.logger.debug('Schema check not found (args=%o)', args);
       return null;
+    }
+
+    if (schemaCheck.breakingSchemaChanges && schemaCheck.conditionalBreakingChangeMetadata) {
+      for (const change of schemaCheck.breakingSchemaChanges) {
+        this.breakingSchemaChangeUsageHelper.registerUsageDataForBreakingSchemaChange(
+          change,
+          schemaCheck.conditionalBreakingChangeMetadata.usage,
+        );
+      }
     }
 
     return schemaCheck;

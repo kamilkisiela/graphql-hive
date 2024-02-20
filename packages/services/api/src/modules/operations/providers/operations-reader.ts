@@ -1080,6 +1080,7 @@ export class OperationsReader {
     const TotalCountModel = z
       .tuple([z.object({ amountOfRequests: z.string() })])
       .transform(data => ensureNumber(data[0].amountOfRequests));
+
     return await this.clickHouse
       .query<unknown>({
         queryId: 'getTotalCountForSchemaCoordinates',
@@ -1105,6 +1106,7 @@ export class OperationsReader {
     excludedClients: null | readonly string[];
     period: DateRange;
     schemaCoordinates: string[];
+    requestCountThreshold: number;
   }) {
     const RecordArrayType = z.array(
       z.object({
@@ -1150,6 +1152,7 @@ export class OperationsReader {
             GROUP BY
               "coordinates_daily"."coordinate",
               "coordinates_daily"."hash"
+            HAVING SUM("coordinates_daily"."total") >= ${String(args.requestCountThreshold)}
             ORDER BY
               "total" DESC,
               "coordinates_daily"."hash" DESC
@@ -1218,6 +1221,7 @@ export class OperationsReader {
       excludedClients: null | readonly string[];
       period: DateRange;
       schemaCoordinate: string;
+      requestCountThreshold: number;
     },
     Array<{
       hash: string;
@@ -1226,13 +1230,14 @@ export class OperationsReader {
     }> | null
   >(
     item =>
-      `${item.targetIds.join(',')}-${item.excludedClients?.join(',') ?? ''}-${item.period.from.toISOString()}-${item.period.to.toISOString()}`,
+      `${item.targetIds.join(',')}-${item.excludedClients?.join(',') ?? ''}-${item.period.from.toISOString()}-${item.period.to.toISOString()}-${item.requestCountThreshold}`,
     async items => {
       const schemaCoordinates = items.map(item => item.schemaCoordinate);
       return await this._getTopOperationsForSchemaCoordinates({
         targetIds: items[0].targetIds,
         excludedClients: items[0].excludedClients,
         period: items[0].period,
+        requestCountThreshold: items[0].requestCountThreshold,
         schemaCoordinates,
       }).then(result => result.map(result => Promise.resolve(result)));
     },

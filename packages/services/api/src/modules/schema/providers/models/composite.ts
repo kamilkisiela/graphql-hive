@@ -2,7 +2,7 @@ import { Injectable, Scope } from 'graphql-modules';
 import { SchemaChangeType } from '@hive/storage';
 import { FederationOrchestrator } from '../orchestrators/federation';
 import { StitchingOrchestrator } from '../orchestrators/stitching';
-import { RegistryChecks } from '../registry-checks';
+import { RegistryChecks, type ConditionalBreakingChangeDiffConfig } from '../registry-checks';
 import { swapServices } from '../schema-helper';
 import type { PublishInput } from '../schema-publisher';
 import type {
@@ -48,11 +48,7 @@ export class CompositeModel {
       }
     > | null;
     compositionCheck: Awaited<ReturnType<RegistryChecks['composition']>>;
-    usageDataSelector: {
-      organization: string;
-      project: string;
-      target: string;
-    };
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
   }): Promise<Array<ContractCheckInput> | null> {
     const contractResults = (args.compositionCheck.result ?? args.compositionCheck.reason)
       ?.contracts;
@@ -73,7 +69,7 @@ export class CompositeModel {
           contractName: contract.contract.contractName,
           compositionCheck: contractCompositionResult,
           diffCheck: await this.checks.diff({
-            usageDataSelector: args.usageDataSelector,
+            conditionalBreakingChangeConfig: args.conditionalBreakingChangeDiffConfig,
             includeUrlChanges: false,
             // contracts were introduced after this, so we do not need to filter out federation.
             filterOutFederationChanges: false,
@@ -96,6 +92,7 @@ export class CompositeModel {
     organization,
     baseSchema,
     approvedChanges,
+    conditionalBreakingChangeDiffConfig,
     contracts,
   }: {
     input: {
@@ -122,6 +119,7 @@ export class CompositeModel {
     project: Project;
     organization: Organization;
     approvedChanges: Map<string, SchemaChangeType>;
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
     contracts: Array<
       ContractInput & {
         approvedChanges: Map<string, SchemaChangeType> | null;
@@ -201,18 +199,18 @@ export class CompositeModel {
     const contractChecks = await this.getContractChecks({
       contracts,
       compositionCheck,
-      usageDataSelector: selector,
+      conditionalBreakingChangeDiffConfig,
     });
 
     const [diffCheck, policyCheck] = await Promise.all([
       this.checks.diff({
-        usageDataSelector: selector,
         includeUrlChanges: false,
         filterOutFederationChanges: project.type === ProjectType.FEDERATION,
         approvedChanges,
         existingSdl: previousVersionSdl,
         incomingSdl:
           compositionCheck.result?.fullSchemaSdl ?? compositionCheck.reason?.fullSchemaSdl ?? null,
+        conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
       }),
       this.checks.policyCheck({
         selector,
@@ -279,6 +277,7 @@ export class CompositeModel {
     schemaVersionContractNames,
     baseSchema,
     contracts,
+    conditionalBreakingChangeDiffConfig,
   }: {
     input: PublishInput;
     project: Project;
@@ -297,6 +296,7 @@ export class CompositeModel {
     schemaVersionContractNames: string[] | null;
     baseSchema: string | null;
     contracts: Array<ContractInput> | null;
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
   }): Promise<SchemaPublishResult> {
     const incoming: PushedCompositeSchema = {
       kind: 'composite',
@@ -436,11 +436,7 @@ export class CompositeModel {
     });
 
     const diffCheck = await this.checks.diff({
-      usageDataSelector: {
-        target: target.id,
-        project: project.id,
-        organization: project.orgId,
-      },
+      conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
       includeUrlChanges: {
         schemasBefore: schemaVersionToCompareAgainst?.schemas ?? [],
         schemasAfter: schemas,
@@ -451,16 +447,10 @@ export class CompositeModel {
       incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
     });
 
-    const usageDataSelector = {
-      target: target.id,
-      project: project.id,
-      organization: project.orgId,
-    };
-
     const contractChecks = await this.getContractChecks({
       contracts,
       compositionCheck,
-      usageDataSelector,
+      conditionalBreakingChangeDiffConfig,
     });
 
     const hasNewUrl =
@@ -518,6 +508,7 @@ export class CompositeModel {
     project,
     selector,
     baseSchema,
+    conditionalBreakingChangeDiffConfig,
     contracts,
   }: {
     input: {
@@ -542,6 +533,7 @@ export class CompositeModel {
       schemas: PushedCompositeSchema[];
     } | null;
     contracts: Array<ContractInput> | null;
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
   }): Promise<SchemaDeleteResult> {
     const incoming: DeletedCompositeSchema = {
       kind: 'composite',
@@ -602,7 +594,7 @@ export class CompositeModel {
     });
 
     const diffCheck = await this.checks.diff({
-      usageDataSelector: selector,
+      conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
       includeUrlChanges: {
         schemasBefore: latestVersion.schemas,
         schemasAfter: schemas,
@@ -616,7 +608,7 @@ export class CompositeModel {
     const contractChecks = await this.getContractChecks({
       contracts,
       compositionCheck,
-      usageDataSelector: selector,
+      conditionalBreakingChangeDiffConfig,
     });
 
     if (

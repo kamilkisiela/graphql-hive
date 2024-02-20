@@ -47,6 +47,7 @@ import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import { extractSuperGraphInformation } from './lib/federation-super-graph';
 import { stripUsedSchemaCoordinatesFromDocumentNode } from './lib/unused-graphql';
+import { BreakingSchemaChangeUsageHelper } from './providers/breaking-schema-changes-helper';
 import { ContractsManager } from './providers/contracts-manager';
 import { SchemaCheckManager } from './providers/schema-check-manager';
 import { SchemaManager } from './providers/schema-manager';
@@ -794,7 +795,8 @@ export const resolvers: SchemaModule.Resolvers = {
     criticalityReason: change => change.reason,
     approval: change => change.approvalMetadata,
     isSafeBasedOnUsage: change => change.isSafeBasedOnUsage,
-    usageStatistics: change => change.usageStatistics,
+    usageStatistics: (change, _, { injector }) =>
+      injector.get(BreakingSchemaChangeUsageHelper).getUsageDataForBreakingSchemaChange(change),
   },
   SchemaChangeApproval: {
     approvedBy: (approval, _, { injector }) =>

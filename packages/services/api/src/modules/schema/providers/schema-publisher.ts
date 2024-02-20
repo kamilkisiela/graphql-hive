@@ -6,11 +6,16 @@ import lodash from 'lodash';
 import promClient from 'prom-client';
 import { z } from 'zod';
 import { CriticalityLevel } from '@graphql-inspector/core';
-import { SchemaChangeType, SchemaCheck } from '@hive/storage';
+import type {
+  ConditionalBreakingChangeMetadata,
+  SchemaChangeType,
+  SchemaCheck,
+} from '@hive/storage';
 import * as Sentry from '@sentry/node';
 import * as Types from '../../../__generated__/types';
 import { Organization, Project, ProjectType, Schema, Target } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
+import { createPeriod } from '../../../shared/helpers';
 import { isGitHubRepositoryString } from '../../../shared/is-github-repository-string';
 import { bolderize } from '../../../shared/markdown';
 import { sentry } from '../../../shared/sentry';
@@ -21,6 +26,7 @@ import {
   GitHubIntegrationManager,
   type GitHubCheckRun,
 } from '../../integrations/providers/github-integration-manager';
+import { OperationsReader } from '../../operations/providers/operations-reader';
 import { OrganizationManager } from '../../organization/providers/organization-manager';
 import { ProjectManager } from '../../project/providers/project-manager';
 import { RateLimitProvider } from '../../rate-limit/providers/rate-limit.provider';
@@ -50,6 +56,7 @@ import {
 } from './models/shared';
 import { SingleModel } from './models/single';
 import { SingleLegacyModel } from './models/single-legacy';
+import type { ConditionalBreakingChangeDiffConfig } from './registry-checks';
 import { ensureCompositeSchemas, ensureSingleSchema, SchemaHelper } from './schema-helper';
 import { SchemaManager } from './schema-manager';
 import { SchemaVersionHelper } from './schema-version-helper';
@@ -101,6 +108,13 @@ function assertNonNull<T>(value: T | null, message: string): T {
   return value;
 }
 
+type ConditionalBreakingChangeConfiguration = {
+  conditionalBreakingChangeDiffConfig: ConditionalBreakingChangeDiffConfig;
+  retentionInDays: number;
+  percentage: number;
+  totalRequestCount: number;
+};
+
 @Injectable({
   scope: Scope.Operation,
 })
@@ -138,6 +152,7 @@ export class SchemaPublisher {
     private rateLimit: RateLimitProvider,
     private contracts: Contracts,
     private schemaVersionHelper: SchemaVersionHelper,
+    private operationsReader: OperationsReader,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
     singleModel: SingleModel,
     compositeModel: CompositeModel,
@@ -157,6 +172,100 @@ export class SchemaPublisher {
       [ProjectType.STITCHING]: {
         modern: compositeModel,
         legacy: compositeLegacyModel,
+      },
+    };
+  }
+
+  private async getConditionalBreakingChangeConfiguration({
+    selector,
+  }: {
+    selector: {
+      organization: string;
+      project: string;
+      target: string;
+    };
+  }): Promise<ConditionalBreakingChangeConfiguration | null> {
+    try {
+      const settings = await this.storage.getTargetSettings(selector);
+
+      if (!settings.validation.enabled) {
+        this.logger.debug('Usage validation disabled');
+        this.logger.debug('Mark all as used');
+        return null;
+      }
+
+      if (settings.validation.enabled && settings.validation.targets.length === 0) {
+        this.logger.debug('Usage validation enabled but no targets to check against');
+        this.logger.debug('Mark all as used');
+        return null;
+      }
+
+      const targetIds = settings.validation.targets;
+      const excludedClientNames = settings.validation.excludedClients?.length
+        ? settings.validation.excludedClients
+        : null;
+      const period = createPeriod(`${settings.validation.period}d`);
+
+      const totalRequestCount = await this.operationsReader.getTotalAmountOfRequests({
+        targetIds,
+        excludedClients: excludedClientNames,
+        period,
+      });
+
+      return {
+        conditionalBreakingChangeDiffConfig: {
+          period,
+          targetIds,
+          excludedClientNames: settings.validation.excludedClients?.length
+            ? settings.validation.excludedClients
+            : null,
+          requestCountThreshold: totalRequestCount * settings.validation.percentage,
+        },
+        retentionInDays: settings.validation.period,
+        percentage: settings.validation.percentage,
+        totalRequestCount,
+      };
+    } catch (error: unknown) {
+      this.logger.error(`Failed to get settings`, error);
+      return null;
+    }
+  }
+
+  private async getConditionalBreakingChangeMetadata(args: {
+    conditionalBreakingChangeConfiguration: null | ConditionalBreakingChangeConfiguration;
+    organizationId: string;
+    projectId: string;
+    targetId: string;
+  }): Promise<null | ConditionalBreakingChangeMetadata> {
+    if (args.conditionalBreakingChangeConfiguration === null) {
+      return null;
+    }
+
+    const { conditionalBreakingChangeDiffConfig } = args.conditionalBreakingChangeConfiguration;
+
+    return {
+      period: conditionalBreakingChangeDiffConfig.period,
+      settings: {
+        retentionInDays: args.conditionalBreakingChangeConfiguration.retentionInDays,
+        excludedClientNames: conditionalBreakingChangeDiffConfig.excludedClientNames,
+        percentage: args.conditionalBreakingChangeConfiguration.percentage,
+        targets: await Promise.all(
+          conditionalBreakingChangeDiffConfig.targetIds.map(async targetId => {
+            return {
+              id: targetId,
+              name: (
+                await this.targetManager.getTarget({
+                  organization: args.organizationId,
+                  project: args.projectId,
+                  target: args.targetId,
+                })
+              ).name,
+            };
+          }),
+        ),
+      },
+      usage: {
+        totalRequestCount: args.conditionalBreakingChangeConfiguration.totalRequestCount,
       },
     };
   }
@@ -400,6 +509,11 @@ export class SchemaPublisher {
         ? latestSchemaVersion
         : latestComposableSchemaVersion;
 
+    const conditionalBreakingChangeConfiguration =
+      await this.getConditionalBreakingChangeConfiguration({
+        selector,
+      });
+
     const schemaVersionContracts = comparedSchemaVersion
       ? await this.contracts.getContractVersionsForSchemaVersion({
           schemaVersionId: comparedSchemaVersion.id,
@@ -430,6 +544,8 @@ export class SchemaPublisher {
           project,
           organization,
           approvedChanges: approvedSchemaChanges,
+          conditionalBreakingChangeDiffConfig:
+            conditionalBreakingChangeConfiguration?.conditionalBreakingChangeDiffConfig ?? null,
         });
         break;
       case ProjectType.FEDERATION:
@@ -475,6 +591,8 @@ export class SchemaPublisher {
               ...contract,
               approvedChanges: approvedContractChanges?.get(contract.contract.id) ?? null,
             })) ?? null,
+          conditionalBreakingChangeDiffConfig:
+            conditionalBreakingChangeConfiguration?.conditionalBreakingChangeDiffConfig ?? null,
         });
         break;
       default:
@@ -519,6 +637,12 @@ export class SchemaPublisher {
         githubSha: githubCheckRun?.commit ?? null,
         expiresAt,
         contextId,
+        conditionalBreakingChangeMetadata: await this.getConditionalBreakingChangeMetadata({
+          conditionalBreakingChangeConfiguration,
+          organizationId: project.orgId,
+          projectId: project.id,
+          targetId: target.id,
+        }),
         contracts:
           checkResult.state.contracts?.map(contract => ({
             contractId: contract.contractId,
@@ -557,6 +681,12 @@ export class SchemaPublisher {
         githubSha: githubCheckRun?.commit ?? null,
         expiresAt,
         contextId,
+        conditionalBreakingChangeMetadata: await this.getConditionalBreakingChangeMetadata({
+          conditionalBreakingChangeConfiguration,
+          organizationId: project.orgId,
+          projectId: project.id,
+          targetId: target.id,
+        }),
         contracts:
           checkResult.state?.contracts?.map(contract => ({
             contractId: contract.contractId,
@@ -617,6 +747,12 @@ export class SchemaPublisher {
         githubSha: githubCheckRun?.commit ?? null,
         expiresAt,
         contextId,
+        conditionalBreakingChangeMetadata: await this.getConditionalBreakingChangeMetadata({
+          conditionalBreakingChangeConfiguration,
+          organizationId: project.orgId,
+          projectId: project.id,
+          targetId: target.id,
+        }),
         contracts: schemaVersionContracts
           ? await Promise.all(
               schemaVersionContracts?.edges.map(async edge => ({
@@ -1088,6 +1224,15 @@ export class SchemaPublisher {
           } as const;
         }
 
+        const conditionalBreakingChangeConfiguration =
+          await this.getConditionalBreakingChangeConfiguration({
+            selector: {
+              target: input.target.id,
+              project: input.project,
+              organization: input.organization,
+            },
+          });
+
         const contracts =
           project.type === ProjectType.FEDERATION
             ? await this.contracts.loadActiveContractsWithLatestValidContractVersionsByTargetId({
@@ -1127,6 +1272,8 @@ export class SchemaPublisher {
             project: input.project,
             organization: input.organization,
           },
+          conditionalBreakingChangeDiffConfig:
+            conditionalBreakingChangeConfiguration?.conditionalBreakingChangeDiffConfig ?? null,
           contracts,
         });
 
@@ -1199,6 +1346,12 @@ export class SchemaPublisher {
                   });
                 }
               },
+              conditionalBreakingChangeMetadata: await this.getConditionalBreakingChangeMetadata({
+                conditionalBreakingChangeConfiguration,
+                organizationId: input.organization,
+                projectId: input.project,
+                targetId: input.target.id,
+              }),
             });
 
             const changes = deleteResult.state.changes ?? [];
@@ -1419,6 +1572,15 @@ export class SchemaPublisher {
 
     this.logger.debug(`Found ${latestVersion?.schemas.length ?? 0} most recent schemas`);
 
+    const conditionalBreakingChangeConfiguration =
+      await this.getConditionalBreakingChangeConfiguration({
+        selector: {
+          organization: organization.id,
+          project: project.id,
+          target: target.id,
+        },
+      });
+
     const contracts =
       project.type === ProjectType.FEDERATION
         ? await this.contracts.loadActiveContractsWithLatestValidContractVersionsByTargetId({
@@ -1473,6 +1635,8 @@ export class SchemaPublisher {
           project,
           target,
           baseSchema,
+          conditionalBreakingChangeDiffConfig:
+            conditionalBreakingChangeConfiguration?.conditionalBreakingChangeDiffConfig ?? null,
         });
         break;
       case ProjectType.FEDERATION:
@@ -1506,6 +1670,8 @@ export class SchemaPublisher {
           target,
           baseSchema,
           contracts,
+          conditionalBreakingChangeDiffConfig:
+            conditionalBreakingChangeConfiguration?.conditionalBreakingChangeDiffConfig ?? null,
         });
         break;
       default: {
@@ -1709,6 +1875,12 @@ export class SchemaPublisher {
       changes,
       diffSchemaVersionId,
       previousSchemaVersion: latestVersion?.version ?? null,
+      conditionalBreakingChangeMetadata: await this.getConditionalBreakingChangeMetadata({
+        conditionalBreakingChangeConfiguration,
+        organizationId,
+        projectId,
+        targetId,
+      }),
       contracts:
         publishResult.state.contracts?.map(contract => ({
           contractId: contract.contractId,

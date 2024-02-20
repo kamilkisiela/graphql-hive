@@ -1,7 +1,7 @@
 import { Injectable, Scope } from 'graphql-modules';
 import { FederationOrchestrator } from '../orchestrators/federation';
 import { StitchingOrchestrator } from '../orchestrators/stitching';
-import { RegistryChecks } from '../registry-checks';
+import { RegistryChecks, type ConditionalBreakingChangeDiffConfig } from '../registry-checks';
 import { swapServices } from '../schema-helper';
 import type { PublishInput } from '../schema-publisher';
 import type {
@@ -42,6 +42,7 @@ export class CompositeLegacyModel {
     project,
     organization,
     baseSchema,
+    conditionalBreakingChangeDiffConfig,
   }: {
     input: {
       sdl: string;
@@ -60,6 +61,7 @@ export class CompositeLegacyModel {
     baseSchema: string | null;
     project: Project;
     organization: Organization;
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
   }): Promise<SchemaCheckResult> {
     const incoming: PushedCompositeSchema = {
       kind: 'composite',
@@ -117,13 +119,13 @@ export class CompositeLegacyModel {
     });
 
     const diffCheck = await this.checks.diff({
-      usageDataSelector: selector,
       includeUrlChanges: false,
       filterOutFederationChanges: project.type === ProjectType.FEDERATION,
       approvedChanges: null,
       existingSdl: previousVersionSdl,
       incomingSdl:
         compositionCheck.result?.fullSchemaSdl ?? compositionCheck.reason?.fullSchemaSdl ?? null,
+      conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
     });
 
     if (compositionCheck.status === 'failed' || diffCheck.status === 'failed') {
@@ -159,6 +161,7 @@ export class CompositeLegacyModel {
     project,
     organization,
     baseSchema,
+    conditionalBreakingChangeDiffConfig,
   }: {
     input: PublishInput;
     project: Project;
@@ -170,6 +173,7 @@ export class CompositeLegacyModel {
       schemas: PushedCompositeSchema[];
     } | null;
     baseSchema: string | null;
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
   }): Promise<SchemaPublishResult> {
     const incoming: PushedCompositeSchema = {
       kind: 'composite',
@@ -275,11 +279,6 @@ export class CompositeLegacyModel {
 
     const [diffCheck, metadataCheck] = await Promise.all([
       this.checks.diff({
-        usageDataSelector: {
-          target: target.id,
-          project: project.id,
-          organization: project.orgId,
-        },
         includeUrlChanges: {
           schemasBefore: latestVersion?.schemas ?? [],
           schemasAfter: schemas,
@@ -288,6 +287,7 @@ export class CompositeLegacyModel {
         approvedChanges: null,
         existingSdl: previousVersionSdl,
         incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+        conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
       }),
       isFederation
         ? {

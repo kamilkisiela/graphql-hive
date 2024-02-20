@@ -3,9 +3,9 @@ import crypto from 'node:crypto';
 import stableJSONStringify from 'fast-json-stable-stringify';
 import { SerializableValue } from 'slonik';
 import { z } from 'zod';
-import { CriticalityLevel } from '@graphql-inspector/core';
-import type {
+import {
   ChangeType,
+  CriticalityLevel,
   DirectiveAddedChange,
   DirectiveArgumentAddedChange,
   DirectiveArgumentDefaultValueChangedChange,
@@ -817,6 +817,10 @@ const ApprovalMetadataModel = z.object({
 
 export type SchemaCheckApprovalMetadata = z.TypeOf<typeof ApprovalMetadataModel>;
 
+function isInputFieldAddedChange(change: Change): change is z.TypeOf<typeof InputFieldAddedModel> {
+  return change.type === 'INPUT_FIELD_ADDED';
+}
+
 export const HiveSchemaChangeModel = z
   .intersection(
     SchemaChangeModel,
@@ -835,14 +839,12 @@ export const HiveSchemaChangeModel = z
               hash: z.string(),
               name: z.string(),
               count: z.number(),
-              percentage: z.number(),
             }),
           ),
           topAffectedClients: z.array(
             z.object({
               name: z.string(),
               count: z.number(),
-              percentage: z.number(),
             }),
           ),
         })
@@ -870,11 +872,26 @@ export const HiveSchemaChangeModel = z
       readonly approvalMetadata: SchemaCheckApprovalMetadata | null;
       isSafeBasedOnUsage: boolean;
       usageStatistics: {
-        topAffectedOperations: { hash: string; name: string; count: number; percentage: number }[];
-        topAffectedClients: { name: string; count: number; percentage: number }[];
+        topAffectedOperations: { hash: string; name: string; count: number }[];
+        topAffectedClients: { name: string; count: number }[];
       } | null;
+      readonly breakingChangeSchemaCoordinate: string | null;
     } => {
       const change = schemaChangeFromSerializableChange(rawChange as any);
+
+      /** The schema coordinate used for detecting whether something is a breaking change can be different based on the change type. */
+      let breakingChangeSchemaCoordinate: string | null = null;
+
+      if (change.criticality.level === CriticalityLevel.Breaking) {
+        breakingChangeSchemaCoordinate = change.path ?? null;
+
+        if (
+          isInputFieldAddedChange(rawChange) &&
+          rawChange.meta.isAddedInputFieldTypeNullable === false
+        ) {
+          breakingChangeSchemaCoordinate = rawChange.meta.inputName;
+        }
+      }
 
       return {
         get id() {
@@ -893,6 +910,7 @@ export const HiveSchemaChangeModel = z
           false,
         reason: change.criticality.reason ?? null,
         usageStatistics: rawChange.usageStatistics ?? null,
+        breakingChangeSchemaCoordinate,
       };
     },
   );
@@ -976,6 +994,45 @@ const ContractCheckInput = z.object({
   safeSchemaChanges: z.array(HiveSchemaChangeModel).nullable(),
 });
 
+const DateOrString = z
+  .union([z.date(), z.string()])
+  .transform(value => (typeof value === 'string' ? new Date(value) : value));
+
+export const ConditionalBreakingChangeMetadataModel = z.object({
+  period: z.object({
+    from: DateOrString,
+    to: DateOrString,
+  }),
+  settings: z.object({
+    retentionInDays: z.number(),
+    percentage: z.number(),
+    excludedClientNames: z.array(z.string()).nullable(),
+    /** we keep both reference to id and name so in case target gets deleted we can still display the name */
+    targets: z.array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+      }),
+    ),
+  }),
+  usage: z.object({
+    totalRequestCount: z.number(),
+  }),
+});
+
+export type ConditionalBreakingChangeMetadata = z.TypeOf<
+  typeof ConditionalBreakingChangeMetadataModel
+>;
+
+export const InsertConditionalBreakingChangeMetadataModel =
+  ConditionalBreakingChangeMetadataModel.transform(data => ({
+    ...data,
+    period: {
+      from: data.period.from.toISOString(),
+      to: data.period.to.toISOString(),
+    },
+  })).nullable();
+
 const SchemaCheckInputModel = z.union([
   z.intersection(
     z.object({
@@ -985,6 +1042,7 @@ const SchemaCheckInputModel = z.union([
       ...NotManuallyApprovedSchemaCheckFields,
       ...SchemaCheckSharedInputFields,
       contracts: z.array(ContractCheckInput).nullable(),
+      conditionalBreakingChangeMetadata: ConditionalBreakingChangeMetadataModel.nullable(),
     }),
     z.union([
       z.object(FailedSchemaCompositionInputFields),
@@ -999,6 +1057,7 @@ const SchemaCheckInputModel = z.union([
       ...SuccessfulSchemaCompositionInputFields,
       ...SchemaCheckSharedInputFields,
       contracts: z.array(ContractCheckInput).nullable(),
+      conditionalBreakingChangeMetadata: ConditionalBreakingChangeMetadataModel.nullable(),
     }),
     z.union([
       z.object({ ...ManuallyApprovedSchemaCheckFields }),
@@ -1022,6 +1081,7 @@ export const SchemaCheckModel = z.union([
       ...PersistedSchemaCheckFields,
       ...NotManuallyApprovedSchemaCheckFields,
       ...SchemaCheckSharedOutputFields,
+      conditionalBreakingChangeMetadata: ConditionalBreakingChangeMetadataModel.nullable(),
     }),
     z.union([
       z.object(FailedSchemaCompositionOutputFields),
@@ -1036,6 +1096,7 @@ export const SchemaCheckModel = z.union([
       ...SuccessfulSchemaCompositionOutputFields,
       ...PersistedSchemaCheckFields,
       ...SchemaCheckSharedOutputFields,
+      conditionalBreakingChangeMetadata: ConditionalBreakingChangeMetadataModel.nullable(),
     }),
     z.union([
       z.object({ ...ManuallyApprovedSchemaCheckFields }),
