@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
+import { hostname } from 'os';
 import {
   createServer,
   registerShutdown,
@@ -16,7 +17,8 @@ import { createRateLimiter } from './limiter';
 async function main() {
   if (env.sentry) {
     Sentry.init({
-      serverName: 'rate-limit',
+      serverName: hostname(),
+      dist: 'rate-limit',
       enabled: !!env.sentry,
       environment: env.environment,
       dsn: env.sentry.dsn,

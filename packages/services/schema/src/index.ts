@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import crypto from 'crypto';
+import { hostname } from 'os';
 import Redis from 'ioredis';
 import {
   createErrorHandler,
@@ -35,7 +36,8 @@ function decryptFactory() {
 async function main() {
   if (env.sentry) {
     Sentry.init({
-      serverName: 'schema',
+      serverName: hostname(),
+      dist: 'schema',
       enabled: !!env.sentry,
       environment: env.environment,
       dsn: env.sentry.dsn,
