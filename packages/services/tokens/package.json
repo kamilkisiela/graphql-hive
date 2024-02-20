@@ -12,7 +12,7 @@
   "devDependencies": {
     "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
-    "@sentry/node": "7.101.1",
+    "@sentry/node": "7.102.0",
     "@trpc/server": "10.45.1",
     "@types/ms": "0.7.34",
     "dotenv": "16.4.5",
