@@ -78,6 +78,7 @@ describe('Schema policy checks', () => {
       expect(message.split('\n')).toEqual([
         'ℹ Detected 1 change',
         '',
+        '   Safe changes:',
         '   - Field field was added to object type Query',
         '',
         '',
@@ -153,6 +154,7 @@ describe('Schema policy checks', () => {
         '',
         'ℹ Detected 1 change',
         '',
+        '   Safe changes:',
         '   - Field field was added to object type Query',
         '',
         'View full report:',
