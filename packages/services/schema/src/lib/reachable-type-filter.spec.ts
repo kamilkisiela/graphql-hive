@@ -1,5 +1,5 @@
 import { parse, print } from 'graphql';
-import { addDirectiveOnExcludedTypes, getReachableTypes } from './reachable-type-filter';
+import { addDirectiveOnTypes, getReachableTypes } from './reachable-type-filter';
 
 describe('getReachableTypes', () => {
   it('includes the query type', () => {
@@ -159,7 +159,7 @@ describe('getReachableTypes', () => {
   });
 });
 
-describe('addDirectiveOnExcludedTypes', () => {
+describe('addDirectiveOnTypes', () => {
   it('add directive on unused root type', () => {
     const documentNode = parse(/* GraphQL */ `
       type Query {
@@ -173,11 +173,11 @@ describe('addDirectiveOnExcludedTypes', () => {
         query: Query
       }
     `);
-    const document = addDirectiveOnExcludedTypes(
+    const document = addDirectiveOnTypes({
       documentNode,
-      getReachableTypes(documentNode),
-      'inaccessible',
-    );
+      excludedTypeNames: getReachableTypes(documentNode),
+      directiveName: 'inaccessible',
+    });
     expect(print(document)).toMatchInlineSnapshot(`
       type Query {
         hello: String
@@ -208,11 +208,11 @@ describe('addDirectiveOnExcludedTypes', () => {
 
       directive @inaccessible on OBJECT
     `);
-    const document = addDirectiveOnExcludedTypes(
+    const document = addDirectiveOnTypes({
       documentNode,
-      getReachableTypes(documentNode),
-      'inaccessible',
-    );
+      excludedTypeNames: getReachableTypes(documentNode),
+      directiveName: 'inaccessible',
+    });
     expect(print(document)).toMatchInlineSnapshot(`
       type Query {
         hello: String
@@ -273,11 +273,17 @@ describe('addDirectiveOnExcludedTypes', () => {
       }
     `);
 
-    const document = addDirectiveOnExcludedTypes(
+    const excludedTypeNames = getReachableTypes(documentNode);
+
+    excludedTypeNames.add('join__Graph');
+    excludedTypeNames.add('join__FieldSet');
+
+    const document = addDirectiveOnTypes({
       documentNode,
-      getReachableTypes(documentNode),
-      'inaccessible',
-    );
+      excludedTypeNames,
+      directiveName: 'inaccessible',
+    });
+
     expect(print(document)).toMatchInlineSnapshot(`
       type Query @join__type(graph: BAR_GRAPHQL) {
         bar: Car @inaccessible
@@ -300,13 +306,13 @@ describe('addDirectiveOnExcludedTypes', () => {
 
       directive @inaccessible on FIELD_DEFINITION | OBJECT | INTERFACE | UNION | ENUM | ENUM_VALUE | SCALAR | INPUT_OBJECT | INPUT_FIELD_DEFINITION | ARGUMENT_DEFINITION
 
-      scalar join__FieldSet @inaccessible
+      scalar join__FieldSet
 
       directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boolean! = false, resolvable: Boolean! = true, isInterfaceObject: Boolean! = false) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
 
       directive @join__graph(name: String!, url: String!) on ENUM_VALUE
 
-      enum join__Graph @inaccessible {
+      enum join__Graph {
         BAR_GRAPHQL @join__graph(name: "bar.graphql", url: "")
       }
     `);
