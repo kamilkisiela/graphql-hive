@@ -8,6 +8,7 @@ import {
 } from '../auth/providers/organization-access';
 import { isProjectScope, ProjectAccessScope } from '../auth/providers/project-access';
 import { isTargetScope, TargetAccessScope } from '../auth/providers/target-access';
+import { InMemoryRateLimiter } from '../rate-limit/providers/in-memory-rate-limiter';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { Logger } from '../shared/providers/logger';
 import type { OrganizationModule } from './__generated__/types';
@@ -255,6 +256,13 @@ export const resolvers: OrganizationModule.Resolvers = {
       };
     },
     async inviteToOrganizationByEmail(_, { input }, { injector }) {
+      await injector.get(InMemoryRateLimiter).check(
+        'inviteToOrganizationByEmail',
+        5_000, // 5 seconds
+        6, // 6 invites
+        `Exceeded rate limit for inviting to organization by email.`,
+      );
+
       const InputModel = z.object({
         email: z.string().email().max(128, 'Email must be at most 128 characters long'),
       });
