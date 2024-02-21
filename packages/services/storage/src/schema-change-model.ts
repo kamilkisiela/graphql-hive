@@ -794,7 +794,7 @@ export const SchemaCompositionErrorModel = z.object({
 
 export type SchemaCompositionError = z.TypeOf<typeof SchemaCompositionErrorModel>;
 
-const SchemaPolicyWarningModel = z.object({
+export const SchemaPolicyWarningModel = z.object({
   message: z.string(),
   line: z.number().nullable().optional(),
   column: z.number().nullable().optional(),
