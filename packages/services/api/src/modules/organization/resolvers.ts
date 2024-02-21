@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
+import { NameModel } from '../../shared/entities';
 import { createConnection } from '../../shared/schema';
 import { AuthManager } from '../auth/providers/auth-manager';
 import {
@@ -14,14 +15,7 @@ import { Logger } from '../shared/providers/logger';
 import type { OrganizationModule } from './__generated__/types';
 import { OrganizationManager } from './providers/organization-manager';
 
-const OrganizationNameModel = z
-  .string()
-  .min(2)
-  .max(50)
-  .regex(
-    /^([a-z]|[0-9]|\s|\.|,|_|-|\/|&)+$/i,
-    `Name restricted to alphanumerical characters, spaces and . , _ - / &`,
-  );
+const OrganizationNameModel = NameModel.min(2).max(50);
 
 const createOrUpdateMemberRoleInputSchema = z.object({
   name: z
