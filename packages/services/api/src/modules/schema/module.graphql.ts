@@ -801,8 +801,8 @@ export default gql`
 
   type SchemaPolicyWarning {
     message: String!
-    ruleId: String!
-    start: CodePosition!
+    ruleId: String
+    start: CodePosition
     end: CodePosition
   }
 
