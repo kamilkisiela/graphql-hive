@@ -26,11 +26,8 @@
     "zod-validation-error": "3.0.2"
   },
   "buildOptions": {
-    "runify": true,
-    "tsup": true,
-    "tags": [
-      "backend"
-    ],
-    "banner": "../../../scripts/banner.js"
+    "external": [
+      "pg-native"
+    ]
   }
 }
