@@ -2,8 +2,10 @@ FROM node:18.18.2-slim
 
 RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /usr/src/app
-COPY . /usr/src/app/
+ARG SERVICE_DIR_NAME
+
+WORKDIR /usr/src/app/$SERVICE_DIR_NAME
+COPY . /usr/src/app/$SERVICE_DIR_NAME/
 
 LABEL org.opencontainers.image.title=$IMAGE_TITLE
 LABEL org.opencontainers.image.version=$RELEASE

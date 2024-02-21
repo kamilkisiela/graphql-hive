@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { hostname } from 'os';
 import {
   createErrorHandler,
   createServer,
@@ -17,7 +18,8 @@ import type { Context } from './types';
 async function main() {
   if (env.sentry) {
     Sentry.init({
-      serverName: 'webhooks',
+      serverName: hostname(),
+      dist: 'webhooks',
       enabled: !!env.sentry,
       environment: env.environment,
       dsn: env.sentry.dsn,

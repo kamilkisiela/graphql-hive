@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { hostname } from 'os';
 import {
   createServer,
   registerShutdown,
@@ -25,7 +26,8 @@ import { createUsage } from './usage';
 async function main() {
   if (env.sentry) {
     Sentry.init({
-      serverName: 'usage',
+      serverName: hostname(),
+      dist: 'usage',
       enabled: !!env.sentry,
       environment: env.environment,
       dsn: env.sentry.dsn,

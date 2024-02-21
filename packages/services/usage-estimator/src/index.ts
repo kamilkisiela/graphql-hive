@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import 'reflect-metadata';
+import { hostname } from 'os';
 import {
   createServer,
   registerShutdown,
@@ -16,7 +17,8 @@ import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
 async function main() {
   if (env.sentry) {
     Sentry.init({
-      serverName: 'usage-estimator',
+      serverName: hostname(),
+      dist: 'usage-estimator',
       enabled: !!env.sentry,
       environment: env.environment,
       dsn: env.sentry.dsn,
