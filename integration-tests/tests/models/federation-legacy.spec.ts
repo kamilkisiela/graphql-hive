@@ -305,6 +305,7 @@ describe('publish', () => {
       }),
     ).resolves.toMatchInlineSnapshot(`
       i Detected 1 change
+      Safe changes:
       - Field price was added to object type Product
       v Schema published
       i Available at http://localhost:8080/$organization/$project/production/history/$version
