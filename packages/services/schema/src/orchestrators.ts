@@ -34,7 +34,7 @@ import {
   getInaccessibleDirectiveNameFromFederation2SupergraphSDL,
   type Federation2SubgraphDocumentNodeByTagsFilter,
 } from './lib/federation-tag-extraction';
-import { addDirectiveOnExcludedTypes, getReachableTypes } from './lib/reachable-type-filter';
+import { addDirectiveOnTypes, getReachableTypes } from './lib/reachable-type-filter';
 import type {
   ComposeAndValidateInput,
   ComposeAndValidateOutput,
@@ -515,6 +515,15 @@ async function composeExternalFederation(args: {
   return parseResult.data;
 }
 
+const federationTypes = new Set([
+  'join__FieldSet',
+  'join__Graph',
+  'link__Import',
+  'link__Purpose',
+  'policy__Policy',
+  'requiresScopes__Scope',
+]);
+
 const createFederation: (
   cache: Cache,
   logger: FastifyLoggerInstance,
@@ -656,12 +665,17 @@ const createFederation: (
 
             // we retrieve the list of reachable types from the public api sdl
             const reachableTypeNames = getReachableTypes(parse(compositionResult.result.sdl));
+            // apollo router does not like @inaccessible on federation types...
+            for (const federationType of federationTypes) {
+              reachableTypeNames.add(federationType);
+            }
+
             // then we apply the filter to the supergraph SDL (which is the source for the public api sdl)
-            supergraphSDL = addDirectiveOnExcludedTypes(
-              supergraphSDL,
-              reachableTypeNames,
-              inaccessibleDirectiveName,
-            );
+            supergraphSDL = addDirectiveOnTypes({
+              documentNode: supergraphSDL,
+              excludedTypeNames: reachableTypeNames,
+              directiveName: inaccessibleDirectiveName,
+            });
             compositionResult.result.supergraph = print(supergraphSDL);
             compositionResult.result.sdl = print(transformSupergraphToPublicSchema(supergraphSDL));
           }
