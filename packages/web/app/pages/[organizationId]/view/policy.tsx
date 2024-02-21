@@ -66,7 +66,6 @@ const UpdateSchemaPolicyForOrganization = graphql(`
           id
           ...OrganizationLayout_CurrentOrganizationFragment
           schemaPolicy {
-            # we should limit it to users with read-only access to settings
             id
             updatedAt
             allowOverrides
