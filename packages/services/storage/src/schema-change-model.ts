@@ -796,11 +796,11 @@ export type SchemaCompositionError = z.TypeOf<typeof SchemaCompositionErrorModel
 
 export const SchemaPolicyWarningModel = z.object({
   message: z.string(),
-  line: z.number(),
-  column: z.number(),
-  ruleId: z.string(),
-  endLine: z.number().nullable(),
-  endColumn: z.number().nullable(),
+  line: z.number().nullable().optional(),
+  column: z.number().nullable().optional(),
+  ruleId: z.string().nullable(),
+  endLine: z.number().nullable().optional(),
+  endColumn: z.number().nullable().optional(),
 });
 
 function createSchemaChangeId(change: { type: string; meta: Record<string, unknown> }): string {

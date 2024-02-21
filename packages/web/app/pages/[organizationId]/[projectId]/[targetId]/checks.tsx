@@ -478,6 +478,12 @@ const SchemaPolicyEditor_PolicyWarningsFragment = graphql(`
   }
 `);
 
+function withLineAndColumn<T>(
+  marker: T,
+): marker is T & { start: { line: number; column: number } } {
+  return typeof (marker as any)?.start?.line === 'number';
+}
+
 const SchemaPolicyEditor = (props: {
   compositeSchemaSDL: string;
   warnings: FragmentType<typeof SchemaPolicyEditor_PolicyWarningsFragment> | null;
@@ -496,22 +502,28 @@ const SchemaPolicyEditor = (props: {
       }}
       onMount={(_, monaco) => {
         monaco.editor.setModelMarkers(monaco.editor.getModels()[0], 'owner', [
-          ...(warnings?.edges.map(edge => ({
-            message: edge.node.message,
-            startLineNumber: edge.node.start.line,
-            startColumn: edge.node.start.column,
-            endLineNumber: edge.node.end?.line ?? edge.node.start.line,
-            endColumn: edge.node.end?.column ?? edge.node.start.column,
-            severity: monaco.MarkerSeverity.Warning,
-          })) ?? []),
-          ...(errors?.edges.map(edge => ({
-            message: edge.node.message,
-            startLineNumber: edge.node.start.line,
-            startColumn: edge.node.start.column,
-            endLineNumber: edge.node.end?.line ?? edge.node.start.line,
-            endColumn: edge.node.end?.column ?? edge.node.start.column,
-            severity: monaco.MarkerSeverity.Error,
-          })) ?? []),
+          ...(warnings?.edges
+            .map(edge => edge.node)
+            .filter(withLineAndColumn)
+            .map(node => ({
+              message: node.message,
+              startLineNumber: node.start.line,
+              startColumn: node.start.column,
+              endLineNumber: node.end?.line ?? node.start.line,
+              endColumn: node.end?.column ?? node.start.column,
+              severity: monaco.MarkerSeverity.Warning,
+            })) ?? []),
+          ...(errors?.edges
+            .map(edge => edge.node)
+            .filter(withLineAndColumn)
+            .map(node => ({
+              message: node.message,
+              startLineNumber: node.start.line,
+              startColumn: node.start.column,
+              endLineNumber: node.end?.line ?? node.start.line,
+              endColumn: node.end?.column ?? node.start.column,
+              severity: monaco.MarkerSeverity.Error,
+            })) ?? []),
         ]);
       }}
       schema={props.compositeSchemaSDL}
