@@ -27,6 +27,7 @@ jobs:
     with:
       dockerize: ${{ !github.event.pull_request.head.repo.fork }}
       imageTag: ${{ github.event.pull_request.head.sha }}
+      publishSourceMaps: true
       publishLatest: false
       targets: 'build'
       uploadJavaScriptArtifacts: true
