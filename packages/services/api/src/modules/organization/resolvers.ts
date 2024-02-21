@@ -19,8 +19,8 @@ const OrganizationNameModel = z
   .min(2)
   .max(50)
   .regex(
-    /^([A-Za-z]|[0-9]|_| )+$/,
-    "Only characters 'A-Z', 'a-z', '0-9', '_', '-' and ' ' are allowed.",
+    /^([a-z]|[0-9]|\s|\.|,|_|-|\/|&)+$/i,
+    `Name restricted to alphanumerical characters, spaces and . , _ - / &`,
   );
 
 const createOrUpdateMemberRoleInputSchema = z.object({

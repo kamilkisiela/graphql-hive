@@ -93,7 +93,7 @@ mjml.raw = (content: string): RawValue => ({
  */
 
 function escapeHtml(input: string): string {
-  const matchHtmlRegExp = /["'&<>]/;
+  const matchHtmlRegExp = /["'<>]/;
   const match = matchHtmlRegExp.exec(input);
 
   if (!match) {
@@ -110,8 +110,6 @@ function escapeHtml(input: string): string {
       case 34: // "
         escape = '&quot;';
         break;
-      case 38: // &
-        escape = '&amp;';
         break;
       case 39: // '
         escape = '&#39;';

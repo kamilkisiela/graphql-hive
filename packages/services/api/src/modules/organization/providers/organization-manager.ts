@@ -542,9 +542,7 @@ export class OrganizationManager {
                   <mj-image width="150px" src="https://graphql-hive.com/logo.png"></mj-image>
                   <mj-divider border-color="#ca8a04"></mj-divider>
                   <mj-text>
-                    Someone from <strong>${
-                      organization.name
-                    }</strong> invited you to join GraphQL Hive.
+                    Someone from <strong>${organization.name}</strong> invited you to join GraphQL Hive.
                   </mj-text>.
                   <mj-button href="${mjml.raw(this.appBaseUrl)}/join/${invitation.code}">
                     Accept the invitation
