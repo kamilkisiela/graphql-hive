@@ -155,6 +155,8 @@ export const backendConfig = (): TypeInput => {
                 email: user.email,
               };
 
+              // Revoke all sessions when a new session is created.
+              await SessionNode.revokeAllSessionsForUser(input.userId);
               return originalImplementation.createNewSession(input);
             },
           }),
