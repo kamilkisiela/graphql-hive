@@ -96,7 +96,7 @@ export const resolvers: OrganizationModule.Resolvers = {
           error: {
             message: 'Please check your input.',
             inputErrors: {
-              name: organizationNameResult.error.formErrors.fieldErrors?.[0]?.[0] ?? null,
+              name: organizationNameResult.error.issues[0].message ?? null,
             },
           },
         };
