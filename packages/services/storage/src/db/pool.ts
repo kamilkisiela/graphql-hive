@@ -16,6 +16,7 @@ export async function getPool(connection: string, maximumPoolSize: number) {
     interceptors: dbInterceptors,
     captureStackTrace: false,
     maximumPoolSize,
+    idleTimeout: 30000,
   });
 
   function interceptError<K extends Exclude<keyof CommonQueryMethods, 'transaction'>>(
