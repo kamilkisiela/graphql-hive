@@ -12,7 +12,6 @@ done
 pnpm sentry-cli releases set-commits --auto $SENTRY_RELEASE
 pnpm sentry-cli releases finalize "$SENTRY_RELEASE"
 
-
 # for dir in packages/web/*/dist; do
 #   name=$(echo $dir | awk -F / '{print $3}')
 #   echo $name
