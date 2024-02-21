@@ -18,8 +18,18 @@ import {
   startSentryTransaction,
 } from '@hive/service-common';
 import { createConnectionString, createStorage as createPostgreSQLStorage } from '@hive/storage';
-import { Dedupe, ExtraErrorData } from '@sentry/integrations';
-import { captureException, init, Integrations, SeverityLevel } from '@sentry/node';
+import {
+  contextLinesIntegration,
+  dedupeIntegration,
+  extraErrorDataIntegration,
+} from '@sentry/integrations';
+import {
+  captureException,
+  httpIntegration,
+  init,
+  linkedErrorsIntegration,
+  SeverityLevel,
+} from '@sentry/node';
 import { createServerAdapter } from '@whatwg-node/server';
 import { createContext, internalApiRouter } from './api';
 import { asyncStorage } from './async-storage';
@@ -41,15 +51,17 @@ export async function main() {
     ],
     release: env.release,
     integrations: [
-      new Integrations.Http({ tracing: true }),
-      new Integrations.ContextLines(),
-      new Integrations.LinkedErrors(),
-      new ExtraErrorData({
+      httpIntegration({ tracing: true }),
+      contextLinesIntegration({
+        frameContextLines: 0,
+      }),
+      linkedErrorsIntegration(),
+      extraErrorDataIntegration({
         depth: 2,
       }),
-      new Dedupe(),
+      dedupeIntegration(),
     ],
-    maxBreadcrumbs: 5,
+    maxBreadcrumbs: 10,
     defaultIntegrations: false,
     autoSessionTracking: false,
   });
