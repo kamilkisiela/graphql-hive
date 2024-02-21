@@ -15,7 +15,7 @@ directly with your preferred package manager (for example: `yarn hive ...` or `p
 If you are using a different runtime environment for your project, you should install the
 [Hive CLI binary](/docs/api-reference/cli#binary) and use it directly as a binary (`hive ...`).
 
-### GitHub Check Suites
+## GitHub Check Suites
 
 If you are using GitHub Actions, you can specify an additional flag to the Hive CLI: `--github`.
 
@@ -33,7 +33,7 @@ hive schema:publish schema.graphql --github
 hive schema:check schema.graphql --github
 ```
 
-#### GitHub Workflow for CI
+### GitHub Workflow for CI
 
 The following workflow will run the check workflow for every Pull Request, and will associated the
 check results with the Pull Request.
@@ -58,7 +58,7 @@ jobs:
             --github
 ```
 
-#### GitHub Workflow for CD
+### GitHub Workflow for CD
 
 The following workflow will run the publish the latest schema to the schema registry for every push
 to `main` branch.
@@ -83,3 +83,39 @@ jobs:
             --registry.accessToken ${{ env.HIVE_TOKEN }} \
             --github
 ```
+
+## Multi Environment Best Practices
+
+By default each project has three targets: `development`, `staging`, and `production`. You can
+utilize these environments (or even add more), to model a multi environment/stage depployment
+process.
+
+For CI, run `hive schema:check`, and for CD, run `hive schema:publish` on the respective target for
+that environment. Each target can be configured to use the usage data from other targets for
+[conditional breaking changes](/docs/management/targets#conditional-breaking-changes) based on usage
+data.
+
+### Example
+
+Three branches:
+
+| Git Branch | Hive Target |
+| ---------- | ----------- |
+| main       | development |
+| staging    | staging     |
+| production | production  |
+
+New features are developed on a branch that targets the `main` branch. The `hive schema:check`
+command is run against the `development` target. conditional breaking changes are configured on
+`staging` and `production` targets.
+
+When the feature is ready for QA, the branch is merged into `main`. The `hive schema:publish`
+command is triggered by CD workflow, and the schema is published to the `development` target.
+
+When the feature is ready for staging, the `main` branch is merged into `staging`. The
+`hive schema:publish` command is triggered by the CD workflow, and the schema is published to the
+`staging` target.
+
+When the feature is ready for production, the `staging` branch is merged into `production`. The
+`hive schema:publish` command is triggered by the CD workflow, and the schema published to the
+`production` target.
