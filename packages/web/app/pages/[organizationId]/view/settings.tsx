@@ -410,7 +410,6 @@ const SettingsPageRenderer = (props: {
                 <DeleteOrganizationModal
                   isOpen={isDeleteModalOpen}
                   toggleModalOpen={toggleDeleteModalOpen}
-                  organization={organization}
                 />
               </CardContent>
             </Card>
