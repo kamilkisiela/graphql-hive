@@ -522,6 +522,7 @@ const federationTypes = new Set([
   'link__Purpose',
   'policy__Policy',
   'requiresScopes__Scope',
+  'join__DirectiveArguments',
 ]);
 
 const createFederation: (
