@@ -843,13 +843,10 @@ export class SchemaPublisher {
           source: error.source,
         })) ?? []),
         ...(contractVersions?.edges.flatMap(edge => [
-          ...(edge.node.schemaCompositionErrors?.map(
-            error =>
-              ({
-                message: `[${edge.node.contractName}] ${error.message}`,
-                source: error.source,
-              }) ?? [],
-          ) ?? []),
+          ...(edge.node.schemaCompositionErrors?.map(error => ({
+            message: `[${edge.node.contractName}] ${error.message}`,
+            source: error.source,
+          })) ?? []),
         ]) ?? []),
       ],
       schemaCheck: toGraphQLSchemaCheck(schemaCheckSelector, schemaCheck),

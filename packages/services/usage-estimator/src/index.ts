@@ -86,7 +86,10 @@ async function main() {
     if (env.prometheus) {
       await startMetrics(env.prometheus.labels.instance);
     }
-    await server.listen(env.http.port, '::');
+    await server.listen({
+      port: env.http.port,
+      host: '::',
+    });
     await estimator.start();
   } catch (error) {
     server.log.fatal(error);

@@ -1,5 +1,5 @@
 import { fastify } from 'fastify';
-import cors from 'fastify-cors';
+import cors from '@fastify/cors';
 import * as Sentry from '@sentry/node';
 import { useRequestLogging } from './request-logs';
 import { useSentryTracing } from './sentry';

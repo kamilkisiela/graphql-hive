@@ -1,6 +1,6 @@
 import { fastify } from 'fastify';
-import cors from 'fastify-cors';
 import promClient from 'prom-client';
+import cors from '@fastify/cors';
 
 export { promClient as metrics };
 
@@ -40,5 +40,8 @@ export async function startMetrics(instanceLabel: string | undefined, port = 10_
 
   await server.register(cors);
 
-  return server.listen(port, '::');
+  return await server.listen({
+    port,
+    host: '::',
+  });
 }
