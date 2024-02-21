@@ -2,7 +2,11 @@ import { Injectable, Scope } from 'graphql-modules';
 import type { CheckPolicyResponse, PolicyConfigurationObject } from '@hive/policy';
 import { SchemaPolicy } from '../../../shared/entities';
 import { AuthManager } from '../../auth/providers/auth-manager';
-import { OrganizationAccessScope, ProjectAccessScope } from '../../auth/providers/scopes';
+import {
+  OrganizationAccessScope,
+  ProjectAccessScope,
+  TargetAccessScope,
+} from '../../auth/providers/scopes';
 import { Logger } from '../../shared/providers/logger';
 import {
   OrganizationSelector,
@@ -37,7 +41,20 @@ export class SchemaPolicyProvider {
     }, {} as PolicyConfigurationObject);
   }
 
-  async getCalculatedPolicyForTarget(selector: TargetSelector): Promise<{
+  async getCalculatedTargetPolicyForApi(selector: TargetSelector): Promise<{
+    orgLevel: SchemaPolicy | null;
+    projectLevel: SchemaPolicy | null;
+    mergedPolicy: PolicyConfigurationObject | null;
+  }> {
+    await this.authManager.ensureTargetAccess({
+      ...selector,
+      scope: TargetAccessScope.SETTINGS,
+    });
+
+    return this._getCalculatedPolicyForTarget(selector);
+  }
+
+  private async _getCalculatedPolicyForTarget(selector: TargetSelector): Promise<{
     orgLevel: SchemaPolicy | null;
     projectLevel: SchemaPolicy | null;
     mergedPolicy: PolicyConfigurationObject | null;
@@ -50,7 +67,7 @@ export class SchemaPolicyProvider {
       projectLevel = null;
     }
 
-    // We want to make sure they are appliedin that order, to allow project level to override org level
+    // We want to make sure they are applied in that order, to allow project level to override org level
     const policies = [orgLevel!, projectLevel!].filter(r => r !== null);
 
     if (policies.length === 0) {
@@ -91,7 +108,7 @@ export class SchemaPolicyProvider {
         errors: CheckPolicyResponse;
       }
   > {
-    const { mergedPolicy } = await this.getCalculatedPolicyForTarget(selector);
+    const { mergedPolicy } = await this._getCalculatedPolicyForTarget(selector);
 
     if (!mergedPolicy) {
       return null;
@@ -153,7 +170,7 @@ export class SchemaPolicyProvider {
   async getOrganizationPolicy(selector: OrganizationSelector) {
     await this.authManager.ensureOrganizationAccess({
       ...selector,
-      scope: OrganizationAccessScope.READ,
+      scope: OrganizationAccessScope.SETTINGS,
     });
 
     return this.storage.getSchemaPolicyForOrganization(selector.organization);
@@ -162,7 +179,7 @@ export class SchemaPolicyProvider {
   async getProjectPolicy(selector: ProjectSelector) {
     await this.authManager.ensureProjectAccess({
       ...selector,
-      scope: ProjectAccessScope.READ,
+      scope: ProjectAccessScope.SETTINGS,
     });
 
     return this.storage.getSchemaPolicyForProject(selector.project);

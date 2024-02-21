@@ -9,7 +9,9 @@ import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { DocsLink, DocsNote, MetaTitle } from '@/components/v2';
 import { graphql } from '@/gql';
+import { OrganizationAccessScope } from '@/gql/graphql';
 import { RegistryModel } from '@/graphql';
+import { useOrganizationAccess } from '@/lib/access/organization';
 import { useRouteSelector } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
@@ -19,6 +21,9 @@ const OrganizationPolicyPageQuery = graphql(`
       organization {
         id
         ...OrganizationLayout_CurrentOrganizationFragment
+        me {
+          ...CanAccessOrganization_MemberFragment
+        }
         projects {
           nodes {
             id
@@ -61,6 +66,7 @@ const UpdateSchemaPolicyForOrganization = graphql(`
           id
           ...OrganizationLayout_CurrentOrganizationFragment
           schemaPolicy {
+            # we should limit it to users with read-only access to settings
             id
             updatedAt
             allowOverrides
@@ -84,17 +90,27 @@ function PolicyPageContent() {
   });
   const [mutation, mutate] = useMutation(UpdateSchemaPolicyForOrganization);
 
-  if (query.error) {
-    return <QueryError error={query.error} />;
-  }
-
   const me = query.data?.me;
   const currentOrganization = query.data?.organization?.organization;
   const organizationConnection = query.data?.organizations;
 
+  const hasAccess = useOrganizationAccess({
+    scope: OrganizationAccessScope.Settings,
+    member: currentOrganization?.me ?? null,
+    redirect: true,
+  });
+
+  if (!hasAccess) {
+    return null;
+  }
+
   const legacyProjects = currentOrganization?.projects.nodes.filter(
     p => p.registryModel === RegistryModel.Legacy,
   );
+
+  if (query.error) {
+    return <QueryError error={query.error} />;
+  }
 
   return (
     <OrganizationLayout
