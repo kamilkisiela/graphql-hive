@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ProjectType } from '../../shared/entities';
+import { NameModel, ProjectType } from '../../shared/entities';
 import { createConnection } from '../../shared/schema';
 import { OrganizationManager } from '../organization/providers/organization-manager';
 import { IdTranslator } from '../shared/providers/id-translator';
@@ -7,7 +7,7 @@ import { TargetManager } from '../target/providers/target-manager';
 import type { ProjectModule } from './__generated__/types';
 import { ProjectManager } from './providers/project-manager';
 
-const ProjectNameModel = z.string().min(2).max(40);
+const ProjectNameModel = NameModel.min(2).max(40);
 const URLModel = z.string().url().max(500);
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
 
