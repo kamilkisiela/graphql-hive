@@ -321,7 +321,14 @@ export class SchemaVersionHelper {
    * This function will check if the SDL contains supergraph spec and if it does, it will transform it to public schema.
    */
   private autoFixCompositeSchemaSdl(sdl: string, versionId: string) {
-    if (!containsSupergraphSpec(sdl)) {
+    const isFederationV1Output = sdl.includes('@core');
+    /**
+     * If the SDL is clean from Supergraph spec or it's an output of @apollo/federation, we don't need to transform it.
+     * We ignore @apollo/federation, because we never really transformed the output of it to public schema.
+     * Doing so might be a breaking change for some users (like: removed join__Graph type).
+     */
+
+    if (isFederationV1Output || !containsSupergraphSpec(sdl)) {
       return sdl;
     }
 
@@ -329,6 +336,7 @@ export class SchemaVersionHelper {
       'Composite schema SDL contains supergraph spec, transforming to public schema (versionId: %s)',
       versionId,
     );
+
     const transformedSdl = print(
       transformSupergraphToPublicSchema(parseGraphQLSource(sdl, 'autoFixCompositeSchemaSdl')),
     );
