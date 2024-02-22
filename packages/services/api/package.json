@@ -28,7 +28,7 @@
     "@sentry/types": "7.102.0",
     "@slack/web-api": "7.0.2",
     "@theguild/buddy": "0.1.0",
-    "@theguild/federation-composition": "0.8.1",
+    "@theguild/federation-composition": "0.8.2-alpha-20240222093720-e8f2bb3",
     "@trpc/client": "10.45.1",
     "@trpc/server": "10.45.1",
     "@types/bcryptjs": "2.4.6",

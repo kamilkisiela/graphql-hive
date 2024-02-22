@@ -209,7 +209,7 @@ export class OperationsManager {
     operations?: readonly string[];
     clients?: readonly string[];
   } & Listify<TargetSelector, 'target'>) {
-    this.logger.info('Counting requests and failures (period=%s, target=%s)', period, target);
+    this.logger.info('Counting requests and failures (period=%o, target=%s)', period, target);
     await this.authManager.ensureTargetAccess({
       organization,
       project,
