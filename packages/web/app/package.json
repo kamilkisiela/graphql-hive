@@ -59,7 +59,7 @@
     "cmdk": "0.2.1",
     "cookies": "0.9.1",
     "date-fns": "3.3.1",
-    "dompurify": "3.0.8",
+    "dompurify": "3.0.9",
     "echarts": "5.5.0",
     "echarts-for-react": "3.0.2",
     "formik": "2.4.5",
