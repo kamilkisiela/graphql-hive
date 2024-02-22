@@ -959,8 +959,8 @@ importers:
         specifier: workspace:*
         version: link:../../libraries/external-composition/dist
       '@graphql-tools/stitch':
-        specifier: 9.0.3
-        version: 9.0.3(graphql@16.8.1)
+        specifier: 9.0.4
+        version: 9.0.4(graphql@16.8.1)
       '@graphql-tools/stitching-directives':
         specifier: 3.0.0
         version: 3.0.0(graphql@16.8.1)
@@ -7463,8 +7463,8 @@ packages:
       tslib: 2.6.2
       value-or-promise: 1.0.12
 
-  /@graphql-tools/stitch@9.0.3(graphql@16.8.1):
-    resolution: {integrity: sha512-G03XahiHDu1pnaS8z2GNfsV/5BribMEUATT5dCHBAqj13Te5y1amZNQePrmw8DLtbf5qDbU6CO7kGHPxv0XO9A==}
+  /@graphql-tools/stitch@9.0.4(graphql@16.8.1):
+    resolution: {integrity: sha512-R9ZQMcMLblHOMfTmw82hcfPZtAWzkoT1w9Dj+t9p8u+TzriZU9ws5ERy4q9ZUau94yxTiV7FuSq70DV6z2aCjw==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
