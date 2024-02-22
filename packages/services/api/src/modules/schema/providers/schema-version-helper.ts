@@ -92,7 +92,7 @@ export class SchemaVersionHelper {
   async getCompositeSchemaSdl(schemaVersion: SchemaVersion) {
     if (schemaVersion.hasPersistedSchemaChanges) {
       return schemaVersion.compositeSchemaSDL
-        ? this.autoFixCompositeSchemaSdl(schemaVersion.compositeSchemaSDL)
+        ? this.autoFixCompositeSchemaSdl(schemaVersion.compositeSchemaSDL, schemaVersion.id)
         : null;
     }
 
@@ -107,7 +107,7 @@ export class SchemaVersionHelper {
   async getSupergraphSdl(schemaVersion: SchemaVersion) {
     if (schemaVersion.hasPersistedSchemaChanges) {
       return schemaVersion.supergraphSDL
-        ? this.autoFixCompositeSchemaSdl(schemaVersion.supergraphSDL)
+        ? this.autoFixCompositeSchemaSdl(schemaVersion.supergraphSDL, schemaVersion.id)
         : null;
     }
 
@@ -322,10 +322,11 @@ export class SchemaVersionHelper {
    *
    * This function will check if the SDL contains supergraph spec and if it does, it will transform it to public schema.
    */
-  private autoFixCompositeSchemaSdl(sdl: string) {
+  private autoFixCompositeSchemaSdl(sdl: string, versionId: string) {
     if (containsSupergraphSpec(sdl)) {
       this.logger.warn(
-        'Composite schema SDL contains supergraph spec, transforming to public schema',
+        'Composite schema SDL contains supergraph spec, transforming to public schema (versionId: %s)',
+        versionId,
       );
       const transformedSdl = print(
         transformSupergraphToPublicSchema(parseGraphQLSource(sdl, 'autoFixCompositeSchemaSdl')),
