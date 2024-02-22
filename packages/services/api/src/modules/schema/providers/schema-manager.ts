@@ -163,7 +163,7 @@ export class SchemaManager {
   }
 
   async getMaybeLatestValidVersion(selector: TargetSelector) {
-    this.logger.debug('Fetching latest valid version (selector=%o)', selector);
+    this.logger.debug('Fetching maybe latest valid version (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
       ...selector,
       scope: TargetAccessScope.REGISTRY_READ,
