@@ -1,5 +1,11 @@
 # @graphql-hive/cli
 
+## 0.33.1
+
+### Patch Changes
+
+- [#3862](https://github.com/kamilkisiela/graphql-hive/pull/3862) [`02f5274`](https://github.com/kamilkisiela/graphql-hive/commit/02f52748508dfe70eb8ec500a442bfc5aecba34e) Thanks [@kongMina](https://github.com/kongMina)! - Separated schema check changes in CLI output
+
 ## 0.33.0
 
 ### Minor Changes
