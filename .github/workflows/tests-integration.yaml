@@ -18,6 +18,9 @@ on:
       configureEnv:
         default: ''
         type: string
+      useLocalArtifacts:
+        default: false
+        type: boolean
 
 jobs:
   integration:
@@ -59,6 +62,26 @@ jobs:
       - name: get cpu count for vitest
         id: cpu-cores
         uses: SimenB/github-actions-cpu-cores@v2
+
+      - name: download local artifact
+        if: ${{ inputs.useLocalArtifacts }}
+        uses: actions/download-artifact@v4
+        with:
+          name: docker_output
+          path: docker_output
+
+      - name: pull local images
+        if: ${{ inputs.useLocalArtifacts }}
+        working-directory: docker_output
+        run: |
+          for f in *.tar; do
+            image_name=$(basename -- "$f")
+            image_tag="${image_name}:${{ inputs.imageTag }}"
+            echo "loading local docker image $f as tag $image_tag"
+
+            cat $f | docker import - $image_tag
+          done
+          docker image ls -a
 
       - name: run containers
         timeout-minutes: 8

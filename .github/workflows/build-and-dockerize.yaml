@@ -31,6 +31,9 @@ on:
       publishPrComment:
         default: true
         type: boolean
+      useLocalArtifacts:
+        default: false
+        type: boolean
 
 jobs:
   build-and-dockerize:
@@ -90,7 +93,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: login to docker registry
-        if: ${{ inputs.dockerize }}
+        if: ${{ inputs.dockerize && !inputs.useLocalArtifacts }}
         uses: docker/login-action@v3
         with:
           registry: ${{ inputs.registry }}
@@ -124,13 +127,20 @@ jobs:
           done
           echo "$EOF" >> "$GITHUB_ENV"
 
+      - name: make output dir
+        if: ${{ inputs.useLocalArtifacts }}
+        run: mkdir -p docker_output
+
       - name: build docker images
         timeout-minutes: 360
         id: docker-bake
         if: ${{ inputs.dockerize }}
         uses: docker/bake-action@v4
         env:
-          DOCKER_REGISTRY: ${{ inputs.registry }}/${{ inputs.imageName }}/
+          IMAGE_OUTPUT_BASE_DIR: ${{ inputs.useLocalArtifacts && './docker_output' || '' }}
+          DOCKER_REGISTRY:
+            ${{ inputs.useLocalArtifacts && '' || format('{0}/{1}/', inputs.registry,
+            inputs.imageName) }}
           COMMIT_SHA: ${{ inputs.imageTag }}
           RELEASE: ${{ inputs.imageTag }}
           BRANCH_NAME: ${{ steps.branch_name_fix.outputs.replaced }}
@@ -146,10 +156,21 @@ jobs:
           set: |
             ${{ steps.docker-bake-inputs.outputs.set }}
 
+      - name: upload local artifacts
+        if: ${{ inputs.useLocalArtifacts }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker_output
+          path: docker_output
+          if-no-files-found: error
+          retention-days: 3
+          overwrite: true
+
       - name: docker details pr comment
         uses: marocchino/sticky-pull-request-comment@v2
         if:
-          ${{ inputs.dockerize && github.event_name == 'pull_request' && inputs.publishPrComment }}
+          ${{ inputs.dockerize && !inputs.useLocalArtifacts && github.event_name == 'pull_request'
+          && inputs.publishPrComment }}
         with:
           message: |
             🐋 This PR was built and pushed to the following [Docker images](https://github.com/kamilkisiela?ecosystem=container&tab=packages&visibility=public&tab=packages&ecosystem=container&visibility=public&q=graphql-hive) (tag: `${{ inputs.imageTag }}`):
@@ -163,7 +184,7 @@ jobs:
             </details>
 
       - name: upload sourcemaps to Sentry
-        if: ${{ inputs.publishSourceMaps }}
+        if: ${{ inputs.publishSourceMaps && !inputs.useLocalArtifacts }}
         env:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_ORG: the-guild-z4
