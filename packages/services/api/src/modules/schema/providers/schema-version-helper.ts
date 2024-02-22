@@ -106,9 +106,7 @@ export class SchemaVersionHelper {
 
   async getSupergraphSdl(schemaVersion: SchemaVersion) {
     if (schemaVersion.hasPersistedSchemaChanges) {
-      return schemaVersion.supergraphSDL
-        ? this.autoFixCompositeSchemaSdl(schemaVersion.supergraphSDL, schemaVersion.id)
-        : null;
+      return schemaVersion.supergraphSDL;
     }
 
     const composition = await this.composeSchemaVersion(schemaVersion);
