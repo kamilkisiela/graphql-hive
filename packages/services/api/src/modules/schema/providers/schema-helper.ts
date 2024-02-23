@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { print } from 'graphql';
+import { DocumentNode, print, visit } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import objectHash from 'object-hash';
 import type {
@@ -89,6 +89,19 @@ export function extendWithBase(
     }
 
     return schema;
+  });
+}
+
+export function removeDescriptions(documentNode: DocumentNode): DocumentNode {
+  return visit(documentNode, {
+    enter(node) {
+      if ('description' in node) {
+        return {
+          ...node,
+          description: null,
+        };
+      }
+    },
   });
 }
 
