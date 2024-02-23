@@ -12,6 +12,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Table,
   TableBody,
@@ -138,7 +139,7 @@ function ChangeItem(props: {
         </AccordionTrigger>
         <AccordionContent className="pb-8 pt-4">
           {change.approval && <SchemaChangeApproval approval={change.approval} />}
-          {change.usageStatistics ? (
+          {change.usageStatistics && metadata ? (
             <div>
               <div className="flex space-x-4">
                 <Table>
@@ -155,22 +156,41 @@ function ChangeItem(props: {
                       ({ hash, name, countFormatted, percentageFormatted }) => (
                         <TableRow key={hash}>
                           <TableCell className="font-medium">
-                            <Link
-                              className="text-orange-500 hover:text-orange-500 hover:underline hover:underline-offset-2"
-                              href={{
-                                pathname:
-                                  '/[organizationId]/[projectId]/[targetId]/insights/[operationName]/[operationHash]',
-                                query: {
-                                  organizationId: router.organizationId,
-                                  projectId: router.projectId,
-                                  targetId: router.targetId,
-                                  operationName: `${hash.substring(0, 4)}_${name}`,
-                                  operationHash: hash,
-                                },
-                              }}
-                            >
-                              {hash.substring(0, 4)}_{name}
-                            </Link>
+                            <Popover>
+                              <PopoverTrigger className="text-orange-500 hover:text-orange-500 hover:underline hover:underline-offset-4">
+                                {hash.substring(0, 4)}_{name}
+                              </PopoverTrigger>
+                              <PopoverContent side="right">
+                                <div className="flex flex-col gap-y-2 text-sm">
+                                  View live usage on
+                                  {metadata.settings.targets.map(target =>
+                                    target.target ? (
+                                      <p>
+                                        <Link
+                                          className="text-orange-500 hover:text-orange-500"
+                                          href={{
+                                            pathname:
+                                              '/[organizationId]/[projectId]/[targetId]/insights/[operationName]/[operationHash]',
+                                            query: {
+                                              organizationId: router.organizationId,
+                                              projectId: router.projectId,
+                                              targetId: target.target.cleanId,
+                                              operationName: `${hash.substring(0, 4)}_${name}`,
+                                              operationHash: hash,
+                                            },
+                                          }}
+                                          target="_blank"
+                                        >
+                                          {target.name}
+                                        </Link>{' '}
+                                        <span className="text-white">target</span>
+                                      </p>
+                                    ) : null,
+                                  )}
+                                </div>
+                                <PopoverArrow />
+                              </PopoverContent>
+                            </Popover>
                           </TableCell>
                           <TableCell className="text-right">{countFormatted}</TableCell>
                           <TableCell className="text-right">{percentageFormatted}</TableCell>
