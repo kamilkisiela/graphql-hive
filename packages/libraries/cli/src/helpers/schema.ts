@@ -54,17 +54,22 @@ export function renderChanges(
   };
   const writeChanges = (changes: ChangeType[]) => {
     changes.forEach(change => {
-      this.log(
+      const messageParts = [
         String(indent),
         criticalityMap[change.isSafeBasedOnUsage ? CriticalityLevel.Safe : change.criticality],
         this.bolderize(change.message),
-        change.isSafeBasedOnUsage ? colors.green('(Safe based on usage ✓)') : undefined,
-        change.approval
-          ? colors.green(
-              `(Approved by ${change.approval.approvedBy?.displayName ?? '<unknown>'} ✓)`,
-            )
-          : undefined,
-      );
+      ];
+
+      if (change.isSafeBasedOnUsage) {
+        messageParts.push(colors.green('(Safe based on usage ✓)'));
+      }
+      if (change.approval) {
+        messageParts.push(
+          colors.green(`(Approved by ${change.approval.approvedBy?.displayName ?? '<unknown>'} ✓)`),
+        );
+      }
+
+      this.log(...messageParts);
     });
   };
 
