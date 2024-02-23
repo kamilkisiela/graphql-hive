@@ -25,6 +25,7 @@ const schemaPublishMutation = graphql(/* GraphQL */ `
             isSafeBasedOnUsage
           }
           total
+          ...RenderChanges_schemaChanges
         }
       }
       ... on SchemaPublishError @skip(if: $usesGitHubApp) {
@@ -37,6 +38,7 @@ const schemaPublishMutation = graphql(/* GraphQL */ `
             isSafeBasedOnUsage
           }
           total
+          ...RenderChanges_schemaChanges
         }
         errors {
           nodes {

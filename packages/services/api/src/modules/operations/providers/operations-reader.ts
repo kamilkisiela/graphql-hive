@@ -1117,6 +1117,8 @@ export class OperationsReader {
       }),
     );
 
+    this.logger.debug('Fetching top operations for schema coordinates (args=%o)', args);
+
     /**
      * top_operations_by_coordinates -> get the top operations for schema coordinates, we need to right join operations_daily as coordinates_daily does not contain the client_names column
      */
@@ -1257,6 +1259,8 @@ export class OperationsReader {
         count: z.string().transform(ensureNumber),
       }),
     );
+
+    this.logger.debug('Fetching top clients for schema coordinates (args=%o)', args);
 
     const results = await this.clickHouse
       .query<unknown>({
