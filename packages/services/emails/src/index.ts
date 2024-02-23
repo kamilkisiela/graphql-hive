@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { hostname } from 'os';
 import {
   createErrorHandler,
   createServer,
@@ -18,7 +19,8 @@ import { createScheduler } from './scheduler';
 async function main() {
   if (env.sentry) {
     Sentry.init({
-      serverName: 'emails',
+      dist: 'emails',
+      serverName: hostname(),
       enabled: !!env.sentry,
       environment: env.environment,
       dsn: env.sentry.dsn,

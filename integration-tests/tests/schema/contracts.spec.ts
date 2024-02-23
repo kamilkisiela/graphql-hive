@@ -225,6 +225,11 @@ describe('schema service can process contracts', () => {
         id: String!
       }
     `);
+
+    // there should be no @inaccessible on federation specific types otherwise apollo router goes brrrt
+    expect(result.contracts?.[0].supergraph).toContain('enum join__Graph {');
+    expect(result.contracts?.[0].supergraph).toContain('scalar link__Import\n');
+    expect(result.contracts?.[0].supergraph).toContain('scalar join__FieldSet\n');
   });
 });
 

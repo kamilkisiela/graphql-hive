@@ -1,12 +1,18 @@
+import { print } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import { CriticalityLevel } from '@graphql-inspector/core';
 import type { SchemaChangeType } from '@hive/storage';
+import {
+  containsSupergraphSpec,
+  transformSupergraphToPublicSchema,
+} from '@theguild/federation-composition';
 import { ProjectType } from '../../../shared/entities';
 import { cache } from '../../../shared/helpers';
 import type { SchemaVersion } from '../../../shared/mappers';
 import { parseGraphQLSource } from '../../../shared/schema';
 import { OrganizationManager } from '../../organization/providers/organization-manager';
 import { ProjectManager } from '../../project/providers/project-manager';
+import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
 import { RegistryChecks } from './registry-checks';
 import { ensureCompositeSchemas, SchemaHelper } from './schema-helper';
@@ -29,6 +35,7 @@ export class SchemaVersionHelper {
     private organizationManager: OrganizationManager,
     private registryChecks: RegistryChecks,
     private storage: Storage,
+    private logger: Logger,
   ) {}
 
   @cache<SchemaVersion>(version => version.id)
@@ -84,7 +91,9 @@ export class SchemaVersionHelper {
 
   async getCompositeSchemaSdl(schemaVersion: SchemaVersion) {
     if (schemaVersion.hasPersistedSchemaChanges) {
-      return schemaVersion.compositeSchemaSDL;
+      return schemaVersion.compositeSchemaSDL
+        ? this.autoFixCompositeSchemaSdl(schemaVersion.compositeSchemaSDL, schemaVersion.id)
+        : null;
     }
 
     const composition = await this.composeSchemaVersion(schemaVersion);
@@ -300,5 +309,43 @@ export class SchemaVersionHelper {
 
   async getIsValid(schemaVersion: SchemaVersion) {
     return schemaVersion.isComposable && schemaVersion.hasContractCompositionErrors === false;
+  }
+
+  /**
+   * There's a possibility that the composite schema SDL contains parts of the supergraph spec.
+   * This is a problem because we want to show the public schema to the user, and the supergraph spec is not part of that.
+   * This may happen when composite schema was produced with an old version of `transformSupergraphToPublicSchema`
+   * or when supergraph sdl contained something new.
+   *
+   * This function will check if the SDL contains supergraph spec and if it does, it will transform it to public schema.
+   */
+  private autoFixCompositeSchemaSdl(sdl: string, versionId: string) {
+    const isFederationV1Output = sdl.includes('@core');
+    /**
+     * If the SDL is clean from Supergraph spec or it's an output of @apollo/federation, we don't need to transform it.
+     * We ignore @apollo/federation, because we never really transformed the output of it to public schema.
+     * Doing so might be a breaking change for some users (like: removed join__Graph type).
+     */
+
+    if (isFederationV1Output || !containsSupergraphSpec(sdl)) {
+      return sdl;
+    }
+
+    this.logger.warn(
+      'Composite schema SDL contains supergraph spec, transforming to public schema (versionId: %s)',
+      versionId,
+    );
+
+    const transformedSdl = print(
+      transformSupergraphToPublicSchema(parseGraphQLSource(sdl, 'autoFixCompositeSchemaSdl')),
+    );
+
+    this.logger.debug(
+      transformedSdl === sdl
+        ? 'Transformation did not change the original SDL'
+        : 'Transformation changed the original SDL',
+    );
+
+    return transformedSdl;
   }
 }

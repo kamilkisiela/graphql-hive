@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import got from 'got';
 import { DocumentNode, GraphQLError, stripIgnoredCharacters } from 'graphql';
 import 'reflect-metadata';
+import { hostname } from 'os';
 import { createRegistry, createTaskRunner, CryptoProvider, LogFn, Logger } from '@hive/api';
 import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
 import { ArtifactStorageReader } from '@hive/cdn-script/artifact-storage-reader';
@@ -17,8 +18,18 @@ import {
   startSentryTransaction,
 } from '@hive/service-common';
 import { createConnectionString, createStorage as createPostgreSQLStorage } from '@hive/storage';
-import { Dedupe, ExtraErrorData } from '@sentry/integrations';
-import { captureException, init, Integrations, SeverityLevel } from '@sentry/node';
+import {
+  contextLinesIntegration,
+  dedupeIntegration,
+  extraErrorDataIntegration,
+} from '@sentry/integrations';
+import {
+  captureException,
+  httpIntegration,
+  init,
+  linkedErrorsIntegration,
+  SeverityLevel,
+} from '@sentry/node';
 import { createServerAdapter } from '@whatwg-node/server';
 import { createContext, internalApiRouter } from './api';
 import { asyncStorage } from './async-storage';
@@ -28,7 +39,8 @@ import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
 
 export async function main() {
   init({
-    serverName: 'api',
+    serverName: hostname(),
+    dist: 'server',
     enabled: !!env.sentry,
     environment: env.environment,
     dsn: env.sentry?.dsn,
@@ -39,15 +51,17 @@ export async function main() {
     ],
     release: env.release,
     integrations: [
-      new Integrations.Http({ tracing: true }),
-      new Integrations.ContextLines(),
-      new Integrations.LinkedErrors(),
-      new ExtraErrorData({
+      httpIntegration({ tracing: true }),
+      contextLinesIntegration({
+        frameContextLines: 0,
+      }),
+      linkedErrorsIntegration(),
+      extraErrorDataIntegration({
         depth: 2,
       }),
-      new Dedupe(),
+      dedupeIntegration(),
     ],
-    maxBreadcrumbs: 5,
+    maxBreadcrumbs: 10,
     defaultIntegrations: false,
     autoSessionTracking: false,
   });

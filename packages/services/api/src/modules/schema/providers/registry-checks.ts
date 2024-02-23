@@ -789,18 +789,29 @@ const toSchemaCheckWarning = (record: CheckPolicyResponse[number]): SchemaCheckW
   endLine: record.endLine ?? null,
 });
 
-const federationTypes = new Set(['join__FieldSet', 'join__Graph', 'link__Import', 'link__Purpose']);
+const federationTypes = new Set([
+  'join__FieldSet',
+  'join__Graph',
+  'link__Import',
+  'link__Purpose',
+  'core__Purpose',
+  'policy__Policy',
+  'requiresScopes__Scope',
+  'join__DirectiveArguments',
+]);
 const federationDirectives = new Set([
   '@join__enumValue',
   '@join__field',
   '@join__graph',
   '@join__implements',
   '@join__type',
+  '@join__owner',
   '@join__unionMember',
   '@link',
   '@federation__inaccessible',
   '@inaccessible',
   '@tag',
+  '@core',
   '@federation__tag',
 ]);
 

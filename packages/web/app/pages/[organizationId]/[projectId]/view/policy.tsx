@@ -120,7 +120,7 @@ function ProjectPolicyContent() {
     >
       <div>
         <div className="py-6">
-          <Title>Organization Schema Policy</Title>
+          <Title>Project Schema Policy</Title>
           <Subtitle>
             Schema Policies enable developers to define additional semantic checks on the GraphQL
             schema.

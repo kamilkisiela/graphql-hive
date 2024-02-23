@@ -14,6 +14,13 @@ import type {
 } from '../__generated__/types';
 import { parseGraphQLSource, sortDocumentNode } from './schema';
 
+export const NameModel = z
+  .string()
+  .regex(
+    /^([a-z]|[0-9]|\s|\.|,|_|-|\/|&)+$/i,
+    `Name restricted to alphanumerical characters, spaces and . , _ - / &`,
+  );
+
 export const SingleSchemaModel = z
   .object({
     kind: z.literal('single'),

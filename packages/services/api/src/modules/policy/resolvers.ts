@@ -38,7 +38,7 @@ export const resolvers: PolicyModule.Resolvers = {
     schemaPolicy: async (target, _, { injector }) => {
       const { mergedPolicy, orgLevel, projectLevel } = await injector
         .get(SchemaPolicyProvider)
-        .getCalculatedPolicyForTarget({
+        .getCalculatedTargetPolicyForApi({
           project: target.projectId,
           organization: target.orgId,
           target: target.id,

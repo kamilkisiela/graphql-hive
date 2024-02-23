@@ -19,6 +19,36 @@ describe.each`
   const serviceName = projectType === ProjectType.Single ? undefined : 'test';
   const serviceUrl = projectType === ProjectType.Single ? undefined : 'http://localhost:4000';
 
+  test.concurrent('can publish a schema with breaking, warning and safe changes', async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { inviteAndJoinMember, createProject } = await createOrg();
+    await inviteAndJoinMember();
+    const { createToken } = await createProject(projectType, {
+      useLegacyRegistryModels: model === 'legacy',
+    });
+    const { secret } = await createToken({});
+
+    await schemaPublish([
+      '--registry.accessToken',
+      secret,
+      '--author',
+      'Kamil',
+      '--commit',
+      'abc123',
+      ...serviceNameArgs,
+      ...serviceUrlArgs,
+      'fixtures/init-schema-detailed.graphql',
+    ]);
+    await expect(
+      schemaCheck([
+        ...serviceNameArgs,
+        '--registry.accessToken',
+        secret,
+        'fixtures/breaking-schema-detailed.graphql',
+      ]),
+    ).rejects.toThrowError(/breaking changes:|dangerous changes:|safe changes/i);
+  });
+
   test.concurrent('can publish and check a schema with target:registry:read access', async () => {
     const { createOrg } = await initSeed().createOwner();
     const { inviteAndJoinMember, createProject } = await createOrg();

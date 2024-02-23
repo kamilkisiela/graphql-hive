@@ -122,14 +122,14 @@ function createAddDirectiveIfNotExists(directiveName: string) {
 /**
  * For a given GraphQL schema document node, add a directive with a given name to all types not in the provided set.
  */
-export function addDirectiveOnExcludedTypes(
-  documentNode: DocumentNode,
+export function addDirectiveOnTypes(args: {
+  documentNode: DocumentNode;
   /** a set of excluded types. e.g. as retrieved from the `getReachableTypes` function. */
-  typeNames: Set<string>,
+  excludedTypeNames: Set<string>;
   /** name of the directive that should be added on the types. */
-  directiveName: string,
-): DocumentNode {
-  const addDirectiveIfNotExists = createAddDirectiveIfNotExists(directiveName);
+  directiveName: string;
+}): DocumentNode {
+  const addDirectiveIfNotExists = createAddDirectiveIfNotExists(args.directiveName);
 
   function onNamedTypeDefinitionNode(
     node:
@@ -140,7 +140,7 @@ export function addDirectiveOnExcludedTypes(
       | EnumTypeDefinitionNode
       | InputObjectTypeDefinitionNode,
   ) {
-    if (typeNames.has(node.name.value)) {
+    if (args.excludedTypeNames.has(node.name.value)) {
       return;
     }
     return {
@@ -149,7 +149,7 @@ export function addDirectiveOnExcludedTypes(
     };
   }
 
-  return visit(documentNode, {
+  return visit(args.documentNode, {
     [Kind.OBJECT_TYPE_DEFINITION]: onNamedTypeDefinitionNode,
     [Kind.INTERFACE_TYPE_DEFINITION]: onNamedTypeDefinitionNode,
     [Kind.UNION_TYPE_DEFINITION]: onNamedTypeDefinitionNode,
