@@ -138,6 +138,8 @@ const config: CodegenConfig = {
             '../modules/schema/providers/contracts#ContractCheck as ContractCheckMapper',
           ContractVersion:
             '../modules/schema/providers/contracts#ContractVersion as ContractVersionMapper',
+          BreakingChangeMetadataTarget:
+            '../shared/mappers#BreakingChangeMetadataTarget as BreakingChangeMetadataTargetMapper',
         },
       },
     },

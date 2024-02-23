@@ -1,6 +1,7 @@
 import { Injectable, Scope } from 'graphql-modules';
 import { FailedSchemaCheckMapper, SuccessfulSchemaCheckMapper } from '../../../shared/mappers';
 import { Storage } from '../../shared/providers/storage';
+import { formatNumber } from '../lib/number-formatting';
 import { SchemaManager } from './schema-manager';
 
 type SchemaCheck = FailedSchemaCheckMapper | SuccessfulSchemaCheckMapper;
@@ -70,5 +71,31 @@ export class SchemaCheckManager {
     });
 
     return service?.sdl ?? null;
+  }
+
+  getConditionalBreakingChangeMetadata(schemaCheck: SchemaCheck) {
+    if (!schemaCheck.conditionalBreakingChangeMetadata) {
+      return null;
+    }
+
+    return {
+      period: {
+        from: schemaCheck.conditionalBreakingChangeMetadata.period.from.toISOString(),
+        to: schemaCheck.conditionalBreakingChangeMetadata.period.to.toISOString(),
+      },
+      settings: {
+        percentage: schemaCheck.conditionalBreakingChangeMetadata.settings.percentage,
+        retentionInDays: schemaCheck.conditionalBreakingChangeMetadata.settings.retentionInDays,
+        excludedClientNames:
+          schemaCheck.conditionalBreakingChangeMetadata.settings.excludedClientNames,
+        targets: schemaCheck.conditionalBreakingChangeMetadata.settings.targets,
+      },
+      usage: {
+        totalRequestCount: schemaCheck.conditionalBreakingChangeMetadata.usage.totalRequestCount,
+        totalRequestCountFormatted: formatNumber(
+          schemaCheck.conditionalBreakingChangeMetadata.usage.totalRequestCount,
+        ),
+      },
+    };
   }
 }

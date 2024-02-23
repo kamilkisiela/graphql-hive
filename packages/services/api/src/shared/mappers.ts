@@ -41,6 +41,11 @@ export type WithGraphQLParentInfo<T> = T & {
   };
 };
 
+export type BreakingChangeMetadataTarget = {
+  name: string;
+  id: string;
+};
+
 export type SchemaCoordinateUsageForUnusedExplorer = {
   isUsed: false;
   usedCoordinates: Set<string>;

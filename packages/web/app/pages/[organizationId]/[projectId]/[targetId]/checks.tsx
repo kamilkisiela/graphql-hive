@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import NextLink from 'next/link';
 import clsx from 'clsx';
+import { format } from 'date-fns';
 import { GitCompareIcon } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
@@ -27,6 +28,7 @@ import {
   Button as LegacyButton,
   MetaTitle,
   Modal,
+  Spinner,
   Switch,
   TimeAgo,
 } from '@/components/v2';
@@ -388,10 +390,8 @@ const BreakingChangesTitle = () => {
 
 const ActiveSchemaCheck = ({
   schemaCheckId,
-  retentionInDays,
 }: {
   schemaCheckId: string | null;
-  retentionInDays: number | undefined;
 }): React.ReactElement | null => {
   const router = useRouteSelector();
   const [query] = useQuery({
@@ -411,6 +411,17 @@ const ActiveSchemaCheck = ({
     ActiveSchemaCheck_SchemaCheckFragment,
     query.data?.target?.schemaCheck,
   );
+
+  if (query.fetching) {
+    return (
+      <div className="flex h-fit flex-1 items-center justify-center self-center">
+        <div className="flex flex-col items-center">
+          <Spinner className="size-12" />
+          <div className="mt-3">Loading Schema Check...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!schemaCheck) {
     return (
@@ -482,7 +493,7 @@ const ActiveSchemaCheck = ({
           ) : null}
         </div>
       </div>
-      <SchemaChecksView schemaCheck={schemaCheck} retentionInDays={retentionInDays} />
+      <SchemaChecksView schemaCheck={schemaCheck} />
       <ApproveFailedSchemaCheckModal
         organizationId={router.organizationId}
         projectId={router.projectId}
@@ -573,12 +584,12 @@ const SchemaChecksView_SchemaCheckFragment = graphql(`
       }
     }
     ...DefaultSchemaView_SchemaCheckFragment
+    ...ContractCheckView_SchemaCheckFragment
   }
 `);
 
 function SchemaChecksView(props: {
   schemaCheck: FragmentType<typeof SchemaChecksView_SchemaCheckFragment>;
-  retentionInDays: number | undefined;
 }) {
   const schemaCheck = useFragment(SchemaChecksView_SchemaCheckFragment, props.schemaCheck);
 
@@ -679,12 +690,9 @@ function SchemaChecksView(props: {
         </TabsList>
       </Tabs>
       {selectedContractCheckNode ? (
-        <ContractCheckView
-          contractCheck={selectedContractCheckNode}
-          retentionInDays={props.retentionInDays}
-        />
+        <ContractCheckView contractCheck={selectedContractCheckNode} schemaCheck={schemaCheck} />
       ) : (
-        <DefaultSchemaView schemaCheck={schemaCheck} retentionInDays={props.retentionInDays} />
+        <DefaultSchemaView schemaCheck={schemaCheck} />
       )}
     </>
   );
@@ -784,12 +792,15 @@ const DefaultSchemaView_SchemaCheckFragment = graphql(`
         }
       }
     }
+    conditionalBreakingChangeMetadata {
+      ...ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment
+    }
+    ...ConditionalBreakingChangesMetadataSection_SchemaCheckFragment
   }
 `);
 
 function DefaultSchemaView(props: {
   schemaCheck: FragmentType<typeof DefaultSchemaView_SchemaCheckFragment>;
-  retentionInDays: number | undefined;
 }) {
   const schemaCheck = useFragment(DefaultSchemaView_SchemaCheckFragment, props.schemaCheck);
   const [selectedView, setSelectedView] = useState<string>('details');
@@ -870,7 +881,7 @@ function DefaultSchemaView(props: {
                   title={<BreakingChangesTitle />}
                   criticality={CriticalityLevel.Breaking}
                   changes={schemaCheck.breakingSchemaChanges.nodes}
-                  retentionInDays={props.retentionInDays}
+                  conditionBreakingChangeMetadata={schemaCheck.conditionalBreakingChangeMetadata}
                 />
               </div>
             ) : null}
@@ -901,16 +912,7 @@ function DefaultSchemaView(props: {
                 />
               </div>
             ) : null}
-            <div className="mb-5 mt-10 text-sm text-gray-400">
-              <p>
-                The schema check is a snapshot at a specific point in time. Live usage data result
-                can change.
-              </p>
-              <p>
-                It is recommended to see if the schema check result is up to date, before making any
-                decisions based on it.
-              </p>
-            </div>
+            <ConditionalBreakingChangesMetadataSection schemaCheck={schemaCheck} />
           </div>
         )}
         {selectedView === 'service' && (
@@ -950,6 +952,99 @@ function DefaultSchemaView(props: {
         )}
       </div>
     </>
+  );
+}
+
+const ConditionalBreakingChangesMetadataSection_SchemaCheckFragment = graphql(`
+  fragment ConditionalBreakingChangesMetadataSection_SchemaCheckFragment on SchemaCheck {
+    id
+    conditionalBreakingChangeMetadata {
+      period {
+        from
+        to
+      }
+      settings {
+        retentionInDays
+        percentage
+        excludedClientNames
+        targets {
+          name
+          target {
+            id
+          }
+        }
+      }
+      usage {
+        totalRequestCountFormatted
+      }
+    }
+  }
+`);
+
+function ConditionalBreakingChangesMetadataSection(props: {
+  schemaCheck: FragmentType<typeof ConditionalBreakingChangesMetadataSection_SchemaCheckFragment>;
+}) {
+  const schemaCheck = useFragment(
+    ConditionalBreakingChangesMetadataSection_SchemaCheckFragment,
+    props.schemaCheck,
+  );
+
+  return (
+    <div className="mb-5 mt-10 text-sm text-gray-400">
+      {schemaCheck.conditionalBreakingChangeMetadata ? (
+        <p>
+          Based on{' '}
+          <span className="text-white">
+            {schemaCheck.conditionalBreakingChangeMetadata.usage.totalRequestCountFormatted}{' '}
+            requests
+          </span>{' '}
+          from target
+          {schemaCheck.conditionalBreakingChangeMetadata.settings.targets.length === 1
+            ? ''
+            : 's'}{' '}
+          {schemaCheck.conditionalBreakingChangeMetadata.settings.targets.map(
+            (target, index, arr) => (
+              <>
+                <span className="text-white">{target.name}</span>
+                {index === arr.length - 1 ? null : index === arr.length - 2 ? 'and' : ','}
+              </>
+            ),
+          )}
+          . <br />
+          Usage data ranges from{' '}
+          <span className="text-white">
+            {format(schemaCheck.conditionalBreakingChangeMetadata.period.from, 'do MMM yyyy HH:mm')}
+          </span>{' '}
+          to{' '}
+          <span className="text-white">
+            {format(schemaCheck.conditionalBreakingChangeMetadata.period.to, 'do MMM yyyy HH:mm')} (
+            {format(schemaCheck.conditionalBreakingChangeMetadata.period.to, 'z')})
+          </span>{' '}
+          (period of {schemaCheck.conditionalBreakingChangeMetadata.settings.retentionInDays} day
+          {schemaCheck.conditionalBreakingChangeMetadata.settings.retentionInDays === 1 ? '' : 's'}
+          ).
+          <br />
+          <DocsLink
+            href="/management/targets#conditional-breaking-changes"
+            className="text-gray-500 hover:text-gray-300"
+          >
+            Learn more about conditional breaking changes.
+          </DocsLink>
+        </p>
+      ) : (
+        <p>
+          Get more out of schema checks by enabling conditional breaking changes based on usage
+          data.
+          <br />
+          <DocsLink
+            href="/management/targets#conditional-breaking-changes"
+            className="text-gray-500 hover:text-gray-300"
+          >
+            Learn more about conditional breaking changes.
+          </DocsLink>
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -1016,11 +1111,22 @@ const ContractCheckView_ContractCheckFragment = graphql(`
   }
 `);
 
+const ContractCheckView_SchemaCheckFragment = graphql(`
+  fragment ContractCheckView_SchemaCheckFragment on SchemaCheck {
+    id
+    ...ConditionalBreakingChangesMetadataSection_SchemaCheckFragment
+    conditionalBreakingChangeMetadata {
+      ...ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment
+    }
+  }
+`);
+
 function ContractCheckView(props: {
   contractCheck: FragmentType<typeof ContractCheckView_ContractCheckFragment>;
-  retentionInDays: number | undefined;
+  schemaCheck: FragmentType<typeof ContractCheckView_SchemaCheckFragment>;
 }) {
   const contractCheck = useFragment(ContractCheckView_ContractCheckFragment, props.contractCheck);
+  const schemaCheck = useFragment(ContractCheckView_SchemaCheckFragment, props.schemaCheck);
 
   const [selectedView, setSelectedView] = useState<string>('details');
 
@@ -1085,7 +1191,7 @@ function ContractCheckView(props: {
                   title={<BreakingChangesTitle />}
                   criticality={CriticalityLevel.Breaking}
                   changes={contractCheck.breakingSchemaChanges.nodes}
-                  retentionInDays={props.retentionInDays}
+                  conditionBreakingChangeMetadata={schemaCheck.conditionalBreakingChangeMetadata}
                 />
               </div>
             )}
@@ -1099,8 +1205,12 @@ function ContractCheckView(props: {
               </div>
             )}
             {!contractCheck.breakingSchemaChanges &&
-              !contractCheck.safeSchemaChanges &&
-              !contractCheck.schemaCompositionErrors && <NoGraphChanges />}
+            !contractCheck.safeSchemaChanges &&
+            !contractCheck.schemaCompositionErrors ? (
+              <NoGraphChanges />
+            ) : (
+              <ConditionalBreakingChangesMetadataSection schemaCheck={schemaCheck} />
+            )}
           </div>
         )}
         {selectedView === 'schema' && (
@@ -1208,7 +1318,6 @@ function ChecksPageContent() {
   const hasSchemaChecks = !!query.data?.target?.schemaChecks?.edges?.length;
   const hasFilteredSchemaChecks = !!query.data?.target?.filteredSchemaChecks?.edges?.length;
   const hasActiveSchemaCheck = !!schemaCheckId;
-  const retentionInDays = query.data?.organization?.organization?.rateLimit?.retentionInDays;
 
   const handleShowOnlyFilterChange = () => {
     const updatedFilters = !filters.showOnlyChanged;
@@ -1328,11 +1437,7 @@ function ChecksPageContent() {
           </div>
           {hasActiveSchemaCheck ? (
             schemaCheckId ? (
-              <ActiveSchemaCheck
-                schemaCheckId={schemaCheckId}
-                key={schemaCheckId}
-                retentionInDays={retentionInDays}
-              />
+              <ActiveSchemaCheck schemaCheckId={schemaCheckId} key={schemaCheckId} />
             ) : null
           ) : hasSchemaChecks ? (
             <EmptyList

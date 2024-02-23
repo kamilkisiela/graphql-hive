@@ -1,10 +1,16 @@
-import { ReactElement, useMemo } from 'react';
+import { ReactElement } from 'react';
 import Link from 'next/link';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
 import { CheckIcon } from 'lucide-react';
 import reactStringReplace from 'react-string-replace';
 import { Label, Label as LegacyLabel } from '@/components/common';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -18,7 +24,6 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Heading } from '@/components/v2';
 import { PulseIcon } from '@/components/v2/icon';
-import { Tooltip as LegacyTooltip } from '@/components/v2/tooltip';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel, SchemaChangeFieldsFragment } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
@@ -37,214 +42,260 @@ const criticalityLevelMapping = {
   [CriticalityLevel.Dangerous]: clsx('text-yellow-400'),
 } as Record<CriticalityLevel, string>;
 
+const ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment = graphql(`
+  fragment ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment on SchemaCheckConditionalBreakingChangeMetadata {
+    settings {
+      retentionInDays
+      targets {
+        name
+        target {
+          id
+          cleanId
+        }
+      }
+    }
+  }
+`);
+
 export function ChangesBlock(props: {
   title: string | React.ReactElement;
   criticality: CriticalityLevel;
-  retentionInDays?: number;
   changes: SchemaChangeFieldsFragment[];
+  conditionBreakingChangeMetadata?: FragmentType<
+    typeof ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment
+  > | null;
 }): ReactElement | null {
-  const router = useRouteSelector();
-
   return (
     <div>
       <h2 className="mb-3 font-bold text-gray-900 dark:text-white">{props.title}</h2>
-      <ul className="list-inside list-disc space-y-2 pl-3 text-sm leading-relaxed">
+      <div className="list-inside list-disc space-y-2 text-sm leading-relaxed">
         {props.changes.map((change, key) => (
-          <li
+          <ChangeItem
             key={key}
-            className={clsx(
-              (!!change.approval && 'text-orange-500') ||
-                (criticalityLevelMapping[props.criticality] ?? 'text-red-400'),
-              ' my-1 flex space-x-2',
-            )}
-          >
-            <MaybeWrapTooltip tooltip={change.criticalityReason ?? null}>
-              <span className="text-gray-600 dark:text-white">{labelize(change.message)}</span>
-            </MaybeWrapTooltip>
-            {change.isSafeBasedOnUsage && (
-              <span className="cursor-pointer text-yellow-500">
-                {' '}
-                <CheckIcon className="inline size-3" /> Safe based on usage data
-              </span>
-            )}
-            {change.usageStatistics ? (
-              <TooltipProvider delayDuration={0}>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <span className="flex cursor-help items-center space-x-1 rounded-sm bg-gray-800 px-2 font-bold">
-                      <PulseIcon className="h-6 stroke-[1px]" />
-                      <span className="text-xs">
-                        {change.usageStatistics.topAffectedOperations.length}
-                        {change.usageStatistics.topAffectedOperations.length > 10 ? '+' : ''}{' '}
-                        {change.usageStatistics.topAffectedOperations.length === 1
-                          ? 'operation'
-                          : 'operations'}{' '}
-                        by {change.usageStatistics.topAffectedClients.length}{' '}
-                        {change.usageStatistics.topAffectedClients.length === 1
-                          ? 'client'
-                          : 'clients'}{' '}
-                        affected
-                      </span>
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <div className="mb-2 w-full text-base font-bold">
-                      Usage based on conditional breaking change configuration
-                    </div>
-                    <div className="flex space-x-4">
-                      <Table>
-                        <TableCaption>Top 10 affected operations.</TableCaption>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-[150px]">Operation Name</TableHead>
-                            <TableHead>Total Requests</TableHead>
-                            <TableHead className="text-right">% of traffic</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {change.usageStatistics.topAffectedOperations.map(
-                            ({ hash, name, countFormatted, percentageFormatted }) => (
-                              <TableRow key={hash}>
-                                <TableCell className="font-medium">
-                                  <Link
-                                    className="text-orange-500 hover:text-orange-500 hover:underline hover:underline-offset-2"
-                                    href={{
-                                      pathname:
-                                        '/[organizationId]/[projectId]/[targetId]/insights/[operationName]/[operationHash]',
-                                      query: {
-                                        organizationId: router.organizationId,
-                                        projectId: router.projectId,
-                                        targetId: router.targetId,
-                                        operationName: `${hash.substring(0, 4)}_${name}`,
-                                        operationHash: hash,
-                                        period: `${props.retentionInDays || 7}d`,
-                                      },
-                                    }}
-                                  >
-                                    {hash.substring(0, 4)}_{name}
-                                  </Link>
-                                </TableCell>
-                                <TableCell className="text-right">{countFormatted}</TableCell>
-                                <TableCell className="text-right">{percentageFormatted}</TableCell>
-                              </TableRow>
-                            ),
-                          )}
-                        </TableBody>
-                      </Table>
-                      <Table>
-                        <TableCaption>Top 10 affected clients.</TableCaption>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-[150px]">Client Name</TableHead>
-                            <TableHead>Total Requests</TableHead>
-                            <TableHead className="text-right">% of traffic</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {change.usageStatistics.topAffectedClients.map(
-                            ({ name, countFormatted, percentageFormatted }) => (
-                              <TableRow key={name}>
-                                <TableCell className="font-medium">{name}</TableCell>
-                                <TableCell className="text-right">{countFormatted}</TableCell>
-                                <TableCell className="text-right">{percentageFormatted}</TableCell>
-                              </TableRow>
-                            ),
-                          )}
-                        </TableBody>
-                      </Table>
-                    </div>
-                    <div className="mt-4 border-t border-t-gray-700 pt-2 text-xs text-gray-100">
-                      <span>
-                        See{' '}
-                        <Link
-                          className="text-orange-500 hover:text-orange-500 hover:underline hover:underline-offset-2"
-                          href={{
-                            pathname:
-                              '/[organizationId]/[projectId]/[targetId]/insights/schema-coordinate/[coordinate]',
-                            query: {
-                              organizationId: router.organizationId,
-                              projectId: router.projectId,
-                              targetId: router.targetId,
-                              coordinate: change.path?.join('.'),
-                              period: `${props.retentionInDays || 7}d`,
-                            },
-                          }}
-                        >
-                          Insights
-                        </Link>{' '}
-                        for live usage data.
-                      </span>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            ) : null}
-            {change.approval ? <SchemaChangeApproval approval={change.approval} /> : null}
-          </li>
+            change={change}
+            conditionBreakingChangeMetadata={props.conditionBreakingChangeMetadata ?? null}
+          />
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
 
-const SchemaChangeApproval = (props: {
-  approval: Exclude<SchemaChangeFieldsFragment['approval'], null | undefined>;
-}) => {
-  const approvalName = props.approval.approvedBy?.displayName ?? '<unknown>';
-  const approvalDate = useMemo(
-    () => format(new Date(props.approval.approvedAt), 'do MMMM yyyy'),
-    [props.approval.approvedAt],
-  );
-  const route = useRouteSelector();
-  // eslint-disable-next-line no-restricted-syntax
-  const schemaCheckPath = useMemo(
-    () =>
-      '/' +
-      [
-        route.organizationId,
-        route.projectId,
-        route.targetId,
-        'checks',
-        props.approval.schemaCheckId,
-      ].join('/'),
-    [],
+function ChangeItem(props: {
+  change: SchemaChangeFieldsFragment;
+  conditionBreakingChangeMetadata: FragmentType<
+    typeof ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment
+  > | null;
+}) {
+  const router = useRouteSelector();
+  const { change } = props;
+
+  const metadata = useFragment(
+    ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment,
+    props.conditionBreakingChangeMetadata,
   );
 
   return (
-    <LegacyTooltip.Provider delayDuration={200}>
-      <LegacyTooltip
-        content={
-          <>
-            This breaking change was manually{' '}
-            {props.approval.schemaCheckId === route.schemaCheckId ? (
-              <>
-                {' '}
-                approved by {approvalName} in this check on {approvalDate}.
-              </>
-            ) : (
-              <Link href={schemaCheckPath} className="text-orange-500 hover:underline">
-                approved by {approvalName} on {approvalDate}.
-              </Link>
+    <Accordion type="single" collapsible>
+      <AccordionItem value="item-1">
+        <AccordionTrigger className="py-3 hover:no-underline">
+          <div
+            className={clsx(
+              (!!change.approval && 'text-orange-500') ||
+                (criticalityLevelMapping[change.criticality] ?? 'text-red-400'),
             )}
-          </>
-        }
-      >
-        <span className="cursor-pointer text-green-500">
-          {' '}
-          <CheckIcon className="inline size-3" /> Approved by {approvalName}
-        </span>
-      </LegacyTooltip>
-    </LegacyTooltip.Provider>
+          >
+            <div className="inline-flex justify-start space-x-2">
+              <span className="text-gray-600 dark:text-white">{labelize(change.message)}</span>
+              {change.isSafeBasedOnUsage && (
+                <span className="cursor-pointer text-yellow-500">
+                  {' '}
+                  <CheckIcon className="inline size-3" /> Safe based on usage data
+                </span>
+              )}
+              {change.usageStatistics && (
+                <span className="flex items-center space-x-1 rounded-sm bg-gray-800 px-2 font-bold">
+                  <PulseIcon className="h-6 stroke-[1px]" />
+                  <span className="text-xs">
+                    {change.usageStatistics.topAffectedOperations.length}
+                    {change.usageStatistics.topAffectedOperations.length > 10 ? '+' : ''}{' '}
+                    {change.usageStatistics.topAffectedOperations.length === 1
+                      ? 'operation'
+                      : 'operations'}{' '}
+                    by {change.usageStatistics.topAffectedClients.length}{' '}
+                    {change.usageStatistics.topAffectedClients.length === 1 ? 'client' : 'clients'}{' '}
+                    affected
+                  </span>
+                </span>
+              )}
+              {change.approval ? (
+                <div className="self-end">
+                  <ApprovedByBadge approval={change.approval} />
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </AccordionTrigger>
+        <AccordionContent className="pb-8 pt-4">
+          {change.approval && <SchemaChangeApproval approval={change.approval} />}
+          {change.usageStatistics ? (
+            <div>
+              <div className="flex space-x-4">
+                <Table>
+                  <TableCaption>Top 10 affected operations.</TableCaption>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[150px]">Operation Name</TableHead>
+                      <TableHead>Total Requests</TableHead>
+                      <TableHead className="text-right">% of traffic</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {change.usageStatistics.topAffectedOperations.map(
+                      ({ hash, name, countFormatted, percentageFormatted }) => (
+                        <TableRow key={hash}>
+                          <TableCell className="font-medium">
+                            <Link
+                              className="text-orange-500 hover:text-orange-500 hover:underline hover:underline-offset-2"
+                              href={{
+                                pathname:
+                                  '/[organizationId]/[projectId]/[targetId]/insights/[operationName]/[operationHash]',
+                                query: {
+                                  organizationId: router.organizationId,
+                                  projectId: router.projectId,
+                                  targetId: router.targetId,
+                                  operationName: `${hash.substring(0, 4)}_${name}`,
+                                  operationHash: hash,
+                                },
+                              }}
+                            >
+                              {hash.substring(0, 4)}_{name}
+                            </Link>
+                          </TableCell>
+                          <TableCell className="text-right">{countFormatted}</TableCell>
+                          <TableCell className="text-right">{percentageFormatted}</TableCell>
+                        </TableRow>
+                      ),
+                    )}
+                  </TableBody>
+                </Table>
+                <Table>
+                  <TableCaption>Top 10 affected clients.</TableCaption>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[150px]">Client Name</TableHead>
+                      <TableHead>Total Requests</TableHead>
+                      <TableHead className="text-right">% of traffic</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {change.usageStatistics.topAffectedClients.map(
+                      ({ name, countFormatted, percentageFormatted }) => (
+                        <TableRow key={name}>
+                          <TableCell className="font-medium">{name}</TableCell>
+                          <TableCell className="text-right">{countFormatted}</TableCell>
+                          <TableCell className="text-right">{percentageFormatted}</TableCell>
+                        </TableRow>
+                      ),
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="mt-4 flex justify-end pt-2 text-xs text-gray-100">
+                {metadata && (
+                  <span>
+                    See{' '}
+                    {metadata.settings.targets.map((target, index, arr) => (
+                      <>
+                        {/* eslint-disable-next-line unicorn/no-negated-condition */}
+                        {!target.target ? (
+                          <TooltipProvider key={index}>
+                            <Tooltip>
+                              <TooltipTrigger>{target.name}</TooltipTrigger>
+                              <TooltipContent>Target does no longer exist.</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          <Link
+                            key={index}
+                            className="text-orange-500 hover:text-orange-500 "
+                            href={{
+                              pathname:
+                                '/[organizationId]/[projectId]/[targetId]/insights/schema-coordinate/[coordinate]',
+                              query: {
+                                organizationId: router.organizationId,
+                                projectId: router.projectId,
+                                targetId: target.target.cleanId,
+                                coordinate: change.path?.join('.'),
+                              },
+                            }}
+                            target="_blank"
+                          >
+                            {target.name}
+                          </Link>
+                        )}
+                        {index === arr.length - 1 ? null : index === arr.length - 2 ? 'and' : ','}
+                      </>
+                    ))}{' '}
+                    target{metadata.settings.targets.length > 1 && 's'} insights for live usage
+                    data.
+                  </span>
+                )}
+              </div>
+            </div>
+          ) : change.criticality === CriticalityLevel.Breaking ? (
+            <>{change.criticalityReason ?? 'No details available for this breaking change.'}</>
+          ) : (
+            <>No details available for this change.</>
+          )}
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
-};
+}
 
-function MaybeWrapTooltip(props: { children: React.ReactNode; tooltip: string | null }) {
-  return props.tooltip ? (
-    <LegacyTooltip.Provider delayDuration={200}>
-      <LegacyTooltip content={props.tooltip}>{props.children}</LegacyTooltip>
-    </LegacyTooltip.Provider>
-  ) : (
-    <>{props.children}</>
+function ApprovedByBadge(props: {
+  approval: Exclude<SchemaChangeFieldsFragment['approval'], null | undefined>;
+}) {
+  const approvalName = props.approval.approvedBy?.displayName ?? '<unknown>';
+
+  return (
+    <span className="cursor-pointer text-green-500">
+      <CheckIcon className="inline size-3" /> Approved by {approvalName}
+    </span>
+  );
+}
+
+function SchemaChangeApproval(props: {
+  approval: Exclude<SchemaChangeFieldsFragment['approval'], null | undefined>;
+}) {
+  const approvalName = props.approval.approvedBy?.displayName ?? '<unknown>';
+  const approvalDate = format(new Date(props.approval.approvedAt), 'do MMMM yyyy');
+  const route = useRouteSelector();
+  const schemaCheckPath =
+    '/' +
+    [
+      route.organizationId,
+      route.projectId,
+      route.targetId,
+      'checks',
+      props.approval.schemaCheckId,
+    ].join('/');
+
+  return (
+    <div className="mb-3">
+      This breaking change was manually{' '}
+      {props.approval.schemaCheckId === route.schemaCheckId ? (
+        <>
+          {' '}
+          approved by {approvalName} in this schema check on {approvalDate}.
+        </>
+      ) : (
+        <Link href={schemaCheckPath} className="text-orange-500 hover:underline">
+          approved by {approvalName} on {approvalDate}.
+        </Link>
+      )}
+    </div>
   );
 }
 

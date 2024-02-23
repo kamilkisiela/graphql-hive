@@ -1665,6 +1665,9 @@ export const resolvers: SchemaModule.Resolvers = {
     previousSchemaSDL(schemaCheck, _, { injector }) {
       return injector.get(SchemaCheckManager).getPreviousSchemaSDL(schemaCheck);
     },
+    conditionalBreakingChangeMetadata(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getConditionalBreakingChangeMetadata(schemaCheck);
+    },
   },
   FailedSchemaCheck: {
     schemaVersion(schemaCheck, _, { injector }) {
@@ -1705,6 +1708,17 @@ export const resolvers: SchemaModule.Resolvers = {
     },
     previousSchemaSDL(schemaCheck, _, { injector }) {
       return injector.get(SchemaCheckManager).getPreviousSchemaSDL(schemaCheck);
+    },
+    conditionalBreakingChangeMetadata(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getConditionalBreakingChangeMetadata(schemaCheck);
+    },
+  },
+  BreakingChangeMetadataTarget: {
+    target(record, _, { injector }) {
+      return injector
+        .get(TargetManager)
+        .getTargetById({ targetId: record.id })
+        .catch(() => null);
     },
   },
   SchemaPolicyWarningConnection: createDummyConnection(warning => ({
