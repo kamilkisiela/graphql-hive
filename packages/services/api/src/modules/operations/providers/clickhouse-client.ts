@@ -18,7 +18,7 @@ function hashQuery(query: SqlStatement): string {
 export interface QueryResponse<T> {
   data: readonly T[];
   rows: number;
-  statistics: {
+  statistics?: {
     elapsed: number;
   };
 }
@@ -167,7 +167,7 @@ export class ClickHouse {
 
     this.config.onReadEnd?.(queryId, {
       totalSeconds: endedAt,
-      elapsedSeconds: response.statistics.elapsed,
+      elapsedSeconds: response.statistics?.elapsed,
     });
 
     return response;

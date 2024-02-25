@@ -46,7 +46,10 @@ async function main() {
         password: env.clickhouse.password,
         onReadEnd(query, timings) {
           clickHouseReadDuration.labels({ query }).observe(timings.totalSeconds);
-          clickHouseElapsedDuration.labels({ query }).observe(timings.elapsedSeconds);
+
+          if (timings.elapsedSeconds !== undefined) {
+            clickHouseElapsedDuration.labels({ query }).observe(timings.elapsedSeconds);
+          }
         },
       },
     });
