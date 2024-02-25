@@ -61,7 +61,6 @@
     "env-ci": "7.3.0",
     "graphql": "^16.8.1",
     "graphql-tag": "2.12.6",
-    "log-symbols": "4.1.0",
     "mkdirp": "3.0.1",
     "tslib": "2.6.2",
     "zod": "3.22.4"
