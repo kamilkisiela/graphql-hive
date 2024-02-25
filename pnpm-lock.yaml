@@ -378,8 +378,8 @@ importers:
         specifier: 4.1.0
         version: 4.1.0
       mkdirp:
-        specifier: 2.1.6
-        version: 2.1.6
+        specifier: 3.0.1
+        version: 3.0.1
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -25343,8 +25343,8 @@ packages:
     hasBin: true
     dev: true
 
-  /mkdirp@2.1.6:
-    resolution: {integrity: sha512-+hEnITedc8LAtIP9u3HJDFIdcLV2vXP33sqLLIzkv1Db1zO/1OxbvYf0Y1OC/S/Qo5dxHXepofhmxL02PsKe+A==}
+  /mkdirp@3.0.1:
+    resolution: {integrity: sha512-+NsyUUAZDmo6YVHzL/stxSu3t9YS1iljliy3BSDrXJ/dkn1KYdmtZODGGjLcc9XLgVVpH4KshHB8XmZgMhaBXg==}
     engines: {node: '>=10'}
     hasBin: true
     dev: false
