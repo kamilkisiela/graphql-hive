@@ -51,7 +51,7 @@
     "@graphql-tools/json-file-loader": "~8.0.0",
     "@graphql-tools/load": "~8.0.0",
     "@graphql-tools/url-loader": "~8.0.0",
-    "@graphql-tools/utils": "10.0.13",
+    "@graphql-tools/utils": "10.1.0",
     "@graphql-typed-document-node/core": "3.2.0",
     "@oclif/core": "^2.8.5",
     "@oclif/plugin-help": "5.2.20",
