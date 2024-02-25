@@ -4,6 +4,7 @@ import { config } from 'dotenv';
 
 config({
   debug: true,
+  encoding: 'utf8',
 });
 
 const privateKeyFile = join(process.cwd(), 'github-app.pem');
