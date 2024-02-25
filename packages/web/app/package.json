@@ -71,7 +71,7 @@
     "json-schema-typed": "8.0.1",
     "json-schema-yup-transformer": "1.6.12",
     "lucide-react": "0.340.0",
-    "monaco-editor": "0.43.0",
+    "monaco-editor": "0.46.0",
     "monaco-themes": "0.4.4",
     "next": "13.5.6",
     "nextjs-cors": "2.2.0",
