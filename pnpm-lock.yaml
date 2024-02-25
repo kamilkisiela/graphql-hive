@@ -499,8 +499,8 @@ importers:
         specifier: 18.18.13
         version: 18.18.13
       '@types/pg':
-        specifier: 8.11.0
-        version: 8.11.0
+        specifier: 8.11.1
+        version: 8.11.1
       '@whatwg-node/fetch':
         specifier: 0.9.16
         version: 0.9.16
@@ -1179,8 +1179,8 @@ importers:
         specifier: 18.18.13
         version: 18.18.13
       '@types/pg':
-        specifier: 8.11.0
-        version: 8.11.0
+        specifier: 8.11.1
+        version: 8.11.1
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
@@ -13752,8 +13752,8 @@ packages:
   /@types/parse-json@4.0.0:
     resolution: {integrity: sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==}
 
-  /@types/pg@8.11.0:
-    resolution: {integrity: sha512-sDAlRiBNthGjNFfvt0k6mtotoVYVQ63pA8R4EMWka7crawSR60waVYR0HAgmPRs/e2YaeJTD/43OoZ3PFw80pw==}
+  /@types/pg@8.11.1:
+    resolution: {integrity: sha512-tUMU6HRvsosqH0qov7YH0Kj6EnziKoqmHUcREBPlDEQLWT+TxDUBT1MmQ53byHXs171xn3YFPIPwVTkVb16mVg==}
     dependencies:
       '@types/node': 18.18.13
       pg-protocol: 1.6.0
