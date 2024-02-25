@@ -29,9 +29,9 @@ patchedDependencies:
   '@theguild/editor@1.2.5':
     hash: pz2nlsfawfhpo6sw62ecmp2yum
     path: patches/@theguild__editor@1.2.5.patch
-  bullmq@5.3.2:
+  bullmq@5.3.3:
     hash: kobtuuqaglbtaadx3jiqtahl3i
-    path: patches/bullmq@5.3.2.patch
+    path: patches/bullmq@5.3.3.patch
   eslint@8.57.0:
     hash: fjbpfrtrjd6idngyeqxnwopfva
     path: patches/eslint@8.57.0.patch
@@ -800,8 +800,8 @@ importers:
         specifier: 0.9.16
         version: 0.9.16
       bullmq:
-        specifier: 5.3.2
-        version: 5.3.2(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
+        specifier: 5.3.3
+        version: 5.3.3(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -1452,8 +1452,8 @@ importers:
         specifier: 10.45.1
         version: 10.45.1
       bullmq:
-        specifier: 5.3.2
-        version: 5.3.2(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
+        specifier: 5.3.3
+        version: 5.3.3(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -15820,13 +15820,14 @@ packages:
       semver: 7.5.4
     dev: true
 
-  /bullmq@5.3.2(patch_hash=kobtuuqaglbtaadx3jiqtahl3i):
-    resolution: {integrity: sha512-o9pNinjX+33fdwY22ilrZh20vL2/KwfdYb/csh2USrDqcqmtA65AFeYD0p5u9PHjWk/RWWFvc90mvBq8+taspQ==}
+  /bullmq@5.3.3(patch_hash=kobtuuqaglbtaadx3jiqtahl3i):
+    resolution: {integrity: sha512-Gc/68HxiCHLMPBiGIqtINxcf8HER/5wvBYMY/6x3tFejlvldUBFaAErMTLDv4TnPsTyzNPrfBKmFCEM58uVnJg==}
     dependencies:
       cron-parser: 4.6.0
-      glob: 8.1.0
+      fast-glob: 3.3.2
       ioredis: 5.3.2
       lodash: 4.17.21
+      minimatch: 9.0.3
       msgpackr: 1.10.1
       node-abort-controller: 3.1.1
       semver: 7.5.4
@@ -19479,6 +19480,17 @@ packages:
       glob-parent: 5.1.2
       merge2: 1.4.1
       micromatch: 4.0.5
+
+  /fast-glob@3.3.2:
+    resolution: {integrity: sha512-oX2ruAFQwf/Orj8m737Y5adxDQO0LAB7/S5MnxCdTNDd4p6BsyIVsv9JQsATbTSq8KHRpLwIHbVlUNatxd+1Ow==}
+    engines: {node: '>=8.6.0'}
+    dependencies:
+      '@nodelib/fs.stat': 2.0.5
+      '@nodelib/fs.walk': 1.2.8
+      glob-parent: 5.1.2
+      merge2: 1.4.1
+      micromatch: 4.0.5
+    dev: true
 
   /fast-json-parse@1.0.3:
     resolution: {integrity: sha512-FRWsaZRWEJ1ESVNbDWmsAlqDk96gPQezzLghafp5J4GUKjbCz3OkAHuZs5TuPEtkbVQERysLp9xv6c24fBm8Aw==}
@@ -24816,6 +24828,13 @@ packages:
 
   /minimatch@9.0.1:
     resolution: {integrity: sha512-0jWhJpD/MdhPXwPuiRkCbfYfSKp2qnn2eOc279qI7f+osl/l+prKSrvhg157zSYvx/1nmgn2NqdT6k2Z7zSH9w==}
+    engines: {node: '>=16 || 14 >=14.17'}
+    dependencies:
+      brace-expansion: 2.0.1
+    dev: true
+
+  /minimatch@9.0.3:
+    resolution: {integrity: sha512-RHiac9mvaRw0x3AYRgDC1CxAP7HTcNrrECeA8YYJeWnpo+2Q5CegtZjaotWTWxDG3UeGA1coE05iH1mPjT/2mg==}
     engines: {node: '>=16 || 14 >=14.17'}
     dependencies:
       brace-expansion: 2.0.1
