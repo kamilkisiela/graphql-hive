@@ -514,8 +514,8 @@ importers:
         specifier: 16.4.5
         version: 16.4.5
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 14.2.0
+        version: 14.2.0
       p-limit:
         specifier: 4.0.0
         version: 4.0.0
@@ -635,8 +635,8 @@ importers:
         specifier: 2.1.0
         version: 2.1.0
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 14.2.0
+        version: 14.2.0
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -935,8 +935,8 @@ importers:
         specifier: 16.4.5
         version: 16.4.5
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 14.2.0
+        version: 14.2.0
       pino-pretty:
         specifier: 10.3.1
         version: 10.3.1
@@ -995,8 +995,8 @@ importers:
         specifier: 4.26.1
         version: 4.26.1
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 14.2.0
+        version: 14.2.0
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -1094,8 +1094,8 @@ importers:
         specifier: 4.26.1
         version: 4.26.1
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 14.2.0
+        version: 14.2.0
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -1188,8 +1188,8 @@ importers:
         specifier: 2.1.0
         version: 2.1.0
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 14.2.0
+        version: 14.2.0
       param-case:
         specifier: 3.0.4
         version: 3.0.4
@@ -1242,8 +1242,8 @@ importers:
         specifier: 16.4.5
         version: 16.4.5
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 14.2.0
+        version: 14.2.0
       pino-pretty:
         specifier: 10.3.1
         version: 10.3.1
@@ -1335,8 +1335,8 @@ importers:
         specifier: 16.4.5
         version: 16.4.5
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 14.2.0
+        version: 14.2.0
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -1380,8 +1380,8 @@ importers:
         specifier: 16.4.5
         version: 16.4.5
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 14.2.0
+        version: 14.2.0
       pino-pretty:
         specifier: 10.3.1
         version: 10.3.1
@@ -1419,8 +1419,8 @@ importers:
         specifier: 16.4.5
         version: 16.4.5
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 14.2.0
+        version: 14.2.0
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -1461,8 +1461,8 @@ importers:
         specifier: 16.4.5
         version: 16.4.5
       got:
-        specifier: 12.6.1
-        version: 12.6.1
+        specifier: 14.2.0
+        version: 14.2.0
       ioredis:
         specifier: 5.3.2
         version: 5.3.2
@@ -11419,9 +11419,9 @@ packages:
     resolution: {integrity: sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==}
     engines: {node: '>=10'}
 
-  /@sindresorhus/is@5.3.0:
-    resolution: {integrity: sha512-CX6t4SYQ37lzxicAqsBtxA3OseeoVrh9cSJ5PFYam0GksYlupRfy1A+Q4aYD3zvcfECLc0zO2u+ZnR2UYKvCrw==}
-    engines: {node: '>=14.16'}
+  /@sindresorhus/is@6.1.0:
+    resolution: {integrity: sha512-BuvU07zq3tQ/2SIgBsEuxKYDyDjC0n7Zir52bpHy2xnBbW81+po43aLFPLbeV3HRAheFbGud1qgcqSYfhtHMAg==}
+    engines: {node: '>=16'}
     dev: true
 
   /@slack/logger@4.0.0:
@@ -13670,6 +13670,10 @@ packages:
 
   /@types/http-cache-semantics@4.0.1:
     resolution: {integrity: sha512-SZs7ekbP8CN0txVG2xVRH6EgKmEm31BOxA07vkFaETzZz1xh+cbt8BcI0slpymvwhx5dlFnQG2rTlPVQn+iRPQ==}
+
+  /@types/http-cache-semantics@4.0.4:
+    resolution: {integrity: sha512-1m0bIFVc7eJWyve9S0RnuRgcQqF/Xd5QsUZAZeQFr1Q3/p9JWoQQEqmVy+DPTNpGXwhgIetAoYF8JSc33q29QA==}
+    dev: true
 
   /@types/ioredis-mock@8.2.5:
     resolution: {integrity: sha512-cZyuwC9LGtg7s5G9/w6rpy3IOZ6F/hFR0pQlWYZESMo1xQUYbDpa6haqB4grTePjsGzcB/YLBFCjqRunK5wieg==}
@@ -15996,14 +16000,14 @@ packages:
     engines: {node: '>=14.16'}
     dev: true
 
-  /cacheable-request@10.2.8:
-    resolution: {integrity: sha512-IDVO5MJ4LItE6HKFQTqT2ocAQsisOoCTUDu1ddCmnhyiwFQjXNPp4081Xj23N4tO+AFEFNzGuNEf/c8Gwwt15A==}
+  /cacheable-request@10.2.14:
+    resolution: {integrity: sha512-zkDT5WAF4hSSoUgyfg5tFIxz8XQK+25W/TLVojJTMKBaxevLBBtLxgqguAuVQB8PVW79FVjHcU+GJ9tVbDZ9mQ==}
     engines: {node: '>=14.16'}
     dependencies:
-      '@types/http-cache-semantics': 4.0.1
+      '@types/http-cache-semantics': 4.0.4
       get-stream: 6.0.1
       http-cache-semantics: 4.1.1
-      keyv: 4.5.2
+      keyv: 4.5.4
       mimic-response: 4.0.0
       normalize-url: 8.0.0
       responselike: 3.0.0
@@ -19949,9 +19953,9 @@ packages:
       webpack: 5.89.0(@swc/core@1.4.2)(esbuild@0.20.1)
     dev: true
 
-  /form-data-encoder@2.1.3:
-    resolution: {integrity: sha512-KqU0nnPMgIJcCOFTNJFEA8epcseEaoox4XZffTgy8jlI6pL/5EFyR54NRG7CnCJN0biY7q52DO3MH6/sJ/TKlQ==}
-    engines: {node: '>= 14.17'}
+  /form-data-encoder@4.0.2:
+    resolution: {integrity: sha512-KQVhvhK8ZkWzxKxOr56CPulAhH3dobtuQ4+hNQ+HekH/Wp5gSOafqRAeTphQUJAIk0GBvHZgJ2ZGRWd5kphMuw==}
+    engines: {node: '>= 18'}
     dev: true
 
   /form-data@2.3.3:
@@ -20544,20 +20548,20 @@ packages:
       p-cancelable: 2.1.1
       responselike: 2.0.1
 
-  /got@12.6.1:
-    resolution: {integrity: sha512-mThBblvlAF1d4O5oqyvN+ZxLAYwIJK7bpMxgYqPD9okW0C3qm5FFn7k811QrcuEBwaogR3ngOFoCfs6mRv7teQ==}
-    engines: {node: '>=14.16'}
+  /got@14.2.0:
+    resolution: {integrity: sha512-dBq2KkHcQl3AwPoIWsLsQScCPpUgRulz1qZVthjPYKYOPmYfBnekR3vxecjZbm91Vc3JUGnV9mqFX7B+Fe2quw==}
+    engines: {node: '>=20'}
     dependencies:
-      '@sindresorhus/is': 5.3.0
+      '@sindresorhus/is': 6.1.0
       '@szmarczak/http-timer': 5.0.1
       cacheable-lookup: 7.0.0
-      cacheable-request: 10.2.8
+      cacheable-request: 10.2.14
       decompress-response: 6.0.0
-      form-data-encoder: 2.1.3
-      get-stream: 6.0.1
-      http2-wrapper: 2.1.11
+      form-data-encoder: 4.0.2
+      get-stream: 8.0.1
+      http2-wrapper: 2.2.1
       lowercase-keys: 3.0.0
-      p-cancelable: 3.0.0
+      p-cancelable: 4.0.1
       responselike: 3.0.0
     dev: true
 
@@ -21433,8 +21437,8 @@ packages:
       quick-lru: 5.1.1
       resolve-alpn: 1.2.1
 
-  /http2-wrapper@2.1.11:
-    resolution: {integrity: sha512-aNAk5JzLturWEUiuhAN73Jcbq96R7rTitAoXV54FYMatvihnpD2+6PUgU4ce3D/m5VDbw+F5CsyKSF176ptitQ==}
+  /http2-wrapper@2.2.1:
+    resolution: {integrity: sha512-V5nVw1PAOgfI3Lmeaj2Exmeg7fenjhRUgz1lPSezy1CuhPYbgQtbQj4jZfEAEMlaL+vupsvhjqCyjzob0yxsmQ==}
     engines: {node: '>=10.19.0'}
     dependencies:
       quick-lru: 5.1.1
@@ -22834,6 +22838,12 @@ packages:
     resolution: {integrity: sha512-5MHbFaKn8cNSmVW7BYnijeAVlE4cYA/SVkifVgrh7yotnfhKmjuXpDKjrABLnT0SfHWV21P8ow07OGfRrNDg8g==}
     dependencies:
       json-buffer: 3.0.1
+
+  /keyv@4.5.4:
+    resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
+    dependencies:
+      json-buffer: 3.0.1
+    dev: true
 
   /khroma@2.0.0:
     resolution: {integrity: sha512-2J8rDNlQWbtiNYThZRvmMv5yt44ZakX+Tz5ZIp/mN1pt4snn+m030Va5Z4v8xA0cQFDXBwO/8i42xL4QPsVk3g==}
@@ -26445,9 +26455,9 @@ packages:
     resolution: {integrity: sha512-BZOr3nRQHOntUjTrH8+Lh54smKHoHyur8We1V8DSMVrl5A2malOOwuJRnKRDjSnkoeBh4at6BwEnb5I7Jl31wg==}
     engines: {node: '>=8'}
 
-  /p-cancelable@3.0.0:
-    resolution: {integrity: sha512-mlVgR3PGuzlo0MmTdk4cXqXWlwQDLnONTAg6sm62XkMJEiRxN3GL3SffkYvqwonbkJBcrI7Uvv5Zh9yjvn2iUw==}
-    engines: {node: '>=12.20'}
+  /p-cancelable@4.0.1:
+    resolution: {integrity: sha512-wBowNApzd45EIKdO1LaU+LrMBwAcjfPaYtVzV3lmfM3gf8Z4CHZsiIqlM8TZZ8okYvh5A1cP6gTfCRQtwUpaUg==}
+    engines: {node: '>=14.16'}
     dev: true
 
   /p-defer@3.0.0:
