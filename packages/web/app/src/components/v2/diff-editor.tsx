@@ -17,7 +17,7 @@ export const DiffEditor = (props: {
   const [showDiff, setShowDiff] = useState<boolean>(true);
   const sdlBefore = usePrettify(props.before);
   const sdlAfter = usePrettify(props.after);
-  const diffNavigator = useRef<ReturnType<Monaco['editor']['createDiffNavigator']>>(null);
+  const diffNavigator = useRef<ReturnType<Monaco['editor']['createDiffEditor']>>(null);
   const editorRef = useRef<OriginalMonacoDiffEditor>(null);
 
   function handleEditorDidMount(editor: OriginalMonacoDiffEditor, monaco: Monaco) {
@@ -33,10 +33,10 @@ export const DiffEditor = (props: {
 
   function addKeyBindings(editor: OriginalMonacoDiffEditor, monaco: Monaco) {
     editor.addCommand(monaco.KeyMod.CtrlCmd + monaco.KeyCode.UpArrow, () => {
-      diffNavigator.current?.previous();
+      diffNavigator.current?.goToDiff('previous');
     });
     editor.addCommand(monaco.KeyMod.CtrlCmd + monaco.KeyCode.DownArrow, () => {
-      diffNavigator.current?.next();
+      diffNavigator.current?.goToDiff('next');
     });
   }
 
@@ -57,7 +57,7 @@ export const DiffEditor = (props: {
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      onClick={() => diffNavigator.current?.previous()}
+                      onClick={() => diffNavigator.current?.goToDiff('previous')}
                     >
                       <ArrowUpIcon />
                     </Button>
@@ -69,7 +69,7 @@ export const DiffEditor = (props: {
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      onClick={() => diffNavigator.current?.next()}
+                      onClick={() => diffNavigator.current?.goToDiff('next')}
                     >
                       <ArrowDownIcon />
                     </Button>
