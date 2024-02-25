@@ -75,7 +75,7 @@ jobs:
         working-directory: docker_output
         run: |
           for f in *.tar; do
-            image_name=$(basename -- "$f")
+            image_name=$(basename $f .tar)
             image_tag="${image_name}:${{ inputs.imageTag }}"
             echo "loading local docker image $f as tag $image_tag"
 
