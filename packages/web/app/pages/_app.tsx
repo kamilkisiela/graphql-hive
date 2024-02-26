@@ -102,6 +102,7 @@ if (globalThis.window) {
     init({
       dsn: env.sentry.dsn,
       enabled: true,
+      dist: 'webapp',
       release: env.release,
       environment: env.environment,
     });
