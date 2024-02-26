@@ -84,6 +84,7 @@ jobs:
             cat $f | docker import - $image_tag
           done
           docker image ls -a
+          rm -rf docker_output
 
       - name: run containers
         timeout-minutes: 8
