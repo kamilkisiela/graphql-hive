@@ -12,6 +12,7 @@ const withBundleAnalyzer = bundleAnalyzer({
 });
 
 export default withBundleAnalyzer({
+  productionBrowserSourceMaps: true,
   poweredByHeader: false,
   eslint: {
     ignoreDuringBuilds: true,

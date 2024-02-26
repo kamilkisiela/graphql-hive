@@ -17,6 +17,7 @@ import { build } from 'esbuild';
       platform: 'node',
       target: 'node18',
       minify: false,
+      sourcemap: true,
       outfile: nodeOutputPath,
       treeShaking: true,
     }).then(result => {
@@ -30,7 +31,8 @@ import { build } from 'esbuild';
       platform: 'browser',
       target: 'chrome95',
       format: 'esm',
-      minify: false,
+      minify: true,
+      sourcemap: true,
       outfile: workerOutputPath,
       treeShaking: true,
     }).then(result => {
