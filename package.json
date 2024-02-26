@@ -117,12 +117,10 @@
     "patchedDependencies": {
       "@theguild/buddy@0.1.0": "patches/@theguild__buddy@0.1.0.patch",
       "mjml-core@4.14.0": "patches/mjml-core@4.14.0.patch",
-      "oclif@3.17.2": "patches/oclif@3.17.2.patch",
       "@apollo/federation@0.38.1": "patches/@apollo__federation@0.38.1.patch",
       "bullmq@5.3.3": "patches/bullmq@5.3.3.patch",
       "@theguild/editor@1.2.5": "patches/@theguild__editor@1.2.5.patch",
       "eslint@8.57.0": "patches/eslint@8.57.0.patch",
-      "@oclif/core@2.8.5": "patches/@oclif__core@2.8.5.patch",
       "@graphql-eslint/eslint-plugin@3.20.1": "patches/@graphql-eslint__eslint-plugin@3.20.1.patch",
       "graphiql@3.0.0-alpha.0": "patches/graphiql@3.0.0-alpha.0.patch",
       "@graphiql/react@0.18.0-alpha.0": "patches/@graphiql__react@0.18.0-alpha.0.patch",
