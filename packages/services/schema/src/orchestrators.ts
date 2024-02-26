@@ -418,7 +418,7 @@ function composeFederationV2(
       type: 'success',
       result: {
         supergraph: result.supergraphSdl,
-        sdl: print(transformSupergraphToPublicSchema(parse(result.supergraphSdl))),
+        sdl: result.publicSdl,
       },
       includesNetworkError: false,
     } as const;
