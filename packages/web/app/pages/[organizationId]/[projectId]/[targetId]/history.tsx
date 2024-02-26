@@ -17,7 +17,7 @@ import { Badge, Button, DiffEditor, MetaTitle, Spinner, TimeAgo } from '@/compon
 import { noSchemaVersion } from '@/components/v2/empty-list';
 import { DiffIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { CriticalityLevel } from '@/graphql';
+import { CriticalityLevel, ProjectType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { cn } from '@/lib/utils';
@@ -213,6 +213,7 @@ const SchemaVersionView_SchemaVersionFragment = graphql(`
 
 function SchemaVersionView(props: {
   schemaVersion: FragmentType<typeof SchemaVersionView_SchemaVersionFragment>;
+  projectType: ProjectType;
 }) {
   const schemaVersion = useFragment(SchemaVersionView_SchemaVersionFragment, props.schemaVersion);
 
@@ -306,9 +307,12 @@ function SchemaVersionView(props: {
         </Tabs>
       )}
       {contractVersionNode ? (
-        <ContractVersionView contractVersion={contractVersionNode} />
+        <ContractVersionView
+          contractVersion={contractVersionNode}
+          projectType={props.projectType}
+        />
       ) : (
-        <DefaultSchemaVersionView schemaVersion={schemaVersion} />
+        <DefaultSchemaVersionView schemaVersion={schemaVersion} projectType={props.projectType} />
       )}
     </div>
   );
@@ -382,6 +386,7 @@ const DefaultSchemaVersionView_SchemaVersionFragment = graphql(`
 
 function DefaultSchemaVersionView(props: {
   schemaVersion: FragmentType<typeof DefaultSchemaVersionView_SchemaVersionFragment>;
+  projectType: ProjectType;
 }) {
   const schemaVersion = useFragment(
     DefaultSchemaVersionView_SchemaVersionFragment,
@@ -410,7 +415,10 @@ function DefaultSchemaVersionView(props: {
       tooltip: 'Show diff of the schema',
       disabledReason: schemaVersion?.schemaCompositionErrors ? 'Composition failed.' : null,
     },
-    {
+  ];
+
+  if (props.projectType === ProjectType.Federation) {
+    availableViews.push({
       value: 'supergraph',
       icon: <DiffIcon className="h-5 w-auto flex-none" />,
       label: 'Supergraph',
@@ -420,10 +428,10 @@ function DefaultSchemaVersionView(props: {
         : schemaVersion?.supergraph
           ? null
           : 'No supergraph.',
-    },
-  ];
+    });
+  }
 
-  if (schemaVersion && ('service' in schemaVersion.log || 'deletedService' in schemaVersion.log)) {
+  if (props.projectType !== ProjectType.Single) {
     availableViews.push({
       value: 'service-schema',
       icon: <CubeIcon className="h-5 w-auto flex-none" />,
@@ -571,6 +579,7 @@ const ContractVersionView_ContractVersionFragment = graphql(`
 
 function ContractVersionView(props: {
   contractVersion: FragmentType<typeof ContractVersionView_ContractVersionFragment>;
+  projectType: ProjectType;
 }) {
   const contractVersion = useFragment(
     ContractVersionView_ContractVersionFragment,
@@ -599,7 +608,10 @@ function ContractVersionView(props: {
       tooltip: 'Show diff of the schema',
       disabledReason: contractVersion?.schemaCompositionErrors ? 'Composition failed.' : null,
     },
-    {
+  ];
+
+  if (props.projectType === ProjectType.Federation) {
+    availableViews.push({
       value: 'supergraph',
       icon: <DiffIcon className="h-5 w-auto flex-none" />,
       label: 'Supergraph',
@@ -609,8 +621,8 @@ function ContractVersionView(props: {
         : contractVersion?.supergraphSDL
           ? null
           : 'No supergraph.',
-    },
-  ];
+    });
+  }
 
   return (
     <>
@@ -703,6 +715,10 @@ const ActiveSchemaVersion_SchemaVersionQuery = graphql(`
         ...SchemaVersionView_SchemaVersionFragment
       }
     }
+    project(selector: { organization: $organization, project: $project }) {
+      id
+      type
+    }
   }
 `);
 
@@ -723,8 +739,9 @@ function ActiveSchemaVersion({ versionId }: { versionId: string }) {
 
   const isLoading = query.fetching;
   const schemaVersion = query?.data?.target?.schemaVersion;
+  const projectType = query?.data?.project?.type;
 
-  if (isLoading || !schemaVersion) {
+  if (isLoading || !schemaVersion || !projectType) {
     return (
       <div className="flex size-full items-center justify-center">
         <Spinner />
@@ -749,7 +766,9 @@ function ActiveSchemaVersion({ versionId }: { versionId: string }) {
     );
   }
 
-  return schemaVersion ? <SchemaVersionView schemaVersion={schemaVersion} /> : null;
+  return schemaVersion ? (
+    <SchemaVersionView schemaVersion={schemaVersion} projectType={projectType} />
+  ) : null;
 }
 
 const TargetHistoryPageQuery = graphql(`
