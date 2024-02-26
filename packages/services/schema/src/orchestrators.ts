@@ -20,6 +20,7 @@ import type { ErrorCode } from '@graphql-hive/external-composition';
 import { stitchSchemas } from '@graphql-tools/stitch';
 import { stitchingDirectives } from '@graphql-tools/stitching-directives';
 import type { ServiceLogger } from '@hive/service-common';
+import { startSentryTransaction } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import {
   composeServices as nativeComposeServices,
@@ -502,6 +503,11 @@ async function composeExternalFederation(args: {
   }
 
   if (parseResult.data.type === 'success') {
+    await checkExternalCompositionCompatibility(
+      parseResult.data.result.supergraph,
+      parseResult.data.result.sdl,
+    );
+
     return {
       type: 'success',
       result: {
@@ -513,6 +519,44 @@ async function composeExternalFederation(args: {
   }
 
   return parseResult.data;
+}
+
+async function checkExternalCompositionCompatibility(supergraph: string, maybeSdl: string) {
+  const transaction = startSentryTransaction({
+    op: 'schema.checkExternalCompositionSdlValidity',
+    name: 'Check External Composition SDL Validity',
+  });
+
+  let parsed: DocumentNode | undefined;
+  let errors: ReadonlyArray<GraphQLError> | undefined;
+  // 1 means it passed, 0 means it failed
+  try {
+    parsed = parse(maybeSdl);
+    errors = validateSDL(parsed);
+
+    Sentry.setMeasurement('parse_success', 1, 'none');
+    if (errors.length === 0) {
+      Sentry.setMeasurement('validate_success', 1, 'none');
+    } else {
+      Sentry.setMeasurement('validate_failure', 1, 'none');
+    }
+
+    // everything okay
+  } catch (err) {
+    if (parsed === undefined) {
+      Sentry.setMeasurement('parse_failure', 1, 'none');
+      return;
+    }
+    Sentry.captureException(err);
+  } finally {
+    Sentry.setContext('Extra Info', {
+      maybeSdl,
+      supergraph,
+      validationErrors: errors?.map(e => e.message) ?? null,
+    });
+
+    transaction.end();
+  }
 }
 
 const federationTypes = new Set([
