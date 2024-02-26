@@ -32,7 +32,7 @@ jobs:
 
     env:
       DOCKER_REGISTRY:
-        ${{ inputs.useLocalArtifacts && '' || format('{0}/{1}/', inputs.registry, inputs.imageName)
+        ${{ !inputs.useLocalArtifacts && format('{0}/{1}/', inputs.registry, inputs.imageName) || ''
         }}
       DOCKER_TAG: :${{ inputs.imageTag }}
 
