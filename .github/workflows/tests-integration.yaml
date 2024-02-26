@@ -31,7 +31,9 @@ jobs:
         shardIndex: [1, 2, 3]
 
     env:
-      DOCKER_REGISTRY: ${{ inputs.registry }}/${{ inputs.imageName }}/
+      DOCKER_REGISTRY:
+        ${{ inputs.useLocalArtifacts && '' || format('{0}/{1}/', inputs.registry, inputs.imageName)
+        }}
       DOCKER_TAG: :${{ inputs.imageTag }}
 
     steps:
