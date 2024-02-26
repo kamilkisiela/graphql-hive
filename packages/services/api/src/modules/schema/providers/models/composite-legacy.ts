@@ -184,8 +184,8 @@ export class CompositeLegacyModel {
       commit: input.commit,
       target: target.id,
       date: Date.now() as any,
-      service_name: input.service!,
-      service_url: input.url!,
+      service_name: input.service || '',
+      service_url: input.url || '',
       action: 'PUSH',
       metadata: input.metadata ?? null,
     };
@@ -327,8 +327,8 @@ export class CompositeLegacyModel {
     if (shouldBePublished) {
       const messages: string[] = [];
 
-      if (hasNewUrl) {
-        messages.push(serviceUrlCheck.result.message!);
+      if (serviceUrlCheck.status === 'completed' && serviceUrlCheck.result.status === 'modified') {
+        messages.push(serviceUrlCheck.result.message);
       }
 
       if (hasNewMetadata) {
