@@ -308,8 +308,8 @@ export class CompositeModel {
       commit: input.commit,
       target: target.id,
       date: Date.now() as any,
-      service_name: input.service!,
-      service_url: input.url!,
+      service_name: input.service || '',
+      service_url: input.url || '',
       action: 'PUSH',
       metadata: input.metadata ?? null,
     };
@@ -456,18 +456,13 @@ export class CompositeModel {
       conditionalBreakingChangeDiffConfig,
     });
 
-    const hasNewUrl =
-      serviceUrlCheck.status === 'completed' && serviceUrlCheck.result.status === 'modified';
-    const hasNewMetadata =
-      metadataCheck?.status === 'completed' && metadataCheck.result.status === 'modified';
-
     const messages: string[] = [];
 
-    if (hasNewUrl) {
-      messages.push(serviceUrlCheck.result.message!);
+    if (serviceUrlCheck.status === 'completed' && serviceUrlCheck.result.status === 'modified') {
+      messages.push(serviceUrlCheck.result.message);
     }
 
-    if (hasNewMetadata) {
+    if (metadataCheck?.status === 'completed' && metadataCheck.result.status === 'modified') {
       messages.push('Metadata has been updated');
     }
 
