@@ -290,7 +290,7 @@ export class SchemaVersionHelper {
         beforeVersionCreatedAt: schemaVersion.createdAt,
       });
 
-    return !!composableVersion;
+    return !composableVersion;
   }
 
   async getServiceSdlForPreviousVersionService(schemaVersion: SchemaVersion, serviceName: string) {
