@@ -572,11 +572,6 @@ export default gql`
     sdl: String!
     github: GitHubSchemaCheckInput
     meta: SchemaCheckMetaInput
-    """
-    Optional context ID to group schema checks together.
-    Manually approved breaking changes will be memorized for schema checks with the same context id.
-    """
-    contextId: String
   }
 
   input SchemaDeleteInput {
