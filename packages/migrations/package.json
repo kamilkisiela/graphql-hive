@@ -19,7 +19,7 @@
   "devDependencies": {
     "@graphql-hive/core": "workspace:*",
     "@types/bcryptjs": "2.4.6",
-    "@types/node": "18.19.18",
+    "@types/node": "20.11.20",
     "@types/pg": "8.11.1",
     "@whatwg-node/fetch": "0.9.16",
     "bcryptjs": "2.4.3",
