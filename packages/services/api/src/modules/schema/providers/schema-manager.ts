@@ -43,7 +43,7 @@ import { Contracts } from './contracts';
 import { FederationOrchestrator } from './orchestrators/federation';
 import { SingleOrchestrator } from './orchestrators/single';
 import { StitchingOrchestrator } from './orchestrators/stitching';
-import { ensureCompositeSchemas, SchemaHelper } from './schema-helper';
+import { ensureCompositeSchemas, removeDescriptions, SchemaHelper } from './schema-helper';
 
 const ENABLE_EXTERNAL_COMPOSITION_SCHEMA = z.object({
   endpoint: z.string().url().nonempty(),
@@ -1138,18 +1138,22 @@ export class SchemaManager {
 
         if (compositionResult.supergraph) {
           const sortedExistingSupergraph = print(
-            sortSDL(
-              parseGraphQLSource(
-                compositionResult.supergraph,
-                'parsing existing supergraph in getNativeFederationCompatibilityStatus',
+            removeDescriptions(
+              sortSDL(
+                parseGraphQLSource(
+                  compositionResult.supergraph,
+                  'parsing existing supergraph in getNativeFederationCompatibilityStatus',
+                ),
               ),
             ),
           );
           const sortedNativeSupergraph = print(
-            sortSDL(
-              parseGraphQLSource(
-                version.supergraphSDL!,
-                'parsing native supergraph in getNativeFederationCompatibilityStatus',
+            removeDescriptions(
+              sortSDL(
+                parseGraphQLSource(
+                  version.supergraphSDL!,
+                  'parsing native supergraph in getNativeFederationCompatibilityStatus',
+                ),
               ),
             ),
           );
