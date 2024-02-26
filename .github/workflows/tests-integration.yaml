@@ -85,9 +85,12 @@ jobs:
           done
           docker image ls -a
           rm -rf docker_output
+          rm -rf /usr/share/dotnet/
+          rm -rf /opt/hostedtoolcache
+          df -h
 
       - name: run containers
-        timeout-minutes: 8
+        timeout-minutes: 10
         run: |
           docker compose -f docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
 
