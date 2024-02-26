@@ -2635,16 +2635,18 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           conditionalBreakingChangeMetadata: input.conditionalBreakingChangeMetadata,
         });
 
-        await Promise.all(
-          input.logIds.concat(log.id).map(async lid => {
-            await trx.query(sql`
-              INSERT INTO schema_version_to_log
-                (version_id, action_id)
-              VALUES
-              (${version.id}, ${lid})
-            `);
-          }),
-        );
+        await trx.query(sql`
+          INSERT INTO schema_version_to_log
+            (version_id, action_id)
+          SELECT * FROM
+            ${sql.unnest(
+              input.logIds.concat(log.id).map(actionId =>
+                // Note: change.criticality.level is actually a computed value from meta
+                [version.id, actionId],
+              ),
+              ['uuid', 'uuid'],
+            )}
+        `);
 
         await insertSchemaVersionChanges(trx, {
           versionId: version.id,
