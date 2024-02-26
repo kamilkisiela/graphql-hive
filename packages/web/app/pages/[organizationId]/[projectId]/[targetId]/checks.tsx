@@ -35,6 +35,7 @@ import {
 import { AlertTriangleIcon, DiffIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel } from '@/gql/graphql';
+import { ProjectType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 import { cn } from '@/lib/utils';
@@ -238,6 +239,10 @@ const ActiveSchemaCheckQuery = graphql(`
         ...ActiveSchemaCheck_SchemaCheckFragment
       }
     }
+    project(selector: { organization: $organizationId, project: $projectId }) {
+      id
+      type
+    }
   }
 `);
 
@@ -423,7 +428,7 @@ const ActiveSchemaCheck = ({
     );
   }
 
-  if (!schemaCheck) {
+  if (!schemaCheck || !query.data?.project) {
     return (
       <EmptyList
         className="border-0"
@@ -493,7 +498,7 @@ const ActiveSchemaCheck = ({
           ) : null}
         </div>
       </div>
-      <SchemaChecksView schemaCheck={schemaCheck} />
+      <SchemaChecksView schemaCheck={schemaCheck} projectType={query.data.project.type} />
       <ApproveFailedSchemaCheckModal
         organizationId={router.organizationId}
         projectId={router.projectId}
@@ -602,6 +607,7 @@ const SchemaChecksView_SchemaCheckFragment = graphql(`
 
 function SchemaChecksView(props: {
   schemaCheck: FragmentType<typeof SchemaChecksView_SchemaCheckFragment>;
+  projectType: ProjectType;
 }) {
   const schemaCheck = useFragment(SchemaChecksView_SchemaCheckFragment, props.schemaCheck);
 
@@ -702,9 +708,13 @@ function SchemaChecksView(props: {
         </TabsList>
       </Tabs>
       {selectedContractCheckNode ? (
-        <ContractCheckView contractCheck={selectedContractCheckNode} schemaCheck={schemaCheck} />
+        <ContractCheckView
+          contractCheck={selectedContractCheckNode}
+          schemaCheck={schemaCheck}
+          projectType={props.projectType}
+        />
       ) : (
-        <DefaultSchemaView schemaCheck={schemaCheck} />
+        <DefaultSchemaView schemaCheck={schemaCheck} projectType={props.projectType} />
       )}
     </>
   );
@@ -813,6 +823,7 @@ const DefaultSchemaView_SchemaCheckFragment = graphql(`
 
 function DefaultSchemaView(props: {
   schemaCheck: FragmentType<typeof DefaultSchemaView_SchemaCheckFragment>;
+  projectType: ProjectType;
 }) {
   const schemaCheck = useFragment(DefaultSchemaView_SchemaCheckFragment, props.schemaCheck);
   const [selectedView, setSelectedView] = useState<string>('details');
@@ -825,44 +836,48 @@ function DefaultSchemaView(props: {
       tooltip: 'Details',
       isDisabled: false,
     },
-    ...(schemaCheck.serviceName
-      ? [
-          {
-            value: 'service',
-            icon: <DiffIcon className="h-5 w-auto flex-none" />,
-            label: 'Service',
-            tooltip: 'Service',
-            isDisabled: false,
-          },
-        ]
-      : []),
-    {
-      value: 'schema',
+  ];
+
+  if (schemaCheck.serviceName) {
+    items.push({
+      value: 'service',
       icon: <DiffIcon className="h-5 w-auto flex-none" />,
-      label: 'Schema',
-      tooltip: 'Schema Diff',
-      isDisabled: !schemaCheck.compositeSchemaSDL,
-    },
-    {
+      label: 'Service',
+      tooltip: 'Service',
+      isDisabled: false,
+    });
+  }
+
+  items.push({
+    value: 'schema',
+    icon: <DiffIcon className="h-5 w-auto flex-none" />,
+    label: 'Schema',
+    tooltip: 'Schema Diff',
+    isDisabled: !schemaCheck.compositeSchemaSDL,
+  });
+
+  if (props.projectType === ProjectType.Federation) {
+    items.push({
       value: 'supergraph',
       icon: <DiffIcon className="h-5 w-auto flex-none" />,
       label: 'Supergraph',
       tooltip: 'Supergraph',
       isDisabled: !schemaCheck.supergraphSDL,
-    },
-    {
-      value: 'policy',
-      icon: <AlertTriangleIcon className="h-5 w-auto flex-none" />,
-      label: 'Policy',
-      tooltip: 'Schema Policy',
-      isDisabled:
-        !schemaCheck.schemaPolicyWarnings &&
-        !(
-          schemaCheck.__typename === 'FailedSchemaCheck' &&
-          schemaCheck.schemaPolicyErrors?.edges?.length
-        ),
-    },
-  ];
+    });
+  }
+
+  items.push({
+    value: 'policy',
+    icon: <AlertTriangleIcon className="h-5 w-auto flex-none" />,
+    label: 'Policy',
+    tooltip: 'Schema Policy',
+    isDisabled:
+      !schemaCheck.schemaPolicyWarnings &&
+      !(
+        schemaCheck.__typename === 'FailedSchemaCheck' &&
+        schemaCheck.schemaPolicyErrors?.edges?.length
+      ),
+  });
 
   return (
     <>
@@ -1136,6 +1151,7 @@ const ContractCheckView_SchemaCheckFragment = graphql(`
 function ContractCheckView(props: {
   contractCheck: FragmentType<typeof ContractCheckView_ContractCheckFragment>;
   schemaCheck: FragmentType<typeof ContractCheckView_SchemaCheckFragment>;
+  projectType: ProjectType;
 }) {
   const contractCheck = useFragment(ContractCheckView_ContractCheckFragment, props.contractCheck);
   const schemaCheck = useFragment(ContractCheckView_SchemaCheckFragment, props.schemaCheck);
@@ -1159,7 +1175,10 @@ function ContractCheckView(props: {
         <>Composition did not succeed. No public schema SDL available.</>
       ),
     },
-    {
+  ];
+
+  if (props.projectType === ProjectType.Federation) {
+    items.push({
       value: 'supergraph',
       icon: <DiffIcon className="h-5 w-auto flex-none" />,
       label: 'Supergraph',
@@ -1167,8 +1186,8 @@ function ContractCheckView(props: {
       disabledReason: !contractCheck.supergraphSDL && (
         <>Composition did not succeed. No Supergraph available.</>
       ),
-    },
-  ];
+    });
+  }
 
   return (
     <TooltipProvider>
