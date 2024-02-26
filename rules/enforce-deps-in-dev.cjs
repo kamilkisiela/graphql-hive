@@ -9,7 +9,7 @@
 /// @ts-check
 const path = require('path');
 const fs = require('fs');
-const minimatch = require('minimatch');
+const { minimatch } = require('minimatch');
 const readPkgUp = require('eslint-module-utils/readPkgUp').default;
 const moduleVisitor = require('eslint-module-utils/moduleVisitor').default;
 

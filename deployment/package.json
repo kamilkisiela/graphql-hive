@@ -8,7 +8,7 @@
     "@lbrlabs/pulumi-grafana": "0.1.0",
     "@manypkg/get-packages": "2.2.0",
     "@pulumi/cloudflare": "4.16.0",
-    "@pulumi/kubernetes": "4.7.1",
+    "@pulumi/kubernetes": "4.8.0",
     "@pulumi/kubernetesx": "0.1.6",
     "@pulumi/pulumi": "3.107.0",
     "@pulumi/random": "4.14.0",
@@ -18,7 +18,7 @@
   "devDependencies": {
     "@types/js-yaml": "4.0.9",
     "@types/mime-types": "2.1.4",
-    "@types/node": "18.18.13",
+    "@types/node": "18.19.18",
     "typescript": "5.3.3"
   }
 }

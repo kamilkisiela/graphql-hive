@@ -3,6 +3,7 @@ import zod from 'zod';
 
 dotenv({
   debug: true,
+  encoding: 'utf8',
 });
 
 const isNumberString = (input: unknown) => zod.string().regex(/^\d+$/).safeParse(input).success;

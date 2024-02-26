@@ -17,26 +17,19 @@ export const DiffEditor = (props: {
   const [showDiff, setShowDiff] = useState<boolean>(true);
   const sdlBefore = usePrettify(props.before);
   const sdlAfter = usePrettify(props.after);
-  const diffNavigator = useRef<ReturnType<Monaco['editor']['createDiffNavigator']>>(null);
-  const editorRef = useRef<OriginalMonacoDiffEditor>(null);
+  const editorRef = useRef<OriginalMonacoDiffEditor | null>(null);
 
   function handleEditorDidMount(editor: OriginalMonacoDiffEditor, monaco: Monaco) {
     addKeyBindings(editor, monaco);
-    // @ts-expect-error it says read-only but it's not
-    diffNavigator.current = monaco.editor.createDiffNavigator(editor, {
-      followsCaret: true, // resets the navigator state when the user selects something in the editor
-      ignoreCharChanges: true, // jump from line to line
-    });
-    // @ts-expect-error it says read-only but it's not
     editorRef.current = editor;
   }
 
   function addKeyBindings(editor: OriginalMonacoDiffEditor, monaco: Monaco) {
     editor.addCommand(monaco.KeyMod.CtrlCmd + monaco.KeyCode.UpArrow, () => {
-      diffNavigator.current?.previous();
+      editorRef.current?.goToDiff('previous');
     });
     editor.addCommand(monaco.KeyMod.CtrlCmd + monaco.KeyCode.DownArrow, () => {
-      diffNavigator.current?.next();
+      editorRef.current?.goToDiff('next');
     });
   }
 
@@ -57,7 +50,7 @@ export const DiffEditor = (props: {
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      onClick={() => diffNavigator.current?.previous()}
+                      onClick={() => editorRef.current?.goToDiff('previous')}
                     >
                       <ArrowUpIcon />
                     </Button>
@@ -69,7 +62,7 @@ export const DiffEditor = (props: {
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      onClick={() => diffNavigator.current?.next()}
+                      onClick={() => editorRef.current?.goToDiff('next')}
                     >
                       <ArrowDownIcon />
                     </Button>

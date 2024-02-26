@@ -16,9 +16,9 @@ const plugin: FastifyPluginAsync = async server => {
 
   function shouldIgnore(request: FastifyRequest) {
     if (
-      request.routerPath === '/_health' ||
-      request.routerPath === '/_readiness' ||
-      (request.routerPath === '/graphql' && request.headers['x-signature'])
+      request.routeOptions.url === '/_health' ||
+      request.routeOptions.url === '/_readiness' ||
+      (request.routeOptions.url === '/graphql' && request.headers['x-signature'])
     ) {
       return true;
     }

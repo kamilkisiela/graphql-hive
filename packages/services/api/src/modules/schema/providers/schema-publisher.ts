@@ -1341,7 +1341,7 @@ export class SchemaPublisher {
                     supergraph: deleteResult.state.supergraph,
                     fullSchemaSdl: deleteResult.state.fullSchemaSdl,
                     // pass all schemas except the one we are deleting
-                    schemas: schemas.filter(s => s.service_name !== input.serviceName),
+                    schemas: deleteResult.state.schemas,
                     contracts,
                   });
                 }

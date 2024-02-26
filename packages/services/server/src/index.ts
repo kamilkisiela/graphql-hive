@@ -270,7 +270,10 @@ export async function main() {
         requestTimeout: env.clickhouse.requestTimeout,
         onReadEnd(query, timings) {
           clickHouseReadDuration.labels({ query }).observe(timings.totalSeconds);
-          clickHouseElapsedDuration.labels({ query }).observe(timings.elapsedSeconds);
+
+          if (timings.elapsedSeconds !== undefined) {
+            clickHouseElapsedDuration.labels({ query }).observe(timings.elapsedSeconds);
+          }
         },
       },
       cdn: env.cdn,
@@ -464,7 +467,10 @@ export async function main() {
       await startMetrics(env.prometheus.labels.instance, env.prometheus.port);
     }
 
-    await server.listen(port, '::');
+    await server.listen({
+      port: env.http.port,
+      host: '::',
+    });
   } catch (error) {
     server.log.fatal(error);
     captureException(error, {
