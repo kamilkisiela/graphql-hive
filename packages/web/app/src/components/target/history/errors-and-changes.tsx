@@ -147,7 +147,7 @@ function ChangeItem(props: {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-[150px]">Operation Name</TableHead>
-                      <TableHead>Total Requests</TableHead>
+                      <TableHead className="text-right">Total Requests</TableHead>
                       <TableHead className="text-right">% of traffic</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -204,7 +204,7 @@ function ChangeItem(props: {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-[150px]">Client Name</TableHead>
-                      <TableHead>Total Requests</TableHead>
+                      <TableHead className="text-right">Total Requests</TableHead>
                       <TableHead className="text-right">% of traffic</TableHead>
                     </TableRow>
                   </TableHeader>

@@ -1316,6 +1316,8 @@ export class OperationsReader {
           GROUP BY
             "coordinates_to_client_name_mapping"."coordinate",
             "clients_daily"."client_name"
+          ORDER BY
+            SUM("clients_daily"."total") DESC
           LIMIT 10
           BY
             "coordinates_to_client_name_mapping"."coordinate",
@@ -1340,7 +1342,7 @@ export class OperationsReader {
         operationsBySchemaCoordinate.set(result.coordinate, records);
       }
       records.push({
-        name: result.name,
+        name: result.name === '' ? 'unknown' : result.name,
         count: result.count,
       });
     }
