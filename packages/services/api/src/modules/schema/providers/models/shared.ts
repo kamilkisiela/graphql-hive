@@ -274,6 +274,7 @@ export type SchemaDeleteSuccess = {
   conclusion: (typeof SchemaDeleteConclusion)['Accept'];
   state: {
     changes: Array<SchemaChangeType> | null;
+    schemas: PushedCompositeSchema[];
     breakingChanges: Array<SchemaChangeType> | null;
     compositionErrors: Array<SchemaCompositionError> | null;
     supergraph: string | null;

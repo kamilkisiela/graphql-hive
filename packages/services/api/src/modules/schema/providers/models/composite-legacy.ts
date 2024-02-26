@@ -79,6 +79,7 @@ export class CompositeLegacyModel {
     const schemas = latestVersion
       ? swapServices(latestVersion.schemas, incoming).schemas
       : [incoming];
+    schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
     const orchestrator = project.type === ProjectType.FEDERATION ? this.federation : this.stitching;
 
     const checksumCheck = await this.checks.checksum({
@@ -191,6 +192,7 @@ export class CompositeLegacyModel {
     const swap = latestVersion ? swapServices(latestVersion.schemas, incoming) : null;
     const previousService = swap?.existing;
     const schemas = swap?.schemas ?? [incoming];
+    schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
 
     const forced = input.force === true;
     const acceptBreakingChanges = input.experimental_acceptBreakingChanges === true;

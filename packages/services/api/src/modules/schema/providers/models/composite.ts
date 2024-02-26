@@ -144,6 +144,8 @@ export class CompositeModel {
     };
 
     const schemas = latest ? swapServices(latest.schemas, incoming).schemas : [incoming];
+    schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
+
     const comparedVersion =
       organization.featureFlags.compareToPreviousComposableVersion === false
         ? latest
@@ -316,6 +318,7 @@ export class CompositeModel {
     const swap = latestVersion ? swapServices(latestVersion.schemas, incoming) : null;
     const previousService = swap?.existing;
     const schemas = swap?.schemas ?? [incoming];
+    schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
     const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
     const schemaVersionToCompareAgainst = compareToLatest ? latest : latestComposable;
 
@@ -575,6 +578,7 @@ export class CompositeModel {
         ? this.federationOrchestrator
         : this.stitchingOrchestrator;
     const schemas = latestVersion.schemas.filter(s => s.service_name !== input.serviceName);
+    schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
 
     const compositionCheck = await this.checks.composition({
       orchestrator,
@@ -683,6 +687,7 @@ export class CompositeModel {
         compositionErrors: compositionCheck.reason?.errors ?? [],
         supergraph: compositionCheck.result?.supergraph ?? null,
         tags: compositionCheck.result?.tags ?? null,
+        schemas,
         contracts:
           contractChecks?.map(contractCheck => ({
             contractId: contractCheck.contractId,

@@ -3586,3 +3586,62 @@ test.concurrent(
     expect(latestValidSchema.latestValidVersion?.tags).toEqual(['atarashii']);
   },
 );
+
+test.concurrent('CDN services are published in alphanumeric order', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject } = await createOrg();
+  const { createToken } = await createProject(ProjectType.Stitching);
+  const readWriteToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+  });
+
+  await readWriteToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        type Query {
+          ping1: String
+        }
+      `,
+      service: 'z',
+      url: 'http://z.foo',
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  await readWriteToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        type Query {
+          ping2: String
+        }
+      `,
+      service: 'x',
+      url: 'http://x.foo',
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  await readWriteToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        type Query {
+          ping3: String
+        }
+      `,
+      service: 'y',
+      url: 'http://y.foo',
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  const cdn = await readWriteToken.createCdnAccess();
+  const res = await fetch(cdn.cdnUrl + '/services', {
+    method: 'GET',
+    headers: {
+      'X-Hive-CDN-Key': cdn.secretAccessToken,
+    },
+  });
+
+  expect(res.status).toBe(200);
+  const result = await res.json();
+  expect(result).toMatchObject([{ name: 'x' }, { name: 'y' }, { name: 'z' }]);
+});
