@@ -16,6 +16,7 @@ await Promise.all([
     platform: 'node',
     target: 'node18',
     minify: false,
+    sourcemap: true,
     outfile: nodeOutputPath,
     treeShaking: true,
   }).then(result => {
@@ -29,7 +30,8 @@ await Promise.all([
     platform: 'browser',
     target: 'chrome95',
     format: 'esm',
-    minify: false,
+    minify: true,
+    sourcemap: true,
     outfile: workerOutputPath,
     treeShaking: true,
   }).then(result => {

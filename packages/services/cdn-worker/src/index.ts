@@ -117,7 +117,9 @@ const handler: ExportedHandler<Env> = {
       dsn: env.SENTRY_DSN,
       environment: env.SENTRY_ENVIRONMENT,
       release: env.SENTRY_RELEASE,
+      dist: 'cdn-worker',
       context: ctx,
+      request,
       requestDataOptions: {
         allowedHeaders: [
           'user-agent',
