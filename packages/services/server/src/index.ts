@@ -270,7 +270,10 @@ export async function main() {
         requestTimeout: env.clickhouse.requestTimeout,
         onReadEnd(query, timings) {
           clickHouseReadDuration.labels({ query }).observe(timings.totalSeconds);
-          clickHouseElapsedDuration.labels({ query }).observe(timings.elapsedSeconds);
+
+          if (timings.elapsedSeconds !== undefined) {
+            clickHouseElapsedDuration.labels({ query }).observe(timings.elapsedSeconds);
+          }
         },
       },
       cdn: env.cdn,
