@@ -138,6 +138,8 @@ const config: CodegenConfig = {
             '../modules/schema/providers/contracts#ContractCheck as ContractCheckMapper',
           ContractVersion:
             '../modules/schema/providers/contracts#ContractVersion as ContractVersionMapper',
+          BreakingChangeMetadataTarget:
+            '../shared/mappers#BreakingChangeMetadataTarget as BreakingChangeMetadataTargetMapper',
         },
       },
     },
@@ -188,7 +190,7 @@ const config: CodegenConfig = {
     },
     // CLI
     './packages/libraries/cli/src/gql/': {
-      documents: ['./packages/libraries/cli/src/commands/**/*.ts'],
+      documents: ['./packages/libraries/cli/src/(commands|helpers)/**/*.ts'],
       preset: 'client',
       plugins: [],
       config: {

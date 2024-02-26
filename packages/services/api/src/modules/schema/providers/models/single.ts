@@ -1,7 +1,7 @@
 import { Injectable, Scope } from 'graphql-modules';
 import { SchemaChangeType } from '@hive/storage';
 import { SingleOrchestrator } from '../orchestrators/single';
-import { RegistryChecks } from '../registry-checks';
+import { ConditionalBreakingChangeDiffConfig, RegistryChecks } from '../registry-checks';
 import type { PublishInput } from '../schema-publisher';
 import type { Organization, Project, SingleSchema, Target } from './../../../../shared/entities';
 import { Logger } from './../../../shared/providers/logger';
@@ -35,6 +35,7 @@ export class SingleModel {
     organization,
     baseSchema,
     approvedChanges,
+    conditionalBreakingChangeDiffConfig,
   }: {
     input: {
       sdl: string;
@@ -58,6 +59,7 @@ export class SingleModel {
     project: Project;
     organization: Organization;
     approvedChanges: Map<string, SchemaChangeType>;
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
   }): Promise<SchemaCheckResult> {
     const incoming: SingleSchema = {
       kind: 'single',
@@ -114,7 +116,7 @@ export class SingleModel {
 
     const [diffCheck, policyCheck] = await Promise.all([
       this.checks.diff({
-        usageDataSelector: selector,
+        conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
         includeUrlChanges: false,
         filterOutFederationChanges: false,
         approvedChanges,
@@ -166,6 +168,7 @@ export class SingleModel {
     latest,
     latestComposable,
     baseSchema,
+    conditionalBreakingChangeDiffConfig,
   }: {
     input: PublishInput;
     organization: Organization;
@@ -182,6 +185,7 @@ export class SingleModel {
       schemas: [SingleSchema];
     } | null;
     baseSchema: string | null;
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
   }): Promise<SchemaPublishResult> {
     const incoming: SingleSchema = {
       kind: 'single',
@@ -247,11 +251,7 @@ export class SingleModel {
     const [metadataCheck, diffCheck] = await Promise.all([
       this.checks.metadata(incoming, latestVersion ? latestVersion.schemas[0] : null),
       this.checks.diff({
-        usageDataSelector: {
-          target: target.id,
-          project: project.id,
-          organization: project.orgId,
-        },
+        conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
         filterOutFederationChanges: false,
         includeUrlChanges: false,
         approvedChanges: null,

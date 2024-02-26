@@ -32,8 +32,15 @@ const schemaCheckMutation = graphql(/* GraphQL */ `
             message(withSafeBasedOnUsageNote: false)
             criticality
             isSafeBasedOnUsage
+            approval {
+              approvedBy {
+                id
+                displayName
+              }
+            }
           }
           total
+          ...RenderChanges_schemaChanges
         }
         schemaCheck {
           webUrl
@@ -48,6 +55,7 @@ const schemaCheckMutation = graphql(/* GraphQL */ `
             isSafeBasedOnUsage
           }
           total
+          ...RenderChanges_schemaChanges
         }
         warnings {
           nodes {

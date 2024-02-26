@@ -1,6 +1,6 @@
 import { Injectable, Scope } from 'graphql-modules';
 import { SingleOrchestrator } from '../orchestrators/single';
-import { RegistryChecks } from '../registry-checks';
+import { ConditionalBreakingChangeDiffConfig, RegistryChecks } from '../registry-checks';
 import type { PublishInput } from '../schema-publisher';
 import type { Organization, Project, SingleSchema, Target } from './../../../../shared/entities';
 import { Logger } from './../../../shared/providers/logger';
@@ -33,6 +33,7 @@ export class SingleLegacyModel {
     project,
     organization,
     baseSchema,
+    conditionalBreakingChangeDiffConfig,
   }: {
     input: {
       sdl: string;
@@ -50,6 +51,7 @@ export class SingleLegacyModel {
     baseSchema: string | null;
     project: Project;
     organization: Organization;
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
   }): Promise<SchemaCheckResult> {
     const incoming: SingleSchema = {
       kind: 'single',
@@ -102,7 +104,7 @@ export class SingleLegacyModel {
     });
 
     const diffCheck = await this.checks.diff({
-      usageDataSelector: selector,
+      conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
       includeUrlChanges: false,
       filterOutFederationChanges: false,
       approvedChanges: null,
@@ -143,6 +145,7 @@ export class SingleLegacyModel {
     project,
     organization,
     baseSchema,
+    conditionalBreakingChangeDiffConfig,
   }: {
     input: PublishInput;
     project: Project;
@@ -154,6 +157,7 @@ export class SingleLegacyModel {
       schemas: [SingleSchema];
     } | null;
     baseSchema: string | null;
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
   }): Promise<SchemaPublishResult> {
     const incoming: SingleSchema = {
       kind: 'single',
@@ -217,11 +221,7 @@ export class SingleLegacyModel {
 
     const [diffCheck, metadataCheck] = await Promise.all([
       this.checks.diff({
-        usageDataSelector: {
-          target: target.id,
-          project: project.id,
-          organization: project.orgId,
-        },
+        conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
         includeUrlChanges: false,
         filterOutFederationChanges: false,
         approvedChanges: null,

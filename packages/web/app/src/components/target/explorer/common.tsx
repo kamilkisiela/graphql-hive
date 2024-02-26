@@ -104,47 +104,43 @@ export function SchemaExplorerUsageStats(props: {
                   </ul>
 
                   {Array.isArray(usage.topOperations) ? (
-                    <>
-                      <table className="mt-4 table-auto">
-                        <thead>
-                          <tr>
-                            <th className="p-2 pl-0 text-left">Top 5 Operations</th>
-                            <th className="p-2 text-center">Reqs</th>
-                            <th className="p-2 text-center">Of total</th>
+                    <table className="mt-4 table-auto">
+                      <thead>
+                        <tr>
+                          <th className="p-2 pl-0 text-left">Top 5 Operations</th>
+                          <th className="p-2 text-center">Reqs</th>
+                          <th className="p-2 text-center">Of total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {usage.topOperations.map(op => (
+                          <tr key={op.hash}>
+                            <td className="px-2 pl-0 text-left">
+                              <NextLink
+                                className="text-orange-500 hover:text-orange-500 hover:underline hover:underline-offset-2"
+                                href={{
+                                  pathname:
+                                    '/[organizationId]/[projectId]/[targetId]/insights/[operationName]/[operationHash]',
+                                  query: {
+                                    organizationId: props.organizationCleanId,
+                                    projectId: props.projectCleanId,
+                                    targetId: props.targetCleanId,
+                                    operationName: `${op.hash.substring(0, 4)}_${op.name}`,
+                                    operationHash: op.hash,
+                                  },
+                                }}
+                              >
+                                {op.hash.substring(0, 4)}_{op.name}
+                              </NextLink>
+                            </td>
+                            <td className="px-2 text-center font-bold">{formatNumber(op.count)}</td>
+                            <td className="px-2 text-center font-bold">
+                              {toDecimal((op.count / props.totalRequests) * 100)}%
+                            </td>
                           </tr>
-                        </thead>
-                        <tbody>
-                          {usage.topOperations.map(op => (
-                            <tr key={op.hash}>
-                              <td className="px-2 pl-0 text-left">
-                                <NextLink
-                                  className="text-orange-500 hover:text-orange-500 hover:underline hover:underline-offset-2"
-                                  href={{
-                                    pathname:
-                                      '/[organizationId]/[projectId]/[targetId]/insights/[operationName]/[operationHash]',
-                                    query: {
-                                      organizationId: props.organizationCleanId,
-                                      projectId: props.projectCleanId,
-                                      targetId: props.targetCleanId,
-                                      operationName: `${op.hash.substring(0, 4)}_${op.name}`,
-                                      operationHash: op.hash,
-                                    },
-                                  }}
-                                >
-                                  {op.hash.substring(0, 4)}_{op.name}
-                                </NextLink>
-                              </td>
-                              <td className="px-2 text-center font-bold">
-                                {formatNumber(op.count)}
-                              </td>
-                              <td className="px-2 text-center font-bold">
-                                {toDecimal((op.count / props.totalRequests) * 100)}%
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </>
+                        ))}
+                      </tbody>
+                    </table>
                   ) : null}
                 </div>
               )}

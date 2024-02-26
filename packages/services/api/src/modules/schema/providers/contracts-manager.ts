@@ -7,6 +7,7 @@ import { TargetAccessScope } from '../../auth/providers/scopes';
 import { IdTranslator } from '../../shared/providers/id-translator';
 import { Logger } from '../../shared/providers/logger';
 import { Storage } from '../../shared/providers/storage';
+import { BreakingSchemaChangeUsageHelper } from './breaking-schema-changes-helper';
 import {
   Contracts,
   type Contract,
@@ -26,6 +27,7 @@ export class ContractsManager {
     private storage: Storage,
     private authManager: AuthManager,
     private idTranslator: IdTranslator,
+    private breakingSchemaChangeUsageHelper: BreakingSchemaChangeUsageHelper,
   ) {
     this.logger = logger.child({ service: 'ContractsManager' });
   }
@@ -220,9 +222,24 @@ export class ContractsManager {
   }
 
   public async getContractsChecksForSchemaCheck(schemaCheck: SchemaCheck) {
-    return this.contracts.getPaginatedContractChecksBySchemaCheckId({
+    const contractChecks = await this.contracts.getPaginatedContractChecksBySchemaCheckId({
       schemaCheckId: schemaCheck.id,
     });
+
+    if (contractChecks?.edges && schemaCheck.conditionalBreakingChangeMetadata) {
+      for (const edge of contractChecks.edges) {
+        if (edge.node.breakingSchemaChanges) {
+          for (const breakingSchemaChange of edge.node.breakingSchemaChanges) {
+            this.breakingSchemaChangeUsageHelper.registerUsageDataForBreakingSchemaChange(
+              breakingSchemaChange,
+              schemaCheck.conditionalBreakingChangeMetadata.usage,
+            );
+          }
+        }
+      }
+    }
+
+    return contractChecks;
   }
 
   public async getIsFirstComposableContractVersionForContractVersion(

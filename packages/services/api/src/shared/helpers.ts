@@ -212,3 +212,72 @@ export function pushIfMissing<T>(list: T[], item: T): void {
 }
 
 export type PromiseOrValue<T> = Promise<T> | T;
+
+/**
+ * Batch processing of items based on a built key
+ */
+export function batchBy<TItem, TResult>(
+  /** Function to determine the batch group. */
+  buildBatchKey: (arg: TItem) => string,
+  /** Loader for each batch group. */
+  loader: (args: TItem[]) => Promise<Promise<TResult>[]>,
+) {
+  let batchGroups = new Map<
+    string,
+    {
+      args: TItem[];
+      callbacks: Array<{ resolve: (result: TResult) => void; reject: (error: Error) => void }>;
+    }
+  >();
+  let didSchedule = false;
+
+  return (arg: TItem): Promise<TResult> => {
+    const key = buildBatchKey(arg);
+    let currentBatch = batchGroups.get(key);
+    if (!currentBatch) {
+      currentBatch = {
+        args: [],
+        callbacks: [],
+      };
+      batchGroups.set(key, currentBatch);
+    }
+
+    if (!didSchedule) {
+      didSchedule = true;
+      process.nextTick(() => {
+        for (const currentBatch of batchGroups.values()) {
+          const tickArgs = [...currentBatch.args];
+          const tickCallbacks = [...currentBatch.callbacks];
+
+          loader(tickArgs).then(
+            promises => {
+              for (let i = 0; i < tickCallbacks.length; i++) {
+                promises[i].then(
+                  result => {
+                    tickCallbacks[i].resolve(result);
+                  },
+                  error => {
+                    tickCallbacks[i].reject(error);
+                  },
+                );
+              }
+            },
+            error => {
+              for (let i = 0; i < tickCallbacks.length; i++) {
+                tickCallbacks[i].reject(error);
+              }
+            },
+          );
+        }
+        // reset the batch
+        batchGroups = new Map();
+        didSchedule = false;
+      });
+    }
+    currentBatch.args.push(arg);
+    const { callbacks } = currentBatch;
+    return new Promise((resolve, reject) => {
+      callbacks.push({ resolve, reject });
+    });
+  };
+}

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import NextLink from 'next/link';
 import clsx from 'clsx';
+import { format } from 'date-fns';
 import { GitCompareIcon } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
@@ -12,6 +13,7 @@ import {
   labelize,
   NoGraphChanges,
 } from '@/components/target/history/errors-and-changes';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
@@ -26,6 +28,7 @@ import {
   Button as LegacyButton,
   MetaTitle,
   Modal,
+  Spinner,
   Switch,
   TimeAgo,
 } from '@/components/v2';
@@ -39,6 +42,7 @@ import {
   CheckIcon,
   ExclamationTriangleIcon,
   ExternalLinkIcon,
+  InfoCircledIcon,
   ListBulletIcon,
 } from '@radix-ui/react-icons';
 
@@ -353,6 +357,37 @@ const ApproveFailedSchemaCheckModal = (props: {
   );
 };
 
+const BreakingChangesTitle = () => {
+  return (
+    <TooltipProvider>
+      Breaking Changes
+      <Tooltip>
+        <TooltipTrigger>
+          <Button variant="ghost" size="icon-sm" className="ml-1">
+            <InfoCircledIcon className="size-3" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent align="start">
+          <div className="mb-2 max-w-[500px] font-normal">
+            <h5 className="mb-1 text-lg font-bold">Breaking Changes</h5>
+            <p className="mb-2 text-sm">Schema changes that can potentially break clients.</p>
+            <h6 className="mb-1 font-bold">Breaking Change Approval</h6>
+            <p className="mb-2">
+              Approve this schema check for adding the changes to the list of allowed changes and
+              change the status of this schema check to successful.
+            </p>
+            <h6 className="mb-1 font-bold">Conditional Breaking Changes</h6>
+            <p>
+              Configure conditional breaking changes, to automatically mark breaking changes as safe
+              based on live usage data collected from your GraphQL Gateway.
+            </p>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
+
 const ActiveSchemaCheck = ({
   schemaCheckId,
 }: {
@@ -376,6 +411,17 @@ const ActiveSchemaCheck = ({
     ActiveSchemaCheck_SchemaCheckFragment,
     query.data?.target?.schemaCheck,
   );
+
+  if (query.fetching) {
+    return (
+      <div className="flex h-fit flex-1 items-center justify-center self-center">
+        <div className="flex flex-col items-center">
+          <Spinner className="size-12" />
+          <div className="mt-3">Loading Schema Check...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!schemaCheck) {
     return (
@@ -550,6 +596,7 @@ const SchemaChecksView_SchemaCheckFragment = graphql(`
       }
     }
     ...DefaultSchemaView_SchemaCheckFragment
+    ...ContractCheckView_SchemaCheckFragment
   }
 `);
 
@@ -655,7 +702,7 @@ function SchemaChecksView(props: {
         </TabsList>
       </Tabs>
       {selectedContractCheckNode ? (
-        <ContractCheckView contractCheck={selectedContractCheckNode} />
+        <ContractCheckView contractCheck={selectedContractCheckNode} schemaCheck={schemaCheck} />
       ) : (
         <DefaultSchemaView schemaCheck={schemaCheck} />
       )}
@@ -701,6 +748,19 @@ const DefaultSchemaView_SchemaCheckFragment = graphql(`
           schemaCheckId
         }
         isSafeBasedOnUsage
+        usageStatistics {
+          topAffectedOperations {
+            hash
+            name
+            countFormatted
+            percentageFormatted
+          }
+          topAffectedClients {
+            name
+            countFormatted
+            percentageFormatted
+          }
+        }
       }
     }
     safeSchemaChanges {
@@ -744,6 +804,10 @@ const DefaultSchemaView_SchemaCheckFragment = graphql(`
         }
       }
     }
+    conditionalBreakingChangeMetadata {
+      ...ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment
+    }
+    ...ConditionalBreakingChangesMetadataSection_SchemaCheckFragment
   }
 `);
 
@@ -824,23 +888,26 @@ function DefaultSchemaView(props: {
               <CompositionErrorsSection compositionErrors={schemaCheck.compositionErrors} />
             )}
             {schemaCheck.breakingSchemaChanges?.nodes.length ? (
-              <div className="mb-2">
+              <div className="mb-5">
                 <ChangesBlock
+                  title={<BreakingChangesTitle />}
                   criticality={CriticalityLevel.Breaking}
                   changes={schemaCheck.breakingSchemaChanges.nodes}
+                  conditionBreakingChangeMetadata={schemaCheck.conditionalBreakingChangeMetadata}
                 />
               </div>
             ) : null}
             {schemaCheck.safeSchemaChanges ? (
-              <div className="mb-2">
+              <div className="mb-5">
                 <ChangesBlock
+                  title="Safe Changes"
                   criticality={CriticalityLevel.Safe}
                   changes={schemaCheck.safeSchemaChanges.nodes}
                 />
               </div>
             ) : null}
             {schemaCheck.schemaPolicyErrors?.edges.length ? (
-              <div className="mb-2">
+              <div className="mb-5">
                 <PolicyBlock
                   title="Schema Policy Errors"
                   policies={schemaCheck.schemaPolicyErrors}
@@ -849,7 +916,7 @@ function DefaultSchemaView(props: {
               </div>
             ) : null}
             {schemaCheck.schemaPolicyWarnings ? (
-              <div className="mb-2">
+              <div className="mb-5">
                 <PolicyBlock
                   title="Schema Policy Warnings"
                   policies={schemaCheck.schemaPolicyWarnings}
@@ -857,6 +924,7 @@ function DefaultSchemaView(props: {
                 />
               </div>
             ) : null}
+            <ConditionalBreakingChangesMetadataSection schemaCheck={schemaCheck} />
           </div>
         )}
         {selectedView === 'service' && (
@@ -899,6 +967,99 @@ function DefaultSchemaView(props: {
   );
 }
 
+const ConditionalBreakingChangesMetadataSection_SchemaCheckFragment = graphql(`
+  fragment ConditionalBreakingChangesMetadataSection_SchemaCheckFragment on SchemaCheck {
+    id
+    conditionalBreakingChangeMetadata {
+      period {
+        from
+        to
+      }
+      settings {
+        retentionInDays
+        percentage
+        excludedClientNames
+        targets {
+          name
+          target {
+            id
+          }
+        }
+      }
+      usage {
+        totalRequestCountFormatted
+      }
+    }
+  }
+`);
+
+function ConditionalBreakingChangesMetadataSection(props: {
+  schemaCheck: FragmentType<typeof ConditionalBreakingChangesMetadataSection_SchemaCheckFragment>;
+}) {
+  const schemaCheck = useFragment(
+    ConditionalBreakingChangesMetadataSection_SchemaCheckFragment,
+    props.schemaCheck,
+  );
+
+  return (
+    <div className="mb-5 mt-10 text-sm text-gray-400">
+      {schemaCheck.conditionalBreakingChangeMetadata ? (
+        <p>
+          Based on{' '}
+          <span className="text-white">
+            {schemaCheck.conditionalBreakingChangeMetadata.usage.totalRequestCountFormatted}{' '}
+            requests
+          </span>{' '}
+          from target
+          {schemaCheck.conditionalBreakingChangeMetadata.settings.targets.length === 1
+            ? ''
+            : 's'}{' '}
+          {schemaCheck.conditionalBreakingChangeMetadata.settings.targets.map(
+            (target, index, arr) => (
+              <>
+                <span className="text-white">{target.name}</span>
+                {index === arr.length - 1 ? null : index === arr.length - 2 ? 'and' : ','}
+              </>
+            ),
+          )}
+          . <br />
+          Usage data ranges from{' '}
+          <span className="text-white">
+            {format(schemaCheck.conditionalBreakingChangeMetadata.period.from, 'do MMM yyyy HH:mm')}
+          </span>{' '}
+          to{' '}
+          <span className="text-white">
+            {format(schemaCheck.conditionalBreakingChangeMetadata.period.to, 'do MMM yyyy HH:mm')} (
+            {format(schemaCheck.conditionalBreakingChangeMetadata.period.to, 'z')})
+          </span>{' '}
+          (period of {schemaCheck.conditionalBreakingChangeMetadata.settings.retentionInDays} day
+          {schemaCheck.conditionalBreakingChangeMetadata.settings.retentionInDays === 1 ? '' : 's'}
+          ).
+          <br />
+          <DocsLink
+            href="/management/targets#conditional-breaking-changes"
+            className="text-gray-500 hover:text-gray-300"
+          >
+            Learn more about conditional breaking changes.
+          </DocsLink>
+        </p>
+      ) : (
+        <p>
+          Get more out of schema checks by enabling conditional breaking changes based on usage
+          data.
+          <br />
+          <DocsLink
+            href="/management/targets#conditional-breaking-changes"
+            className="text-gray-500 hover:text-gray-300"
+          >
+            Learn more about conditional breaking changes.
+          </DocsLink>
+        </p>
+      )}
+    </div>
+  );
+}
+
 const ContractCheckView_ContractCheckFragment = graphql(`
   fragment ContractCheckView_ContractCheckFragment on ContractCheck {
     id
@@ -920,6 +1081,19 @@ const ContractCheckView_ContractCheckFragment = graphql(`
           schemaCheckId
         }
         isSafeBasedOnUsage
+        usageStatistics {
+          topAffectedOperations {
+            hash
+            name
+            countFormatted
+            percentageFormatted
+          }
+          topAffectedClients {
+            name
+            countFormatted
+            percentageFormatted
+          }
+        }
       }
     }
     safeSchemaChanges {
@@ -949,10 +1123,22 @@ const ContractCheckView_ContractCheckFragment = graphql(`
   }
 `);
 
+const ContractCheckView_SchemaCheckFragment = graphql(`
+  fragment ContractCheckView_SchemaCheckFragment on SchemaCheck {
+    id
+    ...ConditionalBreakingChangesMetadataSection_SchemaCheckFragment
+    conditionalBreakingChangeMetadata {
+      ...ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment
+    }
+  }
+`);
+
 function ContractCheckView(props: {
   contractCheck: FragmentType<typeof ContractCheckView_ContractCheckFragment>;
+  schemaCheck: FragmentType<typeof ContractCheckView_SchemaCheckFragment>;
 }) {
   const contractCheck = useFragment(ContractCheckView_ContractCheckFragment, props.contractCheck);
+  const schemaCheck = useFragment(ContractCheckView_SchemaCheckFragment, props.schemaCheck);
 
   const [selectedView, setSelectedView] = useState<string>('details');
 
@@ -1014,22 +1200,29 @@ function ContractCheckView(props: {
             {contractCheck.breakingSchemaChanges?.nodes.length && (
               <div className="mb-2">
                 <ChangesBlock
+                  title={<BreakingChangesTitle />}
                   criticality={CriticalityLevel.Breaking}
                   changes={contractCheck.breakingSchemaChanges.nodes}
+                  conditionBreakingChangeMetadata={schemaCheck.conditionalBreakingChangeMetadata}
                 />
               </div>
             )}
             {contractCheck.safeSchemaChanges && (
               <div className="mb-2">
                 <ChangesBlock
+                  title="Safe Changes"
                   criticality={CriticalityLevel.Safe}
                   changes={contractCheck.safeSchemaChanges.nodes}
                 />
               </div>
             )}
             {!contractCheck.breakingSchemaChanges &&
-              !contractCheck.safeSchemaChanges &&
-              !contractCheck.schemaCompositionErrors && <NoGraphChanges />}
+            !contractCheck.safeSchemaChanges &&
+            !contractCheck.schemaCompositionErrors ? (
+              <NoGraphChanges />
+            ) : (
+              <ConditionalBreakingChangesMetadataSection schemaCheck={schemaCheck} />
+            )}
           </div>
         )}
         {selectedView === 'schema' && (
@@ -1064,6 +1257,9 @@ const ChecksPageQuery = graphql(`
     organization(selector: { organization: $organizationId }) {
       organization {
         ...TargetLayout_CurrentOrganizationFragment
+        rateLimit {
+          retentionInDays
+        }
       }
     }
     project(selector: { organization: $organizationId, project: $projectId }) {

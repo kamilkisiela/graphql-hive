@@ -470,7 +470,7 @@ export class Contracts {
           , "breaking_schema_changes" = (
             SELECT json_agg(
               CASE
-                WHEN COALESCE(jsonb_typeof("change"->'approvalMetadata'), 'null') = 'null'
+                WHEN (COALESCE(jsonb_typeof("change"->'approvalMetadata'), 'null') = 'null' AND "change"->>'isSafeBasedOnUsage' = 'false')
                   THEN jsonb_set("change", '{approvalMetadata}', ${sql.jsonb(
                     args.approvalMetadata,
                   )})
@@ -490,6 +490,10 @@ export class Contracts {
 
       if (args.contextId !== null) {
         for (const change of contractCheck.breakingSchemaChanges ?? []) {
+          if (change.isSafeBasedOnUsage) {
+            continue;
+          }
+
           breakingChangeApprovalInserts.push([
             contractCheck.contractId,
             args.contextId,

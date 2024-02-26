@@ -2,6 +2,7 @@ import { Injectable } from 'graphql-modules';
 import type { DatabasePool } from 'slonik';
 import type { PolicyConfigurationObject } from '@hive/policy';
 import type {
+  ConditionalBreakingChangeMetadata,
   PaginatedSchemaVersionConnection,
   SchemaChangeType,
   SchemaCheck,
@@ -426,6 +427,7 @@ export interface Storage {
       actionFn(): Promise<void>;
       changes: Array<SchemaChangeType> | null;
       diffSchemaVersionId: string | null;
+      conditionalBreakingChangeMetadata: null | ConditionalBreakingChangeMetadata;
       contracts: null | Array<CreateContractVersionInput>;
     } & TargetSelector &
       (
@@ -464,6 +466,7 @@ export interface Storage {
         sha: string;
       };
       contracts: null | Array<CreateContractVersionInput>;
+      conditionalBreakingChangeMetadata: null | ConditionalBreakingChangeMetadata;
     } & TargetSelector) &
       (
         | {

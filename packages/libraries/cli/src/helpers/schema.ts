@@ -6,13 +6,8 @@ import { JsonFileLoader } from '@graphql-tools/json-file-loader';
 import { loadTypedefs } from '@graphql-tools/load';
 import { UrlLoader } from '@graphql-tools/url-loader';
 import baseCommand from '../base-command';
-import {
-  CriticalityLevel,
-  SchemaChange,
-  SchemaChangeConnection,
-  SchemaErrorConnection,
-  SchemaWarningConnection,
-} from '../gql/graphql';
+import { FragmentType, graphql, useFragment as unmaskFragment } from '../gql';
+import { CriticalityLevel, SchemaErrorConnection, SchemaWarningConnection } from '../gql/graphql';
 
 const indent = '  ';
 
@@ -31,13 +26,50 @@ export function renderErrors(this: baseCommand, errors: SchemaErrorConnection) {
   });
 }
 
-export function renderChanges(this: baseCommand, changes: SchemaChangeConnection) {
+const RenderChanges_SchemaChanges = graphql(`
+  fragment RenderChanges_schemaChanges on SchemaChangeConnection {
+    total
+    nodes {
+      criticality
+      isSafeBasedOnUsage
+      message(withSafeBasedOnUsageNote: false)
+      approval {
+        approvedBy {
+          displayName
+        }
+      }
+    }
+  }
+`);
+
+export function renderChanges(
+  this: baseCommand,
+  maskedChanges: FragmentType<typeof RenderChanges_SchemaChanges>,
+) {
+  const changes = unmaskFragment(RenderChanges_SchemaChanges, maskedChanges);
+  type ChangeType = (typeof changes)['nodes'][number];
+
   const filterChangesByLevel = (level: CriticalityLevel) => {
-    return (change: SchemaChange) => change.criticality === level;
+    return (change: ChangeType) => change.criticality === level;
   };
-  const writeChanges = (changes: SchemaChange[]) => {
+  const writeChanges = (changes: ChangeType[]) => {
     changes.forEach(change => {
-      this.log(String(indent), criticalityMap[change.criticality], this.bolderize(change.message));
+      const messageParts = [
+        String(indent),
+        criticalityMap[change.isSafeBasedOnUsage ? CriticalityLevel.Safe : change.criticality],
+        this.bolderize(change.message),
+      ];
+
+      if (change.isSafeBasedOnUsage) {
+        messageParts.push(colors.green('(Safe based on usage ✓)'));
+      }
+      if (change.approval) {
+        messageParts.push(
+          colors.green(`(Approved by ${change.approval.approvedBy?.displayName ?? '<unknown>'} ✓)`),
+        );
+      }
+
+      this.log(...messageParts);
     });
   };
 

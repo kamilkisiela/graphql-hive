@@ -7,14 +7,16 @@ import type { CheckPolicyResponse } from '@hive/policy';
 import type { CompositionFailureError, ContractsInputType } from '@hive/schema';
 import {
   HiveSchemaChangeModel,
-  SchemaChangeType,
   type RegistryServiceUrlChangeSerializableChange,
+  type SchemaChangeType,
 } from '@hive/storage';
 import { ProjectType } from '../../../shared/entities';
 import { buildSortedSchemaFromSchemaObject } from '../../../shared/schema';
+import { OperationsReader } from '../../operations/providers/operations-reader';
 import { SchemaPolicyProvider } from '../../policy/providers/schema-policy.provider';
 import type {
   ComposeAndValidateResult,
+  DateRange,
   Orchestrator,
   Organization,
   Project,
@@ -25,6 +27,13 @@ import { Logger } from './../../shared/providers/logger';
 import { Inspector } from './inspector';
 import { SchemaCheckWarning } from './models/shared';
 import { extendWithBase, isCompositeSchema, SchemaHelper } from './schema-helper';
+
+export type ConditionalBreakingChangeDiffConfig = {
+  period: DateRange;
+  requestCountThreshold: number;
+  targetIds: string[];
+  excludedClientNames: string[] | null;
+};
 
 // The reason why I'm using `result` and `reason` instead of just `data` for both:
 // https://bit.ly/hive-check-result-data
@@ -156,6 +165,7 @@ export class RegistryChecks {
     private policy: SchemaPolicyProvider,
     private inspector: Inspector,
     private logger: Logger,
+    private operationsReader: OperationsReader,
   ) {}
 
   async checksum(args: {
@@ -392,12 +402,8 @@ export class RegistryChecks {
     filterOutFederationChanges: boolean;
     /** Lookup map of changes that are approved and thus safe. */
     approvedChanges: null | Map<string, SchemaChangeType>;
-    /** Selector for fetching conditional breaking changes. */
-    usageDataSelector: null | {
-      organization: string;
-      project: string;
-      target: string;
-    };
+    /** Settings for fetching conditional breaking changes. */
+    conditionalBreakingChangeConfig: null | ConditionalBreakingChangeDiffConfig;
   }) {
     if (args.existingSdl == null || args.incomingSdl == null) {
       this.logger.debug('Skip diff check due to either existing or incoming SDL being absent.');
@@ -428,11 +434,62 @@ export class RegistryChecks {
       } satisfies CheckResult;
     }
 
-    let inspectorChanges = await this.inspector.diff(
-      existingSchema,
-      incomingSchema,
-      args.usageDataSelector ?? undefined,
-    );
+    let inspectorChanges = await this.inspector.diff(existingSchema, incomingSchema);
+
+    // Filter out federation specific changes as they are not relevant for the schema diff and were in previous schema versions by accident.
+    if (args.filterOutFederationChanges === true) {
+      inspectorChanges = inspectorChanges.filter(change => !isFederationRelatedChange(change));
+    }
+
+    if (args.conditionalBreakingChangeConfig) {
+      this.logger.debug('Conditional breaking change settings available.');
+      const settings = args.conditionalBreakingChangeConfig;
+
+      this.logger.debug('Fetching affected operations and affected clients for breaking changes.');
+
+      await Promise.all(
+        inspectorChanges.map(async change => {
+          if (
+            change.criticality !== CriticalityLevel.Breaking ||
+            !change.breakingChangeSchemaCoordinate
+          ) {
+            return;
+          }
+
+          // We need to run both the affected operations an affected clients query.
+          // Since the affected clients query is lighter it makes more sense to run it first and skip running the operations query if no clients are affected, as it will also yield zero results in that case.
+
+          const topAffectedClients = await this.operationsReader.getTopClientsForSchemaCoordinate({
+            targetIds: settings.targetIds,
+            excludedClients: settings.excludedClientNames,
+            period: settings.period,
+            schemaCoordinate: change.breakingChangeSchemaCoordinate,
+          });
+
+          if (topAffectedClients) {
+            const topAffectedOperations =
+              await this.operationsReader.getTopOperationsForSchemaCoordinate({
+                targetIds: settings.targetIds,
+                excludedClients: settings.excludedClientNames,
+                period: settings.period,
+                requestCountThreshold: settings.requestCountThreshold,
+                schemaCoordinate: change.breakingChangeSchemaCoordinate,
+              });
+
+            if (topAffectedOperations) {
+              change.usageStatistics = {
+                topAffectedOperations,
+                topAffectedClients,
+              };
+            }
+          }
+
+          change.isSafeBasedOnUsage = change.usageStatistics === null;
+        }),
+      );
+    } else {
+      this.logger.debug('No conditional breaking change settings available');
+    }
 
     if (args.includeUrlChanges) {
       inspectorChanges.push(
@@ -443,24 +500,26 @@ export class RegistryChecks {
       );
     }
 
-    // Filter out federation specific changes as they are not relevant for the schema diff and were in previous schema versions by accident.
-    if (args.filterOutFederationChanges === true) {
-      inspectorChanges = inspectorChanges.filter(change => !isFederationRelatedChange(change));
-    }
-
     let isFailure = false;
     const safeChanges: Array<SchemaChangeType> = [];
     const breakingChanges: Array<SchemaChangeType> = [];
 
     for (const change of inspectorChanges) {
-      if (change.isSafeBasedOnUsage === true) {
-        breakingChanges.push(change);
-      } else if (change.criticality === CriticalityLevel.Breaking) {
+      if (change.criticality === CriticalityLevel.Breaking) {
+        if (change.isSafeBasedOnUsage === true) {
+          breakingChanges.push(change);
+          continue;
+        }
+
         // If this change is approved, we return the already approved on instead of the newly detected one,
         // as it it contains the necessary metadata on when the change got first approved and by whom.
         const approvedChange = args.approvedChanges?.get(change.id);
         if (approvedChange) {
-          breakingChanges.push(approvedChange);
+          breakingChanges.push({
+            ...approvedChange,
+            isSafeBasedOnUsage: change.isSafeBasedOnUsage,
+            usageStatistics: change.usageStatistics,
+          });
           continue;
         }
         isFailure = true;

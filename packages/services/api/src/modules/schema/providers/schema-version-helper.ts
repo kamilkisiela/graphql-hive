@@ -220,8 +220,7 @@ export class SchemaVersionHelper {
         schemasAfter: ensureCompositeSchemas(schemasAfter),
       },
       filterOutFederationChanges: project.type === ProjectType.FEDERATION,
-      // For things that we compute on the fly we just ignore the latest usage data.
-      usageDataSelector: null,
+      conditionalBreakingChangeConfig: null,
     });
 
     if (diffCheck.status === 'skipped') {

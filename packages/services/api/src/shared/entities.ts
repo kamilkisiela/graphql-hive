@@ -342,8 +342,8 @@ export interface TargetSettings {
     enabled: boolean;
     period: number;
     percentage: number;
-    targets: readonly string[];
-    excludedClients: readonly string[];
+    targets: string[];
+    excludedClients: string[];
   };
 }
 

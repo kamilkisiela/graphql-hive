@@ -1,4 +1,5 @@
 import { createModule } from 'graphql-modules';
+import { BreakingSchemaChangeUsageHelper } from './providers/breaking-schema-changes-helper';
 import { Contracts } from './providers/contracts';
 import { ContractsManager } from './providers/contracts-manager';
 import { Inspector } from './providers/inspector';
@@ -28,6 +29,7 @@ export const schemaModule = createModule({
     Contracts,
     ContractsManager,
     SchemaCheckManager,
+    BreakingSchemaChangeUsageHelper,
     ...orchestrators,
     ...models,
   ],
