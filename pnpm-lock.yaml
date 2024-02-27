@@ -575,8 +575,8 @@ importers:
         specifier: 14.0.2
         version: 14.0.2
       '@octokit/request-error':
-        specifier: 5.0.1
-        version: 5.0.1
+        specifier: 6.0.2
+        version: 6.0.2
       '@sentry/node':
         specifier: 7.102.1
         version: 7.102.1
@@ -9107,6 +9107,13 @@ packages:
       '@octokit/types': 12.4.0
       deprecation: 2.3.1
       once: 1.4.0
+    dev: true
+
+  /@octokit/request-error@6.0.2:
+    resolution: {integrity: sha512-WtRVpoHcNXs84+s9s/wqfHaxM68NGMg8Av7h59B50OVO0PwwMx+2GgQ/OliUd0iQBSNWgR6N8afi/KjSHbXHWw==}
+    engines: {node: '>= 18'}
+    dependencies:
+      '@octokit/types': 12.4.0
     dev: true
 
   /@octokit/request@5.6.3:
