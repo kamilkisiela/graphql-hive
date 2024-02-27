@@ -59,7 +59,7 @@ export class SingleLegacyModel {
       author: temp,
       commit: temp,
       target: selector.target,
-      date: Date.now() as any,
+      date: Date.now(),
       sdl: input.sdl,
       metadata: null,
     };
@@ -166,7 +166,7 @@ export class SingleLegacyModel {
       sdl: input.sdl,
       commit: input.commit,
       target: target.id,
-      date: Date.now() as any,
+      date: Date.now(),
       metadata: input.metadata ?? null,
     };
 

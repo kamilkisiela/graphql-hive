@@ -132,7 +132,7 @@ export class CompositeModel {
       author: temp,
       commit: temp,
       target: selector.target,
-      date: Date.now() as any,
+      date: Date.now(),
       sdl: input.sdl,
       service_name: input.serviceName,
       service_url:
@@ -307,7 +307,7 @@ export class CompositeModel {
       sdl: input.sdl,
       commit: input.commit,
       target: target.id,
-      date: Date.now() as any,
+      date: Date.now(),
       service_name: input.service || '',
       service_url: input.url || '',
       action: 'PUSH',
@@ -537,7 +537,7 @@ export class CompositeModel {
       kind: 'composite',
       id: temp,
       target: selector.target,
-      date: Date.now() as any,
+      date: Date.now(),
       service_name: input.serviceName,
       action: 'DELETE',
     };
