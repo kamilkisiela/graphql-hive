@@ -3645,3 +3645,65 @@ test.concurrent('CDN services are published in alphanumeric order', async () => 
   const result = await res.json();
   expect(result).toMatchObject([{ name: 'x' }, { name: 'y' }, { name: 'z' }]);
 });
+
+test.concurrent(
+  'Composite schema project publish without service name results in error',
+  async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createToken } = await createProject(ProjectType.Federation);
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
+
+    const result = await readWriteToken
+      .publishSchema({
+        sdl: /* GraphQL */ `
+          type Query {
+            ping: String
+          }
+        `,
+        url: 'http://example.localhost',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(result).toEqual({
+      schemaPublish: {
+        __typename: 'SchemaPublishMissingServiceError',
+      },
+    });
+  },
+);
+
+test.concurrent(
+  'Composite schema project publish without service url results in error',
+  async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createToken } = await createProject(ProjectType.Federation);
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
+
+    const result = await readWriteToken
+      .publishSchema({
+        sdl: /* GraphQL */ `
+          type Query {
+            ping: String
+          }
+        `,
+        service: 'example',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(result).toEqual({
+      schemaPublish: {
+        __typename: 'SchemaPublishMissingUrlError',
+      },
+    });
+  },
+);
