@@ -20,7 +20,7 @@
     "@whatwg-node/fetch": "0.9.16",
     "date-fns": "3.3.1",
     "dotenv": "16.4.5",
-    "got": "12.6.1",
+    "got": "14.2.0",
     "pino-pretty": "10.3.1",
     "reflect-metadata": "0.2.1",
     "tslib": "2.6.2",
