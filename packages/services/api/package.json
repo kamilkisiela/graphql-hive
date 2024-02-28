@@ -23,7 +23,7 @@
     "@hive/tokens": "workspace:*",
     "@hive/webhooks": "workspace:*",
     "@octokit/app": "14.0.2",
-    "@octokit/request-error": "5.0.1",
+    "@octokit/request-error": "6.0.2",
     "@sentry/node": "7.102.1",
     "@sentry/types": "7.102.1",
     "@slack/web-api": "7.0.2",
