@@ -8,9 +8,6 @@ export interface HiveClient {
   info(): Promise<void>;
   reportSchema: SchemaReporter['report'];
   collectUsage(): CollectUsageCallback;
-  /**
-   * @deprecated https://github.com/kamilkisiela/graphql-hive/issues/659
-   */
   dispose(): Promise<void>;
 }
 
