@@ -1,5 +1,4 @@
 import pRetry from 'p-retry';
-import { fetch } from '@whatwg-node/fetch';
 import { invariant } from './helpers';
 
 type Heartbeats = () => void;
