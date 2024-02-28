@@ -12,8 +12,8 @@
   "devDependencies": {
     "@graphql-eslint/eslint-plugin": "3.20.1",
     "@hive/service-common": "workspace:*",
-    "@sentry/node": "7.102.1",
-    "@sentry/tracing": "7.102.1",
+    "@sentry/node": "7.103.0",
+    "@sentry/tracing": "7.103.0",
     "@trpc/server": "10.45.1",
     "@whatwg-node/fetch": "0.9.16",
     "ajv": "8.12.0",
