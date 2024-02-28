@@ -29,7 +29,6 @@ import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { HiveError, Registry, RegistryContext } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
 import { runWithAsyncContext } from '@sentry/node';
-import { fetch } from '@whatwg-node/fetch';
 import { asyncStorage } from './async-storage';
 import type { HiveConfig } from './environment';
 import { useArmor } from './use-armor';
