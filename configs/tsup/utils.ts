@@ -65,7 +65,9 @@ export const watchEntryPlugin = () => {
       }
 
       const outFile = entry.replace('src/', 'dist/').replace('.ts', '.js');
-      this.options.onSuccess = `node --enable-source-maps ${outFile} | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname`;
+      const inspectFlag = process.env.INSPECT ? '--inspect ' : ' ';
+      const nodeOptions = process.env.NODE_OPTIONS || '';
+      this.options.onSuccess = `node --enable-source-maps ${inspectFlag} ${nodeOptions} ${outFile} | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname`;
     },
   };
 };
