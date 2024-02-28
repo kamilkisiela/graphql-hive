@@ -14,7 +14,6 @@
     "@sentry/node": "7.102.1",
     "@sentry/types": "7.102.1",
     "@sentry/utils": "7.102.1",
-    "@whatwg-node/fetch": "0.9.16",
     "fastify": "4.26.1",
     "fastify-plugin": "4.5.1",
     "p-retry": "6.2.0",
