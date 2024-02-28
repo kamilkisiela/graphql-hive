@@ -43,7 +43,7 @@ export const handleTRPCError = experimental_standaloneMiddleware<{
       });
     }
 
-    opts.ctx.req.log.error(result.error.message);
+    opts.ctx.req.log.error(result.error.stack ?? result.error);
   }
 
   return result;

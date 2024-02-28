@@ -20,7 +20,6 @@ import type { ErrorCode } from '@graphql-hive/external-composition';
 import { stitchSchemas } from '@graphql-tools/stitch';
 import { stitchingDirectives } from '@graphql-tools/stitching-directives';
 import type { ServiceLogger } from '@hive/service-common';
-import { startSentryTransaction } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import {
   composeServices as nativeComposeServices,
@@ -503,10 +502,7 @@ async function composeExternalFederation(args: {
   }
 
   if (parseResult.data.type === 'success') {
-    await checkExternalCompositionCompatibility(
-      parseResult.data.result.supergraph,
-      parseResult.data.result.sdl,
-    );
+    await checkExternalCompositionCompatibility(args.logger, parseResult.data.result.sdl);
 
     return {
       type: 'success',
@@ -521,41 +517,26 @@ async function composeExternalFederation(args: {
   return parseResult.data;
 }
 
-async function checkExternalCompositionCompatibility(supergraph: string, maybeSdl: string) {
-  const transaction = startSentryTransaction({
-    op: 'schema.checkExternalCompositionSdlValidity',
-    name: 'Check External Composition SDL Validity',
-  });
-
+async function checkExternalCompositionCompatibility(logger: ServiceLogger, maybeSdl: string) {
   let parsed: DocumentNode | undefined;
   let errors: ReadonlyArray<GraphQLError> | undefined;
-  // 1 means it passed, 0 means it failed
   try {
     parsed = parse(maybeSdl);
     errors = validateSDL(parsed);
-
-    Sentry.setMeasurement('parse_success', 1, 'none');
-    if (errors.length === 0) {
-      Sentry.setMeasurement('validate_success', 1, 'none');
-    } else {
-      Sentry.setMeasurement('validate_failure', 1, 'none');
-    }
-
-    // everything okay
   } catch (err) {
     if (parsed === undefined) {
-      Sentry.setMeasurement('parse_failure', 1, 'none');
       return;
     }
     Sentry.captureException(err);
   } finally {
-    Sentry.setContext('Extra Info', {
-      maybeSdl,
-      supergraph,
-      validationErrors: errors?.map(e => e.message) ?? null,
-    });
-
-    transaction.end();
+    if (errors === undefined || errors.length > 0) {
+      logger.warn(`External composition GraphQL validity check failed. (info=%o)`, {
+        isParseSuccessful: parsed !== undefined,
+        validationErrors: errors?.map(e => e.message) ?? null,
+      });
+    } else {
+      logger.debug(`External composition GraphQL validity check passed.`);
+    }
   }
 }
 
