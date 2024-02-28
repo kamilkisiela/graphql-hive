@@ -2,7 +2,6 @@ import * as pulumi from '@pulumi/pulumi';
 import * as random from '@pulumi/random';
 import { deployApp } from './services/app';
 import { deployStripeBilling } from './services/billing';
-import { deployBotKube } from './services/bot-kube';
 import { deployCFBroker } from './services/cf-broker';
 import { deployCFCDN } from './services/cf-cdn';
 import { deployClickhouse } from './services/clickhouse';
@@ -18,6 +17,7 @@ import { deployProxy } from './services/proxy';
 import { deployRateLimit } from './services/rate-limit';
 import { deployRedis } from './services/redis';
 import { deploySchema } from './services/schema';
+import { deploySentryEventsMonitor } from './services/sentry-events';
 import { deploySuperTokens } from './services/supertokens';
 import { deployTokens } from './services/tokens';
 import { deployUsage } from './services/usage';
@@ -74,7 +74,7 @@ const deploymentEnv: DeploymentEnvironment = {
   DEPLOYED_DNS: appHostname,
 };
 
-deployBotKube({ envName });
+deploySentryEventsMonitor({ envName, imagePullSecret });
 deployMetrics({ envName });
 
 const cdnAuthPrivateKey = commonConfig.requireSecret('cdnAuthPrivateKey');
