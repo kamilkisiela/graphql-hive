@@ -27,6 +27,14 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
 
   void hive.info();
 
+  if (!isHiveClient(clientOrOptions)) {
+    for (const signal of ['SIGINT', 'SIGTERM'] as const) {
+      process.once(signal, () => {
+        hive.dispose();
+      });
+    }
+  }
+
   const parsedDocumentCache = LRU<DocumentNode>(10_000);
   let latestSchema: GraphQLSchema | null = null;
   const cache = new WeakMap<Request, CacheRecord>();

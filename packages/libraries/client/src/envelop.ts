@@ -18,6 +18,14 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
 
   void hive.info();
 
+  if (!isHiveClient(clientOrOptions)) {
+    for (const signal of ['SIGINT', 'SIGTERM'] as const) {
+      process.once(signal, () => {
+        hive.dispose();
+      });
+    }
+  }
+
   return {
     onSchemaChange({ schema }) {
       hive.reportSchema({ schema });
