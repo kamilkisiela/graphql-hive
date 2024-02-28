@@ -616,9 +616,6 @@ importers:
       '@types/object-hash':
         specifier: 3.0.6
         version: 3.0.6
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       agentkeepalive:
         specifier: 4.5.0
         version: 4.5.0
@@ -796,9 +793,6 @@ importers:
       '@types/sendmail':
         specifier: 1.4.7
         version: 1.4.7
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       bullmq:
         specifier: 5.3.3
         version: 5.3.3(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
@@ -844,9 +838,6 @@ importers:
       '@graphql-hive/external-composition':
         specifier: workspace:*
         version: link:../../../libraries/external-composition/dist
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       '@whatwg-node/server':
         specifier: 0.9.25
         version: 0.9.25
@@ -877,9 +868,6 @@ importers:
       '@trpc/server':
         specifier: 10.45.1
         version: 10.45.1
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       ajv:
         specifier: 8.12.0
         version: 8.12.0
@@ -925,9 +913,6 @@ importers:
       '@trpc/server':
         specifier: 10.45.1
         version: 10.45.1
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       date-fns:
         specifier: 3.3.1
         version: 3.3.1
@@ -982,9 +967,6 @@ importers:
       '@types/ioredis-mock':
         specifier: 8.2.5
         version: 8.2.5
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
@@ -1081,9 +1063,6 @@ importers:
       '@trpc/server':
         specifier: 10.45.1
         version: 10.45.1
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       '@whatwg-node/server':
         specifier: 0.9.25
         version: 0.9.25
@@ -1229,9 +1208,6 @@ importers:
       '@trpc/server':
         specifier: 10.45.1
         version: 10.45.1
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       date-fns:
         specifier: 3.3.1
         version: 3.3.1
@@ -1322,9 +1298,6 @@ importers:
       '@trpc/server':
         specifier: 10.45.1
         version: 10.45.1
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       ajv:
         specifier: 8.12.0
         version: 8.12.0
@@ -1370,9 +1343,6 @@ importers:
       '@trpc/server':
         specifier: 10.45.1
         version: 10.45.1
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
@@ -1595,9 +1565,6 @@ importers:
       '@urql/exchange-persisted':
         specifier: 4.1.0
         version: 4.1.0(graphql@16.8.1)
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       class-variance-authority:
         specifier: 0.7.0
         version: 0.7.0

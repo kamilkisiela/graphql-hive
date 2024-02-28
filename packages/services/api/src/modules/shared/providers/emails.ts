@@ -1,7 +1,6 @@
 import { Inject, Injectable, InjectionToken, Optional } from 'graphql-modules';
 import type { EmailsApi } from '@hive/emails';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
-import { fetch } from '@whatwg-node/fetch';
 
 export const EMAILS_ENDPOINT = new InjectionToken<string>('EMAILS_ENDPOINT');
 

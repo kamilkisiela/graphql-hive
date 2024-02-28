@@ -1,7 +1,6 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import type { RateLimitApi, RateLimitApiInput } from '@hive/rate-limit';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
-import { fetch } from '@whatwg-node/fetch';
 import { sentry } from '../../../shared/sentry';
 import { Logger } from '../../shared/providers/logger';
 import type { RateLimitServiceConfig } from './tokens';
