@@ -25,7 +25,7 @@
     "@types/pg": "8.11.1",
     "dotenv": "16.4.5",
     "fast-json-stable-stringify": "2.1.0",
-    "got": "12.6.1",
+    "got": "14.2.0",
     "param-case": "3.0.4",
     "pg-promise": "11.5.4",
     "slonik": "30.4.4",
