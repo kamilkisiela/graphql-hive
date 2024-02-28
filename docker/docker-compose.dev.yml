@@ -2,7 +2,7 @@ version: '3.8'
 name: 'hive-dev'
 services:
   db:
-    image: postgres:14.10-alpine
+    image: postgres:14.11-alpine
     networks:
       - 'stack'
     healthcheck:
@@ -21,7 +21,7 @@ services:
       - '5432:5432'
 
   redis:
-    image: bitnami/redis:7.2.3
+    image: bitnami/redis:7.2.4
     networks:
       - 'stack'
     healthcheck:
@@ -70,7 +70,7 @@ services:
       ls myminio/artifacts >/dev/null 2>&1 || /usr/bin/mc mb myminio/artifacts; exit 0"
 
   clickhouse:
-    image: clickhouse/clickhouse-server:23.10-alpine
+    image: clickhouse/clickhouse-server:23.12-alpine
     environment:
       CLICKHOUSE_USER: test
       CLICKHOUSE_PASSWORD: test
@@ -89,7 +89,7 @@ services:
       - 'stack'
 
   broker:
-    image: redpandadata/redpanda:v23.2.17
+    image: redpandadata/redpanda:v23.3.6
     container_name: broker
     hostname: broker
     networks:

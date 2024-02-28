@@ -15,7 +15,7 @@ export function createEstimator(config: {
       label: string,
       timings: {
         totalSeconds: number;
-        elapsedSeconds: number;
+        elapsedSeconds?: number;
       },
     ) => void;
   };

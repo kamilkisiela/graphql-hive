@@ -15,6 +15,16 @@ export type ComposeAndValidateOutput = {
   }>;
   sdl: string | null;
   supergraph: string | null;
+  tags: Array<string> | null;
+  contracts: Array<{
+    id: string;
+    errors: Array<{
+      message: string;
+      source: CompositionErrorSource;
+    }>;
+    sdl: string | null;
+    supergraph: string | null;
+  }> | null;
 };
 
 export type ExternalComposition = {

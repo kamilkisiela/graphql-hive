@@ -16,7 +16,7 @@ type Changelog = {
 function ProductUpdateTeaser(props: Changelog) {
   return (
     <li className="mb-10 ml-4">
-      <div className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border border-white bg-gray-200 dark:border-gray-900 dark:bg-gray-700" />
+      <div className="absolute -left-1.5 mt-1.5 size-3 rounded-full border border-white bg-gray-200 dark:border-gray-900 dark:bg-gray-700" />
       <time
         className="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500"
         dateTime={props.date}
@@ -26,9 +26,9 @@ function ProductUpdateTeaser(props: Changelog) {
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
         <Link href={props.route}>{props.title}</Link>
       </h3>
-      <p className="mb-4 text-base font-normal text-gray-500 dark:text-gray-400">
+      <div className="mb-4 mt-1 max-w-[600px] text-base font-normal leading-6 text-gray-500 dark:text-gray-400">
         {props.description}
-      </p>
+      </div>
     </li>
   );
 }

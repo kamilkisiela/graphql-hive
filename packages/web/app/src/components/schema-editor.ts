@@ -1,5 +1,9 @@
 import dynamic from 'next/dynamic';
-import { loader, DiffEditor as MonacoDiffEditor } from '@monaco-editor/react';
+import {
+  loader,
+  DiffEditor as MonacoDiffEditor,
+  Editor as MonacoEditor,
+} from '@monaco-editor/react';
 import pkg from '../../package.json' assert { type: 'json' };
 
 loader.config({
@@ -9,6 +13,7 @@ loader.config({
 });
 
 export { MonacoDiffEditor };
+export { MonacoEditor };
 
 export const SchemaEditor = dynamic({
   async loader() {

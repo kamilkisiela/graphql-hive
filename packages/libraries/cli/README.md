@@ -70,7 +70,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/artifact/fetch.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/artifact/fetch.js)_
+[dist/commands/artifact/fetch.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.33.0/dist/commands/artifact/fetch.js)_
 
 ## `hive config:delete KEY`
 
@@ -88,7 +88,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/config/delete.js)_
+[dist/commands/config/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.33.0/dist/commands/config/delete.js)_
 
 ## `hive config:get KEY`
 
@@ -106,7 +106,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/config/get.js)_
+[dist/commands/config/get.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.33.0/dist/commands/config/get.js)_
 
 ## `hive config:reset`
 
@@ -121,7 +121,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/config/reset.js)_
+[dist/commands/config/reset.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.33.0/dist/commands/config/reset.js)_
 
 ## `hive config:set KEY VALUE`
 
@@ -140,7 +140,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/config/set.js)_
+[dist/commands/config/set.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.33.0/dist/commands/config/set.js)_
 
 ## `hive help [COMMANDS]`
 
@@ -161,7 +161,7 @@ DESCRIPTION
 ```
 
 _See code:
-[@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.10/src/commands/help.ts)_
+[@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.20/src/commands/help.ts)_
 
 ## `hive introspect LOCATION`
 
@@ -183,7 +183,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/introspect.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/introspect.js)_
+[dist/commands/introspect.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.33.0/dist/commands/introspect.js)_
 
 ## `hive operations:check FILE`
 
@@ -192,12 +192,15 @@ checks operations against a published schema
 ```
 USAGE
   $ hive operations:check FILE [--registry.endpoint <value>] [--registry <value>] [--registry.accessToken <value>]
-    [--token <value>] [--require <value>] [--graphqlTag <value>] [--globalGraphqlTag <value>]
+    [--token <value>] [--require <value>] [--graphqlTag <value>] [--globalGraphqlTag <value>] [--apolloClient]
 
 ARGUMENTS
   FILE  Glob pattern to find the operations
 
 FLAGS
+  --apolloClient
+      Supports Apollo Client specific directives
+
   --globalGraphqlTag=<value>...
       Allows to use a global identifier instead of a module import. Similar to --graphqlTag.
       Examples:
@@ -230,7 +233,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/operations/check.js)_
+[dist/commands/operations/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.33.0/dist/commands/operations/check.js)_
 
 ## `hive schema:check FILE`
 
@@ -240,7 +243,7 @@ checks schema
 USAGE
   $ hive schema:check FILE [--service <value>] [--registry.endpoint <value>] [--registry <value>]
     [--registry.accessToken <value>] [--token <value>] [--forceSafe] [--github] [--require <value>] [--author <value>]
-    [--commit <value>]
+    [--commit <value>] [--contextId <value>]
 
 ARGUMENTS
   FILE  Path to the schema file(s)
@@ -248,6 +251,7 @@ ARGUMENTS
 FLAGS
   --author=<value>                Author of the change
   --commit=<value>                Associated commit sha
+  --contextId=<value>             Context ID for grouping the schema check.
   --forceSafe                     mark the check as safe, breaking changes are expected
   --github                        Connect with GitHub Application
   --registry=<value>              registry address
@@ -263,7 +267,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/schema/check.js)_
+[dist/commands/schema/check.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.33.0/dist/commands/schema/check.js)_
 
 ## `hive schema:delete SERVICE`
 
@@ -290,7 +294,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/schema/delete.js)_
+[dist/commands/schema/delete.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.33.0/dist/commands/schema/delete.js)_
 
 ## `hive schema:fetch ACTIONID`
 
@@ -318,7 +322,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/fetch.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/schema/fetch.js)_
+[dist/commands/schema/fetch.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.33.0/dist/commands/schema/fetch.js)_
 
 ## `hive schema:publish FILE`
 
@@ -356,7 +360,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/schema/publish.js)_
+[dist/commands/schema/publish.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.33.0/dist/commands/schema/publish.js)_
 
 ## `hive update [CHANNEL]`
 
@@ -394,7 +398,7 @@ EXAMPLES
 ```
 
 _See code:
-[@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.1.19/src/commands/update.ts)_
+[@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v3.2.4/src/commands/update.ts)_
 
 ## `hive whoami`
 
@@ -416,7 +420,7 @@ DESCRIPTION
 ```
 
 _See code:
-[dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.28.0/dist/commands/whoami.js)_
+[dist/commands/whoami.js](https://github.com/kamilkisiela/graphql-hive/blob/v0.33.0/dist/commands/whoami.js)_
 
 <!-- commandsstop -->
 

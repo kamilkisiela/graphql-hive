@@ -620,7 +620,11 @@ export function initSeed() {
                         secret,
                       ).then(r => r.expectNoGraphQLErrors());
 
-                      return result.schemaVersions.nodes;
+                      if (!result.target) {
+                        throw new Error('Could not find target');
+                      }
+
+                      return result.target?.schemaVersions.edges.map(edge => edge.node);
                     },
                     async fetchTokenInfo() {
                       const tokenInfoResult = await readTokenInfo(secret).then(r =>

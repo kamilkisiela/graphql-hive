@@ -24,6 +24,7 @@ async function exec(cmd: string) {
     shell: true,
     env: {
       OCLIF_CLI_CUSTOM_PATH: cliDir,
+      NODE_OPTIONS: '--no-deprecation',
     },
   });
 

@@ -10,7 +10,7 @@ import { OrganizationAccessScope } from '../../auth/providers/organization-acces
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 import { BillingProvider } from '../../billing/providers/billing.provider';
-import { Emails } from '../../shared/providers/emails';
+import { Emails, mjml } from '../../shared/providers/emails';
 import { Logger } from '../../shared/providers/logger';
 import type { OrganizationSelector } from '../../shared/providers/storage';
 import { Storage } from '../../shared/providers/storage';
@@ -534,7 +534,7 @@ export class OrganizationManager {
           email: createHash('sha256').update(invitation.email).digest('hex'),
         }),
         email,
-        body: `
+        body: mjml`
           <mjml>
             <mj-body>
               <mj-section>
@@ -544,7 +544,7 @@ export class OrganizationManager {
                   <mj-text>
                     Someone from <strong>${organization.name}</strong> invited you to join GraphQL Hive.
                   </mj-text>.
-                  <mj-button href="${this.appBaseUrl}/join/${invitation.code}">
+                  <mj-button href="${mjml.raw(this.appBaseUrl)}/join/${invitation.code}">
                     Accept the invitation
                   </mj-button>
                 </mj-column>
@@ -647,7 +647,7 @@ export class OrganizationManager {
     await this.emails.schedule({
       email: member.user.email,
       subject: `Organization transfer from ${currentUser.displayName} (${organization.name})`,
-      body: `
+      body: mjml`
         <mjml>
           <mj-body>
             <mj-section>

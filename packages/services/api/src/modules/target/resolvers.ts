@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { NameModel } from '../../shared/entities';
 import { createConnection } from '../../shared/schema';
 import { OrganizationManager } from '../organization/providers/organization-manager';
 import { ProjectManager } from '../project/providers/project-manager';
@@ -6,7 +7,7 @@ import { IdTranslator } from '../shared/providers/id-translator';
 import type { TargetModule } from './__generated__/types';
 import { TargetManager } from './providers/target-manager';
 
-const TargetNameModel = z.string().min(2).max(30);
+const TargetNameModel = NameModel.min(2).max(30);
 const PercentageModel = z.number().min(0).max(100);
 
 export const resolvers: TargetModule.Resolvers = {
@@ -252,8 +253,8 @@ export const resolvers: TargetModule.Resolvers = {
         target,
         project,
         organization,
-        targets: input.targets,
-        excludedClients: input.excludedClients ?? [],
+        targets: result.data.targets,
+        excludedClients: result.data.excludedClients ?? [],
       });
 
       return {

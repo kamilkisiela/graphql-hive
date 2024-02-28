@@ -31,11 +31,18 @@ export const CreateOrganizationMutation = graphql(`
 export const CreateOrganizationForm = () => {
   const [mutation, mutate] = useMutation(CreateOrganizationMutation);
   const { push } = useRouter();
-  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched } =
+  const { handleSubmit, values, handleChange, handleBlur, isSubmitting, errors, touched, isValid } =
     useFormik({
       initialValues: { name: '' },
       validationSchema: Yup.object().shape({
-        name: Yup.string().required('Organization name is required'),
+        name: Yup.string()
+          .min(2, 'Name must be at least 2 characters long')
+          .max(50, 'Name must be at most 50 characters long')
+          .matches(
+            /^([a-z]|[0-9]|\s|\.|,|_|-|\/|&)+$/i,
+            'Name restricted to alphanumerical characters, spaces and . , _ - / &',
+          )
+          .required('Organization name is required'),
       }),
       async onSubmit(values) {
         const mutation = await mutate({
@@ -78,10 +85,16 @@ export const CreateOrganizationForm = () => {
         </div>
       )}
       <div className="flex gap-2">
-        <Button type="submit" size="large" block variant="primary" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          size="large"
+          block
+          variant="primary"
+          disabled={isSubmitting || !isValid}
+        >
           {isSubmitting ? (
             <>
-              <Spinner className="h-6 w-6 text-white" />
+              <Spinner className="size-6 text-white" />
               <span className="ml-4">Creating...</span>
             </>
           ) : (

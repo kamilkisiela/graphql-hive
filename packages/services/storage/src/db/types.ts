@@ -52,6 +52,58 @@ export interface cdn_access_tokens {
   target_id: string;
 }
 
+export interface contract_checks {
+  breaking_schema_changes: any | null;
+  compared_contract_version_id: string | null;
+  composite_schema_sdl_store_id: string | null;
+  contract_id: string;
+  id: string;
+  is_success: boolean;
+  safe_schema_changes: any | null;
+  schema_check_id: string;
+  schema_composition_errors: any | null;
+  supergraph_sdl_store_id: string | null;
+}
+
+export interface contract_schema_change_approvals {
+  context_id: string;
+  contract_id: string;
+  created_at: Date;
+  schema_change: any;
+  schema_change_id: string;
+}
+
+export interface contract_version_changes {
+  change_type: string;
+  contract_version_id: string;
+  id: string;
+  is_safe_based_on_usage: boolean;
+  meta: any;
+  severity_level: string;
+}
+
+export interface contract_versions {
+  composite_schema_sdl: string | null;
+  contract_id: string;
+  contract_name: string;
+  created_at: Date;
+  id: string;
+  schema_composition_errors: any | null;
+  schema_version_id: string;
+  supergraph_sdl: string | null;
+}
+
+export interface contracts {
+  contract_name: string;
+  created_at: Date;
+  exclude_tags: Array<string> | null;
+  id: string;
+  include_tags: Array<string> | null;
+  is_disabled: boolean;
+  remove_unreachable_types_from_public_api_schema: boolean;
+  target_id: string;
+}
+
 export interface document_collection_documents {
   contents: string;
   created_at: Date;
@@ -180,12 +232,14 @@ export interface schema_checks {
   breaking_schema_changes: any | null;
   composite_schema_sdl: string | null;
   composite_schema_sdl_store_id: string | null;
+  conditional_breaking_change_metadata: any | null;
   context_id: string | null;
   created_at: Date;
   expires_at: Date | null;
   github_check_run_id: string | null;
   github_repository: string | null;
   github_sha: string | null;
+  has_contract_schema_changes: boolean | null;
   id: string;
   is_manually_approved: boolean | null;
   is_success: boolean;
@@ -246,15 +300,20 @@ export interface schema_versions {
   action_id: string;
   base_schema: string | null;
   composite_schema_sdl: string | null;
+  conditional_breaking_change_metadata: any | null;
   created_at: Date;
+  diff_schema_version_id: string | null;
   github_repository: string | null;
   github_sha: string | null;
+  has_contract_composition_errors: boolean | null;
   has_persisted_schema_changes: boolean | null;
   id: string;
   is_composable: boolean;
   previous_schema_version_id: string | null;
+  record_version: string | null;
   schema_composition_errors: any | null;
   supergraph_sdl: string | null;
+  tags: Array<string> | null;
   target_id: string;
 }
 
@@ -329,6 +388,11 @@ export interface DBTables {
   alert_channels: alert_channels;
   alerts: alerts;
   cdn_access_tokens: cdn_access_tokens;
+  contract_checks: contract_checks;
+  contract_schema_change_approvals: contract_schema_change_approvals;
+  contract_version_changes: contract_version_changes;
+  contract_versions: contract_versions;
+  contracts: contracts;
   document_collection_documents: document_collection_documents;
   document_collections: document_collections;
   migration: migration;

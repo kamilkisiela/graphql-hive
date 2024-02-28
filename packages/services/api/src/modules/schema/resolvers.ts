@@ -2,7 +2,6 @@ import { createHash } from 'crypto';
 import stringify from 'fast-json-stable-stringify';
 import {
   GraphQLEnumType,
-  GraphQLError,
   GraphQLInputObjectType,
   GraphQLInterfaceType,
   GraphQLObjectType,
@@ -15,16 +14,13 @@ import {
   isScalarType,
   isUnionType,
   Kind,
-  parse,
   print,
-  type DocumentNode,
 } from 'graphql';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { z } from 'zod';
 import { CriticalityLevel } from '@graphql-inspector/core';
-import { SchemaChangeType } from '@hive/storage';
 import type * as Types from '../../__generated__/types';
-import { ProjectType, type DateRange } from '../../shared/entities';
+import { type DateRange } from '../../shared/entities';
 import { createPeriod, parseDateRangeInput, PromiseOrValue } from '../../shared/helpers';
 import type {
   GraphQLEnumTypeMapper,
@@ -34,20 +30,12 @@ import type {
   GraphQLObjectTypeMapper,
   GraphQLScalarTypeMapper,
   GraphQLUnionTypeMapper,
-  SchemaCompareError,
-  SchemaCompareResult,
   SchemaCoordinateUsageForUnusedExplorer,
   SchemaCoordinateUsageTypeMapper,
   WithGraphQLParentInfo,
   WithSchemaCoordinatesUsage,
 } from '../../shared/mappers';
-import {
-  buildASTSchema,
-  buildSortedSchemaFromSchemaObject,
-  createConnection,
-  createDummyConnection,
-  parseGraphQLSource,
-} from '../../shared/schema';
+import { buildASTSchema, createConnection, createDummyConnection } from '../../shared/schema';
 import { sentryFunction } from '../../shared/sentry';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { OperationsManager } from '../operations/providers/operations-manager';
@@ -57,17 +45,14 @@ import { IdTranslator } from '../shared/providers/id-translator';
 import { TargetSelector } from '../shared/providers/storage';
 import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
-import {
-  extractSuperGraphInformation,
-  type SuperGraphInformation,
-} from './lib/federation-super-graph';
+import { extractSuperGraphInformation } from './lib/federation-super-graph';
 import { stripUsedSchemaCoordinatesFromDocumentNode } from './lib/unused-graphql';
-import { Inspector } from './providers/inspector';
-import { SchemaBuildError } from './providers/orchestrators/errors';
-import { detectUrlChanges } from './providers/registry-checks';
-import { ensureSDL, SchemaHelper } from './providers/schema-helper';
+import { BreakingSchemaChangeUsageHelper } from './providers/breaking-schema-changes-helper';
+import { ContractsManager } from './providers/contracts-manager';
+import { SchemaCheckManager } from './providers/schema-check-manager';
 import { SchemaManager } from './providers/schema-manager';
 import { SchemaPublisher } from './providers/schema-publisher';
+import { SchemaVersionHelper } from './providers/schema-version-helper';
 import { toGraphQLSchemaCheck, toGraphQLSchemaCheckCurry } from './to-graphql-schema-check';
 
 const MaybeModel = <T extends z.ZodType>(value: T) => z.union([z.null(), z.undefined(), value]);
@@ -222,20 +207,6 @@ export const resolvers: SchemaModule.Resolvers = {
         injector.get(ProjectManager).getProjectIdByToken(),
         injector.get(TargetManager).getTargetIdByToken(),
       ]);
-      const token = injector.get(AuthManager).ensureApiToken();
-
-      const checksum = createHash('md5')
-        .update(
-          stringify({
-            ...input,
-            organization,
-            project,
-            target,
-            service: input.service?.toLowerCase(),
-          }),
-        )
-        .update(token)
-        .digest('base64');
 
       // We only want to resolve to SchemaPublishMissingUrlError if it is selected by the operation.
       // NOTE: This should be removed once the usage of cli versions that don't request on 'SchemaPublishMissingUrlError' is becomes pretty low.
@@ -247,7 +218,6 @@ export const resolvers: SchemaModule.Resolvers = {
         {
           ...input,
           service: input.service?.toLowerCase(),
-          checksum,
           organization,
           project,
           target,
@@ -384,6 +354,21 @@ export const resolvers: SchemaModule.Resolvers = {
         secret: input.secret,
       });
     },
+    async updateNativeFederation(_, { input }, { injector }) {
+      const translator = injector.get(IdTranslator);
+      const [organization, project] = await Promise.all([
+        translator.translateOrganizationId(input),
+        translator.translateProjectId(input),
+      ]);
+
+      return {
+        ok: await injector.get(SchemaManager).updateNativeSchemaComposition({
+          project,
+          organization,
+          enabled: input.enabled,
+        }),
+      };
+    },
     async updateProjectRegistryModel(_, { input }, { injector }) {
       const translator = injector.get(IdTranslator);
       const [organization, project] = await Promise.all([
@@ -391,289 +376,62 @@ export const resolvers: SchemaModule.Resolvers = {
         translator.translateProjectId(input),
       ]);
 
-      return injector.get(SchemaManager).updateRegistryModel({
-        project,
-        organization,
-        model: input.model,
+      return {
+        ok: await injector.get(SchemaManager).updateRegistryModel({
+          project,
+          organization,
+          model: input.model,
+        }),
+      };
+    },
+    async createContract(_, args, context) {
+      const result = await context.injector.get(ContractsManager).createContract({
+        contract: {
+          targetId: args.input.targetId,
+          contractName: args.input.contractName,
+          excludeTags: (args.input.excludeTags as Array<string> | null) ?? null,
+          includeTags: (args.input.includeTags as Array<string> | null) ?? null,
+          removeUnreachableTypesFromPublicApiSchema:
+            args.input.removeUnreachableTypesFromPublicApiSchema,
+        },
       });
+
+      if (result.type === 'success') {
+        return {
+          ok: {
+            createdContract: result.contract,
+          },
+        };
+      }
+
+      return {
+        error: {
+          message: 'Something went wrong.',
+          details: result.errors,
+        },
+      };
+    },
+    async disableContract(_, args, context) {
+      const result = await context.injector.get(ContractsManager).disableContract({
+        contractId: args.input.contractId,
+      });
+
+      if (result.type === 'success') {
+        return {
+          ok: {
+            disabledContract: result.contract,
+          },
+        };
+      }
+
+      return {
+        error: {
+          message: result.message,
+        },
+      };
     },
   },
   Query: {
-    async schemaCompareToPrevious(_, { selector, unstable_forceLegacyComparison }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const schemaManager = injector.get(SchemaManager);
-      const projectManager = injector.get(ProjectManager);
-      const organizationManager = injector.get(OrganizationManager);
-      const helper = injector.get(SchemaHelper);
-
-      const [organizationId, projectId, targetId] = await Promise.all([
-        translator.translateOrganizationId(selector),
-        translator.translateProjectId(selector),
-        translator.translateTargetId(selector),
-      ]);
-
-      const [project, organization] = await Promise.all([
-        projectManager.getProject({
-          organization: organizationId,
-          project: projectId,
-        }),
-        organizationManager.getOrganization({
-          organization: organizationId,
-        }),
-      ]);
-
-      const useLegacy = unstable_forceLegacyComparison ?? false;
-      const isCompositeModernProject =
-        project.legacyRegistryModel === false &&
-        (project.type === ProjectType.FEDERATION || project.type === ProjectType.STITCHING);
-
-      // Lord forgive me for my sins
-      if (useLegacy === false) {
-        const currentVersion = await schemaManager.getSchemaVersion({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-          version: selector.version,
-        });
-
-        if (currentVersion.schemaCompositionErrors) {
-          return {
-            error: new SchemaBuildError(
-              'Composition error',
-              currentVersion.schemaCompositionErrors,
-            ),
-          } as SchemaCompareError;
-        }
-
-        const previousVersion = currentVersion.previousSchemaVersionId
-          ? await schemaManager.getSchemaVersion({
-              organization: organizationId,
-              project: projectId,
-              target: targetId,
-              version: currentVersion.previousSchemaVersionId,
-            })
-          : null;
-
-        if (currentVersion.compositeSchemaSDL && previousVersion === null) {
-          return {
-            result: {
-              schemas: {
-                before: null,
-                current: currentVersion.compositeSchemaSDL,
-              },
-              changes: [],
-              versionIds: isCompositeModernProject
-                ? {
-                    before: null,
-                    current: currentVersion.id,
-                  }
-                : null,
-            },
-          } satisfies SchemaCompareResult;
-        }
-
-        const getBeforeSchemaSDL = async () => {
-          const orchestrator = schemaManager.matchOrchestrator(project.type);
-
-          const { schemas: schemasBefore } = await schemaManager.getSchemasOfPreviousVersion({
-            organization: organizationId,
-            project: projectId,
-            target: targetId,
-            version: selector.version,
-            onlyComposable: organization.featureFlags.compareToPreviousComposableVersion === true,
-          });
-
-          if (schemasBefore.length === 0) {
-            return null;
-          }
-          const { raw } = await ensureSDL(
-            orchestrator.composeAndValidate(
-              schemasBefore.map(s => helper.createSchemaObject(s)),
-              {
-                external: project.externalComposition,
-                native: schemaManager.checkProjectNativeFederationSupport({
-                  project,
-                  organization,
-                }),
-              },
-            ),
-          );
-
-          return raw;
-        };
-
-        if (currentVersion.compositeSchemaSDL && currentVersion.hasPersistedSchemaChanges) {
-          const changes = await schemaManager.getSchemaChangesForVersion({
-            organization: organizationId,
-            project: projectId,
-            target: targetId,
-            version: currentVersion.id,
-          });
-
-          return {
-            result: {
-              schemas: {
-                before:
-                  previousVersion === null
-                    ? null
-                    : previousVersion.compositeSchemaSDL ?? (await getBeforeSchemaSDL()),
-                current: currentVersion.compositeSchemaSDL,
-              },
-              changes: changes ?? [],
-              versionIds: isCompositeModernProject
-                ? {
-                    before: previousVersion?.id ?? null,
-                    current: currentVersion.id,
-                  }
-                : null,
-            },
-          } satisfies SchemaCompareResult;
-        }
-      }
-
-      // LEGACY LAND
-      // If we don't have the stuff in the database we compute it on demand.
-      // so we can skip the expensive stuff happening in here...
-
-      const orchestrator = schemaManager.matchOrchestrator(project.type);
-
-      const [{ schemas: schemasBefore, id: previousVersionId }, schemasAfter] = await Promise.all([
-        injector.get(SchemaManager).getSchemasOfPreviousVersion({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-          version: selector.version,
-          onlyComposable: organization.featureFlags.compareToPreviousComposableVersion === true,
-        }),
-        injector.get(SchemaManager).getSchemasOfVersion({
-          organization: organizationId,
-          project: projectId,
-          target: targetId,
-          version: selector.version,
-        }),
-      ]);
-
-      return Promise.all([
-        schemasBefore.length
-          ? ensureSDL(
-              orchestrator.composeAndValidate(
-                schemasBefore.map(s => helper.createSchemaObject(s)),
-                {
-                  external: project.externalComposition,
-                  native: schemaManager.checkProjectNativeFederationSupport({
-                    project,
-                    organization,
-                  }),
-                },
-              ),
-            )
-          : null,
-        ensureSDL(
-          orchestrator.composeAndValidate(
-            schemasAfter.map(s => helper.createSchemaObject(s)),
-            {
-              external: project.externalComposition,
-              native: schemaManager.checkProjectNativeFederationSupport({
-                project,
-                organization,
-              }),
-            },
-          ),
-          organization.featureFlags.compareToPreviousComposableVersion === true
-            ? // Do not show schema changes if the new version is not composable
-              // It only applies when the feature flag is enabled.
-              // Otherwise, we show the errors as usual.
-              'reject-on-graphql-errors'
-            : 'ignore-errors',
-        ),
-      ])
-        .then(async ([before, after]) => {
-          const changes: SchemaChangeType[] = [];
-
-          if (before) {
-            const previousSchema = buildSortedSchemaFromSchemaObject(
-              before,
-              error =>
-                new GraphQLError(
-                  `Failed to build the previous version: ${
-                    error instanceof GraphQLError ? error.message : error
-                  }`,
-                ),
-            );
-            const currentSchema = buildSortedSchemaFromSchemaObject(
-              after,
-              error =>
-                new GraphQLError(
-                  `Failed to build the selected version: ${
-                    error instanceof GraphQLError ? error.message : error
-                  }`,
-                ),
-            );
-            changes.push(...(await injector.get(Inspector).diff(previousSchema, currentSchema)));
-          }
-
-          changes.push(...detectUrlChanges(schemasBefore, schemasAfter));
-
-          const result: SchemaCompareResult = {
-            result: {
-              schemas: {
-                before: before?.raw ?? null,
-                current: after.raw,
-              },
-              changes,
-              versionIds: isCompositeModernProject
-                ? {
-                    before: previousVersionId ?? null,
-                    current: selector.version,
-                  }
-                : null,
-            },
-          };
-
-          return result;
-        })
-        .catch(reason => {
-          if (reason instanceof SchemaBuildError) {
-            const result: SchemaCompareError = {
-              error: reason,
-            };
-            return Promise.resolve(result);
-          }
-
-          return Promise.reject(reason);
-        });
-    },
-    async schemaVersions(_, { selector, after, limit }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project, target] = await Promise.all([
-        translator.translateOrganizationId(selector),
-        translator.translateProjectId(selector),
-        translator.translateTargetId(selector),
-      ]);
-
-      return injector.get(SchemaManager).getSchemaVersions({
-        organization,
-        project,
-        target,
-        after,
-        limit,
-      });
-    },
-    async schemaVersion(_, { selector }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project, target] = await Promise.all([
-        translator.translateOrganizationId(selector),
-        translator.translateProjectId(selector),
-        translator.translateTargetId(selector),
-      ]);
-
-      return injector.get(SchemaManager).getSchemaVersion({
-        organization,
-        project,
-        target,
-        version: selector.version,
-      });
-    },
     async latestVersion(_, __, { injector }) {
       const target = await injector.get(TargetManager).getTargetFromToken();
 
@@ -725,11 +483,46 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   Target: {
+    async schemaVersions(target, args, { injector }) {
+      return injector.get(SchemaManager).getPaginatedSchemaVersionsForTargetId({
+        targetId: target.id,
+        organizationId: target.orgId,
+        projectId: target.projectId,
+        cursor: args.after ?? null,
+        first: args.first ?? null,
+      });
+    },
+    async schemaVersion(target, args, { injector }) {
+      const schemaVersion = await injector.get(SchemaManager).getSchemaVersion({
+        organization: target.orgId,
+        project: target.projectId,
+        target: target.id,
+        version: args.id,
+      });
+
+      if (schemaVersion === null) {
+        return null;
+      }
+
+      return {
+        ...schemaVersion,
+        organization: target.orgId,
+        project: target.projectId,
+        target: target.id,
+      };
+    },
     latestSchemaVersion(target, _, { injector }) {
       return injector.get(SchemaManager).getMaybeLatestVersion({
         target: target.id,
         project: target.projectId,
         organization: target.orgId,
+      });
+    },
+    async latestValidSchemaVersion(target, __, { injector }) {
+      return injector.get(SchemaManager).getMaybeLatestValidVersion({
+        organization: target.orgId,
+        project: target.projectId,
+        target: target.id,
       });
     },
     baseSchema(target, _, { injector }) {
@@ -793,8 +586,28 @@ export const resolvers: SchemaModule.Resolvers = {
         period: period ? parseDateRangeInput(period) : null,
       });
     },
+    async contracts(target, args, { injector }) {
+      return await injector.get(ContractsManager).getPaginatedContractsForTarget({
+        target,
+        cursor: args.after ?? null,
+        first: args.first ?? null,
+      });
+    },
+    async activeContracts(target, args, { injector }) {
+      return await injector.get(ContractsManager).getPaginatedActiveContractsForTarget({
+        target,
+        cursor: args.after ?? null,
+        first: args.first ?? null,
+      });
+    },
   },
   SchemaVersion: {
+    isComposable(version) {
+      return version.schemaCompositionErrors === null;
+    },
+    hasSchemaChanges(version, _, { injector }) {
+      return injector.get(SchemaVersionHelper).getHasSchemaChanges(version);
+    },
     async log(version, _, { injector }) {
       const log = await injector.get(SchemaManager).getSchemaLog({
         commit: version.actionId,
@@ -811,6 +624,7 @@ export const resolvers: SchemaModule.Resolvers = {
           date: log.date as any,
           id: log.id,
           service: null,
+          serviceSdl: null,
         };
       }
 
@@ -822,6 +636,9 @@ export const resolvers: SchemaModule.Resolvers = {
           date: log.date as any,
           id: log.id,
           deletedService: log.service_name,
+          previousServiceSdl: await injector
+            .get(SchemaVersionHelper)
+            .getServiceSdlForPreviousVersionService(version, log.service_name),
         };
       }
 
@@ -832,6 +649,10 @@ export const resolvers: SchemaModule.Resolvers = {
         date: log.date as any,
         id: log.id,
         service: log.service_name,
+        serviceSdl: log.sdl,
+        previousServiceSdl: await injector
+          .get(SchemaVersionHelper)
+          .getServiceSdlForPreviousVersionService(version, log.service_name),
       };
     },
     schemas(version, _, { injector }) {
@@ -842,230 +663,42 @@ export const resolvers: SchemaModule.Resolvers = {
         target: version.target,
       });
     },
-    async errors(version, _, { injector }) {
-      const schemaManager = injector.get(SchemaManager);
-      const schemaHelper = injector.get(SchemaHelper);
-      const [schemas, project, organization] = await Promise.all([
-        schemaManager.getMaybeSchemasOfVersion({
-          version: version.id,
-          organization: version.organization,
-          project: version.project,
-          target: version.target,
-        }),
-        injector.get(ProjectManager).getProject({
-          organization: version.organization,
-          project: version.project,
-        }),
-        injector.get(OrganizationManager).getOrganization({
-          organization: version.organization,
-        }),
-      ]);
-
-      if (schemas.length === 0) {
-        return [];
-      }
-
-      const orchestrator = schemaManager.matchOrchestrator(project.type);
-      const validation = await orchestrator.composeAndValidate(
-        schemas.map(s => schemaHelper.createSchemaObject(s)),
-        {
-          external: project.externalComposition,
-          native: schemaManager.checkProjectNativeFederationSupport({
-            project,
-            organization,
-          }),
-        },
-      );
-
-      return validation.errors;
+    async schemaCompositionErrors(version, _, { injector }) {
+      return injector.get(SchemaVersionHelper).getSchemaCompositionErrors(version);
+    },
+    async breakingSchemaChanges(version, _, { injector }) {
+      return injector.get(SchemaVersionHelper).getBreakingSchemaChanges(version);
+    },
+    async safeSchemaChanges(version, _, { injector }) {
+      return injector.get(SchemaVersionHelper).getSafeSchemaChanges(version);
     },
     async supergraph(version, _, { injector }) {
-      const [project, organization] = await Promise.all([
-        injector.get(ProjectManager).getProject({
-          organization: version.organization,
-          project: version.project,
-        }),
-        injector.get(OrganizationManager).getOrganization({
-          organization: version.organization,
-        }),
-      ]);
-
-      if (project.type !== ProjectType.FEDERATION) {
-        return null;
-      }
-
-      if (version.supergraphSDL) {
-        return version.supergraphSDL;
-      }
-
-      const schemaManager = injector.get(SchemaManager);
-      const orchestrator = schemaManager.matchOrchestrator(project.type);
-      const helper = injector.get(SchemaHelper);
-
-      const schemas = await schemaManager.getMaybeSchemasOfVersion({
-        version: version.id,
-        organization: version.organization,
-        project: version.project,
-        target: version.target,
-        includeMetadata: false,
-      });
-
-      if (schemas.length === 0) {
-        return null;
-      }
-
-      return orchestrator
-        .composeAndValidate(
-          schemas.map(s => helper.createSchemaObject(s)),
-          {
-            external: project.externalComposition,
-            native: schemaManager.checkProjectNativeFederationSupport({
-              project,
-              organization,
-            }),
-          },
-        )
-        .then(r => r.supergraph);
+      return injector.get(SchemaVersionHelper).getSupergraphSdl(version);
     },
     async sdl(version, _, { injector }) {
-      if (version.compositeSchemaSDL) {
-        return version.compositeSchemaSDL;
-      }
-
-      // Legacy Fallback
-
-      const [project, organization] = await Promise.all([
-        injector.get(ProjectManager).getProject({
-          organization: version.organization,
-          project: version.project,
-        }),
-        injector.get(OrganizationManager).getOrganization({
-          organization: version.organization,
-        }),
+      return injector.get(SchemaVersionHelper).getCompositeSchemaSdl(version);
+    },
+    async baseSchema(version) {
+      return version.baseSchema ?? null;
+    },
+    async explorer(version, { usage }, { injector }) {
+      const [schemaAst, supergraphAst] = await Promise.all([
+        injector.get(SchemaVersionHelper).getCompositeSchemaAst(version),
+        injector.get(SchemaVersionHelper).getSupergraphAst(version),
       ]);
 
-      const schemaManager = injector.get(SchemaManager);
-      const orchestrator = schemaManager.matchOrchestrator(project.type);
-      const helper = injector.get(SchemaHelper);
-
-      const schemas = await schemaManager.getMaybeSchemasOfVersion({
-        version: version.id,
-        organization: version.organization,
-        project: version.project,
-        target: version.target,
-        includeMetadata: false,
-      });
-
-      if (schemas.length === 0) {
+      if (!schemaAst) {
         return null;
       }
 
-      return (
-        await ensureSDL(
-          orchestrator.composeAndValidate(
-            schemas.map(s => helper.createSchemaObject(s)),
-            {
-              external: project.externalComposition,
-              native: schemaManager.checkProjectNativeFederationSupport({
-                project,
-                organization,
-              }),
-            },
-          ),
-        )
-      ).raw;
-    },
-    async baseSchema(version) {
-      return version.baseSchema || null;
-    },
-    async explorer(version, { usage }, { injector }) {
-      const [project, organization] = await Promise.all([
-        injector.get(ProjectManager).getProject({
-          organization: version.organization,
-          project: version.project,
-        }),
-        injector.get(OrganizationManager).getOrganization({
-          organization: version.organization,
-        }),
-      ]);
-
-      const schemaManager = injector.get(SchemaManager);
-      const orchestrator = schemaManager.matchOrchestrator(project.type);
-      const helper = injector.get(SchemaHelper);
-
-      let supergraph: SuperGraphInformation | null = null;
-      if (project.type === ProjectType.FEDERATION) {
-        let supergraphDocument: DocumentNode | null = null;
-        if (version.supergraphSDL) {
-          supergraphDocument = parseGraphQLSource(
-            version.supergraphSDL,
-            'parse supergraphSDL in SchemaVersion.explorer',
-          );
-        } else {
-          // Legacy Fallback
-          const schemas = await injector.get(SchemaManager).getSchemasOfVersion({
-            organization: version.organization,
-            project: version.project,
-            target: version.target,
-            version: version.id,
-          });
-
-          const result = await orchestrator.composeAndValidate(
-            schemas.map(s => helper.createSchemaObject(s)),
-            {
-              external: project.externalComposition,
-              native: schemaManager.checkProjectNativeFederationSupport({
-                project,
-                organization,
-              }),
-            },
-          );
-
-          if (result.supergraph) {
-            supergraphDocument = parse(result.supergraph);
-          }
-        }
-
-        if (supergraphDocument) {
-          supergraph = sentryFunction(() => extractSuperGraphInformation(supergraphDocument!), {
+      const supergraph = supergraphAst
+        ? sentryFunction(() => extractSuperGraphInformation(supergraphAst), {
             op: 'extractSuperGraphInformation in explorer',
-          });
-        }
-      }
-
-      let schemaAST: DocumentNode;
-      if (version.compositeSchemaSDL) {
-        schemaAST = parseGraphQLSource(
-          version.compositeSchemaSDL,
-          'parse compositeSchemaSDL in SchemaVersion.explorer',
-        );
-      } else {
-        // Legacy Fallback
-        const schemas = await injector.get(SchemaManager).getSchemasOfVersion({
-          organization: version.organization,
-          project: version.project,
-          target: version.target,
-          version: version.id,
-        });
-
-        const schema = await ensureSDL(
-          orchestrator.composeAndValidate(
-            schemas.map(s => helper.createSchemaObject(s)),
-            {
-              external: project.externalComposition,
-              native: schemaManager.checkProjectNativeFederationSupport({
-                project,
-                organization,
-              }),
-            },
-          ),
-        );
-
-        schemaAST = schema.document;
-      }
+          })
+        : null;
 
       return {
-        schema: buildASTSchema(schemaAST),
+        schema: buildASTSchema(schemaAst),
         usage: {
           period: usage?.period ? parseDateRangeInput(usage.period) : createPeriod('30d'),
           organization: version.organization,
@@ -1076,100 +709,30 @@ export const resolvers: SchemaModule.Resolvers = {
       };
     },
     async unusedSchema(version, { usage }, { injector }) {
-      const [project, organization] = await Promise.all([
-        injector.get(ProjectManager).getProject({
-          organization: version.organization,
-          project: version.project,
-        }),
-        injector.get(OrganizationManager).getOrganization({
-          organization: version.organization,
-        }),
+      const [schemaAst, supergraphAst] = await Promise.all([
+        injector.get(SchemaVersionHelper).getCompositeSchemaAst(version),
+        injector.get(SchemaVersionHelper).getSupergraphAst(version),
       ]);
 
-      const schemaManager = injector.get(SchemaManager);
-      const operationsManager = injector.get(OperationsManager);
-      const orchestrator = schemaManager.matchOrchestrator(project.type);
-      const helper = injector.get(SchemaHelper);
-
-      let supergraph: SuperGraphInformation | null = null;
-
-      if (project.type === ProjectType.FEDERATION) {
-        let supergraphDocument: DocumentNode | null = null;
-        if (version.supergraphSDL) {
-          supergraphDocument = parseGraphQLSource(
-            version.supergraphSDL,
-            'parse supergraphSDL in SchemaVersion.unusedSchema',
-          );
-        } else {
-          // Legacy Fallback
-          const schemas = await injector.get(SchemaManager).getSchemasOfVersion({
-            organization: version.organization,
-            project: version.project,
-            target: version.target,
-            version: version.id,
-          });
-
-          const result = await orchestrator.composeAndValidate(
-            schemas.map(s => helper.createSchemaObject(s)),
-            {
-              external: project.externalComposition,
-              native: schemaManager.checkProjectNativeFederationSupport({
-                project,
-                organization,
-              }),
-            },
-          );
-
-          if (result.supergraph) {
-            supergraphDocument = parse(result.supergraph);
-          }
-        }
-
-        if (supergraphDocument) {
-          supergraph = extractSuperGraphInformation(supergraphDocument);
-        }
+      if (!schemaAst) {
+        return null;
       }
 
-      let schemaAST: DocumentNode;
-      if (version.compositeSchemaSDL) {
-        schemaAST = parseGraphQLSource(
-          version.compositeSchemaSDL,
-          'parse compositeSchemaSDL in SchemaVersion.unusedSchema',
-        );
-      } else {
-        // Legacy Fallback
-        const schemas = await injector.get(SchemaManager).getSchemasOfVersion({
-          organization: version.organization,
-          project: version.project,
-          target: version.target,
-          version: version.id,
-        });
-
-        const schema = await ensureSDL(
-          orchestrator.composeAndValidate(
-            schemas.map(s => helper.createSchemaObject(s)),
-            {
-              external: project.externalComposition,
-              native: schemaManager.checkProjectNativeFederationSupport({
-                project,
-                organization,
-              }),
-            },
-          ),
-        );
-
-        schemaAST = schema.document;
-      }
-
-      const usedCoordinates = await operationsManager.getReportedSchemaCoordinates({
+      const usedCoordinates = await injector.get(OperationsManager).getReportedSchemaCoordinates({
         targetId: version.target,
         projectId: version.project,
         organizationId: version.organization,
         period: usage?.period ? parseDateRangeInput(usage.period) : createPeriod('30d'),
       });
 
+      const supergraph = supergraphAst
+        ? sentryFunction(() => extractSuperGraphInformation(supergraphAst), {
+            op: 'extractSuperGraphInformation in explorer',
+          })
+        : null;
+
       return {
-        sdl: stripUsedSchemaCoordinatesFromDocumentNode(schemaAST, usedCoordinates),
+        sdl: stripUsedSchemaCoordinatesFromDocumentNode(schemaAst, usedCoordinates),
         usage: {
           period: usage?.period ? parseDateRangeInput(usage.period) : createPeriod('30d'),
           organization: version.organization,
@@ -1184,58 +747,17 @@ export const resolvers: SchemaModule.Resolvers = {
     githubMetadata(version, _, { injector }) {
       return injector.get(SchemaManager).getGitHubMetadata(version);
     },
-    valid: version => version.isComposable,
-  },
-  SchemaCompareError: {
-    __isTypeOf(source: unknown) {
-      return typeof source === 'object' && source != null && 'error' in source;
+    valid(version, _, { injector }) {
+      return injector.get(SchemaVersionHelper).getIsValid(version);
     },
-    message: source => source.error.message,
-    details: source =>
-      source.error.errors.map(err => ({
-        message: err.message,
-        type: err.source,
-      })),
-  },
-  SchemaCompareResult: {
-    __isTypeOf(source: unknown) {
-      return typeof source === 'object' && source != null && 'result' in source;
+    previousDiffableSchemaVersion(version, _, { injector }) {
+      return injector.get(SchemaVersionHelper).getPreviousDiffableSchemaVersion(version);
     },
-    initial(source) {
-      return source.result.schemas.before === null;
+    isFirstComposableVersion(version, _, { injector }) {
+      return injector.get(SchemaVersionHelper).getIsFirstComposableVersion(version);
     },
-    async changes(source) {
-      return source.result.changes;
-    },
-    diff(source) {
-      const { before, current } = source.result.schemas;
-
-      return {
-        before: before ?? '',
-        after: current,
-      };
-    },
-    async service(source, _, { injector }) {
-      const versionIds = source.result.versionIds;
-
-      if (!versionIds) {
-        return null;
-      }
-
-      const serviceSchema = await injector.get(SchemaManager).getMatchingServiceSchemaOfVersions({
-        before: versionIds.before,
-        after: versionIds.current,
-      });
-
-      if (!serviceSchema) {
-        return null;
-      }
-
-      return {
-        name: serviceSchema.serviceName,
-        before: serviceSchema.before,
-        after: serviceSchema.after,
-      };
+    contractVersions(version, _, { injector }) {
+      return injector.get(ContractsManager).getContractVersionsForSchemaVersion(version);
     },
   },
   SingleSchema: {
@@ -1261,16 +783,6 @@ export const resolvers: SchemaModule.Resolvers = {
     },
   },
   SchemaConnection: createConnection(),
-  SchemaVersionConnection: {
-    pageInfo(info) {
-      return {
-        hasNextPage: info.hasMore,
-        hasPreviousPage: false,
-        endCursor: '',
-        startCursor: '',
-      };
-    },
-  },
   SchemaChangeConnection: createConnection(),
   SchemaChange: {
     message: (change, args) => {
@@ -1283,6 +795,8 @@ export const resolvers: SchemaModule.Resolvers = {
     criticalityReason: change => change.reason,
     approval: change => change.approvalMetadata,
     isSafeBasedOnUsage: change => change.isSafeBasedOnUsage,
+    usageStatistics: (change, _, { injector }) =>
+      injector.get(BreakingSchemaChangeUsageHelper).getUsageDataForBreakingSchemaChange(change),
   },
   SchemaChangeApproval: {
     approvedBy: (approval, _, { injector }) =>
@@ -1323,6 +837,9 @@ export const resolvers: SchemaModule.Resolvers = {
     },
     isNativeFederationEnabled(project) {
       return project.nativeFederation === true;
+    },
+    nativeFederationCompatibility(project, _, { injector }) {
+      return injector.get(SchemaManager).getNativeFederationCompatibilityStatus(project);
     },
   },
   SchemaCoordinateUsage: {
@@ -2110,29 +1627,22 @@ export const resolvers: SchemaModule.Resolvers = {
   },
   SuccessfulSchemaCheck: {
     schemaVersion(schemaCheck, _, { injector }) {
-      if (schemaCheck.schemaVersionId === null) {
-        return null;
-      }
-      return injector.get(SchemaManager).getSchemaVersion({
-        organization: schemaCheck.selector.organizationId,
-        project: schemaCheck.selector.projectId,
-        target: schemaCheck.targetId,
-        version: schemaCheck.schemaVersionId,
-      });
+      return injector.get(SchemaCheckManager).getSchemaVersion(schemaCheck);
     },
-    safeSchemaChanges(schemaCheck) {
-      if (!schemaCheck.safeSchemaChanges) {
-        return null;
-      }
-
-      return schemaCheck.safeSchemaChanges;
+    safeSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getSafeSchemaChanges(schemaCheck);
     },
-    breakingSchemaChanges(schemaCheck) {
-      if (!schemaCheck.breakingSchemaChanges) {
-        return null;
-      }
-
-      return schemaCheck.breakingSchemaChanges;
+    breakingSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getBreakingSchemaChanges(schemaCheck);
+    },
+    hasSchemaCompositionErrors(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getHasSchemaCompositionErrors(schemaCheck);
+    },
+    hasSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getHasSchemaChanges(schemaCheck);
+    },
+    hasUnapprovedBreakingChanges() {
+      return false;
     },
     webUrl(schemaCheck, _, { injector }) {
       return injector.get(SchemaManager).getSchemaCheckWebUrl({
@@ -2149,35 +1659,37 @@ export const resolvers: SchemaModule.Resolvers = {
         userId: schemaCheck.manualApprovalUserId,
       });
     },
+    contractChecks(schemaCheck, _, { injector }) {
+      return injector.get(ContractsManager).getContractsChecksForSchemaCheck(schemaCheck);
+    },
+    previousSchemaSDL(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getPreviousSchemaSDL(schemaCheck);
+    },
+    conditionalBreakingChangeMetadata(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getConditionalBreakingChangeMetadata(schemaCheck);
+    },
   },
   FailedSchemaCheck: {
     schemaVersion(schemaCheck, _, { injector }) {
-      if (schemaCheck.schemaVersionId === null) {
-        return null;
-      }
-      return injector.get(SchemaManager).getSchemaVersion({
-        organization: schemaCheck.selector.organizationId,
-        project: schemaCheck.selector.projectId,
-        target: schemaCheck.targetId,
-        version: schemaCheck.schemaVersionId,
-      });
+      return injector.get(SchemaCheckManager).getSchemaVersion(schemaCheck);
     },
-    safeSchemaChanges(schemaCheck) {
-      if (!schemaCheck.safeSchemaChanges) {
-        return null;
-      }
-
-      return schemaCheck.safeSchemaChanges;
+    safeSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getSafeSchemaChanges(schemaCheck);
     },
-    breakingSchemaChanges(schemaCheck) {
-      if (!schemaCheck.breakingSchemaChanges) {
-        return null;
-      }
-
-      return schemaCheck.breakingSchemaChanges;
+    breakingSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getBreakingSchemaChanges(schemaCheck);
     },
     compositionErrors(schemaCheck) {
       return schemaCheck.schemaCompositionErrors;
+    },
+    hasSchemaCompositionErrors(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getHasSchemaCompositionErrors(schemaCheck);
+    },
+    hasSchemaChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getHasSchemaChanges(schemaCheck);
+    },
+    hasUnapprovedBreakingChanges(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getHasUnapprovedBreakingChanges(schemaCheck);
     },
     webUrl(schemaCheck, _, { injector }) {
       return injector.get(SchemaManager).getSchemaCheckWebUrl({
@@ -2186,15 +1698,27 @@ export const resolvers: SchemaModule.Resolvers = {
       });
     },
     async canBeApproved(schemaCheck, _, { injector }) {
-      return injector.get(SchemaManager).getFailedSchemaCheckCanBeApproved({
-        schemaCompositionErrors: schemaCheck.schemaCompositionErrors,
-      });
+      return injector.get(SchemaManager).getFailedSchemaCheckCanBeApproved(schemaCheck);
     },
     async canBeApprovedByViewer(schemaCheck, _, { injector }) {
-      return injector.get(SchemaManager).getFailedSchemaCheckCanBeApprovedByViewer({
-        organizationId: schemaCheck.selector.organizationId,
-        schemaCompositionErrors: schemaCheck.schemaCompositionErrors,
-      });
+      return injector.get(SchemaManager).getFailedSchemaCheckCanBeApprovedByViewer(schemaCheck);
+    },
+    contractChecks(schemaCheck, _, { injector }) {
+      return injector.get(ContractsManager).getContractsChecksForSchemaCheck(schemaCheck);
+    },
+    previousSchemaSDL(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getPreviousSchemaSDL(schemaCheck);
+    },
+    conditionalBreakingChangeMetadata(schemaCheck, _, { injector }) {
+      return injector.get(SchemaCheckManager).getConditionalBreakingChangeMetadata(schemaCheck);
+    },
+  },
+  BreakingChangeMetadataTarget: {
+    target(record, _, { injector }) {
+      return injector
+        .get(TargetManager)
+        .getTargetById({ targetId: record.id })
+        .catch(() => null);
     },
   },
   SchemaPolicyWarningConnection: createDummyConnection(warning => ({
@@ -2211,6 +1735,74 @@ export const resolvers: SchemaModule.Resolvers = {
           }
         : null,
   })),
+  Contract: {
+    target(contract, _, context) {
+      return context.injector.get(TargetManager).getTargetById({
+        targetId: contract.targetId,
+      });
+    },
+    viewerCanDisableContract(contract, _, context) {
+      return context.injector
+        .get(ContractsManager)
+        .getViewerCanDisableContractForContract(contract);
+    },
+  },
+  ContractCheck: {
+    contractVersion(contractCheck, _, context) {
+      return context.injector
+        .get(ContractsManager)
+        .getContractVersionForContractCheck(contractCheck);
+    },
+    compositeSchemaSDL: contractCheck => contractCheck.compositeSchemaSdl,
+    supergraphSDL: contractCheck => contractCheck.supergraphSdl,
+    hasSchemaCompositionErrors(contractCheck, _, { injector }) {
+      return injector
+        .get(ContractsManager)
+        .getHasSchemaCompositionErrorsForContractCheck(contractCheck);
+    },
+    hasUnapprovedBreakingChanges(contractCheck, _, { injector }) {
+      return injector
+        .get(ContractsManager)
+        .getHasUnapprovedBreakingChangesForContractCheck(contractCheck);
+    },
+    hasSchemaChanges(contractCheck, _, { injector }) {
+      return injector.get(ContractsManager).getHasSchemaChangesForContractCheck(contractCheck);
+    },
+  },
+  ContractVersion: {
+    isComposable(contractVersion) {
+      return contractVersion.schemaCompositionErrors === null;
+    },
+    hasSchemaChanges(contractVersion, _, context) {
+      return context.injector
+        .get(ContractsManager)
+        .getHasSchemaChangesForContractVersion(contractVersion);
+    },
+    breakingSchemaChanges(contractVersion, _, context) {
+      return context.injector
+        .get(ContractsManager)
+        .getBreakingChangesForContractVersion(contractVersion);
+    },
+    safeSchemaChanges(contractVersion, _, context) {
+      return context.injector
+        .get(ContractsManager)
+        .getSafeChangesForContractVersion(contractVersion);
+    },
+    compositeSchemaSDL: contractVersion => contractVersion.compositeSchemaSdl,
+    supergraphSDL: contractVersion => contractVersion.supergraphSdl,
+    previousContractVersion: (contractVersion, _, context) =>
+      context.injector
+        .get(ContractsManager)
+        .getPreviousContractVersionForContractVersion(contractVersion),
+    previousDiffableContractVersion: (contractVersion, _, context) =>
+      context.injector
+        .get(ContractsManager)
+        .getDiffableContractVersionForContractVersion(contractVersion),
+    isFirstComposableVersion: (contractVersion, _, context) =>
+      context.injector
+        .get(ContractsManager)
+        .getIsFirstComposableVersionForContractVersion(contractVersion),
+  },
 };
 
 function stringifyDefaultValue(value: unknown): string | null {

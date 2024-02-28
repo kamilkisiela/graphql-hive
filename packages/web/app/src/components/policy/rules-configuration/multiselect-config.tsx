@@ -33,7 +33,7 @@ export const PolicyMultiSelect = (props: {
           <div>{props.title}</div>
           {props.tooltip ? (
             <Tooltip content={props.tooltip}>
-              <InfoIcon className="ml-2 h-4 w-4 text-orange-500" />
+              <InfoIcon className="ml-2 size-4 text-orange-500" />
             </Tooltip>
           ) : null}
         </div>

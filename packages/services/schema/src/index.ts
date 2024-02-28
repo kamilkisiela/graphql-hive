@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import crypto from 'crypto';
+import { hostname } from 'os';
 import Redis from 'ioredis';
 import {
   createErrorHandler,
@@ -35,7 +36,8 @@ function decryptFactory() {
 async function main() {
   if (env.sentry) {
     Sentry.init({
-      serverName: 'schema',
+      serverName: hostname(),
+      dist: 'schema',
       enabled: !!env.sentry,
       environment: env.environment,
       dsn: env.sentry.dsn,
@@ -137,9 +139,13 @@ async function main() {
       },
     });
 
-    await server.listen(env.http.port, '::');
+    await server.listen({
+      port: env.http.port,
+      host: '::',
+    });
+
     if (env.prometheus) {
-      await startMetrics(env.prometheus.labels.instance);
+      await startMetrics(env.prometheus.labels.instance, env.prometheus.port);
     }
   } catch (error) {
     server.log.fatal(error);

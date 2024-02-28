@@ -25,6 +25,7 @@ import type {
 } from '@hive/api';
 import { batch } from '@theguild/buddy';
 import {
+  createSDLHash,
   OrganizationMemberRoleModel,
   ProjectType,
   type CDNAccessToken,
@@ -54,7 +55,10 @@ import {
   users,
 } from './db';
 import {
+  ConditionalBreakingChangeMetadata,
+  ConditionalBreakingChangeMetadataModel,
   HiveSchemaChangeModel,
+  InsertConditionalBreakingChangeMetadataModel,
   SchemaCheckModel,
   SchemaCompositionErrorModel,
   SchemaPolicyWarningModel,
@@ -1614,6 +1618,29 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `),
       );
     },
+    async updateNativeSchemaComposition({ organization, project, enabled }) {
+      return transformProject(
+        await pool.transaction(async t => {
+          await t.one(sql`
+            UPDATE organizations
+            SET
+              feature_flags = ${sql.jsonb({
+                compareToPreviousComposableVersion: true,
+              })}
+            WHERE id = ${organization}
+            RETURNING id
+          `);
+
+          return await t.one<projects>(sql`
+            UPDATE projects
+            SET
+              native_federation = ${enabled}
+            WHERE id = ${project}
+            RETURNING *
+          `);
+        }),
+      );
+    },
     async enableExternalSchemaComposition({ project, endpoint, encryptedSecret }) {
       return transformProject(
         await pool.one<Slonik<projects>>(sql`
@@ -2105,7 +2132,35 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return SchemaVersionModel.parse(version);
     },
-    async getLatestSchemas({ organization, project, target, onlyComposable }) {
+    async getVersionBeforeVersionId(args) {
+      const version = await pool.maybeOne<unknown>(
+        sql`
+          SELECT
+            ${schemaVersionSQLFields()}
+          FROM "schema_versions"
+          WHERE
+            "target_id" = ${args.target}
+            AND (
+              (
+                "created_at" = ${args.beforeVersionCreatedAt}
+                AND "id" < ${args.beforeVersionId}
+              )
+              OR "created_at" < ${args.beforeVersionCreatedAt}
+            )
+            ${args.onlyComposable ? sql`AND "is_composable" = TRUE` : sql``}
+          ORDER BY
+            "created_at" DESC
+          LIMIT 1
+        `,
+      );
+
+      if (!version) {
+        return null;
+      }
+
+      return SchemaVersionModel.parse(version);
+    },
+    async getLatestSchemas({ project, target, onlyComposable }) {
       const latest = await pool.maybeOne<Pick<schema_versions, 'id' | 'is_composable'>>(sql`
         SELECT sv.id, sv.is_composable
         FROM schema_versions as sv
@@ -2124,9 +2179,6 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       const schemas = await storage.getSchemasOfVersion({
         version: latest.id,
-        organization,
-        project,
-        target,
         includeMetadata: true,
       });
 
@@ -2135,6 +2187,56 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         valid: latest.is_composable,
         schemas,
       };
+    },
+    async getSchemaByNameOfVersion(args) {
+      const result = await pool.maybeOne<
+        Pick<
+          OverrideProp<schema_log, 'action', 'PUSH'>,
+          | 'id'
+          | 'commit'
+          | 'action'
+          | 'author'
+          | 'sdl'
+          | 'created_at'
+          | 'project_id'
+          | 'service_name'
+          | 'service_url'
+          | 'target_id'
+          | 'metadata'
+        > &
+          Pick<projects, 'type'>
+      >(
+        sql`
+          SELECT
+            sl.id,
+            sl.commit,
+            sl.author,
+            sl.action,
+            sl.sdl,
+            sl.created_at,
+            sl.project_id,
+            lower(sl.service_name) as service_name,
+            sl.service_url,
+            sl.target_id,
+            p.type
+          FROM schema_version_to_log AS svl
+          LEFT JOIN schema_log AS sl ON (sl.id = svl.action_id)
+          LEFT JOIN projects as p ON (p.id = sl.project_id)
+          WHERE
+            svl.version_id = ${args.versionId}
+            AND sl.action = 'PUSH'
+            AND p.type != 'CUSTOM'
+            AND lower(sl.service_name) = lower(${args.serviceName})
+          ORDER BY
+            sl.created_at DESC
+        `,
+      );
+
+      if (!result) {
+        return null;
+      }
+
+      return transformSchema(result);
     },
     async getSchemasOfVersion({ version, includeMetadata = false }) {
       const result = await pool.query<
@@ -2216,6 +2318,53 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       };
     },
 
+    async getServiceSchemaOfVersion(args) {
+      const result = await pool.maybeOne<
+        Pick<
+          OverrideProp<schema_log, 'action', 'PUSH'>,
+          | 'id'
+          | 'commit'
+          | 'action'
+          | 'author'
+          | 'sdl'
+          | 'created_at'
+          | 'project_id'
+          | 'service_name'
+          | 'service_url'
+          | 'target_id'
+          | 'metadata'
+        > &
+          Pick<projects, 'type'>
+      >(sql`
+        SELECT
+            sl.id,
+            sl.commit,
+            sl.author,
+            sl.action,
+            sl.sdl,
+            sl.created_at,
+            sl.project_id,
+            lower(sl.service_name) as service_name,
+            sl.service_url,
+            sl.target_id,
+            p.type
+          FROM schema_version_to_log AS svl
+          LEFT JOIN schema_log AS sl ON (sl.id = svl.action_id)
+          LEFT JOIN projects as p ON (p.id = sl.project_id)
+          WHERE
+            svl.version_id = ${args.schemaVersionId}
+            AND sl.action = 'PUSH'
+            AND p.type != 'CUSTOM'
+            AND lower(sl.service_name) = lower(${args.serviceName})
+      `);
+
+      if (!result) {
+        return null;
+      }
+
+      return transformSchema(result);
+    },
+
     async getMatchingServiceSchemaOfVersions(versions) {
       const after = await pool.one<{
         sdl: string;
@@ -2260,35 +2409,72 @@ export async function createStorage(connection: string, maximumPoolSize: number)
 
       return SchemaVersionModel.parse(result);
     },
+    async getPaginatedSchemaVersionsForTargetId(args) {
+      let cursor: null | {
+        createdAt: string;
+        id: string;
+      } = null;
 
-    async getVersions({ project, target, after, limit }) {
-      const query = sql`
-      SELECT 
-        ${schemaVersionSQLFields(sql`sv.`)}
-        , sl.author as "author"
-        , lower(sl.service_name) as "service_name"
-      FROM schema_versions as sv
-      LEFT JOIN schema_log as sl ON (sl.id = sv.action_id)
-      LEFT JOIN targets as t ON (t.id = sv.target_id)
-      WHERE sv.target_id = ${target} AND t.project_id = ${project} AND sv.created_at < ${
-        after
-          ? sql`(SELECT svi.created_at FROM schema_versions as svi WHERE svi.id = ${after})`
-          : sql`NOW()`
+      const limit = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
+
+      if (args.cursor) {
+        cursor = decodeCreatedAtAndUUIDIdBasedCursor(args.cursor);
       }
-      ORDER BY sv.created_at DESC
-      LIMIT ${limit + 1}
-    `;
-      const result = await pool.query(query);
 
-      const hasMore = result.rows.length > limit;
+      const query = sql`
+        SELECT 
+          ${schemaVersionSQLFields()}
+        FROM
+          "schema_versions"
+        WHERE
+          "target_id" = ${args.targetId}
+          ${
+            cursor
+              ? sql`
+                AND (
+                  (
+                    "created_at" = ${cursor.createdAt}
+                    AND "id" < ${cursor.id}
+                  )
+                  OR "created_at" < ${cursor.createdAt}
+                )
+              `
+              : sql``
+          }
+        ORDER BY
+          "created_at" DESC
+          , "id" DESC
+        LIMIT ${limit + 1}
+      `;
 
-      const versions = result.rows
-        .slice(0, limit)
-        .map(version => SchemaVersionModel.parse(version));
+      const result = await pool.any<unknown>(query);
+
+      let edges = result.map(row => {
+        const node = SchemaVersionModel.parse(row);
+
+        return {
+          node,
+          get cursor() {
+            return encodeCreatedAtAndUUIDIdBasedCursor(node);
+          },
+        };
+      });
+
+      const hasNextPage = edges.length > limit;
+      edges = edges.slice(0, limit);
 
       return {
-        versions,
-        hasMore,
+        edges,
+        pageInfo: {
+          hasNextPage,
+          hasPreviousPage: cursor !== null,
+          get endCursor() {
+            return edges[edges.length - 1]?.cursor ?? '';
+          },
+          get startCursor() {
+            return edges[0]?.cursor ?? '';
+          },
+        },
       };
     },
     async deleteSchema(args) {
@@ -2334,11 +2520,16 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           actionId: deleteActionResult.id,
           baseSchema: latestVersion.base_schema,
           previousSchemaVersion: latestVersion.id,
+          diffSchemaVersionId: args.diffSchemaVersionId,
           compositeSchemaSDL: args.compositeSchemaSDL,
           supergraphSDL: args.supergraphSDL,
           schemaCompositionErrors: args.schemaCompositionErrors,
           // Deleting a schema is done via CLI and not associated to a commit or a pull request.
           github: null,
+          tags: args.tags,
+          hasContractCompositionErrors:
+            args.contracts?.some(c => c.schemaCompositionErrors != null) ?? false,
+          conditionalBreakingChangeMetadata: args.conditionalBreakingChangeMetadata,
         });
 
         // Move all the schema_version_to_log entries of the previous version to the new version
@@ -2362,6 +2553,21 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           await insertSchemaVersionChanges(trx, {
             versionId: newVersion.id,
             changes: args.changes,
+          });
+        }
+
+        for (const contract of args.contracts ?? []) {
+          const schemaVersionContractId = await insertSchemaVersionContract(trx, {
+            schemaVersionId: newVersion.id,
+            contractId: contract.contractId,
+            contractName: contract.contractName,
+            schemaCompositionErrors: contract.schemaCompositionErrors,
+            compositeSchemaSDL: contract.compositeSchemaSDL,
+            supergraphSDL: contract.supergraphSDL,
+          });
+          await insertSchemaVersionContractChanges(trx, {
+            schemaVersionContractId,
+            changes: contract.changes,
           });
         }
 
@@ -2418,27 +2624,49 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           actionId: log.id,
           baseSchema: input.base_schema,
           previousSchemaVersion: input.previousSchemaVersion,
+          diffSchemaVersionId: input.diffSchemaVersionId,
           compositeSchemaSDL: input.compositeSchemaSDL,
           supergraphSDL: input.supergraphSDL,
           schemaCompositionErrors: input.schemaCompositionErrors,
           github: input.github,
+          tags: input.tags,
+          hasContractCompositionErrors:
+            input.contracts?.some(c => c.schemaCompositionErrors != null) ?? false,
+          conditionalBreakingChangeMetadata: input.conditionalBreakingChangeMetadata,
         });
 
-        await Promise.all(
-          input.logIds.concat(log.id).map(async lid => {
-            await trx.query(sql`
-              INSERT INTO schema_version_to_log
-                (version_id, action_id)
-              VALUES
-              (${version.id}, ${lid})
-            `);
-          }),
-        );
+        await trx.query(sql`
+          INSERT INTO schema_version_to_log
+            (version_id, action_id)
+          SELECT * FROM
+            ${sql.unnest(
+              input.logIds.concat(log.id).map(actionId =>
+                // Note: change.criticality.level is actually a computed value from meta
+                [version.id, actionId],
+              ),
+              ['uuid', 'uuid'],
+            )}
+        `);
 
         await insertSchemaVersionChanges(trx, {
           versionId: version.id,
           changes: input.changes,
         });
+
+        for (const contract of input.contracts ?? []) {
+          const schemaVersionContractId = await insertSchemaVersionContract(trx, {
+            schemaVersionId: version.id,
+            contractId: contract.contractId,
+            contractName: contract.contractName,
+            schemaCompositionErrors: contract.schemaCompositionErrors,
+            compositeSchemaSDL: contract.compositeSchemaSDL,
+            supergraphSDL: contract.supergraphSDL,
+          });
+          await insertSchemaVersionContractChanges(trx, {
+            schemaVersionContractId,
+            changes: contract.changes,
+          });
+        }
 
         await input.actionFn();
 
@@ -3515,7 +3743,10 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         id: string;
       } = null;
 
-      const limit = args.first ? (args.first > 0 ? Math.min(args.first, 20) : 20) : 20;
+      // hard-coded max to prevent abuse (just in case, it's part of persisted operations anyway)
+      const max = 200;
+      const first = args.first && args.first > 0 ? args.first : max;
+      const limit = Math.min(first, max);
 
       if (args.cursor) {
         cursor = decodeCreatedAtAndUUIDIdBasedCursor(args.cursor);
@@ -3717,41 +3948,35 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
     async createSchemaCheck(args) {
       const result = await pool.transaction(async trx => {
-        const sdlStoreInserts: Array<Promise<unknown>> = [
-          trx.query<unknown>(sql`
-            INSERT INTO "sdl_store" (id, sdl)
-            VALUES (${args.schemaSDLHash}, ${args.schemaSDL})
-            ON CONFLICT (id) DO NOTHING;
-          `),
-        ];
+        const sdlStoreInserts: Array<Promise<unknown>> = [];
 
-        if (args.compositeSchemaSDLHash) {
-          sdlStoreInserts.push(
-            trx.query<unknown>(sql`
-                INSERT INTO "sdl_store" (id, sdl)
-                VALUES (${args.compositeSchemaSDLHash}, ${args.compositeSchemaSDL})
-                ON CONFLICT (id) DO NOTHING;
-            `),
-          );
+        function insertSdl(hash: string, sdl: string) {
+          return trx.query<unknown>(sql`
+            INSERT INTO "sdl_store" (id, sdl)
+            VALUES (${hash}, ${sdl})
+            ON CONFLICT (id) DO NOTHING;
+          `);
         }
 
-        if (args.supergraphSDLHash) {
-          if (!args.supergraphSDL) {
-            throw new Error('supergraphSDLHash provided without supergraphSDL');
-          }
+        const schemaSDLHash = createSDLHash(args.schemaSDL);
+        let compositeSchemaSDLHash: string | null = null;
+        let supergraphSDLHash: string | null = null;
 
-          sdlStoreInserts.push(
-            trx.query<unknown>(sql`
-                INSERT INTO "sdl_store" (id, sdl)
-                VALUES (${args.supergraphSDLHash}, ${args.supergraphSDL})
-                ON CONFLICT (id) DO NOTHING;
-            `),
-          );
+        sdlStoreInserts.push(insertSdl(schemaSDLHash, args.schemaSDL));
+
+        if (args.compositeSchemaSDL) {
+          compositeSchemaSDLHash = createSDLHash(args.compositeSchemaSDL);
+          sdlStoreInserts.push(insertSdl(compositeSchemaSDLHash, args.compositeSchemaSDL));
+        }
+
+        if (args.supergraphSDL) {
+          supergraphSDLHash = createSDLHash(args.supergraphSDL);
+          sdlStoreInserts.push(insertSdl(supergraphSDLHash, args.supergraphSDL));
         }
 
         await Promise.all(sdlStoreInserts);
 
-        return trx.one<{ id: string }>(sql`
+        const schemaCheck = await trx.one<{ id: string }>(sql`
           INSERT INTO "schema_checks" (
               "schema_sdl_store_id"
             , "service_name"
@@ -3773,9 +3998,11 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             , "github_sha"
             , "expires_at"
             , "context_id"
+            , "has_contract_schema_changes"
+            , "conditional_breaking_change_metadata"
           )
           VALUES (
-              ${args.schemaSDLHash}
+              ${schemaSDLHash}
             , ${args.serviceName}
             , ${jsonify(args.meta)}
             , ${args.targetId}
@@ -3786,8 +4013,8 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             , ${jsonify(args.safeSchemaChanges?.map(toSerializableSchemaChange))}
             , ${jsonify(args.schemaPolicyWarnings?.map(w => SchemaPolicyWarningModel.parse(w)))}
             , ${jsonify(args.schemaPolicyErrors?.map(w => SchemaPolicyWarningModel.parse(w)))}
-            , ${args.compositeSchemaSDLHash}
-            , ${args.supergraphSDLHash}
+            , ${compositeSchemaSDLHash}
+            , ${supergraphSDLHash}
             , ${args.isManuallyApproved}
             , ${args.manualApprovalUserId}
             , ${args.githubCheckRunId}
@@ -3795,10 +4022,60 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             , ${args.githubSha}
             , ${args.expiresAt?.toISOString() ?? null}
             , ${args.contextId}
+            , ${
+              args.contracts?.some(
+                c => c.breakingSchemaChanges?.length || c.safeSchemaChanges?.length,
+              ) ?? false
+            }
+            , ${jsonify(InsertConditionalBreakingChangeMetadataModel.parse(args.conditionalBreakingChangeMetadata))}
           )
           RETURNING
             "id"
-      `);
+        `);
+
+        if (args.contracts?.length) {
+          for (const contract of args.contracts) {
+            let supergraphSchemaSdlHash: string | null = null;
+            let compositeSchemaSdlHash: string | null = null;
+
+            if (contract.supergraphSchemaSdl) {
+              supergraphSchemaSdlHash = createSDLHash(contract.supergraphSchemaSdl);
+              await insertSdl(supergraphSchemaSdlHash, contract.supergraphSchemaSdl);
+            }
+
+            if (contract.compositeSchemaSdl) {
+              compositeSchemaSdlHash = createSDLHash(contract.compositeSchemaSdl);
+              await insertSdl(compositeSchemaSdlHash, contract.compositeSchemaSdl);
+            }
+
+            await trx.query(sql`
+              INSERT INTO "contract_checks" (
+                "schema_check_id"
+                , "compared_contract_version_id"
+                , "is_success"
+                , "contract_id"
+                , "composite_schema_sdl_store_id"
+                , "supergraph_sdl_store_id"
+                , "schema_composition_errors"
+                , "breaking_schema_changes"
+                , "safe_schema_changes"
+              )
+              VALUES (
+                ${schemaCheck.id}
+                , ${contract.comparedContractVersionId}
+                , ${contract.isSuccess}
+                , ${contract.contractId}
+                , ${compositeSchemaSdlHash}
+                , ${supergraphSchemaSdlHash}
+                , ${jsonify(contract.schemaCompositionErrors)}
+                , ${jsonify(contract.breakingSchemaChanges?.map(toSerializableSchemaChange))}
+                , ${jsonify(contract.safeSchemaChanges?.map(toSerializableSchemaChange))}
+              )
+            `);
+          }
+        }
+
+        return schemaCheck;
       });
 
       const check = await this.findSchemaCheck({
@@ -3835,7 +4112,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         schemaCheckId: args.schemaCheckId,
       });
 
-      if (schemaCheck?.breakingSchemaChanges == null) {
+      if (!schemaCheck) {
         return null;
       }
 
@@ -3846,7 +4123,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         schemaCheckId: schemaCheck.id,
       };
 
-      if (schemaCheck.contextId !== null) {
+      if (schemaCheck.contextId !== null && !!schemaCheck.breakingSchemaChanges) {
         // Try to approve and claim all the breaking schema changes for this context
         await pool.query(sql`
           INSERT INTO "schema_change_approvals" (
@@ -3856,51 +4133,81 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             , "schema_change"
           )
           SELECT * FROM ${sql.unnest(
-            schemaCheck.breakingSchemaChanges.map(change => [
-              schemaCheck.targetId,
-              schemaCheck.contextId ?? null,
-              change.id,
-              JSON.stringify(
-                toSerializableSchemaChange({
-                  ...change,
-                  // We enhance the approved schema changes with some metadata that can be displayed on the UI
-                  approvalMetadata,
-                }),
-              ),
-            ]),
+            schemaCheck.breakingSchemaChanges
+              .filter(change => !change.isSafeBasedOnUsage)
+              .map(change => [
+                schemaCheck.targetId,
+                schemaCheck.contextId,
+                change.id,
+                JSON.stringify(
+                  toSerializableSchemaChange({
+                    ...change,
+                    // We enhance the approved schema changes with some metadata that can be displayed on the UI
+                    approvalMetadata,
+                  }),
+                ),
+              ]),
             ['uuid', 'text', 'text', 'jsonb'],
           )}
           ON CONFLICT ("target_id", "context_id", "schema_change_id") DO NOTHING
         `);
       }
 
-      const updateResult = await pool.maybeOne<{
+      const didUpdateContractChecks = await args.contracts.approveContractChecksForSchemaCheckId({
+        schemaCheckId: schemaCheck.id,
+        approvalMetadata,
+        contextId: schemaCheck.contextId,
+      });
+
+      let updateResult: {
         id: string;
-      }>(sql`
-        UPDATE
-          "schema_checks"
-        SET
-          "is_success" = true
-          , "is_manually_approved" = true
-          , "manual_approval_user_id" = ${args.userId}
-          , "breaking_schema_changes" = (
-            SELECT json_agg(
-              CASE
-                WHEN COALESCE(jsonb_typeof("change"->'approvalMetadata'), 'null') = 'null'
-                  THEN jsonb_set("change", '{approvalMetadata}', ${sql.jsonb(approvalMetadata)})
-                ELSE "change"
-              END
+      } | null = null;
+
+      if (schemaCheck.breakingSchemaChanges) {
+        updateResult = await pool.maybeOne<{
+          id: string;
+        }>(sql`
+          UPDATE
+            "schema_checks"
+          SET
+            "is_success" = true
+            , "is_manually_approved" = true
+            , "manual_approval_user_id" = ${args.userId}
+            , "breaking_schema_changes" = (
+              SELECT json_agg(
+                CASE
+                  WHEN (COALESCE(jsonb_typeof("change"->'approvalMetadata'), 'null') = 'null' AND "change"->>'isSafeBasedOnUsage' = 'false')
+                    THEN jsonb_set("change", '{approvalMetadata}', ${sql.jsonb(approvalMetadata)})
+                  ELSE "change"
+                END
+              )
+              FROM jsonb_array_elements("breaking_schema_changes") AS "change"
             )
-            FROM jsonb_array_elements("breaking_schema_changes") AS "change"
-          )
-        WHERE
-          "id" = ${args.schemaCheckId}
-          AND "is_success" = false
-          AND "schema_composition_errors" IS NULL
-        RETURNING 
-          "id",
-          "breaking_schema_changes"
-      `);
+          WHERE
+            "id" = ${args.schemaCheckId}
+            AND "is_success" = false
+            AND "schema_composition_errors" IS NULL
+          RETURNING 
+            "id"
+        `);
+      } else if (didUpdateContractChecks) {
+        updateResult = await pool.maybeOne<{
+          id: string;
+        }>(sql`
+          UPDATE
+            "schema_checks"
+          SET
+            "is_success" = true
+            , "is_manually_approved" = true
+            , "manual_approval_user_id" = ${args.userId}
+          WHERE
+            "id" = ${args.schemaCheckId}
+            AND "is_success" = false
+            AND "schema_composition_errors" IS NULL
+          RETURNING 
+            "id"
+        `);
+      }
 
       if (updateResult == null) {
         return null;
@@ -3931,7 +4238,12 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           AND "context_id" = ${args.contextId}
       `);
 
-      return result.map(record => HiveSchemaChangeModel.parse(record));
+      const approvedSchemaChanges = new Map<string, SchemaChangeType>();
+      for (const record of result) {
+        const change = HiveSchemaChangeModel.parse(record);
+        approvedSchemaChanges.set(change.id, change);
+      }
+      return approvedSchemaChanges;
     },
     async getPaginatedSchemaChecksForTarget(args) {
       let cursor: null | {
@@ -3985,6 +4297,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
                 AND (
                   jsonb_typeof("safe_schema_changes") = 'array'
                   OR jsonb_typeof("breaking_schema_changes") = 'array'
+                  OR "has_contract_schema_changes" = true
                 )
               `
               : sql``
@@ -4097,91 +4410,177 @@ export async function createStorage(connection: string, maximumPoolSize: number)
     },
 
     async purgeExpiredSchemaChecks(args) {
+      const SchemaCheckModel = zod.object({
+        schemaCheckIds: zod.array(zod.string()),
+        sdlStoreIds: zod.array(zod.string()),
+        contextIds: zod.array(zod.string()),
+        targetIds: zod.array(zod.string()),
+        contractIds: zod.array(zod.string()),
+      });
       return await pool.transaction(async pool => {
-        const result = await pool.any<unknown>(sql`
-          DELETE
-          FROM "schema_checks"
-          WHERE 
-            "id" = ANY(
-              SELECT
-                "id"
-              FROM
-                "schema_checks"
-              WHERE
-                "expires_at" <= ${args.expiresAt.toISOString()}
-              LIMIT
-                1000
-            )
-          RETURNING
-            "schema_sdl_store_id" as "storeId1",
-            "supergraph_sdl_store_id" as "storeId2",
-            "composite_schema_sdl_store_id" as "storeId3",
-            "target_id" as "targetId",
-            "context_id" as "contextId"
+        const date = args.expiresAt.toISOString();
+        const rawData = await pool.maybeOne<unknown>(sql`
+          WITH "filtered_schema_checks" AS (
+            SELECT *
+            FROM "schema_checks"
+            WHERE "expires_at" <= ${date}
+          )
+          SELECT
+            ARRAY(SELECT "filtered_schema_checks"."id" FROM "filtered_schema_checks") AS "schemaCheckIds",
+            ARRAY(SELECT DISTINCT "filtered_schema_checks"."target_id" FROM "filtered_schema_checks") AS "targetIds",
+            ARRAY(
+              SELECT DISTINCT "filtered_schema_checks"."schema_sdl_store_id"
+              FROM "filtered_schema_checks"
+              WHERE "filtered_schema_checks"."schema_sdl_store_id" IS NOT NULL
+
+              UNION SELECT DISTINCT "filtered_schema_checks"."composite_schema_sdl_store_id"
+              FROM "filtered_schema_checks"
+              WHERE "filtered_schema_checks"."composite_schema_sdl_store_id" IS NOT NULL
+
+              UNION SELECT DISTINCT "filtered_schema_checks"."supergraph_sdl_store_id"
+              FROM "filtered_schema_checks"
+              WHERE "filtered_schema_checks"."supergraph_sdl_store_id" IS NOT NULL
+
+              UNION SELECT DISTINCT "contract_checks"."composite_schema_sdl_store_id"
+              FROM "contract_checks"
+                INNER JOIN "filtered_schema_checks" ON "contract_checks"."schema_check_id" = "filtered_schema_checks"."id"
+              WHERE "contract_checks"."composite_schema_sdl_store_id" IS NOT NULL
+
+              UNION SELECT DISTINCT "contract_checks"."supergraph_sdl_store_id" FROM "filtered_schema_checks"
+                INNER JOIN "contract_checks" ON "contract_checks"."schema_check_id" = "filtered_schema_checks"."id"
+                WHERE "contract_checks"."supergraph_sdl_store_id" IS NOT NULL
+            ) AS "sdlStoreIds",
+            ARRAY(
+              SELECT DISTINCT "filtered_schema_checks"."context_id"
+              FROM "filtered_schema_checks"
+              WHERE "filtered_schema_checks"."context_id" IS NOT NULL
+            ) AS "contextIds",
+            ARRAY(
+              SELECT DISTINCT "contract_checks"."contract_id"
+              FROM "contract_checks"
+                INNER JOIN "filtered_schema_checks" ON "contract_checks"."schema_check_id" = "filtered_schema_checks"."id"
+            ) AS "contractIds"
         `);
 
-        const { storeIds, targetIds, contextIds } = PurgeExpiredSchemaChecksIDModel.parse(result);
+        const data = SchemaCheckModel.parse(rawData);
+
+        if (!data.schemaCheckIds.length) {
+          return {
+            deletedSchemaCheckCount: 0,
+            deletedSdlStoreCount: 0,
+            deletedSchemaChangeApprovalCount: 0,
+            deletedContractSchemaChangeApprovalCount: 0,
+          };
+        }
 
         let deletedSdlStoreCount = 0;
         let deletedSchemaChangeApprovalCount = 0;
+        let deletedContractSchemaChangeApprovalCount = 0;
 
-        if (storeIds.size !== 0) {
-          const deletedSdlStoreRecords = await pool.any<unknown>(sql`
-            DELETE
-            FROM
-              "sdl_store"
-            WHERE
-              "id" = ANY(
-                ${sql.array(Array.from(storeIds), 'text')}
-              )
-              AND NOT EXISTS (
-                SELECT
-                  1
-                FROM
-                  "schema_checks"
-                WHERE
-                  "schema_checks"."schema_sdl_store_id" = "sdl_store"."id"
-                  OR "schema_checks"."composite_schema_sdl_store_id" = "sdl_store"."id"
-                  OR "schema_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
-              )
-            RETURNING
-              true as "d"
+        await pool.any<unknown>(sql`
+          DELETE
+          FROM "schema_checks"
+          WHERE
+            "id" = ANY(${sql.array(data.schemaCheckIds, 'uuid')})
+        `);
+
+        if (data.sdlStoreIds.length) {
+          deletedSdlStoreCount = await pool.oneFirst<number>(sql`
+            WITH "deleted" AS (
+              DELETE
+              FROM
+                "sdl_store"
+              WHERE
+                "id" = ANY(
+                  ${sql.array(data.sdlStoreIds, 'text')}
+                )
+                AND NOT EXISTS (
+                  SELECT
+                    1
+                  FROM
+                    "schema_checks"
+                  WHERE
+                    "schema_checks"."schema_sdl_store_id" = "sdl_store"."id"
+                    OR "schema_checks"."composite_schema_sdl_store_id" = "sdl_store"."id"
+                    OR "schema_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
+                )
+                AND NOT EXISTS (
+                  SELECT
+                    1
+                  FROM
+                    "contract_checks"
+                  WHERE
+                   "contract_checks"."composite_schema_sdl_store_id" = "sdl_store"."id"
+                   OR "contract_checks"."supergraph_sdl_store_id" = "sdl_store"."id"
+                )
+              RETURNING
+                "id"
+            ) SELECT COUNT(*) FROM "deleted"
           `);
-
-          deletedSdlStoreCount = deletedSdlStoreRecords.length;
         }
 
-        if (targetIds.size && contextIds.size) {
-          const deletedSchemaChangeApprovals = await pool.any<unknown>(sql`
-            DELETE
-            FROM
-              "schema_change_approvals"
-            WHERE
-              "target_id" = ANY(
-                ${sql.array(Array.from(targetIds), 'uuid')}
-              )
-              AND "context_id" = ANY(
-                ${sql.array(Array.from(contextIds), 'text')}
-              )
-              AND NOT EXISTS (
-                SELECT
-                  1
-                FROM "schema_checks"
-                WHERE
-                  "schema_checks"."target_id" = "schema_change_approvals"."target_id"
-                  AND "schema_checks"."context_id" = "schema_change_approvals"."context_id"
-              )
-            RETURNING
-              true as "d"
+        if (data.targetIds.length && data.contextIds.length) {
+          deletedSchemaChangeApprovalCount = await pool.oneFirst<number>(sql`
+            WITH "deleted" AS (
+              DELETE
+              FROM
+                "schema_change_approvals"
+              WHERE
+                "target_id" = ANY(
+                  ${sql.array(data.targetIds, 'uuid')}
+                )
+                AND "context_id" = ANY(
+                  ${sql.array(data.contextIds, 'text')}
+                )
+                AND NOT EXISTS (
+                  SELECT
+                    1
+                  FROM "schema_checks"
+                  WHERE
+                    "schema_checks"."target_id" = "schema_change_approvals"."target_id"
+                    AND "schema_checks"."context_id" = "schema_change_approvals"."context_id"
+                )
+              RETURNING
+                "target_id"
+            ) SELECT COUNT(*) FROM "deleted"
           `);
+        }
 
-          deletedSchemaChangeApprovalCount = deletedSchemaChangeApprovals.length;
+        if (data.contractIds.length && data.contextIds.length) {
+          deletedContractSchemaChangeApprovalCount = await pool.oneFirst<number>(sql`
+            WITH "deleted" AS (
+              DELETE
+              FROM
+                "contract_schema_change_approvals"
+              WHERE
+                "contract_id" = ANY(
+                  ${sql.array(data.contractIds, 'uuid')}
+                )
+                AND "context_id" = ANY(
+                  ${sql.array(data.contextIds, 'text')}
+                )
+                AND NOT EXISTS (
+                  SELECT
+                    1
+                  FROM
+                    "schema_checks"
+                      INNER JOIN "contract_checks"
+                        ON "contract_checks"."schema_check_id" = "schema_checks"."id"
+                  WHERE
+                    "contract_checks"."contract_id" = "contract_schema_change_approvals"."contract_id"
+                    AND "schema_checks"."context_id" = "contract_schema_change_approvals"."context_id"
+                )
+              RETURNING
+                "contract_id"
+            ) SELECT COUNT(*) FROM "deleted"
+          `);
         }
 
         return {
-          deletedSchemaCheckCount: result.length,
+          deletedSchemaCheckCount: data.schemaCheckIds.length,
           deletedSdlStoreCount,
           deletedSchemaChangeApprovalCount,
+          deletedContractSchemaChangeApprovalCount,
         };
       });
     },
@@ -4244,16 +4643,17 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           AND "user_id" = ${userId}
       `);
     },
+    pool,
   };
 
   return storage;
 }
 
-function encodeCreatedAtAndUUIDIdBasedCursor(cursor: { createdAt: string; id: string }) {
+export function encodeCreatedAtAndUUIDIdBasedCursor(cursor: { createdAt: string; id: string }) {
   return Buffer.from(`${cursor.createdAt}|${cursor.id}`).toString('base64');
 }
 
-function decodeCreatedAtAndUUIDIdBasedCursor(cursor: string) {
+export function decodeCreatedAtAndUUIDIdBasedCursor(cursor: string) {
   const [createdAt, id] = Buffer.from(cursor, 'base64').toString('utf8').split('|');
   if (
     Number.isNaN(Date.parse(createdAt)) ||
@@ -4367,6 +4767,11 @@ function decodeFeatureFlags(column: unknown) {
   return FeatureFlagsModel.parse(column);
 }
 
+/**  This version introduced the "diffSchemaVersionId" column. */
+const SchemaVersionRecordVersion_2024_01_10_Model = zod.literal('2024-01-10');
+
+const SchemaVersionRecordVersionModel = SchemaVersionRecordVersion_2024_01_10_Model;
+
 const SchemaVersionModel = zod.intersection(
   zod.object({
     id: zod.string(),
@@ -4376,9 +4781,17 @@ const SchemaVersionModel = zod.intersection(
     actionId: zod.string(),
     hasPersistedSchemaChanges: zod.nullable(zod.boolean()).transform(val => val ?? false),
     previousSchemaVersionId: zod.nullable(zod.string()),
+    diffSchemaVersionId: zod.nullable(zod.string()),
     compositeSchemaSDL: zod.nullable(zod.string()),
     supergraphSDL: zod.nullable(zod.string()),
     schemaCompositionErrors: zod.nullable(zod.array(SchemaCompositionErrorModel)),
+    recordVersion: zod.nullable(SchemaVersionRecordVersionModel),
+    tags: zod.nullable(zod.array(zod.string())),
+    hasContractCompositionErrors: zod
+      .boolean()
+      .nullable()
+      .transform(val => val ?? false),
+    conditionalBreakingChangeMetadata: ConditionalBreakingChangeMetadataModel.nullable(),
   }),
   zod
     .union([
@@ -4401,6 +4814,8 @@ const SchemaVersionModel = zod.intersection(
     })),
 );
 
+export type SchemaVersion = zod.infer<typeof SchemaVersionModel>;
+
 const DocumentCollectionModel = zod.object({
   id: zod.string(),
   title: zod.string(),
@@ -4422,6 +4837,45 @@ const DocumentCollectionDocumentModel = zod.object({
   createdAt: zod.string(),
   updatedAt: zod.string(),
 });
+
+/**
+ * Insert a schema version changes into the database.
+ */
+async function insertSchemaVersionContractChanges(
+  trx: DatabaseTransactionConnection,
+  args: {
+    changes: Array<SchemaChangeType> | null;
+    schemaVersionContractId: string;
+  },
+) {
+  if (!args.changes?.length) {
+    return;
+  }
+
+  await trx.query(sql`
+    INSERT INTO "contract_version_changes" (
+      "contract_version_id",
+      "change_type",
+      "severity_level",
+      "meta",
+      "is_safe_based_on_usage"
+    )
+    SELECT * FROM
+    ${sql.unnest(
+      args.changes.map(change =>
+        // Note: change.criticality.level is actually a computed value from meta
+        [
+          args.schemaVersionContractId,
+          change.type,
+          change.criticality,
+          JSON.stringify(change.meta),
+          change.isSafeBasedOnUsage ?? false,
+        ],
+      ),
+      ['uuid', 'text', 'text', 'jsonb', 'bool'],
+    )}
+  `);
+}
 
 /**
  * Insert a schema version changes into the database.
@@ -4473,38 +4927,49 @@ async function insertSchemaVersion(
     actionId: string;
     baseSchema: string | null;
     previousSchemaVersion: string | null;
+    diffSchemaVersionId: string | null;
     compositeSchemaSDL: string | null;
     supergraphSDL: string | null;
     schemaCompositionErrors: Array<SchemaCompositionError> | null;
+    tags: Array<string> | null;
+    hasContractCompositionErrors: boolean;
     github: null | {
       sha: string;
       repository: string;
     };
+    conditionalBreakingChangeMetadata: null | ConditionalBreakingChangeMetadata;
   },
 ) {
   const query = sql`
     INSERT INTO schema_versions
       (
+        record_version,
         is_composable,
         target_id,
         action_id,
         base_schema,
         has_persisted_schema_changes,
         previous_schema_version_id,
+        diff_schema_version_id,
         composite_schema_sdl,
         supergraph_sdl,
         schema_composition_errors,
         github_repository,
-        github_sha
+        github_sha,
+        tags,
+        has_contract_composition_errors,
+        conditional_breaking_change_metadata
       )
     VALUES
       (
+        '2024-01-10',
         ${args.isComposable},
         ${args.targetId},
         ${args.actionId},
         ${args.baseSchema},
         ${true},
         ${args.previousSchemaVersion},
+        ${args.diffSchemaVersionId},
         ${args.compositeSchemaSDL},
         ${args.supergraphSDL},
         ${
@@ -4513,13 +4978,51 @@ async function insertSchemaVersion(
             : sql`${null}`
         },
         ${args.github?.repository ?? null},
-        ${args.github?.sha ?? null}
+        ${args.github?.sha ?? null},
+        ${Array.isArray(args.tags) ? sql.array(args.tags, 'text') : null},
+        ${args.hasContractCompositionErrors},
+        ${jsonify(InsertConditionalBreakingChangeMetadataModel.parse(args.conditionalBreakingChangeMetadata))}
       )
     RETURNING
       ${schemaVersionSQLFields()}
   `;
 
   return await trx.one(query).then(SchemaVersionModel.parse);
+}
+
+async function insertSchemaVersionContract(
+  trx: DatabaseTransactionConnection,
+  args: {
+    schemaVersionId: string;
+    contractId: string;
+    contractName: string;
+    compositeSchemaSDL: string | null;
+    supergraphSDL: string | null;
+    schemaCompositionErrors: Array<SchemaCompositionError> | null;
+  },
+): Promise<string> {
+  const id = await trx.oneFirst(sql`
+    INSERT INTO "contract_versions" (
+      "schema_version_id"
+      , "contract_id"
+      , "contract_name"
+      , "schema_composition_errors"
+      , "composite_schema_sdl"
+      , "supergraph_sdl"
+    )
+    VALUES (
+      ${args.schemaVersionId}
+      , ${args.contractId}
+      , ${args.contractName}
+      , ${jsonify(args.schemaCompositionErrors)}
+      , ${args.compositeSchemaSDL}
+      , ${args.supergraphSDL}
+    )
+    RETURNING
+      "id"
+  `);
+
+  return zod.string().parse(id);
 }
 
 /**
@@ -4533,7 +5036,7 @@ function jsonify<T>(obj: T | null | undefined) {
 /**
  * Utility function for stripping a schema change of its computable properties for efficient storage in the database.
  */
-function toSerializableSchemaChange(change: SchemaChangeType): {
+export function toSerializableSchemaChange(change: SchemaChangeType): {
   id: string;
   type: string;
   meta: Record<string, SerializableValue>;
@@ -4543,6 +5046,17 @@ function toSerializableSchemaChange(change: SchemaChangeType): {
     schemaCheckId: string;
   };
   isSafeBasedOnUsage: boolean;
+  usageStatistics: null | {
+    topAffectedOperations: Array<{
+      name: string;
+      hash: string;
+      count: number;
+    }>;
+    topAffectedClients: Array<{
+      name: string;
+      count: number;
+    }>;
+  };
 } {
   return {
     id: change.id,
@@ -4550,6 +5064,7 @@ function toSerializableSchemaChange(change: SchemaChangeType): {
     meta: change.meta,
     isSafeBasedOnUsage: change.isSafeBasedOnUsage,
     approvalMetadata: change.approvalMetadata,
+    usageStatistics: change.usageStatistics,
   };
 }
 
@@ -4576,6 +5091,7 @@ const schemaCheckSQLFields = sql`
   , coalesce(c."is_manually_approved", false) as "isManuallyApproved"
   , c."manual_approval_user_id" as "manualApprovalUserId"
   , c."context_id" as "contextId"
+  , c."conditional_breaking_change_metadata" as "conditionalBreakingChangeMetadata"
 `;
 
 const schemaVersionSQLFields = (t = sql``) => sql`
@@ -4591,6 +5107,11 @@ const schemaVersionSQLFields = (t = sql``) => sql`
   , ${t}"schema_composition_errors" as "schemaCompositionErrors"
   , ${t}"github_repository" as "githubRepository"
   , ${t}"github_sha" as "githubSha"
+  , ${t}"diff_schema_version_id" as "diffSchemaVersionId"
+  , ${t}"record_version" as "recordVersion"
+  , ${t}"tags"
+  , ${t}"has_contract_composition_errors" as "hasContractCompositionErrors"
+  , ${t}"conditional_breaking_change_metadata" as "conditionalBreakingChangeMetadata"
 `;
 
 const targetSQLFields = sql`
@@ -4609,40 +5130,21 @@ const TargetModel = zod.object({
   graphqlEndpointUrl: zod.string().nullable(),
 });
 
-const PurgeExpiredSchemaChecksIDModel = zod
-  .array(
-    zod.object({
-      storeId1: zod.string().nullable(),
-      storeId2: zod.string().nullable(),
-      storeId3: zod.string().nullable(),
-      targetId: zod.string(),
-      contextId: zod.string().nullable(),
-    }),
-  )
-  .transform(items => {
-    const storeIds = new Set<string>();
-    const targetIds = new Set<string>();
-    const contextIds = new Set<string>();
-
-    for (const row of items) {
-      row.storeId1 && storeIds.add(row.storeId1);
-      row.storeId2 && storeIds.add(row.storeId2);
-      row.storeId3 && storeIds.add(row.storeId3);
-      if (row.contextId) {
-        targetIds.add(row.targetId);
-        contextIds.add(row.contextId);
-      }
-    }
-
-    return {
-      storeIds,
-      targetIds,
-      contextIds,
-    };
-  });
-
 export * from './schema-change-model';
 export {
   buildRegistryServiceURLFromMeta,
   type RegistryServiceUrlChangeSerializableChange,
 } from './schema-change-meta';
+
+export type PaginatedSchemaVersionConnection = Readonly<{
+  edges: ReadonlyArray<{
+    cursor: string;
+    node: SchemaVersion;
+  }>;
+  pageInfo: Readonly<{
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    startCursor: string;
+    endCursor: string;
+  }>;
+}>;

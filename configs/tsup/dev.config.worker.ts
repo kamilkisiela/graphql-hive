@@ -10,6 +10,7 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   clean: true,
+  format: 'esm',
   watch: [...commonWatchList(), ...monorepoWatchList()],
   target: targetFromNodeVersion(),
   plugins: [watchEntryPlugin()],

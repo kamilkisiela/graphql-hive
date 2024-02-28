@@ -9,6 +9,7 @@ import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { SchemaEditor } from '@/components/schema-editor';
 import { CDNAccessTokens } from '@/components/target/settings/cdn-access-tokens';
+import { SchemaContracts } from '@/components/target/settings/schema-contracts';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -37,6 +38,7 @@ import {
 import { Combobox } from '@/components/v2/combobox';
 import { CreateAccessTokenModal, DeleteTargetModal } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
+import { ProjectType } from '@/gql/graphql';
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { subDays } from '@/lib/date-time';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
@@ -954,6 +956,7 @@ const TargetSettingsPageQuery = graphql(`
     project(selector: { organization: $organizationId, project: $projectId }) {
       id
       cleanId
+      type
       ...TargetLayout_CurrentProjectFragment
     }
     target(selector: { organization: $organizationId, project: $projectId, target: $targetId }) {
@@ -1032,6 +1035,7 @@ function TargetSettingsContent() {
           />
           {canAccessTokens && <RegistryAccessTokens me={organizationForSettings.me} />}
           {canAccessTokens && <CDNAccessTokens me={organizationForSettings.me} />}
+          {currentProject.type === ProjectType.Federation && <SchemaContracts />}
           <ConditionalBreakingChanges />
           <ExtendBaseSchema baseSchema={targetForSettings?.baseSchema ?? ''} />
           {canDelete && (

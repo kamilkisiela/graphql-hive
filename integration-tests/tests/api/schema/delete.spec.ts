@@ -222,6 +222,7 @@ test.concurrent(
       expect(changes[0]).toMatchInlineSnapshot(`
         {
           approvalMetadata: null,
+          breakingChangeSchemaCoordinate: Query.bruv,
           criticality: BREAKING,
           id: b3cb5845edf64492571c7b5c5857b7f9,
           isSafeBasedOnUsage: false,
@@ -235,6 +236,7 @@ test.concurrent(
           path: Query.bruv,
           reason: Removing a field is a breaking change. It is preferable to deprecate the field before removing it.,
           type: FIELD_REMOVED,
+          usageStatistics: null,
         }
       `);
     } finally {

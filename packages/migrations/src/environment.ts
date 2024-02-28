@@ -5,6 +5,7 @@ import zod from 'zod';
 if (!process.env.RELEASE) {
   dotenv({
     debug: true,
+    encoding: 'utf8',
   });
 }
 

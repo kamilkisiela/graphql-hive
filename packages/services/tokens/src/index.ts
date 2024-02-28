@@ -2,6 +2,7 @@
 import Redis from 'ioredis';
 import ms from 'ms';
 import 'reflect-metadata';
+import { hostname } from 'os';
 import LRU from 'tiny-lru';
 import {
   createErrorHandler,
@@ -21,7 +22,8 @@ import { createStorage } from './storage';
 export async function main() {
   if (env.sentry) {
     Sentry.init({
-      serverName: 'tokens',
+      dist: 'tokens',
+      serverName: hostname(),
       enabled: true,
       environment: env.environment,
       dsn: env.sentry.dsn,
@@ -137,9 +139,12 @@ export async function main() {
     });
 
     if (env.prometheus) {
-      await startMetrics(env.prometheus.labels.instance);
+      await startMetrics(env.prometheus.labels.instance, env.prometheus.port);
     }
-    await server.listen(env.http.port, '::');
+    await server.listen({
+      port: env.http.port,
+      host: '::',
+    });
     await start();
   } catch (error) {
     server.log.fatal(error);

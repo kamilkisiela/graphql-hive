@@ -182,6 +182,7 @@ async function main() {
 
   await server.listen({
     port: parseInt(PORT, 10),
+    host: '::',
   });
 
   console.log(`Server listening on port ${PORT}`);

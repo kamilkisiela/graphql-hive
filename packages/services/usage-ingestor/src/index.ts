@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { hostname } from 'os';
 import {
   createServer,
   registerShutdown,
@@ -13,7 +14,8 @@ import { createIngestor } from './ingestor';
 async function main() {
   if (env.sentry) {
     Sentry.init({
-      serverName: 'usage-ingestor',
+      serverName: hostname(),
+      dist: 'usage-ingestor',
       enabled: !!env.sentry,
       environment: env.environment,
       dsn: env.sentry.dsn,
@@ -79,9 +81,12 @@ async function main() {
     });
 
     if (env.prometheus) {
-      await startMetrics(env.prometheus.labels.instance);
+      await startMetrics(env.prometheus.labels.instance, env.prometheus.port);
     }
-    await server.listen(env.http.port, '::');
+    await server.listen({
+      port: env.http.port,
+      host: '::',
+    });
     await start();
   } catch (error) {
     server.log.fatal(error);

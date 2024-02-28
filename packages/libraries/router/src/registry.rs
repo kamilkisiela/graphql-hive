@@ -21,6 +21,7 @@ pub struct HiveRegistryConfig {
     key: Option<String>,
     poll_interval: Option<u64>,
     accept_invalid_certs: Option<bool>,
+    schema_file_path: Option<String>,
 }
 
 static COMMIT: Option<&'static str> = option_env!("GITHUB_SHA");
@@ -32,6 +33,7 @@ impl HiveRegistry {
             key: None,
             poll_interval: None,
             accept_invalid_certs: Some(true),
+            schema_file_path: None
         };
 
         // Pass values from user's config
@@ -40,6 +42,7 @@ impl HiveRegistry {
             config.key = user_config.key;
             config.poll_interval = user_config.poll_interval;
             config.accept_invalid_certs = user_config.accept_invalid_certs;
+            config.schema_file_path = user_config.schema_file_path;
         }
 
         // Pass values from environment variables if they are not set in the user's config
@@ -76,6 +79,12 @@ impl HiveRegistry {
             }
         }
 
+        if config.schema_file_path.is_none() {
+            if let Ok(schema_file_path) = env::var("HIVE_CDN_SCHEMA_FILE_PATH") {
+                config.schema_file_path = Some(schema_file_path);
+            }
+        }
+
         // Resolve values
         let endpoint = config.endpoint.unwrap_or_else(|| "".to_string());
         let key = config.key.unwrap_or_else(|| "".to_string());
@@ -109,7 +118,7 @@ impl HiveRegistry {
         // A hacky way to force the router to use GraphQL Hive CDN as the source of schema.
         // Our plugin does the polling and saves the supergraph to a file.
         // It also enables hot-reloading to makes sure Apollo Router watches the file.
-        let file_name = "supergraph-schema.graphql".to_string();
+        let file_name = config.schema_file_path.unwrap_or("supergraph-schema.graphql".to_string());
         env::set_var("APOLLO_ROUTER_SUPERGRAPH_PATH", file_name.clone());
         env::set_var("APOLLO_ROUTER_HOT_RELOAD", "true");
 

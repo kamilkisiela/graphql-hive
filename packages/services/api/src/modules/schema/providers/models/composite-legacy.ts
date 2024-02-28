@@ -1,7 +1,7 @@
 import { Injectable, Scope } from 'graphql-modules';
 import { FederationOrchestrator } from '../orchestrators/federation';
 import { StitchingOrchestrator } from '../orchestrators/stitching';
-import { RegistryChecks } from '../registry-checks';
+import { RegistryChecks, type ConditionalBreakingChangeDiffConfig } from '../registry-checks';
 import { swapServices } from '../schema-helper';
 import type { PublishInput } from '../schema-publisher';
 import type {
@@ -42,6 +42,7 @@ export class CompositeLegacyModel {
     project,
     organization,
     baseSchema,
+    conditionalBreakingChangeDiffConfig,
   }: {
     input: {
       sdl: string;
@@ -54,11 +55,13 @@ export class CompositeLegacyModel {
     };
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
     baseSchema: string | null;
     project: Project;
     organization: Organization;
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
   }): Promise<SchemaCheckResult> {
     const incoming: PushedCompositeSchema = {
       kind: 'composite',
@@ -66,7 +69,7 @@ export class CompositeLegacyModel {
       author: temp,
       commit: temp,
       target: selector.target,
-      date: Date.now() as any,
+      date: Date.now(),
       sdl: input.sdl,
       service_name: input.serviceName,
       service_url: temp,
@@ -78,40 +81,53 @@ export class CompositeLegacyModel {
     const schemas = latestVersion
       ? swapServices(latestVersion.schemas, incoming).schemas
       : [incoming];
+    schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
     const orchestrator = project.type === ProjectType.FEDERATION ? this.federation : this.stitching;
 
     const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion,
+      existing: latestVersion
+        ? {
+            schemas: latestVersion.schemas,
+            contractNames: null,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumCheck === 'unchanged') {
       return {
-        conclusion: SchemaCheckConclusion.Success,
-        state: null,
+        conclusion: SchemaCheckConclusion.Skip,
       };
     }
 
-    const [compositionCheck, diffCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        baseSchema,
-      }),
-      this.checks.diff({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        selector,
-        version: latestVersion,
-        includeUrlChanges: false,
-        approvedChanges: null,
-      }),
-    ]);
+    const compositionCheck = await this.checks.composition({
+      orchestrator,
+      project,
+      organization,
+      schemas,
+      baseSchema,
+      contracts: null,
+    });
+
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
+      orchestrator,
+      version: latest,
+      organization,
+      project,
+    });
+
+    const diffCheck = await this.checks.diff({
+      includeUrlChanges: false,
+      filterOutFederationChanges: project.type === ProjectType.FEDERATION,
+      approvedChanges: null,
+      existingSdl: previousVersionSdl,
+      incomingSdl:
+        compositionCheck.result?.fullSchemaSdl ?? compositionCheck.reason?.fullSchemaSdl ?? null,
+      conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
+    });
 
     if (compositionCheck.status === 'failed' || diffCheck.status === 'failed') {
       return {
@@ -120,6 +136,7 @@ export class CompositeLegacyModel {
           compositionCheck,
           diffCheck,
           policyCheck: null,
+          contractChecks: null,
         }),
       };
     }
@@ -133,6 +150,7 @@ export class CompositeLegacyModel {
           compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
           supergraphSDL: compositionCheck.result.supergraph,
         },
+        contracts: null,
       },
     };
   }
@@ -144,6 +162,7 @@ export class CompositeLegacyModel {
     project,
     organization,
     baseSchema,
+    conditionalBreakingChangeDiffConfig,
   }: {
     input: PublishInput;
     project: Project;
@@ -151,9 +170,11 @@ export class CompositeLegacyModel {
     target: Target;
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
     baseSchema: string | null;
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
   }): Promise<SchemaPublishResult> {
     const incoming: PushedCompositeSchema = {
       kind: 'composite',
@@ -162,9 +183,9 @@ export class CompositeLegacyModel {
       sdl: input.sdl,
       commit: input.commit,
       target: target.id,
-      date: Date.now() as any,
-      service_name: input.service!,
-      service_url: input.url!,
+      date: Date.now(),
+      service_name: input.service || '',
+      service_url: input.url || '',
       action: 'PUSH',
       metadata: input.metadata ?? null,
     };
@@ -175,6 +196,7 @@ export class CompositeLegacyModel {
     const swap = latestVersion ? swapServices(latestVersion.schemas, incoming) : null;
     const previousService = swap?.existing;
     const schemas = swap?.schemas ?? [incoming];
+    schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
 
     const forced = input.force === true;
     const acceptBreakingChanges = input.experimental_acceptBreakingChanges === true;
@@ -222,39 +244,52 @@ export class CompositeLegacyModel {
     }
 
     const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion,
+      existing: latestVersion
+        ? {
+            schemas: latestVersion.schemas,
+            contractNames: null,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumCheck === 'unchanged') {
       return {
         conclusion: SchemaPublishConclusion.Ignore,
         reason: PublishIgnoreReasonCode.NoChanges,
       };
     }
 
-    const [compositionCheck, diffCheck, metadataCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        baseSchema,
-      }),
+    const compositionCheck = await this.checks.composition({
+      orchestrator,
+      project,
+      organization,
+      schemas,
+      baseSchema,
+      contracts: null,
+    });
+
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
+      orchestrator,
+      version: latestVersion,
+      organization,
+      project,
+    });
+
+    const [diffCheck, metadataCheck] = await Promise.all([
       this.checks.diff({
-        orchestrator,
-        selector: {
-          target: target.id,
-          project: project.id,
-          organization: project.orgId,
+        includeUrlChanges: {
+          schemasBefore: latestVersion?.schemas ?? [],
+          schemasAfter: schemas,
         },
-        project,
-        organization,
-        schemas,
-        version: latestVersion,
-        includeUrlChanges: true,
+        filterOutFederationChanges: isFederation,
         approvedChanges: null,
+        existingSdl: previousVersionSdl,
+        incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+        conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
       }),
       isFederation
         ? {
@@ -292,8 +327,8 @@ export class CompositeLegacyModel {
     if (shouldBePublished) {
       const messages: string[] = [];
 
-      if (hasNewUrl) {
-        messages.push(serviceUrlCheck.result.message!);
+      if (serviceUrlCheck.status === 'completed' && serviceUrlCheck.result.status === 'modified') {
+        messages.push(serviceUrlCheck.result.message);
       }
 
       if (hasNewMetadata) {
@@ -313,6 +348,8 @@ export class CompositeLegacyModel {
           schemas,
           supergraph: compositionCheck.result?.supergraph ?? null,
           fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+          tags: null,
+          contracts: null,
         },
       };
     }

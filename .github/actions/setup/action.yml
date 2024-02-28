@@ -44,18 +44,18 @@ runs:
         fi
 
     - name: install pnpm
-      uses: pnpm/action-setup@v2.4.0
+      uses: pnpm/action-setup@v3.0.0
       with:
         version: ${{ steps.pnpm.outputs.version }}
 
     - name: install nodejs
-      uses: actions/setup-node@v4.0.0
+      uses: actions/setup-node@v4.0.2
       with:
         node-version-file: .node-version
         cache: ${{ steps.pnpm.outputs.cache }}
 
     - name: Cache Turbo
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       if: ${{ inputs.cacheNext == 'true' }}
       with:
         path: node_modules/.cache/turbo
@@ -64,7 +64,7 @@ runs:
           turbo-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ inputs.actor }}-
           turbo-cache-${{ hashFiles('**/pnpm-lock.yaml') }}-
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       name: Cache Next.js
       if: ${{ inputs.cacheNext == 'true' }}
       with:

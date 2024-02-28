@@ -43,7 +43,8 @@
     },
     "@hive/server#build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**"],
+      "inputs": ["../../web/app/src/gql/persisted-documents.json"]
     },
     "check:build": {
       "outputs": [""]

@@ -193,7 +193,7 @@ const ProjectCard = (props: {
                     <Tooltip>
                       <TooltipTrigger>
                         <div className="flex flex-row items-center gap-x-2">
-                          <Globe className="h-4 w-4 text-gray-500" />
+                          <Globe className="size-4 text-gray-500" />
                           <div className="text-xs">
                             {requestsInDateRange}{' '}
                             {pluralize(totalNumberOfRequests, 'request', 'requests')}
@@ -207,7 +207,7 @@ const ProjectCard = (props: {
                     <Tooltip>
                       <TooltipTrigger>
                         <div className="flex flex-row items-center gap-x-2">
-                          <History className="h-4 w-4 text-gray-500" />
+                          <History className="size-4 text-gray-500" />
                           <div className="text-xs">
                             {schemaVersionsInDateRange}{' '}
                             {pluralize(totalNumberOfVersions, 'commit', 'commits')}

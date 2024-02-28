@@ -354,7 +354,7 @@ function Support(props: {
           </div>
           <div>
             <Button variant="outline" onClick={toggle}>
-              <PencilIcon className="mr-2 h-4 w-4" />
+              <PencilIcon className="mr-2 size-4" />
               New ticket
             </Button>
             <NewTicketForm

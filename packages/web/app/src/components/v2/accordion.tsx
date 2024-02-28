@@ -77,7 +77,7 @@ function Header({
         <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{children}</span>
         <ChevronDownIcon
           className={clsx(
-            'ml-2 h-5 w-5 shrink-0 text-gray-700 ease-in-out dark:text-gray-400',
+            'ml-2 size-5 shrink-0 text-gray-700 ease-in-out dark:text-gray-400',
             'group-radix-state-open:rotate-180 group-radix-state-open:duration-300',
           )}
         />

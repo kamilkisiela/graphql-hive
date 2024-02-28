@@ -15,8 +15,9 @@ import { build } from 'esbuild';
       entryPoints: [`${__dirname}/src/dev.ts`],
       bundle: true,
       platform: 'node',
-      target: 'node18',
+      target: 'node21',
       minify: false,
+      sourcemap: true,
       outfile: nodeOutputPath,
       treeShaking: true,
     }).then(result => {
@@ -30,7 +31,8 @@ import { build } from 'esbuild';
       platform: 'browser',
       target: 'chrome95',
       format: 'esm',
-      minify: false,
+      minify: true,
+      sourcemap: true,
       outfile: workerOutputPath,
       treeShaking: true,
     }).then(result => {

@@ -58,6 +58,10 @@ import migration_2023_10_30T00_00_00_drop_persisted_operations from './actions/2
 import migration_2023_11_02T14_41_41_schema_checks_dedup from './actions/2023.11.02T14.41.41.schema-checks-dedup';
 import migration_2023_11_09T00_00_00_schema_check_approval from './actions/2023.11.09T00.00.00.schema-check-approval';
 import migration_2023_11_20T10_00_00_organization_member_roles from './actions/2023.11.20T10-00-00.organization-member-roles';
+import migration_2024_01_08T_10_00_00_schema_version_diff_schema_version_id from './actions/2024.01.08T10-00-00.schema-version-diff-schema-version-id';
+import migration_2024_01_12_01T00_00_00_contracts from './actions/2024.01.26T00.00.00.contracts';
+import migration_2024_01_12_01T00_00_00_schema_check_pagination_index_update from './actions/2024.01.26T00.00.01.schema-check-pagination-index-update';
+import migration_2024_02_19_01T00_00_00_schema_check_store_breaking_change_metadata from './actions/2024.02.19T00.00.01.schema-check-store-breaking-change-metadata';
 import { runMigrations } from './pg-migrator';
 
 export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) =>
@@ -124,5 +128,9 @@ export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) 
       migration_2023_11_02T14_41_41_schema_checks_dedup,
       migration_2023_11_09T00_00_00_schema_check_approval,
       migration_2023_11_20T10_00_00_organization_member_roles,
+      migration_2024_01_08T_10_00_00_schema_version_diff_schema_version_id,
+      migration_2024_01_12_01T00_00_00_contracts,
+      migration_2024_01_12_01T00_00_00_schema_check_pagination_index_update,
+      migration_2024_02_19_01T00_00_00_schema_check_store_breaking_change_metadata,
     ],
   });

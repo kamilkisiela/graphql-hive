@@ -74,7 +74,7 @@ function RequestsStats({
     <Card className="bg-gray-900/50">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Requests</CardTitle>
-        <GlobeIcon className="text-muted-foreground h-4 w-4" />
+        <GlobeIcon className="text-muted-foreground size-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
@@ -97,7 +97,7 @@ function UniqueOperationsStats({
     <Card className="bg-gray-900/50">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Operations</CardTitle>
-        <BookIcon className="text-muted-foreground h-4 w-4" />
+        <BookIcon className="text-muted-foreground size-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
@@ -125,7 +125,7 @@ function OperationRelativeFrequency({
     <Card className="bg-gray-900/50">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Relative Request Frequency</CardTitle>
-        <PercentIcon className="text-muted-foreground h-4 w-4" />
+        <PercentIcon className="text-muted-foreground size-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{rate}</div>
@@ -150,7 +150,7 @@ function PercentileStats({
     <Card className="bg-gray-900/50">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">p{percentile}</CardTitle>
-        <GaugeIcon className="text-muted-foreground h-4 w-4" />
+        <GaugeIcon className="text-muted-foreground size-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{formatted}</div>
@@ -183,7 +183,7 @@ function RPM({
     <Card className="bg-gray-900/50">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Requests per minute</CardTitle>
-        <ActivityIcon className="text-muted-foreground h-4 w-4" />
+        <ActivityIcon className="text-muted-foreground size-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{throughput}</div>
@@ -213,7 +213,7 @@ function SuccessRateStats({
         <CardTitle className="text-sm font-medium text-emerald-500 dark:text-emerald-500">
           Success rate
         </CardTitle>
-        <SmileIcon className="text-muted-foreground h-4 w-4" />
+        <SmileIcon className="text-muted-foreground size-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{rate}</div>
@@ -240,7 +240,7 @@ function FailureRateStats({
         <CardTitle className="text-sm font-medium text-red-500 dark:text-red-500">
           Failure rate
         </CardTitle>
-        <FrownIcon className="text-muted-foreground h-4 w-4" />
+        <FrownIcon className="text-muted-foreground size-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{rate}</div>
@@ -752,7 +752,7 @@ function ClientsStats(props: {
         <Button variant="outline" onClick={() => setIsOpen(value => !value)}>
           {isOpen ? (
             <>
-              <ChevronUp className="mr-2 h-4 w-4" /> Hide
+              <ChevronUp className="mr-2 size-4" /> Hide
             </>
           ) : (
             'Display all versions'

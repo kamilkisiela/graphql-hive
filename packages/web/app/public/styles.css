@@ -131,6 +131,7 @@
   .monaco-editor-background,
   [role='presentation'] {
     background: transparent !important;
+    --vscode-focusBorder: transparent !important;
   }
 
   .hive-markdown a {

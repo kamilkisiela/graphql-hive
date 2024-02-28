@@ -1,7 +1,7 @@
 import { Injectable, Scope } from 'graphql-modules';
 import { SchemaChangeType } from '@hive/storage';
 import { SingleOrchestrator } from '../orchestrators/single';
-import { RegistryChecks } from '../registry-checks';
+import { ConditionalBreakingChangeDiffConfig, RegistryChecks } from '../registry-checks';
 import type { PublishInput } from '../schema-publisher';
 import type { Organization, Project, SingleSchema, Target } from './../../../../shared/entities';
 import { Logger } from './../../../shared/providers/logger';
@@ -35,6 +35,7 @@ export class SingleModel {
     organization,
     baseSchema,
     approvedChanges,
+    conditionalBreakingChangeDiffConfig,
   }: {
     input: {
       sdl: string;
@@ -46,16 +47,19 @@ export class SingleModel {
     };
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: [SingleSchema];
     } | null;
     latestComposable: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: [SingleSchema];
     } | null;
     baseSchema: string | null;
     project: Project;
     organization: Organization;
     approvedChanges: Map<string, SchemaChangeType>;
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
   }): Promise<SchemaCheckResult> {
     const incoming: SingleSchema = {
       kind: 'single',
@@ -63,55 +67,66 @@ export class SingleModel {
       author: temp,
       commit: temp,
       target: selector.target,
-      date: Date.now() as any,
+      date: Date.now(),
       sdl: input.sdl,
       metadata: null,
     };
 
-    const latestVersion = latest;
     const schemas = [incoming] as [SingleSchema];
-    const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
+    const comparedVersion =
+      organization.featureFlags.compareToPreviousComposableVersion === false
+        ? latest
+        : latestComposable;
 
-    const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion,
+    const checksumResult = await this.checks.checksum({
+      existing: comparedVersion
+        ? {
+            schemas: comparedVersion.schemas,
+            contractNames: null,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumResult === 'unchanged') {
       this.logger.debug('No changes detected, skipping schema check');
       return {
-        conclusion: SchemaCheckConclusion.Success,
-        state: null,
+        conclusion: SchemaCheckConclusion.Skip,
       };
     }
 
-    const [compositionCheck, diffCheck, policyCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator: this.orchestrator,
-        project,
-        organization,
-        schemas,
-        baseSchema,
-      }),
+    const compositionCheck = await this.checks.composition({
+      orchestrator: this.orchestrator,
+      project,
+      organization,
+      schemas,
+      baseSchema,
+      contracts: null,
+    });
+
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
+      orchestrator: this.orchestrator,
+      version: comparedVersion,
+      organization,
+      project,
+    });
+
+    const [diffCheck, policyCheck] = await Promise.all([
       this.checks.diff({
-        orchestrator: this.orchestrator,
-        project,
-        organization,
-        schemas,
-        selector,
-        version: compareToLatest ? latest : latestComposable,
+        conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
         includeUrlChanges: false,
+        filterOutFederationChanges: false,
         approvedChanges,
+        existingSdl: previousVersionSdl,
+        incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       }),
       this.checks.policyCheck({
-        orchestrator: this.orchestrator,
-        project,
-        organization,
         selector,
-        schemas,
         modifiedSdl: input.sdl,
-        baseSchema,
+        incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       }),
     ]);
 
@@ -126,6 +141,7 @@ export class SingleModel {
           compositionCheck,
           diffCheck,
           policyCheck,
+          contractChecks: null,
         }),
       };
     }
@@ -139,6 +155,7 @@ export class SingleModel {
           compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
           supergraphSDL: compositionCheck.result.supergraph,
         },
+        contracts: null,
       },
     };
   }
@@ -151,6 +168,7 @@ export class SingleModel {
     latest,
     latestComposable,
     baseSchema,
+    conditionalBreakingChangeDiffConfig,
   }: {
     input: PublishInput;
     organization: Organization;
@@ -158,13 +176,16 @@ export class SingleModel {
     target: Target;
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: [SingleSchema];
     } | null;
     latestComposable: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: [SingleSchema];
     } | null;
     baseSchema: string | null;
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
   }): Promise<SchemaPublishResult> {
     const incoming: SingleSchema = {
       kind: 'single',
@@ -173,56 +194,69 @@ export class SingleModel {
       sdl: input.sdl,
       commit: input.commit,
       target: target.id,
-      date: Date.now() as any,
+      date: Date.now(),
       metadata: input.metadata ?? null,
     };
 
     const latestVersion = latest;
     const schemas = [incoming] as [SingleSchema];
-    const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
+    const comparedVersion =
+      organization.featureFlags.compareToPreviousComposableVersion === false
+        ? latest
+        : latestComposable;
 
     const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion,
+      existing: comparedVersion
+        ? {
+            schemas: comparedVersion.schemas,
+            contractNames: null,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumCheck === 'unchanged') {
       return {
         conclusion: SchemaPublishConclusion.Ignore,
         reason: PublishIgnoreReasonCode.NoChanges,
       };
     }
 
-    const [compositionCheck, metadataCheck, diffCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator: this.orchestrator,
-        project,
-        organization,
-        baseSchema,
-        schemas: [
-          baseSchema
-            ? {
-                ...incoming,
-                sdl: baseSchema + ' ' + incoming.sdl,
-              }
-            : incoming,
-        ],
-      }),
+    const compositionCheck = await this.checks.composition({
+      orchestrator: this.orchestrator,
+      project,
+      organization,
+      baseSchema,
+      schemas: [
+        baseSchema
+          ? {
+              ...incoming,
+              sdl: baseSchema + ' ' + incoming.sdl,
+            }
+          : incoming,
+      ],
+      contracts: null,
+    });
+
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
+      orchestrator: this.orchestrator,
+      version: comparedVersion,
+      organization,
+      project,
+    });
+
+    const [metadataCheck, diffCheck] = await Promise.all([
       this.checks.metadata(incoming, latestVersion ? latestVersion.schemas[0] : null),
       this.checks.diff({
-        orchestrator: this.orchestrator,
-        project,
-        organization,
-        schemas,
-        selector: {
-          target: target.id,
-          project: project.id,
-          organization: project.orgId,
-        },
-        version: compareToLatest ? latestVersion : latestComposable,
+        conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
+        filterOutFederationChanges: false,
         includeUrlChanges: false,
         approvedChanges: null,
+        existingSdl: previousVersionSdl,
+        incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
       }),
     ]);
 
@@ -250,7 +284,7 @@ export class SingleModel {
       compositionCheck.status === 'failed' &&
       compositionCheck.reason.errorsBySource.graphql.length > 0
     ) {
-      if (compareToLatest) {
+      if (organization.featureFlags.compareToPreviousComposableVersion === false) {
         return {
           conclusion: SchemaPublishConclusion.Reject,
           reasons: [
@@ -276,6 +310,8 @@ export class SingleModel {
         schemas,
         supergraph: null,
         fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+        tags: compositionCheck.result?.tags ?? null,
+        contracts: null,
       },
     };
   }

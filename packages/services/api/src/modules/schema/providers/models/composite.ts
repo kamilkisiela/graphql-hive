@@ -2,7 +2,7 @@ import { Injectable, Scope } from 'graphql-modules';
 import { SchemaChangeType } from '@hive/storage';
 import { FederationOrchestrator } from '../orchestrators/federation';
 import { StitchingOrchestrator } from '../orchestrators/stitching';
-import { RegistryChecks } from '../registry-checks';
+import { RegistryChecks, type ConditionalBreakingChangeDiffConfig } from '../registry-checks';
 import { swapServices } from '../schema-helper';
 import type { PublishInput } from '../schema-publisher';
 import type {
@@ -15,7 +15,10 @@ import type {
 import { ProjectType } from './../../../../shared/entities';
 import {
   buildSchemaCheckFailureState,
+  ContractCheckInput,
+  ContractInput,
   DeleteFailureReasonCode,
+  isContractChecksSuccessful,
   PublishFailureReasonCode,
   PublishIgnoreReasonCode /* Check */,
   SchemaCheckConclusion,
@@ -38,15 +41,59 @@ export class CompositeModel {
     private checks: RegistryChecks,
   ) {}
 
+  private async getContractChecks(args: {
+    contracts: Array<
+      ContractInput & {
+        approvedChanges?: Map<string, SchemaChangeType> | null;
+      }
+    > | null;
+    compositionCheck: Awaited<ReturnType<RegistryChecks['composition']>>;
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
+  }): Promise<Array<ContractCheckInput> | null> {
+    const contractResults = (args.compositionCheck.result ?? args.compositionCheck.reason)
+      ?.contracts;
+
+    if (!args.contracts?.length || !contractResults?.length) {
+      return null;
+    }
+
+    return await Promise.all(
+      args.contracts.map(async (contract, contractIndex) => {
+        const contractCompositionResult = contractResults[contractIndex];
+        if (!contractCompositionResult) {
+          throw new Error("Contract result doesn't exist. Inconsistency detected.");
+        }
+
+        return {
+          contractId: contract.contract.id,
+          contractName: contract.contract.contractName,
+          compositionCheck: contractCompositionResult,
+          diffCheck: await this.checks.diff({
+            conditionalBreakingChangeConfig: args.conditionalBreakingChangeDiffConfig,
+            includeUrlChanges: false,
+            // contracts were introduced after this, so we do not need to filter out federation.
+            filterOutFederationChanges: false,
+            approvedChanges: contract.approvedChanges ?? null,
+            existingSdl: contract.latestValidVersion?.compositeSchemaSdl ?? null,
+            incomingSdl: contractCompositionResult?.result?.fullSchemaSdl ?? null,
+          }),
+        };
+      }),
+    );
+  }
+
   async check({
     input,
     selector,
     latest,
     latestComposable,
+    schemaVersionContractNames,
     project,
     organization,
     baseSchema,
     approvedChanges,
+    conditionalBreakingChangeDiffConfig,
+    contracts,
   }: {
     input: {
       sdl: string;
@@ -59,16 +106,25 @@ export class CompositeModel {
     };
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
     latestComposable: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
+    schemaVersionContractNames: string[] | null;
     baseSchema: string | null;
     project: Project;
     organization: Organization;
     approvedChanges: Map<string, SchemaChangeType>;
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
+    contracts: Array<
+      ContractInput & {
+        approvedChanges: Map<string, SchemaChangeType> | null;
+      }
+    > | null;
   }): Promise<SchemaCheckResult> {
     const incoming: PushedCompositeSchema = {
       kind: 'composite',
@@ -76,30 +132,39 @@ export class CompositeModel {
       author: temp,
       commit: temp,
       target: selector.target,
-      date: Date.now() as any,
+      date: Date.now(),
       sdl: input.sdl,
       service_name: input.serviceName,
-      service_url: temp,
+      service_url:
+        latest?.schemas?.find(s => s.service_name === input.serviceName)?.service_url ?? 'temp',
       action: 'PUSH',
       metadata: null,
     };
 
-    const latestVersion = latest;
-    const schemas = latestVersion
-      ? swapServices(latestVersion.schemas, incoming).schemas
-      : [incoming];
-    const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
+    const schemas = latest ? swapServices(latest.schemas, incoming).schemas : [incoming];
+    schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
+
+    const comparedVersion =
+      organization.featureFlags.compareToPreviousComposableVersion === false
+        ? latest
+        : latestComposable;
 
     const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion,
+      existing: comparedVersion
+        ? {
+            schemas: comparedVersion.schemas,
+            contractNames: schemaVersionContractNames,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: contracts?.map(({ contract }) => contract.contractName) ?? null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumCheck === 'unchanged') {
       return {
-        conclusion: SchemaCheckConclusion.Success,
-        state: null,
+        conclusion: SchemaCheckConclusion.Skip,
       };
     }
 
@@ -108,39 +173,60 @@ export class CompositeModel {
         ? this.federationOrchestrator
         : this.stitchingOrchestrator;
 
-    const [compositionCheck, diffCheck, policyCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        baseSchema,
-      }),
+    const compositionCheck = await this.checks.composition({
+      orchestrator,
+      project,
+      organization,
+      schemas,
+      baseSchema,
+      contracts:
+        contracts?.map(({ contract }) => ({
+          id: contract.id,
+          filter: {
+            exclude: contract.excludeTags,
+            include: contract.includeTags,
+            removeUnreachableTypesFromPublicApiSchema:
+              contract.removeUnreachableTypesFromPublicApiSchema,
+          },
+        })) ?? null,
+    });
+
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
+      orchestrator,
+      version: comparedVersion,
+      organization,
+      project,
+    });
+
+    const contractChecks = await this.getContractChecks({
+      contracts,
+      compositionCheck,
+      conditionalBreakingChangeDiffConfig,
+    });
+
+    const [diffCheck, policyCheck] = await Promise.all([
       this.checks.diff({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        selector,
-        version: compareToLatest ? latest : latestComposable,
         includeUrlChanges: false,
+        filterOutFederationChanges: project.type === ProjectType.FEDERATION,
         approvedChanges,
+        existingSdl: previousVersionSdl,
+        incomingSdl:
+          compositionCheck.result?.fullSchemaSdl ?? compositionCheck.reason?.fullSchemaSdl ?? null,
+        conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
       }),
       this.checks.policyCheck({
-        orchestrator,
-        project,
-        organization,
         selector,
-        schemas,
+        incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
         modifiedSdl: incoming.sdl,
-        baseSchema,
       }),
     ]);
 
     if (
       compositionCheck.status === 'failed' ||
       diffCheck.status === 'failed' ||
-      policyCheck.status === 'failed'
+      policyCheck.status === 'failed' ||
+      // if any of the contract compositions failed, the schema check failed.
+      (contractChecks?.length && !contractChecks.some(isContractChecksSuccessful))
     ) {
       return {
         conclusion: SchemaCheckConclusion.Failure,
@@ -148,6 +234,7 @@ export class CompositeModel {
           compositionCheck,
           diffCheck,
           policyCheck,
+          contractChecks,
         }),
       };
     }
@@ -161,6 +248,23 @@ export class CompositeModel {
           compositeSchemaSDL: compositionCheck.result.fullSchemaSdl,
           supergraphSDL: compositionCheck.result.supergraph,
         },
+        contracts:
+          contractChecks?.map(contractCheck => {
+            if (!isContractChecksSuccessful(contractCheck)) {
+              throw new Error('This should not happen.');
+            }
+
+            return {
+              contractId: contractCheck.contractId,
+              contractName: contractCheck.contractName,
+              isSuccessful: true,
+              composition: {
+                compositeSchemaSDL: contractCheck.compositionCheck.result.fullSchemaSdl,
+                supergraphSDL: contractCheck.compositionCheck.result.supergraph ?? null,
+              },
+              schemaChanges: contractCheck.diffCheck.result ?? null,
+            };
+          }) ?? null,
       },
     };
   }
@@ -172,7 +276,10 @@ export class CompositeModel {
     organization,
     latest,
     latestComposable,
+    schemaVersionContractNames,
     baseSchema,
+    contracts,
+    conditionalBreakingChangeDiffConfig,
   }: {
     input: PublishInput;
     project: Project;
@@ -180,13 +287,18 @@ export class CompositeModel {
     target: Target;
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
     latestComposable: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
+    schemaVersionContractNames: string[] | null;
     baseSchema: string | null;
+    contracts: Array<ContractInput> | null;
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
   }): Promise<SchemaPublishResult> {
     const incoming: PushedCompositeSchema = {
       kind: 'composite',
@@ -195,9 +307,9 @@ export class CompositeModel {
       sdl: input.sdl,
       commit: input.commit,
       target: target.id,
-      date: Date.now() as any,
-      service_name: input.service!,
-      service_url: input.url!,
+      date: Date.now(),
+      service_name: input.service || '',
+      service_url: input.url || '',
       action: 'PUSH',
       metadata: input.metadata ?? null,
     };
@@ -206,7 +318,9 @@ export class CompositeModel {
     const swap = latestVersion ? swapServices(latestVersion.schemas, incoming) : null;
     const previousService = swap?.existing;
     const schemas = swap?.schemas ?? [incoming];
+    schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
     const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
+    const schemaVersionToCompareAgainst = compareToLatest ? latest : latestComposable;
 
     const [serviceNameCheck, serviceUrlCheck] = await Promise.all([
       this.checks.serviceName({
@@ -246,48 +360,26 @@ export class CompositeModel {
     }
 
     const checksumCheck = await this.checks.checksum({
-      schemas,
-      latestVersion,
+      existing: schemaVersionToCompareAgainst
+        ? {
+            schemas: schemaVersionToCompareAgainst.schemas,
+            contractNames: schemaVersionContractNames,
+          }
+        : null,
+      incoming: {
+        schemas,
+        contractNames: contracts?.map(contract => contract.contract.contractName) ?? null,
+      },
     });
 
-    // Short-circuit if there are no changes
-    if (checksumCheck.status === 'completed' && checksumCheck.result === 'unchanged') {
+    if (checksumCheck === 'unchanged') {
       return {
         conclusion: SchemaPublishConclusion.Ignore,
         reason: PublishIgnoreReasonCode.NoChanges,
       };
     }
 
-    const orchestrator =
-      project.type === ProjectType.FEDERATION
-        ? this.federationOrchestrator
-        : this.stitchingOrchestrator;
-
     const metadataCheck = await this.checks.metadata(incoming, previousService ?? null);
-
-    const [compositionCheck, diffCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        baseSchema,
-      }),
-      this.checks.diff({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        selector: {
-          target: target.id,
-          project: project.id,
-          organization: project.orgId,
-        },
-        version: compareToLatest ? latest : latestComposable,
-        includeUrlChanges: true,
-        approvedChanges: null,
-      }),
-    ]);
 
     if (metadataCheck?.status === 'failed') {
       return {
@@ -300,36 +392,78 @@ export class CompositeModel {
       };
     }
 
-    const hasNewUrl =
-      serviceUrlCheck.status === 'completed' && serviceUrlCheck.result.status === 'modified';
-    const hasNewMetadata =
-      metadataCheck?.status === 'completed' && metadataCheck.result.status === 'modified';
+    const orchestrator =
+      project.type === ProjectType.FEDERATION
+        ? this.federationOrchestrator
+        : this.stitchingOrchestrator;
 
-    const messages: string[] = [];
-
-    if (hasNewUrl) {
-      messages.push(serviceUrlCheck.result.message!);
-    }
-
-    if (hasNewMetadata) {
-      messages.push('Metadata has been updated');
-    }
+    const compositionCheck = await this.checks.composition({
+      orchestrator,
+      project,
+      organization,
+      schemas,
+      baseSchema,
+      contracts:
+        contracts?.map(({ contract }) => ({
+          id: contract.id,
+          filter: {
+            exclude: contract.excludeTags,
+            include: contract.includeTags,
+            removeUnreachableTypesFromPublicApiSchema:
+              contract.removeUnreachableTypesFromPublicApiSchema,
+          },
+        })) ?? null,
+    });
 
     if (
       compositionCheck.status === 'failed' &&
-      compositionCheck.reason.errorsBySource.graphql.length > 0
+      compositionCheck.reason.errorsBySource.graphql.length > 0 &&
+      compareToLatest
     ) {
-      if (compareToLatest) {
-        return {
-          conclusion: SchemaPublishConclusion.Reject,
-          reasons: [
-            {
-              code: PublishFailureReasonCode.CompositionFailure,
-              compositionErrors: compositionCheck.reason.errorsBySource.graphql,
-            },
-          ],
-        };
-      }
+      return {
+        conclusion: SchemaPublishConclusion.Reject,
+        reasons: [
+          {
+            code: PublishFailureReasonCode.CompositionFailure,
+            compositionErrors: compositionCheck.reason.errorsBySource.graphql,
+          },
+        ],
+      };
+    }
+
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
+      orchestrator,
+      version: schemaVersionToCompareAgainst,
+      organization,
+      project,
+    });
+
+    const diffCheck = await this.checks.diff({
+      conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
+      includeUrlChanges: {
+        schemasBefore: schemaVersionToCompareAgainst?.schemas ?? [],
+        schemasAfter: schemas,
+      },
+      filterOutFederationChanges: project.type === ProjectType.FEDERATION,
+      approvedChanges: null,
+      existingSdl: previousVersionSdl,
+      incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+    });
+
+    const contractChecks = await this.getContractChecks({
+      contracts,
+      compositionCheck,
+      conditionalBreakingChangeDiffConfig,
+    });
+
+    const messages: string[] = [];
+
+    if (serviceUrlCheck.status === 'completed' && serviceUrlCheck.result.status === 'modified') {
+      messages.push(serviceUrlCheck.result.message);
+    }
+
+    if (metadataCheck?.status === 'completed' && metadataCheck.result.status === 'modified') {
+      messages.push('Metadata has been updated');
     }
 
     return {
@@ -345,6 +479,21 @@ export class CompositeModel {
         schemas,
         supergraph: compositionCheck.result?.supergraph ?? null,
         fullSchemaSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+        tags: compositionCheck.result?.tags ?? null,
+        contracts:
+          contractChecks?.map(contractCheck => ({
+            contractId: contractCheck.contractId,
+            contractName: contractCheck.contractName,
+            isComposable: contractCheck.compositionCheck.status === 'completed',
+            compositionErrors: contractCheck.compositionCheck.reason?.errors ?? null,
+            supergraph: contractCheck.compositionCheck?.result?.supergraph ?? null,
+            fullSchemaSdl:
+              contractCheck.compositionCheck?.result?.fullSchemaSdl ??
+              contractCheck.compositionCheck?.reason?.fullSchemaSdl ??
+              null,
+            changes:
+              (contractCheck.diffCheck.result ?? contractCheck.diffCheck.reason)?.all ?? null,
+          })) ?? null,
       },
     };
   }
@@ -357,6 +506,8 @@ export class CompositeModel {
     project,
     selector,
     baseSchema,
+    conditionalBreakingChangeDiffConfig,
+    contracts,
   }: {
     input: {
       serviceName: string;
@@ -371,18 +522,22 @@ export class CompositeModel {
     baseSchema: string | null;
     latest: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     };
     latestComposable: {
       isComposable: boolean;
+      sdl: string | null;
       schemas: PushedCompositeSchema[];
     } | null;
+    contracts: Array<ContractInput> | null;
+    conditionalBreakingChangeDiffConfig: null | ConditionalBreakingChangeDiffConfig;
   }): Promise<SchemaDeleteResult> {
     const incoming: DeletedCompositeSchema = {
       kind: 'composite',
       id: temp,
       target: selector.target,
-      date: Date.now() as any,
+      date: Date.now(),
       service_name: input.serviceName,
       action: 'DELETE',
     };
@@ -410,26 +565,50 @@ export class CompositeModel {
         ? this.federationOrchestrator
         : this.stitchingOrchestrator;
     const schemas = latestVersion.schemas.filter(s => s.service_name !== input.serviceName);
+    schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
 
-    const [compositionCheck, diffCheck] = await Promise.all([
-      this.checks.composition({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        baseSchema,
-      }),
-      this.checks.diff({
-        orchestrator,
-        project,
-        organization,
-        schemas,
-        selector,
-        version: compareToLatest ? latestVersion : latestComposable,
-        includeUrlChanges: true,
-        approvedChanges: null,
-      }),
-    ]);
+    const compositionCheck = await this.checks.composition({
+      orchestrator,
+      project,
+      organization,
+      schemas,
+      baseSchema,
+      contracts:
+        contracts?.map(({ contract }) => ({
+          id: contract.id,
+          filter: {
+            exclude: contract.excludeTags,
+            include: contract.includeTags,
+            removeUnreachableTypesFromPublicApiSchema:
+              contract.removeUnreachableTypesFromPublicApiSchema,
+          },
+        })) ?? null,
+    });
+
+    const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
+      orchestrator,
+      version: compareToLatest ? latest : latestComposable,
+      organization,
+      project,
+    });
+
+    const diffCheck = await this.checks.diff({
+      conditionalBreakingChangeConfig: conditionalBreakingChangeDiffConfig,
+      includeUrlChanges: {
+        schemasBefore: latestVersion.schemas,
+        schemasAfter: schemas,
+      },
+      filterOutFederationChanges: project.type === ProjectType.FEDERATION,
+      approvedChanges: null,
+      existingSdl: previousVersionSdl,
+      incomingSdl: compositionCheck.result?.fullSchemaSdl ?? null,
+    });
+
+    const contractChecks = await this.getContractChecks({
+      contracts,
+      compositionCheck,
+      conditionalBreakingChangeDiffConfig,
+    });
 
     if (
       compositionCheck.status === 'failed' &&
@@ -494,6 +673,22 @@ export class CompositeModel {
         breakingChanges,
         compositionErrors: compositionCheck.reason?.errors ?? [],
         supergraph: compositionCheck.result?.supergraph ?? null,
+        tags: compositionCheck.result?.tags ?? null,
+        schemas,
+        contracts:
+          contractChecks?.map(contractCheck => ({
+            contractId: contractCheck.contractId,
+            contractName: contractCheck.contractName,
+            isComposable: contractCheck.compositionCheck.status === 'completed',
+            compositionErrors: contractCheck.compositionCheck.reason?.errors ?? null,
+            supergraph: contractCheck.compositionCheck?.result?.supergraph ?? null,
+            fullSchemaSdl:
+              contractCheck.compositionCheck?.result?.fullSchemaSdl ??
+              contractCheck.compositionCheck?.reason?.fullSchemaSdl ??
+              null,
+            changes:
+              (contractCheck.diffCheck.result ?? contractCheck.diffCheck.reason)?.all ?? null,
+          })) ?? null,
       },
     };
   }

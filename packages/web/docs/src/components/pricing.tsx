@@ -54,7 +54,7 @@ function Plan(plan: {
 }): ReactElement {
   return (
     <div className="flex w-full flex-col items-start rounded-md border border-gray-700 p-4 hover:border-gray-600 md:w-1/3">
-      <div className="flex h-full w-full flex-col justify-between">
+      <div className="flex size-full flex-col justify-between">
         <div>
           <h2 className="flex items-center justify-between text-base font-bold text-white">
             {plan.name}
@@ -106,14 +106,16 @@ export function Pricing({ gradient }: { gradient: [string, string] }): ReactElem
   return (
     <div className="w-full bg-neutral-900">
       <div className="mx-auto my-12 box-border w-full max-w-[1024px] px-6">
-        <h2
-          className="bg-clip-text text-2xl font-bold leading-normal text-transparent md:text-3xl"
-          style={{
-            backgroundImage: `linear-gradient(-70deg, ${gradient[1]}, ${gradient[0]})`,
-          }}
-        >
-          Pricing
-        </h2>
+        <a id="pricing">
+          <h2
+            className="bg-clip-text text-2xl font-bold leading-normal text-transparent md:text-3xl"
+            style={{
+              backgroundImage: `linear-gradient(-70deg, ${gradient[1]}, ${gradient[0]})`,
+            }}
+          >
+            Pricing
+          </h2>
+        </a>
         <p className="text-gray-400">
           All features are available on all plans - including the free plan. Our pricing is honest
           and based only on your real usage.

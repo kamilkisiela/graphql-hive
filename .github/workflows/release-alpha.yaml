@@ -8,7 +8,7 @@ jobs:
     with:
       npmTag: alpha
       buildScript: build:libraries
-      nodeVersion: 18
+      nodeVersion: 21
       packageManager: pnpm
     secrets:
       githubToken: ${{ secrets.GITHUB_TOKEN }}
@@ -45,37 +45,37 @@ jobs:
         run: pnpm oclif:pack
 
       - name: upload darwin arm64
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hive-cli-darwin-arm64
           path: ./packages/libraries/cli/dist/*-darwin-arm64.tar.gz
 
       - name: upload darwin x64
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hive-cli-darwin-x64
           path: ./packages/libraries/cli/dist/*-darwin-x64.tar.gz
 
       - name: upload windows x64
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hive-cli-windows-x64
           path: ./packages/libraries/cli/dist/win32/*-x64.exe
 
       - name: upload windows x86
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hive-cli-windows-x86
           path: ./packages/libraries/cli/dist/win32/*-x86.exe
 
       - name: upload linux arm
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hive-cli-linux-arm
           path: ./packages/libraries/cli/dist/*-linux-arm.tar.gz
 
       - name: upload linux x64
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: hive-cli-linux-x64
           path: ./packages/libraries/cli/dist/*-linux-x64.tar.gz
@@ -89,19 +89,19 @@ jobs:
     steps:
       - name: Pull artifact for macos
         if: matrix.os == 'macos-latest'
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: hive-cli-darwin-x64
 
       - name: Pull artifact for ubuntu
         if: matrix.os == 'ubuntu-latest'
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: hive-cli-linux-x64
 
       - name: Pull artifact for windows
         if: matrix.os == 'windows-latest'
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: hive-cli-windows-x64
 

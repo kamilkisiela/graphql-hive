@@ -8,6 +8,7 @@ import { authenticated } from '@/components/authenticated-container';
 import { Page, ProjectLayout } from '@/components/layouts/project';
 import { ExternalCompositionSettings } from '@/components/project/settings/external-composition';
 import { ModelMigrationSettings } from '@/components/project/settings/model-migration';
+import { NativeCompositionSettings } from '@/components/project/settings/native-composition';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -104,9 +105,9 @@ function GitHubIntegration(props: {
             <div>
               <div className="mb-4">Here's how it will look like in your CI pipeline.</div>
               <div className="flex items-center gap-x-2 pl-1">
-                <CheckIcon className="h-4 w-4 text-emerald-500" />
-                <div className="flex h-6 w-6 items-center justify-center rounded-sm bg-white">
-                  <HiveLogo className="h-[80%] w-[80%]" />
+                <CheckIcon className="size-4 text-emerald-500" />
+                <div className="flex size-6 items-center justify-center rounded-sm bg-white">
+                  <HiveLogo className="size-[80%]" />
                 </div>
 
                 <div className="font-semibold text-[#adbac7]">
@@ -116,13 +117,13 @@ function GitHubIntegration(props: {
               </div>
             </div>
             <div>
-              <ArrowBigDownDashIcon className="h-6 w-6" />
+              <ArrowBigDownDashIcon className="size-6" />
             </div>
             <div>
               <div className="flex items-center gap-x-2 pl-1">
-                <CheckIcon className="h-4 w-4 text-emerald-500" />
-                <div className="flex h-6 w-6 items-center justify-center rounded-sm bg-white">
-                  <HiveLogo className="h-[80%] w-[80%]" />
+                <CheckIcon className="size-4 text-emerald-500" />
+                <div className="flex size-6 items-center justify-center rounded-sm bg-white">
+                  <HiveLogo className="size-[80%]" />
                 </div>
 
                 <div className="font-semibold text-[#adbac7]">
@@ -194,6 +195,7 @@ const ProjectSettingsPage_OrganizationFragment = graphql(`
       ...CanAccessProject_MemberFragment
     }
     ...ExternalCompositionSettings_OrganizationFragment
+    ...NativeCompositionSettings_OrganizationFragment
   }
 `);
 
@@ -204,6 +206,7 @@ const ProjectSettingsPage_ProjectFragment = graphql(`
     isProjectNameInGitHubCheckEnabled
     ...ModelMigrationSettings_ProjectFragment
     ...ExternalCompositionSettings_ProjectFragment
+    ...NativeCompositionSettings_ProjectFragment
   }
 `);
 
@@ -362,6 +365,10 @@ function ProjectSettingsContent() {
 
                 {project.type === ProjectType.Federation ? (
                   <ExternalCompositionSettings project={project} organization={organization} />
+                ) : null}
+
+                {project.type === ProjectType.Federation ? (
+                  <NativeCompositionSettings project={project} organization={organization} />
                 ) : null}
 
                 {canAccessProject(ProjectAccessScope.Delete, organization.me) && (

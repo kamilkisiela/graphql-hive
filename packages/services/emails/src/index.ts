@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { hostname } from 'os';
 import {
   createErrorHandler,
   createServer,
@@ -18,7 +19,8 @@ import { createScheduler } from './scheduler';
 async function main() {
   if (env.sentry) {
     Sentry.init({
-      serverName: 'emails',
+      dist: 'emails',
+      serverName: hostname(),
       enabled: !!env.sentry,
       environment: env.environment,
       dsn: env.sentry.dsn,
@@ -109,10 +111,13 @@ async function main() {
       });
     }
 
-    await server.listen(env.http.port, '::');
+    await server.listen({
+      port: env.http.port,
+      host: '::',
+    });
 
     if (env.prometheus) {
-      await startMetrics(env.prometheus.labels.instance);
+      await startMetrics(env.prometheus.labels.instance, env.prometheus.port);
     }
 
     await start();

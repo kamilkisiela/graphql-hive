@@ -16,6 +16,8 @@ const handler: ExportedHandler<Env> = {
       environment: env.SENTRY_ENVIRONMENT,
       release: env.SENTRY_RELEASE,
       context: ctx,
+      request,
+      dist: 'broker-worker',
       requestDataOptions: {
         allowedHeaders: [
           'user-agent',

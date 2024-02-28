@@ -355,15 +355,6 @@ Go to the `Schema` tab in your project target and you're going to see your lates
 
 ## Next Steps
 
-## Bounded Ports Reference
-
-| Port | Purpose                      |
-| ---- | ---------------------------- |
-| 8080 | Hive's Main App UI           |
-| 8081 | The Usage Reporting Endpoint |
-| 8082 | The GraphQL API              |
-| 8083 | The Artifacts Bucket         |
-
 After doing your first testing with GraphQL Hive you should consider the following steps:
 
 - Evaluate whether you want to run Databases yourself within Docker or instead use a managed
@@ -381,9 +372,14 @@ After doing your first testing with GraphQL Hive you should consider the followi
   applying maintenance.
 - Get yourself familiar with SuperTokens and follow their changelogs in order to keep your
   SuperTokens instance up-to-date.
+- In order to use longer retention periods e.g. for conditional breaking changes or schema explorer
+  overviews do the following: Open the postgres database, go to the table `organization`, find your
+  organization and change `plan_name` to ENTERPRISE, `limit_operations_monthly` to 0 and
+  `limit_retention_days` to a value between 0 and 360 in order to unlock full functionality.
 
 You can review the configuration options of all the services in the corresponding Readme files.
 
+- [`@hive/app`](https://github.com/kamilkisiela/graphql-hive/tree/main/packages/web/app/README.md)
 - [`@hive/server`](https://github.com/kamilkisiela/graphql-hive/tree/main/packages/services/server/README.md)
 - [`@hive/schema`](https://github.com/kamilkisiela/graphql-hive/tree/main/packages/services/schema/README.md)
 - [`@hive/webhooks`](https://github.com/kamilkisiela/graphql-hive/tree/main/packages/services/webhooks/README.md)

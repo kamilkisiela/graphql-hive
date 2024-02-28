@@ -133,7 +133,7 @@ function CreateCDNAccessTokenModal(props: {
         <p>The CDN Access Token was successfully created.</p>
 
         <div className="flex items-center gap-2 rounded-sm bg-yellow-500/10 p-4 text-yellow-500">
-          <AlertTriangleIcon className="h-5 w-5" />
+          <AlertTriangleIcon className="size-5" />
           <span>
             Please store this access token securely. You will not be able to see it again.
           </span>
@@ -158,7 +158,7 @@ function CreateCDNAccessTokenModal(props: {
         <p>Something went wrong.</p>
 
         <Tag color="yellow" className="px-4 py-2.5">
-          <AlertTriangleIcon className="h-5 w-5" />
+          <AlertTriangleIcon className="size-5" />
           {createCdnAccessToken.data?.createCdnAccessToken.error.message}
         </Tag>
 
@@ -213,7 +213,7 @@ function DeleteCDNAccessTokenModal(props: {
         <Heading className="text-center">Delete CDN Access Tokens</Heading>
       </div>
       <Tag color="yellow" className="px-4 py-2.5">
-        <AlertTriangleIcon className="h-5 w-5" />
+        <AlertTriangleIcon className="size-5" />
         Deleting an CDN access token can not be undone. After deleting the access token it might
         take up to 5 minutes before the changes are propagated across the CDN.
       </Tag>
@@ -255,7 +255,7 @@ function DeleteCDNAccessTokenModal(props: {
         <p>The CDN Access Token was successfully deleted.</p>
 
         <Tag color="yellow" className="px-4 py-2.5">
-          <AlertTriangleIcon className="h-5 w-5" />
+          <AlertTriangleIcon className="size-5" />
           It can take up to 5 minutes before the changes are propagated across the CDN.
         </Tag>
         <div className="mt-auto flex w-full gap-2 self-end">
@@ -275,7 +275,7 @@ function DeleteCDNAccessTokenModal(props: {
         <p>Something went wrong.</p>
 
         <Tag color="yellow" className="px-4 py-2.5">
-          <AlertTriangleIcon className="h-5 w-5" />
+          <AlertTriangleIcon className="size-5" />
           {deleteCdnAccessToken.data?.deleteCdnAccessToken.error.message}
         </Tag>
         <div className="mt-auto flex w-full gap-2 self-end">

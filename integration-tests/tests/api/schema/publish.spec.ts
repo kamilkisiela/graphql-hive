@@ -2654,41 +2654,78 @@ const SchemaCompareToPreviousVersionQuery = graphql(`
     $target: ID!
     $version: ID!
   ) {
-    schemaCompareToPrevious(
-      selector: {
-        organization: $organization
-        project: $project
-        target: $target
-        version: $version
-      }
-    ) {
-      ... on SchemaCompareResult {
-        initial
-        changes {
-          total
-          nodes {
-            path
-            message
-            criticality
+    target(selector: { organization: $organization, project: $project, target: $target }) {
+      id
+      schemaVersion(id: $version) {
+        id
+        sdl
+        supergraph
+        log {
+          ... on PushedSchemaLog {
+            id
+            author
+            service
+            commit
+            serviceSdl
+            previousServiceSdl
+          }
+          ... on DeletedSchemaLog {
+            id
+            deletedService
+            previousServiceSdl
           }
         }
-        diff {
-          before
-          after
+        schemaCompositionErrors {
+          nodes {
+            message
+          }
         }
-      }
-      ... on SchemaCompareError {
-        message
-        details {
-          message
-          type
+        isFirstComposableVersion
+        breakingSchemaChanges {
+          nodes {
+            message(withSafeBasedOnUsageNote: false)
+            criticality
+            criticalityReason
+            path
+            approval {
+              approvedBy {
+                id
+                displayName
+              }
+              approvedAt
+              schemaCheckId
+            }
+            isSafeBasedOnUsage
+          }
+        }
+        safeSchemaChanges {
+          nodes {
+            message(withSafeBasedOnUsageNote: false)
+            criticality
+            criticalityReason
+            path
+            approval {
+              approvedBy {
+                id
+                displayName
+              }
+              approvedAt
+              schemaCheckId
+            }
+            isSafeBasedOnUsage
+          }
+        }
+        previousDiffableSchemaVersion {
+          id
+          supergraph
+          sdl
         }
       }
     }
   }
 `);
 
-test('Query.schemaCompareToPrevious: result is read from the database', async () => {
+test('Target.schemaVersion: result is read from the database', async () => {
   const storage = await createStorage(connectionString(), 1);
 
   try {
@@ -2750,22 +2787,22 @@ test('Query.schemaCompareToPrevious: result is read from the database', async ()
       authToken: ownerToken,
     }).then(res => res.expectNoGraphQLErrors());
 
-    expect((result.schemaCompareToPrevious as Record<string, unknown>).changes)
-      .toMatchInlineSnapshot(`
-      {
-        nodes: [
-          {
-            criticality: Breaking,
-            message: Field 'Query.ping' changed type from 'String' to 'Int',
-            path: [
-              Query,
-              ping,
-            ],
-          },
-        ],
-        total: 1,
-      }
+    expect(result?.target?.schemaVersion?.breakingSchemaChanges?.nodes).toMatchInlineSnapshot(`
+      [
+        {
+          approval: null,
+          criticality: Breaking,
+          criticalityReason: null,
+          isSafeBasedOnUsage: false,
+          message: Field 'Query.ping' changed type from 'String' to 'Int',
+          path: [
+            Query,
+            ping,
+          ],
+        },
+      ]
     `);
+    expect(result?.target?.schemaVersion?.safeSchemaChanges?.nodes).toBeUndefined();
   } finally {
     await storage.destroy();
   }
@@ -2884,18 +2921,12 @@ test('Composition Error (Federation 2) can be served from the database', async (
       authToken: ownerToken,
     }).then(res => res.expectNoGraphQLErrors());
 
-    expect(result).toMatchInlineSnapshot(`
-      {
-        schemaCompareToPrevious: {
-          details: [
-            {
-              message: [test] On type "Product", for @key(fields: "IDONOTEXIST"): Cannot query field "IDONOTEXIST" on type "Product" (the field should either be added to this subgraph or, if it should not be resolved by this subgraph, you need to add it to this subgraph with @external).,
-              type: composition,
-            },
-          ],
-          message: Composition error,
+    expect(result?.target?.schemaVersion?.schemaCompositionErrors?.nodes).toMatchInlineSnapshot(`
+      [
+        {
+          message: [test] On type "Product", for @key(fields: "IDONOTEXIST"): Cannot query field "IDONOTEXIST" on type "Product" (the field should either be added to this subgraph or, if it should not be resolved by this subgraph, you need to add it to this subgraph with @external).,
         },
-      }
+      ]
     `);
   } finally {
     await storage.destroy();
@@ -3039,41 +3070,41 @@ test('Composition Network Failure (Federation 2)', async () => {
       authToken: ownerToken,
     }).then(res => res.expectNoGraphQLErrors());
 
-    expect(result).toMatchInlineSnapshot(`
-      {
-        schemaCompareToPrevious: {
-          changes: {
-            nodes: [
-              {
-                criticality: Safe,
-                message: Field 'title' was added to object type 'Product',
-                path: [
-                  Product,
-                  title,
-                ],
-              },
-            ],
-            total: 1,
-          },
-          diff: {
-            after: type Product {
+    expect(result?.target?.schemaVersion?.safeSchemaChanges?.nodes).toMatchInlineSnapshot(`
+      [
+        {
+          approval: null,
+          criticality: Safe,
+          criticalityReason: null,
+          isSafeBasedOnUsage: false,
+          message: Field 'title' was added to object type 'Product',
+          path: [
+            Product,
+            title,
+          ],
+        },
+      ]
+    `);
+    expect(result?.target?.schemaVersion?.breakingSchemaChanges?.nodes).toBeUndefined();
+
+    expect(result?.target?.schemaVersion?.sdl).toMatchInlineSnapshot(`
+      type Product {
         id: ID!
         title: String
       }
 
       type Query {
         product(id: ID!): Product
-      },
-            before: type Product {
+      }
+    `);
+    expect(result?.target?.schemaVersion?.previousDiffableSchemaVersion?.sdl)
+      .toMatchInlineSnapshot(`
+      type Product {
         id: ID!
       }
 
       type Query {
         product(id: ID!): Product
-      },
-          },
-          initial: false,
-        },
       }
     `);
   } finally {
@@ -3133,21 +3164,19 @@ test.concurrent(
     }
 
     const compareResult = await writeToken.compareToPreviousVersion(versionId);
-
-    expect(compareResult.schemaCompareToPrevious).toMatchInlineSnapshot(`
-    {
-      changes: {
-        nodes: [
-          {
-            criticality: Dangerous,
-            message: [foo] New service url: 'https://api.com/products-new' (previously: 'https://api.com/products'),
-          },
-        ],
-        total: 1,
-      },
-      initial: false,
-    }
-  `);
+    expect(compareResult?.target?.schemaVersion?.safeSchemaChanges?.nodes).toMatchInlineSnapshot(`
+      [
+        {
+          approval: null,
+          criticality: Dangerous,
+          criticalityReason: The registry service url has changed,
+          isSafeBasedOnUsage: false,
+          message: [foo] New service url: 'https://api.com/products-new' (previously: 'https://api.com/products'),
+          path: null,
+        },
+      ]
+    `);
+    expect(compareResult?.target?.schemaVersion?.breakingSchemaChanges?.nodes).toBeUndefined();
   },
 );
 
@@ -3210,24 +3239,30 @@ test.concurrent(
 
     const compareResult = await writeToken.compareToPreviousVersion(versionId);
 
-    expect(compareResult.schemaCompareToPrevious).toMatchInlineSnapshot(`
-      {
-        changes: {
-          nodes: [
-            {
-              criticality: Safe,
-              message: Field 'name' was added to object type 'Product',
-            },
-            {
-              criticality: Dangerous,
-              message: [foo] New service url: 'https://api.com/products-new' (previously: 'https://api.com/products'),
-            },
+    expect(compareResult?.target?.schemaVersion?.safeSchemaChanges?.nodes).toMatchInlineSnapshot(`
+      [
+        {
+          approval: null,
+          criticality: Safe,
+          criticalityReason: null,
+          isSafeBasedOnUsage: false,
+          message: Field 'name' was added to object type 'Product',
+          path: [
+            Product,
+            name,
           ],
-          total: 2,
         },
-        initial: false,
-      }
+        {
+          approval: null,
+          criticality: Dangerous,
+          criticalityReason: The registry service url has changed,
+          isSafeBasedOnUsage: false,
+          message: [foo] New service url: 'https://api.com/products-new' (previously: 'https://api.com/products'),
+          path: null,
+        },
+      ]
     `);
+    expect(compareResult?.target?.schemaVersion?.breakingSchemaChanges?.nodes).toBeUndefined();
   },
 );
 
@@ -3343,21 +3378,19 @@ test.concurrent(
       }
 
       const compareResult = await writeToken.compareToPreviousVersion(newVersionId);
-
-      expect(compareResult.schemaCompareToPrevious).toMatchInlineSnapshot(`
-        {
-          changes: {
-            nodes: [
-              {
-                criticality: Dangerous,
-                message: [foo] New service url: 'https://api.com/nah' (previously: 'https://api.com/products'),
-              },
-            ],
-            total: 1,
+      expect(compareResult?.target?.schemaVersion?.safeSchemaChanges?.nodes).toMatchInlineSnapshot(`
+        [
+          {
+            approval: null,
+            criticality: Dangerous,
+            criticalityReason: The registry service url has changed,
+            isSafeBasedOnUsage: false,
+            message: [foo] New service url: 'https://api.com/nah' (previously: 'https://api.com/products'),
+            path: null,
           },
-          initial: false,
-        }
+        ]
       `);
+      expect(compareResult?.target?.schemaVersion?.breakingSchemaChanges?.nodes).toBeUndefined();
     } finally {
       await pool?.end();
     }
@@ -3409,22 +3442,19 @@ test.concurrent(
     }
 
     const compareResult = await writeToken.compareToPreviousVersion(newVersionId);
-    expect(compareResult).toMatchInlineSnapshot(`
-    {
-      schemaCompareToPrevious: {
-        changes: {
-          nodes: [
-            {
-              criticality: Dangerous,
-              message: [foo1] New service url: 'https://api.com/foo1' (previously: 'none'),
-            },
-          ],
-          total: 1,
+    expect(compareResult?.target?.schemaVersion?.safeSchemaChanges?.nodes).toMatchInlineSnapshot(`
+      [
+        {
+          approval: null,
+          criticality: Dangerous,
+          criticalityReason: The registry service url has changed,
+          isSafeBasedOnUsage: false,
+          message: [foo1] New service url: 'https://api.com/foo1' (previously: 'none'),
+          path: null,
         },
-        initial: false,
-      },
-    }
+      ]
     `);
+    expect(compareResult?.target?.schemaVersion?.breakingSchemaChanges?.nodes).toBeUndefined();
   },
 );
 
@@ -3474,20 +3504,19 @@ test.concurrent(
 
       const compareResult = await writeToken.compareToPreviousVersion(newVersionId);
 
-      expect(compareResult.schemaCompareToPrevious).toMatchInlineSnapshot(`
-        {
-          changes: {
-            nodes: [
-              {
-                criticality: Dangerous,
-                message: [foo] New service url: 'https://api.com/nah' (previously: 'https://api.com/products'),
-              },
-            ],
-            total: 1,
+      expect(compareResult?.target?.schemaVersion?.safeSchemaChanges?.nodes).toMatchInlineSnapshot(`
+        [
+          {
+            approval: null,
+            criticality: Dangerous,
+            criticalityReason: The registry service url has changed,
+            isSafeBasedOnUsage: false,
+            message: [foo] New service url: 'https://api.com/products' (previously: 'https://api.com/nah'),
+            path: null,
           },
-          initial: false,
-        }
+        ]
       `);
+      expect(compareResult?.target?.schemaVersion?.breakingSchemaChanges?.nodes).toBeUndefined();
     } finally {
       await pool?.end();
     }
@@ -3518,5 +3547,163 @@ test.concurrent(
       .then(r => r.expectNoGraphQLErrors());
 
     expect(result.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  },
+);
+
+test.concurrent(
+  'publishing Federation schema results in tags stored on the schema version',
+  async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject, setFeatureFlag } = await createOrg();
+    const { createToken, setNativeFederation } = await createProject(ProjectType.Federation);
+    await setNativeFederation(true);
+    await setFeatureFlag('compareToPreviousComposableVersion', true);
+
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
+
+    const result = await readWriteToken
+      .publishSchema({
+        sdl: /* GraphQL */ `
+          extend schema
+            @link(url: "https://specs.apollo.dev/link/v1.0")
+            @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@tag"])
+
+          type Query {
+            ping: String @tag(name: "atarashii")
+          }
+        `,
+        service: 'foo',
+        url: 'http://lol.de',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(result.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+    const latestValidSchema = await readWriteToken.fetchLatestValidSchema();
+    expect(latestValidSchema.latestValidVersion?.tags).toEqual(['atarashii']);
+  },
+);
+
+test.concurrent('CDN services are published in alphanumeric order', async () => {
+  const { createOrg } = await initSeed().createOwner();
+  const { createProject } = await createOrg();
+  const { createToken } = await createProject(ProjectType.Stitching);
+  const readWriteToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+    projectScopes: [],
+    organizationScopes: [],
+  });
+
+  await readWriteToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        type Query {
+          ping1: String
+        }
+      `,
+      service: 'z',
+      url: 'http://z.foo',
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  await readWriteToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        type Query {
+          ping2: String
+        }
+      `,
+      service: 'x',
+      url: 'http://x.foo',
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  await readWriteToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        type Query {
+          ping3: String
+        }
+      `,
+      service: 'y',
+      url: 'http://y.foo',
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  const cdn = await readWriteToken.createCdnAccess();
+  const res = await fetch(cdn.cdnUrl + '/services', {
+    method: 'GET',
+    headers: {
+      'X-Hive-CDN-Key': cdn.secretAccessToken,
+    },
+  });
+
+  expect(res.status).toBe(200);
+  const result = await res.json();
+  expect(result).toMatchObject([{ name: 'x' }, { name: 'y' }, { name: 'z' }]);
+});
+
+test.concurrent(
+  'Composite schema project publish without service name results in error',
+  async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createToken } = await createProject(ProjectType.Federation);
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
+
+    const result = await readWriteToken
+      .publishSchema({
+        sdl: /* GraphQL */ `
+          type Query {
+            ping: String
+          }
+        `,
+        url: 'http://example.localhost',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(result).toEqual({
+      schemaPublish: {
+        __typename: 'SchemaPublishMissingServiceError',
+      },
+    });
+  },
+);
+
+test.concurrent(
+  'Composite schema project publish without service url results in error',
+  async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject } = await createOrg();
+    const { createToken } = await createProject(ProjectType.Federation);
+    const readWriteToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [],
+      organizationScopes: [],
+    });
+
+    const result = await readWriteToken
+      .publishSchema({
+        sdl: /* GraphQL */ `
+          type Query {
+            ping: String
+          }
+        `,
+        service: 'example',
+      })
+      .then(r => r.expectNoGraphQLErrors());
+
+    expect(result).toEqual({
+      schemaPublish: {
+        __typename: 'SchemaPublishMissingUrlError',
+      },
+    });
   },
 );

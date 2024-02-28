@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
+import { NameModel } from '../../shared/entities';
 import { createConnection } from '../../shared/schema';
 import { AuthManager } from '../auth/providers/auth-manager';
 import {
@@ -8,12 +9,13 @@ import {
 } from '../auth/providers/organization-access';
 import { isProjectScope, ProjectAccessScope } from '../auth/providers/project-access';
 import { isTargetScope, TargetAccessScope } from '../auth/providers/target-access';
+import { InMemoryRateLimiter } from '../rate-limit/providers/in-memory-rate-limiter';
 import { IdTranslator } from '../shared/providers/id-translator';
 import { Logger } from '../shared/providers/logger';
 import type { OrganizationModule } from './__generated__/types';
 import { OrganizationManager } from './providers/organization-manager';
 
-const OrganizationNameModel = z.string().min(2).max(50);
+const OrganizationNameModel = NameModel.min(2).max(50);
 
 const createOrUpdateMemberRoleInputSchema = z.object({
   name: z
@@ -88,18 +90,13 @@ export const resolvers: OrganizationModule.Resolvers = {
   },
   Mutation: {
     async createOrganization(_, { input }, { injector }) {
-      const CreateOrganizationModel = z.object({
-        name: OrganizationNameModel,
-      });
-
-      const result = CreateOrganizationModel.safeParse(input);
-
-      if (!result.success) {
+      const organizationNameResult = OrganizationNameModel.safeParse(input.name.trim());
+      if (!organizationNameResult.success) {
         return {
           error: {
             message: 'Please check your input.',
             inputErrors: {
-              name: result.error.formErrors.fieldErrors.name?.[0],
+              name: organizationNameResult.error.issues[0].message ?? null,
             },
           },
         };
@@ -160,17 +157,13 @@ export const resolvers: OrganizationModule.Resolvers = {
       };
     },
     async updateOrganizationName(_, { input }, { injector }) {
-      const UpdateOrganizationNameModel = z.object({
-        name: OrganizationNameModel,
-      });
-
-      const result = UpdateOrganizationNameModel.safeParse(input);
+      const result = OrganizationNameModel.safeParse(input.name?.trim());
 
       if (!result.success) {
         return {
           error: {
             message:
-              result.error.formErrors.fieldErrors.name?.[0] ??
+              result.error.formErrors.fieldErrors?.[0]?.[0] ??
               'Changing the organization name failed.',
           },
         };
@@ -255,6 +248,13 @@ export const resolvers: OrganizationModule.Resolvers = {
       };
     },
     async inviteToOrganizationByEmail(_, { input }, { injector }) {
+      await injector.get(InMemoryRateLimiter).check(
+        'inviteToOrganizationByEmail',
+        5_000, // 5 seconds
+        6, // 6 invites
+        `Exceeded rate limit for inviting to organization by email.`,
+      );
+
       const InputModel = z.object({
         email: z.string().email().max(128, 'Email must be at most 128 characters long'),
       });

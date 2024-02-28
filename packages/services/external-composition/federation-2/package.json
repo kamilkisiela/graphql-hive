@@ -8,11 +8,11 @@
     "dev": "tsup-node --config ../../../configs/tsup/dev.config.node.ts src/index.ts"
   },
   "devDependencies": {
-    "@apollo/composition": "2.6.2",
-    "@apollo/federation-internals": "2.6.2",
+    "@apollo/composition": "2.7.1",
+    "@apollo/federation-internals": "2.7.1",
     "@graphql-hive/external-composition": "workspace:*",
-    "@whatwg-node/fetch": "0.9.14",
-    "@whatwg-node/server": "0.9.21",
+    "@whatwg-node/fetch": "0.9.16",
+    "@whatwg-node/server": "0.9.25",
     "graphql": "16.8.1",
     "lru-cache": "^7.17.0",
     "zod": "3.22.4"

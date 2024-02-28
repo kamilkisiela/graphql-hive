@@ -65,7 +65,7 @@ export const getActivity = (
     case 'OrganizationCreatedActivity':
       return {
         content: `${user.displayName} created the organization`,
-        icon: <PlusIcon className="h-4 w-4" />,
+        icon: <PlusIcon className="size-4" />,
       };
     case 'OrganizationNameUpdatedActivity':
       return {
@@ -75,7 +75,7 @@ export const getActivity = (
             <b className="text-gray-300">{(activity as OrganizationNameUpdatedActivity).value}</b>
           </>
         ),
-        icon: <EditIcon className="h-3.5 w-3.5" />,
+        icon: <EditIcon className="size-3.5" />,
       };
     case 'OrganizationIdUpdatedActivity':
       return {
@@ -85,7 +85,7 @@ export const getActivity = (
             <b className="text-gray-300">{(activity as OrganizationIdUpdatedActivity).value}</b>
           </>
         ),
-        icon: <EditIcon className="h-3.5 w-3.5" />,
+        icon: <EditIcon className="size-3.5" />,
       };
     case 'OrganizationPlanChangeActivity':
       return {
@@ -95,12 +95,12 @@ export const getActivity = (
             <b className="text-gray-300">{(activity as OrganizationPlanChangeActivity).newPlan}</b>
           </>
         ),
-        icon: <EditIcon className="h-3.5 w-3.5" />,
+        icon: <EditIcon className="size-3.5" />,
       };
     case 'MemberAddedActivity':
       return {
         content: `${user.displayName} joined the organization`,
-        icon: <UserPlusMinusIcon isPlus className="h-5 w-5" />,
+        icon: <UserPlusMinusIcon isPlus className="size-5" />,
       };
     case 'MemberDeletedActivity':
       return {
@@ -111,7 +111,7 @@ export const getActivity = (
             organization
           </>
         ),
-        icon: <UserPlusMinusIcon isPlus={false} className="h-5 w-5" />,
+        icon: <UserPlusMinusIcon isPlus={false} className="size-5" />,
       };
     case 'MemberLeftActivity':
       return {
@@ -121,7 +121,7 @@ export const getActivity = (
             organization
           </>
         ),
-        icon: <UserPlusMinusIcon isPlus={false} className="h-5 w-5" />,
+        icon: <UserPlusMinusIcon isPlus={false} className="size-5" />,
       };
     /* Project */
     case 'ProjectCreatedActivity':
@@ -131,7 +131,7 @@ export const getActivity = (
             {user.displayName} created {projectLink} project
           </>
         ),
-        icon: <PlusIcon className="h-4 w-4" />,
+        icon: <PlusIcon className="size-4" />,
       };
     case 'ProjectDeletedActivity':
       return {
@@ -141,7 +141,7 @@ export const getActivity = (
             <b className="text-gray-300">{(activity as ProjectDeletedActivity).name}</b> project
           </>
         ),
-        icon: <TrashIcon className="h-5 w-5" />,
+        icon: <TrashIcon className="size-5" />,
       };
     case 'ProjectNameUpdatedActivity':
       return {
@@ -150,7 +150,7 @@ export const getActivity = (
             {user.displayName} changed {projectLink} name
           </>
         ),
-        icon: <EditIcon className="h-3.5 w-3.5" />,
+        icon: <EditIcon className="size-3.5" />,
       };
     case 'ProjectIdUpdatedActivity':
       return {
@@ -160,7 +160,7 @@ export const getActivity = (
             <b className="text-gray-300">{(activity as ProjectIdUpdatedActivity).value}</b>
           </>
         ),
-        icon: <EditIcon className="h-3.5 w-3.5" />,
+        icon: <EditIcon className="size-3.5" />,
       };
     /* Target */
     case 'TargetCreatedActivity':
@@ -170,7 +170,7 @@ export const getActivity = (
             {user.displayName} created {targetLink} target in {projectLink} project
           </>
         ),
-        icon: <PlusIcon className="h-4 w-4" />,
+        icon: <PlusIcon className="size-4" />,
       };
     case 'TargetDeletedActivity':
       return {
@@ -180,7 +180,7 @@ export const getActivity = (
             {projectLink} project
           </>
         ),
-        icon: <TrashIcon className="h-5 w-5" />,
+        icon: <TrashIcon className="size-5" />,
       };
     case 'TargetNameUpdatedActivity':
       return {
@@ -193,7 +193,7 @@ export const getActivity = (
             target name in {projectLink} project
           </>
         ),
-        icon: <EditIcon className="h-3.5 w-3.5" />,
+        icon: <EditIcon className="size-3.5" />,
       };
     case 'TargetIdUpdatedActivity':
       return {
@@ -203,7 +203,7 @@ export const getActivity = (
             <b className="text-gray-300">{activity.value}</b>
           </>
         ),
-        icon: <EditIcon className="h-3.5 w-3.5" />,
+        icon: <EditIcon className="size-3.5" />,
       };
     default:
       // @ts-expect-error -- empty object to omit throwing if new event was added without updating this fn

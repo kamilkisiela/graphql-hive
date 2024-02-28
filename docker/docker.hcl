@@ -86,20 +86,21 @@ target "cli-base" {
 target "target-dev" {}
 
 target "target-ci" {
-  cache-from = ["type=gha"]
-  cache-to = ["type=gha,mode=max"]
+  cache-from = ["type=gha,ignore-error=true"]
+  cache-to = ["type=gha,mode=max,ignore-error=true"]
 }
 
 target "target-publish" {
   platforms = ["linux/amd64", "linux/arm64"]
-  cache-from = ["type=gha"]
-  cache-to = ["type=gha,mode=max"]
+  cache-from = ["type=gha,ignore-error=true"]
+  cache-to = ["type=gha,mode=max,ignore-error=true"]
 }
 
 target "emails" {
   inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/emails/dist"
   args = {
+    SERVICE_DIR_NAME = "@hive/emails"
     IMAGE_TITLE = "graphql-hive/emails"
     IMAGE_DESCRIPTION = "The emails service of the GraphQL Hive project."
     PORT = "3006"
@@ -117,6 +118,7 @@ target "rate-limit" {
   inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/rate-limit/dist"
   args = {
+    SERVICE_DIR_NAME = "@hive/rate-limit"
     IMAGE_TITLE = "graphql-hive/rate-limit"
     IMAGE_DESCRIPTION = "The rate limit service of the GraphQL Hive project."
     PORT = "3009"
@@ -134,6 +136,7 @@ target "schema" {
   inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/schema/dist"
   args = {
+    SERVICE_DIR_NAME = "@hive/schema"
     IMAGE_TITLE = "graphql-hive/schema"
     IMAGE_DESCRIPTION = "The schema service of the GraphQL Hive project."
     PORT = "3002"
@@ -151,6 +154,7 @@ target "policy" {
   inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/policy/dist"
   args = {
+    SERVICE_DIR_NAME = "@hive/policy"
     IMAGE_TITLE = "graphql-hive/policy"
     IMAGE_DESCRIPTION = "The policy service of the GraphQL Hive project."
     PORT = "3012"
@@ -168,6 +172,7 @@ target "server" {
   inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/server/dist"
   args = {
+    SERVICE_DIR_NAME = "@hive/server"
     IMAGE_TITLE = "graphql-hive/server"
     IMAGE_DESCRIPTION = "The server service of the GraphQL Hive project."
     PORT = "3001"
@@ -200,6 +205,7 @@ target "stripe-billing" {
   inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/stripe-billing/dist"
   args = {
+    SERVICE_DIR_NAME = "@hive/stripe-billing"
     IMAGE_TITLE = "graphql-hive/stripe-billing"
     IMAGE_DESCRIPTION = "The stripe billing service of the GraphQL Hive project."
     PORT = "3010"
@@ -217,6 +223,7 @@ target "tokens" {
   inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/tokens/dist"
   args = {
+    SERVICE_DIR_NAME = "@hive/tokens"
     IMAGE_TITLE = "graphql-hive/tokens"
     IMAGE_DESCRIPTION = "The tokens service of the GraphQL Hive project."
     PORT = "3003"
@@ -234,6 +241,7 @@ target "usage-estimator" {
   inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/usage-estimator/dist"
   args = {
+    SERVICE_DIR_NAME = "@hive/usage-estimator"
     IMAGE_TITLE = "graphql-hive/usage-estimator"
     IMAGE_DESCRIPTION = "The usage estimator service of the GraphQL Hive project."
     PORT = "3008"
@@ -251,6 +259,7 @@ target "usage-ingestor" {
   inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/usage-ingestor/dist"
   args = {
+    SERVICE_DIR_NAME = "@hive/usage-ingestor"
     IMAGE_TITLE = "graphql-hive/usage-ingestor"
     IMAGE_DESCRIPTION = "The usage ingestor service of the GraphQL Hive project."
     PORT = "3007"
@@ -268,6 +277,7 @@ target "usage" {
   inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/usage/dist"
   args = {
+    SERVICE_DIR_NAME = "@hive/usage"
     IMAGE_TITLE = "graphql-hive/usage"
     IMAGE_DESCRIPTION = "The usage ingestor service of the GraphQL Hive project."
     PORT = "3006"
@@ -285,6 +295,7 @@ target "webhooks" {
   inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/webhooks/dist"
   args = {
+    SERVICE_DIR_NAME = "@hive/webhooks"
     IMAGE_TITLE = "graphql-hive/webhooks"
     IMAGE_DESCRIPTION = "The webhooks ingestor service of the GraphQL Hive project."
     PORT = "3005"
@@ -302,6 +313,7 @@ target "composition-federation-2" {
   inherits = ["service-base", get_target()]
   context = "${PWD}/packages/services/external-composition/federation-2/dist"
   args = {
+    SERVICE_DIR_NAME = "@hive/external-composition"
     IMAGE_TITLE = "graphql-hive/composition-federation-2"
     IMAGE_DESCRIPTION = "Federation 2 Composition Service for GraphQL Hive."
     PORT = "3069"

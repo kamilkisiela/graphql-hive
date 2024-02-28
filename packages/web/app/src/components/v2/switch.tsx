@@ -20,8 +20,7 @@ export const Switch = ({ className, disabled, ...props }: SwitchProps): ReactEle
           radix-state-checked:bg-orange-500
           hover:radix-state-checked:border-orange-800
           block
-          h-[25px]
-          w-[25px]
+          size-[25px]
           rounded-full
           border-2
           border-transparent

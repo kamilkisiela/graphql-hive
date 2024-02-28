@@ -7,6 +7,7 @@ import { ActivityManager } from '../../activity/providers/activity-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { ProjectAccessScope } from '../../auth/providers/project-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
+import { IdTranslator } from '../../shared/providers/id-translator';
 import { Logger } from '../../shared/providers/logger';
 import { ProjectSelector, Storage, TargetSelector } from '../../shared/providers/storage';
 import { TokenStorage } from '../../token/providers/token-storage';
@@ -29,6 +30,7 @@ export class TargetManager {
     private tokenStorage: TokenStorage,
     private authManager: AuthManager,
     private activityManager: ActivityManager,
+    private idTranslator: IdTranslator,
   ) {
     this.logger = logger.child({ source: 'TargetManager' });
   }
@@ -163,18 +165,11 @@ export class TargetManager {
     });
   });
 
-  async getTargetSettings(
-    selector: TargetSelector & {
-      unsafe__itIsMeInspector?: boolean;
-    },
-  ): Promise<TargetSettings> {
+  async getTargetSettings(selector: TargetSelector): Promise<TargetSettings> {
     this.logger.debug('Fetching target settings (selector=%o)', selector);
     await this.authManager.ensureTargetAccess({
       ...selector,
-      scope:
-        selector.unsafe__itIsMeInspector === true
-          ? TargetAccessScope.READ
-          : TargetAccessScope.SETTINGS,
+      scope: TargetAccessScope.SETTINGS,
     });
 
     return this.storage.getTargetSettings(selector);
@@ -297,6 +292,27 @@ export class TargetManager {
       type: 'ok',
       target,
     } as const;
+  }
+
+  async getTargetById(args: { targetId: string }): Promise<Target> {
+    const breadcrumb = await this.storage.getTargetBreadcrumbForTargetId({
+      targetId: args.targetId,
+    });
+
+    if (!breadcrumb) {
+      throw new Error(`Target not found (targetId=${args.targetId})`);
+    }
+
+    const [organizationId, projectId] = await Promise.all([
+      this.idTranslator.translateOrganizationId(breadcrumb),
+      this.idTranslator.translateProjectId(breadcrumb),
+    ]);
+
+    return this.storage.getTarget({
+      organization: organizationId,
+      project: projectId,
+      target: args.targetId,
+    });
   }
 }
 

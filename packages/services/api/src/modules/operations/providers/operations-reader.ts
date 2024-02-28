@@ -12,6 +12,7 @@ import { Injectable } from 'graphql-modules';
 import * as z from 'zod';
 import { batch } from '@theguild/buddy';
 import type { DateRange } from '../../../shared/entities';
+import { batchBy } from '../../../shared/helpers';
 import { Logger } from '../../shared/providers/logger';
 import { ClickHouse, RowOf, sql } from './clickhouse-client';
 import { calculateTimeWindow } from './helpers';
@@ -223,7 +224,7 @@ export class OperationsReader {
     }).then(r => r[this.makeId({ type, field, argument })]);
   }
 
-  async countFields({
+  private async countFields({
     fields,
     target,
     period,
@@ -238,7 +239,7 @@ export class OperationsReader {
     target: string | readonly string[];
     period: DateRange;
     operations?: readonly string[];
-    excludedClients?: readonly string[];
+    excludedClients?: readonly string[] | null;
   }): Promise<Record<string, number>> {
     const coordinates = fields.map(selector => this.makeId(selector));
     const conditions = [sql`(coordinate IN (${sql.array(coordinates, 'String')}))`];
@@ -368,6 +369,42 @@ export class OperationsReader {
     const total = ensureNumber(result.data[0].total);
 
     return total;
+  }
+
+  /** Read the statistics of fields for a given list of targets in a period. */
+  async readFieldListStats(args: {
+    targetIds: readonly string[];
+    period: DateRange;
+    excludedClients: readonly string[] | null;
+    fields: readonly {
+      type: string;
+      field?: string | null;
+      argument?: string | null;
+    }[];
+  }) {
+    const [totalFields, total] = await Promise.all([
+      this.countFields({
+        fields: args.fields,
+        target: args.targetIds,
+        period: args.period,
+        excludedClients: args.excludedClients,
+      }),
+      this.countOperationsWithoutDetails({ target: args.targetIds, period: args.period }),
+    ]);
+
+    return Object.keys(totalFields).map(id => {
+      const [type, field, argument] = id.split('.');
+      const totalField = totalFields[id] ?? 0;
+
+      return {
+        type,
+        field,
+        argument,
+        period: args.period,
+        count: totalField,
+        percentage: total === 0 ? 0 : (totalField / total) * 100,
+      };
+    });
   }
 
   async countRequests({
@@ -1033,6 +1070,309 @@ export class OperationsReader {
       };
     });
   }
+
+  /** Get the total amount of requests for a list of targets for a period. */
+  async getTotalAmountOfRequests(args: {
+    targetIds: readonly string[];
+    excludedClients: null | readonly string[];
+    period: DateRange;
+  }) {
+    const TotalCountModel = z
+      .tuple([z.object({ amountOfRequests: z.string() })])
+      .transform(data => ensureNumber(data[0].amountOfRequests));
+
+    return await this.clickHouse
+      .query<unknown>({
+        queryId: 'getTotalCountForSchemaCoordinates',
+        query: sql`
+          SELECT 
+            SUM("operations_daily"."total") AS "amountOfRequests"
+          FROM
+            "operations_daily"
+          PREWHERE
+            "operations_daily"."target" IN (${sql.array(args.targetIds, 'String')})
+            AND "operations_daily"."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
+            AND "operations_daily"."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
+            ${args.excludedClients ? sql`AND "operations_daily"."client_name" NOT IN (${sql.array(args.excludedClients, 'String')})` : sql``}
+          `,
+        timeout: 10_000,
+      })
+      .then(result => TotalCountModel.parse(result.data));
+  }
+
+  /** Result array retains the order of the input `args.schemaCoordinates`. */
+  private async _getTopOperationsForSchemaCoordinates(args: {
+    targetIds: readonly string[];
+    excludedClients: null | readonly string[];
+    period: DateRange;
+    schemaCoordinates: string[];
+    requestCountThreshold: number;
+  }) {
+    const RecordArrayType = z.array(
+      z.object({
+        coordinate: z.string(),
+        hash: z.string(),
+        name: z.string(),
+        count: z.string().transform(ensureNumber),
+      }),
+    );
+
+    this.logger.debug('Fetching top operations for schema coordinates (args=%o)', args);
+
+    /**
+     * top_operations_by_coordinates -> get the top operations for schema coordinates, we need to right join operations_daily as coordinates_daily does not contain the client_names column
+     */
+    const results = await this.clickHouse
+      .query<unknown>({
+        queryId: '_getTopOperationsForSchemaCoordinates',
+        query: sql`
+          WITH "top_operations_by_coordinates" AS (
+            SELECT
+              "coordinates_daily"."coordinate" AS "coordinate",
+              "coordinates_daily"."hash" AS "hash",
+              SUM("coordinates_daily"."total") AS "total"
+            FROM
+              "coordinates_daily"
+            RIGHT JOIN (
+              SELECT
+                "hash"
+              FROM
+                "operations_daily"
+              PREWHERE
+                "target" IN (${sql.array(args.targetIds, 'String')})
+                AND "timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
+                AND "timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
+                ${args.excludedClients ? sql`AND "client_name" NOT IN (${sql.array(args.excludedClients, 'String')})` : sql``}
+              LIMIT 1
+              BY "hash"
+            ) AS "coordinates_daily_join" ON "coordinates_daily"."hash" = "coordinates_daily_join"."hash"
+            PREWHERE
+              "coordinates_daily"."target" IN (${sql.array(args.targetIds, 'String')})
+              AND "coordinates_daily"."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
+              AND "coordinates_daily"."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
+              AND "coordinates_daily"."coordinate" IN (${sql.array(args.schemaCoordinates, 'String')})
+            GROUP BY
+              "coordinates_daily"."coordinate",
+              "coordinates_daily"."hash"
+            HAVING SUM("coordinates_daily"."total") >= ${String(args.requestCountThreshold)}
+            ORDER BY
+              "total" DESC,
+              "coordinates_daily"."hash" DESC
+            LIMIT 10
+              BY "coordinates_daily"."coordinate"
+          )
+          SELECT
+            "top_operations_by_coordinates"."coordinate" AS "coordinate",
+            "top_operations_by_coordinates"."hash" AS "hash",
+            "operation_names"."name" AS "name",
+            "top_operations_by_coordinates"."total" AS "count"
+          FROM
+            "top_operations_by_coordinates"
+          LEFT JOIN (
+            SELECT
+              "operation_collection_details"."name",
+              "operation_collection_details"."hash"
+            FROM 
+              "operation_collection_details"
+            WHERE
+              "operation_collection_details"."target" IN (${sql.array(args.targetIds, 'String')})
+              AND "operation_collection_details"."hash" IN (SELECT DISTINCT "hash" FROM "top_operations_by_coordinates")
+            LIMIT 1
+            BY "operation_collection_details"."hash"
+          ) AS "operation_names"
+            ON "operation_names"."hash" = "top_operations_by_coordinates"."hash"
+          ORDER BY
+            "top_operations_by_coordinates"."coordinate" DESC,
+            "top_operations_by_coordinates"."total" DESC
+          `,
+        timeout: 10_000,
+      })
+      .then(result => RecordArrayType.parse(result.data));
+
+    const operationsBySchemaCoordinate = new Map<
+      string,
+      Array<{
+        hash: string;
+        name: string;
+        count: number;
+      }>
+    >();
+
+    for (const result of results) {
+      let records = operationsBySchemaCoordinate.get(result.coordinate);
+      if (!records) {
+        records = [];
+        operationsBySchemaCoordinate.set(result.coordinate, records);
+      }
+      records.push({
+        hash: result.hash,
+        name: result.name,
+        count: result.count,
+      });
+    }
+
+    return args.schemaCoordinates.map(
+      schemaCoordinate => operationsBySchemaCoordinate.get(schemaCoordinate) ?? null,
+    );
+  }
+
+  /** Get the top operations for a given schema coordinate (uses batch loader underneath). */
+  getTopOperationsForSchemaCoordinate = batchBy<
+    {
+      targetIds: readonly string[];
+      excludedClients: null | readonly string[];
+      period: DateRange;
+      schemaCoordinate: string;
+      requestCountThreshold: number;
+    },
+    Array<{
+      hash: string;
+      name: string;
+      count: number;
+    }> | null
+  >(
+    item =>
+      `${item.targetIds.join(',')}-${item.excludedClients?.join(',') ?? ''}-${item.period.from.toISOString()}-${item.period.to.toISOString()}-${item.requestCountThreshold}`,
+    async items => {
+      const schemaCoordinates = items.map(item => item.schemaCoordinate);
+      return await this._getTopOperationsForSchemaCoordinates({
+        targetIds: items[0].targetIds,
+        excludedClients: items[0].excludedClients,
+        period: items[0].period,
+        requestCountThreshold: items[0].requestCountThreshold,
+        schemaCoordinates,
+      }).then(result => result.map(result => Promise.resolve(result)));
+    },
+  );
+
+  /** Result array retains the order of the input `args.schemaCoordinates`. */
+  private async _getTopClientsForSchemaCoordinates(args: {
+    targetIds: readonly string[];
+    excludedClients: null | readonly string[];
+    period: DateRange;
+    schemaCoordinates: string[];
+  }) {
+    const RecordArrayType = z.array(
+      z.object({
+        coordinate: z.string(),
+        name: z.string(),
+        count: z.string().transform(ensureNumber),
+      }),
+    );
+
+    this.logger.debug('Fetching top clients for schema coordinates (args=%o)', args);
+
+    const results = await this.clickHouse
+      .query<unknown>({
+        queryId: '_getTopClientsForSchemaCoordinates',
+        query: sql`
+          WITH "coordinates_to_client_name_mapping" AS (
+           SELECT
+              "coordinates_daily"."coordinate" AS "coordinate",
+              "operations_daily_filtered"."client_name" AS "client_name"
+            FROM
+              "coordinates_daily"
+            LEFT JOIN (
+              SELECT
+                "operations_daily"."hash",
+                "operations_daily"."client_name"
+              FROM
+                "operations_daily"
+              PREWHERE
+                "operations_daily"."target" IN (${sql.array(args.targetIds, 'String')})
+                AND "operations_daily"."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
+                AND "operations_daily"."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
+                ${args.excludedClients ? sql`AND "operations_daily"."client_name" NOT IN (${sql.array(args.excludedClients, 'String')})` : sql``}
+              LIMIT 1
+                BY
+                  "operations_daily"."hash",
+                  "operations_daily"."client_name"
+            ) AS "operations_daily_filtered"
+               ON "operations_daily_filtered"."hash" = "coordinates_daily"."hash"
+            PREWHERE
+              "coordinates_daily"."target" IN (${sql.array(args.targetIds, 'String')})
+              AND "coordinates_daily"."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
+              AND "coordinates_daily"."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
+              AND "coordinates_daily"."coordinate" IN (${sql.array(args.schemaCoordinates, 'String')})
+            LIMIT 1
+            BY
+              "coordinates_daily"."coordinate",
+              "operations_daily_filtered"."client_name"
+          )
+          SELECT
+            "coordinates_to_client_name_mapping"."coordinate" AS "coordinate",
+            "clients_daily"."client_name" AS "name",
+            SUM("clients_daily"."total") AS "count"
+          FROM
+            "clients_daily"
+          LEFT JOIN
+            "coordinates_to_client_name_mapping"
+            ON "clients_daily"."client_name" = "coordinates_to_client_name_mapping"."client_name"
+          PREWHERE
+            "clients_daily"."target" IN (${sql.array(args.targetIds, 'String')})
+            AND "clients_daily"."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
+            AND "clients_daily"."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
+            ${args.excludedClients ? sql`AND "clients_daily"."client_name" NOT IN (${sql.array(args.excludedClients, 'String')})` : sql``}
+          GROUP BY
+            "coordinates_to_client_name_mapping"."coordinate",
+            "clients_daily"."client_name"
+          ORDER BY
+            SUM("clients_daily"."total") DESC
+          LIMIT 10
+          BY
+            "coordinates_to_client_name_mapping"."coordinate",
+            "clients_daily"."client_name"
+        `,
+        timeout: 10_000,
+      })
+      .then(result => RecordArrayType.parse(result.data));
+
+    const operationsBySchemaCoordinate = new Map<
+      string,
+      Array<{
+        name: string;
+        count: number;
+      }>
+    >();
+
+    for (const result of results) {
+      let records = operationsBySchemaCoordinate.get(result.coordinate);
+      if (!records) {
+        records = [];
+        operationsBySchemaCoordinate.set(result.coordinate, records);
+      }
+      records.push({
+        name: result.name === '' ? 'unknown' : result.name,
+        count: result.count,
+      });
+    }
+
+    return args.schemaCoordinates.map(
+      schemaCoordinate => operationsBySchemaCoordinate.get(schemaCoordinate) ?? null,
+    );
+  }
+
+  getTopClientsForSchemaCoordinate = batchBy<
+    {
+      targetIds: readonly string[];
+      excludedClients: null | readonly string[];
+      period: DateRange;
+      schemaCoordinate: string;
+    },
+    Array<{ name: string; count: number }> | null
+  >(
+    item =>
+      `${item.targetIds.join(',')}-${item.excludedClients?.join(',') ?? ''}-${item.period.from.toISOString()}-${item.period.to.toISOString()}`,
+    async items => {
+      const schemaCoordinates = items.map(item => item.schemaCoordinate);
+      return await this._getTopClientsForSchemaCoordinates({
+        targetIds: items[0].targetIds,
+        excludedClients: items[0].excludedClients,
+        period: items[0].period,
+        schemaCoordinates,
+      }).then(result => result.map(result => Promise.resolve(result)));
+    },
+  );
 
   async countClientVersions({
     target,

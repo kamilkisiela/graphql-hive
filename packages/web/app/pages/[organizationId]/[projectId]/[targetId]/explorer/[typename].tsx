@@ -194,7 +194,7 @@ function TypeExplorerPageContent({ typename }: { typename: string }) {
   const currentTarget = query.data?.target;
   const organizationConnection = query.data?.organizations;
   const isCDNEnabled = query.data;
-  const type = currentTarget?.latestSchemaVersion?.explorer.type;
+  const type = currentTarget?.latestSchemaVersion?.explorer?.type;
   const latestSchemaVersion = currentTarget?.latestSchemaVersion;
 
   return (

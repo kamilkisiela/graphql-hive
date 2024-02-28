@@ -6,7 +6,7 @@ import 'graphiql/graphiql.css';
 
 export default function DevPage(): ReactElement {
   return (
-    <div className="mt-20 h-full w-full">
+    <div className="mt-20 size-full">
       <style global jsx>{`
         body.graphiql-dark .graphiql-container {
           --color-base: transparent;
@@ -16,7 +16,7 @@ export default function DevPage(): ReactElement {
       {process.browser && (
         <GraphiQL fetcher={createGraphiQLFetcher({ url: `${location.origin}/api/proxy` })}>
           <GraphiQL.Logo>
-            <HiveLogo className="h-6 w-6" />
+            <HiveLogo className="size-6" />
           </GraphiQL.Logo>
         </GraphiQL>
       )}

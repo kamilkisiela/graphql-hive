@@ -9,6 +9,7 @@ import { createResponse } from './tracked-response';
 
 export type GetArtifactActionFn = (
   targetId: string,
+  contractName: string | null,
   artifactType: ArtifactsType,
   eTag: string | null,
 ) => Promise<
@@ -44,6 +45,10 @@ const ParamsModel = zod.object({
     zod.literal('schema'),
     zod.literal('supergraph'),
   ]),
+  contractName: zod
+    .string()
+    .optional()
+    .transform(value => value ?? null),
 });
 
 const authHeaderName = 'x-hive-cdn-key' as const;
@@ -70,7 +75,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
     return new InvalidAuthKeyResponse(analytics, request);
   };
 
-  router.get('/artifacts/v1/:targetId/:artifactType', async (request: itty.IRequest & Request) => {
+  async function handlerV1(request: itty.IRequest & Request) {
     const parseResult = ParamsModel.safeParse(request.params);
 
     if (parseResult.success === false) {
@@ -120,7 +125,12 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
 
     const eTag = request.headers.get('if-none-match');
 
-    const result = await deps.getArtifactAction(params.targetId, params.artifactType, eTag);
+    const result = await deps.getArtifactAction(
+      params.targetId,
+      params.contractName,
+      params.artifactType,
+      eTag,
+    );
 
     if (result.type === 'notModified') {
       return createResponse(
@@ -197,7 +207,10 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
         request,
       );
     }
-  });
+  }
+
+  router.get('/artifacts/v1/:targetId/contracts/:contractName/:artifactType', handlerV1);
+  router.get('/artifacts/v1/:targetId/:artifactType', handlerV1);
 
   return (request: Request, captureException?: (error: unknown) => void) =>
     router.handle(request, captureException);

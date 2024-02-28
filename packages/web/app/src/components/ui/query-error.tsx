@@ -30,20 +30,16 @@ export function QueryError({
     typeof router.query.organizationId === 'string' ? router.query.organizationId : null;
 
   return (
-    <div className="flex h-full w-full items-center justify-center">
+    <div className="flex size-full items-center justify-center">
       <Button
         variant="outline"
         onClick={() => router.push('/logout')}
         className="absolute right-6 top-6"
       >
-        <LogOutIcon className="mr-2 h-4 w-4" /> Sign out
+        <LogOutIcon className="mr-2 size-4" /> Sign out
       </Button>
       <div className="flex max-w-[960px] flex-col items-center gap-x-6 sm:flex-row">
-        <img
-          src="/images/figures/connection.svg"
-          alt="Ghost"
-          className="block h-[200px] w-[200px]"
-        />
+        <img src="/images/figures/connection.svg" alt="Ghost" className="block size-[200px]" />
         <div className="grow text-center sm:text-left">
           <h1 className="text-xl font-semibold">Oops, something went wrong.</h1>
           <div className="mt-2">

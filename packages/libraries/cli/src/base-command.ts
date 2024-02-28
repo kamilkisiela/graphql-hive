@@ -1,7 +1,6 @@
 import colors from 'colors';
 import { print, type GraphQLError } from 'graphql';
 import type { ExecutionResult } from 'graphql';
-import symbols from 'log-symbols';
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
 import { Command, Errors, Config as OclifConfig } from '@oclif/core';
 import { fetch } from '@whatwg-node/fetch';
@@ -23,19 +22,19 @@ export default abstract class extends Command {
   }
 
   success(...args: any[]) {
-    this.log(colors.green(symbols.success), ...args);
+    this.log(colors.green('✔'), ...args);
   }
 
   fail(...args: any[]) {
-    this.log(colors.red(symbols.error), ...args);
+    this.log(colors.red('✖'), ...args);
   }
 
   info(...args: any[]) {
-    this.log(colors.yellow(symbols.info), ...args);
+    this.log(colors.yellow('ℹ'), ...args);
   }
 
   infoWarning(...args: any[]) {
-    this.log(colors.yellow(symbols.warning), ...args);
+    this.log(colors.yellow('⚠'), ...args);
   }
 
   bolderize(msg: string) {

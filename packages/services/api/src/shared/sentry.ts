@@ -19,7 +19,10 @@ export function sentry(
       };
 
       const lastArgument = args.length > 0 ? (args[args.length - 1] as Span) : null;
-      const passedSpan = lastArgument && 'spanId' in lastArgument ? lastArgument : null;
+      const passedSpan =
+        lastArgument && typeof lastArgument === 'object' && 'spanId' in lastArgument
+          ? lastArgument
+          : null;
 
       if (addToContext) {
         context = {
