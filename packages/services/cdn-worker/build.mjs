@@ -14,7 +14,7 @@ await Promise.all([
     entryPoints: [`${__dirname}/src/dev.ts`],
     bundle: true,
     platform: 'node',
-    target: 'node18',
+    target: 'node21',
     minify: false,
     sourcemap: true,
     outfile: nodeOutputPath,

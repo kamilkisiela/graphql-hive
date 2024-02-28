@@ -8,7 +8,7 @@ jobs:
     with:
       npmTag: alpha
       buildScript: build:libraries
-      nodeVersion: 18
+      nodeVersion: 21
       packageManager: pnpm
     secrets:
       githubToken: ${{ secrets.GITHUB_TOKEN }}

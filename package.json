@@ -15,7 +15,7 @@
   "private": true,
   "packageManager": "pnpm@8.15.4",
   "engines": {
-    "node": ">=18",
+    "node": ">=21.6",
     "pnpm": ">=8.15"
   },
   "scripts": {
@@ -71,7 +71,7 @@
     "@swc/core": "1.4.2",
     "@theguild/eslint-config": "0.11.3",
     "@theguild/prettier-config": "2.0.5",
-    "@types/node": "18.19.18",
+    "@types/node": "20.11.20",
     "bob-the-bundler": "7.0.1",
     "cypress": "13.6.6",
     "dotenv": "16.4.5",
