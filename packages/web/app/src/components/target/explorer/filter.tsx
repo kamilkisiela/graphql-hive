@@ -104,7 +104,7 @@ export function SchemaExplorerFilter({
     <div className="flex flex-row items-center gap-x-4">
       <Input
         className="w-[200px] grow cursor-text"
-        placeholder="Search for a field"
+        placeholder="Filter by field name"
         onChange={e => {
           if (e.target.value === '') {
             const routerQuery = router.query;
