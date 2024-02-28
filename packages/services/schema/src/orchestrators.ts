@@ -418,7 +418,7 @@ function composeFederationV2(
       type: 'success',
       result: {
         supergraph: result.supergraphSdl,
-        sdl: print(transformSupergraphToPublicSchema(parse(result.supergraphSdl))),
+        sdl: result.publicSdl,
       },
       includesNetworkError: false,
     } as const;
@@ -506,7 +506,7 @@ async function composeExternalFederation(args: {
       type: 'success',
       result: {
         supergraph: parseResult.data.result.supergraph,
-        sdl: print(transformSupergraphToPublicSchema(parse(parseResult.data.result.supergraph))),
+        sdl: parseResult.data.result.sdl,
       },
       includesNetworkError: false,
     };
