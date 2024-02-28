@@ -398,7 +398,7 @@ export function GraphQLFields(props: {
   const fieldsFromFragment = useFragment(GraphQLFields_FieldFragment, props.fields);
   const sortedAndFilteredFields = useMemo(
     () =>
-      [...fieldsFromFragment]
+      fieldsFromFragment
         .filter(field => (filterValue ? field.name.includes(filterValue) : true))
         .sort(
           // Sort by usage DESC, name ASC
