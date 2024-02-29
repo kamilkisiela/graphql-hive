@@ -11,7 +11,7 @@ export function deploySentryEventsMonitor(config: {
 
   if (commonEnv.SENTRY_DSN) {
     return new ServiceDeployment('sentry-events-monitor', {
-      image: 'ghcr.io/getsentry/sentry-kubernetes:55429eef4839ecc0267f5acb30e9fcfcca108c30',
+      image: 'ghcr.io/the-guild-org/sentry-kubernetes:d9f489ced1a8eeff4a08c7e2bce427a1545dbbbd',
       imagePullSecret: config.imagePullSecret,
       env: {
         SENTRY_DSN: commonEnv.SENTRY_DSN,
