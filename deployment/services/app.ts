@@ -56,8 +56,14 @@ export function deployApp({
       image,
       replicas: isProduction(deploymentEnv) ? 3 : 1,
       imagePullSecret,
-      readinessProbe: '/api/health',
-      livenessProbe: '/api/health',
+      readinessProbe: {
+        endpoint: '/api/health',
+        initialDelaySeconds: 30,
+      },
+      livenessProbe: {
+        endpoint: '/api/health',
+        initialDelaySeconds: 30,
+      },
       availabilityOnEveryNode: true,
       env: [
         { name: 'DEPLOYED_DNS', value: deploymentEnv.DEPLOYED_DNS },

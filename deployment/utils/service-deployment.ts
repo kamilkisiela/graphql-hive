@@ -14,8 +14,10 @@ export class ServiceDeployment {
       image: string;
       port?: number;
       serviceAccountName?: pulumi.Output<string>;
-      livenessProbe?: string;
-      readinessProbe?: string;
+      livenessProbe?: string | { endpoint: string; timeout?: number; initialDelaySeconds?: number };
+      readinessProbe?:
+        | string
+        | { endpoint: string; timeout?: number; initialDelaySeconds?: number };
       memoryLimit?: string;
       cpuLimit?: string;
       volumes?: k8s.types.input.core.v1.Volume[];
@@ -63,27 +65,48 @@ export class ServiceDeployment {
     let readinessProbe: k8s.types.input.core.v1.Probe | undefined = undefined;
 
     if (this.options.livenessProbe) {
+      let path =
+        typeof this.options.livenessProbe === 'string'
+          ? this.options.livenessProbe
+          : this.options.livenessProbe.endpoint;
+      let timeout =
+        typeof this.options.livenessProbe === 'string' ? 15 : this.options.livenessProbe.timeout;
+      let initialDelaySeconds =
+        typeof this.options.livenessProbe === 'string'
+          ? 5
+          : this.options.livenessProbe.initialDelaySeconds;
       livenessProbe = {
-        initialDelaySeconds: 5,
+        initialDelaySeconds,
         terminationGracePeriodSeconds: 30,
         periodSeconds: 15,
         failureThreshold: 5,
-        timeoutSeconds: 15,
+        timeoutSeconds: timeout,
         httpGet: {
-          path: this.options.livenessProbe,
+          path,
           port,
         },
       };
     }
 
     if (this.options.readinessProbe) {
+      let path =
+        typeof this.options.readinessProbe === 'string'
+          ? this.options.readinessProbe
+          : this.options.readinessProbe.endpoint;
+      let timeout =
+        typeof this.options.readinessProbe === 'string' ? 15 : this.options.readinessProbe.timeout;
+      let initialDelaySeconds =
+        typeof this.options.readinessProbe === 'string'
+          ? 10
+          : this.options.readinessProbe.initialDelaySeconds;
+
       readinessProbe = {
-        initialDelaySeconds: 5,
+        initialDelaySeconds,
         periodSeconds: 30,
         failureThreshold: 5,
-        timeoutSeconds: 15,
+        timeoutSeconds: timeout,
         httpGet: {
-          path: this.options.readinessProbe,
+          path,
           port,
         },
       };
