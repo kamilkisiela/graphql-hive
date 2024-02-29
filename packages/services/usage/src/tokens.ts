@@ -1,5 +1,5 @@
 import LRU from 'tiny-lru';
-import { FastifyLoggerInstance } from '@hive/service-common';
+import { ServiceLogger } from '@hive/service-common';
 import type { TokensApi } from '@hive/tokens';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { tokenCacheHits, tokenRequests } from './metrics';
@@ -18,7 +18,7 @@ export type TokensResponse = {
 
 type Token = TokensResponse | TokenStatus;
 
-export function createTokens(config: { endpoint: string; logger: FastifyLoggerInstance }) {
+export function createTokens(config: { endpoint: string; logger: ServiceLogger }) {
   const endpoint = config.endpoint.replace(/\/$/, '');
   const tokens = LRU<Promise<Token>>(1000, 30_000);
   const tokensApi = createTRPCProxyClient<TokensApi>({

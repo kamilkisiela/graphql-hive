@@ -1,5 +1,5 @@
 import { Kafka, KafkaMessage, logLevel } from 'kafkajs';
-import type { FastifyLoggerInstance } from '@hive/service-common';
+import type { ServiceLogger } from '@hive/service-common';
 import type { RawReport } from '@hive/usage-common';
 import { decompress } from '@hive/usage-common';
 import type { KafkaEnvironment } from './environment';
@@ -37,7 +37,7 @@ function shouldRetryOnFailure(error: any) {
 }
 
 export function createIngestor(config: {
-  logger: FastifyLoggerInstance;
+  logger: ServiceLogger;
   clickhouse: ClickHouseConfig;
   kafka: {
     topic: string;
@@ -193,7 +193,7 @@ async function processMessage({
   processor: ReturnType<typeof createProcessor>;
   writer: ReturnType<typeof createWriter>;
   message: KafkaMessage;
-  logger: FastifyLoggerInstance;
+  logger: ServiceLogger;
 }) {
   reportMessageBytes.observe(message.value!.byteLength);
   // Decompress and parse the message to get a list of reports

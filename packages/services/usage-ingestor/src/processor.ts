@@ -8,7 +8,7 @@ import type {
 import { Kind, parse } from 'graphql';
 import LRU from 'tiny-lru';
 import { normalizeOperation as coreNormalizeOperation } from '@graphql-hive/core';
-import type { FastifyLoggerInstance } from '@hive/service-common';
+import type { ServiceLogger } from '@hive/service-common';
 import type {
   ProcessedOperation,
   RawOperation,
@@ -40,7 +40,7 @@ type NormalizeFunction = (arg: RawOperationMapRecord) => {
 
 const DAY_IN_MS = 86_400_000;
 
-export function createProcessor(config: { logger: FastifyLoggerInstance }) {
+export function createProcessor(config: { logger: ServiceLogger }) {
   const { logger } = config;
   const normalize = cache(
     normalizeOperation,
@@ -151,7 +151,7 @@ function processSingleOperation(
   operationMap: RawOperationMap,
   target: string,
   normalize: NormalizeFunction,
-  logger: FastifyLoggerInstance,
+  logger: ServiceLogger,
 ): ProcessedOperation | null {
   const operationMapRecord = operationMap[operation.operationMapKey];
   const { execution, metadata } = operation;

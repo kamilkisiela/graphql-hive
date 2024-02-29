@@ -19,7 +19,7 @@ import { composeAndValidate, compositionHasErrors } from '@apollo/federation';
 import type { ErrorCode } from '@graphql-hive/external-composition';
 import { stitchSchemas } from '@graphql-tools/stitch';
 import { stitchingDirectives } from '@graphql-tools/stitching-directives';
-import type { FastifyLoggerInstance } from '@hive/service-common';
+import type { ServiceLogger } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import {
   composeServices as nativeComposeServices,
@@ -250,7 +250,7 @@ async function callExternalServiceViaBroker(
     signature: string;
   },
   payload: BrokerPayload,
-  logger: FastifyLoggerInstance,
+  logger: ServiceLogger,
   timeoutMs: number,
   requestId: string,
 ) {
@@ -272,7 +272,7 @@ async function callExternalServiceViaBroker(
 
 async function callExternalService(
   input: { url: string; headers: Record<string, string>; body: string },
-  logger: FastifyLoggerInstance,
+  logger: ServiceLogger,
   timeoutMs: number,
 ) {
   try {
@@ -398,7 +398,7 @@ type SubgraphInput = {
 
 function composeFederationV2(
   subgraphs: Array<SubgraphInput>,
-  logger: FastifyLoggerInstance,
+  logger: ServiceLogger,
 ): ComposerMethodResult {
   try {
     const result = nativeComposeServices(subgraphs);
@@ -443,7 +443,7 @@ function composeFederationV2(
 }
 
 async function composeExternalFederation(args: {
-  logger: FastifyLoggerInstance;
+  logger: ServiceLogger;
   subgraphs: Array<SubgraphInput>;
   decrypt: (value: string) => string;
   external: Exclude<ExternalComposition, null>;
@@ -527,7 +527,7 @@ const federationTypes = new Set([
 
 const createFederation: (
   cache: Cache,
-  logger: FastifyLoggerInstance,
+  logger: ServiceLogger,
   requestId: string,
   decrypt: (value: string) => string,
 ) => Orchestrator = (cache, logger, requestId, decrypt) => {

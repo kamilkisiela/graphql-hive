@@ -1,4 +1,4 @@
-import type { FastifyLoggerInstance } from 'fastify';
+import type { FastifyBaseLogger } from 'fastify';
 import type { Redis } from 'ioredis';
 import ms from 'ms';
 import LRU from 'tiny-lru';
@@ -32,7 +32,7 @@ const TTLSeconds = {
   inMemory: 60, // seconds
 };
 
-function useSafeRedis(redis: Redis, logger: FastifyLoggerInstance) {
+function useSafeRedis(redis: Redis, logger: FastifyBaseLogger) {
   const cache = LRU<string>(1000, TTLSeconds.inMemory * 1000 /* s -> ms */);
 
   // Purge the cache when redis is ready (when it reconnects or when it starts)
@@ -88,7 +88,7 @@ function useSafeRedis(redis: Redis, logger: FastifyLoggerInstance) {
 export function useCache(
   storagePromise: Promise<Storage>,
   redisInstance: Redis,
-  logger: FastifyLoggerInstance,
+  logger: FastifyBaseLogger,
 ): {
   start(): Promise<void>;
   stop(): Promise<void>;
@@ -246,7 +246,7 @@ export function useCache(
   };
 }
 
-function useTokenTouchScheduler(storage: Storage, logger: FastifyLoggerInstance) {
+function useTokenTouchScheduler(storage: Storage, logger: FastifyBaseLogger) {
   const scheduledTokens = new Map<string, Date>();
 
   /**

@@ -359,6 +359,9 @@ importers:
       '@oclif/plugin-update':
         specifier: 3.2.4
         version: 3.2.4(@swc/core@1.4.2)(@types/node@20.11.20)(typescript@5.3.3)
+      '@whatwg-node/fetch':
+        specifier: 0.9.16
+        version: 0.9.16
       colors:
         specifier: 1.4.0
         version: 1.4.0

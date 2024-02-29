@@ -1,6 +1,6 @@
 import Agent from 'agentkeepalive';
 import { got, Response as GotResponse } from 'got';
-import type { FastifyLoggerInstance } from '@hive/service-common';
+import type { ServiceLogger } from '@hive/service-common';
 import { compress } from '@hive/usage-common';
 import * as Sentry from '@sentry/node';
 import { writeDuration } from './metrics';
@@ -38,7 +38,7 @@ export function createWriter({
   logger,
 }: {
   clickhouse: ClickHouseConfig;
-  logger: FastifyLoggerInstance;
+  logger: ServiceLogger;
 }) {
   const httpAgent = new Agent(agentConfig);
   const httpsAgent = new Agent.HttpsAgent(agentConfig);
@@ -98,7 +98,7 @@ async function writeCsv(
   },
   query: string,
   body: Buffer,
-  logger: FastifyLoggerInstance,
+  logger: ServiceLogger,
   maxRetry: number,
 ) {
   const stopTimer = writeDuration.startTimer({

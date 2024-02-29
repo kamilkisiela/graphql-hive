@@ -1,9 +1,9 @@
 import type { Job } from 'bullmq';
-import type { FastifyLoggerInstance, FastifyRequest } from '@hive/service-common';
+import type { FastifyRequest, ServiceLogger } from '@hive/service-common';
 import type { WebhookInput } from './scheduler';
 
 export interface Config {
-  logger: FastifyLoggerInstance;
+  logger: ServiceLogger;
   redis: {
     host: string;
     port: number;
@@ -20,6 +20,6 @@ export interface Config {
 
 export type Context = {
   req: FastifyRequest;
-  errorHandler(message: string, error: Error, logger?: FastifyLoggerInstance | undefined): void;
+  errorHandler(message: string, error: Error, logger?: ServiceLogger | undefined): void;
   schedule(webhook: WebhookInput): Promise<Job<any, any, string>>;
 };

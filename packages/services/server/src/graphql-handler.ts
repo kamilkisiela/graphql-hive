@@ -1,10 +1,5 @@
 import { createHash } from 'node:crypto';
-import type {
-  FastifyLoggerInstance,
-  FastifyReply,
-  FastifyRequest,
-  RouteHandlerMethod,
-} from 'fastify';
+import type { FastifyBaseLogger, FastifyReply, FastifyRequest, RouteHandlerMethod } from 'fastify';
 import {
   DocumentNode,
   GraphQLError,
@@ -70,7 +65,7 @@ export interface GraphQLHandlerOptions {
   isProduction: boolean;
   hiveConfig: HiveConfig;
   release: string;
-  logger: FastifyLoggerInstance;
+  logger: FastifyBaseLogger;
   persistedOperations: Record<string, DocumentNode | string> | null;
 }
 
