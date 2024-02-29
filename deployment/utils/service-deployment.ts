@@ -4,6 +4,11 @@ import * as pulumi from '@pulumi/pulumi';
 import { isDefined } from './helpers';
 import { normalizeEnv, PodBuilder } from './pod-builder';
 
+type ProbeConfig = Omit<
+  k8s.types.input.core.v1.Probe,
+  'httpGet' | 'exec' | 'grpc' | 'tcpSocket'
+> & { endpoint: string };
+
 export class ServiceDeployment {
   constructor(
     protected name: string,
@@ -13,8 +18,10 @@ export class ServiceDeployment {
       args?: kx.types.Container['args'];
       image: string;
       port?: number;
-      livenessProbe?: string;
-      readinessProbe?: string;
+      serviceAccountName?: pulumi.Output<string>;
+      livenessProbe?: string | ProbeConfig;
+      readinessProbe?: string | ProbeConfig;
+      startupProbe?: string | ProbeConfig;
       memoryLimit?: string;
       cpuLimit?: string;
       volumes?: k8s.types.input.core.v1.Volume[];
@@ -58,40 +65,79 @@ export class ServiceDeployment {
     const port = this.options.port || 3000;
     const additionalEnv: any[] = normalizeEnv(this.options.env);
 
+    let startupProbe: k8s.types.input.core.v1.Probe | undefined = undefined;
     let livenessProbe: k8s.types.input.core.v1.Probe | undefined = undefined;
     let readinessProbe: k8s.types.input.core.v1.Probe | undefined = undefined;
 
     if (this.options.livenessProbe) {
-      livenessProbe = {
-        initialDelaySeconds: 5,
-        periodSeconds: 10,
-        failureThreshold: 5,
-        timeoutSeconds: 15,
-        httpGet: {
-          path: this.options.livenessProbe,
-          port,
-        },
-      };
+      livenessProbe =
+        typeof this.options.livenessProbe === 'string'
+          ? {
+              initialDelaySeconds: 10,
+              terminationGracePeriodSeconds: 60,
+              periodSeconds: 10,
+              failureThreshold: 5,
+              timeoutSeconds: 5,
+              httpGet: {
+                path: this.options.livenessProbe,
+                port,
+              },
+            }
+          : {
+              ...this.options.livenessProbe,
+              httpGet: {
+                path: this.options.livenessProbe.endpoint,
+                port,
+              },
+            };
     }
 
     if (this.options.readinessProbe) {
-      readinessProbe = {
-        initialDelaySeconds: 5,
-        periodSeconds: 30,
-        failureThreshold: 5,
-        timeoutSeconds: 15,
-        httpGet: {
-          path: this.options.readinessProbe,
-          port,
-        },
-      };
+      readinessProbe =
+        typeof this.options.readinessProbe === 'string'
+          ? {
+              initialDelaySeconds: 20,
+              periodSeconds: 15,
+              failureThreshold: 5,
+              timeoutSeconds: 5,
+              httpGet: {
+                path: this.options.readinessProbe,
+                port,
+              },
+            }
+          : {
+              ...this.options.readinessProbe,
+              httpGet: {
+                path: this.options.readinessProbe.endpoint,
+                port,
+              },
+            };
+    }
+
+    if (this.options.startupProbe) {
+      startupProbe =
+        typeof this.options.startupProbe === 'string'
+          ? {
+              initialDelaySeconds: 80,
+              periodSeconds: 30,
+              failureThreshold: 5,
+              timeoutSeconds: 10,
+              httpGet: {
+                path: this.options.startupProbe,
+                port,
+              },
+            }
+          : {
+              ...this.options.startupProbe,
+              httpGet: {
+                path: this.options.startupProbe.endpoint,
+                port,
+              },
+            };
     }
 
     if (this.options.exposesMetrics) {
-      additionalEnv.push(
-        { name: 'METRICS_ENABLED', value: 'true' }, // TODO: remove this
-        { name: 'PROMETHEUS_METRICS', value: '1' },
-      );
+      additionalEnv.push({ name: 'PROMETHEUS_METRICS', value: '1' });
     }
 
     const topologySpreadConstraints: k8s.types.input.core.v1.TopologySpreadConstraint[] = [];
@@ -119,10 +165,12 @@ export class ServiceDeployment {
       terminationGracePeriodSeconds: 60,
       volumes: this.options.volumes,
       topologySpreadConstraints,
+      serviceAccountName: this.options.serviceAccountName,
       containers: [
         {
           livenessProbe,
           readinessProbe,
+          startupProbe,
           volumeMounts: this.options.volumeMounts,
           imagePullPolicy: 'Always',
           env: [

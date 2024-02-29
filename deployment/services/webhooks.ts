@@ -47,6 +47,7 @@ export function deployWebhooks({
       },
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
+      startupProbe: '/_health',
       exposesMetrics: true,
       replicas: isProduction(deploymentEnv) ? 3 : 1,
       image,

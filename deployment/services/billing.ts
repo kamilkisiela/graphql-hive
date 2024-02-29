@@ -43,6 +43,7 @@ export function deployStripeBilling({
       replicas: isProduction(deploymentEnv) ? 3 : 1,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
+      startupProbe: '/_health',
       env: {
         ...deploymentEnv,
         ...commonEnv,

@@ -52,6 +52,7 @@ export function deployEmails({
       },
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
+      startupProbe: '/_health',
       exposesMetrics: true,
       image,
       replicas: isProduction(deploymentEnv) ? 3 : 1,

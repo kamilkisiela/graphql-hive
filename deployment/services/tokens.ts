@@ -41,6 +41,7 @@ export function deployTokens({
       imagePullSecret,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
+      startupProbe: '/_health',
       exposesMetrics: true,
       availabilityOnEveryNode: true,
       replicas: isProduction(deploymentEnv) ? 3 : 1,

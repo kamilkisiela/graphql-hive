@@ -101,6 +101,13 @@ export function deployGraphQL({
       pdb: true,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
+      startupProbe: {
+        endpoint: '/_health',
+        initialDelaySeconds: 60,
+        failureThreshold: 10,
+        periodSeconds: 15,
+        timeoutSeconds: 15,
+      },
       availabilityOnEveryNode: true,
       env: {
         ...apiEnv,
