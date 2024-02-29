@@ -58,7 +58,13 @@ export function deployApp({
       imagePullSecret,
       readinessProbe: '/api/health',
       livenessProbe: '/api/health',
-      startupProbe: '/api/health',
+      startupProbe: {
+        endpoint: '/api/health',
+        initialDelaySeconds: 130,
+        failureThreshold: 5,
+        periodSeconds: 30,
+        timeoutSeconds: 15,
+      },
       availabilityOnEveryNode: true,
       env: [
         { name: 'DEPLOYED_DNS', value: deploymentEnv.DEPLOYED_DNS },

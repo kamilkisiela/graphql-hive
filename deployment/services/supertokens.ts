@@ -24,6 +24,16 @@ export function deploySuperTokens(
         ports: {
           http: port,
         },
+        startupProbe: {
+          initialDelaySeconds: 15,
+          periodSeconds: 20,
+          failureThreshold: 5,
+          timeoutSeconds: 5,
+          httpGet: {
+            path: '/hello',
+            port,
+          },
+        },
         readinessProbe: {
           initialDelaySeconds: 5,
           periodSeconds: 20,

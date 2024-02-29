@@ -74,7 +74,7 @@ export class ServiceDeployment {
         typeof this.options.livenessProbe === 'string'
           ? {
               initialDelaySeconds: 10,
-              terminationGracePeriodSeconds: 30,
+              terminationGracePeriodSeconds: 60,
               periodSeconds: 10,
               failureThreshold: 5,
               timeoutSeconds: 5,
@@ -96,8 +96,8 @@ export class ServiceDeployment {
       readinessProbe =
         typeof this.options.readinessProbe === 'string'
           ? {
-              initialDelaySeconds: 10,
-              periodSeconds: 10,
+              initialDelaySeconds: 20,
+              periodSeconds: 15,
               failureThreshold: 5,
               timeoutSeconds: 5,
               httpGet: {
@@ -118,7 +118,8 @@ export class ServiceDeployment {
       startupProbe =
         typeof this.options.startupProbe === 'string'
           ? {
-              initialDelaySeconds: 10,
+              initialDelaySeconds: 80,
+              periodSeconds: 30,
               failureThreshold: 5,
               timeoutSeconds: 10,
               httpGet: {
@@ -136,10 +137,7 @@ export class ServiceDeployment {
     }
 
     if (this.options.exposesMetrics) {
-      additionalEnv.push(
-        { name: 'METRICS_ENABLED', value: 'true' }, // TODO: remove this
-        { name: 'PROMETHEUS_METRICS', value: '1' },
-      );
+      additionalEnv.push({ name: 'PROMETHEUS_METRICS', value: '1' });
     }
 
     const topologySpreadConstraints: k8s.types.input.core.v1.TopologySpreadConstraint[] = [];
