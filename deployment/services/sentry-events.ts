@@ -6,6 +6,7 @@ export function deploySentryEventsMonitor(config: {
   envName: string;
   imagePullSecret: k8s.core.v1.Secret;
 }) {
+  const namepsacesToTrack = ['default', 'observability', 'contour', 'cert-manager'];
   const commonConfig = new pulumi.Config('common');
   const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 
@@ -16,15 +17,31 @@ export function deploySentryEventsMonitor(config: {
         namespace: 'default',
       },
     });
+    const READ_ONLY = ['get', 'list', 'watch'];
     let clusterRole = new k8s.rbac.v1.ClusterRole('sentry-k8s-agent-cluster', {
       metadata: {
         name: 'sentry-k8s-agent-cluster',
       },
       rules: [
         {
+          apiGroups: ['batch'],
+          resources: ['jobs', 'cronjobs'],
+          verbs: READ_ONLY,
+        },
+        {
           apiGroups: [''],
-          resources: ['pods', 'events'],
-          verbs: ['get', 'list', 'watch'],
+          resources: [
+            'pods',
+            'events',
+            'deployments',
+            'replicasets',
+            'statefulsets',
+            'daemonsets',
+            'jobs',
+            'cronjobs',
+            'namespaces',
+          ],
+          verbs: READ_ONLY,
         },
       ],
     });
@@ -54,8 +71,7 @@ export function deploySentryEventsMonitor(config: {
       env: {
         SENTRY_DSN: commonEnv.SENTRY_DSN,
         SENTRY_ENVIRONMENT: config.envName === 'dev' ? 'development' : config.envName,
-        SENTRY_K8S_WATCH_NAMESPACES: 'default,observability,contour,cert-manager',
-        SENTRY_K8S_MONITOR_CRONJOBS: '0',
+        SENTRY_K8S_WATCH_NAMESPACES: namepsacesToTrack.join(','),
       },
     }).deploy();
   } else {
