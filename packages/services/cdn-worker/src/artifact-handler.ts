@@ -134,7 +134,7 @@ export const createArtifactRequestHandler = (deps: ArtifactRequestHandler) => {
     if (result.type === 'notModified') {
       return createResponse(
         analytics,
-        '',
+        null,
         {
           status: 304,
         },
