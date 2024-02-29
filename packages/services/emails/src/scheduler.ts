@@ -2,7 +2,7 @@ import { Job, Queue, Worker } from 'bullmq';
 import Redis, { Redis as RedisInstance } from 'ioredis';
 import mjml2html from 'mjml';
 import pTimeout from 'p-timeout';
-import type { FastifyLoggerInstance } from '@hive/service-common';
+import type { ServiceLogger } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import { emailsFailuresTotal, emailsTotal } from './metrics';
 import type { EmailProvider } from './providers';
@@ -13,7 +13,7 @@ const DAY_IN_SECONDS = 86_400;
 export const clientCommandMessageReg = /ERR unknown command ['`]\s*client\s*['`]/;
 
 export function createScheduler(config: {
-  logger: FastifyLoggerInstance;
+  logger: ServiceLogger;
   redis: {
     host: string;
     port: number;

@@ -1,10 +1,10 @@
-import type { FastifyLoggerInstance } from 'fastify';
+import type { FastifyBaseLogger } from 'fastify';
 
 const errorTypes = ['unhandledRejection', 'uncaughtException'];
 const signalTraps = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
 
 export function registerShutdown(config: {
-  logger: FastifyLoggerInstance;
+  logger: FastifyBaseLogger;
   onShutdown(): void | Promise<void>;
 }): (reason?: string) => Promise<void> {
   let exited = false;

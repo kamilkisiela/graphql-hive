@@ -1,5 +1,5 @@
 export { createServer } from './fastify';
-export type { FastifyLoggerInstance, FastifyRequest } from './fastify';
+export type { FastifyBaseLogger as ServiceLogger, FastifyRequest } from './fastify';
 export * from './errors';
 export * from './metrics';
 export * from './heartbeats';

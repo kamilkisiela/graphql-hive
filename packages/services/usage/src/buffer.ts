@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import type { FastifyLoggerInstance } from '@hive/service-common';
+import type { ServiceLogger } from '@hive/service-common';
 
 export class BufferTooBigError extends Error {
   constructor(public bytes: number) {
@@ -46,7 +46,7 @@ export function createEstimator(config: {
    * Increase the default bytes per operation by 0-1.
    */
   increaseBy: (info: { calls: number; overflows: number }) => number;
-  logger: FastifyLoggerInstance;
+  logger: ServiceLogger;
 }) {
   let calls = 0;
   let overflows = 0;
@@ -123,7 +123,7 @@ export function createEstimator(config: {
 }
 
 export function createKVBuffer<T>(config: {
-  logger: FastifyLoggerInstance;
+  logger: ServiceLogger;
   size: number;
   interval: number;
   limitInBytes: number;

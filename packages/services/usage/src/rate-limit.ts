@@ -1,12 +1,9 @@
 import LRU from 'tiny-lru';
 import type { RateLimitApi, RateLimitApiInput, RateLimitApiOutput } from '@hive/rate-limit';
-import { FastifyLoggerInstance } from '@hive/service-common';
+import { ServiceLogger } from '@hive/service-common';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 
-export function createUsageRateLimit(config: {
-  endpoint: string | null;
-  logger: FastifyLoggerInstance;
-}) {
+export function createUsageRateLimit(config: { endpoint: string | null; logger: ServiceLogger }) {
   const logger = config.logger;
 
   if (!config.endpoint) {

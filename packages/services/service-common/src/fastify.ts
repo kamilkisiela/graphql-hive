@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/node';
 import { useRequestLogging } from './request-logs';
 import { useSentryTracing } from './sentry';
 
-export type { FastifyLoggerInstance, FastifyRequest } from 'fastify';
+export type { FastifyBaseLogger, FastifyRequest } from 'fastify';
 
 export async function createServer(options: {
   tracing: boolean;

@@ -284,9 +284,6 @@ importers:
       '@types/ioredis':
         specifier: 4.28.10
         version: 4.28.10
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       bcryptjs:
         specifier: 2.4.3
         version: 2.4.3
@@ -700,9 +697,6 @@ importers:
       '@types/service-worker-mock':
         specifier: 2.0.4
         version: 2.0.4
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       '@whatwg-node/server':
         specifier: 0.9.25
         version: 0.9.25
@@ -712,9 +706,6 @@ importers:
       itty-router:
         specifier: 4.0.27
         version: 4.0.27
-      nock:
-        specifier: 13.5.3
-        version: 13.5.3
       toucan-js:
         specifier: 3.3.1
         version: 3.3.1
@@ -739,9 +730,6 @@ importers:
       '@types/service-worker-mock':
         specifier: 2.0.4
         version: 2.0.4
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       '@whatwg-node/server':
         specifier: 0.9.25
         version: 0.9.25

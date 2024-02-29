@@ -2,7 +2,7 @@ import { createHash } from 'crypto';
 import stringify from 'fast-json-stable-stringify';
 import type { Redis } from 'ioredis';
 import pTimeout, { TimeoutError } from 'p-timeout';
-import type { FastifyLoggerInstance } from '@hive/service-common';
+import type { ServiceLogger } from '@hive/service-common';
 import { externalCompositionCounter } from './metrics';
 
 function createChecksum<TInput>(input: TInput): string {
@@ -13,7 +13,7 @@ type CacheTTLType = 'long' | 'short';
 
 export function createCache(options: {
   redis: Redis;
-  logger: Pick<FastifyLoggerInstance, 'debug' | 'warn'>;
+  logger: Pick<ServiceLogger, 'debug' | 'warn'>;
   /**
    * Prefix for all keys stored in Redis
    */
