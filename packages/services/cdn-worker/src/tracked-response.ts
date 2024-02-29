@@ -1,7 +1,4 @@
-import { createFetch } from '@whatwg-node/fetch';
 import type { Analytics } from './analytics';
-
-const { Response } = createFetch({ useNodeFetch: true });
 
 export function createResponse(
   analytics: Analytics,

@@ -284,9 +284,6 @@ importers:
       '@types/ioredis':
         specifier: 4.28.10
         version: 4.28.10
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       bcryptjs:
         specifier: 2.4.3
         version: 2.4.3
@@ -362,9 +359,6 @@ importers:
       '@oclif/plugin-update':
         specifier: 3.2.4
         version: 3.2.4(@swc/core@1.4.2)(@types/node@20.11.20)(typescript@5.3.3)
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       colors:
         specifier: 1.4.0
         version: 1.4.0
@@ -700,9 +694,6 @@ importers:
       '@types/service-worker-mock':
         specifier: 2.0.4
         version: 2.0.4
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       '@whatwg-node/server':
         specifier: 0.9.25
         version: 0.9.25
@@ -739,9 +730,6 @@ importers:
       '@types/service-worker-mock':
         specifier: 2.0.4
         version: 2.0.4
-      '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
       '@whatwg-node/server':
         specifier: 0.9.25
         version: 0.9.25
