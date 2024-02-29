@@ -21,7 +21,7 @@
     "@sentry/types": "7.103.0",
     "@tgriesser/schemats": "9.0.1",
     "@theguild/buddy": "0.1.0",
-    "@types/node": "20.11.20",
+    "@types/node": "20.11.23",
     "@types/pg": "8.11.2",
     "dotenv": "16.4.5",
     "fast-json-stable-stringify": "2.1.0",
