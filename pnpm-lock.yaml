@@ -703,9 +703,6 @@ importers:
       itty-router:
         specifier: 4.0.27
         version: 4.0.27
-      nock:
-        specifier: 13.5.3
-        version: 13.5.3
       toucan-js:
         specifier: 3.3.1
         version: 3.3.1
