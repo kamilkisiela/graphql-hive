@@ -29,6 +29,11 @@ export function deploySentryEventsMonitor(config: {
           verbs: READ_ONLY,
         },
         {
+          apiGroups: ['extensions', 'apps'],
+          resources: ['deployments', 'replicasets'],
+          verbs: READ_ONLY,
+        },
+        {
           apiGroups: [''],
           resources: [
             'pods',
