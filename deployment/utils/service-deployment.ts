@@ -65,7 +65,8 @@ export class ServiceDeployment {
     if (this.options.livenessProbe) {
       livenessProbe = {
         initialDelaySeconds: 5,
-        periodSeconds: 10,
+        terminationGracePeriodSeconds: 30,
+        periodSeconds: 15,
         failureThreshold: 5,
         timeoutSeconds: 15,
         httpGet: {
