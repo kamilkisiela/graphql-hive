@@ -4,6 +4,11 @@ import * as pulumi from '@pulumi/pulumi';
 import { isDefined } from './helpers';
 import { normalizeEnv, PodBuilder } from './pod-builder';
 
+type ProbeConfig = Omit<
+  k8s.types.input.core.v1.Probe,
+  'httpGet' | 'exec' | 'grpc' | 'tcpSocket'
+> & { endpoint: string };
+
 export class ServiceDeployment {
   constructor(
     protected name: string,
@@ -14,10 +19,9 @@ export class ServiceDeployment {
       image: string;
       port?: number;
       serviceAccountName?: pulumi.Output<string>;
-      livenessProbe?: string | { endpoint: string; timeout?: number; initialDelaySeconds?: number };
-      readinessProbe?:
-        | string
-        | { endpoint: string; timeout?: number; initialDelaySeconds?: number };
+      livenessProbe?: string | ProbeConfig;
+      readinessProbe?: string | ProbeConfig;
+      startupProbe?: string | ProbeConfig;
       memoryLimit?: string;
       cpuLimit?: string;
       volumes?: k8s.types.input.core.v1.Volume[];
@@ -61,55 +65,74 @@ export class ServiceDeployment {
     const port = this.options.port || 3000;
     const additionalEnv: any[] = normalizeEnv(this.options.env);
 
+    let startupProbe: k8s.types.input.core.v1.Probe | undefined = undefined;
     let livenessProbe: k8s.types.input.core.v1.Probe | undefined = undefined;
     let readinessProbe: k8s.types.input.core.v1.Probe | undefined = undefined;
 
     if (this.options.livenessProbe) {
-      let path =
+      livenessProbe =
         typeof this.options.livenessProbe === 'string'
-          ? this.options.livenessProbe
-          : this.options.livenessProbe.endpoint;
-      let timeout =
-        typeof this.options.livenessProbe === 'string' ? 15 : this.options.livenessProbe.timeout;
-      let initialDelaySeconds =
-        typeof this.options.livenessProbe === 'string'
-          ? 5
-          : this.options.livenessProbe.initialDelaySeconds;
-      livenessProbe = {
-        initialDelaySeconds,
-        terminationGracePeriodSeconds: 30,
-        periodSeconds: 15,
-        failureThreshold: 5,
-        timeoutSeconds: timeout,
-        httpGet: {
-          path,
-          port,
-        },
-      };
+          ? {
+              initialDelaySeconds: 10,
+              terminationGracePeriodSeconds: 30,
+              periodSeconds: 10,
+              failureThreshold: 5,
+              timeoutSeconds: 5,
+              httpGet: {
+                path: this.options.livenessProbe,
+                port,
+              },
+            }
+          : {
+              ...this.options.livenessProbe,
+              httpGet: {
+                path: this.options.livenessProbe.endpoint,
+                port,
+              },
+            };
     }
 
     if (this.options.readinessProbe) {
-      let path =
+      readinessProbe =
         typeof this.options.readinessProbe === 'string'
-          ? this.options.readinessProbe
-          : this.options.readinessProbe.endpoint;
-      let timeout =
-        typeof this.options.readinessProbe === 'string' ? 15 : this.options.readinessProbe.timeout;
-      let initialDelaySeconds =
-        typeof this.options.readinessProbe === 'string'
-          ? 10
-          : this.options.readinessProbe.initialDelaySeconds;
+          ? {
+              initialDelaySeconds: 10,
+              periodSeconds: 10,
+              failureThreshold: 5,
+              timeoutSeconds: 5,
+              httpGet: {
+                path: this.options.readinessProbe,
+                port,
+              },
+            }
+          : {
+              ...this.options.readinessProbe,
+              httpGet: {
+                path: this.options.readinessProbe.endpoint,
+                port,
+              },
+            };
+    }
 
-      readinessProbe = {
-        initialDelaySeconds,
-        periodSeconds: 30,
-        failureThreshold: 5,
-        timeoutSeconds: timeout,
-        httpGet: {
-          path,
-          port,
-        },
-      };
+    if (this.options.startupProbe) {
+      startupProbe =
+        typeof this.options.startupProbe === 'string'
+          ? {
+              initialDelaySeconds: 10,
+              failureThreshold: 5,
+              timeoutSeconds: 10,
+              httpGet: {
+                path: this.options.startupProbe,
+                port,
+              },
+            }
+          : {
+              ...this.options.startupProbe,
+              httpGet: {
+                path: this.options.startupProbe.endpoint,
+                port,
+              },
+            };
     }
 
     if (this.options.exposesMetrics) {
@@ -149,6 +172,7 @@ export class ServiceDeployment {
         {
           livenessProbe,
           readinessProbe,
+          startupProbe,
           volumeMounts: this.options.volumeMounts,
           imagePullPolicy: 'Always',
           env: [
