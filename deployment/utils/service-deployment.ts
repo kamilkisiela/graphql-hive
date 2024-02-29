@@ -13,6 +13,7 @@ export class ServiceDeployment {
       args?: kx.types.Container['args'];
       image: string;
       port?: number;
+      serviceAccountName?: pulumi.Output<string>;
       livenessProbe?: string;
       readinessProbe?: string;
       memoryLimit?: string;
@@ -119,6 +120,7 @@ export class ServiceDeployment {
       terminationGracePeriodSeconds: 60,
       volumes: this.options.volumes,
       topologySpreadConstraints,
+      serviceAccountName: this.options.serviceAccountName,
       containers: [
         {
           livenessProbe,
