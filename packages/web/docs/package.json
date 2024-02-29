@@ -8,13 +8,13 @@
     "dev": "next"
   },
   "dependencies": {
-    "@next/env": "13.5.6",
+    "@next/env": "14.1.0",
     "@radix-ui/react-tooltip": "1.0.7",
     "@theguild/components": "5.2.4",
     "clsx": "2.1.0",
     "date-fns": "3.3.1",
     "gray-matter": "4.0.3",
-    "next": "13.5.6",
+    "next": "14.1.0",
     "next-themes": "*",
     "react": "18.2.0",
     "react-avatar": "5.0.3",
