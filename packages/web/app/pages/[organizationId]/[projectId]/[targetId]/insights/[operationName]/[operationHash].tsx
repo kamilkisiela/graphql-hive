@@ -1,5 +1,6 @@
 import { ReactElement, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
+import { RefreshCw } from 'lucide-react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Section } from '@/components/common';
@@ -7,15 +8,10 @@ import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { ClientsFilterTrigger } from '@/components/target/insights/Filters';
 import { OperationsStats } from '@/components/target/insights/Stats';
+import { Button } from '@/components/ui/button';
+import { DateRangePicker, presetLast1Day } from '@/components/ui/date-range-picker';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { EmptyList, MetaTitle } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
@@ -76,15 +72,9 @@ function OperationView({
   operationHash: string;
   operationName: string;
 }): ReactElement {
-  const {
-    updateDateRangeByKey,
-    dateRangeKey,
-    displayDateRangeLabel,
-    availableDateRangeOptions,
-    dateRange,
-    resolution,
-  } = useDateRangeController({
+  const dateRangeController = useDateRangeController({
     dataRetentionInDays,
+    defaultPreset: presetLast1Day,
   });
   const [selectedClients, setSelectedClients] = useState<string[]>([]);
   const operationsList = useMemo(() => [operationHash], [operationHash]);
@@ -98,34 +88,32 @@ function OperationView({
         </div>
         <div className="flex justify-end gap-x-2">
           <ClientsFilterTrigger
-            period={dateRange}
+            period={dateRangeController.resolvedRange}
             selected={selectedClients}
             onFilter={setSelectedClients}
           />
-          <Select onValueChange={updateDateRangeByKey} defaultValue={dateRangeKey}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={displayDateRangeLabel(dateRangeKey)} />
-            </SelectTrigger>
-            <SelectContent>
-              {availableDateRangeOptions.map(key => (
-                <SelectItem key={key} value={key}>
-                  {displayDateRangeLabel(key)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <DateRangePicker
+            validUnits={['y', 'M', 'w', 'd', 'h']}
+            selectedRange={dateRangeController.selectedPreset.range}
+            startDate={dateRangeController.startDate}
+            align="end"
+            onUpdate={args => dateRangeController.setSelectedPreset(args.preset)}
+          />
+          <Button variant="outline" onClick={() => dateRangeController.refreshResolvedRange()}>
+            <RefreshCw className="size-4" />
+          </Button>
         </div>
       </div>
       <OperationsStats
         organization={organizationCleanId}
         project={projectCleanId}
         target={targetCleanId}
-        period={dateRange}
-        dateRangeText={displayDateRangeLabel(dateRangeKey)}
+        period={dateRangeController.resolvedRange}
+        dateRangeText={dateRangeController.selectedPreset.label}
         operationsFilter={operationsList}
         clientNamesFilter={selectedClients}
-        resolution={resolution}
         mode="operation-page"
+        resolution={30}
       />
       <div className="mt-12 w-full rounded-md border border-gray-800 bg-gray-900/50 p-5">
         <Section.Title>Operation body</Section.Title>

@@ -1,19 +1,13 @@
 import { memo, ReactElement, useEffect, useMemo, useState } from 'react';
-import { AlertCircleIcon } from 'lucide-react';
+import { AlertCircleIcon, RefreshCw } from 'lucide-react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { DateRangePicker, presetLast7Days } from '@/components/ui/date-range-picker';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Link, MetaTitle } from '@/components/v2';
 import { EmptyList, noSchemaVersion } from '@/components/v2/empty-list';
@@ -185,15 +179,9 @@ function UnusedSchemaExplorer(props: {
   projectCleanId: string;
   targetCleanId: string;
 }) {
-  const {
-    updateDateRangeByKey,
-    dateRangeKey,
-    displayDateRangeLabel,
-    availableDateRangeOptions,
-    dateRange,
-  } = useDateRangeController({
+  const dateRangeController = useDateRangeController({
     dataRetentionInDays: props.dataRetentionInDays,
-    minKey: '7d',
+    defaultPreset: presetLast7Days,
   });
 
   const [query] = useQuery({
@@ -202,7 +190,7 @@ function UnusedSchemaExplorer(props: {
       organizationId: props.organizationCleanId,
       projectId: props.projectCleanId,
       targetId: props.targetCleanId,
-      period: dateRange,
+      period: dateRangeController.resolvedRange,
     },
   });
 
@@ -223,22 +211,16 @@ function UnusedSchemaExplorer(props: {
           </Subtitle>
         </div>
         <div className="flex justify-end gap-x-2">
-          <Select
-            onValueChange={updateDateRangeByKey}
-            defaultValue={dateRangeKey}
-            disabled={query.fetching}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={displayDateRangeLabel(dateRangeKey)} />
-            </SelectTrigger>
-            <SelectContent>
-              {availableDateRangeOptions.map(key => (
-                <SelectItem key={key} value={key}>
-                  {displayDateRangeLabel(key)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <DateRangePicker
+            validUnits={['y', 'M', 'w', 'd']}
+            selectedRange={dateRangeController.selectedPreset.range}
+            startDate={dateRangeController.startDate}
+            align="end"
+            onUpdate={args => dateRangeController.setSelectedPreset(args.preset)}
+          />
+          <Button variant="outline" onClick={() => dateRangeController.refreshResolvedRange()}>
+            <RefreshCw className="size-4" />
+          </Button>
           <Button variant="outline" asChild>
             <Link
               href={{

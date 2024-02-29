@@ -1055,7 +1055,7 @@ export function OperationsStats({
         target,
         period,
       },
-      resolution,
+      resolution: 30,
     },
   });
 

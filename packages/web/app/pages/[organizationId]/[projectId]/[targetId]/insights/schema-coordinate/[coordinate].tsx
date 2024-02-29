@@ -3,21 +3,16 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { differenceInMilliseconds } from 'date-fns';
 import ReactECharts from 'echarts-for-react';
-import { ActivityIcon, BookIcon, GlobeIcon, TabletSmartphoneIcon } from 'lucide-react';
+import { ActivityIcon, BookIcon, GlobeIcon, RefreshCw, TabletSmartphoneIcon } from 'lucide-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DateRangePicker, presetLast7Days } from '@/components/ui/date-range-picker';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { EmptyList, MetaTitle } from '@/components/v2';
 import { CHART_PRIMARY_COLOR } from '@/constants';
 import { graphql } from '@/gql';
@@ -63,16 +58,9 @@ function SchemaCoordinateView(props: {
   targetCleanId: string;
 }) {
   const styles = useChartStyles();
-  const {
-    updateDateRangeByKey,
-    dateRangeKey,
-    displayDateRangeLabel,
-    availableDateRangeOptions,
-    dateRange,
-    resolution,
-  } = useDateRangeController({
+  const dateRangeController = useDateRangeController({
     dataRetentionInDays: props.dataRetentionInDays,
-    minKey: '7d',
+    defaultPreset: presetLast7Days,
   });
 
   const [query] = useQuery({
@@ -83,15 +71,11 @@ function SchemaCoordinateView(props: {
         project: props.projectCleanId,
         target: props.targetCleanId,
         schemaCoordinate: props.coordinate,
-        period: dateRange,
+        period: dateRangeController.resolvedRange,
       },
-      resolution,
+      resolution: 60,
     },
   });
-
-  if (query.error) {
-    return <QueryError error={query.error} />;
-  }
 
   const isLoading = query.fetching;
   const points = query.data?.schemaCoordinateStats?.requestsOverTime;
@@ -106,6 +90,10 @@ function SchemaCoordinateView(props: {
   const totalOperations = query.data?.schemaCoordinateStats?.operations.nodes.length ?? 0;
   const totalClients = query.data?.schemaCoordinateStats?.clients.nodes.length ?? 0;
 
+  if (query.error) {
+    return <QueryError error={query.error} />;
+  }
+
   return (
     <>
       <div className="flex flex-row items-center justify-between py-6">
@@ -114,22 +102,16 @@ function SchemaCoordinateView(props: {
           <Subtitle>Schema coordinate insights</Subtitle>
         </div>
         <div className="flex justify-end gap-x-2">
-          <Select
-            onValueChange={updateDateRangeByKey}
-            defaultValue={dateRangeKey}
-            disabled={isLoading}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={displayDateRangeLabel(dateRangeKey)} />
-            </SelectTrigger>
-            <SelectContent>
-              {availableDateRangeOptions.map(key => (
-                <SelectItem key={key} value={key}>
-                  {displayDateRangeLabel(key)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <DateRangePicker
+            validUnits={['y', 'M', 'w', 'd']}
+            selectedRange={dateRangeController.selectedPreset.range}
+            startDate={dateRangeController.startDate}
+            align="end"
+            onUpdate={args => dateRangeController.setSelectedPreset(args.preset)}
+          />
+          <Button variant="outline" onClick={() => dateRangeController.refreshResolvedRange()}>
+            <RefreshCw className="size-4" />
+          </Button>
         </div>
       </div>
       <div className="space-y-4 pb-8">
@@ -146,7 +128,7 @@ function SchemaCoordinateView(props: {
                     {isLoading ? '-' : formatNumber(totalRequests)}
                   </div>
                   <p className="text-muted-foreground text-xs">
-                    Requests in {displayDateRangeLabel(dateRangeKey).toLowerCase()}
+                    Requests in {dateRangeController.selectedPreset.label.toLowerCase()}
                   </p>
                 </CardContent>
               </Card>
@@ -162,13 +144,13 @@ function SchemaCoordinateView(props: {
                       : formatThroughput(
                           totalRequests,
                           differenceInMilliseconds(
-                            new Date(dateRange.to),
-                            new Date(dateRange.from),
+                            new Date(dateRangeController.resolvedRange.to),
+                            new Date(dateRangeController.resolvedRange.from),
                           ),
                         )}
                   </div>
                   <p className="text-muted-foreground text-xs">
-                    RPM in {displayDateRangeLabel(dateRangeKey).toLowerCase()}
+                    RPM in {dateRangeController.selectedPreset.label.toLowerCase()}
                   </p>
                 </CardContent>
               </Card>
@@ -192,7 +174,7 @@ function SchemaCoordinateView(props: {
                 <CardContent>
                   <div className="text-2xl font-bold">{isLoading ? '-' : totalClients}</div>
                   <p className="text-muted-foreground text-xs">
-                    GraphQL clients in {displayDateRangeLabel(dateRangeKey).toLowerCase()}
+                    GraphQL clients in {dateRangeController.selectedPreset.label.toLowerCase()}
                   </p>
                 </CardContent>
               </Card>
@@ -230,8 +212,8 @@ function SchemaCoordinateView(props: {
                           {
                             type: 'time',
                             boundaryGap: false,
-                            min: dateRange.from,
-                            max: dateRange.to,
+                            min: dateRangeController.resolvedRange.from,
+                            max: dateRangeController.resolvedRange.to,
                           },
                         ],
                         yAxis: [
@@ -279,7 +261,7 @@ function SchemaCoordinateView(props: {
               <CardDescription>
                 {props.coordinate} was used by {isLoading ? '-' : totalOperations}{' '}
                 {totalOperations > 1 ? 'operations' : 'operation'} in{' '}
-                {displayDateRangeLabel(dateRangeKey).toLowerCase()}
+                {dateRangeController.selectedPreset.label.toLowerCase()}
               </CardDescription>
             </CardHeader>
             <CardContent className="min-h-[120px] grow basis-0 overflow-y-auto">
@@ -324,7 +306,7 @@ function SchemaCoordinateView(props: {
               <CardDescription>
                 {props.coordinate} was used by {isLoading ? '-' : totalClients}{' '}
                 {totalClients > 1 ? 'clients' : 'client'} in{' '}
-                {displayDateRangeLabel(dateRangeKey).toLowerCase()}.
+                {dateRangeController.selectedPreset.label.toLowerCase()}.
               </CardDescription>
             </CardHeader>
             <CardContent className="min-h-[170px] grow basis-0 overflow-y-auto">
