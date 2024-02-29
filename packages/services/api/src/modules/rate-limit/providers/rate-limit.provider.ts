@@ -1,10 +1,13 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
+import LRU from 'lru-cache';
 import type { RateLimitApi, RateLimitApiInput } from '@hive/rate-limit';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { sentry } from '../../../shared/sentry';
 import { Logger } from '../../shared/providers/logger';
 import type { RateLimitServiceConfig } from './tokens';
 import { RATE_LIMIT_SERVICE_CONFIG } from './tokens';
+
+const RETENTION_CACHE_TTL_IN_SECONDS = 120;
 
 @Injectable({
   global: true,
@@ -13,6 +16,11 @@ import { RATE_LIMIT_SERVICE_CONFIG } from './tokens';
 export class RateLimitProvider {
   private logger: Logger;
   private rateLimit;
+  private retentionCache = new LRU<string, number>({
+    max: 500,
+    ttl: RETENTION_CACHE_TTL_IN_SECONDS * 1000,
+    stale: false,
+  });
 
   constructor(
     logger: Logger,
@@ -57,8 +65,15 @@ export class RateLimitProvider {
       return null;
     }
 
-    this.logger.debug(`Getting retention for target id="${input.targetId}"`);
+    if (this.retentionCache.has(input.targetId)) {
+      return this.retentionCache.get(input.targetId);
+    }
 
-    return await this.rateLimit.getRetention.query(input);
+    this.logger.debug(`Fetching retention for target id="${input.targetId}"`);
+
+    const value = await this.rateLimit.getRetention.query(input);
+    this.retentionCache.set(input.targetId, value);
+
+    return value;
   }
 }
