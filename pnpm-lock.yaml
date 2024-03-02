@@ -360,8 +360,8 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(@swc/core@1.4.2)(@types/node@20.11.23)(typescript@5.3.3)
       '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
+        specifier: 0.9.17
+        version: 0.9.17
       colors:
         specifier: 1.4.0
         version: 1.4.0
@@ -499,8 +499,8 @@ importers:
         specifier: 8.11.2
         version: 8.11.2
       '@whatwg-node/fetch':
-        specifier: 0.9.16
-        version: 0.9.16
+        specifier: 0.9.17
+        version: 0.9.17
       bcryptjs:
         specifier: 2.4.3
         version: 2.4.3
@@ -698,8 +698,8 @@ importers:
         specifier: 2.0.4
         version: 2.0.4
       '@whatwg-node/server':
-        specifier: 0.9.25
-        version: 0.9.25
+        specifier: 0.9.26
+        version: 0.9.26
       esbuild:
         specifier: 0.20.1
         version: 0.20.1
@@ -731,8 +731,8 @@ importers:
         specifier: 2.0.4
         version: 2.0.4
       '@whatwg-node/server':
-        specifier: 0.9.25
-        version: 0.9.25
+        specifier: 0.9.26
+        version: 0.9.26
       bcryptjs:
         specifier: 2.4.3
         version: 2.4.3
@@ -827,8 +827,8 @@ importers:
         specifier: workspace:*
         version: link:../../../libraries/external-composition/dist
       '@whatwg-node/server':
-        specifier: 0.9.25
-        version: 0.9.25
+        specifier: 0.9.26
+        version: 0.9.26
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -1052,8 +1052,8 @@ importers:
         specifier: 10.45.1
         version: 10.45.1
       '@whatwg-node/server':
-        specifier: 0.9.25
-        version: 0.9.25
+        specifier: 0.9.26
+        version: 0.9.26
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
@@ -5052,7 +5052,7 @@ packages:
     dependencies:
       '@envelop/core': 5.0.0
       '@graphql-tools/utils': 10.1.0(graphql@16.8.1)
-      '@whatwg-node/fetch': 0.9.16
+      '@whatwg-node/fetch': 0.9.17
       fast-json-stable-stringify: 2.1.0
       graphql: 16.8.1
       lru-cache: 10.0.0
@@ -6802,7 +6802,7 @@ packages:
     dependencies:
       '@ardatan/sync-fetch': 0.0.1
       '@graphql-tools/utils': 10.1.0(graphql@16.8.1)
-      '@whatwg-node/fetch': 0.9.16
+      '@whatwg-node/fetch': 0.9.17
       graphql: 16.8.1
       tslib: 2.6.2
     transitivePeerDependencies:
@@ -7039,7 +7039,7 @@ packages:
     dependencies:
       '@graphql-tools/utils': 10.1.0(graphql@16.8.1)
       '@repeaterjs/repeater': 3.0.5
-      '@whatwg-node/fetch': 0.9.16
+      '@whatwg-node/fetch': 0.9.17
       dset: 3.1.2
       extract-files: 11.0.0
       graphql: 16.8.1
@@ -7165,7 +7165,7 @@ packages:
       '@graphql-tools/executor-http': 1.0.0(@types/node@20.11.23)(graphql@16.8.1)
       '@graphql-tools/graphql-tag-pluck': 8.2.0(graphql@16.8.1)
       '@graphql-tools/utils': 10.1.0(graphql@16.8.1)
-      '@whatwg-node/fetch': 0.9.16
+      '@whatwg-node/fetch': 0.9.17
       graphql: 16.8.1
       tslib: 2.6.2
       value-or-promise: 1.0.12
@@ -7399,7 +7399,7 @@ packages:
       '@graphql-tools/utils': 10.1.0(graphql@16.8.1)
       '@types/js-yaml': 4.0.9
       '@types/json-stable-stringify': 1.0.34
-      '@whatwg-node/fetch': 0.9.16
+      '@whatwg-node/fetch': 0.9.17
       chalk: 4.1.2
       debug: 4.3.4(supports-color@8.1.1)
       dotenv: 16.4.5
@@ -7541,7 +7541,7 @@ packages:
       '@graphql-tools/utils': 10.1.0(graphql@16.8.1)
       '@graphql-tools/wrap': 10.0.0(graphql@16.8.1)
       '@types/ws': 8.5.3
-      '@whatwg-node/fetch': 0.9.16
+      '@whatwg-node/fetch': 0.9.17
       graphql: 16.8.1
       isomorphic-ws: 5.0.0(ws@8.13.0)
       tslib: 2.6.2
@@ -14402,11 +14402,11 @@ packages:
       urlpattern-polyfill: 8.0.2
       web-streams-polyfill: 3.2.1
 
-  /@whatwg-node/fetch@0.9.16:
-    resolution: {integrity: sha512-mqasZiUNquRe3ea9+aCAuo81BR6vq5opUKprPilIHTnrg8a21Z1T1OrI+KiMFX8OmwO5HUJe/vro47lpj2JPWQ==}
+  /@whatwg-node/fetch@0.9.17:
+    resolution: {integrity: sha512-TDYP3CpCrxwxpiNY0UMNf096H5Ihf67BK1iKGegQl5u9SlpEDYrvnV71gWBGJm+Xm31qOy8ATgma9rm8Pe7/5Q==}
     engines: {node: '>=16.0.0'}
     dependencies:
-      '@whatwg-node/node-fetch': 0.5.6
+      '@whatwg-node/node-fetch': 0.5.7
       urlpattern-polyfill: 10.0.0
 
   /@whatwg-node/node-fetch@0.3.6:
@@ -14418,8 +14418,8 @@ packages:
       fast-url-parser: 1.1.3
       tslib: 2.6.2
 
-  /@whatwg-node/node-fetch@0.5.6:
-    resolution: {integrity: sha512-cmAsGMHoI0S3AHi3CmD3ma1Q234ZI2JNmXyDyM9rLtbXejBKxU3ZWdhS+mzRIAyUxZCMGlFW1tHmROv0MDdxpw==}
+  /@whatwg-node/node-fetch@0.5.7:
+    resolution: {integrity: sha512-YZA+N3JcW1eh2QRi7o/ij+M07M0dqID73ltgsOEMRyEc2UYVDbyomaih+CWCEZqBIDHw4KMDveXvv4SBZ4TLIw==}
     engines: {node: '>=16.0.0'}
     dependencies:
       '@kamilkisiela/fast-url-parser': 1.1.4
@@ -14432,15 +14432,15 @@ packages:
     resolution: {integrity: sha512-B4SkvwXq0dNFQC/9r6UjMeE1MG0zxxFqSCljasgq/HYtY8Sm/blr7F2vZorIsjtz3nv/RDyrh1sM1MG7PUS6Vg==}
     engines: {node: '>=16.0.0'}
     dependencies:
-      '@whatwg-node/fetch': 0.9.16
+      '@whatwg-node/fetch': 0.9.17
       tslib: 2.6.2
     dev: true
 
-  /@whatwg-node/server@0.9.25:
-    resolution: {integrity: sha512-DlPqPPcfyzh4/9Lz1fl4c5bZsGp/1wCh7B+cK8FE1bWoW7tlZkVguvGn/XnYPKthGzEIwo/fLdHwevH44z+eeg==}
+  /@whatwg-node/server@0.9.26:
+    resolution: {integrity: sha512-QqNktlXBqhpZtHf1rq8h2St/flbSegrGTAhhlYo8aOQagM7MrKy+GhAS9h2FAM7JVnxAIIV4NHSJHPcYf7TqzQ==}
     engines: {node: '>=16.0.0'}
     dependencies:
-      '@whatwg-node/fetch': 0.9.16
+      '@whatwg-node/fetch': 0.9.17
       tslib: 2.6.2
     dev: true
 
@@ -20795,8 +20795,8 @@ packages:
       '@graphql-tools/utils': 10.1.0(graphql@16.8.1)
       '@graphql-yoga/logger': 1.0.0
       '@graphql-yoga/subscription': 4.0.0
-      '@whatwg-node/fetch': 0.9.16
-      '@whatwg-node/server': 0.9.25
+      '@whatwg-node/fetch': 0.9.17
+      '@whatwg-node/server': 0.9.26
       dset: 3.1.2
       graphql: 16.8.1
       lru-cache: 10.0.0
@@ -20815,7 +20815,7 @@ packages:
       '@graphql-tools/utils': 10.1.0(graphql@16.8.1)
       '@graphql-yoga/logger': 2.0.0
       '@graphql-yoga/subscription': 5.0.0
-      '@whatwg-node/fetch': 0.9.16
+      '@whatwg-node/fetch': 0.9.17
       '@whatwg-node/server': 0.9.23
       dset: 3.1.2
       graphql: 16.8.1
