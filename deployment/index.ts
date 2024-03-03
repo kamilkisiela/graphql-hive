@@ -46,9 +46,7 @@ optimizeAzureCluster();
 const docker = configureDocker();
 const envName = pulumi.getStack();
 const commonConfig = new pulumi.Config('common');
-const appDns = 'app';
 const rootDns = commonConfig.require('dnsZone');
-const appHostname = `${appDns}.${rootDns}`;
 const heartbeatsConfig = new pulumi.Config('heartbeats');
 
 const sentry = configureSentry();
@@ -60,7 +58,7 @@ const environment = prepareEnvironment({
   release: imagesTag,
   environment: envName,
   rootDns,
-  appDns: appHostname,
+  appDns: `app.${rootDns}`,
 });
 const clickhouse = deployClickhouse();
 const postgres = deployPostgres();
@@ -244,7 +242,6 @@ const app = deployApp({
 });
 
 const proxy = deployProxy({
-  appHostname,
   app,
   graphql,
   usage,

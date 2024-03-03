@@ -9,14 +9,12 @@ import { Usage } from './usage';
 const commonConfig = new pulumi.Config('common');
 
 export function deployProxy({
-  appHostname,
   graphql,
   app,
   usage,
   environment,
 }: {
   environment: Environment;
-  appHostname: string;
   graphql: GraphQL;
   app: App;
   usage: Usage;
@@ -27,7 +25,7 @@ export function deployProxy({
     aksReservedIpResourceGroup: commonConfig.get('aksReservedIpResourceGroup'),
   })
     .deployProxy({ replicas: environment.isProduction ? 3 : 1 })
-    .registerService({ record: appHostname }, [
+    .registerService({ record: environment.appDns }, [
       {
         name: 'app',
         path: '/',
