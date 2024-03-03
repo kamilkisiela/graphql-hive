@@ -1,19 +1,20 @@
-import { parse } from 'pg-connection-string';
-import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
+import { ServiceSecret } from '../secrets';
 import { DeploymentEnvironment } from '../types';
 import { isProduction } from '../utils/helpers';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
+import { Docker } from './docker';
+import { Postgres } from './postgres';
 import { UsageEstimator } from './usage-estimation';
 
-const billingConfig = new pulumi.Config('billing');
-const commonConfig = new pulumi.Config('common');
-const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
-const apiConfig = new pulumi.Config('api');
-
 export type StripeBillingService = ReturnType<typeof deployStripeBilling>;
+
+class StripeSecret extends ServiceSecret<{
+  stripePrivateKey: pulumi.Output<string> | string;
+  stripePublicKey: string | pulumi.Output<string>;
+}> {}
 
 export function deployStripeBilling({
   deploymentEnv,
@@ -21,25 +22,32 @@ export function deployStripeBilling({
   usageEstimator,
   image,
   release,
-  imagePullSecret,
+  docker,
+  postgres,
 }: {
   usageEstimator: UsageEstimator;
   image: string;
   release: string;
   deploymentEnv: DeploymentEnvironment;
   dbMigrations: DbMigrations;
-  imagePullSecret: k8s.core.v1.Secret;
+  docker: Docker;
+  postgres: Postgres;
 }) {
-  const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
-  const connectionString = rawConnectionString.apply(rawConnectionString =>
-    parse(rawConnectionString),
-  );
+  const billingConfig = new pulumi.Config('billing');
+  const commonConfig = new pulumi.Config('common');
+  const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
+  const appConfig = new pulumi.Config('app');
+  const appEnv = appConfig.requireObject<Record<string, string>>('env');
 
-  return new ServiceDeployment(
+  const stripeSecret = new StripeSecret('stripe', {
+    stripePrivateKey: billingConfig.requireSecret('stripePrivateKey'),
+    stripePublicKey: appEnv.STRIPE_PUBLIC_KEY,
+  });
+  const { deployment, service } = new ServiceDeployment(
     'stripe-billing',
     {
       image,
-      imagePullSecret,
+      imagePullSecret: docker.secret,
       replicas: isProduction(deploymentEnv) ? 3 : 1,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
@@ -50,17 +58,26 @@ export function deployStripeBilling({
         SENTRY: commonEnv.SENTRY_ENABLED,
         RELEASE: release,
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
-        STRIPE_SECRET_KEY: billingConfig.requireSecret('stripePrivateKey'),
-        POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
-        POSTGRES_PORT: connectionString.apply(connection => connection.port || '5432'),
-        POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),
-        POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
-        POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
-        POSTGRES_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
       },
       exposesMetrics: true,
       port: 4000,
     },
     [dbMigrations, usageEstimator.service, usageEstimator.deployment],
-  ).deploy();
+  )
+    .withSecret('STRIPE_SECRET_KEY', stripeSecret, 'stripePrivateKey')
+    .withSecret('POSTGRES_HOST', postgres.secret, 'host')
+    .withSecret('POSTGRES_PORT', postgres.secret, 'port')
+    .withSecret('POSTGRES_USER', postgres.secret, 'user')
+    .withSecret('POSTGRES_PASSWORD', postgres.secret, 'password')
+    .withSecret('POSTGRES_DB', postgres.secret, 'database')
+    .withSecret('POSTGRES_SSL', postgres.secret, 'ssl')
+    .deploy();
+
+  return {
+    deployment,
+    service,
+    secret: stripeSecret,
+  };
 }
+
+export type StripeBilling = ReturnType<typeof deployStripeBilling>;

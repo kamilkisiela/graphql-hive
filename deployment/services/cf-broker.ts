@@ -1,12 +1,12 @@
 import * as pulumi from '@pulumi/pulumi';
+import { ServiceSecret } from '../secrets';
 import { CloudflareBroker } from '../utils/cloudflare';
 import { isProduction } from '../utils/helpers';
 
-const commonConfig = new pulumi.Config('common');
-const cfConfig = new pulumi.Config('cloudflareCustom');
-const observabilityConfig = new pulumi.Config('observability');
-
-const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
+export class CloudFlareBrokerSecret extends ServiceSecret<{
+  secretSignature: string | pulumi.Output<string>;
+  baseUrl: string | pulumi.Output<string>;
+}> {}
 
 export type Broker = ReturnType<typeof deployCFBroker>;
 
@@ -19,6 +19,11 @@ export function deployCFBroker({
   envName: string;
   release: string;
 }) {
+  const commonConfig = new pulumi.Config('common');
+  const cfConfig = new pulumi.Config('cloudflareCustom');
+  const observabilityConfig = new pulumi.Config('observability');
+  const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
+
   const cfBrokerSignature = commonConfig.requireSecret('cfBrokerSignature');
   const broker = new CloudflareBroker({
     envName,
@@ -38,5 +43,16 @@ export function deployCFBroker({
         }
       : null,
   });
-  return broker.deploy();
+
+  const deployedBroker = broker.deploy();
+
+  const secret = new CloudFlareBrokerSecret('cloudflare-broker', {
+    secretSignature: cfBrokerSignature,
+    baseUrl: deployedBroker.workerBaseUrl,
+  });
+
+  return {
+    broker: deployedBroker,
+    secret,
+  };
 }

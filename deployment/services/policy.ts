@@ -3,6 +3,7 @@ import * as pulumi from '@pulumi/pulumi';
 import { DeploymentEnvironment } from '../types';
 import { isProduction } from '../utils/helpers';
 import { ServiceDeployment } from '../utils/service-deployment';
+import { Docker } from './docker';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
@@ -13,16 +14,16 @@ export function deploySchemaPolicy({
   deploymentEnv,
   release,
   image,
-  imagePullSecret,
+  docker,
 }: {
   image: string;
   release: string;
   deploymentEnv: DeploymentEnvironment;
-  imagePullSecret: k8s.core.v1.Secret;
+  docker: Docker;
 }) {
   return new ServiceDeployment('schema-policy-service', {
     image,
-    imagePullSecret,
+    imagePullSecret: docker.secret,
     env: {
       ...deploymentEnv,
       ...commonEnv,

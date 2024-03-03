@@ -1,20 +1,25 @@
-import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
+import { ServiceSecret } from '../secrets';
 import { DeploymentEnvironment } from '../types';
 import { isProduction } from '../utils/helpers';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
+import { StripeBilling } from './billing';
 import { DbMigrations } from './db-migrations';
+import { Docker } from './docker';
+import { Emails } from './emails';
+import { GitHubApp } from './github';
 import { GraphQL } from './graphql';
-
-const appConfig = new pulumi.Config('app');
-const commonConfig = new pulumi.Config('common');
-const githubAppConfig = new pulumi.Config('ghapp');
-
-const appEnv = appConfig.requireObject<Record<string, string>>('env');
-const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
+import { SlackApp } from './slack-app';
+import { Supertokens } from './supertokens';
+import { Zendesk } from './zendesk';
 
 export type App = ReturnType<typeof deployApp>;
+
+class AppOAuthSecret extends ServiceSecret<{
+  clientId: string | pulumi.Output<string>;
+  clientSecret: string | pulumi.Output<string>;
+}> {}
 
 export function deployApp({
   deploymentEnv,
@@ -22,40 +27,48 @@ export function deployApp({
   dbMigrations,
   release,
   image,
-  supertokensConfig,
-  googleConfig,
-  githubConfig,
-  imagePullSecret,
-  emailsEndpoint,
-  zendeskSupport,
+  supertokens,
+  docker,
+  emails,
+  zendesk,
+  github,
+  slackApp,
+  billing,
 }: {
   image: string;
   release: string;
   deploymentEnv: DeploymentEnvironment;
   graphql: GraphQL;
   dbMigrations: DbMigrations;
-  imagePullSecret: k8s.core.v1.Secret;
-  supertokensConfig: {
-    endpoint: pulumi.Output<string>;
-    apiKey: pulumi.Output<string>;
-  };
-  googleConfig: {
-    clientId: pulumi.Output<string>;
-    clientSecret: pulumi.Output<string>;
-  };
-  githubConfig: {
-    clientId: pulumi.Output<string>;
-    clientSecret: pulumi.Output<string>;
-  };
-  emailsEndpoint: pulumi.Output<string>;
-  zendeskSupport: boolean;
+  docker: Docker;
+  supertokens: Supertokens;
+  emails: Emails;
+  zendesk: Zendesk;
+  github: GitHubApp;
+  slackApp: SlackApp;
+  billing: StripeBilling;
 }) {
+  const appConfig = new pulumi.Config('app');
+  const commonConfig = new pulumi.Config('common');
+  const appEnv = appConfig.requireObject<Record<string, string>>('env');
+  const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
+
+  const oauthConfig = new pulumi.Config('oauth');
+  const githubOAuthSecret = new AppOAuthSecret('oauth-github', {
+    clientId: oauthConfig.requireSecret('githubClient'),
+    clientSecret: oauthConfig.requireSecret('githubSecret'),
+  });
+  const googleOAuthSecret = new AppOAuthSecret('oauth-google', {
+    clientId: oauthConfig.requireSecret('googleClient'),
+    clientSecret: oauthConfig.requireSecret('googleSecret'),
+  });
+
   return new ServiceDeployment(
     'app',
     {
       image,
       replicas: isProduction(deploymentEnv) ? 3 : 1,
-      imagePullSecret,
+      imagePullSecret: docker.secret,
       readinessProbe: '/api/health',
       livenessProbe: '/api/health',
       startupProbe: {
@@ -66,138 +79,41 @@ export function deployApp({
         timeoutSeconds: 15,
       },
       availabilityOnEveryNode: true,
-      env: [
-        { name: 'DEPLOYED_DNS', value: deploymentEnv.DEPLOYED_DNS },
-        { name: 'NODE_ENV', value: 'production' },
-        {
-          name: 'ENVIRONMENT',
-          value: deploymentEnv.ENVIRONMENT,
-        },
-        {
-          name: 'RELEASE',
-          value: release,
-        },
-        { name: 'SENTRY_DSN', value: commonEnv.SENTRY_DSN },
-        { name: 'SENTRY', value: commonEnv.SENTRY_ENABLED },
-        {
-          name: 'GRAPHQL_ENDPOINT',
-          value: serviceLocalEndpoint(graphql.service).apply(s => `${s}/graphql`),
-        },
-        {
-          name: 'SERVER_ENDPOINT',
-          value: serviceLocalEndpoint(graphql.service),
-        },
-        {
-          name: 'APP_BASE_URL',
-          value: `https://${deploymentEnv.DEPLOYED_DNS}/`,
-        },
-        {
-          name: 'INTEGRATION_SLACK',
-          value: '1',
-        },
-        {
-          name: 'INTEGRATION_SLACK_CLIENT_ID',
-          value: appEnv.SLACK_CLIENT_ID,
-        },
-        {
-          name: 'INTEGRATION_SLACK_CLIENT_SECRET',
-          value: appEnv.SLACK_CLIENT_SECRET,
-        },
-        {
-          name: 'INTEGRATION_GITHUB_APP_NAME',
-          value: githubAppConfig.require('name'),
-        },
-
-        {
-          name: 'STRIPE_PUBLIC_KEY',
-          value: appEnv.STRIPE_PUBLIC_KEY,
-        },
-
-        {
-          name: 'GA_TRACKING_ID',
-          value: appEnv.GA_TRACKING_ID,
-        },
-
-        {
-          name: 'CRISP_WEBSITE_ID',
-          value: appEnv.CRISP_WEBSITE_ID,
-        },
-
-        {
-          name: 'DOCS_URL',
-          value: 'https://the-guild.dev/graphql/hive/docs',
-        },
-
-        {
-          name: 'GRAPHQL_PERSISTED_OPERATIONS',
-          value: '1',
-        },
-
-        {
-          name: 'ZENDESK_SUPPORT',
-          value: zendeskSupport ? '1' : '0',
-        },
-
-        //
-        // AUTH
-        //
-        {
-          name: 'SUPERTOKENS_CONNECTION_URI',
-          value: supertokensConfig.endpoint,
-        },
-        {
-          name: 'SUPERTOKENS_API_KEY',
-          value: supertokensConfig.apiKey,
-        },
-        {
-          name: 'EMAILS_ENDPOINT',
-          value: emailsEndpoint,
-        },
-
-        // GitHub
-        {
-          name: 'AUTH_GITHUB',
-          value: '1',
-        },
-        {
-          name: 'AUTH_GITHUB_CLIENT_ID',
-          value: githubConfig.clientId,
-        },
-        {
-          name: 'AUTH_GITHUB_CLIENT_SECRET',
-          value: githubConfig.clientSecret,
-        },
-        // Google
-        {
-          name: 'AUTH_GOOGLE',
-          value: '1',
-        },
-        {
-          name: 'AUTH_GOOGLE_CLIENT_ID',
-          value: googleConfig.clientId,
-        },
-        {
-          name: 'AUTH_GOOGLE_CLIENT_SECRET',
-          value: googleConfig.clientSecret,
-        },
-        {
-          name: 'AUTH_REQUIRE_EMAIL_VERIFICATION',
-          value: '1',
-        },
-        {
-          name: 'AUTH_ORGANIZATION_OIDC',
-          value: '1',
-        },
-        //
-        // Migrations
-        //
-        {
-          name: 'MEMBER_ROLES_DEADLINE',
-          value: appEnv.MEMBER_ROLES_DEADLINE,
-        },
-      ],
+      env: {
+        DEPLOYED_DNS: deploymentEnv.DEPLOYED_DNS,
+        NODE_ENV: 'production',
+        ENVIRONMENT: deploymentEnv.ENVIRONMENT,
+        RELEASE: release,
+        ...commonEnv,
+        SENTRY: commonEnv.SENTRY_ENABLED,
+        GRAPHQL_ENDPOINT: serviceLocalEndpoint(graphql.service).apply(s => `${s}/graphql`),
+        SERVER_ENDPOINT: serviceLocalEndpoint(graphql.service),
+        APP_BASE_URL: `https://${deploymentEnv.DEPLOYED_DNS}/`,
+        INTEGRATION_SLACK: '1',
+        INTEGRATION_GITHUB_APP_NAME: github.name,
+        GA_TRACKING_ID: appEnv.GA_TRACKING_ID,
+        DOCS_URL: 'https://the-guild.dev/graphql/hive/docs',
+        GRAPHQL_PERSISTED_OPERATIONS: '1',
+        ZENDESK_SUPPORT: zendesk.enabled ? '1' : '0',
+        SUPERTOKENS_CONNECTION_URI: supertokens.localEndpoint,
+        EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
+        AUTH_GITHUB: '1',
+        AUTH_GOOGLE: '1',
+        AUTH_REQUIRE_EMAIL_VERIFICATION: '1',
+        AUTH_ORGANIZATION_OIDC: '1',
+        MEMBER_ROLES_DEADLINE: appEnv.MEMBER_ROLES_DEADLINE,
+      },
       port: 3000,
     },
     [graphql.service, graphql.deployment, dbMigrations],
-  ).deploy();
+  )
+    .withSecret('INTEGRATION_SLACK_CLIENT_ID', slackApp.secret, 'clientId')
+    .withSecret('INTEGRATION_SLACK_CLIENT_SECRET', slackApp.secret, 'clientSecret')
+    .withSecret('STRIPE_PUBLIC_KEY', billing.secret, 'stripePublicKey')
+    .withSecret('SUPERTOKENS_API_KEY', supertokens.secret, 'apiKey')
+    .withSecret('AUTH_GITHUB_CLIENT_ID', githubOAuthSecret, 'clientId')
+    .withSecret('AUTH_GITHUB_CLIENT_SECRET', githubOAuthSecret, 'clientSecret')
+    .withSecret('AUTH_GOOGLE_CLIENT_ID', googleOAuthSecret, 'clientId')
+    .withSecret('AUTH_GOOGLE_CLIENT_SECRET', googleOAuthSecret, 'clientSecret')
+    .deploy();
 }

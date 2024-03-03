@@ -1,9 +1,11 @@
 import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
 import { DeploymentEnvironment } from '../types';
+import { CloudflareBroker } from '../utils/cloudflare';
 import { isProduction } from '../utils/helpers';
 import { ServiceDeployment } from '../utils/service-deployment';
 import type { Broker } from './cf-broker';
+import { Docker } from './docker';
 import { Redis } from './redis';
 
 const commonConfig = new pulumi.Config('common');
@@ -13,37 +15,32 @@ export type Webhooks = ReturnType<typeof deployWebhooks>;
 
 export function deployWebhooks({
   deploymentEnv,
-  redis,
   heartbeat,
   broker,
   image,
   release,
-  imagePullSecret,
+  docker,
+  redis,
 }: {
   image: string;
   release: string;
   deploymentEnv: DeploymentEnvironment;
-  redis: Redis;
-  broker: Broker;
   heartbeat?: string;
-  imagePullSecret: k8s.core.v1.Secret;
+  docker: Docker;
+  broker: Broker;
+  redis: Redis;
 }) {
   return new ServiceDeployment(
     'webhooks-service',
     {
-      imagePullSecret,
+      imagePullSecret: docker.secret,
       env: {
         ...deploymentEnv,
         ...commonEnv,
         SENTRY: commonEnv.SENTRY_ENABLED,
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
         RELEASE: release,
-        REDIS_HOST: redis.config.host,
-        REDIS_PORT: String(redis.config.port),
-        REDIS_PASSWORD: redis.config.password,
         REQUEST_BROKER: '1',
-        REQUEST_BROKER_ENDPOINT: broker.workerBaseUrl,
-        REQUEST_BROKER_SIGNATURE: broker.secretSignature,
       },
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
@@ -53,5 +50,11 @@ export function deployWebhooks({
       image,
     },
     [redis.deployment, redis.service],
-  ).deploy();
+  )
+    .withSecret('REDIS_HOST', redis.secret, 'host')
+    .withSecret('REDIS_PORT', redis.secret, 'port')
+    .withSecret('REDIS_PASSWORD', redis.secret, 'password')
+    .withSecret('REQUEST_BROKER_ENDPOINT', broker.secret, 'baseUrl')
+    .withSecret('REQUEST_BROKER_SIGNATURE', broker.secret, 'secretSignature')
+    .deploy();
 }

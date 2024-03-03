@@ -1,30 +1,31 @@
 import * as pulumi from '@pulumi/pulumi';
+import { ServiceSecret } from '../secrets';
 import { CloudflareCDN } from '../utils/cloudflare';
 import { isProduction } from '../utils/helpers';
-
-const commonConfig = new pulumi.Config('common');
-const cfConfig = new pulumi.Config('cloudflareCustom');
-
-const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
+import { S3 } from './s3';
 
 export type CDN = ReturnType<typeof deployCFCDN>;
+
+export class CDNSecret extends ServiceSecret<{
+  authPrivateKey: string | pulumi.Output<string>;
+  baseUrl: string | pulumi.Output<string>;
+}> {}
 
 export function deployCFCDN({
   rootDns,
   release,
   envName,
-  s3Config,
+  s3,
 }: {
   rootDns: string;
   envName: string;
   release: string;
-  s3Config: {
-    endpoint: string;
-    bucketName: string;
-    accessKeyId: pulumi.Output<string>;
-    secretAccessKey: pulumi.Output<string>;
-  };
+  s3: S3;
 }) {
+  const commonConfig = new pulumi.Config('common');
+  const cfConfig = new pulumi.Config('cloudflareCustom');
+  const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
+
   const cdn = new CloudflareCDN({
     envName,
     zoneId: cfConfig.require('zoneId'),
@@ -34,8 +35,17 @@ export function deployCFCDN({
     cdnDnsRecord: isProduction(envName) ? `cdn.${rootDns}` : `cdn-${rootDns}`,
     sentryDsn: commonEnv.SENTRY_DSN,
     release,
-    s3Config,
+    s3Secret: s3.secret,
   });
 
-  return cdn.deploy();
+  const deployedCdn = cdn.deploy();
+  const secret = new CDNSecret('cdn', {
+    authPrivateKey: commonConfig.requireSecret('cdnAuthPrivateKey'),
+    baseUrl: deployedCdn.workerBaseUrl,
+  });
+
+  return {
+    cdn: deployedCdn,
+    secret,
+  };
 }

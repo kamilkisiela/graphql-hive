@@ -1,44 +1,39 @@
-import { parse } from 'pg-connection-string';
-import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
 import { DeploymentEnvironment } from '../types';
 import { isProduction } from '../utils/helpers';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
+import { Docker } from './docker';
+import { Postgres } from './postgres';
 import { Redis } from './redis';
 
-const commonConfig = new pulumi.Config('common');
-const apiConfig = new pulumi.Config('api');
-const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
+const commonEnv = new pulumi.Config('common').requireObject<Record<string, string>>('env');
 
 export type Tokens = ReturnType<typeof deployTokens>;
 
 export function deployTokens({
   deploymentEnv,
   dbMigrations,
-  redis,
   heartbeat,
   image,
   release,
-  imagePullSecret,
+  docker,
+  postgres,
+  redis,
 }: {
   image: string;
   release: string;
   deploymentEnv: DeploymentEnvironment;
   dbMigrations: DbMigrations;
-  redis: Redis;
   heartbeat?: string;
-  imagePullSecret: k8s.core.v1.Secret;
+  docker: Docker;
+  redis: Redis;
+  postgres: Postgres;
 }) {
-  const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
-  const connectionString = rawConnectionString.apply(rawConnectionString =>
-    parse(rawConnectionString),
-  );
-
   return new ServiceDeployment(
     'tokens-service',
     {
-      imagePullSecret,
+      imagePullSecret: docker.secret,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       startupProbe: '/_health',
@@ -50,19 +45,20 @@ export function deployTokens({
         ...deploymentEnv,
         ...commonEnv,
         SENTRY: commonEnv.SENTRY_ENABLED,
-        POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
-        POSTGRES_PORT: connectionString.apply(connection => connection.port || '5432'),
-        POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),
-        POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
-        POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
-        POSTGRES_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
-        REDIS_HOST: redis.config.host,
-        REDIS_PORT: String(redis.config.port),
-        REDIS_PASSWORD: redis.config.password,
         RELEASE: release,
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
       },
     },
     [dbMigrations],
-  ).deploy();
+  )
+    .withSecret('POSTGRES_HOST', postgres.secret, 'host')
+    .withSecret('POSTGRES_PORT', postgres.secret, 'port')
+    .withSecret('POSTGRES_USER', postgres.secret, 'user')
+    .withSecret('POSTGRES_PASSWORD', postgres.secret, 'password')
+    .withSecret('POSTGRES_DB', postgres.secret, 'database')
+    .withSecret('POSTGRES_SSL', postgres.secret, 'ssl')
+    .withSecret('REDIS_HOST', redis.secret, 'host')
+    .withSecret('REDIS_PORT', redis.secret, 'port')
+    .withSecret('REDIS_PASSWORD', redis.secret, 'password')
+    .deploy();
 }

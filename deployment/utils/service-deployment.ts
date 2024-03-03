@@ -1,6 +1,7 @@
 import * as k8s from '@pulumi/kubernetes';
 import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
+import { ServiceSecret } from '../secrets';
 import { isDefined } from './helpers';
 import { normalizeEnv, PodBuilder } from './pod-builder';
 
@@ -9,7 +10,28 @@ type ProbeConfig = Omit<
   'httpGet' | 'exec' | 'grpc' | 'tcpSocket'
 > & { endpoint: string };
 
+function normalizeEnvSecrets(envSecrets?: Record<string, ServiceSecretBinding<any>>) {
+  return envSecrets
+    ? Object.keys(envSecrets).map(name => ({
+        name,
+        valueFrom: {
+          secretKeyRef: {
+            name: envSecrets[name].secret,
+            key: envSecrets[name].key,
+          },
+        },
+      }))
+    : [];
+}
+
+export type ServiceSecretBinding<T extends Record<string, string>> = {
+  secret: ServiceSecret<T>;
+  key: keyof T | pulumi.Output<keyof T>;
+};
+
 export class ServiceDeployment {
+  private envSecrets: Record<string, ServiceSecretBinding<any>> = {};
+
   constructor(
     protected name: string,
     protected options: {
@@ -47,6 +69,16 @@ export class ServiceDeployment {
     protected parent?: pulumi.Resource | null,
   ) {}
 
+  withSecret<T extends Record<string, string | pulumi.Output<string>>>(
+    envVar: string,
+    secret: ServiceSecret<T>,
+    key: keyof T,
+  ) {
+    this.envSecrets[envVar] = { secret, key };
+
+    return this;
+  }
+
   deployAsJob() {
     const { pb } = this.createPod(true);
 
@@ -64,6 +96,7 @@ export class ServiceDeployment {
   createPod(asJob: boolean) {
     const port = this.options.port || 3000;
     const additionalEnv: any[] = normalizeEnv(this.options.env);
+    const secretsEnv: any[] = normalizeEnvSecrets(this.envSecrets);
 
     let startupProbe: k8s.types.input.core.v1.Probe | undefined = undefined;
     let livenessProbe: k8s.types.input.core.v1.Probe | undefined = undefined;
@@ -183,7 +216,9 @@ export class ServiceDeployment {
                 },
               },
             },
-          ].concat(additionalEnv),
+          ]
+            .concat(additionalEnv)
+            .concat(secretsEnv),
           name: this.name,
           image: this.options.image,
           resources: this.options?.autoScaling?.cpu.limit

@@ -1,10 +1,17 @@
 import * as pulumi from '@pulumi/pulumi';
+import { ServiceSecret } from '../secrets';
 import { DeploymentEnvironment } from '../types';
 import { isProduction } from '../utils/helpers';
 import { serviceLocalHost } from '../utils/local-endpoint';
 import { Redis as RedisStore } from '../utils/redis';
 
 const redisConfig = new pulumi.Config('redis');
+
+export class RedisSecret extends ServiceSecret<{
+  password: string | pulumi.Output<string>;
+  host: string | pulumi.Output<string>;
+  port: string | pulumi.Output<string>;
+}> {}
 
 export type Redis = ReturnType<typeof deployRedis>;
 
@@ -24,13 +31,17 @@ export function deployRedis({ deploymentEnv }: { deploymentEnv: DeploymentEnviro
         },
   });
 
+  const host = serviceLocalHost(redisApi.service);
+  const port = String(redisApi.port);
+  const secret = new RedisSecret('redis', {
+    password: redisConfig.requireSecret('password'),
+    host,
+    port,
+  });
+
   return {
     deployment: redisApi.deployment,
     service: redisApi.service,
-    config: {
-      host: serviceLocalHost(redisApi.service),
-      port: redisApi.port,
-      password: redisPassword,
-    },
+    secret,
   };
 }

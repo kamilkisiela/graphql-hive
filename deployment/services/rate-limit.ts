@@ -1,18 +1,13 @@
-import { parse } from 'pg-connection-string';
-import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
 import { DeploymentEnvironment } from '../types';
 import { isProduction } from '../utils/helpers';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
+import { Docker } from './docker';
 import { Emails } from './emails';
+import { Postgres } from './postgres';
 import { UsageEstimator } from './usage-estimation';
-
-const rateLimitConfig = new pulumi.Config('rateLimit');
-const commonConfig = new pulumi.Config('common');
-const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
-const apiConfig = new pulumi.Config('api');
 
 export type RateLimitService = ReturnType<typeof deployRateLimit>;
 
@@ -23,7 +18,8 @@ export function deployRateLimit({
   emails,
   release,
   image,
-  imagePullSecret,
+  docker,
+  postgres,
 }: {
   usageEstimator: UsageEstimator;
   deploymentEnv: DeploymentEnvironment;
@@ -31,17 +27,17 @@ export function deployRateLimit({
   emails: Emails;
   release: string;
   image: string;
-  imagePullSecret: k8s.core.v1.Secret;
+  docker: Docker;
+  postgres: Postgres;
 }) {
-  const rawConnectionString = apiConfig.requireSecret('postgresConnectionString');
-  const connectionString = rawConnectionString.apply(rawConnectionString =>
-    parse(rawConnectionString),
-  );
+  const rateLimitConfig = new pulumi.Config('rateLimit');
+  const commonConfig = new pulumi.Config('common');
+  const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 
   return new ServiceDeployment(
     'rate-limiter',
     {
-      imagePullSecret,
+      imagePullSecret: docker.secret,
       replicas: isProduction(deploymentEnv) ? 3 : 1,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
@@ -54,12 +50,6 @@ export function deployRateLimit({
         RELEASE: release,
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
         EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
-        POSTGRES_HOST: connectionString.apply(connection => connection.host ?? ''),
-        POSTGRES_PORT: connectionString.apply(connection => connection.port || '5432'),
-        POSTGRES_PASSWORD: connectionString.apply(connection => connection.password ?? ''),
-        POSTGRES_USER: connectionString.apply(connection => connection.user ?? ''),
-        POSTGRES_DB: connectionString.apply(connection => connection.database ?? ''),
-        POSTGRES_SSL: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
         WEB_APP_URL: `https://${deploymentEnv.DEPLOYED_DNS}/`,
       },
       exposesMetrics: true,
@@ -67,5 +57,12 @@ export function deployRateLimit({
       image,
     },
     [dbMigrations, usageEstimator.service, usageEstimator.deployment],
-  ).deploy();
+  )
+    .withSecret('POSTGRES_HOST', postgres.secret, 'host')
+    .withSecret('POSTGRES_PORT', postgres.secret, 'port')
+    .withSecret('POSTGRES_USER', postgres.secret, 'user')
+    .withSecret('POSTGRES_PASSWORD', postgres.secret, 'password')
+    .withSecret('POSTGRES_DB', postgres.secret, 'database')
+    .withSecret('POSTGRES_SSL', postgres.secret, 'ssl')
+    .deploy();
 }
