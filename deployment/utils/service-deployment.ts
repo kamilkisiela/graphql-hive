@@ -79,6 +79,19 @@ export class ServiceDeployment {
     return this;
   }
 
+  withConditionalSecret<T extends Record<string, string | pulumi.Output<string>>>(
+    enabled: boolean,
+    envVar: string,
+    secret: ServiceSecret<T> | null,
+    key: keyof T,
+  ) {
+    if (enabled && secret) {
+      this.envSecrets[envVar] = { secret, key };
+    }
+
+    return this;
+  }
+
   deployAsJob() {
     const { pb } = this.createPod(true);
 

@@ -8,6 +8,7 @@ import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
 import { Kafka } from './kafka';
 import { RateLimitService } from './rate-limit';
+import { Sentry } from './sentry';
 import { Tokens } from './tokens';
 
 export type Usage = ReturnType<typeof deployUsage>;
@@ -21,6 +22,7 @@ export function deployUsage({
   image,
   release,
   docker,
+  sentry,
 }: {
   image: string;
   release: string;
@@ -30,6 +32,7 @@ export function deployUsage({
   dbMigrations: DbMigrations;
   rateLimit: RateLimitService;
   docker: Docker;
+  sentry: Sentry;
 }) {
   const commonConfig = new pulumi.Config('common');
   const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
@@ -52,7 +55,7 @@ export function deployUsage({
       env: {
         ...deploymentEnv,
         ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
+        SENTRY: sentry.enabled ? '1' : '0',
         REQUEST_LOGGING: '0',
         KAFKA_BUFFER_SIZE: kafka.config.bufferSize,
         KAFKA_SASL_MECHANISM: kafka.config.saslMechanism,
@@ -87,5 +90,6 @@ export function deployUsage({
     .withSecret('KAFKA_SASL_PASSWORD', kafka.secret, 'saslPassword')
     .withSecret('KAFKA_SSL', kafka.secret, 'ssl')
     .withSecret('KAFKA_BROKER', kafka.secret, 'endpoint')
+    .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
 }

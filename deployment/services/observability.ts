@@ -2,11 +2,13 @@ import * as pulumi from '@pulumi/pulumi';
 import { Observability } from '../utils/observability';
 import { deployGrafana } from './grafana';
 
-const observabilityConfig = new pulumi.Config('observability');
-
 export function deployMetrics(config: { envName: string }) {
+  const observabilityConfig = new pulumi.Config('observability');
+
   if (!observabilityConfig.getBoolean('enabled')) {
-    return;
+    return {
+      enabled: false,
+    };
   }
 
   const observability = new Observability(config.envName, {
@@ -25,5 +27,6 @@ export function deployMetrics(config: { envName: string }) {
   return {
     observability: observability.deploy(),
     grafana: deployGrafana(config.envName),
+    enabled: true,
   };
 }

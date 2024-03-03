@@ -7,6 +7,7 @@ import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { Docker } from './docker';
 import { Redis } from './redis';
+import { Sentry } from './sentry';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
@@ -26,6 +27,7 @@ export function deployEmails({
   release,
   image,
   docker,
+  sentry,
 }: {
   release: string;
   image: string;
@@ -33,6 +35,7 @@ export function deployEmails({
   redis: Redis;
   docker: Docker;
   heartbeat?: string;
+  sentry: Sentry;
 }) {
   const emailConfig = new pulumi.Config('email');
   const postmarkSecret = new PostmarkSecret('postmark', {
@@ -48,7 +51,7 @@ export function deployEmails({
       env: {
         ...deploymentEnv,
         ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
+        SENTRY: sentry.enabled ? '1' : '0',
         RELEASE: release,
         EMAIL_PROVIDER: 'postmark',
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
@@ -68,6 +71,7 @@ export function deployEmails({
     .withSecret('EMAIL_FROM', postmarkSecret, 'from')
     .withSecret('EMAIL_PROVIDER_POSTMARK_TOKEN', postmarkSecret, 'token')
     .withSecret('EMAIL_PROVIDER_POSTMARK_MESSAGE_STREAM', postmarkSecret, 'messageStream')
+    .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
 
   return { deployment, service, localEndpoint: serviceLocalEndpoint(service) };

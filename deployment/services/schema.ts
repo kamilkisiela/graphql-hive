@@ -6,6 +6,7 @@ import type { Broker } from './cf-broker';
 import { Common } from './common';
 import { Docker } from './docker';
 import { Redis } from './redis';
+import { Sentry } from './sentry';
 
 export type Schema = ReturnType<typeof deploySchema>;
 
@@ -17,6 +18,7 @@ export function deploySchema({
   release,
   image,
   docker,
+  sentry,
 }: {
   common: Common;
   image: string;
@@ -25,6 +27,7 @@ export function deploySchema({
   redis: Redis;
   broker: Broker;
   docker: Docker;
+  sentry: Sentry;
 }) {
   const commonConfig = new pulumi.Config('common');
   const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
@@ -37,7 +40,7 @@ export function deploySchema({
       env: {
         ...deploymentEnv,
         ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
+        SENTRY: sentry.enabled ? '1' : '0',
         RELEASE: release,
         REQUEST_BROKER: '1',
         SCHEMA_CACHE_POLL_INTERVAL_MS: '150',
@@ -60,5 +63,6 @@ export function deploySchema({
     .withSecret('REQUEST_BROKER_ENDPOINT', broker.secret, 'baseUrl')
     .withSecret('REQUEST_BROKER_SIGNATURE', broker.secret, 'secretSignature')
     .withSecret('ENCRYPTION_SECRET', common.encryptionSecret, 'encryptionPrivateKey')
+    .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
 }

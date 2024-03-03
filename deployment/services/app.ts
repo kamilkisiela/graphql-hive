@@ -10,6 +10,7 @@ import { Docker } from './docker';
 import { Emails } from './emails';
 import { GitHubApp } from './github';
 import { GraphQL } from './graphql';
+import { Sentry } from './sentry';
 import { SlackApp } from './slack-app';
 import { Supertokens } from './supertokens';
 import { Zendesk } from './zendesk';
@@ -34,6 +35,7 @@ export function deployApp({
   github,
   slackApp,
   billing,
+  sentry,
 }: {
   image: string;
   release: string;
@@ -47,6 +49,7 @@ export function deployApp({
   github: GitHubApp;
   slackApp: SlackApp;
   billing: StripeBilling;
+  sentry: Sentry;
 }) {
   const appConfig = new pulumi.Config('app');
   const commonConfig = new pulumi.Config('common');
@@ -85,7 +88,7 @@ export function deployApp({
         ENVIRONMENT: deploymentEnv.ENVIRONMENT,
         RELEASE: release,
         ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
+        SENTRY: sentry.enabled ? '1' : '0',
         GRAPHQL_ENDPOINT: serviceLocalEndpoint(graphql.service).apply(s => `${s}/graphql`),
         SERVER_ENDPOINT: serviceLocalEndpoint(graphql.service),
         APP_BASE_URL: `https://${deploymentEnv.DEPLOYED_DNS}/`,
@@ -115,5 +118,6 @@ export function deployApp({
     .withSecret('AUTH_GITHUB_CLIENT_SECRET', githubOAuthSecret, 'clientSecret')
     .withSecret('AUTH_GOOGLE_CLIENT_ID', googleOAuthSecret, 'clientId')
     .withSecret('AUTH_GOOGLE_CLIENT_SECRET', googleOAuthSecret, 'clientSecret')
+    .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
 }

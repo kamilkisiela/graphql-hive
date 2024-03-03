@@ -7,6 +7,7 @@ import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
 import { Postgres } from './postgres';
+import { Sentry } from './sentry';
 import { UsageEstimator } from './usage-estimation';
 
 export type StripeBillingService = ReturnType<typeof deployStripeBilling>;
@@ -24,6 +25,7 @@ export function deployStripeBilling({
   release,
   docker,
   postgres,
+  sentry,
 }: {
   usageEstimator: UsageEstimator;
   image: string;
@@ -32,6 +34,7 @@ export function deployStripeBilling({
   dbMigrations: DbMigrations;
   docker: Docker;
   postgres: Postgres;
+  sentry: Sentry;
 }) {
   const billingConfig = new pulumi.Config('billing');
   const commonConfig = new pulumi.Config('common');
@@ -55,7 +58,7 @@ export function deployStripeBilling({
       env: {
         ...deploymentEnv,
         ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
+        SENTRY: sentry.enabled ? '1' : '0',
         RELEASE: release,
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
       },
@@ -71,6 +74,7 @@ export function deployStripeBilling({
     .withSecret('POSTGRES_PASSWORD', postgres.secret, 'password')
     .withSecret('POSTGRES_DB', postgres.secret, 'database')
     .withSecret('POSTGRES_SSL', postgres.secret, 'ssl')
+    .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
 
   return {

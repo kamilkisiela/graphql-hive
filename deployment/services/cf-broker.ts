@@ -2,6 +2,7 @@ import * as pulumi from '@pulumi/pulumi';
 import { ServiceSecret } from '../secrets';
 import { CloudflareBroker } from '../utils/cloudflare';
 import { isProduction } from '../utils/helpers';
+import { Sentry } from './sentry';
 
 export class CloudFlareBrokerSecret extends ServiceSecret<{
   secretSignature: string | pulumi.Output<string>;
@@ -14,15 +15,16 @@ export function deployCFBroker({
   rootDns,
   envName,
   release,
+  sentry,
 }: {
   rootDns: string;
   envName: string;
   release: string;
+  sentry: Sentry;
 }) {
   const commonConfig = new pulumi.Config('common');
   const cfConfig = new pulumi.Config('cloudflareCustom');
   const observabilityConfig = new pulumi.Config('observability');
-  const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 
   const cfBrokerSignature = commonConfig.requireSecret('cfBrokerSignature');
   const broker = new CloudflareBroker({
@@ -33,7 +35,7 @@ export function deployCFBroker({
     // So for staging env, we are going to use `broker-staging` instead of `broker.staging`.
     cdnDnsRecord: isProduction(envName) ? `broker.${rootDns}` : `broker-${rootDns}`,
     secretSignature: cfBrokerSignature,
-    sentryDsn: commonEnv.SENTRY_DSN,
+    sentryDsn: sentry.enabled && sentry.secret ? sentry.secret.raw.dsn : '',
     release,
     loki: observabilityConfig.getBoolean('enabled')
       ? {

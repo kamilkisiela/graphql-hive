@@ -7,6 +7,7 @@ import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
 import { Emails } from './emails';
 import { Postgres } from './postgres';
+import { Sentry } from './sentry';
 import { UsageEstimator } from './usage-estimation';
 
 export type RateLimitService = ReturnType<typeof deployRateLimit>;
@@ -20,6 +21,7 @@ export function deployRateLimit({
   image,
   docker,
   postgres,
+  sentry,
 }: {
   usageEstimator: UsageEstimator;
   deploymentEnv: DeploymentEnvironment;
@@ -29,6 +31,7 @@ export function deployRateLimit({
   image: string;
   docker: Docker;
   postgres: Postgres;
+  sentry: Sentry;
 }) {
   const rateLimitConfig = new pulumi.Config('rateLimit');
   const commonConfig = new pulumi.Config('common');
@@ -45,7 +48,7 @@ export function deployRateLimit({
       env: {
         ...deploymentEnv,
         ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
+        SENTRY: sentry.enabled ? '1' : '0',
         LIMIT_CACHE_UPDATE_INTERVAL_MS: rateLimitConfig.require('updateIntervalMs'),
         RELEASE: release,
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
@@ -64,5 +67,6 @@ export function deployRateLimit({
     .withSecret('POSTGRES_PASSWORD', postgres.secret, 'password')
     .withSecret('POSTGRES_DB', postgres.secret, 'database')
     .withSecret('POSTGRES_SSL', postgres.secret, 'ssl')
+    .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
 }

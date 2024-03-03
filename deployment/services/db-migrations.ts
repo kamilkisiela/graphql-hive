@@ -4,7 +4,6 @@ import { ServiceDeployment } from '../utils/service-deployment';
 import { CDN } from './cf-cdn';
 import { Clickhouse } from './clickhouse';
 import { Docker } from './docker';
-import { Kafka } from './kafka';
 import { Postgres } from './postgres';
 import { S3 } from './s3';
 

@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import * as cf from '@pulumi/cloudflare';
 import * as pulumi from '@pulumi/pulumi';
-import { S3Secret } from '../secrets';
+import { S3 } from '../services/s3';
 
 export class CloudflareCDN {
   constructor(
@@ -10,9 +10,9 @@ export class CloudflareCDN {
       envName: string;
       zoneId: string;
       cdnDnsRecord: string;
-      sentryDsn: string;
+      sentryDsn: string | pulumi.Output<string>;
       release: string;
-      s3Secret: S3Secret;
+      s3: S3;
     },
   ) {}
 
@@ -74,19 +74,19 @@ export class CloudflareCDN {
         },
         {
           name: 'S3_ENDPOINT',
-          text: this.config.s3Secret.raw.endpoint,
+          text: this.config.s3.secret.raw.endpoint,
         },
         {
           name: 'S3_ACCESS_KEY_ID',
-          text: this.config.s3Secret.raw.accessKeyId,
+          text: this.config.s3.secret.raw.accessKeyId,
         },
         {
           name: 'S3_SECRET_ACCESS_KEY',
-          text: this.config.s3Secret.raw.secretAccessKey,
+          text: this.config.s3.secret.raw.secretAccessKey,
         },
         {
           name: 'S3_BUCKET_NAME',
-          text: this.config.s3Secret.raw.bucket,
+          text: this.config.s3.secret.raw.bucket,
         },
       ],
     });
@@ -114,7 +114,7 @@ export class CloudflareBroker {
       zoneId: string;
       cdnDnsRecord: string;
       secretSignature: pulumi.Output<string>;
-      sentryDsn: string;
+      sentryDsn: string | pulumi.Output<string>;
       release: string;
       loki: null | {
         endpoint: string;

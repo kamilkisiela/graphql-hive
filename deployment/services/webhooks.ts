@@ -7,6 +7,7 @@ import { ServiceDeployment } from '../utils/service-deployment';
 import type { Broker } from './cf-broker';
 import { Docker } from './docker';
 import { Redis } from './redis';
+import { Sentry } from './sentry';
 
 const commonConfig = new pulumi.Config('common');
 const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
@@ -21,6 +22,7 @@ export function deployWebhooks({
   release,
   docker,
   redis,
+  sentry,
 }: {
   image: string;
   release: string;
@@ -29,6 +31,7 @@ export function deployWebhooks({
   docker: Docker;
   broker: Broker;
   redis: Redis;
+  sentry: Sentry;
 }) {
   return new ServiceDeployment(
     'webhooks-service',
@@ -37,7 +40,7 @@ export function deployWebhooks({
       env: {
         ...deploymentEnv,
         ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
+        SENTRY: sentry.enabled ? '1' : '0',
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
         RELEASE: release,
         REQUEST_BROKER: '1',
@@ -56,5 +59,6 @@ export function deployWebhooks({
     .withSecret('REDIS_PASSWORD', redis.secret, 'password')
     .withSecret('REQUEST_BROKER_ENDPOINT', broker.secret, 'baseUrl')
     .withSecret('REQUEST_BROKER_SIGNATURE', broker.secret, 'secretSignature')
+    .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
 }

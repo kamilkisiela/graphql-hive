@@ -21,6 +21,7 @@ import { deployRateLimit } from './services/rate-limit';
 import { deployRedis } from './services/redis';
 import { deployS3 } from './services/s3';
 import { deploySchema } from './services/schema';
+import { configureSentry } from './services/sentry';
 import { deploySentryEventsMonitor } from './services/sentry-events';
 import { configureSlackApp } from './services/slack-app';
 import { deploySuperTokens } from './services/supertokens';
@@ -51,6 +52,8 @@ const rootDns = commonConfig.require('dnsZone');
 const appHostname = `${appDns}.${rootDns}`;
 const heartbeatsConfig = new pulumi.Config('heartbeats');
 
+const sentry = configureSentry();
+
 const deploymentEnv: DeploymentEnvironment = {
   ENVIRONMENT: envName,
   NODE_ENV: 'production',
@@ -72,12 +75,14 @@ const cdn = deployCFCDN({
   rootDns,
   s3,
   release: imagesTag,
+  sentry,
 });
 
 const broker = deployCFBroker({
   envName,
   rootDns,
   release: imagesTag,
+  sentry,
 });
 
 // eslint-disable-next-line no-process-env
@@ -107,6 +112,7 @@ const tokens = deployTokens({
   postgres,
   redis,
   heartbeat: heartbeatsConfig.get('tokens'),
+  sentry,
 });
 
 const webhooks = deployWebhooks({
@@ -117,6 +123,7 @@ const webhooks = deployWebhooks({
   broker,
   docker,
   redis,
+  sentry,
 });
 
 const emails = deployEmails({
@@ -125,6 +132,7 @@ const emails = deployEmails({
   release: imagesTag,
   deploymentEnv,
   redis,
+  sentry,
 });
 
 const usageEstimator = deployUsageEstimation({
@@ -134,6 +142,7 @@ const usageEstimator = deployUsageEstimation({
   deploymentEnv,
   clickhouse,
   dbMigrations,
+  sentry,
 });
 
 const billing = deployStripeBilling({
@@ -144,6 +153,7 @@ const billing = deployStripeBilling({
   deploymentEnv,
   dbMigrations,
   usageEstimator,
+  sentry,
 });
 
 const rateLimit = deployRateLimit({
@@ -155,6 +165,7 @@ const rateLimit = deployRateLimit({
   usageEstimator,
   emails,
   postgres,
+  sentry,
 });
 
 const usage = deployUsage({
@@ -166,6 +177,7 @@ const usage = deployUsage({
   kafka,
   dbMigrations,
   rateLimit,
+  sentry,
 });
 
 const usageIngestor = deployUsageIngestor({
@@ -177,6 +189,7 @@ const usageIngestor = deployUsageIngestor({
   deploymentEnv,
   dbMigrations,
   heartbeat: heartbeatsConfig.get('usageIngestor'),
+  sentry,
 });
 
 const schema = deploySchema({
@@ -187,6 +200,7 @@ const schema = deploySchema({
   redis,
   broker,
   common,
+  sentry,
 });
 
 const schemaPolicy = deploySchemaPolicy({
@@ -194,6 +208,7 @@ const schemaPolicy = deploySchemaPolicy({
   docker,
   release: imagesTag,
   deploymentEnv,
+  sentry
 });
 
 const supertokens = deploySuperTokens(postgres, { dependencies: [dbMigrations] }, deploymentEnv);
@@ -225,6 +240,7 @@ const graphql = deployGraphQL({
   s3,
   zendesk,
   githubApp,
+  sentry
 });
 
 const app = deployApp({
@@ -240,6 +256,7 @@ const app = deployApp({
   billing,
   github: githubApp,
   slackApp,
+  sentry
 });
 
 const proxy = deployProxy({

@@ -6,6 +6,7 @@ import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
 import { Postgres } from './postgres';
 import { Redis } from './redis';
+import { Sentry } from './sentry';
 
 const commonEnv = new pulumi.Config('common').requireObject<Record<string, string>>('env');
 
@@ -20,6 +21,7 @@ export function deployTokens({
   docker,
   postgres,
   redis,
+  sentry,
 }: {
   image: string;
   release: string;
@@ -29,6 +31,7 @@ export function deployTokens({
   docker: Docker;
   redis: Redis;
   postgres: Postgres;
+  sentry: Sentry;
 }) {
   return new ServiceDeployment(
     'tokens-service',
@@ -44,7 +47,7 @@ export function deployTokens({
       env: {
         ...deploymentEnv,
         ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
+        SENTRY: sentry.enabled ? '1' : '0',
         RELEASE: release,
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
       },
@@ -60,5 +63,6 @@ export function deployTokens({
     .withSecret('REDIS_HOST', redis.secret, 'host')
     .withSecret('REDIS_PORT', redis.secret, 'port')
     .withSecret('REDIS_PASSWORD', redis.secret, 'password')
+    .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
 }

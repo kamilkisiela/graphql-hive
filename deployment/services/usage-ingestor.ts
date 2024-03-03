@@ -6,6 +6,7 @@ import { Clickhouse } from './clickhouse';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
 import { Kafka } from './kafka';
+import { Sentry } from './sentry';
 
 export type UsageIngestor = ReturnType<typeof deployUsageIngestor>;
 
@@ -18,6 +19,7 @@ export function deployUsageIngestor({
   image,
   release,
   docker,
+  sentry,
 }: {
   image: string;
   release: string;
@@ -27,6 +29,7 @@ export function deployUsageIngestor({
   dbMigrations: DbMigrations;
   heartbeat?: string;
   docker: Docker;
+  sentry: Sentry;
 }) {
   const commonConfig = new pulumi.Config('common');
   const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
@@ -55,7 +58,7 @@ export function deployUsageIngestor({
       env: {
         ...deploymentEnv,
         ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
+        SENTRY: sentry.enabled ? '1' : '0',
         CLICKHOUSE_ASYNC_INSERT_BUSY_TIMEOUT_MS: '30000', // flush data after max 30 seconds
         CLICKHOUSE_ASYNC_INSERT_MAX_DATA_SIZE: '200000000', // flush data when the buffer reaches 200MB
         KAFKA_SASL_MECHANISM: kafka.config.saslMechanism,
@@ -88,5 +91,6 @@ export function deployUsageIngestor({
     .withSecret('KAFKA_SASL_PASSWORD', kafka.secret, 'saslPassword')
     .withSecret('KAFKA_SSL', kafka.secret, 'ssl')
     .withSecret('KAFKA_BROKER', kafka.secret, 'endpoint')
+    .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
 }
