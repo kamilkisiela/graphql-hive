@@ -1,7 +1,6 @@
 import { Config, Output } from '@pulumi/pulumi';
 import { ServiceSecret } from '../secrets';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
+import { Environment } from './environment';
 
 export class ZendeskSecret extends ServiceSecret<{
   subdomain: string | Output<string>;
@@ -9,8 +8,8 @@ export class ZendeskSecret extends ServiceSecret<{
   password: string | Output<string>;
 }> {}
 
-export function configureZendesk(input: { deploymentEnv: DeploymentEnvironment }) {
-  if (!isProduction(input.deploymentEnv)) {
+export function configureZendesk(input: { environment: Environment }) {
+  if (!input.environment.isProduction) {
     return {
       enabled: false,
       secret: null,

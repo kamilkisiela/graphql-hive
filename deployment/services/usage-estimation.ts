@@ -1,10 +1,9 @@
 import * as pulumi from '@pulumi/pulumi';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { Clickhouse } from './clickhouse';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
+import { Environment } from './environment';
 import { Sentry } from './sentry';
 
 export type UsageEstimator = ReturnType<typeof deployUsageEstimation>;
@@ -12,16 +11,14 @@ export type UsageEstimator = ReturnType<typeof deployUsageEstimation>;
 export function deployUsageEstimation({
   image,
   docker,
-  release,
-  deploymentEnv,
+  environment,
   clickhouse,
   dbMigrations,
   sentry,
 }: {
   image: string;
   docker: Docker;
-  release: string;
-  deploymentEnv: DeploymentEnvironment;
+  environment: Environment;
   clickhouse: Clickhouse;
   dbMigrations: DbMigrations;
   sentry: Sentry;
@@ -34,15 +31,13 @@ export function deployUsageEstimation({
     {
       image,
       imagePullSecret: docker.secret,
-      replicas: isProduction(deploymentEnv) ? 3 : 1,
+      replicas: environment.isProduction ? 3 : 1,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       startupProbe: '/_health',
       env: {
-        ...deploymentEnv,
-        ...commonEnv,
+        ...environment.env,
         SENTRY: sentry.enabled ? '1' : '0',
-        RELEASE: release,
       },
       exposesMetrics: true,
       port: 4000,

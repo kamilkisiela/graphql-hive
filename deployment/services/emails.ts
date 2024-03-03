@@ -1,16 +1,11 @@
-import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
 import { ServiceSecret } from '../secrets';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { Docker } from './docker';
+import { Environment } from './environment';
 import { Redis } from './redis';
 import { Sentry } from './sentry';
-
-const commonConfig = new pulumi.Config('common');
-const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 
 export type Emails = ReturnType<typeof deployEmails>;
 
@@ -21,17 +16,15 @@ class PostmarkSecret extends ServiceSecret<{
 }> {}
 
 export function deployEmails({
-  deploymentEnv,
+  environment,
   redis,
   heartbeat,
-  release,
   image,
   docker,
   sentry,
 }: {
-  release: string;
+  environment: Environment;
   image: string;
-  deploymentEnv: DeploymentEnvironment;
   redis: Redis;
   docker: Docker;
   heartbeat?: string;
@@ -49,10 +42,8 @@ export function deployEmails({
     {
       imagePullSecret: docker.secret,
       env: {
-        ...deploymentEnv,
-        ...commonEnv,
+        ...environment.env,
         SENTRY: sentry.enabled ? '1' : '0',
-        RELEASE: release,
         EMAIL_PROVIDER: 'postmark',
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
       },
@@ -61,7 +52,7 @@ export function deployEmails({
       startupProbe: '/_health',
       exposesMetrics: true,
       image,
-      replicas: isProduction(deploymentEnv) ? 3 : 1,
+      replicas: environment.isProduction ? 3 : 1,
     },
     [redis.deployment, redis.service],
   )

@@ -1,13 +1,12 @@
 import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
 import { ServiceDeployment } from '../utils/service-deployment';
+import { Environment } from './environment';
 
 const apiConfig = new pulumi.Config('api');
 
-export function deployDatabaseCleanupJob(options: { deploymentEnv: DeploymentEnvironment }) {
-  if (isProduction(options.deploymentEnv)) {
+export function deployDatabaseCleanupJob(options: { environment: Environment }) {
+  if (options.environment.isProduction) {
     throw new Error('Database cleanup job is not allowed in "production" environment!');
   }
 

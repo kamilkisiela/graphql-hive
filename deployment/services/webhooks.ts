@@ -1,11 +1,8 @@
-import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
-import { DeploymentEnvironment } from '../types';
-import { CloudflareBroker } from '../utils/cloudflare';
-import { isProduction } from '../utils/helpers';
 import { ServiceDeployment } from '../utils/service-deployment';
 import type { Broker } from './cf-broker';
 import { Docker } from './docker';
+import { Environment } from './environment';
 import { Redis } from './redis';
 import { Sentry } from './sentry';
 
@@ -15,18 +12,16 @@ const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 export type Webhooks = ReturnType<typeof deployWebhooks>;
 
 export function deployWebhooks({
-  deploymentEnv,
+  environment,
   heartbeat,
   broker,
   image,
-  release,
   docker,
   redis,
   sentry,
 }: {
   image: string;
-  release: string;
-  deploymentEnv: DeploymentEnvironment;
+  environment: Environment;
   heartbeat?: string;
   docker: Docker;
   broker: Broker;
@@ -38,18 +33,16 @@ export function deployWebhooks({
     {
       imagePullSecret: docker.secret,
       env: {
-        ...deploymentEnv,
-        ...commonEnv,
+        ...environment.env,
         SENTRY: sentry.enabled ? '1' : '0',
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
-        RELEASE: release,
         REQUEST_BROKER: '1',
       },
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       startupProbe: '/_health',
       exposesMetrics: true,
-      replicas: isProduction(deploymentEnv) ? 3 : 1,
+      replicas: environment.isProduction ? 3 : 1,
       image,
     },
     [redis.deployment, redis.service],

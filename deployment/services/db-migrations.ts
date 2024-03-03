@@ -1,16 +1,16 @@
 import * as pulumi from '@pulumi/pulumi';
-import { DeploymentEnvironment } from '../types';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { CDN } from './cf-cdn';
 import { Clickhouse } from './clickhouse';
 import { Docker } from './docker';
+import { Environment } from './environment';
 import { Postgres } from './postgres';
 import { S3 } from './s3';
 
 export type DbMigrations = ReturnType<typeof deployDbMigrations>;
 
 export function deployDbMigrations({
-  deploymentEnv,
+  environment,
   clickhouse,
   s3,
   image,
@@ -25,7 +25,7 @@ export function deployDbMigrations({
   clickhouse: Clickhouse;
   s3: S3;
   cdn: CDN;
-  deploymentEnv: DeploymentEnvironment;
+  environment: Environment;
   image: string;
   dependencies?: pulumi.Resource[];
   force?: boolean;
@@ -36,12 +36,12 @@ export function deployDbMigrations({
       imagePullSecret: docker.secret,
       image,
       env: {
+        ...environment.env,
         MIGRATOR: 'up',
         CLICKHOUSE_MIGRATOR: 'up',
         CLICKHOUSE_MIGRATOR_GRAPHQL_HIVE_CLOUD: '1',
         TS_NODE_TRANSPILE_ONLY: 'true',
         RUN_S3_LEGACY_CDN_KEY_IMPORT: '1',
-        ...deploymentEnv,
         // Change to this env var will lead to force rerun of the migration job
         // Since K8s job are immutable, we can't edit or ask K8s to re-run a Job, so we are doing a
         // pseudo change to an env var, which causes Pulumi to re-create the Job.

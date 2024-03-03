@@ -1,11 +1,9 @@
-import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
+import { Environment } from './environment';
 import { Kafka } from './kafka';
 import { RateLimitService } from './rate-limit';
 import { Sentry } from './sentry';
@@ -14,19 +12,17 @@ import { Tokens } from './tokens';
 export type Usage = ReturnType<typeof deployUsage>;
 
 export function deployUsage({
-  deploymentEnv,
+  environment,
   tokens,
   kafka,
   dbMigrations,
   rateLimit,
   image,
-  release,
   docker,
   sentry,
 }: {
   image: string;
-  release: string;
-  deploymentEnv: DeploymentEnvironment;
+  environment: Environment;
   tokens: Tokens;
   kafka: Kafka;
   dbMigrations: DbMigrations;
@@ -34,11 +30,9 @@ export function deployUsage({
   docker: Docker;
   sentry: Sentry;
 }) {
-  const commonConfig = new pulumi.Config('common');
-  const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
-  const replicas = isProduction(deploymentEnv) ? 3 : 1;
-  const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
-  const maxReplicas = isProduction(deploymentEnv) ? 6 : 2;
+  const replicas = environment.isProduction ? 3 : 1;
+  const cpuLimit = environment.isProduction ? '600m' : '300m';
+  const maxReplicas = environment.isProduction ? 6 : 2;
   const kafkaBufferDynamic =
     kafka.config.bufferDynamic === 'true' || kafka.config.bufferDynamic === '1' ? '1' : '0';
 
@@ -53,8 +47,7 @@ export function deployUsage({
       startupProbe: '/_health',
       availabilityOnEveryNode: true,
       env: {
-        ...deploymentEnv,
-        ...commonEnv,
+        ...environment.env,
         SENTRY: sentry.enabled ? '1' : '0',
         REQUEST_LOGGING: '0',
         KAFKA_BUFFER_SIZE: kafka.config.bufferSize,
@@ -63,7 +56,6 @@ export function deployUsage({
         KAFKA_BUFFER_INTERVAL: kafka.config.bufferInterval,
         KAFKA_BUFFER_DYNAMIC: kafkaBufferDynamic,
         KAFKA_TOPIC: kafka.config.topic,
-        RELEASE: release,
         TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
         RATE_LIMIT_ENDPOINT: serviceLocalEndpoint(rateLimit.service),
       },

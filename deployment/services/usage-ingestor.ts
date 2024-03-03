@@ -1,29 +1,26 @@
 import * as pulumi from '@pulumi/pulumi';
-import { DeploymentEnvironment } from '../types';
-import { isProduction, isStaging } from '../utils/helpers';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { Clickhouse } from './clickhouse';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
+import { Environment } from './environment';
 import { Kafka } from './kafka';
 import { Sentry } from './sentry';
 
 export type UsageIngestor = ReturnType<typeof deployUsageIngestor>;
 
 export function deployUsageIngestor({
-  deploymentEnv,
+  environment,
   clickhouse,
   kafka,
   dbMigrations,
   heartbeat,
   image,
-  release,
   docker,
   sentry,
 }: {
   image: string;
-  release: string;
-  deploymentEnv: DeploymentEnvironment;
+  environment: Environment;
   clickhouse: Clickhouse;
   kafka: Kafka;
   dbMigrations: DbMigrations;
@@ -31,18 +28,16 @@ export function deployUsageIngestor({
   docker: Docker;
   sentry: Sentry;
 }) {
-  const commonConfig = new pulumi.Config('common');
-  const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
   const clickHouseConfig = new pulumi.Config('clickhouse');
   const numberOfPartitions = 16;
-  const replicas = isProduction(deploymentEnv) ? 6 : 1;
-  const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
-  const maxReplicas = isProduction(deploymentEnv) ? numberOfPartitions : 2;
+  const replicas = environment.isProduction ? 6 : 1;
+  const cpuLimit = environment.isProduction ? '600m' : '300m';
+  const maxReplicas = environment.isProduction ? numberOfPartitions : 2;
 
   // Require migrationV2DataIngestionStartDate only in production and staging
   // Remove it once we are done with migration.
   const clickHouseMigrationV2DataIngestionStartDate =
-    isProduction(deploymentEnv) || isStaging(deploymentEnv)
+    environment.isProduction || environment.isStaging
       ? clickHouseConfig.require('migrationV2DataIngestionStartDate')
       : '';
 
@@ -56,8 +51,7 @@ export function deployUsageIngestor({
       livenessProbe: '/_health',
       availabilityOnEveryNode: true,
       env: {
-        ...deploymentEnv,
-        ...commonEnv,
+        ...environment.env,
         SENTRY: sentry.enabled ? '1' : '0',
         CLICKHOUSE_ASYNC_INSERT_BUSY_TIMEOUT_MS: '30000', // flush data after max 30 seconds
         CLICKHOUSE_ASYNC_INSERT_MAX_DATA_SIZE: '200000000', // flush data when the buffer reaches 200MB
@@ -65,7 +59,6 @@ export function deployUsageIngestor({
         KAFKA_CONCURRENCY: kafka.config.concurrency,
         KAFKA_TOPIC: kafka.config.topic,
         KAFKA_CONSUMER_GROUP: kafka.config.consumerGroup,
-        RELEASE: release,
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
         MIGRATION_V2_INGEST_AFTER_UTC: clickHouseMigrationV2DataIngestionStartDate,
       },

@@ -1,11 +1,10 @@
 import * as pulumi from '@pulumi/pulumi';
 import { ServiceSecret } from '../secrets';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
+import { Environment } from './environment';
 import { Postgres } from './postgres';
 import { Sentry } from './sentry';
 import { UsageEstimator } from './usage-estimation';
@@ -18,48 +17,39 @@ class StripeSecret extends ServiceSecret<{
 }> {}
 
 export function deployStripeBilling({
-  deploymentEnv,
+  environment,
   dbMigrations,
   usageEstimator,
   image,
-  release,
   docker,
   postgres,
   sentry,
 }: {
   usageEstimator: UsageEstimator;
   image: string;
-  release: string;
-  deploymentEnv: DeploymentEnvironment;
+  environment: Environment;
   dbMigrations: DbMigrations;
   docker: Docker;
   postgres: Postgres;
   sentry: Sentry;
 }) {
   const billingConfig = new pulumi.Config('billing');
-  const commonConfig = new pulumi.Config('common');
-  const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
-  const appConfig = new pulumi.Config('app');
-  const appEnv = appConfig.requireObject<Record<string, string>>('env');
-
   const stripeSecret = new StripeSecret('stripe', {
     stripePrivateKey: billingConfig.requireSecret('stripePrivateKey'),
-    stripePublicKey: appEnv.STRIPE_PUBLIC_KEY,
+    stripePublicKey: billingConfig.require('stripePublicKey'),
   });
   const { deployment, service } = new ServiceDeployment(
     'stripe-billing',
     {
       image,
       imagePullSecret: docker.secret,
-      replicas: isProduction(deploymentEnv) ? 3 : 1,
+      replicas: environment.isProduction ? 3 : 1,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       startupProbe: '/_health',
       env: {
-        ...deploymentEnv,
-        ...commonEnv,
+        ...environment.env,
         SENTRY: sentry.enabled ? '1' : '0',
-        RELEASE: release,
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
       },
       exposesMetrics: true,

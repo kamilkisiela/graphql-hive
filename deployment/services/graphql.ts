@@ -1,17 +1,13 @@
 import * as pulumi from '@pulumi/pulumi';
-import { Output } from '@pulumi/pulumi';
-import { ServiceSecret } from '../secrets';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { StripeBillingService } from './billing';
 import { CDN } from './cf-cdn';
 import { Clickhouse } from './clickhouse';
-import { Common } from './common';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
 import { Emails } from './emails';
+import { Environment } from './environment';
 import { GitHubApp } from './github';
 import { SchemaPolicy } from './policy';
 import { Postgres } from './postgres';
@@ -31,9 +27,8 @@ export type GraphQL = ReturnType<typeof deployGraphQL>;
 
 export function deployGraphQL({
   clickhouse,
-  release,
   image,
-  deploymentEnv,
+  environment,
   tokens,
   webhooks,
   schema,
@@ -51,17 +46,14 @@ export function deployGraphQL({
   zendesk,
   docker,
   postgres,
-  common,
   githubApp,
   sentry,
 }: {
   githubApp: GitHubApp;
-  common: Common;
   postgres: Postgres;
-  release: string;
   image: string;
   clickhouse: Clickhouse;
-  deploymentEnv: DeploymentEnvironment;
+  environment: Environment;
   tokens: Tokens;
   webhooks: Webhooks;
   schema: Schema;
@@ -80,10 +72,7 @@ export function deployGraphQL({
   docker: Docker;
   sentry: Sentry;
 }) {
-  const commonConfig = new pulumi.Config('common');
   const apiConfig = new pulumi.Config('api');
-
-  const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
   const apiEnv = apiConfig.requireObject<Record<string, string>>('env');
 
   return (
@@ -92,7 +81,7 @@ export function deployGraphQL({
       {
         imagePullSecret: docker.secret,
         image,
-        replicas: isProduction(deploymentEnv) ? 3 : 1,
+        replicas: environment.isProduction ? 3 : 1,
         pdb: true,
         readinessProbe: '/_readiness',
         livenessProbe: '/_health',
@@ -105,11 +94,8 @@ export function deployGraphQL({
         },
         availabilityOnEveryNode: true,
         env: {
+          ...environment.env,
           ...apiEnv,
-          ...deploymentEnv,
-          ...apiConfig.requireObject<Record<string, string>>('env'),
-          ...commonEnv,
-          RELEASE: release,
           SENTRY: sentry.enabled ? '1' : '0',
           REQUEST_LOGGING: '0', // disabled
           BILLING_ENDPOINT: serviceLocalEndpoint(billing.service),
@@ -121,7 +107,7 @@ export function deployGraphQL({
           RATE_LIMIT_ENDPOINT: serviceLocalEndpoint(rateLimit.service),
           EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
           USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
-          WEB_APP_URL: `https://${deploymentEnv.DEPLOYED_DNS}`,
+          WEB_APP_URL: `https://${environment.appDns}`,
           CDN_CF: '1',
           HIVE: '1',
           HIVE_REPORTING: '1',
@@ -183,7 +169,7 @@ export function deployGraphQL({
       // Sentry
       .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
       // Other
-      .withSecret('ENCRYPTION_SECRET', common.encryptionSecret, 'encryptionPrivateKey')
+      .withSecret('ENCRYPTION_SECRET', environment.encryptionSecret, 'encryptionPrivateKey')
       .deploy()
   );
 }

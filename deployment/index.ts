@@ -5,11 +5,11 @@ import { deployCFBroker } from './services/cf-broker';
 import { deployCFCDN } from './services/cf-cdn';
 import { deployClickhouse } from './services/clickhouse';
 import { deployCloudFlareSecurityTransform } from './services/cloudflare-security';
-import { prepareCommon } from './services/common';
 import { deployDatabaseCleanupJob } from './services/database-cleanup';
 import { deployDbMigrations } from './services/db-migrations';
 import { configureDocker } from './services/docker';
 import { deployEmails } from './services/emails';
+import { prepareEnvironment } from './services/environment';
 import { configureGithubApp } from './services/github';
 import { deployGraphQL } from './services/graphql';
 import { deployKafka } from './services/kafka';
@@ -31,9 +31,8 @@ import { deployUsageEstimation } from './services/usage-estimation';
 import { deployUsageIngestor } from './services/usage-ingestor';
 import { deployWebhooks } from './services/webhooks';
 import { configureZendesk } from './services/zendesk';
-import { DeploymentEnvironment } from './types';
 import { optimizeAzureCluster } from './utils/azure-helpers';
-import { isDefined, isProduction } from './utils/helpers';
+import { isDefined } from './utils/helpers';
 
 // eslint-disable-next-line no-process-env
 const imagesTag = process.env.DOCKER_IMAGE_TAG as string;
@@ -54,19 +53,18 @@ const heartbeatsConfig = new pulumi.Config('heartbeats');
 
 const sentry = configureSentry();
 
-const deploymentEnv: DeploymentEnvironment = {
-  ENVIRONMENT: envName,
-  NODE_ENV: 'production',
-  DEPLOYED_DNS: appHostname,
-};
-
 deploySentryEventsMonitor({ envName, imagePullSecret: docker.secret });
 deployMetrics({ envName });
 
-const common = prepareCommon({ release: imagesTag });
+const environment = prepareEnvironment({
+  release: imagesTag,
+  environment: envName,
+  rootDns,
+  appDns: appHostname,
+});
 const clickhouse = deployClickhouse();
 const postgres = deployPostgres();
-const redis = deployRedis({ deploymentEnv });
+const redis = deployRedis({ environment });
 const kafka = deployKafka();
 const s3 = deployS3();
 
@@ -87,7 +85,7 @@ const broker = deployCFBroker({
 
 // eslint-disable-next-line no-process-env
 const shouldCleanDatabase = process.env.CLEAN_DATABASE === 'true';
-const databaseCleanupJob = shouldCleanDatabase ? deployDatabaseCleanupJob({ deploymentEnv }) : null;
+const databaseCleanupJob = shouldCleanDatabase ? deployDatabaseCleanupJob({ environment }) : null;
 
 // eslint-disable-next-line no-process-env
 const forceRunDbMigrations = process.env.FORCE_DB_MIGRATIONS === 'true';
@@ -97,7 +95,7 @@ const dbMigrations = deployDbMigrations({
   postgres,
   s3,
   cdn,
-  deploymentEnv,
+  environment,
   image: docker.factory.getImageId('storage', imagesTag),
   force: forceRunDbMigrations,
   dependencies: [databaseCleanupJob].filter(isDefined),
@@ -105,8 +103,7 @@ const dbMigrations = deployDbMigrations({
 
 const tokens = deployTokens({
   image: docker.factory.getImageId('tokens', imagesTag),
-  release: imagesTag,
-  deploymentEnv,
+  environment,
   dbMigrations,
   docker,
   postgres,
@@ -117,8 +114,7 @@ const tokens = deployTokens({
 
 const webhooks = deployWebhooks({
   image: docker.factory.getImageId('webhooks', imagesTag),
-  release: imagesTag,
-  deploymentEnv,
+  environment,
   heartbeat: heartbeatsConfig.get('webhooks'),
   broker,
   docker,
@@ -129,8 +125,7 @@ const webhooks = deployWebhooks({
 const emails = deployEmails({
   image: docker.factory.getImageId('emails', imagesTag),
   docker,
-  release: imagesTag,
-  deploymentEnv,
+  environment,
   redis,
   sentry,
 });
@@ -138,8 +133,7 @@ const emails = deployEmails({
 const usageEstimator = deployUsageEstimation({
   image: docker.factory.getImageId('usage-estimator', imagesTag),
   docker,
-  release: imagesTag,
-  deploymentEnv,
+  environment,
   clickhouse,
   dbMigrations,
   sentry,
@@ -148,9 +142,8 @@ const usageEstimator = deployUsageEstimation({
 const billing = deployStripeBilling({
   image: docker.factory.getImageId('stripe-billing', imagesTag),
   docker,
-  release: imagesTag,
   postgres,
-  deploymentEnv,
+  environment,
   dbMigrations,
   usageEstimator,
   sentry,
@@ -159,8 +152,7 @@ const billing = deployStripeBilling({
 const rateLimit = deployRateLimit({
   image: docker.factory.getImageId('rate-limit', imagesTag),
   docker,
-  release: imagesTag,
-  deploymentEnv,
+  environment,
   dbMigrations,
   usageEstimator,
   emails,
@@ -171,8 +163,7 @@ const rateLimit = deployRateLimit({
 const usage = deployUsage({
   image: docker.factory.getImageId('usage', imagesTag),
   docker,
-  release: imagesTag,
-  deploymentEnv,
+  environment,
   tokens,
   kafka,
   dbMigrations,
@@ -183,10 +174,9 @@ const usage = deployUsage({
 const usageIngestor = deployUsageIngestor({
   image: docker.factory.getImageId('usage-ingestor', imagesTag),
   docker,
-  release: imagesTag,
   clickhouse,
   kafka,
-  deploymentEnv,
+  environment,
   dbMigrations,
   heartbeat: heartbeatsConfig.get('usageIngestor'),
   sentry,
@@ -195,35 +185,30 @@ const usageIngestor = deployUsageIngestor({
 const schema = deploySchema({
   image: docker.factory.getImageId('schema', imagesTag),
   docker,
-  release: imagesTag,
-  deploymentEnv,
+  environment,
   redis,
   broker,
-  common,
   sentry,
 });
 
 const schemaPolicy = deploySchemaPolicy({
   image: docker.factory.getImageId('policy', imagesTag),
   docker,
-  release: imagesTag,
-  deploymentEnv,
-  sentry
+  environment,
+  sentry,
 });
 
-const supertokens = deploySuperTokens(postgres, { dependencies: [dbMigrations] }, deploymentEnv);
-const zendesk = configureZendesk({ deploymentEnv });
+const supertokens = deploySuperTokens(postgres, { dependencies: [dbMigrations] }, environment);
+const zendesk = configureZendesk({ environment });
 const githubApp = configureGithubApp();
 const slackApp = configureSlackApp();
 
 const graphql = deployGraphQL({
   postgres,
-  common,
+  environment,
   clickhouse,
   image: docker.factory.getImageId('server', imagesTag),
   docker,
-  release: imagesTag,
-  deploymentEnv,
   tokens,
   webhooks,
   schema,
@@ -240,23 +225,22 @@ const graphql = deployGraphQL({
   s3,
   zendesk,
   githubApp,
-  sentry
+  sentry,
 });
 
 const app = deployApp({
-  deploymentEnv,
+  environment,
   graphql,
   dbMigrations,
   image: docker.factory.getImageId('app', imagesTag),
   docker,
-  release: imagesTag,
   supertokens,
   emails,
   zendesk,
   billing,
   github: githubApp,
   slackApp,
-  sentry
+  sentry,
 });
 
 const proxy = deployProxy({
@@ -264,7 +248,7 @@ const proxy = deployProxy({
   app,
   graphql,
   usage,
-  deploymentEnv,
+  environment,
 });
 
 deployCloudFlareSecurityTransform({

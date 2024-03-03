@@ -1,36 +1,28 @@
 import * as pulumi from '@pulumi/pulumi';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
 import { ServiceDeployment } from '../utils/service-deployment';
 import type { Broker } from './cf-broker';
-import { Common } from './common';
 import { Docker } from './docker';
+import { Environment } from './environment';
 import { Redis } from './redis';
 import { Sentry } from './sentry';
 
 export type Schema = ReturnType<typeof deploySchema>;
 
 export function deploySchema({
-  common,
-  deploymentEnv,
+  environment,
   redis,
   broker,
-  release,
   image,
   docker,
   sentry,
 }: {
-  common: Common;
   image: string;
-  release: string;
-  deploymentEnv: DeploymentEnvironment;
+  environment: Environment;
   redis: Redis;
   broker: Broker;
   docker: Docker;
   sentry: Sentry;
 }) {
-  const commonConfig = new pulumi.Config('common');
-  const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
   return new ServiceDeployment(
     'schema-service',
     {
@@ -38,10 +30,8 @@ export function deploySchema({
       imagePullSecret: docker.secret,
       availabilityOnEveryNode: true,
       env: {
-        ...deploymentEnv,
-        ...commonEnv,
+        ...environment.env,
         SENTRY: sentry.enabled ? '1' : '0',
-        RELEASE: release,
         REQUEST_BROKER: '1',
         SCHEMA_CACHE_POLL_INTERVAL_MS: '150',
         SCHEMA_CACHE_TTL_MS: '65000' /* 65s */,
@@ -52,7 +42,7 @@ export function deploySchema({
       livenessProbe: '/_health',
       startupProbe: '/_health',
       exposesMetrics: true,
-      replicas: isProduction(deploymentEnv) ? 3 : 1,
+      replicas: environment.isProduction ? 3 : 1,
       pdb: true,
     },
     [redis.deployment, redis.service],
@@ -62,7 +52,7 @@ export function deploySchema({
     .withSecret('REDIS_PASSWORD', redis.secret, 'password')
     .withSecret('REQUEST_BROKER_ENDPOINT', broker.secret, 'baseUrl')
     .withSecret('REQUEST_BROKER_SIGNATURE', broker.secret, 'secretSignature')
-    .withSecret('ENCRYPTION_SECRET', common.encryptionSecret, 'encryptionPrivateKey')
+    .withSecret('ENCRYPTION_SECRET', environment.encryptionSecret, 'encryptionPrivateKey')
     .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
 }

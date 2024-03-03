@@ -1,31 +1,25 @@
-import * as pulumi from '@pulumi/pulumi';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
+import { Environment } from './environment';
 import { Postgres } from './postgres';
 import { Redis } from './redis';
 import { Sentry } from './sentry';
 
-const commonEnv = new pulumi.Config('common').requireObject<Record<string, string>>('env');
-
 export type Tokens = ReturnType<typeof deployTokens>;
 
 export function deployTokens({
-  deploymentEnv,
+  environment,
   dbMigrations,
   heartbeat,
   image,
-  release,
   docker,
   postgres,
   redis,
   sentry,
 }: {
   image: string;
-  release: string;
-  deploymentEnv: DeploymentEnvironment;
+  environment: Environment;
   dbMigrations: DbMigrations;
   heartbeat?: string;
   docker: Docker;
@@ -42,13 +36,11 @@ export function deployTokens({
       startupProbe: '/_health',
       exposesMetrics: true,
       availabilityOnEveryNode: true,
-      replicas: isProduction(deploymentEnv) ? 3 : 1,
+      replicas: environment.isProduction ? 3 : 1,
       image,
       env: {
-        ...deploymentEnv,
-        ...commonEnv,
+        ...environment.env,
         SENTRY: sentry.enabled ? '1' : '0',
-        RELEASE: release,
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
       },
     },

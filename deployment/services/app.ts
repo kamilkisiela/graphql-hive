@@ -1,13 +1,12 @@
 import * as pulumi from '@pulumi/pulumi';
 import { ServiceSecret } from '../secrets';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { StripeBilling } from './billing';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
 import { Emails } from './emails';
+import { Environment } from './environment';
 import { GitHubApp } from './github';
 import { GraphQL } from './graphql';
 import { Sentry } from './sentry';
@@ -23,10 +22,8 @@ class AppOAuthSecret extends ServiceSecret<{
 }> {}
 
 export function deployApp({
-  deploymentEnv,
   graphql,
   dbMigrations,
-  release,
   image,
   supertokens,
   docker,
@@ -36,10 +33,10 @@ export function deployApp({
   slackApp,
   billing,
   sentry,
+  environment,
 }: {
+  environment: Environment;
   image: string;
-  release: string;
-  deploymentEnv: DeploymentEnvironment;
   graphql: GraphQL;
   dbMigrations: DbMigrations;
   docker: Docker;
@@ -52,9 +49,7 @@ export function deployApp({
   sentry: Sentry;
 }) {
   const appConfig = new pulumi.Config('app');
-  const commonConfig = new pulumi.Config('common');
   const appEnv = appConfig.requireObject<Record<string, string>>('env');
-  const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 
   const oauthConfig = new pulumi.Config('oauth');
   const githubOAuthSecret = new AppOAuthSecret('oauth-github', {
@@ -70,7 +65,7 @@ export function deployApp({
     'app',
     {
       image,
-      replicas: isProduction(deploymentEnv) ? 3 : 1,
+      replicas: environment.isProduction ? 3 : 1,
       imagePullSecret: docker.secret,
       readinessProbe: '/api/health',
       livenessProbe: '/api/health',
@@ -83,15 +78,11 @@ export function deployApp({
       },
       availabilityOnEveryNode: true,
       env: {
-        DEPLOYED_DNS: deploymentEnv.DEPLOYED_DNS,
-        NODE_ENV: 'production',
-        ENVIRONMENT: deploymentEnv.ENVIRONMENT,
-        RELEASE: release,
-        ...commonEnv,
+        ...environment.env,
         SENTRY: sentry.enabled ? '1' : '0',
         GRAPHQL_ENDPOINT: serviceLocalEndpoint(graphql.service).apply(s => `${s}/graphql`),
         SERVER_ENDPOINT: serviceLocalEndpoint(graphql.service),
-        APP_BASE_URL: `https://${deploymentEnv.DEPLOYED_DNS}/`,
+        APP_BASE_URL: `https://${environment.appDns}/`,
         INTEGRATION_SLACK: '1',
         INTEGRATION_GITHUB_APP_NAME: github.name,
         GA_TRACKING_ID: appEnv.GA_TRACKING_ID,

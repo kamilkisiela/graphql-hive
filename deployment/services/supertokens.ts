@@ -2,9 +2,8 @@ import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
 import * as random from '@pulumi/random';
 import { ServiceSecret } from '../secrets';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
+import { Environment } from './environment';
 import { Postgres } from './postgres';
 
 export class SupertokensSecret extends ServiceSecret<{
@@ -16,7 +15,7 @@ export function deploySuperTokens(
   resourceOptions: {
     dependencies: pulumi.Resource[];
   },
-  deploymentEnv: DeploymentEnvironment,
+  environment: Environment,
 ) {
   const supertokensApiKey = new random.RandomPassword('supertokens-api-key', {
     length: 31,
@@ -89,7 +88,7 @@ export function deploySuperTokens(
   const deployment = new kx.Deployment(
     'supertokens',
     {
-      spec: pb.asDeploymentSpec({ replicas: isProduction(deploymentEnv) ? 3 : 1 }),
+      spec: pb.asDeploymentSpec({ replicas: environment.isProduction ? 3 : 1 }),
     },
     {
       dependsOn: resourceOptions.dependencies,

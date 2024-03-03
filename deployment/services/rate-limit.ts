@@ -1,11 +1,9 @@
-import * as pulumi from '@pulumi/pulumi';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
 import { Emails } from './emails';
+import { Environment } from './environment';
 import { Postgres } from './postgres';
 import { Sentry } from './sentry';
 import { UsageEstimator } from './usage-estimation';
@@ -13,47 +11,39 @@ import { UsageEstimator } from './usage-estimation';
 export type RateLimitService = ReturnType<typeof deployRateLimit>;
 
 export function deployRateLimit({
-  deploymentEnv,
+  environment,
   dbMigrations,
   usageEstimator,
   emails,
-  release,
   image,
   docker,
   postgres,
   sentry,
 }: {
   usageEstimator: UsageEstimator;
-  deploymentEnv: DeploymentEnvironment;
+  environment: Environment;
   dbMigrations: DbMigrations;
   emails: Emails;
-  release: string;
   image: string;
   docker: Docker;
   postgres: Postgres;
   sentry: Sentry;
 }) {
-  const rateLimitConfig = new pulumi.Config('rateLimit');
-  const commonConfig = new pulumi.Config('common');
-  const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
-
   return new ServiceDeployment(
     'rate-limiter',
     {
       imagePullSecret: docker.secret,
-      replicas: isProduction(deploymentEnv) ? 3 : 1,
+      replicas: environment.isProduction ? 3 : 1,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       startupProbe: '/_health',
       env: {
-        ...deploymentEnv,
-        ...commonEnv,
+        ...environment.env,
         SENTRY: sentry.enabled ? '1' : '0',
-        LIMIT_CACHE_UPDATE_INTERVAL_MS: isProduction(deploymentEnv) ? '60000' : '86400000',
-        RELEASE: release,
+        LIMIT_CACHE_UPDATE_INTERVAL_MS: environment.isProduction ? '60000' : '86400000',
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
         EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
-        WEB_APP_URL: `https://${deploymentEnv.DEPLOYED_DNS}/`,
+        WEB_APP_URL: `https://${environment.appDns}/`,
       },
       exposesMetrics: true,
       port: 4000,

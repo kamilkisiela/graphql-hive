@@ -1,9 +1,8 @@
 import * as pulumi from '@pulumi/pulumi';
-import { DeploymentEnvironment } from '../types';
 import { CertManager } from '../utils/cert-manager';
-import { isProduction } from '../utils/helpers';
 import { Proxy } from '../utils/reverse-proxy';
 import { App } from './app';
+import { Environment } from './environment';
 import { GraphQL } from './graphql';
 import { Usage } from './usage';
 
@@ -14,9 +13,9 @@ export function deployProxy({
   graphql,
   app,
   usage,
-  deploymentEnv,
+  environment,
 }: {
-  deploymentEnv: DeploymentEnvironment;
+  environment: Environment;
   appHostname: string;
   graphql: GraphQL;
   app: App;
@@ -27,7 +26,7 @@ export function deployProxy({
     address: commonConfig.get('staticIp'),
     aksReservedIpResourceGroup: commonConfig.get('aksReservedIpResourceGroup'),
   })
-    .deployProxy({ replicas: isProduction(deploymentEnv) ? 3 : 1 })
+    .deployProxy({ replicas: environment.isProduction ? 3 : 1 })
     .registerService({ record: appHostname }, [
       {
         name: 'app',

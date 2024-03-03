@@ -1,9 +1,9 @@
 import * as pulumi from '@pulumi/pulumi';
 import { ServiceSecret } from '../secrets';
-import { DeploymentEnvironment } from '../types';
 import { isProduction } from '../utils/helpers';
 import { serviceLocalHost } from '../utils/local-endpoint';
 import { Redis as RedisStore } from '../utils/redis';
+import { Environment } from './environment';
 
 const redisConfig = new pulumi.Config('redis');
 
@@ -15,12 +15,12 @@ export class RedisSecret extends ServiceSecret<{
 
 export type Redis = ReturnType<typeof deployRedis>;
 
-export function deployRedis({ deploymentEnv }: { deploymentEnv: DeploymentEnvironment }) {
+export function deployRedis(input: { environment: Environment }) {
   const redisPassword = redisConfig.requireSecret('password');
   const redisApi = new RedisStore({
     password: redisPassword,
   }).deploy({
-    limits: isProduction(deploymentEnv)
+    limits: input.environment.isProduction
       ? {
           memory: '800Mi',
           cpu: '1000m',
