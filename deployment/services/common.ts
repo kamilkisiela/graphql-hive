@@ -5,10 +5,6 @@ export class DataEncryptionSecret extends ServiceSecret<{
   encryptionPrivateKey: string | Output<string>;
 }> {}
 
-export class MonitoringHeartbeatSecret extends ServiceSecret<{
-  endpoint: string | Output<string>;
-}> {}
-
 export function prepareCommon(input: { release: string }) {
   const commonConfig = new Config('common');
 

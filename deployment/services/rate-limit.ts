@@ -49,7 +49,7 @@ export function deployRateLimit({
         ...deploymentEnv,
         ...commonEnv,
         SENTRY: sentry.enabled ? '1' : '0',
-        LIMIT_CACHE_UPDATE_INTERVAL_MS: rateLimitConfig.require('updateIntervalMs'),
+        LIMIT_CACHE_UPDATE_INTERVAL_MS: isProduction(deploymentEnv) ? '60000' : '86400000',
         RELEASE: release,
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
         EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),

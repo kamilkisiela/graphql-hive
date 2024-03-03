@@ -16,7 +16,7 @@ export class RedisSecret extends ServiceSecret<{
 export type Redis = ReturnType<typeof deployRedis>;
 
 export function deployRedis({ deploymentEnv }: { deploymentEnv: DeploymentEnvironment }) {
-  const redisPassword = redisConfig.require('password');
+  const redisPassword = redisConfig.requireSecret('password');
   const redisApi = new RedisStore({
     password: redisPassword,
   }).deploy({

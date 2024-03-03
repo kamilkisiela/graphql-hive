@@ -1,5 +1,6 @@
 import * as k8s from '@pulumi/kubernetes';
 import * as kx from '@pulumi/kubernetesx';
+import { Output } from '@pulumi/pulumi';
 import { getLocalComposeConfig } from './local-config';
 import { normalizeEnv, PodBuilder } from './pod-builder';
 
@@ -9,7 +10,7 @@ export class Redis {
   constructor(
     protected options: {
       env?: kx.types.Container['env'];
-      password: string;
+      password: string | Output<string>;
     },
   ) {}
 

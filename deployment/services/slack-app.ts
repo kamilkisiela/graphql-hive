@@ -7,12 +7,11 @@ class SlackIntegrationSecret extends ServiceSecret<{
 }> {}
 
 export function configureSlackApp() {
-  const appConfig = new Config('app');
-  const appEnv = appConfig.requireObject<Record<string, string>>('env');
+  const slackConfig = new Config('slack');
 
   const secret = new SlackIntegrationSecret('slack-app', {
-    clientId: appEnv.SLACK_CLIENT_ID,
-    clientSecret: appEnv.SLACK_CLIENT_SECRET,
+    clientId: slackConfig.require('clientId'),
+    clientSecret: slackConfig.requireSecret('clientSecret'),
   });
 
   return {
