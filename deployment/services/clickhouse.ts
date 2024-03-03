@@ -1,5 +1,5 @@
 import * as pulumi from '@pulumi/pulumi';
-import { ServiceSecret } from '../secrets';
+import { ServiceSecret } from '../utils/secrets';
 
 export type Clickhouse = ReturnType<typeof deployClickhouse>;
 

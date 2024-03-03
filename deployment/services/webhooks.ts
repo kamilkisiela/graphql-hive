@@ -1,13 +1,9 @@
-import * as pulumi from '@pulumi/pulumi';
 import { ServiceDeployment } from '../utils/service-deployment';
 import type { Broker } from './cf-broker';
 import { Docker } from './docker';
 import { Environment } from './environment';
 import { Redis } from './redis';
 import { Sentry } from './sentry';
-
-const commonConfig = new pulumi.Config('common');
-const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 
 export type Webhooks = ReturnType<typeof deployWebhooks>;
 

@@ -6,8 +6,6 @@ import { Environment } from './environment';
 import { GraphQL } from './graphql';
 import { Usage } from './usage';
 
-const commonConfig = new pulumi.Config('common');
-
 export function deployProxy({
   graphql,
   app,
@@ -20,6 +18,8 @@ export function deployProxy({
   usage: Usage;
 }) {
   const { tlsIssueName } = new CertManager().deployCertManagerAndIssuer();
+  const commonConfig = new pulumi.Config('common');
+
   return new Proxy(tlsIssueName, {
     address: commonConfig.get('staticIp'),
     aksReservedIpResourceGroup: commonConfig.get('aksReservedIpResourceGroup'),

@@ -1,5 +1,5 @@
 import { Config, Output } from '@pulumi/pulumi';
-import { ServiceSecret } from '../secrets';
+import { ServiceSecret } from '../utils/secrets';
 
 export class DataEncryptionSecret extends ServiceSecret<{
   encryptionPrivateKey: string | Output<string>;
@@ -7,7 +7,6 @@ export class DataEncryptionSecret extends ServiceSecret<{
 
 export function prepareEnvironment(input: {
   release: string;
-  appDns: string;
   rootDns: string;
   environment: string;
 }) {
@@ -22,20 +21,23 @@ export function prepareEnvironment(input: {
       ? 'production'
       : input.environment;
 
+  const appDns = `app.${input.rootDns}`;
+
   return {
     env: {
       NODE_ENV: 'production',
       LOG_LEVEL: 'debug',
-      DEPLOYED_DNS: input.appDns,
+      DEPLOYED_DNS: appDns,
       ENVIRONMENT: input.environment,
       RELEASE: input.release,
     },
+    envName: env,
     isProduction: env === 'production',
     isStaging: env === 'staging',
     isDev: env === 'dev',
     encryptionSecret,
     release: input.release,
-    appDns: input.appDns,
+    appDns,
     rootDns: input.rootDns,
   };
 }

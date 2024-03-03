@@ -1,5 +1,5 @@
 import * as pulumi from '@pulumi/pulumi';
-import { ServiceSecret } from '../secrets';
+import { ServiceSecret } from '../utils/secrets';
 
 export class S3Secret extends ServiceSecret<{
   accessKeyId: string | pulumi.Output<string>;

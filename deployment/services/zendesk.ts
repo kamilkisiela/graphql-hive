@@ -1,5 +1,5 @@
 import { Config, Output } from '@pulumi/pulumi';
-import { ServiceSecret } from '../secrets';
+import { ServiceSecret } from '../utils/secrets';
 import { Environment } from './environment';
 
 export class ZendeskSecret extends ServiceSecret<{

@@ -1,4 +1,3 @@
-import * as pulumi from '@pulumi/pulumi';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { Clickhouse } from './clickhouse';
 import { DbMigrations } from './db-migrations';
@@ -23,9 +22,6 @@ export function deployUsageEstimation({
   dbMigrations: DbMigrations;
   sentry: Sentry;
 }) {
-  const commonConfig = new pulumi.Config('common');
-  const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
-
   return new ServiceDeployment(
     'usage-estimator',
     {

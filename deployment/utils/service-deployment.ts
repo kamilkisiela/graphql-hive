@@ -1,9 +1,9 @@
 import * as k8s from '@pulumi/kubernetes';
 import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
-import { ServiceSecret } from '../secrets';
 import { isDefined } from './helpers';
 import { normalizeEnv, PodBuilder } from './pod-builder';
+import { ServiceSecret } from './secrets';
 
 type ProbeConfig = Omit<
   k8s.types.input.core.v1.Probe,

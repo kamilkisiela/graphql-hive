@@ -45,21 +45,16 @@ optimizeAzureCluster();
 
 const docker = configureDocker();
 const envName = pulumi.getStack();
-const commonConfig = new pulumi.Config('common');
-const rootDns = commonConfig.require('dnsZone');
 const heartbeatsConfig = new pulumi.Config('heartbeats');
 
 const sentry = configureSentry();
-
-deploySentryEventsMonitor({ envName, imagePullSecret: docker.secret });
-deployMetrics({ envName });
-
 const environment = prepareEnvironment({
   release: imagesTag,
   environment: envName,
-  rootDns,
-  appDns: `app.${rootDns}`,
+  rootDns: new pulumi.Config('common').require('dnsZone'),
 });
+deploySentryEventsMonitor({ docker, environment, sentry });
+deployMetrics({ envName });
 const clickhouse = deployClickhouse();
 const postgres = deployPostgres();
 const redis = deployRedis({ environment });
@@ -67,17 +62,13 @@ const kafka = deployKafka();
 const s3 = deployS3();
 
 const cdn = deployCFCDN({
-  envName,
-  rootDns,
   s3,
-  release: imagesTag,
   sentry,
+  environment,
 });
 
 const broker = deployCFBroker({
-  envName,
-  rootDns,
-  release: imagesTag,
+  environment,
   sentry,
 });
 

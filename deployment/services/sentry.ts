@@ -1,17 +1,17 @@
 import { Config, Output } from '@pulumi/pulumi';
-import { ServiceSecret } from '../secrets';
+import { ServiceSecret } from '../utils/secrets';
 
 export class SentrySecret extends ServiceSecret<{
   dsn: string | Output<string>;
 }> {}
 
 export function configureSentry() {
-  const commonConfig = new Config('common');
-  const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
+  const sentryConfig = new Config('sentry');
+  const isEnabled = sentryConfig.requireBoolean('enabled');
 
-  if (commonEnv.SENTRY_ENABLED == '1') {
+  if (isEnabled) {
     const secret = new SentrySecret('sentry', {
-      dsn: commonEnv.SENTRY_DSN,
+      dsn: sentryConfig.requireSecret('dsn'),
     });
 
     return {

@@ -1,5 +1,5 @@
 import { Config, Output } from '@pulumi/pulumi';
-import { ServiceSecret } from '../secrets';
+import { ServiceSecret } from '../utils/secrets';
 
 class SlackIntegrationSecret extends ServiceSecret<{
   clientId: string | Output<string>;

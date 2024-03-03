@@ -1,8 +1,8 @@
 import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
 import * as random from '@pulumi/random';
-import { ServiceSecret } from '../secrets';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
+import { ServiceSecret } from '../utils/secrets';
 import { Environment } from './environment';
 import { Postgres } from './postgres';
 

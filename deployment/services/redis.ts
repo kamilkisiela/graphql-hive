@@ -1,8 +1,7 @@
 import * as pulumi from '@pulumi/pulumi';
-import { ServiceSecret } from '../secrets';
-import { isProduction } from '../utils/helpers';
 import { serviceLocalHost } from '../utils/local-endpoint';
 import { Redis as RedisStore } from '../utils/redis';
+import { ServiceSecret } from '../utils/secrets';
 import { Environment } from './environment';
 
 const redisConfig = new pulumi.Config('redis');

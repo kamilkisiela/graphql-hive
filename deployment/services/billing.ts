@@ -1,6 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
-import { ServiceSecret } from '../secrets';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
+import { ServiceSecret } from '../utils/secrets';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';

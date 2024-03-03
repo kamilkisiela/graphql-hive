@@ -1,6 +1,6 @@
 import { parse } from 'pg-connection-string';
 import * as pulumi from '@pulumi/pulumi';
-import { ServiceSecret } from '../secrets';
+import { ServiceSecret } from '../utils/secrets';
 
 export class PostgresConnectionSecret extends ServiceSecret<{
   host: string | pulumi.Output<string>;
