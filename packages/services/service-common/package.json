@@ -11,9 +11,9 @@
   },
   "devDependencies": {
     "@fastify/cors": "9.0.1",
-    "@sentry/node": "7.104.0",
-    "@sentry/types": "7.104.0",
-    "@sentry/utils": "7.104.0",
+    "@sentry/node": "7.105.0",
+    "@sentry/types": "7.105.0",
+    "@sentry/utils": "7.105.0",
     "fastify": "4.26.2",
     "fastify-plugin": "4.5.1",
     "p-retry": "6.2.0",
