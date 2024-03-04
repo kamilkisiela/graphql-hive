@@ -164,9 +164,9 @@ export class ServiceDeployment {
       startupProbe =
         typeof this.options.startupProbe === 'string'
           ? {
-              initialDelaySeconds: 80,
+              initialDelaySeconds: 20,
               periodSeconds: 30,
-              failureThreshold: 5,
+              failureThreshold: 10,
               timeoutSeconds: 10,
               httpGet: {
                 path: this.options.startupProbe,
