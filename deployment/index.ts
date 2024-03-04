@@ -1,5 +1,4 @@
 import * as pulumi from '@pulumi/pulumi';
-import * as random from '@pulumi/random';
 import { deployApp } from './services/app';
 import { deployStripeBilling } from './services/billing';
 import { deployCFBroker } from './services/cf-broker';
@@ -8,41 +7,32 @@ import { deployClickhouse } from './services/clickhouse';
 import { deployCloudFlareSecurityTransform } from './services/cloudflare-security';
 import { deployDatabaseCleanupJob } from './services/database-cleanup';
 import { deployDbMigrations } from './services/db-migrations';
+import { configureDocker } from './services/docker';
 import { deployEmails } from './services/emails';
+import { prepareEnvironment } from './services/environment';
+import { configureGithubApp } from './services/github';
 import { deployGraphQL } from './services/graphql';
 import { deployKafka } from './services/kafka';
 import { deployMetrics } from './services/observability';
 import { deploySchemaPolicy } from './services/policy';
+import { deployPostgres } from './services/postgres';
 import { deployProxy } from './services/proxy';
 import { deployRateLimit } from './services/rate-limit';
 import { deployRedis } from './services/redis';
+import { deployS3 } from './services/s3';
 import { deploySchema } from './services/schema';
+import { configureSentry } from './services/sentry';
 import { deploySentryEventsMonitor } from './services/sentry-events';
+import { configureSlackApp } from './services/slack-app';
 import { deploySuperTokens } from './services/supertokens';
 import { deployTokens } from './services/tokens';
 import { deployUsage } from './services/usage';
 import { deployUsageEstimation } from './services/usage-estimation';
 import { deployUsageIngestor } from './services/usage-ingestor';
 import { deployWebhooks } from './services/webhooks';
-import { DeploymentEnvironment } from './types';
+import { configureZendesk } from './services/zendesk';
 import { optimizeAzureCluster } from './utils/azure-helpers';
-import { createDockerImageFactory } from './utils/docker-images';
-import { isDefined, isProduction } from './utils/helpers';
-
-// eslint-disable-next-line no-process-env
-process.env.PULUMI_K8S_SUPPRESS_HELM_HOOK_WARNINGS = '1';
-
-optimizeAzureCluster();
-
-const dockerConfig = new pulumi.Config('docker');
-const dockerImages = createDockerImageFactory({
-  registryHostname: dockerConfig.require('registryUrl'),
-  imagesPrefix: dockerConfig.require('imagesPrefix'),
-});
-
-const imagePullSecret = dockerImages.createRepositorySecret(
-  dockerConfig.requireSecret('registryAuthBase64'),
-);
+import { isDefined } from './utils/helpers';
 
 // eslint-disable-next-line no-process-env
 const imagesTag = process.env.DOCKER_IMAGE_TAG as string;
@@ -51,250 +41,202 @@ if (!imagesTag) {
   throw new Error(`DOCKER_IMAGE_TAG env variable is not set.`);
 }
 
+optimizeAzureCluster();
+
+const docker = configureDocker();
 const envName = pulumi.getStack();
-const commonConfig = new pulumi.Config('common');
-const appDns = 'app';
-const rootDns = commonConfig.require('dnsZone');
-const appHostname = `${appDns}.${rootDns}`;
-
 const heartbeatsConfig = new pulumi.Config('heartbeats');
-const emailConfig = new pulumi.Config('email');
-const r2Config = new pulumi.Config('r2');
 
-const s3Config = {
-  endpoint: r2Config.require('endpoint'),
-  bucketName: r2Config.require('bucketName'),
-  accessKeyId: r2Config.requireSecret('accessKeyId'),
-  secretAccessKey: r2Config.requireSecret('secretAccessKey'),
-};
-
-const deploymentEnv: DeploymentEnvironment = {
-  ENVIRONMENT: envName,
-  NODE_ENV: 'production',
-  DEPLOYED_DNS: appHostname,
-};
-
-deploySentryEventsMonitor({ envName, imagePullSecret });
+const sentry = configureSentry();
+const environment = prepareEnvironment({
+  release: imagesTag,
+  environment: envName,
+  rootDns: new pulumi.Config('common').require('dnsZone'),
+});
+deploySentryEventsMonitor({ docker, environment, sentry });
 deployMetrics({ envName });
-
-const cdnAuthPrivateKey = commonConfig.requireSecret('cdnAuthPrivateKey');
+const clickhouse = deployClickhouse();
+const postgres = deployPostgres();
+const redis = deployRedis({ environment });
+const kafka = deployKafka();
+const s3 = deployS3();
 
 const cdn = deployCFCDN({
-  envName,
-  rootDns,
-  s3Config,
-  release: imagesTag,
+  s3,
+  sentry,
+  environment,
 });
 
-const cfBroker = deployCFBroker({
-  envName,
-  rootDns,
-  release: imagesTag,
+const broker = deployCFBroker({
+  environment,
+  sentry,
 });
-
-const redisApi = deployRedis({ deploymentEnv });
-const kafkaApi = deployKafka();
-const clickhouseApi = deployClickhouse();
 
 // eslint-disable-next-line no-process-env
 const shouldCleanDatabase = process.env.CLEAN_DATABASE === 'true';
-const databaseCleanupJob = shouldCleanDatabase ? deployDatabaseCleanupJob({ deploymentEnv }) : null;
+const databaseCleanupJob = shouldCleanDatabase ? deployDatabaseCleanupJob({ environment }) : null;
 
 // eslint-disable-next-line no-process-env
 const forceRunDbMigrations = process.env.FORCE_DB_MIGRATIONS === 'true';
 const dbMigrations = deployDbMigrations({
-  clickhouse: clickhouseApi,
-  kafka: kafkaApi,
-  deploymentEnv,
-  image: dockerImages.getImageId('storage', imagesTag),
-  imagePullSecret,
+  clickhouse,
+  docker,
+  postgres,
+  s3,
+  cdn,
+  environment,
+  image: docker.factory.getImageId('storage', imagesTag),
   force: forceRunDbMigrations,
   dependencies: [databaseCleanupJob].filter(isDefined),
-  s3: s3Config,
-  cdnAuthPrivateKey,
 });
 
-const tokensApi = deployTokens({
-  image: dockerImages.getImageId('tokens', imagesTag),
-  release: imagesTag,
-  deploymentEnv,
+const tokens = deployTokens({
+  image: docker.factory.getImageId('tokens', imagesTag),
+  environment,
   dbMigrations,
-  redis: redisApi,
+  docker,
+  postgres,
+  redis,
   heartbeat: heartbeatsConfig.get('tokens'),
-  imagePullSecret,
+  sentry,
 });
 
-const webhooksApi = deployWebhooks({
-  image: dockerImages.getImageId('webhooks', imagesTag),
-  imagePullSecret,
-  release: imagesTag,
-  deploymentEnv,
-  redis: redisApi,
+const webhooks = deployWebhooks({
+  image: docker.factory.getImageId('webhooks', imagesTag),
+  environment,
   heartbeat: heartbeatsConfig.get('webhooks'),
-  broker: cfBroker,
+  broker,
+  docker,
+  redis,
+  sentry,
 });
 
-const emailsApi = deployEmails({
-  image: dockerImages.getImageId('emails', imagesTag),
-  imagePullSecret,
-  release: imagesTag,
-  deploymentEnv,
-  redis: redisApi,
-  email: {
-    token: emailConfig.requireSecret('token'),
-    from: emailConfig.require('from'),
-    messageStream: emailConfig.require('messageStream'),
-  },
-  // heartbeat: heartbeatsConfig.get('emails'),
+const emails = deployEmails({
+  image: docker.factory.getImageId('emails', imagesTag),
+  docker,
+  environment,
+  redis,
+  sentry,
 });
 
-const usageEstimationApi = deployUsageEstimation({
-  image: dockerImages.getImageId('usage-estimator', imagesTag),
-  imagePullSecret,
-  release: imagesTag,
-  deploymentEnv,
-  clickhouse: clickhouseApi,
+const usageEstimator = deployUsageEstimation({
+  image: docker.factory.getImageId('usage-estimator', imagesTag),
+  docker,
+  environment,
+  clickhouse,
   dbMigrations,
+  sentry,
 });
 
-const billingApi = deployStripeBilling({
-  image: dockerImages.getImageId('stripe-billing', imagesTag),
-  imagePullSecret,
-  release: imagesTag,
-  deploymentEnv,
+const billing = deployStripeBilling({
+  image: docker.factory.getImageId('stripe-billing', imagesTag),
+  docker,
+  postgres,
+  environment,
   dbMigrations,
-  usageEstimator: usageEstimationApi,
+  usageEstimator,
+  sentry,
 });
 
-const rateLimitApi = deployRateLimit({
-  image: dockerImages.getImageId('rate-limit', imagesTag),
-  imagePullSecret,
-  release: imagesTag,
-  deploymentEnv,
+const rateLimit = deployRateLimit({
+  image: docker.factory.getImageId('rate-limit', imagesTag),
+  docker,
+  environment,
   dbMigrations,
-  usageEstimator: usageEstimationApi,
-  emails: emailsApi,
+  usageEstimator,
+  emails,
+  postgres,
+  sentry,
 });
 
-const usageApi = deployUsage({
-  image: dockerImages.getImageId('usage', imagesTag),
-  imagePullSecret,
-  release: imagesTag,
-  deploymentEnv,
-  tokens: tokensApi,
-  kafka: kafkaApi,
+const usage = deployUsage({
+  image: docker.factory.getImageId('usage', imagesTag),
+  docker,
+  environment,
+  tokens,
+  kafka,
   dbMigrations,
-  rateLimit: rateLimitApi,
+  rateLimit,
+  sentry,
 });
 
-const usageIngestorApi = deployUsageIngestor({
-  image: dockerImages.getImageId('usage-ingestor', imagesTag),
-  imagePullSecret,
-  release: imagesTag,
-  clickhouse: clickhouseApi,
-  kafka: kafkaApi,
-  deploymentEnv,
+const usageIngestor = deployUsageIngestor({
+  image: docker.factory.getImageId('usage-ingestor', imagesTag),
+  docker,
+  clickhouse,
+  kafka,
+  environment,
   dbMigrations,
   heartbeat: heartbeatsConfig.get('usageIngestor'),
+  sentry,
 });
 
-const schemaApi = deploySchema({
-  image: dockerImages.getImageId('schema', imagesTag),
-  imagePullSecret,
-  release: imagesTag,
-  deploymentEnv,
-  redis: redisApi,
-  broker: cfBroker,
+const schema = deploySchema({
+  image: docker.factory.getImageId('schema', imagesTag),
+  docker,
+  environment,
+  redis,
+  broker,
+  sentry,
 });
 
-const schemaPolicyApi = deploySchemaPolicy({
-  image: dockerImages.getImageId('policy', imagesTag),
-  imagePullSecret,
-  release: imagesTag,
-  deploymentEnv,
+const schemaPolicy = deploySchemaPolicy({
+  image: docker.factory.getImageId('policy', imagesTag),
+  docker,
+  environment,
+  sentry,
 });
 
-const supertokensApiKey = new random.RandomPassword('supertokens-api-key', {
-  length: 31,
-  special: false,
-});
+const supertokens = deploySuperTokens(postgres, { dependencies: [dbMigrations] }, environment);
+const zendesk = configureZendesk({ environment });
+const githubApp = configureGithubApp();
+const slackApp = configureSlackApp();
 
-const oauthConfig = new pulumi.Config('oauth');
-
-const githubConfig = {
-  clientId: oauthConfig.requireSecret('githubClient'),
-  clientSecret: oauthConfig.requireSecret('githubSecret'),
-};
-
-const googleConfig = {
-  clientId: oauthConfig.requireSecret('googleClient'),
-  clientSecret: oauthConfig.requireSecret('googleSecret'),
-};
-
-const supertokens = deploySuperTokens(
-  { apiKey: supertokensApiKey.result },
-  { dependencies: [dbMigrations] },
-  deploymentEnv,
-);
-
-const zendeskConfig = new pulumi.Config('zendesk');
-
-const graphqlApi = deployGraphQL({
-  clickhouse: clickhouseApi,
-  image: dockerImages.getImageId('server', imagesTag),
-  imagePullSecret,
-  release: imagesTag,
-  deploymentEnv,
-  tokens: tokensApi,
-  webhooks: webhooksApi,
-  schema: schemaApi,
-  schemaPolicy: schemaPolicyApi,
+const graphql = deployGraphQL({
+  postgres,
+  environment,
+  clickhouse,
+  image: docker.factory.getImageId('server', imagesTag),
+  docker,
+  tokens,
+  webhooks,
+  schema,
+  schemaPolicy,
   dbMigrations,
-  redis: redisApi,
-  usage: usageApi,
-  cdnAuthPrivateKey,
+  redis,
+  usage,
   cdn,
-  usageEstimator: usageEstimationApi,
-  rateLimit: rateLimitApi,
-  billing: billingApi,
-  emails: emailsApi,
-  supertokensConfig: {
-    apiKey: supertokensApiKey.result,
-    endpoint: supertokens.localEndpoint,
-  },
-  s3Config,
-  zendeskConfig: isProduction(deploymentEnv)
-    ? {
-        subdomain: zendeskConfig.require('subdomain'),
-        username: zendeskConfig.require('username'),
-        password: zendeskConfig.requireSecret('password'),
-      }
-    : null,
+  usageEstimator,
+  rateLimit,
+  billing,
+  emails,
+  supertokens,
+  s3,
+  zendesk,
+  githubApp,
+  sentry,
 });
 
 const app = deployApp({
-  deploymentEnv,
-  graphql: graphqlApi,
+  environment,
+  graphql,
   dbMigrations,
-  image: dockerImages.getImageId('app', imagesTag),
-  imagePullSecret,
-  release: imagesTag,
-  supertokensConfig: {
-    apiKey: supertokensApiKey.result,
-    endpoint: supertokens.localEndpoint,
-  },
-  githubConfig,
-  googleConfig,
-  emailsEndpoint: emailsApi.localEndpoint,
-  zendeskSupport: isProduction(deploymentEnv),
+  image: docker.factory.getImageId('app', imagesTag),
+  docker,
+  supertokens,
+  emails,
+  zendesk,
+  billing,
+  github: githubApp,
+  slackApp,
+  sentry,
 });
 
 const proxy = deployProxy({
-  appHostname,
   app,
-  graphql: graphqlApi,
-  usage: usageApi,
-  deploymentEnv,
+  graphql,
+  usage,
+  environment,
 });
 
 deployCloudFlareSecurityTransform({
@@ -315,12 +257,12 @@ deployCloudFlareSecurityTransform({
   ignoredHosts: ['cdn.graphql-hive.com', 'cdn.staging.graphql-hive.com'],
 });
 
-export const graphqlApiServiceId = graphqlApi.service.id;
-export const usageApiServiceId = usageApi.service.id;
-export const usageIngestorApiServiceId = usageIngestorApi.service.id;
-export const tokensApiServiceId = tokensApi.service.id;
-export const schemaApiServiceId = schemaApi.service.id;
-export const webhooksApiServiceId = webhooksApi.service.id;
+export const graphqlApiServiceId = graphql.service.id;
+export const usageApiServiceId = usage.service.id;
+export const usageIngestorApiServiceId = usageIngestor.service.id;
+export const tokensApiServiceId = tokens.service.id;
+export const schemaApiServiceId = schema.service.id;
+export const webhooksApiServiceId = webhooks.service.id;
 
 export const appId = app.deployment.id;
 export const publicIp = proxy!.status.loadBalancer.ingress[0].ip;

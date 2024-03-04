@@ -1,30 +1,28 @@
 import * as pulumi from '@pulumi/pulumi';
-
-const clickhouseConfig = new pulumi.Config('clickhouse');
+import { ServiceSecret } from '../utils/secrets';
 
 export type Clickhouse = ReturnType<typeof deployClickhouse>;
 
-type ClickhouseConfig = {
-  protocol: pulumi.Output<string> | string;
-  host: pulumi.Output<string> | string;
-  port: pulumi.Output<string> | string;
-  username: pulumi.Output<string> | string;
-  password: pulumi.Output<string>;
-};
+export class ClickhouseConnectionSecret extends ServiceSecret<{
+  host: string | pulumi.Output<string>;
+  port: string | pulumi.Output<string>;
+  username: string | pulumi.Output<string>;
+  password: string | pulumi.Output<string>;
+  protocol: string | pulumi.Output<string>;
+}> {}
 
-function getRemoteClickhouseConfig(): ClickhouseConfig {
-  return {
+export function deployClickhouse() {
+  const clickhouseConfig = new pulumi.Config('clickhouse');
+  const secret = new ClickhouseConnectionSecret('clickhouse', {
     host: clickhouseConfig.require('host'),
     port: clickhouseConfig.require('port'),
     username: clickhouseConfig.require('username'),
     password: clickhouseConfig.requireSecret('password'),
     protocol: clickhouseConfig.require('protocol'),
-  };
-}
+  });
 
-export function deployClickhouse() {
   return {
-    config: getRemoteClickhouseConfig(),
+    secret,
     deployment: null,
     service: null,
   };

@@ -1,53 +1,50 @@
-import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
+import { ServiceSecret } from '../utils/secrets';
 import { ServiceDeployment } from '../utils/service-deployment';
+import { Docker } from './docker';
+import { Environment } from './environment';
 import { Redis } from './redis';
-
-const commonConfig = new pulumi.Config('common');
-const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
+import { Sentry } from './sentry';
 
 export type Emails = ReturnType<typeof deployEmails>;
 
+class PostmarkSecret extends ServiceSecret<{
+  token: pulumi.Output<string> | string;
+  from: string;
+  messageStream: string;
+}> {}
+
 export function deployEmails({
-  deploymentEnv,
+  environment,
   redis,
   heartbeat,
-  email,
-  release,
   image,
-  imagePullSecret,
+  docker,
+  sentry,
 }: {
-  release: string;
+  environment: Environment;
   image: string;
-  deploymentEnv: DeploymentEnvironment;
   redis: Redis;
+  docker: Docker;
   heartbeat?: string;
-  email: {
-    token: pulumi.Output<string>;
-    from: string;
-    messageStream: string;
-  };
-  imagePullSecret: k8s.core.v1.Secret;
+  sentry: Sentry;
 }) {
+  const emailConfig = new pulumi.Config('email');
+  const postmarkSecret = new PostmarkSecret('postmark', {
+    token: emailConfig.requireSecret('token'),
+    from: emailConfig.require('from'),
+    messageStream: emailConfig.require('messageStream'),
+  });
+
   const { deployment, service } = new ServiceDeployment(
     'emails-service',
     {
-      imagePullSecret,
+      imagePullSecret: docker.secret,
       env: {
-        ...deploymentEnv,
-        ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
-        RELEASE: release,
-        REDIS_HOST: redis.config.host,
-        REDIS_PORT: String(redis.config.port),
-        REDIS_PASSWORD: redis.config.password,
-        EMAIL_FROM: email.from,
+        ...environment.envVars,
+        SENTRY: sentry.enabled ? '1' : '0',
         EMAIL_PROVIDER: 'postmark',
-        EMAIL_PROVIDER_POSTMARK_TOKEN: email.token,
-        EMAIL_PROVIDER_POSTMARK_MESSAGE_STREAM: email.messageStream,
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
       },
       readinessProbe: '/_readiness',
@@ -55,10 +52,18 @@ export function deployEmails({
       startupProbe: '/_health',
       exposesMetrics: true,
       image,
-      replicas: isProduction(deploymentEnv) ? 3 : 1,
+      replicas: environment.isProduction ? 3 : 1,
     },
     [redis.deployment, redis.service],
-  ).deploy();
+  )
+    .withSecret('REDIS_HOST', redis.secret, 'host')
+    .withSecret('REDIS_PORT', redis.secret, 'port')
+    .withSecret('REDIS_PASSWORD', redis.secret, 'password')
+    .withSecret('EMAIL_FROM', postmarkSecret, 'from')
+    .withSecret('EMAIL_PROVIDER_POSTMARK_TOKEN', postmarkSecret, 'token')
+    .withSecret('EMAIL_PROVIDER_POSTMARK_MESSAGE_STREAM', postmarkSecret, 'messageStream')
+    .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
+    .deploy();
 
   return { deployment, service, localEndpoint: serviceLocalEndpoint(service) };
 }

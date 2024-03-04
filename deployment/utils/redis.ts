@@ -1,5 +1,6 @@
 import * as k8s from '@pulumi/kubernetes';
 import * as kx from '@pulumi/kubernetesx';
+import { Output } from '@pulumi/pulumi';
 import { getLocalComposeConfig } from './local-config';
 import { normalizeEnv, PodBuilder } from './pod-builder';
 
@@ -9,7 +10,7 @@ export class Redis {
   constructor(
     protected options: {
       env?: kx.types.Container['env'];
-      password: string;
+      password: Output<string>;
     },
   ) {}
 
@@ -17,7 +18,7 @@ export class Redis {
     const redisService = getLocalComposeConfig().service('redis');
     const name = 'redis-store';
 
-    const env = normalizeEnv(this.options.env ?? {}).concat([
+    const env: k8s.types.input.core.v1.EnvVar[] = normalizeEnv(this.options.env ?? {}).concat([
       {
         name: 'REDIS_PASSWORD',
         value: this.options.password,
@@ -30,24 +31,28 @@ export class Redis {
           },
         },
       },
-    ]);
+    ] satisfies k8s.types.input.core.v1.EnvVar[]);
 
     const cm = new kx.ConfigMap('redis-scripts', {
       data: {
-        'readiness.sh': `#!/bin/bash
-response=$(timeout -s SIGTERM 3 $1 redis-cli -h localhost -a ${this.options.password} -p ${PORT} ping)
-if [ "$response" != "PONG" ]; then
-  echo "$response"
-  exit 1
-fi
-        `,
-        'liveness.sh': `#!/bin/bash
-response=$(timeout -s SIGTERM 3 $1 redis-cli -h localhost -a ${this.options.password} -p ${PORT} ping)
-if [ "$response" != "PONG" ] && [ "$response" != "LOADING Redis is loading the dataset in memory" ]; then
-  echo "$response"
-  exit 1
-fi
-        `,
+        'readiness.sh': this.options.password.apply(
+          p => `#!/bin/bash
+        response=$(timeout -s SIGTERM 3 $1 redis-cli -h localhost -a ${p} -p ${PORT} ping)
+        if [ "$response" != "PONG" ]; then
+          echo "$response"
+          exit 1
+        fi
+                `,
+        ),
+        'liveness.sh': this.options.password.apply(
+          p => `#!/bin/bash
+        response=$(timeout -s SIGTERM 3 $1 redis-cli -h localhost -a ${p} -p ${PORT} ping)
+        if [ "$response" != "PONG" ] && [ "$response" != "LOADING Redis is loading the dataset in memory" ]; then
+          echo "$response"
+          exit 1
+        fi
+                `,
+        ),
       },
     });
 

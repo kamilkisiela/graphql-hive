@@ -1,57 +1,53 @@
-import * as k8s from '@pulumi/kubernetes';
-import * as pulumi from '@pulumi/pulumi';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
 import { ServiceDeployment } from '../utils/service-deployment';
 import type { Broker } from './cf-broker';
+import { Docker } from './docker';
+import { Environment } from './environment';
 import { Redis } from './redis';
-
-const commonConfig = new pulumi.Config('common');
-const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
+import { Sentry } from './sentry';
 
 export type Webhooks = ReturnType<typeof deployWebhooks>;
 
 export function deployWebhooks({
-  deploymentEnv,
-  redis,
+  environment,
   heartbeat,
   broker,
   image,
-  release,
-  imagePullSecret,
+  docker,
+  redis,
+  sentry,
 }: {
   image: string;
-  release: string;
-  deploymentEnv: DeploymentEnvironment;
-  redis: Redis;
-  broker: Broker;
+  environment: Environment;
   heartbeat?: string;
-  imagePullSecret: k8s.core.v1.Secret;
+  docker: Docker;
+  broker: Broker;
+  redis: Redis;
+  sentry: Sentry;
 }) {
   return new ServiceDeployment(
     'webhooks-service',
     {
-      imagePullSecret,
+      imagePullSecret: docker.secret,
       env: {
-        ...deploymentEnv,
-        ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
+        ...environment.envVars,
+        SENTRY: sentry.enabled ? '1' : '0',
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
-        RELEASE: release,
-        REDIS_HOST: redis.config.host,
-        REDIS_PORT: String(redis.config.port),
-        REDIS_PASSWORD: redis.config.password,
         REQUEST_BROKER: '1',
-        REQUEST_BROKER_ENDPOINT: broker.workerBaseUrl,
-        REQUEST_BROKER_SIGNATURE: broker.secretSignature,
       },
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       startupProbe: '/_health',
       exposesMetrics: true,
-      replicas: isProduction(deploymentEnv) ? 3 : 1,
+      replicas: environment.isProduction ? 3 : 1,
       image,
     },
     [redis.deployment, redis.service],
-  ).deploy();
+  )
+    .withSecret('REDIS_HOST', redis.secret, 'host')
+    .withSecret('REDIS_PORT', redis.secret, 'port')
+    .withSecret('REDIS_PASSWORD', redis.secret, 'password')
+    .withSecret('REQUEST_BROKER_ENDPOINT', broker.secret, 'baseUrl')
+    .withSecret('REQUEST_BROKER_SIGNATURE', broker.secret, 'secretSignature')
+    .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
+    .deploy();
 }

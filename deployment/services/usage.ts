@@ -1,41 +1,38 @@
-import * as k8s from '@pulumi/kubernetes';
 import * as pulumi from '@pulumi/pulumi';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
+import { Docker } from './docker';
+import { Environment } from './environment';
 import { Kafka } from './kafka';
 import { RateLimitService } from './rate-limit';
+import { Sentry } from './sentry';
 import { Tokens } from './tokens';
-
-const commonConfig = new pulumi.Config('common');
-const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
 
 export type Usage = ReturnType<typeof deployUsage>;
 
 export function deployUsage({
-  deploymentEnv,
+  environment,
   tokens,
   kafka,
   dbMigrations,
   rateLimit,
   image,
-  release,
-  imagePullSecret,
+  docker,
+  sentry,
 }: {
   image: string;
-  release: string;
-  deploymentEnv: DeploymentEnvironment;
+  environment: Environment;
   tokens: Tokens;
   kafka: Kafka;
   dbMigrations: DbMigrations;
   rateLimit: RateLimitService;
-  imagePullSecret: k8s.core.v1.Secret;
+  docker: Docker;
+  sentry: Sentry;
 }) {
-  const replicas = isProduction(deploymentEnv) ? 3 : 1;
-  const cpuLimit = isProduction(deploymentEnv) ? '600m' : '300m';
-  const maxReplicas = isProduction(deploymentEnv) ? 6 : 2;
+  const replicas = environment.isProduction ? 3 : 1;
+  const cpuLimit = environment.isProduction ? '600m' : '300m';
+  const maxReplicas = environment.isProduction ? 6 : 2;
   const kafkaBufferDynamic =
     kafka.config.bufferDynamic === 'true' || kafka.config.bufferDynamic === '1' ? '1' : '0';
 
@@ -43,24 +40,22 @@ export function deployUsage({
     'usage-service',
     {
       image,
-      imagePullSecret,
+      imagePullSecret: docker.secret,
       replicas,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       startupProbe: '/_health',
       availabilityOnEveryNode: true,
       env: {
-        ...deploymentEnv,
-        ...commonEnv,
-        ...kafka.connectionEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
-        REQUEST_LOGGING: '0', // disabled
-        KAFKA_BROKER: kafka.config.endpoint,
+        ...environment.envVars,
+        SENTRY: sentry.enabled ? '1' : '0',
+        REQUEST_LOGGING: '0',
         KAFKA_BUFFER_SIZE: kafka.config.bufferSize,
+        KAFKA_SASL_MECHANISM: kafka.config.saslMechanism,
+        KAFKA_CONCURRENCY: kafka.config.concurrency,
         KAFKA_BUFFER_INTERVAL: kafka.config.bufferInterval,
         KAFKA_BUFFER_DYNAMIC: kafkaBufferDynamic,
         KAFKA_TOPIC: kafka.config.topic,
-        RELEASE: release,
         TOKENS_ENDPOINT: serviceLocalEndpoint(tokens.service),
         RATE_LIMIT_ENDPOINT: serviceLocalEndpoint(rateLimit.service),
       },
@@ -81,8 +76,12 @@ export function deployUsage({
       tokens.service,
       rateLimit.deployment,
       rateLimit.service,
-      kafka.deployment,
-      kafka.service,
     ].filter(Boolean),
-  ).deploy();
+  )
+    .withSecret('KAFKA_SASL_USERNAME', kafka.secret, 'saslUsername')
+    .withSecret('KAFKA_SASL_PASSWORD', kafka.secret, 'saslPassword')
+    .withSecret('KAFKA_SSL', kafka.secret, 'ssl')
+    .withSecret('KAFKA_BROKER', kafka.secret, 'endpoint')
+    .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
+    .deploy();
 }

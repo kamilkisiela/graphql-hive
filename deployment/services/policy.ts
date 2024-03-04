@@ -1,39 +1,35 @@
-import * as k8s from '@pulumi/kubernetes';
-import * as pulumi from '@pulumi/pulumi';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
 import { ServiceDeployment } from '../utils/service-deployment';
-
-const commonConfig = new pulumi.Config('common');
-const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
+import { Docker } from './docker';
+import { Environment } from './environment';
+import { Sentry } from './sentry';
 
 export type SchemaPolicy = ReturnType<typeof deploySchemaPolicy>;
 
 export function deploySchemaPolicy({
-  deploymentEnv,
-  release,
+  environment,
   image,
-  imagePullSecret,
+  docker,
+  sentry,
 }: {
   image: string;
-  release: string;
-  deploymentEnv: DeploymentEnvironment;
-  imagePullSecret: k8s.core.v1.Secret;
+  environment: Environment;
+  docker: Docker;
+  sentry: Sentry;
 }) {
   return new ServiceDeployment('schema-policy-service', {
     image,
-    imagePullSecret,
+    imagePullSecret: docker.secret,
     env: {
-      ...deploymentEnv,
-      ...commonEnv,
-      SENTRY: commonEnv.SENTRY_ENABLED,
-      RELEASE: release,
+      ...environment.envVars,
+      SENTRY: sentry.enabled ? '1' : '0',
     },
     readinessProbe: '/_readiness',
     livenessProbe: '/_health',
     startupProbe: '/_health',
     exposesMetrics: true,
-    replicas: isProduction(deploymentEnv) ? 3 : 1,
+    replicas: environment.isProduction ? 3 : 1,
     pdb: true,
-  }).deploy();
+  })
+    .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
+    .deploy();
 }

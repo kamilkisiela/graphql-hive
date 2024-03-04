@@ -1,54 +1,50 @@
-import * as k8s from '@pulumi/kubernetes';
-import * as pulumi from '@pulumi/pulumi';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { Clickhouse } from './clickhouse';
 import { DbMigrations } from './db-migrations';
-
-const commonConfig = new pulumi.Config('common');
-const commonEnv = commonConfig.requireObject<Record<string, string>>('env');
+import { Docker } from './docker';
+import { Environment } from './environment';
+import { Sentry } from './sentry';
 
 export type UsageEstimator = ReturnType<typeof deployUsageEstimation>;
 
 export function deployUsageEstimation({
   image,
-  imagePullSecret,
-  release,
-  deploymentEnv,
+  docker,
+  environment,
   clickhouse,
   dbMigrations,
+  sentry,
 }: {
   image: string;
-  imagePullSecret: k8s.core.v1.Secret;
-  release: string;
-  deploymentEnv: DeploymentEnvironment;
+  docker: Docker;
+  environment: Environment;
   clickhouse: Clickhouse;
   dbMigrations: DbMigrations;
+  sentry: Sentry;
 }) {
   return new ServiceDeployment(
     'usage-estimator',
     {
       image,
-      imagePullSecret,
-      replicas: isProduction(deploymentEnv) ? 3 : 1,
+      imagePullSecret: docker.secret,
+      replicas: environment.isProduction ? 3 : 1,
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',
       startupProbe: '/_health',
       env: {
-        ...deploymentEnv,
-        ...commonEnv,
-        SENTRY: commonEnv.SENTRY_ENABLED,
-        CLICKHOUSE_PROTOCOL: clickhouse.config.protocol,
-        CLICKHOUSE_HOST: clickhouse.config.host,
-        CLICKHOUSE_PORT: clickhouse.config.port,
-        CLICKHOUSE_USERNAME: clickhouse.config.username,
-        CLICKHOUSE_PASSWORD: clickhouse.config.password,
-        RELEASE: release,
+        ...environment.envVars,
+        SENTRY: sentry.enabled ? '1' : '0',
       },
       exposesMetrics: true,
       port: 4000,
     },
     [dbMigrations],
-  ).deploy();
+  )
+    .withSecret('CLICKHOUSE_HOST', clickhouse.secret, 'host')
+    .withSecret('CLICKHOUSE_PORT', clickhouse.secret, 'port')
+    .withSecret('CLICKHOUSE_USERNAME', clickhouse.secret, 'username')
+    .withSecret('CLICKHOUSE_PASSWORD', clickhouse.secret, 'password')
+    .withSecret('CLICKHOUSE_PROTOCOL', clickhouse.secret, 'protocol')
+    .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
+    .deploy();
 }

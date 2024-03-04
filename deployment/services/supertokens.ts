@@ -1,18 +1,30 @@
 import * as kx from '@pulumi/kubernetesx';
 import * as pulumi from '@pulumi/pulumi';
-import { Output } from '@pulumi/pulumi';
-import { DeploymentEnvironment } from '../types';
-import { isProduction } from '../utils/helpers';
+import * as random from '@pulumi/random';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
+import { ServiceSecret } from '../utils/secrets';
+import { Environment } from './environment';
+import { Postgres } from './postgres';
+
+export class SupertokensSecret extends ServiceSecret<{
+  apiKey: string | pulumi.Output<string>;
+}> {}
 
 export function deploySuperTokens(
-  { apiKey }: { apiKey: Output<string> },
+  postgres: Postgres,
   resourceOptions: {
     dependencies: pulumi.Resource[];
   },
-  deploymentEnv: DeploymentEnvironment,
+  environment: Environment,
 ) {
-  const apiConfig = new pulumi.Config('api');
+  const supertokensApiKey = new random.RandomPassword('supertokens-api-key', {
+    length: 31,
+    special: false,
+  }).result;
+
+  const secret = new SupertokensSecret('supertokens', {
+    apiKey: supertokensApiKey,
+  });
 
   const port = 3567;
   const pb = new kx.PodBuilder({
@@ -56,10 +68,18 @@ export function deploySuperTokens(
         },
         env: {
           POSTGRESQL_TABLE_NAMES_PREFIX: 'supertokens',
-          POSTGRESQL_CONNECTION_URI: apiConfig
-            .requireSecret('postgresConnectionString')
-            .apply(str => str.replace('postgres://', 'postgresql://')),
-          API_KEYS: apiKey,
+          POSTGRESQL_CONNECTION_URI: {
+            secretKeyRef: {
+              name: postgres.secret.record.metadata.name,
+              key: 'connectionStringPostgresql',
+            },
+          },
+          API_KEYS: {
+            secretKeyRef: {
+              name: secret.record.metadata.name,
+              key: 'apiKey',
+            },
+          },
         },
       },
     ],
@@ -68,7 +88,7 @@ export function deploySuperTokens(
   const deployment = new kx.Deployment(
     'supertokens',
     {
-      spec: pb.asDeploymentSpec({ replicas: isProduction(deploymentEnv) ? 3 : 1 }),
+      spec: pb.asDeploymentSpec({ replicas: environment.isProduction ? 3 : 1 }),
     },
     {
       dependsOn: resourceOptions.dependencies,
@@ -81,5 +101,8 @@ export function deploySuperTokens(
     deployment,
     service,
     localEndpoint: serviceLocalEndpoint(service),
+    secret,
   };
 }
+
+export type Supertokens = ReturnType<typeof deploySuperTokens>;
