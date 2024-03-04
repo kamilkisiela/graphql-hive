@@ -48,7 +48,7 @@ export function deployStripeBilling({
       livenessProbe: '/_health',
       startupProbe: '/_health',
       env: {
-        ...environment.env,
+        ...environment.envVars,
         SENTRY: sentry.enabled ? '1' : '0',
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
       },

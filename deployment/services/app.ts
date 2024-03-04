@@ -78,7 +78,7 @@ export function deployApp({
       },
       availabilityOnEveryNode: true,
       env: {
-        ...environment.env,
+        ...environment.envVars,
         SENTRY: sentry.enabled ? '1' : '0',
         GRAPHQL_ENDPOINT: serviceLocalEndpoint(graphql.service).apply(s => `${s}/graphql`),
         SERVER_ENDPOINT: serviceLocalEndpoint(graphql.service),

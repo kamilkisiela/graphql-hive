@@ -42,7 +42,7 @@ export function deployEmails({
     {
       imagePullSecret: docker.secret,
       env: {
-        ...environment.env,
+        ...environment.envVars,
         SENTRY: sentry.enabled ? '1' : '0',
         EMAIL_PROVIDER: 'postmark',
         HEARTBEAT_ENDPOINT: heartbeat ?? '',

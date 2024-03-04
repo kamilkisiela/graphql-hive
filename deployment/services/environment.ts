@@ -24,7 +24,7 @@ export function prepareEnvironment(input: {
   const appDns = `app.${input.rootDns}`;
 
   return {
-    env: {
+    envVars: {
       NODE_ENV: 'production',
       LOG_LEVEL: 'debug',
       DEPLOYED_DNS: appDns,

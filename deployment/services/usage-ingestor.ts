@@ -51,7 +51,7 @@ export function deployUsageIngestor({
       livenessProbe: '/_health',
       availabilityOnEveryNode: true,
       env: {
-        ...environment.env,
+        ...environment.envVars,
         SENTRY: sentry.enabled ? '1' : '0',
         CLICKHOUSE_ASYNC_INSERT_BUSY_TIMEOUT_MS: '30000', // flush data after max 30 seconds
         CLICKHOUSE_ASYNC_INSERT_MAX_DATA_SIZE: '200000000', // flush data when the buffer reaches 200MB

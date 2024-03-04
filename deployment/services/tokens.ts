@@ -39,7 +39,7 @@ export function deployTokens({
       replicas: environment.isProduction ? 3 : 1,
       image,
       env: {
-        ...environment.env,
+        ...environment.envVars,
         SENTRY: sentry.enabled ? '1' : '0',
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
       },

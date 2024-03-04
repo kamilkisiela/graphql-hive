@@ -20,7 +20,7 @@ export function deploySchemaPolicy({
     image,
     imagePullSecret: docker.secret,
     env: {
-      ...environment.env,
+      ...environment.envVars,
       SENTRY: sentry.enabled ? '1' : '0',
     },
     readinessProbe: '/_readiness',

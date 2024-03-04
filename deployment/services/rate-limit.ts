@@ -38,7 +38,7 @@ export function deployRateLimit({
       livenessProbe: '/_health',
       startupProbe: '/_health',
       env: {
-        ...environment.env,
+        ...environment.envVars,
         SENTRY: sentry.enabled ? '1' : '0',
         LIMIT_CACHE_UPDATE_INTERVAL_MS: environment.isProduction ? '60000' : '86400000',
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),

@@ -29,7 +29,7 @@ export function deployWebhooks({
     {
       imagePullSecret: docker.secret,
       env: {
-        ...environment.env,
+        ...environment.envVars,
         SENTRY: sentry.enabled ? '1' : '0',
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
         REQUEST_BROKER: '1',

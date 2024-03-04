@@ -16,7 +16,7 @@ function normalizeEnvSecrets(envSecrets?: Record<string, ServiceSecretBinding<an
         name,
         valueFrom: {
           secretKeyRef: {
-            name: envSecrets[name].secret,
+            name: envSecrets[name].secret.record.metadata.name,
             key: envSecrets[name].key,
           },
         },

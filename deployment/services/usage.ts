@@ -47,7 +47,7 @@ export function deployUsage({
       startupProbe: '/_health',
       availabilityOnEveryNode: true,
       env: {
-        ...environment.env,
+        ...environment.envVars,
         SENTRY: sentry.enabled ? '1' : '0',
         REQUEST_LOGGING: '0',
         KAFKA_BUFFER_SIZE: kafka.config.bufferSize,

@@ -36,7 +36,7 @@ export function deployDbMigrations({
       imagePullSecret: docker.secret,
       image,
       env: {
-        ...environment.env,
+        ...environment.envVars,
         MIGRATOR: 'up',
         CLICKHOUSE_MIGRATOR: 'up',
         CLICKHOUSE_MIGRATOR_GRAPHQL_HIVE_CLOUD: '1',

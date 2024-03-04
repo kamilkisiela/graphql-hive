@@ -94,7 +94,7 @@ export function deployGraphQL({
         },
         availabilityOnEveryNode: true,
         env: {
-          ...environment.env,
+          ...environment.envVars,
           ...apiEnv,
           SENTRY: sentry.enabled ? '1' : '0',
           REQUEST_LOGGING: '0', // disabled

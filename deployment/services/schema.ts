@@ -30,7 +30,7 @@ export function deploySchema({
       imagePullSecret: docker.secret,
       availabilityOnEveryNode: true,
       env: {
-        ...environment.env,
+        ...environment.envVars,
         SENTRY: sentry.enabled ? '1' : '0',
         REQUEST_BROKER: '1',
         SCHEMA_CACHE_POLL_INTERVAL_MS: '150',

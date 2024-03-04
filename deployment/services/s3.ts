@@ -11,7 +11,7 @@ export class S3Secret extends ServiceSecret<{
 export function deployS3() {
   const r2Config = new pulumi.Config('r2');
 
-  const secret = new S3Secret('s3', {
+  const secret = new S3Secret('cloudflare-r2', {
     endpoint: r2Config.require('endpoint'),
     bucket: r2Config.require('bucketName'),
     accessKeyId: r2Config.requireSecret('accessKeyId'),

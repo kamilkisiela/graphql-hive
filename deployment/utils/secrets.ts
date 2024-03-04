@@ -14,7 +14,8 @@ export class ServiceSecret<T extends Record<string, string | Output<string>>> {
       metadata: {
         name: this.name,
       },
-      data: this.data,
+      stringData: this.data,
+      type: 'Opaque',
     });
   }
 }

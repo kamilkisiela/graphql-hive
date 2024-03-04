@@ -32,7 +32,7 @@ export function deployUsageEstimation({
       livenessProbe: '/_health',
       startupProbe: '/_health',
       env: {
-        ...environment.env,
+        ...environment.envVars,
         SENTRY: sentry.enabled ? '1' : '0',
       },
       exposesMetrics: true,
