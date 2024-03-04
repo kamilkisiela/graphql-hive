@@ -64,7 +64,7 @@ export function useDateRangeController(args: {
     }
 
     if (timeDifferenceInDays > 1) {
-      let diff = Math.floor(timeDifferenceInDays);
+      const diff = Math.floor(timeDifferenceInDays);
       let size = diff;
       while (size < 20) {
         size = size + diff;
@@ -85,7 +85,7 @@ export function useDateRangeController(args: {
     startDate,
     selectedPreset,
     setSelectedPreset(preset: Preset) {
-      router.push(
+      void router.push(
         `${href}?from=${encodeURIComponent(preset.range.from)}&to=${encodeURIComponent(preset.range.to)}`,
         undefined,
         {

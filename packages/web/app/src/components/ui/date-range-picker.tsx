@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { endOfDay, endOfToday, subMonths } from 'date-fns';
 import { CalendarDays } from 'lucide-react';
 import { DateRange, Matcher } from 'react-day-picker';
@@ -177,7 +177,7 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
   const lastPreset = useRef<Preset | null>(activePreset);
 
   useEffect(() => {
-    if (!activePreset) {
+    if (!activePreset || !props.onUpdate) {
       return;
     }
 
@@ -186,12 +186,10 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
 
     if (fromParsed && toParsed) {
       const resolvedRange = resolveRange(fromValue, toValue);
-      if (resolvedRange) {
-        if (props.onUpdate && lastPreset.current?.name !== activePreset.name) {
-          props.onUpdate({
-            preset: activePreset,
-          });
-        }
+      if (resolvedRange && lastPreset.current?.name !== activePreset.name) {
+        props.onUpdate({
+          preset: activePreset,
+        });
       }
     }
   }, [activePreset]);
@@ -236,7 +234,7 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
 
   return (
     <Popover
-      modal={true}
+      modal
       open={isOpen}
       onOpenChange={(open: boolean) => {
         if (!open) {

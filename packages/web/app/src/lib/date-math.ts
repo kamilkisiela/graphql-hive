@@ -40,9 +40,8 @@ export function isMathString(text: string): boolean {
 
   if (text.substring(0, 3) === 'now') {
     return true;
-  } else {
-    return false;
   }
+  return false;
 }
 
 const dateStringFormat = 'yyyy-MM-dd';
@@ -132,26 +131,23 @@ export function parseDateMath(mathString: string, now: Date): Date | undefined {
       return undefined;
     }
 
-    if (isNaN(parseInt(strippedMathString.charAt(i), 10))) {
+    if (Number.isNaN(parseInt(strippedMathString.charAt(i), 10))) {
       num = 1;
     } else if (strippedMathString.length === 2) {
       num = parseInt(strippedMathString.charAt(i), 10);
-    } else {
-      const numFrom = i;
-      while (!isNaN(parseInt(strippedMathString.charAt(i), 10))) {
-        i++;
-        if (i > 10) {
-          return undefined;
-        }
-      }
-      num = parseInt(strippedMathString.substring(numFrom, i), 10);
     }
-
-    if (type === 0) {
-      // rounding is only allowed on whole, single, units (eg M or 1M, not 0.5M or 2M)
-      if (num !== 1) {
+    const numFrom = i;
+    while (!Number.isNaN(parseInt(strippedMathString.charAt(i), 10))) {
+      i++;
+      if (i > 10) {
         return undefined;
       }
+    }
+    num = parseInt(strippedMathString.substring(numFrom, i), 10);
+
+    // rounding is only allowed on whole, single, units (eg M or 1M, not 0.5M or 2M)
+    if (type === 0 && num !== 1) {
+      return undefined;
     }
 
     unitString = strippedMathString.charAt(i++);
@@ -164,16 +160,16 @@ export function parseDateMath(mathString: string, now: Date): Date | undefined {
 
     if (!units.includes(unit)) {
       return undefined;
-    } else {
-      if (type === 1) {
-        result = add(result, {
-          [unitToDurationKey(unit)]: num,
-        });
-      } else if (type === 2) {
-        result = sub(result, {
-          [unitToDurationKey(unit)]: num,
-        });
-      }
+    }
+
+    if (type === 1) {
+      result = add(result, {
+        [unitToDurationKey(unit)]: num,
+      });
+    } else if (type === 2) {
+      result = sub(result, {
+        [unitToDurationKey(unit)]: num,
+      });
     }
   }
   return result;
@@ -182,6 +178,7 @@ export function parseDateMath(mathString: string, now: Date): Date | undefined {
 export function resolveRange(period: Period) {
   const from = parse(period.from);
   const to = parse(period.to);
+
   if (!from || !to) {
     throw new Error('Could not parse date strings.' + JSON.stringify(period));
   }

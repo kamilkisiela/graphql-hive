@@ -340,7 +340,6 @@ export const TargetLayout = ({
             </div>
           )}
           {currentTarget ? (
-            // eslint-disable-next-line unicorn/no-negated-condition
             connect != null ? (
               connect
             ) : isCDNEnabled?.isCDNEnabled ? (
