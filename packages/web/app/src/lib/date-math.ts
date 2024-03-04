@@ -45,7 +45,7 @@ export function isMathString(text: string): boolean {
   }
 }
 
-const dateStringFormat = 'yyyy-MM-dd HH:mm:ss';
+const dateStringFormat = 'yyyy-MM-dd';
 
 function parseDateString(input: string) {
   try {
@@ -185,6 +185,7 @@ export function resolveRange(period: Period) {
   if (!from || !to) {
     throw new Error('Could not parse date strings.' + JSON.stringify(period));
   }
+
   return {
     from: formatISO(from),
     to: formatISO(to),

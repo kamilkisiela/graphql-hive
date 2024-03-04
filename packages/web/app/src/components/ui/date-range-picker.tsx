@@ -96,7 +96,7 @@ export const availablePresets: Preset[] = [
   { name: 'last60d', label: 'Last 60 days', range: { from: 'now-60d', to: 'now' } },
   { name: 'last90d', label: 'Last 90 days', range: { from: 'now-90d', to: 'now' } },
   { name: 'last6M', label: 'Last 6 months', range: { from: 'now-6M', to: 'now' } },
-  { name: 'last1y', label: 'Last 1 year', range: { from: 'now-1y', to: 'now' } },
+  { name: 'last1y', label: 'Last 1 year', range: { from: 'now-364d', to: 'now' } },
 ];
 
 function findMatchingPreset(range: Preset['range']): Preset | undefined {

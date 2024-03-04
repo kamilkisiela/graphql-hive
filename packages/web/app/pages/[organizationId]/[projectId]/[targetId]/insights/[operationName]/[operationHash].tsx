@@ -113,7 +113,7 @@ function OperationView({
         operationsFilter={operationsList}
         clientNamesFilter={selectedClients}
         mode="operation-page"
-        resolution={30}
+        resolution={dateRangeController.resolution}
       />
       <div className="mt-12 w-full rounded-md border border-gray-800 bg-gray-900/50 p-5">
         <Section.Title>Operation body</Section.Title>

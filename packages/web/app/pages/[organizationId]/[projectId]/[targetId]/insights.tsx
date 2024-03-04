@@ -76,7 +76,7 @@ function OperationsView({
         clientNamesFilter={selectedClients}
         dateRangeText={dateRangeController.selectedPreset.label}
         mode="operation-list"
-        resolution={30}
+        resolution={dateRangeController.resolution}
       />
       <OperationsList
         className="mt-12"

@@ -69,7 +69,7 @@ function ClientView(props: {
         client: props.clientName,
         period: dateRangeController.resolvedRange,
       },
-      resolution: 30,
+      resolution: dateRangeController.resolution,
     },
   });
 

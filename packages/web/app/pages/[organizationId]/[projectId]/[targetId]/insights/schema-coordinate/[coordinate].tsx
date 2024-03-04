@@ -73,7 +73,7 @@ function SchemaCoordinateView(props: {
         schemaCoordinate: props.coordinate,
         period: dateRangeController.resolvedRange,
       },
-      resolution: 60,
+      resolution: dateRangeController.resolution,
     },
   });
 
