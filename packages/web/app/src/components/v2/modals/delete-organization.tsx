@@ -69,8 +69,8 @@ export const DeleteOrganizationModal = ({
                 organization: router.organizationId,
               },
             });
+            void (await replace('/'));
             toggleModalOpen();
-            void replace(`/${organization.cleanId}`);
           }}
         >
           Delete
