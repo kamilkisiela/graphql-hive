@@ -142,7 +142,7 @@ export class ServiceDeployment {
       readinessProbe =
         typeof this.options.readinessProbe === 'string'
           ? {
-              initialDelaySeconds: 20,
+              initialDelaySeconds: 10,
               periodSeconds: 15,
               failureThreshold: 5,
               timeoutSeconds: 5,
