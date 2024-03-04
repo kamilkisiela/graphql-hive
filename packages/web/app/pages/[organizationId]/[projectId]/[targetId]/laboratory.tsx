@@ -12,15 +12,16 @@ import { DeleteCollectionModal } from '@/components/target/laboratory/delete-col
 import { DeleteOperationModal } from '@/components/target/laboratory/delete-operation-modal';
 import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Accordion,
   DocsLink,
+  Tooltip as LegacyTooltip,
   Link,
   MetaTitle,
   Spinner,
   ToggleGroup,
   ToggleGroupItem,
-  Tooltip,
 } from '@/components/v2';
 import { HiveLogo, PlusIcon, SaveIcon, ShareIcon } from '@/components/v2/icon';
 import { graphql } from '@/gql';
@@ -440,6 +441,25 @@ function useOperationCollectionsPlugin({
           <div className="flex h-full flex-col">
             <div className="flex justify-between">
               <Title>Collections</Title>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => {
+                        if (collectionId) {
+                          setCollectionId('');
+                        }
+                        toggleCollectionModal();
+                      }}
+                    >
+                      <PlusIcon className="size-3" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Create new collection</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
             {loading ? (
               <div className="flex h-fit flex-1 items-center justify-center">
@@ -990,7 +1010,7 @@ function LaboratoryPageContent() {
           <GraphiQL.Logo>
             <EditorBreadcrumbs />
             <div className="ml-auto">
-              <Tooltip
+              <LegacyTooltip
                 content={
                   actualSelectedApiEndpoint === 'linkedApi' ? (
                     <>
@@ -1007,7 +1027,7 @@ function LaboratoryPageContent() {
                     ? 'Querying GraphQL API'
                     : 'Querying Mock API'}
                 </span>
-              </Tooltip>
+              </LegacyTooltip>
               <HiveLogo className="h-6 w-auto" />
             </div>
           </GraphiQL.Logo>
