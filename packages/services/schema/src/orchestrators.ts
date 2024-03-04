@@ -502,6 +502,8 @@ async function composeExternalFederation(args: {
   }
 
   if (parseResult.data.type === 'success') {
+    await checkExternalCompositionCompatibility(args.logger, parseResult.data.result.sdl);
+
     return {
       type: 'success',
       result: {
@@ -513,6 +515,29 @@ async function composeExternalFederation(args: {
   }
 
   return parseResult.data;
+}
+
+async function checkExternalCompositionCompatibility(logger: ServiceLogger, maybeSdl: string) {
+  let parsed: DocumentNode | undefined;
+  let errors: ReadonlyArray<GraphQLError> | undefined;
+  try {
+    parsed = parse(maybeSdl);
+    errors = validateSDL(parsed);
+  } catch (err) {
+    if (parsed === undefined) {
+      return;
+    }
+    Sentry.captureException(err);
+  } finally {
+    if (errors === undefined || errors.length > 0) {
+      logger.warn(`External composition GraphQL validity check failed. (info=%o)`, {
+        isParseSuccessful: parsed !== undefined,
+        validationErrors: errors?.map(e => e.message) ?? null,
+      });
+    } else {
+      logger.debug(`External composition GraphQL validity check passed.`);
+    }
+  }
 }
 
 const federationTypes = new Set([
