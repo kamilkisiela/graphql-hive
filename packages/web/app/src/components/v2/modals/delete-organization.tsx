@@ -35,10 +35,6 @@ export const DeleteOrganizationModal = ({
   toggleModalOpen: () => void;
   organization: FragmentType<typeof DeleteOrganizationModal_OrganizationFragment>;
 }): ReactElement => {
-  const organization = useFragment(
-    DeleteOrganizationModal_OrganizationFragment,
-    props.organization,
-  );
   const [, mutate] = useMutation(DeleteOrganizationDocument);
   const router = useRouteSelector();
   const { replace } = useRouter();
