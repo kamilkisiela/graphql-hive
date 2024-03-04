@@ -71,8 +71,8 @@ export function deployApp({
       livenessProbe: '/api/health',
       startupProbe: {
         endpoint: '/api/health',
-        initialDelaySeconds: 130,
-        failureThreshold: 5,
+        initialDelaySeconds: 60,
+        failureThreshold: 10,
         periodSeconds: 30,
         timeoutSeconds: 15,
       },
