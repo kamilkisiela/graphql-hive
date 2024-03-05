@@ -16,6 +16,6 @@ for dir in packages/services/*/dist; do
 done
 
 pnpm sentry-cli sourcemaps inject packages/web/app/dist
-pnpm sentry-cli sourcemaps upload --release=$SENTRY_RELEASE $dir --dist webapp --url-prefix /usr/src/app/ \;
+pnpm sentry-cli sourcemaps upload --release=$SENTRY_RELEASE $dir --dist webapp --url-prefix ~/ \;
 
 pnpm sentry-cli releases finalize "$SENTRY_RELEASE"
