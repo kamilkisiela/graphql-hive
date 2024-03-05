@@ -206,11 +206,11 @@ importers:
         specifier: 4.16.0
         version: 4.16.0
       '@pulumi/kubernetes':
-        specifier: 4.8.1
-        version: 4.8.1
+        specifier: 4.9.0
+        version: 4.9.0
       '@pulumi/kubernetesx':
         specifier: 0.1.6
-        version: 0.1.6(@pulumi/kubernetes@4.8.1)(@pulumi/pulumi@3.108.1)
+        version: 0.1.6(@pulumi/kubernetes@4.9.0)(@pulumi/pulumi@3.108.1)
       '@pulumi/pulumi':
         specifier: 3.108.1
         version: 3.108.1
@@ -5055,7 +5055,7 @@ packages:
       '@whatwg-node/fetch': 0.9.17
       fast-json-stable-stringify: 2.1.0
       graphql: 16.8.1
-      lru-cache: 10.0.0
+      lru-cache: 10.2.0
       tslib: 2.6.2
     dev: true
 
@@ -8973,7 +8973,7 @@ packages:
       '@octokit/request-error': 5.0.1
       '@octokit/types': 12.4.0
       deprecation: 2.3.1
-      lru-cache: 10.0.0
+      lru-cache: 10.2.0
       universal-github-app-jwt: 1.1.1
       universal-user-agent: 6.0.0
     dev: true
@@ -9529,15 +9529,14 @@ packages:
       - supports-color
     dev: false
 
-  /@pulumi/kubernetes@4.8.1:
-    resolution: {integrity: sha512-epO776SvEtfzISYnqTdrSNmr+fbNoFszLNsIcvbw4ZhstbTeyJSUkUmcOlwfft5BHg1KF95duGq0+cauhuKTag==}
+  /@pulumi/kubernetes@4.9.0:
+    resolution: {integrity: sha512-aTnHWXnBkBhsVqRg/QktfaOxFICYnkHAQiH+JcwhNWcqJu+JK0paSH88RsDeduQZHv9drCyAg2QnHPQ2q6vjzg==}
     requiresBuild: true
     dependencies:
       '@pulumi/pulumi': 3.108.1
-      '@types/glob': 5.0.37
       '@types/node-fetch': 2.6.4
       '@types/tmp': 0.0.33
-      glob: 7.2.3
+      glob: 10.3.10
       node-fetch: 2.6.12
       shell-quote: 1.7.3
       tmp: 0.0.33
@@ -9547,13 +9546,13 @@ packages:
       - supports-color
     dev: false
 
-  /@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.8.1)(@pulumi/pulumi@3.108.1):
+  /@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.9.0)(@pulumi/pulumi@3.108.1):
     resolution: {integrity: sha512-9VL4Yi4b4aLC/obBarJuNkm86kABByUZICYPSTdV396MGZtOc066o2brsB+kWVQcVfkYVXTPrpjIkAwBXXnzGw==}
     peerDependencies:
       '@pulumi/kubernetes': ^3.0.0
       '@pulumi/pulumi': ^3.0.0
     dependencies:
-      '@pulumi/kubernetes': 4.8.1
+      '@pulumi/kubernetes': 4.9.0
       '@pulumi/pulumi': 3.108.1
     dev: false
 
@@ -13724,13 +13723,6 @@ packages:
     resolution: {integrity: sha512-frsJrz2t/CeGifcu/6uRo4b+SzAwT4NYCVPu1GN8IB9XTzrpPkGuV0tmh9mN+/L0PklAlsC3u5Fxt0ju00LXIw==}
     dev: true
 
-  /@types/glob@5.0.37:
-    resolution: {integrity: sha512-ATA/xrS7CZ3A2WCPVY4eKdNpybq56zqlTirnHhhyOztZM/lPxJzusOBI3BsaXbu6FrUluqzvMlI4sZ6BDYMlMg==}
-    dependencies:
-      '@types/minimatch': 5.1.2
-      '@types/node': 20.11.24
-    dev: false
-
   /@types/glob@8.1.0:
     resolution: {integrity: sha512-IO+MJPVhoqz+28h1qLAcBEH2+xHMK6MTyHJc7MTnnYb6wsoLR29POVGJ7LycmVXIqyy/4/2ShP5sUwTXuOwb/w==}
     dependencies:
@@ -13892,6 +13884,7 @@ packages:
 
   /@types/minimatch@5.1.2:
     resolution: {integrity: sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==}
+    dev: true
 
   /@types/minimist@1.2.2:
     resolution: {integrity: sha512-jhuKLIRrhvCPLqwPcx6INqmKeiA5EWrsCOPhrlFSrbrmU4ZMPjj5Ul/oLCMDO98XRUIwVm78xICz4EPCektzeQ==}
@@ -20629,7 +20622,7 @@ packages:
       fs.realpath: 1.0.0
       minimatch: 7.4.3
       minipass: 4.2.4
-      path-scurry: 1.6.3
+      path-scurry: 1.10.1
     dev: true
 
   /global-dirs@3.0.1:
@@ -21028,7 +21021,7 @@ packages:
       '@whatwg-node/server': 0.9.26
       dset: 3.1.2
       graphql: 16.8.1
-      lru-cache: 10.0.0
+      lru-cache: 10.2.0
       tslib: 2.6.2
     dev: true
 
@@ -27220,14 +27213,6 @@ packages:
     dependencies:
       lru-cache: 10.2.0
       minipass: 7.0.4
-
-  /path-scurry@1.6.3:
-    resolution: {integrity: sha512-RAmB+n30SlN+HnNx6EbcpoDy9nwdpcGPnEKrJnu6GZoDWBdIjo1UQMVtW2ybtC7LC2oKLcMq8y5g8WnKLiod9g==}
-    engines: {node: '>=16 || 14 >=14.17'}
-    dependencies:
-      lru-cache: 7.18.3
-      minipass: 4.2.4
-    dev: true
 
   /path-to-regexp@0.1.7:
     resolution: {integrity: sha512-5DFkuoqlv1uYQKxy8omFBeJPQcdoE07Kv2sferDCrAq1ohOU+MSDswDIbnx3YAM60qIOnYa53wBhXW0EbMonrQ==}
