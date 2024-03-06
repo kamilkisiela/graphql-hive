@@ -30,6 +30,7 @@ export function deployProxy({
         name: 'app',
         path: '/',
         service: app.service,
+        timeoutInSeconds: 60,
       },
       {
         name: 'server',
