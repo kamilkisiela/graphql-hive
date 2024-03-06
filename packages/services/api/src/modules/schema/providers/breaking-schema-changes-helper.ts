@@ -11,8 +11,8 @@ import { formatNumber, formatPercentage } from '../lib/number-formatting';
 export class BreakingSchemaChangeUsageHelper {
   constructor() {}
 
-  private breakingSchemaChangeToUsageMap = new Map<
-    string,
+  private breakingSchemaChangeToUsageMap = new WeakMap<
+    SchemaChangeType,
     ConditionalBreakingChangeMetadata['usage']
   >();
 
@@ -20,7 +20,7 @@ export class BreakingSchemaChangeUsageHelper {
     schemaChange: SchemaChangeType,
     usage: ConditionalBreakingChangeMetadata['usage'],
   ) {
-    this.breakingSchemaChangeToUsageMap.set(schemaChange.id, usage);
+    this.breakingSchemaChangeToUsageMap.set(schemaChange, usage);
   }
 
   async getUsageDataForBreakingSchemaChange(schemaChange: SchemaChangeType) {
@@ -28,7 +28,7 @@ export class BreakingSchemaChangeUsageHelper {
       return null;
     }
 
-    const usageData = this.breakingSchemaChangeToUsageMap.get(schemaChange.id);
+    const usageData = this.breakingSchemaChangeToUsageMap.get(schemaChange);
 
     if (usageData == null) {
       return null;
