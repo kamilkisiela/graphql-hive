@@ -243,8 +243,8 @@ importers:
         specifier: 2.7.1
         version: 2.7.1(graphql@16.8.1)
       '@apollo/server':
-        specifier: 4.10.0
-        version: 4.10.0(graphql@16.8.1)
+        specifier: 4.10.1
+        version: 4.10.1(graphql@16.8.1)
       '@aws-sdk/client-s3':
         specifier: 3.525.0
         version: 3.525.0
@@ -420,7 +420,7 @@ importers:
     optionalDependencies:
       '@apollo/server':
         specifier: ^4.0.0
-        version: 4.10.0(graphql@16.8.1)
+        version: 4.10.1(graphql@16.8.1)
       '@envelop/types':
         specifier: ^5.0.0
         version: 5.0.0
@@ -2263,8 +2263,8 @@ packages:
       '@apollo/utils.logger': 2.0.0
       graphql: 16.8.1
 
-  /@apollo/server@4.10.0(graphql@16.8.1):
-    resolution: {integrity: sha512-pLx//lZ/pvUfWL9G8Np8+y3ujc0pYc8U7dwD6ztt9FAw8NmCPzPaDzlXLBAjGU6WnkqVBOnz8b3dOwRNjLYSUA==}
+  /@apollo/server@4.10.1(graphql@16.8.1):
+    resolution: {integrity: sha512-XGMOgTyzV4EBHQq0xQVKFry9hZF7AA/6nxxGLamqdxodhdSdGbU9jrlb5/XDveeGuXP3+5JDdrB2HcziVLJcMA==}
     engines: {node: '>=14.16.0'}
     peerDependencies:
       graphql: ^16.6.0
@@ -6254,7 +6254,7 @@ packages:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
       '@graphql-codegen/plugin-helpers': 5.0.3(graphql@16.8.1)
-      '@graphql-tools/schema': 10.0.0(graphql@16.8.1)
+      '@graphql-tools/schema': 10.0.3(graphql@16.8.1)
       '@graphql-tools/utils': 10.1.0(graphql@16.8.1)
       graphql: 16.8.1
       tslib: 2.6.2
@@ -20790,7 +20790,7 @@ packages:
       '@graphql-tools/graphql-file-loader': 8.0.0(graphql@16.8.1)
       '@graphql-tools/json-file-loader': 8.0.0(graphql@16.8.1)
       '@graphql-tools/load': 8.0.0(graphql@16.8.1)
-      '@graphql-tools/merge': 9.0.0(graphql@16.8.1)
+      '@graphql-tools/merge': 9.0.3(graphql@16.8.1)
       '@graphql-tools/url-loader': 8.0.0(@types/node@20.11.24)(graphql@16.8.1)
       '@graphql-tools/utils': 10.1.0(graphql@16.8.1)
       cosmiconfig: 8.3.6(typescript@5.3.3)
@@ -21013,7 +21013,7 @@ packages:
     dependencies:
       '@envelop/core': 4.0.3
       '@graphql-tools/executor': 1.1.0(graphql@16.8.1)
-      '@graphql-tools/schema': 10.0.0(graphql@16.8.1)
+      '@graphql-tools/schema': 10.0.3(graphql@16.8.1)
       '@graphql-tools/utils': 10.1.0(graphql@16.8.1)
       '@graphql-yoga/logger': 1.0.0
       '@graphql-yoga/subscription': 4.0.0
