@@ -7,6 +7,11 @@ import { captureException } from '@sentry/nextjs';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 async function graphql(req: NextApiRequest, res: NextApiResponse) {
+  for (let i = 1; i++; i < 1000000000) {
+    console.log(i);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+
   const logger = getLogger(req);
   const url = env.graphqlEndpoint;
 
