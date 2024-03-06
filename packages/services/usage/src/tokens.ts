@@ -1,7 +1,7 @@
 import LRU from 'tiny-lru';
-import { ServiceLogger } from '@hive/service-common';
+import { createTimeoutHTTPLink, ServiceLogger } from '@hive/service-common';
 import type { TokensApi } from '@hive/tokens';
-import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import { createTRPCProxyClient } from '@trpc/client';
 import { tokenCacheHits, tokenRequests } from './metrics';
 
 export enum TokenStatus {
@@ -23,7 +23,7 @@ export function createTokens(config: { endpoint: string; logger: ServiceLogger }
   const tokens = LRU<Promise<Token>>(1000, 30_000);
   const tokensApi = createTRPCProxyClient<TokensApi>({
     links: [
-      httpLink({
+      createTimeoutHTTPLink({
         url: `${endpoint}/trpc`,
         fetch,
       }),

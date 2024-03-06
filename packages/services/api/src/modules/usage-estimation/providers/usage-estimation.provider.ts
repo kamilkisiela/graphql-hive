@@ -1,6 +1,7 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
+import { createTimeoutHTTPLink } from '@hive/service-common';
 import type { UsageEstimatorApi, UsageEstimatorApiInput } from '@hive/usage-estimator';
-import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import { createTRPCProxyClient } from '@trpc/client';
 import { sentry } from '../../../shared/sentry';
 import { Logger } from '../../shared/providers/logger';
 import type { UsageEstimationServiceConfig } from './tokens';
@@ -22,7 +23,7 @@ export class UsageEstimationProvider {
     this.usageEstimator = usageEstimationConfig.endpoint
       ? createTRPCProxyClient<UsageEstimatorApi>({
           links: [
-            httpLink({
+            createTimeoutHTTPLink({
               url: `${usageEstimationConfig.endpoint}/trpc`,
               fetch,
             }),

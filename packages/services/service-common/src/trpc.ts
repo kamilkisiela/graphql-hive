@@ -1,6 +1,7 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { ZodError } from 'zod';
 import * as Sentry from '@sentry/node';
+import { httpLink, HTTPLinkOptions, OperationLink, TRPCClientError, TRPCLink } from '@trpc/client';
 import { experimental_standaloneMiddleware, type AnyRouter } from '@trpc/server';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
@@ -48,3 +49,50 @@ export const handleTRPCError = experimental_standaloneMiddleware<{
 
   return result;
 });
+
+export function createTimeoutHTTPLink(
+  args: HTTPLinkOptions & {
+    /** timeout in milliseconds defaults to 50_000 */
+    timeout?: number;
+  },
+): TRPCLink<AnyRouter> {
+  const timeout = args.timeout ?? 50_000;
+  const createLink = httpLink(args);
+
+  const linkWithCancelation: TRPCLink<AnyRouter> = args => {
+    const link = createLink(args);
+    const opLink: OperationLink<AnyRouter> = args => {
+      const res = link(args);
+
+      return {
+        subscribe: observer => {
+          const timeoutId = setTimeout(() => {
+            observer?.error?.(new TRPCClientError(`Call exceeded timed out of ${timeout}ms.`));
+          }, timeout);
+
+          const subscription = res.subscribe({
+            next: value => {
+              clearTimeout(timeoutId);
+              observer?.next?.(value);
+            },
+            error: error => {
+              clearTimeout(timeoutId);
+              observer?.error?.(error);
+            },
+            complete: () => {
+              clearTimeout(timeoutId);
+              observer?.complete?.();
+            },
+          });
+
+          return subscription;
+        },
+        pipe: res.pipe,
+      };
+    };
+
+    return opLink;
+  };
+
+  return linkWithCancelation;
+}

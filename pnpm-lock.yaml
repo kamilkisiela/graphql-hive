@@ -562,6 +562,9 @@ importers:
       '@hive/schema':
         specifier: workspace:*
         version: link:../schema
+      '@hive/service-common':
+        specifier: workspace:*
+        version: link:../service-common
       '@hive/storage':
         specifier: workspace:*
         version: link:../storage
@@ -1090,6 +1093,9 @@ importers:
 
   packages/services/service-common:
     dependencies:
+      '@trpc/client':
+        specifier: 10.45.1
+        version: 10.45.1(@trpc/server@10.45.1)
       '@trpc/server':
         specifier: 10.45.1
         version: 10.45.1

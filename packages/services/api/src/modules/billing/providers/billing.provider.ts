@@ -1,6 +1,7 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
+import { createTimeoutHTTPLink } from '@hive/service-common';
 import type { StripeBillingApi, StripeBillingApiInput } from '@hive/stripe-billing';
-import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import { createTRPCProxyClient } from '@trpc/client';
 import { OrganizationSelector } from '../../../__generated__/types';
 import { OrganizationBilling } from '../../../shared/entities';
 import { Logger } from '../../shared/providers/logger';
@@ -26,7 +27,7 @@ export class BillingProvider {
     this.logger = logger.child({ source: 'BillingProvider' });
     this.billingService = billingConfig.endpoint
       ? createTRPCProxyClient<StripeBillingApi>({
-          links: [httpLink({ url: `${billingConfig.endpoint}/trpc`, fetch })],
+          links: [createTimeoutHTTPLink({ url: `${billingConfig.endpoint}/trpc`, fetch })],
         })
       : null;
 

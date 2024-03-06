@@ -1,5 +1,6 @@
 import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
 import type { ContractsInputType, SchemaBuilderApi } from '@hive/schema';
+import { createTimeoutHTTPLink } from '@hive/service-common';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { Orchestrator, Project, ProjectType, SchemaObject } from '../../../../shared/entities';
 import { sentry } from '../../../../shared/sentry';
@@ -28,7 +29,7 @@ export class FederationOrchestrator implements Orchestrator {
     this.logger = logger.child({ service: 'FederationOrchestrator' });
     this.schemaService = createTRPCProxyClient<SchemaBuilderApi>({
       links: [
-        httpLink({
+        createTimeoutHTTPLink({
           url: `${serviceConfig.endpoint}/trpc`,
           fetch,
           headers: {
