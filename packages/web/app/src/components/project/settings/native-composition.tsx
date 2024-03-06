@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import Link from 'next/link';
 import { FlaskConicalIcon, HeartCrackIcon, PartyPopperIcon, RefreshCcwIcon } from 'lucide-react';
-import { useMutation } from 'urql';
+import { useMutation, useQuery } from 'urql';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -27,10 +27,18 @@ const NativeCompositionSettings_ProjectFragment = graphql(`
   fragment NativeCompositionSettings_ProjectFragment on Project {
     id
     cleanId
-    nativeFederationCompatibility
     isNativeFederationEnabled
     externalSchemaComposition {
       endpoint
+    }
+  }
+`);
+
+const NativeCompositionSettings_ProjectQuery = graphql(`
+  query NativeCompositionSettings_ProjectQuery($selector: ProjectSelectorInput!) {
+    project(selector: $selector) {
+      id
+      nativeFederationCompatibility
     }
   }
 `);
@@ -59,6 +67,16 @@ export function NativeCompositionSettings(props: {
     props.organization,
   );
   const project = useFragment(NativeCompositionSettings_ProjectFragment, props.project);
+  const [projectQuery] = useQuery({
+    query: NativeCompositionSettings_ProjectQuery,
+    variables: {
+      selector: {
+        organization: organization.cleanId,
+        project: project.cleanId,
+      },
+    },
+  });
+
   const [mutationState, mutate] = useMutation(
     NativeCompositionSettings_UpdateNativeCompositionMutation,
   );
@@ -127,41 +145,53 @@ export function NativeCompositionSettings(props: {
           </CardDescription>
         )}
       </CardHeader>
-
-      {project.isNativeFederationEnabled ? null : (
+      {projectQuery.error ? (
         <CardContent>
           <div className="flex flex-row items-center gap-x-4">
             <div>
-              {project.nativeFederationCompatibility ===
+              <HeartCrackIcon className="size-10 text-red-500" />
+            </div>
+            <div>
+              <div className="text-base font-semibold">
+                Failed to check compatibility. Please try again later.
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      ) : project.isNativeFederationEnabled || !projectQuery.data?.project ? null : (
+        <CardContent>
+          <div className="flex flex-row items-center gap-x-4">
+            <div>
+              {projectQuery.data.project.nativeFederationCompatibility ===
               NativeFederationCompatibilityStatus.Compatible ? (
                 <PartyPopperIcon className="size-10 text-emerald-500" />
               ) : null}
-              {project.nativeFederationCompatibility ===
+              {projectQuery.data.project.nativeFederationCompatibility ===
               NativeFederationCompatibilityStatus.Incompatible ? (
                 <HeartCrackIcon className="size-10 text-red-500" />
               ) : null}
-              {project.nativeFederationCompatibility ===
+              {projectQuery.data.project.nativeFederationCompatibility ===
               NativeFederationCompatibilityStatus.Unknown ? (
                 <FlaskConicalIcon className="size-10 text-orange-500" />
               ) : null}
             </div>
             <div>
               <div className="text-base font-semibold">
-                {project.nativeFederationCompatibility ===
+                {projectQuery.data.project.nativeFederationCompatibility ===
                 NativeFederationCompatibilityStatus.Compatible
                   ? 'Your project is compatible'
                   : null}
-                {project.nativeFederationCompatibility ===
+                {projectQuery.data.project.nativeFederationCompatibility ===
                 NativeFederationCompatibilityStatus.Incompatible
                   ? 'Your project is not yet supported'
                   : null}
-                {project.nativeFederationCompatibility ===
+                {projectQuery.data.project.nativeFederationCompatibility ===
                 NativeFederationCompatibilityStatus.Unknown
                   ? 'Unclear whether your project is compatible'
                   : null}
               </div>
               <div className="text-muted-foreground text-sm">
-                {project.nativeFederationCompatibility ===
+                {projectQuery.data.project.nativeFederationCompatibility ===
                 NativeFederationCompatibilityStatus.Compatible ? (
                   <>
                     Subgraphs of this project are composed and validated correctly by our{' '}
@@ -174,7 +204,7 @@ export function NativeCompositionSettings(props: {
                     for Apollo Federation.
                   </>
                 ) : null}
-                {project.nativeFederationCompatibility ===
+                {projectQuery.data.project.nativeFederationCompatibility ===
                 NativeFederationCompatibilityStatus.Incompatible ? (
                   <>
                     Our{' '}
@@ -189,7 +219,7 @@ export function NativeCompositionSettings(props: {
                     Please reach out to us to explore solutions for addressing this issue.
                   </>
                 ) : null}
-                {project.nativeFederationCompatibility ===
+                {projectQuery.data.project.nativeFederationCompatibility ===
                 NativeFederationCompatibilityStatus.Unknown ? (
                   <>
                     Your project appears to lack any subgraphs at the moment, making it impossible
@@ -208,6 +238,7 @@ export function NativeCompositionSettings(props: {
           </div>
         </CardContent>
       )}
+
       <CardFooter>
         <div className="flex flex-row items-center gap-x-2">
           <Button
