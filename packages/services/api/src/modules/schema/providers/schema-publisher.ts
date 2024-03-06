@@ -254,10 +254,8 @@ export class SchemaPublisher {
             return {
               id: targetId,
               name: (
-                await this.targetManager.getTarget({
-                  organization: args.organizationId,
-                  project: args.projectId,
-                  target: args.targetId,
+                await this.targetManager.getTargetById({
+                  targetId: targetId,
                 })
               ).name,
             };

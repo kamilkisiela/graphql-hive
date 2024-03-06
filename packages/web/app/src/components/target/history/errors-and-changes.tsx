@@ -254,11 +254,14 @@ function ChangeItem(props: {
                             {target.name}
                           </Link>
                         )}
-                        {index === arr.length - 1 ? null : index === arr.length - 2 ? 'and' : ','}
+                        {index === arr.length - 1
+                          ? null
+                          : index === arr.length - 2
+                            ? ' and '
+                            : ', '}
                       </>
                     ))}{' '}
-                    target{metadata.settings.targets.length > 1 && 's'} insights for live usage
-                    data.
+                    target insights for live usage data.
                   </span>
                 )}
               </div>
