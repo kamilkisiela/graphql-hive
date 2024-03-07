@@ -1,4 +1,4 @@
-import { ReactElement, SetStateAction, useCallback, useMemo, useState } from 'react';
+import { ReactElement, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import clsx from 'clsx';
 import { useQuery } from 'urql';
@@ -486,7 +486,7 @@ export function OperationsList({
   selectedPeriod: null | { to: string; from: string };
 }): ReactElement {
   const [clientFilter, setClientFilter] = useState<string | null>(null);
-  const [query, refetch] = useQuery({
+  const [query, refetchQuery] = useQuery({
     query: OperationsList_OperationsStatsQuery,
     variables: {
       selector: {
@@ -500,11 +500,19 @@ export function OperationsList({
     },
   });
 
+  const refetch = () => refetchQuery({ requestPolicy: 'cache-and-network' });
+
+  useEffect(() => {
+    if (!query.fetching) {
+      refetch();
+    }
+  }, [period]);
+
   return (
     <OperationsFallback
       isError={!!query.error}
       isFetching={query.fetching}
-      refetch={() => refetch({ requestPolicy: 'cache-and-network' })}
+      refetch={() => refetch()}
     >
       <OperationsTableContainer
         operationStats={query.data?.operationsStats ?? null}

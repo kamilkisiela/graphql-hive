@@ -1,4 +1,4 @@
-import { ReactElement, useMemo } from 'react';
+import { ReactElement, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { differenceInMilliseconds } from 'date-fns';
@@ -59,7 +59,7 @@ function ClientView(props: {
     defaultPreset: presetLast7Days,
   });
 
-  const [query] = useQuery({
+  const [query, refetch] = useQuery({
     query: ClientView_ClientStatsQuery,
     variables: {
       selector: {
@@ -72,6 +72,12 @@ function ClientView(props: {
       resolution: dateRangeController.resolution,
     },
   });
+
+  useEffect(() => {
+    if (!query.fetching) {
+      refetch({ requestPolicy: 'network-only' });
+    }
+  }, [dateRangeController.resolvedRange]);
 
   const isLoading = query.fetching;
   const points = query.data?.clientStats?.requestsOverTime;

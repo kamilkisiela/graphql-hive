@@ -184,7 +184,7 @@ function UnusedSchemaExplorer(props: {
     defaultPreset: presetLast7Days,
   });
 
-  const [query] = useQuery({
+  const [query, refresh] = useQuery({
     query: UnusedSchemaExplorer_UnusedSchemaQuery,
     variables: {
       organizationId: props.organizationCleanId,
@@ -193,6 +193,12 @@ function UnusedSchemaExplorer(props: {
       period: dateRangeController.resolvedRange,
     },
   });
+
+  useEffect(() => {
+    if (!query.fetching) {
+      refresh({ requestPolicy: 'network-only' });
+    }
+  }, [dateRangeController.resolvedRange]);
 
   if (query.error) {
     return <QueryError error={query.error} />;

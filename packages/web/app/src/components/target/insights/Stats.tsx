@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { differenceInMilliseconds } from 'date-fns';
 import ReactECharts from 'echarts-for-react';
 import {
@@ -1064,6 +1064,12 @@ export function OperationsStats({
       requestPolicy: 'cache-and-network',
     });
   }, [refetchQuery]);
+
+  useEffect(() => {
+    if (!query.fetching) {
+      refetch();
+    }
+  }, [period]);
 
   const isFetching = query.fetching;
   const isError = !!query.error;
