@@ -59,7 +59,7 @@ export function formatDateToString(date: Date) {
 }
 
 function isValidDateString(input: string) {
-  return parseDateString(input) !== undefined;
+  return input.length === 11 && parseDateString(input) !== undefined;
 }
 
 /**
