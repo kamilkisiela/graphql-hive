@@ -85,6 +85,8 @@ export class ClickHouse {
       printWithValues(query).replace(/\n/g, ' ').replace(/\s+/g, ' '),
     );
 
+    let retries = 0;
+
     const response = await this.httpClient
       .post<QueryResponse<T>>(endpoint, {
         context: {
@@ -144,6 +146,39 @@ export class ClickHouse {
         agent: {
           http: httpAgent,
           https: httpsAgent,
+        },
+        hooks: {
+          // `beforeRetry` runs first, then `beforeRequest`
+          beforeRequest: [
+            options => {
+              if (
+                retries > 0 &&
+                options.searchParams &&
+                typeof options.searchParams === 'object' &&
+                'query_id' in options.searchParams &&
+                typeof options.searchParams.query_id === 'string'
+              ) {
+                // We do it to avoid QUERY_WITH_SAME_ID_IS_ALREADY_RUNNING error in ClickHouse
+                // Context: https://clickhouse.com/docs/en/interfaces/http
+                // > Running requests do not stop automatically if the HTTP connection is lost.
+                // > The optional 'query_id' parameter can be passed as the query ID (any string).
+                // More context: https://clickhouse.com/docs/en/operations/settings/settings#replace-running-query
+                // > When using the HTTP interface, the 'query_id' parameter can be passed.
+                // > If a query from the same user with the same 'query_id' already exists at this time,
+                // > the behaviour depends on the 'replace_running_query' parameter.
+                // > Default: throws QUERY_WITH_SAME_ID_IS_ALREADY_RUNNING exception.
+                options.searchParams.query_id = options.searchParams.query_id.replace(
+                  /\-r\d$/,
+                  '-r' + retries,
+                );
+              }
+            },
+          ],
+          beforeRetry: [
+            (_, retryCount) => {
+              retries = retryCount;
+            },
+          ],
         },
       })
       .then(response => {
