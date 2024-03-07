@@ -168,7 +168,7 @@ export class ClickHouse {
                 // > the behaviour depends on the 'replace_running_query' parameter.
                 // > Default: throws QUERY_WITH_SAME_ID_IS_ALREADY_RUNNING exception.
                 options.searchParams.query_id = options.searchParams.query_id.replace(
-                  /\-r\d$/,
+                  /-r\d$/,
                   '-r' + retries,
                 );
               }
