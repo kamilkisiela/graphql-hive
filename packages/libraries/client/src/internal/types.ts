@@ -1,10 +1,11 @@
 import type { ExecutionArgs } from 'graphql';
-import type { hiveClientSymbol } from '../client.js';
+import type { autoDisposeSymbol, hiveClientSymbol } from '../client.js';
 import type { AgentOptions } from './agent.js';
 import type { SchemaReporter } from './reporting.js';
 
 export interface HiveClient {
   [hiveClientSymbol]: true;
+  [autoDisposeSymbol]: boolean | NodeJS.Signals[];
   info(): Promise<void>;
   reportSchema: SchemaReporter['report'];
   collectUsage(): CollectUsageCallback;
@@ -189,6 +190,13 @@ export type HivePluginOptions = OptionalWhenFalse<
      * Disabled by default
      */
     reporting?: HiveReportingPluginOptions | false;
+    /**
+     * Automatically dispose the client when the process is terminated
+     *
+     * Apollo: Enabled by default
+     * Yoga / Envelop: Enabled by default if `process` exists for SIGINT and SIGTERM signals
+     */
+    autoDispose: boolean | NodeJS.Signals[];
   },
   'enabled',
   'token'

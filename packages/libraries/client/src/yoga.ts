@@ -1,7 +1,7 @@
 import { DocumentNode, ExecutionArgs, GraphQLSchema, Kind, parse } from 'graphql';
 import type { GraphQLParams, Plugin } from 'graphql-yoga';
 import LRU from 'tiny-lru';
-import { createHive } from './client.js';
+import { autoDisposeSymbol, createHive } from './client.js';
 import type { CollectUsageCallback, HiveClient, HivePluginOptions } from './internal/types.js';
 import { isHiveClient } from './internal/utils.js';
 
@@ -19,6 +19,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
     ? clientOrOptions
     : createHive({
         ...clientOrOptions,
+        autoDispose: clientOrOptions.autoDispose ?? global.process != null,
         agent: {
           name: 'hive-client-yoga',
           ...clientOrOptions.agent,
@@ -27,11 +28,17 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
 
   void hive.info();
 
-  if (!isHiveClient(clientOrOptions)) {
-    for (const signal of ['SIGINT', 'SIGTERM'] as const) {
-      process.once(signal, () => {
-        hive.dispose();
-      });
+  if (hive[autoDisposeSymbol]) {
+    if (!global.process) {
+      throw TypeError(
+        'Hive client Automatic disposal feature is not available: process is undefined',
+      );
+    }
+    const signals = Array.isArray(hive[autoDisposeSymbol])
+      ? hive[autoDisposeSymbol]
+      : ['SIGINT', 'SIGTERM'];
+    for (const signal of signals) {
+      process.once(signal, () => hive.dispose());
     }
   }
 

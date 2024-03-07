@@ -2,7 +2,7 @@ import { createHash } from 'crypto';
 import axios from 'axios';
 import type { DocumentNode } from 'graphql';
 import type { ApolloServerPlugin } from '@apollo/server';
-import { createHive } from './client.js';
+import { autoDisposeSymbol, createHive } from './client.js';
 import type {
   HiveClient,
   HivePluginOptions,
@@ -137,6 +137,7 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
     ? clientOrOptions
     : createHive({
         ...clientOrOptions,
+        autoDispose: clientOrOptions.autoDispose ?? true,
         agent: {
           name: 'hive-client-apollo',
           ...clientOrOptions.agent,
@@ -260,7 +261,7 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
 
       hive.reportSchema({ schema: ctx.schema });
 
-      if (isLegacyV0) {
+      if (isLegacyV0 && hive[autoDisposeSymbol]) {
         return {
           async serverWillStop() {
             await hive.dispose();
@@ -272,7 +273,9 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
 
       return Promise.resolve({
         async serverWillStop() {
-          await hive.dispose();
+          if (hive[autoDisposeSymbol]) {
+            await hive.dispose();
+          }
         },
         schemaDidLoadOrUpdate(schemaContext) {
           if (ctx.schema !== schemaContext.apiSchema) {

@@ -169,6 +169,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
 
   return {
     [hiveClientSymbol]: true,
+    [autoDisposeSymbol]: options.autoDispose,
     info,
     reportSchema,
     collectUsage,
@@ -177,6 +178,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
 }
 
 export const hiveClientSymbol: unique symbol = Symbol('hive-client');
+export const autoDisposeSymbol: unique symbol = Symbol('hive-auto-dispose');
 
 function createPrinter(values: string[]) {
   const maxLen = Math.max(...values.map(v => v.length)) + 4;
