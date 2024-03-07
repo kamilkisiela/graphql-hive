@@ -196,7 +196,7 @@ export type HivePluginOptions = OptionalWhenFalse<
      * Apollo: Enabled by default
      * Yoga / Envelop: Enabled by default for SIGINT and SIGTERM signals
      */
-    autoDispose: boolean | NodeJS.Signals[];
+    autoDispose?: boolean | NodeJS.Signals[];
   },
   'enabled',
   'token'
