@@ -260,10 +260,12 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
 
       hive.reportSchema({ schema: ctx.schema });
 
-      if (isLegacyV0 && hive[autoDisposeSymbol]) {
+      if (isLegacyV0) {
         return {
           async serverWillStop() {
-            await hive.dispose();
+            if (hive[autoDisposeSymbol]) {
+              await hive.dispose();
+            }
           },
         } as any;
       }
