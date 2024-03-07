@@ -88,7 +88,7 @@ function resolveResolution(resolution: number) {
   return Math.max(minimumResolution, Math.min(resolution, maximumResolution));
 }
 
-const msMinute = 60 * 1_000;
+const msMinute = 60 * 1000;
 const msHour = msMinute * 60;
 const msDay = msHour * 24;
 
