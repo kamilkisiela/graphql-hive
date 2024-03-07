@@ -137,7 +137,6 @@ export function hiveApollo(clientOrOptions: HiveClient | HivePluginOptions): Apo
     ? clientOrOptions
     : createHive({
         ...clientOrOptions,
-        autoDispose: clientOrOptions.autoDispose ?? true,
         agent: {
           name: 'hive-client-apollo',
           ...clientOrOptions.agent,

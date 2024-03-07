@@ -19,7 +19,6 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
     ? clientOrOptions
     : createHive({
         ...clientOrOptions,
-        autoDispose: clientOrOptions.autoDispose ?? global.process != null,
         agent: {
           name: 'hive-client-yoga',
           ...clientOrOptions.agent,
@@ -31,7 +30,8 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
   if (hive[autoDisposeSymbol]) {
     if (!global.process) {
       throw TypeError(
-        'Hive client Automatic disposal feature is not available: process is undefined',
+        'It seems that GraphQL Hive is not being executed in Node.js. ' +
+          'Please attempt manual client disposal and use autoDispose: false option.',
       );
     }
     const signals = Array.isArray(hive[autoDisposeSymbol])

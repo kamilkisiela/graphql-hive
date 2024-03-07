@@ -169,7 +169,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
 
   return {
     [hiveClientSymbol]: true,
-    [autoDisposeSymbol]: options.autoDispose,
+    [autoDisposeSymbol]: options.autoDispose ?? true,
     info,
     reportSchema,
     collectUsage,

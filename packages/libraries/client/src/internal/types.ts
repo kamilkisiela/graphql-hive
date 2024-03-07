@@ -194,7 +194,7 @@ export type HivePluginOptions = OptionalWhenFalse<
      * Automatically dispose the client when the process is terminated
      *
      * Apollo: Enabled by default
-     * Yoga / Envelop: Enabled by default if `process` exists for SIGINT and SIGTERM signals
+     * Yoga / Envelop: Enabled by default for SIGINT and SIGTERM signals
      */
     autoDispose: boolean | NodeJS.Signals[];
   },
