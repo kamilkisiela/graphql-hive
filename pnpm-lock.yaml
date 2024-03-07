@@ -590,8 +590,8 @@ importers:
         specifier: 0.1.0
         version: 0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)
       '@theguild/federation-composition':
-        specifier: 0.9.0
-        version: 0.9.0(graphql@16.8.1)
+        specifier: 0.10.0
+        version: 0.10.0(graphql@16.8.1)
       '@trpc/client':
         specifier: 10.45.1
         version: 10.45.1(@trpc/server@10.45.1)
@@ -944,8 +944,8 @@ importers:
         specifier: 7.105.0
         version: 7.105.0
       '@theguild/federation-composition':
-        specifier: 0.9.0
-        version: 0.9.0(graphql@16.8.1)
+        specifier: 0.10.0
+        version: 0.10.0(graphql@16.8.1)
       '@trpc/server':
         specifier: 10.45.1
         version: 10.45.1
@@ -13406,16 +13406,19 @@ packages:
       - supports-color
     dev: true
 
-  /@theguild/federation-composition@0.9.0(graphql@16.8.1):
-    resolution: {integrity: sha512-1QXdMTJPVAJQn7u00b2uK8563SCZ+Lsai9fkFNSlsgrj4BTMkntG1TouxPZGoBZXyoUhSc/kL+YTYybEI5a6pQ==}
+  /@theguild/federation-composition@0.10.0(graphql@16.8.1):
+    resolution: {integrity: sha512-ZW4AMD6JnlxPkRnZ4dsY3DXDadVLdp0NAZlk+uPZ2k03CqGaWMwguT2fNE7Sd4nd06hM73yOtDKAqHsird/2Uw==}
     engines: {node: '>=18'}
     peerDependencies:
       graphql: ^16.0.0
     dependencies:
       constant-case: 3.0.4
+      debug: 4.3.4(supports-color@8.1.1)
       graphql: 16.8.1
       json5: 2.2.3
       lodash.sortby: 4.7.0
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /@theguild/prettier-config@2.0.5(prettier@3.2.5):
