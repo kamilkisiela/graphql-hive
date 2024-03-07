@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
+import { formatISO, startOfHour, startOfMinute, subHours, subSeconds } from 'date-fns';
 import { availablePresets, buildDateRangeString, Preset } from '@/components/ui/date-range-picker';
 import { parse, resolveRange } from '@/lib/date-math';
 import { subDays } from '@/lib/date-time';
@@ -43,43 +44,21 @@ export function useDateRangeController(args: {
   }, [fromRaw, toRaw]);
 
   const [triggerRefreshCounter, setTriggerRefreshCounter] = useState(0);
-  const [resolvedRange] = useResetState(
-    () => resolveRange(selectedPreset.range),
-    [selectedPreset.range, triggerRefreshCounter],
-  );
+  const [resolved] = useResetState(() => {
+    const parsed = resolveRange(selectedPreset.range);
+    const resolved = resolveRangeAndResolution({
+      from: new Date(parsed.from),
+      to: new Date(parsed.to),
+    });
 
-  const resolution = useMemo(() => {
-    const timeDifference =
-      new Date(resolvedRange.to).getTime() - new Date(resolvedRange.from).getTime();
-
-    const timeDifferenceInHours = timeDifference / 1000 / 60 / 60;
-    const timeDifferenceInDays = timeDifference / 1000 / 60 / 60 / 24;
-
-    if (timeDifferenceInDays > 90) {
-      return 90;
-    }
-
-    if (timeDifferenceInDays === 1) {
-      return 24;
-    }
-
-    if (timeDifferenceInDays > 1) {
-      const diff = Math.floor(timeDifferenceInDays);
-      let size = diff;
-      while (size < 20) {
-        size = size + diff;
-      }
-
-      return size;
-    }
-
-    let size = timeDifferenceInHours;
-    while (size < 20) {
-      size = size + timeDifferenceInHours;
-    }
-
-    return size;
-  }, [resolvedRange]);
+    return {
+      resolution: resolved.resolution,
+      range: {
+        from: formatISO(resolved.range.from),
+        to: formatISO(resolved.range.to),
+      },
+    };
+  }, [selectedPreset.range, triggerRefreshCounter]);
 
   return {
     startDate,
@@ -94,10 +73,112 @@ export function useDateRangeController(args: {
         },
       );
     },
-    resolvedRange,
+    resolvedRange: resolved.range,
     refreshResolvedRange() {
       setTriggerRefreshCounter(c => c + 1);
     },
-    resolution,
+    resolution: resolved.resolution,
   } as const;
+}
+
+const maximumResolution = 90;
+const minimumResolution = 1;
+
+function resolveResolution(resolution: number) {
+  return Math.max(minimumResolution, Math.min(resolution, maximumResolution));
+}
+
+const msMinute = 60 * 1_000;
+const msHour = msMinute * 60;
+const msDay = msHour * 24;
+
+const thresholdDataPointPerDay = 28;
+const thresholdDataPointPerHour = 24;
+
+const tableTTLInHours = {
+  daily: 365 * 24,
+  hourly: 30 * 24,
+  minutely: 24,
+};
+
+/** Get the UTC start date of a day */
+function getUTCStartOfDay(date: Date) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+}
+
+function resolveRangeAndResolution(range: { from: Date; to: Date }) {
+  const now = new Date();
+  const tableOldestDateTimePoint = {
+    /** Because ClickHouse uses UTC and we aggregate to UTC start fo day, we need to get the UTC day here */
+    daily: getUTCStartOfDay(subHours(now, tableTTLInHours.daily)),
+    hourly: startOfHour(subHours(now, tableTTLInHours.hourly)),
+    minutely: startOfMinute(subHours(now, tableTTLInHours.minutely)),
+  };
+
+  const daysDifference = (range.to.getTime() - range.from.getTime()) / msDay;
+
+  if (
+    daysDifference > thresholdDataPointPerDay ||
+    /** if we are outside this range, we always need to get daily data */
+    range.to.getTime() <= tableOldestDateTimePoint.daily.getTime() ||
+    range.from.getTime() <= tableOldestDateTimePoint.daily.getTime()
+  ) {
+    const resolvedRange = {
+      from: getUTCStartOfDay(range.from),
+      to: subSeconds(getUTCStartOfDay(range.to), 1),
+    };
+    const daysDifference = Math.round(
+      (resolvedRange.to.getTime() - resolvedRange.from.getTime()) / msDay,
+    );
+
+    // try to have at least 1 data points per day, unless the range has more than 90 days.
+    return {
+      resolution: resolveResolution(daysDifference),
+      range: resolvedRange,
+    };
+  }
+
+  const hoursDifference = (range.to.getTime() - range.from.getTime()) / msHour;
+
+  if (
+    hoursDifference > thresholdDataPointPerHour ||
+    /** if we are outside this range, we always need to get hourly data */
+    range.to.getTime() <= tableOldestDateTimePoint.hourly.getTime() ||
+    range.from.getTime() <= tableOldestDateTimePoint.hourly.getTime()
+  ) {
+    const resolvedRange = {
+      from: startOfHour(range.from),
+      to: subSeconds(startOfHour(range.to), 1),
+    };
+    const hoursDifference = Math.round(
+      (resolvedRange.to.getTime() - resolvedRange.from.getTime()) / msHour,
+    );
+
+    // try to have at least 1 data points per hour, unless the range has more than 90 hours.
+    return {
+      resolution: resolveResolution(hoursDifference),
+      range: resolvedRange,
+    };
+  }
+
+  if (
+    range.to.getTime() <= tableOldestDateTimePoint.minutely.getTime() ||
+    range.from.getTime() <= tableOldestDateTimePoint.minutely.getTime()
+  ) {
+    throw new Error('This range can never be resolved.');
+  }
+
+  const resolvedRange = {
+    from: startOfMinute(range.from),
+    to: subSeconds(startOfMinute(range.to), 1),
+  };
+
+  const minutesDifference = Math.round(
+    (resolvedRange.to.getTime() - resolvedRange.from.getTime()) / msMinute,
+  );
+
+  return {
+    resolution: resolveResolution(minutesDifference),
+    range: resolvedRange,
+  };
 }
