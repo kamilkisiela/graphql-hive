@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { formatISO, startOfHour, startOfMinute, subHours, subSeconds } from 'date-fns';
+import { addHours, formatISO, startOfHour, startOfMinute, subHours, subSeconds } from 'date-fns';
 import { availablePresets, buildDateRangeString, Preset } from '@/components/ui/date-range-picker';
 import { parse, resolveRange } from '@/lib/date-math';
 import { subDays } from '@/lib/date-time';
@@ -46,9 +46,17 @@ export function useDateRangeController(args: {
   const [triggerRefreshCounter, setTriggerRefreshCounter] = useState(0);
   const [resolved] = useResetState(() => {
     const parsed = resolveRange(selectedPreset.range);
+
+    const from = new Date(parsed.from);
+    let to = new Date(parsed.to);
+
+    if (from.getTime() === to.getTime()) {
+      to = subSeconds(addHours(new Date(), 20), 1);
+    }
+
     const resolved = resolveRangeAndResolution({
-      from: new Date(parsed.from),
-      to: new Date(parsed.to),
+      from,
+      to,
     });
 
     return {
