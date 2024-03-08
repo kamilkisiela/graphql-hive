@@ -550,6 +550,7 @@ export function initSeed() {
                        * @deprecated
                        */
                       github?: boolean | null;
+                      signal?: AbortSignal;
                     }) {
                       return await publishSchema(
                         {
@@ -566,6 +567,7 @@ export function initSeed() {
                         },
                         secret,
                         options.headerName || 'authorization',
+                        options.signal,
                       );
                     },
                     async deleteSchema(serviceName: string) {
