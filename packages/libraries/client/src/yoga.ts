@@ -1,4 +1,11 @@
-import { DocumentNode, ExecutionArgs, GraphQLSchema, Kind, parse } from 'graphql';
+import {
+  DocumentNode,
+  ExecutionArgs,
+  GraphQLSchema,
+  Kind,
+  parse,
+  type GraphQLError,
+} from 'graphql';
 import type { GraphQLParams, Plugin } from 'graphql-yoga';
 import LRU from 'tiny-lru';
 import { autoDisposeSymbol, createHive } from './client.js';
@@ -10,6 +17,7 @@ type CacheRecord = {
   paramsArgs: GraphQLParams;
   executionArgs?: ExecutionArgs;
   parsedDocument?: DocumentNode;
+  isSubscription: boolean;
 };
 
 export function useHive(clientOrOptions: HiveClient): Plugin;
@@ -57,6 +65,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
         cache.set(context.request, {
           callback: hive.collectUsage(),
           paramsArgs: context.params,
+          isSubscription: false,
         });
       }
     },
@@ -82,9 +91,57 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
         },
       };
     },
+    onSubscribe(context) {
+      const record = cache.get(context.args.contextValue.request);
+
+      if (record) {
+        record.isSubscription = true;
+        const errors: GraphQLError[] = [];
+
+        return {
+          onSubscribeResult() {
+            return {
+              onNext(data) {
+                if (data.result.errors) {
+                  errors.push(...data.result.errors);
+                }
+              },
+              // TODO: maybe it makes sense to invoke the callback within onResultProcess instead...
+              onEnd() {
+                record.callback(context.args, { errors });
+              },
+            };
+          },
+        };
+      }
+
+      // If the record is not found, it means the subscription was not tracked by onParams
+      // and the request is probably done by graphql-sse or graphql-ws
+      // in that case, we will now wrap the subscribe function and track the usage
+
+      // TODO: we do not include parse and validation time within the usage report, as we create the record here
+      const callback = hive.collectUsage();
+      const errors: GraphQLError[] = [];
+
+      return {
+        onSubscribeResult() {
+          return {
+            onNext(data) {
+              if (data.result.errors) {
+                errors.push(...data.result.errors);
+              }
+            },
+            onEnd() {
+              callback(context.args, { errors });
+            },
+          };
+        },
+      };
+    },
     onResultProcess(context) {
       const record = cache.get(context.request);
-      if (!record || Array.isArray(context.result)) {
+
+      if (!record || Array.isArray(context.result) || record.isSubscription) {
         return;
       }
 

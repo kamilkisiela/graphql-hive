@@ -455,12 +455,15 @@ importers:
       '@graphql-yoga/plugin-disable-introspection':
         specifier: 2.2.0
         version: 2.2.0(graphql-yoga@5.2.0)(graphql@16.8.1)
-      '@types/async-retry':
-        specifier: 1.4.8
-        version: 1.4.8
+      '@graphql-yoga/plugin-graphql-sse':
+        specifier: 3.1.1
+        version: 3.1.1(graphql-yoga@5.2.0)(graphql@16.8.1)
       graphql:
         specifier: 16.8.1
         version: 16.8.1
+      graphql-ws:
+        specifier: 5.15.0
+        version: 5.15.0(graphql@16.8.1)
       graphql-yoga:
         specifier: 5.2.0
         version: 5.2.0(graphql@16.8.1)
@@ -7544,6 +7547,18 @@ packages:
       graphql-yoga: ^5.2.0
     dependencies:
       graphql: 16.8.1
+      graphql-yoga: 5.2.0(graphql@16.8.1)
+    dev: true
+
+  /@graphql-yoga/plugin-graphql-sse@3.1.1(graphql-yoga@5.2.0)(graphql@16.8.1):
+    resolution: {integrity: sha512-cqjx6DU2eHh1xA+AHQ6mUAZyUwAN9RW39XP7xq2vjRMlwMVyaCPGbkIf0H6YHMzmvYpvxajIQYfscnx6iOKJAQ==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      graphql: ^15.2.0 || ^16.0.0
+      graphql-yoga: ^5.1.1
+    dependencies:
+      graphql: 16.8.1
+      graphql-sse: 2.5.2(graphql@16.8.1)
       graphql-yoga: 5.2.0(graphql@16.8.1)
     dev: true
 
@@ -20856,6 +20871,15 @@ packages:
       tslib: 2.6.2
     dev: true
 
+  /graphql-sse@2.5.2(graphql@16.8.1):
+    resolution: {integrity: sha512-KCTl7HpD12xQrbXGdLrc1BL0ybfB6M83lxRO1mqT31pvOY01ZuWgiJKTY8+NAX8sgEMPVrnXXOXh9LqYDgNI+g==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      graphql: '>=0.11 <=16'
+    dependencies:
+      graphql: 16.8.1
+    dev: true
+
   /graphql-tag@2.12.6(graphql@16.8.1):
     resolution: {integrity: sha512-FdSNcu2QQcWnM2VNvSCCDCVS5PpPqpzgFT8+GXzqJuoDd0CBncxCY278u4mhRO7tMgo2JjgJA5aZ+nWSQ/Z+xg==}
     engines: {node: '>=10'}
@@ -20880,6 +20904,15 @@ packages:
       graphql: '>=0.11 <=16'
     dependencies:
       graphql: 16.8.1
+
+  /graphql-ws@5.15.0(graphql@16.8.1):
+    resolution: {integrity: sha512-xWGAtm3fig9TIhSaNsg0FaDZ8Pyn/3re3RFlP4rhQcmjRDIPpk1EhRuNB+YSJtLzttyuToaDiNhwT1OMoGnJnw==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      graphql: '>=0.11 <=16'
+    dependencies:
+      graphql: 16.8.1
+    dev: true
 
   /graphql-yoga@4.0.3(graphql@16.8.1):
     resolution: {integrity: sha512-MP+v+yxCqM3lXg95vaA+kXjyRvyRxHUlgZryTecN7ugzEEnyQKKu8JBXA4ziEuLi3liRriyjCAyV4pqFzhHujA==}
