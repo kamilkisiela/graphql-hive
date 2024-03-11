@@ -436,7 +436,7 @@ it('does not report usage if context creating raises an error', async () => {
   });
 });
 
-describe('subscription reporting', () => {
+describe('subscription usage reporting', () => {
   describe('built-in see', () => {
     it('reports usage for successful subscription operation', async () => {
       const graphqlScope = nock('http://localhost')
@@ -569,7 +569,7 @@ describe('subscription reporting', () => {
       });
     });
 
-    it('reports usage for failed subscription operation', async () => {
+    it('reports usage for exception from subscription event stream', async () => {
       const graphqlScope = nock('http://localhost')
         .post('/graphql')
         .reply(200, {
@@ -850,7 +850,7 @@ describe('subscription reporting', () => {
       });
     });
 
-    it('reports usage for failed subscription operation', async () => {
+    it('reports usage for exception from subscription event stream', async () => {
       const graphqlScope = nock('http://localhost')
         .post('/graphql')
         .reply(200, {
@@ -1174,7 +1174,7 @@ describe('subscription reporting', () => {
         });
       });
     });
-    it('reports usage for failed subscription operation', async () => {
+    it('reports usage for exception from subscription event stream', async () => {
       const graphqlScope = nock('http://localhost')
         .post('/graphql')
         .reply(200, {
