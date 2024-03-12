@@ -1,6 +1,7 @@
 import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
+import { createTimeoutHTTPLink } from '@hive/service-common';
 import type { TokensApi } from '@hive/tokens';
-import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import { createTRPCProxyClient } from '@trpc/client';
 import type { Token } from '../../../shared/entities';
 import { HiveError } from '../../../shared/errors';
 import { atomic } from '../../../shared/helpers';
@@ -45,7 +46,7 @@ export class TokenStorage {
     this.logger = logger.child({ source: 'TokenStorage' });
     this.tokensService = createTRPCProxyClient<TokensApi>({
       links: [
-        httpLink({
+        createTimeoutHTTPLink({
           url: `${tokensConfig.endpoint}/trpc`,
           fetch,
           headers: {

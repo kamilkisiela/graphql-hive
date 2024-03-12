@@ -1,6 +1,7 @@
 import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
+import { createTimeoutHTTPLink } from '@hive/service-common';
 import type { WebhooksApi } from '@hive/webhooks';
-import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import { createTRPCProxyClient } from '@trpc/client';
 import { HttpClient } from '../../../shared/providers/http-client';
 import { Logger } from '../../../shared/providers/logger';
 import type { WebhooksConfig } from '../tokens';
@@ -23,7 +24,7 @@ export class WebhookCommunicationAdapter implements CommunicationAdapter {
     this.logger = logger.child({ service: 'WebhookCommunicationAdapter' });
     this.webhooksService = createTRPCProxyClient<WebhooksApi>({
       links: [
-        httpLink({
+        createTimeoutHTTPLink({
           url: `${config.endpoint}/trpc`,
           fetch,
           headers: {

@@ -1,5 +1,5 @@
 import { endOfMonth, startOfMonth } from 'date-fns';
-import type { ServiceLogger } from '@hive/service-common';
+import { createTimeoutHTTPLink, type ServiceLogger } from '@hive/service-common';
 import { createStorage as createPostgreSQLStorage } from '@hive/storage';
 import type { UsageEstimatorApi } from '@hive/usage-estimator';
 import * as Sentry from '@sentry/node';
@@ -63,7 +63,7 @@ export function createRateLimiter(config: {
 }) {
   const rateEstimator = createTRPCProxyClient<UsageEstimatorApi>({
     links: [
-      httpLink({
+      createTimeoutHTTPLink({
         url: `${config.rateEstimator.endpoint}/trpc`,
         fetch,
       }),

@@ -1,6 +1,7 @@
 import { Inject, Injectable, InjectionToken, Optional } from 'graphql-modules';
 import type { EmailsApi } from '@hive/emails';
-import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import { createTimeoutHTTPLink } from '@hive/service-common';
+import { createTRPCProxyClient } from '@trpc/client';
 
 export const EMAILS_ENDPOINT = new InjectionToken<string>('EMAILS_ENDPOINT');
 
@@ -12,7 +13,7 @@ export class Emails {
     this.api = endpoint
       ? createTRPCProxyClient<EmailsApi>({
           links: [
-            httpLink({
+            createTimeoutHTTPLink({
               url: `${endpoint}/trpc`,
               fetch,
             }),

@@ -19,6 +19,7 @@
     "@hive/cdn-script": "workspace:*",
     "@hive/emails": "workspace:*",
     "@hive/schema": "workspace:*",
+    "@hive/service-common": "workspace:*",
     "@hive/storage": "workspace:*",
     "@hive/tokens": "workspace:*",
     "@hive/webhooks": "workspace:*",

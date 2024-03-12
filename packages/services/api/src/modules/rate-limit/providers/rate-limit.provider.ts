@@ -1,7 +1,8 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import LRU from 'lru-cache';
 import type { RateLimitApi, RateLimitApiInput } from '@hive/rate-limit';
-import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import { createTimeoutHTTPLink } from '@hive/service-common';
+import { createTRPCProxyClient } from '@trpc/client';
 import { sentry } from '../../../shared/sentry';
 import { Logger } from '../../shared/providers/logger';
 import type { RateLimitServiceConfig } from './tokens';
@@ -31,7 +32,7 @@ export class RateLimitProvider {
     this.rateLimit = rateLimitServiceConfig.endpoint
       ? createTRPCProxyClient<RateLimitApi>({
           links: [
-            httpLink({
+            createTimeoutHTTPLink({
               url: `${rateLimitServiceConfig.endpoint}/trpc`,
               fetch,
             }),

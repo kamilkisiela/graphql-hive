@@ -1,12 +1,13 @@
 import type { EmailsApi } from '@hive/emails';
-import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import { createTimeoutHTTPLink } from '@hive/service-common';
+import { createTRPCProxyClient } from '@trpc/client';
 import { env } from './environment';
 
 export function createEmailScheduler(config?: { endpoint: string }) {
   const api = config?.endpoint
     ? createTRPCProxyClient<EmailsApi>({
         links: [
-          httpLink({
+          createTimeoutHTTPLink({
             url: `${config.endpoint}/trpc`,
             fetch,
           }),
