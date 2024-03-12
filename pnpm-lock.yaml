@@ -1647,8 +1647,8 @@ importers:
         specifier: 10.0.4
         version: 10.0.4(react-dom@18.2.0)(react@18.2.0)
       react-virtualized-auto-sizer:
-        specifier: 1.0.23
-        version: 1.0.23(react-dom@18.2.0)(react@18.2.0)
+        specifier: 1.0.24
+        version: 1.0.24(react-dom@18.2.0)(react@18.2.0)
       react-window:
         specifier: 1.8.10
         version: 1.8.10(react-dom@18.2.0)(react@18.2.0)
@@ -28454,8 +28454,8 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /react-virtualized-auto-sizer@1.0.23(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-5id3UTx+fG7b7SIOKL9/7aR1vP8+MtIT84cJCf09F6pYalB/nvHlx5EQvsSk27SwHUKjgPamG/nS8ynI0uSfKA==}
+  /react-virtualized-auto-sizer@1.0.24(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-3kCn7N9NEb3FlvJrSHWGQ4iVl+ydQObq2fHMn12i5wbtm74zHOPhz/i64OL3c1S1vi9i2GXtZqNqUJTQ+BnNfg==}
     peerDependencies:
       react: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0
       react-dom: ^15.3.0 || ^16.0.0-alpha || ^17.0.0 || ^18.0.0
