@@ -24,7 +24,7 @@
     "@types/dockerode": "3.3.26",
     "@types/ioredis": "4.28.10",
     "bcryptjs": "2.4.3",
-    "date-fns": "3.3.1",
+    "date-fns": "3.4.0",
     "dockerode": "4.0.1",
     "dotenv": "16.4.5",
     "graphql": "16.8.1",
