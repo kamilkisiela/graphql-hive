@@ -11,7 +11,7 @@ export class PostgresConnectionSecret extends ServiceSecret<{
   ssl: '0' | '1' | pulumi.Output<'0' | '1'>;
   connectionString: pulumi.Output<string>;
   connectionStringPostgresql: pulumi.Output<string>;
-}> {}
+}> { }
 
 export function deployPostgres() {
   const postgresConfig = new pulumi.Config('postgres');
@@ -33,7 +33,7 @@ export function deployPostgres() {
     ssl: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
   });
 
-  const pgBouncerSecret = new PostgresConnectionSecret('postgres', {
+  const pgBouncerSecret = new PostgresConnectionSecret('postgres-bouncer', {
     connectionString: rawConnectionString,
     connectionStringPostgresql: rawConnectionString.apply(str =>
       str.replace('postgres://', 'postgresql://'),
