@@ -273,11 +273,11 @@ importers:
         specifier: workspace:*
         version: link:../packages/services/storage
       '@trpc/client':
-        specifier: 10.45.1
-        version: 10.45.1(@trpc/server@10.45.1)
+        specifier: 10.45.2
+        version: 10.45.2(@trpc/server@10.45.2)
       '@trpc/server':
-        specifier: 10.45.1
-        version: 10.45.1
+        specifier: 10.45.2
+        version: 10.45.2
       '@types/dockerode':
         specifier: 3.3.26
         version: 3.3.26
@@ -593,11 +593,11 @@ importers:
         specifier: 0.10.0
         version: 0.10.0(graphql@16.8.1)
       '@trpc/client':
-        specifier: 10.45.1
-        version: 10.45.1(@trpc/server@10.45.1)
+        specifier: 10.45.2
+        version: 10.45.2(@trpc/server@10.45.2)
       '@trpc/server':
-        specifier: 10.45.1
-        version: 10.45.1
+        specifier: 10.45.2
+        version: 10.45.2
       '@types/bcryptjs':
         specifier: 2.4.6
         version: 2.4.6
@@ -770,8 +770,8 @@ importers:
         specifier: 7.106.1
         version: 7.106.1
       '@trpc/server':
-        specifier: 10.45.1
-        version: 10.45.1
+        specifier: 10.45.2
+        version: 10.45.2
       '@types/mjml':
         specifier: 4.7.1
         version: 4.7.1
@@ -854,8 +854,8 @@ importers:
         specifier: 7.106.1
         version: 7.106.1
       '@trpc/server':
-        specifier: 10.45.1
-        version: 10.45.1
+        specifier: 10.45.2
+        version: 10.45.2
       ajv:
         specifier: 8.12.0
         version: 8.12.0
@@ -896,11 +896,11 @@ importers:
         specifier: 7.106.1
         version: 7.106.1
       '@trpc/client':
-        specifier: 10.45.1
-        version: 10.45.1(@trpc/server@10.45.1)
+        specifier: 10.45.2
+        version: 10.45.2(@trpc/server@10.45.2)
       '@trpc/server':
-        specifier: 10.45.1
-        version: 10.45.1
+        specifier: 10.45.2
+        version: 10.45.2
       date-fns:
         specifier: 3.4.0
         version: 3.4.0
@@ -947,8 +947,8 @@ importers:
         specifier: 0.10.0
         version: 0.10.0(graphql@16.8.1)
       '@trpc/server':
-        specifier: 10.45.1
-        version: 10.45.1
+        specifier: 10.45.2
+        version: 10.45.2
       '@types/async-retry':
         specifier: 1.4.8
         version: 1.4.8
@@ -1049,8 +1049,8 @@ importers:
         specifier: 1.4.6
         version: 1.4.6
       '@trpc/server':
-        specifier: 10.45.1
-        version: 10.45.1
+        specifier: 10.45.2
+        version: 10.45.2
       '@whatwg-node/server':
         specifier: 0.9.28
         version: 0.9.28
@@ -1091,8 +1091,8 @@ importers:
   packages/services/service-common:
     dependencies:
       '@trpc/server':
-        specifier: 10.45.1
-        version: 10.45.1
+        specifier: 10.45.2
+        version: 10.45.2
     devDependencies:
       '@fastify/cors':
         specifier: 9.0.1
@@ -1191,11 +1191,11 @@ importers:
         specifier: 7.106.1
         version: 7.106.1
       '@trpc/client':
-        specifier: 10.45.1
-        version: 10.45.1(@trpc/server@10.45.1)
+        specifier: 10.45.2
+        version: 10.45.2(@trpc/server@10.45.2)
       '@trpc/server':
-        specifier: 10.45.1
-        version: 10.45.1
+        specifier: 10.45.2
+        version: 10.45.2
       date-fns:
         specifier: 3.4.0
         version: 3.4.0
@@ -1230,8 +1230,8 @@ importers:
         specifier: 7.106.1
         version: 7.106.1
       '@trpc/server':
-        specifier: 10.45.1
-        version: 10.45.1
+        specifier: 10.45.2
+        version: 10.45.2
       '@types/ms':
         specifier: 0.7.34
         version: 0.7.34
@@ -1281,11 +1281,11 @@ importers:
         specifier: 7.106.1
         version: 7.106.1
       '@trpc/client':
-        specifier: 10.45.1
-        version: 10.45.1(@trpc/server@10.45.1)
+        specifier: 10.45.2
+        version: 10.45.2(@trpc/server@10.45.2)
       '@trpc/server':
-        specifier: 10.45.1
-        version: 10.45.1
+        specifier: 10.45.2
+        version: 10.45.2
       ajv:
         specifier: 8.12.0
         version: 8.12.0
@@ -1329,8 +1329,8 @@ importers:
         specifier: 7.106.1
         version: 7.106.1
       '@trpc/server':
-        specifier: 10.45.1
-        version: 10.45.1
+        specifier: 10.45.2
+        version: 10.45.2
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
@@ -1404,8 +1404,8 @@ importers:
         specifier: 7.106.1
         version: 7.106.1
       '@trpc/server':
-        specifier: 10.45.1
-        version: 10.45.1
+        specifier: 10.45.2
+        version: 10.45.2
       bullmq:
         specifier: 5.4.1
         version: 5.4.1(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
@@ -1539,11 +1539,11 @@ importers:
         specifier: 1.2.5
         version: 1.2.5(patch_hash=pz2nlsfawfhpo6sw62ecmp2yum)(@monaco-editor/react@4.6.0)(@types/node@20.11.26)(graphql@16.8.1)(monaco-editor@0.47.0)(react-dom@18.2.0)(react@18.2.0)
       '@trpc/client':
-        specifier: 10.45.1
-        version: 10.45.1(@trpc/server@10.45.1)
+        specifier: 10.45.2
+        version: 10.45.2(@trpc/server@10.45.2)
       '@trpc/server':
-        specifier: 10.45.1
-        version: 10.45.1
+        specifier: 10.45.2
+        version: 10.45.2
       '@urql/core':
         specifier: 4.1.4
         version: 4.1.4(graphql@16.8.1)
@@ -13241,15 +13241,15 @@ packages:
     engines: {node: '>= 10'}
     dev: true
 
-  /@trpc/client@10.45.1(@trpc/server@10.45.1):
-    resolution: {integrity: sha512-nVbAk1xpIiI64WgzXGgfxPOGgHoYvffn1IsjV1D/Ri7DL4BKuo2qtZ7UQ+OuHkzH2M8j4ikSVBDpk545fOdvpw==}
+  /@trpc/client@10.45.2(@trpc/server@10.45.2):
+    resolution: {integrity: sha512-ykALM5kYWTLn1zYuUOZ2cPWlVfrXhc18HzBDyRhoPYN0jey4iQHEFSEowfnhg1RvYnrAVjNBgHNeSAXjrDbGwg==}
     peerDependencies:
-      '@trpc/server': 10.45.1
+      '@trpc/server': 10.45.2
     dependencies:
-      '@trpc/server': 10.45.1
+      '@trpc/server': 10.45.2
 
-  /@trpc/server@10.45.1:
-    resolution: {integrity: sha512-KOzBEVaHW9IxEedUP9E50y0tYxAuvlzyjn80Bpemw4rcNbT4WtJnhkFPUY+qDJl7Crt3B/oY2qMgSxVWi9toLg==}
+  /@trpc/server@10.45.2:
+    resolution: {integrity: sha512-wOrSThNNE4HUnuhJG6PfDRp4L2009KDVxsd+2VYH8ro6o/7/jwYZ8Uu5j+VaW+mOmc8EHerHzGcdbGNQSAUPgg==}
 
   /@trysound/sax@0.2.0:
     resolution: {integrity: sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==}
