@@ -16,7 +16,7 @@ export class PostgresConnectionSecret extends ServiceSecret<{
 /**
  * https://chat.openai.com/share/0892e60c-8413-4e66-9abe-e5d22aa7e7ae
  */
-const regex = /(postgres(?:ql)?:\/\/[^:\/\s]+)(:\d+)?(\/[^?]*\??[^#]*)/;
+const regex = /(postgres(?:ql)?:\/\/[^@]+@[^:\/\s]+)(:\d+)?(\/[^?]*\??[^#]*)/;
 
 export function deployPostgres() {
   const postgresConfig = new pulumi.Config('postgres');
