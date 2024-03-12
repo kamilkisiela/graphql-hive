@@ -65,7 +65,7 @@
     "graphiql": "3.0.0-alpha.0",
     "graphql": "16.8.1",
     "hyperid": "3.2.0",
-    "immer": "10.0.3",
+    "immer": "10.0.4",
     "js-cookie": "3.0.5",
     "json-schema-typed": "8.0.1",
     "json-schema-yup-transformer": "1.6.12",
