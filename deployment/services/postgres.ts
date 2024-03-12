@@ -33,7 +33,20 @@ export function deployPostgres() {
     ssl: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
   });
 
-  return { secret };
+  const pgBouncerSecret = new PostgresConnectionSecret('postgres', {
+    connectionString: rawConnectionString,
+    connectionStringPostgresql: rawConnectionString.apply(str =>
+      str.replace('postgres://', 'postgresql://'),
+    ),
+    host: connectionString.apply(connection => connection.host ?? ''),
+    port: connectionString.apply(connection => connection.port || '6432'),
+    user: connectionString.apply(connection => connection.user ?? ''),
+    password: connectionString.apply(connection => connection.password ?? ''),
+    database: connectionString.apply(connection => connection.database ?? ''),
+    ssl: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
+  });
+
+  return { secret, pgBouncerSecret };
 }
 
 export type Postgres = ReturnType<typeof deployPostgres>;
