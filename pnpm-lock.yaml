@@ -210,10 +210,10 @@ importers:
         version: 4.9.0
       '@pulumi/kubernetesx':
         specifier: 0.1.6
-        version: 0.1.6(@pulumi/kubernetes@4.9.0)(@pulumi/pulumi@3.108.1)
+        version: 0.1.6(@pulumi/kubernetes@4.9.0)(@pulumi/pulumi@3.109.0)
       '@pulumi/pulumi':
-        specifier: 3.108.1
-        version: 3.108.1
+        specifier: 3.109.0
+        version: 3.109.0
       '@pulumi/random':
         specifier: 4.16.0
         version: 4.16.0
@@ -7946,7 +7946,7 @@ packages:
     resolution: {integrity: sha512-REc/LQOy17O9jbZnBNm4tLjLJKxOfLaWPIB2CFiAtM1VzwU3FzZQFs0K+XGkuZwWdB+tl2/VHdHv+FqsUrit2w==}
     requiresBuild: true
     dependencies:
-      '@pulumi/pulumi': 3.108.1
+      '@pulumi/pulumi': 3.109.0
     transitivePeerDependencies:
       - bluebird
       - supports-color
@@ -9517,7 +9517,7 @@ packages:
     resolution: {integrity: sha512-cwdB70bLeKL/VNIqqOD5fpHQcocVmpHuiHH589eR+QUfbLa4f+M8yA/TTCcxx2AFFctTqO5wgVuC+faL8xZmWQ==}
     requiresBuild: true
     dependencies:
-      '@pulumi/pulumi': 3.108.1
+      '@pulumi/pulumi': 3.109.0
     transitivePeerDependencies:
       - bluebird
       - supports-color
@@ -9527,7 +9527,7 @@ packages:
     resolution: {integrity: sha512-aTnHWXnBkBhsVqRg/QktfaOxFICYnkHAQiH+JcwhNWcqJu+JK0paSH88RsDeduQZHv9drCyAg2QnHPQ2q6vjzg==}
     requiresBuild: true
     dependencies:
-      '@pulumi/pulumi': 3.108.1
+      '@pulumi/pulumi': 3.109.0
       '@types/node-fetch': 2.6.4
       '@types/tmp': 0.0.33
       glob: 10.3.10
@@ -9540,18 +9540,18 @@ packages:
       - supports-color
     dev: false
 
-  /@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.9.0)(@pulumi/pulumi@3.108.1):
+  /@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.9.0)(@pulumi/pulumi@3.109.0):
     resolution: {integrity: sha512-9VL4Yi4b4aLC/obBarJuNkm86kABByUZICYPSTdV396MGZtOc066o2brsB+kWVQcVfkYVXTPrpjIkAwBXXnzGw==}
     peerDependencies:
       '@pulumi/kubernetes': ^3.0.0
       '@pulumi/pulumi': ^3.0.0
     dependencies:
       '@pulumi/kubernetes': 4.9.0
-      '@pulumi/pulumi': 3.108.1
+      '@pulumi/pulumi': 3.109.0
     dev: false
 
-  /@pulumi/pulumi@3.108.1:
-    resolution: {integrity: sha512-CJeYoleoRZ+uDN38xJ9GaRSzU3BIpgJrRdBRBXUEjKF3OYJedfFEp8PvmPvbFc7/IYo91Gc2P5wcDWRvRSdZJw==}
+  /@pulumi/pulumi@3.109.0:
+    resolution: {integrity: sha512-occSKeffShJJXO0dNwwGRf3MAX9pFhBIK/2vmsOLgQr/12lG9y2d8hyW8FZ3i4mhOSKiyamDnH+1+vPJ2Hk+yQ==}
     engines: {node: '>=8.13.0 || >=10.10.0'}
     dependencies:
       '@grpc/grpc-js': 1.10.1
@@ -9597,7 +9597,7 @@ packages:
   /@pulumi/random@4.16.0:
     resolution: {integrity: sha512-cHwlhy/+xTWCt7gwlJoG0q1l234YLxWtSWI61MzekWSsthbtcYruXo2bUlgcXWX5V4/lHjvQG84l5n1aTNZJoA==}
     dependencies:
-      '@pulumi/pulumi': 3.108.1
+      '@pulumi/pulumi': 3.109.0
     transitivePeerDependencies:
       - bluebird
       - supports-color
@@ -16071,7 +16071,7 @@ packages:
       minipass-pipeline: 1.2.4
       p-map: 4.0.0
       promise-inflight: 1.0.1(bluebird@3.7.2)
-      ssri: 10.0.1
+      ssri: 10.0.5
       tar: 6.1.13
       unique-filename: 3.0.0
     transitivePeerDependencies:
@@ -26253,19 +26253,11 @@ packages:
       semver: 7.5.4
     dev: true
 
-  /npm-install-checks@6.1.1:
-    resolution: {integrity: sha512-dH3GmQL4vsPtld59cOn8uY0iOqRmqKvV+DLGwNXV/Q7MDgD2QfOADWd/mFXcIE5LVhYYGjA3baz6W9JneqnuCw==}
-    engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
-    dependencies:
-      semver: 7.5.4
-    dev: true
-
   /npm-install-checks@6.3.0:
     resolution: {integrity: sha512-W29RiK/xtpCGqn6f3ixfRYGk+zRyr+Ew9F2E20BfXxT5/euLdA/Nm7fO7OeTGuAmTs30cpgInyJ0cYe708YTZw==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dependencies:
       semver: 7.5.4
-    dev: false
 
   /npm-normalize-package-bin@1.0.1:
     resolution: {integrity: sha512-EPfafl6JL5/rU+ot6P3gRSCpPDW5VmIzX959Ob1+ySFUuuYHWHekXpwdUZcKP5C+DS4GEtdJluwBjnsNDl+fSA==}
@@ -26347,7 +26339,7 @@ packages:
     resolution: {integrity: sha512-mRtvlBjTsJvfCCdmPtiu2bdlx8d/KXtF7yNXNWe7G0Z36qWA9Ny5zXsI2PfBZEv7SXgoxTmNaTzGSbbzDZChoA==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dependencies:
-      npm-install-checks: 6.1.1
+      npm-install-checks: 6.3.0
       npm-normalize-package-bin: 3.0.1
       npm-package-arg: 10.1.0
       semver: 7.5.4
@@ -26914,7 +26906,7 @@ packages:
       read-package-json: 6.0.3
       read-package-json-fast: 3.0.2
       sigstore: 1.5.2
-      ssri: 10.0.1
+      ssri: 10.0.5
       tar: 6.1.13
     transitivePeerDependencies:
       - bluebird
@@ -30533,7 +30525,6 @@ packages:
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dependencies:
       minipass: 7.0.4
-    dev: false
 
   /ssri@6.0.2:
     resolution: {integrity: sha512-cepbSq/neFK7xB6A50KHN0xHDotYzq58wWCa5LeWqnPrHG8GzfEjO/4O8kpmcGW+oaxkvhEJCWgbgNk4/ZV93Q==}
