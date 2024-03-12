@@ -39,7 +39,7 @@ export function deployPostgres() {
       str.replace('postgres://', 'postgresql://'),
     ),
     host: connectionString.apply(connection => connection.host ?? ''),
-    port: connectionString.apply(connection => connection.port || '6432'),
+    port: '6432',
     user: connectionString.apply(connection => connection.user ?? ''),
     password: connectionString.apply(connection => connection.password ?? ''),
     database: connectionString.apply(connection => connection.database ?? ''),
