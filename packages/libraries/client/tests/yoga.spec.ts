@@ -113,11 +113,21 @@ it('reports usage', async () => {
     expect(res.status).toBe(200);
     expect(await res.text()).toMatchInlineSnapshot('{"data":{"hi":null}}');
 
-    setTimeout(() => {
-      graphqlScope.done();
+    let timeout = setTimeout(() => {
       resolve();
     }, 1000);
+    let requestCount = 0;
+
+    graphqlScope.on('request', () => {
+      requestCount = requestCount + 1;
+      if (requestCount === 2) {
+        clearTimeout(timeout);
+        resolve();
+      }
+    });
   });
+
+  graphqlScope.done();
 });
 
 it('reports usage with response cache', async () => {
@@ -226,12 +236,22 @@ it('reports usage with response cache', async () => {
       expect(await res.text()).toEqual('{"data":{"hi":null}}');
     }
 
-    setTimeout(() => {
-      graphqlScope.done();
-      expect(usageCount).toEqual(3);
+    let timeout = setTimeout(() => {
       resolve();
     }, 1000);
+    let requestCount = 0;
+
+    graphqlScope.on('request', () => {
+      requestCount = requestCount + 1;
+      if (requestCount === 2) {
+        clearTimeout(timeout);
+        resolve();
+      }
+    });
   });
+
+  expect(usageCount).toBe(3);
+  graphqlScope.done();
 });
 
 it('does not report usage for operation that does not pass validation', async () => {
@@ -412,6 +432,19 @@ it('does not report usage if context creating raises an error', async () => {
       reject(new Error(`Unexpected request was sent to ${req.path}`));
     });
 
+    let timeout = setTimeout(() => {
+      resolve();
+    }, 1000);
+    let requestCount = 0;
+
+    graphqlScope.on('request', () => {
+      requestCount = requestCount + 1;
+      if (requestCount === 1) {
+        clearTimeout(timeout);
+        resolve();
+      }
+    });
+
     const res = await yoga.fetch('http://localhost/graphql', {
       method: 'POST',
       headers: {
@@ -427,13 +460,10 @@ it('does not report usage if context creating raises an error', async () => {
     });
     expect(res.status).toBe(200);
     expect(await res.text()).toMatchInlineSnapshot(`{"errors":[{"message":"Not authenticated."}]}`);
-
-    setTimeout(() => {
-      graphqlScope.done();
-      expect(callback).not.toHaveBeenCalled();
-      resolve();
-    }, 1000);
   });
+
+  graphqlScope.done();
+  expect(callback).not.toHaveBeenCalled();
 });
 
 describe('subscription usage reporting', () => {
@@ -760,6 +790,11 @@ describe('subscription usage reporting', () => {
           }
         `);
 
+          expect(body.operations[0].metadata.client).toEqual({
+            name: 'my-client',
+            version: '1.0.0',
+          });
+
           return true;
         })
         .reply(200);
@@ -799,11 +834,18 @@ describe('subscription usage reporting', () => {
             },
             usage: {
               endpoint: 'http://localhost/usage',
-              clientInfo() {
-                return {
-                  name: 'brrr',
-                  version: '1',
-                };
+              /** With SSE we get the request as headers. */
+              clientInfo(context: { request: Request }) {
+                const name = context.request.headers.get('x-graphql-client-name');
+                const version = context.request.headers.get('x-graphql-client-version');
+
+                if (name && version) {
+                  return {
+                    name,
+                    version,
+                  };
+                }
+                return null;
               },
             },
             agent: {
@@ -823,6 +865,8 @@ describe('subscription usage reporting', () => {
           headers: {
             'Content-Type': 'text/event-stream',
             accept: 'text/event-stream',
+            'x-graphql-client-name': 'my-client',
+            'x-graphql-client-version': '1.0.0',
           },
         });
 
@@ -945,7 +989,8 @@ describe('subscription usage reporting', () => {
             },
             usage: {
               endpoint: 'http://localhost/usage',
-              clientInfo() {
+              clientInfo(ctx) {
+                console.log(ctx.request);
                 return {
                   name: 'brrr',
                   version: '1',
@@ -969,6 +1014,8 @@ describe('subscription usage reporting', () => {
           headers: {
             'Content-Type': 'text/event-stream',
             accept: 'text/event-stream',
+            'x-client-name': 'foo',
+            'x-client-version': '1',
           },
         });
         expect(res.status).toBe(200);
@@ -1042,6 +1089,10 @@ describe('subscription usage reporting', () => {
           },
         }
       `);
+          expect(body.operations[0].metadata.client).toEqual({
+            name: 'foo',
+            version: '1',
+          });
 
           return true;
         })
@@ -1082,11 +1133,24 @@ describe('subscription usage reporting', () => {
             },
             usage: {
               endpoint: 'http://localhost/usage',
-              clientInfo() {
-                return {
-                  name: 'brrr',
-                  version: '1',
+              clientInfo(ctx: {
+                connectionParams?: {
+                  client?: {
+                    name?: string;
+                    version?: string;
+                  };
                 };
+              }) {
+                const name = ctx.connectionParams?.client?.name;
+                const version = ctx.connectionParams?.client?.version;
+                if (name && version) {
+                  return {
+                    name,
+                    version,
+                  };
+                }
+
+                return null;
               },
             },
             agent: {
@@ -1141,21 +1205,9 @@ describe('subscription usage reporting', () => {
       });
 
       const port = (httpServer.address() as any).port as number;
-      const client = createClient({
-        url: `ws://localhost:${port}${yoga.graphqlEndpoint}`,
-        webSocketImpl: WebSocket,
-      });
 
-      const query = client.iterate({
-        query: 'subscription { hi }',
-      });
-
-      const { done } = await query.next();
-      expect(done).toEqual(true);
-
-      await new Promise<void>(resolve => {
+      await new Promise<void>(async resolve => {
         let timeout = setTimeout(() => {
-          graphqlScope.done();
           resolve();
         }, 1000);
         let requestCount = 0;
@@ -1167,12 +1219,31 @@ describe('subscription usage reporting', () => {
             resolve();
           }
         });
+
+        const client = createClient({
+          url: `ws://localhost:${port}${yoga.graphqlEndpoint}`,
+          webSocketImpl: WebSocket,
+          connectionParams: {
+            client: {
+              name: 'foo',
+              version: '1',
+            },
+          },
+        });
+
+        const query = client.iterate({
+          query: 'subscription { hi }',
+        });
+
+        const { done } = await query.next();
+        expect(done).toEqual(true);
       });
       await new Promise<void>(resolve => {
         httpServer.close(() => {
           resolve();
         });
       });
+      graphqlScope.done();
     });
     it('reports usage for exception from subscription event stream', async () => {
       const graphqlScope = nock('http://localhost')
@@ -1333,33 +1404,8 @@ describe('subscription usage reporting', () => {
         webSocketImpl: WebSocket,
       });
 
-      const query = client.iterate({
-        query: 'subscription { hi }',
-      });
-
-      const { value } = await query.next();
-      expect(value).toMatchInlineSnapshot(`
-        {
-          errors: [
-            {
-              extensions: {
-                unexpected: true,
-              },
-              locations: [
-                {
-                  column: 1,
-                  line: 1,
-                },
-              ],
-              message: Unexpected error.,
-            },
-          ],
-        }
-      `);
-
-      await new Promise<void>(resolve => {
+      await new Promise<void>(async resolve => {
         let timeout = setTimeout(() => {
-          graphqlScope.done();
           resolve();
         }, 1000);
         let requestCount = 0;
@@ -1371,12 +1417,37 @@ describe('subscription usage reporting', () => {
             resolve();
           }
         });
+
+        const query = client.iterate({
+          query: 'subscription { hi }',
+        });
+
+        const { value } = await query.next();
+        expect(value).toMatchInlineSnapshot(`
+          {
+            errors: [
+              {
+                extensions: {
+                  unexpected: true,
+                },
+                locations: [
+                  {
+                    column: 1,
+                    line: 1,
+                  },
+                ],
+                message: Unexpected error.,
+              },
+            ],
+          }
+        `);
       });
       await new Promise<void>(resolve => {
         httpServer.close(() => {
           resolve();
         });
       });
+      graphqlScope.done();
     });
   });
 });
