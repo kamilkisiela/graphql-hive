@@ -1,6 +1,6 @@
 import { Inject, Injectable, InjectionToken, Scope } from 'graphql-modules';
 import { App } from '@octokit/app';
-import type { Octokit } from '@octokit/core';
+import { Octokit } from '@octokit/core';
 import { RequestError } from '@octokit/request-error';
 import type { IntegrationsModule } from '../__generated__/types';
 import { HiveError } from '../../../shared/errors';
@@ -42,6 +42,11 @@ export class GitHubIntegrationManager {
         appId: this.config.appId,
         privateKey: this.config.privateKey,
         log: this.logger,
+        Octokit: Octokit.defaults({
+          request: {
+            fetch,
+          },
+        }),
       });
     }
   }

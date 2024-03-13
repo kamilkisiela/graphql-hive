@@ -21,6 +21,9 @@ export function createUsageRateLimit(config: { endpoint: string | null; logger: 
       httpLink({
         url: `${endpoint}/trpc`,
         fetch,
+        headers: {
+          'x-requesting-service': 'usage',
+        },
       }),
     ],
   });

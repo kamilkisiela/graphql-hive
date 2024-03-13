@@ -18,12 +18,14 @@ import { ArtifactStorageReader } from '@hive/cdn-script/artifact-storage-reader'
 import { AwsClient } from '@hive/cdn-script/aws';
 import { createIsKeyValid } from '@hive/cdn-script/key-validation';
 import {
+  configureTracing,
   createServer,
   registerShutdown,
   registerTRPC,
   reportReadiness,
   startMetrics,
-  startSentryTransaction,
+  traceInline,
+  TracingInstance,
 } from '@hive/service-common';
 import { createConnectionString, createStorage as createPostgreSQLStorage } from '@hive/storage';
 import {
@@ -47,20 +49,34 @@ import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
 import { initSupertokens } from './supertokens';
 
 export async function main() {
+  let tracing: TracingInstance | undefined;
+
+  if (env.tracing.enabled && env.tracing.collectorEndpoint) {
+    tracing = configureTracing({
+      collectorEndpoint: env.tracing.collectorEndpoint,
+      serviceName: 'graphql-api',
+      enableConsoleExporter: env.tracing.enableConsoleExporter,
+    });
+
+    tracing.instrumentNodeFetch();
+    tracing.build();
+    tracing.start();
+  }
+
   init({
     serverName: hostname(),
     dist: 'server',
     enabled: !!env.sentry,
     environment: env.environment,
     dsn: env.sentry?.dsn,
-    enableTracing: true,
+    enableTracing: false,
     tracesSampleRate: 1,
     ignoreTransactions: [
       'POST /graphql', // Transaction created for a cached response (@graphql-yoga/plugin-response-cache)
     ],
     release: env.release,
     integrations: [
-      httpIntegration({ tracing: true }),
+      httpIntegration({ tracing: false }),
       contextLinesIntegration({
         frameContextLines: 0,
       }),
@@ -77,13 +93,17 @@ export async function main() {
 
   const server = await createServer({
     name: 'graphql-api',
-    tracing: true,
+    sentryErrorHandler: true,
     cors: false,
     log: {
       level: env.log.level,
       requests: env.log.requests,
     },
   });
+
+  if (tracing) {
+    await server.register(...tracing.instrumentFastify());
+  }
 
   server.addContentTypeParser(
     'application/graphql+json',
@@ -128,7 +148,11 @@ export async function main() {
     };
   });
 
-  const storage = await createPostgreSQLStorage(createConnectionString(env.postgres), 10);
+  const storage = await createPostgreSQLStorage(
+    createConnectionString(env.postgres),
+    10,
+    tracing ? [tracing.instrumentSlonik()] : [],
+  );
 
   let dbPurgeTaskRunner: null | ReturnType<typeof createTaskRunner> = null;
 
@@ -139,50 +163,46 @@ export async function main() {
       `Usage estimation is enabled. Start scheduling purge tasks every ${env.hiveServices.usageEstimator.dateRetentionPurgeIntervalMinutes} minutes.`,
     );
     dbPurgeTaskRunner = createTaskRunner({
-      async run() {
-        const transaction = startSentryTransaction({
-          op: 'db.purgeTaskRunner',
-          name: 'Purge Task',
-        });
-        try {
-          const result = await storage.purgeExpiredSchemaChecks({
-            expiresAt: new Date(),
-          });
-          server.log.debug(
-            'Finished running schema check purge task. (deletedSchemaCheckCount=%s deletedSdlStoreCount=%s)',
-            result.deletedSchemaCheckCount,
-            result.deletedSdlStoreCount,
-          );
-          transaction.setMeasurement('deletedSchemaCheckCount', result.deletedSchemaCheckCount, '');
-          transaction.setMeasurement('deletedSdlStoreCount', result.deletedSdlStoreCount, '');
-          transaction.setMeasurement(
-            'deletedSchemaChangeApprovals',
-            result.deletedSchemaChangeApprovalCount,
-            '',
-          );
-          transaction.setMeasurement(
-            'deletedContractSchemaChangeApprovals',
-            result.deletedContractSchemaChangeApprovalCount,
-            '',
-          );
+      run: traceInline(
+        'Purge Task',
+        {
+          resultAttributes: result => ({
+            'purge.schema.check.count': result.deletedSchemaCheckCount,
+            'purge.sdl.store.count': result.deletedSdlStoreCount,
+            'purge.change.approval.count': result.deletedSchemaChangeApprovalCount,
+            'purge.contract.approval.count': result.deletedContractSchemaChangeApprovalCount,
+          }),
+        },
+        async () => {
+          try {
+            const result = await storage.purgeExpiredSchemaChecks({
+              expiresAt: new Date(),
+            });
+            server.log.debug(
+              'Finished running schema check purge task. (deletedSchemaCheckCount=%s deletedSdlStoreCount=%s)',
+              result.deletedSchemaCheckCount,
+              result.deletedSdlStoreCount,
+            );
 
-          transaction.finish();
-        } catch (error) {
-          captureException(error);
-          transaction.setStatus('internal_error');
-          transaction.finish();
-          throw error;
-        }
-      },
+            return result;
+          } catch (error) {
+            captureException(error);
+            throw error;
+          }
+        },
+      ),
       interval: env.hiveServices.usageEstimator.dateRetentionPurgeIntervalMinutes * 60 * 1000,
       logger: server.log,
     });
+
     dbPurgeTaskRunner.start();
   }
 
   registerShutdown({
     logger: server.log,
     async onShutdown() {
+      server.log.info('Stopping tracing handler...');
+      await tracing?.shutdown();
       server.log.info('Stopping HTTP server listener...');
       await server.close();
       server.log.info('Stopping Storage handler...');
@@ -365,6 +385,7 @@ export async function main() {
       isProduction: env.environment === 'prod',
       release: env.release,
       hiveConfig: env.hive,
+      tracing,
       logger: logger as any,
       persistedOperations,
     });
@@ -420,7 +441,7 @@ export async function main() {
       async handler(req, res) {
         try {
           const [response, storageIsReady] = await Promise.all([
-            got.post(`http://0.0.0.0:${port}${graphqlPath}`, {
+            got.post(`http://0.0.0.0:${port}${graphqlPath}?readiness=true`, {
               method: 'POST',
               body: introspection,
               headers: {

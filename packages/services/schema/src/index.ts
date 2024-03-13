@@ -3,12 +3,14 @@ import crypto from 'node:crypto';
 import { hostname } from 'os';
 import Redis from 'ioredis';
 import {
+  configureTracing,
   createErrorHandler,
   createServer,
   registerShutdown,
   registerTRPC,
   reportReadiness,
   startMetrics,
+  TracingInstance,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import { Context, schemaBuilderApiRouter } from './api';
@@ -34,6 +36,19 @@ function decryptFactory() {
 }
 
 async function main() {
+  let tracing: TracingInstance | undefined;
+
+  if (env.tracing.enabled && env.tracing.collectorEndpoint) {
+    tracing = configureTracing({
+      collectorEndpoint: env.tracing.collectorEndpoint,
+      serviceName: 'schema-composition',
+    });
+
+    tracing.instrumentNodeFetch();
+    tracing.build();
+    tracing.start();
+  }
+
   if (env.sentry) {
     Sentry.init({
       serverName: hostname(),
@@ -47,13 +62,17 @@ async function main() {
 
   const server = await createServer({
     name: 'schema',
-    tracing: false,
+    sentryErrorHandler: true,
     log: {
       level: env.log.level,
       requests: env.log.requests,
     },
     bodyLimit: env.http.bodyLimit,
   });
+
+  if (tracing) {
+    await server.register(...tracing.instrumentFastify());
+  }
 
   registerShutdown({
     logger: server.log,

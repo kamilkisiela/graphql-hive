@@ -4,6 +4,7 @@ import { ServiceSecret } from '../utils/secrets';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { Docker } from './docker';
 import { Environment } from './environment';
+import { Observability } from './observability';
 import { Redis } from './redis';
 import { Sentry } from './sentry';
 
@@ -22,7 +23,9 @@ export function deployEmails({
   image,
   docker,
   sentry,
+  observability,
 }: {
+  observability: Observability;
   environment: Environment;
   image: string;
   redis: Redis;
@@ -46,6 +49,10 @@ export function deployEmails({
         SENTRY: sentry.enabled ? '1' : '0',
         EMAIL_PROVIDER: 'postmark',
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
+        OPENTELEMETRY_COLLECTOR_ENDPOINT:
+          observability.enabled && observability.tracingEndpoint
+            ? observability.tracingEndpoint
+            : '',
       },
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',

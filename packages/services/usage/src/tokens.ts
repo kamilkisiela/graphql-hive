@@ -26,6 +26,9 @@ export function createTokens(config: { endpoint: string; logger: ServiceLogger }
       httpLink({
         url: `${endpoint}/trpc`,
         fetch,
+        headers: {
+          'x-requesting-service': 'usage',
+        },
       }),
     ],
   });

@@ -5,5 +5,6 @@ export default {
   'federation-2': 'Apollo Federation 2',
   'cdn-artifacts': 'CDN Artifacts',
   's3-provider': 'S3 Storage Provider',
+  telemetry: 'Telemetry / Error Reporting',
   troubleshooting: 'Troubleshooting',
 };

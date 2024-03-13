@@ -1,14 +1,13 @@
 import type { OptionsOfJSONResponseBody } from 'got';
 import { got, HTTPError, TimeoutError } from 'got';
 import { Injectable } from 'graphql-modules';
+import { SpanKind, trace, type Span } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
-import type { Span } from '@sentry/types';
 import type { Logger } from './logger';
 
 interface HttpClientOptions extends OptionsOfJSONResponseBody {
   method: 'GET' | 'POST' | 'DELETE' | 'PUT';
   context?: {
-    description?: string;
     logger?: Logger;
   };
 }
@@ -17,59 +16,64 @@ type HttpOptions = Omit<HttpClientOptions, 'method' | 'throwHttpErrors' | 'resol
 
 @Injectable()
 export class HttpClient {
-  get<T>(url: string, opts: HttpOptions, span?: Span): Promise<T> {
-    return this.request<T>(url, { ...opts, method: 'GET' }, span);
-  }
-  post<T>(url: string, opts: HttpOptions = {}, span?: Span): Promise<T> {
-    return this.request<T>(url, { ...opts, method: 'POST' }, span);
-  }
-  put<T>(url: string, opts: HttpOptions = {}, span?: Span): Promise<T> {
-    return this.request<T>(url, { ...opts, method: 'PUT' }, span);
-  }
-  delete<T>(url: string, opts: HttpOptions, span?: Span): Promise<T> {
-    return this.request<T>(url, { ...opts, method: 'DELETE' }, span);
+  private tracer: ReturnType<(typeof trace)['getTracer']>;
+
+  constructor() {
+    this.tracer = trace.getTracer('http-client');
   }
 
-  private request<T>(url: string, opts: HttpClientOptions, upstreamSpan?: Span) {
-    const scope = Sentry.getCurrentHub().getScope();
-    const parentSpan = upstreamSpan ?? scope?.getSpan();
-    const span = parentSpan?.startChild({
-      op: 'HttpClient',
-      description: opts?.context?.description ?? `${opts.method} ${url}`,
-    });
+  get<T>(url: string, opts: HttpOptions, parentSpan?: Span): Promise<T> {
+    return this.request<T>(url, { ...opts, method: 'GET' }, parentSpan);
+  }
+  post<T>(url: string, opts: HttpOptions = {}, parentSpan?: Span): Promise<T> {
+    return this.request<T>(url, { ...opts, method: 'POST' }, parentSpan);
+  }
+  put<T>(url: string, opts: HttpOptions = {}, parentSpan?: Span): Promise<T> {
+    return this.request<T>(url, { ...opts, method: 'PUT' }, parentSpan);
+  }
+  delete<T>(url: string, opts: HttpOptions, parentSpan?: Span): Promise<T> {
+    return this.request<T>(url, { ...opts, method: 'DELETE' }, parentSpan);
+  }
 
+  private request<T>(url: string, opts: HttpClientOptions, parentSpan?: Span) {
     const logger = opts?.context?.logger ?? console;
+    const parsedUrl = new URL(url);
+    const span =
+      parentSpan ??
+      this.tracer.startSpan('HTTP (got)', {
+        kind: SpanKind.CLIENT,
+        attributes: {
+          'http.client': 'got',
+          'client.address': parsedUrl.hostname,
+          'client.port': parsedUrl.port,
+          'http.method': opts.method,
+          'http.route': parsedUrl.pathname,
+        },
+      });
 
     const request = got<T>(url, {
       ...opts,
       throwHttpErrors: true,
     });
 
-    if (!span) {
-      return request.then(response => response.body);
-    }
-
     return request
       .then(
         response => {
-          span.setHttpStatus(response.statusCode);
+          span.setAttribute('http.response.body.size', response.rawBody.length);
+          span.setAttribute('http.response.status_code', response.statusCode);
 
           if (typeof response.headers['x-cache'] !== 'undefined') {
-            span.setTag('cache', response.headers['x-cache'] as string);
+            span.setAttribute('cache', response.headers['x-cache'] as string);
           }
+
           return Promise.resolve(response.body);
         },
         error => {
-          if (opts.context?.description) {
-            span.setTag('contextDescription', opts.context.description);
-            logger.debug('Request context description %s', opts.context.description);
-          }
+          span.setAttribute('http.response.status_code', error.response.statusCode);
 
           let details: string | null = null;
 
           if (error instanceof HTTPError) {
-            span.setHttpStatus(error.response.statusCode);
-
             if (typeof error.response.body === 'string') {
               details = error.response.body;
               logger.error(details);
@@ -78,7 +82,12 @@ export class HttpClient {
               logger.error(details);
             }
           }
-          span.setStatus(error instanceof TimeoutError ? 'deadline_exceeded' : 'internal_error');
+
+          span.setAttribute(
+            'error.type',
+            error instanceof TimeoutError ? 'deadline_exceeded' : 'internal_error',
+          );
+          span.setAttribute('error.message', details || '');
 
           logger.error(error);
           Sentry.captureException(error, {
@@ -90,7 +99,7 @@ export class HttpClient {
         },
       )
       .finally(() => {
-        span.finish();
+        span.end();
       });
   }
 }

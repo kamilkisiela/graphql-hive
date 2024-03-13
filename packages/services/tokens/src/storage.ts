@@ -1,4 +1,4 @@
-import { createConnectionString, createTokenStorage, tokens } from '@hive/storage';
+import { createConnectionString, createTokenStorage, Interceptor, tokens } from '@hive/storage';
 
 export interface StorageItem {
   token: string;
@@ -24,9 +24,10 @@ export interface Storage {
 
 export async function createStorage(
   config: Parameters<typeof createConnectionString>[0],
+  additionalInterceptors: Interceptor[],
 ): Promise<Storage> {
   const connectionString = createConnectionString(config);
-  const db = await createTokenStorage(connectionString, 5);
+  const db = await createTokenStorage(connectionString, 5, additionalInterceptors);
 
   function transformToken(item: tokens): StorageItem {
     return {

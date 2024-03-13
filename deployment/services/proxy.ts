@@ -4,6 +4,7 @@ import { Proxy } from '../utils/reverse-proxy';
 import { App } from './app';
 import { Environment } from './environment';
 import { GraphQL } from './graphql';
+import { Observability } from './observability';
 import { Usage } from './usage';
 
 export function deployProxy({
@@ -11,7 +12,9 @@ export function deployProxy({
   app,
   usage,
   environment,
+  observability,
 }: {
+  observability: Observability;
   environment: Environment;
   graphql: GraphQL;
   app: App;
@@ -30,6 +33,9 @@ export function deployProxy({
         cpu: environment.isProduction ? '800m' : '150m',
         memory: environment.isProduction ? '800Mi' : '192Mi',
       },
+      tracing: observability.enabled
+        ? { collectorService: observability.observability!.otlpCollectorService }
+        : undefined,
     })
     .registerService({ record: environment.appDns }, [
       {

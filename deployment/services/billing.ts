@@ -5,6 +5,7 @@ import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
 import { Environment } from './environment';
+import { Observability } from './observability';
 import { Postgres } from './postgres';
 import { Sentry } from './sentry';
 import { UsageEstimator } from './usage-estimation';
@@ -17,6 +18,7 @@ class StripeSecret extends ServiceSecret<{
 }> {}
 
 export function deployStripeBilling({
+  observability,
   environment,
   dbMigrations,
   usageEstimator,
@@ -25,6 +27,7 @@ export function deployStripeBilling({
   postgres,
   sentry,
 }: {
+  observability: Observability;
   usageEstimator: UsageEstimator;
   image: string;
   environment: Environment;
@@ -51,6 +54,10 @@ export function deployStripeBilling({
         ...environment.envVars,
         SENTRY: sentry.enabled ? '1' : '0',
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
+        OPENTELEMETRY_COLLECTOR_ENDPOINT:
+          observability.enabled && observability.tracingEndpoint
+            ? observability.tracingEndpoint
+            : '',
       },
       exposesMetrics: true,
       port: 4000,

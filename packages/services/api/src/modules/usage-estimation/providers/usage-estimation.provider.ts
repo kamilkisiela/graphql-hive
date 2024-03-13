@@ -1,7 +1,7 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
+import { traceFn } from '@hive/service-common';
 import type { UsageEstimatorApi, UsageEstimatorApiInput } from '@hive/usage-estimator';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
-import { sentry } from '../../../shared/sentry';
 import { Logger } from '../../shared/providers/logger';
 import type { UsageEstimationServiceConfig } from './tokens';
 import { USAGE_ESTIMATION_SERVICE_CONFIG } from './tokens';
@@ -31,7 +31,14 @@ export class UsageEstimationProvider {
       : null;
   }
 
-  @sentry('UsageEstimation.estimateOperationsForOrganization')
+  @traceFn('UsageEstimation.estimateOperations', {
+    initAttributes: input => ({
+      'hive.usageEstimation.operations.organizationId': input.organizationId,
+    }),
+    resultAttributes: result => ({
+      'hive.usageEstimation.operations.estimated': result ?? 0,
+    }),
+  })
   async estimateOperationsForOrganization(
     input: UsageEstimatorApiInput['estimateOperationsForOrganization'],
   ): Promise<number | null> {

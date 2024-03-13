@@ -13,7 +13,7 @@ import { prepareEnvironment } from './services/environment';
 import { configureGithubApp } from './services/github';
 import { deployGraphQL } from './services/graphql';
 import { deployKafka } from './services/kafka';
-import { deployMetrics } from './services/observability';
+import { deployObservability } from './services/observability';
 import { deploySchemaPolicy } from './services/policy';
 import { deployPostgres } from './services/postgres';
 import { deployProxy } from './services/proxy';
@@ -54,7 +54,7 @@ const environment = prepareEnvironment({
   rootDns: new pulumi.Config('common').require('dnsZone'),
 });
 deploySentryEventsMonitor({ docker, environment, sentry });
-deployMetrics({ envName });
+const observability = deployObservability({ envName });
 const clickhouse = deployClickhouse();
 const postgres = deployPostgres();
 const redis = deployRedis({ environment });
@@ -99,6 +99,7 @@ const tokens = deployTokens({
   redis,
   heartbeat: heartbeatsConfig.get('tokens'),
   sentry,
+  observability,
 });
 
 const webhooks = deployWebhooks({
@@ -109,6 +110,7 @@ const webhooks = deployWebhooks({
   docker,
   redis,
   sentry,
+  observability,
 });
 
 const emails = deployEmails({
@@ -117,6 +119,7 @@ const emails = deployEmails({
   environment,
   redis,
   sentry,
+  observability,
 });
 
 const usageEstimator = deployUsageEstimation({
@@ -126,6 +129,7 @@ const usageEstimator = deployUsageEstimation({
   clickhouse,
   dbMigrations,
   sentry,
+  observability,
 });
 
 const billing = deployStripeBilling({
@@ -136,6 +140,7 @@ const billing = deployStripeBilling({
   dbMigrations,
   usageEstimator,
   sentry,
+  observability,
 });
 
 const rateLimit = deployRateLimit({
@@ -147,6 +152,7 @@ const rateLimit = deployRateLimit({
   emails,
   postgres,
   sentry,
+  observability,
 });
 
 const usage = deployUsage({
@@ -178,6 +184,7 @@ const schema = deploySchema({
   redis,
   broker,
   sentry,
+  observability,
 });
 
 const schemaPolicy = deploySchemaPolicy({
@@ -185,6 +192,7 @@ const schemaPolicy = deploySchemaPolicy({
   docker,
   environment,
   sentry,
+  observability,
 });
 
 const supertokens = deploySuperTokens(postgres, { dependencies: [dbMigrations] }, environment);
@@ -215,6 +223,7 @@ const graphql = deployGraphQL({
   zendesk,
   githubApp,
   sentry,
+  observability,
 });
 
 const app = deployApp({
@@ -231,6 +240,7 @@ const app = deployApp({
 });
 
 const proxy = deployProxy({
+  observability,
   app,
   graphql,
   usage,

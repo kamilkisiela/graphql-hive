@@ -3,6 +3,7 @@ import { ServiceDeployment } from '../utils/service-deployment';
 import type { Broker } from './cf-broker';
 import { Docker } from './docker';
 import { Environment } from './environment';
+import { Observability } from './observability';
 import { Redis } from './redis';
 import { Sentry } from './sentry';
 
@@ -15,7 +16,9 @@ export function deploySchema({
   image,
   docker,
   sentry,
+  observability,
 }: {
+  observability: Observability;
   image: string;
   environment: Environment;
   redis: Redis;
@@ -37,6 +40,10 @@ export function deploySchema({
         SCHEMA_CACHE_TTL_MS: '65000' /* 65s */,
         SCHEMA_CACHE_SUCCESS_TTL_MS: '43200000' /* 12h */,
         SCHEMA_COMPOSITION_TIMEOUT_MS: '60000' /* 60s */,
+        OPENTELEMETRY_COLLECTOR_ENDPOINT:
+          observability.enabled && observability.tracingEndpoint
+            ? observability.tracingEndpoint
+            : '',
       },
       readinessProbe: '/_readiness',
       livenessProbe: '/_health',

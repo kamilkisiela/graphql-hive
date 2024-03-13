@@ -6,6 +6,7 @@ import lodash from 'lodash';
 import promClient from 'prom-client';
 import { z } from 'zod';
 import { CriticalityLevel } from '@graphql-inspector/core';
+import { traceFn } from '@hive/service-common';
 import type {
   ConditionalBreakingChangeMetadata,
   SchemaChangeType,
@@ -18,7 +19,6 @@ import { HiveError } from '../../../shared/errors';
 import { createPeriod } from '../../../shared/helpers';
 import { isGitHubRepositoryString } from '../../../shared/is-github-repository-string';
 import { bolderize } from '../../../shared/markdown';
-import { sentry } from '../../../shared/sentry';
 import { AlertsManager } from '../../alerts/providers/alerts-manager';
 import { AuthManager } from '../../auth/providers/auth-manager';
 import { TargetAccessScope } from '../../auth/providers/target-access';
@@ -268,7 +268,14 @@ export class SchemaPublisher {
     };
   }
 
-  @sentry('SchemaPublisher.check')
+  @traceFn('SchemaPublisher.check', {
+    initAttributes: input => ({
+      'hive.target.id': input.target,
+    }),
+    resultAttributes: result => ({
+      'hive.check.result': result.__typename,
+    }),
+  })
   async check(input: CheckInput) {
     this.logger.info('Checking schema (input=%o)', lodash.omit(input, ['sdl']));
 
@@ -988,7 +995,14 @@ export class SchemaPublisher {
     } as const;
   }
 
-  @sentry('SchemaPublisher.publish')
+  @traceFn('SchemaPublisher.publish', {
+    initAttributes: (input, _) => ({
+      'hive.target.id': input.target,
+    }),
+    resultAttributes: result => ({
+      'hive.publish.result': result.__typename,
+    }),
+  })
   async publish(input: PublishInput, signal: AbortSignal): Promise<PublishResult> {
     this.logger.debug(
       'Schema publication (organization=%s, project=%s, target=%s)',
@@ -1122,7 +1136,14 @@ export class SchemaPublisher {
     return updateResult;
   }
 
-  @sentry('SchemaPublisher.delete')
+  @traceFn('SchemaPublisher.delete', {
+    initAttributes: (input, _) => ({
+      'hive.target.id': input.target.id,
+    }),
+    resultAttributes: result => ({
+      'hive.delete.result': result.__typename,
+    }),
+  })
   async delete(input: DeleteInput, signal: AbortSignal) {
     this.logger.info('Deleting schema (input=%o)', input);
 
@@ -2109,7 +2130,7 @@ export class SchemaPublisher {
     }
   }
 
-  @sentry('SchemaPublisher.publishToCDN')
+  @traceFn('SchemaPublisher.publishToCDN')
   private async publishToCDN({
     target,
     project,
