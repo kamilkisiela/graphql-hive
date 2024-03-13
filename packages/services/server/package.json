@@ -31,7 +31,7 @@
     "@sentry/node": "7.106.1",
     "@swc/core": "1.4.6",
     "@trpc/server": "10.45.2",
-    "@whatwg-node/server": "0.9.28",
+    "@whatwg-node/server": "0.9.29",
     "dotenv": "16.4.5",
     "fastify": "4.26.2",
     "got": "14.2.1",
