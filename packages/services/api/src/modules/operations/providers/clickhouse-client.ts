@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import Agent from 'agentkeepalive';
 import { Inject, Injectable } from 'graphql-modules';
-import * as Sentry from '@sentry/node';
+import { SpanKind, trace } from '@hive/service-common';
 import { atomic } from '../../../shared/helpers';
 import { HttpClient } from '../../shared/providers/http-client';
 import { Logger } from '../../shared/providers/logger';
@@ -47,12 +47,14 @@ const httpsAgent = new Agent.HttpsAgent(agentConfig);
 @Injectable()
 export class ClickHouse {
   private logger: Logger;
+  private tracer: ReturnType<(typeof trace)['getTracer']>;
 
   constructor(
     @Inject(CLICKHOUSE_CONFIG) private config: ClickHouseConfig,
     private httpClient: HttpClient,
     logger: Logger,
   ) {
+    this.tracer = trace.getTracer('clickhouse-client');
     this.logger = logger.child({
       service: 'ClickHouse',
     });
@@ -68,17 +70,18 @@ export class ClickHouse {
     queryId: string;
     timeout: number;
   }): Promise<QueryResponse<T>> {
-    const scope = Sentry.getCurrentHub().getScope();
-    const parentSpan = scope.getSpan();
-
-    const span = parentSpan?.startChild({
-      op: queryId,
-      origin: 'auto.clickhouse',
-    });
     const startedAt = Date.now();
     const endpoint = `${this.config.protocol ?? 'https'}://${this.config.host}:${this.config.port}`;
     const executionId = queryId + '-' + Math.random().toString(16).substring(2);
-
+    const span = this.tracer.startSpan(`ClickHouse: ${queryId}`, {
+      kind: SpanKind.CLIENT,
+      attributes: {
+        'db.type': 'ClickHouse',
+        'db.query': query.sql,
+        'db.query.id': queryId,
+        'execution.id': executionId,
+      },
+    });
     this.logger.debug(
       `Executing ClickHouse Query (executionId: %s): %s`,
       executionId,
@@ -88,99 +91,102 @@ export class ClickHouse {
     let retries = 0;
 
     const response = await this.httpClient
-      .post<QueryResponse<T>>(endpoint, {
-        context: {
-          description: `ClickHouse - ${queryId}`,
-        },
-        body: query.sql,
-        headers: {
-          'Accept-Encoding': 'gzip',
-          Accept: 'application/json',
-        },
-        searchParams: {
-          default_format: 'JSON',
-          // Max execution time in seconds
-          max_execution_time: (this.config.requestTimeout ?? timeout) / 1000,
-          query_id: executionId,
-          ...toQueryParams(query),
-        },
-        username: this.config.username,
-        password: this.config.password,
-        decompress: true,
-        timeout: {
-          lookup: 1000,
-          connect: 1000,
-          secureConnect: 1000,
-          // override the provided timeout of a query with the globally configured timeout
-          request: this.config.requestTimeout ?? timeout,
-        },
-        retry: {
-          calculateDelay: info => {
-            if (info.attemptCount >= 6) {
-              // After 5 retries, stop.
-              return 0;
-            }
+      .post<QueryResponse<T>>(
+        endpoint,
+        {
+          body: query.sql,
+          headers: {
+            'Accept-Encoding': 'gzip',
+            Accept: 'application/json',
+          },
+          searchParams: {
+            default_format: 'JSON',
+            // Max execution time in seconds
+            max_execution_time: (this.config.requestTimeout ?? timeout) / 1000,
+            query_id: executionId,
+            ...toQueryParams(query),
+          },
+          username: this.config.username,
+          password: this.config.password,
+          decompress: true,
+          timeout: {
+            lookup: 1000,
+            connect: 1000,
+            secureConnect: 1000,
+            // override the provided timeout of a query with the globally configured timeout
+            request: this.config.requestTimeout ?? timeout,
+          },
+          retry: {
+            calculateDelay: info => {
+              span.setAttribute('retry.count', info.attemptCount);
 
-            const delayBy = info.attemptCount * 250;
-            this.logger.error(
-              `Failed to run ClickHouse query, executionId: %s, code: %s , error name: %s, message: %s`,
-              executionId,
-              info.error.code,
-              info.error.name,
-              info.error.message,
-            );
+              if (info.attemptCount >= 6) {
+                // After 5 retries, stop.
+                return 0;
+              }
 
-            this.logger.debug(
-              `Retry (delay=%s, attempt=%s, reason=%s, queryId=%s, executionId=%s)`,
-              delayBy,
-              info.attemptCount,
-              info.error.message,
-              queryId,
-              executionId,
-            );
+              const delayBy = info.attemptCount * 250;
+              this.logger.error(
+                `Failed to run ClickHouse query, executionId: %s, code: %s , error name: %s, message: %s`,
+                executionId,
+                info.error.code,
+                info.error.name,
+                info.error.message,
+              );
 
-            return delayBy;
+              this.logger.debug(
+                `Retry (delay=%s, attempt=%s, reason=%s, queryId=%s, executionId=%s)`,
+                delayBy,
+                info.attemptCount,
+                info.error.message,
+                queryId,
+                executionId,
+              );
+
+              return delayBy;
+            },
+          },
+          responseType: 'json',
+          agent: {
+            http: httpAgent,
+            https: httpsAgent,
+          },
+          hooks: {
+            // `beforeRetry` runs first, then `beforeRequest`
+            beforeRequest: [
+              options => {
+                if (
+                  retries > 0 &&
+                  options.searchParams &&
+                  typeof options.searchParams === 'object' &&
+                  'query_id' in options.searchParams &&
+                  typeof options.searchParams.query_id === 'string'
+                ) {
+                  // We do it to avoid QUERY_WITH_SAME_ID_IS_ALREADY_RUNNING error in ClickHouse
+                  // Context: https://clickhouse.com/docs/en/interfaces/http
+                  // > Running requests do not stop automatically if the HTTP connection is lost.
+                  // > The optional 'query_id' parameter can be passed as the query ID (any string).
+                  // More context: https://clickhouse.com/docs/en/operations/settings/settings#replace-running-query
+                  // > When using the HTTP interface, the 'query_id' parameter can be passed.
+                  // > If a query from the same user with the same 'query_id' already exists at this time,
+                  // > the behaviour depends on the 'replace_running_query' parameter.
+                  // > Default: throws QUERY_WITH_SAME_ID_IS_ALREADY_RUNNING exception.
+                  options.searchParams.query_id = options.searchParams.query_id.replace(
+                    /-r\d$/,
+                    '-r' + retries,
+                  );
+                }
+              },
+            ],
+            beforeRetry: [
+              (_, retryCount) => {
+                retries = retryCount;
+              },
+            ],
           },
         },
-        responseType: 'json',
-        agent: {
-          http: httpAgent,
-          https: httpsAgent,
-        },
-        hooks: {
-          // `beforeRetry` runs first, then `beforeRequest`
-          beforeRequest: [
-            options => {
-              if (
-                retries > 0 &&
-                options.searchParams &&
-                typeof options.searchParams === 'object' &&
-                'query_id' in options.searchParams &&
-                typeof options.searchParams.query_id === 'string'
-              ) {
-                // We do it to avoid QUERY_WITH_SAME_ID_IS_ALREADY_RUNNING error in ClickHouse
-                // Context: https://clickhouse.com/docs/en/interfaces/http
-                // > Running requests do not stop automatically if the HTTP connection is lost.
-                // > The optional 'query_id' parameter can be passed as the query ID (any string).
-                // More context: https://clickhouse.com/docs/en/operations/settings/settings#replace-running-query
-                // > When using the HTTP interface, the 'query_id' parameter can be passed.
-                // > If a query from the same user with the same 'query_id' already exists at this time,
-                // > the behaviour depends on the 'replace_running_query' parameter.
-                // > Default: throws QUERY_WITH_SAME_ID_IS_ALREADY_RUNNING exception.
-                options.searchParams.query_id = options.searchParams.query_id.replace(
-                  /-r\d$/,
-                  '-r' + retries,
-                );
-              }
-            },
-          ],
-          beforeRetry: [
-            (_, retryCount) => {
-              retries = retryCount;
-            },
-          ],
-        },
-      })
+        span,
+      )
       .then(response => {
         if (response.exception) {
           throw new Error(response.exception);
@@ -195,7 +201,6 @@ export class ClickHouse {
           error.name,
           error.message,
         );
-        span?.setStatus('internal_error');
         return Promise.reject(error);
       })
       .finally(() => {
@@ -204,7 +209,6 @@ export class ClickHouse {
           executionId,
           Date.now() - startedAt,
         );
-        span?.finish();
       });
     const endedAt = (Date.now() - startedAt) / 1000;
     this.config.onReadEnd?.(queryId, {

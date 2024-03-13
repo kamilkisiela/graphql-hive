@@ -12,7 +12,7 @@ export default defineConfig({
   clean: true,
   shims: true,
   format: 'esm',
-  watch: [...commonWatchList(), ...monorepoWatchList()],
+  watch: process.env.WATCH === '0' ? false : [...commonWatchList(), ...monorepoWatchList()],
   target: targetFromNodeVersion(),
   plugins: [watchEntryPlugin()],
 });

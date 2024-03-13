@@ -123,7 +123,7 @@ export function createSchemaObject(
   let document: DocumentNode;
 
   try {
-    document = parseGraphQLSource(schema.sdl, 'parse in createSchemaObject');
+    document = parseGraphQLSource(schema.sdl, 'createSchemaObject');
   } catch (err) {
     if (err instanceof GraphQLError) {
       throw new GraphQLDocumentStringInvalidError(err.message, err.locations?.[0]);

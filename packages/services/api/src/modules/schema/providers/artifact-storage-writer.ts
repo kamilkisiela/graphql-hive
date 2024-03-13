@@ -1,5 +1,6 @@
 import { Inject } from 'graphql-modules';
 import { buildArtifactStorageKey } from '@hive/cdn-script/artifact-storage-reader';
+import { traceFn } from '@hive/service-common';
 import { Logger } from '../../shared/providers/logger';
 import { S3_CONFIG, type S3Config } from '../../shared/providers/s3-config';
 
@@ -35,6 +36,13 @@ export class ArtifactStorageWriter {
     this.logger = logger.child({ service: 'f' });
   }
 
+  @traceFn('CDN: Write Artifact', {
+    initAttributes: args => ({
+      'hive.target.id': args.targetId,
+      'hive.artifact.type': args.artifactType,
+      'hive.contract.name': args.contractName || '',
+    }),
+  })
   async writeArtifact(args: {
     targetId: string;
     artifactType: keyof typeof artifactMeta;
@@ -61,6 +69,13 @@ export class ArtifactStorageWriter {
     }
   }
 
+  @traceFn('CDN: Delete Artifact', {
+    initAttributes: args => ({
+      'hive.target.id': args.targetId,
+      'hive.artifact.type': args.artifactType,
+      'hive.contract.name': args.contractName || '',
+    }),
+  })
   async deleteArtifact(args: {
     targetId: string;
     artifactType: keyof typeof artifactMeta;

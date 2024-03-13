@@ -2,11 +2,13 @@
 import 'reflect-metadata';
 import { hostname } from 'os';
 import {
+  configureTracing,
   createServer,
   registerShutdown,
   registerTRPC,
   reportReadiness,
   startMetrics,
+  TracingInstance,
 } from '@hive/service-common';
 import { createConnectionString } from '@hive/storage';
 import * as Sentry from '@sentry/node';
@@ -15,6 +17,19 @@ import { createStripeBilling } from './billing-sync';
 import { env } from './environment';
 
 async function main() {
+  let tracing: TracingInstance | undefined;
+
+  if (env.tracing.enabled && env.tracing.collectorEndpoint) {
+    tracing = configureTracing({
+      collectorEndpoint: env.tracing.collectorEndpoint,
+      serviceName: 'stripe-billing',
+    });
+
+    tracing.instrumentNodeFetch();
+    tracing.build();
+    tracing.start();
+  }
+
   if (env.sentry) {
     Sentry.init({
       serverName: hostname(),
@@ -28,12 +43,16 @@ async function main() {
 
   const server = await createServer({
     name: 'stripe-billing',
-    tracing: false,
+    sentryErrorHandler: true,
     log: {
       level: env.log.level,
       requests: env.log.requests,
     },
   });
+
+  if (tracing) {
+    await server.register(...tracing.instrumentFastify());
+  }
 
   try {
     const { readiness, start, stop, stripeApi, postgres$, loadStripeData$ } = createStripeBilling({
@@ -47,6 +66,7 @@ async function main() {
       },
       storage: {
         connectionString: createConnectionString(env.postgres),
+        additionalInterceptors: tracing ? [tracing.instrumentSlonik()] : [],
       },
     });
 

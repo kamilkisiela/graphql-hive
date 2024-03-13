@@ -17,8 +17,8 @@ import {
   visit,
 } from 'graphql';
 import lodash from 'lodash';
+import { traceInlineSync } from '@hive/service-common';
 import type { SchemaObject } from './entities';
-import { sentryFunction } from './sentry';
 
 export function hashSchema(schema: SchemaObject): string {
   return createHash('md5')
@@ -31,41 +31,38 @@ export function hashSchema(schema: SchemaObject): string {
 /**
  * Builds GraphQLSchema without validation of SDL and sorts it
  */
-export function buildSortedSchemaFromSchemaObject(
-  schema: Pick<SchemaObject, 'document'>,
-  transformError = (error: unknown) => error,
-): GraphQLSchema {
-  try {
-    return sentryFunction(() => lexicographicSortSchema(buildASTSchema(schema.document)), {
-      op: 'buildSortedSchema',
-    });
-  } catch (error) {
-    throw transformError(error);
-  }
-}
+export const buildSortedSchemaFromSchemaObject = traceInlineSync(
+  'lexicographicSortSchema',
+  {},
+  (
+    schema: Pick<SchemaObject, 'document'>,
+    transformError = (error: unknown) => error,
+  ): GraphQLSchema => {
+    try {
+      return lexicographicSortSchema(buildASTSchema(schema.document));
+    } catch (error) {
+      throw transformError(error);
+    }
+  },
+);
 
 /**
  * Builds GraphQLSchema without validation of SDL
  */
-export function buildASTSchema(
-  schema: DocumentNode,
-  transformError = (error: unknown) => error,
-): GraphQLSchema {
-  try {
-    return sentryFunction(
-      () =>
-        buildASTSchemaGraphQL(schema, {
-          assumeValid: true,
-          assumeValidSDL: true,
-        }),
-      {
-        op: 'buildASTSchema',
-      },
-    );
-  } catch (error) {
-    throw transformError(error);
-  }
-}
+export const buildASTSchema = traceInlineSync(
+  'buildASTSchema',
+  {},
+  (schema: DocumentNode, transformError = (error: unknown) => error): GraphQLSchema => {
+    try {
+      return buildASTSchemaGraphQL(schema, {
+        assumeValid: true,
+        assumeValidSDL: true,
+      });
+    } catch (error) {
+      throw transformError(error);
+    }
+  },
+);
 
 /**
  * It's a wrapper around `graphql.parse` that adds Sentry span to current transaction. It helps us measure performance.
@@ -73,17 +70,15 @@ export function buildASTSchema(
  * @param context Context of the operation, e.g. `parse supergraphSDL in Query.explorer`
  * @returns
  */
-export function parseGraphQLSource(source: string | Source, context: string) {
-  return sentryFunction(
-    () =>
-      parse(source, {
-        noLocation: true,
-      }),
-    {
-      op: context,
-    },
-  );
-}
+export const parseGraphQLSource = traceInlineSync(
+  (_source, context) => `parseGraphQLSource: ${context}`,
+  {},
+  (source: string | Source, _context: string) => {
+    return parse(source, {
+      noLocation: true,
+    });
+  },
+);
 
 export function minifySchema(schema: string): string {
   return schema.replace(/\s+/g, ' ').trim();

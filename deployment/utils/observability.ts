@@ -15,10 +15,15 @@ export type ObservabilityConfig = {
     username: Output<string> | string;
     password: Output<string>;
   };
+  tempo: {
+    endpoint: Output<string> | string;
+    username: Output<string> | string;
+    password: Output<string>;
+  };
 };
 
 // prettier-ignore
-export const OTLP_COLLECTOR_CHART = helmChart('https://open-telemetry.github.io/opentelemetry-helm-charts', 'opentelemetry-collector', '0.54.1');
+export const OTLP_COLLECTOR_CHART = helmChart('https://open-telemetry.github.io/opentelemetry-helm-charts', 'opentelemetry-collector', '0.83.0');
 // prettier-ignore
 export const VECTOR_HELM_CHART = helmChart('https://helm.vector.dev', 'vector', '0.31.1');
 
@@ -29,9 +34,10 @@ export class Observability {
   ) {}
 
   deploy() {
-    const ns = new k8s.core.v1.Namespace('observability', {
+    const nsName = 'observability';
+    const ns = new k8s.core.v1.Namespace(nsName, {
       metadata: {
-        name: 'observability',
+        name: nsName,
       },
     });
 
@@ -92,14 +98,26 @@ export class Observability {
       },
       config: {
         exporters: {
+          'otlp/grafana_cloud_traces': {
+            endpoint: this.config.tempo.endpoint,
+            auth: {
+              authenticator: 'basicauth/grafana_cloud_traces',
+            },
+          },
           logging: {
-            loglevel: 'info',
+            verbosity: 'detailed',
           },
           prometheusremotewrite: {
             endpoint: interpolate`https://${this.config.prom.username}:${this.config.prom.password}@${this.config.prom.endpoint}`,
           },
         },
         extensions: {
+          'basicauth/grafana_cloud_traces': {
+            client_auth: {
+              username: this.config.tempo.username,
+              password: this.config.tempo.password,
+            },
+          },
           health_check: {},
         },
         processors: {
@@ -111,6 +129,12 @@ export class Observability {
           },
         },
         receivers: {
+          otlp: {
+            protocols: {
+              grpc: {},
+              http: {},
+            },
+          },
           prometheus: {
             config: {
               global: {
@@ -197,8 +221,13 @@ export class Observability {
           },
         },
         service: {
-          extensions: ['health_check'],
+          extensions: ['health_check', 'basicauth/grafana_cloud_traces'],
           pipelines: {
+            traces: {
+              receivers: ['otlp'],
+              processors: ['batch'],
+              exporters: ['logging', 'otlp/grafana_cloud_traces'],
+            },
             metrics: {
               exporters: ['logging', 'prometheusremotewrite'],
               processors: ['memory_limiter', 'batch'],
@@ -209,13 +238,17 @@ export class Observability {
       },
     };
 
-    // We are using otel-collector to scrape metrics from Pods
-    // dotansimha: once Vector supports scraping K8s metrics based on Prom, we can drop this.
-    new k8s.helm.v3.Chart('metrics', {
+    // We are using otel-collector to scrape metrics and collect traces from Pods
+    const otlpCollector = new k8s.helm.v3.Chart('metrics', {
       ...OTLP_COLLECTOR_CHART,
       namespace: ns.metadata.name,
       values: chartValues,
     });
+
+    let otlpCollectorService = otlpCollector.getResource(
+      'v1/Service',
+      `${nsName}/metrics-opentelemetry-collector`,
+    );
 
     // https://vector.dev/docs/reference/configuration/
     const vectorValues: VectorValues = {
@@ -303,5 +336,9 @@ export class Observability {
         dependsOn: [ns],
       },
     );
+
+    return {
+      otlpCollectorService,
+    };
   }
 }

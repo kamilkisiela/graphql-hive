@@ -41,7 +41,7 @@ export class SlackCommunicationAdapter implements CommunicationAdapter {
     }
 
     try {
-      const client = new WebClient(input.integrations.slack.token);
+      const client = new WebClient(input.integrations.slack.token, {});
 
       const totalChanges = input.event.changes.length + input.event.messages.length;
       const projectLink = this.createLink({

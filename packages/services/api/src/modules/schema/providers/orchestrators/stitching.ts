@@ -1,8 +1,8 @@
 import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
 import type { SchemaBuilderApi } from '@hive/schema';
+import { traceFn } from '@hive/service-common';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { Orchestrator, ProjectType, SchemaObject } from '../../../../shared/entities';
-import { sentry } from '../../../../shared/sentry';
 import { Logger } from '../../../shared/providers/logger';
 import type { SchemaServiceConfig } from './tokens';
 import { SCHEMA_SERVICE_CONFIG } from './tokens';
@@ -34,7 +34,16 @@ export class StitchingOrchestrator implements Orchestrator {
     });
   }
 
-  @sentry('StitchingOrchestrator.composeAndValidate')
+  @traceFn('StitchingOrchestrator.composeAndValidate', {
+    initAttributes: schemas => ({
+      'hive.composition.schema.count': schemas.length,
+    }),
+    resultAttributes: result => ({
+      'hive.composition.error.count': result.errors.length,
+      'hive.composition.tags.count': result.tags?.length ?? 0,
+      'hive.composition.contracts.count': result.contracts?.length ?? 0,
+    }),
+  })
   async composeAndValidate(schemas: SchemaObject[]) {
     this.logger.debug('Composing and Validating Stitched Schemas');
 
