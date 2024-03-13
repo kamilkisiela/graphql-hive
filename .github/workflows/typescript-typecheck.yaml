@@ -22,6 +22,16 @@ jobs:
         id: cpu-cores
         uses: SimenB/github-actions-cpu-cores@v2
 
+      - uses: azure/setup-helm@v4.1.0
+        with:
+          version: 'v3.14.2'
+
+      - name: install helm deps
+        run: helm plugin install https://github.com/losisin/helm-values-schema-json.git
+
+      - name: generate pulumi deps
+        run: pnpm --filter @hive/deployment generate
+
       - name: typecheck
         run: pnpm run --workspace-concurrency ${{ steps.cpu-cores.outputs.count }} -r typecheck
         env:
