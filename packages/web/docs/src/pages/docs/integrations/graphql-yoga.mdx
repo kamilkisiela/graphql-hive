@@ -140,7 +140,7 @@ With GraphQL over Websockets the recommended way is to use the `connectionParams
 forwarding the client information. Headers are not an option as the browser `WebSocket` API does not
 allow forwarding custom headers.
 
-#### Server Configuration
+##### Server Configuration
 
 The following example shows how to use the `connectionParams` object sent by a client to extract the
 client information and forward it to the Hive registry.
@@ -244,7 +244,7 @@ httpServer.listen(4000, () => {
 })
 ```
 
-#### Client Configuration
+##### Client Configuration
 
 When using the `graphql-ws` client, you can use the `connectionParams` object to forward the client
 information to the server.
