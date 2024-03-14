@@ -24,7 +24,11 @@ import {
   schemaCoordinatesSize,
   totalOperations,
 } from './metrics';
-import { stringifyOperation, stringifyRegistryRecord } from './serializer';
+import {
+  stringifyQueryOrMutationOperation,
+  stringifyRegistryRecord,
+  stringifySubscriptionOperation,
+} from './serializer';
 
 interface NormalizationResult {
   type: OperationTypeNode;
@@ -58,6 +62,7 @@ export function createProcessor(config: { logger: ServiceLogger }) {
       logger.info(`Processing (reports=%s, operations=%s)`, rawReports.length, sizeOfAllReports);
 
       const serializedOperations: string[] = [];
+      const serializedSubscriptionOperations: string[] = [];
       const serializedRegistryRecords: string[] = [];
 
       for (const rawReport of rawReports) {
@@ -70,6 +75,10 @@ export function createProcessor(config: { logger: ServiceLogger }) {
             size: number;
           }
         >();
+
+        /** hash -> processedOperations mapping */
+        const processedOperationWaitingForInsert = new Map<string, Array<ProcessedOperation>>();
+        const hashToOperationTypeMapping = new Map<string, OperationTypeNode>();
 
         for (const rawOperation of rawReport.operations) {
           const processedOperation = processSingleOperation(
@@ -97,8 +106,17 @@ export function createProcessor(config: { logger: ServiceLogger }) {
             sample.size += 1;
           }
 
-          const stringifiedOperation = stringifyOperation(processedOperation);
-          serializedOperations.push(stringifiedOperation);
+          let processedOperations = processedOperationWaitingForInsert.get(
+            rawOperation.operationMapKey,
+          );
+          if (processedOperations === undefined) {
+            processedOperations = [];
+            processedOperationWaitingForInsert.set(
+              rawOperation.operationMapKey,
+              processedOperations,
+            );
+          }
+          processedOperations.push(processedOperation);
         }
 
         for (const group of operationSample.values()) {
@@ -115,6 +133,8 @@ export function createProcessor(config: { logger: ServiceLogger }) {
             // The operation should be ignored
             continue;
           }
+
+          hashToOperationTypeMapping.set(group.operation.operationMapKey, normalized.type);
 
           const operationHash = normalized.hash ?? 'unknown';
           const timestamp =
@@ -136,10 +156,29 @@ export function createProcessor(config: { logger: ServiceLogger }) {
             }),
           );
         }
+
+        for (const [hash, processedOperations] of processedOperationWaitingForInsert.entries()) {
+          const operationType = hashToOperationTypeMapping.get(hash);
+          if (operationType === undefined) {
+            logger.warn(`Operation type not found for hash. Skipping insert. hash(=%s)`, hash);
+            continue;
+          }
+
+          if (operationType === 'subscription') {
+            serializedSubscriptionOperations.push(
+              ...processedOperations.map(record => stringifySubscriptionOperation(record)),
+            );
+          } else {
+            serializedOperations.push(
+              ...processedOperations.map(record => stringifyQueryOrMutationOperation(record)),
+            );
+          }
+        }
       }
 
       return {
         operations: serializedOperations,
+        subscriptionOperations: serializedSubscriptionOperations,
         registryRecords: serializedRegistryRecords,
       };
     },

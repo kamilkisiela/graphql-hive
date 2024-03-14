@@ -4,7 +4,12 @@ import type { ServiceLogger } from '@hive/service-common';
 import { compress } from '@hive/usage-common';
 import * as Sentry from '@sentry/node';
 import { writeDuration } from './metrics';
-import { joinIntoSingleMessage, operationsOrder, registryOrder } from './serializer';
+import {
+  joinIntoSingleMessage,
+  operationsOrder,
+  registryOrder,
+  subscriptionOperationsOrder,
+} from './serializer';
 
 export interface ClickHouseConfig {
   protocol: string;
@@ -17,6 +22,7 @@ export interface ClickHouseConfig {
 }
 
 const operationsFields = operationsOrder.join(', ');
+const subscriptionOperationsFields = subscriptionOperationsOrder.join(', ');
 const registryFields = registryOrder.join(', ');
 
 const agentConfig: Agent.HttpOptions = {
@@ -61,6 +67,23 @@ export function createWriter({
         clickhouse,
         agents,
         `INSERT INTO operations (${operationsFields}) FORMAT CSV`,
+        compressed,
+        logger,
+        3,
+      );
+    },
+    async writeSubscriptionOperations(operations: string[]) {
+      if (operations.length === 0) {
+        return;
+      }
+
+      const csv = joinIntoSingleMessage(operations);
+      const compressed = await compress(csv);
+
+      await writeCsv(
+        clickhouse,
+        agents,
+        `INSERT INTO subscription_operations (${subscriptionOperationsFields}) FORMAT CSV`,
         compressed,
         logger,
         3,

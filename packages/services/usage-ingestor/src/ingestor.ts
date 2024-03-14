@@ -199,7 +199,8 @@ async function processMessage({
   // Decompress and parse the message to get a list of reports
   const rawReports: RawReport[] = JSON.parse((await decompress(message.value!)).toString());
 
-  const { operations, registryRecords } = await processor.processReports(rawReports);
+  const { registryRecords, operations, subscriptionOperations } =
+    await processor.processReports(rawReports);
 
   try {
     // .then and .catch looks weird but async/await with try/catch and Promise.all is even weirder
@@ -222,6 +223,21 @@ async function processMessage({
         })
         .catch(error => {
           ingestedOperationsFailures.inc(operations.length);
+          // We want to retry the kafka message only if the write to operations table fails.
+          // Why? Because if we retry the message for operation_registry, we will have duplicate.
+          // One write could succeed, the other one could fail.
+          // Let's stick to the operations table for now.
+          error[retryOnFailureSymbol] = true;
+          return Promise.reject(error);
+        }),
+      writer
+        .writeSubscriptionOperations(subscriptionOperations)
+        .then(value => {
+          ingestedOperationsWrites.inc(subscriptionOperations.length);
+          return Promise.resolve(value);
+        })
+        .catch(error => {
+          ingestedOperationsFailures.inc(subscriptionOperations.length);
           // We want to retry the kafka message only if the write to operations table fails.
           // Why? Because if we retry the message for operation_registry, we will have duplicate.
           // One write could succeed, the other one could fail.

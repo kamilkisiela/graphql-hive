@@ -1,7 +1,7 @@
 import {
   formatDate,
   joinIntoSingleMessage,
-  stringifyOperation,
+  stringifyQueryOrMutationOperation,
   stringifyRegistryRecord,
 } from '../src/serializer';
 
@@ -53,7 +53,7 @@ test('stringify operation in correct format and order', () => {
         operationType: 'query' as any,
         // missing metadata, on purpose
       },
-    ].map(stringifyOperation),
+    ].map(stringifyQueryOrMutationOperation),
   );
   expect(serialized).toBe(
     [
