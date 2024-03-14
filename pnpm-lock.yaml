@@ -722,8 +722,8 @@ importers:
         specifier: 0.20.1
         version: 0.20.1
       itty-router:
-        specifier: 4.2.0
-        version: 4.2.0
+        specifier: 4.2.1
+        version: 4.2.1
       toucan-js:
         specifier: 3.3.1
         version: 3.3.1
@@ -767,8 +767,8 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       itty-router:
-        specifier: 4.2.0
-        version: 4.2.0
+        specifier: 4.2.1
+        version: 4.2.1
       itty-router-extras:
         specifier: 0.4.5
         version: 0.4.5
@@ -22236,8 +22236,8 @@ packages:
     resolution: {integrity: sha512-flxFhFZgPqiscrHTV3mBbRBk8plgOGdg5tZMyv7hE629PO+XEfXh2uHs78ndH6axRG50fIHfjrrqAlb3Pguemw==}
     dev: true
 
-  /itty-router@4.2.0:
-    resolution: {integrity: sha512-YkoTV5mR5F2q0XP+bnMJQ/jCpS9rl8bqEdQApseZJ9zadCt/zBpTiDY8DqwO/DZ7MmGUA5Nz15sS6RHOVs/wTQ==}
+  /itty-router@4.2.1:
+    resolution: {integrity: sha512-aCcqvSHMvkxoYP8CCmgkPxXgZ1AHvNg8AEYs78liW8OOjCogVYnEksIxZ8j4X9ev4KPBDCL1xAXiCiB8FuSxEA==}
     dev: true
 
   /jackspeak@2.3.6:
