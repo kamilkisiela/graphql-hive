@@ -180,9 +180,9 @@ dependencies = [
 
 [[package]]
 name = "apollo-router"
-version = "1.41.1"
+version = "1.42.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23ebcb49efe6fdca2de9bec2e30af3601d736fd7853f933a208afcf2e892e51f"
+checksum = "7dfc6070128394d389ae075c7398c7ef2e6c7efeefb61772350c59e0ed09e9f5"
 dependencies = [
  "access-json",
  "anyhow",
@@ -208,6 +208,7 @@ dependencies = [
  "ci_info",
  "clap",
  "console",
+ "cookie",
  "dashmap",
  "derivative",
  "derive_more",
@@ -1176,6 +1177,16 @@ name = "convert_case"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6245d59a3e82a7fc217c5828a6692dbc6dfb63a0c8c90495621f7b9d79704a0e"
+
+[[package]]
+name = "cookie"
+version = "0.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3cd91cf61412820176e137621345ee43b3f4423e589e7ae4e50d601d93e35ef8"
+dependencies = [
+ "time",
+ "version_check",
+]
 
 [[package]]
 name = "cookie-factory"
