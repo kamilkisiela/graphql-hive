@@ -1,8 +1,8 @@
-import { validateOperation, validateOperationMapRecord } from '../src/validation';
+import { validateOperationMapRecord, validateRequestOperation } from '../src/validation';
 
 test('correct operation should be valid', () => {
   expect(
-    validateOperation(
+    validateRequestOperation(
       {
         operationMapKey: 'a',
         timestamp: Date.now(),
@@ -21,12 +21,12 @@ test('correct operation should be valid', () => {
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
 test('operation with missing timestamp should be valid', () => {
   expect(
-    validateOperation(
+    validateRequestOperation(
       {
         operationMapKey: 'a',
         execution: {
@@ -43,12 +43,12 @@ test('operation with missing timestamp should be valid', () => {
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
 test('operation with missing operationName should be valid', () => {
   expect(
-    validateOperation(
+    validateRequestOperation(
       {
         operationMapKey: 'a',
         execution: {
@@ -65,12 +65,12 @@ test('operation with missing operationName should be valid', () => {
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
 test('operation with missing metadata should be valid', () => {
   expect(
-    validateOperation(
+    validateRequestOperation(
       {
         operationMapKey: 'a',
         execution: {
@@ -87,12 +87,12 @@ test('operation with missing metadata should be valid', () => {
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
 test('operation with empty metadata.client should be valid', () => {
   expect(
-    validateOperation(
+    validateRequestOperation(
       {
         operationMapKey: 'a',
         execution: {
@@ -111,12 +111,12 @@ test('operation with empty metadata.client should be valid', () => {
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
-test('operation with empty metadata.client.name should be valid', () => {
+test('operation with empty metadata.client.version should be valid', () => {
   expect(
-    validateOperation(
+    validateRequestOperation(
       {
         operationMapKey: 'a',
         execution: {
@@ -137,12 +137,12 @@ test('operation with empty metadata.client.name should be valid', () => {
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
-test('operation with empty metadata.client.version should be valid', () => {
+test('operation with empty metadata.client.name should be valid', () => {
   expect(
-    validateOperation(
+    validateRequestOperation(
       {
         operationMapKey: 'a',
         execution: {
@@ -163,12 +163,12 @@ test('operation with empty metadata.client.version should be valid', () => {
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
 test('operation with empty list in metadata.client.errors should be valid', () => {
   expect(
-    validateOperation(
+    validateRequestOperation(
       {
         operationMapKey: 'a',
         execution: {
@@ -185,12 +185,12 @@ test('operation with empty list in metadata.client.errors should be valid', () =
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
 test('operation with empty metadata.client.errors.path should be valid', () => {
   expect(
-    validateOperation(
+    validateRequestOperation(
       {
         operationMapKey: 'a',
         execution: {
@@ -211,12 +211,12 @@ test('operation with empty metadata.client.errors.path should be valid', () => {
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
 test.skip('operation with empty metadata.client.errors.message should NOT be valid', () => {
   expect(
-    validateOperation(
+    validateRequestOperation(
       {
         operationMapKey: 'a',
         execution: {
@@ -238,7 +238,7 @@ test.skip('operation with empty metadata.client.errors.message should NOT be val
 
 test('operation with empty in execution should NOT be valid', () => {
   expect(
-    validateOperation(
+    validateRequestOperation(
       {
         operationMapKey: 'a',
         execution: {},
@@ -255,7 +255,7 @@ test('operation with empty in execution should NOT be valid', () => {
 
 test('operation with empty in execution.ok should NOT be valid', () => {
   expect(
-    validateOperation(
+    validateRequestOperation(
       {
         operationMapKey: 'a',
         execution: {
@@ -275,7 +275,7 @@ test('operation with empty in execution.ok should NOT be valid', () => {
 
 test('operation with empty execution.duration should NOT be valid', () => {
   expect(
-    validateOperation(
+    validateRequestOperation(
       {
         operationMapKey: 'a',
         execution: {
@@ -295,7 +295,7 @@ test('operation with empty execution.duration should NOT be valid', () => {
 
 test('operation with empty execution.errorsTotal should NOT be valid', () => {
   expect(
-    validateOperation(
+    validateRequestOperation(
       {
         operationMapKey: 'a',
         execution: {
@@ -315,7 +315,7 @@ test('operation with empty execution.errorsTotal should NOT be valid', () => {
 
 test('operation with non-boolean execution.ok should NOT be valid', () => {
   expect(
-    validateOperation(
+    validateRequestOperation(
       {
         operationMapKey: 'a',
         execution: {
@@ -336,7 +336,7 @@ test('operation with non-boolean execution.ok should NOT be valid', () => {
 
 test('operation with non-number execution.duration should NOT be valid', () => {
   expect(
-    validateOperation(
+    validateRequestOperation(
       {
         operationMapKey: 'a',
         execution: {
@@ -357,7 +357,7 @@ test('operation with non-number execution.duration should NOT be valid', () => {
 
 test('operation with non-number execution.errorsTotal should NOT be valid', () => {
   expect(
-    validateOperation(
+    validateRequestOperation(
       {
         operationMapKey: 'a',
         execution: {

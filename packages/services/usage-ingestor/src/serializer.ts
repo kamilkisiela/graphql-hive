@@ -1,5 +1,9 @@
 import LRU from 'tiny-lru';
-import type { ProcessedOperation, ProcessedRegistryRecord } from '@hive/usage-common';
+import type {
+  ProcessedOperation,
+  ProcessedRegistryRecord,
+  ProcessedSubscriptionOperation,
+} from '@hive/usage-common';
 import { cache } from './helpers';
 
 const delimiter = '\n';
@@ -82,7 +86,7 @@ export function stringifyQueryOrMutationOperation(operation: ProcessedOperation)
   return Object.values(mapper).join(',');
 }
 
-export function stringifySubscriptionOperation(operation: ProcessedOperation): string {
+export function stringifySubscriptionOperation(operation: ProcessedSubscriptionOperation): string {
   const mapper: Record<KeysOfArray<typeof subscriptionOperationsOrder>, any> = {
     target: castValue(operation.target),
     timestamp: castDate(operation.timestamp),
