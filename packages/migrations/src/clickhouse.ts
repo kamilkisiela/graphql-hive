@@ -155,6 +155,7 @@ export async function migrateClickHouse(
     import('./clickhouse-actions/002-add-hash-to-clients_daily'),
     import('./clickhouse-actions/003-add-client-name-to-operations-tables'),
     import('./clickhouse-actions/004-version-2'),
+    import('./clickhouse-actions/005-subscription-conditional-breaking-changes'),
   ]);
 
   async function actionRunner(action: Action, index: number) {
