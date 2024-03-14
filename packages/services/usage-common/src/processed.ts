@@ -11,6 +11,14 @@ export interface ProcessedOperation {
   metadata?: RawOperation['metadata'];
 }
 
+export interface ProcessedSubscriptionOperation {
+  target: string;
+  operationHash: string;
+  timestamp: number;
+  expiresAt: number;
+  metadata?: RawOperation['metadata'];
+}
+
 export interface ProcessedRegistryRecord {
   size: number;
   target: string;

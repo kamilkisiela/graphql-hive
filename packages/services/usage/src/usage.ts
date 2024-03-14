@@ -19,8 +19,17 @@ import {
   totalReports,
 } from './metrics';
 import type { TokensResponse } from './tokens';
-import type { IncomingLegacyReport, IncomingReport } from './types';
-import { validateOperation, validateOperationMapRecord } from './validation';
+import type {
+  IncomingLegacyReport,
+  IncomingOperation,
+  IncomingReport,
+  OperationMap,
+} from './types';
+import {
+  validateOperationMapRecord,
+  validateRequestOperation,
+  validateSubscriptionOperation,
+} from './validation';
 
 const DAY_IN_MS = 86_400_000;
 
@@ -321,7 +330,8 @@ export function createUsage(config: {
       const incoming = ensureReportFormat(incomingReport);
       ensureIncomingMessageValidity(incoming);
 
-      const size = incoming.operations.length;
+      const size =
+        incoming.operations?.length ?? 0 + (incoming.subscriptionOperations?.length ?? 0);
       totalReports.inc();
       totalOperations.inc(size);
       rawOperationsSize.observe(size);
@@ -332,6 +342,7 @@ export function createUsage(config: {
         size: 0,
         map: {},
         operations: [],
+        subscriptionOperations: [],
       };
 
       const oldNewKeyMapping = new Map<string, string>();
@@ -341,6 +352,7 @@ export function createUsage(config: {
         const validationResult = validateOperationMapRecord(record);
 
         if (validationResult.valid) {
+          const { record } = validationResult;
           // The key is used for lru cache (usage-ingestor) so we need to make sure, the record is unique per target, operation body, name and the list of fields
           const key = createHash('md5')
             .update(outgoing.target)
@@ -360,18 +372,20 @@ export function createUsage(config: {
         }
       }
 
-      for (const operation of incoming.operations) {
+      for (const operation of incoming.operations ?? []) {
         // The validateOperation function drops the operation if the operationMapKey does not exist, we can safely pass the old key in case the new key is missing.
         operation.operationMapKey =
           oldNewKeyMapping.get(operation.operationMapKey) ?? operation.operationMapKey;
-        const validationResult = validateOperation(operation, outgoing.map);
+        const validationResult = validateRequestOperation(operation, outgoing.map);
 
         if (validationResult.valid) {
+          const { operation } = validationResult;
           // Increase size
           outgoing.size += 1;
 
           // Add operation
           const ts = operation.timestamp ?? now;
+
           outgoing.operations.push({
             operationMapKey: operation.operationMapKey,
             timestamp: ts,
@@ -381,6 +395,48 @@ export function createUsage(config: {
               duration: operation.execution.duration,
               errorsTotal: operation.execution.errorsTotal,
             },
+            metadata: {
+              client: {
+                name: operation.metadata?.client?.name,
+                version: operation.metadata?.client?.version,
+              },
+            },
+          });
+        } else {
+          logger.warn(
+            `Detected invalid operation (target=%s): %o`,
+            token.target,
+            validationResult.errors,
+          );
+          invalidRawOperations
+            .labels({
+              reason:
+                'reason' in validationResult && validationResult.reason
+                  ? validationResult.reason
+                  : 'unknown',
+            })
+            .inc(1);
+        }
+      }
+
+      for (const operation of incoming.subscriptionOperations ?? []) {
+        // The validateOperation function drops the operation if the operationMapKey does not exist, we can safely pass the old key in case the new key is missing.
+        operation.operationMapKey =
+          oldNewKeyMapping.get(operation.operationMapKey) ?? operation.operationMapKey;
+        const validationResult = validateSubscriptionOperation(operation, outgoing.map);
+
+        if (validationResult.valid) {
+          const { operation } = validationResult;
+          // Increase size
+          outgoing.size += 1;
+
+          // Add operation
+          const ts = operation.timestamp ?? now;
+
+          outgoing.subscriptionOperations?.push({
+            operationMapKey: operation.operationMapKey,
+            timestamp: ts,
+            expiresAt: targetRetentionInDays ? ts + targetRetentionInDays * DAY_IN_MS : undefined,
             metadata: {
               client: {
                 name: operation.metadata?.client?.name,
@@ -445,10 +501,9 @@ function ensureReportFormat(report: IncomingLegacyReport | IncomingReport): Inco
 
 function convertLegacyReport(legacy: IncomingLegacyReport): IncomingReport {
   const hashMap = new Map<string, string>();
-  const report: IncomingReport = {
-    map: {},
-    operations: [],
-  };
+
+  const map: OperationMap = {};
+  const operations: IncomingOperation[] = [];
 
   for (const op of legacy) {
     let operationMapKey = hashMap.get(op.operation);
@@ -458,14 +513,14 @@ function convertLegacyReport(legacy: IncomingLegacyReport): IncomingReport {
         .update(op.operation)
         .update(JSON.stringify(op.fields))
         .digest('hex');
-      report.map[operationMapKey] = {
+      map[operationMapKey] = {
         operation: op.operation,
         operationName: op.operationName,
         fields: op.fields,
       };
     }
 
-    report.operations.push({
+    operations.push({
       operationMapKey,
       timestamp: op.timestamp,
       execution: {
@@ -482,5 +537,8 @@ function convertLegacyReport(legacy: IncomingLegacyReport): IncomingReport {
     });
   }
 
-  return report;
+  return {
+    map,
+    operations,
+  };
 }

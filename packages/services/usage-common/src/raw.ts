@@ -4,6 +4,7 @@ export interface RawReport {
   target: string;
   map: RawOperationMap;
   operations: RawOperation[];
+  subscriptionOperations?: RawSubscriptionOperation[];
 }
 
 export interface RawOperation {
@@ -22,6 +23,18 @@ export interface RawOperation {
     };
   };
 }
+
+export type RawSubscriptionOperation = {
+  operationMapKey: string;
+  timestamp: number;
+  expiresAt?: number;
+  metadata?: {
+    client?: {
+      name?: string;
+      version?: string;
+    };
+  };
+};
 
 export interface RawOperationMapRecord {
   key: string;

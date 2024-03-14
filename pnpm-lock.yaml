@@ -1301,15 +1301,15 @@ importers:
       '@sentry/node':
         specifier: 7.108.0
         version: 7.108.0
+      '@sinclair/typebox':
+        specifier: 0.32.15
+        version: 0.32.15
       '@trpc/client':
         specifier: 10.45.2
         version: 10.45.2(@trpc/server@10.45.2)
       '@trpc/server':
         specifier: 10.45.2
         version: 10.45.2
-      ajv:
-        specifier: 8.12.0
-        version: 8.12.0
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
@@ -11287,6 +11287,10 @@ packages:
 
   /@sinclair/typebox@0.27.8:
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
+    dev: true
+
+  /@sinclair/typebox@0.32.15:
+    resolution: {integrity: sha512-5Lrwo7VOiWEBJBhHmqNmf3TPB9ll8gcEshvYJyAIJyCZ2PF48MFOtiDHJNj8+FsNcqImaQYmxVkKBCBlyAa/wg==}
     dev: true
 
   /@sindresorhus/is@4.6.0:

@@ -15,6 +15,7 @@ import type {
   RawOperationMap,
   RawOperationMapRecord,
   RawReport,
+  RawSubscriptionOperation,
 } from '@hive/usage-common';
 import { cache, errorOkTuple } from './helpers';
 import {
@@ -71,14 +72,10 @@ export function createProcessor(config: { logger: ServiceLogger }) {
         const operationSample = new Map<
           string,
           {
-            operation: RawOperation;
+            operation: RawOperation | RawSubscriptionOperation;
             size: number;
           }
         >();
-
-        /** hash -> processedOperations mapping */
-        const processedOperationWaitingForInsert = new Map<string, Array<ProcessedOperation>>();
-        const hashToOperationTypeMapping = new Map<string, OperationTypeNode>();
 
         for (const rawOperation of rawReport.operations) {
           const processedOperation = processSingleOperation(
@@ -106,17 +103,40 @@ export function createProcessor(config: { logger: ServiceLogger }) {
             sample.size += 1;
           }
 
-          let processedOperations = processedOperationWaitingForInsert.get(
-            rawOperation.operationMapKey,
-          );
-          if (processedOperations === undefined) {
-            processedOperations = [];
-            processedOperationWaitingForInsert.set(
-              rawOperation.operationMapKey,
-              processedOperations,
+          serializedOperations.push(stringifyQueryOrMutationOperation(processedOperation));
+        }
+
+        if (rawReport.subscriptionOperations) {
+          for (const rawOperation of rawReport.subscriptionOperations) {
+            const processedOperation = processSubscriptionOperation(
+              rawOperation,
+              rawReport.map,
+              rawReport.target,
+              normalize,
+              logger,
+            );
+
+            if (processedOperation === null) {
+              // The operation should be ignored
+              continue;
+            }
+
+            const sample = operationSample.get(rawOperation.operationMapKey);
+
+            // count operations per operationMapKey
+            if (!sample) {
+              operationSample.set(rawOperation.operationMapKey, {
+                operation: rawOperation,
+                size: 1,
+              });
+            } else {
+              sample.size += 1;
+            }
+
+            serializedSubscriptionOperations.push(
+              stringifySubscriptionOperation(processedOperation),
             );
           }
-          processedOperations.push(processedOperation);
         }
 
         for (const group of operationSample.values()) {
@@ -133,8 +153,6 @@ export function createProcessor(config: { logger: ServiceLogger }) {
             // The operation should be ignored
             continue;
           }
-
-          hashToOperationTypeMapping.set(group.operation.operationMapKey, normalized.type);
 
           const operationHash = normalized.hash ?? 'unknown';
           const timestamp =
@@ -155,24 +173,6 @@ export function createProcessor(config: { logger: ServiceLogger }) {
               timestamp,
             }),
           );
-        }
-
-        for (const [hash, processedOperations] of processedOperationWaitingForInsert.entries()) {
-          const operationType = hashToOperationTypeMapping.get(hash);
-          if (operationType === undefined) {
-            logger.warn(`Operation type not found for hash. Skipping insert. hash(=%s)`, hash);
-            continue;
-          }
-
-          if (operationType === 'subscription') {
-            serializedSubscriptionOperations.push(
-              ...processedOperations.map(record => stringifySubscriptionOperation(record)),
-            );
-          } else {
-            serializedOperations.push(
-              ...processedOperations.map(record => stringifyQueryOrMutationOperation(record)),
-            );
-          }
         }
       }
 
@@ -231,6 +231,56 @@ function processSingleOperation(
     expiresAt: operation.expiresAt || timestamp + 30 * DAY_IN_MS,
     target,
     execution,
+    metadata,
+    operationHash,
+  };
+}
+
+function processSubscriptionOperation(
+  operation: RawSubscriptionOperation,
+  operationMap: RawOperationMap,
+  target: string,
+  normalize: NormalizeFunction,
+  logger: ServiceLogger,
+) {
+  const operationMapRecord = operationMap[operation.operationMapKey];
+  const { metadata } = operation;
+
+  const [normalizationError, normalizationResult] = errorOkTuple(() =>
+    normalize(operationMapRecord),
+  );
+
+  if (!normalizationResult) {
+    // Failed to normalize the operation because of an exception
+    logger.debug(
+      'Failed to normalize operation (operationName=%s, operation=%s)',
+      operationMapRecord.operationName ?? '-',
+      operationMapRecord.operation,
+    );
+    logger.error(normalizationError);
+    return null;
+  }
+
+  const { value: normalized } = normalizationResult;
+
+  if (normalized === null) {
+    // The operation should be ignored
+    return null;
+  }
+
+  const operationHash = normalized.hash ?? 'unknown';
+
+  schemaCoordinatesSize.observe(normalized.coordinates.length);
+
+  const timestamp =
+    typeof operation.timestamp === 'string'
+      ? parseInt(operation.timestamp, 10)
+      : operation.timestamp;
+
+  return {
+    timestamp,
+    expiresAt: operation.expiresAt || timestamp + 30 * DAY_IN_MS,
+    target,
     metadata,
     operationHash,
   };

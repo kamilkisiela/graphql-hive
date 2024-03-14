@@ -1,83 +1,106 @@
-import type { JSONSchemaType } from 'ajv';
-import Ajv from 'ajv';
 import { parse } from 'graphql';
 import LRU from 'tiny-lru';
-import type { IncomingOperation, OperationMap, OperationMapRecord } from './types';
-
-const unixTimestampRegex = /^\d{13,}$/;
-
-function isUnixTimestamp(x: number) {
-  return unixTimestampRegex.test(String(x));
-}
-
-const ajv = new Ajv({
-  formats: {
-    unix_timestamp_in_ms: {
-      type: 'number',
-      validate: isUnixTimestamp,
-    },
-  },
-});
+import * as tb from '@sinclair/typebox';
+import * as tc from '@sinclair/typebox/compiler';
+import type {
+  IncomingOperation,
+  IncomingSubscriptionOperation,
+  OperationMap,
+  OperationMapRecord,
+} from './types';
 
 const validOperationBodyCache = LRU<boolean>(5000, 300_000 /* 5 minutes */);
 
-const operationMapRecordSchema: JSONSchemaType<OperationMapRecord> = {
-  type: 'object',
-  required: ['operation', 'fields'],
-  properties: {
-    operation: { type: 'string' },
-    operationName: { type: 'string', nullable: true },
-    fields: { type: 'array', minItems: 1, items: { type: 'string' } },
+const OperationMapSchema = tb.Object(
+  {
+    operation: tb.String(),
+    operationName: tb.Optional(tb.String()),
+    fields: tb.Array(tb.String(), {
+      minItems: 1,
+    }),
   },
-};
+  { title: 'OperationMapRecord' },
+);
 
-const operationSchema: JSONSchemaType<IncomingOperation> = {
-  type: 'object',
-  required: ['operationMapKey', 'execution'],
-  properties: {
-    timestamp: { type: 'number', format: 'unix_timestamp_in_ms', nullable: true },
-    operationMapKey: { type: 'string' },
-    execution: {
-      type: 'object',
-      required: ['ok', 'duration', 'errorsTotal'],
-      properties: {
-        ok: { type: 'boolean' },
-        duration: { type: 'number' },
-        errorsTotal: { type: 'number' },
-      },
-    },
-    metadata: {
-      type: 'object',
-      nullable: true,
-      required: [],
-      properties: {
-        client: {
-          type: 'object',
-          nullable: true,
-          required: [],
-          properties: {
-            name: { type: 'string', nullable: true },
-            version: { type: 'string', nullable: true },
-          },
-        },
-      },
-    },
+const ExecutionSchema = tb.Type.Object(
+  {
+    ok: tb.Type.Boolean(),
+    duration: tb.Type.Integer(),
+    errorsTotal: tb.Type.Integer(),
   },
-};
+  {
+    title: 'Execution',
+  },
+);
+
+const MetadataSchema = tb.Type.Object({
+  client: tb.Type.Optional(
+    tb.Type.Object(
+      {
+        name: tb.Type.Optional(tb.Type.String()),
+        version: tb.Type.Optional(tb.Type.String()),
+      },
+      {
+        title: 'Client',
+      },
+    ),
+  ),
+});
+
+/** Query + Mutation */
+const RequestOperationSchema = tb.Type.Object(
+  {
+    timestamp: tb.Type.Optional(tb.Type.Integer()),
+    operationMapKey: tb.Type.String(),
+    execution: ExecutionSchema,
+    metadata: tb.Type.Optional(MetadataSchema),
+  },
+  {
+    title: 'RequestOperation',
+  },
+);
+
+/** Subscription / Live Query */
+const SubscriptionOperationSchema = tb.Type.Object(
+  {
+    timestamp: tb.Type.Optional(tb.Type.Integer()),
+    operationMapKey: tb.Type.String(),
+    execution: ExecutionSchema,
+    metadata: tb.Type.Optional(MetadataSchema),
+  },
+  {
+    title: 'SubscriptionOperation',
+  },
+);
+
+const FullSchema = tb.Type.Object(
+  {
+    size: tb.Type.Integer(),
+    map: tb.Record(tb.String(), OperationMapSchema),
+    operations: tb.Array(RequestOperationSchema),
+    subscriptionOperations: tb.Array(SubscriptionOperationSchema),
+  },
+  {
+    title: 'Report',
+  },
+);
+
+const operationMapSchemaModel = tc.TypeCompiler.Compile(OperationMapSchema);
+const requestOperationSchemaModel = tc.TypeCompiler.Compile(RequestOperationSchema);
+const subscriptionOperationSchemaModel = tc.TypeCompiler.Compile(SubscriptionOperationSchema);
 
 export function validateOperationMapRecord(record: OperationMapRecord) {
-  const validate = ajv.compile(operationMapRecordSchema);
-
-  if (validate(record)) {
+  const error = operationMapSchemaModel.Errors(record).First();
+  if (!error) {
     return {
       valid: true,
-    };
+      record: record as tb.Static<typeof OperationMapSchema>,
+    } as const;
   }
 
   return {
     valid: false,
-    errors: validate.errors,
-  };
+  } as const;
 }
 
 function isValidOperationBody(op: OperationMapRecord) {
@@ -99,8 +122,15 @@ function isValidOperationBody(op: OperationMapRecord) {
   }
 }
 
-export function validateOperation(operation: IncomingOperation, operationMap: OperationMap) {
-  const validate = ajv.compile(operationSchema);
+export function validateRequestOperation(operation: IncomingOperation, operationMap: OperationMap) {
+  const errors = [...requestOperationSchemaModel.Errors(operation)];
+
+  if (errors.length) {
+    return {
+      valid: false,
+      errors,
+    } as const;
+  }
 
   if (!operationMap[operation.operationMapKey]) {
     return {
@@ -111,29 +141,72 @@ export function validateOperation(operation: IncomingOperation, operationMap: Op
         },
       ],
       reason: 'operation_map_key_not_found',
-    };
+    } as const;
   }
 
-  if (validate(operation)) {
-    if (!isValidOperationBody(operationMap[operation.operationMapKey])) {
-      return {
-        valid: false,
-        errors: [
-          {
-            message: 'Failed to parse operation',
-          },
-        ],
-        reason: 'invalid_operation_body',
-      };
-    }
-
+  if (!isValidOperationBody(operationMap[operation.operationMapKey])) {
     return {
-      valid: true,
-    };
+      valid: false,
+      errors: [
+        {
+          message: 'Failed to parse operation',
+        },
+      ],
+      reason: 'invalid_operation_body',
+    } as const;
   }
 
   return {
-    valid: false,
-    errors: validate.errors,
-  };
+    valid: true,
+    operation: operation as tb.Static<typeof RequestOperationSchema>,
+    operationMapRecord: operationMap[operation.operationMapKey] as tb.Static<
+      typeof OperationMapSchema
+    >,
+  } as const;
+}
+
+export function validateSubscriptionOperation(
+  operation: IncomingSubscriptionOperation,
+  operationMap: OperationMap,
+) {
+  const errors = [...subscriptionOperationSchemaModel.Errors(operation)];
+
+  if (errors.length) {
+    return {
+      valid: false,
+      errors,
+    } as const;
+  }
+
+  if (!operationMap[operation.operationMapKey]) {
+    return {
+      valid: false,
+      errors: [
+        {
+          message: `Operation map key "${operation.operationMapKey}" is not found`,
+        },
+      ],
+      reason: 'operation_map_key_not_found',
+    } as const;
+  }
+
+  if (!isValidOperationBody(operationMap[operation.operationMapKey])) {
+    return {
+      valid: false,
+      errors: [
+        {
+          message: 'Failed to parse operation',
+        },
+      ],
+      reason: 'invalid_operation_body',
+    } as const;
+  }
+
+  return {
+    valid: true,
+    operation: operation as tb.Static<typeof SubscriptionOperationSchema>,
+    operationMapRecord: operationMap[operation.operationMapKey] as tb.Static<
+      typeof OperationMapSchema
+    >,
+  } as const;
 }
