@@ -9,6 +9,7 @@ export interface HiveClient {
   info(): Promise<void>;
   reportSchema: SchemaReporter['report'];
   collectUsage(): CollectUsageCallback;
+  collectSubscriptionUsage(args: { args: ExecutionArgs }): void;
   dispose(): Promise<void>;
 }
 

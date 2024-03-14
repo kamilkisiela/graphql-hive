@@ -174,6 +174,7 @@ export function createHive(options: HivePluginOptions): HiveClient {
     reportSchema,
     collectUsage,
     dispose,
+    collectSubscriptionUsage: usage.collectSubscription,
   };
 }
 

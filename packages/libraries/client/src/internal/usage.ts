@@ -20,6 +20,7 @@ import {
   TypeInfo,
   visit,
   visitWithTypeInfo,
+  type ExecutionArgs,
 } from 'graphql';
 import LRU from 'tiny-lru';
 import { normalizeOperation } from '@graphql-hive/core';
@@ -45,6 +46,7 @@ import {
 
 interface UsageCollector {
   collect(): CollectUsageCallback;
+  collectSubscription(args: { args: ExecutionArgs }): void;
   dispose(): Promise<void>;
 }
 
@@ -59,21 +61,22 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
         return () => {};
       },
       async dispose() {},
+      collectSubscription() {},
     };
   }
 
-  let report: Report = {
-    size: 0,
-    map: {},
-    operations: [],
-  };
+  let reportSize = 0;
+  let reportMap: Record<string, OperationMapRecord> = {};
+  let reportOperations: RequestOperation[] = [];
+  let reportSubscriptionOperations: SubscriptionOperation[] = [];
+
   const options =
     typeof pluginOptions.usage === 'boolean' ? ({} as HiveUsagePluginOptions) : pluginOptions.usage;
   const selfHostingOptions = pluginOptions.selfHosting;
   const logger = pluginOptions.agent?.logger ?? console;
   const collector = memo(createCollector, arg => arg.schema);
   const excludeSet = new Set(options.exclude ?? []);
-  const agent = createAgent<CollectedOperation>(
+  const agent = createAgent<AgentAction>(
     {
       logger,
       ...(pluginOptions.agent ?? {
@@ -90,40 +93,51 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
     {
       prefix: 'usage',
       data: {
-        set(operation) {
-          report.operations.push({
-            operationMapKey: operation.key,
-            timestamp: operation.timestamp,
-            execution: {
-              ok: operation.execution.ok,
-              duration: operation.execution.duration,
-              errorsTotal: operation.execution.errorsTotal,
-              errors: operation.execution.errors,
-            },
-            metadata: {
-              client: operation.client,
-            },
-          });
+        set(action) {
+          if (action.type === 'request') {
+            const operation = action.data;
+            reportOperations.push({
+              operationMapKey: operation.key,
+              timestamp: operation.timestamp,
+              execution: {
+                ok: operation.execution.ok,
+                duration: operation.execution.duration,
+                errorsTotal: operation.execution.errorsTotal,
+                errors: operation.execution.errors,
+              },
+              metadata: {
+                client: operation.client,
+              },
+            });
+          } else if (action.type === 'subscription') {
+            const operation = action.data;
+            reportSubscriptionOperations.push({
+              operationMapKey: operation.key,
+              timestamp: operation.timestamp,
+              metadata: {
+                client: operation.client,
+              },
+            });
+          }
 
-          report.size += 1;
+          reportSize += 1;
 
-          if (!report.map[operation.key]) {
-            report.map[operation.key] = {
-              operation: operation.operation,
-              operationName: operation.operationName,
-              fields: operation.fields,
+          if (!reportMap[action.data.key]) {
+            reportMap[action.data.key] = {
+              operation: action.data.operation,
+              operationName: action.data.operationName,
+              fields: action.data.fields,
             };
           }
         },
         size() {
-          return report.size;
+          return reportSize;
         },
         clear() {
-          report = {
-            size: 0,
-            map: {},
-            operations: [],
-          };
+          reportSize = 0;
+          reportMap = {};
+          reportOperations = [];
+          reportSubscriptionOperations = [];
         },
       },
       headers() {
@@ -134,6 +148,14 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
         };
       },
       body() {
+        const report: Report = {
+          size: reportSize,
+          map: reportMap,
+          operations: reportOperations.length ? reportOperations : undefined,
+          subscriptionOperations: reportSubscriptionOperations.length
+            ? reportSubscriptionOperations
+            : undefined,
+        };
         return JSON.stringify(report);
       },
     },
@@ -206,23 +228,26 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
             const { key, value: info } = collect(document, args.variableValues ?? null);
 
             agent.capture({
-              key,
-              timestamp: Date.now(),
-              operationName,
-              operation: info.document,
-              fields: info.fields,
-              execution: {
-                ok: errors.length === 0,
-                duration,
-                errorsTotal: errors.length,
-                errors,
+              type: 'request',
+              data: {
+                key,
+                timestamp: Date.now(),
+                operationName,
+                operation: info.document,
+                fields: info.fields,
+                execution: {
+                  ok: errors.length === 0,
+                  duration,
+                  errorsTotal: errors.length,
+                  errors,
+                },
+                // TODO: operationHash is ready to accept hashes of persisted operations
+                client:
+                  typeof args.contextValue !== 'undefined' &&
+                  typeof options.clientInfo !== 'undefined'
+                    ? options.clientInfo(args.contextValue)
+                    : null,
               },
-              // TODO: operationHash is ready to accept hashes of persisted operations
-              client:
-                typeof args.contextValue !== 'undefined' &&
-                typeof options.clientInfo !== 'undefined'
-                  ? options.clientInfo(args.contextValue)
-                  : null,
             });
           }
         } catch (error) {
@@ -230,6 +255,53 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
           logger.error(`Failed to collect operation${details}`, error);
         }
       };
+    },
+    collectSubscription({ args }) {
+      const document = args.document;
+      const rootOperation = document.definitions.find(
+        o => o.kind === Kind.OPERATION_DEFINITION,
+      ) as OperationDefinitionNode;
+      const providedOperationName = args.operationName || rootOperation.name?.value;
+      const operationName = providedOperationName || 'anonymous';
+      // Check if operationName is a match with any string or regex in excludeSet
+      const isMatch = Array.from(excludeSet).some(excludingValue =>
+        excludingValue instanceof RegExp
+          ? excludingValue.test(operationName)
+          : operationName === excludingValue,
+      );
+      if (
+        !isMatch &&
+        shouldInclude({
+          operationName,
+          document,
+          variableValues: args.variableValues,
+          contextValue: args.contextValue,
+        })
+      ) {
+        const collect = collector({
+          schema: args.schema,
+          max: options.max ?? 1000,
+          ttl: options.ttl,
+          processVariables: options.processVariables ?? false,
+        });
+        const { key, value: info } = collect(document, args.variableValues ?? null);
+
+        agent.capture({
+          type: 'subscription',
+          data: {
+            key,
+            timestamp: Date.now(),
+            operationName,
+            operation: info.document,
+            fields: info.fields,
+            // TODO: operationHash is ready to accept hashes of persisted operations
+            client:
+              typeof args.contextValue !== 'undefined' && typeof options.clientInfo !== 'undefined'
+                ? options.clientInfo(args.contextValue)
+                : null,
+          },
+        });
+      }
     },
   };
 }
@@ -570,8 +642,19 @@ type GraphQLNamedInputType = Exclude<
 export interface Report {
   size: number;
   map: OperationMap;
-  operations: Operation[];
+  operations?: RequestOperation[];
+  subscriptionOperations?: SubscriptionOperation[];
 }
+
+type AgentAction =
+  | {
+      type: 'request';
+      data: CollectedOperation;
+    }
+  | {
+      type: 'subscription';
+      data: CollectedSubscriptionOperation;
+    };
 
 interface CollectedOperation {
   key: string;
@@ -591,7 +674,16 @@ interface CollectedOperation {
   client?: ClientInfo | null;
 }
 
-interface Operation {
+interface CollectedSubscriptionOperation {
+  key: string;
+  timestamp: number;
+  operation: string;
+  operationName?: string | null;
+  fields: string[];
+  client?: ClientInfo | null;
+}
+
+interface RequestOperation {
   operationMapKey: string;
   timestamp: number;
   execution: {
@@ -603,6 +695,17 @@ interface Operation {
       path?: string;
     }>;
   };
+  metadata?: {
+    client?: {
+      name?: string;
+      version?: string;
+    } | null;
+  };
+}
+
+interface SubscriptionOperation {
+  operationMapKey: string;
+  timestamp: number;
   metadata?: {
     client?: {
       name?: string;

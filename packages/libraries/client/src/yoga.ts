@@ -96,45 +96,11 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
 
       if (record) {
         record.isSubscription = true;
-        const errors: GraphQLError[] = [];
-
-        return {
-          onSubscribeResult() {
-            return {
-              onNext(data) {
-                if (data.result.errors) {
-                  errors.push(...data.result.errors);
-                }
-              },
-              // TODO: maybe it makes sense to invoke the callback within onResultProcess instead...
-              onEnd() {
-                record.callback(context.args, { errors });
-              },
-            };
-          },
-        };
       }
 
-      // If the record is not found, it means the subscription was not tracked by onParams
-      // and the request is probably done by graphql-sse or graphql-ws
-      // in that case, we will now wrap the subscribe function and track the usage
-
-      // TODO: we do not include parse and validation time within the usage report, as we create the record here
-      const callback = hive.collectUsage();
-      const errors: GraphQLError[] = [];
-
       return {
-        onSubscribeResult() {
-          return {
-            onNext(data) {
-              if (data.result.errors) {
-                errors.push(...data.result.errors);
-              }
-            },
-            onEnd() {
-              callback(context.args, { errors });
-            },
-          };
+        onSubscribeResult({ result }) {
+          hive.collectSubscriptionUsage({ args: context.args });
         },
       };
     },

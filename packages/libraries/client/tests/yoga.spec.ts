@@ -76,7 +76,7 @@ it('reports usage', async () => {
     plugins: [
       useHive({
         enabled: true,
-        debug: true,
+        debug: false,
         token: 'brrrt',
         selfHosting: {
           applicationUrl: 'http://localhost/foo',
@@ -94,6 +94,7 @@ it('reports usage', async () => {
         },
         agent: {
           maxSize: 1,
+          logger: createLogger('silent'),
         },
       }),
     ],
@@ -132,7 +133,6 @@ it('reports usage', async () => {
 
 it('reports usage with response cache', async () => {
   axios.interceptors.request.use(config => {
-    console.log(config.url);
     return config;
   });
   let usageCount = 0;
@@ -198,7 +198,7 @@ it('reports usage with response cache', async () => {
       }),
       useHive({
         enabled: true,
-        debug: true,
+        debug: false,
         token: 'brrrt',
         selfHosting: {
           applicationUrl: 'http://localhost/foo',
@@ -216,6 +216,7 @@ it('reports usage with response cache', async () => {
         },
         agent: {
           maxSize: 1,
+          logger: createLogger('silent'),
         },
       }),
     ],
@@ -298,7 +299,7 @@ it('does not report usage for operation that does not pass validation', async ()
       useDisableIntrospection(),
       useHive({
         enabled: true,
-        debug: true,
+        debug: false,
         token: 'brrrt',
         selfHosting: {
           applicationUrl: 'http://localhost/foo',
@@ -316,6 +317,7 @@ it('does not report usage for operation that does not pass validation', async ()
         },
         agent: {
           maxSize: 1,
+          logger: createLogger('silent'),
         },
       }),
     ],
@@ -403,7 +405,7 @@ it('does not report usage if context creating raises an error', async () => {
       },
       useHive({
         enabled: true,
-        debug: true,
+        debug: false,
         token: 'brrrt',
         selfHosting: {
           applicationUrl: 'http://localhost/foo',
@@ -421,6 +423,7 @@ it('does not report usage if context creating raises an error', async () => {
         },
         agent: {
           maxSize: 1,
+          logger: createLogger('silent'),
         },
       }),
     ],
@@ -499,17 +502,26 @@ describe('subscription usage reporting', () => {
           },
         })
         .post('/usage', body => {
-          expect(body.map).toMatchInlineSnapshot(`
-          {
+          expect(body.map).toEqual({
             c6cc5505189a301dcadc408034c21a2d: {
-              fields: [
-                Subscription.hi,
-              ],
-              operation: subscription{hi},
-              operationName: anonymous,
+              fields: ['Subscription.hi'],
+              operation: 'subscription{hi}',
+              operationName: 'anonymous',
             },
-          }
-        `);
+          });
+
+          expect(body.operations).toBeUndefined();
+          expect(body.subscriptionOperations).toMatchObject([
+            {
+              operationMapKey: 'c6cc5505189a301dcadc408034c21a2d',
+              metadata: {
+                client: {
+                  name: 'brrr',
+                  version: '1',
+                },
+              },
+            },
+          ]);
 
           return true;
         })
@@ -643,13 +655,14 @@ describe('subscription usage reporting', () => {
         `);
 
           expect(body).toMatchObject({
-            operations: [
+            subscriptionOperations: [
               {
-                execution: {
-                  ok: false,
-                  duration: expect.any(Number),
-                  errorsTotal: 1,
-                  errors: [{ message: 'Oof' }],
+                operationMapKey: 'c6cc5505189a301dcadc408034c21a2d',
+                metadata: {
+                  client: {
+                    name: 'brrr',
+                    version: '1',
+                  },
                 },
               },
             ],
@@ -790,7 +803,7 @@ describe('subscription usage reporting', () => {
           }
         `);
 
-          expect(body.operations[0].metadata.client).toEqual({
+          expect(body.subscriptionOperations[0].metadata.client).toEqual({
             name: 'my-client',
             version: '1.0.0',
           });
@@ -938,16 +951,7 @@ describe('subscription usage reporting', () => {
         `);
 
           expect(body).toMatchObject({
-            operations: [
-              {
-                execution: {
-                  ok: false,
-                  duration: expect.any(Number),
-                  errorsTotal: 1,
-                  errors: [{ message: 'Oof' }],
-                },
-              },
-            ],
+            subscriptionOperations: [{}],
           });
 
           return true;
@@ -990,7 +994,6 @@ describe('subscription usage reporting', () => {
             usage: {
               endpoint: 'http://localhost/usage',
               clientInfo(ctx) {
-                console.log(ctx.request);
                 return {
                   name: 'brrr',
                   version: '1',
@@ -1089,7 +1092,7 @@ describe('subscription usage reporting', () => {
           },
         }
       `);
-          expect(body.operations[0].metadata.client).toEqual({
+          expect(body.subscriptionOperations[0].metadata.client).toEqual({
             name: 'foo',
             version: '1',
           });
@@ -1121,7 +1124,6 @@ describe('subscription usage reporting', () => {
           },
         }),
         plugins: [
-          useGraphQLSSE(),
           useHive({
             enabled: true,
             debug: false,
@@ -1289,16 +1291,7 @@ describe('subscription usage reporting', () => {
       `);
 
           expect(body).toMatchObject({
-            operations: [
-              {
-                execution: {
-                  ok: false,
-                  duration: expect.any(Number),
-                  errorsTotal: 1,
-                  errors: [{ message: 'Oof' }],
-                },
-              },
-            ],
+            subscriptionOperations: [{}],
           });
 
           return true;
@@ -1328,7 +1321,6 @@ describe('subscription usage reporting', () => {
           },
         }),
         plugins: [
-          useGraphQLSSE(),
           useHive({
             enabled: true,
             debug: false,
