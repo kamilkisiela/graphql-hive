@@ -227,7 +227,6 @@ function ChangeItem(props: {
                     See{' '}
                     {metadata.settings.targets.map((target, index, arr) => (
                       <>
-                        {/* eslint-disable-next-line unicorn/no-negated-condition */}
                         {!target.target ? (
                           <TooltipProvider key={index}>
                             <Tooltip>

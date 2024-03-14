@@ -1,4 +1,4 @@
-import { ReactElement, useEffect } from 'react';
+import { ReactElement, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { AlertCircleIcon } from 'lucide-react';
 import { useQuery } from 'urql';
@@ -140,14 +140,15 @@ const TargetExplorerPageQuery = graphql(`
 
 function ExplorerPageContent() {
   const router = useRouteSelector();
-  const { period, dataRetentionInDays, setDataRetentionInDays } = useSchemaExplorerContext();
+  const { resolvedPeriod, dataRetentionInDays, setDataRetentionInDays } =
+    useSchemaExplorerContext();
   const [query] = useQuery({
     query: TargetExplorerPageQuery,
     variables: {
       organizationId: router.organizationId,
       projectId: router.projectId,
       targetId: router.targetId,
-      period,
+      period: resolvedPeriod,
     },
   });
 
@@ -172,6 +173,13 @@ function ExplorerPageContent() {
   const latestSchemaVersion = currentTarget?.latestSchemaVersion;
   const latestValidSchemaVersion = currentTarget?.latestValidSchemaVersion;
 
+  /* to avoid janky behaviour we keep track if the version has a successful explorer once, and in that case always show the filter bar. */
+  const isFilterVisible = useRef(false);
+
+  if (latestValidSchemaVersion?.explorer) {
+    isFilterVisible.current = true;
+  }
+
   return (
     <TargetLayout
       page={Page.Explorer}
@@ -186,12 +194,12 @@ function ExplorerPageContent() {
           <Title>Explore</Title>
           <Subtitle>Insights from the latest version.</Subtitle>
         </div>
-        {!query.fetching && latestValidSchemaVersion?.explorer && (
+        {isFilterVisible.current && (
           <SchemaExplorerFilter
             organization={{ cleanId: router.organizationId }}
             project={{ cleanId: router.projectId }}
             target={{ cleanId: router.targetId }}
-            period={period}
+            period={resolvedPeriod}
           >
             <Button variant="outline" asChild>
               <Link

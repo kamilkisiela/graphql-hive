@@ -1,23 +1,18 @@
-import { ReactElement, useMemo } from 'react';
+import { ReactElement, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { differenceInMilliseconds } from 'date-fns';
 import ReactECharts from 'echarts-for-react';
-import { ActivityIcon, BookIcon, GlobeIcon, HistoryIcon } from 'lucide-react';
+import { ActivityIcon, BookIcon, GlobeIcon, HistoryIcon, RefreshCw } from 'lucide-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DateRangePicker, presetLast7Days } from '@/components/ui/date-range-picker';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { EmptyList, MetaTitle } from '@/components/v2';
 import { CHART_PRIMARY_COLOR } from '@/constants';
 import { graphql } from '@/gql';
@@ -59,19 +54,12 @@ function ClientView(props: {
   targetCleanId: string;
 }) {
   const styles = useChartStyles();
-  const {
-    updateDateRangeByKey,
-    dateRangeKey,
-    displayDateRangeLabel,
-    availableDateRangeOptions,
-    dateRange,
-    resolution,
-  } = useDateRangeController({
+  const dateRangeController = useDateRangeController({
     dataRetentionInDays: props.dataRetentionInDays,
-    minKey: '7d',
+    defaultPreset: presetLast7Days,
   });
 
-  const [query] = useQuery({
+  const [query, refetch] = useQuery({
     query: ClientView_ClientStatsQuery,
     variables: {
       selector: {
@@ -79,11 +67,17 @@ function ClientView(props: {
         project: props.projectCleanId,
         target: props.targetCleanId,
         client: props.clientName,
-        period: dateRange,
+        period: dateRangeController.resolvedRange,
       },
-      resolution,
+      resolution: dateRangeController.resolution,
     },
   });
+
+  useEffect(() => {
+    if (!query.fetching) {
+      refetch({ requestPolicy: 'network-only' });
+    }
+  }, [dateRangeController.resolvedRange]);
 
   const isLoading = query.fetching;
   const points = query.data?.clientStats?.requestsOverTime;
@@ -111,22 +105,16 @@ function ClientView(props: {
           <Subtitle>GraphQL API consumer insights</Subtitle>
         </div>
         <div className="flex justify-end gap-x-2">
-          <Select
-            onValueChange={updateDateRangeByKey}
-            defaultValue={dateRangeKey}
-            disabled={isLoading}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={displayDateRangeLabel(dateRangeKey)} />
-            </SelectTrigger>
-            <SelectContent>
-              {availableDateRangeOptions.map(key => (
-                <SelectItem key={key} value={key}>
-                  {displayDateRangeLabel(key)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <DateRangePicker
+            validUnits={['y', 'M', 'w', 'd']}
+            selectedRange={dateRangeController.selectedPreset.range}
+            startDate={dateRangeController.startDate}
+            align="end"
+            onUpdate={args => dateRangeController.setSelectedPreset(args.preset)}
+          />
+          <Button variant="outline" onClick={() => dateRangeController.refreshResolvedRange()}>
+            <RefreshCw className="size-4" />
+          </Button>
         </div>
       </div>
       <div className="space-y-4 pb-8">
@@ -143,7 +131,7 @@ function ClientView(props: {
                     {isLoading ? '-' : formatNumber(totalRequests)}
                   </div>
                   <p className="text-muted-foreground text-xs">
-                    Requests in {displayDateRangeLabel(dateRangeKey).toLowerCase()}
+                    Requests in {dateRangeController.selectedPreset.label.toLowerCase()}
                   </p>
                 </CardContent>
               </Card>
@@ -159,13 +147,13 @@ function ClientView(props: {
                       : formatThroughput(
                           totalRequests,
                           differenceInMilliseconds(
-                            new Date(dateRange.to),
-                            new Date(dateRange.from),
+                            new Date(dateRangeController.resolvedRange.to),
+                            new Date(dateRangeController.resolvedRange.from),
                           ),
                         )}
                   </div>
                   <p className="text-muted-foreground text-xs">
-                    RPM in {displayDateRangeLabel(dateRangeKey).toLowerCase()}
+                    RPM in {dateRangeController.selectedPreset.label.toLowerCase()}
                   </p>
                 </CardContent>
               </Card>
@@ -189,7 +177,7 @@ function ClientView(props: {
                 <CardContent>
                   <div className="text-2xl font-bold">{isLoading ? '-' : totalVersions}</div>
                   <p className="text-muted-foreground text-xs">
-                    Versions in {displayDateRangeLabel(dateRangeKey).toLowerCase()}
+                    Versions in {dateRangeController.selectedPreset.label.toLowerCase()}
                   </p>
                 </CardContent>
               </Card>
@@ -227,8 +215,8 @@ function ClientView(props: {
                           {
                             type: 'time',
                             boundaryGap: false,
-                            min: dateRange.from,
-                            max: dateRange.to,
+                            min: dateRangeController.resolvedRange.from,
+                            max: dateRangeController.resolvedRange.to,
                           },
                         ],
                         yAxis: [
@@ -276,7 +264,7 @@ function ClientView(props: {
               <CardDescription>
                 {props.clientName} requested {isLoading ? '-' : totalOperations}{' '}
                 {totalOperations > 1 ? 'operations' : 'operation'} in{' '}
-                {displayDateRangeLabel(dateRangeKey).toLowerCase()}
+                {dateRangeController.selectedPreset.label.toLowerCase()}
               </CardDescription>
             </CardHeader>
             <CardContent className="min-h-[120px] grow basis-0 overflow-y-auto">
@@ -321,7 +309,7 @@ function ClientView(props: {
               <CardDescription>
                 {props.clientName} had {isLoading ? '-' : totalVersions}{' '}
                 {totalVersions > 1 ? 'versions' : 'version'} in{' '}
-                {displayDateRangeLabel(dateRangeKey).toLowerCase()}.
+                {dateRangeController.selectedPreset.label.toLowerCase()}.
                 {!isLoading && totalVersions > 25
                   ? 'Displaying only 25 most popular versions'
                   : null}

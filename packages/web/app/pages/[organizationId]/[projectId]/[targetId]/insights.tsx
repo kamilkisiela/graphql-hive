@@ -1,4 +1,5 @@
 import { ReactElement, useState } from 'react';
+import { RefreshCw } from 'lucide-react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
@@ -8,15 +9,10 @@ import {
 } from '@/components/target/insights/Filters';
 import { OperationsList } from '@/components/target/insights/List';
 import { OperationsStats } from '@/components/target/insights/Stats';
+import { Button } from '@/components/ui/button';
+import { DateRangePicker, presetLast7Days } from '@/components/ui/date-range-picker';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { EmptyList, MetaTitle } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
@@ -36,15 +32,9 @@ function OperationsView({
 }): ReactElement {
   const [selectedOperations, setSelectedOperations] = useState<string[]>([]);
   const [selectedClients, setSelectedClients] = useState<string[]>([]);
-  const {
-    updateDateRangeByKey,
-    dateRangeKey,
-    displayDateRangeLabel,
-    availableDateRangeOptions,
-    dateRange,
-    resolution,
-  } = useDateRangeController({
+  const dateRangeController = useDateRangeController({
     dataRetentionInDays,
+    defaultPreset: presetLast7Days,
   });
 
   return (
@@ -56,49 +46,47 @@ function OperationsView({
         </div>
         <div className="flex justify-end gap-x-4">
           <OperationsFilterTrigger
-            period={dateRange}
+            period={dateRangeController.resolvedRange}
             selected={selectedOperations}
             onFilter={setSelectedOperations}
           />
           <ClientsFilterTrigger
-            period={dateRange}
+            period={dateRangeController.resolvedRange}
             selected={selectedClients}
             onFilter={setSelectedClients}
           />
-          <Select onValueChange={updateDateRangeByKey} defaultValue={dateRangeKey}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={displayDateRangeLabel(dateRangeKey)} />
-            </SelectTrigger>
-            <SelectContent>
-              {availableDateRangeOptions.map(key => (
-                <SelectItem key={key} value={key}>
-                  {displayDateRangeLabel(key)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <DateRangePicker
+            validUnits={['y', 'M', 'w', 'd', 'h']}
+            selectedRange={dateRangeController.selectedPreset.range}
+            startDate={dateRangeController.startDate}
+            align="end"
+            onUpdate={args => dateRangeController.setSelectedPreset(args.preset)}
+          />
+          <Button variant="outline" onClick={() => dateRangeController.refreshResolvedRange()}>
+            <RefreshCw className="size-4" />
+          </Button>
         </div>
       </div>
       <OperationsStats
         organization={organizationCleanId}
         project={projectCleanId}
         target={targetCleanId}
-        period={dateRange}
+        period={dateRangeController.resolvedRange}
         operationsFilter={selectedOperations}
         clientNamesFilter={selectedClients}
-        resolution={resolution}
-        dateRangeText={displayDateRangeLabel(dateRangeKey)}
+        dateRangeText={dateRangeController.selectedPreset.label}
         mode="operation-list"
+        resolution={dateRangeController.resolution}
       />
       <OperationsList
         className="mt-12"
-        period={dateRange}
+        period={dateRangeController.resolvedRange}
         organization={organizationCleanId}
         project={projectCleanId}
         target={targetCleanId}
         operationsFilter={selectedOperations}
         clientNamesFilter={selectedClients}
-        selectedPeriod={dateRangeKey}
+        selectedPeriod={dateRangeController.selectedPreset.range}
       />
     </>
   );
