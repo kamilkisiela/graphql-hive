@@ -796,11 +796,13 @@ export class OperationsReader {
     target,
     period,
     operations,
+    clients,
     schemaCoordinate,
   }: {
     target: string;
     period: DateRange;
     operations?: readonly string[];
+    clients?: readonly string[];
     schemaCoordinate?: string;
   }): Promise<
     Array<{
@@ -832,6 +834,7 @@ export class OperationsReader {
                 target,
                 period,
                 operations,
+                clients,
                 extra: schemaCoordinate
                   ? [
                       sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
@@ -859,6 +862,7 @@ export class OperationsReader {
                 target,
                 period,
                 operations,
+                clients,
                 extra: schemaCoordinate
                   ? [
                       sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
@@ -886,6 +890,7 @@ export class OperationsReader {
                 target,
                 period,
                 operations,
+                clients,
                 extra: schemaCoordinate
                   ? [
                       sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
