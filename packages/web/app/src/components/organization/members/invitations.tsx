@@ -14,7 +14,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { CardDescription, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -32,6 +31,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { SubPageLayout, SubPageLayoutHeader } from '@/components/ui/page-content-layout';
 import { useToast } from '@/components/ui/use-toast';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useClipboard } from '@/lib/hooks';
@@ -428,21 +428,16 @@ export function OrganizationInvitations(props: {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-row items-center justify-between">
-        <div className="space-y-2">
-          <CardTitle>Pending invitations</CardTitle>
-          <CardDescription>
-            Active invitations to join this organization. Invitations expire after 7 days.
-          </CardDescription>
-        </div>
-        <div>
-          <MemberInvitationButton
-            refetchInvitations={props.refetchInvitations}
-            organization={organization}
-          />
-        </div>
-      </div>
+    <SubPageLayout>
+      <SubPageLayoutHeader
+        title="Pending invitations"
+        description="Active invitations to join this organization. Invitations expire after 7 days."
+      >
+        <MemberInvitationButton
+          refetchInvitations={props.refetchInvitations}
+          organization={organization}
+        />
+      </SubPageLayoutHeader>
       {organization.invitations.nodes.length > 0 ? (
         <table className="w-full table-auto divide-y-[1px] divide-gray-500/20">
           <thead>
@@ -476,6 +471,6 @@ export function OrganizationInvitations(props: {
           </div>
         </div>
       )}
-    </div>
+    </SubPageLayout>
   );
 }

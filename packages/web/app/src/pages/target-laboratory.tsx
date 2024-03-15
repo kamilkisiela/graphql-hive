@@ -965,6 +965,9 @@ function LaboratoryPageContent(props: {
                   projectId: props.projectId,
                   targetId: props.targetId,
                 }}
+                search={{
+                  page: 'general',
+                }}
               >
                 <Button variant="outline" className="mr-2" size="sm">
                   Connect GraphQL API Endpoint

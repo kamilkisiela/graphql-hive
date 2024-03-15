@@ -232,6 +232,7 @@ export const TargetLayout = ({
                         projectId: props.projectId,
                         targetId: props.targetId,
                       }}
+                      search={{ page: 'general' }}
                     >
                       Settings
                     </Link>

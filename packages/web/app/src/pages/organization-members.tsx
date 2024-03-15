@@ -6,6 +6,7 @@ import { OrganizationMemberRolesMigration } from '@/components/organization/memb
 import { OrganizationMemberRoles } from '@/components/organization/members/roles';
 import { Button } from '@/components/ui/button';
 import { Meta } from '@/components/ui/meta';
+import { NavLayout, PageLayout, PageLayoutContent } from '@/components/ui/page-content-layout';
 import { QueryError } from '@/components/ui/query-error';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
@@ -71,49 +72,46 @@ function PageContent(props: {
   }
 
   return (
-    <div className="flex flex-col gap-y-4">
-      <div className="flex flex-row gap-x-6 py-6">
-        <nav className="flex w-48 flex-col space-x-0 space-y-1">
-          {subPages.map(subPage => {
-            // hide migration page from non-admins
-            if (subPage.key === 'migration' && !organization.me.isAdmin) {
-              return null;
-            }
-
-            return (
-              <Button
-                key={subPage.key}
-                variant="ghost"
-                className={cn(
-                  props.page === subPage.key
-                    ? 'bg-muted hover:bg-muted'
-                    : 'hover:bg-transparent hover:underline',
-                  'justify-start',
-                )}
-                onClick={() => props.onPageChange(subPage.key)}
-              >
-                {subPage.title}
-              </Button>
-            );
-          })}
-        </nav>
-        <div className="grow">
-          {props.page === 'roles' ? <OrganizationMemberRoles organization={organization} /> : null}
-          {props.page === 'list' ? (
-            <OrganizationMembers refetchMembers={props.refetchQuery} organization={organization} />
-          ) : null}
-          {props.page === 'invitations' ? (
-            <OrganizationInvitations
-              refetchInvitations={props.refetchQuery}
-              organization={organization}
-            />
-          ) : null}
-          {props.page === 'migration' && organization.me.isAdmin ? (
-            <OrganizationMemberRolesMigration organization={organization} />
-          ) : null}
-        </div>
-      </div>
-    </div>
+    <PageLayout>
+      <NavLayout>
+        {subPages.map(subPage => {
+          // hide migration page from non-admins
+          if (subPage.key === 'migration' && !organization.me.isAdmin) {
+            return null;
+          }
+          return (
+            <Button
+              key={subPage.key}
+              variant="ghost"
+              className={cn(
+                props.page === subPage.key
+                  ? 'bg-muted hover:bg-muted'
+                  : 'hover:bg-transparent hover:underline',
+                'justify-start',
+              )}
+              onClick={() => props.onPageChange(subPage.key)}
+            >
+              {subPage.title}
+            </Button>
+          );
+        })}
+      </NavLayout>
+      <PageLayoutContent>
+        {props.page === 'roles' ? <OrganizationMemberRoles organization={organization} /> : null}
+        {props.page === 'list' ? (
+          <OrganizationMembers refetchMembers={props.refetchQuery} organization={organization} />
+        ) : null}
+        {props.page === 'invitations' ? (
+          <OrganizationInvitations
+            refetchInvitations={props.refetchQuery}
+            organization={organization}
+          />
+        ) : null}
+        {props.page === 'migration' && organization.me.isAdmin ? (
+          <OrganizationMemberRolesMigration organization={organization} />
+        ) : null}
+      </PageLayoutContent>
+    </PageLayout>
   );
 }
 

@@ -166,6 +166,9 @@ export const ConnectSchemaModal = (props: {
           <span className="text-sm text-gray-500">
             To authenticate,{' '}
             <Link
+              search={{
+                page: 'cdn',
+              }}
               variant="primary"
               className="font-bold underline"
               to="/$organizationId/$projectId/$targetId/settings"
