@@ -125,8 +125,8 @@ importers:
         specifier: 7.0.1
         version: 7.0.1(typescript@5.4.2)
       cypress:
-        specifier: 13.6.6
-        version: 13.6.6
+        specifier: 13.7.0
+        version: 13.7.0
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
@@ -17018,8 +17018,8 @@ packages:
     resolution: {integrity: sha512-0sVXIohTfLqVIW3kb/0n6IiWF3Ifj5nm2XaSrLq2DI6fKIGa2fYAZdk917rUneaeLVpYfFcyXE2ft0fe3remsA==}
     dev: false
 
-  /cypress@13.6.6:
-    resolution: {integrity: sha512-S+2S9S94611hXimH9a3EAYt81QM913ZVA03pUmGDfLTFa5gyp85NJ8dJGSlEAEmyRsYkioS1TtnWtbv/Fzt11A==}
+  /cypress@13.7.0:
+    resolution: {integrity: sha512-UimjRSJJYdTlvkChcdcfywKJ6tUYuwYuk/n1uMMglrvi+ZthNhoRYcxnWgTqUtkl17fXrPAsD5XT2rcQYN1xKA==}
     engines: {node: ^16.0.0 || ^18.0.0 || >=20.0.0}
     hasBin: true
     requiresBuild: true
