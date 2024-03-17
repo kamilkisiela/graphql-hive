@@ -1230,8 +1230,8 @@ importers:
         specifier: 0.2.1
         version: 0.2.1
       stripe:
-        specifier: 14.20.0
-        version: 14.20.0
+        specifier: 14.21.0
+        version: 14.21.0
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -1545,11 +1545,11 @@ importers:
         specifier: 7.107.0
         version: 7.107.0(next@13.5.6)(react@18.2.0)(webpack@5.89.0)
       '@stripe/react-stripe-js':
-        specifier: 2.6.0
-        version: 2.6.0(@stripe/stripe-js@3.0.8)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 2.6.2
+        version: 2.6.2(@stripe/stripe-js@3.0.10)(react-dom@18.2.0)(react@18.2.0)
       '@stripe/stripe-js':
-        specifier: 3.0.8
-        version: 3.0.8
+        specifier: 3.0.10
+        version: 3.0.10
       '@tanstack/react-table':
         specifier: 8.0.0-beta.8
         version: 8.0.0-beta.8(react-dom@18.2.0)(react@18.2.0)
@@ -12754,21 +12754,21 @@ packages:
       file-system-cache: 2.3.0
     dev: true
 
-  /@stripe/react-stripe-js@2.6.0(@stripe/stripe-js@3.0.8)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-SuXm8pNpWaE0xd7QsMNW1nz3S3w3MTMc16bVUa3SdGVYc+wJDVD1GzJeK6xtVZ7dC2DZB+aOikPuG/tegj6zAQ==}
+  /@stripe/react-stripe-js@2.6.2(@stripe/stripe-js@3.0.10)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-FSjNg4v7BiCfojvx25PQ8DugOa09cGk1t816R/DLI/lT+1bgRAYpMvoPirLT4ZQ3ev/0VDtPdWNaabPsLDTOMA==}
     peerDependencies:
       '@stripe/stripe-js': ^1.44.1 || ^2.0.0 || ^3.0.0
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
-      '@stripe/stripe-js': 3.0.8
+      '@stripe/stripe-js': 3.0.10
       prop-types: 15.8.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@stripe/stripe-js@3.0.8:
-    resolution: {integrity: sha512-nEDZjCSrGI5GICqr2DsV7gPnEjmt5Y61Uj/z/UuWu3WR/ZyyskbEW/3ziVZdnnvFcoNCfpV2wA2ar1C1W//+Vg==}
+  /@stripe/stripe-js@3.0.10:
+    resolution: {integrity: sha512-CFRNha+aPXR8GrqJss2TbK1j4aSGZXQY8gx0hvaYiSp+dU7EK/Zs5uwFTSAgV+t8H4+jcZ/iBGajAvoMYOwy+A==}
     engines: {node: '>=12.16'}
     dev: false
 
@@ -30478,8 +30478,8 @@ packages:
       js-tokens: 8.0.3
     dev: true
 
-  /stripe@14.20.0:
-    resolution: {integrity: sha512-+3EP8GSWnKVHNATChhDzwAKk3nqSJKQOf2Q+dMGdgEk2sQXWYoA8GXY0A1TjL0m6895FVNavgvno6+0+6lC+kw==}
+  /stripe@14.21.0:
+    resolution: {integrity: sha512-PFmpl35Myn6UDdVLTHcuppdbkPVvlQfkMHOmgGZh5QOdSUxVmvz090Z4obLg8ta1MNs1PNpzr9i7E39iAIv07A==}
     engines: {node: '>=12.*'}
     dependencies:
       '@types/node': 20.11.27
