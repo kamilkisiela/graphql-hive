@@ -1551,8 +1551,8 @@ importers:
         specifier: 3.0.10
         version: 3.0.10
       '@tanstack/react-table':
-        specifier: 8.0.0-beta.8
-        version: 8.0.0-beta.8(react-dom@18.2.0)(react@18.2.0)
+        specifier: 8.13.2
+        version: 8.13.2(react-dom@18.2.0)(react@18.2.0)
       '@theguild/editor':
         specifier: 1.2.5
         version: 1.2.5(patch_hash=pz2nlsfawfhpo6sw62ecmp2yum)(@monaco-editor/react@4.6.0)(@types/node@20.11.28)(graphql@16.8.1)(monaco-editor@0.47.0)(react-dom@18.2.0)(react@18.2.0)
@@ -1841,7 +1841,7 @@ importers:
         version: 18.2.0
       react-avatar:
         specifier: 5.0.3
-        version: 5.0.3(@babel/runtime@7.23.9)(core-js-pure@3.34.0)(prop-types@15.8.1)(react@18.2.0)
+        version: 5.0.3(@babel/runtime@7.24.0)(core-js-pure@3.34.0)(prop-types@15.8.1)(react@18.2.0)
       react-countup:
         specifier: 6.5.0
         version: 6.5.0(react@18.2.0)
@@ -12908,20 +12908,20 @@ packages:
       defer-to-connect: 2.0.1
     dev: true
 
-  /@tanstack/react-table@8.0.0-beta.8(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-hffDi9NnSI2tl/l3cW0CH8ErI1aJOWzIo6of0t1KMGdfES6mDcnfYMMRjm89ffaWogqVrdkKFJfbNAwV0g/0iA==}
+  /@tanstack/react-table@8.13.2(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-b6mR3mYkjRtJ443QZh9sc7CvGTce81J35F/XMr0OoWbx0KIM7TTTdyNP2XKObvkLpYnLpCrYDwI3CZnLezWvpg==}
     engines: {node: '>=12'}
     peerDependencies:
       react: '>=16'
       react-dom: '>=16'
     dependencies:
-      '@tanstack/table-core': 8.0.0-beta.8
+      '@tanstack/table-core': 8.13.2
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@tanstack/table-core@8.0.0-beta.8:
-    resolution: {integrity: sha512-uIl9kHsuyP09Mc5DBhCzBavRg/e2KNUnZmb7/SW6ec+l2cyC4n64c1B64rDVzIn0CaV/0ajuXB4gI3xfcGsPfg==}
+  /@tanstack/table-core@8.13.2:
+    resolution: {integrity: sha512-/2saD1lWBUV6/uNAwrsg2tw58uvMJ07bO2F1IWMxjFRkJiXKQRuc3Oq2aufeobD3873+4oIM/DRySIw7+QsPPw==}
     engines: {node: '>=12'}
     dev: false
 
@@ -28179,7 +28179,7 @@ packages:
       strip-json-comments: 2.0.1
     dev: true
 
-  /react-avatar@5.0.3(@babel/runtime@7.23.9)(core-js-pure@3.34.0)(prop-types@15.8.1)(react@18.2.0):
+  /react-avatar@5.0.3(@babel/runtime@7.24.0)(core-js-pure@3.34.0)(prop-types@15.8.1)(react@18.2.0):
     resolution: {integrity: sha512-DNc+qkWH9QehSEZqHBhqpXWsPY+rU9W7kD68QFHfu8Atfsvx/3ML0DzAePgTUd96nCXQQ3KZMcC3LKYT8FiBIg==}
     peerDependencies:
       '@babel/runtime': '>=7'
@@ -28187,7 +28187,7 @@ packages:
       prop-types: ^15.0.0 || ^16.0.0
       react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
     dependencies:
-      '@babel/runtime': 7.23.9
+      '@babel/runtime': 7.24.0
       core-js-pure: 3.34.0
       is-retina: 1.0.3
       md5: 2.3.0
