@@ -71,7 +71,7 @@
     "@swc/core": "1.4.8",
     "@theguild/eslint-config": "0.11.4",
     "@theguild/prettier-config": "2.0.5",
-    "@types/node": "20.11.27",
+    "@types/node": "20.11.28",
     "bob-the-bundler": "7.0.1",
     "cypress": "13.6.6",
     "dotenv": "16.4.5",
