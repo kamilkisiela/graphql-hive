@@ -29,9 +29,9 @@ patchedDependencies:
   '@theguild/editor@1.2.5':
     hash: pz2nlsfawfhpo6sw62ecmp2yum
     path: patches/@theguild__editor@1.2.5.patch
-  bullmq@5.4.1:
+  bullmq@5.4.2:
     hash: kobtuuqaglbtaadx3jiqtahl3i
-    path: patches/bullmq@5.4.1.patch
+    path: patches/bullmq@5.4.2.patch
   eslint@8.57.0:
     hash: fjbpfrtrjd6idngyeqxnwopfva
     path: patches/eslint@8.57.0.patch
@@ -800,8 +800,8 @@ importers:
         specifier: 1.4.7
         version: 1.4.7
       bullmq:
-        specifier: 5.4.1
-        version: 5.4.1(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
+        specifier: 5.4.2
+        version: 5.4.2(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -1425,8 +1425,8 @@ importers:
         specifier: 10.45.2
         version: 10.45.2
       bullmq:
-        specifier: 5.4.1
-        version: 5.4.1(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
+        specifier: 5.4.2
+        version: 5.4.2(patch_hash=kobtuuqaglbtaadx3jiqtahl3i)
       copyfiles:
         specifier: 2.4.1
         version: 2.4.1
@@ -15532,14 +15532,12 @@ packages:
     dependencies:
       semver: 7.5.4
 
-  /bullmq@5.4.1(patch_hash=kobtuuqaglbtaadx3jiqtahl3i):
-    resolution: {integrity: sha512-0BD1F1CFPTEJAYyfv3KK344pDEeGkI1IefiblzZm9W59yEwB+kLnfAI3zVBEHlUwE+yJxyyPUmoVeUklts8hqg==}
+  /bullmq@5.4.2(patch_hash=kobtuuqaglbtaadx3jiqtahl3i):
+    resolution: {integrity: sha512-dkR/KGUw18miLe3QWtvSlmGvEe08aZF+w1jZyqEHMWFW3RP4162qp6OGud0/QCAOjusiRI8UOxUhbnortPY+rA==}
     dependencies:
       cron-parser: 4.6.0
-      fast-glob: 3.3.2
       ioredis: 5.3.2
       lodash: 4.17.21
-      minimatch: 9.0.3
       msgpackr: 1.10.1
       node-abort-controller: 3.1.1
       semver: 7.5.4
