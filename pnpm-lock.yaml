@@ -306,8 +306,8 @@ importers:
         specifier: 2.4.3
         version: 2.4.3
       date-fns:
-        specifier: 3.4.0
-        version: 3.4.0
+        specifier: 3.5.0
+        version: 3.5.0
       dockerode:
         specifier: 4.0.1
         version: 4.0.1
@@ -641,8 +641,8 @@ importers:
         specifier: 2.2.2
         version: 2.2.2
       date-fns:
-        specifier: 3.4.0
-        version: 3.4.0
+        specifier: 3.5.0
+        version: 3.5.0
       fast-json-stable-stringify:
         specifier: 2.1.0
         version: 2.1.0
@@ -920,8 +920,8 @@ importers:
         specifier: 10.45.2
         version: 10.45.2
       date-fns:
-        specifier: 3.4.0
-        version: 3.4.0
+        specifier: 3.5.0
+        version: 3.5.0
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
@@ -1215,8 +1215,8 @@ importers:
         specifier: 10.45.2
         version: 10.45.2
       date-fns:
-        specifier: 3.4.0
-        version: 3.4.0
+        specifier: 3.5.0
+        version: 3.5.0
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
@@ -1386,8 +1386,8 @@ importers:
         specifier: 4.5.0
         version: 4.5.0
       date-fns:
-        specifier: 3.4.0
-        version: 3.4.0
+        specifier: 3.5.0
+        version: 3.5.0
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
@@ -1584,8 +1584,8 @@ importers:
         specifier: 0.9.1
         version: 0.9.1
       date-fns:
-        specifier: 3.4.0
-        version: 3.4.0
+        specifier: 3.5.0
+        version: 3.5.0
       dompurify:
         specifier: 3.0.9
         version: 3.0.9
@@ -1645,7 +1645,7 @@ importers:
         version: 18.2.0
       react-day-picker:
         specifier: 8.10.0
-        version: 8.10.0(date-fns@3.4.0)(react@18.2.0)
+        version: 8.10.0(date-fns@3.5.0)(react@18.2.0)
       react-dom:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
@@ -1825,8 +1825,8 @@ importers:
         specifier: 2.1.0
         version: 2.1.0
       date-fns:
-        specifier: 3.4.0
-        version: 3.4.0
+        specifier: 3.5.0
+        version: 3.5.0
       gray-matter:
         specifier: 4.0.3
         version: 4.0.3
@@ -17387,8 +17387,8 @@ packages:
       '@babel/runtime': 7.23.9
     dev: true
 
-  /date-fns@3.4.0:
-    resolution: {integrity: sha512-Akz4R8J9MXBsOgF1QeWeCsbv6pntT5KCPjU0Q9prBxVmWJYPLhwAIsNg3b0QAdr0ttiozYLD3L/af7Ra0jqYXw==}
+  /date-fns@3.5.0:
+    resolution: {integrity: sha512-a+DwyXn7NOfdJireCzAA0B9p7jIXEu/Q9JKCyMYvH6+0vPUNbQceA0neXrdfJ/xzl3mhOh5vibQQ3936Tssm6A==}
 
   /dateformat@4.6.3:
     resolution: {integrity: sha512-2P0p0pFGzHS5EMnhdxQi7aJN+iMheud0UhG4dlE1DLAlvL8JHjJJTX/CSm4JXwV0Ka5nGk3zC5mcb5bUQUxxMA==}
@@ -28214,13 +28214,13 @@ packages:
       react: 18.2.0
     dev: false
 
-  /react-day-picker@8.10.0(date-fns@3.4.0)(react@18.2.0):
+  /react-day-picker@8.10.0(date-fns@3.5.0)(react@18.2.0):
     resolution: {integrity: sha512-mz+qeyrOM7++1NCb1ARXmkjMkzWVh2GL9YiPbRjKe0zHccvekk4HE+0MPOZOrosn8r8zTHIIeOUXTmXRqmkRmg==}
     peerDependencies:
       date-fns: ^2.28.0 || ^3.0.0
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
-      date-fns: 3.4.0
+      date-fns: 3.5.0
       react: 18.2.0
     dev: false
 
