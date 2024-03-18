@@ -177,7 +177,6 @@ it('reports usage with response cache', async () => {
         }
       `);
 
-
       return true;
     })
     .thrice()
@@ -347,7 +346,7 @@ it('does not report usage for operation that does not pass validation', async ()
             }
           `,
         }),
-      })
+      });
 
       expect(res.status).toBe(200);
       expect(await res.text()).toContain('GraphQL introspection has been disabled');
@@ -355,7 +354,6 @@ it('does not report usage for operation that does not pass validation', async ()
   });
   expect(callback).not.toHaveBeenCalled();
   graphqlScope.done();
-
 });
 
 it('does not report usage if context creating raises an error', async () => {
@@ -464,10 +462,10 @@ it('does not report usage if context creating raises an error', async () => {
         }),
       });
       expect(res.status).toBe(200);
-      expect(await res.text()).toMatchInlineSnapshot(`{"errors":[{"message":"Not authenticated."}]}`);
+      expect(await res.text()).toMatchInlineSnapshot(
+        `{"errors":[{"message":"Not authenticated."}]}`,
+      );
     })().catch(reject);
-
-   
   });
 
   graphqlScope.done();
@@ -599,16 +597,16 @@ describe('subscription usage reporting', () => {
 
         (async () => {
           const res = await yoga.fetch('http://localhost/graphql', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            query: `subscription { hi }`,
-          }),
-        });
-        expect(res.status).toBe(200);
-        expect(await res.text()).toMatchInlineSnapshot(`
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              query: `subscription { hi }`,
+            }),
+          });
+          expect(res.status).toBe(200);
+          expect(await res.text()).toMatchInlineSnapshot(`
           :
 
           event: complete
@@ -762,7 +760,7 @@ describe('subscription usage reporting', () => {
 
             event: complete
           `);
-        })().catch(reject)
+        })().catch(reject);
       });
       graphqlScope.done();
     });
@@ -905,7 +903,7 @@ describe('subscription usage reporting', () => {
               'x-graphql-client-version': '1.0.0',
             },
           });
-  
+
           expect(res.status).toBe(200);
           expect(await res.text()).toMatchInlineSnapshot(`
             :
@@ -913,7 +911,6 @@ describe('subscription usage reporting', () => {
             event: complete
             data:
           `);
-  
         })().catch(reject);
       });
       graphqlScope.done();
