@@ -19,17 +19,18 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
   void hive.info();
 
   if (hive[autoDisposeSymbol]) {
-    if (!global.process) {
-      throw TypeError(
+    if (global.process) {
+      const signals = Array.isArray(hive[autoDisposeSymbol])
+        ? hive[autoDisposeSymbol]
+        : ['SIGINT', 'SIGTERM'];
+      for (const signal of signals) {
+        process.once(signal, () => hive.dispose());
+      }
+    } else {
+      console.error(
         'It seems that GraphQL Hive is not being executed in Node.js. ' +
           'Please attempt manual client disposal and use autoDispose: false option.',
       );
-    }
-    const signals = Array.isArray(hive[autoDisposeSymbol])
-      ? hive[autoDisposeSymbol]
-      : ['SIGINT', 'SIGTERM'];
-    for (const signal of signals) {
-      process.once(signal, () => hive.dispose());
     }
   }
 
