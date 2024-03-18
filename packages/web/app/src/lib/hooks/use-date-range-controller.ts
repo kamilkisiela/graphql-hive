@@ -1,128 +1,192 @@
-import { useCallback, useMemo } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { formatISO, subHours, subMinutes } from 'date-fns';
+import { addHours, formatISO, startOfHour, startOfMinute, subHours, subSeconds } from 'date-fns';
+import { availablePresets, buildDateRangeString, Preset } from '@/components/ui/date-range-picker';
+import { parse, resolveRange } from '@/lib/date-math';
 import { subDays } from '@/lib/date-time';
+import { useResetState } from './use-reset-state';
 
-function floorDate(date: Date): Date {
-  const time = 1000 * 60;
-  return new Date(Math.floor(date.getTime() / time) * time);
-}
-
-const DateRange = {
-  '90d': {
-    resolution: 90,
-    label: 'Last 90 days',
-  },
-  '60d': {
-    resolution: 60,
-    label: 'Last 60 days',
-  },
-  '30d': {
-    resolution: 60,
-    label: 'Last 30 days',
-  },
-  '14d': {
-    resolution: 60,
-    label: 'Last 14 days',
-  },
-  '7d': {
-    resolution: 60,
-    label: 'Last 7 days',
-  },
-  '1d': {
-    resolution: 60,
-    label: 'Last 24 hours',
-  },
-  '1h': {
-    resolution: 60,
-    label: 'Last hour',
-  },
-};
-
-type DateRangeKey = keyof typeof DateRange;
-
-function isDayBasedPeriodKey<T extends DateRangeKey>(
-  periodKey: T,
-): periodKey is Extract<T, `${number}d`> {
-  return periodKey.endsWith('d');
-}
-
-function keyToHours(key: DateRangeKey): number {
-  if (isDayBasedPeriodKey(key)) {
-    return parseInt(key.replace('d', ''), 10) * 24;
-  }
-
-  return parseInt(key.replace('h', ''), 10);
-}
-
-export function useDateRangeController(options: {
+export function useDateRangeController(args: {
   dataRetentionInDays: number;
-  minKey?: DateRangeKey;
+  defaultPreset: Preset;
 }) {
   const router = useRouter();
-  const [href, periodParam] = router.asPath.split('?');
-  let selectedDateRangeKey: DateRangeKey =
-    (new URLSearchParams(periodParam).get('period') as DateRangeKey) ?? '1d';
-  const availableDateRangeOptions = useMemo<DateRangeKey[]>(() => {
-    return Object.keys(DateRange).filter(key => {
-      const dateRangeKey = key as DateRangeKey;
+  const [href, urlParameter] = router.asPath.split('?');
 
-      if (options.minKey && keyToHours(dateRangeKey) < keyToHours(options.minKey)) {
-        return false;
-      }
-
-      if (isDayBasedPeriodKey(dateRangeKey)) {
-        // Only show day based periods that are within the data retention period
-        const daysBack = parseInt(dateRangeKey.replace('d', ''), 10);
-        return daysBack <= options.dataRetentionInDays;
-      }
-
-      return true;
-    }) as DateRangeKey[];
-  }, [options.dataRetentionInDays]);
-
-  if (!availableDateRangeOptions.includes(selectedDateRangeKey)) {
-    selectedDateRangeKey = options.minKey ?? '1d';
-  }
-
-  const dateRange = useMemo(() => {
-    const now = floorDate(new Date());
-    const sub = selectedDateRangeKey.endsWith('h')
-      ? 'h'
-      : selectedDateRangeKey.endsWith('m')
-        ? 'm'
-        : 'd';
-
-    const value = parseInt(selectedDateRangeKey.replace(sub, ''));
-    const from = formatISO(
-      sub === 'h'
-        ? subHours(now, value)
-        : sub === 'm'
-          ? subMinutes(now, value)
-          : subDays(now, value),
-    );
-    const to = formatISO(now);
-
-    return { from, to };
-  }, [selectedDateRangeKey, availableDateRangeOptions]);
-
-  const updateDateRangeByKey = useCallback(
-    (value: string) => {
-      void router.push(`${href}?period=${value}`);
-    },
-    [href, router],
+  const [startDate] = useResetState(
+    () => subDays(new Date(), args.dataRetentionInDays),
+    [args.dataRetentionInDays],
   );
 
-  const displayDateRangeLabel = useCallback((key: DateRangeKey) => {
-    return DateRange[key].label;
-  }, []);
+  const params = new URLSearchParams(urlParameter);
+  const fromRaw = params.get('from') ?? '';
+  const toRaw = params.get('to') ?? 'now';
+
+  const [selectedPreset] = useResetState(() => {
+    const preset = availablePresets.find(p => p.range.from === fromRaw && p.range.to === toRaw);
+
+    if (preset) {
+      return preset;
+    }
+
+    const from = parse(fromRaw);
+    const to = parse(toRaw);
+
+    if (!from || !to) {
+      return args.defaultPreset;
+    }
+
+    return {
+      name: `${fromRaw}_${toRaw}`,
+      label: buildDateRangeString({ from, to }),
+      range: { from: fromRaw, to: toRaw },
+    };
+  }, [fromRaw, toRaw]);
+
+  const [triggerRefreshCounter, setTriggerRefreshCounter] = useState(0);
+  const [resolved] = useResetState(() => {
+    const parsed = resolveRange(selectedPreset.range);
+
+    const from = new Date(parsed.from);
+    let to = new Date(parsed.to);
+
+    if (from.getTime() === to.getTime()) {
+      to = subSeconds(addHours(new Date(), 20), 1);
+    }
+
+    const resolved = resolveRangeAndResolution({
+      from,
+      to,
+    });
+
+    return {
+      resolution: resolved.resolution,
+      range: {
+        from: formatISO(resolved.range.from),
+        to: formatISO(resolved.range.to),
+      },
+    };
+  }, [selectedPreset.range, triggerRefreshCounter]);
 
   return {
-    dateRange,
-    resolution: DateRange[selectedDateRangeKey].resolution,
-    dateRangeKey: selectedDateRangeKey,
-    availableDateRangeOptions,
-    updateDateRangeByKey,
-    displayDateRangeLabel,
+    startDate,
+    selectedPreset,
+    setSelectedPreset(preset: Preset) {
+      void router.push(
+        `${href}?from=${encodeURIComponent(preset.range.from)}&to=${encodeURIComponent(preset.range.to)}`,
+        undefined,
+        {
+          scroll: false,
+          shallow: true,
+        },
+      );
+    },
+    resolvedRange: resolved.range,
+    refreshResolvedRange() {
+      setTriggerRefreshCounter(c => c + 1);
+    },
+    resolution: resolved.resolution,
+  } as const;
+}
+
+const maximumResolution = 90;
+const minimumResolution = 1;
+
+function resolveResolution(resolution: number) {
+  return Math.max(minimumResolution, Math.min(resolution, maximumResolution));
+}
+
+const msMinute = 60 * 1000;
+const msHour = msMinute * 60;
+const msDay = msHour * 24;
+
+const thresholdDataPointPerDay = 28;
+const thresholdDataPointPerHour = 24;
+
+const tableTTLInHours = {
+  daily: 365 * 24,
+  hourly: 30 * 24,
+  minutely: 24,
+};
+
+/** Get the UTC start date of a day */
+function getUTCStartOfDay(date: Date) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+}
+
+function resolveRangeAndResolution(range: { from: Date; to: Date }) {
+  const now = new Date();
+  const tableOldestDateTimePoint = {
+    /** Because ClickHouse uses UTC and we aggregate to UTC start fo day, we need to get the UTC day here */
+    daily: getUTCStartOfDay(subHours(now, tableTTLInHours.daily)),
+    hourly: startOfHour(subHours(now, tableTTLInHours.hourly)),
+    minutely: startOfMinute(subHours(now, tableTTLInHours.minutely)),
+  };
+
+  const daysDifference = (range.to.getTime() - range.from.getTime()) / msDay;
+
+  if (
+    daysDifference > thresholdDataPointPerDay ||
+    /** if we are outside this range, we always need to get daily data */
+    range.to.getTime() <= tableOldestDateTimePoint.daily.getTime() ||
+    range.from.getTime() <= tableOldestDateTimePoint.daily.getTime()
+  ) {
+    const resolvedRange = {
+      from: getUTCStartOfDay(range.from),
+      to: subSeconds(getUTCStartOfDay(range.to), 1),
+    };
+    const daysDifference = Math.round(
+      (resolvedRange.to.getTime() - resolvedRange.from.getTime()) / msDay,
+    );
+
+    // try to have at least 1 data points per day, unless the range has more than 90 days.
+    return {
+      resolution: resolveResolution(daysDifference),
+      range: resolvedRange,
+    };
+  }
+
+  const hoursDifference = (range.to.getTime() - range.from.getTime()) / msHour;
+
+  if (
+    hoursDifference > thresholdDataPointPerHour ||
+    /** if we are outside this range, we always need to get hourly data */
+    range.to.getTime() <= tableOldestDateTimePoint.hourly.getTime() ||
+    range.from.getTime() <= tableOldestDateTimePoint.hourly.getTime()
+  ) {
+    const resolvedRange = {
+      from: startOfHour(range.from),
+      to: subSeconds(startOfHour(range.to), 1),
+    };
+    const hoursDifference = Math.round(
+      (resolvedRange.to.getTime() - resolvedRange.from.getTime()) / msHour,
+    );
+
+    // try to have at least 1 data points per hour, unless the range has more than 90 hours.
+    return {
+      resolution: resolveResolution(hoursDifference),
+      range: resolvedRange,
+    };
+  }
+
+  if (
+    range.to.getTime() <= tableOldestDateTimePoint.minutely.getTime() ||
+    range.from.getTime() <= tableOldestDateTimePoint.minutely.getTime()
+  ) {
+    throw new Error('This range can never be resolved.');
+  }
+
+  const resolvedRange = {
+    from: startOfMinute(range.from),
+    to: subSeconds(startOfMinute(range.to), 1),
+  };
+
+  const minutesDifference = Math.round(
+    (resolvedRange.to.getTime() - resolvedRange.from.getTime()) / msMinute,
+  );
+
+  return {
+    resolution: resolveResolution(minutesDifference),
+    range: resolvedRange,
   };
 }

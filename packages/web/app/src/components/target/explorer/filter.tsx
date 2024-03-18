@@ -1,15 +1,11 @@
 import { ReactNode, useMemo } from 'react';
 import { useRouter } from 'next/router';
+import { RefreshCw } from 'lucide-react';
 import { useQuery } from 'urql';
+import { Button } from '@/components/ui/button';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Autocomplete } from '@/components/v2';
@@ -138,24 +134,18 @@ export function SchemaExplorerFilter({
         }}
         loading={query.fetching}
       />
-      <div>
-        <Select
-          onValueChange={periodSelector.onChange}
-          defaultValue={periodSelector.value}
-          disabled={query.fetching}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder={periodSelector.displayLabel(periodSelector.value)} />
-          </SelectTrigger>
-          <SelectContent>
-            {periodSelector.options.map(option => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <DateRangePicker
+        validUnits={['y', 'M', 'w', 'd', 'h']}
+        onUpdate={value => {
+          periodSelector.setPeriod(value.preset.range);
+        }}
+        selectedRange={periodSelector.period}
+        startDate={periodSelector.startDate}
+        align="end"
+      />
+      <Button variant="outline" onClick={() => periodSelector.refreshResolvedPeriod()}>
+        <RefreshCw className="size-4" />
+      </Button>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger>

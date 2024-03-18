@@ -132,3 +132,7 @@ packages/web/app/src/gql/*.json
 packages/web/app/src/graphql/*.ts
 
 _redirects
+
+deployment/utils/opentelemetry-collector.types.ts
+deployment/utils/vector.types.ts
+deployment/utils/contour.types.ts

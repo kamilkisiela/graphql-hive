@@ -433,7 +433,7 @@ export const resolvers: OperationsModule.Resolvers = {
       });
     },
     clients(
-      { organization, project, target, period, operations: operationsFilter },
+      { organization, project, target, period, operations: operationsFilter, clients },
       _,
       { injector },
     ) {
@@ -443,6 +443,7 @@ export const resolvers: OperationsModule.Resolvers = {
         organization,
         period,
         operations: operationsFilter,
+        clients,
       });
     },
     duration(

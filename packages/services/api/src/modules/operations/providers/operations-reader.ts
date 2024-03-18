@@ -62,6 +62,20 @@ function ensureNumber(value: number | string): number {
   return parseFloat(value);
 }
 
+const msMinute = 60 * 1_000;
+const msHour = msMinute * 60;
+const msDay = msHour * 24;
+
+// How long rows are kept in the database, per table.
+const tableTTLInHours = {
+  daily: 365 * 24,
+  hourly: 30 * 24,
+  minutely: 24,
+};
+
+const thresholdDataPointPerDay = 28;
+const thresholdDataPointPerHour = 24;
+
 @Injectable({
   global: true,
 })
@@ -99,17 +113,14 @@ export class OperationsReader {
       };
     }
 
-    const dataPoints = resolution;
-    const timeDifference = period.to.getTime() - period.from.getTime();
-    const timeDifferenceInHours = timeDifference / 1000 / 60 / 60;
-    const timeDifferenceInDays = timeDifference / 1000 / 60 / 60 / 24;
+    if (resolution && (resolution < 1 || resolution > 90)) {
+      throw new Error('Invalid resolution provided.');
+    } else {
+      // default value :shrug:
+      resolution = 30;
+    }
 
-    // How long rows are kept in the database, per table.
-    const tableTTLInHours = {
-      daily: 365 * 24,
-      hourly: 30 * 24,
-      minutely: 24,
-    };
+    const now = new Date();
 
     // The oldest data point we can fetch from the database, per table.
     // ! We subtract 2 minutes as we round the date to the nearest minute on UI
@@ -117,90 +128,52 @@ export class OperationsReader {
     //   and by the time it this function is called the minute will change.
     //   That's why we use 2 minutes as a buffer.
     const tableOldestDateTimePoint = {
-      daily: subMinutes(startOfDay(subHours(new Date(), tableTTLInHours.daily)), 2),
-      hourly: subMinutes(startOfHour(subHours(new Date(), tableTTLInHours.hourly)), 2),
-      minutely: subMinutes(startOfMinute(subHours(new Date(), tableTTLInHours.minutely)), 2),
+      daily: subMinutes(startOfDay(subHours(now, tableTTLInHours.daily)), 2),
+      hourly: subMinutes(startOfHour(subHours(now, tableTTLInHours.hourly)), 2),
+      minutely: subMinutes(startOfMinute(subHours(now, tableTTLInHours.minutely)), 2),
     };
 
-    let selectedQueryType: 'daily' | 'hourly' | 'minutely';
+    const daysDifference = (period.to.getTime() - period.from.getTime()) / msDay;
 
-    // If the user requested a specific resolution, we need to pick the right table.
-    //
-    if (dataPoints) {
-      const interval = calculateTimeWindow({ period, resolution });
-
-      if (timeDifferenceInDays >= dataPoints) {
-        // If user selected a date range of 60 days or more and requested 30 data points
-        // we can use daily table as each data point represents at least 1 day.
-        selectedQueryType = 'daily';
-
-        if (interval.unit !== 'd') {
-          this.logger.error(
-            `Calculated interval ${interval.value}${
-              interval.unit
-            } for the requested date range ${formatDate(period.from)} - ${formatDate(
-              period.to,
-            )} does not satisfy the daily table.`,
-          );
-          throw new Error(`Invalid number of data points for the requested date range`);
-        }
-      } else if (timeDifferenceInHours >= dataPoints) {
-        // Same as for daily table, but for hourly table.
-        // If data point represents at least 1 full hour, use hourly table.
-        selectedQueryType = 'hourly';
-
-        if (interval.unit === 'm') {
-          this.logger.error(
-            `Calculated interval ${interval.value}${
-              interval.unit
-            } for the requested date range ${formatDate(period.from)} - ${formatDate(
-              period.to,
-            )} does not satisfy the hourly table.`,
-          );
-          throw new Error(`Invalid number of data points for the requested date range`);
-        }
-      } else {
-        selectedQueryType = 'minutely';
-      }
-    } else if (timeDifferenceInHours > 24) {
-      selectedQueryType = 'daily';
-    } else if (timeDifferenceInHours > 1) {
-      selectedQueryType = 'hourly';
-    } else {
-      selectedQueryType = 'minutely';
+    if (
+      daysDifference > thresholdDataPointPerDay ||
+      /** if we are outside this range, we always need to get daily data */
+      period.to.getTime() <= tableOldestDateTimePoint.daily.getTime() ||
+      period.from.getTime() <= tableOldestDateTimePoint.daily.getTime()
+    ) {
+      return {
+        ...queryMap['daily'],
+        queryType: 'daily',
+      };
     }
 
-    if (tableOldestDateTimePoint[selectedQueryType].getTime() > period.from.getTime()) {
-      if (dataPoints) {
-        // If the oldest data point is newer than the requested data range,
-        // and the user requested a specific resolution
-        const interval = calculateTimeWindow({ period, resolution });
-        this.logger.error(
-          `Requested date range ${formatDate(period.from)} - ${formatDate(
-            period.to,
-          )} is older than the oldest available data point ${formatDate(
-            tableOldestDateTimePoint[selectedQueryType],
-          )} for the selected query type ${selectedQueryType}. The requested resolution is ${
-            interval.value
-          } ${interval.unit}.`,
-        );
-        throw new Error(`The requested date range is too old for the selected query type.`);
-      } else {
-        // If the oldest data point is newer than the requested data range,
-        // but the user didn't request a specific resolution, it's fine.
-        this.logger.warn(
-          `[OPERATIONS_READER_TTL_DATE_RANGE_WARN] The requested date range is too old for the selected query type. Requested date range ${formatDate(
-            period.from,
-          )} - ${formatDate(period.to)} is older than the oldest available data point ${formatDate(
-            tableOldestDateTimePoint[selectedQueryType],
-          )}`,
-        );
-      }
+    const hoursDifference = (period.to.getTime() - period.from.getTime()) / msHour;
+
+    if (
+      hoursDifference > thresholdDataPointPerHour ||
+      /** if we are outside this range, we always need to get hourly data */
+      period.to.getTime() <= tableOldestDateTimePoint.hourly.getTime() ||
+      period.from.getTime() <= tableOldestDateTimePoint.hourly.getTime()
+    ) {
+      return {
+        ...queryMap['hourly'],
+        queryType: 'hourly',
+      };
+    }
+
+    if (
+      period.to.getTime() <= tableOldestDateTimePoint.minutely.getTime() ||
+      period.from.getTime() <= tableOldestDateTimePoint.minutely.getTime()
+    ) {
+      this.logger.error(
+        `Requested date range ${formatDate(period.from)} - ${formatDate(period.to)} is too old.`,
+      );
+      throw new Error(`The requested date range is too old for the selected query type.`);
     }
 
     return {
-      ...queryMap[selectedQueryType],
-      queryType: selectedQueryType,
+      ...queryMap['minutely'],
+      queryType: 'minutely',
     };
   }
 
@@ -823,11 +796,13 @@ export class OperationsReader {
     target,
     period,
     operations,
+    clients,
     schemaCoordinate,
   }: {
     target: string;
     period: DateRange;
     operations?: readonly string[];
+    clients?: readonly string[];
     schemaCoordinate?: string;
   }): Promise<
     Array<{
@@ -859,6 +834,7 @@ export class OperationsReader {
                 target,
                 period,
                 operations,
+                clients,
                 extra: schemaCoordinate
                   ? [
                       sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
@@ -886,6 +862,7 @@ export class OperationsReader {
                 target,
                 period,
                 operations,
+                clients,
                 extra: schemaCoordinate
                   ? [
                       sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
@@ -913,6 +890,7 @@ export class OperationsReader {
                 target,
                 period,
                 operations,
+                clients,
                 extra: schemaCoordinate
                   ? [
                       sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({

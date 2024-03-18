@@ -195,7 +195,7 @@ function runArtifactsCDNTests(
         code: 'MISSING_AUTH_KEY',
         error: 'Hive CDN authentication key is missing',
         description:
-          'Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage',
+          'Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage ',
       });
       expect(response.headers.get('location')).toBe(null);
     });
@@ -216,7 +216,7 @@ function runArtifactsCDNTests(
         error:
           'Hive CDN authentication key is invalid, or it does not match the requested target ID.',
         description:
-          'Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage',
+          'Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage ',
       });
       expect(response.headers.get('location')).toBe(null);
     });

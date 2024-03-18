@@ -1,0 +1,21 @@
+diff --git a/dist/src/factories/createPool.js b/dist/src/factories/createPool.js
+index b91a9fe433dc340f5cdf096ca4c568297c343ab3..401df1272d1c7f344bb956b38cc7dbde29231742 100644
+--- a/dist/src/factories/createPool.js
++++ b/dist/src/factories/createPool.js
+@@ -44,6 +44,16 @@ const createPool = async (connectionUri, clientConfigurationInput) => {
+             getTypeParser,
+         },
+     });
++
++    // https://github.com/gajus/slonik/issues/471
++    // https://github.com/brianc/node-postgres/issues/2764#issuecomment-1163475426
++    // Slonik did not have a way to handle errors emitted by the pool, which resulted in an uncaught exception, which would crash the process.
++    pool.on('error', (error) => {
++        poolLog.error({
++            error: (0, serialize_error_1.serializeError)(error),
++        }, 'client error');
++    });
++
+     state_1.poolStateMap.set(pool, {
+         ended: false,
+         mock: false,
