@@ -1,5 +1,11 @@
 # @graphql-hive/client
 
+## 0.29.0
+
+### Minor Changes
+
+- [#4109](https://github.com/kamilkisiela/graphql-hive/pull/4109) [`441b71f`](https://github.com/kamilkisiela/graphql-hive/commit/441b71fdab36a9eb79336d720d15d0d1cf7f0156) Thanks [@EmrysMyrddin](https://github.com/EmrysMyrddin)! - Automatic disposal of managed clients for Yoga and Envelop plugins.
+
 ## 0.28.1
 
 ### Patch Changes
