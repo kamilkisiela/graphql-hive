@@ -265,6 +265,13 @@ export class GitHubIntegrationManager {
           };
         }
 
+        if (error.message.includes('organization has an IP allow list')) {
+          return {
+            success: false,
+            error: `Your GitHub Organization has an IP allow list enabled, and our IP address is not permitted to access this resource. Please contact our support team to obtain the IP address.`,
+          };
+        }
+
         return {
           success: false,
           error:
@@ -411,7 +418,7 @@ export class GitHubIntegrationManager {
 }
 
 function isOctokitRequestError(error: unknown): error is RequestError {
-  return error instanceof RequestError;
+  return !!error && typeof error === 'object' && 'code' in error && 'status' in error;
 }
 
 export type GitHubCheckRun = {
