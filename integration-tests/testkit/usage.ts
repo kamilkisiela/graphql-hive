@@ -18,7 +18,7 @@ export interface CollectedOperation {
   };
 }
 
-export async function collect(params: {
+export async function legacyCollect(params: {
   operations: CollectedOperation[];
   token: string;
   authorizationHeader?: 'x-api-token' | 'authorization';

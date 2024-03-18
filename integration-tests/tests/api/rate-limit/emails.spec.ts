@@ -32,7 +32,7 @@ test('rate limit approaching and reached for organization', async () => {
     ownerToken,
   );
 
-  const { collectOperations } = await createToken({
+  const { collectLegacyOperations: collectOperations } = await createToken({
     targetScopes: [
       TargetAccessScope.Read,
       TargetAccessScope.RegistryRead,

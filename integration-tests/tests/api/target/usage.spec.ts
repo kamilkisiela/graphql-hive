@@ -1,6 +1,10 @@
 import formatISO from 'date-fns/formatISO';
 import subHours from 'date-fns/subHours';
-import { parse, print } from 'graphql';
+import { buildASTSchema, parse, print } from 'graphql';
+import { createLogger } from 'graphql-yoga';
+import { execute } from 'testkit/graphql';
+import { getServiceHost } from 'testkit/utils';
+import { graphql } from '@app/gql';
 import {
   OrganizationAccessScope,
   ProjectAccessScope,
@@ -9,6 +13,7 @@ import {
 } from '@app/gql/graphql';
 // eslint-disable-next-line hive/enforce-deps-in-dev
 import { normalizeOperation } from '@graphql-hive/core';
+import { createHive } from '../../../../packages/libraries/client/src';
 import { clickHouseQuery } from '../../../testkit/clickhouse';
 import { createTarget, updateTargetValidationSettings, waitFor } from '../../../testkit/flow';
 import { initSeed } from '../../../testkit/seed';
@@ -75,7 +80,7 @@ test.concurrent(
       .then(r => r.expectNoGraphQLErrors());
     expect(unusedCheckResult.schemaCheck.__typename).toEqual('SchemaCheckSuccess');
 
-    const collectResult = await writeToken.collectOperations([
+    const collectResult = await writeToken.collectLegacyOperations([
       {
         operation: 'query ping { ping }',
         operationName: 'ping',
@@ -197,7 +202,7 @@ test.concurrent('normalize and collect operation without breaking its syntax', a
     removeAliases: true,
   });
 
-  const collectResult = await writeToken.collectOperations([
+  const collectResult = await writeToken.collectLegacyOperations([
     {
       operation: normalizeOperation({
         document: parse(raw_document),
@@ -265,7 +270,7 @@ test.concurrent(
     const totalAmount = 10_000;
 
     for await (const _ of new Array(totalAmount / batchSize)) {
-      await writeToken.collectOperations(
+      await writeToken.collectLegacyOperations(
         prepareBatch(batchSize, {
           operation: 'query ping { ping }',
           operationName: 'ping',
@@ -358,7 +363,7 @@ test.concurrent('check usage from two selected targets', async () => {
   expect(targetValidationResult.setTargetValidation.validationSettings.percentage).toEqual(0);
   expect(targetValidationResult.setTargetValidation.validationSettings.period).toEqual(30);
 
-  const collectResult = await productionToken.collectOperations([
+  const collectResult = await productionToken.collectLegacyOperations([
     {
       timestamp: Date.now(),
       operation: 'query ping { ping }',
@@ -475,7 +480,7 @@ test.concurrent('check usage not from excluded client names', async () => {
   expect(targetValidationResult.setTargetValidation.validationSettings.percentage).toEqual(0);
   expect(targetValidationResult.setTargetValidation.validationSettings.period).toEqual(30);
 
-  const collectResult = await token.collectOperations([
+  const collectResult = await token.collectLegacyOperations([
     {
       timestamp: Date.now(),
       operation: 'query ping { ping }',
@@ -682,7 +687,7 @@ describe('changes with usage data', () => {
       expect(targetValidationResult.setTargetValidation.validationSettings.percentage).toEqual(0);
       expect(targetValidationResult.setTargetValidation.validationSettings.period).toEqual(30);
 
-      const collectResult = await token.collectOperations([
+      const collectResult = await token.collectLegacyOperations([
         {
           timestamp: Date.now(),
           operation: input.reportOperation.operation,
@@ -933,7 +938,7 @@ test.concurrent('number of produced and collected operations should match', asyn
   const totalAmount = 10_000;
 
   for await (const i of new Array(totalAmount / batchSize).fill(null).map((_, i) => i)) {
-    await writeToken.collectOperations(
+    await writeToken.collectLegacyOperations(
       prepareBatch(
         batchSize,
         i % 2 === 0
@@ -1020,7 +1025,7 @@ test.concurrent(
       organizationScopes: [OrganizationAccessScope.Read],
     });
 
-    await writeToken.collectOperations([
+    await writeToken.collectLegacyOperations([
       {
         operation: 'query ping {        ping      }', // those spaces are expected and important to ensure normalization is in place
         operationName: 'ping',
@@ -1083,7 +1088,7 @@ test.concurrent(
       organizationScopes: [OrganizationAccessScope.Read],
     });
 
-    await writeToken.collectOperations([
+    await writeToken.collectLegacyOperations([
       {
         operation: 'query ping {        ping      }', // those spaces are expected and important to ensure normalization is in place
         operationName: 'ping',
@@ -1150,7 +1155,7 @@ test.concurrent(
       organizationScopes: [OrganizationAccessScope.Read],
     });
 
-    await writeToken.collectOperations([
+    await writeToken.collectLegacyOperations([
       {
         operation: 'query pingv2 { ping }',
         operationName: 'pingv2',
@@ -1211,7 +1216,7 @@ test.concurrent('ignore operations with syntax errors', async () => {
     organizationScopes: [OrganizationAccessScope.Read],
   });
 
-  const collectResult = await writeToken.collectOperations([
+  const collectResult = await writeToken.collectLegacyOperations([
     {
       operation: 'query pingv2 { pingv2 }',
       operationName: 'pingv2',
@@ -1279,7 +1284,7 @@ test.concurrent('ensure correct data', async () => {
     organizationScopes: [OrganizationAccessScope.Read],
   });
 
-  await writeToken.collectOperations([
+  await writeToken.collectLegacyOperations([
     {
       operation: 'query ping {        ping      }', // those spaces are expected and important to ensure normalization is in place
       operationName: 'ping',
@@ -1517,3 +1522,198 @@ test.concurrent('ensure correct data', async () => {
   expect(dailyAggOfUnknownClient.hash).toHaveLength(32);
   expect(dailyAggOfUnknownClient.target).toEqual(target.id);
 });
+
+const SubscriptionSchemaCheckQuery = graphql(/* GraphQL */ `
+  query SubscriptionSchemaCheck($selector: TargetSelectorInput!, $id: ID!) {
+    target(selector: $selector) {
+      schemaCheck(id: $id) {
+        __typename
+        id
+        breakingSchemaChanges {
+          nodes {
+            criticality
+            criticalityReason
+            message
+            path
+            isSafeBasedOnUsage
+            usageStatistics {
+              topAffectedOperations {
+                hash
+                name
+                countFormatted
+                percentageFormatted
+              }
+              topAffectedClients {
+                name
+                countFormatted
+                percentageFormatted
+              }
+            }
+            approval {
+              schemaCheckId
+              approvedAt
+              approvedBy {
+                id
+                displayName
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`);
+
+test.concurrent(
+  'subscription operation is used for conditional breaking change detection',
+  async () => {
+    const { createOrg } = await initSeed().createOwner();
+    const { organization, createProject } = await createOrg();
+    const { project, target, createToken } = await createProject(ProjectType.Single);
+    const token = await createToken({
+      targetScopes: [
+        TargetAccessScope.Read,
+        TargetAccessScope.RegistryRead,
+        TargetAccessScope.RegistryWrite,
+        TargetAccessScope.Settings,
+      ],
+      projectScopes: [ProjectAccessScope.Read],
+      organizationScopes: [OrganizationAccessScope.Read],
+    });
+
+    const sdl = /* GraphQL */ `
+      type Query {
+        a: String
+        b: String
+      }
+
+      type Subscription {
+        a: String
+        b: String
+      }
+    `;
+
+    const schemaPublishResult = await token
+      .publishSchema({
+        sdl,
+        author: 'Kamil',
+        commit: 'initial',
+      })
+      .then(res => res.expectNoGraphQLErrors());
+
+    expect(schemaPublishResult.schemaPublish.__typename).toEqual('SchemaPublishSuccess');
+
+    await token.toggleTargetValidation(true);
+
+    const usageAddress = await getServiceHost('usage', 8081);
+
+    const client = createHive({
+      enabled: true,
+      token: token.secret,
+      usage: true,
+      debug: false,
+      agent: {
+        logger: createLogger('debug'),
+        maxSize: 1,
+      },
+      selfHosting: {
+        usageEndpoint: 'http://' + usageAddress,
+        graphqlEndpoint: 'http://noop/',
+        applicationUrl: 'http://noop/',
+      },
+    });
+
+    const request = new Request('http://localhost:4000/graphql', {
+      method: 'POST',
+      headers: {
+        'x-graphql-client-name': 'integration-tests',
+        'x-graphql-client-version': '6.6.6',
+      },
+    });
+
+    client.collectSubscriptionUsage({
+      args: {
+        document: parse(/* GraphQL */ `
+          subscription {
+            a
+          }
+        `),
+        schema: buildASTSchema(parse(sdl)),
+        contextValue: {
+          request,
+        },
+      },
+    });
+
+    await waitFor(5000);
+
+    const result = await token
+      .checkSchema(/* GraphQL */ `
+        type Query {
+          a: String
+          b: String
+        }
+
+        type Subscription {
+          b: String
+        }
+      `)
+      .then(r => r.expectNoGraphQLErrors());
+
+    if (result.schemaCheck.__typename !== 'SchemaCheckError') {
+      throw new Error(`Expected SchemaCheckError, got ${result.schemaCheck.__typename}`);
+    }
+
+    expect(result.schemaCheck.errors).toMatchInlineSnapshot(`
+      {
+        nodes: [
+          {
+            message: Field 'a' was removed from object type 'Subscription',
+          },
+        ],
+        total: 1,
+      }
+    `);
+
+    const schemaCheckId = result.schemaCheck.schemaCheck?.id;
+
+    if (!schemaCheckId) {
+      throw new Error('Expected schemaCheckId to be defined');
+    }
+
+    const schemaCheck = await execute({
+      document: SubscriptionSchemaCheckQuery,
+      variables: {
+        id: schemaCheckId,
+        selector: {
+          organization: organization.cleanId,
+          project: project.cleanId,
+          target: target.cleanId,
+        },
+      },
+      authToken: token.secret,
+    }).then(r => r.expectNoGraphQLErrors());
+
+    const node = schemaCheck.target?.schemaCheck?.breakingSchemaChanges?.nodes[0];
+
+    if (!node) {
+      throw new Error('Expected node to be defined');
+    }
+    expect(node.isSafeBasedOnUsage).toEqual(false);
+    expect(node.usageStatistics?.topAffectedOperations).toEqual([
+      {
+        countFormatted: '1',
+        hash: 'c1bbc8385a4a6f4e4988be7394800adc',
+        name: 'anonymous',
+        percentageFormatted: '100.00%',
+      },
+    ]);
+    expect(node.usageStatistics?.topAffectedClients).toEqual([
+      {
+        countFormatted: '1',
+        name: 'integration-tests',
+        percentageFormatted: '100.00%',
+      },
+    ]);
+  },
+);

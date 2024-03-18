@@ -52,7 +52,7 @@ import {
 } from './flow';
 import { execute } from './graphql';
 import { UpdateSchemaPolicyForOrganization, UpdateSchemaPolicyForProject } from './schema-policy';
-import { collect, CollectedOperation } from './usage';
+import { CollectedOperation, legacyCollect } from './usage';
 import { generateUnique } from './utils';
 
 export function initSeed() {
@@ -446,16 +446,17 @@ export function initSeed() {
 
                       return statsResult.operationsStats;
                     },
-                    async collectOperations(
+                    async collectLegacyOperations(
                       operations: CollectedOperation[],
                       headerName: 'x-api-token' | 'authorization' = 'authorization',
                     ) {
-                      return await collect({
+                      return await legacyCollect({
                         operations,
                         token: secret,
                         authorizationHeader: headerName,
                       });
                     },
+                    async collectUsage() {},
                     async checkSchema(
                       sdl: string,
                       service?: string,

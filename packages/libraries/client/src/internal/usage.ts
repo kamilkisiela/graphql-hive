@@ -297,7 +297,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
             client:
               typeof args.contextValue !== 'undefined' && typeof options.clientInfo !== 'undefined'
                 ? options.clientInfo(args.contextValue)
-                : null,
+                : createDefaultClientInfo()(args.contextValue),
           },
         });
       }
@@ -747,7 +747,7 @@ function createDefaultClientInfo(
   const clientFieldName = config?.ws?.clientFieldName ?? 'client';
   return function defaultClientInfo(context: any) {
     // whatwg Request
-    if (context?.request?.headers?.get === 'function') {
+    if (typeof context?.request?.headers?.get === 'function') {
       const name = context.request.headers.get(clientNameHeader);
       const version = context.request.headers.get(clientVersionHeader);
       if (typeof name === 'string' && typeof version === 'string') {

@@ -97,7 +97,13 @@ export function splitReport(report: RawReport, numOfChunks: number) {
 }
 
 function ensureIncomingMessageValidity(incoming: Partial<IncomingReport>) {
-  if (!incoming || !incoming.operations || !Array.isArray(incoming.operations)) {
+  if (
+    // No message
+    !incoming ||
+    (!incoming.operations && !incoming.subscriptionOperations) ||
+    (incoming.operations && !Array.isArray(incoming.operations)) ||
+    (incoming.subscriptionOperations && !Array.isArray(incoming.subscriptionOperations))
+  ) {
     throw new Error('Invalid incoming message');
   }
 }

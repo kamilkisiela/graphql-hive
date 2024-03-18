@@ -35,15 +35,18 @@ const ExecutionSchema = tb.Type.Object(
 
 const MetadataSchema = tb.Type.Object({
   client: tb.Type.Optional(
-    tb.Type.Object(
-      {
-        name: tb.Type.Optional(tb.Type.String()),
-        version: tb.Type.Optional(tb.Type.String()),
-      },
-      {
-        title: 'Client',
-      },
-    ),
+    tb.Union([
+      tb.Null(),
+      tb.Type.Object(
+        {
+          name: tb.Type.Optional(tb.Type.String()),
+          version: tb.Type.Optional(tb.Type.String()),
+        },
+        {
+          title: 'Client',
+        },
+      ),
+    ]),
   ),
 });
 
@@ -65,7 +68,6 @@ const SubscriptionOperationSchema = tb.Type.Object(
   {
     timestamp: tb.Type.Optional(tb.Type.Integer()),
     operationMapKey: tb.Type.String(),
-    execution: ExecutionSchema,
     metadata: tb.Type.Optional(MetadataSchema),
   },
   {
