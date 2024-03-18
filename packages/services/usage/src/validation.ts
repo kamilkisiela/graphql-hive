@@ -19,7 +19,7 @@ const OperationMapSchema = tb.Object(
       minItems: 1,
     }),
   },
-  { title: 'OperationMapRecord' },
+  { title: 'OperationMapRecord', additionalProperties: false },
 );
 
 const ExecutionSchema = tb.Type.Object(
@@ -30,25 +30,30 @@ const ExecutionSchema = tb.Type.Object(
   },
   {
     title: 'Execution',
+    additionalProperties: false,
   },
 );
 
-const MetadataSchema = tb.Type.Object({
-  client: tb.Type.Optional(
-    tb.Union([
-      tb.Null(),
-      tb.Type.Object(
-        {
-          name: tb.Type.Optional(tb.Type.String()),
-          version: tb.Type.Optional(tb.Type.String()),
-        },
-        {
-          title: 'Client',
-        },
-      ),
-    ]),
-  ),
-});
+const ClientSchema = tb.Type.Object(
+  {
+    name: tb.Type.Optional(tb.Type.String()),
+    version: tb.Type.Optional(tb.Type.String()),
+  },
+  {
+    title: 'Client',
+    additionalProperties: false,
+  },
+);
+
+const MetadataSchema = tb.Type.Object(
+  {
+    client: tb.Type.Optional(tb.Union([tb.Null(), ClientSchema])),
+  },
+  {
+    title: 'Metadata',
+    additionalProperties: false,
+  },
+);
 
 /** Query + Mutation */
 const RequestOperationSchema = tb.Type.Object(
@@ -60,6 +65,7 @@ const RequestOperationSchema = tb.Type.Object(
   },
   {
     title: 'RequestOperation',
+    additionalProperties: false,
   },
 );
 
@@ -72,10 +78,11 @@ const SubscriptionOperationSchema = tb.Type.Object(
   },
   {
     title: 'SubscriptionOperation',
+    additionalProperties: false,
   },
 );
 
-// const FullSchema = tb.Type.Object(
+// export const FullSchema = tb.Type.Object(
 //   {
 //     size: tb.Type.Integer(),
 //     map: tb.Record(tb.String(), OperationMapSchema),

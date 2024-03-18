@@ -22,12 +22,13 @@ export interface Report {
    * Number of collected operations
    */
   size: number
-  map: OperationMap
-  operations: Operation[]
-}
-
-export interface OperationMap {
-  [key: string]: OperationMapRecord
+  map: {
+    [k: string]: OperationMapRecord
+  }
+  /** request executions (mutation and query) */
+  operations: RequestOperation[]
+  /** subscription executions */
+  subscriptionOperations: SubscriptionOperation[]
 }
 
 export interface OperationMapRecord {
@@ -41,12 +42,13 @@ export interface OperationMapRecord {
    */
   operationName?: string
   /**
+   * @minItems 1
    * Schema coordinates (['Query', 'Query.me', 'User', 'User.id', 'User.name'])
    */
-  fields: string[]
+  fields: [string, ...string[]]
 }
 
-export interface Operation {
+export interface RequestOperation {
   /**
    * The key of the operation in the operation map
    */
@@ -82,6 +84,18 @@ export interface Metadata {
 export interface Client {
   name?: string
   version?: string
+}
+
+export interface SubscriptionOperation {
+  /**
+   * A number representing the milliseconds elapsed since the UNIX epoch.
+   */
+  timestamp: number
+  /**
+   * The key of the operation in the operation map
+   */
+  operationMapKey: string
+  metadata?: Metadata
 }
 ```
 
@@ -156,6 +170,22 @@ export interface Client {
       "required": ["operationMapKey", "timestamp", "execution"],
       "type": "object"
     },
+    "SubscriptionOperation": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "description": "A number representing the milliseconds elapsed since the UNIX epoch.",
+          "type": "number"
+        },
+        "operationMapKey": {
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/Metadata"
+        }
+      }
+    },
     "OperationMap": {
       "additionalProperties": {
         "$ref": "#/definitions/OperationMapRecord"
@@ -196,12 +226,18 @@ export interface Client {
           },
           "type": "array"
         },
+        "subscriptionOperations": {
+          "items": {
+            "$ref": "#/definitions/SubscriptionOperation"
+          },
+          "type": "array"
+        },
         "size": {
           "description": "Number of collected operations",
           "type": "number"
         }
       },
-      "required": ["size", "map", "operations"],
+      "required": ["size", "map"],
       "type": "object"
     }
   }
@@ -225,6 +261,18 @@ export interface Client {
       "operationName": "users",
       "operation": "query users { users { id } }",
       "fields": ["Query", "Query.users", "User", "User.id"]
+    },
+    "12f3712a": {
+      "operationName": "liveCoordinates",
+      "operation": "subscription liveCoordinates { location { x y } }",
+      "fields": [
+        "Subscription",
+        "Subscription.location",
+        "User",
+        "Location",
+        "Location.x",
+        "Location.y"
+      ]
     }
   },
   "operations": [
@@ -266,6 +314,18 @@ export interface Client {
         "duration": 150000000, // 150ms in nanoseconds
         "errorsTotal": 0
       },
+      "metadata": {
+        "client": {
+          "name": "demo",
+          "version": "0.0.1"
+        }
+      }
+    }
+  ],
+  "subscriptionOperations": [
+    {
+      "operationMapKey": "12f3712a", // points to the 'users' query
+      "timestamp": 1663158676589,
       "metadata": {
         "client": {
           "name": "demo",
