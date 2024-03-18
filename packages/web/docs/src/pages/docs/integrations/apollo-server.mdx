@@ -78,8 +78,8 @@ This will result in all operations sent to the Apollo Server being reported to t
 ##### Client Information
 
 In case you want to also associate a client name and version with any operation reported to Hive,
-you need to send the `x-client-name` and `x-client-version` HTTP headers for requests to the Apollo
-Server instance from your client.
+you need to send the `x-graphql-client-name` and `x-graphql-client-version` HTTP headers for
+requests to the Apollo Server instance from your client.
 
 ```bash filename="Example HTTP Request with client headers" {2-3}
 curl \

@@ -1017,8 +1017,8 @@ describe('subscription usage reporting', () => {
           headers: {
             'Content-Type': 'text/event-stream',
             accept: 'text/event-stream',
-            'x-client-name': 'foo',
-            'x-client-version': '1',
+            'x-graphql-client-name': 'foo',
+            'x-graphql-client-version': '1',
           },
         });
         expect(res.status).toBe(200);

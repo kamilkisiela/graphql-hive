@@ -624,8 +624,8 @@ describe('built-in HTTP usage reporting', async () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-client-version': '4.2.0',
-          'x-client-name': 'apollo-client',
+          'x-graphql-client-version': '4.2.0',
+          'x-graphql-client-name': 'apollo-client',
         },
         body: JSON.stringify({
           query: '{hi}',

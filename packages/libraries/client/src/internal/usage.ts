@@ -723,8 +723,8 @@ interface OperationMap {
   [key: string]: OperationMapRecord;
 }
 
-const defaultClientNameHeader = 'x-client-name';
-const defaultClientVersionHeader = 'x-client-version';
+const defaultClientNameHeader = 'x-graphql-client-name';
+const defaultClientVersionHeader = 'x-graphql-client-version';
 
 type CreateDefaultClientInfo = {
   /** HTTP configuration */
