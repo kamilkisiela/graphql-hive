@@ -97,20 +97,7 @@ it('reports usage', async () => {
     ],
   });
 
-  // eslint-disable-next-line no-async-promise-executor
-  await new Promise<void>(async resolve => {
-    const res = await yoga.fetch('http://localhost/graphql', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: `{ hi }`,
-      }),
-    });
-    expect(res.status).toBe(200);
-    expect(await res.text()).toMatchInlineSnapshot('{"data":{"hi":null}}');
-
+  await new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => {
       resolve();
     }, 1000);
@@ -123,6 +110,20 @@ it('reports usage', async () => {
         resolve();
       }
     });
+
+    (async () => {
+      const res = await yoga.fetch('http://localhost/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: `{ hi }`,
+        }),
+      });
+      expect(res.status).toBe(200);
+      expect(await res.text()).toMatchInlineSnapshot('{"data":{"hi":null}}');
+    })().catch(reject);
   });
 
   graphqlScope.done();
@@ -176,6 +177,7 @@ it('reports usage with response cache', async () => {
         }
       `);
 
+
       return true;
     })
     .thrice()
@@ -218,22 +220,7 @@ it('reports usage with response cache', async () => {
       }),
     ],
   });
-  // eslint-disable-next-line no-async-promise-executor
-  await new Promise<void>(async resolve => {
-    for (const _ of [1, 2, 3]) {
-      const res = await yoga.fetch('http://localhost/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          query: `{ hi }`,
-        }),
-      });
-      expect(res.status).toBe(200);
-      expect(await res.text()).toEqual('{"data":{"hi":null}}');
-    }
-
+  await new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(() => {
       resolve();
     }, 1000);
@@ -241,13 +228,28 @@ it('reports usage with response cache', async () => {
 
     graphqlScope.on('request', () => {
       requestCount = requestCount + 1;
-      if (requestCount === 2) {
+      if (requestCount === 4) {
         clearTimeout(timeout);
         resolve();
       }
     });
-  });
 
+    (async () => {
+      for (const _ of [1, 2, 3]) {
+        const res = await yoga.fetch('http://localhost/graphql', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: `{ hi }`,
+          }),
+        });
+        expect(res.status).toBe(200);
+        expect(await res.text()).toEqual('{"data":{"hi":null}}');
+      }
+    })().catch(reject);
+  });
   expect(usageCount).toBe(3);
   graphqlScope.done();
 });
@@ -320,38 +322,40 @@ it('does not report usage for operation that does not pass validation', async ()
     ],
   });
 
-  // eslint-disable-next-line no-async-promise-executor
-  await new Promise<void>(async (resolve, reject) => {
+  await new Promise<void>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      resolve();
+    }, 1000);
     nock.emitter.once('no match', (req: any) => {
       reject(new Error(`Unexpected request was sent to ${req.path}`));
     });
 
-    const res = await yoga.fetch('http://localhost/graphql', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: /* GraphQL */ `
-          {
-            __schema {
-              types {
-                name
+    (async () => {
+      const res = await yoga.fetch('http://localhost/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: /* GraphQL */ `
+            {
+              __schema {
+                types {
+                  name
+                }
               }
             }
-          }
-        `,
-      }),
-    });
-    expect(res.status).toBe(200);
-    expect(await res.text()).toContain('GraphQL introspection has been disabled');
+          `,
+        }),
+      })
 
-    setTimeout(() => {
-      graphqlScope.done();
-      expect(callback).not.toHaveBeenCalled();
-      resolve();
-    }, 1000);
+      expect(res.status).toBe(200);
+      expect(await res.text()).toContain('GraphQL introspection has been disabled');
+    })().catch(reject);
   });
+  expect(callback).not.toHaveBeenCalled();
+  graphqlScope.done();
+
 });
 
 it('does not report usage if context creating raises an error', async () => {
@@ -427,7 +431,7 @@ it('does not report usage if context creating raises an error', async () => {
   });
 
   // eslint-disable-next-line no-async-promise-executor
-  await new Promise<void>(async (resolve, reject) => {
+  await new Promise<void>((resolve, reject) => {
     nock.emitter.once('no match', (req: any) => {
       reject(new Error(`Unexpected request was sent to ${req.path}`));
     });
@@ -445,21 +449,25 @@ it('does not report usage if context creating raises an error', async () => {
       }
     });
 
-    const res = await yoga.fetch('http://localhost/graphql', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: /* GraphQL */ `
-          {
-            hi
-          }
-        `,
-      }),
-    });
-    expect(res.status).toBe(200);
-    expect(await res.text()).toMatchInlineSnapshot(`{"errors":[{"message":"Not authenticated."}]}`);
+    (async () => {
+      const res = await yoga.fetch('http://localhost/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: /* GraphQL */ `
+            {
+              hi
+            }
+          `,
+        }),
+      });
+      expect(res.status).toBe(200);
+      expect(await res.text()).toMatchInlineSnapshot(`{"errors":[{"message":"Not authenticated."}]}`);
+    })().catch(reject);
+
+   
   });
 
   graphqlScope.done();
@@ -575,9 +583,22 @@ describe('subscription usage reporting', () => {
         ],
       });
 
-      // eslint-disable-next-line no-async-promise-executor
-      await new Promise<void>(async resolve => {
-        const res = await yoga.fetch('http://localhost/graphql', {
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          resolve();
+        }, 1000);
+        let requestCount = 0;
+
+        graphqlScope.on('request', () => {
+          requestCount = requestCount + 1;
+          if (requestCount === 2) {
+            clearTimeout(timeout);
+            resolve();
+          }
+        });
+
+        (async () => {
+          const res = await yoga.fetch('http://localhost/graphql', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -592,19 +613,7 @@ describe('subscription usage reporting', () => {
 
           event: complete
         `);
-
-        const timeout = setTimeout(() => {
-          resolve();
-        }, 1000);
-        let requestCount = 0;
-
-        graphqlScope.on('request', () => {
-          requestCount = requestCount + 1;
-          if (requestCount === 2) {
-            clearTimeout(timeout);
-            resolve();
-          }
-        });
+        })().catch(reject);
       });
       graphqlScope.done();
     });
@@ -720,27 +729,7 @@ describe('subscription usage reporting', () => {
         ],
       });
 
-      // eslint-disable-next-line no-async-promise-executor
-      await new Promise<void>(async resolve => {
-        const res = await yoga.fetch('http://localhost/graphql', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            query: `subscription { hi }`,
-          }),
-        });
-        expect(res.status).toBe(200);
-        expect(await res.text()).toMatchInlineSnapshot(`
-          :
-
-          event: next
-          data: {"errors":[{"message":"Unexpected error.","locations":[{"line":1,"column":1}]}]}
-
-          event: complete
-        `);
-
+      await new Promise<void>((resolve, reject) => {
         const timeout = setTimeout(() => {
           resolve();
         }, 1000);
@@ -753,6 +742,27 @@ describe('subscription usage reporting', () => {
             resolve();
           }
         });
+
+        (async () => {
+          const res = await yoga.fetch('http://localhost/graphql', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              query: `subscription { hi }`,
+            }),
+          });
+          expect(res.status).toBe(200);
+          expect(await res.text()).toMatchInlineSnapshot(`
+            :
+
+            event: next
+            data: {"errors":[{"message":"Unexpected error.","locations":[{"line":1,"column":1}]}]}
+
+            event: complete
+          `);
+        })().catch(reject)
       });
       graphqlScope.done();
     });
@@ -869,28 +879,7 @@ describe('subscription usage reporting', () => {
         ],
       });
 
-      // eslint-disable-next-line no-async-promise-executor
-      await new Promise<void>(async resolve => {
-        const url = new URL('http://localhost/graphql/stream');
-        url.searchParams.set('query', 'subscription { hi }');
-        const res = await yoga.fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'text/event-stream',
-            accept: 'text/event-stream',
-            'x-graphql-client-name': 'my-client',
-            'x-graphql-client-version': '1.0.0',
-          },
-        });
-
-        expect(res.status).toBe(200);
-        expect(await res.text()).toMatchInlineSnapshot(`
-          :
-
-          event: complete
-          data:
-        `);
-
+      await new Promise<void>((resolve, reject) => {
         const timeout = setTimeout(() => {
           resolve();
         }, 1000);
@@ -903,6 +892,29 @@ describe('subscription usage reporting', () => {
             resolve();
           }
         });
+
+        (async () => {
+          const url = new URL('http://localhost/graphql/stream');
+          url.searchParams.set('query', 'subscription { hi }');
+          const res = await yoga.fetch(url, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'text/event-stream',
+              accept: 'text/event-stream',
+              'x-graphql-client-name': 'my-client',
+              'x-graphql-client-version': '1.0.0',
+            },
+          });
+  
+          expect(res.status).toBe(200);
+          expect(await res.text()).toMatchInlineSnapshot(`
+            :
+
+            event: complete
+            data:
+          `);
+  
+        })().catch(reject);
       });
       graphqlScope.done();
     });
