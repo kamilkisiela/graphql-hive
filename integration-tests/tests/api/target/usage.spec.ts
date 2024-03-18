@@ -1664,16 +1664,14 @@ test.concurrent(
       throw new Error(`Expected SchemaCheckError, got ${result.schemaCheck.__typename}`);
     }
 
-    expect(result.schemaCheck.errors).toMatchInlineSnapshot(`
-      {
-        nodes: [
-          {
-            message: Field 'a' was removed from object type 'Subscription',
-          },
-        ],
-        total: 1,
-      }
-    `);
+    expect(result.schemaCheck.errors).toEqual({
+      nodes: [
+        {
+          message: "Field 'a' was removed from object type 'Subscription'",
+        },
+      ],
+      total: 1,
+    });
 
     const schemaCheckId = result.schemaCheck.schemaCheck?.id;
 

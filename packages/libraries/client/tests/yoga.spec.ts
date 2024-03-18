@@ -1,17 +1,14 @@
+/* eslint import/no-extraneous-dependencies: ["error", {"devDependencies": true}] */
 import { createServer } from 'node:http';
 import axios from 'axios';
 import { GraphQLError } from 'graphql';
 import { createClient } from 'graphql-ws';
 import { useServer as useWSServer } from 'graphql-ws/lib/use/ws';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { createLogger, createSchema, createYoga } from 'graphql-yoga';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import nock from 'nock';
 import { WebSocket, WebSocketServer } from 'ws';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useGraphQLSSE } from '@graphql-yoga/plugin-graphql-sse';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { useHive } from '../src/yoga.js';
 
@@ -114,7 +111,7 @@ it('reports usage', async () => {
     expect(res.status).toBe(200);
     expect(await res.text()).toMatchInlineSnapshot('{"data":{"hi":null}}');
 
-    let timeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
       resolve();
     }, 1000);
     let requestCount = 0;
@@ -237,7 +234,7 @@ it('reports usage with response cache', async () => {
       expect(await res.text()).toEqual('{"data":{"hi":null}}');
     }
 
-    let timeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
       resolve();
     }, 1000);
     let requestCount = 0;
@@ -435,7 +432,7 @@ it('does not report usage if context creating raises an error', async () => {
       reject(new Error(`Unexpected request was sent to ${req.path}`));
     });
 
-    let timeout = setTimeout(() => {
+    const timeout = setTimeout(() => {
       resolve();
     }, 1000);
     let requestCount = 0;
@@ -542,6 +539,7 @@ describe('subscription usage reporting', () => {
           resolvers: {
             Subscription: {
               hi: {
+                /* eslint-disable-next-line require-yield */
                 async *subscribe() {
                   return;
                 },
@@ -595,8 +593,7 @@ describe('subscription usage reporting', () => {
           event: complete
         `);
 
-        let timeout = setTimeout(() => {
-          graphqlScope.done();
+        const timeout = setTimeout(() => {
           resolve();
         }, 1000);
         let requestCount = 0;
@@ -609,6 +606,7 @@ describe('subscription usage reporting', () => {
           }
         });
       });
+      graphqlScope.done();
     });
 
     it('reports usage for exception from subscription event stream', async () => {
@@ -687,6 +685,7 @@ describe('subscription usage reporting', () => {
           resolvers: {
             Subscription: {
               hi: {
+                /* eslint-disable-next-line require-yield */
                 async *subscribe() {
                   throw new Error('Oof');
                 },
@@ -742,8 +741,7 @@ describe('subscription usage reporting', () => {
           event: complete
         `);
 
-        let timeout = setTimeout(() => {
-          graphqlScope.done();
+        const timeout = setTimeout(() => {
           resolve();
         }, 1000);
         let requestCount = 0;
@@ -756,6 +754,7 @@ describe('subscription usage reporting', () => {
           }
         });
       });
+      graphqlScope.done();
     });
   });
 
@@ -827,6 +826,7 @@ describe('subscription usage reporting', () => {
           resolvers: {
             Subscription: {
               hi: {
+                /* eslint-disable-next-line require-yield */
                 async *subscribe() {
                   return;
                 },
@@ -891,8 +891,7 @@ describe('subscription usage reporting', () => {
           data:
         `);
 
-        let timeout = setTimeout(() => {
-          graphqlScope.done();
+        const timeout = setTimeout(() => {
           resolve();
         }, 1000);
         let requestCount = 0;
@@ -905,6 +904,7 @@ describe('subscription usage reporting', () => {
           }
         });
       });
+      graphqlScope.done();
     });
 
     it('reports usage for exception from subscription event stream', async () => {
@@ -973,6 +973,7 @@ describe('subscription usage reporting', () => {
           resolvers: {
             Subscription: {
               hi: {
+                /* eslint-disable-next-line require-yield */
                 async *subscribe() {
                   throw new Error('Oof');
                 },
@@ -993,7 +994,7 @@ describe('subscription usage reporting', () => {
             },
             usage: {
               endpoint: 'http://localhost/usage',
-              clientInfo(ctx) {
+              clientInfo() {
                 return {
                   name: 'brrr',
                   version: '1',
@@ -1032,8 +1033,7 @@ describe('subscription usage reporting', () => {
           data:
         `);
 
-        let timeout = setTimeout(() => {
-          graphqlScope.done();
+        const timeout = setTimeout(() => {
           resolve();
         }, 1000);
         let requestCount = 0;
@@ -1046,6 +1046,8 @@ describe('subscription usage reporting', () => {
           }
         });
       });
+
+      graphqlScope.done();
     });
   });
 
@@ -1116,6 +1118,7 @@ describe('subscription usage reporting', () => {
           resolvers: {
             Subscription: {
               hi: {
+                /* eslint-disable-next-line require-yield */
                 async *subscribe() {
                   return;
                 },
@@ -1208,8 +1211,8 @@ describe('subscription usage reporting', () => {
 
       const port = (httpServer.address() as any).port as number;
 
-      await new Promise<void>(async resolve => {
-        let timeout = setTimeout(() => {
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
           resolve();
         }, 1000);
         let requestCount = 0;
@@ -1222,23 +1225,25 @@ describe('subscription usage reporting', () => {
           }
         });
 
-        const client = createClient({
-          url: `ws://localhost:${port}${yoga.graphqlEndpoint}`,
-          webSocketImpl: WebSocket,
-          connectionParams: {
-            client: {
-              name: 'foo',
-              version: '1',
+        (async () => {
+          const client = createClient({
+            url: `ws://localhost:${port}${yoga.graphqlEndpoint}`,
+            webSocketImpl: WebSocket,
+            connectionParams: {
+              client: {
+                name: 'foo',
+                version: '1',
+              },
             },
-          },
-        });
+          });
 
-        const query = client.iterate({
-          query: 'subscription { hi }',
-        });
+          const query = client.iterate({
+            query: 'subscription { hi }',
+          });
 
-        const { done } = await query.next();
-        expect(done).toEqual(true);
+          const { done } = await query.next();
+          expect(done).toEqual(true);
+        })().catch(reject);
       });
       await new Promise<void>(resolve => {
         httpServer.close(() => {
@@ -1313,6 +1318,7 @@ describe('subscription usage reporting', () => {
           resolvers: {
             Subscription: {
               hi: {
+                /* eslint-disable-next-line require-yield */
                 async *subscribe() {
                   throw new Error('Oof');
                 },
@@ -1396,8 +1402,8 @@ describe('subscription usage reporting', () => {
         webSocketImpl: WebSocket,
       });
 
-      await new Promise<void>(async resolve => {
-        let timeout = setTimeout(() => {
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
           resolve();
         }, 1000);
         let requestCount = 0;
@@ -1410,29 +1416,31 @@ describe('subscription usage reporting', () => {
           }
         });
 
-        const query = client.iterate({
-          query: 'subscription { hi }',
-        });
+        (async () => {
+          const query = client.iterate({
+            query: 'subscription { hi }',
+          });
 
-        const { value } = await query.next();
-        expect(value).toMatchInlineSnapshot(`
-          {
-            errors: [
-              {
-                extensions: {
-                  unexpected: true,
-                },
-                locations: [
-                  {
-                    column: 1,
-                    line: 1,
+          const { value } = await query.next();
+          expect(value).toMatchInlineSnapshot(`
+            {
+              errors: [
+                {
+                  extensions: {
+                    unexpected: true,
                   },
-                ],
-                message: Unexpected error.,
-              },
-            ],
-          }
-        `);
+                  locations: [
+                    {
+                      column: 1,
+                      line: 1,
+                    },
+                  ],
+                  message: Unexpected error.,
+                },
+              ],
+            }
+          `);
+        })().catch(reject);
       });
       await new Promise<void>(resolve => {
         httpServer.close(() => {

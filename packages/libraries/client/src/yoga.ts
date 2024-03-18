@@ -1,11 +1,4 @@
-import {
-  DocumentNode,
-  ExecutionArgs,
-  GraphQLSchema,
-  Kind,
-  parse,
-  type GraphQLError,
-} from 'graphql';
+import { DocumentNode, ExecutionArgs, GraphQLSchema, Kind, parse } from 'graphql';
 import type { GraphQLParams, Plugin } from 'graphql-yoga';
 import LRU from 'tiny-lru';
 import { autoDisposeSymbol, createHive } from './client.js';

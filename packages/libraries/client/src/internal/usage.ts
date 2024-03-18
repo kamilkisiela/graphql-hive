@@ -24,6 +24,7 @@ import {
 } from 'graphql';
 import LRU from 'tiny-lru';
 import { normalizeOperation } from '@graphql-hive/core';
+import { isAsyncIterable } from '@graphql-tools/utils';
 import { version } from '../version.js';
 import { createAgent } from './agent.js';
 import { dynamicSampling, randomSampling } from './sampling.js';
@@ -34,15 +35,7 @@ import type {
   HivePluginOptions,
   HiveUsagePluginOptions,
 } from './types.js';
-import {
-  cache,
-  cacheDocumentKey,
-  isAsyncIterable,
-  isAsyncIterableIterator,
-  logIf,
-  measureDuration,
-  memo,
-} from './utils.js';
+import { cache, cacheDocumentKey, logIf, measureDuration, memo } from './utils.js';
 
 interface UsageCollector {
   collect(): CollectUsageCallback;
@@ -188,7 +181,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
             return;
           }
 
-          if (isAsyncIterableIterator(result) || isAsyncIterable(result)) {
+          if (isAsyncIterable(result)) {
             logger.info('@stream @defer is not supported');
             return;
           }

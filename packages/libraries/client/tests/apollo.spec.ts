@@ -1,4 +1,4 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
+/* eslint import/no-extraneous-dependencies: ["error", {"devDependencies": true}] */
 import { createServer, IncomingMessage, Server } from 'http';
 import bodyParser from 'body-parser';
 import express from 'express';
@@ -231,8 +231,8 @@ describe('built-in HTTP usage reporting', async () => {
       ],
     });
 
-    await new Promise<void>(async resolve => {
-      let timeout = setTimeout(() => {
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
         resolve();
       }, 1000);
       let requestCount = 0;
@@ -245,19 +245,22 @@ describe('built-in HTTP usage reporting', async () => {
         }
       });
 
-      const response = await testServer.executeOperation({
-        query: '{hi}',
-      });
-      expect(response.body).toEqual({
-        kind: 'single',
-        singleResult: {
-          data: {
-            hi: null,
+      (async () => {
+        const response = await testServer.executeOperation({
+          query: '{hi}',
+        });
+        expect(response.body).toEqual({
+          kind: 'single',
+          singleResult: {
+            data: {
+              hi: null,
+            },
+            errors: undefined,
           },
-          errors: undefined,
-        },
-      });
+        });
+      })().catch(reject);
     });
+    graphqlScope.done();
   });
 
   test('successful mutation operation is reported', async () => {
@@ -344,8 +347,8 @@ describe('built-in HTTP usage reporting', async () => {
       ],
     });
 
-    await new Promise<void>(async resolve => {
-      let timeout = setTimeout(() => {
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
         resolve();
       }, 1000);
       let requestCount = 0;
@@ -358,19 +361,23 @@ describe('built-in HTTP usage reporting', async () => {
         }
       });
 
-      const response = await testServer.executeOperation({
-        query: 'mutation{hi}',
-      });
-      expect(response.body).toEqual({
-        kind: 'single',
-        singleResult: {
-          data: {
-            hi: null,
+      (async () => {
+        const response = await testServer.executeOperation({
+          query: 'mutation{hi}',
+        });
+        expect(response.body).toEqual({
+          kind: 'single',
+          singleResult: {
+            data: {
+              hi: null,
+            },
+            errors: undefined,
           },
-          errors: undefined,
-        },
-      });
+        });
+      })().catch(reject);
     });
+
+    graphqlScope.done();
   });
 
   test('operation error is reported', async () => {
@@ -480,8 +487,8 @@ describe('built-in HTTP usage reporting', async () => {
       ],
     });
 
-    await new Promise<void>(async resolve => {
-      let timeout = setTimeout(() => {
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
         resolve();
       }, 1000);
       let requestCount = 0;
@@ -494,23 +501,27 @@ describe('built-in HTTP usage reporting', async () => {
         }
       });
 
-      const response = await testServer.executeOperation({
-        query: '{hi}',
-      });
-      expect(response.body).toMatchObject({
-        kind: 'single',
-        singleResult: {
-          data: {
-            hi: null,
-          },
-          errors: [
-            {
-              message: 'nope.',
+      (async () => {
+        const response = await testServer.executeOperation({
+          query: '{hi}',
+        });
+        expect(response.body).toMatchObject({
+          kind: 'single',
+          singleResult: {
+            data: {
+              hi: null,
             },
-          ],
-        },
-      });
+            errors: [
+              {
+                message: 'nope.',
+              },
+            ],
+          },
+        });
+      })().catch(reject);
     });
+
+    graphqlScope.done();
   });
 
   test('custom client info based on context', async () => {
@@ -606,8 +617,8 @@ describe('built-in HTTP usage reporting', async () => {
       },
     });
 
-    await new Promise<void>(async resolve => {
-      let timeout = setTimeout(() => {
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
         resolve();
       }, 1000);
       let requestCount = 0;
@@ -620,26 +631,30 @@ describe('built-in HTTP usage reporting', async () => {
         }
       });
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-graphql-client-version': '4.2.0',
-          'x-graphql-client-name': 'apollo-client',
-        },
-        body: JSON.stringify({
-          query: '{hi}',
-        }),
-      });
+      (async () => {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-graphql-client-version': '4.2.0',
+            'x-graphql-client-name': 'apollo-client',
+          },
+          body: JSON.stringify({
+            query: '{hi}',
+          }),
+        });
 
-      expect(response.status).toBe(200);
-      expect(await response.json()).toEqual({
-        data: {
-          hi: null,
-        },
-        errors: undefined,
-      });
+        expect(response.status).toBe(200);
+        expect(await response.json()).toEqual({
+          data: {
+            hi: null,
+          },
+          errors: undefined,
+        });
+      })().catch(reject);
     });
+
+    graphqlScope.done();
   });
 });
 
@@ -702,8 +717,8 @@ describe('graphql-ws usage reporting setup', async () => {
 
     let httpServer: Server | undefined;
     try {
-      await new Promise<void>(async resolve => {
-        let timeout = setTimeout(() => {
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => {
           resolve();
         }, 1000);
         let requestCount = 0;
@@ -715,100 +730,102 @@ describe('graphql-ws usage reporting setup', async () => {
           }
         });
 
-        const schema = makeExecutableSchema({
-          typeDefs: /* GraphQL */ `
-            type Query {
-              hi: String
-            }
-          `,
-        });
+        (async () => {
+          const schema = makeExecutableSchema({
+            typeDefs: /* GraphQL */ `
+              type Query {
+                hi: String
+              }
+            `,
+          });
 
-        const app = express();
-        httpServer = createServer(app);
-        const wsServer = new WebSocketServer({
-          server: httpServer,
-          path: '/graphql',
-        });
+          const app = express();
+          httpServer = createServer(app);
+          const wsServer = new WebSocketServer({
+            server: httpServer,
+            path: '/graphql',
+          });
 
-        const hiveClient = createHive({
-          token: 'token',
-          selfHosting: {
-            applicationUrl: 'http://localhost/foo',
-            graphqlEndpoint: 'http://localhost/graphql',
-            usageEndpoint: 'http://localhost/usage',
-          },
-          usage: {
-            endpoint: 'http://localhost/usage',
-          },
-          enabled: true,
-          debug: false,
-          agent: {
-            maxSize: 1,
-            logger: createLogger('silent'),
-          },
-        });
+          const hiveClient = createHive({
+            token: 'token',
+            selfHosting: {
+              applicationUrl: 'http://localhost/foo',
+              graphqlEndpoint: 'http://localhost/graphql',
+              usageEndpoint: 'http://localhost/usage',
+            },
+            usage: {
+              endpoint: 'http://localhost/usage',
+            },
+            enabled: true,
+            debug: false,
+            agent: {
+              maxSize: 1,
+              logger: createLogger('silent'),
+            },
+          });
 
-        const serverCleanup = useServer(
-          {
-            schema,
-            execute: hiveClient.createInstrumentedExecute(execute),
-            subscribe: hiveClient.createInstrumentedSubscribe(subscribe),
-            context: ctx => ctx,
-          },
-          wsServer,
-        );
-        const server = new ApolloServer({
-          schema,
-          plugins: [
-            hiveApollo(hiveClient),
-            // Proper shutdown for the HTTP server.
-            ApolloServerPluginDrainHttpServer({ httpServer }),
-            // Proper shutdown for the WebSocket server.
+          const serverCleanup = useServer(
             {
-              async serverWillStart() {
-                return {
-                  async drainServer() {
-                    await serverCleanup.dispose();
-                  },
-                };
+              schema,
+              execute: hiveClient.createInstrumentedExecute(execute),
+              subscribe: hiveClient.createInstrumentedSubscribe(subscribe),
+              context: ctx => ctx,
+            },
+            wsServer,
+          );
+          const server = new ApolloServer({
+            schema,
+            plugins: [
+              hiveApollo(hiveClient),
+              // Proper shutdown for the HTTP server.
+              ApolloServerPluginDrainHttpServer({ httpServer }),
+              // Proper shutdown for the WebSocket server.
+              {
+                async serverWillStart() {
+                  return {
+                    async drainServer() {
+                      await serverCleanup.dispose();
+                    },
+                  };
+                },
+              },
+            ],
+          });
+          await server.start();
+          app.use(
+            '/graphql',
+            bodyParser.json(),
+            expressMiddleware(server, {
+              context: async ({ req }) => ({ req }),
+            }),
+          );
+
+          await new Promise<void>(resolve =>
+            httpServer?.listen(() => {
+              resolve();
+            }),
+          );
+
+          const port = (httpServer.address() as any)?.port;
+
+          const wsClient = createClient({
+            url: `ws://localhost:${port}/graphql`,
+            webSocketImpl: WebSocket,
+            connectionParams: {
+              client: {
+                name: 'apollo-ws-client',
+                version: '1.0.0',
               },
             },
-          ],
-        });
-        await server.start();
-        app.use(
-          '/graphql',
-          bodyParser.json(),
-          expressMiddleware(server, {
-            context: async ({ req }) => ({ req }),
-          }),
-        );
+          });
 
-        await new Promise<void>(resolve =>
-          httpServer?.listen(() => {
-            resolve();
-          }),
-        );
+          const query = wsClient.iterate({
+            query: '{ hi }',
+          });
 
-        const port = (httpServer.address() as any)?.port;
-
-        const wsClient = createClient({
-          url: `ws://localhost:${port}/graphql`,
-          webSocketImpl: WebSocket,
-          connectionParams: {
-            client: {
-              name: 'apollo-ws-client',
-              version: '1.0.0',
-            },
-          },
-        });
-
-        const query = wsClient.iterate({
-          query: '{ hi }',
-        });
-
-        await query.next();
-        await query.return?.();
+          await query.next();
+          await query.return?.();
+        })().catch(reject);
       });
     } finally {
       httpServer?.close();

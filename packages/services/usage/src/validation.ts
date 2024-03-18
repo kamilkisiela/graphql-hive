@@ -75,17 +75,17 @@ const SubscriptionOperationSchema = tb.Type.Object(
   },
 );
 
-const FullSchema = tb.Type.Object(
-  {
-    size: tb.Type.Integer(),
-    map: tb.Record(tb.String(), OperationMapSchema),
-    operations: tb.Array(RequestOperationSchema),
-    subscriptionOperations: tb.Array(SubscriptionOperationSchema),
-  },
-  {
-    title: 'Report',
-  },
-);
+// const FullSchema = tb.Type.Object(
+//   {
+//     size: tb.Type.Integer(),
+//     map: tb.Record(tb.String(), OperationMapSchema),
+//     operations: tb.Array(RequestOperationSchema),
+//     subscriptionOperations: tb.Array(SubscriptionOperationSchema),
+//   },
+//   {
+//     title: 'Report',
+//   },
+// );
 
 const operationMapSchemaModel = tc.TypeCompiler.Compile(OperationMapSchema);
 const requestOperationSchemaModel = tc.TypeCompiler.Compile(RequestOperationSchema);

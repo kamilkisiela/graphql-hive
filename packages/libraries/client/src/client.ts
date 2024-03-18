@@ -177,9 +177,9 @@ export function createHive(options: HivePluginOptions): HiveClient {
   ): typeof ExecuteImplementation {
     return function hiveInstrumentedExecute(args) {
       const collect = usage.collect();
-      let result = executeImpl(args);
+      const result = executeImpl(args);
       if ('then' in result) {
-        result.then(result => collect(args, result));
+        void result.then(result => collect(args, result));
       } else {
         collect(args, result);
       }

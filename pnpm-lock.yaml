@@ -452,12 +452,27 @@ importers:
       '@apollo/subgraph':
         specifier: 2.7.2
         version: 2.7.2(graphql@16.8.1)
+      '@graphql-tools/schema':
+        specifier: 10.0.3
+        version: 10.0.3(graphql@16.8.1)
       '@graphql-yoga/plugin-disable-introspection':
         specifier: 2.2.0
         version: 2.2.0(graphql-yoga@5.2.0)(graphql@16.8.1)
       '@graphql-yoga/plugin-graphql-sse':
         specifier: 3.1.1
         version: 3.1.1(graphql-yoga@5.2.0)(graphql@16.8.1)
+      '@graphql-yoga/plugin-response-cache':
+        specifier: 3.4.0
+        version: 3.4.0(@envelop/core@5.0.0)(graphql-yoga@5.2.0)(graphql@16.8.1)
+      '@types/async-retry':
+        specifier: 1.4.8
+        version: 1.4.8
+      body-parser:
+        specifier: 1.20.2
+        version: 1.20.2
+      express:
+        specifier: 4.18.3
+        version: 4.18.3
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -473,6 +488,9 @@ importers:
       vitest:
         specifier: 1.4.0
         version: 1.4.0(@types/node@20.11.30)
+      ws:
+        specifier: 8.16.0
+        version: 8.16.0
     publishDirectory: dist
 
   packages/libraries/core:
@@ -2317,7 +2335,7 @@ packages:
       '@types/node-fetch': 2.6.4
       async-retry: 1.3.3
       cors: 2.8.5
-      express: 4.18.2
+      express: 4.18.3
       graphql: 16.8.1
       loglevel: 1.8.0
       lru-cache: 7.18.3
@@ -7399,10 +7417,10 @@ packages:
       '@types/ws': 8.5.3
       '@whatwg-node/fetch': 0.8.8
       graphql: 16.8.1
-      isomorphic-ws: 5.0.0(ws@8.13.0)
+      isomorphic-ws: 5.0.0(ws@8.16.0)
       tslib: 2.6.2
       value-or-promise: 1.0.12
-      ws: 8.13.0
+      ws: 8.16.0
     transitivePeerDependencies:
       - '@types/node'
       - bufferutil
@@ -12078,7 +12096,7 @@ packages:
       ejs: 3.1.8
       esbuild: 0.20.2
       esbuild-plugin-alias: 0.2.1
-      express: 4.18.2
+      express: 4.18.3
       fs-extra: 11.2.0
       process: 0.11.10
       util: 0.12.5
@@ -12111,7 +12129,7 @@ packages:
       constants-browserify: 1.0.0
       css-loader: 6.7.3(webpack@5.89.0)
       es-module-lexer: 1.4.1
-      express: 4.18.2
+      express: 4.18.3
       fork-ts-checker-webpack-plugin: 8.0.0(typescript@5.4.3)(webpack@5.89.0)
       fs-extra: 11.2.0
       html-webpack-plugin: 5.5.0(webpack@5.89.0)
@@ -12391,7 +12409,7 @@ packages:
       cli-table3: 0.6.3
       compression: 1.7.4
       detect-port: 1.5.1
-      express: 4.18.2
+      express: 4.18.3
       fs-extra: 11.2.0
       globby: 11.1.0
       ip: 2.0.1
@@ -12407,7 +12425,7 @@ packages:
       util: 0.12.5
       util-deprecate: 1.0.2
       watchpack: 2.4.0
-      ws: 8.13.0
+      ws: 8.16.0
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -15504,8 +15522,8 @@ packages:
       zod: 3.22.4
     dev: true
 
-  /body-parser@1.20.1:
-    resolution: {integrity: sha512-jWi7abTbYwajOytWCQc37VulmWiRae5RyTpaCyDcS5/lMdtwSz5lOpDE67srw/HYe35f1z3fDQw+3txg7gNtWw==}
+  /body-parser@1.20.2:
+    resolution: {integrity: sha512-ml9pReCu3M61kGlqoTm2umSXTlRTuGTx0bfYj+uIUKKYycG5NtSbeetV3faSU6R7ajOPw0g/J1PvK4qNy7s5bA==}
     engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
     dependencies:
       bytes: 3.1.2
@@ -15517,7 +15535,7 @@ packages:
       iconv-lite: 0.4.24
       on-finished: 2.4.1
       qs: 6.11.0
-      raw-body: 2.5.1
+      raw-body: 2.5.2
       type-is: 1.6.18
       unpipe: 1.0.0
     transitivePeerDependencies:
@@ -19334,13 +19352,13 @@ packages:
     resolution: {integrity: sha512-dX7e/LHVJ6W3DE1MHWi9S1EYzDESENfLrYohG2G++ovZrYOkm4Knwa0mc1cn84xJOR4KEU0WSchhLbd0UklbHw==}
     dev: false
 
-  /express@4.18.2:
-    resolution: {integrity: sha512-5/PsL6iGPdfQ/lKM1UuielYgv3BUoJfz1aUwU9vHZ+J7gyvwdQXFEBIEIaxeGf0GIcreATNyBExtalisDbuMqQ==}
+  /express@4.18.3:
+    resolution: {integrity: sha512-6VyCijWQ+9O7WuVMTRBTl+cjNNIzD5cY5mQ1WM8r/LEkI2u8EYpOotESNwzNlyCn3g+dmjKYI6BmNneSr/FSRw==}
     engines: {node: '>= 0.10.0'}
     dependencies:
       accepts: 1.3.8
       array-flatten: 1.1.1
-      body-parser: 1.20.1
+      body-parser: 1.20.2
       content-disposition: 0.5.4
       content-type: 1.0.5
       cookie: 0.5.0
@@ -20829,7 +20847,7 @@ packages:
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     dependencies:
-      '@graphql-tools/schema': 10.0.0(graphql@16.8.1)
+      '@graphql-tools/schema': 10.0.3(graphql@16.8.1)
       '@graphql-tools/wrap': 10.0.0(graphql@16.8.1)
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.8.1)
       graphql: 16.8.1
@@ -22482,6 +22500,13 @@ packages:
       ws: '*'
     dependencies:
       ws: 8.13.0
+
+  /isomorphic-ws@5.0.0(ws@8.16.0):
+    resolution: {integrity: sha512-muId7Zzn9ywDsyXgTIafTry2sV3nySZeUDe6YedVd1Hvuuep5AsIlqK+XefWpYTyJG5e503F2xIuT2lcU6rCSw==}
+    peerDependencies:
+      ws: '*'
+    dependencies:
+      ws: 8.16.0
 
   /isstream@0.1.2:
     resolution: {integrity: sha512-Yljz7ffyPbrLpLngrMtZ7NduUgVvi6wG9RJ9IUcyCd59YQ911PBJphODUcbOVbqYfxe1wuYf/LJ8PauMRwsM/g==}
@@ -28405,8 +28430,8 @@ packages:
     resolution: {integrity: sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==}
     engines: {node: '>= 0.6'}
 
-  /raw-body@2.5.1:
-    resolution: {integrity: sha512-qqJBtEyVgS0ZmPGdCFPWJ3FreoqvG4MVQln/kCgF7Olq95IbOp0/BWyMwbdtn4VTvkM8Y7khCQ2Xgk/tcrCXig==}
+  /raw-body@2.5.2:
+    resolution: {integrity: sha512-8zGqypfENjCIqGhgXToC8aB2r7YrBX+AQAfIPs/Mlk+BtPTztOvTS01NRW/3Eh60J+a48lt8qsCzirQ6loCVfA==}
     engines: {node: '>= 0.8'}
     dependencies:
       bytes: 3.1.2
@@ -33189,6 +33214,18 @@ packages:
 
   /ws@8.13.0:
     resolution: {integrity: sha512-x9vcZYTrFPC7aSIbj7sRCYo7L/Xb8Iy+pW0ng0wt2vCJv7M9HOMy0UoN3rr+IFC7hb7vXoqS+P9ktyLLLhO+LA==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
+  /ws@8.16.0:
+    resolution: {integrity: sha512-HS0c//TP7Ina87TfiPUz1rQzMhHrl/SG2guqRcTOIUYD2q8uhUdNHZYJUaQ8aTGPzCh+c6oawMKW35nFl1dxyQ==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
