@@ -15,7 +15,7 @@
     "@hive/usage-common": "workspace:*",
     "@sentry/node": "7.107.0",
     "agentkeepalive": "4.5.0",
-    "date-fns": "3.5.0",
+    "date-fns": "3.6.0",
     "dotenv": "16.4.5",
     "got": "14.2.1",
     "graphql": "16.8.1",
