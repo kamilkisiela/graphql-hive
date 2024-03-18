@@ -1,6 +1,6 @@
 {
   "name": "@graphql-hive/client",
-  "version": "0.28.1",
+  "version": "0.29.0",
   "type": "module",
   "description": "A NodeJS client for GraphQL Hive",
   "repository": {
