@@ -33,6 +33,14 @@ for complete list of options and configurations you can pass to the Hive JavaScr
 
 #### Client Information
 
+By default, the client information is retrieved by looking up the `x-client-name` and
+`x-client-version` headers in the HTTP request. For operations executed via the
+`GraphQL over WebSocket` protocol, the client information is retrieved by looking for the `client`
+key within the `connectionParams`.
+
+You can fully customize how to retrieve the client information by passing a custom `clientInfo`
+implementation.
+
 You can pass a custom `clientInfo` callback to the `HivePluginOptions` to have full control on how
 you detect a client's information.
 
@@ -40,10 +48,10 @@ you detect a client's information.
 const config: HivePluginOptions = {
   usage: {
     clientInfo(context) {
-      const name = context.headers['x-graphql-client-name']
-      const version = context.headers['x-graphql-client-version']
+      const name = context?.headers?.['x-graphql-client-name']
+      const version = context?.headers?.['x-graphql-client-version']
 
-      if (name && version) {
+      if (name && version && typeof name === 'string' && typeof version === 'string') {
         return { name, version }
       }
 
@@ -52,6 +60,11 @@ const config: HivePluginOptions = {
   }
 }
 ```
+
+The context object is the context object as used within the GraphQL execution. Depending on your
+server framework and GraphQL protocol, the context object may contain different properties.
+
+We recommend to always try to safely decode the context.
 
 #### Excluding Operations
 

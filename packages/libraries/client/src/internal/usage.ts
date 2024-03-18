@@ -226,7 +226,6 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
               processVariables: options.processVariables ?? false,
             });
             const { key, value: info } = collect(document, args.variableValues ?? null);
-
             agent.capture({
               type: 'request',
               data: {
@@ -246,7 +245,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
                   typeof args.contextValue !== 'undefined' &&
                   typeof options.clientInfo !== 'undefined'
                     ? options.clientInfo(args.contextValue)
-                    : null,
+                    : createDefaultClientInfo()(args.contextValue),
               },
             });
           }
@@ -722,4 +721,91 @@ interface OperationMapRecord {
 
 interface OperationMap {
   [key: string]: OperationMapRecord;
+}
+
+const defaultClientNameHeader = 'x-client-name';
+const defaultClientVersionHeader = 'x-client-version';
+
+type CreateDefaultClientInfo = {
+  /** HTTP configuration */
+  http?: {
+    clientHeaderName: string;
+    versionHeaderName: string;
+  };
+  /** GraphQL over Websocket configuration */
+  ws?: {
+    /** The name of the field within `context.connectionParams`, that contains the client info object. */
+    clientFieldName: string;
+  };
+};
+
+function createDefaultClientInfo(
+  config?: CreateDefaultClientInfo,
+): (context: unknown) => ClientInfo | null {
+  const clientNameHeader = config?.http?.clientHeaderName ?? defaultClientNameHeader;
+  const clientVersionHeader = config?.http?.versionHeaderName ?? defaultClientVersionHeader;
+  const clientFieldName = config?.ws?.clientFieldName ?? 'client';
+  return function defaultClientInfo(context: any) {
+    // whatwg Request
+    if (context?.request?.headers?.get === 'function') {
+      const name = context.request.headers.get(clientNameHeader);
+      const version = context.request.headers.get(clientVersionHeader);
+      if (typeof name === 'string' && typeof version === 'string') {
+        return {
+          name,
+          version,
+        };
+      }
+
+      return null;
+    }
+
+    // Node.js IncomingMessage
+    if (context?.req?.headers && typeof context.req?.headers === 'object') {
+      const name = context.req.headers[clientNameHeader];
+      const version = context.req.headers[clientVersionHeader];
+      if (typeof name === 'string' && typeof version === 'string') {
+        return {
+          name,
+          version,
+        };
+      }
+
+      return null;
+    }
+
+    // Plain headers object
+    if (context?.headers && typeof context.req?.headers === 'object') {
+      const name = context.req.headers[clientNameHeader];
+      const version = context.req.headers[clientVersionHeader];
+      if (typeof name === 'string' && typeof version === 'string') {
+        return {
+          name,
+          version,
+        };
+      }
+
+      return null;
+    }
+
+    // GraphQL over WebSocket
+    if (
+      context?.connectionParams?.[clientFieldName] &&
+      typeof context.connectionParams?.[clientFieldName] === 'object'
+    ) {
+      const name = context.connectionParams[clientFieldName].name;
+      const version = context.connectionParams[clientFieldName].version;
+
+      if (typeof name === 'string' && typeof version === 'string') {
+        return {
+          name,
+          version,
+        };
+      }
+
+      return null;
+    }
+
+    return null;
+  };
 }

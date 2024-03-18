@@ -25,7 +25,7 @@ The `@graphql-hive/client` package exports a
 [Apollo-Server plugin](https://www.apollographql.com/docs/apollo-server/), that can be used
 directly.
 
-## Integration Guide
+## Integration
 
 ### Publishing Schemas
 
@@ -34,27 +34,175 @@ Follow the [CI/CD instructions](./ci-cd.mdx) for automating the process.
 
 ### Usage Reporting
 
+You can report usage to the Hive registry by using the `@graphql-hive/client` package. Depending on
+your GraphQL server setup the configuration might differ.
+
 <Callout>
-  For more configuration options, such as sampling, client name and version reporting, please refer
-  to the [Hive client configuration](/docs/api-reference/client#configuration) reference.
+  For more configuration options, such as sampling, please refer to the [Hive client
+  configuration](/docs/api-reference/client#configuration) reference.
 </Callout>
+
+#### GraphQL over HTTP (default)
 
 You can send usage reporting to Hive registry by using the `usage` section of the configuration:
 
-```ts
+```ts filename="Node.js Apollo Server S setup" {8-12,19-21}
 import { ApolloServer } from 'apollo-server'
+import { startStandaloneServer } from '@apollo/server/standalone'
 import { hiveApollo } from '@graphql-hive/client'
 
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
+const testServer = new ApolloServer({
+  schema,
   plugins: [
     hiveApollo({
       enabled: true,
       token: 'YOUR-TOKEN',
-      usage: true // add this one
+      usage: true
     })
   ]
+})
+
+const { url } = await startStandaloneServer(testServer, {
+  // Attach Node.js request to context,
+  // learn more in the "Client Information" section.
+  async context({ req }) {
+    return { req }
+  }
+})
+
+console.log(`Server listening on ${url}`)
+```
+
+This will result in all operations sent to the Apollo Server being reported to the Hive registry.
+
+##### Client Information
+
+In case you want to also associate a client name and version with any operation reported to Hive,
+you need to send the `x-client-name` and `x-client-version` HTTP headers for requests to the Apollo
+Server instance from your client.
+
+```bash filename="Example HTTP Request with client headers" {2-3}
+curl \
+  -H "x-graphql-client-name: my-client" \
+  -H "x-graphql-client-version: 1.0.0" \
+  -H "content-type: application/json" \
+  -H "accept: application/json" \
+  -X POST \
+  "http://localhost:4000/graphql" \
+  -d '{"query":"{ hello }"}
+```
+
+<Callout type='info'>
+In order for the client information to be sent to the Hive registry, you need to ensure that either
+the `req` ([fetch API `Request`](https://developer.mozilla.org/en-US/docs/Web/API/Request)),
+`request` ([Node.js `IncomingMessage`](https://nodejs.org/api/http.html#class-httpincomingmessage)),
+or `headers`
+([primitive header name to value map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object))
+property is within the context object of your server.
+
+Whether you use `req`, `request`, or `headers` depends on the environment you are running your
+Apollo Server in. E.g. on Node.js you would add `req` to the context, in a Cloudflare environment,
+you would add the `request` property, and in a AWS lambda environment, you would simply add the
+`headers` property.
+
+</Callout>
+
+#### GraphQL over WebSocket
+
+Apollo recommends the GraphQL over WebSocket protocol for GraphQL Subscriptions using `graphql-ws`.
+Since WebSocket requests are not HTTP requests, additional configuration to the Apollo Server
+WebSocket setup is required for proper usage reporting to GraphQL Hive.
+
+The following example demonstrates how to set up the Apollo Server with `graphql-ws` and reporting.
+
+```ts filename="Node.js Apollo Server WebSocket setup" {4,9,22-26,31,32,59}
+import { createServer } from 'http'
+import bodyParser from 'body-parser'
+import express from 'express'
+import { execute, subscribe } from 'graphql'
+import { useServer } from 'graphql-ws/lib/use/ws'
+import { WebSocketServer } from 'ws'
+import { ApolloServer } from '@apollo/server'
+import { expressMiddleware } from '@apollo/server/express4'
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer'
+import { createHive, hiveApollo } from '@graphql-hive/client'
+import schema from './schema'
+
+const PORT = 3000
+
+const app = express()
+const httpServer = createServer(app)
+const wsServer = new WebSocketServer({
+  server: httpServer,
+  path: '/graphql'
+})
+
+const hiveClient = createHive({
+  enabled: true,
+  token: 'YOUR-TOKEN',
+  usage: true
+})
+
+const serverCleanup = useServer(
+  {
+    schema,
+    execute: hiveClient.createInstrumentedExecute(execute),
+    execute: hiveClient.createInstrumentedSubscribe(subscribe),
+    context: context => context
+  },
+  wsServer
+)
+
+const server = new ApolloServer({
+  schema,
+  plugins: [
+    hiveApollo(hiveClient),
+    ApolloServerPluginDrainHttpServer({ httpServer }),
+    {
+      async serverWillStart() {
+        return {
+          async drainServer() {
+            await serverCleanup.dispose()
+          }
+        }
+      }
+    }
+  ]
+})
+await server.start()
+app.use(
+  '/graphql',
+  bodyParser.json(),
+  expressMiddleware(server, {
+    context: async ({ req }) => ({ req })
+  })
+)
+
+httpServer.listen(PORT, () => {
+  console.log(`🚀 Query endpoint ready at http://localhost:${PORT}/graphql`)
+  console.log(`🚀 Subscription endpoint ready at ws://localhost:${PORT}/graphql`)
+})
+```
+
+##### Client Information
+
+When using the `graphql-ws` client, you can use the `connectionParams` object to forward the client
+information to the server.
+
+Please make sure that you follow the GraphQL over WebSocket recipe for the server from the section
+above.
+
+```ts filename="GraphQL over WebSocket client configuration"
+import { createClient } from 'graphql-ws'
+
+const client = createClient({
+  url: `ws://localhost:400/graphql`,
+  connectionParams: {
+    client: {
+      name: 'my-client',
+      version: '1.0.0'
+    }
+  }
 })
 ```
 

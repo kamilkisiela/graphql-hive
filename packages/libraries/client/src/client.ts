@@ -1,5 +1,10 @@
 import axios from 'axios';
-import { ExecutionResult, GraphQLSchema } from 'graphql';
+import {
+  type execute as ExecuteImplementation,
+  type ExecutionResult,
+  type GraphQLSchema,
+  type subscribe as SubscribeImplementation,
+} from 'graphql';
 import { createReporting } from './internal/reporting.js';
 import type { HiveClient, HivePluginOptions } from './internal/types.js';
 import { createUsage } from './internal/usage.js';
@@ -167,6 +172,31 @@ export function createHive(options: HivePluginOptions): HiveClient {
     }
   }
 
+  function createInstrumentedExecute(
+    executeImpl: typeof ExecuteImplementation,
+  ): typeof ExecuteImplementation {
+    return function hiveInstrumentedExecute(args) {
+      const collect = usage.collect();
+      let result = executeImpl(args);
+      if ('then' in result) {
+        result.then(result => collect(args, result));
+      } else {
+        collect(args, result);
+      }
+
+      return result;
+    };
+  }
+
+  function createInstrumentedSubscribe(
+    subscribeImpl: typeof SubscribeImplementation,
+  ): typeof SubscribeImplementation {
+    return function hiveInstrumentedSubscribe(args) {
+      usage.collectSubscription({ args });
+      return subscribeImpl(args);
+    };
+  }
+
   return {
     [hiveClientSymbol]: true,
     [autoDisposeSymbol]: options.autoDispose ?? true,
@@ -175,6 +205,8 @@ export function createHive(options: HivePluginOptions): HiveClient {
     collectUsage,
     dispose,
     collectSubscriptionUsage: usage.collectSubscription,
+    createInstrumentedSubscribe,
+    createInstrumentedExecute,
   };
 }
 

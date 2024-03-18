@@ -99,7 +99,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
       }
 
       return {
-        onSubscribeResult({ result }) {
+        onSubscribeResult() {
           hive.collectSubscriptionUsage({ args: context.args });
         },
       };

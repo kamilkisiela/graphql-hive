@@ -35,6 +35,8 @@ Follow the [CI/CD instructions](./ci-cd.mdx) for automating the process.
   configuration](/docs/api-reference/client#configuration) reference.
 </Callout>
 
+#### GraphQL over HTTP (default)
+
 You can send usage reporting to Hive registry by using the `usage` section of the configuration:
 
 ```ts
@@ -62,48 +64,46 @@ server.listen(4000, () => {
 })
 ```
 
-### Usage Reporting Client Information
+##### Client Information
 
-For the usage reporting can also associate a client name and version with any operation reported to
-Hive for a better overview of the clients consuming your GraphQL API.
+You can associate a client name and version with any operation reported to Hive, by sending the
+`x-client-nam`e and `x-client-version` HTTP headers for requests sent to your GraphQL Yoga server.
 
-#### GraphQL over HTTP
+```bash filename="Example HTTP Request with client headers" {2-3}
+curl \
+  -H "x-graphql-client-name: my-client" \
+  -H "x-graphql-client-version: 1.0.0" \
+  -H "content-type: application/json" \
+  -H "accept: application/json" \
+  -X POST \
+  "http://localhost:4000/graphql" \
+  -d '{"query":"{ hello }"}
+```
 
-<Callout type="info">
-  This works for both sending subscription and query/mutation operations using the built-in
-  supported HTTP protocol and the [`graphql-sse` plugin for single connection
-  mode](https://the-guild.dev/graphql/yoga-server/docs/features/subscriptions#single-connection-mode).
-  Please [check the section below](/docs/integrations/graphql-yoga#graphql-over-websocket) for
-  GraphQL over WebSocket.
-</Callout>
+#### GraphQL over SSE
 
-In a basic GraphQL Yoga HTTP setup you can access the request headers from the context object and
-return them from the `clientInfo` configuration function.
+GraphQL over SSE is a popular protocol for executing GraphQL Subscription (and also Mutation and
+Query) operations.
 
-```ts filename="HTTP Request Client info" {2,14-23}
+No additional configuration is required for sending usage reporting to Hive when using the
+[`graphql-sse` plugin](https://the-guild.dev/graphql/yoga-server/docs/features/subscriptions#single-connection-mode).
+Just add the SSE plugin to your Yoga server and the usage reporting will be sent automatically.
+
+```ts filename="SSE HTTP Request Client info" {4,10}
 import { createServer } from 'node:http'
 import { createYoga, type YogaInitialContext } from 'graphql-yoga'
 import { useYogaHive } from '@graphql-hive/client'
+import { useGraphQLSSE } from '@graphql-yoga/plugin-graphql-sse'
 import { schema } from './schema'
 
 const yoga = createYoga({
   schema,
   plugins: [
+    useGraphQLSSE(),
     useYogaHive({
-      enabled: true, // Enable/Disable Hive Client
+      enabled: true,
       token: 'YOUR-TOKEN',
-      // Collects and send usage reporting based on executed operations
-      usage: true,
-      clientInfo(context: YogaInitialContext) {
-        const name = context.request.headers.get('x-graphql-client-name')
-        const version = context.request.headers.get('x-graphql-client-version')
-
-        if (name && version) {
-          return { name, version }
-        }
-
-        return null
-      }
+      usage: true
     })
   ]
 })
@@ -115,88 +115,46 @@ server.listen(4000, () => {
 })
 ```
 
-In the above example we use the `x-graphql-client-name` and `x-graphql-client-version` headers from
-the incoming HTTP request and forward them to the Hive registry.
+##### Client Information
 
-```bash filename="Example HTTP Request with headers" {2-3}
+The same rules apply for any other HTTP client, such as Apollo Client, Relay, or any other HTTP.
+Just forward send the headers to your server.
+
+```bash filename="SSE HTTP Request with headers" {2-3}
 curl \
   -H "x-graphql-client-name: my-client" \
   -H "x-graphql-client-version: 1.0.0" \
-  -H "content-type: application/json" \
-  -H "accept: application/json" \
-  -X POST \
-  "http://localhost:4000/graphql" \
-  -d '{"query":"{ hello }"}
+  -H "content-type: text/event-stream" \
+  -H "accept: text/event-stream" \
+  -X GET \
+  "http://localhost:4000/graphql/stream?query={__typename}"
 ```
 
-#### GraphQL Over WebSocket
+#### GraphQL over WebSocket
 
-When using the GraphQL over WebSocket protocol using `graphql-ws` with GraphQL Yoga
-[using the official recipe](https://the-guild.dev/graphql/yoga-server/docs/features/subscriptions#graphql-over-websocket-protocol-via-graphql-ws),
-the context object passed to the `clientInfo` configuration function is a different one, as the
-operation is handled outside of Yoga's HTTP request flow.
+GraphQL over WebSocket is a popular protocol for executing GraphQL Subscription (and also Mutation
+and Query) operations.
 
-With GraphQL over Websockets the recommended way is to use the `connectionParams` object for
-forwarding the client information. Headers are not an option as the browser `WebSocket` API does not
-allow forwarding custom headers.
+Use the following example for sending usage reporting to Hive with GraphQL Yoga and `graphql-ws`
+([using the official recipe](https://the-guild.dev/graphql/yoga-server/docs/features/subscriptions#graphql-over-websocket-protocol-via-graphql-ws)).
 
-##### Server Configuration
-
-The following example shows how to use the `connectionParams` object sent by a client to extract the
-client information and forward it to the Hive registry.
-
-```ts filename="GraphQL Yoga HTTP + WebSocket Setup" {7-11,25-40}
+```ts filename="GraphQL Yoga HTTP and WebSocket Setup"
 import { createServer } from 'node:http'
 import { useServer } from 'graphql-ws/lib/use/ws'
 import { createYoga } from 'graphql-yoga'
 import { WebSocketServer } from 'ws'
 import { schema } from './schema'
 
-type ContextExtensions = {
-  connectionParams?: {
-    client?: unknown
-  }
-}
-
 const yoga = createYoga({
   schema,
   graphiql: {
-    // Use WebSockets in GraphiQL
     subscriptionsProtocol: 'WS'
   },
   plugins: [
     useYogaHive({
-      enabled: true, // Enable/Disable Hive Client
+      enabled: true,
       token: 'YOUR-TOKEN',
-      // Collects and send usage reporting based on executed operations
-      usage: true,
-      clientInfo(context: YogaInitialContext & ContextExtensions) {
-        // Operations handled via WebSocket
-        // Make sure the decode this objecdt safely.
-        if (
-          typeof context.connectionParams?.client === 'object' &&
-          context.connectionParams?.client
-        ) {
-          if (
-            typeof context.connectionParams.client['name'] === 'string' &&
-            typeof context.connectionParams.client['version'] === 'string'
-          ) {
-            return context.connectionParams.client
-          }
-
-          return null
-        }
-
-        // Operations handled via HTTP
-        const name = context.request.headers.get('x-graphql-client-name')
-        const version = context.request.headers.get('x-graphql-client-version')
-
-        if (name && version) {
-          return { name, version }
-        }
-
-        return null
-      }
+      usage: true
     })
   ]
 })
@@ -244,7 +202,7 @@ httpServer.listen(4000, () => {
 })
 ```
 
-##### Client Configuration
+##### Client Information
 
 When using the `graphql-ws` client, you can use the `connectionParams` object to forward the client
 information to the server.

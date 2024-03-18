@@ -10,6 +10,8 @@ export interface HiveClient {
   reportSchema: SchemaReporter['report'];
   collectUsage(): CollectUsageCallback;
   collectSubscriptionUsage(args: { args: ExecutionArgs }): void;
+  createInstrumentedExecute(executeImpl: any): any;
+  createInstrumentedSubscribe(executeImpl: any): any;
   dispose(): Promise<void>;
 }
 
