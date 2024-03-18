@@ -45,7 +45,6 @@ export class ServiceDeployment {
       readinessProbe?: string | ProbeConfig;
       startupProbe?: string | ProbeConfig;
       memoryLimit?: string;
-      cpuLimit?: string;
       volumes?: k8s.types.input.core.v1.Volume[];
       volumeMounts?: k8s.types.input.core.v1.VolumeMount[];
       /**
@@ -203,6 +202,16 @@ export class ServiceDeployment {
       });
     }
 
+    const resourcesLimits: Record<string, string> = {};
+
+    if (this.options?.autoScaling?.cpu.limit) {
+      resourcesLimits.cpu = this.options.autoScaling.cpu.limit;
+    }
+
+    if (this.options.memoryLimit) {
+      resourcesLimits.memory = this.options.memoryLimit;
+    }
+
     const pb = new PodBuilder({
       restartPolicy: asJob ? 'Never' : 'Always',
       imagePullSecrets: this.options.imagePullSecret
@@ -234,13 +243,9 @@ export class ServiceDeployment {
             .concat(secretsEnv),
           name: this.name,
           image: this.options.image,
-          resources: this.options?.autoScaling?.cpu.limit
-            ? {
-                limits: {
-                  cpu: this.options?.autoScaling?.cpu.limit,
-                },
-              }
-            : undefined,
+          resources: {
+            limits: resourcesLimits,
+          },
           args: this.options.args,
           ports: {
             http: port,
