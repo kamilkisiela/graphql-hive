@@ -53,6 +53,9 @@ patchedDependencies:
   oclif@3.17.2:
     hash: p4jeiorqjhwzipwrwepbyei4ba
     path: patches/oclif@3.17.2.patch
+  slonik@30.4.4:
+    hash: jxrvl4xmdvyktjijg7yfdkb34i
+    path: patches/slonik@30.4.4.patch
 
 importers:
 
@@ -325,7 +328,7 @@ importers:
         version: 5.3.2
       slonik:
         specifier: 30.4.4
-        version: 30.4.4
+        version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
       strip-ansi:
         specifier: 7.1.0
         version: 7.1.0
@@ -539,7 +542,7 @@ importers:
         version: 11.5.4
       slonik:
         specifier: 30.4.4
-        version: 30.4.4
+        version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
       ts-node:
         specifier: 10.9.2
         version: 10.9.2(@swc/core@1.4.8)(@types/node@20.11.28)(typescript@5.4.2)
@@ -693,7 +696,7 @@ importers:
         version: 5.0.0-beta.2
       slonik:
         specifier: 30.4.4
-        version: 30.4.4
+        version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
       supertokens-node:
         specifier: 15.2.1
         version: 15.2.1
@@ -1180,7 +1183,7 @@ importers:
         version: 11.5.4
       slonik:
         specifier: 30.4.4
-        version: 30.4.4
+        version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
       slonik-interceptor-query-logging:
         specifier: 1.4.7
         version: 1.4.7(slonik@30.4.4)
@@ -29821,7 +29824,7 @@ packages:
       crack-json: 1.3.0
       pretty-ms: 7.0.1
       serialize-error: 8.1.0
-      slonik: 30.4.4
+      slonik: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
     dev: true
 
   /slonik-utilities@1.9.4(slonik@30.4.4):
@@ -29836,10 +29839,10 @@ packages:
       lodash: 4.17.21
       roarr: 7.14.3
       serialize-error: 5.0.0
-      slonik: 30.4.4
+      slonik: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
     dev: true
 
-  /slonik@30.4.4:
+  /slonik@30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i):
     resolution: {integrity: sha512-5Z1QJhRCDyq0J+0yiUN6COETKtvrYdmukeQn5RZUSt7EvzYo4oTm7D4j2ZV4DN0DMHsaQBSnW/tIgX+UHRJYmQ==}
     engines: {node: '>=10.0'}
     dependencies:
@@ -29866,6 +29869,7 @@ packages:
     transitivePeerDependencies:
       - pg-native
     dev: true
+    patched: true
 
   /smart-buffer@4.2.0:
     resolution: {integrity: sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg==}
