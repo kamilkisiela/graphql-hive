@@ -1,4 +1,4 @@
-import { ReactElement, SetStateAction, useCallback, useMemo, useState } from 'react';
+import { ReactElement, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import clsx from 'clsx';
 import { useQuery } from 'urql';
@@ -58,7 +58,7 @@ function OperationRow({
   organization: string;
   project: string;
   target: string;
-  selectedPeriod: string;
+  selectedPeriod: null | { to: string; from: string };
 }): ReactElement {
   const count = useFormattedNumber(operation.requests);
   const percentage = useDecimal(operation.percentage);
@@ -82,7 +82,8 @@ function OperationRow({
                   targetId: target,
                   operationName: operation.name,
                   operationHash: operation.hash,
-                  period: selectedPeriod,
+                  from: selectedPeriod?.from ? encodeURIComponent(selectedPeriod.from) : undefined,
+                  to: selectedPeriod?.to ? encodeURIComponent(selectedPeriod.to) : undefined,
                 },
               }}
               passHref
@@ -202,7 +203,7 @@ function OperationsTable({
   clients: readonly { name: string }[] | null;
   clientFilter: string | null;
   setClientFilter: (filter: string) => void;
-  selectedPeriod: string;
+  selectedPeriod: { from: string; to: string } | null;
 }): ReactElement {
   const tableInstance = useTableInstance(table, {
     columns,
@@ -367,7 +368,7 @@ function OperationsTableContainer({
   organization: string;
   project: string;
   target: string;
-  selectedPeriod: string;
+  selectedPeriod: { from: string; to: string } | null;
   clientFilter: string | null;
   setClientFilter: (client: string) => void;
   className?: string;
@@ -482,10 +483,10 @@ export function OperationsList({
   period: DateRangeInput;
   operationsFilter: readonly string[];
   clientNamesFilter: string[];
-  selectedPeriod: string;
+  selectedPeriod: null | { to: string; from: string };
 }): ReactElement {
   const [clientFilter, setClientFilter] = useState<string | null>(null);
-  const [query, refetch] = useQuery({
+  const [query, refetchQuery] = useQuery({
     query: OperationsList_OperationsStatsQuery,
     variables: {
       selector: {
@@ -499,11 +500,19 @@ export function OperationsList({
     },
   });
 
+  const refetch = () => refetchQuery({ requestPolicy: 'cache-and-network' });
+
+  useEffect(() => {
+    if (!query.fetching) {
+      refetch();
+    }
+  }, [period]);
+
   return (
     <OperationsFallback
       isError={!!query.error}
       isFetching={query.fetching}
-      refetch={() => refetch({ requestPolicy: 'cache-and-network' })}
+      refetch={() => refetch()}
     >
       <OperationsTableContainer
         operationStats={query.data?.operationsStats ?? null}

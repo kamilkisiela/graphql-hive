@@ -164,14 +164,15 @@ const TargetExplorerTypenamePageQuery = graphql(`
 
 function TypeExplorerPageContent({ typename }: { typename: string }) {
   const router = useRouteSelector();
-  const { period, dataRetentionInDays, setDataRetentionInDays } = useSchemaExplorerContext();
+  const { resolvedPeriod, dataRetentionInDays, setDataRetentionInDays } =
+    useSchemaExplorerContext();
   const [query] = useQuery({
     query: TargetExplorerTypenamePageQuery,
     variables: {
       organizationId: router.organizationId,
       projectId: router.projectId,
       targetId: router.targetId,
-      period,
+      period: resolvedPeriod,
       typename,
     },
   });
@@ -216,7 +217,7 @@ function TypeExplorerPageContent({ typename }: { typename: string }) {
             organization={{ cleanId: router.organizationId }}
             project={{ cleanId: router.projectId }}
             target={{ cleanId: router.targetId }}
-            period={period}
+            period={resolvedPeriod}
           />
         ) : null}
       </div>

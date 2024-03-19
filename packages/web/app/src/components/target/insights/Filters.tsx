@@ -1,4 +1,4 @@
-import { ChangeEvent, ComponentType, ReactElement, useCallback, useState } from 'react';
+import { ChangeEvent, ComponentType, ReactElement, useCallback, useEffect, useState } from 'react';
 import { FilterIcon } from 'lucide-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
@@ -198,7 +198,7 @@ function OperationsFilterContainer({
   selected?: string[];
 }): ReactElement | null {
   const router = useRouteSelector();
-  const [query] = useQuery({
+  const [query, refresh] = useQuery({
     query: OperationsFilterContainer_OperationStatsQuery,
     variables: {
       selector: {
@@ -210,6 +210,12 @@ function OperationsFilterContainer({
       },
     },
   });
+
+  useEffect(() => {
+    if (!query.fetching) {
+      refresh({ requestPolicy: 'network-only' });
+    }
+  }, [period]);
 
   if (!isOpen) {
     return null;
@@ -523,7 +529,7 @@ function ClientsFilterContainer({
   selected?: string[];
 }): ReactElement | null {
   const router = useRouteSelector();
-  const [query] = useQuery({
+  const [query, refresh] = useQuery({
     query: ClientsFilterContainer_ClientStatsQuery,
     variables: {
       selector: {
@@ -535,6 +541,12 @@ function ClientsFilterContainer({
       },
     },
   });
+
+  useEffect(() => {
+    if (!query.fetching) {
+      refresh({ requestPolicy: 'network-only' });
+    }
+  }, [period]);
 
   if (!isOpen) {
     return null;

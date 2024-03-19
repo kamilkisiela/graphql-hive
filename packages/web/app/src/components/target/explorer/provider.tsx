@@ -4,93 +4,64 @@ import {
   ReactNode,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from 'react';
-import { formatISO } from 'date-fns';
+import { startOfDay } from 'date-fns';
+import { resolveRange, type Period } from '@/lib/date-math';
 import { subDays } from '@/lib/date-time';
 import { useLocalStorage } from '@/lib/hooks';
-
-type PeriodOption = '365d' | '180d' | '90d' | '30d' | '14d' | '7d';
-
-type Period = {
-  from: string;
-  to: string;
-};
-
-function toStartOfMinute(): Date {
-  const today = new Date();
-  today.setSeconds(0, 0);
-  return today;
-}
-
-function createPeriod(option: PeriodOption): Period {
-  const now = toStartOfMinute();
-  const value = parseInt(option.replace('d', ''), 10);
-
-  return {
-    from: formatISO(subDays(now, value)),
-    to: formatISO(now),
-  };
-}
 
 type SchemaExplorerContextType = {
   isArgumentListCollapsed: boolean;
   setArgumentListCollapsed(isCollapsed: boolean): void;
-  setPeriodOption(option: PeriodOption): void;
   setDataRetentionInDays(days: number): void;
-  periodOption: PeriodOption;
-  availablePeriodOptions: PeriodOption[];
-  period: Period;
   dataRetentionInDays: number;
+  startDate: Date;
+  period: Period;
+  setPeriod(period: { from: string; to: string }): void;
+  /** the actual date. */
+  resolvedPeriod: { from: string; to: string };
+  /** refresh the resolved period (aka trigger refetch) */
+  refreshResolvedPeriod(): void;
+};
+
+const defaultPeriod = {
+  from: 'now-7d',
+  to: 'now',
 };
 
 const SchemaExplorerContext = createContext<SchemaExplorerContextType>({
   isArgumentListCollapsed: true,
   setArgumentListCollapsed: () => {},
-  periodOption: '7d',
-  period: createPeriod('7d'),
-  availablePeriodOptions: ['7d'],
-  setPeriodOption: () => {},
   dataRetentionInDays: 7,
+  startDate: startOfDay(subDays(new Date(), 7)),
+  period: defaultPeriod,
+  resolvedPeriod: resolveRange(defaultPeriod),
+  setPeriod: () => {},
   setDataRetentionInDays: () => {},
+  refreshResolvedPeriod: () => {},
 });
 
 export function SchemaExplorerProvider({ children }: { children: ReactNode }): ReactElement {
   const [dataRetentionInDays, setDataRetentionInDays] = useState(
     7 /* Minimum possible data retention period - Free plan */,
   );
+
+  const startDate = useMemo(
+    () => startOfDay(subDays(new Date(), dataRetentionInDays)),
+    [dataRetentionInDays],
+  );
+
   const [isArgumentListCollapsed, setArgumentListCollapsed] = useLocalStorage(
     'hive:schema-explorer:collapsed',
     true,
   );
-  const [periodOption, setPeriodOption] = useLocalStorage<PeriodOption>(
-    'hive:schema-explorer:period',
-    '30d',
+  const [period, setPeriod] = useLocalStorage<Period>(
+    'hive:schema-explorer:period-1',
+    defaultPeriod,
   );
-  const [period, setPeriod] = useState(createPeriod(periodOption));
-
-  const updatePeriod = useCallback<SchemaExplorerContextType['setPeriodOption']>(
-    option => {
-      setPeriodOption(option);
-      setPeriod(createPeriod(option));
-    },
-    [setPeriodOption, setPeriod],
-  );
-
-  useEffect(() => {
-    const inDays = parseInt(periodOption.replace('d', ''), 10);
-    if (dataRetentionInDays < inDays) {
-      updatePeriod(dataRetentionInDays > 7 ? '30d' : '7d');
-    }
-  }, [periodOption, setPeriodOption, updatePeriod, dataRetentionInDays]);
-
-  const availablePeriodOptions = useMemo(() => {
-    const options = Object.keys(periodLabelMap) as PeriodOption[];
-
-    return options.filter(option => parseInt(option.replace('d', ''), 10) <= dataRetentionInDays);
-  }, [periodOption, dataRetentionInDays]);
+  const [resolvedPeriod, setResolvedPeriod] = useState<Period>(() => resolveRange(period));
 
   return (
     <SchemaExplorerContext.Provider
@@ -98,11 +69,17 @@ export function SchemaExplorerProvider({ children }: { children: ReactNode }): R
         isArgumentListCollapsed,
         setArgumentListCollapsed,
         period,
-        setPeriodOption: updatePeriod,
-        periodOption,
-        availablePeriodOptions,
+        setPeriod(period) {
+          setPeriod(period);
+          setResolvedPeriod(resolveRange(period));
+        },
         dataRetentionInDays,
         setDataRetentionInDays,
+        startDate,
+        resolvedPeriod,
+        refreshResolvedPeriod() {
+          setResolvedPeriod(resolveRange(period));
+        },
       }}
     >
       {children}
@@ -123,28 +100,12 @@ export function useArgumentListToggle() {
   return [isArgumentListCollapsed, toggle] as const;
 }
 
-const periodLabelMap: {
-  [key in PeriodOption]: string;
-} = {
-  '365d': 'Last year',
-  '180d': 'Last 6 months',
-  '90d': 'Last 3 months',
-  '30d': 'Last 30 days',
-  '14d': 'Last 14 days',
-  '7d': 'Last 7 days',
-};
-
 export function usePeriodSelector() {
-  const { availablePeriodOptions, setPeriodOption, periodOption } = useSchemaExplorerContext();
+  const { period, setPeriod, startDate, refreshResolvedPeriod } = useSchemaExplorerContext();
   return {
-    options: availablePeriodOptions.map(option => ({
-      label: periodLabelMap[option],
-      value: option,
-    })),
-    onChange: setPeriodOption,
-    value: periodOption,
-    displayLabel(key: PeriodOption) {
-      return periodLabelMap[key];
-    },
+    setPeriod,
+    period,
+    startDate,
+    refreshResolvedPeriod,
   };
 }

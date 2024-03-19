@@ -687,10 +687,12 @@ export class OperationsManager {
     project,
     target,
     operations,
+    clients,
     schemaCoordinate,
   }: {
     period: DateRange;
     operations?: readonly string[];
+    clients?: readonly string[];
     schemaCoordinate?: string;
   } & TargetSelector) {
     this.logger.info('Counting unique clients (period=%o, target=%s)', period, target);
@@ -705,6 +707,7 @@ export class OperationsManager {
       target,
       period,
       operations,
+      clients,
       schemaCoordinate,
     });
   }

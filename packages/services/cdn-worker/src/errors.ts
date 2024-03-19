@@ -1,6 +1,6 @@
 import { Analytics } from './analytics';
 
-const description = `Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage`;
+const description = `Please refer to the documentation for more details: https://docs.graphql-hive.com/features/registry-usage `;
 
 export class MissingTargetIDErrorResponse extends Response {
   constructor(analytics: Analytics, request: Request) {

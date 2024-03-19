@@ -1,7 +1,7 @@
 import { DocumentNode, ExecutionArgs, GraphQLSchema, Kind, parse } from 'graphql';
 import type { GraphQLParams, Plugin } from 'graphql-yoga';
 import LRU from 'tiny-lru';
-import { createHive } from './client.js';
+import { autoDisposeSymbol, createHive } from './client.js';
 import type { CollectUsageCallback, HiveClient, HivePluginOptions } from './internal/types.js';
 import { isHiveClient } from './internal/utils.js';
 
@@ -26,6 +26,22 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
       });
 
   void hive.info();
+
+  if (hive[autoDisposeSymbol]) {
+    if (global.process) {
+      const signals = Array.isArray(hive[autoDisposeSymbol])
+        ? hive[autoDisposeSymbol]
+        : ['SIGINT', 'SIGTERM'];
+      for (const signal of signals) {
+        process.once(signal, () => hive.dispose());
+      }
+    } else {
+      console.error(
+        'It seems that GraphQL Hive is not being executed in Node.js. ' +
+          'Please attempt manual client disposal and use autoDispose: false option.',
+      );
+    }
+  }
 
   const parsedDocumentCache = LRU<DocumentNode>(10_000);
   let latestSchema: GraphQLSchema | null = null;

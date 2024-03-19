@@ -1,6 +1,10 @@
 import * as k8s from '@pulumi/kubernetes';
 import { Output } from '@pulumi/pulumi';
+import { ContourValues } from './contour.types';
 import { helmChart } from './helm';
+
+// prettier-ignore
+export const CONTOUR_CHART = helmChart('https://charts.bitnami.com/bitnami', 'contour', '17.0.0');
 
 export class Proxy {
   private lbService: Output<k8s.core.v1.Service> | null = null;
@@ -119,72 +123,73 @@ export class Proxy {
       },
     });
 
-    const proxyController = new k8s.helm.v3.Chart('contour-proxy', {
-      // prettier-ignore
-      ...helmChart('https://charts.bitnami.com/bitnami', 'contour', '16.0.2'),
-      namespace: ns.metadata.name,
-      // https://github.com/bitnami/charts/tree/master/bitnami/contour
-      values: {
-        configInline: {
-          // https://projectcontour.io/docs/main/configuration/
-          'accesslog-format': 'json',
-          // https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage
-          'json-fields': [
-            '@timestamp',
-            'bytes_received',
-            'bytes_sent',
-            'downstream_local_address',
-            'duration',
-            'method',
-            'path',
-            'request_id',
-            'response_code',
-            'response_flags',
-            'upstream_cluster',
-            'upstream_host',
-            'upstream_service_time',
-            'user_agent',
-            'x_forwarded_for',
-          ],
+    const chartValues: ContourValues = {
+      configInline: {
+        // https://projectcontour.io/docs/main/configuration/
+        'accesslog-format': 'json',
+        // https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage
+        'json-fields': [
+          '@timestamp',
+          'bytes_received',
+          'bytes_sent',
+          'downstream_local_address',
+          'duration',
+          'method',
+          'path',
+          'request_id',
+          'response_code',
+          'response_flags',
+          'upstream_cluster',
+          'upstream_host',
+          'upstream_service_time',
+          'user_agent',
+          'x_forwarded_for',
+        ],
+      },
+      contour: {
+        podAnnotations: {
+          'prometheus.io/scrape': 'true',
+          'prometheus.io/port': '8000',
+          'prometheus.io/scheme': 'http',
+          'prometheus.io/path': '/metrics',
         },
-        contour: {
-          podAnnotations: {
-            'prometheus.io/scrape': 'true',
-            'prometheus.io/port': '8000',
-            'prometheus.io/scheme': 'http',
-            'prometheus.io/path': '/metrics',
-          },
-          podLabels: {
-            'vector.dev/exclude': 'true',
-          },
-        },
-        envoy: {
-          service: {
-            loadBalancerIP: this.staticIp?.address,
-            annotations:
-              this.staticIp?.address && this.staticIp?.aksReservedIpResourceGroup
-                ? {
-                    'service.beta.kubernetes.io/azure-load-balancer-resource-group':
-                      this.staticIp?.aksReservedIpResourceGroup,
-                  }
-                : undefined,
-          },
-          podAnnotations: {
-            'prometheus.io/scrape': 'true',
-            'prometheus.io/port': '8002',
-            'prometheus.io/scheme': 'http',
-            'prometheus.io/path': '/stats/prometheus',
-          },
-          autoscaling:
-            options?.replicas && options?.replicas > 1
-              ? {
-                  enabled: true,
-                  minReplicas: 1,
-                  maxReplicas: options.replicas,
-                }
-              : {},
+        podLabels: {
+          'vector.dev/exclude': 'true',
         },
       },
+      envoy: {
+        service: {
+          loadBalancerIP: this.staticIp?.address,
+          annotations:
+            this.staticIp?.address && this.staticIp?.aksReservedIpResourceGroup
+              ? {
+                  'service.beta.kubernetes.io/azure-load-balancer-resource-group':
+                    this.staticIp?.aksReservedIpResourceGroup,
+                }
+              : undefined,
+        },
+        podAnnotations: {
+          'prometheus.io/scrape': 'true',
+          'prometheus.io/port': '8002',
+          'prometheus.io/scheme': 'http',
+          'prometheus.io/path': '/stats/prometheus',
+        },
+        autoscaling:
+          options?.replicas && options?.replicas > 1
+            ? {
+                enabled: true,
+                minReplicas: 1,
+                maxReplicas: options.replicas,
+              }
+            : {},
+      },
+    };
+
+    const proxyController = new k8s.helm.v3.Chart('contour-proxy', {
+      ...CONTOUR_CHART,
+      namespace: ns.metadata.name,
+      // https://github.com/bitnami/charts/tree/master/bitnami/contour
+      values: chartValues,
     });
 
     this.lbService = proxyController.getResource('v1/Service', 'contour/contour-proxy-envoy');
