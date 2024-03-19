@@ -285,9 +285,27 @@ export class OperationsReader {
       exists: number;
     }>({
       query: sql`
-        SELECT 1 as exists FROM target_existence ${this.createFilter({
+        SELECT
+          1 AS "exists"
+        FROM
+          "target_existence"
+        ${this.createFilter({
           target,
-        })} GROUP BY target LIMIT 1
+        })}
+        GROUP BY "target"
+        LIMIT 1
+
+        UNION DISTINCT
+
+        SELECT
+          1 AS "exists"
+        FROM
+          "subscription_target_existence"
+        ${this.createFilter({
+          target,
+        })}
+        GROUP BY "target"
+        LIMIT 1
       `,
       queryId: 'has_collected_operations',
       timeout: 10_000,

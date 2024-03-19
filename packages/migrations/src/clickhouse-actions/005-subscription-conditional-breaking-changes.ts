@@ -50,4 +50,26 @@ export const action: Action = async exec => {
         timestamp,
         expires_at
   `);
+
+  await exec(`
+    CREATE MATERIALIZED VIEW IF NOT EXISTS default.subscription_target_existence
+    (
+      target LowCardinality(String) CODEC(ZSTD(1)),
+      expires_at DateTime('UTC') CODEC(DoubleDelta, LZ4)
+    )
+    ENGINE = ReplacingMergeTree
+    PARTITION BY tuple()
+    PRIMARY KEY (target)
+    ORDER BY (target)
+    TTL expires_at
+    SETTINGS index_granularity = 8192
+    AS
+      SELECT
+        target,
+        toStartOfDay(expires_at) AS expires_at
+      FROM default.subscription_operations
+      GROUP BY
+        target,
+        expires_at
+  `);
 };

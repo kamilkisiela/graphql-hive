@@ -1,24 +1,40 @@
 import { ReactElement, ReactNode } from 'react';
+import { AlertCircleIcon } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/v2';
 import { cn } from '@/lib/utils';
 
 export function OperationsFallback({
-  isError,
-  isFetching,
-  refetch,
   children,
+  state,
+  refetch,
 }: {
   children: ReactNode;
-  isError: boolean;
-  isFetching?: boolean;
+  state: 'fetching' | 'error' | 'empty' | 'success';
   refetch: () => void;
 }): ReactElement {
   return (
     <div className="relative">
-      <div className={cn(isError && 'blur-sm', isFetching ? 'opacity-30' : 'opacity-100')}>
+      <div
+        className={cn(
+          (state === 'error' || state === 'empty') && 'blur-sm',
+          state === 'fetching' || state === 'empty' ? 'opacity-30' : 'opacity-100',
+        )}
+      >
         {children}
       </div>
-      {isError ? (
+      {state === 'empty' ? (
+        <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
+          <Alert className=" right-0 top-0 max-w-[500px]">
+            <AlertCircleIcon className="h-4 w-4" />
+            <AlertTitle>No stats available yet.</AlertTitle>
+            <AlertDescription>
+              There is no information available for the selected date range.
+            </AlertDescription>
+          </Alert>
+        </div>
+      ) : null}
+      {state === 'error' ? (
         <div className="absolute inset-0 flex items-center justify-center">
           <Button danger onClick={refetch}>
             Failed to load data. Click to retry.
