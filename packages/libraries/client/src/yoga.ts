@@ -104,7 +104,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
               errors.push(...ctx.result.errors);
             },
             onEnd() {
-              record.callback(args, { errors });
+              record.callback(args, errors.length ? { errors } : {});
             },
           };
         },
