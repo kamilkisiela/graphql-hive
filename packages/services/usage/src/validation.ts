@@ -30,7 +30,7 @@ const ExecutionSchema = tb.Type.Object(
   },
   {
     title: 'Execution',
-    additionalProperties: false,
+    additionalProperties: true,
   },
 );
 
