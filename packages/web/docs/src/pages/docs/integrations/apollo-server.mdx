@@ -147,7 +147,7 @@ const serverCleanup = useServer(
   {
     schema,
     execute: hiveClient.createInstrumentedExecute(execute),
-    execute: hiveClient.createInstrumentedSubscribe(subscribe),
+    subscribe: hiveClient.createInstrumentedSubscribe(subscribe),
     context: context => context
   },
   wsServer
