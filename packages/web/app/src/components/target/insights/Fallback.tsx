@@ -24,9 +24,9 @@ export function OperationsFallback({
         {children}
       </div>
       {state === 'empty' ? (
-        <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center">
           <Alert className=" right-0 top-0 max-w-[500px]">
-            <AlertCircleIcon className="h-4 w-4" />
+            <AlertCircleIcon className="size-4" />
             <AlertTitle>No stats available yet.</AlertTitle>
             <AlertDescription>
               There is no information available for the selected date range.
