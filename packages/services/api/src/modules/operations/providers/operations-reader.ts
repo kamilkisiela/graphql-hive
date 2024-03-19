@@ -314,6 +314,28 @@ export class OperationsReader {
     return result.rows > 0;
   }
 
+  async getHasCollectedSubscriptionOperations(args: { target: string }) {
+    const result = await this.clickHouse.query<{
+      exists: number;
+    }>({
+      query: sql`
+        SELECT
+          1 AS "exists"
+        FROM
+          "subscription_target_existence"
+        ${this.createFilter({
+          target: args.target,
+        })}
+        GROUP BY "target"
+        LIMIT 1
+      `,
+      queryId: 'has_collected_subscription_operations',
+      timeout: 10_000,
+    });
+
+    return result.rows > 0;
+  }
+
   async countOperationsWithoutDetails({
     target,
     period,

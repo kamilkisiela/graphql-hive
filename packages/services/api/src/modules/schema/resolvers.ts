@@ -600,6 +600,13 @@ export const resolvers: SchemaModule.Resolvers = {
         first: args.first ?? null,
       });
     },
+    async hasCollectedSubscriptionOperations(target, _, { injector }) {
+      return await injector.get(OperationsManager).hasCollectedSubscriptionOperations({
+        target: target.id,
+        project: target.projectId,
+        organization: target.orgId,
+      });
+    },
   },
   SchemaVersion: {
     isComposable(version) {

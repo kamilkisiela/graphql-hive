@@ -160,6 +160,20 @@ export class OperationsManager {
     );
   }
 
+  async hasCollectedSubscriptionOperations({ organization, project, target }: TargetSelector) {
+    this.logger.info('Checking existence of collected subscription operations (target=%s)', target);
+    await this.authManager.ensureTargetAccess({
+      organization,
+      project,
+      target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    return this.reader.getHasCollectedSubscriptionOperations({
+      target,
+    });
+  }
+
   async countRequestsWithSchemaCoordinate({
     organization,
     project,

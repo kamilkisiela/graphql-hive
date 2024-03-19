@@ -3,17 +3,25 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { differenceInMilliseconds } from 'date-fns';
 import ReactECharts from 'echarts-for-react';
-import { ActivityIcon, BookIcon, GlobeIcon, RefreshCw, TabletSmartphoneIcon } from 'lucide-react';
+import {
+  ActivityIcon,
+  AlertCircleIcon,
+  BookIcon,
+  GlobeIcon,
+  RefreshCw,
+  TabletSmartphoneIcon,
+} from 'lucide-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DateRangePicker, presetLast7Days } from '@/components/ui/date-range-picker';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
-import { EmptyList, MetaTitle } from '@/components/v2';
+import { EmptyList, Link as LegacyLink, MetaTitle } from '@/components/v2';
 import { CHART_PRIMARY_COLOR } from '@/constants';
 import { graphql } from '@/gql';
 import { formatNumber, formatThroughput, toDecimal, useRouteSelector } from '@/lib/hooks';
@@ -24,6 +32,7 @@ import { useChartStyles } from '@/utils';
 const SchemaCoordinateView_SchemaCoordinateStatsQuery = graphql(`
   query SchemaCoordinateView_SchemaCoordinateStatsQuery(
     $selector: SchemaCoordinateStatsInput!
+    $targetSelector: TargetSelectorInput!
     $resolution: Int!
   ) {
     schemaCoordinateStats(selector: $selector) {
@@ -46,6 +55,10 @@ const SchemaCoordinateView_SchemaCoordinateStatsQuery = graphql(`
           count
         }
       }
+    }
+    target(selector: $targetSelector) {
+      id
+      hasCollectedSubscriptionOperations
     }
   }
 `);
@@ -72,6 +85,11 @@ function SchemaCoordinateView(props: {
         target: props.targetCleanId,
         schemaCoordinate: props.coordinate,
         period: dateRangeController.resolvedRange,
+      },
+      targetSelector: {
+        organization: props.organizationCleanId,
+        project: props.projectCleanId,
+        target: props.targetCleanId,
       },
       resolution: dateRangeController.resolution,
     },
@@ -120,6 +138,25 @@ function SchemaCoordinateView(props: {
           </Button>
         </div>
       </div>
+      {query.data?.target?.hasCollectedSubscriptionOperations && (
+        <div className="pb-8">
+          <Alert>
+            <AlertCircleIcon className="size-4" />
+            <AlertTitle>No Subscription insights available yet.</AlertTitle>
+            <AlertDescription>
+              This page currently only shows the information for Query and Mutation operations. We
+              are currently evaluating what kind of insights are useful for subscriptions.{' '}
+              <LegacyLink
+                variant="primary"
+                href="https://github.com/kamilkisiela/graphql-hive/issues/3290"
+              >
+                Please reach out to us directly or via the GitHub issue
+              </LegacyLink>
+              .
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
       <div className="space-y-4 pb-8">
         <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-8">
           <div className="col-span-4">

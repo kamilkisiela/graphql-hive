@@ -219,6 +219,11 @@ export default gql`
     Get a list of paginated schema contracts that are active for the target.
     """
     activeContracts(first: Int, after: String): ContractConnection!
+
+    """
+    Whether any subscription operations were reported for this target.
+    """
+    hasCollectedSubscriptionOperations: Boolean!
   }
 
   input SchemaChecksFilter {
