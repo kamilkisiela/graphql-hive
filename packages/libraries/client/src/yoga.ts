@@ -1,6 +1,14 @@
-import { DocumentNode, ExecutionArgs, GraphQLSchema, Kind, parse } from 'graphql';
+import {
+  DocumentNode,
+  ExecutionArgs,
+  GraphQLSchema,
+  Kind,
+  parse,
+  type GraphQLError,
+} from 'graphql';
 import type { GraphQLParams, Plugin } from 'graphql-yoga';
 import LRU from 'tiny-lru';
+import { isAsyncIterable } from '@graphql-tools/utils';
 import { autoDisposeSymbol, createHive } from './client.js';
 import type { CollectUsageCallback, HiveClient, HivePluginOptions } from './internal/types.js';
 import { isHiveClient } from './internal/utils.js';
@@ -10,7 +18,6 @@ type CacheRecord = {
   paramsArgs: GraphQLParams;
   executionArgs?: ExecutionArgs;
   parsedDocument?: DocumentNode;
-  isSubscription: boolean;
 };
 
 export function useHive(clientOrOptions: HiveClient): Plugin;
@@ -58,7 +65,6 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
         cache.set(context.request, {
           callback: hive.collectUsage(),
           paramsArgs: context.params,
-          isSubscription: false,
         });
       }
     },
@@ -76,21 +82,35 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
     },
     onExecute() {
       return {
-        onExecuteDone({ args }) {
+        onExecuteDone({ args, result }) {
           const record = cache.get(args.contextValue.request);
-          if (record) {
-            record.executionArgs = args;
+          if (!record) {
+            return;
           }
+
+          record.executionArgs = args;
+
+          if (!isAsyncIterable(result)) {
+            return;
+          }
+
+          const errors: GraphQLError[] = [];
+
+          return {
+            onNext(ctx) {
+              if (!ctx.result.errors) {
+                return;
+              }
+              errors.push(...ctx.result.errors);
+            },
+            onEnd() {
+              record.callback(args, { errors });
+            },
+          };
         },
       };
     },
     onSubscribe(context) {
-      const record = cache.get(context.args.contextValue.request);
-
-      if (record) {
-        record.isSubscription = true;
-      }
-
       return {
         onSubscribeResult() {
           hive.collectSubscriptionUsage({ args: context.args });
@@ -100,7 +120,7 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
     onResultProcess(context) {
       const record = cache.get(context.request);
 
-      if (!record || Array.isArray(context.result) || record.isSubscription) {
+      if (!record || Array.isArray(context.result) || isAsyncIterable(context.result)) {
         return;
       }
 

@@ -181,11 +181,6 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
             return;
           }
 
-          if (isAsyncIterable(result)) {
-            logger.info('@stream @defer is not supported');
-            return;
-          }
-
           const document = args.document;
           const rootOperation = document.definitions.find(
             o => o.kind === Kind.OPERATION_DEFINITION,

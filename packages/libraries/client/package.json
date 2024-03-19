@@ -62,6 +62,7 @@
     "@apollo/subgraph": "2.7.2",
     "@envelop/types": "5.0.0",
     "@graphql-tools/schema": "10.0.3",
+    "@graphql-yoga/plugin-defer-stream": "3.2.0",
     "@graphql-yoga/plugin-disable-introspection": "2.2.0",
     "@graphql-yoga/plugin-graphql-sse": "3.1.1",
     "@graphql-yoga/plugin-response-cache": "3.4.0",

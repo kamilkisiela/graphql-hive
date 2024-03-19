@@ -7,6 +7,7 @@ import { useServer as useWSServer } from 'graphql-ws/lib/use/ws';
 import { createLogger, createSchema, createYoga } from 'graphql-yoga';
 import nock from 'nock';
 import { WebSocket, WebSocketServer } from 'ws';
+import { useDeferStream } from '@graphql-yoga/plugin-defer-stream';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useGraphQLSSE } from '@graphql-yoga/plugin-graphql-sse';
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
@@ -16,7 +17,7 @@ beforeAll(() => {
   nock.cleanAll();
 });
 
-it('reports usage', async () => {
+it('reports usage', async ({ expect }) => {
   const graphqlScope = nock('http://localhost')
     .post('/graphql')
     .reply(200, {
@@ -129,7 +130,7 @@ it('reports usage', async () => {
   graphqlScope.done();
 });
 
-it('reports usage with response cache', async () => {
+it('reports usage with response cache', async ({ expect }) => {
   axios.interceptors.request.use(config => {
     return config;
   });
@@ -253,7 +254,7 @@ it('reports usage with response cache', async () => {
   graphqlScope.done();
 });
 
-it('does not report usage for operation that does not pass validation', async () => {
+it('does not report usage for operation that does not pass validation', async ({ expect }) => {
   const callback = vi.fn();
   const graphqlScope = nock('http://localhost')
     .post('/graphql')
@@ -356,7 +357,7 @@ it('does not report usage for operation that does not pass validation', async ()
   graphqlScope.done();
 });
 
-it('does not report usage if context creating raises an error', async () => {
+it('does not report usage if context creating raises an error', async ({ expect }) => {
   const callback = vi.fn();
   const graphqlScope = nock('http://localhost')
     .post('/graphql')
@@ -474,7 +475,7 @@ it('does not report usage if context creating raises an error', async () => {
 
 describe('subscription usage reporting', () => {
   describe('built-in see', () => {
-    it('reports usage for successful subscription operation', async () => {
+    it('reports usage for successful subscription operation', async ({ expect }) => {
       const graphqlScope = nock('http://localhost')
         .post('/graphql')
         .reply(200, {
@@ -616,7 +617,7 @@ describe('subscription usage reporting', () => {
       graphqlScope.done();
     });
 
-    it('reports usage for exception from subscription event stream', async () => {
+    it('reports usage for exception from subscription event stream', async ({ expect }) => {
       const graphqlScope = nock('http://localhost')
         .post('/graphql')
         .reply(200, {
@@ -766,8 +767,8 @@ describe('subscription usage reporting', () => {
     });
   });
 
-  describe('@graphql-yoga/plugin-graphql-sse (distinct connection mode)', async () => {
-    it('reports usage for successful subscription operation', async () => {
+  describe('@graphql-yoga/plugin-graphql-sse (distinct connection mode)', async ({ expect }) => {
+    it('reports usage for successful subscription operation', async ({ expect }) => {
       const graphqlScope = nock('http://localhost')
         .post('/graphql')
         .reply(200, {
@@ -916,7 +917,7 @@ describe('subscription usage reporting', () => {
       graphqlScope.done();
     });
 
-    it.skip('reports usage for exception from subscription event stream', async () => {
+    it.skip('reports usage for exception from subscription event stream', async ({ expect }) => {
       const graphqlScope = nock('http://localhost')
         .post('/graphql')
         .reply(200, {
@@ -1061,8 +1062,8 @@ describe('subscription usage reporting', () => {
     });
   });
 
-  describe('graphql-ws', async () => {
-    it('reports usage for successful subscription operation', async () => {
+  describe('graphql-ws', async ({ expect }) => {
+    it('reports usage for successful subscription operation', async ({ expect }) => {
       const graphqlScope = nock('http://localhost')
         .post('/graphql')
         .reply(200, {
@@ -1262,7 +1263,7 @@ describe('subscription usage reporting', () => {
       });
       graphqlScope.done();
     });
-    it.skip('reports usage for exception from subscription event stream', async () => {
+    it.skip('reports usage for exception from subscription event stream', async ({ expect }) => {
       const graphqlScope = nock('http://localhost')
         .post('/graphql')
         .reply(200, {
@@ -1459,5 +1460,168 @@ describe('subscription usage reporting', () => {
       });
       graphqlScope.done();
     });
+  });
+});
+
+describe('incremental delivery usage reporting', () => {
+  it('reports usage for successful incremental deliver operation', async ({ expect }) => {
+    const graphqlScope = nock('http://localhost')
+      .post('/graphql')
+      .reply(200, {
+        data: {
+          __typename: 'Query',
+          tokenInfo: {
+            __typename: 'TokenInfo',
+            token: {
+              name: 'brrrt',
+            },
+            organization: {
+              name: 'mom',
+              cleanId: 'ur-mom',
+            },
+            project: {
+              name: 'projecto',
+              type: 'FEDERATION',
+              cleanId: 'projecto',
+            },
+            target: {
+              name: 'projecto',
+              cleanId: 'projecto',
+            },
+            canReportSchema: true,
+            canCollectUsage: true,
+            canReadOperations: true,
+          },
+        },
+      })
+      .post('/usage', body => {
+        expect(body.map).toMatchInlineSnapshot(`
+          {
+            4c76cedb3f9db3810a8080b299e93f1a: {
+              fields: [
+                Query.greetings,
+              ],
+              operation: {greetings@stream},
+              operationName: anonymous,
+            },
+          }
+        `);
+
+        expect(body.operations).toMatchObject([
+          {
+            metadata: {
+              client: {
+                name: 'foo',
+                version: '4.2.0',
+              },
+            },
+          },
+        ]);
+
+        return true;
+      })
+      .reply(200);
+
+    const yoga = createYoga({
+      schema: createSchema({
+        typeDefs: /* GraphQL */ `
+          type Query {
+            greetings: [String!]!
+          }
+        `,
+        resolvers: {
+          Query: {
+            async *greetings() {
+              yield 'hi';
+              await new Promise<void>(resolve => setTimeout(resolve, 1));
+              yield 'heee';
+              await new Promise<void>(resolve => setTimeout(resolve, 1));
+              yield 'hooo';
+            },
+          },
+        },
+      }),
+      plugins: [
+        useDeferStream(),
+        useHive({
+          enabled: true,
+          debug: false,
+          token: 'brrrt',
+          selfHosting: {
+            applicationUrl: 'http://localhost/foo',
+            graphqlEndpoint: 'http://localhost/graphql',
+            usageEndpoint: 'http://localhost/usage',
+          },
+          usage: {
+            endpoint: 'http://localhost/usage',
+          },
+          agent: {
+            maxSize: 1,
+            logger: createLogger('silent'),
+          },
+        }),
+      ],
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        resolve();
+      }, 1000);
+      let requestCount = 0;
+
+      graphqlScope.on('request', () => {
+        requestCount = requestCount + 1;
+        if (requestCount === 2) {
+          clearTimeout(timeout);
+          resolve();
+        }
+      });
+
+      (async () => {
+        const res = await yoga.fetch('http://localhost/graphql', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            accept: 'multipart/mixed',
+            'x-graphql-client-name': 'foo',
+            'x-graphql-client-version': '4.2.0',
+          },
+          body: JSON.stringify({
+            query: `query { greetings @stream }`,
+          }),
+        });
+        expect(res.status).toBe(200);
+        expect(await res.text()).toMatchInlineSnapshot(`
+          ---
+          Content-Type: application/json; charset=utf-8
+          Content-Length: 40
+
+          {"data":{"greetings":[]},"hasNext":true}
+          ---
+          Content-Type: application/json; charset=utf-8
+          Content-Length: 72
+
+          {"incremental":[{"items":["hi"],"path":["greetings",0]}],"hasNext":true}
+          ---
+          Content-Type: application/json; charset=utf-8
+          Content-Length: 74
+
+          {"incremental":[{"items":["heee"],"path":["greetings",1]}],"hasNext":true}
+          ---
+          Content-Type: application/json; charset=utf-8
+          Content-Length: 74
+
+          {"incremental":[{"items":["hooo"],"path":["greetings",2]}],"hasNext":true}
+          ---
+          Content-Type: application/json; charset=utf-8
+          Content-Length: 17
+
+          {"hasNext":false}
+          -----
+        `);
+      })().catch(reject);
+    });
+
+    graphqlScope.done();
   });
 });

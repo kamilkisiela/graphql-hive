@@ -27,10 +27,7 @@ export type AbortAction = {
 
 export type CollectUsageCallback = (
   args: ExecutionArgs,
-  result:
-    | AsyncIterableIteratorOrValue<GraphQLErrorsResult>
-    | AsyncIterableOrValue<GraphQLErrorsResult>
-    | AbortAction,
+  result: GraphQLErrorsResult | AbortAction,
 ) => void;
 export interface ClientInfo {
   name: string;
