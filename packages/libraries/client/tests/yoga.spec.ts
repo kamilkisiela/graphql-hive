@@ -767,7 +767,7 @@ describe('subscription usage reporting', () => {
     });
   });
 
-  describe('@graphql-yoga/plugin-graphql-sse (distinct connection mode)', async ({ expect }) => {
+  describe('@graphql-yoga/plugin-graphql-sse (distinct connection mode)', () => {
     it('reports usage for successful subscription operation', async ({ expect }) => {
       const graphqlScope = nock('http://localhost')
         .post('/graphql')
@@ -1062,7 +1062,7 @@ describe('subscription usage reporting', () => {
     });
   });
 
-  describe('graphql-ws', async ({ expect }) => {
+  describe('graphql-ws', () => {
     it('reports usage for successful subscription operation', async ({ expect }) => {
       const graphqlScope = nock('http://localhost')
         .post('/graphql')
