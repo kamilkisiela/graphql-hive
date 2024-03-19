@@ -19,11 +19,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Activities, Card, EmptyList, MetaTitle } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
-import { writeLastVisitedOrganization } from '@/lib/cookies';
 import { subDays } from '@/lib/date-time';
 import { useFormattedNumber } from '@/lib/hooks';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { pluralize } from '@/lib/utils';
 
 function floorDate(date: Date): Date {
@@ -402,10 +400,5 @@ function OrganizationPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection(async ({ req, res, resolvedUrl }) => {
-  writeLastVisitedOrganization(req, res, resolvedUrl.substring(1));
-  return { props: {} };
-});
 
 export default authenticated(OrganizationPage);

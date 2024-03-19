@@ -13,6 +13,7 @@ export async function createServer(options: {
     requests: boolean;
     level: string;
   };
+  cors?: boolean;
   bodyLimit?: number;
 }) {
   const server = fastify({
@@ -48,7 +49,9 @@ export async function createServer(options: {
     await useRequestLogging(server);
   }
 
-  await server.register(cors);
+  if (options.cors !== false) {
+    await server.register(cors);
+  }
 
   return server;
 }

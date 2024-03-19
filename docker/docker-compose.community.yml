@@ -243,8 +243,6 @@ services:
       ENCRYPTION_SECRET: '${HIVE_ENCRYPTION_SECRET}'
       WEB_APP_URL: '${HIVE_APP_BASE_URL}'
       PORT: 3001
-      SUPERTOKENS_CONNECTION_URI: http://supertokens:3567
-      SUPERTOKENS_API_KEY: '${SUPERTOKENS_API_KEY}'
       S3_ENDPOINT: 'http://s3:9000'
       S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
       S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
@@ -253,8 +251,13 @@ services:
       CDN_AUTH_PRIVATE_KEY: ${CDN_AUTH_PRIVATE_KEY}
       CDN_API: '1'
       CDN_API_BASE_URL: 'http://localhost:8082'
-      AUTH_ORGANIZATION_OIDC: '1'
       LOG_LEVEL: '${LOG_LEVEL:-info}'
+      # Auth
+      AUTH_ORGANIZATION_OIDC: '1'
+      AUTH_REQUIRE_EMAIL_VERIFICATION: '0'
+      SUPERTOKENS_CONNECTION_URI: http://supertokens:3567
+      SUPERTOKENS_API_KEY: '${SUPERTOKENS_API_KEY}'
+      GRAPHQL_PUBLIC_ORIGIN: http://localhost:8082
 
   policy:
     image: '${DOCKER_REGISTRY}policy${DOCKER_TAG}'
@@ -390,11 +393,8 @@ services:
       PORT: 3000
       NODE_ENV: production
       APP_BASE_URL: '${HIVE_APP_BASE_URL}'
-      SUPERTOKENS_CONNECTION_URI: http://supertokens:3567
-      SUPERTOKENS_API_KEY: '${SUPERTOKENS_API_KEY}'
-      EMAILS_ENDPOINT: http://emails:3011
-      GRAPHQL_ENDPOINT: http://server:3001/graphql
-      SERVER_ENDPOINT: http://server:3001
+      GRAPHQL_PUBLIC_ENDPOINT: http://localhost:8082/graphql
+      GRAPHQL_PUBLIC_ORIGIN: http://localhost:8082
       AUTH_REQUIRE_EMAIL_VERIFICATION: '0'
       AUTH_ORGANIZATION_OIDC: '1'
       LOG_LEVEL: '${LOG_LEVEL:-info}'

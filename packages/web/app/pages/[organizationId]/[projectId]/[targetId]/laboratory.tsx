@@ -28,7 +28,6 @@ import { graphql } from '@/gql';
 import { TargetAccessScope } from '@/gql/graphql';
 import { canAccessTarget } from '@/lib/access/target';
 import { useClipboard, useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { cn } from '@/lib/utils';
 import {
   Button as GraphiQLButton,
@@ -824,6 +823,7 @@ function LaboratoryPageContent() {
           (actualSelectedApiEndpoint === 'linkedApi'
             ? query.data?.target?.graphqlEndpointUrl
             : undefined) ?? mockEndpoint,
+        fetch,
       });
 
       const result = await fetcher(params, opts);
@@ -1051,8 +1051,6 @@ function LaboratoryPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(LaboratoryPage);
 

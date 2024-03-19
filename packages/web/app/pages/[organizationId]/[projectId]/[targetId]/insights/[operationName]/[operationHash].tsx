@@ -17,7 +17,6 @@ import { EmptyList, Link, MetaTitle } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
 import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const GraphQLOperationBody_OperationFragment = graphql(`
   fragment GraphQLOperationBody_OperationFragment on Operation {
@@ -264,7 +263,5 @@ function OperationInsightsPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(OperationInsightsPage);

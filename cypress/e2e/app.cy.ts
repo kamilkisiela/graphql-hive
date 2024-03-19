@@ -14,7 +14,7 @@ describe('basic user flow', () => {
 
   it('should redirect anon to auth', () => {
     cy.visit('/');
-    cy.url().should('include', '/auth?redirectToPath=%2F');
+    cy.url().should('include', '/auth?redirectToPath=');
   });
 
   it('should sign up', () => {
@@ -34,7 +34,7 @@ describe('basic user flow', () => {
     // Logout
     cy.get('[data-cy="user-menu-trigger"]').click();
     cy.get('[data-cy="user-menu-logout"]').click();
-    cy.url().should('include', '/auth?redirectToPath=%2F');
+    cy.url().should('include', '/auth?redirectToPath=');
   });
 });
 

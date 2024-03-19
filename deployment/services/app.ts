@@ -1,33 +1,23 @@
 import * as pulumi from '@pulumi/pulumi';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
-import { ServiceSecret } from '../utils/secrets';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { StripeBilling } from './billing';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
-import { Emails } from './emails';
 import { Environment } from './environment';
 import { GitHubApp } from './github';
 import { GraphQL } from './graphql';
 import { Sentry } from './sentry';
 import { SlackApp } from './slack-app';
-import { Supertokens } from './supertokens';
 import { Zendesk } from './zendesk';
 
 export type App = ReturnType<typeof deployApp>;
-
-class AppOAuthSecret extends ServiceSecret<{
-  clientId: string | pulumi.Output<string>;
-  clientSecret: string | pulumi.Output<string>;
-}> {}
 
 export function deployApp({
   graphql,
   dbMigrations,
   image,
-  supertokens,
   docker,
-  emails,
   zendesk,
   github,
   slackApp,
@@ -40,8 +30,6 @@ export function deployApp({
   graphql: GraphQL;
   dbMigrations: DbMigrations;
   docker: Docker;
-  supertokens: Supertokens;
-  emails: Emails;
   zendesk: Zendesk;
   github: GitHubApp;
   slackApp: SlackApp;
@@ -50,16 +38,6 @@ export function deployApp({
 }) {
   const appConfig = new pulumi.Config('app');
   const appEnv = appConfig.requireObject<Record<string, string>>('env');
-
-  const oauthConfig = new pulumi.Config('oauth');
-  const githubOAuthSecret = new AppOAuthSecret('oauth-github', {
-    clientId: oauthConfig.requireSecret('githubClient'),
-    clientSecret: oauthConfig.requireSecret('githubSecret'),
-  });
-  const googleOAuthSecret = new AppOAuthSecret('oauth-google', {
-    clientId: oauthConfig.requireSecret('googleClient'),
-    clientSecret: oauthConfig.requireSecret('googleSecret'),
-  });
 
   return new ServiceDeployment(
     'app',
@@ -80,7 +58,8 @@ export function deployApp({
       env: {
         ...environment.envVars,
         SENTRY: sentry.enabled ? '1' : '0',
-        GRAPHQL_ENDPOINT: serviceLocalEndpoint(graphql.service).apply(s => `${s}/graphql`),
+        GRAPHQL_PUBLIC_ENDPOINT: `https://${environment.appDns}/graphql`,
+        GRAPHQL_PUBLIC_ORIGIN: `https://${environment.appDns}`,
         SERVER_ENDPOINT: serviceLocalEndpoint(graphql.service),
         APP_BASE_URL: `https://${environment.appDns}/`,
         INTEGRATION_SLACK: '1',
@@ -89,8 +68,6 @@ export function deployApp({
         DOCS_URL: 'https://the-guild.dev/graphql/hive/docs',
         GRAPHQL_PERSISTED_OPERATIONS: '1',
         ZENDESK_SUPPORT: zendesk.enabled ? '1' : '0',
-        SUPERTOKENS_CONNECTION_URI: supertokens.localEndpoint,
-        EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
         AUTH_GITHUB: '1',
         AUTH_GOOGLE: '1',
         AUTH_REQUIRE_EMAIL_VERIFICATION: '1',
@@ -104,11 +81,6 @@ export function deployApp({
     .withSecret('INTEGRATION_SLACK_CLIENT_ID', slackApp.secret, 'clientId')
     .withSecret('INTEGRATION_SLACK_CLIENT_SECRET', slackApp.secret, 'clientSecret')
     .withSecret('STRIPE_PUBLIC_KEY', billing.secret, 'stripePublicKey')
-    .withSecret('SUPERTOKENS_API_KEY', supertokens.secret, 'apiKey')
-    .withSecret('AUTH_GITHUB_CLIENT_ID', githubOAuthSecret, 'clientId')
-    .withSecret('AUTH_GITHUB_CLIENT_SECRET', githubOAuthSecret, 'clientSecret')
-    .withSecret('AUTH_GOOGLE_CLIENT_ID', googleOAuthSecret, 'clientId')
-    .withSecret('AUTH_GOOGLE_CLIENT_SECRET', googleOAuthSecret, 'clientSecret')
     .withConditionalSecret(sentry.enabled, 'SENTRY_DSN', sentry.secret, 'dsn')
     .deploy();
 }

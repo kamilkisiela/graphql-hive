@@ -1,5 +1,6 @@
 import * as pulumi from '@pulumi/pulumi';
 import { serviceLocalEndpoint } from '../utils/local-endpoint';
+import { ServiceSecret } from '../utils/secrets';
 import { ServiceDeployment } from '../utils/service-deployment';
 import { StripeBillingService } from './billing';
 import { CDN } from './cf-cdn';
@@ -24,6 +25,11 @@ import { Webhooks } from './webhooks';
 import { Zendesk } from './zendesk';
 
 export type GraphQL = ReturnType<typeof deployGraphQL>;
+
+class AppOAuthSecret extends ServiceSecret<{
+  clientId: string | pulumi.Output<string>;
+  clientSecret: string | pulumi.Output<string>;
+}> {}
 
 export function deployGraphQL({
   clickhouse,
@@ -75,6 +81,16 @@ export function deployGraphQL({
   const apiConfig = new pulumi.Config('api');
   const apiEnv = apiConfig.requireObject<Record<string, string>>('env');
 
+  const oauthConfig = new pulumi.Config('oauth');
+  const githubOAuthSecret = new AppOAuthSecret('oauth-github', {
+    clientId: oauthConfig.requireSecret('githubClient'),
+    clientSecret: oauthConfig.requireSecret('githubSecret'),
+  });
+  const googleOAuthSecret = new AppOAuthSecret('oauth-google', {
+    clientId: oauthConfig.requireSecret('googleClient'),
+    clientSecret: oauthConfig.requireSecret('googleSecret'),
+  });
+
   return (
     new ServiceDeployment(
       'graphql-api',
@@ -108,6 +124,7 @@ export function deployGraphQL({
           EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
           USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
           WEB_APP_URL: `https://${environment.appDns}`,
+          GRAPHQL_PUBLIC_ORIGIN: `https://${environment.appDns}`,
           CDN_CF: '1',
           HIVE: '1',
           HIVE_REPORTING: '1',
@@ -115,9 +132,13 @@ export function deployGraphQL({
           HIVE_REPORTING_ENDPOINT: 'http://0.0.0.0:4000/graphql',
           ZENDESK_SUPPORT: zendesk.enabled ? '1' : '0',
           INTEGRATION_GITHUB: '1',
-          SUPERTOKENS_CONNECTION_URI: supertokens.localEndpoint,
-          AUTH_ORGANIZATION_OIDC: '1',
           GRAPHQL_PERSISTED_OPERATIONS_PATH: './persisted-operations.json',
+          // Auth
+          SUPERTOKENS_CONNECTION_URI: supertokens.localEndpoint,
+          AUTH_GITHUB: '1',
+          AUTH_GOOGLE: '1',
+          AUTH_ORGANIZATION_OIDC: '1',
+          AUTH_REQUIRE_EMAIL_VERIFICATION: '1',
         },
         exposesMetrics: true,
         port: 4000,
@@ -160,8 +181,12 @@ export function deployGraphQL({
       .withSecret('S3_SECRET_ACCESS_KEY', s3.secret, 'secretAccessKey')
       .withSecret('S3_BUCKET_NAME', s3.secret, 'bucket')
       .withSecret('S3_ENDPOINT', s3.secret, 'endpoint')
-      // Supertokens
+      // Auth
       .withSecret('SUPERTOKENS_API_KEY', supertokens.secret, 'apiKey')
+      .withSecret('AUTH_GITHUB_CLIENT_ID', githubOAuthSecret, 'clientId')
+      .withSecret('AUTH_GITHUB_CLIENT_SECRET', githubOAuthSecret, 'clientSecret')
+      .withSecret('AUTH_GOOGLE_CLIENT_ID', googleOAuthSecret, 'clientId')
+      .withSecret('AUTH_GOOGLE_CLIENT_SECRET', googleOAuthSecret, 'clientSecret')
       // Zendesk
       .withConditionalSecret(zendesk.enabled, 'ZENDESK_SUBDOMAIN', zendesk.secret, 'subdomain')
       .withConditionalSecret(zendesk.enabled, 'ZENDESK_USERNAME', zendesk.secret, 'username')

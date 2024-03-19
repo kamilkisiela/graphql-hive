@@ -16,7 +16,6 @@ import { BillingPlanType } from '@/gql/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { useRouteSelector } from '@/lib/hooks';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 
 const ManageSubscriptionInner_OrganizationFragment = graphql(`
@@ -441,6 +440,20 @@ const ManageSubscriptionPageQuery = graphql(`
 
 function ManageSubscriptionPageContent() {
   const router = useRouteSelector();
+
+  /**
+   * If Stripe is not enabled we redirect the user to the organization.
+   */
+  if (!getIsStripeEnabled()) {
+    void router.push({
+      pathname: '/[organizationId]',
+      query: {
+        organizationId: router.organizationId,
+      },
+    });
+    return null;
+  }
+
   const [query] = useQuery({
     query: ManageSubscriptionPageQuery,
     variables: {
@@ -522,23 +535,5 @@ function ManageSubscriptionPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection(async context => {
-  /**
-   * If Stripe is not enabled we redirect the user to the organization.
-   */
-  const isStripeEnabled = getIsStripeEnabled();
-  if (!isStripeEnabled) {
-    const parts = String(context.resolvedUrl).split('/');
-    parts.pop();
-    return {
-      redirect: {
-        destination: parts.join('/'),
-        permanent: false,
-      },
-    };
-  }
-  return { props: {} };
-});
 
 export default authenticated(ManageSubscriptionPage);

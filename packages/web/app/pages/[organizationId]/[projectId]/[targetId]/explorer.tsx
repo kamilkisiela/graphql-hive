@@ -18,7 +18,6 @@ import { MetaTitle } from '@/components/v2';
 import { noSchemaVersion, noValidSchemaVersion } from '@/components/v2/empty-list';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const ExplorerPage_SchemaExplorerFragment = graphql(`
   fragment ExplorerPage_SchemaExplorerFragment on SchemaExplorer {
@@ -279,7 +278,5 @@ function ExplorerPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(ExplorerPage);

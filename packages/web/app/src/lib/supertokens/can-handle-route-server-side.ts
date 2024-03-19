@@ -7,13 +7,13 @@ const supertokenRoutes = new Set([
   '/auth',
 ]);
 
-if (env.auth.github) {
+if (env.auth.github.enabled) {
   supertokenRoutes.add('/auth/callback/github');
 }
-if (env.auth.google) {
+if (env.auth.google.enabled) {
   supertokenRoutes.add('/auth/callback/google');
 }
-if (env.auth.okta) {
+if (env.auth.okta.enabled) {
   supertokenRoutes.add('/auth/callback/okta');
 }
 if (env.auth.organizationOIDC) {

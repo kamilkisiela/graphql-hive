@@ -1,6 +1,8 @@
-import { createClient, errorExchange, fetchExchange } from 'urql';
+import Session from 'supertokens-auth-react/recipe/session';
+import { createClient, fetchExchange } from 'urql';
 import { env } from '@/env/frontend';
 import schema from '@/gql/schema';
+import { authExchange } from '@urql/exchange-auth';
 import { cacheExchange } from '@urql/exchange-graphcache';
 import { persistedExchange } from '@urql/exchange-persisted';
 import { Mutation } from './urql-cache';
@@ -8,12 +10,18 @@ import { networkStatusExchange } from './urql-exchanges/state';
 
 const noKey = (): null => null;
 
-const SERVER_BASE_PATH = '/api/proxy';
+const SERVER_BASE_PATH = env.graphqlPublicEndpoint;
 
 const isSome = <T>(value: T | null | undefined): value is T => value != null;
 
 export const urqlClient = createClient({
   url: SERVER_BASE_PATH,
+  fetchOptions: {
+    headers: {
+      'graphql-client-name': 'Hive App',
+      'graphql-client-version': env.release,
+    },
+  },
   exchanges: [
     cacheExchange({
       schema,
@@ -54,12 +62,44 @@ export const urqlClient = createClient({
       globalIDs: ['SuccessfulSchemaCheck', 'FailedSchemaCheck'],
     }),
     networkStatusExchange,
-    errorExchange({
-      onError(error) {
-        if (error.response?.status === 401) {
-          window.location.href = '/logout';
-        }
-      },
+    authExchange(async () => {
+      let action: 'NEEDS_REFRESH' | 'VERIFY_EMAIL' | 'UNAUTHENTICATED' = 'UNAUTHENTICATED';
+
+      return {
+        addAuthToOperation(operation) {
+          return operation;
+        },
+        willAuthError() {
+          return false;
+        },
+        didAuthError(error) {
+          if (error.graphQLErrors.some(e => e.extensions?.code === 'UNAUTHENTICATED')) {
+            action = 'UNAUTHENTICATED';
+            return true;
+          }
+
+          if (error.graphQLErrors.some(e => e.extensions?.code === 'VERIFY_EMAIL')) {
+            action = 'VERIFY_EMAIL';
+            return true;
+          }
+
+          if (error.graphQLErrors.some(e => e.extensions?.code === 'NEEDS_REFRESH')) {
+            action = 'NEEDS_REFRESH';
+            return true;
+          }
+
+          return false;
+        },
+        async refreshAuth() {
+          if (action === 'NEEDS_REFRESH' && (await Session.attemptRefreshingSession())) {
+            location.reload();
+          } else if (action === 'VERIFY_EMAIL') {
+            window.location.href = '/auth/verify-email';
+          } else {
+            window.location.href = `/auth?redirectToPath=${encodeURIComponent(window.location.pathname)}`;
+          }
+        },
+      };
     }),
     env.graphql.persistedOperations
       ? persistedExchange({

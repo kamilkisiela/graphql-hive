@@ -278,6 +278,31 @@ export class OIDCIntegrationsProvider {
       organizationId: integration.linkedOrganizationId,
     } as const;
   }
+
+  async getOIDCIntegrationById(args: { oidcIntegrationId: string }) {
+    if (this.isEnabled() === false) {
+      return {
+        type: 'error',
+        message: 'OIDC integrations are disabled.',
+      } as const;
+    }
+
+    const integration = await this.storage.getOIDCIntegrationById({
+      oidcIntegrationId: args.oidcIntegrationId,
+    });
+
+    if (integration === null) {
+      return {
+        type: 'error',
+        message: 'Integration not found.',
+      } as const;
+    }
+
+    return {
+      type: 'ok',
+      organizationId: integration.linkedOrganizationId,
+    } as const;
+  }
 }
 
 const OIDCIntegrationClientIdModel = zod

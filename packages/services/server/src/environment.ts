@@ -22,7 +22,8 @@ const EnvironmentModel = zod.object({
   ENVIRONMENT: emptyString(zod.string().optional()),
   RELEASE: emptyString(zod.string().optional()),
   ENCRYPTION_SECRET: emptyString(zod.string()),
-  WEB_APP_URL: emptyString(zod.string().url().optional()),
+  WEB_APP_URL: zod.string().url(),
+  GRAPHQL_PUBLIC_ORIGIN: zod.string().url(),
   RATE_LIMIT_ENDPOINT: emptyString(zod.string().url().optional()),
   SCHEMA_POLICY_ENDPOINT: emptyString(zod.string().url().optional()),
   TOKENS_ENDPOINT: zod.string().url(),
@@ -34,6 +35,9 @@ const EnvironmentModel = zod.object({
   SCHEMA_ENDPOINT: zod.string().url(),
   AUTH_ORGANIZATION_OIDC: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
   GRAPHQL_PERSISTED_OPERATIONS_PATH: emptyString(zod.string().optional()),
+  AUTH_REQUIRE_EMAIL_VERIFICATION: emptyString(
+    zod.union([zod.literal('1'), zod.literal('0')]).optional(),
+  ),
 });
 
 const SentryModel = zod.union([
@@ -146,6 +150,45 @@ const S3Model = zod.object({
   S3_PUBLIC_URL: emptyString(zod.string().url().optional()),
 });
 
+const AuthGitHubConfigSchema = zod.union([
+  zod.object({
+    AUTH_GITHUB: zod.union([zod.void(), zod.literal('0'), zod.literal('')]),
+  }),
+  zod.object({
+    AUTH_GITHUB: zod.literal('1'),
+    AUTH_GITHUB_CLIENT_ID: zod.string(),
+    AUTH_GITHUB_CLIENT_SECRET: zod.string(),
+  }),
+]);
+
+const AuthGoogleConfigSchema = zod.union([
+  zod.object({
+    AUTH_GOOGLE: zod.union([zod.void(), zod.literal('0'), zod.literal('')]),
+  }),
+  zod.object({
+    AUTH_GOOGLE: zod.literal('1'),
+    AUTH_GOOGLE_CLIENT_ID: zod.string(),
+    AUTH_GOOGLE_CLIENT_SECRET: zod.string(),
+  }),
+]);
+
+const AuthOktaConfigSchema = zod.union([
+  zod.object({
+    AUTH_OKTA: zod.union([zod.void(), zod.literal('0')]),
+  }),
+  zod.object({
+    AUTH_OKTA: zod.literal('1'),
+    AUTH_OKTA_HIDDEN: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
+    AUTH_OKTA_ENDPOINT: zod.string().url(),
+    AUTH_OKTA_CLIENT_ID: zod.string(),
+    AUTH_OKTA_CLIENT_SECRET: zod.string(),
+  }),
+]);
+
+const AuthOktaMultiTenantSchema = zod.object({
+  AUTH_ORGANIZATION_OIDC: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
+});
+
 const LogModel = zod.object({
   LOG_LEVEL: emptyString(
     zod
@@ -165,35 +208,28 @@ const LogModel = zod.object({
   ),
 });
 
+// eslint-disable-next-line no-process-env
+const processEnv = process.env;
+
 const configs = {
-  // eslint-disable-next-line no-process-env
-  base: EnvironmentModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  sentry: SentryModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  postgres: PostgresModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  clickhouse: ClickHouseModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  redis: RedisModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  supertokens: SuperTokensModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  github: GitHubModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  cdnCf: CdnCFModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  cdnApi: CdnApiModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  prometheus: PrometheusModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  hive: HiveModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  s3: S3Model.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  log: LogModel.safeParse(process.env),
-  // eslint-disable-next-line no-process-env
-  zendeskSupport: ZendeskSupportModel.safeParse(process.env),
+  base: EnvironmentModel.safeParse(processEnv),
+  sentry: SentryModel.safeParse(processEnv),
+  postgres: PostgresModel.safeParse(processEnv),
+  clickhouse: ClickHouseModel.safeParse(processEnv),
+  redis: RedisModel.safeParse(processEnv),
+  supertokens: SuperTokensModel.safeParse(processEnv),
+  authGithub: AuthGitHubConfigSchema.safeParse(processEnv),
+  authGoogle: AuthGoogleConfigSchema.safeParse(processEnv),
+  authOkta: AuthOktaConfigSchema.safeParse(processEnv),
+  authOktaMultiTenant: AuthOktaMultiTenantSchema.safeParse(processEnv),
+  github: GitHubModel.safeParse(processEnv),
+  cdnCf: CdnCFModel.safeParse(processEnv),
+  cdnApi: CdnApiModel.safeParse(processEnv),
+  prometheus: PrometheusModel.safeParse(processEnv),
+  hive: HiveModel.safeParse(processEnv),
+  s3: S3Model.safeParse(processEnv),
+  log: LogModel.safeParse(processEnv),
+  zendeskSupport: ZendeskSupportModel.safeParse(processEnv),
 };
 
 const environmentErrors: Array<string> = [];
@@ -223,6 +259,10 @@ const sentry = extractConfig(configs.sentry);
 const clickhouse = extractConfig(configs.clickhouse);
 const redis = extractConfig(configs.redis);
 const supertokens = extractConfig(configs.supertokens);
+const authGithub = extractConfig(configs.authGithub);
+const authGoogle = extractConfig(configs.authGoogle);
+const authOkta = extractConfig(configs.authOkta);
+const authOktaMultiTenant = extractConfig(configs.authOktaMultiTenant);
 const github = extractConfig(configs.github);
 const prometheus = extractConfig(configs.prometheus);
 const log = extractConfig(configs.log);
@@ -254,11 +294,9 @@ export const env = {
   release: base.RELEASE ?? 'local',
   encryptionSecret: base.ENCRYPTION_SECRET,
   hiveServices: {
-    webApp: base.WEB_APP_URL
-      ? {
-          url: base.WEB_APP_URL,
-        }
-      : null,
+    webApp: {
+      url: base.WEB_APP_URL,
+    },
     tokens: {
       endpoint: base.TOKENS_ENDPOINT,
     },
@@ -311,6 +349,33 @@ export const env = {
     connectionURI: supertokens.SUPERTOKENS_CONNECTION_URI,
     apiKey: supertokens.SUPERTOKENS_API_KEY,
   },
+  auth: {
+    github:
+      authGithub.AUTH_GITHUB === '1'
+        ? {
+            clientId: authGithub.AUTH_GITHUB_CLIENT_ID,
+            clientSecret: authGithub.AUTH_GITHUB_CLIENT_SECRET,
+          }
+        : null,
+    google:
+      authGoogle.AUTH_GOOGLE === '1'
+        ? {
+            clientId: authGoogle.AUTH_GOOGLE_CLIENT_ID,
+            clientSecret: authGoogle.AUTH_GOOGLE_CLIENT_SECRET,
+          }
+        : null,
+    okta:
+      authOkta.AUTH_OKTA === '1'
+        ? {
+            endpoint: authOkta.AUTH_OKTA_ENDPOINT,
+            hidden: authOkta.AUTH_OKTA_HIDDEN === '1',
+            clientId: authOkta.AUTH_OKTA_CLIENT_ID,
+            clientSecret: authOkta.AUTH_OKTA_CLIENT_SECRET,
+          }
+        : null,
+    organizationOIDC: authOktaMultiTenant.AUTH_ORGANIZATION_OIDC === '1',
+    requireEmailVerification: base.AUTH_REQUIRE_EMAIL_VERIFICATION === '1',
+  },
   github:
     github.INTEGRATION_GITHUB === '1'
       ? {
@@ -357,6 +422,7 @@ export const env = {
   hive: hiveConfig,
   graphql: {
     persistedOperationsPath: base.GRAPHQL_PERSISTED_OPERATIONS_PATH ?? null,
+    origin: base.GRAPHQL_PUBLIC_ORIGIN,
   },
   zendeskSupport:
     zendeskSupport.ZENDESK_SUPPORT === '1'

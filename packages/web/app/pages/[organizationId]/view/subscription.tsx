@@ -16,7 +16,6 @@ import { graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { useRouteSelector } from '@/lib/hooks';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const DateFormatter = Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -75,6 +74,17 @@ const SubscriptionPageQuery = graphql(`
 
 function SubscriptionPageContent() {
   const router = useRouteSelector();
+
+  if (!getIsStripeEnabled()) {
+    void router.push({
+      pathname: '/[organizationId]',
+      query: {
+        organizationId: router.organizationId,
+      },
+    });
+    return null;
+  }
+
   const [query] = useQuery({
     query: SubscriptionPageQuery,
     variables: {
@@ -199,23 +209,5 @@ function SubscriptionPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection(async context => {
-  /**
-   * If Stripe is not enabled we redirect the user to the organization.
-   */
-  const isStripeEnabled = getIsStripeEnabled();
-  if (!isStripeEnabled) {
-    const parts = String(context.resolvedUrl).split('/');
-    parts.pop();
-    return {
-      redirect: {
-        destination: parts.join('/'),
-        permanent: false,
-      },
-    };
-  }
-  return { props: {} };
-});
 
 export default authenticated(SubscriptionPage);

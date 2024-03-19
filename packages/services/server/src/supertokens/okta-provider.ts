@@ -1,6 +1,6 @@
 import type { ProviderInput } from 'supertokens-node/recipe/thirdparty/types';
 import zod from 'zod';
-import { env } from '@/env/backend';
+import { env } from '../environment';
 
 type OktaConfig = Exclude<(typeof env)['auth']['okta'], null>;
 
@@ -58,7 +58,7 @@ const OktaProfileModel = zod.object({
   }),
 });
 
-const fetchOktaProfile = async (config: OktaConfig, accessToken: string) => {
+async function fetchOktaProfile(config: OktaConfig, accessToken: string) {
   const response = await fetch(`${config.endpoint}/api/v1/users/me`, {
     method: 'GET',
     headers: {
@@ -74,4 +74,4 @@ const fetchOktaProfile = async (config: OktaConfig, accessToken: string) => {
 
   const json = await response.json();
   return OktaProfileModel.parse(json);
-};
+}

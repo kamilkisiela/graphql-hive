@@ -13,7 +13,6 @@ import { MetaTitle } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { cn } from '@/lib/utils';
 
 const OrganizationMembersPage_OrganizationFragment = graphql(`
@@ -224,7 +223,5 @@ function OrganizationMembersPage() {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(OrganizationMembersPage);

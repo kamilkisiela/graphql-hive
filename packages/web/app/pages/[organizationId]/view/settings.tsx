@@ -31,7 +31,6 @@ import {
   useOrganizationAccess,
 } from '@/lib/access/organization';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const Integrations_CheckIntegrationsQuery = graphql(`
   query Integrations_CheckIntegrationsQuery($selector: OrganizationSelectorInput!) {
@@ -478,7 +477,5 @@ function OrganizationSettingsPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(OrganizationSettingsPage);

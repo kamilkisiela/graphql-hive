@@ -45,7 +45,6 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { SupportTicketPriority, SupportTicketStatus } from '@/gql/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -456,7 +455,5 @@ function SupportPage() {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(SupportPage);

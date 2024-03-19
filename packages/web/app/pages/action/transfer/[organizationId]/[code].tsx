@@ -7,7 +7,6 @@ import { Button, DataWrapper } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const classes = {
   title: clsx('sm:text-4xl text-3xl mb-4 font-medium text-white'),
@@ -147,7 +146,5 @@ function OrganizationTransferPage() {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(OrganizationTransferPage);

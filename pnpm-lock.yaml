@@ -1054,6 +1054,12 @@ importers:
       '@escape.tech/graphql-armor-max-tokens':
         specifier: 2.3.0
         version: 2.3.0
+      '@fastify/cors':
+        specifier: 9.0.1
+        version: 9.0.1
+      '@fastify/formbody':
+        specifier: 7.4.0
+        version: 7.4.0
       '@graphql-hive/client':
         specifier: workspace:*
         version: link:../../libraries/client/dist
@@ -1084,6 +1090,9 @@ importers:
       '@swc/core':
         specifier: 1.4.8
         version: 1.4.8
+      '@trpc/client':
+        specifier: 10.45.2
+        version: 10.45.2(@trpc/server@10.45.2)
       '@trpc/server':
         specifier: 10.45.2
         version: 10.45.2
@@ -1117,6 +1126,12 @@ importers:
       reflect-metadata:
         specifier: 0.2.1
         version: 0.2.1
+      supertokens-js-override:
+        specifier: 0.0.4
+        version: 0.0.4
+      supertokens-node:
+        specifier: 15.2.1
+        version: 15.2.1
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -1586,6 +1601,9 @@ importers:
       '@urql/core':
         specifier: 4.1.4
         version: 4.1.4(graphql@16.8.1)
+      '@urql/exchange-auth':
+        specifier: 2.1.6
+        version: 2.1.6(graphql@16.8.1)
       '@urql/exchange-graphcache':
         specifier: 6.3.3
         version: 6.3.3(graphql@16.8.1)
@@ -1706,12 +1724,6 @@ importers:
       supertokens-auth-react:
         specifier: 0.35.6
         version: 0.35.6(react-dom@18.2.0)(react@18.2.0)(supertokens-web-js@0.8.0)
-      supertokens-js-override:
-        specifier: 0.0.4
-        version: 0.0.4
-      supertokens-node:
-        specifier: 15.2.1
-        version: 15.2.1
       supertokens-web-js:
         specifier: 0.8.0
         version: 0.8.0
@@ -5713,6 +5725,13 @@ packages:
     resolution: {integrity: sha512-aZAXGYo6m22Fk1zZzEUKBvut/CIIQe/BapEORnxiD5Qr0kPHqqI69NtEMCme74h+at72sPhbkb4ZrLd1W3KRLA==}
     dependencies:
       fast-json-stringify: 5.12.0
+    dev: true
+
+  /@fastify/formbody@7.4.0:
+    resolution: {integrity: sha512-H3C6h1GN56/SMrZS8N2vCT2cZr7mIHzBHzOBa5OPpjfB/D6FzP9mMpE02ZzrFX0ANeh0BAJdoXKOF2e7IbV+Og==}
+    dependencies:
+      fast-querystring: 1.1.2
+      fastify-plugin: 4.5.1
     dev: true
 
   /@fastify/merge-json-schemas@0.1.1:
@@ -13994,6 +14013,15 @@ packages:
       - graphql
     dev: false
 
+  /@urql/exchange-auth@2.1.6(graphql@16.8.1):
+    resolution: {integrity: sha512-snOlt7p5kYq0KnPDuXkKe2qW3/BucQZOElvTeo3svLQuk9JiNJVnm6ffQ6QGiGO+G3AtMrctnno1+X44fLtDuQ==}
+    dependencies:
+      '@urql/core': 4.1.4(graphql@16.8.1)
+      wonka: 6.3.4
+    transitivePeerDependencies:
+      - graphql
+    dev: false
+
   /@urql/exchange-graphcache@6.3.3(graphql@16.8.1):
     resolution: {integrity: sha512-uD8zzNIrxQHYCSgfIwYxzEmU1Ml4nJ6NTKwrDlpKmTLJa3aYuG3AoiO138HZBK1XGJ2QzV5yQPfcZsmbVFH8Yg==}
     dependencies:
@@ -15077,6 +15105,7 @@ packages:
       follow-redirects: 1.15.4(debug@4.3.4)
     transitivePeerDependencies:
       - debug
+    dev: true
 
   /axios@1.6.2:
     resolution: {integrity: sha512-7i24Ri4pmDRfJTR7LDBhsOTtcm+9kjX5WiY1X3wIisx6G9So3pfMkEiU7emUBe46oceVImccTEM3k6C5dbVW8A==}
@@ -15544,6 +15573,7 @@ packages:
 
   /buffer-equal-constant-time@1.0.1:
     resolution: {integrity: sha512-zRpUiDwd/xk6ADqPMATG8vc9VPrkck7T07OIx0gnjmJAnHnTVXNQG3vfvWNuiZIkwu9KrKdA1iJKfsfTVxE6NA==}
+    dev: true
 
   /buffer-from@1.1.2:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
@@ -16680,6 +16710,7 @@ packages:
   /cookie@0.4.0:
     resolution: {integrity: sha512-+Hp8fLp57wnUSt0tY0tHEXh4voZRDnoIrZPqlo3DPiI4y9lwg/jqx+1Om94/W6ZaPDOUbnjOt/99w66zk+l1Xg==}
     engines: {node: '>= 0.6'}
+    dev: true
 
   /cookie@0.5.0:
     resolution: {integrity: sha512-YZ3GUyn/o8gfKJlnlX7g7xq4gyO6OSuhGPKaaGssGB2qgDUS0gPgtTvoyZLTt9Ab6dC4hfc9dV5arkvc/OCmrw==}
@@ -16891,6 +16922,7 @@ packages:
       node-fetch: 2.6.12
     transitivePeerDependencies:
       - encoding
+    dev: true
 
   /cross-inspect@1.0.0:
     resolution: {integrity: sha512-4PFfn4b5ZN6FMNGSZlyb7wUhuN8wvj8t/VQHZdM4JsDcruGJ8L2kf9zao98QIrBPFCpdk27qst/AGTl7pL3ypQ==}
@@ -16944,6 +16976,7 @@ packages:
 
   /crypto-js@4.2.0:
     resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
+    dev: true
 
   /crypto-random-string@2.0.0:
     resolution: {integrity: sha512-v1plID3y9r/lPhviJ1wrXpLeyUIGAZ2SHNYTEapm7/8A9nLPoyvVp3RK/EPFqn5kEznyWgYZNsRtYYIWbuG8KA==}
@@ -18051,6 +18084,7 @@ packages:
     resolution: {integrity: sha512-nagl3RYrbNv6kQkeJIpt6NJZy8twLB/2vtz6yN9Z4vRKHN4/QZJIEbqohALSgwKdnksuY3k5Addp5lg8sVoVcQ==}
     dependencies:
       safe-buffer: 5.2.1
+    dev: true
 
   /echarts-for-react@3.0.2(echarts@5.5.0)(react@18.2.0):
     resolution: {integrity: sha512-DRwIiTzx8JfwPOVgGttDytBqdp5VzCSyMRIxubgU/g2n9y3VLUmF2FK7Icmg/sNVkv4+rktmrLN9w22U2yy3fA==}
@@ -19796,6 +19830,7 @@ packages:
         optional: true
     dependencies:
       debug: 4.3.4(supports-color@8.1.1)
+    dev: true
 
   /for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -21572,6 +21607,7 @@ packages:
   /inflation@2.0.0:
     resolution: {integrity: sha512-m3xv4hJYR2oXw4o4Y5l6P5P16WYmazYof+el6Al3f+YlggGj6qT9kImBAnzDelRALnP5d3h4jGBPKzYCizjZZw==}
     engines: {node: '>= 0.8.0'}
+    dev: true
 
   /inflight@1.0.6:
     resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
@@ -22397,6 +22433,7 @@ packages:
 
   /jose@4.14.4:
     resolution: {integrity: sha512-j8GhLiKmUAh+dsFXlX1aJCbt5KMibuKb+d7j1JaOJG6s2UjX1PQlW+OKB/sD4a/5ZYF4RcmYmLSndOoU3Lt/3g==}
+    dev: true
 
   /joycon@3.1.1:
     resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
@@ -22640,6 +22677,7 @@ packages:
       lodash: 4.17.21
       ms: 2.1.3
       semver: 7.5.4
+    dev: true
 
   /jsox@1.2.118:
     resolution: {integrity: sha512-ubYWn4WOc7HA7icvcQuIni1I7Xx4bI4KbRXbXzlr5e48hvdizeAbflBx97B629ZNH5RZnQ657Z5Z8dFgxFVrSQ==}
@@ -22697,12 +22735,14 @@ packages:
       buffer-equal-constant-time: 1.0.1
       ecdsa-sig-formatter: 1.0.11
       safe-buffer: 5.2.1
+    dev: true
 
   /jws@3.2.2:
     resolution: {integrity: sha512-YHlZCB6lMTllWDtSPHz/ZXTsi8S00usEV6v1tjq8tOUZzw7DpSDWVXjXDre6ed1w/pd495ODpHZYSdkRTsa0HA==}
     dependencies:
       jwa: 1.4.1
       safe-buffer: 5.2.1
+    dev: true
 
   /kafkajs@2.2.4:
     resolution: {integrity: sha512-j/YeapB1vfPT2iOIUn/vxdyKEuhuY2PxMBvf5JWux6iSaukAccrMtXEY/Lb7OvavDhOWME589bpLrEdnVHjfjA==}
@@ -22862,6 +22902,7 @@ packages:
 
   /libphonenumber-js@1.10.14:
     resolution: {integrity: sha512-McGS7GV/WjJ2KjfOGhJU1oJn29RYeo7Q+RpANRbUNMQ9gj5XArpbjurSuyYPTejFwbaUojstQ4XyWCrAzGOUXw==}
+    dev: true
 
   /libqp@1.1.0:
     resolution: {integrity: sha512-4Rgfa0hZpG++t1Vi2IiqXG9Ad1ig4QTmtuZF946QJP4bPqOYC78ixUXgz5TW/wE7lNaNKlplSYTxQ+fR2KZ0EA==}
@@ -25731,6 +25772,7 @@ packages:
   /nodemailer@6.9.7:
     resolution: {integrity: sha512-rUtR77ksqex/eZRLmQ21LKVH5nAAsVicAtAYudK7JgwenEDZ0UIQ1adUGqErz7sMkWYxWTTU1aeP2Jga6WQyJw==}
     engines: {node: '>=6.0.0'}
+    dev: true
 
   /noms@0.0.0:
     resolution: {integrity: sha512-lNDU9VJaOPxUmXcLb+HQFeUgQQPtMI24Gt6hgfuMHRJgMRHMF/qZ4HJD3GDru4sSw9IQl2jPjAYnQrdIeLbwow==}
@@ -27066,6 +27108,7 @@ packages:
     resolution: {integrity: sha512-bQ/0XPZZ7eX+cdAkd61uYWpfMhakH3NeteUF1R8GNa+LMqX8QFAkbCLqq+AYAns1/ueACBu/BMWhrlKGrdvGZg==}
     dependencies:
       crypto-js: 4.2.0
+    dev: true
 
   /pkg-dir@3.0.0:
     resolution: {integrity: sha512-/E57AYkoeQ25qkxMj5PBOVgF8Kiu/h7cYS30Z5+R7WaiCCBfLq58ZI/dSeaEKb9WVJV5n/03QwrN3IeWIFllvw==}
@@ -27987,6 +28030,7 @@ packages:
 
   /psl@1.8.0:
     resolution: {integrity: sha512-RIdOzyoavK+hA18OGGWDqUTsCLhtA7IcZ/6NCs4fFJaHBDab+pDDmDIByWFRQJq2Cd7r1OoQxBGKOaztq+hjIQ==}
+    dev: true
 
   /public-encrypt@4.0.3:
     resolution: {integrity: sha512-zVpa8oKZSz5bTMTFClc1fQOnyyEzpl5ozpi1B5YcvBrdohMjH2rfsBtyXcuNuwjsDIXmBYlF2N5FlJYhR29t8Q==}
@@ -28068,6 +28112,7 @@ packages:
 
   /querystringify@2.2.0:
     resolution: {integrity: sha512-FIqgj2EUvTa7R50u0rGsyTftzjYmv/a3hO345bZNrqabNqjtgiDMgmo4mkUjd+nzU5oF3dClKqFIPUKybUyqoQ==}
+    dev: true
 
   /queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
@@ -29006,6 +29051,7 @@ packages:
 
   /requires-port@1.0.0:
     resolution: {integrity: sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==}
+    dev: true
 
   /resolve-alpn@1.2.1:
     resolution: {integrity: sha512-0a1F4l73/ZFZOakJnQ3FvkJ2+gSTQWz/r2KE5OdDY0TxPm5h4GkqkWWfM47T7HsbnOtcJVEF4epCVy6u7Q3K+g==}
@@ -29406,6 +29452,7 @@ packages:
 
   /scmp@2.1.0:
     resolution: {integrity: sha512-o/mRQGk9Rcer/jEEw/yw4mwo3EU/NvYvp577/Btqrym9Qy5/MdWGBqipbALgd2lrdWTJ5/gqDusxfnQBxOxT2Q==}
+    dev: true
 
   /scoped-regex@2.1.0:
     resolution: {integrity: sha512-g3WxHrqSWCZHGHlSrF51VXFdjImhwvH8ZO/pryFH56Qi0cDsZfylQa/t0jCzVQFNbNvM00HfHjkDPEuarKDSWQ==}
@@ -30607,6 +30654,7 @@ packages:
     transitivePeerDependencies:
       - encoding
       - supports-color
+    dev: true
 
   /supertokens-web-js@0.8.0:
     resolution: {integrity: sha512-kkvuPbdy1I0e7nejVJAhpPJhR5h7EUHdn7Fh1YqfSjZfSJh46J3JU2qWGCgSDVZuD1hSuUKb6skF9CQnltHWrQ==}
@@ -31475,6 +31523,7 @@ packages:
     transitivePeerDependencies:
       - debug
       - supports-color
+    dev: true
 
   /twoslash-protocol@0.2.4:
     resolution: {integrity: sha512-AEGTJj4mFGfvQc/M6qi0+s82Zq+mxLcjWZU+EUHGG8LQElyHDs+uDR+/3+m1l+WP7WL+QmWrVzFXgFX+hBg+bg==}
@@ -32010,6 +32059,7 @@ packages:
     dependencies:
       querystringify: 2.2.0
       requires-port: 1.0.0
+    dev: true
 
   /url@0.10.3:
     resolution: {integrity: sha512-hzSUW2q06EqL1gKM/a+obYHLIO6ct2hwPuviqTTOcfFVc61UbfJ2Q32+uGL/HCPxKqrdGB5QUwIe7UqlDgwsOQ==}
@@ -32924,6 +32974,7 @@ packages:
   /xmlbuilder@13.0.2:
     resolution: {integrity: sha512-Eux0i2QdDYKbdbA6AM6xE4m6ZTZr4G4xF9kahI2ukSEMCzwce2eX9WlTI5J3s+NU7hpasFsr8hWIONae7LluAQ==}
     engines: {node: '>=6.0'}
+    dev: true
 
   /xmlbuilder@9.0.7:
     resolution: {integrity: sha512-7YXTQc3P2l9+0rjaUbLwMKRhtmwg1M1eDf6nag7urC7pIPYLD9W/jmzQ4ptRSUbodw5S0jfoGTflLemQibSpeQ==}

@@ -30,7 +30,6 @@ import { DocsLink, MetaTitle } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 
 function Channels(props: {
   channels: FragmentType<typeof ChannelsTable_AlertChannelFragment>[];
@@ -264,7 +263,5 @@ function AlertsPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(AlertsPage);

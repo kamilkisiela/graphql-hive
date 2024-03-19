@@ -12,7 +12,6 @@ import { ProjectAccessScope } from '@/gql/graphql';
 import { RegistryModel } from '@/graphql';
 import { useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector } from '@/lib/hooks';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const ProjectPolicyPageQuery = graphql(`
   query ProjectPolicyPageQuery($organizationId: ID!, $projectId: ID!) {
@@ -205,7 +204,5 @@ function ProjectPolicyPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(ProjectPolicyPage);

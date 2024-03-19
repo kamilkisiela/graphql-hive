@@ -21,7 +21,6 @@ import { FragmentType, graphql, useFragment } from '@/gql';
 import { subDays } from '@/lib/date-time';
 import { useFormattedNumber } from '@/lib/hooks';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { cn, pluralize } from '@/lib/utils';
 
 function floorDate(date: Date): Date {
@@ -382,7 +381,5 @@ function ProjectsPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(ProjectsPage);

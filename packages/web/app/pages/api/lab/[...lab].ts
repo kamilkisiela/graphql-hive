@@ -1,13 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { buildSchema, execute, GraphQLError, parse } from 'graphql';
 import { env } from '@/env/backend';
-import { extractAccessTokenFromRequest } from '@/lib/api/extract-access-token-from-request';
 import { getLogger } from '@/server-logger';
 import { addMocksToSchema } from '@graphql-tools/mock';
 
+// TODO: check if lab is working
 async function lab(req: NextApiRequest, res: NextApiResponse) {
   const logger = getLogger(req);
-  const url = env.graphqlEndpoint;
+  const url = env.graphqlPublicEndpoint;
   const labParams = req.query.lab || [];
 
   if (labParams.length < 3) {
@@ -22,24 +22,9 @@ async function lab(req: NextApiRequest, res: NextApiResponse) {
   const headers: Record<string, string> = {};
 
   if (req.headers['x-hive-key']) {
-    // TODO: change that to Authorization: Bearer
-    headers['X-API-Token'] = req.headers['x-hive-key'] as string;
+    headers['Authorization'] = `Bearer ${req.headers['x-hive-key'] as string}`;
   } else {
-    try {
-      const accessToken = await extractAccessTokenFromRequest(req, res);
-
-      if (!accessToken) {
-        throw 'Invalid Token!';
-      }
-
-      headers['Authorization'] = `Bearer ${accessToken}`;
-    } catch (error) {
-      console.warn('Lab auth failed:', error);
-      res.status(200).send({
-        errors: [new GraphQLError('Invalid or missing X-Hive-Key authentication')],
-      });
-      return;
-    }
+    headers['Cookie'] = req.headers.cookie as string;
   }
 
   const body = {
@@ -72,6 +57,7 @@ async function lab(req: NextApiRequest, res: NextApiResponse) {
       'graphql-client-version': env.release,
       ...headers,
     },
+    credentials: 'include',
     method: 'POST',
     body: JSON.stringify(body),
   });
