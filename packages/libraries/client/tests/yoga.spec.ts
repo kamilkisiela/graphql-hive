@@ -323,7 +323,7 @@ it('does not report usage for operation that does not pass validation', async ({
   });
 
   await new Promise<void>((resolve, reject) => {
-    const timeout = setTimeout(() => {
+    setTimeout(() => {
       resolve();
     }, 1000);
     nock.emitter.once('no match', (req: any) => {

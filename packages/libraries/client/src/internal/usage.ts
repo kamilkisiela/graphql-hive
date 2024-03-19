@@ -24,7 +24,6 @@ import {
 } from 'graphql';
 import LRU from 'tiny-lru';
 import { normalizeOperation } from '@graphql-hive/core';
-import { isAsyncIterable } from '@graphql-tools/utils';
 import { version } from '../version.js';
 import { createAgent } from './agent.js';
 import { dynamicSampling, randomSampling } from './sampling.js';
