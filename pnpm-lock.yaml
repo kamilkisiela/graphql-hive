@@ -1016,8 +1016,8 @@ importers:
         specifier: 7.0.0
         version: 7.0.0(@envelop/core@5.0.0)(graphql@16.8.1)
       '@envelop/graphql-jit':
-        specifier: 8.0.1
-        version: 8.0.1(@envelop/core@5.0.0)(graphql@16.8.1)
+        specifier: 8.0.2
+        version: 8.0.2(@envelop/core@5.0.0)(graphql@16.8.1)
       '@envelop/graphql-modules':
         specifier: 6.0.0
         version: 6.0.0(@envelop/core@5.0.0)(graphql-modules@2.3.0)(graphql@16.8.1)
@@ -5156,8 +5156,8 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /@envelop/graphql-jit@8.0.1(@envelop/core@5.0.0)(graphql@16.8.1):
-    resolution: {integrity: sha512-91AcH3W9qGaY3B2ynCLdAbOzPBqLIcsTOzjFUfbKPBxe4d18qKpgjnBPrZ7s0XcN0DD5SDRq61bkvowg2E2BGQ==}
+  /@envelop/graphql-jit@8.0.2(@envelop/core@5.0.0)(graphql@16.8.1):
+    resolution: {integrity: sha512-I3UYujUZal2SZxO/YlBe2Vy72rVMx7eOmINBubSFuElREYc8uIUiu6FH2AmA/IlT337xG/ce37GWTz2afLolHA==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@envelop/core': ^5.0.0
@@ -5165,7 +5165,7 @@ packages:
     dependencies:
       '@envelop/core': 5.0.0
       graphql: 16.8.1
-      graphql-jit: 0.8.2(graphql@16.8.1)
+      graphql-jit: 0.8.5(graphql@16.8.1)
       tslib: 2.6.2
       value-or-promise: 1.0.12
     dev: true
@@ -19385,14 +19385,6 @@ packages:
   /fast-json-stable-stringify@2.1.0:
     resolution: {integrity: sha512-lhd/wF+Lk98HZoTCtlVraHtfh5XYijIjalXck7saUtuanSDyLMxnHhSXEDJqHxD7msR8D0uCmqlkwjCV8xvwHw==}
 
-  /fast-json-stringify@1.21.0:
-    resolution: {integrity: sha512-xY6gyjmHN3AK1Y15BCbMpeO9+dea5ePVsp3BouHCdukcx0hOHbXwFhRodhcI0NpZIgDChSeAKkHW9YjKvhwKBA==}
-    dependencies:
-      ajv: 6.12.6
-      deepmerge: 4.2.2
-      string-similarity: 4.0.4
-    dev: true
-
   /fast-json-stringify@2.7.13:
     resolution: {integrity: sha512-ar+hQ4+OIurUGjSJD1anvYSDcUflywhKjfxnsW4TBTD7+u0tJufv6DKRWoQk3vI6YBOWMoz0TQtfbe7dxbQmvA==}
     engines: {node: '>= 10.0.0'}
@@ -20594,16 +20586,15 @@ packages:
       graphql: 16.8.1
     dev: true
 
-  /graphql-jit@0.8.2(graphql@16.8.1):
-    resolution: {integrity: sha512-P9KtM/UY4JTtHVRqRlZzFXPmDEtps1Bd27Mvj/naQIa5d0j83zPxAx4jewq1wueF3UEZu1JFZwX1XVBBkoo1Mg==}
+  /graphql-jit@0.8.5(graphql@16.8.1):
+    resolution: {integrity: sha512-J+G9O8dHdvvc/AtEc2Hru4YkvklMYunHMZeHYfQFyHRAiH0yX0cm5fK41C2AD3rsrZ3Dp2mm9VCZSTDhLFibbA==}
     peerDependencies:
       graphql: '>=15'
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.8.1)
-      fast-json-stringify: 1.21.0
+      fast-json-stringify: 5.12.0
       generate-function: 2.3.1
       graphql: 16.8.1
-      json-schema: 0.4.0
       lodash.memoize: 4.1.2
       lodash.merge: 4.6.2
       lodash.mergewith: 4.6.2
