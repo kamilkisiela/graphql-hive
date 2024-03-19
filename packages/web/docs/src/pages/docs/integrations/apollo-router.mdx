@@ -1,4 +1,4 @@
-import { Callout, Tab, Tabs } from 'nextra-theme-docs'
+import { Callout, Tabs } from '@theguild/components'
 
 # Apollo Router
 
@@ -47,7 +47,7 @@ You also need to
 used for authenticating the supergraph polling from the CDN.
 
 <Tabs items={['Binary', 'Docker', 'Custom']}>
-  <Tab>
+  <Tabs.Tab>
     Download Apollo Router for Linux (`x86_64`), MacOS (`x86_64`) or Windows (`x86_64`):
 
     ```bash
@@ -62,8 +62,8 @@ used for authenticating the supergraph polling from the CDN.
       ./router
     ```
 
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
       Running Apollo Router with Hive's Schema Registry:
 
       ```bash
@@ -84,9 +84,9 @@ used for authenticating the supergraph polling from the CDN.
         ghcr.io/kamilkisiela/graphql-hive/apollo-router:latest --log debug
       ```
 
-  </Tab>
+  </Tabs.Tab>
 
-  <Tab>
+  <Tabs.Tab>
     Creating a custom Apollo Router binary requires compiling it from source.
     To setup a project, please follow ["Create a new project"](https://www.apollographql.com/docs/router/customizations/custom-binary/#1-create-a-new-project) section of "Creating a custom Apollo Router binary" guide.
 
@@ -120,7 +120,7 @@ used for authenticating the supergraph polling from the CDN.
 
     In case of any issues, please refer to the [official guide](https://www.apollographql.com/docs/router/customizations/custom-binary/) or [open an issue](https://github.com/kamilkisiela/graphql-hive/issues/new) in GraphQL Hive repository.
 
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ## Configuration
@@ -150,7 +150,7 @@ You can send usage reporting to Hive registry by enabling `hive.usage` plugin in
 - `HIVE_ENDPOINT` - The usage endpoint (defaults to https://app.graphql-hive.com/usage)
 
 <Tabs items={['Binary', 'Docker', 'Custom']}>
-  <Tab>
+  <Tabs.Tab>
     Start the router:
 
     ```bash
@@ -160,8 +160,8 @@ You can send usage reporting to Hive registry by enabling `hive.usage` plugin in
       ./router --config router.yaml
     ```
 
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
       Running Apollo Router with Hive's Schema Registry and Usage Reporting:
 
       ```bash
@@ -176,9 +176,9 @@ You can send usage reporting to Hive registry by enabling `hive.usage` plugin in
 
       To follow the same convention as Apollo Router's official Docker image, the config file is also located at `/dist/config/router.yaml`.
 
-  </Tab>
+  </Tabs.Tab>
 
-  <Tab>
+  <Tabs.Tab>
     Creating a custom Apollo Router binary requires compiling it from source.
     To setup a project, please follow ["Create a new project"](https://www.apollographql.com/docs/router/customizations/custom-binary/#1-create-a-new-project) section of "Creating a custom Apollo Router binary" guide.
 
@@ -215,7 +215,7 @@ You can send usage reporting to Hive registry by enabling `hive.usage` plugin in
 
     In case of any issues, please refer to the [official guide](https://www.apollographql.com/docs/router/customizations/custom-binary/) or [open an issue](https://github.com/kamilkisiela/graphql-hive/issues/new) in GraphQL Hive repository.
 
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ```yaml filename="router.yaml"

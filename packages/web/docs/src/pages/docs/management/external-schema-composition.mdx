@@ -1,5 +1,5 @@
 import NextImage from 'next/image'
-import { Callout, Steps, Tab, Tabs } from '@theguild/components'
+import { Callout, Steps, Tabs } from '@theguild/components'
 import externalCompositionInvalid from '../../../../public/docs/pages/management/external-composition-invalid.png'
 import externalCompositionValid from '../../../../public/docs/pages/management/external-composition-valid.png'
 import externalCompositionOff from '../../../../public/docs/pages/management/external-schema-composition-disabled.png'
@@ -70,15 +70,15 @@ address must contain a valid hostname (not an IP address), and the port must be 
 ### Deploy External Composition Service
 
 <Tabs items={['One-click Deployment', 'Pre-built Docker Image', 'JavaScript Library']}>
-  <Tab>
+  <Tabs.Tab>
     You can use our one-click deployment to deploy your External Composition Service to Heroku:
 
     <a target="_blank" href="https://dashboard.heroku.com/new?template=https%3A%2F%2Fgithub.com%2Fdotansimha%2Fgraphql-hive-external-composition-heroku-template">
       <img src="https://www.herokucdn.com/deploy/button.png" alt="One-click deploy to Heroku" />
     </a>
 
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 We provide a prebuilt
 [Docker image](https://github.com/kamilkisiela/graphql-hive/pkgs/container/graphql-hive%2Fcomposition-federation-2)
 for running External Composition Service for Apollo Federation v2.
@@ -99,8 +99,8 @@ docker run -p 3069:3069 -e SECRET="MY_SECRET_HERE" \
 
 You should make this service publicly available, and then configure it in Hive platform.
 
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 You can also build your own JavaScript/NodeJS server for the composition endpoint. The following example shows how to
 do that.
 
@@ -233,7 +233,7 @@ function verifyRequest(input) {
 }
 ```
 
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Connect to Hive

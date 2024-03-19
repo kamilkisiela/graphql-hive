@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { ReactElement } from 'react';
-import type { GetStaticProps, InferGetStaticPropsType } from 'next';
+import type { GetStaticProps } from 'next';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import matter from 'gray-matter';
@@ -33,9 +33,7 @@ function ProductUpdateTeaser(props: Changelog) {
   );
 }
 
-export const ProductUpdates = ({
-  changelogs,
-}: InferGetStaticPropsType<typeof getStaticProps>): ReactElement => {
+export const ProductUpdates = (props: { changelogs: Changelog[] }): ReactElement => {
   return (
     <>
       <div className="pb-12">
@@ -43,7 +41,7 @@ export const ProductUpdates = ({
         <p>The most recent developments from GraphQL Hive.</p>
       </div>
       <ol className="relative border-l border-gray-200 dark:border-gray-700">
-        {changelogs.map(item => (
+        {props.changelogs.map(item => (
           <ProductUpdateTeaser key={item.route} {...item} />
         ))}
       </ol>
@@ -51,14 +49,13 @@ export const ProductUpdates = ({
   );
 };
 
-export const getStaticProps: GetStaticProps<{ changelogs: Changelog[] }> = async () => {
+export const getStaticProps: GetStaticProps<{ ssg: { changelogs: Changelog[] } }> = async () => {
   const productUpdatesDirectory = path.join(process.cwd(), 'src', 'pages', 'product-updates');
   const filenames = fs.readdirSync(productUpdatesDirectory);
-
   const changelogs: Changelog[] = [];
 
   for (const filename of filenames) {
-    if (filename.endsWith('.json') || filename.endsWith('index.mdx')) {
+    if (filename.endsWith('.json') || filename.endsWith('index.mdx') || filename.endsWith('.ts')) {
       continue;
     }
 
@@ -79,5 +76,9 @@ export const getStaticProps: GetStaticProps<{ changelogs: Changelog[] }> = async
 
   changelogs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  return { props: { changelogs } };
+  return {
+    props: {
+      ssg: { changelogs },
+    },
+  };
 };

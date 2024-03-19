@@ -1,5 +1,5 @@
 import NextImage from 'next/image'
-import { Callout, FileTree, Steps, Tab, Tabs } from '@theguild/components'
+import { Callout, FileTree, Steps, Tabs } from '@theguild/components'
 import cdnTokenImage from '../../../../public/docs/pages/guides/cdn_token.png'
 import historyImage from '../../../../public/docs/pages/guides/history.png'
 import stitchingExplorerImage from '../../../../public/docs/pages/guides/stitching-explorer.png'
@@ -35,7 +35,7 @@ For this guide, we are going to use the following schemas and services:
 Here's the GraphQL schema (SDL) for every service we are going to publish to Hive:
 
 <Tabs items={['Users', 'Posts']}>
-  <Tab>
+  <Tabs.Tab>
 
 <Callout type="info">
   The `@merge` directive denotes a root field used to query a merged type across services. The
@@ -71,8 +71,8 @@ type Query {
 }
 ```
 
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 
 <Callout type="info">
   The `@merge` directive denotes a root field used to query a merged type across services. The
@@ -108,7 +108,7 @@ type Query {
 }
 ```
 
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Hive CLI Access Token

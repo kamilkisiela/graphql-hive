@@ -1,4 +1,3 @@
-/* eslint sort-keys: error */
 import { useRouter } from 'next/router';
 import { defineConfig, FooterExtended, Giscus, useConfig, useTheme } from '@theguild/components';
 import { ProductUpdateBlogPostHeader } from './src/components/product-update-blog-post-header';
