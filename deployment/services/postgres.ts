@@ -13,11 +13,20 @@ export class PostgresConnectionSecret extends ServiceSecret<{
   connectionStringPostgresql: pulumi.Output<string>;
 }> {}
 
+/**
+ * https://chat.openai.com/share/0892e60c-8413-4e66-9abe-e5d22aa7e7ae
+ */
+const regex = /(postgres(?:ql)?:\/\/[^@]+@[^:\/\s]+)(:\d+)?(\/[^?]*\??[^#]*)/;
+
 export function deployPostgres() {
   const postgresConfig = new pulumi.Config('postgres');
   const rawConnectionString = postgresConfig.requireSecret('connectionString');
   const connectionString = rawConnectionString.apply(rawConnectionString =>
     parse(rawConnectionString),
+  );
+
+  const rawPgBouncerConnectionString = rawConnectionString.apply(rawConnectionString =>
+    rawConnectionString.replace(regex, `$1:${6432}$3`),
   );
 
   const secret = new PostgresConnectionSecret('postgres', {
@@ -33,7 +42,20 @@ export function deployPostgres() {
     ssl: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
   });
 
-  return { secret };
+  const pgBouncerSecret = new PostgresConnectionSecret('postgres-bouncer', {
+    connectionString: rawPgBouncerConnectionString,
+    connectionStringPostgresql: rawPgBouncerConnectionString.apply(str =>
+      str.replace('postgres://', 'postgresql://'),
+    ),
+    host: connectionString.apply(connection => connection.host ?? ''),
+    port: '6432',
+    user: connectionString.apply(connection => connection.user ?? ''),
+    password: connectionString.apply(connection => connection.password ?? ''),
+    database: connectionString.apply(connection => connection.database ?? ''),
+    ssl: connectionString.apply(connection => (connection.ssl ? '1' : '0')),
+  });
+
+  return { secret, pgBouncerSecret };
 }
 
 export type Postgres = ReturnType<typeof deployPostgres>;

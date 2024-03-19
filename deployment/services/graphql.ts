@@ -146,12 +146,12 @@ export function deployGraphQL({
       .withSecret('REDIS_PORT', redis.secret, 'port')
       .withSecret('REDIS_PASSWORD', redis.secret, 'password')
       // PG
-      .withSecret('POSTGRES_HOST', postgres.secret, 'host')
-      .withSecret('POSTGRES_PORT', postgres.secret, 'port')
-      .withSecret('POSTGRES_USER', postgres.secret, 'user')
-      .withSecret('POSTGRES_PASSWORD', postgres.secret, 'password')
-      .withSecret('POSTGRES_DB', postgres.secret, 'database')
-      .withSecret('POSTGRES_SSL', postgres.secret, 'ssl')
+      .withSecret('POSTGRES_HOST', postgres.pgBouncerSecret, 'host')
+      .withSecret('POSTGRES_PORT', postgres.pgBouncerSecret, 'port')
+      .withSecret('POSTGRES_USER', postgres.pgBouncerSecret, 'user')
+      .withSecret('POSTGRES_PASSWORD', postgres.pgBouncerSecret, 'password')
+      .withSecret('POSTGRES_DB', postgres.pgBouncerSecret, 'database')
+      .withSecret('POSTGRES_SSL', postgres.pgBouncerSecret, 'ssl')
       // CDN
       .withSecret('CDN_AUTH_PRIVATE_KEY', cdn.secret, 'authPrivateKey')
       .withSecret('CDN_CF_BASE_URL', cdn.secret, 'baseUrl')
