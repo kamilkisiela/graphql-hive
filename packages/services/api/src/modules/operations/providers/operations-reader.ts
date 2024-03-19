@@ -758,17 +758,37 @@ export class OperationsReader {
     });
   }
 
-  async readOperationBody({ target, hash }: { target: string; hash: string }) {
+  async readOperation({ target, hash }: { target: string; hash: string }) {
     const result = await this.clickHouse.query<{
+      hash: string;
       body: string;
+      name: string;
+      type: 'query' | 'mutation' | 'subscription';
     }>({
       query: sql`
         SELECT 
-          body
-        FROM operation_collection_body
+          "operation_collection_details"."hash" AS "hash",
+          "operation_collection_details"."operation_kind" AS "type",
+          "operation_collection_details"."name" AS "name",
+          "body_join"."body" AS "body"
+        FROM "operation_collection_details"
+        RIGHT JOIN (
+          SELECT
+            "operation_collection_body"."hash" AS "hash",
+            "operation_collection_body"."body" AS "body"
+          FROM "operation_collection_body"
+            ${this.createFilter({
+              target,
+              extra: [sql`"operation_collection_body"."hash" = ${hash}`],
+              namespace: 'operation_collection_body',
+            })}
+          LIMIT 1
+        ) AS "body_join"
+          ON "operation_collection_details"."hash" = "body_join"."hash"
           ${this.createFilter({
             target,
-            extra: [sql`hash = ${hash}`],
+            extra: [sql`"operation_collection_details"."hash" = ${hash}`],
+            namespace: 'operation_collection_details',
           })}
         LIMIT 1
         SETTINGS allow_asynchronous_read_from_io_pool_for_merge_tree = 1
@@ -777,7 +797,7 @@ export class OperationsReader {
       timeout: 10_000,
     });
 
-    return result.data.length ? result.data[0].body : null;
+    return result.data.length ? result.data[0] : null;
   }
 
   async getReportedSchemaCoordinates({

@@ -428,7 +428,7 @@ export function initSeed() {
                         secret,
                       ).then(r => r.expectNoGraphQLErrors());
 
-                      return operationBodyResult.operationBodyByHash;
+                      return operationBodyResult?.target?.operation?.body;
                     },
                     async readOperationsStats(from: string, to: string) {
                       const statsResult = await readOperationsStats(

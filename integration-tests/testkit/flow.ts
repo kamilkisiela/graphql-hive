@@ -11,7 +11,6 @@ import type {
   DeleteTokensInput,
   EnableExternalSchemaCompositionInput,
   InviteToOrganizationByEmailInput,
-  OperationBodyByHashInput,
   OperationsStatsSelectorInput,
   OrganizationSelectorInput,
   OrganizationTransferRequestSelector,
@@ -897,16 +896,34 @@ export function readOperationsStats(input: OperationsStatsSelectorInput, token: 
   });
 }
 
-export function readOperationBody(selector: OperationBodyByHashInput, token: string) {
+export function readOperationBody(
+  selector: {
+    organization: string;
+    project: string;
+    target: string;
+    hash: string;
+  },
+  token: string,
+) {
   return execute({
     document: graphql(`
-      query readOperationBody($selector: OperationBodyByHashInput!) {
-        operationBodyByHash(selector: $selector)
+      query readOperationBody($selector: TargetSelectorInput!, $hash: String!) {
+        target(selector: $selector) {
+          id
+          operation(hash: $hash) {
+            body
+          }
+        }
       }
     `),
     token,
     variables: {
-      selector,
+      selector: {
+        organization: selector.organization,
+        project: selector.project,
+        target: selector.target,
+      },
+      hash: selector.hash,
     },
   });
 }

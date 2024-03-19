@@ -142,21 +142,6 @@ export const resolvers: OperationsModule.Resolvers = {
         };
       });
     },
-    async operationBodyByHash(_, { selector }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const [organization, project, target] = await Promise.all([
-        translator.translateOrganizationId(selector),
-        translator.translateProjectId(selector),
-        translator.translateTargetId(selector),
-      ]);
-
-      return injector.get(OperationsManager).getOperationBody({
-        organization,
-        project,
-        target,
-        hash: selector.hash,
-      });
-    },
   },
   SchemaCoordinateStats: {
     totalRequests({ organization, project, target, period, schemaCoordinate }, _, { injector }) {
@@ -524,6 +509,14 @@ export const resolvers: OperationsModule.Resolvers = {
       });
 
       return result[target.id] ?? [];
+    },
+    operation(target, args, { injector }) {
+      return injector.get(OperationsManager).getOperation({
+        hash: args.hash,
+        organization: target.orgId,
+        project: target.projectId,
+        target: target.id,
+      });
     },
   },
 };

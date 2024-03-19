@@ -9,7 +9,6 @@ export default gql`
     clientStats(selector: ClientStatsInput!): ClientStats!
     hasCollectedOperations(selector: TargetSelectorInput!): Boolean!
     clientStatsByTargets(selector: ClientStatsByTargetsInput!): ClientStatsValuesConnection!
-    operationBodyByHash(selector: OperationBodyByHashInput!): String
   }
 
   input OperationsStatsSelectorInput {
@@ -19,13 +18,6 @@ export default gql`
     period: DateRangeInput!
     operations: [ID!]
     clientNames: [String!]
-  }
-
-  input OperationBodyByHashInput {
-    organization: ID!
-    project: ID!
-    target: ID!
-    hash: String!
   }
 
   input ClientStatsInput {
@@ -193,9 +185,23 @@ export default gql`
     reportingOperations: Boolean!
   }
 
+  enum GraphQLOperationType {
+    query
+    mutation
+    subscription
+  }
+
+  type Operation {
+    hash: String!
+    name: String
+    type: GraphQLOperationType!
+    body: String!
+  }
+
   extend type Target {
     requestsOverTime(resolution: Int!, period: DateRangeInput!): [RequestsOverTime!]!
     totalRequests(period: DateRangeInput!): SafeInt!
+    operation(hash: String!): Operation
   }
 
   extend type Project {
