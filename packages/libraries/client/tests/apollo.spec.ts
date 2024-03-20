@@ -425,12 +425,6 @@ describe('built-in HTTP usage reporting', async () => {
 
         expect(body.operations[0]).toMatchObject({
           execution: {
-            errors: [
-              {
-                message: 'nope.',
-                path: 'hi',
-              },
-            ],
             errorsTotal: 1,
             ok: false,
           },

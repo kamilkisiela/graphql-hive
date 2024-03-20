@@ -95,10 +95,9 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
                 ok: operation.execution.ok,
                 duration: operation.execution.duration,
                 errorsTotal: operation.execution.errorsTotal,
-                errors: operation.execution.errors,
               },
               metadata: {
-                client: operation.client,
+                client: operation.client ?? undefined,
               },
             });
           } else if (action.type === 'subscription') {
@@ -107,7 +106,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
               operationMapKey: operation.key,
               timestamp: operation.timestamp,
               metadata: {
-                client: operation.client,
+                client: operation.client ?? undefined,
               },
             });
           }
@@ -137,6 +136,7 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
           'Content-Type': 'application/json',
           'graphql-client-name': 'Hive Client',
           'graphql-client-version': version,
+          'x-usage-api-version': '2',
         };
       },
       body() {
@@ -676,16 +676,12 @@ interface RequestOperation {
     ok: boolean;
     duration: number;
     errorsTotal: number;
-    errors?: Array<{
-      message: string;
-      path?: string;
-    }>;
   };
   metadata?: {
     client?: {
-      name?: string;
-      version?: string;
-    } | null;
+      name: string;
+      version: string;
+    };
   };
 }
 
@@ -694,9 +690,9 @@ interface SubscriptionOperation {
   timestamp: number;
   metadata?: {
     client?: {
-      name?: string;
-      version?: string;
-    } | null;
+      name: string;
+      version: string;
+    };
   };
 }
 

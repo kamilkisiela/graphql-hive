@@ -215,7 +215,6 @@ test('should send data to Hive', async () => {
   expect(operation.execution.duration).toBeGreaterThanOrEqual(1500 * 1_000_000); // >=1500ms in microseconds
   expect(operation.execution.duration).toBeLessThan(3000 * 1_000_000); // <3000ms
   expect(operation.execution.errorsTotal).toBe(0);
-  expect(operation.execution.errors).toHaveLength(0);
   expect(operation.execution.ok).toBe(true);
 });
 
@@ -321,7 +320,6 @@ test('should send data to Hive (deprecated endpoint)', async () => {
   expect(operation.execution.duration).toBeGreaterThanOrEqual(1500 * 1_000_000); // >=1500ms in microseconds
   expect(operation.execution.duration).toBeLessThan(3000 * 1_000_000); // <3000ms
   expect(operation.execution.errorsTotal).toBe(0);
-  expect(operation.execution.errors).toHaveLength(0);
   expect(operation.execution.ok).toBe(true);
 });
 
@@ -692,6 +690,5 @@ test('should not send excluded operation name data to Hive', async () => {
   expect(operation.execution.duration).toBeGreaterThanOrEqual(1500 * 1_000_000); // >=1500ms in microseconds
   expect(operation.execution.duration).toBeLessThan(3000 * 1_000_000); // <3000ms
   expect(operation.execution.errorsTotal).toBe(0);
-  expect(operation.execution.errors).toHaveLength(0);
   expect(operation.execution.ok).toBe(true);
 });

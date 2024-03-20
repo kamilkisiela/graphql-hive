@@ -17,11 +17,13 @@ import {
   httpRequestsWithNonExistingToken,
   httpRequestsWithoutToken,
   tokensDuration,
+  usedAPIVersion,
 } from './metrics';
 import { createUsageRateLimit } from './rate-limit';
 import { createTokens } from './tokens';
-import type { IncomingLegacyReport, IncomingReport } from './types';
 import { createUsage } from './usage';
+import { usageProcessorV1 } from './usage-processor-1';
+import { usageProcessorV2 } from './usage-processor-2';
 
 async function main() {
   if (env.sentry) {
@@ -77,7 +79,7 @@ async function main() {
       : null;
 
     server.route<{
-      Body: IncomingReport | IncomingLegacyReport;
+      Body: unknown;
     }>({
       method: 'POST',
       url: '/',
@@ -85,6 +87,20 @@ async function main() {
         httpRequests.inc();
         let token: string | undefined;
         const legacyToken = req.headers['x-api-token'] as string;
+        const apiVersion = Array.isArray(req.headers['x-usage-api-version'])
+          ? req.headers['x-usage-api-version'][0]
+          : req.headers['x-usage-api-version'];
+
+        if (apiVersion) {
+          if (apiVersion === '1') {
+            usedAPIVersion.labels({ version: '1' }).inc();
+          } else if (apiVersion === '2') {
+            usedAPIVersion.labels({ version: '2' }).inc();
+          }
+          usedAPIVersion.labels({ version: 'invalid' }).inc();
+        } else {
+          usedAPIVersion.labels({ version: 'none' }).inc();
+        }
 
         if (legacyToken) {
           // TODO: add metrics to track legacy x-api-token header
@@ -172,11 +188,43 @@ async function main() {
             return;
           }
 
-          const result = await collect(req.body, tokenInfo, retentionInfo);
-          stopTimer({
-            status: 'success',
-          });
-          void res.status(200).send(result);
+          if (apiVersion === undefined || apiVersion === '1') {
+            const result = usageProcessorV1(server.log, req.body as any, tokenInfo, retentionInfo);
+            collect(result.report);
+            stopTimer({
+              status: 'success',
+            });
+            void res.status(200).send({
+              id: result.report.id,
+              operations: result.operations,
+            });
+          } else if (apiVersion === '2') {
+            const result = usageProcessorV2(server.log, req.body, tokenInfo, retentionInfo);
+
+            if (result.success === false) {
+              stopTimer({
+                status: 'error',
+              });
+              void res.status(400).send({
+                errors: result.errors,
+              });
+              return;
+            }
+
+            collect(result.report);
+            stopTimer({
+              status: 'success',
+            });
+            void res.status(200).send({
+              id: result.report.id,
+              operations: result.operations,
+            });
+          } else {
+            stopTimer({
+              status: 'error',
+            });
+            void res.status(401).send("Invalid 'x-api-version' header value.");
+          }
         } catch (error) {
           stopTimer({
             status: 'error',
