@@ -8,7 +8,7 @@
     "build-storybook": "storybook build",
     "build:config": "tsup-node --no-splitting --out-dir . --loader \".mts=ts\" --format esm --target node21 next.config.mts",
     "dev": "pnpm generate-changelogs && pnpm build:config && next dev | pino-pretty",
-    "generate-changelogs": "node ../../../scripts/generate-changelogs.js && pnpm prettier --write ../../../scripts/generate-changelogs.js",
+    "generate-changelogs": "node ../../../scripts/generate-changelogs.js && pnpm prettier",
     "postbuild": "pnpm --filter @hive/app deploy --prod --no-optional deploy-tmp/web && rimraf dist/node_modules && mv deploy-tmp/web/node_modules dist && rimraf deploy-tmp/web",
     "prepare": "pnpm run generate-changelogs",
     "start": "node dist/index.js",
