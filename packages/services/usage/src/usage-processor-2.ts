@@ -144,7 +144,7 @@ export function usageProcessorV2(
 
     report.size += 1;
     rawSubscriptionOperations.push({
-      operationMapKey: operation.operationMapKey,
+      operationMapKey,
       timestamp: operation.timestamp,
       expiresAt: targetRetentionInDays
         ? operation.timestamp + targetRetentionInDays * DAY_IN_MS
