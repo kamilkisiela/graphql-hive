@@ -39,7 +39,7 @@ function generateChangelogs() {
   // Generate a TypeScript file with the latest changelogs
   const outputFilePath =
     '../../../packages/web/app/src/components/ui/changelog/generated-changelogs.ts';
-  const outputContent = `/* eslint-disable quotes */\nexport const latestChangelogs = ${JSON.stringify(latestChangelogs, null, 2)};\n`;
+  const outputContent = `export const latestChangelogs = ${JSON.stringify(latestChangelogs, null, 2)};\n`;
   fs.writeFileSync(outputFilePath, outputContent, 'utf-8');
 
   console.log(`Changelogs generated successfully at: ${outputFilePath}`);
