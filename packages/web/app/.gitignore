@@ -37,3 +37,4 @@ npm-debug.log*
 lib/graphql-operations.ts
 
 # Changelog
+/packages/web/app/src/components/ui/changelog/generated-changelogs.ts
