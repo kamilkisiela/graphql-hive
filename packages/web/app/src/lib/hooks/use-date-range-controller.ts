@@ -123,13 +123,20 @@ function resolveRangeAndResolution(range: { from: Date; to: Date }) {
     minutely: startOfMinute(subHours(now, tableTTLInHours.minutely)),
   };
 
+  if (
+    range.to.getTime() <= tableOldestDateTimePoint.daily.getTime() ||
+    range.from.getTime() <= tableOldestDateTimePoint.daily.getTime()
+  ) {
+    throw new Error('This range can never be resolved.');
+  }
+
   const daysDifference = (range.to.getTime() - range.from.getTime()) / msDay;
 
   if (
     daysDifference > thresholdDataPointPerDay ||
     /** if we are outside this range, we always need to get daily data */
-    range.to.getTime() <= tableOldestDateTimePoint.daily.getTime() ||
-    range.from.getTime() <= tableOldestDateTimePoint.daily.getTime()
+    range.to.getTime() <= tableOldestDateTimePoint.hourly.getTime() ||
+    range.from.getTime() <= tableOldestDateTimePoint.hourly.getTime()
   ) {
     const resolvedRange = {
       from: getUTCStartOfDay(range.from),
@@ -151,8 +158,8 @@ function resolveRangeAndResolution(range: { from: Date; to: Date }) {
   if (
     hoursDifference > thresholdDataPointPerHour ||
     /** if we are outside this range, we always need to get hourly data */
-    range.to.getTime() <= tableOldestDateTimePoint.hourly.getTime() ||
-    range.from.getTime() <= tableOldestDateTimePoint.hourly.getTime()
+    range.to.getTime() <= tableOldestDateTimePoint.minutely.getTime() ||
+    range.from.getTime() <= tableOldestDateTimePoint.minutely.getTime()
   ) {
     const resolvedRange = {
       from: startOfHour(range.from),
@@ -167,13 +174,6 @@ function resolveRangeAndResolution(range: { from: Date; to: Date }) {
       resolution: resolveResolution(hoursDifference),
       range: resolvedRange,
     };
-  }
-
-  if (
-    range.to.getTime() <= tableOldestDateTimePoint.minutely.getTime() ||
-    range.from.getTime() <= tableOldestDateTimePoint.minutely.getTime()
-  ) {
-    throw new Error('This range can never be resolved.');
   }
 
   const resolvedRange = {

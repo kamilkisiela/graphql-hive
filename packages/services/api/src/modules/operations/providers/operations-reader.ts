@@ -133,13 +133,22 @@ export class OperationsReader {
       minutely: subMinutes(startOfMinute(subHours(now, tableTTLInHours.minutely)), 2),
     };
 
-    const daysDifference = (period.to.getTime() - period.from.getTime()) / msDay;
-
     if (
-      daysDifference > thresholdDataPointPerDay ||
-      /** if we are outside this range, we always need to get daily data */
       period.to.getTime() <= tableOldestDateTimePoint.daily.getTime() ||
       period.from.getTime() <= tableOldestDateTimePoint.daily.getTime()
+    ) {
+      this.logger.error(
+        `Requested date range ${formatDate(period.from)} - ${formatDate(period.to)} is too old.`,
+      );
+      throw new Error(`The requested date range is too old for the selected query type.`);
+    }
+
+    const daysDifference = Math.floor((period.to.getTime() - period.from.getTime()) / msDay);
+
+    if (
+      daysDifference >= thresholdDataPointPerDay ||
+      period.to.getTime() <= tableOldestDateTimePoint.hourly.getTime() ||
+      period.from.getTime() <= tableOldestDateTimePoint.hourly.getTime()
     ) {
       return {
         ...queryMap['daily'],
@@ -150,25 +159,14 @@ export class OperationsReader {
     const hoursDifference = (period.to.getTime() - period.from.getTime()) / msHour;
 
     if (
-      hoursDifference > thresholdDataPointPerHour ||
-      /** if we are outside this range, we always need to get hourly data */
-      period.to.getTime() <= tableOldestDateTimePoint.hourly.getTime() ||
-      period.from.getTime() <= tableOldestDateTimePoint.hourly.getTime()
+      hoursDifference >= thresholdDataPointPerHour &&
+      period.to.getTime() <= tableOldestDateTimePoint.minutely.getTime() &&
+      period.from.getTime() <= tableOldestDateTimePoint.minutely.getTime()
     ) {
       return {
         ...queryMap['hourly'],
         queryType: 'hourly',
       };
-    }
-
-    if (
-      period.to.getTime() <= tableOldestDateTimePoint.minutely.getTime() ||
-      period.from.getTime() <= tableOldestDateTimePoint.minutely.getTime()
-    ) {
-      this.logger.error(
-        `Requested date range ${formatDate(period.from)} - ${formatDate(period.to)} is too old.`,
-      );
-      throw new Error(`The requested date range is too old for the selected query type.`);
     }
 
     return {
