@@ -150,9 +150,9 @@ dependencies = [
 
 [[package]]
 name = "apollo-federation"
-version = "0.0.6"
+version = "0.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8e029d74a3c5f5b5ceeb0450aa95df15b49bb71e962e7c22872afd6f5b5e631"
+checksum = "c810d52e0d9ac684ac2b0583df9479a4efbe3035b466b4c374eeaa388f4a1e93"
 dependencies = [
  "apollo-compiler",
  "derive_more",
@@ -161,7 +161,7 @@ dependencies = [
  "petgraph",
  "salsa",
  "serde_json",
- "strum",
+ "strum 0.26.2",
  "strum_macros 0.26.1",
  "thiserror",
  "url",
@@ -180,9 +180,9 @@ dependencies = [
 
 [[package]]
 name = "apollo-router"
-version = "1.42.0"
+version = "1.43.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7dfc6070128394d389ae075c7398c7ef2e6c7efeefb61772350c59e0ed09e9f5"
+checksum = "af91580630c4d6cd125e327cb6e839b11fa7809f2a50644807f5f132aa27ac35"
 dependencies = [
  "access-json",
  "anyhow",
@@ -229,6 +229,7 @@ dependencies = [
  "humantime-serde",
  "hyper",
  "hyper-rustls",
+ "hyperlocal",
  "indexmap 2.2.5",
  "itertools 0.12.1",
  "jsonpath-rust",
@@ -1494,7 +1495,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "regex",
- "strum",
+ "strum 0.25.0",
  "strum_macros 0.25.3",
  "syn 1.0.109",
  "syn 2.0.48",
@@ -2541,6 +2542,19 @@ dependencies = [
  "pin-project-lite",
  "tokio",
  "tokio-io-timeout",
+]
+
+[[package]]
+name = "hyperlocal"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0fafdf7b2b2de7c9784f76e02c0935e65a8117ec3b768644379983ab333ac98c"
+dependencies = [
+ "futures-util",
+ "hex",
+ "hyper",
+ "pin-project",
+ "tokio",
 ]
 
 [[package]]
@@ -5008,6 +5022,12 @@ checksum = "290d54ea6f91c969195bdbcd7442c8c2a2ba87da8bf60a7ee86a235d4bc1e125"
 dependencies = [
  "strum_macros 0.25.3",
 ]
+
+[[package]]
+name = "strum"
+version = "0.26.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5d8cec3501a5194c432b2b7976db6b7d10ec95c253208b45f83f7136aa985e29"
 
 [[package]]
 name = "strum_macros"
