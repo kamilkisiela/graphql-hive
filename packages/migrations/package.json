@@ -20,7 +20,7 @@
     "@graphql-hive/core": "workspace:*",
     "@types/bcryptjs": "2.4.6",
     "@types/node": "20.11.30",
-    "@types/pg": "8.11.3",
+    "@types/pg": "8.11.4",
     "@whatwg-node/fetch": "0.9.17",
     "bcryptjs": "2.4.3",
     "copyfiles": "2.4.1",
