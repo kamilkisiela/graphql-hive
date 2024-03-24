@@ -824,8 +824,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 10.3.1
-        version: 10.3.1
+        specifier: 11.0.0
+        version: 11.0.0
       sendmail:
         specifier: 1.6.1
         version: 1.6.1
@@ -893,8 +893,8 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       pino-pretty:
-        specifier: 10.3.1
-        version: 10.3.1
+        specifier: 11.0.0
+        version: 11.0.0
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -932,8 +932,8 @@ importers:
         specifier: 14.2.1
         version: 14.2.1(patch_hash=b6pwqmrs3qqykctltsasvrfwti)
       pino-pretty:
-        specifier: 10.3.1
-        version: 10.3.1
+        specifier: 11.0.0
+        version: 11.0.0
       reflect-metadata:
         specifier: 0.2.1
         version: 0.2.1
@@ -1001,8 +1001,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 10.3.1
-        version: 10.3.1
+        specifier: 11.0.0
+        version: 11.0.0
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -1094,8 +1094,8 @@ importers:
         specifier: 3.2.0
         version: 3.2.0
       pino-pretty:
-        specifier: 10.3.1
-        version: 10.3.1
+        specifier: 11.0.0
+        version: 11.0.0
       prom-client:
         specifier: 15.1.0
         version: 15.1.0
@@ -1227,8 +1227,8 @@ importers:
         specifier: 14.2.1
         version: 14.2.1(patch_hash=b6pwqmrs3qqykctltsasvrfwti)
       pino-pretty:
-        specifier: 10.3.1
-        version: 10.3.1
+        specifier: 11.0.0
+        version: 11.0.0
       reflect-metadata:
         specifier: 0.2.1
         version: 0.2.1
@@ -1272,8 +1272,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 10.3.1
-        version: 10.3.1
+        specifier: 11.0.0
+        version: 11.0.0
       reflect-metadata:
         specifier: 0.2.1
         version: 0.2.1
@@ -1323,8 +1323,8 @@ importers:
         specifier: 2.2.4
         version: 2.2.4
       pino-pretty:
-        specifier: 10.3.1
-        version: 10.3.1
+        specifier: 11.0.0
+        version: 11.0.0
       tiny-lru:
         specifier: 8.0.2
         version: 8.0.2
@@ -1359,8 +1359,8 @@ importers:
         specifier: 14.2.1
         version: 14.2.1(patch_hash=b6pwqmrs3qqykctltsasvrfwti)
       pino-pretty:
-        specifier: 10.3.1
-        version: 10.3.1
+        specifier: 11.0.0
+        version: 11.0.0
       reflect-metadata:
         specifier: 0.2.1
         version: 0.2.1
@@ -1404,8 +1404,8 @@ importers:
         specifier: 2.2.4
         version: 2.2.4
       pino-pretty:
-        specifier: 10.3.1
-        version: 10.3.1
+        specifier: 11.0.0
+        version: 11.0.0
       tiny-lru:
         specifier: 8.0.2
         version: 8.0.2
@@ -1446,8 +1446,8 @@ importers:
         specifier: 6.1.2
         version: 6.1.2
       pino-pretty:
-        specifier: 10.3.1
-        version: 10.3.1
+        specifier: 11.0.0
+        version: 11.0.0
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -1789,8 +1789,8 @@ importers:
         specifier: 0.20.2
         version: 0.20.2
       pino-pretty:
-        specifier: 10.3.1
-        version: 10.3.1
+        specifier: 11.0.0
+        version: 11.0.0
       postcss:
         specifier: 8.4.38
         version: 8.4.38
@@ -27274,8 +27274,8 @@ packages:
       process-warning: 3.0.0
     dev: false
 
-  /pino-pretty@10.3.1:
-    resolution: {integrity: sha512-az8JbIYeN/1iLj2t0jR9DV48/LQ3RC6hZPpapKPkb84Q+yTidMCpgWxIT3N0flnBDilyBQ1luWNpOeJptjdp/g==}
+  /pino-pretty@11.0.0:
+    resolution: {integrity: sha512-YFJZqw59mHIY72wBnBs7XhLGG6qpJMa4pEQTRgEPEbjIYbng2LXEZZF1DoyDg9CfejEy8uZCyzpcBXXG0oOCwQ==}
     hasBin: true
     dependencies:
       colorette: 2.0.20
@@ -27289,7 +27289,7 @@ packages:
       pino-abstract-transport: 1.1.0
       pump: 3.0.0
       readable-stream: 4.4.0
-      secure-json-parse: 2.5.0
+      secure-json-parse: 2.7.0
       sonic-boom: 3.7.0
       strip-json-comments: 3.1.1
     dev: true
@@ -29663,10 +29663,6 @@ packages:
       extend-shallow: 2.0.1
       kind-of: 6.0.3
     dev: false
-
-  /secure-json-parse@2.5.0:
-    resolution: {integrity: sha512-ZQruFgZnIWH+WyO9t5rWt4ZEGqCKPwhiw+YbzTwpmT9elgLrLcfuyUiSnwwjUiVy9r4VM3urtbNF1xmEh9IL2w==}
-    dev: true
 
   /secure-json-parse@2.7.0:
     resolution: {integrity: sha512-6aU+Rwsezw7VR8/nyvKTx8QpWH9FrcYiXXlqC4z5d5XQBDRqtbfsRjnwGyqbi3gddNtWHuEk9OANUotL26qKUw==}
