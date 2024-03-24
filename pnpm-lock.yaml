@@ -538,8 +538,8 @@ importers:
         specifier: 4.0.0
         version: 4.0.0
       pg-promise:
-        specifier: 11.5.4
-        version: 11.5.4
+        specifier: 11.5.5
+        version: 11.5.5
       slonik:
         specifier: 30.4.4
         version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
@@ -1179,8 +1179,8 @@ importers:
         specifier: 3.0.4
         version: 3.0.4
       pg-promise:
-        specifier: 11.5.4
-        version: 11.5.4
+        specifier: 11.5.5
+        version: 11.5.5
       slonik:
         specifier: 30.4.4
         version: 30.4.4(patch_hash=jxrvl4xmdvyktjijg7yfdkb34i)
@@ -27154,8 +27154,8 @@ packages:
       pg: 8.11.3
     dev: true
 
-  /pg-promise@11.5.4:
-    resolution: {integrity: sha512-esYSkDt2h6NQOkfotGAm1Ld5OjoITJLpB88Z1PIlcAU/RQ0XQE2PxW0bLJEOMHPGV5iaRnj1Y7ARznXbgN4FNw==}
+  /pg-promise@11.5.5:
+    resolution: {integrity: sha512-DpJkDDH7rG0wUwFRRHimdV6DtG/UTK2SBEKC7KGFR6a5Zuqf9eGThR7dqIaHXnEBDZuWxUfWC5zMRqyk4EP7Lw==}
     engines: {node: '>=14.0'}
     dependencies:
       assert-options: 0.8.1
