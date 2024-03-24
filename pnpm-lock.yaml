@@ -1233,8 +1233,8 @@ importers:
         specifier: 0.2.1
         version: 0.2.1
       stripe:
-        specifier: 14.21.0
-        version: 14.21.0
+        specifier: 14.22.0
+        version: 14.22.0
       zod:
         specifier: 3.22.4
         version: 3.22.4
@@ -30712,8 +30712,8 @@ packages:
       js-tokens: 8.0.3
     dev: true
 
-  /stripe@14.21.0:
-    resolution: {integrity: sha512-PFmpl35Myn6UDdVLTHcuppdbkPVvlQfkMHOmgGZh5QOdSUxVmvz090Z4obLg8ta1MNs1PNpzr9i7E39iAIv07A==}
+  /stripe@14.22.0:
+    resolution: {integrity: sha512-Pj8SAdTNjMq42UnWzBTTy8KMQ8qbQoVemPHbw3x+rHvwq1Psg9UFPT58j54F5os/SCgUAOZSEMcUedvzIDuqvw==}
     engines: {node: '>=12.*'}
     dependencies:
       '@types/node': 20.11.30
