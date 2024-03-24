@@ -70,7 +70,7 @@
     "@sentry/cli": "2.30.2",
     "@swc/core": "1.4.8",
     "@theguild/eslint-config": "0.11.4",
-    "@theguild/prettier-config": "2.0.5",
+    "@theguild/prettier-config": "2.0.6",
     "@types/node": "20.11.30",
     "bob-the-bundler": "7.0.1",
     "cypress": "13.7.0",
