@@ -303,8 +303,8 @@ importers:
         specifier: 3.3.26
         version: 3.3.26
       '@types/ioredis':
-        specifier: 4.28.10
-        version: 4.28.10
+        specifier: 5.0.0
+        version: 5.0.0
       bcryptjs:
         specifier: 2.4.3
         version: 2.4.3
@@ -13663,10 +13663,13 @@ packages:
       - supports-color
     dev: true
 
-  /@types/ioredis@4.28.10:
-    resolution: {integrity: sha512-69LyhUgrXdgcNDv7ogs1qXZomnfOEnSmrmMFqKgt1XMJxmoOSG/u3wYy13yACIfKuMJ8IhKgHafDO3sx19zVQQ==}
+  /@types/ioredis@5.0.0:
+    resolution: {integrity: sha512-zJbJ3FVE17CNl5KXzdeSPtdltc4tMT3TzC6fxQS0sQngkbFZ6h+0uTafsRqu+eSLIugf6Yb0Ea0SUuRr42Nk9g==}
+    deprecated: This is a stub types definition. ioredis provides its own type definitions, so you do not need this installed.
     dependencies:
-      '@types/node': 20.11.30
+      ioredis: 5.3.2
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /@types/is-empty@1.2.1:

@@ -22,7 +22,7 @@
     "@trpc/client": "10.45.2",
     "@trpc/server": "10.45.2",
     "@types/dockerode": "3.3.26",
-    "@types/ioredis": "4.28.10",
+    "@types/ioredis": "5.0.0",
     "bcryptjs": "2.4.3",
     "date-fns": "3.6.0",
     "dockerode": "4.0.1",
