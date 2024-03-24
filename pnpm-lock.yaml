@@ -409,8 +409,8 @@ importers:
         specifier: 3.1.4
         version: 3.1.4
       '@types/mkdirp':
-        specifier: 1.0.2
-        version: 1.0.2
+        specifier: 2.0.0
+        version: 2.0.0
       oclif:
         specifier: 3.17.2
         version: 3.17.2(patch_hash=p4jeiorqjhwzipwrwepbyei4ba)(@swc/core@1.4.8)(@types/node@20.11.30)(typescript@5.4.2)
@@ -13714,10 +13714,11 @@ packages:
       '@types/mjml-core': 4.7.1
     dev: true
 
-  /@types/mkdirp@1.0.2:
-    resolution: {integrity: sha512-o0K1tSO0Dx5X6xlU5F1D6625FawhC3dU3iqr25lluNv/+/QIVH8RLNEiVokgIZo+mz+87w/3Mkg/VvQS+J51fQ==}
+  /@types/mkdirp@2.0.0:
+    resolution: {integrity: sha512-c/iUqMymAlxLAyIK3u5SzrwkrkyOdv1XDc91T+b5FsY7Jr6ERhUD19jJHOhPW4GD6tmN6mFEorfSdks525pwdQ==}
+    deprecated: This is a stub types definition. mkdirp provides its own type definitions, so you do not need this installed.
     dependencies:
-      '@types/node': 20.11.30
+      mkdirp: 3.0.1
     dev: true
 
   /@types/ms@0.7.34:
@@ -25390,7 +25391,6 @@ packages:
     resolution: {integrity: sha512-+NsyUUAZDmo6YVHzL/stxSu3t9YS1iljliy3BSDrXJ/dkn1KYdmtZODGGjLcc9XLgVVpH4KshHB8XmZgMhaBXg==}
     engines: {node: '>=10'}
     hasBin: true
-    dev: false
 
   /mlly@1.4.2:
     resolution: {integrity: sha512-i/Ykufi2t1EZ6NaPLdfnZk2AX8cs0d+mTzVKuPfqPKPatxLApaBoxJQ9x1/uckXtrS/U5oisPMDkNs0yQTaBRg==}
