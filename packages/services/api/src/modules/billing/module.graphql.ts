@@ -8,6 +8,7 @@ export default gql`
 
   type BillingConfiguration {
     hasActiveSubscription: Boolean!
+    canUpdateSubscription: Boolean!
     hasPaymentIssues: Boolean!
     paymentMethod: BillingPaymentMethod
     billingAddress: BillingDetails
