@@ -170,7 +170,7 @@ export default abstract class extends Command {
         if (!response.ok) {
           throw new Error(`Invalid status code for registry HTTP call: ${response.status}`);
         }
-
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         const jsonData = (await response.json()) as ExecutionResult<TResult>;
 
         if (jsonData.errors && jsonData.errors.length > 0) {

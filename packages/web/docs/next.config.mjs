@@ -3,6 +3,7 @@
 import { withGuildDocs } from '@theguild/components/next.config';
 
 export default withGuildDocs({
+  output: 'export',
   basePath: process.env.NEXT_BASE_PATH,
   eslint: {
     ignoreDuringBuilds: true,

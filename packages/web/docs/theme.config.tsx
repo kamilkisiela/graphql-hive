@@ -1,6 +1,12 @@
-/* eslint sort-keys: error */
 import { useRouter } from 'next/router';
-import { defineConfig, FooterExtended, Giscus, useConfig, useTheme } from '@theguild/components';
+import {
+  defineConfig,
+  FooterExtended,
+  Giscus,
+  PRODUCTS,
+  useConfig,
+  useTheme,
+} from '@theguild/components';
 import { ProductUpdateBlogPostHeader } from './src/components/product-update-blog-post-header';
 
 export default defineConfig({
@@ -58,5 +64,7 @@ export default defineConfig({
       </>
     );
   },
-  siteName: 'HIVE',
+  description: 'Schema registry for your GraphQL workflows',
+  websiteName: 'Hive',
+  logo: PRODUCTS.HIVE.logo({ className: 'w-8' }),
 });

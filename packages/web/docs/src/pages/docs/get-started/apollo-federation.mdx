@@ -1,5 +1,5 @@
 import NextImage from 'next/image'
-import { Callout, Card, Cards, FileTree, Steps, Tab, Tabs } from '@theguild/components'
+import { Callout, Cards, FileTree, Steps, Tabs } from '@theguild/components'
 import cdnTokenImage from '../../../../public/docs/pages/guides/federation-cdn-token.png'
 import federationExplorerImage from '../../../../public/docs/pages/guides/federation-explorer.png'
 import federationHistoryImage from '../../../../public/docs/pages/guides/federation-history.png'
@@ -58,7 +58,7 @@ For this guide, we are going to use the following Subgraphs:
 Here's the GraphQL schema (SDL) for every subgraph we are going to publish to Hive:
 
 <Tabs items={['Products', 'Reviews']}>
-  <Tab>
+  <Tabs.Tab>
 
 ```graphql filename="subgraphs/products.graphql"
 enum CURRENCY_CODE {
@@ -112,8 +112,8 @@ extend type Query {
 }
 ```
 
-  </Tab>
-  <Tab>
+  </Tabs.Tab>
+  <Tabs.Tab>
 
 ```graphql filename="subgraphs/reviews.graphql"
 extend type Product @key(fields: "id") {
@@ -134,7 +134,7 @@ type ReviewSummary {
 }
 ```
 
-  </Tab>
+  </Tabs.Tab>
 </Tabs>
 
 ### Hive CLI Access Token
@@ -511,8 +511,8 @@ depending on your needs. You can use the following guides to deploy a gateway ba
 technical preference:
 
 <Cards>
-  <Card arrow title="Apollo Gateway (JS)" href="/docs/integrations/apollo-gateway" />
-  <Card arrow title="Apollo Router (Rust)" href="/docs/integrations/apollo-router" />
+  <Cards.Card arrow title="Apollo Gateway (JS)" href="/docs/integrations/apollo-gateway" />
+  <Cards.Card arrow title="Apollo Router (Rust)" href="/docs/integrations/apollo-router" />
 </Cards>
 
 ### Next Steps

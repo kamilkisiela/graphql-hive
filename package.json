@@ -126,9 +126,6 @@
       "@graphql-eslint/eslint-plugin@3.20.1": "patches/@graphql-eslint__eslint-plugin@3.20.1.patch",
       "graphiql@3.0.0-alpha.0": "patches/graphiql@3.0.0-alpha.0.patch",
       "@graphiql/react@0.18.0-alpha.0": "patches/@graphiql__react@0.18.0-alpha.0.patch",
-      "nextra-theme-docs@2.12.3": "patches/nextra-theme-docs@2.12.3.patch",
-      "@theguild/components@5.2.4": "patches/@theguild__components@5.2.4.patch",
-      "nextra@2.12.3": "patches/nextra@2.12.3.patch",
       "got@14.2.1": "patches/got@14.2.1.patch",
       "slonik@30.4.4": "patches/slonik@30.4.4.patch"
     }
