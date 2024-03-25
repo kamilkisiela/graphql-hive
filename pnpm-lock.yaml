@@ -345,7 +345,7 @@ importers:
   packages/libraries/cli:
     dependencies:
       '@graphql-hive/core':
-        specifier: 0.2.3
+        specifier: 0.2.4
         version: link:../core/dist
       '@graphql-inspector/core':
         specifier: 5.1.0-alpha-20231208113249-34700c8a
@@ -424,7 +424,7 @@ importers:
   packages/libraries/client:
     dependencies:
       '@graphql-hive/core':
-        specifier: ^0.2.3
+        specifier: ^0.2.4
         version: link:../core/dist
       '@graphql-tools/utils':
         specifier: ^10.0.0
@@ -593,7 +593,7 @@ importers:
         specifier: 3.540.0
         version: 3.540.0
       '@graphql-hive/core':
-        specifier: 0.2.3
+        specifier: 0.2.4
         version: link:../../libraries/core/dist
       '@graphql-inspector/core':
         specifier: 5.1.0-alpha-20231208113249-34700c8a
@@ -1401,7 +1401,7 @@ importers:
   packages/services/usage-ingestor:
     devDependencies:
       '@graphql-hive/core':
-        specifier: 0.2.3
+        specifier: 0.2.4
         version: link:../../libraries/core/dist
       '@hive/service-common':
         specifier: workspace:*
