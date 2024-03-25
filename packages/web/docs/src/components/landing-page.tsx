@@ -186,19 +186,19 @@ function Feature(props: {
       <div className={cn(classes.feature, 'relative overflow-hidden')}>
         <div>
           <div
-            className="absolute top-0 h-[1px] w-full opacity-25"
+            className="absolute top-0 h-px w-full opacity-25"
             style={{
               backgroundImage: `linear-gradient(90deg, ${end}, ${start})`,
             }}
           />
           <div
-            className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-[0.15] blur-3xl"
+            className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-15 blur-3xl"
             style={{
               backgroundImage: `linear-gradient(180deg, ${end}, ${start})`,
             }}
           />
           <div
-            className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-[0.15] blur-3xl"
+            className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-15 blur-3xl"
             style={{
               backgroundImage: `linear-gradient(180deg, ${start}, ${end})`,
             }}
@@ -364,7 +364,7 @@ export function IndexPage(): ReactElement {
         </Hero>
         <div className="relative even:bg-gray-50">
           <div>
-            <div className="absolute top-0 h-[1px] w-full bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 opacity-25" />
+            <div className="absolute top-0 h-px w-full bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 opacity-25" />
           </div>
           <StatsList>
             <StatsItem label="Happy users" value={4.1} suffix="K" decimal />
@@ -407,9 +407,9 @@ export function IndexPage(): ReactElement {
           />
           <div className={cn(classes.feature, 'relative overflow-hidden')}>
             <div>
-              <div className="absolute top-0 h-[1px] w-full bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 opacity-25" />
-              <div className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-50 to-gray-300 opacity-[0.15] blur-3xl" />
-              <div className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-300 to-gray-50 opacity-[0.15] blur-3xl" />
+              <div className="absolute top-0 h-px w-full bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 opacity-25" />
+              <div className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-50 to-gray-300 opacity-15 blur-3xl" />
+              <div className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-300 to-gray-50 opacity-15 blur-3xl" />
             </div>
             <div className="py-24">
               <h2 className="base:mr-1 mb-12 ml-1 text-center text-3xl font-semibold leading-normal tracking-tight text-black">
@@ -517,7 +517,7 @@ export function IndexPage(): ReactElement {
             }}
           >
             <div>
-              <div className="absolute top-0 h-[1px] w-full bg-blue-900 opacity-25" />
+              <div className="absolute top-0 h-px w-full bg-blue-900 opacity-25" />
             </div>
             <div className="py-24">
               <div className="mx-auto max-w-lg text-center text-white">
@@ -543,9 +543,9 @@ export function IndexPage(): ReactElement {
           </div>
           <div className={cn(classes.feature, 'relative overflow-hidden')}>
             <div>
-              <div className="absolute top-0 h-[1px] w-full bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 opacity-25" />
-              <div className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-600 to-gray-900 opacity-[0.15] blur-3xl" />
-              <div className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-900 to-gray-600 opacity-[0.15] blur-3xl" />
+              <div className="absolute top-0 h-px w-full bg-gradient-to-r from-gray-300 via-gray-500 to-gray-300 opacity-25" />
+              <div className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-600 to-gray-900 opacity-15 blur-3xl" />
+              <div className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] bg-gradient-to-b from-gray-900 to-gray-600 opacity-15 blur-3xl" />
             </div>
             <div className="py-24">
               <h2 className="mb-12 text-center text-3xl font-semibold leading-normal tracking-tight text-black">
@@ -579,19 +579,19 @@ export function IndexPage(): ReactElement {
           <div className={cn(classes.feature, 'relative overflow-hidden')}>
             <div>
               <div
-                className="absolute top-0 h-[1px] w-full opacity-25"
+                className="absolute top-0 h-px w-full opacity-25"
                 style={{
                   backgroundImage: `linear-gradient(90deg, ${gradients[3][1]}, ${gradients[3][0]})`,
                 }}
               />
               <div
-                className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-[0.15] blur-3xl"
+                className="absolute left-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-15 blur-3xl"
                 style={{
                   backgroundImage: `linear-gradient(180deg, ${gradients[3][0]}, ${gradients[3][1]})`,
                 }}
               />
               <div
-                className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-[0.15] blur-3xl"
+                className="absolute right-[-200px] top-[-200px] h-[255px] w-[60vw] opacity-15 blur-3xl"
                 style={{
                   backgroundImage: `linear-gradient(180deg, ${gradients[3][1]}, ${gradients[3][0]})`,
                 }}

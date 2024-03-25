@@ -166,7 +166,7 @@ const Navigation = (props: {
               </NextLink>
               {edge.node.githubRepository && edge.node.meta ? (
                 <a
-                  className="ml-[-1px] text-xs font-medium text-gray-500 hover:text-gray-400"
+                  className="-ml-px text-xs font-medium text-gray-500 hover:text-gray-400"
                   target="_blank"
                   rel="noreferrer"
                   href={`https://github.com/${edge.node.githubRepository}/commit/${edge.node.meta.commit}`}

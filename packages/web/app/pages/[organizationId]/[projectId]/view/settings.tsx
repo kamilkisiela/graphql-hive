@@ -107,7 +107,7 @@ function GitHubIntegration(props: {
               <div className="flex items-center gap-x-2 pl-1">
                 <CheckIcon className="size-4 text-emerald-500" />
                 <div className="flex size-6 items-center justify-center rounded-sm bg-white">
-                  <HiveLogo className="size-[80%]" />
+                  <HiveLogo className="size-4/5" />
                 </div>
 
                 <div className="font-semibold text-[#adbac7]">
@@ -123,7 +123,7 @@ function GitHubIntegration(props: {
               <div className="flex items-center gap-x-2 pl-1">
                 <CheckIcon className="size-4 text-emerald-500" />
                 <div className="flex size-6 items-center justify-center rounded-sm bg-white">
-                  <HiveLogo className="size-[80%]" />
+                  <HiveLogo className="size-4/5" />
                 </div>
 
                 <div className="font-semibold text-[#adbac7]">

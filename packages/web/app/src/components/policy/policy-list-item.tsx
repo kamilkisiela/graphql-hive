@@ -86,7 +86,7 @@ export function PolicyListItem(props: {
                 <div>
                   <SeverityLevelToggle canTurnOff={props.overridingParentRule} rule={ruleInfo.id} />
                 </div>
-                <div className="grid grow grid-cols-4 align-middle [&>*]:min-h-[40px] [&>*]:border-l-[1px] [&>*]:border-l-gray-800">
+                <div className="[&>*]:border-l-DEFAULT grid grow grid-cols-4 align-middle [&>*]:min-h-[40px] [&>*]:border-l-gray-800">
                   {shouldShowRuleConfig && (
                     <PolicyRuleConfig
                       rule={ruleInfo.id}

@@ -171,7 +171,7 @@ export default abstract class extends Command {
           throw new Error(`Invalid status code for registry HTTP call: ${response.status}`);
         }
 
-        const jsonData = (await response.json()) as ExecutionResult<TResult>;
+        const jsonData = await response.json();
 
         if (jsonData.errors && jsonData.errors.length > 0) {
           throw new ClientError(

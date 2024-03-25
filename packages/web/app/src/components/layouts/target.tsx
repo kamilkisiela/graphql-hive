@@ -333,7 +333,7 @@ export const TargetLayout = ({
               </Tabs.List>
             </Tabs>
           ) : (
-            <div className="flex flex-row gap-x-8 border-b-[2px] border-b-transparent px-4 py-3">
+            <div className="flex flex-row gap-x-8 border-b-2 border-b-transparent px-4 py-3">
               <div className="h-5 w-12 animate-pulse rounded-full bg-gray-800" />
               <div className="h-5 w-12 animate-pulse rounded-full bg-gray-800" />
               <div className="h-5 w-12 animate-pulse rounded-full bg-gray-800" />

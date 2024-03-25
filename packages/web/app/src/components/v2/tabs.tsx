@@ -38,7 +38,7 @@ const Trigger = forwardRef<any, Omit<TabsTriggerProps, 'className'> & { hasBorde
           ? `
             radix-state-active:border-b-orange-500
             cursor-pointer
-            border-b-[2px]
+            border-b-2
             border-b-transparent
             px-4
             py-3

@@ -45,7 +45,7 @@ export const DropdownMenuContent = React.forwardRef<
           flex-col
           gap-1
           rounded-md
-          bg-[#0b0d11]
+          bg-black
           p-[13px]
           text-sm
           font-normal
@@ -110,7 +110,7 @@ export const DropdownMenuSubContent = React.forwardRef<
           flex-col
           gap-1
           rounded-md
-          bg-[#0b0d11]
+          bg-black
           p-[13px]
           text-sm
           font-normal

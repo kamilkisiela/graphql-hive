@@ -909,7 +909,7 @@ export function OrganizationMemberRoles(props: {
             />
           </div>
         </div>
-        <table className="w-full table-auto divide-y-[1px] divide-gray-500/20">
+        <table className="w-full table-auto divide-y-DEFAULT divide-gray-500/20">
           <thead>
             <tr>
               <th className="min-w-[200px] py-3 text-left text-sm font-semibold">Name</th>
@@ -918,7 +918,7 @@ export function OrganizationMemberRoles(props: {
               <th className="w-12 py-3 text-right text-sm font-semibold" />
             </tr>
           </thead>
-          <tbody className="divide-y-[1px] divide-gray-500/20">
+          <tbody className="divide-y-DEFAULT divide-gray-500/20">
             {organization.memberRoles.map(role => (
               <OrganizationMemberRoleRow
                 key={role.id}
