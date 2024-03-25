@@ -226,7 +226,7 @@ export class CompositeModel {
       diffCheck.status === 'failed' ||
       policyCheck.status === 'failed' ||
       // if any of the contract compositions failed, the schema check failed.
-      (contractChecks?.length && !contractChecks.some(isContractChecksSuccessful))
+      (contractChecks?.length && contractChecks.some(check => !isContractChecksSuccessful(check)))
     ) {
       return {
         conclusion: SchemaCheckConclusion.Failure,
