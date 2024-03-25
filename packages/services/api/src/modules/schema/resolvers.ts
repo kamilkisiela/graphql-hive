@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import stringify from 'fast-json-stable-stringify';
 import {
   GraphQLEnumType,

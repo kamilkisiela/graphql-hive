@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { hostname } from 'os';
 import Redis from 'ioredis';
 import {

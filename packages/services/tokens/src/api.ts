@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import type { FastifyRequest } from 'fastify';
 import { Lru as LruType } from 'tiny-lru';
 import { z } from 'zod';

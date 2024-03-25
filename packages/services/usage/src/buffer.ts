@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import type { ServiceLogger } from '@hive/service-common';
 
 export class BufferTooBigError extends Error {

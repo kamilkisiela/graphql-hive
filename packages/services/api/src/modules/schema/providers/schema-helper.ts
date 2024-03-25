@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import { DocumentNode, print, visit } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import objectHash from 'object-hash';

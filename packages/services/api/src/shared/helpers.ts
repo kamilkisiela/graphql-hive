@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import type { InjectionToken } from 'graphql-modules';
 import ms from 'ms';
 import type {

@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 export type ErrorCode = 'ERR_EMPTY_BODY' | 'ERR_INVALID_SIGNATURE';
 

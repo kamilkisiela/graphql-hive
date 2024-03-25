@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { Inject, Injectable, InjectionToken, Scope } from 'graphql-modules';
 
 const ALG = 'aes256';
