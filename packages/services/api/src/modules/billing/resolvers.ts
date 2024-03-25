@@ -40,6 +40,18 @@ export const resolvers: BillingModule.Resolvers = {
   Organization: {
     plan: org => (org.billingPlan || 'HOBBY') as BillingPlanType,
     billingConfiguration: async (org, _args, { injector }) => {
+      if (org.billingPlan === 'ENTERPRISE') {
+        return {
+          hasActiveSubscription: true,
+          canUpdateSubscription: false,
+          hasPaymentIssues: false,
+          paymentMethod: null,
+          billingAddress: null,
+          invoices: null,
+          upcomingInvoice: null,
+        };
+      }
+
       const billingRecord = await injector
         .get(BillingProvider)
         .getOrganizationBillingParticipant({ organization: org.id });
@@ -47,6 +59,21 @@ export const resolvers: BillingModule.Resolvers = {
       if (!billingRecord) {
         return {
           hasActiveSubscription: false,
+          canUpdateSubscription: true,
+          hasPaymentIssues: false,
+          paymentMethod: null,
+          billingAddress: null,
+          invoices: null,
+          upcomingInvoice: null,
+        };
+      }
+
+      // This is a special case where customer is on Pro and doesn't have a record for external billing.
+      // This happens when the customer is paying through an external system and not through Stripe.
+      if (org.billingPlan === 'PRO' && billingRecord.externalBillingReference === 'wire') {
+        return {
+          hasActiveSubscription: true,
+          canUpdateSubscription: false,
           hasPaymentIssues: false,
           paymentMethod: null,
           billingAddress: null,
@@ -62,6 +89,7 @@ export const resolvers: BillingModule.Resolvers = {
       if (!subscriptionInfo) {
         return {
           hasActiveSubscription: false,
+          canUpdateSubscription: true,
           hasPaymentIssues: false,
           paymentMethod: null,
           billingAddress: null,
@@ -85,6 +113,7 @@ export const resolvers: BillingModule.Resolvers = {
 
       return {
         hasActiveSubscription: subscriptionInfo.subscription !== null,
+        canUpdateSubscription: subscriptionInfo.subscription !== null,
         hasPaymentIssues,
         paymentMethod: subscriptionInfo.paymentMethod?.card || null,
         billingAddress: subscriptionInfo.paymentMethod?.billing_details || null,

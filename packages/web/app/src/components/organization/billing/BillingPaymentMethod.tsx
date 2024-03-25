@@ -114,9 +114,9 @@ export const BillingPaymentMethod = ({
             {mutation.fetching ? (
               'Loading...'
             ) : (
-              <>
-                <ExternalLinkIcon /> Stripe Billing Dashboard
-              </>
+              <div className="flex items-center">
+                <ExternalLinkIcon className="mr-1" /> Stripe Billing Dashboard
+              </div>
             )}
           </Button>
         </div>

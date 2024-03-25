@@ -31,6 +31,7 @@ const SubscriptionPage_OrganizationFragment = graphql(`
     }
     billingConfiguration {
       hasPaymentIssues
+      canUpdateSubscription
       invoices {
         id
       }
