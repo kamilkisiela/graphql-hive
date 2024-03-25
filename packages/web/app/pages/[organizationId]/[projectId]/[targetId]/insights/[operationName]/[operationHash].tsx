@@ -1,6 +1,6 @@
 import { ReactElement, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { RefreshCw } from 'lucide-react';
+import { AlertCircleIcon, RefreshCw } from 'lucide-react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Section } from '@/components/common';
@@ -8,54 +8,49 @@ import { GraphQLHighlight } from '@/components/common/GraphQLSDLBlock';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { ClientsFilterTrigger } from '@/components/target/insights/Filters';
 import { OperationsStats } from '@/components/target/insights/Stats';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker, presetLast1Day } from '@/components/ui/date-range-picker';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
-import { EmptyList, MetaTitle } from '@/components/v2';
-import { graphql } from '@/gql';
+import { EmptyList, Link, MetaTitle } from '@/components/v2';
+import { FragmentType, graphql, useFragment } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
 import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
 import { withSessionProtection } from '@/lib/supertokens/guard';
 
-const GraphQLOperationBody_GetOperationBodyQuery = graphql(`
-  query GraphQLOperationBody_GetOperationBodyQuery($selector: OperationBodyByHashInput!) {
-    operationBodyByHash(selector: $selector)
+const GraphQLOperationBody_OperationFragment = graphql(`
+  fragment GraphQLOperationBody_OperationFragment on Operation {
+    body
   }
 `);
 
-export function GraphQLOperationBody({
-  hash,
-  organization,
-  project,
-  target,
-}: {
-  hash: string;
-  organization: string;
-  project: string;
-  target: string;
+function GraphQLOperationBody(props: {
+  operation: FragmentType<typeof GraphQLOperationBody_OperationFragment> | null;
 }) {
-  const [result] = useQuery({
-    query: GraphQLOperationBody_GetOperationBodyQuery,
-    variables: { selector: { hash, organization, project, target } },
-  });
+  const operation = useFragment(GraphQLOperationBody_OperationFragment, props.operation);
 
-  const { data, fetching, error } = result;
-
-  if (fetching) {
-    return <div>Loading...</div>;
+  if (operation?.body) {
+    return <GraphQLHighlight className="pt-6" code={operation.body} />;
   }
 
-  if (error) {
-    return <div>Oh no... {error.message}</div>;
-  }
-
-  if (data?.operationBodyByHash) {
-    return <GraphQLHighlight className="pt-6" code={data.operationBodyByHash} />;
-  }
-
-  return null;
+  return <div>Loading...</div>;
 }
+
+const Operation_View_OperationBodyQuery = graphql(`
+  query GraphQLOperationBody_GetOperationBodyQuery(
+    $selector: TargetSelectorInput!
+    $hash: String!
+  ) {
+    target(selector: $selector) {
+      id
+      operation(hash: $hash) {
+        type
+        ...GraphQLOperationBody_OperationFragment
+      }
+    }
+  }
+`);
 
 function OperationView({
   organizationCleanId,
@@ -79,6 +74,22 @@ function OperationView({
   const [selectedClients, setSelectedClients] = useState<string[]>([]);
   const operationsList = useMemo(() => [operationHash], [operationHash]);
 
+  const [result] = useQuery({
+    query: Operation_View_OperationBodyQuery,
+    variables: {
+      selector: {
+        organization: organizationCleanId,
+        project: projectCleanId,
+        target: targetCleanId,
+      },
+      hash: operationHash,
+    },
+  });
+
+  const isNotNoQueryOrMutation =
+    result.data?.target?.operation?.type !== 'query' &&
+    result.data?.target?.operation?.type !== 'mutation';
+
   return (
     <>
       <div className="flex flex-row items-center justify-between py-6">
@@ -86,43 +97,55 @@ function OperationView({
           <Title>{operationName}</Title>
           <Subtitle>Insights of individual GraphQL operation</Subtitle>
         </div>
-        <div className="flex justify-end gap-x-2">
-          <ClientsFilterTrigger
-            period={dateRangeController.resolvedRange}
-            selected={selectedClients}
-            onFilter={setSelectedClients}
-          />
-          <DateRangePicker
-            validUnits={['y', 'M', 'w', 'd', 'h']}
-            selectedRange={dateRangeController.selectedPreset.range}
-            startDate={dateRangeController.startDate}
-            align="end"
-            onUpdate={args => dateRangeController.setSelectedPreset(args.preset)}
-          />
-          <Button variant="outline" onClick={() => dateRangeController.refreshResolvedRange()}>
-            <RefreshCw className="size-4" />
-          </Button>
-        </div>
+        {!result.fetching && isNotNoQueryOrMutation === false && (
+          <div className="flex justify-end gap-x-2">
+            <ClientsFilterTrigger
+              period={dateRangeController.resolvedRange}
+              selected={selectedClients}
+              onFilter={setSelectedClients}
+            />
+            <DateRangePicker
+              validUnits={['y', 'M', 'w', 'd', 'h']}
+              selectedRange={dateRangeController.selectedPreset.range}
+              startDate={dateRangeController.startDate}
+              align="end"
+              onUpdate={args => dateRangeController.setSelectedPreset(args.preset)}
+            />
+            <Button variant="outline" onClick={() => dateRangeController.refreshResolvedRange()}>
+              <RefreshCw className="size-4" />
+            </Button>
+          </div>
+        )}
       </div>
-      <OperationsStats
-        organization={organizationCleanId}
-        project={projectCleanId}
-        target={targetCleanId}
-        period={dateRangeController.resolvedRange}
-        dateRangeText={dateRangeController.selectedPreset.label}
-        operationsFilter={operationsList}
-        clientNamesFilter={selectedClients}
-        mode="operation-page"
-        resolution={dateRangeController.resolution}
-      />
-      <div className="mt-12 w-full rounded-md border border-gray-800 bg-gray-900/50 p-5">
-        <Section.Title>Operation body</Section.Title>
-        <GraphQLOperationBody
+      {!result.fetching && isNotNoQueryOrMutation === false ? (
+        <OperationsStats
           organization={organizationCleanId}
           project={projectCleanId}
           target={targetCleanId}
-          hash={operationHash}
+          period={dateRangeController.resolvedRange}
+          dateRangeText={dateRangeController.selectedPreset.label}
+          operationsFilter={operationsList}
+          clientNamesFilter={selectedClients}
+          mode="operation-page"
+          resolution={dateRangeController.resolution}
         />
+      ) : (
+        <Alert>
+          <AlertCircleIcon className="size-4" />
+          <AlertTitle>No Subscription insights available yet.</AlertTitle>
+          <AlertDescription>
+            Hive is currently only collecting usage data for this operation. We are currently
+            evaluating what kind of insights are useful for subscriptions.{' '}
+            <Link variant="primary" href="https://github.com/kamilkisiela/graphql-hive/issues/3290">
+              Please reach out to us directly or via the GitHub issue
+            </Link>
+            .
+          </AlertDescription>
+        </Alert>
+      )}
+      <div className="mt-12 w-full rounded-md border border-gray-800 bg-gray-900/50 p-5">
+        <Section.Title>Operation body</Section.Title>
+        <GraphQLOperationBody operation={result.data?.target?.operation ?? null} />
       </div>
     </>
   );

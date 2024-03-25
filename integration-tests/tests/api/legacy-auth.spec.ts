@@ -11,8 +11,12 @@ test.concurrent(
     const { inviteAndJoinMember, createProject } = await createOrg();
     await inviteAndJoinMember();
     const { createToken } = await createProject(ProjectType.Single);
-    const { publishSchema, collectOperations, readOperationsStats, readOperationBody } =
-      await createToken({});
+    const {
+      publishSchema,
+      collectLegacyOperations: collectOperations,
+      readOperationsStats,
+      readOperationBody,
+    } = await createToken({});
 
     const result = await publishSchema({
       sdl: `type Query { ping: String }`,

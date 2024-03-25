@@ -32,7 +32,8 @@ export interface OperationMap {
 
 export interface IncomingReport {
   map: OperationMap;
-  operations: IncomingOperation[];
+  operations?: IncomingOperation[];
+  subscriptionOperations?: IncomingSubscriptionOperation[];
 }
 
 export type IncomingLegacyReport = LegacyIncomingOperation[];
@@ -45,6 +46,17 @@ export interface IncomingOperation {
     duration: number;
     errorsTotal: number;
   };
+  metadata?: {
+    client?: {
+      name?: string;
+      version?: string;
+    };
+  };
+}
+
+export interface IncomingSubscriptionOperation {
+  operationMapKey: string;
+  timestamp?: number;
   metadata?: {
     client?: {
       name?: string;

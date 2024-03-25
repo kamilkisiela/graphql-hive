@@ -8,7 +8,12 @@ export interface HiveClient {
   [autoDisposeSymbol]: boolean | NodeJS.Signals[];
   info(): Promise<void>;
   reportSchema: SchemaReporter['report'];
+  /** Collect usage for Query and Mutation operations */
   collectUsage(): CollectUsageCallback;
+  /** Collect usage for Subscription operations */
+  collectSubscriptionUsage(args: { args: ExecutionArgs }): void;
+  createInstrumentedExecute(executeImpl: any): any;
+  createInstrumentedSubscribe(executeImpl: any): any;
   dispose(): Promise<void>;
 }
 
@@ -22,10 +27,7 @@ export type AbortAction = {
 
 export type CollectUsageCallback = (
   args: ExecutionArgs,
-  result:
-    | AsyncIterableIteratorOrValue<GraphQLErrorsResult>
-    | AsyncIterableOrValue<GraphQLErrorsResult>
-    | AbortAction,
+  result: GraphQLErrorsResult | AbortAction,
 ) => void;
 export interface ClientInfo {
   name: string;

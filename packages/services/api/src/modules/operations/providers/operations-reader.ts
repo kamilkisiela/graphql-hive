@@ -285,11 +285,51 @@ export class OperationsReader {
       exists: number;
     }>({
       query: sql`
-        SELECT 1 as exists FROM target_existence ${this.createFilter({
+        SELECT
+          1 AS "exists"
+        FROM
+          "target_existence"
+        ${this.createFilter({
           target,
-        })} GROUP BY target LIMIT 1
+        })}
+        GROUP BY "target"
+        LIMIT 1
+
+        UNION DISTINCT
+
+        SELECT
+          1 AS "exists"
+        FROM
+          "subscription_target_existence"
+        ${this.createFilter({
+          target,
+        })}
+        GROUP BY "target"
+        LIMIT 1
       `,
       queryId: 'has_collected_operations',
+      timeout: 10_000,
+    });
+
+    return result.rows > 0;
+  }
+
+  async getHasCollectedSubscriptionOperations(args: { target: string }) {
+    const result = await this.clickHouse.query<{
+      exists: number;
+    }>({
+      query: sql`
+        SELECT
+          1 AS "exists"
+        FROM
+          "subscription_target_existence"
+        ${this.createFilter({
+          target: args.target,
+        })}
+        GROUP BY "target"
+        LIMIT 1
+      `,
+      queryId: 'has_collected_subscription_operations',
       timeout: 10_000,
     });
 
@@ -740,17 +780,37 @@ export class OperationsReader {
     });
   }
 
-  async readOperationBody({ target, hash }: { target: string; hash: string }) {
+  async readOperation({ target, hash }: { target: string; hash: string }) {
     const result = await this.clickHouse.query<{
+      hash: string;
       body: string;
+      name: string;
+      type: 'query' | 'mutation' | 'subscription';
     }>({
       query: sql`
         SELECT 
-          body
-        FROM operation_collection_body
+          "operation_collection_details"."hash" AS "hash",
+          "operation_collection_details"."operation_kind" AS "type",
+          "operation_collection_details"."name" AS "name",
+          "body_join"."body" AS "body"
+        FROM "operation_collection_details"
+        RIGHT JOIN (
+          SELECT
+            "operation_collection_body"."hash" AS "hash",
+            "operation_collection_body"."body" AS "body"
+          FROM "operation_collection_body"
+            ${this.createFilter({
+              target,
+              extra: [sql`"operation_collection_body"."hash" = ${hash}`],
+              namespace: 'operation_collection_body',
+            })}
+          LIMIT 1
+        ) AS "body_join"
+          ON "operation_collection_details"."hash" = "body_join"."hash"
           ${this.createFilter({
             target,
-            extra: [sql`hash = ${hash}`],
+            extra: [sql`"operation_collection_details"."hash" = ${hash}`],
+            namespace: 'operation_collection_details',
           })}
         LIMIT 1
         SETTINGS allow_asynchronous_read_from_io_pool_for_merge_tree = 1
@@ -759,7 +819,7 @@ export class OperationsReader {
       timeout: 10_000,
     });
 
-    return result.data.length ? result.data[0].body : null;
+    return result.data.length ? result.data[0] : null;
   }
 
   async getReportedSchemaCoordinates({
@@ -1061,15 +1121,31 @@ export class OperationsReader {
       .query<unknown>({
         queryId: 'getTotalCountForSchemaCoordinates',
         query: sql`
-          SELECT 
-            SUM("operations_daily"."total") AS "amountOfRequests"
-          FROM
-            "operations_daily"
-          PREWHERE
-            "operations_daily"."target" IN (${sql.array(args.targetIds, 'String')})
-            AND "operations_daily"."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
-            AND "operations_daily"."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
-            ${args.excludedClients ? sql`AND "operations_daily"."client_name" NOT IN (${sql.array(args.excludedClients, 'String')})` : sql``}
+          SELECT
+            SUM("result"."total") AS "amountOfRequests"
+          FROM (
+            SELECT 
+              SUM("operations_daily"."total") AS "total"
+            FROM
+              "operations_daily"
+            PREWHERE
+              "operations_daily"."target" IN (${sql.array(args.targetIds, 'String')})
+              AND "operations_daily"."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
+              AND "operations_daily"."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
+              ${args.excludedClients ? sql`AND "operations_daily"."client_name" NOT IN (${sql.array(args.excludedClients, 'String')})` : sql``}
+
+            UNION ALL
+
+            SELECT 
+              SUM("subscription_operations_daily"."total") AS "total"
+            FROM
+              "subscription_operations_daily"
+            PREWHERE
+              "subscription_operations_daily"."target" IN (${sql.array(args.targetIds, 'String')})
+              AND "subscription_operations_daily"."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
+              AND "subscription_operations_daily"."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
+              ${args.excludedClients ? sql`AND "subscription_operations_daily"."client_name" NOT IN (${sql.array(args.excludedClients, 'String')})` : sql``}
+          ) AS "result"
           `,
         timeout: 10_000,
       })
@@ -1103,15 +1179,16 @@ export class OperationsReader {
         queryId: '_getTopOperationsForSchemaCoordinates',
         query: sql`
           WITH "top_operations_by_coordinates" AS (
-            SELECT
+            SELECT DISTINCT
               "coordinates_daily"."coordinate" AS "coordinate",
               "coordinates_daily"."hash" AS "hash",
-              SUM("coordinates_daily"."total") AS "total"
+              "operations_join"."total" AS "total"
             FROM
               "coordinates_daily"
             RIGHT JOIN (
               SELECT
-                "hash"
+                "operations_daily"."hash",
+                SUM("operations_daily"."total") AS "total"
               FROM
                 "operations_daily"
               PREWHERE
@@ -1119,18 +1196,30 @@ export class OperationsReader {
                 AND "timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
                 AND "timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
                 ${args.excludedClients ? sql`AND "client_name" NOT IN (${sql.array(args.excludedClients, 'String')})` : sql``}
-              LIMIT 1
-              BY "hash"
-            ) AS "coordinates_daily_join" ON "coordinates_daily"."hash" = "coordinates_daily_join"."hash"
+              GROUP BY
+                "hash"
+
+              UNION ALL
+
+              SELECT
+                "subscription_operations_daily"."hash",
+                SUM("subscription_operations_daily"."total") AS "total"
+              FROM
+                "subscription_operations_daily"
+              PREWHERE
+                "target" IN (${sql.array(args.targetIds, 'String')})
+                AND "timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
+                AND "timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
+                ${args.excludedClients ? sql`AND "client_name" NOT IN (${sql.array(args.excludedClients, 'String')})` : sql``}
+              GROUP BY
+                "hash"
+            ) AS "operations_join" ON "coordinates_daily"."hash" = "operations_join"."hash"
             PREWHERE
               "coordinates_daily"."target" IN (${sql.array(args.targetIds, 'String')})
               AND "coordinates_daily"."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
               AND "coordinates_daily"."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
               AND "coordinates_daily"."coordinate" IN (${sql.array(args.schemaCoordinates, 'String')})
-            GROUP BY
-              "coordinates_daily"."coordinate",
-              "coordinates_daily"."hash"
-            HAVING SUM("coordinates_daily"."total") >= ${String(args.requestCountThreshold)}
+            HAVING "total" >= ${String(args.requestCountThreshold)}
             ORDER BY
               "total" DESC,
               "coordinates_daily"."hash" DESC
@@ -1150,7 +1239,7 @@ export class OperationsReader {
               "operation_collection_details"."hash"
             FROM 
               "operation_collection_details"
-            WHERE
+            PREWHERE
               "operation_collection_details"."target" IN (${sql.array(args.targetIds, 'String')})
               AND "operation_collection_details"."hash" IN (SELECT DISTINCT "hash" FROM "top_operations_by_coordinates")
             LIMIT 1
@@ -1263,6 +1352,23 @@ export class OperationsReader {
                 BY
                   "operations_daily"."hash",
                   "operations_daily"."client_name"
+
+              UNION ALL
+
+              SELECT
+                "subscription_operations_daily"."hash",
+                "subscription_operations_daily"."client_name"
+              FROM
+                "subscription_operations_daily"
+              PREWHERE
+                "subscription_operations_daily"."target" IN (${sql.array(args.targetIds, 'String')})
+                AND "subscription_operations_daily"."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
+                AND "subscription_operations_daily"."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
+                ${args.excludedClients ? sql`AND "subscription_operations_daily"."client_name" NOT IN (${sql.array(args.excludedClients, 'String')})` : sql``}
+              LIMIT 1
+                BY
+                  "subscription_operations_daily"."hash",
+                  "subscription_operations_daily"."client_name"
             ) AS "operations_daily_filtered"
                ON "operations_daily_filtered"."hash" = "coordinates_daily"."hash"
             PREWHERE
@@ -1275,10 +1381,16 @@ export class OperationsReader {
               "coordinates_daily"."coordinate",
               "operations_daily_filtered"."client_name"
           )
+
+        SELECT
+          "result"."coordinate" AS "coordinate",
+          "result"."name" AS "name",
+          SUM("result"."count") AS "count"
+        FROM (
           SELECT
             "coordinates_to_client_name_mapping"."coordinate" AS "coordinate",
             "clients_daily"."client_name" AS "name",
-            SUM("clients_daily"."total") AS "count"
+            "clients_daily"."total" AS "count"
           FROM
             "clients_daily"
           LEFT JOIN
@@ -1289,15 +1401,33 @@ export class OperationsReader {
             AND "clients_daily"."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
             AND "clients_daily"."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
             ${args.excludedClients ? sql`AND "clients_daily"."client_name" NOT IN (${sql.array(args.excludedClients, 'String')})` : sql``}
-          GROUP BY
-            "coordinates_to_client_name_mapping"."coordinate",
-            "clients_daily"."client_name"
-          ORDER BY
-            SUM("clients_daily"."total") DESC
-          LIMIT 10
-          BY
-            "coordinates_to_client_name_mapping"."coordinate",
-            "clients_daily"."client_name"
+
+          UNION ALL
+
+          SELECT
+            "coordinates_to_client_name_mapping"."coordinate" AS "coordinate",
+            "subscription_operations_daily"."client_name" AS "name",
+            "subscription_operations_daily"."total" AS "count"
+          FROM
+            "subscription_operations_daily"
+          LEFT JOIN
+            "coordinates_to_client_name_mapping"
+            ON "subscription_operations_daily"."client_name" = "coordinates_to_client_name_mapping"."client_name"
+          PREWHERE
+            "subscription_operations_daily"."target" IN (${sql.array(args.targetIds, 'String')})
+            AND "subscription_operations_daily"."timestamp" >= toDateTime(${formatDate(args.period.from)}, 'UTC')
+            AND "subscription_operations_daily"."timestamp" <= toDateTime(${formatDate(args.period.to)}, 'UTC')
+            ${args.excludedClients ? sql`AND "subscription_operations_daily"."client_name" NOT IN (${sql.array(args.excludedClients, 'String')})` : sql``}
+        ) AS "result"
+        GROUP BY
+          "result"."coordinate",
+          "result"."name"
+        ORDER BY
+          SUM("result"."count") DESC
+        LIMIT 10
+        BY
+          "result"."coordinate",
+          "result"."name"
         `,
         timeout: 10_000,
       })

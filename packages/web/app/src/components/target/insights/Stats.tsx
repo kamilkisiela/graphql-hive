@@ -1078,9 +1078,17 @@ export function OperationsStats({
   const allOperationsStats = query.data?.allOperations;
   dateRangeText = dateRangeText.toLowerCase();
 
+  const state = isFetching
+    ? 'fetching'
+    : isError
+      ? 'error'
+      : !operationsStats?.totalRequests
+        ? 'empty'
+        : 'success';
+
   return (
     <section className="space-y-12 text-gray-600 transition-opacity duration-700 ease-in-out dark:text-gray-400">
-      <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
+      <OperationsFallback state={state} refetch={refetch}>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <RequestsStats requests={operationsStats?.totalRequests} dateRangeText={dateRangeText} />
           <RPM
@@ -1128,12 +1136,12 @@ export function OperationsStats({
         </div>
       </OperationsFallback>
       <div>
-        <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
+        <OperationsFallback state={state} refetch={refetch}>
           <ClientsStats operationStats={operationsStats ?? null} />
         </OperationsFallback>
       </div>
       <div>
-        <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
+        <OperationsFallback state={state} refetch={refetch}>
           <OverTimeStats
             period={period}
             resolution={resolution}
@@ -1142,7 +1150,7 @@ export function OperationsStats({
         </OperationsFallback>
       </div>
       <div>
-        <OperationsFallback isError={isError} refetch={refetch} isFetching={isFetching}>
+        <OperationsFallback state={state} refetch={refetch}>
           <RpmOverTimeStats
             period={period}
             resolution={resolution}
@@ -1151,7 +1159,7 @@ export function OperationsStats({
         </OperationsFallback>
       </div>
       <div>
-        <OperationsFallback isError={isError} refetch={refetch}>
+        <OperationsFallback state={state} refetch={refetch}>
           <LatencyOverTimeStats
             period={period}
             operationStats={operationsStats ?? null}

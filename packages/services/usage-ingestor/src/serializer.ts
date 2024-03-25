@@ -1,5 +1,9 @@
 import LRU from 'tiny-lru';
-import type { ProcessedOperation, ProcessedRegistryRecord } from '@hive/usage-common';
+import type {
+  ProcessedOperation,
+  ProcessedRegistryRecord,
+  ProcessedSubscriptionOperation,
+} from '@hive/usage-common';
 import { cache } from './helpers';
 
 const delimiter = '\n';
@@ -39,6 +43,15 @@ export const operationsOrder = [
   'client_version',
 ] as const;
 
+export const subscriptionOperationsOrder = [
+  'target',
+  'timestamp',
+  'expires_at',
+  'hash',
+  'client_name',
+  'client_version',
+] as const;
+
 export const registryOrder = [
   'total',
   'target',
@@ -58,7 +71,7 @@ export function joinIntoSingleMessage(items: string[]): string {
 type KeysOfArray<T extends readonly any[]> = T extends readonly (infer U)[] ? U : never;
 
 // Important, it has to be in the same order as columns in the table
-export function stringifyOperation(operation: ProcessedOperation): string {
+export function stringifyQueryOrMutationOperation(operation: ProcessedOperation): string {
   const mapper: Record<KeysOfArray<typeof operationsOrder>, any> = {
     target: castValue(operation.target),
     timestamp: castDate(operation.timestamp),
@@ -70,6 +83,19 @@ export function stringifyOperation(operation: ProcessedOperation): string {
     client_name: castValue(operation.metadata?.client?.name),
     client_version: castValue(operation.metadata?.client?.version),
   };
+  return Object.values(mapper).join(',');
+}
+
+export function stringifySubscriptionOperation(operation: ProcessedSubscriptionOperation): string {
+  const mapper: Record<KeysOfArray<typeof subscriptionOperationsOrder>, any> = {
+    target: castValue(operation.target),
+    timestamp: castDate(operation.timestamp),
+    expires_at: castDate(operation.expiresAt),
+    hash: castValue(operation.operationHash),
+    client_name: castValue(operation.metadata?.client?.name),
+    client_version: castValue(operation.metadata?.client?.version),
+  };
+
   return Object.values(mapper).join(',');
 }
 

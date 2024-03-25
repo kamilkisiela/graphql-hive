@@ -203,6 +203,10 @@ test('should send data to Hive', async () => {
   // Operations
   const operations = report.operations;
   expect(operations).toHaveLength(1); // one operation
+  if (!operations?.length) {
+    throw new Error('Expected operations to be an array');
+  }
+
   const operation = operations[0];
 
   expect(operation.operationMapKey).toEqual(key);
@@ -211,7 +215,6 @@ test('should send data to Hive', async () => {
   expect(operation.execution.duration).toBeGreaterThanOrEqual(1500 * 1_000_000); // >=1500ms in microseconds
   expect(operation.execution.duration).toBeLessThan(3000 * 1_000_000); // <3000ms
   expect(operation.execution.errorsTotal).toBe(0);
-  expect(operation.execution.errors).toHaveLength(0);
   expect(operation.execution.ok).toBe(true);
 });
 
@@ -305,6 +308,10 @@ test('should send data to Hive (deprecated endpoint)', async () => {
   // Operations
   const operations = report.operations;
   expect(operations).toHaveLength(1); // one operation
+  if (!operations?.length) {
+    throw new Error('Expected operations to be an array');
+  }
+
   const operation = operations[0];
 
   expect(operation.operationMapKey).toEqual(key);
@@ -313,7 +320,6 @@ test('should send data to Hive (deprecated endpoint)', async () => {
   expect(operation.execution.duration).toBeGreaterThanOrEqual(1500 * 1_000_000); // >=1500ms in microseconds
   expect(operation.execution.duration).toBeLessThan(3000 * 1_000_000); // <3000ms
   expect(operation.execution.errorsTotal).toBe(0);
-  expect(operation.execution.errors).toHaveLength(0);
   expect(operation.execution.ok).toBe(true);
 });
 
@@ -672,6 +678,10 @@ test('should not send excluded operation name data to Hive', async () => {
   // Operations
   const operations = report.operations;
   expect(operations).toHaveLength(2); // two operations
+  if (!operations?.length) {
+    throw new Error('Expected operations to be an array');
+  }
+
   const operation = operations[0];
 
   expect(operation.operationMapKey).toEqual(key);
@@ -680,6 +690,5 @@ test('should not send excluded operation name data to Hive', async () => {
   expect(operation.execution.duration).toBeGreaterThanOrEqual(1500 * 1_000_000); // >=1500ms in microseconds
   expect(operation.execution.duration).toBeLessThan(3000 * 1_000_000); // <3000ms
   expect(operation.execution.errorsTotal).toBe(0);
-  expect(operation.execution.errors).toHaveLength(0);
   expect(operation.execution.ok).toBe(true);
 });

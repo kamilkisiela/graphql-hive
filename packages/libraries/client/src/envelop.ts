@@ -1,4 +1,6 @@
+import { GraphQLError } from 'graphql';
 import type { Plugin } from '@envelop/types';
+import { isAsyncIterable } from '@graphql-tools/utils';
 import { autoDisposeSymbol, createHive } from './client.js';
 import type { HiveClient, HivePluginOptions } from './internal/types.js';
 import { isHiveClient } from './internal/utils.js';
@@ -43,9 +45,27 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
 
       return {
         onExecuteDone({ result }) {
-          complete(args, result);
+          if (!isAsyncIterable(result)) {
+            complete(args, result);
+            return;
+          }
+
+          const errors: GraphQLError[] = [];
+          return {
+            onNext(ctx) {
+              if (ctx.result.errors) {
+                errors.push(...ctx.result.errors);
+              }
+            },
+            onEnd() {
+              complete(args, errors.length ? { errors } : {});
+            },
+          };
         },
       };
+    },
+    onSubscribe({ args }) {
+      hive.collectSubscriptionUsage({ args });
     },
   };
 }

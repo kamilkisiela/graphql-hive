@@ -37,17 +37,21 @@ test.concurrent('completing each step should result in updated Get Started progr
     throw new Error('Failed to create project');
   }
 
-  const { publishSchema, checkSchema, collectOperations, toggleTargetValidation } =
-    await createToken({
-      targetScopes: [
-        TargetAccessScope.Read,
-        TargetAccessScope.RegistryRead,
-        TargetAccessScope.RegistryWrite,
-        TargetAccessScope.Settings,
-      ],
-      projectScopes: [ProjectAccessScope.Read],
-      organizationScopes: [OrganizationAccessScope.Read],
-    });
+  const {
+    publishSchema,
+    checkSchema,
+    collectLegacyOperations: collectOperations,
+    toggleTargetValidation,
+  } = await createToken({
+    targetScopes: [
+      TargetAccessScope.Read,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+    ],
+    projectScopes: [ProjectAccessScope.Read],
+    organizationScopes: [OrganizationAccessScope.Read],
+  });
 
   // Step: publish schema
   await publishSchema({ sdl: 'type Query { foo: String }' }).then(r => r.expectNoGraphQLErrors());

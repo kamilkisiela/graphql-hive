@@ -1,21 +1,6 @@
 import { createHash } from 'node:crypto';
 import { hiveClientSymbol } from '../client.js';
-import type {
-  AsyncIterableIteratorOrValue,
-  AsyncIterableOrValue,
-  HiveClient,
-  HivePluginOptions,
-} from './types.js';
-
-export function isAsyncIterableIterator<T>(
-  value: AsyncIterableIteratorOrValue<T>,
-): value is AsyncIterableIterator<T> {
-  return typeof (value as any)?.[Symbol.asyncIterator] === 'function';
-}
-
-export function isAsyncIterable<T>(value: AsyncIterableOrValue<T>): value is AsyncIterable<T> {
-  return typeof (value as any)?.[Symbol.asyncIterator] === 'function';
-}
+import type { HiveClient, HivePluginOptions } from './types.js';
 
 export function memo<R, A, K>(fn: (arg: A) => R, cacheKeyFn: (arg: A) => K): (arg: A) => R {
   let memoizedResult: R | null = null;

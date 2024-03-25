@@ -1,4 +1,4 @@
-import { validateOperation, validateOperationMapRecord } from '../src/validation';
+import { validateOperation, validateOperationMapRecord } from '../src/usage-processor-1';
 
 test('correct operation should be valid', () => {
   expect(
@@ -21,7 +21,7 @@ test('correct operation should be valid', () => {
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
 test('operation with missing timestamp should be valid', () => {
@@ -43,7 +43,7 @@ test('operation with missing timestamp should be valid', () => {
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
 test('operation with missing operationName should be valid', () => {
@@ -65,7 +65,7 @@ test('operation with missing operationName should be valid', () => {
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
 test('operation with missing metadata should be valid', () => {
@@ -87,7 +87,7 @@ test('operation with missing metadata should be valid', () => {
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
 test('operation with empty metadata.client should be valid', () => {
@@ -111,10 +111,10 @@ test('operation with empty metadata.client should be valid', () => {
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
-test('operation with empty metadata.client.name should be valid', () => {
+test('operation with empty metadata.client.version should be valid', () => {
   expect(
     validateOperation(
       {
@@ -137,10 +137,10 @@ test('operation with empty metadata.client.name should be valid', () => {
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
-test('operation with empty metadata.client.version should be valid', () => {
+test('operation with empty metadata.client.name should be valid', () => {
   expect(
     validateOperation(
       {
@@ -163,7 +163,7 @@ test('operation with empty metadata.client.version should be valid', () => {
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
 test('operation with empty list in metadata.client.errors should be valid', () => {
@@ -185,7 +185,7 @@ test('operation with empty list in metadata.client.errors should be valid', () =
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
 test('operation with empty metadata.client.errors.path should be valid', () => {
@@ -211,7 +211,7 @@ test('operation with empty metadata.client.errors.path should be valid', () => {
         },
       },
     ),
-  ).toEqual({ valid: true });
+  ).toMatchObject({ valid: true });
 });
 
 test.skip('operation with empty metadata.client.errors.message should NOT be valid', () => {

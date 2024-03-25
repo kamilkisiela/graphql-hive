@@ -1,6 +1,14 @@
-import { DocumentNode, ExecutionArgs, GraphQLSchema, Kind, parse } from 'graphql';
+import {
+  DocumentNode,
+  ExecutionArgs,
+  GraphQLSchema,
+  Kind,
+  parse,
+  type GraphQLError,
+} from 'graphql';
 import type { GraphQLParams, Plugin } from 'graphql-yoga';
 import LRU from 'tiny-lru';
+import { isAsyncIterable } from '@graphql-tools/utils';
 import { autoDisposeSymbol, createHive } from './client.js';
 import type { CollectUsageCallback, HiveClient, HivePluginOptions } from './internal/types.js';
 import { isHiveClient } from './internal/utils.js';
@@ -74,17 +82,45 @@ export function useHive(clientOrOptions: HiveClient | HivePluginOptions): Plugin
     },
     onExecute() {
       return {
-        onExecuteDone({ args }) {
+        onExecuteDone({ args, result }) {
           const record = cache.get(args.contextValue.request);
-          if (record) {
-            record.executionArgs = args;
+          if (!record) {
+            return;
           }
+
+          record.executionArgs = args;
+
+          if (!isAsyncIterable(result)) {
+            return;
+          }
+
+          const errors: GraphQLError[] = [];
+
+          return {
+            onNext(ctx) {
+              if (!ctx.result.errors) {
+                return;
+              }
+              errors.push(...ctx.result.errors);
+            },
+            onEnd() {
+              record.callback(args, errors.length ? { errors } : {});
+            },
+          };
+        },
+      };
+    },
+    onSubscribe(context) {
+      return {
+        onSubscribeResult() {
+          hive.collectSubscriptionUsage({ args: context.args });
         },
       };
     },
     onResultProcess(context) {
       const record = cache.get(context.request);
-      if (!record || Array.isArray(context.result)) {
+
+      if (!record || Array.isArray(context.result) || isAsyncIterable(context.result)) {
         return;
       }
 

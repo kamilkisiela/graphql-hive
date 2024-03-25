@@ -102,12 +102,7 @@ export class OperationsManager {
     );
   }
 
-  async getOperationBody({
-    organization,
-    project,
-    target,
-    hash,
-  }: { hash: string } & TargetSelector) {
+  async getOperation({ organization, project, target, hash }: { hash: string } & TargetSelector) {
     await this.authManager.ensureTargetAccess({
       organization,
       project,
@@ -115,7 +110,7 @@ export class OperationsManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    return await this.reader.readOperationBody({
+    return await this.reader.readOperation({
       target,
       hash,
     });
@@ -163,6 +158,20 @@ export class OperationsManager {
         target,
       }),
     );
+  }
+
+  async hasCollectedSubscriptionOperations({ organization, project, target }: TargetSelector) {
+    this.logger.info('Checking existence of collected subscription operations (target=%s)', target);
+    await this.authManager.ensureTargetAccess({
+      organization,
+      project,
+      target,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    return this.reader.getHasCollectedSubscriptionOperations({
+      target,
+    });
   }
 
   async countRequestsWithSchemaCoordinate({

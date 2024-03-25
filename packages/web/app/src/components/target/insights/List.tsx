@@ -510,8 +510,7 @@ export function OperationsList({
 
   return (
     <OperationsFallback
-      isError={!!query.error}
-      isFetching={query.fetching}
+      state={query.fetching ? 'fetching' : query.error ? 'error' : 'success'}
       refetch={() => refetch()}
     >
       <OperationsTableContainer

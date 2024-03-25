@@ -20,6 +20,7 @@ import {
   TypeInfo,
   visit,
   visitWithTypeInfo,
+  type ExecutionArgs,
 } from 'graphql';
 import LRU from 'tiny-lru';
 import { normalizeOperation } from '@graphql-hive/core';
@@ -33,18 +34,11 @@ import type {
   HivePluginOptions,
   HiveUsagePluginOptions,
 } from './types.js';
-import {
-  cache,
-  cacheDocumentKey,
-  isAsyncIterable,
-  isAsyncIterableIterator,
-  logIf,
-  measureDuration,
-  memo,
-} from './utils.js';
+import { cache, cacheDocumentKey, logIf, measureDuration, memo } from './utils.js';
 
 interface UsageCollector {
   collect(): CollectUsageCallback;
+  collectSubscription(args: { args: ExecutionArgs }): void;
   dispose(): Promise<void>;
 }
 
@@ -59,21 +53,22 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
         return () => {};
       },
       async dispose() {},
+      collectSubscription() {},
     };
   }
 
-  let report: Report = {
-    size: 0,
-    map: {},
-    operations: [],
-  };
+  let reportSize = 0;
+  let reportMap: Record<string, OperationMapRecord> = {};
+  let reportOperations: RequestOperation[] = [];
+  let reportSubscriptionOperations: SubscriptionOperation[] = [];
+
   const options =
     typeof pluginOptions.usage === 'boolean' ? ({} as HiveUsagePluginOptions) : pluginOptions.usage;
   const selfHostingOptions = pluginOptions.selfHosting;
   const logger = pluginOptions.agent?.logger ?? console;
   const collector = memo(createCollector, arg => arg.schema);
   const excludeSet = new Set(options.exclude ?? []);
-  const agent = createAgent<CollectedOperation>(
+  const agent = createAgent<AgentAction>(
     {
       logger,
       ...(pluginOptions.agent ?? {
@@ -90,40 +85,50 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
     {
       prefix: 'usage',
       data: {
-        set(operation) {
-          report.operations.push({
-            operationMapKey: operation.key,
-            timestamp: operation.timestamp,
-            execution: {
-              ok: operation.execution.ok,
-              duration: operation.execution.duration,
-              errorsTotal: operation.execution.errorsTotal,
-              errors: operation.execution.errors,
-            },
-            metadata: {
-              client: operation.client,
-            },
-          });
+        set(action) {
+          if (action.type === 'request') {
+            const operation = action.data;
+            reportOperations.push({
+              operationMapKey: operation.key,
+              timestamp: operation.timestamp,
+              execution: {
+                ok: operation.execution.ok,
+                duration: operation.execution.duration,
+                errorsTotal: operation.execution.errorsTotal,
+              },
+              metadata: {
+                client: operation.client ?? undefined,
+              },
+            });
+          } else if (action.type === 'subscription') {
+            const operation = action.data;
+            reportSubscriptionOperations.push({
+              operationMapKey: operation.key,
+              timestamp: operation.timestamp,
+              metadata: {
+                client: operation.client ?? undefined,
+              },
+            });
+          }
 
-          report.size += 1;
+          reportSize += 1;
 
-          if (!report.map[operation.key]) {
-            report.map[operation.key] = {
-              operation: operation.operation,
-              operationName: operation.operationName,
-              fields: operation.fields,
+          if (!reportMap[action.data.key]) {
+            reportMap[action.data.key] = {
+              operation: action.data.operation,
+              operationName: action.data.operationName,
+              fields: action.data.fields,
             };
           }
         },
         size() {
-          return report.size;
+          return reportSize;
         },
         clear() {
-          report = {
-            size: 0,
-            map: {},
-            operations: [],
-          };
+          reportSize = 0;
+          reportMap = {};
+          reportOperations = [];
+          reportSubscriptionOperations = [];
         },
       },
       headers() {
@@ -131,9 +136,18 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
           'Content-Type': 'application/json',
           'graphql-client-name': 'Hive Client',
           'graphql-client-version': version,
+          'x-usage-api-version': '2',
         };
       },
       body() {
+        const report: Report = {
+          size: reportSize,
+          map: reportMap,
+          operations: reportOperations.length ? reportOperations : undefined,
+          subscriptionOperations: reportSubscriptionOperations.length
+            ? reportSubscriptionOperations
+            : undefined,
+        };
         return JSON.stringify(report);
       },
     },
@@ -163,11 +177,6 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
             if (result.logging) {
               logger.info(result.reason);
             }
-            return;
-          }
-
-          if (isAsyncIterableIterator(result) || isAsyncIterable(result)) {
-            logger.info('@stream @defer is not supported');
             return;
           }
 
@@ -204,25 +213,27 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
               processVariables: options.processVariables ?? false,
             });
             const { key, value: info } = collect(document, args.variableValues ?? null);
-
             agent.capture({
-              key,
-              timestamp: Date.now(),
-              operationName,
-              operation: info.document,
-              fields: info.fields,
-              execution: {
-                ok: errors.length === 0,
-                duration,
-                errorsTotal: errors.length,
-                errors,
+              type: 'request',
+              data: {
+                key,
+                timestamp: Date.now(),
+                operationName,
+                operation: info.document,
+                fields: info.fields,
+                execution: {
+                  ok: errors.length === 0,
+                  duration,
+                  errorsTotal: errors.length,
+                  errors,
+                },
+                // TODO: operationHash is ready to accept hashes of persisted operations
+                client:
+                  typeof args.contextValue !== 'undefined' &&
+                  typeof options.clientInfo !== 'undefined'
+                    ? options.clientInfo(args.contextValue)
+                    : createDefaultClientInfo()(args.contextValue),
               },
-              // TODO: operationHash is ready to accept hashes of persisted operations
-              client:
-                typeof args.contextValue !== 'undefined' &&
-                typeof options.clientInfo !== 'undefined'
-                  ? options.clientInfo(args.contextValue)
-                  : null,
             });
           }
         } catch (error) {
@@ -230,6 +241,53 @@ export function createUsage(pluginOptions: HivePluginOptions): UsageCollector {
           logger.error(`Failed to collect operation${details}`, error);
         }
       };
+    },
+    collectSubscription({ args }) {
+      const document = args.document;
+      const rootOperation = document.definitions.find(
+        o => o.kind === Kind.OPERATION_DEFINITION,
+      ) as OperationDefinitionNode;
+      const providedOperationName = args.operationName || rootOperation.name?.value;
+      const operationName = providedOperationName || 'anonymous';
+      // Check if operationName is a match with any string or regex in excludeSet
+      const isMatch = Array.from(excludeSet).some(excludingValue =>
+        excludingValue instanceof RegExp
+          ? excludingValue.test(operationName)
+          : operationName === excludingValue,
+      );
+      if (
+        !isMatch &&
+        shouldInclude({
+          operationName,
+          document,
+          variableValues: args.variableValues,
+          contextValue: args.contextValue,
+        })
+      ) {
+        const collect = collector({
+          schema: args.schema,
+          max: options.max ?? 1000,
+          ttl: options.ttl,
+          processVariables: options.processVariables ?? false,
+        });
+        const { key, value: info } = collect(document, args.variableValues ?? null);
+
+        agent.capture({
+          type: 'subscription',
+          data: {
+            key,
+            timestamp: Date.now(),
+            operationName,
+            operation: info.document,
+            fields: info.fields,
+            // TODO: operationHash is ready to accept hashes of persisted operations
+            client:
+              typeof args.contextValue !== 'undefined' && typeof options.clientInfo !== 'undefined'
+                ? options.clientInfo(args.contextValue)
+                : createDefaultClientInfo()(args.contextValue),
+          },
+        });
+      }
     },
   };
 }
@@ -570,8 +628,19 @@ type GraphQLNamedInputType = Exclude<
 export interface Report {
   size: number;
   map: OperationMap;
-  operations: Operation[];
+  operations?: RequestOperation[];
+  subscriptionOperations?: SubscriptionOperation[];
 }
+
+type AgentAction =
+  | {
+      type: 'request';
+      data: CollectedOperation;
+    }
+  | {
+      type: 'subscription';
+      data: CollectedSubscriptionOperation;
+    };
 
 interface CollectedOperation {
   key: string;
@@ -591,23 +660,39 @@ interface CollectedOperation {
   client?: ClientInfo | null;
 }
 
-interface Operation {
+interface CollectedSubscriptionOperation {
+  key: string;
+  timestamp: number;
+  operation: string;
+  operationName?: string | null;
+  fields: string[];
+  client?: ClientInfo | null;
+}
+
+interface RequestOperation {
   operationMapKey: string;
   timestamp: number;
   execution: {
     ok: boolean;
     duration: number;
     errorsTotal: number;
-    errors?: Array<{
-      message: string;
-      path?: string;
-    }>;
   };
   metadata?: {
     client?: {
-      name?: string;
-      version?: string;
-    } | null;
+      name: string;
+      version: string;
+    };
+  };
+}
+
+interface SubscriptionOperation {
+  operationMapKey: string;
+  timestamp: number;
+  metadata?: {
+    client?: {
+      name: string;
+      version: string;
+    };
   };
 }
 
@@ -619,4 +704,91 @@ interface OperationMapRecord {
 
 interface OperationMap {
   [key: string]: OperationMapRecord;
+}
+
+const defaultClientNameHeader = 'x-graphql-client-name';
+const defaultClientVersionHeader = 'x-graphql-client-version';
+
+type CreateDefaultClientInfo = {
+  /** HTTP configuration */
+  http?: {
+    clientHeaderName: string;
+    versionHeaderName: string;
+  };
+  /** GraphQL over Websocket configuration */
+  ws?: {
+    /** The name of the field within `context.connectionParams`, that contains the client info object. */
+    clientFieldName: string;
+  };
+};
+
+function createDefaultClientInfo(
+  config?: CreateDefaultClientInfo,
+): (context: unknown) => ClientInfo | null {
+  const clientNameHeader = config?.http?.clientHeaderName ?? defaultClientNameHeader;
+  const clientVersionHeader = config?.http?.versionHeaderName ?? defaultClientVersionHeader;
+  const clientFieldName = config?.ws?.clientFieldName ?? 'client';
+  return function defaultClientInfo(context: any) {
+    // whatwg Request
+    if (typeof context?.request?.headers?.get === 'function') {
+      const name = context.request.headers.get(clientNameHeader);
+      const version = context.request.headers.get(clientVersionHeader);
+      if (typeof name === 'string' && typeof version === 'string') {
+        return {
+          name,
+          version,
+        };
+      }
+
+      return null;
+    }
+
+    // Node.js IncomingMessage
+    if (context?.req?.headers && typeof context.req?.headers === 'object') {
+      const name = context.req.headers[clientNameHeader];
+      const version = context.req.headers[clientVersionHeader];
+      if (typeof name === 'string' && typeof version === 'string') {
+        return {
+          name,
+          version,
+        };
+      }
+
+      return null;
+    }
+
+    // Plain headers object
+    if (context?.headers && typeof context.req?.headers === 'object') {
+      const name = context.req.headers[clientNameHeader];
+      const version = context.req.headers[clientVersionHeader];
+      if (typeof name === 'string' && typeof version === 'string') {
+        return {
+          name,
+          version,
+        };
+      }
+
+      return null;
+    }
+
+    // GraphQL over WebSocket
+    if (
+      context?.connectionParams?.[clientFieldName] &&
+      typeof context.connectionParams?.[clientFieldName] === 'object'
+    ) {
+      const name = context.connectionParams[clientFieldName].name;
+      const version = context.connectionParams[clientFieldName].version;
+
+      if (typeof name === 'string' && typeof version === 'string') {
+        return {
+          name,
+          version,
+        };
+      }
+
+      return null;
+    }
+
+    return null;
+  };
 }
