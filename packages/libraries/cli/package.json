@@ -1,6 +1,6 @@
 {
   "name": "@graphql-hive/cli",
-  "version": "0.34.0",
+  "version": "0.34.1",
   "description": "A CLI util to manage and control your GraphQL Hive",
   "repository": {
     "type": "git",
@@ -44,7 +44,7 @@
     "version": "oclif readme && git add README.md"
   },
   "dependencies": {
-    "@graphql-hive/core": "0.2.3",
+    "@graphql-hive/core": "0.2.4",
     "@graphql-inspector/core": "5.1.0-alpha-20231208113249-34700c8a",
     "@graphql-tools/code-file-loader": "~8.1.0",
     "@graphql-tools/graphql-file-loader": "~8.0.0",
