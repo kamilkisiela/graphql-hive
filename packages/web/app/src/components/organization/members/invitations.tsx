@@ -444,7 +444,7 @@ export function OrganizationInvitations(props: {
         </div>
       </div>
       {organization.invitations.nodes.length > 0 ? (
-        <table className="w-full table-auto divide-y-DEFAULT divide-gray-500/20">
+        <table className="w-full table-auto divide-y-[1px] divide-gray-500/20">
           <thead>
             <tr>
               <th className="py-3 text-left text-sm font-semibold">Email</th>
@@ -453,7 +453,7 @@ export function OrganizationInvitations(props: {
               <th className="w-12 py-3 text-right text-sm font-semibold" />
             </tr>
           </thead>
-          <tbody className="divide-y-DEFAULT divide-gray-500/20">
+          <tbody className="divide-y-[1px] divide-gray-500/20">
             {organization.invitations.nodes.map(node => (
               <Invitation
                 key={node.id}

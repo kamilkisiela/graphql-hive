@@ -538,7 +538,7 @@ export function OrganizationMembers(props: {
           />
         </div>
       </div>
-      <table className="w-full table-auto divide-y-DEFAULT divide-gray-500/20">
+      <table className="w-full table-auto divide-y-[1px] divide-gray-500/20">
         <thead>
           <tr>
             <th
@@ -575,7 +575,7 @@ export function OrganizationMembers(props: {
             <th className="w-12 py-3 text-right text-sm font-semibold" />
           </tr>
         </thead>
-        <tbody className="divide-y-DEFAULT divide-gray-500/20">
+        <tbody className="divide-y-[1px] divide-gray-500/20">
           {sortedMembers.map(node => (
             <OrganizationMemberRow
               key={node.id}

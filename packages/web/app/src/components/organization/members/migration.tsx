@@ -254,7 +254,7 @@ function SimilarRoles(props: {
                           Members would <span className="text-emerald-500">gain</span> the following
                           permissions:
                         </p>
-                        <div className="space-y-2 divide-y-DEFAULT divide-gray-500/20">
+                        <div className="space-y-2 divide-y-[1px] divide-gray-500/20">
                           <SimilarRoleScopes
                             definitions={scopes.organization}
                             scopes={upgrade.organization}
@@ -289,7 +289,7 @@ function SimilarRoles(props: {
                           Members would <span className="text-red-500">lose</span> the following
                           permissions:
                         </p>
-                        <div className="space-y-2 divide-y-DEFAULT divide-gray-500/20">
+                        <div className="space-y-2 divide-y-[1px] divide-gray-500/20">
                           <SimilarRoleScopes
                             definitions={scopes.organization}
                             scopes={downgrade.organization}
@@ -573,7 +573,7 @@ function OrganizationMemberRolesMigrationGroup(props: {
               <ScrollArea className="h-72 text-left">
                 <div className="p-4">
                   <h4 className="mb-4 text-sm font-medium leading-none">Members</h4>
-                  <div className="divide-y-DEFAULT divide-gray-500/20">
+                  <div className="divide-y-[1px] divide-gray-500/20">
                     {memberGroup.members.map(member => {
                       const IconToUse = authProviderToIconAndTextMap[member.user.provider].icon;
                       const authMethod = authProviderToIconAndTextMap[member.user.provider].text;
@@ -860,7 +860,7 @@ export function OrganizationMemberRolesMigration(props: {
         </ProductUpdatesLink>
       </div>
       {organization.unassignedMembersToMigrate.length > 0 ? (
-        <table className="w-full table-auto divide-y-DEFAULT divide-gray-500/20">
+        <table className="w-full table-auto divide-y-[1px] divide-gray-500/20">
           <thead>
             <tr>
               <th className="w-[170px] py-4 text-left text-sm font-semibold">Role</th>
@@ -871,7 +871,7 @@ export function OrganizationMemberRolesMigration(props: {
               <th className="w-32 py-4 text-center text-sm font-semibold">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y-DEFAULT divide-gray-500/20">
+          <tbody className="divide-y-[1px] divide-gray-500/20">
             {organization.unassignedMembersToMigrate.map(memberGroup => (
               <OrganizationMemberRolesMigrationGroup
                 key={memberGroup.id}
