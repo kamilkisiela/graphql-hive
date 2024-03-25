@@ -1,5 +1,14 @@
 # @graphql-hive/client
 
+## 0.29.1
+
+### Patch Changes
+
+- [#4328](https://github.com/kamilkisiela/graphql-hive/pull/4328) [`bb0ff23`](https://github.com/kamilkisiela/graphql-hive/commit/bb0ff238ee7a413aca618b05cdf2187e6b886188) Thanks [@Hebilicious](https://github.com/Hebilicious)! - Use node specifier for crypto import
+
+- Updated dependencies [[`bb0ff23`](https://github.com/kamilkisiela/graphql-hive/commit/bb0ff238ee7a413aca618b05cdf2187e6b886188)]:
+  - @graphql-hive/core@0.2.4
+
 ## 0.29.0
 
 ### Minor Changes
