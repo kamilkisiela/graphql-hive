@@ -1,4 +1,4 @@
-import { createHmac } from 'crypto';
+import { createHmac } from 'node:crypto';
 import * as bcrypt from 'bcryptjs';
 import '../src/dev-polyfill';
 // eslint-disable-next-line import/no-extraneous-dependencies

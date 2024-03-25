@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { CompressionTypes, Kafka, logLevel, Partitioners, RetryOptions } from 'kafkajs';
 import type { ServiceLogger } from '@hive/service-common';
 import type { RawOperationMap, RawReport } from '@hive/usage-common';

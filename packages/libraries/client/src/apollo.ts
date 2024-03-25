@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import axios from 'axios';
 import type { DocumentNode } from 'graphql';
 import type { ApolloServerPlugin } from '@apollo/server';

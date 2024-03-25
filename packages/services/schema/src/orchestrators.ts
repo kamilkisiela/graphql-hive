@@ -1,4 +1,4 @@
-import { createHmac } from 'crypto';
+import { createHmac } from 'node:crypto';
 import type { FastifyRequest } from 'fastify';
 import got, { RequestError } from 'got';
 import type { DocumentNode } from 'graphql';

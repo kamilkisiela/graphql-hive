@@ -1,4 +1,4 @@
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import { paramCase } from 'param-case';
 import { Organization, OrganizationMemberRole } from '../../../shared/entities';
