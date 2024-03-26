@@ -1,0 +1,42 @@
+---
+title: Support for Subscription and Incremental Delivery Usage Reporting (Defer/Stream)
+description:
+  We now allow you to report usage for subscription operations and incremental delivery with the
+  client SDK.
+date: 2024-03-26
+authors: [laurin]
+---
+
+We are happy to announce that we now support reporting usage for GraphQL Subscription operations and
+GraphQL Operations via the incremental delivery protocol with the Hive Client SDK.
+
+That means the usage of your Subscription operations (executed via GraphQL over WebSocket or GraphQL
+over HTTP) and the usage of `@defer`/`@stream` GraphQL operations are now being used for determining
+conditional breaking changes in schema checks and schema publishes.
+
+**For our JavaScript/TypeScript users:** To benefit from this feature, you need to update your
+[Hive Client SDK to at least version `0.30.0`](https://github.com/kamilkisiela/graphql-hive/releases/tag/%40graphql-hive%2Fclient%400.30.0).
+
+We also updated the usage reporting recipes for GraphQL Yoga and Apollo Server for the recommended
+GraphQL over HTTP, GraphQL over SSE, and GraphQL over WebSocket (via `graphql-ws`) setup.
+
+- [GraphQL Yoga Usage Reporting](/docs/integrations/graphql-yoga#usage-reporting)
+- [Apollo Server Usage Reporting](/docs/integrations/apollo-server#usage-reporting)
+
+**For Apollo Router users:** We unfortunately can not provide support for GraphQL Subscriptions and
+GraphQL Subscription usage reporting. We are currently working on an alternative Rust Gateway that
+will support these features in the future. Please follow the following GitHub issue for updates:
+[Conductor GraphQL Subscription Support](https://github.com/the-guild-org/conductor/issues/14),
+[Hive Usage Reporting](https://github.com/the-guild-org/conductor/issues/369)
+
+**Other Gateway/SDK users**: We updated the
+[API specification for usage reporting](/docs/specs/usage-reports). Please adjust your custom
+implementation accordingly to report the usage of GraphQL Subscription operations.
+
+**Additional Note:** We are currently only collecting the usage of GraphQL Subscription operations.
+We are now evaluating what additional metrics might be relevant for the Subscription analytics. If
+you are interested, please contact us via our shared Slack channels or publicly via
+[this GitHub issue](https://github.com/kamilkisiela/graphql-hive/issues/3290).
+
+This was a highly requested feature and we are happy to finally provide it and make adjustments
+around types used by Subscription operations safer for everyone. Thank you for your patience!
