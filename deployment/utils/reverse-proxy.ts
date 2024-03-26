@@ -116,7 +116,13 @@ export class Proxy {
     return this;
   }
 
-  deployProxy(options: { replicas?: number }) {
+  deployProxy(options: {
+    envoy: {
+      replicas?: number;
+      memory?: string;
+      cpu?: string;
+    };
+  }) {
     const ns = new k8s.core.v1.Namespace('contour', {
       metadata: {
         name: 'contour',
@@ -156,8 +162,14 @@ export class Proxy {
         podLabels: {
           'vector.dev/exclude': 'true',
         },
+        resources: {
+          limits: {},
+        },
       },
       envoy: {
+        resources: {
+          limits: {},
+        },
         service: {
           loadBalancerIP: this.staticIp?.address,
           annotations:
@@ -175,15 +187,23 @@ export class Proxy {
           'prometheus.io/path': '/stats/prometheus',
         },
         autoscaling:
-          options?.replicas && options?.replicas > 1
+          options?.envoy?.replicas && options.envoy.replicas > 1
             ? {
                 enabled: true,
                 minReplicas: 1,
-                maxReplicas: options.replicas,
+                maxReplicas: options.envoy.replicas,
               }
             : {},
       },
     };
+
+    if (options.envoy?.cpu) {
+      (chartValues.envoy!.resources!.limits as any).cpu = options.envoy.cpu;
+    }
+
+    if (options.envoy?.memory) {
+      (chartValues.envoy!.resources!.limits as any).memory = options.envoy.memory;
+    }
 
     const proxyController = new k8s.helm.v3.Chart('contour-proxy', {
       ...CONTOUR_CHART,
