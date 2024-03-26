@@ -5,11 +5,12 @@ them in batches (as a single report, when a buffer is full or every few seconds)
 
 > It's recommended to send a report for more than 1 operation. The maximum payload size is 1 MB.
 
-| Name     | Value                                |
-| -------- | ------------------------------------ |
-| Endpoint | `https://app.graphql-hive.com/usage` |
-| Header   | `Authorization: Bearer token-here`   |
-| Method   | `POST`                               |
+| Name                 | Value                                |
+| -------------------- | ------------------------------------ |
+| Endpoint             | `https://app.graphql-hive.com/usage` |
+| Authorization Header | `Authorization: Bearer token-here`   |
+| API version Header   | `X-Usage-API-Version: 2`             |
+| Method               | `POST`                               |
 
 ## Data structure
 
@@ -18,84 +19,49 @@ them in batches (as a single report, when a buffer is full or every few seconds)
 
 ```typescript
 export interface Report {
-  /**
-   * Number of collected operations
-   */
   size: number
   map: {
     [k: string]: OperationMapRecord
   }
-  /** request executions (mutation and query) */
-  operations: RequestOperation[]
-  /** subscription executions */
-  subscriptionOperations: SubscriptionOperation[]
+  operations?: RequestOperation[]
+  subscriptionOperations?: SubscriptionOperation[]
 }
 
 export interface OperationMapRecord {
-  /**
-   * Operation's body
-   * e.g. query me { me { id name } }
-   */
   operation: string
-  /**
-   * Name of the operation ('me')
-   */
   operationName?: string
   /**
    * @minItems 1
-   * Schema coordinates (['Query', 'Query.me', 'User', 'User.id', 'User.name'])
    */
   fields: [string, ...string[]]
 }
 
 export interface RequestOperation {
-  /**
-   * The key of the operation in the operation map
-   */
-  operationMapKey: string
-  /**
-   * A number representing the milliseconds elapsed since the UNIX epoch.
-   */
   timestamp: number
+  operationMapKey: string
   execution: Execution
   metadata?: Metadata
 }
 
 export interface Execution {
-  /**
-   * true - successful operation
-   * false - failed operation
-   */
   ok: boolean
-  /**
-   * Duration of the entire operation in nanoseconds
-   */
   duration: number
-  /**
-   * Total number of GraphQL errors
-   */
   errorsTotal: number
+}
+
+export interface SubscriptionOperation {
+  timestamp: number
+  operationMapKey: string
+  metadata?: Metadata
+}
+
+export interface Client {
+  name: string
+  version: string
 }
 
 export interface Metadata {
   client?: Client
-}
-
-export interface Client {
-  name?: string
-  version?: string
-}
-
-export interface SubscriptionOperation {
-  /**
-   * A number representing the milliseconds elapsed since the UNIX epoch.
-   */
-  timestamp: number
-  /**
-   * The key of the operation in the operation map
-   */
-  operationMapKey: string
-  metadata?: Metadata
 }
 ```
 
@@ -106,141 +72,135 @@ export interface SubscriptionOperation {
 
 ```json
 {
-  "$ref": "#/definitions/Report",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "definitions": {
-    "Client": {
-      "additionalProperties": false,
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "version": {
-          "type": "string"
-        }
-      },
-      "type": "object"
+  "title": "Report",
+  "additionalProperties": false,
+  "type": "object",
+  "properties": {
+    "size": {
+      "type": "integer"
     },
-    "Execution": {
-      "additionalProperties": false,
-      "properties": {
-        "duration": {
-          "description": "Duration of the entire operation in nanoseconds",
-          "type": "number"
-        },
-        "errorsTotal": {
-          "description": "Total number of GraphQL errors",
-          "type": "number"
-        },
-        "ok": {
-          "description": "true - successful operation false - failed operation",
-          "type": "boolean"
-        }
-      },
-      "required": ["ok", "duration", "errorsTotal"],
-      "type": "object"
-    },
-    "Metadata": {
-      "additionalProperties": false,
-      "properties": {
-        "client": {
-          "$ref": "#/definitions/Client"
-        }
-      },
-      "type": "object"
-    },
-    "Operation": {
-      "additionalProperties": false,
-      "properties": {
-        "execution": {
-          "$ref": "#/definitions/Execution"
-        },
-        "metadata": {
-          "$ref": "#/definitions/Metadata"
-        },
-        "operationMapKey": {
-          "description": "The key of the operation in the operation map",
-          "type": "string"
-        },
-        "timestamp": {
-          "description": "A number representing the milliseconds elapsed since the UNIX epoch.",
-          "type": "number"
-        }
-      },
-      "required": ["operationMapKey", "timestamp", "execution"],
-      "type": "object"
-    },
-    "SubscriptionOperation": {
-      "additionalProperties": false,
+    "map": {
       "type": "object",
-      "properties": {
-        "timestamp": {
-          "description": "A number representing the milliseconds elapsed since the UNIX epoch.",
-          "type": "number"
-        },
-        "operationMapKey": {
-          "type": "string"
-        },
-        "metadata": {
-          "$ref": "#/definitions/Metadata"
+      "patternProperties": {
+        "^(.*)$": {
+          "title": "OperationMapRecord",
+          "additionalProperties": false,
+          "type": "object",
+          "properties": {
+            "operation": {
+              "type": "string"
+            },
+            "operationName": {
+              "type": "string"
+            },
+            "fields": {
+              "minItems": 1,
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": ["operation", "fields"]
         }
       }
     },
-    "OperationMap": {
-      "additionalProperties": {
-        "$ref": "#/definitions/OperationMapRecord"
-      },
-      "type": "object"
-    },
-    "OperationMapRecord": {
-      "additionalProperties": false,
-      "properties": {
-        "fields": {
-          "description": "Schema coordinates (['Query', 'Query.me', 'User', 'User.id', 'User.name'])",
-          "items": {
+    "operations": {
+      "type": "array",
+      "items": {
+        "title": "RequestOperation",
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "integer"
+          },
+          "operationMapKey": {
             "type": "string"
           },
-          "type": "array"
+          "execution": {
+            "title": "Execution",
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "ok": {
+                "type": "boolean"
+              },
+              "duration": {
+                "type": "integer"
+              },
+              "errorsTotal": {
+                "type": "integer"
+              }
+            },
+            "required": ["ok", "duration", "errorsTotal"]
+          },
+          "metadata": {
+            "title": "Metadata",
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "client": {
+                "title": "Client",
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name", "version"]
+              }
+            }
+          }
         },
-        "operation": {
-          "description": "Operation's body e.g. query me { me { id name } }",
-          "type": "string"
-        },
-        "operationName": {
-          "description": "Name of the operation ('me')",
-          "type": "string"
-        }
-      },
-      "required": ["operation", "fields"],
-      "type": "object"
+        "required": ["timestamp", "operationMapKey", "execution"]
+      }
     },
-    "Report": {
-      "additionalProperties": false,
-      "properties": {
-        "map": {
-          "$ref": "#/definitions/OperationMap"
-        },
-        "operations": {
-          "items": {
-            "$ref": "#/definitions/Operation"
+    "subscriptionOperations": {
+      "type": "array",
+      "items": {
+        "title": "SubscriptionOperation",
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "integer"
           },
-          "type": "array"
-        },
-        "subscriptionOperations": {
-          "items": {
-            "$ref": "#/definitions/SubscriptionOperation"
+          "operationMapKey": {
+            "type": "string"
           },
-          "type": "array"
+          "metadata": {
+            "title": "Metadata",
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "client": {
+                "title": "Client",
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "string"
+                  }
+                },
+                "required": ["name", "version"]
+              }
+            }
+          }
         },
-        "size": {
-          "description": "Number of collected operations",
-          "type": "number"
-        }
-      },
-      "required": ["size", "map"],
-      "type": "object"
+        "required": ["timestamp", "operationMapKey"]
+      }
     }
-  }
+  },
+  "required": ["size", "map"]
 }
 ```
 
@@ -343,6 +303,7 @@ export interface SubscriptionOperation {
 curl -X POST \
   https://app.graphql-hive.com/usage \
   -H 'Authorization: Bearer token-here' \
+  -H 'X-Usage-API-Version: 2' \
   -H 'content-type: application/json' \
   -d '{ "size": 1, "map": { "aaa": { "operationName": "me", "operation": "query me { me { id } }", "fields": ["Query", "Query.me", "User", "User.id"] } }, "operations": [{ "operationMapKey" : "c3b6d9b0", "timestamp" : 1663158676535, "execution" : { "ok" : true, "duration" : 150000000, "errorsTotal" : 0 }, "metadata" : { "client" : { "name" : "demo" , "version" : "0.0.1" } } } ] }'
 ```
