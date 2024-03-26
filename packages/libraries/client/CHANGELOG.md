@@ -1,5 +1,16 @@
 # @graphql-hive/client
 
+## 0.30.0
+
+### Minor Changes
+
+- [#4176](https://github.com/kamilkisiela/graphql-hive/pull/4176) [`df0ea91`](https://github.com/kamilkisiela/graphql-hive/commit/df0ea919201d3242148d41248e08231ec55f398b) Thanks [@n1ru4l](https://github.com/n1ru4l)! - Support usage reporting for incremental delivery (`@defer`/`@stream`) operations with GraphQL Yoga
+
+- [#4176](https://github.com/kamilkisiela/graphql-hive/pull/4176) [`df0ea91`](https://github.com/kamilkisiela/graphql-hive/commit/df0ea919201d3242148d41248e08231ec55f398b) Thanks [@n1ru4l](https://github.com/n1ru4l)! - Add APIs for reporting subscription usage.
+  The Hive client will now report the usage of Subscription operations to GraphQL Hive.
+
+  We recommend referring to the corresponding documentation of your server framework for configuration adjustments.
+
 ## 0.29.1
 
 ### Patch Changes
