@@ -27,7 +27,11 @@ export function isGraphQLError(error: unknown): error is GraphQLError {
 export const HiveError = GraphQLError;
 
 export class AccessError extends HiveError {
-  constructor(reason: string) {
-    super(`No access (reason: "${reason}")`);
+  constructor(reason: string, code: string = 'UNAUTHORISED') {
+    super(`No access (reason: "${reason}")`, {
+      extensions: {
+        code,
+      },
+    });
   }
 }

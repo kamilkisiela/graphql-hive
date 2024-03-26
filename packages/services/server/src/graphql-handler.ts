@@ -12,7 +12,6 @@ import {
 } from 'graphql';
 import { createYoga, Plugin, useErrorHandler } from 'graphql-yoga';
 import hyperid from 'hyperid';
-import zod from 'zod';
 import { isGraphQLError } from '@envelop/core';
 import { useGenericAuth } from '@envelop/generic-auth';
 import { useGraphQlJit } from '@envelop/graphql-jit';
@@ -21,11 +20,12 @@ import { useSentry } from '@envelop/sentry';
 import { useYogaHive } from '@graphql-hive/client';
 import { usePersistedOperations } from '@graphql-yoga/plugin-persisted-operations';
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
-import { HiveError, Registry, RegistryContext } from '@hive/api';
+import { Registry, RegistryContext } from '@hive/api';
 import { cleanRequestId } from '@hive/service-common';
 import { runWithAsyncContext } from '@sentry/node';
 import { asyncStorage } from './async-storage';
 import type { HiveConfig } from './environment';
+import { resolveUser, type SupertokensSession } from './supertokens';
 import { useArmor } from './use-armor';
 import { extractUserId, useSentryUser } from './use-sentry-user';
 
@@ -36,23 +36,6 @@ const abortControllerCache = new WeakMap();
 function hashSessionId(sessionId: string): string {
   return createHash('sha256').update(sessionId).digest('hex');
 }
-
-const SuperTokenAccessTokenModel = zod.object({
-  version: zod.literal('1'),
-  superTokensUserId: zod.string(),
-  /**
-   * Supertokens for some reason omits externalUserId from the access token payload if it is null.
-   */
-  externalUserId: zod.optional(zod.union([zod.string(), zod.null()])),
-  email: zod.string(),
-});
-
-const SuperTokenSessionVerifyModel = zod.object({
-  status: zod.literal('OK'),
-  session: zod.object({
-    userDataInJWT: SuperTokenAccessTokenModel,
-  }),
-});
 
 export interface GraphQLHandlerOptions {
   graphiqlEndpoint: string;
@@ -69,12 +52,10 @@ export interface GraphQLHandlerOptions {
   persistedOperations: Record<string, DocumentNode | string> | null;
 }
 
-export type SuperTokenSessionPayload = zod.TypeOf<typeof SuperTokenAccessTokenModel>;
-
 interface Context extends RegistryContext {
   req: FastifyRequest;
   reply: FastifyReply;
-  session: SuperTokenSessionPayload | null;
+  session: SupertokensSession | null;
 }
 
 const NoIntrospection: ValidationRule = (context: ValidationContext) => ({
@@ -204,27 +185,8 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
       useGenericAuth({
         mode: 'resolve-only',
         contextFieldName: 'session',
-        resolveUserFn: async (ctx: Context) => {
-          if (ctx.headers['authorization']) {
-            let authHeader = ctx.headers['authorization'];
-            authHeader = Array.isArray(authHeader) ? authHeader[0] : authHeader;
-
-            const authHeaderParts = authHeader.split(' ');
-            if (authHeaderParts.length === 2 && authHeaderParts[0] === 'Bearer') {
-              const accessToken = authHeaderParts[1];
-              // The token issued by Hive is always 32 characters long.
-              // Everything longer should be treated as a supertokens token (JWT).
-              if (accessToken.length > 32) {
-                return await verifySuperTokensSession(
-                  options.supertokens.connectionUri,
-                  options.supertokens.apiKey,
-                  accessToken,
-                );
-              }
-            }
-          }
-
-          return null;
+        async resolveUserFn(ctx: Context) {
+          return resolveUser(ctx);
         },
       }),
       useYogaHive({
@@ -357,52 +319,6 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
     );
   };
 };
-
-/**
- * Verify whether a SuperTokens access token session is valid.
- * https://app.swaggerhub.com/apis/supertokens/CDI/2.20#/Session%20Recipe/verifySession
- */
-async function verifySuperTokensSession(
-  connectionUri: string,
-  apiKey: string,
-  accessToken: string,
-): Promise<SuperTokenSessionPayload> {
-  const response = await fetch(connectionUri + '/appid-public/public/recipe/session/verify', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'api-key': apiKey,
-      rid: 'session',
-      'cdi-version': '4.0',
-    },
-    body: JSON.stringify({
-      accessToken,
-      enableAntiCsrf: false,
-      doAntiCsrfCheck: false,
-      checkDatabase: true,
-    }),
-  });
-  const body = await response.text();
-  if (response.status !== 200) {
-    console.error(
-      `SuperTokens session verification failed with status ${response.status}.\n` + body,
-    );
-    throw new Error(`SuperTokens instance returned an unexpected error.`);
-  }
-
-  const result = SuperTokenSessionVerifyModel.safeParse(JSON.parse(body));
-
-  if (result.success === false) {
-    console.error(`SuperTokens session verification failed.\n` + body);
-    throw new HiveError(`Invalid token provided`);
-  }
-
-  // ensure externalUserId is a string or null
-  return {
-    ...result.data.session.userDataInJWT,
-    externalUserId: result.data.session.userDataInJWT.externalUserId ?? null,
-  };
-}
 
 function isOperationDefinitionNode(def: DefinitionNode): def is OperationDefinitionNode {
   return def.kind === Kind.OPERATION_DEFINITION;

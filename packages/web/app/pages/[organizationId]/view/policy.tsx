@@ -13,7 +13,6 @@ import { OrganizationAccessScope } from '@/gql/graphql';
 import { RegistryModel } from '@/graphql';
 import { useOrganizationAccess } from '@/lib/access/organization';
 import { useRouteSelector } from '@/lib/hooks';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const OrganizationPolicyPageQuery = graphql(`
   query OrganizationPolicyPageQuery($selector: OrganizationSelectorInput!) {
@@ -222,7 +221,5 @@ function OrganizationPolicyPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(OrganizationPolicyPage);

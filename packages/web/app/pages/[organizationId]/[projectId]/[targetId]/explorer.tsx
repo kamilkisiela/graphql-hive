@@ -18,7 +18,6 @@ import { MetaTitle } from '@/components/v2';
 import { noSchemaVersion, noValidSchemaVersion } from '@/components/v2/empty-list';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const ExplorerPage_SchemaExplorerFragment = graphql(`
   fragment ExplorerPage_SchemaExplorerFragment on SchemaExplorer {
@@ -161,6 +160,9 @@ function ExplorerPageContent() {
     }
   }, [setDataRetentionInDays, retentionInDays]);
 
+  /* to avoid janky behaviour we keep track if the version has a successful explorer once, and in that case always show the filter bar. */
+  const isFilterVisible = useRef(false);
+
   if (query.error) {
     return <QueryError error={query.error} />;
   }
@@ -172,9 +174,6 @@ function ExplorerPageContent() {
   const isCDNEnabled = query.data;
   const latestSchemaVersion = currentTarget?.latestSchemaVersion;
   const latestValidSchemaVersion = currentTarget?.latestValidSchemaVersion;
-
-  /* to avoid janky behaviour we keep track if the version has a successful explorer once, and in that case always show the filter bar. */
-  const isFilterVisible = useRef(false);
 
   if (latestValidSchemaVersion?.explorer) {
     isFilterVisible.current = true;
@@ -279,7 +278,5 @@ function ExplorerPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(ExplorerPage);

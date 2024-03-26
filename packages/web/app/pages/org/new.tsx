@@ -5,7 +5,6 @@ import { authenticated } from '@/components/authenticated-container';
 import { Button } from '@/components/ui/button';
 import { MetaTitle } from '@/components/v2';
 import { CreateOrganizationForm } from '@/components/v2/modals/create-organization';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 
 function CreateOrgPage(): ReactElement {
   const router = useRouter();
@@ -27,7 +26,5 @@ function CreateOrgPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(CreateOrgPage);

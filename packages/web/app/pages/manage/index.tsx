@@ -6,7 +6,6 @@ import { Page } from '@/components/common';
 import { DATE_RANGE_OPTIONS, floorToMinute } from '@/components/common/TimeFilter';
 import { Checkbox as RadixCheckbox, RadixSelect, Tooltip } from '@/components/v2';
 import { subDays } from '@/lib/date-time';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 
 type DateRangeOptions = Exclude<(typeof DATE_RANGE_OPTIONS)[number], { key: 'all' }>;
 
@@ -121,7 +120,5 @@ function Manage() {
     </Page>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(Manage);

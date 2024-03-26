@@ -42,7 +42,6 @@ import { ProjectType } from '@/gql/graphql';
 import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { subDays } from '@/lib/date-time';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const SetTargetValidationMutation = graphql(`
   mutation Settings_SetTargetValidation($input: SetTargetValidationInput!) {
@@ -1059,7 +1058,5 @@ function SettingsPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(SettingsPage);

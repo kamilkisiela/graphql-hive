@@ -17,7 +17,6 @@ import { EmptyList, MetaTitle } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
 import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 
 function OperationsView({
   organizationCleanId,
@@ -186,7 +185,5 @@ function InsightsPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(InsightsPage);

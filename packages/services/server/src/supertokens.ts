@@ -1,27 +1,50 @@
-import { OverrideableBuilder } from 'supertokens-js-override/lib/build';
-import EmailVerification from 'supertokens-node/recipe/emailverification';
-import SessionNode from 'supertokens-node/recipe/session';
+import type { FastifyBaseLogger, FastifyReply, FastifyRequest } from 'fastify';
+import { CryptoProvider } from 'packages/services/api/src/modules/shared/providers/crypto';
+import { OverrideableBuilder } from 'supertokens-js-override/lib/build/index.js';
+import supertokens from 'supertokens-node';
+import EmailVerification from 'supertokens-node/recipe/emailverification/index.js';
+import SessionNode from 'supertokens-node/recipe/session/index.js';
 import type { ProviderInput } from 'supertokens-node/recipe/thirdparty/types';
-import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemailpassword';
-import { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
-import { TypeInput } from 'supertokens-node/types';
-import { env } from '@/env/backend';
-import { appInfo } from '@/lib/supertokens/app-info';
+import ThirdPartyEmailPasswordNode from 'supertokens-node/recipe/thirdpartyemailpassword/index.js';
+import type { TypeInput as ThirdPartEmailPasswordTypeInput } from 'supertokens-node/recipe/thirdpartyemailpassword/types';
+import type { TypeInput } from 'supertokens-node/types';
+import zod from 'zod';
+import { HiveError, type Storage } from '@hive/api';
+import type { EmailsApi } from '@hive/emails';
+import { captureException } from '@sentry/node';
+import { createTRPCProxyClient, httpLink } from '@trpc/client';
+import { createInternalApiCaller } from './api';
+import { env } from './environment';
 import {
   createOIDCSuperTokensProvider,
   getOIDCSuperTokensOverrides,
-} from '@/lib/supertokens/third-party-email-password-node-oidc-provider';
-import { createThirdPartyEmailPasswordNodeOktaProvider } from '@/lib/supertokens/third-party-email-password-node-okta-provider';
-import type { EmailsApi } from '@hive/emails';
-import type { InternalApi } from '@hive/server';
-import { createTRPCProxyClient, CreateTRPCProxyClient, httpLink } from '@trpc/client';
+} from './supertokens/oidc-provider';
+import { createThirdPartyEmailPasswordNodeOktaProvider } from './supertokens/okta-provider';
 
-export const backendConfig = (): TypeInput => {
+const SuperTokenAccessTokenModel = zod.object({
+  version: zod.literal('1'),
+  superTokensUserId: zod.string(),
+  /**
+   * Supertokens for some reason omits externalUserId from the access token payload if it is null.
+   */
+  externalUserId: zod.optional(zod.union([zod.string(), zod.null()])),
+  email: zod.string(),
+});
+
+export type SupertokensSession = zod.TypeOf<typeof SuperTokenAccessTokenModel>;
+
+export const backendConfig = (requirements: {
+  storage: Storage;
+  crypto: CryptoProvider;
+  logger: FastifyBaseLogger;
+}): TypeInput => {
+  const { logger } = requirements;
   const emailsService = createTRPCProxyClient<EmailsApi>({
-    links: [httpLink({ url: `${env.emailsEndpoint}/trpc` })],
+    links: [httpLink({ url: `${env.hiveServices.emails?.endpoint}/trpc` })],
   });
-  const internalApi = createTRPCProxyClient<InternalApi>({
-    links: [httpLink({ url: `${env.serverEndpoint}/trpc` })],
+  const internalApi = createInternalApiCaller({
+    storage: requirements.storage,
+    crypto: requirements.crypto,
   });
   const providers: ProviderInput[] = [];
 
@@ -70,12 +93,24 @@ export const backendConfig = (): TypeInput => {
     );
   }
 
+  logger.info('SuperTokens providers: %s', providers.map(p => p.config.thirdPartyId).join(', '));
+  logger.info('SuperTokens websiteDomain: %s', env.hiveServices.webApp.url);
+  logger.info('SuperTokens apiDomain: %s', env.graphql.origin);
+
   return {
+    framework: 'fastify',
     supertokens: {
-      connectionURI: env.supertokens.connectionUri,
+      connectionURI: env.supertokens.connectionURI,
       apiKey: env.supertokens.apiKey,
     },
-    appInfo: appInfo(),
+    appInfo: {
+      // learn more about this on https://supertokens.com/docs/thirdpartyemailpassword/appinfo
+      appName: 'GraphQL Hive',
+      apiDomain: env.graphql.origin,
+      websiteDomain: env.hiveServices.webApp.url,
+      apiBasePath: '/auth-api',
+      websiteBasePath: '/auth',
+    },
     recipeList: [
       ThirdPartyEmailPasswordNode.init({
         providers,
@@ -166,7 +201,7 @@ export const backendConfig = (): TypeInput => {
 };
 
 const getEnsureUserOverrides = (
-  internalApi: CreateTRPCProxyClient<InternalApi>,
+  internalApi: ReturnType<typeof createInternalApiCaller>,
 ): ThirdPartEmailPasswordTypeInput['override'] => ({
   apis: originalImplementation => ({
     ...originalImplementation,
@@ -178,7 +213,7 @@ const getEnsureUserOverrides = (
       const response = await originalImplementation.emailPasswordSignUpPOST(input);
 
       if (response.status === 'OK') {
-        await internalApi.ensureUser.mutate({
+        await internalApi.ensureUser({
           superTokensUserId: response.user.id,
           email: response.user.email,
           oidcIntegrationId: null,
@@ -195,7 +230,7 @@ const getEnsureUserOverrides = (
       const response = await originalImplementation.emailPasswordSignInPOST(input);
 
       if (response.status === 'OK') {
-        await internalApi.ensureUser.mutate({
+        await internalApi.ensureUser({
           superTokensUserId: response.user.id,
           email: response.user.email,
           oidcIntegrationId: null,
@@ -211,7 +246,6 @@ const getEnsureUserOverrides = (
 
       function extractOidcId(args: typeof input) {
         if (input.provider.id === 'oidc') {
-          // eslint-disable-next-line prefer-destructuring
           const oidcId: unknown = args.userContext['oidcId'];
           if (typeof oidcId === 'string') {
             return oidcId;
@@ -223,7 +257,7 @@ const getEnsureUserOverrides = (
       const response = await originalImplementation.thirdPartySignInUpPOST(input);
 
       if (response.status === 'OK') {
-        await internalApi.ensureUser.mutate({
+        await internalApi.ensureUser({
           superTokensUserId: response.user.id,
           email: response.user.email,
           oidcIntegrationId: extractOidcId(input),
@@ -291,3 +325,64 @@ const composeSuperTokensOverrides = (
     return impl;
   },
 });
+
+export function initSupertokens(requirements: {
+  storage: Storage;
+  crypto: CryptoProvider;
+  logger: FastifyBaseLogger;
+}) {
+  supertokens.init(backendConfig(requirements));
+}
+
+export async function resolveUser(ctx: { req: FastifyRequest; reply: FastifyReply }) {
+  let session: SessionNode.SessionContainer | undefined;
+
+  try {
+    session = await SessionNode.getSession(ctx.req, ctx.reply, {
+      sessionRequired: false,
+      antiCsrfCheck: false,
+      checkDatabase: true,
+    });
+  } catch (error) {
+    if (SessionNode.Error.isErrorFromSuperTokens(error)) {
+      // Check whether the email is already verified.
+      // If it is not then we need to redirect to the email verification page - which will trigger the email sending.
+      if (error.type === SessionNode.Error.INVALID_CLAIMS) {
+        throw new HiveError('Your account is not verified. Please verify your email address.', {
+          extensions: {
+            code: 'VERIFY_EMAIL',
+          },
+        });
+      } else if (
+        error.type === SessionNode.Error.TRY_REFRESH_TOKEN ||
+        error.type === SessionNode.Error.UNAUTHORISED
+      ) {
+        throw new HiveError('Invalid session', {
+          extensions: {
+            code: 'NEEDS_REFRESH',
+          },
+        });
+      }
+    }
+
+    ctx.req.log.error(error, 'Error while resolving user');
+    captureException(error);
+
+    throw error;
+  }
+
+  const payload = session?.getAccessTokenPayload();
+
+  if (!payload) {
+    return null;
+  }
+
+  const result = SuperTokenAccessTokenModel.safeParse(payload);
+
+  if (result.success === false) {
+    console.error(`SuperTokens session verification failed.\n` + JSON.stringify(payload));
+    throw new HiveError(`Invalid token provided`);
+  }
+
+  return result.data;
+}

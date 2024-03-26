@@ -10,7 +10,6 @@ import type { CreateOperationMutationType } from '@/components/target/laboratory
 import type { DeleteCollectionMutationType } from '@/components/target/laboratory/delete-collection-modal';
 import type { DeleteOperationMutationType } from '@/components/target/laboratory/delete-operation-modal';
 import type { CreateAccessToken_CreateTokenMutation } from '@/components/v2/modals/create-access-token';
-import type { CreateOrganizationMutation } from '@/components/v2/modals/create-organization';
 import type { CreateProjectMutation } from '@/components/v2/modals/create-project';
 import type { CreateTarget_CreateTargetMutation } from '@/components/v2/modals/create-target';
 import type { DeleteOrganizationDocument } from '@/components/v2/modals/delete-organization';
@@ -19,7 +18,6 @@ import { type DeleteTargetMutation } from '@/components/v2/modals/delete-target'
 import { graphql } from '@/gql';
 import { ResultOf, VariablesOf } from '@graphql-typed-document-node/core';
 import { Cache, QueryInput, UpdateResolver } from '@urql/exchange-graphcache';
-import { OrganizationsQuery } from '../../pages';
 import { CollectionsQuery } from '../../pages/[organizationId]/[projectId]/[targetId]/laboratory';
 import {
   TokensDocument,
@@ -72,28 +70,6 @@ const deleteAlerts: TypedDocumentNodeUpdateResolver<
       id: deleteAlerts.ok.updatedProject.id,
     });
   }
-};
-
-const createOrganization: TypedDocumentNodeUpdateResolver<typeof CreateOrganizationMutation> = (
-  { createOrganization },
-  _args,
-  cache,
-) => {
-  updateQuery(
-    cache,
-    {
-      query: OrganizationsQuery,
-    },
-    data => {
-      if (createOrganization.ok) {
-        data.organizations.nodes.unshift(
-          // TODO: figure out masking
-          createOrganization.ok.createdOrganizationPayload.organization as any,
-        );
-        data.organizations.total += 1;
-      }
-    },
-  );
 };
 
 const deleteOrganization: TypedDocumentNodeUpdateResolver<typeof DeleteOrganizationDocument> = (
@@ -362,7 +338,6 @@ const createOperationInDocumentCollection: TypedDocumentNodeUpdateResolver<
 
 // UpdateResolver
 export const Mutation = {
-  createOrganization,
   deleteOrganization,
   createProject,
   deleteProject,

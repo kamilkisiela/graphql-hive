@@ -37,6 +37,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/components/ui/use-toast';
 import { ProductUpdatesLink } from '@/components/v2/docs-note';
+import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@/gql/graphql';
 import { Scope, scopes } from '@/lib/access/common';
@@ -69,7 +70,7 @@ export function MemberRoleMigrationStickyNote(props: {
 
   const isAdmin = organization?.me.isAdmin;
   const unassignedMembersToMigrateCount = organization?.unassignedMembersToMigrate.length;
-  const migrationDeadline = __frontend_env.migrations.member_roles_deadline;
+  const migrationDeadline = env.migrations.member_roles_deadline;
   const daysLeft = useRef<number>();
 
   if (typeof daysLeft.current !== 'number') {
@@ -205,7 +206,7 @@ function SimilarRoles(props: {
       <p className="text-xs text-gray-400">
         Maybe some of the existing roles are similar to the one you are about to create?
       </p>
-      <div className="my-4 h-[1px] w-full bg-gray-900" />
+      <div className="my-4 h-px w-full bg-gray-900" />
       <div className="space-y-4 text-sm">
         {props.roles.map(role => {
           const downgrade = {

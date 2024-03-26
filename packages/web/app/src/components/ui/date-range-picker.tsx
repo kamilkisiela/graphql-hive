@@ -361,7 +361,7 @@ export function DateRangePicker(props: DateRangePickerProps): JSX.Element {
           </div>
         </div>
         {showCalendar && (
-          <div className="absolute left-0 top-0  translate-x-[-100%]">
+          <div className="absolute left-0 top-0  -translate-x-full">
             <div className="bg-popover mr-1 rounded-md border p-4">
               <Button
                 variant="ghost"

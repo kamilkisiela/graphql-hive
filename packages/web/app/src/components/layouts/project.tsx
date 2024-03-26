@@ -9,6 +9,7 @@ import { CreateTargetModal } from '@/components/v2/modals';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
+import { useLastVisitedOrganizationWriter } from '@/lib/last-visited-org';
 import { ProjectMigrationToast } from '../project/migration-toast';
 
 export enum Page {
@@ -100,6 +101,8 @@ export function ProjectLayout({
     member: currentOrganization?.me ?? null,
     redirect: true,
   });
+
+  useLastVisitedOrganizationWriter(currentOrganization?.cleanId);
 
   const me = useFragment(ProjectLayout_MeFragment, props.me);
   const organizationConnection = useFragment(
@@ -239,7 +242,7 @@ export function ProjectLayout({
               </Tabs.List>
             </Tabs>
           ) : (
-            <div className="flex flex-row gap-x-8 border-b-[2px] border-b-transparent px-4 py-3">
+            <div className="flex flex-row gap-x-8 border-b-2 border-b-transparent px-4 py-3">
               <div className="h-5 w-12 animate-pulse rounded-full bg-gray-800" />
               <div className="h-5 w-12 animate-pulse rounded-full bg-gray-800" />
               <div className="h-5 w-12 animate-pulse rounded-full bg-gray-800" />

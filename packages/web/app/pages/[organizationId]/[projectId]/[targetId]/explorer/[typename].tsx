@@ -19,7 +19,6 @@ import { MetaTitle } from '@/components/v2';
 import { noSchemaVersion } from '@/components/v2/empty-list';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 
 export const TypeRenderFragment = graphql(`
   fragment TypeRenderFragment on GraphQLNamedType {
@@ -255,7 +254,5 @@ function TypeExplorerPage() {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(TypeExplorerPage);

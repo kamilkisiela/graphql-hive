@@ -1,25 +1,17 @@
 import Document, { DocumentContext, Head, Html, Main, NextScript } from 'next/document';
 import 'regenerator-runtime/runtime';
-// don't remove this import ; it will break the built app ; but not the dev app :)
-import '@/config/frontend-env';
 
 export default class MyDocument extends Document<{
   ids: Array<string>;
   css: string;
-  frontendEnv: (typeof import('@/config/frontend-env'))['env'];
 }> {
   static async getInitialProps(ctx: DocumentContext) {
-    if (globalThis.process.env.BUILD !== '1') {
-      await import('../environment');
-    }
-    const { env: frontendEnv } = await import('@/config/frontend-env');
     const initialProps = await Document.getInitialProps(ctx);
     const page = await ctx.renderPage();
 
     return {
       ...initialProps,
       ...page,
-      frontendEnv,
     };
   }
 
@@ -37,14 +29,8 @@ export default class MyDocument extends Document<{
           <link rel="preconnect" href="https://rsms.me/" />
           <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
           <link rel="icon" href="/just-logo.svg" type="image/svg+xml" />
-          <script
-            type="module"
-            dangerouslySetInnerHTML={{
-              __html: `globalThis.__frontend_env = ${JSON.stringify(
-                (this.props as any).frontendEnv,
-              )}`,
-            }}
-          />
+          {/* eslint-disable-next-line @next/next/no-sync-scripts -- if it's not sync, then env variables are not present) */}
+          <script src="/__ENV.js" />
         </Head>
         <body className="bg-transparent font-sans text-white">
           <Main />

@@ -6,7 +6,6 @@ import { Button, DataWrapper } from '@/components/v2';
 import { graphql } from '@/gql';
 import { useNotifications } from '@/lib/hooks/use-notifications';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { cn } from '@/lib/utils';
 
 const classes = {
@@ -130,7 +129,5 @@ function JoinOrganizationPage() {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(JoinOrganizationPage);

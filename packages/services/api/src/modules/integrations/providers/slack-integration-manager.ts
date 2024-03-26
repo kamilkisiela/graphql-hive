@@ -42,6 +42,7 @@ export class SlackIntegrationManager {
       ...input,
       scope: OrganizationAccessScope.INTEGRATIONS,
     });
+    this.logger.debug('Updating organization');
     await this.storage.addSlackIntegration({
       organization: input.organization,
       token: this.crypto.encrypt(input.token),
@@ -54,6 +55,7 @@ export class SlackIntegrationManager {
       ...input,
       scope: OrganizationAccessScope.INTEGRATIONS,
     });
+    this.logger.debug('Updating organization');
     await this.storage.deleteSlackIntegration({
       organization: input.organization,
     });

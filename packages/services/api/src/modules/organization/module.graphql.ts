@@ -8,6 +8,7 @@ export default gql`
     organizationTransferRequest(
       selector: OrganizationTransferRequestSelector!
     ): OrganizationTransfer
+    myDefaultOrganization(previouslyVisitedOrganizationId: ID): OrganizationPayload
   }
 
   extend type Mutation {

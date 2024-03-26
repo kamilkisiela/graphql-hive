@@ -2,23 +2,19 @@ import { CryptoProvider } from 'packages/services/api/src/modules/shared/provide
 import { z } from 'zod';
 import type { Storage } from '@hive/api';
 import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@hive/api';
-import { FastifyRequest, handleTRPCError } from '@hive/service-common';
 import type { inferAsyncReturnType } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
 
 export async function createContext({
   storage,
   crypto,
-  req,
 }: {
   storage: Storage;
   crypto: CryptoProvider;
-  req: FastifyRequest;
 }) {
   return {
     storage,
     crypto,
-    req,
   };
 }
 
@@ -32,10 +28,9 @@ const oidcDefaultScopes = [
 ];
 
 const t = initTRPC.context<Context>().create();
-const procedure = t.procedure.use(handleTRPCError);
 
 export const internalApiRouter = t.router({
-  ensureUser: procedure
+  ensureUser: t.procedure
     .input(
       z
         .object({
@@ -58,64 +53,8 @@ export const internalApiRouter = t.router({
 
       return result;
     }),
-  getDefaultOrgForUser: procedure
-    .input(
-      z.object({
-        superTokensUserId: z.string(),
-        lastOrgId: z.union([z.string(), z.null()]),
-      }),
-    )
-    .query(async ({ input, ctx }) => {
-      const user = await ctx.storage.getUserBySuperTokenId({
-        superTokensUserId: input.superTokensUserId,
-      });
 
-      // For an OIDC Integration User we want to return the linked organization
-      if (user?.oidcIntegrationId) {
-        const oidcIntegration = await ctx.storage.getOIDCIntegrationById({
-          oidcIntegrationId: user.oidcIntegrationId,
-        });
-        if (oidcIntegration) {
-          const org = await ctx.storage.getOrganization({
-            organization: oidcIntegration.linkedOrganizationId,
-          });
-
-          return {
-            id: org.id,
-            cleanId: org.cleanId,
-          };
-        }
-      }
-
-      // This is the organizaton that got stored as an cookie
-      // We make sure it actually exists before directing to it.
-      if (input.lastOrgId) {
-        const org = await ctx.storage.getOrganizationByCleanId({ cleanId: input.lastOrgId });
-
-        if (org) {
-          return {
-            id: org.id,
-            cleanId: org.cleanId,
-          };
-        }
-      }
-
-      if (user?.id) {
-        const allAllOraganizations = await ctx.storage.getOrganizations({ user: user.id });
-
-        if (allAllOraganizations.length > 0) {
-          const someOrg = allAllOraganizations[0];
-
-          return {
-            id: someOrg.id,
-            cleanId: someOrg.cleanId,
-          };
-        }
-      }
-
-      return null;
-    }),
-  getOIDCIntegrationById: procedure
+  getOIDCIntegrationById: t.procedure
     .input(
       z.object({
         oidcIntegrationId: z.string().min(1),
@@ -144,5 +83,7 @@ export const internalApiRouter = t.router({
       };
     }),
 });
+
+export const createInternalApiCaller = t.createCallerFactory(internalApiRouter);
 
 export type InternalApi = typeof internalApiRouter;

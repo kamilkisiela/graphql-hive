@@ -15,7 +15,6 @@ import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectType, RegistryModel } from '@/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { useRouteSelector } from '@/lib/hooks';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 
 type CompositeSchema = Extract<
   DocumentType<typeof SchemaView_SchemaFragment>,
@@ -360,7 +359,5 @@ function SchemaPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(SchemaPage);

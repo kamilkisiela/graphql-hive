@@ -14,7 +14,6 @@ import { EmptyList, noSchemaVersion } from '@/components/v2/empty-list';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
 import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { cn } from '@/lib/utils';
 import { TypeRenderer, TypeRenderFragment } from './[typename]';
 
@@ -381,7 +380,5 @@ function UnusedSchemaExplorerPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(UnusedSchemaExplorerPage);

@@ -1,10 +1,5 @@
 import bundleAnalyzer from '@next/bundle-analyzer';
-
-// For the dev server we want to make sure that the correct environment variables are set :)
-// during build we don't need environment variables!
-if (globalThis.process.env.BUILD !== '1') {
-  await import('./environment');
-}
+import './environment';
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: globalThis.process.env.ANALYZE === '1',

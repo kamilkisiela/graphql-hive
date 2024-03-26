@@ -28,7 +28,6 @@ import { ProjectType } from '@/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 
 const GithubIntegration_GithubIntegrationDetailsQuery = graphql(`
   query getGitHubIntegrationDetails($selector: OrganizationSelectorInput!) {
@@ -107,7 +106,7 @@ function GitHubIntegration(props: {
               <div className="flex items-center gap-x-2 pl-1">
                 <CheckIcon className="size-4 text-emerald-500" />
                 <div className="flex size-6 items-center justify-center rounded-sm bg-white">
-                  <HiveLogo className="size-[80%]" />
+                  <HiveLogo className="size-4/5" />
                 </div>
 
                 <div className="font-semibold text-[#adbac7]">
@@ -123,7 +122,7 @@ function GitHubIntegration(props: {
               <div className="flex items-center gap-x-2 pl-1">
                 <CheckIcon className="size-4 text-emerald-500" />
                 <div className="flex size-6 items-center justify-center rounded-sm bg-white">
-                  <HiveLogo className="size-[80%]" />
+                  <HiveLogo className="size-4/5" />
                 </div>
 
                 <div className="font-semibold text-[#adbac7]">
@@ -413,7 +412,5 @@ function SettingsPage() {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(SettingsPage);

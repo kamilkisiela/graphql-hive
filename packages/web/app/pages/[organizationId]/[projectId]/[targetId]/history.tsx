@@ -19,7 +19,6 @@ import { DiffIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { CriticalityLevel, ProjectType } from '@/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { cn } from '@/lib/utils';
 import {
   CheckCircledIcon,
@@ -164,7 +163,7 @@ function ListPage({
           </NextLink>
           {version.githubMetadata ? (
             <a
-              className="ml-[-1px] text-xs font-medium text-gray-500 hover:text-gray-400"
+              className="-ml-px text-xs font-medium text-gray-500 hover:text-gray-400"
               target="_blank"
               rel="noreferrer"
               href={`https://github.com/${version.githubMetadata.repository}/commit/${version.githubMetadata.commit}`}
@@ -883,7 +882,5 @@ function HistoryPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(HistoryPage);

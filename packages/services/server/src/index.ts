@@ -2,8 +2,16 @@
 import * as fs from 'fs';
 import got from 'got';
 import { DocumentNode, GraphQLError, stripIgnoredCharacters } from 'graphql';
+import supertokens from 'supertokens-node';
+import {
+  errorHandler as supertokensErrorHandler,
+  plugin as supertokensFastifyPlugin,
+} from 'supertokens-node/framework/fastify/index.js';
+import cors from '@fastify/cors';
+import type { FastifyCorsOptionsDelegateCallback } from '@fastify/cors';
 import 'reflect-metadata';
 import { hostname } from 'os';
+import formDataPlugin from '@fastify/formbody';
 import { createRegistry, createTaskRunner, CryptoProvider, LogFn, Logger } from '@hive/api';
 import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
 import { ArtifactStorageReader } from '@hive/cdn-script/artifact-storage-reader';
@@ -36,6 +44,7 @@ import { asyncStorage } from './async-storage';
 import { env } from './environment';
 import { graphqlHandler } from './graphql-handler';
 import { clickHouseElapsedDuration, clickHouseReadDuration } from './metrics';
+import { initSupertokens } from './supertokens';
 
 export async function main() {
   init({
@@ -69,6 +78,7 @@ export async function main() {
   const server = await createServer({
     name: 'graphql-api',
     tracing: true,
+    cors: false,
     log: {
       level: env.log.level,
       requests: env.log.requests,
@@ -92,6 +102,31 @@ export async function main() {
       });
     },
   );
+
+  server.setErrorHandler(supertokensErrorHandler());
+  await server.register(cors, (_: unknown): FastifyCorsOptionsDelegateCallback => {
+    return (req, callback) => {
+      if (req.headers.origin?.startsWith(env.hiveServices.webApp.url)) {
+        // We need to treat requests from the web app a bit differently than others.
+        // The web app requires to define the `Access-Control-Allow-Origin` header (not *).
+        callback(null, {
+          origin: env.hiveServices.webApp.url,
+          credentials: true,
+          methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+          allowedHeaders: [
+            'Content-Type',
+            'graphql-client-version',
+            'graphql-client-name',
+            'x-request-id',
+            ...supertokens.getAllCORSHeaders(),
+          ],
+        });
+        return;
+      }
+
+      callback(null, {});
+    };
+  });
 
   const storage = await createPostgreSQLStorage(createConnectionString(env.postgres), 10);
 
@@ -292,9 +327,7 @@ export async function main() {
       schemaConfig: env.hiveServices.webApp
         ? {
             schemaPublishLink(input) {
-              let url = `${env.hiveServices.webApp!.url}/${input.organization.cleanId}/${
-                input.project.cleanId
-              }/${input.target.cleanId}`;
+              let url = `${env.hiveServices.webApp.url}/${input.organization.cleanId}/${input.project.cleanId}/${input.target.cleanId}`;
 
               if (input.version) {
                 url += `/history/${input.version.id}`;
@@ -303,9 +336,7 @@ export async function main() {
               return url;
             },
             schemaCheckLink(input) {
-              return `${env.hiveServices.webApp!.url}/${input.organization.cleanId}/${
-                input.project.cleanId
-              }/${input.target.cleanId}/checks/${input.schemaCheckId}`;
+              return `${env.hiveServices.webApp.url}/${input.organization.cleanId}/${input.project.cleanId}/${input.target.cleanId}/checks/${input.schemaCheckId}`;
             },
           }
         : {},
@@ -359,17 +390,26 @@ export async function main() {
 
     const crypto = new CryptoProvider(env.encryptionSecret);
 
+    initSupertokens({
+      storage,
+      crypto,
+      logger: server.log,
+    });
+
+    await server.register(formDataPlugin);
+    await server.register(supertokensFastifyPlugin);
+
     await registerTRPC(server, {
       router: internalApiRouter,
-      createContext({ req }) {
-        return createContext({ storage, crypto, req });
+      createContext() {
+        return createContext({ storage, crypto });
       },
     });
 
     server.route({
       method: ['GET', 'HEAD'],
       url: '/_health',
-      async handler(req, res) {
+      async handler(_, res) {
         res.status(200).send(); // eslint-disable-line @typescript-eslint/no-floating-promises -- false positive, FastifyReply.then returns void
       },
     });

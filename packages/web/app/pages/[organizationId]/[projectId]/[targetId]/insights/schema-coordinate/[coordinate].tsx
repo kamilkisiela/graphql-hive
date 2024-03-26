@@ -26,7 +26,6 @@ import { CHART_PRIMARY_COLOR } from '@/constants';
 import { graphql } from '@/gql';
 import { formatNumber, formatThroughput, toDecimal, useRouteSelector } from '@/lib/hooks';
 import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { useChartStyles } from '@/utils';
 
 const SchemaCoordinateView_SchemaCoordinateStatsQuery = graphql(`
@@ -495,7 +494,5 @@ function SchemaCoordinatePage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection();
 
 export default authenticated(SchemaCoordinatePage);

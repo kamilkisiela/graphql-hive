@@ -223,8 +223,6 @@ const app = deployApp({
   dbMigrations,
   image: docker.factory.getImageId('app', imagesTag),
   docker,
-  supertokens,
-  emails,
   zendesk,
   billing,
   github: githubApp,

@@ -16,7 +16,6 @@ import { BillingPlanType } from '@/gql/graphql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
 import { useRouteSelector } from '@/lib/hooks';
-import { withSessionProtection } from '@/lib/supertokens/guard';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 
 const ManageSubscriptionInner_OrganizationFragment = graphql(`
@@ -168,6 +167,16 @@ function Inner(props: {
     [setOperationsRateLimit],
   );
 
+  const isFetching =
+    updateOrgRateLimitMutationState.fetching ||
+    downgradeToHobbyMutationState.fetching ||
+    upgradeToProMutationState.fetching;
+
+  const billingPlans = useFragment(
+    ManageSubscriptionInner_BillingPlansFragment,
+    props.billingPlans,
+  );
+
   useEffect(() => {
     if (query.data?.billingPlans?.length) {
       if (organization.plan === plan) {
@@ -181,15 +190,6 @@ function Inner(props: {
       }
     }
   }, [organization.plan, organization.rateLimit.operations, plan, query.data?.billingPlans]);
-
-  if (!canAccess) {
-    return null;
-  }
-
-  const isFetching =
-    updateOrgRateLimitMutationState.fetching ||
-    downgradeToHobbyMutationState.fetching ||
-    upgradeToProMutationState.fetching;
 
   const upgrade = useCallback(async () => {
     if (isFetching) {
@@ -262,6 +262,10 @@ function Inner(props: {
     });
   }, [organization.cleanId, operationsRateLimit, updateOrgRateLimitMutation, isFetching]);
 
+  if (!canAccess) {
+    return null;
+  }
+
   const renderActions = () => {
     if (plan === organization.plan) {
       if (organization.rateLimit.operations !== operationsRateLimit * 1_000_000) {
@@ -311,11 +315,6 @@ function Inner(props: {
     upgradeToProMutationState.error ||
     downgradeToHobbyMutationState.error ||
     updateOrgRateLimitMutationState.error;
-
-  const billingPlans = useFragment(
-    ManageSubscriptionInner_BillingPlansFragment,
-    props.billingPlans,
-  );
 
   // TODO: this is also not safe as billingPlans might be an empty list.
   const selectedPlan = billingPlans.find(v => v.planType === plan) ?? billingPlans[0];
@@ -441,6 +440,20 @@ const ManageSubscriptionPageQuery = graphql(`
 
 function ManageSubscriptionPageContent() {
   const router = useRouteSelector();
+
+  /**
+   * If Stripe is not enabled we redirect the user to the organization.
+   */
+  if (!getIsStripeEnabled()) {
+    void router.push({
+      pathname: '/[organizationId]',
+      query: {
+        organizationId: router.organizationId,
+      },
+    });
+    return null;
+  }
+
   const [query] = useQuery({
     query: ManageSubscriptionPageQuery,
     variables: {
@@ -522,23 +535,5 @@ function ManageSubscriptionPage(): ReactElement {
     </>
   );
 }
-
-export const getServerSideProps = withSessionProtection(async context => {
-  /**
-   * If Stripe is not enabled we redirect the user to the organization.
-   */
-  const isStripeEnabled = getIsStripeEnabled();
-  if (!isStripeEnabled) {
-    const parts = String(context.resolvedUrl).split('/');
-    parts.pop();
-    return {
-      redirect: {
-        destination: parts.join('/'),
-        permanent: false,
-      },
-    };
-  }
-  return { props: {} };
-});
 
 export default authenticated(ManageSubscriptionPage);
