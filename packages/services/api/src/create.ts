@@ -50,6 +50,7 @@ import { IdTranslator } from './modules/shared/providers/id-translator';
 import { Logger } from './modules/shared/providers/logger';
 import { Mutex } from './modules/shared/providers/mutex';
 import { PG_POOL_CONFIG } from './modules/shared/providers/pg-pool';
+import { HivePubSub, PUB_SUB_CONFIG } from './modules/shared/providers/pub-sub';
 import { REDIS_CONFIG, RedisConfig, RedisProvider } from './modules/shared/providers/redis';
 import { S3_CONFIG, type S3Config } from './modules/shared/providers/s3-config';
 import { Storage } from './modules/shared/providers/storage';
@@ -111,6 +112,7 @@ export function createRegistry({
   supportConfig,
   emailsEndpoint,
   organizationOIDC,
+  pubSub,
 }: {
   logger: Logger;
   storage: Storage;
@@ -144,6 +146,7 @@ export function createRegistry({
   supportConfig: SupportConfig | null;
   emailsEndpoint?: string;
   organizationOIDC: boolean;
+  pubSub: HivePubSub;
 }) {
   const s3Config: S3Config = {
     client: new AwsClient({
@@ -265,6 +268,7 @@ export function createRegistry({
       scope: Scope.Singleton,
       useValue: storage.pool,
     },
+    { provide: PUB_SUB_CONFIG, scope: Scope.Singleton, useValue: pubSub },
     encryptionSecretProvider(encryptionSecret),
     provideSchemaModuleConfig(schemaConfig),
   ];

@@ -9,8 +9,12 @@ import {
 } from 'supertokens-node/framework/fastify/index.js';
 import cors from '@fastify/cors';
 import type { FastifyCorsOptionsDelegateCallback } from '@fastify/cors';
+import { createRedisEventTarget } from '@graphql-yoga/redis-event-target';
 import 'reflect-metadata';
 import { hostname } from 'os';
+import { createPubSub } from 'graphql-yoga';
+import { Redis } from 'ioredis';
+import { HivePubSub } from 'packages/services/api/src/modules/shared/providers/pub-sub';
 import formDataPlugin from '@fastify/formbody';
 import { createRegistry, createTaskRunner, CryptoProvider, LogFn, Logger } from '@hive/api';
 import { createArtifactRequestHandler } from '@hive/cdn-script/artifact-handler';
@@ -153,6 +157,36 @@ export async function main() {
     10,
     tracing ? [tracing.instrumentSlonik()] : [],
   );
+
+  // TODO: graceful shutdown, error handlers etc.
+  const pubSub = createPubSub({
+    eventTarget: createRedisEventTarget({
+      publishClient: new Redis({
+        host: env.redis.host,
+        port: env.redis.port,
+        password: env.redis.password,
+        maxRetriesPerRequest: null,
+        db: 0,
+        enableReadyCheck: false,
+        reconnectOnError(error) {
+          server.log.warn('Redis reconnectOnError (error=%s)', error);
+          return 1;
+        },
+      }),
+      subscribeClient: new Redis({
+        host: env.redis.host,
+        port: env.redis.port,
+        password: env.redis.password,
+        maxRetriesPerRequest: null,
+        db: 0,
+        enableReadyCheck: false,
+        reconnectOnError(error) {
+          server.log.warn('Redis reconnectOnError (error=%s)', error);
+          return 1;
+        },
+      }),
+    }),
+  }) as HivePubSub;
 
   let dbPurgeTaskRunner: null | ReturnType<typeof createTaskRunner> = null;
 
@@ -362,6 +396,7 @@ export async function main() {
         : {},
       organizationOIDC: env.organizationOIDC,
       supportConfig: env.zendeskSupport,
+      pubSub,
     });
 
     let persistedOperations: Record<string, DocumentNode | string> | null = null;
