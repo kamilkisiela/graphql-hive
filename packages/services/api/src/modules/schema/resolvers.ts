@@ -205,7 +205,7 @@ export const resolvers: SchemaModule.Resolvers = {
         },
       };
     },
-    async schemaPublish(_, { input }, { injector, abortSignal }, info) {
+    async schemaPublish(_, { input }, { injector, request }, info) {
       const [organization, project, target] = await Promise.all([
         injector.get(OrganizationManager).getOrganizationIdByToken(),
         injector.get(ProjectManager).getProjectIdByToken(),
@@ -227,7 +227,7 @@ export const resolvers: SchemaModule.Resolvers = {
           target,
           isSchemaPublishMissingUrlErrorSelected,
         },
-        abortSignal,
+        request.signal,
       );
 
       if ('changes' in result) {
@@ -239,7 +239,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return result;
     },
-    async schemaDelete(_, { input }, { injector, abortSignal }) {
+    async schemaDelete(_, { input }, { injector, request }) {
       const [organization, project, target] = await Promise.all([
         injector.get(OrganizationManager).getOrganizationIdByToken(),
         injector.get(ProjectManager).getProjectIdByToken(),
@@ -267,7 +267,7 @@ export const resolvers: SchemaModule.Resolvers = {
           target,
           checksum,
         },
-        abortSignal,
+        request.signal,
       );
 
       return {
