@@ -45,7 +45,7 @@
     "@repeaterjs/repeater": "3.0.5",
     "@sentry/nextjs": "7.108.0",
     "@stripe/react-stripe-js": "2.6.2",
-    "@stripe/stripe-js": "3.0.10",
+    "@stripe/stripe-js": "3.1.0",
     "@tanstack/react-table": "8.0.0-beta.8",
     "@theguild/editor": "1.2.5",
     "@trpc/client": "10.45.2",
