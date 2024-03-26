@@ -35,7 +35,8 @@ jobs:
             "event_type": "deploy-staging",
             "client_payload": {
               "actor": "${{ github.actor }}",
-              "ref": "${{ github.sha }}"
+              "ref": "${{ github.sha }}",
+              "pulumiRefresh": "true"
             }
           }'
 
