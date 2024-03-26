@@ -7,8 +7,6 @@ import { build as tsup } from 'tsup';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
-const requireShim = fs.readFileSync(normalize(join(__dirname, './banner.js')), 'utf-8');
-
 interface BuildOptions {
   external?: string[];
   next?: {
@@ -140,7 +138,7 @@ async function compile(
     noExternal: dependencies,
     external: buildOptions.external,
     banner: {
-      js: requireShim,
+      js: "const require = (await import('node:module')).createRequire(import.meta.url);const __filename = (await import('node:url')).fileURLToPath(import.meta.url);const __dirname = (await import('node:path')).dirname(__filename);",
     },
   });
 }
