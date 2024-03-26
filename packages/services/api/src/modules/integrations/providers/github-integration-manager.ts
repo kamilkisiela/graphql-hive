@@ -60,6 +60,7 @@ export class GitHubIntegrationManager {
       ...input,
       scope: OrganizationAccessScope.INTEGRATIONS,
     });
+    this.logger.debug('Updating organization');
     await this.storage.addGitHubIntegration({
       organization: input.organization,
       installationId: input.installationId,
@@ -72,6 +73,7 @@ export class GitHubIntegrationManager {
       ...input,
       scope: OrganizationAccessScope.INTEGRATIONS,
     });
+    this.logger.debug('Updating organization');
     await this.storage.deleteGitHubIntegration({
       organization: input.organization,
     });
