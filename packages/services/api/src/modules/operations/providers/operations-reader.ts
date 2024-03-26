@@ -1,19 +1,11 @@
-import {
-  addMinutes,
-  differenceInDays,
-  format,
-  startOfDay,
-  startOfHour,
-  startOfMinute,
-  subHours,
-  subMinutes,
-} from 'date-fns';
+import { addMinutes, differenceInDays, format } from 'date-fns';
 import { Injectable } from 'graphql-modules';
 import * as z from 'zod';
 import { batch } from '@theguild/buddy';
 import type { DateRange } from '../../../shared/entities';
 import { batchBy } from '../../../shared/helpers';
 import { Logger } from '../../shared/providers/logger';
+import { pickTableByPeriod } from '../lib/pick-table-by-provider';
 import { ClickHouse, RowOf, sql } from './clickhouse-client';
 import { calculateTimeWindow } from './helpers';
 import { SqlValue } from './sql';
@@ -62,20 +54,6 @@ function ensureNumber(value: number | string): number {
   return parseFloat(value);
 }
 
-const msMinute = 60 * 1_000;
-const msHour = msMinute * 60;
-const msDay = msHour * 24;
-
-// How long rows are kept in the database, per table.
-const tableTTLInHours = {
-  daily: 365 * 24,
-  hourly: 30 * 24,
-  minutely: 24,
-};
-
-const thresholdDataPointPerDay = 28;
-const thresholdDataPointPerHour = 24;
-
 @Injectable({
   global: true,
 })
@@ -122,56 +100,11 @@ export class OperationsReader {
 
     const now = new Date();
 
-    // The oldest data point we can fetch from the database, per table.
-    // ! We subtract 2 minutes as we round the date to the nearest minute on UI
-    //   and there's also a chance that request will be made at 59th second of the minute
-    //   and by the time it this function is called the minute will change.
-    //   That's why we use 2 minutes as a buffer.
-    const tableOldestDateTimePoint = {
-      daily: subMinutes(startOfDay(subHours(now, tableTTLInHours.daily)), 2),
-      hourly: subMinutes(startOfHour(subHours(now, tableTTLInHours.hourly)), 2),
-      minutely: subMinutes(startOfMinute(subHours(now, tableTTLInHours.minutely)), 2),
-    };
-
-    if (
-      period.to.getTime() <= tableOldestDateTimePoint.daily.getTime() ||
-      period.from.getTime() <= tableOldestDateTimePoint.daily.getTime()
-    ) {
-      this.logger.error(
-        `Requested date range ${formatDate(period.from)} - ${formatDate(period.to)} is too old.`,
-      );
-      throw new Error(`The requested date range is too old for the selected query type.`);
-    }
-
-    const daysDifference = Math.floor((period.to.getTime() - period.from.getTime()) / msDay);
-
-    if (
-      daysDifference >= thresholdDataPointPerDay ||
-      period.to.getTime() <= tableOldestDateTimePoint.hourly.getTime() ||
-      period.from.getTime() <= tableOldestDateTimePoint.hourly.getTime()
-    ) {
-      return {
-        ...queryMap['daily'],
-        queryType: 'daily',
-      };
-    }
-
-    const hoursDifference = (period.to.getTime() - period.from.getTime()) / msHour;
-
-    if (
-      hoursDifference >= thresholdDataPointPerHour &&
-      period.to.getTime() <= tableOldestDateTimePoint.minutely.getTime() &&
-      period.from.getTime() <= tableOldestDateTimePoint.minutely.getTime()
-    ) {
-      return {
-        ...queryMap['hourly'],
-        queryType: 'hourly',
-      };
-    }
+    const resolvedTable = pickTableByPeriod({ now, period, logger: this.logger });
 
     return {
-      ...queryMap['minutely'],
-      queryType: 'minutely',
+      ...queryMap[resolvedTable],
+      queryType: resolvedTable,
     };
   }
 
