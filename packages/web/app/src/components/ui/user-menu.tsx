@@ -34,6 +34,8 @@ import { cn } from '@/lib/utils';
 import { GetStartedProgress } from '../get-started/wizard';
 import { MemberRoleMigrationStickyNote } from '../organization/members/migration';
 import { UserSettingsModal } from '../user/settings';
+import { Changelog } from './changelog/changelog';
+import { latestChangelog } from './changelog/generated-changelog';
 
 export const UserMenu_CurrentOrganizationFragment = graphql(`
   fragment UserMenu_CurrentOrganizationFragment on Organization {
@@ -111,6 +113,7 @@ export function UserMenu(props: {
         />
       ) : null}
       <div className="flex flex-row items-center gap-8">
+        <Changelog changes={latestChangelog} />
         <MemberRoleMigrationStickyNote organization={currentOrganization} />
         {currentOrganization ? <GetStartedProgress tasks={currentOrganization.getStarted} /> : null}
         <DropdownMenu>

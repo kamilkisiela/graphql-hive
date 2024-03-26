@@ -1625,6 +1625,9 @@ importers:
       graphql:
         specifier: 16.8.1
         version: 16.8.1
+      gray-matter:
+        specifier: 4.0.3
+        version: 4.0.3
       hyperid:
         specifier: 3.2.0
         version: 3.2.0
