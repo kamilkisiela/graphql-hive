@@ -55,7 +55,11 @@ export class GitHubIntegrationManager {
       installationId: string;
     },
   ): Promise<void> {
-    this.logger.debug('Registering GitHub integration (organization=%s)', input.organization);
+    this.logger.debug(
+      'Registering GitHub integration (organization=%s, installationId:%s)',
+      input.organization,
+      input.installationId,
+    );
     await this.authManager.ensureOrganizationAccess({
       ...input,
       scope: OrganizationAccessScope.INTEGRATIONS,
@@ -82,7 +86,8 @@ export class GitHubIntegrationManager {
   async isAvailable(selector: OrganizationSelector): Promise<boolean> {
     this.logger.debug('Checking GitHub integration (organization=%s)', selector.organization);
 
-    if (this.isEnabled()) {
+    if (!this.isEnabled()) {
+      this.logger.debug('GitHub integration is disabled.');
       return false;
     }
 
