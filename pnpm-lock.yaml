@@ -453,8 +453,8 @@ importers:
         specifier: 2.2.0
         version: 2.2.0(graphql-yoga@5.2.0)(graphql@16.8.1)
       '@graphql-yoga/plugin-graphql-sse':
-        specifier: 3.1.1
-        version: 3.1.1(graphql-yoga@5.2.0)(graphql@16.8.1)
+        specifier: 3.2.0
+        version: 3.2.0(graphql-yoga@5.2.0)(graphql@16.8.1)
       '@graphql-yoga/plugin-response-cache':
         specifier: 3.4.0
         version: 3.4.0(@envelop/core@5.0.0)(graphql-yoga@5.2.0)(graphql@16.8.1)
@@ -7361,12 +7361,12 @@ packages:
       graphql-yoga: 5.2.0(graphql@16.8.1)
     dev: true
 
-  /@graphql-yoga/plugin-graphql-sse@3.1.1(graphql-yoga@5.2.0)(graphql@16.8.1):
-    resolution: {integrity: sha512-cqjx6DU2eHh1xA+AHQ6mUAZyUwAN9RW39XP7xq2vjRMlwMVyaCPGbkIf0H6YHMzmvYpvxajIQYfscnx6iOKJAQ==}
+  /@graphql-yoga/plugin-graphql-sse@3.2.0(graphql-yoga@5.2.0)(graphql@16.8.1):
+    resolution: {integrity: sha512-6KB9jiWtOLYTjc95nRjTF8CrEqYgmiZJ+06SAKe2tE7GKmcmnezCIjpHH4Jl4xSw2qsP8tu/gFg8sK/CXP46gg==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       graphql: ^15.2.0 || ^16.0.0
-      graphql-yoga: ^5.1.1
+      graphql-yoga: ^5.2.0
     dependencies:
       graphql: 16.8.1
       graphql-sse: 2.5.2(graphql@16.8.1)
