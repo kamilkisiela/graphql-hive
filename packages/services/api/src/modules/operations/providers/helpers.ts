@@ -16,9 +16,9 @@ export function calculateTimeWindow({
     throw new Error(`Invalid resolution. Expected an integer, received ${resolution}`);
   }
 
-  if (resolution < 10 || resolution > maxResolution) {
+  if (resolution < 1 || resolution > maxResolution) {
     throw new Error(
-      `Invalid resolution. Expected 10 <= x <= ${maxResolution}, received ${resolution}`,
+      `Invalid resolution. Expected 1 <= x <= ${maxResolution}, received ${resolution}`,
     );
   }
 
