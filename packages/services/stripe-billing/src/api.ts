@@ -28,45 +28,42 @@ export const stripeBillingApiRouter = t.router({
   invoices: procedure
     .input(
       z.object({
-        organizationId: z.string().nonempty(),
+        customerId: z.string().nonempty(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const storage = await ctx.storage$;
-      const organizationBillingRecord = await storage.getOrganizationBilling({
-        organization: input.organizationId,
-      });
-
-      if (!organizationBillingRecord) {
-        throw new Error(`Organization does not have a subscription record!`);
-      }
-
       const invoices = await ctx.stripe.invoices.list({
-        customer: organizationBillingRecord.externalBillingReference,
+        customer: input.customerId,
         expand: ['data.charge'],
       });
 
       return invoices.data;
     }),
-  upcomingInvoice: procedure
+  customerInfo: procedure
     .input(
       z.object({
-        organizationId: z.string().nonempty(),
+        customerId: z.string().nonempty(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const storage = await ctx.storage$;
-      const organizationBillingRecord = await storage.getOrganizationBilling({
-        organization: input.organizationId,
-      });
+      const customer = await ctx.stripe.customers.retrieve(input.customerId);
 
-      if (!organizationBillingRecord) {
-        throw new Error(`Organization does not have a subscription record!`);
+      if (customer.deleted) {
+        return null;
       }
 
+      return customer;
+    }),
+  upcomingInvoice: procedure
+    .input(
+      z.object({
+        customerId: z.string().nonempty(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
       try {
         const upcomingInvoice = await ctx.stripe.invoices.retrieveUpcoming({
-          customer: organizationBillingRecord.externalBillingReference,
+          customer: input.customerId,
         });
 
         return upcomingInvoice;
@@ -77,34 +74,14 @@ export const stripeBillingApiRouter = t.router({
   activeSubscription: procedure
     .input(
       z.object({
-        organizationId: z.string().nonempty(),
+        customerId: z.string().nonempty(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const storage = await ctx.storage$;
-      const organizationBillingRecord = await storage.getOrganizationBilling({
-        organization: input.organizationId,
-      });
-
-      if (!organizationBillingRecord) {
-        throw new Error(`Organization does not have a subscription record!`);
-      }
-
-      const customer = await ctx.stripe.customers.retrieve(
-        organizationBillingRecord.externalBillingReference,
-      );
-
-      if (customer.deleted === true) {
-        await storage.deleteOrganizationBilling({
-          organization: input.organizationId,
-        });
-
-        return null;
-      }
-
+      const customer = await ctx.stripe.customers.retrieve(input.customerId);
       const subscriptions = await ctx.stripe.subscriptions
         .list({
-          customer: organizationBillingRecord.externalBillingReference,
+          customer: input.customerId,
         })
         .then(v => v.data.filter(r => r.metadata?.hive_subscription));
 
@@ -123,7 +100,7 @@ export const stripeBillingApiRouter = t.router({
   syncOrganizationToStripe: procedure
     .input(
       z.object({
-        organizationId: z.string().nonempty(),
+        customerId: z.string().nonempty(),
         reserved: z
           .object({
             /** in millions, value 1 is actually 1_000_000 */
@@ -133,72 +110,38 @@ export const stripeBillingApiRouter = t.router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const storage = await ctx.storage$;
-      const [organizationBillingRecord, organization, stripePrices] = await Promise.all([
-        storage.getOrganizationBilling({
-          organization: input.organizationId,
-        }),
-        storage.getOrganization({
-          organization: input.organizationId,
-        }),
-        ctx.stripeData$,
-      ]);
+      const stripePrices = await ctx.stripeData$;
+      const allSubscriptions = await ctx.stripe.subscriptions.list({
+        customer: input.customerId,
+      });
 
-      if (organizationBillingRecord && organization) {
-        const allSubscriptions = await ctx.stripe.subscriptions.list({
-          customer: organizationBillingRecord.externalBillingReference,
-        });
+      const actualSubscription = allSubscriptions.data.find(r => r.metadata?.hive_subscription);
 
-        const actualSubscription = allSubscriptions.data.find(r => r.metadata?.hive_subscription);
-
-        if (actualSubscription) {
-          for (const item of actualSubscription.items.data) {
-            if (item.plan.id === stripePrices.operationsPrice.id) {
-              await ctx.stripe.subscriptionItems.update(item.id, {
-                quantity: input.reserved.operations,
-              });
-            }
+      if (actualSubscription) {
+        for (const item of actualSubscription.items.data) {
+          if (item.plan.id === stripePrices.operationsPrice.id) {
+            await ctx.stripe.subscriptionItems.update(item.id, {
+              quantity: input.reserved.operations,
+            });
           }
         }
+      }
 
-        const updateParams: Stripe.CustomerUpdateParams = {};
+      const updateParams: Stripe.CustomerUpdateParams = {};
 
-        if (organizationBillingRecord.billingEmailAddress) {
-          updateParams.email = organizationBillingRecord.billingEmailAddress;
-        }
-
-        if (Object.keys(updateParams).length > 0) {
-          await ctx.stripe.customers.update(
-            organizationBillingRecord.externalBillingReference,
-            updateParams,
-          );
-        }
-      } else {
-        throw new Error(
-          `Failed to sync subscription for organization: failed to find find active record`,
-        );
+      if (Object.keys(updateParams).length > 0) {
+        await ctx.stripe.customers.update(input.customerId, updateParams);
       }
     }),
   generateStripePortalLink: procedure
     .input(
       z.object({
-        organizationId: z.string().nonempty(),
+        customerId: z.string().nonempty(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const storage = await ctx.storage$;
-      const organizationBillingRecord = await storage.getOrganizationBilling({
-        organization: input.organizationId,
-      });
-
-      if (organizationBillingRecord === null) {
-        throw new Error(
-          `Failed to generate Stripe link for organization: no existing participant record`,
-        );
-      }
-
       const session = await ctx.stripe.billingPortal.sessions.create({
-        customer: organizationBillingRecord.externalBillingReference,
+        customer: input.customerId,
         return_url: 'https://app.graphql-hive.com/',
       });
 
@@ -207,24 +150,13 @@ export const stripeBillingApiRouter = t.router({
   cancelSubscriptionForOrganization: procedure
     .input(
       z.object({
-        organizationId: z.string().nonempty(),
+        customerId: z.string().nonempty(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const storage = await ctx.storage$;
-      const organizationBillingRecord = await storage.getOrganizationBilling({
-        organization: input.organizationId,
-      });
-
-      if (organizationBillingRecord === null) {
-        throw new Error(
-          `Failed to cancel subscription for organization: no existing participant record`,
-        );
-      }
-
       const subscriptions = await ctx.stripe.subscriptions
         .list({
-          customer: organizationBillingRecord.externalBillingReference,
+          customer: input.customerId,
         })
         .then(v => v.data.filter(r => r.metadata?.hive_subscription));
 
@@ -237,6 +169,7 @@ export const stripeBillingApiRouter = t.router({
       const actualSubscription = subscriptions[0];
       const response = await ctx.stripe.subscriptions.cancel(actualSubscription.id, {
         prorate: true,
+        invoice_now: true,
       });
 
       return response;
@@ -284,7 +217,7 @@ export const stripeBillingApiRouter = t.router({
         organizationBillingRecord = await storage.createOrganizationBilling({
           externalBillingReference: customerId,
           organizationId: input.organizationId,
-          billingEmailAddress: orgOwner.user.email,
+          provider: 'STRIPE',
         });
       }
 

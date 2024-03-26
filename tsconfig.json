@@ -48,6 +48,7 @@
       "@hive/cdn-script/aws": ["./packages/services/cdn-worker/src/aws.ts"],
       "@hive/server": ["./packages/services/server/src/api.ts"],
       "@hive/stripe-billing": ["./packages/services/stripe-billing/src/api.ts"],
+      "@hive/paddle-billing": ["./packages/services/paddle-billing/src/api.ts"],
       "@hive/schema": ["./packages/services/schema/src/api.ts"],
       "@hive/usage-common": ["./packages/services/usage-common/src/index.ts"],
       "@hive/usage-estimator": ["./packages/services/usage-estimator/src/api.ts"],

@@ -33,33 +33,20 @@ export function deployCloudFlareSecurityTransform(options: {
 
   const monacoCdnDynamicBasePath: `https://${string}/` = `https://cdn.jsdelivr.net/npm/monaco-editor@${monacoEditorVersion}/`;
   const monacoCdnStaticBasePath: `https://${string}/` = `https://cdn.jsdelivr.net/npm/monaco-editor@0.33.0/`;
-  const crispHost = 'client.crisp.chat';
-  const stripeHost = 'js.stripe.com';
-  const gtmHost = 'www.googletagmanager.com';
-  const cspHosts = [
-    crispHost,
-    stripeHost,
-    gtmHost,
-    'settings.crisp.chat',
-    '*.ingest.sentry.io',
-    'wss://client.relay.crisp.chat',
-    'https://storage.crisp.chat',
-    'wss://stream.relay.crisp.chat',
-    'www.google-analytics.com',
-    '*.google-analytics.com',
-  ].join(' ');
+  const paddleHost = 'paddle.com';
+  const cspHosts = [paddleHost, `cdn.${paddleHost}`, '*.ingest.sentry.io'].join(' ');
 
   const contentSecurityPolicy = `
   default-src 'self';
-  frame-src ${stripeHost} https://game.crisp.chat;
+  frame-src ${paddleHost};
   worker-src 'self' blob:;
-  style-src 'self' 'unsafe-inline' ${crispHost} fonts.googleapis.com rsms.me ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath};
+  style-src 'self' 'unsafe-inline' ${paddleHost} fonts.googleapis.com rsms.me ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath};
   script-src 'self' 'unsafe-eval' 'unsafe-inline' {DYNAMIC_HOST_PLACEHOLDER} ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} ${cspHosts};
   connect-src 'self' * {DYNAMIC_HOST_PLACEHOLDER} ${cspHosts}; 
-  media-src ${crispHost};
-  style-src-elem 'self' 'unsafe-inline' ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} fonts.googleapis.com rsms.me ${crispHost};
-  font-src 'self' data: fonts.gstatic.com rsms.me ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} ${crispHost};
-  img-src * 'self' data: https: https://image.crisp.chat https://storage.crisp.chat ${gtmHost} ${crispHost};
+  media-src ${paddleHost};
+  style-src-elem 'self' 'unsafe-inline' ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} fonts.googleapis.com rsms.me ${paddleHost};
+  font-src 'self' data: fonts.gstatic.com rsms.me ${monacoCdnDynamicBasePath} ${monacoCdnStaticBasePath} ${paddleHost};
+  img-src * 'self' data: https: ${paddleHost};
 `;
 
   const mergedCsp = contentSecurityPolicy.replace(/\s{2,}/g, ' ').trim();

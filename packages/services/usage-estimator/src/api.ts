@@ -14,17 +14,15 @@ export function createContext(estimator: Estimator, req: FastifyRequest) {
 
 const t = initTRPC.context<ReturnType<typeof createContext>>().create();
 const procedure = t.procedure.use(handleTRPCError);
+const YYYYMMDD = new RegExp(/^(19\d\d|20\d\d)(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/);
 
 export const usageEstimatorApiRouter = t.router({
   estimateOperationsForOrganization: procedure
     .input(
       z
         .object({
-          month: z.number().min(1).max(12),
-          year: z
-            .number()
-            .min(new Date().getFullYear() - 1)
-            .max(new Date().getFullYear()),
+          start: z.string().regex(YYYYMMDD),
+          end: z.string().regex(YYYYMMDD),
           organizationId: z.string().min(1),
         })
         .required(),
@@ -32,38 +30,15 @@ export const usageEstimatorApiRouter = t.router({
     .query(async ({ ctx, input }) => {
       const estimationResponse = await ctx.estimator.estimateCollectedOperationsForOrganization({
         organizationId: input.organizationId,
-        month: input.month,
-        year: input.year,
+        start: input.start,
+        end: input.end,
       });
 
       if (!estimationResponse.data.length) {
-        return {
-          totalOperations: 0,
-        };
+        return 0;
       }
 
-      return {
-        totalOperations: parseInt(estimationResponse.data[0].total),
-      };
-    }),
-  estimateOperationsForAllTargets: procedure
-    .input(
-      z
-        .object({
-          startTime: z.string().min(1),
-          endTime: z.string().min(1),
-        })
-        .required(),
-    )
-    .query(async ({ ctx, input }) => {
-      const estimationResponse = await ctx.estimator.estimateOperationsForAllTargets({
-        startTime: new Date(input.startTime),
-        endTime: new Date(input.endTime),
-      });
-
-      return Object.fromEntries(
-        estimationResponse.data.map(item => [item.target, parseInt(item.total)]),
-      );
+      return parseInt(estimationResponse.data[0].total);
     }),
 });
 

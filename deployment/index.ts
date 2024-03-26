@@ -1,6 +1,5 @@
 import * as pulumi from '@pulumi/pulumi';
 import { deployApp } from './services/app';
-import { deployStripeBilling } from './services/billing';
 import { deployCFBroker } from './services/cf-broker';
 import { deployCFCDN } from './services/cf-cdn';
 import { deployClickhouse } from './services/clickhouse';
@@ -14,6 +13,7 @@ import { configureGithubApp } from './services/github';
 import { deployGraphQL } from './services/graphql';
 import { deployKafka } from './services/kafka';
 import { deployObservability } from './services/observability';
+import { deployPaddleBilling } from './services/paddle-billing';
 import { deploySchemaPolicy } from './services/policy';
 import { deployPostgres } from './services/postgres';
 import { deployProxy } from './services/proxy';
@@ -24,6 +24,7 @@ import { deploySchema } from './services/schema';
 import { configureSentry } from './services/sentry';
 import { deploySentryEventsMonitor } from './services/sentry-events';
 import { configureSlackApp } from './services/slack-app';
+import { deployStripeBilling } from './services/stripe-billing';
 import { deploySuperTokens } from './services/supertokens';
 import { deployTokens } from './services/tokens';
 import { deployUsage } from './services/usage';
@@ -132,10 +133,20 @@ const usageEstimator = deployUsageEstimation({
   observability,
 });
 
-const billing = deployStripeBilling({
+const stripeBilling = deployStripeBilling({
   image: docker.factory.getImageId('stripe-billing', imagesTag),
   docker,
   postgres,
+  environment,
+  dbMigrations,
+  usageEstimator,
+  sentry,
+  observability,
+});
+
+const paddleBilling = deployPaddleBilling({
+  image: docker.factory.getImageId('paddle-billing', imagesTag),
+  docker,
   environment,
   dbMigrations,
   usageEstimator,
@@ -216,7 +227,10 @@ const graphql = deployGraphQL({
   cdn,
   usageEstimator,
   rateLimit,
-  billing,
+  billing: {
+    paddle: paddleBilling,
+    stripe: stripeBilling,
+  },
   emails,
   supertokens,
   s3,
@@ -233,7 +247,10 @@ const app = deployApp({
   image: docker.factory.getImageId('app', imagesTag),
   docker,
   zendesk,
-  billing,
+  billing: {
+    paddle: paddleBilling,
+    stripe: stripeBilling,
+  },
   github: githubApp,
   slackApp,
   sentry,

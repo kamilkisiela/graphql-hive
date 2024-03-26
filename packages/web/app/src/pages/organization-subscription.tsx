@@ -1,5 +1,4 @@
 import { ReactElement, useMemo } from 'react';
-import { endOfMonth, startOfDay, startOfMonth } from 'date-fns';
 import ReactECharts from 'echarts-for-react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
@@ -18,9 +17,10 @@ import { Card } from '@/components/v2/card';
 import Stat from '@/components/v2/stat';
 import { graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
+import { getIsPaddleEnabled } from '@/lib/billing/paddle-public-key';
 import { formatNumber } from '@/lib/hooks';
 import { useChartStyles } from '@/utils';
-import { Link } from '@tanstack/react-router';
+import { Link, useRouter } from '@tanstack/react-router';
 
 const DateFormatter = Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -43,8 +43,7 @@ const SubscriptionPage_OrganizationFragment = graphql(`
       invoices {
         id
       }
-      upcomingInvoice {
-        id
+      nextPayment {
         amount
         date
       }
@@ -79,6 +78,19 @@ const SubscriptionPageQuery = graphql(`
 `);
 
 function SubscriptionPageContent(props: { organizationId: string }) {
+  const router = useRouter();
+
+  if (!getIsPaddleEnabled()) {
+    void router.navigate({
+      to: '/$organizationId',
+      params: {
+        organizationId: props.organizationId,
+      },
+    });
+
+    return null;
+  }
+
   const [query] = useQuery({
     query: SubscriptionPageQuery,
     variables: {
@@ -122,10 +134,6 @@ function SubscriptionPageContent(props: { organizationId: string }) {
     return null;
   }
 
-  const today = startOfDay(new Date());
-  const start = startOfMonth(today);
-  const end = endOfMonth(today);
-
   return (
     <OrganizationLayout
       page={Page.Subscription}
@@ -154,17 +162,17 @@ function SubscriptionPageContent(props: { organizationId: string }) {
             <Heading className="mb-2">Your current plan</Heading>
             <div>
               <BillingView organization={organization} query={queryForBilling}>
-                {organization.billingConfiguration?.upcomingInvoice && (
+                {organization.billingConfiguration?.nextPayment && (
                   <Stat>
                     <Stat.Label>Next Invoice</Stat.Label>
                     <Stat.Number>
                       {CurrencyFormatter.format(
-                        organization.billingConfiguration.upcomingInvoice.amount,
+                        organization.billingConfiguration.nextPayment.amount,
                       )}
                     </Stat.Number>
                     <Stat.HelpText>
                       {DateFormatter.format(
-                        new Date(organization.billingConfiguration.upcomingInvoice.date),
+                        new Date(organization.billingConfiguration.nextPayment.date),
                       )}
                     </Stat.HelpText>
                   </Stat>
@@ -174,16 +182,15 @@ function SubscriptionPageContent(props: { organizationId: string }) {
           </Card>
           <Card className="mt-8">
             <Heading>Current Usage</Heading>
-            <p className="text-sm text-gray-500">
-              {DateFormatter.format(start)} — {DateFormatter.format(end)}
-            </p>
-            <div className="mt-4">
-              <OrganizationUsageEstimationView organization={organization} />
-            </div>
+            <OrganizationUsageEstimationView organization={organization} />
           </Card>
           {monthlyUsagePoints.length ? (
             <Card className="mt-8">
               <Heading>Historical Usage</Heading>
+              <p className="text-sm text-gray-500">
+                Based on monthly usage data. This information can help you to understand your
+                average usage per month.
+              </p>
               <div className="mt-4">
                 <AutoSizer disableHeight>
                   {size => (
