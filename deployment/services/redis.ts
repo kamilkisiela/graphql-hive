@@ -21,11 +21,11 @@ export function deployRedis(input: { environment: Environment }) {
   }).deploy({
     limits: input.environment.isProduction
       ? {
-          memory: '800Mi',
+          memory: '1300Mi',
           cpu: '1000m',
         }
       : {
-          memory: '80Mi',
+          memory: '100Mi',
           cpu: '50m',
         },
   });
