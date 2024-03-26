@@ -734,8 +734,8 @@ importers:
         specifier: 2.0.4
         version: 2.0.4
       '@whatwg-node/server':
-        specifier: 0.9.31
-        version: 0.9.31
+        specifier: 0.9.32
+        version: 0.9.32
       esbuild:
         specifier: 0.20.2
         version: 0.20.2
@@ -767,8 +767,8 @@ importers:
         specifier: 2.0.4
         version: 2.0.4
       '@whatwg-node/server':
-        specifier: 0.9.31
-        version: 0.9.31
+        specifier: 0.9.32
+        version: 0.9.32
       bcryptjs:
         specifier: 2.4.3
         version: 2.4.3
@@ -863,8 +863,8 @@ importers:
         specifier: workspace:*
         version: link:../../../libraries/external-composition/dist
       '@whatwg-node/server':
-        specifier: 0.9.31
-        version: 0.9.31
+        specifier: 0.9.32
+        version: 0.9.32
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -1088,8 +1088,8 @@ importers:
         specifier: 10.45.2
         version: 10.45.2
       '@whatwg-node/server':
-        specifier: 0.9.31
-        version: 0.9.31
+        specifier: 0.9.32
+        version: 0.9.32
       dotenv:
         specifier: 16.4.5
         version: 16.4.5
@@ -14348,8 +14348,8 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /@whatwg-node/server@0.9.31:
-    resolution: {integrity: sha512-crd8CPnKX6UELsnoU8G4DjAjMYVgNykHsZiRZMaglwqICxY4s2J2QggU0Ism00wbtwJ43umEOGYnwE389BHGOg==}
+  /@whatwg-node/server@0.9.32:
+    resolution: {integrity: sha512-PRTRE8ZhObwYx9yRoUdxYkrhCoDk2vyDA5BtaG+NAqEmU1wwbwlXUpaeRRrPuGaM7ScbIkueU25A0GJIRQzccw==}
     engines: {node: '>=16.0.0'}
     dependencies:
       '@whatwg-node/fetch': 0.9.17
@@ -20779,7 +20779,7 @@ packages:
       '@graphql-yoga/logger': 1.0.0
       '@graphql-yoga/subscription': 4.0.0
       '@whatwg-node/fetch': 0.9.17
-      '@whatwg-node/server': 0.9.31
+      '@whatwg-node/server': 0.9.32
       dset: 3.1.2
       graphql: 16.8.1
       lru-cache: 10.2.0
