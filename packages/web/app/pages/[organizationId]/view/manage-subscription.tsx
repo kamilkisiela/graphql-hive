@@ -167,6 +167,16 @@ function Inner(props: {
     [setOperationsRateLimit],
   );
 
+  const isFetching =
+    updateOrgRateLimitMutationState.fetching ||
+    downgradeToHobbyMutationState.fetching ||
+    upgradeToProMutationState.fetching;
+
+  const billingPlans = useFragment(
+    ManageSubscriptionInner_BillingPlansFragment,
+    props.billingPlans,
+  );
+
   useEffect(() => {
     if (query.data?.billingPlans?.length) {
       if (organization.plan === plan) {
@@ -180,15 +190,6 @@ function Inner(props: {
       }
     }
   }, [organization.plan, organization.rateLimit.operations, plan, query.data?.billingPlans]);
-
-  if (!canAccess) {
-    return null;
-  }
-
-  const isFetching =
-    updateOrgRateLimitMutationState.fetching ||
-    downgradeToHobbyMutationState.fetching ||
-    upgradeToProMutationState.fetching;
 
   const upgrade = useCallback(async () => {
     if (isFetching) {
@@ -261,6 +262,10 @@ function Inner(props: {
     });
   }, [organization.cleanId, operationsRateLimit, updateOrgRateLimitMutation, isFetching]);
 
+  if (!canAccess) {
+    return null;
+  }
+
   const renderActions = () => {
     if (plan === organization.plan) {
       if (organization.rateLimit.operations !== operationsRateLimit * 1_000_000) {
@@ -310,11 +315,6 @@ function Inner(props: {
     upgradeToProMutationState.error ||
     downgradeToHobbyMutationState.error ||
     updateOrgRateLimitMutationState.error;
-
-  const billingPlans = useFragment(
-    ManageSubscriptionInner_BillingPlansFragment,
-    props.billingPlans,
-  );
 
   // TODO: this is also not safe as billingPlans might be an empty list.
   const selectedPlan = billingPlans.find(v => v.planType === plan) ?? billingPlans[0];

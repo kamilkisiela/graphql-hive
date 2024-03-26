@@ -160,6 +160,9 @@ function ExplorerPageContent() {
     }
   }, [setDataRetentionInDays, retentionInDays]);
 
+  /* to avoid janky behaviour we keep track if the version has a successful explorer once, and in that case always show the filter bar. */
+  const isFilterVisible = useRef(false);
+
   if (query.error) {
     return <QueryError error={query.error} />;
   }
@@ -171,9 +174,6 @@ function ExplorerPageContent() {
   const isCDNEnabled = query.data;
   const latestSchemaVersion = currentTarget?.latestSchemaVersion;
   const latestValidSchemaVersion = currentTarget?.latestValidSchemaVersion;
-
-  /* to avoid janky behaviour we keep track if the version has a successful explorer once, and in that case always show the filter bar. */
-  const isFilterVisible = useRef(false);
 
   if (latestValidSchemaVersion?.explorer) {
     isFilterVisible.current = true;
