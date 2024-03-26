@@ -302,14 +302,13 @@ const SupportTicketPageQuery = graphql(`
   }
 `);
 
-function SupportTicketPageContent() {
-  const router = useRouteSelector();
-  const ticketId = router.query.ticketId as string;
+function SupportTicketPageContent(props: { ticketId: string; organizationId: string }) {
+  const ticketId = props.ticketId as string;
   const [query, refetchQuery] = useQuery({
     query: SupportTicketPageQuery,
     variables: {
       selector: {
-        organization: router.organizationId,
+        organization: props.organizationId,
       },
       ticketId,
     },
@@ -355,12 +354,16 @@ function SupportTicketPageContent() {
 
 function SupportTicketPage() {
   const router = useRouteSelector();
-  const ticketId = router.query.ticketId as string;
+  const ticketId = router.query.ticketId;
+
+  if (!ticketId || typeof ticketId !== 'string') {
+    return null;
+  }
 
   return (
     <>
       <MetaTitle title={`Support Ticket #${ticketId}`} />
-      <SupportTicketPageContent />
+      <SupportTicketPageContent organizationId={router.organizationId} ticketId={ticketId} />
     </>
   );
 }

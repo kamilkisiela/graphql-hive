@@ -244,16 +244,16 @@ function OperationInsightsContent({
   );
 }
 
-function OperationInsightsPage(): ReactElement {
+function OperationInsightsPage() {
   const router = useRouter();
   const { operationHash, operationName } = router.query;
 
   if (!operationHash || typeof operationHash !== 'string') {
-    throw new Error('Invalid operation hash');
+    return null;
   }
 
   if (!operationName || typeof operationName !== 'string') {
-    throw new Error('Invalid operation name');
+    return null;
   }
 
   return (

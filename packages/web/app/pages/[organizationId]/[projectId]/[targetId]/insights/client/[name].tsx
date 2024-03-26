@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { differenceInMilliseconds } from 'date-fns';
@@ -425,12 +425,12 @@ function ClientInsightsPageContent({ clientName }: { clientName: string }) {
   );
 }
 
-function ClientInsightsPage(): ReactElement {
+function ClientInsightsPage() {
   const router = useRouter();
   const { name } = router.query;
 
   if (!name || typeof name !== 'string') {
-    throw new Error('Invalid client name');
+    return null;
   }
 
   return (
