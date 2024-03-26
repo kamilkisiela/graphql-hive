@@ -425,12 +425,12 @@ function ClientInsightsPageContent({ clientName }: { clientName: string }) {
   );
 }
 
-function ClientInsightsPage(): ReactElement {
+function ClientInsightsPage() {
   const router = useRouter();
   const { name } = router.query;
 
   if (!name || typeof name !== 'string') {
-    throw new Error('Invalid client name');
+    return null;
   }
 
   return (

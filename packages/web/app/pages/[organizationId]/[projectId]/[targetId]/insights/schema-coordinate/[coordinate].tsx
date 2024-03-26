@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { differenceInMilliseconds } from 'date-fns';
@@ -479,12 +479,12 @@ function TargetSchemaCoordinatePageContent({ coordinate }: { coordinate: string 
   );
 }
 
-function SchemaCoordinatePage(): ReactElement {
+function SchemaCoordinatePage() {
   const router = useRouter();
   const { coordinate } = router.query;
 
   if (!coordinate || typeof coordinate !== 'string') {
-    throw new Error('Invalid coordinate');
+    return null;
   }
 
   return (
