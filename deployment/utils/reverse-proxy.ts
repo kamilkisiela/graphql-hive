@@ -162,10 +162,14 @@ export class Proxy {
         podLabels: {
           'vector.dev/exclude': 'true',
         },
-        resources: {},
+        resources: {
+          limits: {},
+        },
       },
       envoy: {
-        resources: {},
+        resources: {
+          limits: {},
+        },
         service: {
           loadBalancerIP: this.staticIp?.address,
           annotations:
@@ -194,18 +198,10 @@ export class Proxy {
     };
 
     if (options.envoy?.cpu) {
-      if (!chartValues.envoy!.resources!.limits) {
-        chartValues.envoy!.resources!.limits = {};
-      }
-
       (chartValues.envoy!.resources!.limits as any).cpu = options.envoy.cpu;
     }
 
     if (options.envoy?.memory) {
-      if (!chartValues.envoy!.resources!.limits) {
-        chartValues.envoy!.resources!.limits = {};
-      }
-
       (chartValues.envoy!.resources!.limits as any).memory = options.envoy.memory;
     }
 
