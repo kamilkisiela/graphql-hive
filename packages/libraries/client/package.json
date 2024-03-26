@@ -64,7 +64,7 @@
     "@graphql-tools/schema": "10.0.3",
     "@graphql-yoga/plugin-defer-stream": "3.2.0",
     "@graphql-yoga/plugin-disable-introspection": "2.2.0",
-    "@graphql-yoga/plugin-graphql-sse": "3.1.1",
+    "@graphql-yoga/plugin-graphql-sse": "3.2.0",
     "@graphql-yoga/plugin-response-cache": "3.4.0",
     "@types/async-retry": "1.4.8",
     "body-parser": "1.20.2",
