@@ -1714,14 +1714,24 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       };
     },
     async createTarget({ organization, project, name, cleanId }) {
-      const result = await pool.maybeOne<unknown>(sql`
-        INSERT INTO targets
-          (name, clean_id, project_id)
-        VALUES
-          (${name}, ${cleanId}, ${project})
-        RETURNING
-          ${targetSQLFields}
-      `);
+      const result = await pool.transaction(async t => {
+        const target = await t.one<{ id: string }>(sql`
+          INSERT INTO targets
+            (name, clean_id, project_id)
+          VALUES
+            (${name}, ${cleanId}, ${project})
+          RETURNING
+            ${targetSQLFields}
+        `);
+
+        // Adds the target id to the organization's target_ids_log array.
+        // This is used to keep track of all the targets that have been created in the organization.
+        await t.query(sql`
+          UPDATE organizations
+          SET target_ids_log = array_append(target_ids_log, ${target.id})
+          WHERE id = ${organization};
+        `);
+      });
 
       return {
         ...TargetModel.parse(result),
