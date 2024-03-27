@@ -2,7 +2,6 @@ import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import NextLink from 'next/link';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { Section } from '@/components/common';
 import { OrganizationLayout, Page } from '@/components/layouts/organization';
 import {
   BillingPaymentMethodForm,
