@@ -2,7 +2,7 @@ import { ReactElement, ReactNode, useCallback } from 'react';
 import { useMutation } from 'urql';
 import { Button, Card, Heading, Tooltip } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { RegistryModel } from '@/graphql';
+import { RegistryModel } from '@/gql/graphql';
 import { useNotifications, useRouteSelector } from '@/lib/hooks';
 import { CheckIcon, Cross2Icon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 
@@ -112,7 +112,8 @@ const ModelMigrationSettings_upgradeProjectRegistryModelMutation = graphql(`
   ) {
     updateProjectRegistryModel(input: $input) {
       ok {
-        ...ProjectFields
+        id
+        registryModel
       }
       error {
         message

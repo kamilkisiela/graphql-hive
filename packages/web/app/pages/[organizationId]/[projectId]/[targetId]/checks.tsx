@@ -34,8 +34,7 @@ import {
 } from '@/components/v2';
 import { AlertTriangleIcon, DiffIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { CriticalityLevel } from '@/gql/graphql';
-import { ProjectType } from '@/graphql';
+import { CriticalityLevel, ProjectType } from '@/gql/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import {
@@ -744,49 +743,12 @@ const DefaultSchemaView_SchemaCheckFragment = graphql(`
     }
     breakingSchemaChanges {
       nodes {
-        message(withSafeBasedOnUsageNote: false)
-        criticality
-        criticalityReason
-        path
-        approval {
-          approvedBy {
-            id
-            displayName
-          }
-          approvedAt
-          schemaCheckId
-        }
-        isSafeBasedOnUsage
-        usageStatistics {
-          topAffectedOperations {
-            hash
-            name
-            countFormatted
-            percentageFormatted
-          }
-          topAffectedClients {
-            name
-            countFormatted
-            percentageFormatted
-          }
-        }
+        ...ChangesBlock_SchemaChangeWithUsageFragment
       }
     }
     safeSchemaChanges {
       nodes {
-        message(withSafeBasedOnUsageNote: false)
-        criticality
-        criticalityReason
-        path
-        approval {
-          approvedBy {
-            id
-            displayName
-          }
-          approvedAt
-          schemaCheckId
-        }
-        isSafeBasedOnUsage
+        ...ChangesBlock_SchemaChangeFragment
       }
     }
     schemaPolicyWarnings {
@@ -906,7 +868,7 @@ function DefaultSchemaView(props: {
                 <ChangesBlock
                   title={<BreakingChangesTitle />}
                   criticality={CriticalityLevel.Breaking}
-                  changes={schemaCheck.breakingSchemaChanges.nodes}
+                  changesWithUsage={schemaCheck.breakingSchemaChanges.nodes}
                   conditionBreakingChangeMetadata={schemaCheck.conditionalBreakingChangeMetadata}
                 />
               </div>
@@ -1082,49 +1044,12 @@ const ContractCheckView_ContractCheckFragment = graphql(`
     }
     breakingSchemaChanges {
       nodes {
-        message(withSafeBasedOnUsageNote: false)
-        criticality
-        criticalityReason
-        path
-        approval {
-          approvedBy {
-            id
-            displayName
-          }
-          approvedAt
-          schemaCheckId
-        }
-        isSafeBasedOnUsage
-        usageStatistics {
-          topAffectedOperations {
-            hash
-            name
-            countFormatted
-            percentageFormatted
-          }
-          topAffectedClients {
-            name
-            countFormatted
-            percentageFormatted
-          }
-        }
+        ...ChangesBlock_SchemaChangeWithUsageFragment
       }
     }
     safeSchemaChanges {
       nodes {
-        message(withSafeBasedOnUsageNote: false)
-        criticality
-        criticalityReason
-        path
-        approval {
-          approvedBy {
-            id
-            displayName
-          }
-          approvedAt
-          schemaCheckId
-        }
-        isSafeBasedOnUsage
+        ...ChangesBlock_SchemaChangeFragment
       }
     }
     compositeSchemaSDL
@@ -1220,7 +1145,7 @@ function ContractCheckView(props: {
                 <ChangesBlock
                   title={<BreakingChangesTitle />}
                   criticality={CriticalityLevel.Breaking}
-                  changes={contractCheck.breakingSchemaChanges.nodes}
+                  changesWithUsage={contractCheck.breakingSchemaChanges.nodes}
                   conditionBreakingChangeMetadata={schemaCheck.conditionalBreakingChangeMetadata}
                 />
               </div>

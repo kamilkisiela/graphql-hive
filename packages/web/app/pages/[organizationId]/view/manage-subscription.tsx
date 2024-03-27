@@ -70,7 +70,7 @@ const BillingDowngradeMutation = graphql(`
       previousPlan
       newPlan
       organization {
-        ...OrgBillingInfoFields
+        ...ManageSubscriptionInner_OrganizationFragment
       }
     }
   }
@@ -94,7 +94,7 @@ const BillingUpgradeToProMutation = graphql(`
       previousPlan
       newPlan
       organization {
-        ...OrgBillingInfoFields
+        ...ManageSubscriptionInner_OrganizationFragment
       }
     }
   }
@@ -103,7 +103,7 @@ const BillingUpgradeToProMutation = graphql(`
 const UpdateOrgRateLimitMutation = graphql(`
   mutation updateOrgRateLimit($organization: ID!, $monthlyLimits: RateLimitInput!) {
     updateOrgRateLimit(monthlyLimits: $monthlyLimits, selector: { organization: $organization }) {
-      ...OrgBillingInfoFields
+      ...ManageSubscriptionInner_OrganizationFragment
     }
   }
 `);

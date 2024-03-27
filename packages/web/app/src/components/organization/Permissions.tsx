@@ -11,7 +11,7 @@ import {
 import { TabsContent } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@/graphql';
+import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@/gql/graphql';
 import { NoAccess, Scope } from '@/lib/access/common';
 import { canAccessOrganization } from '@/lib/access/organization';
 import { canAccessProject } from '@/lib/access/project';

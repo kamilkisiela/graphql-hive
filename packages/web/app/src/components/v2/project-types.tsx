@@ -2,7 +2,7 @@ import { ReactElement } from 'react';
 import Image, { ImageProps } from 'next/image';
 import clsx from 'clsx';
 import { Radio, RadioGroup } from '@/components/v2';
-import { ProjectType } from '@/graphql';
+import { ProjectType } from '@/gql/graphql';
 import { RadioGroupProps } from '@radix-ui/react-radio-group';
 import federation from '../../../public/images/figures/federation.svg';
 import single from '../../../public/images/figures/single.svg';
