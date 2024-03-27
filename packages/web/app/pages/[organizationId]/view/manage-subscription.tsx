@@ -2,9 +2,11 @@ import { ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import NextLink from 'next/link';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
-import { Section } from '@/components/common';
 import { OrganizationLayout, Page } from '@/components/layouts/organization';
-import { BillingPaymentMethod } from '@/components/organization/billing/BillingPaymentMethod';
+import {
+  BillingPaymentMethodForm,
+  ManagePaymentMethod,
+} from '@/components/organization/billing/BillingPaymentMethod';
 import { BillingPlanPicker } from '@/components/organization/billing/BillingPlanPicker';
 import { PlanSummary } from '@/components/organization/billing/PlanSummary';
 import { Button } from '@/components/ui/button';
@@ -268,25 +270,12 @@ function Inner(props: {
 
   const renderActions = () => {
     if (plan === organization.plan) {
-      if (organization.rateLimit.operations !== operationsRateLimit * 1_000_000) {
-        return (
-          <>
-            <Button type="button" onClick={updateLimits} disabled={isFetching}>
-              Update Limits
-            </Button>
-            <Section.Subtitle className="mt-4">
-              Updating your organization limitations might take a few minutes to update.
-            </Section.Subtitle>
-          </>
-        );
-      }
-
       return null;
     }
 
     if (plan === 'ENTERPRISE') {
       return (
-        <Button type="button" asChild>
+        <Button type="button" asChild className="mt-2">
           <a href="emailto:contact@graphql-hive.com">Contact Us</a>
         </Button>
       );
@@ -294,9 +283,32 @@ function Inner(props: {
 
     if (plan === 'PRO') {
       return (
-        <Button type="button" onClick={upgrade} disabled={!paymentDetailsValid || isFetching}>
-          Upgrade to Pro
-        </Button>
+        <>
+          <div className="my-8 flex flex-row gap-6">
+            <BillingPaymentMethodForm
+              className="w-1/2"
+              onValidationChange={setPaymentDetailsValid}
+            />
+            <div className="w-1/2">
+              {plan === BillingPlanType.Pro && plan !== organization.plan ? (
+                <div>
+                  <Heading className="mb-3">Discount</Heading>
+                  <Input
+                    className="w-full"
+                    size="medium"
+                    value={couponCode ?? ''}
+                    disabled={isFetching}
+                    onChange={e => setCouponCode(e.target.value)}
+                    placeholder="Code"
+                  />
+                </div>
+              ) : null}
+            </div>
+          </div>
+          <Button type="button" onClick={upgrade} disabled={!paymentDetailsValid || isFetching}>
+            Upgrade to Pro
+          </Button>
+        </>
       );
     }
 
@@ -352,64 +364,55 @@ function Inner(props: {
 
             {plan === BillingPlanType.Pro &&
               organization.billingConfiguration.canUpdateSubscription && (
-                <div className="my-8 w-1/2">
-                  <Heading>Define your reserved volume</Heading>
-                  <p className="text-sm text-gray-500">
-                    Pro plan requires to defined quota of reported operations.
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Pick a volume a little higher than you think you'll need to avoid being rate
-                    limited.
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Don't worry, you can always adjust it later.
-                  </p>
-                  <div className="mt-5 pl-2.5">
-                    <Slider
-                      min={1}
-                      max={300}
-                      disabled={isFetching}
-                      value={[operationsRateLimit]}
-                      onValueChange={onOperationsRateLimitChange}
-                    />
-                    <div className="flex justify-between">
-                      <span>1M</span>
-                      <span>100M</span>
-                      <span>200M</span>
-                      <span>300M</span>
+                <>
+                  <div className="my-8 w-1/2">
+                    <Heading>Define your reserved volume</Heading>
+                    <p className="text-sm text-gray-500">
+                      Pro plan requires to defined quota of reported operations.
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Pick a volume a little higher than you think you'll need to avoid being rate
+                      limited.
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Don't worry, you can always adjust it later.
+                    </p>
+                    <div className="mt-5 pl-2.5">
+                      <Slider
+                        min={1}
+                        max={300}
+                        disabled={isFetching}
+                        value={[operationsRateLimit]}
+                        onValueChange={onOperationsRateLimitChange}
+                      />
+                      <div className="flex justify-between">
+                        <span>1M</span>
+                        <span>100M</span>
+                        <span>200M</span>
+                        <span>300M</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                  {plan === organization.plan ? (
+                    <div>
+                      <Button
+                        type="button"
+                        onClick={updateLimits}
+                        disabled={
+                          isFetching ||
+                          organization.rateLimit.operations === operationsRateLimit * 1_000_000
+                        }
+                      >
+                        Update Limits
+                      </Button>
+                      <ManagePaymentMethod organization={organization} plan={plan} />
+                    </div>
+                  ) : null}
+                </>
               )}
 
             {error && <QueryError showError error={error} />}
             <div>{renderActions()}</div>
-
-            {organization.billingConfiguration.canUpdateSubscription ? (
-              <div className="my-8 flex flex-row gap-6">
-                <BillingPaymentMethod
-                  className="w-1/2"
-                  plan={selectedPlan.planType}
-                  organization={organization}
-                  onValidationChange={setPaymentDetailsValid}
-                />
-                <div className="w-1/2">
-                  {plan === BillingPlanType.Pro && plan !== organization.plan ? (
-                    <div>
-                      <Heading className="mb-3">Discount</Heading>
-                      <Input
-                        className="w-full"
-                        size="medium"
-                        value={couponCode ?? ''}
-                        disabled={isFetching}
-                        onChange={e => setCouponCode(e.target.value)}
-                        placeholder="Code"
-                      />
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-            ) : null}
           </div>
         </div>
       </Card>
