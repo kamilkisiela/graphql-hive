@@ -9,6 +9,7 @@ export default gql`
     clientStats(selector: ClientStatsInput!): ClientStats!
     hasCollectedOperations(selector: TargetSelectorInput!): Boolean!
     clientStatsByTargets(selector: ClientStatsByTargetsInput!): ClientStatsValuesConnection!
+    monthlyUsage(selector: OrganizationSelectorInput!): [MonthlyUsage!]!
   }
 
   input OperationsStatsSelectorInput {
@@ -122,6 +123,14 @@ export default gql`
   type ClientStatsValuesConnection {
     nodes: [ClientStatsValues!]!
     total: Int!
+  }
+
+  type MonthlyUsage {
+    total: SafeInt!
+    """
+    Start of the month in 1992-10-21 format
+    """
+    date: Date!
   }
 
   type DurationValues {

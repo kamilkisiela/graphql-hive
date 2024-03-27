@@ -1,4 +1,4 @@
-import { DateTimeResolver, JSONResolver, SafeIntResolver } from 'graphql-scalars';
+import { DateResolver, DateTimeResolver, JSONResolver, SafeIntResolver } from 'graphql-scalars';
 import type { SharedModule } from './__generated__/types';
 
 // Remove descriptions from resolvers
@@ -7,8 +7,10 @@ import type { SharedModule } from './__generated__/types';
 JSONResolver.description = undefined;
 DateTimeResolver.description = undefined;
 SafeIntResolver.description = undefined;
+DateResolver.description = undefined;
 
 export const resolvers: SharedModule.Resolvers = {
+  Date: DateResolver,
   DateTime: DateTimeResolver,
   JSON: JSONResolver,
   JSONSchemaObject: JSONResolver,

@@ -569,14 +569,14 @@ export interface Storage {
     }>
   >;
 
-  getGetOrganizationsAndTargetPairsWithLimitInfo(): Promise<
+  getGetOrganizationsAndTargetsWithLimitInfo(): Promise<
     ReadonlyArray<{
       organization: string;
       org_name: string;
       org_clean_id: string;
       org_plan_name: string;
       owner_email: string;
-      target: string;
+      targets: string[];
       limit_operations_monthly: number;
       limit_retention_days: number;
     }>

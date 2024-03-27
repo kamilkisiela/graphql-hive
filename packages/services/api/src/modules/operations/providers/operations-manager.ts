@@ -5,6 +5,7 @@ import type { DateRange } from '../../../shared/entities';
 import type { Listify, Optional } from '../../../shared/helpers';
 import { cache } from '../../../shared/helpers';
 import { AuthManager } from '../../auth/providers/auth-manager';
+import { OrganizationAccessScope } from '../../auth/providers/organization-access';
 import { TargetAccessScope } from '../../auth/providers/target-access';
 import { Logger } from '../../shared/providers/logger';
 import type {
@@ -114,6 +115,17 @@ export class OperationsManager {
       target,
       hash,
     });
+  }
+
+  async readMonthlyUsage({ organization }: OrganizationSelector) {
+    this.logger.info('Reading monthly usage (organization=%s)', organization);
+    await this.authManager.ensureOrganizationAccess({
+      organization,
+      // Why? Monthly usage is specific to organization settings (subscription page)
+      scope: OrganizationAccessScope.SETTINGS,
+    });
+
+    return this.reader.readMonthlyUsage({ organization });
   }
 
   async countUniqueOperations({

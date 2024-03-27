@@ -2,6 +2,7 @@ import { gql } from 'graphql-modules';
 
 export default gql`
   scalar DateTime
+  scalar Date
   scalar JSON
   scalar JSONSchemaObject
   scalar SafeInt

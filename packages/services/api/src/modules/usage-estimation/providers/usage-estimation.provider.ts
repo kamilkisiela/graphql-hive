@@ -33,13 +33,9 @@ export class UsageEstimationProvider {
 
   @sentry('UsageEstimation.estimateOperations')
   async estimateOperations(
-    input: UsageEstimatorApiInput['estimateOperationsForTarget'],
+    input: UsageEstimatorApiInput['estimateOperationsForOrganization'],
   ): Promise<number | null> {
     this.logger.debug('Estimation operations, input: %o', input);
-
-    if (input.targetIds.length === 0) {
-      return 0;
-    }
 
     if (!this.usageEstimator) {
       this.logger.warn('Usage estimator is not available due to missing configuration');
@@ -47,7 +43,7 @@ export class UsageEstimationProvider {
       return null;
     }
 
-    const result = await this.usageEstimator.estimateOperationsForTarget.query(input);
+    const result = await this.usageEstimator.estimateOperationsForOrganization.query(input);
 
     return result.totalOperations;
   }

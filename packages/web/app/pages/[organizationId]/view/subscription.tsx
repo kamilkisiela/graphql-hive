@@ -1,6 +1,8 @@
-import { ReactElement } from 'react';
+import { ReactElement, useMemo } from 'react';
 import NextLink from 'next/link';
-import { endOfMonth, startOfMonth } from 'date-fns';
+import { endOfMonth, startOfDay, startOfMonth, subMonths } from 'date-fns';
+import ReactECharts from 'echarts-for-react';
+import AutoSizer from 'react-virtualized-auto-sizer';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { OrganizationLayout, Page } from '@/components/layouts/organization';
@@ -15,13 +17,16 @@ import { Card, Heading, MetaTitle, Stat } from '@/components/v2';
 import { graphql, useFragment } from '@/gql';
 import { OrganizationAccessScope, useOrganizationAccess } from '@/lib/access/organization';
 import { getIsStripeEnabled } from '@/lib/billing/stripe-public-key';
-import { useRouteSelector } from '@/lib/hooks';
+import { formatNumber, useRouteSelector } from '@/lib/hooks';
+import { useChartStyles } from '@/utils';
 
 const DateFormatter = Intl.DateTimeFormat('en-US', {
   month: 'short',
   day: 'numeric',
   year: 'numeric',
 });
+
+const numberFormatter = Intl.NumberFormat('en-US');
 
 const SubscriptionPage_OrganizationFragment = graphql(`
   fragment SubscriptionPage_OrganizationFragment on Organization {
@@ -69,6 +74,10 @@ const SubscriptionPageQuery = graphql(`
     me {
       ...OrganizationLayout_MeFragment
     }
+    monthlyUsage(selector: $selector) {
+      date
+      total
+    }
   }
 `);
 
@@ -100,11 +109,18 @@ function SubscriptionPageContent() {
 
   const organization = useFragment(SubscriptionPage_OrganizationFragment, currentOrganization);
   const queryForBilling = useFragment(SubscriptionPage_QueryFragment, query.data);
+  const styles = useChartStyles();
   const canAccess = useOrganizationAccess({
     scope: OrganizationAccessScope.Settings,
     member: organization?.me ?? null,
     redirect: true,
   });
+
+  const monthlyUsage = query.data?.monthlyUsage ?? [];
+  const monthlyUsagePoints: [string, number][] = useMemo(
+    () => monthlyUsage.map(v => [v.date, v.total]),
+    [monthlyUsage],
+  );
 
   if (query.error) {
     return <QueryError error={query.error} />;
@@ -122,7 +138,7 @@ function SubscriptionPageContent() {
     return null;
   }
 
-  const today = new Date();
+  const today = startOfDay(new Date());
   const start = startOfMonth(today);
   const end = endOfMonth(today);
 
@@ -185,6 +201,77 @@ function SubscriptionPageContent() {
             </p>
             <div className="mt-4">
               <OrganizationUsageEstimationView organization={organization} />
+            </div>
+          </Card>
+          <Card className="mt-8">
+            <Heading>Historical Usage</Heading>
+            <div className="mt-4">
+              <AutoSizer disableHeight>
+                {size => (
+                  <ReactECharts
+                    style={{ width: size.width, height: 400 }}
+                    option={{
+                      ...styles,
+                      grid: {
+                        left: 20,
+                        top: 50,
+                        right: 20,
+                        bottom: 20,
+                        containLabel: true,
+                      },
+                      legend: {
+                        show: false,
+                      },
+                      tooltip: {
+                        trigger: 'axis',
+                        valueFormatter: (value: number) => formatNumber(value),
+                        formatter(params: any[]) {
+                          const param = params[0];
+                          const value = param.data[1];
+
+                          return `<strong>${numberFormatter.format(value)}</strong>`;
+                        },
+                      },
+                      xAxis: [
+                        {
+                          type: 'time',
+                          splitNumber: 12,
+                        },
+                      ],
+                      yAxis: [
+                        {
+                          type: 'value',
+                          boundaryGap: false,
+                          min: 0,
+                          axisLabel: {
+                            formatter: (value: number) => formatNumber(value),
+                          },
+                          splitLine: {
+                            lineStyle: {
+                              color: '#595959',
+                              type: 'dashed',
+                            },
+                          },
+                        },
+                      ],
+                      series: [
+                        {
+                          type: 'bar',
+                          name: 'Events',
+                          showSymbol: false,
+                          boundaryGap: false,
+                          color: '#595959',
+                          areaStyle: {},
+                          emphasis: {
+                            focus: 'series',
+                          },
+                          data: monthlyUsagePoints,
+                        },
+                      ],
+                    }}
+                  />
+                )}
+              </AutoSizer>
             </div>
           </Card>
           {organization.billingConfiguration?.invoices?.length ? (

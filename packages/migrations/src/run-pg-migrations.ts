@@ -62,7 +62,6 @@ import migration_2024_01_08T_10_00_00_schema_version_diff_schema_version_id from
 import migration_2024_01_12_01T00_00_00_contracts from './actions/2024.01.26T00.00.00.contracts';
 import migration_2024_01_12_01T00_00_00_schema_check_pagination_index_update from './actions/2024.01.26T00.00.01.schema-check-pagination-index-update';
 import migration_2024_02_19_01T00_00_00_schema_check_store_breaking_change_metadata from './actions/2024.02.19T00.00.01.schema-check-store-breaking-change-metadata';
-import migration_2024_03_27T00_00_01_organization_target_ids_log from './actions/2024.03.27T00.00.01.organization-target-ids-log';
 import { runMigrations } from './pg-migrator';
 
 export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) =>
@@ -133,6 +132,5 @@ export const runPGMigrations = (args: { slonik: DatabasePool; runTo?: string }) 
       migration_2024_01_12_01T00_00_00_contracts,
       migration_2024_01_12_01T00_00_00_schema_check_pagination_index_update,
       migration_2024_02_19_01T00_00_00_schema_check_store_breaking_change_metadata,
-      migration_2024_03_27T00_00_01_organization_target_ids_log,
     ],
   });

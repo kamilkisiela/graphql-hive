@@ -2997,19 +2997,17 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       );
       return results.rows;
     },
-    async getGetOrganizationsAndTargetPairsWithLimitInfo() {
-      const results = await pool.query<
-        Slonik<{
-          organization: string;
-          org_name: string;
-          org_clean_id: string;
-          org_plan_name: string;
-          owner_email: string;
-          target: string;
-          limit_operations_monthly: number;
-          limit_retention_days: number;
-        }>
-      >(
+    async getGetOrganizationsAndTargetsWithLimitInfo() {
+      const results = await pool.query<{
+        organization: string;
+        org_name: string;
+        org_clean_id: string;
+        org_plan_name: string;
+        owner_email: string;
+        targets: string[];
+        limit_operations_monthly: number;
+        limit_retention_days: number;
+      }>(
         sql`
           SELECT
             o.id as organization,
@@ -3018,12 +3016,19 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             o.limit_operations_monthly,
             o.limit_retention_days,
             o.plan_name as org_plan_name,
-            t.id as target,
-            u.email as owner_email
-          FROM targets AS t
-          LEFT JOIN projects AS p ON (p.id = t.project_id)
-          LEFT JOIN organizations AS o ON (o.id = p.org_id)
+            array_agg(o.id) as targets,
+            split_part(
+              string_agg(
+                DISTINCT u.email, ','
+              ),
+              ',',
+              1
+            ) AS owner_email
+          FROM organizations AS o
+          LEFT JOIN projects AS p ON (p.org_id = o.id)
+          LEFT JOIN targets as t ON (t.project_id = p.id)
           LEFT JOIN users AS u ON (u.id = o.user_id)
+          GROUP BY o.id
         `,
       );
       return results.rows;
