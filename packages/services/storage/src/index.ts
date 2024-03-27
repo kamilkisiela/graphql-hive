@@ -3020,26 +3020,26 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         limit_retention_days: number;
       }>(
         sql`
-        SELECT
-          o.id as organization,
-          o.clean_id as org_clean_id,
-          o.name as org_name,
-          o.limit_operations_monthly,
-          o.limit_retention_days,
-          o.plan_name as org_plan_name,
-          array_agg(o.id) as targets,
-          split_part(
-            string_agg(
-              DISTINCT u.email, ','
-            ),
-            ',',
-            1
-          ) AS owner_email
-        FROM organizations AS o
-        LEFT JOIN projects AS p ON (p.org_id = o.id)
-        LEFT JOIN targets as t ON (t.project_id = p.id)
-        LEFT JOIN users AS u ON (u.id = o.user_id)
-        GROUP BY o.id
+          SELECT
+            o.id as organization,
+            o.clean_id as org_clean_id,
+            o.name as org_name,
+            o.limit_operations_monthly,
+            o.limit_retention_days,
+            o.plan_name as org_plan_name,
+            array_agg(o.id) as targets,
+            split_part(
+              string_agg(
+                DISTINCT u.email, ','
+              ),
+              ',',
+              1
+            ) AS owner_email
+          FROM organizations AS o
+          LEFT JOIN projects AS p ON (p.org_id = o.id)
+          LEFT JOIN targets as t ON (t.project_id = p.id)
+          LEFT JOIN users AS u ON (u.id = o.user_id)
+          GROUP BY o.id
         `,
       );
       return results.rows;
