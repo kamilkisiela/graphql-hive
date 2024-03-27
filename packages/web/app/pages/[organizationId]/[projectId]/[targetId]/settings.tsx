@@ -43,7 +43,8 @@ import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { subDays } from '@/lib/date-time';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 
-const Asd = graphql(`
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const TargetSettings_TargetValidationSettingsFragment = graphql(`
   fragment TargetSettings_TargetValidationSettingsFragment on TargetValidationSettings {
     enabled
     period
