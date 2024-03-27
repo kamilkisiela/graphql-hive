@@ -4,39 +4,49 @@ export const action: Action = async exec => {
   await exec(`
     CREATE TABLE IF NOT EXISTS monthly_overview
     (
-      target LowCardinality(String) CODEC(ZSTD(1)),
+      organization LowCardinality(String) CODEC(ZSTD(1)),
       date Date CODEC(DoubleDelta, ZSTD(1)),
       total UInt32 CODEC(T64, ZSTD(1))
     )
     ENGINE = SummingMergeTree
     PARTITION BY tuple()
-    PRIMARY KEY (target)
-    ORDER BY (target, date)
+    PRIMARY KEY (organization)
+    ORDER BY (organization, date)
     TTL date + INTERVAL 1 YEAR
     SETTINGS index_granularity = 8192
   `);
 
   await exec(`
-    CREATE MATERIALIZED VIEW IF NOT EXISTS monthly_operations_log
-    TO monthly_overview
-    AS
-      SELECT
-        target,
-        toDate(timestamp) AS date,
-        count() AS total
-      FROM default.operations
-      GROUP BY target, date
+    ALTER TABLE operations ADD COLUMN IF NOT EXISTS organization LowCardinality(Nullable(String)) CODEC(ZSTD(1))
   `);
 
   await exec(`
-    CREATE MATERIALIZED VIEW IF NOT EXISTS monthly_subscriptions_log
+    ALTER TABLE subscription_operations ADD COLUMN IF NOT EXISTS organization LowCardinality(Nullable(String)) CODEC(ZSTD(1))
+  `);
+
+  await exec(`
+    CREATE MATERIALIZED VIEW IF NOT EXISTS monthly_overview_operations
     TO monthly_overview
     AS
       SELECT
-        target,
+        organization,
+        toDate(timestamp) AS date,
+        count() AS total
+      FROM default.operations
+      WHERE organization IS NOT NULL
+      GROUP BY organization, date
+  `);
+
+  await exec(`
+    CREATE MATERIALIZED VIEW IF NOT EXISTS monthly_overview_subscriptions
+    TO monthly_overview
+    AS
+      SELECT
+        organization,
         toDate(timestamp) AS date,
         count() AS total
       FROM default.subscription_operations
-      GROUP BY target, date
+      WHERE organization IS NOT NULL
+      GROUP BY organization, date
   `);
 };

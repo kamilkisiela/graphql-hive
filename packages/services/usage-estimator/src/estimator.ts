@@ -59,17 +59,17 @@ export function createEstimator(config: {
         timeout: 60_000,
       });
     },
-    async estimateCollectedOperationsForTargets(input: {
-      targets: string[];
+    async estimateCollectedOperationsForOrganization(input: {
+      organizationId: string;
       startTime: Date;
       endTime: Date;
     }) {
       const filter = operationsReader.createFilter({
-        target: input.targets,
         period: {
           from: input.startTime,
           to: input.endTime,
         },
+        extra: [sql`AND organization = ${input.organizationId}`],
       });
 
       return await clickhouse.query<{
@@ -78,7 +78,7 @@ export function createEstimator(config: {
         query: sql`
           SELECT 
             sum(total) as total
-          FROM operations_hourly
+          FROM monthly_overview
           ${filter}
         `,
         queryId: 'usage_estimator_count_operations',

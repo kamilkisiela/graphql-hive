@@ -176,7 +176,6 @@ export interface Organization {
     compareToPreviousComposableVersion: boolean;
   };
   zendeskId: string | null;
-  createdTargetIds: string[];
 }
 
 export interface OrganizationInvitation {

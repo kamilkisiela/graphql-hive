@@ -6,12 +6,12 @@ import { initTRPC } from '@trpc/server';
 import type { Estimator } from './estimator';
 
 const DATE_RANGE_VALIDATION = {
-  startTime: z.string().nonempty(),
-  endTime: z.string().nonempty(),
+  startTime: z.string().min(1),
+  endTime: z.string().min(1),
 };
 
-const TARGET_BASED_FILTER = {
-  targetIds: z.array(z.string().nonempty()),
+const ORGANIZATION_SELECTOR = {
+  organizationId: z.string().min(1),
 };
 
 export function createContext(estimator: Estimator, req: FastifyRequest) {
@@ -30,13 +30,13 @@ export const usageEstimatorApiRouter = t.router({
       z
         .object({
           ...DATE_RANGE_VALIDATION,
-          ...TARGET_BASED_FILTER,
+          ...ORGANIZATION_SELECTOR,
         })
         .required(),
     )
     .query(async ({ ctx, input }) => {
-      const estimationResponse = await ctx.estimator.estimateCollectedOperationsForTargets({
-        targets: input.targetIds,
+      const estimationResponse = await ctx.estimator.estimateCollectedOperationsForOrganization({
+        organizationId: input.organizationId,
         startTime: new Date(input.startTime),
         endTime: new Date(input.endTime),
       });

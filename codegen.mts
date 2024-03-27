@@ -96,8 +96,6 @@ const config: CodegenConfig = {
           AdminGeneralStats: '../shared/mappers#AdminStats as AdminGeneralStatsMapper',
           AdminOrganizationStats:
             '../shared/entities#AdminOrganizationStats as AdminOrganizationStatsMapper',
-          UsageEstimation: '../shared/mappers#TargetsEstimationFilter',
-          UsageEstimationScope: '../shared/mappers#TargetsEstimationDateFilter',
           BillingPaymentMethod: 'StripeTypes.PaymentMethod.Card',
           BillingDetails: 'StripeTypes.PaymentMethod.BillingDetails',
           BillingInvoice: 'StripeTypes.Invoice | StripeTypes.UpcomingInvoice',

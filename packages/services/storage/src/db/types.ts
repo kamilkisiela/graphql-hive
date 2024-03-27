@@ -192,7 +192,6 @@ export interface organizations {
   ownership_transfer_user_id: string | null;
   plan_name: string;
   slack_token: string | null;
-  target_ids_log: Array<string> | null;
   user_id: string;
   zendesk_organization_id: string | null;
 }
