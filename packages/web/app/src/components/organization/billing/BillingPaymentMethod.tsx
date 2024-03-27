@@ -31,61 +31,22 @@ const BillingPaymentMethod_OrganizationFragment = graphql(`
   }
 `);
 
-export const BillingPaymentMethod = ({
-  plan,
-  onValidationChange,
-  className,
-  ...props
-}: {
-  plan: BillingPlanType;
-  className?: string;
+export const ManagePaymentMethod = (props: {
   organization: FragmentType<typeof BillingPaymentMethod_OrganizationFragment>;
-  onValidationChange?: (isValid: boolean) => void;
-}): ReactElement | null => {
+  plan: BillingPlanType;
+}) => {
   const [mutation, mutate] = useMutation(GenerateStripeLinkMutation);
   const router = useRouter();
+  const organization = useFragment(BillingPaymentMethod_OrganizationFragment, props.organization);
+  const info = organization.billingConfiguration.paymentMethod;
 
-  if (plan !== 'PRO') {
+  if (!info) {
     return null;
   }
 
-  const organization = useFragment(BillingPaymentMethod_OrganizationFragment, props.organization);
-
-  if (!organization.billingConfiguration?.paymentMethod) {
-    return (
-      <div className={clsx('flex flex-col gap-6', className)}>
-        <Heading>Payment Method</Heading>
-        <CardElement
-          className="grow"
-          onChange={e => {
-            if (e.error || !e.complete) {
-              onValidationChange?.(false);
-            } else {
-              onValidationChange?.(true);
-            }
-          }}
-          options={{
-            style: {
-              base: {
-                color: '#fff',
-              },
-            },
-          }}
-        />
-        <Section.Subtitle>
-          All payments and subscriptions are processed securely by{' '}
-          <Link variant="primary" href="https://stripe.com" target="_blank" rel="noreferrer">
-            Stripe
-          </Link>
-        </Section.Subtitle>
-      </div>
-    );
-  }
-  const info = organization.billingConfiguration.paymentMethod;
-
   return (
     <>
-      <div>
+      <div className="mt-4">
         <div>
           <Section.BigTitle>Payment Method and Billing Settings</Section.BigTitle>
           <Section.Subtitle className="mb-6">
@@ -122,5 +83,42 @@ export const BillingPaymentMethod = ({
         </div>
       </div>
     </>
+  );
+};
+
+export const BillingPaymentMethodForm = ({
+  onValidationChange,
+  className,
+}: {
+  className?: string;
+  onValidationChange?: (isValid: boolean) => void;
+}): ReactElement | null => {
+  return (
+    <div className={clsx('flex flex-col gap-6', className)}>
+      <Heading>Payment Method</Heading>
+      <CardElement
+        className="grow"
+        onChange={e => {
+          if (e.error || !e.complete) {
+            onValidationChange?.(false);
+          } else {
+            onValidationChange?.(true);
+          }
+        }}
+        options={{
+          style: {
+            base: {
+              color: '#fff',
+            },
+          },
+        }}
+      />
+      <Section.Subtitle>
+        All payments and subscriptions are processed securely by{' '}
+        <Link variant="primary" href="https://stripe.com" target="_blank" rel="noreferrer">
+          Stripe
+        </Link>
+      </Section.Subtitle>
+    </div>
   );
 };
