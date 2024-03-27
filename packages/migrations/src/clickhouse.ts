@@ -156,6 +156,7 @@ export async function migrateClickHouse(
     import('./clickhouse-actions/003-add-client-name-to-operations-tables'),
     import('./clickhouse-actions/004-version-2'),
     import('./clickhouse-actions/005-subscription-conditional-breaking-changes'),
+    import('./clickhouse-actions/006-monthly-operations-log'),
   ]);
 
   async function actionRunner(action: Action, index: number) {
