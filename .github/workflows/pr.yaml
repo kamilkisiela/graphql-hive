@@ -30,6 +30,8 @@ jobs:
       publishLatest: false
       targets: 'build'
       uploadJavaScriptArtifacts: true
+      # useLocalArtifacts: ${{ github.repository_owner != 'kamilkisiela' }}
+      useLocalArtifacts: true
     secrets: inherit
 
   # Run db migrations tests
@@ -51,6 +53,8 @@ jobs:
       stripeTestPublicKey: ${{ secrets.TEST_STRIPE_PUBLIC_KEY }}
       stripeTestSecretKey: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
     with:
+      # useLocalArtifacts: ${{ github.repository_owner != 'kamilkisiela' }}
+      useLocalArtifacts: true
       imageTag: ${{ github.event.pull_request.head.sha }}
 
   # e2e tests using Cypress, runs Hive from pre-built Docker images.
