@@ -235,6 +235,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       },
       featureFlags: decodeFeatureFlags(organization.feature_flags),
       zendeskId: organization.zendesk_organization_id ?? null,
+      createdTargetIds: organization.target_ids_log ?? [],
     };
   }
 
