@@ -15,7 +15,8 @@ export const CreateOrganizationMutation = graphql(`
           }
           organization {
             cleanId
-            ...OrganizationFields
+            id
+            cleanId
           }
         }
       }

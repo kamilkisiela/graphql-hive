@@ -4,7 +4,7 @@ import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Modal, Select } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { AlertType } from '@/graphql';
+import { AlertType } from '@/gql/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 
 export const CreateAlertModal_AddAlertMutation = graphql(`

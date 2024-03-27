@@ -1,5 +1,5 @@
 import { useFormikContext } from 'formik';
-import { RuleInstanceSeverityLevel } from '@/graphql';
+import { RuleInstanceSeverityLevel } from '@/gql/graphql';
 import type { PolicyFormValues } from './rules-configuration';
 
 export function useConfigurationHelper() {

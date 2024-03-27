@@ -73,9 +73,6 @@ importers:
       '@graphql-codegen/graphql-modules-preset':
         specifier: 4.0.6
         version: 4.0.6(graphql@16.8.1)
-      '@graphql-codegen/typed-document-node':
-        specifier: 5.0.6
-        version: 5.0.6(graphql@16.8.1)
       '@graphql-codegen/typescript':
         specifier: 4.0.6
         version: 4.0.6(graphql@16.8.1)

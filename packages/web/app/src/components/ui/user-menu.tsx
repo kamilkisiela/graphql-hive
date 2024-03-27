@@ -27,7 +27,7 @@ import {
 import { LeaveOrganizationModal } from '@/components/v2/modals/leave-organization';
 import { env } from '@/env/frontend';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { AuthProvider } from '@/graphql';
+import { AuthProvider } from '@/gql/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useToggle } from '@/lib/hooks';
 import { cn } from '@/lib/utils';

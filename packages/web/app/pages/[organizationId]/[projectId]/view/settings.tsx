@@ -24,7 +24,7 @@ import { DocsLink, Input, MetaTitle } from '@/components/v2';
 import { HiveLogo } from '@/components/v2/icon';
 import { DeleteProjectModal } from '@/components/v2/modals';
 import { graphql, useFragment } from '@/gql';
-import { ProjectType } from '@/graphql';
+import { ProjectType } from '@/gql/graphql';
 import { canAccessProject, ProjectAccessScope, useProjectAccess } from '@/lib/access/project';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useNotifications, useRouteSelector, useToggle } from '@/lib/hooks';
@@ -173,8 +173,9 @@ const ProjectSettingsPage_UpdateProjectNameMutation = graphql(`
           project
         }
         updatedProject {
-          ...ProjectFields
+          id
           cleanId
+          name
         }
       }
       error {

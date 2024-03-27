@@ -8,8 +8,7 @@ import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { DocsLink, MetaTitle } from '@/components/v2';
 import { graphql } from '@/gql';
-import { ProjectAccessScope } from '@/gql/graphql';
-import { RegistryModel } from '@/graphql';
+import { ProjectAccessScope, RegistryModel } from '@/gql/graphql';
 import { useProjectAccess } from '@/lib/access/project';
 import { useRouteSelector } from '@/lib/hooks';
 

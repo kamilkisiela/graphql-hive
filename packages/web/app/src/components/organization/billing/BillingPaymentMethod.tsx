@@ -5,7 +5,7 @@ import { useMutation } from 'urql';
 import { Section } from '@/components/common';
 import { Button, Heading, Link } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { BillingPlanType } from '@/graphql';
+import { BillingPlanType } from '@/gql/graphql';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import { CardElement } from '@stripe/react-stripe-js';
 

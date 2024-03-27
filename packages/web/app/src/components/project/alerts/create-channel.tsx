@@ -4,7 +4,7 @@ import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal, Select, Tag } from '@/components/v2';
 import { graphql } from '@/gql';
-import { AlertChannelType } from '@/graphql';
+import { AlertChannelType } from '@/gql/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 
 export const CreateChannel_AddAlertChannelMutation = graphql(`
