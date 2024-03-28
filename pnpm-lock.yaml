@@ -626,8 +626,8 @@ importers:
         specifier: 0.1.0
         version: 0.1.0(patch_hash=ryylgra5xglhidfoiaxehn22hq)
       '@theguild/federation-composition':
-        specifier: 0.11.0
-        version: 0.11.0(graphql@16.8.1)
+        specifier: 0.11.1
+        version: 0.11.1(graphql@16.8.1)
       '@trpc/client':
         specifier: 10.45.2
         version: 10.45.2(@trpc/server@10.45.2)
@@ -980,8 +980,8 @@ importers:
         specifier: 7.108.0
         version: 7.108.0
       '@theguild/federation-composition':
-        specifier: 0.11.0
-        version: 0.11.0(graphql@16.8.1)
+        specifier: 0.11.1
+        version: 0.11.1(graphql@16.8.1)
       '@trpc/server':
         specifier: 10.45.2
         version: 10.45.2
@@ -13140,8 +13140,8 @@ packages:
       - supports-color
     dev: true
 
-  /@theguild/federation-composition@0.11.0(graphql@16.8.1):
-    resolution: {integrity: sha512-kszYBFd9aUD2EJy12FW0a6cs5Mjv6+SkFcAbfK6TQu5k9FsR4H3d6yCIrTqENZxTYhDY2ZNOnC+Wyr2Qu6xF4w==}
+  /@theguild/federation-composition@0.11.1(graphql@16.8.1):
+    resolution: {integrity: sha512-+AkkBx4cG6R8TxDIvt9B1p3hQ2bPWwMjxLmtb98J/5A+gczaLCDrpYnEZw7VOnQcJnwASq8Goe3E1JOcF9uujw==}
     engines: {node: '>=18'}
     peerDependencies:
       graphql: ^16.0.0
