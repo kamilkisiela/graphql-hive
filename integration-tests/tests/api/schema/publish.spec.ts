@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import { createServer, Server } from 'node:http';
 import { createPool, sql } from 'slonik';
 import { graphql } from 'testkit/gql';
 import { execute } from 'testkit/graphql';
@@ -3706,3 +3707,219 @@ test.concurrent(
     });
   },
 );
+
+const createDeferred = () => {
+  let resolve: () => void;
+  const promise = new Promise<void>(r => {
+    resolve = r;
+  });
+
+  return {
+    resolve: () => resolve(),
+    promise,
+  };
+};
+
+test.concurrent('schema publish race condition', async () => {
+  const secondExternalCompositionArrived = createDeferred();
+  const thirdExternalCompositionArrived = createDeferred();
+
+  const continueSecondExternalComposition = createDeferred();
+  const continueThirdExternalComposition = createDeferred();
+
+  let counter = 0;
+  /**
+   * This server mocks the external composition and will handle three requests!
+   * But, we will delay sending the response of the second request until the GraphQL operation is aborted
+   * We do this to proof that if the GraphQL request is aborted the publish lock will be released, BUT the publish will not be aborted
+   * This will cause a race condition that will raise an exception on the API
+   */
+  const server = createServer(async (_, res) => {
+    if (counter === 0) {
+      counter++;
+      res.write(
+        JSON.stringify({
+          type: 'success',
+          result: {
+            supergraph: /* GraphQL */ `
+              type Query {
+                a: String
+              }
+            `,
+            sdl: /* GraphQL */ `
+              type Query {
+                a: String
+              }
+            `,
+          },
+        }),
+      );
+      res.end();
+      return;
+    }
+    if (counter === 1) {
+      counter++;
+      secondExternalCompositionArrived.resolve();
+      await continueSecondExternalComposition.promise;
+      res.write(
+        JSON.stringify({
+          type: 'success',
+          result: {
+            supergraph: /* GraphQL */ `
+              type Query {
+                a: String
+                b: String
+              }
+            `,
+            sdl: /* GraphQL */ `
+              type Query {
+                a: String
+                b: String
+              }
+            `,
+          },
+        }),
+      );
+      res.end();
+      return;
+    }
+    if (counter === 2) {
+      thirdExternalCompositionArrived.resolve();
+      await continueThirdExternalComposition.promise;
+      res.write(
+        JSON.stringify({
+          type: 'success',
+          result: {
+            supergraph: /* GraphQL */ `
+              type Query {
+                a: String
+                b: String
+                c: String
+              }
+            `,
+            sdl: /* GraphQL */ `
+              type Query {
+                a: String
+                b: String
+                c: String
+              }
+            `,
+          },
+        }),
+      );
+      res.end();
+      return;
+    }
+  });
+
+  try {
+    await new Promise<void>(resolve => {
+      server.listen(0, () => {
+        resolve();
+      });
+    });
+
+    const port = (server.address() as any).port;
+    const localCompositionAddress = `http://host.docker.internal:${port}/compose`;
+
+    const { createOrg } = await initSeed().createOwner();
+    const { createProject, organization } = await createOrg();
+    const { createToken, project } = await createProject(ProjectType.Federation);
+    const writeToken = await createToken({
+      targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
+      projectScopes: [ProjectAccessScope.Settings, ProjectAccessScope.Read],
+      organizationScopes: [],
+    });
+
+    const service = 'a';
+    const url = 'https://api.com/a';
+
+    const externalCompositionResult = await enableExternalSchemaComposition(
+      {
+        endpoint: localCompositionAddress,
+        // eslint-disable-next-line no-process-env
+        secret: 'foo',
+        project: project.cleanId,
+        organization: organization.cleanId,
+      },
+      writeToken.secret,
+    ).then(r => r.expectNoGraphQLErrors());
+    expect(
+      externalCompositionResult.enableExternalSchemaComposition.ok?.externalSchemaComposition
+        ?.endpoint,
+    ).toBe(localCompositionAddress);
+
+    const publish1 = await writeToken
+      .publishSchema({
+        url,
+        sdl: /* GraphQL */ `
+          type Query {
+            a: String
+          }
+        `,
+        service,
+      })
+      .then(r => r.expectNoGraphQLErrors());
+    expect(publish1.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+    const controller = new AbortController();
+
+    const publish2Promise = writeToken
+      .publishSchema({
+        url,
+        sdl: /* GraphQL */ `
+          type Query {
+            a: String
+            b: String
+          }
+        `,
+        service,
+        signal: controller.signal,
+      })
+      .catch(err => {
+        console.log('ISSA OK, we aborted this');
+      });
+
+    // wait till the request arrives in our mock server
+    await secondExternalCompositionArrived.promise;
+
+    // then start the last publish
+    const publish3Promise = writeToken.publishSchema({
+      url,
+      sdl: /* GraphQL */ `
+        type Query {
+          a: String
+          b: String
+          c: String
+        }
+      `,
+      service,
+    });
+
+    // abort the second publish
+    controller.abort();
+
+    // we wait till the third publish request arrives within the external composition service
+    await thirdExternalCompositionArrived.promise;
+    // resume the external composition response sending for the second request (that we just canceled)
+    continueSecondExternalComposition.resolve();
+
+    // wait some time (just to make sure that request from external composition for second request is processed by API)...
+    await new Promise<void>(res => setTimeout(res, 5000));
+    // ... and then resume the third request
+    continueThirdExternalComposition.resolve();
+
+    await publish3Promise.then(r => r.expectNoGraphQLErrors());
+
+    expect(publish1.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+  } finally {
+    await new Promise<void>((res, rej) => {
+      server?.close(err => {
+        if (err) {
+          return rej(err);
+        }
+        res();
+      });
+    });
+  }
+});
