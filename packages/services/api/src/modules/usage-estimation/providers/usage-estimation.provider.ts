@@ -37,10 +37,6 @@ export class UsageEstimationProvider {
   ): Promise<number | null> {
     this.logger.debug('Estimation operations, input: %o', input);
 
-    if (input.targetIds.length === 0) {
-      return 0;
-    }
-
     if (!this.usageEstimator) {
       this.logger.warn('Usage estimator is not available due to missing configuration');
 

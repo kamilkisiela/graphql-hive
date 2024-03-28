@@ -82,6 +82,7 @@ export function createProcessor(config: { logger: ServiceLogger }) {
             rawOperation,
             rawReport.map,
             rawReport.target,
+            rawReport.organization ?? null,
             normalize,
             logger,
           );
@@ -112,6 +113,7 @@ export function createProcessor(config: { logger: ServiceLogger }) {
               rawOperation,
               rawReport.map,
               rawReport.target,
+              rawReport.organization ?? null,
               normalize,
               logger,
             );
@@ -189,6 +191,7 @@ function processSingleOperation(
   operation: RawOperation,
   operationMap: RawOperationMap,
   target: string,
+  organization: string | null,
   normalize: NormalizeFunction,
   logger: ServiceLogger,
 ): ProcessedOperation | null {
@@ -230,6 +233,7 @@ function processSingleOperation(
     timestamp,
     expiresAt: operation.expiresAt || timestamp + 30 * DAY_IN_MS,
     target,
+    organization,
     execution,
     metadata,
     operationHash,
@@ -240,6 +244,7 @@ function processSubscriptionOperation(
   operation: RawSubscriptionOperation,
   operationMap: RawOperationMap,
   target: string,
+  organization: string | null,
   normalize: NormalizeFunction,
   logger: ServiceLogger,
 ) {
@@ -281,6 +286,7 @@ function processSubscriptionOperation(
     timestamp,
     expiresAt: operation.expiresAt || timestamp + 30 * DAY_IN_MS,
     target,
+    organization,
     metadata,
     operationHash,
   };

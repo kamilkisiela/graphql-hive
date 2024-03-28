@@ -320,9 +320,15 @@ export type TargetsEstimationDateFilter = {
   endTime: Date;
 };
 
-export type TargetsEstimationFilter = TargetsEstimationDateFilter & {
-  targets: string[];
-};
+export type TargetsEstimationFilter = TargetsEstimationDateFilter &
+  (
+    | {
+        target: string;
+      }
+    | {
+        organization: string;
+      }
+  );
 
 export type AdminStats = {
   period: {

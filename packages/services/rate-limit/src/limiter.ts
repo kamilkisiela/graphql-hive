@@ -10,15 +10,15 @@ import { rateLimitOperationsEventOrg } from './metrics';
 
 export type RateLimitCheckResponse = {
   /**
-   * An indictaor that refers to the hard-limit state of the org.
+   * An indicator that refers to the hard-limit state of the org.
    * If this is set to "true" -> usage is limited and no data is processed.
    */
   limited: boolean;
   /**
-   * An indictaor that tells about the usage of the org. We are using that for UI indicators.
+   * An indicator that tells about the usage of the org. We are using that for UI indicators.
    * This is a number between 0-1 (or higher in case of non-limited orgs)
    */
-  usagePercenrage: number;
+  usagePercentage: number;
   quota: number;
   current: number;
 };
@@ -26,7 +26,7 @@ export type RateLimitCheckResponse = {
 const UNKNOWN_RATE_LIMIT_OBJ: RateLimitCheckResponse = {
   current: -1,
   quota: -1,
-  usagePercenrage: 0,
+  usagePercentage: 0,
   limited: false,
 };
 
@@ -76,7 +76,7 @@ export function createRateLimiter(config: {
   let initialized = false;
   let intervalHandle: ReturnType<typeof setInterval> | null = null;
 
-  let targetIdToOrgLookup = new Map<TargetId, OrganizationId>();
+  const targetIdToOrgLookup = new Map<TargetId, OrganizationId>();
   let cachedResult = new Map<OrganizationId, CachedRateLimitInfo>();
 
   async function fetchAndCalculateUsageInformation() {
@@ -95,40 +95,43 @@ export function createRateLimiter(config: {
     const storage = await postgres$;
 
     const [records, operations] = await Promise.all([
-      storage.getGetOrganizationsAndTargetPairsWithLimitInfo(),
-      rateEstimator.estimateOperationsForAllTargets.query(windowAsString),
+      storage.getGetOrganizationsAndTargetsWithLimitInfo(),
+      rateEstimator.estimateOperationsForAllTargets.query(windowAsString), // [ ]
     ]);
 
-    logger.debug(`Fetched total of ${Object.keys(records).length} targets from the DB`);
+    const totalTargets = records.reduce((acc, record) => acc + record.targets.length, 0);
+
+    logger.debug(
+      `Fetched total of ${Object.keys(records).length} organizations (with ${totalTargets} targets) from the DB`,
+    );
     logger.debug(
       `Fetched total of ${Object.keys(operations).length} targets with usage information`,
     );
 
-    const newTargetIdToOrgLookup = new Map<TargetId, OrganizationId>();
     const newCachedResult = new Map<OrganizationId, CachedRateLimitInfo>();
 
-    for (const pairRecord of records) {
-      newTargetIdToOrgLookup.set(pairRecord.target, pairRecord.organization);
-
-      if (!newCachedResult.has(pairRecord.organization)) {
-        newCachedResult.set(pairRecord.organization, {
-          orgName: pairRecord.org_name,
-          orgEmail: pairRecord.owner_email,
-          orgPlan: pairRecord.org_plan_name,
-          orgCleanId: pairRecord.org_clean_id,
+    for (const record of records) {
+      if (!newCachedResult.has(record.organization)) {
+        newCachedResult.set(record.organization, {
+          orgName: record.org_name,
+          orgEmail: record.owner_email,
+          orgPlan: record.org_plan_name,
+          orgCleanId: record.org_clean_id,
           operations: {
             current: 0,
-            quota: pairRecord.limit_operations_monthly,
+            quota: record.limit_operations_monthly,
             limited: false,
-            usagePercenrage: 0,
+            usagePercentage: 0,
           },
-          retentionInDays: pairRecord.limit_retention_days,
+          retentionInDays: record.limit_retention_days,
         });
       }
 
-      const orgRecord = newCachedResult.get(pairRecord.organization)!;
-      orgRecord.operations.current =
-        (orgRecord.operations.current || 0) + (operations[pairRecord.target] || 0);
+      const orgRecord = newCachedResult.get(record.organization)!;
+
+      for (const target of record.targets) {
+        orgRecord.operations.current += operations[target] || 0;
+      }
     }
 
     newCachedResult.forEach((orgRecord, orgId) => {
@@ -138,10 +141,10 @@ export function createRateLimiter(config: {
       orgRecord.operations.limited = noLimits
         ? false
         : orgRecord.operations.current > orgRecord.operations.quota;
-      orgRecord.operations.usagePercenrage =
+      orgRecord.operations.usagePercentage =
         orgRecord.operations.current / orgRecord.operations.quota;
 
-      if (orgRecord.operations.usagePercenrage >= 1) {
+      if (orgRecord.operations.usagePercentage >= 1) {
         rateLimitOperationsEventOrg.labels({ orgId, orgName }).inc();
         logger.info(
           `Organization "${orgName}"/"${orgId}" is now being rate-limited for operations (${orgRecord.operations.current}/${orgRecord.operations.quota})`,
@@ -163,7 +166,7 @@ export function createRateLimiter(config: {
             current: orgRecord.operations.current,
           },
         });
-      } else if (orgRecord.operations.usagePercenrage >= 0.9) {
+      } else if (orgRecord.operations.usagePercentage >= 0.9) {
         emails.limitWarning({
           organization: {
             id: orgId,
@@ -184,7 +187,6 @@ export function createRateLimiter(config: {
     });
 
     cachedResult = newCachedResult;
-    targetIdToOrgLookup = newTargetIdToOrgLookup;
 
     const scheduledEmails = emails.drain();
     if (scheduledEmails.length > 0) {
