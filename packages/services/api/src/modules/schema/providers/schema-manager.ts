@@ -29,7 +29,9 @@ import { GitHubIntegrationManager } from '../../integrations/providers/github-in
 import { OrganizationManager } from '../../organization/providers/organization-manager';
 import { ProjectManager } from '../../project/providers/project-manager';
 import { CryptoProvider } from '../../shared/providers/crypto';
+import { IdTranslator } from '../../shared/providers/id-translator';
 import { Logger } from '../../shared/providers/logger';
+import { PUB_SUB_CONFIG, type HivePubSub } from '../../shared/providers/pub-sub';
 import {
   OrganizationSelector,
   ProjectSelector,
@@ -83,6 +85,8 @@ export class SchemaManager {
     private schemaHelper: SchemaHelper,
     private contracts: Contracts,
     private breakingSchemaChangeUsageHelper: BreakingSchemaChangeUsageHelper,
+    private idTranslator: IdTranslator,
+    @Inject(PUB_SUB_CONFIG) private pubSub: HivePubSub,
     @Inject(SCHEMA_MODULE_CONFIG) private schemaModuleConfig: SchemaModuleConfig,
   ) {
     this.logger = logger.child({ source: 'SchemaManager' });
@@ -1229,5 +1233,48 @@ export class SchemaManager {
     }
     this.logger.info('User not found. (userId=%s)', input.userId);
     return null;
+  }
+
+  async subscribeToNewSchemaVersionsOfTarget(args: {
+    organization: string;
+    project: string;
+    target: string;
+  }) {
+    this.logger.info(
+      'Attempt to subscribe to new schema versions for target. (organization=%s, project=%s, target=%s)',
+      args.organization,
+      args.project,
+      args.target,
+    );
+
+    const [organizationId, projectId, targetId] = await Promise.all([
+      this.idTranslator.translateOrganizationId(args),
+      this.idTranslator.translateProjectId(args),
+      this.idTranslator.translateTargetId(args),
+    ]).catch(() => {
+      throw new HiveError('Could not find target.');
+    });
+
+    await this.authManager.ensureTargetAccess({
+      organization: organizationId,
+      project: projectId,
+      target: targetId,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    this.logger.info('Subscribe to event stream. (targetId=%s)', targetId);
+
+    return this.pubSub.subscribe('publishedNewSchemaVersion', targetId);
+  }
+
+  publishNewSchemaVersionForTargetEvent(args: { targetId: string; schemaVersionId: string }) {
+    this.logger.info(
+      'Broadcast availability of new schema version on target. (targetId=%s, schemaVersionId=%s)',
+      args.targetId,
+      args.schemaVersionId,
+    );
+    this.pubSub.publish('publishedNewSchemaVersion', args.targetId, {
+      publishedSchemaVersionId: args.schemaVersionId,
+    });
   }
 }

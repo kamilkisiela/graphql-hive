@@ -58,6 +58,31 @@ export default gql`
     ): TestExternalSchemaCompositionResult!
   }
 
+  type Subscription {
+    publishedNewSchemaVersion(
+      input: PublishedNewSchemaVersionSubscriptionInput!
+    ): PublishedNewSchemaVersionEvent!
+  }
+
+  input PublishedNewSchemaVersionSubscriptionInput {
+    """
+    Clean ID name of organization to subscribe to.
+    """
+    organization: ID!
+    """
+    Clean ID name of project to subscribe to.
+    """
+    project: ID!
+    """
+    Clean ID name of target to subscribe to.
+    """
+    target: ID!
+  }
+
+  type PublishedNewSchemaVersionEvent {
+    publishedSchemaVersionId: ID!
+  }
+
   input UpdateNativeFederationInput {
     organization: ID!
     project: ID!

@@ -31,8 +31,6 @@ import { extractUserId, useSentryUser } from './use-sentry-user';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
 
-const abortControllerCache = new WeakMap();
-
 function hashSessionId(sessionId: string): string {
   return createHash('sha256').update(sessionId).digest('hex');
 }
@@ -263,23 +261,6 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
   return async (req, reply) => {
     const requestIdHeader = req.headers['x-request-id'] ?? reqIdGenerate();
     const requestId = cleanRequestId(requestIdHeader);
-    let controller = abortControllerCache.get(req.socket);
-
-    // we use the socket.close over req.close because req.close is emitted
-    // when the request gets processed (not canceled)
-    // see more: https://github.com/nodejs/node/issues/38924
-    // TODO: socket.once might break for http/2 because
-    if (!controller) {
-      controller = new AbortController();
-      abortControllerCache.set(req.socket, controller);
-
-      req.raw.socket.once('close', () => {
-        // TODO: Do not execute it after a request is completed
-        req.log.debug('Aborted request (id=%s)', requestId);
-        controller.abort();
-        abortControllerCache.delete(req.socket);
-      });
-    }
 
     await asyncStorage.run(
       {
@@ -287,13 +268,12 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
       },
       async () => {
         const response = await runWithAsyncContext(() => {
-          return server.handleNodeRequest(req, {
+          return server.handleNodeRequestAndResponse(req, reply, {
             req,
             reply,
             headers: req.headers,
             requestId,
             session: null,
-            abortSignal: controller.signal,
           });
         });
 
@@ -312,9 +292,9 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         }
 
         void reply.status(response.status);
+        void reply.send(response.body);
 
-        const textResponse = await response.text();
-        return reply.send(textResponse);
+        return reply;
       },
     );
   };
