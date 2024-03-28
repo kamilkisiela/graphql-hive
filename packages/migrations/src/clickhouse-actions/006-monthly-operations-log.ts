@@ -17,11 +17,11 @@ export const action: Action = async exec => {
   `);
 
   await exec(`
-    ALTER TABLE operations ADD COLUMN IF NOT EXISTS organization LowCardinality(Nullable(String)) CODEC(ZSTD(1))
+    ALTER TABLE operations ADD COLUMN IF NOT EXISTS organization LowCardinality(String) DEFAULT '' CODEC(ZSTD(1))
   `);
 
   await exec(`
-    ALTER TABLE subscription_operations ADD COLUMN IF NOT EXISTS organization LowCardinality(Nullable(String)) CODEC(ZSTD(1))
+    ALTER TABLE subscription_operations ADD COLUMN IF NOT EXISTS organization LowCardinality(String) DEFAULT '' CODEC(ZSTD(1))
   `);
 
   await exec(`
@@ -33,7 +33,7 @@ export const action: Action = async exec => {
         toDate(timestamp) AS date,
         count() AS total
       FROM default.operations
-      WHERE organization IS NOT NULL
+      WHERE notEmpty(organization)
       GROUP BY organization, date
   `);
 
@@ -46,7 +46,7 @@ export const action: Action = async exec => {
         toDate(timestamp) AS date,
         count() AS total
       FROM default.subscription_operations
-      WHERE organization IS NOT NULL
+      WHERE notEmpty(organization)
       GROUP BY organization, date
   `);
 };
