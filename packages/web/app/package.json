@@ -16,7 +16,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@graphiql/react": "0.18.0-alpha.0",
+    "@graphiql/react": "0.20.3",
     "@graphiql/toolkit": "0.9.1",
     "@graphql-tools/mock": "9.0.2",
     "@headlessui/react": "1.7.17",
@@ -65,7 +65,7 @@
     "echarts": "5.5.0",
     "echarts-for-react": "3.0.2",
     "formik": "2.4.5",
-    "graphiql": "3.0.0-alpha.0",
+    "graphiql": "3.1.1",
     "graphql": "16.8.1",
     "gray-matter": "4.0.3",
     "hyperid": "3.2.0",
