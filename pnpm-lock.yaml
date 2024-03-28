@@ -1722,8 +1722,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       supertokens-auth-react:
-        specifier: 0.35.6
-        version: 0.35.6(react-dom@18.2.0)(react@18.2.0)(supertokens-web-js@0.8.0)
+        specifier: 0.39.1
+        version: 0.39.1(react-dom@18.2.0)(react@18.2.0)(supertokens-web-js@0.8.0)
       supertokens-web-js:
         specifier: 0.8.0
         version: 0.8.0
@@ -28058,6 +28058,10 @@ packages:
     resolution: {integrity: sha512-pMpnA0qRdFp32b1sJl1wOJNxZLQ2cbQx+k6tjNtZ8CpvVhNqEPRgivZ2WOUev2YMajecdH7ctUPDvEe87nariQ==}
     engines: {node: '>=6.0.0'}
 
+  /qr.js@0.0.0:
+    resolution: {integrity: sha512-c4iYnWb+k2E+vYpRimHqSu575b1/wKl4XFeJGpFmrJQz5I88v9aY2czh7s0w36srfCM1sXgC/xpoJz5dJfq+OQ==}
+    dev: false
+
   /qs@6.10.4:
     resolution: {integrity: sha512-OQiU+C+Ds5qiH91qh/mg0w+8nwQuLjM4F4M/PbmhDOoYehPh+Fb0bDjtR1sOvy7YKxvj28Y/M0PhP5uVX0kB+g==}
     engines: {node: '>=0.6'}
@@ -28329,6 +28333,20 @@ packages:
       prop-types: 15.8.1
       react: 18.2.0
       react-fast-compare: 3.2.0
+    dev: false
+
+  /react-qr-code@2.0.12(react@18.2.0):
+    resolution: {integrity: sha512-k+pzP5CKLEGBRwZsDPp98/CAJeXlsYRHM2iZn1Sd5Th/HnKhIZCSg27PXO58zk8z02RaEryg+60xa4vyywMJwg==}
+    peerDependencies:
+      react: ^16.x || ^17.x || ^18.x
+      react-native-svg: '*'
+    peerDependenciesMeta:
+      react-native-svg:
+        optional: true
+    dependencies:
+      prop-types: 15.8.1
+      qr.js: 0.0.0
+      react: 18.2.0
     dev: false
 
   /react-refresh@0.14.0:
@@ -30594,20 +30612,23 @@ packages:
       ts-interface-checker: 0.1.13
     dev: true
 
-  /supertokens-auth-react@0.35.6(react-dom@18.2.0)(react@18.2.0)(supertokens-web-js@0.8.0):
-    resolution: {integrity: sha512-Bt+rYunzqP6g331Ks5Q66obiIU/t2k6siG6dtpJNY2DZqAnjgJlDr8S/UAU8I72f4qWwlYv8FKUTa8+O/0z3zA==}
+  /supertokens-auth-react@0.39.1(react-dom@18.2.0)(react@18.2.0)(supertokens-web-js@0.8.0):
+    resolution: {integrity: sha512-n7rvz8Z/nF8ZMFGXAS4EOPoh1wnrDIiaTMEpzhLw+pAhHBoGESsU94+1Y1bGrwmjX+LMIsNinXnEkDuEJHZI/g==}
     engines: {node: '>=16.0.0', npm: '>=8'}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
-      supertokens-web-js: ^0.8.0
+      supertokens-web-js: ^0.10.0
     dependencies:
       intl-tel-input: 17.0.19
       prop-types: 15.8.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
+      react-qr-code: 2.0.12(react@18.2.0)
       supertokens-js-override: 0.0.4
       supertokens-web-js: 0.8.0
+    transitivePeerDependencies:
+      - react-native-svg
     dev: false
 
   /supertokens-js-override@0.0.4:
