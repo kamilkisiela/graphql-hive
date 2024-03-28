@@ -35,7 +35,7 @@ export function deploySchema({
         REQUEST_BROKER: '1',
         SCHEMA_CACHE_POLL_INTERVAL_MS: '150',
         SCHEMA_CACHE_TTL_MS: '65000' /* 65s */,
-        SCHEMA_CACHE_SUCCESS_TTL_MS: '86400000' /* 24h */,
+        SCHEMA_CACHE_SUCCESS_TTL_MS: '43200000' /* 12h */,
         SCHEMA_COMPOSITION_TIMEOUT_MS: '60000' /* 60s */,
       },
       readinessProbe: '/_readiness',
