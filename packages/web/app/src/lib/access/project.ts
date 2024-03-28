@@ -1,5 +1,5 @@
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { ProjectAccessScope } from '../../graphql';
+import { ProjectAccessScope } from '@/gql/graphql';
 import { useRedirect } from './common';
 
 export { ProjectAccessScope };

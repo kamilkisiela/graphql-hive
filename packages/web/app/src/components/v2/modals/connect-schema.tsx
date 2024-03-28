@@ -11,7 +11,7 @@ import {
   Tag,
 } from '@/components/v2';
 import { graphql } from '@/gql';
-import { ProjectType } from '@/graphql';
+import { ProjectType } from '@/gql/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useRouteSelector } from '@/lib/hooks';
 

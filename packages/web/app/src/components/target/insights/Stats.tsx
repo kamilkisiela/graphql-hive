@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CHART_PRIMARY_COLOR } from '@/constants';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { DateRangeInput } from '@/graphql';
+import { DateRangeInput } from '@/gql/graphql';
 import {
   formatDuration,
   formatNumber,

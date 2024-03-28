@@ -9,8 +9,7 @@ import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { DocsLink, DocsNote, MetaTitle } from '@/components/v2';
 import { graphql } from '@/gql';
-import { OrganizationAccessScope } from '@/gql/graphql';
-import { RegistryModel } from '@/graphql';
+import { OrganizationAccessScope, RegistryModel } from '@/gql/graphql';
 import { useOrganizationAccess } from '@/lib/access/organization';
 import { useRouteSelector } from '@/lib/hooks';
 

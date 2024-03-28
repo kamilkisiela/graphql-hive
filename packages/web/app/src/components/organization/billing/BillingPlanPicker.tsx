@@ -2,7 +2,7 @@ import { ReactElement, ReactNode } from 'react';
 import { Label, Section } from '@/components/common';
 import { Radio, RadioGroup } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { BillingPlanType } from '@/graphql';
+import { BillingPlanType } from '@/gql/graphql';
 import { CheckIcon } from '@radix-ui/react-icons';
 
 const planCollection: {

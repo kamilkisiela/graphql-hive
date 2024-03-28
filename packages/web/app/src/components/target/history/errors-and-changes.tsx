@@ -26,7 +26,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Heading } from '@/components/v2';
 import { PulseIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { CriticalityLevel, SchemaChangeFieldsFragment } from '@/graphql';
+import { CriticalityLevel } from '@/gql/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { CheckCircledIcon, InfoCircledIcon } from '@radix-ui/react-icons';
 
@@ -58,19 +58,81 @@ const ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment = graphq
   }
 `);
 
-export function ChangesBlock(props: {
-  title: string | React.ReactElement;
-  criticality: CriticalityLevel;
-  changes: SchemaChangeFieldsFragment[];
-  conditionBreakingChangeMetadata?: FragmentType<
-    typeof ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment
-  > | null;
-}): ReactElement | null {
+export const ChangesBlock_SchemaChangeApprovalFragment = graphql(`
+  fragment ChangesBlock_SchemaChangeApprovalFragment on SchemaChangeApproval {
+    approvedBy {
+      id
+      displayName
+    }
+    approvedAt
+    schemaCheckId
+  }
+`);
+
+export const ChangesBlock_SchemaChangeWithUsageFragment = graphql(`
+  fragment ChangesBlock_SchemaChangeWithUsageFragment on SchemaChange {
+    path
+    message(withSafeBasedOnUsageNote: false)
+    criticality
+    criticalityReason
+    approval {
+      ...ChangesBlock_SchemaChangeApprovalFragment
+    }
+    isSafeBasedOnUsage
+    usageStatistics {
+      topAffectedOperations {
+        hash
+        name
+        countFormatted
+        percentageFormatted
+      }
+      topAffectedClients {
+        name
+        countFormatted
+        percentageFormatted
+      }
+    }
+  }
+`);
+
+export const ChangesBlock_SchemaChangeFragment = graphql(`
+  fragment ChangesBlock_SchemaChangeFragment on SchemaChange {
+    path
+    message(withSafeBasedOnUsageNote: false)
+    criticality
+    criticalityReason
+    approval {
+      ...ChangesBlock_SchemaChangeApprovalFragment
+    }
+    isSafeBasedOnUsage
+  }
+`);
+
+export function ChangesBlock(
+  props: {
+    title: string | React.ReactElement;
+    criticality: CriticalityLevel;
+    conditionBreakingChangeMetadata?: FragmentType<
+      typeof ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment
+    > | null;
+  } & (
+    | {
+        changesWithUsage: FragmentType<typeof ChangesBlock_SchemaChangeWithUsageFragment>[];
+        changes?: undefined;
+      }
+    | {
+        changes: FragmentType<typeof ChangesBlock_SchemaChangeFragment>[];
+        changesWithUsage?: undefined;
+      }
+  ),
+): ReactElement | null {
+  const changes = props.changesWithUsage ?? props.changes;
+
   return (
     <div>
       <h2 className="mb-3 font-bold text-gray-900 dark:text-white">{props.title}</h2>
       <div className="list-inside list-disc space-y-2 text-sm leading-relaxed">
-        {props.changes.map((change, key) => (
+        {changes.map((change, key) => (
           <ChangeItem
             key={key}
             change={change}
@@ -82,14 +144,29 @@ export function ChangesBlock(props: {
   );
 }
 
+// Obviously I'm not proud of this...
+// But I didn't want to spend too much time on this
+function isChangesBlock_SchemaChangeWithUsageFragment(
+  fragment: any,
+): fragment is FragmentType<typeof ChangesBlock_SchemaChangeWithUsageFragment> {
+  return (
+    !!fragment[' $fragmentRefs'] &&
+    'ChangesBlock_SchemaChangeWithUsageFragment' in fragment[' $fragmentRefs']
+  );
+}
+
 function ChangeItem(props: {
-  change: SchemaChangeFieldsFragment;
+  change:
+    | FragmentType<typeof ChangesBlock_SchemaChangeWithUsageFragment>
+    | FragmentType<typeof ChangesBlock_SchemaChangeFragment>;
   conditionBreakingChangeMetadata: FragmentType<
     typeof ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment
   > | null;
 }) {
   const router = useRouteSelector();
-  const { change } = props;
+  const change = isChangesBlock_SchemaChangeWithUsageFragment(props.change)
+    ? useFragment(ChangesBlock_SchemaChangeWithUsageFragment, props.change)
+    : useFragment(ChangesBlock_SchemaChangeFragment, props.change);
 
   const metadata = useFragment(
     ChangesBlock_SchemaCheckConditionalBreakingChangeMetadataFragment,
@@ -114,7 +191,7 @@ function ChangeItem(props: {
                   <CheckIcon className="inline size-3" /> Safe based on usage data
                 </span>
               )}
-              {change.usageStatistics && (
+              {'usageStatistics' in change && change.usageStatistics && (
                 <span className="flex items-center space-x-1 rounded-sm bg-gray-800 px-2 font-bold">
                   <PulseIcon className="h-6 stroke-[1px]" />
                   <span className="text-xs">
@@ -139,7 +216,7 @@ function ChangeItem(props: {
         </AccordionTrigger>
         <AccordionContent className="pb-8 pt-4">
           {change.approval && <SchemaChangeApproval approval={change.approval} />}
-          {change.usageStatistics && metadata ? (
+          {'usageStatistics' in change && change.usageStatistics && metadata ? (
             <div>
               <div className="flex space-x-4">
                 <Table>
@@ -277,9 +354,10 @@ function ChangeItem(props: {
 }
 
 function ApprovedByBadge(props: {
-  approval: Exclude<SchemaChangeFieldsFragment['approval'], null | undefined>;
+  approval: FragmentType<typeof ChangesBlock_SchemaChangeApprovalFragment>;
 }) {
-  const approvalName = props.approval.approvedBy?.displayName ?? '<unknown>';
+  const approval = useFragment(ChangesBlock_SchemaChangeApprovalFragment, props.approval);
+  const approvalName = approval.approvedBy?.displayName ?? '<unknown>';
 
   return (
     <span className="cursor-pointer text-green-500">
@@ -289,25 +367,22 @@ function ApprovedByBadge(props: {
 }
 
 function SchemaChangeApproval(props: {
-  approval: Exclude<SchemaChangeFieldsFragment['approval'], null | undefined>;
+  approval: FragmentType<typeof ChangesBlock_SchemaChangeApprovalFragment>;
 }) {
-  const approvalName = props.approval.approvedBy?.displayName ?? '<unknown>';
-  const approvalDate = format(new Date(props.approval.approvedAt), 'do MMMM yyyy');
+  const approval = useFragment(ChangesBlock_SchemaChangeApprovalFragment, props.approval);
+  const approvalName = approval.approvedBy?.displayName ?? '<unknown>';
+  const approvalDate = format(new Date(approval.approvedAt), 'do MMMM yyyy');
   const route = useRouteSelector();
   const schemaCheckPath =
     '/' +
-    [
-      route.organizationId,
-      route.projectId,
-      route.targetId,
-      'checks',
-      props.approval.schemaCheckId,
-    ].join('/');
+    [route.organizationId, route.projectId, route.targetId, 'checks', approval.schemaCheckId].join(
+      '/',
+    );
 
   return (
     <div className="mb-3">
       This breaking change was manually{' '}
-      {props.approval.schemaCheckId === route.schemaCheckId ? (
+      {approval.schemaCheckId === route.schemaCheckId ? (
         <>
           {' '}
           approved by {approvalName} in this schema check on {approvalDate}.

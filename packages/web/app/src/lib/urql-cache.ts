@@ -29,7 +29,7 @@ const TargetsDocument = graphql(`
     targets(selector: $selector) {
       total
       nodes {
-        ...TargetFields
+        id
       }
     }
   }

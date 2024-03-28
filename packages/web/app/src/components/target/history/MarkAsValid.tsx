@@ -7,7 +7,22 @@ import { useRouteSelector } from '@/lib/hooks';
 const UpdateSchemaVersionStatusMutation = graphql(`
   mutation updateSchemaVersionStatus($input: SchemaVersionUpdateInput!) {
     updateSchemaVersionStatus(input: $input) {
-      ...SchemaVersionFields
+      id
+      date
+      valid
+      log {
+        ... on PushedSchemaLog {
+          id
+          author
+          service
+          commit
+        }
+        ... on DeletedSchemaLog {
+          id
+          deletedService
+        }
+      }
+      baseSchema
     }
   }
 `);

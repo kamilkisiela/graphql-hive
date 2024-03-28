@@ -1,7 +1,7 @@
 import { ReactElement, ReactNode } from 'react';
 import { Stat, Table, TBody, Td, TFoot, Th, THead, Tr } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { BillingPlanType } from '@/graphql';
+import { BillingPlanType } from '@/gql/graphql';
 import { CurrencyFormatter } from './helpers';
 
 const PriceEstimationTable_PlanFragment = graphql(`

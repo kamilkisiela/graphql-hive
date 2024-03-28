@@ -1,23 +1,253 @@
 import { ReactElement, ReactNode } from 'react';
 import { useQuery } from 'urql';
-import { ActivityNode } from '@/components/common/activities/common';
 import { Link, TimeAgo } from '@/components/v2';
 import { EditIcon, PlusIcon, TrashIcon, UserPlusMinusIcon } from '@/components/v2/icon';
-import {
-  MemberDeletedActivity,
-  MemberLeftActivity,
-  OrganizationActivitiesDocument,
-  OrganizationIdUpdatedActivity,
-  OrganizationNameUpdatedActivity,
-  OrganizationPlanChangeActivity,
-  ProjectDeletedActivity,
-  ProjectIdUpdatedActivity,
-} from '@/graphql';
-import { fixDuplicatedFragments } from '@/lib/graphql';
+import { DocumentType, graphql, useFragment } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks';
 import { Subtitle, Title } from '../ui/page';
 
-const organizationActivitiesDocument = fixDuplicatedFragments(OrganizationActivitiesDocument);
+const Activities_OrganizationActivitiesQuery = graphql(`
+  query Activities_OrganizationActivitiesQuery($selector: OrganizationActivitiesSelector!) {
+    organizationActivities(selector: $selector) {
+      nodes {
+        __typename
+        id
+        createdAt
+        ... on OrganizationPlanChangeActivity {
+          id
+          createdAt
+          organization {
+            ...Activities_OrganizationFragment
+          }
+          user {
+            ...Activities_UserFragment
+          }
+          newPlan
+          previousPlan
+        }
+        ... on OrganizationCreatedActivity {
+          id
+          createdAt
+          organization {
+            ...Activities_OrganizationFragment
+          }
+          user {
+            ...Activities_UserFragment
+          }
+        }
+        ... on OrganizationNameUpdatedActivity {
+          id
+          createdAt
+          value
+          organization {
+            ...Activities_OrganizationFragment
+          }
+          user {
+            ...Activities_UserFragment
+          }
+        }
+        ... on OrganizationIdUpdatedActivity {
+          id
+          createdAt
+          value
+          organization {
+            ...Activities_OrganizationFragment
+          }
+          user {
+            ...Activities_UserFragment
+          }
+        }
+        ... on MemberAddedActivity {
+          id
+          createdAt
+          organization {
+            ...Activities_OrganizationFragment
+          }
+          user {
+            ...Activities_UserFragment
+          }
+        }
+        ... on MemberDeletedActivity {
+          id
+          createdAt
+          email
+          organization {
+            ...Activities_OrganizationFragment
+          }
+          user {
+            ...Activities_UserFragment
+          }
+        }
+        ... on MemberLeftActivity {
+          id
+          createdAt
+          email
+          organization {
+            ...Activities_OrganizationFragment
+          }
+        }
+        ... on ProjectCreatedActivity {
+          id
+          createdAt
+          organization {
+            ...Activities_OrganizationFragment
+          }
+          project {
+            ...Activities_ProjectFragment
+          }
+          user {
+            ...Activities_UserFragment
+          }
+        }
+        ... on ProjectDeletedActivity {
+          id
+          createdAt
+          name
+          cleanId
+          organization {
+            ...Activities_OrganizationFragment
+          }
+          user {
+            ...Activities_UserFragment
+          }
+        }
+        ... on ProjectNameUpdatedActivity {
+          id
+          createdAt
+          value
+          organization {
+            ...Activities_OrganizationFragment
+          }
+          project {
+            ...Activities_ProjectFragment
+          }
+          user {
+            ...Activities_UserFragment
+          }
+        }
+        ... on ProjectIdUpdatedActivity {
+          id
+          createdAt
+          value
+          organization {
+            ...Activities_OrganizationFragment
+          }
+          project {
+            ...Activities_ProjectFragment
+          }
+          user {
+            ...Activities_UserFragment
+          }
+        }
+        ... on TargetCreatedActivity {
+          id
+          createdAt
+          organization {
+            ...Activities_OrganizationFragment
+          }
+          project {
+            ...Activities_ProjectFragment
+          }
+          target {
+            ...Activities_TargetFragment
+          }
+          user {
+            ...Activities_UserFragment
+          }
+        }
+        ... on TargetDeletedActivity {
+          id
+          createdAt
+          name
+          cleanId
+          organization {
+            ...Activities_OrganizationFragment
+          }
+          project {
+            ...Activities_ProjectFragment
+          }
+          user {
+            ...Activities_UserFragment
+          }
+        }
+        ... on TargetNameUpdatedActivity {
+          id
+          createdAt
+          value
+          organization {
+            ...Activities_OrganizationFragment
+          }
+          project {
+            ...Activities_ProjectFragment
+          }
+          target {
+            ...Activities_TargetFragment
+          }
+          user {
+            ...Activities_UserFragment
+          }
+        }
+        ... on TargetIdUpdatedActivity {
+          id
+          createdAt
+          value
+          organization {
+            ...Activities_OrganizationFragment
+          }
+          project {
+            ...Activities_ProjectFragment
+          }
+          target {
+            ...Activities_TargetFragment
+          }
+          user {
+            ...Activities_UserFragment
+          }
+        }
+      }
+      total
+    }
+  }
+`);
+
+const Activities_UserFragment = graphql(`
+  fragment Activities_UserFragment on User {
+    id
+    email
+    fullName
+    displayName
+    provider
+    isAdmin
+  }
+`);
+
+const Activities_OrganizationFragment = graphql(`
+  fragment Activities_OrganizationFragment on Organization {
+    id
+    cleanId
+    name
+  }
+`);
+
+const Activities_ProjectFragment = graphql(`
+  fragment Activities_ProjectFragment on Project {
+    id
+    cleanId
+    name
+  }
+`);
+
+const Activities_TargetFragment = graphql(`
+  fragment Activities_TargetFragment on Target {
+    id
+    cleanId
+    name
+  }
+`);
+
+type ActivityNode = DocumentType<
+  typeof Activities_OrganizationActivitiesQuery
+>['organizationActivities']['nodes'][number];
 
 export const getActivity = (
   activity: ActivityNode,
@@ -26,53 +256,72 @@ export const getActivity = (
   content: ReactElement | string;
 } => {
   const { __typename: type } = activity;
-  const { organization, user } = activity as any;
-  const projectLink = 'project' in activity && !!activity.project && (
-    <Link
-      variant="primary"
-      href={{
-        pathname: '/[organizationId]/[projectId]',
-        query: {
-          organizationId: organization.cleanId,
-          projectId: activity.project.cleanId,
-        },
-      }}
-    >
-      {activity.project.name}
-    </Link>
+  const organization = useFragment(
+    Activities_OrganizationFragment,
+    'organization' in activity ? activity.organization : null,
+  );
+  const project = useFragment(
+    Activities_ProjectFragment,
+    'project' in activity && !!activity.project ? activity.project : null,
+  );
+  const target = useFragment(
+    Activities_TargetFragment,
+    'target' in activity && !!activity.target ? activity.target : null,
+  );
+  const user = useFragment(
+    Activities_UserFragment,
+    'user' in activity && activity.user ? activity.user : null,
   );
 
+  const userDisplayName = user?.displayName || '';
+
+  const projectLink =
+    project && organization ? (
+      <Link
+        variant="primary"
+        href={{
+          pathname: '/[organizationId]/[projectId]',
+          query: {
+            organizationId: organization.cleanId,
+            projectId: project.cleanId,
+          },
+        }}
+      >
+        {project.name}
+      </Link>
+    ) : null;
+
   const targetHref =
-    'target' in activity && !!activity.target
+    target && project && organization
       ? {
           pathname: '/[organizationId]/[projectId]/[targetId]',
           query: {
             organizationId: organization.cleanId,
-            projectId: activity.project.cleanId,
-            targetId: activity.target.cleanId,
+            projectId: project.cleanId,
+            targetId: target.cleanId,
           },
         }
       : '#';
 
-  const targetLink = 'target' in activity && !!activity.target && (
+  const targetLink = target ? (
     <Link variant="primary" href={targetHref}>
-      {activity.target.name}
+      {target.name}
     </Link>
-  );
+  ) : null;
 
   switch (type) {
     /* Organization */
     case 'OrganizationCreatedActivity':
       return {
-        content: `${user.displayName} created the organization`,
+        content: `${userDisplayName} created the organization`,
         icon: <PlusIcon className="size-4" />,
       };
     case 'OrganizationNameUpdatedActivity':
       return {
         content: (
           <>
-            {user.displayName} changed organization name to{' '}
-            <b className="text-gray-300">{(activity as OrganizationNameUpdatedActivity).value}</b>
+            {userDisplayName} changed organization name to{' '}
+            <b className="text-gray-300">{activity.value}</b>
           </>
         ),
         icon: <EditIcon className="size-3.5" />,
@@ -81,8 +330,8 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} changed organization id to{' '}
-            <b className="text-gray-300">{(activity as OrganizationIdUpdatedActivity).value}</b>
+            {userDisplayName} changed organization id to{' '}
+            <b className="text-gray-300">{activity.value}</b>
           </>
         ),
         icon: <EditIcon className="size-3.5" />,
@@ -91,23 +340,22 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} changed organization plan to{' '}
-            <b className="text-gray-300">{(activity as OrganizationPlanChangeActivity).newPlan}</b>
+            {userDisplayName} changed organization plan to{' '}
+            <b className="text-gray-300">{activity.newPlan}</b>
           </>
         ),
         icon: <EditIcon className="size-3.5" />,
       };
     case 'MemberAddedActivity':
       return {
-        content: `${user.displayName} joined the organization`,
+        content: `${userDisplayName} joined the organization`,
         icon: <UserPlusMinusIcon isPlus className="size-5" />,
       };
     case 'MemberDeletedActivity':
       return {
         content: (
           <>
-            {user.displayName} removed{' '}
-            <b className="text-gray-300">{(activity as MemberDeletedActivity).email}</b> from
+            {userDisplayName} removed <b className="text-gray-300">{activity.email}</b> from
             organization
           </>
         ),
@@ -117,8 +365,7 @@ export const getActivity = (
       return {
         content: (
           <>
-            <b className="text-gray-300">{(activity as MemberLeftActivity).email}</b> left{' '}
-            organization
+            <b className="text-gray-300">{activity.email}</b> left organization
           </>
         ),
         icon: <UserPlusMinusIcon isPlus={false} className="size-5" />,
@@ -128,7 +375,7 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} created {projectLink} project
+            {userDisplayName} created {projectLink} project
           </>
         ),
         icon: <PlusIcon className="size-4" />,
@@ -137,8 +384,7 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} removed{' '}
-            <b className="text-gray-300">{(activity as ProjectDeletedActivity).name}</b> project
+            {userDisplayName} removed <b className="text-gray-300">{activity.name}</b> project
           </>
         ),
         icon: <TrashIcon className="size-5" />,
@@ -147,7 +393,7 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} changed {projectLink} name
+            {userDisplayName} changed {projectLink} name
           </>
         ),
         icon: <EditIcon className="size-3.5" />,
@@ -156,8 +402,8 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} changed project id to{' '}
-            <b className="text-gray-300">{(activity as ProjectIdUpdatedActivity).value}</b>
+            {userDisplayName} changed project id to{' '}
+            <b className="text-gray-300">{activity.value}</b>
           </>
         ),
         icon: <EditIcon className="size-3.5" />,
@@ -167,7 +413,7 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} created {targetLink} target in {projectLink} project
+            {userDisplayName} created {targetLink} target in {projectLink} project
           </>
         ),
         icon: <PlusIcon className="size-4" />,
@@ -176,7 +422,7 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} removed <b className="text-gray-300">{activity.name}</b> target from{' '}
+            {userDisplayName} removed <b className="text-gray-300">{activity.name}</b> target from{' '}
             {projectLink} project
           </>
         ),
@@ -186,7 +432,7 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} changed{' '}
+            {userDisplayName} changed{' '}
             <Link variant="primary" href={targetHref}>
               {activity.value}
             </Link>{' '}
@@ -199,8 +445,7 @@ export const getActivity = (
       return {
         content: (
           <>
-            {user.displayName} changed target id to{' '}
-            <b className="text-gray-300">{activity.value}</b>
+            {userDisplayName} changed target id to <b className="text-gray-300">{activity.value}</b>
           </>
         ),
         icon: <EditIcon className="size-3.5" />,
@@ -214,7 +459,7 @@ export const getActivity = (
 export const Activities = (): ReactElement => {
   const router = useRouteSelector();
   const [organizationActivitiesQuery] = useQuery({
-    query: organizationActivitiesDocument,
+    query: Activities_OrganizationActivitiesQuery,
     variables: {
       selector: {
         organization: router.organizationId,
@@ -250,25 +495,33 @@ export const Activities = (): ReactElement => {
             ))
           : activities.nodes.map(activity => {
               const { content } = getActivity(activity);
+              const project = useFragment(
+                Activities_ProjectFragment,
+                'project' in activity && !!activity.project ? activity.project : null,
+              );
+              const target = useFragment(
+                Activities_TargetFragment,
+                'target' in activity && !!activity.target ? activity.target : null,
+              );
 
               return (
                 <ActivityContainer key={activity.id}>
                   <>
                     <div className="grow">
-                      {'project' in activity && !!activity.project && (
+                      {project ? (
                         <div className="flex items-center justify-between">
                           <h3 className="mb-1 flex items-center font-medium">
-                            <span className="line-clamp-1">{activity.project.name}</span>
-                            {'target' in activity && !!activity.target && (
+                            <span className="line-clamp-1">{project.name}</span>
+                            {target ? (
                               <>
                                 <span className="mx-2 italic">/</span>
-                                <span className="line-clamp-1">{activity.target.name}</span>
+                                <span className="line-clamp-1">{target.name}</span>
                               </>
-                            )}
+                            ) : null}
                           </h3>
                           <TimeAgo date={activity.createdAt} className="float-right text-xs" />
                         </div>
-                      )}
+                      ) : null}
                       <div>
                         <span className="text-sm text-[#c4c4c4]">{content}</span>
                       </div>

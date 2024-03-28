@@ -17,7 +17,7 @@ import { Badge, Button, DiffEditor, MetaTitle, Spinner, TimeAgo } from '@/compon
 import { noSchemaVersion } from '@/components/v2/empty-list';
 import { DiffIcon } from '@/components/v2/icon';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { CriticalityLevel, ProjectType } from '@/graphql';
+import { CriticalityLevel, ProjectType } from '@/gql/graphql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
 import { cn } from '@/lib/utils';
 import {
@@ -343,36 +343,12 @@ const DefaultSchemaVersionView_SchemaVersionFragment = graphql(`
     isFirstComposableVersion
     breakingSchemaChanges {
       nodes {
-        message(withSafeBasedOnUsageNote: false)
-        criticality
-        criticalityReason
-        path
-        approval {
-          approvedBy {
-            id
-            displayName
-          }
-          approvedAt
-          schemaCheckId
-        }
-        isSafeBasedOnUsage
+        ...ChangesBlock_SchemaChangeFragment
       }
     }
     safeSchemaChanges {
       nodes {
-        message(withSafeBasedOnUsageNote: false)
-        criticality
-        criticalityReason
-        path
-        approval {
-          approvedBy {
-            id
-            displayName
-          }
-          approvedAt
-          schemaCheckId
-        }
-        isSafeBasedOnUsage
+        ...ChangesBlock_SchemaChangeFragment
       }
     }
     previousDiffableSchemaVersion {
@@ -536,36 +512,12 @@ const ContractVersionView_ContractVersionFragment = graphql(`
     }
     breakingSchemaChanges {
       nodes {
-        message(withSafeBasedOnUsageNote: false)
-        criticality
-        criticalityReason
-        path
-        approval {
-          approvedBy {
-            id
-            displayName
-          }
-          approvedAt
-          schemaCheckId
-        }
-        isSafeBasedOnUsage
+        ...ChangesBlock_SchemaChangeFragment
       }
     }
     safeSchemaChanges {
       nodes {
-        message(withSafeBasedOnUsageNote: false)
-        criticality
-        criticalityReason
-        path
-        approval {
-          approvedBy {
-            id
-            displayName
-          }
-          approvedAt
-          schemaCheckId
-        }
-        isSafeBasedOnUsage
+        ...ChangesBlock_SchemaChangeFragment
       }
     }
     previousDiffableContractVersion {

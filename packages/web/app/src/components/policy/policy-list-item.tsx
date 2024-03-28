@@ -4,7 +4,7 @@ import { InfoIcon } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Markdown } from '@/components/v2/markdown';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { RuleInstanceSeverityLevel } from '@/graphql';
+import { RuleInstanceSeverityLevel } from '@/gql/graphql';
 import { DocsLink, Tooltip } from '../v2';
 import { useConfigurationHelper } from './form-helper';
 import { PolicyRuleConfig } from './rules-configuration';
