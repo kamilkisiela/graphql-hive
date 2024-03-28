@@ -204,10 +204,10 @@ importers:
         version: 4.9.1
       '@pulumi/kubernetesx':
         specifier: 0.1.6
-        version: 0.1.6(@pulumi/kubernetes@4.9.1)(@pulumi/pulumi@3.112.0)
+        version: 0.1.6(@pulumi/kubernetes@4.9.1)(@pulumi/pulumi@3.111.1)
       '@pulumi/pulumi':
-        specifier: 3.112.0
-        version: 3.112.0
+        specifier: 3.111.1
+        version: 3.111.1
       '@pulumi/random':
         specifier: 4.16.0
         version: 4.16.0
@@ -7621,7 +7621,7 @@ packages:
     resolution: {integrity: sha512-REc/LQOy17O9jbZnBNm4tLjLJKxOfLaWPIB2CFiAtM1VzwU3FzZQFs0K+XGkuZwWdB+tl2/VHdHv+FqsUrit2w==}
     requiresBuild: true
     dependencies:
-      '@pulumi/pulumi': 3.112.0
+      '@pulumi/pulumi': 3.111.1
     transitivePeerDependencies:
       - bluebird
       - supports-color
@@ -8522,7 +8522,7 @@ packages:
     resolution: {integrity: sha512-C/iR0tk7KSKGldibYIB9x8GtO/0Bd0I2mhOaDb8ucQL/bQVTmGoeREaFj64Z5+iCBRf3dQfed0CjJL7I8iTkiQ==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dependencies:
-      postcss-selector-parser: 6.0.16
+      postcss-selector-parser: 6.0.11
     dev: false
 
   /@npmcli/run-script@2.0.0:
@@ -9284,7 +9284,7 @@ packages:
     resolution: {integrity: sha512-cwdB70bLeKL/VNIqqOD5fpHQcocVmpHuiHH589eR+QUfbLa4f+M8yA/TTCcxx2AFFctTqO5wgVuC+faL8xZmWQ==}
     requiresBuild: true
     dependencies:
-      '@pulumi/pulumi': 3.112.0
+      '@pulumi/pulumi': 3.111.1
     transitivePeerDependencies:
       - bluebird
       - supports-color
@@ -9294,7 +9294,7 @@ packages:
     resolution: {integrity: sha512-9+SpGsVvNeRxUWNNNKAVnTAm5wYGzZZ2lu3McQn1lj7kltf2qU8OkBrOWw7Ey876yVFwtaeTl9L2rhqtllZI3w==}
     requiresBuild: true
     dependencies:
-      '@pulumi/pulumi': 3.112.0
+      '@pulumi/pulumi': 3.111.1
       '@types/node-fetch': 2.6.4
       '@types/tmp': 0.0.33
       glob: 10.3.10
@@ -9307,18 +9307,18 @@ packages:
       - supports-color
     dev: false
 
-  /@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.9.1)(@pulumi/pulumi@3.112.0):
+  /@pulumi/kubernetesx@0.1.6(@pulumi/kubernetes@4.9.1)(@pulumi/pulumi@3.111.1):
     resolution: {integrity: sha512-9VL4Yi4b4aLC/obBarJuNkm86kABByUZICYPSTdV396MGZtOc066o2brsB+kWVQcVfkYVXTPrpjIkAwBXXnzGw==}
     peerDependencies:
       '@pulumi/kubernetes': ^3.0.0
       '@pulumi/pulumi': ^3.0.0
     dependencies:
       '@pulumi/kubernetes': 4.9.1
-      '@pulumi/pulumi': 3.112.0
+      '@pulumi/pulumi': 3.111.1
     dev: false
 
-  /@pulumi/pulumi@3.112.0:
-    resolution: {integrity: sha512-RfAIT0k6Ny7vVjgWP4dauG6EmNz/hkiNXXrVQIYSiD5EfZRwoMML7uhijWf8H5lWUkZwKTcvZdlVkwwgdsJdww==}
+  /@pulumi/pulumi@3.111.1:
+    resolution: {integrity: sha512-dWDePVPoFPOlX1Wv8zoLmywAq+/iD7jkis/V6xhuTQ7vYbkMxQhDHCSuSn3cx1EaqqSzcBe8AqEbg/IcuN68jA==}
     engines: {node: '>=8.13.0 || >=10.10.0'}
     dependencies:
       '@grpc/grpc-js': 1.10.1
@@ -9365,7 +9365,7 @@ packages:
   /@pulumi/random@4.16.0:
     resolution: {integrity: sha512-cHwlhy/+xTWCt7gwlJoG0q1l234YLxWtSWI61MzekWSsthbtcYruXo2bUlgcXWX5V4/lHjvQG84l5n1aTNZJoA==}
     dependencies:
-      '@pulumi/pulumi': 3.112.0
+      '@pulumi/pulumi': 3.111.1
     transitivePeerDependencies:
       - bluebird
       - supports-color
@@ -21527,11 +21527,19 @@ packages:
       minimatch: 3.1.2
     dev: true
 
+  /ignore-walk@6.0.3:
+    resolution: {integrity: sha512-C7FfFoTA+bI10qfeydT8aZbvr91vAEU+2W5BZUlzPec47oNb07SsOfwYrtxuvOYdUApPP/Qlh4DtAO51Ekk2QA==}
+    engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
+    dependencies:
+      minimatch: 9.0.3
+    dev: true
+
   /ignore-walk@6.0.4:
     resolution: {integrity: sha512-t7sv42WkwFkyKbivUCglsQW5YWMskWtbEf4MNKX5u/CCWHKSPzN4FtBQGsQZgCLbxOzpVlcbWVK5KB3auIOjSw==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dependencies:
       minimatch: 9.0.3
+    dev: false
 
   /ignore@5.3.0:
     resolution: {integrity: sha512-g7dmpshy+gD7mh88OC9NwSGTKoc3kyLAZQRU1mt53Aw/vnvfXnbC+F/7F7QoYVKbV+KNvJx8wArewKy1vXMtlg==}
@@ -25941,7 +25949,7 @@ packages:
     resolution: {integrity: sha512-d6RGEuRrNS5/N84iglPivjaJPxhDbZmlbTwTDX2IbcRHG5bZCdtysYMhwiPvcF4GisXHGn7xsxv+GQ7T/02M5Q==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
     dependencies:
-      ignore-walk: 6.0.4
+      ignore-walk: 6.0.3
     dev: true
 
   /npm-packlist@8.0.2:
@@ -27174,7 +27182,7 @@ packages:
       postcss: ^8.2.2
     dependencies:
       postcss: 8.4.38
-      postcss-selector-parser: 6.0.16
+      postcss-selector-parser: 6.0.11
       postcss-value-parser: 4.2.0
     dev: true
 
@@ -27413,7 +27421,7 @@ packages:
     dependencies:
       icss-utils: 5.1.0(postcss@8.4.38)
       postcss: 8.4.38
-      postcss-selector-parser: 6.0.16
+      postcss-selector-parser: 6.0.11
       postcss-value-parser: 4.2.0
     dev: true
 
@@ -27424,7 +27432,7 @@ packages:
       postcss: ^8.1.0
     dependencies:
       postcss: 8.4.38
-      postcss-selector-parser: 6.0.16
+      postcss-selector-parser: 6.0.11
     dev: true
 
   /postcss-modules-values@4.0.0(postcss@8.4.38):
@@ -27444,7 +27452,7 @@ packages:
       postcss: ^8.2.14
     dependencies:
       postcss: 8.4.38
-      postcss-selector-parser: 6.0.16
+      postcss-selector-parser: 6.0.11
     dev: true
 
   /postcss-normalize-charset@6.0.2(postcss@8.4.38):
@@ -27575,7 +27583,6 @@ packages:
     dependencies:
       cssesc: 3.0.0
       util-deprecate: 1.0.2
-    dev: true
 
   /postcss-selector-parser@6.0.16:
     resolution: {integrity: sha512-A0RVJrX+IUkVZbW3ClroRWurercFhieevHB38sr2+l9eUClMqome3LmEmnhlNy+5Mr2EYN6B2Kaw9wYdd+VHiw==}
@@ -27583,6 +27590,7 @@ packages:
     dependencies:
       cssesc: 3.0.0
       util-deprecate: 1.0.2
+    dev: true
 
   /postcss-svgo@6.0.3(postcss@8.4.38):
     resolution: {integrity: sha512-dlrahRmxP22bX6iKEjOM+c8/1p+81asjKT+V5lrgOH944ryx/OHpclnIbGsKVd3uWOXFLYJwCVf0eEkJGvO96g==}
