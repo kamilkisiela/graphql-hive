@@ -145,12 +145,20 @@ export default abstract class extends Command {
 
   registryApi(registry: string, token: string) {
     const requestHeaders = {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      'User-Agent': `hive-cli/${this.config.version}`,
       Authorization: `Bearer ${token}`,
       'graphql-client-name': 'Hive CLI',
       'graphql-client-version': this.config.version,
+    };
+
+    return this.graphql(registry, requestHeaders);
+  }
+
+  graphql(endpoint: string, additionalHeaders: Record<string, string> = {}) {
+    const requestHeaders = {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'User-Agent': `hive-cli/${this.config.version}`,
+      ...additionalHeaders,
     };
 
     return {
@@ -158,7 +166,7 @@ export default abstract class extends Command {
         operation: TypedDocumentNode<TResult, TVariables>,
         ...[variables]: TVariables extends Record<string, never> ? [] : [TVariables]
       ): Promise<TResult> {
-        const response = await fetch(registry, {
+        const response = await fetch(endpoint, {
           headers: requestHeaders,
           method: 'POST',
           body: JSON.stringify({
@@ -168,7 +176,7 @@ export default abstract class extends Command {
         });
 
         if (!response.ok) {
-          throw new Error(`Invalid status code for registry HTTP call: ${response.status}`);
+          throw new Error(`Invalid status code for HTTP call: ${response.status}`);
         }
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         const jsonData = (await response.json()) as ExecutionResult<TResult>;

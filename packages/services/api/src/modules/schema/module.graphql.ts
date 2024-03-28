@@ -14,6 +14,11 @@ export default gql`
     Requires API Token
     """
     schemaDelete(input: SchemaDeleteInput!): SchemaDeleteResult!
+    """
+    Requires API Token
+    """
+    schemaCompose(input: SchemaComposeInput!): SchemaComposePayload!
+
     updateSchemaVersionStatus(input: SchemaVersionUpdateInput!): SchemaVersion!
     updateBaseSchema(input: UpdateBaseSchemaInput!): UpdateBaseSchemaResult!
     updateNativeFederation(input: UpdateNativeFederationInput!): UpdateNativeFederationResult!
@@ -326,6 +331,41 @@ export default gql`
     Link GitHub version to a GitHub commit on a repository.
     """
     gitHub: SchemaPublishGitHubInput
+  }
+
+  input SchemaComposeInput {
+    services: [SchemaComposeServiceInput!]!
+    """
+    Whether to use the latest composable version or just latest schema version for the composition.
+    Latest schema version may or may not be composable.
+    It's true by default, which means the latest composable schema version is used.
+    """
+    useLatestComposableVersion: Boolean = true
+  }
+
+  input SchemaComposeServiceInput {
+    name: String!
+    sdl: String!
+    url: String
+  }
+
+  union SchemaComposePayload = SchemaComposeSuccess | SchemaComposeError
+
+  type SchemaComposeSuccess {
+    valid: Boolean!
+    compositionResult: SchemaCompositionResult!
+  }
+
+  """
+  @oneOf
+  """
+  type SchemaCompositionResult {
+    supergraphSdl: String
+    errors: SchemaErrorConnection
+  }
+
+  type SchemaComposeError implements Error {
+    message: String!
   }
 
   union SchemaCheckPayload =
