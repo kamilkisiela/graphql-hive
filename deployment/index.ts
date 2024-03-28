@@ -13,7 +13,7 @@ import { prepareEnvironment } from './services/environment';
 import { configureGithubApp } from './services/github';
 import { deployGraphQL } from './services/graphql';
 import { deployKafka } from './services/kafka';
-import { deployMetrics } from './services/observability';
+import { deployObservability } from './services/observability';
 import { deploySchemaPolicy } from './services/policy';
 import { deployPostgres } from './services/postgres';
 import { deployProxy } from './services/proxy';
@@ -54,7 +54,7 @@ const environment = prepareEnvironment({
   rootDns: new pulumi.Config('common').require('dnsZone'),
 });
 deploySentryEventsMonitor({ docker, environment, sentry });
-deployMetrics({ envName });
+const observability = deployObservability({ envName });
 const clickhouse = deployClickhouse();
 const postgres = deployPostgres();
 const redis = deployRedis({ environment });
@@ -218,6 +218,7 @@ const graphql = deployGraphQL({
 });
 
 const app = deployApp({
+  observability,
   environment,
   graphql,
   dbMigrations,

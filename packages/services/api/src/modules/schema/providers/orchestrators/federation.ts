@@ -1,8 +1,8 @@
 import { CONTEXT, Inject, Injectable, Scope } from 'graphql-modules';
 import type { ContractsInputType, SchemaBuilderApi } from '@hive/schema';
+import { traceFn } from '@hive/service-common';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
 import { Orchestrator, Project, ProjectType, SchemaObject } from '../../../../shared/entities';
-import { sentry } from '../../../../shared/sentry';
 import { Logger } from '../../../shared/providers/logger';
 import type { SchemaServiceConfig } from './tokens';
 import { SCHEMA_SERVICE_CONFIG } from './tokens';
@@ -58,7 +58,18 @@ export class FederationOrchestrator implements Orchestrator {
     return null;
   }
 
-  @sentry('FederationOrchestrator.composeAndValidate')
+  @traceFn('FederationOrchestrator.composeAndValidate', {
+    initAttributes: (schemas, config) => ({
+      'hive.composition.schema.count': schemas.length,
+      'hive.composition.external': config.external.enabled,
+      'hive.composition.native': config.native,
+    }),
+    resultAttributes: result => ({
+      'hive.composition.error.count': result.errors.length,
+      'hive.composition.tags.count': result.tags?.length ?? 0,
+      'hive.composition.contracts.count': result.contracts?.length ?? 0,
+    }),
+  })
   async composeAndValidate(
     schemas: SchemaObject[],
     config: {

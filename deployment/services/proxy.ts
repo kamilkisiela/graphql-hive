@@ -30,6 +30,7 @@ export function deployProxy({
         cpu: environment.isProduction ? '800m' : '150m',
         memory: environment.isProduction ? '800Mi' : '192Mi',
       },
+      tracing: environment.isStaging || environment.isProduction,
     })
     .registerService({ record: environment.appDns }, [
       {

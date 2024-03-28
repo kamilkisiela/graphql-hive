@@ -1,7 +1,7 @@
 import { Inject, Injectable, Scope } from 'graphql-modules';
 import type { AvailableRulesResponse, SchemaPolicyApi, SchemaPolicyApiInput } from '@hive/policy';
+import { traceFn } from '@hive/service-common';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
-import { sentry } from '../../../shared/sentry';
 import { Logger } from '../../shared/providers/logger';
 import type { SchemaPolicyServiceConfig } from './tokens';
 import { SCHEMA_POLICY_SERVICE_CONFIG } from './tokens';
@@ -33,7 +33,11 @@ export class SchemaPolicyApiProvider {
       : null;
   }
 
-  @sentry('SchemaPolicyProvider.checkPolicy')
+  @traceFn('SchemaPolicyProvider.checkPolicy', {
+    resultAttributes: result => ({
+      'hive.policy.result.count': result.length,
+    }),
+  })
   checkPolicy(input: SchemaPolicyApiInput['checkPolicy']) {
     if (this.schemaPolicy === null) {
       this.logger.warn(
@@ -49,7 +53,6 @@ export class SchemaPolicyApiProvider {
     return this.schemaPolicy.checkPolicy.mutate(input);
   }
 
-  @sentry('SchemaPolicyProvider.validateConfig')
   async validateConfig(input: SchemaPolicyApiInput['validateConfig']) {
     if (this.schemaPolicy === null) {
       this.logger.warn(
@@ -65,7 +68,6 @@ export class SchemaPolicyApiProvider {
     return await this.schemaPolicy.validateConfig.query(input);
   }
 
-  @sentry('SchemaPolicyProvider.listAvailableRules')
   async listAvailableRules() {
     if (this.schemaPolicy === null) {
       this.logger.warn(

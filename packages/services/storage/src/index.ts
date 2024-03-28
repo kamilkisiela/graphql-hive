@@ -1,6 +1,7 @@
 import {
   DatabasePool,
   DatabaseTransactionConnection,
+  Interceptor,
   SerializableValue,
   sql,
   TaggedTemplateLiteralInvocation,
@@ -68,6 +69,8 @@ import {
   type SchemaCompositionError,
 } from './schema-change-model';
 import type { Slonik } from './shared';
+
+export type { Interceptor };
 
 export { ConnectionError } from 'slonik';
 export { createConnectionString } from './db/utils';
@@ -149,8 +152,12 @@ type MemberRoleColumns =
       role_scopes: null;
     };
 
-export async function createStorage(connection: string, maximumPoolSize: number): Promise<Storage> {
-  const pool = await getPool(connection, maximumPoolSize);
+export async function createStorage(
+  connection: string,
+  maximumPoolSize: number,
+  additionalInterceptors: Interceptor[] = [],
+): Promise<Storage> {
+  const pool = await getPool(connection, maximumPoolSize, additionalInterceptors);
 
   function transformUser(
     user: users & {

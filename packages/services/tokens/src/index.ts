@@ -5,6 +5,7 @@ import 'reflect-metadata';
 import { hostname } from 'os';
 import LRU from 'tiny-lru';
 import {
+  configureTracing,
   createErrorHandler,
   createServer,
   registerShutdown,
@@ -12,6 +13,7 @@ import {
   reportReadiness,
   startHeartbeats,
   startMetrics,
+  TracingInstance,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import { Context, tokensApiRouter } from './api';
@@ -20,6 +22,19 @@ import { env } from './environment';
 import { createStorage } from './storage';
 
 export async function main() {
+  let tracing: TracingInstance | undefined;
+
+  if (env.tracing.enabled && env.tracing.collectorEndpoint) {
+    tracing = configureTracing({
+      collectorEndpoint: env.tracing.collectorEndpoint,
+      serviceName: 'tokens',
+    });
+
+    tracing.instrumentNodeFetch();
+    tracing.build();
+    tracing.start();
+  }
+
   if (env.sentry) {
     Sentry.init({
       dist: 'tokens',
@@ -33,12 +48,16 @@ export async function main() {
 
   const server = await createServer({
     name: 'tokens',
-    tracing: false,
+    sentryErrorHandler: true,
     log: {
       level: env.log.level,
       requests: env.log.requests,
     },
   });
+
+  if (tracing) {
+    await server.register(...tracing.instrumentFastify());
+  }
 
   const errorHandler = createErrorHandler(server);
 
@@ -52,7 +71,7 @@ export async function main() {
   });
 
   const { start, stop, readiness, getStorage } = useCache(
-    createStorage(env.postgres),
+    createStorage(env.postgres, tracing ? [tracing.instrumentSlonik()] : []),
     redis,
     server.log,
   );
@@ -141,10 +160,12 @@ export async function main() {
     if (env.prometheus) {
       await startMetrics(env.prometheus.labels.instance, env.prometheus.port);
     }
+
     await server.listen({
       port: env.http.port,
       host: '::',
     });
+
     await start();
   } catch (error) {
     server.log.fatal(error);

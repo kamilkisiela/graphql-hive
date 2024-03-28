@@ -103,6 +103,7 @@ export const backendConfig = (requirements: {
       connectionURI: env.supertokens.connectionURI,
       apiKey: env.supertokens.apiKey,
     },
+    telemetry: false,
     appInfo: {
       // learn more about this on https://supertokens.com/docs/thirdpartyemailpassword/appinfo
       appName: 'GraphQL Hive',

@@ -39,7 +39,7 @@ async function main() {
 
   const server = await createServer({
     name: 'usage',
-    tracing: false,
+    sentryErrorHandler: true,
     log: {
       level: env.log.level,
       requests: env.log.requests,

@@ -11,9 +11,13 @@ import { createSentryInterceptor } from './sentry';
 
 const dbInterceptors: Interceptor[] = [createQueryLoggingInterceptor(), createSentryInterceptor()];
 
-export async function getPool(connection: string, maximumPoolSize: number) {
+export async function getPool(
+  connection: string,
+  maximumPoolSize: number,
+  additionalInterceptors: Interceptor[] = [],
+) {
   const pool = await createPool(connection, {
-    interceptors: dbInterceptors,
+    interceptors: [...dbInterceptors, ...additionalInterceptors],
     captureStackTrace: false,
     maximumPoolSize,
     idleTimeout: 30000,

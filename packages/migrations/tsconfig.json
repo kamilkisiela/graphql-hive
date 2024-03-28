@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "esnext",
+    "target": "ESNext",
+    "module": "ESNext",
     "rootDir": "./",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -18,7 +18,9 @@
     "paths": {
       "@hive/cdn-script/artifact-storage-reader": [
         "../services/cdn-worker/src/artifact-storage-reader.ts"
-      ]
+      ],
+      "@hive/storage": ["../services/storage/src/index.ts"],
+      "@hive/service-common": ["../services/service-common/src/index.ts"]
     }
   },
   "include": ["src"]
