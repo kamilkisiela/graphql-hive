@@ -2,6 +2,7 @@ export interface RawReport {
   id: string;
   size: number;
   target: string;
+  organization?: string | null;
   map: RawOperationMap;
   operations: RawOperation[];
   subscriptionOperations?: RawSubscriptionOperation[];
