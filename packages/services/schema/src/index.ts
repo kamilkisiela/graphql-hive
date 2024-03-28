@@ -108,7 +108,7 @@ async function main() {
       router: schemaBuilderApiRouter,
       createContext({ req }): Context {
         const cache = createCache({
-          prefix: 'schema-service',
+          prefix: 'schema-service-v2',
           redis,
           logger: req.log,
           pollIntervalMs: env.timings.cachePollInterval,
