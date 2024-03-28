@@ -19,7 +19,7 @@
     "@graphiql/react": "0.18.0-alpha.0",
     "@graphiql/toolkit": "0.9.1",
     "@graphql-tools/mock": "9.0.2",
-    "@headlessui/react": "1.7.17",
+    "@headlessui/react": "1.7.18",
     "@hookform/resolvers": "3.3.4",
     "@monaco-editor/react": "4.6.0",
     "@n1ru4l/react-time-ago": "1.1.0",
