@@ -76,7 +76,7 @@ export function createRateLimiter(config: {
   let initialized = false;
   let intervalHandle: ReturnType<typeof setInterval> | null = null;
 
-  let targetIdToOrgLookup = new Map<TargetId, OrganizationId>();
+  const targetIdToOrgLookup = new Map<TargetId, OrganizationId>();
   let cachedResult = new Map<OrganizationId, CachedRateLimitInfo>();
 
   async function fetchAndCalculateUsageInformation() {
