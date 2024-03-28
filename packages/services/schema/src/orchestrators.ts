@@ -399,7 +399,9 @@ type SubgraphInput = {
 function composeFederationV2(
   subgraphs: Array<SubgraphInput>,
   logger: ServiceLogger,
-): ComposerMethodResult {
+): ComposerMethodResult & {
+  includesException?: boolean;
+} {
   try {
     const result = nativeComposeServices(subgraphs);
 
@@ -438,6 +440,7 @@ function composeFederationV2(
         sdl: undefined,
       },
       includesNetworkError: false,
+      includesException: true,
     } as const;
   }
 }
@@ -565,6 +568,7 @@ const createFederation: (
     },
     CompositionResult & {
       includesNetworkError: boolean;
+      includesException?: boolean;
       tags: Array<string> | null;
     }
   >(
@@ -613,6 +617,7 @@ const createFederation: (
       {
         const tempResult: CompositionResult & {
           includesNetworkError: boolean;
+          includesException?: boolean;
         } = await compose(subgraphs);
 
         if (tempResult.type === 'success') {
@@ -735,7 +740,8 @@ const createFederation: (
       };
     },
     function pickCacheType(result) {
-      return 'includesNetworkError' in result && result.includesNetworkError === true
+      return ('includesNetworkError' in result && result.includesNetworkError === true) ||
+        ('includesException' in result && result.includesException === true)
         ? 'short'
         : 'long';
     },
