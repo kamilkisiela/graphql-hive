@@ -1,12 +1,7 @@
-import bundleAnalyzer from '@next/bundle-analyzer';
+import type { NextConfig } from 'next';
 import './environment';
 
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: globalThis.process.env.ANALYZE === '1',
-  openAnalyzer: true,
-});
-
-export default withBundleAnalyzer({
+export default {
   productionBrowserSourceMaps: true,
   poweredByHeader: false,
   eslint: {
@@ -25,4 +20,4 @@ export default withBundleAnalyzer({
       permanent: true,
     },
   ],
-});
+} satisfies NextConfig;
