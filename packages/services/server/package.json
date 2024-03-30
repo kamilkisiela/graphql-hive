@@ -43,7 +43,7 @@
     "hyperid": "3.2.0",
     "pino-pretty": "11.0.0",
     "prom-client": "15.1.1",
-    "reflect-metadata": "0.2.1",
+    "reflect-metadata": "0.2.2",
     "supertokens-js-override": "0.0.4",
     "supertokens-node": "15.2.1",
     "tslib": "2.6.2",
