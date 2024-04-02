@@ -630,6 +630,7 @@ export function publishSchema(
   input: SchemaPublishInput,
   token: string,
   authHeader?: 'x-api-token' | 'authorization',
+  signal?: AbortSignal,
 ) {
   return execute({
     document: graphql(`
@@ -674,6 +675,7 @@ export function publishSchema(
       input,
     },
     legacyAuthorizationMode: authHeader === 'x-api-token',
+    signal,
   });
 }
 

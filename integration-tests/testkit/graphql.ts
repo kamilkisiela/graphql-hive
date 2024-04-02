@@ -9,6 +9,7 @@ export async function execute<TResult, TVariables>(
     authToken?: string;
     token?: string;
     legacyAuthorizationMode?: boolean;
+    signal?: AbortSignal;
   } & (TVariables extends Record<string, never>
     ? { variables?: never }
     : { variables: TVariables }),
@@ -23,6 +24,7 @@ export async function execute<TResult, TVariables>(
       operationName: params.operationName,
       variables: params.variables,
     }),
+    signal: params.signal,
     headers: {
       accept: 'application/json',
       'content-type': 'application/json',
@@ -65,6 +67,7 @@ export async function execute<TResult, TVariables>(
     },
     expectNoGraphQLErrors: async () => {
       if (body.errors?.length) {
+        console.log(body);
         throw new Error(
           `Expected GraphQL response to have no errors, but got ${
             body.errors.length

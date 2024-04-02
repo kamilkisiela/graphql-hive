@@ -201,7 +201,7 @@ export const resolvers: SchemaModule.Resolvers = {
         },
       };
     },
-    async schemaPublish(_, { input }, { injector, abortSignal }, info) {
+    async schemaPublish(_, { input }, { injector }, info) {
       const [organization, project, target] = await Promise.all([
         injector.get(OrganizationManager).getOrganizationIdByToken(),
         injector.get(ProjectManager).getProjectIdByToken(),
@@ -214,17 +214,14 @@ export const resolvers: SchemaModule.Resolvers = {
       const isSchemaPublishMissingUrlErrorSelected =
         !!parsedResolveInfoFragment?.fieldsByTypeName['SchemaPublishMissingUrlError'];
 
-      const result = await injector.get(SchemaPublisher).publish(
-        {
-          ...input,
-          service: input.service?.toLowerCase(),
-          organization,
-          project,
-          target,
-          isSchemaPublishMissingUrlErrorSelected,
-        },
-        abortSignal,
-      );
+      const result = await injector.get(SchemaPublisher).publish({
+        ...input,
+        service: input.service?.toLowerCase(),
+        organization,
+        project,
+        target,
+        isSchemaPublishMissingUrlErrorSelected,
+      });
 
       if ('changes' in result) {
         return {
@@ -235,7 +232,7 @@ export const resolvers: SchemaModule.Resolvers = {
 
       return result;
     },
-    async schemaDelete(_, { input }, { injector, abortSignal }) {
+    async schemaDelete(_, { input }, { injector }) {
       const [organization, project, target] = await Promise.all([
         injector.get(OrganizationManager).getOrganizationIdByToken(),
         injector.get(ProjectManager).getProjectIdByToken(),
@@ -254,17 +251,14 @@ export const resolvers: SchemaModule.Resolvers = {
         .update(token)
         .digest('base64');
 
-      const result = await injector.get(SchemaPublisher).delete(
-        {
-          dryRun: input.dryRun,
-          serviceName: input.serviceName.toLowerCase(),
-          organization,
-          project,
-          target,
-          checksum,
-        },
-        abortSignal,
-      );
+      const result = await injector.get(SchemaPublisher).delete({
+        dryRun: input.dryRun,
+        serviceName: input.serviceName.toLowerCase(),
+        organization,
+        project,
+        target,
+        checksum,
+      });
 
       return {
         ...result,
