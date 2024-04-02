@@ -689,15 +689,6 @@ export class RegistryChecks {
       return false;
     }
 
-    if (organization.featureFlags.compareToPreviousComposableVersion === false) {
-      this.logger.warn(
-        'Organization has compareToPreviousComposableVersion FF disabled, ignoring native Federation support (organization=%s, project=%s)',
-        organization.id,
-        project.id,
-      );
-      return false;
-    }
-
     this.logger.debug(
       'Native Federation support available (organization=%s, project=%s)',
       organization.id,
