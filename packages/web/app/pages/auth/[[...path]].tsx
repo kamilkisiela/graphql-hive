@@ -1,7 +1,7 @@
-import React, { ReactElement, useEffect } from 'react';
-import { GetServerSideProps } from 'next';
+import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import { EmailVerificationPreBuiltUI } from 'supertokens-auth-react/recipe/emailverification/prebuiltui';
 import { ThirdPartyEmailPasswordPreBuiltUI } from 'supertokens-auth-react/recipe/thirdpartyemailpassword/prebuiltui';
 import { getRoutingComponent } from 'supertokens-auth-react/ui';
@@ -9,43 +9,69 @@ import { FullLogo } from '@/components/common/Logo';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/v2';
 import { env } from '@/env/frontend';
-import { canHandleRouteServerSide } from '@/lib/supertokens/can-handle-route-server-side';
 import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
 import { startAuthFlowForOIDCProvider } from '@/lib/supertokens/third-party-email-password-react-oidc-provider';
 
-export const getServerSideProps: GetServerSideProps = async context => {
-  const url = new URL(context.resolvedUrl, env.appBaseUrl);
-  if (!canHandleRouteServerSide(url.pathname)) {
+const supertokenRoutes = new Set([
+  '/auth/verify-email',
+  '/auth/reset-password',
+  '/auth/login',
+  '/auth',
+]);
+
+if (env.auth.github) {
+  supertokenRoutes.add('/auth/callback/github');
+}
+if (env.auth.google) {
+  supertokenRoutes.add('/auth/callback/google');
+}
+if (env.auth.okta) {
+  supertokenRoutes.add('/auth/callback/okta');
+}
+if (env.auth.organizationOIDC) {
+  supertokenRoutes.add('/auth/oidc');
+  supertokenRoutes.add('/auth/callback/oidc');
+}
+
+function useOidcProviderId() {
+  if (typeof window === 'undefined') {
     return {
-      props: {},
-      notFound: true,
-    };
+      loading: true,
+    } as const;
   }
 
-  // See counter-part in '@/config/supertokens/frontend.ts'
+  const url = new URL(window.location.href, env.appBaseUrl);
+
+  if (!supertokenRoutes.has(url.pathname)) {
+    return {
+      loading: false,
+      notFound: true,
+    } as const;
+  }
+
   if (env.auth.organizationOIDC === true) {
-    const oidcProviderId = url.searchParams.get('id');
+    const id = url.searchParams.get('id');
 
     if (url.pathname === '/auth/oidc') {
-      if (!oidcProviderId) {
+      if (!id) {
         return {
-          props: {},
+          loading: false,
           notFound: true,
-        };
+        } as const;
       }
 
       return {
-        props: {
-          oidcProviderId,
-        },
-      };
+        loading: false,
+        id,
+      } as const;
     }
   }
 
   return {
-    props: { oidcProviderId: null },
-  };
-};
+    loading: false,
+    id: null,
+  } as const;
+}
 
 const SuperTokensComponentNoSSR = dynamic(
   () =>
@@ -64,13 +90,19 @@ const isOkta = () =>
 /**
  * Route for showing the SuperTokens login page.
  */
-export default function Auth(props: { oidcProviderId: string | null }): ReactElement {
-  const [error, setError] = React.useState<string | null>(null);
+export default function Auth() {
+  const [error, setError] = useState<string | null>(null);
+  const oidcProvider = useOidcProviderId();
+
   useEffect(() => {
     let task: null | Promise<void> = null;
 
-    if (props.oidcProviderId) {
-      task = startAuthFlowForOIDCProvider(props.oidcProviderId);
+    if (oidcProvider.loading) {
+      return;
+    }
+
+    if ('id' in oidcProvider && oidcProvider.id) {
+      task = startAuthFlowForOIDCProvider(oidcProvider.id);
     } else if (
       // In case we are directed here from the Okta dashboard we automatically start the login flow.
       isOkta()
@@ -85,7 +117,18 @@ export default function Auth(props: { oidcProviderId: string | null }): ReactEle
       }
       setError('An unexpected error occurred.');
     });
-  }, []);
+  }, [oidcProvider]);
+
+  const router = useRouter();
+
+  if (oidcProvider.loading) {
+    return null;
+  }
+
+  if (oidcProvider.notFound) {
+    void router.push('/404');
+    return null;
+  }
 
   return (
     <div>
@@ -102,7 +145,7 @@ export default function Auth(props: { oidcProviderId: string | null }): ReactEle
         <meta
           property="og:image"
           key="og:image"
-          content="https://the-guild-og-image.vercel.app/**Manage%20your%20GraphQL%20APIs**.png?theme=light&md=1&fontSize=100px&images=https://graphql-hive.com/logo.svg&widths=800&heights=400"
+          content="https://og-image.the-guild.dev/?product=HIVE&title=Open%20GraphQL%20Platform"
         />
       </Head>
       <FullLogo
@@ -110,8 +153,8 @@ export default function Auth(props: { oidcProviderId: string | null }): ReactEle
         width={150}
         color={{ main: '#fff', sub: '#fff' }}
       />
-      {props.oidcProviderId ? (
-        <div className=" mx-auto max-w-md rounded-md bg-white p-5 text-center">
+      {oidcProvider.id ? (
+        <div className="mx-auto max-w-md rounded-md bg-white p-5 text-center">
           {error ? (
             <>
               <div className="text-red-500">{error}</div>

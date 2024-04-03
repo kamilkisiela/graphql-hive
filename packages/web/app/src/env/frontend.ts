@@ -182,7 +182,7 @@ export const env = !isNextBuilding ? buildConfig() : noop();
  * Non of our pages can actually be pre-rendered without first running the backend as it requires the runtime environment variables.
  * So we just return a noop. :)
  */
-function noop(): any {
+function noop(): ReturnType<typeof buildConfig> {
   return new Proxy(new String(''), {
     get(obj, prop) {
       if (prop === Symbol.toPrimitive) {
@@ -193,5 +193,5 @@ function noop(): any {
       }
       return noop();
     },
-  });
+  }) as any;
 }
