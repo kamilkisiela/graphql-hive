@@ -157,10 +157,9 @@ export function OrganizationLayout({
                   <Tabs.Trigger value={Page.Members} asChild>
                     <NextLink
                       href={{
-                        pathname: '/[organizationId]/view/[tab]',
+                        pathname: `/[organizationId]/view/${Page.Members}`,
                         query: {
                           organizationId: currentOrganization.cleanId,
-                          tab: Page.Members,
                         },
                       }}
                     >
