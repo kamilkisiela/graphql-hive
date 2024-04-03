@@ -4,7 +4,7 @@ import { useMutation, useQuery } from 'urql';
 import * as Yup from 'yup';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { DocsLink, DocsNote, Input, Spinner, Switch, Tooltip } from '@/components/v2';
+import { DocsNote, Input, Spinner, Switch, Tooltip } from '@/components/v2';
 import { ProductUpdatesLink } from '@/components/v2/docs-note';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { useNotifications } from '@/lib/hooks';
