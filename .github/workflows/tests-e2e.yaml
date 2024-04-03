@@ -52,9 +52,13 @@ jobs:
       - name: cypress
         timeout-minutes: 6
         uses: cypress-io/github-action@v5
+        env:
+          CI: true
         with:
           command: pnpm test:e2e
           install: false
+          browser: chrome
+          headed: true
 
       - name: troubleshoot containers
         if: ${{ failure() }}

@@ -6,9 +6,14 @@ import pg from 'pg';
 
 const isCI = Boolean(process.env.CI);
 
+if (isCI) {
+  // eslint-disable-next-line no-console -- we are logging the environment
+  console.log('Running in CI');
+}
+
 export default defineConfig({
-  video: isCI, // TODO: can it be useful for CI?
-  screenshotOnRunFailure: isCI, // TODO: can it be useful for CI?
+  video: isCI,
+  screenshotOnRunFailure: isCI,
   defaultCommandTimeout: 8000, // sometimes the app takes longer to load, especially in the CI
   env: {
     POSTGRES_URL: 'postgresql://postgres:postgres@localhost:5432/registry',
