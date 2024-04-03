@@ -134,12 +134,13 @@ export class SchemaManager {
       }),
     ]);
 
-    if (project.type === ProjectType.SINGLE) {
+    if (project.type !== ProjectType.FEDERATION) {
       return {
         kind: 'error' as const,
-        message: 'Single project does not support composition',
+        message: 'Only Federation projects are supported',
       };
     }
+
     const orchestrator = this.matchOrchestrator(project.type);
 
     const existingServices = ensureCompositeSchemas(latestSchemas ? latestSchemas.schemas : []);

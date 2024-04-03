@@ -87,8 +87,24 @@ export default class Dev extends Command {
     'registry.endpoint': Flags.string({
       description: 'registry endpoint',
     }),
+    /** @deprecated */
+    registry: Flags.string({
+      description: 'registry address',
+      deprecated: {
+        message: 'use --registry.endpoint instead',
+        version: '0.21.0',
+      },
+    }),
     'registry.accessToken': Flags.string({
       description: 'registry access token',
+    }),
+    /** @deprecated */
+    token: Flags.string({
+      description: 'api token',
+      deprecated: {
+        message: 'use --registry.accessToken instead',
+        version: '0.21.0',
+      },
     }),
     service: Flags.string({
       description: 'Service name',
@@ -134,12 +150,14 @@ export default class Dev extends Command {
 
     const registry = this.ensure({
       key: 'registry.endpoint',
+      legacyFlagName: 'registry',
       args: flags,
       defaultValue: graphqlEndpoint,
       env: 'HIVE_REGISTRY',
     });
     const token = this.ensure({
       key: 'registry.accessToken',
+      legacyFlagName: 'token',
       args: flags,
       env: 'HIVE_TOKEN',
     });
