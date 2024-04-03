@@ -79,6 +79,12 @@ export default withGuildDocs({
       destination: '/docs/api-reference/cli#publish-a-schema',
       permanent: true,
     },
+    {
+      // SEO: Redirect to the new URL
+      source: '/docs/self-hosting/federation-2',
+      destination: '/docs/self-hosting/external-composition',
+      permanent: true,
+    },
   ],
   swcMinify: true,
   webpack: (config, { webpack }) => {

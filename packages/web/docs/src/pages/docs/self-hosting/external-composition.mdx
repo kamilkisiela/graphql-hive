@@ -1,6 +1,10 @@
-# Apollo Federation 2
+import { Callout } from '@theguild/components'
 
-The process of running the self-host version with Apollo Federation 2 is similar to the process of
+# External Composition
+
+<Callout type="warning">Only available for Federation projects.</Callout>
+
+The process of running the self-host version with External Composition is similar to the process of
 running it with Hive Cloud version - you'll need to run the
 [external composition service](/docs/management/external-schema-composition). The difference is that
 you'll be able to run it locally, instead of running it on a publicly available service.
@@ -18,7 +22,7 @@ your `docker-compose.community.yml`:
 ```yaml filename="docker-compose.community.yml"
 services:
   # ... other services
-  composition-federation-2:
+  external-composition:
     image: '${DOCKER_REGISTRY}composition-federation-2${DOCKER_TAG}'
     networks:
       - 'stack'
