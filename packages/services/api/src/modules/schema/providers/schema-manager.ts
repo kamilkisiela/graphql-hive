@@ -113,18 +113,13 @@ export class SchemaManager {
       scope: TargetAccessScope.REGISTRY_READ,
     });
 
-    const [organization, project, target, latestSchemas] = await Promise.all([
+    const [organization, project, latestSchemas] = await Promise.all([
       this.organizationManager.getOrganization({
         organization: input.organization,
       }),
       this.projectManager.getProject({
         organization: input.organization,
         project: input.project,
-      }),
-      this.targetManager.getTarget({
-        organization: input.organization,
-        project: input.project,
-        target: input.target,
       }),
       this.getLatestSchemas({
         organization: input.organization,
