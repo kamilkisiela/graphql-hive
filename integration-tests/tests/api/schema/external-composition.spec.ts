@@ -7,7 +7,7 @@ import { generateUnique } from '../../../testkit/utils';
 test.concurrent('call an external service to compose and validate services', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject, organization } = await createOrg();
-  const { createToken, project } = await createProject(ProjectType.Federation);
+  const { createToken, project, setNativeFederation } = await createProject(ProjectType.Federation);
 
   // Create a token with write rights
   const writeToken = await createToken({
@@ -36,8 +36,7 @@ test.concurrent('call an external service to compose and validate services', asy
     })
     .then(r => r.expectNoGraphQLErrors());
 
-  // Schema publish should be unsuccessful (Fed v2 features are not enabled yet)
-  expect(publishUsersResult.schemaPublish.__typename).toBe('SchemaPublishError');
+  expect(publishUsersResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   // expect `users` service to be composed internally
   await expect(history()).resolves.not.toContainEqual(usersServiceName);
@@ -60,6 +59,9 @@ test.concurrent('call an external service to compose and validate services', asy
     externalCompositionResult.enableExternalSchemaComposition.ok?.externalSchemaComposition
       ?.endpoint,
   ).toBe(`http://${dockerAddress}/compose`);
+
+  // set native federation to false to force external composition
+  await setNativeFederation(false);
 
   const productsServiceName = generateUnique();
   const publishProductsResult = await writeToken
@@ -92,7 +94,9 @@ test.concurrent(
   async () => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject, organization } = await createOrg();
-    const { createToken, project } = await createProject(ProjectType.Federation);
+    const { createToken, project, setNativeFederation } = await createProject(
+      ProjectType.Federation,
+    );
 
     // Create a token with write rights
     const writeToken = await createToken({
@@ -144,6 +148,9 @@ test.concurrent(
         ?.endpoint,
     ).toBe(`http://${dockerAddress}/fail_on_signature`);
 
+    // set native federation to false to force external composition
+    await setNativeFederation(false);
+
     const productsServiceName = generateUnique();
     const publishProductsResult = await writeToken
       .publishSchema({
@@ -187,7 +194,9 @@ test.concurrent(
   async () => {
     const { createOrg } = await initSeed().createOwner();
     const { createProject, organization } = await createOrg();
-    const { createToken, project } = await createProject(ProjectType.Federation);
+    const { createToken, project, setNativeFederation } = await createProject(
+      ProjectType.Federation,
+    );
 
     // Create a token with write rights
     const writeToken = await createToken({
@@ -238,6 +247,8 @@ test.concurrent(
       externalCompositionResult.enableExternalSchemaComposition.ok?.externalSchemaComposition
         ?.endpoint,
     ).toBe(`http://${dockerAddress}/non-existing-endpoint`);
+    // set native federation to false to force external composition
+    await setNativeFederation(false);
 
     const productsServiceName = generateUnique();
     const publishProductsResult = await writeToken
@@ -280,7 +291,7 @@ test.concurrent(
 test.concurrent('a timeout error should be visible to the user', async ({ expect }) => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject, organization } = await createOrg();
-  const { createToken, project } = await createProject(ProjectType.Federation);
+  const { createToken, project, setNativeFederation } = await createProject(ProjectType.Federation);
 
   // Create a token with write rights
   const writeToken = await createToken({
@@ -331,6 +342,8 @@ test.concurrent('a timeout error should be visible to the user', async ({ expect
     externalCompositionResult.enableExternalSchemaComposition.ok?.externalSchemaComposition
       ?.endpoint,
   ).toBe(`http://${dockerAddress}/timeout`);
+  // set native federation to false to force external composition
+  await setNativeFederation(false);
 
   const productsServiceName = generateUnique();
   const publishProductsResult = await writeToken

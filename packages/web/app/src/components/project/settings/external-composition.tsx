@@ -15,6 +15,7 @@ export const ExternalCompositionStatus_TestQuery = graphql(`
     testExternalSchemaComposition(selector: $selector) {
       ok {
         id
+        isNativeFederationEnabled
         externalSchemaComposition {
           endpoint
         }
@@ -31,6 +32,7 @@ export const ExternalCompositionForm_EnableMutation = graphql(`
     enableExternalSchemaComposition(input: $input) {
       ok {
         id
+        isNativeFederationEnabled
         externalSchemaComposition {
           endpoint
         }
@@ -226,6 +228,7 @@ export const ExternalComposition_DisableMutation = graphql(`
     disableExternalSchemaComposition(input: $input) {
       ok {
         id
+        isNativeFederationEnabled
         externalSchemaComposition {
           endpoint
         }
@@ -240,6 +243,7 @@ export const ExternalComposition_ProjectConfigurationQuery = graphql(`
     project(selector: $selector) {
       id
       cleanId
+      isNativeFederationEnabled
       externalSchemaComposition {
         endpoint
       }
@@ -312,6 +316,7 @@ export const ExternalCompositionSettings = (props: {
   const isEnabled = typeof enabled === 'boolean' ? enabled : initialEnabled;
   const isLoading = projectQuery.fetching || mutation.fetching;
   const isFormVisible = isEnabled && !isLoading;
+  const isNativeCompositionEnabled = projectQuery.data?.project?.isNativeFederationEnabled;
 
   return (
     <Card>
@@ -339,13 +344,12 @@ export const ExternalCompositionSettings = (props: {
       </CardHeader>
 
       <CardContent>
-        <DocsNote>
-          External Schema Composition is required for using Apollo Federation 2 with Hive.
-          <br />
-          <DocsLink href="/management/external-schema-composition">
-            Learn more about Apollo Federation 2 support
-          </DocsLink>
-        </DocsNote>
+        {isNativeCompositionEnabled ? (
+          <DocsNote warn>
+            It appears that Native Federation v2 Composition is activated, external composition
+            won't have any effect.
+          </DocsNote>
+        ) : null}
 
         {isFormVisible ? (
           <ExternalCompositionForm

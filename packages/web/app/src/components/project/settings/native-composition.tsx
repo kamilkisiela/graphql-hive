@@ -134,7 +134,7 @@ export function NativeCompositionSettings(props: {
     <Card>
       <CardHeader>
         <CardTitle>
-          <a id="native-composition">Native Composition</a>
+          <a id="native-composition">Native Federation v2 Composition</a>
         </CardTitle>
         <CardDescription>Native Apollo Federation v2 support for your project.</CardDescription>
         {project.isNativeFederationEnabled ? null : (
