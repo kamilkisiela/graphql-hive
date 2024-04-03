@@ -498,14 +498,15 @@ export class SchemaPublisher {
       );
     });
 
-    const comparedVersion =
-      organization.featureFlags.compareToPreviousComposableVersion === false
-        ? latestVersion
-        : latestComposableVersion;
-    const comparedSchemaVersion =
-      organization.featureFlags.compareToPreviousComposableVersion === false
-        ? latestSchemaVersion
-        : latestComposableSchemaVersion;
+    const compareToPreviousComposableVersion =
+      organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
+
+    const comparedVersion = compareToPreviousComposableVersion
+      ? latestComposableVersion
+      : latestVersion;
+    const comparedSchemaVersion = compareToPreviousComposableVersion
+      ? latestComposableSchemaVersion
+      : latestSchemaVersion;
 
     const conditionalBreakingChangeConfiguration =
       await this.getConditionalBreakingChangeConfiguration({
@@ -1181,6 +1182,9 @@ export class SchemaPublisher {
           }),
         ]);
 
+        const compareToPreviousComposableVersion =
+          organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
+
         const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
 
         schemaDeleteCount.inc({ model: modelVersion, projectType: project.type });
@@ -1276,14 +1280,11 @@ export class SchemaPublisher {
         });
 
         let diffSchemaVersionId: string | null = null;
-        if (
-          organization.featureFlags.compareToPreviousComposableVersion &&
-          latestComposableSchemaVersion
-        ) {
+        if (compareToPreviousComposableVersion && latestComposableSchemaVersion) {
           diffSchemaVersionId = latestComposableSchemaVersion.id;
         }
 
-        if (!organization.featureFlags.compareToPreviousComposableVersion && latestSchemaVersion) {
+        if (!compareToPreviousComposableVersion && latestSchemaVersion) {
           diffSchemaVersionId = latestSchemaVersion.id;
         }
 
@@ -1594,10 +1595,11 @@ export class SchemaPublisher {
       );
     }
 
-    const comparedSchemaVersion =
-      organization.featureFlags.compareToPreviousComposableVersion === false
-        ? latestSchemaVersion
-        : latestComposableSchemaVersion;
+    const compareToPreviousComposableVersion =
+      organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
+    const comparedSchemaVersion = compareToPreviousComposableVersion
+      ? latestComposableSchemaVersion
+      : latestSchemaVersion;
     const schemaVersionContracts = comparedSchemaVersion
       ? await this.contracts.getContractVersionsForSchemaVersion({
           schemaVersionId: comparedSchemaVersion.id,
@@ -1819,14 +1821,11 @@ export class SchemaPublisher {
     const supergraph = publishResult.state.supergraph ?? null;
 
     let diffSchemaVersionId: string | null = null;
-    if (
-      organization.featureFlags.compareToPreviousComposableVersion &&
-      latestComposableSchemaVersion
-    ) {
+    if (compareToPreviousComposableVersion && latestComposableSchemaVersion) {
       diffSchemaVersionId = latestComposableSchemaVersion.id;
     }
 
-    if (!organization.featureFlags.compareToPreviousComposableVersion && latestSchemaVersion) {
+    if (!compareToPreviousComposableVersion && latestSchemaVersion) {
       diffSchemaVersionId = latestSchemaVersion.id;
     }
 

@@ -144,10 +144,9 @@ export class CompositeModel {
     const schemas = latest ? swapServices(latest.schemas, incoming).schemas : [incoming];
     schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
 
-    const comparedVersion =
-      organization.featureFlags.compareToPreviousComposableVersion === false
-        ? latest
-        : latestComposable;
+    const compareToPreviousComposableVersion =
+      organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
+    const comparedVersion = compareToPreviousComposableVersion ? latestComposable : latest;
 
     const checksumCheck = await this.checks.checksum({
       existing: comparedVersion
@@ -319,8 +318,9 @@ export class CompositeModel {
     const previousService = swap?.existing;
     const schemas = swap?.schemas ?? [incoming];
     schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
-    const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
-    const schemaVersionToCompareAgainst = compareToLatest ? latest : latestComposable;
+    const compareToLatestComposable =
+      organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
+    const schemaVersionToCompareAgainst = compareToLatestComposable ? latestComposable : latest;
 
     const [serviceNameCheck, serviceUrlCheck] = await Promise.all([
       this.checks.serviceName({
@@ -418,7 +418,7 @@ export class CompositeModel {
     if (
       compositionCheck.status === 'failed' &&
       compositionCheck.reason.errorsBySource.graphql.length > 0 &&
-      compareToLatest
+      !compareToLatestComposable
     ) {
       return {
         conclusion: SchemaPublishConclusion.Reject,
@@ -543,7 +543,8 @@ export class CompositeModel {
     };
 
     const latestVersion = latest;
-    const compareToLatest = organization.featureFlags.compareToPreviousComposableVersion === false;
+    const compareToLatestComposable =
+      organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
 
     const serviceNameCheck = await this.checks.serviceName({
       name: incoming.service_name,
@@ -587,7 +588,7 @@ export class CompositeModel {
 
     const previousVersionSdl = await this.checks.retrievePreviousVersionSdl({
       orchestrator,
-      version: compareToLatest ? latest : latestComposable,
+      version: compareToLatestComposable ? latestComposable : latest,
       organization,
       project,
     });
@@ -614,7 +615,7 @@ export class CompositeModel {
       compositionCheck.status === 'failed' &&
       compositionCheck.reason.errorsBySource.graphql.length > 0
     ) {
-      if (compareToLatest) {
+      if (!compareToLatestComposable) {
         return {
           conclusion: SchemaDeleteConclusion.Reject,
           reasons: [

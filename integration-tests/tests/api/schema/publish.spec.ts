@@ -625,6 +625,7 @@ describe('schema publishing changes are persisted', () => {
 
   function persistedTest(args: {
     name: string;
+    type?: ProjectType;
     schemaBefore: string;
     schemaAfter: string;
     equalsObject: {
@@ -643,7 +644,10 @@ describe('schema publishing changes are persisted', () => {
 
       const { createOrg } = await initSeed().createOwner();
       const { createProject, organization } = await createOrg();
-      const { createToken, target, project } = await createProject(ProjectType.Federation, {});
+      const { createToken, target, project } = await createProject(
+        args.type ?? ProjectType.Single,
+        {},
+      );
       const readWriteToken = await createToken({
         targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
         projectScopes: [],
@@ -2622,6 +2626,7 @@ describe('schema publishing changes are persisted', () => {
 
   persistedTest({
     name: 'RegistryServiceUrlChangeModel',
+    type: ProjectType.Federation,
     schemaBefore: /* GraphQL */ `
       type Query {
         a: String!
@@ -2854,7 +2859,10 @@ test('Composition Error (Federation 2) can be served from the database', async (
 
     const { createOrg, ownerToken } = await initSeed().createOwner();
     const { createProject, organization } = await createOrg();
-    const { createToken, target, project } = await createProject(ProjectType.Federation, {});
+    const { createToken, target, project, setNativeFederation } = await createProject(
+      ProjectType.Federation,
+      {},
+    );
     const readWriteToken = await createToken({
       targetScopes: [
         TargetAccessScope.RegistryRead,
@@ -2875,6 +2883,8 @@ test('Composition Error (Federation 2) can be served from the database', async (
       },
       readWriteToken.secret,
     ).then(r => r.expectNoGraphQLErrors());
+    // set native federation to false to force external composition
+    await setNativeFederation(false);
 
     const publishResult = await readWriteToken
       .publishSchema({
@@ -2978,7 +2988,10 @@ test('Composition Network Failure (Federation 2)', async () => {
 
     const { createOrg, ownerToken } = await initSeed().createOwner();
     const { createProject, organization } = await createOrg();
-    const { createToken, target, project } = await createProject(ProjectType.Federation, {});
+    const { createToken, target, project, setNativeFederation } = await createProject(
+      ProjectType.Federation,
+      {},
+    );
     const readWriteToken = await createToken({
       targetScopes: [
         TargetAccessScope.RegistryRead,
@@ -2999,6 +3012,9 @@ test('Composition Network Failure (Federation 2)', async () => {
       },
       readWriteToken.secret,
     ).then(r => r.expectNoGraphQLErrors());
+
+    // Disable Native Federation v2 composition to allow the external composition to take place
+    await setNativeFederation(false);
 
     const publishResult = await readWriteToken
       .publishSchema({
@@ -3036,6 +3052,8 @@ test('Composition Network Failure (Federation 2)', async () => {
       },
       readWriteToken.secret,
     ).then(r => r.expectNoGraphQLErrors());
+    // Disable Native Federation v2 composition to allow the external composition to take place
+    await setNativeFederation(false);
 
     const publishResult3 = await readWriteToken
       .publishSchema({

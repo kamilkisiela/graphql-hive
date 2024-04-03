@@ -10,7 +10,7 @@ const dockerAddress = `composition_federation_2:3069`;
 test.concurrent('call an external service to compose and validate services', async () => {
   const { createOrg } = await initSeed().createOwner();
   const { createProject, organization } = await createOrg();
-  const { createToken, project } = await createProject(ProjectType.Federation);
+  const { createToken, project, setNativeFederation } = await createProject(ProjectType.Federation);
 
   // Create a token with write rights
   const writeToken = await createToken({
@@ -37,8 +37,7 @@ test.concurrent('call an external service to compose and validate services', asy
     })
     .then(r => r.expectNoGraphQLErrors());
 
-  // Schema publish should be unsuccessful (Fed v2 features are not enabled yet)
-  expect(publishUsersResult.schemaPublish.__typename).toBe('SchemaPublishError');
+  expect(publishUsersResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
 
   // enable external composition
   const externalCompositionResult = await enableExternalSchemaComposition(
@@ -55,6 +54,8 @@ test.concurrent('call an external service to compose and validate services', asy
     externalCompositionResult.enableExternalSchemaComposition.ok?.externalSchemaComposition
       ?.endpoint,
   ).toBe(`http://${dockerAddress}/compose`);
+  // Disable Native Federation v2 composition to allow the external composition to take place
+  await setNativeFederation(false);
 
   const productsServiceName = generateUnique();
   const publishProductsResult = await writeToken

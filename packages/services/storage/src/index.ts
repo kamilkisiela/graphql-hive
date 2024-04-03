@@ -835,13 +835,14 @@ export async function createStorage(connection: string, maximumPoolSize: number)
       };
     },
     async createProject({ name, organization, cleanId, type }) {
+      // Native Composition is enabled by default for fresh Federation-type projects
       return transformProject(
-        await pool.one<Slonik<projects>>(
+        await pool.one<projects>(
           sql`
             INSERT INTO projects
-              ("name", "clean_id", "type", "org_id")
+              ("name", "clean_id", "type", "org_id", "native_federation")
             VALUES
-              (${name}, ${cleanId}, ${type}, ${organization})
+              (${name}, ${cleanId}, ${type}, ${organization}, ${type === ProjectType.FEDERATION})
             RETURNING *
           `,
         ),
@@ -1618,27 +1619,15 @@ export async function createStorage(connection: string, maximumPoolSize: number)
         `),
       );
     },
-    async updateNativeSchemaComposition({ organization, project, enabled }) {
+    async updateNativeSchemaComposition({ project, enabled }) {
       return transformProject(
-        await pool.transaction(async t => {
-          await t.one(sql`
-            UPDATE organizations
-            SET
-              feature_flags = ${sql.jsonb({
-                compareToPreviousComposableVersion: true,
-              })}
-            WHERE id = ${organization}
-            RETURNING id
-          `);
-
-          return await t.one<projects>(sql`
-            UPDATE projects
-            SET
-              native_federation = ${enabled}
-            WHERE id = ${project}
-            RETURNING *
-          `);
-        }),
+        await pool.one<projects>(sql`
+          UPDATE projects
+          SET
+            native_federation = ${enabled}
+          WHERE id = ${project}
+          RETURNING *
+        `),
       );
     },
     async enableExternalSchemaComposition({ project, endpoint, encryptedSecret }) {

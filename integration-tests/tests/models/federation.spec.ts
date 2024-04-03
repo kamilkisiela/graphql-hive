@@ -5,31 +5,27 @@ import { prepareProject } from '../../testkit/registry-models';
 import { initSeed } from '../../testkit/seed';
 
 const cases = [
-  ['default' as const, [] as [string, boolean][], false],
+  ['default' as const, [] as [string, boolean][]],
   [
     'compareToPreviousComposableVersion' as const,
     [['compareToPreviousComposableVersion', true]] as [string, boolean][],
-    false,
   ],
-  [
-    'nativeFederation' as const,
-    [['compareToPreviousComposableVersion', true]] as [string, boolean][],
-    true,
-  ],
+  ['@apollo/federation' as const, [] as [string, boolean][]],
 ] as Array<
   [
-    'default' | 'compareToPreviousComposableVersion' | 'nativeFederation',
+    'default' | 'compareToPreviousComposableVersion' | '@apollo/federation',
     Array<[string, boolean]>,
-    boolean,
   ]
 >;
 
 describe('publish', () => {
-  describe.concurrent.each(cases)('%s', (caseName, ffs, nativeFederation) => {
+  describe.concurrent.each(cases)('%s', (caseName, ffs) => {
+    const legacyComposition = caseName === '@apollo/federation';
+
     test.concurrent('accepted: composable', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, nativeFederation);
+      } = await prepare(ffs, legacyComposition);
       await publish({
         sdl: `type Query { topProductName: String }`,
         serviceName: 'products',
@@ -41,7 +37,7 @@ describe('publish', () => {
     test.concurrent('accepted: composable, breaking changes', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, nativeFederation);
+      } = await prepare(ffs, legacyComposition);
       await publish({
         sdl: /* GraphQL */ `
           type Query {
@@ -66,11 +62,11 @@ describe('publish', () => {
     });
 
     test.concurrent(
-      `${caseName === 'default' ? 'rejected' : 'accepted'}: not composable (graphql errors)`,
+      `${caseName === '@apollo/federation' ? 'rejected' : 'accepted'}: not composable (graphql errors)`,
       async () => {
         const {
           cli: { publish },
-        } = await prepare(ffs, nativeFederation);
+        } = await prepare(ffs, legacyComposition);
 
         // non-composable
         await publish({
@@ -81,7 +77,7 @@ describe('publish', () => {
           `,
           serviceName: 'products',
           serviceUrl: 'http://products:3000/graphql',
-          expect: caseName === 'default' ? 'rejected' : 'latest',
+          expect: caseName === '@apollo/federation' ? 'rejected' : 'latest',
         });
       },
     );
@@ -89,7 +85,7 @@ describe('publish', () => {
     test.concurrent('accepted: composable, previous version was not', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, nativeFederation);
+      } = await prepare(ffs, legacyComposition);
 
       // non-composable
       await publish({
@@ -127,7 +123,7 @@ describe('publish', () => {
     test.concurrent('accepted: composable, no changes', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, nativeFederation);
+      } = await prepare(ffs, legacyComposition);
 
       // composable
       await publish({
@@ -157,7 +153,7 @@ describe('publish', () => {
     test.concurrent('accepted: composable, no changes, no metadata modification', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, nativeFederation);
+      } = await prepare(ffs, legacyComposition);
 
       // composable
       await publish({
@@ -189,7 +185,7 @@ describe('publish', () => {
     test.concurrent('accepted: composable, new url', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, nativeFederation);
+      } = await prepare(ffs, legacyComposition);
 
       // composable
       await publish({
@@ -219,7 +215,7 @@ describe('publish', () => {
     test.concurrent('accepted: composable, new metadata', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, nativeFederation);
+      } = await prepare(ffs, legacyComposition);
 
       // composable
       await publish({
@@ -251,7 +247,7 @@ describe('publish', () => {
     test.concurrent('rejected: missing service name', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, nativeFederation);
+      } = await prepare(ffs, legacyComposition);
 
       // composable
       await publish({
@@ -268,7 +264,7 @@ describe('publish', () => {
     test.concurrent('rejected: missing service url', async () => {
       const {
         cli: { publish },
-      } = await prepare(ffs, nativeFederation);
+      } = await prepare(ffs, legacyComposition);
 
       // composable
       await publish({
@@ -285,7 +281,7 @@ describe('publish', () => {
     test.concurrent('CLI output', async ({ expect }) => {
       const {
         cli: { publish },
-      } = await prepare(ffs, nativeFederation);
+      } = await prepare(ffs, legacyComposition);
 
       const service = {
         serviceName: 'products',
@@ -345,11 +341,13 @@ describe('publish', () => {
 });
 
 describe('check', () => {
-  describe.concurrent.each(cases)('%s', (caseName, ffs, nativeFederation) => {
+  describe.concurrent.each(cases)('%s', (caseName, ffs) => {
+    const legacyComposition = caseName === '@apollo/federation';
+
     test.concurrent('accepted: composable, no breaking changes', async () => {
       const {
         cli: { publish, check },
-      } = await prepare(ffs, nativeFederation);
+      } = await prepare(ffs, legacyComposition);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -379,7 +377,7 @@ describe('check', () => {
     test.concurrent('accepted: composable, previous version was not', async () => {
       const {
         cli: { publish, check },
-      } = await prepare(ffs, nativeFederation);
+      } = await prepare(ffs, legacyComposition);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -415,7 +413,7 @@ describe('check', () => {
     test.concurrent('accepted: no changes', async () => {
       const {
         cli: { publish, check },
-      } = await prepare(ffs, nativeFederation);
+      } = await prepare(ffs, legacyComposition);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -442,7 +440,7 @@ describe('check', () => {
     test.concurrent('rejected: missing service name', async () => {
       const {
         cli: { check },
-      } = await prepare(ffs, nativeFederation);
+      } = await prepare(ffs, legacyComposition);
 
       const message = await check({
         sdl: /* GraphQL */ `
@@ -459,7 +457,7 @@ describe('check', () => {
     test.concurrent('rejected: composable, breaking changes', async () => {
       const {
         cli: { publish, check },
-      } = await prepare(ffs, nativeFederation);
+      } = await prepare(ffs, legacyComposition);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -488,7 +486,7 @@ describe('check', () => {
     test.concurrent('rejected: not composable, no breaking changes', async () => {
       const {
         cli: { publish, check },
-      } = await prepare(ffs, nativeFederation);
+      } = await prepare(ffs, legacyComposition);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -518,7 +516,7 @@ describe('check', () => {
     test.concurrent('rejected: not composable, breaking changes', async () => {
       const {
         cli: { publish, check },
-      } = await prepare(ffs, nativeFederation);
+      } = await prepare(ffs, legacyComposition);
 
       await publish({
         sdl: /* GraphQL */ `
@@ -553,20 +551,22 @@ describe('check', () => {
         }),
       );
 
-      if (caseName === 'nativeFederation') {
-        expect(message).toContain('Cannot query field it on type Product');
-      } else {
+      if (legacyComposition) {
         expect(message).toMatch('Product.it');
         expect(message).toMatch('topProduct');
+      } else {
+        expect(message).toContain('Cannot query field it on type Product');
       }
     });
   });
 });
 
 describe('delete', () => {
-  describe.concurrent.each(cases)('%s', (_, ffs, nativeFederation) => {
+  describe.concurrent.each(cases)('%s', (caseName, ffs) => {
+    const legacyComposition = caseName === '@apollo/federation';
+
     test.concurrent('accepted: composable before and after', async () => {
-      const { cli } = await prepare(ffs, nativeFederation);
+      const { cli } = await prepare(ffs, legacyComposition);
 
       await cli.publish({
         sdl: /* GraphQL */ `
@@ -609,7 +609,7 @@ describe('delete', () => {
     });
 
     test.concurrent('rejected: unknown service', async () => {
-      const { cli } = await prepare(ffs, nativeFederation);
+      const { cli } = await prepare(ffs, legacyComposition);
 
       await cli.publish({
         sdl: /* GraphQL */ `
@@ -661,7 +661,7 @@ describe('other', () => {
       ]);
 
       const supergraph = await fetchSupergraph();
-      expect(supergraph).toMatch('(name: "users" url: "https://api.com/users-subgraph")');
+      expect(supergraph).toMatch('(name: "users", url: "https://api.com/users-subgraph")');
     });
 
     test.concurrent(
@@ -905,7 +905,7 @@ describe('other', () => {
   });
 });
 
-async function prepare(featureFlags: Array<[string, boolean]> = [], nativeFederation = false) {
+async function prepare(featureFlags: Array<[string, boolean]> = [], legacyComposition = false) {
   const { tokens, setFeatureFlag, setNativeFederation, cdn } = await prepareProject(
     ProjectType.Federation,
   );
@@ -914,8 +914,8 @@ async function prepare(featureFlags: Array<[string, boolean]> = [], nativeFedera
     await setFeatureFlag(name, enabled);
   }
 
-  if (nativeFederation === true) {
-    await setNativeFederation(true);
+  if (legacyComposition === true) {
+    await setNativeFederation(false);
   }
 
   return {

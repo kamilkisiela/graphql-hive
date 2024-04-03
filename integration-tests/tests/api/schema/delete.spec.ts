@@ -1,9 +1,11 @@
 import 'reflect-metadata';
+import { parse, print } from 'graphql';
 import { enableExternalSchemaComposition } from 'testkit/flow';
 import { initSeed } from 'testkit/seed';
 import { ProjectAccessScope, ProjectType, TargetAccessScope } from '@app/gql/graphql';
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { createStorage } from '@hive/storage';
+import { sortSDL } from '@theguild/federation-composition';
 
 function connectionString() {
   const {
@@ -50,7 +52,13 @@ async function fetchS3ObjectArtifact(
 }
 
 function normalizeSDL(sdl: string): string {
-  return sdl.replace(/[\n ]+/g, ' ');
+  return print(
+    sortSDL(
+      parse(sdl, {
+        noLocation: true,
+      }),
+    ),
+  );
 }
 
 test.concurrent(
@@ -175,36 +183,8 @@ test.concurrent(
       });
 
       expect(latestVersion.compositeSchemaSDL).toMatchInlineSnapshot(`
-        directive @core(as: String, feature: String!, for: core__Purpose) repeatable on SCHEMA
-
-        directive @join__field(graph: join__Graph, provides: join__FieldSet, requires: join__FieldSet) on FIELD_DEFINITION
-
-        directive @join__graph(name: String!, url: String!) on ENUM_VALUE
-
-        directive @join__owner(graph: join__Graph!) on INTERFACE | OBJECT
-
-        directive @join__type(graph: join__Graph!, key: join__FieldSet) repeatable on INTERFACE | OBJECT
-
         type Query {
           ping: String
-        }
-
-        enum core__Purpose {
-          """
-          \`EXECUTION\` features provide metadata necessary to for operation execution.
-          """
-          EXECUTION
-
-          """
-          \`SECURITY\` features provide metadata necessary to securely resolve fields.
-          """
-          SECURITY
-        }
-
-        scalar join__FieldSet
-
-        enum join__Graph {
-          FOO
         }
       `);
       expect(latestVersion.schemaCompositionErrors).toEqual(null);
@@ -254,7 +234,9 @@ test.concurrent(
       storage = await createStorage(connectionString(), 1);
       const { createOrg } = await initSeed().createOwner();
       const { createProject, organization } = await createOrg();
-      const { createToken, project, target } = await createProject(ProjectType.Federation);
+      const { createToken, project, target, setNativeFederation } = await createProject(
+        ProjectType.Federation,
+      );
 
       const readToken = await createToken({
         targetScopes: [TargetAccessScope.RegistryRead, TargetAccessScope.RegistryWrite],
@@ -271,6 +253,8 @@ test.concurrent(
         },
         readToken.secret,
       ).then(r => r.expectNoGraphQLErrors());
+      // Disable Native Federation v2 composition to allow the external composition to take place
+      await setNativeFederation(false);
 
       const publishService1Result = await readToken
         .publishSchema({

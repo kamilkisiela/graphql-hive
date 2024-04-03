@@ -971,9 +971,15 @@ export class SchemaManager {
   }) {
     this.logger.debug('Fetch version before version id. (args=%o)', args);
 
-    const organization = await this.organizationManager.getOrganization({
-      organization: args.organization,
-    });
+    const [organization, project] = await Promise.all([
+      this.organizationManager.getOrganization({
+        organization: args.organization,
+      }),
+      this.projectManager.getProject({
+        organization: args.organization,
+        project: args.project,
+      }),
+    ]);
 
     const schemaVersion = await this.storage.getVersionBeforeVersionId({
       organization: args.organization,
@@ -981,7 +987,8 @@ export class SchemaManager {
       target: args.target,
       beforeVersionId: args.beforeVersionId,
       beforeVersionCreatedAt: args.beforeVersionCreatedAt,
-      onlyComposable: organization.featureFlags.compareToPreviousComposableVersion,
+      onlyComposable:
+        organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation,
     });
 
     if (!schemaVersion) {
@@ -1035,15 +1042,6 @@ export class SchemaManager {
     if (input.project.legacyRegistryModel === true) {
       this.logger.warn(
         'Project is using legacy registry model, ignoring native Federation support (organization=%s, project=%s)',
-        input.organization.id,
-        input.project.id,
-      );
-      return false;
-    }
-
-    if (input.organization.featureFlags.compareToPreviousComposableVersion === false) {
-      this.logger.warn(
-        'Organization has compareToPreviousComposableVersion FF disabled, ignoring native Federation support (organization=%s, project=%s)',
         input.organization.id,
         input.project.id,
       );
