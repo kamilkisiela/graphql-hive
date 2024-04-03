@@ -14,7 +14,8 @@ if (isCI) {
 export default defineConfig({
   video: isCI,
   screenshotOnRunFailure: isCI,
-  defaultCommandTimeout: 8000, // sometimes the app takes longer to load, especially in the CI
+  defaultCommandTimeout: 4_000, // sometimes the app takes longer to load, especially in the CI
+  // retries: 2,
   env: {
     POSTGRES_URL: 'postgresql://postgres:postgres@localhost:5432/registry',
   },
