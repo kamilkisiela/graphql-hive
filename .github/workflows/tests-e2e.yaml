@@ -52,8 +52,13 @@ jobs:
       - name: troubleshoot containers
         if: ${{ failure() }}
         run: |
-          docker compose -f docker/docker-compose.community.yml ps
-          docker compose -f docker/docker-compose.community.yml logs
+          docker --version
+          docker ps --format json | jq .
+          docker compose \
+            --env-file docker/.end2end.env \
+            -f docker/docker-compose.community.yml \
+            -f docker/docker-compose.end2end.yml \
+            logs
 
       - name: cypress
         timeout-minutes: 6
