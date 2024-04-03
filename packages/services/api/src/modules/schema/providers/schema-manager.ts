@@ -987,7 +987,8 @@ export class SchemaManager {
       target: args.target,
       beforeVersionId: args.beforeVersionId,
       beforeVersionCreatedAt: args.beforeVersionCreatedAt,
-      onlyComposable: organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation,
+      onlyComposable:
+        organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation,
     });
 
     if (!schemaVersion) {

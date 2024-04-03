@@ -73,11 +73,9 @@ export class SingleModel {
     };
 
     const schemas = [incoming] as [SingleSchema];
-    const compareToPreviousComposableVersion = organization.featureFlags.compareToPreviousComposableVersion;
-    const comparedVersion =
-    compareToPreviousComposableVersion
-        ? latestComposable
-        : latest;
+    const compareToPreviousComposableVersion =
+      organization.featureFlags.compareToPreviousComposableVersion;
+    const comparedVersion = compareToPreviousComposableVersion ? latestComposable : latest;
 
     const checksumResult = await this.checks.checksum({
       existing: comparedVersion
@@ -201,11 +199,9 @@ export class SingleModel {
 
     const latestVersion = latest;
     const schemas = [incoming] as [SingleSchema];
-    const compareToPreviousComposableVersion = organization.featureFlags.compareToPreviousComposableVersion;
-    const comparedVersion =
-    compareToPreviousComposableVersion
-        ? latestComposable
-        : latest;
+    const compareToPreviousComposableVersion =
+      organization.featureFlags.compareToPreviousComposableVersion;
+    const comparedVersion = compareToPreviousComposableVersion ? latestComposable : latest;
 
     const checksumCheck = await this.checks.checksum({
       existing: comparedVersion

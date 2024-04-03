@@ -144,11 +144,9 @@ export class CompositeModel {
     const schemas = latest ? swapServices(latest.schemas, incoming).schemas : [incoming];
     schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
 
-    const compareToPreviousComposableVersion = organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
-    const comparedVersion =
-    compareToPreviousComposableVersion
-        ? latestComposable
-        : latest;
+    const compareToPreviousComposableVersion =
+      organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
+    const comparedVersion = compareToPreviousComposableVersion ? latestComposable : latest;
 
     const checksumCheck = await this.checks.checksum({
       existing: comparedVersion
@@ -320,7 +318,8 @@ export class CompositeModel {
     const previousService = swap?.existing;
     const schemas = swap?.schemas ?? [incoming];
     schemas.sort((a, b) => a.service_name.localeCompare(b.service_name));
-    const compareToLatestComposable = organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
+    const compareToLatestComposable =
+      organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
     const schemaVersionToCompareAgainst = compareToLatestComposable ? latestComposable : latest;
 
     const [serviceNameCheck, serviceUrlCheck] = await Promise.all([
@@ -544,7 +543,8 @@ export class CompositeModel {
     };
 
     const latestVersion = latest;
-    const compareToLatestComposable = organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
+    const compareToLatestComposable =
+      organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
 
     const serviceNameCheck = await this.checks.serviceName({
       name: incoming.service_name,

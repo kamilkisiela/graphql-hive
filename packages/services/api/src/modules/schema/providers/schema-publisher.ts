@@ -498,16 +498,15 @@ export class SchemaPublisher {
       );
     });
 
-    const compareToPreviousComposableVersion = organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
+    const compareToPreviousComposableVersion =
+      organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
 
-    const comparedVersion =
-    compareToPreviousComposableVersion
-        ? latestComposableVersion
-        : latestVersion;
-    const comparedSchemaVersion =
-    compareToPreviousComposableVersion
-        ? latestComposableSchemaVersion
-        : latestSchemaVersion;
+    const comparedVersion = compareToPreviousComposableVersion
+      ? latestComposableVersion
+      : latestVersion;
+    const comparedSchemaVersion = compareToPreviousComposableVersion
+      ? latestComposableSchemaVersion
+      : latestSchemaVersion;
 
     const conditionalBreakingChangeConfiguration =
       await this.getConditionalBreakingChangeConfiguration({
@@ -1183,7 +1182,8 @@ export class SchemaPublisher {
           }),
         ]);
 
-        const compareToPreviousComposableVersion = organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
+        const compareToPreviousComposableVersion =
+          organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
 
         const modelVersion = project.legacyRegistryModel ? 'legacy' : 'modern';
 
@@ -1280,10 +1280,7 @@ export class SchemaPublisher {
         });
 
         let diffSchemaVersionId: string | null = null;
-        if (
-          compareToPreviousComposableVersion &&
-          latestComposableSchemaVersion
-        ) {
+        if (compareToPreviousComposableVersion && latestComposableSchemaVersion) {
           diffSchemaVersionId = latestComposableSchemaVersion.id;
         }
 
@@ -1598,11 +1595,11 @@ export class SchemaPublisher {
       );
     }
 
-    const compareToPreviousComposableVersion = organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
-    const comparedSchemaVersion =
-      compareToPreviousComposableVersion
-        ? latestComposableSchemaVersion
-        : latestSchemaVersion;
+    const compareToPreviousComposableVersion =
+      organization.featureFlags.compareToPreviousComposableVersion || project.nativeFederation;
+    const comparedSchemaVersion = compareToPreviousComposableVersion
+      ? latestComposableSchemaVersion
+      : latestSchemaVersion;
     const schemaVersionContracts = comparedSchemaVersion
       ? await this.contracts.getContractVersionsForSchemaVersion({
           schemaVersionId: comparedSchemaVersion.id,
@@ -1824,10 +1821,7 @@ export class SchemaPublisher {
     const supergraph = publishResult.state.supergraph ?? null;
 
     let diffSchemaVersionId: string | null = null;
-    if (
-      compareToPreviousComposableVersion &&
-      latestComposableSchemaVersion
-    ) {
+    if (compareToPreviousComposableVersion && latestComposableSchemaVersion) {
       diffSchemaVersionId = latestComposableSchemaVersion.id;
     }
 
