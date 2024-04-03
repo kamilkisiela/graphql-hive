@@ -232,6 +232,10 @@ the gateway.
 ```bash
 # Introspect the SDL of the local service
 hive dev --service reviews --url http://localhost:3001/graphql
+
+# Watch mode
+hive dev --watch --service reviews --url http://localhost:3001/graphql
+
 # Provide the SDL of the local service
 hive dev --service reviews --url http://localhost:3001/graphql --schema reviews.graphql
 
@@ -243,6 +247,29 @@ hive dev \
 # Custom output file (default: supergraph.graphql)
 hive dev --service reviews --url http://localhost:3001/graphql --write local-supergraph.graphql
 ```
+
+#### Usage example
+
+Let's say you have two subgraphs, `reviews` and `products`, and you want to test the `reviews`
+service.
+
+First, you need to start the `reviews` service locally and then run the following command:
+
+```bash
+hive dev --watch --service reviews --url http://localhost:3001/graphql
+```
+
+This command will fetch subgraph's schema from the provided URL, replace the original `reviews`
+subgraph from the Registry with the local one, and compose a supergraph. The outcome will be saved
+in the `supergraph.graphql` file.
+
+The `products` subgraph will stay untoched, meaing that the gateway will route requests to its
+remote endpoint.
+
+> The `--watch` flag will keep the process running and update the supergraph whenever the local
+> schema changes.
+
+Now you're ready to use the `supergraph.graphql` file in your gateway and execute queries.
 
 ### Git Metadata
 
