@@ -152,6 +152,7 @@ module.exports = {
       rules: {
         // conflicts with official prettier-plugin-tailwindcss and tailwind v3
         'tailwindcss/classnames-order': 'off',
+        'tailwindcss/no-unnecessary-arbitrary-value': 'off',
         // set more strict to highlight in editor
         'tailwindcss/enforces-shorthand': 'error',
         'tailwindcss/no-custom-classname': 'error',
