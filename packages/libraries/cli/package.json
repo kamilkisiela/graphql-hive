@@ -36,6 +36,7 @@
     "postpack": "rm -f oclif.manifest.json",
     "prebuild": "rimraf dist",
     "prepack": "rimraf lib && tsc -b && oclif manifest && oclif readme",
+    "prepublishOnly": "oclif manifest && oclif readme",
     "schema:check:federation": "pnpm start schema:check examples/federation.graphql --service reviews",
     "schema:check:single": "pnpm start schema:check examples/single.graphql",
     "schema:check:stitching": "pnpm start schema:check --service posts examples/stitching.posts.graphql",
