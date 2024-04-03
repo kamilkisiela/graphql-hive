@@ -9,6 +9,7 @@ import { FullLogo } from '@/components/common/Logo';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/v2';
 import { env } from '@/env/frontend';
+import { useBrowser } from '@/lib/hooks/use-browser';
 import { startAuthFlowForProvider } from '@/lib/supertokens/start-auth-flow-for-provider';
 import { startAuthFlowForOIDCProvider } from '@/lib/supertokens/third-party-email-password-react-oidc-provider';
 
@@ -120,6 +121,11 @@ export default function Auth() {
   }, [oidcProvider]);
 
   const router = useRouter();
+  const isBrowser = useBrowser();
+
+  if (!isBrowser) {
+    return null;
+  }
 
   if (oidcProvider.loading) {
     return null;

@@ -1,11 +1,11 @@
-import { ReactElement, useEffect, useState } from 'react';
 import { GraphiQL } from 'graphiql';
 import { HiveLogo } from '@/components/v2/icon';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
 import 'graphiql/graphiql.css';
 import { env } from '@/env/frontend';
+import { useBrowser } from '@/lib/hooks/use-browser';
 
-export default function DevPage(): ReactElement {
+export default function DevPage() {
   return (
     <div className="mt-20 size-full">
       <style global jsx>{`
@@ -20,13 +20,9 @@ export default function DevPage(): ReactElement {
 }
 
 function Editor() {
-  const [isClient, setIsClient] = useState(false);
+  const isBrowser = useBrowser();
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  if (!isClient) {
+  if (!isBrowser) {
     return null;
   }
 
