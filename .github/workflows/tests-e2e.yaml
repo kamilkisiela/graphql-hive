@@ -43,8 +43,8 @@ jobs:
       - name: run containers
         timeout-minutes: 10
         run: |
-          source docker/.end2end.env
           docker compose \
+            --env-file docker/.end2end.env \
             -f docker/docker-compose.community.yml \
             -f docker/docker-compose.end2end.yml \
             up -d --wait
