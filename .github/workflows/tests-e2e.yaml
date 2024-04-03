@@ -49,6 +49,13 @@ jobs:
             -f docker/docker-compose.end2end.yml \
             up -d --wait
 
+      - name: cypress
+        timeout-minutes: 6
+        uses: cypress-io/github-action@v5
+        with:
+          command: pnpm test:e2e
+          install: false
+
       - name: troubleshoot containers
         if: ${{ failure() }}
         run: |
@@ -59,13 +66,6 @@ jobs:
             -f docker/docker-compose.community.yml \
             -f docker/docker-compose.end2end.yml \
             logs
-
-      - name: cypress
-        timeout-minutes: 6
-        uses: cypress-io/github-action@v5
-        with:
-          command: pnpm test:e2e
-          install: false
 
       - uses: actions/upload-artifact@v4.3.1
         if: ${{ failure() }}
