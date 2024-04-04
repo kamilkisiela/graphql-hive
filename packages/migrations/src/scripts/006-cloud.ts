@@ -51,7 +51,7 @@ async function main() {
   const poolSize = 5;
   const limit = pLimit(poolSize);
 
-  const slonik = await createPool(createConnectionString(env.postgres), {
+  const slonik = await createPool(createConnectionString(postgres), {
     // 30 seconds timeout per statement
     statementTimeout: 30 * 1000,
     maximumPoolSize: poolSize,
@@ -218,7 +218,7 @@ async function main() {
       return;
     }
 
-    // TODO: insert data from the previous months
+    // insert data from the previous months
     await execute(`
       INSERT INTO monthly_overview
       (organization, date, total)

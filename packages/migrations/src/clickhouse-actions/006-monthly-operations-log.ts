@@ -12,8 +12,8 @@ export const action: Action = async (exec, _query, isHiveCloud) => {
   let where = 'notEmpty(organization)';
 
   if (isHiveCloud) {
-    const env = process.env;
-    const { CLICKHOUSE_MIGRATION_006_DATE } = MigrationRequirements.parse(env);
+    // eslint-disable-next-line no-process-env
+    const { CLICKHOUSE_MIGRATION_006_DATE } = MigrationRequirements.parse(process.env);
 
     const date = new Date(CLICKHOUSE_MIGRATION_006_DATE);
     const startOfToday = new Date(new Date().toISOString().split('T')[0]);
@@ -64,11 +64,13 @@ export const action: Action = async (exec, _query, isHiveCloud) => {
   `);
 
   await exec(`
-    ALTER TABLE operations ADD COLUMN IF NOT EXISTS organization LowCardinality(String) DEFAULT '' CODEC(ZSTD(1))
+    ALTER TABLE operations
+    ADD COLUMN IF NOT EXISTS organization LowCardinality(String) DEFAULT '' CODEC(ZSTD(1))
   `);
 
   await exec(`
-    ALTER TABLE subscription_operations ADD COLUMN IF NOT EXISTS organization LowCardinality(String) DEFAULT CODEC(ZSTD(1))
+    ALTER TABLE subscription_operations
+    ADD COLUMN IF NOT EXISTS organization LowCardinality(String) DEFAULT '' CODEC(ZSTD(1))
   `);
 
   await exec(`
