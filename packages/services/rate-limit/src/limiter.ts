@@ -96,7 +96,7 @@ export function createRateLimiter(config: {
 
     const [records, operations] = await Promise.all([
       storage.getGetOrganizationsAndTargetsWithLimitInfo(),
-      rateEstimator.estimateOperationsForAllTargets.query(windowAsString), // [ ]
+      rateEstimator.estimateOperationsForAllTargets.query(windowAsString),
     ]);
 
     const totalTargets = records.reduce((acc, record) => acc + record.targets.length, 0);
