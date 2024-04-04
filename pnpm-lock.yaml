@@ -788,8 +788,8 @@ importers:
         specifier: 4.2.2
         version: 4.2.2
       itty-router-extras:
-        specifier: 0.4.5
-        version: 0.4.5
+        specifier: 0.4.6
+        version: 0.4.6
       toucan-js:
         specifier: 3.3.1
         version: 3.3.1
@@ -22254,8 +22254,8 @@ packages:
       set-function-name: 2.0.1
     dev: true
 
-  /itty-router-extras@0.4.5:
-    resolution: {integrity: sha512-flxFhFZgPqiscrHTV3mBbRBk8plgOGdg5tZMyv7hE629PO+XEfXh2uHs78ndH6axRG50fIHfjrrqAlb3Pguemw==}
+  /itty-router-extras@0.4.6:
+    resolution: {integrity: sha512-6r7HQBkFMPSJfcKksrKC7avEQnPCSSEvoz6PAAZMNhz8hthYu1pzedXDrvTFDWXJosfuaittzoNciWHO/TxMaw==}
     dev: true
 
   /itty-router@4.2.2:
