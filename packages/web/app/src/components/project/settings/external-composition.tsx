@@ -344,7 +344,7 @@ export const ExternalCompositionSettings = (props: {
       </CardHeader>
 
       <CardContent>
-        {isNativeCompositionEnabled ? (
+        {isNativeCompositionEnabled && isEnabled ? (
           <DocsNote warn>
             It appears that Native Federation v2 Composition is activated, external composition
             won't have any effect.
