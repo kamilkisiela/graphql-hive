@@ -1,5 +1,11 @@
 # @graphql-hive/cli
 
+## 0.35.0
+
+### Minor Changes
+
+- [#4383](https://github.com/kamilkisiela/graphql-hive/pull/4383) [`ff480e9`](https://github.com/kamilkisiela/graphql-hive/commit/ff480e917337b3dd0c7eb3a51254ca2bac8bddcd) Thanks [@kamilkisiela](https://github.com/kamilkisiela)! - Introducing `hive dev` command - compose local subgraphs with subgraphs from the registry.
+
 ## 0.34.1
 
 ### Patch Changes
