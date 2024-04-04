@@ -4,7 +4,7 @@ import convertToYup from 'json-schema-yup-transformer';
 import * as Yup from 'yup';
 import { DocsLink } from '@/components/v2';
 import { Markdown } from '@/components/v2/markdown';
-import { RuleInstanceSeverityLevel } from '@/graphql';
+import { RuleInstanceSeverityLevel } from '@/gql/graphql';
 import type { AvailableRulesList } from '../policy-settings';
 import { PolicyBooleanToggle } from './boolean-config';
 import { PolicyEnumSelect } from './enum-config';

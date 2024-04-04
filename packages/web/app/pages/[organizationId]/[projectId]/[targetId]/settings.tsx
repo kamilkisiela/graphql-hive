@@ -43,12 +43,27 @@ import { canAccessTarget, TargetAccessScope } from '@/lib/access/target';
 import { subDays } from '@/lib/date-time';
 import { useRouteSelector, useToggle } from '@/lib/hooks';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const TargetSettings_TargetValidationSettingsFragment = graphql(`
+  fragment TargetSettings_TargetValidationSettingsFragment on TargetValidationSettings {
+    enabled
+    period
+    percentage
+    targets {
+      id
+      cleanId
+      name
+    }
+    excludedClients
+  }
+`);
+
 const SetTargetValidationMutation = graphql(`
   mutation Settings_SetTargetValidation($input: SetTargetValidationInput!) {
     setTargetValidation(input: $input) {
       id
       validationSettings {
-        ...TargetValidationSettingsFields
+        ...TargetSettings_TargetValidationSettingsFragment
       }
     }
   }
@@ -78,7 +93,6 @@ export const TokensDocument = graphql(`
     tokens(selector: $selector) {
       total
       nodes {
-        ...TokenFields
         id
         alias
         name
@@ -199,7 +213,8 @@ const Settings_UpdateBaseSchemaMutation = graphql(`
     updateBaseSchema(input: $input) {
       ok {
         updatedTarget {
-          ...TargetFields
+          id
+          baseSchema
         }
       }
       error {
@@ -387,7 +402,7 @@ const TargetSettingsPage_UpdateTargetValidationSettingsMutation = graphql(`
         target {
           id
           validationSettings {
-            ...TargetValidationSettingsFields
+            ...TargetSettings_TargetValidationSettingsFragment
           }
         }
       }
@@ -866,8 +881,9 @@ const TargetSettingsPage_UpdateTargetNameMutation = graphql(`
           target
         }
         updatedTarget {
-          ...TargetFields
+          id
           cleanId
+          name
         }
       }
       error {

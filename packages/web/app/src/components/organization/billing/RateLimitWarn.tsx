@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 import { Callout } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { BillingPlanType } from '@/graphql';
+import { BillingPlanType } from '@/gql/graphql';
 
 const RateLimitWarn_OrganizationFragment = graphql(`
   fragment RateLimitWarn_OrganizationFragment on Organization {

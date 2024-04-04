@@ -1,6 +1,6 @@
 import React from 'react';
+import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '@/gql/graphql';
 import { Router, useRouteSelector } from '@/lib/hooks';
-import { OrganizationAccessScope, ProjectAccessScope, TargetAccessScope } from '../../graphql';
 
 export interface Scope<T> {
   name: string;

@@ -143,22 +143,6 @@ const config: CodegenConfig = {
         },
       },
     },
-    // App
-    './packages/web/app/src/graphql/index.ts': {
-      documents: [
-        './packages/web/app/src/graphql/*.graphql',
-        './packages/web/app/src/(components|lib)/**/*.ts(x)?',
-      ],
-      plugins: ['typescript', 'typescript-operations', 'typed-document-node'],
-      config: {
-        dedupeFragments: true,
-        scalars: {
-          DateTime: 'string',
-          SafeInt: 'number',
-          JSONSchemaObject: 'json-schema-typed#JSONSchema',
-        },
-      },
-    },
     './packages/web/app/src/gql/': {
       documents: [
         './packages/web/app/src/(components|lib)/**/*.ts(x)?',

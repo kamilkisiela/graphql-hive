@@ -7,7 +7,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { Button } from '@/components/ui/button';
 import { Checkbox, Drawer, Input, Button as LegacyButton, Spinner } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { DateRangeInput } from '@/graphql';
+import { DateRangeInput } from '@/gql/graphql';
 import { useFormattedNumber, useRouteSelector, useToggle } from '@/lib/hooks';
 
 const OperationsFilter_OperationStatsValuesConnectionFragment = graphql(`

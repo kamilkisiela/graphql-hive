@@ -12,7 +12,7 @@ import { Accordion, GraphQLBlock, Input, MetaTitle, noSchema } from '@/component
 import { noSchemaVersion } from '@/components/v2/empty-list';
 import { GraphQLHighlight } from '@/components/v2/graphql-block';
 import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
-import { ProjectType, RegistryModel } from '@/graphql';
+import { ProjectType, RegistryModel } from '@/gql/graphql';
 import { TargetAccessScope, useTargetAccess } from '@/lib/access/target';
 import { useRouteSelector } from '@/lib/hooks';
 

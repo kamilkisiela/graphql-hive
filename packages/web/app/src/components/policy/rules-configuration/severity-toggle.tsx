@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
 import clsx from 'clsx';
-import { RuleInstanceSeverityLevel } from '@/graphql';
+import { RuleInstanceSeverityLevel } from '@/gql/graphql';
 import { CrossCircledIcon, ExclamationTriangleIcon, MinusCircledIcon } from '@radix-ui/react-icons';
 import { ToggleGroup, ToggleGroupItem, Tooltip } from '../../v2';
 import { useConfigurationHelper } from '../form-helper';

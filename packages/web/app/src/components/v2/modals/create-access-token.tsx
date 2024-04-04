@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { PermissionScopeItem, usePermissionsManager } from '@/components/organization/Permissions';
 import { Accordion, Button, CopyValue, Heading, Input, Modal, Tag } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
-import { TargetAccessScope } from '@/graphql';
+import { TargetAccessScope } from '@/gql/graphql';
 import { RegistryAccessScope } from '@/lib/access/common';
 import { useRouteSelector } from '@/lib/hooks';
 
@@ -19,7 +19,11 @@ export const CreateAccessToken_CreateTokenMutation = graphql(`
           target
         }
         createdToken {
-          ...TokenFields
+          id
+          name
+          alias
+          date
+          lastUsedAt
         }
         secret
       }

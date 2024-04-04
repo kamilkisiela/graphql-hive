@@ -5,7 +5,7 @@ import { useMutation } from 'urql';
 import * as Yup from 'yup';
 import { Button, Heading, Input, Modal, ProjectTypes } from '@/components/v2';
 import { graphql } from '@/gql';
-import { ProjectType } from '@/graphql';
+import { ProjectType } from '@/gql/graphql';
 import { useRouteSelector } from '@/lib/hooks';
 
 export const CreateProjectMutation = graphql(`
@@ -13,11 +13,12 @@ export const CreateProjectMutation = graphql(`
     createProject(input: $input) {
       ok {
         createdProject {
+          id
           cleanId
-          ...ProjectFields
         }
         createdTargets {
-          ...TargetFields
+          id
+          cleanId
         }
         updatedOrganization {
           id
