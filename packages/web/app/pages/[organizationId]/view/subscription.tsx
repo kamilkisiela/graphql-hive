@@ -203,77 +203,79 @@ function SubscriptionPageContent() {
               <OrganizationUsageEstimationView organization={organization} />
             </div>
           </Card>
-          <Card className="mt-8">
-            <Heading>Historical Usage</Heading>
-            <div className="mt-4">
-              <AutoSizer disableHeight>
-                {size => (
-                  <ReactECharts
-                    style={{ width: size.width, height: 400 }}
-                    option={{
-                      ...styles,
-                      grid: {
-                        left: 20,
-                        top: 50,
-                        right: 20,
-                        bottom: 20,
-                        containLabel: true,
-                      },
-                      legend: {
-                        show: false,
-                      },
-                      tooltip: {
-                        trigger: 'axis',
-                        valueFormatter: (value: number) => formatNumber(value),
-                        formatter(params: any[]) {
-                          const param = params[0];
-                          const value = param.data[1];
+          {monthlyUsagePoints.length ? (
+            <Card className="mt-8">
+              <Heading>Historical Usage</Heading>
+              <div className="mt-4">
+                <AutoSizer disableHeight>
+                  {size => (
+                    <ReactECharts
+                      style={{ width: size.width, height: 400 }}
+                      option={{
+                        ...styles,
+                        grid: {
+                          left: 20,
+                          top: 50,
+                          right: 20,
+                          bottom: 20,
+                          containLabel: true,
+                        },
+                        legend: {
+                          show: false,
+                        },
+                        tooltip: {
+                          trigger: 'axis',
+                          valueFormatter: (value: number) => formatNumber(value),
+                          formatter(params: any[]) {
+                            const param = params[0];
+                            const value = param.data[1];
 
-                          return `<strong>${numberFormatter.format(value)}</strong>`;
-                        },
-                      },
-                      xAxis: [
-                        {
-                          type: 'time',
-                          splitNumber: 12,
-                        },
-                      ],
-                      yAxis: [
-                        {
-                          type: 'value',
-                          boundaryGap: false,
-                          min: 0,
-                          axisLabel: {
-                            formatter: (value: number) => formatNumber(value),
+                            return `<strong>${numberFormatter.format(value)}</strong>`;
                           },
-                          splitLine: {
-                            lineStyle: {
-                              color: '#595959',
-                              type: 'dashed',
+                        },
+                        xAxis: [
+                          {
+                            type: 'time',
+                            splitNumber: 12,
+                          },
+                        ],
+                        yAxis: [
+                          {
+                            type: 'value',
+                            boundaryGap: false,
+                            min: 0,
+                            axisLabel: {
+                              formatter: (value: number) => formatNumber(value),
+                            },
+                            splitLine: {
+                              lineStyle: {
+                                color: '#595959',
+                                type: 'dashed',
+                              },
                             },
                           },
-                        },
-                      ],
-                      series: [
-                        {
-                          type: 'bar',
-                          name: 'Events',
-                          showSymbol: false,
-                          boundaryGap: false,
-                          color: '#595959',
-                          areaStyle: {},
-                          emphasis: {
-                            focus: 'series',
+                        ],
+                        series: [
+                          {
+                            type: 'bar',
+                            name: 'Events',
+                            showSymbol: false,
+                            boundaryGap: false,
+                            color: '#595959',
+                            areaStyle: {},
+                            emphasis: {
+                              focus: 'series',
+                            },
+                            data: monthlyUsagePoints,
                           },
-                          data: monthlyUsagePoints,
-                        },
-                      ],
-                    }}
-                  />
-                )}
-              </AutoSizer>
-            </div>
-          </Card>
+                        ],
+                      }}
+                    />
+                  )}
+                </AutoSizer>
+              </div>
+            </Card>
+          ) : null}
           {organization.billingConfiguration?.invoices?.length ? (
             <Card className="mt-8">
               <Heading>Invoices</Heading>

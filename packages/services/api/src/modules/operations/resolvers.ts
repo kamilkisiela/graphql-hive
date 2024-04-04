@@ -143,12 +143,15 @@ export const resolvers: OperationsModule.Resolvers = {
       });
     },
     async monthlyUsage(_, { selector }, { injector }) {
-      const translator = injector.get(IdTranslator);
-      const organization = await translator.translateOrganizationId(selector);
+      // TODO: once 006 migration is done, remove this line.
+      return [];
 
-      return injector.get(OperationsManager).readMonthlyUsage({
-        organization,
-      });
+      // const translator = injector.get(IdTranslator);
+      // const organization = await translator.translateOrganizationId(selector);
+
+      // return injector.get(OperationsManager).readMonthlyUsage({
+      //   organization,
+      // });
     },
   },
   SchemaCoordinateStats: {
