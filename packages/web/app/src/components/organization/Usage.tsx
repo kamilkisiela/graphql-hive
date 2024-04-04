@@ -3,7 +3,6 @@ import { useQuery } from 'urql';
 import { DataWrapper, Table, TBody, Td, Th, THead, Tr } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { Scale } from '../common';
-import { calculatePeriod } from '../common/TimeFilter';
 
 const NumericFormatter = Intl.NumberFormat('en', { notation: 'standard' });
 

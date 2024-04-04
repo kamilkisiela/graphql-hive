@@ -142,6 +142,7 @@ export const resolvers: OperationsModule.Resolvers = {
         };
       });
     },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async monthlyUsage(_, { selector }, { injector }) {
       // TODO: once 006 migration is done, remove this line.
       return [];

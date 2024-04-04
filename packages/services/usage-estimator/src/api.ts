@@ -5,11 +5,6 @@ import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
 import type { Estimator } from './estimator';
 
-const DATE_RANGE_VALIDATION = {
-  startTime: z.string().min(1),
-  endTime: z.string().min(1),
-};
-
 export function createContext(estimator: Estimator, req: FastifyRequest) {
   return {
     estimator,
