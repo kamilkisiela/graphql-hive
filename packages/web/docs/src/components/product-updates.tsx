@@ -78,6 +78,12 @@ export const getStaticProps: GetStaticProps<{ ssg: { changelogs: Changelog[] } }
 
   return {
     props: {
+      __nextra_dynamic_opts: {
+        title: 'Product Updates',
+        frontMatter: {
+          description: 'The most recent developments from GraphQL Hive.',
+        },
+      },
       ssg: { changelogs },
     },
   };
