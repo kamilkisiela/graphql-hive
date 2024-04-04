@@ -45,7 +45,7 @@ export const action: Action = async (exec, _query, isHiveCloud) => {
       throw new Error('Oh no! The date is not set!');
     }
 
-    where = ` && toDate(timestamp) >= toDate('${insertAfterDate}')`;
+    where = ` AND toDate(timestamp) >= toDate('${insertAfterDate}')`;
   }
 
   await exec(`
