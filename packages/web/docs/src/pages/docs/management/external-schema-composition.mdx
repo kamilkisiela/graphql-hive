@@ -5,7 +5,9 @@ import externalCompositionValid from '../../../../public/docs/pages/management/e
 import externalCompositionOff from '../../../../public/docs/pages/management/external-schema-composition-disabled.png'
 import externalCompositionOn from '../../../../public/docs/pages/management/external-schema-composition-enabled.png'
 
-# External Schema Composition (for Apollo Federation v2)
+# External Schema Composition
+
+<Callout type="warning">Only available for Federation projects.</Callout>
 
 **External Schema Composition** feature allows you to build and validate GraphQL Schema outside of
 Hive. When enabled, Hive will send necessary information over HTTP to your endpoint and expect a
@@ -13,31 +15,6 @@ composition result in return.
 
 To make this process easier, we've implemented the actual service that you need to deploy: either as
 a JavaScript library, or as a Docker image that can be deployed anywhere.
-
-<Callout type="info" emoji="👩‍🔬">
-**Native Apollo Federation v2 support is coming soon**
-
-We're currently developing a new functionality that enables you to utilize Apollo Federation v2
-seamlessly with Hive Cloud, **eliminating the need for you to manage your own composition server**.
-
-To gain early access to this feature, submit a support ticket (_🛟 Support_ in user menu), and we'll
-activate it for your project.
-
-</Callout>
-
-<Callout type="warning">
-
-**Why external composition is required for Apollo Federation v2?**
-
-As part of the Apollo Federation v2 release,
-[Apollo changed their product license from MIT to Elastic License v2](https://www.apollographql.com/blog/announcement/moving-apollo-federation-2-to-the-elastic-license-v2/).
-This means that Hive Cloud cannot use Apollo Federation v2 libraries directly, or offer Cloud
-services that uses the new properitey libraries internally.
-
-**To use Apollo Federation v2 with your Hive project, you have to run your own composition server
-and connect it to Hive.**
-
-</Callout>
 
 ## How does it work?
 
