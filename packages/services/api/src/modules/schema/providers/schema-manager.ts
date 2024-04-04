@@ -97,6 +97,89 @@ export class SchemaManager {
     return this.storage.hasSchema(selector);
   }
 
+  async compose(
+    input: TargetSelector & {
+      onlyComposable: boolean;
+      services: ReadonlyArray<{
+        sdl: string;
+        url?: string | null;
+        name: string;
+      }>;
+    },
+  ) {
+    this.logger.debug('Composing schemas (input=%o)', lodash.omit(input, 'services'));
+    await this.authManager.ensureTargetAccess({
+      ...input,
+      scope: TargetAccessScope.REGISTRY_READ,
+    });
+
+    const [organization, project, latestSchemas] = await Promise.all([
+      this.organizationManager.getOrganization({
+        organization: input.organization,
+      }),
+      this.projectManager.getProject({
+        organization: input.organization,
+        project: input.project,
+      }),
+      this.getLatestSchemas({
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
+        onlyComposable: input.onlyComposable,
+      }),
+    ]);
+
+    if (project.type !== ProjectType.FEDERATION) {
+      return {
+        kind: 'error' as const,
+        message: 'Only Federation projects are supported',
+      };
+    }
+
+    const orchestrator = this.matchOrchestrator(project.type);
+
+    const existingServices = ensureCompositeSchemas(latestSchemas ? latestSchemas.schemas : []);
+    const services = existingServices
+      // remove provided services from the list
+      .filter(service => !input.services.some(s => s.name === service.service_name))
+      .map(service => ({
+        service_name: service.service_name,
+        sdl: service.sdl,
+        service_url: service.service_url,
+      }))
+      // add provided services to the list
+      .concat(
+        input.services.map(service => ({
+          service_name: service.name,
+          sdl: service.sdl,
+          service_url: service.url ?? null,
+        })),
+      )
+      .map(service => this.schemaHelper.createSchemaObject(service));
+
+    const compositionResult = await orchestrator.composeAndValidate(services, {
+      external: project.externalComposition,
+      native: this.checkProjectNativeFederationSupport({ project, organization }),
+      contracts: null,
+    });
+
+    if (compositionResult.errors.length > 0) {
+      return {
+        kind: 'success' as const,
+        errors: compositionResult.errors,
+      };
+    }
+
+    if (compositionResult.supergraph) {
+      return {
+        kind: 'success' as const,
+        supergraphSDL: compositionResult.supergraph,
+      };
+    }
+
+    throw new Error('Composition was successful but is missing a supergraph');
+  }
+
   @atomic(stringifySelector)
   async getSchemasOfVersion(
     selector: {

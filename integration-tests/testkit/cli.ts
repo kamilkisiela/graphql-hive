@@ -62,6 +62,14 @@ export async function schemaDelete(args: string[]) {
   );
 }
 
+async function dev(args: string[]) {
+  const registryAddress = await getServiceHost('server', 8082);
+
+  return await exec(
+    ['dev', `--registry.endpoint`, `http://${registryAddress}/graphql`, ...args].join(' '),
+  );
+}
+
 export function createCLI(tokens: { readwrite: string; readonly: string }) {
   let publishCount = 0;
 
@@ -245,9 +253,39 @@ export function createCLI(tokens: { readwrite: string; readonly: string }) {
     return cmd;
   }
 
+  async function devCmd(input: {
+    services: Array<{
+      name: string;
+      url: string;
+      sdl: string;
+    }>;
+    write?: string;
+    useLatestVersion?: boolean;
+  }) {
+    return dev([
+      '--registry.accessToken',
+      tokens.readonly,
+      input.write ? `--write ${input.write}` : '',
+      input.useLatestVersion ? '--unstable__forceLatest' : '',
+      ...(await Promise.all(
+        input.services.map(async ({ name, url, sdl }) => {
+          return [
+            '--service',
+            name,
+            '--url',
+            url,
+            '--schema',
+            await generateTmpFile(sdl, 'graphql'),
+          ].join(' ');
+        }),
+      )),
+    ]);
+  }
+
   return {
     publish,
     check,
     delete: deleteCommand,
+    dev: devCmd,
   };
 }
