@@ -17,16 +17,6 @@ const ProjectPolicyPageQuery = graphql(`
     organization(selector: { organization: $organizationId }) {
       organization {
         id
-        schemaPolicy {
-          id
-          updatedAt
-          allowOverrides
-          rules {
-            rule {
-              id
-            }
-          }
-        }
         me {
           id
           ...CanAccessProject_MemberFragment
@@ -42,6 +32,16 @@ const ProjectPolicyPageQuery = graphql(`
         id
         updatedAt
         ...PolicySettings_SchemaPolicyFragment
+      }
+      parentSchemaPolicy {
+        id
+        updatedAt
+        allowOverrides
+        rules {
+          rule {
+            id
+          }
+        }
       }
     }
     organizations {
