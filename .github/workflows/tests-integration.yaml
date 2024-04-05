@@ -18,6 +18,9 @@ on:
       configureEnv:
         default: ''
         type: string
+      useLocalArtifacts:
+        default: false
+        type: boolean
 
 jobs:
   integration:
@@ -28,7 +31,9 @@ jobs:
         shardIndex: [1, 2, 3]
 
     env:
-      DOCKER_REGISTRY: ${{ inputs.registry }}/${{ inputs.imageName }}/
+      DOCKER_REGISTRY:
+        ${{ !inputs.useLocalArtifacts && format('{0}/{1}/', inputs.registry, inputs.imageName) || ''
+        }}
       DOCKER_TAG: :${{ inputs.imageTag }}
 
     steps:
@@ -60,8 +65,32 @@ jobs:
         id: cpu-cores
         uses: SimenB/github-actions-cpu-cores@v2
 
+      - name: download local artifact
+        if: ${{ inputs.useLocalArtifacts }}
+        uses: actions/download-artifact@v4
+        with:
+          name: docker_output
+          path: docker_output
+
+      - name: pull local images
+        if: ${{ inputs.useLocalArtifacts }}
+        working-directory: docker_output
+        run: |
+          for f in *.tar; do
+            image_name=$(basename $f .tar)
+            image_tag="${image_name}:${{ inputs.imageTag }}"
+            echo "loading local docker image $f as tag $image_tag"
+
+            cat $f | docker import - $image_tag
+          done
+          docker image ls -a
+          rm -rf docker_output
+          rm -rf /usr/share/dotnet/
+          rm -rf /opt/hostedtoolcache
+          df -h
+
       - name: run containers
-        timeout-minutes: 8
+        timeout-minutes: 10
         run: |
           docker compose -f docker/docker-compose.community.yml -f ./integration-tests/docker-compose.integration.yaml --env-file ./integration-tests/.env up -d --wait
 

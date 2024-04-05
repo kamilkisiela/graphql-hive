@@ -14,12 +14,20 @@ variable "COMMIT_SHA" {
   default = ""
 }
 
+variable "IMAGE_OUTPUT_BASE_DIR" {
+  default = ""
+}
+
 variable "BRANCH_NAME" {
   default = ""
 }
 
 variable "BUILD_TYPE" {
   # Can be "", "ci" or "publish"
+  default = ""
+}
+
+variable "IMAGE_OUTPUT" {
   default = ""
 }
 
@@ -31,6 +39,11 @@ variable "BUILD_STABLE" {
 function "get_target" {
   params = []
   result = notequal("", BUILD_TYPE) ? notequal("ci", BUILD_TYPE) ? "target-publish" : "target-ci" : "target-dev"
+}
+
+function "get_target_output" {
+  params = [name]
+  result = equal("", IMAGE_OUTPUT_BASE_DIR) ? [] : ["type=tar,dest=${IMAGE_OUTPUT_BASE_DIR}/${name}.tar"]
 }
 
 function "local_image_tag" {
@@ -83,7 +96,8 @@ target "cli-base" {
   }
 }
 
-target "target-dev" {}
+target "target-dev" {
+}
 
 target "target-ci" {
   cache-from = ["type=gha,ignore-error=true"]
@@ -98,6 +112,7 @@ target "target-publish" {
 
 target "emails" {
   inherits = ["service-base", get_target()]
+  output = get_target_output("emails")
   context = "${PWD}/packages/services/emails/dist"
   args = {
     SERVICE_DIR_NAME = "@hive/emails"
@@ -116,6 +131,7 @@ target "emails" {
 
 target "rate-limit" {
   inherits = ["service-base", get_target()]
+  output = get_target_output("rate-limit")
   context = "${PWD}/packages/services/rate-limit/dist"
   args = {
     SERVICE_DIR_NAME = "@hive/rate-limit"
@@ -134,6 +150,7 @@ target "rate-limit" {
 
 target "schema" {
   inherits = ["service-base", get_target()]
+  output = get_target_output("schema")
   context = "${PWD}/packages/services/schema/dist"
   args = {
     SERVICE_DIR_NAME = "@hive/schema"
@@ -152,6 +169,7 @@ target "schema" {
 
 target "policy" {
   inherits = ["service-base", get_target()]
+  output = get_target_output("policy")
   context = "${PWD}/packages/services/policy/dist"
   args = {
     SERVICE_DIR_NAME = "@hive/policy"
@@ -170,6 +188,7 @@ target "policy" {
 
 target "server" {
   inherits = ["service-base", get_target()]
+  output = get_target_output("server")
   context = "${PWD}/packages/services/server/dist"
   args = {
     SERVICE_DIR_NAME = "@hive/server"
@@ -188,6 +207,7 @@ target "server" {
 
 target "storage" {
   inherits = ["migrations-base", get_target()]
+  output = get_target_output("storage")
   context = "${PWD}/packages/migrations/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/storage"
@@ -203,6 +223,7 @@ target "storage" {
 
 target "stripe-billing" {
   inherits = ["service-base", get_target()]
+  output = get_target_output("stripe-billing")
   context = "${PWD}/packages/services/stripe-billing/dist"
   args = {
     SERVICE_DIR_NAME = "@hive/stripe-billing"
@@ -221,6 +242,7 @@ target "stripe-billing" {
 
 target "tokens" {
   inherits = ["service-base", get_target()]
+  output = get_target_output("tokens")
   context = "${PWD}/packages/services/tokens/dist"
   args = {
     SERVICE_DIR_NAME = "@hive/tokens"
@@ -239,6 +261,7 @@ target "tokens" {
 
 target "usage-estimator" {
   inherits = ["service-base", get_target()]
+  output = get_target_output("usage-estimator")
   context = "${PWD}/packages/services/usage-estimator/dist"
   args = {
     SERVICE_DIR_NAME = "@hive/usage-estimator"
@@ -257,6 +280,7 @@ target "usage-estimator" {
 
 target "usage-ingestor" {
   inherits = ["service-base", get_target()]
+  output = get_target_output("usage-ingestor")
   context = "${PWD}/packages/services/usage-ingestor/dist"
   args = {
     SERVICE_DIR_NAME = "@hive/usage-ingestor"
@@ -275,6 +299,7 @@ target "usage-ingestor" {
 
 target "usage" {
   inherits = ["service-base", get_target()]
+  output = get_target_output("usage")
   context = "${PWD}/packages/services/usage/dist"
   args = {
     SERVICE_DIR_NAME = "@hive/usage"
@@ -293,6 +318,7 @@ target "usage" {
 
 target "webhooks" {
   inherits = ["service-base", get_target()]
+  output = get_target_output("webhooks")
   context = "${PWD}/packages/services/webhooks/dist"
   args = {
     SERVICE_DIR_NAME = "@hive/webhooks"
@@ -311,6 +337,7 @@ target "webhooks" {
 
 target "composition-federation-2" {
   inherits = ["service-base", get_target()]
+  output = get_target_output("composition-federation-2")
   context = "${PWD}/packages/services/external-composition/federation-2/dist"
   args = {
     SERVICE_DIR_NAME = "@hive/external-composition"
@@ -329,6 +356,7 @@ target "composition-federation-2" {
 
 target "app" {
   inherits = ["app-base", get_target()]
+  output = get_target_output("app")
   context = "${PWD}/packages/web/app/dist"
   args = {
     IMAGE_TITLE = "graphql-hive/app"
@@ -345,6 +373,7 @@ target "app" {
 
 target "apollo-router" {
   inherits = ["router-base", get_target()]
+  output = get_target_output("apollo-router")
   contexts = {
     pkg = "${PWD}/packages/libraries/router"
     config = "${PWD}/configs/cargo"
@@ -364,6 +393,7 @@ target "apollo-router" {
 
 target "cli" {
   inherits = ["cli-base", get_target()]
+  output = get_target_output("cli")
   context = "${PWD}/packages/libraries/cli"
   args = {
     IMAGE_TITLE = "graphql-hive/cli"
