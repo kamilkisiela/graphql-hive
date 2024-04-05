@@ -3016,7 +3016,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
             o.limit_operations_monthly,
             o.limit_retention_days,
             o.plan_name as org_plan_name,
-            array_agg(o.id) as targets,
+            array_agg(DISTINCT t.id) as targets,
             split_part(
               string_agg(
                 DISTINCT u.email, ','

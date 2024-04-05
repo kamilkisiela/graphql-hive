@@ -122,7 +122,7 @@ export class OperationsReader {
         GROUP BY date
         ORDER BY date ASC
         WITH FILL
-          FROM toStartOfMonth(now() - INTERVAL 1 YEAR)
+          FROM toStartOfMonth(now() - INTERVAL 11 MONTHS)
           TO toStartOfMonth(now())
           STEP INTERVAL 1 MONTH
       `,
