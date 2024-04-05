@@ -5,15 +5,6 @@ import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import { initTRPC } from '@trpc/server';
 import type { Estimator } from './estimator';
 
-const DATE_RANGE_VALIDATION = {
-  startTime: z.string().nonempty(),
-  endTime: z.string().nonempty(),
-};
-
-const TARGET_BASED_FILTER = {
-  targetIds: z.array(z.string().nonempty()),
-};
-
 export function createContext(estimator: Estimator, req: FastifyRequest) {
   return {
     estimator,
@@ -25,28 +16,76 @@ const t = initTRPC.context<ReturnType<typeof createContext>>().create();
 const procedure = t.procedure.use(handleTRPCError);
 
 export const usageEstimatorApiRouter = t.router({
-  estimateOperationsForTarget: procedure
+  // TODO: once 006 migration is done, delete this method
+  estimateOperationsForTargets: procedure
     .input(
       z
         .object({
-          ...DATE_RANGE_VALIDATION,
-          ...TARGET_BASED_FILTER,
+          month: z.number().min(1).max(12),
+          year: z
+            .number()
+            .min(new Date().getFullYear() - 1)
+            .max(new Date().getFullYear()),
+          targetIds: z.array(z.string().min(1)),
         })
         .required(),
     )
     .query(async ({ ctx, input }) => {
       const estimationResponse = await ctx.estimator.estimateCollectedOperationsForTargets({
-        targets: input.targetIds,
-        startTime: new Date(input.startTime),
-        endTime: new Date(input.endTime),
+        targetIds: input.targetIds,
+        month: input.month,
+        year: input.year,
       });
+
+      if (!estimationResponse.data.length) {
+        return {
+          totalOperations: 0,
+        };
+      }
+
+      return {
+        totalOperations: parseInt(estimationResponse.data[0].total),
+      };
+    }),
+  estimateOperationsForOrganization: procedure
+    .input(
+      z
+        .object({
+          month: z.number().min(1).max(12),
+          year: z
+            .number()
+            .min(new Date().getFullYear() - 1)
+            .max(new Date().getFullYear()),
+          organizationId: z.string().min(1),
+        })
+        .required(),
+    )
+    .query(async ({ ctx, input }) => {
+      const estimationResponse = await ctx.estimator.estimateCollectedOperationsForOrganization({
+        organizationId: input.organizationId,
+        month: input.month,
+        year: input.year,
+      });
+
+      if (!estimationResponse.data.length) {
+        return {
+          totalOperations: 0,
+        };
+      }
 
       return {
         totalOperations: parseInt(estimationResponse.data[0].total),
       };
     }),
   estimateOperationsForAllTargets: procedure
-    .input(z.object(DATE_RANGE_VALIDATION).required())
+    .input(
+      z
+        .object({
+          startTime: z.string().min(1),
+          endTime: z.string().min(1),
+        })
+        .required(),
+    )
     .query(async ({ ctx, input }) => {
       const estimationResponse = await ctx.estimator.estimateOperationsForAllTargets({
         startTime: new Date(input.startTime),

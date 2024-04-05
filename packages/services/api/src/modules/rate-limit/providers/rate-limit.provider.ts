@@ -49,7 +49,7 @@ export class RateLimitProvider {
       );
 
       return {
-        usagePercenrage: 0,
+        usagePercentage: 0,
         limited: false,
       };
     }

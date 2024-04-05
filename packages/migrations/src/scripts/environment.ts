@@ -13,6 +13,13 @@ const numberFromNumberOrNumberString = (input: unknown): number | undefined => {
   if (isNumberString(input)) return Number(input);
 };
 
+const emptyString = <T extends zod.ZodType>(input: T) => {
+  return zod.preprocess((value: unknown) => {
+    if (value === '') return undefined;
+    return value;
+  }, input);
+};
+
 const NumberFromString = zod.preprocess(numberFromNumberOrNumberString, zod.number().min(1));
 
 const ClickHouseModel = zod.object({
@@ -23,8 +30,18 @@ const ClickHouseModel = zod.object({
   CLICKHOUSE_PASSWORD: zod.string(),
 });
 
+const PostgresModel = zod.object({
+  POSTGRES_SSL: emptyString(zod.union([zod.literal('1'), zod.literal('0')]).optional()),
+  POSTGRES_HOST: zod.string(),
+  POSTGRES_PORT: NumberFromString,
+  POSTGRES_DB: zod.string(),
+  POSTGRES_USER: zod.string(),
+  POSTGRES_PASSWORD: zod.string(),
+});
+
 const configs = {
   clickhouse: ClickHouseModel.safeParse(process.env),
+  postgres: PostgresModel.safeParse(process.env),
 };
 
 const environmentErrors: Array<string> = [];
@@ -49,6 +66,7 @@ function extractConfig<Input, Output>(config: zod.SafeParseReturnType<Input, Out
 }
 
 const clickhouse = extractConfig(configs.clickhouse);
+const postgres = extractConfig(configs.postgres);
 
 export const env = {
   clickhouse: {
@@ -57,5 +75,13 @@ export const env = {
     port: clickhouse.CLICKHOUSE_PORT,
     username: clickhouse.CLICKHOUSE_USERNAME,
     password: clickhouse.CLICKHOUSE_PASSWORD,
+  },
+  postgres: {
+    host: postgres.POSTGRES_HOST,
+    port: postgres.POSTGRES_PORT,
+    db: postgres.POSTGRES_DB,
+    user: postgres.POSTGRES_USER,
+    password: postgres.POSTGRES_PASSWORD,
+    ssl: postgres.POSTGRES_SSL === '1',
   },
 } as const;

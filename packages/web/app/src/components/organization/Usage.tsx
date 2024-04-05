@@ -3,7 +3,6 @@ import { useQuery } from 'urql';
 import { DataWrapper, Table, TBody, Td, Th, THead, Tr } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { Scale } from '../common';
-import { calculatePeriod } from '../common/TimeFilter';
 
 const NumericFormatter = Intl.NumberFormat('en', { notation: 'standard' });
 
@@ -17,11 +16,9 @@ const OrganizationUsageEstimationView_OrganizationFragment = graphql(`
 `);
 
 const Usage_UsageEstimationQuery = graphql(`
-  query Usage_UsageEstimationQuery($range: DateRangeInput!, $organization: ID!) {
-    usageEstimation(range: $range) {
-      org(selector: { organization: $organization }) {
-        operations
-      }
+  query Usage_UsageEstimationQuery($input: UsageEstimationInput!) {
+    usageEstimation(input: $input) {
+      operations
     }
   }
 `);
@@ -33,13 +30,15 @@ export function OrganizationUsageEstimationView(props: {
     OrganizationUsageEstimationView_OrganizationFragment,
     props.organization,
   );
-  const period = calculatePeriod('month');
 
   const [query] = useQuery({
     query: Usage_UsageEstimationQuery,
     variables: {
-      organization: organization.cleanId,
-      range: period,
+      input: {
+        organization: organization.cleanId,
+        month: new Date().getMonth() + 1,
+        year: new Date().getFullYear(),
+      },
     },
   });
 
@@ -57,12 +56,12 @@ export function OrganizationUsageEstimationView(props: {
               <Tr>
                 <Td>Operations</Td>
                 <Td align="right">
-                  {NumericFormatter.format(result.data.usageEstimation.org.operations)}
+                  {NumericFormatter.format(result.data.usageEstimation.operations)}
                 </Td>
                 <Td align="right">{NumericFormatter.format(organization.rateLimit.operations)}</Td>
                 <Td>
                   <Scale
-                    value={result.data.usageEstimation.org.operations}
+                    value={result.data.usageEstimation.operations}
                     size={10}
                     max={organization.rateLimit.operations}
                     className="justify-end"

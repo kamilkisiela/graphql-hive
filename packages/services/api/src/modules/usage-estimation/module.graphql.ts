@@ -2,12 +2,13 @@ import { gql } from 'graphql-modules';
 
 export default gql`
   extend type Query {
-    usageEstimation(range: DateRangeInput!): UsageEstimationScope!
+    usageEstimation(input: UsageEstimationInput!): UsageEstimation!
   }
 
-  type UsageEstimationScope {
-    target(selector: TargetSelectorInput!): UsageEstimation!
-    org(selector: OrganizationSelectorInput!): UsageEstimation!
+  input UsageEstimationInput {
+    year: Int!
+    month: Int!
+    organization: String!
   }
 
   type UsageEstimation {

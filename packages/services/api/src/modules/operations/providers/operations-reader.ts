@@ -108,6 +108,34 @@ export class OperationsReader {
     };
   }
 
+  async readMonthlyUsage({ organization }: { organization: string }) {
+    const result = await this.clickHouse.query<{
+      date: string;
+      total: number;
+    }>({
+      query: sql`
+        SELECT
+          date,
+          sum(total) as total
+        FROM monthly_overview
+        WHERE organization = ${organization}
+        GROUP BY date
+        ORDER BY date ASC
+        WITH FILL
+          FROM toStartOfMonth(now() - INTERVAL 11 MONTHS)
+          TO toStartOfMonth(now())
+          STEP INTERVAL 1 MONTH
+      `,
+      queryId: 'read_monthly_usage',
+      timeout: 10_000,
+    });
+
+    return result.data.map(row => ({
+      date: row.date,
+      total: ensureNumber(row.total),
+    }));
+  }
+
   async countField({
     type,
     field,

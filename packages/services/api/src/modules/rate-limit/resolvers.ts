@@ -17,7 +17,7 @@ export const resolvers: RateLimitModule.Resolvers = {
         });
 
         logger.debug('Fetched rate-limit info:', { orgId: org.id, operationsRateLimit });
-        limitedForOperations = operationsRateLimit.usagePercenrage >= 1;
+        limitedForOperations = operationsRateLimit.usagePercentage >= 1;
       } catch (e) {
         logger.error('Failed to fetch rate-limit info:', org.id, e);
       }

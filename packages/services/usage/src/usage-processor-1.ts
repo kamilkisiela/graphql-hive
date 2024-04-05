@@ -44,6 +44,7 @@ export function usageProcessorV1(
   const report: RawReport = {
     id: randomUUID(),
     target: token.target,
+    organization: token.organization,
     size: 0,
     map: {},
     operations: [],

@@ -162,7 +162,7 @@ const SystemSettingsModel = z.array(
   }),
 );
 
-export const action: Action = async (exec, query, isClickHouseCloud) => {
+export const action: Action = async (exec, query, isHiveCloud) => {
   const allowExperimentalAlterMaterializedViewStructure = await query(
     `
       SELECT value 
@@ -407,7 +407,7 @@ export const action: Action = async (exec, query, isClickHouseCloud) => {
 
   const isBig = sizeOfOperationsTable === 'big';
 
-  if (isClickHouseCloud || isBig) {
+  if (isHiveCloud || isBig) {
     console.log(
       `${
         isBig ? 'Detected more than 50M rows in operations table.' : 'Detected ClickHouse Cloud.'

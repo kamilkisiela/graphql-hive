@@ -59,19 +59,13 @@ export function createEstimator(config: {
         timeout: 60_000,
       });
     },
+    // TODO: once 006 migration is done, delete this method
     async estimateCollectedOperationsForTargets(input: {
-      targets: string[];
-      startTime: Date;
-      endTime: Date;
+      targetIds: string[];
+      month: number;
+      year: number;
     }) {
-      const filter = operationsReader.createFilter({
-        target: input.targets,
-        period: {
-          from: input.startTime,
-          to: input.endTime,
-        },
-      });
-
+      const startOfMonth = `${input.year}-${String(input.month).padStart(2, '0')}-01`;
       return await clickhouse.query<{
         total: string;
       }>({
@@ -79,7 +73,30 @@ export function createEstimator(config: {
           SELECT 
             sum(total) as total
           FROM operations_hourly
-          ${filter}
+          PREWHERE 
+            target IN ${sql.array(input.targetIds, 'String')}
+            AND timestamp >= toDateTime(${startOfMonth})
+            AND timestamp < (toDateTime(${startOfMonth}) + INTERVAL 1 MONTH)
+        `,
+        queryId: 'usage_estimator_count_operations',
+        timeout: 15_000,
+      });
+    },
+    async estimateCollectedOperationsForOrganization(input: {
+      organizationId: string;
+      month: number;
+      year: number;
+    }) {
+      const startOfMonth = `${input.year}-${String(input.month).padStart(2, '0')}-01`;
+      return await clickhouse.query<{
+        total: string;
+      }>({
+        query: sql`
+          SELECT 
+            sum(total) as total
+          FROM monthly_overview
+          PREWHERE organization = ${input.organizationId} AND date=${startOfMonth}
+          GROUP BY organization
         `,
         queryId: 'usage_estimator_count_operations',
         timeout: 15_000,

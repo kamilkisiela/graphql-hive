@@ -32,6 +32,7 @@ function dateCacheKey(date: number): string {
 const cachedFormatDate = cache(formatDate, dateCacheKey, LRU(50_000));
 
 export const operationsOrder = [
+  'organization',
   'target',
   'timestamp',
   'expires_at',
@@ -44,6 +45,7 @@ export const operationsOrder = [
 ] as const;
 
 export const subscriptionOperationsOrder = [
+  'organization',
   'target',
   'timestamp',
   'expires_at',
@@ -73,6 +75,7 @@ type KeysOfArray<T extends readonly any[]> = T extends readonly (infer U)[] ? U 
 // Important, it has to be in the same order as columns in the table
 export function stringifyQueryOrMutationOperation(operation: ProcessedOperation): string {
   const mapper: Record<KeysOfArray<typeof operationsOrder>, any> = {
+    organization: castValue(operation.organization),
     target: castValue(operation.target),
     timestamp: castDate(operation.timestamp),
     expires_at: castDate(operation.expiresAt),
@@ -88,6 +91,7 @@ export function stringifyQueryOrMutationOperation(operation: ProcessedOperation)
 
 export function stringifySubscriptionOperation(operation: ProcessedSubscriptionOperation): string {
   const mapper: Record<KeysOfArray<typeof subscriptionOperationsOrder>, any> = {
+    organization: castValue(operation.organization),
     target: castValue(operation.target),
     timestamp: castDate(operation.timestamp),
     expires_at: castDate(operation.expiresAt),

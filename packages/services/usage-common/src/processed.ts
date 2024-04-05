@@ -4,6 +4,7 @@ export type ProcessedReport = ProcessedOperation[];
 
 export interface ProcessedOperation {
   target: string;
+  organization: string | null;
   operationHash: string;
   timestamp: number;
   expiresAt: number;
@@ -13,6 +14,7 @@ export interface ProcessedOperation {
 
 export interface ProcessedSubscriptionOperation {
   target: string;
+  organization: string | null;
   operationHash: string;
   timestamp: number;
   expiresAt: number;
