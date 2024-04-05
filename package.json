@@ -67,7 +67,7 @@
     "@manypkg/get-packages": "2.2.1",
     "@next/eslint-plugin-next": "14.1.4",
     "@sentry/cli": "2.31.0",
-    "@swc/core": "1.4.11",
+    "@swc/core": "1.4.12",
     "@theguild/eslint-config": "0.11.4",
     "@theguild/prettier-config": "2.0.6",
     "@types/node": "20.12.4",
