@@ -160,11 +160,11 @@ function ProjectPolicyContent() {
               )}
             </CardHeader>
             <CardContent>
-              {currentOrganization.schemaPolicy === null ||
-              currentOrganization.schemaPolicy?.allowOverrides ? (
+              {currentProject.parentSchemaPolicy === null ||
+              currentProject.parentSchemaPolicy?.allowOverrides ? (
                 <PolicySettings
                   saving={mutation.fetching}
-                  rulesInParent={currentOrganization.schemaPolicy?.rules.map(r => r.rule.id)}
+                  rulesInParent={currentProject.parentSchemaPolicy?.rules.map(r => r.rule.id)}
                   error={
                     mutation.error?.message ||
                     mutation.data?.updateSchemaPolicyForProject.error?.message
