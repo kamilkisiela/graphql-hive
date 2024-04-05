@@ -6,8 +6,8 @@ ENV NODE_ENV production
 
 WORKDIR /usr/src/app
 
-# context packages/web/app/.next/standalone
-COPY . /usr/src/app/
+COPY --from=dist . /usr/src/app/
+COPY --from=shared . /
 
 LABEL org.opencontainers.image.title=$IMAGE_TITLE
 LABEL org.opencontainers.image.version=$RELEASE
@@ -21,4 +21,4 @@ ENV ENVIRONMENT production
 ENV RELEASE $RELEASE
 ENV PORT $PORT
 
-CMD ["node", "index.js"]
+ENTRYPOINT [ "/entrypoint.sh" ]

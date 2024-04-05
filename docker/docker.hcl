@@ -98,7 +98,10 @@ target "target-publish" {
 
 target "emails" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/emails/dist"
+  contexts = {
+    dist = "${PWD}/packages/services/emails/dist"
+    shared = "${PWD}/docker/shared"
+  }
   args = {
     SERVICE_DIR_NAME = "@hive/emails"
     IMAGE_TITLE = "graphql-hive/emails"
@@ -116,7 +119,10 @@ target "emails" {
 
 target "rate-limit" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/rate-limit/dist"
+  contexts = {
+    dist = "${PWD}/packages/services/rate-limit/dist"
+    shared = "${PWD}/docker/shared"
+  }
   args = {
     SERVICE_DIR_NAME = "@hive/rate-limit"
     IMAGE_TITLE = "graphql-hive/rate-limit"
@@ -134,7 +140,10 @@ target "rate-limit" {
 
 target "schema" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/schema/dist"
+  contexts = {
+    dist = "${PWD}/packages/services/schema/dist"
+    shared = "${PWD}/docker/shared"
+  }
   args = {
     SERVICE_DIR_NAME = "@hive/schema"
     IMAGE_TITLE = "graphql-hive/schema"
@@ -152,7 +161,10 @@ target "schema" {
 
 target "policy" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/policy/dist"
+  contexts = {
+    dist = "${PWD}/packages/services/policy/dist"
+    shared = "${PWD}/docker/shared"
+  }
   args = {
     SERVICE_DIR_NAME = "@hive/policy"
     IMAGE_TITLE = "graphql-hive/policy"
@@ -170,7 +182,10 @@ target "policy" {
 
 target "server" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/server/dist"
+  contexts = {
+    dist = "${PWD}/packages/services/server/dist"
+    shared = "${PWD}/docker/shared"
+  }
   args = {
     SERVICE_DIR_NAME = "@hive/server"
     IMAGE_TITLE = "graphql-hive/server"
@@ -188,7 +203,10 @@ target "server" {
 
 target "storage" {
   inherits = ["migrations-base", get_target()]
-  context = "${PWD}/packages/migrations/dist"
+  contexts = {
+    dist = "${PWD}/packages/migrations/dist"
+    shared = "${PWD}/docker/shared"
+  }
   args = {
     IMAGE_TITLE = "graphql-hive/storage"
     IMAGE_DESCRIPTION = "The migrations service of the GraphQL Hive project."
@@ -203,7 +221,10 @@ target "storage" {
 
 target "stripe-billing" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/stripe-billing/dist"
+  contexts = {
+    dist = "${PWD}/packages/services/stripe-billing/dist"
+    shared = "${PWD}/docker/shared"
+  }
   args = {
     SERVICE_DIR_NAME = "@hive/stripe-billing"
     IMAGE_TITLE = "graphql-hive/stripe-billing"
@@ -221,7 +242,10 @@ target "stripe-billing" {
 
 target "tokens" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/tokens/dist"
+  contexts = {
+    dist = "${PWD}/packages/services/tokens/dist"
+    shared = "${PWD}/docker/shared"
+  }
   args = {
     SERVICE_DIR_NAME = "@hive/tokens"
     IMAGE_TITLE = "graphql-hive/tokens"
@@ -239,7 +263,10 @@ target "tokens" {
 
 target "usage-estimator" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/usage-estimator/dist"
+  contexts = {
+    dist = "${PWD}/packages/services/usage-estimator/dist"
+    shared = "${PWD}/docker/shared"
+  }
   args = {
     SERVICE_DIR_NAME = "@hive/usage-estimator"
     IMAGE_TITLE = "graphql-hive/usage-estimator"
@@ -257,7 +284,10 @@ target "usage-estimator" {
 
 target "usage-ingestor" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/usage-ingestor/dist"
+  contexts = {
+    dist = "${PWD}/packages/services/usage-ingestor/dist"
+    shared = "${PWD}/docker/shared"
+  }
   args = {
     SERVICE_DIR_NAME = "@hive/usage-ingestor"
     IMAGE_TITLE = "graphql-hive/usage-ingestor"
@@ -275,7 +305,10 @@ target "usage-ingestor" {
 
 target "usage" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/usage/dist"
+  contexts = {
+    dist = "${PWD}/packages/services/usage/dist"
+    shared = "${PWD}/docker/shared"
+  }
   args = {
     SERVICE_DIR_NAME = "@hive/usage"
     IMAGE_TITLE = "graphql-hive/usage"
@@ -293,7 +326,10 @@ target "usage" {
 
 target "webhooks" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/webhooks/dist"
+  contexts = {
+    dist = "${PWD}/packages/services/webhooks/dist"
+    shared = "${PWD}/docker/shared"
+  }
   args = {
     SERVICE_DIR_NAME = "@hive/webhooks"
     IMAGE_TITLE = "graphql-hive/webhooks"
@@ -311,7 +347,10 @@ target "webhooks" {
 
 target "composition-federation-2" {
   inherits = ["service-base", get_target()]
-  context = "${PWD}/packages/services/external-composition/federation-2/dist"
+  contexts = {
+    dist = "${PWD}/packages/services/external-composition/federation-2/dist"
+    shared = "${PWD}/docker/shared"
+  }
   args = {
     SERVICE_DIR_NAME = "@hive/external-composition"
     IMAGE_TITLE = "graphql-hive/composition-federation-2"
@@ -329,7 +368,10 @@ target "composition-federation-2" {
 
 target "app" {
   inherits = ["app-base", get_target()]
-  context = "${PWD}/packages/web/app/dist"
+  contexts = {
+    dist = "${PWD}/packages/web/app/dist"
+    shared = "${PWD}/docker/shared"
+  }
   args = {
     IMAGE_TITLE = "graphql-hive/app"
     PORT = "3000"

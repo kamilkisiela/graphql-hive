@@ -3,9 +3,10 @@ FROM node:21.7.1-slim
 RUN apt-get update && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 
 ARG SERVICE_DIR_NAME
-
 WORKDIR /usr/src/app/$SERVICE_DIR_NAME
-COPY . /usr/src/app/$SERVICE_DIR_NAME/
+
+COPY --from=dist . /usr/src/app/$SERVICE_DIR_NAME/
+COPY --from=shared . /
 
 LABEL org.opencontainers.image.title=$IMAGE_TITLE
 LABEL org.opencontainers.image.version=$RELEASE
@@ -25,4 +26,4 @@ HEALTHCHECK --interval=5s \
   --retries=6 \
   CMD $HEALTHCHECK_CMD
 
-CMD ["node", "index.js"]
+ENTRYPOINT [ "/entrypoint.sh" ]
