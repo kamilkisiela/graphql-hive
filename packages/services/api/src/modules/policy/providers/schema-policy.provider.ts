@@ -176,6 +176,15 @@ export class SchemaPolicyProvider {
     return this.storage.getSchemaPolicyForOrganization(selector.organization);
   }
 
+  async getOrganizationPolicyForProject(selector: ProjectSelector) {
+    await this.authManager.ensureProjectAccess({
+      ...selector,
+      scope: ProjectAccessScope.SETTINGS,
+    });
+
+    return this.storage.getSchemaPolicyForOrganization(selector.organization);
+  }
+
   async getProjectPolicy(selector: ProjectSelector) {
     await this.authManager.ensureProjectAccess({
       ...selector,

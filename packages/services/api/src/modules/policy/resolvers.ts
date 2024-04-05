@@ -33,6 +33,11 @@ export const resolvers: PolicyModule.Resolvers = {
         project: project.id,
         organization: project.orgId,
       }),
+    parentSchemaPolicy: async (project, _, { injector }) =>
+      injector.get(SchemaPolicyProvider).getOrganizationPolicyForProject({
+        project: project.id,
+        organization: project.orgId,
+      }),
   },
   Target: {
     schemaPolicy: async (target, _, { injector }) => {

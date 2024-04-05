@@ -81,6 +81,7 @@ export default gql`
 
   extend type Project {
     schemaPolicy: SchemaPolicy
+    parentSchemaPolicy: SchemaPolicy
   }
 
   extend type Target {
