@@ -48,7 +48,7 @@ export class SchemaPolicyProvider {
   }> {
     await this.authManager.ensureTargetAccess({
       ...selector,
-      scope: TargetAccessScope.SETTINGS,
+      scope: TargetAccessScope.READ,
     });
 
     return this._getCalculatedPolicyForTarget(selector);
@@ -170,7 +170,7 @@ export class SchemaPolicyProvider {
   async getOrganizationPolicy(selector: OrganizationSelector) {
     await this.authManager.ensureOrganizationAccess({
       ...selector,
-      scope: OrganizationAccessScope.SETTINGS,
+      scope: OrganizationAccessScope.READ,
     });
 
     return this.storage.getSchemaPolicyForOrganization(selector.organization);
@@ -179,7 +179,7 @@ export class SchemaPolicyProvider {
   async getProjectPolicy(selector: ProjectSelector) {
     await this.authManager.ensureProjectAccess({
       ...selector,
-      scope: ProjectAccessScope.SETTINGS,
+      scope: ProjectAccessScope.READ,
     });
 
     return this.storage.getSchemaPolicyForProject(selector.project);
