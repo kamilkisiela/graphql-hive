@@ -142,17 +142,13 @@ export const resolvers: OperationsModule.Resolvers = {
         };
       });
     },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async monthlyUsage(_, { selector }, { injector }) {
-      // TODO: once 006 migration is done, remove this line.
-      return [];
+      const translator = injector.get(IdTranslator);
+      const organization = await translator.translateOrganizationId(selector);
 
-      // const translator = injector.get(IdTranslator);
-      // const organization = await translator.translateOrganizationId(selector);
-
-      // return injector.get(OperationsManager).readMonthlyUsage({
-      //   organization,
-      // });
+      return injector.get(OperationsManager).readMonthlyUsage({
+        organization,
+      });
     },
   },
   SchemaCoordinateStats: {

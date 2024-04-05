@@ -16,37 +16,6 @@ const t = initTRPC.context<ReturnType<typeof createContext>>().create();
 const procedure = t.procedure.use(handleTRPCError);
 
 export const usageEstimatorApiRouter = t.router({
-  // TODO: once 006 migration is done, delete this method
-  estimateOperationsForTargets: procedure
-    .input(
-      z
-        .object({
-          month: z.number().min(1).max(12),
-          year: z
-            .number()
-            .min(new Date().getFullYear() - 1)
-            .max(new Date().getFullYear()),
-          targetIds: z.array(z.string().min(1)),
-        })
-        .required(),
-    )
-    .query(async ({ ctx, input }) => {
-      const estimationResponse = await ctx.estimator.estimateCollectedOperationsForTargets({
-        targetIds: input.targetIds,
-        month: input.month,
-        year: input.year,
-      });
-
-      if (!estimationResponse.data.length) {
-        return {
-          totalOperations: 0,
-        };
-      }
-
-      return {
-        totalOperations: parseInt(estimationResponse.data[0].total),
-      };
-    }),
   estimateOperationsForOrganization: procedure
     .input(
       z
