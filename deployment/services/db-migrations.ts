@@ -30,9 +30,6 @@ export function deployDbMigrations({
   dependencies?: pulumi.Resource[];
   force?: boolean;
 }) {
-  const migrationsConfig = new pulumi.Config('migrations');
-  const migrationsEnv = migrationsConfig.requireObject<Record<string, string>>('env');
-
   const { job } = new ServiceDeployment(
     'db-migrations',
     {
@@ -40,7 +37,6 @@ export function deployDbMigrations({
       image,
       env: {
         ...environment.envVars,
-        ...migrationsEnv,
         MIGRATOR: 'up',
         CLICKHOUSE_MIGRATOR: 'up',
         CLICKHOUSE_MIGRATOR_GRAPHQL_HIVE_CLOUD: '1',
