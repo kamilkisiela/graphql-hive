@@ -23,7 +23,7 @@ export type ObservabilityConfig = {
 };
 
 // prettier-ignore
-export const OTLP_COLLECTOR_CHART = helmChart('https://open-telemetry.github.io/opentelemetry-helm-charts', 'opentelemetry-collector', '0.83.0');
+export const OTLP_COLLECTOR_CHART = helmChart('https://open-telemetry.github.io/opentelemetry-helm-charts', 'opentelemetry-collector', '0.54.1');
 // prettier-ignore
 export const VECTOR_HELM_CHART = helmChart('https://helm.vector.dev', 'vector', '0.31.1');
 
@@ -136,6 +136,7 @@ export class Observability {
               span: [
                 'attributes["component"] == "proxy" and attributes["http.method"] == "HEAD"',
                 'attributes["component"] == "proxy" and attributes["http.method"] == "OPTIONS"',
+                'attributes["component"] == "proxy" and attributes["http.method"] == "POST" and attributes["http.url"] == "/usage"',
                 'attributes["component"] == "proxy" and attributes["http.method"] == "GET" and attributes["http.url"] == "/metrics"',
                 'attributes["component"] == "proxy" and attributes["http.method"] == "GET" and attributes["http.url"] == "/_readiness"',
                 'attributes["component"] == "proxy" and attributes["http.method"] == "GET" and attributes["http.url"] == "/_health"',
