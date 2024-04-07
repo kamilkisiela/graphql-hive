@@ -136,6 +136,7 @@ export class Observability {
               span: [
                 'attributes["component"] == "proxy" and attributes["http.method"] == "HEAD"',
                 'attributes["component"] == "proxy" and attributes["http.method"] == "OPTIONS"',
+                'attributes["component"] == "proxy" and attributes["http.method"] == "POST" and attributes["http.url"] == "/usage"',
                 'attributes["component"] == "proxy" and attributes["http.method"] == "GET" and attributes["http.url"] == "/metrics"',
                 'attributes["component"] == "proxy" and attributes["http.method"] == "GET" and attributes["http.url"] == "/_readiness"',
                 'attributes["component"] == "proxy" and attributes["http.method"] == "GET" and attributes["http.url"] == "/_health"',
