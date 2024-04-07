@@ -26,6 +26,6 @@
     "json-schema-to-typescript": "13.1.2",
     "tmp": "0.2.3",
     "tsx": "4.7.2",
-    "typescript": "5.4.3"
+    "typescript": "5.4.4"
   }
 }
