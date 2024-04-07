@@ -1674,8 +1674,8 @@ importers:
         specifier: 2.2.0
         version: 2.2.0(next@14.1.4)
       pino:
-        specifier: 8.19.0
-        version: 8.19.0
+        specifier: 8.20.0
+        version: 8.20.0
       pino-http:
         specifier: 9.0.0
         version: 9.0.0
@@ -26946,7 +26946,7 @@ packages:
     resolution: {integrity: sha512-Q9QDNEz0vQmbJtMFjOVr2c9yL92vHudjmr3s3m6J1hbw3DBGFZJm3TIj9TWyynZ4GEsEA9SOtni4heRUr6lNOg==}
     dependencies:
       get-caller-file: 2.0.5
-      pino: 8.19.0
+      pino: 8.20.0
       pino-std-serializers: 6.2.2
       process-warning: 3.0.0
     dev: false
@@ -26989,6 +26989,24 @@ packages:
       safe-stable-stringify: 2.4.2
       sonic-boom: 3.7.0
       thread-stream: 2.3.0
+    dev: true
+
+  /pino@8.20.0:
+    resolution: {integrity: sha512-uhIfMj5TVp+WynVASaVEJFTncTUe4dHBq6CWplu/vBgvGHhvBvQfxz+vcOrnnBQdORH3izaGEurLfNlq3YxdFQ==}
+    hasBin: true
+    dependencies:
+      atomic-sleep: 1.0.0
+      fast-redact: 3.1.2
+      on-exit-leak-free: 2.1.0
+      pino-abstract-transport: 1.1.0
+      pino-std-serializers: 6.2.2
+      process-warning: 3.0.0
+      quick-format-unescaped: 4.0.4
+      real-require: 0.2.0
+      safe-stable-stringify: 2.4.2
+      sonic-boom: 3.7.0
+      thread-stream: 2.3.0
+    dev: false
 
   /pirates@4.0.5:
     resolution: {integrity: sha512-8V9+HQPupnaXMA23c5hvl69zXvTwTzyAYasnkb0Tts4XvO4CliqONMOnvlq26rkhLC3nWDFBJf73LU1e1VZLaQ==}
