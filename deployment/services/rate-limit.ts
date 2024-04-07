@@ -4,6 +4,7 @@ import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
 import { Emails } from './emails';
 import { Environment } from './environment';
+import { Observability } from './observability';
 import { Postgres } from './postgres';
 import { Sentry } from './sentry';
 import { UsageEstimator } from './usage-estimation';
@@ -19,7 +20,9 @@ export function deployRateLimit({
   docker,
   postgres,
   sentry,
+  observability,
 }: {
+  observability: Observability;
   usageEstimator: UsageEstimator;
   environment: Environment;
   dbMigrations: DbMigrations;
@@ -44,6 +47,10 @@ export function deployRateLimit({
         USAGE_ESTIMATOR_ENDPOINT: serviceLocalEndpoint(usageEstimator.service),
         EMAILS_ENDPOINT: serviceLocalEndpoint(emails.service),
         WEB_APP_URL: `https://${environment.appDns}/`,
+        OPENTELEMETRY_COLLECTOR_ENDPOINT:
+          observability.enabled && observability.tracingEndpoint
+            ? observability.tracingEndpoint
+            : '',
       },
       exposesMetrics: true,
       port: 4000,

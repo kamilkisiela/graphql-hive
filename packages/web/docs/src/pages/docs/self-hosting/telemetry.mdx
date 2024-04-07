@@ -1,0 +1,99 @@
+import { Steps } from '@theguild/components'
+
+# Telemetry / Error Handling
+
+When self-hosting Hive, you can enable telemetry to help us understand how Hive is being used and
+how we can improve it. Telemetry is disabled by default.
+
+## OpenTelemetry Traces
+
+<Steps>
+
+### Prepare your OpenTelemetry Backend
+
+To enable [OpenTelemetry](https://opentelemetry.io/) traces for your Hive instance, start by running
+a OpenTelemetry Collector (or, a compatible service that can process OTLP traces, like DataDog or
+Jaeger).
+
+Hive supports sending traces to OTLP backend over HTTP protocol (port `4318`) only.
+
+To setup a test [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) locally, you can
+use the following configuration file and script to run it as a Docker image that just prints the
+received traces:
+
+```yaml filename="otel-local-config.yaml"
+receivers:
+  otlp:
+    protocols:
+      http:
+      grpc:
+
+processors:
+  batch:
+
+exporters:
+  logging:
+    loglevel: debug
+
+extensions:
+  health_check: {}
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging]
+```
+
+Run the collector:
+
+```
+docker run \
+  -v "${PWD}/otel-local-config.yaml":/otel-local-config.yaml \
+  -p 4318:4318 \
+  -p 4317:4317 \
+  otel/opentelemetry-collector-contrib \
+  --config otel-local-config.yaml;
+```
+
+### Configure Hive to send traces to the OTLP Collector
+
+To instruct Hive to send traces to the OTLP Collector, you need to set the following environment
+variable:
+
+```
+OPENTELEMETRY_COLLECTOR_ENDPOINT="http://localhost:4318/v1/traces"
+```
+
+</Steps>
+
+## OpenTelemetry Metrics
+
+Hive supports exposing metrics in Prometheus format, using the scrapping technique.
+
+To enable metrics, you need to set the following environment variable:
+
+```
+PROMETHEUS_METRICS=1
+```
+
+You should now configure your Prometheus server to scrape the metrics from Hive, using the `10254`
+port and `/metrics` endpoint for each service.
+
+Please check the `README` file of each service for additional configuration options.
+
+## Sentry Error Reporting
+
+Hive supports error reporting to [Sentry](https://sentry.io/), a popular error tracking service.
+
+To enable Sentry error reporting, start by gathering your
+[Sentry DSN](https://docs.sentry.io/product/sentry-basics/concepts/dsn-explainer/).
+
+Then, set the following environment variables:
+
+```
+SENTRY_DSN=<YOUR_DSN_HERE>
+SENTRY=1
+```

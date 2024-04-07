@@ -3,6 +3,7 @@ import { Clickhouse } from './clickhouse';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
 import { Environment } from './environment';
+import { Observability } from './observability';
 import { Sentry } from './sentry';
 
 export type UsageEstimator = ReturnType<typeof deployUsageEstimation>;
@@ -14,7 +15,9 @@ export function deployUsageEstimation({
   clickhouse,
   dbMigrations,
   sentry,
+  observability,
 }: {
+  observability: Observability;
   image: string;
   docker: Docker;
   environment: Environment;
@@ -34,6 +37,10 @@ export function deployUsageEstimation({
       env: {
         ...environment.envVars,
         SENTRY: sentry.enabled ? '1' : '0',
+        OPENTELEMETRY_COLLECTOR_ENDPOINT:
+          observability.enabled && observability.tracingEndpoint
+            ? observability.tracingEndpoint
+            : '',
       },
       exposesMetrics: true,
       port: 4000,

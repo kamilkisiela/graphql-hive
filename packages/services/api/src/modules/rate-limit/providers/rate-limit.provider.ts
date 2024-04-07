@@ -2,7 +2,6 @@ import { Inject, Injectable, Scope } from 'graphql-modules';
 import LRU from 'lru-cache';
 import type { RateLimitApi, RateLimitApiInput } from '@hive/rate-limit';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
-import { sentry } from '../../../shared/sentry';
 import { Logger } from '../../shared/providers/logger';
 import type { RateLimitServiceConfig } from './tokens';
 import { RATE_LIMIT_SERVICE_CONFIG } from './tokens';
@@ -40,7 +39,6 @@ export class RateLimitProvider {
       : null;
   }
 
-  @sentry('RateLimitProvider.checkRateLimit')
   async checkRateLimit(input: RateLimitApiInput['checkRateLimit']) {
     if (this.rateLimit === null) {
       this.logger.warn(
@@ -59,7 +57,6 @@ export class RateLimitProvider {
     return await this.rateLimit.checkRateLimit.query(input);
   }
 
-  @sentry('RateLimitProvider.getRetention')
   async getRetention(input: RateLimitApiInput['getRetention']) {
     if (this.rateLimit === null) {
       return null;

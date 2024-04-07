@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { hostname } from 'os';
 import {
+  configureTracing,
   createErrorHandler,
   createServer,
   registerShutdown,
@@ -8,6 +9,7 @@ import {
   reportReadiness,
   startHeartbeats,
   startMetrics,
+  TracingInstance,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import { webhooksApiRouter } from './api';
@@ -16,6 +18,19 @@ import { createScheduler } from './scheduler';
 import type { Context } from './types';
 
 async function main() {
+  let tracing: TracingInstance | undefined;
+
+  if (env.tracing.enabled && env.tracing.collectorEndpoint) {
+    tracing = configureTracing({
+      collectorEndpoint: env.tracing.collectorEndpoint,
+      serviceName: 'webhooks',
+    });
+
+    tracing.instrumentNodeFetch();
+    tracing.build();
+    tracing.start();
+  }
+
   if (env.sentry) {
     Sentry.init({
       serverName: hostname(),
@@ -29,12 +44,16 @@ async function main() {
 
   const server = await createServer({
     name: 'webhooks',
-    tracing: false,
+    sentryErrorHandler: true,
     log: {
       level: env.log.level,
       requests: env.log.requests,
     },
   });
+
+  if (tracing) {
+    await server.register(...tracing.instrumentFastify());
+  }
 
   const errorHandler = createErrorHandler(server);
 

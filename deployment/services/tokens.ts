@@ -2,6 +2,7 @@ import { ServiceDeployment } from '../utils/service-deployment';
 import { DbMigrations } from './db-migrations';
 import { Docker } from './docker';
 import { Environment } from './environment';
+import { Observability } from './observability';
 import { Postgres } from './postgres';
 import { Redis } from './redis';
 import { Sentry } from './sentry';
@@ -17,7 +18,9 @@ export function deployTokens({
   postgres,
   redis,
   sentry,
+  observability,
 }: {
+  observability: Observability;
   image: string;
   environment: Environment;
   dbMigrations: DbMigrations;
@@ -42,6 +45,10 @@ export function deployTokens({
         ...environment.envVars,
         SENTRY: sentry.enabled ? '1' : '0',
         HEARTBEAT_ENDPOINT: heartbeat ?? '',
+        OPENTELEMETRY_COLLECTOR_ENDPOINT:
+          observability.enabled && observability.tracingEndpoint
+            ? observability.tracingEndpoint
+            : '',
       },
     },
     [dbMigrations],

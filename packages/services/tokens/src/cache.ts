@@ -2,6 +2,7 @@ import type { FastifyBaseLogger } from 'fastify';
 import type { Redis } from 'ioredis';
 import ms from 'ms';
 import LRU from 'tiny-lru';
+import { traceInlineSync } from '@hive/service-common';
 import { ConnectionError } from '@hive/storage';
 import { atomic, until, useActionTracker } from './helpers';
 import { cacheHits, cacheInvalidations, cacheMisses } from './metrics';
@@ -258,22 +259,25 @@ function useTokenTouchScheduler(storage: Storage, logger: FastifyBaseLogger) {
   }
 
   // updated every 10m
-  const interval = setInterval(() => {
-    if (!scheduledTokens.size) {
-      return;
-    }
+  const interval = setInterval(
+    traceInlineSync('Touch Tokens', {}, () => {
+      if (!scheduledTokens.size) {
+        return;
+      }
 
-    const tokens = Array.from(scheduledTokens.entries()).map(([token, date]) => ({
-      token,
-      date,
-    }));
-    scheduledTokens.clear();
+      const tokens = Array.from(scheduledTokens.entries()).map(([token, date]) => ({
+        token,
+        date,
+      }));
+      scheduledTokens.clear();
 
-    logger.debug(`Touch ${tokens.length} tokens`);
-    storage.touchTokens(tokens).catch(error => {
-      logger.error(error);
-    });
-  }, ms('60s'));
+      logger.debug(`Touch ${tokens.length} tokens`);
+      storage.touchTokens(tokens).catch(error => {
+        logger.error(error);
+      });
+    }),
+    ms('60s'),
+  );
 
   function dispose() {
     clearInterval(interval);

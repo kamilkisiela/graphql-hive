@@ -1,4 +1,5 @@
 import zod from 'zod';
+import { OpenTelemetryConfigurationModel } from '@hive/service-common';
 
 const isNumberString = (input: unknown) => zod.string().regex(/^\d+$/).safeParse(input).success;
 
@@ -235,6 +236,7 @@ const configs = {
   s3: S3Model.safeParse(processEnv),
   log: LogModel.safeParse(processEnv),
   zendeskSupport: ZendeskSupportModel.safeParse(processEnv),
+  tracing: OpenTelemetryConfigurationModel.safeParse(processEnv),
 };
 
 const environmentErrors: Array<string> = [];
@@ -276,6 +278,7 @@ const cdnApi = extractConfig(configs.cdnApi);
 const hive = extractConfig(configs.hive);
 const s3 = extractConfig(configs.s3);
 const zendeskSupport = extractConfig(configs.zendeskSupport);
+const tracing = extractConfig(configs.tracing);
 
 const hiveConfig =
   hive.HIVE === '1'
@@ -298,6 +301,11 @@ export const env = {
   environment: base.ENVIRONMENT,
   release: base.RELEASE ?? 'local',
   encryptionSecret: base.ENCRYPTION_SECRET,
+  tracing: {
+    enabled: !!tracing.OPENTELEMETRY_COLLECTOR_ENDPOINT,
+    collectorEndpoint: tracing.OPENTELEMETRY_COLLECTOR_ENDPOINT,
+    enableConsoleExporter: tracing.OPENTELEMETRY_CONSOLE_EXPORTER === '1',
+  },
   hiveServices: {
     webApp: {
       url: base.WEB_APP_URL,

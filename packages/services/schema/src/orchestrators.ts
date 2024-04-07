@@ -20,6 +20,7 @@ import type { ErrorCode } from '@graphql-hive/external-composition';
 import { stitchSchemas } from '@graphql-tools/stitch';
 import { stitchingDirectives } from '@graphql-tools/stitching-directives';
 import type { ServiceLogger } from '@hive/service-common';
+import { SpanKind, trace } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import {
   composeServices as nativeComposeServices,
@@ -275,6 +276,19 @@ async function callExternalService(
   logger: ServiceLogger,
   timeoutMs: number,
 ) {
+  const tracer = trace.getTracer('external-composition');
+  const parsedUrl = new URL(input.url);
+  const span = tracer.startSpan('External Composition', {
+    kind: SpanKind.CLIENT,
+    attributes: {
+      'http.client': 'got',
+      'client.address': parsedUrl.hostname,
+      'client.port': parsedUrl.port,
+      'http.method': 'POST',
+      'http.route': parsedUrl.pathname,
+    },
+  });
+
   try {
     const response = await got(input.url, {
       method: 'POST',
@@ -292,10 +306,17 @@ async function callExternalService(
       },
     });
 
+    span.setAttribute('http.response.body.size', response.rawBody.length);
+    span.setAttribute('http.response.status_code', response.statusCode);
+    span.end();
+
     return JSON.parse(response.body) as unknown;
   } catch (error) {
     if (error instanceof RequestError) {
       if (!error.response) {
+        span.setAttribute('error.message', error.message);
+        span.setAttribute('error.type', error.name);
+
         logger.info('Network error without response. (%s)', error.message);
         return {
           type: 'failure',
@@ -312,13 +333,17 @@ async function callExternalService(
           includesNetworkError: true,
         };
       }
+
       if (error.response) {
+        span.setAttribute('http.response.status_code', error.response.statusCode);
         const message = error.response.body ? error.response.body : error.response.statusMessage;
 
         // If the response is a string starting with ERR_ it's a special error returned by the composition service.
         // We don't want to throw an error in this case, but instead return a failure result.
         if (typeof message === 'string') {
           const translatedMessage = translateMessage(message);
+          span.setAttribute('error.message', translatedMessage || '');
+          span.setAttribute('error.type', error.name);
 
           if (translatedMessage) {
             return {
@@ -341,6 +366,10 @@ async function callExternalService(
           error.response.statusCode,
           error.message,
         );
+
+        span.setAttribute('error.message', error.message || '');
+        span.setAttribute('error.type', error.name);
+
         return {
           type: 'failure',
           result: {
@@ -357,6 +386,8 @@ async function callExternalService(
     }
 
     throw error;
+  } finally {
+    span.end();
   }
 }
 

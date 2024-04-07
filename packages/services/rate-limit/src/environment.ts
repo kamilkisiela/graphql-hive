@@ -1,4 +1,5 @@
 import zod from 'zod';
+import { OpenTelemetryConfigurationModel } from '@hive/service-common';
 
 const isNumberString = (input: unknown) => zod.string().regex(/^\d+$/).safeParse(input).success;
 
@@ -81,6 +82,8 @@ const configs = {
   prometheus: PrometheusModel.safeParse(process.env),
   // eslint-disable-next-line no-process-env
   log: LogModel.safeParse(process.env),
+  // eslint-disable-next-line no-process-env
+  tracing: OpenTelemetryConfigurationModel.safeParse(process.env),
 };
 
 const environmentErrors: Array<string> = [];
@@ -109,6 +112,7 @@ const postgres = extractConfig(configs.postgres);
 const sentry = extractConfig(configs.sentry);
 const prometheus = extractConfig(configs.prometheus);
 const log = extractConfig(configs.log);
+const tracing = extractConfig(configs.tracing);
 
 export const env = {
   environment: base.ENVIRONMENT,
@@ -121,6 +125,10 @@ export const env = {
   limitCacheUpdateIntervalMs: base.LIMIT_CACHE_UPDATE_INTERVAL_MS ?? 60_000,
   http: {
     port: base.PORT ?? 4012,
+  },
+  tracing: {
+    enabled: !!tracing.OPENTELEMETRY_COLLECTOR_ENDPOINT,
+    collectorEndpoint: tracing.OPENTELEMETRY_COLLECTOR_ENDPOINT,
   },
   postgres: {
     host: postgres.POSTGRES_HOST,

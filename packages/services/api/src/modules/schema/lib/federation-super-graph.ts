@@ -10,6 +10,7 @@ import {
   type FieldDefinitionNode,
   type NameNode,
 } from 'graphql';
+import { traceInlineSync } from '@hive/service-common';
 
 export type SuperGraphInformation = {
   /** Mapping of schema coordinate to the services that own it. */
@@ -19,152 +20,39 @@ export type SuperGraphInformation = {
 /**
  * Extracts the super graph information from the GraphQL schema AST.
  */
-export function extractSuperGraphInformation(documentAst: DocumentNode): SuperGraphInformation {
-  const schemaCoordinateServicesMappings = new Map<string, Array<string>>();
+export const extractSuperGraphInformation = traceInlineSync(
+  'Extract Supergraph Info',
+  {},
+  (documentAst: DocumentNode): SuperGraphInformation => {
+    const schemaCoordinateServicesMappings = new Map<string, Array<string>>();
 
-  const serviceEnumValueToServiceNameMappings = new Map<string, string>();
-  const schemaCoordinateToServiceEnumValueMappings = new Map<string, Set<string>>();
-
-  // START -- Federation 1.0 support - this can be removed once we ship Federation 2.0 by default.
-  const potentialTypeServiceOwners = new Map<string, string>();
-  const typeFieldMappings = new Map<string, Set<string>>();
-  // END -- Federation 1.0 support
-
-  function interfaceAndObjectHandler(node: {
-    readonly fields?: ReadonlyArray<FieldDefinitionNode> | undefined;
-    readonly directives?: ReadonlyArray<ConstDirectiveNode> | undefined;
-    readonly name: NameNode;
-  }) {
-    const objectTypeServiceReferences = new Set(
-      getJoinTypeEnumServiceName({
-        directives: node.directives ?? [],
-        valueName: 'type',
-      }),
-    );
-
-    if (node.fields === undefined) {
-      return false;
-    }
+    const serviceEnumValueToServiceNameMappings = new Map<string, string>();
+    const schemaCoordinateToServiceEnumValueMappings = new Map<string, Set<string>>();
 
     // START -- Federation 1.0 support - this can be removed once we ship Federation 2.0 by default.
-    const typeFields = new Set<string>();
+    const potentialTypeServiceOwners = new Map<string, string>();
+    const typeFieldMappings = new Map<string, Set<string>>();
     // END -- Federation 1.0 support
 
-    for (const fieldNode of node.fields) {
-      const schemaCoordinate = `${node.name.value}.${fieldNode.name.value}`;
-
-      const graphArg = fieldNode.directives
-        ?.find(directive => directive.name.value === 'join__field')
-        ?.arguments?.find(arg => arg.name.value === 'graph');
-
-      if (graphArg === undefined) {
-        schemaCoordinateToServiceEnumValueMappings.set(
-          schemaCoordinate,
-          objectTypeServiceReferences,
-        );
-
-        // START -- Federation 1.0 support - this can be removed once we ship Federation 2.0 by default.
-        typeFields.add(fieldNode.name.value);
-        // END -- Federation 1.0 support
-
-        continue;
-      }
-
-      const serviceEnumValue = getEnumValueArgumentValue(graphArg);
-
-      if (!serviceEnumValue) {
-        continue;
-      }
-
-      schemaCoordinateToServiceEnumValueMappings.set(schemaCoordinate, new Set([serviceEnumValue]));
-
-      // START -- Federation 1.0 support - this can be removed once we ship Federation 2.0 by default.
-      objectTypeServiceReferences.add(serviceEnumValue);
-
-      const fieldTypeName = unwrapTypeNode(fieldNode.type).name.value;
-      potentialTypeServiceOwners.set(fieldTypeName, serviceEnumValue);
-      // END -- Federation 1.0 support
-    }
-
-    schemaCoordinateToServiceEnumValueMappings.set(node.name.value, objectTypeServiceReferences);
-
-    // START -- Federation 1.0 support - this can be removed once we ship Federation 2.0 by default.
-    if (typeFields.size) {
-      typeFieldMappings.set(node.name.value, typeFields);
-    }
-    // END -- Federation 1.0 support
-
-    return false;
-  }
-
-  visit(documentAst, {
-    /** Collect the service enum to service name mappings. */
-    EnumTypeDefinition(node) {
-      if (node.name.value === 'join__Graph' && node.values?.length) {
-        for (const enumValueNode of node.values) {
-          const serviceName = getJoinGraphEnumServiceName(enumValueNode);
-          if (serviceName === null) {
-            continue;
-          }
-
-          serviceEnumValueToServiceNameMappings.set(enumValueNode.name.value, serviceName);
-        }
-      }
-
-      const enumServiceNames = getJoinTypeEnumServiceName({
-        directives: node.directives ?? [],
-        valueName: 'type',
-      });
-
-      if (enumServiceNames.size) {
-        schemaCoordinateToServiceEnumValueMappings.set(node.name.value, enumServiceNames);
-      }
-
-      if (node.values?.length) {
-        for (const enumValueNode of node.values) {
-          const enumValueServiceNames = getJoinTypeEnumServiceName({
-            directives: enumValueNode.directives ?? [],
-            valueName: 'enumValue',
-          });
-
-          if (enumValueServiceNames.size) {
-            const schemaCoordinate = `${node.name.value}.${enumValueNode.name.value}`;
-            schemaCoordinateToServiceEnumValueMappings.set(schemaCoordinate, enumValueServiceNames);
-          }
-        }
-      }
-
-      return false;
-    },
-    ObjectTypeDefinition(node) {
-      return interfaceAndObjectHandler(node);
-    },
-    InterfaceTypeDefinition(node) {
-      return interfaceAndObjectHandler(node);
-    },
-    UnionTypeDefinition(node) {
-      const serviceReferences = new Set(
+    function interfaceAndObjectHandler(node: {
+      readonly fields?: ReadonlyArray<FieldDefinitionNode> | undefined;
+      readonly directives?: ReadonlyArray<ConstDirectiveNode> | undefined;
+      readonly name: NameNode;
+    }) {
+      const objectTypeServiceReferences = new Set(
         getJoinTypeEnumServiceName({
           directives: node.directives ?? [],
           valueName: 'type',
         }),
       );
 
-      schemaCoordinateToServiceEnumValueMappings.set(node.name.value, serviceReferences);
-    },
-    InputObjectTypeDefinition(node) {
-      const serviceReferences = new Set(
-        getJoinTypeEnumServiceName({
-          directives: node.directives ?? [],
-          valueName: 'type',
-        }),
-      );
-
-      schemaCoordinateToServiceEnumValueMappings.set(node.name.value, serviceReferences);
-
-      if (!node.fields?.length) {
+      if (node.fields === undefined) {
         return false;
       }
+
+      // START -- Federation 1.0 support - this can be removed once we ship Federation 2.0 by default.
+      const typeFields = new Set<string>();
+      // END -- Federation 1.0 support
 
       for (const fieldNode of node.fields) {
         const schemaCoordinate = `${node.name.value}.${fieldNode.name.value}`;
@@ -174,7 +62,15 @@ export function extractSuperGraphInformation(documentAst: DocumentNode): SuperGr
           ?.arguments?.find(arg => arg.name.value === 'graph');
 
         if (graphArg === undefined) {
-          schemaCoordinateToServiceEnumValueMappings.set(schemaCoordinate, serviceReferences);
+          schemaCoordinateToServiceEnumValueMappings.set(
+            schemaCoordinate,
+            objectTypeServiceReferences,
+          );
+
+          // START -- Federation 1.0 support - this can be removed once we ship Federation 2.0 by default.
+          typeFields.add(fieldNode.name.value);
+          // END -- Federation 1.0 support
+
           continue;
         }
 
@@ -188,70 +84,188 @@ export function extractSuperGraphInformation(documentAst: DocumentNode): SuperGr
           schemaCoordinate,
           new Set([serviceEnumValue]),
         );
+
+        // START -- Federation 1.0 support - this can be removed once we ship Federation 2.0 by default.
+        objectTypeServiceReferences.add(serviceEnumValue);
+
+        const fieldTypeName = unwrapTypeNode(fieldNode.type).name.value;
+        potentialTypeServiceOwners.set(fieldTypeName, serviceEnumValue);
+        // END -- Federation 1.0 support
       }
+
+      schemaCoordinateToServiceEnumValueMappings.set(node.name.value, objectTypeServiceReferences);
+
+      // START -- Federation 1.0 support - this can be removed once we ship Federation 2.0 by default.
+      if (typeFields.size) {
+        typeFieldMappings.set(node.name.value, typeFields);
+      }
+      // END -- Federation 1.0 support
 
       return false;
-    },
-    ScalarTypeDefinition(node) {
-      const objectTypeServiceReferences = new Set(
-        getJoinTypeEnumServiceName({
+    }
+
+    visit(documentAst, {
+      /** Collect the service enum to service name mappings. */
+      EnumTypeDefinition(node) {
+        if (node.name.value === 'join__Graph' && node.values?.length) {
+          for (const enumValueNode of node.values) {
+            const serviceName = getJoinGraphEnumServiceName(enumValueNode);
+            if (serviceName === null) {
+              continue;
+            }
+
+            serviceEnumValueToServiceNameMappings.set(enumValueNode.name.value, serviceName);
+          }
+        }
+
+        const enumServiceNames = getJoinTypeEnumServiceName({
           directives: node.directives ?? [],
           valueName: 'type',
-        }),
-      );
+        });
 
-      if (objectTypeServiceReferences.size) {
-        schemaCoordinateToServiceEnumValueMappings.set(
-          node.name.value,
-          objectTypeServiceReferences,
+        if (enumServiceNames.size) {
+          schemaCoordinateToServiceEnumValueMappings.set(node.name.value, enumServiceNames);
+        }
+
+        if (node.values?.length) {
+          for (const enumValueNode of node.values) {
+            const enumValueServiceNames = getJoinTypeEnumServiceName({
+              directives: enumValueNode.directives ?? [],
+              valueName: 'enumValue',
+            });
+
+            if (enumValueServiceNames.size) {
+              const schemaCoordinate = `${node.name.value}.${enumValueNode.name.value}`;
+              schemaCoordinateToServiceEnumValueMappings.set(
+                schemaCoordinate,
+                enumValueServiceNames,
+              );
+            }
+          }
+        }
+
+        return false;
+      },
+      ObjectTypeDefinition(node) {
+        return interfaceAndObjectHandler(node);
+      },
+      InterfaceTypeDefinition(node) {
+        return interfaceAndObjectHandler(node);
+      },
+      UnionTypeDefinition(node) {
+        const serviceReferences = new Set(
+          getJoinTypeEnumServiceName({
+            directives: node.directives ?? [],
+            valueName: 'type',
+          }),
         );
-      }
-    },
-  });
 
-  for (const [schemaCoordinate, serviceEnumValues] of schemaCoordinateToServiceEnumValueMappings) {
-    const serviceNames = new Set<string>();
-    for (const serviceEnumValue of serviceEnumValues) {
+        schemaCoordinateToServiceEnumValueMappings.set(node.name.value, serviceReferences);
+      },
+      InputObjectTypeDefinition(node) {
+        const serviceReferences = new Set(
+          getJoinTypeEnumServiceName({
+            directives: node.directives ?? [],
+            valueName: 'type',
+          }),
+        );
+
+        schemaCoordinateToServiceEnumValueMappings.set(node.name.value, serviceReferences);
+
+        if (!node.fields?.length) {
+          return false;
+        }
+
+        for (const fieldNode of node.fields) {
+          const schemaCoordinate = `${node.name.value}.${fieldNode.name.value}`;
+
+          const graphArg = fieldNode.directives
+            ?.find(directive => directive.name.value === 'join__field')
+            ?.arguments?.find(arg => arg.name.value === 'graph');
+
+          if (graphArg === undefined) {
+            schemaCoordinateToServiceEnumValueMappings.set(schemaCoordinate, serviceReferences);
+            continue;
+          }
+
+          const serviceEnumValue = getEnumValueArgumentValue(graphArg);
+
+          if (!serviceEnumValue) {
+            continue;
+          }
+
+          schemaCoordinateToServiceEnumValueMappings.set(
+            schemaCoordinate,
+            new Set([serviceEnumValue]),
+          );
+        }
+
+        return false;
+      },
+      ScalarTypeDefinition(node) {
+        const objectTypeServiceReferences = new Set(
+          getJoinTypeEnumServiceName({
+            directives: node.directives ?? [],
+            valueName: 'type',
+          }),
+        );
+
+        if (objectTypeServiceReferences.size) {
+          schemaCoordinateToServiceEnumValueMappings.set(
+            node.name.value,
+            objectTypeServiceReferences,
+          );
+        }
+      },
+    });
+
+    for (const [
+      schemaCoordinate,
+      serviceEnumValues,
+    ] of schemaCoordinateToServiceEnumValueMappings) {
+      const serviceNames = new Set<string>();
+      for (const serviceEnumValue of serviceEnumValues) {
+        const serviceName = serviceEnumValueToServiceNameMappings.get(serviceEnumValue);
+        if (serviceName) {
+          serviceNames.add(serviceName);
+        }
+      }
+
+      if (!serviceNames.size) {
+        continue;
+      }
+
+      schemaCoordinateServicesMappings.set(schemaCoordinate, Array.from(serviceNames));
+    }
+
+    // START -- Federation 1.0 support - this can be removed once we ship Federation 2.0 by default.
+    for (const [typeName, serviceEnumValue] of potentialTypeServiceOwners) {
+      if (schemaCoordinateServicesMappings.has(typeName)) {
+        continue;
+      }
+
+      const fields = typeFieldMappings.get(typeName);
+
+      if (fields === undefined) {
+        continue;
+      }
+
       const serviceName = serviceEnumValueToServiceNameMappings.get(serviceEnumValue);
-      if (serviceName) {
-        serviceNames.add(serviceName);
+      if (serviceName === undefined) {
+        continue;
+      }
+
+      schemaCoordinateServicesMappings.set(typeName, [serviceName]);
+
+      for (const fieldName of fields) {
+        schemaCoordinateServicesMappings.set(`${typeName}.${fieldName}`, [serviceName]);
       }
     }
+    // END -- Federation 1.0 support
 
-    if (!serviceNames.size) {
-      continue;
-    }
-
-    schemaCoordinateServicesMappings.set(schemaCoordinate, Array.from(serviceNames));
-  }
-
-  // START -- Federation 1.0 support - this can be removed once we ship Federation 2.0 by default.
-  for (const [typeName, serviceEnumValue] of potentialTypeServiceOwners) {
-    if (schemaCoordinateServicesMappings.has(typeName)) {
-      continue;
-    }
-
-    const fields = typeFieldMappings.get(typeName);
-
-    if (fields === undefined) {
-      continue;
-    }
-
-    const serviceName = serviceEnumValueToServiceNameMappings.get(serviceEnumValue);
-    if (serviceName === undefined) {
-      continue;
-    }
-
-    schemaCoordinateServicesMappings.set(typeName, [serviceName]);
-
-    for (const fieldName of fields) {
-      schemaCoordinateServicesMappings.set(`${typeName}.${fieldName}`, [serviceName]);
-    }
-  }
-  // END -- Federation 1.0 support
-
-  return { schemaCoordinateServicesMappings };
-}
+    return { schemaCoordinateServicesMappings };
+  },
+);
 
 function getJoinGraphEnumServiceName(enumValueDefinitionNode: EnumValueDefinitionNode) {
   const arg = enumValueDefinitionNode.directives

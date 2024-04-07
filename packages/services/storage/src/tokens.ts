@@ -1,9 +1,13 @@
-import { sql } from 'slonik';
+import { Interceptor, sql } from 'slonik';
 import { getPool, toDate, tokens } from './db';
 import type { Slonik } from './shared';
 
-export async function createTokenStorage(connection: string, maximumPoolSize: number) {
-  const pool = await getPool(connection, maximumPoolSize);
+export async function createTokenStorage(
+  connection: string,
+  maximumPoolSize: number,
+  additionalInterceptors: Interceptor[] = [],
+) {
+  const pool = await getPool(connection, maximumPoolSize, additionalInterceptors);
 
   return {
     destroy() {

@@ -126,7 +126,7 @@ export class SchemaVersionHelper {
 
     const compositeSchemaAst = parseGraphQLSource(
       compositeSchemaSdl,
-      'parse composite schema sdl in SchemaVersionHelper.getCompositeSchemaAst',
+      'SchemaVersionHelper.getCompositeSchemaAst: Composite',
     );
 
     return compositeSchemaAst;
@@ -141,7 +141,7 @@ export class SchemaVersionHelper {
 
     const supergraphAst = parseGraphQLSource(
       compositeSchemaSdl,
-      'parse supergraph sdl in SchemaVersionHelper.getSupergraphAst',
+      'SchemaVersionHelper.getSupergraphAst: Supergraph',
     );
 
     return supergraphAst;

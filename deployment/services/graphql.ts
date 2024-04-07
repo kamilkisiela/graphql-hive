@@ -10,6 +10,7 @@ import { Docker } from './docker';
 import { Emails } from './emails';
 import { Environment } from './environment';
 import { GitHubApp } from './github';
+import { Observability } from './observability';
 import { SchemaPolicy } from './policy';
 import { Postgres } from './postgres';
 import { RateLimitService } from './rate-limit';
@@ -54,7 +55,9 @@ export function deployGraphQL({
   postgres,
   githubApp,
   sentry,
+  observability,
 }: {
+  observability: Observability;
   githubApp: GitHubApp;
   postgres: Postgres;
   image: string;
@@ -139,6 +142,12 @@ export function deployGraphQL({
           AUTH_GOOGLE: '1',
           AUTH_ORGANIZATION_OIDC: '1',
           AUTH_REQUIRE_EMAIL_VERIFICATION: '1',
+          // Traces (OTLP)
+          OPENTELEMETRY_CONSOLE_EXPORTER: '1',
+          OPENTELEMETRY_COLLECTOR_ENDPOINT:
+            observability.enabled && observability.tracingEndpoint
+              ? observability.tracingEndpoint
+              : '',
         },
         exposesMetrics: true,
         port: 4000,

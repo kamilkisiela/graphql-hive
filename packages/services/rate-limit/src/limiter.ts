@@ -1,6 +1,7 @@
 import { endOfMonth, startOfMonth } from 'date-fns';
 import type { ServiceLogger } from '@hive/service-common';
-import { createStorage as createPostgreSQLStorage } from '@hive/storage';
+import { traceInline } from '@hive/service-common';
+import { createStorage as createPostgreSQLStorage, Interceptor } from '@hive/storage';
 import type { UsageEstimatorApi } from '@hive/usage-estimator';
 import * as Sentry from '@sentry/node';
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
@@ -59,6 +60,7 @@ export function createRateLimiter(config: {
   };
   storage: {
     connectionString: string;
+    additionalInterceptors?: Interceptor[];
   };
 }) {
   const rateEstimator = createTRPCProxyClient<UsageEstimatorApi>({
@@ -72,14 +74,18 @@ export function createRateLimiter(config: {
   const emails = createEmailScheduler(config.emails);
 
   const { logger } = config;
-  const postgres$ = createPostgreSQLStorage(config.storage.connectionString, 1);
+  const postgres$ = createPostgreSQLStorage(
+    config.storage.connectionString,
+    1,
+    config.storage.additionalInterceptors,
+  );
   let initialized = false;
   let intervalHandle: ReturnType<typeof setInterval> | null = null;
 
   const targetIdToOrgLookup = new Map<TargetId, OrganizationId>();
   let cachedResult = new Map<OrganizationId, CachedRateLimitInfo>();
 
-  async function fetchAndCalculateUsageInformation() {
+  const fetchAndCalculateUsageInformation = traceInline('Calculate Rate Limit', {}, async () => {
     const now = new Date();
     const window = {
       startTime: startOfMonth(now),
@@ -193,7 +199,7 @@ export function createRateLimiter(config: {
       await Promise.all(scheduledEmails);
       logger.info(`Scheduled ${scheduledEmails.length} emails`);
     }
-  }
+  });
 
   return {
     logger,
@@ -247,7 +253,8 @@ export function createRateLimiter(config: {
       });
 
       initialized = true;
-      intervalHandle = setInterval(async () => {
+
+      const pollFn = traceInline('Rate Limit Background Refresh', {}, async () => {
         logger.info(`Interval triggered, updating interval rate-limit cache...`);
 
         try {
@@ -258,7 +265,9 @@ export function createRateLimiter(config: {
             level: 'error',
           });
         }
-      }, config.rateLimitConfig.interval);
+      });
+
+      intervalHandle = setInterval(pollFn, config.rateLimitConfig.interval);
     },
     async stop() {
       initialized = false; // to make readiness check == false

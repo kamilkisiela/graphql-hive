@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { hostname } from 'os';
 import {
+  configureTracing,
   createErrorHandler,
   createServer,
   registerShutdown,
@@ -8,6 +9,7 @@ import {
   reportReadiness,
   startHeartbeats,
   startMetrics,
+  TracingInstance,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import { emailsApiRouter } from './api';
@@ -17,6 +19,19 @@ import { createEmailProvider } from './providers';
 import { createScheduler } from './scheduler';
 
 async function main() {
+  let tracing: TracingInstance | undefined;
+
+  if (env.tracing.enabled && env.tracing.collectorEndpoint) {
+    tracing = configureTracing({
+      collectorEndpoint: env.tracing.collectorEndpoint,
+      serviceName: 'emails',
+    });
+
+    tracing.instrumentNodeFetch();
+    tracing.build();
+    tracing.start();
+  }
+
   if (env.sentry) {
     Sentry.init({
       dist: 'emails',
@@ -30,12 +45,16 @@ async function main() {
 
   const server = await createServer({
     name: 'emails',
-    tracing: false,
+    sentryErrorHandler: true,
     log: {
       level: env.log.level,
       requests: env.log.requests,
     },
   });
+
+  if (tracing) {
+    await server.register(...tracing.instrumentFastify());
+  }
 
   const errorHandler = createErrorHandler(server);
 

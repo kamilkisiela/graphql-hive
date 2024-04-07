@@ -1,8 +1,8 @@
 import { type GraphQLSchema } from 'graphql';
 import { Injectable, Scope } from 'graphql-modules';
 import { Change, ChangeType, diff } from '@graphql-inspector/core';
+import { traceFn } from '@hive/service-common';
 import { HiveSchemaChangeModel, SchemaChangeType } from '@hive/storage';
-import { sentry } from '../../../shared/sentry';
 import { Logger } from '../../shared/providers/logger';
 
 @Injectable({
@@ -16,7 +16,11 @@ export class Inspector {
     this.logger = logger.child({ service: 'Inspector' });
   }
 
-  @sentry('Inspector.diff')
+  @traceFn('Inspector.diff', {
+    resultAttributes: result => ({
+      'hive.diff.changes.count': result.length,
+    }),
+  })
   async diff(existing: GraphQLSchema, incoming: GraphQLSchema): Promise<Array<SchemaChangeType>> {
     this.logger.debug('Comparing Schemas');
 

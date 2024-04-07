@@ -16,12 +16,13 @@ import { isGraphQLError } from '@envelop/core';
 import { useGenericAuth } from '@envelop/generic-auth';
 import { useGraphQlJit } from '@envelop/graphql-jit';
 import { useGraphQLModules } from '@envelop/graphql-modules';
+import { useOpenTelemetry } from '@envelop/opentelemetry';
 import { useSentry } from '@envelop/sentry';
 import { useYogaHive } from '@graphql-hive/client';
 import { usePersistedOperations } from '@graphql-yoga/plugin-persisted-operations';
 import { useResponseCache } from '@graphql-yoga/plugin-response-cache';
 import { Registry, RegistryContext } from '@hive/api';
-import { cleanRequestId } from '@hive/service-common';
+import { cleanRequestId, type TracingInstance } from '@hive/service-common';
 import { runWithAsyncContext } from '@sentry/node';
 import { asyncStorage } from './async-storage';
 import type { HiveConfig } from './environment';
@@ -30,7 +31,6 @@ import { useArmor } from './use-armor';
 import { extractUserId, useSentryUser } from './use-sentry-user';
 
 const reqIdGenerate = hyperid({ fixedLength: true });
-
 const abortControllerCache = new WeakMap();
 
 function hashSessionId(sessionId: string): string {
@@ -41,6 +41,7 @@ export interface GraphQLHandlerOptions {
   graphiqlEndpoint: string;
   registry: Registry;
   signature: string;
+  tracing?: TracingInstance;
   supertokens: {
     connectionUri: string;
     apiKey: string;
@@ -119,25 +120,11 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
         includeResolverArgs: false,
         includeExecuteVariables: true,
         configureScope(args, scope) {
-          const transaction = scope.getTransaction();
-
           // Get the operation name from the request, or use the operation name from the document.
           const operationName =
             args.operationName ??
             args.document.definitions.find(isOperationDefinitionNode)?.name?.value ??
             'unknown';
-          const ctx = args.contextValue as Context;
-          const clientNameHeaderValue = ctx.req.headers['graphql-client-name'];
-          const clientName = Array.isArray(clientNameHeaderValue)
-            ? clientNameHeaderValue[0]
-            : clientNameHeaderValue;
-
-          if (transaction) {
-            transaction.setName(`graphql.${operationName}`);
-            transaction.setTag('graphql_client_name', clientName ?? 'unknown');
-            // Reduce the number of transactions to avoid overloading Sentry
-            transaction.sampled = !!clientName && clientName !== 'Hive Client';
-          }
 
           scope.setContext('Extra Info', {
             operationName,
@@ -253,6 +240,24 @@ export const graphqlHandler = (options: GraphQLHandlerOptions): RouteHandlerMeth
           },
         },
       ),
+      options.tracing
+        ? useOpenTelemetry(
+            {
+              document: true,
+              resolvers: false,
+              result: false,
+              variables: variables => {
+                if (variables && typeof variables === 'object' && 'selector' in variables) {
+                  return JSON.stringify(variables.selector);
+                }
+
+                return '';
+              },
+              excludedOperationNames: ['readiness'],
+            },
+            options.tracing.traceProvider(),
+          )
+        : {},
     ],
     /*
     graphiql: request =>

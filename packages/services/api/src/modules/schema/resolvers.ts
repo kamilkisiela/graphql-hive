@@ -36,7 +36,6 @@ import type {
   WithSchemaCoordinatesUsage,
 } from '../../shared/mappers';
 import { buildASTSchema, createConnection, createDummyConnection } from '../../shared/schema';
-import { sentryFunction } from '../../shared/sentry';
 import { AuthManager } from '../auth/providers/auth-manager';
 import { OperationsManager } from '../operations/providers/operations-manager';
 import { OrganizationManager } from '../organization/providers/organization-manager';
@@ -729,11 +728,7 @@ export const resolvers: SchemaModule.Resolvers = {
         return null;
       }
 
-      const supergraph = supergraphAst
-        ? sentryFunction(() => extractSuperGraphInformation(supergraphAst), {
-            op: 'extractSuperGraphInformation in explorer',
-          })
-        : null;
+      const supergraph = supergraphAst ? await extractSuperGraphInformation(supergraphAst) : null;
 
       return {
         schema: buildASTSchema(schemaAst),
@@ -763,11 +758,7 @@ export const resolvers: SchemaModule.Resolvers = {
         period: usage?.period ? parseDateRangeInput(usage.period) : createPeriod('30d'),
       });
 
-      const supergraph = supergraphAst
-        ? sentryFunction(() => extractSuperGraphInformation(supergraphAst), {
-            op: 'extractSuperGraphInformation in explorer',
-          })
-        : null;
+      const supergraph = supergraphAst ? await extractSuperGraphInformation(supergraphAst) : null;
 
       return {
         sdl: stripUsedSchemaCoordinatesFromDocumentNode(schemaAst, usedCoordinates),

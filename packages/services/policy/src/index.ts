@@ -1,17 +1,32 @@
 #!/usr/bin/env node
 import { hostname } from 'os';
 import {
+  configureTracing,
   createServer,
   registerShutdown,
   registerTRPC,
   reportReadiness,
   startMetrics,
+  TracingInstance,
 } from '@hive/service-common';
 import * as Sentry from '@sentry/node';
 import { Context, schemaPolicyApiRouter } from './api';
 import { env } from './environment';
 
 async function main() {
+  let tracing: TracingInstance | undefined;
+
+  if (env.tracing.enabled && env.tracing.collectorEndpoint) {
+    tracing = configureTracing({
+      collectorEndpoint: env.tracing.collectorEndpoint,
+      serviceName: 'schema-policy',
+    });
+
+    tracing.instrumentNodeFetch();
+    tracing.build();
+    tracing.start();
+  }
+
   if (env.sentry) {
     Sentry.init({
       dist: 'policy',
@@ -25,12 +40,16 @@ async function main() {
 
   const server = await createServer({
     name: 'policy',
-    tracing: false,
+    sentryErrorHandler: true,
     log: {
       level: env.log.level,
       requests: env.log.requests,
     },
   });
+
+  if (tracing) {
+    await server.register(...tracing.instrumentFastify());
+  }
 
   registerShutdown({
     logger: server.log,

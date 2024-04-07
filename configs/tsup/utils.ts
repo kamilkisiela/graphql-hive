@@ -64,7 +64,10 @@ export const watchEntryPlugin = () => {
         throw new Error('No entry point found');
       }
 
-      const outFile = entry.replace('src/', 'dist/').replace('.ts', '.js');
+      const outFile = entry
+        .replace('src/', 'dist/')
+        .replace('test/', 'dist/')
+        .replace('.ts', '.js');
       const inspectFlag = process.env.INSPECT ? '--inspect ' : ' ';
       const nodeOptions = process.env.NODE_OPTIONS || '';
       this.options.onSuccess = `node --enable-source-maps ${inspectFlag} ${nodeOptions} ${outFile} | pino-pretty --translateTime HH:MM:ss TT --ignore pid,hostname`;

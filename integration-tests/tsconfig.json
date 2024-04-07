@@ -5,6 +5,7 @@
     "baseUrl": ".",
     "esModuleInterop": true,
     "paths": {
+      "@hive/service-common": ["../packages/services/service-common/src/index.ts"],
       "@hive/server": ["../packages/services/server/src/api.ts"],
       "@hive/storage": ["../packages/services/storage/src/index.ts"],
       "@hive/rate-limit": ["../packages/services/rate-limit/src/api.ts"],

@@ -2,11 +2,14 @@
 import 'reflect-metadata';
 import { hostname } from 'os';
 import {
+  configureTracing,
   createServer,
   registerShutdown,
   registerTRPC,
   reportReadiness,
+  SamplingDecision,
   startMetrics,
+  TracingInstance,
 } from '@hive/service-common';
 import { createConnectionString } from '@hive/storage';
 import * as Sentry from '@sentry/node';
@@ -15,6 +18,31 @@ import { env } from './environment';
 import { createRateLimiter } from './limiter';
 
 async function main() {
+  let tracing: TracingInstance | undefined;
+
+  if (env.tracing.enabled && env.tracing.collectorEndpoint) {
+    tracing = configureTracing({
+      collectorEndpoint: env.tracing.collectorEndpoint,
+      serviceName: 'rate-limit',
+      sampler(ctx, traceId, spanName, spanKind, attributes, _links) {
+        if (attributes['requesting.service'] === 'usage') {
+          console.log('NOT_RECORD, usage', attributes);
+          return {
+            decision: SamplingDecision.NOT_RECORD,
+          };
+        }
+
+        return {
+          decision: SamplingDecision.RECORD_AND_SAMPLED,
+        };
+      },
+    });
+
+    tracing.instrumentNodeFetch();
+    tracing.build();
+    tracing.start();
+  }
+
   if (env.sentry) {
     Sentry.init({
       serverName: hostname(),
@@ -28,12 +56,16 @@ async function main() {
 
   const server = await createServer({
     name: 'rate-limit',
-    tracing: false,
+    sentryErrorHandler: true,
     log: {
       level: env.log.level,
       requests: env.log.requests,
     },
   });
+
+  if (tracing) {
+    await server.register(...tracing.instrumentFastify());
+  }
 
   try {
     const limiter = createRateLimiter({
@@ -45,6 +77,7 @@ async function main() {
       emails: env.hiveServices.emails ?? undefined,
       storage: {
         connectionString: createConnectionString(env.postgres),
+        additionalInterceptors: tracing ? [tracing.instrumentSlonik()] : undefined,
       },
     });
 

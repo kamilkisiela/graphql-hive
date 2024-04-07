@@ -1,6 +1,6 @@
 import { Stripe } from 'stripe';
 import { ServiceLogger } from '@hive/service-common';
-import { createStorage as createPostgreSQLStorage } from '@hive/storage';
+import { createStorage as createPostgreSQLStorage, Interceptor } from '@hive/storage';
 
 export function createStripeBilling(config: {
   logger: ServiceLogger;
@@ -9,6 +9,7 @@ export function createStripeBilling(config: {
   };
   storage: {
     connectionString: string;
+    additionalInterceptors?: Interceptor[];
   };
   stripe: {
     token: string;
@@ -16,16 +17,15 @@ export function createStripeBilling(config: {
   };
 }) {
   const logger = config.logger;
-  const postgres$ = createPostgreSQLStorage(config.storage.connectionString, 10);
-  let intervalHandle: null | ReturnType<typeof setInterval> = null;
-  // feat(metered-usage)
-  // const estimationApi = createTRPCClient<UsageEstimatorApi>({
-  //   url: `${config.rateEstimator.endpoint}/trpc`,
-  //   fetch,
-  // });
+  const postgres$ = createPostgreSQLStorage(
+    config.storage.connectionString,
+    10,
+    config.storage.additionalInterceptors,
+  );
   const stripeApi = new Stripe(config.stripe.token, {
     apiVersion: '2023-10-16',
     typescript: true,
+    httpClient: Stripe.createFetchHttpClient(fetch),
   });
   const loadStripeData$ = ensureStripeProducts();
 
@@ -70,99 +70,6 @@ export function createStripeBilling(config: {
     };
   }
 
-  // feat(metered-usage)
-  // This is needed only if we want to enable real-time usage-based billing, and not by reserved quota.
-  // async function estimateAndReport() {
-  //   const stripePrices = await loadStripeData$;
-  //   const now = new Date();
-  //   const window = {
-  //     startTime: startOfMonth(now).toUTCString(),
-  //     endTime: endOfMonth(now).toUTCString(),
-  //   };
-  //   config.logger.info(
-  //     `Calculating billing usage information based on window: ${window.startTime} -> ${window.endTime}`
-  //   );
-  //   const storage = await postgres$;
-
-  //   const [participants, pairs, operations, pushes] = await Promise.all([
-  //     storage.getBillingParticipants(),
-  //     storage.adminGetOrganizationsTargetPairs(),
-  //     estimationApi.query('estimateOperationsForAllTargets', window),
-  //     estimationApi.query('estiamteSchemaPushesForAllTargets', window),
-  //   ]);
-
-  //   logger.debug(
-  //     `Fetched total of ${
-  //       Object.keys(participants).length
-  //     } participants from the DB`
-  //   );
-  //   logger.debug(
-  //     `Fetched total of ${
-  //       Object.keys(operations).length
-  //     } targets with usage information`
-  //   );
-  //   logger.debug(
-  //     `Fetched total of ${
-  //       Object.keys(pushes).length
-  //     } targets with schema push information`
-  //   );
-
-  //   await Promise.all(
-  //     participants.map(async (participant) => {
-  //       const relevantTargetIds = pairs
-  //         .filter((v) => v.organization === participant.organizationId)
-  //         .map((v) => v.target);
-
-  //       if (relevantTargetIds.length === 0) {
-  //         return;
-  //       }
-
-  //       const totalSchemaPushes = relevantTargetIds.reduce(
-  //         (prev, targetId) => prev + (pushes[targetId] || 0),
-  //         0
-  //       );
-  //       const totalOperations = relevantTargetIds.reduce(
-  //         (prev, targetId) => prev + (operations[targetId] || 0),
-  //         0
-  //       );
-
-  //       const subscriptions = await stripeApi.subscriptions
-  //         .list({
-  //           customer: participant.externalBillingReference,
-  //         })
-  //         .then((v) => v.data.filter((r) => r.metadata?.hive_subscription));
-
-  //       if (subscriptions.length === 0) {
-  //         return;
-  //       }
-
-  //       const actualSubscription = subscriptions[0];
-  //       const subscriptionItems = actualSubscription.items.data;
-
-  //       for (const item of subscriptionItems) {
-  //         if (item.plan.id === stripePrices.operationsPrice.id) {
-  //           const asThausands = Math.floor(totalOperations / 1000);
-  //           logger.info(
-  //             `Reported total of ${asThausands}K operations for org ${participant.organizationId}`
-  //           );
-  //           await stripeApi.subscriptionItems.createUsageRecord(item.id, {
-  //             action: 'set',
-  //             quantity: asThausands,
-  //           });
-  //         } else if (item.plan.id === stripePrices.schemaPushesPrice.id) {
-  //           logger.info(
-  //             `Reported total of ${totalSchemaPushes} schema pushes for org ${participant.organizationId}`
-  //           );
-  //           await stripeApi.subscriptionItems.createUsageRecord(item.id, {
-  //             action: 'set',
-  //             quantity: totalSchemaPushes,
-  //           });
-  //         }
-  //       }
-  //     })
-  //   );
-  // }
-
   return {
     postgres$,
     loadStripeData$,
@@ -177,26 +84,8 @@ export function createStripeBilling(config: {
 
       const stripeData = await loadStripeData$;
       logger.info(`Stripe is configured correctly, prices info: %o`, stripeData);
-
-      // feat(metered-usage)
-      // await estimateAndReport().catch((e) => {
-      //   logger.error(e, `Failed to estimate and report`);
-      // });
-
-      // intervalHandle = setInterval(async () => {
-      //   try {
-      //     await estimateAndReport();
-      //   } catch (e) {
-      //     logger.error(e, `Failed to estimate and report`);
-      //   }
-      // }, config.stripe.syncIntervalMs);
     },
     async stop() {
-      if (intervalHandle) {
-        clearInterval(intervalHandle);
-        intervalHandle = null;
-      }
-
       await (await postgres$).destroy();
 
       logger.info(`Stripe Billing Sync stopped...`);

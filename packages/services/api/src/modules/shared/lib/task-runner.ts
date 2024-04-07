@@ -4,7 +4,7 @@ import { type Logger } from '../providers/logger';
  * Create task runner that runs a task at at a given interval.
  */
 export const createTaskRunner = (args: {
-  run: () => Promise<void>;
+  run: () => Promise<any>;
   interval: number;
   logger: Logger;
 }) => {
