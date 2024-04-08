@@ -26,6 +26,7 @@
     "@sentry/utils": "7.109.0",
     "fastify": "4.26.2",
     "fastify-plugin": "4.5.1",
+    "opentelemetry-instrumentation-fetch-node": "1.2.0",
     "p-retry": "6.2.0",
     "prom-client": "15.1.1",
     "slonik": "30.4.4",

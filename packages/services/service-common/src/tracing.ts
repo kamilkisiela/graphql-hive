@@ -1,4 +1,8 @@
 import { FastifyPluginCallback } from 'fastify';
+import {
+  FetchInstrumentation,
+  type FetchInstrumentationConfig,
+} from 'opentelemetry-instrumentation-fetch-node';
 import type { Interceptor, Query, QueryContext } from 'slonik';
 import zod from 'zod';
 import {
@@ -26,7 +30,6 @@ import {
 } from '@opentelemetry/sdk-trace-node';
 import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 import openTelemetryPlugin, { OpenTelemetryPluginOptions } from './fastify-tracing';
-import { FetchInstrumentation, type FetchInstrumentationConfig } from './fetch-tracing';
 
 export { trace, Span, SpanKind, SamplingDecision };
 
@@ -114,8 +117,17 @@ export class TracingInstance {
   instrumentNodeFetch(config: FetchInstrumentationConfig = {}) {
     const serviceName = this.options.serviceName;
     const instance = new FetchInstrumentation({
-      staticAttributes: {
-        'x-requesting-service': serviceName,
+      onRequest({ request, span, additionalHeaders }) {
+        additionalHeaders['x-requesting-service'] = serviceName;
+
+        if (request.path.startsWith('/trpc/')) {
+          const url = new URL(request.origin + request.path);
+          const trpcFunctionName = url.pathname.split('/').pop();
+          span.setAttribute('trpc.function', trpcFunctionName || '');
+          span.setAttribute('trpc.server', url.host);
+          span.setAttribute('trpc.input', url.search);
+          span.updateName(`tRPC: ${trpcFunctionName}`);
+        }
       },
       ...config,
     });
