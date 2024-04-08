@@ -65,13 +65,28 @@ export function onlyDeprecatedDocumentNode(doc: DocumentNode): DocumentNode {
           return;
         }
 
+        // No need to preserve these, as they can't be deprecated
+        if (
+          node.kind === Kind.SCALAR_TYPE_DEFINITION ||
+          node.kind === Kind.SCALAR_TYPE_EXTENSION ||
+          node.kind === Kind.UNION_TYPE_DEFINITION ||
+          node.kind === Kind.UNION_TYPE_EXTENSION ||
+          node.kind === Kind.SCHEMA_DEFINITION ||
+          node.kind === Kind.SCHEMA_EXTENSION ||
+          node.kind === Kind.DIRECTIVE_DEFINITION
+        ) {
+          return null;
+        }
+
         if (
           node.kind === Kind.OBJECT_TYPE_DEFINITION ||
           node.kind === Kind.OBJECT_TYPE_EXTENSION ||
           node.kind === Kind.ENUM_TYPE_DEFINITION ||
           node.kind === Kind.ENUM_TYPE_EXTENSION ||
           node.kind === Kind.INTERFACE_TYPE_DEFINITION ||
-          node.kind === Kind.INTERFACE_TYPE_EXTENSION
+          node.kind === Kind.INTERFACE_TYPE_EXTENSION ||
+          node.kind === Kind.INPUT_OBJECT_TYPE_DEFINITION ||
+          node.kind === Kind.INPUT_OBJECT_TYPE_EXTENSION
         ) {
           if (!preservedCoordinates.has(node.name.value)) {
             return null;
