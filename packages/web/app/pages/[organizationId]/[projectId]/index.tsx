@@ -329,7 +329,6 @@ const ProjectsPageContent = () => {
           )}
         </div>
       </div>
-      <Activities />
     </ProjectLayout>
   );
 };

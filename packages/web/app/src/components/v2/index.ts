@@ -1,5 +1,4 @@
 export { Accordion } from '@/components/v2/accordion';
-export { Activities } from '@/components/v2/activities';
 export { Autocomplete } from '@/components/v2/autocomplete';
 export { Avatar } from '@/components/v2/avatar';
 export { Badge } from '@/components/v2/badge';

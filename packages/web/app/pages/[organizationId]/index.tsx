@@ -16,7 +16,7 @@ import {
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Activities, Card, EmptyList, MetaTitle } from '@/components/v2';
+import { Card, EmptyList, MetaTitle } from '@/components/v2';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { ProjectType } from '@/gql/graphql';
 import { subDays } from '@/lib/date-time';
@@ -386,7 +386,6 @@ function OrganizationPageContent() {
             </div>
           )}
         </div>
-        <Activities />
       </>
     </OrganizationLayout>
   );
