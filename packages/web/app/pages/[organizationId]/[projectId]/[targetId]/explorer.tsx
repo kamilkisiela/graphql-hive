@@ -4,14 +4,19 @@ import { AlertCircleIcon } from 'lucide-react';
 import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
-import { SchemaExplorerFilter } from '@/components/target/explorer/filter';
+import {
+  ArgumentVisibilityFilter,
+  DateRangeFilter,
+  FieldByNameFilter,
+  SchemaVariantFilter,
+  TypeFilter,
+} from '@/components/target/explorer/filter';
 import { GraphQLObjectTypeComponent } from '@/components/target/explorer/object-type';
 import {
   SchemaExplorerProvider,
   useSchemaExplorerContext,
 } from '@/components/target/explorer/provider';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import { Subtitle, Title } from '@/components/ui/page';
 import { QueryError } from '@/components/ui/query-error';
 import { MetaTitle } from '@/components/v2';
@@ -190,32 +195,30 @@ function ExplorerPageContent() {
     >
       <div className="flex flex-row items-center justify-between py-6">
         <div>
-          <Title>Explore</Title>
+          <Title>Explore Schema</Title>
           <Subtitle>Insights from the latest version.</Subtitle>
         </div>
-        {isFilterVisible.current && (
-          <SchemaExplorerFilter
-            organization={{ cleanId: router.organizationId }}
-            project={{ cleanId: router.projectId }}
-            target={{ cleanId: router.targetId }}
-            period={resolvedPeriod}
-          >
-            <Button variant="outline" asChild>
-              <Link
-                href={{
-                  pathname: '/[organizationId]/[projectId]/[targetId]/explorer/unused',
-                  query: {
-                    organizationId: router.organizationId,
-                    projectId: router.projectId,
-                    targetId: router.targetId,
-                  },
-                }}
-              >
-                Only unused
-              </Link>
-            </Button>
-          </SchemaExplorerFilter>
-        )}
+        <div className="flex flex-row items-center gap-x-4">
+          {isFilterVisible.current && (
+            <>
+              <TypeFilter
+                organizationId={router.organizationId}
+                projectId={router.projectId}
+                targetId={router.targetId}
+                period={resolvedPeriod}
+              />
+              <FieldByNameFilter />
+              <DateRangeFilter />
+              <ArgumentVisibilityFilter />
+              <SchemaVariantFilter
+                organizationId={router.organizationId}
+                projectId={router.projectId}
+                targetId={router.targetId}
+                variant="all"
+              />
+            </>
+          )}
+        </div>
       </div>
       {!query.fetching && (
         <>

@@ -320,7 +320,7 @@ function TargetSchemaPage() {
           <Title>Schema</Title>
           <Subtitle>The latest published schema.</Subtitle>
         </div>
-        <div>
+        <div className="flex flex-row items-center gap-x-4">
           <Button variant="outline" asChild>
             <Link
               href={{
@@ -332,7 +332,22 @@ function TargetSchemaPage() {
                 },
               }}
             >
-              Show unused schema
+              Unused schema
+            </Link>
+          </Button>
+          <span className="italic">|</span>
+          <Button variant="outline" asChild>
+            <Link
+              href={{
+                pathname: '/[organizationId]/[projectId]/[targetId]/explorer/deprecated',
+                query: {
+                  organizationId: router.organizationId,
+                  projectId: router.projectId,
+                  targetId: router.targetId,
+                },
+              }}
+            >
+              Deprecated schema
             </Link>
           </Button>
         </div>

@@ -95,6 +95,17 @@ export type UnusedSchemaExplorerMapper = {
   supergraph: null | SuperGraphInformation;
 };
 
+export type DeprecatedSchemaExplorerMapper = {
+  sdl: DocumentNode;
+  usage: {
+    period: DateRange;
+    organization: string;
+    project: string;
+    target: string;
+  };
+  supergraph: null | SuperGraphInformation;
+};
+
 export type GraphQLFieldMapper = WithSchemaCoordinatesUsage<
   WithGraphQLParentInfo<{
     entity: {

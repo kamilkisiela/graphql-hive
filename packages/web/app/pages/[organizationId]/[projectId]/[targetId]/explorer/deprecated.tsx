@@ -18,8 +18,8 @@ import { useDateRangeController } from '@/lib/hooks/use-date-range-controller';
 import { cn } from '@/lib/utils';
 import { TypeRenderer, TypeRenderFragment } from './[typename]';
 
-const UnusedSchemaView_UnusedSchemaExplorerFragment = graphql(`
-  fragment UnusedSchemaView_UnusedSchemaExplorerFragment on UnusedSchemaExplorer {
+const DeprecatedSchemaView_DeprecatedSchemaExplorerFragment = graphql(`
+  fragment DeprecatedSchemaView_DeprecatedSchemaExplorerFragment on DeprecatedSchemaExplorer {
     types {
       __typename
       ... on GraphQLObjectType {
@@ -45,15 +45,18 @@ const UnusedSchemaView_UnusedSchemaExplorerFragment = graphql(`
   }
 `);
 
-const UnusedSchemaView = memo(function _UnusedSchemaView(props: {
-  explorer: FragmentType<typeof UnusedSchemaView_UnusedSchemaExplorerFragment>;
+const DeprecatedSchemaView = memo(function _DeprecatedSchemaView(props: {
+  explorer: FragmentType<typeof DeprecatedSchemaView_DeprecatedSchemaExplorerFragment>;
   totalRequests: number;
   organizationCleanId: string;
   projectCleanId: string;
   targetCleanId: string;
 }) {
   const [selectedLetter, setSelectedLetter] = useState<string>();
-  const { types } = useFragment(UnusedSchemaView_UnusedSchemaExplorerFragment, props.explorer);
+  const { types } = useFragment(
+    DeprecatedSchemaView_DeprecatedSchemaExplorerFragment,
+    props.explorer,
+  );
 
   const typesGroupedByFirstLetter = useMemo(() => {
     const grouped = new Map<string, FragmentType<typeof TypeRenderFragment>[]>([]);
@@ -85,9 +88,9 @@ const UnusedSchemaView = memo(function _UnusedSchemaView(props: {
         <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
           <PartyPopperIcon className="size-10 text-emerald-500" />
 
-          <h3 className="mt-4 text-lg font-semibold">No unused types</h3>
+          <h3 className="mt-4 text-lg font-semibold">No deprecations found</h3>
           <p className="text-muted-foreground mb-4 mt-2 text-sm">
-            It looks like you are using all typea in your schema, congratulations!
+            It looks like you are maintaining your schema well, congratulations!
           </p>
         </div>
       </div>
@@ -144,8 +147,8 @@ const UnusedSchemaView = memo(function _UnusedSchemaView(props: {
   );
 });
 
-const UnusedSchemaExplorer_UnusedSchemaQuery = graphql(`
-  query UnusedSchemaExplorer_UnusedSchemaQuery(
+const DeprecatedSchemaExplorer_DeprecatedSchemaQuery = graphql(`
+  query DeprecatedSchemaExplorer_DeprecatedSchemaQuery(
     $organizationId: ID!
     $projectId: ID!
     $targetId: ID!
@@ -161,8 +164,8 @@ const UnusedSchemaExplorer_UnusedSchemaQuery = graphql(`
         __typename
         id
         valid
-        unusedSchema(usage: { period: $period }) {
-          ...UnusedSchemaView_UnusedSchemaExplorerFragment
+        deprecatedSchema(usage: { period: $period }) {
+          ...DeprecatedSchemaView_DeprecatedSchemaExplorerFragment
         }
       }
     }
@@ -179,7 +182,7 @@ const UnusedSchemaExplorer_UnusedSchemaQuery = graphql(`
   }
 `);
 
-function UnusedSchemaExplorer(props: {
+function DeprecatedSchemaExplorer(props: {
   dataRetentionInDays: number;
   organizationCleanId: string;
   projectCleanId: string;
@@ -191,7 +194,7 @@ function UnusedSchemaExplorer(props: {
   });
 
   const [query, refresh] = useQuery({
-    query: UnusedSchemaExplorer_UnusedSchemaQuery,
+    query: DeprecatedSchemaExplorer_DeprecatedSchemaQuery,
     variables: {
       organizationId: props.organizationCleanId,
       projectId: props.projectCleanId,
@@ -217,10 +220,8 @@ function UnusedSchemaExplorer(props: {
     <>
       <div className="flex flex-row items-center justify-between py-6">
         <div>
-          <Title>Unused Schema</Title>
-          <Subtitle>
-            Helps you understand the coverage of GraphQL schema and safely remove the unused part
-          </Subtitle>
+          <Title>Deprecated Schema</Title>
+          <Subtitle>Understand the deprecated part of GraphQL schema</Subtitle>
         </div>
         <div className="flex justify-end gap-x-2">
           <DateRangePicker
@@ -234,13 +235,13 @@ function UnusedSchemaExplorer(props: {
             organizationId={props.organizationCleanId}
             projectId={props.projectCleanId}
             targetId={props.targetCleanId}
-            variant="unused"
+            variant="deprecated"
           />
         </div>
       </div>
       {!query.fetching && (
         <>
-          {latestValidSchemaVersion?.unusedSchema && latestSchemaVersion ? (
+          {latestValidSchemaVersion?.deprecatedSchema && latestSchemaVersion ? (
             <>
               {latestSchemaVersion.id !== latestValidSchemaVersion.id && (
                 <Alert className="mb-3">
@@ -270,9 +271,9 @@ function UnusedSchemaExplorer(props: {
                   </AlertDescription>
                 </Alert>
               )}
-              <UnusedSchemaView
+              <DeprecatedSchemaView
                 totalRequests={query.data?.operationsStats.totalRequests ?? 0}
-                explorer={latestValidSchemaVersion.unusedSchema}
+                explorer={latestValidSchemaVersion.deprecatedSchema}
                 organizationCleanId={props.organizationCleanId}
                 projectCleanId={props.projectCleanId}
                 targetCleanId={props.targetCleanId}
@@ -287,8 +288,12 @@ function UnusedSchemaExplorer(props: {
   );
 }
 
-const TargetExplorerUnusedSchemaPageQuery = graphql(`
-  query TargetExplorerUnusedSchemaPageQuery($organizationId: ID!, $projectId: ID!, $targetId: ID!) {
+const TargetExplorerDeprecatedSchemaPageQuery = graphql(`
+  query TargetExplorerDeprecatedSchemaPageQuery(
+    $organizationId: ID!
+    $projectId: ID!
+    $targetId: ID!
+  ) {
     organizations {
       ...TargetLayout_OrganizationConnectionFragment
     }
@@ -315,10 +320,10 @@ const TargetExplorerUnusedSchemaPageQuery = graphql(`
   }
 `);
 
-function ExplorerUnusedSchemaPageContent() {
+function ExplorerDeprecatedSchemaPageContent() {
   const router = useRouteSelector();
   const [query] = useQuery({
-    query: TargetExplorerUnusedSchemaPageQuery,
+    query: TargetExplorerDeprecatedSchemaPageQuery,
     variables: {
       organizationId: router.organizationId,
       projectId: router.projectId,
@@ -348,7 +353,7 @@ function ExplorerUnusedSchemaPageContent() {
     >
       {currentOrganization ? (
         hasCollectedOperations ? (
-          <UnusedSchemaExplorer
+          <DeprecatedSchemaExplorer
             dataRetentionInDays={currentOrganization.rateLimit.retentionInDays}
             organizationCleanId={router.organizationId}
             projectCleanId={router.projectId}
@@ -368,13 +373,13 @@ function ExplorerUnusedSchemaPageContent() {
   );
 }
 
-function UnusedSchemaExplorerPage(): ReactElement {
+function DeprecatedSchemaExplorerPage(): ReactElement {
   return (
     <>
-      <MetaTitle title="Unused Schema Explorer" />
-      <ExplorerUnusedSchemaPageContent />
+      <MetaTitle title="Deprecated Schema Explorer" />
+      <ExplorerDeprecatedSchemaPageContent />
     </>
   );
 }
 
-export default authenticated(UnusedSchemaExplorerPage);
+export default authenticated(DeprecatedSchemaExplorerPage);

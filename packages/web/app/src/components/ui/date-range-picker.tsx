@@ -36,7 +36,6 @@ const formatDate = (date: Date, locale = 'en-us'): string => {
   return date.toLocaleDateString(locale, {
     month: 'short',
     day: 'numeric',
-    year: 'numeric',
   });
 };
 

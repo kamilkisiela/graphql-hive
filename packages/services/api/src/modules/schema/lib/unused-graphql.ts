@@ -6,6 +6,7 @@ export function stripUsedSchemaCoordinatesFromDocumentNode(
   usedCoordinates: Set<string>,
 ): DocumentNode {
   const typeNodeInfo = new TypeNodeInfo();
+
   return visit(
     doc,
     visitWithTypeNodeInfo(typeNodeInfo, {
