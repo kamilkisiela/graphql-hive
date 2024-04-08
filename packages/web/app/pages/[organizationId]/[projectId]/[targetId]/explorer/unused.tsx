@@ -136,6 +136,9 @@ const UnusedSchemaView = memo(function _UnusedSchemaView(props: {
               organizationCleanId={props.organizationCleanId}
               projectCleanId={props.projectCleanId}
               targetCleanId={props.targetCleanId}
+              warnAboutDeprecatedArguments={false}
+              warnAboutUnusedArguments={true}
+              styleDeprecated={true}
             />
           );
         })}

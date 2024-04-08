@@ -44,6 +44,9 @@ export function TypeRenderer(props: {
   organizationCleanId: string;
   projectCleanId: string;
   targetCleanId: string;
+  warnAboutUnusedArguments: boolean;
+  warnAboutDeprecatedArguments: boolean;
+  styleDeprecated: boolean;
 }) {
   const ttype = useFragment(TypeRenderFragment, props.type);
   switch (ttype.__typename) {
@@ -55,6 +58,9 @@ export function TypeRenderer(props: {
           targetCleanId={props.targetCleanId}
           projectCleanId={props.projectCleanId}
           organizationCleanId={props.organizationCleanId}
+          warnAboutUnusedArguments={props.warnAboutUnusedArguments}
+          warnAboutDeprecatedArguments={props.warnAboutDeprecatedArguments}
+          styleDeprecated={props.styleDeprecated}
         />
       );
     case 'GraphQLInterfaceType':
@@ -65,6 +71,9 @@ export function TypeRenderer(props: {
           targetCleanId={props.targetCleanId}
           projectCleanId={props.projectCleanId}
           organizationCleanId={props.organizationCleanId}
+          warnAboutUnusedArguments={props.warnAboutUnusedArguments}
+          warnAboutDeprecatedArguments={props.warnAboutDeprecatedArguments}
+          styleDeprecated={props.styleDeprecated}
         />
       );
     case 'GraphQLUnionType':
@@ -85,6 +94,7 @@ export function TypeRenderer(props: {
           targetCleanId={props.targetCleanId}
           projectCleanId={props.projectCleanId}
           organizationCleanId={props.organizationCleanId}
+          styleDeprecated={props.styleDeprecated}
         />
       );
     case 'GraphQLInputObjectType':
@@ -95,6 +105,7 @@ export function TypeRenderer(props: {
           targetCleanId={props.targetCleanId}
           projectCleanId={props.projectCleanId}
           organizationCleanId={props.organizationCleanId}
+          styleDeprecated={props.styleDeprecated}
         />
       );
     case 'GraphQLScalarType':
@@ -247,6 +258,9 @@ function TypeExplorerPageContent({ typename }: { typename: string }) {
           organizationCleanId={router.organizationId}
           projectCleanId={router.projectId}
           targetCleanId={router.targetId}
+          warnAboutDeprecatedArguments={false}
+          warnAboutUnusedArguments={false}
+          styleDeprecated={true}
         />
       ) : type ? (
         noSchemaVersion

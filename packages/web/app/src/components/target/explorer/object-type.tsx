@@ -26,6 +26,9 @@ export function GraphQLObjectTypeComponent(props: {
   organizationCleanId: string;
   projectCleanId: string;
   targetCleanId: string;
+  warnAboutUnusedArguments: boolean;
+  warnAboutDeprecatedArguments: boolean;
+  styleDeprecated: boolean;
 }) {
   const ttype = useFragment(GraphQLObjectTypeComponent_TypeFragment, props.type);
   const router = useRouter();
@@ -50,6 +53,9 @@ export function GraphQLObjectTypeComponent(props: {
         targetCleanId={props.targetCleanId}
         projectCleanId={props.projectCleanId}
         organizationCleanId={props.organizationCleanId}
+        warnAboutDeprecatedArguments={props.warnAboutDeprecatedArguments}
+        warnAboutUnusedArguments={props.warnAboutUnusedArguments}
+        styleDeprecated={props.styleDeprecated}
       />
     </GraphQLTypeCard>
   );

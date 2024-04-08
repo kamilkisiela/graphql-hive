@@ -136,9 +136,13 @@ const DeprecatedSchemaView = memo(function _DeprecatedSchemaView(props: {
             <TypeRenderer
               key={i}
               type={type}
+              totalRequests={props.totalRequests}
               organizationCleanId={props.organizationCleanId}
               projectCleanId={props.projectCleanId}
               targetCleanId={props.targetCleanId}
+              warnAboutDeprecatedArguments={true}
+              warnAboutUnusedArguments={false}
+              styleDeprecated={false}
             />
           );
         })}

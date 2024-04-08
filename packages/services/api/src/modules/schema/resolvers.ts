@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto';
 import stringify from 'fast-json-stable-stringify';
 import {
+  ConstDirectiveNode,
+  DEFAULT_DEPRECATION_REASON,
   GraphQLEnumType,
   GraphQLInputObjectType,
   GraphQLInterfaceType,
@@ -1342,10 +1344,12 @@ export const resolvers: SchemaModule.Resolvers = {
                   name: f.name.value,
                   description: f.description?.value,
                   type: print(f.type),
+                  deprecationReason: deprecationReasonFromDirectives(f.directives),
                   args:
                     f.arguments?.map(a => ({
                       name: a.name.value,
                       description: a.description?.value,
+                      deprecationReason: deprecationReasonFromDirectives(a.directives),
                       type: print(a.type),
                     })) ?? [],
                 })) ?? [],
@@ -1376,11 +1380,13 @@ export const resolvers: SchemaModule.Resolvers = {
                 typeDefinition.fields?.map(f => ({
                   name: f.name.value,
                   description: f.description?.value,
+                  deprecationReason: deprecationReasonFromDirectives(f.directives),
                   type: print(f.type),
                   args:
                     f.arguments?.map(a => ({
                       name: a.name.value,
                       description: a.description?.value,
+                      deprecationReason: deprecationReasonFromDirectives(a.directives),
                       type: print(a.type),
                     })) ?? [],
                 })) ?? [],
@@ -1410,6 +1416,7 @@ export const resolvers: SchemaModule.Resolvers = {
                 typeDefinition.values?.map(value => ({
                   name: value.name.value,
                   description: value.description?.value,
+                  deprecationReason: deprecationReasonFromDirectives(value.directives),
                 })) ?? [],
             },
             usage() {
@@ -1462,6 +1469,7 @@ export const resolvers: SchemaModule.Resolvers = {
                   name: f.name.value,
                   defaultValue: f.defaultValue ? print(f.defaultValue) : undefined,
                   description: f.description?.value,
+                  deprecationReason: deprecationReasonFromDirectives(f.directives),
                   type: print(f.type),
                 })) ?? [],
             },
@@ -2222,3 +2230,27 @@ const criticalityMap: Record<CriticalityLevel, Types.CriticalityLevel> = {
   [CriticalityLevel.NonBreaking]: 'Safe',
   [CriticalityLevel.Dangerous]: 'Dangerous',
 };
+
+function deprecationReasonFromDirectives(directives: readonly ConstDirectiveNode[] | undefined) {
+  if (!directives) {
+    return null;
+  }
+
+  const deprecatedDirective = directives.find(d => d.name.value === 'deprecated');
+
+  if (!deprecatedDirective) {
+    return null;
+  }
+
+  const reasonArgument = deprecatedDirective.arguments?.find(a => a.name.value === 'reason');
+
+  if (!reasonArgument) {
+    return DEFAULT_DEPRECATION_REASON;
+  }
+
+  if (reasonArgument.value.kind !== 'StringValue') {
+    throw new Error('Expected @deprecated(reason:) to be StringValue');
+  }
+
+  return reasonArgument.value.value;
+}

@@ -73,8 +73,8 @@ export function onlyDeprecatedDocumentNode(doc: DocumentNode): DocumentNode {
           node.kind === Kind.INTERFACE_TYPE_DEFINITION ||
           node.kind === Kind.INTERFACE_TYPE_EXTENSION
         ) {
-          if (preservedCoordinates.has(node.name.value)) {
-            return;
+          if (!preservedCoordinates.has(node.name.value)) {
+            return null;
           }
         }
 
@@ -86,8 +86,8 @@ export function onlyDeprecatedDocumentNode(doc: DocumentNode): DocumentNode {
             throw new Error('Expected type to be defined');
           }
 
-          if (preservedCoordinates.has(`${typeName}.${fieldName}`)) {
-            return;
+          if (!preservedCoordinates.has(`${typeName}.${fieldName}`)) {
+            return null;
           }
         }
 
@@ -104,12 +104,10 @@ export function onlyDeprecatedDocumentNode(doc: DocumentNode): DocumentNode {
               ? `${typeName}.${fieldDef.name.value}.${node.name.value}`
               : `${typeName}.${node.name.value}`;
 
-          if (preservedCoordinates.has(coordinate)) {
-            return;
+          if (!preservedCoordinates.has(coordinate)) {
+            return null;
           }
         }
-
-        return null;
       },
     }),
   );

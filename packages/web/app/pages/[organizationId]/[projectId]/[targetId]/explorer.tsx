@@ -61,6 +61,9 @@ function SchemaView(props: {
           targetCleanId={props.targetCleanId}
           projectCleanId={props.projectCleanId}
           organizationCleanId={props.organizationCleanId}
+          warnAboutDeprecatedArguments={false}
+          warnAboutUnusedArguments={false}
+          styleDeprecated={true}
         />
       ) : null}
       {mutation ? (
@@ -71,6 +74,9 @@ function SchemaView(props: {
           targetCleanId={props.targetCleanId}
           projectCleanId={props.projectCleanId}
           organizationCleanId={props.organizationCleanId}
+          warnAboutDeprecatedArguments={false}
+          warnAboutUnusedArguments={false}
+          styleDeprecated={true}
         />
       ) : null}
       {subscription ? (
@@ -81,6 +87,9 @@ function SchemaView(props: {
           targetCleanId={props.targetCleanId}
           projectCleanId={props.projectCleanId}
           organizationCleanId={props.organizationCleanId}
+          warnAboutDeprecatedArguments={false}
+          warnAboutUnusedArguments={false}
+          styleDeprecated={true}
         />
       ) : null}
     </div>
