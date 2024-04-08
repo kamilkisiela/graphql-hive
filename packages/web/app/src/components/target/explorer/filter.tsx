@@ -1,4 +1,4 @@
-import { ReactNode, useMemo } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useQuery } from 'urql';
@@ -177,93 +177,62 @@ export function ArgumentVisibilityFilter() {
   );
 }
 
+const variants = [
+  {
+    value: 'all',
+    label: 'All',
+    pathname: '/[organizationId]/[projectId]/[targetId]/explorer',
+    tooltip: 'Shows all types, including unused and deprecated ones',
+  },
+  {
+    value: 'unused',
+    label: 'Unused',
+    pathname: '/[organizationId]/[projectId]/[targetId]/explorer/unused',
+    tooltip: 'Shows only types that are not used in any operation',
+  },
+  {
+    value: 'deprecated',
+    label: 'Deprecated',
+    pathname: '/[organizationId]/[projectId]/[targetId]/explorer/deprecated',
+    tooltip: 'Shows only types that are marked as deprecated',
+  },
+];
+
 export function SchemaVariantFilter(props: {
   organizationId: string;
   projectId: string;
   targetId: string;
   variant: 'all' | 'unused' | 'deprecated';
 }) {
-  const router = useRouter();
-
   return (
     <TooltipProvider>
       <Tabs defaultValue={props.variant}>
         <TabsList>
-          <Tooltip>
-            <TooltipTrigger>
-              {props.variant === 'all' ? (
-                <TabsTrigger value="all">All</TabsTrigger>
-              ) : (
-                <TabsTrigger value="all" asChild>
-                  <Link
-                    href={{
-                      pathname: '/[organizationId]/[projectId]/[targetId]/explorer',
-                      query: {
-                        organizationId: props.organizationId,
-                        projectId: props.projectId,
-                        targetId: props.targetId,
-                      },
-                    }}
-                  >
-                    All
-                  </Link>
-                </TabsTrigger>
-              )}
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              Shows all types, including unused and deprecated ones.
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger>
-              {props.variant === 'unused' ? (
-                <TabsTrigger value="unused">Unused</TabsTrigger>
-              ) : (
-                <TabsTrigger value="unused">
-                  <Link
-                    href={{
-                      pathname: '/[organizationId]/[projectId]/[targetId]/explorer/unused',
-                      query: {
-                        organizationId: props.organizationId,
-                        projectId: props.projectId,
-                        targetId: props.targetId,
-                      },
-                    }}
-                  >
-                    Unused
-                  </Link>
-                </TabsTrigger>
-              )}
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              Shows only types that are not used in any operation.
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger>
-              {props.variant === 'deprecated' ? (
-                <TabsTrigger value="deprecated">Deprecated</TabsTrigger>
-              ) : (
-                <TabsTrigger value="deprecated">
-                  <Link
-                    href={{
-                      pathname: '/[organizationId]/[projectId]/[targetId]/explorer/deprecated',
-                      query: {
-                        organizationId: props.organizationId,
-                        projectId: props.projectId,
-                        targetId: props.targetId,
-                      },
-                    }}
-                  >
-                    Deprecated
-                  </Link>
-                </TabsTrigger>
-              )}
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              Shows only types that are marked as deprecated.
-            </TooltipContent>
-          </Tooltip>
+          {variants.map(variant => (
+            <Tooltip key={variant.value}>
+              <TooltipTrigger>
+                {props.variant === variant.value ? (
+                  <TabsTrigger value={variant.value}>{variant.label}</TabsTrigger>
+                ) : (
+                  <TabsTrigger value={variant.value} asChild>
+                    <Link
+                      href={{
+                        pathname: variant.pathname,
+                        query: {
+                          organizationId: props.organizationId,
+                          projectId: props.projectId,
+                          targetId: props.targetId,
+                        },
+                      }}
+                    >
+                      {variant.label}
+                    </Link>
+                  </TabsTrigger>
+                )}
+              </TooltipTrigger>
+              <TooltipContent side="bottom">{variant.tooltip}</TooltipContent>
+            </Tooltip>
+          ))}
         </TabsList>
       </Tabs>
     </TooltipProvider>
