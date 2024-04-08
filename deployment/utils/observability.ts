@@ -136,6 +136,7 @@ export class Observability {
               span: [
                 'attributes["component"] == "proxy" and attributes["http.method"] == "HEAD"',
                 'attributes["component"] == "proxy" and attributes["http.method"] == "OPTIONS"',
+                'attributes["component"] == "proxy" and attributes["http.method"] == "GET" and IsMatch(attributes["http.url"], ".*/_health") == true',
                 'attributes["component"] == "proxy" and attributes["http.method"] == "POST" and attributes["http.url"] == "/usage"',
                 'attributes["component"] == "proxy" and attributes["http.method"] == "GET" and attributes["http.url"] == "/metrics"',
                 'attributes["component"] == "proxy" and attributes["http.method"] == "GET" and attributes["http.url"] == "/_readiness"',
@@ -160,6 +161,7 @@ export class Observability {
           },
           'resource/trace_cleanup': {
             attributes: [
+              'host.arch',
               'process.command',
               'process.command_args',
               'process.executable.path',
@@ -184,7 +186,7 @@ export class Observability {
                 context: 'span',
                 statements: [
                   // By defualt, Envoy reports this as full URL, but we only want the path
-                  'replace_pattern(attributes["http.url"], "https?://[^/]+(/[^?#]*)", "$$1")',
+                  'replace_pattern(attributes["http.url"], "https?://[^/]+(/[^?#]*)", "$$1") where attributes["component"] == "proxy"',
                   // Replace Envoy default span name with a more human-readable one (e.g. "METHOD /path")
                   'set(name, Concat([attributes["http.method"], attributes["http.url"]], " ")) where attributes["component"] == "proxy"',
                 ],

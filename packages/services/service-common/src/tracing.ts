@@ -28,7 +28,15 @@ import {
   Sampler,
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-node';
-import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
+import {
+  SEMATTRS_HTTP_METHOD,
+  SEMATTRS_HTTP_REQUEST_CONTENT_LENGTH,
+  SEMATTRS_HTTP_RESPONSE_CONTENT_LENGTH,
+  SEMATTRS_HTTP_ROUTE,
+  SEMATTRS_HTTP_STATUS_CODE,
+  SEMATTRS_HTTP_USER_AGENT,
+  SEMRESATTRS_SERVICE_NAME,
+} from '@opentelemetry/semantic-conventions';
 import openTelemetryPlugin, { OpenTelemetryPluginOptions } from './fastify-tracing';
 
 export { trace, Span, SpanKind, SamplingDecision };
@@ -61,14 +69,30 @@ export class TracingInstance {
         [SEMRESATTRS_SERVICE_NAME]: this.options.serviceName,
       }),
       contextManager,
-      sampler: this.options.sampler
-        ? {
-            shouldSample: this.options.sampler,
-            toString: () => {
-              return `${this.options.serviceName}-sampler`;
-            },
+      sampler: {
+        shouldSample: (context, traceId, spanName, spanKind, attributes, links) => {
+          if (
+            attributes['http.client'] === 'fetch' &&
+            attributes['http.target'] &&
+            String(attributes['http.target']).includes('/heartbeat/')
+          ) {
+            return {
+              decision: SamplingDecision.NOT_RECORD,
+            };
           }
-        : undefined,
+
+          if (this.options.sampler) {
+            return this.options.sampler(context, traceId, spanName, spanKind, attributes, links);
+          }
+
+          return {
+            decision: SamplingDecision.RECORD_AND_SAMPLED,
+          };
+        },
+        toString: () => {
+          return `${this.options.serviceName}-sampler`;
+        },
+      },
       spanProcessors: this.options.enableConsoleExporter
         ? [processor, new SimpleSpanProcessor(new ConsoleSpanExporter())]
         : [processor],
@@ -161,18 +185,18 @@ export class TracingInstance {
             }
 
             return {
-              request_id: request.headers['x-request-id'] || request.id,
-              'http.method': request.method,
-              'http.request.body.size': request.headers['content-length'],
-              'http.route': request.url,
-              'http.user_agent': request.headers['user-agent'],
+              'request.id': request.headers['x-request-id'] || request.id,
+              [SEMATTRS_HTTP_METHOD]: request.method,
+              [SEMATTRS_HTTP_REQUEST_CONTENT_LENGTH]: request.headers['content-length'],
+              [SEMATTRS_HTTP_ROUTE]: request.url,
+              [SEMATTRS_HTTP_USER_AGENT]: request.headers['user-agent'],
               'requesting.service': request.headers['x-requesting-service'],
               ...gqlClientHeaders,
             };
           },
           reply: reply => ({
-            'http.response.status_code': reply.statusCode,
-            'http.response.body.size': reply.getHeader('content-length'),
+            [SEMATTRS_HTTP_STATUS_CODE]: reply.statusCode,
+            [SEMATTRS_HTTP_RESPONSE_CONTENT_LENGTH]: reply.getHeader('content-length'),
           }),
           error: error => ({
             'error.type': error.name,
