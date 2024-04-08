@@ -24,7 +24,7 @@
     "@hive/tokens": "workspace:*",
     "@hive/webhooks": "workspace:*",
     "@octokit/app": "14.1.0",
-    "@octokit/core": "5.0.2",
+    "@octokit/core": "5.2.0",
     "@octokit/request-error": "6.1.0",
     "@sentry/node": "7.109.0",
     "@sentry/types": "7.109.0",
