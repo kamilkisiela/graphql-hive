@@ -260,7 +260,7 @@ function TypeExplorerPageContent({ typename }: { typename: string }) {
           targetCleanId={router.targetId}
           warnAboutDeprecatedArguments={false}
           warnAboutUnusedArguments={false}
-          styleDeprecated={true}
+          styleDeprecated
         />
       ) : type ? (
         noSchemaVersion

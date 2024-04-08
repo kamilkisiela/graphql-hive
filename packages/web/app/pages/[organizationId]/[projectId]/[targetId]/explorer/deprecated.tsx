@@ -140,7 +140,7 @@ const DeprecatedSchemaView = memo(function _DeprecatedSchemaView(props: {
               organizationCleanId={props.organizationCleanId}
               projectCleanId={props.projectCleanId}
               targetCleanId={props.targetCleanId}
-              warnAboutDeprecatedArguments={true}
+              warnAboutDeprecatedArguments
               warnAboutUnusedArguments={false}
               styleDeprecated={false}
             />
