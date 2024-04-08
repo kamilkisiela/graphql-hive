@@ -9,7 +9,6 @@ import Session from 'supertokens-auth-react/recipe/session';
 import { Provider as UrqlProvider } from 'urql';
 import { LoadingAPIIndicator } from '@/components/common/LoadingAPI';
 import { frontendConfig } from '@/config/supertokens/frontend';
-import { LAST_VISITED_ORG_KEY } from '@/constants';
 import { env } from '@/env/frontend';
 import * as gtag from '@/lib/gtag';
 import { urqlClient } from '@/lib/urql';
@@ -28,19 +27,6 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
   useEffect(() => {
     const handleRouteChange = (url: string) => {
       gtag.pageview(url);
-
-      const orgId = Router.query.organizationId as string;
-      const lastVisitedOrgCookieValue = cookies.get(LAST_VISITED_ORG_KEY);
-
-      // Make sure we do have organizationId and the cookie is not in the legacy format
-      if (lastVisitedOrgCookieValue?.includes(':') && orgId) {
-        const [lastVisitedOrgId, checksum] = lastVisitedOrgCookieValue.split(':');
-
-        if (orgId !== lastVisitedOrgId) {
-          // Update the cookie with the new orgId
-          cookies.set(LAST_VISITED_ORG_KEY, `${orgId}:${checksum}`);
-        }
-      }
     };
 
     Router.events.on('routeChangeComplete', handleRouteChange);

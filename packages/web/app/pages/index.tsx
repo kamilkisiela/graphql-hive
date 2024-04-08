@@ -6,7 +6,10 @@ import { QueryError } from '@/components/ui/query-error';
 import { HiveLogo } from '@/components/v2/icon';
 import { graphql } from '@/gql';
 import { useRouteSelector } from '@/lib/hooks/use-route-selector';
-import { useLastVisitedOrganizationWriter } from '@/lib/last-visited-org';
+import {
+  useLastVisitedOrganizationReader,
+  useLastVisitedOrganizationWriter,
+} from '@/lib/last-visited-org';
 
 export const DefaultOrganizationQuery = graphql(`
   query myDefaultOrganization($previouslyVisitedOrganizationId: ID) {
@@ -20,11 +23,17 @@ export const DefaultOrganizationQuery = graphql(`
 `);
 
 function Home(): ReactElement {
-  const [query] = useQuery({ query: DefaultOrganizationQuery });
+  const previouslyVisitedOrganizationId = useLastVisitedOrganizationReader();
+  const [query] = useQuery({
+    query: DefaultOrganizationQuery,
+    variables: {
+      previouslyVisitedOrganizationId,
+    },
+  });
   const router = useRouteSelector();
   const result = query.data?.myDefaultOrganization;
-
   useLastVisitedOrganizationWriter(result?.organization?.cleanId);
+
   useEffect(() => {
     if (result === null) {
       // No organization, redirect to create one
