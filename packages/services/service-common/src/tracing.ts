@@ -5,7 +5,6 @@ import {
 } from 'opentelemetry-instrumentation-fetch-node';
 import type { Interceptor, Query, QueryContext } from 'slonik';
 import zod from 'zod';
-import * as fastifyOpenTelemetry from '@autotelic/fastify-opentelemetry';
 import {
   Attributes,
   AttributeValue,
@@ -30,6 +29,7 @@ import {
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-node';
 import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
+import openTelemetryPlugin, { OpenTelemetryPluginOptions } from './fastify-tracing';
 
 export { trace, Span, SpanKind, SamplingDecision };
 
@@ -131,17 +131,15 @@ export class TracingInstance {
       },
       ...config,
     });
+
     this.instrumentations.push(instance);
   }
 
   instrumentFastify(
-    config?: fastifyOpenTelemetry.OpenTelemetryPluginOptions,
-  ): [
-    FastifyPluginCallback<fastifyOpenTelemetry.OpenTelemetryPluginOptions>,
-    fastifyOpenTelemetry.OpenTelemetryPluginOptions,
-  ] {
+    config?: OpenTelemetryPluginOptions,
+  ): [FastifyPluginCallback<OpenTelemetryPluginOptions>, OpenTelemetryPluginOptions] {
     return [
-      fastifyOpenTelemetry.default,
+      openTelemetryPlugin,
       {
         wrapRoutes: true,
         exposeApi: true,

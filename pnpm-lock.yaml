@@ -1154,9 +1154,6 @@ importers:
         specifier: 10.45.2
         version: 10.45.2
     devDependencies:
-      '@autotelic/fastify-opentelemetry':
-        specifier: 0.20.0
-        version: 0.20.0(@opentelemetry/api@1.8.0)
       '@fastify/cors':
         specifier: 9.0.1
         version: 9.0.1
@@ -1170,6 +1167,9 @@ importers:
         specifier: 1.23.0
         version: 1.23.0(@opentelemetry/api@1.8.0)
       '@opentelemetry/exporter-trace-otlp-http':
+        specifier: 0.50.0
+        version: 0.50.0(@opentelemetry/api@1.8.0)
+      '@opentelemetry/instrumentation':
         specifier: 0.50.0
         version: 0.50.0(@opentelemetry/api@1.8.0)
       '@opentelemetry/resources':
@@ -1203,8 +1203,8 @@ importers:
         specifier: 4.5.1
         version: 4.5.1
       opentelemetry-instrumentation-fetch-node:
-        specifier: 1.1.2
-        version: 1.1.2
+        specifier: 1.2.0
+        version: 1.2.0
       p-retry:
         specifier: 6.2.0
         version: 6.2.0
@@ -2351,16 +2351,6 @@ packages:
       node-fetch: 2.6.12
     transitivePeerDependencies:
       - encoding
-
-  /@autotelic/fastify-opentelemetry@0.20.0(@opentelemetry/api@1.8.0):
-    resolution: {integrity: sha512-OpCAUocoao7GATPobDOu6ee4svRa7kc68tlMBYwQqKjXFoh4y6W6KOTKBwLnkEWoVvKL8umX9GYONcLWGL96EQ==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': ^1.0.0
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      fastify-plugin: 4.5.1
-    dev: true
 
   /@aw-web-design/x-default-browser@1.4.126:
     resolution: {integrity: sha512-Xk1sIhyNC/esHGGVjL/niHLowM0csl/kFO5uawBy4IrWwy0o1G8LGt3jP6nmWGz+USxeeqbihAmp/oVZju6wug==}
@@ -27462,8 +27452,8 @@ packages:
     hasBin: true
     dev: false
 
-  /opentelemetry-instrumentation-fetch-node@1.1.2:
-    resolution: {integrity: sha512-w5KYAw/X/F0smj1v67VQUhnWusS6+0y/v7W/H5iY6s1Zf7uOCCm0fiffY8t2H+4wXui2AOjcfEM77S6AvSTAJg==}
+  /opentelemetry-instrumentation-fetch-node@1.2.0:
+    resolution: {integrity: sha512-aiSt/4ubOTyb1N5C2ZbGrBvaJOXIZhZvpRPYuUVxQJe27wJZqf/o65iPrqgLcgfeOLaQ8cS2Q+762jrYvniTrA==}
     engines: {node: '>18.0.0'}
     dependencies:
       '@opentelemetry/api': 1.8.0

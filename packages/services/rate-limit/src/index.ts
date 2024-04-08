@@ -24,9 +24,8 @@ async function main() {
     tracing = configureTracing({
       collectorEndpoint: env.tracing.collectorEndpoint,
       serviceName: 'rate-limit',
-      sampler(ctx, traceId, spanName, spanKind, attributes, _links) {
+      sampler(ctx, traceId, spanName, spanKind, attributes) {
         if (attributes['requesting.service'] === 'usage') {
-          console.log('NOT_RECORD, usage', attributes);
           return {
             decision: SamplingDecision.NOT_RECORD,
           };
