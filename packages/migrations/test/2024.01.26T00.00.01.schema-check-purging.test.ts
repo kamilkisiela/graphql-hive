@@ -435,6 +435,7 @@ describe('schema check purging', async () => {
       await storage.approveFailedSchemaCheck({
         schemaCheckId: failedSchemaCheck.id,
         userId: user.id,
+        comment: null,
         contracts: {
           approveContractChecksForSchemaCheckId() {
             return Promise.resolve(false);
@@ -865,6 +866,7 @@ describe('schema check purging', async () => {
         schemaCheckId: failedSchemaCheck.id,
         userId: user.id,
         contracts,
+        comment: null,
       });
 
       schemaChangeApprovalCount = await db.oneFirst<number>(
@@ -1065,6 +1067,7 @@ describe('schema check purging', async () => {
         schemaCheckId: failedSchemaCheck.id,
         userId: user.id,
         contracts,
+        comment: null,
       });
 
       schemaChangeApprovalCount = await db.oneFirst<number>(
