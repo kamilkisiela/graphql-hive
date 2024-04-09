@@ -101,8 +101,8 @@ importers:
         specifier: 1.4.12
         version: 1.4.12
       '@theguild/eslint-config':
-        specifier: 0.11.4
-        version: 0.11.4(eslint@8.57.0)(typescript@5.4.4)
+        specifier: 0.11.6
+        version: 0.11.6(eslint@8.57.0)(typescript@5.4.4)
       '@theguild/prettier-config':
         specifier: 2.0.6
         version: 2.0.6(prettier@3.2.5)
@@ -14152,8 +14152,8 @@ packages:
     dev: false
     patched: true
 
-  /@theguild/eslint-config@0.11.4(eslint@8.57.0)(typescript@5.4.4):
-    resolution: {integrity: sha512-O0k78W8GJ+dfxyibdxUvB9S9DbuWYiRr502qRv3CNcwnKe1ekNd9fqSFNSOzIDW5JN+N1IDzW4GVLJleJIkEzQ==}
+  /@theguild/eslint-config@0.11.6(eslint@8.57.0)(typescript@5.4.4):
+    resolution: {integrity: sha512-mpZMPikRFkDH0tOi+seB7iPse0qX/5edDunmTnUfFOoLwcSEGjSf6Kfp5UTtS03eeLekv7qOS65lgyTGnxAjKQ==}
     peerDependencies:
       eslint: ^8
       typescript: ^5
@@ -14168,12 +14168,12 @@ packages:
       eslint-plugin-jsonc: 2.11.1(eslint@8.57.0)
       eslint-plugin-jsx-a11y: 6.8.0(eslint@8.57.0)
       eslint-plugin-mdx: 3.0.0(eslint@8.57.0)
-      eslint-plugin-n: 16.4.0(eslint@8.57.0)
+      eslint-plugin-n: 17.0.0(eslint@8.57.0)
       eslint-plugin-promise: 6.1.1(eslint@8.57.0)
       eslint-plugin-react: 7.33.2(eslint@8.57.0)
       eslint-plugin-react-hooks: 4.6.0(eslint@8.57.0)
-      eslint-plugin-sonarjs: 0.24.0(eslint@8.57.0)
-      eslint-plugin-unicorn: 51.0.1(eslint@8.57.0)
+      eslint-plugin-sonarjs: 0.25.1(eslint@8.57.0)
+      eslint-plugin-unicorn: 52.0.0(eslint@8.57.0)
       eslint-plugin-yml: 1.11.0(eslint@8.57.0)
       typescript: 5.4.4
     transitivePeerDependencies:
@@ -19958,22 +19958,21 @@ packages:
       - supports-color
     dev: true
 
-  /eslint-plugin-n@16.4.0(eslint@8.57.0):
-    resolution: {integrity: sha512-IkqJjGoWYGskVaJA7WQuN8PINIxc0N/Pk/jLeYT4ees6Fo5lAhpwGsYek6gS9tCUxgDC4zJ+OwY2bY/6/9OMKQ==}
-    engines: {node: '>=16.0.0'}
+  /eslint-plugin-n@17.0.0(eslint@8.57.0):
+    resolution: {integrity: sha512-0Ihff+kWUIiXYTNTotGj/yRI1X5uCh/lef5Hr7ih/mFeYMQ3bPfN0KxlrfhU+Xn4x697l/TPO6zxqE33M1yD0w==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
-      eslint: '>=7.0.0'
+      eslint: '>=8.23.0'
     dependencies:
       '@eslint-community/eslint-utils': 4.4.0(eslint@8.57.0)
-      builtins: 5.0.1
+      enhanced-resolve: 5.15.0
       eslint: 8.57.0(patch_hash=fjbpfrtrjd6idngyeqxnwopfva)
       eslint-plugin-es-x: 7.5.0(eslint@8.57.0)
       get-tsconfig: 4.7.2
+      globals: 14.0.0
       ignore: 5.3.0
       is-builtin-module: 3.2.1
-      is-core-module: 2.13.1
-      minimatch: 3.1.2
-      resolve: 1.22.8
+      minimatch: 9.0.3
       semver: 7.5.4
     dev: true
 
@@ -20020,8 +20019,8 @@ packages:
       string.prototype.matchall: 4.0.8
     dev: true
 
-  /eslint-plugin-sonarjs@0.24.0(eslint@8.57.0):
-    resolution: {integrity: sha512-87zp50mbbNrSTuoEOebdRQBPa0mdejA5UEjyuScyIw8hEpEjfWP89Qhkq5xVZfVyVSRQKZc9alVm7yRKQvvUmg==}
+  /eslint-plugin-sonarjs@0.25.1(eslint@8.57.0):
+    resolution: {integrity: sha512-5IOKvj/GMBNqjxBdItfotfRHo7w48496GOu1hxdeXuD0mB1JBlDCViiLHETDTfA8pDAVSBimBEQoetRXYceQEw==}
     engines: {node: '>=16'}
     peerDependencies:
       eslint: ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
@@ -20040,8 +20039,8 @@ packages:
       tailwindcss: 3.4.3(ts-node@10.9.2)
     dev: true
 
-  /eslint-plugin-unicorn@51.0.1(eslint@8.57.0):
-    resolution: {integrity: sha512-MuR/+9VuB0fydoI0nIn2RDA5WISRn4AsJyNSaNKLVwie9/ONvQhxOBbkfSICBPnzKrB77Fh6CZZXjgTt/4Latw==}
+  /eslint-plugin-unicorn@52.0.0(eslint@8.57.0):
+    resolution: {integrity: sha512-1Yzm7/m+0R4djH0tjDjfVei/ju2w3AzUGjG6q8JnuNIL5xIwsflyCooW5sfBvQp2pMYQFSWWCFONsjCax1EHng==}
     engines: {node: '>=16'}
     peerDependencies:
       eslint: '>=8.56.0'
@@ -21600,6 +21599,11 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       type-fest: 0.20.2
+    dev: true
+
+  /globals@14.0.0:
+    resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
+    engines: {node: '>=18'}
     dev: true
 
   /globalthis@1.0.3:
