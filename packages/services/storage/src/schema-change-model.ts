@@ -952,6 +952,7 @@ const SchemaCheckSharedChangesFields = {
 const ManuallyApprovedSchemaCheckFields = {
   isManuallyApproved: z.literal(true),
   manualApprovalUserId: z.string().nullable(),
+  manualApprovalComment: z.string().nullable(),
 };
 
 const NotManuallyApprovedSchemaCheckFields = {

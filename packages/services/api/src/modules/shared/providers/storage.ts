@@ -790,6 +790,7 @@ export interface Storage {
     contracts: Contracts;
     schemaCheckId: string;
     userId: string;
+    comment: string | null | undefined;
   }): Promise<SchemaCheck | null>;
 
   /**
