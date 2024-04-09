@@ -47,7 +47,7 @@ export function Page(props: { children: ReactNode }) {
         <link rel="preconnect" href="https://rsms.me/" />
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
       </Head>
-      <div className="font-display flex h-full flex-col">{props.children}</div>
+      <div className="flex h-full flex-col">{props.children}</div>
       {mounted && <CookiesConsent />}
     </>
   );
