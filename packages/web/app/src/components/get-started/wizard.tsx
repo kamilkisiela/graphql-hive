@@ -1,116 +1,74 @@
-import { ReactElement, ReactNode } from 'react';
-import clsx from 'clsx';
-import { Drawer } from '@/components/v2';
-import { DocumentType, FragmentType, graphql, useFragment } from '@/gql';
-import { getDocsUrl } from '@/lib/docs-url';
-import { useToggle } from '@/lib/hooks';
-import { CheckCircledIcon } from '@radix-ui/react-icons';
+import { ReactElement } from 'react';
+import { Circle, CircleCheck } from 'lucide-react';
+import { Drawer } from '@/components/v2/drawer';
+import { cn } from '@/lib/utils';
 
-export const GetStartedWizard_GetStartedProgress = graphql(`
-  fragment GetStartedWizard_GetStartedProgress on OrganizationGetStarted {
-    creatingProject
-    publishingSchema
-    checkingSchema
-    invitingMembers
-    reportingOperations
-    enablingUsageBasedBreakingChanges
-  }
-`);
-
-export function GetStartedProgress(props: {
-  tasks: FragmentType<typeof GetStartedWizard_GetStartedProgress>;
-}): ReactElement | null {
-  const [isOpen, toggle] = useToggle();
-  const tasks = useFragment(GetStartedWizard_GetStartedProgress, props.tasks);
-
-  if (!tasks) {
-    return null;
-  }
-
-  const values = Object.values(tasks).filter(v => typeof v === 'boolean');
-  const total = values.length;
-  const completed = values.filter(t => t === true).length;
-  const remaining = total - completed;
-
-  if (remaining === 0) {
-    return null;
-  }
-
-  return (
-    <>
-      <button
-        onClick={toggle}
-        className="cursor-pointer rounded px-4 py-2 text-left hover:opacity-80"
-      >
-        <div className="text-sm font-medium">Get Started</div>
-        <div className="text-xs text-gray-500">
-          {remaining} remaining task{remaining > 1 ? 's' : ''}
-        </div>
-        <div>
-          <div className="relative mt-1 h-[5px] w-full overflow-hidden rounded bg-gray-800">
-            <div
-              className="h-full bg-orange-500"
-              style={{ width: `${(completed / total) * 100}%` }}
-            />
-          </div>
-        </div>
-      </button>
-      <GetStartedWizard isOpen={isOpen} onClose={toggle} tasks={tasks} />
-    </>
-  );
-}
-
-function GetStartedWizard({
+export function GetStartedWizard({
   isOpen,
   onClose,
   tasks,
+  docsUrl,
 }: {
+  docsUrl: (path: string) => string;
   isOpen: boolean;
   onClose(): void;
-  tasks:
-    | DocumentType<typeof GetStartedWizard_GetStartedProgress>
-    | Omit<DocumentType<typeof GetStartedWizard_GetStartedProgress>, 'invitingMembers'>;
+  tasks: {
+    creatingProject: boolean;
+    publishingSchema: boolean;
+    checkingSchema: boolean;
+    invitingMembers: boolean;
+    reportingOperations: boolean;
+    enablingUsageBasedBreakingChanges: boolean;
+  };
 }): ReactElement {
   return (
-    <Drawer open={isOpen} onOpenChange={onClose}>
-      <Drawer.Title>Get Started</Drawer.Title>
-      <p>Complete these steps to experience the full power of GraphQL Hive</p>
-      <div className="mt-4 flex flex-col divide-y-2 divide-gray-900">
+    <Drawer open={isOpen} onOpenChange={onClose} width={450}>
+      <div className="space-y-2 px-2 pt-4">
+        <div className="text-lg font-semibold leading-none tracking-tight">Get Started</div>
+        <div className="text-muted-foreground text-sm">
+          Follow the steps to set up your organization and experience the full power of GraphQL Hive
+        </div>
+      </div>
+      <div className="mt-4 space-y-3">
         <Task
-          link={getDocsUrl('/management/projects#create-a-new-project')}
+          link={docsUrl('/management/projects#create-a-new-project')}
           completed={tasks.creatingProject}
-        >
-          Create a project
-        </Task>
+          title="Create a project"
+          description="A project represents a GraphQL API"
+        />
         <Task
-          link={getDocsUrl('/features/schema-registry#publish-a-schema')}
+          link={docsUrl('/features/schema-registry#publish-a-schema')}
           completed={tasks.publishingSchema}
-        >
-          Publish a schema
-        </Task>
+          title="Publish a schema"
+          description="Publish your first schema to the registry"
+        />
         <Task
-          link={getDocsUrl('/features/schema-registry#check-a-schema')}
+          link={docsUrl('/features/schema-registry#check-a-schema')}
           completed={tasks.checkingSchema}
-        >
-          Check a schema
-        </Task>
+          title="Check a schema"
+          description="Run a schema check to validate your changes"
+        />
         {'invitingMembers' in tasks && typeof tasks.invitingMembers === 'boolean' ? (
           <Task
-            link={getDocsUrl('/management/organizations#members')}
+            link={docsUrl('/management/organizations#members')}
             completed={tasks.invitingMembers}
-          >
-            Invite members
-          </Task>
+            title="Invite members"
+            description="Invite your team members to collaborate on your projects"
+          />
         ) : null}
-        <Task link={getDocsUrl('/features/usage-reporting')} completed={tasks.reportingOperations}>
-          Report operations
-        </Task>
+
         <Task
-          link={getDocsUrl('/management/targets#conditional-breaking-changes')}
+          link={docsUrl('/features/usage-reporting')}
+          completed={tasks.reportingOperations}
+          title="Report operations"
+          description="Collect and analyze your GraphQL API usage"
+        />
+        <Task
+          link={docsUrl('/management/targets#conditional-breaking-changes')}
           completed={tasks.enablingUsageBasedBreakingChanges}
-        >
-          Enable usage-based breaking changes
-        </Task>
+          title="Enable usage-based schema checking"
+          description="Detect breaking changes based on real usage data"
+        />
       </div>
     </Drawer>
   );
@@ -118,25 +76,36 @@ function GetStartedWizard({
 
 function Task({
   completed,
-  children,
   link,
+  title,
+  description,
 }: {
-  children: ReactNode;
   completed: boolean;
+  title: string;
+  description: string;
   link: string | null;
-}): ReactElement {
+}) {
   return (
     <a
       href={link ?? undefined}
       target="_blank"
       rel="noreferrer"
-      className="flex items-center gap-4 p-3"
+      className={cn(
+        'relative block rounded-lg border border-gray-800 bg-gray-900 p-4 hover:bg-gray-800',
+        completed ? 'opacity-70' : null,
+      )}
     >
-      <CheckCircledIcon
-        className={clsx('h-5 w-auto', completed ? 'text-green-500' : 'text-gray-500')}
-      />
-
-      <span className={completed ? 'line-through opacity-50' : 'hover:opacity-80'}>{children}</span>
+      <div className="flex items-start space-x-3">
+        {completed ? (
+          <CircleCheck className="size-5 text-orange-500" />
+        ) : (
+          <Circle className="size-5 text-orange-500" />
+        )}
+        <div className="w-0 flex-1">
+          <p className="font-medium	leading-5 text-white">{title}</p>
+          <p className="text-muted-foreground mt-1 text-sm">{description}</p>
+        </div>
+      </div>
     </a>
   );
 }

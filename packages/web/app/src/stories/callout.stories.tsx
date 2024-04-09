@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Callout } from '../components/v2';
+import { Callout } from '../components/v2/callout';
 
 const meta: Meta<typeof Callout> = {
   title: 'Callout',

@@ -31,7 +31,7 @@ import { AuthProvider } from '@/gql/graphql';
 import { getDocsUrl } from '@/lib/docs-url';
 import { useToggle } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
-import { GetStartedProgress } from '../get-started/wizard';
+import { GetStartedProgress } from '../get-started/trigger';
 import { MemberRoleMigrationStickyNote } from '../organization/members/migration';
 import { UserSettingsModal } from '../user/settings';
 import { Changelog } from './changelog/changelog';
