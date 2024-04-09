@@ -39,7 +39,7 @@ import {
 } from '@opentelemetry/semantic-conventions';
 import openTelemetryPlugin, { OpenTelemetryPluginOptions } from './fastify-tracing';
 
-export { trace, Span, SpanKind, SamplingDecision };
+export { trace, context, Span, SpanKind, SamplingDecision, SpanStatusCode };
 
 type Instrumentations = NodeSDKConfiguration['instrumentations'];
 
@@ -238,6 +238,18 @@ export type SlonikTracingInterceptorOptions = {
   shouldExcludeStatement?: (context: QueryContext, query: Query) => boolean;
 };
 
+function extractParts(sqlStatement: string): {
+  sql: string;
+  name?: string;
+} {
+  const regex = /\/\*(.*?)\*\//;
+  const match = sqlStatement.match(regex);
+  const name = match ? match[1]?.trim() : undefined;
+  const sql = sqlStatement.replace(regex, '').trim();
+
+  return { sql, name };
+}
+
 export const createSlonikInterceptor = (options: SlonikTracingInterceptorOptions): Interceptor => {
   const tracer = trace.getTracer('slonik');
   const connections: Record<string, Record<string, Span>> = {};
@@ -274,7 +286,6 @@ export const createSlonikInterceptor = (options: SlonikTracingInterceptorOptions
       if (span) {
         span.setAttribute('db.result.command', result.command);
         span.setAttribute('db.result.count', result.rowCount);
-        span.updateName(`Postgres: ${result.command}`);
         span.end();
       }
 
@@ -291,12 +302,13 @@ export const createSlonikInterceptor = (options: SlonikTracingInterceptorOptions
         return null;
       }
 
-      const span = tracer.startSpan('Postgres', {
+      const statementsParts = extractParts(query.sql);
+      const span = tracer.startSpan(statementsParts.name ? `PG: ${statementsParts.name}` : 'PG', {
         kind: SpanKind.CLIENT,
         attributes: {
           'db.transaction.id': context.transactionId || '',
           'db.connection.id': context.connectionId,
-          'db.statement': context.originalQuery.sql,
+          'db.statement': statementsParts.sql,
           'db.query.id': context.queryId,
         },
       });

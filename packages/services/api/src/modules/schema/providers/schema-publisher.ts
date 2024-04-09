@@ -271,6 +271,8 @@ export class SchemaPublisher {
   @traceFn('SchemaPublisher.check', {
     initAttributes: input => ({
       'hive.target.id': input.target,
+      'hive.organization.id': input.organization,
+      'hive.project.id': input.project,
     }),
     resultAttributes: result => ({
       'hive.check.result': result.__typename,
@@ -998,6 +1000,8 @@ export class SchemaPublisher {
   @traceFn('SchemaPublisher.publish', {
     initAttributes: (input, _) => ({
       'hive.target.id': input.target,
+      'hive.organization.id': input.organization,
+      'hive.project.id': input.project,
     }),
     resultAttributes: result => ({
       'hive.publish.result': result.__typename,
@@ -1139,6 +1143,8 @@ export class SchemaPublisher {
   @traceFn('SchemaPublisher.delete', {
     initAttributes: (input, _) => ({
       'hive.target.id': input.target.id,
+      'hive.organization.id': input.organization,
+      'hive.project.id': input.project,
     }),
     resultAttributes: result => ({
       'hive.delete.result': result.__typename,
