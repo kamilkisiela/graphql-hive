@@ -3,6 +3,7 @@ import stringify from 'fast-json-stable-stringify';
 import {
   ConstDirectiveNode,
   DEFAULT_DEPRECATION_REASON,
+  DocumentNode,
   GraphQLEnumType,
   GraphQLInputObjectType,
   GraphQLInterfaceType,
@@ -47,7 +48,7 @@ import { TargetSelector } from '../shared/providers/storage';
 import { TargetManager } from '../target/providers/target-manager';
 import type { SchemaModule } from './__generated__/types';
 import { onlyDeprecatedDocumentNode } from './lib/deprecated-graphql';
-import { extractSuperGraphInformation } from './lib/federation-super-graph';
+import { extractSuperGraphInformation, SuperGraphInformation } from './lib/federation-super-graph';
 import { stripUsedSchemaCoordinatesFromDocumentNode } from './lib/unused-graphql';
 import { BreakingSchemaChangeUsageHelper } from './providers/breaking-schema-changes-helper';
 import { ContractsManager } from './providers/contracts-manager';
@@ -1305,14 +1306,6 @@ export const resolvers: SchemaModule.Resolvers = {
   },
   DeprecatedSchemaExplorer: {
     types({ sdl, supergraph, usage }, _, { injector }) {
-      const types: Array<
-        | GraphQLObjectTypeMapper
-        | GraphQLInterfaceTypeMapper
-        | GraphQLUnionTypeMapper
-        | GraphQLEnumTypeMapper
-        | GraphQLInputObjectTypeMapper
-        | GraphQLScalarTypeMapper
-      > = [];
       const operationsManager = injector.get(OperationsManager);
 
       async function getStats(typename: string) {
@@ -1331,199 +1324,13 @@ export const resolvers: SchemaModule.Resolvers = {
         });
       }
 
-      for (const typeDefinition of sdl.definitions) {
-        if (typeDefinition.kind === Kind.OBJECT_TYPE_DEFINITION) {
-          types.push({
-            entity: {
-              kind: 'object',
-              name: typeDefinition.name.value,
-              description: typeDefinition.description?.value,
-              interfaces: typeDefinition.interfaces?.map(i => i.name.value) ?? [],
-              fields:
-                typeDefinition.fields?.map(f => ({
-                  name: f.name.value,
-                  description: f.description?.value,
-                  type: print(f.type),
-                  deprecationReason: deprecationReasonFromDirectives(f.directives),
-                  args:
-                    f.arguments?.map(a => ({
-                      name: a.name.value,
-                      description: a.description?.value,
-                      deprecationReason: deprecationReasonFromDirectives(a.directives),
-                      type: print(a.type),
-                    })) ?? [],
-                })) ?? [],
-            },
-            usage() {
-              return getStats(typeDefinition.name.value);
-            },
-            supergraph: supergraph
-              ? {
-                  ownedByServiceNames:
-                    supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ??
-                    null,
-                  getFieldOwnedByServices: (fieldName: string) =>
-                    supergraph.schemaCoordinateServicesMappings.get(
-                      `${typeDefinition.name.value}.${fieldName}`,
-                    ) ?? null,
-                }
-              : null,
-          });
-        } else if (typeDefinition.kind === Kind.INTERFACE_TYPE_DEFINITION) {
-          types.push({
-            entity: {
-              kind: 'interface',
-              name: typeDefinition.name.value,
-              description: typeDefinition.description?.value,
-              interfaces: typeDefinition.interfaces?.map(i => i.name.value) ?? [],
-              fields:
-                typeDefinition.fields?.map(f => ({
-                  name: f.name.value,
-                  description: f.description?.value,
-                  deprecationReason: deprecationReasonFromDirectives(f.directives),
-                  type: print(f.type),
-                  args:
-                    f.arguments?.map(a => ({
-                      name: a.name.value,
-                      description: a.description?.value,
-                      deprecationReason: deprecationReasonFromDirectives(a.directives),
-                      type: print(a.type),
-                    })) ?? [],
-                })) ?? [],
-            },
-            usage() {
-              return getStats(typeDefinition.name.value);
-            },
-            supergraph: supergraph
-              ? {
-                  ownedByServiceNames:
-                    supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ??
-                    null,
-                  getFieldOwnedByServices: (fieldName: string) =>
-                    supergraph.schemaCoordinateServicesMappings.get(
-                      `${typeDefinition.name.value}.${fieldName}`,
-                    ) ?? null,
-                }
-              : null,
-          });
-        } else if (typeDefinition.kind === Kind.ENUM_TYPE_DEFINITION) {
-          types.push({
-            entity: {
-              kind: 'enum',
-              name: typeDefinition.name.value,
-              description: typeDefinition.description?.value,
-              values:
-                typeDefinition.values?.map(value => ({
-                  name: value.name.value,
-                  description: value.description?.value,
-                  deprecationReason: deprecationReasonFromDirectives(value.directives),
-                })) ?? [],
-            },
-            usage() {
-              return getStats(typeDefinition.name.value);
-            },
-            supergraph: supergraph
-              ? {
-                  ownedByServiceNames:
-                    supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ??
-                    null,
-                  getEnumValueOwnedByServices: (fieldName: string) =>
-                    supergraph.schemaCoordinateServicesMappings.get(
-                      `${typeDefinition.name.value}.${fieldName}`,
-                    ) ?? null,
-                }
-              : null,
-          });
-        } else if (typeDefinition.kind === Kind.UNION_TYPE_DEFINITION) {
-          types.push({
-            entity: {
-              kind: 'union',
-              name: typeDefinition.name.value,
-              description: typeDefinition.description?.value,
-              members:
-                typeDefinition.types?.map(t => ({
-                  name: t.name.value,
-                })) ?? [],
-            },
-            usage() {
-              return getStats(typeDefinition.name.value);
-            },
-            supergraph: supergraph
-              ? {
-                  ownedByServiceNames:
-                    supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ??
-                    null,
-                  getUnionMemberOwnedByServices: (memberName: string) =>
-                    supergraph.schemaCoordinateServicesMappings.get(memberName) ?? null,
-                }
-              : null,
-          });
-        } else if (typeDefinition.kind === Kind.INPUT_OBJECT_TYPE_DEFINITION) {
-          types.push({
-            entity: {
-              kind: 'input-object',
-              name: typeDefinition.name.value,
-              description: typeDefinition.description?.value,
-              fields:
-                typeDefinition.fields?.map(f => ({
-                  name: f.name.value,
-                  defaultValue: f.defaultValue ? print(f.defaultValue) : undefined,
-                  description: f.description?.value,
-                  deprecationReason: deprecationReasonFromDirectives(f.directives),
-                  type: print(f.type),
-                })) ?? [],
-            },
-            usage() {
-              return getStats(typeDefinition.name.value);
-            },
-            supergraph: supergraph
-              ? {
-                  ownedByServiceNames:
-                    supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ??
-                    null,
-                  getInputFieldOwnedByServices: (inputFieldName: string) =>
-                    supergraph.schemaCoordinateServicesMappings.get(
-                      `${typeDefinition.name.value}.${inputFieldName}`,
-                    ) ?? null,
-                }
-              : null,
-          });
-        } else if (typeDefinition.kind === Kind.SCALAR_TYPE_DEFINITION) {
-          types.push({
-            entity: {
-              kind: 'scalar',
-              name: typeDefinition.name.value,
-              description: typeDefinition.description?.value,
-            },
-            usage() {
-              return getStats(typeDefinition.name.value);
-            },
-            supergraph: supergraph
-              ? {
-                  ownedByServiceNames:
-                    supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ??
-                    null,
-                }
-              : null,
-          });
-        }
-      }
-
-      types.sort((a, b) => a.entity.name.localeCompare(b.entity.name));
-
-      return types;
+      return buildGraphQLTypesFromSDL(sdl, getStats, supergraph).sort((a, b) =>
+        a.entity.name.localeCompare(b.entity.name),
+      );
     },
   },
   UnusedSchemaExplorer: {
     types({ sdl, supergraph, usage }) {
-      const types: Array<
-        | GraphQLObjectTypeMapper
-        | GraphQLInterfaceTypeMapper
-        | GraphQLUnionTypeMapper
-        | GraphQLEnumTypeMapper
-        | GraphQLInputObjectTypeMapper
-        | GraphQLScalarTypeMapper
-      > = [];
       const unused = () =>
         ({
           isUsed: false,
@@ -1534,173 +1341,13 @@ export const resolvers: SchemaModule.Resolvers = {
           target: usage.target,
         }) as const;
 
-      for (const typeDefinition of sdl.definitions) {
-        if (typeDefinition.kind === Kind.OBJECT_TYPE_DEFINITION) {
-          types.push({
-            entity: {
-              kind: 'object',
-              name: typeDefinition.name.value,
-              description: typeDefinition.description?.value,
-              interfaces: typeDefinition.interfaces?.map(i => i.name.value) ?? [],
-              fields:
-                typeDefinition.fields?.map(f => ({
-                  name: f.name.value,
-                  description: f.description?.value,
-                  type: print(f.type),
-                  args:
-                    f.arguments?.map(a => ({
-                      name: a.name.value,
-                      description: a.description?.value,
-                      type: print(a.type),
-                    })) ?? [],
-                })) ?? [],
-            },
-            usage: unused,
-            supergraph: supergraph
-              ? {
-                  ownedByServiceNames:
-                    supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ??
-                    null,
-                  getFieldOwnedByServices: (fieldName: string) =>
-                    supergraph.schemaCoordinateServicesMappings.get(
-                      `${typeDefinition.name.value}.${fieldName}`,
-                    ) ?? null,
-                }
-              : null,
-          });
-        } else if (typeDefinition.kind === Kind.INTERFACE_TYPE_DEFINITION) {
-          types.push({
-            entity: {
-              kind: 'interface',
-              name: typeDefinition.name.value,
-              description: typeDefinition.description?.value,
-              interfaces: typeDefinition.interfaces?.map(i => i.name.value) ?? [],
-              fields:
-                typeDefinition.fields?.map(f => ({
-                  name: f.name.value,
-                  description: f.description?.value,
-                  type: print(f.type),
-                  args:
-                    f.arguments?.map(a => ({
-                      name: a.name.value,
-                      description: a.description?.value,
-                      type: print(a.type),
-                    })) ?? [],
-                })) ?? [],
-            },
-            usage: unused,
-            supergraph: supergraph
-              ? {
-                  ownedByServiceNames:
-                    supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ??
-                    null,
-                  getFieldOwnedByServices: (fieldName: string) =>
-                    supergraph.schemaCoordinateServicesMappings.get(
-                      `${typeDefinition.name.value}.${fieldName}`,
-                    ) ?? null,
-                }
-              : null,
-          });
-        } else if (typeDefinition.kind === Kind.ENUM_TYPE_DEFINITION) {
-          types.push({
-            entity: {
-              kind: 'enum',
-              name: typeDefinition.name.value,
-              description: typeDefinition.description?.value,
-              values:
-                typeDefinition.values?.map(value => ({
-                  name: value.name.value,
-                  description: value.description?.value,
-                })) ?? [],
-            },
-            usage: unused,
-            supergraph: supergraph
-              ? {
-                  ownedByServiceNames:
-                    supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ??
-                    null,
-                  getEnumValueOwnedByServices: (fieldName: string) =>
-                    supergraph.schemaCoordinateServicesMappings.get(
-                      `${typeDefinition.name.value}.${fieldName}`,
-                    ) ?? null,
-                }
-              : null,
-          });
-        } else if (typeDefinition.kind === Kind.UNION_TYPE_DEFINITION) {
-          types.push({
-            entity: {
-              kind: 'union',
-              name: typeDefinition.name.value,
-              description: typeDefinition.description?.value,
-              members:
-                typeDefinition.types?.map(t => ({
-                  name: t.name.value,
-                })) ?? [],
-            },
-            usage: unused,
-            supergraph: supergraph
-              ? {
-                  ownedByServiceNames:
-                    supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ??
-                    null,
-                  getUnionMemberOwnedByServices: (memberName: string) =>
-                    supergraph.schemaCoordinateServicesMappings.get(memberName) ?? null,
-                }
-              : null,
-          });
-        } else if (typeDefinition.kind === Kind.INPUT_OBJECT_TYPE_DEFINITION) {
-          types.push({
-            entity: {
-              kind: 'input-object',
-              name: typeDefinition.name.value,
-              description: typeDefinition.description?.value,
-              fields:
-                typeDefinition.fields?.map(f => ({
-                  name: f.name.value,
-                  defaultValue: f.defaultValue ? print(f.defaultValue) : undefined,
-                  description: f.description?.value,
-                  type: print(f.type),
-                })) ?? [],
-            },
-            usage: unused,
-            supergraph: supergraph
-              ? {
-                  ownedByServiceNames:
-                    supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ??
-                    null,
-                  getInputFieldOwnedByServices: (inputFieldName: string) =>
-                    supergraph.schemaCoordinateServicesMappings.get(
-                      `${typeDefinition.name.value}.${inputFieldName}`,
-                    ) ?? null,
-                }
-              : null,
-          });
-        } else if (typeDefinition.kind === Kind.SCALAR_TYPE_DEFINITION) {
-          types.push({
-            entity: {
-              kind: 'scalar',
-              name: typeDefinition.name.value,
-              description: typeDefinition.description?.value,
-            },
-            usage: unused,
-            supergraph: supergraph
-              ? {
-                  ownedByServiceNames:
-                    supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ??
-                    null,
-                }
-              : null,
-          });
-        }
-      }
-
-      types.sort((a, b) => a.entity.name.localeCompare(b.entity.name));
-
-      return types;
+      return buildGraphQLTypesFromSDL(sdl, unused, supergraph).sort((a, b) =>
+        a.entity.name.localeCompare(b.entity.name),
+      );
     },
   },
   GraphQLObjectType: {
-    __isTypeOf: __isTypeOf('object'),
+    __isTypeOf: __isTypeOf(Kind.OBJECT_TYPE_DEFINITION),
     name: t => t.entity.name,
     description: t => t.entity.description ?? null,
     fields: t =>
@@ -1724,7 +1371,7 @@ export const resolvers: SchemaModule.Resolvers = {
         : null,
   },
   GraphQLInterfaceType: {
-    __isTypeOf: __isTypeOf('interface'),
+    __isTypeOf: __isTypeOf(Kind.INTERFACE_TYPE_DEFINITION),
     name: t => t.entity.name,
     description: t => t.entity.description ?? null,
     fields: t =>
@@ -1748,7 +1395,7 @@ export const resolvers: SchemaModule.Resolvers = {
         : null,
   },
   GraphQLUnionType: {
-    __isTypeOf: __isTypeOf('union'),
+    __isTypeOf: __isTypeOf(Kind.UNION_TYPE_DEFINITION),
     name: t => t.entity.name,
     description: t => t.entity.description ?? null,
     members: t =>
@@ -1775,7 +1422,7 @@ export const resolvers: SchemaModule.Resolvers = {
         : null,
   },
   GraphQLEnumType: {
-    __isTypeOf: __isTypeOf('enum'),
+    __isTypeOf: __isTypeOf(Kind.ENUM_TYPE_DEFINITION),
     name: t => t.entity.name,
     description: t => t.entity.description ?? null,
     values: t =>
@@ -1798,7 +1445,7 @@ export const resolvers: SchemaModule.Resolvers = {
         : null,
   },
   GraphQLInputObjectType: {
-    __isTypeOf: __isTypeOf('input-object'),
+    __isTypeOf: __isTypeOf(Kind.INPUT_OBJECT_TYPE_DEFINITION),
     name: t => t.entity.name,
     description: t => t.entity.description ?? null,
     fields: t =>
@@ -1823,7 +1470,7 @@ export const resolvers: SchemaModule.Resolvers = {
         : null,
   },
   GraphQLScalarType: {
-    __isTypeOf: __isTypeOf('scalar'),
+    __isTypeOf: __isTypeOf(Kind.SCALAR_TYPE_DEFINITION),
     name: t => t.entity.name,
     description: t => t.entity.description ?? null,
     usage,
@@ -2132,7 +1779,7 @@ function withUsedByClients<
 
 function transformGraphQLObjectType(entity: GraphQLObjectType): GraphQLObjectTypeMapper['entity'] {
   return {
-    kind: 'object',
+    kind: Kind.OBJECT_TYPE_DEFINITION,
     name: entity.name,
     description: entity.description,
     interfaces: entity.getInterfaces().map(iface => iface.name),
@@ -2156,7 +1803,7 @@ function transformGraphQLInterfaceType(
   entity: GraphQLInterfaceType,
 ): GraphQLInterfaceTypeMapper['entity'] {
   return {
-    kind: 'interface',
+    kind: Kind.INTERFACE_TYPE_DEFINITION,
     name: entity.name,
     description: entity.description,
     interfaces: entity.getInterfaces().map(iface => iface.name),
@@ -2178,7 +1825,7 @@ function transformGraphQLInterfaceType(
 
 function transformGraphQLEnumType(entity: GraphQLEnumType): GraphQLEnumTypeMapper['entity'] {
   return {
-    kind: 'enum',
+    kind: Kind.ENUM_TYPE_DEFINITION,
     name: entity.name,
     description: entity.description,
     values: entity.getValues().map(value => ({
@@ -2191,7 +1838,7 @@ function transformGraphQLEnumType(entity: GraphQLEnumType): GraphQLEnumTypeMappe
 
 function transformGraphQLUnionType(entity: GraphQLUnionType): GraphQLUnionTypeMapper['entity'] {
   return {
-    kind: 'union',
+    kind: Kind.UNION_TYPE_DEFINITION,
     name: entity.name,
     description: entity.description,
     members: entity.getTypes().map(type => ({
@@ -2204,7 +1851,7 @@ function transformGraphQLInputObjectType(
   entity: GraphQLInputObjectType,
 ): GraphQLInputObjectTypeMapper['entity'] {
   return {
-    kind: 'input-object',
+    kind: Kind.INPUT_OBJECT_TYPE_DEFINITION,
     name: entity.name,
     description: entity.description,
     fields: Object.values(entity.getFields()).map(field => ({
@@ -2219,7 +1866,7 @@ function transformGraphQLInputObjectType(
 
 function transformGraphQLScalarType(entity: GraphQLScalarType): GraphQLScalarTypeMapper['entity'] {
   return {
-    kind: 'scalar',
+    kind: Kind.SCALAR_TYPE_DEFINITION,
     name: entity.name,
     description: entity.description,
   };
@@ -2253,4 +1900,202 @@ function deprecationReasonFromDirectives(directives: readonly ConstDirectiveNode
   }
 
   return reasonArgument.value.value;
+}
+
+function buildGraphQLTypesFromSDL(
+  sdl: DocumentNode,
+  getStats: (
+    typeName: string,
+  ) => ReturnType<
+    | GraphQLObjectTypeMapper['usage']
+    | GraphQLInterfaceTypeMapper['usage']
+    | GraphQLUnionTypeMapper['usage']
+    | GraphQLEnumTypeMapper['usage']
+    | GraphQLInputObjectTypeMapper['usage']
+    | GraphQLScalarTypeMapper['usage']
+  >,
+  supergraph: SuperGraphInformation | null,
+) {
+  const types: Array<
+    | GraphQLObjectTypeMapper
+    | GraphQLInterfaceTypeMapper
+    | GraphQLUnionTypeMapper
+    | GraphQLEnumTypeMapper
+    | GraphQLInputObjectTypeMapper
+    | GraphQLScalarTypeMapper
+  > = [];
+
+  for (const typeDefinition of sdl.definitions) {
+    if (typeDefinition.kind === Kind.OBJECT_TYPE_DEFINITION) {
+      types.push({
+        entity: {
+          kind: Kind.OBJECT_TYPE_DEFINITION,
+          name: typeDefinition.name.value,
+          description: typeDefinition.description?.value,
+          interfaces: typeDefinition.interfaces?.map(i => i.name.value) ?? [],
+          fields:
+            typeDefinition.fields?.map(f => ({
+              name: f.name.value,
+              description: f.description?.value,
+              type: print(f.type),
+              deprecationReason: deprecationReasonFromDirectives(f.directives),
+              args:
+                f.arguments?.map(a => ({
+                  name: a.name.value,
+                  description: a.description?.value,
+                  deprecationReason: deprecationReasonFromDirectives(a.directives),
+                  type: print(a.type),
+                })) ?? [],
+            })) ?? [],
+        },
+        usage() {
+          return getStats(typeDefinition.name.value);
+        },
+        supergraph: supergraph
+          ? {
+              ownedByServiceNames:
+                supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ?? null,
+              getFieldOwnedByServices: (fieldName: string) =>
+                supergraph.schemaCoordinateServicesMappings.get(
+                  `${typeDefinition.name.value}.${fieldName}`,
+                ) ?? null,
+            }
+          : null,
+      } satisfies GraphQLObjectTypeMapper);
+    } else if (typeDefinition.kind === Kind.INTERFACE_TYPE_DEFINITION) {
+      types.push({
+        entity: {
+          kind: Kind.INTERFACE_TYPE_DEFINITION,
+          name: typeDefinition.name.value,
+          description: typeDefinition.description?.value,
+          interfaces: typeDefinition.interfaces?.map(i => i.name.value) ?? [],
+          fields:
+            typeDefinition.fields?.map(f => ({
+              name: f.name.value,
+              description: f.description?.value,
+              deprecationReason: deprecationReasonFromDirectives(f.directives),
+              type: print(f.type),
+              args:
+                f.arguments?.map(a => ({
+                  name: a.name.value,
+                  description: a.description?.value,
+                  deprecationReason: deprecationReasonFromDirectives(a.directives),
+                  type: print(a.type),
+                })) ?? [],
+            })) ?? [],
+        },
+        usage() {
+          return getStats(typeDefinition.name.value);
+        },
+        supergraph: supergraph
+          ? {
+              ownedByServiceNames:
+                supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ?? null,
+              getFieldOwnedByServices: (fieldName: string) =>
+                supergraph.schemaCoordinateServicesMappings.get(
+                  `${typeDefinition.name.value}.${fieldName}`,
+                ) ?? null,
+            }
+          : null,
+      } satisfies GraphQLInterfaceTypeMapper);
+    } else if (typeDefinition.kind === Kind.ENUM_TYPE_DEFINITION) {
+      types.push({
+        entity: {
+          kind: Kind.ENUM_TYPE_DEFINITION,
+          name: typeDefinition.name.value,
+          description: typeDefinition.description?.value,
+          values:
+            typeDefinition.values?.map(value => ({
+              name: value.name.value,
+              description: value.description?.value,
+              deprecationReason: deprecationReasonFromDirectives(value.directives),
+            })) ?? [],
+        },
+        usage() {
+          return getStats(typeDefinition.name.value);
+        },
+        supergraph: supergraph
+          ? {
+              ownedByServiceNames:
+                supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ?? null,
+              getEnumValueOwnedByServices: (fieldName: string) =>
+                supergraph.schemaCoordinateServicesMappings.get(
+                  `${typeDefinition.name.value}.${fieldName}`,
+                ) ?? null,
+            }
+          : null,
+      } satisfies GraphQLEnumTypeMapper);
+    } else if (typeDefinition.kind === Kind.UNION_TYPE_DEFINITION) {
+      types.push({
+        entity: {
+          kind: Kind.UNION_TYPE_DEFINITION,
+          name: typeDefinition.name.value,
+          description: typeDefinition.description?.value,
+          members:
+            typeDefinition.types?.map(t => ({
+              name: t.name.value,
+            })) ?? [],
+        },
+        usage() {
+          return getStats(typeDefinition.name.value);
+        },
+        supergraph: supergraph
+          ? {
+              ownedByServiceNames:
+                supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ?? null,
+              getUnionMemberOwnedByServices: (memberName: string) =>
+                supergraph.schemaCoordinateServicesMappings.get(memberName) ?? null,
+            }
+          : null,
+      } satisfies GraphQLUnionTypeMapper);
+    } else if (typeDefinition.kind === Kind.INPUT_OBJECT_TYPE_DEFINITION) {
+      types.push({
+        entity: {
+          kind: Kind.INPUT_OBJECT_TYPE_DEFINITION,
+          name: typeDefinition.name.value,
+          description: typeDefinition.description?.value,
+          fields:
+            typeDefinition.fields?.map(f => ({
+              name: f.name.value,
+              defaultValue: f.defaultValue ? print(f.defaultValue) : undefined,
+              description: f.description?.value,
+              deprecationReason: deprecationReasonFromDirectives(f.directives),
+              type: print(f.type),
+            })) ?? [],
+        },
+        usage() {
+          return getStats(typeDefinition.name.value);
+        },
+        supergraph: supergraph
+          ? {
+              ownedByServiceNames:
+                supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ?? null,
+              getInputFieldOwnedByServices: (inputFieldName: string) =>
+                supergraph.schemaCoordinateServicesMappings.get(
+                  `${typeDefinition.name.value}.${inputFieldName}`,
+                ) ?? null,
+            }
+          : null,
+      } satisfies GraphQLInputObjectTypeMapper);
+    } else if (typeDefinition.kind === Kind.SCALAR_TYPE_DEFINITION) {
+      types.push({
+        entity: {
+          kind: Kind.SCALAR_TYPE_DEFINITION,
+          name: typeDefinition.name.value,
+          description: typeDefinition.description?.value,
+        },
+        usage() {
+          return getStats(typeDefinition.name.value);
+        },
+        supergraph: supergraph
+          ? {
+              ownedByServiceNames:
+                supergraph.schemaCoordinateServicesMappings.get(typeDefinition.name.value) ?? null,
+            }
+          : null,
+      } satisfies GraphQLScalarTypeMapper);
+    }
+  }
+
+  return types;
 }
