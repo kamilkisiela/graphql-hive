@@ -607,6 +607,7 @@ describe('schema check purging', async () => {
       await storage.approveFailedSchemaCheck({
         schemaCheckId: failedSchemaCheck.id,
         userId: user.id,
+        comment: null,
         contracts: {
           approveContractChecksForSchemaCheckId() {
             return Promise.resolve(false);

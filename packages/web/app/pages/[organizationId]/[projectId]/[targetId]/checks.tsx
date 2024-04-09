@@ -366,7 +366,7 @@ function ApproveFailedSchemaCheckModal(props: {
         <div className="text-right">
           {mutation.fetching ? (
             <Button disabled>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-2 size-4 animate-spin" />
               Please wait
             </Button>
           ) : (
@@ -516,7 +516,7 @@ const ActiveSchemaCheck = ({
                 <Popover open={approvalOpen} onOpenChange={setApprovalOpen}>
                   <PopoverTrigger asChild>
                     <Button variant="destructive">
-                      Approve <ChevronDown className="ml-2 h-4 w-4" />
+                      Approve <ChevronDown className="ml-2 size-4" />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-[450px]">
@@ -542,7 +542,7 @@ const ActiveSchemaCheck = ({
                 <TooltipProvider delayDuration={100}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <BadgeCheck className="h-6 w-6 text-green-500" />
+                      <BadgeCheck className="size-6 text-green-500" />
                     </TooltipTrigger>
                     <TooltipContent>
                       Schema Check was manually approved by{' '}
