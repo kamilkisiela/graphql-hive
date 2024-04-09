@@ -191,6 +191,7 @@ const SchemaCheckQuery = graphql(/* GraphQL */ `
         ... on SuccessfulSchemaCheck {
           compositeSchemaSDL
           supergraphSDL
+          approvalComment
         }
         ... on FailedSchemaCheck {
           compositionErrors {
@@ -229,6 +230,7 @@ const ApproveFailedSchemaCheckMutation = graphql(/* GraphQL */ `
           __typename
           ... on SuccessfulSchemaCheck {
             isApproved
+            approvalComment
             approvedBy {
               __typename
             }
@@ -946,6 +948,7 @@ test.concurrent(
           schemaCheck: {
             __typename: 'SuccessfulSchemaCheck',
             isApproved: true,
+            approvalComment: null,
             approvedBy: {
               __typename: 'User',
             },
@@ -991,6 +994,115 @@ test.concurrent(
     });
   },
 );
+
+test.concurrent('approve failed schema check with a comment', async () => {
+  const { createOrg, ownerToken } = await initSeed().createOwner();
+  const { createProject, organization } = await createOrg();
+  const { createToken, project, target } = await createProject(ProjectType.Single);
+
+  // Create a token with write rights
+  const writeToken = await createToken({
+    targetScopes: [
+      TargetAccessScope.Read,
+      TargetAccessScope.RegistryRead,
+      TargetAccessScope.RegistryWrite,
+      TargetAccessScope.Settings,
+    ],
+  });
+
+  // Publish schema with write rights
+  const publishResult = await writeToken
+    .publishSchema({
+      sdl: /* GraphQL */ `
+        type Query {
+          ping: String
+        }
+      `,
+    })
+    .then(r => r.expectNoGraphQLErrors());
+
+  // Schema publish should be successful
+  expect(publishResult.schemaPublish.__typename).toBe('SchemaPublishSuccess');
+
+  // Create a token with read rights
+  const readToken = await createToken({
+    targetScopes: [TargetAccessScope.RegistryRead],
+    projectScopes: [],
+    organizationScopes: [],
+  });
+
+  // Check schema with read rights
+  const checkResult = await readToken
+    .checkSchema(/* GraphQL */ `
+      type Query {
+        ping: Float
+      }
+    `)
+    .then(r => r.expectNoGraphQLErrors());
+  const check = checkResult.schemaCheck;
+
+  if (check.__typename !== 'SchemaCheckError') {
+    throw new Error(`Expected SchemaCheckError, got ${check.__typename}`);
+  }
+
+  const schemaCheckId = check.schemaCheck?.id;
+
+  if (schemaCheckId == null) {
+    throw new Error('Missing schema check id.');
+  }
+
+  const mutationResult = await execute({
+    document: ApproveFailedSchemaCheckMutation,
+    variables: {
+      input: {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        target: target.cleanId,
+        schemaCheckId,
+        comment: 'This is a comment',
+      },
+    },
+    authToken: ownerToken,
+  }).then(r => r.expectNoGraphQLErrors());
+
+  expect(mutationResult).toEqual({
+    approveFailedSchemaCheck: {
+      ok: {
+        schemaCheck: {
+          __typename: 'SuccessfulSchemaCheck',
+          isApproved: true,
+          approvalComment: 'This is a comment',
+          approvedBy: {
+            __typename: 'User',
+          },
+        },
+      },
+      error: null,
+    },
+  });
+
+  const schemaCheck = await execute({
+    document: SchemaCheckQuery,
+    variables: {
+      selector: {
+        organization: organization.cleanId,
+        project: project.cleanId,
+        target: target.cleanId,
+      },
+      id: schemaCheckId,
+    },
+    authToken: readToken.secret,
+  }).then(r => r.expectNoGraphQLErrors());
+
+  expect(schemaCheck).toMatchObject({
+    target: {
+      schemaCheck: {
+        __typename: 'SuccessfulSchemaCheck',
+        approvalComment: 'This is a comment',
+      },
+    },
+  });
+});
 
 test.concurrent(
   'approving a schema check with contextId containing breaking changes allows the changes for subsequent checks with the same contextId',
@@ -1076,6 +1188,7 @@ test.concurrent(
           schemaCheck: {
             __typename: 'SuccessfulSchemaCheck',
             isApproved: true,
+            approvalComment: null,
             approvedBy: {
               __typename: 'User',
             },
@@ -1225,6 +1338,7 @@ test.concurrent(
           schemaCheck: {
             __typename: 'SuccessfulSchemaCheck',
             isApproved: true,
+            approvalComment: null,
             approvedBy: {
               __typename: 'User',
             },
@@ -1368,6 +1482,7 @@ test.concurrent(
           schemaCheck: {
             __typename: 'SuccessfulSchemaCheck',
             isApproved: true,
+            approvalComment: null,
             approvedBy: {
               __typename: 'User',
             },
