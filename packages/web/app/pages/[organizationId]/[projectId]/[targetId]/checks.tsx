@@ -349,7 +349,7 @@ function ApproveFailedSchemaCheckModal(props: {
       <h4 className="font-medium leading-none">Finish your approval</h4>
       <div>
         <p className="text-muted-foreground text-sm">Acknowledge and accept breaking changes.</p>
-        {props?.contextId || true ? (
+        {props?.contextId ? (
           <p className="text-muted-foreground text-sm">
             Approval applies to all future changes within the context of a pull request or branch
             lifecycle: <span className="font-medium">{props?.contextId}</span>
