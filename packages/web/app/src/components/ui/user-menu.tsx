@@ -112,7 +112,7 @@ export function UserMenu(props: {
           organizationName={currentOrganization.name}
         />
       ) : null}
-      <div className="flex flex-row items-center gap-8">
+      <div className="flex flex-row items-center gap-x-4 lg:gap-x-8">
         <Changelog changes={latestChangelog} />
         <MemberRoleMigrationStickyNote organization={currentOrganization} />
         {currentOrganization ? <GetStartedProgress tasks={currentOrganization.getStarted} /> : null}

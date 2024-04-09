@@ -37,10 +37,10 @@ export function GetStartedProgress(props: {
   }
 
   return (
-    <>
+    <div className="flex-row items-center gap-x-8">
       <button
         onClick={toggle}
-        className="cursor-pointer rounded px-4 py-2 text-left hover:opacity-80"
+        className="hidden cursor-pointer rounded px-4 py-2 text-left hover:opacity-80 lg:block"
       >
         <div className="text-sm font-medium">Get Started</div>
         <div className="text-xs text-gray-500">
@@ -55,8 +55,41 @@ export function GetStartedProgress(props: {
           </div>
         </div>
       </button>
+      <button className="relative size-10 lg:hidden" onClick={toggle}>
+        <svg
+          className="size-full"
+          width="36"
+          height="36"
+          viewBox="0 0 36 36"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <circle
+            cx="18"
+            cy="18"
+            r="16"
+            fill="none"
+            className="stroke-current text-gray-700"
+            strokeWidth="2"
+          />
+          <g className="origin-center -rotate-90 transform">
+            <circle
+              cx="18"
+              cy="18"
+              r="16"
+              fill="none"
+              className="stroke-current text-orange-500"
+              strokeWidth="2"
+              strokeDasharray={Math.round((completed / total) * 100)}
+              strokeDashoffset="0"
+            />
+          </g>
+        </svg>
+        <div className="absolute start-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform">
+          <span className="text-center text-sm font-bold text-white">{remaining}</span>
+        </div>
+      </button>
       <GetStartedWizard isOpen={isOpen} onClose={toggle} tasks={tasks} />
-    </>
+    </div>
   );
 }
 

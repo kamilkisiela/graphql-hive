@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode, useMemo } from 'react';
+import React, { ReactElement, ReactNode, useMemo, useState } from 'react';
 import NextLink from 'next/link';
 import { clsx } from 'clsx';
 import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -7,6 +7,7 @@ import { PulseIcon, UsersIcon } from '@/components/v2/icon';
 import { Markdown } from '@/components/v2/markdown';
 import { FragmentType, graphql, useFragment } from '@/gql';
 import { formatNumber, toDecimal, useRouteSelector } from '@/lib/hooks';
+import { useOnClickOpener } from '@/lib/hooks/use-on-click-opener';
 import { cn } from '@/lib/utils';
 import { ChatBubbleIcon } from '@radix-ui/react-icons';
 import { useArgumentListToggle } from './provider';
@@ -69,6 +70,8 @@ export function SchemaExplorerUsageStats(props: {
 }) {
   const usage = useFragment(SchemaExplorerUsageStats_UsageFragment, props.usage);
   const percentage = props.totalRequests ? (usage.total / props.totalRequests) * 100 : 0;
+  const fieldUsageTooltip = useOnClickOpener();
+  const clientsTooltip = useOnClickOpener();
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -85,7 +88,7 @@ export function SchemaExplorerUsageStats(props: {
             <div className="z-0 h-full bg-orange-500" style={{ width: `${percentage}%` }} />
           </div>
         </div>
-        <Tooltip>
+        <Tooltip {...fieldUsageTooltip.container}>
           <TooltipContent>
             <div className="z-10">
               <div className="mb-1 text-lg font-bold">Field Usage</div>
@@ -146,14 +149,14 @@ export function SchemaExplorerUsageStats(props: {
               )}
             </div>
           </TooltipContent>
-          <TooltipTrigger>
+          <TooltipTrigger {...fieldUsageTooltip.trigger}>
             <div className="cursor-help text-xl">
               <PulseIcon className="h-6 w-auto" />
             </div>
           </TooltipTrigger>
         </Tooltip>
 
-        <Tooltip>
+        <Tooltip {...clientsTooltip.container}>
           <TooltipContent>
             <>
               <div className="mb-1 text-lg font-bold">Client Usage</div>
@@ -188,7 +191,7 @@ export function SchemaExplorerUsageStats(props: {
               )}
             </>
           </TooltipContent>
-          <TooltipTrigger>
+          <TooltipTrigger {...clientsTooltip.trigger}>
             <div className="cursor-help p-1 text-xl">
               <UsersIcon size={16} className="h-6 w-auto" />
             </div>

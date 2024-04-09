@@ -52,7 +52,8 @@ function ChangelogPopover(props: { changes: Changelog[] }) {
       {props.changes.length > 0 ? (
         <PopoverTrigger>
           <Button variant="outline" className="relative text-sm">
-            Latest changes
+            <span className="hidden lg:block">Latest changes</span>
+            <span className="lg:hidden">Changes</span>
             {displayDot ? (
               <div className="absolute right-0 top-0 -mr-1 -mt-1 flex size-2">
                 <div className="absolute inline-flex size-full animate-pulse rounded-full bg-orange-500" />
