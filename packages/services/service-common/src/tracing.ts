@@ -132,7 +132,12 @@ export class TracingInstance {
   instrumentSlonik(options: SlonikTracingInterceptorOptions = {}): Interceptor {
     return createSlonikInterceptor({
       shouldExcludeStatement: (_ctx, query) => {
-        return query.sql === 'SELECT EXISTS(SELECT 1)';
+        return (
+          query.sql === 'SELECT EXISTS(SELECT 1)' ||
+          query.sql === 'SELECT 1' ||
+          query.sql === '/* Heartbeat */ SELECT 1' ||
+          query.sql === 'SELECT EXISTS( SELECT 1)'
+        );
       },
       ...options,
     });
