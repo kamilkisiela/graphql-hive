@@ -3,7 +3,13 @@ import { useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
 import { GraphQLEnumTypeComponent } from '@/components/target/explorer/enum-type';
-import { SchemaExplorerFilter } from '@/components/target/explorer/filter';
+import {
+  ArgumentVisibilityFilter,
+  DateRangeFilter,
+  FieldByNameFilter,
+  SchemaVariantFilter,
+  TypeFilter,
+} from '@/components/target/explorer/filter';
 import { GraphQLInputObjectTypeComponent } from '@/components/target/explorer/input-object-type';
 import { GraphQLInterfaceTypeComponent } from '@/components/target/explorer/interface-type';
 import { GraphQLObjectTypeComponent } from '@/components/target/explorer/object-type';
@@ -38,6 +44,9 @@ export function TypeRenderer(props: {
   organizationCleanId: string;
   projectCleanId: string;
   targetCleanId: string;
+  warnAboutUnusedArguments: boolean;
+  warnAboutDeprecatedArguments: boolean;
+  styleDeprecated: boolean;
 }) {
   const ttype = useFragment(TypeRenderFragment, props.type);
   switch (ttype.__typename) {
@@ -49,6 +58,9 @@ export function TypeRenderer(props: {
           targetCleanId={props.targetCleanId}
           projectCleanId={props.projectCleanId}
           organizationCleanId={props.organizationCleanId}
+          warnAboutUnusedArguments={props.warnAboutUnusedArguments}
+          warnAboutDeprecatedArguments={props.warnAboutDeprecatedArguments}
+          styleDeprecated={props.styleDeprecated}
         />
       );
     case 'GraphQLInterfaceType':
@@ -59,6 +71,9 @@ export function TypeRenderer(props: {
           targetCleanId={props.targetCleanId}
           projectCleanId={props.projectCleanId}
           organizationCleanId={props.organizationCleanId}
+          warnAboutUnusedArguments={props.warnAboutUnusedArguments}
+          warnAboutDeprecatedArguments={props.warnAboutDeprecatedArguments}
+          styleDeprecated={props.styleDeprecated}
         />
       );
     case 'GraphQLUnionType':
@@ -79,6 +94,7 @@ export function TypeRenderer(props: {
           targetCleanId={props.targetCleanId}
           projectCleanId={props.projectCleanId}
           organizationCleanId={props.organizationCleanId}
+          styleDeprecated={props.styleDeprecated}
         />
       );
     case 'GraphQLInputObjectType':
@@ -89,6 +105,7 @@ export function TypeRenderer(props: {
           targetCleanId={props.targetCleanId}
           projectCleanId={props.projectCleanId}
           organizationCleanId={props.organizationCleanId}
+          styleDeprecated={props.styleDeprecated}
         />
       );
     case 'GraphQLScalarType':
@@ -211,14 +228,28 @@ function TypeExplorerPageContent({ typename }: { typename: string }) {
           <Title>Explore</Title>
           <Subtitle>Insights from the latest version.</Subtitle>
         </div>
-        {latestSchemaVersion && type ? (
-          <SchemaExplorerFilter
-            organization={{ cleanId: router.organizationId }}
-            project={{ cleanId: router.projectId }}
-            target={{ cleanId: router.targetId }}
-            period={resolvedPeriod}
-          />
-        ) : null}
+        <div className="flex flex-row items-center gap-x-4">
+          {latestSchemaVersion && type ? (
+            <>
+              <TypeFilter
+                organizationId={router.organizationId}
+                projectId={router.projectId}
+                targetId={router.targetId}
+                period={resolvedPeriod}
+                typename={typename}
+              />
+              <FieldByNameFilter />
+              <DateRangeFilter />
+              <ArgumentVisibilityFilter />
+              <SchemaVariantFilter
+                organizationId={router.organizationId}
+                projectId={router.projectId}
+                targetId={router.targetId}
+                variant="all"
+              />
+            </>
+          ) : null}
+        </div>
       </div>
       {query.fetching ? null : latestSchemaVersion && type ? (
         <TypeRenderer
@@ -227,6 +258,9 @@ function TypeExplorerPageContent({ typename }: { typename: string }) {
           organizationCleanId={router.organizationId}
           projectCleanId={router.projectId}
           targetCleanId={router.targetId}
+          warnAboutDeprecatedArguments={false}
+          warnAboutUnusedArguments={false}
+          styleDeprecated
         />
       ) : type ? (
         noSchemaVersion

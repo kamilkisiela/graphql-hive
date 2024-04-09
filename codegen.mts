@@ -104,6 +104,7 @@ const config: CodegenConfig = {
             '../shared/entities#OrganizationGetStarted as OrganizationGetStartedMapper',
           SchemaExplorer: '../shared/mappers#SchemaExplorerMapper',
           UnusedSchemaExplorer: '../shared/mappers#UnusedSchemaExplorerMapper',
+          DeprecatedSchemaExplorer: '../shared/mappers#DeprecatedSchemaExplorerMapper',
           GraphQLObjectType: '../shared/mappers#GraphQLObjectTypeMapper',
           GraphQLInterfaceType: '../shared/mappers#GraphQLInterfaceTypeMapper',
           GraphQLUnionType: '../shared/mappers#GraphQLUnionTypeMapper',

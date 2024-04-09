@@ -23,6 +23,7 @@ export function GraphQLInputObjectTypeComponent(props: {
   organizationCleanId: string;
   projectCleanId: string;
   targetCleanId: string;
+  styleDeprecated: boolean;
 }) {
   const ttype = useFragment(GraphQLInputObjectTypeComponent_TypeFragment, props.type);
   return (
@@ -44,6 +45,7 @@ export function GraphQLInputObjectTypeComponent(props: {
         targetCleanId={props.targetCleanId}
         projectCleanId={props.projectCleanId}
         organizationCleanId={props.organizationCleanId}
+        styleDeprecated={props.styleDeprecated}
       />
     </GraphQLTypeCard>
   );

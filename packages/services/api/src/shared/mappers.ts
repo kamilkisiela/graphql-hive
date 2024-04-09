@@ -1,4 +1,4 @@
-import type { DocumentNode, GraphQLSchema } from 'graphql';
+import type { DocumentNode, GraphQLSchema, Kind } from 'graphql';
 import type {
   SchemaChangeType,
   SchemaCheck,
@@ -95,6 +95,17 @@ export type UnusedSchemaExplorerMapper = {
   supergraph: null | SuperGraphInformation;
 };
 
+export type DeprecatedSchemaExplorerMapper = {
+  sdl: DocumentNode;
+  usage: {
+    period: DateRange;
+    organization: string;
+    project: string;
+    target: string;
+  };
+  supergraph: null | SuperGraphInformation;
+};
+
 export type GraphQLFieldMapper = WithSchemaCoordinatesUsage<
   WithGraphQLParentInfo<{
     entity: {
@@ -168,7 +179,7 @@ export type GraphQLUnionTypeMemberMapper = WithSchemaCoordinatesUsage<
 
 export type GraphQLObjectTypeMapper = WithSchemaCoordinatesUsage<{
   entity: {
-    kind: 'object';
+    kind: Kind.OBJECT_TYPE_DEFINITION;
     name: string;
     description?: string | null;
     fields: Array<GraphQLFieldMapper['entity']>;
@@ -181,7 +192,7 @@ export type GraphQLObjectTypeMapper = WithSchemaCoordinatesUsage<{
 }>;
 export type GraphQLInterfaceTypeMapper = WithSchemaCoordinatesUsage<{
   entity: {
-    kind: 'interface';
+    kind: Kind.INTERFACE_TYPE_DEFINITION;
     name: string;
     description?: string | null;
     fields: Array<GraphQLFieldMapper['entity']>;
@@ -194,7 +205,7 @@ export type GraphQLInterfaceTypeMapper = WithSchemaCoordinatesUsage<{
 }>;
 export type GraphQLUnionTypeMapper = WithSchemaCoordinatesUsage<{
   entity: {
-    kind: 'union';
+    kind: Kind.UNION_TYPE_DEFINITION;
     name: string;
     description?: string | null;
     members: Array<GraphQLUnionTypeMemberMapper['entity']>;
@@ -206,7 +217,7 @@ export type GraphQLUnionTypeMapper = WithSchemaCoordinatesUsage<{
 }>;
 export type GraphQLEnumTypeMapper = WithSchemaCoordinatesUsage<{
   entity: {
-    kind: 'enum';
+    kind: Kind.ENUM_TYPE_DEFINITION;
     name: string;
     description?: string | null;
     values: Array<GraphQLEnumValueMapper['entity']>;
@@ -218,7 +229,7 @@ export type GraphQLEnumTypeMapper = WithSchemaCoordinatesUsage<{
 }>;
 export type GraphQLInputObjectTypeMapper = WithSchemaCoordinatesUsage<{
   entity: {
-    kind: 'input-object';
+    kind: Kind.INPUT_OBJECT_TYPE_DEFINITION;
     name: string;
     description?: string | null;
     fields: Array<GraphQLInputFieldMapper['entity']>;
@@ -230,7 +241,7 @@ export type GraphQLInputObjectTypeMapper = WithSchemaCoordinatesUsage<{
 }>;
 export type GraphQLScalarTypeMapper = WithSchemaCoordinatesUsage<{
   entity: {
-    kind: 'scalar';
+    kind: Kind.SCALAR_TYPE_DEFINITION;
     name: string;
     description?: string | null;
   };

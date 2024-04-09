@@ -1,5 +1,6 @@
 import { FragmentType, graphql, useFragment } from '@/gql';
 import {
+  DeprecationNote,
   GraphQLTypeCard,
   GraphQLTypeCardListItem,
   LinkToCoordinatePage,
@@ -17,6 +18,8 @@ export const GraphQLEnumTypeComponent_TypeFragment = graphql(`
     values {
       name
       description
+      isDeprecated
+      deprecationReason
       usage {
         ...SchemaExplorerUsageStats_UsageFragment
       }
@@ -36,6 +39,7 @@ export function GraphQLEnumTypeComponent(props: {
   organizationCleanId: string;
   projectCleanId: string;
   targetCleanId: string;
+  styleDeprecated: boolean;
 }) {
   const ttype = useFragment(GraphQLEnumTypeComponent_TypeFragment, props.type);
   return (
@@ -52,9 +56,14 @@ export function GraphQLEnumTypeComponent(props: {
         {ttype.values.map((value, i) => (
           <GraphQLTypeCardListItem key={value.name} index={i}>
             <div>
-              <LinkToCoordinatePage coordinate={`${ttype.name}.${value.name}`}>
-                {value.name}
-              </LinkToCoordinatePage>
+              <DeprecationNote
+                styleDeprecated={props.styleDeprecated}
+                deprecationReason={value.deprecationReason}
+              >
+                <LinkToCoordinatePage coordinate={`${ttype.name}.${value.name}`}>
+                  {value.name}
+                </LinkToCoordinatePage>
+              </DeprecationNote>
             </div>
             {value.supergraphMetadata ? (
               <SupergraphMetadataList supergraphMetadata={value.supergraphMetadata} />

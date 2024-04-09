@@ -704,6 +704,7 @@ export default gql`
     """
     explorer(usage: SchemaExplorerUsageInput): SchemaExplorer
     unusedSchema(usage: UnusedSchemaExplorerUsageInput): UnusedSchemaExplorer
+    deprecatedSchema(usage: DeprecatedSchemaExplorerUsageInput): DeprecatedSchemaExplorer
 
     schemaCompositionErrors: SchemaErrorConnection
 
@@ -751,6 +752,10 @@ export default gql`
     period: DateRangeInput!
   }
 
+  input DeprecatedSchemaExplorerUsageInput {
+    period: DateRangeInput!
+  }
+
   type SchemaExplorer {
     types: [GraphQLNamedType!]!
     type(name: String!): GraphQLNamedType
@@ -760,6 +765,10 @@ export default gql`
   }
 
   type UnusedSchemaExplorer {
+    types: [GraphQLNamedType!]!
+  }
+
+  type DeprecatedSchemaExplorer {
     types: [GraphQLNamedType!]!
   }
 
@@ -850,6 +859,7 @@ export default gql`
   type GraphQLEnumType {
     name: String!
     description: String
+    deprecationReason: String
     values: [GraphQLEnumValue!]!
     usage: SchemaCoordinateUsage!
     """

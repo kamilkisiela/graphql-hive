@@ -204,6 +204,8 @@ const GraphQLFields_FieldFragment = graphql(`
     name
     description
     type
+    isDeprecated
+    deprecationReason
     usage {
       total
       ...SchemaExplorerUsageStats_UsageFragment
@@ -222,6 +224,8 @@ const GraphQLArguments_ArgumentFragment = graphql(`
     name
     description
     type
+    isDeprecated
+    deprecationReason
   }
 `);
 
@@ -230,6 +234,8 @@ const GraphQLInputFields_InputFieldFragment = graphql(`
     name
     description
     type
+    isDeprecated
+    deprecationReason
     usage {
       total
       ...SchemaExplorerUsageStats_UsageFragment
@@ -242,6 +248,32 @@ const GraphQLTypeCard_SupergraphMetadataFragment = graphql(`
     ...SupergraphMetadataList_SupergraphMetadataFragment
   }
 `);
+
+export function DeprecationNote(props: {
+  deprecationReason: string | null | undefined;
+  styleDeprecated: boolean;
+  children: ReactNode;
+}) {
+  if (!props.deprecationReason) {
+    return <>{props.children}</>;
+  }
+
+  return (
+    <TooltipProvider delayDuration={100}>
+      <Tooltip>
+        <TooltipTrigger
+          className={cn(props.styleDeprecated ? 'line-through hover:line-through' : '')}
+        >
+          {props.children}
+        </TooltipTrigger>
+        <TooltipContent className="min-w-6 max-w-screen-md" side="right" sideOffset={5}>
+          <div className="mb-2">Deprecation reason</div>
+          <Markdown className="text-gray-400" content={props.deprecationReason} />
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
 
 export function GraphQLTypeCard(props: {
   kind: string;
@@ -303,6 +335,7 @@ export function GraphQLTypeCard(props: {
 function GraphQLArguments(props: {
   parentCoordinate: string;
   args: FragmentType<typeof GraphQLArguments_ArgumentFragment>[];
+  styleDeprecated: boolean;
 }) {
   const args = useFragment(GraphQLArguments_ArgumentFragment, props.args);
   const [isCollapsedGlobally] = useArgumentListToggle();
@@ -323,7 +356,12 @@ function GraphQLArguments(props: {
             const coordinate = `${props.parentCoordinate}.${arg.name}`;
             return (
               <div key={arg.name}>
-                <LinkToCoordinatePage coordinate={coordinate}>{arg.name}</LinkToCoordinatePage>
+                <DeprecationNote
+                  styleDeprecated={props.styleDeprecated}
+                  deprecationReason={arg.deprecationReason}
+                >
+                  <LinkToCoordinatePage coordinate={coordinate}>{arg.name}</LinkToCoordinatePage>
+                </DeprecationNote>
                 {': '}
                 <GraphQLTypeAsLink type={arg.type} />
                 {arg.description ? <Description description={arg.description} /> : null}
@@ -344,7 +382,12 @@ function GraphQLArguments(props: {
           const coordinate = `${props.parentCoordinate}.${arg.name}`;
           return (
             <span key={arg.name}>
-              <LinkToCoordinatePage coordinate={coordinate}>{arg.name}</LinkToCoordinatePage>
+              <DeprecationNote
+                styleDeprecated={props.styleDeprecated}
+                deprecationReason={arg.deprecationReason}
+              >
+                <LinkToCoordinatePage coordinate={coordinate}>{arg.name}</LinkToCoordinatePage>
+              </DeprecationNote>
               {': '}
               <GraphQLTypeAsLink type={arg.type} />
             </span>
@@ -393,6 +436,9 @@ export function GraphQLFields(props: {
   projectCleanId: string;
   organizationCleanId: string;
   filterValue?: string;
+  warnAboutUnusedArguments: boolean;
+  warnAboutDeprecatedArguments: boolean;
+  styleDeprecated: boolean;
 }) {
   const { totalRequests, filterValue } = props;
   const fieldsFromFragment = useFragment(GraphQLFields_FieldFragment, props.fields);
@@ -420,11 +466,15 @@ export function GraphQLFields(props: {
           const isUsed = field.usage.total > 0;
           const hasUnusedArguments = field.args.length > 0;
           const showsUnusedSchema = typeof totalRequests !== 'number';
+          const isDeprecated = field.isDeprecated;
 
           return (
             <GraphQLTypeCardListItem key={field.name} index={i}>
               <div>
-                {isUsed && hasUnusedArguments && showsUnusedSchema ? (
+                {props.warnAboutUnusedArguments &&
+                isUsed &&
+                hasUnusedArguments &&
+                showsUnusedSchema ? (
                   <Tooltip>
                     <TooltipContent>
                       This field is used but the presented arguments are not.
@@ -434,11 +484,30 @@ export function GraphQLFields(props: {
                     </TooltipTrigger>
                   </Tooltip>
                 ) : null}
-                <LinkToCoordinatePage coordinate={coordinate} className="font-semibold">
-                  {field.name}
-                </LinkToCoordinatePage>
+                {props.warnAboutDeprecatedArguments && !isDeprecated ? (
+                  <Tooltip>
+                    <TooltipContent>
+                      This field is not deprecated but the presented arguments are.
+                    </TooltipContent>
+                    <TooltipTrigger>
+                      <span className="mr-1 text-sm text-orange-500">*</span>
+                    </TooltipTrigger>
+                  </Tooltip>
+                ) : null}
+                <DeprecationNote
+                  styleDeprecated={props.styleDeprecated}
+                  deprecationReason={field.deprecationReason}
+                >
+                  <LinkToCoordinatePage coordinate={coordinate} className="font-semibold">
+                    {field.name}
+                  </LinkToCoordinatePage>
+                </DeprecationNote>
                 {field.args.length > 0 ? (
-                  <GraphQLArguments parentCoordinate={coordinate} args={field.args} />
+                  <GraphQLArguments
+                    styleDeprecated={props.styleDeprecated}
+                    parentCoordinate={coordinate}
+                    args={field.args}
+                  />
                 ) : null}
                 <span className="mr-1">:</span>
                 <GraphQLTypeAsLink className="font-semibold text-gray-400" type={field.type} />
@@ -483,6 +552,7 @@ export function GraphQLInputFields(props: {
   targetCleanId: string;
   projectCleanId: string;
   organizationCleanId: string;
+  styleDeprecated: boolean;
 }): ReactElement {
   const fields = useFragment(GraphQLInputFields_InputFieldFragment, props.fields);
 
@@ -493,9 +563,14 @@ export function GraphQLInputFields(props: {
         return (
           <GraphQLTypeCardListItem key={field.name} index={i}>
             <div className="text-gray-400">
-              <LinkToCoordinatePage coordinate={coordinate} className="font-semibold text-white">
-                {field.name}
-              </LinkToCoordinatePage>
+              <DeprecationNote
+                styleDeprecated={props.styleDeprecated}
+                deprecationReason={field.deprecationReason}
+              >
+                <LinkToCoordinatePage coordinate={coordinate} className="font-semibold text-white">
+                  {field.name}
+                </LinkToCoordinatePage>
+              </DeprecationNote>
               <span className="mr-1">:</span>
               <GraphQLTypeAsLink className="font-semibold" type={field.type} />
             </div>
@@ -570,15 +645,19 @@ function GraphQLTypeAsLink(props: { type: string; className?: string }): ReactEl
   );
 }
 
-export function LinkToCoordinatePage(props: {
-  coordinate: string;
-  children: ReactNode;
-  className?: string;
-}): ReactElement {
+export const LinkToCoordinatePage = React.forwardRef<
+  HTMLAnchorElement,
+  {
+    coordinate: string;
+    children: ReactNode;
+    className?: string;
+  }
+>((props, ref) => {
   const router = useRouteSelector();
 
   return (
     <NextLink
+      ref={ref}
       className={cn('hover:underline hover:underline-offset-2', props.className)}
       href={{
         pathname:
@@ -595,4 +674,4 @@ export function LinkToCoordinatePage(props: {
       {props.children}
     </NextLink>
   );
-}
+});
