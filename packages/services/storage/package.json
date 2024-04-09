@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@graphql-inspector/core": "5.1.0-alpha-20231208113249-34700c8a",
+    "@hive/service-common": "workspace:*",
     "@sentry/node": "7.109.0",
     "@sentry/types": "7.109.0",
     "@tgriesser/schemats": "9.0.1",

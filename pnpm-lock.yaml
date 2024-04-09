@@ -1223,6 +1223,9 @@ importers:
       '@graphql-inspector/core':
         specifier: 5.1.0-alpha-20231208113249-34700c8a
         version: 5.1.0-alpha-20231208113249-34700c8a(graphql@16.8.1)
+      '@hive/service-common':
+        specifier: workspace:*
+        version: link:../service-common
       '@sentry/node':
         specifier: 7.109.0
         version: 7.109.0
