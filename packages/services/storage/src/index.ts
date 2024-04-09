@@ -4236,6 +4236,7 @@ export async function createStorage(
             "is_success" = true
             , "is_manually_approved" = true
             , "manual_approval_user_id" = ${args.userId}
+            , "manual_approval_comment" = ${args.comment ?? null}
             , "breaking_schema_changes" = (
               SELECT json_agg(
                 CASE
@@ -4262,6 +4263,7 @@ export async function createStorage(
           SET
             "is_success" = true
             , "is_manually_approved" = true
+            , "manual_approval_comment" = ${args.comment ?? null}
             , "manual_approval_user_id" = ${args.userId}
           WHERE
             "id" = ${args.schemaCheckId}
@@ -5155,6 +5157,7 @@ const schemaCheckSQLFields = sql`
   , c."github_sha" as "githubSha"
   , coalesce(c."is_manually_approved", false) as "isManuallyApproved"
   , c."manual_approval_user_id" as "manualApprovalUserId"
+  , c."manual_approval_comment" as "manualApprovalComment"
   , c."context_id" as "contextId"
   , c."conditional_breaking_change_metadata" as "conditionalBreakingChangeMetadata"
 `;

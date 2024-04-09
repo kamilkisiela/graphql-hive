@@ -976,6 +976,10 @@ export default gql`
     id: ID!
     createdAt: String!
     """
+    Optional context ID to group schema checks together.
+    """
+    contextId: String
+    """
     The SDL of the schema that was checked.
     """
     schemaSDL: String!
@@ -1117,6 +1121,10 @@ export default gql`
     id: ID!
     createdAt: String!
     """
+    Optional context ID to group schema checks together.
+    """
+    contextId: String
+    """
     The SDL of the schema that was checked.
     """
     schemaSDL: String!
@@ -1189,6 +1197,10 @@ export default gql`
     The user that approved the schema check.
     """
     approvedBy: User
+    """
+    Comment given when the schema check was approved.
+    """
+    approvalComment: String
   }
 
   """
@@ -1197,6 +1209,10 @@ export default gql`
   type FailedSchemaCheck implements SchemaCheck {
     id: ID!
     createdAt: String!
+    """
+    Optional context ID to group schema checks together.
+    """
+    contextId: String
     """
     The SDL of the schema that was checked.
     """
@@ -1293,6 +1309,11 @@ export default gql`
     project: ID!
     target: ID!
     schemaCheckId: ID!
+    """
+    Optional comment visible in the schema check.
+    Give a reason why the schema check was approved.
+    """
+    comment: String
   }
 
   type ApproveFailedSchemaCheckResult {

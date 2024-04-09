@@ -182,6 +182,7 @@ export const resolvers: SchemaModule.Resolvers = {
         projectId,
         targetId,
         schemaCheckId: input.schemaCheckId,
+        comment: input.comment,
       });
 
       if (result.type === 'error') {
@@ -1567,10 +1568,15 @@ export const resolvers: SchemaModule.Resolvers = {
       return schemaCheck.isManuallyApproved;
     },
     approvedBy(schemaCheck, _, { injector }) {
-      return injector.get(SchemaManager).getApprovedByUser({
-        organizationId: schemaCheck.selector.organizationId,
-        userId: schemaCheck.manualApprovalUserId,
-      });
+      return schemaCheck.isManuallyApproved
+        ? injector.get(SchemaManager).getApprovedByUser({
+            organizationId: schemaCheck.selector.organizationId,
+            userId: schemaCheck.manualApprovalUserId,
+          })
+        : null;
+    },
+    approvalComment(schemaCheck) {
+      return schemaCheck.isManuallyApproved ? schemaCheck.manualApprovalComment : null;
     },
     contractChecks(schemaCheck, _, { injector }) {
       return injector.get(ContractsManager).getContractsChecksForSchemaCheck(schemaCheck);

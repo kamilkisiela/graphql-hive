@@ -1,8 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import NextLink from 'next/link';
-import clsx from 'clsx';
 import { format } from 'date-fns';
-import { GitCompareIcon } from 'lucide-react';
+import { BadgeCheck, ChevronDown, GitCompareIcon, Loader2 } from 'lucide-react';
 import { useMutation, useQuery } from 'urql';
 import { authenticated } from '@/components/authenticated-container';
 import { Page, TargetLayout } from '@/components/layouts/target';
@@ -16,8 +15,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Subtitle, Title } from '@/components/ui/page';
+import { Popover, PopoverArrow, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { QueryError } from '@/components/ui/query-error';
+import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Badge,
@@ -27,9 +29,7 @@ import {
   Heading,
   Button as LegacyButton,
   MetaTitle,
-  Modal,
   Spinner,
-  Switch,
   TimeAgo,
 } from '@/components/v2';
 import { AlertTriangleIcon, DiffIcon } from '@/components/v2/icon';
@@ -117,6 +117,7 @@ const Navigation = (props: {
         <>
           {query.data.target.schemaChecks.edges.map(edge => (
             <div
+              key={edge.node.id}
               className={cn(
                 'flex flex-col rounded-md p-2.5 hover:bg-gray-800/40',
                 edge.node.id === router.schemaCheckId ? 'bg-gray-800/40' : null,
@@ -195,6 +196,7 @@ const ActiveSchemaCheck_SchemaCheckFragment = graphql(`
     __typename
     id
     serviceName
+    contextId
     createdAt
     meta {
       commit
@@ -209,7 +211,9 @@ const ActiveSchemaCheck_SchemaCheckFragment = graphql(`
       approvedBy {
         id
         displayName
+        email
       }
+      approvalComment
     }
     contractChecks {
       __typename
@@ -284,81 +288,109 @@ const ApproveFailedSchemaCheckMutation = graphql(`
   }
 `);
 
-const ApproveFailedSchemaCheckModal = (props: {
+function ApproveFailedSchemaCheckModal(props: {
   organizationId: string;
   projectId: string;
   targetId: string;
   schemaCheckId: string;
-  isOpen: boolean;
-  close: () => void;
-}) => {
-  const [state, mutate] = useMutation(ApproveFailedSchemaCheckMutation);
+  contextId: string | null | undefined;
+  onClose(): void;
+}) {
+  const [mutation, approve] = useMutation(ApproveFailedSchemaCheckMutation);
+  const [approvalComment, setApprovalComment] = useState<string>('');
+  const onApprovalCommentChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setApprovalComment(e.target.value);
+    },
+    [setApprovalComment],
+  );
+
+  if (mutation.error) {
+    return (
+      <div className="space-y-2">
+        <h4 className="font-medium leading-none">Oops. Something unexpected happened</h4>
+        <p className="text-muted-foreground text-sm">{mutation.error.message}</p>
+        <div className="text-right">
+          <Button onClick={props.onClose}>Close</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (mutation.data?.approveFailedSchemaCheck.error) {
+    return (
+      <div className="space-y-2">
+        <h4 className="font-medium leading-none">Approval failed</h4>
+        <p className="text-muted-foreground text-sm">
+          {mutation.data.approveFailedSchemaCheck.error.message}
+        </p>
+        <div className="text-right">
+          <Button onClick={props.onClose}>Close</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (mutation.data?.approveFailedSchemaCheck.ok) {
+    return (
+      <div className="space-y-2">
+        <h4 className="font-medium leading-none">
+          The schema check has been approved successfully!
+        </h4>
+        <div className="text-right">
+          <Button onClick={props.onClose}>Close</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <Modal open={props.isOpen} onOpenChange={props.close} className={clsx('w-[550px]')}>
-      <div className={clsx('flex flex-col items-stretch gap-5')}>
-        <Heading>Approve Failed Schema Check</Heading>
-        {!state.data && !state.error ? (
-          <>
-            <p>Are you sure you want to approve this failed schema check?</p>
-            <div className="flex w-full gap-2">
-              <LegacyButton type="button" size="large" block onClick={props.close}>
-                Close
-              </LegacyButton>
-              <LegacyButton
-                type="submit"
-                size="large"
-                block
-                variant="primary"
-                disabled={state.fetching}
-                onClick={() =>
-                  mutate({
-                    input: {
-                      organization: props.organizationId,
-                      project: props.projectId,
-                      target: props.targetId,
-                      schemaCheckId: props.schemaCheckId,
-                    },
-                  })
-                }
-              >
-                Approve failed schema check
-              </LegacyButton>
-            </div>
-          </>
-        ) : state.error ? (
-          <>
-            <p>Oops. Something unexpected went wrong. Please try again later</p>
-            <code>{state.error.message}</code>
-            <div className="flex w-full gap-2">
-              <LegacyButton type="button" size="large" block onClick={props.close}>
-                Close
-              </LegacyButton>
-            </div>
-          </>
-        ) : state.data?.approveFailedSchemaCheck.error ? (
-          <>
-            <p>{state.data.approveFailedSchemaCheck.error.message}</p>
-            <div className="flex w-full gap-2">
-              <LegacyButton type="button" size="large" block onClick={props.close}>
-                Close
-              </LegacyButton>
-            </div>
-          </>
-        ) : state.data?.approveFailedSchemaCheck.ok ? (
-          <>
-            <p>The schema check has been approved successfully!</p>
-            <div className="flex w-full gap-2">
-              <LegacyButton type="button" size="large" block onClick={props.close}>
-                Close
-              </LegacyButton>
-            </div>
-          </>
+    <div className="space-y-2">
+      <h4 className="font-medium leading-none">Finish your approval</h4>
+      <div>
+        <p className="text-muted-foreground text-sm">Acknowledge and accept breaking changes.</p>
+        {props?.contextId ? (
+          <p className="text-muted-foreground text-sm">
+            Approval applies to all future changes within the context of a pull request or branch
+            lifecycle: <span className="font-medium">{props?.contextId}</span>
+          </p>
         ) : null}
       </div>
-    </Modal>
+      <div className="space-y-2">
+        <Textarea
+          value={approvalComment}
+          onChange={onApprovalCommentChange}
+          className="w-full"
+          placeholder="Leave a comment"
+        />
+        <div className="text-right">
+          {mutation.fetching ? (
+            <Button disabled>
+              <Loader2 className="mr-2 size-4 animate-spin" />
+              Please wait
+            </Button>
+          ) : (
+            <Button
+              onClick={() =>
+                approve({
+                  input: {
+                    organization: props.organizationId,
+                    project: props.projectId,
+                    target: props.targetId,
+                    schemaCheckId: props.schemaCheckId,
+                    comment: approvalComment,
+                  },
+                })
+              }
+            >
+              Submit approval
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
   );
-};
+}
 
 const BreakingChangesTitle = () => {
   return (
@@ -407,13 +439,16 @@ const ActiveSchemaCheck = ({
     },
     pause: !schemaCheckId,
   });
-  const [isApproveFailedSchemaCheckModalOpen, setIsApproveFailedSchemaCheckModalOpen] =
-    useState(false);
+  const [approvalOpen, setApprovalOpen] = useState(false);
 
   const schemaCheck = useFragment(
     ActiveSchemaCheck_SchemaCheckFragment,
     query.data?.target?.schemaCheck,
   );
+
+  if (!schemaCheckId) {
+    return null;
+  }
 
   if (query.fetching) {
     return (
@@ -478,33 +513,68 @@ const ActiveSchemaCheck = ({
           {schemaCheck.__typename === 'FailedSchemaCheck' && schemaCheck.canBeApproved ? (
             <div className="ml-auto mr-0 pl-4">
               {schemaCheck.canBeApprovedByViewer ? (
-                <LegacyButton danger onClick={() => setIsApproveFailedSchemaCheckModalOpen(true)}>
-                  Approve
-                </LegacyButton>
+                <Popover open={approvalOpen} onOpenChange={setApprovalOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="destructive">
+                      Approve <ChevronDown className="ml-2 size-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[450px]">
+                    <PopoverArrow />
+                    <ApproveFailedSchemaCheckModal
+                      onClose={() => setApprovalOpen(false)}
+                      organizationId={router.organizationId}
+                      projectId={router.projectId}
+                      targetId={router.targetId}
+                      schemaCheckId={schemaCheck.id}
+                      contextId={schemaCheck.contextId}
+                    />
+                  </PopoverContent>
+                </Popover>
               ) : null}
             </div>
           ) : null}
-          {schemaCheck.__typename === 'SuccessfulSchemaCheck' && schemaCheck.isApproved ? (
-            <div className="ml-4">
-              <div className="text-xs">Approved by</div>
-              <div>
-                <div className="text-sm font-bold text-white">
-                  {schemaCheck.approvedBy?.displayName ?? 'unknown'}
-                </div>
-              </div>
-            </div>
-          ) : null}
         </div>
+        {schemaCheck.__typename === 'SuccessfulSchemaCheck' && schemaCheck.isApproved ? (
+          <div className="py-6">
+            <div className="flex flex-row items-center gap-x-6 rounded-md border border-gray-900 p-4 font-medium text-gray-400">
+              <div>
+                <TooltipProvider delayDuration={100}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <BadgeCheck className="size-6 text-green-500" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Schema Check was manually approved by{' '}
+                      {schemaCheck.approvedBy?.displayName ?? 'unknown'}.
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <div>
+                <p className="text-sm font-medium leading-none">
+                  {schemaCheck.approvedBy?.displayName ?? 'unknown'}
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  {schemaCheck.approvedBy?.email ?? 'unknown'}
+                </p>
+              </div>
+              {schemaCheck.approvalComment ? (
+                <div className="text-sm italic text-white">
+                  <span>„ </span>
+                  {schemaCheck.approvalComment}
+                  <span> ”</span>
+                </div>
+              ) : (
+                <div className="text-sm italic">
+                  manually approved this schema check without a comment
+                </div>
+              )}
+            </div>
+          </div>
+        ) : null}
       </div>
       <SchemaChecksView schemaCheck={schemaCheck} projectType={query.data.project.type} />
-      <ApproveFailedSchemaCheckModal
-        organizationId={router.organizationId}
-        projectId={router.projectId}
-        targetId={router.targetId}
-        schemaCheckId={schemaCheck.id}
-        isOpen={isApproveFailedSchemaCheckModalOpen}
-        close={() => setIsApproveFailedSchemaCheckModalOpen(false)}
-      />
     </div>
   );
 };
@@ -845,7 +915,7 @@ function DefaultSchemaView(props: {
       <Tabs value={selectedView} onValueChange={value => setSelectedView(value)}>
         <TabsList className="bg-background border-muted w-full justify-start rounded-none border-x border-b">
           {items.map(item => (
-            <TabsTrigger value={item.value} disabled={item.isDisabled}>
+            <TabsTrigger key={item.value} value={item.value} disabled={item.isDisabled}>
               {item.icon}
               <span className="ml-2">{item.label}</span>
             </TabsTrigger>

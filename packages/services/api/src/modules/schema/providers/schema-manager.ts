@@ -902,6 +902,7 @@ export class SchemaManager {
     projectId: string;
     organizationId: string;
     schemaCheckId: string;
+    comment: string | null | undefined;
   }) {
     this.logger.debug('Manually approve failed schema check (args=%o)', args);
 
@@ -982,6 +983,7 @@ export class SchemaManager {
       contracts: this.contracts,
       schemaCheckId: args.schemaCheckId,
       userId: viewer.id,
+      comment: args.comment,
     });
 
     if (!schemaCheck) {

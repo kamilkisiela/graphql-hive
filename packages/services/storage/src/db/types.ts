@@ -243,6 +243,7 @@ export interface schema_checks {
   id: string;
   is_manually_approved: boolean | null;
   is_success: boolean;
+  manual_approval_comment: string | null;
   manual_approval_user_id: string | null;
   meta: any | null;
   safe_schema_changes: any | null;

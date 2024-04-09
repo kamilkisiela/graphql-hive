@@ -292,7 +292,7 @@ test.concurrent(
 );
 
 const ApproveFailedSchemaCheckMutation = graphql(/* GraphQL */ `
-  mutation ApproveFailedSchemaCheck($input: ApproveFailedSchemaCheckInput!) {
+  mutation ApproveFailedSchemaCheckContracts($input: ApproveFailedSchemaCheckInput!) {
     approveFailedSchemaCheck(input: $input) {
       ok {
         schemaCheck {
