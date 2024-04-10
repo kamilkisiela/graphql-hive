@@ -10,7 +10,6 @@ export { Checkbox } from '@/components/v2/checkbox';
 export { CopyValue } from '@/components/v2/copy-value';
 export { DataWrapper } from '@/components/v2/data-wrapper';
 export { DiffEditor } from '@/components/v2/diff-editor';
-export { Drawer } from '@/components/v2/drawer';
 export { EmptyList, noSchema } from '@/components/v2/empty-list';
 export { GraphQLBlock } from '@/components/v2/graphql-block';
 export { Heading } from '@/components/v2/heading';
