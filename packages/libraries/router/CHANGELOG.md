@@ -1,3 +1,7 @@
+# 10.04.2024
+
+- `HIVE_CDN_ENDPOINT` and `endpoint` accept an URL with and without the `/supergraph` part
+
 # 09.01.2024
 
 - Introduce `HIVE_CDN_SCHEMA_FILE_PATH` environment variable to specify where to download the supergraph schema (default is `./supergraph-schema.graphql`)

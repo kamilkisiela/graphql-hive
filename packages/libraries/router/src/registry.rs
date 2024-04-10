@@ -33,7 +33,7 @@ impl HiveRegistry {
             key: None,
             poll_interval: None,
             accept_invalid_certs: Some(true),
-            schema_file_path: None
+            schema_file_path: None,
         };
 
         // Pass values from user's config
@@ -86,7 +86,7 @@ impl HiveRegistry {
         }
 
         // Resolve values
-        let endpoint = config.endpoint.unwrap_or_else(|| "".to_string());
+        let mut endpoint = config.endpoint.unwrap_or_else(|| "".to_string());
         let key = config.key.unwrap_or_else(|| "".to_string());
         let poll_interval: u64 = match config.poll_interval {
             Some(value) => value,
@@ -110,6 +110,14 @@ impl HiveRegistry {
             return Err(anyhow!("environment variable HIVE_CDN_ENDPOINT not found",));
         }
 
+        if !endpoint.ends_with("/supergraph") {
+            if endpoint.ends_with("/") {
+                endpoint.push_str("supergraph")
+            } else {
+                endpoint.push_str("/supergraph")
+            }
+        }
+
         // Throw if key is empty
         if key.is_empty() {
             return Err(anyhow!("environment variable HIVE_CDN_KEY not found"));
@@ -118,7 +126,9 @@ impl HiveRegistry {
         // A hacky way to force the router to use GraphQL Hive CDN as the source of schema.
         // Our plugin does the polling and saves the supergraph to a file.
         // It also enables hot-reloading to makes sure Apollo Router watches the file.
-        let file_name = config.schema_file_path.unwrap_or("supergraph-schema.graphql".to_string());
+        let file_name = config
+            .schema_file_path
+            .unwrap_or("supergraph-schema.graphql".to_string());
         env::set_var("APOLLO_ROUTER_SUPERGRAPH_PATH", file_name.clone());
         env::set_var("APOLLO_ROUTER_HOT_RELOAD", "true");
 
@@ -172,7 +182,7 @@ impl HiveRegistry {
         }
 
         let resp = client
-            .get(format!("{}/supergraph", self.endpoint))
+            .get(self.endpoint.as_str())
             .headers(headers)
             .send()
             .map_err(|e| e.to_string())?;
