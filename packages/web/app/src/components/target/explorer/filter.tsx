@@ -138,7 +138,7 @@ export function DateRangeFilter() {
 
   return (
     <DateRangePicker
-      validUnits={['y', 'M', 'w', 'd', 'h']}
+      validUnits={['y', 'M', 'w', 'd']}
       onUpdate={value => {
         periodSelector.setPeriod(value.preset.range);
       }}
