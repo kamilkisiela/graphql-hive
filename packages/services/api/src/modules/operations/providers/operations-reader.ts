@@ -10,7 +10,7 @@ import { toEndOfInterval, toStartOfInterval } from '../lib/date-time-helpers';
 import { pickTableByPeriod } from '../lib/pick-table-by-provider';
 import { ClickHouse, RowOf, sql } from './clickhouse-client';
 import { calculateTimeWindow } from './helpers';
-import { SqlValue } from './sql';
+import { RawValue, SqlValue } from './sql';
 
 const CoordinateClientNamesGroupModel = z.array(
   z.object({
@@ -75,27 +75,45 @@ export class OperationsReader {
     private logger: Logger,
   ) {}
 
-  private pickQueryByPeriod(
-    queryMap: {
-      hourly: {
-        query: SqlValue;
-        queryId: string;
-        timeout: number;
-      };
+  private pickAggregationByPeriod(args: {
+    period: DateRange | null;
+    resolution?: number;
+    timeout:
+      | {
+          daily: number;
+          hourly: number;
+          minutely: number;
+        }
+      | number;
+    query(
+      aggregationTableName: (tableName: 'operations' | 'clients' | 'coordinates') => RawValue,
+    ): SqlValue;
+    queryId(aggregation: 'daily' | 'hourly' | 'minutely'): `${string}_${typeof aggregation}`;
+  }) {
+    const timeout =
+      typeof args.timeout === 'number'
+        ? { daily: args.timeout, hourly: args.timeout, minutely: args.timeout }
+        : args.timeout;
+    let { period, resolution } = args;
+
+    const queryMap = {
       daily: {
-        query: SqlValue;
-        queryId: string;
-        timeout: number;
-      };
+        query: args.query(tName => sql.raw(tName + '_daily')),
+        queryId: args.queryId('daily'),
+        timeout: timeout.daily,
+      },
+      hourly: {
+        query: args.query(tName => sql.raw(tName + '_hourly')),
+        queryId: args.queryId('hourly'),
+        timeout: timeout.hourly,
+      },
       minutely: {
-        query: SqlValue;
-        queryId: string;
-        timeout: number;
-      };
-    },
-    period: DateRange | null,
-    resolution?: number,
-  ) {
+        query: args.query(tName => sql.raw(tName + '_minutely')),
+        queryId: args.queryId('minutely'),
+        timeout: timeout.minutely,
+      },
+    };
+
     if (!period) {
       return {
         ...queryMap.daily,
@@ -319,35 +337,22 @@ export class OperationsReader {
     target: string | readonly string[];
     period: DateRange;
   }): Promise<number> {
-    const query = this.pickQueryByPeriod(
-      {
-        daily: {
-          query: sql`SELECT sum(total) as total FROM operations_daily ${this.createFilter({
-            target,
-            period,
-          })}`,
-          queryId: 'count_operations_daily',
-          timeout: 10_000,
-        },
-        hourly: {
-          query: sql`SELECT sum(total) as total FROM operations_hourly ${this.createFilter({
-            target,
-            period,
-          })}`,
-          queryId: 'count_operations_hourly',
-          timeout: 15_000,
-        },
-        minutely: {
-          query: sql`SELECT sum(total) as total FROM operations_minutely ${this.createFilter({
-            target,
-            period,
-          })}`,
-          queryId: 'count_operations_regular',
-          timeout: 30_000,
-        },
+    const query = this.pickAggregationByPeriod({
+      period,
+      timeout: {
+        daily: 30_000,
+        hourly: 15_000,
+        minutely: 10_000,
       },
-      period ?? null,
-    );
+      query: aggregationTableName =>
+        sql`SELECT sum(total) as total FROM ${aggregationTableName('operations')} ${this.createFilter(
+          {
+            target,
+            period,
+          },
+        )}`,
+      queryId: aggregation => `count_operations_${aggregation}`,
+    });
 
     const result = await this.clickHouse.query<{
       total: number;
@@ -411,74 +416,35 @@ export class OperationsReader {
     ok: number;
     notOk: number;
   }> {
-    const query = this.pickQueryByPeriod(
-      {
-        daily: {
-          query: sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_daily ${this.createFilter(
-            {
-              target,
-              period,
-              operations,
-              clients,
-              extra: schemaCoordinate
-                ? [
-                    sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
-                      target,
-                      period,
-                      extra: [sql`coordinate = ${schemaCoordinate}`],
-                    })})`,
-                  ]
-                : [],
-            },
-          )}`,
-          queryId: 'count_operations_daily',
-          timeout: 10_000,
-        },
-        hourly: {
-          query: sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_hourly ${this.createFilter(
-            {
-              target,
-              period,
-              operations,
-              clients,
-              extra: schemaCoordinate
-                ? [
-                    sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
-                      target,
-                      period,
-                      extra: [sql`coordinate = ${schemaCoordinate}`],
-                    })})`,
-                  ]
-                : [],
-            },
-          )}`,
-          queryId: 'count_operations_hourly',
-          timeout: 15_000,
-        },
-        minutely: {
-          query: sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM operations_minutely ${this.createFilter(
-            {
-              target,
-              period,
-              operations,
-              clients,
-              extra: schemaCoordinate
-                ? [
-                    sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
-                      target,
-                      period,
-                      extra: [sql`coordinate = ${schemaCoordinate}`],
-                    })})`,
-                  ]
-                : [],
-            },
-          )}`,
-          queryId: 'count_operations_regular',
-          timeout: 30_000,
-        },
+    const query = this.pickAggregationByPeriod({
+      timeout: {
+        minutely: 10_000,
+        hourly: 15_000,
+        daily: 30_000,
       },
-      period ?? null,
-    );
+      queryId: aggregation => `count_operations_${aggregation}`,
+      query: aggregationTableName =>
+        sql`SELECT sum(total) as total, sum(total_ok) as totalOk FROM ${aggregationTableName('operations')} ${this.createFilter(
+          {
+            target,
+            period,
+            operations,
+            clients,
+            extra: schemaCoordinate
+              ? [
+                  sql`hash IN (SELECT hash FROM ${aggregationTableName('coordinates')} ${this.createFilter(
+                    {
+                      target,
+                      period,
+                      extra: [sql`coordinate = ${schemaCoordinate}`],
+                    },
+                  )})`,
+                ]
+              : [],
+          },
+        )}`,
+      period,
+    });
 
     const result = await this.clickHouse.query<{
       total: number;
@@ -520,53 +486,24 @@ export class OperationsReader {
     operations?: readonly string[];
     clients?: readonly string[];
   }): Promise<number> {
-    const query = this.pickQueryByPeriod(
-      {
-        daily: {
-          query: sql`
-            SELECT count(distinct hash) as total
-            FROM operations_daily
-            ${this.createFilter({
-              target,
-              period,
-              operations,
-              clients,
-            })}
-          `,
-          queryId: 'count_unique_documents_daily',
-          timeout: 10_000,
-        },
-        hourly: {
-          query: sql`
-            SELECT count(distinct hash) as total
-            FROM operations_hourly
-            ${this.createFilter({
-              target,
-              period,
-              operations,
-              clients,
-            })}
-          `,
-          queryId: 'count_unique_documents_hourly',
-          timeout: 15_000,
-        },
-        minutely: {
-          query: sql`
-            SELECT count(distinct hash) as total
-            FROM operations_minutely
-            ${this.createFilter({
-              target,
-              period,
-              operations,
-              clients,
-            })}
-          `,
-          queryId: 'count_unique_documents',
-          timeout: 15_000,
-        },
-      },
+    const query = this.pickAggregationByPeriod({
       period,
-    );
+      timeout: {
+        daily: 30_000,
+        hourly: 15_000,
+        minutely: 10_000,
+      },
+      query: aggregationTableName =>
+        sql`SELECT count(distinct hash) as total FROM ${aggregationTableName('operations')} ${this.createFilter(
+          {
+            target,
+            period,
+            operations,
+            clients,
+          },
+        )}`,
+      queryId: aggregation => `count_unique_documents_${aggregation}`,
+    });
 
     const result = await this.clickHouse.query<{
       total: string;
@@ -597,86 +534,35 @@ export class OperationsReader {
       percentage: number;
     }>
   > {
-    const query = this.pickQueryByPeriod(
-      {
-        daily: {
-          query: sql`
-            SELECT sum(total) as total, sum(total_ok) as totalOk, hash 
-            FROM operations_daily
-            ${this.createFilter({
-              target,
-              period,
-              operations,
-              clients,
-              extra: schemaCoordinate
-                ? [
-                    sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
-                      target,
-                      period,
-                      extra: [sql`coordinate = ${schemaCoordinate}`],
-                    })})`,
-                  ]
-                : [],
-            })}
-            GROUP BY hash
-          `,
-          queryId: 'read_unique_documents_daily',
-          timeout: 10_000,
-        },
-        hourly: {
-          query: sql`
-            SELECT 
-              sum(total) as total,
-              sum(total_ok) as totalOk,
-              hash
-            FROM operations_hourly
-            ${this.createFilter({
-              target,
-              period,
-              operations,
-              clients,
-              extra: schemaCoordinate
-                ? [
-                    sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
-                      target,
-                      period,
-                      extra: [sql`coordinate = ${schemaCoordinate}`],
-                    })})`,
-                  ]
-                : [],
-            })}
-            GROUP BY hash
-          `,
-          queryId: 'read_unique_documents_hourly',
-          timeout: 15_000,
-        },
-        minutely: {
-          query: sql`
-            SELECT sum(total) as total, sum(total_ok) as totalOk, hash
-            FROM operations_minutely
-            ${this.createFilter({
-              target,
-              period,
-              operations,
-              clients,
-              extra: schemaCoordinate
-                ? [
-                    sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
-                      target,
-                      period,
-                      extra: [sql`coordinate = ${schemaCoordinate}`],
-                    })})`,
-                  ]
-                : [],
-            })}
-            GROUP BY hash
-          `,
-          queryId: 'read_unique_documents',
-          timeout: 15_000,
-        },
-      },
+    const query = this.pickAggregationByPeriod({
       period,
-    );
+      timeout: {
+        daily: 30_000,
+        hourly: 15_000,
+        minutely: 10_000,
+      },
+      query: aggregationTableName =>
+        sql`SELECT sum(total) as total, sum(total_ok) as totalOk, hash FROM ${aggregationTableName(
+          'operations',
+        )} ${this.createFilter({
+          target,
+          period,
+          operations,
+          clients,
+          extra: schemaCoordinate
+            ? [
+                sql`hash IN (SELECT hash FROM ${aggregationTableName('coordinates')} ${this.createFilter(
+                  {
+                    target,
+                    period,
+                    extra: [sql`coordinate = ${schemaCoordinate}`],
+                  },
+                )})`,
+              ]
+            : [],
+        })} GROUP BY hash`,
+      queryId: aggregation => `read_unique_documents_${aggregation}`,
+    });
 
     const [operationsResult, registryResult] = await Promise.all([
       this.clickHouse.query<{
@@ -708,11 +594,13 @@ export class OperationsReader {
                       operations,
                       extra: schemaCoordinate
                         ? [
-                            sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
-                              target,
-                              period,
-                              extra: [sql`coordinate = ${schemaCoordinate}`],
-                            })})`,
+                            sql`hash IN (SELECT hash FROM ${sql.raw('coordinates_' + query.queryType)} ${this.createFilter(
+                              {
+                                target,
+                                period,
+                                extra: [sql`coordinate = ${schemaCoordinate}`],
+                              },
+                            )})`,
                           ]
                         : [],
                     })}
@@ -723,7 +611,7 @@ export class OperationsReader {
             })}
           GROUP BY name, hash, operation_kind
         `,
-        queryId: 'operations_registry',
+        queryId: 'operations_registry_' + query.queryType,
         timeout: 15_000,
       }),
     ]);
@@ -807,21 +695,24 @@ export class OperationsReader {
   }): Promise<Set<string>> {
     const result = await this.clickHouse.query<{
       coordinate: string;
-    }>({
-      query: sql`
-        SELECT 
-          coordinate
-        FROM coordinates_daily
-          ${this.createFilter({
-            target,
-            period,
-          })}
-        WHERE coordinate NOT ILIKE '%.__typename'
-        GROUP BY coordinate
-      `,
-      queryId: 'reported_schema_coordinates',
-      timeout: 10_000,
-    });
+    }>(
+      this.pickAggregationByPeriod({
+        query: aggregationTableName => sql`
+          SELECT 
+            coordinate
+          FROM ${aggregationTableName('coordinates')}
+            ${this.createFilter({
+              target,
+              period,
+            })}
+          WHERE coordinate NOT ILIKE '%.__typename'
+          GROUP BY coordinate
+        `,
+        queryId: aggregation => `reported_schema_coordinates_${aggregation}`,
+        timeout: 10_000,
+        period,
+      }),
+    );
 
     return new Set(result.data.map(row => row.coordinate));
   }
@@ -855,15 +746,13 @@ export class OperationsReader {
       client_name: string;
       client_version: string;
     }>(
-      this.pickQueryByPeriod(
-        {
-          daily: {
-            query: sql`
+      this.pickAggregationByPeriod({
+        query: aggregationTableName => sql`
               SELECT 
                 sum(total) as total,
                 client_name,
                 client_version
-              FROM clients_daily
+              FROM ${aggregationTableName('clients')}
               ${this.createFilter({
                 target,
                 period,
@@ -871,79 +760,23 @@ export class OperationsReader {
                 clients,
                 extra: schemaCoordinate
                   ? [
-                      sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
-                        target,
-                        period,
-                        extra: [sql`coordinate = ${schemaCoordinate}`],
-                      })})`,
+                      sql`hash IN (SELECT hash FROM ${aggregationTableName('coordinates')} ${this.createFilter(
+                        {
+                          target,
+                          period,
+                          extra: [sql`coordinate = ${schemaCoordinate}`],
+                        },
+                      )})`,
                     ]
                   : [],
               })}
               GROUP BY client_name, client_version
               ORDER BY total DESC
             `,
-            queryId: 'count_clients_daily',
-            timeout: 10_000,
-          },
-          hourly: {
-            query: sql`
-              SELECT 
-                sum(total) as total,
-                client_name,
-                client_version
-              FROM operations_hourly
-              ${this.createFilter({
-                target,
-                period,
-                operations,
-                clients,
-                extra: schemaCoordinate
-                  ? [
-                      sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
-                        target,
-                        period,
-                        extra: [sql`coordinate = ${schemaCoordinate}`],
-                      })})`,
-                    ]
-                  : [],
-              })}
-              GROUP BY client_name, client_version
-              ORDER BY total DESC
-            `,
-            queryId: 'count_clients_hourly',
-            timeout: 10_000,
-          },
-          minutely: {
-            query: sql`
-              SELECT 
-                sum(total) as total,
-                client_name,
-                client_version
-              FROM operations_minutely
-              ${this.createFilter({
-                target,
-                period,
-                operations,
-                clients,
-                extra: schemaCoordinate
-                  ? [
-                      sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
-                        target,
-                        period,
-                        extra: [sql`coordinate = ${schemaCoordinate}`],
-                      })})`,
-                    ]
-                  : [],
-              })}
-              GROUP BY client_name, client_version
-              ORDER BY total DESC
-            `,
-            queryId: 'count_clients_regular',
-            timeout: 10_000,
-          },
-        },
+        queryId: aggregation => `count_clients_${aggregation}`,
+        timeout: 10_000,
         period,
-      ),
+      }),
     );
 
     const total = result.data.reduce((sum, row) => sum + parseInt(row.total, 10), 0);
@@ -1010,14 +843,12 @@ export class OperationsReader {
       total: string;
       client_version: string;
     }>(
-      this.pickQueryByPeriod(
-        {
-          daily: {
-            query: sql`
+      this.pickAggregationByPeriod({
+        query: aggregationTableName => sql`
               SELECT 
                 sum(total) as total,
                 client_version
-              FROM clients_daily
+              FROM ${aggregationTableName('clients')}
               ${this.createFilter({
                 target,
                 period,
@@ -1027,48 +858,10 @@ export class OperationsReader {
               ORDER BY total DESC
               LIMIT ${sql.raw(limit.toString())}
             `,
-            queryId: 'read_client_versions_daily',
-            timeout: 10_000,
-          },
-          hourly: {
-            query: sql`
-              SELECT 
-                sum(total) as total,
-                client_version
-              FROM operations_hourly
-              ${this.createFilter({
-                target,
-                period,
-                clients: clientName === 'unknown' ? [clientName, ''] : [clientName],
-              })}
-              GROUP BY client_version
-              ORDER BY total DESC
-              LIMIT ${sql.raw(limit.toString())}
-            `,
-            queryId: 'read_client_versions_hourly',
-            timeout: 10_000,
-          },
-          minutely: {
-            query: sql`
-              SELECT 
-                sum(total) as total,
-                client_version
-              FROM operations_minutely
-              ${this.createFilter({
-                target,
-                period,
-                clients: clientName === 'unknown' ? [clientName, ''] : [clientName],
-              })}
-              GROUP BY client_version
-              ORDER BY total DESC
-              LIMIT ${sql.raw(limit.toString())}
-            `,
-            queryId: 'read_client_versions_regular',
-            timeout: 10_000,
-          },
-        },
+        queryId: aggregation => `read_client_versions_${aggregation}`,
+        timeout: 10_000,
         period,
-      ),
+      }),
     );
 
     const total = result.data.reduce((sum, row) => sum + parseInt(row.total, 10), 0);
@@ -1468,53 +1261,21 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       total: string;
     }>(
-      this.pickQueryByPeriod(
-        {
-          daily: {
-            query: sql`
+      this.pickAggregationByPeriod({
+        query: aggregationTableName => sql`
               SELECT 
                 count(distinct client_version) as total
-              FROM clients_daily
+              FROM ${aggregationTableName('clients')}
               ${this.createFilter({
                 target,
                 period,
                 clients: clientName === 'unknown' ? [clientName, ''] : [clientName],
               })}
             `,
-            queryId: 'count_client_versions_daily',
-            timeout: 10_000,
-          },
-          hourly: {
-            query: sql`
-              SELECT 
-                count(distinct client_version) as total
-              FROM operations_hourly
-              ${this.createFilter({
-                target,
-                period,
-                clients: clientName === 'unknown' ? [clientName, ''] : [clientName],
-              })}
-            `,
-            queryId: 'count_client_versions_hourly',
-            timeout: 10_000,
-          },
-          minutely: {
-            query: sql`
-              SELECT 
-                count(distinct client_version) as total
-              FROM operations_minutely
-              ${this.createFilter({
-                target,
-                period,
-                clients: clientName === 'unknown' ? [clientName, ''] : [clientName],
-              })}
-            `,
-            queryId: 'count_client_versions_regular',
-            timeout: 10_000,
-          },
-        },
+        queryId: aggregation => `count_client_versions_${aggregation}`,
+        timeout: 10_000,
         period,
-      ),
+      }),
     );
 
     return result.data.length > 0 ? ensureNumber(result.data[0].total) : 0;
@@ -1544,37 +1305,42 @@ export class OperationsReader {
       hash: string;
       name: string;
       coordinate: string;
-    }>({
-      queryId: 'get_top_operations_for_types',
-      query: sql`
-        WITH coordinates as (
-          SELECT cd.total, cd.hash, cd.coordinate
-          FROM (
-            SELECT
-              sum(cdi.total) as total, cdi.hash as hash, cdi.coordinate as coordinate
-            FROM coordinates_daily as cdi
-              ${this.createFilter({
-                target: args.targetId,
-                period: args.period,
-                extra: [sql`cdi.coordinate NOT LIKE '%.%.%'`],
-                namespace: 'cdi',
-              })}
-            GROUP BY cdi.hash, cdi.coordinate ORDER by total DESC, cdi.hash ASC LIMIT ${sql.raw(
-              String(args.limit),
-            )} by cdi.coordinate
-          ) as cd
-          WHERE ${sql.join(ORs, ' OR ')}
-        )
-        SELECT total, hash, coordinate, ocd.name
-        FROM coordinates as c LEFT JOIN (
-            SELECT ocd.name, ocd.hash
-            FROM operation_collection_details as ocd
-            WHERE ocd.target = ${args.targetId} AND hash IN (SELECT hash FROM coordinates)
-            LIMIT 1 BY ocd.hash
-        ) as ocd ON ocd.hash = c.hash
-      `,
-      timeout: 15_000,
-    });
+    }>(
+      this.pickAggregationByPeriod({
+        queryId(aggregation) {
+          return `get_top_operations_for_types_${aggregation}`;
+        },
+        query: aggregationTableName => sql`
+          WITH coordinates as (
+            SELECT cd.total, cd.hash, cd.coordinate
+            FROM (
+              SELECT
+                sum(cdi.total) as total, cdi.hash as hash, cdi.coordinate as coordinate
+              FROM ${aggregationTableName('coordinates')} as cdi
+                ${this.createFilter({
+                  target: args.targetId,
+                  period: args.period,
+                  extra: [sql`cdi.coordinate NOT LIKE '%.%.%'`],
+                  namespace: 'cdi',
+                })}
+              GROUP BY cdi.hash, cdi.coordinate ORDER by total DESC, cdi.hash ASC LIMIT ${sql.raw(
+                String(args.limit),
+              )} by cdi.coordinate
+            ) as cd
+            WHERE ${sql.join(ORs, ' OR ')}
+          )
+          SELECT total, hash, coordinate, ocd.name
+          FROM coordinates as c LEFT JOIN (
+              SELECT ocd.name, ocd.hash
+              FROM operation_collection_details as ocd
+              WHERE ocd.target = ${args.targetId} AND hash IN (SELECT hash FROM coordinates)
+              LIMIT 1 BY ocd.hash
+          ) as ocd ON ocd.hash = c.hash
+        `,
+        period: args.period,
+        timeout: 15_000,
+      }),
+    );
 
     const coordinateToTopOperations = new Map<
       string,
@@ -1618,66 +1384,69 @@ export class OperationsReader {
     // even though some coordinates may no longer be used in the schema.
     // But it's a fine tradeoff for the sake of simplicity.
 
-    const dbResult = await this.clickHouse.query({
-      queryId: 'get_hashes_for_schema_coordinates',
-      // KAMIL: I know this query is a bit weird, but it's the best I could come up with.
-      // It processed 27x less rows than the previous version.
-      // It's 30x faster.
-      // It consumes 36x less memory (~8MB).
-      // It obviously depends on the amount of original data, but I tested it on a multiple datasets
-      // and the ratio is always similar.
-      // I'm open to suggestions on how to improve it.
-      //
-      // What the query does is:
-      // 1. Fetches all coordinates of a given type, with associated operation hashes.
-      // 2. Fetches all client names (groups them by hash) of a given hash.
-      // 3. Groups rows by coordinate.
-      // 4. Merges client names and removes duplicates.
-      //
-      // Why it's faster then the previous version?
-      // It's using sub queries instead of joins (yeah there is a join but with preselected list of rows).
-      // It fetches much less data.
-      // It fetches rows more accurately.
-      query: sql`
-        SELECT
-          co.coordinate AS coordinate,
-          groupUniqArrayArray(cl.client_names) AS client_names
-        FROM
-        (
+    const dbResult = await this.clickHouse.query(
+      this.pickAggregationByPeriod({
+        queryId: aggregation => `get_hashes_for_schema_coordinates_${aggregation}`,
+        // KAMIL: I know this query is a bit weird, but it's the best I could come up with.
+        // It processed 27x less rows than the previous version.
+        // It's 30x faster.
+        // It consumes 36x less memory (~8MB).
+        // It obviously depends on the amount of original data, but I tested it on a multiple datasets
+        // and the ratio is always similar.
+        // I'm open to suggestions on how to improve it.
+        //
+        // What the query does is:
+        // 1. Fetches all coordinates of a given type, with associated operation hashes.
+        // 2. Fetches all client names (groups them by hash) of a given hash.
+        // 3. Groups rows by coordinate.
+        // 4. Merges client names and removes duplicates.
+        //
+        // Why it's faster then the previous version?
+        // It's using sub queries instead of joins (yeah there is a join but with preselected list of rows).
+        // It fetches much less data.
+        // It fetches rows more accurately.
+        query: aggregationTableName => sql`
           SELECT
-            co.coordinate,
-            co.hash
-          FROM coordinates_daily AS co
-          ${this.createFilter({
-            target: args.targetId,
-            period: args.period,
-            extra: [
-              sql`( co.coordinate = ${args.typename} OR co.coordinate LIKE ${
-                args.typename + '.%'
-              } )`,
-            ],
-            namespace: 'co',
-          })}
-          GROUP BY co.coordinate, co.hash
-        ) AS co
-        LEFT JOIN
-        (
+            co.coordinate AS coordinate,
+            groupUniqArrayArray(cl.client_names) AS client_names
+          FROM
+          (
             SELECT
-              arrayDistinct(groupArray(client_name)) AS client_names,
-              cl.hash AS hash
-            FROM clients_daily AS cl
+              co.coordinate,
+              co.hash
+            FROM ${aggregationTableName('coordinates')} AS co
             ${this.createFilter({
               target: args.targetId,
               period: args.period,
-              namespace: 'cl',
+              extra: [
+                sql`( co.coordinate = ${args.typename} OR co.coordinate LIKE ${
+                  args.typename + '.%'
+                } )`,
+              ],
+              namespace: 'co',
             })}
-            GROUP BY cl.hash
-        ) AS cl ON co.hash = cl.hash
-        GROUP BY co.coordinate
-        SETTINGS join_algorithm = 'parallel_hash'
-      `,
-      timeout: 15_000,
-    });
+            GROUP BY co.coordinate, co.hash
+          ) AS co
+          LEFT JOIN
+          (
+              SELECT
+                arrayDistinct(groupArray(client_name)) AS client_names,
+                cl.hash AS hash
+              FROM ${aggregationTableName('clients')} AS cl
+              ${this.createFilter({
+                target: args.targetId,
+                period: args.period,
+                namespace: 'cl',
+              })}
+              GROUP BY cl.hash
+          ) AS cl ON co.hash = cl.hash
+          GROUP BY co.coordinate
+          SETTINGS join_algorithm = 'parallel_hash'
+        `,
+        timeout: 15_000,
+        period: args.period,
+      }),
+    );
 
     const list = CoordinateClientNamesGroupModel.parse(dbResult.data);
     return new Map<string, Set<string>>(
@@ -1797,28 +1566,6 @@ export class OperationsReader {
       const startDateTimeFormatted = formatDate(roundedPeriod.from);
       const endDateTimeFormatted = formatDate(roundedPeriod.to);
 
-      const createQuery = (tableName: string) => sql`
-        SELECT 
-          toDateTime(
-              intDiv(
-                toUnixTimestamp(timestamp),
-                toUInt32(${String(interval.seconds)})
-              ) * toUInt32(${String(interval.seconds)})
-          ) as date,
-          sum(total) as total,
-          target
-        FROM ${sql.raw(tableName)}
-        ${this.createFilter({ target: targets, period: roundedPeriod })}
-        GROUP BY target, date
-        ORDER BY 
-          target,
-          date
-            WITH FILL
-              FROM toDateTime(${startDateTimeFormatted}, 'UTC')
-              TO toDateTime(${endDateTimeFormatted}, 'UTC')
-              STEP INTERVAL ${intervalRaw}
-       `;
-
       aggregationResultMap.set(
         key,
         this.clickHouse
@@ -1827,27 +1574,33 @@ export class OperationsReader {
             target: string;
             total: number;
           }>(
-            this.pickQueryByPeriod(
-              {
-                daily: {
-                  query: createQuery('operations_daily'),
-                  queryId: 'targets_count_over_time_daily',
-                  timeout: 15_000,
-                },
-                hourly: {
-                  query: createQuery('operations_hourly'),
-                  queryId: 'targets_count_over_time_hourly',
-                  timeout: 15_000,
-                },
-                minutely: {
-                  query: createQuery('operations_minutely'),
-                  queryId: 'targets_count_over_time_regular',
-                  timeout: 15_000,
-                },
-              },
+            this.pickAggregationByPeriod({
+              query: aggregationTableName => sql`
+                SELECT 
+                  toDateTime(
+                      intDiv(
+                        toUnixTimestamp(timestamp),
+                        toUInt32(${String(interval.seconds)})
+                      ) * toUInt32(${String(interval.seconds)})
+                  ) as date,
+                  sum(total) as total,
+                  target
+                FROM ${aggregationTableName('operations')}
+                ${this.createFilter({ target: targets, period: roundedPeriod })}
+                GROUP BY target, date
+                ORDER BY 
+                  target,
+                  date
+                    WITH FILL
+                      FROM toDateTime(${startDateTimeFormatted}, 'UTC')
+                      TO toDateTime(${endDateTimeFormatted}, 'UTC')
+                      STEP INTERVAL ${intervalRaw}
+              `,
+              queryId: aggregation => `targets_count_over_time_${aggregation}`,
+              timeout: 15_000,
               period,
               resolution,
-            ),
+            }),
           )
           .then(result =>
             result.data.map(row => ({
@@ -1999,41 +1752,17 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       percentiles: [number, number, number, number];
     }>(
-      this.pickQueryByPeriod(
-        {
-          daily: {
-            query: sql`
-              SELECT 
-                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
-              FROM operations_daily
-              ${this.createFilter({ target, period, operations, clients })}
-            `,
-            queryId: 'general_duration_percentiles_daily',
-            timeout: 15_000,
-          },
-          hourly: {
-            query: sql`
-              SELECT 
-                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
-              FROM operations_hourly
-              ${this.createFilter({ target, period, operations, clients })}
-            `,
-            queryId: 'general_duration_percentiles_hourly',
-            timeout: 15_000,
-          },
-          minutely: {
-            query: sql`
-              SELECT 
-                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
-              FROM operations_minutely
-              ${this.createFilter({ target, period, operations, clients })}
-            `,
-            queryId: 'general_duration_percentiles_regular',
-            timeout: 15_000,
-          },
-        },
+      this.pickAggregationByPeriod({
+        query: aggregationTableName => sql`
+          SELECT 
+            quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
+          FROM ${aggregationTableName('operations')}
+            ${this.createFilter({ target, period, operations, clients })}
+        `,
+        queryId: aggregation => `general_duration_percentiles_${aggregation}`,
+        timeout: 15_000,
         period,
-      ),
+      }),
     );
 
     return toPercentiles(result.data[0].percentiles);
@@ -2056,14 +1785,12 @@ export class OperationsReader {
       hash: string;
       percentiles: [number, number, number, number];
     }>(
-      this.pickQueryByPeriod(
-        {
-          daily: {
-            query: sql`
+      this.pickAggregationByPeriod({
+        query: aggregationTableName => sql`
               SELECT 
                 hash,
                 quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
-              FROM operations_daily
+              FROM ${aggregationTableName('operations')}
               ${this.createFilter({
                 target,
                 period,
@@ -2071,74 +1798,22 @@ export class OperationsReader {
                 clients,
                 extra: schemaCoordinate
                   ? [
-                      sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
-                        target,
-                        period,
-                        extra: [sql`coordinate = ${schemaCoordinate}`],
-                      })})`,
+                      sql`hash IN (SELECT hash FROM ${aggregationTableName('coordinates')} ${this.createFilter(
+                        {
+                          target,
+                          period,
+                          extra: [sql`coordinate = ${schemaCoordinate}`],
+                        },
+                      )})`,
                     ]
                   : [],
               })}
               GROUP BY hash
             `,
-            queryId: 'duration_percentiles_daily',
-            timeout: 15_000,
-          },
-          hourly: {
-            query: sql`
-              SELECT 
-                hash,
-                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
-              FROM operations_hourly
-              ${this.createFilter({
-                target,
-                period,
-                operations,
-                clients,
-                extra: schemaCoordinate
-                  ? [
-                      sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
-                        target,
-                        period,
-                        extra: [sql`coordinate = ${schemaCoordinate}`],
-                      })})`,
-                    ]
-                  : [],
-              })}
-              GROUP BY hash
-            `,
-            queryId: 'duration_percentiles_hourly',
-            timeout: 15_000,
-          },
-          minutely: {
-            query: sql`
-              SELECT 
-                hash,
-                quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles
-              FROM operations_minutely
-              ${this.createFilter({
-                target,
-                period,
-                operations,
-                clients,
-                extra: schemaCoordinate
-                  ? [
-                      sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
-                        target,
-                        period,
-                        extra: [sql`coordinate = ${schemaCoordinate}`],
-                      })})`,
-                    ]
-                  : [],
-              })}
-              GROUP BY hash
-            `,
-            queryId: 'duration_percentiles_regular',
-            timeout: 15_000,
-          },
-        },
+        queryId: aggregation => `duration_percentiles_${aggregation}`,
+        timeout: 15_000,
         period,
-      ),
+      }),
     );
 
     const collection = new Map<string, Percentiles>();
@@ -2159,14 +1834,19 @@ export class OperationsReader {
   }): Promise<string[]> {
     const result = await this.clickHouse.query<{
       client_name: string;
-    }>({
-      queryId: 'client_names_per_target_v2',
-      query: sql`SELECT client_name FROM clients_daily ${this.createFilter({
-        target,
+    }>(
+      this.pickAggregationByPeriod({
+        queryId: aggregation => `client_names_per_target_${aggregation}`,
+        query: aggregationTableName => sql`
+        SELECT client_name FROM ${aggregationTableName('clients')} ${this.createFilter({
+          target,
+          period,
+        })} GROUP BY client_name
+      `,
+        timeout: 10_000,
         period,
-      })} GROUP BY client_name`,
-      timeout: 10_000,
-    });
+      }),
+    );
 
     return result.data.map(row => row.client_name);
   }
@@ -2195,15 +1875,13 @@ export class OperationsReader {
     const startDateTimeFormatted = formatDate(roundedPeriod.from);
     const endDateTimeFormatted = formatDate(roundedPeriod.to);
 
-    const createSQLQuery = (tableName: string, isAggregation: boolean) => {
-      // TODO: remove this once we shift to the new table structure (PR #2712)
-      const quantiles = isAggregation
-        ? 'quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles)'
-        : 'quantiles(0.75, 0.90, 0.95, 0.99)(duration)';
-      const total = isAggregation ? 'sum(total)' : 'count(*)';
-      const totalOk = isAggregation ? 'sum(total_ok)' : 'sum(ok)';
-
-      return sql`
+    const query = this.pickAggregationByPeriod({
+      timeout: 15_000,
+      period,
+      resolution,
+      queryId: aggregation => `duration_and_count_over_time_${aggregation}`,
+      query: aggregationTableName => {
+        return sql`
         SELECT
           date,
           percentiles,
@@ -2217,10 +1895,10 @@ export class OperationsReader {
                 toUInt32(${String(interval.seconds)})
               ) * toUInt32(${String(interval.seconds)})
             ) as date,
-            ${sql.raw(quantiles)} as percentiles,
-            ${sql.raw(total)} as total,
-            ${sql.raw(totalOk)} as totalOk
-          FROM ${sql.raw(tableName)}
+            quantilesMerge(0.75, 0.90, 0.95, 0.99)(duration_quantiles) as percentiles,
+            sum(total) as total,
+            sum(total_ok) as totalOk
+          FROM ${aggregationTableName('operations')}
           ${this.createFilter({
             target,
             period: roundedPeriod,
@@ -2228,11 +1906,13 @@ export class OperationsReader {
             clients,
             extra: schemaCoordinate
               ? [
-                  sql`hash IN (SELECT hash FROM coordinates_daily ${this.createFilter({
-                    target,
-                    period: roundedPeriod,
-                    extra: [sql`coordinate = ${schemaCoordinate}`],
-                  })})`,
+                  sql`hash IN (SELECT hash FROM ${aggregationTableName('coordinates')} ${this.createFilter(
+                    {
+                      target,
+                      period: roundedPeriod,
+                      extra: [sql`coordinate = ${schemaCoordinate}`],
+                    },
+                  )})`,
                 ]
               : [],
           })}
@@ -2244,29 +1924,8 @@ export class OperationsReader {
             STEP INTERVAL ${intervalRaw}
         )
       `;
-    };
-
-    const query = this.pickQueryByPeriod(
-      {
-        daily: {
-          query: createSQLQuery('operations_daily', true),
-          queryId: 'duration_and_count_over_time_daily',
-          timeout: 15_000,
-        },
-        hourly: {
-          query: createSQLQuery('operations_hourly', true),
-          queryId: 'duration_and_count_over_time_hourly',
-          timeout: 15_000,
-        },
-        minutely: {
-          query: createSQLQuery('operations_minutely', true),
-          queryId: 'duration_and_count_over_time_regular',
-          timeout: 15_000,
-        },
       },
-      period,
-      resolution,
-    );
+    });
 
     // multiply by 1000 to convert to milliseconds
     const result = await this.clickHouse.query<{
@@ -2384,18 +2043,21 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       coordinate: string;
       total: number;
-    }>({
-      query: sql`
-        SELECT coordinate, sum(total) as total FROM coordinates_daily
+    }>(
+      this.pickAggregationByPeriod({
+        query: aggregationTableName => sql`
+        SELECT coordinate, sum(total) as total FROM ${aggregationTableName('coordinates')}
         ${this.createFilter({
           target,
           period,
           extra: [sql`(${sql.join(typesConditions, ' OR ')})`],
         })}
         GROUP BY coordinate`,
-      queryId: 'coordinates_per_types',
-      timeout: 15_000,
-    });
+        queryId: aggregation => `coordinates_per_types_${aggregation}`,
+        timeout: 15_000,
+        period,
+      }),
+    );
 
     return result.data.map(row => ({
       coordinate: row.coordinate,
@@ -2407,18 +2069,21 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       coordinate: string;
       total: number;
-    }>({
-      query: sql`
-        SELECT coordinate, sum(total) as total FROM coordinates_daily
+    }>(
+      this.pickAggregationByPeriod({
+        query: aggregationTableName => sql`
+        SELECT coordinate, sum(total) as total FROM ${aggregationTableName('coordinates')}
         ${this.createFilter({
           target,
           period,
         })}
         GROUP BY coordinate
       `,
-      queryId: 'coordinates_per_target',
-      timeout: 15_000,
-    });
+        queryId: aggregation => `coordinates_per_target_${aggregation}`,
+        timeout: 15_000,
+        period,
+      }),
+    );
 
     return result.data.map(row => ({
       coordinate: row.coordinate,
@@ -2437,20 +2102,23 @@ export class OperationsReader {
     const result = await this.clickHouse.query<{
       total: string;
       target: string;
-    }>({
-      query: sql`
+    }>(
+      this.pickAggregationByPeriod({
+        query: aggregationTableName => sql`
         SELECT
           sum(total) as total,
           target
-        FROM operations_daily
+        FROM ${aggregationTableName('operations')}
         PREWHERE
           timestamp >= toDateTime(${formatDate(period.from)}, 'UTC')
           AND
           timestamp <= toDateTime(${formatDate(period.to)}, 'UTC')
         GROUP BY target`,
-      queryId: 'admin_operations_per_target',
-      timeout: 15_000,
-    });
+        queryId: aggregation => `admin_operations_per_target_${aggregation}`,
+        timeout: 15_000,
+        period,
+      }),
+    );
 
     return result.data.map(row => ({
       total: ensureNumber(row.total),
@@ -2477,51 +2145,34 @@ export class OperationsReader {
     const startDateTimeFormatted = formatDate(roundedPeriod.from);
     const endDateTimeFormatted = formatDate(roundedPeriod.to);
 
-    const createSQL = (tableName: string) => sql`
-      SELECT 
-        toDateTime(
-          intDiv(
-            toUnixTimestamp(timestamp),
-            toUInt32(${String(interval.seconds)})
-          ) * toUInt32(${String(interval.seconds)})
-        ) as date,
-        sum(total) as total
-      FROM ${sql.raw(tableName)}
-      ${this.createFilter({ period: roundedPeriod })}
-      GROUP BY date
-      ORDER BY 
-        date
-          WITH FILL
-            FROM toDateTime(${startDateTimeFormatted}, 'UTC')
-            TO toDateTime(${endDateTimeFormatted}, 'UTC')
-            STEP INTERVAL ${intervalRaw}
-    `;
-
     const result = await this.clickHouse.query<{
       date: string;
       total: string;
     }>(
-      this.pickQueryByPeriod(
-        {
-          daily: {
-            query: createSQL('operations_daily'),
-            queryId: 'admin_operations_per_target_daily',
-            timeout: 15_000,
-          },
-          hourly: {
-            query: createSQL('operations_hourly'),
-            queryId: 'admin_operations_per_target_hourly',
-            timeout: 15_000,
-          },
-          minutely: {
-            query: createSQL('operations_minutely'),
-            queryId: 'admin_operations_per_target_minutely',
-            timeout: 15_000,
-          },
-        },
+      this.pickAggregationByPeriod({
+        query: aggregationTableName => sql`
+        SELECT 
+          toDateTime(
+            intDiv(
+              toUnixTimestamp(timestamp),
+              toUInt32(${String(interval.seconds)})
+            ) * toUInt32(${String(interval.seconds)})
+          ) as date,
+          sum(total) as total
+        FROM ${aggregationTableName('operations')}
+        ${this.createFilter({ period: roundedPeriod })}
+        GROUP BY date
+        ORDER BY date
+          WITH FILL
+            FROM toDateTime(${startDateTimeFormatted}, 'UTC')
+            TO toDateTime(${endDateTimeFormatted}, 'UTC')
+            STEP INTERVAL ${intervalRaw}
+      `,
+        queryId: aggregation => `admin_operations_per_target_${aggregation}`,
+        timeout: 15_000,
         period,
         resolution,
-      ),
+      }),
     );
 
     return result.data.map(row => ({
