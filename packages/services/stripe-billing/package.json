@@ -21,7 +21,7 @@
     "got": "14.2.1",
     "pino-pretty": "11.0.0",
     "reflect-metadata": "0.2.2",
-    "stripe": "14.24.0",
+    "stripe": "14.25.0",
     "zod": "3.22.4"
   },
   "buildOptions": {
